@@ -75,7 +75,7 @@ function always_false($input)
 echo "*** Testing array_filter() : object functionality ***\n";
 
 // 'input' array containing objects as elements
-$input = varray[
+$input = vec[
   new SimpleClass(),
   new EmptyClass(),
   new ChildClass(),

@@ -5,7 +5,7 @@
 
 function get_instances(string $cls, ?darray $objs) :mixed{
   if (!$objs) return 0;
-  return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]), "instances", 0);
+  return hphp_array_idx(hphp_array_idx($objs, $cls, vec[]), "instances", 0);
 }
 function get_bytes_eq(string $cls, ?darray $objs) :mixed{
   if (!$objs) return 0;
@@ -18,11 +18,11 @@ function get_bytes_eq(string $cls, ?darray $objs) :mixed{
 }
 function get_bytes(string $cls, ?darray $objs) :mixed{
   if (!$objs) return 0;
-  return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]), "bytes", 0);
+  return hphp_array_idx(hphp_array_idx($objs, $cls, vec[]), "bytes", 0);
 }
 function get_bytesd(string $cls, ?darray $objs) :mixed{
   if (!$objs) return 0;
-  return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]),
+  return hphp_array_idx(hphp_array_idx($objs, $cls, vec[]),
     "bytes_normalized", 0);
 }
 function getStr(int $len): string {
@@ -51,13 +51,13 @@ class SimpleProps { // 16:48
 
 // TEST: sizes of arrays
 class SimpleArrays {
-  public varray $arrEmpty = varray[]; // 16 (tv) + static = 16
-  public darray $arrMixed = darray[ // 16 (tv) + static = 16
+  public varray $arrEmpty = vec[]; // 16 (tv) + static = 16
+  public darray $arrMixed = dict[ // 16 (tv) + static = 16
     "somekey" => "someval", 321 => 3,
   ];
-  public varray<int> $arrNums = varray[];
+  public varray<int> $arrNums = vec[];
   function __construct() {
-    $this->arrNums = varray[
+    $this->arrNums = vec[
       2012, // 16:16
       2013, // 16:16
       rand(1, 2) // 16:16
@@ -311,7 +311,7 @@ $myClass2 = null;
 
 
 // TEST: multiple ref counted arrays
-$my_arr = darray[
+$my_arr = dict[
   getStr(4) => getStr(8), // 20:20 + 24:24 = 44:44
   getStr(5) => getStr(7), // 21:21 + 23:23 = 44:44
 ];
@@ -333,8 +333,8 @@ $myClass = null;
 $myClass2 = null;
 
 // TEST: multiple ref counted nested arrays
-$my_arr = varray[ // 16 /*(tv)*/ + 16 /*(ArrayData)*/ + 76 = 108
-  darray[getStr(4) => getStr(8)], // 20 + 24 + 16 /*(tv)*/ + 16 /*(ArrayData)*/
+$my_arr = vec[ // 16 /*(tv)*/ + 16 /*(ArrayData)*/ + 76 = 108
+  dict[getStr(4) => getStr(8)], // 20 + 24 + 16 /*(tv)*/ + 16 /*(ArrayData)*/
 ];
 $myClass = new NestedArrayClass($my_arr);
 $my_arr = null;
@@ -411,7 +411,7 @@ $parent_class_bytesd_before =get_bytesd('SimpleClassForExclude', $objs);
 
 $my_obj = new SimpleClassForExclude();
 __hhvm_intrinsics\launder_value($my_obj);
-$objs = objprof_get_data(OBJPROF_FLAGS_DEFAULT, varray['ExlcudeClass']);
+$objs = objprof_get_data(OBJPROF_FLAGS_DEFAULT, vec['ExlcudeClass']);
 __hhvm_intrinsics\launder_value($my_obj);
 $exclude_class_instances_after = get_instances('ExlcudeClass', $objs);
 $parent_class_bytes_after = get_bytes('SimpleClassForExclude', $objs);
@@ -441,7 +441,7 @@ $parent_class_bytesd_before = get_bytesd('SimpleClassForExclude', $objs);
 
 $my_obj = new SimpleClassForExclude();
 __hhvm_intrinsics\launder_value($my_obj);
-$objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY, varray['ExlcudeClass']);
+$objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY, vec['ExlcudeClass']);
 __hhvm_intrinsics\launder_value($my_obj);
 $exclude_class_instances_after = get_instances('ExlcudeClass', $objs);
 $parent_class_bytes_after = get_bytes('SimpleClassForExclude', $objs);

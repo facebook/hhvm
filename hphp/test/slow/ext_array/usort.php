@@ -8,7 +8,7 @@ function reverse_comp_func($n1,$n2) :mixed{
 
 <<__EntryPoint>>
 function main_usort() :mixed{
-$a = varray[3, 2, 5, 6, 10];
+$a = vec[3, 2, 5, 6, 10];
 usort(inout $a, reverse_comp_func<>);
 var_dump($a);
 

@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$booleans = darray[
+$booleans = dict[
 '1' => true,
 'On' => true,
 'Off' => true,

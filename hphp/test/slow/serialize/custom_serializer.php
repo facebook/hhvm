@@ -18,5 +18,5 @@ class A {}
   $s = new MySerializable(new A());
 
   var_dump(unserialize(serialize($s)));
-  var_dump(unserialize(serialize($s), darray['allowed_classes' => false]));
+  var_dump(unserialize(serialize($s), dict['allowed_classes' => false]));
 }

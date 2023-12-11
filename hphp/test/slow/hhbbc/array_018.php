@@ -1,7 +1,7 @@
 <?hh
 
 function four() :mixed{ return 4; }
-function arr() :mixed{ return darray['x' => four(), 'something' => new stdClass()]; }
+function arr() :mixed{ return dict['x' => four(), 'something' => new stdClass()]; }
 function go() :mixed{
   $x = arr();
   $x['something']->hahaha = "yeah";

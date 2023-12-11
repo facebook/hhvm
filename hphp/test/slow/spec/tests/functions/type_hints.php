@@ -63,7 +63,7 @@ function main_entry(): void {
 
   // f1();    // Argument 1 passed to f1() must be of the type array, none given
   // f1(123); // Argument 1 passed to f1() must be of the type array, integer given
-  f1(varray[10,20]);
+  f1(vec[10,20]);
 
   echo "--------------- test type hint class-name ---------------------\n";
 

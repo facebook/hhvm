@@ -47,16 +47,16 @@ class DummyTransport {
 }
 
 class Mappish {
-  const darray<int, darray<string, mixed>> SPEC = darray[
-    1 => darray[
+  const darray<int, darray<string, mixed>> SPEC = dict[
+    1 => dict[
       'var' => 'extraData',
       'type' => TType::MAP,
       'ktype' => TType::STRING,
       'vtype' => TType::STRING,
-      'key' => darray[
+      'key' => dict[
         'type' => TType::STRING,
       ],
-      'val' => darray[
+      'val' => dict[
         'type' => TType::STRING,
         ],
         'format' => 'array',
@@ -71,12 +71,12 @@ class Mappish {
 }
 
 class Settish {
-  const darray<int, darray<string, mixed>> SPEC = darray[
-    1 => darray[
+  const darray<int, darray<string, mixed>> SPEC = dict[
+    1 => dict[
       'var' => 'extraData',
       'type' => TType::SET,
       'etype' => TType::STRING,
-      'elem' => darray[
+      'elem' => dict[
         'type' => TType::STRING,
       ],
       'format' => 'array',
@@ -91,8 +91,8 @@ class Settish {
 }
 
 class TestStruct {
-  const SPEC = darray[
-    0 => darray[
+  const SPEC = dict[
+    0 => dict[
       'var' => 'success',
       'type' => TType::STRUCT,
       'class' => 'Config'

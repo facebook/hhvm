@@ -3,8 +3,8 @@
 <<__NEVER_INLINE>>
 function mixed_value($x) :mixed{
   if ($x === 'null') return null;
-  if ($x === 'varray') return varray['value'];
-  if ($x === 'darray') return darray[0 => 'value'];
+  if ($x === 'varray') return vec['value'];
+  if ($x === 'darray') return dict[0 => 'value'];
 }
 
 function nesting_level_1($x) :mixed{

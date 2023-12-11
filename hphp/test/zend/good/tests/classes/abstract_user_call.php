@@ -17,7 +17,7 @@ $o = new test;
 
 $o->func();
 
-call_user_func(varray[$o, 'test_base::func']);
+call_user_func(vec[$o, 'test_base::func']);
 
 echo "===DONE===\n";
 }

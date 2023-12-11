@@ -75,27 +75,27 @@ class PDOSubClass extends PDO {
 }
 
 function main() :mixed{
-  $tests = varray[
-    varray["Cls1", "method1"],
-    varray["Cls1", "method2"],
-    varray["Cls2", "method2"],
-    varray["Cls3", "method1"],
-    varray["Cls3", "method3"],
-    varray["Cls4", "method1"],
-    varray["Cls4", "method3"],
-    varray["Cls5", "method3"],
-    varray["Cls5", "method4"],
-    varray["Cls6", "method3"],
-    varray["Cls6", "method4"],
-    varray["Cls6", "method1"],
-    varray["Cls7", "method1"],
-    varray["Cls7", "method7"],
-    varray["Cls8", "method1"],
-    varray["Cls8", "method7"],
+  $tests = vec[
+    vec["Cls1", "method1"],
+    vec["Cls1", "method2"],
+    vec["Cls2", "method2"],
+    vec["Cls3", "method1"],
+    vec["Cls3", "method3"],
+    vec["Cls4", "method1"],
+    vec["Cls4", "method3"],
+    vec["Cls5", "method3"],
+    vec["Cls5", "method4"],
+    vec["Cls6", "method3"],
+    vec["Cls6", "method4"],
+    vec["Cls6", "method1"],
+    vec["Cls7", "method1"],
+    vec["Cls7", "method7"],
+    vec["Cls8", "method1"],
+    vec["Cls8", "method7"],
     // builtin class
-    varray["PDO", "commit"],
+    vec["PDO", "commit"],
     // sublcass of builtin class
-    varray["PDOSubClass", "commit"],
+    vec["PDOSubClass", "commit"],
   ];
 
   foreach ($tests as $test) {

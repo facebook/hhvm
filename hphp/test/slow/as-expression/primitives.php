@@ -19,7 +19,7 @@ function f(mixed $x) :mixed{
 
 <<__EntryPoint>>
 function main_primitives() :mixed{
-$arr = varray[1, 2, 3, 3.14, Vector {}, "hiii"];
+$arr = vec[1, 2, 3, 3.14, Vector {}, "hiii"];
 
 foreach ($arr as $e) {
   f($e);

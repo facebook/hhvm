@@ -29,7 +29,7 @@ function main_entry(): void {
   $wsdl = dirname(__FILE__)."/bug55323.wsdl";
 
   $soapClient = new TestSoapClient($wsdl,
-          darray['trace' => 1, 'exceptions' => 0]);
-  $result = $soapClient->__soapcall('getObject', varray[]);
+          dict['trace' => 1, 'exceptions' => 0]);
+  $result = $soapClient->__soapcall('getObject', vec[]);
   var_dump($result);
 }

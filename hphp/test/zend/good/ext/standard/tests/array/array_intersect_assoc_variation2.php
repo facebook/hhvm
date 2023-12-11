@@ -22,10 +22,10 @@ class classA
 echo "*** Testing array_intersect_assoc() : Passing non-array values to \$arr2 argument ***\n";
 
 // array to be passsed to $arr1 as default argument
-$arr1 = varray[1, 2];
+$arr1 = vec[1, 2];
 
 // additional array to be passed for intersection
-$arr3 = darray[0 => 1, 1 => 2, "one" => 1, "two" => 2];
+$arr3 = dict[0 => 1, 1 => 2, "one" => 1, "two" => 2];
 
 
 // heredoc string
@@ -37,7 +37,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $arr2 argument
-$arrays = varray[
+$arrays = vec[
 
        // int data
 /*1*/  0,

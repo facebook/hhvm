@@ -19,8 +19,8 @@ function is_vec_(mixed $x): void {
 
 <<__EntryPoint>>
 function main_is_expression_hack_array_compat() :mixed{
-is_dict_(darray[]);
-is_dict_(varray[]);
-is_vec_(varray[]);
-is_vec_(darray[]);
+is_dict_(dict[]);
+is_dict_(vec[]);
+is_vec_(vec[]);
+is_vec_(dict[]);
 }

@@ -57,7 +57,7 @@ $ents = $dtd->entities;
 $length = $ents->length;
 echo "Length: ".$length."\n";
 
-$xkeys = varray[];
+$xkeys = vec[];
 foreach ($ents as $key=>$node) {
     $xkeys[] = "Key: $key Name: ".$node->nodeName."\n";
 }
@@ -67,7 +67,7 @@ foreach ($xkeys as $key => $node) {
 }
 echo "\n";
 
-$xkeys = varray[];
+$xkeys = vec[];
 for($x=0; $x < $length; $x++) {
     $xkeys[] = "Index: ".$ents->item($x)->nodeName."\n";
 }

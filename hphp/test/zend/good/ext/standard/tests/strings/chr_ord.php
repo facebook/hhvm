@@ -10,7 +10,7 @@ for($i=0; $i<256; $i++) echo !ord(chr($i)) == $i;
 
 /* miscelleous input */
 echo "\n*** Testing chr() usage variations ***\n";
-$arr_test = varray[
+$arr_test = vec[
   "true",
   "false",
   true,

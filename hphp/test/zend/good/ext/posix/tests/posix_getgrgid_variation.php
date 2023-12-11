@@ -12,7 +12,7 @@ function main(): void {
 
 
   //array of values to iterate over
-  $values = varray[
+  $values = vec[
 
     // float data
     10.5,

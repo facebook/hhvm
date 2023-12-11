@@ -7,14 +7,14 @@ function main() :mixed{
   $s = 'hello';
 
   // Arrays
-  var_dump(idx(darray[2 => 'h', 3 => 'i', 4 => 'j'], 4, null));
-  var_dump(idx(darray['hello' => 42], 'hello', 31337));
-  var_dump(idx(darray[2 => false], 2, true));
-  var_dump(idx(darray['world' => 1], 'hello', $o));
-  var_dump(idx(darray[2 => null], 2, 'not_reached'));
-  var_dump(idx(varray[], 2, 'not_reached'));
-  var_dump(idx(varray[], 'absent'));
-  var_dump(idx(varray[], null, 5));
+  var_dump(idx(dict[2 => 'h', 3 => 'i', 4 => 'j'], 4, null));
+  var_dump(idx(dict['hello' => 42], 'hello', 31337));
+  var_dump(idx(dict[2 => false], 2, true));
+  var_dump(idx(dict['world' => 1], 'hello', $o));
+  var_dump(idx(dict[2 => null], 2, 'not_reached'));
+  var_dump(idx(vec[], 2, 'not_reached'));
+  var_dump(idx(vec[], 'absent'));
+  var_dump(idx(vec[], null, 5));
   echo "\n";
 
   // Collections

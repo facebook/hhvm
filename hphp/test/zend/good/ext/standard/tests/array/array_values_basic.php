@@ -12,7 +12,7 @@ echo "*** Testing array_values() : basic functionality ***\n";
 
 
 // Initialise all required variables
-$input = darray[0 => 'zero', 1 => 'one', 2 => 'two', 'three' => 3, 10 => 'ten'];
+$input = dict[0 => 'zero', 1 => 'one', 2 => 'two', 'three' => 3, 10 => 'ten'];
 
 // Calling array_values() with all possible arguments
 var_dump( array_values($input) );

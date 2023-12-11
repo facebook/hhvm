@@ -21,7 +21,7 @@ class z {
     var_dump($args);
   }
   <<__DynamicallyCallable>> function varArgsTest2($a1, $a2, ...$more_args) :mixed{
-    $args = varray[$a1, $a2];
+    $args = vec[$a1, $a2];
     $args = array_merge($args, $more_args);
     var_dump($args);
   }

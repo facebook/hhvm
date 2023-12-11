@@ -72,7 +72,7 @@ function is($x, $y) :mixed{
 }
 
 <<__EntryPoint>> function cmpr(): void {
-  $s = varray[
+  $s = vec[
     "",
     "123",
     "123q",
@@ -83,7 +83,7 @@ function is($x, $y) :mixed{
     "9000000000",
     "9e10",
   ];
-  $i = varray[
+  $i = vec[
     0, 123, -456, 7.8, 90000000000,
   ];
 

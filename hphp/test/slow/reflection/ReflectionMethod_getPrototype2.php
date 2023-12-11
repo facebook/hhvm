@@ -17,7 +17,7 @@ class SimpleXMLElementChild extends SimpleXMLElement {
 
 
 function main() :mixed{
-  $tests = varray[
+  $tests = vec[
     tuple(Generator::class, "next"),
     tuple(Generator::class, "getOrigFuncName"),
     tuple(SimpleXMLElementChild::class, '__construct'),

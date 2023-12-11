@@ -14,7 +14,7 @@ unset($data);
 
 var_dump(stream_get_contents($file));
 
-$streams = varray[
+$streams = vec[
   'data://text/plain;base64,SSBsb3ZlIFBIUAo=',
   'data:text/plain;base64,SSBsb3ZlIFBIUAo=',
   "data:,A%20brief%20note",

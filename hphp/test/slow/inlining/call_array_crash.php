@@ -3,7 +3,7 @@
 class FooCls {
   <<__NEVER_INLINE>>
   function __construct($a, $b, $c, $d) {
-    $this->what = varray[$a, $b, $c, $d];
+    $this->what = vec[$a, $b, $c, $d];
   }
   <<__NEVER_INLINE>>
   function why() :mixed{ return $this->what; }
@@ -29,10 +29,10 @@ function main(bool $b, varray $x) :mixed{
 
 <<__EntryPoint>>
 function main_call_array_crash() :mixed{
-$small = varray['array_fill', 0, 10, 'foo'];
-$large = varray['array_fill', 0, 10000000000, 'foo'];
-$easy = varray[$small, $small, $small, $small];
-$hard = varray[$small, $small, $small, $small, $large];
+$small = vec['array_fill', 0, 10, 'foo'];
+$large = vec['array_fill', 0, 10000000000, 'foo'];
+$easy = vec[$small, $small, $small, $small];
+$hard = vec[$small, $small, $small, $small, $large];
 
 main(false, $small);
 main(false, $small);

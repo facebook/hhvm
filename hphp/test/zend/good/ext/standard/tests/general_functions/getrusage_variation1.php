@@ -15,7 +15,7 @@ echo "*** Testing getrusage() : usage variations ***\n";
 
 
 // unexpected values to be passed to $stream_id argument
-$inputs = varray[
+$inputs = vec[
 
        // int data
 /*1*/  0,

@@ -15,9 +15,9 @@ $format = "format";
 $format1 = "%d";
 $format2 = "%d %d";
 $format3 = "%d %d %d";
-$arg1 = varray[111];
-$arg2 = varray[111,222];
-$arg3 = varray[111,222,333];
+$arg1 = vec[111];
+$arg2 = vec[111,222];
+$arg3 = vec[111,222,333];
 
 $result = vprintf($format1,$arg1);
 echo "\n";

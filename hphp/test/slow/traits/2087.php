@@ -2,7 +2,7 @@
 
 trait T {
   public function foo() :mixed{
-    $values = varray[1, 2, 3];
+    $values = vec[1, 2, 3];
     $values = array_map(function($p) {
       return $this->goo($p);
     }

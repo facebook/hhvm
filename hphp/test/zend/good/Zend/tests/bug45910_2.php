@@ -6,7 +6,7 @@ class foo {
     const CCC = 'a';
     const DDD = self::AAA;
 
-    private static $foo = darray[
+    private static $foo = dict[
         self::BBB    => 'a',
         self::CCC    => 'b',
         self::DDD    =>  11

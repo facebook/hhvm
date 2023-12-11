@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 echo "==Mixed==\n";
-$a = darray[-1=>'a', '-2'=>'b', 3=>'c', '4'=>'d', 5=>'e', '6001'=>'f', '07'=>'g'];
+$a = dict[-1=>'a', '-2'=>'b', 3=>'c', '4'=>'d', 5=>'e', '6001'=>'f', '07'=>'g'];
 
 foreach($a as $k => $v) {
 	var_dump($k);
@@ -9,7 +9,7 @@ foreach($a as $k => $v) {
 }
 
 echo "==Normal==\n";
-$b = varray[];
+$b = vec[];
 $b[] = 'a';
 
 foreach($b as $k => $v) {
@@ -18,7 +18,7 @@ foreach($b as $k => $v) {
 }
 
 echo "==Negative==\n";
-$c = darray['-2' => 'a'];
+$c = dict['-2' => 'a'];
 
 foreach($c as $k => $v) {
 	var_dump($k);

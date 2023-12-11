@@ -16,8 +16,8 @@ function key_compare_func($key1, $key2)
 echo "*** Testing array_diff_uassoc() : usage variation ***\n";
 
 //Initialize variables
-$arr_string_int = varray['1', '2'];
-$arr_string_float = darray['0' => '1.00', '1.00' => '2.00'];
+$arr_string_int = vec['1', '2'];
+$arr_string_float = dict['0' => '1.00', '1.00' => '2.00'];
 
 echo "\n-- Result of comparing strings containing integers and strings containing floating points --\n";
 var_dump( array_diff_uassoc($arr_string_int, $arr_string_float, key_compare_func<>) );

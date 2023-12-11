@@ -1,7 +1,7 @@
 <?hh
 class A {
     public static $b = 0;
-    public static $c = varray[0, 1];
+    public static $c = vec[0, 1];
     public static $A_str = 'A';
 }
 

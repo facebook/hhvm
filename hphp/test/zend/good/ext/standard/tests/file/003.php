@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$funcs = varray[
+$funcs = vec[
   is_writable<>,
   is_readable<>,
   is_executable<>,

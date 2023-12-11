@@ -5,7 +5,7 @@ $password = "openssl";
 $iv = str_repeat("\0", openssl_cipher_iv_length($method));
 $wrong = "wrong";
 $object = new stdClass;
-$arr = varray[1];
+$arr = vec[1];
 
 // wrong paramters tests
 var_dump(openssl_encrypt($data, $wrong, $password));

@@ -1,7 +1,7 @@
 <?hh
 
 class X {
-  static public $val = varray[1,2,3];
+  static public $val = vec[1,2,3];
   function foo() :mixed{
     list($a, $b) = self::$val;
     var_dump($a, $b);

@@ -7,7 +7,7 @@ echo "*** Testing fputcsv() : with enclosure & delimiter of two chars and file o
 
 $fo = new SplFileObject(sys_get_temp_dir().'/'.'SplFileObject_fputcsv_variation14.csv', 'w');
 
-var_dump($fo->fputcsv(varray['water', 'fruit'], ',,', '""'));
+var_dump($fo->fputcsv(vec['water', 'fruit'], ',,', '""'));
 
 unset($fo);
 

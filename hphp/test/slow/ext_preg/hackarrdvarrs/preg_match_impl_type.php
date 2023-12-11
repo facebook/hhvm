@@ -1,7 +1,7 @@
 <?hh
 
 function f(): dict {
-  $captures = darray[];
+  $captures = dict[];
   $ret = preg_match_with_matches("%bcd%", "abcdbcdef", inout $captures);
   var_dump($captures);
   var_dump(HH\is_dict($captures));
@@ -9,7 +9,7 @@ function f(): dict {
 }
 
 function g(): dict {
-  $captures = darray[];
+  $captures = dict[];
   $ret = preg_match_all_with_matches("%b[a-z]d%", "abcdbzdef", inout $captures);
   var_dump($captures);
   var_dump(HH\is_dict($captures));
@@ -18,7 +18,7 @@ function g(): dict {
 }
 
 function h(): dict {
-  $captures = darray[];
+  $captures = dict[];
   $ret = preg_match_with_matches(
     '/def$/',
     'abcdef',

@@ -1,6 +1,6 @@
 <?hh
 
-function a() :mixed{ return varray[]; }
+function a() :mixed{ return vec[]; }
 function main() :mixed{
   $x = a();
   $x[] = 2;

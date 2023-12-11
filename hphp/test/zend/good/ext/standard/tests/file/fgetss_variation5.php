@@ -28,7 +28,7 @@ EOT;
 $filename = sys_get_temp_dir().'/'.'fgetss_variation5.tmp';
 
 /* try reading the file opened in different modes of reading */
-$file_modes = varray["w+","w+b", "w+t","a+", "a+b", "a+t","x+","x+b","x+t"];
+$file_modes = vec["w+","w+b", "w+t","a+", "a+b", "a+t","x+","x+b","x+t"];
 
 for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
   echo "\n-- Testing fgetss() with file opened using $file_modes[$mode_counter] mode --\n";

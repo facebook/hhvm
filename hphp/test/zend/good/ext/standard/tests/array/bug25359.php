@@ -6,8 +6,8 @@ abstract final class ZendGoodExtStandardTestsArrayBug25359 {
 
 function does_not_work()
 :mixed{
-    ZendGoodExtStandardTestsArrayBug25359::$data = varray['first', 'fifth', 'second', 'forth', 'third'];
-    $sort = varray[1, 5, 2, 4, 3];
+    ZendGoodExtStandardTestsArrayBug25359::$data = vec['first', 'fifth', 'second', 'forth', 'third'];
+    $sort = vec[1, 5, 2, 4, 3];
     $data = ZendGoodExtStandardTestsArrayBug25359::$data;
     array_multisort2(inout $sort, inout $data);
     ZendGoodExtStandardTestsArrayBug25359::$data = $data;

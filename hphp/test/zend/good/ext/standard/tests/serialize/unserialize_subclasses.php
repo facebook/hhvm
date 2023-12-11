@@ -6,8 +6,8 @@ class D extends C {}
 $c = serialize(new C);
 $d = serialize(new D);
 
-var_dump(unserialize($c, darray["allowed_classes" => varray["C"]]));
-var_dump(unserialize($c, darray["allowed_classes" => varray["D"]]));
-var_dump(unserialize($d, darray["allowed_classes" => varray["C"]]));
-var_dump(unserialize($d, darray["allowed_classes" => varray["D"]]));
+var_dump(unserialize($c, dict["allowed_classes" => vec["C"]]));
+var_dump(unserialize($c, dict["allowed_classes" => vec["D"]]));
+var_dump(unserialize($d, dict["allowed_classes" => vec["C"]]));
+var_dump(unserialize($d, dict["allowed_classes" => vec["D"]]));
 }

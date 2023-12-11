@@ -4,11 +4,11 @@
 require(__DIR__ . '/common.inc');
 
 // Set breakpoint on throw statement
-$breakpoints = varray[
-   darray[
+$breakpoints = vec[
+   dict[
      "path" => __FILE__ . ".test",
-     "breakpoints" => varray[
-       darray["line" => 6, "calibratedLine" => 6, "condition" => ""],
+     "breakpoints" => vec[
+       dict["line" => 6, "calibratedLine" => 6, "condition" => ""],
      ]]
    ];
 

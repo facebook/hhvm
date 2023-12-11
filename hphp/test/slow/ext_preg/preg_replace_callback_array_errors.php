@@ -18,12 +18,12 @@ try { var_dump(preg_replace_callback_array(1)); } catch (Exception $e) { echo "\
 var_dump(preg_replace_callback_array(1, 2, -1, inout $count));
 var_dump(preg_replace_callback_array(1,2,3, inout $count));
 // Provide an integer subject; no warning, just null
-var_dump(preg_replace_callback_array(varray[], 3, -1, inout $count));
+var_dump(preg_replace_callback_array(vec[], 3, -1, inout $count));
 $a = 5;
 var_dump(preg_replace_callback_array(1, 2, 3, inout $a));
 $a = "";
-try { var_dump(preg_replace_callback_array(darray["" => ""], "", "", inout $a)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-$a = varray[];
+try { var_dump(preg_replace_callback_array(dict["" => ""], "", "", inout $a)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+$a = vec[];
 $b = "";
 try { var_dump(preg_replace_callback_array($a, $a, $a, inout $a, $b)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump($b);
@@ -33,14 +33,14 @@ $b = -1;
 // Testing multiple invalid. We only catch the first invalid one
 // even if there are more - that matches PHP 7
 var_dump(preg_replace_callback_array(
-  darray["xx" => "notValid1", "yy" => "notValid2"], $a, -1, inout $b)
+  dict["xx" => "notValid1", "yy" => "notValid2"], $a, -1, inout $b)
 );
 var_dump($b);
-var_dump(preg_replace_callback_array(darray['/\w' => 'f'], 'z', -1, inout $count));
+var_dump(preg_replace_callback_array(dict['/\w' => 'f'], 'z', -1, inout $count));
 try {
   var_dump(
     preg_replace_callback_array(
-      darray['/\w/' => 'f', '/.*/' => 'f'],
+      dict['/\w/' => 'f', '/.*/' => 'f'],
       'z',
       -1,
       inout $count

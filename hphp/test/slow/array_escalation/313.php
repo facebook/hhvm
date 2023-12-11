@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_313() :mixed{
-$a = varray[varray[0]];
- $a[0] = varray[0];
+$a = vec[vec[0]];
+ $a[0] = vec[0];
       var_dump($a);
 }

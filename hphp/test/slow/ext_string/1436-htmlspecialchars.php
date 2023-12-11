@@ -6,11 +6,11 @@
 
 <<__EntryPoint>>
 function main_1436_htmlspecialchars() :mixed{
-$inputs = varray[
+$inputs = vec[
   'foo<>bar',
   '',
   null,
-  darray['str' => 'aaa'],
+  dict['str' => 'aaa'],
   42,
   1.234
 ];

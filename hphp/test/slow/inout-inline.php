@@ -12,7 +12,7 @@ function foo(inout float $a, inout int $b, inout string $c) :mixed{
 
 <<__EntryPoint>>
 function main() :mixed{
-  list($a, $b, $c) = varray[2.0, 3, "5"];
+  list($a, $b, $c) = vec[2.0, 3, "5"];
   var_dump(
     "one",
     var_dump(1),

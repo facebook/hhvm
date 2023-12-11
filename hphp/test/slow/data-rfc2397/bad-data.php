@@ -5,7 +5,7 @@
 
 <<__EntryPoint>>
 function main_bad_data() :mixed{
-$streams = varray[
+$streams = vec[
   "data:;base64,\0Zm9vYmFyIGZvb2Jhcg==",
   "data:;base64,Zm9vYmFy\0IGZvb2Jhcg==",
   "data:;base64,Zm9vYmFyIGZvb2Jhcg==",

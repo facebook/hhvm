@@ -1,7 +1,7 @@
 <?hh
 
 function main() :mixed{
-  $ctypes = darray[
+  $ctypes = dict[
     'Vector' => new Vector(),
     'Map' => new Map(),
   ];

@@ -1,8 +1,8 @@
 <?hh
 
 function run(inout $a, inout $c) :mixed{
-  $b = varray[0, 1];
-  $a = varray[$b, 1];
+  $b = vec[0, 1];
+  $a = vec[$b, 1];
   unset($a[0][1]);
   var_dump($a);
 }

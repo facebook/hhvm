@@ -5,7 +5,7 @@ function test_auth_digest_entrypoint() :mixed{
     $realm = 'Restricted area';
 
     //user => password
-    $users = darray['admin' => 'mypass'];
+    $users = dict['admin' => 'mypass'];
 
     if (!($_SERVER['PHP_AUTH_DIGEST'] ?? false)) {
         header('HTTP/1 . 1 401 Unauthorized');
@@ -41,9 +41,9 @@ function test_auth_digest_entrypoint() :mixed{
 function http_digest_parse($txt)
 :mixed{
     // protect against missing data
-    $needed_parts = darray['nonce'=>1, 'nc'=>1, 'cnonce'=>1, 'qop'=>1,
+    $needed_parts = dict['nonce'=>1, 'nc'=>1, 'cnonce'=>1, 'qop'=>1,
                           'username'=>1, 'uri'=>1, 'response'=>1];
-    $data = darray[];
+    $data = dict[];
     $keys = implode('|', array_keys($needed_parts));
 
     $matches = null;

@@ -11,7 +11,7 @@ $output2 = null;
 $output3 = null;
 $output4 = null;
 
-openssl_seal($data, inout $sealed, inout $ekeys, varray[$pub_key, $pub_key, $pub_key], '', inout $iv);
+openssl_seal($data, inout $sealed, inout $ekeys, vec[$pub_key, $pub_key, $pub_key], '', inout $iv);
 openssl_open($sealed, inout $output, $ekeys[0], $priv_key);
 var_dump($output);
 openssl_open($sealed, inout $output2, $ekeys[1], $wrong);

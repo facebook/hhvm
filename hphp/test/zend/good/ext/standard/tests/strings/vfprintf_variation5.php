@@ -13,7 +13,7 @@ echo "*** Testing vfprintf() : int formats with float values ***\n";
 
 
 // defining array of float formats
-$formats = varray[
+$formats = vec[
   "%f",
   "%+f %-f %F",
   "%lf %Lf, %4f %-4f",
@@ -26,15 +26,15 @@ $formats = varray[
 
 // Arrays of float values for the format defined in $format.
 // Each sub array contains float values which correspond to each format string in $format
-$args_array = varray[
-  varray[0.0],
-  varray[-0.1, +0.1, +10.0000006],
-  varray[2147483649, -2147483647, +2147483640, -2147483640],
-  varray[2e5, 2e-5, -2e5, -2e-5],
-  varray[0.2E5, -0.2e40, 0.2E-20, 0.2E+20],
-  varray[0x123b, 0xfAb, 0123, 012],
-  varray[1234.1234, -5678.5678, 2345.2345],
-  varray[3.33, 4.44, 1.11, 2.22]
+$args_array = vec[
+  vec[0.0],
+  vec[-0.1, +0.1, +10.0000006],
+  vec[2147483649, -2147483647, +2147483640, -2147483640],
+  vec[2e5, 2e-5, -2e5, -2e-5],
+  vec[0.2E5, -0.2e40, 0.2E-20, 0.2E+20],
+  vec[0x123b, 0xfAb, 0123, 012],
+  vec[1234.1234, -5678.5678, 2345.2345],
+  vec[3.33, 4.44, 1.11, 2.22]
 
 ];
 

@@ -1,15 +1,15 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$array1 = darray[
+$array1 = dict[
        'friends' => 5,
-       'children' => darray[
+       'children' => dict[
                'dogs' => 0,
        ],
 ];
 
-$array2 = darray[
+$array2 = dict[
        'friends' => 10,
-       'children' => darray[
+       'children' => dict[
                'cats' => 5,
        ],
 ];

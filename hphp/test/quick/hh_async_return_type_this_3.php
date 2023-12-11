@@ -84,7 +84,7 @@ function call_wrapper($fn, $arg) :mixed{
 
 function main() :mixed{
   for ($i = 1; $i <= 20; $i++) {
-    foreach (varray['', '_soft'] as $suffix) {
+    foreach (vec['', '_soft'] as $suffix) {
       if ($suffix !== '' && $i === 1) {
         // f1_soft() does not exist
         continue;
@@ -97,14 +97,14 @@ function main() :mixed{
       call_wrapper($f, true);
       call_wrapper($f, 14.1);
       call_wrapper($f, imagecreate(10, 10));
-      call_wrapper($f, varray[]);
+      call_wrapper($f, vec[]);
       call_wrapper($f, function($x){return $x*$x;});
       call_wrapper($f, new Figure());
       call_wrapper($f, new Square());
       call_wrapper($f, new Fractal());
       call_wrapper($f, <div/>);
       call_wrapper($f, 'testfunc');
-      call_wrapper($f, varray['C', 'testfunc']);
+      call_wrapper($f, vec['C', 'testfunc']);
     }
   }
 
@@ -122,8 +122,8 @@ function main() :mixed{
   }
 
   $callbacks = Map {
-    'f22' => varray[$c, 'f22'],
-    'f22_soft' => varray[$c, 'f22_soft'],
+    'f22' => vec[$c, 'f22'],
+    'f22_soft' => vec[$c, 'f22_soft'],
   };
   foreach ($callbacks as $name => $f) {
     echo "\ncalling $name\n";
@@ -133,7 +133,7 @@ function main() :mixed{
     call_wrapper($f, true);
     call_wrapper($f, 14.1);
     call_wrapper($f, imagecreate(10, 10));
-    call_wrapper($f, varray[]);
+    call_wrapper($f, vec[]);
     call_wrapper($f, function($x){return $x*$x;});
     call_wrapper($f, new Figure());
     call_wrapper($f, new Square());

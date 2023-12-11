@@ -12,9 +12,9 @@ mb_detect_order("eucjp-win,UTF-8,sjis-win");
 var_dump(mb_detect_encoding($str));
 
 /* Set detection order by array */
-mb_detect_order(varray["eucjp-win", "sjis-win", "UTF-8"]);
+mb_detect_order(vec["eucjp-win", "sjis-win", "UTF-8"]);
 var_dump(mb_detect_encoding($str));
-mb_detect_order(varray["eucjp-win", "UTF-8", "sjis-win"]);
+mb_detect_order(vec["eucjp-win", "UTF-8", "sjis-win"]);
 var_dump(mb_detect_encoding($str));
 
 /* Display current detection order */

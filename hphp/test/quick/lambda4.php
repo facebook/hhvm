@@ -3,7 +3,7 @@
 <<__EntryPoint>> function function_scope(): void {
   // Shouldn't try to capture $k
   $bar = () ==> {
-    foreach (varray[1,2,3,4] as $k) {
+    foreach (vec[1,2,3,4] as $k) {
       var_dump($k);
     }
   };

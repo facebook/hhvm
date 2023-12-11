@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$ar = darray[0 => 0, 1 => "123", 2 => 123, 22 => "abc", 23 => "a2b", 24 => 22, "a2d" => 7, 25 => 42];
+$ar = dict[0 => 0, 1 => "123", 2 => 123, 22 => "abc", 23 => "a2b", 24 => 22, "a2d" => 7, 25 => 42];
 
 foreach(new RegexIterator(new ArrayIterator($ar), "/2/") as $k => $v)
 {

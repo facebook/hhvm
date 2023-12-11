@@ -8,7 +8,7 @@ class X implements Serializable {
   }
 }
 function test() :mixed{
-  $a = varray[];
+  $a = vec[];
   $a[] = $x = new X;
   $a[] = $x;
   $a[] = $x;

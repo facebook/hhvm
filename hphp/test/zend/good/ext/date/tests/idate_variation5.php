@@ -11,7 +11,7 @@ echo "*** Testing idate() : usage variation ***\n";
 date_default_timezone_set("Asia/Calcutta");
 
 //array of values to iterate over
-$inputs = darray[
+$inputs = dict[
 
       'Internet Time' => 'B',
       '12 hour format' => 'h',

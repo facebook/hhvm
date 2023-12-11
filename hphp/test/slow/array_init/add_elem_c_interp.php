@@ -3,7 +3,7 @@ class X {
   public $foo;
 
   function test() :mixed{
-    $a = darray[
+    $a = dict[
       'null' => $this->foo,
     ];
     return $a;

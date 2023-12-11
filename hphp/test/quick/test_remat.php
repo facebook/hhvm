@@ -8,9 +8,9 @@ class KM {
     return $this->kSA;
   }
   function __construct() {
-    $this->specs = darray[
+    $this->specs = dict[
       "r:3600" =>
-        darray['oblt' => 0,
+        dict['oblt' => 0,
           'ms' => 10000000,
           'ttdm' => 100]
       ];
@@ -19,15 +19,15 @@ class KM {
   private static function decay($a, $b, $c, $d) :mixed{ return 0; }
 
   private function getXXX() :mixed{
-    return varray[1, 0, 0];
+    return vec[1, 0, 0];
   }
   public function getInfo() :mixed{
     $time = time();
-    $this->kSA = darray[];
+    $this->kSA = dict[];
     foreach ($this->specs as $key => $spec) {
       $fetched = $this->getXXX();
       list($sc, $l_o, $l_b_t) =
-        varray[
+        vec[
           $fetched[0],
           $fetched[1],
           $fetched[2]
@@ -44,8 +44,8 @@ class KM {
             $l_o
           );
         }
-        $this->dKV = darray[];
-        $this->dKV[$key] = darray[
+        $this->dKV = dict[];
+        $this->dKV[$key] = dict[
           'sc' => (float)$sc,
           'l_o' => (int)$l_o,
           'l_b_t' => (int)$l_b_t

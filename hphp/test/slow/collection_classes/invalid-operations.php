@@ -15,9 +15,9 @@ function main() :mixed{
   echo "\n";
 
   $containers = Vector {
-    ImmVector {varray[Vector {}], varray[Vector {}]},
-    ImmMap {0 => varray[Vector {}], 1 => varray[Vector {}]},
-    Pair {varray[Vector {}], varray[Vector {}]}
+    ImmVector {vec[Vector {}], vec[Vector {}]},
+    ImmMap {0 => vec[Vector {}], 1 => vec[Vector {}]},
+    Pair {vec[Vector {}], vec[Vector {}]}
   };
   foreach ($containers as $x) {
     $y = $x[0][0];
@@ -29,9 +29,9 @@ function main() :mixed{
   echo "\n";
 
   $containers = Vector {
-    ImmVector {varray[Vector {}], varray[Vector {}]},
-    ImmMap {0 => varray[Vector {}], 1 => varray[Vector {}]},
-    Pair {varray[Vector {}], varray[Vector {}]}
+    ImmVector {vec[Vector {}], vec[Vector {}]},
+    ImmMap {0 => vec[Vector {}], 1 => vec[Vector {}]},
+    Pair {vec[Vector {}], vec[Vector {}]}
   };
   foreach ($containers as $x) {
     try {
@@ -93,9 +93,9 @@ function main() :mixed{
   echo "\n";
 
   $containers = Vector {
-    ImmVector {varray[], varray[]},
-    ImmMap {0 => varray[], 1 => varray[]},
-    Pair {varray[], varray[]}
+    ImmVector {vec[], vec[]},
+    ImmMap {0 => vec[], 1 => vec[]},
+    Pair {vec[], vec[]}
   };
   foreach ($containers as $x) {
     try {
@@ -125,9 +125,9 @@ function main() :mixed{
   echo "\n";
 
   $containers = Vector {
-    ImmVector {varray[4, 5, 6], varray[7, 8, 9]},
-    ImmMap {0 => varray[4, 5, 6], 1 => varray[7, 8, 9]},
-    Pair {varray[4, 5, 6], varray[7, 8, 9]}
+    ImmVector {vec[4, 5, 6], vec[7, 8, 9]},
+    ImmMap {0 => vec[4, 5, 6], 1 => vec[7, 8, 9]},
+    Pair {vec[4, 5, 6], vec[7, 8, 9]}
   };
   foreach ($containers as $x) {
     try {
@@ -141,9 +141,9 @@ function main() :mixed{
   echo "\n";
 
   $containers = Vector {
-    ImmVector {varray[4, 5, 6], varray[7, 8, 9]},
-    ImmMap {0 => varray[4, 5, 6], 1 => varray[7, 8, 9]},
-    Pair {varray[4, 5, 6], varray[7, 8, 9]}
+    ImmVector {vec[4, 5, 6], vec[7, 8, 9]},
+    ImmMap {0 => vec[4, 5, 6], 1 => vec[7, 8, 9]},
+    Pair {vec[4, 5, 6], vec[7, 8, 9]}
   };
   foreach ($containers as $x) {
     try {
@@ -157,9 +157,9 @@ function main() :mixed{
   echo "\n";
 
   $containers = Vector {
-    ImmVector {varray[], varray[]},
-    ImmMap {0 => varray[], 1 => varray[]},
-    Pair {varray[], varray[]}
+    ImmVector {vec[], vec[]},
+    ImmMap {0 => vec[], 1 => vec[]},
+    Pair {vec[], vec[]}
   };
   foreach ($containers as $x) {
     try {

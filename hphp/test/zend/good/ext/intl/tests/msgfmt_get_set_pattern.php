@@ -12,7 +12,7 @@ function ut_main()
 
     // Get default patten.
     $res_str .= "Default pattern: '" . ut_msgfmt_get_pattern( $fmt ) . "'\n";
-    $res_str .= "Formatting result: " . ut_msgfmt_format( $fmt, darray[0 => 123, 1 => 456] ) . "\n";
+    $res_str .= "Formatting result: " . ut_msgfmt_format( $fmt, dict[0 => 123, 1 => 456] ) . "\n";
 
     // Set a new pattern.
     $pattern = "{0,number} trees hosting {1,number} monkeys";
@@ -25,11 +25,11 @@ function ut_main()
     if( $res === false )
         $res_str .= ut_msgfmt_get_error_message( $fmt ) . " (" . ut_msgfmt_get_error_code( $fmt ) . ")\n";
     $res_str .= "New pattern: '" . ut_msgfmt_get_pattern( $fmt ) . "'\n";
-    $res_str .= "Formatted message: " . ut_msgfmt_format( $fmt, darray[0 => 123, 1 => 456] ) . "\n";
+    $res_str .= "Formatted message: " . ut_msgfmt_format( $fmt, dict[0 => 123, 1 => 456] ) . "\n";
 
     ut_msgfmt_set_pattern($fmt, str_repeat($pattern, 10));
     $res_str .= "New pattern: '" . ut_msgfmt_get_pattern( $fmt ) . "'\n";
-    $res_str .= "Formatted message: " . ut_msgfmt_format( $fmt, darray[0 => 123, 1 => 456] ) . "\n";
+    $res_str .= "Formatted message: " . ut_msgfmt_format( $fmt, dict[0 => 123, 1 => 456] ) . "\n";
 
 
     return $res_str;

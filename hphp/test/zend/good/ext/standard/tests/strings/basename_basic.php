@@ -22,50 +22,50 @@ function check_basename( $path_arrays ) :mixed{
 <<__EntryPoint>> function main(): void {
 $file_paths = varray [
   /* simple paths */
-  varray["bar"],
-  varray["/foo/bar"],
-  varray["foo/bar"],
-  varray["/bar"],
+  vec["bar"],
+  vec["/foo/bar"],
+  vec["foo/bar"],
+  vec["/bar"],
 
   /* simple paths with trailing slashes */
-  varray["bar/"],
-  varray["/bar/"],
-  varray["/foo/bar/"],
-  varray["foo/bar/"],
-  varray["/bar/"],
+  vec["bar/"],
+  vec["/bar/"],
+  vec["/foo/bar/"],
+  vec["foo/bar/"],
+  vec["/bar/"],
 
   /* paths with suffix removal */
-  varray["bar.gz", ".gz"],
-  varray["bar.gz", "bar.gz"],
-  varray["/foo/bar.gz", ".gz"],
-  varray["foo/bar.gz", ".gz"],
-  varray["/bar.gz", ".gz"],
+  vec["bar.gz", ".gz"],
+  vec["bar.gz", "bar.gz"],
+  vec["/foo/bar.gz", ".gz"],
+  vec["foo/bar.gz", ".gz"],
+  vec["/bar.gz", ".gz"],
 
   /* paths with suffix and trailing slashes with suffix removal*/
-  varray["bar.gz/", ".gz"],
-  varray["/bar.gz/", ".gz"],
-  varray["/foo/bar.gz/", ".gz"],
-  varray["foo/bar.gz/", ".gz"],
-  varray["/bar.gz/", ".gz"],
+  vec["bar.gz/", ".gz"],
+  vec["/bar.gz/", ".gz"],
+  vec["/foo/bar.gz/", ".gz"],
+  vec["foo/bar.gz/", ".gz"],
+  vec["/bar.gz/", ".gz"],
 
   /* paths with basename only suffix, with suffix removal*/
-  varray["/.gz", ".gz"],
-  varray[".gz", ".gz"],
-  varray["/foo/.gz", ".gz"],
+  vec["/.gz", ".gz"],
+  vec[".gz", ".gz"],
+  vec["/foo/.gz", ".gz"],
 
   /* paths with basename only suffix & trailing slashes, with suffix removal*/
-  varray[".gz/", ".gz"],
-  varray["/foo/.gz/", ".gz"],
-  varray["foo/.gz/", ".gz"],
+  vec[".gz/", ".gz"],
+  vec["/foo/.gz/", ".gz"],
+  vec["foo/.gz/", ".gz"],
 
   /* paths with binary value to check if the function is binary safe*/
-  varray["foo".chr(0)."bar"],
-  varray["/foo".chr(0)."bar"],
-  varray["/foo".chr(0)."bar/"],
-  varray["foo".chr(0)."bar/"],
-  varray["foo".chr(0)."bar/test"],
-  varray["/foo".chr(0)."bar/bar.gz", ".gz"],
-  varray["/foo".chr(0)."bar/bar.gz"]
+  vec["foo".chr(0)."bar"],
+  vec["/foo".chr(0)."bar"],
+  vec["/foo".chr(0)."bar/"],
+  vec["foo".chr(0)."bar/"],
+  vec["foo".chr(0)."bar/test"],
+  vec["/foo".chr(0)."bar/bar.gz", ".gz"],
+  vec["/foo".chr(0)."bar/bar.gz"]
 ];
 
 echo "*** Testing basic operations ***\n";

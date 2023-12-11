@@ -16,11 +16,11 @@ function ackermann($n = 7) :mixed{
 }
 
 function ary($n = 50000) :mixed{
-  $X = darray[];
+  $X = dict[];
   for ($i=0; $i<$n; $i++) {
     $X[$i] = $i;
   }
-  $Y = darray[];
+  $Y = dict[];
   for ($i=$n-1; $i>=0; $i--) {
     $Y[$i] = $X[$i];
   }
@@ -29,7 +29,7 @@ function ary($n = 50000) :mixed{
 }
 
 function ary2($n = 50000) :mixed{
-  $X = darray[];
+  $X = dict[];
   for ($i=0; $i<$n;) {
     $X[$i] = $i; ++$i;
     $X[$i] = $i; ++$i;
@@ -43,7 +43,7 @@ function ary2($n = 50000) :mixed{
     $X[$i] = $i; ++$i;
     $X[$i] = $i; ++$i;
   }
-  $Y = darray[];
+  $Y = dict[];
   for ($i=$n-1; $i>=0;) {
     $Y[$i] = $X[$i]; --$i;
     $Y[$i] = $X[$i]; --$i;
@@ -62,8 +62,8 @@ function ary2($n = 50000) :mixed{
 }
 
 function ary3($n = 2000) :mixed{
-  $X = darray[];
-  $Y = darray[];
+  $X = dict[];
+  $Y = dict[];
   for ($i=0; $i<$n; $i++) {
     $X[$i] = $i + 1;
     $Y[$i] = 0;
@@ -89,7 +89,7 @@ function fibo($n = 30) :mixed{
 }
 
 function hash1($n = 50000) :mixed{
-  $X = darray[];
+  $X = dict[];
   for ($i = 1; $i <= $n; $i++) {
     $X[dechex($i)] = $i;
   }
@@ -101,8 +101,8 @@ function hash1($n = 50000) :mixed{
 }
 
 function hash2($n = 500) :mixed{
-  $hash1 = darray[];
-  $hash2 = darray[];
+  $hash1 = dict[];
+  $hash2 = dict[];
   for ($i = 0; $i < $n; $i++) {
     $hash1["foo_$i"] = $i;
     $hash2["foo_$i"] = 0;
@@ -150,7 +150,7 @@ function heapsort_r($n, inout $ra) :mixed{
 }
 
 function heapsort($N = 20000) :mixed{
-  $ary = darray[];
+  $ary = dict[];
   for ($i=1; $i<=$N; $i++) {
     $ary[$i] = ($N - $i);
   }
@@ -160,10 +160,10 @@ function heapsort($N = 20000) :mixed{
 
 function mkmatrix ($rows, $cols) :mixed{
   $count = 1;
-  $mx = darray[];
+  $mx = dict[];
   for ($i=0; $i<$rows; $i++) {
     for ($j=0; $j<$cols; $j++) {
-      if (!array_key_exists($i, $mx)) $mx[$i] = darray[];
+      if (!array_key_exists($i, $mx)) $mx[$i] = dict[];
       $mx[$i][$j] = $count++;
     }
   }
@@ -171,14 +171,14 @@ function mkmatrix ($rows, $cols) :mixed{
 }
 
 function mmult ($rows, $cols, $m1, $m2) :mixed{
-  $m3 = darray[];
+  $m3 = dict[];
   for ($i=0; $i<$rows; $i++) {
     for ($j=0; $j<$cols; $j++) {
       $x = 0;
       for ($k=0; $k<$cols; $k++) {
         $x += $m1[$i][$k] * $m2[$k][$j];
       }
-      if (!array_key_exists($i, $m3)) $m3[$i] = darray[];
+      if (!array_key_exists($i, $m3)) $m3[$i] = dict[];
       $m3[$i][$j] = $x;
     }
   }
@@ -239,13 +239,13 @@ function bottomUpTree($item, $depth)
    {
       --$depth;
       $newItem = $item<<1;
-      return varray[
+      return vec[
          bottomUpTree($newItem - 1, $depth),
          bottomUpTree($newItem, $depth),
          $item
       ];
    }
-   return varray[NULL, NULL, $item];
+   return vec[NULL, NULL, $item];
 }
 
 function itemCheck($treeNode)
@@ -304,10 +304,10 @@ function binary_trees($n = 12) :mixed{
 
 function Fannkuch_run($n):mixed{
    $check = 0;
-   $perm = darray[];
-   $perm1 = darray[];
-   $count = darray[];
-   $maxPerm = darray[];
+   $perm = dict[];
+   $perm1 = dict[];
+   $count = dict[];
+   $maxPerm = dict[];
    $maxFlipsCount = 0;
    $m = $n - 1;
 

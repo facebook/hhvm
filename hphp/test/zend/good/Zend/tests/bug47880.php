@@ -6,6 +6,6 @@ class bomb {
   }
 }
 <<__EntryPoint>> function main(): void {
-call_user_func_array(varray['bomb', 'go'], varray[0]);
+call_user_func_array(vec['bomb', 'go'], vec[0]);
 echo "ok\n";
 }

@@ -14,7 +14,7 @@ class Sleep {
 
   function __sleep() :mixed{
     echo "Sleep...\n";
-    return varray[];
+    return vec[];
   }
 }
 

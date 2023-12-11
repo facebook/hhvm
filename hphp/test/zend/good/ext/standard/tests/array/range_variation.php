@@ -1,8 +1,8 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 echo "\n*** Testing range() with various low and high values ***";
-$low_arr = varray[ "ABCD", -10.5555, TRUE, NULL, FALSE, "", varray[1,2]];
-$high_arr = varray[ "ABCD", -10.5555, TRUE, NULL, FALSE, "", varray[1,2]];
+$low_arr = vec[ "ABCD", -10.5555, TRUE, NULL, FALSE, "", vec[1,2]];
+$high_arr = vec[ "ABCD", -10.5555, TRUE, NULL, FALSE, "", vec[1,2]];
 
 for( $i = 0; $i < count($low_arr); $i++) {
   for( $j = 0; $j < count($high_arr); $j++) {
@@ -15,7 +15,7 @@ for( $i = 0; $i < count($low_arr); $i++) {
 
 echo "\n*** Possible variatins with steps ***\n";
 var_dump( range( 1, 5, TRUE ) );
-var_dump( range( 1, 5, varray[1, 2] ) );
+var_dump( range( 1, 5, vec[1, 2] ) );
 
 echo "Done\n";
 }

@@ -1,8 +1,8 @@
 <?hh
 
 function main() :mixed{
-  $a = varray[];
-  $b = varray[];
+  $a = vec[];
+  $b = vec[];
   $res = xml_parse_into_struct(
     xml_parser_create_ns(),
     str_repeat("<blah>", 100000),

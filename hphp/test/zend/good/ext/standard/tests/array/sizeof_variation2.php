@@ -15,20 +15,20 @@ echo "--- Testing sizeof() with different array values for 'var' argument ---\n"
 
 // array containing different types of array values for 'var' argument
 $values = varray [
-  /* 1  */  darray[0 => $fp, "resource" => $fp],
-            varray[1, varray[3, 4, varray[6, varray[8]]]],
-            darray["a" => 1, 'b' => 2, 0 => darray[ "c" =>3, 0 => darray[ "d" => 5]]],
-            varray[],
-  /* 5  */  varray[1, 2, 3, 4],
-            varray["Saffron", "White", "Green"],
-            varray['saffron', 'white', 'green'],
-            darray[1 => "Hi", 2 => "Hello" ],
-            darray["color" => "red", "item" => "pen"],
-  /* 10 */  darray['color' => 'red', 'item' => 'pen'],
-            darray[1 => "red", 0 => "pen" ],
-            darray[0 => 'red', 1 => 'pen' ],
-            darray['color' => "red", "item" => 'pen', 1 => "Hi", "" => "Hello" ],
-  /* 14 */  darray[0 => $fp, "resource1" => $fp, 'resource2' => $fp, 1 => darray[0 => $fp, 'type' => $fp] ]
+  /* 1  */  dict[0 => $fp, "resource" => $fp],
+            vec[1, vec[3, 4, vec[6, vec[8]]]],
+            dict["a" => 1, 'b' => 2, 0 => dict[ "c" =>3, 0 => dict[ "d" => 5]]],
+            vec[],
+  /* 5  */  vec[1, 2, 3, 4],
+            vec["Saffron", "White", "Green"],
+            vec['saffron', 'white', 'green'],
+            dict[1 => "Hi", 2 => "Hello" ],
+            dict["color" => "red", "item" => "pen"],
+  /* 10 */  dict['color' => 'red', 'item' => 'pen'],
+            dict[1 => "red", 0 => "pen" ],
+            dict[0 => 'red', 1 => 'pen' ],
+            dict['color' => "red", "item" => 'pen', 1 => "Hi", "" => "Hello" ],
+  /* 14 */  dict[0 => $fp, "resource1" => $fp, 'resource2' => $fp, 1 => dict[0 => $fp, 'type' => $fp] ]
 ];
 
 // loop through each element of the values array for 'var' argument

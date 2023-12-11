@@ -11,7 +11,7 @@ function main(): void { if (HH\execution_context() === "xbox") return;
     await fb_gen_user_func_array(
       __FILE__,
       'child_main',
-      varray['args', 'go', 'here']
+      vec['args', 'go', 'here']
     );
   });
 }

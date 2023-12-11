@@ -1,7 +1,7 @@
 <?hh
 
 function test($x) :mixed{
-  apc_store('foo', varray['a'.$x, varray[$x]]);
+  apc_store('foo', vec['a'.$x, vec[$x]]);
   $a = __hhvm_intrinsics\apc_fetch_no_check('foo');
   var_dump($a);
 }

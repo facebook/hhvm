@@ -1,7 +1,7 @@
 <?hh
 
 function test() :mixed{
-  $_POST = darray['HELLO' => 1];
+  $_POST = dict['HELLO' => 1];
 }
 
 <<__EntryPoint>>

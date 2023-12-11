@@ -12,10 +12,10 @@ function f(inout $a, inout $b) :mixed{
 
 <<__EntryPoint>>
 function test() :mixed{
-  $a = darray[];
+  $a = dict[];
   f(inout $a, inout $a);
   var_dump($a);
-  $a = darray[];
+  $a = dict[];
   $a[100] = f(inout $a, inout $a);
   var_dump($a);
 

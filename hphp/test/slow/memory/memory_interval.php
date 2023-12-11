@@ -9,7 +9,7 @@ class testobj {
 }
 
 function alloc_lots($x) :mixed{
-  $v = darray[];
+  $v = dict[];
   for ($i = 0; $i < $x * 5000; ++$i) {
     $m = new testobj($x * $i);
     $v[] = $m;

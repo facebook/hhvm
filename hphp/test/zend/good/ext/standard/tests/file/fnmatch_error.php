@@ -7,7 +7,7 @@
 echo "*** Testing error conditions for fnmatch() ***";
 
 /* Invalid arguments */
-try { var_dump( fnmatch(varray[], varray[]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( fnmatch(vec[], vec[]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 $file_handle = fopen(__FILE__, "r");
 try { var_dump( fnmatch($file_handle, $file_handle) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

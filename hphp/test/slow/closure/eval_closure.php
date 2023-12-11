@@ -2,7 +2,7 @@
 
 function reproduce( $code, $func ) :mixed{
         eval( $code );
-        return $func( varray[] );
+        return $func( vec[] );
 }
 
 

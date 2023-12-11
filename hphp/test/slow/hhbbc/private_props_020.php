@@ -8,7 +8,7 @@ class Foo {
 
   public function __construct() {
     $this->x = new B();
-    \HH\global_set('foo', darray[12 => new stdClass()]);
+    \HH\global_set('foo', dict[12 => new stdClass()]);
     \HH\global_get('foo')[12]->bar = 2;
   }
 

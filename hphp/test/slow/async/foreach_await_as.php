@@ -19,7 +19,7 @@ async function bar($from, $to) :AsyncGenerator<mixed,mixed,void>{
     if ($num > 47) {
       break;
     }
-    yield $num => varray[$num * $num, $num * $num * $num];
+    yield $num => vec[$num * $num, $num * $num * $num];
   }
   echo "end bar\n";
 }

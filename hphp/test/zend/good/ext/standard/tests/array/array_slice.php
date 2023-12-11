@@ -1,17 +1,17 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$var_array = varray[
-                   varray[],
-                   varray[1,2,3,4,5,6,7,8,9],
-                   varray["One", "Two", "Three", "Four", "Five"],
-                   varray[6, "six", 7, "seven", 8, "eight", 9, "nine"],
-                   darray[ "a" => "aaa", "A" => "AAA", "c" => "ccc", "d" => "ddd", "e" => "eee"],
-                   darray["1" => "one", "2" => "two", "3" => "three", "4" => "four", "5" => "five"],
-                   darray[1 => "one", 2 => "two", 3 => 7, 4 => "four", 5 => "five"],
-                   darray["f" => "fff", "1" => "one", 4 => 6, "" => "blank", 2 => "float", "F" => "FFF",
+$var_array = vec[
+                   vec[],
+                   vec[1,2,3,4,5,6,7,8,9],
+                   vec["One", "Two", "Three", "Four", "Five"],
+                   vec[6, "six", 7, "seven", 8, "eight", 9, "nine"],
+                   dict[ "a" => "aaa", "A" => "AAA", "c" => "ccc", "d" => "ddd", "e" => "eee"],
+                   dict["1" => "one", "2" => "two", "3" => "three", "4" => "four", "5" => "five"],
+                   dict[1 => "one", 2 => "two", 3 => 7, 4 => "four", 5 => "five"],
+                   dict["f" => "fff", "1" => "one", 4 => 6, "" => "blank", 2 => "float", "F" => "FFF",
                          "blank" => "", 3 => 3.7, 5 => 7, 6 => 8.6, '5' => "Five"],
-                   varray[12, "name", 'age', '45'],
-                   varray[ varray["oNe", "tWo", 4], varray[10, 20, 30, 40, 50], varray[]]
+                   vec[12, "name", 'age', '45'],
+                   vec[ vec["oNe", "tWo", 4], vec[10, 20, 30, 40, 50], vec[]]
                  ];
 
 $num = 4;

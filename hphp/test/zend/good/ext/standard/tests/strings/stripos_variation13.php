@@ -11,7 +11,7 @@
 echo "*** Test stripos() function: binary safe ***\n";
 $haystack = "\0Hello\0World\0";
 
-$needles = varray[
+$needles = vec[
   "Hello".chr(0)."World",
   chr(0)."Hello World",
   "Hello World".chr(0),

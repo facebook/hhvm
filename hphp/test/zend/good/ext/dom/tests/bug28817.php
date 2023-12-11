@@ -6,7 +6,7 @@ class z extends DOMDocument{
     public $p_variable;
 
     function __construct(){
-        $this->p_array = varray[];
+        $this->p_array = vec[];
         $this->p_array[] = 'bonus';
         $this->p_array[] = 'vir';
         $this->p_array[] = 'semper';

@@ -20,7 +20,7 @@ $resource_types = varray [
 ];
 
 // various integer formats
-$int_formats = varray[
+$int_formats = vec[
   "%d", "%Ld", " %d",
   "\t%d", "\n%d", "%4d",
   "%[0-9]", "%*d"

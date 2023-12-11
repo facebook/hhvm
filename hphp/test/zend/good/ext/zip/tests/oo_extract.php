@@ -47,7 +47,7 @@ function main_entry(): void {
   }
 
   /* extract two files */
-  $zip->extractTo($dirname . '__oo_extract_tmp', varray['bar','foo']);
+  $zip->extractTo($dirname . '__oo_extract_tmp', vec['bar','foo']);
   if (!file_exists($dirname . '__oo_extract_tmp/bar')) {
   	echo "failed. extract  bar file\n";
   } else {

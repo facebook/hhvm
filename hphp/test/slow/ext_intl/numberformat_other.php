@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_numberformat_other() :mixed{
-$locales = varray[
+$locales = vec[
   'en_US',
   'en_GB',
   'es_AR',
@@ -13,7 +13,7 @@ $locales = varray[
   'he_IL',
 ];
 
-$styles = varray[
+$styles = vec[
   NumberFormatter::DECIMAL,
   NumberFormatter::CURRENCY,
 ];
@@ -28,8 +28,8 @@ foreach ($locales as $locale) {
     var_dump($formatter->format('not a number'));
     var_dump($formatter->format(true));
     var_dump($formatter->format(false));
-    var_dump($formatter->format(varray[]));
-    var_dump($formatter->format(varray[5]));
+    var_dump($formatter->format(vec[]));
+    var_dump($formatter->format(vec[5]));
   }
 }
 

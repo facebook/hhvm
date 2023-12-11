@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : with  white spaces in format strings ***\n";
 
 // initializing the format array
-$formats = varray[
+$formats = vec[
   "% d", "%  d", "%   d",
   "% f", "%  f", "%   f",
   "% F", "%  F", "%   F",

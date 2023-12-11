@@ -25,7 +25,7 @@ function LV($x) :mixed{ return __hhvm_intrinsics\launder_value($x); }
 }
 
 <<__NEVER_INLINE>> function compare_varray_empty_static() :mixed{
-  $va = varray[];
+  $va = vec[];
   $tr = true;
   $fa = false;
   $nu = null;
@@ -98,7 +98,7 @@ function LV($x) :mixed{ return __hhvm_intrinsics\launder_value($x); }
 }
 
 <<__NEVER_INLINE>> function compare_varray_empty_dynamic() :mixed{
-  $va = LV(varray[]);
+  $va = LV(vec[]);
   $tr = LV(true);
   $fa = LV(false);
   $nu = LV(null);
@@ -171,7 +171,7 @@ function LV($x) :mixed{ return __hhvm_intrinsics\launder_value($x); }
 }
 
 <<__NEVER_INLINE>> function compare_varray_nonempty_static() :mixed{
-  $vx = varray[42, 'foo'];
+  $vx = vec[42, 'foo'];
   $tr = true;
   $fa = false;
   $nu = null;
@@ -244,7 +244,7 @@ function LV($x) :mixed{ return __hhvm_intrinsics\launder_value($x); }
 }
 
 <<__NEVER_INLINE>> function compare_varray_nonempty_dynamic() :mixed{
-  $vx = LV(varray[42, 'foo']);
+  $vx = LV(vec[42, 'foo']);
   $tr = LV(true);
   $fa = LV(false);
   $nu = LV(null);
@@ -317,7 +317,7 @@ function LV($x) :mixed{ return __hhvm_intrinsics\launder_value($x); }
 }
 
 <<__NEVER_INLINE>> function compare_darray_empty_static() :mixed{
-  $da = darray[];
+  $da = dict[];
   $tr = true;
   $fa = false;
   $nu = null;
@@ -390,7 +390,7 @@ function LV($x) :mixed{ return __hhvm_intrinsics\launder_value($x); }
 }
 
 <<__NEVER_INLINE>> function compare_darray_empty_dynamic() :mixed{
-  $da = LV(darray[]);
+  $da = LV(dict[]);
   $tr = LV(true);
   $fa = LV(false);
   $nu = LV(null);
@@ -463,7 +463,7 @@ function LV($x) :mixed{ return __hhvm_intrinsics\launder_value($x); }
 }
 
 <<__NEVER_INLINE>> function compare_darray_nonempty_static() :mixed{
-  $dx = darray['foo' => 42, 'bar' => 'baz'];
+  $dx = dict['foo' => 42, 'bar' => 'baz'];
   $tr = true;
   $fa = false;
   $nu = null;
@@ -536,7 +536,7 @@ function LV($x) :mixed{ return __hhvm_intrinsics\launder_value($x); }
 }
 
 <<__NEVER_INLINE>> function compare_darray_nonempty_dynamic() :mixed{
-  $dx = LV(darray['foo' => 42, 'bar' => 'baz']);
+  $dx = LV(dict['foo' => 42, 'bar' => 'baz']);
   $tr = LV(true);
   $fa = LV(false);
   $nu = LV(null);

@@ -3,14 +3,14 @@
 class IterableClass implements \HH\Iterable {
   use StrictIterable;
   public function getIterator() :mixed{
-    return new ArrayIterator(varray[11, 22, 33]);
+    return new ArrayIterator(vec[11, 22, 33]);
   }
 }
 
 class KeyedIterableClass implements \HH\KeyedIterable {
   use StrictKeyedIterable;
   public function getIterator() :mixed{
-    return new ArrayIterator(varray[44, 55, 66]);
+    return new ArrayIterator(vec[44, 55, 66]);
   }
 }
 
@@ -30,7 +30,7 @@ function test($name, $a, $b) :mixed{
 }
 
 function main() :mixed{
-  $zippable = darray[
+  $zippable = dict[
     'empty Vector'    => Vector    {},
     'short Vector'    => Vector    {1, 2},
     'long  Vector'    => Vector    {3, 4, 5, 6},
@@ -45,7 +45,7 @@ function main() :mixed{
     'short ImmMap' => ImmMap {'u' => 'U', 'v' => 'V'},
     'long  ImmMap' => ImmMap {'w' => 'W', 'x' => 'X', 'y' => 'Y', 'z' => 'Z'},
   ];
-  $additional_iterable = darray[
+  $additional_iterable = dict[
     'IterableClass'      => new IterableClass,
     'KeyedIterableClass' => new KeyedIterableClass,
   ];

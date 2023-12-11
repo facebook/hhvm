@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$values = varray[111000111,
+$values = vec[111000111,
                 011100000,
                 100002001,
                 '111000111',

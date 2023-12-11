@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-  public static $bar = darray['baz' => myfunc<>];
+  public static $bar = dict['baz' => myfunc<>];
 }
 
 function myfunc() :mixed{

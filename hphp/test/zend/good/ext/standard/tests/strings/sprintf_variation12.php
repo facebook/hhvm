@@ -8,24 +8,24 @@ echo "*** Testing sprintf() : float formats with arrays ***\n";
 
 // array of array types
 $array_values = varray [
-  varray[],
-  varray[0],
-  varray[1],
-  varray[NULL],
-  varray[null],
-  varray["string"],
-  varray[true],
-  varray[TRUE],
-  varray[false],
-  varray[FALSE],
-  varray[1,2,3,4],
-  varray["123.456abc"],
-  varray['123.456abc'],
-  darray[1 => "One", "two" => 2]
+  vec[],
+  vec[0],
+  vec[1],
+  vec[NULL],
+  vec[null],
+  vec["string"],
+  vec[true],
+  vec[TRUE],
+  vec[false],
+  vec[FALSE],
+  vec[1,2,3,4],
+  vec["123.456abc"],
+  vec['123.456abc'],
+  dict[1 => "One", "two" => 2]
 ];
 
 // various float formats
-$float_formats = varray[
+$float_formats = vec[
   "%f", "%hf", "%lf", 
   "%Lf", " %f", "%f ", 
   "\t%f", "\n%f", "%4f",

@@ -17,20 +17,20 @@ function b() :mixed{
 function main_preg_replace_callback_array_basic() :mixed{
 $count = -1;
 var_dump(preg_replace_callback_array(
-  darray[
+  dict[
     "/a/" => 'b',
     "/b/" => function () { return "c"; },
     "/c/" => new Rep,
-    '/d/' => varray["Foo", "rep"]], 'a', -1, inout $count));
+    '/d/' => vec["Foo", "rep"]], 'a', -1, inout $count));
 var_dump(preg_replace_callback_array(
-  darray[
+  dict[
     "/a/" => 'b',
     "/c/" => new Rep,
     "/b/" => function () { return "ok"; },
-    '/d/' => varray["Foo", "rep"]], 'a', -1, inout $count));
+    '/d/' => vec["Foo", "rep"]], 'a', -1, inout $count));
 var_dump(preg_replace_callback_array(
-  darray[
-    '/d/' => varray["Foo", "rep"],
+  dict[
+    '/d/' => vec["Foo", "rep"],
     "/c/" => new Rep,
     "/a/" => 'b',
     "/b/" => $_ ==> 'ok',

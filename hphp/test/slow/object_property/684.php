@@ -4,8 +4,8 @@ function f() :mixed{
   return false;
 }
 class B {
-  public $a = darray[1 => 1];
-  public static $b = varray[1, 2, 3];
+  public $a = dict[1 => 1];
+  public static $b = vec[1, 2, 3];
 }
 
 <<__EntryPoint>>

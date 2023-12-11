@@ -8,6 +8,6 @@ function foo($i) :mixed{
 
  <<__EntryPoint>>
 function main_1504() :mixed{
-  $a1 = darray['a' => darray[]];
+  $a1 = dict['a' => dict[]];
   $a1[foo(2)][foo(3)] = foo(4);
 }

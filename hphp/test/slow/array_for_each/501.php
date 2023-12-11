@@ -2,7 +2,7 @@
 
 function main() :mixed{
   echo "Entering main\n";
-  foreach (darray[1 => 1] as $k => $v) {
+  foreach (dict[1 => 1] as $k => $v) {
     break;
   }
   echo "Leaving main\n";

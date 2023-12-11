@@ -17,21 +17,21 @@ var_dump($ret);
 
 echo("\n*** array serialize-and-unserialize ***\n");
 $ret = null;
-$unserialized = fb_unserialize(fb_serialize(varray["test"]), inout $ret);
+$unserialized = fb_unserialize(fb_serialize(vec["test"]), inout $ret);
 var_dump($unserialized);
 var_dump(is_darray($unserialized));
 var_dump($ret);
 $ret = null;
 
 echo("\n* array with flag on serialize and unserialize *\n");
-var_dump(fb_unserialize(  fb_serialize(varray["test"], FB_SERIALIZE_HACK_ARRAYS), inout $ret,   FB_SERIALIZE_HACK_ARRAYS
+var_dump(fb_unserialize(  fb_serialize(vec["test"], FB_SERIALIZE_HACK_ARRAYS), inout $ret,   FB_SERIALIZE_HACK_ARRAYS
 ));
 var_dump($ret);
 
 echo("\n* array with flag on only unserialize *\n");
 $ret = null;
 var_dump(fb_unserialize(
-  fb_serialize(varray["test"]),
+  fb_serialize(vec["test"]),
   inout $ret,
   FB_SERIALIZE_HACK_ARRAYS
 ));
@@ -40,19 +40,19 @@ var_dump($ret);
 echo("\n* array with flag on only serialize *\n");
 $ret = null;
 var_dump(fb_unserialize(
-  fb_serialize(varray["test"], FB_SERIALIZE_HACK_ARRAYS),
+  fb_serialize(vec["test"], FB_SERIALIZE_HACK_ARRAYS),
   inout $ret,
 ));
 var_dump($ret);
 
 
 $ret = null;
-var_dump(fb_unserialize(fb_serialize(varray["test", 42]), inout $ret));
+var_dump(fb_unserialize(fb_serialize(vec["test", 42]), inout $ret));
 var_dump($ret);
 
 $ret = null;
 var_dump(
-  fb_unserialize(fb_serialize(darray["test" => 'testval', 42 => '42val']), inout $ret)
+  fb_unserialize(fb_serialize(dict["test" => 'testval', 42 => '42val']), inout $ret)
 );
 var_dump($ret);
 

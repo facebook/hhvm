@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : unsigned formats with string values ***\n";
 
 // array of string values 
-$string_values = varray[
+$string_values = vec[
   "",
   '',
   "0",
@@ -31,7 +31,7 @@ $string_values = varray[
 ];
 
 // array of unsigned formats
-$unsigned_formats = varray[ 
+$unsigned_formats = vec[ 
   "%u", "%hu", "%lu",
   "%Lu", " %u", "%u ",   
   "\t%u", "\n%u", "%4u", 

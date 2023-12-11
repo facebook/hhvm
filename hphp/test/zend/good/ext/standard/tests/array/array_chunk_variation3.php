@@ -11,12 +11,12 @@
 echo "*** Testing array_chunk() : usage variations ***\n";
 
 // input array
-$input = varray[1, 2];
+$input = vec[1, 2];
 $size = 10;
 
 
 //array of values to iterate over
-$values = varray[
+$values = vec[
 
         // int data
 /*1*/   0,

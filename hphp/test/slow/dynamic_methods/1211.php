@@ -4,7 +4,7 @@ function bar() :mixed{
   echo 'bar called';
 }
 class foo {
-  public $functions = darray[];
+  public $functions = dict[];
   function __construct() {
     $function = 'bar';
     print($function);

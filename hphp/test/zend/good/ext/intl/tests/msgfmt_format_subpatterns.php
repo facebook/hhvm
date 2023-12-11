@@ -27,11 +27,11 @@ $pattern=<<<_MSG_
 _MSG_;
 
 
-$args = varray[
-      darray[0 => 'female', 1 => 0,  2 => 'Alice', 3 => 'Bob'],
-      darray[0 => 'male',   1 => 1,  2 => 'Alice', 3 => 'Bob'],
-      darray[0 => 'none',   1 => 2,  2 => 'Alice', 3 => 'Bob'],
-      darray[0 => 'female', 1 => 27, 2 => 'Alice', 3 => 'Bob'],
+$args = vec[
+      dict[0 => 'female', 1 => 0,  2 => 'Alice', 3 => 'Bob'],
+      dict[0 => 'male',   1 => 1,  2 => 'Alice', 3 => 'Bob'],
+      dict[0 => 'none',   1 => 2,  2 => 'Alice', 3 => 'Bob'],
+      dict[0 => 'female', 1 => 27, 2 => 'Alice', 3 => 'Bob'],
 ];
 
 $str_res = '';

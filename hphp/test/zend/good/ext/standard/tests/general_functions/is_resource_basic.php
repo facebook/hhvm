@@ -13,17 +13,17 @@ class Hello {
 echo "*** Testing is_resource() : basic functionality ***\n";
 
 
-$vars = varray[
+$vars = vec[
     false,
     true,
     10,
     10.5,
     "Helo World",
-    varray[1,2,3,4,5],
+    vec[1,2,3,4,5],
     NULL,
     new Hello()];
 
-$types = varray[
+$types = vec[
     "bool=false",
     "bool=true",
     "integer",

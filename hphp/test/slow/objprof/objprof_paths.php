@@ -5,7 +5,7 @@
 
 function get_instances(string $cls, ?AnyArray $objs) :mixed{
   if (!$objs) return 0;
-  return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]), "instances", 0);
+  return hphp_array_idx(hphp_array_idx($objs, $cls, vec[]), "instances", 0);
 }
 function get_bytes_eq(string $cls, ?AnyArray $objs) :mixed{
   if (!$objs) return 0;
@@ -18,11 +18,11 @@ function get_bytes_eq(string $cls, ?AnyArray $objs) :mixed{
 }
 function get_bytes(string $cls, ?AnyArray $objs) :mixed{
   if (!$objs) return 0;
-  return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]), "bytes", 0);
+  return hphp_array_idx(hphp_array_idx($objs, $cls, vec[]), "bytes", 0);
 }
 function get_bytesd(string $cls, ?AnyArray $objs) :mixed{
   if (!$objs) return 0;
-  return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]),
+  return hphp_array_idx(hphp_array_idx($objs, $cls, vec[]),
     "bytes_normalized", 0);
 }
 function getStr(int $len): string {
@@ -36,7 +36,7 @@ function getStr(int $len): string {
 // TEST: tracking works when enabled and not when disabled
 class StaticClass {
   public static ?mixed $myStaticRef;
-  public static varray<mixed> $myStaticArr = varray[];
+  public static varray<mixed> $myStaticArr = vec[];
 }
 
 class RootClass {
@@ -59,8 +59,8 @@ class ParentClass {
 class ChildClass extends ParentClass{
   public string $childString = "abcdef";
   public NestedClass $childNested;
-  public AnyArray $mixedArr = varray[];
-  public AnyArray $packedArr = varray[];
+  public AnyArray $mixedArr = vec[];
+  public AnyArray $packedArr = vec[];
 }
 
 
@@ -69,9 +69,9 @@ function main_objprof_paths() :mixed{
 $childClass = new ChildClass();
 $childClass->parentNested = new NestedClass();
 $childClass->childNested = new NestedClass();
-$childClass->mixed = darray["MyStringKey" => $childClass->parentNested];
+$childClass->mixed = dict["MyStringKey" => $childClass->parentNested];
 $childClass->mixed[123] = $childClass->parentNested;
-$childClass->packed = varray[$childClass->parentNested];
+$childClass->packed = vec[$childClass->parentNested];
 
 $childClass2 = new ChildClass();
 $childClass2->parentNested = new NestedClass();
@@ -82,12 +82,12 @@ $rootObject->someObject = $childClass;
 StaticClass::$myStaticRef = new ClassReachableByStaticOnly();
 StaticClass::$myStaticArr[] = StaticClass::$myStaticRef;
 $allobjs = objprof_get_paths();
-$objs = darray[];
+$objs = dict[];
 $objs['RootClass'] = $allobjs['RootClass'];
 $objs['NestedClass'] = $allobjs['NestedClass'];
 $objs['ClassReachableByStaticOnly'] = $allobjs['ClassReachableByStaticOnly'];
 $objs['ChildClass'] = $allobjs['ChildClass'];
-$pathstrs = varray[];
+$pathstrs = vec[];
 foreach ($objs as $name => $metrics) {
   foreach ($metrics['paths'] as $path => $path_metrics) {
     $pathstrs[] = $path.' '.idx($path_metrics,'refs',-1);

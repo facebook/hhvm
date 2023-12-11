@@ -19,7 +19,7 @@
 function main_entry(): void {
   	mb_regex_set_options( '' );
 
-  	$encs = varray[ 'EUC-JP', 'Shift_JIS', 'SJIS', 'UTF-8' ];
+  	$encs = vec[ 'EUC-JP', 'Shift_JIS', 'SJIS', 'UTF-8' ];
 
   	foreach( $encs as $enc ) {
   		do_tests( $enc, '' );

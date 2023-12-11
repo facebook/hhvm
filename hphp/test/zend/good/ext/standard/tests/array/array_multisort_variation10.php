@@ -7,7 +7,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_multisort() : Testing with anonymous arguments ***\n";
 
-$arr = varray[1,3,2,4];
+$arr = vec[1,3,2,4];
 var_dump(array_multisort1(inout $arr));
 
 echo "===DONE===\n";

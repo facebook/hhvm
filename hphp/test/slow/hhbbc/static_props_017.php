@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-  private static $a = darray['foo' => 'a', 'bar' => 'b'];
+  private static $a = dict['foo' => 'a', 'bar' => 'b'];
 
   public static function main() :mixed{
     unset(self::$a['foo']);

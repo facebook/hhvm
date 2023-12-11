@@ -26,7 +26,7 @@ function main(): void {
   $fp = fopen(__FILE__, "r");
 
   //array of values to iterate over
-  $values = varray[
+  $values = vec[
          // int data
   /*1*/  0,
          1,

@@ -2,14 +2,14 @@
 class IterableClass implements \HH\Iterable {
   use StrictIterable;
   public function getIterator() :mixed{
-    return new ArrayIterator(varray[1, 2, 3]);
+    return new ArrayIterator(vec[1, 2, 3]);
   }
 }
 
 class KeyedIterableClass implements \HH\KeyedIterable {
   use StrictKeyedIterable;
   public function getIterator() :mixed{
-    return new ArrayIterator(varray[1, 2, 3]);
+    return new ArrayIterator(vec[1, 2, 3]);
   }
 }
 
@@ -42,7 +42,7 @@ function main() :mixed{
   };
 
   foreach ($concatable as $lhs) {
-    test ($lhs, varray[1, 2, 3]);
+    test ($lhs, vec[1, 2, 3]);
     foreach ($concatable as $rhs) {
       test($lhs, $rhs);
     }

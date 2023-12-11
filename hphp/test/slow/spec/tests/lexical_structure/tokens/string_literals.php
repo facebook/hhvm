@@ -65,7 +65,7 @@ echo ">$a|$b__str|$c__str|$d__str|$e__str|$f<\n";
 $s = sprintf("%d|%G|%s|%s|%s|%s", $a, $b, $c, $d, $e, $f);
 echo ">$s<\n";
 
-$fpvalues = varray[24.543567891234565, -2345e25, 6E-200, NAN, INF];
+$fpvalues = vec[24.543567891234565, -2345e25, 6E-200, NAN, INF];
 foreach ($fpvalues as $fpval)
 {
     $fpval__str = (string)($fpval);
@@ -125,7 +125,7 @@ echo ">$1|$&<\n";
 ///*
 // use arrays and array elements
 
-$colors = varray["red", "white", "blue"];
+$colors = vec["red", "white", "blue"];
 try { echo "\colors contains >$colors<\n"; } catch (Exception $e) { echo $e->getMessage()."\n"; }
 try { echo "\colors[1] contains >$colors[1]<\n"; } catch (Exception $e) { echo $e->getMessage()."\n"; }
 // whitespace permitted, but semantics change
@@ -139,14 +139,14 @@ try { var_dump("$colors[0X1]"); } catch (Exception $e) { echo $e->getMessage()."
 
 $index = 2;
 echo "\$colors[$index] contains >$colors[$index]<\n";
-$indices = varray[2, 1, 0];
+$indices = vec[2, 1, 0];
 // echo "\colors[$indices[0]] contains >$colors[$indices[0]]<\n"; // the subscript cannot itself be
 // other than a simple variable
 //*/
 
 ///*
-$a1 = varray[10,20];
-$a2 = varray[FALSE,10.3,NULL];
+$a1 = vec[10,20];
+$a2 = vec[FALSE,10.3,NULL];
 try { echo ">$a1|$a2<\n"; } catch (Exception $e) { echo $e->getMessage()."\n"; }
 
 // use class properties

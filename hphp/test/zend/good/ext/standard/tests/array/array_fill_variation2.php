@@ -26,7 +26,7 @@ function main(): void {
 
 
   //array of different  values for 'num' argument
-  $values = varray[
+  $values = vec[
             // float values
   /* 1  */  2.5,
             -2.5,
@@ -35,11 +35,11 @@ function main(): void {
             .5,
 
             // array values
-  /* 6  */  varray[],
-            varray[0],
-            varray[1],
-            varray[1, 2],
-            darray['color' => 'red', 'item' => 'pen'],
+  /* 6  */  vec[],
+            vec[0],
+            vec[1],
+            vec[1, 2],
+            dict['color' => 'red', 'item' => 'pen'],
 
             // null values
   /* 11 */  NULL,

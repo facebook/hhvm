@@ -19,12 +19,12 @@ print "COUNT_NORMAL: should be 0, is ".count($arr, COUNT_NORMAL)."\n";
 print "COUNT_RECURSIVE: should be 0, is ".count($arr, COUNT_RECURSIVE)."\n";
 
 print "-- Testing arrays --\n";
-$arr = varray[1, varray[3, 4, varray[6, varray[8]]]];
+$arr = vec[1, vec[3, 4, vec[6, vec[8]]]];
 print "COUNT_NORMAL: should be 2, is ".count($arr, COUNT_NORMAL)."\n";
 print "COUNT_RECURSIVE: should be 8, is ".count($arr, COUNT_RECURSIVE)."\n";
 
 print "-- Testing hashes --\n";
-$arr = darray["a" => 1, "b" => 2, 0 => darray["c" => 3, 0 => darray["d" => 5]]];
+$arr = dict["a" => 1, "b" => 2, 0 => dict["c" => 3, 0 => dict["d" => 5]]];
 print "COUNT_NORMAL: should be 3, is ".count($arr, COUNT_NORMAL)."\n";
 print "COUNT_RECURSIVE: should be 6, is ".count($arr, COUNT_RECURSIVE)."\n";
 
@@ -34,28 +34,28 @@ print "COUNT_RECURSIVE: should be 1, is ".count("string", COUNT_RECURSIVE)."\n";
 
 print "-- Testing various types with no second argument --\n";
 print "COUNT_NORMAL: should be 1, is ".count("string")."\n";
-print "COUNT_NORMAL: should be 2, is ".count(varray["a", varray["b"]])."\n";
+print "COUNT_NORMAL: should be 2, is ".count(vec["a", vec["b"]])."\n";
 
-$arr = darray['a'=>varray[NULL, NULL, NULL], 1=>darray[''=>1, 1=>NULL],
-    2 => varray[varray[varray[varray[varray[NULL]]]]]];
+$arr = dict['a'=>vec[NULL, NULL, NULL], 1=>dict[''=>1, 1=>NULL],
+    2 => vec[vec[vec[vec[vec[NULL]]]]]];
 print "-- Testing really cool arrays --\n";
 print "COUNT_NORMAL: should be 3, is ".count($arr, COUNT_NORMAL)."\n";
 print "COUNT_RECURSIVE: should be 13, is ".count($arr, COUNT_RECURSIVE)."\n";
 
 echo "\n*** Testing possible variations of count() function on arrays ***";
-$count_array = varray[
-  varray[],
-  darray[ 1 => "string"],
-  darray[ "" => "string", 0 => "a", '' => "b", -1 => "c",
-         1 => varray[varray[varray[NULL]]]],
-  darray[ -2 => 12, 0 => varray[varray[1, 2, varray[varray["0"]]]]],
-  darray[ "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL, "d" => -2.344],
-  darray[ 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL,
-         1 => -2.344, 5 => varray[]],
-  darray[ 1 => TRUE, 0 => FALSE, "" => "", " " => " ",
+$count_array = vec[
+  vec[],
+  dict[ 1 => "string"],
+  dict[ "" => "string", 0 => "a", '' => "b", -1 => "c",
+         1 => vec[vec[vec[NULL]]]],
+  dict[ -2 => 12, 0 => vec[vec[1, 2, vec[vec["0"]]]]],
+  dict[ "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL, "d" => -2.344],
+  dict[ 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL,
+         1 => -2.344, 5 => vec[]],
+  dict[ 1 => TRUE, 0 => FALSE, "" => "", " " => " ",
      '' => NULL, "\x000" => "\x000", "\000" => "\000"],
-  darray[ 0 => NULL, 1 => "Hi", "string" => "hello",
-          2 => darray["" => "World", "-2.34" => "a", "0" => "b"]]
+  dict[ 0 => NULL, 1 => "Hi", "string" => "hello",
+          2 => dict["" => "World", "-2.34" => "a", "0" => "b"]]
 ];
 
 $i = 0;
@@ -79,7 +79,7 @@ try {print "COUNT_NORMAL: should be 0, is ".@count($a)."\n";} catch (UndefinedVa
 
 
 print "\n-- Testing count() on an empty sub-array --\n";
-$arr = varray[1, varray[3, 4, varray[]]];
+$arr = vec[1, vec[3, 4, vec[]]];
 print "COUNT_NORMAL: should be 2, is ".count($arr, COUNT_NORMAL)."\n";
 print "COUNT_RECURSIVE: should be 5, is ".count($arr, COUNT_RECURSIVE)."\n";
 
@@ -94,16 +94,16 @@ $resource1 = fopen( __FILE__, "r" );  // Creating file(stream type) resource
 $resource2 = opendir( "." );  // Creating dir resource
 
 /* creating an array with resources as elements */
-$arr_resource = darray["a" => $resource1, "b" => $resource2];
+$arr_resource = dict["a" => $resource1, "b" => $resource2];
 var_dump(count($arr_resource));
 
 echo "\n-- Testing error conditions --";
 try { var_dump( count() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // No. of args = 0
-try { var_dump( count(varray[], COUNT_NORMAL, 100) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // No. of args > expected
+try { var_dump( count(vec[], COUNT_NORMAL, 100) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // No. of args > expected
 
 /* Testing Invalid type arguments */
 try { var_dump( count(100, "string") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-try { var_dump( count(varray[], "") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( count(vec[], "") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\nDone";
 

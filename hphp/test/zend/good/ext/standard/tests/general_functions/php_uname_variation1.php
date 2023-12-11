@@ -14,7 +14,7 @@ echo "*** Testing php_uname() - usage variations\n";
 error_reporting(E_ALL & ~E_NOTICE);
 
 
-$values = darray[
+$values = dict[
 
           // int data
           "0" => 0,

@@ -1,7 +1,7 @@
 <?hh
 
 function foo($v) :mixed{
-  $a = darray['key' => $v];
+  $a = dict['key' => $v];
   return $a;
 }
 function goo($v) :mixed{

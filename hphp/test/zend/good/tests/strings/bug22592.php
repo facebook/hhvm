@@ -1,6 +1,6 @@
 <?hh <<__EntryPoint>> function main(): void {
 $wrong = $correct = 'abcdef';
-$x = varray[];
+$x = vec[];
 $t = $x[] = 'x';
 
 var_dump($correct);

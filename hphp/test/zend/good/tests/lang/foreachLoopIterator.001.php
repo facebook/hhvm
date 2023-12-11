@@ -3,7 +3,7 @@
 class MealIterator implements Iterator {
   public static $indent;
     private $pos=0;
-    private $myContent=varray["breakfast", "lunch", "dinner"];
+    private $myContent=vec["breakfast", "lunch", "dinner"];
 
     public function valid() :mixed{
         echo (string)(self::$indent)."--> " . __METHOD__ . " ($this->pos)\n";

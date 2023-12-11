@@ -1,6 +1,6 @@
 <?hh <<__EntryPoint>> function main(): void {
-$a = varray[1,2,3];
-$b = darray['a'=>1,'b'=>1,'c'=>2];
+$a = vec[1,2,3];
+$b = dict['a'=>1,'b'=>1,'c'=>2];
 
 var_dump(
         array_slice($a, 1),

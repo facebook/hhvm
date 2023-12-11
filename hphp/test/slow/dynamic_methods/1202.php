@@ -14,5 +14,5 @@ class A {
  <<__EntryPoint>>
 function main_1202() :mixed{
 $obj = new B();
- call_user_func_array(varray[$obj, 'A::test'], varray[]);
+ call_user_func_array(vec[$obj, 'A::test'], vec[]);
 }

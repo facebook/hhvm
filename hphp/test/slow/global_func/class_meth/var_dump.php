@@ -15,6 +15,6 @@ function test_eval($name, $f) :mixed{
 
 <<__EntryPoint>>
 function main() :mixed{
-  test_eval('varray', varray[A::class, 'f1']);
+  test_eval('varray', vec[A::class, 'f1']);
   test_eval('class_meth', A::f1<>);
 }

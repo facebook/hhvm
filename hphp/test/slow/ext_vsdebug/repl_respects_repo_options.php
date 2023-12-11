@@ -18,29 +18,29 @@ function skipEvents() :mixed{
 chdir(__DIR__);
 require('./common.inc');
 $path = __FILE__ . ".test";
-$testProcess = vsDebugLaunch($path, true, varray[]);
+$testProcess = vsDebugLaunch($path, true, vec[]);
 // We don't actually need the stack trace, but we do need a frame ID to execute
 // in - even though we know what it will be, it won't be allocated until we
 // request a stack trace, so, here goes nothing :)
-sendVsCommand(darray[
+sendVsCommand(dict[
   'command' => 'stackTrace',
   'type' => 'request',
-  'arguments' => darray['threadId' => 1],
+  'arguments' => dict['threadId' => 1],
 ]);
 skipEvents();
 
 echo "---- FRAME: repo_options_test_main();-----\n";
 
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "evaluate",
   "type" => "request",
   "arguments" =>
-  darray["frameId" => 2,
+  dict["frameId" => 2,
   "expression" => 'Aliased\\hello()',
   'context' => 'repl']]);
 
 $msg = skipEvents();
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "response",
   "command" => "evaluate",
   "success" => true,
@@ -49,15 +49,15 @@ checkObjEqualRecursively($msg, darray[
 echo "---- FRAME: hphp_debug_break() -----\n";
 
 // Should fail, as `Aliased\` won't expand
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "evaluate",
   "type" => "request",
   "arguments" =>
-  darray["frameId" => 1,
+  dict["frameId" => 1,
   "expression" => 'Aliased\\hello()',
   'context' => 'repl']]);
 $msg = skipEvents();
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "response",
   "command" => "evaluate",
   "success" => false,

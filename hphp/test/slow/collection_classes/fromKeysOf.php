@@ -24,10 +24,10 @@ function vector_from_keys($containers) :mixed{
 }
 
 function main() :mixed{
-  $containers = darray[
-    'empty array'  => varray[],
-    'packed array' => varray['a', 'b', 'c'],
-    'mixed array'  => darray['a' => 1, 'b' => 2],
+  $containers = dict[
+    'empty array'  => vec[],
+    'packed array' => vec['a', 'b', 'c'],
+    'mixed array'  => dict['a' => 1, 'b' => 2],
 
     'empty Vector'    => Vector {},
     'empty ImmVector' => ImmVector {},

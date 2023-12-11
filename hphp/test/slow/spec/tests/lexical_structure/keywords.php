@@ -8,7 +8,7 @@
 <<__EntryPoint>> function main(): void {
 error_reporting(-1);
 
-$colors = varray["red", "white", "blue"];
+$colors = vec["red", "white", "blue"];
 
 foreach ($colors as $a)
 {

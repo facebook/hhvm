@@ -2,7 +2,7 @@
 <<__EntryPoint>> function main(): void {
 echo "===Current===\n";
 
-$it = new NoRewindIterator(new ArrayIterator(darray[0 => 'A', 1 => 'B', 2 => 'C']));
+$it = new NoRewindIterator(new ArrayIterator(dict[0 => 'A', 1 => 'B', 2 => 'C']));
 
 echo $it->key() . '=>' . $it->current() . "\n";
 

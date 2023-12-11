@@ -29,12 +29,12 @@ function f4($x) :mixed{
 
 <<__EntryPoint>>
 function main_538() :mixed{
-f1(varray[varray[0, 1, 2]]);
+f1(vec[vec[0, 1, 2]]);
 f1('abc');
 f2(null);
-f2(varray[]);
-f2(varray[10]);
-f3(varray['first', 'second']);
+f2(vec[]);
+f2(vec[10]);
+f3(vec['first', 'second']);
 f3('AB');
-f4(varray['e1', 'e2']);
+f4(vec['e1', 'e2']);
 }

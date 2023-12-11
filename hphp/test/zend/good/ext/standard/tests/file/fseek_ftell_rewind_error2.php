@@ -27,7 +27,7 @@ $invalid_args = varray [
   10,
   10.5,
   true,
-  varray[1,2,3],
+  vec[1,2,3],
   new stdClass,
 ];
 /* loop to test ftell with different invalid type of args */

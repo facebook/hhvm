@@ -6,9 +6,9 @@ function test($name, $a) :mixed{
 }
 
 function main() :mixed{
-  test('empty', varray[]);
-  test('packed', varray[1, 2, 3]);
-  test('mixed', darray['a' => 'b', 'c' => 'd']);
+  test('empty', vec[]);
+  test('packed', vec[1, 2, 3]);
+  test('mixed', dict['a' => 'b', 'c' => 'd']);
 }
 
 

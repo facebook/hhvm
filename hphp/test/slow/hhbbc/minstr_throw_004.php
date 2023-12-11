@@ -2,7 +2,7 @@
 
 function err($x) :mixed{ throw new Exception(); }
 function foo() :mixed{
-  $x = varray[darray['asd' => true]];
+  $x = vec[dict['asd' => true]];
   try {
     $x[0]['asd'][] = 2;
   } catch (Exception $e) {

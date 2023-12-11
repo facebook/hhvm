@@ -32,9 +32,9 @@ $inputs =  varray [
           10.1234567e10,
 
           // array values
-/*8*/      varray[],
-          varray[0],
-          varray[1, 2],
+/*8*/      vec[],
+          vec[0],
+          vec[1, 2],
 
           // boolean values
 /*11*/      true,

@@ -1,15 +1,15 @@
 <?hh
 
 function g($key, $old, $new, $s = false) :mixed{
-  $diff = darray[];
+  $diff = dict[];
   if ($old !== $new) {
     if ($s) {
       $old = f($old, true);
       $new = f($new, true);
     }
-    $diff['old'] = darray[];
+    $diff['old'] = dict[];
     $diff['old'][$key] = $old;
-    $diff['new'] = darray[];
+    $diff['new'] = dict[];
     $diff['new'][$key] = $new;
   }
   return $diff;

@@ -14,7 +14,7 @@ function main() :mixed{
       break;
   }
 
-  $a = varray[2];
+  $a = vec[2];
   switch ($a[0]) {
     case ++$a[0]:
       echo "nope: pre-inc\n";
@@ -27,7 +27,7 @@ function main() :mixed{
       break;
   }
 
-  $a = varray[10];
+  $a = vec[10];
   $ten = 10;
   switch ($a[0]) {
     case $ten:

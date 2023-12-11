@@ -15,17 +15,17 @@
 
 function callback($a, $b)
 :mixed{
-  return varray[$a, $b];
+  return vec[$a, $b];
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : arrays with diff. size ***\n";
 
 // calling array_map with different arrays
-var_dump( array_map(callback<>, varray[1, 2, 3], varray[]) );
-var_dump( array_map(callback<>, varray[], varray['a', 'b', 'c']) );
-var_dump( array_map(callback<>, varray[1, 2, 3], varray['a', 'b']) );
-var_dump( array_map(callback<>, varray[012, 0x2F, 0X1A], varray[2.3, 12.4e2]) );
-var_dump( array_map(callback<>, varray[], varray[1, 2, 3], varray['a', 'b']) );  // passing more no. of arrays than callback function argument
+var_dump( array_map(callback<>, vec[1, 2, 3], vec[]) );
+var_dump( array_map(callback<>, vec[], vec['a', 'b', 'c']) );
+var_dump( array_map(callback<>, vec[1, 2, 3], vec['a', 'b']) );
+var_dump( array_map(callback<>, vec[012, 0x2F, 0X1A], vec[2.3, 12.4e2]) );
+var_dump( array_map(callback<>, vec[], vec[1, 2, 3], vec['a', 'b']) );  // passing more no. of arrays than callback function argument
 
 echo "Done";
 }

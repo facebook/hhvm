@@ -9,5 +9,5 @@ function f($a) :mixed{
 }
 <<__EntryPoint>>
 function main_540() :mixed{
-f(varray[0]);
+f(vec[0]);
 }

@@ -2,7 +2,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function foo() :mixed{
-  return Pair {varray[123], varray[456]};
+  return Pair {vec[123], vec[456]};
 }
 
 <<__EntryPoint>>

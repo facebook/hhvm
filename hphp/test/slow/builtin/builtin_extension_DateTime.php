@@ -7,7 +7,7 @@ class A_DateTime extends DateTime {
   }
 }
 
-function test($cls, $args = varray[]) :mixed{
+function test($cls, $args = vec[]) :mixed{
   echo $cls . "\n";
   $a = (new ReflectionClass($cls))->newInstanceArgs($args);
   var_dump($a);
@@ -107,7 +107,7 @@ function DataTimeFromString() :mixed{
 <<__EntryPoint>> function main_entry(): void {
 date_default_timezone_set('America/Los_Angeles');
 
-test("DateTime", varray["2012-06-23T11:00:00"]);
+test("DateTime", vec["2012-06-23T11:00:00"]);
 
 main();
 

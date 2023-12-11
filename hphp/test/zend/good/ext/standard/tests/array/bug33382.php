@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$array = varray[1,2,3,4,5];
+$array = vec[1,2,3,4,5];
 
 sort(inout $array);
 

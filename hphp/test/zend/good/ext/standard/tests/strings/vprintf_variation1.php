@@ -20,7 +20,7 @@ class sample
 echo "*** Testing vprintf() : with unexpected values for format argument ***\n";
 
 // initialising the required variables
-$args = varray[1, 2];
+$args = vec[1, 2];
 
 
 // Defining resource
@@ -28,7 +28,7 @@ $file_handle = fopen(__FILE__, 'r');
 
 
 //array of values to iterate over
-$values = varray[
+$values = vec[
 
           // int data
 /*1*/      0,

@@ -10,8 +10,8 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : built-in function ***\n";
 
-$array1 = varray[1, 2, 3];
-$array2 = varray[3, 4, 5];
+$array1 = vec[1, 2, 3];
+$array2 = vec[3, 4, 5];
 
 echo "-- with built-in function 'pow' and two parameters --\n";
 var_dump( array_map('pow', $array1, $array2));

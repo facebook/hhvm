@@ -1,6 +1,6 @@
 <?hh
 
-function foo($a = darray[0 => \unknown])
+function foo($a = dict[0 => \unknown])
 :mixed{
 }
 <<__EntryPoint>> function main(): void {

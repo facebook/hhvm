@@ -10,7 +10,7 @@ class A {
 function main_1213() :mixed{
 $obj = new A();
 $method = 'foo';
-$aa = darray[];
+$aa = dict[];
 $obj->$method(inout $aa);
 var_dump($aa);
 }

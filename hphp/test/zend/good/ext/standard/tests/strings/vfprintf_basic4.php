@@ -11,9 +11,9 @@ $format = "format";
 $format1 = "%b";
 $format2 = "%b %b";
 $format3 = "%b %b %b";
-$arg1 = varray[TRUE];
-$arg2 = varray[TRUE,FALSE];
-$arg3 = varray[TRUE,FALSE,TRUE];
+$arg1 = vec[TRUE];
+$arg2 = vec[TRUE,FALSE];
+$arg3 = vec[TRUE,FALSE,TRUE];
 
 /* creating dumping file */
 $data_file = sys_get_temp_dir().'/'.'vfprintf_basic4.txt';

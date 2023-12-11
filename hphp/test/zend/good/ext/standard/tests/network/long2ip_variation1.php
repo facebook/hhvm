@@ -43,7 +43,7 @@ $assoc_array = darray ['one' => 1, 'two' => 2];
 $res = fopen(__FILE__,'r');
 
 //array of values to iterate over
-$inputs = darray[
+$inputs = dict[
 
       // float data
       'float 10.5' => 10.5,
@@ -51,10 +51,10 @@ $inputs = darray[
       'float .5' => .5,
 
       // array data
-      'empty array' => varray[],
+      'empty array' => vec[],
       'int indexed array' => $index_array,
       'associative array' => $assoc_array,
-      'nested arrays' => varray['foo', $index_array, $assoc_array],
+      'nested arrays' => vec['foo', $index_array, $assoc_array],
 
       // null data
       'uppercase NULL' => NULL,

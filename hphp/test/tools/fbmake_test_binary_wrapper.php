@@ -15,11 +15,11 @@ function finish($status) :mixed{
 
 
 
-  say(darray['op' => 'test_done',
+  say(dict['op' => 'test_done',
             'test' => ToolsFbmakeTestBinaryWrapperPhp::$current,
             'details' => '',
             'status' => $status]);
-  ToolsFbmakeTestBinaryWrapperPhp::$results[] = darray[
+  ToolsFbmakeTestBinaryWrapperPhp::$results[] = dict[
     'name'   => ToolsFbmakeTestBinaryWrapperPhp::$current,
     'status' => $status,
   ];
@@ -30,7 +30,7 @@ function start($test) :mixed{
 
 
   ToolsFbmakeTestBinaryWrapperPhp::$current = $test;
-  say(darray['op'    => 'start',
+  say(dict['op'    => 'start',
             'test'  => ToolsFbmakeTestBinaryWrapperPhp::$current]);
 }
 
@@ -62,7 +62,7 @@ function loop_tests($cmd, $line_func) :mixed{
     return;
   }
 
-  say(darray['op'      => 'all_done',
+  say(dict['op'      => 'all_done',
             'results' => ToolsFbmakeTestBinaryWrapperPhp::$results]);
 }
 
@@ -87,7 +87,7 @@ async function main(): Awaitable<void> {
   );
 
   // Currently running test, and the results of each test.
-  ToolsFbmakeTestBinaryWrapperPhp::$results = varray[];
+  ToolsFbmakeTestBinaryWrapperPhp::$results = vec[];
   ToolsFbmakeTestBinaryWrapperPhp::$current = '';
 
   loop_tests($cmd, function ($line) {

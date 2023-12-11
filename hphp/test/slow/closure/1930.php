@@ -16,6 +16,6 @@ call_user_func($f);
 call_user_func_array(  function() use($v)   {
  echo $v;
  }
-, varray[]);
-call_user_func($f, varray[]);
+, vec[]);
+call_user_func($f, vec[]);
 }

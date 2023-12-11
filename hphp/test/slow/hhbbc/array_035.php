@@ -1,11 +1,11 @@
 <?hh
 
 class C { function heh() :mixed{ echo "heh\n"; } }
-function foo() :mixed{ return varray[new C]; }
+function foo() :mixed{ return vec[new C]; }
 function bar() :mixed{
   $x = foo();
   $x[] = new C;
-  return varray[$x[0], $x[1]];
+  return vec[$x[0], $x[1]];
 }
 function main() :mixed{
   list($y, $yy) = bar();

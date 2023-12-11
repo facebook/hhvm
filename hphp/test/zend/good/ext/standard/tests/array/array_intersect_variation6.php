@@ -21,37 +21,37 @@ EOT;
 $arrays = varray [
 
        // empty array
-/*1*/  varray[],
+/*1*/  vec[],
 
        // arrays with integer keys
-       darray[0 => "0"],
-       darray[1 => "1"],
-       darray[1 => "1", 2 => "2", 3 => "3", 4 => "4"],
+       dict[0 => "0"],
+       dict[1 => "1"],
+       dict[1 => "1", 2 => "2", 3 => "3", 4 => "4"],
 
        // arrays with float keys
-/*5*/  darray[2 => "float"],
-       darray[1 => "f1", 3 => "f2",
+/*5*/  dict[2 => "float"],
+       dict[1 => "f1", 3 => "f2",
              4 => "f3",
              33333333 => "f4"],
 
        // arrays with string keys
-/*7*/  darray['\tHello' => 111, 're\td' => "color",
+/*7*/  dict['\tHello' => 111, 're\td' => "color",
              '\v\fworld' => 2.2, 'pen\n' => 33],
-       darray["\tHello" => 111, "re\td" => "color",
+       dict["\tHello" => 111, "re\td" => "color",
              "\v\fworld" => 2.2, "pen\n" => 33],
-       darray[0 => "hello", $heredoc => "string"], // heredoc
+       dict[0 => "hello", $heredoc => "string"], // heredoc
 
        // array with unset variable
-/*10*/ darray[ '' => "hello"],
+/*10*/ dict[ '' => "hello"],
 
        // array with mixed keys
-/*11*/ darray['hello' => 1,  "fruit" => 2.2,
+/*11*/ dict['hello' => 1,  "fruit" => 2.2,
              133 => "int", 444 => "float",
              '' => "unset", $heredoc => "heredoc"]
 ];
 
 // array to be passsed to $arr1 argument
-$arr1 = varray[1, "float", "f4", "hello", 2.2, 'color', "string", "pen\n", 11];
+$arr1 = vec[1, "float", "f4", "hello", 2.2, 'color', "string", "pen\n", 11];
 
 // loop through each sub-array within $arrrays to check the behavior of array_intersect()
 $iterator = 1;

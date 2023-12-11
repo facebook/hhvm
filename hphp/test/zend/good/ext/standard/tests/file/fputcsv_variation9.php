@@ -14,15 +14,15 @@ echo "*** Testing fputcsv() : with two chars as enclosure & delimiter ***\n";
    and 3rd element is csv fields
 */
 $csv_lists = varray [
-  varray[',', '"', varray['water,fruit'] ],
-  varray[',', '"', varray['"water","fruit'] ],
-  varray[',', '"', varray['"water","fruit"'] ],
-  varray[' ', '^', varray['^water^ ^fruit^']],
-  varray[':', '&', varray['&water&:&fruit&']],
-  varray['=', '=', varray['=water===fruit=']],
-  varray['-', '-', varray['-water--fruit-air']],
-  varray['-', '-', varray['-water---fruit---air-']],
-  varray[':', '&', varray['&""""&:&"&:,:":&,&:,,,,']]
+  vec[',', '"', vec['water,fruit'] ],
+  vec[',', '"', vec['"water","fruit'] ],
+  vec[',', '"', vec['"water","fruit"'] ],
+  vec[' ', '^', vec['^water^ ^fruit^']],
+  vec[':', '&', vec['&water&:&fruit&']],
+  vec['=', '=', vec['=water===fruit=']],
+  vec['-', '-', vec['-water--fruit-air']],
+  vec['-', '-', vec['-water---fruit---air-']],
+  vec[':', '&', vec['&""""&:&"&:,:":&,&:,,,,']]
 
 ];
 $filename = sys_get_temp_dir().'/'.'fputcsv_variation9.tmp';

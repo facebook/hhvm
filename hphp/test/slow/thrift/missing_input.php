@@ -23,24 +23,24 @@ function main(): void {
 }
 
 class TestStruct {
-  const SPEC = darray[
-    5 => darray[
+  const SPEC = dict[
+    5 => dict[
       'var' => 'aList',
       'type' => TType::LST,
       'etype' => TType::I64,
-      'elem' => darray[
+      'elem' => dict[
         'type' => TType::I64,
       ],
       'is_terse' => true,
     ]
   ];
-  public $aList = varray[];
+  public $aList = vec[];
 
   public function __construct($vals=null)[] { }
 
   public static function withDefaultValues()[]: this { return new static(); }
 
   public function clearTerseFields()[write_props]: void {
-    $this->aList = varray[];
+    $this->aList = vec[];
   }
 }

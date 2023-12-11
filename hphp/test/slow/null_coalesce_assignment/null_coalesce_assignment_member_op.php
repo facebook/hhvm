@@ -40,7 +40,7 @@ function main() :mixed{
   VS($e['e']['a'], 15);
 
   $a = dict['a' => null];
-  $a['a'] ??= darray[];
+  $a['a'] ??= dict[];
   $a['a']['b'] = 10;
 
   // Uninit

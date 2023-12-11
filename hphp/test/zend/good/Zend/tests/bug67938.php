@@ -16,5 +16,5 @@ class Test implements TestInterface {
 <<__EntryPoint>> function main(): void {
 $obj = new Test;
 $obj->foo();
-$obj->bar(varray[]);
+$obj->bar(vec[]);
 }

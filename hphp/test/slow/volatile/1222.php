@@ -4,7 +4,7 @@ class c {
   const B = 'b';
   const C = 'c';
   const D = 'd';
-  public static $S = varray[    self::A,    self::B,    self::C,    self::D];
+  public static $S = vec[    self::A,    self::B,    self::C,    self::D];
 }
 
 

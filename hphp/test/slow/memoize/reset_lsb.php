@@ -30,7 +30,7 @@ function run(?string $cls, ?string $func = null) :mixed{
     $ok = "-";
   }
   A::$sideEffects = vec[];
-  $values = varray[
+  $values = vec[
     A::foo1(),
     B::foo1(),
     C::foo1(),

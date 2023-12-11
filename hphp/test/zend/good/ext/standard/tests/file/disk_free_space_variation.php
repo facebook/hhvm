@@ -20,7 +20,7 @@ echo "\n*** Testing with different directory combinations ***";
 $dir = "/disk_free_space";
 mkdir($file_path.$dir);
 
-$dirs_arr = varray[
+$dirs_arr = vec[
   ".",
   $file_path.$dir,
   $file_path."/.".$dir,

@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$ipv6_test = darray[
+$ipv6_test = dict[
     "::127.0.0.1"                    => true,
     "FF01::101:127.0.1"             => false,
     "FF01:0:0:0:101:127.0.1.1"        => false,

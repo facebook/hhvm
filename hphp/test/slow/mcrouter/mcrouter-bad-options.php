@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 try {
-  $mcr = new MCRouter(darray[
+  $mcr = new MCRouter(dict[
     'asynclog_disable' => 'purple',
   ]);
   var_dump($mcr);

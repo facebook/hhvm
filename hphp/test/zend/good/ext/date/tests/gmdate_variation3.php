@@ -12,7 +12,7 @@ date_default_timezone_set('UTC');
 $timestamp = mktime(8, 8, 8, 8, 8, 2008);
 
 //array of values to iterate over
-$inputs = darray[
+$inputs = dict[
 
      'Day with leading zeros' => 'd',
      'Day without leading zeros' => 'j',

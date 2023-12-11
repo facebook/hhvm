@@ -1,7 +1,7 @@
 <?hh
 
 function main() :mixed{
-  $elts = varray['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+  $elts = vec['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
   $v = Vector {'a', 'b', 'c', 'd'};
 

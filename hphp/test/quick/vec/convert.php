@@ -92,9 +92,9 @@ function convert_to($from) :mixed{
 }
 
 <<__EntryPoint>> function main(): void {
-  convert_to(varray[]);
-  convert_to(varray[100, 'val1', 'val2', 400, null, true, 1.234, new stdClass]);
-  convert_to(darray[1 => 10, 'key1' => 'val1', 5 => 'val2', 'key2' => 7,
+  convert_to(vec[]);
+  convert_to(vec[100, 'val1', 'val2', 400, null, true, 1.234, new stdClass]);
+  convert_to(dict[1 => 10, 'key1' => 'val1', 5 => 'val2', 'key2' => 7,
               10 => null, 15 => true, 'key3' => 1.234,
               'key4' => new stdClass]);
 

@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$read = darray[];
+$read = dict[];
 $read[1] = fopen(__FILE__, "r");
 foreach ($read as $value) {}
 $read["myindex"] = $value;

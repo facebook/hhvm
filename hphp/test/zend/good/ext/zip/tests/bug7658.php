@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>>
 function main_entry(): void {
-  $expect = varray[
+  $expect = vec[
   	"mimetype",
   	"Configurations2/statusbar/",
   	"Configurations2/accelerator/current.xml",
@@ -33,7 +33,7 @@ function main_entry(): void {
   $zip->close();
   echo "\n";
   $zip->open($file);
-  $found = varray[];
+  $found = vec[];
   for($i=0; $i < $zip->numFiles; $i++) {
   	$sb = $zip->statIndex($i);
   	$found[] = $sb['name'];

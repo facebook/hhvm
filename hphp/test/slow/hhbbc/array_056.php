@@ -2,7 +2,7 @@
 
 class C { public function heh() :mixed{ echo "hey\n"; } }
 function foo() :mixed{
-  $x = varray[];
+  $x = vec[];
   for ($i = 0; $i < 10; ++$i) {
     $x[] = new C;
   }

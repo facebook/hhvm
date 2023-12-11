@@ -18,7 +18,7 @@ function entrypoint_image_type_to_mime_type_variation1(): void {
   error_reporting(E_ALL ^ E_NOTICE);
 
   //array of values to iterate over
-  $values = varray[
+  $values = vec[
 
         // float data
         100.5,
@@ -28,8 +28,8 @@ function entrypoint_image_type_to_mime_type_variation1(): void {
         .5,
 
         // array data
-        varray[],
-        darray['color' => 'red', 'item' => 'pen'],
+        vec[],
+        dict['color' => 'red', 'item' => 'pen'],
 
         // null data
         NULL,

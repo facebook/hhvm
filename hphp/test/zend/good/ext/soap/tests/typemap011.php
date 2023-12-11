@@ -25,16 +25,16 @@ function book_from_xml($xml) :mixed{
 <<__EntryPoint>>
 function main_entry(): void {
 
-  $options=darray[
+  $options=dict[
   		'actor' =>'http://schemas.nothing.com',
-  		'typemap' => varray[darray["type_ns"   => "http://schemas.nothing.com",
+  		'typemap' => vec[dict["type_ns"   => "http://schemas.nothing.com",
   		                         "type_name" => "book",
   		                         "from_xml"  => book_from_xml<>]]
   		];
 
   $client = new TestSoapClient(dirname(__FILE__)."/classmap.wsdl",$options);
   try {
-  	$ret = $client->__soapcall('dotest2', varray["???"]);
+  	$ret = $client->__soapcall('dotest2', vec["???"]);
   } catch (SoapFault $e) {
   	$ret = "SoapFault = " . $e->faultcode . " - " . $e->faultstring;
   }

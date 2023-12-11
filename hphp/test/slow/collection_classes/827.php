@@ -1,7 +1,7 @@
 <?hh
 
 function f() :mixed{
-  $mp1 = Map { 'a' => 1, 2 => 'b', 'c' => varray[]};
+  $mp1 = Map { 'a' => 1, 2 => 'b', 'c' => vec[]};
   $mp2 = Map {};
   $mp3 = Map {} ;
   foreach ($mp1->items() as $t) {

@@ -10,7 +10,7 @@ function f() :mixed{
 }
 
 function test() :mixed{
-  $x1 = varray[
+  $x1 = vec[
     f(), f(), f(), f(), f(), f(), f(), f(), f(), f(),
     f(), f(), f(), f(), f(), f(), f(), f(), f(), f(),
     f(), f(), f(), f(), f(), f(), f(), f(), f(), f(),
@@ -28,7 +28,7 @@ function test() :mixed{
   var_dump(is_varray($x1));
   var_dump(is_darray($x1));
 
-  $x2 = darray[
+  $x2 = dict[
     0 => f(), 1 => f(), 2 => f(), 3 => f(), 4 => f(),
     5 => f(), 6 => f(), 7 => f(), 8 => f(), 9 => f(),
     10 => f(), 11 => f(), 12 => f(), 13 => f(), 14 => f(),
@@ -56,7 +56,7 @@ function test() :mixed{
   var_dump(is_varray($x2));
   var_dump(is_darray($x2));
 
-  $x3 = darray[
+  $x3 = dict[
     'k0' => f(), 'k1' => f(), 'k2' => f(), 'k3' => f(), 'k4' => f(),
     'k5' => f(), 'k6' => f(), 'k7' => f(), 'k8' => f(), 'k9' => f(),
     'k10' => f(), 'k11' => f(), 'k12' => f(), 'k13' => f(), 'k14' => f(),

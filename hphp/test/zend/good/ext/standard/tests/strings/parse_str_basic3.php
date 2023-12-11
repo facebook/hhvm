@@ -24,7 +24,7 @@ var_dump(parse_str($str, inout $res));
 var_dump($res);
 
 echo "\nTest string with non-array value with same name as existing array variable\n";
-$a = varray[10,11,12,13];
+$a = vec[10,11,12,13];
 $s1 = "a=999";
 parse_str($s1, inout $res);
 var_dump($res);

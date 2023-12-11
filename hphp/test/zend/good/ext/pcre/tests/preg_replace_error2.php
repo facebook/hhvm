@@ -8,7 +8,7 @@
 */
 echo "*** Testing preg_replace() : error conditions ***\n";
 $regex = '/[a-zA-Z]/';
-$replace = varray['this is a string', varray['this is', 'a subarray'],];
+$replace = vec['this is a string', vec['this is', 'a subarray'],];
 $subject = 'test';
 foreach($replace as $value) {
     $text = HH\is_any_array($value) ? 'Array' : $value;

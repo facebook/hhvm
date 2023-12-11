@@ -10,7 +10,7 @@ $end = $end->modify( '+1 day' );
 $interval = new DateInterval('P1D');
 $daterange = new DatePeriod($begin, $interval ,$end);
 
-$v = varray[];
+$v = vec[];
 foreach($daterange as $date){
   echo $date->format("Ymd") . "\n";
   $v[] = $date;

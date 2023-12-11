@@ -2,7 +2,7 @@
 
 function foo() :mixed{
   $x = new stdClass;
-  $x->v = varray[1, 2];
+  $x->v = vec[1, 2];
   return $x;
 }
 

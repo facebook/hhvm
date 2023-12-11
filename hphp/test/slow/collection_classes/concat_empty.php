@@ -6,7 +6,7 @@ function test($name, $a, $b) :mixed{
 }
 
 function main() :mixed{
-  $containers = darray[
+  $containers = dict[
     'Vector'          => Vector {1},
     'empty Vector'    => Vector {},
     'ImmVector'       => ImmVector {2},

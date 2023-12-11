@@ -6,8 +6,8 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing strtr() : basic functionality ***\n";
 //definitions of required input variables
-$trans1_arr = darray["t" => "T", "e" => "E", "st" => "ST"];
-$trans2_arr = darray['t' => 'T', 'e' => 'E', 'st' => 'ST'];
+$trans1_arr = dict["t" => "T", "e" => "E", "st" => "ST"];
+$trans2_arr = dict['t' => 'T', 'e' => 'E', 'st' => 'ST'];
 $heredoc_str = <<<EOD
 test strtr
 EOD;

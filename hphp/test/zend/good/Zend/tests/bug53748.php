@@ -1,7 +1,7 @@
 <?hh
 
 trait Singleton {
-  protected static $instances=darray[];
+  protected static $instances=dict[];
   abstract protected function __construct($config);
   public static function getInstance($config) :mixed{
     if (!isset(self::$instances[$serialize = serialize($config)])) {
@@ -23,6 +23,6 @@ class MyHelloWorld {
 $o= MyHelloWorld::getInstance(1);
 $o= MyHelloWorld::getInstance(1);
 $o= MyHelloWorld::getInstance(2);
-$o= MyHelloWorld::getInstance(darray[1=>2]);
-$o= MyHelloWorld::getInstance(darray[1=>2]);
+$o= MyHelloWorld::getInstance(dict[1=>2]);
+$o= MyHelloWorld::getInstance(dict[1=>2]);
 }

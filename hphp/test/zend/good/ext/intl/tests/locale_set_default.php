@@ -9,7 +9,7 @@ function ut_main()
 :mixed{
     $res_str = '';
 
-    $locales = varray[
+    $locales = vec[
         'uk-ua_CALIFORNIA@currency=;currency=GRN',
         'root',
         'uk@currency=EURO',

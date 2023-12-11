@@ -14,45 +14,45 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff_assoc() : usage variations ***\n";
 
-$array = darray[0 => 'zero',
+$array = dict[0 => 'zero',
                 1 => 1,
                 'two' => 2.00000000000001];
 
 $inputs = varray [
 
 //default keys => string values
-/*1*/    varray['2.00000000000001', '1', 'zero', 'a'],
+/*1*/    vec['2.00000000000001', '1', 'zero', 'a'],
 
 //numeric keys => string values
-/*2*/    darray[2 => '2.00000000000001',
+/*2*/    dict[2 => '2.00000000000001',
               1 => '1',
               0 => 'zero',
               3 => 'a'],
 
 //string keys => string values
-/*3*/    darray['2' => '2.00000000000001',
+/*3*/    dict['2' => '2.00000000000001',
               '1' => '1',
               '0' => 'zero',
               '3' => 'a'] ,
 
 //default keys => numeric values
-/*4*/    varray[2, 1, 0],
+/*4*/    vec[2, 1, 0],
 
 //numeric keys => numeric values
-/*5*/    darray[2 => 2,
+/*5*/    dict[2 => 2,
               1 => 1,
               0 => 0],
 
 //string keys => numeric values
-/*6*/    darray['two' => 2,
+/*6*/    dict['two' => 2,
               '1' => 1,
               '0' => 0],
 
 //defualt keys => float values
-/*7*/    varray[2.00000000000001, 1.00, 0.01E-9],
+/*7*/    vec[2.00000000000001, 1.00, 0.01E-9],
 
 //numeric keys => float values
-/*8*/    darray[2 => 2.00000000000001,
+/*8*/    dict[2 => 2.00000000000001,
               1 =>  1.00,
               0 => 0.01E-9],
 

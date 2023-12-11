@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$streams = varray[
+$streams = vec[
 	'data://,;test',
 	'data://text/plain,test',
 	'data://text/plain;charset=US-ASCII,test',

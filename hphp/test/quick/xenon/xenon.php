@@ -56,7 +56,7 @@ function entrypoint_xenon(): void {
   } else {
     $stacks = xenon_get_data();
   }
-  $required_functions = varray[
+  $required_functions = vec[
     'array_map',
     'HH\Asio\join',
     'HH\Asio\result',
@@ -71,7 +71,7 @@ function entrypoint_xenon(): void {
     'apc_fetch',
     'entrypoint_xenon',
   ];
-  $optional_functions = varray[
+  $optional_functions = vec[
     'include',
     'is_callable',
     AwaitAllWaitHandle::class.'::fromVec',

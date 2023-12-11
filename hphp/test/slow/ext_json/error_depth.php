@@ -2,9 +2,9 @@
 
 <<__EntryPoint>>
 function main_error_depth() :mixed{
-  $array = varray[];
+  $array = vec[];
   for ($i=0; $i<550; $i++) {
-    $array = varray[$array];
+    $array = vec[$array];
   }
 
   $error = null;

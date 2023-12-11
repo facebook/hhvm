@@ -16,12 +16,12 @@ function main_entry(): void {
 
   for ($i = 0; $i < 10; $i++) {
     try {
-      d(dict[a => dict[]], dict[a => darray[]]);
+      d(dict[a => dict[]], dict[a => dict[]]);
     } catch (Exception $e) {
       echo ".";
     }
     try {
-      v(vec[dict[]], vec[darray[]]);
+      v(vec[dict[]], vec[dict[]]);
     } catch (Exception $e) {
       echo ".";
     }

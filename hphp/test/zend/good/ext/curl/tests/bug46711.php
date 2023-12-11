@@ -1,7 +1,7 @@
 <?hh <<__EntryPoint>> function main(): void {
 $ch = curl_init();
 
-$opt = darray[
+$opt = dict[
     CURLOPT_AUTOREFERER  => TRUE,
     CURLOPT_BINARYTRANSFER => TRUE
 ];

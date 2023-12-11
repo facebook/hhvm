@@ -24,7 +24,7 @@ $float_values = varray [
 ];
 
 // various integer formats
-$int_formats = varray[
+$int_formats = vec[
   "%d", "%hd", "%ld",
   "%Ld", " %d", "%d ",
   "\t%d", "\n%d", "%4d",

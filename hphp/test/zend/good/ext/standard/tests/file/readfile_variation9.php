@@ -25,7 +25,7 @@ fclose($h);
 
 chdir(sys_get_temp_dir());
 
-$allDirs = varray[
+$allDirs = vec[
   // absolute paths
   "$absSubDir/",
   "$absSubDir/../".$subDir,

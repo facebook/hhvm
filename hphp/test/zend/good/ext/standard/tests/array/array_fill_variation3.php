@@ -26,7 +26,7 @@ function main(): void {
 
 
   //array of different values for 'val' argument
-  $values = varray[
+  $values = vec[
             // empty string
   /* 1  */  "",
             '',

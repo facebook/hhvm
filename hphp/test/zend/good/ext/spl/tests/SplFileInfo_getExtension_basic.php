@@ -2,7 +2,7 @@
 <<__EntryPoint>> function main(): void {
 chdir(sys_get_temp_dir());
 $file = md5('SplFileInfo::getExtension');
-$exts = varray['.txt', '.extension', '..', '.', ''];
+$exts = vec['.txt', '.extension', '..', '.', ''];
 foreach ($exts as $ext) {
     touch($file . $ext);
     $info = new SplFileInfo($file . $ext);

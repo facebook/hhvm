@@ -34,13 +34,13 @@ class SelfSerializingTest extends SerializingTest
     }
 }
 <<__EntryPoint>> function main(): void {
-$adata = darray[
+$adata = dict[
     'str'    => 'foo',
     'int'    => 1,
     'float'    => 2.3,
     'bool'    => false,
     'nil'    => null,
-    'arr'    => varray[1,2,3],
+    'arr'    => vec[1,2,3],
     'obj'    => new stdClass,
 ];
 
@@ -51,10 +51,10 @@ $odata->int = 1;
 $odata->float = 2.3;
 $odata->bool = false;
 $odata->nil = null;
-$odata->arr = varray[1,2,3];
+$odata->arr = vec[1,2,3];
 $odata->obj = new stdClass();
 
-foreach(varray['NonSerializingTest','SerializingTest','ValueSerializingTest','SelfSerializingTest'] as $class) {
+foreach(vec['NonSerializingTest','SerializingTest','ValueSerializingTest','SelfSerializingTest'] as $class) {
     echo "==$class==\n";
     echo json_encode(new $class($adata)), "\n";
     echo json_encode(new $class($ndata)), "\n";

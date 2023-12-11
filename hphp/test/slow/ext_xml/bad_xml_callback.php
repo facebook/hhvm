@@ -13,14 +13,14 @@ class foo {
 
 <<__EntryPoint>>
 function main_bad_xml_callback() :mixed{
-var_dump( is_callable( varray[ 'foo', 'elementopen', 'elementclose' ] ) );
+var_dump( is_callable( vec[ 'foo', 'elementopen', 'elementclose' ] ) );
 var_dump( is_callable( 'foo::randomClose' ) );
-var_dump( is_callable( varray[ 'foo'] ) );
+var_dump( is_callable( vec[ 'foo'] ) );
 
 $parser = xml_parser_create();
 xml_set_element_handler(
     $parser,
-    varray[ 'foo' ],
+    vec[ 'foo' ],
     'foo::randomClose'
 );
 

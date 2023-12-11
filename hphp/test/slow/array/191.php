@@ -3,8 +3,8 @@
 
 <<__EntryPoint>>
 function main_191() :mixed{
-$a = varray[1];
+$a = vec[1];
  $b = $a;
- $a = varray[2];
+ $a = vec[2];
  var_dump($b);
 }

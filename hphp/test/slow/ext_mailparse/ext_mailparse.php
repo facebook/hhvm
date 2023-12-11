@@ -50,7 +50,7 @@ VS($result, false);
 
 VS(ezmlm_hash("foo"), 40);
 
-$files = varray["mime", "phpcvs1", "qp", "uue"];
+$files = vec["mime", "phpcvs1", "qp", "uue"];
 
 foreach ($files as $file) {
   $testname = __DIR__."/test_ext_mailparse." . $file . ".txt";
@@ -204,11 +204,11 @@ foreach ($arr as $first => $second) {
   $section = mailparse_msg_get_part($mail, $second);
   $info = mailparse_msg_get_part_data($section);
   $received =
-    varray["from mail pickup service by hotmail.com with Microsoft",
+    vec["from mail pickup service by hotmail.com with Microsoft",
                    "from 66.178.40.49 by BAY116-DAV8.phx.gbl with DAV;"];
   VS($info,
-    darray[
-           "headers" => darray["received" => $received],
+    dict[
+           "headers" => dict["received" => $received],
            "starting-pos" => 0,
            "starting-pos-body" => 200,
            "ending-pos" => 200,
@@ -226,7 +226,7 @@ foreach ($arr as $first => $second) {
 //////////////////////////////////////////////////////////////////////
 
 $addresses =
-  varray["\":sysmail\"@ Some-Group. Some-Org, Muhammed.".
+  vec["\":sysmail\"@ Some-Group. Some-Org, Muhammed.".
                  "(I am the greatest) Ali @(the)Vegas.WBA",
                  "\"strange\":\":sysmail\"@ Some-Group. Some-Org, Muhammed.".
                  "(I am the greatest) Ali @(the)Vegas.WBA;"];

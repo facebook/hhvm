@@ -16,13 +16,13 @@ function g(inout $x, $y) :mixed{
 <<__EntryPoint>>
 function main_533() :mixed{
   f(null, 0);
-  f(varray[0], 0);
-  f(varray[0], 'noidx');
+  f(vec[0], 0);
+  f(vec[0], 'noidx');
   f('abc', 0);
   f('abc', 'noidx');
   $x = null; g(inout $x, 0);
-  $x = varray[0]; g(inout $x, 0);
-  $x = varray[0]; g(inout $x, 'noidx');
+  $x = vec[0]; g(inout $x, 0);
+  $x = vec[0]; g(inout $x, 'noidx');
   $x = 'abc'; g(inout $x, 0);
   $x = 'abc'; g(inout $x, 'noidx');
 }

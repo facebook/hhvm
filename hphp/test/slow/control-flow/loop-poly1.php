@@ -4,7 +4,7 @@
 function main($a, $doit) :mixed{
   $o = "abc";
   if ($doit) {
-    $o = darray[];
+    $o = dict[];
     foreach ($a as $k => $v) {
       $o[$k] = $v;
     }
@@ -17,11 +17,11 @@ function main($a, $doit) :mixed{
 
 <<__EntryPoint>>
 function main_loop_poly1() :mixed{
-var_dump(main(varray[], 1));
-var_dump(main(varray["1",1], 1));
-var_dump(main(varray["1",1], 1));
-var_dump(main(varray["1",1], 0));
-var_dump(main(varray["1",1,1], 0));
-var_dump(main(varray["1",1], 0));
-var_dump(main(varray[], 0));
+var_dump(main(vec[], 1));
+var_dump(main(vec["1",1], 1));
+var_dump(main(vec["1",1], 1));
+var_dump(main(vec["1",1], 0));
+var_dump(main(vec["1",1,1], 0));
+var_dump(main(vec["1",1], 0));
+var_dump(main(vec[], 0));
 }

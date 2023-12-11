@@ -19,7 +19,7 @@ $heredoc = <<<EOT
 hd_file
 EOT;
 
-$inputs = varray[
+$inputs = vec[
 
        // int data
 /*1*/  0,

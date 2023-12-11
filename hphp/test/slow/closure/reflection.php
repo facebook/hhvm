@@ -11,6 +11,6 @@ class Foo {
 function main_reflection() :mixed{
 $func = Foo::getClosure();
 $reflection = new \ReflectionFunction($func);
-$result = $reflection->invokeArgs(varray[]);
+$result = $reflection->invokeArgs(vec[]);
 var_dump($result);
 }

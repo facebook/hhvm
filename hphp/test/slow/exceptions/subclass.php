@@ -2,7 +2,7 @@
 
 <<__EntryPoint>>
 function main_subclass() :mixed{
-$exec_class = varray['Exception', 'RuntimeException', 'InvalidArgumentException',
+$exec_class = vec['Exception', 'RuntimeException', 'InvalidArgumentException',
                'BadMethodCallException', 'OutOfBoundsException',
                'DOMException', 'PDOException'];
 

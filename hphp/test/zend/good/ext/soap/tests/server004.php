@@ -6,8 +6,8 @@ function Sub($x,$y) :mixed{
   return $x-$y;
 }
 <<__EntryPoint>> function main(): void {
-$server = new SoapServer(null,darray['uri'=>"http://testuri.org"]);
-$server->addFunction(varray["Sub","Add"]);
+$server = new SoapServer(null,dict['uri'=>"http://testuri.org"]);
+$server->addFunction(vec["Sub","Add"]);
 
 $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version="1.0" encoding="ISO-8859-1"?>

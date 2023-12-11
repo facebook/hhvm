@@ -8,5 +8,5 @@ function test($a, ...$more_args) :mixed{
 
  <<__EntryPoint>>
 function main_14() :mixed{
-test(2, 'ok', varray[1]);
+test(2, 'ok', vec[1]);
 }

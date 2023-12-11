@@ -54,7 +54,7 @@ $i++ ? f($i) : f(++$i);
 
 // Test all kinds of scalar values to see which are ints or can be implicitly converted
 
-$scalarValueList = varray[10, -100, 0, 1.234, 0.0, TRUE, FALSE, NULL, "123", 'xx', ""];
+$scalarValueList = vec[10, -100, 0, 1.234, 0.0, TRUE, FALSE, NULL, "123", 'xx', ""];
 foreach ($scalarValueList as $v)
 {
     echo "\$v = ".(string)$v.", ";

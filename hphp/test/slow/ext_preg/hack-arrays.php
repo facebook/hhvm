@@ -64,8 +64,8 @@ function test_preg_match() :mixed{
 
 function test_preg_grep() :mixed{
   echo "====================== preg_grep =============================\n";
-  $strs1 = varray['a', '1', 'q6', 'h20'];
-  $strs2 = darray['key1' => 'a', 'key2' =>'1', 'key3' => 'q6', 'key4' => 'h20'];
+  $strs1 = vec['a', '1', 'q6', 'h20'];
+  $strs2 = dict['key1' => 'a', 'key2' =>'1', 'key3' => 'q6', 'key4' => 'h20'];
   var_dump(preg_grep('/^(\d|.\d)$/', $strs1, 0));
   var_dump(preg_grep('/^(\d|.\d)$/', $strs1, PREG_GREP_INVERT));
   var_dump(preg_grep('/^(\d|.\d)$/', $strs2, 0));

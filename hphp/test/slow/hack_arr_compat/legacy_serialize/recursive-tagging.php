@@ -24,13 +24,13 @@ function test_marking_nested_arrays($recursive) :mixed{
   print("\n==============================================\n");
   print('test_marking_nested_arrays($recursive='.str($recursive)."):\n");
   $c = new C();
-  $x = varray[
+  $x = vec[
     vec[$c],
-    varray[$c],
+    vec[$c],
     vec[
-      darray['c' => $c, 'v' => varray[$c]],
+      dict['c' => $c, 'v' => vec[$c]],
       vec[$c],
-      varray[$c],
+      vec[$c],
     ],
   ];
   print_recursive_marking($x, '$x');
@@ -43,7 +43,7 @@ function test_marking_nested_arrays($recursive) :mixed{
 function test_cow_optimizations($recursive) :mixed{
   print("\n==============================================\n");
   print('test_cow_optimizations($recursive='.str($recursive)."):\n");
-  $x = HH\array_mark_legacy(varray[varray[new C()]], $recursive);
+  $x = HH\array_mark_legacy(vec[vec[new C()]], $recursive);
   print_recursive_marking($x, '$x');
 }
 
@@ -51,8 +51,8 @@ function test_cow_optimizations($recursive) :mixed{
 function test_unable_to_cow($recursive) :mixed{
   print("\n==============================================\n");
   print('test_unable_to_cow($recursive='.str($recursive)."):\n");
-  $x = darray['a' => darray['b' => varray[new C()]]];
-  $y = HH\array_mark_legacy(varray[$x['a']], $recursive);
+  $x = dict['a' => dict['b' => vec[new C()]]];
+  $y = HH\array_mark_legacy(vec[$x['a']], $recursive);
   print_recursive_marking($x, '$x');
   print_recursive_marking($y, '$y');
 }

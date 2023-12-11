@@ -17,7 +17,7 @@ $resource_values = varray [
 ];
 
 // array of unsigned formats
-$unsigned_formats = varray[
+$unsigned_formats = vec[
   "%u", "%hu", "%lu",
   "%Lu", " %u", "%u ", 
   "\t%u", "\n%u", "%4u",

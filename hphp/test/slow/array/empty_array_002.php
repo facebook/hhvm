@@ -1,6 +1,6 @@
 <?hh
 
-function a() :mixed{ return darray[]; }
+function a() :mixed{ return dict[]; }
 function main() :mixed{
   $x = a();
   $x['heh'] = 2;

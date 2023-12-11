@@ -1,7 +1,7 @@
 <?hh
 class Foo extends SplFileObject
 {
-    public $bam = varray[];
+    public $bam = vec[];
 }
 <<__EntryPoint>> function main(): void {
 $fileInfo = new SplFileInfo('php://temp');

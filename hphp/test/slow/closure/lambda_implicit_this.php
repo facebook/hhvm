@@ -23,14 +23,14 @@ class D extends C {
 
   protected function direct() :mixed{
     echo "\ndirect:\n\n";
-    array_map($x ==> parent::bar(), varray[1]); // capture $this
+    array_map($x ==> parent::bar(), vec[1]); // capture $this
   }
 
   protected function nestedCapture() :mixed{
     echo "\nnestedCapture:\n\n";
     array_map($x ==> { // capture, because of inner capture
       (() ==> parent::bar())(); // capture
-    }, varray[1]);
+    }, vec[1]);
   }
 
   protected function reflectionInfo() :mixed{

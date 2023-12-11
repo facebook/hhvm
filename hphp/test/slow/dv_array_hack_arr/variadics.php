@@ -16,11 +16,11 @@ function test($x) :mixed{
 
 <<__EntryPoint>>
 function main_variadics() :mixed{
-test(darray[]);
+test(dict[]);
 test(darray(vec[3, 4, 5]));
 test(vec[]);
 test(vec[3, 4, 5]);
 test(dict['a' => 3, 'b' => 4, 'c' => 5]);
-test(varray[3, 4, 5]);
+test(vec[3, 4, 5]);
 test(Vector{3, 4, 5});
 }

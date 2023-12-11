@@ -16,7 +16,7 @@ async function foo() :Awaitable<mixed>{
       async $id ==> {
         return await bar($id);
       },
-      varray[1,2,3,4],
+      vec[1,2,3,4],
     )
   );
 }

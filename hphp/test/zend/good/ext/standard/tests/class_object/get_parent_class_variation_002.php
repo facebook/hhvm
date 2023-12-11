@@ -14,7 +14,7 @@ echo "*** Testing get_parent_class() : usage variations ***\n";
 
 
 //array of values to iterate over
-$values = varray[
+$values = vec[
 
       // int data
       0,

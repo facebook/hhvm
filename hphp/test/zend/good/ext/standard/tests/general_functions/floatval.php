@@ -5,7 +5,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing floatval() with valid float values ***\n";
 // different valid  float values
-$valid_floats = varray[
+$valid_floats = vec[
                 0.0,
                 1.0,
                 -1.0,

@@ -20,7 +20,7 @@ trait TestTrait {
 }
 
 function main() :mixed{
-  $classes = varray[
+  $classes = vec[
     'TestClassImplementingInterface', // false
     'TestInterface', // false
     'TestConcreteClass', // true
@@ -28,7 +28,7 @@ function main() :mixed{
     'TestTrait' // true
   ];
 
-  $out = darray[];
+  $out = dict[];
   foreach ($classes as $class) {
     $rc = (new ReflectionClass($class));
     $out[$class] = $rc->getMethod('__construct')->isConstructor();

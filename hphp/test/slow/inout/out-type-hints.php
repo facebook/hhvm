@@ -5,7 +5,7 @@ function foo($x, inout int $y): string {
 }
 
 function bar(inout int $x, inout int $y): int {
-  list($x, $y) = varray[$y, $x];
+  list($x, $y) = vec[$y, $x];
   return $x + $y;
 }
 

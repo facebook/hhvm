@@ -29,7 +29,7 @@ var_dump(interface_exists("iTESTable"));
 
 var_dump(get_class_methods("TEst")[0] === "foo");
 
-var_dump(get_class_vars("TEst") === darray["foo" => null]);
+var_dump(get_class_vars("TEst") === dict["foo" => null]);
 
-var_dump(get_class_constants("test") === darray["const_foo" => "f"]);
+var_dump(get_class_constants("test") === dict["const_foo" => "f"]);
 }

@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  private $x = varray[1,2,3];
+  private $x = vec[1,2,3];
   private $y = "string";
 
   public function heh(int $i) :mixed{

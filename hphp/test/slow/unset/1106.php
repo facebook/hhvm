@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  public static $foo = varray[123];
+  public static $foo = vec[123];
 }
 
 <<__EntryPoint>>

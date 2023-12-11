@@ -3,7 +3,7 @@ function test() :mixed{
   $aUser = new User();
   $aUser->sName = 'newUser';
 
-  $aUsers = varray[];
+  $aUsers = vec[];
   $aUsers[] = $aUser;
   $aUsers[] = $aUser;
   $aUsers[] = $aUser;
@@ -17,7 +17,7 @@ class User {
   public $sName;
 }
 <<__EntryPoint>> function main(): void {
-$server = new SoapServer(null,darray['uri'=>"http://testuri.org", 'soap_version'=>SOAP_1_2]);
+$server = new SoapServer(null,dict['uri'=>"http://testuri.org", 'soap_version'=>SOAP_1_2]);
 $server->addFunction("test");
 
 $HTTP_RAW_POST_DATA = <<<EOF

@@ -1,7 +1,7 @@
 <?hh
 
 function main() :mixed{
-  $inputs = varray[
+  $inputs = vec[
     'php://temp',
     'php://memory',
   ];

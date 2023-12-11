@@ -2,7 +2,7 @@
 
 function a() :mixed{ return 1; }
 function foo() :mixed{
-  $x = varray[a()];
+  $x = vec[a()];
   $x[] = 0;
   $x[1]++;
   return $x;

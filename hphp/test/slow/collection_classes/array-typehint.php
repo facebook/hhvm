@@ -43,7 +43,7 @@ function f8(<<__Soft>> inout ?varray $x) :mixed{ helper_ref(inout $x); }
 
 function main() :mixed{
   $containers = Map {
-    'array' => varray[1, 2, 3],
+    'array' => vec[1, 2, 3],
     'Vector' => Vector {1, 2, 3},
     'Map' => Map {'a' => 1, 'b' => 2, 'c' => 3},
     'Set' => Set {1, 2, 3},

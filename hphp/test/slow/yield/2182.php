@@ -1,7 +1,7 @@
 <?hh
 
 class X {
-  private $a = varray[1,2,3];
+  private $a = vec[1,2,3];
   function foo() :AsyncGenerator<mixed,mixed,void>{
     yield $this->a;
   }

@@ -1,7 +1,7 @@
 <?hh
 
 function foo($a) :mixed{
-  $v = varray[];
+  $v = vec[];
   for ($i = 0; $i < 1024; $i++) {
     $v[] = $a;
   }

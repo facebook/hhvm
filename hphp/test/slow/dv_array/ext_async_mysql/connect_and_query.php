@@ -5,7 +5,7 @@ try {
   $options->setTotalTimeout(10);
   $options->setQueryTimeout(10);
   $options->setConnectionAttributes(
-    darray[
+    dict[
       'nonsense' => 'foo',
       'welp' => 'bar',
       'lol' => 'wut',

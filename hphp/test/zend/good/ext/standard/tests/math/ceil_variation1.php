@@ -17,7 +17,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $value argument
-$inputs = varray[
+$inputs = vec[
        // null data
 /* 1*/ NULL,
        null,
@@ -31,7 +31,7 @@ $inputs = varray[
        // empty data
 /* 7*/ "",
        '',
-       varray[],
+       vec[],
 
        // string data
 /*10*/ "abcxyz",

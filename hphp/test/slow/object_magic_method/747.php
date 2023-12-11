@@ -8,7 +8,7 @@ class A {
 }
    public function __sleep() :mixed{
  $this->foo = 3;
- return varray['foo'];
+ return vec['foo'];
 }
  }
 

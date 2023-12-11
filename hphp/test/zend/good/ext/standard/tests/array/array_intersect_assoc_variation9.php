@@ -17,17 +17,17 @@ echo "*** Testing array_intersect_assoc() : passing two dimensional array to bot
 $arr1 = varray [
 
   // arrays with default keys
-  varray[1, 2, "hello", 'world'],
-  varray[1, 2, 3, 4],
+  vec[1, 2, "hello", 'world'],
+  vec[1, 2, 3, 4],
 
   // arrays with explicit keys
-  darray[1 => "one", 2 => "two", 3 => "three"],
-  darray["ten" => 10, "twenty" => 20.00, "thirty" => 30]
+  dict[1 => "one", 2 => "two", 3 => "three"],
+  dict["ten" => 10, "twenty" => 20.00, "thirty" => 30]
 ];
 
 $arr2 = varray [
-  varray[1, 2, 3, 4],
-  darray[1 => "one", 2 => "two", 3 => "three"]
+  vec[1, 2, 3, 4],
+  dict[1 => "one", 2 => "two", 3 => "three"]
 ];
 
 /* Passing the sub-array as argument to $arr1 and $arr2 */

@@ -6,5 +6,5 @@ $wrong = "wrong";
 $sign = null;
 var_dump(openssl_sign($data, inout $sign, $privkey));                 // no output
 var_dump(openssl_sign($data, inout $sign, $wrong));
-try { var_dump(openssl_sign(varray[], inout $sign, $privkey)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(openssl_sign(vec[], inout $sign, $privkey)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }

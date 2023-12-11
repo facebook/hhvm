@@ -5,7 +5,7 @@ echo "*** Test substituting argument 1 with boolean values ***\n";
 
 
 
-$variation_array = darray[
+$variation_array = dict[
   'lowercase true' => true,
   'lowercase false' =>false,
   'uppercase TRUE' =>TRUE,

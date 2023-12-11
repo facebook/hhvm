@@ -21,7 +21,7 @@ function entrypoint_get_headers_error_002(): void {
 
   // Format argument as type Array
   echo "\n-- Testing get_headers() function with format argument as type array --\n";
-  try { var_dump( get_headers($url, varray[]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { var_dump( get_headers($url, vec[]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
   $object = new testObject();
   echo "\n-- Testing get_headers() function with format argument as type object --\n";

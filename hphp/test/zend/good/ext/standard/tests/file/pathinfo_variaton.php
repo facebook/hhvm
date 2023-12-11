@@ -16,7 +16,7 @@ function main(): void {
 
   $obj = new object_temp();
 
-  $path_arr = varray[
+  $path_arr = vec[
     "www.example.com",
     "/testdir/foo//test/",
     "../foo/test.link",
@@ -24,7 +24,7 @@ function main(): void {
     2.345
   ];
 
-  $paths = varray[
+  $paths = vec[
     /* pathname containing numeric string */
     0,
     1234,

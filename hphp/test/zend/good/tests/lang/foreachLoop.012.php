@@ -5,7 +5,7 @@ const MAX_LOOPS = 5;
 function withRefValue($elements, $transform) :mixed{
     echo "\n---( Array with $elements element(s): )---\n";
     //Build array:
-    $a = darray[];
+    $a = dict[];
     for ($i=0; $i<$elements; $i++) {
         $a[] = "v.$i";
     }

@@ -72,27 +72,27 @@ function test1() :mixed{
     dict['abc' => 100, 200 => 'def'],
     keyset[],
     keyset['a', 100, 'b'],
-    varray[],
-    varray[1, 2, 3],
-    darray[],
-    darray[100 => 'abc', 'def' => 200],
-    darray[0 => 'a', 1 => 'b', 2 => 'c'],
-       varray[
+    vec[],
+    vec[1, 2, 3],
+    dict[],
+    dict[100 => 'abc', 'def' => 200],
+    dict[0 => 'a', 1 => 'b', 2 => 'c'],
+       vec[
       __hhvm_intrinsics\launder_value('x'),
       __hhvm_intrinsics\launder_value('y'),
       __hhvm_intrinsics\launder_value('z'),
     ],
-    darray[
+    dict[
       0 => __hhvm_intrinsics\launder_value(123),
       1 => __hhvm_intrinsics\launder_value(456),
       2 => __hhvm_intrinsics\launder_value(789)
     ],
-    darray[
+    dict[
       'x' => __hhvm_intrinsics\launder_value(123),
       'y' => __hhvm_intrinsics\launder_value(456),
       'z' => __hhvm_intrinsics\launder_value(789)
     ],
-    darray[
+    dict[
       __hhvm_intrinsics\launder_value(66) => __hhvm_intrinsics\launder_value(11),
       __hhvm_intrinsics\launder_value(55) => __hhvm_intrinsics\launder_value(22),
       __hhvm_intrinsics\launder_value(44) => __hhvm_intrinsics\launder_value(33)
@@ -111,27 +111,27 @@ function test1() :mixed{
 
 function test2() :mixed{
   $values = vec[
-    varray[],
-    varray[1, 2, 3],
-    darray[],
-    darray[100 => 'abc', 'def' => 200],
-    darray[0 => 'a', 1 => 'b', 2 => 'c'],
-    varray[
+    vec[],
+    vec[1, 2, 3],
+    dict[],
+    dict[100 => 'abc', 'def' => 200],
+    dict[0 => 'a', 1 => 'b', 2 => 'c'],
+    vec[
       __hhvm_intrinsics\launder_value('x'),
       __hhvm_intrinsics\launder_value('y'),
       __hhvm_intrinsics\launder_value('z'),
     ],
-    darray[
+    dict[
       0 => __hhvm_intrinsics\launder_value(123),
       1 => __hhvm_intrinsics\launder_value(456),
       2 => __hhvm_intrinsics\launder_value(789)
     ],
-    darray[
+    dict[
       'x' => __hhvm_intrinsics\launder_value(123),
       'y' => __hhvm_intrinsics\launder_value(456),
       'z' => __hhvm_intrinsics\launder_value(789)
     ],
-    darray[
+    dict[
       __hhvm_intrinsics\launder_value(66) => __hhvm_intrinsics\launder_value(11),
       __hhvm_intrinsics\launder_value(55) => __hhvm_intrinsics\launder_value(22),
       __hhvm_intrinsics\launder_value(44) => __hhvm_intrinsics\launder_value(33)
@@ -168,33 +168,33 @@ function test3() :mixed{
   var_dump(is_varray(dict[0 => 'a', 1 => 'b']));
   var_dump(is_darray(dict[0 => 'a', 1 => 'b']));
 
-  var_dump(gettype(varray[]));
-  var_dump(HH\is_php_array(varray[]));
-  var_dump(is_vec(varray[]));
-  var_dump(is_dict(varray[]));
-  var_dump(is_varray(varray[]));
-  var_dump(is_darray(varray[]));
+  var_dump(gettype(vec[]));
+  var_dump(HH\is_php_array(vec[]));
+  var_dump(is_vec(vec[]));
+  var_dump(is_dict(vec[]));
+  var_dump(is_varray(vec[]));
+  var_dump(is_darray(vec[]));
 
-  var_dump(gettype(darray[]));
-  var_dump(HH\is_php_array(darray[]));
-  var_dump(is_vec(darray[]));
-  var_dump(is_dict(darray[]));
-  var_dump(is_varray(darray[]));
-  var_dump(is_darray(darray[]));
+  var_dump(gettype(dict[]));
+  var_dump(HH\is_php_array(dict[]));
+  var_dump(is_vec(dict[]));
+  var_dump(is_dict(dict[]));
+  var_dump(is_varray(dict[]));
+  var_dump(is_darray(dict[]));
 
-  var_dump(gettype(varray['a', 'b', 'c']));
-  var_dump(HH\is_php_array(varray['a', 'b', 'c']));
-  var_dump(is_vec(varray['a', 'b', 'c']));
-  var_dump(is_dict(varray['a', 'b', 'c']));
-  var_dump(is_varray(varray['a', 'b', 'c']));
-  var_dump(is_darray(varray['a', 'b', 'c']));
+  var_dump(gettype(vec['a', 'b', 'c']));
+  var_dump(HH\is_php_array(vec['a', 'b', 'c']));
+  var_dump(is_vec(vec['a', 'b', 'c']));
+  var_dump(is_dict(vec['a', 'b', 'c']));
+  var_dump(is_varray(vec['a', 'b', 'c']));
+  var_dump(is_darray(vec['a', 'b', 'c']));
 
-  var_dump(gettype(darray[0 => 'a', 1 => 'b', 2 => 'c']));
-  var_dump(HH\is_php_array(darray[0 => 'a', 1 => 'b', 2 => 'c']));
-  var_dump(is_vec(darray[0 => 'a', 1 => 'b', 2 => 'c']));
-  var_dump(is_dict(darray[0 => 'a', 1 => 'b', 2 => 'c']));
-  var_dump(is_varray(darray[0 => 'a', 1 => 'b', 2 => 'c']));
-  var_dump(is_darray(darray[0 => 'a', 1 => 'b', 2 => 'c']));
+  var_dump(gettype(dict[0 => 'a', 1 => 'b', 2 => 'c']));
+  var_dump(HH\is_php_array(dict[0 => 'a', 1 => 'b', 2 => 'c']));
+  var_dump(is_vec(dict[0 => 'a', 1 => 'b', 2 => 'c']));
+  var_dump(is_dict(dict[0 => 'a', 1 => 'b', 2 => 'c']));
+  var_dump(is_varray(dict[0 => 'a', 1 => 'b', 2 => 'c']));
+  var_dump(is_darray(dict[0 => 'a', 1 => 'b', 2 => 'c']));
 }
 
 

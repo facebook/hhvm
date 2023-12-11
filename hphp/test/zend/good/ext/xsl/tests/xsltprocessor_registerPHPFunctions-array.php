@@ -10,6 +10,6 @@ function main_entry(): void {
   }
   $proc = XSLTPrepare::getProc();
   $proc->importStylesheet($phpfuncxsl);
-  var_dump($proc->registerPHPFunctions(varray['ucwords']));
+  var_dump($proc->registerPHPFunctions(vec['ucwords']));
   var_dump($proc->transformToXML(XSLTPrepare::getDOM()));
 }

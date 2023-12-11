@@ -6,10 +6,10 @@ if (!$socket) {
 socket_set_block($socket);
 
 //wrong params
-$retval_1 = socket_set_option( $socket, SOL_SOCKET, SO_SNDTIMEO, varray[]);
+$retval_1 = socket_set_option( $socket, SOL_SOCKET, SO_SNDTIMEO, vec[]);
 
 //set/get comparison
-$options = darray["sec" => 1, "usec" => 0];
+$options = dict["sec" => 1, "usec" => 0];
 $retval_2 = socket_set_option( $socket, SOL_SOCKET, SO_SNDTIMEO, $options);
 $retval_3 = socket_get_option( $socket, SOL_SOCKET, SO_SNDTIMEO);
 

@@ -19,7 +19,7 @@ abc
 1a2b3c
 EOD;
 //array of string inputs for $str
-$str_arr = varray[
+$str_arr = vec[
   //double quoted strings
   "123",
   "abc",
@@ -35,7 +35,7 @@ $str_arr = varray[
 ];
 $from = "123abc";
 $to = "abc123";
-$replace_pairs = darray["1" => "a", "a" => 1, "2b3c" => "b2c3", "b2c3" => "3c2b"];
+$replace_pairs = dict["1" => "a", "a" => 1, "2b3c" => "b2c3", "b2c3" => "3c2b"];
 
 /* loop through to test strtr() with each element of $str_arr */
 for($index = 0; $index < count($str_arr); $index++) {

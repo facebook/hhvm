@@ -2,7 +2,7 @@
 
 class TestingIterator implements HH\Iterator {
     private $position = 0;
-    private $array = varray[
+    private $array = vec[
         "second",
         "third",
         "forth"
@@ -119,10 +119,10 @@ function main() :mixed{
   print "==========\n";
   print "array\n";
   print "==========\n";
-  test(varray[7, 8, 9]);
-  test(varray[7]);
-  test(varray[]);
-  $a = darray[];
+  test(vec[7, 8, 9]);
+  test(vec[7]);
+  test(vec[]);
+  $a = dict[];
   $a[100] = "321";
   $a["0"] = 2;
   $a[-1] = "10";

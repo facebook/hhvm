@@ -3,7 +3,7 @@
 class test {
 
     function foo () :mixed{
-        set_exception_handler(varray[$this, "bar"]);
+        set_exception_handler(vec[$this, "bar"]);
     }
 
     <<__DynamicallyCallable>> function bar($e) :mixed{

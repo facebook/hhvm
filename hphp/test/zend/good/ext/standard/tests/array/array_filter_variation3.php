@@ -23,15 +23,15 @@ function always_true($input)
 echo "*** Testing array_filter() : usage variations - different types of array for 'input' argument***\n";
 
 // different types of 'input' array
-$input_values = varray[
-  varray[0, 1, 2, -1, 034, 0X4A],  // integer values
-  varray[0.0, 1.2, 1.2e3, 1.2e-3],  // float values
-  varray['value1', "value2", '', " ", ""],  // string values
-  varray[true, false, TRUE, FALSE],  // bool values
-  varray[null, NULL],  // null values
-  darray[1 => 'one', 'zero' => 0, -2 => "value"], //associative array
-  darray["one" => 1, '' => 'null', 5 => "float", 1 => 1, "" => 'empty'],  // associative array with different keys
-  darray[1 => 'one', 2 => 2, "key" => 'value']  // combinition of associative and non-associative array
+$input_values = vec[
+  vec[0, 1, 2, -1, 034, 0X4A],  // integer values
+  vec[0.0, 1.2, 1.2e3, 1.2e-3],  // float values
+  vec['value1', "value2", '', " ", ""],  // string values
+  vec[true, false, TRUE, FALSE],  // bool values
+  vec[null, NULL],  // null values
+  dict[1 => 'one', 'zero' => 0, -2 => "value"], //associative array
+  dict["one" => 1, '' => 'null', 5 => "float", 1 => 1, "" => 'empty'],  // associative array with different keys
+  dict[1 => 'one', 2 => 2, "key" => 'value']  // combinition of associative and non-associative array
 
 ];
 

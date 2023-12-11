@@ -8,7 +8,7 @@ function array_extend(inout $dest, varray $src): void {
 }
 
 function getImpliedChecks(varray $arg): varray {
-  $implied_checks = varray[];
+  $implied_checks = vec[];
   foreach ($arg as $key => $val) {
     array_extend(inout $implied_checks, $val);
   }
@@ -20,6 +20,6 @@ function getImpliedChecks(varray $arg): varray {
 <<__EntryPoint>>
 function main_bug_3715777() :mixed{
 for ($i = 0; $i < 10; $i++) {
-  var_dump(getImpliedChecks(varray[varray[1,2,3], varray[4,5,6], varray[7,8,9]]));
+  var_dump(getImpliedChecks(vec[vec[1,2,3], vec[4,5,6], vec[7,8,9]]));
 }
 }

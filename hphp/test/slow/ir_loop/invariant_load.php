@@ -27,11 +27,11 @@ function foo($x, $k) :mixed{
 
 <<__EntryPoint>>
 function main_invariant_load() :mixed{
-foo(varray[1,2,3], 123);
-foo(varray[1,2,3], 123);
-foo(varray[1,2,3], 123);
-foo(varray[1,2,3], 123);
-foo(varray[1,2,3], 123);
-foo(varray[1,2,3], 123);
-foo(varray[1,2,3], 'asd');
+foo(vec[1,2,3], 123);
+foo(vec[1,2,3], 123);
+foo(vec[1,2,3], 123);
+foo(vec[1,2,3], 123);
+foo(vec[1,2,3], 123);
+foo(vec[1,2,3], 123);
+foo(vec[1,2,3], 'asd');
 }

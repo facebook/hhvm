@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$coderange = varray[
+$coderange = vec[
     range(0x0000, 0x1fff),
     range(0xff60, 0xff9f)
 ];

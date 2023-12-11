@@ -5,8 +5,8 @@ function t($x) :mixed{
 }
 class z {
   function q() :mixed{
-    $x = varray[1,2,3];
-    array_map(varray['z', 'p'], $x);
+    $x = vec[1,2,3];
+    array_map(vec['z', 'p'], $x);
   }
   <<__DynamicallyCallable>> static function p($x) :mixed{
     var_dump($x);
@@ -15,7 +15,7 @@ class z {
 
 <<__EntryPoint>>
 function main_1212() :mixed{
-$x = varray[1,2,3];
+$x = vec[1,2,3];
 array_map(t<>, $x);
 $m = new z();
 $m->q();

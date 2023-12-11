@@ -5,7 +5,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing is_numeric() with valid numeric values ***\n";
 // different valid numeric  vlaues
-$numerics = varray[
+$numerics = vec[
   0,
   1,
   -1,
@@ -97,7 +97,7 @@ $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
 
 // other types in a array
-$not_numerics = varray[
+$not_numerics = vec[
   "0x80001",
   "-0x80001",
   "+0x80001",
@@ -106,8 +106,8 @@ $not_numerics = varray[
   new stdClass, // object
   $fp,  // resource
   $dfp,
-  varray[],
-  varray["string"],
+  vec[],
+  vec["string"],
   "",
   "1 ",
   "- 1",

@@ -36,7 +36,7 @@ printf("0b101101 ^ 0b111 = 0b%b\n", 0b101111 ^ 0b101);
 
 // Test all kinds of scalar values to see which are ints or can be implicitly converted
 
-$scalarValueList = varray[10, -100];//, 0, 1.234, 0.0, TRUE, FALSE, NULL, "123", 'xx', "");
+$scalarValueList = vec[10, -100];//, 0, 1.234, 0.0, TRUE, FALSE, NULL, "123", 'xx', "");
 foreach ($scalarValueList as $v)
 {
     printf("%b & 123 = %b\n", $v, $v & 123);

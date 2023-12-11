@@ -60,10 +60,10 @@ class StaticClass
 echo "*** Testing array_unshift() : Passing object to \$var argument ***\n";
 
 // array to be passed to $array argument
-$array = darray['f' => "first", "s" => 'second', 0 => 1, 1 => 2.222];
+$array = dict['f' => "first", "s" => 'second', 0 => 1, 1 => 2.222];
 
 // array containing different types of objects as elements
-$vars = varray[
+$vars = vec[
   new SimpleClass(),
   new EmptyClass(),
   new ChildClass(),

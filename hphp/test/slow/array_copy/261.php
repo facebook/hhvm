@@ -1,7 +1,7 @@
 <?hh
 
 function f($b) :mixed{
-  $a = $b ? 0 : darray['x' => $b];
+  $a = $b ? 0 : dict['x' => $b];
   $a[] = $a;
   var_dump($a);
 }

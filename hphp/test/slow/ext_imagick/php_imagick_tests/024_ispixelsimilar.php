@@ -5,7 +5,7 @@
 function main_024_ispixelsimilar() :mixed{
 $root3 = 1.732050807568877;
 
-$tests = varray[
+$tests = vec[
   varray ['rgb(245, 0, 0)',     'rgb(255, 0, 0)',        9 / $root3, false,],
   varray ['rgb(245, 0, 0)',     'rgb(255, 0, 0)',       10 / $root3, true,],
   varray ['rgb(0, 0, 0)',       'rgb(7, 7, 0)',          9 / $root3, false,],

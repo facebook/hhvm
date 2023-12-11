@@ -3,7 +3,7 @@
 class X {
 }
 function test() :mixed{
-  $a = varray[new X, 0];
+  $a = vec[new X, 0];
   foreach ($a as $v) {
     var_dump($v);
   }

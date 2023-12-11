@@ -10,5 +10,5 @@ class A {
 function main_234() :mixed{
 $a = true;
  $a = new A();
-$a->f(varray[]);
+$a->f(vec[]);
 }

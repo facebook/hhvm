@@ -22,7 +22,7 @@ function run(inout $ref, inout $badref) :mixed{
   set(dict[], "1", "hello")
     |> set($$, 1, "goodbye")
     |> set($$, null, "null")
-    |> set($$, darray[], "arr")
+    |> set($$, dict[], "arr")
     |> set($$, new stdClass, "cls")
     |> set($$, 1.2, "double")
     |> set($$, $ref, "num-ref")
@@ -31,7 +31,7 @@ function run(inout $ref, inout $badref) :mixed{
     |> get($$, 1)
     |> get($$, "1")
     |> get($$, null)
-    |> get($$, darray[])
+    |> get($$, dict[])
     |> get($$, new stdClass)
     |> get($$, 1.2)
     |> get($$, $ref)
@@ -43,6 +43,6 @@ function run(inout $ref, inout $badref) :mixed{
 <<__EntryPoint>>
 function main() :mixed{
   $foo = 12;
-  $bar = darray[];
+  $bar = dict[];
   run(inout $foo, inout $bar);
 }

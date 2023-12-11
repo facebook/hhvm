@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$floats = varray[
+$floats = vec[
 '1.234   ',
 '   1.234',
 '1.234'	,
@@ -16,7 +16,7 @@ foreach ($floats as $float) {
 	var_dump($out);
 }
 
-$floats = darray[
+$floats = dict[
 '1.234   '	=> ',',
 '1,234'		=> ',',
 '   1.234'	=> '.',
@@ -26,7 +26,7 @@ $floats = darray[
 
 echo "\ncustom decimal:\n";
 foreach ($floats as $float => $dec) {
-	$out = filter_var($float, FILTER_VALIDATE_FLOAT, darray["options"=>darray['decimal' => $dec]]);
+	$out = filter_var($float, FILTER_VALIDATE_FLOAT, dict["options"=>dict['decimal' => $dec]]);
 	var_dump($out);
 }
 }

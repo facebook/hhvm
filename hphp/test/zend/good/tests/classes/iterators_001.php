@@ -47,7 +47,7 @@ class c implements IteratorAggregate {
 <<__EntryPoint>> function main(): void {
 echo "===Array===\n";
 
-$a = varray[0,1,2];
+$a = vec[0,1,2];
 foreach($a as $v) {
     echo "array:$v\n";
 }

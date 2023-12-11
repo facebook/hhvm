@@ -7,7 +7,7 @@ class A {
   }
   function g() :mixed{
     $this->a = 100;
-    call_user_func(varray['self', 'f']);
+    call_user_func(vec['self', 'f']);
   }
 }
 <<__EntryPoint>> function main(): void { echo "Done.\n"; }

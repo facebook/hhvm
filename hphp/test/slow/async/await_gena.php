@@ -1,7 +1,7 @@
 <?hh
 
 async function foo() :Awaitable<mixed>{
-  return await gena(varray[
+  return await gena(vec[
                       async { return 1; },
                       async { return 2; },
                       async { return 3; }
@@ -9,7 +9,7 @@ async function foo() :Awaitable<mixed>{
 }
 
 async function fooReschedule() :Awaitable<mixed>{
-  return await gena(varray[
+  return await gena(vec[
                       async { return 1; },
                       async { return 2; },
                       RescheduleWaitHandle::create(0,0)
@@ -17,7 +17,7 @@ async function fooReschedule() :Awaitable<mixed>{
 }
 
 async function fooError() :Awaitable<mixed>{
-  return await gena(varray[
+  return await gena(vec[
                       async { return 1; },
                       async { return 2; },
                       async { throw new Exception("oops"); }
@@ -26,9 +26,9 @@ async function fooError() :Awaitable<mixed>{
 
 async function bogusGena() :Awaitable<mixed>{
   return await gena(
-    varray[async { return 1; }],
-    varray[async { return 2; }],
-    varray[async { return 3; }]
+    vec[async { return 1; }],
+    vec[async { return 2; }],
+    vec[async { return 3; }]
   );
 }
 

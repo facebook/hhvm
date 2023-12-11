@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$trans = darray["a" => 1,
+$trans = dict["a" => 1,
                "b" => 1,
                "c" => 2,
                "z" => 0,

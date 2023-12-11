@@ -1,9 +1,9 @@
 <?hh
 
 class foo {
-    public $x = varray[];
+    public $x = vec[];
     public function __construct() {
-        $h = varray[];
+        $h = vec[];
         $h[] = new stdClass;
         $this->x = $h;
     }

@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$int_variation = varray[ "%d", "%-d", "%+d", "%7.2d", "%-7.2d", "%07.2d", "%-07.2d", "%'#7.2d" ];
-$int_numbers = varray[ 0, 1, -1, 2.7, -2.7, 23333333, -23333333, "1234" ];
+$int_variation = vec[ "%d", "%-d", "%+d", "%7.2d", "%-7.2d", "%07.2d", "%-07.2d", "%'#7.2d" ];
+$int_numbers = vec[ 0, 1, -1, 2.7, -2.7, 23333333, -23333333, "1234" ];
 
 /* creating dumping file */
 $data_file = sys_get_temp_dir().'/'.'fprintf_variation_008_64bit.phpt.txt';

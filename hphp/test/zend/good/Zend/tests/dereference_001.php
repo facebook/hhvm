@@ -1,23 +1,23 @@
 <?hh
 
 function a() :mixed{
-    return varray[1,varray[5]];
+    return vec[1,vec[5]];
 }
 
 function b() :mixed{
-    return varray[];
+    return vec[];
 }
 
 class foo {
     public $y = 1;
 
     public function test() :mixed{
-        return varray[varray[varray['foobar']]];
+        return vec[vec[vec['foobar']]];
     }
 }
 
 function c() :mixed{
-    return varray[new foo];
+    return vec[new foo];
 }
 
 function d() :mixed{
@@ -27,7 +27,7 @@ function d() :mixed{
 
 function e() :mixed{
     $y = 'bar';
-    $x = darray['a' => 'foo', 'b' => $y];
+    $x = dict['a' => 'foo', 'b' => $y];
     return $x;
 }
 

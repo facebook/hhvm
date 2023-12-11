@@ -6,7 +6,7 @@ function bar($x) :mixed{
 }
 
 function foo($x) :mixed{
-  $x = varray[$x];
+  $x = vec[$x];
   array_map(foo<>, $x);
   bar($x);
 }

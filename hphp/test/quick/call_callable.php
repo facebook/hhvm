@@ -16,7 +16,7 @@ class Base {
 class C extends Base {
   private function blah() :mixed{ echo __CLASS__, "\n"; }
   public function exposeBlah() :mixed{
-    return varray[$this, 'blah'];
+    return vec[$this, 'blah'];
   }
 
   public static function intval($x) :mixed{
@@ -28,7 +28,7 @@ class C extends Base {
 }
 
 class Foo extends Base {
-  public function get() :mixed{ return varray[$this, 'blah']; }
+  public function get() :mixed{ return vec[$this, 'blah']; }
 }
 
 function invoker($x) :mixed{
@@ -50,12 +50,12 @@ function test_invocation_syntaxes() :mixed{
   $call_functor = new Functor();
   $inst = new C();
   $call_func_string = 'intval';
-  $call_static_arr = varray['C', 'intval'];
+  $call_static_arr = vec['C', 'intval'];
   $call_static_string = 'C::intval';
-  $call_instance = varray[$inst, 'inst_intval'];
-  $call_static_on_instance = varray[$inst, 'intval'];
+  $call_instance = vec[$inst, 'inst_intval'];
+  $call_static_on_instance = vec[$inst, 'intval'];
   $call_closure = function($x) {return C::intval($x);};
-  $call_invalid = varray['C', 'noSuchMethod'];
+  $call_invalid = vec['C', 'noSuchMethod'];
 
   echo "* call_user_func ********************\n";
   var_dump(call_user_func($call_func_string, $test));

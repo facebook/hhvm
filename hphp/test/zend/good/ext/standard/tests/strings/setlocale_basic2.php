@@ -39,7 +39,7 @@ function list_system_locales() :mixed{
 echo "*** Testing setlocale() with an array containing list of locales ***\n";
 
 //set of locales to be used
-$common_locales = darray[
+$common_locales = dict[
   "english_US"=> "en_US.utf8",
   "english_AU" => "en_AU.utf8",
   "korean_KR" => "ko_KR.utf8",
@@ -53,7 +53,7 @@ $common_locales = darray[
 ];
 
 //set of currency symbol according to above list of locales
-$currency_symbol = darray[
+$currency_symbol = dict[
   "en_US.utf8" => "USD",
   "en_AU.utf8" => "AUD",
   "ko_KR.utf8" => "KRW",
@@ -73,7 +73,7 @@ $all_system_locales = list_system_locales();
 // and those known to this script ( as stored $common_locales) which can be
 // given as input to setlocale(), later verify the new locale setting by
 // checking the currency setting of the system(use localconv())
-$list_of_locales = varray[];
+$list_of_locales = vec[];
 foreach($common_locales as $value) {
   if( in_array($value, $all_system_locales) ) {
     $list_of_locales[] = $value;

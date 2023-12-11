@@ -33,7 +33,7 @@ function main() :mixed{
   reflect_meth('C', 'st_variadic_some');
 
   echo "\n", '* reflect func (direct construction)', "\n";
-  reflect_param(new ReflectionParameter(varray['C', 'variadic_some'], 'v'));
+  reflect_param(new ReflectionParameter(vec['C', 'variadic_some'], 'v'));
   echo "\n", '* reflect meth (direct construction)', "\n";
   reflect_param(new ReflectionParameter('variadic_some', 'v'));
 }

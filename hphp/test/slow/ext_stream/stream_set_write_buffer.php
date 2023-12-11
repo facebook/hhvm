@@ -3,10 +3,10 @@
 
 <<__EntryPoint>>
 function main_stream_set_write_buffer() :mixed{
-$descriptorspec = darray[
-  0 => varray["pipe", "r+"],
-  1 => varray["pipe", "w"],
-  2 => varray["pipe", "a"],
+$descriptorspec = dict[
+  0 => vec["pipe", "r+"],
+  1 => vec["pipe", "w"],
+  2 => vec["pipe", "a"],
 ];
 
 $io = null;

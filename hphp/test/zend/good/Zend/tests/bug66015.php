@@ -5,7 +5,7 @@ class Test
    const SECOND = 2;
    const THIRD = 3;
 
-   protected static $array = darray[
+   protected static $array = dict[
        self::FIRST => 'first',
        self::SECOND => 'second',
        self::THIRD => 'third'

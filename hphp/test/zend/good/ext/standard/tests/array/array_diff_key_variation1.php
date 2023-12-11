@@ -19,8 +19,8 @@ class classWithoutToString
 echo "*** Testing array_diff_key() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$array2 = darray['green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan' => 8];
-$array3 = varray[1, 2, 3, 4, 5];
+$array2 = dict['green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan' => 8];
+$array3 = vec[1, 2, 3, 4, 5];
 
 
 //resource variable
@@ -32,7 +32,7 @@ hello world
 EOT;
 
 //array of values to iterate over
-$inputs = darray[
+$inputs = dict[
 
       // int data
       'int 0' => 0,

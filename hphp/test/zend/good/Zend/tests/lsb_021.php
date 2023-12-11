@@ -9,18 +9,18 @@ class B extends A {
     public static function testForward() :mixed{
         parent::test();
         call_user_func(parent::class."::test");
-        call_user_func(varray[parent::class, "test"]);
+        call_user_func(vec[parent::class, "test"]);
         self::test();
         call_user_func(self::class."::test");
-        call_user_func(varray[self::class, "test"]);
+        call_user_func(vec[self::class, "test"]);
     }
     public static function testNoForward() :mixed{
         A::test();
         call_user_func("A::test");
-        call_user_func(varray["A", "test"]);
+        call_user_func(vec["A", "test"]);
         B::test();
         call_user_func("B::test");
-        call_user_func(varray["B", "test"]);
+        call_user_func(vec["B", "test"]);
     }
 }
 

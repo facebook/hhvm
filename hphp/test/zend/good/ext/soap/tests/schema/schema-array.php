@@ -9,8 +9,8 @@ $schema = <<<EOF
   </complexType>
 EOF;
 
-test_schema($schema, 'testType', darray['testItem' => varray[17, 'foo']]);
-test_schema($schema, 'testType', darray['testItem' => vec[34, 'foo']]);
-test_schema($schema, 'testType', dict['testItem' => varray[51, 'foo']]);
+test_schema($schema, 'testType', dict['testItem' => vec[17, 'foo']]);
+test_schema($schema, 'testType', dict['testItem' => vec[34, 'foo']]);
+test_schema($schema, 'testType', dict['testItem' => vec[51, 'foo']]);
 test_schema($schema, 'testType', dict['testItem' => vec[68, 'foo']]);
 }

@@ -1,12 +1,12 @@
 <?hh
-function f($x = varray[1]) :mixed{
+function f($x = vec[1]) :mixed{
   return $x;
 }
 class C {
-  public static $y = varray[2, 3];
+  public static $y = vec[2, 3];
 }
 <<__EntryPoint>> function main(): void {
-var_dump(varray[]);
+var_dump(vec[]);
 var_dump(f());
 var_dump(C::$y);
 }

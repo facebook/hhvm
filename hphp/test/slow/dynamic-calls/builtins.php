@@ -11,21 +11,21 @@ class A extends DateTime {
 }
 
 function test() :mixed{
-  $x = 'count'; $x(varray[]);
+  $x = 'count'; $x(vec[]);
 
-  $x = 'HH\Vector::fromItems'; $x(varray[]);
-  $x = varray['HH\Vector', 'fromItems']; $x(varray[]);
-  $x = varray[new Vector, 'fromItems']; $x(varray[]);
-  $x = varray[new Vector, 'toVArray']; $x();
-  $x = 'HH\Vector'; $x::fromItems(varray[]);
-  $x = 'fromItems'; Vector::$x(varray[]);
+  $x = 'HH\Vector::fromItems'; $x(vec[]);
+  $x = vec['HH\Vector', 'fromItems']; $x(vec[]);
+  $x = vec[new Vector, 'fromItems']; $x(vec[]);
+  $x = vec[new Vector, 'toVArray']; $x();
+  $x = 'HH\Vector'; $x::fromItems(vec[]);
+  $x = 'fromItems'; Vector::$x(vec[]);
 
   $x = 'toVArray'; $obj = new Vector; $obj->$x();
   $x = 'HH\Vector'; new $x();
 
   $obj = new A; $obj->test();
 
-  $x = 'array_map'; $x($a ==> $a, varray[]);
+  $x = 'array_map'; $x($a ==> $a, vec[]);
 
   $x = null; $x?->foo();
 }

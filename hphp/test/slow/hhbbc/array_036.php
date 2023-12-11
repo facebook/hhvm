@@ -1,7 +1,7 @@
 <?hh
 
 function x() :mixed{ return 2; }
-function foo() :mixed{ return varray[x()]; }
+function foo() :mixed{ return vec[x()]; }
 function bar() :mixed{
   $z = foo();
   $z[] = 12;

@@ -33,6 +33,6 @@ var_dump(mb_detect_encoding($str, "auto"));
 var_dump(mb_detect_encoding($str, "JIS, eucjp-win, sjis-win"));
 
 /* Use array to specify encoding_list  */
-$ary = varray["ASCII", "JIS", "EUC-JP"];
+$ary = vec["ASCII", "JIS", "EUC-JP"];
 var_dump(mb_detect_encoding($str, $ary));
 }

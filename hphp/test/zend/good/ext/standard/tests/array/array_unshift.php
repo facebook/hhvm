@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$a = varray[];
+$a = vec[];
 $s = "";
 var_dump(array_unshift(inout $a, $s));
 var_dump($a);

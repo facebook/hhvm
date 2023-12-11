@@ -4,7 +4,7 @@
 class A {
   public function __construct() { echo "A::__construct\n"; }
 
-  public function __sleep() :mixed{ echo "A::__sleep\n"; return varray[]; }
+  public function __sleep() :mixed{ echo "A::__sleep\n"; return vec[]; }
   public function __wakeup() :mixed{ echo "A::__wakeup\n"; }
 
   public function __toString()[] :mixed{ echo "A::__toString\n"; return ""; }
@@ -12,7 +12,7 @@ class A {
   public function __invoke() :mixed{ echo "A::__invoke\n"; }
 
   public static function __set_state($a) :mixed{ echo "A::__set_state\n"; return new stdClass; }
-  public function __debugInfo() :mixed{ echo "A::__debugInfo\n"; return varray[]; }
+  public function __debugInfo() :mixed{ echo "A::__debugInfo\n"; return vec[]; }
 
   public function __clone() :mixed{ echo "A::__clone\n"; }
 }
@@ -42,10 +42,10 @@ function test_invoke() :mixed{
 
   $x->__invoke();
 
-  array_map($x, varray[1]);
-  Vector::fromItems(varray[true])->map($x);
-  call_user_func($x, varray[]);
-  call_user_func_array($x, varray[varray[]]);
+  array_map($x, vec[1]);
+  Vector::fromItems(vec[true])->map($x);
+  call_user_func($x, vec[]);
+  call_user_func_array($x, vec[vec[]]);
 }
 
 function test_debug() :mixed{

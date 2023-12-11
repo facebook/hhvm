@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$string_variation = varray[ "%5s", "%-5s", "%05s", "%'#5s" ];
-$strings = varray[ NULL, "abc", 'aaa' ];
+$string_variation = vec[ "%5s", "%-5s", "%05s", "%'#5s" ];
+$strings = vec[ NULL, "abc", 'aaa' ];
 
 /* creating dumping file */
 $data_file = sys_get_temp_dir().'/'.'fprintf_variation_009.phpt.txt';

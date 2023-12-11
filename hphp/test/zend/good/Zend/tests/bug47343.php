@@ -3,7 +3,7 @@ class A
 {
     public function getB()
 :mixed    {
-        $this->data = darray[];
+        $this->data = dict[];
         $this->data['foo'] = new B($this);
         $this->data['bar'] = new B($this);
         // Return either of the above

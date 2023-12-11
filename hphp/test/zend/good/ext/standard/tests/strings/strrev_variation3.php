@@ -38,7 +38,7 @@ EOD;
 $empty_str = <<<EOD
 EOD;
 
-$strings = varray[
+$strings = vec[
   $multi_line_str,
   $special_chars_str,
   $control_chars_str,

@@ -1,7 +1,7 @@
 <?hh
 
 function h() :mixed{
-  return array_filter(varray[1, 2, 3],
+  return array_filter(vec[1, 2, 3],
                       function($e) {
  return !($e & 1);
  }

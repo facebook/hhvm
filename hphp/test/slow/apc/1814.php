@@ -9,7 +9,7 @@ class A {
 
 <<__EntryPoint>>
 function main() :mixed{
-  $a = varray[varray[1, 2, 3], new A()];
+  $a = vec[vec[1, 2, 3], new A()];
   apc_store('0', $a);
   $b = __hhvm_intrinsics\apc_fetch_no_check(0);
   var_dump($b[1]->v);

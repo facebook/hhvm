@@ -7,10 +7,10 @@ var_dump(stream_context_get_params($ctx));
 var_dump(stream_context_set_option($ctx, "foo","bar","baz"));
 var_dump(stream_context_get_params($ctx));
 
-var_dump(stream_context_set_params($ctx, darray["notification" => "stream_notification_callback"]));
+var_dump(stream_context_set_params($ctx, dict["notification" => "stream_notification_callback"]));
 var_dump(stream_context_get_params($ctx));
 
-var_dump(stream_context_set_params($ctx, darray["notification" => varray["stream","notification_callback"]]));
+var_dump(stream_context_set_params($ctx, dict["notification" => vec["stream","notification_callback"]]));
 var_dump(stream_context_get_params($ctx));
 
 var_dump(stream_context_get_params($ctx));

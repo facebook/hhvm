@@ -5,7 +5,7 @@ function bar() :mixed{
 }
 
 abstract final class FooStatics {
-  public static $result_cache = darray[];
+  public static $result_cache = dict[];
 }
 
 async function foo($uid) :Awaitable<mixed>{

@@ -22,12 +22,12 @@ try { fpassthru(false); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMe
 try { fwrite(false, ''); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { fputs(false, ''); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump('fprintf', @fprintf(false, ''));
-var_dump('vfprintf', @vfprintf(false, '', varray[]));
+var_dump('vfprintf', @vfprintf(false, '', vec[]));
 try { fflush(false); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { ftruncate(false); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // NULL
-try { fputcsv(false, varray[]); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { fputcsv(false, vec[]); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { fgetcsv(false); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 $wouldblock = false;
 try { flock(false, 0, inout $wouldblock); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

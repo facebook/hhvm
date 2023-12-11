@@ -13,12 +13,12 @@ echo "*** Testing array_merge_recursive() : array with duplicate keys for \$arr1
 
 /* initialize the array having duplicate keys */
 // array with numeric keys
-$arr1_numeric_key = darray[ 1 => "one", 2 => "two", 2 => varray[1, 2], 3 => "three", 1 => varray["duplicate", 'strings']];
+$arr1_numeric_key = dict[ 1 => "one", 2 => "two", 2 => vec[1, 2], 3 => "three", 1 => vec["duplicate", 'strings']];
 // array with string keys
-$arr1_string_key = darray["str1" => "hello", "str2" => 111, "str1" => "world", "str2" => 111.111];
+$arr1_string_key = dict["str1" => "hello", "str2" => 111, "str1" => "world", "str2" => 111.111];
 
 // initialize the second argument
-$arr2 = darray[0 => "one", "str1" => "two", 1 => varray["one", "two"]];
+$arr2 = dict[0 => "one", "str1" => "two", 1 => vec["one", "two"]];
 
 echo "-- With default argument --\n";
 var_dump( array_merge_recursive($arr1_numeric_key) );

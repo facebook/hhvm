@@ -2,7 +2,7 @@
 
 function p(?AnyArray $i = null) :mixed{
   var_dump($i);
-  $i = varray[];
+  $i = vec[];
 }
 function q() :mixed{
   p(null);

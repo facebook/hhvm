@@ -2,7 +2,7 @@
 
 final class X {
   private function foo() :mixed{
-    $r = darray[1 => varray[]];
+    $r = dict[1 => vec[]];
     $r[1][] = 55;
     $r[1][] = "foo";
 

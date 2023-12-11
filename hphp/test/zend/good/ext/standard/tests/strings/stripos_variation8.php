@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing stripos() function: strings repetitive chars ***\n";
 $haystack = "aBAbaBAbaBabAbAbaBa";
-$needles = varray[
+$needles = vec[
   "aba",
   "aBA",
   "ABA",

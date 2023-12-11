@@ -5,12 +5,12 @@ function no_return() :mixed{
 }
 
 function main1() :mixed{
-  $foo = varray[1,2,3];
+  $foo = vec[1,2,3];
   no_return(...$foo);
 }
 
 function main2() :mixed{
-  $foo = varray[1,2,3];
+  $foo = vec[1,2,3];
   call_user_func_array(no_return<>, $foo);
 }
 

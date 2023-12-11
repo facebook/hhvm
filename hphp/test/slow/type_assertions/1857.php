@@ -21,7 +21,7 @@ function h($x) :mixed{
 
 <<__EntryPoint>>
 function main_1857() :mixed{
-f(varray[varray[varray[varray['hello']]]]);
-g(varray[varray[varray[varray['hello']]]]);
-h(varray[varray[varray[varray['hello']]]]);
+f(vec[vec[vec[vec['hello']]]]);
+g(vec[vec[vec[vec['hello']]]]);
+h(vec[vec[vec[vec['hello']]]]);
 }

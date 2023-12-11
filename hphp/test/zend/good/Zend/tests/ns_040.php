@@ -18,13 +18,13 @@ function f4($x=\X\A) :mixed{
 function f5($x=B) :mixed{
     echo $x;
 }
-function f6($x=varray[A]) :mixed{
+function f6($x=vec[A]) :mixed{
     echo $x[0];
 }
-function f7($x=darray["aaa"=>A]) :mixed{
+function f7($x=dict["aaa"=>A]) :mixed{
     echo $x["aaa"];
 }
-function f8($x=darray[A=>"aaa\n"]) :mixed{
+function f8($x=dict[A=>"aaa\n"]) :mixed{
     echo $x["ok\n"];
 }
 <<__EntryPoint>> function main(): void {

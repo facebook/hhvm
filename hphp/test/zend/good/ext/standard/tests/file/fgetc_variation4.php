@@ -10,7 +10,7 @@
 echo "*** Testing fgetc() : usage variations ***\n";
 echo "-- Testing fgetc() with files opened with different read modes --\n";
 
-$file_modes = varray[ "a+", "a+b", "a+t", 
+$file_modes = vec[ "a+", "a+b", "a+t", 
                      "x+", "x+b", "x+t", 
                      "w+", "w+b", "w+t" ];
 

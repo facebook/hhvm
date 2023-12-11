@@ -6,6 +6,6 @@ function f($x, $y) :mixed{
 
 <<__EntryPoint>>
 function main_1738() :mixed{
-var_dump(f(varray[varray[0, 1, 2]], 0));
-var_dump(f(varray[varray[0, 1, 2]], 1));
+var_dump(f(vec[vec[0, 1, 2]], 0));
+var_dump(f(vec[vec[0, 1, 2]], 1));
 }

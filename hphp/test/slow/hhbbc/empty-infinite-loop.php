@@ -7,7 +7,7 @@ function foo($x) :mixed{
 
 <<__EntryPoint>>
 function main_empty_infinite_loop() :mixed{
-foo(__hhvm_intrinsics\launder_value(varray[]));
+foo(__hhvm_intrinsics\launder_value(vec[]));
 
 echo "DONE\n";
 }

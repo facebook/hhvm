@@ -5,7 +5,7 @@
 }
 
 function main() :mixed{
-  $a = varray[4, 5, 6];
+  $a = vec[4, 5, 6];
   fb_setprofile(prof<>);
   test(1,2,3);
   test(...$a);

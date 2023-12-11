@@ -15,12 +15,12 @@ function sort_key_cmp(Collator $c, string $a, string $b) :mixed{
 
 <<__EntryPoint>>
 function main_get_sort_key() :mixed{
-$inputs = varray[
-  varray['1', '2', '10'],
-  varray['y', 'k', 'i'],
+$inputs = vec[
+  vec['1', '2', '10'],
+  vec['y', 'k', 'i'],
 ];
 
-$locales = varray[
+$locales = vec[
   'en_US',
   'lt_LT',
 ];
@@ -31,12 +31,12 @@ foreach ($inputs as $input) {
     usort(inout $input, function($a, $b) use ($c) {
       return sort_key_cmp($c, $a, $b);
     });
-    var_dump(darray[$locale => $input]);
+    var_dump(dict[$locale => $input]);
     $c->setAttribute(Collator::NUMERIC_COLLATION, Collator::ON);
     usort(inout $input, function($a, $b) use ($c) {
       return sort_key_cmp($c, $a, $b);
     });
-    var_dump(darray[$locale.' numeric' => $input]);
+    var_dump(dict[$locale.' numeric' => $input]);
   }
 }
 }

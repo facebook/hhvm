@@ -1,7 +1,7 @@
 <?hh
 
 function send_to_pagelet($relative_file_path, $locale) :mixed{
-  $headers = darray[];
+  $headers = dict[];
   $task = pagelet_server_task_start(
     "$relative_file_path/?pagelet=true&locale=$locale", $headers, 'dummy'
   );

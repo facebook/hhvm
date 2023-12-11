@@ -35,10 +35,10 @@ function entrypoint_typemap006(): void {
   <env:Header/>
   </env:Envelope>");
 
-  $options=darray[
+  $options=dict[
   		'uri'     => "http://schemas.nothing.com",
   		'actor'   => 'http://schemas.nothing.com',
-  		'typemap' => varray[darray["type_ns"   => "http://schemas.nothing.com",
+  		'typemap' => vec[dict["type_ns"   => "http://schemas.nothing.com",
   		                         "type_name" => "book",
   		                         "to_xml"    => book_to_xml<>]]
   		];

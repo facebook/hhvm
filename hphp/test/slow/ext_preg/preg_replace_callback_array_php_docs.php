@@ -7,7 +7,7 @@ function main_preg_replace_callback_array_php_docs() :mixed{
 $subject = 'Aaafaaba BbaCZbx';
 $count = 0;
 $ret = preg_replace_callback_array(
-    darray[
+    dict[
         '~[a]+~i' => function ($match) {},
         '~[b]+~i' => function ($match) {}
     ],

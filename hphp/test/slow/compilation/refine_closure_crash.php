@@ -3,7 +3,7 @@
 class R {
   public $dimensions;
   function __construct() {
-    $this->dimensions = darray['thing' => 'x'];
+    $this->dimensions = dict['thing' => 'x'];
   }
 }
 final class Table {
@@ -18,7 +18,7 @@ final class Tree {
   static function go($t) :mixed{
     $things = new Table();
     $samples = function($row) use($things) {
-      return darray[
+      return dict[
         'thing1_id' => $things->insert($row->dimensions['thing'], null),
         'thing2_id' => $things->insert(
           null, () ==> { return $row; })

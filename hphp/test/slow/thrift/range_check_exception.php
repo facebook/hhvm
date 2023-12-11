@@ -3,8 +3,8 @@
 class TestStruct {
   public $anI32 = null;
 
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'anI32',
       'type' => TType::I32,
     ],

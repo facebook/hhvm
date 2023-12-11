@@ -12,7 +12,7 @@
 echo "*** Testing vfprintf() : octal formats with octal values ***\n";
 
 // defining array of octal formats
-$formats = varray[
+$formats = vec[
   "%o",
   "%+o %-o %O",
   "%lo %Lo, %4o %-4o",
@@ -25,15 +25,15 @@ $formats = varray[
 
 // Arrays of octal values for the format defined in $format.
 // Each sub array contains octal values which correspond to each format string in $format
-$args_array = varray[
-  varray[00],
-  varray[-01, 01, +022],
-  varray[-020000000000, 020000000000, 017777777777, -017777777777],
-  varray[0123456, 01234567, -01234567, 01234567],
-  varray[0111, 02222, -0333333, -044444444],
-  varray[0x123b, 0xfAb, 0123, 012],
-  varray[01234, 0567, -01234, 02345],
-  varray[03, 04, 01, 02]
+$args_array = vec[
+  vec[00],
+  vec[-01, 01, +022],
+  vec[-020000000000, 020000000000, 017777777777, -017777777777],
+  vec[0123456, 01234567, -01234567, 01234567],
+  vec[0111, 02222, -0333333, -044444444],
+  vec[0x123b, 0xfAb, 0123, 012],
+  vec[01234, 0567, -01234, 02345],
+  vec[03, 04, 01, 02]
 
 ];
 

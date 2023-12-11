@@ -1,14 +1,14 @@
 <?hh
 
 function four() :mixed{ return 4; }
-function heh2() :mixed{ return darray['heh' => four()]; }
-function heh() :mixed{ return darray['foo' => heh2()]; }
-function bar() :mixed{ return darray['other' => heh()]; }
+function heh2() :mixed{ return dict['heh' => four()]; }
+function heh() :mixed{ return dict['foo' => heh2()]; }
+function bar() :mixed{ return dict['other' => heh()]; }
 function foo() :mixed{
   $x = bar();
   $x['other']['foo']['heh'] = 2;
   $x['other']['whatever'] = 2;
-  $x['yoyo'] = darray['stuff' => $x];
+  $x['yoyo'] = dict['stuff' => $x];
   return $x;
 }
 function main() :mixed{

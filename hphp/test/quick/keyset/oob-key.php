@@ -45,6 +45,6 @@ function manipulate($arr) :mixed{
     |> get($$, 'foobar')
     |> var_dump($$);
 
-  $arr = darray['foo' => keyset[$foo[1], '2', 3]];
+  $arr = dict['foo' => keyset[$foo[1], '2', 3]];
   manipulate($arr);
 }

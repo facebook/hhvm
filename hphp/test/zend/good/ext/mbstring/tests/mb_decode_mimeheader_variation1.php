@@ -46,7 +46,7 @@ EOT;
   $assoc_array = darray ['one' => 1, 'two' => 2];
 
   //array of values to iterate over
-  $inputs = darray[
+  $inputs = dict[
 
         // int data
         'int 0' => 0,
@@ -62,10 +62,10 @@ EOT;
         'float .5' => .5,
 
         // array data
-        'empty array' => varray[],
+        'empty array' => vec[],
         'int indexed array' => $index_array,
         'associative array' => $assoc_array,
-        'nested arrays' => varray['foo', $index_array, $assoc_array],
+        'nested arrays' => vec['foo', $index_array, $assoc_array],
 
         // null data
         'uppercase NULL' => NULL,

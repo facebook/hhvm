@@ -24,7 +24,7 @@ class C extends B {
 }
 
 <<__EntryPoint>> function method_exists_basic_001(): void {
-$methods = varray[
+$methods = vec[
     'inherit_pub', 'inherit_prot', 'inherit_priv',
     'inherit_static_pub', 'inherit_static_prot', 'inherit_static_priv',
     'pub', 'prot', 'priv',

@@ -73,7 +73,7 @@ function with_keyset($k1) :mixed{
   // like if an array were passed.
   //
   echo "array_key_exists: ";
-  var_dump(varray[array_key_exists('x', $k1), array_key_exists('q', $k1)]);
+  var_dump(vec[array_key_exists('x', $k1), array_key_exists('q', $k1)]);
   echo "array_keys: ";
   var_dump(array_keys($k1));
   $k = $k1;
@@ -97,7 +97,7 @@ function with_keyset($k1) :mixed{
   echo "array_sum: ";
   var_dump(array_sum($k1));
   echo "in_array: ";
-  var_dump(varray[in_array('x', $k1), in_array('q', $k1)]);
+  var_dump(vec[in_array('x', $k1), in_array('q', $k1)]);
   // list() could be tested here, but it's just weird with keysets
   echo "count: ";
   var_dump(count($k1));
@@ -106,7 +106,7 @@ function with_keyset($k1) :mixed{
   echo "array_pad 2: ";
   var_dump(array_pad($k1, 2, 'x'));
   echo "array_replace: ";
-  var_dump(array_replace($k1, darray['q' => 'r']));
+  var_dump(array_replace($k1, dict['q' => 'r']));
   echo "array_unique 1: ";
   var_dump(array_unique($k1));
   echo "array_unique 2: ";
@@ -142,16 +142,16 @@ echo "array_chunk 2: ";
 var_dump(array_chunk(keyset[1, 2, 3], 2, true /* preserve keys */));
 echo "array_column 1: ";
 var_dump(array_column(
-  darray[
-    'a' => darray['foo' => 'bar1', 'baz' => 'qux1'],
+  dict[
+    'a' => dict['foo' => 'bar1', 'baz' => 'qux1'],
     'b' => keyset['foo', 'baz'],
   ],
   'foo',
 ));
 echo "array_column 2: ";
 var_dump(array_column(
-  darray[
-    'a' => darray['foo' => 'bar1', 'baz' => 'qux1'],
+  dict[
+    'a' => dict['foo' => 'bar1', 'baz' => 'qux1'],
     'b' => keyset['foo', 'baz'],
   ],
   'foo',
@@ -166,14 +166,14 @@ with_keyset(keyset[]);
 // Recursive functions will convert the keysets they process in a "lazy"
 // fashion...
 ///
-$ar1 = darray["colors" => keyset["green", "red"], 0 => 5];
-$ar2 = darray[0 => 10, "colors" => keyset["green", "blue"]];
+$ar1 = dict["colors" => keyset["green", "red"], 0 => 5];
+$ar2 = dict[0 => 10, "colors" => keyset["green", "blue"]];
 echo "array_merge_recursive: ";
 var_dump(array_merge_recursive($ar1, $ar2));
 echo "array_replace_recursive 1: "; // The keyset remains in the return value
-var_dump(array_replace_recursive($ar1, darray["green" => "blue"]));
+var_dump(array_replace_recursive($ar1, dict["green" => "blue"]));
 echo "array_replace_recursive 2: ";
-var_dump(array_replace_recursive($ar1, darray["colors" => darray["green" => "blue"]]));
+var_dump(array_replace_recursive($ar1, dict["colors" => dict["green" => "blue"]]));
 
 // These functions should return false or null and emit a warning when passed a
 // hack array.

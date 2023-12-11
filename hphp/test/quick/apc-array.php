@@ -2,12 +2,12 @@
 
 <<__EntryPoint>>
 function main(): void {
-  $d = darray[];
+  $d = dict[];
   $d[17] = Vector { 'foo', 'bar' };
   $d[34] = 51;
   apc_add('d', $d);
 
-  $v = darray[];
+  $v = dict[];
   $v[] = Vector { 17, 34 };
   $v[] = 68;
   apc_add('v', $v);

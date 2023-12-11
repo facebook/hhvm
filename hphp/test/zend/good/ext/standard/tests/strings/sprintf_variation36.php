@@ -17,7 +17,7 @@ $resource_values = varray [
 ];
 
 // array of hexa formats
-$hexa_formats = varray[  
+$hexa_formats = vec[  
   "%x", "%xx", "%lx", 
   "%Lx", " %x", "%x ",
   "\t%x", "\n%x", "%4x",

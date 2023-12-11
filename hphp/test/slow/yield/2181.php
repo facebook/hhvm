@@ -9,7 +9,7 @@ function foo($results) :AsyncGenerator<mixed,mixed,void>{
   yield 1;
 }
 function bar() :mixed{
-  foreach (foo(varray[]) as $r) {
+  foreach (foo(vec[]) as $r) {
     var_dump($r);
   }
 }

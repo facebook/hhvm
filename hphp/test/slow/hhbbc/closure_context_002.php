@@ -1,7 +1,7 @@
 <?hh
 
 class MyClass {
-  private static $x = varray[1,2,3];
+  private static $x = vec[1,2,3];
 
   public function closure_fun() :mixed{
     $z = () ==> {

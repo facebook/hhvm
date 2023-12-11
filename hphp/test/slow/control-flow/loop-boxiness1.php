@@ -6,7 +6,7 @@ function foo(inout $arr) :mixed{
 }
 
 function main() :mixed{
-  $arr = darray[];
+  $arr = dict[];
   $arr[0] = -1;
   while (true) {
     if (foo(inout $arr)) break;

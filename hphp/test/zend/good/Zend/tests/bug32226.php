@@ -4,7 +4,7 @@ class A
 {
         public function __construct()
         {
-                set_exception_handler(varray[$this, 'EH']);
+                set_exception_handler(vec[$this, 'EH']);
 
                 throw new Exception();
         }

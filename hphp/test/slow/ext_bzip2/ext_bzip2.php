@@ -49,7 +49,7 @@ function test_bzerror() :mixed{
   $ret = bzerror($f);
   bzclose($f);
   unlink(ExtBzip2ExtBzip2Php::$tmpfile);
-  VS($ret, darray["errno" => -5,
+  VS($ret, dict["errno" => -5,
                  "errstr" => "DATA_ERROR_MAGIC"]);
 }
 

@@ -26,7 +26,7 @@ openssl_pkey_export_to_file($privkey, $key_file_name, $passphrase) || die("faile
 
 echo "Load key from file - array syntax\n";
 
-$loaded_key = openssl_pkey_get_private(varray["file://$key_file_name", $passphrase]);
+$loaded_key = openssl_pkey_get_private(vec["file://$key_file_name", $passphrase]);
 
 if ($loaded_key === false)
     die("failed to load key using array syntax");

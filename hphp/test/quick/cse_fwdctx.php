@@ -51,9 +51,9 @@ class HijriConverter {
       if ($m < 10)
         $m = "0".$m;
 
-      return varray[$y, $m, $d];
+      return vec[$y, $m, $d];
     }
-    return varray[];
+    return vec[];
   }
 }
 

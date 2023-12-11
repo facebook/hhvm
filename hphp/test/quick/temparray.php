@@ -11,7 +11,7 @@ function dynString() :mixed{
 }
 
 function dynArray($n) :mixed{
-  $a = varray[];
+  $a = vec[];
   foreach (range(0, $n) as $i) {
     $a[] = dynString();
   }

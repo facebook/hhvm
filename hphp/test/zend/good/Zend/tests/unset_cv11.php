@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$x = darray["default"=>"ok"];
+$x = dict["default"=>"ok"];
 var_dump($x);
 $cf = $x;
 unset($cf['default']);

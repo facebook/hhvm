@@ -9,7 +9,7 @@ class Foo {
   }
   public function __sleep() :mixed{
     echo "I'm going to sleep\n";
-    return varray['foo'];
+    return vec['foo'];
   }
   public function __wakeup() :mixed{
     echo "I'm waking up\n";

@@ -1,5 +1,5 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$arr = varray['a', 'b'];
+$arr = vec['a', 'b'];
 $arr();
 }

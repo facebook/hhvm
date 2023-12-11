@@ -9,7 +9,7 @@ var_dump(strlen($build) > 0);
 var_dump(
   in_array(
     $build,
-    varray['Debug', 'Release', 'Release with asserts'],
+    vec['Debug', 'Release', 'Release with asserts'],
   )
 );
 }

@@ -4,7 +4,7 @@ function f() :mixed{
  throw new Exception();
  }
 function test() :mixed{
-  $a = varray[1, f(), 2, f(), 3];
+  $a = vec[1, f(), 2, f(), 3];
   var_dump($a);
 }
 

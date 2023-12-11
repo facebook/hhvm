@@ -4,7 +4,7 @@
 <<__EntryPoint>>
 function main_1571() :mixed{
 $str = '';
-$arr1 = varray['a', 'b'];
+$arr1 = vec['a', 'b'];
 $arr2 = $arr1;
 foreach ($arr1 as $v1) {
   $str .= $v1;

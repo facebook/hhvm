@@ -5,7 +5,7 @@
 function main_glob() :mixed{
 $path = 'glob://' . __DIR__ . '/../../sample_dir/*';
 
-$iters = varray[
+$iters = vec[
   new DirectoryIterator($path),
   new FilesystemIterator($path),
   new GlobIterator($path)

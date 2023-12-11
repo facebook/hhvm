@@ -47,7 +47,7 @@ function execute($class_name, $method_name, $instance) :mixed{
 function main_get_closure_instance() :mixed{
 execute('A', 'M1', new A(true));
 execute('A', 'M2', new A(42));
-execute('A', 'M3', new A(varray[]));
+execute('A', 'M3', new A(vec[]));
 execute('A', 'M4', new A('NOT STATIC'));
 
 execute('A', 'M1', new B());

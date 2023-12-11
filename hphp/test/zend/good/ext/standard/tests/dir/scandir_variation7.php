@@ -15,7 +15,7 @@ $dir_path = sys_get_temp_dir().'/'.'scandir_variation7';
 mkdir($dir_path);
 
 // different values for directory permissions
-$permission_values = varray[
+$permission_values = vec[
 /*1*/  0477,  // owner has read only, other and group has rwx
        0677,  // owner has rw only, other and group has rwx
 

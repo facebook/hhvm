@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$list = varray[
+$list = vec[
     'aaa,bbb',
     'aaa,"bbb"',
     '"aaa","bbb"',

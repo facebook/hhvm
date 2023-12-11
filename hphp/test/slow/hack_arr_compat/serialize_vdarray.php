@@ -25,19 +25,19 @@ function test_unserialize($options) :mixed{
 function main() :mixed{
   echo "=== serialize ===\n";
   $options = dict['keepDVArrays' => true];
-  var_dump(HH\serialize_with_options(varray[], $options));
-  var_dump(HH\serialize_with_options(varray[1, 2, 3], $options));
-  var_dump(HH\serialize_with_options(darray[], $options));
-  var_dump(HH\serialize_with_options(darray[1 => 1, 2 => 2], $options));
+  var_dump(HH\serialize_with_options(vec[], $options));
+  var_dump(HH\serialize_with_options(vec[1, 2, 3], $options));
+  var_dump(HH\serialize_with_options(dict[], $options));
+  var_dump(HH\serialize_with_options(dict[1 => 1, 2 => 2], $options));
   var_dump(HH\serialize_with_options(vec[], $options));
   var_dump(HH\serialize_with_options(vec[1, 2, 3], $options));
   var_dump(HH\serialize_with_options(dict[], $options));
   var_dump(HH\serialize_with_options(dict[1 => 1, 2 => 2], $options));
 
   echo "=== unserialize ===\n";
-  test_unserialize(darray[]);
+  test_unserialize(dict[]);
 
   echo "=== unserialize (force_darrays) ===\n";
-  test_unserialize(darray['force_darrays' => true]);
+  test_unserialize(dict['force_darrays' => true]);
 
 }

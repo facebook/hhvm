@@ -7,22 +7,22 @@
 <<__EntryPoint>> function main(): void {
 $old = null;
 $first_set = null;
-pcntl_sigprocmask(SIG_SETMASK, varray[], inout $old);
+pcntl_sigprocmask(SIG_SETMASK, vec[], inout $old);
 
-pcntl_sigprocmask(SIG_BLOCK, varray[SIGCHLD,SIGTERM], inout $first_set);
+pcntl_sigprocmask(SIG_BLOCK, vec[SIGCHLD,SIGTERM], inout $first_set);
 
-pcntl_sigprocmask(SIG_BLOCK, varray[SIGINT], inout $old);
+pcntl_sigprocmask(SIG_BLOCK, vec[SIGINT], inout $old);
 var_dump(count($old) - count($first_set));
 
-pcntl_sigprocmask(SIG_UNBLOCK, varray[SIGINT], inout $old);
+pcntl_sigprocmask(SIG_UNBLOCK, vec[SIGINT], inout $old);
 var_dump(count($old) - count($first_set));
 
-pcntl_sigprocmask(SIG_SETMASK, varray[SIGINT], inout $old);
+pcntl_sigprocmask(SIG_SETMASK, vec[SIGINT], inout $old);
 var_dump(count($old) - count($first_set));
 
-pcntl_sigprocmask(SIG_SETMASK, varray[], inout $old);
+pcntl_sigprocmask(SIG_SETMASK, vec[], inout $old);
 var_dump(count($old));
 
-pcntl_sigprocmask(SIG_SETMASK, varray[], inout $old);
+pcntl_sigprocmask(SIG_SETMASK, vec[], inout $old);
 var_dump(count($old));
 }

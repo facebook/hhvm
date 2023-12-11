@@ -3,12 +3,12 @@
 
 <<__EntryPoint>>
 function main_dup_array() :mixed{
-$nested = darray[
-  'key1' => darray[
+$nested = dict[
+  'key1' => dict[
     'subkey1' => 'subval1',
     'subkey2' => 'subval2'
   ],
-  'key2' => darray[
+  'key2' => dict[
     'subkey1' => 'subval1',
     'subkey2' => 'subval2'
   ],
@@ -17,7 +17,7 @@ $nested = darray[
 echo http_build_query($nested), "\n";
 
 $subarr = Map {'subkey1'=>'subval1', 'subkey2'=>'subval2'};
-$nested = darray['key1'=>$subarr, 'key2'=>$subarr];
+$nested = dict['key1'=>$subarr, 'key2'=>$subarr];
 
 echo http_build_query($nested), "\n";
 }

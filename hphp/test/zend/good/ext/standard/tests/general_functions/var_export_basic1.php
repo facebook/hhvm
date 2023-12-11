@@ -7,7 +7,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing var_export() with integer values ***\n";
 // different integer vlaues
-$valid_ints = darray[
+$valid_ints = dict[
                 '0' => '0',
                 '1' => '1',
                 '-1' => '-1',

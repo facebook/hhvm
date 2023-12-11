@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$server = new SoapServer(NULL, darray['uri'=>"http://testuri.org"]);
+$server = new SoapServer(NULL, dict['uri'=>"http://testuri.org"]);
 $server->setClass("SoapServerActions");
 
 $HTTP_RAW_POST_DATA = <<<EOF

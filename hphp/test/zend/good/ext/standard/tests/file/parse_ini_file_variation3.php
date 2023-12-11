@@ -9,7 +9,7 @@ echo "*** Testing parse_ini_file() : variation ***\n";
 chdir(sys_get_temp_dir());
 
 $iniFile = "php.ini";
-$newdirs = varray['dir1', 'dir2', 'dir3'];
+$newdirs = vec['dir1', 'dir2', 'dir3'];
 $pathSep = ":";
 $newIncludePath = "";
 if(substr(PHP_OS, 0, 3) == 'WIN' ) {

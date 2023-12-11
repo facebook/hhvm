@@ -9,5 +9,5 @@ $a = function ($v) {
 ;
  echo (string)$a(4)."
 ";
- echo call_user_func_array($a, varray[4]);
+ echo call_user_func_array($a, vec[4]);
 }

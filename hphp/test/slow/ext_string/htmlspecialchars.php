@@ -35,15 +35,15 @@ function test_htmlspecialchars() :mixed{
   VS(fb_htmlspecialchars($zfoo, ENT_COMPAT), $zfoo);
 
   VS(fb_htmlspecialchars("abcdef'\"{}@gz", ENT_QUOTES,
-                           "", varray["z"]),
+                           "", vec["z"]),
      "abcdef&#039;&quot;&#123;&#125;&#064;g&#122;");
 
   VS(fb_htmlspecialchars("abcdef'\"".u('\u00a1\uabcd'), ENT_FB_UTF8,
-                           "", varray["d"]),
+                           "", vec["d"]),
      "abc&#100;ef&#039;&quot;&#xa1;&#xabcd;");
 
   VS(fb_htmlspecialchars("abcdef'\"".u('\u00a1\uabcd'), ENT_FB_UTF8_ONLY,
-                           "", varray["d"]),
+                           "", vec["d"]),
      "abcdef'\"&#xa1;&#xabcd;");
 
   // The rest here expects RuntimeOption::Utf8izeReplace = true;
@@ -61,10 +61,10 @@ function test_htmlspecialchars() :mixed{
   fb_utf8ize(inout $tmp);
   $sanitized = $tmp;
 
-  VS(fb_htmlspecialchars($input, ENT_QUOTES, "UtF-8", varray[]),
+  VS(fb_htmlspecialchars($input, ENT_QUOTES, "UtF-8", vec[]),
      $sanitized);
 
-  VS(fb_htmlspecialchars($input, ENT_FB_UTF8, "utf-8", varray[]),
+  VS(fb_htmlspecialchars($input, ENT_FB_UTF8, "utf-8", vec[]),
      '&#xa1;&#xfffd;A'.
      '&#x561;&#xfffd;&#xfffd;'.
      '&#x3862;&#xfffd;&#xfffd;'.
@@ -74,7 +74,7 @@ function test_htmlspecialchars() :mixed{
      '&#xfffd;'.
      '&#xfffd;');
 
-  VS(fb_htmlspecialchars($sanitized, ENT_QUOTES, "", varray[]),
+  VS(fb_htmlspecialchars($sanitized, ENT_QUOTES, "", vec[]),
      $sanitized);
 
   VS(fb_htmlspecialchars($zfoo, ENT_COMPAT, "UTF-8"), u('\ufffd')."foo");

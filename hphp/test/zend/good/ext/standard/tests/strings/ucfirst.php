@@ -3,7 +3,7 @@ class mystring { function __toString() :mixed{ return "hello, world"; } }
 <<__EntryPoint>> function main(): void {
 /* Make a string's first character uppercase */
 echo "#### Basic and Various operations ####\n";
-$str_array = varray[
+$str_array = vec[
   "testing ucfirst.",
   "1.testing ucfirst",
   "hELLO wORLD",
@@ -45,7 +45,7 @@ foreach ($str_array as $string) {
 echo "\n#### Testing Miscelleneous inputs ####\n";
 
 echo "--- Testing arrays ---";
-$str_arr = varray["hello", "?world", "!$%**()%**[][[[&@#~!", varray[]];
+$str_arr = vec["hello", "?world", "!$%**()%**[][[[&@#~!", vec[]];
 try { var_dump( ucfirst($str_arr) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n--- Testing objects ---\n";

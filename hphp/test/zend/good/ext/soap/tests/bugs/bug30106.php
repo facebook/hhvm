@@ -1,13 +1,13 @@
 <?hh
 
 function getContinentList() :mixed{
-	return darray["getContinentListResult"=>darray[
+	return dict["getContinentListResult"=>dict[
 	  "schema"=>"<xsd:schema><element name=\"test\" type=\"xsd:string\"/></xsd:schema>",
 	  "any"=>"<test>Hello World!</test><test>Bye World!</test>"]];
 }
 
 class LocalSoapClient extends SoapClient {
-  function __construct($wsdl, $options=darray[]) {
+  function __construct($wsdl, $options=dict[]) {
     parent::__construct($wsdl, $options);
     $this->server = new SoapServer($wsdl, $options);
 		$this->server->addFunction("getContinentList");
@@ -32,7 +32,7 @@ function main_entry(): void {
   var_dump($client->__getTypes());
   $x = $client->__soapcall(
     'getContinentList',
-    varray[darray["AFFILIATE_ID"=>1,"PASSWORD"=>"x"]],
+    vec[dict["AFFILIATE_ID"=>1,"PASSWORD"=>"x"]],
   );
   var_dump($x);
 }

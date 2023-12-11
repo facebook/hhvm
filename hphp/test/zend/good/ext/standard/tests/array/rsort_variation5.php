@@ -12,13 +12,13 @@ echo "*** Testing rsort() : variation ***\n";
 
 $various_arrays = varray [
 // group of escape sequences
-varray["\a", "\cx", "\e", "\f", "\n", "\t", "\xhh", "\ddd", "\v"],
+vec["\a", "\cx", "\e", "\f", "\n", "\t", "\xhh", "\ddd", "\v"],
 
 // array contains combination of capital/small letters
-varray["lemoN", "Orange", "banana", "apple", "Test", "TTTT", "ttt", "ww", "x", "X", "oraNGe", "BANANA"]
+vec["lemoN", "Orange", "banana", "apple", "Test", "TTTT", "ttt", "ww", "x", "X", "oraNGe", "BANANA"]
 ];
 
-$flags = darray["SORT_REGULAR" => SORT_REGULAR, "SORT_STRING" => SORT_STRING];
+$flags = dict["SORT_REGULAR" => SORT_REGULAR, "SORT_STRING" => SORT_STRING];
 
 $count = 1;
 // loop through to test rsort() with different arrays

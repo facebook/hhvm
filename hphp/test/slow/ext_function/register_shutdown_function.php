@@ -18,7 +18,7 @@ function onShutdownRegisterShutdown() :mixed{
 
 function onShutdown() :mixed{
   echo "in register\n";
-  register_shutdown_function(varray[new Fooz, 'baz']);
+  register_shutdown_function(vec[new Fooz, 'baz']);
 }
 
 function onShutdown2() :mixed{

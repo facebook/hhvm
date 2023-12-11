@@ -6,7 +6,7 @@ function test($magick) :mixed{
   }
 }
 <<__EntryPoint>> function main(): void {
-$img = varray[
+$img = vec[
   'magick:logo',
   __DIR__.'/facebook.png',
   __DIR__.'/draw_example.png',

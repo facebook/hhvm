@@ -15,7 +15,7 @@ function buz($x,$y) :mixed{
 
 <<__EntryPoint>>
 function main_499() :mixed{
-$a = varray[1,2,3,4,5];
+$a = vec[1,2,3,4,5];
 $s = buz('hello',1);
 foreach ($a as $s[3]) {
   var_dump($s);

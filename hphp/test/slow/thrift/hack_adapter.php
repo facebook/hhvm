@@ -1,8 +1,8 @@
 <?hh
 
 class ThriftStruct {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'int_value',
       'type' => \TType::I32,
     ],
@@ -19,8 +19,8 @@ class ThriftStruct {
 }
 
 class HackStruct {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'str_value',
       'type' => \TType::STRING,
     ],
@@ -56,30 +56,30 @@ class StringToIntStructAdapter {
 }
 
 class OuterStruct {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'value',
       'type' => \TType::I32,
       'adapter' => StringToIntPrimitiveAdapter::class,
     ],
-    2 => darray[
+    2 => dict[
       'var' => 'nested',
       'type' => \TType::STRUCT,
       'class' => ThriftStruct::class,
       'adapter' => StringToIntStructAdapter::class,
     ],
-    3 => darray[
+    3 => dict[
       'var' => 'vec',
       'type' => \TType::LST,
       'etype' => \TType::STRUCT,
-      'elem' => darray[
+      'elem' => dict[
         'type' => \TType::STRUCT,
         'class' => ThriftStruct::class,
         'adapter' => StringToIntStructAdapter::class
       ],
       'format' => 'harray',
     ],
-    4 => darray[
+    4 => dict[
       'var' => 'unset',
       'type' => \TType::STRUCT,
       'class' => ThriftStruct::class,
@@ -101,27 +101,27 @@ class OuterStruct {
 // It's used to "peek" at the actual serialized data without adapters getting
 // in the way.
 class OuterStructNoAdapter {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'value',
       'type' => \TType::I32,
     ],
-    2 => darray[
+    2 => dict[
       'var' => 'nested',
       'type' => \TType::STRUCT,
       'class' => ThriftStruct::class
     ],
-    3 => darray[
+    3 => dict[
       'var' => 'vec',
       'type' => \TType::LST,
       'etype' => \TType::STRUCT,
-      'elem' => darray[
+      'elem' => dict[
         'type' => \TType::STRUCT,
         'class' => ThriftStruct::class,
       ],
       'format' => 'harray',
     ],
-    4 => darray[
+    4 => dict[
       'var' => 'unset',
       'type' => \TType::STRUCT,
       'class' => ThriftStruct::class

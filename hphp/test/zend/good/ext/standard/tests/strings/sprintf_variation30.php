@@ -17,7 +17,7 @@ $resource_values = varray [
 ];
 
 // array of octal formats
-$octal_formats = varray[ 
+$octal_formats = vec[ 
   "%o", "%ho", "%lo", 
   "%Lo", " %o", "%o ",                        
   "\t%o", "\n%o", "%4o",

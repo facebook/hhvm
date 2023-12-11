@@ -63,14 +63,14 @@ function entrypoint_ext_pdo(): void {
   try {
     $dbh = new PDO($source);
     VERIFY($dbh != null);
-    $stmt = $dbh->prepare("select * from foo", darray[]);
+    $stmt = $dbh->prepare("select * from foo", dict[]);
     VERIFY($stmt != false);
-    VERIFY($stmt->execute(darray[]));
+    VERIFY($stmt->execute(dict[]));
 
     $rs = $stmt->fetch(PDO::FETCH_ASSOC);
-    VS($rs, darray["bar" => "ABC"]);
+    VS($rs, dict["bar" => "ABC"]);
     $rs = $stmt->fetch(PDO::FETCH_ASSOC);
-    VS($rs, darray["bar" => "DEF"]);
+    VS($rs, dict["bar" => "DEF"]);
 
   } catch (Exception $e) {
     VS($e, null);
@@ -110,8 +110,8 @@ function entrypoint_ext_pdo(): void {
     }
 
     // Test FETCH_FUNC
-    $stmt = $dbh->prepare("select * from foo", darray[]);
-    $stmt->execute(darray[]);
+    $stmt = $dbh->prepare("select * from foo", dict[]);
+    $stmt->execute(dict[]);
     var_dump($stmt->fetchAll(PDO::FETCH_FUNC, 'on_fetch'));
 
     //Test fetching into an object
@@ -134,7 +134,7 @@ function entrypoint_ext_pdo(): void {
 
     //Test setAttribute with ATTR_STATEMENT_CLASS. Set it to our own class
     var_dump(
-      $dbh->setAttribute(PDO::ATTR_STATEMENT_CLASS, varray['MyStatement']),
+      $dbh->setAttribute(PDO::ATTR_STATEMENT_CLASS, vec['MyStatement']),
     );
     $vstmt = $dbh->query("select * from foo", PDO::FETCH_COLUMN, 0);
     var_dump(get_class($vstmt));
@@ -143,7 +143,7 @@ function entrypoint_ext_pdo(): void {
     //Then reset to PDOStatement. Zend allows the class name to be explicitly set
     //to PDOStatement.
     var_dump(
-      $dbh->setAttribute(PDO::ATTR_STATEMENT_CLASS, varray['PDOStatement']),
+      $dbh->setAttribute(PDO::ATTR_STATEMENT_CLASS, vec['PDOStatement']),
     );
     $vstmt = $dbh->query("select * from foo", PDO::FETCH_COLUMN, 0);
     var_dump(get_class($vstmt));

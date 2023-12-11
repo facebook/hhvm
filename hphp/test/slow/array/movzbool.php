@@ -1,8 +1,8 @@
 <?hh
 
 function foo() :mixed{
-  if (mt_rand() == 0) return varray[];
-  $z = varray[true, mt_rand() ? true : false];
+  if (mt_rand() == 0) return vec[];
+  $z = vec[true, mt_rand() ? true : false];
   return $z;
 }
 

@@ -21,13 +21,13 @@ class book{
 <<__EntryPoint>>
 function main_entry(): void {
 
-  $options=darray[
+  $options=dict[
   		'actor' =>'http://schema.nothing.com',
-  		'classmap' => darray['book'=>'book', 'wsdltype2'=>'classname2']
+  		'classmap' => dict['book'=>'book', 'wsdltype2'=>'classname2']
   		];
 
   $client = new TestSoapClient(dirname(__FILE__)."/classmap.wsdl",$options);
-  $ret = $client->__soapcall('dotest2', varray["???"]);
+  $ret = $client->__soapcall('dotest2', vec["???"]);
   var_dump($ret);
   echo "ok\n";
 }

@@ -8,7 +8,7 @@ function nfoo(?int $a): ?bool {}
 function main_reflection_type_basic_explicit_php7() :mixed{
 $rp = null;
 
-foreach(varray['nfoo','foo'] as $fName) {
+foreach(vec['nfoo','foo'] as $fName) {
   $rf = new ReflectionFunction($fName);
 
   echo "--Function $fName - Parameter--\n\n";

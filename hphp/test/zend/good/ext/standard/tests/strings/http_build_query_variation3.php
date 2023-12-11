@@ -4,7 +4,7 @@
  * Source code: ext/standard/http.c
 */
 <<__EntryPoint>> function main(): void {
-$oDimensional = darray[
+$oDimensional = dict[
   "name" => "main page",
   "sort" => "desc,admin",
   "equation" => "10 + 10 - 5"

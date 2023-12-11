@@ -12,8 +12,8 @@ class A {
 
 function bar() :mixed{
   $a = new A();
-  $a->bar(1, "str", varray[1, 2, 3]);
-  hphp_invoke_method($a, "A", "bar", varray[1, 2]);
+  $a->bar(1, "str", vec[1, 2, 3]);
+  hphp_invoke_method($a, "A", "bar", vec[1, 2]);
   hphp_invoke_method($a, "A", "bar", Map {'a' => 1, 'b' => 2});
 }
 function foo() :mixed{

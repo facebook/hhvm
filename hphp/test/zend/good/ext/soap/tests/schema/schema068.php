@@ -7,6 +7,6 @@ $schema = <<<EOF
         <attribute name="int" type="int" fixed="5"/>
     </complexType>
 EOF;
-test_schema($schema,'testType', darray["str"=>"str","int"=>5]);
-test_schema($schema,'testType', darray["str"=>"str","int"=>4]);
+test_schema($schema,'testType', dict["str"=>"str","int"=>5]);
+test_schema($schema,'testType', dict["str"=>"str","int"=>4]);
 }

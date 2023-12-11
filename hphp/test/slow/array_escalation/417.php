@@ -1,7 +1,7 @@
 <?hh
 
 function test() :mixed{
-  $a = varray[];
+  $a = vec[];
   for ($i = 0;
  $i < 17;
  $i++) {

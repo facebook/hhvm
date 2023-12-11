@@ -1,8 +1,8 @@
 <?hh
 
 class InnerStruct {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'value',
       'type' => \TType::I16,
     ],
@@ -16,24 +16,24 @@ class InnerStruct {
 }
 
 class OldStruct {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'field1',
       'type' => TType::LST,
       'etype' => TType::LST,
-      'elem' => darray[
+      'elem' => dict[
         'type' => TType::LST,
         'etype' => TType::STRING,
-        'elem' => darray[
+        'elem' => dict[
           'type' => TType::STRING,
         ],
       ],
     ],
-    2 => darray[
+    2 => dict[
       'var' => 'field2',
       'type' => TType::LST,
       'etype' => TType::STRUCT,
-      'elem' => darray[
+      'elem' => dict[
         'type' => TType::STRUCT,
         'class' => 'InnerStruct',
       ],
@@ -49,20 +49,20 @@ class OldStruct {
 }
 
 class NewStruct {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'field1',
       'type' => TType::LST,
       'etype' => TType::I16,
-      'elem' => darray[
+      'elem' => dict[
         'type' => TType::I16,
       ],
     ],
-    2 => darray[
+    2 => dict[
       'var' => 'field2',
       'type' => TType::LST,
       'etype' => TType::I16,
-      'elem' => darray[
+      'elem' => dict[
         'type' => TType::I16,
       ],
     ],

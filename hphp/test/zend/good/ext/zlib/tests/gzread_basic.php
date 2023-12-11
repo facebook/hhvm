@@ -4,7 +4,7 @@
 <<__EntryPoint>> function main(): void {
 $f = dirname(__FILE__)."/004.txt.gz";
 $h = gzopen($f, 'r');
-$lengths = varray[10, 14, 7, 99, 2000];
+$lengths = vec[10, 14, 7, 99, 2000];
 
 foreach ($lengths as $length) {
    var_dump(gzread( $h, $length ) );

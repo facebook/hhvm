@@ -10,8 +10,8 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_merge() : usage variations ***\n";
 
-$arr1 = varray['zero', 'one', 'two', varray[0]];
-$arr2 = varray[1, 2, 3];
+$arr1 = vec['zero', 'one', 'two', vec[0]];
+$arr2 = vec[1, 2, 3];
 
 echo "\n-- Merge a two-dimensional and a one-dimensional array --\n";
 var_dump(array_merge($arr1, $arr2));

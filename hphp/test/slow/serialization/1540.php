@@ -3,7 +3,7 @@
 class A implements Serializable {
   public $__foo = true;
   public function serialize() :mixed{
-    return serialize(darray['a' => 'apple', 'b' => 'banana']);
+    return serialize(dict['a' => 'apple', 'b' => 'banana']);
   }
   public function unserialize($serialized) :mixed{
     $props = unserialize($serialized);

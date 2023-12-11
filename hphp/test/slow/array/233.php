@@ -2,7 +2,7 @@
 
 abstract final class PushStackStatics {
   public static $index = 0;
-  public static $stack = varray[];
+  public static $stack = vec[];
 }
 
 function push_stack():mixed{
@@ -28,6 +28,6 @@ pop_stack();
 push_stack();
 pop_stack();
 push_stack();
-$info = varray[count(PushStackStatics::$stack), PushStackStatics::$stack[count(PushStackStatics::$stack)-1], PushStackStatics::$stack];
+$info = vec[count(PushStackStatics::$stack), PushStackStatics::$stack[count(PushStackStatics::$stack)-1], PushStackStatics::$stack];
 var_dump($info);
 }

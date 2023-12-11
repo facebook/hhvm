@@ -11,7 +11,7 @@ class C extends B {
     echo "C::foo\n";
   }
   public static function test() :mixed{
-    $arr = varray['foo'];
+    $arr = vec['foo'];
     self::foo();
     parent::foo();
     self::$arr[0]();

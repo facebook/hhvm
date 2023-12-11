@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-	$services = varray['http', 'ftp', 'ssh', 'telnet', 'imap', 'smtp', 'nicname', 'gopher', 'finger', 'pop3', 'www'];
+	$services = vec['http', 'ftp', 'ssh', 'telnet', 'imap', 'smtp', 'nicname', 'gopher', 'finger', 'pop3', 'www'];
 
 	foreach ($services as $service) {
     		$port = getservbyname($service, 'tcp');

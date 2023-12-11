@@ -12,7 +12,7 @@ function reverse(darray $array) :AsyncGenerator<mixed,mixed,void>{
   }
 }
 <<__EntryPoint>> function main(): void {
-  $array = darray['foo' => 'bar', 'bar' => 'foo'];
+  $array = dict['foo' => 'bar', 'bar' => 'foo'];
   foreach (reverse($array) as $key => $value) {
     echo $key, ' => ', $value, "\n";
   }

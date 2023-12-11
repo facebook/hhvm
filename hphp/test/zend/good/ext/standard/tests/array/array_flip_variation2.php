@@ -23,7 +23,7 @@ multiline heredoc with 123 and
 speci@! ch@r$...checking\nand\talso
 EOT7;
 
-$input = darray[
+$input = dict[
   // default key
   0 => 'one',  //expected: default key 0, value will be replaced by 'bool_key4'
 

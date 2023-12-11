@@ -23,8 +23,8 @@ function test_fn($name, $base, $with_error) :mixed{
 function test_preg_grep() :mixed{
   test_fn(
     'preg_grep',
-    $p ==> preg_grep($p, varray[TINPUT]),
-    ($p, inout $e) ==> preg_grep_with_error($p, varray[TINPUT], inout $e),
+    $p ==> preg_grep($p, vec[TINPUT]),
+    ($p, inout $e) ==> preg_grep_with_error($p, vec[TINPUT], inout $e),
   );
 }
 
@@ -117,13 +117,13 @@ function test_preg_replace_callback_array() :mixed{
   test_fn(
     'preg_replace_callback_array',
     $p ==> preg_replace_callback_array(
-      darray[$p => $x ==> $x],
+      dict[$p => $x ==> $x],
       TINPUT,
       -1,
       inout $_c,
     ),
     ($p, inout $e) ==> preg_replace_callback_array_with_error(
-      darray[$p => $x ==> $x],
+      dict[$p => $x ==> $x],
       TINPUT,
       -1,
       inout $_c,

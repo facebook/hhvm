@@ -5,6 +5,6 @@
 function main_curl_setopt_array_typehint_notices() :mixed{
   $handle = curl_init();
   echo "before\n";
-  curl_setopt_array($handle, darray[CURLOPT_URL => 'http://localhost']);
+  curl_setopt_array($handle, dict[CURLOPT_URL => 'http://localhost']);
   echo "after\n";
 }

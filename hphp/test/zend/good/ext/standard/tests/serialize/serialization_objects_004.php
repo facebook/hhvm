@@ -11,22 +11,22 @@
  */
 <<__EntryPoint>> function main(): void {
 $x = new stdClass;
-var_dump(serialize(varray[$x, $x]));
+var_dump(serialize(vec[$x, $x]));
 
 $x = 1;
-var_dump(serialize(varray[$x, $x]));
+var_dump(serialize(vec[$x, $x]));
 
 $x = "a";
-var_dump(serialize(varray[$x, $x]));
+var_dump(serialize(vec[$x, $x]));
 
 $x = true;
-var_dump(serialize(varray[$x, $x]));
+var_dump(serialize(vec[$x, $x]));
 
 $x = null;
-var_dump(serialize(varray[$x, $x]));
+var_dump(serialize(vec[$x, $x]));
 
-$x = varray[];
-var_dump(serialize(varray[$x, $x]));
+$x = vec[];
+var_dump(serialize(vec[$x, $x]));
 
 echo "Done";
 }

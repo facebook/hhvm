@@ -4,7 +4,7 @@ class X {
 }
 
 function test($a) :mixed{
-  apc_store('foo', darray[1 => $a]);
+  apc_store('foo', dict[1 => $a]);
   $a = __hhvm_intrinsics\apc_fetch_no_check('foo');
   $a[1] = 'bar';
   var_dump($a);

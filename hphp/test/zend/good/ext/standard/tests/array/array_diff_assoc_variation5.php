@@ -10,10 +10,10 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff_assoc() : usage variations ***\n";
-$arr_default_int = varray[1, 2, 3, 'a'];
-$arr_float = darray[0 => 1.00, 1 => 2.00, 2 => 3.00, 3 => 'b'];
-$arr_string = varray['1', '2', '3', 'c'];
-$arr_string_float = darray['0' => '1.00', '1.00' => '2.00', '2.00' => '3.00', 0 => 'd'];
+$arr_default_int = vec[1, 2, 3, 'a'];
+$arr_float = dict[0 => 1.00, 1 => 2.00, 2 => 3.00, 3 => 'b'];
+$arr_string = vec['1', '2', '3', 'c'];
+$arr_string_float = dict['0' => '1.00', '1.00' => '2.00', '2.00' => '3.00', 0 => 'd'];
 
 echo "-- Result of comparing integers and floating point numbers: --\n";
 var_dump(array_diff_assoc($arr_default_int, $arr_float));

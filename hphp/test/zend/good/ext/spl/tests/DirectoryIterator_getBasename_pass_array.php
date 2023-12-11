@@ -7,7 +7,7 @@
   while(!$dir->isFile()) {
     $dir->next();
   }
-  try { echo $dir->getBasename(varray[]); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { echo $dir->getBasename(vec[]); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
   unlink($file);
 }

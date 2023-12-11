@@ -11,8 +11,8 @@ echo "*** Testing xml_parse_into_struct() : error conditions ***\n";
 echo "\n-- Testing xml_parse_into_struct() function with more than expected no. of arguments --\n";
 
 $data = 'string_val';
-$struct = varray[1, 2];
-$index = varray[1, 2];
+$struct = vec[1, 2];
+$index = vec[1, 2];
 $extra_arg = 10;
 try { var_dump( xml_parse_into_struct(null, $data, inout $struct, inout $index, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 

@@ -12,7 +12,7 @@ class Foo {
 
 function test_invoke($ref, $instance) :mixed{
   try {
-    $ref->invokeArgs($instance, varray["SUCCESS"]);
+    $ref->invokeArgs($instance, vec["SUCCESS"]);
   } catch (Exception $e) {
     echo get_class($e) . ': ' . $e->getMessage() . "\n";
   }

@@ -28,7 +28,7 @@ $various_arrays = varray [
         ]
 ];
 
-$flags = darray["SORT_REGULAR" => SORT_REGULAR, "SORT_STRING" => SORT_STRING];
+$flags = dict["SORT_REGULAR" => SORT_REGULAR, "SORT_STRING" => SORT_STRING];
 
 $count = 1;
 echo "\n-- Testing asort() by supplying various string arrays --\n";

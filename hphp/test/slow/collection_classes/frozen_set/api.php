@@ -133,13 +133,13 @@ function static_methods() :mixed{
 
   echo "\nfromKeysOf...\n";
   show_elems(ImmSet::fromKeysOf(Vector {1, 2, 3}));
-  show_elems(ImmSet::fromKeysOf(varray['a', 'b', 'c']));
+  show_elems(ImmSet::fromKeysOf(vec['a', 'b', 'c']));
   show_elems(ImmSet::fromKeysOf(Map {'a' => 1, 'b' => 2}));
-  show_elems(ImmSet::fromKeysOf(darray['a' => 1, 'b' => 2]));
+  show_elems(ImmSet::fromKeysOf(dict['a' => 1, 'b' => 2]));
   show_elems(ImmSet::fromKeysOf(Set {4, 5, 6}));
 
   echo "\nfromArrays...\n";
-  show_elems(ImmSet::fromArrays(varray[], varray[1, 2, 3], varray[4, 5, 6]));
+  show_elems(ImmSet::fromArrays(vec[], vec[1, 2, 3], vec[4, 5, 6]));
   show_elems(ImmSet::fromArrays(vec[], vec[1, 2, 3], vec[4, 5, 6]));
 }
 
@@ -149,7 +149,7 @@ function constructors() :mixed{
   show_elems(new ImmSet(ImmVector {1, 2, 3}));
   show_elems(new ImmSet(Set {1, 2, 3}));
   show_elems(new ImmSet(Map {0 => 1, 10 => 2, 40 => 3}));
-  show_elems(new ImmSet(varray[1, 2, 3]));
+  show_elems(new ImmSet(vec[1, 2, 3]));
 }
 
 function main() :mixed{

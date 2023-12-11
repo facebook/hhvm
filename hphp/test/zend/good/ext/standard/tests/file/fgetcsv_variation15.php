@@ -12,11 +12,11 @@ echo "*** Testing fgetcsv() : with default enclosure ***\n";
    1st element is delimiter & 2nd element is csv fields 
 */
 $csv_lists = varray [
-  varray[',', 'water,fruit'],
-  varray[' ', 'water fruit'],
-  varray[' ', '"water" "fruit"'],
-  varray['\\', 'water\\"fruit"\\"air"'],
-  varray['\\', '"water"\\"fruit"\\"""'],
+  vec[',', 'water,fruit'],
+  vec[' ', 'water fruit'],
+  vec[' ', '"water" "fruit"'],
+  vec['\\', 'water\\"fruit"\\"air"'],
+  vec['\\', '"water"\\"fruit"\\"""'],
 ];
 
 $filename = sys_get_temp_dir().'/'.'fgetcsv_variation15.tmp';

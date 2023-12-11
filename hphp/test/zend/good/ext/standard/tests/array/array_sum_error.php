@@ -12,7 +12,7 @@ try { var_dump( array_sum() ); } catch (Exception $e) { echo "\n".'Warning: '.$e
 
 // One more than the expected number of arguments
 echo "-- Testing array_sum() function with more than expected no. of arguments --\n";
-$input = varray[1, 2, 3, 4];
+$input = vec[1, 2, 3, 4];
 $extra_arg = 10;
 try { var_dump( array_sum($input, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 

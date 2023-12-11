@@ -10,7 +10,7 @@ XML;
 
 $writer = new SimpleXMLElement( $template );
 
-$messages = darray[
+$messages = dict[
   'key' => 'value',
   'anotherkey' => 'anothervalue',
 ];

@@ -33,14 +33,14 @@ function test_get_meta_tags() :mixed{
 }
 
 function test_http_build_query() :mixed{
-  $data = darray["foo" => "bar", "baz" => "boom", "cow" => "milk",
+  $data = dict["foo" => "bar", "baz" => "boom", "cow" => "milk",
                            "php" => "hypertext processor"];
   VS(http_build_query($data),
      "foo=bar&baz=boom&cow=milk&php=hypertext+processor");
   VS(http_build_query($data, "", "&amp;"),
      "foo=bar&amp;baz=boom&amp;cow=milk&amp;php=hypertext+processor");
 
-  $data = darray[
+  $data = dict[
     0 => 'foo',
     1 => 'bar',
     2 => 'baz',
@@ -54,15 +54,15 @@ function test_http_build_query() :mixed{
      "myvar_0=foo&myvar_1=bar&myvar_2=baz&myvar_3=boom&cow=milk&".
      "php=hypertext+processor");
 
-  $data = darray[
-    'user' => darray['name' => 'Bob Smith',
+  $data = dict[
+    'user' => dict['name' => 'Bob Smith',
                     'age' => 47,
                     'sex' => 'M',
                     'dob' => '5/12/1956'],
-    'pastimes' => varray['golf', 'opera', 'poker', 'rap'],
-    'children' => darray['bobby' => darray['age' => 12,
+    'pastimes' => vec['golf', 'opera', 'poker', 'rap'],
+    'children' => dict['bobby' => dict['age' => 12,
                                          'sex' => 'M'],
-                        'sally' => darray['age' => 8,
+                        'sally' => dict['age' => 8,
                                          'sex' => 'F']],
     0 => 'CEO'
   ];

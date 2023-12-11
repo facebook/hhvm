@@ -54,7 +54,7 @@ function main_entry(): void {
   //*/
 
   ///*
-  $values = varray[0, 1, 2, 3, 4, 5, 6];
+  $values = vec[0, 1, 2, 3, 4, 5, 6];
   $i = 3;
   echo "\n".'initially, $i = '.$i."\n";
   $values[$i] = $values[++$i];        // prefix ++
@@ -65,7 +65,7 @@ function main_entry(): void {
   }
   echo "\n";
 
-  $values = varray[0, 1, 2, 3, 4, 5, 6];
+  $values = vec[0, 1, 2, 3, 4, 5, 6];
   $i = 3;
   echo "\n".'initially, $i = '.$i."\n";
   $values[$i] = $values[$i++];        // postfix ++
@@ -78,7 +78,7 @@ function main_entry(): void {
   //*/
 
   ///*
-  $values = varray[0, 1, 2, 3, 4, 5, 6];
+  $values = vec[0, 1, 2, 3, 4, 5, 6];
   $i = 3;
   echo "\n".'initially, $i = '.$i."\n";
   $values[$i] = f($i, ++$i);
@@ -89,7 +89,7 @@ function main_entry(): void {
   }
   echo "\n";
 
-  $values = varray[0, 1, 2, 3, 4, 5, 6];
+  $values = vec[0, 1, 2, 3, 4, 5, 6];
   $i = 3;
   echo "\n".'initially, $i = '.$i."\n";
   $values[$i] *= f($i, ++$i);
@@ -100,7 +100,7 @@ function main_entry(): void {
   }
   echo "\n";
 
-  $values = varray[0, 1, 2, 3, 4, 5, 6];
+  $values = vec[0, 1, 2, 3, 4, 5, 6];
   $i = 3;
   echo "\n".'initially, $i = '.$i."\n";
   $values[$i] = f($i, ++$i) + g(++$i);
@@ -111,7 +111,7 @@ function main_entry(): void {
   }
   echo "\n";
 
-  $values = varray[0, 1, 2, 3, 4, 5, 6];
+  $values = vec[0, 1, 2, 3, 4, 5, 6];
   $i = 3;
   echo "\n".'initially, $i = '.$i."\n";
   $values[$i] = f($i, ++$i) - g(++$i);
@@ -122,7 +122,7 @@ function main_entry(): void {
   }
   echo "\n";
 
-  $values = varray[0, 1, 2, 3, 4, 5, 6];
+  $values = vec[0, 1, 2, 3, 4, 5, 6];
   $i = 3;
   echo "\n".'initially, $i = '.$i."\n";
   $values[$i] = f($i, ++$i) / g(++$i) - f(--$i, $i);
@@ -133,7 +133,7 @@ function main_entry(): void {
   }
   echo "\n";
 
-  $values = varray[0, 1, 2, 3, 4, 5, 6];
+  $values = vec[0, 1, 2, 3, 4, 5, 6];
   $i = 3;
   echo "\n".'initially, $i = '.$i."\n";
   $values[$i] = f($i, ++$i) + g(++$i) + f(--$i, $i) + ($i = 5);
@@ -150,11 +150,11 @@ function main_entry(): void {
   echo 'f(10, 12) * g(15) = '.(f(10, 12) * g(15))."\n";
   echo 'f(10, 12) / g(15) = '.(string)(f(10, 12) / g(15))."\n";
 
-  $values = varray[0, 1, 2, 3, 4, 5, 6];
+  $values = vec[0, 1, 2, 3, 4, 5, 6];
   var_dump($values);
   $values[f1(4) - f2(2)] = $values[f3(3) * f4(2)];
   var_dump($values);
-  $values = varray[0, 1, 2, 3, 4, 5, 6];
+  $values = vec[0, 1, 2, 3, 4, 5, 6];
   $values[f1(1) + f2(2)] = $values[f3(6) / f4(3)];
   var_dump($values);
 }

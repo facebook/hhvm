@@ -3,11 +3,11 @@
 <<__EntryPoint>>
 function main_proc_terminate() :mixed{
 $cmd = 'sleep 3';
-$descriptors = darray[];
+$descriptors = dict[];
 
 // Don't add signals that would cause the process to abort, the output will
 // depend on whether it dumps its core.
-$signals = varray[
+$signals = vec[
   2.2,    // SIGINT
   '9',    // SIGKILL
   'herp', // invalid, does nothing

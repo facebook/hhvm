@@ -2,7 +2,7 @@
 
 class C { function heh() :mixed{ echo "heh\n"; } }
 function foo() :mixed{
-  return mt_rand() ? varray[new C, new C] : varray[new C, new C, new C];
+  return mt_rand() ? vec[new C, new C] : vec[new C, new C, new C];
 }
 function bar() :mixed{
   $x = foo();

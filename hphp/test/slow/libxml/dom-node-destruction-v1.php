@@ -27,7 +27,7 @@ function foo() :mixed{
   $dom->appendChild($dom->createElement('bar')->init());
 
   echo "Leave foo()\n";
-  return varray[$dom, $child];
+  return vec[$dom, $child];
 }
 
 function bar() :mixed{

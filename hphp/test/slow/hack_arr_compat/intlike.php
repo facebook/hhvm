@@ -39,11 +39,11 @@ function test_casting($a) :mixed{
 }
 
 function run_tests() :mixed{
-  test(darray[], '10');
+  test(dict[], '10');
   test(darray(vec[1, 2, 3, 4]), '2');
   test(darray(dict[10 => 'abc']), '10');
 
-  test_const_key(darray[]);
+  test_const_key(dict[]);
   test_const_key(darray(vec[1, 2, 3, 4]));
   test_const_key(darray(dict[2 => 'abc']));
 

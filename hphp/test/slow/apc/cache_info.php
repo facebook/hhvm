@@ -40,7 +40,7 @@ apc_add('key', 1);
 echo "1 key\n";
 $info = apc_cache_info('user');
 checkInfo($info, 10, 3, 1, true);
-apc_add('key1', varray[1, 2, 3]);
+apc_add('key1', vec[1, 2, 3]);
 echo "2 keys\n";
 $info = apc_cache_info('user');
 checkInfo($info, 32, 7, 2, true);
@@ -54,9 +54,9 @@ echo "1 delete, 2 keys\n";
 $info = apc_cache_info('user');
 checkInfo($info, 20, 7, 2, true);
 dumpKeys($info);
-apc_add('key1', varray[true, 10, 4.5678,
+apc_add('key1', vec[true, 10, 4.5678,
                       'hello',
-                      darray['a' => 'b',
+                      dict['a' => 'b',
                             'c' => 'd'],
                       'and more']);
 echo "add again, 3 keys\n";

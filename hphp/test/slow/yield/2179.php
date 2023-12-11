@@ -1,7 +1,7 @@
 <?hh
 
 trait DY {
-  private $drc = darray[];
+  private $drc = dict[];
   public function dty($key) :AsyncGenerator<mixed,mixed,void>{
     $this->drc[$key] = true;
     yield (true);

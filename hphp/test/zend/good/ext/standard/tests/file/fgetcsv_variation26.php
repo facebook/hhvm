@@ -13,14 +13,14 @@ echo "*** Testing fgetcsv() : reading the files opened in write only mode ***\n"
    and 3rd element is csv fields
 */
 $csv_lists = varray [
-  varray[',', '"', '"water",fruit'],
-  varray[',', '"', '"water","fruit"'],
-  varray[' ', '^', '^water^ ^fruit^'],
-  varray[':', '&', '&water&:&fruit&'],
-  varray['=', '=', '=water===fruit='],
-  varray['-', '-', '-water--fruit-air'],
-  varray['-', '-', '-water---fruit---air-'],
-  varray[':', '&', '&""""&:&"&:,:":&,&:,,,,']
+  vec[',', '"', '"water",fruit'],
+  vec[',', '"', '"water","fruit"'],
+  vec[' ', '^', '^water^ ^fruit^'],
+  vec[':', '&', '&water&:&fruit&'],
+  vec['=', '=', '=water===fruit='],
+  vec['-', '-', '-water--fruit-air'],
+  vec['-', '-', '-water---fruit---air-'],
+  vec[':', '&', '&""""&:&"&:,:":&,&:,,,,']
 ];
 
 $filename = sys_get_temp_dir().'/'.'fgetcsv_variation26.tmp';

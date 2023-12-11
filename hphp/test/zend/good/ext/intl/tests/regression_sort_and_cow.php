@@ -35,8 +35,8 @@ function ut_main()
 :mixed{
     $res_str = '';
 
-    $a1 = varray[ 'b', 'a', 'c' ];
-    $a2 = varray[ 'в', 'а', 'б' ];
+    $a1 = vec[ 'b', 'a', 'c' ];
+    $a2 = vec[ 'в', 'а', 'б' ];
 
     $res_str .= test_COW( 'en_US', $a1 );
     $res_str .= test_COW( 'ru_RU', $a2 );

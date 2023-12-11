@@ -30,7 +30,7 @@ NULL
 EOD;
 
 // different valid  scalar vlaues
-$scalars = varray[
+$scalars = vec[
   /* integers */
   0,
   1,

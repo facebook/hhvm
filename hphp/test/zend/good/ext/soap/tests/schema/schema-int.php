@@ -7,6 +7,6 @@ $schema = <<<EOF
   </complexType>
 EOF;
 
-test_schema($schema, 'testType', darray['testAttr' => 17]);
-test_schema($schema, 'testType', darray['testAttr' => 'foo']);
+test_schema($schema, 'testType', dict['testAttr' => 17]);
+test_schema($schema, 'testType', dict['testAttr' => 'foo']);
 }

@@ -14,7 +14,7 @@ class B implements Serializable {
     }
 }
 <<__EntryPoint>> function main(): void {
-$data = varray[new A, new B];
+$data = vec[new A, new B];
 
 try {
     serialize($data);

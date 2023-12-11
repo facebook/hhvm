@@ -5,12 +5,12 @@ function main_packages(): void {
   chdir(__DIR__);
   require('./../common.inc');
   $path = __FILE__ . ".test";
-  $testProcess = vsDebugLaunch($path, true, varray[]);
+  $testProcess = vsDebugLaunch($path, true, vec[]);
 
-  sendVsCommand(darray[
+  sendVsCommand(dict[
     'command' => 'stackTrace',
     'type' => 'request',
-    'arguments' => darray['threadId' => 1],
+    'arguments' => dict['threadId' => 1],
   ]);
   skip_events();
 

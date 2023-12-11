@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_266() :mixed{
-$a = darray[];
+$a = dict[];
  $a[0] = 1;
              var_dump($a);
 }

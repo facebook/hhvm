@@ -2,7 +2,7 @@
 
 function foo() :mixed{
   $x = 42;
-  return varray[@$x];
+  return vec[@$x];
 }
 <<__EntryPoint>>
 function entrypoint_fatal_and_no_op(): void {

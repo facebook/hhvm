@@ -12,7 +12,7 @@ try { var_dump( array_reverse() ); } catch (Exception $e) { echo "\n".'Warning: 
 
 // more than the expected number of arguments
 echo "\n-- Testing array_diff() function with more than expected no. of arguments --\n";
-$array = varray[1, 2, 3, 4, 5, 6];
+$array = vec[1, 2, 3, 4, 5, 6];
 $extra_arg = 10;
 try { var_dump( array_reverse($array, true, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump( array_reverse($array, false, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

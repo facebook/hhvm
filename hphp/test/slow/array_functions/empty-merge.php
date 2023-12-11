@@ -1,12 +1,12 @@
 <?hh
 
 function get_empty_array() :mixed{
-  return extension_loaded('pdo') ? varray[] : varray['wut'];
+  return extension_loaded('pdo') ? vec[] : vec['wut'];
 }
 
 function main() :mixed{
   $emp = get_empty_array();
-  $full = varray[new stdClass, 2];
+  $full = vec[new stdClass, 2];
   $merge = array_merge($emp, $full);
   return $merge;
 }

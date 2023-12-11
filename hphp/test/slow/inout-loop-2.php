@@ -4,7 +4,7 @@ class D {
 }
 
 function foo(inout int $x) :mixed{
-  foreach (varray[new D] as $bar) {
+  foreach (vec[new D] as $bar) {
     try {
       return $x;
     } finally {

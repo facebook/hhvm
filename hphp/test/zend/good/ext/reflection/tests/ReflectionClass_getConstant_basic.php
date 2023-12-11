@@ -12,7 +12,7 @@ class F extends E {
 class X {
 }
 <<__EntryPoint>> function main(): void {
-$classes = varray["C", "D", "E", "F", "X"];
+$classes = vec["C", "D", "E", "F", "X"];
 foreach($classes as $class) {
     echo "Reflecting on class $class: \n";
     $rc = new ReflectionClass($class);

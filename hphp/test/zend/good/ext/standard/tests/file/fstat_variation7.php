@@ -3,7 +3,7 @@ $heredoc = <<<EOT
 hello world
 EOT;
 
-$variation_array = darray[
+$variation_array = dict[
   'string DQ' => "string",
   'string SQ' => 'string',
   'mixed case string' => "sTrInG",

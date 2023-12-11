@@ -13,12 +13,12 @@ abstract final class TestAsyncMysqlConn {
   }
 }
 <<__EntryPoint>> function main(): void {
-$pool = new AsyncMysqlConnectionPool(darray['foo' => null]);
+$pool = new AsyncMysqlConnectionPool(dict['foo' => null]);
 var_dump($pool->getPoolStats());
 
 $inputs = vec[
-  varray[],
-  darray[],
+  vec[],
+  dict[],
   Vector {},
   dict[],
   vec[],

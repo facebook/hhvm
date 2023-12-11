@@ -1,6 +1,6 @@
 <?hh
 class A {
-    public $e = varray[];
+    public $e = vec[];
 }
 
 class Token implements \Serializable {
@@ -15,7 +15,7 @@ class Token implements \Serializable {
             $e->e = $c->e;
         }
 
-        return serialize(varray[serialize($c)]);
+        return serialize(vec[serialize($c)]);
     }
 
     public function unserialize($str)

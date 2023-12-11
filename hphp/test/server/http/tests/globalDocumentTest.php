@@ -9,7 +9,7 @@ require_once('globalDocumentTestUtils.inc');
 echo "No global doc\n";
 
 requestAll(
-  varray[
+  vec[
     "global_document_should_not_be_hit.php",
   ],
   "",
@@ -18,7 +18,7 @@ requestAll(
 echo "Global doc, existing file\n";
 
 requestAll(
-  varray[
+  vec[
     "global_document_should_not_be_hit.php",
   ],
   "-vServer.GlobalDocument=/global_document.php",
@@ -27,7 +27,7 @@ requestAll(
 echo "Global doc, nonexistent file\n";
 
 requestAll(
-  varray[
+  vec[
     "this_file_does_not_exist.php",
     "foo/this_file_does_not_exist.php",
     "foo/bar/this_file_does_not_exist.php",
@@ -39,7 +39,7 @@ echo "Nonexistent global doc\n";
 
 runTestWith404HealthCheck(
   function($serverPort) {
-    $nonexistent_requests = varray[
+    $nonexistent_requests = vec[
       "some_file.php",
       "this_file_does_not_exist.php",
       "index.php",

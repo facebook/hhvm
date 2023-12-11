@@ -19,7 +19,7 @@ namespace testing {
     <<__EntryPoint>> function main(): void {
     \call_user_func(__NAMESPACE__ .'\foobar', 'foobar');
     $class =  __NAMESPACE__ .'\foo';
-    \call_user_func(varray[new $class, 'priv'], 'foobar');
-    \call_user_func(varray[new $class, 'prot'], 'foobar');
+    \call_user_func(vec[new $class, 'priv'], 'foobar');
+    \call_user_func(vec[new $class, 'prot'], 'foobar');
     }
 }

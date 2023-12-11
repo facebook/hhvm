@@ -16,10 +16,10 @@ function key_compare_func($key1, $key2)
 echo "*** Testing array_intersect_ukey() : usage variation ***\n";
 
 //Initialize variables
-$arr_default_int = varray[1, 2 ];
-$arr_float = darray[0 => 1.00, 1 => 2.00, 2 => 3.00];
-$arr_string = darray['0' => '1', '1' => '2', '2' => '3'];
-$arr_string_float = darray['0.00' => '1.00', '1.00' => '2.00'];
+$arr_default_int = vec[1, 2 ];
+$arr_float = dict[0 => 1.00, 1 => 2.00, 2 => 3.00];
+$arr_string = dict['0' => '1', '1' => '2', '2' => '3'];
+$arr_string_float = dict['0.00' => '1.00', '1.00' => '2.00'];
 
 echo "\n-- Result of integers and floating point intersection --\n";
 var_dump( array_intersect_ukey($arr_default_int, $arr_float, key_compare_func<>) );

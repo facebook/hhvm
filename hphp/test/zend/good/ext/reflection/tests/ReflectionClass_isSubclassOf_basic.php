@@ -6,8 +6,8 @@ class C extends B {}
 interface I {}
 class X implements I {}
 <<__EntryPoint>> function main(): void {
-$classNames = varray['A', 'B', 'C', 'I', 'X'];
-$rcs = darray[];
+$classNames = vec['A', 'B', 'C', 'I', 'X'];
+$rcs = dict[];
 foreach ($classNames as $className) {
     $rcs[$className] = new ReflectionClass($className);
 }

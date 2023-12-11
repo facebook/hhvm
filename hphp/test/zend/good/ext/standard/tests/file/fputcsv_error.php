@@ -13,7 +13,7 @@ try { var_dump( fputcsv() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->
 // more than expected no. of args
 echo "-- Testing fputcsv() with more than expected number of arguments --\n";
 $fp = fopen(__FILE__, "r");
-$fields = varray["fld1", "fld2"];
+$fields = vec["fld1", "fld2"];
 $delim = ";";
 $enclosure ="\"";
 try { var_dump( fputcsv($fp, $fields, $delim, $enclosure, $fp) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
@@ -26,7 +26,7 @@ $invalid_args = varray [
   10,
   10.5,
   true,
-  varray[1,2,3],
+  vec[1,2,3],
   new stdClass,
 ];
 /* loop to test fputcsv() with different invalid type of args */

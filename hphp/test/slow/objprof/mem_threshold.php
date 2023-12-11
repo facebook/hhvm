@@ -1,6 +1,6 @@
 <?hh
 class MyClass {
-  public static AnyArray $a = varray[];
+  public static AnyArray $a = vec[];
   public function doSomethin($str) :mixed{
     for ($j = 0; $j < 200; $j++) {
       self::$a[] = $str.$j;

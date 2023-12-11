@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$input_array = varray['a', 'b', 'c', 'd', 'e'];
+$input_array = vec['a', 'b', 'c', 'd', 'e'];
 var_dump(array_chunk($input_array, 0));
 var_dump(array_chunk($input_array, 0, true));
 var_dump(array_chunk($input_array, 1));

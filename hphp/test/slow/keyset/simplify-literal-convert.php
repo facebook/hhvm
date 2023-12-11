@@ -7,13 +7,13 @@
 function main() :mixed{
   // These should all fail and not be simplified away at JIT time
   try {
-    var_dump(keyset(darray[1 => 'a', 2 => 100, 3 => false]));
+    var_dump(keyset(dict[1 => 'a', 2 => 100, 3 => false]));
   } catch (Exception $e) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
   }
 
   try {
-    var_dump(keyset(varray['a', 100, false]));
+    var_dump(keyset(vec['a', 100, false]));
   } catch (Exception $e) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
   }
@@ -31,8 +31,8 @@ function main() :mixed{
   }
 
   // These should all succeed and be simplified away at JIT time
-  var_dump(keyset(darray[1 => 'a', 2 => 100, 3 => 'b']));
-  var_dump(keyset(varray['a', 100, 'b']));
+  var_dump(keyset(dict[1 => 'a', 2 => 100, 3 => 'b']));
+  var_dump(keyset(vec['a', 100, 'b']));
   var_dump(keyset(vec['a', 100, 'b']));
   var_dump(keyset(dict[1 => 'a', 2 => 100, 3 => 'b']));
 }

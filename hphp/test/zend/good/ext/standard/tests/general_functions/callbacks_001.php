@@ -20,13 +20,13 @@ class C extends B {
         $cb();
     }
     public function test() :mixed{
-        $this->call(varray['parent', 'who']);
-        $this->call(varray['C', 'parent::who']);
-        $this->call(varray['B', 'parent::who']);
-        $this->call(varray['E', 'parent::who']);
-        $this->call(varray['A', 'who']);
-        $this->call(varray['C', 'who']);
-        $this->call(varray['B', 'who2']);
+        $this->call(vec['parent', 'who']);
+        $this->call(vec['C', 'parent::who']);
+        $this->call(vec['B', 'parent::who']);
+        $this->call(vec['E', 'parent::who']);
+        $this->call(vec['A', 'who']);
+        $this->call(vec['C', 'who']);
+        $this->call(vec['B', 'who2']);
     }
 }
 
@@ -60,9 +60,9 @@ class P extends O {
         $cb();
     }
     public function test() :mixed{
-        $this->call(varray['parent', 'who']);
-        $this->call(varray['P', 'parent::who']);
-        $this->call(varray[$this, 'O::who']);
+        $this->call(vec['parent', 'who']);
+        $this->call(vec['P', 'parent::who']);
+        $this->call(vec[$this, 'O::who']);
     }
 }
 <<__EntryPoint>> function main(): void {

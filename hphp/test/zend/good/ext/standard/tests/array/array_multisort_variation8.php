@@ -23,7 +23,7 @@ echo "*** Testing array_multisort() : usage variation  - test sort order of all 
 
 set_error_handler(test_error_handler<>);
 
-$inputs = darray[
+$inputs = dict[
       'int 0' => 0,
       'float -10.5' => -10.5,
       0 => 'Array',

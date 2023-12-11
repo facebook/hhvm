@@ -26,8 +26,8 @@ echo "\n";
 ///*
 // NULL operand with all kinds of operands
 
-$oper1 = varray[NULL];
-$oper2 = varray[0, 100, -3.4, TRUE, FALSE, NULL, "", "123", "abc", varray[], varray[10,2.3]];
+$oper1 = vec[NULL];
+$oper2 = vec[0, 100, -3.4, TRUE, FALSE, NULL, "", "123", "abc", vec[], vec[10,2.3]];
 
 foreach ($oper1 as $e1)
 {
@@ -49,8 +49,8 @@ echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n";
 ///*
 // Two non-numeric strings
 
-$oper1 = varray["", "a", "aa"];
-$oper2 = varray["", "aa", "A", "AB"];
+$oper1 = vec["", "a", "aa"];
+$oper2 = vec["", "aa", "A", "AB"];
 
 foreach ($oper1 as $e1)
 {
@@ -72,8 +72,8 @@ echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n";
 ///*
 // Boolean operand with all kinds of operands
 
-$oper1 = varray[TRUE, FALSE];
-$oper2 = varray[0, 100, -3.4, TRUE, FALSE, NULL, "", "123", "abc", varray[], varray[10,2.3]];
+$oper1 = vec[TRUE, FALSE];
+$oper2 = vec[0, 100, -3.4, TRUE, FALSE, NULL, "", "123", "abc", vec[], vec[10,2.3]];
 
 foreach ($oper1 as $e1)
 {
@@ -95,8 +95,8 @@ echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n";
 ///*
 // Numeric strings with all kinds of operands
 
-$oper1 = varray["10", "-5.1"];
-$oper2 = varray[0, 10, -3.4, TRUE, FALSE, NULL, "", "123", "abc", varray[], varray[10,2.3]];
+$oper1 = vec["10", "-5.1"];
+$oper2 = vec[0, 10, -3.4, TRUE, FALSE, NULL, "", "123", "abc", vec[], vec[10,2.3]];
 
 foreach ($oper1 as $e1)
 {
@@ -118,8 +118,8 @@ echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n";
 ///*
 // Two array types
 
-$oper1 = varray[varray[10,20], darray["red"=>0,"green"=>0]];
-$oper2 = varray[varray[10,20.0], varray[10,20,30], darray["red"=>0,"green"=>0], darray["green"=>0,"red"=>0]];
+$oper1 = vec[vec[10,20], dict["red"=>0,"green"=>0]];
+$oper2 = vec[vec[10,20.0], vec[10,20,30], dict["red"=>0,"green"=>0], dict["green"=>0,"red"=>0]];
 
 foreach ($oper1 as $e1)
 {

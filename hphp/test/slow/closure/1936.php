@@ -12,5 +12,5 @@ function test($x) :mixed{
 <<__EntryPoint>>
 function main_1936() :mixed{
 test('hello');
-test(darray[0 => 1, 1 => 2,'foo'=>'bar']);
+test(dict[0 => 1, 1 => 2,'foo'=>'bar']);
 }

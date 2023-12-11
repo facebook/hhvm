@@ -24,9 +24,9 @@ class TestSoap extends SoapClient {
 function main_entry(): void {
   ini_set('soap.wsdl_cache_enabled','0');
 
-  $client = new TestSoap(dirname(__FILE__) . "/bug42692.wsdl", darray["trace"=>1]);
+  $client = new TestSoap(dirname(__FILE__) . "/bug42692.wsdl", dict["trace"=>1]);
   try {
-  	$result = $client->__soapcall('checkAuth', varray[1,"two"]);
+  	$result = $client->__soapcall('checkAuth', vec[1,"two"]);
   	echo "Auth for 1 is $result\n";
   } catch (Exception $e) {
   	echo $e->getMessage();

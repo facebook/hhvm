@@ -13,10 +13,10 @@ try { var_dump(microtime($opt_arg_0, $extra_arg)); } catch (Exception $e) { echo
 
 echo "\n-- Bad Arg types --\n";
 
-$bad_args = varray[null,
+$bad_args = vec[null,
                   1.5,
                   "hello",
-                  darray['k'=>'v', 0 => varray[0]],
+                  dict['k'=>'v', 0 => vec[0]],
                   new stdClass,
                   1];
 foreach ($bad_args as $bad_arg) {

@@ -13,7 +13,7 @@ mkdir($dir_name);
 $file_handle = fopen($dir_name."/fileperms_variation3.tmp", "w");
 fclose($file_handle);
 
-$files_arr = varray[
+$files_arr = vec[
   "/fileperms_variation3/fileperms_variation3.tmp",
 
   /* Testing a file trailing slash */

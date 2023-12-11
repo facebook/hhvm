@@ -6,7 +6,7 @@ function sprintf_wrapper($format, ...$args) :mixed{
 
 function test_builtin() :mixed{
   $format = '%s %d %s';
-  $args = varray['a', 10, 'b'];
+  $args = vec['a', 10, 'b'];
 
   var_dump(sprintf_wrapper($format, ...$args));
   var_dump(sprintf($format, ...$args));

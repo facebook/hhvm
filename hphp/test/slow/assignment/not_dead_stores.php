@@ -1,7 +1,7 @@
 <?hh
 
 function getTestArray() :mixed{
-  return varray['opera', '12', '16'];
+  return vec['opera', '12', '16'];
 }
 
 function stringFunc() :mixed{
@@ -9,7 +9,7 @@ function stringFunc() :mixed{
   var_dump($results);
   if (!$results) return null;
 
-  $groups = varray[];
+  $groups = vec[];
   $prefix = 'foo.browser';
 
   if ($results[0]) {
@@ -32,7 +32,7 @@ function intFunc() :mixed{
   var_dump($results);
   if (!$results) return null;
 
-  $groups = varray[];
+  $groups = vec[];
   $prefix = 1;
 
   if ($results[0]) {

@@ -117,7 +117,7 @@ f_2(2.0);
 f_2(true);
 f_2(false);
 f_2(null);
-f_2(varray[]);
+f_2(vec[]);
 f_2(3.21200);
 g_2(0);
 g_2(null);

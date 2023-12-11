@@ -37,7 +37,7 @@ $value2 = 100;
 $value3 = 0;
 
 
-$array_arg = darray[
+$array_arg = dict[
   0 => 10,
   1 => $value1,
   2 => $value2,

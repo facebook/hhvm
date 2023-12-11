@@ -6,7 +6,7 @@ function f($a, $b, $c) :mixed{
 }
 
 function main() :mixed{
-  $args = varray['a', 'b', 'c'];
+  $args = vec['a', 'b', 'c'];
   f(...$args, ...$args);
 }
 

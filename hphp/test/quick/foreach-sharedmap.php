@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$arr = varray[1,2,3];
+$arr = vec[1,2,3];
 var_dump(apc_store('bluh', $arr));
 
 $bla = __hhvm_intrinsics\apc_fetch_no_check('bluh');

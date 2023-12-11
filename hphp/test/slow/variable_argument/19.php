@@ -2,7 +2,7 @@
 
 class A {
   public function __construct($a, ...$more_args) {
-    $args = array_merge(varray[$a], $more_args);
+    $args = array_merge(vec[$a], $more_args);
     var_dump(count($args));
     var_dump($args);
   }

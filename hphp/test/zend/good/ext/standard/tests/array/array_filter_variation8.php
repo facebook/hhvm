@@ -33,12 +33,12 @@ function callback4($input)
 // array as return value
 function callback5($input)
 :mixed{
-  return varray[8];
+  return vec[8];
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_filter() : usage variations - callback function with different return values***\n";
 
-$input = varray[0, 1, -1, 10, 100, 1000, 'Hello', null, true];
+$input = vec[0, 1, -1, 10, 100, 1000, 'Hello', null, true];
 
 echo "callback function with int return value\n";
 var_dump( array_filter($input, callback1<>) );

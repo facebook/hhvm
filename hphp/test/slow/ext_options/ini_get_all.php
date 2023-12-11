@@ -18,7 +18,7 @@ ksort(inout $pcre_false);
 var_dump($pcre_false);
 
 $core = ini_get_all('core');
-var_dump(darray[
+var_dump(dict[
   'core: allow_url_fopen' => isset($core['allow_url_fopen']),
   'core: pcre.backtrack_limit' => isset($core['pcre.backtrack_limit']),
 ]);

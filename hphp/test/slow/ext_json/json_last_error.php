@@ -1,7 +1,7 @@
 <?hh
 
 function test_decode() :mixed{
-  $json = varray[
+  $json = vec[
     // A valid json string
     '{"Organization": "PHP Documentation Team"}',
     // An invalid json string which will cause an syntax
@@ -25,7 +25,7 @@ function test_decode() :mixed{
 }
 
 function test_encode() :mixed{
-  $json = varray[
+  $json = vec[
     // A valid json string
     "hello",
     // Invalid UTF-8

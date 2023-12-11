@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$out = darray[];
-list($out[0]) = varray[1];
+$out = dict[];
+list($out[0]) = vec[1];
 var_dump($out);
 }

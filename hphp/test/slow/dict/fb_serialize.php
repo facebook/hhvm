@@ -38,12 +38,12 @@ serde(dict[
         789 => 100,
         987 => 'abc']);
 serde(dict[
-        'a' => varray[1, 2, 3],
-        'b' => varray['a', 'b', 'c'],
+        'a' => vec[1, 2, 3],
+        'b' => vec['a', 'b', 'c'],
         'c' => 100,
         'd' => 'abc']);
 serde(dict['1' => 100, 1 => 200]);
-serde(darray['a' => 1,
+serde(dict['a' => 1,
        'b' => 2,
        'c' => dict['a' => 1, 'b' => 2, 'c' => 3],
        'd' => dict[1 => 'a', 2 => 'b', 3 => 'c'],

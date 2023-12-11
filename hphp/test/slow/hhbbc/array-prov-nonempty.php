@@ -2,9 +2,9 @@
 
 <<__EntryPoint>>
 function main() :mixed{
-  $x = darray[];
+  $x = dict[];
   if (__hhvm_intrinsics\launder_value(true)) {
-    $x = darray['a' => 123, 'b' => 456];
+    $x = dict['a' => 123, 'b' => 456];
   }
   if (__hhvm_intrinsics\launder_value(true) && $x) {
     var_dump($x);

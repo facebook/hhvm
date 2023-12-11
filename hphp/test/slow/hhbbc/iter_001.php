@@ -2,7 +2,7 @@
 
 class C { function heh() :mixed{ echo "hi\n"; } }
 function foo() :mixed{
-  $x = varray[new C, new C];
+  $x = vec[new C, new C];
   foreach ($x as $v) {
     $v->heh();
   }

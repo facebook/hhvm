@@ -6,7 +6,7 @@ function main_scalar_none() :mixed{
 require 'fix_exceptions.inc';
 fix_exceptions();
 
-$functions = darray[
+$functions = dict[
     'int' => function (int $i) { return $i; },
     'float' => function (float $f) { return $f; },
     'string' => function (string $s) { return $s; },

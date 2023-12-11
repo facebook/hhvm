@@ -2,17 +2,17 @@
 <<__EntryPoint>> function main(): void {
 require "connect.inc";
 $link = ldap_connect(test_host(), test_port());
-$controls = varray[
-    varray[
-        darray["xid" => "1.2.752.58.10.1", "iscritical" => true],
-        darray["xid" => "1.2.752.58.1.10", "value" => "magic"],
+$controls = vec[
+    vec[
+        dict["xid" => "1.2.752.58.10.1", "iscritical" => true],
+        dict["xid" => "1.2.752.58.1.10", "value" => "magic"],
     ],
-    varray[
-        darray["oid" => "1.2.752.58.10.1", "iscritical" => true],
-        darray["oid" => "1.2.752.58.1.10", "value" => "magic"],
+    vec[
+        dict["oid" => "1.2.752.58.10.1", "iscritical" => true],
+        dict["oid" => "1.2.752.58.1.10", "value" => "magic"],
         "weird"
     ],
-    varray[
+    vec[
     ],
 ];
 

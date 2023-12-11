@@ -1,6 +1,6 @@
 <?hh
 namespace Foo;
-function f($a=varray[Foo::bar]) :mixed{
+function f($a=vec[Foo::bar]) :mixed{
     return $a[0];
 }
 <<__EntryPoint>> function main(): void {

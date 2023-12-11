@@ -6,24 +6,24 @@
 */
 
 class array_search_check {
-  public $array_var = darray[1=>"one", "two"=>2, 3=>3];
+  public $array_var = dict[1=>"one", "two"=>2, 3=>3];
   public function foo() :mixed{
     echo "Public function\n";
   }
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing sub-arrays with array_search() ***\n";
-$sub_array = darray[
+$sub_array = dict[
   0 => "one",
-  1 => darray[0 => 1, 2 => "two", "three" => 3],
+  1 => dict[0 => 1, 2 => "two", "three" => 3],
   4 => "four",
   "five" => 5,
-  5 => varray['', 'i']
+  5 => vec['', 'i']
 ];
 var_dump( array_search("four", $sub_array) );
 //checking for element in a sub-array
 var_dump( array_search(3, $sub_array[1]) );
-var_dump( array_search(varray['','i'], $sub_array) );
+var_dump( array_search(vec['','i'], $sub_array) );
 
 /* checking for objects in array_search() */
 echo "\n*** Testing objects with array_search() ***\n";

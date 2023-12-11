@@ -14,8 +14,8 @@ function test_mapping() :mixed{
   var_dump(array_map(plusOne<>, Set {3}));
   var_dump(array_map(plusOne<>, Pair {11, 22}));
   echo "========\n";
-  var_dump(array_map(multiply<>, darray[2 => 0, 4 => 2, 6 => 4], Vector {3, 5}));
-  var_dump(array_map(multiply<>, Map {2 => 0, 4 => 2}, varray[3, 5, 7]));
+  var_dump(array_map(multiply<>, dict[2 => 0, 4 => 2, 6 => 4], Vector {3, 5}));
+  var_dump(array_map(multiply<>, Map {2 => 0, 4 => 2}, vec[3, 5, 7]));
   var_dump(array_map(multiply<>, Map {4 => 2}, Set {3}));
   var_dump(array_map(multiply<>, Pair {11, 22}, Pair {33, 44}));
   echo "========\n";
@@ -24,8 +24,8 @@ function test_mapping() :mixed{
   var_dump(array_map(null, Set {3}));
   var_dump(array_map(null, Pair {11, 22}));
   echo "========\n";
-  var_dump(array_map(null, darray[2 => 0, 4 => 2, 6 => 4], Vector {3, 5}));
-  var_dump(array_map(null, Map {2 => 0, 4 => 2}, varray[3, 5, 7]));
+  var_dump(array_map(null, dict[2 => 0, 4 => 2, 6 => 4], Vector {3, 5}));
+  var_dump(array_map(null, Map {2 => 0, 4 => 2}, vec[3, 5, 7]));
   var_dump(array_map(null, Map {4 => 2}, Set {3}));
   var_dump(array_map(null, Pair {11, 22}, Pair {33, 44}));
   echo "\n";

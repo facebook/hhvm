@@ -21,7 +21,7 @@ class MyConverter extends UConverter {
 <<__EntryPoint>>
 function main() :mixed{
   using ($c = new MyConverter('ascii', 'utf-8')) {
-    foreach(varray["regular", "irregul\xC1\xA1r", "\xC2\xA1unsupported!"] as $word) {
+    foreach(vec["regular", "irregul\xC1\xA1r", "\xC2\xA1unsupported!"] as $word) {
       $c->convert($word);
     }
   }

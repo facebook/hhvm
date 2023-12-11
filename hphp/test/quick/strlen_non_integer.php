@@ -20,7 +20,7 @@ function main() :mixed{
       asdf(new Foo());
     } catch (Exception $e) {}
     try {
-      asdf(varray[]);
+      asdf(vec[]);
     } catch (Exception $e) {}
   }
 }

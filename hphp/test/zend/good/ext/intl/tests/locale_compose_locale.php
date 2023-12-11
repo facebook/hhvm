@@ -7,36 +7,36 @@
 
 function ut_main()
 :mixed{
-    $loc_parts_arr1 = darray[
+    $loc_parts_arr1 = dict[
         Locale::LANG_TAG =>'sl' ,
         Locale::SCRIPT_TAG =>'Latn' ,
         Locale::REGION_TAG =>'IT'
     ];
-    $loc_parts_arr2 = darray[
+    $loc_parts_arr2 = dict[
         Locale::LANG_TAG =>'de' ,
         Locale::REGION_TAG =>'DE'
     ];
-    $loc_parts_arr3 = darray[
+    $loc_parts_arr3 = dict[
         Locale::LANG_TAG =>'hi'
     ];
-    $loc_parts_arr4 = darray[
+    $loc_parts_arr4 = dict[
         Locale::LANG_TAG =>'zh' ,
         Locale::SCRIPT_TAG =>'Hans' ,
         Locale::REGION_TAG =>'CN'
     ];
-    $loc_parts_arr5 = darray[
+    $loc_parts_arr5 = dict[
         Locale::LANG_TAG =>'es' ,
         Locale::SCRIPT_TAG =>'Hans' ,
         Locale::REGION_TAG =>'CN'
     ];
-    $loc_parts_arr6 = darray[
+    $loc_parts_arr6 = dict[
         Locale::LANG_TAG =>'en' ,
         Locale::SCRIPT_TAG =>'Hans' ,
         Locale::REGION_TAG =>'CN',
         Locale::VARIANT_TAG.'14' =>'rozaj' ,
         'variant1'=>'nedis'
     ];
-    $loc_parts_arr7 = darray[
+    $loc_parts_arr7 = dict[
         Locale::LANG_TAG =>'en' ,
         Locale::SCRIPT_TAG =>'Hans' ,
         Locale::REGION_TAG =>'CN',
@@ -45,7 +45,7 @@ function ut_main()
         'extlang0'=>'lng' ,
         'extlang1'=>'ing'
     ];
-    $loc_parts_arr8 = darray[
+    $loc_parts_arr8 = dict[
         Locale::LANG_TAG =>'en' ,
         Locale::SCRIPT_TAG =>'Hans' ,
         Locale::REGION_TAG =>'CN',
@@ -56,32 +56,32 @@ function ut_main()
         'private7'=>'prv1' ,
         'private9'=>'prv2'
     ];
-    $loc_parts_arr9 = darray[
+    $loc_parts_arr9 = dict[
         Locale::REGION_TAG =>'DE'
     ];
-    $loc_parts_arr10 = darray[
+    $loc_parts_arr10 = dict[
         Locale::LANG_TAG => 45,
         Locale::REGION_TAG => false,
         Locale::SCRIPT_TAG => 15
     ];
-    $loc_parts_arr11 = darray[
+    $loc_parts_arr11 = dict[
         Locale::LANG_TAG =>'de'  ,
         Locale::REGION_TAG =>'DE',
         'private0' => 13,
-        'variant1' => varray[],
+        'variant1' => vec[],
         'extlang2' => false
     ];
-    $loc_parts_arr12 = darray[
+    $loc_parts_arr12 = dict[
         Locale::LANG_TAG =>'en' ,
         Locale::SCRIPT_TAG =>'Hans' ,
         Locale::REGION_TAG =>'CN',
-        Locale::VARIANT_TAG => varray['nedis', 'rozaj'],
-        Locale::PRIVATE_TAG => varray['prv1', 'prv2'],
-        Locale::EXTLANG_TAG => varray['lng', 'ing']
+        Locale::VARIANT_TAG => vec['nedis', 'rozaj'],
+        Locale::PRIVATE_TAG => vec['prv1', 'prv2'],
+        Locale::EXTLANG_TAG => vec['lng', 'ing']
     ];
 
 
-    $loc_parts_arr = darray[
+    $loc_parts_arr = dict[
         'loc1' => $loc_parts_arr1,
         'loc2' => $loc_parts_arr2,
         'loc3' => $loc_parts_arr3,

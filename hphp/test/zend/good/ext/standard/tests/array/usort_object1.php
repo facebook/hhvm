@@ -61,7 +61,7 @@ class SimpleClass2
 echo "*** Testing usort() : object functionality ***\n";
 
 // array of SimpleClass objects with only one property
-$array_arg = darray[
+$array_arg = dict[
 0 => new SimpleClass1(10),
 1 => new SimpleClass1(1),
 2 => new SimpleClass1(100),
@@ -71,7 +71,7 @@ var_dump( usort(inout $array_arg, simple_cmp<>) );
 var_dump($array_arg);
 
 // array of SimpleClass objects having more than one properties
-$array_arg = darray[
+$array_arg = dict[
 0 => new SimpleClass2(2, 3.4, "mango"),
 1 => new SimpleClass2(10, 1.2, "apple"),
 2 => new SimpleClass2(5, 2.5, "orange"),

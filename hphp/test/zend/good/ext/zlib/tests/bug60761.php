@@ -9,7 +9,7 @@ ini_set('zlib.output_compression_level', '9');
 // so it follows more of the original code-path than just calling
 // gzcompress on CLI or CGI
 
-$lens = darray[];
+$lens = dict[];
 
 for ( $i=0 ; $i < 100 ; $i++ ) {
 

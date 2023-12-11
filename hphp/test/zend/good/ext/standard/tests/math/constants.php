@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$constants = varray[
+$constants = vec[
     "M_E",
     "M_LOG2E",
     "M_LOG10E",

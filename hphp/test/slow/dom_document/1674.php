@@ -1,8 +1,8 @@
 <?hh
 
 function adjustDoctype($xml) :mixed{
-    return str_replace(varray[">
-<","DOCTYPE HTML",'<p>','</p>'],varray["><","DOCTYPE html",'',''],$xml);
+    return str_replace(vec[">
+<","DOCTYPE HTML",'<p>','</p>'],vec["><","DOCTYPE html",'',''],$xml);
 }
 
 

@@ -1,7 +1,7 @@
 <?hh
 
 class A {
- public $a = darray['t' => 't'];
+ public $a = dict['t' => 't'];
 }
  class B {
  public $a;

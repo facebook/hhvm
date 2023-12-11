@@ -8,7 +8,7 @@ function add($a, $b) :mixed{
 function main_headers_sent_no_warn() :mixed{
 var_dump(headers_sent()); // false
 var_dump(headers_sent()); //true
-$server = new SoapServer(NULL, darray['uri' => 'http://test-uri']);
+$server = new SoapServer(NULL, dict['uri' => 'http://test-uri']);
 $str = '<?xml version="1.0" '
 .       'encoding="ISO-8859-1"?>'
 .       '<SOAP-ENV:Envelope SOAP-ENV:encodingStyle='

@@ -33,33 +33,33 @@ EOT;
 $arrays = varray [
 
        // empty array
-/*1*/  varray[],
+/*1*/  vec[],
 
        // arrays with integer values
-       darray['0' => 0],
-       darray["1" => 1],
-       darray["one" => 1, 'two' => 2, "three" => 3, 4 => 4],
+       dict['0' => 0],
+       dict["1" => 1],
+       dict["one" => 1, 'two' => 2, "three" => 3, 4 => 4],
 
        // arrays with float values
-/*5*/  darray["float" => 2.3333],
-       darray["f1" => 1.2, 'f2' => 3.33, 3 => 4.89999922839999, 'f4' => 33333333.333333],
+/*5*/  dict["float" => 2.3333],
+       dict["f1" => 1.2, 'f2' => 3.33, 3 => 4.89999922839999, 'f4' => 33333333.333333],
 
        // arrays with string values
-/*7*/  darray[111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3 =>  "pen\n"],
-       darray[111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3 =>  'pen\n'],
-       darray[1 => "hello", "heredoc" => $heredoc],
+/*7*/  dict[111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3 =>  "pen\n"],
+       dict[111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3 =>  'pen\n'],
+       dict[1 => "hello", "heredoc" => $heredoc],
 
        // array with object, unset variable and resource variable
-/*10*/ darray[11 => new classA(), "resource" => $fp],
+/*10*/ dict[11 => new classA(), "resource" => $fp],
 
        // array with mixed values
-/*11*/ darray[1 => 'hello', 2 => new classA(), 222 => "fruit",
+/*11*/ dict[1 => 'hello', 2 => new classA(), 222 => "fruit",
              'resource' => $fp, "int" => 133, "float" => 444.432,
              "heredoc" => $heredoc]
 ];
 
 // array to be passsed to $arr1 argument
-$arr1 = varray[1, 2, 1.2, 2.3333, "col\tor", '\v\fworld', $fp,
+$arr1 = vec[1, 2, 1.2, 2.3333, "col\tor", '\v\fworld', $fp,
               "Hello world", $heredoc, new classA(), 444.432, "fruit"];
 
 // loop through each sub-array within $arrrays to check the behavior of array_intersect()

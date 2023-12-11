@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$arr = varray[];
+$arr = vec[];
 try {
   $a = $arr[123];
   echo $a;

@@ -54,45 +54,45 @@ function ut_main()
     $res_str = '';
 
     // Compare strings using en_US locale.
-    $test_params = varray[
-        varray[ 'abc', 'abc' ],
-        varray[ 'Abc', 'abc' ],
-        varray[ 'a'  , 'abc' ],
-        varray[ 'a'  , ''    ],
-        varray[ ''  , ''     ],
-        varray[ 'a'  , 'b'   ],
-        varray[ 'ab'  , 'b'  ],
-        varray[ 'ab'  , 'a'  ],
-        varray[ 123  , 'abc' ],
-        varray[ 'ac' , null  ],
-        varray[ '.'  , '.'   ],
+    $test_params = vec[
+        vec[ 'abc', 'abc' ],
+        vec[ 'Abc', 'abc' ],
+        vec[ 'a'  , 'abc' ],
+        vec[ 'a'  , ''    ],
+        vec[ ''  , ''     ],
+        vec[ 'a'  , 'b'   ],
+        vec[ 'ab'  , 'b'  ],
+        vec[ 'ab'  , 'a'  ],
+        vec[ 123  , 'abc' ],
+        vec[ 'ac' , null  ],
+        vec[ '.'  , '.'   ],
         // Try to compare long strings.
-        varray[ 'abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcde',
+        vec[ 'abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcde',
                'abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdea'],
-        varray[ null , null  ]
+        vec[ null , null  ]
     ];
 
     $res_str .= compare_pairs( 'en_US', $test_params );
 
 
     // Compare strings using ru_RU locale.
-    $test_params = varray[
-        varray[ 'а',   'б' ],
-        varray[ 'а',   'аа' ],
-        varray[ 'аб', 'ба' ],
-        varray[ 'а',   ',' ],
-        varray[ 'а',   'b' ],
-        varray[ 'а',   'bb' ],
-        varray[ 'а',   'ab' ],
-        varray[ 'а',   null ]
+    $test_params = vec[
+        vec[ 'а',   'б' ],
+        vec[ 'а',   'аа' ],
+        vec[ 'аб', 'ба' ],
+        vec[ 'а',   ',' ],
+        vec[ 'а',   'b' ],
+        vec[ 'а',   'bb' ],
+        vec[ 'а',   'ab' ],
+        vec[ 'а',   null ]
     ];
 
     $res_str .= compare_pairs( 'ru_RU', $test_params );
 
 
     // Compare strings using lt_LT locale.
-    $test_params = varray[
-        varray[ 'y', 'k' ]
+    $test_params = vec[
+        vec[ 'y', 'k' ]
     ];
 
     $res_str .= compare_pairs( 'lt_LT', $test_params );

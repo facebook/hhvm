@@ -14,10 +14,10 @@
 echo "*** Testing shuffle() : with arrays having default keys ***\n";
 
 // Initialise the array with integers
-$array_arg_int = varray[0, 10, 20, 30, 40, 50, 60, 70, 80];
+$array_arg_int = vec[0, 10, 20, 30, 40, 50, 60, 70, 80];
 
 // Initialise the array with strings
-$array_arg_strings = varray["one", 'two', 'three', "four", "five", " ", 'six', ' ', "seven"];
+$array_arg_strings = vec["one", 'two', 'three', "four", "five", " ", 'six', ' ', "seven"];
 
 /* Testing shuffle() function with array of integers */
 

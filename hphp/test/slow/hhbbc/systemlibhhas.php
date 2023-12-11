@@ -16,7 +16,7 @@ class WhateverTest {
 <<__EntryPoint>>
 function main_systemlibhhas() :mixed{
 $t = new WhateverTest();
-$ret = $t->filter( varray[  "lol", "wow", "doge" ] );
+$ret = $t->filter( vec[  "lol", "wow", "doge" ] );
 
 \var_dump( $ret );
 }

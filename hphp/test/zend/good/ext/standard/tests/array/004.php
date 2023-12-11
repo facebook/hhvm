@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$data = darray[
+$data = dict[
     0 => 'Test1',
     'teST2' => 0,
     5 => 'test2',

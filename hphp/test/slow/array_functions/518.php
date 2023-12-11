@@ -3,8 +3,8 @@
 
 <<__EntryPoint>>
 function main_518() :mixed{
-$x = darray['x' => 'y'];
-$a = darray['a1' => $x, 'a2' => $x];
-$b = darray['a1' => varray[], 'a2' => varray[1,2]];
+$x = dict['x' => 'y'];
+$a = dict['a1' => $x, 'a2' => $x];
+$b = dict['a1' => vec[], 'a2' => vec[1,2]];
 var_dump(array_merge_recursive($a, $b));
 }

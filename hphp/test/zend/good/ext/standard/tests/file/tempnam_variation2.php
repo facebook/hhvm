@@ -13,7 +13,7 @@ mkdir($dir_path);
 
 chdir(sys_get_temp_dir());
 
-$dir_paths = varray[
+$dir_paths = vec[
   // absolute paths
   "$dir_path",
   "$dir_path/",

@@ -80,7 +80,7 @@ function testFunction(mixed $fun_meth_or_string) :mixed{
 
 
 class A {
-  private $map = darray[];
+  private $map = dict[];
   function set($k, $v) :mixed{
     $this->map[$k] = $v;
   }

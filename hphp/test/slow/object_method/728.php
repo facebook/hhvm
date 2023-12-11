@@ -33,5 +33,5 @@ function main_728() :mixed{
   B1::$b(1);
   $f = 'b2f';
   $b = 'b2b';
-  call_user_func(varray[$b1, 'b1f'], 1);
+  call_user_func(vec[$b1, 'b1f'], 1);
 }

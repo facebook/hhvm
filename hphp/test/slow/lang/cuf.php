@@ -112,31 +112,31 @@ class C extends B {
 
     echo "****************\n";
 
-    call_user_func(varray['B','C::meth']); // warning
-    call_user_func(varray['B','D::meth']); // warning
-    call_user_func(varray['B','F::meth']); // warning
-    call_user_func(varray['B','G::meth']); // warning
-    call_user_func(varray['B','H::meth']); // warning
+    call_user_func(vec['B','C::meth']); // warning
+    call_user_func(vec['B','D::meth']); // warning
+    call_user_func(vec['B','F::meth']); // warning
+    call_user_func(vec['B','G::meth']); // warning
+    call_user_func(vec['B','H::meth']); // warning
 
 
 
     echo "****************\n";
-    $call = varray['B','B::meth']; $call(); // B D D
+    $call = vec['B','B::meth']; $call(); // B D D
     // $call = array('B','C::meth'); $call(); // expected fatal
     // $call = array('B','D::meth'); $call(); // expected fatal
     // $call = array('B','F::meth'); $call(); // expected fatal
     // $call = array('B','G::meth'); $call(); // expected fatal
     // $call = array('B','H::meth'); $call(); // expected fatal
-    $call = varray['B','parent::meth']; $call(); // A D D
-    $call = varray['B','self::meth']; $call();   // B D D
+    $call = vec['B','parent::meth']; $call(); // A D D
+    $call = vec['B','self::meth']; $call();   // B D D
     // $call = array('B','static::meth'); $call(); // expected fatal
     echo "****************\n";
-    call_user_func(varray['G','B::meth']); // warning
-    call_user_func(varray['G','C::meth']); // warning
-    call_user_func(varray['G','D::meth']); // warning
+    call_user_func(vec['G','B::meth']); // warning
+    call_user_func(vec['G','C::meth']); // warning
+    call_user_func(vec['G','D::meth']); // warning
 
 
-    call_user_func(varray['G','H::meth']); // warning
+    call_user_func(vec['G','H::meth']); // warning
 
 
 
@@ -152,51 +152,51 @@ class C extends B {
     // $call = array('G','static::meth'); $call(); // expected fatal
     echo "****************\n";
     $b = new B;
-    call_user_func(varray[$b,'meth']); // B B B
-    call_user_func(varray[$b,'B::meth']); // B B B
-    call_user_func(varray[$b,'C::meth']); // warning
-    call_user_func(varray[$b,'D::meth']); // warning
-    call_user_func(varray[$b,'F::meth']); // warning
-    call_user_func(varray[$b,'G::meth']); // warning
-    call_user_func(varray[$b,'H::meth']); // warning
-    call_user_func(varray[$b,'parent::meth']); // A B B
-    call_user_func(varray[$b,'self::meth']);   // B B B
-    call_user_func(varray[$b,'static::meth']); // warning
+    call_user_func(vec[$b,'meth']); // B B B
+    call_user_func(vec[$b,'B::meth']); // B B B
+    call_user_func(vec[$b,'C::meth']); // warning
+    call_user_func(vec[$b,'D::meth']); // warning
+    call_user_func(vec[$b,'F::meth']); // warning
+    call_user_func(vec[$b,'G::meth']); // warning
+    call_user_func(vec[$b,'H::meth']); // warning
+    call_user_func(vec[$b,'parent::meth']); // A B B
+    call_user_func(vec[$b,'self::meth']);   // B B B
+    call_user_func(vec[$b,'static::meth']); // warning
     echo "****************\n";
     $b = new B;
-    $call = varray[$b,'meth']; $call(); // B B B
-    $call = varray[$b,'B::meth']; $call(); // B B B
+    $call = vec[$b,'meth']; $call(); // B B B
+    $call = vec[$b,'B::meth']; $call(); // B B B
     // $call = array($b,'C::meth'); $call(); // expected fatal
     // $call = array($b,'D::meth'); $call(); // expected fatal
     // $call = array($b,'F::meth'); $call(); // expected fatal
     // $call = array($b,'G::meth'); $call(); // expected fatal
     // $call = array($b,'H::meth'); $call(); // expected fatal
-    $call = varray[$b,'parent::meth']; $call(); // A B B
-    $call = varray[$b,'self::meth']; $call();   // B B B
+    $call = vec[$b,'parent::meth']; $call(); // A B B
+    $call = vec[$b,'self::meth']; $call();   // B B B
     // $call = array($b,'static::meth'); $call(); // expected fatal
     echo "****************\n";
     $g = new G;
-    call_user_func(varray[$g,'meth']); // G G G
-    call_user_func(varray[$g,'B::meth']); // warning
-    call_user_func(varray[$g,'C::meth']); // warning
-    call_user_func(varray[$g,'D::meth']); // warning
-    call_user_func(varray[$g,'F::meth']); // F G G
-    call_user_func(varray[$g,'G::meth']); // G G G
-    call_user_func(varray[$g,'H::meth']); // warning
-    call_user_func(varray[$g,'parent::meth']); // F G G
-    call_user_func(varray[$g,'self::meth']);   // G G G
-    call_user_func(varray[$g,'static::meth']); // warning
+    call_user_func(vec[$g,'meth']); // G G G
+    call_user_func(vec[$g,'B::meth']); // warning
+    call_user_func(vec[$g,'C::meth']); // warning
+    call_user_func(vec[$g,'D::meth']); // warning
+    call_user_func(vec[$g,'F::meth']); // F G G
+    call_user_func(vec[$g,'G::meth']); // G G G
+    call_user_func(vec[$g,'H::meth']); // warning
+    call_user_func(vec[$g,'parent::meth']); // F G G
+    call_user_func(vec[$g,'self::meth']);   // G G G
+    call_user_func(vec[$g,'static::meth']); // warning
     echo "****************\n";
     $g = new G;
-    $call = varray[$g,'meth']; $call(); // G G G
+    $call = vec[$g,'meth']; $call(); // G G G
     // $call = array($g,'B::meth'); $call(); // expected fatal
     // $call = array($g,'C::meth'); $call(); // expected fatal
     // $call = array($g,'D::meth'); $call(); // expected fatal
-    $call = varray[$g,'F::meth']; $call(); // F G G
-    $call = varray[$g,'G::meth']; $call(); // G G G
+    $call = vec[$g,'F::meth']; $call(); // F G G
+    $call = vec[$g,'G::meth']; $call(); // G G G
     // $call = array($g,'H::meth'); $call(); // expected fatal
-    $call = varray[$g,'parent::meth']; $call(); // F G G
-    $call = varray[$g,'self::meth']; $call();   // G G G
+    $call = vec[$g,'parent::meth']; $call(); // F G G
+    $call = vec[$g,'self::meth']; $call();   // G G G
     // $call = array($g,'static::meth'); $call(); // expected fatal
     echo "****************\n";
   }
@@ -283,51 +283,51 @@ class C extends B {
     // $call = array('G','static::meth'); $call(); // expected fatal
     echo "****************\n";
     $b = new B;
-    call_user_func(varray[$b,'meth']);    // B B B
-    call_user_func(varray[$b,'B::meth']); // B B B
-    call_user_func(varray[$b,'C::meth']); // warning
-    call_user_func(varray[$b,'D::meth']); // warning
-    call_user_func(varray[$b,'F::meth']); // warning
-    call_user_func(varray[$b,'G::meth']); // warning
-    call_user_func(varray[$b,'H::meth']); // warning
-    call_user_func(varray[$b,'parent::meth']); // A B B
-    call_user_func(varray[$b,'self::meth']);   // B B B
-    call_user_func(varray[$b,'static::meth']); // warning
+    call_user_func(vec[$b,'meth']);    // B B B
+    call_user_func(vec[$b,'B::meth']); // B B B
+    call_user_func(vec[$b,'C::meth']); // warning
+    call_user_func(vec[$b,'D::meth']); // warning
+    call_user_func(vec[$b,'F::meth']); // warning
+    call_user_func(vec[$b,'G::meth']); // warning
+    call_user_func(vec[$b,'H::meth']); // warning
+    call_user_func(vec[$b,'parent::meth']); // A B B
+    call_user_func(vec[$b,'self::meth']);   // B B B
+    call_user_func(vec[$b,'static::meth']); // warning
     echo "****************\n";
     $b = new B;
-    $call = varray[$b,'meth']; $call();    // B B B
-    $call = varray[$b,'B::meth']; $call(); // B B B
+    $call = vec[$b,'meth']; $call();    // B B B
+    $call = vec[$b,'B::meth']; $call(); // B B B
     // $call = array($b,'C::meth'); $call(); // expected fatal
     // $call = array($b,'D::meth'); $call(); // expected fatal
     // $call = array($b,'F::meth'); $call(); // expected fatal
     // $call = array($b,'G::meth'); $call(); // expected fatal
     // $call = array($b,'H::meth'); $call(); // expected fatal
-    $call = varray[$b,'parent::meth']; $call(); // A B B
-    $call = varray[$b,'self::meth']; $call();   // B B B
+    $call = vec[$b,'parent::meth']; $call(); // A B B
+    $call = vec[$b,'self::meth']; $call();   // B B B
     // $call = array($b,'static::meth'); $call(); // expected fatal
     echo "****************\n";
     $g = new G;
-    call_user_func(varray[$g,'meth']);    // G G G
-    call_user_func(varray[$g,'B::meth']); // warning
-    call_user_func(varray[$g,'C::meth']); // warning
-    call_user_func(varray[$g,'D::meth']); // warning
-    call_user_func(varray[$g,'F::meth']); // F G G
-    call_user_func(varray[$g,'G::meth']); // G G G
-    call_user_func(varray[$g,'H::meth']); // warning
-    call_user_func(varray[$g,'parent::meth']); // F G G
-    call_user_func(varray[$g,'self::meth']);   // G G G
-    call_user_func(varray[$g,'static::meth']); // warning
+    call_user_func(vec[$g,'meth']);    // G G G
+    call_user_func(vec[$g,'B::meth']); // warning
+    call_user_func(vec[$g,'C::meth']); // warning
+    call_user_func(vec[$g,'D::meth']); // warning
+    call_user_func(vec[$g,'F::meth']); // F G G
+    call_user_func(vec[$g,'G::meth']); // G G G
+    call_user_func(vec[$g,'H::meth']); // warning
+    call_user_func(vec[$g,'parent::meth']); // F G G
+    call_user_func(vec[$g,'self::meth']);   // G G G
+    call_user_func(vec[$g,'static::meth']); // warning
     echo "****************\n";
     $g = new G;
-    $call = varray[$g,'meth']; $call();    // G G G
+    $call = vec[$g,'meth']; $call();    // G G G
     // $call = array($g,'B::meth'); $call(); // expected fatal
     // $call = array($g,'C::meth'); $call(); // expected fatal
     // $call = array($g,'D::meth'); $call(); // expected fatal
-    $call = varray[$g,'F::meth']; $call(); // F G G
-    $call = varray[$g,'G::meth']; $call(); // G G G
+    $call = vec[$g,'F::meth']; $call(); // F G G
+    $call = vec[$g,'G::meth']; $call(); // G G G
     // $call = array($g,'H::meth'); $call(); // expected fatal
-    $call = varray[$g,'parent::meth']; $call(); // F G G
-    $call = varray[$g,'self::meth']; $call();   // G G G
+    $call = vec[$g,'parent::meth']; $call(); // F G G
+    $call = vec[$g,'self::meth']; $call();   // G G G
     // $call = array($g,'static::meth'); $call(); // expected fatal
     echo "****************\n";
   }
@@ -353,112 +353,112 @@ class C extends B {
     call_user_func(self::class.'::staticMeth');   // C D
     call_user_func(static::class.'::staticMeth'); // D D
     echo "****************\n";
-    call_user_func(varray['B','staticMeth']); // B B   (Zend: B D) (Rule 3)
-    call_user_func(varray['C','staticMeth']); // C C   (Zend: C D) (Rule 3)
-    call_user_func(varray['D','staticMeth']); // D D
-    call_user_func(varray['F','staticMeth']); // F F
-    call_user_func(varray['G','staticMeth']); // G G
-    call_user_func(varray['H','staticMeth']); // H H
-    call_user_func(varray[parent::class,'staticMeth']); // B D
-    call_user_func(varray[self::class,'staticMeth']);   // C D
-    call_user_func(varray[static::class,'staticMeth']); // D D
+    call_user_func(vec['B','staticMeth']); // B B   (Zend: B D) (Rule 3)
+    call_user_func(vec['C','staticMeth']); // C C   (Zend: C D) (Rule 3)
+    call_user_func(vec['D','staticMeth']); // D D
+    call_user_func(vec['F','staticMeth']); // F F
+    call_user_func(vec['G','staticMeth']); // G G
+    call_user_func(vec['H','staticMeth']); // H H
+    call_user_func(vec[parent::class,'staticMeth']); // B D
+    call_user_func(vec[self::class,'staticMeth']);   // C D
+    call_user_func(vec[static::class,'staticMeth']); // D D
     echo "****************\n";
-    $call = varray['B','staticMeth']; $call(); // B B   (Zend: B D) (Rule 3)
-    $call = varray['C','staticMeth']; $call(); // C C   (Zend: C D) (Rule 3)
-    $call = varray['D','staticMeth']; $call(); // D D
-    $call = varray['F','staticMeth']; $call(); // F F
-    $call = varray['G','staticMeth']; $call(); // G G
-    $call = varray['H','staticMeth']; $call(); // H H
-    $call = varray['parent','staticMeth']; $call(); // B D
-    $call = varray['self','staticMeth']; $call();   // C D
-    $call = varray['static','staticMeth']; $call(); // D D
+    $call = vec['B','staticMeth']; $call(); // B B   (Zend: B D) (Rule 3)
+    $call = vec['C','staticMeth']; $call(); // C C   (Zend: C D) (Rule 3)
+    $call = vec['D','staticMeth']; $call(); // D D
+    $call = vec['F','staticMeth']; $call(); // F F
+    $call = vec['G','staticMeth']; $call(); // G G
+    $call = vec['H','staticMeth']; $call(); // H H
+    $call = vec['parent','staticMeth']; $call(); // B D
+    $call = vec['self','staticMeth']; $call();   // C D
+    $call = vec['static','staticMeth']; $call(); // D D
     echo "****************\n";
-    call_user_func(varray['B','B::staticMeth']); // B B   (Zend: B D) (Rule 3)
-    call_user_func(varray['B','C::staticMeth']); // warning
-    call_user_func(varray['B','D::staticMeth']); // warning
-    call_user_func(varray['B','F::staticMeth']); // warning
-    call_user_func(varray['B','G::staticMeth']); // warning
-    call_user_func(varray['B','H::staticMeth']); // warning
-    call_user_func(varray['B','parent::staticMeth']); // A D
-    call_user_func(varray['B','self::staticMeth']);   // B D
-    call_user_func(varray['B','static::staticMeth']); // warning
+    call_user_func(vec['B','B::staticMeth']); // B B   (Zend: B D) (Rule 3)
+    call_user_func(vec['B','C::staticMeth']); // warning
+    call_user_func(vec['B','D::staticMeth']); // warning
+    call_user_func(vec['B','F::staticMeth']); // warning
+    call_user_func(vec['B','G::staticMeth']); // warning
+    call_user_func(vec['B','H::staticMeth']); // warning
+    call_user_func(vec['B','parent::staticMeth']); // A D
+    call_user_func(vec['B','self::staticMeth']);   // B D
+    call_user_func(vec['B','static::staticMeth']); // warning
     echo "****************\n";
-    $call = varray['B','B::staticMeth']; $call(); // B B   (Zend: B D) (Rule 3)
+    $call = vec['B','B::staticMeth']; $call(); // B B   (Zend: B D) (Rule 3)
     // $call = array('B','C::staticMeth'); $call(); // expected fatal
     // $call = array('B','D::staticMeth'); $call(); // expected fatal
     // $call = array('B','F::staticMeth'); $call(); // expected fatal
     // $call = array('B','G::staticMeth'); $call(); // expected fatal
     // $call = array('B','H::staticMeth'); $call(); // expected fatal
-    $call = varray['B','parent::staticMeth']; $call(); // A D
-    $call = varray['B','self::staticMeth']; $call();   // B D
+    $call = vec['B','parent::staticMeth']; $call(); // A D
+    $call = vec['B','self::staticMeth']; $call();   // B D
     // $call = array('B','static::staticMeth'); $call(); // expected fatal
     echo "****************\n";
-    call_user_func(varray['G','B::staticMeth']); // warning
-    call_user_func(varray['G','C::staticMeth']); // warning
-    call_user_func(varray['G','D::staticMeth']); // warning
-    call_user_func(varray['G','F::staticMeth']); // F F
-    call_user_func(varray['G','G::staticMeth']); // G G
-    call_user_func(varray['G','H::staticMeth']); // warning
-    call_user_func(varray['G','parent::staticMeth']); // F F   (Zend: F D) (Rule 4)
-    call_user_func(varray['G','self::staticMeth']);   // G G   (Zend: G D) (Rule 4)
-    call_user_func(varray['G','static::staticMeth']); // warning
+    call_user_func(vec['G','B::staticMeth']); // warning
+    call_user_func(vec['G','C::staticMeth']); // warning
+    call_user_func(vec['G','D::staticMeth']); // warning
+    call_user_func(vec['G','F::staticMeth']); // F F
+    call_user_func(vec['G','G::staticMeth']); // G G
+    call_user_func(vec['G','H::staticMeth']); // warning
+    call_user_func(vec['G','parent::staticMeth']); // F F   (Zend: F D) (Rule 4)
+    call_user_func(vec['G','self::staticMeth']);   // G G   (Zend: G D) (Rule 4)
+    call_user_func(vec['G','static::staticMeth']); // warning
     echo "****************\n";
     // $call = array('G','B::staticMeth'); $call(); // expected fatal
     // $call = array('G','C::staticMeth'); $call(); // expected fatal
     // $call = array('G','D::staticMeth'); $call(); // expected fatal
-    $call = varray['G','F::staticMeth']; $call(); // F F
-    $call = varray['G','G::staticMeth']; $call(); // G G
+    $call = vec['G','F::staticMeth']; $call(); // F F
+    $call = vec['G','G::staticMeth']; $call(); // G G
     // $call = array('G','H::staticMeth'); $call(); // expected fatal
-    $call = varray['G','parent::staticMeth']; $call(); // F F   (Zend: F D) (Rule 4)
-    $call = varray['G','self::staticMeth']; $call();   // G G   (Zend: G D) (Rule 4)
+    $call = vec['G','parent::staticMeth']; $call(); // F F   (Zend: F D) (Rule 4)
+    $call = vec['G','self::staticMeth']; $call();   // G G   (Zend: G D) (Rule 4)
     // $call = array('G','static::staticMeth'); $call(); // expected fatal
     echo "****************\n";
     $b = new B;
-    call_user_func(varray[$b,'staticMeth']);    // B B
-    call_user_func(varray[$b,'B::staticMeth']); // B B
-    call_user_func(varray[$b,'C::staticMeth']); // warning
-    call_user_func(varray[$b,'D::staticMeth']); // warning
-    call_user_func(varray[$b,'F::staticMeth']); // warning
-    call_user_func(varray[$b,'G::staticMeth']); // warning
-    call_user_func(varray[$b,'H::staticMeth']); // warning
-    call_user_func(varray[$b,'parent::staticMeth']); // A B
-    call_user_func(varray[$b,'self::staticMeth']);   // B B
-    call_user_func(varray[$b,'static::staticMeth']); // warning
+    call_user_func(vec[$b,'staticMeth']);    // B B
+    call_user_func(vec[$b,'B::staticMeth']); // B B
+    call_user_func(vec[$b,'C::staticMeth']); // warning
+    call_user_func(vec[$b,'D::staticMeth']); // warning
+    call_user_func(vec[$b,'F::staticMeth']); // warning
+    call_user_func(vec[$b,'G::staticMeth']); // warning
+    call_user_func(vec[$b,'H::staticMeth']); // warning
+    call_user_func(vec[$b,'parent::staticMeth']); // A B
+    call_user_func(vec[$b,'self::staticMeth']);   // B B
+    call_user_func(vec[$b,'static::staticMeth']); // warning
     echo "****************\n";
     $b = new B;
-    $call = varray[$b,'staticMeth']; $call();    // B B
-    $call = varray[$b,'B::staticMeth']; $call(); // B B
+    $call = vec[$b,'staticMeth']; $call();    // B B
+    $call = vec[$b,'B::staticMeth']; $call(); // B B
     // $call = array($b,'C::staticMeth'); $call(); // expected fatal
     // $call = array($b,'D::staticMeth'); $call(); // expected fatal
     // $call = array($b,'F::staticMeth'); $call(); // expected fatal
     // $call = array($b,'G::staticMeth'); $call(); // expected fatal
     // $call = array($b,'H::staticMeth'); $call(); // expected fatal
-    $call = varray[$b,'parent::staticMeth']; $call(); // A B
-    $call = varray[$b,'self::staticMeth']; $call();   // B B
+    $call = vec[$b,'parent::staticMeth']; $call(); // A B
+    $call = vec[$b,'self::staticMeth']; $call();   // B B
     // $call = array($b,'static::staticMeth'); $call(); // expected fatal
     echo "****************\n";
     $g = new G;
-    call_user_func(varray[$g,'staticMeth']);    // G G
-    call_user_func(varray[$g,'B::staticMeth']); // warning
-    call_user_func(varray[$g,'C::staticMeth']); // warning
-    call_user_func(varray[$g,'D::staticMeth']); // warning
-    call_user_func(varray[$g,'F::staticMeth']); // F G
-    call_user_func(varray[$g,'G::staticMeth']); // G G
-    call_user_func(varray[$g,'H::staticMeth']); // warning
-    call_user_func(varray[$g,'parent::staticMeth']); // F G
-    call_user_func(varray[$g,'self::staticMeth']);   // G G
-    call_user_func(varray[$g,'static::staticMeth']); // warning
+    call_user_func(vec[$g,'staticMeth']);    // G G
+    call_user_func(vec[$g,'B::staticMeth']); // warning
+    call_user_func(vec[$g,'C::staticMeth']); // warning
+    call_user_func(vec[$g,'D::staticMeth']); // warning
+    call_user_func(vec[$g,'F::staticMeth']); // F G
+    call_user_func(vec[$g,'G::staticMeth']); // G G
+    call_user_func(vec[$g,'H::staticMeth']); // warning
+    call_user_func(vec[$g,'parent::staticMeth']); // F G
+    call_user_func(vec[$g,'self::staticMeth']);   // G G
+    call_user_func(vec[$g,'static::staticMeth']); // warning
     echo "****************\n";
     $g = new G;
-    $call = varray[$g,'staticMeth']; $call();    // G G
+    $call = vec[$g,'staticMeth']; $call();    // G G
     // $call = array($g,'B::staticMeth'); $call(); // expected fatal
     // $call = array($g,'C::staticMeth'); $call(); // expected fatal
     // $call = array($g,'D::staticMeth'); $call(); // expected fatal
-    $call = varray[$g,'F::staticMeth']; $call(); // F G
-    $call = varray[$g,'G::staticMeth']; $call(); // G G
+    $call = vec[$g,'F::staticMeth']; $call(); // F G
+    $call = vec[$g,'G::staticMeth']; $call(); // G G
     // $call = array($g,'H::staticMeth'); $call(); // expected fatal
-    $call = varray[$g,'parent::staticMeth']; $call(); // F G
-    $call = varray[$g,'self::staticMeth']; $call();   // G G
+    $call = vec[$g,'parent::staticMeth']; $call(); // F G
+    $call = vec[$g,'self::staticMeth']; $call();   // G G
     // $call = array($g,'static::staticMeth'); $call(); // expected fatal
     echo "****************\n";
   }
@@ -484,112 +484,112 @@ class C extends B {
     call_user_func(self::class.'::staticMeth');   // C D
     call_user_func(static::class.'::staticMeth'); // D D
     echo "****************\n";
-    call_user_func(varray['B','staticMeth']); // B B
-    call_user_func(varray['C','staticMeth']); // C C
-    call_user_func(varray['D','staticMeth']); // D D
-    call_user_func(varray['F','staticMeth']); // F F
-    call_user_func(varray['G','staticMeth']); // G G
-    call_user_func(varray['H','staticMeth']); // H H
-    call_user_func(varray[parent::class,'staticMeth']); // B D
-    call_user_func(varray[self::class,'staticMeth']);   // C D
-    call_user_func(varray[static::class,'staticMeth']); // D D
+    call_user_func(vec['B','staticMeth']); // B B
+    call_user_func(vec['C','staticMeth']); // C C
+    call_user_func(vec['D','staticMeth']); // D D
+    call_user_func(vec['F','staticMeth']); // F F
+    call_user_func(vec['G','staticMeth']); // G G
+    call_user_func(vec['H','staticMeth']); // H H
+    call_user_func(vec[parent::class,'staticMeth']); // B D
+    call_user_func(vec[self::class,'staticMeth']);   // C D
+    call_user_func(vec[static::class,'staticMeth']); // D D
     echo "****************\n";
-    $call = varray['B','staticMeth']; $call(); // B B
-    $call = varray['C','staticMeth']; $call(); // C C
-    $call = varray['D','staticMeth']; $call(); // D D
-    $call = varray['F','staticMeth']; $call(); // F F
-    $call = varray['G','staticMeth']; $call(); // G G
-    $call = varray['H','staticMeth']; $call(); // H H
-    $call = varray['parent','staticMeth']; $call(); // B D
-    $call = varray['self','staticMeth']; $call();   // C D
-    $call = varray['static','staticMeth']; $call(); // D D
+    $call = vec['B','staticMeth']; $call(); // B B
+    $call = vec['C','staticMeth']; $call(); // C C
+    $call = vec['D','staticMeth']; $call(); // D D
+    $call = vec['F','staticMeth']; $call(); // F F
+    $call = vec['G','staticMeth']; $call(); // G G
+    $call = vec['H','staticMeth']; $call(); // H H
+    $call = vec['parent','staticMeth']; $call(); // B D
+    $call = vec['self','staticMeth']; $call();   // C D
+    $call = vec['static','staticMeth']; $call(); // D D
     echo "****************\n";
-    call_user_func(varray['B','B::staticMeth']); // B B
-    call_user_func(varray['B','C::staticMeth']); // warning
-    call_user_func(varray['B','D::staticMeth']); // warning
-    call_user_func(varray['B','F::staticMeth']); // warning
-    call_user_func(varray['B','G::staticMeth']); // warning
-    call_user_func(varray['B','H::staticMeth']); // warning
-    call_user_func(varray['B','parent::staticMeth']); // A D
-    call_user_func(varray['B','self::staticMeth']);   // B D
-    call_user_func(varray['B','static::staticMeth']); // warning
+    call_user_func(vec['B','B::staticMeth']); // B B
+    call_user_func(vec['B','C::staticMeth']); // warning
+    call_user_func(vec['B','D::staticMeth']); // warning
+    call_user_func(vec['B','F::staticMeth']); // warning
+    call_user_func(vec['B','G::staticMeth']); // warning
+    call_user_func(vec['B','H::staticMeth']); // warning
+    call_user_func(vec['B','parent::staticMeth']); // A D
+    call_user_func(vec['B','self::staticMeth']);   // B D
+    call_user_func(vec['B','static::staticMeth']); // warning
     echo "****************\n";
-    $call = varray['B','B::staticMeth']; $call(); // B B
+    $call = vec['B','B::staticMeth']; $call(); // B B
     // $call = array('B','C::staticMeth'); $call(); // expected fatal
     // $call = array('B','D::staticMeth'); $call(); // expected fatal
     // $call = array('B','F::staticMeth'); $call(); // expected fatal
     // $call = array('B','G::staticMeth'); $call(); // expected fatal
     // $call = array('B','H::staticMeth'); $call(); // expected fatal
-    $call = varray['B','parent::staticMeth']; $call(); // A D
-    $call = varray['B','self::staticMeth']; $call();   // B D
+    $call = vec['B','parent::staticMeth']; $call(); // A D
+    $call = vec['B','self::staticMeth']; $call();   // B D
     // $call = array('B','static::staticMeth'); $call(); // expected fatal
     echo "****************\n";
-    call_user_func(varray['G','B::staticMeth']); // warning
-    call_user_func(varray['G','C::staticMeth']); // warning
-    call_user_func(varray['G','D::staticMeth']); // warning
-    call_user_func(varray['G','F::staticMeth']); // F F
-    call_user_func(varray['G','G::staticMeth']); // G G
-    call_user_func(varray['G','H::staticMeth']); // warning
-    call_user_func(varray['G','parent::staticMeth']); // F F   (Zend: F D) (Rule 4)
-    call_user_func(varray['G','self::staticMeth']);   // G G   (Zend: G D) (Rule 4)
-    call_user_func(varray['G','static::staticMeth']); // warning
+    call_user_func(vec['G','B::staticMeth']); // warning
+    call_user_func(vec['G','C::staticMeth']); // warning
+    call_user_func(vec['G','D::staticMeth']); // warning
+    call_user_func(vec['G','F::staticMeth']); // F F
+    call_user_func(vec['G','G::staticMeth']); // G G
+    call_user_func(vec['G','H::staticMeth']); // warning
+    call_user_func(vec['G','parent::staticMeth']); // F F   (Zend: F D) (Rule 4)
+    call_user_func(vec['G','self::staticMeth']);   // G G   (Zend: G D) (Rule 4)
+    call_user_func(vec['G','static::staticMeth']); // warning
     echo "****************\n";
     // $call = array('G','B::staticMeth'); $call(); // expected fatal
     // $call = array('G','C::staticMeth'); $call(); // expected fatal
     // $call = array('G','D::staticMeth'); $call(); // expected fatal
-    $call = varray['G','F::staticMeth']; $call(); // F F
-    $call = varray['G','G::staticMeth']; $call(); // G G
+    $call = vec['G','F::staticMeth']; $call(); // F F
+    $call = vec['G','G::staticMeth']; $call(); // G G
     // $call = array('G','H::staticMeth'); $call(); // expected fatal
-    $call = varray['G','parent::staticMeth']; $call(); // F F   (Zend: F D) (Rule 4)
-    $call = varray['G','self::staticMeth']; $call();   // G G   (Zend: G D) (Rule 4)
+    $call = vec['G','parent::staticMeth']; $call(); // F F   (Zend: F D) (Rule 4)
+    $call = vec['G','self::staticMeth']; $call();   // G G   (Zend: G D) (Rule 4)
     // $call = array('G','static::staticMeth'); $call(); // expected fatal
     echo "****************\n";
     $b = new B;
-    call_user_func(varray[$b,'staticMeth']);    // B B
-    call_user_func(varray[$b,'B::staticMeth']); // B B
-    call_user_func(varray[$b,'C::staticMeth']); // warning
-    call_user_func(varray[$b,'D::staticMeth']); // warning
-    call_user_func(varray[$b,'F::staticMeth']); // warning
-    call_user_func(varray[$b,'G::staticMeth']); // warning
-    call_user_func(varray[$b,'H::staticMeth']); // warning
-    call_user_func(varray[$b,parent::class.'::staticMeth']); // A B
-    call_user_func(varray[$b,self::class.'::staticMeth']);   // B B
-    call_user_func(varray[$b,static::class.'::staticMeth']); // warning
+    call_user_func(vec[$b,'staticMeth']);    // B B
+    call_user_func(vec[$b,'B::staticMeth']); // B B
+    call_user_func(vec[$b,'C::staticMeth']); // warning
+    call_user_func(vec[$b,'D::staticMeth']); // warning
+    call_user_func(vec[$b,'F::staticMeth']); // warning
+    call_user_func(vec[$b,'G::staticMeth']); // warning
+    call_user_func(vec[$b,'H::staticMeth']); // warning
+    call_user_func(vec[$b,parent::class.'::staticMeth']); // A B
+    call_user_func(vec[$b,self::class.'::staticMeth']);   // B B
+    call_user_func(vec[$b,static::class.'::staticMeth']); // warning
     echo "****************\n";
     $b = new B;
-    $call = varray[$b,'staticMeth']; $call();    // B B
-    $call = varray[$b,'B::staticMeth']; $call(); // B B
+    $call = vec[$b,'staticMeth']; $call();    // B B
+    $call = vec[$b,'B::staticMeth']; $call(); // B B
     // $call = array($b,'C::staticMeth'); $call(); // expected fatal
     // $call = array($b,'D::staticMeth'); $call(); // expected fatal
     // $call = array($b,'F::staticMeth'); $call(); // expected fatal
     // $call = array($b,'G::staticMeth'); $call(); // expected fatal
     // $call = array($b,'H::staticMeth'); $call(); // expected fatal
-    $call = varray[$b,'parent::staticMeth']; $call(); // A B
-    $call = varray[$b,'self::staticMeth']; $call();   // B B
+    $call = vec[$b,'parent::staticMeth']; $call(); // A B
+    $call = vec[$b,'self::staticMeth']; $call();   // B B
     // $call = array($b,'static::staticMeth'); $call(); // expected fatal
     echo "****************\n";
     $g = new G;
-    call_user_func(varray[$g,'staticMeth']);    // G G
-    call_user_func(varray[$g,'B::staticMeth']); // warning
-    call_user_func(varray[$g,'C::staticMeth']); // warning
-    call_user_func(varray[$g,'D::staticMeth']); // warning
-    call_user_func(varray[$g,'F::staticMeth']); // F G
-    call_user_func(varray[$g,'G::staticMeth']); // G G
-    call_user_func(varray[$g,'H::staticMeth']); // warning
-    call_user_func(varray[$g,parent::class.'::staticMeth']); // F G
-    call_user_func(varray[$g,self::class.'::staticMeth']);   // G G
-    call_user_func(varray[$g,static::class.'::staticMeth']); // warning
+    call_user_func(vec[$g,'staticMeth']);    // G G
+    call_user_func(vec[$g,'B::staticMeth']); // warning
+    call_user_func(vec[$g,'C::staticMeth']); // warning
+    call_user_func(vec[$g,'D::staticMeth']); // warning
+    call_user_func(vec[$g,'F::staticMeth']); // F G
+    call_user_func(vec[$g,'G::staticMeth']); // G G
+    call_user_func(vec[$g,'H::staticMeth']); // warning
+    call_user_func(vec[$g,parent::class.'::staticMeth']); // F G
+    call_user_func(vec[$g,self::class.'::staticMeth']);   // G G
+    call_user_func(vec[$g,static::class.'::staticMeth']); // warning
     echo "****************\n";
     $g = new G;
-    $call = varray[$g,'staticMeth']; $call();    // G G
+    $call = vec[$g,'staticMeth']; $call();    // G G
     // $call = array($g,'B::staticMeth'); $call(); // warning
     // $call = array($g,'C::staticMeth'); $call(); // warning
     // $call = array($g,'D::staticMeth'); $call(); // warning
-    $call = varray[$g,'F::staticMeth']; $call(); // F G
-    $call = varray[$g,'G::staticMeth']; $call(); // G G
+    $call = vec[$g,'F::staticMeth']; $call(); // F G
+    $call = vec[$g,'G::staticMeth']; $call(); // G G
     // $call = array($g,'H::staticMeth'); $call(); // warning
-    $call = varray[$g,'parent::staticMeth']; $call(); // F G
-    $call = varray[$g,'self::staticMeth']; $call();   // G G
+    $call = vec[$g,'parent::staticMeth']; $call(); // F G
+    $call = vec[$g,'self::staticMeth']; $call();   // G G
     // $call = array($g,'static::staticMeth'); $call(); // warning
     echo "****************\n";
   }

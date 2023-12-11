@@ -19,5 +19,5 @@ function test($tr_data) :mixed{
 
 <<__EntryPoint>>
 function main_1845() :mixed{
-var_dump(test(darray['a' => 1, 'b' => 45]));
+var_dump(test(dict['a' => 1, 'b' => 45]));
 }

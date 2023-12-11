@@ -14,7 +14,7 @@ function VERIFY($x) :mixed{ VS($x != false, true); }
 function main_ext_zlib() :mixed{
 var_dump(readgzfile(__DIR__."/test_ext_zlib.gz"));
 
-VS(gzfile(__DIR__."/test_ext_zlib.gz"), varray["Testing Ext Zlib\n"]);
+VS(gzfile(__DIR__."/test_ext_zlib.gz"), vec["Testing Ext Zlib\n"]);
 
 VS(gzuncompress(gzcompress("testing gzcompress")), "testing gzcompress");
 

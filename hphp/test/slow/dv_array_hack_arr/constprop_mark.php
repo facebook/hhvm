@@ -2,7 +2,7 @@
 
 <<__EntryPoint>>
 function main() :mixed{
-  $a = varray[0];
+  $a = vec[0];
   $a = HH\array_mark_legacy($a);
   $a[0] += 10;
   var_dump($a);

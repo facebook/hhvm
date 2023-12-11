@@ -6,7 +6,7 @@ mkdir("$file_path/rename_variation");
 
 /* rename files across directories */
 echo "*** Testing rename() : rename files across directories ***\n";
-$src_filenames = varray[
+$src_filenames = vec[
   "$file_path/rename_variation/rename_variation.phpt.tmp",
 
   /* Testing a file trailing slash */

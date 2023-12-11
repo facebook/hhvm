@@ -19,7 +19,7 @@ class classA
 echo "*** Testing array_reverse() : usage variations ***\n";
 
 // Initialise the array
-$array = darray["a" => "green", 0 => "red", 1 => "blue", 2 => "red", 3 => "orange", 4 => "pink"];
+$array = dict["a" => "green", 0 => "red", 1 => "blue", 2 => "red", 3 => "orange", 4 => "pink"];
 
 
 //get a resource variable
@@ -42,11 +42,11 @@ $preserve_keys = varray [
        .5,
 
        // array data
-/*10*/ varray[],
-       varray[0],
-       varray[1],
-       varray[1, 2],
-       darray['color' => 'red', 'item' => 'pen'],
+/*10*/ vec[],
+       vec[0],
+       vec[1],
+       vec[1, 2],
+       dict['color' => 'red', 'item' => 'pen'],
 
        // null data
 /*15*/ NULL,

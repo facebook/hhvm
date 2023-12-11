@@ -38,7 +38,7 @@ function create($a, $b, $c) :mixed{
   create('a', null, 'b');
   create(1, 2, false);
   create(1, 2, 3.14);
-  create('a', 'b', varray[]);
+  create('a', 'b', vec[]);
   create(4, 3, vec[2, 1]);
   create(dict['a' => 1], 'a', 5);
   create(100, keyset['a', 'b'], 200);

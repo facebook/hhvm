@@ -6,10 +6,10 @@ function comp_func($a, $b) :mixed{
 
 }
 <<__EntryPoint>> function main(): void {
-$a = varray[1, 6, 2, -20, 15, 1200, -2500];
-$b = varray[0, 7, 2, -20, 11, 1100, -2500];
-$c = varray[0, 6, 2, -20, 19, 1000, -2500];
-$d = varray[3, 8,-2, -20, 14,  900, -2600];
+$a = vec[1, 6, 2, -20, 15, 1200, -2500];
+$b = vec[0, 7, 2, -20, 11, 1100, -2500];
+$c = vec[0, 6, 2, -20, 19, 1000, -2500];
+$d = vec[3, 8,-2, -20, 14,  900, -2600];
 $a_f = array_flip($a);
 $b_f = array_flip($b);
 $c_f = array_flip($c);

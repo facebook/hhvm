@@ -14,7 +14,7 @@ $timestamp = mktime(18, 8, 8, 8, 8, 2008);
 
 
 //array of values to iterate over
-$inputs = darray[
+$inputs = dict[
       'Day of the month as a decimal number' => "%d",
       'Day of the year as a decimal number' => "%j",
       'Day of the week as a decimal number' => "%w"

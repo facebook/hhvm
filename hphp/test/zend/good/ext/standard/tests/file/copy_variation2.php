@@ -15,7 +15,7 @@ fwrite( $file_handle, str_repeat(b"Hello2World...\n", 100) );
 fclose($file_handle);
 
 /* array of destination file names */
-$dest_files = varray[
+$dest_files = vec[
 
   /* File names containing special(non-alpha numeric) characters */
   "_copy_variation2.tmp", 

@@ -1,14 +1,14 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$ctxs = varray[
+$ctxs = vec[
 	NULL,
 	'bogus',
 	123,
 	new stdClass,
-	varray['a'],
+	vec['a'],
 	stream_context_create(),
-	stream_context_create(darray[0 => 'file']),
-	stream_context_create(darray['file' => darray['some_opt' => 'aaa']])
+	stream_context_create(dict[0 => 'file']),
+	stream_context_create(dict['file' => dict['some_opt' => 'aaa']])
 ];
 
 

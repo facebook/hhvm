@@ -27,7 +27,7 @@ UTF-8
 EOT;
 
 // unexpected values to be passed to $encoding argument
-$inputs = varray[
+$inputs = vec[
 
        // int data
 /*1*/  0,

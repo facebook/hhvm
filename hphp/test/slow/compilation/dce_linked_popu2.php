@@ -9,5 +9,5 @@ function f($k) :mixed{
 }
 
 function t(HH\arraykey $k) :mixed{
-  return f(darray[HH\array_key_cast($k) => $k]);
+  return f(dict[HH\array_key_cast($k) => $k]);
 }

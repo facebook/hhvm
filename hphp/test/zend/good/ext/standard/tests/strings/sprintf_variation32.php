@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : octal formats with string values ***\n";
 
 // array of string values 
-$string_values = varray[
+$string_values = vec[
   "",
   '',
   "0",
@@ -30,7 +30,7 @@ $string_values = varray[
 ];
 
 // array of octal formats
-$octal_formats = varray[ 
+$octal_formats = vec[ 
   "%o", "%ho", "%lo", 
   "%Lo", " %o", "%o ",                        
   "\t%o", "\n%o", "%4o",

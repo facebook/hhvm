@@ -3,10 +3,10 @@
 
 //This makes reading the output easier for debugging
 function escapeNewLine($string) :mixed{
-  return str_replace(varray["\n", "\r"], varray['\n', '\r'], $string);
+  return str_replace(vec["\n", "\r"], vec['\n', '\r'], $string);
 }
 <<__EntryPoint>> function main(): void {
-$stringList = varray[
+$stringList = vec[
   "Test\nString",
   "Test\rString",
   "Test\n\rString",

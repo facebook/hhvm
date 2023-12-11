@@ -1,7 +1,7 @@
 <?hh
 class Node {
     public $parent = NULL;
-    public $childs = varray[];
+    public $childs = vec[];
 
     function __construct(?Node $parent=NULL) {
         if ($parent) {

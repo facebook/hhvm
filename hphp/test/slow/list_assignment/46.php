@@ -7,5 +7,5 @@ function test($a, $b, $i) :mixed{
 
 <<__EntryPoint>>
 function main_46() :mixed{
-test(darray[], varray['x', 'y', 'z'], 0);
+test(dict[], vec['x', 'y', 'z'], 0);
 }

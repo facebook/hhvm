@@ -52,7 +52,7 @@ EOT;
 echo "*** Testing uasort() : different string arrays as 'array_arg' ***\n";
 
 // Single quoted strings
-$single_quoted_values = darray[
+$single_quoted_values = dict[
   0 => ' ', 1 => 'test', 3 => 'Hello', 4 => 'HELLO',
   5 => '', 6 => '\t', 7 => '0', 8 => '123Hello', 9 => '\'', 10 => '@#$%'
 ];
@@ -61,7 +61,7 @@ var_dump( uasort(inout $single_quoted_values, cmp_function<>) );  // expecting: 
 var_dump($single_quoted_values);
 
 // Double quoted strings
-$double_quoted_values = darray[
+$double_quoted_values = dict[
   0 => " ", 1 => "test", 3 => "Hello", 4 => "HELLO",
   5 => "", 6 => "\t", 7 => "0", 8 => "123Hello", 9 => "\"", 10 => "@#$%"
 ];
@@ -70,7 +70,7 @@ var_dump( uasort(inout $double_quoted_values, cmp_function<>) );  // expecting: 
 var_dump($double_quoted_values);
 
 // Heredoc strings
-$heredoc_values = darray[0 => $empty_heredoc, 1 => $simple_heredoc1, 2 => $simple_heredoc2, 3 => $multiline_heredoc];
+$heredoc_values = dict[0 => $empty_heredoc, 1 => $simple_heredoc1, 2 => $simple_heredoc2, 3 => $multiline_heredoc];
 echo "-- Sorting Heredoc String values --\n";
 var_dump( uasort(inout $heredoc_values, cmp_function<>) );  // expecting: bool(true)
 var_dump($heredoc_values);

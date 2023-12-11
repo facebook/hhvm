@@ -13,8 +13,8 @@ function main($arr) :mixed{
 
 <<__EntryPoint>>
 function main_bug_5593564() :mixed{
-$packed = varray[1,2,3];
-$mixed = darray[(1 << 33) => varray["value"]];
+$packed = vec[1,2,3];
+$mixed = dict[(1 << 33) => vec["value"]];
 
 main($packed);
 main($mixed);

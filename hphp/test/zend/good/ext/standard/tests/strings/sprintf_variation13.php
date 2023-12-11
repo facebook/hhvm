@@ -31,7 +31,7 @@ $string_values = varray [
 ];
 
 // various float formats
-$float_formats = varray[
+$float_formats = vec[
   "%f", "%hf", "%lf", 
   "%Lf", " %f", "%f ", 
   "\t%f", "\n%f", "%4f",

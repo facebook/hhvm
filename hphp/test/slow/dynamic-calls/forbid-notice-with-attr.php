@@ -23,7 +23,7 @@ function test() :mixed{
   $foo = 'foo';
   $a_obj = new A();
   $a_bar = 'A::bar';
-  $a_foo = varray[new A, 'foo'];
+  $a_foo = vec[new A, 'foo'];
   $a = 'A';
   $bar = 'bar';
 
@@ -41,7 +41,7 @@ function test() :mixed{
   $corge = 'corge';
   $a1_obj = new A1();
   $a1_flob = 'A1::flob';
-  $a1_corge = varray[new A1, 'corge'];
+  $a1_corge = vec[new A1, 'corge'];
   $a1 = 'A1';
   $flob = 'flob';
 

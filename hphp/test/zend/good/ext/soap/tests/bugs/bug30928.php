@@ -31,12 +31,12 @@ function main_entry(): void {
   ini_set("soap.wsdl_cache_enabled", 0);
 
   $x = new LocalSoapClient(dirname(__FILE__)."/bug30928.wsdl",
-                           darray[]);
-  var_dump($x->__soapcall('test', varray[new foo()]));
+                           dict[]);
+  var_dump($x->__soapcall('test', vec[new foo()]));
 
   $x = new LocalSoapClient(dirname(__FILE__)."/bug30928.wsdl",
-                           darray["classmap" => darray['testType'=>'foo']]);
-  var_dump($x->__soapcall('test', varray[new foo()]));
+                           dict["classmap" => dict['testType'=>'foo']]);
+  var_dump($x->__soapcall('test', vec[new foo()]));
 
   echo "ok\n";
 }

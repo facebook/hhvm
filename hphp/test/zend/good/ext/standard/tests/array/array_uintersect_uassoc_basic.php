@@ -18,8 +18,8 @@ class cr {
     }
 }
 <<__EntryPoint>> function main(): void {
-$a = darray["0.1" => new cr(9), "0.5" => new cr(12), 0 => new cr(23), 1 => new cr(4), 2 => new cr(-15),];
-$b = darray["0.2" => new cr(9), "0.5" => new cr(22), 0 => new cr(3), 1 => new cr(4), 2 => new cr(-15),];
-$result = array_uintersect_uassoc($a, $b, varray["cr", "comp_func_cr"], varray["cr", "comp_func_key"]);
+$a = dict["0.1" => new cr(9), "0.5" => new cr(12), 0 => new cr(23), 1 => new cr(4), 2 => new cr(-15),];
+$b = dict["0.2" => new cr(9), "0.5" => new cr(22), 0 => new cr(3), 1 => new cr(4), 2 => new cr(-15),];
+$result = array_uintersect_uassoc($a, $b, vec["cr", "comp_func_cr"], vec["cr", "comp_func_key"]);
 var_dump($result);
 }

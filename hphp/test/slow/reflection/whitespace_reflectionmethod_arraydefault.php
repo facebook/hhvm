@@ -1,7 +1,7 @@
 <?hh
 
 class Herp {
-  function derp($derp = varray[1,2,3]) :mixed{}
+  function derp($derp = vec[1,2,3]) :mixed{}
 }
 
 

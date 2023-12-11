@@ -6,20 +6,20 @@ function get_int() :mixed{
 }
 
 function get_sarr() :mixed{
-  return varray[1, 2, 3];
+  return vec[1, 2, 3];
 }
 function get_arrn() :mixed{
-  return varray[get_int(), get_int(), get_int()];
+  return vec[get_int(), get_int(), get_int()];
 }
 function get_arre() :mixed{
-  return varray[];
+  return vec[];
 }
 function get_single_arr() :mixed{
-  return varray[10];
+  return vec[10];
 }
 
 function get_packedn() :mixed{
-  $a = varray[1];
+  $a = vec[1];
   for ($i = 0; $i < __hhvm_intrinsics\launder_value(3); $i++) {
     $a[] = get_int();
   }
@@ -27,11 +27,11 @@ function get_packedn() :mixed{
 }
 
 function get_map() :mixed{
-  return darray['a' => get_int(), 'b' => get_int(), 'c' => get_int()];
+  return dict['a' => get_int(), 'b' => get_int(), 'c' => get_int()];
 }
 
 function get_mapn() :mixed{
-  $a = darray[
+  $a = dict[
     __hhvm_intrinsics\launder_value('a') => get_int(),
     __hhvm_intrinsics\launder_value('b') => get_int(),
     __hhvm_intrinsics\launder_value('c') => get_int(),
@@ -60,7 +60,7 @@ function get_obj() :mixed{
 }
 
 function get_anything() :mixed{
-  return __hhvm_intrinsics\launder_value(varray[1, 2, 3]);
+  return __hhvm_intrinsics\launder_value(vec[1, 2, 3]);
 }
 
 function fun1() :mixed{

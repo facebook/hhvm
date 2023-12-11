@@ -1,7 +1,7 @@
 <?hh
 
 class C { function heh() :mixed{ echo "heh\n"; } }
-function foo() :mixed{ return darray[]; }
+function foo() :mixed{ return dict[]; }
 function some_int() :mixed{ return mt_rand() ? 1 : 2; }
 function bar() :mixed{
   $x = foo();

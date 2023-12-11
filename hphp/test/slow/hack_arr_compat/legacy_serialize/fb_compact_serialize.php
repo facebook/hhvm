@@ -44,8 +44,8 @@ function test($value) :mixed{
 
 <<__EntryPoint>>
 function main() :mixed{
-  test(varray[]);
-  test(varray[varray[]]);
-  test(darray(varray[17, 34]));
-  test(varray[darray(varray[17, 34])]);
+  test(vec[]);
+  test(vec[vec[]]);
+  test(darray(vec[17, 34]));
+  test(vec[darray(vec[17, 34])]);
 }

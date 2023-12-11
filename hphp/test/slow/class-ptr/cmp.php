@@ -29,12 +29,12 @@ function comp($x, $y) :mixed{
 }
 
 function getTestcase(int $num) :mixed{
-  $test_cases = varray[
+  $test_cases = vec[
     true, false, 0, 1, 0.0, 1.0, "foo",
     darray(vec['foo']),
-    varray['foo'],
     vec['foo'],
-    darray[0 => 'foo'],
+    vec['foo'],
+    dict[0 => 'foo'],
     dict[0 => 'foo'],
     keyset['foo'],
   ];

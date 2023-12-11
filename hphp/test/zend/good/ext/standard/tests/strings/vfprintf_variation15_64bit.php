@@ -12,7 +12,7 @@
 echo "*** Testing vfprintf() : unsigned formats and unsigned values ***\n";
 
 // defining array of unsigned formats
-$formats = varray[
+$formats = vec[
   '%u %+u %-u', 
   '%lu %Lu %4u %-4u',
   '%10.4u %-10.4u %.4u', 
@@ -22,12 +22,12 @@ $formats = varray[
 
 // Arrays of unsigned values for the format defined in $format.
 // Each sub array contains unsigned values which correspond to each format string in $format
-$args_array = varray[
-  varray[1234567, 01234567, 0 ],
-  varray[12345678900, 12345678900, 1234, 12345],
-  varray["1234000", 10.1234567e10, 1.2e2],
-  varray[1, 0, 00, "10_"],
-  varray[3, 4, 1, 2]
+$args_array = vec[
+  vec[1234567, 01234567, 0 ],
+  vec[12345678900, 12345678900, 1234, 12345],
+  vec["1234000", 10.1234567e10, 1.2e2],
+  vec[1, 0, 00, "10_"],
+  vec[3, 4, 1, 2]
 ];
 
 /* creating dumping file */

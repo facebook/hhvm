@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$keys = varray[
+$keys = vec[
   1234,
   'foo',
   1.234,

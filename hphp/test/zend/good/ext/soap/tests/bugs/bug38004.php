@@ -32,7 +32,7 @@ function main_entry(): void {
   $strB = 'test & test';
   $res = $client->__soapcall(
     'Test',
-    varray[darray['strA'=>$strA, 'strB'=>$strB]],
+    vec[dict['strA'=>$strA, 'strB'=>$strB]],
   );
   print_r($res);
   print_r(ZendGoodExtSoapTestsBugsBug38004::$g);

@@ -23,7 +23,7 @@ multiline heredoc with 123 and
 speci@! ch@r$..checking\nwith\talso
 EOT7;
 
-$input = darray[
+$input = dict[
   // numeric values
   'int_value' => 1,
   'negative_value' => -2,

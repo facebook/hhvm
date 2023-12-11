@@ -15,9 +15,9 @@ function reverse($input) :mixed{
 }
 
 function main() :mixed{
-  reverse(varray['foo', 'bar', 'baz']);
-  reverse(darray['a' => 'foo', 'b' => 'bar', 'c' => 'baz']);
-  reverse(darray[10 => 'foo', 20 => 'bar', 30 => 'baz']);
+  reverse(vec['foo', 'bar', 'baz']);
+  reverse(dict['a' => 'foo', 'b' => 'bar', 'c' => 'baz']);
+  reverse(dict[10 => 'foo', 20 => 'bar', 30 => 'baz']);
   reverse(Vector {'foo', 'bar', 'baz'});
   reverse(Set {'foo', 'bar', 'baz'});
   reverse(Map { 'a' => 'foo', 'b' => 'bar', 'c' => 'baz'});

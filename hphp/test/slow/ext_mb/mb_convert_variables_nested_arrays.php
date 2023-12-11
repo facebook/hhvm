@@ -3,9 +3,9 @@
 
 <<__EntryPoint>>
 function main_mb_convert_variables_nested_arrays() :mixed{
-$a = darray[
-  'test' => darray[
-    'sub_test' => varray[
+$a = dict[
+  'test' => dict[
+    'sub_test' => vec[
 
     ],
   ],

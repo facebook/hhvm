@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_228() :mixed{
-$foo = varray[1,2,3,4];
+$foo = vec[1,2,3,4];
 foreach ($foo as $key => $val) {
   if($val == 2) {
     $foo[$key] = 0;

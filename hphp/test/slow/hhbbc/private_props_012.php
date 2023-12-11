@@ -1,7 +1,7 @@
 <?hh
 
 class X {
-  private $x    = varray[null];
+  private $x    = vec[null];
   private $prop = "string";
 
   public function foo() :mixed{

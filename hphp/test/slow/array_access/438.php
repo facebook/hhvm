@@ -8,13 +8,13 @@ function test($x) :mixed{
   var_dump($a, $b);
   $a = $x;
   $b = $a;
-  $a[0] = darray[];
+  $a[0] = dict[];
   $a[0][1] = 1;
   var_dump($a, $b);
   }
 
 <<__EntryPoint>>
 function main_438() :mixed{
-test(varray[false]);
-var_dump(varray[false]);
+test(vec[false]);
+var_dump(vec[false]);
 }

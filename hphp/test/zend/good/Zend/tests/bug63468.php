@@ -1,7 +1,7 @@
 <?hh
 class Foo {
   public function run() :mixed{
-    return call_user_func(varray['Bar', 'getValue']);
+    return call_user_func(vec['Bar', 'getValue']);
   }
 
   <<__DynamicallyCallable>> private static function getValue() :mixed{

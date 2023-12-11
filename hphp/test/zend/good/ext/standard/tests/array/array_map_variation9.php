@@ -14,13 +14,13 @@ function callback1($a)
 <<__DynamicallyCallable>>
 function callback2($a, $b)
 :mixed{
-  return darray[$a => $b];
+  return dict[$a => $b];
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : array with binary data for 'arr1' argument ***\n";
 
 // array with binary data
-$arr1 = varray[b"hello", b"world", "1", b"22.22"];
+$arr1 = vec[b"hello", b"world", "1", b"22.22"];
 
 echo "-- checking binary safe array with one parameter callback function --\n";
 var_dump( array_map(callback1<>, $arr1) );

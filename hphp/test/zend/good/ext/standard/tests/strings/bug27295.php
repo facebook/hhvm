@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$strings = varray["foo = bar", "bar = foo"];
+$strings = vec["foo = bar", "bar = foo"];
 foreach( $strings as $string )
 {
     list($var, $val) = sscanf( $string, "%s = %[^[]]");

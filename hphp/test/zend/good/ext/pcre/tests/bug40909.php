@@ -4,7 +4,7 @@ $pattern =
 "/\s([\w_\.\/]+)(?:=([\'\"]?(?:[\w\d\s\?=\(\)\.,'_#\/\\:;&-]|(?:\\\\\"|\\\')?)+[\'\"]?))?/";
 $context = "<simpletag an_attribute=\"simpleValueInside\">";
 
-$match = varray[];
+$match = vec[];
 
   if ($result = preg_match_all_with_matches($pattern, $context, inout $match)) {
 

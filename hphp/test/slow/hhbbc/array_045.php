@@ -1,7 +1,7 @@
 <?hh
 
 function foo() :mixed{
-  return mt_rand() ? varray[1,2,3] : varray[2,3,4];
+  return mt_rand() ? vec[1,2,3] : vec[2,3,4];
 }
 function bar() :mixed{
   $x = darray(foo());

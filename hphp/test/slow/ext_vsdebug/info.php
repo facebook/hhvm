@@ -1,16 +1,16 @@
 <?hh
 
 function getInfo($sym) :mixed{
-  $command = darray[
+  $command = dict[
     "command" => "info",
     "type" => "request",
-    "arguments" => darray[
+    "arguments" => dict[
       "object" => $sym,
       "threadId" => 1,
     ]];
 
   $seq = sendVsCommand($command);
-  $response = darray[
+  $response = dict[
     "type" => "response",
     "command" => "info",
     "success" => true,
@@ -26,12 +26,12 @@ function getInfo($sym) :mixed{
 require(__DIR__ . '/common.inc');
 $path = __FILE__ . ".test";
 
-$breakpoints = varray[
-   darray[
+$breakpoints = vec[
+   dict[
      "path" => __FILE__ . ".test",
-     "breakpoints" => varray[
-       darray["line" => 7, "calibratedLine" => 7, "condition" => ""],
-       darray["line" => 12, "calibratedLine" => 12, "condition" => ""],
+     "breakpoints" => vec[
+       dict["line" => 7, "calibratedLine" => 7, "condition" => ""],
+       dict["line" => 12, "calibratedLine" => 12, "condition" => ""],
      ]]
    ];
 

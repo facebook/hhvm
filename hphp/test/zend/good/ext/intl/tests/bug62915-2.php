@@ -1,16 +1,16 @@
 <?hh
 class A extends IntlDateFormatter {
-        public static $ARGS = varray["en_US" ,IntlDateFormatter::FULL, IntlDateFormatter::FULL,
+        public static $ARGS = vec["en_US" ,IntlDateFormatter::FULL, IntlDateFormatter::FULL,
             'America/Los_Angeles', IntlDateFormatter::GREGORIAN];
 }
 class B extends NumberFormatter {
-        public static $ARGS = varray['de_DE', NumberFormatter::DECIMAL];
+        public static $ARGS = vec['de_DE', NumberFormatter::DECIMAL];
 }
 class C extends MessageFormatter {
-        public static $ARGS = varray["en_US", "foo"];
+        public static $ARGS = vec["en_US", "foo"];
 }
 class D extends SpoofChecker {
-        public static $ARGS = varray[];
+        public static $ARGS = vec[];
 }
 <<__EntryPoint>> function main(): void {
 foreach (range('A', 'D') as $subclass) {

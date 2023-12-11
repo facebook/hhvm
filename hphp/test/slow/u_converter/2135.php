@@ -13,7 +13,7 @@ class MyConverter extends UConverter {
 
 function main() :mixed{
   using ($c = new MyConverter('ascii', 'utf-8')) {
-    $words = varray[
+    $words = vec[
       "regular",
       "irregul\xC1\xA1r",
       "\xC2\xA1unsupported!",

@@ -11,7 +11,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing base64_encode() : basic functionality ***\n";
 
-$values = varray[
+$values = vec[
     "Hello World",
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!%^&*(){}[]",
     "\n\t Line with control characters\r\n",

@@ -1,7 +1,7 @@
 <?hh
 function foo() :mixed{
   $x = new stdClass();
-  $x->bar = darray[0 => 1];
+  $x->bar = dict[0 => 1];
   return $x;
 }
 <<__EntryPoint>> function main(): void {

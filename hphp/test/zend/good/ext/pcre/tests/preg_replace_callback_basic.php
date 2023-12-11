@@ -8,7 +8,7 @@
 */
 function integer_word($matches) :mixed{
   // Maps from key values (0-9) to corresponding key written in words.
-  $replacement = varray['zero', 'one', 'two', 'three', 'four',
+  $replacement = vec['zero', 'one', 'two', 'three', 'four',
                        'five', 'six', 'seven', 'eight', 'nine'];
   // All examples will be looking for an integer value, if one is found it
   // will be stored in $matches[0] which corresponds to a key in the

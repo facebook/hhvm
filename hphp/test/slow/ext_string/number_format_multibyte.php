@@ -3,9 +3,9 @@
 
 <<__EntryPoint>>
 function main_number_format_multibyte() :mixed{
-$separators = darray[
-  'multichar' => varray['herp', 'derp'],
-  'multibyte' => varray['¡', '×']
+$separators = dict[
+  'multichar' => vec['herp', 'derp'],
+  'multibyte' => vec['¡', '×']
 ];
 
 var_dump(

@@ -35,7 +35,7 @@ try { var_dump( escapeshellarg($fp)); } catch (Exception $e) { echo "\n".'Warnin
 fclose($fp);
 
 echo "\n-- Testing escapeshellarg() function with a array supplied for argument --\n";
-$arg = varray[1,2,3];
+$arg = vec[1,2,3];
 try { var_dump( escapeshellarg($arg)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "===Done===";
 }

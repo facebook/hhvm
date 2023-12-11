@@ -6,9 +6,9 @@ class CatWrapper {
   private darray $pipes;
 
   public function __construct() {
-    $descriptorspec = darray[
-      0 => varray["pipe", "r"],
-      1 => varray["pipe", "w"],
+    $descriptorspec = dict[
+      0 => vec["pipe", "r"],
+      1 => vec["pipe", "w"],
     ];
     $__pipes = $this->pipes;
     $this->proc = proc_open("cat", $descriptorspec, inout $__pipes);

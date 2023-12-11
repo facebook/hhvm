@@ -5,7 +5,7 @@
 
 function get_instances(string $cls, ?darray $objs) :mixed{
   if (!$objs) return 0;
-  return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]), "instances", 0);
+  return hphp_array_idx(hphp_array_idx($objs, $cls, vec[]), "instances", 0);
 }
 function get_bytes_eq(string $cls, ?darray $objs) :mixed{
   if (!$objs) return 0;
@@ -18,11 +18,11 @@ function get_bytes_eq(string $cls, ?darray $objs) :mixed{
 }
 function get_bytes(string $cls, ?darray $objs) :mixed{
   if (!$objs) return 0;
-  return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]), "bytes", 0);
+  return hphp_array_idx(hphp_array_idx($objs, $cls, vec[]), "bytes", 0);
 }
 function get_bytesd(string $cls, ?darray $objs) :mixed{
   if (!$objs) return 0;
-  return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]),
+  return hphp_array_idx(hphp_array_idx($objs, $cls, vec[]),
     "bytes_normalized", 0);
 }
 function getStr(int $len): string {
@@ -48,14 +48,14 @@ class SimpleProps { // 16+16+16 = 48
 
 // TEST: sizes of arrays
 class SimpleArrays {
-  public varray $arrEmpty = varray[]; // 16 (tv) static
-  public darray $arrMixed = darray[ // 16 (tv) static
+  public varray $arrEmpty = vec[]; // 16 (tv) static
+  public darray $arrMixed = dict[ // 16 (tv) static
     "somekey" => "someval",
     321 => 3,
   ];
-  public varray<int> $arrNums = varray[];
+  public varray<int> $arrNums = vec[];
   function __construct() {
-    $this->arrNums = varray[
+    $this->arrNums = vec[
       2012,
       2013,
       rand(1, 2)
@@ -241,7 +241,7 @@ echo get_bytes('SharedStringClass', $objs) == 2 * ($ObjSize + 9 + 16)  && // 114
 $objs = null;
 
 // TEST: multiple ref counted arrays
-$my_arr = darray[ // 32 + 88 = 120
+$my_arr = dict[ // 32 + 88 = 120
   getStr(4) => getStr(8), // 4 + 8 + 16 + 16 = 44
   getStr(5) => getStr(7), // 5 + 7 + 16 + 16 = 44
 ];
@@ -262,8 +262,8 @@ $myClass = null;
 $myClass2 = null;
 
 // TEST: multiple ref counted nested arrays
-$my_arr = varray[ // 32 + 76 = 108
-  darray[getStr(4) => getStr(8)], // 4 + 8 + 16 + 16 = 44 + 32 = 76
+$my_arr = vec[ // 32 + 76 = 108
+  dict[getStr(4) => getStr(8)], // 4 + 8 + 16 + 16 = 44 + 32 = 76
 ];
 $myClass = new NestedArrayClass($my_arr);
 $my_arr = null;

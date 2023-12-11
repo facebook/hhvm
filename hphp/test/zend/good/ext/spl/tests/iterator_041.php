@@ -17,7 +17,7 @@ class MyArrayIterator extends ArrayIterator
     {
         $this->state = MyArrayIterator::$fail;
         self::fail(0, __FUNCTION__);
-        parent::__construct(varray[1, 2]);
+        parent::__construct(vec[1, 2]);
         self::fail(1, __FUNCTION__);
     }
 
@@ -79,7 +79,7 @@ class MyArrayIterator extends ArrayIterator
 }
 <<__EntryPoint>> function main(): void {
 MyArrayIterator::test('iterator_to_array');
-MyArrayIterator::test('iterator_count', darray[3 => 6]);
+MyArrayIterator::test('iterator_count', dict[3 => 6]);
 
 echo "===DONE===\n";
 }

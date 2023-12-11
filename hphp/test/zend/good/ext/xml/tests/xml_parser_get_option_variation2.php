@@ -22,7 +22,7 @@ function entrypoint_xml_parser_get_option_variation2(): void {
   $fp = fopen(__FILE__, "r");
 
   //array of values to iterate over
-  $values = varray[
+  $values = vec[
 
         // outside of range int data
         12345,

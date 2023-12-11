@@ -4,7 +4,7 @@ class c {}
 
 <<__EntryPoint>>
 function main_164() :mixed{
-$a = darray['x'=>'foo'];
+$a = dict['x'=>'foo'];
 $b = 'qqq';
 $c = new c;
 $c->p = 'zzz';

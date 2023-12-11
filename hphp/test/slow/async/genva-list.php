@@ -7,7 +7,7 @@ async function foo($x, $suspend = false, $throw = false) :Awaitable<mixed>{
 }
 
 async function bar($x) :Awaitable<mixed>{
-  return varray[$x + 1, varray[$x + 2, $x + 3]];
+  return vec[$x + 1, vec[$x + 2, $x + 3]];
 }
 
 async function herp() :Awaitable<mixed>{

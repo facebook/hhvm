@@ -19,7 +19,7 @@ class classA
 <<__EntryPoint>> function main(): void {
 echo "\n*** Testing array_diff_assoc() : usage variations ***\n";
 
-$array = varray[1, 2, 3];
+$array = vec[1, 2, 3];
 
 
 // heredoc string
@@ -28,11 +28,11 @@ hello world
 EOT;
 
 //array of different data types to be passed to $arr1 argument
-$inputs = darray[
+$inputs = dict[
 
        // int data
 /*1*/
-'int' => varray[
+'int' => vec[
        0,
        1,
        12345,
@@ -40,7 +40,7 @@ $inputs = darray[
 
        // float data
 /*2*/
-'float' => varray[
+'float' => vec[
        10.5,
        -10.5,
        12.3456789000e10,
@@ -49,13 +49,13 @@ $inputs = darray[
 
        // null data
 /*3*/
-'null' => varray[
+'null' => vec[
        NULL,
        null],
 
        // boolean data
 /*4*/
-'bool' => varray[
+'bool' => vec[
        true,
        false,
        TRUE,
@@ -63,26 +63,26 @@ $inputs = darray[
 
        // empty data
 /*5*/
-'empty' => varray[
+'empty' => vec[
        "",
        ''],
 
        // string data
 /*6*/
-'string' => varray[
+'string' => vec[
        "string",
        'string',
        $heredoc],
 
        // binary data
 /*7*/
-'binary' => varray[
+'binary' => vec[
        b"binary",
        (string)"binary"],
 
        // object data
 /*8*/
-'object' => varray[
+'object' => vec[
       new classA()]
 ];
 

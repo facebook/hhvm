@@ -8,12 +8,12 @@ class C {
 
 class D {
   public function __toDebugDisplay() :mixed{
-    return darray['c'=>new C()];
+    return dict['c'=>new C()];
   }
 }
 
 <<__EntryPoint>> function main() :mixed{
-$a = darray[];
+$a = dict[];
 for ($i = 0; $i < 20; $i++) { $a[$i] = $i; }
 $s = "hello";
 $ch = curl_init();

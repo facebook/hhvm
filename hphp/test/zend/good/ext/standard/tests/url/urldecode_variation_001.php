@@ -17,7 +17,7 @@ echo "*** Testing urldecode() : usage variations ***\n";
 // Initialise function arguments not being substituted (if any)
 
 //array of values to iterate over
-$values = varray[
+$values = vec[
 
       // int data
       0,

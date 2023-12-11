@@ -14,7 +14,7 @@ function wrap_exception(callable $f) :mixed{
 
 function main() :mixed{
   // All of these should throw.
-  $funcs = varray[
+  $funcs = vec[
     function ($fm) {
       $fm['a'] = 1;
     },

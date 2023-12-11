@@ -19,7 +19,7 @@ function f($x) :mixed{
 
 <<__EntryPoint>>
 function main_1853() :mixed{
-f(varray[]);
-f(varray[0, 1]);
-f(varray[darray[1 => 1]]);
+f(vec[]);
+f(vec[0, 1]);
+f(vec[dict[1 => 1]]);
 }

@@ -4,7 +4,7 @@ function foo($a, $b, $c) :mixed{
 }
 function bar($a) :mixed{
   foo($a, $a++, $a);
-  $arr = varray[$a, $a++, $a];
+  $arr = vec[$a, $a++, $a];
   var_dump($arr);
 }
 

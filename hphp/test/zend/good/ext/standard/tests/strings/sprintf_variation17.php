@@ -17,7 +17,7 @@ $resource_values = varray [
 ];
 
 // array of string formats
-$string_formats = varray[ 
+$string_formats = vec[ 
   "%s", "%hs", "%ls", 
   "%Ls"," %s", "%s ", 
   "\t%s", "\n%s", "%4s",

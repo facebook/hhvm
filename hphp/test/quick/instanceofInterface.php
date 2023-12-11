@@ -28,5 +28,5 @@ function array_some(darray $array) :mixed{
 $a = new C1;
 
 var_dump( array_some(array_map(function($v) { return $v is Interf2; },
-                     varray[$a])) );
+                     vec[$a])) );
 }

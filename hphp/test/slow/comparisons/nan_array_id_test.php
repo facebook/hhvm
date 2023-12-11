@@ -54,13 +54,13 @@ function test_pair($k1, $v1, $k2, $v2) :mixed{
 
 <<__EntryPoint>>
 function main(): void {
-  $make_nan_array = () ==> varray[1, NAN];
+  $make_nan_array = () ==> vec[1, NAN];
   $arr1 = $make_nan_array();
   $arr2 = $make_nan_array();
-  $arr3 = varray[NAN, 1];
-  $arr4 = varray[1, NAN, 2];
+  $arr3 = vec[NAN, 1];
+  $arr4 = vec[1, NAN, 2];
 
-  $arr = darray['array arr1' => $arr1, 'array arr2' => $arr2,
+  $arr = dict['array arr1' => $arr1, 'array arr2' => $arr2,
                 'array arr3' => $arr3, 'array arr4' => $arr4];
 
   foreach ($arr as $k1 => $v1) {

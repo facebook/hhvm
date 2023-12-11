@@ -15,7 +15,7 @@ function main() :mixed{
   set_error_handler(handle_error<>);
 
   print("\n===================================\nTesting tuple:\n");
-  print("\nUsing empty tuple:\n"); $tuple = varray[];
+  print("\nUsing empty tuple:\n"); $tuple = vec[];
   print('varray: '); var_dump(varray($tuple) is (int, int));
   print('darray: '); var_dump(darray($tuple) is (int, int));
   print('vec:    '); var_dump(vec($tuple)    is (int, int));
@@ -43,7 +43,7 @@ function main() :mixed{
   print('keyset: '); var_dump(keyset($shape) is shape('a' => int));
 
   print("\n===================================\nTesting open shape:\n");
-  print("\nUsing empty shape:\n"); $shape = darray[];
+  print("\nUsing empty shape:\n"); $shape = dict[];
   print('varray: '); var_dump(varray($shape) is shape(...));
   print('darray: '); var_dump(darray($shape) is shape(...));
   print('vec:    '); var_dump(vec($shape)    is shape(...));

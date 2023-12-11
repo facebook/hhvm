@@ -19,5 +19,5 @@ function main() :mixed{
   test('a', 'b', null);
   test('a', 'b', new stdClass());
   // FIXME(t4599379): This is a Traversable
-  test('a', 'b', new ArrayIterator(varray['c', 'd', 'e']));
+  test('a', 'b', new ArrayIterator(vec['c', 'd', 'e']));
 }

@@ -13,10 +13,10 @@ function main() :mixed{
   $test_cases = vec[
     new NoProps(),
     new OneProp(),
-    varray[new NoProps()],
-    varray[new OneProp()],
-    new OneProp(varray[new NoProps()]),
-    varray[new OneProp(varray[new NoProps()])],
+    vec[new NoProps()],
+    vec[new OneProp()],
+    new OneProp(vec[new NoProps()]),
+    vec[new OneProp(vec[new NoProps()])],
   ];
   foreach ($test_cases as $test_case) {
     print("============================================\n");

@@ -26,7 +26,7 @@ $xmlstr = <<<XML
 </movies>
 XML;
 
-$Array = varray[ ];
+$Array = vec[ ];
 for( $XX = 0; $XX < 2000; ++$XX )
 {
  $Array[] = $xml = new SimpleXMLElement($xmlstr);

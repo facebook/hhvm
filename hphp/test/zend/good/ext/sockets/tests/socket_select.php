@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$sockets = varray[];
+$sockets = vec[];
 if (strtolower(substr(PHP_OS, 0, 3)) == 'win') {
     $domain = AF_INET;
 } else {

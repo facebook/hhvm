@@ -42,9 +42,9 @@ $formats =  varray [
           10.1234567e10,
 
           // array values
-/*10*/      varray[],
-          varray[0],
-          varray[1, 2],
+/*10*/      vec[],
+          vec[0],
+          vec[1, 2],
 
           // boolean values
 /*13*/      true,

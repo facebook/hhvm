@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_arsort() :mixed{
-$fruits = darray[
+$fruits = dict[
   "d" => "lemon",
   "a" => "orange",
   "b" => "banana",
@@ -13,7 +13,7 @@ arsort(inout $fruits);
 var_dump($fruits);
 
 
-$fruits = darray[
+$fruits = dict[
   "d" => "lemon",
   "a" => "orange",
   "b" => "banana",
@@ -23,7 +23,7 @@ ksort(inout $fruits);
 var_dump($fruits);
 
 
-$fruits = darray[
+$fruits = dict[
   "d" => "lemon",
   "a" => "orange",
   "b" => "banana",

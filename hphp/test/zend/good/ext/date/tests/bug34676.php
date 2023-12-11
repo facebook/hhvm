@@ -1,7 +1,7 @@
 <?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set("UTC");
 
-$tests = varray[
+$tests = vec[
     'noon', 'midnight'
 ];
 

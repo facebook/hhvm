@@ -7,22 +7,22 @@
 echo "*** Testing array_diff_ukey() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$array1 = darray[
+$array1 = dict[
 
-      'first' => darray['blue' => 1, 'red' => 2],
+      'first' => dict['blue' => 1, 'red' => 2],
 
-      'second' => darray['yellow' => 7],
+      'second' => dict['yellow' => 7],
 
-      'third' => darray[0 => 'zero'],
+      'third' => dict[0 => 'zero'],
 ];
 
 $array2 = darray [
 
-      'first' => darray['blue' => 1, 'red' => 2,],
+      'first' => dict['blue' => 1, 'red' => 2,],
 
-      'second' => darray['cyan' => 8],
+      'second' => dict['cyan' => 8],
 
-      'fourth' => darray[2 => 'two'],
+      'fourth' => dict[2 => 'two'],
 ];
 
 echo "\n-- Testing array_diff_ukey() function with multi dimensional array --\n";

@@ -2,7 +2,7 @@
 
 function getFiles($rdi,$depth=0) :mixed{
   if (!is_object($rdi)) return;
-  $files = varray[];
+  $files = vec[];
   // order changes per machine
   for ($rdi->rewind(); $rdi->valid(); $rdi->next()) {
     if ($rdi->isDot()) continue;

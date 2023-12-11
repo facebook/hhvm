@@ -16,10 +16,10 @@ hello world
 EOT;
 
 // arrays with keys as different data types to be passed as $array_arg
-$inputs = darray[
+$inputs = dict[
 
        // int data
-/*1*/  'int' => darray[
+/*1*/  'int' => dict[
        0 => 'zero',
        1 => 'one',
        12345 => 'positive',
@@ -27,23 +27,23 @@ $inputs = darray[
        ],
 
        // empty data
-/*2*/ 'empty double quotes' => darray[
+/*2*/ 'empty double quotes' => dict[
        "" => 'emptyd',
        ],
 
-/*3*/  'empty single quotes' => darray[
+/*3*/  'empty single quotes' => dict[
        '' => 'emptys',
        ],
 
        // string data
-/*4*/  'string' => darray[
+/*4*/  'string' => dict[
        "stringd" => 'stringd',
        'strings' => 'strings',
        $heredoc => 'stringh',
        ],
 
        // duplicate values
-/*5*/  'duplicate' => darray[
+/*5*/  'duplicate' => dict[
        'foo' => 'bar',
        'baz' => 'bar',
        'hello' => 'world'

@@ -29,12 +29,12 @@ function go(bool $ret) :mixed{
   $m1 = "mixed";
   $m2 = 42;
   $out1 = new stdClass;
-  $out2 = varray[1, 2, new stdClass];
+  $out2 = vec[1, 2, new stdClass];
   $out3 = "beepboop";
   var_dump(
     "one",
     "two",
-    varray[1,2,3],
+    vec[1,2,3],
     $s1,
     $s2,
     $i1,
@@ -102,12 +102,12 @@ function go2(bool $ret) :mixed{
   $m1 = "mixed";
   $m2 = 42;
   $out1 = new stdClass;
-  $out2 = varray[1, 2, new stdClass];
+  $out2 = vec[1, 2, new stdClass];
   $out3 = "beepboop";
   var_dump(
     "one",
     "two",
-    varray[1,2,3],
+    vec[1,2,3],
     $s1,
     $s2,
     $i1,

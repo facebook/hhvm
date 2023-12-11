@@ -3,6 +3,6 @@
 
 <<__EntryPoint>>
 function main_systemlib_is_silent() :mixed{
-new ArrayIterator(darray[]);
-var_dump(idx(darray[], "foo", "bah"));
+new ArrayIterator(dict[]);
+var_dump(idx(dict[], "foo", "bah"));
 }

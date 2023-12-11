@@ -1,7 +1,7 @@
 <?hh
 
 class C { function heh() :mixed{ echo "heh\n"; } }
-function foo() :mixed{ return darray[]; }
+function foo() :mixed{ return dict[]; }
 function bar() :mixed{
   $x = foo();
   $x['a'] = new C;

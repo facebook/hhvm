@@ -51,7 +51,7 @@ function main_entry(): void {
   // Intercept static method
   fb_intercept2('Blark::sfrap', 'handler');
   try {
-    call_user_func(varray['Blark', 'sfrap']);
+    call_user_func(vec['Blark', 'sfrap']);
   } catch (Exception $e) {
     echo "caught static call 1\n";
   }
@@ -60,7 +60,7 @@ function main_entry(): void {
   $b = new Blark();
   fb_intercept2('Blark::frap', 'handler');
   try {
-    call_user_func(varray[$b, 'frap']);
+    call_user_func(vec[$b, 'frap']);
   } catch (Exception $e) {
     echo "caught non-static call 1\n";
   }

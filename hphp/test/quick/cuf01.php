@@ -15,10 +15,10 @@ class C {
 <<__EntryPoint>>
 function main(): void {
   $obj = new C;
-  var_dump(call_user_func(varray[$obj, 'foo'], 123, 456));
-  var_dump(call_user_func(varray[$obj, 'bar'], 123, 456));
-  var_dump(call_user_func_array(varray[$obj, 'foo'], varray[123, 456]));
-  var_dump(call_user_func_array(varray[$obj, 'bar'], varray[123, 456]));
-  var_dump(call_user_func(varray['C', 'bar'], 123, 456));
-  var_dump(call_user_func_array(varray['C', 'bar'], varray[123, 456]));
+  var_dump(call_user_func(vec[$obj, 'foo'], 123, 456));
+  var_dump(call_user_func(vec[$obj, 'bar'], 123, 456));
+  var_dump(call_user_func_array(vec[$obj, 'foo'], vec[123, 456]));
+  var_dump(call_user_func_array(vec[$obj, 'bar'], vec[123, 456]));
+  var_dump(call_user_func(vec['C', 'bar'], 123, 456));
+  var_dump(call_user_func_array(vec['C', 'bar'], vec[123, 456]));
 }

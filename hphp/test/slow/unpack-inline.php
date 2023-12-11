@@ -12,7 +12,7 @@ function mix(...$args) :mixed{
 
 <<__NEVER_INLINE>>
 function bar() :mixed{
-  echo mix('alpha', new stdClass, 'gamma', varray[])."\n";
+  echo mix('alpha', new stdClass, 'gamma', vec[])."\n";
 }
 
 <<__EntryPoint>>

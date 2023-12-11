@@ -4,7 +4,7 @@
 function literals() :mixed{
   echo "================== literals ==================\n";
   json_encode(
-    darray[],
+    dict[],
     JSON_FB_WARN_DICTS | JSON_FB_WARN_KEYSETS | JSON_FB_WARN_PHP_ARRAYS
   );
   json_encode(
@@ -57,16 +57,16 @@ function literals() :mixed{
 
 function test($name, $options) :mixed{
   echo "==================== $name =========================\n";
-  var_dump(json_encode(darray[], $options));
+  var_dump(json_encode(dict[], $options));
   var_dump(json_encode(darray(vec[1, 2, 3, 4]), $options));
   var_dump(json_encode(vec[], $options));
   var_dump(json_encode(vec[1, 2, 3, 4], $options));
   var_dump(json_encode(dict[], $options));
   var_dump(json_encode(dict['a' => 1, 'b' => 2, 'c' => 3], $options));
   var_dump(json_encode(dict[0 => 'a', 1 => 'b', 2 => 'c'], $options));
-  var_dump(json_encode(darray[], $options));
-  var_dump(json_encode(darray['a' => 1, 'b' => 2, 'c' => 3], $options));
-  var_dump(json_encode(darray[0 => 'a', 1 => 'b', 2 => 'c'], $options));
+  var_dump(json_encode(dict[], $options));
+  var_dump(json_encode(dict['a' => 1, 'b' => 2, 'c' => 3], $options));
+  var_dump(json_encode(dict[0 => 'a', 1 => 'b', 2 => 'c'], $options));
   var_dump(json_encode(keyset[], $options));
   var_dump(json_encode(keyset['a', 'b', 'c'], $options));
 
@@ -127,9 +127,9 @@ test(
 test("ignore lateinit", JSON_FB_IGNORE_LATEINIT);
 echo "==================== no repeated warnings =========================\n";
 var_dump(json_encode(vec[
-  darray[], darray[],
-  darray[0 => 'a'], darray[0 => 'a'],
-  darray[1 => 'a'], darray[1 => 'a'],
+  dict[], dict[],
+  dict[0 => 'a'], dict[0 => 'a'],
+  dict[1 => 'a'], dict[1 => 'a'],
   dict[0 => 'a'], dict[0 => 'a'],
 ], JSON_FB_WARN_EMPTY_DARRAYS |
   JSON_FB_WARN_VEC_LIKE_DARRAYS |
@@ -140,17 +140,17 @@ var_dump(json_encode(vec[
 ));
 echo "=============== force Hack arrays ignores structure ===============\n";
 $examples = vec[
-  varray[],
-  darray[],
+  vec[],
+  dict[],
   vec[],
   dict[],
   keyset[],
-  varray[17, 34],
-  darray[0 => 17, 1 => 34],
+  vec[17, 34],
+  dict[0 => 17, 1 => 34],
   vec[17, 34],
   dict[0 => 17, 1 => 34],
   keyset[17, 34],
-  darray['a' => 17, 'b' => 34],
+  dict['a' => 17, 'b' => 34],
   dict['a' => 17, 'b' => 34],
   keyset['a', 'b'],
 ];

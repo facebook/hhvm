@@ -1,7 +1,7 @@
 <?hh
 
 const THE_CONST = 123;
-function f($a=darray[THE_CONST=>THE_CONST]) :mixed{
+function f($a=dict[THE_CONST=>THE_CONST]) :mixed{
   print_r($a);
 }
 

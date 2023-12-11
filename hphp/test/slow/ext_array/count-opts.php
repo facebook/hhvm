@@ -11,8 +11,8 @@ class BadCounted implements Countable {
 }
 
 function res() :mixed{ return count(HH\stdin()); }
-function staticArr() :mixed{ return count(varray[3,2,1,0]); }
-function packed() :mixed{ return count(varray[3,2,1,new stdClass]); }
+function staticArr() :mixed{ return count(vec[3,2,1,0]); }
+function packed() :mixed{ return count(vec[3,2,1,new stdClass]); }
 function vect() :mixed{ return count(HH\Vector{5,7,8,3}); }
 function counted_obj() :mixed{ return count(new Counted); }
 function not_counted_obj() :mixed{ return count(new NotCounted); }
@@ -30,7 +30,7 @@ function append($arr) :mixed{
 
 <<__EntryPoint>>
 function main_count_opts() :mixed{
-append(varray[3,2]);
+append(vec[3,2]);
 append(HH\Vector{3,2});
 
 var_dump(res());

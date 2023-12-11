@@ -1,7 +1,7 @@
 <?hh
 
 function foo(inout $perms, inout $t) :mixed{
-  $perms = darray['x' => 1];
+  $perms = dict['x' => 1];
   $t = $t['x'];
   unset($t);
   return $perms;

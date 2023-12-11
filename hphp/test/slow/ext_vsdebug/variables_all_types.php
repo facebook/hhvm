@@ -6,21 +6,21 @@ require(__DIR__ . '/common.inc');
   $path = __FILE__ . '.test';
   $bp1_line = 10;
   $bp2_line = 12;
-  $bp1 = darray[
+  $bp1 = dict[
     'line' => $bp1_line,
     'calibratedLine' => $bp1_line,
     'condition' => ''
   ];
-  $bp2 = darray[
+  $bp2 = dict[
     'line' => $bp2_line,
     'calibratedLine' => $bp2_line,
     'condition' => ''
   ];
 
-  $breakpoints = varray[
-    darray[
+  $breakpoints = vec[
+    dict[
       'path' => $path,
-      'breakpoints' => varray[$bp1, $bp2],
+      'breakpoints' => vec[$bp1, $bp2],
     ]
   ];
 
@@ -37,25 +37,25 @@ require(__DIR__ . '/common.inc');
   // variables references to be allocated for the constants/globals/locals in
   // scope in a particular frame, and finally the variables command to fetch a
   // variables reference
-  $seq = sendVsCommand(darray[
+  $seq = sendVsCommand(dict[
     'command' => 'stackTrace',
     'type' => 'request',
-    'arguments' => darray['threadId' => 1],
+    'arguments' => dict['threadId' => 1],
   ]);
   $msg = json_decode(getNextVsDebugMessage(), true);
   checkObjEqualRecursively(
     $msg,
-    darray[
+    dict[
       'command' => 'stackTrace',
       'type' => 'response',
       'request_seq' => $seq,
       'success' => true,
-      'body' => darray[
+      'body' => dict[
         'totalFrames' => 1,
-        'stackFrames' => varray[
-          darray[
+        'stackFrames' => vec[
+          dict[
             'id' => 1,
-            'source' => darray['path' => $path],
+            'source' => dict['path' => $path],
             'line' => $bp1_line,
             'name' => 'main',
           ],
@@ -64,32 +64,32 @@ require(__DIR__ . '/common.inc');
     ],
   );
 
-  $seq = sendVsCommand(darray[
+  $seq = sendVsCommand(dict[
     'command' => 'scopes',
     'type' => 'request',
-    'arguments' => darray['frameId' => 1]
+    'arguments' => dict['frameId' => 1]
   ]);
   $msg = json_decode(getNextVsDebugMessage(), true);
   checkObjEqualRecursively(
     $msg,
-    darray[
+    dict[
       'command' => 'scopes',
       'type' => 'response',
       'request_seq' => $seq,
       'success' => true,
-      'body' => darray[
-        'scopes' => varray[
-          darray[
+      'body' => dict[
+        'scopes' => vec[
+          dict[
             'name' => 'Locals',
             'namedVariables' => 1,
             'variablesReference' => 2,
           ],
-          darray[
+          dict[
             'name' => 'Superglobals',
             'namedVariables' => 7,
             'variablesReference' => 3,
           ],
-          darray[
+          dict[
             'name' => 'Constants',
             'namedVariables' => 2,
             'variablesReference' => 4,
@@ -100,22 +100,22 @@ require(__DIR__ . '/common.inc');
   );
 
   // Locals
-  $seq = sendVsCommand(darray[
+  $seq = sendVsCommand(dict[
     'command' => 'variables',
     'type' => 'request',
-    'arguments' => darray['variablesReference' => 2]
+    'arguments' => dict['variablesReference' => 2]
   ]);
   $msg = json_decode(getNextVsDebugMessage(), true);
   checkObjEqualRecursively(
     $msg,
-    darray[
+    dict[
       'command' => 'variables',
       'type' => 'response',
       'request_seq' => $seq,
       'success' => true,
-      'body' => darray[
-        'variables' => varray[
-          darray[
+      'body' => dict[
+        'variables' => vec[
+          dict[
             'name' => '$x',
             'type' => 'int',
             'value' => '7',
@@ -126,52 +126,52 @@ require(__DIR__ . '/common.inc');
   );
 
   // Superglobals
-  $seq = sendVsCommand(darray[
+  $seq = sendVsCommand(dict[
     'command' => 'variables',
     'type' => 'request',
-    'arguments' => darray['variablesReference' => 3]
+    'arguments' => dict['variablesReference' => 3]
   ]);
   $msg = json_decode(getNextVsDebugMessage(), true);
   checkObjEqualRecursively(
     $msg,
-    darray[
+    dict[
       'command' => 'variables',
       'type' => 'response',
       'request_seq' => $seq,
       'success' => true,
-      'body' => darray[
-        'variables' => varray[
-          darray[
+      'body' => dict[
+        'variables' => vec[
+          dict[
             'name' => '$_COOKIE',
             'type' => 'dict',
             'namedVariables' => 0,
           ],
-          darray[
+          dict[
             'name' => '$_ENV',
             'type' => 'dict',
             // not asserting size of array; ENV may vary
           ],
-          darray[
+          dict[
             'name' => '$_FILES',
             'type' => 'dict',
             'namedVariables' => 0,
           ],
-          darray[
+          dict[
             'name' => '$_GET',
             'type' => 'dict',
             'namedVariables' => 0,
           ],
-          darray[
+          dict[
             'name' => '$_POST',
             'type' => 'dict',
             'namedVariables' => 0,
           ],
-          darray[
+          dict[
             'name' => '$_REQUEST',
             'type' => 'dict',
             'namedVariables' => 0,
           ],
-          darray[
+          dict[
             'name' => '$_SERVER',
             'type' => 'dict',
             // not asserting size of array as it may vary
@@ -182,27 +182,27 @@ require(__DIR__ . '/common.inc');
   );
 
   // Constants; we'll have to chase more variablesReferences from here
-  $seq = sendVsCommand(darray[
+  $seq = sendVsCommand(dict[
     'command' => 'variables',
     'type' => 'request',
-    'arguments' => darray['variablesReference' => 4]
+    'arguments' => dict['variablesReference' => 4]
   ]);
   $msg = json_decode(getNextVsDebugMessage(), true);
   checkObjEqualRecursively(
     $msg,
-    darray[
+    dict[
       'command' => 'variables',
       'type' => 'response',
       'request_seq' => $seq,
       'success' => true,
-      'body' => darray[
-        'variables' => varray[
-          darray[
+      'body' => dict[
+        'variables' => vec[
+          dict[
             'name' => 'System Defined Constants',
             'variablesReference' => 11,
             // not asserting number of namedVariables, it will change often
           ],
-          darray[
+          dict[
             'name' => 'User Defined Constants',
             'variablesReference' => 10,
             'namedVariables' => 2,
@@ -213,27 +213,27 @@ require(__DIR__ . '/common.inc');
   );
 
   // User Defined Constants
-  $seq = sendVsCommand(darray[
+  $seq = sendVsCommand(dict[
     'command' => 'variables',
     'type' => 'request',
-    'arguments' => darray['variablesReference' => 10]
+    'arguments' => dict['variablesReference' => 10]
   ]);
   $msg = json_decode(getNextVsDebugMessage(), true);
   checkObjEqualRecursively(
     $msg,
-    darray[
+    dict[
       'command' => 'variables',
       'type' => 'response',
       'request_seq' => $seq,
       'success' => true,
-      'body' => darray[
-        'variables' => varray[
-          darray[
+      'body' => dict[
+        'variables' => vec[
+          dict[
             'name' => 'RUNTIME_INIT',
             'type' => 'int',
             'value' => '2',
           ],
-          darray[
+          dict[
             'name' => 'SIMPLE',
             'type' => 'int',
             'value' => '1',
@@ -244,10 +244,10 @@ require(__DIR__ . '/common.inc');
   );
 
   // change the value of a local via the REPL
-  $seq = sendVsCommand(darray[
+  $seq = sendVsCommand(dict[
     'command' => 'evaluate',
     'type' => 'request',
-    'arguments' => darray[
+    'arguments' => dict[
       'frameId' => 1,
       'expression' => '$x = 8;',
     ],
@@ -255,12 +255,12 @@ require(__DIR__ . '/common.inc');
   $msg = json_decode(getNextVsDebugMessage(), true);
   checkObjEqualRecursively(
     $msg,
-    darray[
+    dict[
       'command' => 'evaluate',
       'type' => 'response',
       'request_seq' => $seq,
       'success' => true,
-      'body' => darray[
+      'body' => dict[
         'type' => 'int',
         'result' => '8',
       ],
@@ -268,10 +268,10 @@ require(__DIR__ . '/common.inc');
   );
 
   // set a local via the REPL that doesn't exist in the frame
-  $seq = sendVsCommand(darray[
+  $seq = sendVsCommand(dict[
     'command' => 'evaluate',
     'type' => 'request',
-    'arguments' => darray[
+    'arguments' => dict[
       'frameId' => 1,
       'expression' => '$y = 99;',
     ],
@@ -279,12 +279,12 @@ require(__DIR__ . '/common.inc');
   $msg = json_decode(getNextVsDebugMessage(), true);
   checkObjEqualRecursively(
     $msg,
-    darray[
+    dict[
       'command' => 'evaluate',
       'type' => 'response',
       'request_seq' => $seq,
       'success' => true,
-      'body' => darray[
+      'body' => dict[
         'type' => 'int',
         'result' => '99',
       ],
@@ -292,27 +292,27 @@ require(__DIR__ . '/common.inc');
   );
 
   // Pull locals again and see changes we made via the REPL
-  $seq = sendVsCommand(darray[
+  $seq = sendVsCommand(dict[
     'command' => 'variables',
     'type' => 'request',
-    'arguments' => darray['variablesReference' => 2]
+    'arguments' => dict['variablesReference' => 2]
   ]);
   $msg = json_decode(getNextVsDebugMessage(), true);
   checkObjEqualRecursively(
     $msg,
-    darray[
+    dict[
       'command' => 'variables',
       'type' => 'response',
       'request_seq' => $seq,
       'success' => true,
-      'body' => darray[
-        'variables' => varray[
-          darray[
+      'body' => dict[
+        'variables' => vec[
+          dict[
             'name' => '$x',
             'type' => 'int',
             'value' => '8',
           ],
-          darray[
+          dict[
             'name' => '$y',
             'type' => 'int',
             'value' => '99',
@@ -329,25 +329,25 @@ require(__DIR__ . '/common.inc');
   verifyBpHit($path, $bp2);
 
   // go through the process of looking at locals at the second BP
-  $seq = sendVsCommand(darray[
+  $seq = sendVsCommand(dict[
     'command' => 'stackTrace',
     'type' => 'request',
-    'arguments' => darray['threadId' => 1],
+    'arguments' => dict['threadId' => 1],
   ]);
   $msg = json_decode(getNextVsDebugMessage(), true);
   checkObjEqualRecursively(
     $msg,
-    darray[
+    dict[
       'command' => 'stackTrace',
       'type' => 'response',
       'request_seq' => $seq,
       'success' => true,
-      'body' => darray[
+      'body' => dict[
         'totalFrames' => 1,
-        'stackFrames' => varray[
-          darray[
+        'stackFrames' => vec[
+          dict[
             'id' => 12,
-            'source' => darray['path' => $path],
+            'source' => dict['path' => $path],
             'line' => $bp2_line,
             'name' => 'main',
           ],
@@ -356,32 +356,32 @@ require(__DIR__ . '/common.inc');
     ],
   );
 
-  $seq = sendVsCommand(darray[
+  $seq = sendVsCommand(dict[
     'command' => 'scopes',
     'type' => 'request',
-    'arguments' => darray['frameId' => 12]
+    'arguments' => dict['frameId' => 12]
   ]);
   $msg = json_decode(getNextVsDebugMessage(), true);
   checkObjEqualRecursively(
     $msg,
-    darray[
+    dict[
       'command' => 'scopes',
       'type' => 'response',
       'request_seq' => $seq,
       'success' => true,
-      'body' => darray[
-        'scopes' => varray[
-          darray[
+      'body' => dict[
+        'scopes' => vec[
+          dict[
             'name' => 'Locals',
             'namedVariables' => 2,
             'variablesReference' => 2,
           ],
-          darray[
+          dict[
             'name' => 'Superglobals',
             'namedVariables' => 7,
             'variablesReference' => 3,
           ],
-          darray[
+          dict[
             'name' => 'Constants',
             'namedVariables' => 2,
             'variablesReference' => 4,
@@ -393,27 +393,27 @@ require(__DIR__ . '/common.inc');
 
   // we see mutations to locals that happened between our 2 BPs, and can still
   // see the nonexistent local we set earlier
-  $seq = sendVsCommand(darray[
+  $seq = sendVsCommand(dict[
     'command' => 'variables',
     'type' => 'request',
-    'arguments' => darray['variablesReference' => 2]
+    'arguments' => dict['variablesReference' => 2]
   ]);
   $msg = json_decode(getNextVsDebugMessage(), true);
   checkObjEqualRecursively(
     $msg,
-    darray[
+    dict[
       'command' => 'variables',
       'type' => 'response',
       'request_seq' => $seq,
       'success' => true,
-      'body' => darray[
-        'variables' => varray[
-          darray[
+      'body' => dict[
+        'variables' => vec[
+          dict[
             'name' => '$x',
             'type' => 'int',
             'value' => '9',
           ],
-          darray[
+          dict[
             'name' => '$y',
             'type' => 'int',
             'value' => '99',
@@ -425,10 +425,10 @@ require(__DIR__ . '/common.inc');
 
   // change the value of our local again, debugged code running after we
   // resume will observe it
-  $seq = sendVsCommand(darray[
+  $seq = sendVsCommand(dict[
     'command' => 'evaluate',
     'type' => 'request',
-    'arguments' => darray[
+    'arguments' => dict[
       'frameId' => 12,
       'expression' => '$x = 2;',
     ],
@@ -436,12 +436,12 @@ require(__DIR__ . '/common.inc');
   $msg = json_decode(getNextVsDebugMessage(), true);
   checkObjEqualRecursively(
     $msg,
-    darray[
+    dict[
       'command' => 'evaluate',
       'type' => 'response',
       'request_seq' => $seq,
       'success' => true,
-      'body' => darray[
+      'body' => dict[
         'type' => 'int',
         'result' => '2',
       ],

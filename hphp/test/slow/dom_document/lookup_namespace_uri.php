@@ -17,5 +17,5 @@ $childElts = $dom->getElementsByTagName('childElement');
 echo 'Empty: '; var_dump($childElts->item(0)->lookupNamespaceUri(''));
 echo 'string: '; var_dump($childElts->item(0)->lookupNamespaceUri('string'));
 echo 'null: '; var_dump($childElts->item(0)->lookupNamespaceUri(null));
-echo 'array: '; var_dump($childElts->item(0)->lookupNamespaceUri(varray[]));
+echo 'array: '; var_dump($childElts->item(0)->lookupNamespaceUri(vec[]));
 }

@@ -35,10 +35,10 @@ ini_set("soap.wsdl_cache_enabled", 0);
 
 $client = new LocalSoapClient(
     dirname(__FILE__) . "/classmap_extension_crash.wsdl",
-    darray['classmap' => darray['A' => 'A', 'B' => 'B']]
+    dict['classmap' => dict['A' => 'A', 'B' => 'B']]
 );
 $b = new B();
 $b->x = 1;
 $b->y = 2;
-print_r($client->__soapcall('f', varray[$b]));
+print_r($client->__soapcall('f', vec[$b]));
 }

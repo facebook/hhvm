@@ -19,7 +19,7 @@ class returnObject implements Countable {
 
 class returnArray implements Countable {
     function count() :mixed{
-        return varray[1,2,3];
+        return vec[1,2,3];
     }
 }
 

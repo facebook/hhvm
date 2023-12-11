@@ -13,6 +13,6 @@ $c->rewind();
 var_dump($c->current());
 $c->send(2);
 var_dump($c->current());
-$c->send(varray[3, 4]);
+$c->send(vec[3, 4]);
 var_dump($c->current());
 }

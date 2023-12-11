@@ -31,7 +31,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $str argument
-$inputs = darray[
+$inputs = dict[
 
        // int data
 /*1*/

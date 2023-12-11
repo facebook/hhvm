@@ -22,7 +22,7 @@ function rerender($html, $frag = false) :mixed{
         $body .= helper($child);
       }
       if ($element is DOMElement) {
-        $attrs = varray[];
+        $attrs = vec[];
         foreach ($element->attributes as $attr) {
           $attrs[] = htmlspecialchars($attr->name) . '="' .             htmlspecialchars($attr->value) . '"';
         }

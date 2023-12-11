@@ -5,9 +5,9 @@ ini_set("intl.error_level", E_WARNING);
 $mf = new MessageFormatter('en_US',
     "{0,number} -- {1,ordinal}");
 
-var_dump($mf->format(darray[0 => 1.3, 1 => 1.3]));
-var_dump($mf->format(darray[0 => 1.3, 1 => 1.3]));
+var_dump($mf->format(dict[0 => 1.3, 1 => 1.3]));
+var_dump($mf->format(dict[0 => 1.3, 1 => 1.3]));
 $mf->setPattern("{0,ordinal} -- {1,number}");
-var_dump($mf->format(darray[0 => 1.3, 1 => 1.3]));
+var_dump($mf->format(dict[0 => 1.3, 1 => 1.3]));
 echo "==DONE==";
 }

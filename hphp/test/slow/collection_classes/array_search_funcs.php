@@ -23,11 +23,11 @@ function strict() :mixed{
 
 function nested() :mixed{
   echo '=== ', __FUNCTION__, " ===\n";
-  $a = Vector { varray['p', 'h'], varray['p', 'r'], 'o' };
-  var_dump(in_array(varray['p', 'h'], $a));
-  var_dump(array_search(varray['p', 'h'], $a));
-  var_dump(in_array(varray['f', 'i'], $a));
-  var_dump(array_search(varray['f', 'i'], $a));
+  $a = Vector { vec['p', 'h'], vec['p', 'r'], 'o' };
+  var_dump(in_array(vec['p', 'h'], $a));
+  var_dump(array_search(vec['p', 'h'], $a));
+  var_dump(in_array(vec['f', 'i'], $a));
+  var_dump(array_search(vec['f', 'i'], $a));
   var_dump(in_array('o', $a));
   var_dump(array_search('o', $a));
 }

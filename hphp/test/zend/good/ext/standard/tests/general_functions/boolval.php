@@ -3,7 +3,7 @@ var_dump(boolval(false));
 var_dump(boolval(NULL));
 var_dump(boolval(""));
 var_dump(boolval(0));
-var_dump(boolval(varray[]));
+var_dump(boolval(vec[]));
 
 var_dump(boolval(true));
 var_dump(boolval("abc"));

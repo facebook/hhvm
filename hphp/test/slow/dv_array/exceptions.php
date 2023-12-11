@@ -2,7 +2,7 @@
 
 final class MyException extends Exception {
   public function __construct() {
-    $this->__prependTrace(varray['garbage!']);
+    $this->__prependTrace(vec['garbage!']);
   }
 }
 

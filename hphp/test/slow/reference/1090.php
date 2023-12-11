@@ -16,7 +16,7 @@ function f() :mixed{
 }
 function test() :mixed{
   $v = 100;
-  $arr = darray['hello' => $v];
+  $arr = dict['hello' => $v];
   $a = new B();
   $a->t($arr['hello'], $arr);
 }

@@ -17,7 +17,7 @@ function square_recur_single_array($var) :mixed{
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : recursive callback function ***\n";
 
-$array1 = varray[1, varray[2, 3, varray[5]], varray[4]];
+$array1 = vec[1, vec[2, 3, vec[5]], vec[4]];
 
 var_dump( array_map(square_recur_single_array<>, $array1));
 

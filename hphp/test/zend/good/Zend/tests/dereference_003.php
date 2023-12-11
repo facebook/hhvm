@@ -3,15 +3,15 @@
 class  foo {
 	public $x = 2;
 	public function a() :mixed{
-		$x = varray[];
+		$x = vec[];
 		$x[] = new foo;
 		return $x;
 	}
 	public function b() :mixed{
-		return varray[1.2, varray[new self]];
+		return vec[1.2, vec[new self]];
 	}
 	public function c(inout $a, inout $b) :mixed{
-		$a = varray[];
+		$a = vec[];
 		$a[] = true;
 		return $a;
 	}

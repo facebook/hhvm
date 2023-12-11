@@ -7,8 +7,8 @@ function baz():void {
   $vecpairs = vec[tuple(2,"a"), tuple(4,"b")];
   $dictpairs = dict[2 => tuple("a", 5), 3 => tuple("b", 7)];
   $p = new P(3, "c");
-  $a = varray[2,3,4];
-  $sa = varray["a"];
+  $a = vec[2,3,4];
+  $sa = vec["a"];
   foreach ($vecpairs as list($p->i, $a[2])) {
     echo $p->i;
     echo $a[2];

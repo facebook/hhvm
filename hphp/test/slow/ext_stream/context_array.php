@@ -3,13 +3,13 @@
 
 <<__EntryPoint>>
 function main_context_array() :mixed{
-$opts = darray[
-  'http' => darray[
-    'header' => varray[
+$opts = dict[
+  'http' => dict[
+    'header' => vec[
       "Accept-Encoding: gzip",
       "User-Agent: Composer/source PHP 5.5.99)",
     ],
-    'tls' => darray[
+    'tls' => dict[
       "verify_peer_name"=>TRUE
     ],
   ],

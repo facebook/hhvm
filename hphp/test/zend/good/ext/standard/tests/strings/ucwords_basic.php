@@ -7,7 +7,7 @@
 echo "*** Testing ucwords() : basic functionality ***\n";
 
 // lines with different whitespace charecter
-$str_array = varray[
+$str_array = vec[
  "testing ucwords",
  'testing ucwords',
  'testing\tucwords',

@@ -20,7 +20,7 @@ $string_arg = "foo";
 try { $dat = getrusage($string_arg); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing getrusage() function with invalid argument - ARRAY--\n";
-$array_arg = varray[1,2,3];
+$array_arg = vec[1,2,3];
 try { $dat = getrusage($array_arg); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing getrusage() function with invalid argument - OBJECT --\n";

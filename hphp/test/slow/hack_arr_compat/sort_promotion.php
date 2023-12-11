@@ -2,17 +2,17 @@
 
 function test($name, $sf) :mixed{
   echo "==== $name 0 ====\n";
-  $a = varray[];
+  $a = vec[];
   $sf(inout $a);
   var_dump(is_varray($a), is_darray($a));
 
   echo "==== $name 1 ====\n";
-  $a = varray[1];
+  $a = vec[1];
   $sf(inout $a);
   var_dump(is_varray($a), is_darray($a));
 
   echo "==== $name 2 ====\n";
-  $a = varray[2, 1];
+  $a = vec[2, 1];
   $sf(inout $a);
   var_dump(is_varray($a), is_darray($a));
 }
@@ -21,17 +21,17 @@ function utest($name, $sf) :mixed{
   $cb = ($a, $b) ==> $a <=> $b;
 
   echo "==== $name 0 ====\n";
-  $a = varray[];
+  $a = vec[];
   $sf(inout $a, $cb);
   var_dump(is_varray($a), is_darray($a));
 
   echo "==== $name 1 ====\n";
-  $a = varray[1];
+  $a = vec[1];
   $sf(inout $a, $cb);
   var_dump(is_varray($a), is_darray($a));
 
   echo "==== $name 2 ====\n";
-  $a = varray[2, 1];
+  $a = vec[2, 1];
   $sf(inout $a, $cb);
   var_dump(is_varray($a), is_darray($a));
 }

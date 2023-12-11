@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$array1 = varray[1,
+$array1 = vec[1,
                 "hello",
                 1,
                 "world",

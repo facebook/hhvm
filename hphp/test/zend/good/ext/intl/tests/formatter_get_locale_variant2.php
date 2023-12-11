@@ -6,13 +6,13 @@
 
 function ut_main()
 :mixed{
-    $locales = varray[
+    $locales = vec[
         'en_UK',
         'en_US@California',
         'fr_CA',
     ];
 
-    $loc_types = darray[
+    $loc_types = dict[
         Locale::ACTUAL_LOCALE    => 'actual',
         Locale::VALID_LOCALE     => 'valid',
     ];

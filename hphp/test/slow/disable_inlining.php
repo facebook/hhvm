@@ -11,7 +11,7 @@ function bar($x) :mixed{
 }
 
 function main() :mixed{
-  $a = varray[1, 2, 3, foo()];
+  $a = vec[1, 2, 3, foo()];
   bar($a);
 }
 

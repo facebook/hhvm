@@ -9,7 +9,7 @@ function f2($x) :mixed{
 }
 
 function f3($x) :mixed{
-  $y = varray[1];
+  $y = vec[1];
   return $x == $y;
 }
 

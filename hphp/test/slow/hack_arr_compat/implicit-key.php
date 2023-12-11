@@ -96,19 +96,19 @@ function member_ops($arr, $keys) :mixed{
 
 <<__EntryPoint>>
 function main_implicit_key() :mixed{
-$sub = darray[0 => 100, 1 => 100, "" => 100];
-$arr = darray[
-  0 => darray[
+$sub = dict[0 => 100, 1 => 100, "" => 100];
+$arr = dict[
+  0 => dict[
     0 => $sub,
     1 => $sub,
     "" => $sub
   ],
-  1 => darray[
+  1 => dict[
     0 => $sub,
     1 => $sub,
     "" => $sub
   ],
-  "" => darray[
+  "" => dict[
     0 => $sub,
     1 => $sub,
     "" => $sub

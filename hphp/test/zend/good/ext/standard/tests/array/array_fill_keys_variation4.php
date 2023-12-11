@@ -16,7 +16,7 @@ echo "*** Testing array_fill_keys() : parameter variations ***\n";
 $fp = fopen(__FILE__, "r");
 $bool = false;
 $float = 2.4;
-$array = varray["one"];
+$array = vec["one"];
 $nullVal = null;
 
 $obj = new classA();

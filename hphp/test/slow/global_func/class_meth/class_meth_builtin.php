@@ -21,13 +21,13 @@ function main() :mixed{
   $c = A::class;
   $f = 'func1';
   print "test on varray:\n";
-  test_legacy_usecase(varray[A::class, 'func1']);
-  test_clsmeth_builtins(varray[A::class, 'func1']);
+  test_legacy_usecase(vec[A::class, 'func1']);
+  test_clsmeth_builtins(vec[A::class, 'func1']);
 
   print "test on clsmeth:\n";
   test_legacy_usecase(A::func1<>);
   test_clsmeth_builtins(A::func1<>);
 
   // failure
-  var_dump(HH\class_meth_get_class(varray[A::class, 'func1']));
+  var_dump(HH\class_meth_get_class(vec[A::class, 'func1']));
 }

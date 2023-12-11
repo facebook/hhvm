@@ -2,7 +2,7 @@
 
 class X {
   <<__DynamicallyCallable>> public function foo($y) :mixed{
-    call_user_func(varray[$y, 'foo']);
+    call_user_func(vec[$y, 'foo']);
     $y::foo();
   }
 }

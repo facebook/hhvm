@@ -7,7 +7,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_multisort() : natural sorting\n";
 
-$a = varray[
+$a = vec[
     'Second',
     'First',
     'Twentieth',
@@ -15,7 +15,7 @@ $a = varray[
     'Third',
 ];
 
-$b = varray[
+$b = vec[
     '2 a',
     '1 b',
     '20 c',

@@ -1,7 +1,7 @@
 <?hh
 
 function handler($_1, $_2, inout $_3) :mixed{
-  return shape('prepend_this' => true, 'callback' => varray['C', 'bar']);
+  return shape('prepend_this' => true, 'callback' => vec['C', 'bar']);
 }
 
 class C {

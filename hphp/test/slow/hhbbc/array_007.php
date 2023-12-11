@@ -1,7 +1,7 @@
 <?hh
 
-function foo() :mixed{ return varray[1,2,3]; }
-function bar() :mixed{ return varray[]; }
+function foo() :mixed{ return vec[1,2,3]; }
+function bar() :mixed{ return vec[]; }
 function test($x) :mixed{
   $y = $x ? foo() : bar();
   return $y[0];

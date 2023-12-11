@@ -31,7 +31,7 @@ function main(): void {
 
   comp($f, 1);
 
-  comp($f, varray['Test','foo']);
+  comp($f, vec['Test','foo']);
 
   comp($f, Test::foo<>);
 

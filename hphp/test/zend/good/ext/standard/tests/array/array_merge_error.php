@@ -12,7 +12,7 @@ echo "*** Testing array_merge() : error conditions ***\n";
 
 // Testing array_merge with zero arguments
 echo "\n-- Testing array_merge() function with less than expected no. of arguments --\n";
-$arr1 = varray[1, 2];
+$arr1 = vec[1, 2];
 try { var_dump( array_merge() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";

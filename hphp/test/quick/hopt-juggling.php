@@ -54,12 +54,12 @@ function foo11($x, $y) :mixed{
 }
 
 function foo12() :mixed{
-  $x = varray[];
+  $x = vec[];
   return (int)$x;
 }
 
 function foo13() :mixed{
-  $x = varray[1,2,3];
+  $x = vec[1,2,3];
   return (int)$x;
 }
 <<__EntryPoint>> function main(): void {

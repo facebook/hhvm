@@ -6,7 +6,7 @@ class C1 extends Base {}
 class C2 extends Base {}
 
 class Foo {
-  public static darray<int, classname<Base>> $p = darray[
+  public static darray<int, classname<Base>> $p = dict[
     1 => C1::class,
     3 => C2::class,
   ];

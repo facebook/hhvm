@@ -1,7 +1,7 @@
 <?hh
 
 function blah() :mixed{
-  return darray['x' => 2];
+  return dict['x' => 2];
 }
 
 abstract class X {
@@ -13,7 +13,7 @@ abstract class X {
     $array = blah(static::heh() ? 2 : 3, 2);
     // unreachable:
     for ($i = 0; $i < 10; ++$i) echo "hi\n";
-    return varray[$array['x']];
+    return vec[$array['x']];
   }
 
   abstract protected static function heh(): varray<string>;

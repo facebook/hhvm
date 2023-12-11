@@ -5,14 +5,14 @@
 function main_1798() :mixed{
 $sample_dir = __DIR__.'/../../sample_dir';
 
-$files = varray[];
+$files = vec[];
 foreach (new DirectoryIterator($sample_dir.'/') as $file) {
   $files[] = $file;
 }
 var_dump(count($files));
 
 $dir = new DirectoryIterator($sample_dir.'/');
-$files = varray[];
+$files = vec[];
  // order changes per machine
 foreach ($dir as $fileinfo) {
   if (!$fileinfo->isDot()) {
@@ -23,7 +23,7 @@ asort(inout $files);
 var_dump(array_values($files));
 
 $iterator = new DirectoryIterator($sample_dir);
-$files = darray[];
+$files = dict[];
  // order changes per machine
 foreach ($iterator as $fileinfo) {
   if ($fileinfo->isFile()) {
@@ -56,7 +56,7 @@ foreach ($files as $str) {
 }
 
 $iterator = new RecursiveDirectoryIterator($sample_dir);
-$files = darray[];
+$files = dict[];
  // order changes per machine
 foreach ($iterator as $fileinfo) {
   if ($fileinfo->isFile()) {

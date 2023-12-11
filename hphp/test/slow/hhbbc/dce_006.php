@@ -10,5 +10,5 @@ function foo($params) :mixed{
 
 <<__EntryPoint>>
 function main_dce_006() :mixed{
-var_dump(foo(darray['id' => '42']));
+var_dump(foo(dict['id' => '42']));
 }

@@ -28,7 +28,7 @@ function main($base) :mixed{
 <<__EntryPoint>>
 function main_unreachable_contains_key() :mixed{
 for ($i = 0; $i < 100; ++$i) {
-  main(darray[]);
+  main(dict[]);
   main(keyset[]);
 }
 }

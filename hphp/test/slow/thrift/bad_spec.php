@@ -5,21 +5,21 @@ interface IThriftStruct {
 }
 
 class NodeObject {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'fbid',
       'type' => TType::I64,
     ],
-    2 => darray[
+    2 => dict[
       'var' => 'type',
       'type' => TType::I64,
     ],
-    3 => darray[
+    3 => dict[
       'var' => 'owner',
       'type' => TType::I64,
     ],
   ];
-  public static $_TFIELDMAP = darray[
+  public static $_TFIELDMAP = dict[
     'fbid' => 1,
     'type' => 2,
     'owner' => 3,
@@ -63,41 +63,41 @@ class NodeObject {
 }
 
 class EdgeObject {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'source',
       'type' => TType::STRUCT,
       'class' => 'NodeObject',
     ],
-    2 => darray[
+    2 => dict[
       'var' => 'target',
       'type' => TType::STRUCT,
       'class' => 'NodeObject',
     ],
-    3 => darray[
+    3 => dict[
       'var' => 'type',
       'type' => TType::I64,
     ],
-    4 => darray[
+    4 => dict[
       'var' => 'timeCreated',
       'type' => TType::I64,
     ],
-    5 => darray[
+    5 => dict[
       'var' => 'creator',
       'type' => TType::STRUCT,
       'class' => 'NodeObject',
     ],
-    6 => darray[
+    6 => dict[
       'var' => 'actionSource',
       'type' => TType::I32,
       'enum' => 'ActionSource',
     ],
-    7 => darray[
+    7 => dict[
       'var' => 'appId',
       'type' => TType::I64,
     ],
   ];
-  public static $_TFIELDMAP = darray[
+  public static $_TFIELDMAP = dict[
     'source' => 1,
     'target' => 2,
     'type' => 3,
@@ -161,8 +161,8 @@ class EdgeObject {
 }
 
 class EdgeObjectWithBadSpec1 extends EdgeObject {
-  const SPEC = darray[
-    7 => darray[
+  const SPEC = dict[
+    7 => dict[
       'var' => 'appId',
       'type' => TType::STRING,
     ],
@@ -176,7 +176,7 @@ class EdgeObjectWithBadSpec1 extends EdgeObject {
 }
 
 class EdgeObjectWithBadSpec2 extends EdgeObject {
-  const SPEC = varray[];
+  const SPEC = vec[];
 
   public static function withDefaultValues()[]: this {
     return new static();
@@ -196,7 +196,7 @@ class EdgeObjectWithBadSpec3 extends EdgeObject {
 }
 
 class EdgeObjectWithBadSpec4 extends EdgeObject {
-  const SPEC = darray[
+  const SPEC = dict[
     'foo' => 'bar',
   ];
 

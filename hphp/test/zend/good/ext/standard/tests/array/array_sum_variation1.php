@@ -21,7 +21,7 @@ echo "*** Testing array_sum() : unexpected values for 'input' ***\n";
 
 
 // different scalar/non scalar values for 'input' argument
-$input_values = varray[
+$input_values = vec[
 
          // int data
 /*1*/    0,

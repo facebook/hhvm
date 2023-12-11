@@ -1,7 +1,7 @@
 <?hh
 
 function array_trailing_comma(): varray<int, > {
-  return varray[42];
+  return vec[42];
 }
 
 <<__EntryPoint>> function main(): void {

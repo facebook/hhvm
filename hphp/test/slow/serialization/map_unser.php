@@ -11,7 +11,7 @@ function makeBig($n) :mixed{
 function entrypoint_map_unser(): void {
   // Remember to also update map_unser_big, which exercises the fast path.
 
-  $data = varray[
+  $data = vec[
     'K:6:"HH\\Map":0:{}',
     'K:6:"HH\\Map":1:{s:3:"bar";i:7;}',
     'K:6:"HH\\Map":1:{s:3:"bar";i:;}',
@@ -33,7 +33,7 @@ function entrypoint_map_unser(): void {
     var_dump(unserialize($serialized));
   }
 
-  $sizes = varray[ 0, 1, 100, 1000];
+  $sizes = vec[ 0, 1, 100, 1000];
 
   foreach ($sizes as $n) {
     var_dump(unserialize(serialize(makeBig($n))));

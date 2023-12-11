@@ -8,7 +8,7 @@
 /*
  * Load APP info from jpeg  */
 <<__EntryPoint>> function main(): void {
-$arr = darray[];
+$arr = dict[];
 $arr['this'] = "will";
 $arr['all'] = "be destroyed!";
 $arr['APP1'] = "and this too";

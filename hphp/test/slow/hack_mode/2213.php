@@ -3,7 +3,7 @@ function vidx<X>(blarg<X> $list, int $idx):X {
   return $list->d[$idx];
 }
 function pair<X,Y>(X $x, Y $y):(X,Y) {
- return varray[$x, $y];
+ return vec[$x, $y];
  }
 function car<X,Y>((X,?Y) $pair):X {
   return $pair[0];

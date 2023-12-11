@@ -275,18 +275,18 @@ function runMethods() :mixed{
   echo "==========================================\n";
   echo "Testing methods....\n\n";
   $a = new Cls1();
-  runFuncs(varray[$a, 'func1'],
-           varray[$a, 'func2'],
-           varray[$a, 'func3'],
-           varray[$a, 'func4'],
-           varray[$a, 'func5']);
+  runFuncs(vec[$a, 'func1'],
+           vec[$a, 'func2'],
+           vec[$a, 'func3'],
+           vec[$a, 'func4'],
+           vec[$a, 'func5']);
 
   $b = new Cls1();
-  runFuncs(varray[$b, 'func1'],
-           varray[$b, 'func2'],
-           varray[$b, 'func3'],
-           varray[$b, 'func4'],
-           varray[$b, 'func5']);
+  runFuncs(vec[$b, 'func1'],
+           vec[$b, 'func2'],
+           vec[$b, 'func3'],
+           vec[$b, 'func4'],
+           vec[$b, 'func5']);
 }
 
 function runSingleMethods() :mixed{
@@ -297,11 +297,11 @@ function runSingleMethods() :mixed{
   $c = new Cls4();
   $d = new Cls5();
   $e = new Cls6();
-  runFuncs(varray[$a, 'func'],
-           varray[$b, 'func'],
-           varray[$c, 'func'],
-           varray[$d, 'func'],
-           varray[$e, 'func']);
+  runFuncs(vec[$a, 'func'],
+           vec[$b, 'func'],
+           vec[$c, 'func'],
+           vec[$d, 'func'],
+           vec[$e, 'func']);
 }
 
 function runTraitStatics() :mixed{
@@ -323,17 +323,17 @@ function runTraitMethods() :mixed{
   echo "==========================================\n";
   echo "Testing trait methods....\n\n";
   $a = new Cls7();
-  runFuncs(varray[$a, 'func1'],
-           varray[$a, 'func2'],
-           varray[$a, 'func3'],
-           varray[$a, 'func4'],
-           varray[$a, 'func5']);
+  runFuncs(vec[$a, 'func1'],
+           vec[$a, 'func2'],
+           vec[$a, 'func3'],
+           vec[$a, 'func4'],
+           vec[$a, 'func5']);
   $b = new Cls8();
-  runFuncs(varray[$b, 'func1'],
-           varray[$b, 'func2'],
-           varray[$b, 'func3'],
-           varray[$b, 'func4'],
-           varray[$b, 'func5']);
+  runFuncs(vec[$b, 'func1'],
+           vec[$b, 'func2'],
+           vec[$b, 'func3'],
+           vec[$b, 'func4'],
+           vec[$b, 'func5']);
 }
 
 

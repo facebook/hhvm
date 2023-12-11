@@ -2,7 +2,7 @@
 
 <<__EntryPoint>>
 function main() :mixed{
-  $x = new ArrayIterator(darray['a' => 'b']);
+  $x = new ArrayIterator(dict['a' => 'b']);
   $x->p = 'q';
   var_dump(darray($x));
 }

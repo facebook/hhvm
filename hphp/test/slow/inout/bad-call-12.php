@@ -3,7 +3,7 @@
 function foo(inout $x) :mixed{}
 
 function main() :mixed{
-  $x = Vector{1,varray['a', 'b', 'c'],3};
+  $x = Vector{1,vec['a', 'b', 'c'],3};
   foo(inout $x[1][1]);
 }
 

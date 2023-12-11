@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_no_double_slash() :mixed{
-$streams = varray[
+$streams = vec[
   'data:,A%20brief%20note',
   'data:application/vnd-xxx-query,select_vcount,fcol_from_fieldtable/local',
   'data:;base64,Zm9vYmFyIGZvb2Jhcg==',

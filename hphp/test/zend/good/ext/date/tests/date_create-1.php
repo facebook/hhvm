@@ -3,7 +3,7 @@ date_default_timezone_set('Europe/Oslo');
 $tz1 = timezone_open("GMT");
 $tz2 = timezone_open("Europe/London");
 $tz3 = timezone_open("America/Los_Angeles");
-$d = varray[];
+$d = vec[];
 $d[] = date_create("2005-07-14 22:30:41");
 $d[] = date_create("2005-07-14 22:30:41 GMT");
 $d[] = date_create("2005-07-14 22:30:41 CET");

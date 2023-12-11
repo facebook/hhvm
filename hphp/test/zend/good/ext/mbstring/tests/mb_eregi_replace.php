@@ -1,6 +1,6 @@
 <?hh
 function do_translit($st) :mixed{
-    $replacement = darray[
+    $replacement = dict[
         "й"=>"i","ц"=>"c","у"=>"u","к"=>"k","е"=>"e","н"=>"n",
         "г"=>"g","ш"=>"sh","щ"=>"sh","з"=>"z","х"=>"x","ъ"=>"\'",
         "ф"=>"f","ы"=>"i","в"=>"v","а"=>"a","п"=>"p","р"=>"r",

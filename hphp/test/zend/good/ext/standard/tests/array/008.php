@@ -1,7 +1,7 @@
 <?hh
 //-=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=- TEST 1 -=-=-=-=-
 <<__EntryPoint>> function main(): void {
-$a = darray[
+$a = dict[
   0 => 1,
   "big" => 2,
   1 => 2,
@@ -22,8 +22,8 @@ $a = darray[
   16 => 3,
   17 => 17
 ];
-$b = varray[2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,17,25,'some_string',7,8,9,109,78,17];
-$c = varray[-1,2,1,15,25,17];
+$b = vec[2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,17,25,'some_string',7,8,9,109,78,17];
+$c = vec[-1,2,1,15,25,17];
 echo str_repeat("-=",10)." TEST 1 ".str_repeat("-=",20)."\n";
 echo '$a='.var_export($a,TRUE).";\n";
 echo '$b='.var_export($b,TRUE).";\n";
@@ -42,7 +42,7 @@ echo 'array_intersect_assoc($a,$b);'."\n";
 var_dump(array_intersect_assoc($a,$b));
 
 //-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=- TEST 2 -=-=-=-=-=-
-$a = darray[
+$a = dict[
 'a'=>2,
 'b'=>'some',
 'c'=>'done',
@@ -62,7 +62,7 @@ $a = darray[
 'want'=>'wanna'];
 
 
-$b = darray[
+$b = dict[
 'a'=>7,
 7=>18,
 9=>13,
@@ -75,7 +75,7 @@ $b = darray[
 'z'=>'equal',
 'gate'=>'web'
 ];
-$c = darray[
+$c = dict[
 'gate'=>'web',
 73=>'foo',
 95=>'some'

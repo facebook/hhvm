@@ -6,7 +6,7 @@ $string = "goodyear12345NULL\0truefalse\a\v\f\b\n\r\t";
 $charlist = varray [ 
   NULL,
   2,
-  varray[5,6,7],
+  vec[5,6,7],
   "a",
   "\0",
   "\n",

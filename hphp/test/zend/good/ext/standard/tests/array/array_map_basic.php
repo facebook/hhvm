@@ -19,8 +19,8 @@ function concatenate($a, $b) :mixed{
 echo "*** Testing array_map() : basic functionality ***\n";
 
 // integer array
-$arr1 = varray[1, 2, 3];
-$arr2 = varray[4, 5, 6];
+$arr1 = vec[1, 2, 3];
+$arr2 = vec[4, 5, 6];
 
 echo "-- With two integer array --\n";
 var_dump( array_map(multiply<>, $arr1, $arr2) );
@@ -29,8 +29,8 @@ echo "-- With single integer array --\n";
 var_dump( array_map(square<>, $arr1) );
 
 // string array
-$arr1 = varray["one", "two"];
-$arr2 = varray["single", "double"];
+$arr1 = vec["one", "two"];
+$arr2 = vec["single", "double"];
 
 echo "-- With string array --\n";
 var_dump( array_map(concatenate<>, $arr1, $arr2) );

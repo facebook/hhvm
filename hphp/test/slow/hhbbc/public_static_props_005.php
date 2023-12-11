@@ -1,9 +1,9 @@
 <?hh
 
 class Foo {
-  public static $heh = varray[];
+  public static $heh = vec[];
   function go() :mixed{
-    self::$heh = varray[self::$heh];
+    self::$heh = vec[self::$heh];
   }
 }
 

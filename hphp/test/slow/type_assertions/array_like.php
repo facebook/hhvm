@@ -20,5 +20,5 @@ function test($a) :mixed{
 
 <<__EntryPoint>>
 function main_array_like() :mixed{
-test(varray[1]);
+test(vec[1]);
 }

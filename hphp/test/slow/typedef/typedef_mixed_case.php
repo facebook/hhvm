@@ -71,7 +71,7 @@ function main() :mixed{
   bar(1.0);
   baz(new Bazcls());
   baz2(new Bazcls());
-  lots(varray[],
+  lots(vec[],
        12,
        12,
        false,
@@ -80,7 +80,7 @@ function main() :mixed{
        1.3,
        1.4,
        1.5);
-  lots2(varray[],
+  lots2(vec[],
         12,
         12,
         false,
@@ -89,7 +89,7 @@ function main() :mixed{
         1.3,
         1.4,
         1.5);
-  lots3(varray[],
+  lots3(vec[],
         12,
         12,
         false,

@@ -1,6 +1,6 @@
 <?hh <<__EntryPoint>> function main(): void {
 
-$variation_array = darray[
+$variation_array = dict[
   'empty string DQ' => "",
   'empty string SQ' => '',
   'uppercase NULL' => NULL,

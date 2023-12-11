@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_slice() : usage variations ***\n";
 
-$input = darray['one' => 1, 2 => 'two', 3 => 'three', 9 => 'nine', 'ten' => 10];
+$input = dict['one' => 1, 2 => 'two', 3 => 'three', 9 => 'nine', 'ten' => 10];
 
 for ($i = -7; $i <= 7; $i++) {
     echo "\n-- \$offset is $i --\n";

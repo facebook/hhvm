@@ -43,11 +43,11 @@ function entrypoint_1352(): void {
 
   echo "\ninvoking g\n";
   $rg->invoke('hello');
-  $rg->invokeArgs(varray['goodbye']);
+  $rg->invokeArgs(vec['goodbye']);
 
   echo "\ninvoking add\n";
   $radd->invoke(1, 2);
-  $radd->invokeArgs(varray[5000000000, 5000000000]);
+  $radd->invokeArgs(vec[5000000000, 5000000000]);
 
   echo "\nshowing f\n";
   show($rf);

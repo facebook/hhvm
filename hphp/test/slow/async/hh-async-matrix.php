@@ -11,24 +11,24 @@
 
 <<__EntryPoint>>
 function main_hh_async_matrix() :mixed{
-$vals = varray[
+$vals = vec[
   NULL,
   true,
   false,
   1,
   2.0,
   "Hello World",
-  varray[3.14],
+  vec[3.14],
 ];
 
 
 
-$typeMap = darray[
+$typeMap = dict[
   'v'  => new Vector($vals),
   'm'  => new Map($vals),
 ];
 
-$callMap = darray[
+$callMap = dict[
   ''  => (($f, $inputs) ==>
     $f($inputs->map(async $input ==> $input))),
   'f' => (($f, $inputs) ==>
@@ -38,9 +38,9 @@ $callMap = darray[
   'fk' => (($f, $inputs) ==>
     $f($inputs, async ($k, $v) ==> (bool) $v)),
   'mk' => (($f, $inputs) ==>
-    $f($inputs, async ($k, $v) ==> var_export(darray[$k => $v], true))),
+    $f($inputs, async ($k, $v) ==> var_export(dict[$k => $v], true))),
 ];
-$wrapMap = darray[
+$wrapMap = dict[
   ''  => ($r ==> $r),
   'w' => ($r ==> (is_array($r) ? array_map($o ==> $o->getResult(), $r)
                                : $r->map($o ==> $o->getResult()))),

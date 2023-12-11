@@ -31,7 +31,7 @@ function create($a, $b, $c, $d) :mixed{
   var_dump(vec[1, 'b', 3]);
   var_dump(vec[10, 'abc', 10, 'abc']);
   var_dump(vec[123, '123']);
-  var_dump(vec[null, false, true, 7.89, varray[], vec[], keyset[], dict[]]);
+  var_dump(vec[null, false, true, 7.89, vec[], vec[], keyset[], dict[]]);
   var_dump(vec[new stdClass, 1234, 'abc', Vector{1, 2, 3}]);
 
   create('a', 'b', 'c', 'd');
@@ -40,7 +40,7 @@ function create($a, $b, $c, $d) :mixed{
   create(10, 10, 'abc', 'abc');
   create(123, '123', 123, '123');
   create(1.23, null, false, true);
-  create(new stdClass, varray[], vec[1, 2, 3], keyset['a', 1]);
+  create(new stdClass, vec[], vec[1, 2, 3], keyset['a', 1]);
   create(dict[1 => 'a'], new ToString, 'abc', 10, Vector{1, 2, 3});
 
   try {

@@ -47,7 +47,7 @@ function make_tests($func) :mixed{
     vec[$func(), 'abc'],
     vec[$func(), '456'],
     vec[$func(), fopen(__FILE__, 'r')],
-    vec[$func(), varray[]],
+    vec[$func(), vec[]],
     vec[$func(), vec[]],
     vec[$func(), dict[]],
     vec[$func(), keyset[]],

@@ -1,36 +1,36 @@
 <?hh
 
 class TestStruct {
-  const SPEC = darray[
-    -1 => darray[
+  const SPEC = dict[
+    -1 => dict[
       'var' => 'aBool',
       'type' => TType::BOOL,
     ],
-    1 => darray[
+    1 => dict[
       'var' => 'anInt',
       'type' => TType::I32,
     ],
-    2 => darray[
+    2 => dict[
       'var' => 'aDouble',
       'type' => TType::DOUBLE,
     ],
-    3 => darray[
+    3 => dict[
       'var' => 'anInt64',
       'type' => TType::I64,
     ],
-    4 => darray[
+    4 => dict[
       'var' => 'anByte',
       'type' => TType::BYTE,
     ],
-    5 => darray[
+    5 => dict[
       'var' => 'anI16',
       'type' => TType::I16,
     ],
-    6 => darray[
+    6 => dict[
       'var' => 'aFloat',
       'type' => TType::FLOAT,
     ],
-    7 => darray[
+    7 => dict[
       'var' => 'bFloat',
       'type' => TType::FLOAT,
     ],

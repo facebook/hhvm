@@ -17,7 +17,7 @@ class C implements IteratorAggregate {
 }
 class D implements IteratorAggregate {
   function getIterator() :mixed{
-    return new ArrayIterator(varray[1,2,3]);
+    return new ArrayIterator(vec[1,2,3]);
   }
 }
 

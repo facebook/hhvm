@@ -16,7 +16,7 @@
 echo "*** Testing sort() : usage variations ***\n";
 
 // an array containing unsorted octal values
-$unsorted_oct_array = varray[01235, 0321, 0345, 066, 0772, 077, -066, -0345, 0];
+$unsorted_oct_array = vec[01235, 0321, 0345, 066, 0772, 077, -066, -0345, 0];
 
 echo "\n-- Testing sort() by supplying octal value array, 'flag' value is defualt  --\n";
 $temp_array = $unsorted_oct_array;

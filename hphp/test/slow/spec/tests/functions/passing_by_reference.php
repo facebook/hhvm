@@ -26,7 +26,7 @@ function main_entry(): void {
   error_reporting(-1);
 
   $a1 = 1.23e27;
-  $a2 = varray[10,TRUE,NULL];
+  $a2 = vec[10,TRUE,NULL];
   var_dump($a1);
   var_dump($a2);
   swap(inout $a1, inout $a2);

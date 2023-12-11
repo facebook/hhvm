@@ -3,32 +3,32 @@
 
 <<__EntryPoint>>
 function main_3() :mixed{
-$complexMap = darray[
+$complexMap = dict[
   "f" => "facebook",
-  "a" => darray["b" => 1,
-               "c" => varray["d", "e"]],
-  "f" => varray[1,2,3],
+  "a" => dict["b" => 1,
+               "c" => vec["d", "e"]],
+  "f" => vec[1,2,3],
   "h" => "hello",
 ];
 
 apc_store("complexMap", $complexMap);
 apc_store("ts", "TestString");
-apc_store("ta", darray["a" => 1, "b" => 2]);
+apc_store("ta", dict["a" => 1, "b" => 2]);
 apc_store("ts", "NewValue");
-apc_store("ta", varray["newelement"]);
+apc_store("ta", vec["newelement"]);
 if (apc_store($complexMap) !==
-    darray[]) {
+    dict[]) {
   echo "set failed\n";
 }
 
 if (__hhvm_intrinsics\apc_fetch_no_check("ts") !== "NewValue") echo "no\n";
-if (__hhvm_intrinsics\apc_fetch_no_check("ta") !== varray["newelement"]) echo "no\n";
+if (__hhvm_intrinsics\apc_fetch_no_check("ta") !== vec["newelement"]) echo "no\n";
 if (__hhvm_intrinsics\apc_fetch_no_check("h") !== "hello") echo "no\n";
 if (__hhvm_intrinsics\apc_fetch_no_check("complexMap") !== $complexMap) echo "no\n";
 
 if (__hhvm_intrinsics\apc_fetch_no_check("ts") !== "NewValue") echo "no\n";
-if (__hhvm_intrinsics\apc_fetch_no_check("ta") !== varray["newelement"]) echo "no\n";
-if (__hhvm_intrinsics\apc_fetch_no_check("f") !== varray[1,2,3]) echo "no\n";
+if (__hhvm_intrinsics\apc_fetch_no_check("ta") !== vec["newelement"]) echo "no\n";
+if (__hhvm_intrinsics\apc_fetch_no_check("f") !== vec[1,2,3]) echo "no\n";
 if (__hhvm_intrinsics\apc_fetch_no_check("complexMap") !== $complexMap) echo "no\n";
 
 // Make sure it doesn't change the shared value.
@@ -45,8 +45,8 @@ $tsFetched[0] = "M";
 if ($tsFetched !== "MewValue") echo "no\n";
 if ($sharedString !== "NewValue") echo "no\n";
 if (__hhvm_intrinsics\apc_fetch_no_check("ts") !== "NewValue") echo "no\n";
-if (__hhvm_intrinsics\apc_fetch_no_check("a") !== darray["b" => 1,
-                             "c" => varray["d", "e"]]) echo "no\n";
+if (__hhvm_intrinsics\apc_fetch_no_check("a") !== dict["b" => 1,
+                             "c" => vec["d", "e"]]) echo "no\n";
 
 echo "ok\n";
 }

@@ -12,8 +12,8 @@ function key_compare_func($key1, $key2)
 echo "*** Testing array_diff_ukey() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$input_array = darray[0 => '0', 1 => '1', -10 => '-10', 'true' => 1, 'false' => 0];
-$boolean_indx_array = darray[1 => 'boolt', 0 => 'boolf', 1 => 'boolT', 0 => 'boolF'];
+$input_array = dict[0 => '0', 1 => '1', -10 => '-10', 'true' => 1, 'false' => 0];
+$boolean_indx_array = dict[1 => 'boolt', 0 => 'boolf', 1 => 'boolT', 0 => 'boolF'];
 
 echo "\n-- Testing array_diff_ukey() function with boolean indexed array --\n";
 

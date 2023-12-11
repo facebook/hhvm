@@ -23,7 +23,7 @@ function run(inout $ref, inout $badref) :mixed{
   add(keyset[$dyn], 1)
     |> add($$, "1")
     |> add($$, null)
-    |> add($$, darray[])
+    |> add($$, dict[])
     |> add($$, new stdClass)
     |> add($$, 1.2)
     |> add($$, $ref)
@@ -32,7 +32,7 @@ function run(inout $ref, inout $badref) :mixed{
     |> get($$, 1)
     |> get($$, "1")
     |> get($$, null)
-    |> get($$, darray[])
+    |> get($$, dict[])
     |> get($$, new stdClass)
     |> get($$, 1.2)
     |> get($$, $ref)
@@ -44,6 +44,6 @@ function run(inout $ref, inout $badref) :mixed{
 <<__EntryPoint>>
 function main() :mixed{
   $foo = 12;
-  $bar = darray[];
+  $bar = dict[];
   run(inout $foo, inout $bar);
 }

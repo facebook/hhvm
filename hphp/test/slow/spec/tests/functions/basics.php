@@ -53,7 +53,7 @@ $f();           // call f1 indirectly via $f
 f1();
 f1(10);
 f1(TRUE, "green");
-f1(23.45, NULL, varray[1,2,3]);
+f1(23.45, NULL, vec[1,2,3]);
 
 // if fewer arguments are passed than there are paramaters declared, a warning is issued
 // and the parameters corresponding to each each omitted argument are undefined

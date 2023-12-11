@@ -1,7 +1,7 @@
 <?hh
 
 function k4() :mixed{
-  $arr = varray[0,1,2,3,4];
+  $arr = vec[0,1,2,3,4];
   $b = true;
   foreach ($arr as $v) {
     if ($b) {

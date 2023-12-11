@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_invalid() :mixed{
-$streams = varray[
+$streams = vec[
   "data://invalid,data",
   "data://invalid-data",
   "data://foo;base64,data",

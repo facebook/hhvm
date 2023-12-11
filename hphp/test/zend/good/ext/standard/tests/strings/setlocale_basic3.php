@@ -39,7 +39,7 @@ function list_system_locales() :mixed{
 echo "*** Testing setlocale() by passing multiple locales as argument ***\n";
 
 //set of currency symbol according to above list of locales
-$currency_symbol = darray[
+$currency_symbol = dict[
   "en_US.utf8" => "USD",
   "en_AU.utf8" => "AUD",
   "ko_KR.utf8" => "KRW",

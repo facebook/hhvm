@@ -14,7 +14,7 @@ function f($x) :mixed{
 
 <<__EntryPoint>>
 function main_1854() :mixed{
-f(varray[32]);
+f(vec[32]);
 f('foobar');
 f(32);
 }

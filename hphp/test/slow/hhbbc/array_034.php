@@ -1,11 +1,11 @@
 <?hh
 
 function a() :mixed{ return 4; }
-function junk() :mixed{ return darray['z' => a()]; }
+function junk() :mixed{ return dict['z' => a()]; }
 <<__EntryPoint>>
 function bar() :mixed{
   $y = null;
-  $x = darray['z' => junk()];
+  $x = dict['z' => junk()];
   unset($x['z']['z']);
   $val = $x['z'];
   try { $val1 = $x['z']['z']; }

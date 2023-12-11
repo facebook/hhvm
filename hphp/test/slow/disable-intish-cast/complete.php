@@ -60,22 +60,22 @@ function run_tests() :mixed{
   $arr = $x ==> darray($x);
 
   echo "\n******* ad-hoc tests ********************************\n";
-  test($arr(varray[]), '10');
-  test($arr(varray[]), 10);
-  test($arr(varray[1, 2, 3, 4]), '2');
-  test(varray[1, 2, 3, 4], 2);
-  test(darray[10 => 'abc'], '10');
-  test(darray[10 => 'abc'], 10);
+  test($arr(vec[]), '10');
+  test($arr(vec[]), 10);
+  test($arr(vec[1, 2, 3, 4]), '2');
+  test(vec[1, 2, 3, 4], 2);
+  test(dict[10 => 'abc'], '10');
+  test(dict[10 => 'abc'], 10);
 
   echo "\n******* constant string tests ***********************\n";
-  test_const_key($arr(varray[]));
-  test_const_key($arr(varray[1, 2, 3, 4]));
-  test_const_key(darray[2 => 'abc']);
+  test_const_key($arr(vec[]));
+  test_const_key($arr(vec[1, 2, 3, 4]));
+  test_const_key(dict[2 => 'abc']);
 
   echo "\n******* constant int tests **************************\n";
-  test_const_key_int($arr(varray[]));
-  test_const_key_int(varray[1, 2, 3, 4]);
-  test_const_key_int(darray[2 => 'abc']);
+  test_const_key_int($arr(vec[]));
+  test_const_key_int(vec[1, 2, 3, 4]);
+  test_const_key_int(dict[2 => 'abc']);
 
   echo "\n******* casting tests *******************************\n";
   test_casting(dict['1' => true, '2' => false]);

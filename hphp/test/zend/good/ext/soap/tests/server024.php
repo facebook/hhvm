@@ -24,7 +24,7 @@ abstract final class ZendGoodExtSoapTestsServer024 {
 <<__EntryPoint>>
 function entrypoint_server024(): void {
 
-  ZendGoodExtSoapTestsServer024::$server = new SoapServer(null,darray['uri'=>"http://testuri.org"]);
+  ZendGoodExtSoapTestsServer024::$server = new SoapServer(null,dict['uri'=>"http://testuri.org"]);
   ZendGoodExtSoapTestsServer024::$server->addFunction("test");
 
   $HTTP_RAW_POST_DATA = <<<EOF

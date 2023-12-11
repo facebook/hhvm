@@ -16,9 +16,9 @@ class B extends A {
 
 <<__EntryPoint>>
 function main_1885() :mixed{
-$array = varray['foo'];
+$array = vec['foo'];
 array_map('B::foo', $array);
 call_user_func('B::foo');
-call_user_func(varray['B', 'foo']);
+call_user_func(vec['B', 'foo']);
 A::bar();
 }

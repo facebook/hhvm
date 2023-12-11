@@ -8,8 +8,8 @@ class DBStatement extends PDOStatement {
 }
 <<__EntryPoint>> function main(): void {
 $pdo = new PDO('sqlite::memory:', '', '');
-$pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, varray['DBStatement',
-    varray[$pdo]]);
+$pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, vec['DBStatement',
+    vec[$pdo]]);
 $pdo->exec("CREATE TABLE IF NOT EXISTS messages (
     id INTEGER PRIMARY KEY,
     title TEXT,

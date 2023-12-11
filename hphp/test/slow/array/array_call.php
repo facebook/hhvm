@@ -7,6 +7,6 @@ class C {
 }
 <<__EntryPoint>> function main(): void {
 $c = new C;
-$x = varray['C', var_dump<>];
+$x = vec['C', var_dump<>];
 $x();
 }

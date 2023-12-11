@@ -1,7 +1,7 @@
 <?hh
 
 function blah() :mixed{
-  $xs = varray[1, 2, 3, 4, 5];
+  $xs = vec[1, 2, 3, 4, 5];
 
   try {
     foreach ($xs as $x) {

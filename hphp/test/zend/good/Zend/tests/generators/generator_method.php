@@ -14,7 +14,7 @@ class Test implements IteratorAggregate {
     }
 }
 <<__EntryPoint>> function main(): void {
-$test = new Test(varray['foo', 'bar', 'baz']);
+$test = new Test(vec['foo', 'bar', 'baz']);
 foreach ($test as $value) {
     var_dump($value);
 }

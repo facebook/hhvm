@@ -29,8 +29,8 @@ function test_dictlike($name, $c, $d) :mixed{
 }
 
 function test() :mixed{
-  test_veclike('Packed Array', varray[1], varray[1]);
-  test_dictlike('Mixed Array', darray['a' => 1], darray['a' => 1]);
+  test_veclike('Packed Array', vec[1], vec[1]);
+  test_dictlike('Mixed Array', dict['a' => 1], dict['a' => 1]);
 
   test_veclike('Vec', vec[1], vec[1]);
   test_dictlike('Dict', dict['a' => 1], dict['a' => 1]);

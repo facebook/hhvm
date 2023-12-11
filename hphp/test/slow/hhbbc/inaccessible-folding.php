@@ -6,8 +6,8 @@ class D {
 }
 
 class A extends D {
-  private function func1() :mixed{ return varray[1, 2, 3]; }
-  protected function func2() :mixed{ return varray[4, 5, 6]; }
+  private function func1() :mixed{ return vec[1, 2, 3]; }
+  protected function func2() :mixed{ return vec[4, 5, 6]; }
 }
 
 class B {

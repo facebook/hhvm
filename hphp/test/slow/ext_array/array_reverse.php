@@ -1,7 +1,7 @@
 <?hh
 
 function a() :mixed{
-  $input = varray["php", 4.0, varray["green", "red"]];
+  $input = vec["php", 4.0, vec["green", "red"]];
   $result = array_reverse($input);
   var_dump($result);
   $result_keyed = array_reverse($input, true);
@@ -9,7 +9,7 @@ function a() :mixed{
 }
 
 function b() :mixed{
-  $input = darray["php" => 4.0, 10 => 5.0, "blab" =>"b"];
+  $input = dict["php" => 4.0, 10 => 5.0, "blab" =>"b"];
   $result = array_reverse($input);
   var_dump($result);
 }

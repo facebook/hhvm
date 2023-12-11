@@ -14,9 +14,9 @@ async function baz(int $num) :Awaitable<mixed>{
 
 async function bar() :AsyncGenerator<mixed,mixed,void>{
   $exp = 0;
-  foreach (varray[0, 1] as $block_dep1) {
-    foreach (varray[0, 1] as $block_dep2) {
-      foreach (varray[0, 1] as $block_outer) {
+  foreach (vec[0, 1] as $block_dep1) {
+    foreach (vec[0, 1] as $block_dep2) {
+      foreach (vec[0, 1] as $block_outer) {
         if ($block_outer) {
           await block();
         }

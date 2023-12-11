@@ -27,8 +27,8 @@ function key_compare_func($key1, $key2)
 echo "*** Testing array_diff_ukey() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$array2 = darray['green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan'   => 8];
-$array3 = darray['blue'  => 1, 'red'  => 2, 'green'  => 3, 'purple' => 4];
+$array2 = dict['green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan'   => 8];
+$array3 = dict['blue'  => 1, 'red'  => 2, 'green'  => 3, 'purple' => 4];
 
 
 //resource variable
@@ -40,7 +40,7 @@ hello world
 EOT;
 
 //array of values to iterate over
-$inputs = darray[
+$inputs = dict[
 
       // int data
       'int 0' => 0,

@@ -36,7 +36,7 @@ function main_get_return_types() :mixed{
   $gen->next();
   var_dump($gen->getReturn());
 
-  $gen = gen3(varray[1, 2, 3]);
+  $gen = gen3(vec[1, 2, 3]);
   $gen->next();
   var_dump($gen->getReturn());
 

@@ -7,7 +7,7 @@
 
 function ut_main()
 :mixed{
-    $locales  = varray[
+    $locales  = vec[
         'sl_IT_nedis_KIRTI',
         'sl_IT_nedis-a-kirti-x-xyz',
         'sl_IT_rozaj',

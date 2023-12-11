@@ -11,7 +11,7 @@
 
 function ut_main()
 :mixed{
-    $locales = darray[
+    $locales = dict[
         'en_UK' => 'GBP',
         'en_US' => 'USD',
         'ru'    => 'RUR',

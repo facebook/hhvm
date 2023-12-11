@@ -13,7 +13,7 @@
 echo "*** Testing array_unshift() : double quoted strings for \$var argument ***\n";
 
 // array to be passed to $array argument
-$array = darray['f' => "first", "s" => 'second', 0 => 1, 1 => 2.222];
+$array = dict['f' => "first", "s" => 'second', 0 => 1, 1 => 2.222];
 
 // different variations of double quoted strings to be passed to $var argument
 $vars = varray [

@@ -38,7 +38,7 @@ hello\0world\0hello
 \0hello\0
 EOT;
 
-$input = darray[
+$input = dict[
   $empty_heredoc => "heredoc1",
   $heredoc_with_newline => "heredoc2",
   $heredoc_with_characters => "heredoc3",

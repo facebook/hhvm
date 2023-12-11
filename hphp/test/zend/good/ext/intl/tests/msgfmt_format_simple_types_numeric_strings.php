@@ -18,7 +18,7 @@ function entrypoint_msgfmt_format_simple_types_numeric_strings(): void {
 	");
 
   $ex = "1336317965.5 str";
-  var_dump($mf->format(darray[
+  var_dump($mf->format(dict[
   'a' => $ex,
   'b' => $ex,
   'c' => $ex,

@@ -1,6 +1,6 @@
 <?hh
 
-<<Foo1, Bar1(), Baz1('blah', varray[1,2])>>
+<<Foo1, Bar1(), Baz1('blah', vec[1,2])>>
 type FBID = int;
 
 <<__StrictType>>

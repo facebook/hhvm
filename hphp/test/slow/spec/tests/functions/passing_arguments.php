@@ -36,7 +36,7 @@ f($a1, inout $a2);        // variable $a2 is passed by inout
 var_dump($a1);
 var_dump($a2);
 $twenty = 20;
-$a2 = varray[10,$twenty,30];
+$a2 = vec[10,$twenty,30];
 var_dump($a2);
 f($a1, inout $twenty);
 var_dump($a1);
@@ -77,7 +77,7 @@ var_dump($a2);
    $a2 = "abc";
    g(inout $a2);
 var_dump($a2);
-   $a2 = varray[1,2,3];
+   $a2 = vec[1,2,3];
    g(inout $a2);
 var_dump($a2);
 //*/

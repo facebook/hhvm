@@ -16,7 +16,7 @@ $value2 = "hello";
 $value3 = 0;
 
 
-$arr1 = darray[
+$arr1 = dict[
   0 => 0,
   1 => $value2,
   2 => $value2,
@@ -26,7 +26,7 @@ $arr1 = darray[
 ];
 
 // initialize the second argument
-$arr2 = darray[$value2 => "hello", 0 => $value2];
+$arr2 = dict[$value2 => "hello", 0 => $value2];
 
 echo "-- With default argument --\n";
 var_dump( array_merge_recursive($arr1) );

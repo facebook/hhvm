@@ -11,7 +11,7 @@ function cb2 ($a,$b) :mixed{return varray [$a,$b];}
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : string keys ***\n";
 
-$arr = darray["stringkey" => "value"];
+$arr = dict["stringkey" => "value"];
 var_dump( array_map(cb1<>, $arr));
 var_dump( array_map(cb2<>, $arr,$arr));
 var_dump( array_map(null,  $arr));

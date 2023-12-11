@@ -1,6 +1,6 @@
 <?hh
 
-function f() :mixed{ return darray[]; }
+function f() :mixed{ return dict[]; }
 
 function populateArray($max) :mixed{
   $a = f();

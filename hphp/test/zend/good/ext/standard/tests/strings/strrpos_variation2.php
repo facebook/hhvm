@@ -8,7 +8,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing strrpos() function: with single quoted strings ***\n";
 $haystack = 'Hello,\t\n\0\n  $&!#%()*<=>?@hello123456he \x234 \101 ';
-$needle = varray[
+$needle = vec[
   //regular strings
   'l',  
   'L',

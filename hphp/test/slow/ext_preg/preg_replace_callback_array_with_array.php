@@ -5,11 +5,11 @@
 // an array as the subject, etc.
 <<__EntryPoint>>
 function main_preg_replace_callback_array_with_array() :mixed{
-$subject = varray['Aaafaaba BbaCZbx', '34wad3423 basd3z34qwe &&$#7723ABaac',
+$subject = vec['Aaafaaba BbaCZbx', '34wad3423 basd3z34qwe &&$#7723ABaac',
                  'kjklsdfjkldsiu3dklj12kl dsf;s4a;as bas'];
 $count = 1000; // This should be reset to 0 when replacement starts.
 $ret = preg_replace_callback_array(
-    darray[
+    dict[
         '~[a]+~i' => function ($match) {},
         '~[b]+~i' => function ($match) {}
     ],
@@ -22,10 +22,10 @@ var_dump($count);
 
 // Let's try with just one element in the array
 
-$subject = varray['kjklsdfjkldsiu3dklj12kl dsf;s4a;as bas'];
+$subject = vec['kjklsdfjkldsiu3dklj12kl dsf;s4a;as bas'];
 $count = -1; // This should be reset to 0 when replacement starts.
 $ret = preg_replace_callback_array(
-    darray[
+    dict[
         '~[a]+~i' => function ($match) {},
         '~[b]+~i' => function ($match) {}
     ],

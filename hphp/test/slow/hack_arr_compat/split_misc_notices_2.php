@@ -2,9 +2,9 @@
 
 <<__EntryPoint>>
 function main () :mixed{
-  $a = darray["" => "empty string", 1 => "one", 0 => "zero"];
+  $a = dict["" => "empty string", 1 => "one", 0 => "zero"];
   try {
-    var_dump($a + darray["more stuff" => "yep"]);
+    var_dump($a + dict["more stuff" => "yep"]);
   } catch (Exception $e) {
     print($e->getMessage()."\n");
   }

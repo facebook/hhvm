@@ -2,8 +2,8 @@
 class X
 {
     // Static and instance array using class constants
-    public static $sa_x = darray[B::KEY => B::VALUE];
-    public $a_x = darray[B::KEY => B::VALUE];
+    public static $sa_x = dict[B::KEY => B::VALUE];
+    public $a_x = dict[B::KEY => B::VALUE];
 }
 
 class B
@@ -12,19 +12,19 @@ class B
     const VALUE = "value";
 
     // Static and instance array using class constants with self
-    public static $sa_b = darray[self::KEY => self::VALUE];
-    public $a_b = darray[self::KEY => self::VALUE];
+    public static $sa_b = dict[self::KEY => self::VALUE];
+    public $a_b = dict[self::KEY => self::VALUE];
 }
 
 class C extends B
 {
     // Static and instance array using class constants with parent
-    public static $sa_c_parent = darray[parent::KEY => parent::VALUE];
-    public $a_c_parent = darray[parent::KEY => parent::VALUE];
+    public static $sa_c_parent = dict[parent::KEY => parent::VALUE];
+    public $a_c_parent = dict[parent::KEY => parent::VALUE];
 
     // Static and instance array using class constants with self (constants should be inherited)
-    public static $sa_c_self = darray[self::KEY => self::VALUE];
-    public $a_c_self = darray[self::KEY => self::VALUE];
+    public static $sa_c_self = dict[self::KEY => self::VALUE];
+    public $a_c_self = dict[self::KEY => self::VALUE];
 
     // Should also include inherited properties from B.
 }

@@ -5,7 +5,7 @@ function foo(inout $x) :mixed{
 }
 <<__DynamicallyCallable>>
 function bar(inout $a, inout $b) :mixed{
-  list($a, $b) = varray[$b, $a];
+  list($a, $b) = vec[$b, $a];
   return HH\Lib\Legacy_FIXME\cast_for_arithmetic($a) + HH\Lib\Legacy_FIXME\cast_for_arithmetic($b);
 }
 <<__DynamicallyCallable>>

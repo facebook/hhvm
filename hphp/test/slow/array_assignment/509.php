@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_509() :mixed{
-$a = varray[1, 2, 3];
+$a = vec[1, 2, 3];
 var_dump($a);
 array_pop(inout $a);
 var_dump($a);

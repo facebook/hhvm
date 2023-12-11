@@ -5,7 +5,7 @@ function err($x, $y) :mixed{ throw new Exception('heh'); }
 function foo() :mixed{
   echo "----\n";
   $lol = new stdClass;
-  $x = darray[];
+  $x = dict[];
   try {
     $x[$lol] = 2;
   } catch (Exception $y) {

@@ -4,7 +4,7 @@ class Foo {
   private $thing;
   function go() :mixed{
     // This better not iterate the dataflow algorithm forever:
-    $this->thing = darray['thing' => $this->thing];
+    $this->thing = dict['thing' => $this->thing];
     return $this->thing;
   }
 }

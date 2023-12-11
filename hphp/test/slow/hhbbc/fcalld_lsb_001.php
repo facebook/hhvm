@@ -3,7 +3,7 @@
 class someJunk { public function __construct(private $blah)[] {} }
 
 class Foo {
-  private static $foo = varray[];
+  private static $foo = vec[];
   protected static function createInstance() :mixed{ return new stdClass; }
   public static function get($x) :mixed{
     self::$foo[] = new someJunk(static::createInstance($x));

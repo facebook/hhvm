@@ -6,7 +6,7 @@ echo "*** Test substituting argument 1 with emptyUnsetUndefNull values ***\n";
 
 
 
-$variation_array = darray[
+$variation_array = dict[
   'empty string DQ' => "",
   'empty string SQ' => '',
   'uppercase NULL' => NULL,

@@ -10,7 +10,7 @@ echo "*** Testing gzopen() : basic functionality ***\n";
 
 // Initialise all required variables
 $filename = sys_get_temp_dir().'/'."gzopen_basic2.txt.gz";
-$modes = varray['w', 'w+'];
+$modes = vec['w', 'w+'];
 $data = "This was the information that was written";
 
 foreach($modes as $mode) {

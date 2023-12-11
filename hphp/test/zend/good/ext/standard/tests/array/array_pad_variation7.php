@@ -14,9 +14,9 @@ echo "*** Testing array_pad() : Passing 2-D array to \$input argument ***\n";
 
 // initialize the 2-d array
 $input = varray [
-  varray[1, 2, 3],
-  varray["hello", 'world'],
-  darray["one" => 1, "two" => 2]
+  vec[1, 2, 3],
+  vec["hello", 'world'],
+  dict["one" => 1, "two" => 2]
 ];
 
 // initialize the $pad_size and $pad_value arguments

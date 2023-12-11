@@ -6,7 +6,7 @@
 */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing str_repeat() with possible strings ***";
-$variations = varray[
+$variations = vec[
   'a',
   'foo',
   'barbazbax',

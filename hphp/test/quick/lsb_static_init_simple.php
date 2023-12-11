@@ -3,7 +3,7 @@
 class A {
   <<__LSB>> private static $x = "hello";
   <<__LSB>> protected static $y = 123;
-  <<__LSB>> public static $z = varray[1,2,3];
+  <<__LSB>> public static $z = vec[1,2,3];
 
   static function dump() :mixed{
     var_dump(static::$x);

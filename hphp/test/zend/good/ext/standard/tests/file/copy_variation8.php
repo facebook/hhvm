@@ -25,7 +25,7 @@ $hardlink = sys_get_temp_dir().'/'.'copy_variation8_hardlink.tmp';
 symlink($file, $symlink);  //creating symlink
 link($file, $hardlink);  //creating hardlink
 
-$dests = varray[
+$dests = vec[
   $base_dir."/copy_copy_variation8.tmp",
   $base_dir."/copy_variation8_sub/copy_copy_variation8.tmp",
   "$sub_dir/copy_copy_variation8.tmp",

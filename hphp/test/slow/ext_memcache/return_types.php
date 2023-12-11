@@ -11,7 +11,7 @@ $stdClass = new stdClass();
 $stdClass->prop1 = 1;
 $stdClass->prop2 = '2';
 
-$testValueList = varray[
+$testValueList = vec[
   'Some string',
   '1234567',
   1234567,

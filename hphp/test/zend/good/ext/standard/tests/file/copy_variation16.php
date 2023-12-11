@@ -26,7 +26,7 @@ echo "- Size of source file => ";
 var_dump( filesize($src_file_name) );
 clearstatcache();
 
-$dests = varray[
+$dests = vec[
   $base_dir."/copy_copy_variation16.tmp",
   $base_dir."/copy_variation16_sub/copy_copy_variation16.tmp",
   "$sub_dir/copy_copy_variation16.tmp",

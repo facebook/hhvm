@@ -8,7 +8,7 @@
 $file_handle = fopen(sys_get_temp_dir().'/'.'readlink_variation2.tmp', "w");
 
 echo "*** Testing Invalid file types ***\n";
-$filenames = varray[
+$filenames = vec[
   /* Invalid filenames */
   -2.34555,
   "",

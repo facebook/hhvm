@@ -1,5 +1,5 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$argv = varray[true, false];
+$argv = vec[true, false];
 var_dump(getopt("abcd"));
 }

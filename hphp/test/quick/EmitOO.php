@@ -16,7 +16,7 @@ class C extends B implements I {
   public $p1 = null;
   public $p = 13;
   protected $q = "q...";
-  private $r = varray[1, 2, 3];
+  private $r = vec[1, 2, 3];
 
   function __construct() {
     print "In C::__construct()\n";

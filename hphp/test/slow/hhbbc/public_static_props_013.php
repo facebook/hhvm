@@ -1,6 +1,6 @@
 <?hh
 
-class X        { public static $x = darray[]; }
+class X        { public static $x = dict[]; }
 function go()  :mixed{ X::$x[0] = 2; }
 function go2() :mixed{ var_dump((bool)X::$x); }
 

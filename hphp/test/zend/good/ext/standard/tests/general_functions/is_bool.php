@@ -5,7 +5,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing is_bool() with valid boolean values ***\n";
 // different valid  boolean vlaues
-$valid_bools = varray[
+$valid_bools = vec[
   TRUE,
   FALSE,
   true,
@@ -90,18 +90,18 @@ $not_bool_types = varray [
   NULL,
 
   /* arrays */
-  varray[],
-  varray[0],
-  varray[1],
-  varray[NULL],
-  varray[null],
-  varray["string"],
-  varray[true],
-  varray[TRUE],
-  varray[false],
-  varray[FALSE],
-  varray[1,2,3,4],
-  darray[1 => "One", "two" => 2],
+  vec[],
+  vec[0],
+  vec[1],
+  vec[NULL],
+  vec[null],
+  vec["string"],
+  vec[true],
+  vec[TRUE],
+  vec[false],
+  vec[FALSE],
+  vec[1,2,3,4],
+  dict[1 => "One", "two" => 2],
 
 ];
 /* loop through the $not_bool_types to see working of

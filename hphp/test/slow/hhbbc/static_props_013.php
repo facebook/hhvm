@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  private static $x = darray[];
+  private static $x = dict[];
   private static $y = "string";
 
   public static function heh(int $i) :mixed{

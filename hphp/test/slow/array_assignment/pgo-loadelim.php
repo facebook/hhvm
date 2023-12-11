@@ -10,28 +10,28 @@ class thing {
 
   public function __construct() {
     $this->location = '0110111001101';
-    $this->paper = darray[
+    $this->paper = dict[
       'a' => true,
       'b' => false,
       'c' => true,
       'd' => false,
     ];
-    $this->kittens = darray[
+    $this->kittens = dict[
       'a' => 1,
       'b' => 1,
       'c' => 1,
       'd' => 1,
     ];
-    $this->puppies = darray[
-      'a' => varray[12, 34],
-      'b' => varray[56, 78],
-      'c' => varray[90, 12],
-      'd' => varray[34, 56],
+    $this->puppies = dict[
+      'a' => vec[12, 34],
+      'b' => vec[56, 78],
+      'c' => vec[90, 12],
+      'd' => vec[34, 56],
     ];
   }
 
   public function teleport() :mixed{
-    $arr = darray[];
+    $arr = dict[];
     $location = $this->location;
 
     $offset = 0;

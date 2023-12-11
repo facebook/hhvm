@@ -16,14 +16,14 @@ function main() :mixed{
 
   $x = Vector {null};
   $y = $x->toImmVector();
-  $x[0] = varray[]; $x[0][] = 73;
+  $x[0] = vec[]; $x[0][] = 73;
   var_dump($y);
   unset($y);
   unset($x);
 
   $x = Vector {null};
   $y = $x->toImmVector();
-  $x[0] = darray[]; $x[0][42] = 73;
+  $x[0] = dict[]; $x[0][42] = 73;
   var_dump($y);
   unset($y);
   unset($x);
@@ -43,21 +43,21 @@ function main() :mixed{
   unset($y);
   unset($x);
 
-  $x = Vector {varray[1]};
+  $x = Vector {vec[1]};
   $y = $x->toImmVector();
   unset($x[0][0]);
   var_dump($y);
   unset($y);
   unset($x);
 
-  $x = Vector {varray[1]};
+  $x = Vector {vec[1]};
   $y = $x->toImmVector();
   $x[0][] = 2;
   var_dump($y);
   unset($y);
   unset($x);
 
-  $x = Vector {darray[0 => 1]};
+  $x = Vector {dict[0 => 1]};
   $y = $x->toImmVector();
   $x[0][1] = 2;
   var_dump($y);

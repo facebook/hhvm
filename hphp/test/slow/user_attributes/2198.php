@@ -1,13 +1,13 @@
 <?hh
 
-<<A(1),B('foo',varray[42,73])>>
+<<A(1),B('foo',vec[42,73])>>
 class C {
-  <<A(2),B('bar',varray[43,74])>>
+  <<A(2),B('bar',vec[43,74])>>
   function f() :mixed{
 }
 }
 
-<<A(3),B('bar',varray[44,75]), C('concat'.'enate')>>
+<<A(3),B('bar',vec[44,75]), C('concat'.'enate')>>
 function f() :mixed{
 }
 

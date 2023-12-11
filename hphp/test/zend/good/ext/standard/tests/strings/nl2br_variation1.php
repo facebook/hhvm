@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing nl2br() : usage variations ***\n";
 
-$strings = varray[
+$strings = vec[
   //new line chars embedded in strings
   "Hello\nWorld",
   "\nHello\nWorld\n",

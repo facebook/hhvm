@@ -29,12 +29,12 @@ $total = array_reduce($numbers, add_up<>);
 print "Total is $total\n";
 
 /* test #2: string data */
-$a = varray["a", "b", "c"];
+$a = vec["a", "b", "c"];
 var_dump(array_reduce($a, foo<>));
 
 /* test #3: basic test (used to leak memory) */
-$a = varray[1, 2, 3, 4, 5];
-$x = varray[];
+$a = vec[1, 2, 3, 4, 5];
+$x = vec[];
 $b = array_reduce($a, rsum<>);
 $c = array_reduce($a, rmul<>, 10);
 $d = array_reduce($x, rsum<>, 1);

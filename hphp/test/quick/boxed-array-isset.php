@@ -7,7 +7,7 @@ function main($o, inout $x) :mixed{
 }
 <<__EntryPoint>> function main_entry(): void {
 $o = new stdClass;
-$o->prop = darray[23 => 'hi'];
+$o->prop = dict[23 => 'hi'];
 $y = null;
 echo main($o, inout $y) ? "true\n" : "false\n";
 }

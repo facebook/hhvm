@@ -1,8 +1,8 @@
 <?hh
 
-function __toString($res_str = varray[
+function __toString($res_str = vec[
   1e3,
-  darray[
+  dict[
     ' in '=> 12345,
     -$t => "\n-- Testing sort() by supplying octal value array, 'flag' value is SORT_REGULAR  --\n"
     ]

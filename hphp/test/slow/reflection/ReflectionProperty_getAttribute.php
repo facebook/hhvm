@@ -1,7 +1,7 @@
 <?hh
 
 class C {
-  <<A, B(1, "two", varray[3])>>
+  <<A, B(1, "two", vec[3])>>
   public $p;
   <<C, D('a', dict['b' => 'c'])>>
   public static $sp;

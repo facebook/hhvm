@@ -20,7 +20,7 @@ mkdir($absSubDir);
 
 // Note invalid dirs in p8 result in (The system cannot find the path specified.)
 // rather than No Such File or Directory in php.net
-$allDirs = varray[
+$allDirs = vec[
   // absolute paths
   "$absSubDir/",
   "$absSubDir/../".$subDir,

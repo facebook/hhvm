@@ -13,8 +13,8 @@ function main($arr1, $arr2) :mixed{
 
 <<__EntryPoint>>
 function main_nested_foreach1() :mixed{
-$a = varray[1,2,3];
-$b = varray[10,20,30];
+$a = vec[1,2,3];
+$b = vec[10,20,30];
 
 for ($i = 0; $i < 10; $i++) {
   var_dump(main($a, $b));

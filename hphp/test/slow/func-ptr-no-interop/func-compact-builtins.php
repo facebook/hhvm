@@ -13,10 +13,10 @@ function W($f) :mixed{
 
 <<__EntryPoint>>
 function main() :mixed{
-  W(() ==> array_column(varray[darray[foo<> => 't1'], darray['foo' => 't2'], darray['bar' => 't3']], foo<>));
-  W(() ==> array_count_values(varray[foo<>, 'foo', 1]));
-  W(() ==> array_key_exists(foo<>, darray['foo' => 1]));
-  W(() ==> array_key_exists(foo<>, darray[foo<> => 1]));
-  W(() ==> array_replace(darray[foo<> => 1], darray[foo<> => 2]));
-  W(() ==> array_flip(darray[foo<> => bar<>]));
+  W(() ==> array_column(vec[dict[foo<> => 't1'], dict['foo' => 't2'], dict['bar' => 't3']], foo<>));
+  W(() ==> array_count_values(vec[foo<>, 'foo', 1]));
+  W(() ==> array_key_exists(foo<>, dict['foo' => 1]));
+  W(() ==> array_key_exists(foo<>, dict[foo<> => 1]));
+  W(() ==> array_replace(dict[foo<> => 1], dict[foo<> => 2]));
+  W(() ==> array_flip(dict[foo<> => bar<>]));
 }

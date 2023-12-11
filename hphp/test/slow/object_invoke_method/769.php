@@ -10,5 +10,5 @@ class C8 {
 <<__EntryPoint>>
 function main_769() :mixed{
 $c = new C8;
-$c(varray[1, 2, 3]);
+$c(vec[1, 2, 3]);
 }

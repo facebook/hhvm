@@ -12,19 +12,19 @@ class Test2 {
 // Target: Integer array keys
 <<__EntryPoint>>
 function main_foreach_target_variables() :mixed{
-$array = varray[1, 2, 3];
+$array = vec[1, 2, 3];
 
-$a = darray[];
+$a = dict[];
 foreach ($array as $a[0] => $a[1]) {
   echo $a[0], " => ", $a[1], ",";
 }
 echo "\n";
 
 // Target: Append to array
-$array = varray[1, 2, 3];
+$array = vec[1, 2, 3];
 
 $i = 0;
-$a = varray[];
+$a = vec[];
 foreach ($array as $a[] => $a[]) {
     echo $a[$i+1], " => ", $a[$i], ",";
     $i += 2;
@@ -32,7 +32,7 @@ foreach ($array as $a[] => $a[]) {
 echo "\n";
 
 // Target: Non-static properties
-$array = varray[1, 2, 3];
+$array = vec[1, 2, 3];
 
 $obj = new Test;
 foreach ($array as $obj->keyProp => $obj->valProp) {
@@ -41,7 +41,7 @@ foreach ($array as $obj->keyProp => $obj->valProp) {
 echo "\n";
 
 // Target: Static properties
-$array = varray[1, 2, 3];
+$array = vec[1, 2, 3];
 
 foreach ($array as Test2::$staticKeyProp => Test::$staticValProp) {
     echo Test2::$staticKeyProp, " => ", Test::$staticValProp, ",";

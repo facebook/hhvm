@@ -1,8 +1,8 @@
 <?hh <<__EntryPoint>> function main(): void {
-$ds = darray[
-        0 => varray["pipe", "r"],
-        1 => varray["pipe", "w"],
-        2 => varray["pipe", "w"]
+$ds = dict[
+        0 => vec["pipe", "r"],
+        1 => vec["pipe", "w"],
+        2 => vec["pipe", "w"]
         ];
 
 $pipes = null;

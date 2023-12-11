@@ -3,9 +3,9 @@
 
 <<__EntryPoint>>
 function main_array_sum() :mixed{
-$a = varray[2, 4, 6, 8];
+$a = vec[2, 4, 6, 8];
 var_dump(array_sum($a));
-$b = darray["a" => 1.2, "b" => 2.3, "c" => 3.4];
+$b = dict["a" => 1.2, "b" => 2.3, "c" => 3.4];
 var_dump(array_sum($b));
 $c = Vector { 3, 6, 9, 12 };
 var_dump(array_sum($c));

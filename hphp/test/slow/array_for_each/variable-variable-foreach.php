@@ -29,7 +29,7 @@ abstract final class ArrayForEachVariableVariableForeach {
 }
 <<__EntryPoint>>
 function entrypoint_variablevariableforeach(): void {
-  ArrayForEachVariableVariableForeach::$rows=varray[1,2,3];
+  ArrayForEachVariableVariableForeach::$rows=vec[1,2,3];
 
   // ORIGINAL ARRAY
   print_r(ArrayForEachVariableVariableForeach::$rows);

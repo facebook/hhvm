@@ -10,7 +10,7 @@ class foo {
 <<__EntryPoint>> function main(): void {
 $foo = new foo();
 
-call_user_func_array( varray[ $foo , 'bar' ] , varray[ '2' ] );
+call_user_func_array( vec[ $foo , 'bar' ] , vec[ '2' ] );
 
 $foo->bar('3');
 }

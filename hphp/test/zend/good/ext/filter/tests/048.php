@@ -18,14 +18,14 @@ function hex_inc($s) :mixed{
 
 <<__EntryPoint>> function main(): void {
 $s = sprintf("%x", PHP_INT_MAX);
-var_dump(is_long(filter_var('0x'.$s, FILTER_VALIDATE_INT, darray["flags"=>FILTER_FLAG_ALLOW_HEX])));
+var_dump(is_long(filter_var('0x'.$s, FILTER_VALIDATE_INT, dict["flags"=>FILTER_FLAG_ALLOW_HEX])));
 
 $s = hex_inc($s);
-var_dump(is_long(filter_var('0x'.$s, FILTER_VALIDATE_INT, darray["flags"=>FILTER_FLAG_ALLOW_HEX])));
+var_dump(is_long(filter_var('0x'.$s, FILTER_VALIDATE_INT, dict["flags"=>FILTER_FLAG_ALLOW_HEX])));
 
 $s = sprintf("%x", ~0);
-var_dump(is_long(filter_var('0x'.$s, FILTER_VALIDATE_INT, darray["flags"=>FILTER_FLAG_ALLOW_HEX])));
+var_dump(is_long(filter_var('0x'.$s, FILTER_VALIDATE_INT, dict["flags"=>FILTER_FLAG_ALLOW_HEX])));
 
 $s = hex_inc($s);
-var_dump(filter_var('0x'.$s, FILTER_VALIDATE_INT, darray["flags"=>FILTER_FLAG_ALLOW_HEX]));
+var_dump(filter_var('0x'.$s, FILTER_VALIDATE_INT, dict["flags"=>FILTER_FLAG_ALLOW_HEX]));
 }

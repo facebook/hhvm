@@ -2,7 +2,7 @@
 
 <<__EntryPoint>>
 function main() :mixed{
-  $a = darray["42" => 10];
+  $a = dict["42" => 10];
   var_dump($a);
 
   $a["10"] = 5;
@@ -11,7 +11,7 @@ function main() :mixed{
   try { var_dump($a[42]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
   var_dump($a["42"]);
 
-  $b = darray(darray["42" => "string", 42 => "int"]);
+  $b = darray(dict["42" => "string", 42 => "int"]);
   var_dump($b);
   var_dump($b["42"]);
   var_dump($b[42]);

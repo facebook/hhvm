@@ -4,8 +4,8 @@
 function main() :mixed{
   $arrs = vec[
     shape('x' => 1),
-    darray['x' => 1],
-    varray[true, false],
+    dict['x' => 1],
+    vec[true, false],
     new Map(dict['x' => 1]),
   ];
   foreach ($arrs as $arr) {

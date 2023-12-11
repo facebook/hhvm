@@ -19,7 +19,7 @@ $dir_name = sys_get_temp_dir().'/'.'006_variation2';
 mkdir($dir_name);
 
 echo "\n*** Testing fileperms(), chmod() with miscellaneous permissions ***\n";
-$perms_array = varray[
+$perms_array = vec[
   /* testing sticky bit */
   07777,
   00000,

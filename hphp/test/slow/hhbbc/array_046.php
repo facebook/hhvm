@@ -1,7 +1,7 @@
 <?hh
 
 class C {}
-function foo() :mixed{ return mt_rand() ? varray[new C] : varray[new C, new C]; }
+function foo() :mixed{ return mt_rand() ? vec[new C] : vec[new C, new C]; }
 function val() :mixed{
   $x = '0';
   apc_store('asd', $x);

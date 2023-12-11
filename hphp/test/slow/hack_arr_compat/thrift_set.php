@@ -47,13 +47,13 @@ class DummyTransport {
 }
 
 class Settish {
-  const darray<int, darray<string, mixed>> SPEC = darray[
-    1 => darray[
+  const darray<int, darray<string, mixed>> SPEC = dict[
+    1 => dict[
       'var' => 'extraData',
       'type' => TType::SET,
       'etype' => TType::STRING,
       'format' => 'collection',
-      'elem' => darray[
+      'elem' => dict[
           'type' => TType::STRING,
       ],
     ],

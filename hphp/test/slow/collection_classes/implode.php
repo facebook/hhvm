@@ -1,7 +1,7 @@
 <?hh
 
 function main() :mixed{
-  $arr = varray['a', 'b', 'c'];
+  $arr = vec['a', 'b', 'c'];
 
   $v = Vector {'a', 'b', 'c'};
   $m = Map {0 => 'a', 1 => 'b', 2 => 'c'};

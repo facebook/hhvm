@@ -20,8 +20,8 @@ function ut_main()
 
     // Define a couple of arrays.
     // Each array contains equal strings that differ only in their length.
-    $a1 = varray[ 'aa', 'aaa', 'a' ];
-    $a2 = varray[ 'пп', 'ппп', 'п' ];
+    $a1 = vec[ 'aa', 'aaa', 'a' ];
+    $a2 = vec[ 'пп', 'ппп', 'п' ];
 
     // Sort them.
     $res_str .= sort_using_locale( 'en_US', $a1 );

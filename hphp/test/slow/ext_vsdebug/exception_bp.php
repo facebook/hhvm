@@ -1,11 +1,11 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 require(__DIR__ . '/common.inc');
-$breakpoints = varray[
-   darray[
+$breakpoints = vec[
+   dict[
      "path" => __FILE__ . ".test",
-     "breakpoints" => varray[
-       darray["line" => 3, "calibratedLine" => 3, "condition" => ""],
+     "breakpoints" => vec[
+       dict["line" => 3, "calibratedLine" => 3, "condition" => ""],
      ]]
    ];
 
@@ -16,17 +16,17 @@ skipMessages(count($breakpoints[0]{'breakpoints'}));
 
 verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0]);
 
-$exnBpCommand = darray[
+$exnBpCommand = dict[
   "command" => "setExceptionBreakpoints",
   "type" => "request",
-  "arguments" => darray[
-    "exceptionOptions" => darray[
+  "arguments" => dict[
+    "exceptionOptions" => dict[
       "breakMode" => "always"
     ]
   ]];
 
 $seq = sendVsCommand($exnBpCommand);
-$exnBpResp = darray[
+$exnBpResp = dict[
   "type" => "response",
   "command" => "setExceptionBreakpoints",
   "success" => true,
@@ -41,20 +41,20 @@ checkForOutput($testProcess, "hello world.\n", "stdout");
 
 // See the exception output.
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "event",
   "event" => "output",
-  "body" => darray[
+  "body" => dict[
       "category" => "console",
       "output" =>
         "Request 1: Exception (UnexpectedValueException) thrown: Exn thrown!"
   ]]);
 
 // Verify we stopped on exception thrown.
-$exnStopObj = darray[
+$exnStopObj = dict[
   "type" => "event",
   "event" => "stopped",
-  "body" => darray[
+  "body" => dict[
       "threadId" => 1,
       "reason" => "exception",
       "description" => "Exception (UnexpectedValueException) thrown"
@@ -63,17 +63,17 @@ $msg = json_decode(getNextVsDebugMessage(), true);
 checkObjEqualRecursively($msg, $exnStopObj);
 
 // Set exn breaks to an invalid value.
-$exnBpCommand = darray[
+$exnBpCommand = dict[
   "command" => "setExceptionBreakpoints",
   "type" => "request",
-  "arguments" => darray[
-    "exceptionOptions" => darray[
+  "arguments" => dict[
+    "exceptionOptions" => dict[
       "breakMode" => "INVALID"
     ]
   ]];
 sendVsCommand($exnBpCommand);
 
-$exnBpResp = darray[
+$exnBpResp = dict[
   "type" => "response",
   "command" => "setExceptionBreakpoints",
   "success" => false];
@@ -82,17 +82,17 @@ checkObjEqualRecursively($msg, $exnBpResp);
 
 // Set to break on unhandled only - this currently generates a warning on
 // exception but doesn't break.
-$exnBpCommand = darray[
+$exnBpCommand = dict[
   "command" => "setExceptionBreakpoints",
   "type" => "request",
-  "arguments" => darray[
-    "exceptionOptions" => darray[
+  "arguments" => dict[
+    "exceptionOptions" => dict[
       "breakMode" => "unhandled"
     ]
   ]];
 sendVsCommand($exnBpCommand);
 
-$exnBpResp = darray[
+$exnBpResp = dict[
   "type" => "response",
   "command" => "setExceptionBreakpoints",
   "success" => true];
@@ -103,10 +103,10 @@ resumeTarget();
 
 // See a warning when the next exception is thrown, but no breakpoint.
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "event",
   "event" => "output",
-  "body" => darray[
+  "body" => dict[
     "category" => "console",
     "output" =>
       "Request 1: Exception (UnexpectedValueException) thrown: Exn thrown!",
@@ -116,20 +116,20 @@ checkForOutput($testProcess, "About to throw again.\n", "stdout");
 
 // See a warning when the next exception is thrown, but no breakpoint.
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "event",
   "event" => "output",
-  "body" => darray[
+  "body" => dict[
     "category" => "console",
     "output" =>
       "Request 1: Exception (UnexpectedValueException) thrown: Exn thrown!",
   ]]);
 
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "event",
   "event" => "output",
-  "body" => darray[
+  "body" => dict[
     "category" => "stderr",
   ]]);
 

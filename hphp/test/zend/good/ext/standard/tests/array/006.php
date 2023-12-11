@@ -1,8 +1,8 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$a = varray["foo", "bar", "fubar"];
-$b = darray["3" => "foo", "4" => "bar", "5" => "fubar"];
-$c = darray["a" => "foo", "b" => "bar", "c" => "fubar"];
+$a = vec["foo", "bar", "fubar"];
+$b = dict["3" => "foo", "4" => "bar", "5" => "fubar"];
+$c = dict["a" => "foo", "b" => "bar", "c" => "fubar"];
 
 /* simple array */
 echo array_pop(inout $a), "\n";

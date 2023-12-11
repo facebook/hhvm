@@ -9,22 +9,22 @@ function main(): void {
   $a[] = fb_gen_user_func_array(
     __FILE__,
     'test',
-    varray[ 0 ],
+    vec[ 0 ],
   );
   $a[] = fb_gen_user_func_array(
     __FILE__,
     'test',
-    varray[ 1 ],
+    vec[ 1 ],
   );
   $a[] = fb_gen_user_func_array(
     __FILE__,
     'test',
-    varray[ 2 ],
+    vec[ 2 ],
   );
   $a[] = fb_gen_user_func_array(
     __FILE__,
     'test',
-    varray[ 3 ],
+    vec[ 3 ],
   );
   HH\Asio\join(AwaitAllWaitHandle::fromVec($a));
 }

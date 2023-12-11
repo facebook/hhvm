@@ -54,8 +54,8 @@ function test_pair($k1, $v1, $k2, $v2) :mixed{
 
 <<__EntryPoint>>
 function main(): void {
-  $aiter1 = new ArrayIterator(darray['a' => 'b']);
-  $aiter2 = new ArrayIterator(darray['a' => 'b']); $aiter2->c = 'd';
+  $aiter1 = new ArrayIterator(dict['a' => 'b']);
+  $aiter2 = new ArrayIterator(dict['a' => 'b']); $aiter2->c = 'd';
   $xml1 = simplexml_load_string("<apple />");
   $xml2 = simplexml_load_string("<pie><apple /></pie>");
   $dynamicA = new stdClass(); $dynamicA->a = 'a';
@@ -65,29 +65,29 @@ function main(): void {
   $dynamicBCThrows = new stdClass();
   $dynamicBCThrows->c = 'c';
 
-  $pairs = varray[
-    varray[
-      darray['k' => 'ArrayIterator 1', 'v' => $aiter1],
-      darray['k' => 'ArrayIterator 2', 'v' => $aiter2],
+  $pairs = vec[
+    vec[
+      dict['k' => 'ArrayIterator 1', 'v' => $aiter1],
+      dict['k' => 'ArrayIterator 2', 'v' => $aiter2],
     ],
-    varray[
-      darray['k' => 'SimpleXMLElement 1', 'v' => $xml1],
-      darray['k' => 'SimpleXMLElement 2', 'v' => $xml2],
+    vec[
+      dict['k' => 'SimpleXMLElement 1', 'v' => $xml1],
+      dict['k' => 'SimpleXMLElement 2', 'v' => $xml2],
     ],
-    varray[
+    vec[
       // same number of dynamic properties with the same value, but diff name
-      darray['k' => 'Dynamic property a', 'v' => $dynamicA],
-      darray['k' => 'Dynamic property b', 'v' => $dynamicB],
+      dict['k' => 'Dynamic property a', 'v' => $dynamicA],
+      dict['k' => 'Dynamic property b', 'v' => $dynamicB],
     ],
-    varray[
-      darray['k' => 'Dynamic property a', 'v' => $dynamicA],
-      darray['k' => 'Dynamic property NAN', 'v' => $dynamicANAN],
+    vec[
+      dict['k' => 'Dynamic property a', 'v' => $dynamicA],
+      dict['k' => 'Dynamic property NAN', 'v' => $dynamicANAN],
     ],
-    varray[
+    vec[
       // depending on which operand in the comparison we traverse, we'll either
       // short-circuit or throw
-      darray['k' => 'Dynamic props (a, b)', 'v' => $dynamicAB],
-      darray['k' => 'Dynamic props (b, c)', 'v' => $dynamicBCThrows],
+      dict['k' => 'Dynamic props (a, b)', 'v' => $dynamicAB],
+      dict['k' => 'Dynamic props (b, c)', 'v' => $dynamicBCThrows],
     ],
   ];
 

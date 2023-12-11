@@ -8,7 +8,7 @@
 echo "*** Testing file() : variation ***\n";
 $testfile = sys_get_temp_dir().'/'.'fileVar9.txt';
 
-$contents = varray[
+$contents = vec[
    "File ends on a single character\na",
    "File ends on a new line\n",
    "File ends on multiple newlines\n\n\n\n",

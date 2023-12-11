@@ -7,7 +7,7 @@ function round_trip_in_apc(mixed $val): mixed {
 }
 
 function foo($v) :mixed{
-  return varray[$v];
+  return vec[$v];
 }
 
 <<__EntryPoint>>

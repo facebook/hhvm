@@ -1,8 +1,8 @@
 <?hh
 
 function two() :mixed{ return 2; }
-function bar(bool $x) :mixed{ return $x ? darray['y' => two()] : darray['y' => new stdClass()]; }
-function foo(bool $x) :mixed{ return darray['x' => bar($x)]; }
+function bar(bool $x) :mixed{ return $x ? dict['y' => two()] : dict['y' => new stdClass()]; }
+function foo(bool $x) :mixed{ return dict['x' => bar($x)]; }
 function main(bool $x) :mixed{
   $ar = foo($x);
   $ar['x']['y']->x = 42;

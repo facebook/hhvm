@@ -87,7 +87,7 @@ function do_request($scheme, $port, $context) :mixed{
 function main_persistent_socket() :mixed{
 $pemfile = tempnam(sys_get_temp_dir(), 'sslservertest');
 
-$certdata = darray['countryName' => 'US',
+$certdata = dict['countryName' => 'US',
                   'stateOrProvinceName' => 'California',
                   'localityName' => 'Menlo Park',
                   'organizationName' => 'Test Corp',
@@ -118,10 +118,10 @@ stream_context_set_option($context, 'ssl', 'passphrase', $pem_passphrase);
 stream_context_set_option($context, 'ssl', 'allow_self_signed', true);
 stream_context_set_option($context, 'ssl', 'verify_peer', false);
 
-$schemes = varray["tcp", "tls", "ssl"];
-$contexts = varray[null, $context, $context];
-$servers = varray[];
-$ports = varray[];
+$schemes = vec["tcp", "tls", "ssl"];
+$contexts = vec[null, $context, $context];
+$servers = vec[];
+$ports = vec[];
 foreach ($schemes as $i => $scheme) {
   $server = null;
   $port = 0;

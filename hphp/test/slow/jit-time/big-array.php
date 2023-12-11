@@ -1,7 +1,7 @@
 <?hh
 
 function test($a) :mixed{
-  $x = darray[
+  $x = dict[
     $a.'1' => $a.'1',
     $a.'2' => $a.'2',
     $a.'3' => $a.'3',

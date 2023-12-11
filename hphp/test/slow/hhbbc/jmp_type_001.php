@@ -20,5 +20,5 @@ function main($x) :mixed{
 <<__EntryPoint>>
 function main_jmp_type_001() :mixed{
 main(12);
-main(varray[1,2,3]);
+main(vec[1,2,3]);
 }

@@ -27,7 +27,7 @@ function test($num) :mixed{
   try {
 	  printf("%s %0.0f\n", gettype($num), $num);
     $ret = ZendGoodExtSoapTestsBugsBug36999::$soap
-      ->__soapcall('echoLong', varray[$num]);
+      ->__soapcall('echoLong', vec[$num]);
 	  printf("%s %0.0f\n", gettype($ret), $ret);
 	} catch (SoapFault $ex) {
 	  var_dump($ex);

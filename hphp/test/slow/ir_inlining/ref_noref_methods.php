@@ -3,7 +3,7 @@
 
 class Cls1 {
 
-  private static $get_res = darray['type' => 1];
+  private static $get_res = dict['type' => 1];
   <<__NEVER_INLINE>>
   public function get() :mixed{
     return self::$get_res;
@@ -12,7 +12,7 @@ class Cls1 {
 
 class Cls2 {
 
-  private static $get_res = darray['type' => 2];
+  private static $get_res = dict['type' => 2];
   <<__NEVER_INLINE>>
   public function get() :mixed{
     return self::$get_res;

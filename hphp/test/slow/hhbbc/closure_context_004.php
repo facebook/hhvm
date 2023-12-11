@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-  private $foo = varray[1,2,3];
+  private $foo = vec[1,2,3];
 
   public function f() :mixed{
     return function () {

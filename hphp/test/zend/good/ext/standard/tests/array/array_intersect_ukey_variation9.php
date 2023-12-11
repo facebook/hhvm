@@ -19,15 +19,15 @@ class MyClass
 echo "*** Testing array_intersect_ukey() : usage variation ***\n";
 
 //Initialise arguments
-$array1 = darray['blue'  => 1, 'red'  => 2, 'green'  => 3, 'purple' => 4];
-$array2 = darray['green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan'   => 8];
+$array1 = dict['blue'  => 1, 'red'  => 2, 'green'  => 3, 'purple' => 4];
+$array2 = dict['green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan'   => 8];
 
 echo "\n-- Testing array_intersect_ukey() function using class with static method as callback --\n";
-var_dump( array_intersect_ukey($array1, $array2, varray['MyClass','static_compare_func']) );
+var_dump( array_intersect_ukey($array1, $array2, vec['MyClass','static_compare_func']) );
 var_dump( array_intersect_ukey($array1, $array2, 'MyClass::static_compare_func') );
 
 echo "\n-- Testing array_intersect_uassoc() function using class with regular method as callback --\n";
 $obj = new MyClass();
-var_dump( array_intersect_ukey($array1, $array2, varray[$obj,'class_compare_func']) );
+var_dump( array_intersect_ukey($array1, $array2, vec[$obj,'class_compare_func']) );
 echo "===DONE===\n";
 }

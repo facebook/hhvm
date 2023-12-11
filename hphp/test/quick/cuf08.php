@@ -9,5 +9,5 @@ class Test {
 }
 <<__EntryPoint>> function main(): void {
 $test = new Test();
-call_user_func_array(varray[$test, 'normal'], darray['badum' => 'tss']);
+call_user_func_array(vec[$test, 'normal'], dict['badum' => 'tss']);
 }

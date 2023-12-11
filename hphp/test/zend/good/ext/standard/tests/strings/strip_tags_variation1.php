@@ -21,7 +21,7 @@ echo "*** Testing strip_tags() : usage variations ***\n";
 $fp = fopen(__FILE__, "r");
 
 //array of values to iterate over
-$values = varray[
+$values = vec[
 
           // int data
 /*1*/     0,
@@ -37,11 +37,11 @@ $values = varray[
           .5,
 
           // array data
-/*10*/    varray[],
-          varray[0],
-          varray[1],
-          varray[1, 2],
-          darray['color' => 'red', 'item' => 'pen'],
+/*10*/    vec[],
+          vec[0],
+          vec[1],
+          vec[1, 2],
+          dict['color' => 'red', 'item' => 'pen'],
 
           // null data
 /*15*/    NULL,

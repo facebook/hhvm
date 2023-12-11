@@ -3,7 +3,7 @@
 class TestClass {
 
   public static function test(): varray<shape(?'foo' => int, 'bar' => int)> {
-    return varray[];
+    return vec[];
   }
 }
 

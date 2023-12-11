@@ -4,7 +4,7 @@ function foo($x) :mixed{
  var_dump($x);
  }
 function test() :mixed{
-  $data = darray['bar' => darray[]];
+  $data = dict['bar' => dict[]];
   $data['bar']['baz'] = 1;
   foo($data);
 }

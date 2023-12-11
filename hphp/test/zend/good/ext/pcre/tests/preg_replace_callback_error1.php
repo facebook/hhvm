@@ -6,7 +6,7 @@
 
 function integer_word($matches) :mixed{
   // Maps from key values (0-9) to corresponding key written in words.
-  $replacement = varray['zero', 'one', 'two', 'three', 'four',
+  $replacement = vec['zero', 'one', 'two', 'three', 'four',
                        'five', 'six', 'seven', 'eight', 'nine'];
   try {
     return $replacement[$matches[0]];
@@ -23,10 +23,10 @@ function integer_word($matches) :mixed{
 * Testing how preg_replace_callback reacts to being passed the wrong type of regex argument
 */
 echo "*** Testing preg_replace_callback() : error conditions ***\n";
-$regex_array = varray['abcdef', //Regex without delimiters
+$regex_array = vec['abcdef', //Regex without delimiters
 '/[a-zA-Z]', //Regex without closing delimiter
 '[a-zA-Z]/', //Regex without opening delimiter
-'/[a-zA-Z]/F', varray['[a-z]', //Array of Regexes
+'/[a-zA-Z]/F', vec['[a-z]', //Array of Regexes
 '[A-Z]', '[0-9]'], '/[a-zA-Z]/']; //Regex string
 $subject = 'number 1.';
 foreach($regex_array as $regex_value) {

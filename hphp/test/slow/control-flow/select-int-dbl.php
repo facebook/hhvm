@@ -10,8 +10,8 @@ function main(bool $b1, bool $b2) :mixed{
 
 <<__EntryPoint>>
 function main_select_int_dbl() :mixed{
-foreach (varray[false, true, false, true] as $b1) {
-  foreach (varray[false, true, false, true] as $b2) {
+foreach (vec[false, true, false, true] as $b1) {
+  foreach (vec[false, true, false, true] as $b2) {
     var_dump(main($b1, $b2));
   }
 }

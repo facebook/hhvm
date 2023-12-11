@@ -7,10 +7,10 @@ function randint() :mixed{
 }
 
 function pt2d() :mixed{
-  return darray['x' => randint(), 'y' => randint()];
+  return dict['x' => randint(), 'y' => randint()];
 }
 function pt3d() :mixed{
-  return darray['x' => randint(), 'y' => randint(), 'z' => randint()];
+  return dict['x' => randint(), 'y' => randint(), 'z' => randint()];
 }
 
 function test(bool $x) :mixed{

@@ -58,7 +58,7 @@ $heredoc_quote_slash = <<<EOT8
 EOT8;
 
 // different heredoc strings for 'ending'
-$heredoc_arr = varray[
+$heredoc_arr = vec[
   $heredoc_null,
   $heredoc_blank,
   $heredoc_char,

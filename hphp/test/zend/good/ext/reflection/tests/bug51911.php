@@ -2,7 +2,7 @@
 
 class Foo {
    const X = 1;
-   public function x($x = varray[1]) :mixed{}
+   public function x($x = vec[1]) :mixed{}
 }
 <<__EntryPoint>> function main(): void {
 $clazz = new ReflectionClass('Foo');

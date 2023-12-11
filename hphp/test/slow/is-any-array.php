@@ -9,10 +9,10 @@ function flib_is_any_array($x) :mixed{
 
 <<__EntryPoint>>
 function main_is_any_array() :mixed{
-$foo = varray[
-  varray[],
-  darray[],
-  varray[],
+$foo = vec[
+  vec[],
+  dict[],
+  vec[],
   vec[],
   dict[],
   keyset[],

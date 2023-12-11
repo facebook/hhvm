@@ -22,7 +22,7 @@ function main_2227() :mixed{
     include '2227-2.inc';
   }
 
-  $f = new Foo(varray[0]);
+  $f = new Foo(vec[0]);
   \var_dump(Foo::$baz);
   \var_dump(B::FOO);
   \var_dump(B::$baz);

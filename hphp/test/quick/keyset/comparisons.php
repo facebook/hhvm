@@ -94,7 +94,7 @@ function compare($a, $b) :mixed{
   compare(keyset[], 1.2345);
   compare(keyset[], 'abc');
   compare(keyset[], new stdClass);
-  compare(keyset[], varray[]);
+  compare(keyset[], vec[]);
   compare(keyset[], vec[]);
   compare(keyset[], dict[]);
 }

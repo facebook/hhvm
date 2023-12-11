@@ -18,7 +18,7 @@ trait T {
   function go() :mixed{
     parent::go();
     echo "In ".self::class."\n";
-    foreach (varray['f', 'g', 'h', 'i'] as $f) self::point($f);
+    foreach (vec['f', 'g', 'h', 'i'] as $f) self::point($f);
   }
 }
 
@@ -48,12 +48,12 @@ function main() :mixed{
   (new W)->go();
 
   echo "In main\n";
-  foreach (varray['f', 'g', 'h', 'i'] as $f) {
+  foreach (vec['f', 'g', 'h', 'i'] as $f) {
     wrap(() ==>
       HH\dynamic_class_meth(C::class, __hhvm_intrinsics\launder_value($f))
     );
   }
-  foreach (varray['f', 'g', 'h', 'i', 'j'] as $f) {
+  foreach (vec['f', 'g', 'h', 'i', 'j'] as $f) {
     wrap(() ==>
       HH\dynamic_class_meth(A::class, __hhvm_intrinsics\launder_value($f))
     );

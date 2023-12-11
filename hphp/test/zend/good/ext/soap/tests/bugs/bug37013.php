@@ -17,7 +17,7 @@ class MultiRefTest {
     $p2 = new ThingWithParent(2, $p);
     $p3 = new ThingWithParent(3, $p);
 
-    $p->children = varray[$p2, $p3];
+    $p->children = vec[$p2, $p3];
 
     return $p2;
   }

@@ -13,7 +13,7 @@ function baz($a) :mixed{
   return 2;
 }
 <<__EntryPoint>> function main(): void {
-$a = varray[1, 2];
+$a = vec[1, 2];
 array_map(foo<>, $a);
 
 $a = call_user_func(baz<>, $a);

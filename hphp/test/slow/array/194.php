@@ -3,6 +3,6 @@
 
 <<__EntryPoint>>
 function main_194() :mixed{
-$a = varray[];
+$a = vec[];
  foreach ($a as $item) print '['.$item.']';
 }

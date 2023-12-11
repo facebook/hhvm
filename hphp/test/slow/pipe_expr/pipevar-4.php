@@ -23,10 +23,10 @@ function unwrap($y) :mixed{
 
 function main($bar) :mixed{
   $foo = "Hello!";
-  $out = varray[1, 2, 3]
+  $out = vec[1, 2, 3]
     |> array_map($x ==> $x + beep(1), $$)
     |> array_merge(
-      varray[50, 60, 70]
+      vec[50, 60, 70]
         |> array_map($x ==> $x * beep(2), $$)
         |> array_filter($$, $x ==> $x != beep(100)),
       $$)

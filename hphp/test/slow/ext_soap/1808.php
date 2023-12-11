@@ -6,7 +6,7 @@ function add($a, $b) :mixed{
 
 <<__EntryPoint>>
 function main_1808() :mixed{
-$server = new SoapServer(NULL, darray['uri' => 'http://test-uri']);
+$server = new SoapServer(NULL, dict['uri' => 'http://test-uri']);
 $str = '<?xml version="1.0" '
 .       'encoding="ISO-8859-1"?>'
 .       '<SOAP-ENV:Envelope SOAP-ENV:encodingStyle='

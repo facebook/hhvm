@@ -2,7 +2,7 @@
 
 function test($x) :mixed{
   $y = ($x ? 5 : 3) + 5;
-  return varray[$y + 1, $y + 1,];
+  return vec[$y + 1, $y + 1,];
 }
 
 

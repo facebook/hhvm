@@ -22,7 +22,7 @@ namespace N {
   $c = new C;
 
   M\call('N\sayHi');
-  M\call(varray['N\C', 'sm']);
-  M\call(varray[$c, 'm']);
+  M\call(vec['N\C', 'sm']);
+  M\call(vec[$c, 'm']);
 }
 }

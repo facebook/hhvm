@@ -9,8 +9,8 @@ function flip($input) :mixed{
 }
 
 function main() :mixed{
-  flip(varray['foo', 'bar', 'baz']);
-  flip(darray['a' => 10, 'b' => 20, 'c' => 30]);
+  flip(vec['foo', 'bar', 'baz']);
+  flip(dict['a' => 10, 'b' => 20, 'c' => 30]);
   flip(Vector {'foo', 'bar', 'baz'});
   flip(Set {'foo', 'bar', 'baz'});
   flip(Map { 'a' => 10, 'b' => 20, 'c' => 30});

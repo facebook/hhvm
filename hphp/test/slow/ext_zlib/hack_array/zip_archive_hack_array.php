@@ -2,8 +2,8 @@
 
 const string ZIP_NAME = 'output.zip';
 const string OUTPUT_DIR = 'output';
-const varray<string> TARGETS = varray['bing', 'bong'];
-const OPTS = darray[
+const varray<string> TARGETS = vec['bing', 'bong'];
+const OPTS = dict[
   'add_path' => 1,
   'remove_all_path' => 1,
   'remove_path' => 1,

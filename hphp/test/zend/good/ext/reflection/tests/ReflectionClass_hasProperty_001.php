@@ -20,7 +20,7 @@ class privf {
 class subprivf extends privf  {
 }
 <<__EntryPoint>> function main(): void {
-$classes = varray["pubf", "subpubf", "protf", "subprotf",
+$classes = vec["pubf", "subpubf", "protf", "subprotf",
                  "privf", "subprivf"];
 foreach($classes as $class) {
     echo "Reflecting on class $class: \n";

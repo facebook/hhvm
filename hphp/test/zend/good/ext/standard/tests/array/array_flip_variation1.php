@@ -20,7 +20,7 @@ echo "*** Testing array_flip() : usage variations - unexpected values for 'input
 $fp = fopen(__FILE__,'r');
 
 //array of values for 'input' argument
-$values = varray[
+$values = vec[
           // int data
   /*1*/   0,
           1,

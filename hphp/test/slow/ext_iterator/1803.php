@@ -7,7 +7,7 @@ $directory = __DIR__."/../../sample_dir";
 $fileSPLObjects = new RecursiveIteratorIterator(
   new RecursiveDirectoryIterator($directory),
   RecursiveIteratorIterator::SELF_FIRST);
-$files = varray[];
+$files = vec[];
  // order changes per machine
 foreach( $fileSPLObjects as $fullFileName => $fileSPLObject ) {
   if (substr($fullFileName,-1)=='.') continue;
@@ -19,7 +19,7 @@ var_dump(array_values($files));
 $fileSPLObjects = new RecursiveIteratorIterator(
   new RecursiveDirectoryIterator($directory),
   RecursiveIteratorIterator::CHILD_FIRST);
-$files = varray[];
+$files = vec[];
  // order changes per machine
 foreach( $fileSPLObjects as $fullFileName => $fileSPLObject ) {
   if (substr($fullFileName,-1)=='.') continue;
@@ -31,7 +31,7 @@ var_dump(array_values($files));
 $fileSPLObjects = new RecursiveIteratorIterator(
   new RecursiveDirectoryIterator($directory),
   RecursiveIteratorIterator::LEAVES_ONLY);
-$files = varray[];
+$files = vec[];
  // order changes per machine
 foreach( $fileSPLObjects as $fullFileName => $fileSPLObject ) {
   if (substr($fullFileName,-1)=='.') continue;
@@ -43,7 +43,7 @@ var_dump(array_values($files));
 // invalid mode -100
 $fileSPLObjects = new RecursiveIteratorIterator(
    new RecursiveDirectoryIterator($directory), -100);
-$files = varray[];
+$files = vec[];
  // order changes per machine
 foreach( $fileSPLObjects as $fullFileName => $fileSPLObject ) {
   if (substr($fullFileName,-1)=='.') continue;
@@ -55,7 +55,7 @@ var_dump(array_values($files));
 // two foreaches
 $fileSPLObjects = new RecursiveIteratorIterator(
   new RecursiveDirectoryIterator($directory));
-$files = varray[];
+$files = vec[];
  // order changes per machine
 foreach( $fileSPLObjects as $fullFileName => $fileSPLObject ) {
   if (substr($fullFileName,-1)=='.') continue;

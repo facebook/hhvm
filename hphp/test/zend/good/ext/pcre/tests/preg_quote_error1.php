@@ -7,7 +7,7 @@
 * Testing how preg_quote reacts to being passed the wrong type of input argument
 */
 echo "*** Testing preg_quote() : error conditions ***\n";
-$input = varray['this is a string', varray['this is', 'a subarray'],];
+$input = vec['this is a string', vec['this is', 'a subarray'],];
 foreach($input as $value) {
     $text = HH\is_any_array($value) ? 'Array' : $value;
     print "\nArg value is: $text\n";

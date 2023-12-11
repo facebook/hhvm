@@ -44,7 +44,7 @@ f(0.0);
 f(3.0);
 f(true);
 f(false);
-f(varray[]);
+f(vec[]);
 f(new stdClass());
 g(0);
 g(0.0);

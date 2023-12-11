@@ -78,7 +78,7 @@ function test() :mixed{
    *              whitespace before the ':')
    *
    */
-  $a = false?:varray[];
+  $a = false?:vec[];
   $a = false?:floor(12.98);
   $a = b()?:NULL;
 

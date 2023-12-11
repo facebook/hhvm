@@ -45,13 +45,13 @@ $fp = fopen( $file, 'a+' );
 
 // Test vfprintf()
 writeAndDump( $fp, "format", null );
-writeAndDump( $fp, "Foo is %d and %s", varray[ 30, 'bar' ] );
-writeAndDump( $fp, "Foobar testing", varray[] );
-writeAndDump( $fp, "%s %s %s", varray[ 'bar', 'bar', 'bar' ] );
-writeAndDump( $fp, "%02d", varray[ 50 ] );
-writeAndDump( $fp, "", varray[] );
-writeAndDump( $fp, "Testing %b %d %f %o %s %x %X", varray[ 9, 6, 2.5502, 24, "foobar", 15, 65 ] );
-@writeAndDump( new FooClass(), "Foo with %s", varray[ 'string' ] );
+writeAndDump( $fp, "Foo is %d and %s", vec[ 30, 'bar' ] );
+writeAndDump( $fp, "Foobar testing", vec[] );
+writeAndDump( $fp, "%s %s %s", vec[ 'bar', 'bar', 'bar' ] );
+writeAndDump( $fp, "%02d", vec[ 50 ] );
+writeAndDump( $fp, "", vec[] );
+writeAndDump( $fp, "Testing %b %d %f %o %s %x %X", vec[ 9, 6, 2.5502, 24, "foobar", 15, 65 ] );
+@writeAndDump( new FooClass(), "Foo with %s", vec[ 'string' ] );
 
 // Close handle
 fclose( $fp );

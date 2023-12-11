@@ -29,11 +29,11 @@ function entrypoint_bug42326(): void {
 EOF;
 
 
-  $soap_admin_classmap = darray['productDetailsType' => 'SOAP_productDetailsType',
+  $soap_admin_classmap = dict['productDetailsType' => 'SOAP_productDetailsType',
                                'GetProductsRequest' => 'SOAP_GetProductsRequest',
                                'GetProductsResponse' => 'SOAP_GetProductsResponse'];
 
-  $soap = new SoapServer(dirname(__FILE__).'/bug42326.wsdl', darray['classmap' => $soap_admin_classmap]);
+  $soap = new SoapServer(dirname(__FILE__).'/bug42326.wsdl', dict['classmap' => $soap_admin_classmap]);
   $soap->setClass('SOAP_Admin');
   ob_start();
   $soap->handle($request);

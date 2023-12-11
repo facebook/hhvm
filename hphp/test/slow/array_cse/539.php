@@ -6,7 +6,7 @@ function id($x) :mixed{
 function f1($x) :mixed{
   $z = id($x[0]);
   foreach ($x[0] as $a) {
-    $z[] = varray[id($z), count($x[0])];
+    $z[] = vec[id($z), count($x[0])];
   }
 }
 
@@ -22,8 +22,8 @@ function f3($x) :mixed{
 
 <<__EntryPoint>>
 function main_539() :mixed{
-f1(varray[varray[0, 1, 2, 3]]);
+f1(vec[vec[0, 1, 2, 3]]);
 f2('foobar');
 var_dump(f3('abc'));
-var_dump(f3(varray[new stdClass]));
+var_dump(f3(vec[new stdClass]));
 }

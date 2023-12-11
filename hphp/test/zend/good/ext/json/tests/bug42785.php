@@ -5,7 +5,7 @@ class bar {}
 function main_entry(): void {
   setlocale(LC_ALL, "de_DE", "de", "german", "ge", "de_DE.ISO8859-1", "ISO8859-1");
 
-  $foo = varray[100.10,"bar"];
+  $foo = vec[100.10,"bar"];
   var_dump(json_encode($foo));
   $bar1 = new bar;
   $bar1->a = 100.10;

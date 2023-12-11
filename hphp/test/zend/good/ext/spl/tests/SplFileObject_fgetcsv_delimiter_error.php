@@ -2,7 +2,7 @@
 <<__EntryPoint>> function main(): void {
 chdir(sys_get_temp_dir());
 $fp = fopen('SplFileObject__fgetcsv3.csv', 'w+');
-fputcsv($fp, varray[
+fputcsv($fp, vec[
     'field1',
     'field2',
     'field3',

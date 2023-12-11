@@ -42,13 +42,13 @@ f(inout $a,2);
 var_dump(($a.$a) . f(inout $a));
 
 
-$a = varray[2];
+$a = vec[2];
 var_dump($a[0] . g(inout $a));
 
 
 
 
-$a = varray[2];
+$a = vec[2];
 var_dump(($a[0] . '') . g(inout $a));
 $a = new stdClass;
 $a->prop = 2;

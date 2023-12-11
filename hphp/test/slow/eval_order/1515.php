@@ -10,5 +10,5 @@ function bug2($a, $b) :mixed{
 
 <<__EntryPoint>>
 function main_1515() :mixed{
-bug2(0, varray[]);
+bug2(0, vec[]);
 }

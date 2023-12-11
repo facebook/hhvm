@@ -6,8 +6,8 @@
 class Fub {
   const FLUB = 'flub';
   // This depends on a class constant, which means it will need a 86pinit().
-  public $dub = darray[
-    self::FLUB => varray[123]
+  public $dub = dict[
+    self::FLUB => vec[123]
   ];
 }
 <<__EntryPoint>> function main(): void {

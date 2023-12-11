@@ -28,8 +28,8 @@ function key_compare_func($a, $b)
 echo "*** Testing array_diff_uassoc() : usage variation ***\n";
 
 //Initialize variables
-$array1 = darray["a" => "green", "b" => "brown", "c" => "blue", 0 => "red"];
-$array2 = darray["a" => "green", 0 => "yellow", 1 => "red"];
+$array1 = dict["a" => "green", "b" => "brown", "c" => "blue", 0 => "red"];
+$array2 = dict["a" => "green", 0 => "yellow", 1 => "red"];
 
 
 
@@ -46,7 +46,7 @@ $index_array = varray [1, 2, 3];
 $assoc_array = darray ['one' => 1, 'two' => 2];
 
 //array of values to iterate over
-$inputs = darray[
+$inputs = dict[
 
       // int data
       'int 0' => 0,

@@ -5,7 +5,7 @@ const THIRD_KEY = "c";
 
 function test()
 :mixed{
-        $arr = darray[
+        $arr = dict[
                 FIRST_KEY => "111",
                 "b" => "222",
                 THIRD_KEY => "333",
@@ -16,7 +16,7 @@ function test()
 
 function test2()
 :mixed{
-        $arr = darray[
+        $arr = dict[
                 FIRST_KEY => "111",
                 "a" => "222",
                 "c" => "333",

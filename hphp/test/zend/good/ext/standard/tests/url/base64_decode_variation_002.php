@@ -35,11 +35,11 @@ $values =  darray [
     ".5" => .5,
 
     // array data
-    "array()" =>   varray[],
-    "array(0)" =>  varray[0],
-    "array(1)" =>  varray[1],
-    "array(1, 2)" => varray[1, 2],
-    "array('color' => 'red', 'item' => 'pen'" => darray['color' => 'red', 'item' => 'pen'],
+    "array()" =>   vec[],
+    "array(0)" =>  vec[0],
+    "array(1)" =>  vec[1],
+    "array(1, 2)" => vec[1, 2],
+    "array('color' => 'red', 'item' => 'pen'" => dict['color' => 'red', 'item' => 'pen'],
 
     // null data
     "NULL" => NULL,

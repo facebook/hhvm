@@ -35,7 +35,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // different scalar/non-scalar values for array input
-$unexpected_inputs = varray[
+$unexpected_inputs = vec[
 
        // int data
 /*1*/  0,

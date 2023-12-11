@@ -11,10 +11,10 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff() : usage variations ***\n";
 
-$arr_int = varray[1, 2, 3];
-$arr_float = varray[1.00, 2.00, 3.00];
-$arr_int_str = varray['1', '2', '3'];
-$arr_float_str = varray['1.00', '2.00', '3.00'];
+$arr_int = vec[1, 2, 3];
+$arr_float = vec[1.00, 2.00, 3.00];
+$arr_int_str = vec['1', '2', '3'];
+$arr_float_str = vec['1.00', '2.00', '3.00'];
 
 print "-- Compare integers and floats: --\n";
 var_dump(array_diff($arr_int, $arr_float));

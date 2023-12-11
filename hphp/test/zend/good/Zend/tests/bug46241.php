@@ -29,8 +29,8 @@ function errorHandler2($errno, $errstr)
 <<__EntryPoint>> function main(): void {
 $err = new ErrorHandling();
 
-set_error_handler(varray[$err, 'errorHandler1']);
-set_error_handler(varray[$err, 'errorHandler2']);
+set_error_handler(vec[$err, 'errorHandler1']);
+set_error_handler(vec[$err, 'errorHandler2']);
 
 trigger_error('Foo', E_USER_WARNING);
 

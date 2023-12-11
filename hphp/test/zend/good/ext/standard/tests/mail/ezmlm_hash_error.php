@@ -18,7 +18,7 @@ function entrypoint_ezmlm_hash_error(): void {
   try { var_dump( ezmlm_hash("webmaster@example.com", $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
   echo "\n-- Testing ezmlm_hash() function with invalid input - ARRAY --\n";
-  $array_arg = varray[1,2,3,4];
+  $array_arg = vec[1,2,3,4];
   $extra_arg = 10;
   try { var_dump( ezmlm_hash($array_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 

@@ -13,15 +13,15 @@ echo "*** Testing fputcsv() : with enclosure as NULL ***\n";
    and 3rd element is csv fields
 */
 $csv_lists = varray [
-  varray[',', '"', varray['water','fruit'] ],
-  varray[',', '"', varray['"water","fruit'] ],
-  varray[',', '"', varray['"water","fruit"'] ],
-  varray[' ', '^', varray['^water^ ^fruit^']],
-  varray[':', '&', varray['&water&:&fruit&']],
-  varray['=', '=', varray['=water===fruit=']],
-  varray['-', '-', varray['-water--fruit-air']],
-  varray['-', '-', varray['-water---fruit---air-']],
-  varray[':', '&', varray['&""""&:&"&:,:":&,&:,,,,']]
+  vec[',', '"', vec['water','fruit'] ],
+  vec[',', '"', vec['"water","fruit'] ],
+  vec[',', '"', vec['"water","fruit"'] ],
+  vec[' ', '^', vec['^water^ ^fruit^']],
+  vec[':', '&', vec['&water&:&fruit&']],
+  vec['=', '=', vec['=water===fruit=']],
+  vec['-', '-', vec['-water--fruit-air']],
+  vec['-', '-', vec['-water---fruit---air-']],
+  vec[':', '&', vec['&""""&:&"&:,:":&,&:,,,,']]
 
 ];
 

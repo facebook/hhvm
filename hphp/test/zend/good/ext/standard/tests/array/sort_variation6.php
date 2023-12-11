@@ -15,7 +15,7 @@
 echo "*** Testing sort() : usage variations ***\n";
 
 // an array contains unsorted hexadecimal values  
-$unsorted_hex_array = varray[0x1AB, 0xFFF, 0xF, 0xFF, 0x2AA, 0xBB, 0x1ab, 0xff, -0xFF, 0, -0x2aa];
+$unsorted_hex_array = vec[0x1AB, 0xFFF, 0xF, 0xFF, 0x2AA, 0xBB, 0x1ab, 0xff, -0xFF, 0, -0x2aa];
 
 echo "\n-- Testing sort() by supplying hexadecimal value array, 'flag' value is defualt  --\n";
 $temp_array = $unsorted_hex_array;

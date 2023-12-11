@@ -2,7 +2,7 @@
 
 function f(darray $a = null, $e) :mixed{
   if (is_int($e) || is_string($e)) {
-    $a[$e] ??= darray[];
+    $a[$e] ??= dict[];
     $a[$e]['foo'] = 30;
     try { $x = $a[$e]['baz']; } catch (Exception $e) { echo $e->getMessage()."\n"; $x = null; }
   } else {
@@ -32,10 +32,10 @@ function h($x, $y) :mixed{
 
 <<__EntryPoint>>
 function main_534() :mixed{
-f(darray[], 'e');
-f(darray['e' => darray['baz' => 40]], 'e');
-var_dump(f(darray['y' => darray[]], 'y'));
-var_dump(f(darray[], 'y'));
-h(darray[], 0);
-h(darray[0 => darray[]], 0);
+f(dict[], 'e');
+f(dict['e' => dict['baz' => 40]], 'e');
+var_dump(f(dict['y' => dict[]], 'y'));
+var_dump(f(dict[], 'y'));
+h(dict[], 0);
+h(dict[0 => dict[]], 0);
 }

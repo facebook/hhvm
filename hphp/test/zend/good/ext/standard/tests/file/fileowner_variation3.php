@@ -14,7 +14,7 @@ mkdir($dir_name);
 $file_handle = fopen($dir_name."/fileowner_variation3.tmp", "w");
 fclose($file_handle);
 
-$files_arr = varray[
+$files_arr = vec[
   "/fileowner_variation3/fileowner_variation3.tmp",
 
   /* Testing a file trailing slash */

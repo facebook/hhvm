@@ -8,7 +8,7 @@ class MyArrayIterator extends ArrayIterator {
 
 function test() :mixed{}
 <<__EntryPoint>> function main(): void {
-$it = new MyArrayIterator(varray[1, 21, 22]);
+$it = new MyArrayIterator(vec[1, 21, 22]);
 
 try {
     $res = iterator_apply($it, test<>);

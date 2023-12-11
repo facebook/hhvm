@@ -34,15 +34,15 @@ function check_alternate_handling( inout $coll )
     ut_coll_set_strength( $coll, Collator::TERTIARY );
     ut_coll_set_attribute( $coll, Collator::ALTERNATE_HANDLING, Collator::NON_IGNORABLE );
 
-    $res .= cmp_array( inout $coll, varray[ 'di Silva', 'Di Silva', 'diSilva', 'U.S.A.', 'USA' ] );
+    $res .= cmp_array( inout $coll, vec[ 'di Silva', 'Di Silva', 'diSilva', 'U.S.A.', 'USA' ] );
 
     ut_coll_set_attribute( $coll, Collator::ALTERNATE_HANDLING, Collator::SHIFTED );
 
-    $res .= cmp_array( inout $coll, varray[ 'di Silva', 'diSilva', 'Di Silva', 'U.S.A.', 'USA' ] );
+    $res .= cmp_array( inout $coll, vec[ 'di Silva', 'diSilva', 'Di Silva', 'U.S.A.', 'USA' ] );
 
     ut_coll_set_strength( $coll, Collator::QUATERNARY );
 
-    $res .= cmp_array( inout $coll, varray[ 'di Silva', 'diSilva', 'Di Silva', 'U.S.A.', 'USA' ] );
+    $res .= cmp_array( inout $coll, vec[ 'di Silva', 'diSilva', 'Di Silva', 'U.S.A.', 'USA' ] );
     $res .= "\n";
 
     return $res;

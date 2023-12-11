@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$a = varray[];
+$a = vec[];
 $a[] = $a;
 
 var_dump($a);

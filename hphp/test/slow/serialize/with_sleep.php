@@ -12,7 +12,7 @@ class A {
   protected $c;
   private $d;
   public function __sleep() :mixed{
-    return varray['b', 'c', 'd'];
+    return vec['b', 'c', 'd'];
   }
 }
 

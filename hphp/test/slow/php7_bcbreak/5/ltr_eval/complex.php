@@ -4,7 +4,7 @@ class Foo { public static int $n = 0; }
 <<__EntryPoint>>
 function entrypoint_complex(): void {
 
-  $a=darray[];
+  $a=dict[];
 
   $foo = function($i) {
     $n = Foo::$n;
@@ -25,9 +25,9 @@ function entrypoint_complex(): void {
       $a[Foo::$n++ + $foo(20)],
     ),
     $a[Foo::$n++ + $foo(2)]
-  ) = varray[
+  ) = vec[
     "S0: n = " . (Foo::$n++ + $bar(0)),
-    varray[
+    vec[
       "T0: n = " . (Foo::$n++ + $bar(10)),
       "T1: n = " . (Foo::$n++ + $bar(20)),
     ],

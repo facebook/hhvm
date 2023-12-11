@@ -6,7 +6,7 @@ class MyClass {
   }
 
   public function makeArray() :mixed{
-    $data = darray[];
+    $data = dict[];
     $p = $this->getKeyPrefix();
 
     $data[$p.'a'] = 2;

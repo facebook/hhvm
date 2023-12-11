@@ -17,6 +17,6 @@ function bar($ar) :mixed{
 
 <<__EntryPoint>>
 function main_dce_003() :mixed{
-bar(varray['a']);
-bar(varray[]);
+bar(vec['a']);
+bar(vec[]);
 }

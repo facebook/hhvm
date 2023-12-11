@@ -7,11 +7,11 @@
 function test_splice ($offset, $length)
 :mixed{
     echo "  - No replacement\n";
-    $input_array=varray[0,1,2,3,4,5];
+    $input_array=vec[0,1,2,3,4,5];
     var_dump (array_splice(inout $input_array, $offset,$length));
     var_dump ($input_array);
     echo "  - With replacement\n";
-    $input_array=varray[0,1,2,3,4,5];
+    $input_array=vec[0,1,2,3,4,5];
     var_dump (array_splice(inout $input_array, $offset,$length,varray ["A","B","C"]));
     var_dump ($input_array);
 }

@@ -1,7 +1,7 @@
 <?hh
 
 function foo(bool $x) :mixed{
-  return darray['flag' => darray['flag2' => $x]];
+  return dict['flag' => dict['flag2' => $x]];
 }
 function bar() :mixed{
   $x = foo(true);

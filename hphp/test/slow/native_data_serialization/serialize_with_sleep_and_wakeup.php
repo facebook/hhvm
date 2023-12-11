@@ -19,7 +19,7 @@ class Bar extends ReflectionClass {
     var_dump("__sleep invoked");
     var_dump($this->name);
     var_dump($this->getName());
-    return varray['name', 'prop', 'meh'];
+    return vec['name', 'prop', 'meh'];
   }
 
   public function __wakeup() :mixed{

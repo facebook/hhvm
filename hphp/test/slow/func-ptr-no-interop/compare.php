@@ -13,7 +13,7 @@ function bar() :mixed{}
 function LV($x)  :mixed{ return __hhvm_intrinsics\launder_value($x); }
 function CLS($c) :mixed{ return __hhvm_intrinsics\create_class_pointer($c); }
 
-function WRAPA($x) :mixed{ return LV(varray[$x]); }
+function WRAPA($x) :mixed{ return LV(vec[$x]); }
 function WRAPO($x) :mixed{ return LV(new Wrapper($x)); }
 function WRAPD($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
 
@@ -47,7 +47,7 @@ function WRAPD($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   $oa = new StrObj('foobar');
   $fa = CLS('foobar');
 
-  $xx = varray[$cm]; $vx = varray[$va]; $ox = varray[$oa]; $fx = varray[$fa];
+  $xx = vec[$cm]; $vx = vec[$va]; $ox = vec[$oa]; $fx = vec[$fa];
 
   $xy = new Wrapper($cm); $vy = new Wrapper($va); $oy = new Wrapper($oa);
   $fy = new Wrapper($fa);

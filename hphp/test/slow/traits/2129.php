@@ -9,13 +9,13 @@ function show_without_extra_vardump_nonsense($arr) :mixed{
 }
 function do_wonderful_things_with($r) :mixed{
   echo "yall know what time it is. time to show you some properties\n";
-  $props = varray[];
+  $props = vec[];
   foreach ($r->getProperties() as $prop) {
     $props[] = $prop->getName();
   }
   asort(inout $props);
   show_without_extra_vardump_nonsense($props);
-  $meths = varray[];
+  $meths = vec[];
   echo "yall know what time it is now too. time to show you some methods\n";
   foreach ($r->getMethods() as $meth) {
     $meths[] = $meth->getName();

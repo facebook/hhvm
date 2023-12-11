@@ -5,9 +5,9 @@ function id($x) :mixed{ return $x; }
 
 class thinger {
   private
-    $things = varray[],
-    $otherThings = varray[],
-    $updatedIDs = varray[];
+    $things = vec[],
+    $otherThings = vec[],
+    $updatedIDs = vec[];
 
   function thinger() :mixed{
     $this->things[3] = 'three';
@@ -19,7 +19,7 @@ class thinger {
   private function process($history, inout $updated) :mixed{
     $updated = rand(0, 1) == 2;
     $fn = $this->fn;
-    return $fn(varray[$history]);
+    return $fn(vec[$history]);
   }
 
   public function done($init) :mixed{

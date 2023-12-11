@@ -13,7 +13,7 @@ function foo($x) :mixed{
 <<__EntryPoint>>
 function main() :mixed{
   try {
-    foo(varray[1,2]);
+    foo(vec[1,2]);
   } catch (Exception $e) {
     var_dump($e->getMessage());
   }

@@ -9,8 +9,8 @@ class A {
   public bool $p5 = true;
   public vec $p6 = vec[1, 2, 3];
   public Traversable $p7;
-  public varray $p8 = varray[];
-  public darray $p9 = darray[];
+  public varray $p8 = vec[];
+  public darray $p9 = dict[];
   public ?AnyArray $p10;
 }
 

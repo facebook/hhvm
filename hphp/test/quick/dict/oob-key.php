@@ -22,7 +22,7 @@ function manipulate($arr) :mixed{
     echo "Caught ".$ex->getMessage()."\n";
   }
   $arr['foo'][3][] = 5;
-  $arr['foo'][3]['bar'] = varray[12];
+  $arr['foo'][3]['bar'] = vec[12];
   try { var_dump($arr['foo'][3]['bar'][256]); }
   catch (Exception $e) { echo $e->getMessage()."\n"; }
   var_dump($arr);
@@ -50,6 +50,6 @@ function manipulate($arr) :mixed{
     |> get($$, 'foobar')
     |> var_dump($$);
 
-  $arr = darray['foo' => dict[1 => 'hello', '2' => 'world', 3 => darray[]]];
+  $arr = dict['foo' => dict[1 => 'hello', '2' => 'world', 3 => dict[]]];
   manipulate($arr);
 }

@@ -6,9 +6,9 @@ class c {
   private static $otherthing;
 
   public static function doit($id, $value) :mixed{
-    self::$thing = darray[];
+    self::$thing = dict[];
     self::$thing[(string)$id] = $value;
-    self::$otherthing = darray[];
+    self::$otherthing = dict[];
     self::$otherthing[(string)$id] = $value;
   }
 

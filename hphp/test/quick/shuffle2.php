@@ -11,9 +11,9 @@ function iss($a, $i) :mixed{
   return isset($a[$i]);
 }
 <<__EntryPoint>> function main(): void {
-$a = varray['a', 2, false];
+$a = vec['a', 2, false];
 var_dump(iss($a, 5));
 
-$a = darray['a'=>'b', 1=>'c', 2=>4, 'c'=>3, 0=>'hello'];
+$a = dict['a'=>'b', 1=>'c', 2=>4, 'c'=>3, 0=>'hello'];
 var_dump(iss($a, 5));
 }

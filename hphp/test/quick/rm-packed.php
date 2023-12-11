@@ -5,5 +5,5 @@ function main($a, $i) :mixed{
   return $a;
 }
 <<__EntryPoint>> function main_entry(): void {
-var_dump(main(varray['a', 'b'], 1));
+var_dump(main(vec['a', 'b'], 1));
 }

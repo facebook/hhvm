@@ -25,28 +25,28 @@ function error_boundary(inout $x, $fn) :mixed{
   var_dump($min - 1);
   var_dump($max * 5);
 
-  $ops = varray[
+  $ops = vec[
     // initial sanity checks for no overflow
-    varray[$add, 3, 5],
-    varray[$sub, 3, 5],
-    varray[$mul, 7, 4],
+    vec[$add, 3, 5],
+    vec[$sub, 3, 5],
+    vec[$mul, 7, 4],
 
     // check runtime operators on just ints
-    varray[$add, $max, 1],
-    varray[$add, $min, -1],
+    vec[$add, $max, 1],
+    vec[$add, $min, -1],
 
-    varray[$sub, $min, 1],
-    varray[$sub, $max, -1],
+    vec[$sub, $min, 1],
+    vec[$sub, $max, -1],
 
-    varray[$mul, $max / 2, 3],
-    varray[$mul, $min, 2],
-    varray[$mul, $max, -2],
-    varray[$mul, $min, -3],
+    vec[$mul, $max / 2, 3],
+    vec[$mul, $min, 2],
+    vec[$mul, $max, -2],
+    vec[$mul, $min, -3],
 
     // check numeric strings
-    varray[$add, "$max", 1],
-    varray[$add, $max, '1'],
-    varray[$add, "$max", '1'],
+    vec[$add, "$max", 1],
+    vec[$add, $max, '1'],
+    vec[$add, "$max", '1'],
   ];
 
   foreach ($ops as list($op, $lhs, $rhs)) {
@@ -54,7 +54,7 @@ function error_boundary(inout $x, $fn) :mixed{
     var_dump($res);
   }
 
-  $unary = varray[$min, $max, -4, 0, 5, "12", 5.2, "1.5", "abc", "", null];
+  $unary = vec[$min, $max, -4, 0, 5, "12", 5.2, "1.5", "abc", "", null];
 
   // inc/dec
   foreach ($unary as $val) {

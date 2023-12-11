@@ -7,7 +7,7 @@
 
 <<__EntryPoint>>
 function main_hash_keccak() :mixed{
-$subjects = varray[
+$subjects = vec[
   '',
   'a',
   'The quick brown fox jumps over the lazy dog',
@@ -18,7 +18,7 @@ $subjects = varray[
 
 foreach ($subjects as $subject) {
   echo '== ', urlencode($subject), " ==\n";
-  foreach (varray[224, 256, 384, 512] as $bits) {
+  foreach (vec[224, 256, 384, 512] as $bits) {
     echo $bits, ': ', hash("sha3-$bits", $subject), "\n";
   }
 }

@@ -5,7 +5,7 @@ class foo {
   public $public = 'public';
 
   public function __sleep() :mixed{
-    return varray['private', 'protected', 'public', 'no_such'];
+    return vec['private', 'protected', 'public', 'no_such'];
   }
 }
 

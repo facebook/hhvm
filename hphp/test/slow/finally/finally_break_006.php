@@ -1,8 +1,8 @@
 <?hh
 
 function blah() :mixed{
-  $xs = varray[11, 22, 33, 44, 55];
-  $ys = varray['a', 'b', 'c', 'd', 'e', 'f'];
+  $xs = vec[11, 22, 33, 44, 55];
+  $ys = vec['a', 'b', 'c', 'd', 'e', 'f'];
 
   try {
     echo "try\n";

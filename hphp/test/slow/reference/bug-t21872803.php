@@ -14,7 +14,7 @@
   }
 
 function main() :mixed{
-  var_dump(wat(varray[6, 3, 7, 1, 8], true));
+  var_dump(wat(vec[6, 3, 7, 1, 8], true));
 }
 
 

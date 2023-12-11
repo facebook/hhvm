@@ -6,7 +6,7 @@
 
 function ut_main()
 :mixed{
-    $locales = darray[
+    $locales = dict[
         'en_US' => "{0,number,integer} monkeys on {1,number,integer} trees make {2,number} monkeys per tree",
         'ru_UA' => "{0,number,integer} мавп на {1,number,integer} деревах це {2,number} мавпи на кожному деревi",
         'de' => "{0,number,integer} Affen über {1,number,integer} Bäume um {2,number} Affen pro Baum",
@@ -27,8 +27,8 @@ function ut_main()
 			$str_res .= dump(intl_get_error_message())."\n";
 			continue;
 		}
-        $str_res .= dump( ut_msgfmt_format( $fmt, darray[0 => $m, 1 => $t, 2 => $m/$t] ) ) . "\n";
-		$str_res .= dump( ut_msgfmt_format_message($locale, $pattern, darray[0 => $m, 1 => $t, 2 => $m/$t])) . "\n";
+        $str_res .= dump( ut_msgfmt_format( $fmt, dict[0 => $m, 1 => $t, 2 => $m/$t] ) ) . "\n";
+		$str_res .= dump( ut_msgfmt_format_message($locale, $pattern, dict[0 => $m, 1 => $t, 2 => $m/$t])) . "\n";
     }
     return $str_res;
 }

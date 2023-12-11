@@ -15,10 +15,10 @@ function key_compare_func($a, $b)
 echo "*** Testing array_intersect_uassoc() : usage variation ***\n";
 
 //Initialize variables
-$arr1_string_int = varray['1', '2'];
-$arr2_string_int = varray['1', '3'];
-$arr1_string_float = varray['1.00', '2.00'];
-$arr2_string_float = varray['1.00', '3.00'];
+$arr1_string_int = vec['1', '2'];
+$arr2_string_int = vec['1', '3'];
+$arr1_string_float = vec['1.00', '2.00'];
+$arr2_string_float = vec['1.00', '3.00'];
 
 echo "\n-- Result of strings containing integers intersection --\n";
 var_dump( array_intersect_uassoc($arr1_string_int, $arr2_string_int, key_compare_func<>) );

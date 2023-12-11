@@ -11,13 +11,13 @@
 echo "*** Testing strtok() : with invalid escape sequences in token ***\n";
 
 // defining arrays for input strings and tokens
-$string_array = varray[
+$string_array = vec[
                 "khellok worldk",
                 "\khello\k world\k",
                 "/khello\k world/k",
                 "/hellok/ world"
               ];
-$token_array = varray[
+$token_array = vec[
                "k",
                "/ ",
                "/k",

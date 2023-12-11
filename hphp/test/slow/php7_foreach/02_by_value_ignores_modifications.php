@@ -9,6 +9,6 @@ function run(inout $a) :mixed{
 
 <<__EntryPoint>>
 function main() :mixed{
-  $a = darray[0 => 1, 1 => 2, 2 => 3];
+  $a = dict[0 => 1, 1 => 2, 2 => 3];
   run(inout $a);
 }

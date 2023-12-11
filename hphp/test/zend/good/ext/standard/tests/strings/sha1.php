@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 $filename = sys_get_temp_dir().'/'.'sha1.dat';
-$a = varray[
+$a = vec[
 	"abc",
 	"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
 	"a",

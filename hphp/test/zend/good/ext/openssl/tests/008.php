@@ -6,7 +6,7 @@ fclose($fp);
 $b = "file://" . dirname(__FILE__) . "/cert.crt";
 $c = "invalid cert";
 $d = openssl_x509_read($a);
-$e = varray[];
+$e = vec[];
 
 $output = null;
 $output2 = null;

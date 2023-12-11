@@ -15,8 +15,8 @@ class B extends A {
 <<__EntryPoint>> function main(): void {
   $method = new ReflectionMethod("B::call");
   $method->invoke(null);
-  $method->invokeArgs(null, varray[]);
+  $method->invokeArgs(null, vec[]);
   $method = new ReflectionMethod("A::call");
   $method->invoke(null);
-  $method->invokeArgs(null, varray[]);
+  $method->invokeArgs(null, vec[]);
 }

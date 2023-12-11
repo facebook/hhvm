@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_296() :mixed{
-$a = varray['test'];
+$a = vec['test'];
  $a[0] = 1;
              var_dump($a);
 }

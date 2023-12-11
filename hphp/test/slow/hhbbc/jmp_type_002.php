@@ -4,7 +4,7 @@ class Foo {}
 class Bar {}
 
 function main($x) :mixed{
-  if (!is_array($x)) $x = varray[$x];
+  if (!is_array($x)) $x = vec[$x];
   echo is_array($x);
   echo "\n";
   echo (bool)$x;
@@ -15,5 +15,5 @@ function main($x) :mixed{
 <<__EntryPoint>>
 function main_jmp_type_002() :mixed{
 main(12);
-main(varray[1,2,3]);
+main(vec[1,2,3]);
 }

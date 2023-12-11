@@ -13,7 +13,7 @@ function wrap($fun) :mixed{
 }
 
 function getTestcase(int $num) :mixed{
-  $test_cases = varray[
+  $test_cases = vec[
     null,
     false, true,
     0, 1,

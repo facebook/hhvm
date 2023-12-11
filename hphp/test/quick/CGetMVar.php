@@ -2,7 +2,7 @@
 
 class V { const X = 10; }
 function values() :mixed{
-  $VALUES = darray[
+  $VALUES = dict[
     'X'                        => V::X,
   ];
   return $VALUES;

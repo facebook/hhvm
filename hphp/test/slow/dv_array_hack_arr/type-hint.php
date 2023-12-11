@@ -69,10 +69,10 @@ function test1() :mixed{
         keyset[100, 'abc', 200],
         xml_parser_create(),
         new stdClass(),
-        varray[],
-        varray[1, 2, 3],
-        darray[],
-        darray['a' => 1, 'b' => 2, 'c' => 3]
+        vec[],
+        vec[1, 2, 3],
+        dict[],
+        dict['a' => 1, 'b' => 2, 'c' => 3]
       ]
     );
 
@@ -117,8 +117,8 @@ function test1() :mixed{
 function test2() :mixed{
   $values = __hhvm_intrinsics\launder_value(
     vec[
-      varray[1, 2, 3],
-      darray[100 => 200]
+      vec[1, 2, 3],
+      dict[100 => 200]
     ]
   );
 

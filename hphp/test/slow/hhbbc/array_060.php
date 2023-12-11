@@ -1,7 +1,7 @@
 <?hh
 
 function foo() :mixed{
-  $x = darray[0 => 1];
+  $x = dict[0 => 1];
   for ($i = 0; $i < 2; ++$i) {
     $x[$i] = 'a';
   }

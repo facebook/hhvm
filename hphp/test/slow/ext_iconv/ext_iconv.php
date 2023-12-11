@@ -10,7 +10,7 @@ function VERIFY($x) :mixed{ VS($x, true); }
 //////////////////////////////////////////////////////////////////////
 
 function test_iconv_mime_encode() :mixed{
-  $preferences = darray["input-charset" => "ISO-8859-1",
+  $preferences = dict["input-charset" => "ISO-8859-1",
                                   "output-charset" => "UTF-8",
                                   "line-length" => 76,
                                   "line-break-chars" => "\n"];
@@ -44,13 +44,13 @@ function test_iconv_mime_decode_headers() :mixed{
      ("Subject: =?UTF-8?B?UHLDnGZ1bmcgUHLDnGZ1bmc=?=\n".
       "Subject: =?UTF-8?B?UHLDnGZ1bmcgUHLDnGZ1bmc=?=\n",
       0, "ISO-8859-1"),
-     darray["Subject" => varray["Pr\xDC"."fung Pr\xDC"."fung",
+     dict["Subject" => vec["Pr\xDC"."fung Pr\xDC"."fung",
                                            "Pr\xDC"."fung Pr\xDC"."fung"]]);
 }
 
 function test_iconv_get_encoding() :mixed{
   VS(iconv_get_encoding(),
-     darray["input_encoding" => "ISO-8859-1",
+     dict["input_encoding" => "ISO-8859-1",
                  "output_encoding" => "ISO-8859-1",
                  "internal_encoding" => "ISO-8859-1"]);
 }
@@ -59,7 +59,7 @@ function test_iconv_set_encoding() :mixed{
   VS(iconv_set_encoding("output_encoding", "UTF-8"), true);
 
   VS(iconv_get_encoding(),
-     darray["input_encoding" => "ISO-8859-1",
+     dict["input_encoding" => "ISO-8859-1",
                  "output_encoding" => "UTF-8",
                  "internal_encoding" => "ISO-8859-1"]);
 }

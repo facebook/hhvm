@@ -9,12 +9,12 @@ function ut_main()
 :mixed{
     $res_str = '';
 
-    $locales = varray[
+    $locales = vec[
         "de_DE@currency=EUR;collation=PHONEBOOK",
         'uk-ua_CALIFORNIA@currency=GRN'
     ];
 
-    $locales = varray[
+    $locales = vec[
     'de_DE@currency=EUR;collation=PHONEBOOK',
         'root',
         'uk@currency=EURO',

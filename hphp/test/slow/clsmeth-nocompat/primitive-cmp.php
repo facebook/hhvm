@@ -12,7 +12,7 @@ function bar() :mixed{}
 function LV($x)  :mixed{ return __hhvm_intrinsics\launder_value($x); }
 function CLS($c) :mixed{ return __hhvm_intrinsics\create_class_pointer($c); }
 
-function WRAPA($x) :mixed{ return LV(varray[$x]); }
+function WRAPA($x) :mixed{ return LV(vec[$x]); }
 function WRAPO($x) :mixed{ return LV(new Wrapper($x)); }
 function WRAPD($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
 
@@ -59,17 +59,17 @@ function WRAPD($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   $sv = 'Foo::bar';
   $rv = opendir(getcwd());
   $ov = new StrObj('Foo::bar');
-  $va = varray[Foo::class, 'bar'];
-  $da = darray[0 => Foo::class, 1 => 'bar'];
+  $va = vec[Foo::class, 'bar'];
+  $da = dict[0 => Foo::class, 1 => 'bar'];
   $cp = Foo::bar<>;
   $ep = bar<>;
   $lp = Foo::baz<>;
   $qp = CLS('Foo');
 
-  $xx = varray[$cm]; $nx = varray[$nv]; $tx = varray[$tv]; $bx = varray[$bv];
-  $ix = varray[$iv]; $fx = varray[$fv]; $sx = varray[$sv]; $rx = varray[$rv];
-  $ox = varray[$ov]; $vx = varray[$va]; $dx = varray[$da]; $cx = varray[$cp];
-  $ex = varray[$ep]; $lx = varray[$lp]; $qx = varray[$qp];
+  $xx = vec[$cm]; $nx = vec[$nv]; $tx = vec[$tv]; $bx = vec[$bv];
+  $ix = vec[$iv]; $fx = vec[$fv]; $sx = vec[$sv]; $rx = vec[$rv];
+  $ox = vec[$ov]; $vx = vec[$va]; $dx = vec[$da]; $cx = vec[$cp];
+  $ex = vec[$ep]; $lx = vec[$lp]; $qx = vec[$qp];
 
   $xy = new Wrapper($cm); $ny = new Wrapper($nv); $ty = new Wrapper($tv);
   $by = new Wrapper($bv); $iy = new Wrapper($iv); $fy = new Wrapper($fv);
@@ -427,8 +427,8 @@ function WRAPD($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   $sv = LV('Foo::bar');
   $rv = LV(opendir(getcwd()));
   $ov = LV(new StrObj('Foo::bar'));
-  $va = LV(varray[Foo::class, 'bar']);
-  $da = LV(darray[0 => Foo::class, 1 => 'bar']);
+  $va = LV(vec[Foo::class, 'bar']);
+  $da = LV(dict[0 => Foo::class, 1 => 'bar']);
   $cp = LV(Foo::bar<>);
   $ep = LV(bar<>);
   $lp = LV(Foo::baz<>);

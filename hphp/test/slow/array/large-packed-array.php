@@ -1,7 +1,7 @@
 <?hh
 function main() :mixed{
   // Test arrays whose size exceeds 65536
-  $a = array_pad(varray[], 50000, null);
+  $a = array_pad(vec[], 50000, null);
   for ($i = 50000; $i < 100000; ++$i) {
     $a[] = $i;
   }

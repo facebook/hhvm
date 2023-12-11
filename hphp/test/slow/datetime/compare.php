@@ -4,7 +4,7 @@ function main() :mixed{
   date_default_timezone_set('UTC');
   $tz = new DateTimeZone(date_default_timezone_get());
   $now = new DateTime('', $tz);
-  $tests = varray[
+  $tests = vec[
     new DateTime('-1day', $tz),
     new DateTime('+1day', $tz),
   ];
@@ -17,7 +17,7 @@ function main() :mixed{
 
   // microseconds tests
   $base = DateTime::createFromFormat('U.u', '1448889063.3531');
-  $tests = varray[
+  $tests = vec[
     DateTime::createFromFormat('U.u', '1448889063.3530'),
     DateTime::createFromFormat('U.u', '1448889063.3531'),
     DateTime::createFromFormat('U.u', '1448889063.3532')

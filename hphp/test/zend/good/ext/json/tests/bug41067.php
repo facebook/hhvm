@@ -1,6 +1,6 @@
 <?hh <<__EntryPoint>> function main(): void {
 $single_barline = "\360\235\204\200";
-$array = varray[$single_barline];
+$array = vec[$single_barline];
 print bin2hex($single_barline) . "\n";
 // print $single_barline . "\n\n";
 $json = json_encode($array);

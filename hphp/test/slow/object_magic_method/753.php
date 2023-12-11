@@ -3,7 +3,7 @@
 class foo{
   public $public = 'public';
   public function __sleep()  :mixed{
- return varray['public'];
+ return vec['public'];
  }
 }
 

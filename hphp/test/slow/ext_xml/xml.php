@@ -16,8 +16,8 @@ VS(utf8_encode("abc \xc0 def"), "abc \xc3\x80 def");
 
 $simple = "<para><note attrib1='foo'>simple&amp;note</note></para>";
 $p = xml_parser_create();
-$vals = varray[];
-$index = varray[];
+$vals = vec[];
+$index = vec[];
 xml_parse_into_struct($p, $simple, inout $vals, inout $index);
 xml_parser_free($p);
 

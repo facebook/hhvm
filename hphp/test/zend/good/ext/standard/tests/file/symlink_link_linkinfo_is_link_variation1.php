@@ -61,7 +61,7 @@ function main(): void {
 
   echo "\n*** Testing symlink(), link(), linkinfo() and is_link() with linknames stored as members of an array ***\n";
 
-  $link_arr = varray["$dirname/symlink_link_linkinfo_is_link_link.tmp"];
+  $link_arr = vec["$dirname/symlink_link_linkinfo_is_link_link.tmp"];
 
   /* Testing on soft links */
   echo "\n-- Working with soft links --\n";

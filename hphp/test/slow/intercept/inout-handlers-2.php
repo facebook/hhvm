@@ -47,7 +47,7 @@ function main() :mixed{
   };
   fb_intercept2('foo', 'handler1');
   fb_intercept2('bar', 'W::handler2');
-  fb_intercept2('fiz', varray[new W, 'handler3']);
+  fb_intercept2('fiz', vec[new W, 'handler3']);
   fb_intercept2('buz', (new W)->make_closure());
   fb_intercept2('biz', W::make_static_closure());
   fb_intercept2('far', $handler6);

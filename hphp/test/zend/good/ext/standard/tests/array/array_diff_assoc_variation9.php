@@ -13,9 +13,9 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff_assoc() : usage variations ***\n";
 
-$array1 = darray['sub_array1' => varray [1, 2, 3],
+$array1 = dict['sub_array1' => varray [1, 2, 3],
                 'sub_array2' => varray ['a', 'b', 'c']];
-$array2 = darray['sub_arraya' => varray [1, 3, 5],
+$array2 = dict['sub_arraya' => varray [1, 3, 5],
                 'sub_arrayb' => varray ['a', 'z', 'y']];
 
 echo "-- Compare two 2-D arrays --\n";

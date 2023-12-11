@@ -3,10 +3,10 @@
 
 <<__EntryPoint>>
 function main_stream_select_not_full_read() :mixed{
-$descriptorspec = varray[
-  varray["pipe", "r"],
-  varray["pipe", "w"],
-  varray["pipe", "a"],
+$descriptorspec = vec[
+  vec["pipe", "r"],
+  vec["pipe", "w"],
+  vec["pipe", "a"],
 ];
 $io = null;
 $process = proc_open('cat', darray($descriptorspec), inout $io);
@@ -17,7 +17,7 @@ $io2 = null;
 $process2 = proc_open('cat', darray($descriptorspec), inout $io2);
 
 while (!feof($io[1])) {
-  $r = varray[$io[1], $io2[1]];
+  $r = vec[$io[1], $io2[1]];
   $w = $e = null;
   $i = stream_select(inout $r, inout $w, inout $e, 1);
   var_dump($i);

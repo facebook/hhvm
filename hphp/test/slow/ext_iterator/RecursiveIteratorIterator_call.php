@@ -7,7 +7,7 @@ $it = new RecursiveIteratorIterator(
   new RecursiveDirectoryIterator(__DIR__.'/../../sample_dir'),
   RecursiveIteratorIterator::SELF_FIRST
 );
-$files = darray[];
+$files = dict[];
 foreach($it as $file) {
   $files[$file->getFilename()] =
     $it->getInnerIterator()->getFilename() == $file->getFilename();

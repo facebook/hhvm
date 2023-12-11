@@ -10,7 +10,7 @@ function test($magick) :mixed{
 
 <<__EntryPoint>>
 function main_magick_foreach() :mixed{
-$img = varray[
+$img = vec[
   'magick:logo',
   __DIR__.'/facebook.png',
   __DIR__.'/draw_example.png',

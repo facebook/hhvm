@@ -17,8 +17,8 @@ var_dump(openssl_private_decrypt($encrypted, inout $output2, $wrong));
 var_dump($output2);
 var_dump(openssl_private_decrypt($wrong, inout $output3, $privkey));
 var_dump($output3);
-var_dump(openssl_private_decrypt($encrypted, inout $output4, varray[$privkey]));
+var_dump(openssl_private_decrypt($encrypted, inout $output4, vec[$privkey]));
 var_dump($output4);
-var_dump(openssl_private_decrypt($encrypted, inout $output5, varray[$privkey, ""]));
+var_dump(openssl_private_decrypt($encrypted, inout $output5, vec[$privkey, ""]));
 var_dump($output5);
 }

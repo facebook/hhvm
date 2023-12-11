@@ -21,7 +21,7 @@ function main(): void {
   json_encode_with_error($b, inout $error);
   var_dump($error[0], $error[1]);
 
-  $c = darray[
+  $c = dict[
       'foo' => $bad_utf8,
       'bar' => 1
   ];

@@ -9,7 +9,7 @@ function makeNonStatic($n) :mixed{
 }
 
 <<__EntryPoint>> function main(): void {
-  $a = darray[];
+  $a = dict[];
   // Insert an object to force $a to become ref-counted in APC.
   $a['obj'] = new stdClass;
   $a['unc'] = makeNonStatic(10);

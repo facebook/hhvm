@@ -14,11 +14,11 @@ function test($a, $b) :mixed{
 
 function test_all() :mixed{
   $vals = vec[
-    varray[],
-    varray['a', 'b', 'c'],
-    darray[],
-    darray[10 => 'a', 20 => 'b', 30 => 'c'],
-    darray['a' => 123, 'b' => 456, 'c' => 789],
+    vec[],
+    vec['a', 'b', 'c'],
+    dict[],
+    dict[10 => 'a', 20 => 'b', 30 => 'c'],
+    dict['a' => 123, 'b' => 456, 'c' => 789],
     vec[],
     vec['a', 'b', 'c'],
     dict[],

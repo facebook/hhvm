@@ -137,10 +137,10 @@ function testMethods() :mixed{
   echo "================================\n";
   echo "Testing methods....\n\n";
   $a = new Cls2();
-  runFuncs(varray[$a, 'func1'], varray[$a, 'func2']);
-  runFuncs(varray[$a, 'func1'], varray[$a, 'func2']);
+  runFuncs(vec[$a, 'func1'], vec[$a, 'func2']);
+  runFuncs(vec[$a, 'func1'], vec[$a, 'func2']);
   HH\clear_instance_memoization($a);
-  runFuncs(varray[$a, 'func1'], varray[$a, 'func2']);
+  runFuncs(vec[$a, 'func1'], vec[$a, 'func2']);
 }
 
 function testSingleMethods() :mixed{
@@ -148,22 +148,22 @@ function testSingleMethods() :mixed{
   echo "Testing single methods....\n\n";
   $a = new Cls3();
   $b = new Cls4();
-  runFuncs(varray[$a, 'func'], varray[$b, 'func']);
-  runFuncs(varray[$a, 'func'], varray[$b, 'func']);
+  runFuncs(vec[$a, 'func'], vec[$b, 'func']);
+  runFuncs(vec[$a, 'func'], vec[$b, 'func']);
   HH\clear_instance_memoization($a);
-  runFuncs(varray[$a, 'func'], varray[$b, 'func']);
+  runFuncs(vec[$a, 'func'], vec[$b, 'func']);
   HH\clear_instance_memoization($b);
-  runFuncs(varray[$a, 'func'], varray[$b, 'func']);
+  runFuncs(vec[$a, 'func'], vec[$b, 'func']);
 }
 
 function testTraits() :mixed{
   echo "================================\n";
   echo "Testing traits....\n\n";
   $a = new Cls5();
-  runFuncs(varray[$a, 'func1'], varray[$a, 'func2']);
-  runFuncs(varray[$a, 'func1'], varray[$a, 'func2']);
+  runFuncs(vec[$a, 'func1'], vec[$a, 'func2']);
+  runFuncs(vec[$a, 'func1'], vec[$a, 'func2']);
   HH\clear_instance_memoization($a);
-  runFuncs(varray[$a, 'func1'], varray[$a, 'func2']);
+  runFuncs(vec[$a, 'func1'], vec[$a, 'func2']);
 }
 
 function testTraitStatics() :mixed{
@@ -184,12 +184,12 @@ function testTraitSingleMethods() :mixed{
   echo "Testing trait single methods....\n\n";
   $a = new Cls7();
   $b = new Cls8();
-  runFuncs(varray[$a, 'func'], varray[$b, 'func']);
-  runFuncs(varray[$a, 'func'], varray[$b, 'func']);
+  runFuncs(vec[$a, 'func'], vec[$b, 'func']);
+  runFuncs(vec[$a, 'func'], vec[$b, 'func']);
   HH\clear_instance_memoization($a);
-  runFuncs(varray[$a, 'func'], varray[$b, 'func']);
+  runFuncs(vec[$a, 'func'], vec[$b, 'func']);
   HH\clear_instance_memoization($b);
-  runFuncs(varray[$a, 'func'], varray[$b, 'func']);
+  runFuncs(vec[$a, 'func'], vec[$b, 'func']);
 }
 
 function testFreeFuncs() :mixed{

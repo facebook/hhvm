@@ -8,13 +8,13 @@ function foo($s) :mixed{
 <<__EntryPoint>> function main(): void {
   print "Test begin\n";
 
-  call_user_func_array(print_r<>, varray["Hello!\n"]);
+  call_user_func_array(print_r<>, vec["Hello!\n"]);
   call_user_func_array(call_user_func_array<>,
-                       varray[print_r<>, varray["Hello!\n"]]);
+                       vec[print_r<>, vec["Hello!\n"]]);
 
   // Throw an exception throw nested builtin calls.
   try {
-    call_user_func_array(call_user_func_array<>, varray[foo<>, varray["foo arg"]]);
+    call_user_func_array(call_user_func_array<>, vec[foo<>, vec["foo arg"]]);
   } catch (Exception $e) {
     print "Caught exception\n";
   }

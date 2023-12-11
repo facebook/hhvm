@@ -2,7 +2,7 @@
 
 class B { public function __wakeup() :mixed{ var_dump('a'); } }
 <<__EntryPoint>> function main(): void {
-$serialized_strs = varray[
+$serialized_strs = vec[
   'O:1:"B":0:{}',
   'V:1:"B":0:{}',
   'K:1:"B":0:{}',
@@ -11,7 +11,7 @@ $serialized_strs = varray[
 ];
 
 foreach ($serialized_strs as $serialized_str) {
-  var_dump(unserialize($serialized_str, darray['allowed_classes' => false]));
+  var_dump(unserialize($serialized_str, dict['allowed_classes' => false]));
   var_dump(unserialize($serialized_str));
 }
 }

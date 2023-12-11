@@ -7,7 +7,7 @@ class A {
 }
 <<__EntryPoint>> function main(): void {
 $a = new A;
-$b = darray[ 0 => 'A', 1 => 'B' ];
+$b = dict[ 0 => 'A', 1 => 'B' ];
 list ($a->bar0,  $a->bar1) = $b;
 list ($a->foo(), $a->bar1) = $b;
 }

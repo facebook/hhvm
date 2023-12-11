@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$dirs = varray[];
+$dirs = vec[];
 $empty_dir = sys_get_temp_dir().'/'.'empty';
 @mkdir($empty_dir);
 

@@ -22,12 +22,12 @@ if($file_handle == false)
 fclose($file_handle);
 
 // various formats
-$formats = varray[ "%d", "%f", "%e", "%u", " %s", "%x", "%o"];
+$formats = vec[ "%d", "%f", "%e", "%u", " %s", "%x", "%o"];
 
 $counter = 1;
 
 // various write only modes
-$modes = varray["w", "wb", "wt",
+$modes = vec["w", "wb", "wt",
                "a", "ab", "at",
                "x", "xb", "xt"
          ];

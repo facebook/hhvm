@@ -47,7 +47,7 @@ class for_string_sort
 echo "*** Testing sort() : object functionality ***\n";
 
 // array of integer objects
-$unsorted_int_obj = varray[
+$unsorted_int_obj = vec[
   new for_integer_sort(11,33,30),
   new for_integer_sort(66,44,4),
   new for_integer_sort(-88,-5,5),

@@ -7,5 +7,5 @@ function test($a) :mixed{
 
 <<__EntryPoint>>
 function main_44() :mixed{
-test(varray['abc', 'cde', 'fgh']);
+test(vec['abc', 'cde', 'fgh']);
 }

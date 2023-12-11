@@ -1,11 +1,11 @@
 <?hh
 
 abstract class first {
-    protected $someArray = varray[];
+    protected $someArray = vec[];
 }
 
 class second extends first {
-    protected $someArray = varray[];
+    protected $someArray = vec[];
     protected $someValue = null;
 
     public function __construct($someValue) {

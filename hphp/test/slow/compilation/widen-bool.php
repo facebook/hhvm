@@ -1,7 +1,7 @@
 <?hh
 
 function test($m1, $m2) :mixed{
-  return varray[$m1 == $m2];
+  return vec[$m1 == $m2];
 }
 
 function foo($m1, $m2) :mixed{

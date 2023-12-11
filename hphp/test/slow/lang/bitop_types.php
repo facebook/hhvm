@@ -68,7 +68,7 @@ function main_bitop_types() :mixed{
     42,
     24.1987,
     "str",
-    varray[1, 2, 3],
+    vec[1, 2, 3],
     new c(),
     null,
   ];

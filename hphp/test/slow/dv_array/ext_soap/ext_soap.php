@@ -94,10 +94,10 @@ function entrypoint_ext_soap(): void {
   for ($n = 1; $n <= 2; $n++) {
     switch ($n) {
       case 1:
-        DvArrayExtSoapExtSoapPhp::$server = new SoapServer(null, darray["uri" => "http://testuri.org"]);
+        DvArrayExtSoapExtSoapPhp::$server = new SoapServer(null, dict["uri" => "http://testuri.org"]);
         break;
       case 2:
-        DvArrayExtSoapExtSoapPhp::$server = new SoapServer(null, darray["uri" => "http://testuri.org",
+        DvArrayExtSoapExtSoapPhp::$server = new SoapServer(null, dict["uri" => "http://testuri.org",
                       "ssl_method" => SOAP_SSL_METHOD_TLS]);
         break;
     }
@@ -116,7 +116,7 @@ function entrypoint_ext_soap(): void {
     "<ns1:strlenResponse><return xsi:type=\"xsd:int\">11".
     "</return></ns1:strlenResponse>");
 
-    $funcs = varray["sub", "add"];
+    $funcs = vec["sub", "add"];
     DvArrayExtSoapExtSoapPhp::$server->addFunction($funcs);
 
     VSOAP("<ns1:add xmlns:ns1=\"http://testuri.org\">".
@@ -141,7 +141,7 @@ function entrypoint_ext_soap(): void {
     "</return></ns1:sumResponse>");
 
     DvArrayExtSoapExtSoapPhp::$server = new SoapServer(__DIR__."/1809.wsdl",
-          darray["uri" => "http://testuri.org"]);
+          dict["uri" => "http://testuri.org"]);
 
     DvArrayExtSoapExtSoapPhp::$server->addFunction("fault");
 

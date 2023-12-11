@@ -6,7 +6,7 @@ class MyClass {
     $this->prop2 = 'somethingElse';
     $this->prop3 = 'somethingElseThen';
 
-    var_dump(set_error_handler(varray[$this, 'errorHandler']));
+    var_dump(set_error_handler(vec[$this, 'errorHandler']));
   }
 
   public function errorHandler($severity, $message, $file = NULL,

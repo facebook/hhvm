@@ -28,9 +28,9 @@ function key_compare_func($key1, $key2)
 echo "*** Testing array_intersect_ukey() : usage variation ***\n";
 
 //Initialise arguments
-$array1 = darray['blue'  => 1, 'red'  => 2, 'green'  => 3, 'purple' => 4];
-$array2 = darray['green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan'   => 8];
-$array4 = darray['green' => 5, 'cyan'   => 8];
+$array1 = dict['blue'  => 1, 'red'  => 2, 'green'  => 3, 'purple' => 4];
+$array2 = dict['green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan'   => 8];
+$array4 = dict['green' => 5, 'cyan'   => 8];
 
 
 //resource variable
@@ -42,7 +42,7 @@ hello world
 EOT;
 
 //array of values to iterate over
-$inputs = darray[
+$inputs = dict[
 
       // int data
       'int 0' => 0,

@@ -3,9 +3,9 @@
 class A { public function yo() :mixed{ echo "hi\n"; } }
 
 function foo() :mixed{
-  $x = varray[varray[new A]];
+  $x = vec[vec[new A]];
   for ($i = 0; $i < 10; ++$i) {
-    $x[] = varray[];
+    $x[] = vec[];
     $x[$i + 1][] = new A;
   }
   return $x;

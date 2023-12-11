@@ -1,6 +1,6 @@
 <?hh
 class A {
-  public function a(int $a0 = varray[]) :mixed{}
+  public function a(int $a0 = vec[]) :mixed{}
 }
 
 <<__EntryPoint>>

@@ -11,7 +11,7 @@ $file = sys_get_temp_dir().'/'.'flock.tmp';
 $fp = fopen($file, "w");
 
 /* array of operatons */
-$operations = varray[
+$operations = vec[
   LOCK_SH,
   LOCK_EX,
   LOCK_SH|LOCK_NB,
@@ -25,7 +25,7 @@ $operations = varray[
 ];
 
 /* array of wouldblocks */
-$wouldblocks = varray[
+$wouldblocks = vec[
   0,
   1,
   2,
@@ -33,8 +33,8 @@ $wouldblocks = varray[
   TRUE,
   FALSE,
   NULL,
-  varray[1,2,3],
-  varray[],
+  vec[1,2,3],
+  vec[],
   "string",
   "",
   /* binary input */

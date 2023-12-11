@@ -20,9 +20,9 @@ function min_max_multi(...$args) :mixed{
 
 function single_arg() :mixed{
   echo ' === Single Array ===', "\n";
-  min_max_single(varray[3, 1, 6, 7]);
-  min_max_single(varray[2, 4, 5]);
-  min_max_single(darray[1 => "1236150163"]);
+  min_max_single(vec[3, 1, 6, 7]);
+  min_max_single(vec[2, 4, 5]);
+  min_max_single(dict[1 => "1236150163"]);
 
   echo ' === Single Collection ===', "\n";
   min_max_single(Vector {3, 1, 6, 7});
@@ -32,7 +32,7 @@ function single_arg() :mixed{
 
 function multi_arg() :mixed{
   echo ' === Multiple Arguments ===', "\n";
-  min_max_multi(varray[varray[2], 4, 8], varray[varray[2, 5, 1]]);
+  min_max_multi(vec[vec[2], 4, 8], vec[vec[2, 5, 1]]);
   min_max_multi(1, 1.0);
   min_max_multi(1.0, 1);
 }

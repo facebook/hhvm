@@ -1,7 +1,7 @@
 <?hh
 
 function main() :mixed{
-  $x = varray[1, 2, 3];
+  $x = vec[1, 2, 3];
   array_unshift(inout $x, 24);
   array_unshift(inout $x, 42, 'apple', 200);
   array_unshift(inout $x, 8, 99, 'green');

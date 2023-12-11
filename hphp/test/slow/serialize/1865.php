@@ -4,7 +4,7 @@ class X {
   private $o, $a, $o2;
   function foo() :mixed{
     $this->o = $this;
-    $this->a = varray[1,2,3];
+    $this->a = vec[1,2,3];
     $this->o2 = $this;
   }
 }

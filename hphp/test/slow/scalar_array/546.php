@@ -1,11 +1,11 @@
 <?hh
 
 function test1() :mixed{
- $a = varray[__FUNCTION__, __LINE__];
+ $a = vec[__FUNCTION__, __LINE__];
  return $a;
  }
 function test2() :mixed{
- $a = varray[__FUNCTION__, __LINE__];
+ $a = vec[__FUNCTION__, __LINE__];
  return $a;
  }
 

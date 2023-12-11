@@ -1,7 +1,7 @@
 <?hh
 
 function foo() :mixed{
- return varray[1, 2, 3];
+ return vec[1, 2, 3];
 }
 
  <<__EntryPoint>>

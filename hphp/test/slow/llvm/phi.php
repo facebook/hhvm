@@ -1,7 +1,7 @@
 <?hh
 
 function test_InitPackedArrayLoop($x) :mixed{
-  $arr = varray[$x, $x, $x, $x, $x, $x, $x, $x, $x];
+  $arr = vec[$x, $x, $x, $x, $x, $x, $x, $x, $x];
   return $arr;
 }
 

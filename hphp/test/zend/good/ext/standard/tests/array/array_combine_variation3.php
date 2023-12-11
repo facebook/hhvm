@@ -43,24 +43,24 @@ EOT;
 
 // arrays passed to $keys argument
 $arrays = varray [
-/*1*/  varray[1, 2], // with default keys and numeric values
-       varray[1.1, 2.2], // with default keys & float values
-       varray[false,true], // with default keys and boolean values
-       varray[], // empty array
-/*5*/  varray[NULL], // with NULL
-       varray["a\v\f","aaaa\r","b","b\tbbb","c","\[\]\!\@\#\$\%\^\&\*\(\)\{\}"],  // with double quoted strings
-       varray['a\v\f','aaaa\r','b','b\tbbb','c','\[\]\!\@\#\$\%\^\&\*\(\)\{\}'],  // with single quoted strings
-       darray["h1" => $blank_line, "h2" => $multiline_string, "h3" => $diff_whitespaces, 0 => $numeric_string],  // with heredocs
+/*1*/  vec[1, 2], // with default keys and numeric values
+       vec[1.1, 2.2], // with default keys & float values
+       vec[false,true], // with default keys and boolean values
+       vec[], // empty array
+/*5*/  vec[NULL], // with NULL
+       vec["a\v\f","aaaa\r","b","b\tbbb","c","\[\]\!\@\#\$\%\^\&\*\(\)\{\}"],  // with double quoted strings
+       vec['a\v\f','aaaa\r','b','b\tbbb','c','\[\]\!\@\#\$\%\^\&\*\(\)\{\}'],  // with single quoted strings
+       dict["h1" => $blank_line, "h2" => $multiline_string, "h3" => $diff_whitespaces, 0 => $numeric_string],  // with heredocs
 
        // associative arrays
-/*9*/  darray[1 => "one", 2 => "two", 3 => "three"],  // explicit numeric keys, string values
-       darray["one" => 1, "two" => 2, "three" => 3 ],  // string keys & numeric values
-       darray[ 1 => 10, 2 => 20, 4 => 40, 3 => 30],  // explicit numeric keys and numeric values
-       darray[ "one" => "ten", "two" => "twenty", "three" => "thirty"],  // string key/value
-       darray["one" => 1, 2 => "two", 4 => "four"],  //mixed
+/*9*/  dict[1 => "one", 2 => "two", 3 => "three"],  // explicit numeric keys, string values
+       dict["one" => 1, "two" => 2, "three" => 3 ],  // string keys & numeric values
+       dict[ 1 => 10, 2 => 20, 4 => 40, 3 => 30],  // explicit numeric keys and numeric values
+       dict[ "one" => "ten", "two" => "twenty", "three" => "thirty"],  // string key/value
+       dict["one" => 1, 2 => "two", 4 => "four"],  //mixed
 
        // array with repetative keys
-/*14*/ darray["One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3]
+/*14*/ dict["One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3]
 ];
 
 // loop through each sub-array within $arrays to check the behavior of array_combine()

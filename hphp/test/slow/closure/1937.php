@@ -9,5 +9,5 @@ function test($a, $b) :mixed{
 
 <<__EntryPoint>>
 function main_1937() :mixed{
-test(varray[varray[1], varray[2]], 5);
+test(vec[vec[1], vec[2]], 5);
 }

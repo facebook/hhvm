@@ -3,7 +3,7 @@
 function foo(inout dict<int, int> $arr) :mixed{
   foreach ($arr as $val) {
     if ($arr[$val]) {
-      $arr = varray[];
+      $arr = vec[];
       return true;
     }
   }

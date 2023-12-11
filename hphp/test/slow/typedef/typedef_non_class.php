@@ -31,7 +31,7 @@ function main() :mixed{
   fooInt(12);
   fooBool(false);
   fooDouble(1.2);
-  fooArray(varray[1,2,3]);
+  fooArray(vec[1,2,3]);
   fooString("asdasd");
 }
 

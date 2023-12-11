@@ -5,20 +5,20 @@ function launder($x) :mixed{ return __hhvm_intrinsics\launder_value($x); }
 
 function get() :mixed{
   if (launder(true)) {
-    return darray[
+    return dict[
       launder('a') => launder(100),
       launder('b') => launder(200),
       launder('c') => launder(300)
     ];
   } else {
-    return darray[];
+    return dict[];
   }
 }
 
 function foo() :mixed{
   $x = get();
-  if ($x === darray[]) return varray[];
-  return varray['a', 'b', 'c'];
+  if ($x === dict[]) return vec[];
+  return vec['a', 'b', 'c'];
 }
 
 function test() :mixed{

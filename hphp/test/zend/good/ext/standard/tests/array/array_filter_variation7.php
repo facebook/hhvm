@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_filter() : usage variations - Anonymous callback functions ***\n";
 
-$input = varray[0, 1, -1, 10, 100, 1000, 'Hello', null];
+$input = vec[0, 1, -1, 10, 100, 1000, 'Hello', null];
 
 // anonymous callback function
 echo "Anonymous callback function with regular parameter and statement\n";

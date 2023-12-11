@@ -7,7 +7,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_multisort() : Testing  all array sort specifiers ***\n";
 
-$ar = varray[ "2", "aa" , "1"];
+$ar = vec[ "2", "aa" , "1"];
 $regular = SORT_REGULAR;
 $string = SORT_STRING;
 $numeric = SORT_NUMERIC;

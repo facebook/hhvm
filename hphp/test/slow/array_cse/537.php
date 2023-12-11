@@ -37,15 +37,15 @@ function f5($x) :mixed{
 function main_537() :mixed{
 error_reporting(0);
 var_dump(f1(null));
-var_dump(f1(varray[]));
-var_dump(f1(varray[0]));
+var_dump(f1(vec[]));
+var_dump(f1(vec[0]));
 var_dump(f1(''));
 var_dump(f1('a'));
-f2(darray[0 => varray[]]);
-f2(varray[]);
+f2(dict[0 => vec[]]);
+f2(vec[]);
 f2('');
 f2(null);
-f3(darray['foo' => varray[0,1,2,3]]);
-f4(varray[darray[1 => new stdClass()]]);
+f3(dict['foo' => vec[0,1,2,3]]);
+f4(vec[dict[1 => new stdClass()]]);
 f5('foobar');
 }

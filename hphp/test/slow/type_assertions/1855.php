@@ -16,6 +16,6 @@ function main_1855() :mixed{
 f('');
 f('foo');
 f('f');
-f(varray[]);
-f(varray[32]);
+f(vec[]);
+f(vec[32]);
 }

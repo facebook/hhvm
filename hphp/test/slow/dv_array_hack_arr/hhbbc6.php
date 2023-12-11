@@ -12,13 +12,13 @@ function marked_varray(varray $x) :mixed{
 
 <<__EntryPoint>>
 function main() :mixed{
-  marked_darray(darray['a' => 17]);
-  marked_darray(HH\array_mark_legacy(darray['a' => 17]));
-  marked_darray(darray['a' => new C()]);
-  marked_darray(HH\array_mark_legacy(darray['a' => new C()]));
+  marked_darray(dict['a' => 17]);
+  marked_darray(HH\array_mark_legacy(dict['a' => 17]));
+  marked_darray(dict['a' => new C()]);
+  marked_darray(HH\array_mark_legacy(dict['a' => new C()]));
 
-  marked_varray(varray[17]);
-  marked_varray(HH\array_mark_legacy(varray[17]));
-  marked_varray(varray[new C()]);
-  marked_varray(HH\array_mark_legacy(varray[new C()]));
+  marked_varray(vec[17]);
+  marked_varray(HH\array_mark_legacy(vec[17]));
+  marked_varray(vec[new C()]);
+  marked_varray(HH\array_mark_legacy(vec[new C()]));
 }

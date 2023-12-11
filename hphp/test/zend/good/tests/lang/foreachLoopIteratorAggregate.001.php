@@ -6,7 +6,7 @@ abstract final class ForeachLoopIteratorAggregate {
 
 class EnglishMealIterator implements Iterator {
     private $pos=0;
-    private $myContent=varray["breakfast", "dinner", "tea"];
+    private $myContent=vec["breakfast", "dinner", "tea"];
 
     public function valid() :mixed{
         $indent = ForeachLoopIteratorAggregate::$indent;
@@ -47,7 +47,7 @@ class EnglishMealIterator implements Iterator {
 
 class FrenchMealIterator implements Iterator {
     private $pos=0;
-    private $myContent=varray["petit dejeuner", "dejeuner", "gouter", "dinner"];
+    private $myContent=vec["petit dejeuner", "dejeuner", "gouter", "dinner"];
 
     public function valid() :mixed{
         $indent = ForeachLoopIteratorAggregate::$indent;

@@ -13,9 +13,9 @@
 echo "*** Testing array_intersect_assoc() : binary safe checking ***\n";
 
 // array with binary values
-$arr_binary = varray[b"hello", b"world"];
+$arr_binary = vec[b"hello", b"world"];
 // simple array
-$arr_normal = varray["hello", "world"];
+$arr_normal = vec["hello", "world"];
 
 // array with binary value for $arr1 argument
 var_dump( array_intersect_assoc($arr_binary, $arr_normal) );

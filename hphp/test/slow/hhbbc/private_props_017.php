@@ -14,7 +14,7 @@
  * for MOpMode::Unset.
  */
 class A {
-  private $x = varray[1,2,3];
+  private $x = vec[1,2,3];
   public function __construct() {
     unset($this->x);
     $y = $this;

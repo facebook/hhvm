@@ -5,12 +5,12 @@ function r($r) :mixed{
 }
 
 function build() :mixed{
-  $a = darray["A0" => 0,
+  $a = dict["A0" => 0,
              "A1" => "a1"];
-  $b = darray["A" => $a,
+  $b = dict["A" => $a,
              "B0" => 0,
              "B1" => "b1"];
-  $c = darray["A" => $a,
+  $c = dict["A" => $a,
              "B" => $b,
              "C0" => 0,
              "C1" => "c1"];

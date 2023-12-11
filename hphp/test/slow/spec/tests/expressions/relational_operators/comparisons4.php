@@ -12,8 +12,8 @@ error_reporting(-1);
 // Numeric strings with all kinds of operands, swapping them over to make
 // LHS/RHS order is irrelevent.
 
-$oper1 = varray["10", "-5.1"];
-$oper2 = varray[0, 100, -3.4, TRUE, FALSE, NULL, "", "123", "abc", varray[], varray[10,2.3]];
+$oper1 = vec["10", "-5.1"];
+$oper2 = vec[0, 100, -3.4, TRUE, FALSE, NULL, "", "123", "abc", vec[], vec[10,2.3]];
 
 foreach ($oper1 as $e1)
 {

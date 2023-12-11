@@ -93,7 +93,7 @@ $values = vec[
   123,
   '123',
   3.14,
-  darray[],
+  dict[],
   darray(vec[1, 2, 3, 4]),
   darray(dict['a' => 100, 'b' => 200, 'c' => 300]),
   vec[],
@@ -113,11 +113,11 @@ $values = vec[
   Set{'a', 'b', 'c', 'd'},
   Map{100 => 'a', 200 => 'b', 300 => 'c'},
   Pair{'a', 100},
-  varray[],
-  varray['a', 'b', 'c'],
-  darray[],
-  darray[0 => 'x', 1 => 'y', 2 => 'z'],
-  darray['key1' => 111, 'key2' => 222]
+  vec[],
+  vec['a', 'b', 'c'],
+  dict[],
+  dict[0 => 'x', 1 => 'y', 2 => 'z'],
+  dict['key1' => 111, 'key2' => 222]
 ];
 $values = __hhvm_intrinsics\launder_value($values);
 

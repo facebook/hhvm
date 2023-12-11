@@ -21,7 +21,7 @@ class classA
 echo "*** Testing array_pad() : possible values for \$pad_value argument ***\n";
 
 // Initialise $input and $pad_size argument
-$input = varray[1, 2];
+$input = vec[1, 2];
 $pad_size = 4;
 
 // heredoc string
@@ -33,7 +33,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // different values to be passed to $pad_value argument
-$pad_values = varray[
+$pad_values = vec[
 
        // int data
 /*1*/  0,
@@ -49,11 +49,11 @@ $pad_values = varray[
       .5,
 
        // array data
-/*10*/ varray[],
-       varray[0],
-       varray[1],
-       varray[1, 2],
-       darray['color' => 'red', 'item' => 'pen'],
+/*10*/ vec[],
+       vec[0],
+       vec[1],
+       vec[1, 2],
+       dict['color' => 'red', 'item' => 'pen'],
 
        // null data
 /*15*/ NULL,

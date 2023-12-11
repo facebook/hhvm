@@ -1,7 +1,7 @@
 <?hh
 
 function main() :mixed{
-  $a = varray[123];
+  $a = vec[123];
   foreach ($a as $x => $x) {
     var_dump($x);
   }

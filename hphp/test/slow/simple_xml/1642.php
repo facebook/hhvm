@@ -1,7 +1,7 @@
 <?hh
 
 function convert_simplexml_to_array($sxml) :mixed{
-  $arr = darray[];
+  $arr = dict[];
   if ($sxml) {
     foreach ($sxml as $k => $v) {
       if ($sxml->offsetGet('list')) {

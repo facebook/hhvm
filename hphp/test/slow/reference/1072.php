@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_1072() :mixed{
-$a = varray[1, 2];
+$a = vec[1, 2];
  foreach ($a as $b) {
  $b++;
 }

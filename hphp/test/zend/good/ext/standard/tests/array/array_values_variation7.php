@@ -12,7 +12,7 @@
 echo "*** Testing array_values() : usage variations ***\n";
 
 // populate array with 'default' keys in reverse order
-$input = darray[3 => 'three', 2 => 'two', 1 => 'one', 0 => 'zero'];
+$input = dict[3 => 'three', 2 => 'two', 1 => 'one', 0 => 'zero'];
 
 echo "\n-- \$input argument: --\n";
 var_dump($input);

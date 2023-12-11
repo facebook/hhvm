@@ -7,7 +7,7 @@
 
 function ut_main()
 :mixed{
-    $loc_ranges = varray[
+    $loc_ranges = vec[
         'de-de',
         'sl_IT',
         'sl_IT_Nedis',
@@ -16,7 +16,7 @@ function ut_main()
         'sl_IT'
     ];
 
-    $lang_tags = varray[
+    $lang_tags = vec[
         'de-DEVA',
         'de-DE-1996',
         'de-DE',

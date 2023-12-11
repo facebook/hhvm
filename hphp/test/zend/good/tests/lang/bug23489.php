@@ -2,7 +2,7 @@
 class Test {
   function __construct() {
     ob_start(
-      varray[
+      vec[
         $this, 'transform'
       ]
     );

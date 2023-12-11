@@ -23,7 +23,7 @@ function ifoo(IFoo $x) :mixed{
   var_dump($x);
 }
 function main() :mixed{
-  $arr = varray[];
+  $arr = vec[];
   var_dump($arr is Traversable);
   var_dump($arr is KeyedTraversable);
   var_dump($arr is Container);

@@ -70,5 +70,5 @@ function main($obj, $foo, $alpha, $beta, $one, $two, $bar, $arr1, $arr2) :mixed{
 <<__EntryPoint>>
 function main_method_dynamic() :mixed{
 main(new Foo, 'Foo', 'alpha', 'beta', 'one', 'two', new Bar,
-     varray[new Foo, 'one'], varray['Foo', 'two']);
+     vec[new Foo, 'one'], vec['Foo', 'two']);
 }

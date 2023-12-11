@@ -35,9 +35,9 @@ function main() :mixed{
   memo_cptr(A::b<>, 3);
   memo_cptr(__hhvm_intrinsics\launder_value(A::b<>), 4);
 
-  memo_cptr(varray[A::class, 'b'], 3);
-  memo_cptr(__hhvm_intrinsics\launder_value(varray[A::class, 'b']), 4);
+  memo_cptr(vec[A::class, 'b'], 3);
+  memo_cptr(__hhvm_intrinsics\launder_value(vec[A::class, 'b']), 4);
 
-  memo_cptr(varray[A::class, 'b'], 3);
-  memo_cptr(__hhvm_intrinsics\launder_value(varray[A::class, 'b']), 4);
+  memo_cptr(vec[A::class, 'b'], 3);
+  memo_cptr(__hhvm_intrinsics\launder_value(vec[A::class, 'b']), 4);
 }

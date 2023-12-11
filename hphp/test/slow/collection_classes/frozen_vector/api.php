@@ -48,9 +48,9 @@ function static_methods() :mixed{
 
   echo "\nfromKeysOf...\n";
   show_elems(ImmVector::fromKeysOf(Vector {1, 2, 3}));
-  show_elems(ImmVector::fromKeysOf(varray['a', 'b', 'c']));
+  show_elems(ImmVector::fromKeysOf(vec['a', 'b', 'c']));
   show_elems(ImmVector::fromKeysOf(Map {'a' => 1, 'b' => 2}));
-  show_elems(ImmVector::fromKeysOf(darray['a' => 1, 'b' => 2]));
+  show_elems(ImmVector::fromKeysOf(dict['a' => 1, 'b' => 2]));
   show_elems(ImmVector::fromKeysOf(Set {4, 5, 6}));
 }
 

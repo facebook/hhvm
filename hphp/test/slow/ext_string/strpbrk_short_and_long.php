@@ -51,15 +51,15 @@ function restarting_things() :mixed{
   var_dump(
     strtr(
       strpbrk("foo\x00bar\x00waaaaa", 'w'),
-      darray["\x00" => '<0>']));
+      dict["\x00" => '<0>']));
   var_dump(
     strtr(
       strpbrk("foo\x00bar\x00waaaaa", 'r'),
-      darray["\x00" => '<0>']));
+      dict["\x00" => '<0>']));
   var_dump(
     strtr(
       strpbrk("foo\x00bar\x00waaaaaz", 'z'),
-      darray["\x00" => '<0>']));
+      dict["\x00" => '<0>']));
 }
 
 function main() :mixed{

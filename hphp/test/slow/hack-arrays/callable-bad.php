@@ -8,7 +8,7 @@ class A {
 
 function call1($c, $x) :mixed{ return $c($x); }
 function call2($c, $x) :mixed{ return call_user_func($c, $x); }
-function call3($c, $x) :mixed{ return array_map($c, varray[$x]); }
+function call3($c, $x) :mixed{ return array_map($c, vec[$x]); }
 
 <<__EntryPoint>>
 function main_callable_bad() :mixed{
@@ -16,11 +16,11 @@ function main_callable_bad() :mixed{
     42,
     'nonexistent',
     'A::func1',
-    varray['B', 'nonexistent'],
+    vec['B', 'nonexistent'],
     vec[new A],
     vec[new A, 'func2'],
     vec['staticMeth', 'A'],
-    darray[0 => 'staticMeth', 1 => A::class],
+    dict[0 => 'staticMeth', 1 => A::class],
     dict[1 => 'A', 2 => 'staticMeth'],
     dict[1 => new A, 2 => 'meth'],
     dict[0 => 'A'],
@@ -29,7 +29,7 @@ function main_callable_bad() :mixed{
     dict[1 => 'meth', 0 => new A],
   ];
   $tests = vec[];
-  foreach (varray['call1', 'call2', 'call3'] as $t) {
+  foreach (vec['call1', 'call2', 'call3'] as $t) {
     foreach ($cases as $k => $c) {
       $tests[] = tuple($t, $k, $c);
     }

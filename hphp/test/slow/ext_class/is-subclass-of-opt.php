@@ -28,7 +28,7 @@ function main() :mixed{
   $x10 = is_subclass_of(get_sub_b(), 'B');
   $x11 = is_subclass_of(get_sub_b(), 'A');
 
-  return varray[$x0, $x1, $x2, $x3, $x4, $x5, $x6, $x7, $x10, $x11];
+  return vec[$x0, $x1, $x2, $x3, $x4, $x5, $x6, $x7, $x10, $x11];
 }
 
 

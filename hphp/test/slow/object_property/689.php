@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  private $a = varray['apple'];
+  private $a = vec['apple'];
   private $b = 'banana';
   static function foo() :mixed{
     $b = new A();

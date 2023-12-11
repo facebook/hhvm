@@ -3,12 +3,12 @@
 
 <<__EntryPoint>>
 function main_array_intersect() :mixed{
-$array1 = darray[
+$array1 = dict[
   "a" => "green",
   0 => "red",
   1 => "blue"
 ];
-$array2 = darray[
+$array2 = dict[
   "b" => "green",
   0 => "yellow",
   1 => "red"

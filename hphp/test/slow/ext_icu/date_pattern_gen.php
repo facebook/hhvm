@@ -302,7 +302,7 @@ function test_get_error() :mixed{
 
 <<__EntryPoint>>
 function main_date_pattern_gen() :mixed{
-$tests = varray[
+$tests = vec[
   'test_create_instance_with_no_locale_fails',
   'test_create_instance_with_null_locale_fails',
   'test_create_instances_with_different_locales',

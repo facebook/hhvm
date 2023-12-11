@@ -17,7 +17,7 @@ function main_entry(): void {
 
   $filename = $filename = dirname(__FILE__)."/004.txt.gz";
 
-  $variation = darray[
+  $variation = dict[
     'instance of classWithToString' => new classWithToString(),
     'instance of classWithoutToString' => new classWithoutToString(),
     ];

@@ -14,8 +14,8 @@ class FooChild extends Foo {
     protected static $className = 'FooChild';
 }
 <<__EntryPoint>> function main(): void {
-register_shutdown_function(varray['Foo', 'bar']);
-register_shutdown_function(varray['FooChild', 'bar']);
+register_shutdown_function(vec['Foo', 'bar']);
+register_shutdown_function(vec['FooChild', 'bar']);
 
 $foo = new Foo();
 $fooChild = new FooChild();

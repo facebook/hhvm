@@ -9,13 +9,13 @@ function main() :mixed{
   if (\HH\global_get('argc') > 1000000000) {
     $cufa = 'call_user_func';
   }
-  call_user_func_array('var_dump', darray[4 => 123, 6 => 456]);
+  call_user_func_array('var_dump', dict[4 => 123, 6 => 456]);
   echo "\n";
-  call_user_func_array('C::foo', darray[4 => 123, 6 => 456]);
+  call_user_func_array('C::foo', dict[4 => 123, 6 => 456]);
   echo "\n";
-  $cufa('var_dump', darray[4 => 123, 6 => 456]);
+  $cufa('var_dump', dict[4 => 123, 6 => 456]);
   echo "\n";
-  $cufa('C::foo', darray[4 => 123, 6 => 456]);
+  $cufa('C::foo', dict[4 => 123, 6 => 456]);
   echo "\n";
   call_user_func_array('var_dump', Vector {123, 456});
   echo "\n";

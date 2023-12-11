@@ -15,8 +15,8 @@ class W {
 function main() :mixed{
   $w = new W();
   ObjectMethod::$trace = "a";
-  call_user_func_array(varray[$w, 'f'], varray["b"]);
+  call_user_func_array(vec[$w, 'f'], vec["b"]);
   echo ObjectMethod::$trace . "\n";
-  call_user_func_array(varray[$w, 'f'], varray["c"]);
+  call_user_func_array(vec[$w, 'f'], vec["c"]);
   echo ObjectMethod::$trace . "\n";
 }

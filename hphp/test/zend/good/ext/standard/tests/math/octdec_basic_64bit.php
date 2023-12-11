@@ -2,7 +2,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing octdec() : basic functionality ***\n";
 
-$values = varray[01234567,
+$values = vec[01234567,
 				0567,
 				017777777777,
 				020000000000,

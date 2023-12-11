@@ -12,13 +12,13 @@ class A {
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_reduce() : variation - object callbacks ***\n";
 
-$array = varray[1];
+$array = vec[1];
 
 echo "\n--- Static method callback ---\n";
-var_dump(array_reduce($array, varray["A", "adder"]));
+var_dump(array_reduce($array, vec["A", "adder"]));
 
 echo "\n--- Instance method callback ---\n";
-var_dump(array_reduce($array, varray[new A(), "adder2"]));
+var_dump(array_reduce($array, vec[new A(), "adder2"]));
 
 echo "===DONE===\n";
 }

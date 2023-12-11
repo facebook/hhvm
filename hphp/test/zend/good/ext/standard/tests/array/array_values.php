@@ -5,28 +5,28 @@
 */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_values() on basic array ***\n"; 
-$basic_arr = varray[ 1, 2, 2.0, "asdasd", varray[1,2,3] ];
+$basic_arr = vec[ 1, 2, 2.0, "asdasd", vec[1,2,3] ];
 var_dump( array_values($basic_arr) );
 
 echo "\n*** Testing array_values() on various arrays ***";
 $arrays = varray [
-  varray[], 
-  varray[0],
-  varray[-1],
-  varray[ varray[] ],
-  varray["Hello"],
-  varray[""],  
-  varray["", varray[]],
-  varray[1,2,3], 
-  varray[1,2,3, varray[]],
-  varray[1,2,3, varray[4,6]],
-  darray["a" => 1, "b" => 2, "c" =>3],
-  darray[0 => 0, 1 => 1, 2 => 2],  
-  varray[TRUE, FALSE, NULL, true, false, null, "TRUE", "FALSE",
+  vec[], 
+  vec[0],
+  vec[-1],
+  vec[ vec[] ],
+  vec["Hello"],
+  vec[""],  
+  vec["", vec[]],
+  vec[1,2,3], 
+  vec[1,2,3, vec[]],
+  vec[1,2,3, vec[4,6]],
+  dict["a" => 1, "b" => 2, "c" =>3],
+  dict[0 => 0, 1 => 1, 2 => 2],  
+  vec[TRUE, FALSE, NULL, true, false, null, "TRUE", "FALSE",
         "NULL", "\x000", "\000"],
-  darray["Hi" => 1, "Hello" => 2, "World" => 3],
-  darray["a" => "abcd", "a" => "", "ab" => -6, "cd" => -0.5 ],
-  darray[0 => varray[], 1=> varray[0], 2 => varray[1], ""=> varray[], ""=>"" ]
+  dict["Hi" => 1, "Hello" => 2, "World" => 3],
+  dict["a" => "abcd", "a" => "", "ab" => -6, "cd" => -0.5 ],
+  dict[0 => vec[], 1=> vec[0], 2 => vec[1], ""=> vec[], ""=>"" ]
 ];
 
 $i = 0;

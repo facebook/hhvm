@@ -5,7 +5,7 @@ class Y {
 class X {
   public $a;
   function __construct() {
-    $this->a = darray['x' => new Y];
+    $this->a = dict['x' => new Y];
   }
   function bar() :mixed{
     var_dump('bar');
@@ -36,5 +36,5 @@ function test($x, $a, $s) :mixed{
 <<__EntryPoint>>
 function main_798() :mixed{
   $s = false;
-  test(new X, varray[], $s);
+  test(new X, vec[], $s);
 }

@@ -17,7 +17,7 @@ $stringh = <<<END
 utf-8
 END;
 
-$inputs = darray['Double Quoted String' => "utf-8",
+$inputs = dict['Double Quoted String' => "utf-8",
                 'Single Quoted String' => 'utf-8',
                 'Heredoc' => $stringh];
 foreach ($inputs as $type => $input) {

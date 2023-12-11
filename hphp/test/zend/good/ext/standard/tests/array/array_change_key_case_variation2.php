@@ -24,7 +24,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $case argument
-$inputs = varray[
+$inputs = vec[
 
        // int data
 /*1*/  0,
@@ -52,7 +52,7 @@ $inputs = varray[
        // empty data
 /*16*/ "",
        '',
-       varray[],
+       vec[],
 
        // string data
 /*19*/ "CASE_UPPER",

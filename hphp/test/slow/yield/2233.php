@@ -2,7 +2,7 @@
 
 function foo() :AsyncGenerator<mixed,mixed,void>{
   yield 1.0 => "hello";
-  yield varray[1,2,3] => "world";
+  yield vec[1,2,3] => "world";
   yield new stdClass => "foobar";
 }
 

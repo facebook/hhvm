@@ -7,6 +7,6 @@ class Collator2 extends Collator{
 }
 <<__EntryPoint>> function main(): void {
 $c = new Collator2();
-$a = varray['a', 'b'];
+$a = vec['a', 'b'];
 $c->sortWithSortKeys(inout $a);
 }

@@ -13,8 +13,8 @@ $n1 = gmp_init("827278512385463739");
 var_dump(gmp_cmp($n1,$n));
 
 try { var_dump(gmp_cmp($n1,$n,1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-var_dump(gmp_cmp(varray[],varray[]));
-try { var_dump(gmp_cmp(varray[])); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+var_dump(gmp_cmp(vec[],vec[]));
+try { var_dump(gmp_cmp(vec[])); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump(gmp_cmp()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";

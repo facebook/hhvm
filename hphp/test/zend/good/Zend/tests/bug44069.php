@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$array = varray[];
+$array = vec[];
 $newstring = "";
 $string = str_repeat('This is a teststring.', 50);
 for($i = 1; $i <= 2000; $i++)

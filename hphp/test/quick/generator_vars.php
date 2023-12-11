@@ -22,12 +22,12 @@ function create() :AsyncGenerator<mixed,mixed,void>{
 
 function unusedarg($x, $y) :AsyncGenerator<mixed,mixed,void>{
   $z = 5;
-  yield darray['x' => $x, 'z' => $z];
+  yield dict['x' => $x, 'z' => $z];
   $s = 'foo';
   yield 'almost there';
   $foo = 'inside foo';
-  yield darray['foo' => $foo, 's' => $s];
-  yield darray['x' => $x, 'y' => $y, 'foo' => $foo, 'z' => $z];
+  yield dict['foo' => $foo, 's' => $s];
+  yield dict['x' => $x, 'y' => $y, 'foo' => $foo, 'z' => $z];
 }
 
 function dumpgen($g) :mixed{
@@ -60,11 +60,11 @@ function manylocals() :AsyncGenerator<mixed,mixed,void>{
   $j = 10;
   $k = 11;
   $l = 12;
-  $a = yield darray['a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l];
+  $a = yield dict['a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l];
   $b = 0xdeadbeef;
-  $c = yield darray['a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l];
+  $c = yield dict['a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l];
   $d = $e = 0xba53b411;
-  yield darray['a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l];
+  yield dict['a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l];
 }
 
 <<__EntryPoint>> function main(): void {

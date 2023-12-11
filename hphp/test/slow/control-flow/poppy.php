@@ -3,7 +3,7 @@
 
 function poppy($arr) :mixed{
   $ret = $arr[1];
-  $ret = $ret ?: varray[];
+  $ret = $ret ?: vec[];
   return $ret;
 }
 
@@ -11,9 +11,9 @@ function poppy($arr) :mixed{
 <<__EntryPoint>>
 function main_poppy() :mixed{
 for ($i = 0; $i < 20; $i++) {
-  var_dump(poppy(varray[null, varray[]]));
-  var_dump(poppy(varray[null, varray[]]));
-  var_dump(poppy(varray[null, varray[]]));
-  var_dump(poppy(varray[null, varray[1,2]]));
+  var_dump(poppy(vec[null, vec[]]));
+  var_dump(poppy(vec[null, vec[]]));
+  var_dump(poppy(vec[null, vec[]]));
+  var_dump(poppy(vec[null, vec[1,2]]));
 }
 }

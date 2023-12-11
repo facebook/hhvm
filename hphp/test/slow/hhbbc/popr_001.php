@@ -7,7 +7,7 @@ function bar(inout $a) :mixed{
 }
 
 function main() :mixed{
-  $a = varray[new A];
+  $a = vec[new A];
   bar(inout $a);
 }
 

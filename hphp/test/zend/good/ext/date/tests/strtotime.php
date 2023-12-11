@@ -1,6 +1,6 @@
 <?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set('Europe/Oslo');
-$d = varray[];
+$d = vec[];
 $d[] = strtotime("2005-07-14 22:30:41");
 $d[] = strtotime("2005-07-14 22:30:41 GMT");
 $d[] = strtotime("@1121373041");

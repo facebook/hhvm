@@ -1,3 +1,3 @@
 <?hh <<__EntryPoint>> function main(): void {
-password_hash('foo', PASSWORD_BCRYPT, darray["cost" => 0]);
+password_hash('foo', PASSWORD_BCRYPT, dict["cost" => 0]);
 }

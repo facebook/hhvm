@@ -4,7 +4,7 @@
 class NoisyClass {
   function __sleep() :mixed{
     echo "NoisyClass::__sleep()\n";
-    return varray[];
+    return vec[];
   }
   function __wakeup() :mixed{
     echo "NoisyClass::__wakeup()\n";

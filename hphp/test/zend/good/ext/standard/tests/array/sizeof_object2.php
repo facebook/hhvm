@@ -57,7 +57,7 @@ function main(): void {
 
   echo "--- Testing sizeof() with objects which doesn't implement Countable interface ---\n";
 
-  $objects = varray[
+  $objects = vec[
   /* 1  */  new test(),
             new test1(),
             new test2(),

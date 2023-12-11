@@ -16,7 +16,7 @@ fclose($file_write);
 
 $file_read = fopen($file_name, "r");
 
-$offset_arr = varray[
+$offset_arr = vec[
   /* Positive offsets */
   0,
   1,

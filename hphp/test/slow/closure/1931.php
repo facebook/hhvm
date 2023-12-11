@@ -9,7 +9,7 @@ $myfunc = function() {
 ;
 $myfunc();
 call_user_func($myfunc);
-call_user_func_array($myfunc, varray[]);
+call_user_func_array($myfunc, vec[]);
 $p = null;
 $isc = is_callable_with_name($myfunc, false, inout $p);
 $isc__str = (string)($isc);

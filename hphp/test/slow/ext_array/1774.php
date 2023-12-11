@@ -4,7 +4,7 @@ function cmp($a, $b) :mixed{
   throw new Exception('Surprise!');
 }
 function test() :mixed{
-  $a = varray[1,2,3];
+  $a = vec[1,2,3];
   try {
     usort(inout $a, cmp<>);
     var_dump('unreached');

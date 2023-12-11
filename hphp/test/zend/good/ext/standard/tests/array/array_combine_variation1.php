@@ -22,7 +22,7 @@ class classA
 echo "*** Testing array_combine() : Passing non-array values to \$keys argument ***\n";
 
 // Initialise $values argument
-$values = varray[1, 2];
+$values = vec[1, 2];
 
 
 // heredoc string
@@ -34,7 +34,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $keys argument
-$keys_passed = varray[
+$keys_passed = vec[
 
        // int data
 /*1*/  0,

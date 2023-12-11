@@ -42,10 +42,10 @@ function f6($x, $y, $z) :mixed{
 
 <<__EntryPoint>>
 function main_543() :mixed{
-f1(varray[0, 0]);
-f2(varray[10]);
-f3(varray[10], false);
-f4(varray[varray[1, 2, 3]]);
-f5(varray[false, false]);
-f6(varray[true], false, false);
+f1(vec[0, 0]);
+f2(vec[10]);
+f3(vec[10], false);
+f4(vec[vec[1, 2, 3]]);
+f5(vec[false, false]);
+f6(vec[true], false, false);
 }

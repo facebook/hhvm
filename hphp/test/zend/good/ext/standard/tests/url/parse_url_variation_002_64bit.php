@@ -17,7 +17,7 @@ $url = 'http://secret:hideout@www.php.net:80/index.php?test=1&test2=char&test3=m
 
 
 //array of values to iterate over
-$values = varray[
+$values = vec[
 
       // float data
       10.5,

@@ -12,8 +12,8 @@ class C2 {
   }
 }
 function foo($a) :mixed{
-  if ($a == 0) return is_callable(varray['C', 'f'], false);
-  return is_callable(varray['C2', 'f'], false);
+  if ($a == 0) return is_callable(vec['C', 'f'], false);
+  return is_callable(vec['C2', 'f'], false);
 }
 
 <<__EntryPoint>>

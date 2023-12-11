@@ -1,17 +1,17 @@
 <?hh
 
-const VCONST2 = varray['a', 'b', 'c'];
-const DCONST2 = darray['a' => 100, 'b' => 200];
+const VCONST2 = vec['a', 'b', 'c'];
+const DCONST2 = dict['a' => 100, 'b' => 200];
 
 class A {
-  const VCONST3 = varray[100, 'value'];
-  const DCONST3 = darray[100 => 300, 500 => 800];
+  const VCONST3 = vec[100, 'value'];
+  const DCONST3 = dict[100 => 300, 500 => 800];
 }
 
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-const VCONST1 = varray[1, 2, 3];
-const DCONST1 = darray[100 => 'abc', 'def' => 200];
+const VCONST1 = vec[1, 2, 3];
+const DCONST1 = dict[100 => 'abc', 'def' => 200];
 <<__EntryPoint>>
 function main_constants() :mixed{
 

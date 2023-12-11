@@ -1,20 +1,20 @@
 <?hh
 function foo() :mixed{
-  foreach (varray[1,2,3] as $v) {
-    foreach (varray[1,2,3] as $w) {
+  foreach (vec[1,2,3] as $v) {
+    foreach (vec[1,2,3] as $w) {
       try {
         echo "A\n";
         throw new Exception("c");
       } finally {
         echo "B\n";
-        foreach (varray[1,2,3] as $x) {
-          foreach (varray[1,2,3] as $y) {
+        foreach (vec[1,2,3] as $x) {
+          foreach (vec[1,2,3] as $y) {
             try {
               echo "C\n";
               throw new Exception("d");
             } finally {
               echo "D\n";
-              foreach (varray[1,2,3] as $z) { var_dump($z); }
+              foreach (vec[1,2,3] as $z) { var_dump($z); }
             }
           }
         }

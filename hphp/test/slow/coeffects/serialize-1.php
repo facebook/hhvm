@@ -6,7 +6,7 @@ class APure {
   }
   function __sleep()[] :mixed{
     echo __CLASS__." sleeps safely.\n";
-    return varray[];
+    return vec[];
   }
 }
 
@@ -16,7 +16,7 @@ class ANonPure {
   }
   function __sleep() :mixed{
     echo __CLASS__." sleeps safely.\n";
-    return varray[];
+    return vec[];
   }
 }
 

@@ -8,7 +8,7 @@ function foo() :mixed{
   $bar = new bar;
   echo "----\n";
   $lol = new stdClass;
-  $bar->x = darray[];
+  $bar->x = dict[];
   try {
     $bar->x[$lol] = 2;
   } catch (Exception $y) {

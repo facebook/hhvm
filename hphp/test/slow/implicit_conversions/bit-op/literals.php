@@ -35,7 +35,7 @@ function and(): void {
   echo with_exn(() ==> false & null);
   echo with_exn(() ==> HH\stdin() & "string");
   echo with_exn(() ==> "string" & "string");
-  echo with_exn(() ==> varray[42] & dict['foobar' => false]);
+  echo with_exn(() ==> vec[42] & dict['foobar' => false]);
   echo ">\n";
 
   $i = 1;
@@ -49,7 +49,7 @@ function and(): void {
   $i = with_exn(() ==> { $i &= false; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i &= HH\stdin(); return $i; }) ?? $i;
   $i = with_exn(() ==> { $i &= "string"; return $i; }) ?? $i;
-  $i = with_exn(() ==> { $i &= varray[42]; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i &= vec[42]; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i &= dict['foobar' => false]; return $i; }) ?? $i;
   echo $i;
 
@@ -66,7 +66,7 @@ function or(): void {
   echo with_exn(() ==> false | null);
   echo with_exn(() ==> HH\stdin() | "string");
   echo with_exn(() ==> "string" | "string");
-  echo with_exn(() ==> varray[42] | dict['foobar' => false]);
+  echo with_exn(() ==> vec[42] | dict['foobar' => false]);
   echo ">\n";
 
   $i = 1;
@@ -80,7 +80,7 @@ function or(): void {
   $i = with_exn(() ==> { $i |= false; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i |= HH\stdin(); return $i; }) ?? $i;
   $i = with_exn(() ==> { $i |= "string"; return $i; }) ?? $i;
-  $i = with_exn(() ==> { $i |= varray[42]; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i |= vec[42]; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i |= dict['foobar' => false]; return $i; }) ?? $i;
   echo $i;
 
@@ -97,7 +97,7 @@ function xor(): void {
   echo with_exn(() ==> false ^ null);
   echo with_exn(() ==> HH\stdin() ^ "string");
   echo with_exn(() ==> "string" ^ "string");
-  echo with_exn(() ==> varray[42] ^ dict['foobar' => false]);
+  echo with_exn(() ==> vec[42] ^ dict['foobar' => false]);
   echo ">\n";
 
   $i = 1;
@@ -111,7 +111,7 @@ function xor(): void {
   $i = with_exn(() ==> { $i ^= false; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i ^= HH\stdin(); return $i; }) ?? $i;
   $i = with_exn(() ==> { $i ^= "string"; return $i; }) ?? $i;
-  $i = with_exn(() ==> { $i ^= varray[42]; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i ^= vec[42]; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i ^= dict['foobar' => false]; return $i; }) ?? $i;
   echo $i;
 
@@ -128,7 +128,7 @@ function shl(): void {
   echo with_exn(() ==> false << null);
   echo with_exn(() ==> HH\stdin() << "string");
   echo with_exn(() ==> "string" << "string");
-  echo with_exn(() ==> varray[42] << dict['foobar' => false]);
+  echo with_exn(() ==> vec[42] << dict['foobar' => false]);
   echo ">\n";
 
   $i = 1;
@@ -142,7 +142,7 @@ function shl(): void {
   $i = with_exn(() ==> { $i <<= false; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i <<= HH\stdin(); return $i; }) ?? $i;
   $i = with_exn(() ==> { $i <<= "string"; return $i; }) ?? $i;
-  $i = with_exn(() ==> { $i <<= varray[42]; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i <<= vec[42]; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i <<= dict['foobar' => false]; return $i; }) ?? $i;
   echo $i;
 
@@ -159,7 +159,7 @@ function shr(): void {
   echo with_exn(() ==> false >> null);
   echo with_exn(() ==> HH\stdin() >> "string");
   echo with_exn(() ==> "string" >> "string");
-  echo with_exn(() ==> varray[42] >> dict['foobar' => false]);
+  echo with_exn(() ==> vec[42] >> dict['foobar' => false]);
   echo ">\n";
 
   $i = 1;
@@ -173,7 +173,7 @@ function shr(): void {
   $i = with_exn(() ==> { $i >>= false; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i >>= HH\stdin(); return $i; }) ?? $i;
   $i = with_exn(() ==> { $i >>= "string"; return $i; }) ?? $i;
-  $i = with_exn(() ==> { $i >>= varray[42]; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i >>= vec[42]; return $i; }) ?? $i;
   $i = with_exn(() ==> { $i >>= dict['foobar' => false]; return $i; }) ?? $i;
   echo $i;
 

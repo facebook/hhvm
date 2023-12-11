@@ -18,33 +18,33 @@ class E {
   $d = new D();
   $e = new E();
 
-  call_user_func(varray[$c, 'foo']);
-  call_user_func(varray[$c, 'C::foo']);
-  call_user_func(varray[$c, 'D::foo']); // warns and bails returning null
-  call_user_func(varray[$c, 'E::foo']); // warns and bails returning null
+  call_user_func(vec[$c, 'foo']);
+  call_user_func(vec[$c, 'C::foo']);
+  call_user_func(vec[$c, 'D::foo']); // warns and bails returning null
+  call_user_func(vec[$c, 'E::foo']); // warns and bails returning null
 
-  call_user_func(varray['C', 'bar']);
-  call_user_func(varray['C', 'C::bar']);
-  call_user_func(varray['C', 'D::bar']); // warns and bails returning null
-  call_user_func(varray['C', 'E::bar']); // warns and bails returning null
+  call_user_func(vec['C', 'bar']);
+  call_user_func(vec['C', 'C::bar']);
+  call_user_func(vec['C', 'D::bar']); // warns and bails returning null
+  call_user_func(vec['C', 'E::bar']); // warns and bails returning null
 
-  call_user_func(varray[$d, 'foo']);
-  call_user_func(varray[$d, 'C::foo']);
-  call_user_func(varray[$d, 'D::foo']);
-  call_user_func(varray[$d, 'E::foo']); // warns and bails returning null
+  call_user_func(vec[$d, 'foo']);
+  call_user_func(vec[$d, 'C::foo']);
+  call_user_func(vec[$d, 'D::foo']);
+  call_user_func(vec[$d, 'E::foo']); // warns and bails returning null
 
-  call_user_func(varray['D', 'bar']);
-  call_user_func(varray['D', 'C::bar']);
-  call_user_func(varray['D', 'D::bar']);
-  call_user_func(varray['D', 'E::bar']); // warns and bails returning null
+  call_user_func(vec['D', 'bar']);
+  call_user_func(vec['D', 'C::bar']);
+  call_user_func(vec['D', 'D::bar']);
+  call_user_func(vec['D', 'E::bar']); // warns and bails returning null
 
-  call_user_func(varray[$e, 'foo']);
-  call_user_func(varray[$e, 'C::foo']);
-  call_user_func(varray[$e, 'D::foo']);
-  call_user_func(varray[$e, 'E::foo']); // warns and bails returning null
+  call_user_func(vec[$e, 'foo']);
+  call_user_func(vec[$e, 'C::foo']);
+  call_user_func(vec[$e, 'D::foo']);
+  call_user_func(vec[$e, 'E::foo']); // warns and bails returning null
 
-  call_user_func(varray['E', 'bar']);
-  call_user_func(varray['E', 'C::bar']);
-  call_user_func(varray['E', 'D::bar']);
-  call_user_func(varray['E', 'E::bar']); // warns and bails returning null
+  call_user_func(vec['E', 'bar']);
+  call_user_func(vec['E', 'C::bar']);
+  call_user_func(vec['E', 'D::bar']);
+  call_user_func(vec['E', 'E::bar']); // warns and bails returning null
 }

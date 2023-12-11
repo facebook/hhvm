@@ -12,7 +12,7 @@
 */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing basic operations of fopen() and fclose() functions ***\n";
-$modes = varray[
+$modes = vec[
   "w",
   "wb",
   "wt",
@@ -56,7 +56,7 @@ for( $i=0; $i<count($modes); $i++ ) {
 // remove the temp file
 unlink($filename);
 
-$x_modes = varray[
+$x_modes = vec[
   "x",
   "xb",
   "xt",

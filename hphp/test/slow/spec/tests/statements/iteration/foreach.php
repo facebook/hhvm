@@ -8,13 +8,13 @@
 <<__EntryPoint>> function main(): void {
 error_reporting(-1);
 
-$array = varray[];
+$array = vec[];
 foreach ($array as $a)
 {
     echo $a."\n";
 }
 
-$colors = varray["red", "white", "blue"];
+$colors = vec["red", "white", "blue"];
 
 // access each element's value
 
@@ -44,10 +44,10 @@ foreach ($colors as $color)
 }
 var_dump($colors);
 
-$ary = darray[];
-$ary[0] = varray["abc"];
+$ary = dict[];
+$ary[0] = vec["abc"];
 $ary[0][] = "ij";
-$ary[1] = varray["mnop"];
+$ary[1] = vec["mnop"];
 $ary[1][] = "xyz";
 
 foreach ($ary as $e1)
@@ -61,7 +61,7 @@ foreach ($ary as $e1)
 
 // test use of list
 
-$a = varray[varray[10,20], varray[1.2, 4.5], varray[TRUE, "abc"]];
+$a = vec[vec[10,20], vec[1.2, 4.5], vec[TRUE, "abc"]];
 foreach ($a as $key => $value)
 {
     echo "------\n";

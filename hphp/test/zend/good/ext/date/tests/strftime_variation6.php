@@ -14,7 +14,7 @@ $timestamp = mktime(18, 8, 8, 8, 8, 2008);
 
 
 //array of values to iterate over
-$inputs = darray[
+$inputs = dict[
       'Hour as decimal by 24-hour format' => "%H",
       'Hour as decimal by 12-hour format' => "%I",
       'Minute as decimal number' => "%M",

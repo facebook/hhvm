@@ -5,7 +5,7 @@ class test {
     }
 }
 <<__EntryPoint>> function main(): void {
-set_error_handler(varray[new test(), "hdlr"]);
+set_error_handler(vec[new test(), "hdlr"]);
 
 trigger_error("test");
 }

@@ -32,10 +32,10 @@ function i($x) :mixed{
 
 <<__EntryPoint>>
 function main_1859() :mixed{
-f(varray[0, 1, 2]);
-g(varray[0, 1, 2]);
-h(varray[0, 1, 2]);
+f(vec[0, 1, 2]);
+g(vec[0, 1, 2]);
+h(vec[0, 1, 2]);
 h('foobar');
 h(new stdClass());
-var_dump(i(varray[0, 1, 2]));
+var_dump(i(vec[0, 1, 2]));
 }

@@ -19,7 +19,7 @@ $value2 = 33;
 $value3 = 555;
 
 
-$unsorted_numerics =  darray[ 1 => $value1 , 2 => $value2, 3 => $value3];
+$unsorted_numerics =  dict[ 1 => $value1 , 2 => $value2, 3 => $value3];
 
 echo "\n-- Testing arsort() 'flag' value is defualt --\n";
 $temp_array = $unsorted_numerics;

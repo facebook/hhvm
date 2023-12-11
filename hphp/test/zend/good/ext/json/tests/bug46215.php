@@ -1,7 +1,7 @@
 <?hh
 
 class foo {
-    protected $a = varray[];
+    protected $a = vec[];
 }
 <<__EntryPoint>> function main(): void {
 $a = new foo;

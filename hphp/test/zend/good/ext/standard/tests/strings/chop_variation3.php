@@ -39,7 +39,7 @@ hello\0world\0hello
 \0hello\0
 EOT;
 
-$heredoc_strings = varray[
+$heredoc_strings = vec[
                    $empty_heredoc,
                    $heredoc_with_newline,
                    $heredoc_with_characters,

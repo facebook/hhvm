@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 date_default_timezone_set('UTC');
-$formats = varray[
+$formats = vec[
     '2017-03-25 10:52:09',
     '2017-03-25 10:52',
     '2017-03-25 10am',

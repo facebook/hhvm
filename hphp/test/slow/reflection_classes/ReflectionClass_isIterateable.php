@@ -19,7 +19,7 @@ function dump_iterateable($class) :mixed{
 
 <<__EntryPoint>>
 function main_reflection_class_is_iterateable() :mixed{
-$classes = varray["IteratorClass", "DerivedClass", "NonIterator"];
+$classes = vec["IteratorClass", "DerivedClass", "NonIterator"];
 
 foreach ($classes as $class) {
   echo "Is $class iterateable? ";

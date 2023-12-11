@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_filter() : usage variations - built-in functions as 'callback' argument ***\n";
 
-$input = varray[0, 1, -1, 10, 100, 1000, 'Hello', null];
+$input = vec[0, 1, -1, 10, 100, 1000, 'Hello', null];
 
 // using built-in function 'is_int' as 'callback'
 var_dump( array_filter($input, 'is_int') );

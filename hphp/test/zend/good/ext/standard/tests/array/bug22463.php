@@ -8,12 +8,12 @@ function cb($v, $elem) :mixed{
     return $v + a($elem);
 }
 <<__EntryPoint>> function main(): void {
-$ary = varray[
-    varray[
-        varray[
-            varray[
-                varray[
-                    varray[0, 1, 2, 3, 4]
+$ary = vec[
+    vec[
+        vec[
+            vec[
+                vec[
+                    vec[0, 1, 2, 3, 4]
                 ]
             ]
         ]

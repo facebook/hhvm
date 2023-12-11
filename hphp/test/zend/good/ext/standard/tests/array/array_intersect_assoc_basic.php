@@ -13,10 +13,10 @@
 echo "*** Testing array_intersect_assoc() : basic functionality ***\n";
 
 // array with default keys
-$arr_default_keys = varray[1, 2, "hello", 'world'];
+$arr_default_keys = vec[1, 2, "hello", 'world'];
 
 // associative array
-$arr_associative = darray["one" => 1, "two" => 2];
+$arr_associative = dict["one" => 1, "two" => 2];
 
 // default key array for both $arr1 and $arr2 argument
 var_dump( array_intersect_assoc($arr_default_keys, $arr_default_keys) );
@@ -31,7 +31,7 @@ var_dump( array_intersect_assoc($arr_associative, $arr_default_keys) );
 var_dump( array_intersect_assoc($arr_associative, $arr_associative) );
 
 // more arrays to be intersected
-$arr3 = varray[2, 3, 4];
+$arr3 = vec[2, 3, 4];
 var_dump( array_intersect_assoc($arr_default_keys, $arr_associative, $arr3) );
 var_dump( array_intersect_assoc($arr_associative, $arr_default_keys, $arr3, $arr_associative) );
 

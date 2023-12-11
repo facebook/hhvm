@@ -3,7 +3,7 @@ $cwd = dirname(__FILE__);
 $font = "$cwd/Tuffy.ttf";
 $image = imagecreatetruecolor(50, 50);
 $color = imagecolorallocate($image, 255, 255, 255);
-foreach (varray["E", "I", "P", "g", "i", "q"] as $c)
+foreach (vec["E", "I", "P", "g", "i", "q"] as $c)
 {
     $x = imagettftext($image, 32, 0, 0, 0, $color, $font, $c);
     $y = imagettfbbox(32.0, 0.0, "$cwd/Tuffy.ttf", $c);

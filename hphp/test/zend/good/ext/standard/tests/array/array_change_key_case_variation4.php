@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_change_key_case() : usage variations ***\n";
 
-$input = darray['One' => 'un', 'TWO' => 'deux', 'three' => 'trois'];
+$input = dict['One' => 'un', 'TWO' => 'deux', 'three' => 'trois'];
 for ($i = -5; $i <=5; $i += 1){
     echo "\n-- \$sort argument is $i --\n";
     $temp = $input;

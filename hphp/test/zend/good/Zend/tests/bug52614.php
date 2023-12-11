@@ -1,7 +1,7 @@
 <?hh
 class foo {
     public $a1;
-    public $a2 = darray[];
+    public $a2 = dict[];
     public $a3;
     public $o2;
 
@@ -14,7 +14,7 @@ class foo {
     }
 
     public function f3() :mixed{
-        $this->a3 = darray[];
+        $this->a3 = dict[];
         return $this->a3;
     }
 
@@ -40,7 +40,7 @@ var_dump($foo->a3);
 $foo->f5()->a = 1;
 var_dump($foo->o2);
 
-$foo->a1 = varray[2];
+$foo->a1 = vec[2];
 
 var_dump($foo->a1[0]);
 $foo->f1()[0]++;

@@ -14,8 +14,8 @@ function f($a1, $a2) :AsyncGenerator<mixed,mixed,void>{
 
 <<__EntryPoint>>
 function main_2152() :mixed{
-$a1 = varray[1, 2];
-$a2 = new Ref(varray[1, 2]);
+$a1 = vec[1, 2];
+$a2 = new Ref(vec[1, 2]);
 foreach (f($a1, $a2) as $v) {
  var_dump($v);
  }

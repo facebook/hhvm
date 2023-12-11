@@ -12,7 +12,7 @@ function main_reflection_type_detailed_explicit_php7() :mixed{
 $closure = function (Test $a): Test { return $a; };
 $nclosure = function (?Test $a): ?Test { return $a; };
 echo "*** functions\n";
-foreach (varray[
+foreach (vec[
   new ReflectionFunction('foo'),
   new ReflectionFunction('nfoo'),
   new ReflectionFunction($closure),
@@ -30,7 +30,7 @@ foreach (varray[
   }
 }
 echo "\n*** methods\n";
-foreach (varray[
+foreach (vec[
   new ReflectionMethod('SplObserver', 'update'),
   new ReflectionMethod($closure, '__invoke'),
   new ReflectionMethod($nclosure, '__invoke'),
@@ -47,7 +47,7 @@ foreach (varray[
   }
 }
 echo "\n*** return types\n";
-foreach (varray[
+foreach (vec[
   new ReflectionMethod('SplObserver', 'update'),
   new ReflectionFunction('bar'),
   new ReflectionFunction($closure),

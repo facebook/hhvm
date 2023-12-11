@@ -10,15 +10,15 @@ $r = fopen(__FILE__, "r");
 
 $o = new test;
 
-$vars = varray[
+$vars = vec[
     "string",
     "8754456",
     "",
     "\0",
     9876545,
     0.10,
-    varray[],
-    varray[1,2,3],
+    vec[],
+    vec[1,2,3],
     false,
     true,
     NULL,

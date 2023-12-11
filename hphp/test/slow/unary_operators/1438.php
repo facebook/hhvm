@@ -3,7 +3,7 @@
 class Foo {}
 function foo($x) :mixed{
   if ($x) {
-    $a = varray[];
+    $a = vec[];
     $s = 'hello';
     $o = new Foo();
   }

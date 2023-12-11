@@ -4,7 +4,7 @@ $method = "AES-128-CBC";
 $password = "openssl";
 $wrong = "wrong";
 $object = new stdClass;
-$arr = varray[1];
+$arr = vec[1];
 
 var_dump(openssl_encrypt($data, $wrong, $password));
 try { var_dump(openssl_encrypt($object, $method, $password)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

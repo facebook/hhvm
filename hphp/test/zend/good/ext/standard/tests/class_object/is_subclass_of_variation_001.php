@@ -19,7 +19,7 @@ $class_name = 'string_val';
 
 
 //array of values to iterate over
-$values = varray[
+$values = vec[
 
       // int data
       0,

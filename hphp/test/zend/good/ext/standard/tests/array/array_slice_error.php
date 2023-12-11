@@ -12,7 +12,7 @@ echo "*** Testing array_slice() : error conditions ***\n";
 
 //Test array_slice with one more than the expected number of arguments
 echo "\n-- Testing array_slice() function with more than expected no. of arguments --\n";
-$input = varray[1, 2];
+$input = vec[1, 2];
 $offset = 10;
 $length = 10;
 $preserve_keys = true;

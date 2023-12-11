@@ -2,7 +2,7 @@
 
 function foo($p) :mixed{
   if ($p) {
-    $a = varray[];
+    $a = vec[];
   }
   try {
     var_dump((string)$a);

@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$streams = darray[
+$streams = dict[
 	0 => 'data://,A%20brief%20note',
 	1 => 'data://application/vnd-xxx-query,select_vcount,fcol_from_fieldtable/local',
 	2 => 'data://;base64,Zm9vYmFyIGZvb2Jhcg==',

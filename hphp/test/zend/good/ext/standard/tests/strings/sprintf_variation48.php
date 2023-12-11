@@ -17,7 +17,7 @@ $resource_values = varray [
 ];
 
 // array of scientific formats
-$scientific_formats = varray[ 
+$scientific_formats = vec[ 
   "%e", "%he", "%le",
   "%Le", " %e", "%e ",
   "\t%e", "\n%e", "%4e", 

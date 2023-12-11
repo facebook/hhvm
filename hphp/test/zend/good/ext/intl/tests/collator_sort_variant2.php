@@ -39,25 +39,25 @@ function ut_main()
     $res_str = '';
 
     // Sort an array in SORT_REGULAR mode using en_US locale.
-    $test_params = varray[
-        varray[ 'abc', 'abd', 'aaa' ],
-        varray[ 'm'  , '1'  , '_'   ],
-        varray[ 'a'  , 'aaa', 'aa'  ],
-        varray[ 'ba' , 'b'  , 'ab'  ],
-        varray[ 'e'  , 'c'  , 'a'   ],
-        varray[ '100', '25' , '36'  ],
-        varray[ 'd'  , ''   , ' a'  ],
-        varray[ 'd ' , 'f ' , ' a'  ],
-        varray[ 'y'  , 'k'  , 'i' ]
+    $test_params = vec[
+        vec[ 'abc', 'abd', 'aaa' ],
+        vec[ 'm'  , '1'  , '_'   ],
+        vec[ 'a'  , 'aaa', 'aa'  ],
+        vec[ 'ba' , 'b'  , 'ab'  ],
+        vec[ 'e'  , 'c'  , 'a'   ],
+        vec[ '100', '25' , '36'  ],
+        vec[ 'd'  , ''   , ' a'  ],
+        vec[ 'd ' , 'f ' , ' a'  ],
+        vec[ 'y'  , 'k'  , 'i' ]
     ];
 
     $res_str .= sort_arrays( 'en_US', $test_params );
 
-    $test_params = varray[
-        varray[ '100', '25' , '36'  ],
-        varray[ 5    , '30' , 2     ],
-        varray[ 'd'  , ''   , ' a'  ],
-        varray[ 'y'  , 'k'  , 'i' ]
+    $test_params = vec[
+        vec[ '100', '25' , '36'  ],
+        vec[ 5    , '30' , 2     ],
+        vec[ 'd'  , ''   , ' a'  ],
+        vec[ 'y'  , 'k'  , 'i' ]
     ];
 
     // Sort in en_US locale with SORT_STRING flag
@@ -65,16 +65,16 @@ function ut_main()
 
 
     // Sort a non-ASCII array using ru_RU locale.
-    $test_params = varray[
-        varray[ 'абг', 'абв', 'ааа', 'abc' ],
-        varray[ 'аа', 'ааа' , 'а' ]
+    $test_params = vec[
+        vec[ 'абг', 'абв', 'ааа', 'abc' ],
+        vec[ 'аа', 'ааа' , 'а' ]
     ];
 
     $res_str .= sort_arrays( 'ru_RU', $test_params );
 
     // Sort an array using Lithuanian locale.
-    $test_params = varray[
-        varray[ 'y'  , 'k'  , 'i' ]
+    $test_params = vec[
+        vec[ 'y'  , 'k'  , 'i' ]
     ];
 
     $res_str .= sort_arrays( 'lt_LT', $test_params );

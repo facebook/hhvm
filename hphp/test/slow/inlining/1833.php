@@ -1,7 +1,7 @@
 <?hh
 
 function g($a) :mixed{
- return $a ? varray[1,2,3] : 'foo';
+ return $a ? vec[1,2,3] : 'foo';
  }
 function f($a) :mixed{
  return g($a);

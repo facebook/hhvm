@@ -13,7 +13,7 @@ var_dump(gmp_strval(gmp_com($n)));
 $n = gmp_init("98765463337");
 var_dump(gmp_strval(gmp_com($n)));
 
-var_dump(gmp_strval(gmp_com(varray[])));
+var_dump(gmp_strval(gmp_com(vec[])));
 try { var_dump(gmp_strval(gmp_com())); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";

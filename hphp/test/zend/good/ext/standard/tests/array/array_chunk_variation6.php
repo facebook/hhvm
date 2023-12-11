@@ -18,13 +18,13 @@ echo "*** Testing array_chunk() : usage variations ***\n";
 $input_arrays = darray [
 
   // array without elements
-  "array1" => varray[],
+  "array1" => vec[],
 
   // array with one element
-  "array2" => varray[1],
+  "array2" => vec[1],
   
   // associative array with duplicate keys
-  "array3" => darray["a" => 1, "b" => 2, "c" => 3, "a" => 4, "d" => 5]
+  "array3" => dict["a" => 1, "b" => 2, "c" => 3, "a" => 4, "d" => 5]
 
 ];
 

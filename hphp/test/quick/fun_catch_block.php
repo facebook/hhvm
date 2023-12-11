@@ -9,7 +9,7 @@ class FunCatchBlock {
                       $jumbo_shrimp,
                       Thing::SMS_MUTE,
                       $is_add);
-      $tagger->setThreadIds(varray[$robot_car]);
+      $tagger->setThreadIds(vec[$robot_car]);
       prep($tagger);
     } catch (GoodException $e) {
       // Some control flow within a catch block.  A case for the

@@ -16,13 +16,13 @@ function meep(inout $f, $g, inout $r) :mixed{
 
 function too_many($name, $obj_or_cls, inout $args) :mixed{
   var_dump($args);
-  $args = varray['red', 'green', 'blue', 'apple', 'bannana', 'pear'];
+  $args = vec['red', 'green', 'blue', 'apple', 'bannana', 'pear'];
   return shape('value' => null);
 }
 
 function too_few($name, $obj_or_cls, inout $args) :mixed{
   var_dump($args);
-  $args = varray['foo'];
+  $args = vec['foo'];
   return shape('value' => null);
 }
 

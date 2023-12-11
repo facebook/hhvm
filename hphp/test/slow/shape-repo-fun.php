@@ -5,10 +5,10 @@ class Q { const A = 'f'; const B = 'Q::B'; }
 
 <<__EntryPoint>>
 function main() :mixed{
-  $x = darray[0 => 42, 1 => 1337];
-  $y = darray['f' => 10];
-  $z = darray['Q::B' => 20];
-  $t = darray['f' => 10, 'Q::B' => 20];
+  $x = dict[0 => 42, 1 => 1337];
+  $y = dict['f' => 10];
+  $z = dict['Q::B' => 20];
+  $t = dict['f' => 10, 'Q::B' => 20];
 
   var_dump($x is shape(K::A => int, K::B => int));
   var_dump($y is shape(Q::A => int));

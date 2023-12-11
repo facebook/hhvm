@@ -1,11 +1,11 @@
 <?hh
 
-function x($x, $y, $a = varray[1,2,3], $b = vec[]) :mixed{
+function x($x, $y, $a = vec[1,2,3], $b = vec[]) :mixed{
   return $x + $y;
 }
 
 class F {
-  function x($x, $y, $a = varray[1,2,3], $b = vec[]) :mixed{
+  function x($x, $y, $a = vec[1,2,3], $b = vec[]) :mixed{
     return $x + $y;
   }
 }

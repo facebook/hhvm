@@ -1,7 +1,7 @@
 <?hh
 
 function main($n) :mixed{
-  $p = Pair{varray[$n], "foobar"};
+  $p = Pair{vec[$n], "foobar"};
   while (--$n > 0) $p2 = clone $p;
 }
 

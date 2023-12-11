@@ -15,7 +15,7 @@ var_dump(gmp_strval(gmp_sqrt($n)));
 
 try { var_dump(gmp_sqrt($n, 1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump(gmp_sqrt()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-var_dump(gmp_sqrt(varray[]));
+var_dump(gmp_sqrt(vec[]));
 
 echo "Done\n";
 }

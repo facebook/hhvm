@@ -2,7 +2,7 @@
 
 trait TestTrait {
   public static function test() :mixed{
-    $fun = varray['A', 'test'];
+    $fun = vec['A', 'test'];
     return 'Forwarded '.$fun();
   }
 }

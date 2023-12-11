@@ -32,7 +32,7 @@ function runTakeoverTest() :mixed{
     // Check and make sure that the server is always online, and old
     // server exits after a finite amount of time.  It is OK if both
     // servers are working at the same time.
-    $testids = varray[ServerUtilServerTests::test_run_id(), $takeoverid];
+    $testids = vec[ServerUtilServerTests::test_run_id(), $takeoverid];
     for ($i = 1; ; $i++) {
       if (!checkServerId($serverPort, $testids)) {
         return;

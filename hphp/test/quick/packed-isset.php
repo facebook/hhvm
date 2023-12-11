@@ -1,7 +1,7 @@
 <?hh
 
 function foo() :mixed{
-  $arr = darray[];
+  $arr = dict[];
   for ($i = 0; $i < 4; $i++) {
     $arr[$i] = $i;
   }
@@ -14,7 +14,7 @@ function foo() :mixed{
 }
 
 function foo2() :mixed{
-  $arr = darray[];
+  $arr = dict[];
   for ($i = 0; $i < 4; $i++) {
     $arr[$i] = null;
   }

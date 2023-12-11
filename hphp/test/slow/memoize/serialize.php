@@ -75,7 +75,7 @@ function test_unserialize($class, $s) :mixed{
 
   // changing the class in the string to simulate deserialization into a
   // PHP with a different implementation of C1
-  $s = strtr($s, darray[ C1::class => $class]);
+  $s = strtr($s, dict[ C1::class => $class]);
   var_dump($s);
 
   $un = unserialize($s);

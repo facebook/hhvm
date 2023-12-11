@@ -8,10 +8,10 @@ class someclass {
 }
 
 function asd() :mixed{ return mt_rand() ? 'a' : 2; }
-function array_of_one() :mixed{ return varray['ZZZZ']; }
+function array_of_one() :mixed{ return vec['ZZZZ']; }
 function main() :mixed{
   $time = asd();
-  $items = darray[];
+  $items = dict[];
   if (someclass::yo()) {
     $items = array_of_one();
   }

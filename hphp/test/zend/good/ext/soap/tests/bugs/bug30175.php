@@ -29,5 +29,5 @@ EOF;
 function main_entry(): void {
 
   $client = new LocalSoapClient(dirname(__FILE__)."/bug30175.wsdl");
-  var_dump($client->__soapcall('qwebGetHostInfo', varray[]));
+  var_dump($client->__soapcall('qwebGetHostInfo', vec[]));
 }

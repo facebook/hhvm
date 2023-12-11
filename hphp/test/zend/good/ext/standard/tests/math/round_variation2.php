@@ -22,7 +22,7 @@ EOT;
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
-$inputs = varray[
+$inputs = vec[
        // int data
 /*1*/  0,
        1,
@@ -50,7 +50,7 @@ $inputs = varray[
        // empty data
 /*17*/ "",
        '',
-       varray[],
+       vec[],
 
        // string data
 /*20*/ "abcxyz",

@@ -2,14 +2,14 @@
 class Stringable { public function __toString()[] :mixed{ return "foobar"; } }
 <<__EntryPoint>> function main(): void {
 require 'fix_exceptions.inc'; fix_exceptions();
-$functions = darray[
+$functions = dict[
     'int' => function ($i): int { return $i; },
     'float' => function ($f): float { return $f; },
     'string' => function ($s): string { return $s; },
     'bool' => function ($b): bool { return $b; }
 ];
 
-$values = varray[
+$values = vec[
     1,
     "1",
     1.0,
@@ -22,7 +22,7 @@ $values = varray[
     TRUE,
     FALSE,
     NULL,
-    varray[],
+    vec[],
     new stdClass,
     new Stringable,
     fopen("data:text/plain,foobar", "r")

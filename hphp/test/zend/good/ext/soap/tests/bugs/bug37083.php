@@ -37,16 +37,16 @@ EOF;
 function main_entry(): void {
   for ($i = 0; $i < 10; $i++) {
   	$ws=new TestSoapClient(dirname(__FILE__).'/bug37083.wsdl',
-                     darray['encoding'=>'ISO-8859-1',
+                     dict['encoding'=>'ISO-8859-1',
                            'cache_wsdl'=>WSDL_CACHE_BOTH]);
   	$search=new stdClass();
   	$search->queryString='argo';
-  	$search->ranges = varray[];
+  	$search->ranges = vec[];
   	$search->ranges[]=$r=new stdClass();
   	$r->field='maxDateTime';
   	$r->min='2003-04-01';
   	$search->index='all';
-  	$res=$ws->__soapcall('search', varray[$search,0,10]);
+  	$res=$ws->__soapcall('search', vec[$search,0,10]);
   }
   echo "ok\n";
 }

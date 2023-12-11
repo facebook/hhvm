@@ -33,7 +33,7 @@ $file_handle = fopen(__FILE__, 'r');
 
 
 //array of values to iterate over
-$values = varray[
+$values = vec[
 
       // int data
       0,
@@ -49,11 +49,11 @@ $values = varray[
       .5,
 
       // array data
-      varray[],
-      varray[0],
-      varray[1],
-      varray[1, 2],
-      darray['color' => 'red', 'item' => 'pen'],
+      vec[],
+      vec[0],
+      vec[1],
+      vec[1, 2],
+      dict['color' => 'red', 'item' => 'pen'],
 
       // null data
       NULL,

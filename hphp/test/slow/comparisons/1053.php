@@ -6,7 +6,7 @@ function foo($p) :mixed{
   if ($p) {
     $obj = new C;
   } else {
-    $a = varray[1];
+    $a = vec[1];
   }
   try {
     var_dump($obj == $a);

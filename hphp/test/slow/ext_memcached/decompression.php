@@ -4,24 +4,24 @@ const MEMC_COMPRESSED =         16;
 const MEMC_COMPRESSION_ZLIB =   32;
 const MEMC_COMPRESSION_FASTLZ = 64;
 <<__EntryPoint>> function main(): void {
-$keys = darray[
-  'no_compression'   => darray[
+$keys = dict[
+  'no_compression'   => dict[
     'flag' => MEMC_SERIALIZED,
     'data' => 'a:2:{s:16:"compression_type";N;s:5:"valid";b:1;}',
   ],
-  'old_style_zlib'   => darray[
+  'old_style_zlib'   => dict[
     'flag' => MEMC_SERIALIZED | MEMC_COMPRESSED,
     'data' =>
      base64_decode('eJxLtDKyqi62MjSzUkrOzy0oSi0uzszPiy+pLEhVsgaKm1gp5eekxBeXVOa'
                     . 'kxlflZCaBRE2tlMoSczJTlKyTrAytawEh2Bb9'),
   ],
-  'new_style_zlib'   => darray[
+  'new_style_zlib'   => dict[
     'flag' => MEMC_SERIALIZED | MEMC_COMPRESSED | MEMC_COMPRESSION_ZLIB,
     'data' =>
      base64_decode('RAAAAHicS7QysqoutjI0s1JKzs8tKEotLs7Mz4svqSxIVbIGiptYKeWllsc'
                     . 'Xl1TmpMZX5WQmgURNrZTKEnMyU5Ssk6wMrWsBIyQXCA=='),
   ],
-  'new_style_fastlz' => darray[
+  'new_style_fastlz' => dict[
     'flag' => MEMC_SERIALIZED | MEMC_COMPRESSED | MEMC_COMPRESSION_FASTLZ,
     'data' =>
      base64_decode('RgAAABxhOjI6e3M6MTY6ImNvbXByZXNzaW9uX3R5cGUiO4AXD25ld19zdHl'

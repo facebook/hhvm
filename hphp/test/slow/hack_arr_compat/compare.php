@@ -50,9 +50,9 @@ function main_compare() :mixed{
   set_error_handler(handler<>);
 
   $x1 = vec[
-    varray[],
-    varray[1, 2, varray[3, 4]],
-    darray['a' => 'b', 'c' => 'd'],
+    vec[],
+    vec[1, 2, vec[3, 4]],
+    dict['a' => 'b', 'c' => 'd'],
   ];
   $x2_non_hack_arrays = vec[
     true,
@@ -63,8 +63,8 @@ function main_compare() :mixed{
     'abc',
     new stdClass,
     imagecreate(1, 1),
-    varray[1, varray[2, 5], varray[3, 4]],
-    darray['a' => varray[], 'c' => varray[1, 2]],
+    vec[1, vec[2, 5], vec[3, 4]],
+    dict['a' => vec[], 'c' => vec[1, 2]],
   ];
   $x2_hack_arrays = vec[
     vec[],
@@ -73,7 +73,7 @@ function main_compare() :mixed{
     dict['a' => 'b', 'c' => 'd'],
     keyset[],
     keyset['a', 'b', 'c'],
-    varray[1, 2, vec[3, 4]],
+    vec[1, 2, vec[3, 4]],
   ];
 
   foreach ($x1 as $a) {

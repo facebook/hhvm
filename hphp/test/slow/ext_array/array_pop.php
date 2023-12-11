@@ -1,13 +1,13 @@
 <?hh
 
 function a() :mixed{
-  $input = varray["orange", "banana", "apple", "raspberryu"];
+  $input = vec["orange", "banana", "apple", "raspberryu"];
   $fruit = array_pop(inout $input);
   var_dump($input);
 }
 
 function b() :mixed{
-  $input = varray["orange"];
+  $input = vec["orange"];
   $fruit = array_pop(inout $input);
   array_push(inout $input, "banana");
   var_dump($input);

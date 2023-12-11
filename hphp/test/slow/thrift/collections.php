@@ -1,29 +1,29 @@
 <?hh
 
 class TestStruct {
-  const SPEC = darray[
-    5 => darray[
+  const SPEC = dict[
+    5 => dict[
       'var' => 'aList',
       'format' => 'collection',
       'type' => TType::LST,
       'etype' => TType::DOUBLE,
-      'elem' => darray[ 'type' => TType::DOUBLE ],
+      'elem' => dict[ 'type' => TType::DOUBLE ],
     ],
-    6 => darray[
+    6 => dict[
       'var' => 'aMap',
       'format' => 'collection',
       'type' => TType::MAP,
       'ktype' => TType::I32,
       'vtype' => TType::DOUBLE,
-      'key' => darray[ 'type' => TType::I32 ],
-      'val' => darray[ 'type' => TType::DOUBLE ],
+      'key' => dict[ 'type' => TType::I32 ],
+      'val' => dict[ 'type' => TType::DOUBLE ],
     ],
-    7 => darray[
+    7 => dict[
       'var' => 'aSet',
       'format' => 'collection',
       'type' => TType::SET,
       'etype' => TType::I32,
-      'elem' => darray[ 'type' => TType::I32 ],
+      'elem' => dict[ 'type' => TType::I32 ],
     ],
   ];
 
@@ -68,9 +68,9 @@ function main() :mixed{
   );
   test(
     "php arrays",
-    varray[13.3, 23.4, 3576.2],
-    darray[10 => 1.2, 43 => 5.33],
-    darray[10 => 'doesnt', 11 => 'matter']
+    vec[13.3, 23.4, 3576.2],
+    dict[10 => 1.2, 43 => 5.33],
+    dict[10 => 'doesnt', 11 => 'matter']
   );
   $listObj = new stdClass();
   $listObj->{0} = 13.3;

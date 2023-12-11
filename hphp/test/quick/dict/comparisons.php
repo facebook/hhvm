@@ -130,7 +130,7 @@ function compare($a, $b) :mixed{
   compare(dict[], 1.2345);
   compare(dict[], 'abc');
   compare(dict[], new stdClass);
-  compare(dict[], varray[]);
+  compare(dict[], vec[]);
   compare(dict[], vec[]);
   compare(dict[], keyset[]);
 

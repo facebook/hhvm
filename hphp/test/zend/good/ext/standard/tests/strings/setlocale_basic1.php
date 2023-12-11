@@ -38,7 +38,7 @@ function list_system_locales() :mixed{
 <<__EntryPoint>> function main(): void {
 echo "*** Testing setlocale() : basic functionality - set to a specific locale ***\n";
 //set of locales to be used
-$common_locales = darray[
+$common_locales = dict[
   "english_US"=> "en_US.utf8",
   "english_AU" => "en_AU.utf8",
   "korean_KR" => "ko_KR.utf8",
@@ -52,7 +52,7 @@ $common_locales = darray[
 ];
 
 //set of currency symbol according to above list of locales
-$currency_symbol = darray[
+$currency_symbol = dict[
   "en_US.utf8" => "USD",
   "en_AU.utf8" => "AUD",
   "ko_KR.utf8" => "KRW",

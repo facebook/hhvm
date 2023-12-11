@@ -11,7 +11,7 @@ var_dump(f($i=0) > f(++$i));
 var_dump(f($i=0) >= f(++$i));
 
 echo "\nArray indices:\n";
-$a = darray[1 => darray[], 3 => darray[]];
+$a = dict[1 => dict[], 3 => dict[]];
 $a[1][2] = 0;
 $a[3][4] = 1;
 $i=0;

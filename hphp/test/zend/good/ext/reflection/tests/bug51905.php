@@ -6,7 +6,7 @@ class Bar {
 
 class Foo extends Bar {
     const X = 12;
-    public function x($x = 1, $y = varray[self::X], $z = parent::Y) :mixed{}
+    public function x($x = 1, $y = vec[self::X], $z = parent::Y) :mixed{}
 }
 <<__EntryPoint>> function main(): void {
 $clazz = new ReflectionClass('Foo');

@@ -38,7 +38,7 @@ class RobustRegularEnterpriseBusiness extends RobustEnterpriseBusiness {}
 //////////////////////////////////////////////////////////////////////
 // Same case with a scalar initializer
 
-trait TScalar { private $scalarTraitProperty = varray[]; }
+trait TScalar { private $scalarTraitProperty = vec[]; }
 
 abstract class RobustCreationInterface2 {}
 abstract class Robustish2 extends RobustCreationInterface2 { use TScalar; }

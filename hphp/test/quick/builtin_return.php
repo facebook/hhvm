@@ -11,5 +11,5 @@ function foo(varray $data) :mixed{
   return $ret;
 }
 <<__EntryPoint>> function main(): void {
-var_dump(foo(varray[]));
+var_dump(foo(vec[]));
 }

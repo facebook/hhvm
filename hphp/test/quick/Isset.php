@@ -25,7 +25,7 @@ function f() :mixed{
   print ":".(string)(\HH\global_isset('y')).":\n";
   print ":".(string)(isset(quickIsset::$y)).":\n";
 
-  $a = darray[];
+  $a = dict[];
   $a["foo"] = null;
   var_dump(isset($a["foo"]));
 }
@@ -36,7 +36,7 @@ function get_index() :mixed{
 }
 
 function g($dontTake, inout $toFillIn, $id, $key, $value) :mixed{
-  $toFillIn = darray[];
+  $toFillIn = dict[];
   if (isset($toFillIn[$id])) {
     $cur = $toFillIn[$id];
   }
@@ -48,7 +48,7 @@ function g($dontTake, inout $toFillIn, $id, $key, $value) :mixed{
 f();
 
 $a = 4;
-$arr = varray["get_index should not be called"];
+$arr = vec["get_index should not be called"];
 var_dump(isset($a, $b, $arr[get_index()]));
 
 /**

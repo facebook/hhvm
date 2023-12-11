@@ -89,7 +89,7 @@ ob_start(mytolower<>);
 $handlers = ob_list_handlers();
 ob_end_clean();
 ob_end_clean();
-VS($handlers, varray["default output handler", mytolower<>]);
+VS($handlers, vec["default output handler", mytolower<>]);
 VS(is_varray($handlers), true);
 
 echo "\nok\n";

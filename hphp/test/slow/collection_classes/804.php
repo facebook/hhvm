@@ -18,7 +18,7 @@ try {
  catch (Exception $e) {
     echo 'B';
   }
-  $methods = Vector::fromArray(varray['containsKey','remove']);
+  $methods = Vector::fromArray(vec['containsKey','remove']);
   foreach ($methods as $method) {
     $m = new Map();
     $m->$method(1);

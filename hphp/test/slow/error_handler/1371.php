@@ -5,7 +5,7 @@ class C {
     var_dump($msg);
   }
   public static function setup() :mixed{
-    set_exception_handler(varray[__CLASS__, 'log']);
+    set_exception_handler(vec[__CLASS__, 'log']);
   }
 }
 <<__EntryPoint>> function main(): void {

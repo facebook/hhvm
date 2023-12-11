@@ -3,12 +3,12 @@
 class X {
   private $b = false;
   private $i = 0;
-  private $a = varray[];
+  private $a = vec[];
   private $s = 'hello';
   function set() :mixed{
     $this->b = true;
     $this->i = 5;
-    $this->a = varray[1,2,3];
+    $this->a = vec[1,2,3];
     $this->s = 'goodbye';
   }
   function foo() :mixed{

@@ -7,7 +7,7 @@ function handler($a, $b) :mixed{
 function foo() :mixed{}
 
 function test() :mixed{
-  call_user_func_array('foo', varray[]);
+  call_user_func_array('foo', vec[]);
 }
 
 function main() :mixed{

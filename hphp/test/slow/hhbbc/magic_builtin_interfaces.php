@@ -46,9 +46,9 @@ class C {
 }
 
 function main() :mixed{
-  instance_of_test(varray[1,2,3]);
-  type_hint_traversable(varray[1,2,3]);
-  type_hint_container(varray[1,2,3]);
+  instance_of_test(vec[1,2,3]);
+  type_hint_traversable(vec[1,2,3]);
+  type_hint_container(vec[1,2,3]);
 
   $c = new C();
   type_hint_stringish($c);

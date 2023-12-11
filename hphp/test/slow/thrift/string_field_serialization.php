@@ -1,8 +1,8 @@
 <?hh
 
 class TestStruct {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'var',
       'type' => TType::STRING,
     ],

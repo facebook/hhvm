@@ -5,12 +5,12 @@ function foo() :mixed{ }
 
 <<__EntryPoint>>
 function main_readline_completion_function() :mixed{
-$data = varray[
+$data = vec[
   foo<>,
   strtolower<>,
   1,
   1.1231,
-  function ($str, $start, $end) { return varray[]; },
+  function ($str, $start, $end) { return vec[]; },
 ];
 
 foreach ($data as $callback) {

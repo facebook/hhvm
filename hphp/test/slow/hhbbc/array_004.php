@@ -3,7 +3,7 @@
 class obj1 { function heh() :mixed{ echo "heh\n"; } }
 class obj2 { function heh() :mixed{ echo "yup\n"; } }
 function stuff() :mixed{
-  return varray[new obj1, new obj2];
+  return vec[new obj1, new obj2];
 }
 function main() :mixed{
   list($x, $y) = stuff();

@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$test = darray[
+$test = dict[
     '1e+308'                    => 1e+308,
     '1e+309'                    => false,
     '1e-323'                    => 1e-323,

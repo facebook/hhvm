@@ -1,7 +1,7 @@
 <?hh
 
 function foo($a) :mixed{
-  $result = darray[];
+  $result = dict[];
 
 
   try {
@@ -16,7 +16,7 @@ function foo($a) :mixed{
   }
 
   if ($a & 4) {
-    return darray['success' => true];//$result;
+    return dict['success' => true];//$result;
   }
 
   $result['success'] = false;

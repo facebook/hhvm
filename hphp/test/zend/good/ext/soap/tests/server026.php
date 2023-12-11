@@ -6,7 +6,7 @@ class Foo {
 }
 <<__EntryPoint>> function main(): void {
 $foo = new Foo();
-$server = new SoapServer(null,darray['uri'=>"http://testuri.org"]);
+$server = new SoapServer(null,dict['uri'=>"http://testuri.org"]);
 $server->setobject($foo);
 
 $HTTP_RAW_POST_DATA = <<<EOF

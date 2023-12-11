@@ -15,20 +15,20 @@
 echo "*** Testing ksort() : usage variations ***\n";
 
 // diff. associative arrays to sort
-$various_arrays = varray[
+$various_arrays = vec[
   // negative/posative integer key value array
-  darray[1 => 11, -2 => -11, 3 => 21, -4 => -21, 5 => 31, -6 => -31, 7 => 0, 8 => 41, -10 =>-41],
+  dict[1 => 11, -2 => -11, 3 => 21, -4 => -21, 5 => 31, -6 => -31, 7 => 0, 8 => 41, -10 =>-41],
 
   // float key values
-  darray[1 => 10.5, 0 => -10.5, 3 => 10.5e2, 4 => 10.6E-2, 0 => .5, 6 => .0001, -7 => -.1],
+  dict[1 => 10.5, 0 => -10.5, 3 => 10.5e2, 4 => 10.6E-2, 0 => .5, 6 => .0001, -7 => -.1],
 
   // mixed value array with different types of keys
-  darray[1 => .0001, 2 => .0021, -3 => -.01, 4 => -1, 5 => 0, 6 => .09, 7 => 2, -8 => -.9,
+  dict[1 => .0001, 2 => .0021, -3 => -.01, 4 => -1, 5 => 0, 6 => .09, 7 => 2, -8 => -.9,
         9 => 10.6E-2, -10 => -10.6E-2, 11 => 33]
 ];
 
 // set of possible flag values
-$flags = darray["SORT_REGULAR" => SORT_REGULAR, "SORT_NUMERIC" => SORT_NUMERIC];
+$flags = dict["SORT_REGULAR" => SORT_REGULAR, "SORT_NUMERIC" => SORT_NUMERIC];
 
 $count = 1;
 echo "\n-- Testing ksort() by supplying various integer/float arrays --\n";

@@ -9,7 +9,7 @@ class mystring {
 
 <<__EntryPoint>> function main(): void {
 echo "#### Basic and Various operations ####\n";
-$str_array = varray[
+$str_array = vec[
             "TesTing lcfirst.",
             "1.testing lcfirst",
             "HELLO wORLD",
@@ -52,7 +52,7 @@ foreach ($str_array as $string) {
 echo "\n#### Testing Miscelleneous inputs ####\n";
 
 echo "--- Testing arrays ---";
-$str_arr = varray["Hello", "?world", "!$%**()%**[][[[&@#~!", varray[]];
+$str_arr = vec["Hello", "?world", "!$%**()%**[][[[&@#~!", vec[]];
 try { var_dump( lcfirst($str_arr) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n--- Testing objects ---\n";

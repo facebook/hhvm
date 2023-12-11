@@ -13,7 +13,7 @@ echo "*** Testing vsprintf() : int formats with int values ***\n";
 
 
 // defining array of int formats
-$formats = varray[
+$formats = vec[
   "%d",
   "%+d %-d %D",
   "%ld %Ld, %4d %-4d",
@@ -26,15 +26,15 @@ $formats = varray[
 
 // Arrays of int values for the format defined in $format.
 // Each sub array contains int values which correspond to each format string in $format
-$args_array = varray[
-  varray[0],
-  varray[-1, 1, +22],
-  varray[2147483647, -2147483648, +2147483640, -2147483640],
-  varray[123456, 12345678, -1234567, 1234567],
-  varray[111, 2222, 333333, 44444444],
-  varray[0x123b, 0xfAb, 0123, 012],
-  varray[1234, -5678, 2345],
-  varray[3, 4, 1, 2]
+$args_array = vec[
+  vec[0],
+  vec[-1, 1, +22],
+  vec[2147483647, -2147483648, +2147483640, -2147483640],
+  vec[123456, 12345678, -1234567, 1234567],
+  vec[111, 2222, 333333, 44444444],
+  vec[0x123b, 0xfAb, 0123, 012],
+  vec[1234, -5678, 2345],
+  vec[3, 4, 1, 2]
 ];
 
 // looping to test vsprintf() with different int formats from the above $format array

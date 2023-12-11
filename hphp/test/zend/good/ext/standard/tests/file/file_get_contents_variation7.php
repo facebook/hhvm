@@ -16,7 +16,7 @@ mkdir($absSubDir);
 
 
 
-$allDirs = varray[
+$allDirs = vec[
   // absolute paths
   "$absSubDir/",
   "$absSubDir/../".$subDir,

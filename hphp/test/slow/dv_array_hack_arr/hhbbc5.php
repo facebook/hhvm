@@ -9,6 +9,6 @@ function show($x) :mixed{
 
 <<__EntryPoint>>
 function main() :mixed{
-  show(varray[17, 34]);
-  show(varray[17, 'ace']);
+  show(vec[17, 34]);
+  show(vec[17, 'ace']);
 }

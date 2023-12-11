@@ -11,9 +11,9 @@ function test($a) :mixed{
 function main_shuffle() :mixed{
 srand(1234);
 
-test(varray[]);
-test(varray[1, 2, 3, 4, 5]);
-test(darray[1 => 'a', 2 => 'b', 3 => 'c']);
+test(vec[]);
+test(vec[1, 2, 3, 4, 5]);
+test(dict[1 => 'a', 2 => 'b', 3 => 'c']);
 
 test(vec[]);
 test(vec[1, 2, 3, 4, 5]);

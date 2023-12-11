@@ -1,6 +1,6 @@
 <?hh
 
-const AR = varray[1,3,2];
+const AR = vec[1,3,2];
 
 //////////////////////////////////////////////////////////////////////
 // Exception test cases with fault funclets and nested FPI regions of

@@ -2,7 +2,7 @@
 
 function val() :mixed{ return 0; }
 function foo($k) :mixed{
-  $array = varray[0, 1];
+  $array = vec[0, 1];
   $idx = val();
   for ($ik = 0; $ik < 10; ++$ik) {
   }

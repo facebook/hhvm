@@ -20,7 +20,7 @@ function entrypoint_utf8_encode_variation1(): void {
 
 
   //array of values to iterate over
-  $values = varray[
+  $values = vec[
 
         // int data
         0,

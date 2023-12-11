@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-  private $foo = varray[1,2,3];
+  private $foo = vec[1,2,3];
   private $bar = "foofoo";
 
   public function __construct(string $k) {

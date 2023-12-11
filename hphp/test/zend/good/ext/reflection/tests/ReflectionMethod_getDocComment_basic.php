@@ -51,7 +51,7 @@ class B extends A {
 <<__EntryPoint>>
 function main_entry(): void {
 
-  foreach (varray['A', 'B'] as $class) {
+  foreach (vec['A', 'B'] as $class) {
       $rc = new ReflectionClass($class);
       $rms = $rc->getMethods();
       foreach ($rms as $rm) {

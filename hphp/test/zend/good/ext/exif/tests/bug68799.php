@@ -13,7 +13,7 @@ function doStuff ($limit) :mixed{
 
   $a = new A;
 
-  $b = darray[];
+  $b = dict[];
   for ($i = 0; $i < $limit; $i++) {
     $b[$i] = clone $a;
   }

@@ -18,13 +18,13 @@ $value = new ValueClass();
 
 
 // Array representing a possible record set returned from a database
-$records = varray[
-    darray[
+$records = vec[
+    dict[
         'id' => $value,
         'first_name' => 'John',
         'last_name' => 'XXX'
     ],
-    darray[
+    dict[
         'id' => 3245,
         'first_name' => 'Sally',
         'last_name' => 'Smith'

@@ -9,17 +9,17 @@ class TestClass
 
     function whee()
 :mixed    {
-        array_map(varray['TestClass', 'test'], varray['array_value']);
+        array_map(vec['TestClass', 'test'], vec['array_value']);
     }
 
     function whee4()
 :mixed    {
-        call_user_func(varray['TestClass', 'test']);
+        call_user_func(vec['TestClass', 'test']);
     }
 
     static function whee5()
 :mixed    {
-        call_user_func(varray['TestClass', 'test']);
+        call_user_func(vec['TestClass', 'test']);
     }
 }
 <<__EntryPoint>> function main(): void {

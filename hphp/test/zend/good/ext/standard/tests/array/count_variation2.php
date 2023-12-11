@@ -19,7 +19,7 @@ class classA
 echo "*** Testing count() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$var = varray[1, 2, varray ['one', 'two']];
+$var = vec[1, 2, varray ['one', 'two']];
 
 
 // heredoc string
@@ -31,7 +31,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $mode argument
-$inputs = varray[
+$inputs = vec[
 
        // int data
 /*1*/  0,

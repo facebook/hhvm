@@ -24,17 +24,17 @@ class X
 {
 //  const Cprop1 = 10 + 12 - 5.6;       // invalid
 //  const Cprop2 = f();                 // invalid
-//  const Cprop10 = varray[];            // Arrays are not allowed in class constants
+//  const Cprop10 = vec[];            // Arrays are not allowed in class constants
 //  const Cprop11 = array(10, "red", TRUE);
 //  const Cprop12 = array(10, "red", TRUE, f());
 //  const Cprop13 = array(10, "red", array(2.3, NULL, array(12, FALSE, "zzz")));
 
 //  private $prop1 = 10 + 12 - 5.6;     // invalid
 //  private $prop2 = f();               // invalid
-    private $prop10 = varray[];
-    private $prop11 = varray[10, "red", TRUE];
+    private $prop10 = vec[];
+    private $prop11 = vec[10, "red", TRUE];
 //  private $prop12 = array(10, "red", TRUE, f());  // invalid
-    private $prop13 = varray[10, "red", varray[2.3, NULL, varray[12, FALSE, "zzz"]]];
+    private $prop13 = vec[10, "red", vec[2.3, NULL, vec[12, FALSE, "zzz"]]];
 
 
     public $q1;         // take on NULL by default

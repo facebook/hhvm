@@ -31,6 +31,6 @@ $xml = '<?xml version="1.0"?>' . "\n"
 $doc = new DOMDocument();
 $res = $doc->loadXML($xml);
 
-$caNode = $doc->C14N(true, false, null, varray['xs', 'xsi', 'saml']);
+$caNode = $doc->C14N(true, false, null, vec['xs', 'xsi', 'saml']);
 echo md5($caNode);
 }

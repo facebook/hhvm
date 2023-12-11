@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_get_html_trans_table_bad() :mixed{
-$encodings = varray[
+$encodings = vec[
   null,
   '',
   5

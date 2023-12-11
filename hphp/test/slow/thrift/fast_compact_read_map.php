@@ -11,57 +11,57 @@ abstract class ThriftData {
 }
 
 class DictI64 extends ThriftData {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'data',
       'format' => 'harray',
       'type' => TType::MAP,
       'ktype' => TType::I64,
       'vtype' => TType::I64,
-      'key' => darray['type' => TType::I64],
-      'val' => darray['type' => TType::I64],
+      'key' => dict['type' => TType::I64],
+      'val' => dict['type' => TType::I64],
     ],
   ];
 }
 
 class DictI08 extends ThriftData {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'data',
       'format' => 'harray',
       'type' => TType::MAP,
       'ktype' => TType::I08,
       'vtype' => TType::I08,
-      'key' => darray['type' => TType::I08],
-      'val' => darray['type' => TType::I08],
+      'key' => dict['type' => TType::I08],
+      'val' => dict['type' => TType::I08],
     ],
   ];
 }
 
 class MapI64 extends ThriftData {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'data',
       'format' => 'collection',
       'type' => TType::MAP,
       'ktype' => TType::I64,
       'vtype' => TType::I64,
-      'key' => darray['type' => TType::I64],
-      'val' => darray['type' => TType::I64],
+      'key' => dict['type' => TType::I64],
+      'val' => dict['type' => TType::I64],
     ],
   ];
 }
 
 class MapI08 extends ThriftData {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'data',
       'format' => 'collection',
       'type' => TType::MAP,
       'ktype' => TType::I08,
       'vtype' => TType::I08,
-      'key' => darray['type' => TType::I08],
-      'val' => darray['type' => TType::I08],
+      'key' => dict['type' => TType::I08],
+      'val' => dict['type' => TType::I08],
     ],
   ];
 }

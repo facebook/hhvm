@@ -14,6 +14,6 @@ function test(inout $a, $b) :mixed{
   var_dump($a);
 }
 <<__EntryPoint>> function main(): void {
-$y = darray[];
+$y = dict[];
 test(inout $y, 5);
 }

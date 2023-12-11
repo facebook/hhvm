@@ -52,7 +52,7 @@ EOD;
 $empty_string = <<<EOD
 EOD;
 
-$strings = varray[
+$strings = vec[
   $multi_line_str,
   $identifier_str1,
   $identifier_str2,

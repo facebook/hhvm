@@ -10,7 +10,7 @@ class PrependingException extends Exception {
 <<__EntryPoint>>
 function main_prepend_exception_trace() :mixed{
   $exception = new PrependingException();
-  $exception->prepend(varray[darray['prepended_key' => 'prepended_value']]);
+  $exception->prepend(vec[dict['prepended_key' => 'prepended_value']]);
   var_dump($exception->getTrace()[0]);
   var_dump($exception->getTraceAsString());
 }

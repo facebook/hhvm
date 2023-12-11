@@ -12,5 +12,5 @@ function main($a) :mixed{
 
 <<__EntryPoint>>
 function main_usort() :mixed{
-main(varray[1,2]);
+main(vec[1,2]);
 }

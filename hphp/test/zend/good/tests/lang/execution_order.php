@@ -127,7 +127,7 @@ function entrypoint_execution_order(): void {
   echo "\r\n";
 
 
-  $a = varray[100,200];
+  $a = vec[100,200];
   $i = 0;
 
   echo "17)";

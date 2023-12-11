@@ -11,6 +11,6 @@ class Ref { public $a; }
 <<__EntryPoint>>
 function main() :mixed{
   $aa = new Ref();
-  $a = varray[$aa];
+  $a = vec[$aa];
   foo($aa, $a);
 }

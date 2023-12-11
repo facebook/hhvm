@@ -15,7 +15,7 @@ class Thing {
     if (self::$thingsArray !== null) {
       return;
     }
-    self::$thingsArray = darray[];
+    self::$thingsArray = dict[];
     self::$thingsArray[3] = 4;
   }
 }

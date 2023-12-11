@@ -4,7 +4,7 @@
 function literals() :mixed{
   echo "================== literals ==================\n";
   HH\serialize_with_options(
-    darray[],
+    dict[],
     dict["warnOnHackArrays" => true, "warnOnPHPArrays" => true]
   );
   HH\serialize_with_options(
@@ -57,7 +57,7 @@ function literals() :mixed{
 
 function test($name, $options) :mixed{
   echo "==================== $name =========================\n";
-  var_dump(HH\serialize_with_options(darray[], $options));
+  var_dump(HH\serialize_with_options(dict[], $options));
   var_dump(HH\serialize_with_options(darray(vec[1, 2, 3, 4]), $options));
   var_dump(HH\serialize_with_options(vec[], $options));
   var_dump(HH\serialize_with_options(vec[1, 2, 3, 4], $options));

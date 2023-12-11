@@ -12,7 +12,7 @@ function run () :mixed{
         $x++;
     };
 
-    return varray[$lambda1, $lambda2];
+    return vec[$lambda1, $lambda2];
 }
 <<__EntryPoint>> function main(): void {
 list ($lambda1, $lambda2) = run();

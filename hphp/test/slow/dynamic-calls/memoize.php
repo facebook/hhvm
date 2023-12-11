@@ -22,15 +22,15 @@ class A {
     $x = 'A::func3'; $x($v);
     $x = 'A::func3$memoize_impl'; $x($v);
 
-    //$x = varray['A', 'func2']; $x($v); // fatal
-    //$x = varray['A', 'func2$memoize_impl']; $x($v); // fatal
-    $x = varray['A', 'func3']; $x($v);
-    $x = varray['A', 'func3$memoize_impl']; $x($v);
+    //$x = vec['A', 'func2']; $x($v); // fatal
+    //$x = vec['A', 'func2$memoize_impl']; $x($v); // fatal
+    $x = vec['A', 'func3']; $x($v);
+    $x = vec['A', 'func3$memoize_impl']; $x($v);
 
-    $x = varray[new A, 'func2']; $x($v);
-    $x = varray[new A, 'func2$memoize_impl']; $x($v);
-    $x = varray[new A, 'func3']; $x($v);
-    $x = varray[new A, 'func3$memoize_impl']; $x($v);
+    $x = vec[new A, 'func2']; $x($v);
+    $x = vec[new A, 'func2$memoize_impl']; $x($v);
+    $x = vec[new A, 'func3']; $x($v);
+    $x = vec[new A, 'func3$memoize_impl']; $x($v);
 
 
     $x = 'A'; $x::func3($v);
@@ -58,11 +58,11 @@ class B {
     $x = 'func4$memoize_impl'; $x($v);
     $x = 'B::func6$memoize_impl'; $x($v);
 
-    //$x = varray['B', 'func5$memoize_impl']; $x($v); // fatal
-    $x = varray['B', 'func6$memoize_impl']; $x($v);
+    //$x = vec['B', 'func5$memoize_impl']; $x($v); // fatal
+    $x = vec['B', 'func6$memoize_impl']; $x($v);
 
-    $x = varray[new B, 'func5$memoize_impl']; $x($v);
-    $x = varray[new B, 'func6$memoize_impl']; $x($v);
+    $x = vec[new B, 'func5$memoize_impl']; $x($v);
+    $x = vec[new B, 'func6$memoize_impl']; $x($v);
 
 
     $x = 'func6$memoize_impl'; B::$x($v);
@@ -78,10 +78,10 @@ class B {
     $x = 'func4'; $x($v);
     $x = 'B::func6'; $x($v);
 
-    $x = varray['B', 'func6']; $x($v);
+    $x = vec['B', 'func6']; $x($v);
 
-    $x = varray[new B, 'func5']; $x($v);
-    $x = varray[new B, 'func6']; $x($v);
+    $x = vec[new B, 'func5']; $x($v);
+    $x = vec[new B, 'func6']; $x($v);
 
     $x = 'B'; $x::func6($v);
 

@@ -7,7 +7,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing number_format() : basic functionality ***\n";
 
-$values = varray[1234.5678,
+$values = vec[1234.5678,
                 -1234.5678,
                 1234.6578e4,
                 -1234.56789e4,

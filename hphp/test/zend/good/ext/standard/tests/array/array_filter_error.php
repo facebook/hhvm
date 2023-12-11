@@ -15,7 +15,7 @@ function odd($input) :mixed{
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_filter() : error conditions ***\n";
 
-$input = varray[0, 1, 2, 3, 5];
+$input = vec[0, 1, 2, 3, 5];
 
 $extra_arg = 10;
 

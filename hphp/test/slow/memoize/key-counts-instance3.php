@@ -5,55 +5,55 @@ class A {
   public function func0A() :mixed{
 
     if (MemoizeKeyCountsInstance3Php::$do_echo) echo "A::func0A()\n";
-    return json_encode(varray[]);
+    return json_encode(vec[]);
   }
   <<__Memoize>>
   public function func0B() :mixed{
 
     if (MemoizeKeyCountsInstance3Php::$do_echo) echo "A::func0B()\n";
-    return json_encode(varray[]);
+    return json_encode(vec[]);
   }
   <<__Memoize>>
   public function func1A($p1) :mixed{
 
     if (MemoizeKeyCountsInstance3Php::$do_echo)
       echo "A::func1A(".(string)$p1.")\n";
-    return json_encode(varray[$p1]);
+    return json_encode(vec[$p1]);
   }
   <<__Memoize>>
   public function func1B($p1) :mixed{
 
     if (MemoizeKeyCountsInstance3Php::$do_echo)
       echo "A::func1B(".(string)$p1.")\n";
-    return json_encode(varray[$p1]);
+    return json_encode(vec[$p1]);
   }
   <<__Memoize>>
   public function func2A($p1, $p2) :mixed{
 
     if (MemoizeKeyCountsInstance3Php::$do_echo)
       echo "A::func2A(".(string)$p1.", ".(string)$p2.")\n";
-    return json_encode(varray[$p1, $p2]);
+    return json_encode(vec[$p1, $p2]);
   }
   <<__Memoize>>
   public function func2B($p1, $p2) :mixed{
 
     if (MemoizeKeyCountsInstance3Php::$do_echo)
       echo "A::func2B(".(string)$p1.", ".(string)$p2.")\n";
-    return json_encode(varray[$p1, $p2]);
+    return json_encode(vec[$p1, $p2]);
   }
   <<__Memoize>>
   public function func3A($p1, $p2, $p3) :mixed{
 
     if (MemoizeKeyCountsInstance3Php::$do_echo)
       echo "A::func3A(".(string)$p1.", ".(string)$p2.", ".(string)$p3.")\n";
-    return json_encode(varray[$p1, $p2, $p3]);
+    return json_encode(vec[$p1, $p2, $p3]);
   }
   <<__Memoize>>
   public function func3B($p1, $p2, $p3) :mixed{
 
     if (MemoizeKeyCountsInstance3Php::$do_echo)
       echo "A::func3B(".(string)$p1.", ".(string)$p2.", ".(string)$p3.")\n";
-    return json_encode(varray[$p1, $p2, $p3]);
+    return json_encode(vec[$p1, $p2, $p3]);
   }
   <<__Memoize>>
   public function func4A($p1, $p2, $p3, $p4) :mixed{
@@ -68,7 +68,7 @@ class A {
         ", ".
         (string)$p4.
         ")\n";
-    return json_encode(varray[$p1, $p2, $p3, $p4]);
+    return json_encode(vec[$p1, $p2, $p3, $p4]);
   }
   <<__Memoize>>
   public function func4B($p1, $p2, $p3, $p4) :mixed{
@@ -83,7 +83,7 @@ class A {
         ", ".
         (string)$p4.
         ")\n";
-    return json_encode(varray[$p1, $p2, $p3, $p4]);
+    return json_encode(vec[$p1, $p2, $p3, $p4]);
   }
   <<__Memoize>>
   public function func5A($p1, $p2, $p3, $p4, $p5) :mixed{
@@ -100,7 +100,7 @@ class A {
         ", ".
         (string)$p5.
         ")\n";
-    return json_encode(varray[$p1, $p2, $p3, $p4, $p5]);
+    return json_encode(vec[$p1, $p2, $p3, $p4, $p5]);
   }
   <<__Memoize>>
   public function func5B($p1, $p2, $p3, $p4, $p5) :mixed{
@@ -117,7 +117,7 @@ class A {
         ", ".
         (string)$p5.
         ")\n";
-    return json_encode(varray[$p1, $p2, $p3, $p4, $p5]);
+    return json_encode(vec[$p1, $p2, $p3, $p4, $p5]);
   }
   <<__Memoize>>
   public function func6A($p1, $p2, $p3, $p4, $p5, $p6) :mixed{
@@ -136,7 +136,7 @@ class A {
         ", ".
         (string)$p6.
         ")\n";
-    return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6]);
+    return json_encode(vec[$p1, $p2, $p3, $p4, $p5, $p6]);
   }
   <<__Memoize>>
   public function func6B($p1, $p2, $p3, $p4, $p5, $p6) :mixed{
@@ -155,7 +155,7 @@ class A {
         ", ".
         (string)$p6.
         ")\n";
-    return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6]);
+    return json_encode(vec[$p1, $p2, $p3, $p4, $p5, $p6]);
   }
   <<__Memoize>>
   public function func7A($p1, $p2, $p3, $p4, $p5, $p6, $p7) :mixed{
@@ -176,7 +176,7 @@ class A {
         ", ".
         (string)$p7.
         ")\n";
-    return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7]);
+    return json_encode(vec[$p1, $p2, $p3, $p4, $p5, $p6, $p7]);
   }
   <<__Memoize>>
   public function func7B($p1, $p2, $p3, $p4, $p5, $p6, $p7) :mixed{
@@ -197,7 +197,7 @@ class A {
         ", ".
         (string)$p7.
         ")\n";
-    return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7]);
+    return json_encode(vec[$p1, $p2, $p3, $p4, $p5, $p6, $p7]);
   }
   <<__Memoize>>
   public function func8A($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8) :mixed{
@@ -220,7 +220,7 @@ class A {
         ", ".
         (string)$p8.
         ")\n";
-    return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8]);
+    return json_encode(vec[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8]);
   }
   <<__Memoize>>
   public function func8B($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8) :mixed{
@@ -243,7 +243,7 @@ class A {
         ", ".
         (string)$p8.
         ")\n";
-    return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8]);
+    return json_encode(vec[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8]);
   }
   <<__Memoize>>
   public function func9A($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9) :mixed{
@@ -268,7 +268,7 @@ class A {
         ", ".
         (string)$p9.
         ")\n";
-    return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9]);
+    return json_encode(vec[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9]);
   }
   <<__Memoize>>
   public function func9B($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9) :mixed{
@@ -293,7 +293,7 @@ class A {
         ", ".
         (string)$p9.
         ")\n";
-    return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9]);
+    return json_encode(vec[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9]);
   }
   <<__Memoize>>
   public function func10A($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10) :mixed{
@@ -321,7 +321,7 @@ class A {
         (string)$p10.
         ")\n";
     return json_encode(
-      varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10],
+      vec[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10],
     );
   }
   <<__Memoize>>
@@ -350,7 +350,7 @@ class A {
         (string)$p10.
         ")\n";
     return json_encode(
-      varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10],
+      vec[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10],
     );
   }
   <<__Memoize>>
@@ -393,7 +393,7 @@ class A {
         (string)$p11.
         ")\n";
     return json_encode(
-      varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11],
+      vec[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11],
     );
   }
   <<__Memoize>>
@@ -436,7 +436,7 @@ class A {
         (string)$p11.
         ")\n";
     return json_encode(
-      varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11],
+      vec[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11],
     );
   }
   <<__Memoize>>
@@ -482,7 +482,7 @@ class A {
         (string)$p12.
         ")\n";
     return json_encode(
-      varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11, $p12],
+      vec[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11, $p12],
     );
   }
   <<__Memoize>>
@@ -528,7 +528,7 @@ class A {
         (string)$p12.
         ")\n";
     return json_encode(
-      varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11, $p12],
+      vec[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11, $p12],
     );
   }
 }

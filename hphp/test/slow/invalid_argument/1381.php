@@ -14,7 +14,7 @@ $subject = 'Subject: =?UTF-8?B?UHLDvGZ1bmcgUHLDvGZ1bmc=?=';
 var_dump(iconv_strpos($subject, 'H', 0, str_pad('invalid-charset', 64)));
 var_dump(iconv_strrpos($subject, 'H', str_pad('invalid-charset', 64)));
 var_dump(iconv_substr('AB',0,1, str_pad('invalid-charset', 64)));
-$preferences = darray[  'output-charset' => 'UTF-8',  'line-length' => 76,  'line-break-chars' => "\n"];
+$preferences = dict[  'output-charset' => 'UTF-8',  'line-length' => 76,  'line-break-chars' => "\n"];
 $preferences['scheme'] = 'Q';
 $preferences['input-charset'] = str_pad('invalid-charset', 64);
 var_dump(iconv_mime_encode('Subject', "Pr\xc3\xbcfung Pr\xc3\xbcffung",  $preferences));
@@ -44,12 +44,12 @@ unlink($tmpfname);
 $tmpfname = tempnam(sys_get_temp_dir(), '/var/www' . str_repeat('a', 128));
 var_dump(strlen(basename($tmpfname)));
 unlink($tmpfname);
-$ar1 = varray[10, 100, 100, 0];
-$ar2 = varray[1, 3, 2];
+$ar1 = vec[10, 100, 100, 0];
+$ar2 = vec[1, 3, 2];
 var_dump(array_multisort2(inout $ar1, inout $ar2));
 $phrase  = 'eat fruits, vegetables, and fiber every day.';
-$healthy = varray['fruits', 'vegetables'];
-$yummy   = varray['pizza', 'beer', 'ice cream'];
+$healthy = vec['fruits', 'vegetables'];
+$yummy   = vec['pizza', 'beer', 'ice cream'];
 var_dump(str_replace($healthy, $yummy, $phrase));
 try {
   var_dump(
@@ -60,7 +60,7 @@ try {
 } catch (UndefinedVariableException $e) {
   var_dump($e->getMessage());
 }
-var_dump(setlocale(LC_ALL, varray['de_DE@garbage', 'de_DE', 'deu_deu'], varray[1, 2]));
+var_dump(setlocale(LC_ALL, vec['de_DE@garbage', 'de_DE', 'deu_deu'], vec[1, 2]));
 var_dump(setlocale(LC_ALL, str_pad('a', 255)));
 var_dump(pack("\xf4", 0x1234, 0x5678, 65, 66));
 var_dump(pack("x5", 0x1234, 0x5678, 65, 66));

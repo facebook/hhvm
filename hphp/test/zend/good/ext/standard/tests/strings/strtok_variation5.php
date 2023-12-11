@@ -11,7 +11,7 @@
 echo "*** Testing strtok() : with miscellaneous inputs ***\n";
 
 // defining arrays for input strings and tokens
-$string_array = varray[
+$string_array = vec[
                   "HELLO WORLD",
                 "hello world",
                   "_HELLO_WORLD_",
@@ -24,7 +24,7 @@ $string_array = varray[
                        chr(0).'hello'.chr(0),
                        'hello'.chr(0).'world'
               ];
-$token_array = varray[
+$token_array = vec[
               "wr",
               "hello world",
               "__",

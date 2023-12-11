@@ -15,7 +15,7 @@ echo "*** Testing strcspn() : with different str and default start and len args 
 // initialing required variables
 // defining different strings
 
-$strings = varray[
+$strings = vec[
                    "",
            '',
            "\n",

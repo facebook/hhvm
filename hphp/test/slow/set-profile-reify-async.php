@@ -3,7 +3,7 @@
 class C {}
 
 async function test<reify T>() :Awaitable<mixed>{
-  $x = darray[17 => new C()];
+  $x = dict[17 => new C()];
   await RescheduleWaitHandle::create(1, 1);
   print(json_encode($x[17])."\n");
 }

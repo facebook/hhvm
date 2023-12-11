@@ -41,24 +41,24 @@ function ut_main()
     $res_str = '';
 
     // Sort an array in SORT_REGULAR mode using en_US locale.
-    $test_params = varray[
-        darray[ 'd' => 'y'  ,
+    $test_params = vec[
+        dict[ 'd' => 'y'  ,
                'c' => 'i'  ,
                'a' => 'k'  ],
 
-        darray[ 'a' => 'a'  ,
+        dict[ 'a' => 'a'  ,
                'b' => 'aaa',
                'c' => 'aa' ],
 
-        darray[ 'a'  => 'a' ,
+        dict[ 'a'  => 'a' ,
                'aaa'=> 'a' ,
                'aa' => 'a' ],
 
-        darray[ '1' => 'abc',
+        dict[ '1' => 'abc',
                '5' => '!'  ,
                '7' => ''   ],
 
-        darray[ '1' => '100',
+        dict[ '1' => '100',
                '2' => '25' ,
                '3' => '36' ],
     ];
@@ -66,16 +66,16 @@ function ut_main()
     $res_str .= sort_arrays( 'en_US', $test_params );
 
     // Sort an array in SORT_STRING mode using en_US locale.
-    $test_params = varray[
-        darray[ '1' => '100',
+    $test_params = vec[
+        dict[ '1' => '100',
                '2' => '25' ,
                '3' => '36' ],
 
-        darray[ '1' => 'd'  ,
+        dict[ '1' => 'd'  ,
                '2' => ''   ,
                '3' => ' a' ],
 
-        darray[ '1' => 'y'  ,
+        dict[ '1' => 'y'  ,
                '2' => 'k'  ,
                '3' => 'i'  ]
     ];
@@ -83,12 +83,12 @@ function ut_main()
     $res_str .= sort_arrays( 'en_US', $test_params, Collator::SORT_STRING );
 
     // Sort a non-ASCII array using ru_RU locale.
-    $test_params = varray[
-        darray[ 'п' => 'у',
+    $test_params = vec[
+        dict[ 'п' => 'у',
                'б' => 'в',
                'е' => 'а' ],
 
-        darray[ '1' => 'п',
+        dict[ '1' => 'п',
                '4' => '',
                '7' => 'd',
                '2' => 'пп' ]
@@ -98,8 +98,8 @@ function ut_main()
 
 
     // Sort an array using Lithuanian locale.
-    $test_params = varray[
-        darray[ 'd' => 'y',
+    $test_params = vec[
+        dict[ 'd' => 'y',
                'c' => 'i',
                'a' => 'k' ]
     ];

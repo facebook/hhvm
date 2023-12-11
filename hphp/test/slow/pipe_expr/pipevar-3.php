@@ -2,10 +2,10 @@
 
 function main($bar) :mixed{
   $foo = "Hello!";
-  varray[1, 2, 3]
+  vec[1, 2, 3]
     |> array_map($x ==> $x + 1, $$)
     |> array_merge(
-      varray[50, 60, 70]
+      vec[50, 60, 70]
         |> array_map($x ==> $x * 2, $$)
         |> array_filter($$, $x ==> $x != 100),
       $$)

@@ -13,8 +13,8 @@ function entrypoint_bug42183(): void {
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://ws.sit.com" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body><ns1:test/></SOAP-ENV:Body></SOAP-ENV:Envelope>
 EOF;
 
-  $server = new SoapServer(NULL, darray['uri' => 'http://ws.sit.com', 
-  	'classmap' => darray['Object' => 'PHPObject']]);
+  $server = new SoapServer(NULL, dict['uri' => 'http://ws.sit.com', 
+  	'classmap' => dict['Object' => 'PHPObject']]);
   $server->addFunction("test");
   ob_start();
   $server->handle($req);

@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$tests = varray[
+$tests = vec[
     "abc",
     "abc&amp;sfdsa",
     "test&#043;s &amp; some more &#68;",

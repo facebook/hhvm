@@ -32,10 +32,10 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // arrays of different data types to be passed as $input
-$inputs = darray[
+$inputs = dict[
 
        // int data
-/*1*/  'int' => varray[
+/*1*/  'int' => vec[
        0,
        1,
        12345,
@@ -43,7 +43,7 @@ $inputs = darray[
        ],
 
        // float data
-/*2*/  'float' => varray[
+/*2*/  'float' => vec[
        10.5,
        -10.5,
        12.3456789000e10,
@@ -52,13 +52,13 @@ $inputs = darray[
        ],
 
        // null data
-/*3*/ 'null' => varray[
+/*3*/ 'null' => vec[
        NULL,
        null,
        ],
 
        // boolean data
-/*4*/ 'bool' => varray[
+/*4*/ 'bool' => vec[
        true,
        false,
        TRUE,
@@ -66,28 +66,28 @@ $inputs = darray[
        ],
 
        // empty data
-/*5*/ 'empty string' => varray[
+/*5*/ 'empty string' => vec[
        "",
        '',
        ],
 
-/*6*/ 'empty array' => varray[
+/*6*/ 'empty array' => vec[
        ],
 
        // string data
-/*7*/ 'string' => varray[
+/*7*/ 'string' => vec[
        "string",
        'string',
        $heredoc,
        ],
 
        // object data
-/*8*/ 'object' => varray[
+/*8*/ 'object' => vec[
        new classA(),
        ],
 
        // resource variable
-/*9*/ 'resource' => varray[
+/*9*/ 'resource' => vec[
        $fp
        ],
 ];

@@ -3,7 +3,7 @@
 function run(inout $a, inout $b, inout $c) :mixed{
   $a = "hello";
   $b = 2;
-  $c = varray[];
+  $c = vec[];
 
   return $a;
 }

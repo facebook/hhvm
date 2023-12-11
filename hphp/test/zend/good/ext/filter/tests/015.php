@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$values = varray[
+$values = vec[
 'http://example.com/index.html',
 'http://www.example.com/index.php',
 'http://www.example/img/test.png',
@@ -18,7 +18,7 @@ sys_get_temp_dir().'/test.c',
 'http',
 '',
 -1,
-varray[],
+vec[],
 'mailto:foo@bar.com',
 'news:news.php.net',
 'file://foo/bar',

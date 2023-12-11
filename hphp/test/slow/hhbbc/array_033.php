@@ -4,7 +4,7 @@ function junk() :mixed{ return 2; }
 <<__EntryPoint>>
 function bar() :mixed{
   $y = null;
-  $x = darray['z' => junk()];
+  $x = dict['z' => junk()];
   unset($x['z']);
   try {
     $val = $x['z'];

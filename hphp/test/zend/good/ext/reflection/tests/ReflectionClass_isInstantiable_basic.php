@@ -19,7 +19,7 @@ class D extends abstractClass {
     function f2() :mixed{}
 }
 <<__EntryPoint>> function main(): void {
-$classes = varray["C", "iface", "ifaceImpl", "abstractClass", "D"];
+$classes = vec["C", "iface", "ifaceImpl", "abstractClass", "D"];
 
 foreach($classes  as $class ) {
     $reflectionClass = new ReflectionClass($class);

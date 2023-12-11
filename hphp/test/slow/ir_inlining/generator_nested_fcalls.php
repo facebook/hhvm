@@ -24,11 +24,11 @@ function SecurityLogger($x, $y) :mixed{
 
 function unique_function() :mixed{
   mt_rand();
-  return varray['1'];
+  return vec['1'];
 }
 
 function foo() :AsyncGenerator<mixed,mixed,void>{
-  $resource_arr = darray['a' => 'b'];
+  $resource_arr = dict['a' => 'b'];
   // Inlining something which calls a function inside a generator
   // doesn't work.  This test shouldn't inline right now (if it does
   // it crashes).

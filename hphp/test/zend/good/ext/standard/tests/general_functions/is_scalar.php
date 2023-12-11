@@ -4,7 +4,7 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing basic operations ***\n";
-$scalar_variables = varray[
+$scalar_variables = vec[
   0,  // integers
   1,
   -45678,
@@ -57,15 +57,15 @@ echo "\n*** Testing possible variations ***\n";
 $fp = fopen(__FILE__, "r");
 $dfp = opendir(".");
 
-$variation_array = varray[
+$variation_array = vec[
   NULL,
   null,
 
-  varray[],  // arrays
-  varray[NULL],
-  varray[true],
-  varray[0],
-  varray[1,2,3,4],
+  vec[],  // arrays
+  vec[NULL],
+  vec[true],
+  vec[0],
+  vec[1,2,3,4],
 
   $fp,  // resources
   $dfp,

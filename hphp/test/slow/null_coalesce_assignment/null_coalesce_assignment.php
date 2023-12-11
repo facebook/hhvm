@@ -22,7 +22,7 @@ function n_dump($x) :mixed{
 
 class CounterArray
 {
-  private $container = varray[];
+  private $container = vec[];
   public $counter = 0;
 
   public function incrementCounter () :mixed{
@@ -98,7 +98,7 @@ function test_falsey(): void {
 function test_array_get(): void {
   echo("test_array_get()\n");
 
-  $arr = darray[];
+  $arr = dict[];
   $i = -1;
   VS($arr[++$i] ??= 42, 42); // Evaluates $i once
   VS($i, 0);
@@ -163,9 +163,9 @@ function test_associativity(): void {
 function test_multi_dim_basic(): void {
   echo("test_multi_dim_basic()\n");
 
-  $arr = darray[4 =>
-    darray[2 =>
-      darray[]
+  $arr = dict[4 =>
+    dict[2 =>
+      dict[]
     ]];
   $x = 4;
   $y = 0;
@@ -191,7 +191,7 @@ function test_multi_dim_basic(): void {
 
 function test_null_base(): void {
   echo("test_null_base()\n");
-  $arr = darray[]; $arreq = darray[];
+  $arr = dict[]; $arreq = dict[];
   VS($arr[1] ??= 'hello', 'hello');
   VS($arreq[1] = 'hello', 'hello'); // Consistent with plain ol' equals
   VS($arr, $arreq); // $arr and $arreq get set consistently by `??=` and `=`
@@ -206,7 +206,7 @@ function test_null_base(): void {
 function test_multi_dim_lvars(): void {
   echo("test_multi_dim_lvars()\n");
 
-  $arr = darray[4 => darray[2 => darray[]]];
+  $arr = dict[4 => dict[2 => dict[]]];
   $x = 4;
   $y = 0;
   $z = 2;
@@ -215,7 +215,7 @@ function test_multi_dim_lvars(): void {
 
   VS($arr[$x][$z][$q] ??= ($x = 2), 2);
   n_dump($arr);
-  $arr[$x] = darray[$z => darray[]]; VS($arr[$x][$z][$w] ??= ($w = 3), 3);
+  $arr[$x] = dict[$z => dict[]]; VS($arr[$x][$z][$w] ??= ($w = 3), 3);
   n_dump($arr);
   $arr[$x][$z][$w] ??= 5;
   VS($arr[$x][$z][$w] ??= ($w = 'Not me'), 5);
@@ -244,14 +244,14 @@ function speak($s): string {
 }
 
 class Shoo {
-    public $b = darray[];
+    public $b = dict[];
 }
 
 function test_multi_dim_side_effects(): void {
   echo("test_multi_dim_side_effects()\n");
 
   $obj = new Shoo;
-  $x = darray['a' => $obj];
+  $x = dict['a' => $obj];
 
   VS($x[speak('a')]->b[speak('c')] ??= 42, 42);
   n_dump($x);

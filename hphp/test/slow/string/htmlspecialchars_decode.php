@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_htmlspecialchars_decode() :mixed{
-$test = varray[
+$test = vec[
   '&#34;&#x32;',
   '&#9829;&#x2665;',
 ];

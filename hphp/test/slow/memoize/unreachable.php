@@ -81,8 +81,8 @@ function main() :mixed{
   $a = new Cls2();
   $b = new Cls3();
   $c = new Cls4();
-  run(varray[$a, 'alwaysThrows1'], varray[$a, 'alwaysThrows1']);
-  run(varray[$b, 'alwaysThrows'], varray[$c, 'alwaysThrows']);
+  run(vec[$a, 'alwaysThrows1'], vec[$a, 'alwaysThrows1']);
+  run(vec[$b, 'alwaysThrows'], vec[$c, 'alwaysThrows']);
 }
 
 <<__EntryPoint>>

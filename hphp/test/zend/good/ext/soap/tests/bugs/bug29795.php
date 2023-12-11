@@ -18,10 +18,10 @@ EOF;
 <<__EntryPoint>>
 function main_entry(): void {
 
-  $client = new LocalSoapClient(dirname(__FILE__)."/bug29795.wsdl",darray["trace"=>1]);
-  $ar=$client->__soapcall('GetPrice', varray[]);
+  $client = new LocalSoapClient(dirname(__FILE__)."/bug29795.wsdl",dict["trace"=>1]);
+  $ar=$client->__soapcall('GetPrice', vec[]);
   echo "o";
-  $client = new LocalSoapClient(dirname(__FILE__)."/bug29795.wsdl",darray["trace"=>1]);
-  $ar=$client->__soapcall('GetPrice', varray[]);
+  $client = new LocalSoapClient(dirname(__FILE__)."/bug29795.wsdl",dict["trace"=>1]);
+  $ar=$client->__soapcall('GetPrice', vec[]);
   echo "k\n";
 }

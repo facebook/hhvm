@@ -2,7 +2,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function make_error() :mixed{
-  $a = darray['x' => 2];
+  $a = dict['x' => 2];
   $a->foo;
 }
 

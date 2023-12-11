@@ -11,7 +11,7 @@ class C {
     return $string;
   }
 
-  private static $static_arr = darray[
+  private static $static_arr = dict[
     'a' => 'b',
     'c' => 'd',
     'e' => 'f',

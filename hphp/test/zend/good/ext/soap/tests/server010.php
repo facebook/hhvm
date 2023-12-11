@@ -7,7 +7,7 @@ class foo {
   }
 }
 <<__EntryPoint>> function main(): void {
-$server = new SoapServer(null,darray['uri'=>"http://testuri.org"]);
+$server = new SoapServer(null,dict['uri'=>"http://testuri.org"]);
 $server->setClass("foo");
 $server->setpersistence(SOAP_PERSISTENCE_REQUEST);
 

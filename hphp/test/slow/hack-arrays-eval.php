@@ -12,7 +12,7 @@ function test_eval() :mixed{
   var_dump(f2());
   var_dump(f3());
 
-  $a = varray[100, 200, 300];
+  $a = vec[100, 200, 300];
   eval('function f4($a) { return vec($a); }');
   eval('function f5($a) { return dict($a); }');
   eval('function f6($a) { return keyset($a); }');
@@ -34,9 +34,9 @@ function test_eval() :mixed{
   f9($k);
 }
 function wrap($arr, $v) :mixed{ return $arr[] = $v; }
-function test_func($v = wrap(varray[], vec[1, 2]),
-                   $d = wrap(varray[], dict[100 => 'a', 200 => 'b']),
-                   $k = wrap(varray[], keyset['a', 'b'])) :mixed{}
+function test_func($v = wrap(vec[], vec[1, 2]),
+                   $d = wrap(vec[], dict[100 => 'a', 200 => 'b']),
+                   $k = wrap(vec[], keyset['a', 'b'])) :mixed{}
 
 function test_default_value() :mixed{
   echo "============ test_default_value ==============================\n";

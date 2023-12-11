@@ -45,7 +45,7 @@ class Ascending {
   use T;
   function __construct() {
     banner("asc");
-    $this->binary(varray[-1, 0, 1], varray[-1, 0, 1]);
+    $this->binary(vec[-1, 0, 1], vec[-1, 0, 1]);
   }
 }
 
@@ -53,7 +53,7 @@ class Descending {
   use T;
   function __construct() {
     banner("desc");
-    $this->binary(varray[1, 0, -1], varray[1, 0, -1]);
+    $this->binary(vec[1, 0, -1], vec[1, 0, -1]);
   }
 }
 
@@ -61,14 +61,14 @@ class Equal {
   use T;
   function __construct() {
     banner("eq");
-    $this->binary(varray[0, 0, 0], varray[0, 0, 0]);
+    $this->binary(vec[0, 0, 0], vec[0, 0, 0]);
   }
 }
 
 class Str {
   use T;
   function __construct() {
-    $a = varray["a", "abc", "abcd", "0", "1", "2"];
+    $a = vec["a", "abc", "abcd", "0", "1", "2"];
     $this->binary($a, $a);
   }
 }
@@ -76,7 +76,7 @@ class NotEqual {
   use T;
   function __construct() {
     banner("neq");
-    $this->binary(varray[1, 2, 3], varray[4, 5, 6]);
+    $this->binary(vec[1, 2, 3], vec[4, 5, 6]);
   }
 }
 
@@ -84,7 +84,7 @@ class Bools {
   use T;
   function __construct() {
     banner("bools");
-    $this->binary(varray[false, true], varray[false, true]);
+    $this->binary(vec[false, true], vec[false, true]);
   }
 }
 
@@ -96,7 +96,7 @@ class DifferentTypes {
   use T;
   function __construct() {
     banner("weirdTypes");
-    $a = varray[0, true, null, 0.3, "str", varray[], new C()];
+    $a = vec[0, true, null, 0.3, "str", vec[], new C()];
     $this->unary($a);
   }
 }

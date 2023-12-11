@@ -30,7 +30,7 @@ $empty_heredoc =<<<EOT
 EOT;
 
 // input array with different false elements
-$input = varray[
+$input = vec[
   false,
   False,
   '',
@@ -41,7 +41,7 @@ $input = varray[
   NULL,
   "0",
   '0',
-  varray[],
+  vec[],
   !1,
   1==2,
   $empty_heredoc,

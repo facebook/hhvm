@@ -4,8 +4,8 @@
 <<__EntryPoint>>
 function main_array_equality() :mixed{
 $a = function($a, $b) { return $a + $b; };
-$aa = darray[
-  "parameter" => darray[
+$aa = dict[
+  "parameter" => dict[
     '$a' => '<required>',
     '$b' => '<required>'
   ]

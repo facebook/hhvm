@@ -1,7 +1,7 @@
 <?hh
 
 function test() :mixed{
-  $a = varray['abc', 'cde', 'fgh'];
+  $a = vec['abc', 'cde', 'fgh'];
   list($a[0], $a[1], $a) = $a;
   var_dump($a);
 }

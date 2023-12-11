@@ -23,6 +23,6 @@ function store($k, $a) :mixed{
 
 <<__EntryPoint>>
 function main_sleep_throw() :mixed{
-store("a1", varray[new SleepThrow("Sleep throw 1")]);
-store("a2", darray["key" => new SleepThrow("Sleep throw 2")]);
+store("a1", vec[new SleepThrow("Sleep throw 1")]);
+store("a2", dict["key" => new SleepThrow("Sleep throw 2")]);
 }

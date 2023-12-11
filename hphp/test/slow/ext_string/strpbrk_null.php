@@ -1,7 +1,7 @@
 <?hh
 
 function prettify_null($x) :mixed{
-  return strtr($x, darray["\x00" => '<0>']);
+  return strtr($x, dict["\x00" => '<0>']);
 }
 
 function nulls_in_haystack() :mixed{

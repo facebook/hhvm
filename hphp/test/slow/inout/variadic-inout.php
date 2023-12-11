@@ -13,7 +13,7 @@ function bar(inout $x, ...$z) :mixed{
 }
 
 function main() :mixed{
-  $x = varray[1, 2, 3];
+  $x = vec[1, 2, 3];
   foo(inout $x, 24);
   foo(inout $x, 42, 'apple', 200);
   foo(inout $x, 8, 99, 'green');

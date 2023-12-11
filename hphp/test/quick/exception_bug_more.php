@@ -5,7 +5,7 @@ function thrower() :mixed{
 }
 
 function foo() :mixed{
-  foreach (varray[1,2,3] as $x) {
+  foreach (vec[1,2,3] as $x) {
     try {
       thrower();
     } catch (MyJunk $z) { echo "Not Here\n"; }

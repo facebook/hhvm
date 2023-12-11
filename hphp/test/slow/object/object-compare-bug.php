@@ -3,7 +3,7 @@ trait T { public $z; }
 class A { use T; }
 class B { use T; }
 function main() :mixed{
-  foreach (varray[varray[1,1], varray[1,2], varray[2,1]] as list($x, $y)) {
+  foreach (vec[vec[1,1], vec[1,2], vec[2,1]] as list($x, $y)) {
     $a = new A;
     $a->z = $x;
     $b = new B;

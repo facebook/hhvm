@@ -8,6 +8,6 @@ function x($y, $k) :mixed{
 
 <<__EntryPoint>>
 function main_floor_ceil() :mixed{
-x(varray[1,2,3,4], 'floor');
-x(varray[1,2,3,4], 'ceil');
+x(vec[1,2,3,4], 'floor');
+x(vec[1,2,3,4], 'ceil');
 }

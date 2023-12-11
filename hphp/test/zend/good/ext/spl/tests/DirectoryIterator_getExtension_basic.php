@@ -3,14 +3,14 @@
 $dir = sys_get_temp_dir().'/'.'DirectoryIterator::getExtension' . DIRECTORY_SEPARATOR;
 mkdir($dir);
 
-$files = varray['test.txt', 'test.extension', 'test..', 'test.', 'test'];
+$files = vec['test.txt', 'test.extension', 'test..', 'test.', 'test'];
 foreach ($files as $file) {
     touch($dir . $file);
 }
 
-$dit_exts = varray[];
-$nfo_exts = varray[];
-$skip = varray['.', '..'];
+$dit_exts = vec[];
+$nfo_exts = vec[];
+$skip = vec['.', '..'];
 
 foreach (new DirectoryIterator($dir) as $file) {
     if (in_array($file->getFilename(), $skip)) {

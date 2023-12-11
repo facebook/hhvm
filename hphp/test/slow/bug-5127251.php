@@ -6,7 +6,7 @@ function g($x) :mixed{
 }
 
 function h() :mixed{
-  return varray[1,2];
+  return vec[1,2];
 }
 
 class C {

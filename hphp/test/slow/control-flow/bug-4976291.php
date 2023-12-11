@@ -16,7 +16,7 @@ class Dlgr {
 }
 
 class X {
-  private static $classCache = darray[];
+  private static $classCache = dict[];
 
   static function getuirc(E $blah) :mixed{
     $blah_class = get_class($blah);

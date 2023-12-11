@@ -22,11 +22,11 @@ function main(): void {
   echo "*** Testing array_rand() : unexpected values for 'num_req' parameter ***\n";
 
   // Initialise function arguments
-  $input = varray[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+  $input = vec[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
 
 
   //array of values to iterate over
-  $values = varray[
+  $values = vec[
           // int data
   /*1*/   0,
           1,

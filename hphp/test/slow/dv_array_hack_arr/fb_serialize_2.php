@@ -25,11 +25,11 @@ function test($label, $value) :mixed{
 <<__EntryPoint>>
 function main() :mixed{
   $examples = vec[
-    vec['Empty varray', varray[]],
-    vec['Empty darray', darray[]],
-    vec['List-like varray', varray[4, 5, 6]],
-    vec['List-like darray', darray(varray[4, 5, 6])],
-    vec['Map-like darray', darray['a' => 17, 'b' => 34]],
+    vec['Empty varray', vec[]],
+    vec['Empty darray', dict[]],
+    vec['List-like varray', vec[4, 5, 6]],
+    vec['List-like darray', darray(vec[4, 5, 6])],
+    vec['Map-like darray', dict['a' => 17, 'b' => 34]],
   ];
   foreach ($examples as list($label, $value)) {
     test($label, $value);

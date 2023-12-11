@@ -1,6 +1,6 @@
 <?hh
 function foo($a) :mixed{
-  $arr = varray[$a, $a++, $a];
+  $arr = vec[$a, $a++, $a];
   var_dump($arr);
 }
 

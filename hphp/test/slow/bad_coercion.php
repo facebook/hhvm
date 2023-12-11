@@ -7,7 +7,7 @@ function test_is_nan($v) :mixed{
 
 <<__EntryPoint>>
 function main_bad_coercion() :mixed{
-$values = varray[
+$values = vec[
   0,
   '0',
   '0a',

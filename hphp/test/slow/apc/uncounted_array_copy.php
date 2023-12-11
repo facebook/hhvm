@@ -21,7 +21,7 @@ if (apc_exists('minefield')) {
   apc_store('mine', $ns, 3);
   $unc0 = __hhvm_intrinsics\apc_fetch_no_check('mine');
   $unc1 = __hhvm_intrinsics\apc_fetch_no_check('mine');
-  $v = darray[];
+  $v = dict[];
   $v['hey'] = $unc0;
   $v[0] = $unc1;
   var_dump($v);

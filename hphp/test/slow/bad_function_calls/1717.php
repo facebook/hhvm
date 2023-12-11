@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_1717() :mixed{
-$vals = varray[null, 0, false, varray[], 'test'];
+$vals = vec[null, 0, false, vec[], 'test'];
 foreach ($vals as $val) {
   try {
     $val->foo();

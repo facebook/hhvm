@@ -11,5 +11,5 @@ function foo($b) :mixed{
 
 <<__EntryPoint>>
 function main_fpassm_mw() :mixed{
-foo(varray[]);
+foo(vec[]);
 }

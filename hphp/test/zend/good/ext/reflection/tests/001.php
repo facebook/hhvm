@@ -6,7 +6,7 @@ class ReflectionClassEx extends ReflectionClass
 
     function getMethodNames()
 :mixed    {
-        $res = varray[];
+        $res = vec[];
         foreach($this->getMethods() as $m)
         {
             $res[] = $m->class . '::' . $m->name;
@@ -53,7 +53,7 @@ $exp = varray [
   'UMLClass::getExtension',
   'UMLClass::getExtensionName'];
 
-$miss = varray[];
+$miss = vec[];
 
 $res = $r->getMethodNames();
 

@@ -11,13 +11,13 @@ $file = sys_get_temp_dir().'/'.'flock.tmp';
 $fp = fopen($file, "w");
 
 /* array of operatons */
-$operations = varray[
+$operations = vec[
   0,
   LOCK_NB,
   FALSE,
   NULL,
-  varray[1,2,3],
-  varray[],
+  vec[1,2,3],
+  vec[],
   "string",
   "",
   "\0"

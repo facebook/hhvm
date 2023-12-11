@@ -26,7 +26,7 @@ class Point implements Serializable
 :mixed    {
         echo "\nInside " . __METHOD__ . ", $this\n\n";
 
-        return serialize(darray['y' => $this->y, 'x' => $this->x]);
+        return serialize(dict['y' => $this->y, 'x' => $this->x]);
     }
 
     public function unserialize($data)
@@ -64,7 +64,7 @@ class ColoredPoint extends Point implements Serializable
 :mixed    {
         echo "\nInside " . __METHOD__ . ", $this\n\n";
 
-        return serialize(darray[
+        return serialize(dict[
             'color' => $this->color,
             'baseData' => parent::serialize()
         ]);

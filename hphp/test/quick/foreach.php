@@ -13,7 +13,7 @@ function goo($arr) :mixed{
   return array_glue('fub', $arr, '');
 }
 <<__EntryPoint>> function main(): void {
-$x = varray['1',2,'3'];
+$x = vec['1',2,'3'];
 foreach ($x as $k => $v) {
   echo $k;
   echo ' ';
@@ -21,7 +21,7 @@ foreach ($x as $k => $v) {
   echo "\n";
 }
 
-$array = varray[1,2,3];
+$array = vec[1,2,3];
 $array []= 400;  // make it non-static
 
 $new = goo($array);

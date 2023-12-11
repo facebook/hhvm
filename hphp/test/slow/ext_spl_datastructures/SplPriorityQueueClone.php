@@ -10,12 +10,12 @@ function getQueueWithLittleData() :mixed{
 }
 
 function testExtractFlags() :mixed{
-  $flags = varray[
-    varray['SplPriorityQueue::EXTR_DATA', SplPriorityQueue::EXTR_DATA],
-    varray['SplPriorityQueue::EXTR_PRIORITY', SplPriorityQueue::EXTR_PRIORITY],
-    varray['SplPriorityQueue::EXTR_BOTH', SplPriorityQueue::EXTR_BOTH],
+  $flags = vec[
+    vec['SplPriorityQueue::EXTR_DATA', SplPriorityQueue::EXTR_DATA],
+    vec['SplPriorityQueue::EXTR_PRIORITY', SplPriorityQueue::EXTR_PRIORITY],
+    vec['SplPriorityQueue::EXTR_BOTH', SplPriorityQueue::EXTR_BOTH],
   ];
-  $sources = varray[
+  $sources = vec[
     getQueueWithLittleData(),
     clone getQueueWithLittleData(),
   ];

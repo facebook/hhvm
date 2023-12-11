@@ -90,7 +90,7 @@ function base($ks) :mixed{
   echo "======= base_prop_set ==============================\n";
   try {
     $copy = $ks;
-    $copy->foobaz = varray[123];
+    $copy->foobaz = vec[123];
     var_dump($copy);
   } catch (Exception $e) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
@@ -186,7 +186,7 @@ function dim($a) :mixed{
   echo "======= dim_prop_set ===============================\n";
   try {
     $copy = $a;
-    $copy[1]->foobaz = varray[123];
+    $copy[1]->foobaz = vec[123];
     var_dump($copy);
   } catch (Exception $e) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
@@ -372,6 +372,6 @@ function fini($a) :mixed{
 }
 <<__EntryPoint>> function main(): void {
 base(keyset[1, 2, '1']);
-dim(varray[null, keyset[1, 2, '1', '']]);
-fini(varray[null, keyset[1, 2, '1', '']]);
+dim(vec[null, keyset[1, 2, '1', '']]);
+fini(vec[null, keyset[1, 2, '1', '']]);
 }

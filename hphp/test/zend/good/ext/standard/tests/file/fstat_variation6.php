@@ -24,7 +24,7 @@ function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) :mixe
 <<__EntryPoint>> function main(): void {
 set_error_handler(test_error_handler<>);
 
-$variation_array = darray[
+$variation_array = dict[
   'instance of classWithToString' => new classWithToString(),
   'instance of classWithoutToString' => new classWithoutToString(),
   ];

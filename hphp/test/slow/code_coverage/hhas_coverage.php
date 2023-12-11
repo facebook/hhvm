@@ -11,5 +11,5 @@ function test($a) :mixed{
 
 <<__EntryPoint>>
 function main_hhas_coverage() :mixed{
-test(varray[1,2,3]);
+test(vec[1,2,3]);
 }

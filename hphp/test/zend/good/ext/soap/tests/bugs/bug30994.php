@@ -35,7 +35,7 @@ soap:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
 </soap:Envelope>
 EOF;
 
-  $x = new SoapServer(NULL, darray["uri"=>"http://spock/kunta/kunta"]);
+  $x = new SoapServer(NULL, dict["uri"=>"http://spock/kunta/kunta"]);
   $x->addFunction("bassCall");
   $x->handle($HTTP_RAW_POST_DATA);
 }

@@ -13,7 +13,7 @@ class D5 {
   }
   public function test() :mixed{
     call_user_func('F5::foo');
-    call_user_func(varray['F5','foo']);
+    call_user_func(vec['F5','foo']);
   }
 }
 class E5 extends D5 {

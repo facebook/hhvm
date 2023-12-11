@@ -26,7 +26,7 @@ $value2 = "hello";
 $value3 = 0;
 
 // array containing reference variables
-$arr1 = darray[
+$arr1 = dict[
   0 => 0,
   1 => $value2,
   2 => $value2,

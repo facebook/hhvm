@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : hexa formats with float values ***\n";
 
 // array of float values 
-$float_values = varray[
+$float_values = vec[
   2147483647,
   0x800000001, // float value, beyond max positive int
   020000000001, // float value, beyond max positive int
@@ -23,7 +23,7 @@ $float_values = varray[
 ];
 
 // array of hexa formats
-$hexa_formats = varray[  
+$hexa_formats = vec[  
   "%x", "%xx", "%lx", 
   "%Lx", " %x", "%x ",
   "\t%x", "\n%x", "%4x",

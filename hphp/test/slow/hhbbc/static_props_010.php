@@ -7,7 +7,7 @@ class x {
   private static $hm = "asd";
   private static $heh;
   public static function go() :mixed{
-    self::$heh = varray[];
+    self::$heh = vec[];
     self::$heh->bar = 0;  // we should know this can't affect $this->bar
   }
   public function get() :mixed{

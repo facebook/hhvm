@@ -1,16 +1,16 @@
 <?hh
 
 class OldStruct {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'features',
       'type' => TType::MAP,
       'ktype' => TType::I16,
       'vtype' => TType::DOUBLE,
-      'key' => darray[
+      'key' => dict[
         'type' => TType::I16,
       ],
-      'val' => darray[
+      'val' => dict[
         'type' => TType::DOUBLE,
       ],
     ],
@@ -24,16 +24,16 @@ class OldStruct {
 }
 
 class NewStruct {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'features',
       'type' => TType::MAP,
       'ktype' => TType::I32,
       'vtype' => TType::FLOAT,
-      'key' => darray[
+      'key' => dict[
         'type' => TType::I32,
       ],
-      'val' => darray[
+      'val' => dict[
         'type' => TType::FLOAT,
       ],
     ],
@@ -49,13 +49,13 @@ class NewStruct {
 function testBinary() :mixed{
   $p1 = new DummyProtocol();
   $v1 = new OldStruct();
-  $v1->features = darray[1 => 314, 2 => 271.8];
+  $v1->features = dict[1 => 314, 2 => 271.8];
   thrift_protocol_write_binary($p1, 'foomethod', 1, $v1, 20, true);
   var_dump(thrift_protocol_read_binary($p1, 'NewStruct', true));
 
   $p2 = new DummyProtocol();
   $v2 = new NewStruct();
-  $v2->features = darray[1 => 314, 2 => 271.8];
+  $v2->features = dict[1 => 314, 2 => 271.8];
   thrift_protocol_write_binary($p2, 'foomethod', 1, $v2, 20, true);
   var_dump(thrift_protocol_read_binary($p2, 'OldStruct', true));
 }
@@ -63,13 +63,13 @@ function testBinary() :mixed{
 function testCompact() :mixed{
   $p1 = new DummyProtocol();
   $v1 = new OldStruct();
-  $v1->features = darray[1 => 314, 2 => 271.8];
+  $v1->features = dict[1 => 314, 2 => 271.8];
   thrift_protocol_write_compact2($p1, 'foomethod', 2, $v1, 20);
   var_dump(thrift_protocol_read_compact($p1, 'NewStruct'));
 
   $p2 = new DummyProtocol();
   $v2 = new NewStruct();
-  $v2->features = darray[1 => 314, 2 => 271.8];
+  $v2->features = dict[1 => 314, 2 => 271.8];
   thrift_protocol_write_compact2($p2, 'foomethod', 2, $v2, 20);
   var_dump(thrift_protocol_read_compact($p2, 'OldStruct'));
 }

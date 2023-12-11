@@ -10,7 +10,7 @@
 echo "*** Testing is_writable(): usage variations ***\n";
 
 echo "\n*** Testing is_writable() with invalid filenames ***\n";
-$misc_files = varray[
+$misc_files = vec[
   0,
   1234,
   -2.34555,
@@ -18,7 +18,7 @@ $misc_files = varray[
   FALSE,
   NULL,
   " ",
-  varray[],
+  vec[],
 ];
 /* loop through to test each element in the above array
    is a writable file */

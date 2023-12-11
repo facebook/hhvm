@@ -45,7 +45,7 @@ class C {
 }
   public function o(<<Hi('bye')>> $param) :mixed{
 }
-  public function p(<<A('b', varray['c', 'd']), E('fg')>> $param) :mixed{
+  public function p(<<A('b', vec['c', 'd']), E('fg')>> $param) :mixed{
 }
   public function q(<<RS>> $tuv) :mixed{
 }

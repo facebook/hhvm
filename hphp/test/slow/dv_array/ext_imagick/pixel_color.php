@@ -35,7 +35,7 @@ dump($pixel->getHSL());
 dump($pixel->getColor(true));
 
 $pixel = new ImagickPixel('#F02B88');
-$colors = varray[
+$colors = vec[
   Imagick::COLOR_BLACK,
   Imagick::COLOR_BLUE,
   Imagick::COLOR_CYAN,

@@ -24,7 +24,7 @@ $n = gmp_init(0);
 var_dump(gmp_prob_prime($n));
 
 try { var_dump(gmp_prob_prime()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-var_dump(gmp_prob_prime(varray[]));
+var_dump(gmp_prob_prime(vec[]));
 
 echo "Done\n";
 }

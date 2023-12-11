@@ -1,6 +1,6 @@
 <?hh
 function s() :mixed{
-  $storage = varray[varray['x', 'y']];
+  $storage = vec[vec['x', 'y']];
   return $storage[0];
 }
 <<__EntryPoint>> function main(): void {

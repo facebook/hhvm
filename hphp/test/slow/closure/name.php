@@ -37,7 +37,7 @@ class Test {
   }
 }
 <<__EntryPoint>> function main(): void {
-$closures = varray[
+$closures = vec[
   testOne(),
   testTwo(),
   testNested(),

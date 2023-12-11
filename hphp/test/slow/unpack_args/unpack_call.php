@@ -148,7 +148,7 @@ function test_param_mix_typed(varray $args, I $iface) :mixed{
 }
 
 function main() :mixed{
-  $a = varray['a', 'b', 'c'];
+  $a = vec['a', 'b', 'c'];
   $v = Vector {'a', 'b', 'c'};
   // TODO(t4599379): arbitrary traversables
   // $t = new ArrayIterator(['a', 'b', 'c']);

@@ -22,7 +22,7 @@ function main() :mixed{
   var_dump(trait_exists('iiii'));
   var_dump(trait_exists('zzzz'));
 
-  foreach (varray['tttt', 'cccc', 'iiii', 'zzzz'] as $n) {
+  foreach (vec['tttt', 'cccc', 'iiii', 'zzzz'] as $n) {
     var_dump(class_exists($n));
     var_dump(interface_exists($n));
     var_dump(trait_exists($n));

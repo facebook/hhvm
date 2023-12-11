@@ -20,5 +20,5 @@ function main($a) :mixed{
   var_dump($result);
 }
 <<__EntryPoint>> function main_entry(): void {
-main(varray[42]);
+main(vec[42]);
 }

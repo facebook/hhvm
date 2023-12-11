@@ -12,8 +12,8 @@ function key_compare_func($key1, $key2)
 echo "*** Testing array_diff_ukey() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$input_array = darray[0 => '0', 10 => '10', -10 => '-10', 20 =>'20'];
-$float_indx_array = darray[0 => '0.0', 10 => '10.5', -30 => '-30.5'];
+$input_array = dict[0 => '0', 10 => '10', -10 => '-10', 20 =>'20'];
+$float_indx_array = dict[0 => '0.0', 10 => '10.5', -30 => '-30.5'];
 
 echo "\n-- Testing array_diff_ukey() function with float indexed array --\n";
 

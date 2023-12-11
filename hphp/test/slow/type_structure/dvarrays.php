@@ -7,9 +7,9 @@ class C {
   const type SH = shape('a' => int, 'b' => string);
   const type TU = (int, string);
 
-  public function d_(): darray<string, bool> { return darray[]; }
-  public function v_(): varray<int> { return varray[]; }
-  public function dv(): varray_or_darray<float> { return varray[]; }
+  public function d_(): darray<string, bool> { return dict[]; }
+  public function v_(): varray<int> { return vec[]; }
+  public function dv(): varray_or_darray<float> { return vec[]; }
   public function sh(): shape(?'a' => int, ?'b' => string) { return shape(); }
   public function tu(): (int, string) { return tuple(17, 'x'); }
 }

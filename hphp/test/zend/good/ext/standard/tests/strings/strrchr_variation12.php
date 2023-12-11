@@ -7,7 +7,7 @@
 /* Test strrchr() function: with binary values & null terminated strings passed to 'str1' & 'str2' */
 <<__EntryPoint>> function main(): void {
 echo "*** Test strrchr() function: binary safe ***\n";
-$haystacks = varray[
+$haystacks = vec[
   "Hello".chr(0)."World",
   chr(0)."Hello World",
   "Hello World".chr(0),

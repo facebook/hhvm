@@ -4,7 +4,7 @@
 class C {
   public function foo() :mixed{
     echo "foo\n";
-    $x = varray[];
+    $x = vec[];
     if ($x) {
       print_r($x);
     } else {

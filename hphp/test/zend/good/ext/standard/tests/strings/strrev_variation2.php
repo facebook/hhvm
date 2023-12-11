@@ -9,7 +9,7 @@
 echo "*** Testing strrev() : with various single quoted strings ***\n";
 $str = 'Hiiii';
 
-$strings = varray[
+$strings = vec[
   //strings containing escape chars
   'hello\\world',
   'hello\$world',

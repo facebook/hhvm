@@ -1,7 +1,7 @@
 <?hh
 function doThrow() :mixed{ throw new Exception("blah!"); }
 function foo() :mixed{
-  foreach (varray[1, 2, 3] as $_) {
+  foreach (vec[1, 2, 3] as $_) {
     doThrow();
   }
   try { echo "Hi\n"; } catch (Exception $ex) { echo "We should not reach here\n"; }

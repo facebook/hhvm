@@ -32,8 +32,8 @@ function bar($i) :mixed{
     $v7 = 1.1;
     $v8 = "false";
     $v9 = new C();
-    $v10 = varray[];
-    $v11 = varray[1];
+    $v10 = vec[];
+    $v11 = vec[1];
 
     $empty_col_1 = Set {};
     $empty_col_2 = Map {};
@@ -83,7 +83,7 @@ function main_entry(): void {
   var_dump(foo(1));
   var_dump(foo(1.1));
   var_dump(foo("true"));
-  var_dump(foo(varray[123]));
+  var_dump(foo(vec[123]));
 
   bar(1);
 }

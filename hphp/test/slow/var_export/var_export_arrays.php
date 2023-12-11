@@ -4,17 +4,17 @@
 <<__EntryPoint>>
 function main_var_export_arrays() :mixed{
 echo("** array **\n");
-var_export(varray[]);
+var_export(vec[]);
 echo("\n\n");
-var_export(varray['foo']);
+var_export(vec['foo']);
 echo("\n\n");
-var_export(varray['foo', 'bar']);
+var_export(vec['foo', 'bar']);
 echo("\n\n");
-var_export(darray['foo' => 'fooval']);
+var_export(dict['foo' => 'fooval']);
 echo("\n\n");
-var_export(darray['foo' => 'fooval', 'bar' => 'barval']);
+var_export(dict['foo' => 'fooval', 'bar' => 'barval']);
 echo("\n\n");
-var_export(darray['4' => 'zuckval', '4bar' => 'barval']);
+var_export(dict['4' => 'zuckval', '4bar' => 'barval']);
 echo("\n\n");
 
 echo("** vec **\n");

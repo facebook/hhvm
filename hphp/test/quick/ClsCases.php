@@ -19,7 +19,7 @@ $foo = new MyClass();
 $foo::$x = 1;
 
 // ClsH
-$refs = varray[];
+$refs = vec[];
 $refs[] = clsFact();
 $refs[] = 'MyClass';
 $s = 'MyClass';

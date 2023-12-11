@@ -8,19 +8,19 @@ class Stringable {
 
 <<__EntryPoint>> function main(): void {
 require 'fix_exceptions.inc'; fix_exceptions();
-$errnames = darray[
+$errnames = dict[
     E_NOTICE => 'E_NOTICE',
     E_WARNING => 'E_WARNING',
 ];
 
-$functions = darray[
+$functions = dict[
     'int' => function (int $i) { return $i; },
     'float' => function (float $f) { return $f; },
     'string' => function (string $s) { return $s; },
     'bool' => function (bool $b) { return $b; }
 ];
 
-$values = varray[
+$values = vec[
     1,
     "1",
     1.0,
@@ -33,7 +33,7 @@ $values = varray[
     TRUE,
     FALSE,
     NULL,
-    varray[],
+    vec[],
     new stdClass,
     new Stringable,
     fopen("data:text/plain,foobar", "r")

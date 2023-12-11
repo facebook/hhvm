@@ -29,72 +29,72 @@ function main() :mixed{
 }
 
 function setop_main() :mixed{
-  $a = varray[zero()];
+  $a = vec[zero()];
   $a[0] = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a[0]);
   $a[0] += HH\Lib\Legacy_FIXME\cast_for_arithmetic(foo());
   var_dump($a[0]);
-  $a = varray[zero()];
+  $a = vec[zero()];
   $a[0] = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a[0]);
   $a[0] -= HH\Lib\Legacy_FIXME\cast_for_arithmetic(foo());
   var_dump($a[0]);
-  $a = varray[zero()];
+  $a = vec[zero()];
   $a[0] = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a[0]);
   $a[0] /= HH\Lib\Legacy_FIXME\cast_for_arithmetic(foo());
   var_dump($a[0]);
-  $a = varray[zero()];
+  $a = vec[zero()];
   $a[0] = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a[0]);
   $a[0] *= HH\Lib\Legacy_FIXME\cast_for_arithmetic(foo());
   var_dump($a[0]);
 
-  $a = varray[foo()];
+  $a = vec[foo()];
   $a[0] = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a[0]);
   $a[0] += HH\Lib\Legacy_FIXME\cast_for_arithmetic(zero());
   var_dump($a[0]);
-  $a = varray[foo()];
+  $a = vec[foo()];
   $a[0] = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a[0]);
   $a[0] -= HH\Lib\Legacy_FIXME\cast_for_arithmetic(zero());
   var_dump($a[0]);
-  $a = varray[foo()];
+  $a = vec[foo()];
   try {
     $a[0] = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a[0]);
     $a[0] /= HH\Lib\Legacy_FIXME\cast_for_arithmetic(zero());
     var_dump($a[0]);
   } catch (DivisionByZeroException $e) {}
-  $a = varray[foo()];
+  $a = vec[foo()];
   $a[0] = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a[0]);
   $a[0] *= HH\Lib\Legacy_FIXME\cast_for_arithmetic(zero());
   var_dump($a[0]);
 
-  $a = varray[twelve()];
+  $a = vec[twelve()];
   $a[0] = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a[0]);
   $a[0] += HH\Lib\Legacy_FIXME\cast_for_arithmetic(foo());
   var_dump($a[0]);
-  $a = varray[twelve()];
+  $a = vec[twelve()];
   $a[0] = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a[0]);
   $a[0] -= HH\Lib\Legacy_FIXME\cast_for_arithmetic(foo());
   var_dump($a[0]);
-  $a = varray[twelve()];
+  $a = vec[twelve()];
   $a[0] = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a[0]);
   $a[0] /= HH\Lib\Legacy_FIXME\cast_for_arithmetic(foo());
   var_dump($a[0]);
-  $a = varray[twelve()];
+  $a = vec[twelve()];
   $a[0] = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a[0]);
   $a[0] *= HH\Lib\Legacy_FIXME\cast_for_arithmetic(foo());
   var_dump($a[0]);
 
-  $a = varray[foo()];
+  $a = vec[foo()];
   $a[0] = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a[0]);
   $a[0] += HH\Lib\Legacy_FIXME\cast_for_arithmetic(twelve());
   var_dump($a[0]);
-  $a = varray[foo()];
+  $a = vec[foo()];
   $a[0] = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a[0]);
   $a[0] -= HH\Lib\Legacy_FIXME\cast_for_arithmetic(twelve());
   var_dump($a[0]);
-  $a = varray[foo()];
+  $a = vec[foo()];
   $a[0] = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a[0]);
   $a[0] /= HH\Lib\Legacy_FIXME\cast_for_arithmetic(twelve());
   var_dump($a[0]);
-  $a = varray[foo()];
+  $a = vec[foo()];
   $a[0] = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a[0]);
   $a[0] *= HH\Lib\Legacy_FIXME\cast_for_arithmetic(twelve());
   var_dump($a[0]);

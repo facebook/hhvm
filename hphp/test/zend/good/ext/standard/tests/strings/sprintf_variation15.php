@@ -28,7 +28,7 @@ NULL
 EOT;
 
 // array of strings used to test the function
-$string_values = varray[
+$string_values = vec[
   "",
   " ",
   '',
@@ -54,7 +54,7 @@ $string_values = varray[
 ];
 
 // array of string formats
-$string_formats = varray[ 
+$string_formats = vec[ 
   "%s", "%hs", "%ls",
   "%Ls"," %s", "%s ",
   "\t%s", "\n%s", "%4s",

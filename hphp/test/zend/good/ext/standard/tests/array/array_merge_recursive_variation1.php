@@ -73,7 +73,7 @@ $arrays = varray [
 ];
 
 // initialise the second argument
-$arr2 = varray[1, varray["hello", 'world']];
+$arr2 = vec[1, vec["hello", 'world']];
 
 // loop through each element of $arrays and check the behavior of array_merge_recursive()
 $iterator = 1;

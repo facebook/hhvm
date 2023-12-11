@@ -7,7 +7,7 @@ $iterator = new FilesystemIterator(
   $sample_dir,
   FilesystemIterator::CURRENT_AS_PATHNAME
 );
-$ret = varray[];
+$ret = vec[];
 foreach ($iterator as $fileinfo) {
   $ret[] = $iterator->current();
 }

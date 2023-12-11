@@ -23,7 +23,7 @@ function main(): void {
     null,
     HH\stdin(),
     "string",
-    varray[42],
+    vec[42],
     dict['foobar' => false],
   ];
   foreach($vals as $i) {

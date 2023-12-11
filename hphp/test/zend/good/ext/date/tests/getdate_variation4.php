@@ -11,7 +11,7 @@ echo "*** Testing getdate() : usage variation ***\n";
 date_default_timezone_set("Asia/Calcutta");
 
 //array of values to iterate over
-$inputs = darray[
+$inputs = dict[
 
     //Year wise time stamps
     '01 Jan 1970' => 0,

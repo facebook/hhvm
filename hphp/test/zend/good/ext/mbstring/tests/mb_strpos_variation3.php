@@ -33,7 +33,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $offest argument
-$inputs = varray[
+$inputs = vec[
 
        // int data
 /*1*/  0,

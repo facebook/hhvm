@@ -53,13 +53,13 @@ enum ComplexUnionEnum: int {
   stringValue = 2;
 }
 class ComplexUnion {
-  const AnyArray SPEC = darray[
-    1 => darray[
+  const AnyArray SPEC = dict[
+    1 => dict[
       'var' => 'intValue',
       'union' => true,
       'type' => TType::I64,
       ],
-    2 => darray[
+    2 => dict[
       'var' => 'stringValue',
       'union' => true,
       'type' => TType::STRING,

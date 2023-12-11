@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : hexa formats with integer values ***\n";
 
 // array of integer values
-$integer_values = varray[
+$integer_values = vec[
   0,
   1,
   -1,
@@ -29,7 +29,7 @@ $integer_values = varray[
 ];
 
 // array of hexa formats
-$hexa_formats = varray[
+$hexa_formats = vec[
   "%x", "%xx", "%lx",
   "%Lx", " %x", "%x ",
   "\t%x", "\n%x", "%4x",

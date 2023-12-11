@@ -22,7 +22,7 @@ $toFile = "IwasRenamed.tmp";
 $old_dir_path = getcwd();
 chdir(sys_get_temp_dir());
 
-$allDirs = varray[
+$allDirs = vec[
   // absolute paths
   "$absSubDir/",
   "$absSubDir/../".$subDir,

@@ -1,7 +1,7 @@
 <?hh
 
 class RootClass {
-  public darray<string, mixed> $children = darray[];
+  public darray<string, mixed> $children = dict[];
   <<__Memoize>>
   public static function getInstance() :mixed{
     return new RootClass();
@@ -21,7 +21,7 @@ class ParentWithClosureTarget {
   public $child;
 
   public function __construct() {
-    $this->somestring = json_encode(varray[1,2,3]);
+    $this->somestring = json_encode(vec[1,2,3]);
     $this->child = new ChildWithClosureMember();
     $this->child->closure = $this->createClosure();
   }
@@ -49,7 +49,7 @@ function echo_flush() :mixed{
   foreach ($echobuf_uniq as $str) {
     echo $str;
   }
-  DvArrayHackArrExtHeapgraphPhp::$echobuf = varray[];
+  DvArrayHackArrExtHeapgraphPhp::$echobuf = vec[];
 }
 function showTestClasses($node) :mixed{
 
@@ -57,7 +57,7 @@ function showTestClasses($node) :mixed{
 
   $classname = idx($node, 'class', 'no class...');
   $kind = $node['kind'];
-  $testclasses = darray[
+  $testclasses = dict[
     ChildWithClosureMember::class => 1,
     ParentWithClosureTarget::class => 1,
     RootClass::class => 1,
@@ -99,7 +99,7 @@ function edgeName($hg, $edge) :mixed{
 
 function showTestEdge($edge) :mixed{
 
-  $testedges = darray[
+  $testedges = dict[
     'ArrayKey:MemoizedSingleton' => 1,
     'Property:somestring' => 1,
     'Property:child' => 1,
@@ -182,12 +182,12 @@ function entrypoint_ext_heapgraph(): void {
   // We do some consolidation here because the behavior when testing
   // is really non-deterministic. Both on order of scans and also
   // whether things are in CPP or PHP (based on mode of test)
-  DvArrayHackArrExtHeapgraphPhp::$echobuf = varray[];
+  DvArrayHackArrExtHeapgraphPhp::$echobuf = vec[];
 
   DvArrayHackArrExtHeapgraphPhp::$hg_for_closure = null;
   DvArrayHackArrExtHeapgraphPhp::$id_of_rootclass = null;
 
-  DvArrayHackArrExtHeapgraphPhp::$visited = darray[];
+  DvArrayHackArrExtHeapgraphPhp::$visited = dict[];
 
   ////////////////////////////////////////////////////
   // Test starts here:
@@ -247,12 +247,12 @@ function entrypoint_ext_heapgraph(): void {
 
   // DFS NODES
   echo "\nDoing DFS from root class on nodes:\n";
-  heapgraph_dfs_nodes($hg, varray[DvArrayHackArrExtHeapgraphPhp::$id_of_rootclass], varray[], showClassOnly<>);
+  heapgraph_dfs_nodes($hg, vec[DvArrayHackArrExtHeapgraphPhp::$id_of_rootclass], vec[], showClassOnly<>);
   echo_flush();
 
   echo "\nDoing DFS from root class on nodes (skipping root):\n";
   heapgraph_dfs_nodes(
-    $hg, varray[DvArrayHackArrExtHeapgraphPhp::$id_of_rootclass], varray[DvArrayHackArrExtHeapgraphPhp::$id_of_rootclass], showClass<>
+    $hg, vec[DvArrayHackArrExtHeapgraphPhp::$id_of_rootclass], vec[DvArrayHackArrExtHeapgraphPhp::$id_of_rootclass], showClass<>
   );
   echo_flush();
 

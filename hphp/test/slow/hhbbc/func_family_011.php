@@ -8,7 +8,7 @@ abstract class Unimpl {
   }
 
   static function doweirdthings() :mixed{
-    $k = varray[];
+    $k = vec[];
     return static::aa($k);
   }
 }

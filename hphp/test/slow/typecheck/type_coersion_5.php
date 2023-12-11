@@ -8,7 +8,7 @@ function errHandler($errno, $errmsg, $file, $line) :mixed{
 
 function check($kind, $builtin_fn, $user_fn) :mixed{
   echo "\n$kind\n";
-  foreach (varray[True, 1, 3.14, "abc", varray[1, 2, 3], null] as $k => $v) {
+  foreach (vec[True, 1, 3.14, "abc", vec[1, 2, 3], null] as $k => $v) {
     printf("Builtin:\n");
     try { $builtin_fn($v); } catch (Exception $e) { echo 'WARNING: '.$e->getMessage()."\n"; }
     printf("User:\n");

@@ -82,8 +82,8 @@ function test_functionality() :mixed{
   f2(null);
 
   echo '********** array **********', "\n";
-  f1(varray[1, 2, 3]);
-  f2(varray[1, 2, 3]);
+  f1(vec[1, 2, 3]);
+  f2(vec[1, 2, 3]);
 
   echo '********** number **********', "\n";
   f1(10);

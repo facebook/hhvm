@@ -6,7 +6,7 @@ class X {
 <<__EntryPoint>>
 function main_1549() :mixed{
 $a = new X;
-$q = varray[1,2,3];
+$q = vec[1,2,3];
 $a->foo = $q;
 for ($i = 0;
  $i < 10;

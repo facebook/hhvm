@@ -1,11 +1,11 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 require(__DIR__ . '/common.inc');
-$breakpoints = varray[
-  darray[
+$breakpoints = vec[
+  dict[
     "path" => __FILE__ . ".test",
-      "breakpoints" => varray[
-        darray["line" => 4, "calibratedLine" => 4, "condition" => ""],
+      "breakpoints" => vec[
+        dict["line" => 4, "calibratedLine" => 4, "condition" => ""],
     ]
   ]
 ];
@@ -39,11 +39,11 @@ checkForOutput($testProcess, "foo\n", "stdout");
 
 verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0], 3);
 // Set breakpoints after await in foo
-$breakpoints = varray[
-  darray[
+$breakpoints = vec[
+  dict[
     "path" => __FILE__ . ".test",
-      "breakpoints" => varray[
-        darray["line" => 5, "calibratedLine" => 5, "condition" => ""],
+      "breakpoints" => vec[
+        dict["line" => 5, "calibratedLine" => 5, "condition" => ""],
     ]
   ]
 ];
@@ -59,11 +59,11 @@ resumeTarget();
 checkForOutput($testProcess, "bar\n", "stdout");
 verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0], 2);
 // Set breakpoints after call to foo
-$breakpoints = varray[
-  darray[
+$breakpoints = vec[
+  dict[
     "path" => __FILE__ . ".test",
-      "breakpoints" => varray[
-        darray["line" => 38, "calibratedLine" => 38, "condition" => ""],
+      "breakpoints" => vec[
+        dict["line" => 38, "calibratedLine" => 38, "condition" => ""],
     ]
   ]
 ];

@@ -5,7 +5,7 @@ function test_case(string $serialized): void {
   printf("=== %s ===\n", $serialized);
   $unserialized = unserialize(
     $serialized,
-    darray['mark_legacy_arrays' => true],
+    dict['mark_legacy_arrays' => true],
   );
   printf("%s\n", HH\is_array_marked_legacy($unserialized) ? 'true' : 'false');
   var_dump($unserialized);

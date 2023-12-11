@@ -6,9 +6,9 @@ function do_add($a, $b) :mixed{
 }
 
 function main() :mixed{
-  do_add(darray[], darray[]);
-  do_add(darray(vec[1, 2, 3]), darray[]);
-  do_add(darray[], darray(vec[1, 2, 3]));
+  do_add(dict[], dict[]);
+  do_add(darray(vec[1, 2, 3]), dict[]);
+  do_add(dict[], darray(vec[1, 2, 3]));
   do_add(darray(vec[1, 2, 3]), darray(vec[4, 5, 6]));
 }
 

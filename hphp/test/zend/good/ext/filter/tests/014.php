@@ -12,7 +12,7 @@ $t = new test;
 var_dump(filter_var("no", FILTER_VALIDATE_BOOLEAN));
 var_dump(filter_var(NULL, FILTER_VALIDATE_BOOLEAN));
 var_dump(filter_var($t, FILTER_VALIDATE_BOOLEAN));
-var_dump(filter_var(varray[1,2,3,0,varray["", "123"]], FILTER_VALIDATE_BOOLEAN, FILTER_REQUIRE_ARRAY));
+var_dump(filter_var(vec[1,2,3,0,vec["", "123"]], FILTER_VALIDATE_BOOLEAN, FILTER_REQUIRE_ARRAY));
 var_dump(filter_var("yes", FILTER_VALIDATE_BOOLEAN));
 var_dump(filter_var("true", FILTER_VALIDATE_BOOLEAN));
 var_dump(filter_var("false", FILTER_VALIDATE_BOOLEAN));

@@ -11,10 +11,10 @@ class X {
 }
 
 function go() :mixed{
-  var_dump((new X(varray[new stdClass]))->thing());
-  var_dump((new X(varray[new stdClass]))->thing());
-  var_dump((new X(varray[new stdClass]))->thing());
-  var_dump((new X(varray[new stdClass]))->thing());
+  var_dump((new X(vec[new stdClass]))->thing());
+  var_dump((new X(vec[new stdClass]))->thing());
+  var_dump((new X(vec[new stdClass]))->thing());
+  var_dump((new X(vec[new stdClass]))->thing());
   var_dump((new X("yoyoyo"))->thing());
 }
 

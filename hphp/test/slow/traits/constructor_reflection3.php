@@ -10,7 +10,7 @@ class A {
 }
 
 function main() :mixed{
-  foreach (varray['A', 'B'] as $class) {
+  foreach (vec['A', 'B'] as $class) {
     $rc = new ReflectionClass($class);
     foreach ($rc->getMethods() as $method) {
       var_dump($method->isConstructor());

@@ -31,8 +31,8 @@ function chwrap($x) :mixed{
 }
 
 function choose($a) :mixed{
-  $arr = varray['banana', $a, 'apple'];
-  $dict = darray[
+  $arr = vec['banana', $a, 'apple'];
+  $dict = dict[
     'banana' => 'banana',
     $a => $a,
     'apple' => 'apple',
@@ -51,8 +51,8 @@ function choose($a) :mixed{
 }
 
 function quux($b, $a) :mixed{
-  $arr = varray[$b, 'banana', $a, 'apple'];
-  $dict = darray[
+  $arr = vec[$b, 'banana', $a, 'apple'];
+  $dict = dict[
     $b => $b,
     'banana' => 'banana',
     $a => $a,

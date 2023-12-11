@@ -19,7 +19,7 @@ class B extends A {
     public function func($str) :mixed{
           self::func2($str);
           self::func3($str);
-          call_user_func_array(varray[$this, 'self::inexistent'], varray[$str]);
+          call_user_func_array(vec[$this, 'self::inexistent'], vec[$str]);
     }
     private function func2($str) :mixed{
         var_dump(__METHOD__ .': '. $str);

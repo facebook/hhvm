@@ -1,7 +1,7 @@
 <?hh
 
 class X {
-  public static $y = varray[];
+  public static $y = vec[];
 
   static function z() :mixed{
     self::$y[] = 2;

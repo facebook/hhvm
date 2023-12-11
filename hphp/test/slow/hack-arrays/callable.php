@@ -15,8 +15,8 @@ function make_tests($tests, $c1, $c2) :mixed{
   if ($c2) $tests[] = vec[call1<>, $c2, count($tests)+1];
   if ($c1) $tests[] = vec[call2<>, $c1, count($tests)+1];
   if ($c2) $tests[] = vec[call2<>, $c2, count($tests)+1];
-  if ($c1) $tests[] = vec[call3<>, $c1, varray[count($tests)+1]];
-  if ($c2) $tests[] = vec[call3<>, $c2, varray[count($tests)+1]];
+  if ($c1) $tests[] = vec[call3<>, $c1, vec[count($tests)+1]];
+  if ($c2) $tests[] = vec[call3<>, $c2, vec[count($tests)+1]];
   return $tests;
 }
 

@@ -1,7 +1,7 @@
 <?hh
 
 function tokenize($str, $token) :mixed{
-    $tokenizedStrArr = varray[];
+    $tokenizedStrArr = vec[];
     $tokStr = strtok($str, $token);
 
     while($tokStr !== false) {

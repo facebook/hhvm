@@ -13,7 +13,7 @@ class B {
 function main_430() :mixed{
 ;
 ;
-$attr=darray[];
+$attr=dict[];
 $attr[A::i1]='abc';
 $attr[A::i2]='def';
 $attr[-3]='ghi';

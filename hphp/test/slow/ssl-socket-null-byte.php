@@ -5,10 +5,10 @@
 function main_ssl_socket_null_byte() :mixed{
 $file = '/etc/passwd'.chr(0).'asdf';
 
-$opt_choices = varray[
-  darray['ssl' => darray['cafile' => $file]],
-  darray['ssl' => darray['capath' => $file]],
-  darray['ssl' => darray['local_cert' => $file]],
+$opt_choices = vec[
+  dict['ssl' => dict['cafile' => $file]],
+  dict['ssl' => dict['capath' => $file]],
+  dict['ssl' => dict['local_cert' => $file]],
 ];
 
 $errno = null;

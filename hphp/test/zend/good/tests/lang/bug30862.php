@@ -1,13 +1,13 @@
 <?hh
 
 class T {
-    public static $a = darray[0=>"false", 1=>"true"];
+    public static $a = dict[0=>"false", 1=>"true"];
 }
 
 const X = 0;
 const Y = 1;
 class T2 {
-    public static $a = darray[X=>"false", Y=>"true"];
+    public static $a = dict[X=>"false", Y=>"true"];
 }
 
 <<__EntryPoint>> function main(): void {

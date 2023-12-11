@@ -3,7 +3,7 @@ function test() :mixed{
     return new SoapFault("MyFault","My fault string");
 }
 <<__EntryPoint>> function main(): void {
-$server = new SoapServer(null,darray['uri'=>"http://testuri.org"]);
+$server = new SoapServer(null,dict['uri'=>"http://testuri.org"]);
 $server->addFunction("test");
 
 $HTTP_RAW_POST_DATA = <<<EOF

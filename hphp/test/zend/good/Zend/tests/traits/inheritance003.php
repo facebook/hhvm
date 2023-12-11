@@ -26,8 +26,8 @@ function entrypoint_inheritance003(): void {
   error_reporting(E_ALL);
 
   $s = new SubClass();
-  $s->sayHello(varray[]);
+  $s->sayHello(vec[]);
 
   $o = new MyHelloWorld();
-  $o->sayHello(varray[]);
+  $o->sayHello(vec[]);
 }

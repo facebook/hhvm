@@ -1,7 +1,7 @@
 <?hh
 
 function test($x, $y) :mixed{
-$a = varray[$x, $y];
+$a = vec[$x, $y];
 $a[] = 3;
 return $a;
 }

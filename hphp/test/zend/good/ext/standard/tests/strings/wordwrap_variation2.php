@@ -28,11 +28,11 @@ $values =  varray [
   -10,
 
   // array values
-  varray[],
-  varray[0],
-  varray[1],
-  varray[1, 2],
-  darray['color' => 'red', 'item' => 'pen'],
+  vec[],
+  vec[0],
+  vec[1],
+  vec[1, 2],
+  dict['color' => 'red', 'item' => 'pen'],
 
   // boolean values
   true,

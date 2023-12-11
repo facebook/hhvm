@@ -92,7 +92,7 @@ function test_is_vec($val) :mixed{
 }
 
 <<__EntryPoint>> function main(): void {
-  $interfaces = varray[
+  $interfaces = vec[
     "HH\\Traversable",
     "HH\\KeyedTraversable",
     "HH\\Container",
@@ -112,7 +112,7 @@ function test_is_vec($val) :mixed{
   test_is_vec(1.23);
   test_is_vec("abcd");
   test_is_vec(new stdClass);
-  test_is_vec(varray[1, 2, 3]);
+  test_is_vec(vec[1, 2, 3]);
   test_is_vec(Vector{'a', 'b', 'c'});
   test_is_vec(Map{100 => 'a', 'b' => 200});
   test_is_vec(Pair{123, 'abc'});

@@ -11,7 +11,7 @@
 echo "*** Testing strtok() : with embedded nulls in the strings ***\n";
 
 // defining varous strings with embedded nulls
-$strings_with_nulls = varray[
+$strings_with_nulls = vec[
                     "\0",
                     '\0',
                            "hello\0world",

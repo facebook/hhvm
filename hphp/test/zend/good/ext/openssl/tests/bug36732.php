@@ -1,11 +1,11 @@
 <?hh <<__EntryPoint>> function main(): void {
-$configargs = darray[
+$configargs = dict[
         "req_extensions" => "v3_req",
         "x509_extensions" => "usr_cert",
         "config" => __DIR__."/openssl.cnf",
 ];
 
-$dn = darray[
+$dn = dict[
         "countryName" => "GB",
         "stateOrProvinceName" => "Berkshire",
         "localityName" => "Newbury",

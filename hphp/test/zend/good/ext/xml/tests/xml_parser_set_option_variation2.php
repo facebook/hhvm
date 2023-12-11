@@ -20,7 +20,7 @@ function entrypoint_xml_parser_set_option_variation2(): void {
 
 
   //array of values to iterate over
-  $values = varray[
+  $values = vec[
 
         // outside of range int data
         12345,

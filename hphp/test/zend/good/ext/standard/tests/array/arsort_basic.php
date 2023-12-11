@@ -17,13 +17,13 @@
 echo "*** Testing arsort() : basic functionality ***\n";
 
 // an array containing unsorted string values with indices
-$unsorted_strings = darray[
+$unsorted_strings = dict[
     "l" => "lemon", "o" => "orange",
     "O" => "Orange", "O1" => "Orange1", "o2" => "orange2", "O3" => "Orange3", "o20" => "orange20",
     "b" => "banana",
 ];
 // an array containing unsorted numeric values with indices
-$unsorted_numerics =  darray[ 1 => 100, 2 => 33, 3 => 555, 4 => 22 ];
+$unsorted_numerics =  dict[ 1 => 100, 2 => 33, 3 => 555, 4 => 22 ];
 
 echo "\n-- Testing arsort() by supplying string array, 'flag' value is default --\n";
 $temp_array = $unsorted_strings;

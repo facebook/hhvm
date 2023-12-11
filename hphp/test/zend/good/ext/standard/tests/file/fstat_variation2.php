@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$variation_array = darray[
+$variation_array = dict[
   'lowercase true' => true,
   'lowercase false' =>false,
   'uppercase TRUE' =>TRUE,

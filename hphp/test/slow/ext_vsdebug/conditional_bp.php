@@ -1,15 +1,15 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 require(__DIR__ . '/common.inc');
-$breakpoints = varray[
-   darray[
+$breakpoints = vec[
+   dict[
      "path" => __FILE__ . ".test",
-     "breakpoints" => varray[
-       darray["line" => 4, "calibratedLine" => 4, "condition" => "\$a == 2"],
-       darray["line" => 5, "calibratedLine" => 5, "condition" => "\$a == 1"],
-       darray["line" => 6, "calibratedLine" => 6, "condition" =>
+     "breakpoints" => vec[
+       dict["line" => 4, "calibratedLine" => 4, "condition" => "\$a == 2"],
+       dict["line" => 5, "calibratedLine" => 5, "condition" => "\$a == 1"],
+       dict["line" => 6, "calibratedLine" => 6, "condition" =>
             "436fsl2$#^%l324;;'"],
-       darray["line" => 7, "calibratedLine" => 7, "condition" => "\"STRING\""],
+       dict["line" => 7, "calibratedLine" => 7, "condition" => "\"STRING\""],
      ]]
    ];
 
@@ -25,10 +25,10 @@ resumeTarget();
 
 // Breakpoint 3 should hit and generate a warning: condition is invalid php
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "event",
   "event" => "output",
-  "body" => darray[
+  "body" => dict[
       "category" => "stdout"
   ]]);
 $expectedOutput = "Hit fatal : A semicolon `;` is expected here.";
@@ -40,10 +40,10 @@ if ($result !== $expectedOutput) {
 // Ignore the rest of the stack trace.
 $msg = json_decode(getNextVsDebugMessage(), true);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "event",
   "event" => "output",
-  "body" => darray[
+  "body" => dict[
       "category" => "console"
   ]]);
 
@@ -52,10 +52,10 @@ resumeTarget();
 
 // Breakpoint 4 should hit and generate a warning: returned non bool
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "event",
   "event" => "output",
-  "body" => darray[
+  "body" => dict[
       "category" => "console"
   ]]);
 

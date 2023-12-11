@@ -2,7 +2,7 @@
 
 function foobar() :mixed{
     echo "called\n";
-    return varray['a'];
+    return vec['a'];
 }
 function f($x)
 :mixed{
@@ -18,12 +18,12 @@ function main_entry(): void {
   $obj = new stdClass;
   $obj->boo = 7;
 
-  $arr = darray[
+  $arr = dict[
       2 => 7,
       "foo" => "bar",
       "foobar" => NULL,
       "qux" => $obj,
-      "bing" => varray[
+      "bing" => vec[
           "bang"
       ]
   ];

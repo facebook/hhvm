@@ -29,7 +29,7 @@ function main() :mixed{
   echo "ImmMap\n";
   show_keyed_iter(new ImmMap(new ImmMap(Map {0 => 1, 10 => 2, 40 => 3})));
   echo "array\n";
-  show_keyed_iter(new ImmMap(varray[1, 2, 3]));
+  show_keyed_iter(new ImmMap(vec[1, 2, 3]));
 
   // We can't construct a Map or ImmMap from a Set.
 }

@@ -24,7 +24,7 @@ function reflect($class_name) :mixed{
     echo get_class($e), ': ', $e->getMessage(), "\n";
   }
   try {
-    $c2 = $rc->newInstanceArgs(varray['a', 1, 2]);
+    $c2 = $rc->newInstanceArgs(vec['a', 1, 2]);
   } catch (Exception $e) {
     echo get_class($e), ': ', $e->getMessage(), "\n";
   }

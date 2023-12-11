@@ -11,7 +11,7 @@ class Item {
 class handlerClass {
     public function getItems()
 :mixed    {
-        return varray[
+        return vec[
                 new Item(0),
                 new Item(1),
                 new Item(2),

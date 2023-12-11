@@ -13,7 +13,7 @@ function get_local_region() :mixed{
 class c {
   public function __construct() {
     $local1 = new stdClass;
-    $local2 = varray[];
+    $local2 = vec[];
     get_local_region();
   }
 

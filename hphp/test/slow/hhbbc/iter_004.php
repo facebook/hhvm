@@ -1,6 +1,6 @@
 <?hh
 
-function asd() :mixed{ return varray[]; }
+function asd() :mixed{ return vec[]; }
 function foo() :mixed{
   $x = asd();
   foreach ($x as $k => $v) {

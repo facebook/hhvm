@@ -1,7 +1,7 @@
 <?hh
 
 function a() :mixed{
-  $input = darray[
+  $input = dict[
     "a" => "green",
     0 => "red",
     "b" => "green",
@@ -13,7 +13,7 @@ function a() :mixed{
 }
 
 function b() :mixed{
-  $input = varray[
+  $input = vec[
     4,
     "4",
     "3",
@@ -25,7 +25,7 @@ function b() :mixed{
 }
 
 function c() :mixed{
-  $input = darray[
+  $input = dict[
     "a" => "A",
     "b" => "C",
     0 => "1",
@@ -38,7 +38,7 @@ function c() :mixed{
 }
 
 function d() :mixed{
-  $input = darray[
+  $input = dict[
     'a' => 'A',
     'b' => 'C',
     0 => '1',

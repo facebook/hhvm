@@ -33,7 +33,7 @@ echo "\n-- Iteration 6 --\n";
 print "foo is $foo"; // foo is foobar
 
 // You can also use arrays
-$bar = darray["value" => "foo"];
+$bar = dict["value" => "foo"];
 
 echo "\n-- Iteration 7 --\n";
 print "this is {$bar['value']} !"; // this is foo !

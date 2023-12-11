@@ -1,7 +1,7 @@
 <?hh
 
 function f($a) :mixed{
- $a = varray[$a];
+ $a = vec[$a];
  var_dump($a);
  }
 

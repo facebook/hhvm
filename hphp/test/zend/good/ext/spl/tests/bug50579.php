@@ -2,7 +2,7 @@
 
 class foo extends ArrayIterator {
     public function __construct( ) {
-        parent::__construct(darray[
+        parent::__construct(dict[
         'test1'=>'test888',
         'test2'=>'what?',
         'test3'=>'test999']);

@@ -49,7 +49,7 @@ $quote_char_string = <<<EOT
 <html>this\line is single quoted /with\slashes </html>
 EOT;
 
-$res_heredoc_strings = varray[
+$res_heredoc_strings = vec[
   //heredoc strings
   $null_string,
   $blank_line,

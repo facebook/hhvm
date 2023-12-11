@@ -13,7 +13,7 @@ class B {
 class C extends B {
   public function g() :mixed{
     $obj = new B;
-    $f = (varray['B', 'f1']);
+    $f = (vec['B', 'f1']);
     $f();
   }
 }

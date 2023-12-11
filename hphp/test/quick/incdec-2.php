@@ -5,7 +5,7 @@ function test($a, $b) :mixed{
   var_dump($a,$b);
   }
 <<__EntryPoint>> function main(): void {
-$a = varray[];
+$a = vec[];
 $a[] = 1;
 test(false, $a);
 test(true, $a);

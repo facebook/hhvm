@@ -35,7 +35,7 @@ clearstatcache();
 sleep(1);
 touch($filename);
 $next_meta = stat($filename);
-$type = varray["dev", "ino", "mode", "nlink", "uid", "gid",
+$type = vec["dev", "ino", "mode", "nlink", "uid", "gid",
               "rdev", "size", "atime", "mtime", "ctime",
               "blksize", "blocks"];
 

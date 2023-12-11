@@ -14,7 +14,7 @@ function test_builtins($m) :mixed{
 <<__EntryPoint>>
 function main() :mixed{
   test_builtins(HH\meth_caller(A::class, "afunc"));
-  $carr = varray[A::class];
+  $carr = vec[A::class];
   $func_n = "afunc";
   foreach ($carr as $c) {
     $m = new __SystemLib\MethCallerHelper($c, $func_n);

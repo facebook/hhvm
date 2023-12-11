@@ -21,7 +21,7 @@ include('compare_function.inc');
 echo "*** Testing array_udiff() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$arr1 = varray[1, 2];
+$arr1 = vec[1, 2];
 
 $data_comp_func = compare_function<>;
 
@@ -36,7 +36,7 @@ $index_array = varray [1, 2, 3];
 $assoc_array = darray ['one' => 1, 'two' => 2];
 
 //array of values to iterate over
-$inputs = darray[
+$inputs = dict[
 
       // int data
       'int 0' => 0,

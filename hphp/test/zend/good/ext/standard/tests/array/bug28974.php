@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$a = $b = $c = varray[0,1,2,3,4,5];
+$a = $b = $c = vec[0,1,2,3,4,5];
 print_r($a);
 // this is ok:
 print_r(array_slice($a,2,2147483645));

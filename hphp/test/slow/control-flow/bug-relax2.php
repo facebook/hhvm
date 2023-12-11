@@ -1,7 +1,7 @@
 <?hh
 
 function foo($arr) :mixed{
-  $children = varray[];
+  $children = vec[];
   foreach ($arr as $child) {
     $children[] = $child;
   }
@@ -11,7 +11,7 @@ function foo($arr) :mixed{
 
 <<__EntryPoint>>
 function main_bug_relax2() :mixed{
-var_dump(foo(varray[]));
-var_dump(foo(varray[1]));
-var_dump(foo(varray[2]));
+var_dump(foo(vec[]));
+var_dump(foo(vec[1]));
+var_dump(foo(vec[2]));
 }

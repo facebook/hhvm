@@ -13,14 +13,14 @@
 echo "*** Testing array_pad() : Passing 2-d array to \$pad_value argument ***\n";
 
 // initialize the $input and $pad_size argument
-$input = varray[1, 2, 3];
+$input = vec[1, 2, 3];
 $pad_size = 5;
 
 // initialize $pad_value
 $pad_value = varray [
-  varray[1],
-  varray["hello", 'world'],
-  darray["one" => 1, 'two' => 2]
+  vec[1],
+  vec["hello", 'world'],
+  dict["one" => 1, 'two' => 2]
 ];
 
 var_dump( array_pad($input, $pad_size, $pad_value) );  // positive 'pad_value'

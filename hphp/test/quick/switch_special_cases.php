@@ -37,7 +37,7 @@ class c {}
 <<__EntryPoint>>
 function main() :mixed{
   $f = fopen("/dev/null", "w");
-  $things = varray[
+  $things = vec[
     null,
     true,
     false,
@@ -50,8 +50,8 @@ function main() :mixed{
     'blar',
     '',
     4,
-    varray[],
-    varray['foo', 'floo'],
+    vec[],
+    vec['foo', 'floo'],
     new stdClass(),
     new c(),
     $f

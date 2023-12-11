@@ -9,7 +9,7 @@ function bar($x) :mixed{
 }
 
 function main() :mixed{
-  $arr = varray[1, 'foo', varray[bar<>, 3], false];
+  $arr = vec[1, 'foo', vec[bar<>, 3], false];
   array_map(hello_my_name_is_mwang<>, $arr);
 }
 

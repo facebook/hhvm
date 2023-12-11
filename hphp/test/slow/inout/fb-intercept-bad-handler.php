@@ -16,7 +16,7 @@ function meep(inout $f, $g, inout $r) :mixed{
 
 function io_intercept($name, inout $obj_or_cls, $args) :mixed{
   var_dump($args);
-  $args = varray['red', 'green', 'blue'];
+  $args = vec['red', 'green', 'blue'];
   return shape('value' => null);
 }
 

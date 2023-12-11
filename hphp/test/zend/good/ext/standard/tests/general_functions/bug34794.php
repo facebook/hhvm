@@ -1,11 +1,11 @@
 <?hh <<__EntryPoint>> function main(): void {
 echo "Opening process 1\n";
 $pipes1 = null;
-$process1 = proc_open('/bin/cat', darray[0 => varray['pipe', 'r'], 1 =>varray['pipe', 'r']], inout $pipes1);
+$process1 = proc_open('/bin/cat', dict[0 => vec['pipe', 'r'], 1 =>vec['pipe', 'r']], inout $pipes1);
 
 echo "Opening process 2\n";
 $pipes2 = null;
-$process2 = proc_open('/bin/cat', darray[0 => varray['pipe', 'r'], 1 =>varray['pipe', 'r']], inout $pipes2);
+$process2 = proc_open('/bin/cat', dict[0 => vec['pipe', 'r'], 1 =>vec['pipe', 'r']], inout $pipes2);
 
 
 echo "Closing process 1\n";

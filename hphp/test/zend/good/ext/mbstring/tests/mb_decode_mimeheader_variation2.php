@@ -10,7 +10,7 @@ mb_internal_encoding('utf-8');
 
 //all the following are identical, we will convert to utf-8
 
-$encoded_words = varray[
+$encoded_words = vec[
 "=?Shift_JIS?B?k/qWe4zqg2WDTINYg2eCxYK3gUIwMTIzNIJUglWCVoJXgliBQg==?=",
 "=?Shift_JIS?Q?=93=FA=96=7B=8C=EA=83e=83L=83X=83g=82=C5=82=B7=81B=30=31=32?=
 =?Shift_JIS?Q?=33=34=82T=82U=82V=82W=82X=81B?=",

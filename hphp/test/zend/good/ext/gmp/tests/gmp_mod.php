@@ -7,7 +7,7 @@ var_dump(gmp_mod(0,1));
 var_dump(gmp_mod(0,-1));
 var_dump(gmp_mod(-1,0));
 
-var_dump(gmp_mod(varray[], varray[]));
+var_dump(gmp_mod(vec[], vec[]));
 
 $a = gmp_init("-100000000");
 $b = gmp_init("353467");

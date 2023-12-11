@@ -5,7 +5,7 @@
 
 function get_instances(string $cls, ?darray $objs) :mixed{
   if (!$objs) return 0;
-  return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]), "instances", 0);
+  return hphp_array_idx(hphp_array_idx($objs, $cls, vec[]), "instances", 0);
 }
 function get_bytes_eq(string $cls, ?darray $objs) :mixed{
   if (!$objs) return 0;
@@ -18,11 +18,11 @@ function get_bytes_eq(string $cls, ?darray $objs) :mixed{
 }
 function get_bytes(string $cls, ?darray $objs) :mixed{
   if (!$objs) return 0;
-  return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]), "bytes", 0);
+  return hphp_array_idx(hphp_array_idx($objs, $cls, vec[]), "bytes", 0);
 }
 function get_bytesd(string $cls, ?darray $objs) :mixed{
   if (!$objs) return 0;
-  return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]),
+  return hphp_array_idx(hphp_array_idx($objs, $cls, vec[]),
     "bytes_normalized", 0);
 }
 function getStr(int $len): string {
@@ -47,14 +47,14 @@ class SimpleProps { // 48:48
 
 // TEST: sizes of arrays
 class SimpleArrays {
-  public varray $arrEmpty = varray[]; // 16 (tv)
-  public darray $arrMixed = darray[ // 16 (tv)
+  public varray $arrEmpty = vec[]; // 16 (tv)
+  public darray $arrMixed = dict[ // 16 (tv)
     "somekey" => "someval",
     321 => 3,
   ];
-  public varray<int> $arrNums = varray[];
+  public varray<int> $arrNums = vec[];
   function __construct() {
-    $this->arrNums = varray[
+    $this->arrNums = vec[
       2012, // 16:16
       2013, // 16:16
       rand(1,2) // 16:16

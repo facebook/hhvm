@@ -3,6 +3,6 @@
 $delimiter = "|";
 
 echo "delimiter: $delimiter\n";
-implode($delimiter, varray["foo", "bar"]);
+implode($delimiter, vec["foo", "bar"]);
 echo "delimiter: $delimiter\n";
 }

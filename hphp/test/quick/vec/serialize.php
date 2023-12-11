@@ -4,7 +4,7 @@
 class NoisyClass {
   function __sleep() :mixed{
     echo "NoisyClass::__sleep()\n";
-    return varray[];
+    return vec[];
   }
   function __wakeup() :mixed{
     echo "NoisyClass::__wakeup()\n";
@@ -62,7 +62,7 @@ function try_unserialize($val) :mixed{
   roundtrip(vec[123, "123"]);
   roundtrip(vec[new stdClass(), true, false, 1.23, null]);
   roundtrip(vec[vec[], vec[100, 200], vec["key1", "key2", "key3"]]);
-  roundtrip(vec[varray[], varray[111, 222],
+  roundtrip(vec[vec[], vec[111, 222],
                 dict['a' => 50, 'b' => 60, 'c' => 70],
                 keyset["abc", 123, "def", 456]]);
   roundtrip(vec[new NoisyClass]);

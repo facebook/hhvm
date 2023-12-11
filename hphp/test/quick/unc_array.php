@@ -7,6 +7,6 @@ class Foo {
 function what($k) :mixed{}
 
 <<__EntryPoint>> function a(): void {
-  $x = Foo::blah() ? varray[1,2,3] : null;
+  $x = Foo::blah() ? vec[1,2,3] : null;
   what($x);
 }

@@ -4,7 +4,7 @@
   chdir(__DIR__);
   require('./common.inc');
   $path = __FILE__ . ".test";
-  $testProcess = vsDebugLaunch($path, true, varray[]);
+  $testProcess = vsDebugLaunch($path, true, vec[]);
 
   send_eval('$a = 76;') |> expect_int($$, '76');
 
@@ -18,16 +18,16 @@
   send_eval('$l2 = function () use ($a) { return $a; };') |> expect_success($$);
 
   // This one requires frame id to be null, so leave it old style
-  $seq = sendVsCommand(darray[
+  $seq = sendVsCommand(dict[
     "command" => "evaluate",
     "type" => "request",
     "arguments" =>
-    darray[
+    dict[
       'expression' => '$l2();',
       'context' => 'repl']]);
 
   $msg = skip_events();
-  checkObjEqualRecursively($msg, darray[
+  checkObjEqualRecursively($msg, dict[
     "type" => "response",
     "command" => "evaluate",
     "success" => true,

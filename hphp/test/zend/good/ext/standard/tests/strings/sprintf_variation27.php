@@ -8,10 +8,10 @@
 echo "*** Testing sprintf() : char formats with char values ***\n";
 
 // array of char values 
-$char_values = varray[ 'a', "a", 67, -67, 99, ' ', '', 'A', "A" ];
+$char_values = vec[ 'a', "a", 67, -67, 99, ' ', '', 'A', "A" ];
 
 // array of char formats
-$char_formats = varray[ 
+$char_formats = vec[ 
   "%c", "%hc", "%lc", 
   "%Lc", " %c", "%c ",
   "\t%c", "\n%c", "%4c",

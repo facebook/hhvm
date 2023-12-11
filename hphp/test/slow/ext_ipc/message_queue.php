@@ -59,9 +59,9 @@ var_dump(MSG_ENOMSG === $r_error_code);
 
 $ret = msg_stat_queue($queue);
 var_dump($ret[$s_msg_qnum]);
-msg_set_queue($queue, darray["msg_perm.mode" => 0666]);
+msg_set_queue($queue, dict["msg_perm.mode" => 0666]);
 $qb = () ==> msg_stat_queue($queue)['msg_qbytes'];
-msg_set_queue($queue, darray['msg_qbytes' => $qb() - 1]);
+msg_set_queue($queue, dict['msg_qbytes' => $qb() - 1]);
 var_dump($qb());
 
 msg_remove_queue($queue);

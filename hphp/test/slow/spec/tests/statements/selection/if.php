@@ -37,8 +37,8 @@ if (0)
 
 // use if with all scalar types + array
 
-$colors = varray["red", "white", "blue"];
-$scalarValueList = varray[10, -100, 0, 1.234, 0.0, TRUE, FALSE, NULL, 'xx', "", $colors];
+$colors = vec["red", "white", "blue"];
+$scalarValueList = vec[10, -100, 0, 1.234, 0.0, TRUE, FALSE, NULL, 'xx', "", $colors];
 
 foreach ($scalarValueList as $e)
 {

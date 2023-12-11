@@ -1,7 +1,7 @@
 <?hh
 
 function test($a, ...$more_args) :mixed{
-  $args = varray[$a];
+  $args = vec[$a];
   $args = array_merge($args, $more_args);
   $n = count($args);
   var_dump($n);

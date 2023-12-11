@@ -71,10 +71,10 @@ function test() :mixed{
   var_dump($s);
 
   echo "==== array_diff ====\n";
-  var_dump(array_diff(varray["int", "string"], varray[$c]));
-  var_dump(array_diff(varray["int", $c], varray["string"]));
+  var_dump(array_diff(vec["int", "string"], vec[$c]));
+  var_dump(array_diff(vec["int", $c], vec["string"]));
 
   echo "==== array_intersect ====\n";
-  var_dump(array_intersect(varray["int", "string"], varray[$c]));
-  var_dump(array_intersect(varray["int", $c], varray["string"]));
+  var_dump(array_intersect(vec["int", "string"], vec[$c]));
+  var_dump(array_intersect(vec["int", $c], vec["string"]));
 }

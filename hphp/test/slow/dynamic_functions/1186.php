@@ -7,6 +7,6 @@ function test($a, $b) :mixed{
  <<__EntryPoint>>
 function main_1186() :mixed{
 $a = 'test';
- $y = varray['k','q','q'];
+ $y = vec['k','q','q'];
  $a('o',$y[0]);
 }

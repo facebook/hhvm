@@ -23,7 +23,7 @@ $node = new NodeClass();
 $node->child = new LeafClass();
 dump(objprof_get_data());
 dump(objprof_get_paths());
-dump(objprof_get_data(OBJPROF_FLAGS_DEFAULT, varray[LeafClass::class]));
-dump(objprof_get_paths(OBJPROF_FLAGS_DEFAULT, varray[LeafClass::class]));
+dump(objprof_get_data(OBJPROF_FLAGS_DEFAULT, vec[LeafClass::class]));
+dump(objprof_get_paths(OBJPROF_FLAGS_DEFAULT, vec[LeafClass::class]));
 __hhvm_intrinsics\launder_value($node);
 }

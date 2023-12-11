@@ -8,7 +8,7 @@ function f(int ...$x) :mixed{
 }
 
 function g() : varray<int> {
-  return varray[1,2,3,4];
+  return vec[1,2,3,4];
 }
 
 

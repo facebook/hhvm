@@ -12,7 +12,7 @@
 echo "*** Testing vfprintf() : scientific formats and scientific values ***\n";
 
 // defining array of scientific formats
-$formats = varray[
+$formats = vec[
   '%e %+e %-e', 
   '%le %Le %4e %-4e',
   '%10.4e %-10.4e %.4e', 
@@ -22,12 +22,12 @@ $formats = varray[
 
 // Arrays of scientific values for the format defined in $format.
 // Each sub array contains scientific values which correspond to each format string in $format
-$args_array = varray[
-  varray[0, 1e0, "10e2" ],
-  varray[2.2e2, 10e10, 1000e-2, 1000e7],
-  varray[-22e12, 10e20, 1.2e2],
-  varray[1e1, +1e2, -1e3, "1e2_"],
-  varray[3e3, 4e3, 1e3, 2e3]
+$args_array = vec[
+  vec[0, 1e0, "10e2" ],
+  vec[2.2e2, 10e10, 1000e-2, 1000e7],
+  vec[-22e12, 10e20, 1.2e2],
+  vec[1e1, +1e2, -1e3, "1e2_"],
+  vec[3e3, 4e3, 1e3, 2e3]
 ];
 
 /* creating dumping file */

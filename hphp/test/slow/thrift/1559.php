@@ -2,68 +2,68 @@
 
 
 class TestStruct {
-  const SPEC = darray[
-    -1 => darray[
+  const SPEC = dict[
+    -1 => dict[
       'var' => 'aBool',
       'type' => TType::BOOL,
     ],
-    1 => darray[
+    1 => dict[
       'var' => 'anInt',
       'type' => TType::I32,
     ],
-    2 => darray[
+    2 => dict[
       'var' => 'aString',
       'type' => TType::STRING,
     ],
-    3 => darray[
+    3 => dict[
       'var' => 'aDouble',
       'type' => TType::DOUBLE,
     ],
-    4 => darray[
+    4 => dict[
       'var' => 'anInt64',
       'type' => TType::I64,
     ],
-    5 => darray[
+    5 => dict[
       'var' => 'aList',
       'type' => TType::LST,
       'etype' => TType::DOUBLE,
-      'elem' => darray[
+      'elem' => dict[
         'type' => TType::DOUBLE,
       ],
     ],
-    6 => darray[
+    6 => dict[
       'var' => 'aMap',
       'type' => TType::MAP,
       'ktype' => TType::I32,
       'vtype' => TType::DOUBLE,
-      'key' => darray[
+      'key' => dict[
         'type' => TType::I32,
       ],
-      'val' => darray[
+      'val' => dict[
         'type' => TType::DOUBLE,
       ],
     ],
-    7 => darray[
+    7 => dict[
       'var' => 'aSet',
       'type' => TType::SET,
       'etype' => TType::I32,
-      'elem' => darray[
+      'elem' => dict[
         'type' => TType::I32,
       ],
     ],
-    8 => darray[
+    8 => dict[
       'var' => 'anByte',
       'type' => TType::BYTE,
     ],
-    9 => darray[
+    9 => dict[
       'var' => 'anI16',
       'type' => TType::I16,
     ],
-    10 => darray[
+    10 => dict[
       'var' => 'aFloat',
       'type' => TType::FLOAT,
     ],
-    11 => darray[
+    11 => dict[
       'var' => 'bFloat',
       'type' => TType::FLOAT,
     ],
@@ -94,9 +94,9 @@ function test() :mixed{
   $v1->aString = 'abcdef';
   $v1->aDouble = 1.2345;
   $v1->anInt64 = 8589934592;
-  $v1->aList = varray[13.3, 23.4, 3576.2];
-  $v1->aMap = darray[10=>1.2, 43=>5.33];
-  $v1->aSet = darray[10=>true, 11=>true];
+  $v1->aList = vec[13.3, 23.4, 3576.2];
+  $v1->aMap = dict[10=>1.2, 43=>5.33];
+  $v1->aSet = dict[10=>true, 11=>true];
   $v1->anByte = 123;
   $v1->anI16 = 1234;
   $v1->aFloat = 1.25;

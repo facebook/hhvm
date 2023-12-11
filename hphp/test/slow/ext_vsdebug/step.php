@@ -8,11 +8,11 @@ require(__DIR__ . '/common.inc');
 
 ExtVsdebugStep::$path = __FILE__ . ".test";
 
-$breakpoints = varray[
-   darray[
+$breakpoints = vec[
+   dict[
      "path" => __FILE__ . ".test",
-     "breakpoints" => varray[
-       darray["line" => 17, "calibratedLine" => 17, "condition" => ""],
+     "breakpoints" => vec[
+       dict["line" => 17, "calibratedLine" => 17, "condition" => ""],
      ]]
    ];
 

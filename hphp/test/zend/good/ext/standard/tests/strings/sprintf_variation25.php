@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : char formats with string values ***\n";
 
 // array of string values 
-$string_values = varray[
+$string_values = vec[
   "",
   '',
   "0",
@@ -29,7 +29,7 @@ $string_values = varray[
 ];
 
 // array of char formats
-$char_formats = varray[ 
+$char_formats = vec[ 
   "%c", "%hc", "%lc", 
   "%Lc", " %c", "%c ",
   "\t%c", "\n%c", "%4c",

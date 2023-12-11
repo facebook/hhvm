@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : octal formats with integer values ***\n";
 
 // array of integer values
-$integer_values = varray[
+$integer_values = vec[
   0,
   1,
   -1,
@@ -29,7 +29,7 @@ $integer_values = varray[
 ];
 
 // array of octal formats
-$octal_formats = varray[
+$octal_formats = vec[
   "%o", "%ho", "%lo",
   "%Lo", " %o", "%o ",
   "\t%o", "\n%o", "%4o",

@@ -38,7 +38,7 @@ class for_string_rsort
 echo "*** Testing rsort() : object functionality ***\n";
 
 // array of integer objects
-$unsorted_int_obj = varray[
+$unsorted_int_obj = vec[
   new for_integer_rsort(11), new for_integer_rsort(66),
   new for_integer_rsort(23), new for_integer_rsort(-5),
   new for_integer_rsort(0.001), new for_integer_rsort(0)

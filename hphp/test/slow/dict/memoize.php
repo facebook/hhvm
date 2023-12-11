@@ -28,19 +28,19 @@ function main() :mixed{
   var_dump(get(dict['value2' => 'value2']));
   var_dump(get(dict['value2' => 'value2']));
 
-  var_dump(get(varray[]));
+  var_dump(get(vec[]));
   var_dump(get(vec[]));
   var_dump(get(keyset[]));
   var_dump(get(Map{}));
   var_dump(get(Set{}));
   var_dump(get(Vector{}));
 
-  var_dump(get(darray['value' => 'value', 'value2' => 'value2']));
+  var_dump(get(dict['value' => 'value', 'value2' => 'value2']));
   var_dump(get(keyset['value', 'value2']));
   var_dump(get(Map{'value' => 'value', 'value2' => 'value2'}));
   var_dump(get(Set{'value', 'value2'}));
 
-  var_dump(get(varray['value', 'value2']));
+  var_dump(get(vec['value', 'value2']));
   var_dump(get(vec['value', 'value2']));
   var_dump(get(Vector{'value', 'value2'}));
 }

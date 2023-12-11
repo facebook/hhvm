@@ -17,7 +17,7 @@ echo "*** Test substituting argument 1 with object values ***\n";
 $protocol = "tcp";
 
 
-$variation_array = darray[
+$variation_array = dict[
   'instance of classWithToString' => new classWithToString(),
   'instance of classWithoutToString' => new classWithoutToString(),
   ];

@@ -8,10 +8,10 @@ function ret_array(): AnyArray<arraykey, mixed> {
   return darray(dict[42 => 'lol']);
 }
 function ret_varray(): AnyArray<arraykey, mixed> {
-  return varray['lol'];
+  return vec['lol'];
 }
 function ret_darray(): AnyArray<arraykey, mixed> {
-  return darray[42 => 'lol'];
+  return dict[42 => 'lol'];
 }
 function ret_vec(): AnyArray<arraykey, mixed> {
   return vec['lol'];
@@ -61,17 +61,17 @@ function test_builtins($a, $b, $c, $d, $e, $f, $g) :mixed{
     echo "Exception: {$e->getMessage()}\n";
   }
   try {
-    __hhvm_intrinsics\dummy_arraylike_builtin(varray[]);
+    __hhvm_intrinsics\dummy_arraylike_builtin(vec[]);
   } catch (Exception $e) {
     echo "Exception: {$e->getMessage()}\n";
   }
   try {
-    __hhvm_intrinsics\dummy_arraylike_builtin(darray[]);
+    __hhvm_intrinsics\dummy_arraylike_builtin(dict[]);
   } catch (Exception $e) {
     echo "Exception: {$e->getMessage()}\n";
   }
   try {
-    __hhvm_intrinsics\dummy_arraylike_builtin(varray[]);
+    __hhvm_intrinsics\dummy_arraylike_builtin(vec[]);
   } catch (Exception $e) {
     echo "Exception: {$e->getMessage()}\n";
   }
@@ -87,8 +87,8 @@ function test_builtins($a, $b, $c, $d, $e, $f, $g) :mixed{
 
 function main() :mixed{
   takes_arraylike(darray(dict[42 => 'lol']));
-  takes_arraylike(varray['lol']);
-  takes_arraylike(darray[42 => 'lol']);
+  takes_arraylike(vec['lol']);
+  takes_arraylike(dict[42 => 'lol']);
   takes_arraylike(vec['lol']);
   takes_arraylike(dict[42 => 'lol']);
   takes_arraylike(keyset['lol']);
@@ -105,9 +105,9 @@ function main() :mixed{
     42,
     tuple(true, false),
     shape('a' => true, 'b' => false),
-    varray[],
-    darray[],
-    varray[]
+    vec[],
+    dict[],
+    vec[]
   );
 }
 

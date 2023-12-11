@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$arr = darray['exists' => 'foz'];
+$arr = dict['exists' => 'foz'];
 
 if (isset($arr['exists']['non_existent'])) {
     echo "sub-key 'non_existent' is set: ";

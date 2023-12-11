@@ -40,11 +40,11 @@ $values =  varray [
   .5,
 
   // array values
-  varray[],
-  varray[0],
-  varray[1],
-  varray[1, 2],
-  darray['color' => 'red-color', 'item' => 'pen-color'],
+  vec[],
+  vec[0],
+  vec[1],
+  vec[1, 2],
+  dict['color' => 'red-color', 'item' => 'pen-color'],
 
   // boolean values
   true,

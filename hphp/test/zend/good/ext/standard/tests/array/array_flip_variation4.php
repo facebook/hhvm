@@ -23,7 +23,7 @@ $obj = new MyClass();
 // resource data
 $fp = fopen(__FILE__, 'r');
 
-$input = darray[
+$input = dict[
   // float values
   'float_value1' => 1.2,
   'float_value2' => 0.5,
@@ -40,7 +40,7 @@ $input = darray[
   'null_value1' => null,
 
   // array value
-  'array_value' => varray[1],
+  'array_value' => vec[1],
 
   // object value
   'obj_value' => $obj,

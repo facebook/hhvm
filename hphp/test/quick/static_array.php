@@ -1,71 +1,71 @@
 <?hh
 // Static arrays.
 <<__EntryPoint>> function main(): void {
-$a = varray[];
+$a = vec[];
 var_dump($a);
 
-$a = varray[null];
+$a = vec[null];
 var_dump($a);
 
-$a = varray[true];
+$a = vec[true];
 var_dump($a);
 
-$a = varray[42];
+$a = vec[42];
 var_dump($a);
 
-$a = varray[12.34];
+$a = vec[12.34];
 var_dump($a);
 
-$a = varray["hello"];
+$a = vec["hello"];
 var_dump($a);
 
-$a = varray[varray[]];
+$a = vec[vec[]];
 var_dump($a);
 
-$a = varray[null, true, 42, 12.34, "hello", varray[1, varray[2, varray[3]]]];
+$a = vec[null, true, 42, 12.34, "hello", vec[1, vec[2, vec[3]]]];
 var_dump($a);
-$a = varray[null, true, 42, 12.34, "hello", varray[1, varray[2, varray[3]]]];
-var_dump($a);
-
-$a = darray[0 => "0"];
+$a = vec[null, true, 42, 12.34, "hello", vec[1, vec[2, vec[3]]]];
 var_dump($a);
 
-$a = darray[42 => "42"];
+$a = dict[0 => "0"];
 var_dump($a);
 
-$a = darray["hello" => "world"];
+$a = dict[42 => "42"];
+var_dump($a);
+
+$a = dict["hello" => "world"];
 var_dump($a);
 
 // Non-static arrays.
 $v = null;
-$a = varray[$v];
+$a = vec[$v];
 var_dump($a);
 
 $k = 0;
-$a = darray[$k => "0"];
+$a = dict[$k => "0"];
 var_dump($a);
 
 $v = "0";
-$a = darray[0 => $v];
+$a = dict[0 => $v];
 var_dump($a);
 
 $k = "hello";
-$a = darray[$k => "world"];
+$a = dict[$k => "world"];
 var_dump($a);
 
 $v = "world";
-$a = darray["hello" => $v];
+$a = dict["hello" => $v];
 var_dump($a);
 
 $v = 0;
-$a = varray[varray[$v]];
+$a = vec[vec[$v]];
 var_dump($a);
 
 $v = 0;
-$a = varray[varray[$v], varray[0]];
+$a = vec[vec[$v], vec[0]];
 var_dump($a);
 
 $v = 0;
-$a = varray[varray[0], varray[$v]];
+$a = vec[vec[0], vec[$v]];
 var_dump($a);
 }

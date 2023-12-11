@@ -10,7 +10,7 @@ class A {
 class lol {}
 class B {
   public static function bar($_1, $_2, inout $_3) :mixed{
-    var_dump(varray[$_1, $_2, $_3]);
+    var_dump(vec[$_1, $_2, $_3]);
     $x = new lol();
     return shape('value' => $x);
   }

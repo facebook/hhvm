@@ -3,7 +3,7 @@
 class A { public function yo() :mixed{ echo "hi\n"; } }
 
 function foo() :mixed{
-  $x = varray[new A];
+  $x = vec[new A];
   for ($i = 0; $i < 10; ++$i) {
     $x[] = new A;
   }

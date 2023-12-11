@@ -29,7 +29,7 @@ function main() :mixed{
   var_dump(HH\Asio\join(HH\Asio\va(
     asyncval(123),
     asyncval('foo'),
-    asyncval(varray[1]),
+    asyncval(vec[1]),
   )));
 }
 

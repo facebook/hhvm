@@ -10,7 +10,7 @@ function foo2(): void {
   var_dump(foo(9007199254740992));
   var_dump(foo(1.1));
   var_dump(foo("abc"));
-  var_dump(foo(varray[123]));
+  var_dump(foo(vec[123]));
   try {
     var_dump(foo(new C));
   } catch (TypecastException $e) {
@@ -40,8 +40,8 @@ function real($i) :mixed{
     $v7 = "1.1";
     $v8 = "abc";
     $v9 = new C;
-    $v10 = varray[];
-    $v11 = varray[123];
+    $v10 = vec[];
+    $v11 = vec[123];
   }
   var_dump((float)$v1);
   var_dump((float)$v2);

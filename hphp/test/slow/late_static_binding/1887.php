@@ -27,6 +27,6 @@ test(new ReflectionClass('X'), new X);
 test(new ReflectionClass('Y'), new X);
 test(new ReflectionClass('X'), new X);
 test(new ReflectionClass('Z'), new Z);
-call_user_func(varray[new Y, 'X::foo']);
-call_user_func(varray[new Z, 'X::foo']);
+call_user_func(vec[new Y, 'X::foo']);
+call_user_func(vec[new Z, 'X::foo']);
 }

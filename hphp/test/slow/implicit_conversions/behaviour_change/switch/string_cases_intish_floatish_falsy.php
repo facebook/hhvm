@@ -23,7 +23,7 @@ function main() :mixed{
   f2(true);
   f2(false);
   f2(null);
-  f2(varray[]);
+  f2(vec[]);
   f2(3.21200);
   f2("");
   f2("0");

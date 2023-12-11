@@ -119,25 +119,25 @@ function main(): void {
   $clsmeth = Bar::foo<>;
   $rclsmeth = Bar::rfoo<int>;
 
-  $arr1 = varray[];
-  $arr2 = varray[99];
-  $arr3 = varray['foo'];
-  $arr4 = varray['foo', 'bar'];
-  $arr5 = varray['foo', 'bar'];
-  $arr6 = varray['foo', 'baz'];
-  $arr7 = varray[new A, new A];
-  $arr8 = varray[new A, new A];
-  $arr9 = varray[new A, new C];
-  $arr12 = varray[varray[1, 2], varray[1, 2, 3]];
-  $arr13 = varray[varray[1, 2], varray[1, 2, 3]];
-  $arr14 = varray[varray[1, 2], varray[99]];
-  $arr15 = varray[Vector{0, 1, 2, 3, 4}, Vector{5, 6, 7, 8}];
-  $arr16 = varray[Vector{0, 1, 2, 3, 4}, Vector{5, 6, 7, 8}];
-  $arr17 = darray['key1' => 1, 'key2' => 2, 'key3' => 3];
-  $arr18 = darray['key1' => 1, 'key2' => 2, 'key3' => 3];
-  $arr19 = darray['key1' => 1, 'key2-other' => 2, 'key3' => 3];
-  $arr20 = darray['key2' => 2, 'key3' => 3, 'key1' => 1];
-  $arr21 = varray['baz', 'foo'];
+  $arr1 = vec[];
+  $arr2 = vec[99];
+  $arr3 = vec['foo'];
+  $arr4 = vec['foo', 'bar'];
+  $arr5 = vec['foo', 'bar'];
+  $arr6 = vec['foo', 'baz'];
+  $arr7 = vec[new A, new A];
+  $arr8 = vec[new A, new A];
+  $arr9 = vec[new A, new C];
+  $arr12 = vec[vec[1, 2], vec[1, 2, 3]];
+  $arr13 = vec[vec[1, 2], vec[1, 2, 3]];
+  $arr14 = vec[vec[1, 2], vec[99]];
+  $arr15 = vec[Vector{0, 1, 2, 3, 4}, Vector{5, 6, 7, 8}];
+  $arr16 = vec[Vector{0, 1, 2, 3, 4}, Vector{5, 6, 7, 8}];
+  $arr17 = dict['key1' => 1, 'key2' => 2, 'key3' => 3];
+  $arr18 = dict['key1' => 1, 'key2' => 2, 'key3' => 3];
+  $arr19 = dict['key1' => 1, 'key2-other' => 2, 'key3' => 3];
+  $arr20 = dict['key2' => 2, 'key3' => 3, 'key1' => 1];
+  $arr21 = vec['baz', 'foo'];
 
   $vec1 = vec[];
   $vec2 = vec[1, 2];
@@ -175,7 +175,7 @@ function main(): void {
   $f2 = imagecreate(10, 10);
   $f3 = imagecreate(1, 1);
 
-  $arr = darray['null' => null,
+  $arr = dict['null' => null,
 
                'false' => false, 'true' => true,
 

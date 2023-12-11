@@ -24,7 +24,7 @@ if(!$proc) {
 
 $proc->importStylesheet($xsl);
 
-$parameters = darray[
+$parameters = dict[
                     'foo' => 'barbar',
                     'foo1' => 'test',
                     ];

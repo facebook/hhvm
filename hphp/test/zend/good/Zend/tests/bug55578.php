@@ -11,7 +11,7 @@ function test($options, $queryPart) :mixed{
 }
 
 <<__EntryPoint>> function main(): void {
-$options = varray[];
+$options = vec[];
 
 var_dump(test($options, new Foo()));
 }

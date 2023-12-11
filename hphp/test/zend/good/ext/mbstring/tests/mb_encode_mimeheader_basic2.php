@@ -16,7 +16,7 @@ $sjis_string = base64_decode('k/qWe4zqg2WDTINYg2eCxYK3gUIwMTIzNIJUglWCVoJXgliBQg
 $jis_string = base64_decode('GyRCRnxLXDhsJUYlLSU5JUgkRyQ5ISMbKEIwMTIzNBskQiM1IzYjNyM4IzkhIxsoQg==');
 $euc_jp_string = base64_decode('xvzL3LjspcalraW5pcikx6S5oaMwMTIzNKO1o7ajt6O4o7mhow==');
 
-$inputs = darray['SJIS' => $sjis_string,
+$inputs = dict['SJIS' => $sjis_string,
                 'JIS' => $jis_string,
                 'EUC_JP' => $euc_jp_string];
 

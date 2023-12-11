@@ -23,7 +23,7 @@ function cmp($value1, $value2)
 echo "*** Testing usort() : usage variation ***\n";
 
 // Array with duplicate string and integer keys and values
-$array_arg = darray[0 => 2,     "a" => 8, "d" => 9,
+$array_arg = dict[0 => 2,     "a" => 8, "d" => 9,
                    3 => 3,     5 => 2,   "o" => 6,
                    "z" => -99, 0 => 1,   "z" => 3];
 
@@ -32,7 +32,7 @@ var_dump( usort(inout $array_arg, cmp<>) );
 var_dump($array_arg);
 
 // Array with default and assigned keys
-$array_arg = darray[0 => "Banana", 1 => "Mango", 2 => "Orange", 2 => "Apple", 3 => "Pineapple"];
+$array_arg = dict[0 => "Banana", 1 => "Mango", 2 => "Orange", 2 => "Apple", 3 => "Pineapple"];
 
 echo "\n-- Array with default/assigned keys --\n";
 var_dump( usort(inout $array_arg, cmp<>) );

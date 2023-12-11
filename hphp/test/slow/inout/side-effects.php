@@ -20,8 +20,8 @@ function launder($x) :mixed{
   return $x;
 }
 function get_arr() :mixed{
-  $x = darray['alpha' => vec[dict['beta' => new Herp], null, new Herp, null]];
-  $x['alpha'][0]['beta'] = darray['one' => '*BLANK*', 'two' => '*BLANK*'];
+  $x = dict['alpha' => vec[dict['beta' => new Herp], null, new Herp, null]];
+  $x['alpha'][0]['beta'] = dict['one' => '*BLANK*', 'two' => '*BLANK*'];
   return $x;
 }
 
@@ -86,9 +86,9 @@ function main() :mixed{
   );
   var_dump($a, $b, $c);
 
-  $a = varray['yep'];
-  $b = varray['nope'];
-  $c = varray['yep'];
+  $a = vec['yep'];
+  $b = vec['nope'];
+  $c = vec['yep'];
   foo(
     $a,
     inout $a[0],

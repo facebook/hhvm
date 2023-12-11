@@ -13,7 +13,7 @@ function main_entry(): void {
 
   echo "===Array===\n";
 
-  $a = darray['zero' => 0, 'one' => 1, 'two' => 2];
+  $a = dict['zero' => 0, 'one' => 1, 'two' => 2];
   $it = new ArrayIterator($a);
 
   foreach($it as $key => $val)

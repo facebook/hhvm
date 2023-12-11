@@ -30,9 +30,9 @@ function i6() :mixed{
         return 0;
 }
 <<__EntryPoint>> function main(): void {
-$a = varray[varray[0]];
-$b = varray[varray[1]];
-$c = varray[varray[2]];
+$a = vec[vec[0]];
+$b = vec[vec[1]];
+$c = vec[vec[2]];
 
 $a[i1()][i2()] = $b[i3()][i4()] = $c[i5()][i6()];
 

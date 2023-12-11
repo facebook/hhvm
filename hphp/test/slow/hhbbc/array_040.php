@@ -1,7 +1,7 @@
 <?hh
 
 class C { function heh() :mixed{ echo "heh\n"; } }
-function foo() :mixed{ return varray[]; }
+function foo() :mixed{ return vec[]; }
 function bar() :mixed{
   $x = foo();
   $x[] = new C;

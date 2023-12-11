@@ -16,12 +16,12 @@ function callback($a)
 echo "*** Testing array_map() : array having subarrays ***\n";
 
 // different subarrays
-$arr1 = varray[
-  varray[],
-  varray[1, 2],
-  varray['a', 'b'],
-  varray[1, 2, 'a', 'b'],
-  darray[1 => 'a', 'b' => 2]
+$arr1 = vec[
+  vec[],
+  vec[1, 2],
+  vec['a', 'b'],
+  vec[1, 2, 'a', 'b'],
+  dict[1 => 'a', 'b' => 2]
 ];
 
 var_dump( array_map(callback<>, $arr1));

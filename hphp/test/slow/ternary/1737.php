@@ -13,9 +13,9 @@ function f($a0,
   $r2 = $a2 ?: false;
   $r3 = $a3 ?: '';
 
-  $r4 = $a4 ?: varray[];
+  $r4 = $a4 ?: vec[];
   $r5 = $a5 ?: new X;
-  return varray[
+  return vec[
     $r0, $r1, $r2,
     $r3, $r4, $r5];
 }
@@ -23,5 +23,5 @@ function f($a0,
 <<__EntryPoint>>
 function main_1737() :mixed{
 var_dump(f(0, 0.0, false, null, null, null));
-var_dump(f(1, 1.0, true, 'hello', varray[0, 1], new X));
+var_dump(f(1, 1.0, true, 'hello', vec[0, 1], new X));
 }

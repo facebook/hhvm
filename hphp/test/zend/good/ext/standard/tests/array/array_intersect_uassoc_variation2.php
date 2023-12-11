@@ -27,8 +27,8 @@ function key_compare_func($a, $b) :mixed{
 echo "*** Testing array_intersect_uassoc() : usage variation ***\n";
 
 // Initialise function arguments
-$array1 = darray["a" => "green", "b" => "brown", "c" => "blue", 0 => "red"];
-$array3 = darray["a"=>"green", 0 => "brown"];
+$array1 = dict["a" => "green", "b" => "brown", "c" => "blue", 0 => "red"];
+$array3 = dict["a"=>"green", 0 => "brown"];
 
 
 //resource variable
@@ -44,7 +44,7 @@ $index_array = varray [1, 2, 3];
 $assoc_array = darray ['one' => 1, 'two' => 2];
 
 //array of values to iterate over
-$inputs = darray[
+$inputs = dict[
 
       // int data
       'int 0' => 0,

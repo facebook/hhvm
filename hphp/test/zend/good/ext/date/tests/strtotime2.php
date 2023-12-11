@@ -3,7 +3,7 @@
 date_default_timezone_set("Europe/Oslo");
 $time = time();
 
-$constants = varray[
+$constants = vec[
 	'DATE_ATOM',
 	'DATE_COOKIE',
 	'DATE_ISO8601',

@@ -3,7 +3,7 @@
 class A implements Serializable {
   public $_foo = 42;
   public function serialize() :mixed{
-    return serialize(darray['a' => 'apple', 'b' => 'banana']);
+    return serialize(dict['a' => 'apple', 'b' => 'banana']);
   }
   public function unserialize($_) :mixed{}
 }
@@ -15,7 +15,7 @@ class B {
 class C implements JsonSerializable {
   public $_foo = 42;
   public function jsonSerialize() :mixed{
-    return serialize(darray['a' => 'apple', 'b' => 'banana']);
+    return serialize(dict['a' => 'apple', 'b' => 'banana']);
   }
 }
 

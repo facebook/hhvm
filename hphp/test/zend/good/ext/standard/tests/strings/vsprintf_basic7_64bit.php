@@ -11,9 +11,9 @@ $format = "format";
 $format1 = "%u";
 $format2 = "%u %u";
 $format3 = "%u %u %u";
-$arg1 = varray[-1111];
-$arg2 = varray[-1111,-1234567];
-$arg3 = varray[-1111,-1234567,-2345432];
+$arg1 = vec[-1111];
+$arg2 = vec[-1111,-1234567];
+$arg3 = vec[-1111,-1234567,-2345432];
 
 var_dump( vsprintf($format1,$arg1) );
 var_dump( vsprintf($format2,$arg2) );

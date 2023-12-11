@@ -7,7 +7,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing file_get_contents() : variation ***\n";
 /* An array of filenames */ 
-$names_arr = varray[
+$names_arr = vec[
   /* Invalid args */ 
   -1,
   TRUE,
@@ -16,7 +16,7 @@ $names_arr = varray[
   "",
   " ",
   "\0",
-  varray[],
+  vec[],
 
   /* prefix with path separator of a non existing directory*/
   "/no/such/file/dir", 

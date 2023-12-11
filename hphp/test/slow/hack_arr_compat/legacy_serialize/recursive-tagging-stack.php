@@ -7,19 +7,19 @@ class C {}
 // It will have multiple arrays at the given depth (but we should only warn
 // once about blowing the recursion stack for that depth).
 function make_recursive_varray($depth) :mixed{
-  $result = varray[
-    varray[
-      varray[varray[new C()], varray[new C()]],
-      varray[varray[new C()], varray[new C()]],
+  $result = vec[
+    vec[
+      vec[vec[new C()], vec[new C()]],
+      vec[vec[new C()], vec[new C()]],
     ],
-    varray[
-      varray[varray[new C()], varray[new C()]],
-      varray[varray[new C()], varray[new C()]],
+    vec[
+      vec[vec[new C()], vec[new C()]],
+      vec[vec[new C()], vec[new C()]],
     ],
   ];
 
   for ($i = 0; $i < $depth - 2; $i++) {
-    $result = varray[$result];
+    $result = vec[$result];
   }
   return $result;
 }

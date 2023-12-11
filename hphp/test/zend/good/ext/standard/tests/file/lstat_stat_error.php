@@ -12,7 +12,7 @@ try { var_dump( lstat() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->ge
 try { var_dump( lstat(__FILE__, 2) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // args > expected
 var_dump( lstat("$file_path/temp.tmp") ); // non existing file
 var_dump( lstat('22') ); // scalar looking string
-$arr = varray[__FILE__];
+$arr = vec[__FILE__];
 try { var_dump( lstat($arr) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // array argument
 
 echo "\n*** Testing stat() for error conditions ***\n";

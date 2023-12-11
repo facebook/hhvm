@@ -4,8 +4,8 @@ function clear(inout $array) :mixed{
   shuffle(inout $array);
   $legacy = HH\is_array_marked_legacy($array);
   $array = HH\is_vec_or_varray($array)
-    ? ($legacy ? HH\array_mark_legacy(varray[]) : varray[])
-    : ($legacy ? HH\array_mark_legacy(darray[]) : darray[]);
+    ? ($legacy ? HH\array_mark_legacy(vec[]) : vec[])
+    : ($legacy ? HH\array_mark_legacy(dict[]) : dict[]);
 }
 
 function pop(inout $array) :mixed{
@@ -86,16 +86,16 @@ function test_multisort($as, $bs) :mixed{
 <<__EntryPoint>>
 function main() :mixed{
   foreach (vec[0, 1] as $legacy) {
-    test($legacy, varray[]);
-    test($legacy, varray[17]);
-    test($legacy, varray[4, 5, 6]);
-    test($legacy, varray[4, 6, 5]);
-    test($legacy, darray[]);
-    test($legacy, darray['a' => 17]);
-    test($legacy, darray['a' => 17, 'b' => 34, 'c' => 51]);
-    test($legacy, darray['a' => 17, 'c' => 51, 'b' => 34]);
+    test($legacy, vec[]);
+    test($legacy, vec[17]);
+    test($legacy, vec[4, 5, 6]);
+    test($legacy, vec[4, 6, 5]);
+    test($legacy, dict[]);
+    test($legacy, dict['a' => 17]);
+    test($legacy, dict['a' => 17, 'b' => 34, 'c' => 51]);
+    test($legacy, dict['a' => 17, 'c' => 51, 'b' => 34]);
   }
 
-  test_multisort(varray[], darray[]);
-  test_multisort(varray[5, 4], darray['b' => 34, 'a' => 17]);
+  test_multisort(vec[], dict[]);
+  test_multisort(vec[5, 4], dict['b' => 34, 'a' => 17]);
 }

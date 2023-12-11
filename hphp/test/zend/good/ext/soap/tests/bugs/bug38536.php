@@ -32,5 +32,5 @@ function main_entry(): void {
 
   ini_set("soap.wsdl_cache_enabled", 0);
   $SOAPObject = new LocalSoapClient(dirname(__FILE__).'/bug38536.wsdl');
-  print_r($SOAPObject->__soapcall('test', varray[]));
+  print_r($SOAPObject->__soapcall('test', vec[]));
 }

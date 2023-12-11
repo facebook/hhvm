@@ -6,10 +6,10 @@ class Foo {
 
 function f(): void {
   try {
-    $arr = darray[
-      4 => darray[
-        2 => darray[],
-        (string)$z => darray[],
+    $arr = dict[
+      4 => dict[
+        2 => dict[],
+        (string)$z => dict[],
       ],
     ];
     $arreq = $arr;

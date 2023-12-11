@@ -66,12 +66,12 @@ function main() :mixed{
   $klass2::funktion();
   $klass2::$funktion2();
 
-  $arr = varray[Klass::class, 'funktion'];
+  $arr = vec[Klass::class, 'funktion'];
 
   echo "Class/method array call\n";
   $arr();
 
-  $arr2 = __hhvm_intrinsics\launder_value(varray[Klass::class, 'funktion']);
+  $arr2 = __hhvm_intrinsics\launder_value(vec[Klass::class, 'funktion']);
 
   echo "Class/method array call (laundered)\n";
   $arr2();
@@ -95,12 +95,12 @@ function main() :mixed{
   (new $alpha2)->beta();
   (new $alpha2)->$beta2();
 
-  $iarr = varray[new Alpha, 'beta'];
+  $iarr = vec[new Alpha, 'beta'];
 
   echo "Method array call\n";
   $iarr();
 
-  $iarr2 = __hhvm_intrinsics\launder_value(varray[new Alpha, 'beta']);
+  $iarr2 = __hhvm_intrinsics\launder_value(vec[new Alpha, 'beta']);
 
   echo "Method array call (laundered)\n";
   $iarr2();

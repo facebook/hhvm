@@ -3,7 +3,7 @@
 class A {
   public $foo;
   public function f() :mixed{
-    inOtherUnit($this->foo, varray[]);
+    inOtherUnit($this->foo, vec[]);
   }
 }
 

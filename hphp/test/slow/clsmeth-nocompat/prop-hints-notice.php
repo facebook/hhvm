@@ -23,10 +23,10 @@ function C(mixed $m): void { echo gettype($m)."\n"; }
 class Props {
   public  static Foo          $pub_sprop_foo_static;
   public  static Foo          $pub_sprop_foo_dynamic;
-  public  static Traversable  $pub_sprop_trav_static         = varray[];
-  public  static Traversable  $pub_sprop_trav_dynamic        = varray[];
-  public  static varray       $pub_sprop_varray_static       = varray[];
-  public  static varray       $pub_sprop_varray_dynamic      = varray[];
+  public  static Traversable  $pub_sprop_trav_static         = vec[];
+  public  static Traversable  $pub_sprop_trav_dynamic        = vec[];
+  public  static varray       $pub_sprop_varray_static       = vec[];
+  public  static varray       $pub_sprop_varray_dynamic      = vec[];
   public  static ?Foo         $pub_sprop_opt_foo_static      = null;
   public  static ?Foo         $pub_sprop_opt_foo_dynamic     = null;
   public  static ?Traversable $pub_sprop_opt_trav_static     = null;
@@ -36,10 +36,10 @@ class Props {
 
   private static Foo          $priv_sprop_foo_static;
   private static Foo          $priv_sprop_foo_dynamic;
-  private static Traversable  $priv_sprop_trav_static        = varray[];
-  private static Traversable  $priv_sprop_trav_dynamic       = varray[];
-  private static varray       $priv_sprop_varray_static      = varray[];
-  private static varray       $priv_sprop_varray_dynamic     = varray[];
+  private static Traversable  $priv_sprop_trav_static        = vec[];
+  private static Traversable  $priv_sprop_trav_dynamic       = vec[];
+  private static varray       $priv_sprop_varray_static      = vec[];
+  private static varray       $priv_sprop_varray_dynamic     = vec[];
   private static ?Foo         $priv_sprop_opt_foo_static     = null;
   private static ?Foo         $priv_sprop_opt_foo_dynamic    = null;
   private static ?Traversable $priv_sprop_opt_trav_static    = null;
@@ -49,10 +49,10 @@ class Props {
 
   public         Foo          $pub_prop_foo_static;
   public         Foo          $pub_prop_foo_dynamic;
-  public         Traversable  $pub_prop_trav_static          = varray[];
-  public         Traversable  $pub_prop_trav_dynamic         = varray[];
-  public         varray       $pub_prop_varray_static        = varray[];
-  public         varray       $pub_prop_varray_dynamic       = varray[];
+  public         Traversable  $pub_prop_trav_static          = vec[];
+  public         Traversable  $pub_prop_trav_dynamic         = vec[];
+  public         varray       $pub_prop_varray_static        = vec[];
+  public         varray       $pub_prop_varray_dynamic       = vec[];
   public         ?Foo         $pub_prop_opt_foo_static       = null;
   public         ?Foo         $pub_prop_opt_foo_dynamic      = null;
   public         ?Traversable $pub_prop_opt_trav_static      = null;
@@ -62,10 +62,10 @@ class Props {
 
   private        Foo          $priv_prop_foo_static;
   private        Foo          $priv_prop_foo_dynamic;
-  private        Traversable  $priv_prop_trav_static         = varray[];
-  private        Traversable  $priv_prop_trav_dynamic        = varray[];
-  private        varray       $priv_prop_varray_static       = varray[];
-  private        varray       $priv_prop_varray_dynamic      = varray[];
+  private        Traversable  $priv_prop_trav_static         = vec[];
+  private        Traversable  $priv_prop_trav_dynamic        = vec[];
+  private        varray       $priv_prop_varray_static       = vec[];
+  private        varray       $priv_prop_varray_dynamic      = vec[];
   private        ?Foo         $priv_prop_opt_foo_static      = null;
   private        ?Foo         $priv_prop_opt_foo_dynamic     = null;
   private        ?Traversable $priv_prop_opt_trav_static     = null;

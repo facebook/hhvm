@@ -1,7 +1,7 @@
 <?hh
 
 abstract class c {
-  public static $arr = varray[];
+  public static $arr = vec[];
   function g() :mixed{
     $cl = new ReflectionClass(get_class($this));
     $p = $cl->getProperty('arr');
@@ -15,7 +15,7 @@ abstract class aa extends c {
   }
 }
 class a extends aa {
-  public static $arr = varray['v'];
+  public static $arr = vec['v'];
 }
 
 <<__EntryPoint>>

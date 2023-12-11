@@ -19,7 +19,7 @@ function entrypoint_base64_encode_variation_001(): void {
 
 
   //array of values to iterate over
-  $values = varray[
+  $values = vec[
 
         // int data
         0,

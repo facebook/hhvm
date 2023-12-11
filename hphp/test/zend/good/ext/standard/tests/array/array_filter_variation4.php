@@ -42,7 +42,7 @@ function callback4($input)
 echo "*** Testing array_filter() : usage variation - different 'callback' functions***\n";
 
 // Initialize variables
-$input = darray[0 => 0, 1 => -1, 2 => 2, 3 => 3.4E-3, 4 => 'hello', 5 => "value", "key" => 4, 'null' => NULL];
+$input = dict[0 => 0, 1 => -1, 2 => 2, 3 => 3.4E-3, 4 => 'hello', 5 => "value", "key" => 4, 'null' => NULL];
 
 echo "-- Callback function without parameter and with return --\n";
 var_dump( array_filter($input, callback1<>) );

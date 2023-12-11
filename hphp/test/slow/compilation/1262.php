@@ -4,7 +4,7 @@
 <<__EntryPoint>>
 function main_1262() :mixed{
 $a = 1;
- $a = darray[];
+ $a = dict[];
  $a['a'] = $a['b'] = 'test';
  var_dump($a);
 }

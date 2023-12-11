@@ -2,7 +2,7 @@
 
 <<__EntryPoint>>
 function main() :mixed{
-  foo(darray[]);
+  foo(dict[]);
   foo(null);
 }
 

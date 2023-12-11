@@ -19,7 +19,7 @@ class classA
 echo "*** Testing array_unshift() : all possible values for \$var argument ***\n";
 
 // array to be passed to $array argument
-$array = darray['f' => "first", "s" => 'second', 0 => 1, 1 => 2.222];
+$array = dict['f' => "first", "s" => 'second', 0 => 1, 1 => 2.222];
 
 // get a resource variable
 $fp = fopen(__FILE__, "r");
@@ -31,7 +31,7 @@ EOT;
 
 
 // different types of values to be passed to $var argument
-$vars = varray[
+$vars = vec[
 
        // int data
 /*1*/  0,
@@ -47,11 +47,11 @@ $vars = varray[
        .5,
 
        // array data
-/*10*/ varray[],
-       varray[0],
-       varray[1],
-       varray[1, 2],
-       darray['color' => 'red', 'item' => 'pen'],
+/*10*/ vec[],
+       vec[0],
+       vec[1],
+       vec[1, 2],
+       dict['color' => 'red', 'item' => 'pen'],
 
        // null data
 /*15*/ NULL,

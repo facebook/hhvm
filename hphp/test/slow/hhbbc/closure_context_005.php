@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-  private $prop = varray[1,2,3];
+  private $prop = vec[1,2,3];
 
   public function f() :mixed{
     return async function() {

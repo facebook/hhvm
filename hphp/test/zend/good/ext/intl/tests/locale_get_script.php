@@ -8,7 +8,7 @@
 function ut_main()
 :mixed{
 
-    $locales = varray[
+    $locales = vec[
         'uk-ua_CALIFORNIA@currency=;currency=GRN',
         'root',
         'uk@currency=EURO',

@@ -11,7 +11,7 @@ class Ex3 extends Exception {
 
 function bar($a) :mixed{
   print "bar $a\n";
-  $b = varray[1, 2];
+  $b = vec[1, 2];
   foreach($b as $c) {
     if ($a == 0) {
       throw new Ex1();
@@ -40,8 +40,8 @@ function foo($a) :mixed{
 }
 
 function main1() :mixed{
-  $a = varray[0, 1, 2];
-  $b = varray[0];
+  $a = vec[0, 1, 2];
+  $b = vec[0];
 
   foreach ($b as $c) {
     try {
@@ -52,7 +52,7 @@ function main1() :mixed{
   }
 
   try {
-    foreach (varray[1,2,3] as $_) {
+    foreach (vec[1,2,3] as $_) {
       echo "before\n";
       throw new Exception();
       echo "after\n";
@@ -100,7 +100,7 @@ function main3() :mixed{
   printf("Exception from %s:%d\n", $e->getFile(), $e->getLine());
   var_dump($e->getTraceAsString());
 
-  $b = varray[3];
+  $b = vec[3];
   try {
     array_map(foo<>, $b);
   } catch (Ex3 $e) {

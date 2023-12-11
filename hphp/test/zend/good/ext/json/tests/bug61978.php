@@ -15,7 +15,7 @@ class JsonTest2 implements JsonSerializable {
         $this->test = '123';
     }
     public function jsonSerialize() :mixed{
-        return darray[
+        return dict[
             'test' => $this->test,
             'me'   => $this
         ];

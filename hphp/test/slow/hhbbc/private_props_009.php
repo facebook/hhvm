@@ -1,7 +1,7 @@
 <?hh
 
 class Bar {
-  public $x = varray[1,2,3];
+  public $x = vec[1,2,3];
 }
 
 class Whatever {

@@ -19,7 +19,7 @@ class classA
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff() : usage variations ***\n";
 
-$array = darray['a' => '1', 'b' => '2', 'c' => '3'];
+$array = dict['a' => '1', 'b' => '2', 'c' => '3'];
 
 
 // get a resource variable
@@ -33,20 +33,20 @@ EOT;
 // associative arrays with different values
 $inputs = varray [
        // arrays with integer values
-/*1*/  darray['0' => 0, '1' => 0],
-       darray["one" => 1, 'two' => 2, "three" => 1, 4 => 1],
+/*1*/  dict['0' => 0, '1' => 0],
+       dict["one" => 1, 'two' => 2, "three" => 1, 4 => 1],
 
        // arrays with float values
-/*3*/  darray["float1" => 2.3333, "float2" => 2.3333],
-       darray["f1" => 1.2, 'f2' => 3.33, 3 => 4.89999922839999, 'f4' => 1.2],
+/*3*/  dict["float1" => 2.3333, "float2" => 2.3333],
+       dict["f1" => 1.2, 'f2' => 3.33, 3 => 4.89999922839999, 'f4' => 1.2],
 
        // arrays with string values
-/*5*/  darray[111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3 =>  "\tHello"],
-       darray[111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3 =>  '\tHello'],
-       darray[1 => "hello", "heredoc" => $heredoc, 2 => $heredoc],
+/*5*/  dict[111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3 =>  "\tHello"],
+       dict[111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3 =>  '\tHello'],
+       dict[1 => "hello", "heredoc" => $heredoc, 2 => $heredoc],
 
        // array with object, unset variable and resource variable
-/*8*/ darray[11 => new classA(), "resource" => $fp, 12 => new classA(), 13 => $fp],
+/*8*/ dict[11 => new classA(), "resource" => $fp, 12 => new classA(), 13 => $fp],
 ];
 
 // loop through each sub-array of $inputs to check the behavior of array_unique()

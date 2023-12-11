@@ -22,7 +22,7 @@ This is line 2 \tof "heredoc" string
 EOT;
 // initialising the string array
 
-$str_array = varray[
+$str_array = vec[
                     // string with newline character
                     "\n",
             "\\n",

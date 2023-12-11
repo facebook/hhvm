@@ -11,7 +11,7 @@ echo "*** Testing getdate() : usage variation ***\n";
 date_default_timezone_set("Asia/Calcutta");
 
 //array of values to iterate over
-$inputs = darray[
+$inputs = dict[
 
     //octal values
     'hexadcimal 0x5' => 0x5,

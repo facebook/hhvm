@@ -12,9 +12,9 @@ class E {
 }
 
 function getProps($class, $obj) :mixed{
-  $ret = darray[];
+  $ret = dict[];
   foreach ((new ReflectionClass($class))->getProperties() as $key => $prop) {
-    $values = varray[];
+    $values = vec[];
 
     $key = $prop->getName();
 

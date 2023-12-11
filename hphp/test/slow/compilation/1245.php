@@ -1,7 +1,7 @@
 <?hh
 
 class A {
- public static $a = varray['a', 'b'];
+ public static $a = vec['a', 'b'];
  public static function test() :mixed{
  self::$a[] = 'c';
  var_dump(self::$a);

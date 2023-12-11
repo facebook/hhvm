@@ -17,7 +17,7 @@ function main_entry(): void {
   $m = new Memcached();
   $m->addServer('localhost', '11211');
 
-  $data = darray[
+  $data = dict[
       'foo' => 'foo-data',
       'bar' => 'bar-data',
       'baz' => 'baz-data',
@@ -54,7 +54,7 @@ function main_entry(): void {
   var_dump($m->getMultiByKey('hi', $keys));
 
   /* Test deleting non-existent keys */
-  $keys = varray[];
+  $keys = vec[];
   $keys[] = "nothere";
   $keys[] = "nothere2";
 

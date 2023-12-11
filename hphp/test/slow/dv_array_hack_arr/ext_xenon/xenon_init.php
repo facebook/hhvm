@@ -18,7 +18,7 @@ async function fa2($a) :Awaitable<mixed>{
 }
 
 async function fa1($a) :Awaitable<mixed>{
-  $values = await \HH\Asio\v(varray[
+  $values = await \HH\Asio\v(vec[
     fa2($a),
   ]);
   return 3 * $values[0];
@@ -46,7 +46,7 @@ function entrypoint_xenon_init(): void {
   // get the Xenon data then verify that there are no unknown functions
   // and that all of the functions in this file are in the stack
   $stacks = xenon_get_data();
-  $required_functions = varray[
+  $required_functions = vec[
     'HH\Asio\join',
     'HH\Asio\v',
 
@@ -59,7 +59,7 @@ function entrypoint_xenon_init(): void {
     'main',
     'entrypoint_xenon_init',
   ];
-  $optional_functions = varray[
+  $optional_functions = vec[
     'include',
     'count',
     'HH\Asio\result',

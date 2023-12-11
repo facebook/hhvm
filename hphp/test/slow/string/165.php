@@ -34,7 +34,7 @@ function test3($a, $b) :mixed{
 
 <<__EntryPoint>>
 function main_165() :mixed{
-test(varray['a', 'b', 'c'], varray['u', 'v']);
-test2(varray['a', 'b', 'c'], varray['u', 'v']);
-test3(varray['a', 'b', 'c'], varray['u', 'v']);
+test(vec['a', 'b', 'c'], vec['u', 'v']);
+test2(vec['a', 'b', 'c'], vec['u', 'v']);
+test3(vec['a', 'b', 'c'], vec['u', 'v']);
 }

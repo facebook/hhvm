@@ -2,7 +2,7 @@
 
 function junk() :mixed{ return 2; }
 function bar() :mixed{
-  $x = darray['y' => junk()];
+  $x = dict['y' => junk()];
   $x['x'] = 0;
   $x['x'] += 1;
   $val = $x['x'];

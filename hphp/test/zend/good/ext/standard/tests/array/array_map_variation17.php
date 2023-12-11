@@ -18,13 +18,13 @@ class classA
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : unexpected values for 'callback' argument ***\n";
 
-$arr1 = varray[1, 2, 3];
+$arr1 = vec[1, 2, 3];
 
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $input argument
-$unexpected_callbacks = varray[
+$unexpected_callbacks = vec[
 
        // int data
 /*1*/  0,
@@ -50,9 +50,9 @@ $unexpected_callbacks = varray[
        '',
 
        // array data
-/*16*/ varray[],
-       varray[1, 2],
-       varray[1, varray[2]],
+/*16*/ vec[],
+       vec[1, 2],
+       vec[1, vec[2]],
 
        // object data
 /*19*/ new classA(),

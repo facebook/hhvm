@@ -5,22 +5,22 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing is_array() on different type of arrays ***\n";
 /* different types of arrays */
-$arrays = varray[
-  varray[],
-  varray[NULL],
-  varray[null],
-  varray[true],
-  varray[""],
-  varray[''],
-  varray[varray[], varray[]],
-  varray[varray[1, 2], varray['a', 'b']],
-  darray[1 => 'One'],
-  darray["test" => "is_array"],
-  varray[0],
-  varray[-1],
-  varray[10.5, 5.6],
-  varray["string", "test"],
-  varray['string', 'test']
+$arrays = vec[
+  vec[],
+  vec[NULL],
+  vec[null],
+  vec[true],
+  vec[""],
+  vec[''],
+  vec[vec[], vec[]],
+  vec[vec[1, 2], vec['a', 'b']],
+  dict[1 => 'One'],
+  dict["test" => "is_array"],
+  vec[0],
+  vec[-1],
+  vec[10.5, 5.6],
+  vec["string", "test"],
+  vec['string', 'test']
 ];
 /* loop to check that is_array() recognizes different
    type of arrays, expected output bool(true) */

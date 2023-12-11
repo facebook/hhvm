@@ -21,7 +21,7 @@ include('compare_function.inc');
 echo "*** Testing array_uintersect_uassoc() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$arr2 = varray[1, 2];
+$arr2 = vec[1, 2];
 
 $data_compare_func = compare_function<>;
 $key_compare_func = compare_function<>;
@@ -37,7 +37,7 @@ $index_array = varray [1, 2, 3];
 $assoc_array = darray ['one' => 1, 'two' => 2];
 
 //array of values to iterate over
-$inputs = darray[
+$inputs = dict[
 
       // int data
       'int 0' => 0,

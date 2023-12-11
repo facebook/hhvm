@@ -1,12 +1,12 @@
 <?hh
 
 class A {
-  private $x = varray[];
+  private $x = vec[];
   private $y = "string";
 
   public function heh(int $i) :mixed{
-    $this->x = varray[darray[3 => new stdClass()]];
-    $this->x[0][3]->foo = varray[$i];
+    $this->x = vec[dict[3 => new stdClass()]];
+    $this->x[0][3]->foo = vec[$i];
     return $this;
   }
   public function getY() :mixed{ return $this->y; }

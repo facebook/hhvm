@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_array_search() :mixed{
-$array = darray[
+$array = dict[
   0 => "blue",
   1 => "red",
   2 => "green",

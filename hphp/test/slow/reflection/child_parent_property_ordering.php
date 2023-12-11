@@ -9,7 +9,7 @@ class A {
 
 class B extends A {
   public $foo = null;
-  protected $bar = varray[];
+  protected $bar = vec[];
 }
 
 

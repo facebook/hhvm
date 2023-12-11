@@ -1,4 +1,4 @@
 <?hh <<__EntryPoint>> function main(): void {
-$a = varray[];
+$a = vec[];
 var_dump(http_build_query($a));
 }

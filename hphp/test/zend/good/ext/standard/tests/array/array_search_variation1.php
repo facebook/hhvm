@@ -8,14 +8,14 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_search() with different needle values ***\n";
 $arrays = varray [
-  varray[0],
-  darray["a" => "A", 2 => "B", "C" => 3, 4 => 4, "one" => 1, "" => NULL, 5 => "b", 6 => "ab", 7 => "abcd"],
-  darray[0 => 4, 1 => darray[0 => 1, 2 => 3], "one" => 1, "5" => 5],
-  darray[0 => -1, 1 => -2, 2 => -3, 3 => -4, 4 => -2.989888, "-0.005" => "neg0.005", 2 => "float2", "-.9" => -.9],
-  varray[TRUE, FALSE],
-  varray["", varray[]],
-  varray["abcd\x00abcd\x00abcd"],
-  varray["abcd\tabcd\nabcd\rabcd\0abcdefghij"]
+  vec[0],
+  dict["a" => "A", 2 => "B", "C" => 3, 4 => 4, "one" => 1, "" => NULL, 5 => "b", 6 => "ab", 7 => "abcd"],
+  dict[0 => 4, 1 => dict[0 => 1, 2 => 3], "one" => 1, "5" => 5],
+  dict[0 => -1, 1 => -2, 2 => -3, 3 => -4, 4 => -2.989888, "-0.005" => "neg0.005", 2 => "float2", "-.9" => -.9],
+  vec[TRUE, FALSE],
+  vec["", vec[]],
+  vec["abcd\x00abcd\x00abcd"],
+  vec["abcd\tabcd\nabcd\rabcd\0abcdefghij"]
 ];
 
 $array_compare = varray [
@@ -30,7 +30,7 @@ $array_compare = varray [
   "-.9",
   "True",
   "",
-  varray[],
+  vec[],
   NULL,
   "ab",
   "abcd",

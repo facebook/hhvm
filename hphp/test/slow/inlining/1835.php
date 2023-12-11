@@ -10,7 +10,7 @@ class B {
  }
 class X extends B {
   function __construct() {
- parent::__construct(varray[]);
+ parent::__construct(vec[]);
  }
   function foo() :mixed{
  echo "foo

@@ -11,12 +11,12 @@
 echo "*** Test fscanf(): to read a file when file pointer is pointing to EOF ***\n"; 
 
 // various formats
-$formats = varray[ "%d", "%f", "%e", "%u", " %s", "%x", "%o"];
+$formats = vec[ "%d", "%f", "%e", "%u", " %s", "%x", "%o"];
 
 $counter = 1;
 
 // various read modes
-$modes = varray["r", "rb", "rt", "r+", "r+b", "r+t",
+$modes = vec["r", "rb", "rt", "r+", "r+b", "r+t",
                "w+", "w+b", "w+t",
                "a+", "a+b", "a+t"
          ];

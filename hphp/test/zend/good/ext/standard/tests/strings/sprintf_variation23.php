@@ -17,7 +17,7 @@ $resource_values = varray [
 ];
 
 // array of char formats
-$char_formats = varray[ 
+$char_formats = vec[ 
   "%c", "%hc", "%lc", 
   "%Lc", " %c", "%c ",
   "\t%c", "\n%c", "%4c",

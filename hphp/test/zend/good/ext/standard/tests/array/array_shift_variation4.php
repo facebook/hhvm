@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_shift() : usage variations ***\n";
 
-$stack_first = varray[varray[1, 2, 3], 'one', 'two'];
+$stack_first = vec[vec[1, 2, 3], 'one', 'two'];
 $last = varray [1, 2, 3];
 $stack_last = varray ['zero', 'one', $last ];
 echo "\n-- Before shift: --\n";

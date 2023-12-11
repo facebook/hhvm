@@ -7,7 +7,7 @@
  * as a SStr or SArr.
  */
 class SerDe {
-  private $arr = varray[1,2,3];
+  private $arr = vec[1,2,3];
   private $str = "one two three";
 
   public function foo() :mixed{

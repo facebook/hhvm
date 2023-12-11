@@ -24,13 +24,13 @@ function test_marking_nested_arrays() :mixed{
   print("\n==============================================\n");
   print("test_marking_nested_arrays():\n");
   $c = new C();
-  $x = varray[
+  $x = vec[
     vec[$c],
-    varray[$c],
+    vec[$c],
     vec[
-      darray['c' => $c, 'v' => varray[$c]],
+      dict['c' => $c, 'v' => vec[$c]],
       vec[$c],
-      varray[$c],
+      vec[$c],
     ],
   ];
   print_recursive_marking($x, '$x');
@@ -43,13 +43,13 @@ function test_unmarking_nested_arrays() :mixed{
   print("\n==============================================\n");
   print("test_unmarking_nested_arrays():\n");
   $c = new C();
-  $x = HH\array_mark_legacy(varray[
+  $x = HH\array_mark_legacy(vec[
     vec[$c],
-    varray[$c],
+    vec[$c],
     vec[
-      HH\array_mark_legacy(darray['c' => $c, 'v' => varray[$c]]),
+      HH\array_mark_legacy(dict['c' => $c, 'v' => vec[$c]]),
       vec[$c],
-      varray[$c],
+      vec[$c],
     ],
   ]);
   print_recursive_marking($x, '$x');

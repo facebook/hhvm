@@ -16,7 +16,7 @@ function row_dump($row, $pixels) :mixed{
 <<__EntryPoint>> function main(): void {
 $magick = new Imagick(__DIR__.'/facebook.png');
 
-$iterators = varray[
+$iterators = vec[
   ImagickPixelIterator::getPixelIterator($magick),
   ImagickPixelIterator::getPixelRegionIterator($magick, 40, 30, 20, 10),
 ];

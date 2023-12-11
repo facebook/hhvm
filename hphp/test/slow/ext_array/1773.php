@@ -1,7 +1,7 @@
 <?hh
 
 function xsort(inout $a) :mixed{
-  $b = darray[];
+  $b = dict[];
   $b[0] = $a;
   uksort(inout $a, function ($i, $j) use($b) {
       if ($b[0][$i] == $b[0][$j]) return 0;
@@ -10,7 +10,7 @@ function xsort(inout $a) :mixed{
 );
 }
 function test($x) :mixed{
-  $a = varray[220,250,240,$x];
+  $a = vec[220,250,240,$x];
   xsort(inout $a);
   var_dump($a);
 }

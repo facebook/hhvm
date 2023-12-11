@@ -31,8 +31,8 @@ function callback_without_ret($arr1)
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : callback with diff return value ***\n";
 
-$array1 = varray[1, 2, 3];
-$array2 = varray[3, 4, 5];
+$array1 = vec[1, 2, 3];
+$array2 = vec[3, 4, 5];
 
 echo "-- with integer return value --\n";
 var_dump( array_map(callback_int<>, $array1, $array2));

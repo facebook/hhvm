@@ -12,7 +12,7 @@ class B {
   <<__LateInit>> public $y;
   public $z = 'abc';
   public function __sleep() :mixed{
-    return varray['x', 'y'];
+    return vec['x', 'y'];
   }
 }
 
@@ -21,7 +21,7 @@ class C {
   <<__LateInit>> public $y;
   public $z = 'abc';
   public function __sleep() :mixed{
-    return varray['x', 'z'];
+    return vec['x', 'z'];
   }
 }
 

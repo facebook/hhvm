@@ -11,24 +11,24 @@ function compare($args, $args_manual, $var_args, $var_arg_start = 0) :mixed{
 
 <<__EntryPoint>>
 function main_bug_5183265() :mixed{
-var_dump(compare(varray["a", "b", "c"], varray["a", "a", "b"],
-                 varray["a", "b", "c"]), 0);
-var_dump(compare(varray["a", "b", "c"], varray["b", "a", "b"],
-                 varray["b", "c"]), 1);
+var_dump(compare(vec["a", "b", "c"], vec["a", "a", "b"],
+                 vec["a", "b", "c"]), 0);
+var_dump(compare(vec["a", "b", "c"], vec["b", "a", "b"],
+                 vec["b", "c"]), 1);
 
-var_dump(compare(varray["a", "b", "c"], varray["a", "a", "b"],
-                 varray["a", "b", "c"]), 0);
-var_dump(compare(varray["a", "b", "c"], varray["b", "a", "b"],
-                 varray["b", "c"]), 1);
+var_dump(compare(vec["a", "b", "c"], vec["a", "a", "b"],
+                 vec["a", "b", "c"]), 0);
+var_dump(compare(vec["a", "b", "c"], vec["b", "a", "b"],
+                 vec["b", "c"]), 1);
 
-var_dump(compare(varray["a", "b", "c"], varray["a", "a", "b"],
-                 varray["a", "b", "c"]), 0);
-var_dump(compare(varray["a", "b", "c"], varray["b", "a", "b"],
-                 varray["b", "c"]), 1);
+var_dump(compare(vec["a", "b", "c"], vec["a", "a", "b"],
+                 vec["a", "b", "c"]), 0);
+var_dump(compare(vec["a", "b", "c"], vec["b", "a", "b"],
+                 vec["b", "c"]), 1);
 
-var_dump(compare(varray[], varray[], varray[]), 0);
-var_dump(compare(varray[], varray[], varray[]), 1);
+var_dump(compare(vec[], vec[], vec[]), 0);
+var_dump(compare(vec[], vec[], vec[]), 1);
 
-var_dump(compare(varray[], varray[], varray[]), 0);
-var_dump(compare(varray[], varray[], varray[]), 1);
+var_dump(compare(vec[], vec[], vec[]), 0);
+var_dump(compare(vec[], vec[], vec[]), 1);
 }

@@ -6,7 +6,7 @@ async function waitForMe(): Awaitable<string> {
 }
 
 function makeWaitHandles(): darray<string,Awaitable<mixed>> {
-  return darray[
+  return dict[
     'later' => HH\Asio\later(),
     'sleep' => HH\Asio\usleep(1),
     'user'  => waitForMe(),

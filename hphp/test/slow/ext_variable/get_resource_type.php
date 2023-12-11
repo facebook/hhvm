@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_get_resource_type() :mixed{
-$types = varray[
+$types = vec[
   'php://stdin',
   'php://stdout',
   'php://stderr',

@@ -1,7 +1,7 @@
 <?hh
 
 class MyClass {
-  protected static $stack = varray[];
+  protected static $stack = vec[];
 
   public function addToStack(MyClass $o)
 :mixed  {

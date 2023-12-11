@@ -11,49 +11,49 @@ class ThriftData {
 }
 
 class ListI64 extends ThriftData {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'data',
       'format' => 'harray',
       'type' => TType::LST,
       'etype' => TType::I64,
-      'elem' => darray[ 'type' => TType::I64 ],
+      'elem' => dict[ 'type' => TType::I64 ],
     ],
   ];
 }
 
 class ListI08 extends ThriftData {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'data',
       'format' => 'harray',
       'type' => TType::LST,
       'etype' => TType::I08,
-      'elem' => darray[ 'type' => TType::I08 ],
+      'elem' => dict[ 'type' => TType::I08 ],
     ],
   ];
 }
 
 class VectorI64 extends ThriftData {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'data',
       'format' => 'collection',
       'type' => TType::LST,
       'etype' => TType::I64,
-      'elem' => darray[ 'type' => TType::I64 ],
+      'elem' => dict[ 'type' => TType::I64 ],
     ],
   ];
 }
 
 class VectorI08 extends ThriftData {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'data',
       'format' => 'collection',
       'type' => TType::LST,
       'etype' => TType::I08,
-      'elem' => darray[ 'type' => TType::I08 ],
+      'elem' => dict[ 'type' => TType::I08 ],
     ],
   ];
 }

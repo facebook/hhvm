@@ -4,7 +4,7 @@ class X {
 }
 
 function test($x) :mixed{
-  call_user_func(varray[$x, "FOO"]);
+  call_user_func(vec[$x, "FOO"]);
 }
 
 function main() :mixed{

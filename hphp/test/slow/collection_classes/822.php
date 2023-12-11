@@ -15,10 +15,10 @@ function g() :mixed{
   var_dump($v);
 }
 function h() :mixed{
-  $arr1 = varray[11, 22, 33];
+  $arr1 = vec[11, 22, 33];
   var_dump(new Vector($arr1));
   var_dump(new Map($arr1));
-  $arr2 = darray['a' => 1, 2 => 'b'];
+  $arr2 = dict['a' => 1, 2 => 'b'];
   var_dump(new Vector($arr2));
   var_dump(new Map($arr2));
 }

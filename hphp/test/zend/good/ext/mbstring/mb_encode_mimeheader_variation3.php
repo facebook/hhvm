@@ -40,7 +40,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $transfer_encoding argument
-$inputs = varray[
+$inputs = vec[
 
        // int data
 /*1*/  0,

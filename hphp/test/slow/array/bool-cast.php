@@ -8,7 +8,7 @@ function f($a) :mixed{
 
 <<__EntryPoint>>
 function main_bool_cast() :mixed{
-f(darray['a' => 'b']);
-f(varray['a']);
-f(varray[]);
+f(dict['a' => 'b']);
+f(vec['a']);
+f(vec[]);
 }

@@ -10,7 +10,7 @@ $red = 10;
 $green = 10;
 $blue = 10;
 
-$values = darray[
+$values = dict[
       // octal integer data
       "Octal 000" => 000,
       "Octal 012" => 012,

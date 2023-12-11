@@ -10,7 +10,7 @@
 */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing implode() : usage variations - sub arrays ***\n";
-$sub_array = varray[varray[1,2,3,4], darray[1 => "one", 2 => "two"], "PHP", 50];
+$sub_array = vec[vec[1,2,3,4], dict[1 => "one", 2 => "two"], "PHP", 50];
 
 // using directly the sub_array as pieces
 var_dump( join(", ", $sub_array[0]) );

@@ -4,14 +4,14 @@
 require(__DIR__ . '/common.inc');
 
 $path = __FILE__ . ".test";
-$breakpoints = varray[
-   darray[
+$breakpoints = vec[
+   dict[
      "path" => $path,
-     "breakpoints" => varray[
-       darray["line" => 20, "calibratedLine" => 20, "condition" => ""],
-       darray["line" => 21, "calibratedLine" => 21, "condition" => ""],
-       darray["line" => 23, "calibratedLine" => 24, "condition" => ""],
-       darray["line" => 28, "calibratedLine" => 28, "condition" => ""],
+     "breakpoints" => vec[
+       dict["line" => 20, "calibratedLine" => 20, "condition" => ""],
+       dict["line" => 21, "calibratedLine" => 21, "condition" => ""],
+       dict["line" => 23, "calibratedLine" => 24, "condition" => ""],
+       dict["line" => 28, "calibratedLine" => 28, "condition" => ""],
      ]]
    ];
 
@@ -24,30 +24,30 @@ skipMessages(count($breakpoints[0]{'breakpoints'}));
 verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0]);
 
 // Check thread stacks.
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "stackTrace",
   "type" => "request",
-  "arguments" => darray[
+  "arguments" => dict[
     "threadId" => 1
   ]]);
 
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "response",
   "command" => "stackTrace",
   "request_seq" => $seq,
   "success" => true,
-  "body" => darray[
+  "body" => dict[
       "totalFrames" => 2,
-      "stackFrames" => varray[
-        darray[
-          "source" => darray["path" => $path, "name" => str_replace(".test", "", basename($path))],
+      "stackFrames" => vec[
+        dict[
+          "source" => dict["path" => $path, "name" => str_replace(".test", "", basename($path))],
           "id" => 1,
           "line" => 20,
           "name" => "innerFunc"
         ],
-        darray[
-          "source" => darray["path" => $path, "name" => str_replace(".test", "", basename($path))],
+        dict[
+          "source" => dict["path" => $path, "name" => str_replace(".test", "", basename($path))],
           "id" => 2,
           "line" => 31,
           "name" => "main"
@@ -57,43 +57,43 @@ checkObjEqualRecursively($msg, darray[
   ]);
 
 // Check threads.
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "threads",
   "type" => "request"]);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "response",
   "command" => "threads",
   "request_seq" => $seq,
   "success" => true,
-  "body" => darray[
-    "threads" => varray[darray["name" => "Request 1", "id" => 1]]
+  "body" => dict[
+    "threads" => vec[dict["name" => "Request 1", "id" => 1]]
   ]
   ]);
 
 
 // Get scopes.
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "scopes",
   "type" => "request",
-  "arguments" => darray["frameId" => 1]]);
+  "arguments" => dict["frameId" => 1]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "response",
   "command" => "scopes",
   "request_seq" => $seq,
   "success" => true,
-  "body" => darray[
-    "scopes" => varray[
-      darray[
+  "body" => dict[
+    "scopes" => vec[
+      dict[
         "namedVariables" => 1,
         "name" => "Locals",
       ],
-      darray[
+      dict[
         "namedVariables" => 7,
         "name" => "Superglobals",
       ],
-      darray[
+      dict[
         "namedVariables" => 2,
         "name" => "Constants",
       ]
@@ -101,19 +101,19 @@ checkObjEqualRecursively($msg, darray[
   ]);
 
 // Get locals, only $a should be visible right here.
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "variables",
   "type" => "request",
-  "arguments" => darray["variablesReference" => 3]]);
+  "arguments" => dict["variablesReference" => 3]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "response",
   "command" => "variables",
   "request_seq" => $seq,
   "success" => true,
-  "body" => darray[
-    "variables" => varray[
-      darray[
+  "body" => dict[
+    "variables" => vec[
+      dict[
         "type" => "int",
         "name" => "\$a",
         "value" => "1",
@@ -138,60 +138,60 @@ resumeTarget();
 // Verify we hit breakpoint 4.
 verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[3]);
 
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "stackTrace",
   "type" => "request",
-  "arguments" => darray[
+  "arguments" => dict[
     "threadId" => 1
   ]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
 
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "scopes",
   "type" => "request",
-  "arguments" => darray["frameId" => 8]]);
+  "arguments" => dict["frameId" => 8]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
 
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "variables",
   "type" => "request",
-  "arguments" => darray["variablesReference" => 3]]);
+  "arguments" => dict["variablesReference" => 3]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
     "type" => "response",
     "command" => "variables",
     "request_seq" => $seq,
     "success" => true,
-    "body" => darray[
-      "variables" => varray[
-        darray[
+    "body" => dict[
+      "variables" => vec[
+        dict[
           "type" => "int",
           "name" => "\$a",
           "value" => "1",
         ],
-        darray[
+        dict[
           "type" => "string",
           "name" => "\$b",
           "value" => "Hello world",
         ],
-        darray[
+        dict[
           "type" => "B",
           "name" => "\$bObj",
           "value" => "B",
         ],
-        darray[
+        dict[
           "type" => "vec",
           "name" => "\$c",
           "value" => "vec[3]",
           "indexedVariables" => 3,
         ],
-        darray[
+        dict[
           "type" => "vec",
           "name" => "\$d",
           "value" => "vec[2]",
           "indexedVariables" => 2,
         ],
-        darray[
+        dict[
           "type" => "vec",
           "name" => "\$e",
           "value" => "vec[2]",
@@ -204,126 +204,126 @@ if (count($msg{"body"}{"variables"}) != 6) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "variables",
   "type" => "request",
-  "arguments" => darray["variablesReference" => 14]]);
+  "arguments" => dict["variablesReference" => 14]]);
 
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
     "type" => "response",
     "command" => "variables",
     "request_seq" => $seq,
     "success" => true,
-    "body" => darray[
-      "variables" => varray[
-        darray[
+    "body" => dict[
+      "variables" => vec[
+        dict[
           "type" => "A",
           "name" => "aObj",
           "value" => "A",
           "namedVariables" => 2,
           "variablesReference" => 16,
-          "presentationHint" => darray[
+          "presentationHint" => dict[
             "visibility" => "public"
           ]
         ],
-        darray[
+        dict[
           "type" => "int",
           "name" => "b",
           "value" => "2",
-          "presentationHint" => darray[
+          "presentationHint" => dict[
             "visibility" => "protected"
           ]
         ],
-        darray[
+        dict[
           "type" => "int",
           "name" => "c",
           "value" => "3",
-          "presentationHint" => darray[
+          "presentationHint" => dict[
             "visibility" => "public"
           ]
         ],
 
         // The private props should contain the base class's copy of $a, only.
-        darray[
+        dict[
           "variablesReference" => 17,
           "name" => "Private props",
           "value" => "class A",
           "namedVariables" => 1,
-          "presentationHint" => darray[
-            "attributes" => varray["constant", "readOnly"]
+          "presentationHint" => dict[
+            "attributes" => vec["constant", "readOnly"]
           ]
         ],
 
         // Two constants should be visible on A, HELLOA and HELLOB, and one
         // on class B.
-        darray[
+        dict[
           "variablesReference" => 18,
           "name" => "Class Constants",
           "value" => "class B",
           "namedVariables" => 3,
-          "presentationHint" => darray[
-            "attributes" => varray["constant", "readOnly"]
+          "presentationHint" => dict[
+            "attributes" => vec["constant", "readOnly"]
           ]
         ],
 
-        darray[
+        dict[
           "variablesReference" => 19,
           "name" => "Static Props",
           "value" => "class B",
           "namedVariables" => 1,
-          "presentationHint" => darray[
-            "attributes" => varray["constant", "readOnly"]
+          "presentationHint" => dict[
+            "attributes" => vec["constant", "readOnly"]
           ]
         ],
     ]]
     ]);
 
 // Check that we can see the correct properties of $aObj
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "variables",
   "type" => "request",
-  "arguments" => darray["variablesReference" => 16]]);
+  "arguments" => dict["variablesReference" => 16]]);
 
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
     "type" => "response",
     "command" => "variables",
     "request_seq" => $seq,
     "success" => true,
-    "body" => darray[
-      "variables" => varray[
-        darray[
+    "body" => dict[
+      "variables" => vec[
+        dict[
           "type" => "int",
           "name" => "a",
           "value" => "0",
-          "presentationHint" => darray[
+          "presentationHint" => dict[
             "visibility" => "private"
           ]
         ],
-        darray[
+        dict[
           "type" => "int",
           "name" => "b",
           "value" => "1",
-          "presentationHint" => darray[
+          "presentationHint" => dict[
             "visibility" => "protected"
           ]
         ],
-        darray[
+        dict[
           "name" => "Class Constants",
           "value" => "class A",
           "namedVariables" => 2,
-          "presentationHint" => darray[
-            "attributes" => varray["constant", "readOnly"]
+          "presentationHint" => dict[
+            "attributes" => vec["constant", "readOnly"]
           ]
         ],
 
-        darray[
+        dict[
           "name" => "Static Props",
           "value" => "class A",
           "namedVariables" => 1,
-          "presentationHint" => darray[
-            "attributes" => varray["constant", "readOnly"]
+          "presentationHint" => dict[
+            "attributes" => vec["constant", "readOnly"]
           ]
         ],
       ]
@@ -334,23 +334,23 @@ if (count($msg{"body"}{"variables"}) != 4) {
 }
 
 // Correct private props of $bObj from base class A
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "variables",
   "type" => "request",
-  "arguments" => darray["variablesReference" => 17]]);
+  "arguments" => dict["variablesReference" => 17]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
     "type" => "response",
     "command" => "variables",
     "request_seq" => $seq,
     "success" => true,
-    "body" => darray[
-      "variables" => varray[
-        darray[
+    "body" => dict[
+      "variables" => vec[
+        dict[
           "type" => "int",
           "name" => "a",
           "value" => "0",
-          "presentationHint" => darray[
+          "presentationHint" => dict[
             "visibility" => "private"
           ]
         ]
@@ -362,23 +362,23 @@ if (count($msg{"body"}{"variables"}) != 1) {
 }
 
 // Correct statics, $bObj should see statics inherited from class A
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "variables",
   "type" => "request",
-  "arguments" => darray["variablesReference" => 19]]);
+  "arguments" => dict["variablesReference" => 19]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
     "type" => "response",
     "command" => "variables",
     "request_seq" => $seq,
     "success" => true,
-    "body" => darray[
-      "variables" => varray[
-        darray[
+    "body" => dict[
+      "variables" => vec[
+        dict[
           "type" => "int",
           "name" => "B::\$S",
           "value" => "100",
-          "presentationHint" => darray[
+          "presentationHint" => dict[
             "visibility" => "public"
           ]
         ]
@@ -390,40 +390,40 @@ if (count($msg{"body"}{"variables"}) != 1) {
 }
 
 // Correct class constants. Should inclide consts from A and B, sorted by name.
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "variables",
   "type" => "request",
-  "arguments" => darray["variablesReference" => 18]]);
+  "arguments" => dict["variablesReference" => 18]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
     "type" => "response",
     "command" => "variables",
     "request_seq" => $seq,
     "success" => true,
-    "body" => darray[
-      "variables" => varray[
-        darray[
+    "body" => dict[
+      "variables" => vec[
+        dict[
           "type" => "string",
           "name" => "A::HELLOA",
           "value" => "hello0",
-          "presentationHint" => darray[
-            "attributes" => varray["constant", "readOnly"]
+          "presentationHint" => dict[
+            "attributes" => vec["constant", "readOnly"]
           ]
         ],
-        darray[
+        dict[
           "type" => "string",
           "name" => "A::HELLOB",
           "value" => "hello0",
-          "presentationHint" => darray[
-            "attributes" => varray["constant", "readOnly"]
+          "presentationHint" => dict[
+            "attributes" => vec["constant", "readOnly"]
           ]
         ],
-        darray[
+        dict[
           "type" => "string",
           "name" => "B::HELLOB",
           "value" => "hello1",
-          "presentationHint" => darray[
-            "attributes" => varray["constant", "readOnly"]
+          "presentationHint" => dict[
+            "attributes" => vec["constant", "readOnly"]
           ]
         ]
       ]
@@ -434,29 +434,29 @@ if (count($msg{"body"}{"variables"}) != 3) {
 }
 
 // Check $c, a regular array of ints.
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "variables",
   "type" => "request",
-  "arguments" => darray["variablesReference" => 12]]);
+  "arguments" => dict["variablesReference" => 12]]);
   $msg = json_decode(getNextVsDebugMessage(), true);
-  checkObjEqualRecursively($msg, darray[
+  checkObjEqualRecursively($msg, dict[
       "type" => "response",
       "command" => "variables",
       "request_seq" => $seq,
       "success" => true,
-      "body" => darray[
-        "variables" => varray[
-          darray[
+      "body" => dict[
+        "variables" => vec[
+          dict[
             "type" => "int",
             "name" => "0",
             "value" => "1"
           ],
-          darray[
+          dict[
             "type" => "int",
             "name" => "1",
             "value" => "2"
           ],
-          darray[
+          dict[
             "type" => "int",
             "name" => "2",
             "value" => "3"
@@ -469,24 +469,24 @@ if (count($msg{"body"}{"variables"}) != 3) {
 }
 
 // Ask for a subset of the array.
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "variables",
   "type" => "request",
-  "arguments" =>darray["variablesReference" => 12, "count" => 2]]);
+  "arguments" =>dict["variablesReference" => 12, "count" => 2]]);
   $msg = json_decode(getNextVsDebugMessage(), true);
-  checkObjEqualRecursively($msg, darray[
+  checkObjEqualRecursively($msg, dict[
       "type" => "response",
       "command" => "variables",
       "request_seq" => $seq,
       "success" => true,
-      "body" => darray[
-        "variables" => varray[
-          darray[
+      "body" => dict[
+        "variables" => vec[
+          dict[
             "type" => "int",
             "name" => "0",
             "value" => "1"
           ],
-          darray[
+          dict[
             "type" => "int",
             "name" => "1",
             "value" => "2"
@@ -499,24 +499,24 @@ if (count($msg{"body"}{"variables"}) != 2) {
 }
 
 // Check $d, a array of arrays.
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "variables",
   "type" => "request",
-  "arguments" => darray["variablesReference" => 13]]);
+  "arguments" => dict["variablesReference" => 13]]);
   $msg = json_decode(getNextVsDebugMessage(), true);
-  checkObjEqualRecursively($msg, darray[
+  checkObjEqualRecursively($msg, dict[
       "type" => "response",
       "command" => "variables",
       "request_seq" => $seq,
       "success" => true,
-      "body" => darray[
-        "variables" => varray[
-          darray[
+      "body" => dict[
+        "variables" => vec[
+          dict[
             "type" => "int",
             "name" => "0",
             "value" => "1"
           ],
-          darray[
+          dict[
             "type" => "vec",
             "name" => "1",
             "value" => "vec[2]",
@@ -530,24 +530,24 @@ if (count($msg{"body"}{"variables"}) != 2) {
 }
 
 // check $d[1], sub array of ints.
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "variables",
   "type" => "request",
-  "arguments" => darray["variablesReference" => 22]]);
+  "arguments" => dict["variablesReference" => 22]]);
   $msg = json_decode(getNextVsDebugMessage(), true);
-  checkObjEqualRecursively($msg, darray[
+  checkObjEqualRecursively($msg, dict[
       "type" => "response",
       "command" => "variables",
       "request_seq" => $seq,
       "success" => true,
-      "body" => darray[
-        "variables" => varray[
-          darray[
+      "body" => dict[
+        "variables" => vec[
+          dict[
             "type" => "int",
             "name" => "0",
             "value" => "2"
           ],
-          darray[
+          dict[
             "type" => "int",
             "name" => "1",
             "value" => "3"
@@ -560,25 +560,25 @@ if (count($msg{"body"}{"variables"}) != 2) {
 }
 
 // Check $e, array of objects
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "variables",
   "type" => "request",
-  "arguments" => darray["variablesReference" => 15]]);
+  "arguments" => dict["variablesReference" => 15]]);
   $msg = json_decode(getNextVsDebugMessage(), true);
-  checkObjEqualRecursively($msg, darray[
+  checkObjEqualRecursively($msg, dict[
       "type" => "response",
       "command" => "variables",
       "request_seq" => $seq,
       "success" => true,
-      "body" => darray[
-        "variables" => varray[
-          darray[
+      "body" => dict[
+        "variables" => vec[
+          dict[
             "type" => "B",
             "name" => "0",
             "value" => "B",
             "variablesReference" => 14
           ],
-          darray[
+          dict[
             "type" => "B",
             "name" => "1",
             "value" => "B",
@@ -591,100 +591,100 @@ if (count($msg{"body"}{"variables"}) != 2) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "variables",
   "type" => "request",
-  "arguments" => darray["variablesReference" => 14]]);
+  "arguments" => dict["variablesReference" => 14]]);
 
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "response",
   "command" => "variables",
   "request_seq" => $seq,
   "success" => true,
-  "body" => darray[
-    "variables" => varray[
-      darray[
+  "body" => dict[
+    "variables" => vec[
+      dict[
         "type" => "A",
         "name" => "aObj",
         "value" => "A",
         "namedVariables" => 2,
         "variablesReference" => 16,
-        "presentationHint" => darray[
+        "presentationHint" => dict[
           "visibility" => "public"
         ]
       ],
-      darray[
+      dict[
         "type" => "int",
         "name" => "b",
         "value" => "2",
-        "presentationHint" => darray[
+        "presentationHint" => dict[
           "visibility" => "protected"
         ]
       ],
-      darray[
+      dict[
         "type" => "int",
         "name" => "c",
         "value" => "3",
-        "presentationHint" => darray[
+        "presentationHint" => dict[
           "visibility" => "public"
         ]
       ],
 
       // The private props should contain the base class's copy of $a, only.
-      darray[
+      dict[
         "variablesReference" => 23,
         "name" => "Private props",
         "value" => "class A",
         "namedVariables" => 1,
-        "presentationHint" => darray[
-          "attributes" => varray["constant", "readOnly"]
+        "presentationHint" => dict[
+          "attributes" => vec["constant", "readOnly"]
         ]
       ],
 
       // Two constants should be visible on A, HELLOA and HELLOB, and one
       // on class B.
-      darray[
+      dict[
         "variablesReference" => 24,
         "name" => "Class Constants",
         "value" => "class B",
         "namedVariables" => 3,
-        "presentationHint" => darray[
-          "attributes" => varray["constant", "readOnly"]
+        "presentationHint" => dict[
+          "attributes" => vec["constant", "readOnly"]
         ]
       ],
 
-      darray[
+      dict[
         "variablesReference" => 25,
         "name" => "Static Props",
         "value" => "class B",
         "namedVariables" => 1,
-        "presentationHint" => darray[
-          "attributes" => varray["constant", "readOnly"]
+        "presentationHint" => dict[
+          "attributes" => vec["constant", "readOnly"]
         ]
       ],
   ]]
   ]);
 
   // Ask for a subset of the array. Give me index 1 only.
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "variables",
   "type" => "request",
   "seq" => 27,
-  "arguments" => darray[
+  "arguments" => dict[
     "variablesReference" => 12,
     "start" => 1,
     "count" => 1
   ]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
     "type" => "response",
     "command" => "variables",
     "request_seq" => $seq,
     "success" => true,
-    "body" => darray[
-      "variables" => varray[
-          darray[
+    "body" => dict[
+      "variables" => vec[
+          dict[
           "type" => "int",
           "name" => "1",
           "value" => "2"
@@ -697,37 +697,37 @@ if (count($msg{"body"}{"variables"}) != 1) {
 }
 
 // Subset of class constants.
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "variables",
   "type" => "request",
   "arguments" =>
-  darray[
+  dict[
     "variablesReference" => 24,
     "start" => 1,
     "count" => 2
   ]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
     "type" => "response",
     "command" => "variables",
     "request_seq" => $seq,
     "success" => true,
-    "body" => darray[
-      "variables" => varray[
-        darray[
+    "body" => dict[
+      "variables" => vec[
+        dict[
           "type" => "string",
           "name" => "A::HELLOB",
           "value" => "hello0",
-          "presentationHint" => darray[
-            "attributes" => varray["constant", "readOnly"]
+          "presentationHint" => dict[
+            "attributes" => vec["constant", "readOnly"]
           ]
         ],
-        darray[
+        dict[
           "type" => "string",
           "name" => "B::HELLOB",
           "value" => "hello1",
-          "presentationHint" => darray[
-            "attributes" => varray["constant", "readOnly"]
+          "presentationHint" => dict[
+            "attributes" => vec["constant", "readOnly"]
           ]
         ]
       ]
@@ -738,29 +738,29 @@ if (count($msg{"body"}{"variables"}) != 2) {
 }
 
 // Invalid subsets.
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "variables",
   "type" => "request",
   "arguments" =>
-  darray[
+  dict[
     "variablesReference" => 24,
     "start" => 100,
     "count" => 1
   ]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
     "type" => "response",
     "command" => "variables",
     "request_seq" => $seq,
     "success" => true,
-    "body" => darray[
-      "variables" => varray[
-        darray[
+    "body" => dict[
+      "variables" => vec[
+        dict[
           "type" => "string",
           "name" => "A::HELLOA",
           "value" => "hello0",
-          "presentationHint" => darray[
-            "attributes" => varray["constant", "readOnly"]
+          "presentationHint" => dict[
+            "attributes" => vec["constant", "readOnly"]
           ]
         ],
       ]
@@ -769,37 +769,37 @@ if (count($msg{"body"}{"variables"}) != 1) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "variables",
   "type" => "request",
   "arguments" =>
-  darray[
+  dict[
     "variablesReference" => 24,
     "start" => 1,
     "count" => 100
   ]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
     "type" => "response",
     "command" => "variables",
     "request_seq" => $seq,
     "success" => true,
-    "body" => darray[
-      "variables" => varray[
-        darray[
+    "body" => dict[
+      "variables" => vec[
+        dict[
           "type" => "string",
           "name" => "A::HELLOB",
           "value" => "hello0",
-          "presentationHint" => darray[
-            "attributes" => varray["constant", "readOnly"]
+          "presentationHint" => dict[
+            "attributes" => vec["constant", "readOnly"]
           ]
         ],
-        darray[
+        dict[
           "type" => "string",
           "name" => "B::HELLOB",
           "value" => "hello1",
-          "presentationHint" => darray[
-            "attributes" => varray["constant", "readOnly"]
+          "presentationHint" => dict[
+            "attributes" => vec["constant", "readOnly"]
           ]
         ]
       ]

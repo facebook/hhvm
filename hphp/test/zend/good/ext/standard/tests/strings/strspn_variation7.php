@@ -48,7 +48,7 @@ hello\0\100\xaaworld\0hello
 EOT;
 
 // defining array of different heredoc strings
-$heredoc_strings = varray[
+$heredoc_strings = vec[
                    $empty_heredoc,
                    $heredoc_with_newline,
                    $heredoc_with_characters,
@@ -59,7 +59,7 @@ $heredoc_strings = varray[
                    ];
 
 // defining array of different mask strings
-$mask_array = varray[
+$mask_array = vec[
             "",
             '',
             "f\nh\trstie \l",
@@ -73,7 +73,7 @@ $mask_array = varray[
                    ];
 
 // defining array of different start values
-$start_array = varray[
+$start_array = vec[
             0,
             1,
                   2,

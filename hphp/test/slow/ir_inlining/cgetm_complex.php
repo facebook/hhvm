@@ -11,7 +11,7 @@ class CGetM {
   private $x;
 
   public function __construct() {
-    $this->x = varray[new Obj];
+    $this->x = vec[new Obj];
   }
 
   public function getVal() :mixed{

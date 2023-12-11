@@ -114,7 +114,7 @@ function compare($a, $b) :mixed{
   compare(vec[], 1.2345);
   compare(vec[], 'abc');
   compare(vec[], new stdClass);
-  compare(vec[], varray[]);
+  compare(vec[], vec[]);
   compare(vec[], dict[]);
   compare(vec[], keyset[]);
 

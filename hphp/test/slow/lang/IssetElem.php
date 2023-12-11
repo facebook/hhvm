@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_isset_elem() :mixed{
-$a = varray[0, 1, 2];
+$a = vec[0, 1, 2];
 print ":".(string)(isset($a[-1])).":\n";
 print ":".(string)(isset($a[0])).":\n";
 print ":".(string)(isset($a[1])).":\n";
@@ -11,7 +11,7 @@ print ":".(string)(isset($a[3])).":\n";
 print ":".(string)(isset($a["blah"])).":\n";
 print "\n";
 
-$a = varray[null, null];
+$a = vec[null, null];
 print ":".(string)(isset($a[-1])).":\n";
 print ":".(string)(isset($a[0])).":\n";
 print ":".(string)(isset($a[1])).":\n";

@@ -7,9 +7,9 @@
 echo "*** Testing array_merge_recursive() : array with default keys ***\n";
 
 // Initialise the arrays
-$arr1 = varray[1, varray[1, 2]];
-$arr2 = varray[3, varray["hello", 'world']];
-$arr3 = varray[varray[6, 7], varray["str1", 'str2']];
+$arr1 = vec[1, vec[1, 2]];
+$arr2 = vec[3, vec["hello", 'world']];
+$arr3 = vec[vec[6, 7], vec["str1", 'str2']];
 
 // Calling array_merge_recursive() with default arguments
 echo "-- With default argument --\n";

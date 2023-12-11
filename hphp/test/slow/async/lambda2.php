@@ -14,7 +14,7 @@ async function foo() :Awaitable<mixed>{
   return await \HH\Asio\m(
     array_map(
       async $id ==> await bar($id),
-      varray[1,2,3,4],
+      vec[1,2,3,4],
     )
   );
 }

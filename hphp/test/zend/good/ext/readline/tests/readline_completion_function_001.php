@@ -2,7 +2,7 @@
 
 function foo() :mixed{ }
 <<__EntryPoint>> function main(): void {
-$data = varray[
+$data = vec[
     foo<>,
     strtolower<>,
     1,

@@ -9,7 +9,7 @@ class t
     function __sleep()
 :mixed    {
         echo "__sleep called\n";
-        return varray['a','b'];
+        return vec['a','b'];
     }
 }
 <<__EntryPoint>> function main(): void {

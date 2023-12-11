@@ -33,7 +33,7 @@ var_dump(get_parent_class(""));
 var_dump(get_parent_class("[[[["));
 var_dump(get_parent_class(" "));
 var_dump(get_parent_class(new stdClass));
-var_dump(get_parent_class(varray[]));
+var_dump(get_parent_class(vec[]));
 var_dump(get_parent_class(1));
 
 echo "Done\n";

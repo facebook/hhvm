@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_keygen() :mixed{
-$algos = varray[
+$algos = vec[
   'aead_chacha20poly1305',
   'aead_chacha20poly1305_ietf',
   'aead_xchacha20poly1305_ietf',

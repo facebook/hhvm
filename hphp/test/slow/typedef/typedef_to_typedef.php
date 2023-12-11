@@ -10,5 +10,5 @@ function main(Bar $x) :mixed{
 
 <<__EntryPoint>>
 function main_typedef_to_typedef() :mixed{
-main(varray[12]);
+main(vec[12]);
 }

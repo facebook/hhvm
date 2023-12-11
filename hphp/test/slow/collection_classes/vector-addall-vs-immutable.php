@@ -8,7 +8,7 @@ function addAndDump($addMe) :mixed{
 }
 
 function main() :mixed{
-  addAndDump(varray[1, 2]);
+  addAndDump(vec[1, 2]);
   addAndDump(vec[1, 2]);
   addAndDump(Vector {1, 2});
 }

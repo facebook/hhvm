@@ -1,8 +1,8 @@
 <?hh
 
 class InnerStruct {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'value',
       'type' => \TType::I16,
     ],
@@ -16,25 +16,25 @@ class InnerStruct {
 }
 
 class OuterStruct {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'value',
       'type' => \TType::STRING,
     ],
-    2 => darray[
+    2 => dict[
       'var' => 'nested',
       'type' => \TType::STRUCT,
       'class' => 'InnerStruct',
     ],
-    3 => darray[
+    3 => dict[
       'var' => 'collection',
       'type' => \TType::MAP,
       'ktype' => \TType::I16,
       'vtype' => \TType::STRUCT,
-      'key' => darray[
+      'key' => dict[
         'type' => \TType::I16,
       ],
-      'val' => darray[
+      'val' => dict[
         'type' => \TType::STRUCT,
         'class' => 'InnerStruct',
       ],

@@ -12,7 +12,7 @@
 <<__EntryPoint>> function main(): void {
 echo "\n\nArray containing same object twice:\n";
 $obj = new stdClass;
-$a = darray[];
+$a = dict[];
 $a[0] = $obj;
 $a[1] = $a[0];
 var_dump($a);

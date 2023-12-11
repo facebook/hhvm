@@ -12,7 +12,7 @@ $subDir = "aSubDir";
 mkdir($workDir);
 $cwd = getcwd();
 
-$dirs = varray[
+$dirs = vec[
              // relative
              $workDir.'/'.$subDir,
              './'.$workDir.'/'.$subDir,

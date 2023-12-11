@@ -1,7 +1,7 @@
 <?hh
 
 function heh() :mixed{ return 4; }
-function bar() :mixed{ return darray['foo' => heh()]; }
+function bar() :mixed{ return dict['foo' => heh()]; }
 function foo() :mixed{
   $x = bar();
   $x['foo'] = 2;

@@ -5,7 +5,7 @@ abstract final class ExtOutputObCleanHandler {
 }
 
 function my_output($output, $flag) :mixed{
-  ExtOutputObCleanHandler::$buffer = var_export(darray['output' => $output, 'flags' => $flag], true);
+  ExtOutputObCleanHandler::$buffer = var_export(dict['output' => $output, 'flags' => $flag], true);
   return $output;
 }
 <<__EntryPoint>> function main(): void {

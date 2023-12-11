@@ -8,25 +8,25 @@ echo "*** Testing sprintf() : integer formats with arrays ***\n";
 
 // different arrays used to test the function
 $array_types = varray [
-  varray[],
-  varray[0],
-  varray[1],
-  varray[-123],
-  varray["123"],
-  varray["-123"],
-  varray[NULL],
-  varray[null],
-  varray["string"],
-  varray[true],
-  varray[TRUE],
-  varray[false],
-  varray[FALSE],
-  varray[1,2,3,4],
-  darray[1 => "One", "two" => 2]
+  vec[],
+  vec[0],
+  vec[1],
+  vec[-123],
+  vec["123"],
+  vec["-123"],
+  vec[NULL],
+  vec[null],
+  vec["string"],
+  vec[true],
+  vec[TRUE],
+  vec[false],
+  vec[FALSE],
+  vec[1,2,3,4],
+  dict[1 => "One", "two" => 2]
 ];
 
 // various integer formats
-$int_formats = varray[
+$int_formats = vec[
   "%d", "%hd", "%ld",
   "%Ld", " %d", "%d ",
   "\t%d", "\n%d", "%4d", 

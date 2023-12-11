@@ -12,6 +12,6 @@ function main(varray $x = null) :mixed{
 
 <<__EntryPoint>>
 function main_jmp_local_006() :mixed{
-main(varray[]);
-main(varray[1,2,3]);
+main(vec[]);
+main(vec[1,2,3]);
 }

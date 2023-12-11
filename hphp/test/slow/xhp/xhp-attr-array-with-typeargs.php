@@ -1,7 +1,7 @@
 <?hh
 abstract class :base {
   protected static function __xhpAttributeDeclaration()[] :mixed{
-    return darray[];
+    return dict[];
   }
   public static function xhpAttributeDeclaration() :mixed{
     return static::__xhpAttributeDeclaration();

@@ -1,8 +1,8 @@
 <?hh
 
 function main() :mixed{
-  $x1 = $x2 = $x3 = varray[32, 8, 19, 17, 23];
-  $y1 = $y2 = $y3 = darray['orange' => 12, 'apple' => 0, 'banana' => 2];
+  $x1 = $x2 = $x3 = vec[32, 8, 19, 17, 23];
+  $y1 = $y2 = $y3 = dict['orange' => 12, 'apple' => 0, 'banana' => 2];
 
   sort(inout $x1);
   asort(inout $x2);

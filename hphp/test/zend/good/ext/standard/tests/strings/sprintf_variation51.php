@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : scientific formats with boolean values ***\n";
 
 // array of boolean values 
-$boolean_values = varray[
+$boolean_values = vec[
   true,
   false,
   TRUE,
@@ -15,7 +15,7 @@ $boolean_values = varray[
 ];
 
 // array of scientific formats
-$scientific_formats = varray[ 
+$scientific_formats = vec[ 
   "%e", "%he", "%le",
   "%Le", " %e", "%e ",
   "\t%e", "\n%e", "%4e", 

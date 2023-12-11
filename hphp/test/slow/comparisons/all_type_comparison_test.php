@@ -164,28 +164,28 @@ function main(): void {
   $clsmeth = Bar::foo<>;
   $rclsmeth = Bar::rfoo<int>;
 
-  $arr1 = varray[];
-  $arr2 = varray[99];
-  $arr3 = varray['foo'];
-  $arr4 = varray['foo', 'bar'];
-  $arr5 = varray['foo', 'bar'];
-  $arr6 = varray['foo', 'baz'];
-  $arr7 = varray[new A, new A];
-  $arr8 = varray[new A, new A];
-  $arr9 = varray[new A, new C];
-  $arr10 = varray[new ToString('foo'), new ToString('bar')];
-  $arr11 = varray[new ToString('foo'), new ToStringThrower];
-  $arr12 = varray[varray[1, 2], varray[1, 2, 3]];
-  $arr13 = varray[varray[1, 2], varray[1, 2, 3]];
-  $arr14 = varray[varray[1, 2], varray[99]];
-  $arr15 = varray[Vector{0, 1, 2, 3, 4}, Vector{5, 6, 7, 8}];
-  $arr16 = varray[Vector{0, 1, 2, 3, 4}, Vector{5, 6, 7, 8}];
-  $arr17 = darray['key1' => 1, 'key2' => 2, 'key3' => 3];
-  $arr18 = darray['key1' => 1, 'key2' => 2, 'key3' => 3];
-  $arr19 = darray['key1' => 1, 'key2-other' => 2, 'key3' => 3];
-  $arr20 = darray['key2' => 2, 'key3' => 3, 'key1' => 1];
-  $arr21 = varray['baz', 'foo'];
-  $arr22 = varray['baz', new ToStringThrower];
+  $arr1 = vec[];
+  $arr2 = vec[99];
+  $arr3 = vec['foo'];
+  $arr4 = vec['foo', 'bar'];
+  $arr5 = vec['foo', 'bar'];
+  $arr6 = vec['foo', 'baz'];
+  $arr7 = vec[new A, new A];
+  $arr8 = vec[new A, new A];
+  $arr9 = vec[new A, new C];
+  $arr10 = vec[new ToString('foo'), new ToString('bar')];
+  $arr11 = vec[new ToString('foo'), new ToStringThrower];
+  $arr12 = vec[vec[1, 2], vec[1, 2, 3]];
+  $arr13 = vec[vec[1, 2], vec[1, 2, 3]];
+  $arr14 = vec[vec[1, 2], vec[99]];
+  $arr15 = vec[Vector{0, 1, 2, 3, 4}, Vector{5, 6, 7, 8}];
+  $arr16 = vec[Vector{0, 1, 2, 3, 4}, Vector{5, 6, 7, 8}];
+  $arr17 = dict['key1' => 1, 'key2' => 2, 'key3' => 3];
+  $arr18 = dict['key1' => 1, 'key2' => 2, 'key3' => 3];
+  $arr19 = dict['key1' => 1, 'key2-other' => 2, 'key3' => 3];
+  $arr20 = dict['key2' => 2, 'key3' => 3, 'key1' => 1];
+  $arr21 = vec['baz', 'foo'];
+  $arr22 = vec['baz', new ToStringThrower];
 
   $vec1 = vec[];
   $vec2 = vec[1, 2];
@@ -229,7 +229,7 @@ function main(): void {
   $f2 = imagecreate(10, 10);
   $f3 = imagecreate(1, 1);
 
-  $arr = darray['null' => null,
+  $arr = dict['null' => null,
 
                'false' => false, 'true' => true,
 
@@ -307,8 +307,8 @@ function main(): void {
 
   // also test some pairs that are not interesting to compare in an O(n^2) way
   // to everything above, but we want to see how they compare to each other
-  $aiter1 = new ArrayIterator(darray['a' => 'b']);
-  $aiter2 = new ArrayIterator(darray['a' => 'b']); $aiter2->c = 'd';
+  $aiter1 = new ArrayIterator(dict['a' => 'b']);
+  $aiter2 = new ArrayIterator(dict['a' => 'b']); $aiter2->c = 'd';
   $xml1 = simplexml_load_string("<apple />");
   $xml2 = simplexml_load_string("<pie><apple /></pie>");
   $aa1 = new A(new ToStringThrower());
@@ -321,35 +321,35 @@ function main(): void {
   $dynamicBCThrows->b = new ToStringThrower();
   $dynamicBCThrows->c = 'c';
 
-  $pairs = varray[
-    varray[
-      darray['k' => 'ArrayIterator 1', 'v' => $aiter1],
-      darray['k' => 'ArrayIterator 2', 'v' => $aiter2],
+  $pairs = vec[
+    vec[
+      dict['k' => 'ArrayIterator 1', 'v' => $aiter1],
+      dict['k' => 'ArrayIterator 2', 'v' => $aiter2],
     ],
-    varray[
-      darray['k' => 'SimpleXMLElement 1', 'v' => $xml1],
-      darray['k' => 'SimpleXMLElement 2', 'v' => $xml2],
+    vec[
+      dict['k' => 'SimpleXMLElement 1', 'v' => $xml1],
+      dict['k' => 'SimpleXMLElement 2', 'v' => $xml2],
     ],
-    varray[
+    vec[
       // the first property is different, so we should always short-circuit
       // and never throw
-      darray['k' => 'object aa1', 'v' => $aa1],
-      darray['k' => 'object aa2', 'v' => $aa2],
+      dict['k' => 'object aa1', 'v' => $aa1],
+      dict['k' => 'object aa2', 'v' => $aa2],
     ],
-    varray[
+    vec[
       // same number of dynamic properties with the same value, but diff name
-      darray['k' => 'Dynamic property a', 'v' => $dynamicA],
-      darray['k' => 'Dynamic property b', 'v' => $dynamicB],
+      dict['k' => 'Dynamic property a', 'v' => $dynamicA],
+      dict['k' => 'Dynamic property b', 'v' => $dynamicB],
     ],
-    varray[
-      darray['k' => 'Dynamic property a', 'v' => $dynamicA],
-      darray['k' => 'Dynamic property NAN', 'v' => $dynamicANAN],
+    vec[
+      dict['k' => 'Dynamic property a', 'v' => $dynamicA],
+      dict['k' => 'Dynamic property NAN', 'v' => $dynamicANAN],
     ],
-    varray[
+    vec[
       // depending on which operand in the comparison we traverse, we'll either
       // short-circuit or throw
-      darray['k' => 'Dynamic props (a, b)', 'v' => $dynamicAB],
-      darray['k' => 'Dynamic props (b, c)', 'v' => $dynamicBCThrows],
+      dict['k' => 'Dynamic props (a, b)', 'v' => $dynamicAB],
+      dict['k' => 'Dynamic props (b, c)', 'v' => $dynamicBCThrows],
     ],
   ];
 

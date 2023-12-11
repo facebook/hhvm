@@ -1,8 +1,8 @@
 <?hh
 
 class Struct1 {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'value',
       'type' => \TType::I32,
       'adapter' => 'ThisAdapterDoesntExist',
@@ -18,8 +18,8 @@ class Struct1 {
 
 class BadAdapter {}
 class Struct2 {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'value',
       'type' => \TType::I32,
       'adapter' => BadAdapter::class,

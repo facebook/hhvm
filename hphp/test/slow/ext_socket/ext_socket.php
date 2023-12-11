@@ -52,7 +52,7 @@ function get_client_server() :mixed{
   var_dump(socket_connect($client, "127.0.0.1", $port));
 
   $s = socket_accept($server);
-  return varray[$client, $s];
+  return vec[$client, $s];
 }
 
 
@@ -82,11 +82,11 @@ var_dump(socket_write($client, "hello world"));
 var_dump(socket_read($s, 100));
 
 list($client, $s) = get_client_server();
-$reads = varray[$s];
+$reads = vec[$s];
 $ignore1 = $ignore2 = null;
 var_dump(socket_select(inout $reads, inout $ignore1, inout $ignore2, 1, 0));
 var_dump(socket_write($client, "next select will be 1"));
-$reads = varray[$s];
+$reads = vec[$s];
 var_dump(socket_select(inout $reads, inout $ignore1, inout $ignore2, 1, 0));
 
 list($client, $s) = get_client_server();

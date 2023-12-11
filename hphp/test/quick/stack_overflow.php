@@ -14,7 +14,7 @@ function fiz() :mixed{
 <<__EntryPoint>>
 function entrypoint_stack_overflow(): void {
 
-  StackOverflow::$g = varray[1,2,3];
+  StackOverflow::$g = vec[1,2,3];
 
   cmp(0, 0);
 }

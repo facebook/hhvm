@@ -3,7 +3,7 @@ date_default_timezone_set('UTC');
 
 $aTzAbbr = timezone_abbreviations_list();
 
-$aTz = varray[];
+$aTz = vec[];
 foreach (array_keys($aTzAbbr) as $sKey) {
     foreach (array_keys($aTzAbbr[$sKey]) as $iIndex) {
         $sTz = $aTzAbbr[$sKey][$iIndex]['timezone_id'];

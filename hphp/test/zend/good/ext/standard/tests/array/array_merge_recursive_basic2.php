@@ -7,9 +7,9 @@
 echo "*** Testing array_merge_recursive() : associative arrays ***\n";
 
 // Initialise the arrays
-$arr1 = darray[1 => "one", 2 => varray[1, 2]];
-$arr2 = darray[2 => 'three', "four" => varray["hello", 'world']];
-$arr3 = darray[1 => varray[6, 7], 'four' => varray["str1", 'str2']];
+$arr1 = dict[1 => "one", 2 => vec[1, 2]];
+$arr2 = dict[2 => 'three', "four" => vec["hello", 'world']];
+$arr3 = dict[1 => vec[6, 7], 'four' => vec["str1", 'str2']];
 
 // Calling array_merge_recursive() with default arguments
 echo "-- With default argument --\n";

@@ -30,8 +30,8 @@ class BodyType {}
 function main_data_type_check() :mixed{
 $client = new MySoapClient(
   __DIR__ . '/data-type-check.wdsl',
-  darray[
-    'classmap' => darray[
+  dict[
+    'classmap' => dict[
       'BodyType' => 'BodyType',
     ],
     'cache_wsdl' => WSDL_CACHE_NONE,
@@ -42,5 +42,5 @@ $client = new MySoapClient(
 $recipientType = new BodyType();
 $recipientType->_ = '1234567890';
 $recipientType->uid = 4119859;
-$client->__soapcall('test', varray[$recipientType]);
+$client->__soapcall('test', vec[$recipientType]);
 }

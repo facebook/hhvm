@@ -17,7 +17,7 @@ $chunklen = 5;
 $ending = "????";
 
 // different values for 'str'
-$values = varray[
+$values = vec[
   "",  //empty
   " ",  //space
   "This is simple string",  //regular string

@@ -14,7 +14,7 @@ function main() :mixed{
   foreach ($containers as $c) {
     $name = get_class($c);
     echo "$name\n";
-    foreach (varray[~PHP_INT_MAX, -1, 0, 1, 2, 6, PHP_INT_MAX] as $n) {
+    foreach (vec[~PHP_INT_MAX, -1, 0, 1, 2, 6, PHP_INT_MAX] as $n) {
       if ($name === Set::class ||
           $name === ImmSet::class ||
           $name === LazyIterableView::class) {

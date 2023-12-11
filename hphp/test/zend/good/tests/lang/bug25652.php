@@ -5,7 +5,7 @@ function testfunc ($var) :mixed{
 }
 
 class foo {
-    public $arr = varray['testfunc'];
+    public $arr = vec['testfunc'];
     function bar () :mixed{
         $this->arr[0]('testvalue');
     }

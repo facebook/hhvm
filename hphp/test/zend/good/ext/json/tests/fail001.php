@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$tests = varray['"A JSON payload should be an object or array, not a string."',
+$tests = vec['"A JSON payload should be an object or array, not a string."',
                '["Unclosed array"',
                '{unquoted_key: "keys must be quoted}',
                '["extra comma",]',

@@ -13,12 +13,12 @@ function test_preg_rep($a,$b,$c) :mixed{
 }
 
 function test_preg_grep() :mixed{
-  $array = varray["foo 123.1", "fg 24bar", "123.1", "24"];
+  $array = vec["foo 123.1", "fg 24bar", "123.1", "24"];
   $fl_array = preg_grep("/^(\\d+)?\\.\\d+$/", $array);
   VS(count($fl_array), 1);
   VS($fl_array[2], "123.1");
 
-  VS(preg_grep("/a/", varray["c", "b"]), darray[]);
+  VS(preg_grep("/a/", vec["c", "b"]), dict[]);
 }
 
 function test_preg_match() :mixed{
@@ -169,8 +169,8 @@ function test_preg_replace() :mixed{
   VS(preg_replace($pattern, $replacement, $str), "April1,2003");
 
   $str = "The quick brown fox jumped over the lazy dog.";
-  $patterns = darray[];
-  $replacements = darray[];
+  $patterns = dict[];
+  $replacements = dict[];
   $patterns[0] = "/quick/";
   $patterns[1] = "/brown/";
   $patterns[2] = "/fox/";
@@ -185,20 +185,20 @@ function test_preg_replace() :mixed{
   VS(preg_replace($patterns, $replacements, $str),
      "The slow black bear jumped over the lazy dog.");
 
-  $foos = darray[];
+  $foos = dict[];
   $foos[0] = "foo";
   $foos[1] = "Foo";
   $foos[2] = "FOO";
-  $expFoo = darray[];
+  $expFoo = dict[];
   $expFoo[0] = "FOO";
   $expFoo[1] = "FOO";
   $expFoo[2] = "FOO";
-  VS(preg_replace("/some pattern/", "", varray[]), darray[]);
+  VS(preg_replace("/some pattern/", "", vec[]), dict[]);
   VS(preg_replace("/foo/i", "FOO", $foos), $expFoo);
 
-  $patterns = varray["/(19|20)(\\d{2})-(\\d{1,2})-(\\d{1,2})/",
+  $patterns = vec["/(19|20)(\\d{2})-(\\d{1,2})-(\\d{1,2})/",
                                   "/^\\s*{(\\w+)}\\s*=/"];
-  $replace = varray["\\3/\\4/\\1\\2", "$\\1 ="];
+  $replace = vec["\\3/\\4/\\1\\2", "$\\1 ="];
   VS(preg_replace($patterns, $replace, "{startDate} = 1999-5-27"),
      "\$startDate = 5/27/1999");
 
@@ -207,22 +207,22 @@ function test_preg_replace() :mixed{
   VS($str, "foo o");
 
   $count = 0;
-  preg_replace_with_count(varray["/\\d/", "/\\s/"], "*", "xp 4 to", -1, inout $count);
+  preg_replace_with_count(vec["/\\d/", "/\\s/"], "*", "xp 4 to", -1, inout $count);
   VS($count, 3);
 
   VS(preg_replace("/xxx", "w", "xxxx"), NULL);
   VS(preg_replace("/xxx/", "w", "xxxx"), "wx");
   VS(preg_replace("/xxy/", "w", "xxxx"), "xxxx");
 
-  VS(preg_replace("/xxx", "w", varray["xxxx"]), darray[]);
-  VS(preg_replace("/xxx/", "w", varray["xxxx"]), darray[0 => "wx"]);
-  VS(preg_replace("/xxx/", "w", varray["xxxx", "yyyy"]), darray[0 => "wx", 1 => "yyyy"]);
-  VS(preg_replace(varray["/xxx/", "/xxx"], "w", varray["xxxx"]), darray[]);
-  VS(preg_replace(varray["/xxx/", "/xxx/"], "w", varray["xxxx"]), darray[0 => "wx"]);
+  VS(preg_replace("/xxx", "w", vec["xxxx"]), dict[]);
+  VS(preg_replace("/xxx/", "w", vec["xxxx"]), dict[0 => "wx"]);
+  VS(preg_replace("/xxx/", "w", vec["xxxx", "yyyy"]), dict[0 => "wx", 1 => "yyyy"]);
+  VS(preg_replace(vec["/xxx/", "/xxx"], "w", vec["xxxx"]), dict[]);
+  VS(preg_replace(vec["/xxx/", "/xxx/"], "w", vec["xxxx"]), dict[0 => "wx"]);
 
-  VS(preg_replace("/xxx", varray["w"], varray["xxxx"]), false);
-  VS(preg_replace(varray["/xxx"], varray["w"], varray["xxxx"]), darray[]);
-  VS(preg_replace(varray["/xxx/"], varray["w"], varray["xxxx"]), darray[0 => "wx"]);
+  VS(preg_replace("/xxx", vec["w"], vec["xxxx"]), false);
+  VS(preg_replace(vec["/xxx"], vec["w"], vec["xxxx"]), dict[]);
+  VS(preg_replace(vec["/xxx/"], vec["w"], vec["xxxx"]), dict[0 => "wx"]);
 }
 
 function next_year($m) :mixed{

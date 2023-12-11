@@ -17,7 +17,7 @@ $chunklen = 7;
 $ending = "):(";
 
 //different single quoted string for 'str'
-$values = varray[
+$values = vec[
   '',  //empty
   ' ',  //space
   'This is simple string',  //regular string

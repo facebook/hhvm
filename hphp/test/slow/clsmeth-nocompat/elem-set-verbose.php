@@ -15,13 +15,13 @@ function LV(mixed $m): mixed { return __hhvm_intrinsics\launder_value($m); }
 
 function set_static1(): void {
   $cm = Foo::bar<>;
-  $am = varray[$cm];
-  $dm = darray[0 => $cm];
+  $am = vec[$cm];
+  $dm = dict[0 => $cm];
   $om = new P($cm);
 
   var_dump($cm[0] = 'Apple');
   var_dump($cm[1] = 'list');
-  var_dump($am[0][1] = varray[1, 2, 3]);
+  var_dump($am[0][1] = vec[1, 2, 3]);
   var_dump($am[0][0] = null);
   var_dump($dm[0][0] = 12);
   var_dump($dm[0][1] = 1.2);
@@ -33,12 +33,12 @@ function set_static1(): void {
 
 function set_static2(): void {
   $cm = Foo::bar<>;
-  $am = varray[$cm];
-  $dm = darray[0 => $cm];
+  $am = vec[$cm];
+  $dm = dict[0 => $cm];
   $om = new P($cm);
 
   var_dump($cm[] = 'XYZ');
-  var_dump($am[0][] = varray[]);
+  var_dump($am[0][] = vec[]);
   var_dump($dm[0][] = 99);
   var_dump($om->m[] = false);
 
@@ -47,8 +47,8 @@ function set_static2(): void {
 
 function set_static3(): void {
   $cm = Foo::bar<>;
-  $am = varray[$cm];
-  $dm = darray[0 => $cm];
+  $am = vec[$cm];
+  $dm = dict[0 => $cm];
   $om = new P($cm);
 
   var_dump($cm[0] .= '-ext1');
@@ -65,8 +65,8 @@ function set_static3(): void {
 
 function set_static4(): void {
   $cm = Foo::bar<>;
-  $am = varray[$cm];
-  $dm = darray[0 => $cm];
+  $am = vec[$cm];
+  $dm = dict[0 => $cm];
   $om = new P($cm);
 
   var_dump($cm[0]++);
@@ -83,13 +83,13 @@ function set_static4(): void {
 
 function set_dynamic1(): void {
   $cm = LV(Foo::bar<>);
-  $am = LV(varray[$cm]);
-  $dm = LV(darray[0 => $cm]);
+  $am = LV(vec[$cm]);
+  $dm = LV(dict[0 => $cm]);
   $om = LV(new P($cm));
 
   var_dump($cm[0] = 'Apple');
   var_dump($cm[1] = 'list');
-  var_dump($am[0][1] = varray[1, 2, 3]);
+  var_dump($am[0][1] = vec[1, 2, 3]);
   var_dump($am[0][0] = null);
   var_dump($dm[0][0] = 12);
   var_dump($dm[0][1] = 1.2);
@@ -101,12 +101,12 @@ function set_dynamic1(): void {
 
 function set_dynamic2(): void {
   $cm = LV(Foo::bar<>);
-  $am = LV(varray[$cm]);
-  $dm = LV(darray[0 => $cm]);
+  $am = LV(vec[$cm]);
+  $dm = LV(dict[0 => $cm]);
   $om = LV(new P($cm));
 
   var_dump($cm[] = 'XYZ');
-  var_dump($am[0][] = varray[]);
+  var_dump($am[0][] = vec[]);
   var_dump($dm[0][] = 99);
   var_dump($om->m[] = false);
 
@@ -115,8 +115,8 @@ function set_dynamic2(): void {
 
 function set_dynamic3(): void {
   $cm = LV(Foo::bar<>);
-  $am = LV(varray[$cm]);
-  $dm = LV(darray[0 => $cm]);
+  $am = LV(vec[$cm]);
+  $dm = LV(dict[0 => $cm]);
   $om = LV(new P($cm));
 
   var_dump($cm[0] .= '-ext1');
@@ -133,8 +133,8 @@ function set_dynamic3(): void {
 
 function set_dynamic4(): void {
   $cm = LV(Foo::bar<>);
-  $am = LV(varray[$cm]);
-  $dm = LV(darray[0 => $cm]);
+  $am = LV(vec[$cm]);
+  $dm = LV(dict[0 => $cm]);
   $om = LV(new P($cm));
 
   var_dump($cm[0]++);

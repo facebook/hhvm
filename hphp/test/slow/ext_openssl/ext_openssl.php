@@ -42,7 +42,7 @@ function test_openssl_csr_get_subject() :mixed{
 }
 
 function test_openssl_csr_sign() :mixed{
-  $dn = varray[
+  $dn = vec[
            "countryName",
            "stateOrProvinceName",
            "localityName",
@@ -136,14 +136,14 @@ function test_openssl_pkcs7_sign() :mixed{
 
   VERIFY(openssl_pkcs7_sign
          ($infile, $outfile, $scert, $privkey,
-          darray["To" => "t@facebook.com", "From" => "hzhao@facebook.com"]));
+          dict["To" => "t@facebook.com", "From" => "hzhao@facebook.com"]));
 
   $tmp = tempnam(sys_get_temp_dir(), 'x509vmtestopenssl');
   unlink($tmp);
   VS(file_get_contents($tmp), false);
   VERIFY(openssl_x509_export_to_file($scert, $tmp));
 
-  VS(openssl_pkcs7_verify($outfile, 0, $infile, varray[$tmp]), true);
+  VS(openssl_pkcs7_verify($outfile, 0, $infile, vec[$tmp]), true);
   unlink($infile);
   unlink($outfile);
   unlink($tmp);
@@ -239,7 +239,7 @@ function test_openssl_seal() :mixed{
   $sealed = null;
   $ekeys = null;
   $iv = null;
-  VERIFY(openssl_seal($data, inout $sealed, inout $ekeys, varray[$pubkey],
+  VERIFY(openssl_seal($data, inout $sealed, inout $ekeys, vec[$pubkey],
                       '', inout $iv));
   VERIFY(strlen($sealed) > 0);
   VS(count($ekeys), 1);
@@ -252,7 +252,7 @@ function test_openssl_seal() :mixed{
   VERIFY(openssl_open($sealed, inout $open_data, $ekeys[0], $privkey, 'RC4'));
   VS($open_data, $data);
 
-  VERIFY(openssl_seal($data, inout $sealed, inout $ekeys, varray[$pubkey],
+  VERIFY(openssl_seal($data, inout $sealed, inout $ekeys, vec[$pubkey],
                       'AES-256-ECB', inout $iv));
   VERIFY(strlen($sealed) > 0);
   VS(count($ekeys), 1);
@@ -290,8 +290,8 @@ function test_openssl_x509_check_private_key() :mixed{
 function test_openssl_x509_checkpurpose() :mixed{
   $fcert = file_get_contents(__DIR__."/test_x509.crt");
   $cert = openssl_x509_read($fcert);
-  VS(openssl_x509_checkpurpose($cert, X509_PURPOSE_SSL_CLIENT, varray[]), 0);
-  VS(openssl_x509_checkpurpose($cert, X509_PURPOSE_SSL_SERVER, varray[]), 0);
+  VS(openssl_x509_checkpurpose($cert, X509_PURPOSE_SSL_CLIENT, vec[]), 0);
+  VS(openssl_x509_checkpurpose($cert, X509_PURPOSE_SSL_SERVER, vec[]), 0);
 }
 
 function test_openssl_x509_export_to_file() :mixed{

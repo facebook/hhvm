@@ -1,7 +1,7 @@
 <?hh
 
 function rain() :mixed{
-  $arr = darray[];
+  $arr = dict[];
   for ($i = 0; $i < 4; $i++) {
     $arr[$i] = $i;
   }

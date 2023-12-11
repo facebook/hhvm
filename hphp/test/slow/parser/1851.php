@@ -19,7 +19,7 @@ Foo::$b = function ($x) {
  }
 ;
 (Foo::$b)("bar\n");
-Foo::$c = varray[function ($x) {
+Foo::$c = vec[function ($x) {
  echo '.' . $x;
 }]
 ;

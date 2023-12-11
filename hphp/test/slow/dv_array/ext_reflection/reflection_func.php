@@ -24,9 +24,9 @@ function main() :mixed{
   var_dump($foo_fn->getAttributes());
   var_dump($foo_fn->getParameters());
   var_dump($foo_fn->getReturnType());
-  $foo_fn->invoke(varray[1]);
+  $foo_fn->invoke(vec[1]);
   $a_meth = new ReflectionMethod(Baz::class, 'a');
   var_dump($a_meth->getAttributes());
   var_dump($a_meth->getParameters());
-  $a_meth->invokeArgs(new Baz(), varray[2]);
+  $a_meth->invokeArgs(new Baz(), vec[2]);
 }

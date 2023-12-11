@@ -19,7 +19,7 @@ $heredoc = <<<EOT
 hd_file
 EOT;
 
-$inputs = varray[
+$inputs = vec[
 
        // int data
 /*1*/  0,
@@ -56,7 +56,7 @@ foreach($inputs as $key => $input) {
 
 echo "\n-- Call to readdir() --\n";
 $dir_handle = opendir($dir_path);
-$contents = varray[];
+$contents = vec[];
 while(FALSE !== ($file = readdir($dir_handle))){
 
     // different OS order files differently so will

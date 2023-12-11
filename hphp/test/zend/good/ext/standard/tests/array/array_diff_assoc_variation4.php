@@ -12,7 +12,7 @@
 <<__EntryPoint>> function main(): void {
 echo "\n*** Testing array_diff_assoc() : usage variations ***\n";
 
-$array = varray[1, 2, 3];
+$array = vec[1, 2, 3];
 
 // heredoc string
 $heredoc = <<<EOT
@@ -20,11 +20,11 @@ hello world
 EOT;
 
 //Different data types as keys to be passed to $arr1 argument
-$inputs = darray[
+$inputs = dict[
 
        // int data
 /*1*/
-'int' => darray[
+'int' => dict[
        0 => 'zero',
        1 => 'one',
        12345 => 'positive',
@@ -32,20 +32,20 @@ $inputs = darray[
 
        // empty data
 /*2*/
-'empty' => darray[
+'empty' => dict[
       "" => 'emptyd',
       '' => 'emptys'],
 
        // string data
 /*3*/
-'string' => darray[
+'string' => dict[
       "string" => 'stringd',
       'string' => 'strings',
       $heredoc => 'stringh'],
 
        // binary data
 /*4*/
-'binary' => darray[
+'binary' => dict[
       b"binary1" => 'binary 1',
       (string)"binary2" => 'binary 2'],
 ];

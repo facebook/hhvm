@@ -6,6 +6,6 @@ function f($x) :mixed{
 
 <<__EntryPoint>>
 function main_1861() :mixed{
-f(varray[0]);
+f(vec[0]);
 f('foo');
 }

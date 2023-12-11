@@ -8,8 +8,8 @@
 echo "*** Testing array_diff_uassoc() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$input_array = darray[0 => '0', 1 => '1', -10 => '-10', 'true' => 1, 'false' => 0];
-$boolean_indx_array = darray[1 => 'boolt', 0 => 'boolf', 1 => 'boolT', 0 => 'boolF'];
+$input_array = dict[0 => '0', 1 => '1', -10 => '-10', 'true' => 1, 'false' => 0];
+$boolean_indx_array = dict[1 => 'boolt', 0 => 'boolf', 1 => 'boolT', 0 => 'boolF'];
 
 echo "\n-- Testing array_diff_key() function with float indexed array --\n";
 try { var_dump( array_diff_uassoc($input_array, $boolean_indx_array, strcasecmp<>) ); } catch (Exception $e) { var_dump($e->getMessage()); }

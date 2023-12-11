@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_slice() : usage variations ***\n";
 
-$input = darray['one' => 'un', 'two' => 'deux', 23 => 'twenty-three', 24 => 'zero'];
+$input = dict['one' => 'un', 'two' => 'deux', 23 => 'twenty-three', 24 => 'zero'];
 
 echo "\n-- Call array_slice() --\n";
 var_dump($result = array_slice($input, 2));

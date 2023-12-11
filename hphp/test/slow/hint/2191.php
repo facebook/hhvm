@@ -8,7 +8,7 @@ $y = (string) $x;
  return $y;
  }
 function f2(?AnyArray $x = null) :mixed{
- $y = $x !== null ? darray($x) : darray[];
+ $y = $x !== null ? darray($x) : dict[];
  var_dump($y);
  return $y;
  }
@@ -71,14 +71,14 @@ var_dump(call_user_func(rf2(true), null));
 var_dump(call_user_func(rf4(true), null));
 var_dump(call_user_func(rf5(true), null));
 var_dump(call_user_func(rf6(true), null));
-var_dump(call_user_func_array(rf1(true), varray[]));
-var_dump(call_user_func_array(rf2(true), varray[]));
-var_dump(call_user_func_array(rf4(true), varray[]));
-var_dump(call_user_func_array(rf5(true), varray[]));
-var_dump(call_user_func_array(rf6(true), varray[]));
-var_dump(call_user_func_array(rf1(true), varray[null]));
-var_dump(call_user_func_array(rf2(true), varray[null]));
-var_dump(call_user_func_array(rf4(true), varray[null]));
-var_dump(call_user_func_array(rf5(true), varray[null]));
-var_dump(call_user_func_array(rf6(true), varray[null]));
+var_dump(call_user_func_array(rf1(true), vec[]));
+var_dump(call_user_func_array(rf2(true), vec[]));
+var_dump(call_user_func_array(rf4(true), vec[]));
+var_dump(call_user_func_array(rf5(true), vec[]));
+var_dump(call_user_func_array(rf6(true), vec[]));
+var_dump(call_user_func_array(rf1(true), vec[null]));
+var_dump(call_user_func_array(rf2(true), vec[null]));
+var_dump(call_user_func_array(rf4(true), vec[null]));
+var_dump(call_user_func_array(rf5(true), vec[null]));
+var_dump(call_user_func_array(rf6(true), vec[null]));
 }

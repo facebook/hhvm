@@ -1,7 +1,7 @@
 <?hh
 
 function f1() :mixed{
-  $arr = varray[1,2,3];
+  $arr = vec[1,2,3];
   foreach ($arr as $v1) {
     foreach ($arr as $v2) {
       return;

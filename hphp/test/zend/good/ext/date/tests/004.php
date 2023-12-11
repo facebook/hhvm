@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 date_default_timezone_set("UTC");
-$tz = varray["UTC", "Asia/Jerusalem", "America/Chicago", "Europe/London"];
+$tz = vec["UTC", "Asia/Jerusalem", "America/Chicago", "Europe/London"];
 $t = mktime(0, 0, 0, 6, 27, 2006);
 
 foreach ($tz as $zone) {

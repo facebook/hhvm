@@ -12,7 +12,7 @@ function bar() :mixed{}
 function LV($x)  :mixed{ return __hhvm_intrinsics\launder_value($x); }
 function CLS($c) :mixed{ return __hhvm_intrinsics\create_class_pointer($c); }
 
-function WRAPA($x) :mixed{ return LV(varray[$x]); }
+function WRAPA($x) :mixed{ return LV(vec[$x]); }
 function WRAPO($x) :mixed{ return LV(new Wrapper($x)); }
 function WRAPD($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
 
@@ -51,14 +51,14 @@ function WRAPD($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
 
 <<__NEVER_INLINE>> function static_compare() :mixed{
   $cm = Foo::bar<>;
-  $va = varray[Foo::class, 'bar'];
-  $oa = varray[new StrObj(Foo::class), new StrObj('bar')];
-  $fa = varray[Foo::class, bar<>];
-  $ca = varray[CLS('Foo'), 'bar'];
-  $pa = varray[CLS('Foo'), bar<>];
+  $va = vec[Foo::class, 'bar'];
+  $oa = vec[new StrObj(Foo::class), new StrObj('bar')];
+  $fa = vec[Foo::class, bar<>];
+  $ca = vec[CLS('Foo'), 'bar'];
+  $pa = vec[CLS('Foo'), bar<>];
 
-  $xx = varray[$cm]; $vx = varray[$va]; $ox = varray[$oa]; $fx = varray[$fa];
-  $cx = varray[$ca]; $px = varray[$pa];
+  $xx = vec[$cm]; $vx = vec[$va]; $ox = vec[$oa]; $fx = vec[$fa];
+  $cx = vec[$ca]; $px = vec[$pa];
 
   $xy = new Wrapper($cm); $vy = new Wrapper($va); $oy = new Wrapper($oa);
   $fy = new Wrapper($fa); $cy = new Wrapper($ca); $py = new Wrapper($pa);
@@ -202,11 +202,11 @@ function WRAPD($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
 
 <<__NEVER_INLINE>> function dynamic_compare() :mixed{
   $cm = LV(Foo::bar<>);
-  $va = LV(varray[Foo::class, 'bar']);
-  $oa = LV(varray[new StrObj(Foo::class), new StrObj('bar')]);
-  $fa = LV(varray[Foo::class, bar<>]);
-  $ca = LV(varray[CLS('Foo'), 'bar']);
-  $pa = LV(varray[CLS('Foo'), bar<>]);
+  $va = LV(vec[Foo::class, 'bar']);
+  $oa = LV(vec[new StrObj(Foo::class), new StrObj('bar')]);
+  $fa = LV(vec[Foo::class, bar<>]);
+  $ca = LV(vec[CLS('Foo'), 'bar']);
+  $pa = LV(vec[CLS('Foo'), bar<>]);
 
   $xx = WRAPA($cm); $vx = WRAPA($va); $ox = WRAPA($oa); $fx = WRAPA($fa);
   $cx = WRAPA($ca); $px = WRAPA($pa);

@@ -23,10 +23,10 @@ function positive_tests() :mixed{
   $x = 'func1'; $x(inout $v);
   $x = 'A::func3'; $x(inout $v);
 
-  $x = varray['A', 'func3']; $x(inout $v);
+  $x = vec['A', 'func3']; $x(inout $v);
 
-  $x = varray[new A, 'func2']; $x(inout $v);
-  $x = varray[new A, 'func3']; $x(inout $v);
+  $x = vec[new A, 'func2']; $x(inout $v);
+  $x = vec[new A, 'func3']; $x(inout $v);
 
 
 
@@ -48,10 +48,10 @@ function negative_tests() :mixed{
   $x = 'func4'; $x(inout $v);
   $x = 'B::func6'; $x(inout $v);
 
-  $x = varray['B', 'func6']; $x(inout $v);
+  $x = vec['B', 'func6']; $x(inout $v);
 
-  $x = varray[new B, 'func5']; $x(inout $v);
-  $x = varray[new B, 'func6']; $x(inout $v);
+  $x = vec[new B, 'func5']; $x(inout $v);
+  $x = vec[new B, 'func6']; $x(inout $v);
 
   $x = 'B'; $x::func6(inout $v);
 

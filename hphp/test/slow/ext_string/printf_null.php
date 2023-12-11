@@ -7,9 +7,9 @@ $format = "(\000)\n";
 
 printf($format);
 
-vprintf($format, varray[]);
+vprintf($format, vec[]);
 
 echo sprintf($format);
 
-echo vsprintf($format, varray[]);
+echo vsprintf($format, vec[]);
 }

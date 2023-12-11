@@ -6,25 +6,25 @@ class Baz {
 }
 
 function foo($x) :mixed{
-  $ed = HH\array_mark_legacy(darray[]);
+  $ed = HH\array_mark_legacy(dict[]);
   var_dump(HH\is_array_marked_legacy($ed));
   var_dump($ed);
-  $ev = HH\array_mark_legacy(varray[]);
+  $ev = HH\array_mark_legacy(vec[]);
   var_dump(HH\is_array_marked_legacy($ev));
   var_dump($ev);
-  $a = HH\array_mark_legacy(darray['a' => $x]);
+  $a = HH\array_mark_legacy(dict['a' => $x]);
   var_dump(HH\is_array_marked_legacy($a));
   var_dump($a);
-  $b = HH\array_mark_legacy(varray[$x, $x]);
+  $b = HH\array_mark_legacy(vec[$x, $x]);
   var_dump(HH\is_array_marked_legacy($b));
   var_dump($b);
-  $c = HH\array_mark_legacy(darray['a' => 1]);
+  $c = HH\array_mark_legacy(dict['a' => 1]);
   var_dump(HH\is_array_marked_legacy($c));
   var_dump($c);
-  $d = HH\array_mark_legacy(varray[1, 2]);
+  $d = HH\array_mark_legacy(vec[1, 2]);
   var_dump(HH\is_array_marked_legacy($d));
   var_dump($d);
-  $e = HH\array_mark_legacy(darray[1 => $x]);
+  $e = HH\array_mark_legacy(dict[1 => $x]);
   var_dump(HH\is_array_marked_legacy($e));
   var_dump($e);
 
@@ -46,7 +46,7 @@ function foo($x) :mixed{
   var_dump($e);
 
   // casts to d/varray
-  $a = HH\array_mark_legacy(darray[]);
+  $a = HH\array_mark_legacy(dict[]);
   var_dump(HH\is_array_marked_legacy($a));
   var_dump($a);
   $b = HH\array_mark_legacy(darray(vec[1, 2]));
@@ -68,6 +68,6 @@ function bar<reify T>(vec<T> $v, int $i) :mixed{
 function main() :mixed{
   foo(1);
   bar<int>(vec[1, 2], 0);
-  var_dump(gettype(HH\array_mark_legacy(varray[])));
-  var_dump(gettype(HH\array_mark_legacy(darray['a' => 10])));
+  var_dump(gettype(HH\array_mark_legacy(vec[])));
+  var_dump(gettype(HH\array_mark_legacy(dict['a' => 10])));
 }

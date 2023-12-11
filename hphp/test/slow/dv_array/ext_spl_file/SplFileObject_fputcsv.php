@@ -41,7 +41,7 @@ foreach($res as $key => $val)
 echo '$list = ';var_export($res);echo ";\n";
 
 $fp = fopen($file, "r");
-$res = varray[];
+$res = vec[];
 while($l=fgetcsv($fp))
 {
   $res[] = join(',',$l);

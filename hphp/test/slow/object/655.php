@@ -9,7 +9,7 @@ class g {
 }
 function foo() :mixed{
   $z = 1;
-  $qd = darray['x' => $z];
+  $qd = dict['x' => $z];
   $a = G()->set($qd);
   var_dump($a);
   $qd['e'] = true;

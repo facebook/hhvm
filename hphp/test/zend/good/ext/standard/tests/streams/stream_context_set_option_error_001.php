@@ -5,5 +5,5 @@ $context = stream_context_create();
 var_dump(stream_context_set_option($context, 'http'));
 
 // Array of options
-var_dump(stream_context_set_option($context, varray[], 'foo', 'bar'));
+var_dump(stream_context_set_option($context, vec[], 'foo', 'bar'));
 }

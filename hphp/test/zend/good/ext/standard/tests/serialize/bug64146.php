@@ -2,7 +2,7 @@
 
 class A
 {
-    public $a = varray[];
+    public $a = vec[];
 
     public function __construct()
     {

@@ -67,7 +67,7 @@ function f($str)
 
 function p5($a1, $a2, $a3, $a4, $a5, $a6, $a7, $a8, $a9, $a10, $a11, $a12)
 :mixed{
-  $ret = array_filter(varray[0], f<>);
+  $ret = array_filter(vec[0], f<>);
 }
 
 function p4()

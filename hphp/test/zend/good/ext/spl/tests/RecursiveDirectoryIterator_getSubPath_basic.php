@@ -21,7 +21,7 @@ function main_entry(): void {
   $iterator = new RecursiveDirectoryIterator(sys_get_temp_dir().'/'.$depth0);
   $it = new RecursiveIteratorIterator($iterator);
 
-  $list = varray[];
+  $list = vec[];
   while($it->valid()) {
     $list[] = $it->getInnerIterator()->getSubPath();
     $it->next();

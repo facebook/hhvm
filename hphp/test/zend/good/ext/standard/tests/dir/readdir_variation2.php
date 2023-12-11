@@ -18,7 +18,7 @@ mkdir($path);
 $dir_handle = opendir($path);
 
 echo "\n-- Pass an empty directory to readdir() --\n";
-$entries = varray[];
+$entries = vec[];
 while(FALSE !== ($file = readdir($dir_handle))){
     $entries[] = $file;
 }

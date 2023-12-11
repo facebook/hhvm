@@ -25,7 +25,7 @@ function main() :mixed{
   __hhvm_intrinsics\rqtrace_create_event("EVENT1", 850, 900, dict['e'=>'f']);
   __hhvm_intrinsics\rqtrace_create_scope("SCOPE1", 900, 950, dict['g'=>'h']);
 
-  $valid = varray[
+  $valid = vec[
     'EVENT0',
     'EVENT1',
     'SCOPE0',

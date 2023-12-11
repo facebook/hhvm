@@ -11,7 +11,7 @@
 echo "*** Testing array_slice() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$input_array = darray['one' => 1, 0 => 2, 'three' => 3, 1 => 4];
+$input_array = dict['one' => 1, 0 => 2, 'three' => 3, 1 => 4];
 $offset = 2;
 
 
@@ -21,7 +21,7 @@ hello world
 EOT;
 
 // unexpected values to be passed to $length argument
-$inputs = varray[
+$inputs = vec[
 
        // int data
 /*1*/  0,
@@ -49,7 +49,7 @@ $inputs = varray[
        // empty data
 /*16*/ "",
        '',
-       varray[],
+       vec[],
 
        // string data
 /*19*/ "string",

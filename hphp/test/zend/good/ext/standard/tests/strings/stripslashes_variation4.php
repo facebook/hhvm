@@ -17,13 +17,13 @@ echo "*** Testing stripslashes() : with double dimensional arrays ***\n";
 
 // initialising the string array
 
-$str_array = varray[
-                    varray["", varray[]],
-                    varray["", varray[""]],
-                    varray["f\\'oo", "b\\'ar", varray["fo\\'o", "b\\'ar"]],
-                    varray["f\\'oo", "b\\'ar", varray[""]],
-                    varray["f\\'oo", "b\\'ar", varray["fo\\'o", "b\\'ar", varray[""]]],
-                    varray["f\\'oo", "b\\'ar", varray["fo\\'o", "b\\'ar", varray["fo\\'o", "b\\'ar"]]]
+$str_array = vec[
+                    vec["", vec[]],
+                    vec["", vec[""]],
+                    vec["f\\'oo", "b\\'ar", vec["fo\\'o", "b\\'ar"]],
+                    vec["f\\'oo", "b\\'ar", vec[""]],
+                    vec["f\\'oo", "b\\'ar", vec["fo\\'o", "b\\'ar", vec[""]]],
+                    vec["f\\'oo", "b\\'ar", vec["fo\\'o", "b\\'ar", vec["fo\\'o", "b\\'ar"]]]
                   ];
 $count = 1;
 // looping to test for all strings in $str_array

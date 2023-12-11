@@ -37,9 +37,9 @@ function main_fb_serialize() :mixed{
 serde(keyset[]);
 serde(keyset[1, 2, 3]);
 serde(keyset['a', 'b', 'c']);
-serde(varray[1, 2, keyset[1, 2, 3], keyset['a', 'b', 'c'], keyset[]]);
 serde(vec[1, 2, keyset[1, 2, 3], keyset['a', 'b', 'c'], keyset[]]);
-serde(darray['a' => 1,
+serde(vec[1, 2, keyset[1, 2, 3], keyset['a', 'b', 'c'], keyset[]]);
+serde(dict['a' => 1,
        'b' => 2,
        'c' => keyset[1, 2, 3],
        'd' => keyset['a', 'b', 'c'],

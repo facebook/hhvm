@@ -19,7 +19,7 @@ $heredoc_needle = <<<EOD
 ^^&*(
 EOD;
 
-$needles = varray[
+$needles = vec[
   "!@@!",
   '_',
   '("_")',

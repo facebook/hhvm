@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$no_arg_filters = varray[
+$no_arg_filters = vec[
     "IMG_FILTER_NEGATE",
     "IMG_FILTER_GRAYSCALE",
     "IMG_FILTER_EDGEDETECT",

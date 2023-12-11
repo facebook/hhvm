@@ -6,7 +6,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing abs() : basic functionality ***\n";
 
-$values = varray[23,
+$values = vec[23,
                 -23,
                 2.345e1,
                 -2.345e1,

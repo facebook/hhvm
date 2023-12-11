@@ -10,5 +10,5 @@ function g(string $s) :mixed{
 <<__EntryPoint>>
 function main_2189() :mixed{
 g(DATE_RFC850);
-f(count(varray[]));
+f(count(vec[]));
 }

@@ -11,7 +11,7 @@ function some() :mixed{
 function wat() :mixed{
   $z = 'asd' . mt_rand();
   $k = new Foo();
-  $l = varray[$z, $z];
+  $l = vec[$z, $z];
   $y = $k == $z;
   $k = null;
   return $y;

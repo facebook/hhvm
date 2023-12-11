@@ -12,7 +12,7 @@ function foo($a) :AsyncGenerator<mixed,mixed,void>{
 
 <<__EntryPoint>>
 function main_2160() :mixed{
-foreach (foo(varray[1]) as $x) {
+foreach (foo(vec[1]) as $x) {
   var_dump('o:'.$x);
 }
 }

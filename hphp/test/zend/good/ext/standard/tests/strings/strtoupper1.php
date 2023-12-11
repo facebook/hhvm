@@ -32,7 +32,7 @@ $strings = varray [
   NULL,
   TRUE,
   FALSE,
-  varray[]
+  vec[]
 ];
 
 $count = 0;

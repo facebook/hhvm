@@ -12,13 +12,13 @@ function main() :mixed{
 
   $nullVal = null;
   $simpleStr = "simple";
-  $emptyArr = varray[];
+  $emptyArr = vec[];
 
   echo "\n-- Testing array_fill_keys() function with empty arguments --\n";
   var_dump( array_fill_keys($emptyArr, $nullVal) );
 
   echo "\n-- Testing array_fill_keys() function with keyed array --\n";
-  $keyedArray = darray["two" => 2, "strk1" => "strv1", 0 => 4, 1 => $simpleStr];
+  $keyedArray = dict["two" => 2, "strk1" => "strv1", 0 => 4, 1 => $simpleStr];
   var_dump( array_fill_keys($keyedArray, $simpleStr) );
 
   echo "Done";

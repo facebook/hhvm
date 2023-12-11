@@ -3,7 +3,7 @@
 <<__EntryPoint>> function main(): void {
   require_once('test_base.inc');
   init();
-requestAll(varray[
+requestAll(vec[
   "test_get_request_id.php",
   "test_get_request_id.php",
   "test_get_request_id.php",

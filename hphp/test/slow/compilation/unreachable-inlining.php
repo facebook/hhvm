@@ -16,7 +16,7 @@ final class X {
 
   private static function getArr($val) :mixed{
     self::check($val);
-    return varray[
+    return vec[
       (int)$val
     ];
   }

@@ -35,7 +35,7 @@ $assoc_array = darray ['one' => 1, 'two' => 2];
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $stream_id argument
-$inputs = varray[
+$inputs = vec[
 
        // int data
 /*1*/  0,
@@ -70,10 +70,10 @@ $inputs = varray[
        $heredoc,
 
        // array data
-/*21*/ varray[],
+/*21*/ vec[],
        $index_array,
        $assoc_array,
-       varray['foo', $index_array, $assoc_array],
+       vec['foo', $index_array, $assoc_array],
 
 
        // object data

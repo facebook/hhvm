@@ -156,14 +156,14 @@ class StringToIntPrimitiveAdapter {
 }
 
 class OuterStructWithWrapperAndAdapter implements IThriftStruct {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'value',
       'type' => \TType::I32,
       'is_wrapped' => true,
       'adapter' => \StringToIntPrimitiveAdapter::class,
     ],
-    2 => darray[
+    2 => dict[
       'var' => 'struct_value',
       'type' => \TType::STRUCT,
       'is_wrapped' => true,
@@ -213,13 +213,13 @@ class OuterStructWithWrapperAndAdapter implements IThriftStruct {
 }
 
 class OuterStructWithWrapper implements IThriftStruct {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'value',
       'type' => \TType::I32,
       'is_wrapped' => true,
     ],
-    2 => darray[
+    2 => dict[
       'var' => 'struct_value',
       'type' => \TType::STRUCT,
       'class' => InnerStruct::class,
@@ -268,12 +268,12 @@ class OuterStructWithWrapper implements IThriftStruct {
 }
 
 class OuterStructNoWrappedFields {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'value',
       'type' => \TType::I32,
     ],
-    2 => darray[
+    2 => dict[
       'var' => 'struct_value',
       'type' => \TType::STRUCT,
       'class' => InnerStruct::class,
@@ -301,8 +301,8 @@ class OuterStructNoWrappedFields {
 }
 
 class InnerStruct implements IThriftStruct {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'value',
       'type' => \TType::I32,
     ],
@@ -329,12 +329,12 @@ class InnerStruct implements IThriftStruct {
 type WrappedInnerStruct = MyStructWrapper<InnerStruct>;
 
 class StructWithTypeWrapper  {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'value',
       'type' => \TType::I32,
     ],
-    2 => darray[
+    2 => dict[
       'var' => 'struct_value',
       'type' => \TType::STRUCT,
       'is_type_wrapped' => true,

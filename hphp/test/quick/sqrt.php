@@ -46,12 +46,12 @@ function main($f) :mixed{
     var_dump($e->getMessage());
   }
   try {
-    var_dump(sqrt(varray[]));
+    var_dump(sqrt(vec[]));
   } catch (Exception $e) {
     var_dump($e->getMessage());
   }
   try {
-    var_dump(sqrt(varray[2,3,4]));
+    var_dump(sqrt(vec[2,3,4]));
   } catch (Exception $e) {
     var_dump($e->getMessage());
   }

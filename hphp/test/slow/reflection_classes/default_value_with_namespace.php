@@ -21,7 +21,7 @@ namespace A\B {
 
 namespace {
 <<__EntryPoint>> function main(): void {
-  foreach (varray['c', 'd', 'e', 'f'] as $func) {
+  foreach (vec['c', 'd', 'e', 'f'] as $func) {
     echo "A\\$func reflection:\n";
     $rc = new ReflectionFunction("A\\$func");
     \var_dump($rc->getParameters()[0]->getDefaultValue());

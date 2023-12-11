@@ -16,7 +16,7 @@ function main_1462() :mixed{
   $y = new a;
   var_dump(a::foo());
   var_dump(a::$foo());
-  var_dump(call_user_func(varray['a','foo']));
+  var_dump(call_user_func(vec['a','foo']));
   var_dump(a::$astat);
   var_dump(a::$a1stat);
   var_dump(a::aconst);

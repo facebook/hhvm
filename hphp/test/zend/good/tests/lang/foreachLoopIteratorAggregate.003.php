@@ -1,7 +1,7 @@
 <?hh
 class EnglishMealIterator implements Iterator {
     private $pos=0;
-    private $myContent=varray["breakfast", "dinner", "tea"];
+    private $myContent=vec["breakfast", "dinner", "tea"];
 
     public function valid() :mixed{
         echo "--> " . __METHOD__ . " ($this->pos)\n";

@@ -3,7 +3,7 @@ class C { public static $p; }
 function f() :mixed{ return 0; }
 <<__EntryPoint>> function main(): void {
 error_reporting(E_ALL & ~E_STRICT);
-$a = varray[darray[], darray[]];
+$a = vec[dict[], dict[]];
 $a[0][1] = 'good';
 $a[1][1] = 'bad';
 
@@ -12,12 +12,12 @@ echo $a[$i=f()][++$i];
 unset($i);
 
 echo "\n" . '$i[0]=f(): ';
-$i = darray[];
+$i = dict[];
 echo $a[$i[0]=f()][++$i[0]];
 unset($i);
 
 echo "\n" . '$i[0][0]=f(): ';
-$i = varray[darray[]];
+$i = vec[dict[]];
 echo $a[$i[0][0]=f()][++$i[0][0]];
 unset($i);
 
@@ -28,13 +28,13 @@ unset($i);
 
 echo "\n" . '$i->p[0]=f(): ';
 $i = new stdClass();
-$i->p = darray[];
+$i->p = dict[];
 echo $a[$i->p[0]=f()][++$i->p[0]];
 unset($i);
 
 echo "\n" . '$i->p[0]->p=f(): ';
 $i = new stdClass();
-$i->p = varray[new stdClass()];
+$i->p = vec[new stdClass()];
 echo $a[$i->p[0]->p=f()][++$i->p[0]->p];
 unset($i);
 
@@ -42,7 +42,7 @@ echo "\n" . 'C::$p=f(): ';
 echo $a[C::$p=f()][++C::$p];
 
 echo "\n" . 'C::$p[0]=f(): ';
-C::$p = darray[];
+C::$p = dict[];
 echo $a[C::$p[0]=f()][++C::$p[0]];
 
 echo "\n" . 'C::$p->q=f(): ';

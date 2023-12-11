@@ -2,7 +2,7 @@
 
 
 function subdomains($domain) :mixed{
-  $domains = varray[];
+  $domains = vec[];
   $components = explode('.', strtolower($domain));
   while (count($components) > 0) {
     $domains[] = implode('.', $components);

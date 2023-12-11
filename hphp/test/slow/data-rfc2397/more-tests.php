@@ -5,7 +5,7 @@
 
 <<__EntryPoint>>
 function main_more_tests() :mixed{
-$streams = varray[
+$streams = vec[
   'data://,;test',
   'data://text/plain,test',
   'data://text/plain;charset=US-ASCII,test',

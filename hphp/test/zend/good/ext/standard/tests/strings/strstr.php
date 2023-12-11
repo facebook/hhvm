@@ -43,7 +43,7 @@ function entrypoint_strstr(): void {
 abcd$:Hello world";
 
   /* needles in an array to get the string starts with needle, in $string */
-  $needles = varray[
+  $needles = vec[
     "Hello world",
     "WORLD",
     "\0",
@@ -93,7 +93,7 @@ abcd$:Hello world";
 
 
   echo "\n-- passing an array as string and needle --\n";
-  $needles = varray["hello", "?world", "!$%**()%**[][[[&@#~!"];
+  $needles = vec["hello", "?world", "!$%**()%**[][[[&@#~!"];
   try { var_dump( strstr($needles, $needles) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // won't work
   var_dump( strstr("hello?world,!$%**()%**[][[[&@#~!", (string)$needles[1]) );  // works
   var_dump( strstr("hello?world,!$%**()%**[][[[&@#~!", (string)$needles[2]) );  // works

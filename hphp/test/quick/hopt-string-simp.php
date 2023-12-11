@@ -58,7 +58,7 @@ function foo11() :mixed{
 }
 
 function foo12() :mixed{
-  $x = varray[];
+  $x = vec[];
   try {
     return strlen($x);
   } catch (Exception $e) {

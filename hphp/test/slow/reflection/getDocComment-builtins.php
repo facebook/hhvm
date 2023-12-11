@@ -20,11 +20,11 @@ class C {
 
 <<__EntryPoint>>
 function main_get_doc_comment_builtins() :mixed{
-$meths = varray[
-  varray['ArrayAccess', 'offsetExists'],
-  varray['ReflectionMethod', 'getDocComment'],
-  varray['I', 'meth'],
-  varray['C', 'okay']
+$meths = vec[
+  vec['ArrayAccess', 'offsetExists'],
+  vec['ReflectionMethod', 'getDocComment'],
+  vec['I', 'meth'],
+  vec['C', 'okay']
 ];
 
 foreach ($meths as list($class, $meth)) {
@@ -35,7 +35,7 @@ foreach ($meths as list($class, $meth)) {
   var_dump($s);
 }
 
-foreach (varray['p1', 'p2'] as $prop) {
+foreach (vec['p1', 'p2'] as $prop) {
   $refl = new ReflectionProperty('C', $prop);
   $s = $refl->getDocComment();
   var_dump($s);

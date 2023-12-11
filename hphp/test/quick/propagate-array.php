@@ -1,7 +1,7 @@
 <?hh
 
 function foo(inout $x, $y) :mixed{
-  $x = varray[1,2];
+  $x = vec[1,2];
   $y = $x;
   return $y;
 }

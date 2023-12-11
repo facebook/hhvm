@@ -6,7 +6,7 @@ class X {
   private $obj;
   function foo() :mixed{
     $this->str = 'hello';
-    $this->arr = varray[1,2,3];
+    $this->arr = vec[1,2,3];
     $this->obj = $this;
   }
 }

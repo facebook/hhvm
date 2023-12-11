@@ -3,16 +3,16 @@
 
 function get1() :mixed{
   if (__hhvm_intrinsics\launder_value(true)) {
-    return varray['a', 'b', 'c'];
+    return vec['a', 'b', 'c'];
   } else {
-    return varray[];
+    return vec[];
   }
 }
 function get2() :mixed{
   if (__hhvm_intrinsics\launder_value(true)) {
-    return darray[0 => 'a', 1 => 'b', 2 => 'c'];
+    return dict[0 => 'a', 1 => 'b', 2 => 'c'];
   } else {
-    return darray[];
+    return dict[];
   }
 }
 

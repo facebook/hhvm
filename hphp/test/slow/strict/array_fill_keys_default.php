@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_array_fill_keys_default() :mixed{
-$keys = varray[
+$keys = vec[
   1234,
   'foo',
 ];

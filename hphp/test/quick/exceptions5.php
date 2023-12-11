@@ -1,13 +1,13 @@
 <?hh
 class C {
   public function baz($z) :mixed{
-    return $z = call_user_func(varray[$this,'foo'], $z);
+    return $z = call_user_func(vec[$this,'foo'], $z);
   }
   public function bar($z) :mixed{
-    return $z = call_user_func(varray[$this,'baz'], $z);
+    return $z = call_user_func(vec[$this,'baz'], $z);
   }
   public function foo($z) :mixed{
-    return $z = call_user_func(varray[$this,'bar'], $z);
+    return $z = call_user_func(vec[$this,'bar'], $z);
   }
 }
 <<__EntryPoint>> function bar() :mixed{

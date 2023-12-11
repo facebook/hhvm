@@ -2,7 +2,7 @@
 
 <<__EntryPoint>>
 function main_locale_lookup_two_params() :mixed{
-$arr = varray[
+$arr = vec[
     'de-DEVA',
     'de-DE-1996',
     'de',

@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$doubles = varray[
+$doubles = vec[
         PHP_INT_MAX,
         PHP_INT_MAX + 1,
         PHP_INT_MAX + 1000,

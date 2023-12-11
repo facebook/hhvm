@@ -15,7 +15,7 @@ class test
     }
 }
 <<__EntryPoint>> function main(): void {
-$t = darray[];
+$t = dict[];
 $t['one'] = 'ABC';
 $t['two'] = new test();
 

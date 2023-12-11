@@ -11,46 +11,46 @@ function skipEvents() :mixed{
 <<__EntryPoint>> function main(): void {
 require(__DIR__ . '/common.inc');
 $path = __FILE__ . ".test";
-$testProcess = vsDebugLaunch($path, true, varray[]);
+$testProcess = vsDebugLaunch($path, true, vec[]);
 
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "event",
   "event" => "stopped",
-  "body" => darray[
+  "body" => dict[
       "threadId" => 1,
       "reason" => "breakpoint",
       "description" => "hphp_debug_break()",
   ]]);
 
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "stackTrace",
   "type" => "request",
-  "arguments" => darray[
+  "arguments" => dict[
     "threadId" => 1
   ]]);
 
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "response",
   "command" => "stackTrace",
   "request_seq" => $seq,
   "success" => true,
-  "body" => darray["totalFrames" => 2]]);
+  "body" => dict["totalFrames" => 2]]);
 
 // Get bogus option throws
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "evaluate",
   "type" => "request",
   "arguments" =>
-  darray["frameId" => 1,
+  dict["frameId" => 1,
     "expression" => "hphp_debugger_get_option('BOGUS OPTION')"]]);
 
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "event",
   "event" => "output",
-  "body" => darray[
+  "body" => dict[
     "output" => "Hit fatal : getDebuggerOption: Unknown option specified\n"
   ]]);
 
@@ -59,66 +59,66 @@ checkObjEqualRecursively($msg, darray[
 $msg = skipEvents();
 
 // Response to the failed eval.
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "response",
   "command" => "evaluate",
   "request_seq" => $seq,
   "success" => false]);
 
 // Get valid option succeeds.
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "evaluate",
   "type" => "request",
   "arguments" =>
-  darray["frameId" => 1,
+  dict["frameId" => 1,
     "expression" => "hphp_debugger_get_option('showDummyOnAsyncPause')"]]);
 
 $msg = skipEvents();
 
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "response",
   "command" => "evaluate",
   "request_seq" => $seq,
   "success" => true,
-  "body" => darray[
+  "body" => dict[
     "result" => "false",
     "type" => "bool"
   ]]);
 
 
 // Set valid option succeeds.
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "evaluate",
   "type" => "request",
   "arguments" =>
-  darray["frameId" => 1,
+  dict["frameId" => 1,
     "expression" =>
       "hphp_debugger_set_option('showDummyOnAsyncPause', true)"]]);
 
 $msg = skipEvents();
 
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "response",
   "command" => "evaluate",
   "request_seq" => $seq,
   "success" => true]);
 
 // Get valid option succeeds, sees the new value, and is case-insensitive
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "evaluate",
   "type" => "request",
   "arguments" =>
-  darray["frameId" => 1,
+  dict["frameId" => 1,
     "expression" => "hphp_debugger_get_option('showdummyonasyncPause')"]]);
 
 $msg = skipEvents();
 
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "response",
   "command" => "evaluate",
   "request_seq" => $seq,
   "success" => true,
-  "body" => darray[
+  "body" => dict[
     "result" => "true",
     "type" => "bool"
   ]]);

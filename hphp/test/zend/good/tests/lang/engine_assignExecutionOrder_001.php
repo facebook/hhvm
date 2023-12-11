@@ -12,7 +12,7 @@ function g() :mixed{
 
 class C {
     public static $name = "original";
-    public static $a = darray[];
+    public static $a = dict[];
     public static $string = "hello";
 }
 
@@ -27,7 +27,7 @@ function newChar() :mixed{
 
 <<__EntryPoint>> function main(): void {
 echo "\n\nOrder with array assignment:\n";
-$a = darray[];
+$a = dict[];
 $a[f()] = g();
 var_dump($a);
 

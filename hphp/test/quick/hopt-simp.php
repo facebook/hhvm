@@ -36,12 +36,12 @@ function foo7($x) :mixed{
 }
 
 function foo8() :mixed{
-  $x = varray[];
+  $x = vec[];
   return (bool)$x;
 }
 
 function foo9() :mixed{
-  $x = varray[1, 2, 3];
+  $x = vec[1, 2, 3];
   return (bool)$x;
 }
 

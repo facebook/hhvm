@@ -5,7 +5,7 @@ class thing {
 
   function go() :mixed{
     $idx = 'five';
-    $instances = darray[];
+    $instances = dict[];
     $instances[(string)$this->prop] = false;
     return isset($this->prop[$idx]);
   }

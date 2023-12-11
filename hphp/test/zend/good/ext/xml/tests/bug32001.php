@@ -11,7 +11,7 @@ class testcase {
 		$this->chunk_size = $chunk_size;
 		$this->bom = $bom;
 		$this->prologue = !$omit_prologue;
-		$this->tags = varray[];
+		$this->tags = vec[];
 	}
 
 	function start_element($parser, $name, $attrs) :mixed{
@@ -123,7 +123,7 @@ HERE;
 // vim600: sts=4 sw=4 ts=4 encoding=UTF-8
 <<__EntryPoint>>
 function main_entry(): void {
-  $suite = varray[
+  $suite = vec[
   	new testcase("UTF-8",     0, 0, 0),
   	new testcase("UTF-8",     0, 0, 1),
   	new testcase("UTF-8",     0, 1, 0),

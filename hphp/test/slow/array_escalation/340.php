@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_340() :mixed{
-$a = darray['a' => 'va'];
- $a[] = varray[0];
+$a = dict['a' => 'va'];
+ $a[] = vec[0];
        var_dump($a);
 }

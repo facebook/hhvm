@@ -58,129 +58,129 @@ function is_equal($obj1, $obj2) :mixed{
 }
 
 function main() :mixed{
-  $tests = varray[
+  $tests = vec[
     // Scalar types tests from HHJsonDecodeTest.php
-    darray[
+    dict[
       'input' => 'null',
       'options' => 0,
       'expected' => null,
     ],
-    darray[
+    dict[
       'input' => '0',
       'options' => JSON_FB_LOOSE,
       'expected' => 0,
     ],
-    darray[
+    dict[
       'input' => '"0"',
       'options' => JSON_FB_COLLECTIONS,
       'expected' => '0',
     ],
-    darray[
+    dict[
       'input' => 'true',
       'options' => JSON_FB_LOOSE,
       'expected' => true,
     ],
     // Parse Errors tests from HHJsonDecodeTest.php
-    darray[
+    dict[
       'input' => '',
       'options' => JSON_FB_LOOSE,
       'expected' => null,
     ],
-    darray[
+    dict[
       'input' => '{[}',
       'options' => JSON_FB_LOOSE,
       'expected' => null,
     ],
-    darray[
+    dict[
       'input' => '[:(]',
       'options' => JSON_FB_LOOSE,
       'expected' => null,
     ],
-    darray[
+    dict[
       'input' => 'xxx',
       'options' => JSON_FB_LOOSE,
       'expected' => null,
     ],
-    darray[
+    dict[
       'input' => 'a {',
       'options' => JSON_FB_LOOSE,
       'expected' => null,
     ],
     // Maps checks from HHJsonDecodeTest.php
-    darray[
+    dict[
       'input' => '{"0": 1, "a": "b"}',
       'options' => JSON_FB_COLLECTIONS,
       'expected' => Map {'0' => 1, 'a' => 'b'},
     ],
     // Vectors/Maps - some basic tests
-    darray[
+    dict[
       'input' => '[1,2]',
       'options' => JSON_FB_COLLECTIONS,
       'expected' => Vector {1, 2},
     ],
-    darray[
+    dict[
       'input' => '{}',
       'options' => JSON_FB_COLLECTIONS,
       'expected' => Map {},
     ],
-    darray[
+    dict[
       'input' => '{"{" : "}"}',
       'options' => JSON_FB_COLLECTIONS,
       'expected' => Map {'{' => '}'},
     ],
-    darray[
+    dict[
       'input' => '{"0": 1, "a": "b", "[]": null, "#": false}',
       'options' => JSON_FB_COLLECTIONS,
       'expected' => Map {'a' => 'b', '0' => 1, '[]' => null, '#' => false},
     ],
     // Collections tests from HHJsonDecodeTest.php
-    darray[
+    dict[
       'input' => '[]',
       'options' => JSON_FB_COLLECTIONS,
       'expected' => Vector {},
     ],
-    darray[
+    dict[
       'input' => '[null, 0, "0", true]',
       'options' => JSON_FB_COLLECTIONS,
       'expected' => Vector {null, 0, '0', true},
     ],
     // LooseModeCollections from HHJsonDecodeTest.phpi
     // Single-quoted strings
-    darray[
+    dict[
       'input' => '[\'value\']',
       'options' => JSON_FB_LOOSE | JSON_FB_COLLECTIONS,
       'expected' => Vector {'value'},
     ],
     // Unquoted keys
-    darray[
+    dict[
       'input' => '{key: "value"}',
       'options' => JSON_FB_LOOSE | JSON_FB_COLLECTIONS,
       'expected' => Map {'key' => 'value'},
     ],
     // Boolean keys
-    darray[
+    dict[
       'input' => '{true: "value"}',
       'options' => JSON_FB_LOOSE | JSON_FB_COLLECTIONS,
       'expected' => Map {'true' => 'value'},
     ],
     // Null keys
-    darray[
+    dict[
       'input' => '{null: "value"}',
       'options' => JSON_FB_LOOSE | JSON_FB_COLLECTIONS,
       'expected' => Map {'null' => 'value'},
     ],
     // Nested collections
-    darray[
+    dict[
       'input' =>  '[2,"4",{0:[]}]',
       'options' => JSON_FB_LOOSE | JSON_FB_COLLECTIONS,
       'expected' => Vector {2, '4', Map {'0' => Vector {}}},
     ],
-    darray[
+    dict[
       'input' => '{"vec": [], "map": {}}',
       'options' => JSON_FB_COLLECTIONS,
       'expected' => Map {'vec' => Vector {}, 'map' => Map {}},
     ],
-    darray[
+    dict[
       'input' => '{"vec" : [{"z" : []}], "map" : {"a" : {"]" : "["}}}',
       'options' => JSON_FB_COLLECTIONS,
       'expected' => Map {

@@ -8,7 +8,7 @@ class bar {
   public function foo() :mixed{
     return array_map(
       $y ==> $this->x,
-      varray[1,2,3,4]
+      vec[1,2,3,4]
     );
   }
 

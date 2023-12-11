@@ -19,7 +19,7 @@ function main_ref_type_fail() :mixed{
 set_error_handler(handler<>);
 
 test("hello");
-test(varray[1,2,3]);
-test(varray[]);
+test(vec[1,2,3]);
+test(vec[]);
 test("hello");
 }

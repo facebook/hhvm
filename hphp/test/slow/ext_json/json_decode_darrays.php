@@ -129,24 +129,24 @@ function is_equal($result1, $result2) :mixed{
       'input' => '[]',
       'options' => JSON_FB_DARRAYS,
       'expected' => dict[
-        IsAssoc::TRUE => darray[],
-        IsAssoc::FALSE => darray[],
+        IsAssoc::TRUE => dict[],
+        IsAssoc::FALSE => dict[],
       ],
     ],
     dict[
       'input' => '[2]',
       'options' => JSON_FB_DARRAYS,
       'expected' => dict[
-        IsAssoc::TRUE => darray[0 => 2],
-        IsAssoc::FALSE => darray[0 => 2],
+        IsAssoc::TRUE => dict[0 => 2],
+        IsAssoc::FALSE => dict[0 => 2],
       ],
     ],
     dict[
       'input' => '[42, "foo", "0"]',
       'options' => JSON_FB_DARRAYS,
       'expected' => dict[
-        IsAssoc::TRUE => darray[0 => 42, 1 => 'foo', 2 => '0'],
-        IsAssoc::FALSE => darray[0 => 42, 1 => 'foo', 2 => '0'],
+        IsAssoc::TRUE => dict[0 => 42, 1 => 'foo', 2 => '0'],
+        IsAssoc::FALSE => dict[0 => 42, 1 => 'foo', 2 => '0'],
       ],
     ],
 
@@ -155,118 +155,118 @@ function is_equal($result1, $result2) :mixed{
       'input' => '{}',
       'options' => JSON_FB_DARRAYS,
       'expected' => dict[
-        IsAssoc::TRUE => darray[],
-        IsAssoc::FALSE => make_object(darray[]),
+        IsAssoc::TRUE => dict[],
+        IsAssoc::FALSE => make_object(dict[]),
       ],
     ],
     dict[
       'input' => '{"0": 1}',
       'options' => JSON_FB_DARRAYS,
       'expected' => dict[
-        IsAssoc::TRUE => darray[0 => 1],
-        IsAssoc::FALSE => make_object(darray[0 => 1]),
+        IsAssoc::TRUE => dict[0 => 1],
+        IsAssoc::FALSE => make_object(dict[0 => 1]),
       ],
     ],
     dict[
       'input' => '{"0": 1, "a": "b"}',
       'options' => JSON_FB_DARRAYS,
       'expected' => dict[
-        IsAssoc::TRUE => darray[0 => 1, 'a' => 'b'],
-        IsAssoc::FALSE => make_object(darray[0 => 1, 'a' => 'b']),
+        IsAssoc::TRUE => dict[0 => 1, 'a' => 'b'],
+        IsAssoc::FALSE => make_object(dict[0 => 1, 'a' => 'b']),
       ],
     ],
     dict[
       'input' => '{"{" : "}"}',
       'options' => JSON_FB_DARRAYS,
       'expected' => dict[
-        IsAssoc::TRUE => darray['{' => '}'],
-        IsAssoc::FALSE => make_object(darray['{' => '}']),
+        IsAssoc::TRUE => dict['{' => '}'],
+        IsAssoc::FALSE => make_object(dict['{' => '}']),
       ],
     ],
     dict[
       'input' => '{"0": 1, "a": "b", "[]": null, "#": false}',
       'options' => JSON_FB_DARRAYS,
       'expected' => dict[
-        IsAssoc::TRUE => darray[0 => 1,  'a' => 'b', '[]' => null, '#' => false],
-        IsAssoc::FALSE => make_object(darray[0 => 1, 'a' => 'b', '[]' => null, '#' => false]),
+        IsAssoc::TRUE => dict[0 => 1,  'a' => 'b', '[]' => null, '#' => false],
+        IsAssoc::FALSE => make_object(dict[0 => 1, 'a' => 'b', '[]' => null, '#' => false]),
       ],
     ],
 
     // LooseModeCollections from HHJsonDecodeTest.phpi
     // Single-quoted strings
-    darray[
+    dict[
       'input' => '[\'value\']',
       'options' => JSON_FB_LOOSE | JSON_FB_DARRAYS,
       'expected' => dict[
-        IsAssoc::TRUE => darray[0 => 'value'],
-        IsAssoc::FALSE => darray[0 => 'value'],
+        IsAssoc::TRUE => dict[0 => 'value'],
+        IsAssoc::FALSE => dict[0 => 'value'],
       ],
     ],
     // Unquoted keys
-    darray[
+    dict[
       'input' => '{key: "value"}',
       'options' => JSON_FB_LOOSE | JSON_FB_DARRAYS,
       'expected' => dict[
-        IsAssoc::TRUE => darray['key' => 'value'],
-        IsAssoc::FALSE => make_object(darray['key' => 'value']),
+        IsAssoc::TRUE => dict['key' => 'value'],
+        IsAssoc::FALSE => make_object(dict['key' => 'value']),
       ],
     ],
     // Boolean keys
-    darray[
+    dict[
       'input' => '{true: "value"}',
       'options' => JSON_FB_LOOSE | JSON_FB_DARRAYS,
       'expected' => dict[
-        IsAssoc::TRUE => darray['true' => 'value'],
-        IsAssoc::FALSE => make_object(darray['true' => 'value']),
+        IsAssoc::TRUE => dict['true' => 'value'],
+        IsAssoc::FALSE => make_object(dict['true' => 'value']),
       ],
     ],
     // Null keys
-    darray[
+    dict[
       'input' => '{null: "value"}',
       'options' => JSON_FB_LOOSE | JSON_FB_DARRAYS,
       'expected' => dict[
-        IsAssoc::TRUE => darray['null' => 'value'],
-        IsAssoc::FALSE => make_object(darray['null' => 'value']),
+        IsAssoc::TRUE => dict['null' => 'value'],
+        IsAssoc::FALSE => make_object(dict['null' => 'value']),
       ],
     ],
 
     // Nested hack-arrays
-    darray[
+    dict[
       'input' =>  '[2,"4",{0:[]}]',
       'options' => JSON_FB_LOOSE | JSON_FB_DARRAYS,
       'expected' => dict[
-        IsAssoc::TRUE => darray[0 => 2, 1 => '4', 2 => darray[0 => darray[]]],
-        IsAssoc::FALSE => darray[0 => 2, 1 => '4', 2 => make_object(darray[0 => darray[]])],
+        IsAssoc::TRUE => dict[0 => 2, 1 => '4', 2 => dict[0 => dict[]]],
+        IsAssoc::FALSE => dict[0 => 2, 1 => '4', 2 => make_object(dict[0 => dict[]])],
       ],
     ],
-    darray[
+    dict[
       'input' => '{"vec": [], "map": {}}',
       'options' => JSON_FB_DARRAYS,
       'expected' => dict[
-        IsAssoc::TRUE => darray['vec' => darray[], 'map' => darray[]],
-        IsAssoc::FALSE => make_object(darray['vec' => darray[], 'map' => make_object(darray[])]),
+        IsAssoc::TRUE => dict['vec' => dict[], 'map' => dict[]],
+        IsAssoc::FALSE => make_object(dict['vec' => dict[], 'map' => make_object(dict[])]),
       ],
     ],
-    darray[
+    dict[
       'input' => '{"vec" : [{"z" : []}], "map" : {"a" : {"]" : "["}}}',
       'options' => JSON_FB_DARRAYS,
       'expected' => dict[
         IsAssoc::TRUE =>
-          darray[
-            'vec' => darray[0 => darray['z' => darray[]]],
-            'map' => darray['a' => darray[']' => '[']]
+          dict[
+            'vec' => dict[0 => dict['z' => dict[]]],
+            'map' => dict['a' => dict[']' => '[']]
           ],
         IsAssoc::FALSE =>
-          make_object(darray[
-            'vec' => darray[0 => make_object(darray['z' => darray[]])],
-            'map' => make_object(darray['a' => make_object(darray[']' => '['])])
+          make_object(dict[
+            'vec' => dict[0 => make_object(dict['z' => dict[]])],
+            'map' => make_object(dict['a' => make_object(dict[']' => '['])])
           ]),
       ],
     ],
   ];
 
   foreach ($tests as $idx => $test) {
-    foreach (varray[IsAssoc::TRUE, IsAssoc::FALSE] as $is_assoc) {
+    foreach (vec[IsAssoc::TRUE, IsAssoc::FALSE] as $is_assoc) {
       $output =
         json_decode($test['input'], (bool) $is_assoc, 512, $test['options']);
 

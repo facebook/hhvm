@@ -14,5 +14,5 @@ function test($f) :mixed{
 
 <<__EntryPoint>>
 function main_classof() :mixed{
-test(varray['T', 'T::foo']);
+test(vec['T', 'T::foo']);
 }

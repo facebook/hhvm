@@ -2,7 +2,7 @@
 
 <<exit>>
 function g() :mixed{
-$a = darray[
+$a = dict[
   '012345678901234567890123456789012345678901234567890123456789' => -"b",
   'testclass' => 0567,
   "NaN"=> "Done\n",
@@ -15,7 +15,7 @@ $a = darray[
 <<C>>
 function h() :mixed{
   var_dump( $start, 0, opendir);
-  $count= '/fgetcsv_variation10.tmp'.darray[
+  $count= '/fgetcsv_variation10.tmp'.dict[
     '0x12ab' => 'koi8-r',
     '158x158' => 160,
     '400x400' => 403,

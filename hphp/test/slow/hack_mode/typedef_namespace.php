@@ -5,7 +5,7 @@ namespace test;
 type HandlerFunction = (function(AnyArray, ?string, Map<string, mixed>):mixed);
 
 function t(HandlerFunction $f) :mixed{
-  $f(varray[], "", Map {});
+  $f(vec[], "", Map {});
 }
 
 <<__EntryPoint>>

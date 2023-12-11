@@ -32,19 +32,19 @@ echo $doc->C14N(FALSE, TRUE)."\n\n";
 echo $doc->C14N(TRUE, TRUE)."\n\n";
 
 /* exclusive/without comments using xpath query. */
-echo $doc->C14N(TRUE, FALSE, darray['query'=>'(//. | //@* | //namespace::*)'])."\n\n";
+echo $doc->C14N(TRUE, FALSE, dict['query'=>'(//. | //@* | //namespace::*)'])."\n\n";
 
 /* exclusive/without comments first child element of doc element is context.
    using xpath query with registered namespace.
    test namespace prefix is also included. */
 echo $doc->C14N(TRUE, FALSE,
-                darray[
+                dict[
                   'query'=>'(//a:contain | //a:bar | .//namespace::*)',
-                  'namespaces'=>darray['a'=>'http://www.example.com/ns/foo']
+                  'namespaces'=>dict['a'=>'http://www.example.com/ns/foo']
                 ],
-                varray['test'])."\n\n";
+                vec['test'])."\n\n";
 
 /* exclusive/without comments first child element of doc element is context.
    test namespace prefix is also included */
-echo $doc->C14N(TRUE, FALSE, NULL, varray['test']);
+echo $doc->C14N(TRUE, FALSE, NULL, vec['test']);
 }

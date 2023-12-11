@@ -5,7 +5,7 @@ function handler($err, $errstr) :mixed{
   var_dump($err, $errstr);
 }
 class Y {
-  public $foo = varray[1,2,3];
+  public $foo = vec[1,2,3];
 }
 class X {
   function __construct(<<__Soft>> Y $y) {

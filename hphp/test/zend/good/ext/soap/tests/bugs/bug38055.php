@@ -34,7 +34,7 @@ function main_entry(): void {
   $boolB = '1';
   $res = $client->__soapcall(
     'Test',
-    varray[darray['boolA'=>$boolA, 'boolB'=>$boolB]],
+    vec[dict['boolA'=>$boolA, 'boolB'=>$boolB]],
   );
   var_dump(ZendGoodExtSoapTestsBugsBug38055::$g1);
   var_dump(ZendGoodExtSoapTestsBugsBug38055::$g2);

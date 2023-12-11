@@ -2,16 +2,16 @@
 
 function varray_cases() :mixed{
   return vec[
-    tuple(varray[1, 2, 3], varray[1, 2, 3]),
-    tuple(varray[], varray[]),
+    tuple(vec[1, 2, 3], vec[1, 2, 3]),
+    tuple(vec[], vec[]),
   ];
 }
 
 function darray_cases() :mixed{
   return vec[
-    tuple(darray['foo' => 1, 'bar' => 3], darray['foo' => 1, 'bar' => 3]),
-    tuple(darray[0 => 1, 1 => 2], darray[0 => 1, 1 => 2]),
-    tuple(darray[], darray[]),
+    tuple(dict['foo' => 1, 'bar' => 3], dict['foo' => 1, 'bar' => 3]),
+    tuple(dict[0 => 1, 1 => 2], dict[0 => 1, 1 => 2]),
+    tuple(dict[], dict[]),
   ];
 }
 

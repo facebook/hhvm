@@ -6,5 +6,5 @@ function handle_error() :mixed{
 <<__EntryPoint>>
 function main() :mixed{
   set_error_handler(handle_error<>);
-  date_default_timezone_set(...varray['America/Gotham_City']);
+  date_default_timezone_set(...vec['America/Gotham_City']);
 }

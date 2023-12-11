@@ -9,9 +9,9 @@ echo "*** Testing fputcsv() : with no CSV format in the field ***\n";
    and 3rd element is csv fields
 */
 
-$fields = varray[ varray['water_fruit\n'],
-                varray["water_fruit\n"],
-                varray[""]
+$fields = vec[ vec['water_fruit\n'],
+                vec["water_fruit\n"],
+                vec[""]
          ];
 
 $file = sys_get_temp_dir().'/'.'fputcsv_variation10.tmp';

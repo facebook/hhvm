@@ -104,7 +104,7 @@ function test() :mixed{
   var_dump(takes_anything(__hhvm_intrinsics\launder_value(500)));
   var_dump(takes_anything(__hhvm_intrinsics\launder_value('a-string')));
   var_dump(takes_anything(__hhvm_intrinsics\launder_value('')));
-  var_dump(takes_anything(__hhvm_intrinsics\launder_value(varray[1, 2, 3])));
+  var_dump(takes_anything(__hhvm_intrinsics\launder_value(vec[1, 2, 3])));
   var_dump(takes_anything(__hhvm_intrinsics\launder_value(vec[4, 5, 6])));
   var_dump(takes_anything(__hhvm_intrinsics\launder_value(dict['a' => 1, 'b' => 2, 'c' => 3])));
   var_dump(takes_anything(__hhvm_intrinsics\launder_value(keyset['z', 'y', 'x'])));

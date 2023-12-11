@@ -16,7 +16,7 @@ function foo($a, $b) :mixed{
 function f() :mixed{ return FIZ; }
 
 function test() :mixed{
-  foo(f(), varray[X::FOO, X::BAZ,
+  foo(f(), vec[X::FOO, X::BAZ,
                  X::BAR, X::BAZ,
                  X::BOO, X::BIZ]);
 }

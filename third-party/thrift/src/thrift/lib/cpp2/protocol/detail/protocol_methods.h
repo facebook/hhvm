@@ -517,8 +517,8 @@ struct protocol_methods<type_class::list<ElemClass>, Type> {
  private:
   template <typename Protocol>
   FOLLY_ERASE static void read_one(Protocol& protocol, Type& out) {
-    if FOLLY_CXX17_CONSTEXPR ( //
-        std::is_const<std::remove_reference_t<typename Type::reference>>{}) {
+    if constexpr ( //
+        std::is_const_v<std::remove_reference_t<typename Type::reference>>) {
       out.emplace_back(folly::invocable_to([&] {
         elem_type elem;
         elem_methods::read(protocol, elem);

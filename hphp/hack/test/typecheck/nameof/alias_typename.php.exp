@@ -1,0 +1,12 @@
+File "alias_typename.php", line 12, characters 10-17:
+Invalid argument (Typing[4110])
+  File "alias_typename.php", line 8, characters 26-26:
+  Expected `C`
+  File "alias_typename.php", line 12, characters 10-10:
+  But got `D`
+File "alias_typename.php", line 13, characters 10-17:
+Invalid argument (Typing[4110])
+  File "alias_typename.php", line 8, characters 26-26:
+  Expected `C`
+  File "alias_typename.php", line 13, characters 17-17:
+  But got `D`

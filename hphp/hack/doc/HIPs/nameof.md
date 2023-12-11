@@ -26,12 +26,11 @@ The expressions valid on the left hand side of `C::class` are
 3. Traits
 4. Enums / enum classes
 5. `static`, `self`, and `parent`
-6. Reified generics in scope
-7. Type aliases
+6. Type aliases
+7. Reified generics in scope
 
-`nameof` supports 1-5 as targets. The confusion around 6 was significant enough
-to where we've decided to exclude it, and 7 can wait until the semantics of what
-`MyTypeAlias::class` should mean are nailed down. Other top-level identifiers
+`nameof` supports 1-6 as targets. The confusion around 7 was significant enough
+to where we've decided to exclude it. Other top-level identifiers
 are similarly unsupported by nameof at the moment, such as `nameof my_function`,
 `nameof MY_CONST` and `nameof my.module`, and Hack will error as though they
 are missing (or illegal in the case of `my.module`) class names.
@@ -109,6 +108,17 @@ trait T {
 }
 ```
 
+### Type alias
+```
+type T = int;
+newtype U = string; // assume in different file
+
+function f(): void {
+  $t = nameof T; // $t: typename<int> = String "T";
+  $u = nameof U; // $u: typename<U> = String "U";
+}
+```
+
 ## User Experience
 
 `nameof` is a new keyword in VSCode's grammar, highlighted in blue with default
@@ -116,15 +126,6 @@ settings. Class names are autocompleted as they would be for `new`, without the
 restriction on concrete classes.
 
 ## Unsupported
-
-### Type aliases
-```
-class C {}
-type X = C; // does not matter that X points to class
-function f(): void {
-  $x = nameof X; // $x: classname<nothing> (Naming[2052]) = "X"
-}
-```
 
 ### Reified generics
 ```

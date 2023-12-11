@@ -2573,6 +2573,56 @@ end = struct
         (env2, err2, true)
     end
 
+  let typename_expr env p sid outer result =
+    begin
+      match Env.get_typedef env (snd sid) with
+      | Decl_entry.Found { td_tparams = tparaml; _ } ->
+        (* Typedef type parameters cannot have constraints *)
+        let params =
+          List.map
+            ~f:
+              begin
+                fun { tp_name = (p, x); _ } ->
+                  (* TODO(T69551141) handle type arguments for Tgeneric *)
+                  MakeType.generic (Reason.Rwitness_from_decl p) x
+              end
+            tparaml
+        in
+        let p_ = Pos_or_decl.of_raw_pos p in
+        let tdef =
+          mk
+            ( Reason.Rwitness_from_decl p_,
+              Tapply (Positioned.of_raw_positioned sid, params) )
+        in
+        let typename =
+          mk
+            ( Reason.Rwitness_from_decl p_,
+              Tapply ((p_, SN.Classes.cTypename), [tdef]) )
+        in
+        let (env, tparams) =
+          List.map_env env tparaml ~f:(fun env _tp -> Env.fresh_type env p)
+        in
+        let ety_env =
+          {
+            (empty_expand_env_with_on_error
+               (Env.invalid_type_hint_assert_primary_pos_in_current_decl env))
+            with
+            substs = Subst.make_locl tparaml tparams;
+          }
+        in
+        let (env, ty_err_opt1) =
+          Phase.check_tparams_constraints ~use_pos:p ~ety_env env tparaml
+        in
+        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt1;
+        let ((env, ty_err_opt2), ty) = Phase.localize ~ety_env env typename in
+        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt2;
+        result env ty
+      | Decl_entry.NotYetAvailable
+      | Decl_entry.DoesNotExist ->
+        (* Should not expect None as we've checked whether the sid is a typedef *)
+        expr_error env p outer
+    end
+
   let rec expr ~(expected : ExpectedTy.t option) ~ctxt env ((_, p, _) as e) =
     try
       begin
@@ -3871,54 +3921,8 @@ end = struct
       eif env ~expected ~in_await:ctxt.Context.in_await p c e1 e2
     | Class_const ((_, p, CI sid), pstr)
       when String.equal (snd pstr) "class" && Env.is_typedef env (snd sid) ->
-    begin
-      match Env.get_typedef env (snd sid) with
-      | Decl_entry.Found { td_tparams = tparaml; _ } ->
-        (* Typedef type parameters cannot have constraints *)
-        let params =
-          List.map
-            ~f:
-              begin
-                fun { tp_name = (p, x); _ } ->
-                  (* TODO(T69551141) handle type arguments for Tgeneric *)
-                  MakeType.generic (Reason.Rwitness_from_decl p) x
-              end
-            tparaml
-        in
-        let p_ = Pos_or_decl.of_raw_pos p in
-        let tdef =
-          mk
-            ( Reason.Rwitness_from_decl p_,
-              Tapply (Positioned.of_raw_positioned sid, params) )
-        in
-        let typename =
-          mk
-            ( Reason.Rwitness_from_decl p_,
-              Tapply ((p_, SN.Classes.cTypename), [tdef]) )
-        in
-        let (env, tparams) =
-          List.map_env env tparaml ~f:(fun env _tp -> Env.fresh_type env p)
-        in
-        let ety_env =
-          {
-            (empty_expand_env_with_on_error
-               (Env.invalid_type_hint_assert_primary_pos_in_current_decl env))
-            with
-            substs = Subst.make_locl tparaml tparams;
-          }
-        in
-        let (env, ty_err_opt1) =
-          Phase.check_tparams_constraints ~use_pos:p ~ety_env env tparaml
-        in
-        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt1;
-        let ((env, ty_err_opt2), ty) = Phase.localize ~ety_env env typename in
-        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt2;
-        make_result env p (Class_const ((ty, p, CI sid), pstr)) ty
-      | Decl_entry.NotYetAvailable
-      | Decl_entry.DoesNotExist ->
-        (* Should not expect None as we've checked whether the sid is a typedef *)
-        expr_error env p outer
-    end
+      typename_expr env p sid outer (fun env ty ->
+          make_result env p (Class_const ((ty, p, CI sid), pstr)) ty)
     | Class_const (cid, mid) ->
       class_const
         env
@@ -4702,6 +4706,9 @@ end = struct
         error ())
     | Package ((p, _) as id) ->
       make_result env p (Aast.Package id) (MakeType.bool (Reason.Rwitness p))
+    | Nameof (_, p, CI sid) when Env.is_typedef env (snd sid) ->
+      typename_expr env p sid outer (fun env ty ->
+          make_result env p (Aast.Nameof (ty, p, CI sid)) ty)
     | Nameof cid ->
       let (env, _tal, ce, cty) = Class_id.class_expr env [] cid in
       make_result

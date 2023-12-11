@@ -16,8 +16,8 @@ function test(): void {
 
 ## Full Example
 
-`nameof` supports direct class names, traits and interfaces, and enums, and it
-also supports the special class identifiers `self`, `static`, and `parent` where
+`nameof` supports direct class names, traits and interfaces, enums, and type aliases.
+It also supports the special class identifiers `self`, `static`, and `parent` where
 they are valid.
 
 ```Hack
@@ -42,6 +42,6 @@ function main(): void {
 ```
 
 The type of a `nameof Target` expression is
-[`classname<Target>`](/hack/built-in-types/classname).
-[Reified generics](/hack/reified-generics/reified-generics) and
-[type aliases](/hack/types/type-aliases) are not supported targets for `nameof`.
+[`classname<Target>`](/hack/built-in-types/classname) and `typename<Target>` when `Target`
+is a type alias. [Reified generics](/hack/reified-generics/reified-generics) are not 
+supported targets for `nameof`.

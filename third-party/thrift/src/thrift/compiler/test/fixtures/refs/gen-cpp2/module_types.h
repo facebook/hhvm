@@ -420,6 +420,33 @@ class StructWithString;
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
 
+namespace apache::thrift::detail::qualifier {
+template<>
+struct is_cpp_ref_field_optional<::cpp2::MyField,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::cpp2::MyField,::apache::thrift::type::field_id<4>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::cpp2::MyField,::apache::thrift::type::field_id<7>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::cpp2::MyStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::cpp2::StructWithSharedConst,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::cpp2::StructWithRef,::apache::thrift::type::field_id<2>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::cpp2::StructWithBox,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::cpp2::StructWithBox,::apache::thrift::type::field_id<2>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::cpp2::StructWithBox,::apache::thrift::type::field_id<3>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::cpp2::StructWithRefTypeUnique,::apache::thrift::type::field_id<2>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::cpp2::StructWithRefTypeShared,::apache::thrift::type::field_id<2>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::cpp2::StructWithRefTypeSharedConst,::apache::thrift::type::field_id<2>> : std::true_type{};
+} // namespace apache::thrift::detail::qualifier
+
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {

@@ -769,6 +769,27 @@ class MyDataItemEnsureStruct;
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
 
+namespace apache::thrift::detail::qualifier {
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::python_capi::PrimitiveStruct,::apache::thrift::type::field_id<9>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::python_capi::PrimitiveStruct,::apache::thrift::type::field_id<12>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::python_capi::PrimitiveStruct,::apache::thrift::type::field_id<13>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::python_capi::ListStruct,::apache::thrift::type::field_id<3>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::python_capi::SetStruct,::apache::thrift::type::field_id<3>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::python_capi::MapStruct,::apache::thrift::type::field_id<3>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::python_capi::MyStructPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::python_capi::MyStructEnsureStruct,::apache::thrift::type::field_id<3>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::python_capi::MyDataItemPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+} // namespace apache::thrift::detail::qualifier
+
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace test { namespace fixtures { namespace python_capi {

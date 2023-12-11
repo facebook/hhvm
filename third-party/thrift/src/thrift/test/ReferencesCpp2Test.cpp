@@ -646,4 +646,21 @@ TEST(References, NonTriviallyDestructibleUnionSetter) {
   EXPECT_EQ(obj, objd);
 }
 
+TEST(References, is_cpp_ref_field_optional) {
+  using apache::thrift::field_id;
+  using apache::thrift::detail::qualifier::is_cpp_ref_field_optional;
+  bool def_field =
+      is_cpp_ref_field_optional<cpp2::RecursiveStruct, field_id<1>>::value;
+  bool opt_field =
+      is_cpp_ref_field_optional<cpp2::RecursiveStruct, field_id<2>>::value;
+  bool req_field =
+      is_cpp_ref_field_optional<cpp2::RecursiveStruct, field_id<3>>::value;
+  bool plain_field =
+      is_cpp_ref_field_optional<cpp2::PlainStruct, field_id<1>>::value;
+  EXPECT_FALSE(def_field);
+  EXPECT_TRUE(opt_field);
+  EXPECT_FALSE(req_field);
+  EXPECT_FALSE(plain_field);
+}
+
 } // namespace cpp2

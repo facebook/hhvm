@@ -40,6 +40,13 @@ class Foo;
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
 
+namespace apache::thrift::detail::qualifier {
+template<>
+struct is_cpp_ref_field_optional<::cpp2::Foo,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::cpp2::Foo,::apache::thrift::type::field_id<2>> : std::true_type{};
+} // namespace apache::thrift::detail::qualifier
+
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {

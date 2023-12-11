@@ -171,6 +171,11 @@ template<>
 const std::vector<std::any>& field_annotation_values<::test::fixtures::basic-structured-annotations::MyStruct>(FieldId);
 } // namespace apache::thrift::detail::annotation
 
+namespace apache::thrift::detail::qualifier {
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::basic-structured-annotations::structured_annotation_recursive,::apache::thrift::type::field_id<2>> : std::true_type{};
+} // namespace apache::thrift::detail::qualifier
+
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace test { namespace fixtures { namespace basic-structured-annotations {

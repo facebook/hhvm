@@ -67,6 +67,17 @@ const std::vector<std::any>& field_annotation_values<<%struct:cpp_fullname%>>(Fi
 <%/program:structs%>
 } // namespace apache::thrift::detail::annotation
 
+namespace apache::thrift::detail::qualifier {
+<%#program:structs%>
+<%#struct:fields%>
+<%#field:opt_cpp_ref?%>
+template<>
+struct is_cpp_ref_field_optional<<%struct:cpp_fullname%>,::apache::thrift::type::field_id<<%field:key%>>> : std::true_type{};
+<%/field:opt_cpp_ref?%>
+<%/struct:fields%>
+<%/program:structs%>
+} // namespace apache::thrift::detail::qualifier
+
 <% > module_types_h/hash_and_equal_to%>
 
 <% > common/namespace_cpp2_begin%>

@@ -155,6 +155,15 @@ class CppRef;
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
 
+namespace apache::thrift::detail::qualifier {
+template<>
+struct is_cpp_ref_field_optional<::some::ns::CppRef,::apache::thrift::type::field_id<3>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::some::ns::CppRef,::apache::thrift::type::field_id<4>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::some::ns::CppRef,::apache::thrift::type::field_id<5>> : std::true_type{};
+} // namespace apache::thrift::detail::qualifier
+
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace some { namespace ns {

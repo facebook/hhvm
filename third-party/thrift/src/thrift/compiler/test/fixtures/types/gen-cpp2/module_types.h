@@ -541,6 +541,19 @@ class StructWithDoubleUnderscores;
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
 
+namespace apache::thrift::detail::qualifier {
+template<>
+struct is_cpp_ref_field_optional<::apache::thrift::fixtures::types::ForwardUsageRoot,::apache::thrift::type::field_id<2>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::apache::thrift::fixtures::types::ForwardUsageStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::apache::thrift::fixtures::types::ForwardUsageByRef,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::apache::thrift::fixtures::types::AllocatorAware2,::apache::thrift::type::field_id<2>> : std::true_type{};
+} // namespace apache::thrift::detail::qualifier
+
 // BEGIN hash_and_equal_to
 namespace std {
 

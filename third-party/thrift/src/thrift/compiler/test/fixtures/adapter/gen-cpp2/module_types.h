@@ -618,6 +618,15 @@ class Person2;
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
 
+namespace apache::thrift::detail::qualifier {
+template<>
+struct is_cpp_ref_field_optional<::facebook::thrift::test::StructWithFieldAdapter,::apache::thrift::type::field_id<3>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::facebook::thrift::test::StructWithFieldAdapter,::apache::thrift::type::field_id<4>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::facebook::thrift::test::CircularStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+} // namespace apache::thrift::detail::qualifier
+
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace facebook { namespace thrift { namespace test {

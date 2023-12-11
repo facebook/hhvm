@@ -1185,6 +1185,43 @@ class LoopPatchStruct;
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
 
+namespace apache::thrift::detail::qualifier {
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::patch::MyDataPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::patch::InnerUnionPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::patch::MyUnionPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::patch::MyStructPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::patch::MyStructEnsureStruct,::apache::thrift::type::field_id<-32>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::patch::MyStructEnsureStruct,::apache::thrift::type::field_id<-25>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::patch::MyStructEnsureStruct,::apache::thrift::type::field_id<-24>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::patch::MyStructEnsureStruct,::apache::thrift::type::field_id<-13>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::patch::MyStructEnsureStruct,::apache::thrift::type::field_id<-12>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::patch::MyStructEnsureStruct,::apache::thrift::type::field_id<-11>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::patch::MyStructEnsureStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::patch::LateDefStructPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::patch::RecursivePatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::patch::BarPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::patch::BarEnsureStruct,::apache::thrift::type::field_id<-1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::test::fixtures::patch::LoopPatchStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+} // namespace apache::thrift::detail::qualifier
+
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace test { namespace fixtures { namespace patch {

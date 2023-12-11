@@ -1070,6 +1070,21 @@ class AllRequiredNoExceptMoveCtrStruct;
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
 
+namespace apache::thrift::detail::qualifier {
+template<>
+struct is_cpp_ref_field_optional<::some::valid::ns::AnnotatedStruct,::apache::thrift::type::field_id<8>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::some::valid::ns::AnnotatedStruct,::apache::thrift::type::field_id<9>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::some::valid::ns::AnnotatedStruct,::apache::thrift::type::field_id<10>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::some::valid::ns::AnnotatedStruct,::apache::thrift::type::field_id<17>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::some::valid::ns::AnnotatedStruct,::apache::thrift::type::field_id<18>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::some::valid::ns::AnnotatedStruct,::apache::thrift::type::field_id<19>> : std::true_type{};
+} // namespace apache::thrift::detail::qualifier
+
 // BEGIN hash_and_equal_to
 namespace std {
 

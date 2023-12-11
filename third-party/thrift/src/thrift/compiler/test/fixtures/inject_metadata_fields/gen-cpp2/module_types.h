@@ -74,6 +74,13 @@ class FieldsInjectedWithIncludedStruct;
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
 
+namespace apache::thrift::detail::qualifier {
+template<>
+struct is_cpp_ref_field_optional<::cpp2::FieldsInjectedWithIncludedStruct,::apache::thrift::type::field_id<-1101>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::cpp2::FieldsInjectedWithIncludedStruct,::apache::thrift::type::field_id<-1102>> : std::true_type{};
+} // namespace apache::thrift::detail::qualifier
+
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {

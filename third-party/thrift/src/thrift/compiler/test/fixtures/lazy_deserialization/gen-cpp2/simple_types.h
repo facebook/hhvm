@@ -197,6 +197,15 @@ class Empty;
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
 
+namespace apache::thrift::detail::qualifier {
+template<>
+struct is_cpp_ref_field_optional<::apache::thrift::test::LazyCppRef,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::apache::thrift::test::LazyCppRef,::apache::thrift::type::field_id<2>> : std::true_type{};
+template<>
+struct is_cpp_ref_field_optional<::apache::thrift::test::LazyCppRef,::apache::thrift::type::field_id<3>> : std::true_type{};
+} // namespace apache::thrift::detail::qualifier
+
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace apache { namespace thrift { namespace test {

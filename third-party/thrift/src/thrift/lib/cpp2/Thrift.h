@@ -448,6 +448,13 @@ void swap_allocators(Alloc& a, Alloc& b) {
   swap_allocators_impl(pocs{}, a, b);
 }
 
+// We identify field quailfier using different types of C++ field_ref. For
+// cpp.ref fields, we can not deduce the field qualifier information.
+namespace qualifier {
+template <class Struct, class Id>
+struct is_cpp_ref_field_optional : folly::bool_constant<!sizeof(Struct)> {};
+} // namespace qualifier
+
 } // namespace detail
 
 } // namespace thrift

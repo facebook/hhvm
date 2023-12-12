@@ -86,6 +86,12 @@ static const std::set<std::string> common_initialisms = {
     "UUID", "VM",   "XML",   "XMPP", "XSRF", "XSS",
 };
 
+// To avoid conflict with methods (e.g. Error(), String())
+static const std::set<std::string> reserved_field_names = {
+    "Error",
+    "String",
+};
+
 void codegen_data::set_current_program(const t_program* program) {
   current_program_ = program;
 
@@ -538,7 +544,12 @@ std::string get_go_field_name(const t_field* field) {
   if (name_override != nullptr) {
     return *name_override;
   }
-  return munge_ident(field->name());
+
+  auto name = munge_ident(field->name());
+  if (reserved_field_names.count(name) > 0) {
+    name += "_";
+  }
+  return name;
 }
 
 std::set<std::string> get_struct_go_field_names(const t_structured* tstruct) {

@@ -559,10 +559,10 @@ bool verifyReifiedLocalType(
       bool persistent = true;
       type = TypeStructure::resolve(type, ctx, func->cls(),
                                     req::vector<Array>(), persistent);
-    } catch (Exception& e) {
+    } catch (Exception& ) {
       if (is_ts_soft(type_)) warn = true;
       return false;
-    } catch (Object& e) {
+    } catch (Object& ) {
       if (is_ts_soft(type_)) warn = true;
       return false;
     }
@@ -1127,7 +1127,7 @@ Array resolveAndVerifyTypeStructure(
   } catch (Exception& e) {
     // Catch and throw again so we get a line number
     resolved = handleResolutionException(e.getMessage());
-  } catch (Object& e) {
+  } catch (Object& ) {
     std::string errMsg = "unable to resolve anonymous type structure";
     resolved = handleResolutionException(errMsg);
   }

@@ -375,7 +375,7 @@ void RepoOptionsFlags::calcCachedQuery() {
   if (Query.empty()) return;
   try {
     m_cachedQuery = folly::parseJson(Query);
-  } catch (const folly::json::parse_error& e) { /* swallow error */ }
+  } catch (const folly::json::parse_error& ) { /* swallow error */ }
 }
 
 const RepoOptions& RepoOptions::forFile(const std::string& path) {

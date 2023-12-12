@@ -1113,9 +1113,9 @@ Variant unserialize_ex(const char* str, int len,
   Variant v;
   try {
     v = vu.unserialize();
-  } catch (FatalErrorException& e) {
+  } catch (FatalErrorException& ) {
     throw;
-  } catch (InvalidAllowedClassesException& e) {
+  } catch (InvalidAllowedClassesException& ) {
     raise_warning(
       "unserialize(): allowed_classes option should be array or boolean"
     );
@@ -1199,7 +1199,7 @@ Variant include_impl_invoke(const String& file, bool once,
     if (RuntimeOption::SandboxMode || !RuntimeOption::AlwaysUseRelativePath) {
       try {
         return invoke_file(file, once, currentDir, callByHPHPInvoke);
-      } catch(PhpFileDoesNotExistException& e) {}
+      } catch(PhpFileDoesNotExistException& ) {}
     }
 
     try {
@@ -1208,7 +1208,7 @@ Variant include_impl_invoke(const String& file, bool once,
 
       // Don't try/catch - We want the exception to be passed along
       return invoke_file(rel_path, once, currentDir, callByHPHPInvoke);
-    } catch(PhpFileDoesNotExistException& e) {
+    } catch(PhpFileDoesNotExistException& ) {
       throw PhpFileDoesNotExistException(file.c_str());
     }
   } else {
@@ -1237,7 +1237,7 @@ static bool include_impl_invoke_context(const String& file, void* ctx) {
     context->returnValue = include_impl_invoke(file, context->once,
                                                context->currentDir);
     invoked_file = true;
-  } catch (PhpFileDoesNotExistException& e) {
+  } catch (PhpFileDoesNotExistException& ) {
     context->returnValue = false;
   }
   return invoked_file;

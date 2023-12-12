@@ -249,7 +249,7 @@ ALWAYS_INLINE Variant var_export_impl(const Variant& expression,
       vs.serialize(expression, ret);
       res = true;
     }
-  } catch (StringBufferLimitException& e) {
+  } catch (StringBufferLimitException& ) {
     raise_notice("var_export() exceeded max bytes limit");
   }
   return res;

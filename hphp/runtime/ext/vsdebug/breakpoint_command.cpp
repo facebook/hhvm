@@ -225,7 +225,7 @@ bool SetBreakpointsCommand::executeImpl(
         bpMgr->removeBreakpoint(bp->m_id);
       }
     }
-  } catch (std::out_of_range &e) {
+  } catch (std::out_of_range &) {
   }
 
   // Completion of this command does not resume the target.

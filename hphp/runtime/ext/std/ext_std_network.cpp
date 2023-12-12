@@ -93,7 +93,7 @@ String HHVM_FUNCTION(gethostbyname, const String& hostname) {
   memcpy(&in.s_addr, *(result.hostbuf.h_addr_list), sizeof(in.s_addr));
   try {
     return String(folly::IPAddressV4(in).str());
-  } catch (folly::IPAddressFormatException& e) {
+  } catch (folly::IPAddressFormatException& ) {
     return hostname;
   }
 }
@@ -110,7 +110,7 @@ Variant HHVM_FUNCTION(gethostbynamel, const String& hostname) {
     struct in_addr in = *(struct in_addr *)result.hostbuf.h_addr_list[i];
     try {
       ret.append(String(folly::IPAddressV4(in).str()));
-    } catch (folly::IPAddressFormatException& e) {
+    } catch (folly::IPAddressFormatException& ) {
         // ok to skip
     }
   }
@@ -239,7 +239,7 @@ String HHVM_FUNCTION(long2ip, const String& proper_address) {
   unsigned long ul = strtoul(proper_address.c_str(), nullptr, 0);
   try {
     return folly::IPAddress::fromLongHBO(ul).str();
-  } catch (folly::IPAddressFormatException& e) {
+  } catch (folly::IPAddressFormatException& ) {
     return empty_string();
   }
 }

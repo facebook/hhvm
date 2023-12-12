@@ -726,6 +726,7 @@ void releaseFromHashCache(Unit* unit) {
 }
 
 CachedFilePtr createUnitFromFile(const StringData* const path,
+                                 CodeSource codeSource,
                                  Stream::Wrapper* wrapper,
                                  Unit** releaseUnit,
                                  OptLog& ent,
@@ -783,7 +784,7 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
       rqtrace::EventGuard trace{"COMPILE_UNIT"};
       trace.annotate("file_size", folly::to<std::string>(loader.fileLength()));
       flags = FileLoadFlags::kCompiled;
-      return compile_file(loader, path->data(), extension, map, releaseUnit);
+      return compile_file(loader, codeSource, path->data(), extension, map, releaseUnit);
     };
 
     // If orig is provided, check if the given Unit has the same bcSha1
@@ -1229,7 +1230,8 @@ CachedUnit loadUnitNonRepoAuth(const StringData* rpath,
     auto orig = (RuntimeOption::EvalCheckUnitSHA1 && !forceNewUnit)
       ? cachedUnit.copy()
       : CachedFilePtr{};
-    return createUnitFromFile(rpath, wrapper, &releaseUnit, ent,
+    return createUnitFromFile(rpath, CodeSource::User,
+                              wrapper, &releaseUnit, ent,
                               extension, map, options, flags,
                               statInfo, std::move(orig), forPrefetch,
                               changeRes);
@@ -1929,8 +1931,8 @@ void prefetchUnit(StringData* requestedPath,
           : CachedFilePtr{};
         FileLoadFlags flags;
         OptLog optLog;
-        return createUnitFromFile(rpath, nullptr, &releaseUnit, optLog,
-                                  nullptr,
+        return createUnitFromFile(rpath, CodeSource::User, nullptr, &releaseUnit,
+                                  optLog, nullptr,
                                   map.get(),
                                   options, flags, *fileStat, std::move(orig),
                                   true, changeRes);
@@ -2093,8 +2095,8 @@ void unitCacheSyncRepo(AutoloadMap* map,
             : CachedFilePtr{};
           FileLoadFlags flags;
           OptLog optLog;
-          return createUnitFromFile(rpath, nullptr, &releaseUnit, optLog,
-                                    nullptr,
+          return createUnitFromFile(rpath, CodeSource::User, nullptr,
+                                    &releaseUnit, optLog, nullptr,
                                     map.get(),
                                     *options, flags, fileStat, std::move(orig),
                                     true, changeRes);
@@ -2178,6 +2180,7 @@ Unit* compileEvalString(const StringData* code, const char* evalFilename) {
     acc->second = compile_string(
       scode->data(),
       scode->size(),
+      CodeSource::Eval,
       evalFilename,
       nullptr,
       map,

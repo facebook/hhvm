@@ -1806,7 +1806,7 @@ static int execute_program_impl(int argc, char** argv) {
       defaults.dir()
     };
     auto compiled =
-      compile_file(loader, file.c_str(), nullptr, nullptr, nullptr);
+      compile_file(loader, CodeSource::User, file.c_str(), nullptr, nullptr, nullptr);
 
     if (po.mode == "verify") {
       return 0;
@@ -2012,7 +2012,7 @@ static int execute_program_impl(int argc, char** argv) {
         repoOptions.dir()
       };
       auto const unit =
-        compile_file(loader, file.c_str(), nullptr, nullptr, nullptr);
+        compile_file(loader, CodeSource::User, file.c_str(), nullptr, nullptr, nullptr);
       if (!unit) {
         std::cerr << "Unable to compile \"" << file << "\"\n";
         return HPHP_EXIT_FAILURE;

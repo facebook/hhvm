@@ -30,9 +30,12 @@ namespace Native {
 struct FuncTable;
 }
 
+enum class CodeSource;
+
 // If set, releaseUnit will contain a pointer to any extraneous unit created due
 // to race-conditions while compiling
 Unit* compile_file(LazyUnitContentsLoader& loader,
+                   CodeSource codeSource,
                    const char* filename,
                    const Extension* extension,
                    AutoloadMap*,
@@ -44,7 +47,9 @@ Unit* compile_file(LazyUnitContentsLoader& loader,
 // forDebuggerEval is only meant to be used by debuggers, where humans may
 // enter a statement and we wish to eval it and display the resulting value,
 // if any.
-Unit* compile_string(const char* s, size_t sz, const char* fname,
+Unit* compile_string(const char* s, size_t sz,
+                     CodeSource codeSource,
+                     const char* fname,
                      const Extension* extension,
                      AutoloadMap*,
                      const RepoOptions&,

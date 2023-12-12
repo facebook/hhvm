@@ -108,6 +108,7 @@ CompilerResult unitEmitterFromHackCUnitHandleErrors(const hackc::hhbc::Unit& uni
 
 CompilerResult hackc_compile(
   folly::StringPiece code,
+  CodeSource codeSource,
   const char* filename,
   const SHA1& sha1,
   const Extension* extension,
@@ -167,6 +168,8 @@ CompilerResult hackc_compile(
     native_env.non_interceptable_functions.emplace_back(rust::String{f});
   }
 
+  (void)codeSource;
+
   rust::Box<hackc::UnitWrapper> unit_wrapped = [&] {
     tracing::Block _{
       "hackc_translator",
@@ -210,6 +213,7 @@ struct HackcUnitCompiler final : UnitCompiler {
 // lambda will only be called once. Its output is cached afterwards.
 struct CacheUnitCompiler final : UnitCompiler {
   CacheUnitCompiler(LazyUnitContentsLoader& loader,
+                    CodeSource codeSource,
                     const char* filename,
                     const Extension* extension,
                     AutoloadMap* map,
@@ -218,6 +222,7 @@ struct CacheUnitCompiler final : UnitCompiler {
                     std::function<std::unique_ptr<UnitCompiler>()> makeFallback)
     : UnitCompiler{
         loader,
+        codeSource,
         filename,
         extension,
         map,
@@ -299,15 +304,17 @@ FfpResult ffp_parse_file(
 
 std::unique_ptr<UnitCompiler>
 UnitCompiler::create(LazyUnitContentsLoader& loader,
+                     CodeSource codeSource,
                      const char* filename,
                      const Extension* extension,
                      AutoloadMap* map,
                      bool isSystemLib,
                      bool forDebuggerEval) {
-  auto make = [&loader, extension, filename, isSystemLib, forDebuggerEval,
+  auto make = [&loader, codeSource, extension, filename, isSystemLib, forDebuggerEval,
                map] {
     return std::make_unique<HackcUnitCompiler>(
       loader,
+      codeSource,
       filename,
       extension,
       map,
@@ -319,6 +326,7 @@ UnitCompiler::create(LazyUnitContentsLoader& loader,
   if (g_unit_emitter_cache_hook && !forDebuggerEval) {
     return std::make_unique<CacheUnitCompiler>(
       loader,
+      codeSource,
       filename,
       extension,
       map,
@@ -344,6 +352,7 @@ std::unique_ptr<UnitEmitter> UnitCompiler::compile(
 
 std::unique_ptr<UnitEmitter> compile_unit(
   folly::StringPiece code,
+  CodeSource codeSource,
   const char* filename,
   const SHA1& sha1,
   const Extension* extension,
@@ -354,7 +363,7 @@ std::unique_ptr<UnitEmitter> compile_unit(
   hackc::DeclProvider* provider
 ) {
   bool ice = false;
-  auto res = hackc_compile(code, filename, sha1, extension, isSystemLib,
+  auto res = hackc_compile(code, codeSource, filename, sha1, extension, isSystemLib,
       forDebuggerEval, ice, options, mode, provider);
   auto unitEmitter = match<std::unique_ptr<UnitEmitter>>(res,
     [&] (std::unique_ptr<UnitEmitter>& ue) {
@@ -391,6 +400,7 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
     CompileAbortMode mode) {
   cacheHit = false;
   auto unitEmitter = compile_unit(m_loader.contents().data(),
+                                  m_codeSource,
                                   m_filename,
                                   m_loader.sha1(),
                                   m_extension,

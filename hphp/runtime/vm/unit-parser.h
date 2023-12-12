@@ -84,14 +84,23 @@ struct CompilerAbort : public std::runtime_error {
                 const std::string& error);
 };
 
+enum class CodeSource {
+  User,
+  Eval,
+  Debugger,
+  Systemlib,
+};
+
 struct UnitCompiler {
   UnitCompiler(LazyUnitContentsLoader& loader,
+               CodeSource codeSource,
                const char* filename,
                const Extension* extension,
                AutoloadMap* map,
                bool isSystemLib,
                bool forDebuggerEval)
     : m_loader{loader}
+    , m_codeSource(codeSource)
     , m_filename{filename}
     , m_extension{extension}
     , m_map{map}
@@ -102,6 +111,7 @@ struct UnitCompiler {
 
   static std::unique_ptr<UnitCompiler> create(
     LazyUnitContentsLoader& loader,
+    CodeSource codeSource,
     const char* filename,
     const Extension* extension,
     AutoloadMap* map,
@@ -122,6 +132,7 @@ struct UnitCompiler {
 
  protected:
   LazyUnitContentsLoader& m_loader;
+  CodeSource m_codeSource;
   const char* m_filename;
   const Extension* m_extension;
   AutoloadMap* m_map;
@@ -144,6 +155,7 @@ extern UnitEmitterCacheHook g_unit_emitter_cache_hook;
 // Invoke hackc directly without any caching.
 std::unique_ptr<UnitEmitter> compile_unit(
   folly::StringPiece code,
+  CodeSource codeSource,
   const char* filename,
   const SHA1& sha1,
   const Extension* extension,

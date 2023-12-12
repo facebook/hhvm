@@ -23,6 +23,8 @@
 
 namespace HPHP {
 
+enum class CodeSource;
+
 inline const hackc::hhbc::Unit* hackCUnitRaw(const rust::Box<hackc::UnitWrapper>& unit) {
   return (const hackc::hhbc::Unit*)(&(*unit));
 }

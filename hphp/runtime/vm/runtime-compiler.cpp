@@ -43,6 +43,7 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
+                                   CodeSource codeSource,
                                    const char* filename,
                                    const Extension* extension,
                                    AutoloadMap* map,
@@ -101,6 +102,7 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
   if (!ue) {
     auto uc = UnitCompiler::create(
       loader,
+      codeSource,
       filename,
       extension,
       map,
@@ -133,6 +135,7 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
 }
 
 Unit* compile_file(LazyUnitContentsLoader& loader,
+                   CodeSource codeSource,
                    const char* filename,
                    const Extension* extension,
                    AutoloadMap* map,
@@ -140,6 +143,7 @@ Unit* compile_file(LazyUnitContentsLoader& loader,
   assertx(!filename || filename[0] != '/' || filename[1] != ':');
   return parse(
     loader,
+    codeSource,
     filename,
     extension,
     map,
@@ -151,6 +155,7 @@ Unit* compile_file(LazyUnitContentsLoader& loader,
 
 Unit* compile_string(const char* s,
                      size_t sz,
+                     CodeSource codeSource,
                      const char* fname,
                      const Extension* extension,
                      AutoloadMap* map,
@@ -167,6 +172,7 @@ Unit* compile_string(const char* s,
   LazyUnitContentsLoader loader{sha1, {s, sz}, options.flags(), options.dir()};
   return parse(
     loader,
+    codeSource,
     fname,
     extension,
     map,
@@ -176,7 +182,8 @@ Unit* compile_string(const char* s,
   )->create().release();
 }
 
-Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
+Unit* compile_systemlib_string(const char* s, size_t sz,
+                               const char* fname,
                                const Extension* extension) {
   assertx(fname && fname[0] == '/' && fname[1] == ':');
   if (RuntimeOption::RepoAuthoritative) {
@@ -203,6 +210,7 @@ Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
   RepoAutoloadMap empty_map({}, {}, {}, {}, {});
   auto ue = parse(
     loader,
+    CodeSource::Systemlib,
     fname,
     extension,
     RuntimeOption::EvalEnableDecl ? &empty_map : nullptr,
@@ -231,6 +239,7 @@ Unit* compile_debugger_string(
   return compile_string(
     s,
     sz,
+    CodeSource::Debugger,
     nullptr,
     nullptr,
     map,

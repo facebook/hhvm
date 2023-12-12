@@ -377,6 +377,7 @@ Package::parseRun(const std::string& content,
     try {
       ue = compile_unit(
         content,
+        CodeSource::User,
         fileName.c_str(),
         mangled_sha1,
         nullptr,

@@ -225,6 +225,7 @@ fn rewrite_and_emit<'p, 'arena, 'decl>(
     namespace_env: Arc<NamespaceEnv>,
     ast: &'p mut ast::Program,
     profile: &'p mut Profile,
+    valid_utf8: bool,
 ) -> Result<Unit<'arena>, Error> {
     // First rewrite and modify `ast` in place.
     stack_limit::reset();
@@ -234,7 +235,7 @@ fn rewrite_and_emit<'p, 'arena, 'decl>(
     let unit = match result {
         Ok(()) => {
             // Rewrite ok, now emit.
-            emit_unit_from_ast(emitter, namespace_env, ast)
+            emit_unit_from_ast(emitter, namespace_env, ast, valid_utf8)
         }
         Err(e) => match e.into_kind() {
             ErrorKind::IncludeTimeFatalException(fatal_op, pos, msg) => {
@@ -315,8 +316,9 @@ fn emit_unit_from_ast<'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     namespace: Arc<NamespaceEnv>,
     ast: &mut ast::Program,
+    valid_utf8: bool,
 ) -> Result<Unit<'arena>, Error> {
-    emit_unit(emitter, namespace, ast)
+    emit_unit(emitter, namespace, ast, valid_utf8)
 }
 
 fn create_namespace_env(emitter: &Emitter<'_, '_>) -> NamespaceEnv {
@@ -344,6 +346,8 @@ fn emit_unit_from_text<'arena, 'decl>(
     let namespace_env = Arc::new(create_namespace_env(emitter));
     let path = source_text.file_path_rc();
 
+    let valid_utf8 = std::str::from_utf8(source_text.text()).is_ok();
+
     let parse_result = parse_file(
         emitter.options(),
         source_text,
@@ -365,7 +369,7 @@ fn emit_unit_from_text<'arena, 'decl>(
             ) {
                 Ok(()) => profile_rust::time(move || {
                     (
-                        rewrite_and_emit(emitter, namespace_env, &mut ast, profile),
+                        rewrite_and_emit(emitter, namespace_env, &mut ast, profile, valid_utf8),
                         profile,
                     )
                 }),

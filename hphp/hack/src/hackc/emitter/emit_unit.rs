@@ -86,8 +86,9 @@ pub fn emit_unit<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     namespace: Arc<namespace_env::Env>,
     tast: &'a ast::Program,
+    valid_utf8: bool,
 ) -> Result<Unit<'arena>> {
-    let result = emit_unit_(emitter, namespace, tast);
+    let result = emit_unit_(emitter, namespace, tast, valid_utf8);
     match result {
         Err(e) => match e.into_kind() {
             ErrorKind::IncludeTimeFatalException(op, pos, msg) => {
@@ -155,6 +156,7 @@ fn emit_unit_<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     namespace: Arc<namespace_env::Env>,
     prog: &'a ast::Program,
+    valid_utf8: bool,
 ) -> Result<Unit<'arena>> {
     let prog = prog.as_slice();
     let mut functions = emit_functions_from_program(emitter, prog)?;
@@ -228,6 +230,7 @@ fn emit_unit_<'a, 'arena, 'decl>(
         fatal,
         missing_symbols: Slice::fill_iter(emitter.alloc, missing_syms.into_iter()),
         error_symbols: Slice::fill_iter(emitter.alloc, error_syms.into_iter()),
+        valid_utf8,
     })
 }
 

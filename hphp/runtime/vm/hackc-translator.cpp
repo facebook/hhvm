@@ -1554,8 +1554,8 @@ void translate(TranslationState& ts, const hhbc::Unit& unit) {
 std::unique_ptr<UnitEmitter> unitEmitterFromHackCUnit(
   const hhbc::Unit& unit,
   const char* filename,
-	const SHA1& sha1,
-	const SHA1& bcSha1,
+  const SHA1& sha1,
+  const SHA1& bcSha1,
   const Extension* extension,
   bool swallowErrors,
   const PackageInfo& packageInfo

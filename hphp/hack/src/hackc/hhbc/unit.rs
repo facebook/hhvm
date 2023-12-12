@@ -34,6 +34,9 @@ pub struct Unit<'arena> {
     pub fatal: Maybe<Fatal<'arena>>,
     pub missing_symbols: Slice<'arena, Str<'arena>>,
     pub error_symbols: Slice<'arena, Str<'arena>>,
+    // TODO(T120858428): Remove this field once non-utf8 is banned from the
+    // parser.
+    pub valid_utf8: bool,
 }
 
 /// Fields used when a unit had compile-time errors that should be reported

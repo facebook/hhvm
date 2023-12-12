@@ -118,6 +118,7 @@ impl<'a> UnitBuilder<'a> {
             fatal: self.fatal.into(),
             missing_symbols: Default::default(),
             error_symbols: Default::default(),
+            valid_utf8: true,
         }
     }
 

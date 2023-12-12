@@ -341,7 +341,7 @@ static Variant collator_convert_object_to_string(const Variant& obj) {
   String str;
   try {
     str = obj.toString();
-  } catch (Exception& e) {
+  } catch (Exception& ) {
     return obj;
   }
   UErrorCode status;

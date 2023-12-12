@@ -338,7 +338,7 @@ void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
         disableSignalPolling();
         SCOPE_EXIT { enableSignalPolling(); };
         processInterrupt(cmd);
-      } catch (const DebuggerException& e) {
+      } catch (const DebuggerException& ) {
         TRACE(2, "DebuggerException from processInterrupt!\n");
         switchThreadMode(Normal);
         throw;
@@ -747,7 +747,7 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
                            "Command receive failed");
         cmdFailure = true;
       }
-    } catch (const DebuggerException& e) {
+    } catch (const DebuggerException& ) {
       throw;
     } catch (const Object &o) {
       Logger::Warning(DEBUGGER_LOG_TAG

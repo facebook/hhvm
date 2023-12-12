@@ -19,26 +19,11 @@
 #include <utility>
 
 #include <thrift/lib/cpp2/op/detail/BasePatch.h>
-#include <thrift/lib/cpp2/protocol/Patch.h>
 
 namespace apache {
 namespace thrift {
-namespace ident {
-struct assign;
-}
-class BinaryProtocolReader;
-class BinaryProtocolWriter;
-class CompactProtocolReader;
-class CompactProtocolWriter;
 namespace op {
 namespace detail {
-
-template <class Protocol>
-inline constexpr bool kProtocolSupportsDynamicPatch =
-    std::is_same_v<Protocol, BinaryProtocolReader> ||
-    std::is_same_v<Protocol, BinaryProtocolWriter> ||
-    std::is_same_v<Protocol, CompactProtocolReader> ||
-    std::is_same_v<Protocol, CompactProtocolWriter>;
 
 /// A patch adapter that only supports 'assign',
 /// which is the minimum any patch should support.
@@ -46,86 +31,51 @@ inline constexpr bool kProtocolSupportsDynamicPatch =
 /// The `Patch` template parameter must be a Thrift struct with the following
 /// fields:
 /// * `optional T assign`
-///
-/// If the assign only patch is deserialized from a dynamic patch, it might have
-/// other operations besides assign operation.
 template <typename Patch>
 class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
   using Base = BaseAssignPatch<Patch, AssignPatch>;
   using T = typename Base::value_type;
-  using Tag = get_type_tag<Patch, ident::assign>;
 
  public:
   using Base::apply;
   using Base::Base;
+  using Base::operator=;
 
-  void assign(T a) {
-    Base::assign(std::move(a));
-    dynPatch_.reset();
-  }
-
-  auto& operator=(T a) {
-    assign(std::move(a));
-    return *this;
+  /// @brief This API uses the Visitor pattern to describe how Patch is applied.
+  /// For each operation that will be performed by the patch, the corresponding
+  /// method (that matches the write API) will be invoked.
+  ///
+  /// Users should provide a visitor with the following methods
+  ///
+  ///     struct Visitor {
+  ///       void assign(const MyClass&);
+  ///     }
+  ///
+  /// For example:
+  ///
+  ///     MyClassPatch patch;
+  ///     patch = myClass;
+  ///
+  /// `patch.customVisit(v)` will invoke the following methods
+  ///
+  ///     v.assign(myClass);
+  template <typename Visitor>
+  void customVisit(Visitor&& v) const {
+    if (auto p = data_.assign()) {
+      std::forward<Visitor>(v).assign(*p);
+    }
   }
 
   void apply(T& val) const {
-    if (dynPatch_) {
-      auto value = protocol::asValueStruct<Tag>(val);
-      protocol::applyPatch(*dynPatch_, value);
-      val = protocol::fromValueStruct<Tag>(value);
-    } else if (auto p = data_.assign()) {
-      val = data_.assign().value();
-    }
-  }
-
-  void merge(AssignPatch other) {
-    if (dynPatch_ && other.dynPatch_) {
-      folly::throw_exception<std::runtime_error>(
-          "Merging dynamic patch is not implemented.");
-    }
-
-    if (!other.dynPatch_) {
-      if (auto p = other.data_.assign()) {
-        assign(std::move(*p));
-      }
-      return;
-    }
-
-    if (auto p = data_.assign()) {
-      other.apply(*p);
-    } else {
-      dynPatch_ = std::move(other.dynPatch_);
-    }
-  }
-
-  template <class Protocol>
-  uint32_t encode(Protocol& prot) const {
-    if (!kProtocolSupportsDynamicPatch<Protocol> || !dynPatch_) {
-      return op::encode<type::struct_t<Patch>>(prot, data_);
-    }
-
-    return protocol::detail::serializeObject(prot, *dynPatch_);
-  }
-
-  template <class Protocol>
-  void decode(Protocol& prot) {
-    if (!kProtocolSupportsDynamicPatch<Protocol>) {
-      return op::decode<type::struct_t<Patch>>(prot, data_);
-    }
-
-    auto result = protocol::detail::parseValue(prot, protocol::T_STRUCT);
-    data_ = protocol::fromValueStruct<type::struct_t<Patch>>(result);
-    if (data_.assign()) {
-      dynPatch_.reset();
-    } else {
-      dynPatch_ = std::move(result.as_object());
-    }
+    struct Visitor {
+      T& v;
+      void assign(const T& t) { v = t; }
+    };
+    return customVisit(Visitor{val});
   }
 
  private:
   using Base::data_;
-  std::optional<protocol::Object> dynPatch_;
 };
 
 /// Patch for a Thrift bool.

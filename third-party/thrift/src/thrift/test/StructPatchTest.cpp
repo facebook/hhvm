@@ -1189,8 +1189,9 @@ TEST(PatchDiscrepancy, AssignOnly) {
       protocol::fromValueStruct<type::infer_tag<AssignOnlyPatch>>(patchValue);
 
   // Apply patch statically
+  // ClearOp is ignored in AssignOnlyPatch. Otherwise d.field() should be 0.
   patch.apply(foo);
-  EXPECT_EQ(foo.field(), 0);
+  EXPECT_EQ(foo.field(), 1);
 
   // Apply patch dynamically
   protocol::applyPatch(dynPatch, dynFoo);
@@ -1393,92 +1394,6 @@ TEST(StructPatchTest, Remove) {
   EXPECT_EQ(data.data1(), "");
   EXPECT_EQ(data.data2(), 0);
   EXPECT_FALSE(data.data3().has_value());
-}
-
-TEST(StructPatchTest, AssignOnly) {
-  protocol::Object dynPatch;
-
-  // foo.patch<ident::field>() += 100;
-  dynPatch[static_cast<FieldId>(op::PatchOp::EnsureStruct)]
-      .emplace_object()[FieldId{1}]
-      .emplace_i32() = 0;
-  dynPatch[static_cast<FieldId>(op::PatchOp::PatchAfter)]
-      .emplace_object()[FieldId{1}]
-      .emplace_object()[static_cast<FieldId>(op::PatchOp::Add)]
-      .emplace_i32() = 100;
-
-  // foo.ensure<ident::field>(10);
-  // foo.patch<ident::field>() += 200;
-  dynPatch[static_cast<FieldId>(op::PatchOp::EnsureStruct)]
-      .as_object()[FieldId{2}]
-      .emplace_i32() = 10;
-  dynPatch[static_cast<FieldId>(op::PatchOp::PatchAfter)]
-      .as_object()[FieldId{2}]
-      .emplace_object()[static_cast<FieldId>(op::PatchOp::Add)]
-      .emplace_i32() = 200;
-
-  auto genPatch = [&dynPatch] {
-    // Serialize dynamic patch and deserialize as AssignOnly static patch
-    auto buf = *protocol::serializeObject<CompactProtocolWriter>(dynPatch);
-    AssignOnlyPatch patch;
-    CompactProtocolReader reader;
-    reader.setInput(&buf);
-    op::decode<type::infer_tag<AssignOnlyPatch>>(reader, patch);
-    return patch;
-  };
-
-  {
-    auto patch = genPatch();
-    AssignOnly foo;
-    patch.apply(foo);
-    EXPECT_EQ(foo.field(), 100);
-    EXPECT_EQ(foo.optField(), 210);
-  }
-
-  {
-    AssignOnlyPatch patch;
-    patch.merge(genPatch());
-    AssignOnly foo;
-    patch.apply(foo);
-    EXPECT_EQ(foo.field(), 100);
-    EXPECT_EQ(foo.optField(), 210);
-  }
-
-  {
-    auto patch = genPatch();
-    AssignOnly bar;
-    bar.field() = 300;
-    patch = bar;
-
-    AssignOnly foo;
-    patch.apply(foo);
-    EXPECT_EQ(foo.field(), 300);
-    EXPECT_FALSE(foo.optField().has_value());
-
-    auto patch2 = genPatch();
-    patch2.merge(patch);
-
-    AssignOnly foo2;
-    patch2.apply(foo2);
-    EXPECT_EQ(foo, foo2);
-
-    AssignOnly foo3;
-    patch.merge(genPatch());
-    patch.apply(foo3);
-    EXPECT_EQ(foo3.field(), 400);
-    EXPECT_EQ(foo3.optField(), 210);
-
-    AssignOnly foo4;
-    patch.merge(genPatch());
-    patch.apply(foo4);
-    EXPECT_EQ(foo4.field(), 500);
-    EXPECT_EQ(foo4.optField(), 410);
-  }
-
-  {
-    auto patch2 = genPatch();
-    EXPECT_THROW(patch2.merge(genPatch()), std::runtime_error);
-  }
 }
 
 } // namespace

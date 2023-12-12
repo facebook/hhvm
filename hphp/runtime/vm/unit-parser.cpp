@@ -69,6 +69,8 @@ TRACE_SET_MOD(unit_parse);
 
 UnitEmitterCacheHook g_unit_emitter_cache_hook = nullptr;
 
+void eval_non_utf8_log(folly::StringPiece code);
+
 namespace {
 
 struct CompileException : Exception {
@@ -168,8 +170,6 @@ CompilerResult hackc_compile(
     native_env.non_interceptable_functions.emplace_back(rust::String{f});
   }
 
-  (void)codeSource;
-
   rust::Box<hackc::UnitWrapper> unit_wrapped = [&] {
     tracing::Block _{
       "hackc_translator",
@@ -187,6 +187,11 @@ CompilerResult hackc_compile(
 
   auto const bcSha1 = SHA1(hash_unit(*unit_wrapped));
   const hackc::hhbc::Unit* unit = hackCUnitRaw(unit_wrapped);
+
+  if (codeSource == CodeSource::Eval && !unit->valid_utf8) {
+    eval_non_utf8_log(code.data()) ;
+  }
+
   auto hackCResult = unitEmitterFromHackCUnitHandleErrors(
     *unit, filename, sha1, bcSha1, extension,
     internal_error, mode, options.packageInfo()

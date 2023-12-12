@@ -826,6 +826,7 @@ struct RuntimeOption {
   F(string, EmbeddedDataFallbackPath,  "/tmp/hhvm_%{type}_%{buildid}_XXXXXX") \
   /* Whether to trust existing versions of extracted embedded data. */  \
   F(bool, EmbeddedDataTrustExtract,    true)                            \
+  F(uint32_t, EvalNonUtf8SampleRate, 0)                                 \
   F(bool, LogThreadCreateBacktraces,   false)                           \
   F(bool, FailJitPrologs,              false)                           \
   F(bool, UseHHBBC,                    !getenv("HHVM_DISABLE_HHBBC"))   \

@@ -283,7 +283,7 @@ ParseFactsResult extract_facts(
     );
     auto blob = hackc::decls_to_facts_binary(*decls, actual_sha1);
     return FactsBinaryString { std::string{(char*)blob.data(), blob.size()} };
-  } catch (const std::exception& e) {
+  } catch (const std::exception& ) {
     return FactsBinaryString { "" }; // Swallow errors from HackC
   }
 }

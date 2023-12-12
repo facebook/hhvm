@@ -162,7 +162,7 @@ void* dlopen_embedded_data(const embedded_data& desc,
           0644
         );
         return extractPath;
-      } catch (const std::system_error& ex) {
+      } catch (const std::system_error& ) {
       }
     }
 

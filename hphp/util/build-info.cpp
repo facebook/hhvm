@@ -80,7 +80,7 @@ void readBuildInfo() {
 
   try {
     timestamp = std::stoll(get("compiler_ts"));
-  } catch(std::exception& e) {
+  } catch(std::exception& ) {
     timestamp = 0;
   }
 

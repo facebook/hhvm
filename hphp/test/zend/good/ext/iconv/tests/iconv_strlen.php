@@ -7,5 +7,5 @@ function foo($str, $charset) :mixed{
 function main_entry(): void {
 
   foo("abc", "ASCII");
-  foo("ÆüËÜ¸ì EUC-JP", "EUC-JP");
+  foo("\xc6\xfc\xcb\xdc\xb8\xec EUC-JP", "EUC-JP");
 }

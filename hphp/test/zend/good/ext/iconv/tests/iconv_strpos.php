@@ -24,8 +24,8 @@ function main_entry(): void {
   foo("abcabcabcdabcababcdabc", "bcd", 0);
   foo("abcabcabcdabcababcdabc", "bcd", 10);
   foo(str_repeat("abcab", 60)."abcdb".str_repeat("adabc", 60), "abcd", 0);
-  foo(str_repeat("あいうえお", 30)."いうおえあ".str_repeat("あいえおう", 30), "うお", 0, "EUC-JP");
-  $str = str_repeat("あいうえお", 60).'$'.str_repeat("あいえおう", 60);
+  foo(str_repeat("\xa4\xa2\xa4\xa4\xa4\xa6\xa4\xa8\xa4\xaa", 30)."\xa4\xa4\xa4\xa6\xa4\xaa\xa4\xa8\xa4\xa2".str_repeat("\xa4\xa2\xa4\xa4\xa4\xa8\xa4\xaa\xa4\xa6", 30), "\xa4\xa6\xa4\xaa", 0, "EUC-JP");
+  $str = str_repeat("\xa4\xa2\xa4\xa4\xa4\xa6\xa4\xa8\xa4\xaa", 60).'$'.str_repeat("\xa4\xa2\xa4\xa4\xa4\xa8\xa4\xaa\xa4\xa6", 60);
   foo($str, '$', 0, "ISO-2022-JP", "EUC-JP");
 
   var_dump(iconv_strpos("string", ""));

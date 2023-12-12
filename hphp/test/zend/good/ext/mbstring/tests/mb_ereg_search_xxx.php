@@ -12,7 +12,7 @@
 		}
 	}
 	function do_tests( $enc, $opt ) :mixed{
-		test_search( $enc, "¢Ï¡¦ ¡¦¢Ï\n", ' (¡¦?¢Ï¡¦?)[[:space:]]', $opt );
+		test_search( $enc, "\xa2\xcf\xa1\xa6 \xa1\xa6\xa2\xcf\n", " (\xa1\xa6?\xa2\xcf\xa1\xa6?)[[:space:]]", $opt );
 		test_search( $enc, 'abcde abdeabcf anvfabc odu abcd ', '(ab[a-z]+)', $opt );
 	}
 <<__EntryPoint>>

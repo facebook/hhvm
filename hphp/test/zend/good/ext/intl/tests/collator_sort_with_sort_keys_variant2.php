@@ -57,8 +57,8 @@ function ut_main()
 
     // Sort a non-ASCII array using ru_RU locale.
     $test_params = vec[
-        vec[ 'абг', 'абв', 'ааа', 'abc' ],
-        vec[ 'аа', 'ааа', 'а' ]
+        vec[ "\xd0\xb0\xd0\xb1\xd0\xb3", "\xd0\xb0\xd0\xb1\xd0\xb2", "\xd0\xb0\xd0\xb0\xd0\xb0", 'abc' ],
+        vec[ "\xd0\xb0\xd0\xb0", "\xd0\xb0\xd0\xb0\xd0\xb0", "\xd0\xb0" ]
     ];
 
     $res_str .= sort_arrays( 'ru_RU', $test_params );

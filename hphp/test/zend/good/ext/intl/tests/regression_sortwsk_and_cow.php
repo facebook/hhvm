@@ -37,7 +37,7 @@ function ut_main()
     $res_str = '';
 
     $a1 = vec[ 'b', 'a', 'c' ];
-    $a2 = vec[ 'в', 'а', 'б' ];
+    $a2 = vec[ "\xd0\xb2", "\xd0\xb0", "\xd0\xb1" ];
 
     $res_str .= test_COW( 'en_US', $a1 );
     $res_str .= test_COW( 'ru_RU', $a2 );

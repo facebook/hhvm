@@ -25,12 +25,12 @@ function bar($str, $offset, $len = false) :mixed{
 function main_entry(): void {
 
   foo("abcdefghijklmnopqrstuvwxyz", 5, 7, "ASCII");
-  foo("あいうえおかきくけこさしす", 5, 7, "EUC-JP");
+  foo("\xa4\xa2\xa4\xa4\xa4\xa6\xa4\xa8\xa4\xaa\xa4\xab\xa4\xad\xa4\xaf\xa4\xb1\xa4\xb3\xa4\xb5\xa4\xb7\xa4\xb9", 5, 7, "EUC-JP");
   bar("This is a test", 100000);
   bar("This is a test", 0, 100000);
   bar("This is a test", -3);
   bar("This is a test", 0, -9);
   bar("This is a test", 0, -100000);
   bar("This is a test", -9, -100000);
-  var_dump(iconv("ISO-2022-JP", "EUC-JP", iconv_substr(iconv("EUC-JP", "ISO-2022-JP", "こんにちは ISO-2022-JP"), 3, 8, "ISO-2022-JP")));
+  var_dump(iconv("ISO-2022-JP", "EUC-JP", iconv_substr(iconv("EUC-JP", "ISO-2022-JP", "\xa4\xb3\xa4\xf3\xa4\xcb\xa4\xc1\xa4\xcf ISO-2022-JP"), 3, 8, "ISO-2022-JP")));
 }

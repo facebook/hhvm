@@ -77,14 +77,14 @@ function ut_main()
 
     // Compare strings using ru_RU locale.
     $test_params = vec[
-        vec[ 'а',   'б' ],
-        vec[ 'а',   'аа' ],
-        vec[ 'аб', 'ба' ],
-        vec[ 'а',   ',' ],
-        vec[ 'а',   'b' ],
-        vec[ 'а',   'bb' ],
-        vec[ 'а',   'ab' ],
-        vec[ 'а',   null ]
+        vec[ "\xd0\xb0",   "\xd0\xb1" ],
+        vec[ "\xd0\xb0",   "\xd0\xb0\xd0\xb0" ],
+        vec[ "\xd0\xb0\xd0\xb1", "\xd0\xb1\xd0\xb0" ],
+        vec[ "\xd0\xb0",   ',' ],
+        vec[ "\xd0\xb0",   'b' ],
+        vec[ "\xd0\xb0",   'bb' ],
+        vec[ "\xd0\xb0",   'ab' ],
+        vec[ "\xd0\xb0",   null ]
     ];
 
     $res_str .= compare_pairs( 'ru_RU', $test_params );

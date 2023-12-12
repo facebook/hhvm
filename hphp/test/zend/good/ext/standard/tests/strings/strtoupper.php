@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>>
 function main_entry(): void {
-  $chars = "הצü";
+  $chars = "\xe4\xf6\xfc";
   // Not sure which is most portable. BSD's answer to
   // this one. A small array based on PHP_OS should
   // cover a majority of systems and makes the problem

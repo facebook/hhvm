@@ -21,7 +21,7 @@ function ut_main()
     // Define a couple of arrays.
     // Each array contains equal strings that differ only in their length.
     $a1 = vec[ 'aa', 'aaa', 'a' ];
-    $a2 = vec[ 'пп', 'ппп', 'п' ];
+    $a2 = vec[ "\xd0\xbf\xd0\xbf", "\xd0\xbf\xd0\xbf\xd0\xbf", "\xd0\xbf" ];
 
     // Sort them.
     $res_str .= sort_using_locale( 'en_US', $a1 );

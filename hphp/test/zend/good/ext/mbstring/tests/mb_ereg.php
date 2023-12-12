@@ -9,9 +9,9 @@
 	}
 	function do_tests( $enc ) :mixed{
 		test_ereg( $enc, b'abc ([a-z]+) ([a-z]+) ([a-z]+)$', b"abc def ghi jkl" );
-		$pat = b'([£á-£ú]+) ([ ¤¢-¤«]+)([¤«-¤Ê]+) ([¤ï-¤ó]+)$';
-		test_ereg( $enc, $pat, b'£á£â£ã ¤¢¤ª¤¤ ¤«¤³¤Ê ¤ï¤ñ¤ó' );
-		test_ereg( $enc, $pat, b'£í£ú£ø£æ£ð ¤¦¤ª¤« ¤­¤« ¤ò¤ð' );
+		$pat = b"([\xa3\xe1-\xa3\xfa]+) ([ \xa4\xa2-\xa4\xab]+)([\xa4\xab-\xa4\xca]+) ([\xa4\xef-\xa4\xf3]+)$";
+		test_ereg( $enc, $pat, b"\xa3\xe1\xa3\xe2\xa3\xe3 \xa4\xa2\xa4\xaa\xa4\xa4 \xa4\xab\xa4\xb3\xa4\xca \xa4\xef\xa4\xf1\xa4\xf3" );
+		test_ereg( $enc, $pat, b"\xa3\xed\xa3\xfa\xa3\xf8\xa3\xe6\xa3\xf0 \xa4\xa6\xa4\xaa\xa4\xab \xa4\xad\xa4\xab \xa4\xf2\xa4\xf0" );
 	}
 <<__EntryPoint>>
 function main_entry(): void {

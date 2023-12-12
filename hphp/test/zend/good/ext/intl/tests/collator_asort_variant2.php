@@ -84,14 +84,14 @@ function ut_main()
 
     // Sort a non-ASCII array using ru_RU locale.
     $test_params = vec[
-        dict[ 'п' => 'у',
-               'б' => 'в',
-               'е' => 'а' ],
+        dict[ "\xd0\xbf" => "\xd1\x83",
+               "\xd0\xb1" => "\xd0\xb2",
+               "\xd0\xb5" => "\xd0\xb0" ],
 
-        dict[ '1' => 'п',
+        dict[ '1' => "\xd0\xbf",
                '4' => '',
                '7' => 'd',
-               '2' => 'пп' ]
+               '2' => "\xd0\xbf\xd0\xbf" ]
     ];
 
     $res_str .= sort_arrays( 'ru_RU', $test_params );

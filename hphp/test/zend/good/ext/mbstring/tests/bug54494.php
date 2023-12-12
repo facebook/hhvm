@@ -6,7 +6,7 @@ function main_entry(): void {
 
   header('Content-Type: text/plain; charset=UTF-32LE');
 
-  $stringOr = "hällö wörld\n";
+  $stringOr = "h\xc3\xa4ll\xc3\xb6 w\xc3\xb6rld\n";
 
   $mode = "UTF-32LE";
 

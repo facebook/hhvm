@@ -29,7 +29,7 @@ function main_entry(): void {
 
   $client = new TestSoapClient(dirname(__FILE__).'/bug38067.wsdl',
   	dict['encoding' => 'ISO-8859-1']);
-  $str = 'test: Ä';
+  $str = "test: \xc4";
   $res = $client->__soapcall(
     'Test',
     vec[dict['str'=>$str]],

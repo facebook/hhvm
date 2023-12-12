@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>>
 function main_entry(): void {
-  $utf8dn = "www.fußball.com";
+  $utf8dn = "www.fu\xc3\x9fball.com";
   $asciiNonTrans = "www.xn--fuball-cta.com";
 
   echo "all ok, no details:", "\n";

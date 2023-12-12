@@ -26,7 +26,8 @@ class Endpoint {
   }
 
   explicit Endpoint(const folly::SocketAddress& addr, bool isSecure)
-      : Endpoint(addr.getAddressStr(), addr.getPort(), isSecure){};
+      : Endpoint(addr.getAddressStr(), addr.getPort(), isSecure) {
+  }
 
   const std::string& getHostname() const {
     return hostname_;

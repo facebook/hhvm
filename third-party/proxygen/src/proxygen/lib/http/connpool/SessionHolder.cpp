@@ -270,13 +270,13 @@ void SessionHolder::onPingReplySent(int64_t latency) {
   if (originalSessionInfoCb_) {
     originalSessionInfoCb_->onPingReplySent(latency);
   }
-};
+}
 
 void SessionHolder::onPingReplyReceived() {
   if (originalSessionInfoCb_) {
     originalSessionInfoCb_->onPingReplyReceived();
   }
-};
+}
 
 void SessionHolder::onSettingsOutgoingStreamsFull(
     const HTTPSessionBase& session) {

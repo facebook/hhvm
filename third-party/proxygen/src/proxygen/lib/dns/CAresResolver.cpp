@@ -58,10 +58,13 @@ class NullStatsCollector : public DNSResolver::StatsCollector {
   ~NullStatsCollector() override {
   }
   void recordSuccess(const std::vector<DNSResolver::Answer>& /*answers*/,
-                     std::chrono::milliseconds /*latency*/) noexcept override{};
+                     std::chrono::milliseconds /*latency*/) noexcept override {
+  }
   void recordError(const folly::exception_wrapper& /*ew*/,
-                   std::chrono::milliseconds /*latency*/) noexcept override{};
-  void recordQueryResult(uint8_t /*rcode*/) noexcept override{};
+                   std::chrono::milliseconds /*latency*/) noexcept override {
+  }
+  void recordQueryResult(uint8_t /*rcode*/) noexcept override {
+  }
 };
 
 NullStatsCollector nullStatsCollector;

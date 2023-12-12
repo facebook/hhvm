@@ -116,7 +116,8 @@ std::string DNSResolver::getPtrName(const SocketAddress& address) {
 
 void DNSResolver::resolveMailExchange(ResolutionCallback* /*cb*/,
                                       const std::string& /*domain*/,
-                                      std::chrono::milliseconds /*timeout*/){};
+                                      std::chrono::milliseconds /*timeout*/) {
+}
 
 std::string describe(const DNSResolver::ResolutionStatus status, bool details) {
 #define DNSRESOLVER_RESOLUTION_STATUS_STR(sym, descr) #sym,

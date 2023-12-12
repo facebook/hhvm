@@ -329,9 +329,9 @@ bool HHVM_FUNCTION(pcntl_signal_dispatch) {
       // ExitException and ResourceExceededException.
       try {
         vm_call_user_func(handler, make_vec_array(signum));
-      } catch (const ExitException& e) {
+      } catch (const ExitException& ) {
         throw;
-      } catch (const ResourceExceededException& e) {
+      } catch (const ResourceExceededException& ) {
         throw;
       } catch (const Object& e) {
         std::string what;

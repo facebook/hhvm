@@ -575,7 +575,7 @@ Array implTypeStructure(const Variant& cls_or_obj,
     try {
       bool persistent = true;
       resolved = TypeStructure::resolve(name, typeStructure, persistent);
-    } catch (Exception& e) {
+    } catch (Exception& ) {
       raise_error("resolving type alias %s failed. "
                   "Have you declared all classes in the type alias",
                   name.get()->data());

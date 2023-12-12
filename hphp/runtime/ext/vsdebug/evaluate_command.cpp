@@ -263,7 +263,7 @@ bool EvaluateCommand::executeImpl(
         2
       );
       body["serialized"] = vs.serialize(result.result, true).get()->data();
-    } catch (const StringBufferLimitException& e) {
+    } catch (const StringBufferLimitException& ) {
       body["serialized"] = "Serialization limit exceeded";
     } catch (...) {
       assertx(false);
@@ -292,7 +292,7 @@ bool EvaluateCommand::executeImpl(
   try {
     const auto& presentationHint = serializedResult["presentationHint"];
     body["presentationHint"] = presentationHint;
-  } catch (std::out_of_range &e) {
+  } catch (std::out_of_range &) {
   }
 
   return false;

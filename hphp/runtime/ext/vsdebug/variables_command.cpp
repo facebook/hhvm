@@ -171,7 +171,7 @@ void VariablesCommand::sortVariablesInPlace(folly::dynamic& vars) {
   for (auto it = vars.begin(); it != vars.end(); it++) {
     try {
       it->erase(ucKey);
-    } catch (std::out_of_range &e) {
+    } catch (std::out_of_range &) {
     }
   }
 }

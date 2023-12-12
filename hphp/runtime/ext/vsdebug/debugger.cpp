@@ -1452,7 +1452,7 @@ void Debugger::onClientMessage(folly::dynamic& message) {
       if (!type.isString() || type.getString().empty()) {
         throw DebuggerCommandException("Invalid command type.");
       }
-    } catch (std::out_of_range &e) {
+    } catch (std::out_of_range &) {
       throw DebuggerCommandException(
         "Message is missing a required attribute."
       );
@@ -1470,7 +1470,7 @@ void Debugger::onClientMessage(folly::dynamic& message) {
           errorMsg += "\" was invalid or is not implemented in the debugger.";
           throw DebuggerCommandException(errorMsg.c_str());
         }
-      } catch (std::out_of_range &e) {
+      } catch (std::out_of_range &) {
       }
 
       throw DebuggerCommandException(

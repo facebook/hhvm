@@ -123,7 +123,7 @@ public:
           moduleName = piece;
           level = 1;
         }
-      } catch (const std::exception& re) {
+      } catch (const std::exception& ) {
         std::cerr <<
           folly::format("Ignoring invalid TRACE component: {}\n", piece);
         continue;

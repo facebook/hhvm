@@ -201,7 +201,7 @@ void SQLite::txPop() {
     SQLiteQuery query{m_rollbackStmt};
     try {
       query.step();
-    } catch (const SQLiteExc& ex) {
+    } catch (const SQLiteExc& ) {
       /*
        * Having a rollback fail is actually a normal, expected case,
        * so just swallow this.

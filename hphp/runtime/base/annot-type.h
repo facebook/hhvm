@@ -57,6 +57,7 @@ enum class AnnotType : uint16_t {
   Int      = (uint8_t)KindOfInt64    | (uint16_t)AnnotMetaType::Precise << 8,
   Float    = (uint8_t)KindOfDouble   | (uint16_t)AnnotMetaType::Precise << 8,
   String   = (uint8_t)KindOfString   | (uint16_t)AnnotMetaType::Precise << 8,
+  Object   = (uint8_t)KindOfObject   | (uint16_t)AnnotMetaType::Precise << 8,
   Resource = (uint8_t)KindOfResource | (uint16_t)AnnotMetaType::Precise << 8,
   Dict     = (uint8_t)KindOfDict     | (uint16_t)AnnotMetaType::Precise << 8,
   Vec      = (uint8_t)KindOfVec      | (uint16_t)AnnotMetaType::Precise << 8,
@@ -98,6 +99,7 @@ constexpr const char* annotNullableTypeName(AnnotType ty) {
     case AnnotType::Nothing: return "?HH\\nothing";
     case AnnotType::Null: return "?HH\\null";
     case AnnotType::Number: return "?HH\\num";
+    case AnnotType::Object: return "?HH\\object";
     case AnnotType::Resource: return "?HH\\resource";
     case AnnotType::String: return "?HH\\string";
     case AnnotType::SubObject: not_implemented();

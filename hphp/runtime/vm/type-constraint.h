@@ -105,13 +105,14 @@ struct TypeConstraint {
   constexpr static UnionTypeMask kUnionTypeInt       = 1 << 1;
   constexpr static UnionTypeMask kUnionTypeFloat     = 1 << 2;
   constexpr static UnionTypeMask kUnionTypeCallable  = 1 << 3;
-  constexpr static UnionTypeMask kUnionTypeResource  = 1 << 4;
-  constexpr static UnionTypeMask kUnionTypeThis      = 1 << 5;
-  constexpr static UnionTypeMask kUnionTypeString    = 1 << 6;
-  constexpr static UnionTypeMask kUnionTypeVec       = 1 << 7;
-  constexpr static UnionTypeMask kUnionTypeKeyset    = 1 << 8;
-  constexpr static UnionTypeMask kUnionTypeDict      = 1 << 9;
-  constexpr static UnionTypeMask kUnionTypeClassname = 1 << 10;
+  constexpr static UnionTypeMask kUnionTypeObject    = 1 << 4;
+  constexpr static UnionTypeMask kUnionTypeResource  = 1 << 5;
+  constexpr static UnionTypeMask kUnionTypeThis      = 1 << 6;
+  constexpr static UnionTypeMask kUnionTypeString    = 1 << 7;
+  constexpr static UnionTypeMask kUnionTypeVec       = 1 << 8;
+  constexpr static UnionTypeMask kUnionTypeKeyset    = 1 << 9;
+  constexpr static UnionTypeMask kUnionTypeDict      = 1 << 10;
+  constexpr static UnionTypeMask kUnionTypeClassname = 1 << 11;
   // Class should be the last flag because it indicates a list of classnames in
   // the repr which we want to handle last and repeat until we're out of
   // classes.
@@ -210,6 +211,7 @@ struct TypeConstraint {
       case AnnotType::Int:
       case AnnotType::Float:
       case AnnotType::String:
+      case AnnotType::Object:
       case AnnotType::Resource:
       case AnnotType::Dict:
       case AnnotType::Vec:
@@ -342,7 +344,7 @@ struct TypeConstraint {
   bool isDict()     const { return !isUnion() && m_u.single.type == Type::Dict; }
   bool isVec()      const { return !isUnion() && m_u.single.type == Type::Vec; }
   bool isKeyset()   const { return !isUnion() && m_u.single.type == Type::Keyset; }
-  bool isAnyObject() const { return false; }
+  bool isAnyObject() const { return !isUnion() && m_u.single.type == Type::Object; }
   bool isSubObject() const { return !isUnion() && m_u.single.type == Type::SubObject; }
   bool isInt()       const { return !isUnion() && m_u.single.type == Type::Int; }
   bool isString()    const { return !isUnion() && m_u.single.type == Type::String; }

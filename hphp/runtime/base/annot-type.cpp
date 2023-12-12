@@ -62,6 +62,7 @@ static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
       { annotTypeName(AnnotType::Int),       AnnotType::Int },
       { annotTypeName(AnnotType::Float),     AnnotType::Float },
       { annotTypeName(AnnotType::String),    AnnotType::String },
+      { annotTypeName(AnnotType::Object),    AnnotType::Object },
       { annotTypeName(AnnotType::Resource),  AnnotType::Resource },
       { annotTypeName(AnnotType::Mixed),     AnnotType::Mixed },
       { annotTypeName(AnnotType::Nonnull),   AnnotType::Nonnull },
@@ -158,6 +159,7 @@ TypedValue annotDefaultValue(AnnotType at) {
     case AnnotType::This:
     case AnnotType::Callable:
     case AnnotType::Resource:
+    case AnnotType::Object:
     case AnnotType::SubObject:
     case AnnotType::Unresolved:
     case AnnotType::Nothing:
@@ -257,9 +259,9 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
   }
 
   if (metatype == AnnotMetaType::Precise) {
-    // If `at' is "bool", "int", "float", "string", "array", or "resource",
-    // then equivDataTypes() can definitively tell us whether or not `dt'
-    // is compatible.
+    // If `at' is "bool", "int", "float", "string", "vec", "dict", "keyset",
+    // "object", or "resource", then equivDataTypes() can definitively tell us
+    // whether or not `dt' is compatible.
     return equivDataTypes(getAnnotDataType(at), dt)
       ? AnnotAction::Pass : AnnotAction::Fail;
   }
@@ -333,7 +335,8 @@ const char* annotName(AnnotType at) {
     case AnnotType::This:       return "this";
     case AnnotType::Callable:   return "callable";
     case AnnotType::Resource:   return "resource";
-    case AnnotType::SubObject:  return "object";
+    case AnnotType::Object:     return "object";
+    case AnnotType::SubObject:  return "subobject";
     case AnnotType::Unresolved: return "unresolved";
     case AnnotType::Nothing:    return "nothing";
     case AnnotType::NoReturn:   return "noreturn";

@@ -1004,6 +1004,7 @@ Type typeFromTCImpl(const HPHP::TypeConstraint& tc,
       case A::Float:      return TDbl;
       case A::String:     return TStr;
       case A::Mixed:      return TCell;
+      case A::Object:     return TObj;
       case A::Resource:   return TRes;
       case A::Dict:       return TDict;
       case A::Vec:        return TVec;

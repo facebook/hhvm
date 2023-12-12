@@ -4379,6 +4379,7 @@ Type from_hni_constraint(SString s) {
   }
 
   if (!strcasecmp(p, annotTypeName(AnnotType::Null)))     return opt(std::move(ret));
+  if (!strcasecmp(p, annotTypeName(AnnotType::Object)))   return union_of(std::move(ret), TObj);
   if (!strcasecmp(p, annotTypeName(AnnotType::Resource))) return union_of(std::move(ret), TRes);
   if (!strcasecmp(p, annotTypeName(AnnotType::Bool)))     return union_of(std::move(ret), TBool);
   if (!strcasecmp(p, annotTypeName(AnnotType::Int)))      return union_of(std::move(ret), TInt);

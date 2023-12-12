@@ -186,6 +186,10 @@ Optional<TypeConstraint> TypeConstraint::UnionBuilder::recordConstraint(const Ty
       m_preciseTypeMask |= kUnionTypeString;
       break;
     }
+    case AnnotType::Object: {
+      m_preciseTypeMask |= kUnionTypeObject;
+      break;
+    }
     case AnnotType::Resource: {
       m_preciseTypeMask |= kUnionTypeResource;
       break;
@@ -679,6 +683,7 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
         case AnnotType::Int:      str = "int";  break;
         case AnnotType::Float:    str = "float"; break;
         case AnnotType::String:   str = "string"; break;
+        case AnnotType::Object:   str = "object"; break;
         case AnnotType::Resource: str = "resource"; break;
         case AnnotType::Dict:     str = "dict"; break;
         case AnnotType::Vec:      str = "vec"; break;
@@ -726,6 +731,7 @@ std::string showUnionTypeMask(UnionTypeMask mask) {
   bitName(res, mask, TypeConstraint::kUnionTypeFloat, "float");
   bitName(res, mask, TypeConstraint::kUnionTypeInt, "int");
   bitName(res, mask, TypeConstraint::kUnionTypeKeyset, "keyset");
+  bitName(res, mask, TypeConstraint::kUnionTypeObject, "object");
   bitName(res, mask, TypeConstraint::kUnionTypeResource, "resource");
   bitName(res, mask, TypeConstraint::kUnionTypeString, "string");
   bitName(res, mask, TypeConstraint::kUnionTypeThis, "this");
@@ -763,6 +769,7 @@ std::string show(AnnotType t) {
     case AnnotType::Float: return "Float";
     case AnnotType::String: return "String";
     case AnnotType::SubObject: return "SubObject";
+    case AnnotType::Object: return "Object";
     case AnnotType::Resource: return "Resource";
     case AnnotType::Dict: return "Dict";
     case AnnotType::Vec: return "Vec";
@@ -2005,6 +2012,10 @@ void TcUnionPieceIterator::buildUnionTypeConstraint() {
     }
     case TypeConstraint::kUnionTypeKeyset: {
       m_outTc = TypeConstraint{ AnnotType::Keyset, flags, CC{LAZY_STATIC_STRING(annotTypeName(AnnotType::Keyset))} };
+      break;
+    }
+    case TypeConstraint::kUnionTypeObject: {
+      m_outTc = TypeConstraint{ AnnotType::Object, flags, CC{LAZY_STATIC_STRING(annotTypeName(AnnotType::Object))} };
       break;
     }
     case TypeConstraint::kUnionTypeResource: {

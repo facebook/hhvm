@@ -1,7 +1,3 @@
-fb_compact_unserialize
-  INSERT fb_compact_unserialize(${1:\$thing}, ${2:\$success}, ${3:\$errcode})
-  (function(HH\FIXME\MISSING_PARAM_TYPE $thing, inout ~?bool $success, inout ~?int $errcode): ~HH\FIXME\MISSING_RETURN_TYPE)
-SORT TEXT: none
 fb_disable_code_coverage
   INSERT fb_disable_code_coverage()
   (function(): ~HH\FIXME\MISSING_RETURN_TYPE)
@@ -125,6 +121,10 @@ SORT TEXT: none
 fb_scribe_gen_write_message
   INSERT fb_scribe_gen_write_message(${1:\$category}, ${2:\$message}, ${3:\$metadata}, ${4:\$timeoutMs})
   (function(string $category, string $message, string $metadata, int $timeoutMs): ~Awaitable<int>)
+SORT TEXT: none
+fb_scribe_gen_write_structured_message
+  INSERT fb_scribe_gen_write_structured_message(${1:\$message_blob}, ${2:\$timeout_ms})
+  (function(string $message_blob, int $timeout_ms): ~dict<int, NativeExtScribeWriteResult>)
 SORT TEXT: none
 fb_scribe_offer
   INSERT fb_scribe_offer(${1:\$category}, ${2:\$message}, ${3:\$bucket}, ${4:\$secureThrift})

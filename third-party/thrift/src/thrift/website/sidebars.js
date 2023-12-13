@@ -359,6 +359,17 @@ module.exports = {
                   'fb/server/overload-protection/cpuconcurrencycontroller/rollout',
                 ],
               },
+              {
+                type: 'category',
+                label: 'DLS',
+                link: {
+                  type: 'doc',
+                  id: 'fb/server/overload-protection/dls/index',
+                },
+                items: [
+                ],
+              },
+              // 'fb/server/overload-protection/dls/index',
               'fb/server/overload-protection/adaptive-concurrency',
               'fb/server/overload-protection/queue-timeout',
             ],

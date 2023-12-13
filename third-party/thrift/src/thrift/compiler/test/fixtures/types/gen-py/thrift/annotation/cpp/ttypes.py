@@ -311,7 +311,7 @@ class Ref:
 class Name:
   r"""
   Changes the name of the definition in generated C++ code.
-  In most cases a much better solution is to rename the problematic Thrift field itself. Only use the `cpp.name` annotation if such renaming is problematic,
+  In most cases a much better solution is to rename the problematic Thrift field itself. Only use the `@cpp.Name` annotation if such renaming is problematic,
   e.g. when the field name appears in code as a string, particularly when using JSON serialization, and it is hard to change all usage sites.
   
   Attributes:

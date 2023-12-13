@@ -4,7 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated
  */
-package com.facebook.thrift.annotation.cpp_deprecated;
+package com.facebook.thrift.annotation.rust_deprecated;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -23,18 +23,13 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
-/**
- * Changes the name of the definition in generated C++ code.
- * In most cases a much better solution is to rename the problematic Thrift field itself. Only use the `@cpp.Name` annotation if such renaming is problematic,
- * e.g. when the field name appears in code as a string, particularly when using JSON serialization, and it is hard to change all usage sites.
- */
 @SuppressWarnings({ "unused", "serial" })
-public class Name implements TBase, java.io.Serializable, Cloneable, Comparable<Name> {
-  private static final TStruct STRUCT_DESC = new TStruct("Name");
-  private static final TField VALUE_FIELD_DESC = new TField("value", TType.STRING, (short)1);
+public class Type implements TBase, java.io.Serializable, Cloneable, Comparable<Type> {
+  private static final TStruct STRUCT_DESC = new TStruct("Type");
+  private static final TField NAME_FIELD_DESC = new TField("name", TType.STRING, (short)1);
 
-  public String value;
-  public static final int VALUE = 1;
+  public String name;
+  public static final int NAME = 1;
 
   // isset id assignments
 
@@ -42,38 +37,38 @@ public class Name implements TBase, java.io.Serializable, Cloneable, Comparable<
 
   static {
     Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
-    tmpMetaDataMap.put(VALUE, new FieldMetaData("value", TFieldRequirementType.DEFAULT, 
+    tmpMetaDataMap.put(NAME, new FieldMetaData("name", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.STRING)));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
 
   static {
-    FieldMetaData.addStructMetaDataMap(Name.class, metaDataMap);
+    FieldMetaData.addStructMetaDataMap(Type.class, metaDataMap);
   }
 
-  public Name() {
+  public Type() {
   }
 
-  public Name(
-      String value) {
+  public Type(
+      String name) {
     this();
-    this.value = value;
+    this.name = name;
   }
 
   public static class Builder {
-    private String value;
+    private String name;
 
     public Builder() {
     }
 
-    public Builder setValue(final String value) {
-      this.value = value;
+    public Builder setName(final String name) {
+      this.name = name;
       return this;
     }
 
-    public Name build() {
-      Name result = new Name();
-      result.setValue(this.value);
+    public Type build() {
+      Type result = new Type();
+      result.setName(this.name);
       return result;
     }
   }
@@ -85,47 +80,47 @@ public class Name implements TBase, java.io.Serializable, Cloneable, Comparable<
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public Name(Name other) {
-    if (other.isSetValue()) {
-      this.value = TBaseHelper.deepCopy(other.value);
+  public Type(Type other) {
+    if (other.isSetName()) {
+      this.name = TBaseHelper.deepCopy(other.name);
     }
   }
 
-  public Name deepCopy() {
-    return new Name(this);
+  public Type deepCopy() {
+    return new Type(this);
   }
 
-  public String getValue() {
-    return this.value;
+  public String getName() {
+    return this.name;
   }
 
-  public Name setValue(String value) {
-    this.value = value;
+  public Type setName(String name) {
+    this.name = name;
     return this;
   }
 
-  public void unsetValue() {
-    this.value = null;
+  public void unsetName() {
+    this.name = null;
   }
 
-  // Returns true if field value is set (has been assigned a value) and false otherwise
-  public boolean isSetValue() {
-    return this.value != null;
+  // Returns true if field name is set (has been assigned a value) and false otherwise
+  public boolean isSetName() {
+    return this.name != null;
   }
 
-  public void setValueIsSet(boolean __value) {
+  public void setNameIsSet(boolean __value) {
     if (!__value) {
-      this.value = null;
+      this.name = null;
     }
   }
 
   public void setFieldValue(int fieldID, Object __value) {
     switch (fieldID) {
-    case VALUE:
+    case NAME:
       if (__value == null) {
-        unsetValue();
+        unsetName();
       } else {
-        setValue((String)__value);
+        setName((String)__value);
       }
       break;
 
@@ -136,8 +131,8 @@ public class Name implements TBase, java.io.Serializable, Cloneable, Comparable<
 
   public Object getFieldValue(int fieldID) {
     switch (fieldID) {
-    case VALUE:
-      return getValue();
+    case NAME:
+      return getName();
 
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
@@ -150,22 +145,22 @@ public class Name implements TBase, java.io.Serializable, Cloneable, Comparable<
       return false;
     if (this == _that)
       return true;
-    if (!(_that instanceof Name))
+    if (!(_that instanceof Type))
       return false;
-    Name that = (Name)_that;
+    Type that = (Type)_that;
 
-    if (!TBaseHelper.equalsNobinary(this.isSetValue(), that.isSetValue(), this.value, that.value)) { return false; }
+    if (!TBaseHelper.equalsNobinary(this.isSetName(), that.isSetName(), this.name, that.name)) { return false; }
 
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {value});
+    return Arrays.deepHashCode(new Object[] {name});
   }
 
   @Override
-  public int compareTo(Name other) {
+  public int compareTo(Type other) {
     if (other == null) {
       // See java.lang.Comparable docs
       throw new NullPointerException();
@@ -176,11 +171,11 @@ public class Name implements TBase, java.io.Serializable, Cloneable, Comparable<
     }
     int lastComparison = 0;
 
-    lastComparison = Boolean.valueOf(isSetValue()).compareTo(other.isSetValue());
+    lastComparison = Boolean.valueOf(isSetName()).compareTo(other.isSetName());
     if (lastComparison != 0) {
       return lastComparison;
     }
-    lastComparison = TBaseHelper.compareTo(value, other.value);
+    lastComparison = TBaseHelper.compareTo(name, other.name);
     if (lastComparison != 0) { 
       return lastComparison;
     }
@@ -198,9 +193,9 @@ public class Name implements TBase, java.io.Serializable, Cloneable, Comparable<
       }
       switch (__field.id)
       {
-        case VALUE:
+        case NAME:
           if (__field.type == TType.STRING) {
-            this.value = iprot.readString();
+            this.name = iprot.readString();
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -222,9 +217,9 @@ public class Name implements TBase, java.io.Serializable, Cloneable, Comparable<
     validate();
 
     oprot.writeStructBegin(STRUCT_DESC);
-    if (this.value != null) {
-      oprot.writeFieldBegin(VALUE_FIELD_DESC);
-      oprot.writeString(this.value);
+    if (this.name != null) {
+      oprot.writeFieldBegin(NAME_FIELD_DESC);
+      oprot.writeString(this.name);
       oprot.writeFieldEnd();
     }
     oprot.writeFieldStop();
@@ -241,20 +236,20 @@ public class Name implements TBase, java.io.Serializable, Cloneable, Comparable<
     String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
     String newLine = prettyPrint ? "\n" : "";
     String space = prettyPrint ? " " : "";
-    StringBuilder sb = new StringBuilder("Name");
+    StringBuilder sb = new StringBuilder("Type");
     sb.append(space);
     sb.append("(");
     sb.append(newLine);
     boolean first = true;
 
     sb.append(indentStr);
-    sb.append("value");
+    sb.append("name");
     sb.append(space);
     sb.append(":").append(space);
-    if (this.getValue() == null) {
+    if (this.getName() == null) {
       sb.append("null");
     } else {
-      sb.append(TBaseHelper.toString(this.getValue(), indent + 1, prettyPrint));
+      sb.append(TBaseHelper.toString(this.getName(), indent + 1, prettyPrint));
     }
     first = false;
     sb.append(newLine + TBaseHelper.reduceIndent(indentStr));

@@ -13421,15 +13421,13 @@ Job<BuildSubclassListJob> s_buildSubclassJob;
 struct SubclassWork {
   ISStringToOneT<std::unique_ptr<BuildSubclassListJob::Split>> allSplits;
   struct Bucket {
-    size_t cost() const {
-      return classes.size() + deps.size() + splits.size() + splitDeps.size();
-    }
     std::vector<SString> classes;
     std::vector<SString> deps;
     std::vector<SString> splits;
     std::vector<SString> splitDeps;
     std::vector<SString> leafs;
     std::vector<BuildSubclassListJob::EdgeToSplit> edges;
+    size_t cost{0};
   };
   std::vector<std::vector<Bucket>> buckets;
   ISStringSet leafInterfaces;
@@ -13819,6 +13817,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
       auto& bucket = out.buckets.back().back();
       // Separate out any of the "roots" which are actually leafs.
       for (auto const cls : w.classes) {
+        bucket.cost += depsSize(cls);
         markProcessed.emplace_back(cls);
         if (leafs.count(cls)) {
           leafs.erase(cls);
@@ -13847,7 +13846,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
       begin(out.buckets.back()), end(out.buckets.back()),
       [] (const SubclassWork::Bucket& a,
           const SubclassWork::Bucket& b) {
-            return a.cost() > b.cost();
+            return a.cost > b.cost;
       }
     );
 

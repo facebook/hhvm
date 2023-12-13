@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4ca42618917d6bc56d7cb03b6bc4b82c>>
+// @generated SignedSource<<44c3af257d7c75061ec9dc12a5d46f24>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -239,6 +239,6 @@ pub struct DeclClassType {
     pub enum_type: Option<EnumType>,
     pub decl_errors: Vec<DeclError>,
     pub docs_url: Option<String>,
-    /// Wether this interface has attribute __AllowMultipleInstantiations.
+    /// Wether this interface has attribute __UNSAFE_AllowMultipleInstantiations.
     pub allow_multiple_instantiations: bool,
 }

@@ -157,7 +157,7 @@ type decl_class_type = {
   dc_decl_errors: decl_error list;
   dc_docs_url: string option;
   dc_allow_multiple_instantiations: bool;
-      (** Wether this interface has attribute __AllowMultipleInstantiations. *)
+      (** Wether this interface has attribute __UNSAFE_AllowMultipleInstantiations. *)
 }
 [@@deriving show]
 

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<77843511b42c7ae9034e402508df6f5c>>
+// @generated SignedSource<<118edea3ff04700c6961cfc38b7e9fee>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -258,7 +258,7 @@ pub struct DeclClassType<'a> {
     pub decl_errors: &'a [DeclError<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub docs_url: Option<&'a str>,
-    /// Wether this interface has attribute __AllowMultipleInstantiations.
+    /// Wether this interface has attribute __UNSAFE_AllowMultipleInstantiations.
     pub allow_multiple_instantiations: bool,
 }
 impl<'a> TrivialDrop for DeclClassType<'a> {}

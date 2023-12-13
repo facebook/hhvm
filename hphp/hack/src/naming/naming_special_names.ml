@@ -378,6 +378,9 @@ module UserAttributes = struct
 
   let uaAllowMultipleInstantiations = "__AllowMultipleInstantiations"
 
+  let uaUnsafeAllowMultipleInstantiations =
+    "__UNSAFE_AllowMultipleInstantiations"
+
   type attr_info = {
     contexts: string list;
     doc: string;
@@ -394,6 +397,13 @@ module UserAttributes = struct
               autocomplete = true;
               doc =
                 "Allows implementing this interface with multiple instantiations, e.g. `implements I<int>, I<string>`";
+            } );
+          ( uaUnsafeAllowMultipleInstantiations,
+            {
+              contexts = [cls];
+              autocomplete = true;
+              doc =
+                "CLOWNY. Allows implementing this interface with multiple instantiations, e.g. `implements I<int>, I<string>`.";
             } );
           ( uaOverride,
             {

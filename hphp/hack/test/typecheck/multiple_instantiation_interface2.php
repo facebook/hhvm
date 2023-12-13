@@ -3,7 +3,7 @@
 class A {}
 class B {}
 
-<<__AllowMultipleInstantiations>>
+<<__UNSAFE_AllowMultipleInstantiations>>
 interface I<+T> {}
 
 trait T1 implements I<A> {}

@@ -35,3 +35,8 @@ __Sealed
   built-in attribute
 SORT TEXT: none
   Only the named classes can extend this class or interface. Child classes may still be extended unless they are marked `final`.
+__UNSAFE_AllowMultipleInstantiations
+  INSERT __UNSAFE_AllowMultipleInstantiations
+  built-in attribute
+SORT TEXT: none
+  CLOWNY. Allows implementing this interface with multiple instantiations, e.g. `implements I<int>, I<string>`.

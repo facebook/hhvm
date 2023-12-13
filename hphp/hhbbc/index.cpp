@@ -13508,6 +13508,9 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
   // Keep creating rounds until all of the classes are assigned to a
   // bucket in a round.
   auto toProcess = std::move(subclassMeta.all);
+  ISStringSet tp;
+  if (debug) tp.insert(toProcess.begin(), toProcess.end());
+
   for (size_t round = 0; !toProcess.empty(); ++round) {
     // If we have this many rounds, something has gone wrong, because
     // it should require an astronomical amount of classes.
@@ -13818,6 +13821,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
       for (auto const cls : w.classes) {
         markProcessed.emplace_back(cls);
         if (leafs.count(cls)) {
+          leafs.erase(cls);
           bucket.leafs.emplace_back(cls);
         } else {
           add(cls, bucket.classes, bucket.splits, bucket.edges);
@@ -13858,8 +13862,27 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
   // Keep all split nodes created in the output
   for (auto& [name, p] : splitPtrs) out.allSplits.emplace(name, std::move(p));
 
-  if (Trace::moduleEnabled(Trace::hhbbc_index, 5)) {
+  // Ensure we create an output for everything exactly once
+  if (debug) {
     for (size_t round = 0; round < out.buckets.size(); ++round) {
+      auto const& r = out.buckets[round];
+      for (size_t i = 0; i < r.size(); ++i) {
+        auto const& bucket = r[i];
+        for (auto const c : bucket.classes) always_assert(tp.erase(c));
+        for (auto const l : bucket.leafs) always_assert(tp.erase(l));
+      }
+    }
+    assertx(tp.empty());
+  }
+
+  if (Trace::moduleEnabled(Trace::hhbbc_index, 4)) {
+    for (size_t round = 0; round < out.buckets.size(); ++round) {
+      size_t nc = 0;
+      size_t ns = 0;
+      size_t nd = 0;
+      size_t nsd = 0;
+      size_t nl = 0;
+
       auto const& r = out.buckets[round];
       for (size_t i = 0; i < r.size(); ++i) {
         auto const& bucket = r[i];
@@ -13875,14 +13898,26 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
           FTRACE(6, "    {}\n", s);
         }
         FTRACE(5, "  leafs ({}):\n", bucket.leafs.size());
-        for (auto const DEBUG_ONLY c : bucket.leafs) {
-          FTRACE(6, "    {}\n", c);
-        }
+        for (auto const DEBUG_ONLY c : bucket.leafs) FTRACE(6, "    {}\n", c);
         FTRACE(5, "  edges ({}):\n", bucket.edges.size());
         for (DEBUG_ONLY auto const& e : bucket.edges) {
           FTRACE(6, "    {} -> {}\n", e.cls, e.split);
         }
+        nc += bucket.classes.size();
+        ns += bucket.splits.size();
+        nd += bucket.deps.size();
+        nsd += bucket.splitDeps.size();
+        nl += bucket.leafs.size();
       }
+      FTRACE(4, "BSL round #{} stats\n"
+        " {} buckets\n"
+        " {} classes\n"
+        " {} splits\n"
+        " {} deps\n"
+        " {} split deps\n"
+        " {} leafs\n",
+        round, r.size(), nc, ns, nd, nsd, nl
+      );
     }
   }
 

@@ -74,20 +74,20 @@ class TLConnectionStats : public ConnectionStats {
   void addIngressBodyBytes(size_t bytes) override;
 
  private:
-  BaseStats::TLTimeseriesMinuteAndAllTime req_;
-  BaseStats::TLTimeseriesMinuteAndAllTime resp_;
-  BaseStats::TLTimeseriesMinuteAndAllTime egressBytes_;
-  BaseStats::TLTimeseriesMinuteAndAllTime ingressBytes_;
-  BaseStats::TLTimeseriesMinuteAndAllTime egressBodyBytes_;
-  BaseStats::TLTimeseriesMinuteAndAllTime ingressBodyBytes_;
-  TLResponseCodeStats responseCodes_;
-  BaseStats::TLHistogram totalDuration_;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> req_;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> resp_;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> egressBytes_;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> ingressBytes_;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> egressBodyBytes_;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> ingressBodyBytes_;
+  std::optional<TLResponseCodeStats> responseCodes_;
+  std::optional<BaseStats::TLHistogram> totalDuration_;
 
-  BaseStats::TLCounter currConns_;
-  BaseStats::TLTimeseries newConns_;
+  std::optional<BaseStats::TLCounter> currConns_;
+  std::optional<BaseStats::TLTimeseries> newConns_;
 
-  BaseStats::TLCounter currTcpConns_;
-  BaseStats::TLTimeseries newTcpConns_;
+  std::optional<BaseStats::TLCounter> currTcpConns_;
+  std::optional<BaseStats::TLTimeseries> newTcpConns_;
 };
 
 } // namespace proxygen

@@ -12,76 +12,76 @@ using namespace facebook::fb303;
 
 namespace proxygen {
 
-TLConnectionStats::TLConnectionStats(const std::string& prefix)
-    : req_(prefix + "_req", SUM, RATE), // RATE used
-      resp_(prefix + "_resp", SUM),
-      egressBytes_(prefix + "_egress_bytes", SUM),
-      ingressBytes_(prefix + "_ingress_bytes", SUM),
-      egressBodyBytes_(
-          prefix + "_egress_body_bytes",
-          SUM,
-          RATE), // RATE is being used for body throughout the code base
-                 // https://www.internalfb.com/code/search?q=repo%3Aall%20gress_body_bytes.rate.60
-      ingressBodyBytes_(prefix + "_ingress_body_bytes", SUM, RATE),
+TLConnectionStats::TLConnectionStats(const std::string& prefix) {
+  req_.emplace(prefix + "_req", SUM, RATE); // RATE used
+  resp_.emplace(prefix + "_resp", SUM);
+  egressBytes_.emplace(prefix + "_egress_bytes", SUM);
+  ingressBytes_.emplace(prefix + "_ingress_bytes", SUM);
+  egressBodyBytes_.emplace(
+      prefix + "_egress_body_bytes",
+      SUM,
+      RATE); // RATE is being used for body throughout the code base
+             // https://www.internalfb.com/code/search?q=repo%3Aall%20gress_body_bytes.rate.60
+  ingressBodyBytes_.emplace(prefix + "_ingress_body_bytes", SUM, RATE);
 
-      responseCodes_(prefix + "_"),
-      totalDuration_(prefix + "_conn_duration",
-                     100,
-                     0,
-                     5000,
-                     facebook::fb303::AVG,
-                     50,
-                     95,
-                     99),
-      currConns_(prefix + "_conn"),
-      newConns_(prefix + "_new_conn", SUM),
-      currTcpConns_(prefix + "_tcp_conn"),
-      newTcpConns_(prefix + "_new_tcp_conn", SUM) {
+  responseCodes_.emplace(prefix + "_");
+  totalDuration_.emplace(prefix + "_conn_duration",
+                         100,
+                         0,
+                         5000,
+                         facebook::fb303::AVG,
+                         50,
+                         95,
+                         99);
+  currConns_.emplace(prefix + "_conn");
+  newConns_.emplace(prefix + "_new_conn", SUM);
+  currTcpConns_.emplace(prefix + "_tcp_conn");
+  newTcpConns_.emplace(prefix + "_new_tcp_conn", SUM);
 }
 
 void TLConnectionStats::recordConnectionOpen() {
-  currConns_.incrementValue(1);
-  newConns_.add(1);
+  BaseStats::incrementOptionalCounter(currConns_, 1);
+  BaseStats::addToOptionalStat(newConns_, 1);
 }
 
 void TLConnectionStats::recordTcpConnectionOpen() {
-  currTcpConns_.incrementValue(1);
-  newTcpConns_.add(1);
+  BaseStats::incrementOptionalCounter(currTcpConns_, 1);
+  BaseStats::addToOptionalStat(newTcpConns_, 1);
 }
 
 void TLConnectionStats::recordConnectionClose() {
-  currConns_.incrementValue(-1);
+  BaseStats::incrementOptionalCounter(currConns_, -1);
 }
 
 void TLConnectionStats::recordRequest() {
-  req_.add(1);
+  BaseStats::addToOptionalStat(req_, 1);
 }
 
 void TLConnectionStats::recordResponse(folly::Optional<uint16_t> responseCode) {
-  resp_.add(1);
-  if (responseCode.has_value()) {
-    responseCodes_.addStatus(responseCode.value());
+  BaseStats::addToOptionalStat(resp_, 1);
+  if (responseCodes_ && responseCode.has_value()) {
+    responseCodes_->addStatus(responseCode.value());
   }
 }
 
 void TLConnectionStats::recordDuration(size_t duration) {
-  totalDuration_.add(duration);
+  BaseStats::addToOptionalStat(totalDuration_, duration);
 }
 
 void TLConnectionStats::addEgressBytes(size_t bytes) {
-  egressBytes_.add(bytes);
+  BaseStats::addToOptionalStat(egressBytes_, bytes);
 }
 
 void TLConnectionStats::addIngressBytes(size_t bytes) {
-  ingressBytes_.add(bytes);
+  BaseStats::addToOptionalStat(ingressBytes_, bytes);
 }
 
 void TLConnectionStats::addEgressBodyBytes(size_t bytes) {
-  egressBodyBytes_.add(bytes);
+  BaseStats::addToOptionalStat(egressBodyBytes_, bytes);
 }
 
 void TLConnectionStats::addIngressBodyBytes(size_t bytes) {
-  ingressBodyBytes_.add(bytes);
+  BaseStats::addToOptionalStat(ingressBodyBytes_, bytes);
 }
 
 } // namespace proxygen

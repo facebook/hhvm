@@ -51,30 +51,30 @@ function launder($v) { return __hhvm_intrinsics\launder_value($v); }
 
 function make_circular_varray() {
   $x = new stdClass;
-  $v = varray[$x];
+  $v = vec[$x];
   $x->foo = $v;
   return $v;
 }
 
 function make_circular_darray() {
   $x = new stdClass;
-  $d = darray[0 => $x];
+  $d = dict[0 => $x];
   $x->foo = $d;
   return $d;
 }
 
 function test() {
   $values = dict[
-    'varray1' => varray[],
-    'varray2' => varray[1, 2, 3],
-    'varray3' => varray['a', 'b', 'c'],
-    'varray4' => varray[launder(7), launder(8), launder(9)],
+    'varray1' => vec[],
+    'varray2' => vec[1, 2, 3],
+    'varray3' => vec['a', 'b', 'c'],
+    'varray4' => vec[launder(7), launder(8), launder(9)],
     'varray5' => make_circular_varray(),
-    'darray1' => darray[],
-    'darray2' => darray[0 => 'a', 1 => 'b', 2 => 'c'],
-    'darray3' => darray['a' => 100, 'b' => 200],
-    'darray4' => darray[0 => launder('x'), 1 => launder('y'), 2 => launder('z')],
-    'darray5' => darray[launder('j') => 11, launder('k') => 222],
+    'darray1' => dict[],
+    'darray2' => dict[0 => 'a', 1 => 'b', 2 => 'c'],
+    'darray3' => dict['a' => 100, 'b' => 200],
+    'darray4' => dict[0 => launder('x'), 1 => launder('y'), 2 => launder('z')],
+    'darray5' => dict[launder('j') => 11, launder('k') => 222],
     'darray6' => make_circular_darray()
   ];
 

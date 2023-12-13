@@ -1,4 +1,4 @@
-string(16) "varray[\C::A, 1]"
+string(13) "vec[\C::A, 1]"
 string(22) "vec [
   2,
   1,
@@ -27,7 +27,7 @@ string(128) "vec [
     3,
   ],
 ]"
-string(72) "varray[varray[], varray[varray[1, \C::A, 3], varray[]], varray[1, 2, 3]]"
+string(54) "vec[vec[], vec[vec[1, \C::A, 3], vec[]], vec[1, 2, 3]]"
 string(128) "vec [
   vec [
   ],
@@ -46,7 +46,7 @@ string(128) "vec [
     3,
   ],
 ]"
-string(63) "varray[varray[], vec[varray[1, \C::A, 3], vec[]], vec[1, 2, 3]]"
+string(54) "vec[vec[], vec[vec[1, \C::A, 3], vec[]], vec[1, 2, 3]]"
 string(22) "vec [
   1,
   2,
@@ -189,7 +189,7 @@ string(9) "HH\varray"
 string(9) "HH\varray"
 string(9) "HH\varray"
 ======================================================
-string(26) "darray[1 => \C::A, 2 => 1]"
+string(24) "dict[1 => \C::A, 2 => 1]"
 string(38) "dict [
   1 => 2,
   4 => 1,
@@ -218,7 +218,7 @@ string(163) "dict [
   dict [
   ],
 ]"
-string(102) "darray[1 => darray[], "hi" => varray[darray["key1" => \C::A, "key2" => darray[]], 456], 5 => darray[]]"
+string(89) "dict[1 => dict[], "hi" => vec[dict["key1" => \C::A, "key2" => dict[]], 456], 5 => dict[]]"
 string(179) "dict [
   1 => 
   dict [
@@ -238,7 +238,7 @@ string(179) "dict [
   dict [
   ],
 ]"
-string(106) "darray[1 => darray[], "hi" => dict[2 => darray["key1" => \C::A, "key2" => dict[]], 3 => 456], 5 => dict[]]"
+string(100) "dict[1 => dict[], "hi" => dict[2 => dict["key1" => \C::A, "key2" => dict[]], 3 => 456], 5 => dict[]]"
 string(32) "dict [
   "a" => 1,
   "b" => 2,

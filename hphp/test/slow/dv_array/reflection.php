@@ -3,32 +3,32 @@
 class C {
   const A = 1;
 
-  public varray $p0 = varray[2, 1, 3];
-  public varray<int> $p1 = varray[C::A, 1];
-  public darray $p2 = darray['a' => 2, 'b' => 1, 'c' => 3];
-  public darray<string, mixed> $p3 = darray['a' => C::A, 'b' => 1];
+  public varray $p0 = vec[2, 1, 3];
+  public varray<int> $p1 = vec[C::A, 1];
+  public darray $p2 = dict['a' => 2, 'b' => 1, 'c' => 3];
+  public darray<string, mixed> $p3 = dict['a' => C::A, 'b' => 1];
 }
 
 function f(
-  varray $p0 = varray[C::A, 1],
-  varray<int> $p1 = varray[2, 1, 3],
-  ?varray $p2 = varray[1, 2, 3],
-  varray $p3 = varray[varray[], varray[varray[1, 2, 3], varray[]], varray[1, 2, 3]],
-  varray $p4 = varray[varray[], varray[varray[1, C::A, 3], varray[]], varray[1, 2, 3]],
-  varray $p5 = varray[varray[], vec[varray[1, 2, 3], vec[]], vec[1, 2, 3]],
-  varray $p6 = varray[varray[], vec[varray[1, C::A, 3], vec[]], vec[1, 2, 3]],
+  varray $p0 = vec[C::A, 1],
+  varray<int> $p1 = vec[2, 1, 3],
+  ?varray $p2 = vec[1, 2, 3],
+  varray $p3 = vec[vec[], vec[vec[1, 2, 3], vec[]], vec[1, 2, 3]],
+  varray $p4 = vec[vec[], vec[vec[1, C::A, 3], vec[]], vec[1, 2, 3]],
+  varray $p5 = vec[vec[], vec[vec[1, 2, 3], vec[]], vec[1, 2, 3]],
+  varray $p6 = vec[vec[], vec[vec[1, C::A, 3], vec[]], vec[1, 2, 3]],
   varray $p7 = tuple(1, 2, 3),
   varray $p8 = tuple(C::A, 1, 2)
 ) :mixed{}
 
 function g(
-  darray $p0 = darray[1 => C::A, 2 => 1],
-  darray<int, int> $p1 = darray[1 => 2, 4 => 1, 3 => 3],
-  ?darray $p2 = darray[1 => 1, "hi" => 2, 5 => 3],
-  darray $p3 = darray[1 => darray[], "hi" => varray[darray["key1" => 123, "key2" => darray[]], 456], 5 => darray[]],
-  darray $p4 = darray[1 => darray[], "hi" => varray[darray["key1" => C::A, "key2" => darray[]], 456], 5 => darray[]],
-  darray $p5 = darray[1 => darray[], "hi" => dict[2 => darray["key1" => 123, "key2" => dict[]], 3 => 456], 5 => dict[]],
-  darray $p6 = darray[1 => darray[], "hi" => dict[2 => darray["key1" => C::A, "key2" => dict[]], 3 => 456], 5 => dict[]],
+  darray $p0 = dict[1 => C::A, 2 => 1],
+  darray<int, int> $p1 = dict[1 => 2, 4 => 1, 3 => 3],
+  ?darray $p2 = dict[1 => 1, "hi" => 2, 5 => 3],
+  darray $p3 = dict[1 => dict[], "hi" => vec[dict["key1" => 123, "key2" => dict[]], 456], 5 => dict[]],
+  darray $p4 = dict[1 => dict[], "hi" => vec[dict["key1" => C::A, "key2" => dict[]], 456], 5 => dict[]],
+  darray $p5 = dict[1 => dict[], "hi" => dict[2 => dict["key1" => 123, "key2" => dict[]], 3 => 456], 5 => dict[]],
+  darray $p6 = dict[1 => dict[], "hi" => dict[2 => dict["key1" => C::A, "key2" => dict[]], 3 => 456], 5 => dict[]],
   darray $p7 = shape('a' => 1, 'b' => 2),
   darray $p8 = shape('a' => C::A, 'b' => 2)
 ) :mixed{}

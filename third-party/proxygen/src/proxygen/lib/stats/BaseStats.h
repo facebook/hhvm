@@ -73,6 +73,20 @@ class BaseStats {
   // At a minimum they require formatters and map lookups for
   // operations and make it easier to violate the constraint that all counters
   // are created at startup.
+
+  // Following are helpers to add/increment optional BaseStats types
+  template <typename StatT>
+  static void addToOptionalStat(StatT& tlStat, int64_t value) {
+    if (tlStat) {
+      tlStat->add(value);
+    }
+  }
+  static void incrementOptionalCounter(std::optional<TLCounter>& tlCounter,
+                                       facebook::fb303::CounterType value) {
+    if (tlCounter) {
+      tlCounter->incrementValue(value);
+    }
+  }
 };
 
 } // namespace proxygen

@@ -44,7 +44,7 @@ struct RequestEventHandler {
 
 protected:
   // Never delete these polymorphically.
-  ~RequestEventHandler() {};
+  ~RequestEventHandler() {}
 
 private:
   bool m_inited = false;

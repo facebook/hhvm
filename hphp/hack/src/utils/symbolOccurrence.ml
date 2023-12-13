@@ -120,7 +120,7 @@ type 'a t = {
   (* Span of the symbol itself *)
   pos: 'a Pos.pos;
 }
-[@@deriving ord]
+[@@deriving ord, show]
 
 let to_absolute x = { x with pos = Pos.to_absolute x.pos }
 

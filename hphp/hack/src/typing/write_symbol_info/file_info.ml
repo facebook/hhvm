@@ -13,13 +13,15 @@ type symbol = {
   occ: Relative_path.t SymbolOccurrence.t;
   def: Sym_def.t option;
 }
+[@@deriving show]
 
 type container = {
   name: string;
   kind: Ast_defs.classish_kind;
 }
+[@@deriving show]
 
-type member = { name: string }
+type member = { name: string } [@@deriving show]
 
 type member_cluster = {
   container: container;
@@ -28,6 +30,7 @@ type member_cluster = {
   class_constants: member list;
   type_constants: member list;
 }
+[@@deriving show]
 
 type t = {
   path: string;

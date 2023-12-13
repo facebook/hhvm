@@ -18,6 +18,7 @@ type t = {
   full_name: string;
   path: Relative_path.t option;
 }
+[@@deriving show]
 
 val resolve :
   Provider_context.t ->

@@ -14,6 +14,7 @@ type t = {
   full_name: string;
   path: Relative_path.t option;
 }
+[@@deriving show]
 
 let resolve ctx occ ~sym_path =
   Option.map

@@ -127,7 +127,7 @@ type 'a t = {
   (* Span of the symbol itself *)
   pos: 'a Pos.pos;
 }
-[@@deriving ord]
+[@@deriving ord, show]
 
 val to_absolute : Relative_path.t t -> string t
 

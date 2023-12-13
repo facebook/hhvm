@@ -632,24 +632,24 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
     const char* stripped = str + 3;
     switch (len - 3) {
       case 3:
-        strip = (!strcasecmp(stripped, "int") ||
-                 !strcasecmp(stripped, "num"));
+        strip = (!istrcmp(stripped, "int") ||
+                 !istrcmp(stripped, "num"));
         break;
       case 4:
-        strip = (!strcasecmp(stripped, "bool") ||
-                 !strcasecmp(stripped, "this") ||
-                 !strcasecmp(stripped, "null"));
+        strip = (!istrcmp(stripped, "bool") ||
+                 !istrcmp(stripped, "this") ||
+                 !istrcmp(stripped, "null"));
         break;
-      case 5: strip = !strcasecmp(stripped, "float"); break;
-      case 6: strip = !strcasecmp(stripped, "string"); break;
+      case 5: strip = !istrcmp(stripped, "float"); break;
+      case 6: strip = !istrcmp(stripped, "string"); break;
       case 7:
-        strip = (!strcasecmp(stripped, "nonnull") ||
-                 !strcasecmp(stripped, "nothing"));
+        strip = (!istrcmp(stripped, "nonnull") ||
+                 !istrcmp(stripped, "nothing"));
         break;
       case 8:
-        strip = (!strcasecmp(stripped, "resource") ||
-                 !strcasecmp(stripped, "noreturn") ||
-                 !strcasecmp(stripped, "arraykey"));
+        strip = (!istrcmp(stripped, "resource") ||
+                 !istrcmp(stripped, "noreturn") ||
+                 !istrcmp(stripped, "arraykey"));
         break;
       default:
         break;

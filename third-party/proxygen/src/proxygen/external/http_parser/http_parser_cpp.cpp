@@ -996,7 +996,7 @@ size_t http_parser_execute_options (http_parser *parser,
         if (ch == ' ' && matcher[parser->index] == '\0') {
           state = s_req_spaces_before_url;
         } else if (ch == matcher[parser->index]) {
-          ; /* nada */
+          /* nada */
         } else if (parser->method == HTTP_CONNECT) {
           if (parser->index == 1 && ch == 'H') {
             parser->method = HTTP_CHECKOUT;

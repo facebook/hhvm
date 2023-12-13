@@ -195,9 +195,7 @@ class WSAData64(ctypes.Structure):
         ("iMaxSockets", ctypes.c_ushort),
         ("iMaxUdpDg", ctypes.c_ushort),
         ("lpVendorInfo", ctypes.c_char_p),
-        # pyre-ignore
         ("szDescription", ctypes.c_ushort * WSADESCRIPTION_LEN),
-        # pyre-ignore
         ("szSystemStatus", ctypes.c_ushort * WSASYS_STATUS_LEN),
     ]
 
@@ -208,7 +206,6 @@ WSAStartup.restype = ctypes.c_int
 
 
 class SOCKADDR_UN(ctypes.Structure):
-    # pyre-ignore
     _fields_ = [("sun_family", ctypes.c_ushort), ("sun_path", ctypes.c_char * 108)]
 
 

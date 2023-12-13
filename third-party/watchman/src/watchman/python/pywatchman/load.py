@@ -60,9 +60,6 @@ def load(fp, mutable: bool = True, value_encoding=None, value_errors=None):
     """
     buf = ctypes.create_string_buffer(8192)
     SNIFF_BUFFER_SIZE = len(EMPTY_HEADER)
-    # pyre-fixme[16]: `int` has no attribute `from_buffer`.
-    # pyre-fixme[58]: `*` is not supported for operand types `Type[ctypes.c_char]`
-    #  and `int`.
     header = (ctypes.c_char * SNIFF_BUFFER_SIZE).from_buffer(buf)
     read_len = _read_bytes(fp, header)
     if read_len < len(header):
@@ -73,8 +70,6 @@ def load(fp, mutable: bool = True, value_encoding=None, value_errors=None):
     if total_len > len(buf):
         ctypes.resize(buf, total_len)
 
-    # pyre-fixme[58]: `*` is not supported for operand types `Type[ctypes.c_char]`
-    #  and `Any`.
     body = (ctypes.c_char * (total_len - len(header))).from_buffer(buf, len(header))
     read_len = _read_bytes(fp, body)
     if read_len < len(body):
@@ -82,8 +77,6 @@ def load(fp, mutable: bool = True, value_encoding=None, value_errors=None):
 
     # pyre-fixme[16]: Module `pywatchman` has no attribute `bser`.
     return bser.loads(
-        # pyre-fixme[58]: `*` is not supported for operand types
-        #  `Type[ctypes.c_char]` and `Any`.
         (ctypes.c_char * total_len).from_buffer(buf, 0),
         mutable,
         value_encoding,

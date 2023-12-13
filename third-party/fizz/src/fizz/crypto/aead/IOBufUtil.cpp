@@ -48,5 +48,5 @@ void XOR(ByteRange first, MutableByteRange second) {
   for (size_t i = 0; i < first.size(); ++i) {
     second[i] ^= first[i];
   }
-};
+}
 } // namespace fizz

@@ -30,7 +30,7 @@ static auto toIOBuf(std::string&& s) -> fizz::Buf {
   memcpy(buf->writableTail(), s.data(), s.size());
   buf->append(s.size());
   return buf;
-};
+}
 
 static fizz::TrafficKey unhexlifyKey(
     std::string_view key,

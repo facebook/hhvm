@@ -142,7 +142,7 @@ hpke::KEMId getKEMId(std::string kemStr) {
 
   // Input doesn't match any KEM id.
   throw std::runtime_error("Input doesn't match any KEM id");
-};
+}
 
 std::string tryReadFile(const std::string& echFile) {
   if (echFile.empty()) {

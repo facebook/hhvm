@@ -109,7 +109,7 @@ bool tvInstanceOfImpl(const TypedValue* tv, F lookupClass) {
 } // namespace
 
 bool tvInstanceOf(const TypedValue* tv, const NamedType* ne) {
-  return tvInstanceOfImpl(tv, [ne]() { return ne->getCachedClass(); });
+  return tvInstanceOfImpl(tv, [ne]() { return Class::lookup(ne); });
 }
 
 bool tvInstanceOf(const TypedValue* tv, const Class* cls) {

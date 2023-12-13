@@ -1279,10 +1279,12 @@ public:
   static void def(Func* func);
 
   /*
-   * Look up the defined Func in this request with name `name'.
+   * Look up the defined Func in this request with name `name', or with the name
+   * mapped to the NamedFunc `ne'.
    *
    * Return nullptr if the function is not yet defined in this request.
    */
+  static Func* lookup(const NamedFunc* ne);
   static Func* lookup(const StringData* name);
 
   /*

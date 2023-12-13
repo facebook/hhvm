@@ -15,13 +15,13 @@
 */
 
 #include "hphp/runtime/vm/native-prop-handler.h"
-#include "hphp/util/hash-map.h"
 
 namespace HPHP::Native {
 //////////////////////////////////////////////////////////////////////////////
+using NativePropHandlerMap = hphp_fast_map
+  <const StringData*, NativePropHandler>;
 
-static hphp_fast_map<const StringData*, NativePropHandler>
-  s_nativePropHandlerMap;
+static NativePropHandlerMap s_nativePropHandlerMap;
 
 void registerNativePropHandler(const StringData* className,
                                NativePropHandler::GetFunc get,
@@ -123,10 +123,4 @@ Variant unsetProp(const Object& obj, const String& name) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-bool cmpNPA::operator()(const PropAccessor* pa1,
-                        const PropAccessor* pa2) const {
-  // Hack property names are case sensitive; use a collision-logging compare.
-  return istrcmp(pa1->name, pa2->name) == 0;
-}
-
 } // namespace HPHP::Native

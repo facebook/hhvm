@@ -64,22 +64,6 @@ bool isame_log(const StringData* input, const StringData* arg) {
   return true;
 }
 
-int istrcmp_log(const char* s1, const char* s2) {
-  FTRACE(1, "isame collision {} != {}\n", s1, s2);
-  auto const rate = RO::EvalIsameCollisionSampleRate;
-  if (StructuredLog::coinflip(rate)) {
-    StructuredLogEntry sample;
-    sample.force_init = true;
-    sample.setInt("sample_rate", rate);
-    sample.setStr("event", "istrcmp");
-    sample.setStr("lhs", s1);
-    sample.setStr("rhs", s2);
-    log_fill_bt(sample);
-    StructuredLog::log("hhvm_isame_collisions", sample);
-  }
-  return 0;
-}
-
 void eval_non_utf8_log(folly::StringPiece code) {
   auto const rate = RO::EvalEvalNonUtf8SampleRate;
   bool doLog = StructuredLog::coinflip(rate);

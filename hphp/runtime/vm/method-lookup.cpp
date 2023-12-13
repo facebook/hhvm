@@ -335,21 +335,20 @@ const Func* lookupImmutableCtor(const Class* cls,
 }
 
 Func* lookupImmutableFunc(const StringData* name) {
-  if (auto const ne = NamedFunc::getNoCreate(name)) {
-    if (auto const f = ne->getCachedFunc()) {
-      if (f->isPersistent()) {
-        assertx(!RO::funcIsRenamable(name));
+  auto const ne = NamedFunc::getOrCreate(name);
+  if (auto const f = ne->getCachedFunc()) {
+    if (f->isPersistent()) {
+      assertx(!RO::funcIsRenamable(name));
 
-        // In non-repo mode while the function must be available in this unit, it
-        // may be de-duplication on load. This may mean that while the func is
-        // available it is not immutable in the current compilation unit. The order
-        // of the de-duplication can also differ between requests.
-        if (f->isMethCaller() && !RO::RepoAuthoritative) return nullptr;
+      // In non-repo mode while the function must be available in this unit, it
+      // may be de-duplication on load. This may mean that while the func is
+      // available it is not immutable in the current compilation unit. The order
+      // of the de-duplication can also differ between requests.
+      if (f->isMethCaller() && !RO::RepoAuthoritative) return nullptr;
 
-        // We load persistent symbols once and can persist them across
-        // all requests.
-        return f;
-      }
+      // We load persistent symbols once and can persist them across
+      // all requests.
+      return f;
     }
   }
   return nullptr;

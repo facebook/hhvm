@@ -837,9 +837,13 @@ void Func::def(Func* func) {
   raise_error(Strings::FUNCTION_ALREADY_DEFINED, func->name()->data());
 }
 
+Func* Func::lookup(const NamedFunc* ne) {
+  return ne->getCachedFunc();
+}
+
 Func* Func::lookup(const StringData* name) {
-  const NamedFunc* ne = NamedFunc::getNoCreate(name);
-  return ne ? ne->getCachedFunc() : nullptr;
+  const NamedFunc* ne = NamedFunc::getOrCreate(name);
+  return ne->getCachedFunc();
 }
 
 Func* Func::lookupBuiltin(const StringData* name) {
@@ -847,8 +851,7 @@ Func* Func::lookupBuiltin(const StringData* name) {
   // beginning of every request (if JitEnableRenameFunction or interception is
   // enabled). In either case, they're unique, so they should be present in the
   // NamedFunc.
-  auto const ne = NamedFunc::getNoCreate(name);
-  if (!ne) return nullptr;
+  auto const ne = NamedFunc::getOrCreate(name);
   auto const f = ne->getCachedFunc();
   return (f && f->isPersistent() && f->isBuiltin()) ? f : nullptr;
 }
@@ -865,8 +868,7 @@ Func* Func::load(const NamedFunc* ne, const StringData* name) {
 
 Func* Func::load(const StringData* name) {
   String normStr;
-  auto ne = NamedFunc::getNoCreate(name, &normStr);
-  if (!ne) return nullptr;
+  auto ne = NamedFunc::getOrCreate(name, &normStr);
 
   // Try to fetch from cache
   Func* func_ = ne->getCachedFunc();

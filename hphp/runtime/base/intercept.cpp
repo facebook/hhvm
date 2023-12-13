@@ -166,11 +166,13 @@ Variant* get_intercept_handler(const Func* func) {
 void rename_function(const String& old_name, const String& new_name) {
   auto const old = old_name.get();
   auto const n3w = new_name.get();
-  auto const oldNe = const_cast<NamedFunc*>(NamedFunc::getNoCreate(old));
+  auto const oldNe = const_cast<NamedFunc*>(NamedFunc::getOrCreate(old));
+  auto const newNe = const_cast<NamedFunc*>(NamedFunc::getOrCreate(n3w));
 
-  Func* func = oldNe ? oldNe->getCachedFunc() : nullptr;
+  Func* func = Func::lookup(oldNe);
   if (!func) {
-    // It's the caller's responsibility to ensure that the old function exists.
+    // It's the caller's responsibility to ensure that the old function
+    // exists.
     not_reached();
   }
 
@@ -185,8 +187,7 @@ void rename_function(const String& old_name, const String& new_name) {
     }
   }
 
-  auto const newNe = const_cast<NamedFunc*>(NamedFunc::getOrCreate(n3w));
-  auto const fnew = newNe->getCachedFunc();
+  auto const fnew = Func::lookup(newNe);
   if (fnew && fnew != func) {
     raise_error("Function already defined: %s", n3w->data());
   }
@@ -203,8 +204,10 @@ void rename_function(const String& old_name, const String& new_name) {
     !rds::isPersistentHandle(oldNe->getFuncHandle(func->fullName()))
   );
   oldNe->setCachedFunc(nullptr);
-  auto const newName = fnew ? fnew->fullName() : makeStaticString(n3w);
-  newNe->m_cachedFunc.bind(rds::Mode::Normal, rds::LinkName{"NEFunc", newName});
+  newNe->m_cachedFunc.bind(
+    rds::Mode::Normal,
+    rds::LinkName{"NEFunc", fnew ? fnew->fullName() : makeStaticString(n3w)}
+  );
   newNe->setCachedFunc(func);
 
   if (RuntimeOption::EvalJit) {

@@ -164,7 +164,7 @@ struct BasePropHandler {
 
 /**
  * Base prop handler class, that uses `Native::PropAccessorMap`.
- * Derived classes provide the handling map with accessors per each property.
+ * Derived classes provide the handling map with accessort per each property.
  */
 template <class Derived>
 struct MapPropHandler : BasePropHandler {
@@ -224,9 +224,11 @@ struct hashNPA {
     return hash_string_i(pa->name, strlen(pa->name));
   }
 };
-
 struct cmpNPA {
-  bool operator()(const PropAccessor* pa1, const PropAccessor* pa2) const;
+  bool operator()(const PropAccessor* pa1,
+                  const PropAccessor* pa2) const {
+    return strcasecmp(pa1->name, pa2->name) == 0;
+  }
 };
 
 /**

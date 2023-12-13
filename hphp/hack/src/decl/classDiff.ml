@@ -367,16 +367,9 @@ module MajorChange = struct
 end
 
 type t =
-  | Unchanged
   | Major_change of MajorChange.t
   | Minor_change of member_diff
 [@@deriving eq, show { with_path = false }]
-
-let has_changed = function
-  | Unchanged -> false
-  | Major_change _
-  | Minor_change _ ->
-    true
 
 let pretty ~(name : string) (diff : t) : string =
   let buf = Buffer.create 512 in
@@ -677,19 +670,16 @@ end
 
 module ChangeCategory = struct
   type t =
-    | CUnchanged
     | CMajor_change of MajorChangeCategory.t
     | CMinor_change of MemberDiffCategory.t
 
   let of_change = function
-    | Unchanged -> CUnchanged
     | Major_change change ->
       CMajor_change (MajorChangeCategory.of_major_change change)
     | Minor_change member_diff ->
       CMinor_change (MemberDiffCategory.of_member_diff member_diff)
 
   let to_json = function
-    | CUnchanged -> Hh_json.string_ "Unchanged"
     | CMajor_change change ->
       Hh_json.JSON_Object [("Major_change", MajorChangeCategory.to_json change)]
     | CMinor_change change ->

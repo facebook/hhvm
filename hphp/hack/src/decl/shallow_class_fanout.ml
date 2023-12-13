@@ -413,7 +413,6 @@ let get_major_change_fanout ctx class_dep (change : ClassDiff.MajorChange.t) :
 let get_fanout ~(ctx : Provider_context.t) (class_name, diff) : Fanout.t =
   let class_dep = Dep.make (Dep.Type class_name) in
   match diff with
-  | Unchanged -> Fanout.empty
   | Major_change change ->
     if
       TypecheckerOptions.optimized_parent_fanout

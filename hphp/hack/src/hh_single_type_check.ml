@@ -1247,12 +1247,13 @@ let test_shallow_class_diff ctx filename =
               c1
               c2
           | (None, None) ->
-            ClassDiff.(Major_change (MajorChange.Unknown Neither_found))
-          | (None, Some _) -> ClassDiff.(Major_change MajorChange.Added)
-          | (Some _, None) -> ClassDiff.(Major_change MajorChange.Removed) ))
+            Some ClassDiff.(Major_change (MajorChange.Unknown Neither_found))
+          | (None, Some _) -> Some ClassDiff.(Major_change MajorChange.Added)
+          | (Some _, None) -> Some ClassDiff.(Major_change MajorChange.Removed)
+        ))
   in
   List.iter diffs ~f:(fun (cid, diff) ->
-      Format.printf "%s: %a@." cid ClassDiff.pp diff)
+      Format.printf "%s: %a@." cid (Format.pp_print_option ClassDiff.pp) diff)
 
 let add_newline contents =
   (* this is used for incremental mode to change all the positions, so we

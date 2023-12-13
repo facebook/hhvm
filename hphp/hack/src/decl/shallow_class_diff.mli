@@ -14,4 +14,4 @@ val diff_class :
   PackageInfo.t ->
   shallow_class ->
   shallow_class ->
-  ClassDiff.t
+  ClassDiff.t option

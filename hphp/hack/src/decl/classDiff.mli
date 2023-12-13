@@ -121,12 +121,9 @@ module MajorChange : sig
 end
 
 type t =
-  | Unchanged
   | Major_change of MajorChange.t
   | Minor_change of member_diff
 [@@deriving eq, show]
-
-val has_changed : t -> bool
 
 val pretty : name:string -> t -> string
 

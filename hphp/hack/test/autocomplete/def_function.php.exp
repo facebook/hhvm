@@ -114,10 +114,6 @@ fb_scribe_fetch_graphapi_category_meta
   INSERT fb_scribe_fetch_graphapi_category_meta(${1:\$category}, ${2:\$appId})
   (function(string $category, string $appId): string)
 SORT TEXT: none
-fb_scribe_genWrite
-  INSERT fb_scribe_genWrite(${1:\$category}, ${2:\$message}, ${3:\$timeoutMs}, ${4:\$bucket})
-  (function(string $category, string $message, int $timeoutMs, int $bucket): ~Awaitable<int>)
-SORT TEXT: none
 fb_scribe_gen_write_message
   INSERT fb_scribe_gen_write_message(${1:\$category}, ${2:\$message}, ${3:\$metadata}, ${4:\$timeoutMs})
   (function(string $category, string $message, string $metadata, int $timeoutMs): ~Awaitable<int>)
@@ -125,6 +121,10 @@ SORT TEXT: none
 fb_scribe_gen_write_structured_message
   INSERT fb_scribe_gen_write_structured_message(${1:\$message_blob}, ${2:\$timeout_ms})
   (function(string $message_blob, int $timeout_ms): ~dict<int, NativeExtScribeWriteResult>)
+SORT TEXT: none
+fb_scribe_is_initialized
+  INSERT fb_scribe_is_initialized()
+  (function(): bool)
 SORT TEXT: none
 fb_scribe_offer
   INSERT fb_scribe_offer(${1:\$category}, ${2:\$message}, ${3:\$bucket}, ${4:\$secureThrift})

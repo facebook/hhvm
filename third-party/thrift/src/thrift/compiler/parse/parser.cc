@@ -285,7 +285,7 @@ class parser {
         : boost::optional<comment>();
   }
 
-  // structured_annotation: "@" (struct_literal | struct_literal_type)
+  // structured_annotation: "@" (identifier | struct_initializer)
   std::unique_ptr<t_const> parse_structured_annotation() {
     assert(token_.kind == '@');
     auto range = track_range();
@@ -294,7 +294,7 @@ class parser {
     if (token_.kind != '{') {
       return actions_.on_structured_annotation(range, name.str);
     }
-    auto value = parse_struct_literal_body(name);
+    auto value = parse_struct_initializer_body(name);
     return actions_.on_structured_annotation(range, std::move(value));
   }
 
@@ -663,7 +663,7 @@ class parser {
   //
   // field_id: integer
   // field_qualifier: "required" | "optional"
-  // default_value: "=" const_value
+  // default_value: "=" initializer
   std::unique_ptr<t_field> parse_field(field_kind kind) {
     auto range = track_range();
     auto attrs = parse_attributes();
@@ -697,7 +697,7 @@ class parser {
     // Parse the default value.
     auto value = std::unique_ptr<t_const_value>();
     if (try_consume_token('=')) {
-      value = parse_const_value();
+      value = parse_initializer();
     }
 
     try_parse_deprecated_annotations(attrs);
@@ -852,7 +852,7 @@ class parser {
   }
 
   // const:
-  //   attributes "const" type identifier "=" const_value
+  //   attributes "const" type identifier "=" initializer
   //   [deprecated_annotations] [";"]
   void parse_const(source_location loc, std::unique_ptr<attributes> attrs) {
     auto range = range_tracker(loc, end_);
@@ -860,16 +860,16 @@ class parser {
     auto type = parse_type();
     auto name = parse_identifier();
     expect_and_consume('=');
-    auto value = parse_const_value();
+    auto value = parse_initializer();
     try_parse_deprecated_annotations(attrs);
     try_consume_token(';');
     actions_.on_const(range, std::move(attrs), type, name, std::move(value));
   }
 
-  // const_value:
-  //   bool_literal | integer | float | string_literal |
-  //   list_literal | map_literal | struct_literal | identifier
-  std::unique_ptr<t_const_value> parse_const_value() {
+  // initializer:
+  //   integer | float | string_literal | bool_literal | identifier |
+  //   list_initializer | map_initializer | struct_initializer
+  std::unique_ptr<t_const_value> parse_initializer() {
     auto range = track_range();
     auto s = sign::plus;
     switch (token_.kind) {
@@ -894,12 +894,12 @@ class parser {
       case tok::string_literal:
         return actions_.on_string_literal(lex_string_literal(consume_token()));
       case to_tok('['):
-        return parse_list_literal();
+        return parse_list_initializer();
       case to_tok('{'):
-        return parse_map_literal();
+        return parse_map_initializer();
       default:
         if (auto id = try_parse_identifier()) {
-          return token_.kind == '{' ? parse_struct_literal_body(*id)
+          return token_.kind == '{' ? parse_struct_initializer_body(*id)
                                     : actions_.on_const_ref(*id);
         }
         break;
@@ -907,15 +907,15 @@ class parser {
     report_expected("constant");
   }
 
-  // list_literal: "[" list_literal_contents? "]"
+  // list_initializer: "[" list_initializer_contents? "]"
   //
-  // list_literal_contents:
-  //   (const_value comma_or_semicolon)* const_value comma_or_semicolon?
-  std::unique_ptr<t_const_value> parse_list_literal() {
+  // list_initializer_contents:
+  //   (initializer comma_or_semicolon)* initializer comma_or_semicolon?
+  std::unique_ptr<t_const_value> parse_list_initializer() {
     expect_and_consume('[');
-    auto list = actions_.on_list_literal();
+    auto list = actions_.on_list_initializer();
     while (token_.kind != ']') {
-      list->add_list(parse_const_value());
+      list->add_list(parse_initializer());
       if (!try_parse_comma_or_semicolon()) {
         break;
       }
@@ -924,18 +924,18 @@ class parser {
     return list;
   }
 
-  // map_literal: "{" map_literal_contents? "}"
+  // map_initializer: "{" map_initializer_contents? "}"
   //
-  // map_literal_contents:
-  //   (const_value ":" const_value comma_or_semicolon)
-  //    const_value ":" const_value comma_or_semicolon?
-  std::unique_ptr<t_const_value> parse_map_literal() {
+  // map_initializer_contents:
+  //   (initializer ":" initializer comma_or_semicolon)*
+  //    initializer ":" initializer comma_or_semicolon?
+  std::unique_ptr<t_const_value> parse_map_initializer() {
     expect_and_consume('{');
-    auto map = actions_.on_map_literal();
+    auto map = actions_.on_map_initializer();
     while (token_.kind != '}') {
-      auto key = parse_const_value();
+      auto key = parse_initializer();
       expect_and_consume(':');
-      auto value = parse_const_value();
+      auto value = parse_initializer();
       map->add_map(std::move(key), std::move(value));
       if (!try_parse_comma_or_semicolon()) {
         break;
@@ -945,20 +945,20 @@ class parser {
     return map;
   }
 
-  // struct_literal: identifier "{" struct_literal_contents? "}"
+  // struct_initializer: identifier "{" struct_initializer_contents? "}"
   //
-  // struct_literal_contents:
-  //   (identifier "=" const_value comma_or_semicolon)*
-  //    identifier "=" const_value comma_or_semicolon?
-  std::unique_ptr<t_const_value> parse_struct_literal_body(identifier id) {
+  // struct_initializer_contents:
+  //   (identifier "=" initializer comma_or_semicolon)*
+  //    identifier "=" initializer comma_or_semicolon?
+  std::unique_ptr<t_const_value> parse_struct_initializer_body(identifier id) {
     auto id_end = end_;
     expect_and_consume('{');
-    auto map = actions_.on_struct_literal({id.loc, id_end}, id.str);
+    auto map = actions_.on_struct_initializer({id.loc, id_end}, id.str);
     while (token_.kind != '}') {
       auto key =
           actions_.on_string_literal(fmt::to_string(parse_identifier().str));
       expect_and_consume('=');
-      auto value = parse_const_value();
+      auto value = parse_initializer();
       map->add_map(std::move(key), std::move(value));
       if (!try_parse_comma_or_semicolon()) {
         break;

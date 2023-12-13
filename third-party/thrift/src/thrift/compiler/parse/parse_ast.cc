@@ -971,19 +971,19 @@ class ast_builder : public parser_actions {
     return const_value;
   }
 
-  std::unique_ptr<t_const_value> on_list_literal() override {
+  std::unique_ptr<t_const_value> on_list_initializer() override {
     auto const_value = std::make_unique<t_const_value>();
     const_value->set_list();
     return const_value;
   }
 
-  std::unique_ptr<t_const_value> on_map_literal() override {
+  std::unique_ptr<t_const_value> on_map_initializer() override {
     auto const_value = std::make_unique<t_const_value>();
     const_value->set_map();
     return const_value;
   }
 
-  std::unique_ptr<t_const_value> on_struct_literal(
+  std::unique_ptr<t_const_value> on_struct_initializer(
       source_range range, std::string_view name) override {
     auto const_value = std::make_unique<t_const_value>();
     const_value->set_map();

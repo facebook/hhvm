@@ -227,9 +227,9 @@ class parser_actions {
   virtual std::unique_ptr<t_const_value> on_string_literal(
       std::string value) = 0;
   virtual std::unique_ptr<t_const_value> on_bool_literal(bool value) = 0;
-  virtual std::unique_ptr<t_const_value> on_list_literal() = 0;
-  virtual std::unique_ptr<t_const_value> on_map_literal() = 0;
-  virtual std::unique_ptr<t_const_value> on_struct_literal(
+  virtual std::unique_ptr<t_const_value> on_list_initializer() = 0;
+  virtual std::unique_ptr<t_const_value> on_map_initializer() = 0;
+  virtual std::unique_ptr<t_const_value> on_struct_initializer(
       source_range range, std::string_view name) = 0;
 
   virtual int64_t on_integer(source_range range, sign s, uint64_t value) = 0;

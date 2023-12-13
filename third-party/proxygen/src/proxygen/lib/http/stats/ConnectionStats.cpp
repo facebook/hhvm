@@ -6,37 +6,41 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <proxygen/lib/http/stats/ConnectionStats.h>
+#include "proxygen/lib/http/stats/ConnectionStats.h"
 
 using namespace facebook::fb303;
 
 namespace proxygen {
 
-TLConnectionStats::TLConnectionStats(const std::string& prefix) {
+TLConnectionStats::TLConnectionStats(const std::string& prefix,
+                                     uint8_t verbosity) {
   req_.emplace(prefix + "_req", SUM, RATE); // RATE used
-  resp_.emplace(prefix + "_resp", SUM);
   egressBytes_.emplace(prefix + "_egress_bytes", SUM);
-  ingressBytes_.emplace(prefix + "_ingress_bytes", SUM);
-  egressBodyBytes_.emplace(
-      prefix + "_egress_body_bytes",
-      SUM,
-      RATE); // RATE is being used for body throughout the code base
-             // https://www.internalfb.com/code/search?q=repo%3Aall%20gress_body_bytes.rate.60
-  ingressBodyBytes_.emplace(prefix + "_ingress_body_bytes", SUM, RATE);
+  responseCodes_.emplace(prefix + "_", verbosity);
 
-  responseCodes_.emplace(prefix + "_");
-  totalDuration_.emplace(prefix + "_conn_duration",
-                         100,
-                         0,
-                         5000,
-                         facebook::fb303::AVG,
-                         50,
-                         95,
-                         99);
-  currConns_.emplace(prefix + "_conn");
-  newConns_.emplace(prefix + "_new_conn", SUM);
-  currTcpConns_.emplace(prefix + "_tcp_conn");
-  newTcpConns_.emplace(prefix + "_new_tcp_conn", SUM);
+  if (verbosity > 8) {
+    resp_.emplace(prefix + "_resp", SUM);
+    ingressBytes_.emplace(prefix + "_ingress_bytes", SUM);
+    egressBodyBytes_.emplace(
+        prefix + "_egress_body_bytes",
+        SUM,
+        RATE); // RATE is being used for body throughout the code base
+               // https://www.internalfb.com/code/search?q=repo%3Aall%20gress_body_bytes.rate.60
+    ingressBodyBytes_.emplace(prefix + "_ingress_body_bytes", SUM, RATE);
+
+    totalDuration_.emplace(prefix + "_conn_duration",
+                           100,
+                           0,
+                           5000,
+                           facebook::fb303::AVG,
+                           50,
+                           95,
+                           99);
+    currConns_.emplace(prefix + "_conn");
+    newConns_.emplace(prefix + "_new_conn", SUM);
+    currTcpConns_.emplace(prefix + "_tcp_conn");
+    newTcpConns_.emplace(prefix + "_new_tcp_conn", SUM);
+  }
 }
 
 void TLConnectionStats::recordConnectionOpen() {

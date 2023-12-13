@@ -50,7 +50,7 @@ class ConnectionStats {
  */
 class TLConnectionStats : public ConnectionStats {
  public:
-  explicit TLConnectionStats(const std::string& prefix);
+  explicit TLConnectionStats(const std::string& prefix, uint8_t verbosity);
 
   void recordConnectionOpen() override;
 

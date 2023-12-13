@@ -13,7 +13,7 @@
 namespace proxygen {
 
 struct TLResponseCodeStats {
-  explicit TLResponseCodeStats(const std::string& name);
+  explicit TLResponseCodeStats(const std::string& name, uint8_t verbosity);
 
   void addStatus(int status);
 

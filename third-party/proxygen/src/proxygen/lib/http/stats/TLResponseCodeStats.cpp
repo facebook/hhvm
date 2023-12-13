@@ -6,13 +6,14 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <proxygen/lib/http/stats/TLResponseCodeStats.h>
+#include "proxygen/lib/http/stats/TLResponseCodeStats.h"
 
 using facebook::fb303::SUM;
 
 namespace proxygen {
 
-TLResponseCodeStats::TLResponseCodeStats(const std::string& name)
+TLResponseCodeStats::TLResponseCodeStats(const std::string& name,
+                                         uint8_t verbosity)
     : statusNone(name + "nostatus", SUM),
       statusOther(name + "other", SUM),
       status1xx(name + "1xx", SUM),
@@ -20,30 +21,32 @@ TLResponseCodeStats::TLResponseCodeStats(const std::string& name)
       status3xx(name + "3xx", SUM),
       status4xx(name + "4xx", SUM),
       status5xx(name + "5xx", SUM) {
-  status39x.emplace(name + "39x", SUM);
-  status200.emplace(name + "200", SUM);
-  status206.emplace(name + "206", SUM);
-  status301.emplace(name + "301", SUM);
-  status302.emplace(name + "302", SUM);
-  status303.emplace(name + "303", SUM);
-  status304.emplace(name + "304", SUM);
-  status307.emplace(name + "307", SUM);
-  status395.emplace(name + "395", SUM);
-  status396.emplace(name + "396", SUM);
-  status397.emplace(name + "397", SUM);
-  status398.emplace(name + "398", SUM);
-  status399.emplace(name + "399", SUM);
-  status400.emplace(name + "400", SUM);
-  status401.emplace(name + "401", SUM);
-  status403.emplace(name + "403", SUM);
-  status404.emplace(name + "404", SUM);
-  status408.emplace(name + "408", SUM);
-  status429.emplace(name + "429", SUM);
-  status500.emplace(name + "500", SUM);
-  status501.emplace(name + "501", SUM);
-  status502.emplace(name + "502", SUM);
-  status503.emplace(name + "503", SUM);
-  status504.emplace(name + "504", SUM);
+  if (verbosity > 8) {
+    status39x.emplace(name + "39x", SUM);
+    status200.emplace(name + "200", SUM);
+    status206.emplace(name + "206", SUM);
+    status301.emplace(name + "301", SUM);
+    status302.emplace(name + "302", SUM);
+    status303.emplace(name + "303", SUM);
+    status304.emplace(name + "304", SUM);
+    status307.emplace(name + "307", SUM);
+    status395.emplace(name + "395", SUM);
+    status396.emplace(name + "396", SUM);
+    status397.emplace(name + "397", SUM);
+    status398.emplace(name + "398", SUM);
+    status399.emplace(name + "399", SUM);
+    status400.emplace(name + "400", SUM);
+    status401.emplace(name + "401", SUM);
+    status403.emplace(name + "403", SUM);
+    status404.emplace(name + "404", SUM);
+    status408.emplace(name + "408", SUM);
+    status429.emplace(name + "429", SUM);
+    status500.emplace(name + "500", SUM);
+    status501.emplace(name + "501", SUM);
+    status502.emplace(name + "502", SUM);
+    status503.emplace(name + "503", SUM);
+    status504.emplace(name + "504", SUM);
+  }
 }
 
 void TLResponseCodeStats::addStatus(int status) {

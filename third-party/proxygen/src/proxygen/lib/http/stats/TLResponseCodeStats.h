@@ -27,31 +27,31 @@ struct TLResponseCodeStats {
 
   // TODO: all the counters below are marked for deprecation.
 
-  BaseStats::TLTimeseries status39x;
+  std::optional<BaseStats::TLTimeseries> status39x;
 
-  BaseStats::TLTimeseriesMinuteAndAllTime status200;
-  BaseStats::TLTimeseriesMinuteAndAllTime status206;
-  BaseStats::TLTimeseriesMinuteAndAllTime status301;
-  BaseStats::TLTimeseriesMinuteAndAllTime status302;
-  BaseStats::TLTimeseriesMinuteAndAllTime status303;
-  BaseStats::TLTimeseriesMinuteAndAllTime status304;
-  BaseStats::TLTimeseriesMinuteAndAllTime status307;
-  BaseStats::TLTimeseriesMinuteAndAllTime status395;
-  BaseStats::TLTimeseriesMinuteAndAllTime status396;
-  BaseStats::TLTimeseriesMinuteAndAllTime status397;
-  BaseStats::TLTimeseriesMinuteAndAllTime status398;
-  BaseStats::TLTimeseriesMinuteAndAllTime status399;
-  BaseStats::TLTimeseriesMinuteAndAllTime status400;
-  BaseStats::TLTimeseriesMinuteAndAllTime status401;
-  BaseStats::TLTimeseriesMinuteAndAllTime status403;
-  BaseStats::TLTimeseriesMinuteAndAllTime status404;
-  BaseStats::TLTimeseriesMinuteAndAllTime status408;
-  BaseStats::TLTimeseriesMinuteAndAllTime status429;
-  BaseStats::TLTimeseriesMinuteAndAllTime status500;
-  BaseStats::TLTimeseriesMinuteAndAllTime status501;
-  BaseStats::TLTimeseriesMinuteAndAllTime status502;
-  BaseStats::TLTimeseriesMinuteAndAllTime status503;
-  BaseStats::TLTimeseriesMinuteAndAllTime status504;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status200;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status206;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status301;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status302;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status303;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status304;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status307;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status395;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status396;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status397;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status398;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status399;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status400;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status401;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status403;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status404;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status408;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status429;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status500;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status501;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status502;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status503;
+  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status504;
 };
 
 } // namespace proxygen

@@ -19,66 +19,66 @@ TLResponseCodeStats::TLResponseCodeStats(const std::string& name)
       status2xx(name + "2xx", SUM),
       status3xx(name + "3xx", SUM),
       status4xx(name + "4xx", SUM),
-      status5xx(name + "5xx", SUM),
-      status39x(name + "39x", SUM),
-      status200(name + "200", SUM),
-      status206(name + "206", SUM),
-      status301(name + "301", SUM),
-      status302(name + "302", SUM),
-      status303(name + "303", SUM),
-      status304(name + "304", SUM),
-      status307(name + "307", SUM),
-      status395(name + "395", SUM),
-      status396(name + "396", SUM),
-      status397(name + "397", SUM),
-      status398(name + "398", SUM),
-      status399(name + "399", SUM),
-      status400(name + "400", SUM),
-      status401(name + "401", SUM),
-      status403(name + "403", SUM),
-      status404(name + "404", SUM),
-      status408(name + "408", SUM),
-      status429(name + "429", SUM),
-      status500(name + "500", SUM),
-      status501(name + "501", SUM),
-      status502(name + "502", SUM),
-      status503(name + "503", SUM),
-      status504(name + "504", SUM) {
+      status5xx(name + "5xx", SUM) {
+  status39x.emplace(name + "39x", SUM);
+  status200.emplace(name + "200", SUM);
+  status206.emplace(name + "206", SUM);
+  status301.emplace(name + "301", SUM);
+  status302.emplace(name + "302", SUM);
+  status303.emplace(name + "303", SUM);
+  status304.emplace(name + "304", SUM);
+  status307.emplace(name + "307", SUM);
+  status395.emplace(name + "395", SUM);
+  status396.emplace(name + "396", SUM);
+  status397.emplace(name + "397", SUM);
+  status398.emplace(name + "398", SUM);
+  status399.emplace(name + "399", SUM);
+  status400.emplace(name + "400", SUM);
+  status401.emplace(name + "401", SUM);
+  status403.emplace(name + "403", SUM);
+  status404.emplace(name + "404", SUM);
+  status408.emplace(name + "408", SUM);
+  status429.emplace(name + "429", SUM);
+  status500.emplace(name + "500", SUM);
+  status501.emplace(name + "501", SUM);
+  status502.emplace(name + "502", SUM);
+  status503.emplace(name + "503", SUM);
+  status504.emplace(name + "504", SUM);
 }
 
 void TLResponseCodeStats::addStatus(int status) {
   switch (status) {
     case 200:
       status2xx.add(1);
-      status200.add(1);
+      BaseStats::addToOptionalStat(status200, 1);
       return;
     case 404:
       status4xx.add(1);
-      status404.add(1);
+      BaseStats::addToOptionalStat(status404, 1);
       return;
     case 206:
       status2xx.add(1);
-      status206.add(1);
+      BaseStats::addToOptionalStat(status206, 1);
       return;
     case 301:
       status3xx.add(1);
-      status301.add(1);
+      BaseStats::addToOptionalStat(status301, 1);
       return;
     case 302:
       status3xx.add(1);
-      status302.add(1);
+      BaseStats::addToOptionalStat(status302, 1);
       return;
     case 303:
       status3xx.add(1);
-      status303.add(1);
+      BaseStats::addToOptionalStat(status303, 1);
       return;
     case 304:
       status3xx.add(1);
-      status304.add(1);
+      BaseStats::addToOptionalStat(status304, 1);
       return;
     case 307:
       status3xx.add(1);
-      status307.add(1);
+      BaseStats::addToOptionalStat(status307, 1);
       return;
     case 390:
     case 391:
@@ -86,72 +86,72 @@ void TLResponseCodeStats::addStatus(int status) {
     case 393:
     case 394:
       status3xx.add(1);
-      status39x.add(1);
+      BaseStats::addToOptionalStat(status39x, 1);
       return;
     case 395:
       status3xx.add(1);
-      status39x.add(1);
-      status395.add(1);
+      BaseStats::addToOptionalStat(status39x, 1);
+      BaseStats::addToOptionalStat(status395, 1);
       return;
     case 396:
       status3xx.add(1);
-      status39x.add(1);
-      status396.add(1);
+      BaseStats::addToOptionalStat(status39x, 1);
+      BaseStats::addToOptionalStat(status396, 1);
       return;
     case 397:
       status3xx.add(1);
-      status39x.add(1);
-      status397.add(1);
+      BaseStats::addToOptionalStat(status39x, 1);
+      BaseStats::addToOptionalStat(status397, 1);
       return;
     case 398:
       status3xx.add(1);
-      status39x.add(1);
-      status398.add(1);
+      BaseStats::addToOptionalStat(status39x, 1);
+      BaseStats::addToOptionalStat(status398, 1);
       return;
     case 399:
       status3xx.add(1);
-      status39x.add(1);
-      status399.add(1);
+      BaseStats::addToOptionalStat(status39x, 1);
+      BaseStats::addToOptionalStat(status399, 1);
       return;
     case 400:
       status4xx.add(1);
-      status400.add(1);
+      BaseStats::addToOptionalStat(status400, 1);
       return;
     case 401:
       status4xx.add(1);
-      status401.add(1);
+      BaseStats::addToOptionalStat(status401, 1);
       return;
     case 403:
       status4xx.add(1);
-      status403.add(1);
+      BaseStats::addToOptionalStat(status403, 1);
       return;
     case 408:
       status4xx.add(1);
-      status408.add(1);
+      BaseStats::addToOptionalStat(status408, 1);
       return;
     case 429:
       status4xx.add(1);
-      status429.add(1);
+      BaseStats::addToOptionalStat(status429, 1);
       return;
     case 500:
       status5xx.add(1);
-      status500.add(1);
+      BaseStats::addToOptionalStat(status500, 1);
       return;
     case 501:
       status5xx.add(1);
-      status501.add(1);
+      BaseStats::addToOptionalStat(status501, 1);
       return;
     case 502:
       status5xx.add(1);
-      status502.add(1);
+      BaseStats::addToOptionalStat(status502, 1);
       return;
     case 503:
       status5xx.add(1);
-      status503.add(1);
+      BaseStats::addToOptionalStat(status503, 1);
       return;
     case 504:
       status5xx.add(1);
-      status504.add(1);
+      BaseStats::addToOptionalStat(status504, 1);
       return;
     case 555:
       // 555 is returned on healthcheck failures. Skip counting it in exported

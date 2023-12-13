@@ -272,7 +272,8 @@ typedef string AdaptedString
 
 typedef AdaptedBool DoubleTypedefBool
 
-typedef binary (cpp.type = "::folly::IOBuf") IOBuf
+@cpp.Type{name = "::folly::IOBuf"}
+typedef binary IOBuf
 @cpp.Adapter{name = "::apache::thrift::test::CustomProtocolAdapter"}
 typedef IOBuf CustomProtocolType
 
@@ -352,14 +353,16 @@ struct AdaptTemplatedNestedTestStruct {
   1: AdaptTemplatedTestStruct adaptedStruct;
 }
 
+@cpp.Name{value = "ThriftAdaptTestUnion"}
 union AdaptTestUnion {
   1: DurationMs delay;
   2: CustomProtocolType custom;
-} (cpp.name = "ThriftAdaptTestUnion")
+}
 
+@cpp.Name{value = "ThriftAdaptedStruct"}
 struct AdaptedStruct {
   1: i64 data;
-} (cpp.name = "ThriftAdaptedStruct")
+}
 
 @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
 typedef AdaptedStruct AdaptedTypedef

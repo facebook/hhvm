@@ -59,16 +59,19 @@ void match_type_with_const_value(
     }
   }
   if (type->is_struct()) {
-    auto* struct_type = dynamic_cast<const t_structured*>(type);
-    for (auto map_val : value->get_map()) {
-      auto name = map_val.first->get_string();
-      auto tfield = struct_type->get_field_by_name(name);
-      if (!tfield) {
+    const auto* structured = dynamic_cast<const t_structured*>(type);
+    for (const auto& [map_key, map_val] : value->get_map()) {
+      bool resolved = map_key->kind() != t_const_value::CV_IDENTIFIER;
+      auto name = resolved ? map_key->get_string() : map_key->get_identifier();
+      auto field = structured->get_field_by_name(name);
+      if (!field) {
         // Error reported by const_checker.
         return;
       }
-      match_type_with_const_value(
-          ctx, program, tfield->get_type(), map_val.second);
+      if (!resolved) {
+        map_key->set_string(name);
+      }
+      match_type_with_const_value(ctx, program, field->get_type(), map_val);
     }
   }
   // Set constant value types as enums when they are declared with integers
@@ -80,22 +83,19 @@ void match_type_with_const_value(
       if (const auto* enum_value = enm->find_value(value->get_integer())) {
         value->set_enum_value(enum_value);
       }
-    } else if (value->kind() == t_const_value::CV_STRING) {
-      // The enum was defined after the struct field with that type was declared
-      // so the field default value, if present, was treated as a string rather
-      // than resolving to the enum constant in the parser.
-      // So we have to resolve the string to the enum constant here instead.
-      auto str = value->get_string();
-      const t_const* constant = program.scope()->find_constant(str);
+    } else if (value->kind() == t_const_value::CV_IDENTIFIER) {
+      // Resolve enum values defined after use.
+      const std::string& id = value->get_identifier();
+      const t_const* constant = program.scope()->find_constant(id);
       if (!constant) {
-        auto full_str = program.name() + "." + str;
-        constant = program.scope()->find_constant(full_str);
+        constant = program.scope()->find_constant(program.name() + "." + id);
       }
       if (!constant) {
+        ctx.error(
+            value->ref_range().begin, "use of undeclared identifier '{}'", id);
         return;
       }
-      std::unique_ptr<t_const_value> value_copy = constant->value()->clone();
-      value->assign(std::move(*value_copy));
+      value->assign(t_const_value(*constant->value()));
     }
   }
   // Remove enum_value if type is a base_type to use the integer instead

@@ -51,7 +51,8 @@ class t_const_value {
     CV_DOUBLE,
     CV_STRING,
     CV_MAP,
-    CV_LIST
+    CV_LIST,
+    CV_IDENTIFIER
   };
 
   t_const_value() = default;
@@ -91,6 +92,9 @@ class t_const_value {
           add_list(elem->clone());
         }
         break;
+      case CV_IDENTIFIER:
+        string_val_ = other.string_val_;
+        break;
     }
   }
 
@@ -104,6 +108,15 @@ class t_const_value {
     return value;
   }
 
+  static std::unique_ptr<t_const_value> make_identifier(
+      source_location loc, std::string id) {
+    auto value = std::make_unique<t_const_value>();
+    value->kind_ = CV_IDENTIFIER;
+    value->ref_range_ = {loc, loc + id.size()};
+    value->string_val_ = std::move(id);
+    return value;
+  }
+
   void assign(t_const_value&& value) { *this = std::move(value); }
 
   void set_string(std::string val) {
@@ -113,6 +126,11 @@ class t_const_value {
 
   const std::string& get_string() const {
     assert(kind_ == CV_STRING);
+    return string_val_;
+  }
+
+  const std::string& get_identifier() const {
+    assert(kind_ == CV_IDENTIFIER);
     return string_val_;
   }
 
@@ -216,7 +234,7 @@ class t_const_value {
       std::pair<std::unique_ptr<t_const_value>, std::unique_ptr<t_const_value>>>
       map_val_;
   std::vector<std::unique_ptr<t_const_value>> list_val_;
-  std::string string_val_;
+  std::string string_val_; // a string or an identifier
   bool bool_val_ = false;
   int64_t int_val_ = 0;
   double double_val_ = 0.0;

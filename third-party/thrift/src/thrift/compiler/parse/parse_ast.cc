@@ -931,16 +931,7 @@ class ast_builder : public parser_actions {
       result->set_ref_range({name.loc, name.loc + name.str.size()});
       return result;
     }
-
-    // TODO: Make this an error.
-    diags_.warning(
-        name.loc,
-        "The identifier '{}' is not defined yet. Constants and enums should "
-        "be defined before using them as default values.",
-        name.str);
-    auto ret = std::make_unique<t_const_value>(std::move(name_str));
-    ret->set_ref_range({name.loc, name.loc + name.str.size()});
-    return ret;
+    return t_const_value::make_identifier(name.loc, name_str);
   }
 
   std::unique_ptr<t_const_value> on_integer(

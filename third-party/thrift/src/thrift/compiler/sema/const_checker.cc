@@ -83,9 +83,10 @@ const char* get_category(const t_const_value* val) {
       return "map";
     case t_const_value::CV_LIST:
       return "list";
+    case t_const_value::CV_IDENTIFIER:
+      break;
   }
-  assert(false && "unknown category");
-  return "unknown";
+  return nullptr;
 }
 
 class const_checker {
@@ -156,6 +157,12 @@ class const_checker {
         "in future versions of thrift.",
         name_,
         expected);
+  }
+
+  void report_incompatible(const t_const_value* value, const t_type* type) {
+    if (const char* category = get_category(value)) {
+      error("{} is incompatible with `{}`", category, type->name());
+    }
   }
 
   // For CV_INTEGER, an overflow of int64_t is checked in the parser;
@@ -252,7 +259,7 @@ class const_checker {
 
   void check_enum(const t_enum* type, const t_const_value* value) {
     if (value->kind() != t_const_value::CV_INTEGER) {
-      error("{} is incompatible with `{}`", get_category(value), type->name());
+      report_incompatible(value, type);
       return;
     }
 
@@ -266,7 +273,7 @@ class const_checker {
 
   void check_union(const t_union* type, const t_const_value* value) {
     if (value->kind() != t_const_value::CV_MAP) {
-      error("{} is incompatible with `{}`", get_category(value), type->name());
+      report_incompatible(value, type);
       return;
     }
     const auto& map = value->get_map();
@@ -284,7 +291,7 @@ class const_checker {
       check_fields(type, value->get_map());
       return;
     }
-    error("{} is incompatible with `{}`", get_category(value), type->name());
+    report_incompatible(value, type);
   }
 
   void check_exception(const t_exception* type, const t_const_value* value) {
@@ -297,21 +304,27 @@ class const_checker {
   void check_fields(
       const t_structured* type,
       const std::vector<std::pair<t_const_value*, t_const_value*>>& map) {
-    for (const auto& entry : map) {
-      if (entry.first->kind() != t_const_value::CV_STRING) {
-        error("type error: `{}` field name must be string.", name_);
+    for (auto [key, value] : map) {
+      std::string field_name;
+      if (key->kind() == t_const_value::CV_STRING) {
+        field_name = key->get_string();
+      } else if (key->kind() == t_const_value::CV_IDENTIFIER) {
+        field_name = key->get_identifier();
+      } else {
+        error("{} field name must be a string or an identifier", name_);
+        continue;
       }
-      const auto* field = type->get_field_by_name(entry.first->get_string());
+      const auto* field = type->get_field_by_name(field_name);
       if (field == nullptr) {
         error(
             "type error: `{}` has no field `{}`.",
             type->name(),
-            entry.first->get_string());
+            key->get_string());
         continue;
       }
       const t_type* field_type = &field->type().deref();
-      const_checker(diags_, node_, name_ + "." + entry.first->get_string())
-          .check(field_type, entry.second);
+      const_checker(diags_, node_, fmt::format("{}.{}", name_, field_name))
+          .check(field_type, value);
     }
   }
 

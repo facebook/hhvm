@@ -151,6 +151,9 @@ inline protocol::Value const_to_value(const t_const_value& val) {
         return t_type::type::t_list;
       case t_const_value::CV_MAP:
         return t_type::type::t_map;
+      case t_const_value::CV_IDENTIFIER:
+        assert(false);
+        return t_type::type::t_void;
     }
   }();
   switch (type) {

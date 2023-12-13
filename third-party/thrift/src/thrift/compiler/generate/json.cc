@@ -78,6 +78,8 @@ std::string to_json(const t_const_value* value) {
       return stringify_list(value->get_list());
     case t_const_value::CV_MAP:
       return stringify_map(value->get_map());
+    case t_const_value::CV_IDENTIFIER:
+      break;
   }
   return "";
 }

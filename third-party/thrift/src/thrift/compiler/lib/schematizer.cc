@@ -773,6 +773,8 @@ std::unique_ptr<t_const_value> wrap_with_protocol_value(
       ret->add_map(val("listValue"), std::move(list));
       break;
     }
+    case t_const_value::CV_IDENTIFIER:
+      break;
   }
   return ret;
 }

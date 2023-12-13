@@ -494,12 +494,13 @@ TEST(CompilerTest, union_initializer) {
 TEST(CompilerTest, enum_initializer) {
   check_compile(R"(
     enum E {A = 1}
-    const E e1 = E.A;  # OK
-    const E e2 = 42;   # expected-warning: const `e2` is defined as enum `E` with a value not of that enum
-    const E e3 = 4.2;  # expected-error: floating-point number is incompatible with `E`
-    const E e4 = "";   # expected-error: string is incompatible with `E`
-    const E e5 = true; # expected-error: bool is incompatible with `E`
-    const E e6 = [];   # expected-error: list is incompatible with `E`
+    const E e1 = E.A;   # OK
+    const E e2 = 42;    # expected-warning: const `e2` is defined as enum `E` with a value not of that enum
+    const E e3 = 4.2;   # expected-error: floating-point number is incompatible with `E`
+    const E e4 = "";    # expected-error: string is incompatible with `E`
+    const E e5 = "E.A"; # expected-error: string is incompatible with `E`
+    const E e6 = true;  # expected-error: bool is incompatible with `E`
+    const E e7 = [];    # expected-error: list is incompatible with `E`
   )");
 }
 
@@ -649,8 +650,7 @@ TEST(CompilerTest, deprecated_annotations) {
 TEST(CompilerTest, invalid_enum_constant) {
   check_compile(R"(
     enum E {}
-    const list<E> c = [nonexistant.Value]; # expected-error: string is incompatible with `E`
-    # expected-warning@-1: The identifier 'nonexistant.Value' is not defined yet. Constants and enums should be defined before using them as default values.
+    const list<E> c = [nonexistent.Value]; # expected-error: use of undeclared identifier 'nonexistent.Value'
   )");
 }
 

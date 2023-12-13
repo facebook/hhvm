@@ -12394,7 +12394,7 @@ protected:
     return entries;
   }
 
-    // From the information present in the inputs, calculate a mapping
+  // From the information present in the inputs, calculate a mapping
   // of classes and splits to their children (which can be other
   // classes or split nodes). This is not just direct children, but
   // all transitive subclasses.
@@ -12454,48 +12454,57 @@ protected:
           c.emplace(child);
         }
         split->children.clear();
-      } else {
-        children[name].emplace(name);
       }
     }
 
-    // For every ClassInfo and split, we now know the direct
-    // children. Iterate and find all transitive children.
-    for (auto& [_, transitiveChildren] : children) {
-      auto toExplore = transitiveChildren;
+    // Calculate the indegree for all children. The indegree for a given node
+    // differs depending on the top used, so these are calculated separately.
+    auto const getIndegree = [&](SString root) {
+      ISStringSet visited;
+      ISStringSet toExplore{root};
       ISStringSet toExploreNext;
+      ISStringToOneT<uint32_t> indegree;
 
       while (!toExplore.empty()) {
         toExploreNext.clear();
         for (auto const child : toExplore) {
+          if (visited.count(child)) continue;
+          visited.emplace(child);
           auto const it = children.find(child);
           // May not exist in children if processed in earlier round.
           if (it == end(children)) continue;
           for (auto const c : it->second) {
-            if (transitiveChildren.count(c)) continue;
+            indegree[c]++;
             toExploreNext.emplace(c);
           }
         }
-
         std::swap(toExplore, toExploreNext);
-        for (auto const child : toExplore) {
-          transitiveChildren.emplace(child);
-        }
       }
-    }
+      return indegree;
+    };
 
-    for (auto const& [name, transitiveChildren] : children) {
-      std::vector<SString> sorted{begin(transitiveChildren), end(transitiveChildren)};
-      std::sort(
-        begin(sorted), end(sorted),
-        [&] (SString a, SString b) {
-          auto const t1 = index.top.contains(a);
-          auto const t2 = index.top.contains(b);
-          // Top classes come first
-          if (t1 != t2) return t2 < t1;
-          return string_data_lti{}(a, b);
+    // Topological sort the transitive children for each node.
+    for (auto& [name, _] : children) {
+      auto indegree = getIndegree(name);
+      std::vector<SString> sorted{name};
+
+      int sortedBegin = 0;
+      int sortedEnd = sorted.size();
+
+      while (sortedBegin != sortedEnd) {
+        for (int i = sortedBegin; i < sortedEnd; i++) {
+          auto const cls = sorted[i];
+          auto const it = children.find(cls);
+          if (it == end(children)) continue;
+          for (auto const c : it->second) {
+            indegree[c]--;
+            if (indegree[c] == 0) sorted.emplace_back(c);
+          }
         }
-      );
+        sortedBegin = sortedEnd;
+        sortedEnd = sorted.size();
+      }
+      assertx(indegree.size() + 1 == sorted.size());
       index.children[name] = std::move(sorted);
     }
   }
@@ -12864,6 +12873,12 @@ protected:
     while (calculatedForTop.size() < children.size()) {
       auto child = children[childIdx++];
       if (calculatedForTop.contains(child)) continue;
+      // Top Splits have no associated data yet.
+      if (index.top.count(child) && index.splits.count(child)) {
+        calculatedForTop.emplace(child);
+        continue;
+      }
+
       auto childData = [&]() {
         if (index.top.contains(child) && !child->isame(top)) {
           return aggregate_data(index, child, calculatedForTop);

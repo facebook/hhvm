@@ -103,7 +103,7 @@ class RootRoute {
     McDeleteReply reply;
     if (enableDeleteDistribution_ && !req.key_ref()->routingPrefix().empty()) {
       auto routingPrefix = RoutingPrefix(req.key_ref()->routingPrefix());
-      if (routingPrefix.str() != defaultRoute_.str() &&
+      if (routingPrefix.getRegion() != defaultRoute_.getRegion() &&
           req.key_ref()->routingPrefix() != kBroadcastPrefix) {
         reply = fiber_local<RouterInfo>::runWithLocals(
             [this, &req, &routingPrefix]() {
@@ -204,8 +204,12 @@ class RootRoute {
       const std::vector<std::shared_ptr<typename RouterInfo::RouteHandleIf>>&
           rh,
       const Request& req) const {
-    if (FOLLY_LIKELY(rh.size() == 1)) {
-      return rh[0]->route(req);
+    // for deletes, we cannot assume that there's only one target
+    // even if it's a broadcast delete
+    if (!folly::IsOneOf<Request, McDeleteRequest>::value) {
+      if (FOLLY_LIKELY(rh.size() == 1)) {
+        return rh[0]->route(req);
+      }
     }
     if (!rh.empty()) {
       return routeToAll(rh, req);
@@ -230,7 +234,7 @@ class RootRoute {
       const std::vector<std::shared_ptr<typename RouterInfo::RouteHandleIf>>&
           rh,
       const McDeleteRequest& req) const {
-    if (enableCrossRegionDeleteRpc_) {
+    if (enableCrossRegionDeleteRpc_ && rh.size() > 1) {
       auto reqCopy = std::make_shared<const McDeleteRequest>(req);
       for (size_t i = 1, e = rh.size(); i < e; ++i) {
         auto r = rh[i];

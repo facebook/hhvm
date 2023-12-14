@@ -29,8 +29,6 @@ import (
 
 	"github.com/golang/glog"
 
-	"libfb/go/thriftbase"
-
 	thrift_any "thrift/conformance/any"
 	"thrift/conformance/conformance"
 	"thrift/conformance/patch_data"
@@ -135,13 +133,12 @@ func main() {
 	// Startup thrift server
 	handler := &dataConformanceServiceHandler{registry}
 	proc := conformance.NewConformanceServiceProcessor(handler)
-	ts, err := thriftbase.ServerContext(
+	ts, err := newServer(
 		proc,
-		thriftbase.ServerSSLPolicy(thriftbase.SSLPolicyDisabled),
 		// Ports must be dynamically allocated to prevent any conflicts.
 		// Allocating a free port is usually done by setting the port number as zero.
 		// Operating system should assign a free port to the application.
-		thriftbase.BindAddr("[::]:0"),
+		"[::]:0",
 	)
 	if err != nil {
 		glog.Fatalf("failed to start server: %v", err)
@@ -166,6 +163,16 @@ func main() {
 	}
 	<-sigc
 	os.Exit(0)
+}
+
+func newServer(processor thrift.ProcessorContext, addr string) (thrift.Server, error) {
+	socket, err := thrift.NewServerSocket(addr)
+	if err != nil {
+		return nil, err
+	}
+	protocols := thrift.ProtocolFactories(thrift.NewHeaderProtocolFactory())
+	transports := thrift.TransportFactories(thrift.NewHeaderTransportFactory(thrift.NewTransportFactory()))
+	return thrift.NewSimpleServerContext(processor, socket, protocols, transports), nil
 }
 
 type dataConformanceServiceHandler struct {

@@ -220,12 +220,12 @@ struct SrcRec final {
 
   //////////////////////////////////////////////////////////////////////////////
 
-  folly::SharedMutex::WriteHolder writelock() const {
-    return folly::SharedMutex::WriteHolder(m_lock);
+  std::unique_lock<folly::SharedMutex> writelock() const {
+    return std::unique_lock(m_lock);
   }
 
-  folly::SharedMutex::ReadHolder readlock() const {
-    return folly::SharedMutex::ReadHolder(m_lock);
+  std::shared_lock<folly::SharedMutex> readlock() const {
+    return std::shared_lock(m_lock);
   }
 
 private:

@@ -5667,7 +5667,6 @@ AdaptTestUnion.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
 
 AdaptTestUnion.thrift_struct_annotations = {
-  "cpp.name": "ThriftAdaptTestUnion",
 }
 AdaptTestUnion.thrift_field_annotations = {
 }
@@ -5692,7 +5691,6 @@ AdaptedStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
 
 AdaptedStruct.thrift_struct_annotations = {
-  "cpp.name": "ThriftAdaptedStruct",
 }
 AdaptedStruct.thrift_field_annotations = {
 }

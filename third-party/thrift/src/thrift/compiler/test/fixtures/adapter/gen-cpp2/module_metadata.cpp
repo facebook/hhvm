@@ -373,7 +373,7 @@ StructMetadata<::facebook::thrift::test::AdaptTestStruct>::gen(ThriftMetadata& m
   static const auto* const
   module_AdaptTestStruct_fields = new std::array<EncodedThriftField, 10>{{
     {1, "delay", false, std::make_unique<Typedef>("module.DurationMs", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::test::AdaptTestMsAdapter")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
-    {2, "custom", false, std::make_unique<Typedef>("module.CustomProtocolType", std::make_unique<Typedef>("module.IOBuf", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::test::CustomProtocolAdapter")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
+    {2, "custom", false, std::make_unique<Typedef>("module.CustomProtocolType", std::make_unique<Typedef>("module.IOBuf", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("::folly::IOBuf")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::test::CustomProtocolAdapter")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
     {3, "timeout", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::test::AdaptTestMsAdapter")}}).cv_struct_ref(), }},
     {4, "data", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::test::AdapterWithContext")}}).cv_struct_ref(), }},
     {5, "meta", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
@@ -475,7 +475,7 @@ StructMetadata<::facebook::thrift::test::ThriftAdaptTestUnion>::gen(ThriftMetada
   static const auto* const
   module_AdaptTestUnion_fields = new std::array<EncodedThriftField, 2>{{
     {1, "delay", false, std::make_unique<Typedef>("module.DurationMs", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::test::AdaptTestMsAdapter")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
-    {2, "custom", false, std::make_unique<Typedef>("module.CustomProtocolType", std::make_unique<Typedef>("module.IOBuf", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::test::CustomProtocolAdapter")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
+    {2, "custom", false, std::make_unique<Typedef>("module.CustomProtocolType", std::make_unique<Typedef>("module.IOBuf", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("::folly::IOBuf")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::test::CustomProtocolAdapter")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_AdaptTestUnion_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -486,6 +486,7 @@ StructMetadata<::facebook::thrift::test::ThriftAdaptTestUnion>::gen(ThriftMetada
     field.structured_annotations() = f.structured_annotations;
     module_AdaptTestUnion.fields()->push_back(std::move(field));
   }
+  module_AdaptTestUnion.structured_annotations()->push_back(*cvStruct("cpp.Name", {{"value", cvString("ThriftAdaptTestUnion")}}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -510,6 +511,7 @@ StructMetadata<::facebook::thrift::test::ThriftAdaptedStruct>::gen(ThriftMetadat
     field.structured_annotations() = f.structured_annotations;
     module_AdaptedStruct.fields()->push_back(std::move(field));
   }
+  module_AdaptedStruct.structured_annotations()->push_back(*cvStruct("cpp.Name", {{"value", cvString("ThriftAdaptedStruct")}}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&

@@ -6096,7 +6096,13 @@ class AdaptTestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[],
+      'struct' => dict[
+        '\facebook\thrift\annotation\cpp\Name' => \facebook\thrift\annotation\cpp\Name::fromShape(
+          shape(
+            "value" => "ThriftAdaptTestUnion",
+          )
+        ),
+      ],
       'fields' => dict[
         'delay' => shape(
           'field' => dict[],
@@ -6236,7 +6242,13 @@ class AdaptedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[],
+      'struct' => dict[
+        '\facebook\thrift\annotation\cpp\Name' => \facebook\thrift\annotation\cpp\Name::fromShape(
+          shape(
+            "value" => "ThriftAdaptedStruct",
+          )
+        ),
+      ],
       'fields' => dict[
       ],
     );
@@ -6589,7 +6601,13 @@ class StructFieldAdaptedStruct implements \IThriftSyncStruct, \IThriftStructMeta
               )
             ),
           ],
-          'type' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\Name' => \facebook\thrift\annotation\cpp\Name::fromShape(
+              shape(
+                "value" => "ThriftAdaptedStruct",
+              )
+            ),
+          ],
         ),
         'adaptedTypedef' => shape(
           'field' => dict[],

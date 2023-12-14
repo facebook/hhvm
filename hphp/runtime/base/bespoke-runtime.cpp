@@ -112,7 +112,7 @@ RuntimeStruct* RuntimeStruct::registerRuntimeStruct(
     if (idx >= fieldsLength) fieldsLength = idx + 1;
   }
 
-  folly::SharedMutex::WriteHolder lock{s_mapLock};
+  std::unique_lock lock{s_mapLock};
   auto const pair = s_runtimeStrMap.emplace(stableIdentifier.get(), nullptr);
   if (!pair.second) return pair.first->second;
 

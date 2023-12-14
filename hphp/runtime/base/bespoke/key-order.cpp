@@ -81,7 +81,7 @@ KeyOrder KeyOrder::Make(const KeyOrderData& ko) {
     if (it != s_profilingKeyOrders.end()) return KeyOrder{&*it};
   }
 
-  folly::SharedMutex::WriteHolder wlock{s_keyOrderLock};
+  std::unique_lock wlock{s_keyOrderLock};
   auto const ret = s_profilingKeyOrders.insert(std::move(trimmedKeyOrder));
   return KeyOrder{&*ret.first};
 }

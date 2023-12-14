@@ -86,7 +86,7 @@ void addTranslation(const TransRec& transRec) {
   tc::assertOwnsCodeLock();
 
   auto transRecPtr = std::make_unique<TransRec>(transRec);
-  folly::SharedMutex::WriteHolder guard(s_lock);
+  std::unique_lock guard(s_lock);
   if (transRecPtr->id == kInvalidTransID) {
     transRecPtr->id = s_translations.size();
   } else {

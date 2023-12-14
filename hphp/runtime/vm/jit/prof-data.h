@@ -366,7 +366,7 @@ struct ProfData {
    */
   int64_t* transCounterAddr(TransID id) {
     // getAddr() can grow the slab list, so grab a write lock.
-    folly::SharedMutex::WriteHolder lock{m_transLock};
+    std::unique_lock lock{m_transLock};
     return m_counters.getAddr(id);
   }
 

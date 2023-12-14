@@ -50,7 +50,7 @@ AsyncFrameId getAsyncFrameId(SrcKey sk) {
     if (it != s_asyncFrameMap.end()) return it->second;
     if (s_numAsyncFrameIds > kMaxAsyncFrameId) return kInvalidAsyncFrameId;
   }
-  folly::SharedMutex::WriteHolder lock(s_asyncFrameLock);
+  std::unique_lock lock(s_asyncFrameLock);
   auto const it = s_asyncFrameMap.insert({sk, s_numAsyncFrameIds});
   if (!it.second) return it.first->second;
   if (s_numAsyncFrameIds > kMaxAsyncFrameId) {

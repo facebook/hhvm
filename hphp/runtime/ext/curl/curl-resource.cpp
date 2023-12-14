@@ -1484,7 +1484,7 @@ CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
           return nullptr;
         }
 
-        folly::SharedMutex::WriteHolder lock(s_mutex);
+        std::unique_lock lock(s_mutex);
         auto const iter = s_certCache.find(cainfo);
         if (iter != s_certCache.end()) {
           // Lost the race to parse & insert the cached item.

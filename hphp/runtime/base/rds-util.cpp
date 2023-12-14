@@ -47,7 +47,7 @@ bindConstMemoCache(const Func* func, const Class* cls,
     ConstMemoCache { func->getFuncId(), cls, paramVals, asyncEager }
   );
   {
-    folly::SharedMutex::WriteHolder wlock{s_constMemoLock};
+    std::unique_lock wlock{s_constMemoLock};
     s_funcToConstMemoCaches.emplace(std::pair{func, cls}, ret);
   }
   return ret;

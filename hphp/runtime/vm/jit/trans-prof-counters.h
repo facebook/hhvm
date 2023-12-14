@@ -82,7 +82,7 @@ struct TransProfCounters {
    */
   template <typename K>
   T* addCounter(const K& key, const M& meta) {
-    folly::SharedMutex::WriteHolder lock(m_lock);
+    std::unique_lock lock(m_lock);
     auto& indices = getIndices(key);
     auto const index = m_meta.size();
     m_meta.push_back(meta);
@@ -128,7 +128,7 @@ struct TransProfCounters {
    * Free the memory used to keep all the counters.
    */
   void freeCounters() {
-    folly::SharedMutex::WriteHolder lock(m_lock);
+    std::unique_lock lock(m_lock);
     m_meta.clear();
     m_regionIndices.clear();
     m_prologueIndices.clear();
@@ -137,7 +137,7 @@ struct TransProfCounters {
   }
 
   void serialize(ProfDataSerializer& ser) {
-    folly::SharedMutex::WriteHolder lock(m_lock);
+    std::unique_lock lock(m_lock);
     auto write_counters = [&](const Indices& indices) {
       write_raw(ser, indices.size());
       for (auto index : indices) {
@@ -172,7 +172,7 @@ struct TransProfCounters {
   }
 
   void deserialize(ProfDataDeserializer& des) {
-    folly::SharedMutex::WriteHolder lock(m_lock);
+    std::unique_lock lock(m_lock);
     auto deserialize_counters = [&]
       (Indices& indices, size_t& index)
     {

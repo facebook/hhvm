@@ -94,7 +94,7 @@ ProfData::ProfData()
 {}
 
 TransID ProfData::allocTransID() {
-  folly::SharedMutex::WriteHolder lock{m_transLock};
+  std::unique_lock lock{m_transLock};
   m_transRecs.emplace_back();
   return m_transRecs.size() - 1;
 }
@@ -149,14 +149,14 @@ void ProfData::addTransProfile(TransID transID,
   }
 
   {
-    folly::SharedMutex::WriteHolder lock{m_transLock};
+    std::unique_lock lock{m_transLock};
     m_transRecs[transID].reset(new ProfTransRec(lastSk, startSk, region,
                                                 asmSize));
   }
 
   // Putting transID in m_funcProfTrans makes it visible to other threads, so
   // this has to happen after we've already put its metadata in m_transRecs.
-  folly::SharedMutex::WriteHolder lock{m_funcProfTransLock};
+  std::unique_lock lock{m_funcProfTransLock};
   m_funcProfTrans[funcId].push_back(transID);
 }
 
@@ -164,7 +164,7 @@ void ProfData::addTransProfPrologue(TransID transID, SrcKey sk, int nArgs,
                                     uint32_t asmSize) {
   m_proflogueDB.emplace(PrologueID{sk.funcID(), nArgs}, transID);
 
-  folly::SharedMutex::WriteHolder lock{m_transLock};
+  std::unique_lock lock{m_transLock};
   m_transRecs[transID].reset(new ProfTransRec(sk, nArgs, asmSize));
 }
 
@@ -281,14 +281,14 @@ void ProfData::maybeResetCounters() {
   if (m_countersReset.load(std::memory_order_acquire)) return;
   if (requestCount() < RuntimeOption::EvalJitResetProfCountersRequest) return;
 
-  folly::SharedMutex::WriteHolder lock{m_transLock};
+  std::unique_lock lock{m_transLock};
   if (m_countersReset.load(std::memory_order_relaxed)) return;
   m_counters.resetAllCounters(RuntimeOption::EvalJitPGOThreshold);
   m_countersReset.store(true, std::memory_order_release);
 }
 
 void ProfData::addTargetProfile(const ProfData::TargetProfileInfo& info) {
-  folly::SharedMutex::WriteHolder lock{m_targetProfilesLock};
+  std::unique_lock lock{m_targetProfilesLock};
   m_targetProfiles[info.key.transId].push_back(info);
 }
 

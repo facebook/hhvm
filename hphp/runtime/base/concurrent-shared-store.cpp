@@ -370,7 +370,7 @@ bool HotCache::clearValueIdx(Idx idx) {
 //////////////////////////////////////////////////////////////////////
 
 bool ConcurrentTableSharedStore::clear() {
-  SharedMutex::WriteHolder l(m_lock);
+  std::unique_lock l(m_lock);
   for (Map::iterator iter = m_vars.begin(); iter != m_vars.end();
        ++iter) {
     s_hotCache.clearValue(iter->second);
@@ -947,7 +947,7 @@ std::vector<EntryInfo> ConcurrentTableSharedStore::getEntriesInfo() {
   entries.reserve(m_vars.size() + 1000);
 
   {
-    SharedMutex::WriteHolder l(m_lock);
+    std::unique_lock l(m_lock);
     for (Map::iterator iter = m_vars.begin(); iter != m_vars.end(); ++iter) {
       entries.push_back(
           makeEntryInfo(iter->first, &iter->second, curr_time));
@@ -997,7 +997,7 @@ static void dumpEntriesInfo(std::vector<EntryInfo> entries, std::ostream& out) {
 }
 
 void ConcurrentTableSharedStore::dumpKeyAndValue(std::ostream & out) {
-  SharedMutex::WriteHolder l(m_lock);
+  std::unique_lock l(m_lock);
   out << "Total " << m_vars.size() << std::endl;
   for (Map::iterator iter = m_vars.begin(); iter != m_vars.end(); ++iter) {
     dumpOneKeyAndValue(out, iter->first, &iter->second);
@@ -1030,7 +1030,7 @@ void ConcurrentTableSharedStore::dumpPrefix(std::ostream& out,
                                             const std::string &prefix,
                                             uint32_t count) {
   Logger::Info("dumping apc prefix %s", prefix.c_str());
-  SharedMutex::WriteHolder l(m_lock);
+  std::unique_lock l(m_lock);
 
   uint32_t dumped = 0;
   for (auto const &iter : m_vars) {
@@ -1053,7 +1053,7 @@ void ConcurrentTableSharedStore::dumpKeysWithPrefixes(
   std::ostream& out,
   const std::vector<std::string>& prefixes) {
   if (prefixes.empty()) return;
-  SharedMutex::WriteHolder l(m_lock);
+  std::unique_lock l(m_lock);
   for (auto const& iter : m_vars) {
     const StoreValue& value = iter.second;
     if (value.c_time == 0) continue;
@@ -1073,7 +1073,7 @@ void ConcurrentTableSharedStore::dumpKeysWithPrefixes(
 
 std::vector<EntryInfo>
 ConcurrentTableSharedStore::sampleEntriesInfo(uint32_t count) {
-  SharedMutex::WriteHolder l(m_lock);
+  std::unique_lock l(m_lock);
   if (m_vars.empty()) {
     Logger::Warning("No APC entries sampled (empty store)");
     return std::vector<EntryInfo>();
@@ -1095,7 +1095,7 @@ ConcurrentTableSharedStore::sampleEntriesInfoBySize(uint32_t bytes) {
   int64_t next = folly::Random::rand32(bytes);
   int64_t curr_time = time(nullptr);
   samples.reserve(m_vars.size() / bytes * 128);
-  SharedMutex::WriteHolder l(m_lock);
+  std::unique_lock l(m_lock);
   for (auto& iter : m_vars) {
     auto const key = iter.first;
     StoreValue& value = iter.second;

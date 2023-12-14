@@ -192,7 +192,7 @@ const StructLayout* StructLayout::GetLayout(
   }
   if (!create) return nullptr;
 
-  folly::SharedMutex::WriteHolder wlock{s_fieldVectorLock};
+  std::unique_lock wlock{s_fieldVectorLock};
   auto const it = s_fieldVectorToIdx.find(fv);
   if (it != s_fieldVectorToIdx.end()) return As(FromIndex(it->second));
 

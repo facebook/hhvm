@@ -47,7 +47,7 @@ StringTag tag_from_string(const char* str) {
     if (it != s_string_to_tag.end()) return it->second;
   }
   { // Check again with the write lock held.
-    SharedMutex::WriteHolder l(s_mutex);
+    std::unique_lock l(s_mutex);
     auto const it = s_string_to_tag.find(str);
     if (it != s_string_to_tag.end()) return it->second;
 

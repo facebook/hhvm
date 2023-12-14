@@ -1820,7 +1820,7 @@ struct ClassGraph::LockedSerdeImpl {
     }
 
     // It didn't, we need to create it:
-    folly::SharedMutex::WriteHolder _{t.locking->table};
+    std::unique_lock _{t.locking->table};
     // We now have exlusive access to the table. Check for the node
     // again, as someone else might have created it in the meantime.
     if (auto const n = folly::get_ptr(t.nodes, name)) {
@@ -1867,7 +1867,7 @@ struct ClassGraph::LockedSerdeImpl {
         return;
       }
     }
-    folly::SharedMutex::WriteHolder _{t.locking->equivs};
+    std::unique_lock _{t.locking->equivs};
     auto const [it, s] = t.regOnlyEquivs.emplace(&n, &e);
     always_assert(s || it->second == &e);
   }

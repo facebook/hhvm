@@ -128,7 +128,7 @@ void initImpl(F&& func) {
   // must be done while holding a lock that blocks insertion of new Classes
   // into their class lists, but in practice most Classes will already be
   // created by now and this process is very fast.
-  SharedMutex::WriteHolder clsLocker(g_clsInitLock);
+  std::unique_lock clsLocker(g_clsInitLock);
   NamedType::foreach_class([&](Class* cls) {
     cls->setInstanceBitsAndParents();
   });
@@ -161,7 +161,7 @@ void init() {
         // concurrently modify a tbb::concurrent_hash_map, but
         // iteration is not guaranteed to be safe with concurrent
         // insertions.
-        SharedMutex::WriteHolder l(s_instanceCountsLock);
+        std::unique_lock l(s_instanceCountsLock);
         for (auto& pair : s_instanceCounts) {
           counts.push_back(pair);
           total += pair.second;

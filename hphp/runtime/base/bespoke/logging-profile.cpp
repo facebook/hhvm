@@ -145,7 +145,7 @@ size_t incrementCounter(M& map, L& mutex, K key) {
       return it->second;
     }
   }
-  folly::SharedMutex::WriteHolder lock{mutex};
+  std::unique_lock lock{mutex};
   auto [it, didInsert] = map.emplace(key, 0);
   it->second.value++;
   return it->second;
@@ -1053,7 +1053,7 @@ std::vector<SinkOutputData> sortSinkData() {
 void stopProfiling() {
   assertx(allowBespokeArrayLikes());
   assertx(s_profiling.load(std::memory_order_acquire));
-  folly::SharedMutex::WriteHolder lock{s_profilingLock};
+  std::unique_lock lock{s_profilingLock};
   s_profiling.store(false, std::memory_order_release);
 }
 

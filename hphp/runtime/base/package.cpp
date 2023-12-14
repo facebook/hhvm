@@ -321,7 +321,7 @@ bool PackageInfo::violatesDeploymentBoundary(const StringData* module) const {
     auto const inActiveDeployment = moduleInDeployment(
       module, *activeDeployment, DeployKind::Hard);
     if (RO::RepoAuthoritative) {
-      folly::SharedMutex::WriteHolder lock(s_mutex);
+      std::unique_lock lock(s_mutex);
       m_moduleInActiveDeployment.emplace(module, inActiveDeployment);
     }
     return !inActiveDeployment;

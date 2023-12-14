@@ -245,12 +245,12 @@ bool EmptiableStruct::__fbthrift_is_empty() const {
  !(this->__fbthrift_field_long_field != ::std::int64_t()) &&
  !(this->__fbthrift_field_float_field != float()) &&
  !(this->__fbthrift_field_double_field != double()) &&
- !(!apache::thrift::StringTraits<std::string>::isEmpty(this->__fbthrift_field_string_field)) &&
- !(!apache::thrift::StringTraits<std::string>::isEmpty(this->__fbthrift_field_binary_field)) &&
+ !(!::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_string_field)) &&
+ !(!::apache::thrift::op::isEmpty<::apache::thrift::type::binary_t>(this->__fbthrift_field_binary_field)) &&
  !(this->__fbthrift_field_enum_field != ::apache::thrift::test::MyEnum()) &&
- !(!this->__fbthrift_field_list_field.empty()) &&
- !(!this->__fbthrift_field_set_field.empty()) &&
- !(!this->__fbthrift_field_map_field.empty()) &&
+ !(!::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_list_field)) &&
+ !(!::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::i16_t>>(this->__fbthrift_field_set_field)) &&
+ !(!::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>>(this->__fbthrift_field_map_field)) &&
  !(this->__isset.get(13));
 }
 

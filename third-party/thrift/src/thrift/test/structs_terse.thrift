@@ -84,3 +84,10 @@ struct OptionalFieldsTerseStruct {
   @thrift.Box
   6: optional structs.HasInt boxed_field;
 }
+
+struct RefsWithStringAndContainerTerseWrites {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<string> string_list_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: string string_field;
+}

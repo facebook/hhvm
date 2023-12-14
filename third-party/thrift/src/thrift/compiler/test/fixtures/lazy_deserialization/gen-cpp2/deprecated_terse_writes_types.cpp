@@ -94,10 +94,10 @@ void TerseFoo::__fbthrift_clear_terse_fields() {
 }
 
 bool TerseFoo::__fbthrift_is_empty() const {
-  return !(!this->__fbthrift_field_field1.empty()) &&
- !(!this->__fbthrift_field_field2.empty()) &&
- !(!this->__fbthrift_field_field3.empty()) &&
- !(!this->__fbthrift_field_field4.empty());
+  return !(!::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::double_t>>(this->__fbthrift_field_field1)) &&
+ !(!::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_field2)) &&
+ !(!::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::double_t>>(this->__fbthrift_field_field3)) &&
+ !(!::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_field4));
 }
 
 bool TerseFoo::operator==(FOLLY_MAYBE_UNUSED const TerseFoo& rhs) const {
@@ -372,10 +372,10 @@ void TerseLazyFoo::__fbthrift_clear_terse_fields() {
 }
 
 bool TerseLazyFoo::__fbthrift_is_empty() const {
-  return !(!this->__fbthrift_field_field1.empty()) &&
- !(!this->__fbthrift_field_field2.empty()) &&
- !(!this->__fbthrift_field_field3.empty()) &&
- !(!this->__fbthrift_field_field4.empty());
+  return !(!::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::double_t>>(this->__fbthrift_field_field1)) &&
+ !(!::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_field2)) &&
+ !(!::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::double_t>>(this->__fbthrift_field_field3)) &&
+ !(!::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_field4));
 }
 
 bool TerseLazyFoo::operator==(FOLLY_MAYBE_UNUSED const TerseLazyFoo& rhs) const {

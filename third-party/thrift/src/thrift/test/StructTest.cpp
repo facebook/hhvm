@@ -722,4 +722,26 @@ TEST_F(StructTest, OptionalFieldsTerseStruct) {
   apache::thrift::clear(obj);
   EXPECT_TRUE(apache::thrift::empty(obj));
 }
+
+TEST_F(StructTest, RefsWithStringAndContainerTerseWrites) {
+  {
+    RefsWithStringAndContainerTerseWrites obj;
+    EXPECT_TRUE(apache::thrift::empty(obj));
+  }
+  {
+    RefsWithStringAndContainerTerseWrites obj;
+    obj.string_list_field() = std::make_shared<std::vector<std::string>>(
+        std::vector<std::string>{"1", "2", "3"});
+    EXPECT_FALSE(apache::thrift::empty(obj));
+    apache::thrift::clear(obj);
+    EXPECT_TRUE(apache::thrift::empty(obj));
+  }
+  {
+    RefsWithStringAndContainerTerseWrites obj;
+    obj.string_field() = std::make_shared<std::string>("123");
+    EXPECT_FALSE(apache::thrift::empty(obj));
+    apache::thrift::clear(obj);
+    EXPECT_TRUE(apache::thrift::empty(obj));
+  }
+}
 } // namespace

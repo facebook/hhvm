@@ -17,15 +17,15 @@
 %><%!
 // Must not be null.
 %><%#field:cpp_ref?%><%!
-  %><% > field/member%><%!
+  %><% > field/member%> && <%!
 %><%/field:cpp_ref?%><%!
 
 // Must not be empty.
 %><%#type:resolves_to_container?%><%!
-  %><%#field:cpp_ref?%> && <%/field:cpp_ref?%>!<% > field/member%><%#field:cpp_ref?%>-><%/field:cpp_ref?%><%^field:cpp_ref?%>.<%/field:cpp_ref?%>empty()<%!
+  %>!::apache::thrift::op::isEmpty<<% > field/tag%>>(<%#field:cpp_ref?%>*<%/field:cpp_ref?%><% > field/member%>)<%!
 %><%/type:resolves_to_container?%><%!
 %><%#field:raw_string_or_binary?%><%!
-  %>!apache::thrift::StringTraits<<% > types/indirected_string_type%>>::isEmpty(<% >  module_types_tcc/field_ref %>)<%!
+  %>!::apache::thrift::op::isEmpty<<% > field/tag%>>(<%#field:cpp_ref?%>*<%/field:cpp_ref?%><% > field/member%>)<%!
 %><%/field:raw_string_or_binary?%><%!
 
 %><%^field:cpp_ref?%><%^type:resolves_to_container?%><%^field:raw_string_or_binary?%><%!

@@ -2642,8 +2642,8 @@ void ComplexContainerStruct::__fbthrift_clear_terse_fields() {
 }
 
 bool ComplexContainerStruct::__fbthrift_is_empty() const {
-  return !(!this->__fbthrift_field_map_of_iobufs.empty()) &&
- !(!this->__fbthrift_field_map_of_iobuf_ptrs.empty());
+  return !(!::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>>>(this->__fbthrift_field_map_of_iobufs)) &&
+ !(!::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::cpp_type<std::unique_ptr<folly::IOBuf>, ::apache::thrift::type::binary_t>>>(this->__fbthrift_field_map_of_iobuf_ptrs));
 }
 
 bool ComplexContainerStruct::operator==(FOLLY_MAYBE_UNUSED const ComplexContainerStruct& rhs) const {

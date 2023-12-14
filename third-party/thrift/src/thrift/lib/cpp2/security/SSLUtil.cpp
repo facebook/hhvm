@@ -23,6 +23,7 @@
 #include <fizz/client/AsyncFizzClient.h>
 #include <fizz/experimental/util/CertExtraction.h>
 #include <fizz/protocol/Exporter.h>
+#include <fizz/protocol/OpenSSLFactory.h>
 #include <fizz/server/AsyncFizzServer.h>
 
 namespace apache {

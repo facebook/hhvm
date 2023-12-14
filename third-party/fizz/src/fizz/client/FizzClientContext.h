@@ -13,7 +13,6 @@
 #include <fizz/compression/CertDecompressionManager.h>
 #include <fizz/protocol/Certificate.h>
 #include <fizz/protocol/Factory.h>
-#include <fizz/protocol/OpenSSLFactory.h>
 #include <fizz/protocol/clock/SystemClock.h>
 #include <fizz/record/Types.h>
 
@@ -27,11 +26,11 @@ enum class SendKeyShare {
 
 class FizzClientContext {
  public:
-  FizzClientContext()
-      : factory_(std::make_shared<OpenSSLFactory>()),
-        clock_(std::make_shared<SystemClock>()) {}
-  FizzClientContext(std::shared_ptr<Factory> factory)
+  FizzClientContext();
+
+  explicit FizzClientContext(std::shared_ptr<Factory> factory)
       : factory_(std::move(factory)), clock_(std::make_shared<SystemClock>()) {}
+
   virtual ~FizzClientContext() = default;
 
   /**

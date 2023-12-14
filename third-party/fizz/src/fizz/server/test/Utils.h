@@ -10,6 +10,7 @@
 #include <fizz/crypto/aead/AESGCM128.h>
 #include <fizz/crypto/aead/OpenSSLEVPCipher.h>
 #include <fizz/protocol/DefaultCertificateVerifier.h>
+#include <fizz/protocol/OpenSSLFactory.h>
 #include <fizz/protocol/test/Utilities.h>
 #include <fizz/server/AsyncFizzServer.h>
 #include <fizz/server/TicketTypes.h>

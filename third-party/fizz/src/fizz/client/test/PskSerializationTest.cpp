@@ -7,6 +7,7 @@
  */
 #include <fizz/client/PskSerializationUtils.h>
 #include <fizz/client/test/Utilities.h>
+#include <fizz/protocol/test/Mocks.h>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
@@ -20,7 +21,7 @@ class PskSerializationTest : public Test {
  public:
   void SetUp() override {
     ticketTime_ = std::chrono::system_clock::now();
-    factory_ = std::make_unique<fizz::OpenSSLFactory>();
+    factory_ = std::make_unique<fizz::test::MockFactory>();
   }
 
  protected:

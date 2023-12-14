@@ -18,6 +18,7 @@
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/experimental/ktls/AsyncFizzBaseKTLS.h>
 #include <fizz/protocol/Certificate.h>
+#include <fizz/protocol/test/Mocks.h>
 #include <fizz/server/AeadTicketCipher.h>
 #include <fizz/server/AsyncFizzServer.h>
 #include <fizz/server/CertManager.h>
@@ -228,7 +229,7 @@ makeTestServerContext() {
           fizz::test::kP256Certificate.str(), fizz::test::kP256Key.str()),
       true);
 
-  auto factory = std::make_shared<OpenSSLFactory>();
+  auto factory = std::make_shared<fizz::test::MockFactory>();
   auto certManager = std::make_shared<CertManager>();
   auto ticketCipher = std::make_shared<
       Aead128GCMTicketCipher<TicketCodec<CertificateStorage::X509>>>(

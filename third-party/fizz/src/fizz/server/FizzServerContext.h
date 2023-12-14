@@ -9,7 +9,7 @@
 #pragma once
 
 #include <fizz/protocol/Certificate.h>
-#include <fizz/protocol/OpenSSLFactory.h>
+#include <fizz/protocol/Factory.h>
 #include <fizz/protocol/clock/SystemClock.h>
 #include <fizz/protocol/ech/Decrypter.h>
 #include <fizz/record/Types.h>
@@ -49,7 +49,11 @@ enum class AlpnMode { AllowMismatch, Optional, Required };
 
 class FizzServerContext {
  public:
-  FizzServerContext() : factory_(std::make_shared<OpenSSLFactory>()) {}
+  FizzServerContext();
+
+  explicit FizzServerContext(std::shared_ptr<Factory> factory)
+      : factory_(std::move(factory)) {}
+
   virtual ~FizzServerContext() = default;
 
   /**

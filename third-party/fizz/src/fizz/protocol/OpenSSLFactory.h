@@ -10,42 +10,31 @@
 
 #include <fizz/crypto/Sha256.h>
 #include <fizz/crypto/Sha384.h>
-#include <fizz/protocol/Factory.h>
+#include <fizz/crypto/aead/AEGISCipher.h>
+#include <fizz/crypto/aead/AESGCM128.h>
+#include <fizz/crypto/aead/AESGCM256.h>
+#include <fizz/crypto/aead/AESOCB128.h>
+#include <fizz/crypto/aead/ChaCha20Poly1305.h>
+#include <fizz/crypto/aead/OpenSSLEVPCipher.h>
+#include <fizz/crypto/exchange/ECCurveKeyExchange.h>
+#include <fizz/crypto/exchange/X25519.h>
+#include <fizz/protocol/DefaultFactory.h>
 
 namespace fizz {
 
-class OpenSSLFactory : public Factory {
+class OpenSSLFactory : public DefaultFactory {
  public:
+  [[nodiscard]] std::unique_ptr<KeyExchange> makeKeyExchange(
+      NamedGroup group,
+      KeyExchangeMode mode) const override;
+
+  [[nodiscard]] std::unique_ptr<Aead> makeAead(
+      CipherSuite cipher) const override;
+
   std::unique_ptr<KeyDerivation> makeKeyDeriver(
-      CipherSuite cipher) const override {
-    switch (cipher) {
-      case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:
-      case CipherSuite::TLS_AES_128_GCM_SHA256:
-      case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
-      case CipherSuite::TLS_AEGIS_128L_SHA256:
-        return KeyDerivationImpl::make<Sha256>(getHkdfPrefix());
-      case CipherSuite::TLS_AES_256_GCM_SHA384:
-      case CipherSuite::TLS_AEGIS_256_SHA384:
-        return KeyDerivationImpl::make<Sha384>(getHkdfPrefix());
-      default:
-        throw std::runtime_error("ks: not implemented");
-    }
-  }
+      CipherSuite cipher) const override;
 
   std::unique_ptr<HandshakeContext> makeHandshakeContext(
-      CipherSuite cipher) const override {
-    switch (cipher) {
-      case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:
-      case CipherSuite::TLS_AES_128_GCM_SHA256:
-      case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
-      case CipherSuite::TLS_AEGIS_128L_SHA256:
-        return std::make_unique<HandshakeContextImpl<Sha256>>(getHkdfPrefix());
-      case CipherSuite::TLS_AES_256_GCM_SHA384:
-      case CipherSuite::TLS_AEGIS_256_SHA384:
-        return std::make_unique<HandshakeContextImpl<Sha384>>(getHkdfPrefix());
-      default:
-        throw std::runtime_error("hs: not implemented");
-    }
-  }
+      CipherSuite cipher) const override;
 };
 } // namespace fizz

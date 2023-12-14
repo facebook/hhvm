@@ -8,133 +8,77 @@
 
 #pragma once
 
-#include <fizz/fizz-config.h>
-#if FIZZ_BUILD_AEGIS
-#include <fizz/crypto/aead/AEGISCipher.h>
-#endif
+#include <memory>
+#include <string>
 
+#include <fizz/crypto/KeyDerivation.h>
 #include <fizz/crypto/RandomGenerator.h>
-#include <fizz/crypto/aead/AESGCM128.h>
-#include <fizz/crypto/aead/AESGCM256.h>
-#include <fizz/crypto/aead/AESOCB128.h>
-#include <fizz/crypto/aead/ChaCha20Poly1305.h>
-#include <fizz/crypto/aead/OpenSSLEVPCipher.h>
-#include <fizz/crypto/exchange/ECCurveKeyExchange.h>
+#include <fizz/crypto/aead/Aead.h>
 #include <fizz/crypto/exchange/KeyExchange.h>
-#include <fizz/crypto/exchange/X25519.h>
 #include <fizz/protocol/Certificate.h>
 #include <fizz/protocol/HandshakeContext.h>
-#include <fizz/protocol/IFactory.h>
 #include <fizz/protocol/KeyScheduler.h>
+#include <fizz/protocol/Types.h>
 #include <fizz/record/EncryptedRecordLayer.h>
 #include <fizz/record/PlaintextRecordLayer.h>
 #include <fizz/record/Types.h>
+#include <folly/io/async/AsyncTransportCertificate.h>
 
 namespace fizz {
+
+class PeerCert;
 
 /**
  * This class instantiates various objects to facilitate testing.
  */
-class Factory : public IFactory {
+class Factory {
  public:
+  enum class KeyExchangeMode { Server, Client };
+
+  virtual ~Factory() = default;
+
   virtual std::unique_ptr<PlaintextReadRecordLayer>
-  makePlaintextReadRecordLayer() const override {
-    return std::make_unique<PlaintextReadRecordLayer>();
-  }
+  makePlaintextReadRecordLayer() const = 0;
 
   virtual std::unique_ptr<PlaintextWriteRecordLayer>
-  makePlaintextWriteRecordLayer() const override {
-    return std::make_unique<PlaintextWriteRecordLayer>();
-  }
+  makePlaintextWriteRecordLayer() const = 0;
 
   virtual std::unique_ptr<EncryptedReadRecordLayer>
-  makeEncryptedReadRecordLayer(EncryptionLevel encryptionLevel) const override {
-    return std::make_unique<EncryptedReadRecordLayer>(encryptionLevel);
-  }
+  makeEncryptedReadRecordLayer(EncryptionLevel encryptionLevel) const = 0;
 
   virtual std::unique_ptr<EncryptedWriteRecordLayer>
-  makeEncryptedWriteRecordLayer(
-      EncryptionLevel encryptionLevel) const override {
-    return std::make_unique<EncryptedWriteRecordLayer>(encryptionLevel);
-  }
+  makeEncryptedWriteRecordLayer(EncryptionLevel encryptionLevel) const = 0;
 
   virtual std::unique_ptr<KeyScheduler> makeKeyScheduler(
-      CipherSuite cipher) const override {
-    auto keyDer = makeKeyDeriver(cipher);
-    return std::make_unique<KeyScheduler>(std::move(keyDer));
-  }
+      CipherSuite cipher) const = 0;
 
   virtual std::unique_ptr<KeyDerivation> makeKeyDeriver(
-      CipherSuite cipher) const override = 0;
+      CipherSuite cipher) const = 0;
 
   virtual std::unique_ptr<HandshakeContext> makeHandshakeContext(
-      CipherSuite cipher) const override = 0;
+      CipherSuite cipher) const = 0;
 
   virtual std::unique_ptr<KeyExchange> makeKeyExchange(
       NamedGroup group,
-      KeyExchangeMode mode) const override {
-    (void)mode;
-    switch (group) {
-      case NamedGroup::secp256r1:
-        return std::make_unique<OpenSSLECKeyExchange<P256>>();
-      case NamedGroup::secp384r1:
-        return std::make_unique<OpenSSLECKeyExchange<P384>>();
-      case NamedGroup::secp521r1:
-        return std::make_unique<OpenSSLECKeyExchange<P521>>();
-      case NamedGroup::x25519:
-        return std::make_unique<X25519KeyExchange>();
-      default:
-        throw std::runtime_error("ke: not implemented");
-    }
-  }
+      KeyExchangeMode mode) const = 0;
 
-  virtual std::unique_ptr<Aead> makeAead(CipherSuite cipher) const override {
-    switch (cipher) {
-      case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:
-        return OpenSSLEVPCipher::makeCipher<ChaCha20Poly1305>();
-      case CipherSuite::TLS_AES_128_GCM_SHA256:
-        return OpenSSLEVPCipher::makeCipher<AESGCM128>();
-      case CipherSuite::TLS_AES_256_GCM_SHA384:
-        return OpenSSLEVPCipher::makeCipher<AESGCM256>();
-      case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
-        return OpenSSLEVPCipher::makeCipher<AESOCB128>();
-#if FIZZ_BUILD_AEGIS
-      case CipherSuite::TLS_AEGIS_256_SHA384:
-        return AEGISCipher::make256();
-      case CipherSuite::TLS_AEGIS_128L_SHA256:
-        return AEGISCipher::make128L();
-#endif
-      default:
-        throw std::runtime_error("aead: not implemented");
-    }
-  }
+  [[nodiscard]] virtual std::unique_ptr<Aead> makeAead(
+      CipherSuite cipher) const = 0;
 
-  virtual Random makeRandom() const override {
-    return RandomGenerator<Random().size()>().generateRandom();
-  }
+  [[nodiscard]] virtual Random makeRandom() const = 0;
 
-  virtual uint32_t makeTicketAgeAdd() const override {
-    return RandomNumGenerator<uint32_t>().generateRandom();
-  }
+  [[nodiscard]] virtual uint32_t makeTicketAgeAdd() const = 0;
 
-  virtual std::unique_ptr<folly::IOBuf> makeRandomBytes(
-      size_t count) const override {
-    return RandomBufGenerator(count).generateRandom();
-  }
+  [[nodiscard]] virtual std::unique_ptr<folly::IOBuf> makeRandomBytes(
+      size_t count) const = 0;
 
   virtual std::shared_ptr<PeerCert> makePeerCert(
       CertificateEntry certEntry,
-      bool /*leaf*/) const override {
-    return CertUtils::makePeerCert(std::move(certEntry.cert_data));
-  }
+      bool /*leaf*/) const = 0;
 
-  virtual std::shared_ptr<Cert> makeIdentityOnlyCert(
-      std::string ident) const override {
-    return std::make_shared<IdentityCert>(std::move(ident));
-  }
+  [[nodiscard]] virtual std::shared_ptr<folly::AsyncTransportCertificate>
+  makeIdentityOnlyCert(std::string ident) const = 0;
 
-  virtual std::string getHkdfPrefix() const override {
-    return kHkdfLabelPrefix.str();
-  }
+  [[nodiscard]] virtual std::string getHkdfPrefix() const = 0;
 };
 } // namespace fizz

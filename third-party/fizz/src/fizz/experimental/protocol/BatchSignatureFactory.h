@@ -14,8 +14,8 @@
 namespace fizz {
 
 /**
- * A decorator class for an exisiting Factory to generate PeerCert that supports
- * batch signature schemes.
+ * A decorator class for an exisiting DefaultFactory to generate PeerCert that
+ * supports batch signature schemes.
  */
 class BatchSignatureFactory : public Factory {
  public:
@@ -80,6 +80,10 @@ class BatchSignatureFactory : public Factory {
     return original_->makeTicketAgeAdd();
   }
 
+  std::unique_ptr<folly::IOBuf> makeRandomBytes(size_t count) const override {
+    return original_->makeRandomBytes(count);
+  }
+
   /**
    * Make BatchSigPeerCert instead of PeerCert.
    *
@@ -93,6 +97,10 @@ class BatchSignatureFactory : public Factory {
           original_->makePeerCert(std::move(certEntry), leaf));
     }
     return original_->makePeerCert(std::move(certEntry), leaf);
+  }
+
+  std::shared_ptr<Cert> makeIdentityOnlyCert(std::string ident) const override {
+    return original_->makeIdentityOnlyCert(std::move(ident));
   }
 
   std::string getHkdfPrefix() const override {

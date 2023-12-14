@@ -8,6 +8,7 @@
 #include <fizz/server/TicketTypes.h>
 #include <fizz/util/FizzUtil.h>
 
+#include <fizz/crypto/exchange/X25519.h>
 #include <folly/FileUtil.h>
 #include <folly/Format.h>
 #include <folly/io/async/SSLContext.h>

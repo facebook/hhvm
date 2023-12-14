@@ -7,6 +7,7 @@
  */
 
 #include <fizz/client/AsyncFizzClient.h>
+#include <fizz/crypto/RandomGenerator.h>
 #include <fizz/crypto/Utils.h>
 #include <fizz/crypto/aead/AESGCM128.h>
 #include <fizz/crypto/aead/OpenSSLEVPCipher.h>

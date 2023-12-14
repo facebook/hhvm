@@ -204,6 +204,7 @@ set(FIZZ_SOURCES
   record/BufAndPaddingPolicy.cpp
   server/AeadTokenCipher.cpp
   server/AeadCookieCipher.cpp
+  server/FizzServerContext.cpp
   server/ServerProtocol.cpp
   server/CertManager.cpp
   server/State.cpp
@@ -219,6 +220,7 @@ set(FIZZ_SOURCES
   protocol/Events.cpp
   protocol/KeyScheduler.cpp
   protocol/Certificate.cpp
+  protocol/OpenSSLFactory.cpp
   protocol/Params.cpp
   protocol/clock/SystemClock.cpp
   protocol/ech/Decrypter.cpp
@@ -239,6 +241,7 @@ set(FIZZ_SOURCES
   experimental/ktls/FizzKTLSCallback.cpp
   experimental/ktls/AsyncKTLSSocket.cpp
   experimental/ktls/KTLS.cpp
+  client/FizzClientContext.cpp
   client/State.cpp
   client/ClientProtocol.cpp
   client/PskSerializationUtils.cpp

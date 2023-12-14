@@ -490,7 +490,7 @@ public:
    * reference) in C++.
    */
   bool isSimpleType() const;
-  bool isReferenceType() const;
+  bool isSingularReferenceType() const;
 
 
   /////////////////////////////////////////////////////////////////////////////

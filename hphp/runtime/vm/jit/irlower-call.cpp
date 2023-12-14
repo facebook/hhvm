@@ -255,7 +255,6 @@ void cgCallFuncEntry(IRLS& env, const IRInstruction* inst) {
 void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<CallBuiltin>();
   auto const callee = extra->callee;
-  auto const funcReturnType = callee->returnTypeConstraint().asSystemlibType();
   auto const returnByValue = callee->isReturnByValue();
 
   auto& v = vmain(env);
@@ -268,29 +267,20 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
   auto const tmpType = v.makeReg();
 
   auto returnType = inst->dst()->type();
-  // Subtract out the null possibility from the return type if it would be a
-  // reference type otherwise. Don't do this if the type is nothing but a null
-  // (which would give us TBottom. This makes it easier to test what kind of
-  // return we need to generate below.
+
   if (returnType.maybe(TNull) && !(returnType <= TNull)) {
-    if ((returnType - TNull).isReferenceType()) {
+    if ((returnType - TNull).isSingularReferenceType()) {
       returnType -= TNull;
     }
   }
-
-  // Whether `t' is passed in/out of C++ as String&/Array&/Object&.
-  auto const isReqPtrRef = [] (MaybeDataType t) {
-    return isStringType(t) || isArrayLikeType(t) ||
-           t == KindOfObject || t == KindOfResource;
-  };
 
   int returnOffset = rds::kVmMInstrStateOff +
                      offsetof(MInstrState, tvBuiltinReturn);
   auto args = argGroup(env, inst);
 
   if (!returnByValue) {
-    if (isBuiltinByRef(funcReturnType)) {
-      if (isReqPtrRef(funcReturnType)) {
+    if (!returnType.isSimpleType()) {
+      if (returnType.isSingularReferenceType()) {
         returnOffset += TVOFF(m_data);
       }
       // Pass the address of tvBuiltinReturn to the native function as the
@@ -370,9 +360,9 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
   }
 
   auto dest = [&] () -> CallDest {
-    if (isBuiltinByRef(funcReturnType)) {
+    if (!returnType.isSimpleType()) {
       if (!returnByValue) return kVoidDest; // indirect return
-      return funcReturnType
+      return returnType.isSingularReferenceType()
         ? callDest(dstData) // String, Array, or Object
         : callDest(dstData, dstType); // Variant
     }
@@ -398,9 +388,8 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
   // writes the return value into MInstrState::tvBuiltinReturn, from where it
   // has to be tested and copied.
 
-  if (returnType.isReferenceType()) {
+  if (returnType.isSingularReferenceType()) {
     // The return type is String, Array, or Object; fold nullptr to KindOfNull.
-    assertx(isBuiltinByRef(funcReturnType) && isReqPtrRef(funcReturnType));
 
     v << load{rvmtl()[returnOffset], tmpData};
 
@@ -416,7 +405,6 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
 
   if (returnType <= TCell) {
     // The return type is Variant; fold KindOfUninit to KindOfNull.
-    assertx(isBuiltinByRef(funcReturnType) && !isReqPtrRef(funcReturnType));
 
     v << load{rvmtl()[returnOffset + TVOFF(m_data)], tmpData};
 

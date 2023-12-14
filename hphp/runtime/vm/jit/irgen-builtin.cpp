@@ -2034,25 +2034,13 @@ Type builtinReturnType(const Func* builtin) {
   // approximation). The builtin's return type inferred here is used to control
   // code-gen when lowering the builtin call to vasm and must be no more general
   // than the HNI declaration (if present).
-  auto type = [&]{
-    if (auto const hniType = builtin->returnTypeConstraint().asSystemlibType()) {
-      return Type{*hniType};
-    }
-    return TInitCell;
-  }();
+  auto type = typeFromFuncReturn(builtin);
 
   // Allow builtins to return bespoke array likes if the flag is set.
   assertx(!type.arrSpec().vanilla());
   if (!allowBespokeArrayLikes()) type = type.narrowToVanilla();
 
-  // "Reference" types (types represented by a pointer) can always be null.
-  if (type.isReferenceType()) {
-    type |= TInitNull;
-  } else {
-    assertx(type == TInitCell || type.isSimpleType());
-  }
-
-  return type & TInitCell;
+  return type;
 }
 
 /////////////////////////////////////////////////////////////////////

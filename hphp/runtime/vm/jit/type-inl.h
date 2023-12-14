@@ -251,8 +251,8 @@ inline bool Type::isSimpleType() const {
   return subtypeOfAny(TBool, TInt, TDbl, TNull);
 }
 
-inline bool Type::isReferenceType() const {
-  return subtypeOfAny(TStr, TArrLike, TObj, TRes);
+inline bool Type::isSingularReferenceType() const {
+  return *this != TBottom && subtypeOfAny(TStr, TVec, TDict, TKeyset, TObj, TRes);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

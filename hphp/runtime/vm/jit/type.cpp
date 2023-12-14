@@ -1155,7 +1155,14 @@ Type typeFromFuncReturn(const Func* func) {
   auto const getThisType = [&] {
     return func->cls() ? Type::SubObj(func->cls()) : TBottom;
   };
-  return typeFromTCImpl(tc, getThisType, func->cls(), true) & TInitCell;
+  auto const rt = typeFromTCImpl(tc, getThisType, func->cls(), true) & TInitCell;
+
+  if (rt.maybe(TInitNull) && rt > TInitNull) {
+    return TInitCell;
+  }
+
+  if (rt.subtypeOfAny(TStr, TArrLike, TObj, TRes)) return rt | TInitNull;
+  return rt;
 }
 
 //////////////////////////////////////////////////////////////////////

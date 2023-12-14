@@ -1,5 +1,5 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 $sockets = @stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
-if (!$sockets) die("skip stream_socket_pair");
+if (!$sockets) exit("skip stream_socket_pair");
 }

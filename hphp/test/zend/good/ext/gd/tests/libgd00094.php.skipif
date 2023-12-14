@@ -1,5 +1,5 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-if (!extension_loaded('gd')) die("skip gd extension not available\n");
-if (!GD_BUNDLED) die("skip requires bundled GD library\n");
+if (!extension_loaded('gd')) exit("skip gd extension not available\n");
+if (!GD_BUNDLED) exit("skip requires bundled GD library\n");
 }

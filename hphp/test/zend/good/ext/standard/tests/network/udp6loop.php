@@ -12,13 +12,13 @@ for ($i=0; $i<100; $i++) {
 }
 
   if (!$server) {
-      die('Unable to create AF_INET6 socket [server]');
+      exit('Unable to create AF_INET6 socket [server]');
   }
 
   /* Connect to it */
   $client = stream_socket_client("udp://[::1]:$port", inout $errno, inout $errstr);
   if (!$client) {
-      die('Unable to create AF_INET6 socket [client]');
+      exit('Unable to create AF_INET6 socket [client]');
   }
 
   fwrite($client, "ABCdef123\n");

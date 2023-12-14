@@ -313,7 +313,7 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = varr
   if (!\HH\global_get('USE_UNIX_SOCKET')) {
     // Grab an available port.
     $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-    socket_bind($sock, "localhost", 0) || die("Could not bind socket");
+    socket_bind($sock, "localhost", 0) || exit("Could not bind socket");
     $ip = null;
     $port = null;
     socket_getsockname($sock, inout $ip, inout $port);

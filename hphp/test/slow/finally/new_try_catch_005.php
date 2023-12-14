@@ -29,7 +29,7 @@ function blah() :mixed{
     } catch (B $ab) {
       echo "7\n";
     } catch (Exception $e) {
-      die("fff\n");
+      exit("fff\n");
     } finally {
       echo "8\n";
     }

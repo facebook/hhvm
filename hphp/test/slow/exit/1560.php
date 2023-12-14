@@ -6,5 +6,5 @@ function foo() :mixed{
 
 <<__EntryPoint>>
 function main_1560() :mixed{
-foo() || die("foobar");
+foo() || exit("foobar");
 }

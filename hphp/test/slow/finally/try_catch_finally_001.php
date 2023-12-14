@@ -10,7 +10,7 @@ function foo () :mixed{
                 throw new Exception("try");
             } catch (AE $e) {
                 echo "0";
-                die("error");
+                exit("error");
             } finally {
                 echo "1";
             }
@@ -18,7 +18,7 @@ function foo () :mixed{
             echo "2";
         }
     } catch (BE $e) {
-      die("error");
+      exit("error");
     } catch (Exception $e) {
         echo "3";
     } finally {

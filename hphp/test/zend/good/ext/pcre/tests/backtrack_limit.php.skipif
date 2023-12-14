@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 if (@preg_match_all('/\p{N}/', '0123456789') === false) {
-    die("skip no support for \p support PCRE library");
+    exit("skip no support for \p support PCRE library");
 }
 }

@@ -31,7 +31,7 @@ for ($i=0; $i<100; $i++) {
 $client = fsockopen("tcp://127.0.0.1:$port", -1, inout $errno, inout $errstr);
 
 if (!$client) {
-    die("Unable to create socket");
+    exit("Unable to create socket");
 }
 
 /* Accept that connection */

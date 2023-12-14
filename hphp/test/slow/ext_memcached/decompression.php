@@ -34,12 +34,12 @@ $errstr = null;
 // Write the values to memcache using a raw socket connection
 // to make sure that they are not transformed in any way.
 $socket = fsockopen('localhost', 11211, inout $errno, inout $errstr);
-$socket || die("Couldn't connect to memcache.\n");
+$socket || exit("Couldn't connect to memcache.\n");
 foreach($keys as $key => $value) {
   extract($value, EXTR_OVERWRITE);
   $size = strlen($data);
   fwrite($socket, "set $key $flag 0 $size\r\n$data\r\n");
-  fread($socket, 8) === "STORED\r\n" || die("Couldn't store value.\n");
+  fread($socket, 8) === "STORED\r\n" || exit("Couldn't store value.\n");
 }
 socket_close($socket);
 

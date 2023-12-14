@@ -33,7 +33,7 @@ function blah() :mixed{
       }
       echo "ccc\n";
     } catch (A $ae) {
-      die("ddd\n");
+      exit("ddd\n");
     } finally {
       echo "11\n";
       try {

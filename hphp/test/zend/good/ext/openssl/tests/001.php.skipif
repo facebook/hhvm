@@ -1,5 +1,5 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-if (!extension_loaded("openssl")) die("skip");
-if (!@openssl_pkey_new()) die("skip cannot create private key");
+if (!extension_loaded("openssl")) exit("skip");
+if (!@openssl_pkey_new()) exit("skip cannot create private key");
 }

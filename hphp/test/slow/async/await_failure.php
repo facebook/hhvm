@@ -26,7 +26,7 @@ function main() :mixed{
   }
 
   $x = bar();
-  if (!$x->isFinished()) { die("test failed"); }
+  if (!$x->isFinished()) { exit("test failed"); }
   try {
     var_dump(HH\Asio\result($x));
   } catch (Blah $x) {

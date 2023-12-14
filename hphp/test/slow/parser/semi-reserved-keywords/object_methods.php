@@ -187,7 +187,7 @@ class Foo {
   public function catch(): int {
     return 60;
   }
-  // public function die(): int {
+  // public function exit(): int {
   //   return 61;
   // }
   public function self(): int {
@@ -266,7 +266,7 @@ echo $foo->do();
 echo $foo->while();
 echo $foo->as();
 echo $foo->catch();
-//echo $foo->die();
+//echo $foo->exit();
 echo $foo->self();
 echo $foo->parent();
 echo $foo->unset();

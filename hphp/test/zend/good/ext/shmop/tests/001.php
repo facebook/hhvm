@@ -6,7 +6,7 @@ $write_d2 = "test #2 append data to shared memory segment";
 echo "shm open for create: ";
 $shm_id = shmop_open($hex_shm_id, "n", 0644, 1024);
 if (!$shm_id) {
-  die("failed\n");
+  exit("failed\n");
 } else {
   echo "ok\n";
 }
@@ -51,7 +51,7 @@ if (!$shm_id) {
 echo "shm write test #1: ";
 $written = shmop_write($shm_id, $write_d2, $written);
 if ($written != strlen($write_d2)) {
-  die("failed\n");
+  exit("failed\n");
 } else {
   echo "ok\n";
 }

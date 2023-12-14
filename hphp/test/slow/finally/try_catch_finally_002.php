@@ -11,7 +11,7 @@ function foo () :mixed{
                    echo "1";
                    throw new Exception("try");
                 } catch (AE $e) {
-                   die("error");
+                   exit("error");
                 } finally {
                    echo "2";
                 }
@@ -19,14 +19,14 @@ function foo () :mixed{
                 echo "3";
             }
         } catch (BE $e) {
-            die("error");
+            exit("error");
         } finally {
             echo "4";
         }
     } catch (Exception $e) {
         echo "5";
     } catch (AE $e) {
-        die("error");
+        exit("error");
     } finally {
         echo "6";
     }

@@ -21,7 +21,7 @@ var_dump(openssl_x509_export($e, inout $output5));    // read an array, fails
 
 $outfilename = tempnam(sys_get_temp_dir(), "ssl");
 if ($outfilename === false)
-        die("failed to get a temporary filename!");
+        exit("failed to get a temporary filename!");
 
 echo "---\n";
 

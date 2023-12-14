@@ -56,6 +56,6 @@ try {
     $runner->run(new AAA);
 }
 catch(Exception $e) {
-    die('Exception thrown');
+    exit('Exception thrown');
 }
 }

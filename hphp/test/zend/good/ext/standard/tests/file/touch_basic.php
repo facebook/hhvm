@@ -12,11 +12,11 @@ $filename = sys_get_temp_dir().'/'.'touch_basic.dat';
 echo "\n--- testing touch creates a file ---\n";
 @unlink($filename);
 if (file_exists($filename)) {
-   die("touch_basic failed");
+   exit("touch_basic failed");
 }
 var_dump( touch($filename) );
 if (file_exists($filename) == false) {
-   die("touch_basic failed");
+   exit("touch_basic failed");
 }
 
 echo "\n --- testing touch doesn't alter file contents ---\n";

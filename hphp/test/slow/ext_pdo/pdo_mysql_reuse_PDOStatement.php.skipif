@@ -9,6 +9,6 @@ $db     = getenv("MYSQL_TEST_DB")     ? getenv("MYSQL_TEST_DB") : "test";
 try {
   $pdo = new PDO("mysql:dbname=$db;host=$host", $user, $passwd);
 } catch (PDOException $e) {
-  die("skip: ".$e->getMessage());
+  exit("skip: ".$e->getMessage());
 }
 }

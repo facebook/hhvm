@@ -4,6 +4,6 @@
   skip_if_no_iconv();
 
   if (@iconv("ascii","UCS-4LE", "abcd") == '') {
-    die("skip conversion to UCS-4LE not supported");
+    exit("skip conversion to UCS-4LE not supported");
   }
 }

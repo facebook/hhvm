@@ -3,7 +3,7 @@
 function main(): void {
   $drivers = PDO::getAvailableDrivers();
   if (!in_array('mysql', $drivers)) {
-    die("skip: Driver not found");
+    exit("skip: Driver not found");
   }
 
   $environmentVars = vec[
@@ -16,7 +16,7 @@ function main(): void {
 
   foreach ($environmentVars as $environmentVar) {
     if (false === getenv($environmentVar)) {
-      die("skip: Environment variable $environmentVar is not set.");
+      exit("skip: Environment variable $environmentVar is not set.");
     }
   }
 }

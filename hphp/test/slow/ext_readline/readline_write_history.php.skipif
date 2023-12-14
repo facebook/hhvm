@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 if (READLINE_LIB !== "readline") {
-  die("skip");
+  exit("skip");
 }
 }

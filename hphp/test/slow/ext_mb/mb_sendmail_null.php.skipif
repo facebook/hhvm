@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 if (!is_executable('/usr/sbin/sendmail')) {
-  die("skip sendmail not available.");
+  exit("skip sendmail not available.");
 }
 }

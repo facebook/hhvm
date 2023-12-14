@@ -17,20 +17,20 @@ function main_entry(): void {
       }
     }
   	if (!$server) {
-  		die('Unable to create AF_INET socket [server]');
+  		exit('Unable to create AF_INET socket [server]');
   	}
 
   	/* Connect to it */
   	$client = stream_socket_client("tcp://127.0.0.1:$port", inout $errno, inout $errstr);
   	if (!$client) {
-  		die('Unable to create AF_INET socket [client]');
+  		exit('Unable to create AF_INET socket [client]');
   	}
 
   	/* Accept that connection */
     $peername = null;
 	$socket = stream_socket_accept($server, -1.0, inout $peername);
   	if (!$socket) {
-  		die('Unable to accept connection');
+  		exit('Unable to accept connection');
   	}
 
   	fwrite($client, "ABCdef123\n");

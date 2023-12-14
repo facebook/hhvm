@@ -2,20 +2,20 @@
 $sockdir = getenv('HPHP_TEST_SOCKETDIR') ?? sys_get_temp_dir();
 $uniqid = uniqid();
 if (file_exists($sockdir."/$uniqid.sock"))
-    die('Temporary socket '.$sockdir.'/$uniqid.sock already exists.');
+    exit('Temporary socket '.$sockdir.'/$uniqid.sock already exists.');
 
 /* Setup socket server */
 $errno = null;
 $errstr = null;
 $server = stream_socket_server("udg://".$sockdir."/$uniqid.sock", inout $errno, inout $errstr, STREAM_SERVER_BIND);
 if (!$server) {
-    die('Unable to create AF_UNIX socket [server]');
+    exit('Unable to create AF_UNIX socket [server]');
 }
 
 /* Connect to it */
 $client = stream_socket_client("udg://".$sockdir."/$uniqid.sock", inout $errno, inout $errstr);
 if (!$client) {
-    die('Unable to create AF_UNIX socket [client]');
+    exit('Unable to create AF_UNIX socket [client]');
 }
 
 fwrite($client, "ABCdef123\n");

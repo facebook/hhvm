@@ -33,11 +33,11 @@ try {
     }
     echo "ccc\n";
   } catch (A $ae) {
-    die("ddd\n");
+    exit("ddd\n");
   } catch (B $ab) {
     echo "11\n";
   } catch (Exception $e) {
-    die("eee\n");
+    exit("eee\n");
   } finally {
     echo "12\n";
     try {

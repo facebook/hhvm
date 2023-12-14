@@ -21,7 +21,7 @@ function main_entry(): void {
   	$underflow = "-9223372036854775809";
   	break;
   default:
-  	die("failed: unknown value for PHP_MAX_INT");
+  	exit("failed: unknown value for PHP_MAX_INT");
   	break;
   }
 

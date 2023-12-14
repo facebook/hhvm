@@ -2,7 +2,7 @@
 <<__EntryPoint>> function main(): void {
     $server = socket_create(AF_INET6, SOCK_STREAM, getprotobyname('tcp'));
     if (!$server) {
-        die('Unable to create AF_INET6 socket [server]');
+        exit('Unable to create AF_INET6 socket [server]');
     }
     $bound = false;
     for($port = 31337; $port < 31357; ++$port) {
@@ -13,25 +13,25 @@
         }
     }
     if (!$bound) {
-        die("Unable to bind to [::1]:$port");
+        exit("Unable to bind to [::1]:$port");
     }
     if (!socket_listen($server, 2)) {
-        die('Unable to listen on socket');
+        exit('Unable to listen on socket');
     }
 
     /* Connect to it */
     $client = socket_create(AF_INET6, SOCK_STREAM, getprotobyname('tcp'));
     if (!$client) {
-        die('Unable to create AF_INET6 socket [client]');
+        exit('Unable to create AF_INET6 socket [client]');
     }
     if (!socket_connect($client, '::1', $port)) {
-        die('Unable to connect to server socket');
+        exit('Unable to connect to server socket');
     }
 
     /* Accept that connection */
     $socket = socket_accept($server);
     if (!$socket) {
-        die('Unable to accept connection');
+        exit('Unable to accept connection');
     }
 
     socket_write($client, "ABCdef123\n");

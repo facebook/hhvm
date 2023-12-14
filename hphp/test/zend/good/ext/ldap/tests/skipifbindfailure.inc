@@ -9,7 +9,7 @@ function skip_if_bind_failure(): void {
   error_reporting(0);
   if (!ldap_bind($link, test_user(), test_passwd())) {
     error_reporting($error);
-    die(sprintf(
+    exit(sprintf(
       "skip Can't bind to LDAP Server - [%d] %s",
       ldap_errno($link),
       ldap_error($link),

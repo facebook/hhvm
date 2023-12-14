@@ -919,8 +919,6 @@ module PseudoFunctions = struct
 
   let exit = "\\exit"
 
-  let die = "\\die"
-
   let unsafe_cast = "\\HH\\FIXME\\UNSAFE_CAST"
 
   let unsafe_nonnull_cast = "\\HH\\FIXME\\UNSAFE_NONNULL_CAST"
@@ -942,7 +940,6 @@ module PseudoFunctions = struct
         echo;
         empty;
         exit;
-        die;
         unsafe_cast;
         unsafe_nonnull_cast;
       ]
@@ -1124,12 +1121,10 @@ module PseudoConsts = struct
 
   let g__FUNCTION_CREDENTIAL__ = "\\__FUNCTION_CREDENTIAL__"
 
-  (* exit and die are not pseudo consts, but they are currently parsed as such.
-   * Would be more correct to parse them as special statements like return
+  (* exit is not a pseudo consts, but it is currently parsed as such.
+   * Would be more correct to parse it as special statement like return
    *)
   let exit = "\\exit"
-
-  let die = "\\die"
 
   let all_pseudo_consts =
     HashSet.of_list
@@ -1145,7 +1140,6 @@ module PseudoConsts = struct
         g__COMPILER_FRONTEND__;
         g__FUNCTION_CREDENTIAL__;
         exit;
-        die;
       ]
 
   let is_pseudo_const x = HashSet.mem all_pseudo_consts x

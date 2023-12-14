@@ -13,14 +13,14 @@ function test_auth_digest_entrypoint() :mixed{
             '",qop="auth",nonce="' . uniqid() . '",opaque="' .
             md5($realm) . '"');
 
-        die('Text to send if user hits Cancel button');
+        exit('Text to send if user hits Cancel button');
     }
 
 
     // analyze the PHP_AUTH_DIGEST variable
     if (!($data = http_digest_parse($_SERVER['PHP_AUTH_DIGEST'])) ||
         !isset($users[$data['username']]))
-        die('Wrong Credentials!');
+        exit('Wrong Credentials!');
 
 
     // generate the valid response
@@ -30,7 +30,7 @@ function test_auth_digest_entrypoint() :mixed{
                         $data['cnonce'] . ':' . $data['qop'] . ':' . $A2);
 
     if ($data['response'] != $valid_response)
-        die('Wrong Credentials!');
+        exit('Wrong Credentials!');
 
     // ok, valid username & password
     echo 'You are logged in as: ' . $data['username'];

@@ -9,7 +9,7 @@ while(100000 > $i++) {
 	/*echo "$d\n";*/
 
 	if ($d < 0) {
-		die("failed in {$i}th iteration");
+		exit("failed in {$i}th iteration");
 	}
 }
 echo "ok\n";

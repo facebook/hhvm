@@ -7,14 +7,14 @@ function send_to_pagelet($relative_file_path, $locale) :mixed{
   );
   if (is_null($task)) {
     echo "Failed to start pagelet task\n";
-    die();
+    exit();
   }
 
   $rc = 0;
   $result = pagelet_server_task_result($task, inout $headers, inout $rc, 2000);
   if ($rc != 200) {
     echo "Failed to finish pagelet task, status = $rc\n";
-    die();
+    exit();
   }
 
   echo trim($result) . "\n";
@@ -58,7 +58,7 @@ echo ($is_pagelet ? "Pagelet: " : "Not pagelet: "),
 if (!$is_pagelet) {
   if (!pagelet_server_is_enabled()) {
     echo "This test needs pagelet server enabled\n";
-    die();
+    exit();
   }
 
   // Send to pagelet multiple times to ensure the previously set locale

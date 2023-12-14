@@ -200,7 +200,7 @@ echo "dynamic call 'missing(2)' ".ObjectMethod736::$trace.", FAIL =", call_user_
 
 // test mapping for system function names
 $ourFileName = sys_get_temp_dir().'/'.'testFile.txt';
-($ourFileHandle = fopen($ourFileName, 'w')) || die("can't open file");
+($ourFileHandle = fopen($ourFileName, 'w')) || exit("can't open file");
 fclose($ourFileHandle);
 unlink($ourFileName);
 

@@ -65,7 +65,7 @@ diff -u -r1.2 skipif.inc
 +//  @dl("iconv$dlext");
 +//}
   if (!extension_loaded("iconv")) {
-      die("skip iconv extension not available\n");
+      exit("skip iconv extension not available\n");
   }
 Index: test.inc
 =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=

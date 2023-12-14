@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 if (@preg_match('/./u', '') === false) {
-    die('skip no utf8 support in PCRE library');
+    exit('skip no utf8 support in PCRE library');
 }
 }

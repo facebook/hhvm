@@ -413,7 +413,6 @@ pub mod pseudo_functions {
     pub static echo: Lazy<FunName> = lazy!(sn::pseudo_functions::ECHO);
     pub static empty: Lazy<FunName> = lazy!(sn::pseudo_functions::EMPTY);
     pub static exit: Lazy<FunName> = lazy!(sn::pseudo_functions::EXIT);
-    pub static die: Lazy<FunName> = lazy!(sn::pseudo_functions::DIE);
     pub static unsafe_cast: Lazy<FunName> = lazy!(sn::pseudo_functions::UNSAFE_CAST);
     pub static unsafe_nonnull_cast: Lazy<FunName> =
         lazy!(sn::pseudo_functions::UNSAFE_NONNULL_CAST);
@@ -433,7 +432,6 @@ pub mod pseudo_functions {
             *echo,
             *empty,
             *exit,
-            *die,
             *unsafe_cast,
             *unsafe_nonnull_cast,
             *enforced_cast,
@@ -551,7 +549,6 @@ pub mod pseudo_consts {
     pub static g__FUNCTION_CREDENTIAL__: Lazy<ConstName> =
         lazy!(sn::pseudo_consts::G__FUNCTION_CREDENTIAL__);
     pub static exit: Lazy<ConstName> = lazy!(sn::pseudo_consts::EXIT);
-    pub static die: Lazy<ConstName> = lazy!(sn::pseudo_consts::DIE);
 }
 
 pub mod fb {

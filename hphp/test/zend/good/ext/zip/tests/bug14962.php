@@ -9,7 +9,7 @@ $za->addFromString($file, '1234');
 $za->close();
 
 if (!is_file($zipfile)) {
-	die('failed to create the archive');
+	exit('failed to create the archive');
 }
 $za = new ZipArchive;
 $za->open($zipfile);

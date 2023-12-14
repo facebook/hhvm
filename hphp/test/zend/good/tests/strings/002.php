@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 error_reporting(0);
-($fp = fopen("php://stdout", "w")) || die("Arrggsgg!!");
+($fp = fopen("php://stdout", "w")) || exit("Arrggsgg!!");
 $x = fprintf($fp, "fprintf test 1:%.5s", "abcdefghij");
 echo "\n";
 var_dump($x);

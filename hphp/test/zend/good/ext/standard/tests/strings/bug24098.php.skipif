@@ -1,4 +1,4 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-if (DIRECTORY_SEPARATOR == '\\') die("skip directory separator won't match expected output");
+if (DIRECTORY_SEPARATOR == '\\') exit("skip directory separator won't match expected output");
 }

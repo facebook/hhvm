@@ -1,7 +1,7 @@
 <?hh 
 
 <<__EntryPoint>> function skip(): void {
-  if (!extension_loaded('xsl')) die('skip xsl extension not available');
+  if (!extension_loaded('xsl')) exit('skip xsl extension not available');
   $proc = new XSLTProcessor();
-  if (!$proc->hasExsltSupport()) die('skip EXSLT support not available');
+  if (!$proc->hasExsltSupport()) exit('skip EXSLT support not available');
 }

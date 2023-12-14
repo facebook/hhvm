@@ -8,8 +8,6 @@
  *
  */
 
-// exit and die terminate the request
+// exit terminates the request
 <<__PHPStdLib>>
 function exit(HH\FIXME\MISSING_PARAM_TYPE $exit_code_or_message = 0): noreturn;
-<<__PHPStdLib>>
-function die(HH\FIXME\MISSING_PARAM_TYPE $exit_code_or_message = 0): noreturn;

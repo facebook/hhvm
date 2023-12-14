@@ -1,7 +1,7 @@
 <?hh
 
 function gen() :AsyncGenerator<mixed,mixed,void>{
-    die('Test');
+    exit('Test');
     yield; // force generator
 }
 

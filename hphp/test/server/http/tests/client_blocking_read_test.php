@@ -10,7 +10,7 @@ function createSocketStream($serverPort) :mixed{
     3.0
   );
   if (!$stream) {
-      die($errorMessage);
+      exit($errorMessage);
   }
   return $stream;
 }

@@ -531,8 +531,6 @@ pub mod pseudo_functions {
 
     pub const EXIT: &str = "\\exit";
 
-    pub const DIE: &str = "\\die";
-
     pub const UNSAFE_CAST: &str = "\\HH\\FIXME\\UNSAFE_CAST";
 
     pub const UNSAFE_NONNULL_CAST: &str = "\\HH\\FIXME\\UNSAFE_NONNULL_CAST";
@@ -554,7 +552,6 @@ pub mod pseudo_functions {
         ECHO,
         EMPTY,
         EXIT,
-        DIE,
         UNSAFE_CAST,
         UNSAFE_NONNULL_CAST,
         PACKAGE_EXISTS,
@@ -794,8 +791,6 @@ pub mod pseudo_consts {
 
     pub const G__FUNCTION_CREDENTIAL__: &str = "\\__FUNCTION_CREDENTIAL__";
 
-    pub const DIE: &str = "\\die";
-
     pub const EXIT: &str = "\\exit";
 
     pub static ALL_PSEUDO_CONSTS: &[&str] = &[
@@ -809,7 +804,6 @@ pub mod pseudo_consts {
         G__NAMESPACE__,
         G__COMPILER_FRONTEND__,
         G__FUNCTION_CREDENTIAL__,
-        DIE,
         EXIT,
     ];
 

@@ -4,7 +4,7 @@ const pass2 = 1;
 
 function errorHandler($errorNumber, $errorMessage, $fileName, $lineNumber) :mixed{
   include(__FILE__);
-  die("Error: $errorMessage ($fileName:$lineNumber)\n");
+  exit("Error: $errorMessage ($fileName:$lineNumber)\n");
 }
 
 <<__EntryPoint>>

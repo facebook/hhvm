@@ -28,7 +28,7 @@ class PDOTest {
 		$db = new $classname($dsn, $user, $pass, $attr);
 
 		if (!$db) {
-			die("Could not create PDO object (DSN=$dsn, user=$user)\n");
+			exit("Could not create PDO object (DSN=$dsn, user=$user)\n");
 		}
 
 		// clean up any crufty test tables we might have left behind
@@ -54,7 +54,7 @@ class PDOTest {
 		try {
 			$db = PDOTest::factory();
 		} catch (PDOException $e) {
-			die("skip " . $e->getMessage());
+			exit("skip " . $e->getMessage());
 		}
 	}
 

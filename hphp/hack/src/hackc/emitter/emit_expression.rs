@@ -614,7 +614,7 @@ fn emit_id<'a, 'arena, 'decl>(
             alloc,
             env.namespace.name.as_ref().map_or("", |s| &s[..]),
         )),
-        pseudo_consts::EXIT | pseudo_consts::DIE => emit_exit(emitter, env, None),
+        pseudo_consts::EXIT => emit_exit(emitter, env, None),
         _ => {
             // panic!("TODO: uncomment after D19350786 lands")
             // let cid: ConstId = hhbc::ConstName::from_ast_name(&s);
@@ -2630,7 +2630,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 instr::oo_decl_exists(class_kind),
             ])))
         }
-        ("exit", _) | ("die", _) if nargs == 0 || nargs == 1 => Ok(Some(emit_exit(
+        ("exit", _) if nargs == 0 || nargs == 1 => Ok(Some(emit_exit(
             e,
             env,
             args.first()
@@ -3401,15 +3401,11 @@ fn emit_call_expr<'a, 'arena, 'decl>(
                 instr::null(),
             ]))
         }
-        (Expr_::Id(id), [], None)
-            if id.1 == pseudo_functions::EXIT || id.1 == pseudo_functions::DIE =>
-        {
+        (Expr_::Id(id), [], None) if id.1 == pseudo_functions::EXIT => {
             let exit = emit_exit(e, env, None)?;
             Ok(emit_pos_then(pos, exit))
         }
-        (Expr_::Id(id), [(pk, arg1)], None)
-            if id.1 == pseudo_functions::EXIT || id.1 == pseudo_functions::DIE =>
-        {
+        (Expr_::Id(id), [(pk, arg1)], None) if id.1 == pseudo_functions::EXIT => {
             error::ensure_normal_paramkind(pk)?;
             let exit = emit_exit(e, env, Some(arg1))?;
             Ok(emit_pos_then(pos, exit))

@@ -23,7 +23,7 @@ class MySQLPDOTest extends PDOTest {
 
 		$db = new $classname($dsn, $user, $pass, $attr);
 		if (!$db) {
-			die("Could not create PDO object (DSN=$dsn, user=$user)\n");
+			exit("Could not create PDO object (DSN=$dsn, user=$user)\n");
 		}
 
 		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);

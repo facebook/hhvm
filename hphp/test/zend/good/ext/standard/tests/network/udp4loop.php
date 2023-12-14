@@ -11,13 +11,13 @@ function entrypoint_udp4loop(): void {
         if ($server) break;
       }
       if (!$server) {
-          die('Unable to create AF_INET socket [server]: ' . $errstr);
+          exit('Unable to create AF_INET socket [server]: ' . $errstr);
       }
 
       /* Connect to it */
       $client = stream_socket_client($uri, inout $errno, inout $errstr);
       if (!$client) {
-          die('Unable to create AF_INET socket [client]');
+          exit('Unable to create AF_INET socket [client]');
       }
 
       fwrite($client, "ABCdef123\n");

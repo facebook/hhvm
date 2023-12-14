@@ -1,5 +1,5 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 if (array_search("udg",stream_get_transports()) === false)
-    die('skip No support for UNIX domain sockets.');
+    exit('skip No support for UNIX domain sockets.');
 }

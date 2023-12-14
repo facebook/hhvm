@@ -3,7 +3,7 @@
 echo "Procedural\n";
 $zip = zip_open(dirname(__FILE__) . '/test.zip');
 if (!is_resource($zip)) {
-	die("Failure");
+	exit("Failure");
 	}
 var_dump(zip_close($zip));
 var_dump(zip_close($zip));
@@ -11,13 +11,13 @@ var_dump(zip_close($zip));
 echo "Object\n";
 $zip = new ZipArchive();
 if (!$zip->open(dirname(__FILE__) . '/test.zip')) {
-	die('Failure');
+	exit('Failure');
 }
 if ($zip->status == ZipArchive::ER_OK) {
 	var_dump($zip->close());
 	var_dump($zip->close());
 } else {
-	die("Failure");
+	exit("Failure");
 }
 echo "Done";
 }

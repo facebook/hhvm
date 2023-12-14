@@ -452,7 +452,9 @@ void swap_allocators(Alloc& a, Alloc& b) {
 // cpp.ref fields, we can not deduce the field qualifier information.
 namespace qualifier {
 template <class Struct, class Id>
-struct is_cpp_ref_field_optional : folly::bool_constant<!sizeof(Struct)> {};
+struct is_cpp_ref_field_optional : std::false_type {
+  static_assert(sizeof(Struct), "Struct must be a complete type.");
+};
 } // namespace qualifier
 
 } // namespace detail

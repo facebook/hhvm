@@ -988,7 +988,8 @@ namespace {
 template<class TGetThisType>
 Type typeFromTCImpl(const HPHP::TypeConstraint& tc,
                     TGetThisType getThisType,
-                    const Class* ctx) {
+                    const Class* ctx,
+                    bool useObjectForUnresolved = false) {
   if (!tc.isCheckable() || tc.isSoft() ||
       (tc.isUpperBound() && RuntimeOption::EvalEnforceGenericsUB < 2)) {
     return TCell;
@@ -1076,6 +1077,14 @@ Type typeFromTCImpl(const HPHP::TypeConstraint& tc,
       }
     }
 
+    // If the flag is supplied, we want to return TObj
+    // this should only be set true when the call is made from
+    // a return type deduction function
+    // we are mimicking the behaviour of TypeConstraint::asSystemlibType()
+    if (useObjectForUnresolved) {
+      return TObj;
+    }
+
     // It could be an alias to mixed so we might have refs
     return TCell;
   };
@@ -1136,6 +1145,17 @@ Type typeFromFuncParam(const Func* func, uint32_t paramId) {
   }
 
   return t;
+}
+
+Type typeFromFuncReturn(const Func* func) {
+  // Assert this here since we're modifying the behaviour of
+  // typeFromTCImpl below which should only be done for builtins
+  assertx(func->isCPPBuiltin());
+  auto& tc = func->returnTypeConstraint();
+  auto const getThisType = [&] {
+    return func->cls() ? Type::SubObj(func->cls()) : TBottom;
+  };
+  return typeFromTCImpl(tc, getThisType, func->cls(), true) & TInitCell;
 }
 
 //////////////////////////////////////////////////////////////////////

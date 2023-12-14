@@ -45,7 +45,7 @@ static void verify_fields_struct_schema(
   auto field = fields.at(0);
   EXPECT_EQ(*field.name(), "num");
   EXPECT_EQ(*field.id(), apache::thrift::type::FieldId{1});
-  EXPECT_EQ(*field.qualifier(), apache::thrift::type::FieldQualifier::Fill);
+  EXPECT_EQ(*field.qualifier(), apache::thrift::type::FieldQualifier::Default);
   EXPECT_EQ(
       field.type()->toThrift().name()->getType(),
       apache::thrift::type::TypeName::Type::i32Type);
@@ -67,7 +67,7 @@ static void verify_fields_struct_schema(
   field = fields.at(2);
   EXPECT_EQ(*field.name(), "strct");
   EXPECT_EQ(*field.id(), apache::thrift::type::FieldId{7});
-  EXPECT_EQ(*field.qualifier(), apache::thrift::type::FieldQualifier::Fill);
+  EXPECT_EQ(*field.qualifier(), apache::thrift::type::FieldQualifier::Default);
   EXPECT_EQ(
       field.type()->toThrift().name()->getType(),
       apache::thrift::type::TypeName::Type::structType);
@@ -267,7 +267,7 @@ TEST(SchemaTest, TestService) {
         EXPECT_EQ(*field0.name(), "param0");
         EXPECT_EQ(*field0.id(), apache::thrift::type::FieldId{1});
         EXPECT_EQ(
-            *field0.qualifier(), apache::thrift::type::FieldQualifier::Fill);
+            *field0.qualifier(), apache::thrift::type::FieldQualifier::Default);
         EXPECT_EQ(
             field0.type()->toThrift().name()->getType(),
             apache::thrift::type::TypeName::Type::i32Type);
@@ -279,7 +279,7 @@ TEST(SchemaTest, TestService) {
         EXPECT_EQ(*field0.name(), "ex0");
         EXPECT_EQ(*field0.id(), apache::thrift::type::FieldId{1});
         EXPECT_EQ(
-            *field0.qualifier(), apache::thrift::type::FieldQualifier::Fill);
+            *field0.qualifier(), apache::thrift::type::FieldQualifier::Default);
         EXPECT_EQ(
             field0.type()->toThrift().name()->getType(),
             apache::thrift::type::TypeName::Type::exceptionType);
@@ -297,7 +297,7 @@ TEST(SchemaTest, TestService) {
         EXPECT_EQ(*field0.name(), "param0");
         EXPECT_EQ(*field0.id(), apache::thrift::type::FieldId{1});
         EXPECT_EQ(
-            *field0.qualifier(), apache::thrift::type::FieldQualifier::Fill);
+            *field0.qualifier(), apache::thrift::type::FieldQualifier::Default);
         EXPECT_EQ(
             field0.type()->toThrift().name()->getType(),
             apache::thrift::type::TypeName::Type::unionType);

@@ -251,13 +251,13 @@ struct Enum {
 
 /** The field qualifier. */
 enum FieldQualifier {
-  /** `Terse` v1+, `Fill` pre-v1. */
+  /** Unqualified: always written. */
   Default = 0,
-  /** Written if explicitly 'set'. */
+  /** `optional`: written if explicitly 'set'. */
   Optional = 1,
-  /** Written if not 'empty'. */
+  /** `@thrift.TerseWrite`: written if not 'empty'. */
   Terse = 2,
-  /** Always written. */
+  /** `required`: always written, not actually required. */
   Fill = 3,
 }
 

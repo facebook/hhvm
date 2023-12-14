@@ -419,6 +419,7 @@ void schematizer::add_fields(
     add_qualifier(field_qualifier_enum, *field_schema, [&] {
       switch (field.qualifier()) {
         case t_field_qualifier::none:
+          return 0; // Default
         case t_field_qualifier::required:
           return 3; // Fill
         case t_field_qualifier::optional:

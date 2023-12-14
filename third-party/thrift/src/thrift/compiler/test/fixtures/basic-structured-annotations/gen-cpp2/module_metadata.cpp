@@ -112,8 +112,8 @@ StructMetadata<::test::fixtures::basic-structured-annotations::structured_annota
   static const auto* const
   module_structured_annotation_recursive_fields = new std::array<EncodedThriftField, 3>{{
     {1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "recurse", true, std::make_unique<Typedef>("module.structured_annotation_recursive", std::make_unique<Struct<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>>("module.structured_annotation_recursive"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{*cvStruct("cpp.Ref", {{"type", cvInteger(0)}}).cv_struct_ref(), }},
-    {3, "forward", false, std::make_unique<Typedef>("module.structured_annotation_forward", std::make_unique<Struct<::test::fixtures::basic-structured-annotations::structured_annotation_forward>>("module.structured_annotation_forward"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
+    {2, "recurse", true, std::make_unique<Struct<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>>("module.structured_annotation_recursive"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Ref", {{"type", cvInteger(0)}}).cv_struct_ref(), }},
+    {3, "forward", false, std::make_unique<Struct<::test::fixtures::basic-structured-annotations::structured_annotation_forward>>("module.structured_annotation_forward"), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_structured_annotation_recursive_fields) {
     ::apache::thrift::metadata::ThriftField field;

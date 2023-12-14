@@ -568,18 +568,9 @@ class Raiser_doRaise_result extends \ThriftSyncStructWithoutResult implements \I
               "id" => 1,
               "type" => tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                  "t_struct" => tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.Banal",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_struct" => tmeta_ThriftStructType::fromShape(
-                            shape(
-                              "name" => "module.Banal",
-                            )
-                          ),
-                        )
-                      ),
                     )
                   ),
                 )
@@ -947,18 +938,9 @@ class Raiser_get500_result extends \ThriftSyncStructWithResult implements \IThri
               "id" => 2,
               "type" => tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                  "t_struct" => tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.Banal",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_struct" => tmeta_ThriftStructType::fromShape(
-                            shape(
-                              "name" => "module.Banal",
-                            )
-                          ),
-                        )
-                      ),
                     )
                   ),
                 )
@@ -1043,18 +1025,9 @@ class RaiserStaticMetadata implements \IThriftServiceStaticMetadata {
                     "id" => 1,
                     "type" => tmeta_ThriftType::fromShape(
                       shape(
-                        "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                        "t_struct" => tmeta_ThriftStructType::fromShape(
                           shape(
                             "name" => "module.Banal",
-                            "underlyingType" => tmeta_ThriftType::fromShape(
-                              shape(
-                                "t_struct" => tmeta_ThriftStructType::fromShape(
-                                  shape(
-                                    "name" => "module.Banal",
-                                  )
-                                ),
-                              )
-                            ),
                           )
                         ),
                       )
@@ -1134,18 +1107,9 @@ class RaiserStaticMetadata implements \IThriftServiceStaticMetadata {
                     "id" => 2,
                     "type" => tmeta_ThriftType::fromShape(
                       shape(
-                        "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                        "t_struct" => tmeta_ThriftStructType::fromShape(
                           shape(
                             "name" => "module.Banal",
-                            "underlyingType" => tmeta_ThriftType::fromShape(
-                              shape(
-                                "t_struct" => tmeta_ThriftStructType::fromShape(
-                                  shape(
-                                    "name" => "module.Banal",
-                                  )
-                                ),
-                              )
-                            ),
                           )
                         ),
                       )
@@ -1199,7 +1163,6 @@ class RaiserStaticMetadata implements \IThriftServiceStaticMetadata {
               'module.Banal' => Banal::getExceptionMetadata(),
               'module.Fiery' => Fiery::getExceptionMetadata(),
               'module.Serious' => Serious::getExceptionMetadata(),
-              'module.Banal' => Banal::getExceptionMetadata(),
             ],
             'services' => dict[
             ],

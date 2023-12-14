@@ -37,8 +37,8 @@ StructMetadata<::cpp2::Foo>::gen(ThriftMetadata& metadata) {
   module_Foo.is_union() = false;
   static const auto* const
   module_Foo_fields = new std::array<EncodedThriftField, 2>{{
-    {1, "foo", true, std::make_unique<Typedef>("module.Foo", std::make_unique<Struct<::cpp2::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{*cvStruct("cpp.Ref", {{"type", cvInteger(0)}}).cv_struct_ref(), }},
-    {2, "bar", true, std::make_unique<Typedef>("module.Foo", std::make_unique<Struct<::cpp2::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{*cvStruct("cpp.Ref", {{"type", cvInteger(2)}}).cv_struct_ref(), }},
+    {1, "foo", true, std::make_unique<Struct<::cpp2::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Ref", {{"type", cvInteger(0)}}).cv_struct_ref(), }},
+    {2, "bar", true, std::make_unique<Struct<::cpp2::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Ref", {{"type", cvInteger(2)}}).cv_struct_ref(), }},
   }};
   for (const auto& f : *module_Foo_fields) {
     ::apache::thrift::metadata::ThriftField field;

@@ -258,18 +258,9 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
               "id" => 3,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.MyDataItem",
-                      "underlyingType" => \tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_struct" => \tmeta_ThriftStructType::fromShape(
-                            shape(
-                              "name" => "module.MyDataItem",
-                            )
-                          ),
-                        )
-                      ),
                     )
                   ),
                 )

@@ -195,7 +195,7 @@ StructMetadata<::cpp2::RecursiveStruct>::gen(ThriftMetadata& metadata) {
   module_RecursiveStruct.is_union() = false;
   static const auto* const
   module_RecursiveStruct_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "mes", true, std::make_unique<List>(std::make_unique<Typedef>("module.RecursiveStruct", std::make_unique<Struct<::cpp2::RecursiveStruct>>("module.RecursiveStruct"), std::vector<ThriftConstStruct>{})), std::vector<ThriftConstStruct>{*cvStruct("java.Recursive", {}).cv_struct_ref(), }},
+    {1, "mes", true, std::make_unique<List>(std::make_unique<Struct<::cpp2::RecursiveStruct>>("module.RecursiveStruct")), std::vector<ThriftConstStruct>{*cvStruct("java.Recursive", {}).cv_struct_ref(), }},
   }};
   for (const auto& f : *module_RecursiveStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;

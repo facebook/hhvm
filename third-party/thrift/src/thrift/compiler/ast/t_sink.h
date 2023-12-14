@@ -40,6 +40,8 @@ class t_sink : public t_node {
 
   const t_type_ref& elem_type() const { return elem_type_; }
   const t_type_ref& final_response_type() const { return final_response_type_; }
+  t_type_ref& elem_type() { return elem_type_; }
+  t_type_ref& final_response_type() { return final_response_type_; }
 
   // Returns nullptr when throws clause is absent.
   t_throws* sink_exceptions() { return sink_exceptions_.get(); }

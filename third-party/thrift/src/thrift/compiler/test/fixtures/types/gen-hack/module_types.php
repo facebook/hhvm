@@ -576,20 +576,11 @@ class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
                       "name" => "module.set_i32_7194",
                       "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                          "t_set" => \tmeta_ThriftSetType::fromShape(
                             shape(
-                              "name" => "module.set_i32_7194",
-                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                              "valueType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_set" => \tmeta_ThriftSetType::fromShape(
-                                    shape(
-                                      "valueType" => \tmeta_ThriftType::fromShape(
-                                        shape(
-                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
-                                        )
-                                      ),
-                                    )
-                                  ),
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                                 )
                               ),
                             )
@@ -613,25 +604,16 @@ class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
                       "name" => "module.map_i32_string_1261",
                       "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                          "t_map" => \tmeta_ThriftMapType::fromShape(
                             shape(
-                              "name" => "module.map_i32_string_1261",
-                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                              "keyType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_map" => \tmeta_ThriftMapType::fromShape(
-                                    shape(
-                                      "keyType" => \tmeta_ThriftType::fromShape(
-                                        shape(
-                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
-                                        )
-                                      ),
-                                      "valueType" => \tmeta_ThriftType::fromShape(
-                                        shape(
-                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
-                                        )
-                                      ),
-                                    )
-                                  ),
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                                )
+                              ),
+                              "valueType" => \tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                                 )
                               ),
                             )
@@ -1193,18 +1175,9 @@ class MyStructWithForwardRefEnum implements \IThriftSyncStruct, \IThriftStructMe
               "id" => 1,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                  "t_enum" => \tmeta_ThriftEnumType::fromShape(
                     shape(
                       "name" => "module.MyForwardRefEnum",
-                      "underlyingType" => \tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_enum" => \tmeta_ThriftEnumType::fromShape(
-                            shape(
-                              "name" => "module.MyForwardRefEnum",
-                            )
-                          ),
-                        )
-                      ),
                     )
                   ),
                 )
@@ -1217,18 +1190,9 @@ class MyStructWithForwardRefEnum implements \IThriftSyncStruct, \IThriftStructMe
               "id" => 2,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                  "t_enum" => \tmeta_ThriftEnumType::fromShape(
                     shape(
                       "name" => "module.MyForwardRefEnum",
-                      "underlyingType" => \tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_enum" => \tmeta_ThriftEnumType::fromShape(
-                            shape(
-                              "name" => "module.MyForwardRefEnum",
-                            )
-                          ),
-                        )
-                      ),
                     )
                   ),
                 )
@@ -2464,18 +2428,9 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
               "id" => 4,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.MyDataItem",
-                      "underlyingType" => \tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_struct" => \tmeta_ThriftStructType::fromShape(
-                            shape(
-                              "name" => "module.MyDataItem",
-                            )
-                          ),
-                        )
-                      ),
                     )
                   ),
                 )
@@ -2789,7 +2744,7 @@ class AnnotatedTypes implements \IThriftSyncStruct, \IThriftStructMetadata {
                         shape(
                           "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                             shape(
-                              "name" => "module.TBinary_8623",
+                              "name" => "module.TBinary",
                               "underlyingType" => \tmeta_ThriftType::fromShape(
                                 shape(
                                   "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
@@ -2797,16 +2752,7 @@ class AnnotatedTypes implements \IThriftSyncStruct, \IThriftStructMetadata {
                                       "name" => "module.TBinary",
                                       "underlyingType" => \tmeta_ThriftType::fromShape(
                                         shape(
-                                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
-                                            shape(
-                                              "name" => "module.TBinary",
-                                              "underlyingType" => \tmeta_ThriftType::fromShape(
-                                                shape(
-                                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
-                                                )
-                                              ),
-                                            )
-                                          ),
+                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
                                         )
                                       ),
                                     )
@@ -2836,7 +2782,7 @@ class AnnotatedTypes implements \IThriftSyncStruct, \IThriftStructMetadata {
                         shape(
                           "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                             shape(
-                              "name" => "module.SomeListOfTypeMap_2468",
+                              "name" => "included.SomeListOfTypeMap",
                               "underlyingType" => \tmeta_ThriftType::fromShape(
                                 shape(
                                   "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
@@ -2844,34 +2790,25 @@ class AnnotatedTypes implements \IThriftSyncStruct, \IThriftStructMetadata {
                                       "name" => "included.SomeListOfTypeMap",
                                       "underlyingType" => \tmeta_ThriftType::fromShape(
                                         shape(
-                                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                                          "t_list" => \tmeta_ThriftListType::fromShape(
                                             shape(
-                                              "name" => "included.SomeListOfTypeMap",
-                                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                                              "valueType" => \tmeta_ThriftType::fromShape(
                                                 shape(
-                                                  "t_list" => \tmeta_ThriftListType::fromShape(
+                                                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                                                     shape(
-                                                      "valueType" => \tmeta_ThriftType::fromShape(
+                                                      "name" => "included.SomeMap",
+                                                      "underlyingType" => \tmeta_ThriftType::fromShape(
                                                         shape(
-                                                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                                                          "t_map" => \tmeta_ThriftMapType::fromShape(
                                                             shape(
-                                                              "name" => "included.SomeMap",
-                                                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                                                              "keyType" => \tmeta_ThriftType::fromShape(
                                                                 shape(
-                                                                  "t_map" => \tmeta_ThriftMapType::fromShape(
-                                                                    shape(
-                                                                      "keyType" => \tmeta_ThriftType::fromShape(
-                                                                        shape(
-                                                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
-                                                                        )
-                                                                      ),
-                                                                      "valueType" => \tmeta_ThriftType::fromShape(
-                                                                        shape(
-                                                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
-                                                                        )
-                                                                      ),
-                                                                    )
-                                                                  ),
+                                                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                                                                )
+                                                              ),
+                                                              "valueType" => \tmeta_ThriftType::fromShape(
+                                                                shape(
+                                                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                                                                 )
                                                               ),
                                                             )
@@ -3025,18 +2962,9 @@ class ForwardUsageRoot implements \IThriftSyncStruct, \IThriftStructMetadata {
               "id" => 1,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.ForwardUsageStruct",
-                      "underlyingType" => \tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_struct" => \tmeta_ThriftStructType::fromShape(
-                            shape(
-                              "name" => "module.ForwardUsageStruct",
-                            )
-                          ),
-                        )
-                      ),
                     )
                   ),
                 )
@@ -3050,18 +2978,9 @@ class ForwardUsageRoot implements \IThriftSyncStruct, \IThriftStructMetadata {
               "id" => 2,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.ForwardUsageByRef",
-                      "underlyingType" => \tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_struct" => \tmeta_ThriftStructType::fromShape(
-                            shape(
-                              "name" => "module.ForwardUsageByRef",
-                            )
-                          ),
-                        )
-                      ),
                     )
                   ),
                 )
@@ -3434,18 +3353,9 @@ class IncompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
                       ),
                       "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
                             shape(
                               "name" => "module.IncompleteMapDep",
-                              "underlyingType" => \tmeta_ThriftType::fromShape(
-                                shape(
-                                  "t_struct" => \tmeta_ThriftStructType::fromShape(
-                                    shape(
-                                      "name" => "module.IncompleteMapDep",
-                                    )
-                                  ),
-                                )
-                              ),
                             )
                           ),
                         )
@@ -3648,18 +3558,9 @@ class CompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
                       ),
                       "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
                             shape(
                               "name" => "module.CompleteMapDep",
-                              "underlyingType" => \tmeta_ThriftType::fromShape(
-                                shape(
-                                  "t_struct" => \tmeta_ThriftStructType::fromShape(
-                                    shape(
-                                      "name" => "module.CompleteMapDep",
-                                    )
-                                  ),
-                                )
-                              ),
                             )
                           ),
                         )
@@ -3863,18 +3764,9 @@ class IncompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
                     shape(
                       "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
                             shape(
                               "name" => "module.IncompleteListDep",
-                              "underlyingType" => \tmeta_ThriftType::fromShape(
-                                shape(
-                                  "t_struct" => \tmeta_ThriftStructType::fromShape(
-                                    shape(
-                                      "name" => "module.IncompleteListDep",
-                                    )
-                                  ),
-                                )
-                              ),
                             )
                           ),
                         )
@@ -4078,18 +3970,9 @@ class CompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
                     shape(
                       "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
                             shape(
                               "name" => "module.CompleteListDep",
-                              "underlyingType" => \tmeta_ThriftType::fromShape(
-                                shape(
-                                  "t_struct" => \tmeta_ThriftStructType::fromShape(
-                                    shape(
-                                      "name" => "module.CompleteListDep",
-                                    )
-                                  ),
-                                )
-                              ),
                             )
                           ),
                         )
@@ -4293,18 +4176,9 @@ class AdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata {
                     shape(
                       "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
                             shape(
                               "name" => "module.AdaptedListDep",
-                              "underlyingType" => \tmeta_ThriftType::fromShape(
-                                shape(
-                                  "t_struct" => \tmeta_ThriftStructType::fromShape(
-                                    shape(
-                                      "name" => "module.AdaptedListDep",
-                                    )
-                                  ),
-                                )
-                              ),
                             )
                           ),
                         )
@@ -4542,18 +4416,9 @@ class DependentAdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata
                     shape(
                       "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
                             shape(
                               "name" => "module.DependentAdaptedListDep",
-                              "underlyingType" => \tmeta_ThriftType::fromShape(
-                                shape(
-                                  "t_struct" => \tmeta_ThriftStructType::fromShape(
-                                    shape(
-                                      "name" => "module.DependentAdaptedListDep",
-                                    )
-                                  ),
-                                )
-                              ),
                             )
                           ),
                         )
@@ -4889,20 +4754,11 @@ class AllocatorAware implements \IThriftSyncStruct, \IThriftStructMetadata {
                       "name" => "module.list_i32_9187",
                       "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                          "t_list" => \tmeta_ThriftListType::fromShape(
                             shape(
-                              "name" => "module.list_i32_9187",
-                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                              "valueType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_list" => \tmeta_ThriftListType::fromShape(
-                                    shape(
-                                      "valueType" => \tmeta_ThriftType::fromShape(
-                                        shape(
-                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
-                                        )
-                                      ),
-                                    )
-                                  ),
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                                 )
                               ),
                             )
@@ -4926,20 +4782,11 @@ class AllocatorAware implements \IThriftSyncStruct, \IThriftStructMetadata {
                       "name" => "module.set_i32_7070",
                       "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                          "t_set" => \tmeta_ThriftSetType::fromShape(
                             shape(
-                              "name" => "module.set_i32_7070",
-                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                              "valueType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_set" => \tmeta_ThriftSetType::fromShape(
-                                    shape(
-                                      "valueType" => \tmeta_ThriftType::fromShape(
-                                        shape(
-                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
-                                        )
-                                      ),
-                                    )
-                                  ),
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                                 )
                               ),
                             )
@@ -4963,25 +4810,16 @@ class AllocatorAware implements \IThriftSyncStruct, \IThriftStructMetadata {
                       "name" => "module.map_i32_i32_9565",
                       "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                          "t_map" => \tmeta_ThriftMapType::fromShape(
                             shape(
-                              "name" => "module.map_i32_i32_9565",
-                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                              "keyType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_map" => \tmeta_ThriftMapType::fromShape(
-                                    shape(
-                                      "keyType" => \tmeta_ThriftType::fromShape(
-                                        shape(
-                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
-                                        )
-                                      ),
-                                      "valueType" => \tmeta_ThriftType::fromShape(
-                                        shape(
-                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
-                                        )
-                                      ),
-                                    )
-                                  ),
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                                )
+                              ),
+                              "valueType" => \tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                                 )
                               ),
                             )
@@ -5005,16 +4843,7 @@ class AllocatorAware implements \IThriftSyncStruct, \IThriftStructMetadata {
                       "name" => "module.string_5252",
                       "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
-                            shape(
-                              "name" => "module.string_5252",
-                              "underlyingType" => \tmeta_ThriftType::fromShape(
-                                shape(
-                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
-                                )
-                              ),
-                            )
-                          ),
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                         )
                       ),
                     )
@@ -5045,16 +4874,7 @@ class AllocatorAware implements \IThriftSyncStruct, \IThriftStructMetadata {
                       "name" => "module.i32_9314",
                       "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
-                            shape(
-                              "name" => "module.i32_9314",
-                              "underlyingType" => \tmeta_ThriftType::fromShape(
-                                shape(
-                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
-                                )
-                              ),
-                            )
-                          ),
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                         )
                       ),
                     )
@@ -5074,16 +4894,7 @@ class AllocatorAware implements \IThriftSyncStruct, \IThriftStructMetadata {
                       "name" => "module.i32_9314",
                       "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
-                            shape(
-                              "name" => "module.i32_9314",
-                              "underlyingType" => \tmeta_ThriftType::fromShape(
-                                shape(
-                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
-                                )
-                              ),
-                            )
-                          ),
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                         )
                       ),
                     )

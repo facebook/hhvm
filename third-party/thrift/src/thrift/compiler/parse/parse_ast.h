@@ -69,6 +69,12 @@ struct parsing_params {
   bool allow_missing_includes = false;
 
   /**
+   * Whether to use the legacy type ref resolution behavior, which produces a
+   * worse AST. Do not use in new code. Only enabled for plugins.
+   */
+  bool use_legacy_type_ref_resolution = false;
+
+  /**
    * Search path for includes.
    */
   std::vector<std::string> incl_searchpath;

@@ -343,18 +343,9 @@ class Ref implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
               "id" => 1,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                  "t_enum" => \tmeta_ThriftEnumType::fromShape(
                     shape(
                       "name" => "cpp.RefType",
-                      "underlyingType" => \tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_enum" => \tmeta_ThriftEnumType::fromShape(
-                            shape(
-                              "name" => "cpp.RefType",
-                            )
-                          ),
-                        )
-                      ),
                     )
                   ),
                 )

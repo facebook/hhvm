@@ -682,21 +682,6 @@ const folly::StringPiece MyStructWithForwardRefEnum::__fbthrift_get_class_name()
   return apache::thrift::TStructDataStorage<MyStructWithForwardRefEnum>::name;
 }
 
-MyStructWithForwardRefEnum::MyStructWithForwardRefEnum(const MyStructWithForwardRefEnum&) = default;
-MyStructWithForwardRefEnum& MyStructWithForwardRefEnum::operator=(const MyStructWithForwardRefEnum&) = default;
-MyStructWithForwardRefEnum::MyStructWithForwardRefEnum(FOLLY_MAYBE_UNUSED MyStructWithForwardRefEnum&& other) noexcept :
-    __fbthrift_field_a(std::move(other.__fbthrift_field_a)),
-    __fbthrift_field_b(std::move(other.__fbthrift_field_b)),
-    __isset(other.__isset) {
-}
-
-MyStructWithForwardRefEnum& MyStructWithForwardRefEnum::operator=(FOLLY_MAYBE_UNUSED MyStructWithForwardRefEnum&& other) noexcept {
-    this->__fbthrift_field_a = std::move(other.__fbthrift_field_a);
-    this->__fbthrift_field_b = std::move(other.__fbthrift_field_b);
-    __isset = other.__isset;
-    return *this;
-}
-
 
 MyStructWithForwardRefEnum::MyStructWithForwardRefEnum(apache::thrift::FragileConstructor, ::apache::thrift::fixtures::types::MyForwardRefEnum a__arg, ::apache::thrift::fixtures::types::MyForwardRefEnum b__arg) :
     __fbthrift_field_a(std::move(a__arg)),
@@ -2276,6 +2261,12 @@ template uint32_t IncompleteMap::write<>(apache::thrift::CompactProtocolWriter*)
 template uint32_t IncompleteMap::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t IncompleteMap::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        IncompleteMap,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>,
+        ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep>>,
+    "inconsistent use of json option");
 
 }}}} // apache::thrift::fixtures::types
 
@@ -2460,6 +2451,12 @@ template uint32_t CompleteMap::write<>(apache::thrift::CompactProtocolWriter*) c
 template uint32_t CompleteMap::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t CompleteMap::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        CompleteMap,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>,
+        std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>>,
+    "inconsistent use of json option");
 
 }}}} // apache::thrift::fixtures::types
 
@@ -2644,6 +2641,12 @@ template uint32_t IncompleteList::write<>(apache::thrift::CompactProtocolWriter*
 template uint32_t IncompleteList::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t IncompleteList::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        IncompleteList,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::list<::apache::thrift::fixtures::types::IncompleteListDep>>,
+    "inconsistent use of json option");
 
 }}}} // apache::thrift::fixtures::types
 
@@ -2828,6 +2831,12 @@ template uint32_t CompleteList::write<>(apache::thrift::CompactProtocolWriter*) 
 template uint32_t CompleteList::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t CompleteList::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        CompleteList,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>>,
+    "inconsistent use of json option");
 
 }}}} // apache::thrift::fixtures::types
 
@@ -3012,6 +3021,12 @@ template uint32_t AdaptedList::write<>(apache::thrift::CompactProtocolWriter*) c
 template uint32_t AdaptedList::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t AdaptedList::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        AdaptedList,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector<::apache::thrift::fixtures::types::AdaptedListDep>>,
+    "inconsistent use of json option");
 
 }}}} // apache::thrift::fixtures::types
 
@@ -3232,6 +3247,12 @@ template uint32_t DependentAdaptedList::write<>(apache::thrift::CompactProtocolW
 template uint32_t DependentAdaptedList::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t DependentAdaptedList::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        DependentAdaptedList,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep>>,
+    "inconsistent use of json option");
 
 }}}} // apache::thrift::fixtures::types
 

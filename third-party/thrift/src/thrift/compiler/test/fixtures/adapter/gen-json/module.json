@@ -928,8 +928,8 @@
       "is_union" : false,
       "fields" : {
         "intField" : {
-          "type_enum" : "I32",
-          "spec_args" : null,
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "i32_5137",
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -943,8 +943,8 @@
           }
         },
         "optionalIntField" : {
-          "type_enum" : "I32",
-          "spec_args" : null,
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "i32_5137",
           "required" : false,
           "source_range" : {
             "begin" : {
@@ -958,8 +958,8 @@
           }
         },
         "intFieldWithDefault" : {
-          "type_enum" : "I32",
-          "spec_args" : null,
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "i32_5137",
           "required" : true,
           "default_value" : 13,
           "source_range" : {
@@ -1004,8 +1004,8 @@
           }
         },
         "mapField" : {
-          "type_enum" : "MAP",
-          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "TYPEDEF", "spec_args" : "ListWithElemAdapter_withAdapter_2312"} } ,
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "map_string_ListWithElemAdapter_withAdapter_8454",
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -1019,8 +1019,8 @@
           }
         },
         "optionalMapField" : {
-          "type_enum" : "MAP",
-          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "TYPEDEF", "spec_args" : "ListWithElemAdapter_withAdapter_2312"} } ,
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "map_string_ListWithElemAdapter_withAdapter_8454",
           "required" : false,
           "source_range" : {
             "begin" : {
@@ -1034,8 +1034,8 @@
           }
         },
         "binaryField" : {
-          "type_enum" : "STRING",
-          "spec_args" : null,
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "binary_5673",
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -1111,8 +1111,8 @@
       "is_union" : true,
       "fields" : {
         "intField" : {
-          "type_enum" : "I32",
-          "spec_args" : null,
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "i32_5137",
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -1141,8 +1141,8 @@
           }
         },
         "mapField" : {
-          "type_enum" : "MAP",
-          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "TYPEDEF", "spec_args" : "ListWithElemAdapter_withAdapter_2312"} } ,
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "map_string_ListWithElemAdapter_withAdapter_8454",
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -1156,8 +1156,8 @@
           }
         },
         "binaryField" : {
-          "type_enum" : "STRING",
-          "spec_args" : null,
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "binary_5673",
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -1203,8 +1203,8 @@
       "is_union" : false,
       "fields" : {
         "structField" : {
-          "type_enum" : "STRUCT",
-          "spec_args" : "Foo",
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "Foo_6868",
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -1218,8 +1218,8 @@
           }
         },
         "optionalStructField" : {
-          "type_enum" : "STRUCT",
-          "spec_args" : "Foo",
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "Foo_3943",
           "required" : false,
           "source_range" : {
             "begin" : {
@@ -1234,7 +1234,7 @@
         },
         "structListField" : {
           "type_enum" : "LIST",
-          "spec_args" : { "type_enum" : "STRUCT", "spec_args" : "Foo"} ,
+          "spec_args" : { "type_enum" : "TYPEDEF", "spec_args" : "FooWithAdapter_9317"} ,
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -1249,7 +1249,7 @@
         },
         "optionalStructListField" : {
           "type_enum" : "LIST",
-          "spec_args" : { "type_enum" : "STRUCT", "spec_args" : "Foo"} ,
+          "spec_args" : { "type_enum" : "TYPEDEF", "spec_args" : "FooWithAdapter_9317"} ,
           "required" : false,
           "source_range" : {
             "begin" : {
@@ -1263,8 +1263,8 @@
           }
         },
         "unionField" : {
-          "type_enum" : "STRUCT",
-          "spec_args" : "Baz",
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "Baz_7352",
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -1278,8 +1278,8 @@
           }
         },
         "optionalUnionField" : {
-          "type_enum" : "STRUCT",
-          "spec_args" : "Baz",
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "Baz_7352",
           "required" : false,
           "source_range" : {
             "begin" : {
@@ -1528,8 +1528,8 @@
       "is_union" : false,
       "fields" : {
         "a" : {
-          "type_enum" : "STRUCT",
-          "spec_args" : "A",
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "AdaptedA",
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -2434,8 +2434,8 @@
       "is_union" : false,
       "fields" : {
         "field" : {
-          "type_enum" : "STRUCT",
-          "spec_args" : "CircularAdaptee",
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "AdaptedCircularAdaptee",
           "required" : false,
           "source_range" : {
             "begin" : {
@@ -2831,8 +2831,8 @@
           "args" : [
             {
               "name" : "arg1",
-              "type_enum" : "STRING",
-              "spec_args" : null
+              "type_enum" : "TYPEDEF",
+              "spec_args" : "StringWithAdapter_7208"
             },
             {
               "name" : "arg2",

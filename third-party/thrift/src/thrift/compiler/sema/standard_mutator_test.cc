@@ -33,7 +33,7 @@ class StandardMutatorTest : public ::testing::Test {
     source_manager source_mgr;
     diagnostic_results results;
     diagnostic_context ctx(source_mgr, results, std::move(params));
-    standard_mutators()(ctx, program_bundle_);
+    standard_mutators(false)(ctx, program_bundle_);
     return std::move(results).diagnostics();
   }
 

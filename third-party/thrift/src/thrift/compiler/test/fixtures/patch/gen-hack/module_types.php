@@ -1550,18 +1550,9 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
               "id" => -13,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.LateDefStruct",
-                      "underlyingType" => \tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_struct" => \tmeta_ThriftStructType::fromShape(
-                            shape(
-                              "name" => "module.LateDefStruct",
-                            )
-                          ),
-                        )
-                      ),
                     )
                   ),
                 )
@@ -1714,18 +1705,9 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
               "id" => -25,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.LateDefStruct",
-                      "underlyingType" => \tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_struct" => \tmeta_ThriftStructType::fromShape(
-                            shape(
-                              "name" => "module.LateDefStruct",
-                            )
-                          ),
-                        )
-                      ),
                     )
                   ),
                 )
@@ -2435,18 +2417,9 @@ class Recursive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
                       ),
                       "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
                             shape(
                               "name" => "module.Recursive",
-                              "underlyingType" => \tmeta_ThriftType::fromShape(
-                                shape(
-                                  "t_struct" => \tmeta_ThriftStructType::fromShape(
-                                    shape(
-                                      "name" => "module.Recursive",
-                                    )
-                                  ),
-                                )
-                              ),
                             )
                           ),
                         )
@@ -2595,18 +2568,9 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
               "id" => -1,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.Loop",
-                      "underlyingType" => \tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_struct" => \tmeta_ThriftStructType::fromShape(
-                            shape(
-                              "name" => "module.Loop",
-                            )
-                          ),
-                        )
-                      ),
                     )
                   ),
                 )
@@ -9025,18 +8989,9 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
               "id" => -25,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.LateDefStructPatch",
-                      "underlyingType" => \tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_struct" => \tmeta_ThriftStructType::fromShape(
-                            shape(
-                              "name" => "module.LateDefStructPatch",
-                            )
-                          ),
-                        )
-                      ),
                     )
                   ),
                 )
@@ -9214,18 +9169,9 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
               "id" => -13,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.LateDefStructPatch",
-                      "underlyingType" => \tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_struct" => \tmeta_ThriftStructType::fromShape(
-                            shape(
-                              "name" => "module.LateDefStructPatch",
-                            )
-                          ),
-                        )
-                      ),
                     )
                   ),
                 )
@@ -10907,18 +10853,9 @@ class MyStructEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadata
               "id" => -25,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.LateDefStruct",
-                      "underlyingType" => \tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_struct" => \tmeta_ThriftStructType::fromShape(
-                            shape(
-                              "name" => "module.LateDefStruct",
-                            )
-                          ),
-                        )
-                      ),
                     )
                   ),
                 )
@@ -11072,18 +11009,9 @@ class MyStructEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadata
               "id" => -13,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.LateDefStruct",
-                      "underlyingType" => \tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_struct" => \tmeta_ThriftStructType::fromShape(
-                            shape(
-                              "name" => "module.LateDefStruct",
-                            )
-                          ),
-                        )
-                      ),
                     )
                   ),
                 )
@@ -12527,18 +12455,9 @@ class RecursiveField1Patch implements \IThriftSyncStruct, \IThriftStructMetadata
                       ),
                       "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
                             shape(
                               "name" => "module.Recursive",
-                              "underlyingType" => \tmeta_ThriftType::fromShape(
-                                shape(
-                                  "t_struct" => \tmeta_ThriftStructType::fromShape(
-                                    shape(
-                                      "name" => "module.Recursive",
-                                    )
-                                  ),
-                                )
-                              ),
                             )
                           ),
                         )
@@ -12827,18 +12746,9 @@ class RecursiveEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadat
                       ),
                       "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
                             shape(
                               "name" => "module.Recursive",
-                              "underlyingType" => \tmeta_ThriftType::fromShape(
-                                shape(
-                                  "t_struct" => \tmeta_ThriftStructType::fromShape(
-                                    shape(
-                                      "name" => "module.Recursive",
-                                    )
-                                  ),
-                                )
-                              ),
                             )
                           ),
                         )
@@ -13339,18 +13249,9 @@ class BarFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
               "id" => -1,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.LoopPatch",
-                      "underlyingType" => \tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_struct" => \tmeta_ThriftStructType::fromShape(
-                            shape(
-                              "name" => "module.LoopPatch",
-                            )
-                          ),
-                        )
-                      ),
                     )
                   ),
                 )
@@ -13479,18 +13380,9 @@ class BarEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
               "id" => -1,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.Loop",
-                      "underlyingType" => \tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_struct" => \tmeta_ThriftStructType::fromShape(
-                            shape(
-                              "name" => "module.Loop",
-                            )
-                          ),
-                        )
-                      ),
                     )
                   ),
                 )

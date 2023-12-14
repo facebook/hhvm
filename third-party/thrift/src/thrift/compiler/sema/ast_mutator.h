@@ -51,6 +51,99 @@ class ast_mutator
   }
 };
 
+/// An AST mutator that replaces placeholder_typedefs with resolved types.
+struct type_ref_resolver {
+  void resolve_in_place(t_type_ref& ref) {
+    unresolved_ = !ref.resolve() || unresolved_;
+  }
+  [[nodiscard]] t_type_ref resolve(t_type_ref ref) {
+    resolve_in_place(ref);
+    return ref;
+  }
+  bool operator()(diagnostic_context& ctx, t_program_bundle& bundle) {
+    ast_mutator mutator;
+
+    auto resolve_const_value = [&](t_const_value& node, auto& recurse) -> void {
+      node.set_ttype(resolve(node.ttype()));
+
+      if (node.kind() == t_const_value::CV_MAP) {
+        for (auto& map_val : node.get_map()) {
+          recurse(*map_val.first, recurse);
+          recurse(*map_val.second, recurse);
+        }
+      } else if (node.kind() == t_const_value::CV_LIST) {
+        for (auto& list_val : node.get_list()) {
+          recurse(*list_val, recurse);
+        }
+      }
+    };
+
+    mutator.add_field_visitor(
+        [&](diagnostic_context&, mutator_context&, t_field& node) {
+          node.set_type(resolve(node.type()));
+
+          if (auto* dflt = node.get_default_value()) {
+            resolve_const_value(*dflt, resolve_const_value);
+          }
+        });
+
+    mutator.add_typedef_visitor(
+        [&](diagnostic_context&, mutator_context&, t_typedef& node) {
+          node.set_type(resolve(node.type()));
+        });
+
+    mutator.add_function_visitor(
+        [&](diagnostic_context& ctx, mutator_context& mCtx, t_function& node) {
+          resolve_in_place(node.return_type());
+          resolve_in_place(node.interaction());
+          for (auto& field : node.params().fields()) {
+            mutator(ctx, mCtx, field);
+          }
+        });
+    mutator.add_throws_visitor(
+        [&](diagnostic_context& ctx, mutator_context& mCtx, t_throws& node) {
+          for (auto& field : node.fields()) {
+            mutator(ctx, mCtx, field);
+          }
+        });
+    mutator.add_stream_visitor(
+        [&](diagnostic_context&, mutator_context&, t_stream& node) {
+          resolve_in_place(node.elem_type());
+        });
+    mutator.add_sink_visitor(
+        [&](diagnostic_context&, mutator_context&, t_sink& node) {
+          resolve_in_place(node.elem_type());
+          resolve_in_place(node.final_response_type());
+        });
+
+    mutator.add_map_visitor(
+        [&](diagnostic_context&, mutator_context&, t_map& node) {
+          resolve_in_place(node.key_type());
+          resolve_in_place(node.val_type());
+        });
+    mutator.add_set_visitor(
+        [&](diagnostic_context&, mutator_context&, t_set& node) {
+          resolve_in_place(node.elem_type());
+        });
+    mutator.add_list_visitor(
+        [&](diagnostic_context&, mutator_context&, t_list& node) {
+          resolve_in_place(node.elem_type());
+        });
+
+    mutator.add_const_visitor(
+        [&](diagnostic_context&, mutator_context&, t_const& node) {
+          resolve_in_place(node.type_ref());
+          resolve_const_value(*node.value(), resolve_const_value);
+        });
+
+    mutator.mutate(ctx, bundle);
+    return !unresolved_;
+  }
+
+ private:
+  bool unresolved_{false};
+};
+
 // A thin wrapper around a vector of mutators that
 // knows how to apply those mutators in order.
 struct ast_mutators {
@@ -59,7 +152,12 @@ struct ast_mutators {
     bool unresolvable_typeref = false;
   };
 
+  bool use_legacy_type_ref_resolution_;
+
  public:
+  explicit ast_mutators(bool use_legacy_type_ref_resolution)
+      : use_legacy_type_ref_resolution_(use_legacy_type_ref_resolution) {}
+
   std::vector<ast_mutator> stages;
 
   // Access a specific mutator stage, growing the number of stages if needed.
@@ -89,11 +187,23 @@ struct ast_mutators {
   // successful.
   //
   // Any errors are reported via diags.
-  bool resolve_all_types(diagnostics_engine& diags, t_program_bundle& bundle) {
+  bool resolve_all_types(diagnostic_context& diags, t_program_bundle& bundle) {
     bool success = true;
+    if (!use_legacy_type_ref_resolution_) {
+      success = type_ref_resolver{}(diags, bundle);
+    }
     for (auto& td : bundle.root_program()->scope()->placeholder_typedefs()) {
-      if (!td.resolve()) {
+      if (!td.type()) {
+        if (use_legacy_type_ref_resolution_) {
+          if (td.resolve()) {
+            continue;
+          }
+          success = false;
+        }
+
         diags.error(td, "Type `{}` not defined.", td.name());
+        assert(!td.resolve());
+        assert(!success);
         success = false;
       }
     }

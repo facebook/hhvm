@@ -64,7 +64,7 @@ StructMetadata<::test::fixtures::basic::MyStruct>::gen(ThriftMetadata& metadata)
   module_MyStruct_fields = new std::array<EncodedThriftField, 9>{{
     {1, "MyIntField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
     {2, "MyStringField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {3, "MyDataField", false, std::make_unique<Typedef>("module.MyDataItem", std::make_unique<Struct<::test::fixtures::basic::MyDataItem>>("module.MyDataItem"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
+    {3, "MyDataField", false, std::make_unique<Struct<::test::fixtures::basic::MyDataItem>>("module.MyDataItem"), std::vector<ThriftConstStruct>{}},
     {4, "myEnum", false, std::make_unique<Enum<::test::fixtures::basic::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{}},
     {5, "oneway", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
     {6, "readonly", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},

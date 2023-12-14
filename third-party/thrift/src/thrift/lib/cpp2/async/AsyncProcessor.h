@@ -473,6 +473,8 @@ class ServerRequest {
 
   ResponseChannelRequest::UniquePtr& request() { return request_; }
 
+  const ServerRequestData& requestData() const { return requestData_; }
+
   ServerRequestData& requestData() { return requestData_; }
 
   const std::shared_ptr<folly::RequestContext>& follyRequestContext() const {

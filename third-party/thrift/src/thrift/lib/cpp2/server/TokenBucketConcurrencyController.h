@@ -145,6 +145,17 @@ class TokenBucketConcurrencyController : public ConcurrencyControllerBase {
         "{{TokenBucketConcurrencyController qpsLimit={}}}", qpsLimit_.load());
   }
 
+  using ServerRequestLoggingFunction =
+      std::function<void(const ServerRequest&)>;
+
+  void setOnExpireFunction(ServerRequestLoggingFunction fn) {
+    onExpireFunction_ = std::move(fn);
+  }
+
+  void setOnExecuteFunction(ServerRequestLoggingFunction fn) {
+    onExecuteFunction_ = std::move(fn);
+  }
+
  private:
   // We already acquired a token, so now we should make as much progress as
   // possible given one token. We will process and require requests from the
@@ -155,7 +166,7 @@ class TokenBucketConcurrencyController : public ConcurrencyControllerBase {
   void fastPath();
 
   static bool expired(const ServerRequest& request);
-  static void release(ServerRequest&& request);
+  void release(ServerRequest&& request);
   void execute(ServerRequest&& request);
 
   bool consumeTokens(double tokens) {
@@ -209,6 +220,9 @@ class TokenBucketConcurrencyController : public ConcurrencyControllerBase {
   std::unique_ptr<folly::CPUThreadPoolExecutor> innerExecutor_;
 
   std::atomic<uint64_t> pendingDequeueOps_{0};
+
+  ServerRequestLoggingFunction onExpireFunction_;
+  ServerRequestLoggingFunction onExecuteFunction_;
 };
 
 } // namespace apache::thrift

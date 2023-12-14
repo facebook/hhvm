@@ -18,6 +18,7 @@
 
 #include <chrono>
 #include <cstdint>
+#include <optional>
 
 namespace apache::thrift {
 
@@ -40,6 +41,12 @@ struct ServerRequestData {
 
   intptr_t requestPileUserData = 0;
   intptr_t concurrencyControllerUserData = 0;
+
+  // If this request was stored in RoundRobinRequestPile we want to record the
+  // bucket this request was assigned to so that we can later use this for
+  // logging and counters.
+  using RoundRobinRequestPileBucket = std::pair<size_t, size_t>;
+  std::optional<RoundRobinRequestPileBucket> bucket;
 };
 
 } // namespace apache::thrift

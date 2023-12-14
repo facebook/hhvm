@@ -132,7 +132,7 @@ std::optional<ServerRequestRejection> RoundRobinRequestPile::enqueue(
   }
   DCHECK_LT(pri, opts_.numBucketsPerPriority.size());
   DCHECK_LT(bucket, opts_.numBucketsPerPriority[pri]);
-
+  request.requestData().bucket = {pri, bucket};
   RequestPileBase::onEnqueued(request);
 
   // TODO(yichengfb): enforcing limit on single bucket queue

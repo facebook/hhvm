@@ -22964,7 +22964,7 @@ func (x *LoopPatch) String() string {
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
-	  RegisterType(name string, initializer func() any)
+  RegisterType(name string, initializer func() any)
 }) {
     registry.RegisterType("test.dev/fixtures/patch/MyData", func() any { return NewMyData() })
     registry.RegisterType("test.dev/fixtures/patch/MyDataWithCustomDefault", func() any { return NewMyDataWithCustomDefault() })

@@ -1792,7 +1792,7 @@ func (x *UnionToBeRenamed) String() string {
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
-	  RegisterType(name string, initializer func() any)
+  RegisterType(name string, initializer func() any)
 }) {
     registry.RegisterType("test.dev/fixtures/basic/MyStruct", func() any { return NewMyStruct() })
     registry.RegisterType("test.dev/fixtures/basic/MyDataItem", func() any { return NewMyDataItem() })

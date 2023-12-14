@@ -3193,7 +3193,7 @@ func (x *BinaryPatch) String() string {
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
-	  RegisterType(name string, initializer func() any)
+  RegisterType(name string, initializer func() any)
 }) {
     registry.RegisterType("facebook.com/thrift/op/GeneratePatch", func() any { return NewGeneratePatch() })
     registry.RegisterType("facebook.com/thrift/op/AssignOnlyPatch", func() any { return NewAssignOnlyPatch() })

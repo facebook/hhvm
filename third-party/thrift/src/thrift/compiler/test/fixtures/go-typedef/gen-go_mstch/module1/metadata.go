@@ -4,6 +4,8 @@
 package module1 // [[[ program thrift source path ]]]
 
 import (
+    "maps"
+
     module0 "module0"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
@@ -12,6 +14,7 @@ import (
 var _ = module0.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = thrift.ZERO
+var _ = maps.Copy[map[int]int, map[int]int]
 var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
@@ -263,48 +266,10 @@ var serviceMetadatas = []*metadata.ThriftService{
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.
 func GetThriftMetadata() *metadata.ThriftMetadata {
-    includedEnumsMetadatas := []map[string]*metadata.ThriftEnum{
-        GetEnumsMetadata(),
-        module0.GetEnumsMetadata(),
-    }
-    includedStructsMetadatas := []map[string]*metadata.ThriftStruct{
-        GetStructsMetadata(),
-        module0.GetStructsMetadata(),
-    }
-    includedExceptionsMetadatas := []map[string]*metadata.ThriftException{
-        GetExceptionsMetadata(),
-        module0.GetExceptionsMetadata(),
-    }
-    includedServicesMetadatas := []map[string]*metadata.ThriftService{
-        GetServicesMetadata(),
-        module0.GetServicesMetadata(),
-    }
-
-	allEnums := make(map[string]*metadata.ThriftEnum)
-	allStructs := make(map[string]*metadata.ThriftStruct)
-	allExceptions := make(map[string]*metadata.ThriftException)
-    allServices := make(map[string]*metadata.ThriftService)
-
-    for _, includedEnumsMetadata := range includedEnumsMetadatas {
-        for enumName, thriftEnum := range includedEnumsMetadata {
-            allEnums[enumName] = thriftEnum
-        }
-    }
-    for _, includedStructsMetadata := range includedStructsMetadatas {
-        for structName, thriftStruct := range includedStructsMetadata {
-            allStructs[structName] = thriftStruct
-        }
-    }
-    for _, includedExceptionsMetadata := range includedExceptionsMetadatas {
-        for exceptionName, thriftException := range includedExceptionsMetadata {
-            allExceptions[exceptionName] = thriftException
-        }
-    }
-    for _, includedServicesMetadata := range includedServicesMetadatas {
-        for serviceName, thriftService := range includedServicesMetadata {
-            allServices[serviceName] = thriftService
-        }
-    }
+    allEnums := GetEnumsMetadata()
+    allStructs := GetStructsMetadata()
+    allExceptions := GetExceptionsMetadata()
+    allServices := GetServicesMetadata()
 
     return metadata.NewThriftMetadata().
         SetEnums(allEnums).
@@ -313,38 +278,62 @@ func GetThriftMetadata() *metadata.ThriftMetadata {
         SetServices(allServices)
 }
 
-// GetStructsMetadata returns Thrift metadata for enums in the current package.
+// GetEnumsMetadata returns Thrift metadata for enums in the current and recursively included packages.
 func GetEnumsMetadata() map[string]*metadata.ThriftEnum {
-    result := make(map[string]*metadata.ThriftEnum)
+    allEnumsMap := make(map[string]*metadata.ThriftEnum)
+
+    // Add enum metadatas from the current program...
     for _, enumMetadata := range enumMetadatas {
-        result[enumMetadata.GetName()] = enumMetadata
+        allEnumsMap[enumMetadata.GetName()] = enumMetadata
     }
-    return result
+
+    // ...now add enum metadatas from recursively included programs.
+    maps.Copy(allEnumsMap, module0.GetEnumsMetadata())
+
+    return allEnumsMap
 }
 
-// GetStructsMetadata returns Thrift metadata for structs in the current package.
+// GetStructsMetadata returns Thrift metadata for structs in the current and recursively included packages.
 func GetStructsMetadata() map[string]*metadata.ThriftStruct {
-    result := make(map[string]*metadata.ThriftStruct)
+    allStructsMap := make(map[string]*metadata.ThriftStruct)
+
+    // Add struct metadatas from the current program...
     for _, structMetadata := range structMetadatas {
-        result[structMetadata.GetName()] = structMetadata
+        allStructsMap[structMetadata.GetName()] = structMetadata
     }
-    return result
+
+    // ...now add struct metadatas from recursively included programs.
+    maps.Copy(allStructsMap, module0.GetStructsMetadata())
+
+    return allStructsMap
 }
 
-// GetStructsMetadata returns Thrift metadata for exceptions in the current package.
+// GetExceptionsMetadata returns Thrift metadata for exceptions in the current and recursively included packages.
 func GetExceptionsMetadata() map[string]*metadata.ThriftException {
-    result := make(map[string]*metadata.ThriftException)
+    allExceptionsMap := make(map[string]*metadata.ThriftException)
+
+    // Add exception metadatas from the current program...
     for _, exceptionMetadata := range exceptionMetadatas {
-        result[exceptionMetadata.GetName()] = exceptionMetadata
+        allExceptionsMap[exceptionMetadata.GetName()] = exceptionMetadata
     }
-    return result
+
+    // ...now add exception metadatas from recursively included programs.
+    maps.Copy(allExceptionsMap, module0.GetExceptionsMetadata())
+
+    return allExceptionsMap
 }
 
-// GetStructsMetadata returns Thrift metadata for services in the current package.
+// GetServicesMetadata returns Thrift metadata for services in the current and recursively included packages.
 func GetServicesMetadata() map[string]*metadata.ThriftService {
-    result := make(map[string]*metadata.ThriftService)
+    allServicesMap := make(map[string]*metadata.ThriftService)
+
+    // Add service metadatas from the current program...
     for _, serviceMetadata := range serviceMetadatas {
-        result[serviceMetadata.GetName()] = serviceMetadata
+        allServicesMap[serviceMetadata.GetName()] = serviceMetadata
     }
-    return result
+
+    // ...now add service metadatas from recursively included programs.
+    maps.Copy(allServicesMap, module0.GetServicesMetadata())
+
+    return allServicesMap
 }

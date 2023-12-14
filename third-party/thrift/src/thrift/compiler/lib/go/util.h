@@ -96,6 +96,7 @@ class codegen_data {
       {"strings", 0},
       {"sync", 0},
       {"metadata", 0},
+      {"maps", 0},
   };
 };
 

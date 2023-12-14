@@ -747,7 +747,7 @@ func (x *UseCAPI) String() string {
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
-	  RegisterType(name string, initializer func() any)
+  RegisterType(name string, initializer func() any)
 }) {
     registry.RegisterType("facebook.com/thrift/annotation/python/Py3Hidden", func() any { return NewPy3Hidden() })
     registry.RegisterType("facebook.com/thrift/annotation/python/Flags", func() any { return NewFlags() })

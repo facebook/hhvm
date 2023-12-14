@@ -906,7 +906,7 @@ func (x *Recursive) String() string {
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
-	  RegisterType(name string, initializer func() any)
+  RegisterType(name string, initializer func() any)
 }) {
     registry.RegisterType("facebook.com/thrift/annotation/java/Mutable", func() any { return NewMutable() })
     registry.RegisterType("facebook.com/thrift/annotation/java/Annotation", func() any { return NewAnnotation() })

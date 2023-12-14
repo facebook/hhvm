@@ -3,9 +3,11 @@ In thread_main
 bool(false)
 bool(false)
 bool(false)
-object(Foo) (0) {
-}
+In wakeup
+int(13)
 bool(true)
 object(Foo) (0) {
 }
 bool(true)
+bool(false)
+bool(false)

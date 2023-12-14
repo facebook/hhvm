@@ -1,3 +1,0 @@
-<?hh
-
-class Foo {}

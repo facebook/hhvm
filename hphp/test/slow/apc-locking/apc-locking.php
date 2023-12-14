@@ -1,5 +1,14 @@
 <?hh
 
+class Foo {
+  function __wakeup() {
+    echo "In wakeup\n";
+
+    var_dump(count(apc_cache_info()));
+    var_dump(apc_delete('whoops'));
+  }
+}
+
 function thread_main() :mixed{
   echo "In thread_main\n";
   $res = false;
@@ -14,12 +23,11 @@ function main() :mixed{
   if (HH\execution_context() === "xbox") return;
   echo "In main\n";
 
-  require_once('apc-locking.inc'); // define Foo
-
   apc_store('whoops', new Foo);
 
-  fb_call_user_func_async(
+  $r = fb_call_user_func_async(
     __FILE__,
     'thread_main'
   );
+  fb_end_user_func_async($r);
 }

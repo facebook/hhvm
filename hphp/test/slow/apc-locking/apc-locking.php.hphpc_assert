@@ -1,2 +1,0 @@
-Fatal: An unexpected exception was thrown while emitting: More than one class with the name Foo. In %s/apc-locking2.inc and %s/apc-locking.inc
-hphp failed

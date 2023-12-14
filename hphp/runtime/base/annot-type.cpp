@@ -100,7 +100,7 @@ const AnnotType* nameToAnnotType(const StringData* typeName) {
 namespace {
 
 bool isame(folly::StringPiece a, folly::StringPiece b) {
-  return a.size() == b.size() && !istrcmp(a.data(), b.data());
+  return a.size() == b.size() && !strcasecmp(a.data(), b.data());
 }
 
 }

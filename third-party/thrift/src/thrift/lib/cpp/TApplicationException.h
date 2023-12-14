@@ -319,12 +319,11 @@ struct FOLLY_EXPORT AppOverloadedException : TApplicationException {
  * before processing starts.
  */
 struct FOLLY_EXPORT AppQuotaExceededException : TApplicationException {
-  AppQuotaExceededException(
-      const std::string& tenantId, const std::string& methodName)
-      : TApplicationException(fmt::format(
-            "Tenant {} has exceeded the quota for method {}.",
-            tenantId,
-            methodName)) {}
+  explicit AppQuotaExceededException(const std::string& tenantId)
+      : TApplicationException(
+            fmt::format("Tenant {} has exceeded the quota", tenantId)),
+        tenantId_(tenantId) {}
+  const std::string tenantId_;
 };
 
 } // namespace thrift

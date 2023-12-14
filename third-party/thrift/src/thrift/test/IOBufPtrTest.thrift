@@ -25,6 +25,10 @@ struct Request {
   3: IOBufBinary three;
 }
 
+union Union {
+  1: IOBufPtr foo;
+} (cpp.noncopyable)
+
 service IOBufPtrTestService {
   IOBufPtr combine(1: Request req);
 }

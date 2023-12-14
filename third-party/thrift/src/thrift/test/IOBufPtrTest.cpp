@@ -141,6 +141,13 @@ TEST_F(IOBufPtrTest, Simple) {
   }
 }
 
+TEST(IOBufPtrUnionTest, Union) {
+  Union foo;
+  foo.foo_ref() = folly::IOBuf::wrapBufferAsValue("meow", 4);
+  Union bar = std::move(foo);
+  EXPECT_EQ(bar.foo_ref()->moveToFbString(), "meow");
+}
+
 } // namespace iobufptr
 } // namespace test
 } // namespace thrift

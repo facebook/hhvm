@@ -23,6 +23,9 @@
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <quic/client/QuicClientAsyncTransport.h>
+#include <quic/common/events/FollyQuicEventBase.h>
+#include <quic/common/events/HighResQuicTimer.h>
+#include <quic/common/udpsocket/FollyQuicAsyncUDPSocket.h>
 #include <quic/fizz/client/handshake/FizzClientQuicHandshakeContext.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 
@@ -153,20 +156,20 @@ folly::AsyncTransport::UniquePtr createQuicSocket(
       .shouldRecvBatch = true,
       .shouldUseRecvmmsgForBatchRecv = true,
   };
-
-  auto sock = std::make_unique<quic::QuicAsyncUDPSocketWrapperImpl>(evb);
+  auto qEvb = std::make_shared<quic::FollyQuicEventBase>(evb);
+  auto sock = std::make_unique<quic::FollyQuicAsyncUDPSocket>(qEvb);
   constexpr size_t kBufSize = 4 * 1024 * 1024;
   sock->setRcvBuf(kBufSize);
   sock->setSndBuf(kBufSize);
   auto quicClient = std::make_shared<quic::QuicClientTransport>(
-      evb,
+      qEvb,
       std::move(sock),
       quic::FizzClientQuicHandshakeContext::Builder()
           .setFizzClientContext(getFizzContext(cfg))
           .setCertificateVerifier(getFizzVerifier(cfg))
           .build());
-  quicClient->setPacingTimer(
-      quic::TimerHighRes::newTimer(evb, std::chrono::microseconds(200)));
+  quicClient->setPacingTimer(std::make_shared<quic::HighResQuicTimer>(
+      evb, std::chrono::microseconds(200)));
   quicClient->setTransportSettings(ts);
   quicClient->addNewPeerAddress(cfg.serverHost);
   auto quicAsyncTransport = new quic::QuicClientAsyncTransport(quicClient);

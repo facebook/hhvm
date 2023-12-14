@@ -10,6 +10,7 @@
 #include <proxygen/lib/http/session/HQSession.h>
 
 #include <folly/io/async/HHWheelTimer.h>
+#include <quic/common/events/FollyQuicEventBase.h>
 
 namespace proxygen {
 

@@ -13,6 +13,8 @@
 #include <proxygen/lib/http/codec/HQFramer.h>
 #include <proxygen/lib/http/codec/HQUnidirectionalCodec.h>
 
+#include <folly/io/async/EventBase.h>
+
 namespace proxygen {
 
 // Base class for the unidirectional stream callbacks

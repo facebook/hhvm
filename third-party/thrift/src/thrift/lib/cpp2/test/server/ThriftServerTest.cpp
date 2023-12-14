@@ -55,6 +55,8 @@
 #include <folly/test/TestUtils.h>
 #include <proxygen/httpserver/HTTPServerOptions.h>
 #include <quic/client/QuicClientAsyncTransport.h>
+#include <quic/common/events/FollyQuicEventBase.h>
+#include <quic/common/udpsocket/FollyQuicAsyncUDPSocket.h>
 #include <quic/fizz/client/handshake/FizzClientQuicHandshakeContext.h>
 #include <thrift/lib/cpp/server/TServerEventHandler.h>
 #include <thrift/lib/cpp/transport/THeader.h>
@@ -3409,7 +3411,8 @@ TEST(ThriftServer, PooledRocketSyncChannel) {
 
 static std::shared_ptr<quic::QuicClientTransport> makeQuicClient(
     folly::EventBase& evb, folly::SocketAddress&& peerAddr) {
-  auto sock = std::make_unique<quic::QuicAsyncUDPSocketWrapperImpl>(&evb);
+  auto qEvb = std::make_shared<quic::FollyQuicEventBase>(&evb);
+  auto sock = std::make_unique<quic::FollyQuicAsyncUDPSocket>(qEvb);
   auto ctx = std::make_shared<fizz::client::FizzClientContext>();
   ctx->setSupportedAlpns({"rs"});
   auto verifier = fizz::DefaultCertificateVerifier::createFromCAFiles(
@@ -3432,7 +3435,7 @@ static std::shared_ptr<quic::QuicClientTransport> makeQuicClient(
   }
 
   auto quicClient = std::make_shared<quic::QuicClientTransport>(
-      &evb,
+      qEvb,
       std::move(sock),
       quic::FizzClientQuicHandshakeContext::Builder()
           .setFizzClientContext(std::move(ctx))

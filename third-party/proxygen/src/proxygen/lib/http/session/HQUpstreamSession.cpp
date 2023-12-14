@@ -7,6 +7,7 @@
  */
 
 #include <proxygen/lib/http/session/HQUpstreamSession.h>
+#include <quic/common/events/FollyQuicEventBase.h>
 #include <wangle/acceptor/ConnectionManager.h>
 
 namespace proxygen {
@@ -130,12 +131,13 @@ void HQUpstreamSession::attachThreadLocals(
   txnEgressQueue_.attachThreadLocals(timeout);
   setController(controller);
   setSessionStats(stats);
+  auto qEvbWrapper = std::make_shared<quic::FollyQuicEventBase>(eventBase);
   if (sock_) {
-    sock_->attachEventBase(eventBase);
+    sock_->attachEventBase(std::move(qEvbWrapper));
   }
   codec_.foreach (fn);
   setHeaderCodecStats(headerCodecStats);
-  sock_->getEventBase()->runInLoop(this);
+  getEventBase()->runInLoop(this);
   // The caller MUST re-add the connection to a new connection manager.
 }
 

@@ -26,15 +26,17 @@
 #include <proxygen/lib/utils/UtilInl.h>
 #include <quic/api/QuicSocket.h>
 #include <quic/client/QuicClientTransport.h>
+#include <quic/common/udpsocket/FollyQuicAsyncUDPSocket.h>
 #include <quic/congestion_control/CongestionControllerFactory.h>
 #include <quic/fizz/client/handshake/FizzClientQuicHandshakeContext.h>
 #include <quic/logging/FileQLogger.h>
 
 namespace quic::samples {
 
-HQClient::HQClient(const HQToolClientParams& params) : params_(params) {
+HQClient::HQClient(const HQToolClientParams& params)
+    : params_(params), qEvb_(std::make_shared<FollyQuicEventBase>(&evb_)) {
   if (params_.transportSettings.pacingEnabled) {
-    pacingTimer_ = TimerHighRes::newTimer(
+    pacingTimer_ = std::make_shared<HighResQuicTimer>(
         &evb_, params_.transportSettings.pacingTimerResolution);
   }
 }
@@ -53,7 +55,7 @@ int HQClient::start() {
   evb_.loopForever();
   if (params_.migrateClient) {
     quicClient_->onNetworkSwitch(
-        std::make_unique<quic::QuicAsyncUDPSocketWrapperImpl>(&evb_));
+        std::make_unique<FollyQuicAsyncUDPSocket>(qEvb_));
     sendRequests(true, quicClient_->getNumOpenableBidirectionalStreams());
   }
   evb_.loop();
@@ -259,9 +261,9 @@ void HQClient::connectError(const quic::QuicError& error) {
 }
 
 void HQClient::initializeQuicClient() {
-  auto sock = std::make_unique<quic::QuicAsyncUDPSocketWrapperImpl>(&evb_);
+  auto sock = std::make_unique<FollyQuicAsyncUDPSocket>(qEvb_);
   auto client = std::make_shared<quic::QuicClientTransport>(
-      &evb_,
+      qEvb_,
       std::move(sock),
       quic::FizzClientQuicHandshakeContext::Builder()
           .setFizzClientContext(

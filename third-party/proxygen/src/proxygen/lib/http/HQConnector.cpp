@@ -12,10 +12,11 @@
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <proxygen/lib/http/session/HQSession.h>
 #include <quic/api/QuicSocket.h>
+#include <quic/common/events/FollyQuicEventBase.h>
+#include <quic/common/udpsocket/FollyQuicAsyncUDPSocket.h>
 #include <quic/congestion_control/CongestionControllerFactory.h>
 #include <quic/fizz/client/handshake/FizzClientQuicHandshakeContext.h>
 
-using namespace folly;
 using namespace std;
 using namespace fizz::client;
 
@@ -47,13 +48,13 @@ void HQConnector::setQuicPskCache(
 }
 
 void HQConnector::connect(
-    EventBase* eventBase,
+    folly::EventBase* eventBase,
     folly::Optional<folly::SocketAddress> localAddr,
     const folly::SocketAddress& connectAddr,
     std::shared_ptr<const FizzClientContext> fizzContext,
     std::shared_ptr<const fizz::CertificateVerifier> verifier,
     std::chrono::milliseconds connectTimeout,
-    const SocketOptionMap& socketOptions,
+    const folly::SocketOptionMap& socketOptions,
     folly::Optional<std::string> sni,
     std::shared_ptr<quic::QLogger> qLogger,
     std::shared_ptr<quic::LoopDetectorCallback> quicLoopDetectorCallback,
@@ -61,9 +62,10 @@ void HQConnector::connect(
         quicTransportStatsCallback) {
 
   DCHECK(!isBusy());
-  auto sock = std::make_unique<quic::QuicAsyncUDPSocketWrapperImpl>(eventBase);
+  auto qEvb = std::make_shared<quic::FollyQuicEventBase>(eventBase);
+  auto sock = std::make_unique<quic::FollyQuicAsyncUDPSocket>(qEvb);
   auto quicClient = quic::QuicClientTransport::newClient(
-      eventBase,
+      std::move(qEvb),
       std::move(sock),
       quic::FizzClientQuicHandshakeContext::Builder()
           .setFizzClientContext(fizzContext)

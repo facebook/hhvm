@@ -14,7 +14,7 @@
 #include <proxygen/httpserver/samples/hq/H1QUpstreamSession.h>
 #include <proxygen/httpserver/samples/hq/HQCommandLine.h>
 #include <proxygen/lib/http/session/HQUpstreamSession.h>
-#include <quic/common/Timers.h>
+#include <quic/common/events/HighResQuicTimer.h>
 
 namespace quic {
 
@@ -83,8 +83,9 @@ class HQClient : private quic::QuicSocket::ConnectionSetupCallback {
 
   std::shared_ptr<quic::QuicClientTransport> quicClient_;
 
-  TimerHighRes::SharedPtr pacingTimer_;
+  QuicTimer::SharedPtr pacingTimer_;
 
+  std::shared_ptr<FollyQuicEventBase> qEvb_;
   folly::EventBase evb_;
 
   // H3

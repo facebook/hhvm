@@ -34,6 +34,7 @@
 #include <proxygen/lib/utils/ConditionalGate.h>
 #include <quic/api/QuicSocket.h>
 #include <quic/common/BufUtil.h>
+#include <quic/common/events/FollyQuicEventBase.h>
 
 namespace proxygen {
 
@@ -256,8 +257,10 @@ class HQSession
   }
 
   folly::EventBase* getEventBase() const override {
-    if (sock_) {
-      return sock_->getEventBase();
+    if (sock_ && sock_->getEventBase()) {
+      return sock_->getEventBase()
+          ->getTypedEventBase<quic::FollyQuicEventBase>()
+          ->getBackingEventBase();
     }
     return nullptr;
   }

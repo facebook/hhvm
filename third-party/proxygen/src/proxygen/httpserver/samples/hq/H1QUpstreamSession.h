@@ -13,6 +13,7 @@
 #include <proxygen/lib/http/session/HTTPUpstreamSession.h>
 #include <quic/api/QuicSocket.h>
 #include <quic/api/QuicStreamAsyncTransport.h>
+#include <quic/common/events/FollyQuicEventBase.h>
 
 namespace quic::samples {
 
@@ -49,8 +50,11 @@ class H1QUpstreamSession
     codec->setReleaseEgressAfterRequest(true);
     wangle::TransportInfo tinfo;
     auto session = new proxygen::HTTPUpstreamSession(
-        proxygen::WheelTimerInstance(std::chrono::seconds(5),
-                                     sock_->getEventBase()),
+        proxygen::WheelTimerInstance(
+            std::chrono::seconds(5),
+            sock_->getEventBase()
+                ->getTypedEventBase<FollyQuicEventBase>()
+                ->getBackingEventBase()),
         std::move(streamTransport),
         sock_->getLocalAddress(),
         sock_->getPeerAddress(),

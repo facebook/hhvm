@@ -9,6 +9,7 @@
 #include <proxygen/lib/transport/H3DatagramAsyncSocket.h>
 
 #include <folly/FileUtil.h>
+#include <quic/common/udpsocket/FollyQuicAsyncUDPSocket.h>
 #include <quic/fizz/client/handshake/FizzClientQuicHandshakeContext.h>
 #include <utility>
 #include <wangle/acceptor/TransportInfo.h>
@@ -192,14 +193,15 @@ void H3DatagramAsyncSocket::startClient() {
     transportSettings.datagramConfig.readBufSize = rcvBufPkts_;
   }
   if (!upstreamSession_) {
-    auto sock = std::make_unique<quic::QuicAsyncUDPSocketWrapperImpl>(evb_);
+    auto qEvb = std::make_shared<quic::FollyQuicEventBase>(evb_);
+    auto sock = std::make_unique<quic::FollyQuicAsyncUDPSocket>(qEvb);
     auto fizzClientContext =
         quic::FizzClientQuicHandshakeContext::Builder()
             .setFizzClientContext(createFizzClientContext())
             .setCertificateVerifier(options_.certVerifier_)
             .build();
     auto client = std::make_shared<quic::QuicClientTransport>(
-        evb_, std::move(sock), fizzClientContext);
+        qEvb, std::move(sock), fizzClientContext);
     CHECK(connectAddress_.isInitialized());
     client->addNewPeerAddress(connectAddress_);
     if (bindAddress_.isInitialized()) {

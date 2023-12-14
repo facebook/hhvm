@@ -9,11 +9,11 @@
 #pragma once
 
 #include <folly/Format.h>
-#include <folly/io/async/EventBase.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <proxygen/lib/transport/test/MockAsyncTransportCertificate.h>
 #include <quic/api/test/MockQuicSocket.h>
+#include <quic/common/events/FollyQuicEventBase.h>
 #include <unordered_map>
 
 namespace quic {
@@ -115,6 +115,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
       TransportEnum transportType,
       std::string alpn = "h3")
       : eventBase_(eventBase),
+        quicEventBase_(std::make_shared<quic::FollyQuicEventBase>(eventBase_)),
         transportType_(transportType),
         sock_(std::make_shared<MockQuicSocket>(eventBase, connSetupCb, connCb)),
         alpn_(alpn) {
@@ -176,7 +177,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
         .WillRepeatedly(testing::ReturnPointee(&sockGood_));
 
     EXPECT_CALL(*sock_, getEventBase())
-        .WillRepeatedly(testing::ReturnPointee(&eventBase_));
+        .WillRepeatedly(testing::Return(quicEventBase_));
 
     EXPECT_CALL(*sock_, setControlStream(testing::_))
         .WillRepeatedly(testing::Invoke(
@@ -1753,6 +1754,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
 
   bool strictErrorCheck_{true};
   folly::EventBase* eventBase_;
+  std::shared_ptr<quic::FollyQuicEventBase> quicEventBase_;
   TransportSettings transportSettings_;
   uint64_t bufferAvailable_{std::numeric_limits<uint64_t>::max()};
   // keeping this ordered for better debugging

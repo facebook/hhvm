@@ -14,6 +14,7 @@
 #include <quic/api/LoopDetectorCallback.h>
 #include <quic/api/QuicSocket.h>
 #include <quic/client/QuicClientTransport.h>
+#include <quic/common/events/FollyQuicEventBase.h>
 #include <quic/fizz/client/handshake/QuicPskCache.h>
 #include <quic/logging/QLogger.h>
 

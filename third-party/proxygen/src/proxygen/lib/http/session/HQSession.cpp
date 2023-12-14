@@ -1097,10 +1097,9 @@ void HQSession::scheduleWrite() {
 }
 
 void HQSession::scheduleLoopCallback(bool thisIteration) {
-  if (!isLoopCallbackScheduled()) {
-    auto evb = getEventBase();
-    if (evb) {
-      evb->runInLoop(this, thisIteration);
+  if (sock_ && sock_->getEventBase()) {
+    if (!isLoopCallbackScheduled()) {
+      getEventBase()->runInLoop(this, thisIteration);
     }
   }
 }
@@ -1617,7 +1616,7 @@ void HQSession::onPushPriority(hq::PushId pushId, const HTTPPriority& pri) {
 void HQSession::notifyEgressBodyBuffered(int64_t bytes) {
   if (HTTPSessionBase::notifyEgressBodyBuffered(bytes, true) &&
       !inLoopCallback_ && !isLoopCallbackScheduled() && sock_) {
-    sock_->getEventBase()->runInLoop(this);
+    getEventBase()->runInLoop(this);
   }
 }
 

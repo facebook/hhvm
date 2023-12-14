@@ -20,9 +20,10 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"net"
 
-	"libfb/go/thriftbase"
 	"thrift/conformance/rpc"
+	"thrift/lib/go/thrift"
 
 	"github.com/golang/glog"
 )
@@ -50,14 +51,16 @@ func newRPCClientConformanceTester(port int) *rpcClientConformanceTester {
 
 func (t *rpcClientConformanceTester) getClient() (*rpc.RPCConformanceServiceClient, error) {
 	addr := fmt.Sprintf("localhost:%d", t.port)
-	conn, err := thriftbase.Open(
-		thriftbase.Binary(),
-		thriftbase.RemoteAddrInsecure(addr),
-	)
+	conn, err := net.Dial("tcp", addr)
+	if err != nil {
+		return nil, err
+	}
+	transport, err := thrift.NewSocket(thrift.SocketConn(conn))
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect to %s", addr)
 	}
-	return rpc.NewRPCConformanceServiceClient(conn.Transport(), conn, conn), nil
+	proto := thrift.NewHeaderProtocol(thrift.NewHeaderTransport(transport))
+	return rpc.NewRPCConformanceServiceClient(transport, proto, proto), nil
 }
 
 func (t *rpcClientConformanceTester) execute() {

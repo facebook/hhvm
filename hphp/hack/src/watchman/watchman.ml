@@ -610,7 +610,20 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
         (Hh_json.json_to_string ~pretty:true response);
       raise Exit_status.(Exit_with Watchman_failed)
 
-  let prepend_relative_path_term ~relative_path ~terms =
+  (** Given a list of terms [a;b;c], this constructs [ ["dirname","relative_path"]; a; b; c]
+  It's used because if the watchman root is /fbsource but we want to watch /fbsource/www,
+  then watchman needs us to pass "/fbsource" as the watched-root and then use our
+  own dirname query to restrict to the directory we want.
+
+  CARE: watchman is fast with [dirname,relative_path] and [alloff, [dirname, relative_path]]
+  but it's slow with [anyof, [dirname,relative_path], [name,relative_path]]. That's because
+  watchman indexes on dirname and the first two queries can be done fast, but the third
+  query would require an item-by-item search over every item in /fbsource to see if it
+  matches the "name" predicate.
+
+  This function doesn't do anything if relative_path is empty or there are no terms, then
+  we don't add the restrictions (since it wouldn't be needed). *)
+  let prepend_relative_path_of_directory ~relative_path ~terms =
     match terms with
     | None -> None
     | Some _ when String.equal relative_path "" ->
@@ -621,10 +634,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
     | Some terms ->
       (* So lets say we're being told to watch foo/bar. Is foo/bar a directory? Is it a file? If it
        * is a file now, might it become a directory later? I'm not aware of aterm which will watch for either a file or a directory, so let's add two terms *)
-      Some
-        (J.strlist ["dirname"; relative_path]
-        :: J.strlist ["name"; relative_path]
-        :: terms)
+      Some (J.strlist ["dirname"; relative_path] :: terms)
 
   let re_init
       ?prior_clockspec
@@ -679,7 +689,9 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
           let relative_path =
             J.get_string_val "relative_path" ~default:"" response
           in
-          let terms = prepend_relative_path_term ~relative_path ~terms in
+          let terms =
+            prepend_relative_path_of_directory ~relative_path ~terms
+          in
           let watch_roots = SSet.add watch_root watch_roots in
           (terms, watch_roots, failed_paths))
     >>= fun (watched_path_expression_terms, watch_roots, failed_paths) ->
@@ -698,7 +710,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
             | None -> failwith (spf "Cannot deduce watch root for path %s" path)
             | Some root ->
               let relative_path = lstrip (lstrip path root) Filename.dir_sep in
-              prepend_relative_path_term ~relative_path ~terms))
+              prepend_relative_path_of_directory ~relative_path ~terms))
         failed_paths
         watched_path_expression_terms
     in

@@ -74,3 +74,5 @@ let server_progress_file (root : Path.t) : string =
 
 let server_receipt_to_monitor_file (pid : int) : string =
   Filename.concat (get_tmp ()) (spf "server_receipt_to_monitor.%d.json" pid)
+
+let saved_state_download_dir = "/tmp/hh_server/hh_saved_states_sql"

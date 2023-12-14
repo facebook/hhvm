@@ -24,6 +24,7 @@
   direct_decl_utils
   gen_deps
   hh_server_provider_backend_stubs
+  hh_single_common
   hhi
   hhi_get
   naming_ast_print
@@ -77,6 +78,7 @@
  (libraries
   default_injector_config
   file_content
+  hh_single_common
   hhi
   search
   server_autocomplete_services
@@ -85,6 +87,11 @@
   string
   sys_utils
   utils_core))
+
+(library
+  (name hh_single_common)
+  (modules hh_single_common)
+  (libraries server_files))
 
 (executable
  (name hh_server)

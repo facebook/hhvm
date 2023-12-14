@@ -118,24 +118,6 @@ let magic_builtins =
       ^ "}\n" );
   |]
 
-let find_naming_table_or_fail () : string =
-  let dir = "/tmp/hh_server/hh_saved_states_sql" in
-  let candidates =
-    Disk.readdir dir
-    |> Array.to_list
-    |> List.map ~f:(fun s ->
-           Printf.sprintf "%s/%s/hh_mini_saved_state_naming.sql" dir s)
-    |> List.filter ~f:Sys.file_exists
-  in
-  match candidates with
-  | [] -> failwith ("--root needs --naming-table, or to find one in " ^ dir)
-  | naming_table :: _ ->
-    Printf.eprintf
-      "WARNING: --naming-table wasn't specified, so guessing this one will work (out of %d total candidates):\n%s\n"
-      (List.length candidates)
-      naming_table;
-    naming_table
-
 (*****************************************************************************)
 (* Helpers *)
 (*****************************************************************************)
@@ -861,7 +843,7 @@ let parse_options () =
     | None -> Path.make "/" (* if none specified, we use this dummy *)
     | Some root ->
       if Option.is_none !naming_table then
-        naming_table := Some (find_naming_table_or_fail ());
+        naming_table := Some (Hh_single_common.find_naming_table_or_fail ());
       (* Following will throw an exception if .hhconfig not found *)
       let (_config_hash, config) =
         Config_file.parse_hhconfig

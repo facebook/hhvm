@@ -44,6 +44,7 @@
 // DANGER: If you disable this overly broadly, this can completely break
 // workloads that rely on passing FDs over Unix sockets + Thrift.
 THRIFT_FLAG_DEFINE_bool(enable_server_async_fd_socket, /* default = */ true);
+THRIFT_FLAG_DEFINE_bool(fizz_server_enable_inplace_decryption, false);
 
 namespace apache {
 namespace thrift {
@@ -143,6 +144,11 @@ void Cpp2Worker::onNewConnectionThatMayThrow(
       break;
     }
     case wangle::SecureTransportType::TLS:
+      if (auto fizz =
+              sock->getUnderlyingTransport<fizz::server::AsyncFizzServer>()) {
+        fizz->setDecryptInplace(
+            THRIFT_FLAG(fizz_server_enable_inplace_decryption));
+      }
       // Use the announced protocol to determine the correct handler
       if (!nextProtocolName.empty()) {
         for (auto& routingHandler : *server_->getRoutingHandlers()) {

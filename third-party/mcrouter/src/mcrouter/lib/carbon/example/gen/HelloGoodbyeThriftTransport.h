@@ -271,7 +271,13 @@ class ThriftTransport<hellogoodbye::HelloGoodbyeRouterInfo> : public ThriftTrans
 
   void resetClient() override final {
     if (thriftClient_) {
-      if (auto channel = thriftClient_->getChannel()) {
+      if (auto* channel = static_cast<apache::thrift::RocketClientChannel*>(
+            thriftClient_->getChannel())) {
+        if (auto* transport = channel->getTransport()) {
+          if (auto* socket = transport->getUnderlyingTransport<folly::AsyncSocket>()) {
+            socket->cancelConnect();
+          }
+        }
         // Reset the callback to avoid the following cycle:
         //  ~ThriftAsyncClient() -> ~RocketClientChannel() ->
         //  channelClosed() -> ~ThriftAsyncClient()

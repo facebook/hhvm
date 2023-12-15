@@ -16,7 +16,7 @@ ffi = { version = "0.0.0", path = "../../../utils/ffi" }
 hash = { version = "0.0.0", path = "../../../utils/hash" }
 hhbc = { version = "0.0.0", path = "../../hhbc/cargo/hhbc" }
 hhvm_types_ffi = { version = "0.0.0", path = "../../hhvm_cxx/hhvm_types" }
-indexmap = { version = "1.9.2", features = ["arbitrary", "rayon", "serde-1"] }
+indexmap = { version = "2.1.0", features = ["arbitrary", "rayon", "serde"] }
 macros = { version = "0.0.0", path = "../macros" }
 naming_special_names_rust = { version = "0.0.0", path = "../../../naming" }
 newtype = { version = "0.0.0", path = "../../../utils/newtype" }

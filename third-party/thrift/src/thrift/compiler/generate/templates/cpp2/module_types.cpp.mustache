@@ -304,9 +304,9 @@ namespace apache::thrift::detail::annotation {
 <%#program:split_structs%>
 <%#struct:has_field_with_runtime_annotation?%>
 template<> const std::vector<std::any>& field_annotation_values<<%struct:cpp_fullname%>>(FieldId id) {
-  switch (id) {
+  switch (static_cast<int16_t>(id)) {
 <%#struct:fields%>
-  case FieldId{<%field:key%>}: {
+  case <%field:key%>: {
     static const folly::Indestructible<std::vector<std::any>> ret = [] {
       std::vector<std::any> values;
 <%#field:structured_annotations%>

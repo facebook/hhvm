@@ -992,8 +992,8 @@ FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
 }}}} // test::fixtures::basic-structured-annotations
 namespace apache::thrift::detail::annotation {
 template<> const std::vector<std::any>& field_annotation_values<::test::fixtures::basic-structured-annotations::MyStruct>(FieldId id) {
-  switch (id) {
-  case FieldId{1}: {
+  switch (static_cast<int16_t>(id)) {
+  case 1: {
     static const folly::Indestructible<std::vector<std::any>> ret = [] {
       std::vector<std::any> values;
       values.emplace_back(::apache::thrift::detail::make_structured_constant<::test::fixtures::basic-structured-annotations::runtime_annotation>());
@@ -1001,21 +1001,21 @@ template<> const std::vector<std::any>& field_annotation_values<::test::fixtures
     }();
     return *ret;
   }
-  case FieldId{2}: {
+  case 2: {
     static const folly::Indestructible<std::vector<std::any>> ret = [] {
       std::vector<std::any> values;
       return values;
     }();
     return *ret;
   }
-  case FieldId{3}: {
+  case 3: {
     static const folly::Indestructible<std::vector<std::any>> ret = [] {
       std::vector<std::any> values;
       return values;
     }();
     return *ret;
   }
-  case FieldId{4}: {
+  case 4: {
     static const folly::Indestructible<std::vector<std::any>> ret = [] {
       std::vector<std::any> values;
       return values;

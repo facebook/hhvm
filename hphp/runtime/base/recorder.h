@@ -107,7 +107,7 @@ struct Recorder {
   void onNativeCallThrow(std::exception_ptr exc);
   void onNativeCallWaitHandle(c_Awaitable* wh);
   void resolveWaitHandles();
-  Array toArray() const;
+  std::vector<char> toRecording() const;
 
   template<typename R, typename... A>
   R recordNativeCall(R(*f)(A...), NativeFunction ptr, A&&... args) {

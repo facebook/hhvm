@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/base/replayer.h"
 
+#include <algorithm>
+#include <cstdio>
 #include <fstream>
 #include <optional>
 #include <vector>
@@ -112,7 +114,10 @@ void Replayer::onRuntimeOptionLoad(IniSettingMap& ini, Hdf& hdf,
   always_assert_flog(!ifs.fail(), "{}", path);
   std::vector<char> data(static_cast<std::size_t>(ifs.tellg()));
   ifs.seekg(0).read(data.data(), data.size());
-  BlobDecoder decoder{data.data(), data.size()};
+  ifs.close();
+  std::string_view sv{data.data(), data.size()};
+  const auto size{std::stoull(std::string{sv.substr(sv.rfind('\0') + 1)})};
+  BlobDecoder decoder{data.data(), size};
   const ArrayData* ptr;
   BlobEncoderHelper<decltype(ptr)>::serde(decoder, ptr, true);
   const Array recording{const_cast<ArrayData*>(ptr)};
@@ -158,6 +163,11 @@ void Replayer::onRuntimeOptionLoad(IniSettingMap& ini, Hdf& hdf,
   RO::EvalReplay = true;
   hdf = newHdf;
   ini = newIni;
+  if (RO::RepoAuthoritative) {
+    RO::RepoPath = std::tmpnam(nullptr);
+    std::ofstream ofs{RO::RepoPath, std::ios::binary};
+    ofs.write(&data[size], sv.rfind('\0') - size);
+  }
 }
 
 c_ExternalThreadEventWaitHandle* Replayer::onTryReceiveSome() {

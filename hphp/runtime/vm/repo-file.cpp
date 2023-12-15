@@ -640,5 +640,11 @@ std::vector<const StringData*> RepoFile::enumerateUnits() {
   return ret;
 }
 
+std::size_t RepoFile::numUnits() {
+  assertx(s_repoFileData);
+  assertx(s_repoFileData->loadedGlobalTables.load());
+  return s_repoFileData->unitInfosIndex.size;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 }

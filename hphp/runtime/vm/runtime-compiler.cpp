@@ -186,7 +186,8 @@ Unit* compile_systemlib_string(const char* s, size_t sz,
                                const char* fname,
                                const Extension* extension) {
   assertx(fname && fname[0] == '/' && fname[1] == ':');
-  if (RuntimeOption::RepoAuthoritative) {
+  if (RuntimeOption::RepoAuthoritative &&
+      !(RO::EvalRecordReplay && RO::EvalReplay)) {
     if (auto u = lookupSyslibUnit(makeStaticString(fname))) {
       return u;
     }

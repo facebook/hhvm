@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/recorder.h"
 
+#include <cstdio>
 #include <deque>
 #include <filesystem>
 #include <fstream>
@@ -48,17 +49,20 @@
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
-#include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/debugger-hook.h"
-#include "hphp/runtime/vm/native.h"
+#include "hphp/runtime/vm/hhbc-shared.h"
+#include "hphp/runtime/vm/repo-autoload-map-builder.h"
+#include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/util/blob-encoder.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/optional.h"
+#include "hphp/util/sha1.h"
 
 namespace HPHP {
 
@@ -157,9 +161,7 @@ void Recorder::requestExit() {
     resolveWaitHandles();
     Stream::setThreadLocalFileHandler(m_parentStreamWrapper);
     try {
-      BlobEncoder encoder;
-      toArray().serde(encoder);
-      g_writer->write(encoder.take());
+      g_writer->write(toRecording());
     } catch (...) {
       // TODO Record failure to record
     }
@@ -681,7 +683,7 @@ void Recorder::resolveWaitHandles() {
   }
 }
 
-Array Recorder::toArray() const {
+std::vector<char> Recorder::toRecording() const {
   const std::size_t numNativeCall{m_nativeCalls.size()};
   VecInit nativeCalls{numNativeCall};
   DictInit nativeFuncIds{numNativeCall};
@@ -695,7 +697,8 @@ Array Recorder::toArray() const {
   for (const auto& [type, value] : m_nativeEvents) {
     nativeEvents.append(make_vec_array(static_cast<std::int64_t>(type), value));
   }
-  return make_dict_array(
+  BlobEncoder encoder;
+  make_dict_array(
     "header", make_dict_array(
       "compilerId", compilerId(),
       "entryPoint", g_entryPoint,
@@ -708,7 +711,40 @@ Array Recorder::toArray() const {
     "nativeEvents", nativeEvents.toArray(),
     "nativeFuncIds", nativeFuncIds.toArray(),
     "streamWrapper", m_streamWrapper
-  );
+  ).serde(encoder);
+  auto recording{encoder.take()};
+  const auto recordingSize{recording.size()};
+  if (RO::RepoAuthoritative) {
+    const std::string repoPath{std::tmpnam(nullptr)};
+    RepoAutoloadMapBuilder autoload;
+    RepoFileBuilder builder{repoPath};
+    for (std::int64_t sn{0}; sn < RepoFile::numUnits(); sn++) {
+      if (const auto path{RepoFile::findUnitPath(sn)}; path != nullptr) {
+        std::unique_ptr<UnitEmitter> ue;
+        if (g_context->m_evaledFiles.contains(path)) {
+          ue = RepoFile::loadUnitEmitter(path, nullptr, false);
+        } else {
+          ue = createFatalUnit(path, SHA1{}, FatalOp::Runtime, "");
+          ue->m_sn = sn;
+        }
+        if (ue != nullptr) {
+          autoload.addUnit(*ue);
+          builder.add(*ue);
+        }
+      }
+    }
+    builder.finish(RepoFile::globalData(), autoload, RepoFile::packageInfo());
+    std::ifstream ifs{repoPath, std::ios::binary | std::ios::ate};
+    const auto repoSize{ifs.tellg()};
+    recording.resize(recordingSize + repoSize);
+    ifs.seekg(0).read(&recording[recordingSize], repoSize);
+    ifs.close();
+    std::remove(repoPath.c_str());
+  }
+  recording.push_back('\0');
+  const auto len{std::to_string(recordingSize)};
+  recording.insert(recording.end(), len.begin(), len.end());
+  return recording;
 }
 
 } // namespace HPHP

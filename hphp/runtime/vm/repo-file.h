@@ -197,6 +197,9 @@ struct RepoFile {
   // file.
   static std::vector<const StringData*> enumerateUnits();
 
+  // Return the number of units in the repo file.
+  static std::size_t numUnits();
+
   // Load the UnitEmitter with the given path `searchPath`, returning
   // nullptr if none exists. The UnitEmitter will be assigned the path
   // `path' (it might be different from `searchPath` due to SourceRoot

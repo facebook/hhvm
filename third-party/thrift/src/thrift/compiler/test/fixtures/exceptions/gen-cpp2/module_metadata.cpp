@@ -335,7 +335,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Raiser>>::gen_doRa
   module_Raiser_doRaise_b_1.id() = 1;
   module_Raiser_doRaise_b_1.name() = "b";
   module_Raiser_doRaise_b_1.is_optional() = false;
-  auto module_Raiser_doRaise_b_1_type = std::make_unique<Typedef>("module.Banal", std::make_unique<Struct<::cpp2::Banal>>("module.Banal"), std::vector<ThriftConstStruct>{});
+  auto module_Raiser_doRaise_b_1_type = std::make_unique<Struct<::cpp2::Banal>>("module.Banal");
   module_Raiser_doRaise_b_1_type->writeAndGenType(*module_Raiser_doRaise_b_1.type(), metadata);
   func.exceptions()->push_back(std::move(module_Raiser_doRaise_b_1));
   ExceptionMetadata<::cpp2::Banal>::gen(metadata);
@@ -383,7 +383,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Raiser>>::gen_get5
   module_Raiser_get500_b_2.id() = 2;
   module_Raiser_get500_b_2.name() = "b";
   module_Raiser_get500_b_2.is_optional() = false;
-  auto module_Raiser_get500_b_2_type = std::make_unique<Typedef>("module.Banal", std::make_unique<Struct<::cpp2::Banal>>("module.Banal"), std::vector<ThriftConstStruct>{});
+  auto module_Raiser_get500_b_2_type = std::make_unique<Struct<::cpp2::Banal>>("module.Banal");
   module_Raiser_get500_b_2_type->writeAndGenType(*module_Raiser_get500_b_2.type(), metadata);
   func.exceptions()->push_back(std::move(module_Raiser_get500_b_2));
   ExceptionMetadata<::cpp2::Banal>::gen(metadata);

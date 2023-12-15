@@ -37,7 +37,7 @@ StructMetadata<::apache::thrift::test::A>::gen(ThriftMetadata& metadata) {
   module_A.is_union() = false;
   static const auto* const
   module_A_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "some_map", true, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Typedef>("module.B", std::make_unique<Struct<::apache::thrift::test::B>>("module.B"), std::vector<ThriftConstStruct>{})), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"template", cvString("std::unordered_map")}}).cv_struct_ref(), }},
+    {1, "some_map", true, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Struct<::apache::thrift::test::B>>("module.B")), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"template", cvString("std::unordered_map")}}).cv_struct_ref(), }},
   }};
   for (const auto& f : *module_A_fields) {
     ::apache::thrift::metadata::ThriftField field;

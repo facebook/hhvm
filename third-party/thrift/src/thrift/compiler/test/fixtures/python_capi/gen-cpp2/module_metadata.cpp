@@ -63,7 +63,7 @@ StructMetadata<::test::fixtures::python_capi::MyStruct>::gen(ThriftMetadata& met
   module_MyStruct_fields = new std::array<EncodedThriftField, 8>{{
     {1, "inty", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
     {2, "stringy", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {3, "myItemy", false, std::make_unique<Typedef>("module.MyDataItem", std::make_unique<Struct<::test::fixtures::python_capi::MyDataItem>>("module.MyDataItem"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
+    {3, "myItemy", false, std::make_unique<Struct<::test::fixtures::python_capi::MyDataItem>>("module.MyDataItem"), std::vector<ThriftConstStruct>{}},
     {4, "myEnumy", false, std::make_unique<Enum<::test::fixtures::python_capi::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{}},
     {5, "booly", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
     {6, "floatListy", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE)), std::vector<ThriftConstStruct>{}},
@@ -562,7 +562,7 @@ StructMetadata<::test::fixtures::python_capi::MyStructFieldPatchStruct>::gen(Thr
   module_MyStructFieldPatch_fields = new std::array<EncodedThriftField, 8>{{
     {1, "inty", false, std::make_unique<Struct<::apache::thrift::op::I64PatchStruct>>("patch.I64Patch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
     {2, "stringy", false, std::make_unique<Struct<::apache::thrift::op::StringPatchStruct>>("patch.StringPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
-    {3, "myItemy", false, std::make_unique<Typedef>("module.MyDataItemPatch", std::make_unique<Struct<::test::fixtures::python_capi::MyDataItemPatchStruct>>("module.MyDataItemPatch"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {3, "myItemy", false, std::make_unique<Struct<::test::fixtures::python_capi::MyDataItemPatchStruct>>("module.MyDataItemPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
     {4, "myEnumy", false, std::make_unique<Struct<::test::fixtures::python_capi::MyStructField4PatchStruct>>("module.MyStructField4Patch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
     {5, "booly", false, std::make_unique<Struct<::apache::thrift::op::BoolPatchStruct>>("patch.BoolPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
     {6, "floatListy", false, std::make_unique<Struct<::test::fixtures::python_capi::MyStructField6PatchStruct>>("module.MyStructField6Patch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
@@ -594,7 +594,7 @@ StructMetadata<::test::fixtures::python_capi::MyStructEnsureStruct>::gen(ThriftM
   module_MyStructEnsureStruct_fields = new std::array<EncodedThriftField, 8>{{
     {1, "inty", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
     {2, "stringy", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {3, "myItemy", true, std::make_unique<Typedef>("module.MyDataItem", std::make_unique<Struct<::test::fixtures::python_capi::MyDataItem>>("module.MyDataItem"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
+    {3, "myItemy", true, std::make_unique<Struct<::test::fixtures::python_capi::MyDataItem>>("module.MyDataItem"), std::vector<ThriftConstStruct>{}},
     {4, "myEnumy", true, std::make_unique<Enum<::test::fixtures::python_capi::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{}},
     {5, "booly", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
     {6, "floatListy", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE)), std::vector<ThriftConstStruct>{}},

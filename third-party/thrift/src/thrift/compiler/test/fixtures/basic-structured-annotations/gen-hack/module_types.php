@@ -420,18 +420,9 @@ class structured_annotation_recursive implements \IThriftSyncStruct, \IThriftStr
               "id" => 2,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.structured_annotation_recursive",
-                      "underlyingType" => \tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_struct" => \tmeta_ThriftStructType::fromShape(
-                            shape(
-                              "name" => "module.structured_annotation_recursive",
-                            )
-                          ),
-                        )
-                      ),
                     )
                   ),
                 )
@@ -445,18 +436,9 @@ class structured_annotation_recursive implements \IThriftSyncStruct, \IThriftStr
               "id" => 3,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.structured_annotation_forward",
-                      "underlyingType" => \tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_struct" => \tmeta_ThriftStructType::fromShape(
-                            shape(
-                              "name" => "module.structured_annotation_forward",
-                            )
-                          ),
-                        )
-                      ),
                     )
                   ),
                 )

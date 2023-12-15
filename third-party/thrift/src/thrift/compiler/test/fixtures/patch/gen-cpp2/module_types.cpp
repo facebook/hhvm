@@ -1106,6 +1106,12 @@ template uint32_t Recursive::write<>(apache::thrift::CompactProtocolWriter*) con
 template uint32_t Recursive::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t Recursive::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Recursive,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::structure>,
+        ::std::map<::std::string, ::test::fixtures::patch::Recursive>>,
+    "inconsistent use of json option");
 
 }}} // test::fixtures::patch
 
@@ -5952,6 +5958,12 @@ template uint32_t RecursiveField1PatchStruct::write<>(apache::thrift::CompactPro
 template uint32_t RecursiveField1PatchStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t RecursiveField1PatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        RecursiveField1PatchStruct,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::structure>,
+        ::std::map<::std::string, ::test::fixtures::patch::Recursive>>,
+    "inconsistent use of json option");
 
 }}} // test::fixtures::patch
 
@@ -6176,6 +6188,12 @@ template uint32_t RecursiveEnsureStruct::write<>(apache::thrift::CompactProtocol
 template uint32_t RecursiveEnsureStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t RecursiveEnsureStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        RecursiveEnsureStruct,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::structure>,
+        ::std::map<::std::string, ::test::fixtures::patch::Recursive>>,
+    "inconsistent use of json option");
 
 }}} // test::fixtures::patch
 

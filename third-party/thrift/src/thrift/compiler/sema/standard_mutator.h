@@ -23,7 +23,7 @@ namespace thrift {
 namespace compiler {
 
 // Standard mutators for Thrift.
-ast_mutators standard_mutators();
+ast_mutators standard_mutators(bool use_legacy_type_ref_resolution);
 
 } // namespace compiler
 } // namespace thrift

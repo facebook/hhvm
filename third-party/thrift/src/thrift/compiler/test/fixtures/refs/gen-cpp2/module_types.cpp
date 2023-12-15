@@ -781,6 +781,12 @@ template uint32_t RecursiveStruct::write<>(apache::thrift::CompactProtocolWriter
 template uint32_t RecursiveStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t RecursiveStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        RecursiveStruct,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector<::cpp2::RecursiveStruct>>,
+    "inconsistent use of json option");
 
 } // cpp2
 

@@ -178,18 +178,9 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
               "id" => 1,
               "type" => tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                  "t_struct" => tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "include.MyNestedStruct",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_struct" => tmeta_ThriftStructType::fromShape(
-                            shape(
-                              "name" => "include.MyNestedStruct",
-                            )
-                          ),
-                        )
-                      ),
                     )
                   ),
                 )
@@ -665,18 +656,9 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
               "id" => 8,
               "type" => tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                  "t_struct" => tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "include.StructWithWrapper",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_struct" => tmeta_ThriftStructType::fromShape(
-                            shape(
-                              "name" => "include.StructWithWrapper",
-                            )
-                          ),
-                        )
-                      ),
                     )
                   ),
                 )
@@ -1602,18 +1584,9 @@ class MyComplexStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \I
                               ),
                               "valueType" => tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                                  "t_struct" => tmeta_ThriftStructType::fromShape(
                                     shape(
                                       "name" => "include.StructWithWrapper",
-                                      "underlyingType" => tmeta_ThriftType::fromShape(
-                                        shape(
-                                          "t_struct" => tmeta_ThriftStructType::fromShape(
-                                            shape(
-                                              "name" => "include.StructWithWrapper",
-                                            )
-                                          ),
-                                        )
-                                      ),
                                     )
                                   ),
                                 )

@@ -438,18 +438,9 @@ class TestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
               "id" => 6,
               "type" => tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                  "t_struct" => tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.Foo",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_struct" => tmeta_ThriftStructType::fromShape(
-                            shape(
-                              "name" => "module.Foo",
-                            )
-                          ),
-                        )
-                      ),
                     )
                   ),
                 )
@@ -900,18 +891,9 @@ class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
               "id" => 3,
               "type" => tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                  "t_struct" => tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.TestStruct",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_struct" => tmeta_ThriftStructType::fromShape(
-                            shape(
-                              "name" => "module.TestStruct",
-                            )
-                          ),
-                        )
-                      ),
                     )
                   ),
                 )
@@ -979,18 +961,9 @@ class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
                     shape(
                       "valueType" => tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                          "t_struct" => tmeta_ThriftStructType::fromShape(
                             shape(
                               "name" => "module.TestStruct",
-                              "underlyingType" => tmeta_ThriftType::fromShape(
-                                shape(
-                                  "t_struct" => tmeta_ThriftStructType::fromShape(
-                                    shape(
-                                      "name" => "module.TestStruct",
-                                    )
-                                  ),
-                                )
-                              ),
                             )
                           ),
                         )

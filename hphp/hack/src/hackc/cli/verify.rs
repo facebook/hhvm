@@ -17,6 +17,7 @@ use clap::Parser;
 use decl_provider::SelfProvider;
 use hash::HashMap;
 use hash::HashSet;
+use hhbc::SrcLoc;
 use itertools::Itertools;
 use multifile_rust as multifile;
 use parser_core_types::source_text::SourceText;
@@ -49,14 +50,36 @@ enum VerifyError {
     MultifileError(String),
     #[error("panic {0}")]
     Panic(String),
+    #[error("parse error: {0}")]
+    ParseError(String, SrcLoc),
     #[error("printing error: {0}")]
     PrintError(String),
     #[error("unable to read file: {0}")]
     ReadError(String),
+    #[error("runtime error: {0}")]
+    RuntimeError(String, SrcLoc),
     #[error("units mismatch: {0}")]
     UnitMismatchError(cmp::CmpError),
     #[error("semantic units mismatch: {0}")]
     SemanticUnitMismatchError(String),
+}
+
+impl VerifyError {
+    fn loc(&self) -> Option<&SrcLoc> {
+        match self {
+            VerifyError::ParseError(_, loc) | VerifyError::RuntimeError(_, loc) => Some(loc),
+            VerifyError::AssembleError(_)
+            | VerifyError::CompileError(_)
+            | VerifyError::IoError(_)
+            | VerifyError::IrUnitMismatchError(_)
+            | VerifyError::MultifileError(_)
+            | VerifyError::Panic(_)
+            | VerifyError::PrintError(_)
+            | VerifyError::ReadError(_)
+            | VerifyError::UnitMismatchError(_)
+            | VerifyError::SemanticUnitMismatchError(_) => None,
+        }
+    }
 }
 
 impl From<std::io::Error> for VerifyError {
@@ -95,6 +118,10 @@ struct CommonOpts {
     /// Print all errors
     #[clap(short = 'a')]
     show_all: bool,
+
+    /// Print all files
+    #[clap(long)]
+    show_verbose: bool,
 }
 
 #[derive(Args, Debug)]
@@ -149,6 +176,50 @@ impl AssembleOpts {
         });
 
         result.map_err(VerifyError::UnitMismatchError)
+    }
+}
+
+#[derive(Args, Debug)]
+struct CompileOpts {
+    #[command(flatten)]
+    common: CommonOpts,
+}
+
+impl CompileOpts {
+    fn verify_file(&self, path: &Path, content: Vec<u8>, profile: &mut ProfileAcc) -> Result<()> {
+        let alloc = bumpalo::Bump::default();
+        let mut compile_profile = compile::Profile::default();
+        let (_env, unit) = compile_php_file(
+            &alloc,
+            path,
+            content,
+            &self.common.single_file_opts,
+            &mut compile_profile,
+        )?;
+
+        profile.fold_with(ProfileAcc {
+            total_t: Timing::from_duration(
+                compile_profile.codegen_t + compile_profile.parser_profile.total_t,
+                path,
+            ),
+            codegen_t: Timing::from_duration(compile_profile.codegen_t, path),
+            parsing_t: Timing::from_duration(compile_profile.parser_profile.parsing_t, path),
+            lowering_t: Timing::from_duration(compile_profile.parser_profile.lowering_t, path),
+            ..Default::default()
+        });
+
+        if let ffi::Maybe::Just(hhbc::Fatal { op, loc, message }) = unit.fatal {
+            use hhbc::FatalOp;
+            let msg = message.as_bstr().to_string();
+            let err = match op {
+                FatalOp::Parse => VerifyError::ParseError(msg, loc),
+                FatalOp::Runtime | FatalOp::RuntimeOmitFrame => VerifyError::RuntimeError(msg, loc),
+                _ => VerifyError::CompileError(msg),
+            };
+            return Err(err);
+        }
+
+        Ok(())
     }
 }
 
@@ -281,9 +352,22 @@ impl InferOpts {
 
 #[derive(Parser, Debug)]
 enum Mode {
-    /// Compile files and save the resulting HHAS and interior hhbc::Unit. Assemble the HHAS files and save the resulting Unit. Compare Unit.
+    /// Assemble the input HHAS files to verify that they can be assembled
+    /// successfully.  This is similar to the 'assemble' major mode but doesn't
+    /// produce any output files.
     Assemble(AssembleOpts),
+    /// Compile the input Hack files to verify that they can compile
+    /// successfully.  This is similar to the 'compile' major mode but doesn't
+    /// produce any output files.
+    Compile(CompileOpts),
+    /// Compile the input Hack files and convert to Infer to verify that they
+    /// can compile successfully. This is similar to the 'compile-infer' major
+    /// mode but doesn't produce any output files.
     Infer(InferOpts),
+    /// Compile the input Hack files into HHAS, convert them to IR, convert the
+    /// resulting IR back to HHAS and then verify that the resulting HHAS
+    /// matches the original HHAS to ensure that the HHAS -> IR -> HHAS pipeline
+    /// is working properly.
     Ir(IrOpts),
 }
 
@@ -291,6 +375,7 @@ impl Mode {
     fn common(&self) -> &CommonOpts {
         match self {
             Mode::Assemble(AssembleOpts { common, .. })
+            | Mode::Compile(CompileOpts { common, .. })
             | Mode::Infer(InferOpts { common, .. })
             | Mode::Ir(IrOpts { common, .. }) => common,
         }
@@ -299,6 +384,7 @@ impl Mode {
     fn common_mut(&mut self) -> &mut CommonOpts {
         match self {
             Mode::Assemble(AssembleOpts { common, .. })
+            | Mode::Compile(CompileOpts { common, .. })
             | Mode::Infer(InferOpts { common, .. })
             | Mode::Ir(IrOpts { common, .. }) => common,
         }
@@ -306,7 +392,7 @@ impl Mode {
 
     fn setup(&self) {
         match self {
-            Mode::Assemble(_) | Mode::Ir(_) => {}
+            Mode::Assemble(_) | Mode::Compile(_) | Mode::Ir(_) => {}
             Mode::Infer(opts) => opts.setup(),
         }
     }
@@ -314,6 +400,7 @@ impl Mode {
     fn verify_file(&self, path: &Path, content: Vec<u8>, profile: &mut ProfileAcc) -> Result<()> {
         match self {
             Mode::Assemble(opts) => opts.verify_file(path, content, profile),
+            Mode::Compile(opts) => opts.verify_file(path, content, profile),
             Mode::Infer(opts) => opts.verify_file(path, content, profile),
             Mode::Ir(opts) => opts.verify_file(path, content, profile),
         }
@@ -387,9 +474,15 @@ where
     }
 }
 
+#[derive(Debug)]
+struct ErrorStat {
+    count: usize,
+    example: PathBuf,
+}
+
 struct ProfileAcc {
     passed: bool,
-    error_histogram: HashMap<VerifyError, (usize, PathBuf)>,
+    error_histogram: HashMap<String, ErrorStat>,
     assemble_t: Timing,
     bc_to_ir_t: Timing,
     codegen_t: Timing,
@@ -424,11 +517,15 @@ impl std::default::Default for ProfileAcc {
 impl ProfileAcc {
     fn fold_with(&mut self, other: Self) {
         self.passed = self.passed && other.passed;
-        for (err, (n, example)) in other.error_histogram {
-            self.error_histogram
+        for (err, stat) in other.error_histogram {
+            let e = self
+                .error_histogram
                 .entry(err)
-                .or_insert_with(|| (0, example))
-                .0 += n;
+                .or_insert_with(|| ErrorStat {
+                    count: 0,
+                    example: stat.example,
+                });
+            e.count += stat.count;
         }
         self.assemble_t.fold_with(other.assemble_t);
         self.bc_to_ir_t.fold_with(other.bc_to_ir_t);
@@ -502,10 +599,10 @@ impl ProfileAcc {
             for (k, v) in self
                 .error_histogram
                 .iter()
-                .sorted_by(|a, b| a.1.0.cmp(&b.1.0).reverse())
+                .sorted_by(|a, b| a.1.count.cmp(&b.1.count).reverse())
                 .take(num_show)
             {
-                println!("  {:3} ({}): {}", v.0, v.1.display(), k);
+                println!("  {:3} ({}): {}", v.count, v.example.display(), k);
             }
             if self.error_histogram.len() > 20 {
                 println!(
@@ -549,19 +646,37 @@ impl ProfileAcc {
         Ok(())
     }
 
-    fn record_error(mut self, err: VerifyError, f: &Path) -> Self {
+    fn record_error(mut self, err: VerifyError, f: &Path, show_verbose: bool) -> Self {
+        if show_verbose {
+            if let Some(loc) = err.loc() {
+                println!(
+                    "\rerror: {}[{}:{}]: {}",
+                    f.display(),
+                    loc.line_begin,
+                    loc.col_begin,
+                    err
+                );
+            } else {
+                println!("error: {}: {}", f.display(), err);
+            }
+        }
+
         self.passed = false;
-        self.error_histogram
-            .entry(err)
-            .or_insert_with(|| (0, f.to_path_buf()))
-            .0 += 1;
+        let e = self
+            .error_histogram
+            .entry(err.to_string())
+            .or_insert_with(|| ErrorStat {
+                count: 0,
+                example: f.to_path_buf(),
+            });
+        e.count += 1;
         self
     }
 
     fn num_failed(&self) -> usize {
         self.error_histogram
             .values()
-            .fold(0, |acc, (val, _)| acc + val)
+            .fold(0, |acc, ErrorStat { count, .. }| acc + count)
     }
 }
 
@@ -571,14 +686,22 @@ fn verify_one_file(path: &Path, mode: &Mode) -> ProfileAcc {
     let content = match fs::read(path) {
         Ok(content) => content,
         Err(err) => {
-            return acc.record_error(VerifyError::ReadError(err.to_string()), path);
+            return acc.record_error(
+                VerifyError::ReadError(err.to_string()),
+                path,
+                mode.common().show_verbose,
+            );
         }
     };
 
     let files = match multifile::to_files(path, content) {
         Ok(files) => files,
         Err(err) => {
-            return acc.record_error(VerifyError::MultifileError(err.to_string()), path);
+            return acc.record_error(
+                VerifyError::MultifileError(err.to_string()),
+                path,
+                mode.common().show_verbose,
+            );
         }
     };
 
@@ -593,7 +716,7 @@ fn verify_one_file(path: &Path, mode: &Mode) -> ProfileAcc {
         };
         acc = acc.fold(file_profile);
         if let Err(err) = result {
-            return acc.record_error(err, &path);
+            return acc.record_error(err, &path, mode.common().show_verbose);
         }
     }
 
@@ -626,7 +749,8 @@ fn verify_files(files: &[PathBuf], mode: &Mode) -> anyhow::Result<()> {
 
     let (count, duration) = status_ticker.finish();
 
-    profile.report_final(duration, count, total, mode.common().show_all)?;
+    let common = mode.common();
+    profile.report_final(duration, count, total, common.show_all)?;
 
     ensure!(
         profile.passed,

@@ -2133,6 +2133,7 @@ dependencies = [
  "elab",
  "env_logger 0.10.0",
  "facts",
+ "ffi",
  "file_provider",
  "hackrs_test_utils",
  "hash",

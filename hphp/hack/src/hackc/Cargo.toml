@@ -28,6 +28,7 @@ direct_decl_parser = { version = "0.0.0", path = "../parser/api/cargo/direct_dec
 elab = { version = "0.0.0", path = "../elab" }
 env_logger = "0.10"
 facts = { version = "0.0.0", path = "facts/cargo/facts_rust" }
+ffi = { version = "0.0.0", path = "../utils/ffi" }
 file_provider = { version = "0.0.0", path = "../hackrs/file_provider/cargo/file_provider" }
 hackrs_test_utils = { version = "0.0.0", path = "../hackrs/hackrs_test_utils/cargo/hackrs_test_utils" }
 hash = { version = "0.0.0", path = "../utils/hash" }

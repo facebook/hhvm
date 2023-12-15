@@ -32,7 +32,6 @@ class t_stream : public t_type {
   explicit t_stream(t_type_ref elem_type) : elem_type_(std::move(elem_type)) {}
 
   const t_type_ref& elem_type() const { return elem_type_; }
-  t_type_ref& elem_type() { return elem_type_; }
 
   // Returns the exceptions declared in the throws clause or or null if there
   // is no throws clause.

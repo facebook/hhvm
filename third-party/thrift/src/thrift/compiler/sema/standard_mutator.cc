@@ -433,8 +433,8 @@ void field_to_const_value(
 
 } // namespace
 
-ast_mutators standard_mutators(bool use_legacy_type_ref_resolution) {
-  ast_mutators mutators(use_legacy_type_ref_resolution);
+ast_mutators standard_mutators() {
+  ast_mutators mutators;
   {
     auto& initial = mutators[standard_mutator_stage::initial];
     initial.add_field_visitor(&lower_type_annotations<t_field>);

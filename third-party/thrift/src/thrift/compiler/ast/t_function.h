@@ -60,7 +60,6 @@ class t_function final : public t_named {
   // Returns an interaction created by this function or null if there is none.
   // It is represented as a type for legacy reasons.
   const t_type_ref& interaction() const { return interaction_; }
-  t_type_ref& interaction() { return interaction_; }
 
   // Returns the function's return type. The return type can be omitted if
   // there is a stream or interaction in the return clause of a function

@@ -446,9 +446,18 @@ class TestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
               "id" => 6,
               "type" => tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
                     shape(
                       "name" => "module.Foo",
+                      "underlyingType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_struct" => tmeta_ThriftStructType::fromShape(
+                            shape(
+                              "name" => "module.Foo",
+                            )
+                          ),
+                        )
+                      ),
                     )
                   ),
                 )

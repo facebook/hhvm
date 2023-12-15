@@ -1263,9 +1263,18 @@ class Service1_func2_args implements \IThriftAsyncStruct, \IThriftStructMetadata
               "id" => 1,
               "type" => tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
                     shape(
                       "name" => "include.StructWithWrapper",
+                      "underlyingType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_struct" => tmeta_ThriftStructType::fromShape(
+                            shape(
+                              "name" => "include.StructWithWrapper",
+                            )
+                          ),
+                        )
+                      ),
                     )
                   ),
                 )
@@ -1620,9 +1629,18 @@ class Service1StaticMetadata implements \IThriftServiceStaticMetadata {
                     "id" => 1,
                     "type" => tmeta_ThriftType::fromShape(
                       shape(
-                        "t_struct" => tmeta_ThriftStructType::fromShape(
+                        "t_typedef" => tmeta_ThriftTypedefType::fromShape(
                           shape(
                             "name" => "include.StructWithWrapper",
+                            "underlyingType" => tmeta_ThriftType::fromShape(
+                              shape(
+                                "t_struct" => tmeta_ThriftStructType::fromShape(
+                                  shape(
+                                    "name" => "include.StructWithWrapper",
+                                  )
+                                ),
+                              )
+                            ),
                           )
                         ),
                       )
@@ -1678,6 +1696,7 @@ class Service1StaticMetadata implements \IThriftServiceStaticMetadata {
             'structs' => dict[
               'include.MyStruct' => MyStruct::getStructMetadata(),
               'include.MyNestedStruct' => MyNestedStruct::getStructMetadata(),
+              'include.StructWithWrapper' => \thrift_adapted_types\StructWithWrapper::getStructMetadata(),
               'include.StructWithWrapper' => \thrift_adapted_types\StructWithWrapper::getStructMetadata(),
               'include.MyStruct' => MyStruct::getStructMetadata(),
             ],

@@ -622,11 +622,20 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
                       "name" => "module.list_string_6884",
                       "underlyingType" => tmeta_ThriftType::fromShape(
                         shape(
-                          "t_list" => tmeta_ThriftListType::fromShape(
+                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
                             shape(
-                              "valueType" => tmeta_ThriftType::fromShape(
+                              "name" => "module.list_string_6884",
+                              "underlyingType" => tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                  "t_list" => tmeta_ThriftListType::fromShape(
+                                    shape(
+                                      "valueType" => tmeta_ThriftType::fromShape(
+                                        shape(
+                                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                        )
+                                      ),
+                                    )
+                                  ),
                                 )
                               ),
                             )

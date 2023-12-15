@@ -31,10 +31,6 @@ public class Priority implements TBase, java.io.Serializable, Cloneable, Compara
   private static final TStruct STRUCT_DESC = new TStruct("Priority");
   private static final TField LEVEL_FIELD_DESC = new TField("level", TType.I32, (short)1);
 
-  /**
-   * 
-   * @see RpcPriority
-   */
   public RpcPriority level;
   public static final int LEVEL = 1;
 
@@ -97,18 +93,10 @@ public class Priority implements TBase, java.io.Serializable, Cloneable, Compara
     return new Priority(this);
   }
 
-  /**
-   * 
-   * @see RpcPriority
-   */
   public RpcPriority getLevel() {
     return this.level;
   }
 
-  /**
-   * 
-   * @see RpcPriority
-   */
   public Priority setLevel(RpcPriority level) {
     this.level = level;
     return this;

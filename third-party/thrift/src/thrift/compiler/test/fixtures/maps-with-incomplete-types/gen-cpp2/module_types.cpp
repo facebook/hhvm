@@ -110,12 +110,6 @@ template uint32_t A::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t A::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t A::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
-static_assert(
-    ::apache::thrift::detail::st::gen_check_json<
-        A,
-        ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>,
-        std::unordered_map<::std::int32_t, ::apache::thrift::test::B>>,
-    "inconsistent use of json option");
 
 }}} // apache::thrift::test
 

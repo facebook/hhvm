@@ -1718,14 +1718,13 @@ class MyStructWithForwardRefEnum final  {
   [[deprecated("This constructor is deprecated")]]
   MyStructWithForwardRefEnum(apache::thrift::FragileConstructor, ::apache::thrift::fixtures::types::MyForwardRefEnum a__arg, ::apache::thrift::fixtures::types::MyForwardRefEnum b__arg);
 
-  MyStructWithForwardRefEnum(MyStructWithForwardRefEnum&&) = default;
+  MyStructWithForwardRefEnum(MyStructWithForwardRefEnum&&) noexcept;
 
-  MyStructWithForwardRefEnum(const MyStructWithForwardRefEnum&) = default;
+  MyStructWithForwardRefEnum(const MyStructWithForwardRefEnum& src);
 
 
-  MyStructWithForwardRefEnum& operator=(MyStructWithForwardRefEnum&&) = default;
-
-  MyStructWithForwardRefEnum& operator=(const MyStructWithForwardRefEnum&) = default;
+  MyStructWithForwardRefEnum& operator=(MyStructWithForwardRefEnum&&) noexcept;
+  MyStructWithForwardRefEnum& operator=(const MyStructWithForwardRefEnum& src);
  private:
   ::apache::thrift::fixtures::types::MyForwardRefEnum __fbthrift_field_a;
  private:

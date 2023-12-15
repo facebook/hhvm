@@ -36,7 +36,6 @@
 #include <thrift/compiler/diagnostic.h>
 #include <thrift/compiler/parse/lexer.h>
 #include <thrift/compiler/parse/parser.h>
-#include <thrift/compiler/sema/ast_mutator.h>
 #include <thrift/compiler/source_location.h>
 
 namespace apache {
@@ -1117,13 +1116,6 @@ std::unique_ptr<t_program_bundle> parse_ast(
   }
 
   // Resolve types in the root program.
-  diagnostic_context ctx(
-      diags.source_mgr(),
-      [&](auto diag) { diags.report(std::move(diag)); },
-      diags.params());
-  if (!params.use_legacy_type_ref_resolution) {
-    type_ref_resolver{}(ctx, *programs);
-  }
   std::string program_prefix = root_program.name() + ".";
   for (t_placeholder_typedef& t :
        root_program.scope()->placeholder_typedefs()) {

@@ -226,7 +226,7 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
                         shape(
                           "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                             shape(
-                              "name" => "module.StringWithAdapter",
+                              "name" => "module.StringWithAdapter_7208",
                               "underlyingType" => \tmeta_ThriftType::fromShape(
                                 shape(
                                   "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
@@ -234,7 +234,16 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
                                       "name" => "module.StringWithAdapter",
                                       "underlyingType" => \tmeta_ThriftType::fromShape(
                                         shape(
-                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                                            shape(
+                                              "name" => "module.StringWithAdapter",
+                                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                                                shape(
+                                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                                )
+                                              ),
+                                            )
+                                          ),
                                         )
                                       ),
                                     )
@@ -530,7 +539,7 @@ class ServiceStaticMetadata implements \IThriftServiceStaticMetadata {
                               shape(
                                 "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                                   shape(
-                                    "name" => "module.StringWithAdapter",
+                                    "name" => "module.StringWithAdapter_7208",
                                     "underlyingType" => \tmeta_ThriftType::fromShape(
                                       shape(
                                         "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
@@ -538,7 +547,16 @@ class ServiceStaticMetadata implements \IThriftServiceStaticMetadata {
                                             "name" => "module.StringWithAdapter",
                                             "underlyingType" => \tmeta_ThriftType::fromShape(
                                               shape(
-                                                "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                                "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                                                  shape(
+                                                    "name" => "module.StringWithAdapter",
+                                                    "underlyingType" => \tmeta_ThriftType::fromShape(
+                                                      shape(
+                                                        "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                                      )
+                                                    ),
+                                                  )
+                                                ),
                                               )
                                             ),
                                           )

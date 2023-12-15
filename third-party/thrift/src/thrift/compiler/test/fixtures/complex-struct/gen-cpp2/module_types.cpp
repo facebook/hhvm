@@ -686,18 +686,6 @@ static_assert(
         ::apache::thrift::type_class::structure,
         ::cpp2::MyDataItem>,
     "inconsistent use of json option");
-static_assert(
-    ::apache::thrift::detail::st::gen_check_json<
-        MyStruct,
-        ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::structure>,
-        ::std::map<::std::string, ::cpp2::MyStruct>>,
-    "inconsistent use of json option");
-static_assert(
-    ::apache::thrift::detail::st::gen_check_json<
-        MyStruct,
-        ::apache::thrift::type_class::set<::apache::thrift::type_class::structure>,
-        ::std::set<::cpp2::MyStruct>>,
-    "inconsistent use of json option");
 
 } // cpp2
 
@@ -1170,12 +1158,6 @@ static_assert(
         defaultStruct,
         ::apache::thrift::type_class::variant,
         ::cpp2::MyUnion>,
-    "inconsistent use of json option");
-static_assert(
-    ::apache::thrift::detail::st::gen_check_json<
-        defaultStruct,
-        ::apache::thrift::type_class::list<::apache::thrift::type_class::variant>,
-        ::std::vector<::cpp2::MyUnion>>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<

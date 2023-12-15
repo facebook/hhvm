@@ -63,7 +63,6 @@ class t_const final : public t_named {
   const t_type* type() const { return type_ref_.get_type(); }
 
   t_type_ref type_ref() const { return type_ref_; }
-  t_type_ref& type_ref() { return type_ref_; }
 
   const t_const_value* value() const { return value_.get(); }
   t_const_value* value() { return value_.get(); }

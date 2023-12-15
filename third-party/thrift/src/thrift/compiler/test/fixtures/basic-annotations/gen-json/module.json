@@ -390,8 +390,8 @@
           }
         },
         "cpp_type_annotation" : {
-          "type_enum" : "TYPEDEF",
-          "spec_args" : "list_string_6884",
+          "type_enum" : "LIST",
+          "spec_args" : { "type_enum" : "STRING", "spec_args" : null} ,
           "required" : true,
           "source_range" : {
             "begin" : {

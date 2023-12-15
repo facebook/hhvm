@@ -33,8 +33,6 @@ class t_map final : public t_container {
 
   const t_type_ref& key_type() const { return key_type_; }
   const t_type_ref& val_type() const { return val_type_; }
-  t_type_ref& key_type() { return key_type_; }
-  t_type_ref& val_type() { return val_type_; }
 
   type container_type() const override { return type::t_map; }
   std::string get_full_name() const override {

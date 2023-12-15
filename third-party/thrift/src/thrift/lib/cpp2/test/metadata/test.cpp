@@ -327,7 +327,10 @@ TEST_F(ServiceMetadataTest, NestedStructsTest) {
   auto listType = *s3.fields_ref()[1].type_ref();
   EXPECT_EQ(listType.getType(), ThriftType::Type::t_list);
   auto elemType = listType.get_t_list().valueType_ref().get();
-  EXPECT_EQ(*elemType->get_t_struct().name_ref(), "nested_structs_test.Foo");
+  auto ttypedef = elemType->get_t_typedef();
+  EXPECT_EQ(
+      *ttypedef.underlyingType_ref()->get_t_struct().name_ref(),
+      "nested_structs_test.Foo");
 }
 
 TEST_F(ServiceMetadataTest, IncludeTest) {

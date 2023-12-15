@@ -4147,7 +4147,11 @@ MyStructWithForwardRefEnum.thrift_field_annotations = {
 }
 
 def MyStructWithForwardRefEnum__init__(self, a=MyStructWithForwardRefEnum.thrift_spec[1][4], b=MyStructWithForwardRefEnum.thrift_spec[2][4],):
+  if a is self.thrift_spec[1][4]:
+    a =   12
   self.a = a
+  if b is self.thrift_spec[2][4]:
+    b =   12
   self.b = b
 
 MyStructWithForwardRefEnum.__init__ = MyStructWithForwardRefEnum__init__

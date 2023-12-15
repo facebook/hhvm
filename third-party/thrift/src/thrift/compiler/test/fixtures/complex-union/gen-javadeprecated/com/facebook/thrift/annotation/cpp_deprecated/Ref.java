@@ -35,10 +35,6 @@ public class Ref implements TBase, java.io.Serializable, Cloneable, Comparable<R
   private static final TStruct STRUCT_DESC = new TStruct("Ref");
   private static final TField TYPE_FIELD_DESC = new TField("type", TType.I32, (short)1);
 
-  /**
-   * 
-   * @see RefType
-   */
   public RefType type;
   public static final int TYPE = 1;
 
@@ -101,18 +97,10 @@ public class Ref implements TBase, java.io.Serializable, Cloneable, Comparable<R
     return new Ref(this);
   }
 
-  /**
-   * 
-   * @see RefType
-   */
   public RefType getType() {
     return this.type;
   }
 
-  /**
-   * 
-   * @see RefType
-   */
   public Ref setType(RefType type) {
     this.type = type;
     return this;

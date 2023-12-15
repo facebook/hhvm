@@ -1430,9 +1430,18 @@ class Priority implements \IThriftSyncStruct, \IThriftStructMetadata {
               "id" => 1,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_enum" => \tmeta_ThriftEnumType::fromShape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
                       "name" => "thrift.RpcPriority",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_enum" => \tmeta_ThriftEnumType::fromShape(
+                            shape(
+                              "name" => "thrift.RpcPriority",
+                            )
+                          ),
+                        )
+                      ),
                     )
                   ),
                 )

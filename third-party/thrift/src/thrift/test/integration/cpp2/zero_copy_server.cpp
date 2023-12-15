@@ -24,6 +24,8 @@
 #include <folly/experimental/io/IoUringBackend.h>
 #include <folly/io/async/AsyncSignalHandler.h>
 
+#include <folly/experimental/io/MuxIOThreadPoolExecutor.h>
+
 #include <common/services/cpp/ServiceFramework.h>
 #include <thrift/test/integration/cpp2/gen-cpp2/ZeroCopyService.h>
 
@@ -59,6 +61,13 @@ DEFINE_int32(io_max_submit, 0, "");
 DEFINE_int32(io_registers, 2048, "");
 DEFINE_int32(io_prov_buffs_size, 2048, "");
 DEFINE_int32(io_prov_buffs, 2000, "");
+
+// mux thread pool related
+DEFINE_bool(mux_io_tp_enable, false, "enable mux I/O thread pool");
+DEFINE_int32(mux_io_tp_num_evbs, 16, "");
+DEFINE_int32(mux_io_tp_num_threads, 16, "");
+DEFINE_int32(mux_io_tp_num_max_events, 64, "");
+DEFINE_int32(mux_io_tp_num_wakeup_us, 200, "");
 
 using namespace thrift::zerocopy::cpp2;
 
@@ -115,8 +124,28 @@ std::unique_ptr<folly::EventBaseBackendBase> getEventBaseBackendFunc() {
   }
 }
 
-std::shared_ptr<folly::IOThreadPoolExecutor> getIOThreadPool(
+std::shared_ptr<folly::IOThreadPoolExecutorBase> getIOThreadPool(
     const std::string& name, size_t numThreads) {
+  LOG(INFO) << "mux_io_tp_enable = " << FLAGS_mux_io_tp_enable;
+  if (FLAGS_mux_io_tp_enable) {
+    LOG(INFO) << "numThreads = " << numThreads;
+    LOG(INFO) << "mux_io_tp_num_threads = " << FLAGS_mux_io_tp_num_threads;
+    LOG(INFO) << "mux_io_tp_num_evbs = " << FLAGS_mux_io_tp_num_evbs;
+    LOG(INFO) << "mux_io_tp_num_wakeup_us = " << FLAGS_mux_io_tp_num_wakeup_us;
+    LOG(INFO) << "mux_io_tp_num_max_events = "
+              << FLAGS_mux_io_tp_num_max_events;
+
+    folly::MuxIOThreadPoolExecutor::Options options;
+    options.setNumEVBs(FLAGS_mux_io_tp_num_evbs);
+    options.setWakeUpInterval(
+        std::chrono::microseconds(FLAGS_mux_io_tp_num_wakeup_us));
+    options.setMaxEvents(FLAGS_mux_io_tp_num_max_events);
+    auto pool = std::make_shared<folly::MuxIOThreadPoolExecutor>(
+        (numThreads > 0) ? numThreads : FLAGS_mux_io_tp_num_threads, options);
+
+    return pool;
+  }
+
   auto threadFactory = std::make_shared<folly::NamedThreadFactory>(name);
   if (FLAGS_io_uring) {
     LOG(INFO) << "using io_uring EventBase backend";

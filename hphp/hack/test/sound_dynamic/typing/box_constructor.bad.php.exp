@@ -1,0 +1,6 @@
+File "box_constructor.bad.php", line 7, characters 12-13:
+Method  `__construct` in class `Box` is not dynamically callable. (Typing[4426])
+  File "box_constructor.bad.php", line 7, characters 12-13:
+  Cannot write to property `vi` through dynamic type because private property in `Box` does not have an enforceable type
+  File "box_constructor.bad.php", line 5, characters 11-18:
+  Property `vi` has type `vec<int>`

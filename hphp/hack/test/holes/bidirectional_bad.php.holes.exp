@@ -183,4 +183,57 @@
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([16:10-13], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+  (Class
+     { c_span = [4:1-6:2]; c_annotation = (); c_mode = Mstrict; c_final = true; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+       c_name = ([4:13-14], "\\C"); c_tparams = []; c_extends = []; c_uses = []; 
+       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
+       c_where_constraints = []; c_consts = []; c_typeconsts = [];
+       c_vars =
+       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
+          cv_readonly = false; cv_visibility = Private;
+          cv_type =
+          ((~dict<string, mixed>),
+           (Some ([5:39-58], (Happly (([5:39-43], "\\HH\\dict"), [([5:44-50], (Hprim Tstring)); ([5:52-57], (Happly (([5:52-57], "\\HH\\supportdyn"), [([5:52-57], Hmixed)])))])))));
+          cv_id = ([5:59-64], "spec"); cv_expr = None; cv_user_attributes = []; 
+          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
+          cv_span = [5:59-64] }
+         ];
+       c_methods =
+       [{ m_span = [5:3-68]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([5:19-30], "__construct"); m_tparams = []; m_where_constraints = [];
+          m_params =
+          [{ param_annotation = (dynamic);
+             param_type_hint =
+             ((dynamic), (Some ([5:39-58], (Happly (([5:39-43], "\\HH\\dict"), [([5:44-50], (Hprim Tstring)); ([5:52-57], (Happly (([5:52-57], "\\HH\\supportdyn"), [([5:52-57], Hmixed)])))])))));
+             param_is_variadic = false; param_pos = [5:59-64]; param_name = "$spec"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = (Some Private) }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None;
+          m_body =
+          { fb_ast =
+            [([5:59-64],
+              (Expr
+                 ((dynamic), [5:59-64],
+                  (Binop
+                     { bop = (Eq None);
+                       lhs =
+                       ((~dict<string, mixed>), [5:59-64], (Obj_get ((((this & dynamic)), [5:59-64], This), ((~dict<string, mixed>), [5:59-64], (Id ([5:59-64], "spec"))), OG_nullthrows, Is_prop)));
+                       rhs = ((dynamic), [5:59-64], (Lvar ([5:59-64], $spec))) }))));
+              ([Pos.none], Noop)]
+            };
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((dynamic), (Some ([5:19-30], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None }
+         ];
+       c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = [{ ua_name = ([4:13-14], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None })

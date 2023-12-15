@@ -6,7 +6,7 @@ interface I<+T> { }
 
 <<__SupportDynamicType>>
 class Wrap<+T> implements I<T> {
-  public function __construct(private T $item) { }
+  public function __construct(private ~T $item) { }
 }
 
 <<__SupportDynamicType>>

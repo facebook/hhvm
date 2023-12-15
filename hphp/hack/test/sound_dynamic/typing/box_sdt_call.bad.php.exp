@@ -4,3 +4,9 @@ Typing error (Typing[4110])
   Expected `dynamic`
   File "box_sdt_call.bad.php", line 25, characters 13-15:
   Type `Box<int>` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "box_sdt_call.bad.php", line 14, characters 41-42:
+Method  `__construct` in class `ROBox` is not dynamically callable. (Typing[4426])
+  File "box_sdt_call.bad.php", line 14, characters 41-42:
+  Cannot write to property `x` through dynamic type because private property in `ROBox` does not have an enforceable type
+  File "box_sdt_call.bad.php", line 14, characters 39-39:
+  Property `x` has type `T`

@@ -16,6 +16,12 @@ Typing error (Typing[4110])
   Expected `dynamic`
   File "generic_params.bad.php", line 20, characters 7-12:
   Type `KeyBox<int>` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "generic_params.bad.php", line 30, characters 46-50:
+Method  `__construct` in class `AnotherBox` is not dynamically callable. (Typing[4426])
+  File "generic_params.bad.php", line 30, characters 46-50:
+  Cannot write to property `item` through dynamic type because private property in `AnotherBox` does not have an enforceable type
+  File "generic_params.bad.php", line 30, characters 39-44:
+  Property `item` has type `vec<T>`
 File "generic_params.bad.php", line 29, characters 7-16:
 Class AnotherBox must support dynamic at least as often as Getter:
 Getter<vec<T>> is subtype of dynamic implies AnotherBox<T> is subtype of dynamic (Typing[4433])

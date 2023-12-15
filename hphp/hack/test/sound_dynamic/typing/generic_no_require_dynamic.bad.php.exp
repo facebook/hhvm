@@ -4,6 +4,18 @@ Typing error (Typing[4110])
   Expected `dynamic`
   File "generic_no_require_dynamic.bad.php", line 17, characters 7-7:
   Type `C<mixed>` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "generic_no_require_dynamic.bad.php", line 6, characters 41-42:
+Method  `__construct` in class `C` is not dynamically callable. (Typing[4426])
+  File "generic_no_require_dynamic.bad.php", line 6, characters 41-42:
+  Cannot write to property `x` through dynamic type because private property in `C` does not have an enforceable type
+  File "generic_no_require_dynamic.bad.php", line 6, characters 39-39:
+  Property `x` has type `T`
+File "generic_no_require_dynamic.bad.php", line 12, characters 41-42:
+Method  `__construct` in class `D` is not dynamically callable. (Typing[4426])
+  File "generic_no_require_dynamic.bad.php", line 12, characters 41-42:
+  Cannot write to property `x` through dynamic type because private property in `D` does not have an enforceable type
+  File "generic_no_require_dynamic.bad.php", line 12, characters 39-39:
+  Property `x` has type `T`
 File "generic_no_require_dynamic.bad.php", line 13, characters 45-45:
 Method  `set` in class `D` is not dynamically callable. (Typing[4426])
   File "generic_no_require_dynamic.bad.php", line 13, characters 45-45:

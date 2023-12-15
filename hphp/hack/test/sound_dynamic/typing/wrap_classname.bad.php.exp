@@ -1,0 +1,6 @@
+File "wrap_classname.bad.php", line 6, characters 48-50:
+Method  `__construct` in class `Wrap` is not dynamically callable. (Typing[4426])
+  File "wrap_classname.bad.php", line 6, characters 48-50:
+  Cannot write to property `vi` through dynamic type because private property in `Wrap` does not have an enforceable type
+  File "wrap_classname.bad.php", line 6, characters 39-46:
+  Property `vi` has type `vec<int>`

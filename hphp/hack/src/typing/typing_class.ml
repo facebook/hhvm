@@ -221,11 +221,13 @@ let method_def ~is_disposable env cls m =
   let (ret_decl_ty, params_decl_ty) =
     hint_fun_decl ~params:m.m_params ~ret:m.m_ret env
   in
-  (* Is sound dynamic enabled, and the function not a constructor
-   * and marked <<__SupportDynamicType>> explicitly or implicitly? *)
+  (* Is sound dynamic enabled and the function is
+   * marked <<__SupportDynamicType>> explicitly or implicitly?
+   * (Even constructors must be treated as SDT because they can be called
+   * through a classname cast to dynamic).
+   *)
   let sdt_method =
     TCO.enable_sound_dynamic (Provider_context.get_tcopt (Env.get_ctx env))
-    && (not env.inside_constructor)
     && Env.get_support_dynamic_type env
   in
   (* Does the body of the method need to be checked again under

@@ -1107,6 +1107,15 @@ let modify_worker_count hack_worker_count =
 
 let setup_server ~informant_managed ~monitor_pid options config local_config =
   let num_workers = num_workers options local_config |> modify_worker_count in
+
+  let old_decl_client_opt =
+    match Remote_old_decls_ffi.initialize_client () with
+    | Ok handle -> Some handle
+    | Error msg ->
+      Hh_logger.log "Error initializing remote decl client: %s" msg;
+      None
+  in
+
   let handle =
     SharedMem.init ~num_workers (ServerConfig.sharedmem_config config)
   in
@@ -1282,7 +1291,13 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
     { env.ServerEnv.tcopt with GlobalOptions.tco_package_info = package_info }
   in
   let env =
-    ServerEnv.{ env with tcopt; errorl = Errors.merge env.errorl errors }
+    ServerEnv.
+      {
+        env with
+        tcopt;
+        old_decl_client_opt;
+        errorl = Errors.merge env.errorl errors;
+      }
   in
 
   (workers, env)

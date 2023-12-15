@@ -8,6 +8,7 @@
 
 val fetch_old_decls :
   ctx:Provider_context.t ->
+  old_decl_client_opt:Remote_old_decls_ffi.old_decl_client option ->
   string list ->
   Shallow_decl_defs.shallow_class option SMap.t
 

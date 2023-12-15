@@ -267,6 +267,7 @@ let do_redecl
       get_classes
       ~previously_oldified_defs:FileInfo.empty_names
       ~defs:defs_per_file
+      ~old_decl_client_opt:env.old_decl_client_opt
   in
   let to_recheck =
     ServerIncremental.get_files_to_recheck

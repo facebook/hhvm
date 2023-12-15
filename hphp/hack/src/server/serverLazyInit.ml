@@ -600,6 +600,7 @@ let get_files_to_recheck
       get_old_and_new_classes
       ~previously_oldified_defs:old_dirty_names
       ~defs:defs_per_file_to_redeclare
+      ~old_decl_client_opt:env.old_decl_client_opt
   in
   Decl_redecl_service.remove_old_defs
     ctx

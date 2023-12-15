@@ -246,6 +246,7 @@ type env = {
           recheck (for logging/debugging purposes) *)
   last_recheck_loop_stats: RecheckLoopStats.t; [@opaque]
   last_recheck_loop_stats_for_actual_work: RecheckLoopStats.t option; [@opaque]
+  old_decl_client_opt: Remote_old_decls_ffi.old_decl_client option; [@opaque]
 }
 [@@deriving show]
 

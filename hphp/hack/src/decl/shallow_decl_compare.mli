@@ -12,5 +12,6 @@ val compute_class_fanout :
   Provider_context.t ->
   during_init:bool ->
   class_names:Decl_compare.VersionedSSet.diff ->
+  old_decl_client_opt:Remote_old_decls_ffi.old_decl_client option ->
   Relative_path.t list ->
   Fanout.t

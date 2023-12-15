@@ -11,6 +11,7 @@ open Shallow_decl_defs
 val get_old_batch :
   Provider_context.t ->
   during_init:bool ->
+  old_decl_client_opt:Remote_old_decls_ffi.old_decl_client option ->
   SSet.t ->
   shallow_class option SMap.t
 

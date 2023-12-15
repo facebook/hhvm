@@ -15,21 +15,28 @@ let fetch_remote_old_decl_flag (ctx : Provider_context.t) =
 let fetch_remote_old_decls ctx ~during_init =
   fetch_remote_old_decl_flag ctx && during_init
 
-let fetch_missing_old_classes_remotely ctx ~during_init old_classes =
+let fetch_missing_old_classes_remotely
+    ctx ~during_init ~old_decl_client_opt old_classes =
   if fetch_remote_old_decls ctx ~during_init then
     let missing_old_classes =
       SMap.filter (fun _key -> Option.is_none) old_classes |> SMap.keys
     in
     let remote_old_classes =
-      Remote_old_decl_client.fetch_old_decls ~ctx missing_old_classes
+      Remote_old_decl_client.fetch_old_decls
+        ~ctx
+        ~old_decl_client_opt
+        missing_old_classes
     in
     SMap.union old_classes remote_old_classes ~combine:(fun _key decl1 decl2 ->
         Some (Option.first_some decl1 decl2))
   else
     old_classes
 
-let get_old_batch (ctx : Provider_context.t) ~during_init (names : SSet.t) :
-    shallow_class option SMap.t =
+let get_old_batch
+    (ctx : Provider_context.t)
+    ~during_init
+    ~(old_decl_client_opt : Remote_old_decls_ffi.old_decl_client option)
+    (names : SSet.t) : shallow_class option SMap.t =
   match Provider_context.get_backend ctx with
   | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Analysis ->
@@ -41,10 +48,18 @@ let get_old_batch (ctx : Provider_context.t) ~during_init (names : SSet.t) :
         be
         FileInfo.{ empty_names with n_classes = names }
     in
-    fetch_missing_old_classes_remotely ctx ~during_init old_classes
+    fetch_missing_old_classes_remotely
+      ctx
+      ~during_init
+      ~old_decl_client_opt
+      old_classes
   | Provider_backend.Shared_memory ->
     let old_classes = Shallow_classes_heap.Classes.get_old_batch names in
-    fetch_missing_old_classes_remotely ctx ~during_init old_classes
+    fetch_missing_old_classes_remotely
+      ctx
+      ~during_init
+      ~old_decl_client_opt
+      old_classes
   | Provider_backend.Local_memory _ ->
     failwith "get_old_batch not implemented for Local_memory"
 

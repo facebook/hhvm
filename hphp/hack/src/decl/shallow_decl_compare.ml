@@ -31,8 +31,11 @@ let diff_class_in_changed_file
     Some (Major_change (MajorChange.Unknown New_decl_not_found))
 
 let compute_class_diffs
-    (ctx : Provider_context.t) ~during_init ~(class_names : VersionedSSet.diff)
-    : (string * ClassDiff.t) list =
+    (ctx : Provider_context.t)
+    ~during_init
+    ~(class_names : VersionedSSet.diff)
+    ~(old_decl_client_opt : Remote_old_decls_ffi.old_decl_client option) :
+    (string * ClassDiff.t) list =
   let { VersionedSSet.added; kept; removed } = class_names in
   let acc = [] in
   let acc =
@@ -44,7 +47,11 @@ let compute_class_diffs
         (name, Major_change MajorChange.Removed) :: acc)
   in
   let old_classes =
-    Old_shallow_classes_provider.get_old_batch ctx ~during_init kept
+    Old_shallow_classes_provider.get_old_batch
+      ctx
+      ~during_init
+      ~old_decl_client_opt
+      kept
   in
   let new_classes =
     SSet.fold kept ~init:SMap.empty ~f:(fun name acc ->
@@ -149,11 +156,14 @@ let compute_class_fanout
     (ctx : Provider_context.t)
     ~during_init
     ~(class_names : VersionedSSet.diff)
+    ~(old_decl_client_opt : Remote_old_decls_ffi.old_decl_client option)
     (changed_files : Relative_path.t list) : Fanout.t =
   let file_count = List.length changed_files in
   Hh_logger.log "Detecting changes to classes in %d files:" file_count;
 
-  let changes = compute_class_diffs ctx ~during_init ~class_names in
+  let changes =
+    compute_class_diffs ctx ~during_init ~class_names ~old_decl_client_opt
+  in
   log_changes changes;
 
   let fanout = Shallow_class_fanout.fanout_of_changes ~ctx changes in

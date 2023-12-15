@@ -428,8 +428,19 @@ class ast_builder : public parser_actions {
   t_type_ref new_type_ref(
       std::string name,
       std::unique_ptr<deprecated_annotations> annotations,
-      const source_range& range) {
+      const source_range& range,
+      bool is_const = false) {
     t_type_ref result = scope_->ref_type(program_, name, range);
+
+    // TODO: Consider removing this special case for const, which requires a
+    // specific declaration order.
+    if (!result.resolved() && is_const) {
+      diags_.error(
+          range.begin,
+          "The type '{}' is not defined yet. Types must be "
+          "defined before the usage in constant values.",
+          name);
+    }
 
     if (auto* node = result.get_unresolved_type()) { // A newly created ph.
       set_annotations(node, std::move(annotations));
@@ -968,7 +979,8 @@ class ast_builder : public parser_actions {
       source_range range, std::string_view name) override {
     auto const_value = std::make_unique<t_const_value>();
     const_value->set_map();
-    const_value->set_ttype(new_type_ref(fmt::to_string(name), nullptr, range));
+    const_value->set_ttype(
+        new_type_ref(fmt::to_string(name), nullptr, range, /*is_const=*/true));
     return const_value;
   }
 

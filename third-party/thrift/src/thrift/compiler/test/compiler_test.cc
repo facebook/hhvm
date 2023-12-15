@@ -779,6 +779,7 @@ TEST(CompilerTest, structured_annotations_type_resolved) {
     }
 
     @Annotation{count=1, forward=TooForward{name="abc"}}
+      # expected-error@-1: The type 'TooForward' is not defined yet. Types must be defined before the usage in constant values.
     struct Annotated {
         1: string name;
     }

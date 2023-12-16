@@ -376,22 +376,18 @@ class ServerAcceptorFactory : public AcceptorFactory {
   std::shared_ptr<SharedSSLContextManager> sharedSSLContextManager_;
 };
 
-class ServerWorkerPool : public folly::ThreadPoolExecutor::Observer {
+class ServerWorkerPool : public folly::IOThreadPoolExecutorBase::IOObserver {
  public:
   explicit ServerWorkerPool(
       std::shared_ptr<AcceptorFactory> acceptorFactory,
-      folly::IOThreadPoolExecutorBase* exec,
       std::shared_ptr<std::vector<std::shared_ptr<folly::AsyncSocketBase>>>
           sockets,
       std::shared_ptr<ServerSocketFactory> socketFactory)
       : workers_(std::make_shared<WorkerMap>()),
         workersMutex_(std::make_shared<Mutex>()),
         acceptorFactory_(acceptorFactory),
-        exec_(exec),
         sockets_(sockets),
-        socketFactory_(socketFactory) {
-    CHECK(exec);
-  }
+        socketFactory_(socketFactory) {}
 
   template <typename F>
   void forEachWorker(F&& f) const;
@@ -399,27 +395,17 @@ class ServerWorkerPool : public folly::ThreadPoolExecutor::Observer {
   template <typename F>
   void forRandomWorker(F&& f) const;
 
-  void threadStarted(folly::ThreadPoolExecutor::ThreadHandle*) override;
-  void threadStopped(folly::ThreadPoolExecutor::ThreadHandle*) override;
-  void threadPreviouslyStarted(
-      folly::ThreadPoolExecutor::ThreadHandle* thread) override {
-    threadStarted(thread);
-  }
-  void threadNotYetStopped(
-      folly::ThreadPoolExecutor::ThreadHandle* thread) override {
-    threadStopped(thread);
-  }
+  void registerEventBase(folly::EventBase& evb) override;
+  void unregisterEventBase(folly::EventBase& evb) override;
 
  private:
-  using WorkerMap = std::vector<std::pair<
-      folly::ThreadPoolExecutor::ThreadHandle*,
-      std::shared_ptr<Acceptor>>>;
+  using WorkerMap =
+      std::vector<std::pair<folly::EventBase*, std::shared_ptr<Acceptor>>>;
   using Mutex = folly::SharedMutexReadPriority;
 
   std::shared_ptr<WorkerMap> workers_;
   std::shared_ptr<Mutex> workersMutex_;
   std::shared_ptr<AcceptorFactory> acceptorFactory_;
-  folly::IOThreadPoolExecutorBase* exec_{nullptr};
   std::shared_ptr<std::vector<std::shared_ptr<folly::AsyncSocketBase>>>
       sockets_;
   std::shared_ptr<ServerSocketFactory> socketFactory_;

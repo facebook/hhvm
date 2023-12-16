@@ -21,12 +21,11 @@
 
 namespace wangle {
 
-void ServerWorkerPool::threadStarted(
-    folly::ThreadPoolExecutor::ThreadHandle* h) {
-  auto worker = acceptorFactory_->newAcceptor(exec_->getEventBase(h));
+void ServerWorkerPool::registerEventBase(folly::EventBase& evb) {
+  auto worker = acceptorFactory_->newAcceptor(&evb);
   {
     Mutex::WriteHolder holder(workersMutex_.get());
-    workers_->push_back({h, worker});
+    workers_->push_back({&evb, worker});
   }
 
   for (auto socket : *sockets_) {
@@ -38,12 +37,11 @@ void ServerWorkerPool::threadStarted(
   }
 }
 
-void ServerWorkerPool::threadStopped(
-    folly::ThreadPoolExecutor::ThreadHandle* h) {
+void ServerWorkerPool::unregisterEventBase(folly::EventBase& evb) {
   auto worker = [&]() -> std::shared_ptr<Acceptor> {
     Mutex::WriteHolder holder(workersMutex_.get());
     for (auto it = workers_->begin(); it != workers_->end(); ++it) {
-      if (it->first != h) {
+      if (it->first != &evb) {
         continue;
       }
       auto acceptor = std::move(it->second);
@@ -65,9 +63,8 @@ void ServerWorkerPool::threadStopped(
     });
   }
 
-  auto evb = worker->getEventBase();
-
-  evb->runImmediatelyOrRunInEventBaseThreadAndWait(
+  auto workerEvb = worker->getEventBase();
+  workerEvb->runImmediatelyOrRunInEventBaseThreadAndWait(
       [w = std::move(worker)]() mutable {
         w->dropAllConnections();
         w.reset();

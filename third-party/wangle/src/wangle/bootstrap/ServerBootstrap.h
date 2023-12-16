@@ -143,14 +143,14 @@ class ServerBootstrap {
 
     if (acceptorFactory_) {
       workerFactory_ = std::make_shared<ServerWorkerPool>(
-          acceptorFactory_, io_group.get(), sockets_, socketFactory_);
+          acceptorFactory_, sockets_, socketFactory_);
     } else {
       auto acceptorFactory = std::make_shared<ServerAcceptorFactory<Pipeline>>(
           acceptPipelineFactory_, childPipelineFactory_, accConfig_);
       acceptorFactory->enableSharedSSLContext(useSharedSSLContextManager_);
       sharedSSLContextManager_ = acceptorFactory->getSharedSSLContextManager();
       workerFactory_ = std::make_shared<ServerWorkerPool>(
-          acceptorFactory, io_group.get(), sockets_, socketFactory_);
+          acceptorFactory, sockets_, socketFactory_);
     }
 
     io_group->addObserver(workerFactory_);

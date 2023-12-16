@@ -590,7 +590,7 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
 
   if (tc.isUnresolved()) {
     // FIXME(T116301380): native builtins don't resolve properly
-    return ty == T::Object || ty == T::ObjectArg;
+    return ty == T::Object || ty == T::ObjectNN;
   }
 
   if (!tc.underlyingDataType()) {
@@ -600,15 +600,15 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
   switch (*tc.underlyingDataType()) {
     case KindOfDouble:       return ty == T::Double;
     case KindOfBoolean:      return ty == T::Bool;
-    case KindOfObject:       return ty == T::Object   || ty == T::ObjectArg;
+    case KindOfObject:       return ty == T::Object   || ty == T::ObjectNN;
     case KindOfPersistentString:
-    case KindOfString:       return ty == T::String   || ty == T::StringArg;
+    case KindOfString:       return ty == T::String   || ty == T::StringNN;
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
     case KindOfDict:
     case KindOfPersistentKeyset:
-    case KindOfKeyset:       return ty == T::Array    || ty == T::ArrayArg;
+    case KindOfKeyset:       return ty == T::Array    || ty == T::ArrayNN;
     case KindOfResource:     return ty == T::Resource || ty == T::ResourceArg;
     case KindOfUninit:
     case KindOfNull:         return ty == T::Void;
@@ -804,9 +804,9 @@ static std::string nativeTypeString(NativeSig::Type ty) {
   case T::String:     return "string";
   case T::Array:      return "array";
   case T::Resource:   return "resource";
-  case T::ObjectArg:  return "object";
-  case T::StringArg:  return "string";
-  case T::ArrayArg:   return "array";
+  case T::ObjectNN:   return "object";
+  case T::StringNN:   return "string";
+  case T::ArrayNN:    return "array";
   case T::ResourceArg:return "resource";
   case T::Mixed:      return "mixed";
   case T::MixedTV:    return "mixed";

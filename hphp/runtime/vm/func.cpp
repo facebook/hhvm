@@ -723,6 +723,7 @@ Func::SharedData::SharedData(BCPtr bc, Offset bclen,
   m_allFlags.m_isGenerated = false;
   m_allFlags.m_hasExtendedSharedData = false;
   m_allFlags.m_returnByValue = false;
+  m_allFlags.m_isUntrustedReturnType = false;
   m_allFlags.m_isMemoizeWrapper = false;
   m_allFlags.m_isMemoizeWrapperLSB = false;
   m_allFlags.m_memoizeICType = Func::MemoizeICType::NoIC;

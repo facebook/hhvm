@@ -368,6 +368,10 @@ inline bool Func::isReturnByValue() const {
   return shared()->m_allFlags.m_returnByValue;
 }
 
+inline bool Func::hasUntrustedReturnType() const {
+  return shared()->m_allFlags.m_isUntrustedReturnType;
+}
+
 inline const TypeConstraint& Func::returnTypeConstraint() const {
   return shared()->m_retTypeConstraint;
 }

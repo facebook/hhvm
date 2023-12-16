@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/replayer.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/type-nonnull-ret.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
@@ -238,9 +239,9 @@ void coerceFCallArgsFromLocals(const ActRec* fp,
   X(Class,      const Class*,         const Class*)   \
   X(ClsMeth,    ClsMethDataRef,       ClsMethDataRef) \
   X(Mixed,      const Variant&,       Variant)        \
-  X(ObjectArg,  ObjectArg,            ObjectArg)      \
-  X(StringArg,  StringArg,            StringArg)      \
-  X(ArrayArg,   ArrayArg,             ArrayArg)       \
+  X(ObjectNN,   ObjectArg,            ObjectRet)      \
+  X(StringNN,   StringArg,            StringRet)      \
+  X(ArrayNN,    ArrayArg,             ArrayRet)       \
   X(ResourceArg,ResourceArg,          ResourceArg)    \
   X(MixedTV,    TypedValue,           TypedValue)     \
   X(This,       ObjectData*,          ObjectData*)    \

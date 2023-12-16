@@ -475,6 +475,14 @@ public:
   bool isReturnByValue() const;
 
   /*
+   * Builtins can potentially return null when the return type is
+   * specified as a reference type. This function returns true if
+   * the builtin return type is a reference type.
+   * (e.g. ref types like String, Array, Object)
+  */
+  bool hasUntrustedReturnType() const;
+
+  /*
    * The TypeConstraint of the return.
    */
   const TypeConstraint& returnTypeConstraint() const;
@@ -1365,6 +1373,7 @@ private:
         bool m_isGenerated : 1;
         bool m_hasExtendedSharedData : 1;
         bool m_returnByValue : 1; // only for builtins
+        bool m_isUntrustedReturnType : 1;  // applicable for builtins
         bool m_isMemoizeWrapper : 1;
         bool m_isMemoizeWrapperLSB : 1;
         MemoizeICType m_memoizeICType : 2;

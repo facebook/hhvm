@@ -348,6 +348,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     ex->m_dynCallSampleRate = dynCallSampleRate.value_or(-1);
     ex->m_softMakeICInaccessibleSampleRate = softMakeICInaccessibleSampleRate;
     ex->m_allFlags.m_returnByValue = false;
+    ex->m_allFlags.m_isUntrustedReturnType = false;
     ex->m_allFlags.m_isMemoizeWrapper = false;
     ex->m_allFlags.m_isMemoizeWrapperLSB = false;
     ex->m_allFlags.m_memoizeICType = Func::MemoizeICType::NoIC;
@@ -456,16 +457,29 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
       if (UNLIKELY(RO::EvalRecordReplay)) {
         rr::addNativeFuncAttrs(ex->m_nativeFuncPtr, attrs);
       }
-      if (info.sig.ret == Native::NativeSig::Type::MixedTV) {
+      if (info.sig.ret == Native::NativeSig::Type::MixedTV  ||
+          info.sig.ret == Native::NativeSig::Type::StringNN ||
+          info.sig.ret == Native::NativeSig::Type::ArrayNN  ||
+          info.sig.ret == Native::NativeSig::Type::ObjectNN) {
+        // the non null ref or mixed TV should be return by value
         ex->m_allFlags.m_returnByValue = true;
       }
+      if (info.sig.ret == Native::NativeSig::Type::String ||
+          info.sig.ret == Native::NativeSig::Type::Array   ||
+          info.sig.ret == Native::NativeSig::Type::Object  ||
+          info.sig.ret == Native::NativeSig::Type::Resource ) {
+        // these types are nullable
+        // set return by value flag
+        ex->m_allFlags.m_isUntrustedReturnType = true;
+      }
+
       int extra = isMethod() ? 1 : 0;
       assertx(info.sig.args.size() == params.size() + extra);
       for (auto i = params.size(); i--; ) {
         switch (info.sig.args[extra + i]) {
-          case Native::NativeSig::Type::ObjectArg:
-          case Native::NativeSig::Type::StringArg:
-          case Native::NativeSig::Type::ArrayArg:
+          case Native::NativeSig::Type::ObjectNN:
+          case Native::NativeSig::Type::StringNN:
+          case Native::NativeSig::Type::ArrayNN:
           case Native::NativeSig::Type::ResourceArg:
             fParams[i].setFlag(Func::ParamInfo::Flags::NativeArg);
             break;

@@ -474,6 +474,7 @@ fn parse_aast_from_string(input: &str, internal_offset: usize, span: Span) -> Re
     let parser_options = ParserOptions {
         tco_union_intersection_type_hints: true,
         po_allow_unstable_features: true,
+        po_strict_utf8: true,
         ..ParserOptions::default()
     };
 

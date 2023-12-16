@@ -25,6 +25,7 @@ type t = {
   interpret_soft_types_as_like_types: bool;
   is_systemlib: bool;
   nameof_precedence: bool;
+  strict_utf8: bool;
 }
 [@@deriving show, sexp_of]
 
@@ -45,6 +46,7 @@ let default =
     interpret_soft_types_as_like_types = false;
     is_systemlib = false;
     nameof_precedence = false;
+    strict_utf8 = false;
   }
 
 let make
@@ -67,6 +69,7 @@ let make
       default.interpret_soft_types_as_like_types)
     ?(is_systemlib = default.is_systemlib)
     ?(nameof_precedence = default.nameof_precedence)
+    ?(strict_utf8 = default.strict_utf8)
     () =
   {
     hhvm_compat_mode;
@@ -84,6 +87,7 @@ let make
     interpret_soft_types_as_like_types;
     is_systemlib;
     nameof_precedence;
+    strict_utf8;
   }
 
 let hhvm_compat_mode e = e.hhvm_compat_mode

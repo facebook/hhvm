@@ -18,6 +18,7 @@ impl From<FullFidelityParserEnv> for ParserEnv {
             disable_xhp_children_declarations: env.disable_xhp_children_declarations,
             interpret_soft_types_as_like_types: env.interpret_soft_types_as_like_types,
             nameof_precedence: env.nameof_precedence,
+            strict_utf8: env.strict_utf8,
         }
     }
 }

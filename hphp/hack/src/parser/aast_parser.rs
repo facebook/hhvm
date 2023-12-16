@@ -85,6 +85,13 @@ impl<'src> AastParser {
         indexed_source_text: &'src IndexedSourceText<'src>,
         default_unstable_features: HashSet<rust_parser_errors::UnstableFeatures>,
     ) -> Result<ParserResult> {
+        // TODO(T120858428): remove this check (and always verify_utf8) once
+        // we're strict everywhere!
+        if env.parser_options.po_strict_utf8 {
+            if let Some(err) = Self::verify_utf8(indexed_source_text) {
+                return Ok(err);
+            }
+        }
         let start_t = Instant::now();
         let arena = Bump::new();
         stack_limit::reset();
@@ -132,6 +139,27 @@ impl<'src> AastParser {
             tree,
             default_unstable_features,
         )
+    }
+
+    fn verify_utf8(text: &IndexedSourceText<'_>) -> Option<ParserResult> {
+        let bytes = text.source_text().text();
+        let Err(error) = std::str::from_utf8(bytes) else {
+            return None;
+        };
+
+        let (_, _, offset) = text.offset_to_file_pos_triple(error.valid_up_to());
+
+        let err = SyntaxError::make(offset, offset + 1, "Invalid utf8 sequence".into(), vec![]);
+        Some(ParserResult {
+            file_mode: Mode::Mstrict,
+            scoured_comments: default_scoured_comments(),
+            aast: Default::default(),
+            lowerer_parsing_errors: Default::default(),
+            syntax_errors: vec![err],
+            errors: Default::default(),
+            lint_errors: Default::default(),
+            profile: Default::default(),
+        })
     }
 
     fn from_tree_with_namespace_env<'arena>(
@@ -288,6 +316,7 @@ impl<'src> AastParser {
                 .parser_options
                 .po_interpret_soft_types_as_like_types,
             nameof_precedence: env.parser_options.po_nameof_precedence,
+            strict_utf8: env.parser_options.po_strict_utf8,
         };
         (language, mode.map(Into::into), parser_env)
     }
@@ -331,13 +360,17 @@ impl<'src> AastParser {
                 };
             Ok(scourer.scour_comments(script))
         } else {
-            Ok(ScouredComments {
-                comments: Default::default(),
-                fixmes: Default::default(),
-                misuses: Default::default(),
-                error_pos: Default::default(),
-                bad_ignore_pos: Default::default(),
-            })
+            Ok(default_scoured_comments())
         }
+    }
+}
+
+fn default_scoured_comments() -> ScouredComments {
+    ScouredComments {
+        comments: Default::default(),
+        fixmes: Default::default(),
+        misuses: Default::default(),
+        error_pos: Default::default(),
+        bad_ignore_pos: Default::default(),
     }
 }

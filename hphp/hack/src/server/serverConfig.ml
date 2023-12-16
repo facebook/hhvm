@@ -399,6 +399,7 @@ let load_config config options =
     ?po_disallow_direct_superglobals_refs:
       (bool_opt "disallow_direct_superglobals_refs" config)
     ?po_nameof_precedence:(bool_opt "nameof_precedence" config)
+    ?po_strict_utf8:(bool_opt "strict_utf8" config)
     options
 
 let load ~silent options : t * ServerLocalConfig.t =

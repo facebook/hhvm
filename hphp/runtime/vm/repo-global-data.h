@@ -211,6 +211,9 @@ struct RepoGlobalData {
   std::set<std::string> RenamableFunctions;
   std::set<std::string> NonInterceptableFunctions;
 
+  // see RuntimeOptions::EvalStrictUtf8Mode
+  int StrictUtf8Mode = 0;
+
   // NB: Only use C++ types in this struct because we want to be able
   // to serde it before memory manager and family are set up.
 
@@ -259,6 +262,7 @@ struct RepoGlobalData {
       (ActiveDeployment)
       (ModuleLevelTraits)
       (TreatCaseTypesAsMixed)
+      (StrictUtf8Mode)
       ;
   }
 };

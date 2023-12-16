@@ -170,6 +170,24 @@ CompilerResult hackc_compile(
     native_env.non_interceptable_functions.emplace_back(rust::String{f});
   }
 
+  switch (RO::EvalStrictUtf8Mode) {
+    case 0:
+      native_env.parser_flags.strict_utf8 = false;
+      break;
+    case 1: {
+      if (codeSource == CodeSource::Eval) {
+        native_env.parser_flags.strict_utf8 = false;
+      } else {
+        native_env.parser_flags.strict_utf8 = true;
+      }
+      break;
+    }
+    case 2:
+      native_env.parser_flags.strict_utf8 = true;
+      break;
+    default: not_reached();
+  }
+
   rust::Box<hackc::UnitWrapper> unit_wrapped = [&] {
     tracing::Block _{
       "hackc_translator",

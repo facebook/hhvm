@@ -290,6 +290,7 @@ RepoGlobalData get_global_data() {
   gd.RenamableFunctions = RO::RenamableFunctions;
   gd.JitEnableRenameFunction = RO::EvalJitEnableRenameFunction;
   gd.NonInterceptableFunctions = RO::NonInterceptableFunctions;
+  gd.StrictUtf8Mode   = RuntimeOption::EvalStrictUtf8Mode;
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     auto const s = internal_serialize(tvAsCVarRef(elm.second));

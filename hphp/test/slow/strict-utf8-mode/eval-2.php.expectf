@@ -1,0 +1,3 @@
+Fatal error: Invalid utf8 sequence in %s/strict-utf8-mode/eval-2.php(6)(%s) : eval()'d code on line %d
+bool(false)
+done

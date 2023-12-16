@@ -167,6 +167,7 @@ impl Default for GlobalOptions {
             tco_autocomplete_skip_hierarchy_checks: false,
             tco_autocomplete_sort_text: false,
             po_nameof_precedence: false,
+            po_strict_utf8: false,
         }
     }
 }

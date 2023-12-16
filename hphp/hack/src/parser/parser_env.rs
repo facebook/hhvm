@@ -14,4 +14,5 @@ pub struct ParserEnv {
     pub disable_xhp_children_declarations: bool,
     pub interpret_soft_types_as_like_types: bool,
     pub nameof_precedence: bool,
+    pub strict_utf8: bool,
 }

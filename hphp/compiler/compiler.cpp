@@ -504,6 +504,7 @@ RepoGlobalData getGlobalData() {
   gd.JitEnableRenameFunction = RO::EvalJitEnableRenameFunction;
   gd.RenamableFunctions = RO::RenamableFunctions;
   gd.NonInterceptableFunctions = RO::NonInterceptableFunctions;
+  gd.StrictUtf8Mode = RuntimeOption::EvalStrictUtf8Mode;
 
   if (Option::ConstFoldFileBC) {
     gd.SourceRootForFileBC.emplace(RO::SourceRoot);

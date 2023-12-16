@@ -453,6 +453,9 @@ impl HhConfig {
                 "nameof_precedence" => {
                     go.po_nameof_precedence = parse_json(&value)?;
                 }
+                "strict_utf8" => {
+                    go.po_strict_utf8 = parse_json(&value)?;
+                }
                 _ => c.unknown.push((key, value)),
             }
         }

@@ -310,6 +310,7 @@ type t = {
       (** Controls behavior of [Provider_context.with_tcopt_for_autocomplete] *)
   tco_autocomplete_sort_text: bool;
   po_nameof_precedence: bool;  (** Make nameof bind tighter *)
+  po_strict_utf8: bool;  (** Require utf8 in source files *)
 }
 [@@deriving eq, show]
 
@@ -443,6 +444,7 @@ val set :
   ?tco_autocomplete_skip_hierarchy_checks:bool ->
   ?tco_autocomplete_sort_text:bool ->
   ?po_nameof_precedence:bool ->
+  ?po_strict_utf8:bool ->
   t ->
   t
 

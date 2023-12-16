@@ -1157,11 +1157,15 @@ Type typeFromFuncReturn(const Func* func) {
   };
   auto const rt = typeFromTCImpl(tc, getThisType, func->cls(), true) & TInitCell;
 
+  if (func->hasUntrustedReturnType()) return rt | TInitNull;
+
+  // if the type is {T | InitNull}, return InitCell
   if (rt.maybe(TInitNull) && rt > TInitNull) {
     return TInitCell;
   }
-
-  if (rt.subtypeOfAny(TStr, TArrLike, TObj, TRes)) return rt | TInitNull;
+  if (rt == TBottom) {
+    return TInitNull;
+  }
   return rt;
 }
 

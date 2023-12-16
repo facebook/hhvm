@@ -305,12 +305,9 @@ bool runServerDual(
         mcrouterOpts.num_proxies,
         std::make_shared<folly::NamedThreadFactory>(threadPrefix));
 
-    // Run observer and extract event bases
-    auto executorObserver = std::make_shared<ExecutorObserver>();
-    ioThreadPool->addObserver(executorObserver);
-    auto evbs = executorObserver->extractEvbs();
+    // extract event bases
+    auto evbs = extractEvbs(*ioThreadPool);
     CHECK_EQ(evbs.size(), mcrouterOpts.num_proxies);
-    ioThreadPool->removeObserver(executorObserver);
 
     // Create AsyncMcServer instance
     asyncMcServer =
@@ -508,12 +505,9 @@ bool runServer(
     ioThreadPool = std::make_shared<folly::IOThreadPoolExecutor>(
         mcrouterOpts.num_proxies, mcrouterOpts.num_proxies);
 
-    // Run observer and extract event bases
-    auto executorObserver = std::make_shared<ExecutorObserver>();
-    ioThreadPool->addObserver(executorObserver);
-    auto evbs = executorObserver->extractEvbs();
+    // extract event bases
+    auto evbs = extractEvbs(*ioThreadPool);
     CHECK_EQ(evbs.size(), mcrouterOpts.num_proxies);
-    ioThreadPool->removeObserver(executorObserver);
 
     // Get EVB of main thread
     auto localEvb = ioThreadPool->getEventBaseManager()->getEventBase();

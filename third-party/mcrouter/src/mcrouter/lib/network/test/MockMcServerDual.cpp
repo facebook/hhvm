@@ -20,6 +20,7 @@
 #include <folly/logging/Init.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 
+#include "mcrouter/ExecutorObserver.h"
 #include "mcrouter/lib/network/AsyncMcServer.h"
 #include "mcrouter/lib/network/AsyncMcServerWorker.h"
 #include "mcrouter/lib/network/CarbonMessageDispatcher.h"
@@ -86,33 +87,6 @@ void shutdown() {
   }
 }
 
-class ExecutorObserver : public folly::ThreadPoolExecutor::Observer {
- public:
-  void threadStarted(
-      folly::ThreadPoolExecutor::ThreadHandle* threadHandle) override {
-    CHECK(!initializationComplete_);
-    evbs_.wlock()->push_back(
-        folly::IOThreadPoolExecutor::getEventBase(threadHandle));
-  }
-  void threadPreviouslyStarted(
-      folly::ThreadPoolExecutor::ThreadHandle* threadHandle) override {
-    CHECK(!initializationComplete_);
-    evbs_.wlock()->push_back(
-        folly::IOThreadPoolExecutor::getEventBase(threadHandle));
-  }
-
-  void threadStopped(folly::ThreadPoolExecutor::ThreadHandle*) override {}
-
-  std::vector<folly::EventBase*> extractEvbs() {
-    CHECK(!std::exchange(initializationComplete_, true));
-    return evbs_.exchange({});
-  }
-
- private:
-  bool initializationComplete_{false};
-  folly::Synchronized<std::vector<folly::EventBase*>> evbs_;
-};
-
 class ShutdownSignalHandler : public folly::AsyncSignalHandler {
  public:
   explicit ShutdownSignalHandler(folly::EventBase* evb)
@@ -166,12 +140,7 @@ int main(int argc, char** argv) {
     // Create IOThreadPoolExecutor and extract event bases
     std::shared_ptr<folly::IOThreadPoolExecutor> ioThreadPool =
         std::make_shared<folly::IOThreadPoolExecutor>(numThreads);
-    auto executorObserver = std::make_shared<ExecutorObserver>();
-    ioThreadPool->addObserver(executorObserver);
-    std::vector<folly::EventBase*> ioThreads;
-    for (auto& ioEvb : executorObserver->extractEvbs()) {
-      ioThreads.push_back(ioEvb);
-    }
+    auto ioThreads = mcrouter::extractEvbs(*ioThreadPool);
 
     // Thrift server setup
     LOG(INFO) << "Configure thrift server.";

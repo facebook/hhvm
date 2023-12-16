@@ -7,31 +7,30 @@
 
 #pragma once
 
-#include <folly/executors/ThreadPoolExecutor.h>
+#include <vector>
+
+#include <folly/executors/IOThreadPoolExecutor.h>
+#include <folly/io/async/EventBase.h>
 
 namespace facebook {
 namespace memcache {
 namespace mcrouter {
 
-class ExecutorObserver : public folly::ThreadPoolExecutor::Observer {
- public:
-  void threadStarted(
-      folly::ThreadPoolExecutor::ThreadHandle* threadHandle) override {
-    CHECK(!initializationComplete_);
-    evbs_.wlock()->push_back(
-        folly::IOThreadPoolExecutorBase::getEventBase(threadHandle));
+/**
+ * Convenience method to convert the keepalives returned by getAllEventBases()
+ * into raw pointers, to accommodate for AsyncMcServer::Options interface.
+ * TODO: Change Options to accept KeepAlives instead?
+ */
+inline std::vector<folly::EventBase*> extractEvbs(
+    folly::IOThreadPoolExecutorBase& ex) {
+  auto evbKeepAlives = ex.getAllEventBases();
+  std::vector<folly::EventBase*> ret;
+  ret.reserve(evbKeepAlives.size());
+  for (const auto& ka : evbKeepAlives) {
+    ret.push_back(ka.get());
   }
-  void threadStopped(folly::ThreadPoolExecutor::ThreadHandle*) override {}
-
-  std::vector<folly::EventBase*> extractEvbs() {
-    CHECK(!std::exchange(initializationComplete_, true));
-    return evbs_.exchange({});
-  }
-
- private:
-  bool initializationComplete_{false};
-  folly::Synchronized<std::vector<folly::EventBase*>> evbs_;
-};
+  return ret;
+}
 
 } // namespace mcrouter
 } // namespace memcache

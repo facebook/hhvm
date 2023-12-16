@@ -35,6 +35,7 @@
 #include "hphp/runtime/base/record-replay.h"
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-nonnull-ret.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"

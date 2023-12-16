@@ -27,12 +27,7 @@ namespace HPHP {
 
 template <class T, class I>
 struct NonNullReturnType {
-  // these functions is needed only for recorder-replayer's sake
-  I detach_do_not_use() {
-    auto ret = I::attach(m_data);
-    m_data = nullptr;
-    return ret;
-  }
+  // this function is needed only for recorder-replayer's sake
   T* get_do_not_use() const {
     return m_data;
   }

@@ -218,6 +218,16 @@ String serialize(ArrayArg value) {
   return serialize(Variant{value.get()});
 }
 
+/* NB: We are not taking ownership here, so it should be ideally
+* String serialize(const ArrayRet& value)
+* we need to change the signature of serialize to make it const & type arg
+* to make it clear we are not taking ownership. Defering it to PIVV team
+*/
+template<>
+String serialize(ArrayRet value) {
+  return serialize(Array{value.get_do_not_use()});
+}
+
 template<>
 String serialize(const Class* value) {
   return serialize<Variant>(const_cast<Class*>(value));
@@ -243,6 +253,11 @@ String serialize(ObjectArg value) {
 }
 
 template<>
+String serialize(ObjectRet value) {
+  return serialize(Object{value.get_do_not_use()});
+}
+
+template<>
 String serialize(Optional<std::filesystem::path> value) {
   return serialize<Variant>(value ? value->string() : init_null());
 }
@@ -265,6 +280,11 @@ String serialize(OptResource value) {
 template<>
 String serialize(String value) {
   return serialize<Variant>(value);
+}
+
+template<>
+String serialize(StringRet value) {
+  return serialize(String{value.get_do_not_use()});
 }
 
 template<>
@@ -386,6 +406,11 @@ Array unserialize(const String& recordedValue) {
 }
 
 template<>
+ArrayRet unserialize(const String& recordedValue) {
+  return ArrayRet{unserialize<Array>(recordedValue)};
+}
+
+template<>
 Object unserialize(const String& recordedValue) {
   const auto variant{unserialize<Variant>(recordedValue)};
   if (variant.isNull()) {
@@ -394,6 +419,11 @@ Object unserialize(const String& recordedValue) {
     always_assert_flog(variant.isObject(), "{}", recordedValue);
     return variant.asCObjRef();
   }
+}
+
+template<>
+ObjectRet unserialize(const String& recordedValue) {
+  return ObjectRet{unserialize<Object>(recordedValue)};
 }
 
 template<>
@@ -446,6 +476,11 @@ String unserialize(const String& recordedValue) {
     always_assert_flog(variant.isString(), "{}", recordedValue);
     return variant.asCStrRef();
   }
+}
+
+template<>
+StringRet unserialize(const String& recordedValue) {
+  return StringRet{unserialize<String>(recordedValue)};
 }
 
 template<>

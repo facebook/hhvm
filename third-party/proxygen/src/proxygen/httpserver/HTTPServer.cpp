@@ -98,23 +98,22 @@ void HTTPServer::bind(std::vector<IPConfig> const& addrs) {
   addresses_ = addrs;
 }
 
-class HandlerCallbacks : public ThreadPoolExecutor::Observer {
+class HandlerCallbacks : public IOThreadPoolExecutorBase::IOObserver {
  public:
   explicit HandlerCallbacks(std::shared_ptr<HTTPServerOptions> options)
       : options_(options) {
   }
 
-  void threadStarted(ThreadPoolExecutor::ThreadHandle* h) override {
-    auto evb = IOThreadPoolExecutorBase::getEventBase(h);
-    CHECK(evb) << "Invariant violated - started thread must have an EventBase";
-    evb->runInEventBaseThread([=]() {
+  void registerEventBase(folly::EventBase& evb) override {
+    evb.runInEventBaseThread([&evb, this]() {
       for (auto& factory : options_->handlerFactories) {
-        factory->onServerStart(evb);
+        factory->onServerStart(&evb);
       }
     });
   }
-  void threadStopped(ThreadPoolExecutor::ThreadHandle* h) override {
-    IOThreadPoolExecutorBase::getEventBase(h)->runInEventBaseThread([&]() {
+
+  void unregisterEventBase(folly::EventBase& evb) override {
+    evb.runInEventBaseThread([this]() {
       for (auto& factory : options_->handlerFactories) {
         factory->onServerStop();
       }

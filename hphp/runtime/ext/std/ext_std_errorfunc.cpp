@@ -132,7 +132,7 @@ bool hphp_debug_caller_info_impl(
  * optionally "class" which indicate the filename, function, line number and
  * class name (if in class context) where the "caller" called the "callee".
  */
-Array HHVM_FUNCTION(hphp_debug_caller_info) {
+ArrayRet HHVM_FUNCTION(hphp_debug_caller_info) {
   Array result = empty_dict_array();
   bool skipped = false;
   walkStack([&] (const BTFrame& frm) {

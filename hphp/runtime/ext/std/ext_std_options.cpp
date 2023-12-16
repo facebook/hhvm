@@ -689,7 +689,7 @@ Variant HHVM_FUNCTION(ini_get, const String& varname) {
   return value;
 }
 
-static Array HHVM_FUNCTION(ini_get_all,
+static ArrayRet HHVM_FUNCTION(ini_get_all,
                            const String& extension, bool detailed) {
   return IniSetting::GetAll(extension, detailed);
 }

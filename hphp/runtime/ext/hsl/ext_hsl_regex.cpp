@@ -22,7 +22,7 @@
 
 namespace HPHP {
 namespace {
-  Array HHVM_FUNCTION(HH_regex_match, const String& haystack,
+  ArrayRet HHVM_FUNCTION(HH_regex_match, const String& haystack,
                       const String& pattern, int64_t& offset) {
     // TODO(alexeyt): make a version of preg_match that behaves how we want
     // instead of working around it here

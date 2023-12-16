@@ -51,12 +51,12 @@ static TypedValue HHVM_METHOD(FunctionCredential, getClassName) {
              : make_tv<KindOfNull>();
 }
 
-static String HHVM_METHOD(FunctionCredential, getFunctionName) {
+static StringRet HHVM_METHOD(FunctionCredential, getFunctionName) {
   auto data = FunctionCredential::fromObject(this_);
   return String{makeStaticString(data->func()->name())};
 }
 
-static String HHVM_METHOD(FunctionCredential, getFilename) {
+static StringRet HHVM_METHOD(FunctionCredential, getFilename) {
   auto data = FunctionCredential::fromObject(this_);
   return String{makeStaticString(data->func()->filename())};
 }

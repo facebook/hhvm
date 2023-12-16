@@ -154,14 +154,14 @@ bool HHVM_FUNCTION(ends_with_ci_l,
   return get_ops(maybe_loc)->ends_with_ci(string, suffix);
 }
 
-String HHVM_FUNCTION(strip_prefix_l,
+StringRet HHVM_FUNCTION(strip_prefix_l,
                      const String& string,
                      const String& prefix,
                      const Variant& maybe_loc) {
   return get_ops(maybe_loc)->strip_prefix(string, prefix);
 }
 
-String HHVM_FUNCTION(strip_suffix_l,
+StringRet HHVM_FUNCTION(strip_suffix_l,
                      const String& string,
                      const String& suffix,
                      const Variant& maybe_loc) {
@@ -209,7 +209,7 @@ ALWAYS_INLINE int64_t normalize_length(int64_t length) {
 }
 } // namespace
 
-String HHVM_FUNCTION(slice_l,
+StringRet HHVM_FUNCTION(slice_l,
                      const String& str,
                      int64_t offset,
                      int64_t length,
@@ -218,7 +218,7 @@ String HHVM_FUNCTION(slice_l,
   return get_ops(maybe_loc)->slice(str, offset, length);
 }
 
-String HHVM_FUNCTION(splice_l,
+StringRet HHVM_FUNCTION(splice_l,
                      const String& str,
                      const String& replacement,
                      int64_t offset,
@@ -230,13 +230,13 @@ String HHVM_FUNCTION(splice_l,
   return get_ops(maybe_loc)->splice(str, replacement, offset, int_length);
 }
 
-Array HHVM_FUNCTION(split_l,
+ArrayRet HHVM_FUNCTION(split_l,
                     const String& str,
                     const String& delimiter,
                     const Variant& limit,
                     const Variant& maybe_loc) {
   if (str.empty()) {
-    return make_vec_array(empty_string());
+    return  make_vec_array(empty_string());;
   }
 
   int64_t int_limit = limit.isNull() ? k_PHP_INT_MAX : limit.asInt64Val();
@@ -246,7 +246,6 @@ Array HHVM_FUNCTION(split_l,
   if (int_limit < 0) {
     SystemLib::throwInvalidArgumentExceptionObject("Limit must be >= 0");
   }
-
   return get_ops(maybe_loc)->split(str, delimiter, int_limit);
 }
 
@@ -259,7 +258,7 @@ String HHVM_FUNCTION(reverse_l,
   return get_ops(maybe_loc)->reverse(str);
 }
 
-String HHVM_FUNCTION(pad_left_l,
+StringRet HHVM_FUNCTION(pad_left_l,
                      const String& str,
                      int64_t len,
                      const String& pad,
@@ -273,7 +272,7 @@ String HHVM_FUNCTION(pad_left_l,
   return get_ops(maybe_loc)->pad_left(str, len, pad);
 }
 
-String HHVM_FUNCTION(pad_right_l,
+StringRet HHVM_FUNCTION(pad_right_l,
                      const String& str,
                      int64_t len,
                      const String& pad,
@@ -287,7 +286,7 @@ String HHVM_FUNCTION(pad_right_l,
   return get_ops(maybe_loc)->pad_right(str, len, pad);
 }
 
-String HHVM_FUNCTION(vsprintf_l,
+StringRet HHVM_FUNCTION(vsprintf_l,
                      const Variant& maybe_loc,
                      const String& fmt,
                      const Array& args) {
@@ -338,21 +337,21 @@ String trim_impl(const String& str,
 }
 } // namespace
 
-String HHVM_FUNCTION(trim_l,
+StringRet HHVM_FUNCTION(trim_l,
                      const String& str,
                      const Variant& what,
                      const Variant& maybe_loc) {
   return trim_impl(str, what, maybe_loc, HSLLocale::Ops::TrimSides::BOTH);
 }
 
-String HHVM_FUNCTION(trim_left_l,
+StringRet HHVM_FUNCTION(trim_left_l,
                      const String& str,
                      const Variant& what,
                      const Variant& maybe_loc) {
   return trim_impl(str, what, maybe_loc, HSLLocale::Ops::TrimSides::LEFT);
 }
 
-String HHVM_FUNCTION(trim_right_l,
+StringRet HHVM_FUNCTION(trim_right_l,
                      const String& str,
                      const Variant& what,
                      const Variant& maybe_loc) {

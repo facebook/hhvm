@@ -1765,9 +1765,9 @@ String HHVM_FUNCTION(md5,
   return StringUtil::MD5(str, raw_output);
 }
 
-String HHVM_FUNCTION(sha1,
-                     const String& str,
-                     bool raw_output /* = false */) {
+StringRet HHVM_FUNCTION(sha1,
+                        const String& str,
+                        bool raw_output /* = false */) {
   return StringUtil::SHA1(str, raw_output);
 }
 

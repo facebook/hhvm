@@ -691,7 +691,7 @@ static TypedValue HHVM_METHOD(ReflectionFunctionAbstract, getDocComment) {
   }
 }
 
-static String HHVM_METHOD(ReflectionFunctionAbstract, getName) {
+static StringRet HHVM_METHOD(ReflectionFunctionAbstract, getName) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   auto ret = const_cast<StringData*>(func->name());
   return String(ret);
@@ -1273,18 +1273,18 @@ static Variant HHVM_METHOD(ReflectionFunction, getClosureThisObject,
 // class ReflectionClass
 
 // helper for __construct
-static String HHVM_METHOD(ReflectionClass, __init, const String& name) {
+static StringRet HHVM_METHOD(ReflectionClass, __init, const String& name) {
   return ReflectionClassHandle::Get(this_)->init(name);
 }
 
-static String HHVM_METHOD(ReflectionClass, getName) {
+static StringRet HHVM_METHOD(ReflectionClass, getName) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
-  return cls->nameStr();
+  return String{cls->nameStr()};
 }
 
-static String HHVM_METHOD(ReflectionClass, getParentName) {
+static StringRet HHVM_METHOD(ReflectionClass, getParentName) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
-  return cls->parentStr();
+  return String{cls->parentStr()};
 }
 
 static bool HHVM_METHOD(ReflectionClass, isHack) {
@@ -1452,7 +1452,7 @@ static Variant HHVM_METHOD(ReflectionClass, getRequiredClass) {
   return init_null_variant;
 }
 
-static Array HHVM_METHOD(ReflectionClass, getInterfaceNames) {
+static ArrayRet HHVM_METHOD(ReflectionClass, getInterfaceNames) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
 
   auto st = req::make<c_Set>();
@@ -1471,7 +1471,7 @@ static Array HHVM_METHOD(ReflectionClass, getInterfaceNames) {
   return st->toValuesArray();
 }
 
-static Array HHVM_METHOD(ReflectionClass, getTraitNames) {
+static ArrayRet HHVM_METHOD(ReflectionClass, getTraitNames) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   auto const& traits = cls->preClass()->usedTraits();
   VecInit ai(traits.size());
@@ -1720,7 +1720,7 @@ static Array HHVM_STATIC_METHOD(
   );
 }
 
-static Array HHVM_METHOD(ReflectionClass, getAttributesNamespaced) {
+static ArrayRet HHVM_METHOD(ReflectionClass, getAttributesNamespaced) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   // UserAttributes are stored exclusively on the PreClass.
   auto const pcls = cls->preClass();

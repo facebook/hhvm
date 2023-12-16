@@ -295,19 +295,19 @@ Variant HHVM_FUNCTION(parse_url, const String& url,
   return ret.toVariant();
 }
 
-String HHVM_FUNCTION(rawurldecode, const String& str) {
+StringRet HHVM_FUNCTION(rawurldecode, const String& str) {
   return StringUtil::UrlDecode(str, false);
 }
 
-String HHVM_FUNCTION(rawurlencode, const String& str) {
+StringRet HHVM_FUNCTION(rawurlencode, const String& str) {
   return StringUtil::UrlEncode(str, false);
 }
 
-String HHVM_FUNCTION(urldecode, const String& str) {
+StringRet HHVM_FUNCTION(urldecode, const String& str) {
   return StringUtil::UrlDecode(str, true);
 }
 
-String HHVM_FUNCTION(urlencode, const String& str) {
+StringRet HHVM_FUNCTION(urlencode, const String& str) {
   return StringUtil::UrlEncode(str, true);
 }
 

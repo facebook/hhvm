@@ -107,7 +107,7 @@ String HHVM_FUNCTION(htmlentities,
 String HHVM_FUNCTION(md5,
                      const String& str,
                      bool raw_output = false);
-String HHVM_FUNCTION(sha1,
+StringRet HHVM_FUNCTION(sha1,
                      const String& str,
                      bool raw_output = false);
 Variant HHVM_FUNCTION(strtr,

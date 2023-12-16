@@ -135,7 +135,7 @@ Array HSLLocaleICUOps::chunk(const String& str, int64_t chunk_size) const {
     ret.append(buf);
   }
 
-  return ret.toArray(); 
+  return ret.toArray();
 }
 
 int64_t HSLLocaleICUOps::strcoll(const String& a, const String& b) const {
@@ -632,7 +632,7 @@ String HSLLocaleICUOps::replace(const String& haystack,
   uhaystack = normalizer->normalize(uhaystack, err);
   uneedle = normalizer->normalize(uneedle, err);
   // No need to normalize replacement
-  
+
   uhaystack.findAndReplace(uneedle, ureplacement);
   std::string ret;
   uhaystack.toUTF8String(ret);
@@ -652,7 +652,7 @@ String HSLLocaleICUOps::replace_ci(const String& haystack,
   uhaystack = normalizer->normalize(uhaystack, err);
   uneedle = normalizer->normalize(uneedle, err);
   // No need to normalize replacement
- 
+
   auto usearch(uhaystack);
   usearch.foldCase(m_caseFoldFlags);
   uneedle.foldCase(m_caseFoldFlags);
@@ -673,7 +673,7 @@ String HSLLocaleICUOps::replace_ci(const String& haystack,
 
   std::string ret;
   uhaystack.toUTF8String(ret);
-  
+
   return ret;
 }
 

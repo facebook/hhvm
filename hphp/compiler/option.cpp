@@ -65,6 +65,7 @@ bool Option::ForceEnableSymbolRefs = false;
 
 std::string Option::ExternWorkerUseCase;
 std::string Option::ExternWorkerFeaturesFile;
+std::string Option::ExternWorkerPath;
 bool Option::ExternWorkerForceSubprocess = false;
 bool Option::ExternWorkerAllowFallback = true;
 int Option::ExternWorkerTimeoutSecs = 0;
@@ -218,6 +219,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
                ExternWorkerUseCase);
   Config::Bind(ExternWorkerFeaturesFile, ini, config,
                "ExternWorker.FeaturesFile", ExternWorkerFeaturesFile);
+  // If not set or empty, default to current_executable_path()
+  Config::Bind(ExternWorkerPath, ini, config, "ExternWorker.Path",
+               ExternWorkerPath);
   // Kill switch for extern-worker. Disable all implementations except
   // the builtin one.
   Config::Bind(ExternWorkerForceSubprocess, ini, config,

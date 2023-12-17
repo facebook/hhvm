@@ -111,6 +111,7 @@ struct Option {
   /* Config passed to extern_worker::Client */
   static std::string ExternWorkerUseCase;
   static std::string ExternWorkerFeaturesFile;
+  static std::string ExternWorkerPath;
   static bool ExternWorkerForceSubprocess;
   static bool ExternWorkerAllowFallback;
   static int ExternWorkerTimeoutSecs;

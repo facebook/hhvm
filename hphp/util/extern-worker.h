@@ -401,6 +401,11 @@ struct Options {
     return *this;
   }
 
+  Options& setWorkerPath(std::string p) {
+    m_workerPath = std::move(p);
+    return *this;
+  }
+
   // If the backend is busy, retry the action this number of times (0
   // disables retrying).
   Options& setThrottleRetries(size_t r) {
@@ -465,6 +470,7 @@ struct Options {
   int m_acConnectionCount{16};
   std::string m_useCase{""};
   std::string m_featuresFile{""};
+  std::string m_workerPath{""};
 };
 
 //////////////////////////////////////////////////////////////////////

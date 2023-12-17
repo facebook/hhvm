@@ -813,6 +813,7 @@ Options makeExternWorkerOptions(const CompilerOptions& po) {
   options
     .setUseCase(Option::ExternWorkerUseCase)
     .setFeaturesFile(Option::ExternWorkerFeaturesFile)
+    .setWorkerPath(Option::ExternWorkerPath)
     .setUseSubprocess(Option::ExternWorkerForceSubprocess
                       ? Options::UseSubprocess::Always
                       : Option::ExternWorkerAllowFallback
@@ -1092,6 +1093,7 @@ bool process(CompilerOptions &po) {
   sample.setStr("debug", debug ? "true" : "false");
   sample.setStr("use_case", Option::ExternWorkerUseCase);
   sample.setStr("features_file", Option::ExternWorkerFeaturesFile);
+  sample.setStr("worker_path", Option::ExternWorkerPath);
   sample.setInt("use_rich_client", Option::ExternWorkerUseRichClient);
   sample.setInt("use_zippy_rich_client",
       Option::ExternWorkerUseZippyRichClient);

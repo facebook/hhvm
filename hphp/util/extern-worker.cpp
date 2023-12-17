@@ -1211,8 +1211,11 @@ SubprocessImpl::doSubprocess(const RequestId& requestId,
                              const std::string& command,
                              std::string inputBlob,
                              const fs::path& outputPath) {
+  auto workerPath = m_options.m_workerPath.empty()
+    ? current_executable_path()
+    : m_options.m_workerPath;
   std::vector<std::string> args{
-    current_executable_path(),
+    workerPath,
     s_option,
     g_local_option,
     command,

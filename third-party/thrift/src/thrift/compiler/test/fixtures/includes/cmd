@@ -1,5 +1,6 @@
 json src/service.thrift
 py src/service.thrift
+android src/module.thrift
 cocoa:import_path=thrift src/service.thrift
 mstch_java src/service.thrift
 mstch_java src/module.thrift

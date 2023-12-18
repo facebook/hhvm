@@ -1,3 +1,4 @@
+android src/module.thrift
 go src/module.thrift
 java_deprecated src/module.thrift
 hack:json=1,protected_unions=1 src/module.thrift

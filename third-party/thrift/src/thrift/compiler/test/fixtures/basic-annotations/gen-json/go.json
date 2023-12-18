@@ -8,7 +8,7 @@
   },
   "structs" : {
     "Name" : {
-      "lineno" : 28,
+      "lineno" : 29,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -23,11 +23,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 32,
+              "line" : 33,
               "column" : 3
             },
             "end" : {
-              "line" : 32,
+              "line" : 33,
               "column" : 18
             }
           }
@@ -35,17 +35,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 28,
+          "line" : 29,
           "column" : 1
         },
         "end" : {
-          "line" : 33,
+          "line" : 34,
           "column" : 2
         }
       }
     },
     "Tag" : {
-      "lineno" : 36,
+      "lineno" : 37,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -58,11 +58,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 38,
+              "line" : 39,
               "column" : 3
             },
             "end" : {
-              "line" : 38,
+              "line" : 39,
               "column" : 17
             }
           }
@@ -70,17 +70,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 36,
+          "line" : 37,
           "column" : 1
         },
         "end" : {
-          "line" : 39,
+          "line" : 40,
           "column" : 2
         }
       }
     },
     "NewType" : {
-      "lineno" : 45,
+      "lineno" : 46,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -91,11 +91,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 45,
+          "line" : 46,
           "column" : 1
         },
         "end" : {
-          "line" : 46,
+          "line" : 47,
           "column" : 18
         }
       }

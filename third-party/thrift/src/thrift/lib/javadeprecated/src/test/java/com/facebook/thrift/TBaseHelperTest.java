@@ -115,9 +115,114 @@ public class TBaseHelperTest {
   }
 
   @Test
+  public void testReflectiveIsSet() throws Exception {
+    com.facebook.thrift.android.test.MySimpleStruct struct =
+        new com.facebook.thrift.android.test.MySimpleStruct(123L, "toto");
+    assertTrue(TBaseHelper.isSet(struct, (short) 1));
+
+    com.facebook.thrift.android.test.MySimpleStruct struct2 =
+        new com.facebook.thrift.android.test.MySimpleStruct(null, "toto");
+    assertFalse(TBaseHelper.isSet(struct2, (short) 1));
+    assertTrue(TBaseHelper.isSet(struct2, (short) 2));
+  }
+
+  @Test
   public void testGetFieldValue() throws Exception {
     MySimpleStruct struct = new MySimpleStruct(123L, "toto");
     assertThat(TBaseHelper.getFieldValue(struct, (short) 1), equalTo(struct.getId()));
     assertThat(TBaseHelper.getFieldValue(struct, (short) 2), equalTo(struct.getName()));
+  }
+
+  @Test
+  public void testReflectiveGetFieldValue() throws Exception {
+    com.facebook.thrift.android.test.MySimpleStruct struct =
+        new com.facebook.thrift.android.test.MySimpleStruct(123L, "toto");
+    assertThat(TBaseHelper.getFieldValue(struct, (short) 1), equalTo(struct.getId()));
+    assertThat(TBaseHelper.getFieldValue(struct, (short) 2), equalTo(struct.getName()));
+  }
+
+  @Test
+  public void testToString() throws Exception {
+    long id = 321;
+    String name = "titi";
+
+    MySimpleStruct struct = new MySimpleStruct(id, name);
+    com.facebook.thrift.android.test.MySimpleStruct struct2 =
+        new com.facebook.thrift.android.test.MySimpleStruct(id, name);
+
+    assertThat(struct.toString(), equalTo(struct2.toString()));
+    assertThat(struct.toString(1, false), equalTo(struct2.toString(1, false)));
+  }
+
+  @Test
+  public void testToStringOfUnion() throws Exception {
+    MySimpleUnion struct = MySimpleUnion.caseOne(1L);
+    com.facebook.thrift.android.test.MySimpleUnion struct2 =
+        com.facebook.thrift.android.test.MySimpleUnion.caseOne(1L);
+
+    assertThat(struct.toString(), equalTo(struct2.toString()));
+    assertThat(struct.toString(1, false), equalTo(struct2.toString(1, false)));
+
+    long id = 321;
+    String name = "titi";
+
+    MySimpleStruct simpleStruct = new MySimpleStruct(id, name);
+    com.facebook.thrift.android.test.MySimpleStruct simpleStruct2 =
+        new com.facebook.thrift.android.test.MySimpleStruct(id, name);
+
+    MySimpleUnion struct3 = MySimpleUnion.caseFour(simpleStruct);
+    com.facebook.thrift.android.test.MySimpleUnion struct4 =
+        com.facebook.thrift.android.test.MySimpleUnion.caseFour(simpleStruct2);
+
+    assertThat(struct3.toString(), equalTo(struct4.toString()));
+    assertThat(struct3.toString(1, false), equalTo(struct4.toString(1, false)));
+  }
+
+  @Test
+  public void testToStringWithNull() throws Exception {
+    long id = 321;
+    String name = null;
+
+    MySimpleStruct struct = new MySimpleStruct(id, name);
+    com.facebook.thrift.android.test.MySimpleStruct struct2 =
+        new com.facebook.thrift.android.test.MySimpleStruct(id, name);
+
+    assertThat(struct.toString(), equalTo(struct2.toString()));
+    assertThat(struct.toString(1, false), equalTo(struct2.toString(1, false)));
+  }
+
+  @Test
+  public void testNestedToString() throws Exception {
+    long id = 321;
+    String name = "titi";
+
+    Map<Integer, String> myMap = new HashMap<>();
+    myMap.put(1, "one");
+    myMap.put(2, "two");
+    myMap.put(3, "three");
+
+    Set<Integer> mySet = new HashSet<>();
+    mySet.add(51);
+    mySet.add(53);
+    mySet.add(57);
+
+    List<String> myList = new ArrayList<>();
+    myList.add("un");
+    myList.add("deux");
+    myList.add("trois");
+
+    MySimpleStruct struct = new MySimpleStruct(id, name);
+    MySimpleUnion union = MySimpleUnion.caseOne(1L);
+    NestedStruct nested = new NestedStruct(myMap, struct, mySet, myList, union);
+
+    com.facebook.thrift.android.test.MySimpleStruct struct2 =
+        new com.facebook.thrift.android.test.MySimpleStruct(id, name);
+    com.facebook.thrift.android.test.MySimpleUnion union2 =
+        com.facebook.thrift.android.test.MySimpleUnion.caseOne(1L);
+    com.facebook.thrift.android.test.NestedStruct nested2 =
+        new com.facebook.thrift.android.test.NestedStruct(myMap, struct2, mySet, myList, union2);
+
+    assertThat(struct.toString(), equalTo(struct2.toString()));
+    assertThat(struct.toString(1, false), equalTo(struct2.toString(1, false)));
   }
 }

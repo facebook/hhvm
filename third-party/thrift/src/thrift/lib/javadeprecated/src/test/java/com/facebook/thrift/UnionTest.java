@@ -208,6 +208,22 @@ public class UnionTest {
   }
 
   @Test
+  public void testAndroidUnion() {
+    TMemoryBuffer buf = new TMemoryBuffer(0);
+    TProtocolFactory factory = new TCompactProtocol.Factory();
+    TProtocol proto = factory.getProtocol(buf);
+
+    MySimpleUnion union = MySimpleUnion.caseOne(61753);
+    union.write(proto);
+
+    com.facebook.thrift.android.test.MySimpleUnion androidUnion =
+        new com.facebook.thrift.android.test.MySimpleUnion();
+    androidUnion.read(proto);
+
+    assertThat(androidUnion.getCaseOne(), equalTo(union.getCaseOne()));
+  }
+
+  @Test
   public void testInvalidUnion() {
     try {
       MySimpleUnion invalidUnion = new MySimpleUnion(1, null);
@@ -221,14 +237,25 @@ public class UnionTest {
   public void testToStringOnEmptyUnion() {
     MySimpleUnion union = new MySimpleUnion();
     assertThat(union.toString(), equalTo("<MySimpleUnion uninitialized>"));
+
+    com.facebook.thrift.android.test.MySimpleUnion androidUnion =
+        new com.facebook.thrift.android.test.MySimpleUnion();
+    assertThat(union.toString(), equalTo("<MySimpleUnion uninitialized>"));
   }
 
   @Test
   public void testUnionConstructor() {
     MySimpleUnion union =
         new MySimpleUnion(MySimpleUnion.CASEFOUR, new MySimpleStruct(1L, "blabla"));
+    com.facebook.thrift.android.test.MySimpleUnion androidUnion =
+        new com.facebook.thrift.android.test.MySimpleUnion(
+            MySimpleUnion.CASEFOUR,
+            new com.facebook.thrift.android.test.MySimpleStruct(1L, "blabla"));
 
     MySimpleUnion union5 = new MySimpleUnion(MySimpleUnion.CASEFIVE, Arrays.asList("foo", "bar"));
+    com.facebook.thrift.android.test.MySimpleUnion androidUnion5 =
+        new com.facebook.thrift.android.test.MySimpleUnion(
+            MySimpleUnion.CASEFIVE, Arrays.asList("foo", "bar"));
   }
 
   @Test

@@ -210,6 +210,49 @@ public class TSimpleJSONProtocolTest {
     Assert.assertEquals(everyLayout, read);
   }
 
+  @Test(expected = UnsupportedOperationException.class)
+  public void testAndroidEveryLayout() throws Exception {
+    com.facebook.thrift.android.test.EveryLayout everyLayout =
+        new com.facebook.thrift.android.test.EveryLayout.Builder()
+            .setABool(true)
+            .setADouble(Double.MAX_VALUE)
+            .setAFloat(Float.MAX_VALUE)
+            .setAByte((byte) 1)
+            .setAString("I am a string")
+            .setAInt(Integer.MAX_VALUE)
+            .setAShort(Short.MAX_VALUE)
+            .setALong(Long.MAX_VALUE)
+            .setAList(Lists.newArrayList("1", "2", "3"))
+            .setAMap(ImmutableMap.of(1, "value", 2, "value"))
+            .setASet(ImmutableSet.of("1", "2", "3"))
+            .setAListOfLists(
+                Lists.newArrayList(
+                    Lists.newArrayList("1", "2", "3"),
+                    Lists.newArrayList("1", "2", "3"),
+                    Lists.newArrayList("1", "2", "3")))
+            .setASetOfSets(
+                ImmutableSet.of(
+                    ImmutableSet.of("1", "2", "3"),
+                    ImmutableSet.of("4", "5", "6"),
+                    ImmutableSet.of("7", "8", "9")))
+            .setAMapOfLists(ImmutableMap.of())
+            .setBlob("XXXX".getBytes(StandardCharsets.UTF_8))
+            .build();
+
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    TIOStreamTransport transport = new TIOStreamTransport(bos);
+
+    TSimpleJSONProtocol protocol1 = new TSimpleJSONProtocol(transport);
+    everyLayout.write(protocol1);
+
+    ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+    TIOStreamTransport transport1 = new TIOStreamTransport(bis);
+    TSimpleJSONProtocol protocol2 = new TSimpleJSONProtocol(transport1);
+
+    // Android codegen doesn't generate metadata for code size reasons
+    com.facebook.thrift.android.test.EveryLayout.deserialize(protocol2);
+  }
+
   @Test
   public void testEveryLayoutWithBase64() throws Exception {
     EveryLayout everyLayout =

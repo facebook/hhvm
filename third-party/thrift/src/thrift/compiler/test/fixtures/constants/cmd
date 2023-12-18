@@ -1,3 +1,4 @@
+android src/module.thrift
 py src/module.thrift
 php:lazy_constants=1 src/module.thrift
 hack:typedef,lazy_constants=1 src/module.thrift

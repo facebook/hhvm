@@ -6,6 +6,7 @@
     "thrift": "thrift/annotation/thrift.thrift"
   },
   "namespaces": {
+    "android": "com.facebook.thrift.annotation.cpp_deprecated",
     "go": "thrift.annotation.cpp",
     "java": "com.facebook.thrift.annotation.cpp_deprecated",
     "js": "thrift.annotation.cpp",
@@ -26,24 +27,24 @@
         "constants" : {
           "Unique" : {
             "name" : "Unique",
-            "lineno" : 65,
+            "lineno" : 66,
             "value" : 0
           },
           "Shared" : {
             "name" : "Shared",
             "docstring" : "`std::unique_ptr<T>`\n",
-            "lineno" : 66,
+            "lineno" : 67,
             "value" : 1
           },
           "SharedMutable" : {
             "name" : "SharedMutable",
             "docstring" : "`std::shared_ptr<const T> `\n",
-            "lineno" : 67,
+            "lineno" : 68,
             "value" : 2
           }
         },
         "docstring" : "Optional, defaults to Unique\n",
-        "lineno" : 64
+        "lineno" : 65
       },
       "EnumUnderlyingType" : {
         "name" : "EnumUnderlyingType",
@@ -51,36 +52,36 @@
           "I8" : {
             "name" : "I8",
             "docstring" : "::std::int8_t\n",
-            "lineno" : 294,
+            "lineno" : 295,
             "value" : 0
           },
           "U8" : {
             "name" : "U8",
             "docstring" : "::std::uint8_t\n",
-            "lineno" : 296,
+            "lineno" : 297,
             "value" : 1
           },
           "I16" : {
             "name" : "I16",
             "docstring" : "::std::int16_t\n",
-            "lineno" : 298,
+            "lineno" : 299,
             "value" : 2
           },
           "U16" : {
             "name" : "U16",
             "docstring" : "::std::uint16_t\n",
-            "lineno" : 300,
+            "lineno" : 301,
             "value" : 3
           },
           "U32" : {
             "name" : "U32",
             "docstring" : "::std::uint32_t\n",
-            "lineno" : 302,
+            "lineno" : 303,
             "value" : 4
           }
         },
         "docstring" : "Enum in C++ by default uses signed 32 bit integer. There is no need to specify\nunderlying type for signed 32 bit integer.\n64-bit is not supported to avoid truncation since enums are sent as 32-bit integers over the wire.\n",
-        "lineno" : 292
+        "lineno" : 293
       }
       },
   "structs" :
@@ -110,21 +111,21 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 49,
+            "lineno" : 50,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
           "template" : {
             "name" : "template",
             "key" : 2,
-            "lineno" : 50,
+            "lineno" : 51,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 46
+        "lineno" : 47
       },
       "Ref" : {
         "name" : "Ref",
@@ -143,7 +144,7 @@
           "type" : {
             "name" : "type",
             "key" : 1,
-            "lineno" : 62,
+            "lineno" : 63,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -153,7 +154,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 60
+        "lineno" : 61
       },
       "Name" : {
         "name" : "Name",
@@ -172,14 +173,14 @@
           "value" : {
             "name" : "value",
             "key" : 1,
-            "lineno" : 77,
+            "lineno" : 78,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 75
+        "lineno" : 76
       },
       "Lazy" : {
         "name" : "Lazy",
@@ -199,14 +200,14 @@
             "name" : "ref",
             "default_value" : 0,
             "key" : 1,
-            "lineno" : 101,
+            "lineno" : 102,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 98
+        "lineno" : 99
       },
       "DisableLazyChecksum" : {
         "name" : "DisableLazyChecksum",
@@ -222,7 +223,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 104
+        "lineno" : 105
       },
       "Adapter" : {
         "name" : "Adapter",
@@ -266,7 +267,7 @@
             "name" : "name",
             "docstring" : "The name of a C++ adapter type used to convert between Thrift and native\nC++ representation.\n\nThe adapter can be either a Type or Field adapter, providing either of the following APIs:\n\n    struct ThriftTypeAdapter {\n      static AdaptedType fromThrift(ThriftType thrift);\n      static {const ThriftType& | ThriftType} toThrift(const AdaptedType& native);\n    };\n\n    struct ThriftFieldAdapter {\n      // Context is an instantiation of apache::thrift::FieldContext\n      template <class Context>\n      static void construct(AdaptedType& field, Context ctx);\n\n      template <class Context>\n      static AdaptedType fromThriftField(ThriftType value, Context ctx);\n\n      template <class Context>\n      static {const ThriftType& | ThriftType} toThrift(const AdaptedType& adapted, Context ctx);\n    };\n",
             "key" : 1,
-            "lineno" : 152,
+            "lineno" : 153,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
@@ -274,7 +275,7 @@
             "name" : "adaptedType",
             "docstring" : "It is sometimes necessary to specify AdaptedType here (in case the codegen would\nhave a circular depdenceny, which will cause the C++ build to fail).\n",
             "key" : 2,
-            "lineno" : 158,
+            "lineno" : 159,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
@@ -282,14 +283,14 @@
             "name" : "underlyingName",
             "docstring" : "The name and/or extra namespace to use when directly adapting a type\n(as opposed a typedef).\n\nIn this case, the IDL name of the type will refer to the adapted type in\nC++ and the underlying thrift type will be generated in a nested\nnamespace and/or with a different name.\n\nIf neither `underlyingName` or `extraNamespace` is provided, the\nunderlying type will be generated in a nested 'detail' namespace with\nthe same name.\n",
             "key" : 3,
-            "lineno" : 172,
+            "lineno" : 173,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
           "extraNamespace" : {
             "name" : "extraNamespace",
             "key" : 4,
-            "lineno" : 173,
+            "lineno" : 174,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
@@ -297,14 +298,14 @@
             "name" : "moveOnly",
             "docstring" : "Must set to true when adapted type is not copyable.\n",
             "key" : 5,
-            "lineno" : 176,
+            "lineno" : 177,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 124
+        "lineno" : 125
       },
       "PackIsset" : {
         "name" : "PackIsset",
@@ -324,14 +325,14 @@
             "name" : "atomic",
             "default_value" : 1,
             "key" : 1,
-            "lineno" : 186,
+            "lineno" : 187,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 184
+        "lineno" : 185
       },
       "MinimizePadding" : {
         "name" : "MinimizePadding",
@@ -348,7 +349,7 @@
         "docstring" : "This annotation enables reordering of fields in the generated C++ struct to minimize padding.\nThis is achieved by placing the fields in the order of decreasing alignments. The order of fields with the same alignment is preserved.\n\n```\n@cpp.MinimizePadding\nstruct Padded {\n  1: byte small\n  2: i64 big\n  3: i16 medium\n  4: i32 biggish\n  5: byte tiny\n}\n```\n\nFor example, the C++ fields for the `Padded` Thrift struct above will be generated in the following order:\n\n```\nint64_t big;\nint32_t biggish;\nint16_t medium;\nint8_t small;\nint8_t tiny;\n```\n\nwhich gives the size of 16 bytes compared to 32 bytes if `cpp.MinimizePadding` was not specified.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 216
+        "lineno" : 217
       },
       "TriviallyRelocatable" : {
         "name" : "TriviallyRelocatable",
@@ -364,7 +365,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 219
+        "lineno" : 220
       },
       "ScopedEnumAsUnionType" : {
         "name" : "ScopedEnumAsUnionType",
@@ -380,7 +381,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 222
+        "lineno" : 223
       },
       "StrongType" : {
         "name" : "StrongType",
@@ -405,7 +406,7 @@
         "docstring" : "Indicates a typedef should be 'strong', and require an explicit cast to\nthe underlying type.\n\nCurrently only works for integer typedefs, for example:\n\n    @cpp.StrongType\n    typedef i32 MyId;\n\nWill cause an enum class to be used instead of a typedef in the genearte code, for example:\n\n    enum class MyId : ::std::int32_t {};\n\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 239
+        "lineno" : 240
       },
       "FieldInterceptor" : {
         "name" : "FieldInterceptor",
@@ -433,7 +434,7 @@
             "name" : "name",
             "docstring" : "The name of a field interceptor.\n\nThe field interceptor provides the following API:\n\n    struct ThriftFieldInterceptor {\n      template <typename T, typename Struct, int16_t FieldId>\n      static void interceptThriftFieldAccess(T&& field,\n                                             apache::thrift::FieldContext<Struct, FieldId>&& ctx);\n    };\n\nThe field interceptor intercepts with the field value and the field context.\nIt enforces an easily searchable function name `interceptThriftFieldAccess`.\n",
             "key" : 1,
-            "lineno" : 274,
+            "lineno" : 275,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
@@ -441,14 +442,14 @@
             "name" : "noinline",
             "docstring" : "Setting to true makes compiler not inline and erase function signature for\nthe intercepting field accessor.\n",
             "key" : 2,
-            "lineno" : 280,
+            "lineno" : 281,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 257
+        "lineno" : 258
       },
       "UseOpEncode" : {
         "name" : "UseOpEncode",
@@ -472,7 +473,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 283
+        "lineno" : 284
       },
       "EnumType" : {
         "name" : "EnumType",
@@ -491,7 +492,7 @@
           "type" : {
             "name" : "type",
             "key" : 1,
-            "lineno" : 324,
+            "lineno" : 325,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -501,7 +502,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 322
+        "lineno" : 323
       },
       "Frozen2Exclude" : {
         "name" : "Frozen2Exclude",
@@ -518,7 +519,7 @@
         "docstring" : "Indicates that frozen types should not be generated for a given struct.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 330
+        "lineno" : 331
       },
       "Frozen2RequiresCompleteContainerParams" : {
         "name" : "Frozen2RequiresCompleteContainerParams",
@@ -535,7 +536,7 @@
         "docstring" : "Indicates that the container params must be complete at the time this type is instantiated.\nOnly required in rare cases where the build fails with a frozen-related assert failure.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 337
+        "lineno" : 338
       },
       "GenerateTypedInterceptor" : {
         "name" : "GenerateTypedInterceptor",
@@ -568,7 +569,7 @@
         "docstring" : "Generates typed interceptor stubs that can be overriden by user,\nand adorn the handler methods. This can be used on individual functions\nor on services (equivalent to adding it to all functions).\n\n  service MyService {\n    @cpp.GenerateTypedInterceptor\n    void ping();\n  }\n\nThis will generate the following interface:\n\n  class TypedInterceptor<MyService> {\n    TypeErasedStorage before_ping();\n    TypeErasedStorage after_ping();\n  }\n\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 358
+        "lineno" : 359
       },
       "ProcessInEbThreadUnsafe" : {
         "name" : "ProcessInEbThreadUnsafe",
@@ -593,7 +594,7 @@
         "docstring" : "Causes C++ handler code to run inline on the EventBase thread.\nDisables overload protection, use with caution.\nCannot be applied to individual functions in interactions.\n\nCauses the request to be executed on the event base thread directly instead of rescheduling onto a thread manager thread, provided the async_eb_ handler method is implemented.\nYou should only execute the request on the event base thread if it is very fast and you have measured that rescheduling is a substantial chunk of your service's CPU usage.\nIf a request executing on the event base thread blocks or takes a long time, all other requests sharing the same event base are affected and latency will increase significantly.\nWe strongly discourage the use of this annotation unless strictly necessary. You will have to implement the harder-to-use async_eb_ handler method.\nThis also disables queue timeouts, an important form of overload protection.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 374
+        "lineno" : 375
       },
       "RuntimeAnnotation" : {
         "name" : "RuntimeAnnotation",
@@ -610,7 +611,7 @@
         "docstring" : "Applies to structured annotation that need to be accessed in Runtime.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 381
+        "lineno" : 382
       }
       },
   "source_path" : "thrift/annotation/cpp",

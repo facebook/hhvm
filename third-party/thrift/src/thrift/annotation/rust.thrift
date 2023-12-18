@@ -19,6 +19,7 @@ include "thrift/annotation/scope.thrift"
 package "facebook.com/thrift/annotation/rust"
 
 namespace java com.facebook.thrift.annotation.rust_deprecated
+namespace android com.facebook.thrift.annotation.rust_deprecated
 namespace py.asyncio facebook_thrift_asyncio.annotation.rust
 namespace go thrift.annotation.rust
 namespace py thrift.annotation.rust

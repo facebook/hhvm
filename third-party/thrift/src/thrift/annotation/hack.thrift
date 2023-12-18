@@ -20,6 +20,7 @@ package "facebook.com/thrift/annotation/hack"
 
 namespace py thrift.annotation.hack
 namespace java com.facebook.thrift.annotation.hack_deprecated
+namespace android com.facebook.thrift.annotation.hack_deprecated
 namespace py.asyncio facebook_thrift_asyncio.annotation.hack
 namespace go thrift.annotation.hack
 namespace hs2 facebook.thrift.annotation.hack

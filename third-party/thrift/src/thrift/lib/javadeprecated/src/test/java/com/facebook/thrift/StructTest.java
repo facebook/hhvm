@@ -188,6 +188,20 @@ public class StructTest {
   }
 
   @Test
+  public void testAndroidStructWithOptionalEquality() throws Exception {
+    com.facebook.thrift.android.test.StructWithOptional orig =
+        new com.facebook.thrift.android.test.StructWithOptional(1L, "toto", 2, "titi");
+
+    com.facebook.thrift.android.test.StructWithOptional copy =
+        new com.facebook.thrift.android.test.StructWithOptional(1L, "toto", 2, null);
+    assertThat(orig, not(equalTo(copy)));
+
+    com.facebook.thrift.android.test.StructWithOptional copy2 =
+        new com.facebook.thrift.android.test.StructWithOptional(1L, "toto", null, "titi");
+    assertThat(orig, not(equalTo(copy2)));
+  }
+
+  @Test
   public void testStructInequality() throws Exception {
     MySimpleStruct struct1 = new MySimpleStruct(1, "Foo");
     MySimpleStruct struct2 = new MySimpleStruct(2, "Bar");

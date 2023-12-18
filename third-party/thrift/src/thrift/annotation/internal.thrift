@@ -22,6 +22,7 @@ include "thrift/annotation/thrift.thrift"
 package "facebook.com/thrift/annotation"
 
 namespace java com.facebook.thrift.annotation_deprecated
+namespace android com.facebook.thrift.annotation_deprecated
 namespace py.asyncio facebook_thrift_asyncio.annotation.internal
 namespace go thrift.annotation.internals
 namespace py thrift.annotation.internal

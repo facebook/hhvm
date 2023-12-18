@@ -19,6 +19,7 @@ include "thrift/annotation/scope.thrift"
 package "facebook.com/thrift/annotation/go"
 
 namespace java com.facebook.thrift.annotation.go_deprecated
+namespace android com.facebook.thrift.annotation.go_deprecated
 namespace js thrift.annotation.go
 namespace py.asyncio facebook_thrift_asyncio.annotation.go
 namespace go thrift.annotation.go

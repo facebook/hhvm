@@ -1,4 +1,5 @@
 go src/module.thrift
+android src/module.thrift
 java_deprecated src/module.thrift
 hack:json,server=1,shapes=1,shapes_allow_unknown_fields=1 src/module.thrift
 mstch_cpp2:deprecated_unstructured_annotations_in_metadata src/module.thrift

@@ -20,6 +20,7 @@ include "thrift/annotation/thrift.thrift"
 package "facebook.com/thrift/annotation/cpp"
 
 namespace java com.facebook.thrift.annotation.cpp_deprecated
+namespace android com.facebook.thrift.annotation.cpp_deprecated
 namespace js thrift.annotation.cpp
 namespace py.asyncio facebook_thrift_asyncio.annotation.cpp
 namespace go thrift.annotation.cpp

@@ -5,6 +5,7 @@
     "scope": "thrift/annotation/scope.thrift"
   },
   "namespaces": {
+    "android": "com.facebook.thrift.annotation.hack_deprecated",
     "go": "thrift.annotation.hack",
     "hs2": "facebook.thrift.annotation.hack",
     "java": "com.facebook.thrift.annotation.hack_deprecated",
@@ -37,14 +38,14 @@
             "name" : "name",
             "docstring" : "The name of a Hack wrapper class used to wrap the field\n",
             "key" : 1,
-            "lineno" : 39,
+            "lineno" : 40,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 36
+        "lineno" : 37
       },
       "Wrapper" : {
         "name" : "Wrapper",
@@ -80,7 +81,7 @@
             "name" : "name",
             "docstring" : "The name of a Hack wrapper class used to wrap the field\n",
             "key" : 1,
-            "lineno" : 54,
+            "lineno" : 55,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
@@ -88,7 +89,7 @@
             "name" : "underlyingName",
             "docstring" : "When applied directly to a typedef or struct, the IDL name of the\ntype will refer to the adapted type in Hack and the underlying thrift struct will be\ngenerated in a nested namespace and/or with a different name. By default the type/struct\nwill be generated in a nested 'thrift_adapted_types' namespace with the same name,\nbut both of these can be changed by setting these fields.\nEmpty string enables the nested namespace and uses the IDL name for the struct.\n",
             "key" : 2,
-            "lineno" : 61,
+            "lineno" : 62,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
@@ -96,14 +97,14 @@
             "name" : "extraNamespace",
             "default_value" : "thrift_adapted_types",
             "key" : 3,
-            "lineno" : 62,
+            "lineno" : 63,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 49
+        "lineno" : 50
       },
       "Adapter" : {
         "name" : "Adapter",
@@ -131,14 +132,14 @@
             "name" : "name",
             "docstring" : "The name of a Hack adapter class that implements IThriftAdapter\n",
             "key" : 1,
-            "lineno" : 101,
+            "lineno" : 102,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 97
+        "lineno" : 98
       },
       "SkipCodegen" : {
         "name" : "SkipCodegen",
@@ -172,14 +173,14 @@
           "reason" : {
             "name" : "reason",
             "key" : 1,
-            "lineno" : 108,
+            "lineno" : 109,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 104
+        "lineno" : 105
       },
       "Name" : {
         "name" : "Name",
@@ -198,21 +199,21 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 117,
+            "lineno" : 118,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
           "reason" : {
             "name" : "reason",
             "key" : 2,
-            "lineno" : 118,
+            "lineno" : 119,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 115
+        "lineno" : 116
       },
       "UnionEnumAttributes" : {
         "name" : "UnionEnumAttributes",
@@ -231,7 +232,7 @@
           "attributes" : {
             "name" : "attributes",
             "key" : 1,
-            "lineno" : 124,
+            "lineno" : 125,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "list",
@@ -241,7 +242,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 122
+        "lineno" : 123
       },
       "StructTrait" : {
         "name" : "StructTrait",
@@ -276,14 +277,14 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 132,
+            "lineno" : 133,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 128
+        "lineno" : 129
       },
       "Attributes" : {
         "name" : "Attributes",
@@ -292,7 +293,7 @@
           "attributes" : {
             "name" : "attributes",
             "key" : 1,
-            "lineno" : 175,
+            "lineno" : 176,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "list",
@@ -302,7 +303,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 174
+        "lineno" : 175
       },
       "StructAsTrait" : {
         "name" : "StructAsTrait",
@@ -334,7 +335,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 178
+        "lineno" : 179
       },
       "ModuleInternal" : {
         "name" : "ModuleInternal",
@@ -399,7 +400,7 @@
         "docstring" : "This annotation is to generate an entity as internal\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 184
+        "lineno" : 185
       }
       },
   "source_path" : "thrift/annotation/hack",

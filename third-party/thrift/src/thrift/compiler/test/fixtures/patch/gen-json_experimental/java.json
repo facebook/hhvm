@@ -5,6 +5,7 @@
     "scope": "thrift/annotation/scope.thrift"
   },
   "namespaces": {
+    "android": "com.facebook.thrift.annotation.java_deprecated",
     "go": "thrift.annotation.java",
     "java": "com.facebook.thrift.annotation.java_deprecated",
     "js": "thrift.annotation.java",
@@ -41,7 +42,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 29
+        "lineno" : 30
       },
       "Annotation" : {
         "name" : "Annotation",
@@ -83,14 +84,14 @@
           "java_annotation" : {
             "name" : "java_annotation",
             "key" : 1,
-            "lineno" : 39,
+            "lineno" : 40,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 34
+        "lineno" : 35
       },
       "BinaryString" : {
         "name" : "BinaryString",
@@ -106,7 +107,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 42
+        "lineno" : 43
       },
       "Adapter" : {
         "name" : "Adapter",
@@ -140,21 +141,21 @@
           "adapterClassName" : {
             "name" : "adapterClassName",
             "key" : 1,
-            "lineno" : 55,
+            "lineno" : 56,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
           "typeClassName" : {
             "name" : "typeClassName",
             "key" : 2,
-            "lineno" : 58,
+            "lineno" : 59,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 50
+        "lineno" : 51
       },
       "Wrapper" : {
         "name" : "Wrapper",
@@ -172,21 +173,21 @@
           "wrapperClassName" : {
             "name" : "wrapperClassName",
             "key" : 1,
-            "lineno" : 64,
+            "lineno" : 65,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
           "typeClassName" : {
             "name" : "typeClassName",
             "key" : 2,
-            "lineno" : 67,
+            "lineno" : 68,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 61
+        "lineno" : 62
       },
       "Recursive" : {
         "name" : "Recursive",
@@ -202,7 +203,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 70
+        "lineno" : 71
       }
       },
   "source_path" : "thrift/annotation/java",

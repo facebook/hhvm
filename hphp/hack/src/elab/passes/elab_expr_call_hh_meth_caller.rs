@@ -59,13 +59,6 @@ impl Pass for ElabExprCallHhMethCallerPass {
                             )));
                             Continue(())
                         }
-                        Expr_::Nameof(box ClassId(_, _, ClassId_::CI(id))) => {
-                            *elem = Expr_::MethodCaller(Box::new((
-                                take(id),
-                                (take(meth_pos), meth.to_string()),
-                            )));
-                            Continue(())
-                        }
                         Expr_::ClassConst(box (ClassId(_, _, ClassId_::CI(id)), (_, mem)))
                             if mem == sn::members::M_CLASS =>
                         {

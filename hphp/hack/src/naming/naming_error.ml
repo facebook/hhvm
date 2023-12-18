@@ -964,7 +964,7 @@ let illegal_meth_caller pos =
     Error_code.(to_enum IllegalMethCaller)
     ( pos,
       "The two arguments to `meth_caller()` must be:"
-      ^ "\n - first: `ClassOrInterface::class` or `nameof ClassOrInterface`"
+      ^ "\n - first: `ClassOrInterface::class`"
       ^ "\n - second: a single-quoted string literal containing the name"
       ^ " of a non-static method of that class" )
     []

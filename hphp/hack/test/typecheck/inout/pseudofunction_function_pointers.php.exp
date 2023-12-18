@@ -1,14 +1,14 @@
 File "pseudofunction_function_pointers.php", line 8, characters 3-13:
 The two arguments to `meth_caller()` must be:
- - first: `ClassOrInterface::class` or `nameof ClassOrInterface`
+ - first: `ClassOrInterface::class`
  - second: a single-quoted string literal containing the name of a non-static method of that class (Naming[2026])
 File "pseudofunction_function_pointers.php", line 9, characters 3-13:
 The two arguments to `meth_caller()` must be:
- - first: `ClassOrInterface::class` or `nameof ClassOrInterface`
+ - first: `ClassOrInterface::class`
  - second: a single-quoted string literal containing the name of a non-static method of that class (Naming[2026])
 File "pseudofunction_function_pointers.php", line 10, characters 3-13:
 The two arguments to `meth_caller()` must be:
- - first: `ClassOrInterface::class` or `nameof ClassOrInterface`
+ - first: `ClassOrInterface::class`
  - second: a single-quoted string literal containing the name of a non-static method of that class (Naming[2026])
 File "pseudofunction_function_pointers.php", line 5, characters 18-25:
 Unexpected `inout` argument for `call_user_func` (NastCheck[3096])

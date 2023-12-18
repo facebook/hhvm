@@ -171,7 +171,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   bool empty() const {
     bool b = true;
     op::for_each_ordinal<T>(
-        [&](auto id) { b = b && !modifies<decltype(id)>(); });
+        [&](auto id) { b = b && !this->modifies<decltype(id)>(); });
     return b;
   }
 
@@ -559,7 +559,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
   std::unordered_set<FieldId> removedFields() const {
     auto removed = *data_.remove();
     op::for_each_field_id<T>([&](auto id) {
-      if (isRemoved<decltype(id)>()) {
+      if (this->isRemoved<decltype(id)>()) {
         removed.insert(id.value);
       }
     });

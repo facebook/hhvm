@@ -1,0 +1,42 @@
+<?hh // strict
+  <<file: MyFileAttribute(123)>>
+
+  module myModule;
+  new module myModuleInner {};
+
+  final class MyAttribute1 implements HH\ClassAttribute {
+    public function __construct(string $first, string ...$remainder)[] {}
+  }
+  final class MyAttribute2 implements HH\ClassAttribute {
+    public function __construct(string $first, string ...$remainder)[] {}
+  }
+
+  const int MY_GLOBAL_CONST1 = 1;
+  const string MY_GLOBAL_CONST2 = "one";
+
+  function myGlobalFunc1(): void {}
+  function myGlobalFunc2(): int { return 1; }
+
+  type myGlobalType1 = shape("a" => int, "b" => string);
+  newtype myGlobalType2 = (float, float);
+
+  <<MyAttribute1("a","b"), MyAttribute2("a","b")>>
+  class MyClass {
+    const type MyTypeAlias1 = dict<string, MyClass>;
+    const type MyTypeAlias2 = dict<int, MyClass>;
+
+    const string MY_CONST1 = "abc";
+    const int MY_CONST2 = 1;
+
+    private static int $myStaticField1 = 123;
+    public static int $myStaticField2 = 345;
+
+    private bool $myInstanceField1 = true;
+    public bool $myInstanceField2 = false;
+
+    private static function mySMethod1(): void {}
+    public static function mySMethod2(): void {}
+
+    private function myMethod1(): void {}
+    public function myMethod2(): void {}
+  }

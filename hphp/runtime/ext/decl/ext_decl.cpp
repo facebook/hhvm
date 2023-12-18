@@ -22,6 +22,8 @@
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/system/systemlib.h"
 
+#include <fstream>
+
 TRACE_SET_MOD(decl);
 
 namespace HPHP {
@@ -631,26 +633,7 @@ struct FileDecls : SystemLib::ClassLoader<"HH\\FileDecls"> {
   static hphp_hash_map<std::string, FileDecls> m_cache;
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// API
-
-/*
- * Not implemented yet. Parses the content in the given path and returns
- * a new instance of FileDecls. This method may use a cache instead of parsing.
- */
-Object HHVM_STATIC_METHOD(FileDecls, parsePath, const String& path) {
-  assertEnv();
-  Object obj{FileDecls::classof()};
-  auto data = Native::data<FileDecls>(obj);
-  initDeclConfig();
-  data->error = String("Not implemented yet");
-  return obj;
-}
-
-/*
- * Parses the provided text and returns a new instance of FileDecls.
- */
-Object HHVM_STATIC_METHOD(FileDecls, parseText, const String& text) {
+Object getDeclsObjectFromText(const String& text) {
   assertEnv();
   Object obj{FileDecls::classof()};
   auto data = Native::data<FileDecls>(obj);
@@ -665,6 +648,38 @@ Object HHVM_STATIC_METHOD(FileDecls, parseText, const String& text) {
   }
 
   return obj;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// API
+
+/*
+ * Parses the content in the given path and returns
+ * a new instance of FileDecls. This method may use a cache instead of parsing.
+ */
+Object HHVM_STATIC_METHOD(FileDecls, parsePath, const String& path) {
+  std::filesystem::path filePath{path.data()};
+  if (!std::filesystem::exists(filePath)) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+        String("File not found ") + path.data());
+  };
+
+  std::ifstream s(filePath.native());
+  if (!s.good()) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+        String("Couldn't open file: ") + path.data());
+  }
+  std::string text{
+      std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>()};
+
+  return getDeclsObjectFromText(text);
+}
+
+/*
+ * Parses the provided text and returns a new instance of FileDecls.
+ */
+Object HHVM_STATIC_METHOD(FileDecls, parseText, const String& text) {
+  return getDeclsObjectFromText(text);
 }
 
 /*

@@ -1,0 +1,10 @@
+File "require_as.php", line 5, characters 8-8:
+Context X must declare a context constraint e.g. `as [write_props]` (Parsing[1002])
+File "require_as.php", line 6, characters 8-8:
+Context Y must declare a context constraint e.g. `as [write_props]` (Parsing[1002])
+File "require_as.php", line 6, characters 8-8:
+Invalid constraint on `newtype` (Typing[4110])
+  File "require_as.php", line 6, characters 8-8:
+  Expected `dynamic`
+  File "require_as.php", line 6, characters 12-13:
+  Type `mixed` is not a subtype of `dynamic` under dynamic-aware subtyping

@@ -1,0 +1,6 @@
+File "unresolved_compare.php", line 13, characters 10-16:
+This comparison has invalid types.  Only comparisons in which both arguments are strings, nums, DateTime, or DateTimeImmutable are allowed (Typing[4240])
+  File "unresolved_compare.php", line 3, characters 23-23:
+  This is a dynamic value or an object of exactly the class A because the type of this return is implicitly a like-type
+  File "unresolved_compare.php", line 3, characters 23-23:
+  This is a dynamic value or an object of exactly the class B because the type of this return is implicitly a like-type

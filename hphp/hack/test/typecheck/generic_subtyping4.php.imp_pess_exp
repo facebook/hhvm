@@ -1,0 +1,12 @@
+File "generic_subtyping4.php", line 52, characters 14-20:
+Invalid argument (Typing[4110])
+  File "generic_subtyping4.php", line 41, characters 19-22:
+  Expected `bool`
+  File "generic_subtyping4.php", line 35, characters 32-40:
+  But got `dynamic` because the type of this return is implicitly a like-type
+File "generic_subtyping4.php", line 52, characters 14-20:
+Invalid argument (Typing[4110])
+  File "generic_subtyping4.php", line 41, characters 19-22:
+  Expected `bool`
+  File "generic_subtyping4.php", line 46, characters 21-21:
+  But got `int`

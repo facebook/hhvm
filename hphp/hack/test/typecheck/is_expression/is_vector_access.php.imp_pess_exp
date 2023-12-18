@@ -1,0 +1,4 @@
+File "is_vector_access.php", line 7, characters 10-16:
+You are trying to access an element of this container but the container could be `null`.  (Typing[4063])
+  File "collections/Vector.hhi", line 48, characters 15-20:
+  This is what makes me believe it can be `null`.

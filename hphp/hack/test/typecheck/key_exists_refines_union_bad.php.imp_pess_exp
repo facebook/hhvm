@@ -1,0 +1,6 @@
+File "key_exists_refines_union_bad.php", line 12, characters 16-22:
+Invalid argument (Typing[4110])
+  File "key_exists_refines_union_bad.php", line 3, characters 21-23:
+  Expected `int`
+  File "key_exists_refines_union_bad.php", line 5, characters 48-57:
+  But got `mixed`

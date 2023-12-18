@@ -1,0 +1,6 @@
+File "bad_inout_use_assign1.php", line 4, characters 3-12:
+Invalid assignment to an `inout` parameter (Typing[4337])
+  File "bad_inout_use_assign1.php", line 3, characters 18-20:
+  Expected `int`
+  File "bad_inout_use_assign1.php", line 4, characters 8-12:
+  But got `string`

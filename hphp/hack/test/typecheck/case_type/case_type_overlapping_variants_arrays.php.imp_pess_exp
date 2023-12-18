@@ -1,0 +1,196 @@
+File "case_type_overlapping_variants_arrays.php", line 4, characters 11-18:
+Invalid case type declaration. More than one variant of `DictData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 5, characters 5-9:
+  This is the type `mixed`, which includes **dicts**
+  File "case_type_overlapping_variants_arrays.php", line 8, characters 5-22:
+  It overlaps with `TypeStructure<int>`, which also includes **dicts** because shapes are dicts at runtime
+  File "typestructure.hhi", line 55, characters 31-621:
+    via the constraint on the newtype `TypeStructure`
+File "case_type_overlapping_variants_arrays.php", line 4, characters 11-18:
+Invalid case type declaration. More than one variant of `DictData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 5, characters 5-9:
+  This is the type `mixed`, which includes **dicts**
+  File "case_type_overlapping_variants_arrays.php", line 9, characters 5-11:
+  It overlaps with `shape()`, which also includes **dicts** because shapes are dicts at runtime
+File "case_type_overlapping_variants_arrays.php", line 4, characters 11-18:
+Invalid case type declaration. More than one variant of `DictData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 5, characters 5-9:
+  This is the type `mixed`, which includes **dicts**
+  File "case_type_overlapping_variants_arrays.php", line 10, characters 5-18:
+  It overlaps with `dict<int, int>`, which also includes **dicts**
+File "case_type_overlapping_variants_arrays.php", line 4, characters 11-18:
+Invalid case type declaration. More than one variant of `DictData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 6, characters 5-11:
+  This is the type `nonnull`, which includes **dicts**
+  File "case_type_overlapping_variants_arrays.php", line 5, characters 5-9:
+  It overlaps with `mixed`, which also includes **dicts**
+File "case_type_overlapping_variants_arrays.php", line 4, characters 11-18:
+Invalid case type declaration. More than one variant of `DictData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 6, characters 5-11:
+  This is the type `nonnull`, which includes **dicts**
+  File "case_type_overlapping_variants_arrays.php", line 8, characters 5-22:
+  It overlaps with `TypeStructure<int>`, which also includes **dicts** because shapes are dicts at runtime
+  File "typestructure.hhi", line 55, characters 31-621:
+    via the constraint on the newtype `TypeStructure`
+File "case_type_overlapping_variants_arrays.php", line 4, characters 11-18:
+Invalid case type declaration. More than one variant of `DictData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 6, characters 5-11:
+  This is the type `nonnull`, which includes **dicts**
+  File "case_type_overlapping_variants_arrays.php", line 9, characters 5-11:
+  It overlaps with `shape()`, which also includes **dicts** because shapes are dicts at runtime
+File "case_type_overlapping_variants_arrays.php", line 4, characters 11-18:
+Invalid case type declaration. More than one variant of `DictData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 6, characters 5-11:
+  This is the type `nonnull`, which includes **dicts**
+  File "case_type_overlapping_variants_arrays.php", line 10, characters 5-18:
+  It overlaps with `dict<int, int>`, which also includes **dicts**
+File "case_type_overlapping_variants_arrays.php", line 4, characters 11-18:
+Invalid case type declaration. More than one variant of `DictData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 7, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **dicts** because a function could be any value at runtime
+  File "case_type_overlapping_variants_arrays.php", line 5, characters 5-9:
+  It overlaps with `mixed`, which also includes **dicts**
+File "case_type_overlapping_variants_arrays.php", line 4, characters 11-18:
+Invalid case type declaration. More than one variant of `DictData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 7, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **dicts** because a function could be any value at runtime
+  File "case_type_overlapping_variants_arrays.php", line 6, characters 5-11:
+  It overlaps with `nonnull`, which also includes **dicts**
+File "case_type_overlapping_variants_arrays.php", line 4, characters 11-18:
+Invalid case type declaration. More than one variant of `DictData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 7, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **dicts** because a function could be any value at runtime
+  File "case_type_overlapping_variants_arrays.php", line 8, characters 5-22:
+  It overlaps with `TypeStructure<int>`, which also includes **dicts** because shapes are dicts at runtime
+  File "typestructure.hhi", line 55, characters 31-621:
+    via the constraint on the newtype `TypeStructure`
+File "case_type_overlapping_variants_arrays.php", line 4, characters 11-18:
+Invalid case type declaration. More than one variant of `DictData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 7, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **dicts** because a function could be any value at runtime
+  File "case_type_overlapping_variants_arrays.php", line 9, characters 5-11:
+  It overlaps with `shape()`, which also includes **dicts** because shapes are dicts at runtime
+File "case_type_overlapping_variants_arrays.php", line 4, characters 11-18:
+Invalid case type declaration. More than one variant of `DictData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 7, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **dicts** because a function could be any value at runtime
+  File "case_type_overlapping_variants_arrays.php", line 10, characters 5-18:
+  It overlaps with `dict<int, int>`, which also includes **dicts**
+File "case_type_overlapping_variants_arrays.php", line 4, characters 11-18:
+Invalid case type declaration. More than one variant of `DictData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 8, characters 5-22:
+  This is the type `TypeStructure<int>`, which includes **dicts** because shapes are dicts at runtime
+  File "typestructure.hhi", line 55, characters 31-621:
+    via the constraint on the newtype `TypeStructure`
+  File "case_type_overlapping_variants_arrays.php", line 9, characters 5-11:
+  It overlaps with `shape()`, which also includes **dicts** because shapes are dicts at runtime
+File "case_type_overlapping_variants_arrays.php", line 4, characters 11-18:
+Invalid case type declaration. More than one variant of `DictData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 8, characters 5-22:
+  This is the type `TypeStructure<int>`, which includes **dicts** because shapes are dicts at runtime
+  File "typestructure.hhi", line 55, characters 31-621:
+    via the constraint on the newtype `TypeStructure`
+  File "case_type_overlapping_variants_arrays.php", line 10, characters 5-18:
+  It overlaps with `dict<int, int>`, which also includes **dicts**
+File "case_type_overlapping_variants_arrays.php", line 4, characters 11-18:
+Invalid case type declaration. More than one variant of `DictData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 9, characters 5-11:
+  This is the type `shape()`, which includes **dicts** because shapes are dicts at runtime
+  File "case_type_overlapping_variants_arrays.php", line 10, characters 5-18:
+  It overlaps with `dict<int, int>`, which also includes **dicts**
+File "case_type_overlapping_variants_arrays.php", line 12, characters 11-20:
+Invalid case type declaration. More than one variant of `KeysetData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 13, characters 5-9:
+  This is the type `mixed`, which includes **keysets**
+  File "case_type_overlapping_variants_arrays.php", line 16, characters 5-15:
+  It overlaps with `keyset<int>`, which also includes **keysets**
+File "case_type_overlapping_variants_arrays.php", line 12, characters 11-20:
+Invalid case type declaration. More than one variant of `KeysetData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 14, characters 5-11:
+  This is the type `nonnull`, which includes **dicts**
+  File "case_type_overlapping_variants_arrays.php", line 13, characters 5-9:
+  It overlaps with `mixed`, which also includes **dicts**
+File "case_type_overlapping_variants_arrays.php", line 12, characters 11-20:
+Invalid case type declaration. More than one variant of `KeysetData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 14, characters 5-11:
+  This is the type `nonnull`, which includes **keysets**
+  File "case_type_overlapping_variants_arrays.php", line 16, characters 5-15:
+  It overlaps with `keyset<int>`, which also includes **keysets**
+File "case_type_overlapping_variants_arrays.php", line 12, characters 11-20:
+Invalid case type declaration. More than one variant of `KeysetData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 15, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **dicts** because a function could be any value at runtime
+  File "case_type_overlapping_variants_arrays.php", line 13, characters 5-9:
+  It overlaps with `mixed`, which also includes **dicts**
+File "case_type_overlapping_variants_arrays.php", line 12, characters 11-20:
+Invalid case type declaration. More than one variant of `KeysetData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 15, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **dicts** because a function could be any value at runtime
+  File "case_type_overlapping_variants_arrays.php", line 14, characters 5-11:
+  It overlaps with `nonnull`, which also includes **dicts**
+File "case_type_overlapping_variants_arrays.php", line 12, characters 11-20:
+Invalid case type declaration. More than one variant of `KeysetData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 15, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **keysets** because a function could be any value at runtime
+  File "case_type_overlapping_variants_arrays.php", line 16, characters 5-15:
+  It overlaps with `keyset<int>`, which also includes **keysets**
+File "case_type_overlapping_variants_arrays.php", line 18, characters 11-17:
+Invalid case type declaration. More than one variant of `VecData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 19, characters 5-9:
+  This is the type `mixed`, which includes **vecs**
+  File "case_type_overlapping_variants_arrays.php", line 22, characters 5-14:
+  It overlaps with `(int, int)`, which also includes **vecs** because tuples are vecs at runtime
+File "case_type_overlapping_variants_arrays.php", line 18, characters 11-17:
+Invalid case type declaration. More than one variant of `VecData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 19, characters 5-9:
+  This is the type `mixed`, which includes **vecs**
+  File "case_type_overlapping_variants_arrays.php", line 23, characters 5-12:
+  It overlaps with `vec<int>`, which also includes **vecs**
+File "case_type_overlapping_variants_arrays.php", line 18, characters 11-17:
+Invalid case type declaration. More than one variant of `VecData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 20, characters 5-11:
+  This is the type `nonnull`, which includes **dicts**
+  File "case_type_overlapping_variants_arrays.php", line 19, characters 5-9:
+  It overlaps with `mixed`, which also includes **dicts**
+File "case_type_overlapping_variants_arrays.php", line 18, characters 11-17:
+Invalid case type declaration. More than one variant of `VecData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 20, characters 5-11:
+  This is the type `nonnull`, which includes **vecs**
+  File "case_type_overlapping_variants_arrays.php", line 22, characters 5-14:
+  It overlaps with `(int, int)`, which also includes **vecs** because tuples are vecs at runtime
+File "case_type_overlapping_variants_arrays.php", line 18, characters 11-17:
+Invalid case type declaration. More than one variant of `VecData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 20, characters 5-11:
+  This is the type `nonnull`, which includes **vecs**
+  File "case_type_overlapping_variants_arrays.php", line 23, characters 5-12:
+  It overlaps with `vec<int>`, which also includes **vecs**
+File "case_type_overlapping_variants_arrays.php", line 18, characters 11-17:
+Invalid case type declaration. More than one variant of `VecData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 21, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **dicts** because a function could be any value at runtime
+  File "case_type_overlapping_variants_arrays.php", line 19, characters 5-9:
+  It overlaps with `mixed`, which also includes **dicts**
+File "case_type_overlapping_variants_arrays.php", line 18, characters 11-17:
+Invalid case type declaration. More than one variant of `VecData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 21, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **dicts** because a function could be any value at runtime
+  File "case_type_overlapping_variants_arrays.php", line 20, characters 5-11:
+  It overlaps with `nonnull`, which also includes **dicts**
+File "case_type_overlapping_variants_arrays.php", line 18, characters 11-17:
+Invalid case type declaration. More than one variant of `VecData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 21, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **vecs** because a function could be any value at runtime
+  File "case_type_overlapping_variants_arrays.php", line 22, characters 5-14:
+  It overlaps with `(int, int)`, which also includes **vecs** because tuples are vecs at runtime
+File "case_type_overlapping_variants_arrays.php", line 18, characters 11-17:
+Invalid case type declaration. More than one variant of `VecData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 21, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **vecs** because a function could be any value at runtime
+  File "case_type_overlapping_variants_arrays.php", line 23, characters 5-12:
+  It overlaps with `vec<int>`, which also includes **vecs**
+File "case_type_overlapping_variants_arrays.php", line 18, characters 11-17:
+Invalid case type declaration. More than one variant of `VecData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 22, characters 5-14:
+  This is the type `(int, int)`, which includes **vecs** because tuples are vecs at runtime
+  File "case_type_overlapping_variants_arrays.php", line 23, characters 5-12:
+  It overlaps with `vec<int>`, which also includes **vecs**

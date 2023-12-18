@@ -1,0 +1,33 @@
+File "list_destructuring_vec.php", line 6, characters 3-13:
+  int
+File "list_destructuring_vec.php", line 7, characters 3-13:
+  int
+File "list_destructuring_vec.php", line 9, characters 3-13:
+  float
+File "list_destructuring_vec.php", line 10, characters 3-13:
+  float
+File "list_destructuring_vec.php", line 12, characters 3-13:
+  string
+File "list_destructuring_vec.php", line 13, characters 3-13:
+  string
+File "list_destructuring_vec.php", line 15, characters 3-13:
+  bool
+File "list_destructuring_vec.php", line 16, characters 3-13:
+  bool
+File "list_destructuring_vec.php", line 6, characters 3-13:[2]
+  dynamic
+File "list_destructuring_vec.php", line 7, characters 3-13:[2]
+  dynamic
+File "list_destructuring_vec.php", line 9, characters 3-13:[2]
+  dynamic
+File "list_destructuring_vec.php", line 10, characters 3-13:[2]
+  dynamic
+File "list_destructuring_vec.php", line 12, characters 3-13:[2]
+  dynamic
+File "list_destructuring_vec.php", line 13, characters 3-13:[2]
+  dynamic
+File "list_destructuring_vec.php", line 15, characters 3-13:[2]
+  dynamic
+File "list_destructuring_vec.php", line 16, characters 3-13:[2]
+  dynamic
+No errors

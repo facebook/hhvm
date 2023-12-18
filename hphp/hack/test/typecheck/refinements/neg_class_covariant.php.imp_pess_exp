@@ -1,0 +1,31 @@
+File "neg_class_covariant.php", line 19, characters 3-17:
+  (int | (not vec & T) | ((vec<mixed> & T) | vec<int>))
+File "neg_class_covariant.php", line 20, characters 3-13:
+  (int | ((vec<mixed> & T) | vec<int>))
+File "neg_class_covariant.php", line 21, characters 3-13:
+  (int | (not vec & T) | ((vec<mixed> & T) | vec<int>))
+File "neg_class_covariant.php", line 19, characters 3-17:[2]
+  ((dynamic & not vec) | vec<mixed>)
+File "neg_class_covariant.php", line 20, characters 3-13:[2]
+  (int | vec<mixed>)
+File "neg_class_covariant.php", line 21, characters 3-13:[2]
+  ((dynamic & not vec) | vec<mixed>)
+File "neg_class_covariant.php", line 32, characters 3-13:
+  ((T & not vec) | (T & vec<mixed>))
+File "neg_class_covariant.php", line 33, characters 3-13:
+  (int | (T & vec<mixed>))
+File "neg_class_covariant.php", line 34, characters 3-13:
+  ((T & not vec) | (T & vec<mixed>))
+File "neg_class_covariant.php", line 32, characters 3-13:[2]
+  ((dynamic & not vec) | vec<mixed>)
+File "neg_class_covariant.php", line 33, characters 3-13:[2]
+  (int | vec<mixed>)
+File "neg_class_covariant.php", line 34, characters 3-13:[2]
+  ((dynamic & not vec) | vec<mixed>)
+File "neg_class_covariant.php", line 45, characters 3-13:
+  mixed
+File "neg_class_covariant.php", line 46, characters 3-13:
+  (int | vec<mixed>)
+File "neg_class_covariant.php", line 47, characters 3-13:
+  mixed
+No errors

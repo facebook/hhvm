@@ -1,0 +1,12 @@
+File "lambda_escape.php", line 15, characters 10-11:
+Invalid return type (Typing[4110])
+  File "lambda_escape.php", line 11, characters 37-43:
+  Expected `nothing`
+  File "expr_tree.hhi", line 25, characters 8-53:
+  But got `ExprTree<ExampleDsl, mixed, ExampleInt>`
+File "lambda_escape.php", line 15, characters 10-11:
+Invalid return type (Typing[4110])
+  File "lambda_escape.php", line 11, characters 37-43:
+  Expected `nothing`
+  File "expr_tree.hhi", line 25, characters 8-53:
+  But got `dynamic` because the type of this return is implicitly a like-type

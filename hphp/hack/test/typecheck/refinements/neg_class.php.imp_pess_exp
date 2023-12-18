@@ -1,0 +1,11 @@
+File "neg_class.php", line 12, characters 3-13:
+  T as Base
+File "neg_class.php", line 12, characters 3-13:[2]
+  dynamic
+File "neg_class.php", line 18, characters 3-13:
+  mixed
+File "neg_class.php", line 24, characters 3-13:
+  T
+File "neg_class.php", line 24, characters 3-13:[2]
+  dynamic
+No errors

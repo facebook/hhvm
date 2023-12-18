@@ -1,0 +1,30 @@
+File "method-subtyping.php", line 22, characters 23-31:
+Invalid argument (Typing[4110])
+  File "method-subtyping.php", line 12, characters 29-31:
+  Expected `int`
+  File "method-subtyping.php", line 21, characters 29-35:
+  But got `this::T where this::T super num, this::T as B1::T`
+File "method-subtyping.php", line 28, characters 16-22:
+Invalid argument (Typing[4110])
+  File "method-subtyping.php", line 10, characters 22-28:
+  Expected `this::T`
+  File "method-subtyping.php", line 27, characters 22-29:
+  But got `this::T2 where this::T2 super this::T, this::T2 as B1::T2`
+File "method-subtyping.php", line 29, characters 23-29:
+Invalid argument (Typing[4110])
+  File "method-subtyping.php", line 12, characters 29-31:
+  Expected `int`
+  File "method-subtyping.php", line 27, characters 22-29:
+  But got `this::T2 where this::T2 super this::T, this::T2 as B1::T2`
+File "method-subtyping.php", line 34, characters 19-29:
+The method `returns_int` is not compatible with the overridden method (Typing[4341])
+  File "method-subtyping.php", line 34, characters 19-29:
+  Method `returns_int` has type `(function(): ~this::T)` in `B1`
+  File "method-subtyping.php", line 13, characters 19-29:
+  But is has type `(function(): int)` in parent `A`
+  File "method-subtyping.php", line 34, characters 19-29:
+  Type `(function(): ~this::T)` is not a subtype of `(function(): int)`
+  File "method-subtyping.php", line 13, characters 34-36:
+  Expected `int`
+  File "method-subtyping.php", line 34, characters 34-40:
+  But got `this::T where this::T super num, this::T as B1::T`

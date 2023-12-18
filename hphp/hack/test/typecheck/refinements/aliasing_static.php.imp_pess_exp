@@ -1,0 +1,9 @@
+File "aliasing_static.php", line 19, characters 10-18:
+Invalid return type (Typing[4110])
+  File "aliasing_static.php", line 11, characters 44-46:
+  Expected `~int` because the type of this return is implicitly a like-type
+  File "aliasing_static.php", line 4, characters 10-13:
+  But got `?int`
+  File "aliasing_static.php", line 16, characters 3-17:
+  All the local information about `$alias->i` has been invalidated by this assignment.
+This is a limitation of the type-checker; use a local if that's the problem.

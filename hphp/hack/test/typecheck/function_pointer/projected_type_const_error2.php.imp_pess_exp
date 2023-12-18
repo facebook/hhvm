@@ -1,0 +1,12 @@
+File "projected_type_const_error2.php", line 18, characters 10-20:
+Invalid return type (Typing[4110])
+  File "projected_type_const_error2.php", line 17, characters 18-49:
+  Expected `~(function(IntBox, string): ~void)` because the type of this return is implicitly a like-type
+  File "projected_type_const_error2.php", line 13, characters 10-18:
+  But got `(readonly function<TBox as MyBox, TVal>($b, $v): void)` because method must be callable in a dynamic context
+File "projected_type_const_error2.php", line 18, characters 10-18:
+Can't access a type constant TInner from an unresolved type (Typing[4436])
+  File "projected_type_const_error2.php", line 13, characters 84-89:
+  Access happens here
+  File "projected_type_const_error2.php", line 18, characters 10-18:
+  Disambiguate the types using explicit type annotations here.

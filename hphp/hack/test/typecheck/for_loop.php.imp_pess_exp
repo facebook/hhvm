@@ -1,0 +1,6 @@
+File "for_loop.php", line 21, characters 10-13:
+Invalid return type (Typing[4110])
+  File "for_loop.php", line 14, characters 20-20:
+  Expected `~A` because the type of this return is implicitly a like-type
+  File "for_loop.php", line 15, characters 10-13:
+  But got `?A`

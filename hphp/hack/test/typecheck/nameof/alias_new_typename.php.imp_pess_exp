@@ -1,0 +1,24 @@
+File "alias_new_typename.php--file2.php", line 7, characters 10-17:
+Invalid argument (Typing[4110])
+  File "alias_new_typename.php--file2.php", line 3, characters 26-26:
+  Expected `X`
+  File "alias_new_typename.php--file1.php", line 4, characters 9-9:
+  But got `mixed`
+File "alias_new_typename.php--file2.php", line 7, characters 10-17:
+Invalid argument (Typing[4110])
+  File "alias_new_typename.php--file2.php", line 3, characters 26-26:
+  Expected `X`
+  File "alias_new_typename.php--file1.php", line 4, characters 9-9:
+  But got `nonnull`
+File "alias_new_typename.php--file2.php", line 8, characters 10-17:
+Invalid argument (Typing[4110])
+  File "alias_new_typename.php--file2.php", line 3, characters 26-26:
+  Expected `X`
+  File "alias_new_typename.php--file1.php", line 4, characters 9-9:
+  But got `mixed`
+File "alias_new_typename.php--file2.php", line 8, characters 10-17:
+Invalid argument (Typing[4110])
+  File "alias_new_typename.php--file2.php", line 3, characters 26-26:
+  Expected `X`
+  File "alias_new_typename.php--file1.php", line 4, characters 9-9:
+  But got `nonnull`

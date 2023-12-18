@@ -1,0 +1,8 @@
+File "plus_tyvar_int.php", line 9, characters 14-22:
+Invalid argument (Typing[4110])
+  File "plus_tyvar_int.php", line 3, characters 21-23:
+  Expected `int`
+  File "plus_tyvar_int.php", line 9, characters 14-22:
+  But got `float` because this is the result of an arithmetic operation with a `num` as the first argument, and no `float`s.
+  File "plus_tyvar_int.php", line 7, characters 8-16:
+  Here is why I think the argument is a `num`: this is a `num` because type parameter `T` of `HH\Vector` could not be determined. Please add explicit type parameters to the invocation of `HH\Vector`

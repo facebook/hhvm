@@ -1,0 +1,17 @@
+File "upcast.php", line 6, characters 3-13:
+  num
+File "upcast.php", line 12, characters 3-13:
+  num
+File "upcast.php", line 13, characters 3-13:
+  int
+File "upcast.php", line 12, characters 3-13:[2]
+  num
+File "upcast.php", line 13, characters 3-13:[2]
+  int
+File "upcast.php", line 18, characters 3-13:
+  T super num
+File "upcast.php", line 23, characters 3-13:
+  vec<num>
+File "upcast.php", line 23, characters 3-13:[2]
+  vec<num>
+No errors

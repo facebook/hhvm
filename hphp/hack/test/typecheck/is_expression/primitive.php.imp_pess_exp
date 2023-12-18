@@ -1,0 +1,54 @@
+File "primitive.php", line 15, characters 15-16:
+Invalid argument (Typing[4110])
+  File "primitive.php", line 22, characters 22-25:
+  Expected `bool`
+  File "primitive.php", line 4, characters 13-16:
+  But got `not bool` from this `is` expression test
+File "primitive.php", line 16, characters 16-17:
+Invalid argument (Typing[4110])
+  File "primitive.php", line 23, characters 23-27:
+  Expected `float`
+  File "primitive.php", line 4, characters 13-16:
+  But got `bool`
+File "primitive.php", line 16, characters 16-17:
+Invalid argument (Typing[4110])
+  File "primitive.php", line 23, characters 23-27:
+  Expected `float`
+  File "primitive.php", line 4, characters 13-16:
+  But got `not bool` from this `is` expression test
+File "primitive.php", line 17, characters 14-15:
+Invalid argument (Typing[4110])
+  File "primitive.php", line 24, characters 21-23:
+  Expected `int`
+  File "primitive.php", line 4, characters 13-16:
+  But got `bool`
+File "primitive.php", line 17, characters 14-15:
+Invalid argument (Typing[4110])
+  File "primitive.php", line 24, characters 21-23:
+  Expected `int`
+  File "primitive.php", line 4, characters 13-16:
+  But got `not bool` from this `is` expression test
+File "primitive.php", line 18, characters 19-20:
+Invalid argument (Typing[4110])
+  File "primitive.php", line 25, characters 26-33:
+  Expected `resource`
+  File "primitive.php", line 4, characters 13-16:
+  But got `bool`
+File "primitive.php", line 18, characters 19-20:
+Invalid argument (Typing[4110])
+  File "primitive.php", line 25, characters 26-33:
+  Expected `resource`
+  File "primitive.php", line 4, characters 13-16:
+  But got `not bool` from this `is` expression test
+File "primitive.php", line 19, characters 17-18:
+Invalid argument (Typing[4110])
+  File "primitive.php", line 26, characters 24-29:
+  Expected `string`
+  File "primitive.php", line 4, characters 13-16:
+  But got `bool`
+File "primitive.php", line 19, characters 17-18:
+Invalid argument (Typing[4110])
+  File "primitive.php", line 26, characters 24-29:
+  Expected `string`
+  File "primitive.php", line 4, characters 13-16:
+  But got `not bool` from this `is` expression test

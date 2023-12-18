@@ -1,0 +1,8 @@
+File "module_newtype.php--decl.php", line 5, characters 26-36:
+You cannot use this type in a public declaration. (Typing[4446])
+  File "module_newtype.php--decl.php", line 6, characters 16-26:
+  It is declared as `internal` here
+File "module_newtype.php--use_bad.php", line 3, characters 7-9:
+You are trying to access the method `foo` but this is a mixed value. Use a **specific** class or interface name. (Typing[4064])
+  File "module_newtype.php--decl.php", line 4, characters 16-18:
+  Definition is here

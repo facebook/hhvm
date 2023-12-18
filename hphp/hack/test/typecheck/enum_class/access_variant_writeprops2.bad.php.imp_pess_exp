@@ -1,0 +1,30 @@
+File "access_variant_writeprops2.bad.php", line 9, characters 17-17:
+Wrong type hint (Typing[4338])
+  File "access_variant_writeprops2.bad.php", line 9, characters 9-15:
+  Expected `MyClass`
+  File "access_variant_writeprops2.bad.php", line 5, characters 3-9:
+  But got `dynamic`
+File "access_variant_writeprops2.bad.php", line 10, characters 19-37:
+Wrong type hint (Typing[4339])
+  File "access_variant_writeprops2.bad.php", line 10, characters 11-17:
+  Expected `MyClass`
+  File "access_variant_writeprops2.bad.php", line 5, characters 3-9:
+  But got `dynamic`
+File "access_variant_writeprops2.bad.php", line 11, characters 26-50:
+Wrong type hint (Typing[4339])
+  File "access_variant_writeprops2.bad.php", line 11, characters 18-24:
+  Expected `MyClass`
+  File "access_variant_writeprops2.bad.php", line 5, characters 3-9:
+  But got `dynamic`
+File "access_variant_writeprops2.bad.php", line 9, characters 21-31:
+Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
+  File "access_variant_writeprops2.bad.php", line 9, characters 21-31:
+  The local (enclosing) context provides the capability set {}
+File "access_variant_writeprops2.bad.php", line 10, characters 27-37:
+Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
+  File "access_variant_writeprops2.bad.php", line 10, characters 27-37:
+  The local (enclosing) context provides the capability set {}
+File "access_variant_writeprops2.bad.php", line 11, characters 40-50:
+Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
+  File "access_variant_writeprops2.bad.php", line 11, characters 40-50:
+  The local (enclosing) context provides the capability set {}

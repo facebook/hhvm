@@ -1,0 +1,6 @@
+File "nullsafe-prop-1.php", line 8, characters 10-15:
+Invalid return type (Typing[4110])
+  File "nullsafe-prop-1.php", line 7, characters 23-25:
+  Expected `~int` because the type of this return is implicitly a like-type
+  File "nullsafe-prop-1.php", line 8, characters 10-15:
+  But got `?int` (use of `?->` operator)

@@ -1,0 +1,12 @@
+File "any_as_lower_bound.php", line 5, characters 3-87:
+  (function(): ~(void | _))
+File "any_as_lower_bound.php", line 5, characters 3-87:[2]
+  dynamic
+File "any_as_lower_bound.php", line 4, characters 32-33:
+Was expecting a type hint (Typing[4032])
+File "any_as_lower_bound.php", line 5, characters 11-86:
+This function can exit with and without returning a value (Typing[4421])
+  File "any_as_lower_bound.php", line 9, characters 7-16:
+  Returning a value here.
+  File "any_as_lower_bound.php", line 7, characters 7-13:
+  Returning without a value here

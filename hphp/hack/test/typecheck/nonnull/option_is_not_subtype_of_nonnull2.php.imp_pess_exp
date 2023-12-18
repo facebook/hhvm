@@ -1,0 +1,12 @@
+File "option_is_not_subtype_of_nonnull2.php", line 8, characters 10-24:
+Invalid return type (Typing[4110])
+  File "option_is_not_subtype_of_nonnull2.php", line 7, characters 41-47:
+  Expected `nonnull`
+  File "option_is_not_subtype_of_nonnull2.php", line 4, characters 34-35:
+  But got `null`
+File "option_is_not_subtype_of_nonnull2.php", line 8, characters 10-24:
+Invalid return type (Typing[4110])
+  File "option_is_not_subtype_of_nonnull2.php", line 7, characters 41-47:
+  Expected `~nonnull` because the type of this return is implicitly a like-type
+  File "option_is_not_subtype_of_nonnull2.php", line 4, characters 34-35:
+  But got `?_`

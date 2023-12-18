@@ -1,0 +1,6 @@
+File "fake_members8.php", line 25, characters 14-21:
+Invalid return type (Typing[4110])
+  File "fake_members8.php", line 22, characters 27-27:
+  Expected `Z`
+  File "fake_members8.php", line 16, characters 11-15:
+  But got `mixed`

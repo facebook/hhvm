@@ -1,0 +1,20 @@
+File "class2.php", line 15, characters 28-28:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+  File "class2.php", line 4, characters 13-13:
+  Definition is here
+File "class2.php", line 16, characters 28-28:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+  File "class2.php", line 4, characters 13-13:
+  Definition is here
+File "class2.php", line 16, characters 13-28:
+Invalid argument (Typing[4110])
+  File "class2.php", line 27, characters 22-27:
+  Expected `string`
+  File "class2.php", line 4, characters 13-13:
+  But got `mixed`
+File "class2.php", line 19, characters 13-31:
+Invalid argument (Typing[4110])
+  File "class2.php", line 27, characters 22-27:
+  Expected `string`
+  File "class2.php", line 4, characters 13-13:
+  But got `mixed`

@@ -1,0 +1,12 @@
+File "valid_targ_fun.php", line 5, characters 13-42:
+Invalid reified hint (Typing[4305])
+  File "supportdynamic.hhi", line 6, characters 34-34:
+  This is a function type, it cannot be used as a reified type argument
+  File "valid_targ_fun.php", line 3, characters 15-15:
+  `T` is reified
+File "valid_targ_fun.php", line 6, characters 13-52:
+Invalid reified hint (Typing[4305])
+  File "supportdynamic.hhi", line 6, characters 34-34:
+  This is a function type, it cannot be used as a reified type argument
+  File "valid_targ_fun.php", line 3, characters 15-15:
+  `T` is reified

@@ -1,0 +1,18 @@
+File "incompatible_interface.php", line 18, characters 19-21:
+Invalid return type (Typing[4336])
+  File "incompatible_interface.php", line 18, characters 26-26:
+  Expected `T`
+  File "incompatible_interface.php", line 18, characters 19-21:
+  But got `void` because this function does not always return a value
+File "incompatible_interface.php", line 18, characters 19-21:
+The method `foo` is not compatible with the overridden method (Typing[4341])
+  File "incompatible_interface.php", line 18, characters 19-21:
+  Method `foo` has type `(function(): ~T)` in `B`
+  File "incompatible_interface.php", line 13, characters 19-21:
+  But is has type `(function(): ~int)` in parent `A`
+  File "incompatible_interface.php", line 18, characters 19-21:
+  Type `(function(): ~T)` is not a subtype of `(function(): ~int)`
+  File "incompatible_interface.php", line 13, characters 26-28:
+  Expected `int`
+  File "incompatible_interface.php", line 18, characters 26-26:
+  But got `T`

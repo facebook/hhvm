@@ -1,0 +1,6 @@
+File "switch_case_terminality1.php", line 27, characters 10-11:
+Invalid return type (Typing[4110])
+  File "switch_case_terminality1.php", line 12, characters 32-34:
+  Expected `~int` because the type of this return is implicitly a like-type
+  File "switch_case_terminality1.php", line 12, characters 14-17:
+  But got `?int`

@@ -1,0 +1,6 @@
+File "coalesce_conditional_refinement.php", line 5, characters 10-11:
+Invalid return type (Typing[4110])
+  File "coalesce_conditional_refinement.php", line 3, characters 25-27:
+  Expected `~int` because the type of this return is implicitly a like-type
+  File "coalesce_conditional_refinement.php", line 3, characters 15-18:
+  But got `?int`

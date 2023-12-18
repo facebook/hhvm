@@ -1,0 +1,2 @@
+File "call_fty_any.php", line 5, characters 21-24:
+Please add a type hint `public SomeType $foo` (Naming[2001])

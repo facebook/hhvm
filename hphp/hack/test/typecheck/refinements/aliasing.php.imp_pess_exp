@@ -1,0 +1,18 @@
+File "aliasing.php", line 14, characters 10-16:
+Invalid return type (Typing[4110])
+  File "aliasing.php", line 7, characters 28-30:
+  Expected `~int` because the type of this return is implicitly a like-type
+  File "aliasing.php", line 4, characters 10-13:
+  But got `?int`
+  File "aliasing.php", line 11, characters 3-18:
+  All the local information about `$obj->i` has been invalidated by this assignment.
+This is a limitation of the type-checker; use a local if that's the problem.
+File "aliasing.php", line 22, characters 10-17:
+Invalid return type (Typing[4110])
+  File "aliasing.php", line 18, characters 44-46:
+  Expected `~int` because the type of this return is implicitly a like-type
+  File "aliasing.php", line 4, characters 10-13:
+  But got `?int`
+  File "aliasing.php", line 20, characters 3-17:
+  All the local information about `$obj1->i` has been invalidated by this assignment.
+This is a limitation of the type-checker; use a local if that's the problem.

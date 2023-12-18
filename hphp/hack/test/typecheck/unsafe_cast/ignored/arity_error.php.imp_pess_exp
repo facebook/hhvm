@@ -1,0 +1,6 @@
+File "arity_error.php", line 8, characters 51-53:
+This argument must be a literal format string (Typing[4027])
+File "arity_error.php", line 4, characters 10-45:
+Too few arguments (required 1 but got 0) (Typing[4104])
+  File "soundness.hhi", line 31, characters 10-20:
+  Definition is here

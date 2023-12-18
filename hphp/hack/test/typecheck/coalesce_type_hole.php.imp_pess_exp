@@ -1,0 +1,12 @@
+File "coalesce_type_hole.php", line 11, characters 16-23:
+Invalid argument (Typing[4110])
+  File "coalesce_type_hole.php", line 4, characters 21-23:
+  Expected `int`
+  File "coalesce_type_hole.php", line 7, characters 11-22:
+  But got `?Set<string>`
+File "coalesce_type_hole.php", line 11, characters 16-23:
+Invalid argument (Typing[4110])
+  File "coalesce_type_hole.php", line 4, characters 21-23:
+  Expected `int`
+  File "coalesce_type_hole.php", line 7, characters 11-22:
+  But got `dynamic` because the type of this property is implicitly a like-type

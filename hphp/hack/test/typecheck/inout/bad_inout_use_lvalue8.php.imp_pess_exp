@@ -1,0 +1,8 @@
+File "bad_inout_use_lvalue8.php", line 15, characters 11-16:
+`?->` operator is not allowed in write context (Parsing[1002])
+File "bad_inout_use_lvalue8.php", line 15, characters 5-16:
+Invalid argument (Typing[4110])
+  File "bad_inout_use_lvalue8.php", line 3, characters 22-23:
+  Expected `~int` because the type of this inout parameter is implicitly a like-type
+  File "bad_inout_use_lvalue8.php", line 15, characters 11-16:
+  But got `?int` (use of `?->` operator)

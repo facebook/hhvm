@@ -1,0 +1,14 @@
+File "assign_map_bad.php", line 5, characters 3-18:
+Invalid assignment (Typing[4110])
+  File "assign_map_bad.php", line 4, characters 27-29:
+  Expected `int`
+  File "assign_map_bad.php", line 5, characters 15-18:
+  But got `float`
+File "assign_map_bad.php", line 6, characters 10-11:
+Invalid return type (Typing[4110])
+  File "assign_map_bad.php", line 4, characters 27-29:
+  Expected `int`
+  File "assign_map_bad.php", line 4, characters 49-51:
+  But got `float`
+  File "assign_map_bad.php", line 4, characters 49-51:
+  This type argument to `Map` must match exactly (it is invariant)

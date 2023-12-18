@@ -1,0 +1,10 @@
+File "union_w_any.php", line 8, characters 5-27:
+  vec<(int | _)>
+File "union_w_any.php", line 9, characters 5-27:
+  vec<(int | _)>
+File "union_w_any.php", line 8, characters 5-27:[2]
+  dynamic
+File "union_w_any.php", line 9, characters 5-27:[2]
+  dynamic
+File "union_w_any.php", line 4, characters 7-7:
+Wildcard typehints are not allowed in this position (Naming[2084])

@@ -1,0 +1,12 @@
+File "bad_inout_hint_return4.php", line 4, characters 10-46:
+Invalid return type (Typing[4110])
+  File "bad_inout_hint_return4.php", line 4, characters 19-21:
+  Expected `int`
+  File "bad_inout_hint_return4.php", line 3, characters 33-35:
+  But got `dynamic`
+File "bad_inout_hint_return4.php", line 4, characters 10-46:
+Invalid return type (Typing[4184])
+  File "bad_inout_hint_return4.php", line 3, characters 33-35:
+  This is an `inout` parameter
+  File "bad_inout_hint_return4.php", line 4, characters 23-24:
+  It is incompatible with a normal parameter

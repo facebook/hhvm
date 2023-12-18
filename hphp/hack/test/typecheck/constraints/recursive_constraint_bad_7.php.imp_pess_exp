@@ -1,0 +1,4 @@
+File "recursive_constraint_bad_7.php", line 5, characters 12-14:
+You are trying to access the method `Foo` but this is a mixed value. Use a **specific** class or interface name. (Typing[4064])
+  File "recursive_constraint_bad_7.php", line 4, characters 24-25:
+  Definition is here

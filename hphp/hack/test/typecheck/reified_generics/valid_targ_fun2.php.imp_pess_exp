@@ -1,0 +1,12 @@
+File "valid_targ_fun2.php", line 6, characters 30-30:
+Invalid argument (Typing[4110])
+  File "valid_targ_fun2.php", line 6, characters 5-27:
+  Expected `(function(mixed): ~mixed)`
+  File "valid_targ_fun2.php", line 6, characters 30-30:
+  But got `int`
+File "valid_targ_fun2.php", line 6, characters 5-27:
+Invalid reified hint (Typing[4305])
+  File "supportdynamic.hhi", line 6, characters 34-34:
+  This is a function type, it cannot be used as a reified type argument
+  File "valid_targ_fun2.php", line 3, characters 18-18:
+  `T` is reified

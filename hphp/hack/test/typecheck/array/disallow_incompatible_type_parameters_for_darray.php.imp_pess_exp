@@ -1,0 +1,24 @@
+File "disallow_incompatible_type_parameters_for_darray.php", line 4, characters 10-28:
+Invalid index type for this dict (Typing[4110])
+  File "disallow_incompatible_type_parameters_for_darray.php", line 4, characters 15-18:
+  Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
+  File "disallow_incompatible_type_parameters_for_darray.php", line 4, characters 15-18:
+  But got `bool`
+File "disallow_incompatible_type_parameters_for_darray.php", line 4, characters 10-28:
+The keys of this `dict` are incompatible (Typing[4110])
+  File "hackarray.hhi", line 33, characters 30-37:
+  Expected `arraykey`
+  File "disallow_incompatible_type_parameters_for_darray.php", line 4, characters 15-18:
+  But got `bool`
+File "disallow_incompatible_type_parameters_for_darray.php", line 4, characters 10-28:
+The keys of this `dict` are incompatible (Typing[4110])
+  File "disallow_incompatible_type_parameters_for_darray.php", line 3, characters 25-30:
+  Expected `string`
+  File "disallow_incompatible_type_parameters_for_darray.php", line 4, characters 15-18:
+  But got `bool`
+File "disallow_incompatible_type_parameters_for_darray.php", line 4, characters 10-28:
+The values of this `dict` are incompatible (Typing[4110])
+  File "disallow_incompatible_type_parameters_for_darray.php", line 3, characters 33-35:
+  Expected `int`
+  File "disallow_incompatible_type_parameters_for_darray.php", line 4, characters 23-27:
+  But got `bool`

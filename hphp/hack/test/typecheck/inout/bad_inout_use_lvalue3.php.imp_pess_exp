@@ -1,0 +1,8 @@
+File "bad_inout_use_lvalue3.php", line 10, characters 11-31:
+You cannot decorate this argument as `inout` (Parsing[1002])
+File "bad_inout_use_lvalue3.php", line 10, characters 11-31:
+Invalid argument to an `inout` parameter (Typing[4110])
+  File "bad_inout_use_lvalue3.php", line 4, characters 28-34:
+  Expected `float`
+  File "bad_inout_use_lvalue3.php", line 7, characters 24-25:
+  But got `dynamic` because the type of this inout parameter is implicitly a like-type

@@ -1,0 +1,16 @@
+File "tparam_constraints2.php", line 15, characters 24-34:
+Invalid return type (Typing[4323])
+  File "tparam_constraints2.php", line 3, characters 29-30:
+  `Tk` is a constrained type parameter
+  File "tparam_constraints2.php", line 3, characters 35-42:
+  This type constraint is violated
+  File "tparam_constraints2.php", line 3, characters 35-42:
+  Expected `arraykey`
+  File "tparam_constraints2.php", line 10, characters 37-40:
+  But got `void`
+File "tparam_constraints2.php", line 3, characters 10-23:
+Invalid return type (Typing[4336])
+  File "tparam_constraints2.php", line 6, characters 4-24:
+  Expected `Awaitable<keyset<Tk>>`
+  File "tparam_constraints2.php", line 3, characters 10-23:
+  But got `void` because this function does not always return a value

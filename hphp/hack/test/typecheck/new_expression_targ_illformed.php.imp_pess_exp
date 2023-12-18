@@ -1,0 +1,10 @@
+File "new_expression_targ_illformed.php", line 6, characters 12-15:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+  File "new_expression_targ_illformed.php", line 3, characters 7-10:
+  Definition is here
+File "new_expression_targ_illformed.php", line 6, characters 7-10:
+Some type arguments violate their constraints (Typing[4323])
+  File "new_expression_targ_illformed.php", line 3, characters 7-10:
+  Expected `dynamic`
+  File "new_expression_targ_illformed.php", line 6, characters 12-15:
+  Type `Test` is not a subtype of `dynamic` under dynamic-aware subtyping

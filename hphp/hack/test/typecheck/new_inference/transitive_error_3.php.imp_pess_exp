@@ -1,0 +1,10 @@
+File "transitive_error_3.php", line 18, characters 10-11:
+Invalid return type (Typing[4110])
+  File "transitive_error_3.php", line 15, characters 8-10:
+  Expected `~_` because type parameter `T` of `inv` could not be determined. Please add explicit type parameters to the invocation of `inv`
+  File "transitive_error_3.php", line 6, characters 24-24:
+    via this generic `T`
+  File "transitive_error_3.php", line 14, characters 22-24:
+  But got `int`
+  File "transitive_error_3.php", line 14, characters 22-24:
+  This type argument to `Inv` must match exactly (it is invariant)

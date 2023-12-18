@@ -1,0 +1,16 @@
+File "test_erling.php", line 15, characters 7-8:
+Invalid argument (Typing[4110])
+  File "test_erling.php", line 12, characters 21-21:
+  Expected `A`
+  File "test_erling.php", line 12, characters 21-21:
+  This type argument to `Vector` must match exactly (it is invariant)
+  File "test_erling.php", line 14, characters 21-22:
+  But got `?A`
+File "test_erling.php", line 16, characters 10-11:
+Invalid return type (Typing[4110])
+  File "test_erling.php", line 14, characters 37-37:
+  Expected `~A`
+  File "test_erling.php", line 14, characters 37-37:
+  This type argument to `Vector` must match exactly (it is invariant)
+  File "test_erling.php", line 14, characters 21-22:
+  But got `?A`

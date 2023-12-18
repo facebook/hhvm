@@ -1,0 +1,10 @@
+File "xhp_attr_13.php", line 7, characters 18-26:
+Invalid argument (Typing[4110])
+  File "xhp_attr_13.php", line 11, characters 23-28:
+  Expected `string`
+  File "xhp_attr_13.php", line 4, characters 13-15:
+  But got `int` because the type of this property is implicitly a like-type
+File "xhp_attr_13.php", line 20, characters 23-28:
+Type constant `TInner` is abstract but the class is concrete. Either provide an implementation here. (Typing[4465])
+  File "xhp_attr_13.php", line 19, characters 7-10:
+  Or make the class abstract.

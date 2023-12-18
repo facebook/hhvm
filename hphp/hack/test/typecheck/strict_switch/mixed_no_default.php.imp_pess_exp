@@ -1,0 +1,6 @@
+File "mixed_no_default.php", line 6, characters 11-12:
+`switch` statement nonexhaustive; at least the following cases are missing: `default` (Typing[4019])
+  File "mixed_no_default.php", line 6, characters 11-12:
+  only unions and intersections of bool, null and enums can be switched on without a default
+File "mixed_no_default.php", line 7, characters 10-14:
+Case in `switch` must be either an enum constant or a literal expression. (Typing[4020])

@@ -1,0 +1,6 @@
+File "newtype1.php--file2.php", line 4, characters 10-11:
+Invalid return type (Typing[4110])
+  File "newtype1.php--file2.php", line 3, characters 25-27:
+  Expected `int`
+  File "newtype1.php--file1.php", line 12, characters 9-12:
+  But got `mixed`

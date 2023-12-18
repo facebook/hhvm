@@ -1,0 +1,20 @@
+File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
+You cannot use this syntax with `inout`. (Parsing[1002])
+File "bad_inout_use_lvalue9.php", line 6, characters 5-23:
+Invalid argument (Typing[4110])
+  File "bad_inout_use_lvalue9.php", line 3, characters 18-28:
+  Expected `vec<int>`
+  File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
+  But got `(int, int)`
+File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
+Invalid argument to an `inout` parameter (Typing[4110])
+  File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
+  Expected `(int, int)`
+  File "bad_inout_use_lvalue9.php", line 3, characters 18-28:
+  But got `vec<int>`
+File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
+Invalid argument to an `inout` parameter (Typing[4110])
+  File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
+  Expected `(int, int)`
+  File "bad_inout_use_lvalue9.php", line 3, characters 30-31:
+  But got `dynamic` because the type of this inout parameter is implicitly a like-type

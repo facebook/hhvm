@@ -1,0 +1,10 @@
+File "unknown_class.php--file2.php", line 4, characters 19-23:
+Invalid argument (Typing[4110])
+  File "unknown_class.php--file1.php", line 22, characters 24-25:
+  Expected `~?_`
+  File "unknown_class.php--file1.php", line 5, characters 16-19:
+  But got `Sens` because this is an internal symbol from module foo, which is opaque outside of the module.
+  File "unknown_class.php--file1.php", line 13, characters 12-15:
+  The type originated from here
+  File "unknown_class.php--file1.php", line 10, characters 11-11:
+    via this generic `T`

@@ -1,0 +1,12 @@
+File "call.php", line 21, characters 3-4:
+This expression is readonly, so it can only call readonly methods (Typing[4413])
+  File "call.php", line 9, characters 19-21:
+  This method is not readonly
+File "call.php", line 27, characters 3-4:
+This function is readonly, so it must be marked readonly at declaration time to be called. (Typing[4428])
+  File "call.php", line 25, characters 74-91:
+  Did you mean to annotate this typehint as a (readonly function(): ~void)?
+File "call.php", line 29, characters 4-12:
+This function is readonly, so it must be marked readonly at declaration time to be called. (Typing[4428])
+  File "call.php", line 4, characters 10-27:
+  Did you mean to declaring this as a `readonly` function?

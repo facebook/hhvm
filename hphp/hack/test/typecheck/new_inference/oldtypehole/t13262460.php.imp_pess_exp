@@ -1,0 +1,18 @@
+File "t13262460.php", line 18, characters 19-21:
+The method `foo` is not compatible with the overridden method (Typing[4341])
+  File "t13262460.php", line 18, characters 19-21:
+  Method `foo` has type `(function<T as mixed as C>(): ~Action<T>)` in `C`
+  File "t13262460.php", line 13, characters 19-21:
+  But is has type `(function<T as mixed as B>(): ~Action<T>)` in parent `B`
+  File "t13262460.php", line 18, characters 19-21:
+  Type `(function<T as mixed as C>(): ~Action<T>)` is not a subtype of `(function<T as mixed as B>(): ~Action<T>)`
+  File "t13262460.php", line 18, characters 23-23:
+  `T` is a constrained type parameter
+  File "t13262460.php", line 18, characters 28-28:
+  This type constraint is violated
+  File "t13262460.php", line 18, characters 28-28:
+  Expected `C`
+  File "t13262460.php", line 13, characters 41-41:
+  But got `T as B`
+  File "t13262460.php", line 13, characters 41-41:
+  This type argument to `Action` only allows supertypes (it is contravariant)

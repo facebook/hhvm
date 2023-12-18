@@ -1,0 +1,10 @@
+File "instance_method_error2.php", line 8, characters 12-17:
+Expression trees only support named property access. (Parsing[1002])
+File "instance_method_error2.php", line 8, characters 16-17:
+Dynamic access of properties and methods is only permitted on values of type `dynamic`. (Naming[2011])
+  File "instance_method_error2.php", line 8, characters 16-17:
+  Did you mean `->z` instead?
+File "instance_method_error2.php", line 8, characters 16-17:
+Variable `$z` is undefined, or not always defined. (Naming[2050])
+  File "instance_method_error2.php", line 5, characters 62-63:
+  Did you mean `$y` instead?

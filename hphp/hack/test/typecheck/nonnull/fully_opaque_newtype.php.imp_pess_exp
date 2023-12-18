@@ -1,0 +1,6 @@
+File "fully_opaque_newtype.php--file2.php", line 4, characters 10-11:
+Invalid return type (Typing[4110])
+  File "fully_opaque_newtype.php--file2.php", line 3, characters 19-25:
+  Expected `nonnull`
+  File "fully_opaque_newtype.php--file1.php", line 3, characters 9-9:
+  But got `mixed`

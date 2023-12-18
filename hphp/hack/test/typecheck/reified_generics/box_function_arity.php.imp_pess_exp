@@ -1,0 +1,16 @@
+File "box_function_arity.php", line 8, characters 12-17:
+Wrong number of type arguments (expected 2, got 1) (Typing[4101])
+  File "box_function_arity.php", line 4, characters 7-7:
+  Definition is here
+File "box_function_arity.php", line 8, characters 3-3:
+Some type arguments violate their constraints (Typing[4323])
+  File "box_function_arity.php", line 5, characters 10-10:
+  Expected `dynamic`
+  File "box_function_arity.php", line 8, characters 5-18:
+  Type `C<int, C<int>>` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "box_function_arity.php", line 8, characters 5-18:
+Some type arguments violate their constraints (Typing[4323])
+  File "box_function_arity.php", line 4, characters 7-7:
+  Expected `dynamic`
+  File "box_function_arity.php", line 8, characters 12-17:
+  Type `C<int>` is not a subtype of `dynamic` under dynamic-aware subtyping

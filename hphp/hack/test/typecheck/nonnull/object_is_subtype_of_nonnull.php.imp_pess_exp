@@ -1,0 +1,2 @@
+File "object_is_subtype_of_nonnull.php", line 10, characters 16-17:
+Was expecting a class, but got a mixed value (Typing[4026])

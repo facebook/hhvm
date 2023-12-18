@@ -1,0 +1,14 @@
+File "decl_fun_expr_hints.php", line 16, characters 11-13:
+Encountered unexpected token `100`. (Parsing[1002])
+File "decl_fun_expr_hints.php", line 16, characters 5-14:
+`break` can only be used inside loops or `switch` statements (NastCheck[3022])
+File "decl_fun_expr_hints.php", line 13, characters 3-168:
+You cannot return a value (Typing[4084])
+  File "decl_fun_expr_hints.php", line 12, characters 15-18:
+  This is a `void` function
+File "decl_fun_expr_hints.php", line 13, characters 10-167:
+Invalid return type (Typing[4110])
+  File "decl_fun_expr_hints.php", line 12, characters 15-18:
+  Expected `void`
+  File "decl_fun_expr_hints.php", line 13, characters 10-167:
+  But got `(function(vec<int> $a): ~vec<int>)`

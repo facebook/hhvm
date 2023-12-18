@@ -1,0 +1,2 @@
+File "string_expressions6.php", line 14, characters 19-23:
+Expected an object convertible to string but got a dynamic value or an object of type Meh (Typing[4318])

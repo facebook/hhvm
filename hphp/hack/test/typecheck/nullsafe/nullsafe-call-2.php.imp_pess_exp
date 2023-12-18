@@ -1,0 +1,6 @@
+File "nullsafe-call-2.php", line 9, characters 10-19:
+Invalid return type (Typing[4110])
+  File "nullsafe-call-2.php", line 8, characters 23-23:
+  Expected `~D` because the type of this return is implicitly a like-type
+  File "nullsafe-call-2.php", line 9, characters 10-19:
+  But got `?D` (use of `?->` operator)

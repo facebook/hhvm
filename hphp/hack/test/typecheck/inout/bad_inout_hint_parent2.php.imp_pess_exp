@@ -1,0 +1,12 @@
+File "bad_inout_hint_parent2.php", line 8, characters 19-21:
+The method `foo` is not compatible with the overridden method (Typing[4341])
+  File "bad_inout_hint_parent2.php", line 8, characters 19-21:
+  Method `foo` has type `(function((function(string, inout ~int): ~void) $f): void)` in `C2`
+  File "bad_inout_hint_parent2.php", line 4, characters 19-21:
+  But is has type `(function((function(string, int): ~void) $f): void)` in parent `C1`
+  File "bad_inout_hint_parent2.php", line 8, characters 19-21:
+  Type `(function((function(string, inout ~int): ~void) $f): void)` is not a subtype of `(function((function(string, int): ~void) $f): void)`
+  File "bad_inout_hint_parent2.php", line 8, characters 47-49:
+  This is an `inout` parameter
+  File "bad_inout_hint_parent2.php", line 4, characters 41-43:
+  It is incompatible with a normal parameter

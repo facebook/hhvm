@@ -1,0 +1,22 @@
+File "tconst_on_generics7.php", line 72, characters 11-12:
+Invalid argument (Typing[4110])
+  File "tconst_on_generics7.php", line 79, characters 35-45:
+  Expected `ArraykeyBox`
+  File "tconst_on_generics7.php", line 69, characters 13-21:
+  But got `StringBox`
+File "tconst_on_generics7.php", line 59, characters 11-12:
+Invalid argument (Typing[4326])
+  File "tconst_on_generics7.php", line 77, characters 21-23:
+  Expected `int`
+  File "tconst_on_generics7.php", line 30, characters 18-23:
+  But got `string`
+  File "tconst_on_generics7.php", line 50, characters 43-43:
+    resulting from accessing the type constant 'T'
+  File "tconst_on_generics7.php", line 56, characters 12-20:
+    on an object of type StringBox
+File "tconst_on_generics7.php", line 64, characters 12-15:
+Can't access a type constant T from an unresolved type (Typing[4436])
+  File "tconst_on_generics7.php", line 50, characters 43-43:
+  Access happens here
+  File "tconst_on_generics7.php", line 64, characters 12-15:
+  Disambiguate the types using explicit type annotations here.

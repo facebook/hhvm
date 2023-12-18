@@ -1,0 +1,26 @@
+File "static_props.php", line 17, characters 3-23:
+  int
+File "static_props.php", line 20, characters 3-20:
+  string
+File "static_props.php", line 21, characters 3-22:
+  string
+File "static_props.php", line 22, characters 3-26:
+  nothing
+File "static_props.php", line 27, characters 3-25:
+  dynamic
+File "static_props.php", line 32, characters 3-24:
+  ~float
+File "static_props.php", line 33, characters 3-26:
+  ~float
+File "static_props.php", line 36, characters 3-25:
+  dynamic
+File "static_props.php", line 27, characters 18-21:
+Variable `$baz` is undefined, or not always defined. (Naming[2050])
+  File "static_props.php", line 24, characters 3-30:
+  Did you mean `$foo` instead?
+File "static_props.php", line 22, characters 17-24:
+Cannot use dynamic class or method name in strict mode (Naming[2078])
+File "static_props.php", line 27, characters 18-21:
+Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()` (Naming[2121])
+File "static_props.php", line 36, characters 18-21:
+Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()` (Naming[2121])

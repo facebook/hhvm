@@ -1,0 +1,8 @@
+File "inout.php", line 8, characters 11-12:
+Invalid assignment to an `inout` parameter (Typing[4337])
+  File "inout.php", line 7, characters 20-21:
+  Expected exactly the type `V`
+  File "inout.php", line 5, characters 18-18:
+  But got the nonexact type `V`
+File "inout.php", line 8, characters 11-12:
+This variable cannot be reassigned because it is used for a dependent context (Typing[4404])

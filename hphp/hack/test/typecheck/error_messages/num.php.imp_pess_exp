@@ -1,0 +1,16 @@
+File "num.php", line 9, characters 10-15:
+Invalid return type (Typing[4110])
+  File "num.php", line 3, characters 23-28:
+  Expected `string`
+  File "num.php", line 9, characters 10-15:
+  But got `float` because this is the result of an arithmetic operation with a `num` as the second argument, and no `float`s.
+  File "num.php", line 3, characters 14-16:
+  Here is why I think the argument is a `num`: this is a `num`
+File "num.php", line 9, characters 10-15:
+Invalid return type (Typing[4110])
+  File "num.php", line 3, characters 23-28:
+  Expected `string`
+  File "num.php", line 9, characters 10-15:
+  But got `int` because this is the result of an arithmetic operation with a `num` as the second argument, and no `float`s.
+  File "num.php", line 3, characters 14-16:
+  Here is why I think the argument is a `num`: this is a `num`

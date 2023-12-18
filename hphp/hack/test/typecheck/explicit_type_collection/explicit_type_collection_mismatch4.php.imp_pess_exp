@@ -1,0 +1,12 @@
+File "explicit_type_collection_mismatch4.php", line 4, characters 15-17:
+Wrong type hint (Typing[4110])
+  File "explicit_type_collection_mismatch4.php", line 4, characters 15-17:
+  Expected `int`
+  File "explicit_type_collection_mismatch4.php", line 4, characters 20-24:
+  But got `string`
+File "explicit_type_collection_mismatch4.php", line 4, characters 15-17:
+Wrong type hint (Typing[4110])
+  File "explicit_type_collection_mismatch4.php", line 4, characters 15-17:
+  Expected `int`
+  File "explicit_type_collection_mismatch4.php", line 4, characters 27-31:
+  But got `string`

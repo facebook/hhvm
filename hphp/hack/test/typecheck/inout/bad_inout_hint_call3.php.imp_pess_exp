@@ -1,0 +1,12 @@
+File "bad_inout_hint_call3.php", line 7, characters 5-28:
+Invalid argument (Typing[4110])
+  File "bad_inout_hint_call3.php", line 7, characters 6-8:
+  Expected `int`
+  File "bad_inout_hint_call3.php", line 3, characters 30-32:
+  But got `dynamic`
+File "bad_inout_hint_call3.php", line 7, characters 5-28:
+Invalid argument (Typing[4184])
+  File "bad_inout_hint_call3.php", line 3, characters 30-32:
+  This is an `inout` parameter
+  File "bad_inout_hint_call3.php", line 7, characters 10-11:
+  It is incompatible with a normal parameter

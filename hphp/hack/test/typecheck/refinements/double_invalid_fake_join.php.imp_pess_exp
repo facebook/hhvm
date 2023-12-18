@@ -1,0 +1,9 @@
+File "double_invalid_fake_join.php", line 21, characters 10-14:
+Invalid return type (Typing[4110])
+  File "double_invalid_fake_join.php", line 10, characters 24-26:
+  Expected `~int` because the type of this return is implicitly a like-type
+  File "double_invalid_fake_join.php", line 4, characters 10-13:
+  But got `?int`
+  File "double_invalid_fake_join.php", line 15, characters 5-14:
+  All the local information about `$x->i` has been invalidated because of scope change.
+This is a limitation of the type-checker; use a local if that's the problem.

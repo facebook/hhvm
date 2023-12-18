@@ -1,0 +1,6 @@
+File "meth_caller4.php", line 23, characters 10-16:
+Invalid return type (Typing[4110])
+  File "meth_caller4.php", line 20, characters 18-48:
+  Expected `~(function(X<bool>, bool): ~bool)` because the type of this return is implicitly a like-type
+  File "meth_caller4.php", line 13, characters 19-21:
+  But got `(function(X<_>, $x): ~_)` because method must be callable in a dynamic context

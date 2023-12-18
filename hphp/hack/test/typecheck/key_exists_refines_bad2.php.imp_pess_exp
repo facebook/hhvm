@@ -1,0 +1,6 @@
+File "key_exists_refines_bad2.php", line 7, characters 19-25:
+Invalid argument (Typing[4110])
+  File "key_exists_refines_bad2.php", line 3, characters 24-29:
+  Expected `string`
+  File "key_exists_refines_bad2.php", line 5, characters 15-24:
+  But got `mixed`

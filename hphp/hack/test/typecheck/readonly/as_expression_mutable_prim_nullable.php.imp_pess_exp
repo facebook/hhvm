@@ -1,0 +1,6 @@
+File "as_expression_mutable_prim_nullable.php", line 5, characters 12-27:
+Invalid return type (Typing[4110])
+  File "as_expression_mutable_prim_nullable.php", line 4, characters 38-40:
+  Expected `~int` because the type of this return is implicitly a like-type
+  File "as_expression_mutable_prim_nullable.php", line 5, characters 12-27:
+  But got `?int`

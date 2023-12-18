@@ -1,0 +1,12 @@
+File "mixed_and_null.php", line 16, characters 11-12:
+`switch` statement nonexhaustive; at least the following cases are missing: `default` (Typing[4019])
+  File "mixed_and_null.php", line 16, characters 11-12:
+  only unions and intersections of bool, null and enums can be switched on without a default
+File "mixed_and_null.php", line 7, characters 10-13:
+Switching on `mixed` but using constant from `null` (Typing[4023])
+  File "mixed_and_null.php", line 5, characters 31-35:
+  expecting `mixed` based on this
+File "mixed_and_null.php", line 17, characters 10-13:
+Switching on `mixed` but using constant from `null` (Typing[4023])
+  File "mixed_and_null.php", line 15, characters 26-30:
+  expecting `mixed` based on this

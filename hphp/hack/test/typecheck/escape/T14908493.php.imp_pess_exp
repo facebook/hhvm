@@ -1,0 +1,14 @@
+File "T14908493.php", line 55, characters 10-43:
+Invalid return type (Typing[4110])
+  File "T14908493.php", line 46, characters 51-55:
+  Expected `mixed`
+  File "T14908493.php", line 50, characters 7-8:
+  But got `T#1` from this "as" assertion
+  File "T14908493.php", line 9, characters 43-43:
+    via this generic `T`
+File "T14908493.php", line 49, characters 5-62:
+Rigid type variable escapes its lambda (Typing[4442])
+  File "T14908493.php", line 50, characters 24-24:
+  Rigid type variable `T#1` is escaping
+  File "T14908493.php", line 49, characters 5-62:
+  in the return type of this lambda

@@ -1,0 +1,20 @@
+File "ambiguous_inheritance.php", line 11, characters 33-34:
+Some members in class `C` are incompatible with those declared in type `I2` (Typing[4341])
+  File "ambiguous_inheritance.php", line 4, characters 19-21:
+  The method `foo` is not compatible with the overridden method
+  File "ambiguous_inheritance.php", line 11, characters 33-34:
+  Some members in class `C` are incompatible with those declared in type `I2`
+  File "ambiguous_inheritance.php", line 4, characters 19-21:
+  The method `foo` is not compatible with the overridden method
+  File "ambiguous_inheritance.php", line 4, characters 19-21:
+  Method `foo` has type `(function(): ~mixed)` in `C` and comes from ancestor or trait `I1`
+  File "ambiguous_inheritance.php", line 8, characters 19-21:
+  But is has type `(function(): ~int)` in parent `I2`
+  File "ambiguous_inheritance.php", line 4, characters 19-21:
+  Type `(function(): ~mixed)` is not a subtype of `(function(): ~int)`
+  File "ambiguous_inheritance.php", line 8, characters 26-28:
+  Expected `int`
+  File "ambiguous_inheritance.php", line 4, characters 26-30:
+  But got `mixed`
+  File "ambiguous_inheritance.php", line 4, characters 19-21:
+  This declaration was inherited from an object of type `I1`. Redeclare this member in `C` with a compatible signature.

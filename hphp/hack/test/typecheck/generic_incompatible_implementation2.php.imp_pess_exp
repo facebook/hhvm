@@ -1,0 +1,16 @@
+File "generic_incompatible_implementation2.php", line 6, characters 19-19:
+The method `f` is not compatible with the overridden method (Typing[4341])
+  File "generic_incompatible_implementation2.php", line 6, characters 19-19:
+  Method `f` has type `(function<T as mixed as num>(C<T> $x): void)` in `Foo`
+  File "generic_incompatible_implementation2.php", line 10, characters 19-19:
+  But is has type `(function<T as mixed>(C<T> $x): void)` in parent `Bar`
+  File "generic_incompatible_implementation2.php", line 6, characters 19-19:
+  Type `(function<T as mixed as num>(C<T> $x): void)` is not a subtype of `(function<T as mixed>(C<T> $x): void)`
+  File "generic_incompatible_implementation2.php", line 6, characters 21-21:
+  `T` is a constrained type parameter
+  File "generic_incompatible_implementation2.php", line 6, characters 26-28:
+  This type constraint is violated
+  File "generic_incompatible_implementation2.php", line 6, characters 26-28:
+  Expected `num`
+  File "generic_incompatible_implementation2.php", line 10, characters 26-26:
+  But got `T`

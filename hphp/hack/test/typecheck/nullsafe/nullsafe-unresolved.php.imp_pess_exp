@@ -1,0 +1,6 @@
+File "nullsafe-unresolved.php", line 8, characters 18-19:
+Invalid argument (Typing[4110])
+  File "nullsafe-unresolved.php", line 15, characters 25-40:
+  Expected `Container<mixed>`
+  File "nullsafe-unresolved.php", line 7, characters 8-13:
+  But got `null` (use of `?->` operator)

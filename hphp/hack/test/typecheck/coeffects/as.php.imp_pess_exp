@@ -1,0 +1,74 @@
+File "as.php", line 6, characters 29-32:
+Unbound name: `HH\Contexts\cipp` (Naming[2049])
+File "as.php", line 9, characters 10-17:
+Invalid `as` expression hint (Typing[4195])
+  File "as.php", line 4, characters 18-19:
+  The `as` operator cannot be used with an intersection type, which is restricted to coeffects
+File "as.php", line 10, characters 10-17:
+Invalid `as` expression hint (Typing[4195])
+  File "as.php", line 5, characters 18-30:
+  The `as` operator cannot be used with an intersection type, which is restricted to coeffects
+File "as.php", line 11, characters 10-17:
+Invalid `as` expression hint (Typing[4195])
+  File "as.php", line 6, characters 18-33:
+  The `as` operator cannot be used with an intersection type, which is restricted to coeffects
+File "as.php", line 22, characters 8-12:
+Invalid `as` expression hint (Typing[4195])
+  File "as.php", line 4, characters 18-19:
+  The `as` operator cannot be used with an intersection type, which is restricted to coeffects
+File "as.php", line 23, characters 8-12:
+Invalid `as` expression hint (Typing[4195])
+  File "as.php", line 5, characters 18-30:
+  The `as` operator cannot be used with an intersection type, which is restricted to coeffects
+File "as.php", line 24, characters 8-12:
+Invalid `as` expression hint (Typing[4195])
+  File "as.php", line 6, characters 18-33:
+  The `as` operator cannot be used with an intersection type, which is restricted to coeffects
+File "as.php", line 15, characters 9-16:
+Invalid type (Typing[4302])
+  File "as.php", line 27, characters 38-38:
+  Type parameter `T` was declared `__Enforceable` here
+  File "as.php", line 4, characters 18-19:
+  This type is not enforceable because it has an intersection type, which is restricted to coeffects
+File "as.php", line 16, characters 9-16:
+Invalid type (Typing[4302])
+  File "as.php", line 27, characters 38-38:
+  Type parameter `T` was declared `__Enforceable` here
+  File "as.php", line 5, characters 18-30:
+  This type is not enforceable because it has an intersection type, which is restricted to coeffects
+File "as.php", line 17, characters 9-16:
+Invalid type (Typing[4302])
+  File "as.php", line 27, characters 38-38:
+  Type parameter `T` was declared `__Enforceable` here
+  File "as.php", line 6, characters 18-33:
+  This type is not enforceable because it has an intersection type, which is restricted to coeffects
+File "as.php", line 32, characters 7-11:
+Invalid type (Typing[4302])
+  File "as.php", line 27, characters 38-38:
+  Type parameter `T` was declared `__Enforceable` here
+  File "as.php", line 4, characters 18-19:
+  This type is not enforceable because it has an intersection type, which is restricted to coeffects
+File "as.php", line 33, characters 7-11:
+Invalid type (Typing[4302])
+  File "as.php", line 27, characters 38-38:
+  Type parameter `T` was declared `__Enforceable` here
+  File "as.php", line 5, characters 18-30:
+  This type is not enforceable because it has an intersection type, which is restricted to coeffects
+File "as.php", line 34, characters 7-11:
+Invalid type (Typing[4302])
+  File "as.php", line 27, characters 38-38:
+  Type parameter `T` was declared `__Enforceable` here
+  File "as.php", line 6, characters 18-33:
+  This type is not enforceable because it has an intersection type, which is restricted to coeffects
+File "as.php", line 15, characters 5-7:
+Some type arguments violate their constraints (Typing[4323])
+  File "as.php", line 27, characters 10-12:
+  Expected `dynamic`
+  File "as.php", line 4, characters 18-19:
+  Type `mixed` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "as.php", line 32, characters 3-5:
+Some type arguments violate their constraints (Typing[4323])
+  File "as.php", line 27, characters 10-12:
+  Expected `dynamic`
+  File "as.php", line 4, characters 18-19:
+  Type `mixed` is not a subtype of `dynamic` under dynamic-aware subtyping

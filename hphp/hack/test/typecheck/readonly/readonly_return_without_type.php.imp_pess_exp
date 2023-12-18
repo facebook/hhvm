@@ -1,0 +1,7 @@
+File "readonly_return_without_type.php", line 7, characters 5-15:
+  (readonly function(): readonly int)
+File "readonly_return_without_type.php", line 9, characters 5-15:
+  (function(): readonly ~(readonly function(): readonly int))
+File "readonly_return_without_type.php", line 13, characters 5-15:
+  (function(int $x): readonly int)
+No errors

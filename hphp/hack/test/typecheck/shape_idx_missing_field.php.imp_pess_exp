@@ -1,0 +1,6 @@
+File "shape_idx_missing_field.php", line 4, characters 22-23:
+Invalid argument (Typing[4110])
+  File "shape_idx_missing_field.php", line 3, characters 40-40:
+  Expected `T`
+  File "shape_idx_missing_field.php", line 3, characters 39-40:
+  But got `nonnull`

@@ -1,0 +1,6 @@
+File "nullable_compare.php", line 8, characters 10-22:
+This comparison has invalid types.  Only comparisons in which both arguments are strings, nums, DateTime, or DateTimeImmutable are allowed (Typing[4240])
+  File "nullable_compare.php", line 3, characters 23-23:
+  This is a dynamic value or an int because the type of this return is implicitly a like-type
+  File "nullable_compare.php", line 8, characters 19-22:
+  This is null

@@ -1,0 +1,90 @@
+File "box_parametrized.php", line 13, characters 14-20:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+  File "box_parametrized.php", line 8, characters 7-13:
+  Definition is here
+File "box_parametrized.php", line 18, characters 15-20:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+  File "box_parametrized.php", line 7, characters 7-12:
+  Definition is here
+File "box_parametrized.php", line 20, characters 15-21:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+  File "box_parametrized.php", line 8, characters 7-13:
+  Definition is here
+File "box_parametrized.php", line 26, characters 21-26:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+  File "box_parametrized.php", line 7, characters 7-12:
+  Definition is here
+File "box_parametrized.php", line 27, characters 28-34:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+  File "box_parametrized.php", line 8, characters 7-13:
+  Definition is here
+File "box_parametrized.php", line 31, characters 29-35:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+  File "box_parametrized.php", line 8, characters 7-13:
+  Definition is here
+File "box_parametrized.php", line 13, characters 7-12:
+Some type arguments violate their constraints (Typing[4323])
+  File "box_parametrized.php", line 7, characters 7-12:
+  Expected `dynamic`
+  File "box_parametrized.php", line 13, characters 14-20:
+  Type `Reified` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "box_parametrized.php", line 18, characters 7-13:
+Some type arguments violate their constraints (Typing[4323])
+  File "box_parametrized.php", line 8, characters 7-13:
+  Expected `dynamic`
+  File "box_parametrized.php", line 18, characters 15-20:
+  Type `Erased` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "box_parametrized.php", line 20, characters 7-13:
+Some type arguments violate their constraints (Typing[4323])
+  File "box_parametrized.php", line 8, characters 7-13:
+  Expected `dynamic`
+  File "box_parametrized.php", line 20, characters 15-21:
+  Type `Reified` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "box_parametrized.php", line 26, characters 7-12:
+Some type arguments violate their constraints (Typing[4323])
+  File "box_parametrized.php", line 7, characters 7-12:
+  Expected `dynamic`
+  File "box_parametrized.php", line 26, characters 14-27:
+  Type `Erased<Erased>` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "box_parametrized.php", line 26, characters 14-27:
+Some type arguments violate their constraints (Typing[4323])
+  File "box_parametrized.php", line 7, characters 7-12:
+  Expected `dynamic`
+  File "box_parametrized.php", line 26, characters 21-26:
+  Type `Erased` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "box_parametrized.php", line 27, characters 7-12:
+Some type arguments violate their constraints (Typing[4323])
+  File "box_parametrized.php", line 7, characters 7-12:
+  Expected `dynamic`
+  File "box_parametrized.php", line 27, characters 14-36:
+  Type `Erased<Erased<Reified>>` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "box_parametrized.php", line 27, characters 14-36:
+Some type arguments violate their constraints (Typing[4323])
+  File "box_parametrized.php", line 7, characters 7-12:
+  Expected `dynamic`
+  File "box_parametrized.php", line 27, characters 21-35:
+  Type `Erased<Reified>` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "box_parametrized.php", line 27, characters 21-35:
+Some type arguments violate their constraints (Typing[4323])
+  File "box_parametrized.php", line 7, characters 7-12:
+  Expected `dynamic`
+  File "box_parametrized.php", line 27, characters 28-34:
+  Type `Reified` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "box_parametrized.php", line 31, characters 7-13:
+Some type arguments violate their constraints (Typing[4323])
+  File "box_parametrized.php", line 8, characters 7-13:
+  Expected `dynamic`
+  File "box_parametrized.php", line 31, characters 15-37:
+  Type `Erased<Erased<Reified>>` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "box_parametrized.php", line 31, characters 15-37:
+Some type arguments violate their constraints (Typing[4323])
+  File "box_parametrized.php", line 7, characters 7-12:
+  Expected `dynamic`
+  File "box_parametrized.php", line 31, characters 22-36:
+  Type `Erased<Reified>` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "box_parametrized.php", line 31, characters 22-36:
+Some type arguments violate their constraints (Typing[4323])
+  File "box_parametrized.php", line 7, characters 7-12:
+  Expected `dynamic`
+  File "box_parametrized.php", line 31, characters 29-35:
+  Type `Reified` is not a subtype of `dynamic` under dynamic-aware subtyping

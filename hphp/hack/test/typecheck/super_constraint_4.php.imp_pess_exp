@@ -1,0 +1,16 @@
+File "super_constraint_4.php", line 12, characters 10-13:
+Invalid return type (Typing[4110])
+  File "super_constraint_4.php", line 11, characters 4-5:
+  Expected `Tx`
+  File "super_constraint_4.php", line 9, characters 3-4:
+  But got `Ty as Ty1`
+File "super_constraint_4.php", line 15, characters 7-18:
+Invalid argument (Typing[4323])
+  File "super_constraint_4.php", line 8, characters 54-56:
+  `Ty1` is a constrained type parameter
+  File "super_constraint_4.php", line 8, characters 61-64:
+  This type constraint is violated
+  File "super_constraint_4.php", line 8, characters 61-64:
+  Expected `Blah`
+  File "super_constraint_4.php", line 14, characters 36-45:
+  But got `FooDerived`

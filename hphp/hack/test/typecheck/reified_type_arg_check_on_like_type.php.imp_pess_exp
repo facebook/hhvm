@@ -1,0 +1,4 @@
+File "reified_type_arg_check_on_like_type.php", line 16, characters 3-11:
+All type arguments must be specified because a type parameter is reified (Typing[4303])
+  File "reified_type_arg_check_on_like_type.php", line 16, characters 7-9:
+  Definition is here

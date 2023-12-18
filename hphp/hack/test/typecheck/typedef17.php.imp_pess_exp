@@ -1,0 +1,8 @@
+File "typedef17.php", line 23, characters 6-7:
+Invalid argument (Typing[4110])
+  File "typedef17.php", line 14, characters 26-29:
+  Expected `~vec<_>`
+  File "typedef17.php", line 22, characters 13-20:
+  But got `<expr#1> as vec<int>`
+  File "typedef17.php", line 23, characters 6-7:
+    where `<expr#1>` is a reference to this expression

@@ -1,0 +1,8 @@
+File "xhp_cvar_arity2.php", line 7, characters 5-10:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+  File "collections/Vector.hhi", line 48, characters 15-20:
+  Definition is here
+File "xhp_cvar_arity2.php", line 7, characters 12-22:
+Class `:fb:support-form:diff` cannot support dynamic because property `:addedfields` cannot be assigned to dynamic (Typing[4402])
+  File "xhp_cvar_arity2.php", line 7, characters 5-10:
+  Property `:addedfields` has type `~Vector`

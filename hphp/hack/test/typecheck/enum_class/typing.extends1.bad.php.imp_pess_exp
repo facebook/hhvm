@@ -1,0 +1,16 @@
+File "typing.extends1.bad.php", line 62, characters 18-21:
+Invalid argument (Typing[4110])
+  File "typing.extends1.bad.php", line 35, characters 13-13:
+  Expected `F`
+  File "typing.extends1.bad.php", line 57, characters 22-22:
+  But got `E`
+  File "typing.extends1.bad.php", line 41, characters 38-48:
+    resulting from expanding the type constant `Ext::TEnum`
+  File "typing.extends1.bad.php", line 57, characters 22-22:
+  This type argument to `HH\MemberOf` only allows supertypes (it is contravariant)
+File "typing.extends1.bad.php", line 62, characters 18-21:
+Invalid argument (Typing[4110])
+  File "typing.extends1.bad.php", line 41, characters 51-56:
+  Expected `Box<_>`
+  File "typing.extends1.bad.php", line 35, characters 4-11:
+  But got `dynamic`

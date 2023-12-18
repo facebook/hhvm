@@ -1,0 +1,16 @@
+File "async_lambda.php", line 6, characters 11-25:
+Invalid argument (Typing[4110])
+  File "collections/Set.hhi", line 199, characters 7-27:
+  Expected `~(function((arraykey & _))[_]: ~_)`
+  File "async_lambda.php", line 6, characters 11-25:
+  But got `(function((arraykey & _) $_): Awaitable<int>)`
+File "async_lambda.php", line 6, characters 11-25:
+Invalid return type (Typing[4323])
+  File "collections/Set.hhi", line 198, characters 25-26:
+  `Tu` is a constrained type parameter
+  File "collections/Set.hhi", line 198, characters 31-38:
+  This type constraint is violated
+  File "collections/Set.hhi", line 198, characters 31-38:
+  Expected `arraykey`
+  File "async_lambda.php", line 6, characters 11-25:
+  But got `Awaitable<_>` (result of an `async` function)

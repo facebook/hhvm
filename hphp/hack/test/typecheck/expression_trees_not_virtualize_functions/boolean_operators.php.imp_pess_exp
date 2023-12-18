@@ -1,0 +1,24 @@
+File "boolean_operators.php", line 27, characters 7-33:
+You are trying to access the method `__barbar` but this object can be null. (Typing[4064])
+  File "boolean_operators.php", line 7, characters 66-77:
+  This can be null
+File "boolean_operators.php", line 32, characters 7-33:
+You are trying to access the method `__ampamp` but this object can be null. (Typing[4064])
+  File "boolean_operators.php", line 7, characters 66-77:
+  This can be null
+File "boolean_operators.php", line 37, characters 7-22:
+You are trying to access the method `__exclamationMark` but this object can be null. (Typing[4064])
+  File "boolean_operators.php", line 7, characters 66-77:
+  This can be null
+File "boolean_operators.php", line 28, characters 19-33:
+Invalid argument (Typing[4110])
+  File "expr_tree.hhi", line 261, characters 28-38:
+  Expected `~ExampleBool`
+  File "boolean_operators.php", line 7, characters 66-77:
+  But got `?ExampleBool`
+File "boolean_operators.php", line 33, characters 19-33:
+Invalid argument (Typing[4110])
+  File "expr_tree.hhi", line 260, characters 28-38:
+  Expected `~ExampleBool`
+  File "boolean_operators.php", line 7, characters 66-77:
+  But got `?ExampleBool`

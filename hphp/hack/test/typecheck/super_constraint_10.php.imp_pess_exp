@@ -1,0 +1,22 @@
+File "super_constraint_10.php", line 19, characters 34-38:
+Invalid argument (Typing[4110])
+  File "super_constraint_10.php", line 10, characters 5-22:
+  Expected `~ConstMap<_, _>`
+  File "super_constraint_10.php", line 17, characters 5-22:
+  But got `<expr#1> as ConstMap<Tk2, Tv2>`
+  File "super_constraint_10.php", line 19, characters 34-38:
+    where `<expr#1>` is a reference to this expression
+File "super_constraint_10.php", line 20, characters 12-18:
+Invalid return type (Typing[4110])
+  File "super_constraint_10.php", line 16, characters 14-16:
+  Expected `Tk1`
+  File "super_constraint_10.php", line 18, characters 10-12:
+  But got `Tk2 where Tk2 super Tk1, Tk2 as arraykey`
+  File "super_constraint_10.php", line 18, characters 10-12:
+  This type argument to `Map` must match exactly (it is invariant)
+File "super_constraint_10.php", line 8, characters 26-30:
+Invalid return type (Typing[4336])
+  File "super_constraint_10.php", line 11, characters 6-18:
+  Expected `Map<Tk1, Tv1>`
+  File "super_constraint_10.php", line 8, characters 26-30:
+  But got `void` because this function does not always return a value

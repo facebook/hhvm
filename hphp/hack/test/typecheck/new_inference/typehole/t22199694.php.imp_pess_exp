@@ -1,0 +1,10 @@
+File "t22199694.php", line 12, characters 15-38:
+Invalid argument (Typing[4323])
+  File "t22199694.php", line 5, characters 30-30:
+  `T` is a constrained type parameter
+  File "t22199694.php", line 5, characters 35-37:
+  This type constraint is violated
+  File "t22199694.php", line 5, characters 35-37:
+  Expected `num`
+  File "t22199694.php", line 12, characters 15-38:
+  But got `vec<(int | (nonnull & dynamic))>`

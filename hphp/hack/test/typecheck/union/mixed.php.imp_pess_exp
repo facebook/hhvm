@@ -1,0 +1,76 @@
+File "mixed.php", line 17, characters 3-13:
+  (_ | exact A)
+File "mixed.php", line 25, characters 3-13:
+  nonnull
+File "mixed.php", line 34, characters 3-13:
+  mixed
+File "mixed.php", line 43, characters 3-13:
+  (exact A | exact Object)
+File "mixed.php", line 54, characters 3-13:
+  (function(string $s1, string $s2): ~(int | string))
+File "mixed.php", line 63, characters 3-13:
+  ((function(~?(bool | float | resource | arraykey | HH\FormatString<_>) $s1, ~?(bool | float | resource | arraykey | HH\FormatString<_>) $s2): string) | (function(string $s1, string $s2): int))
+File "mixed.php", line 72, characters 3-13:
+  A
+File "mixed.php", line 76, characters 3-13:
+  (int | string)
+File "mixed.php", line 79, characters 3-13:
+  num
+File "mixed.php", line 82, characters 3-13:
+  (float | string)
+File "mixed.php", line 85, characters 3-13:
+  B
+File "mixed.php", line 88, characters 3-13:
+  (int | B)
+File "mixed.php", line 91, characters 3-13:
+  (B | exact A)
+File "mixed.php", line 11, characters 24-31:
+Was expecting a type hint (Typing[4032])
+File "mixed.php", line 65, characters 28-29:
+Invalid argument (Typing[4041])
+  File "mixed.php", line 59, characters 10-31:
+  Too many mandatory arguments (expected 1 but got 2)
+  File "mixed.php", line 94, characters 35-60:
+  Because of this definition
+File "mixed.php", line 65, characters 28-29:
+Invalid argument (Typing[4041])
+  File "mixed.php", line 61, characters 10-51:
+  Too many mandatory arguments (expected 1 but got 2)
+  File "mixed.php", line 94, characters 35-60:
+  Because of this definition
+File "mixed.php", line 27, characters 12-13:
+Invalid argument (Typing[4110])
+  File "mixed.php", line 102, characters 19-19:
+  Expected `A`
+  File "mixed.php", line 11, characters 48-54:
+  But got `nonnull`
+File "mixed.php", line 36, characters 12-13:
+Invalid argument (Typing[4110])
+  File "mixed.php", line 102, characters 19-19:
+  Expected `A`
+  File "mixed.php", line 11, characters 34-38:
+  But got `mixed`
+File "mixed.php", line 44, characters 17-18:
+Invalid argument (Typing[4110])
+  File "mixed.php", line 101, characters 24-29:
+  Expected `Object`
+  File "mixed.php", line 41, characters 14-14:
+  But got `A`
+File "mixed.php", line 45, characters 12-13:
+Invalid argument (Typing[4110])
+  File "mixed.php", line 102, characters 19-19:
+  Expected `A`
+  File "mixed.php", line 39, characters 14-19:
+  But got `Object`
+File "mixed.php", line 56, characters 18-19:
+Invalid argument (Typing[4110])
+  File "mixed.php", line 96, characters 52-54:
+  Expected `int`
+  File "mixed.php", line 52, characters 36-41:
+  But got `string`
+File "mixed.php", line 65, characters 28-29:
+Invalid argument (Typing[4110])
+  File "mixed.php", line 94, characters 54-59:
+  Expected `string`
+  File "mixed.php", line 61, characters 25-51:
+  But got `int` because this is the result of an integer arithmetic operation

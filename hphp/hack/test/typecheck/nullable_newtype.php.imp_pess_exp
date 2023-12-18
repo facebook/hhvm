@@ -1,0 +1,6 @@
+File "nullable_newtype.php--file2.php", line 10, characters 16-17:
+Invalid argument (Typing[4110])
+  File "nullable_newtype.php--file2.php", line 3, characters 24-25:
+  Expected `~?_`
+  File "nullable_newtype.php--file2.php", line 9, characters 16-21:
+  But got `N<num>`

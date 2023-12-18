@@ -1,0 +1,10 @@
+File "bad_inout_use_lvalue6.php", line 15, characters 11-13:
+You cannot use this syntax with `inout`. (Parsing[1002])
+File "bad_inout_use_lvalue6.php", line 16, characters 11-13:
+You cannot use this syntax with `inout`. (Parsing[1002])
+File "bad_inout_use_lvalue6.php", line 15, characters 11-13:
+Invalid argument to an `inout` parameter (Typing[4110])
+  File "bad_inout_use_lvalue6.php", line 5, characters 15-17:
+  Expected `int`
+  File "bad_inout_use_lvalue6.php", line 3, characters 22-23:
+  But got `dynamic` because the type of this inout parameter is implicitly a like-type

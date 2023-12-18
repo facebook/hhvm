@@ -1,0 +1,5 @@
+File "inter_lambda_as.php", line 8, characters 3-13:
+  ~vec<(B & C)>
+File "inter_lambda_as.php", line 8, characters 3-13:[2]
+  ~vec<nothing>
+No errors

@@ -1,0 +1,10 @@
+File "bad_inout_use_lvalue2.php", line 8, characters 11-20:
+You cannot use this syntax with `inout`. (Parsing[1002])
+File "bad_inout_use_lvalue2.php", line 3, characters 7-16:
+Please add a type hint `const SomeType SOME_CONST` (Naming[2001])
+File "bad_inout_use_lvalue2.php", line 8, characters 11-20:
+Invalid argument to an `inout` parameter (Typing[4110])
+  File "bad_inout_use_lvalue2.php", line 3, characters 20-24:
+  Expected `string`
+  File "bad_inout_use_lvalue2.php", line 5, characters 25-26:
+  But got `dynamic` because the type of this inout parameter is implicitly a like-type

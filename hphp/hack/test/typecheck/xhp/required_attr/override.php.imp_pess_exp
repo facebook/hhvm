@@ -1,0 +1,44 @@
+File "override.php", line 6, characters 35-37:
+Redeclared attribute must not be less strict (Typing[4315])
+  File "override.php", line 4, characters 35-37:
+  The attribute is `@required`, which is stricter than `@lateinit`
+File "override.php", line 7, characters 35-37:
+Redeclared attribute must not be less strict (Typing[4315])
+  File "override.php", line 4, characters 35-37:
+  The attribute is `@required`, which is stricter than not `@required` or `@lateinit`
+File "override.php", line 12, characters 35-37:
+Redeclared attribute must not be less strict (Typing[4315])
+  File "override.php", line 9, characters 35-37:
+  The attribute is `@lateinit`, which is stricter than not `@required` or `@lateinit`
+File "override.php", line 7, characters 35-37:
+The property `:a` has the wrong type (Typing[4341])
+  File "override.php", line 7, characters 35-37:
+  Typing error
+  File "override.php", line 4, characters 35-37:
+  Expected `~int` because the type of this property is implicitly a like-type
+  File "override.php", line 7, characters 35-37:
+  But got `?int`
+File "override.php", line 12, characters 35-37:
+The property `:a` has the wrong type (Typing[4341])
+  File "override.php", line 12, characters 35-37:
+  Typing error
+  File "override.php", line 9, characters 35-37:
+  Expected `~int` because the type of this property is implicitly a like-type
+  File "override.php", line 12, characters 35-37:
+  But got `?int`
+File "override.php", line 15, characters 35-37:
+The property `:a` has the wrong type (Typing[4341])
+  File "override.php", line 15, characters 35-37:
+  Typing error
+  File "override.php", line 15, characters 35-37:
+  Expected `~int` because the type of this property is implicitly a like-type
+  File "override.php", line 14, characters 35-37:
+  But got `?int`
+File "override.php", line 16, characters 35-37:
+The property `:a` has the wrong type (Typing[4341])
+  File "override.php", line 16, characters 35-37:
+  Typing error
+  File "override.php", line 16, characters 35-37:
+  Expected `~int` because the type of this property is implicitly a like-type
+  File "override.php", line 14, characters 35-37:
+  But got `?int`

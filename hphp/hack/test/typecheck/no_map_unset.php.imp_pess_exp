@@ -1,0 +1,4 @@
+File "no_map_unset.php", line 11, characters 3-18:
+In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing (Typing[4135])
+  File "no_map_unset.php", line 3, characters 21-36:
+  This is an object of type Map<string, int> because the type of this return is implicitly a like-type

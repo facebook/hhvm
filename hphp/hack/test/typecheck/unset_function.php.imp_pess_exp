@@ -1,0 +1,10 @@
+File "unset_function.php", line 8, characters 9-17:
+You cannot use this syntax in an `unset()` expression. (Parsing[1002])
+File "unset_function.php", line 9, characters 9-17:
+You cannot use this syntax in an `unset()` expression. (Parsing[1002])
+File "unset_function.php", line 8, characters 3-19:
+In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing (Typing[4135])
+File "unset_function.php", line 9, characters 3-28:
+In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing (Typing[4135])
+  File "unset_function.php", line 3, characters 21-38:
+  This is an object of type Map<string, mixed> because the type of this return is implicitly a like-type

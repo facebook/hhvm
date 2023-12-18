@@ -1,0 +1,42 @@
+File "instance_of_refinement.php", line 25, characters 16-17:
+Invalid argument (Typing[4110])
+  File "instance_of_refinement.php", line 17, characters 21-23:
+  Expected `int`
+  File "instance_of_refinement.php", line 20, characters 14-15:
+  But got `string`
+File "instance_of_refinement.php", line 43, characters 13-14:
+Invalid argument (Typing[4110])
+  File "instance_of_refinement.php", line 42, characters 13-16:
+  Expected `T#1` from this `is` expression test
+  File "instance_of_refinement.php", line 10, characters 23-23:
+    via this generic `T`
+  File "instance_of_refinement.php", line 43, characters 13-14:
+  But got `string`
+File "instance_of_refinement.php", line 44, characters 16-24:
+Invalid argument (Typing[4110])
+  File "instance_of_refinement.php", line 17, characters 21-23:
+  Expected `int`
+  File "instance_of_refinement.php", line 42, characters 13-16:
+  But got `T#1` from this `is` expression test
+  File "instance_of_refinement.php", line 7, characters 26-26:
+    via this generic `T`
+File "instance_of_refinement.php", line 52, characters 16-24:
+Invalid argument (Typing[4110])
+  File "instance_of_refinement.php", line 17, characters 21-23:
+  Expected `int`
+  File "instance_of_refinement.php", line 49, characters 14-15:
+  But got `string`
+File "instance_of_refinement.php", line 52, characters 16-24:
+Invalid argument (Typing[4110])
+  File "instance_of_refinement.php", line 17, characters 21-23:
+  Expected `int`
+  File "instance_of_refinement.php", line 50, characters 13-16:
+  But got `T#1` from this `is` expression test
+  File "instance_of_refinement.php", line 7, characters 26-26:
+    via this generic `T`
+File "instance_of_refinement.php", line 52, characters 16-24:
+Invalid argument (Typing[4110])
+  File "instance_of_refinement.php", line 17, characters 21-23:
+  Expected `~int`
+  File "instance_of_refinement.php", line 7, characters 19-21:
+  But got `(_ & T#1)` because method must be callable in a dynamic context

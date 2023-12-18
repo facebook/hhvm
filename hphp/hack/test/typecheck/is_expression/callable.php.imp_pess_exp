@@ -1,0 +1,12 @@
+File "callable.php", line 6, characters 13-33:
+`__Callable` typehints cannot be used with `is` expressions (Parsing[1002])
+File "callable.php", line 7, characters 7-8:
+Invalid argument (Typing[4110])
+  File "callable.php", line 3, characters 12-14:
+  Expected `int`
+  File "callable.php", line 6, characters 13-33:
+  But got `(function(int): ~?int)`
+File "callable.php", line 6, characters 13-33:
+Invalid `is` expression hint (Typing[4195])
+  File "callable.php", line 6, characters 13-33:
+  The `is` operator cannot be used with a function type

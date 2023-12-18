@@ -1,0 +1,52 @@
+File "just_enum_class.php", line 59, characters 11-12:
+`switch` statement nonexhaustive; at least the following cases are missing: `default` (Typing[4019])
+  File "just_enum_class.php", line 59, characters 11-12:
+  only unions and intersections of bool, null and enums can be switched on without a default
+File "just_enum_class.php", line 67, characters 11-12:
+`switch` statement nonexhaustive; at least the following cases are missing: `default` (Typing[4019])
+  File "just_enum_class.php", line 67, characters 11-12:
+  only unions and intersections of bool, null and enums can be switched on without a default
+File "just_enum_class.php", line 77, characters 11-12:
+`switch` statement nonexhaustive; at least the following cases are missing: `default` (Typing[4019])
+  File "just_enum_class.php", line 77, characters 11-12:
+  only unions and intersections of bool, null and enums can be switched on without a default
+File "just_enum_class.php", line 89, characters 11-12:
+`switch` statement nonexhaustive; at least the following cases are missing: `default` (Typing[4019])
+  File "just_enum_class.php", line 89, characters 11-12:
+  only unions and intersections of bool, null and enums can be switched on without a default
+File "just_enum_class.php", line 27, characters 10-31:
+Switching on `MixedEnumClass` but using constant from `HH\MemberOf<MixedEnumClass, ~IntEnumCD>` (Typing[4023])
+  File "just_enum_class.php", line 25, characters 21-34:
+  expecting `MixedEnumClass` based on this
+File "just_enum_class.php", line 40, characters 10-34:
+Switching on `bool` but using constant from `HH\MemberOf<MixedEnumClass, ~bool>` (Typing[4023])
+  File "just_enum_class.php", line 38, characters 50-53:
+  expecting `bool` based on this
+File "just_enum_class.php", line 50, characters 10-37:
+Switching on `string` but using constant from `HH\MemberOf<MixedEnumClass, ~string>` (Typing[4023])
+  File "just_enum_class.php", line 48, characters 47-52:
+  expecting `string` based on this
+File "just_enum_class.php", line 60, characters 10-33:
+Switching on `HH\MemberOf<MixedEnumClass, string>` but using constant from `HH\MemberOf<MixedEnumClass, ~int>` (Typing[4023])
+  File "just_enum_class.php", line 58, characters 36-71:
+  expecting `HH\MemberOf<MixedEnumClass, string>` based on this
+File "just_enum_class.php", line 68, characters 10-33:
+Switching on `HH\MemberOf<MixedEnumClass, int>` but using constant from `HH\MemberOf<MixedEnumClass, ~int>` (Typing[4023])
+  File "just_enum_class.php", line 66, characters 38-70:
+  expecting `HH\MemberOf<MixedEnumClass, int>` based on this
+File "just_enum_class.php", line 70, characters 10-34:
+Switching on `HH\MemberOf<MixedEnumClass, int>` but using constant from `HH\MemberOf<MixedEnumClass, ~int>` (Typing[4023])
+  File "just_enum_class.php", line 66, characters 38-70:
+  expecting `HH\MemberOf<MixedEnumClass, int>` based on this
+File "just_enum_class.php", line 78, characters 10-31:
+Switching on `HH\MemberOf<MixedEnumClass, (IntEnumAB | IntEnumCD)>` but using constant from `HH\MemberOf<MixedEnumClass, ~IntEnumAB>` (Typing[4023])
+  File "just_enum_class.php", line 76, characters 36-118:
+  expecting `HH\MemberOf<MixedEnumClass, (IntEnumAB | IntEnumCD)>` based on this
+File "just_enum_class.php", line 90, characters 10-40:
+Switching on `HH\MemberOf<ExtendedEnumClass, string>` but using constant from `HH\MemberOf<MixedEnumClass, ~string>` (Typing[4023])
+  File "just_enum_class.php", line 88, characters 39-77:
+  expecting `HH\MemberOf<ExtendedEnumClass, string>` based on this
+File "just_enum_class.php", line 92, characters 10-40:
+Switching on `HH\MemberOf<ExtendedEnumClass, string>` but using constant from `HH\MemberOf<ExtendedEnumClass, ~string>` (Typing[4023])
+  File "just_enum_class.php", line 88, characters 39-77:
+  expecting `HH\MemberOf<ExtendedEnumClass, string>` based on this

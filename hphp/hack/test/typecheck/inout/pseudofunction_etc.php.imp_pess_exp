@@ -1,0 +1,32 @@
+File "pseudofunction_etc.php", line 6, characters 15-15:
+An expression is expected here. (Parsing[1002])
+File "pseudofunction_etc.php", line 6, characters 9-13:
+Unbound name: `inout` (a global constant) (Naming[2049])
+File "pseudofunction_etc.php", line 8, characters 9-13:
+Unbound name: `inout` (a global constant) (Naming[2049])
+File "pseudofunction_etc.php", line 9, characters 9-13:
+Unbound name: `inout` (a global constant) (Naming[2049])
+File "pseudofunction_etc.php", line 14, characters 41-42:
+Methods with special semantics cannot have `inout` parameters. (NastCheck[3043])
+File "pseudofunction_etc.php", line 4, characters 3-17:
+Unexpected `inout` argument for `invariant` (NastCheck[3096])
+File "pseudofunction_etc.php", line 10, characters 3-17:
+`isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode (Typing[4016])
+File "pseudofunction_etc.php", line 6, characters 9-13:
+Unbound global constant (Typing) (Typing[4106])
+File "pseudofunction_etc.php", line 8, characters 9-13:
+Unbound global constant (Typing) (Typing[4106])
+File "pseudofunction_etc.php", line 9, characters 9-13:
+Unbound global constant (Typing) (Typing[4106])
+File "pseudofunction_etc.php", line 6, characters 3-18:
+In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing (Typing[4135])
+File "pseudofunction_etc.php", line 8, characters 3-13:
+In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing (Typing[4135])
+File "pseudofunction_etc.php", line 9, characters 3-13:
+In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing (Typing[4135])
+File "pseudofunction_etc.php", line 5, characters 42-49:
+Unexpected `inout` annotation for argument (Typing[4183])
+  File "soundness.hhi", line 32, characters 7-8:
+  This is a normal parameter (does not have `inout`)
+File "pseudofunction_etc.php", line 10, characters 3-17:
+`isset` does not allow arguments to be passed by `inout` (Typing[4450])

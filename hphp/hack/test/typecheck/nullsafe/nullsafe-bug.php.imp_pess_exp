@@ -1,0 +1,2 @@
+File "nullsafe-bug.php", line 8, characters 25-28:
+Was expecting a type hint (Typing[4032])

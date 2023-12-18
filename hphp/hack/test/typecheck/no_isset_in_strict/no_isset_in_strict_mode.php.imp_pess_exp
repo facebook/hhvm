@@ -1,0 +1,6 @@
+File "no_isset_in_strict_mode.php", line 13, characters 8-27:
+`isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode (Typing[4016])
+File "no_isset_in_strict_mode.php", line 15, characters 8-16:
+`isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode (Typing[4016])
+File "no_isset_in_strict_mode.php", line 16, characters 8-30:
+`isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode (Typing[4016])

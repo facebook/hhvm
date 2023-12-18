@@ -1,0 +1,6 @@
+File "subsume_tconst1.php", line 8, characters 23-23:
+The constraint on this type constant is inconsistent with its parent (Typing[4110])
+  File "subsume_tconst1.php", line 4, characters 28-35:
+  Expected `arraykey`
+  File "subsume_tconst1.php", line 8, characters 23-23:
+  But got `mixed`

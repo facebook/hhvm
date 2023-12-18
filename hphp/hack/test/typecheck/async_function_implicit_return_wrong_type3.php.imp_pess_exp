@@ -1,0 +1,12 @@
+File "async_function_implicit_return_wrong_type3.php", line 14, characters 10-10:
+Invalid return type (Typing[4336])
+  File "async_function_implicit_return_wrong_type3.php", line 14, characters 53-67:
+  Expected `Awaitable<void>`
+  File "async_function_implicit_return_wrong_type3.php", line 14, characters 10-10:
+  But got `void` because this function does not always return a value
+File "async_function_implicit_return_wrong_type3.php", line 14, characters 1-230:
+This function can exit with and without returning a value (Typing[4421])
+  File "async_function_implicit_return_wrong_type3.php", line 16, characters 22-31:
+  Returning a value here.
+  File "async_function_implicit_return_wrong_type3.php", line 14, characters 1-230:
+  This function does not always return a value

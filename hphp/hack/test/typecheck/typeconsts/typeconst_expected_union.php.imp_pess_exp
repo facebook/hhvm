@@ -1,8 +1,26 @@
 File "typeconst_expected_union.php", line 23, characters 12-42:
-Invalid argument (Typing[4110])
-  File "typeconst_expected_union.php", line 23, characters 7-7:
-  Expected `~_` because a type could not be determined here
-  File "typeconst_expected_union.php", line 15, characters 32-32:
-    via this generic `T`
+Invalid argument (Typing[4326])
+  File "typeconst_expected_union.php", line 8, characters 23-25:
+  Expected `int`
+  File "typeconst_expected_union.php", line 15, characters 75-80:
+    resulting from accessing the type constant 'Tconst'
+  File "typeconst_expected_union.php", line 23, characters 27-40:
+    on an object of exactly the class SomeClassChild
+  File "typeconst_expected_union.php", line 15, characters 75-80:
+  But got `SomeClass::Tconst where \SomeClass::Tconst super <expr#1>::Tconst, \SomeClass::Tconst as arraykey`
+  by accessing the type constant `Tconst`
   File "typeconst_expected_union.php", line 20, characters 33-41:
-  But got `SomeClass`
+  on an object of type SomeClass
+File "typeconst_expected_union.php", line 23, characters 12-42:
+Invalid argument (Typing[4326])
+  File "typeconst_expected_union.php", line 15, characters 75-80:
+  Expected `SomeClass::Tconst`
+  by accessing the type constant `Tconst`
+  File "typeconst_expected_union.php", line 20, characters 33-41:
+  on an object of type SomeClass
+  File "typeconst_expected_union.php", line 8, characters 23-25:
+  But got `int`
+  File "typeconst_expected_union.php", line 15, characters 75-80:
+    resulting from accessing the type constant 'Tconst'
+  File "typeconst_expected_union.php", line 23, characters 27-40:
+    on an object of exactly the class SomeClassChild

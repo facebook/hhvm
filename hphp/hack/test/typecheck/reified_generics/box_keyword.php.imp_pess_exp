@@ -1,0 +1,26 @@
+File "box_keyword.php", line 8, characters 14-19:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+  File "box_keyword.php", line 4, characters 7-12:
+  Definition is here
+File "box_keyword.php", line 16, characters 15-20:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+  File "box_keyword.php", line 4, characters 7-12:
+  Definition is here
+File "box_keyword.php", line 17, characters 15-23:
+Invalid reified hint (Typing[4305])
+  File "box_keyword.php", line 17, characters 22-22:
+  This is a wildcard, it cannot be used as a reified type argument
+  File "box_keyword.php", line 5, characters 21-22:
+  `Tr` is reified
+File "box_keyword.php", line 8, characters 7-12:
+Some type arguments violate their constraints (Typing[4323])
+  File "box_keyword.php", line 4, characters 7-12:
+  Expected `dynamic`
+  File "box_keyword.php", line 8, characters 14-19:
+  Type `Erased` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "box_keyword.php", line 16, characters 7-13:
+Some type arguments violate their constraints (Typing[4323])
+  File "box_keyword.php", line 5, characters 7-13:
+  Expected `dynamic`
+  File "box_keyword.php", line 16, characters 15-20:
+  Type `Erased` is not a subtype of `dynamic` under dynamic-aware subtyping

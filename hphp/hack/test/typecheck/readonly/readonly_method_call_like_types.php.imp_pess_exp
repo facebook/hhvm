@@ -1,0 +1,16 @@
+File "readonly_method_call_like_types.php", line 11, characters 3-13:
+This expression is readonly, so it can only call readonly methods (Typing[4413])
+  File "readonly_method_call_like_types.php", line 3, characters 19-23:
+  This method is not readonly
+File "readonly_method_call_like_types.php", line 14, characters 5-15:
+This expression is readonly, so it can only call readonly methods (Typing[4413])
+  File "readonly_method_call_like_types.php", line 14, characters 18-22:
+  This method is not readonly
+File "readonly_method_call_like_types.php", line 18, characters 5-6:
+This expression is readonly, so it can only call readonly methods (Typing[4413])
+  File "readonly_method_call_like_types.php", line 18, characters 9-13:
+  This method is not readonly
+File "readonly_method_call_like_types.php", line 19, characters 5-15:
+This expression is readonly, so it can only call readonly methods (Typing[4413])
+  File "readonly_method_call_like_types.php", line 19, characters 18-22:
+  This method is not readonly

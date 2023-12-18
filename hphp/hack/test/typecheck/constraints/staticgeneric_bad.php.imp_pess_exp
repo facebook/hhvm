@@ -1,0 +1,18 @@
+File "staticgeneric_bad.php", line 15, characters 25-29:
+Invalid argument (Typing[4110])
+  File "staticgeneric_bad.php", line 15, characters 23-23:
+  Expected `~_` because type parameter `T` of `C` could not be determined. Please add explicit type parameters to the invocation of `C`
+  File "staticgeneric_bad.php", line 5, characters 39-39:
+    via this generic `T`
+  File "staticgeneric_bad.php", line 15, characters 25-29:
+  But got `bool`
+File "staticgeneric_bad.php", line 14, characters 14-17:
+Invalid argument (Typing[4323])
+  File "staticgeneric_bad.php", line 4, characters 9-9:
+  `T` is a constrained type parameter
+  File "staticgeneric_bad.php", line 4, characters 14-21:
+  This type constraint is violated
+  File "staticgeneric_bad.php", line 4, characters 14-21:
+  Expected `arraykey`
+  File "staticgeneric_bad.php", line 14, characters 14-17:
+  But got `bool`

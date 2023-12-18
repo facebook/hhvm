@@ -1,0 +1,5 @@
+File "new_expr_dependent.php", line 18, characters 5-15:
+  this as C2
+File "new_expr_dependent.php", line 18, characters 5-15:[2]
+  this as C2
+No errors

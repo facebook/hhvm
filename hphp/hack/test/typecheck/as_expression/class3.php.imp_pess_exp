@@ -1,0 +1,64 @@
+File "class3.php", line 15, characters 28-28:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+  File "class3.php", line 4, characters 13-13:
+  Definition is here
+File "class3.php", line 16, characters 28-28:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+  File "class3.php", line 4, characters 13-13:
+  Definition is here
+File "class3.php", line 15, characters 13-28:
+Invalid argument (Typing[4110])
+  File "class3.php", line 15, characters 13-23:
+  Expected `T#1` from this "as" assertion
+  File "class3.php", line 26, characters 22-26:
+  But got `mixed`
+  File "class3.php", line 26, characters 22-26:
+  This type argument to `B` must match exactly (it is invariant)
+File "class3.php", line 16, characters 13-28:
+Invalid argument (Typing[4110])
+  File "class3.php", line 16, characters 13-23:
+  Expected `T#2` from this "as" assertion
+  File "class3.php", line 27, characters 22-27:
+  But got `string`
+  File "class3.php", line 27, characters 22-27:
+  This type argument to `B` must match exactly (it is invariant)
+File "class3.php", line 16, characters 13-28:
+Invalid argument (Typing[4110])
+  File "class3.php", line 27, characters 22-27:
+  Expected `string`
+  File "class3.php", line 27, characters 22-27:
+  This type argument to `B` must match exactly (it is invariant)
+  File "class3.php", line 16, characters 13-23:
+  But got `T#2` from this "as" assertion
+File "class3.php", line 18, characters 13-31:
+Invalid argument (Typing[4110])
+  File "class3.php", line 18, characters 13-23:
+  Expected `T#3` from this "as" assertion
+  File "class3.php", line 26, characters 22-26:
+  But got `mixed`
+  File "class3.php", line 26, characters 22-26:
+  This type argument to `B` must match exactly (it is invariant)
+File "class3.php", line 19, characters 13-31:
+Invalid argument (Typing[4110])
+  File "class3.php", line 19, characters 13-23:
+  Expected `T#4` from this "as" assertion
+  File "class3.php", line 27, characters 22-27:
+  But got `string`
+  File "class3.php", line 27, characters 22-27:
+  This type argument to `B` must match exactly (it is invariant)
+File "class3.php", line 19, characters 13-31:
+Invalid argument (Typing[4110])
+  File "class3.php", line 27, characters 22-27:
+  Expected `string`
+  File "class3.php", line 27, characters 22-27:
+  This type argument to `B` must match exactly (it is invariant)
+  File "class3.php", line 19, characters 13-23:
+  But got `T#4` from this "as" assertion
+File "class3.php", line 21, characters 13-27:
+Invalid argument (Typing[4110])
+  File "class3.php", line 10, characters 21-26:
+  Expected `string`
+  File "class3.php", line 10, characters 21-26:
+  This type argument to `A` must match exactly (it is invariant)
+  File "class3.php", line 26, characters 22-26:
+  But got `mixed`

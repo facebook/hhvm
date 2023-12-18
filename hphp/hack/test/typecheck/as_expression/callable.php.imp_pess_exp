@@ -1,0 +1,12 @@
+File "callable.php", line 6, characters 9-29:
+`__Callable` typehints cannot be used with `as` expressions (Parsing[1002])
+File "callable.php", line 7, characters 5-6:
+Invalid argument (Typing[4110])
+  File "callable.php", line 3, characters 12-14:
+  Expected `int`
+  File "callable.php", line 6, characters 9-29:
+  But got `(function(int): ~?int)`
+File "callable.php", line 6, characters 9-29:
+Invalid `as` expression hint (Typing[4195])
+  File "callable.php", line 6, characters 9-29:
+  The `as` operator cannot be used with a function type

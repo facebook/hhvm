@@ -1,0 +1,6 @@
+File "early_solve_inter2.php", line 13, characters 7-27:
+Invalid assignment (Typing[4110])
+  File "early_solve_inter2.php", line 4, characters 8-13:
+  Expected `dynamic` because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map`
+  File "early_solve_inter2.php", line 13, characters 17-27:
+  But got `Vector<_>`

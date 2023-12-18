@@ -1,0 +1,24 @@
+File "or.php", line 6, characters 16-17:
+Invalid argument (Typing[4110])
+  File "or.php", line 25, characters 21-23:
+  Expected `int`
+  File "or.php", line 4, characters 13-18:
+  But got `string`
+File "or.php", line 7, characters 19-20:
+Invalid argument (Typing[4110])
+  File "or.php", line 26, characters 24-29:
+  Expected `string`
+  File "or.php", line 4, characters 29-31:
+  But got `int`
+File "or.php", line 13, characters 19-20:
+Invalid argument (Typing[4110])
+  File "or.php", line 26, characters 24-29:
+  Expected `string`
+  File "or.php", line 12, characters 13-18:
+  But got `not string` from this `is` expression test
+File "or.php", line 14, characters 19-20:
+Invalid argument (Typing[4110])
+  File "or.php", line 26, characters 24-29:
+  Expected `string`
+  File "or.php", line 11, characters 22-26:
+  But got `mixed`

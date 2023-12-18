@@ -1,0 +1,16 @@
+File "expr_dep_escapes_2.php", line 19, characters 10-13:
+Invalid return type (Typing[4110])
+  File "expr_dep_escapes_2.php", line 14, characters 18-20:
+  Expected `int`
+  File "expr_dep_escapes_2.php", line 7, characters 26-32:
+  But got `dynamic` because the type of this return is implicitly a like-type
+File "expr_dep_escapes_2.php", line 19, characters 10-13:
+Invalid return type (Typing[4110])
+  File "expr_dep_escapes_2.php", line 14, characters 18-20:
+  Expected `int`
+  File "expr_dep_escapes_2.php", line 15, characters 9-28:
+  But got `Foo<I>` because `<expr#1>::T` escaped from lambda
+  File "expr_dep_escapes_2.php", line 7, characters 26-32:
+    where `<expr#1>::T` originates from
+  File "expr_dep_escapes_2.php", line 15, characters 16-21:
+    where `<expr#1>` is a reference to this expression

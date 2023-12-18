@@ -1,0 +1,2 @@
+File "inc_dynamic.php", line 4, characters 12-13:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])

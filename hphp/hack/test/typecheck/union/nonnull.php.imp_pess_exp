@@ -1,0 +1,34 @@
+File "nonnull.php--file2.php", line 19, characters 3-13:
+  nonnull
+File "nonnull.php--file2.php", line 22, characters 3-13:
+  nonnull
+File "nonnull.php--file2.php", line 25, characters 3-13:
+  nonnull
+File "nonnull.php--file2.php", line 28, characters 3-13:
+  ?nonnull
+File "nonnull.php--file2.php", line 31, characters 3-13:
+  ?nonnull
+File "nonnull.php--file2.php", line 34, characters 3-13:
+  ?nonnull
+File "nonnull.php--file2.php", line 37, characters 3-13:
+  nonnull
+File "nonnull.php--file2.php", line 40, characters 3-13:
+  nonnull
+File "nonnull.php--file2.php", line 43, characters 3-13:
+  nonnull
+File "nonnull.php--file2.php", line 45, characters 3-13:
+  B
+File "nonnull.php--file2.php", line 47, characters 3-13:
+  (B | nonnull)
+File "nonnull.php--file2.php", line 50, characters 3-13:
+  (C | nonnull)
+File "nonnull.php--file2.php", line 54, characters 3-13:
+  ?nonnull
+File "nonnull.php--file2.php", line 57, characters 3-13:
+  nonnull
+File "nonnull.php--file2.php", line 51, characters 18-19:
+Invalid argument (Typing[4110])
+  File "nonnull.php--file2.php", line 60, characters 25-31:
+  Expected `nonnull`
+  File "nonnull.php--file1.php", line 5, characters 14-17:
+  But got `?int`

@@ -1,0 +1,44 @@
+File "deep_soft_reification.php", line 12, characters 14-24:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+  File "deep_soft_reification.php", line 5, characters 7-17:
+  Definition is here
+File "deep_soft_reification.php", line 15, characters 14-20:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+  File "deep_soft_reification.php", line 6, characters 7-13:
+  Definition is here
+File "deep_soft_reification.php", line 28, characters 26-31:
+Invalid reified hint (Typing[4305])
+  File "deep_soft_reification.php", line 28, characters 26-31:
+  This is not reified, it cannot be used as a reified type argument
+  File "deep_soft_reification.php", line 5, characters 36-36:
+  `T` is reified
+File "deep_soft_reification.php", line 29, characters 26-30:
+Invalid reified hint (Typing[4305])
+  File "deep_soft_reification.php", line 29, characters 26-30:
+  This is soft reified, it cannot be used as a reified type argument
+  File "deep_soft_reification.php", line 5, characters 36-36:
+  `T` is reified
+File "deep_soft_reification.php", line 32, characters 22-27:
+Invalid reified hint (Typing[4305])
+  File "deep_soft_reification.php", line 32, characters 22-27:
+  This is not reified, it cannot be used as a reified type argument
+  File "deep_soft_reification.php", line 6, characters 21-21:
+  `T` is reified
+File "deep_soft_reification.php", line 33, characters 22-26:
+Invalid reified hint (Typing[4305])
+  File "deep_soft_reification.php", line 33, characters 22-26:
+  This is soft reified, it cannot be used as a reified type argument
+  File "deep_soft_reification.php", line 6, characters 21-21:
+  `T` is reified
+File "deep_soft_reification.php", line 12, characters 7-12:
+Some type arguments violate their constraints (Typing[4323])
+  File "deep_soft_reification.php", line 4, characters 7-12:
+  Expected `dynamic`
+  File "deep_soft_reification.php", line 12, characters 14-24:
+  Type `SoftReified` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "deep_soft_reification.php", line 15, characters 7-12:
+Some type arguments violate their constraints (Typing[4323])
+  File "deep_soft_reification.php", line 4, characters 7-12:
+  Expected `dynamic`
+  File "deep_soft_reification.php", line 15, characters 14-20:
+  Type `Reified` is not a subtype of `dynamic` under dynamic-aware subtyping

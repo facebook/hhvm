@@ -1,0 +1,6 @@
+File "typing_numeric.php", line 13, characters 10-16:
+Invalid return type (Typing[4110])
+  File "typing_numeric.php", line 12, characters 30-34:
+  Expected `float`
+  File "typing_numeric.php", line 13, characters 10-16:
+  But got `int` because it is the result of a division `/`

@@ -1,0 +1,8 @@
+File "condition_isset_member_call.php", line 20, characters 9-23:
+`isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode (Typing[4016])
+File "condition_isset_member_call.php", line 22, characters 14-21:
+Invalid return type (Typing[4110])
+  File "condition_isset_member_call.php", line 19, characters 26-28:
+  Expected `~int` because the type of this return is implicitly a like-type
+  File "condition_isset_member_call.php", line 13, characters 11-14:
+  But got `?int`

@@ -1,0 +1,16 @@
+File "escape_reason.php", line 15, characters 10-11:
+Invalid return type (Typing[4110])
+  File "escape_reason.php", line 12, characters 16-18:
+  Expected `int`
+  File "escape_reason.php", line 5, characters 34-40:
+  But got `dynamic` because the type of this return is implicitly a like-type
+File "escape_reason.php", line 15, characters 10-11:
+Invalid return type (Typing[4110])
+  File "escape_reason.php", line 12, characters 16-18:
+  Expected `int`
+  File "escape_reason.php", line 13, characters 9-27:
+  But got `arraykey` because `<expr#1>::T` escaped from lambda
+  File "escape_reason.php", line 5, characters 34-40:
+    where `<expr#1>::T` originates from
+  File "escape_reason.php", line 13, characters 16-22:
+    where `<expr#1>` is a reference to this expression

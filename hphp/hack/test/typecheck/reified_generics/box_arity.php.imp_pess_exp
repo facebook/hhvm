@@ -1,0 +1,40 @@
+File "box_arity.php", line 8, characters 7-12:
+Wrong number of type arguments (expected 1, got 2) (Typing[4101])
+  File "box_arity.php", line 4, characters 7-12:
+  Definition is here
+File "box_arity.php", line 11, characters 14-32:
+Wrong number of type arguments (expected 1, got 2) (Typing[4101])
+  File "box_arity.php", line 4, characters 7-12:
+  Definition is here
+File "box_arity.php", line 14, characters 14-33:
+Wrong number of type arguments (expected 1, got 2) (Typing[4101])
+  File "box_arity.php", line 5, characters 7-13:
+  Definition is here
+File "box_arity.php", line 18, characters 15-20:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+  File "box_arity.php", line 4, characters 7-12:
+  Definition is here
+File "box_arity.php", line 20, characters 15-33:
+Wrong number of type arguments (expected 1, got 2) (Typing[4101])
+  File "box_arity.php", line 4, characters 7-12:
+  Definition is here
+File "box_arity.php", line 22, characters 15-21:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+  File "box_arity.php", line 5, characters 7-13:
+  Definition is here
+File "box_arity.php", line 24, characters 15-34:
+Wrong number of type arguments (expected 1, got 2) (Typing[4101])
+  File "box_arity.php", line 5, characters 7-13:
+  Definition is here
+File "box_arity.php", line 18, characters 7-13:
+Some type arguments violate their constraints (Typing[4323])
+  File "box_arity.php", line 5, characters 7-13:
+  Expected `dynamic`
+  File "box_arity.php", line 18, characters 15-20:
+  Type `Erased` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "box_arity.php", line 22, characters 7-13:
+Some type arguments violate their constraints (Typing[4323])
+  File "box_arity.php", line 5, characters 7-13:
+  Expected `dynamic`
+  File "box_arity.php", line 22, characters 15-21:
+  Type `Reified` is not a subtype of `dynamic` under dynamic-aware subtyping

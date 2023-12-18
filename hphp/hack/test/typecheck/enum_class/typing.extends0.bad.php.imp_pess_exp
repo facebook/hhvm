@@ -1,0 +1,14 @@
+File "typing.extends0.bad.php", line 44, characters 16-19:
+Invalid argument (Typing[4110])
+  File "typing.extends0.bad.php", line 34, characters 30-35:
+  Expected `Box<_>`
+  File "typing.extends0.bad.php", line 39, characters 4-11:
+  But got `dynamic`
+File "typing.extends0.bad.php", line 44, characters 16-19:
+Invalid argument (Typing[4110])
+  File "typing.extends0.bad.php", line 39, characters 13-13:
+  Expected `F`
+  File "typing.extends0.bad.php", line 34, characters 27-27:
+  But got `E`
+  File "typing.extends0.bad.php", line 34, characters 27-27:
+  This type argument to `HH\MemberOf` only allows supertypes (it is contravariant)

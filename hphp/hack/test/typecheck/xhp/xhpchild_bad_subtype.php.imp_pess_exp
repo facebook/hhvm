@@ -1,0 +1,6 @@
+File "xhpchild_bad_subtype.php--file2.php", line 5, characters 7-8:
+Invalid argument (Typing[4110])
+  File "xhpchild_bad_subtype.php--file2.php", line 2, characters 14-21:
+  Expected `XHPChild`
+  File "xhpchild_bad_subtype.php--file1.php", line 4, characters 9-10:
+  But got `mixed`

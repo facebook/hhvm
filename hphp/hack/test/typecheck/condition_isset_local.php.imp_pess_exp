@@ -1,0 +1,8 @@
+File "condition_isset_local.php", line 18, characters 7-15:
+`isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode (Typing[4016])
+File "condition_isset_local.php", line 19, characters 12-13:
+Invalid return type (Typing[4110])
+  File "condition_isset_local.php", line 16, characters 21-23:
+  Expected `~int` because the type of this return is implicitly a like-type
+  File "condition_isset_local.php", line 12, characters 26-29:
+  But got `?int`

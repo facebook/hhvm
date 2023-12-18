@@ -1,0 +1,6 @@
+File "lambda03.php", line 14, characters 7-18:
+This comparison has invalid types.  Only comparisons in which both arguments are strings, nums, DateTime, or DateTimeImmutable are allowed (Typing[4240])
+  File "lambda03.php", line 13, characters 8-16:
+  This is an int because method must be callable in a dynamic context
+  File "lambda03.php", line 14, characters 14-18:
+  This is a string

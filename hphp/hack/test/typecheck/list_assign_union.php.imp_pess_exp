@@ -1,0 +1,25 @@
+File "list_assign_union.php", line 7, characters 3-13:
+  (int | string)
+File "list_assign_union.php", line 8, characters 3-13:
+  (int | bool)
+File "list_assign_union.php", line 7, characters 3-13:[2]
+  dynamic
+File "list_assign_union.php", line 8, characters 3-13:[2]
+  dynamic
+File "list_assign_union.php", line 14, characters 3-13:
+  (int | bool)
+File "list_assign_union.php", line 15, characters 3-13:
+  (float | string)
+File "list_assign_union.php", line 14, characters 3-13:[2]
+  dynamic
+File "list_assign_union.php", line 15, characters 3-13:[2]
+  dynamic
+File "list_assign_union.php", line 21, characters 3-13:
+  ~float
+File "list_assign_union.php", line 22, characters 3-13:
+  ~bool
+File "list_assign_union.php", line 21, characters 3-13:[2]
+  dynamic
+File "list_assign_union.php", line 22, characters 3-13:[2]
+  dynamic
+No errors

@@ -1,0 +1,18 @@
+File "higher_order_function.php", line 17, characters 3-4:
+This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
+  File "higher_order_function.php", line 16, characters 3-7:
+  From this declaration, the context of this function body provides the capability mixed
+  File "higher_order_function.php", line 15, characters 19-20:
+  But the function being called requires the capability Te
+File "higher_order_function.php", line 30, characters 3-9:
+This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
+  File "higher_order_function.php", line 29, characters 34-35:
+  From this declaration, the context of this function body provides the capability set {}
+  File "higher_order_function.php", line 6, characters 3-4:
+  But the function being called requires the capability mixed
+File "higher_order_function.php", line 32, characters 3-9:
+This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
+  File "higher_order_function.php", line 29, characters 34-35:
+  From this declaration, the context of this function body provides the capability set {}
+  File "higher_order_function.php", line 6, characters 3-4:
+  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}

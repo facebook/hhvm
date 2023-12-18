@@ -1,0 +1,18 @@
+File "generic_capture_bad.php", line 13, characters 19-22:
+The method `cast` is not compatible with the overridden method (Typing[4341])
+  File "generic_capture_bad.php", line 13, characters 19-22:
+  Method `cast` has type `(function<TF as mixed>(TF $x): ~TF)` in `Bad2`
+  File "generic_capture_bad.php", line 5, characters 28-31:
+  But is has type `(function<TF#0 as mixed>(mixed $x): ~TF#0)` in parent `Bad<mixed>` and comes from ancestor or trait `Base<TF>`
+  File "generic_capture_bad.php", line 13, characters 19-22:
+  Type `(function<TF as mixed>(TF $x): ~TF)` is not a subtype of `(function<TF#0 as mixed>(mixed $x): ~TF#0)`
+  File "generic_capture_bad.php", line 5, characters 33-34:
+  Expected `TF#0`
+  File "generic_capture_bad.php", line 5, characters 43-44:
+    via this generic `TF`
+  File "generic_capture_bad.php", line 12, characters 24-28:
+  But got `mixed`
+  File "generic_capture_bad.php", line 9, characters 37-38:
+    via this generic `TF`
+  File "generic_capture_bad.php", line 5, characters 37-37:
+    via this generic `T`

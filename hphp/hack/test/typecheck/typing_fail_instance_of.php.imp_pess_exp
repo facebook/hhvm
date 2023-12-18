@@ -1,0 +1,6 @@
+File "typing_fail_instance_of.php", line 40, characters 10-11:
+Typing error (Typing[4110])
+  File "typing_fail_instance_of.php", line 39, characters 14-15:
+  Expected `?num`
+  File "typing_fail_instance_of.php", line 34, characters 16-20:
+  But got `(not A & not B)`

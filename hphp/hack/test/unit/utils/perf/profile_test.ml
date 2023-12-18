@@ -42,10 +42,11 @@ let test_profile_longer_than () =
       0.01
   in
   if nbr_runs < 1 then failwith "not ran at least once";
-  user_time >= 1e-8
   (* to avoid flakiness, use 5 orders of magnitude smaller *)
+  user_time >= 1e-8
+  (* In OCaml 5, heap_major_chunks will always be zero. *)
+  (* && mem.heap_major_chunks >= 1. *)
   && mem.heap_major_words >= 0.
-  && mem.heap_major_chunks >= 1.
 
 let test_profile_longer_than_min_runs_gt1 () =
   let min_runs = 7 in

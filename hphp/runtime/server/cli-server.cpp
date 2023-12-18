@@ -1741,7 +1741,15 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg, bool isclone) {
 
 void CLIXboxWorker::doJob(int fd) {
   SCOPE_EXIT { finishXboxJob(); };
-  cli_process_command_loop(fd, true, true);
+  try {
+    cli_process_command_loop(fd, true, true);
+  } catch (const Exception& ex) {
+    Logger::Warning("CLI XBox Job failed: %s", ex.what());
+  } catch (const std::exception& ex) {
+    Logger::FError("CLI XBox Job failed with C++ exception: {}", ex.what());
+  } catch (...) {
+    Logger::Error("CLI XBox Job failed with unknown exception");
+  }
 }
 
 Optional<int> run_client(const char* sock_path,

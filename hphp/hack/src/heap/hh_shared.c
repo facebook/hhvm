@@ -1178,9 +1178,13 @@ static int should_exit (void) {
   return worker_can_exit && workers_should_exit != NULL && *workers_should_exit;
 }
 
+// This is called from the non-OCaml thread in glean2client.rs and can not
+// access the OCaml runtime, which includes the local roots (e.g., CAMLparamX).
+//
+// Since we don't allocate or raise from this function, it can be declared as
+// [@@noalloc] and called from other threads.
 CAMLprim value hh_should_exit (void) {
-  CAMLparam0();
-  CAMLreturn(Val_bool(should_exit()));
+  return Val_bool(should_exit());
 }
 
 static void raise_if_should_exit(void) {

@@ -18,7 +18,7 @@ external resume_workers : unit -> unit = "hh_resume_workers"
 
 external set_can_worker_stop : bool -> unit = "hh_set_can_worker_stop"
 
-external is_stop_requested : unit -> bool = "hh_should_exit"
+external is_stop_requested : unit -> bool = "hh_should_exit" [@@noalloc]
 
 external raise_if_stop_requested : unit -> unit = "hh_raise_if_should_exit"
 

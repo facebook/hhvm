@@ -3321,12 +3321,12 @@ void parse_default_value(FuncEmitter::ParamInfo& param, const StringData* str) {
   TypedValue tv;
   tvWriteUninit(tv);
   if (str->size() == 4) {
-    if (!strcasecmp("null", str->data())) {
+    if (!istrcmp("null", str->data())) {
       tvWriteNull(tv);
-    } else if (!strcasecmp("true", str->data())) {
+    } else if (!istrcmp("true", str->data())) {
       tv = make_tv<KindOfBoolean>(true);
     }
-  } else if (str->size() == 5 && !strcasecmp("false", str->data())) {
+  } else if (str->size() == 5 && !istrcmp("false", str->data())) {
     tv = make_tv<KindOfBoolean>(false);
   }
   auto utype = param.typeConstraint.underlyingDataType();

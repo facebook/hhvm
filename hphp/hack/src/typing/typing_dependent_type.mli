@@ -10,7 +10,7 @@ module ExprDepTy : sig
   type dep =
     | Dep_This
     | Dep_Cls of string
-    | Dep_Expr of Ident_provider.Ident.t
+    | Dep_Expr of Expression_id.t
 
   val from_cid :
     Typing_env_types.env ->

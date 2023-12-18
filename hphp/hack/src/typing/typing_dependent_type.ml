@@ -18,10 +18,10 @@ module ExprDepTy = struct
   type dep =
     | Dep_This
     | Dep_Cls of string
-    | Dep_Expr of Ident_provider.Ident.t
+    | Dep_Expr of Expression_id.t
 
   let new_ env =
-    let eid = Env.make_ident env in
+    let eid = Env.make_expression_id env in
     (Reason.ERexpr eid, Dep_Expr eid)
 
   (* Convert a class_id into a "dependent kind" (dep). This later informs the make_with_dep_kind function
@@ -93,7 +93,8 @@ module ExprDepTy = struct
     let apply env ty =
       match dep_ty with
       | Dep_Cls _ ->
-        (env, mk (r_dep_ty, Tdependent (DTexpr (Env.make_ident env), ty)))
+        ( env,
+          mk (r_dep_ty, Tdependent (DTexpr (Env.make_expression_id env), ty)) )
       | Dep_This -> (env, ty)
       | Dep_Expr id -> (env, mk (r_dep_ty, Tdependent (DTexpr id, ty)))
     in

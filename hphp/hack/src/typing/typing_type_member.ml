@@ -27,7 +27,7 @@ type type_member =
     }
 
 type unknown_concrete_class_kind =
-  | EDT of Ident_provider.Ident.t
+  | EDT of Expression_id.t
   | This
 
 let make_missing_err ~on_error cls_id const_name =

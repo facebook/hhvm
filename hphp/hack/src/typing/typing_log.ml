@@ -403,7 +403,7 @@ let local_as_value
        "%s %s [expr_id=%s]"
        (Pr.debug env ty)
        bound
-       (Ident_provider.Ident.show eid))
+       (Expression_id.debug eid))
 
 let per_cont_env_as_value env per_cont_env =
   continuations_map_as_value
@@ -585,7 +585,7 @@ let in_expr_tree_as_value env = function
 
 let env_as_value env =
   let {
-    ident_provider = _;
+    expression_id_provider = _;
     fresh_typarams;
     lenv;
     genv;

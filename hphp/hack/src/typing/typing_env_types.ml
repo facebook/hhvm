@@ -51,7 +51,7 @@ type expr_tree_env = {
 
 (** See the .mli file for the documentation of fields. *)
 type env = {
-  ident_provider: Ident_provider.t;
+  expression_id_provider: Expression_id.provider;
   fresh_typarams: SSet.t;
   lenv: local_env;
   genv: genv;
@@ -100,7 +100,7 @@ let initial_local tpenv =
 
 let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
   {
-    ident_provider = Ident_provider.init ();
+    expression_id_provider = Expression_id.make_provider ();
     fresh_typarams = SSet.empty;
     lenv = initial_local Type_parameter_env.empty;
     in_loop = false;

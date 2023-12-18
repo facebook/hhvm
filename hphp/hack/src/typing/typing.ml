@@ -1096,7 +1096,7 @@ let set_valid_rvalue
   (* We are assigning a new value to the local variable, so we need to
    * generate a new expression id
    *)
-  match Env.set_local_expr_id env lvar (Env.make_ident env) with
+  match Env.set_local_expr_id env lvar (Env.make_expression_id env) with
   | Ok env -> env
   | Error (env, err) ->
     Typing_error_utils.add_typing_error ~env err;

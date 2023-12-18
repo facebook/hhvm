@@ -23,7 +23,7 @@ type arg_position =
 [@@deriving eq, hash, show]
 
 type expr_dep_type_reason =
-  | ERexpr of Ident_provider.Ident.t
+  | ERexpr of Expression_id.t
   | ERstatic
   | ERclass of string
   | ERparent of string
@@ -669,24 +669,37 @@ let arg_pos_str ap =
   | Afirst -> "first"
   | Asecond -> "second"
 
-(* This is a mapping from internal expression ids to a standardized int.
- * Used for outputting cleaner error messages to users
- *)
-let expr_display_id_map = ref Ident_provider.Ident.Map.empty
+let to_pos : type ph. ph t_ -> Pos_or_decl.t =
+ fun r ->
+  if !Errors.report_pos_from_reason then
+    Pos_or_decl.set_from_reason (to_raw_pos r)
+  else
+    to_raw_pos r
 
-let reset_expr_display_id_map () =
-  expr_display_id_map := Ident_provider.Ident.Map.empty
-
-let get_expr_display_id id =
-  let map = !expr_display_id_map in
-  match Ident_provider.Ident.Map.find_opt id map with
-  | Some n -> n
-  | None ->
-    let n = Ident_provider.Ident.Map.cardinal map + 1 in
-    expr_display_id_map := Ident_provider.Ident.Map.add id n map;
-    n
-
-let get_expr_display_id_map () = !expr_display_id_map
+let expr_dep_type_reason_string e =
+  match e with
+  | ERexpr id ->
+    "where "
+    ^ Markdown_lite.md_codify (Expression_id.display_in_error id)
+    ^ " is a reference to this expression"
+  | ERstatic ->
+    "where `<static>` refers to the late bound type of the enclosing class"
+  | ERclass c ->
+    "where the class "
+    ^ (strip_ns c |> Markdown_lite.md_codify)
+    ^ " was referenced here"
+  | ERparent p ->
+    "where the class "
+    ^ (strip_ns p |> Markdown_lite.md_codify)
+    ^ " (the parent of the enclosing) class was referenced here"
+  | ERself c ->
+    "where the class "
+    ^ (strip_ns c |> Markdown_lite.md_codify)
+    ^ " was referenced here via the keyword `self`"
+  | ERpu s ->
+    "where "
+    ^ Markdown_lite.md_codify s
+    ^ " is a type projected from this expression"
 
 (* Translate a reason to a (pos, string) list, suitable for error_l. This
  * previously returned a string, however the need to return multiple lines with
@@ -1132,38 +1145,6 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
     ]
   | Rpattern p ->
     [(Pos_or_decl.of_raw_pos p, prefix ^ " because of this pattern")]
-
-and to_pos : type ph. ph t_ -> Pos_or_decl.t =
- fun r ->
-  if !Errors.report_pos_from_reason then
-    Pos_or_decl.set_from_reason (to_raw_pos r)
-  else
-    to_raw_pos r
-
-and expr_dep_type_reason_string = function
-  | ERexpr id ->
-    let did = get_expr_display_id id in
-    "where "
-    ^ Markdown_lite.md_codify ("<expr#" ^ string_of_int did ^ ">")
-    ^ " is a reference to this expression"
-  | ERstatic ->
-    "where `<static>` refers to the late bound type of the enclosing class"
-  | ERclass c ->
-    "where the class "
-    ^ (strip_ns c |> Markdown_lite.md_codify)
-    ^ " was referenced here"
-  | ERparent p ->
-    "where the class "
-    ^ (strip_ns p |> Markdown_lite.md_codify)
-    ^ " (the parent of the enclosing) class was referenced here"
-  | ERself c ->
-    "where the class "
-    ^ (strip_ns c |> Markdown_lite.md_codify)
-    ^ " was referenced here via the keyword `self`"
-  | ERpu s ->
-    "where "
-    ^ Markdown_lite.md_codify s
-    ^ " is a type projected from this expression"
 
 type ureason =
   | URnone

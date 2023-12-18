@@ -11,11 +11,13 @@ type t
 module Ident : sig
   type t [@@deriving ord, eq, hash, show]
 
-  module Map : Map.S with type key = t
+  module Map : WrappedMap_sig.S with type key = t
 
   val is_immutable : t -> bool
 
   val make_immutable : t -> t
+
+  val cast : int -> t
 end
 
 val init : unit -> t

@@ -545,9 +545,7 @@ let get_param_mode callconv =
 
 module DependentKind = struct
   let to_string = function
-    | DTexpr i ->
-      let display_id = Reason.get_expr_display_id i in
-      "<expr#" ^ string_of_int display_id ^ ">"
+    | DTexpr i -> Expression_id.display_in_error i
 
   let is_generic_dep_ty s =
     String.is_substring ~substring:"::" s

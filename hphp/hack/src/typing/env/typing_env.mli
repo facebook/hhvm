@@ -367,13 +367,9 @@ val is_local_present : env -> Local_id.t -> bool
 val get_local_check_defined : env -> Aast.lid -> Typing_local_types.local
 
 val set_local_expr_id :
-  env ->
-  Local_id.t ->
-  Typing_local_types.expression_id ->
-  (env, env * Typing_error.t) result
+  env -> Local_id.t -> Expression_id.t -> (env, env * Typing_error.t) result
 
-val get_local_expr_id :
-  env -> Local_id.t -> Typing_local_types.expression_id option
+val get_local_expr_id : env -> Local_id.t -> Expression_id.t option
 
 val get_tpenv : env -> TPEnv.t
 
@@ -574,4 +570,4 @@ module Log : sig
     Hh_json.json
 end
 
-val make_ident : env -> Ident_provider.Ident.t
+val make_expression_id : env -> Expression_id.t

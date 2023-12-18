@@ -141,7 +141,8 @@ let rec core_type ?(seen_indirection = false) (ct : core_type) : Rust_type.t =
     (* Hash.hash_value *)
     rust_type "isize" [] []
   | Ptyp_constr
-      ({ txt = Ldot (Ldot (Lident "Ident_provider", "Ident"), "t"); _ }, []) ->
+      ({ txt = Ldot (Ldot (Lident "Ident_provider", "Ident"), "t"); _ }, [])
+  | Ptyp_constr ({ txt = Ldot (Lident "Expression_id", "t"); _ }, []) ->
     rust_type "isize" [] []
   | Ptyp_constr (id, args) ->
     let id =

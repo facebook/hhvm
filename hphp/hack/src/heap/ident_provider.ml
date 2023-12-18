@@ -13,13 +13,15 @@ type t = int ref
 module Ident = struct
   type t = int [@@deriving ord, eq, hash, show]
 
-  module Map = Stdlib.Map.Make (Int)
+  module Map = WrappedMap.Make (Int)
 
   let immutable_mask = 1 lsl 62
 
   let is_immutable i = i land immutable_mask <> 0
 
   let make_immutable i = i lor immutable_mask
+
+  let cast i = i
 end
 
 let init () = ref 0

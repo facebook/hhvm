@@ -25,6 +25,7 @@
   (name typing_defs_core)
   (wrapped false)
   (modules
+    expression_id
     tanySentinel
     typing_defs_core
     typing_defs_flags

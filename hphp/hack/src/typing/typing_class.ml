@@ -153,8 +153,9 @@ let method_def ~is_disposable env cls m =
       Env.env_with_method_droot_member env method_name ~static:m.m_static
   in
   let initial_env = env in
-  (* reset the expression dependent display ids for each method body *)
-  Reason.reset_expr_display_id_map ();
+  let env =
+    { env with expression_id_provider = Expression_id.make_provider () }
+  in
   let pos = fst m.m_name in
   let env = Env.open_tyvars env (fst m.m_name) in
   let env = Env.reinitialize_locals env in

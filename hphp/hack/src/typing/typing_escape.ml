@@ -604,12 +604,6 @@ let escaping_from_snapshot snap env :
     (* Oh, that's nice... *)
     String.length tp > 6 && String.(sub ~pos:0 ~len:6 tp = "this::")
   in
-  let eidmap =
-    let inverse_map m =
-      Expression_id.Map.fold (fun k v -> IMap.add v k) m IMap.empty
-    in
-    inverse_map (Expression_id.get_expr_display_id_map ())
-  in
   let { nextid; _ } = snap in
   let is_old_dep_expr tp =
     (* but it gets better! *)
@@ -620,14 +614,11 @@ let escaping_from_snapshot snap env :
         else
           atoi s (i + 1) ((10 * acc) + Char.(to_int s.[i] - to_int '0'))
       in
-      atoi tp_name 6 0
+      Expression_id.dodgy_from_int @@ atoi tp_name 6 0
     in
     String.length tp > 6
     && String.(sub ~pos:0 ~len:6 tp = "<expr#")
-    &&
-    match IMap.find_opt (extract_id tp) eidmap with
-    | Some id -> Expression_id.compare id nextid < 0
-    | None -> false
+    && Expression_id.compare (extract_id tp) nextid < 0
   in
   let tpmap =
     Type_parameter_env.get_tparams (Env.get_global_tpenv env)

@@ -21,7 +21,7 @@ Invalid argument (Typing[4110])
   File "subtype_supportdynamic.bad.php", line 3, characters 12-30:
   Expected `dynamic`
   File "subtype_supportdynamic.bad.php", line 7, characters 43-43:
-  Type `<expr#1> as C` is not a subtype of `dynamic` under dynamic-aware subtyping
+  Type `<expr#4> as C` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "subtype_supportdynamic.bad.php", line 16, characters 5-6:
 Invalid argument (Typing[4110])
   File "subtype_supportdynamic.bad.php", line 3, characters 12-30:
@@ -33,25 +33,25 @@ Invalid argument (Typing[4110])
   File "subtype_supportdynamic.bad.php", line 3, characters 12-30:
   Expected `dynamic`
   File "subtype_supportdynamic.bad.php", line 13, characters 39-44:
-  Type `<expr#1> as vec<C>` is not a subtype of `dynamic` under dynamic-aware subtyping
+  Type `<expr#3> as vec<C>` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "subtype_supportdynamic.bad.php", line 18, characters 5-7:
 Invalid argument (Typing[4110])
   File "subtype_supportdynamic.bad.php", line 3, characters 12-30:
   Expected `dynamic`
   File "subtype_supportdynamic.bad.php", line 13, characters 50-64:
-  Type `<expr#2> as dict<string, C>` is not a subtype of `dynamic` under dynamic-aware subtyping
+  Type `<expr#4> as dict<string, C>` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "subtype_supportdynamic.bad.php", line 19, characters 5-7:
 Invalid argument (Typing[4110])
   File "subtype_supportdynamic.bad.php", line 3, characters 12-30:
   Expected `dynamic`
   File "subtype_supportdynamic.bad.php", line 14, characters 23-41:
-  Type `<expr#3> as dict<arraykey, C>` is not a subtype of `dynamic` under dynamic-aware subtyping
+  Type `<expr#5> as dict<arraykey, C>` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "subtype_supportdynamic.bad.php", line 20, characters 5-7:
 Invalid argument (Typing[4110])
   File "subtype_supportdynamic.bad.php", line 3, characters 12-30:
   Expected `dynamic`
   File "subtype_supportdynamic.bad.php", line 15, characters 23-31:
-  Type `<expr#4> as vec<C>` is not a subtype of `dynamic` under dynamic-aware subtyping
+  Type `<expr#6> as vec<C>` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "subtype_supportdynamic.bad.php", line 24, characters 5-6:
 Invalid argument (Typing[4110])
   File "subtype_supportdynamic.bad.php", line 3, characters 12-30:
@@ -63,13 +63,13 @@ Invalid argument (Typing[4110])
   File "subtype_supportdynamic.bad.php", line 3, characters 12-30:
   Expected `dynamic`
   File "subtype_supportdynamic.bad.php", line 28, characters 33-38:
-  Type `<expr#1> as vec<C>` is not a subtype of `dynamic` under dynamic-aware subtyping
+  Type `<expr#2> as vec<C>` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "subtype_supportdynamic.bad.php", line 33, characters 5-6:
 Invalid argument (Typing[4110])
   File "subtype_supportdynamic.bad.php", line 3, characters 12-30:
   Expected `dynamic`
   File "subtype_supportdynamic.bad.php", line 29, characters 33-44:
-  Type `<expr#2> as dict<int, C>` is not a subtype of `dynamic` under dynamic-aware subtyping
+  Type `<expr#3> as dict<int, C>` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "subtype_supportdynamic.bad.php", line 37, characters 5-6:
 Invalid argument (Typing[4110])
   File "subtype_supportdynamic.bad.php", line 3, characters 12-30:
@@ -81,19 +81,19 @@ Invalid argument (Typing[4110])
   File "subtype_supportdynamic.bad.php", line 3, characters 12-30:
   Expected `dynamic`
   File "subtype_supportdynamic.bad.php", line 43, characters 29-35:
-  Type `<expr#1> as V1<int>` is not a subtype of `dynamic` under dynamic-aware subtyping
+  Type `<expr#2> as V1<int>` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "subtype_supportdynamic.bad.php", line 45, characters 5-7:
 Invalid argument (Typing[4110])
   File "subtype_supportdynamic.bad.php", line 3, characters 12-30:
   Expected `dynamic`
   File "subtype_supportdynamic.bad.php", line 43, characters 42-46:
-  Type `<expr#2> as V2<C>` is not a subtype of `dynamic` under dynamic-aware subtyping
+  Type `<expr#3> as V2<C>` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "subtype_supportdynamic.bad.php", line 54, characters 5-6:
 Invalid argument (Typing[4110])
   File "subtype_supportdynamic.bad.php", line 3, characters 12-30:
   Expected `dynamic`
   File "subtype_supportdynamic.bad.php", line 48, characters 21-23:
-  Type `(int | <expr#1> as C)` is not a subtype of `dynamic` under dynamic-aware subtyping
+  Type `(int | <expr#11> as C)` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "subtype_supportdynamic.bad.php", line 58, characters 5-6:
 Invalid argument (Typing[4110])
   File "subtype_supportdynamic.bad.php", line 3, characters 23-29:

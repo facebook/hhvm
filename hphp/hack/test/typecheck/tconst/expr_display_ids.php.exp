@@ -1,9 +1,9 @@
 File "expr_display_ids.php", line 20, characters 3-20:
-  <expr#1>::T as C::T
-File "expr_display_ids.php", line 24, characters 3-20:
-  <expr#1>::T as C::T
-File "expr_display_ids.php", line 11, characters 5-22:
-  <expr#1>::T as C::T
-File "expr_display_ids.php", line 15, characters 5-22:
   <expr#2>::T as C::T
+File "expr_display_ids.php", line 24, characters 3-20:
+  <expr#2>::T as C::T
+File "expr_display_ids.php", line 11, characters 5-22:
+  <expr#6>::T as C::T
+File "expr_display_ids.php", line 15, characters 5-22:
+  <expr#10>::T as C::T
 No errors

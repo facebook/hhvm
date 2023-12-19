@@ -3,10 +3,10 @@ This call is not allowed because its capabilities are incompatible with the cont
   File "ctx-const-bounds_call-from-policied-of.php", line 17, characters 31-35:
   From this declaration, the context of this function body provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty}
   File "ctx-const-bounds_call-from-policied-of.php", line 10, characters 29-29:
-  But the function being called requires the capability <expr#1>::C
+  But the function being called requires the capability <expr#2>::C
 File "ctx-const-bounds_call-from-policied-of.php", line 22, characters 7-7:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "ctx-const-bounds_call-from-policied-of.php", line 21, characters 31-54:
   From this declaration, the context of this function body provides the capability set {ImplicitPolicyOf<MySubPolicy>, ReadGlobals, System, WriteProperty}
   File "ctx-const-bounds_call-from-policied-of.php", line 10, characters 29-29:
-  But the function being called requires the capability <expr#1>::C
+  But the function being called requires the capability <expr#2>::C

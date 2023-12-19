@@ -1,9 +1,9 @@
 File "this_tparam_bad2.php", line 26, characters 12-15:
 Invalid argument (Typing[4110])
   File "this_tparam_bad2.php", line 14, characters 36-39:
-  Expected `<expr#1> as Foo`
+  Expected `<expr#2> as Foo`
   File "this_tparam_bad2.php", line 26, characters 12-15:
-    where `<expr#1>` is a reference to this expression
+    where `<expr#2>` is a reference to this expression
   File "this_tparam_bad2.php", line 18, characters 33-35:
   But got `Foo`
   File "this_tparam_bad2.php", line 18, characters 33-35:

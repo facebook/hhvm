@@ -1,33 +1,33 @@
 File "caller-callee_bad.php", line 24, characters 15-18:
 Invalid argument (Typing[4110])
   File "caller-callee_bad.php", line 17, characters 22-29:
-  Expected `<expr#1>::TC`
+  Expected `<expr#3>::TC`
   File "caller-callee_bad.php", line 24, characters 5-9:
-    where `<expr#1>` is a reference to this expression
+    where `<expr#3>` is a reference to this expression
   File "caller-callee_bad.php", line 22, characters 19-25:
-  But got `<expr#2> as CanRead`
+  But got `<expr#4> as CanRead`
   File "caller-callee_bad.php", line 23, characters 50-57:
     resulting from expanding the type constant `this::TC`
   File "caller-callee_bad.php", line 24, characters 15-18:
-    where `<expr#2>` is a reference to this expression
+    where `<expr#4>` is a reference to this expression
 File "caller-callee_bad.php", line 35, characters 15-18:
 Invalid argument (Typing[4110])
   File "caller-callee_bad.php", line 43, characters 22-29:
   Expected `this::TC`
   File "caller-callee_bad.php", line 34, characters 49-57:
-  But got `<expr#1> as CanAppend`
+  But got `<expr#3> as CanAppend`
   File "caller-callee_bad.php", line 35, characters 15-18:
-    where `<expr#1>` is a reference to this expression
+    where `<expr#3>` is a reference to this expression
 File "caller-callee_bad.php", line 36, characters 62-75:
 Invalid argument (Typing[4110])
   File "caller-callee_bad.php", line 43, characters 22-29:
   Expected `this::TC`
   File "caller-callee_bad.php", line 49, characters 19-27:
-  But got `<expr#2> as CanAppend`
+  But got `<expr#7> as CanAppend`
   File "caller-callee_bad.php", line 57, characters 37-44:
     resulting from expanding the type constant `AppendOnly::TC`
   File "caller-callee_bad.php", line 36, characters 62-75:
-    where `<expr#2>` is a reference to this expression
+    where `<expr#7>` is a reference to this expression
 File "caller-callee_bad.php", line 39, characters 66-83:
 Invalid argument (Typing[4110])
   File "caller-callee_bad.php", line 49, characters 19-27:
@@ -45,22 +45,22 @@ Invalid argument (Typing[4110])
 File "caller-callee_bad.php", line 55, characters 47-60:
 Invalid argument (Typing[4110])
   File "caller-callee_bad.php", line 43, characters 22-29:
-  Expected `<expr#1>::TC`
+  Expected `<expr#9>::TC`
   File "caller-callee_bad.php", line 55, characters 39-41:
-    where `<expr#1>` is a reference to this expression
+    where `<expr#9>` is a reference to this expression
   File "caller-callee_bad.php", line 49, characters 19-27:
-  But got `<expr#2> as CanAppend`
+  But got `<expr#11> as CanAppend`
   File "caller-callee_bad.php", line 57, characters 37-44:
     resulting from expanding the type constant `this::TC`
   File "caller-callee_bad.php", line 55, characters 47-60:
-    where `<expr#2>` is a reference to this expression
+    where `<expr#11>` is a reference to this expression
 File "caller-callee_bad.php", line 64, characters 11-14:
 Invalid argument (Typing[4110])
   File "caller-callee_bad.php", line 43, characters 22-29:
-  Expected `<expr#1>::TC`
+  Expected `<expr#2>::TC`
   File "caller-callee_bad.php", line 64, characters 3-5:
-    where `<expr#1>` is a reference to this expression
-  File "caller-callee_bad.php", line 63, characters 66-74:
-  But got `<expr#2> as CanAppend`
-  File "caller-callee_bad.php", line 64, characters 11-14:
     where `<expr#2>` is a reference to this expression
+  File "caller-callee_bad.php", line 63, characters 66-74:
+  But got `<expr#3> as CanAppend`
+  File "caller-callee_bad.php", line 64, characters 11-14:
+    where `<expr#3>` is a reference to this expression

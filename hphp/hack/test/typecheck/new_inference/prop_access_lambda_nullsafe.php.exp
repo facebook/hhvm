@@ -3,6 +3,6 @@ Invalid argument (Typing[4110])
   File "prop_access_lambda_nullsafe.php", line 9, characters 31-36:
   Expected `null` or an object with property `x` (use of `?->` operator)
   File "prop_access_lambda_nullsafe.php", line 8, characters 14-15:
-  But got `<expr#1> as A`
+  But got `<expr#2> as A`
   File "prop_access_lambda_nullsafe.php", line 10, characters 6-7:
-    where `<expr#1>` is a reference to this expression
+    where `<expr#2>` is a reference to this expression

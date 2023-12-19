@@ -1,9 +1,9 @@
 File "this_member.php", line 16, characters 5-20:
 Invalid assignment (Typing[4110])
   File "this_member.php", line 13, characters 38-41:
-  Expected `<expr#1> as X`
+  Expected `<expr#4> as X`
   File "this_member.php", line 16, characters 5-9:
-    where `<expr#1>` is a reference to this expression
+    where `<expr#4>` is a reference to this expression
   File "this_member.php", line 16, characters 13-17:
   But got `this as X`
   File "this_member.php", line 13, characters 38-41:

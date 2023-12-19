@@ -3,4 +3,4 @@ Invalid argument (Typing[4110])
   File "is_as_deep_inference_check.php", line 7, characters 12-45:
   Expected `Reified<Reified<Reified<int>>>`
   File "is_as_deep_inference_check.php", line 12, characters 8-9:
-  But got `(<expr#1> as I & <expr#1> as Reified<Reified<int>>)` from this "as" assertion
+  But got `(<expr#5> as I & <expr#5> as Reified<Reified<int>>)` from this "as" assertion

@@ -5,6 +5,6 @@ Invalid return type (Typing[4110])
   File "invariant-dep-2.php", line 15, characters 18-20:
   But got `int`
   File "invariant-dep-2.php", line 16, characters 26-32:
-    resulting from expanding the type constant `<expr#1> as ConcreteIntBox::T`
+    resulting from expanding the type constant `<expr#4> as ConcreteIntBox::T`
   File "invariant-dep-2.php", line 52, characters 12-29:
-    where `<expr#1>` is a reference to this expression
+    where `<expr#4>` is a reference to this expression

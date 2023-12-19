@@ -182,27 +182,27 @@
          { fb_ast =
            [([21:3-21],
              (Expr
-                ((~<expr#1>::TX), [21:3-20],
+                ((~<expr#2>::TX), [21:3-20],
                  (Binop
-                    { bop = (Eq None); lhs = ((~<expr#1>::TX), [21:3-7], (Lvar ([21:3-7], $gen)));
+                    { bop = (Eq None); lhs = ((~<expr#2>::TX), [21:3-7], (Lvar ([21:3-7], $gen)));
                       rhs =
-                      ((~<expr#1>::TX), [21:10-20],
+                      ((~<expr#2>::TX), [21:10-20],
                        (Call
-                          { func = (((function<T as WithTypeConstant, TR>(<expr#1> as WithTypeConstant $left): ~<expr#1>::TX)), [21:10-16], (Id ([21:10-16], "\\my_gen")));
-                            targs = [((<expr#1> as WithTypeConstant), ([21:10-16], Hwildcard)); ((<expr#1>::TX), ([21:10-16], Hwildcard))];
+                          { func = (((function<T as WithTypeConstant, TR>(<expr#2> as WithTypeConstant $left): ~<expr#2>::TX)), [21:10-16], (Id ([21:10-16], "\\my_gen")));
+                            targs = [((<expr#2> as WithTypeConstant), ([21:10-16], Hwildcard)); ((<expr#2>::TX), ([21:10-16], Hwildcard))];
                             args = [(Pnormal, ((WithTypeConstant), [21:17-19], (Lvar ([21:17-19], $x))))]; 
                             unpacked_arg = None }))
                       }))));
              ([22:3-21],
               (Expr
-                 ((~(function(<expr#2>::TX): ~void)), [22:3-20],
+                 ((~(function(<expr#3>::TX): ~void)), [22:3-20],
                   (Binop
-                     { bop = (Eq None); lhs = ((~(function(<expr#2>::TX): ~void)), [22:3-7], (Lvar ([22:3-7], $log)));
+                     { bop = (Eq None); lhs = ((~(function(<expr#3>::TX): ~void)), [22:3-7], (Lvar ([22:3-7], $log)));
                        rhs =
-                       ((~(function(<expr#2>::TX): ~void)), [22:10-20],
+                       ((~(function(<expr#3>::TX): ~void)), [22:10-20],
                         (Call
-                           { func = (((function<T as WithTypeConstant, TR>(<expr#2> as WithTypeConstant $left): ~(function(<expr#2>::TX): ~void))), [22:10-16], (Id ([22:10-16], "\\my_log")));
-                             targs = [((<expr#2> as WithTypeConstant), ([22:10-16], Hwildcard)); ((<expr#2>::TX), ([22:10-16], Hwildcard))];
+                           { func = (((function<T as WithTypeConstant, TR>(<expr#3> as WithTypeConstant $left): ~(function(<expr#3>::TX): ~void))), [22:10-16], (Id ([22:10-16], "\\my_log")));
+                             targs = [((<expr#3> as WithTypeConstant), ([22:10-16], Hwildcard)); ((<expr#3>::TX), ([22:10-16], Hwildcard))];
                              args = [(Pnormal, ((WithTypeConstant), [22:17-19], (Lvar ([22:17-19], $y))))]; 
                              unpacked_arg = None }))
                        }))));
@@ -210,8 +210,8 @@
               (Expr
                  ((~void), [26:3-13],
                   (Call
-                     { func = ((~(function(<expr#2>::TX): ~void)), [26:3-7], (Lvar ([26:3-7], $log))); 
-                       targs = []; args = [(Pnormal, ((~<expr#1>::TX), [26:8-12], (Hole (((~<expr#1>::TX), [26:8-12], (Lvar ([26:8-12], $gen))), (~<expr#1>::TX), (~<expr#2>::TX), Typing))))];
+                     { func = ((~(function(<expr#3>::TX): ~void)), [26:3-7], (Lvar ([26:3-7], $log))); 
+                       targs = []; args = [(Pnormal, ((~<expr#2>::TX), [26:8-12], (Hole (((~<expr#2>::TX), [26:8-12], (Lvar ([26:8-12], $gen))), (~<expr#2>::TX), (~<expr#3>::TX), Typing))))];
                        unpacked_arg = None }))))
              ]
            };

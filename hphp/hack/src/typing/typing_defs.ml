@@ -545,7 +545,7 @@ let get_param_mode callconv =
 
 module DependentKind = struct
   let to_string = function
-    | DTexpr i -> Expression_id.display_in_error i
+    | DTexpr i -> Expression_id.display i
 
   let is_generic_dep_ty s =
     String.is_substring ~substring:"::" s

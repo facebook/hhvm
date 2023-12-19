@@ -3,4 +3,4 @@ This call is not allowed because its capabilities are incompatible with the cont
   File "ctx-const-bounds_implicit-lower-defaults.php", line 8, characters 10-33:
   From this declaration, the context of this function body provides the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
   File "ctx-const-bounds_implicit-lower-defaults.php", line 5, characters 38-38:
-  But the function being called requires the capability <expr#1>::C
+  But the function being called requires the capability <expr#2>::C

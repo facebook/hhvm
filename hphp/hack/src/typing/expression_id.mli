@@ -20,11 +20,13 @@ val is_immutable : t -> bool
 
 module Map : WrappedMap_sig.S with type key = t
 
-val display_in_error : t -> string
+val display : t -> string
 
 (** Shows the internal value if the ID. Only use for debugging *)
 val debug : t -> string
 
-val get_expr_display_id_map : unit -> int Map.t
-
 val pp : Format.formatter -> t -> unit
+
+(** You probably should get your types straight before using this.
+    Hint: don't use string mingling. *)
+val dodgy_from_int : int -> t

@@ -1,11 +1,11 @@
 File "this_tparam_bad1.php", line 36, characters 13-21:
 Invalid argument (Typing[4110])
   File "this_tparam_bad1.php", line 29, characters 17-20:
-  Expected `<expr#1> as Foo`
+  Expected `<expr#2> as Foo`
   File "this_tparam_bad1.php", line 18, characters 23-23:
     via this generic `T`
   File "this_tparam_bad1.php", line 36, characters 3-6:
-    where `<expr#1>` is a reference to this expression
+    where `<expr#2>` is a reference to this expression
   File "this_tparam_bad1.php", line 36, characters 17-19:
   But got `Foo`
   File "this_tparam_bad1.php", line 34, characters 14-16:

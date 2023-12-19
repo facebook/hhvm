@@ -5,16 +5,16 @@ This call is not allowed because its capabilities are incompatible with the cont
   File "box+ctx_exact.php", line 26, characters 37-38:
   From this declaration, the context of this function body provides the capability set {}
   File "box+ctx_exact.php", line 12, characters 33-33:
-  But the function being called requires the capability <expr#1>::C
+  But the function being called requires the capability <expr#2>::C
 File "box+ctx_exact.php", line 54, characters 17-19:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "box+ctx_exact.php", line 50, characters 2-3:
   From this declaration, the context of this function body provides the capability set {}
   File "box+ctx_exact.php", line 12, characters 33-33:
-  But the function being called requires the capability <expr#3>::C
+  But the function being called requires the capability <expr#5>::C
 File "box+ctx_exact.php", line 55, characters 22-24:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "box+ctx_exact.php", line 50, characters 2-3:
   From this declaration, the context of this function body provides the capability set {}
   File "box+ctx_exact.php", line 12, characters 33-33:
-  But the function being called requires the capability <expr#4>::C
+  But the function being called requires the capability <expr#2>::C

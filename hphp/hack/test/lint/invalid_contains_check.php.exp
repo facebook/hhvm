@@ -50,9 +50,9 @@ File "invalid_contains_check.php", line 40, characters 10-34:
 This call to 'HH\Lib\C\contains' will always return the same value, because type Foo is disjoint from type Baz. (Lint[5638])
 File "invalid_contains_check.php", line 43, characters 10-34:
 Invalid `C\contains` check: This call will always return `false`.
-A `Traversable<Foo>` cannot contain a value of type `<expr#1> as Bar` (Lint[5608])
+A `Traversable<Foo>` cannot contain a value of type `<expr#3> as Bar` (Lint[5608])
 File "invalid_contains_check.php", line 43, characters 10-34:
-This call to 'HH\Lib\C\contains' will always return the same value, because type Foo is disjoint from type <expr#1> as Bar. (Lint[5638])
+This call to 'HH\Lib\C\contains' will always return the same value, because type Foo is disjoint from type <expr#3> as Bar. (Lint[5638])
 File "invalid_contains_check.php", line 46, characters 10-34:
 Invalid `C\contains` check: This call will always return `false`.
 A `Traversable<Bar>` cannot contain a value of type `Foo` (Lint[5608])

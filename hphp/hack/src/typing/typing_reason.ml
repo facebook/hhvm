@@ -680,7 +680,7 @@ let expr_dep_type_reason_string e =
   match e with
   | ERexpr id ->
     "where "
-    ^ Markdown_lite.md_codify (Expression_id.display_in_error id)
+    ^ Markdown_lite.md_codify (Expression_id.display id)
     ^ " is a reference to this expression"
   | ERstatic ->
     "where `<static>` refers to the late bound type of the enclosing class"

@@ -3,6 +3,6 @@ Invalid return type (Typing[4110])
   File "covariant-dep-1.php", line 51, characters 6-7:
   Expected `T0`
   File "covariant-dep-1.php", line 9, characters 26-32:
-  But got `<expr#6>::T as TBox::T`
+  But got `<expr#23>::T as TBox::T`
   File "covariant-dep-1.php", line 52, characters 12-29:
-    where `<expr#6>` is a reference to this expression
+    where `<expr#23>` is a reference to this expression

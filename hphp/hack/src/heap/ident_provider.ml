@@ -21,7 +21,7 @@ module Ident = struct
 
   let make_immutable i = i lor immutable_mask
 
-  let cast i = i
+  let dodgy_from_int i = i
 end
 
 let init () = ref 0

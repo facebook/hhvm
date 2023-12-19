@@ -38,10 +38,10 @@ Errors:
          { fb_ast =
            [([6:2-25],
              (Expr
-                ((<expr#1> as C), [6:2-24],
+                ((<expr#2> as C), [6:2-24],
                  (Binop
-                    { bop = (Eq None); lhs = ((<expr#1> as C), [6:2-4], (Lvar ([6:2-4], $x)));
-                      rhs = ((<expr#1> as C), [6:7-24], (New (((C), [6:11-22], (CIexpr ((classname<C>), [6:11-22], (Lvar ([6:11-22], $class_name))))), [], [], None, ((function(): void))))) }))))
+                    { bop = (Eq None); lhs = ((<expr#2> as C), [6:2-4], (Lvar ([6:2-4], $x)));
+                      rhs = ((<expr#2> as C), [6:7-24], (New (((C), [6:11-22], (CIexpr ((classname<C>), [6:11-22], (Lvar ([6:11-22], $class_name))))), [], [], None, ((function(): void))))) }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([5:10-37], "__SupportDynamicType"); ua_params = [] }]; 

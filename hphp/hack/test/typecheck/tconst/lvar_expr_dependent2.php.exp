@@ -1,31 +1,31 @@
 File "lvar_expr_dependent2.php", line 19, characters 5-23:
-  <expr#1>::T as C::T
+  <expr#16>::T as C::T
 File "lvar_expr_dependent2.php", line 20, characters 5-23:
-  <expr#2>::T as C::T
+  <expr#19>::T as C::T
 File "lvar_expr_dependent2.php", line 25, characters 7-24:
-  <expr#3>::T as C::T
+  <expr#22>::T as C::T
 File "lvar_expr_dependent2.php", line 29, characters 7-24:
-  <expr#4>::T as C::T
+  <expr#25>::T as C::T
 File "lvar_expr_dependent2.php", line 34, characters 5-22:
-  <expr#5>::T as C::T
+  <expr#26>::T as C::T
 File "lvar_expr_dependent2.php", line 37, characters 5-22:
-  <expr#5>::T as C::T
+  <expr#26>::T as C::T
 File "lvar_expr_dependent2.php", line 42, characters 7-24:
-  <expr#6>::T as C::T
+  <expr#27>::T as C::T
 File "lvar_expr_dependent2.php", line 46, characters 5-22:
-  <expr#7>::T as C::T
+  <expr#28>::T as C::T
 File "lvar_expr_dependent2.php", line 49, characters 5-22:
-  <expr#7>::T as C::T
+  <expr#28>::T as C::T
 File "lvar_expr_dependent2.php", line 53, characters 7-24:
-  <expr#8>::T as C::T
+  <expr#30>::T as C::T
 File "lvar_expr_dependent2.php", line 57, characters 5-22:
-  <expr#7>::T as C::T
+  <expr#28>::T as C::T
 File "lvar_expr_dependent2.php", line 61, characters 7-24:
-  <expr#9>::T as C::T
+  <expr#34>::T as C::T
 File "lvar_expr_dependent2.php", line 63, characters 7-24:
-  <expr#9>::T as C::T
+  <expr#34>::T as C::T
 File "lvar_expr_dependent2.php", line 67, characters 5-22:
-  <expr#10>::T as C::T
+  <expr#35>::T as C::T
 File "lvar_expr_dependent2.php", line 22, characters 9-17:
 This comparison has invalid types.  Only comparisons in which both arguments are strings, nums, DateTime, or DateTimeImmutable are allowed (Typing[4240])
   File "lvar_expr_dependent2.php", line 16, characters 31-31:

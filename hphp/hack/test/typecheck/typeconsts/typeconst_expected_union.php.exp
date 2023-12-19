@@ -7,7 +7,7 @@ Invalid argument (Typing[4326])
   File "typeconst_expected_union.php", line 23, characters 27-40:
     on an object of exactly the class SomeClassChild
   File "typeconst_expected_union.php", line 15, characters 75-80:
-  But got `SomeClass::Tconst where \SomeClass::Tconst super <expr#1>::Tconst, \SomeClass::Tconst as arraykey`
+  But got `SomeClass::Tconst where \SomeClass::Tconst super <expr#2>::Tconst, \SomeClass::Tconst as arraykey`
   by accessing the type constant `Tconst`
   File "typeconst_expected_union.php", line 20, characters 33-41:
   on an object of type SomeClass

@@ -3,13 +3,13 @@ Was expecting a return type hint (Typing[4030])
 File "loader_example.php", line 43, characters 11-12:
 Invalid argument (Typing[4110])
   File "loader_example.php", line 17, characters 27-30:
-  Expected `<expr#1> as ALoader`
+  Expected `<expr#4> as ALoader`
   File "loader_example.php", line 43, characters 3-4:
-    where `<expr#1>` is a reference to this expression
+    where `<expr#4>` is a reference to this expression
   File "loader_example.php", line 12, characters 23-38:
-    resulting from expanding the type constant `<expr#1> as ALoader::TLoadsType`
+    resulting from expanding the type constant `<expr#4> as ALoader::TLoadsType`
   File "loader_example.php", line 43, characters 3-4:
-    where `<expr#1>` is a reference to this expression
+    where `<expr#4>` is a reference to this expression
   File "loader_example.php", line 31, characters 49-55:
   But got `ALoader`
   File "loader_example.php", line 38, characters 16-22:

@@ -1,19 +1,19 @@
 File "lvar_expr_dependent5.php", line 13, characters 5-22:
-  <expr#1>::T as C::T
+  <expr#9>::T as C::T
 File "lvar_expr_dependent5.php", line 14, characters 5-22:
-  <expr#1>::T as C::T
+  <expr#9>::T as C::T
 File "lvar_expr_dependent5.php", line 18, characters 7-24:
-  <expr#1>::T as C::T
+  <expr#9>::T as C::T
 File "lvar_expr_dependent5.php", line 21, characters 7-24:
-  <expr#2>::T as C::T
+  <expr#10>::T as C::T
 File "lvar_expr_dependent5.php", line 24, characters 7-24:
-  <expr#3>::T as C::T
+  <expr#11>::T as C::T
 File "lvar_expr_dependent5.php", line 27, characters 7-24:
-  <expr#4>::T as C::T
+  <expr#18>::T as C::T
 File "lvar_expr_dependent5.php", line 27, characters 7-24:[2]
-  <expr#3>::T as C::T
+  <expr#11>::T as C::T
 File "lvar_expr_dependent5.php", line 27, characters 7-24:[3]
-  <expr#5>::T as C::T
+  <expr#17>::T as C::T
 File "lvar_expr_dependent5.php", line 31, characters 5-22:
-  <expr#5>::T as C::T
+  <expr#17>::T as C::T
 No errors

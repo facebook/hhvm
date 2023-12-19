@@ -1,6 +1,6 @@
 File "expr_dep_escapes_1.php", line 13, characters 8-67:
 Rigid type variable escapes its lambda (Typing[4442])
   File "expr_dep_escapes_1.php", line 6, characters 38-38:
-  Could not remove rigid type variable `<expr#1>::T`
+  Could not remove rigid type variable `<expr#13>::T`
   File "expr_dep_escapes_1.php", line 11, characters 3-15:
   in the type of local `$v`

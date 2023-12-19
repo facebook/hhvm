@@ -17,7 +17,7 @@ module Ident : sig
 
   val make_immutable : t -> t
 
-  val cast : int -> t
+  val dodgy_from_int : int -> t
 end
 
 val init : unit -> t

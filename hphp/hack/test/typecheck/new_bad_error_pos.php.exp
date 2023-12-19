@@ -1,10 +1,10 @@
 File "new_bad_error_pos.php--file1.php", line 7, characters 15-16:
 Invalid argument (Typing[4110])
   File "new_bad_error_pos.php--file2.php", line 8, characters 36-43:
-  Expected `<expr#1>::Ta`
+  Expected `<expr#2>::Ta`
   File "new_bad_error_pos.php--file1.php", line 6, characters 8-9:
-    where `<expr#1>` is a reference to this expression
-  File "new_bad_error_pos.php--file1.php", line 4, characters 3-3:
-  But got `<expr#2> as A`
-  File "new_bad_error_pos.php--file1.php", line 7, characters 15-16:
     where `<expr#2>` is a reference to this expression
+  File "new_bad_error_pos.php--file1.php", line 4, characters 3-3:
+  But got `<expr#3> as A`
+  File "new_bad_error_pos.php--file1.php", line 7, characters 15-16:
+    where `<expr#3>` is a reference to this expression

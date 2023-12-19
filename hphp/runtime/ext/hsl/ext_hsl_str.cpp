@@ -154,14 +154,14 @@ bool HHVM_FUNCTION(ends_with_ci_l,
   return get_ops(maybe_loc)->ends_with_ci(string, suffix);
 }
 
-StringRet HHVM_FUNCTION(strip_prefix_l,
+String HHVM_FUNCTION(strip_prefix_l,
                      const String& string,
                      const String& prefix,
                      const Variant& maybe_loc) {
   return get_ops(maybe_loc)->strip_prefix(string, prefix);
 }
 
-StringRet HHVM_FUNCTION(strip_suffix_l,
+String HHVM_FUNCTION(strip_suffix_l,
                      const String& string,
                      const String& suffix,
                      const Variant& maybe_loc) {
@@ -209,7 +209,7 @@ ALWAYS_INLINE int64_t normalize_length(int64_t length) {
 }
 } // namespace
 
-StringRet HHVM_FUNCTION(slice_l,
+String HHVM_FUNCTION(slice_l,
                      const String& str,
                      int64_t offset,
                      int64_t length,
@@ -218,7 +218,7 @@ StringRet HHVM_FUNCTION(slice_l,
   return get_ops(maybe_loc)->slice(str, offset, length);
 }
 
-StringRet HHVM_FUNCTION(splice_l,
+String HHVM_FUNCTION(splice_l,
                      const String& str,
                      const String& replacement,
                      int64_t offset,
@@ -230,7 +230,7 @@ StringRet HHVM_FUNCTION(splice_l,
   return get_ops(maybe_loc)->splice(str, replacement, offset, int_length);
 }
 
-ArrayRet HHVM_FUNCTION(split_l,
+Array HHVM_FUNCTION(split_l,
                     const String& str,
                     const String& delimiter,
                     const Variant& limit,
@@ -258,7 +258,7 @@ String HHVM_FUNCTION(reverse_l,
   return get_ops(maybe_loc)->reverse(str);
 }
 
-StringRet HHVM_FUNCTION(pad_left_l,
+String HHVM_FUNCTION(pad_left_l,
                      const String& str,
                      int64_t len,
                      const String& pad,
@@ -272,7 +272,7 @@ StringRet HHVM_FUNCTION(pad_left_l,
   return get_ops(maybe_loc)->pad_left(str, len, pad);
 }
 
-StringRet HHVM_FUNCTION(pad_right_l,
+String HHVM_FUNCTION(pad_right_l,
                      const String& str,
                      int64_t len,
                      const String& pad,
@@ -286,7 +286,7 @@ StringRet HHVM_FUNCTION(pad_right_l,
   return get_ops(maybe_loc)->pad_right(str, len, pad);
 }
 
-StringRet HHVM_FUNCTION(vsprintf_l,
+String HHVM_FUNCTION(vsprintf_l,
                      const Variant& maybe_loc,
                      const String& fmt,
                      const Array& args) {
@@ -337,21 +337,21 @@ String trim_impl(const String& str,
 }
 } // namespace
 
-StringRet HHVM_FUNCTION(trim_l,
+String HHVM_FUNCTION(trim_l,
                      const String& str,
                      const Variant& what,
                      const Variant& maybe_loc) {
   return trim_impl(str, what, maybe_loc, HSLLocale::Ops::TrimSides::BOTH);
 }
 
-StringRet HHVM_FUNCTION(trim_left_l,
+String HHVM_FUNCTION(trim_left_l,
                      const String& str,
                      const Variant& what,
                      const Variant& maybe_loc) {
   return trim_impl(str, what, maybe_loc, HSLLocale::Ops::TrimSides::LEFT);
 }
 
-StringRet HHVM_FUNCTION(trim_right_l,
+String HHVM_FUNCTION(trim_right_l,
                      const String& str,
                      const Variant& what,
                      const Variant& maybe_loc) {

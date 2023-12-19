@@ -517,6 +517,8 @@ let find_references ctx workers target include_defs files ~stream_file =
   let len = List.length files in
   Hh_logger.debug "find_references: %d files" len;
   let t_start = Unix.gettimeofday () in
+  (* This "10" threshold is exercised in test/integration/findrefs_multiworker --
+     if you change the threshold here, then please update the test. *)
   let results =
     if len < 10 then
       find_refs

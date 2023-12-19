@@ -18,7 +18,9 @@ module type Entry = sig
 
   type 'a value = 'a
 
-  val get_size : key:'a key -> value:'a value -> size
+  val compare : 'a t -> 'b t -> int
+
+  val hash : 'a t -> int
 
   val key_to_log_string : 'a key -> string
 end
@@ -35,6 +37,16 @@ module Cache (Entry : Entry) = struct
   type key_wrapper = Key : 'a Entry.key -> key_wrapper
 
   type value_wrapper = Value_wrapper : 'a Entry.value -> value_wrapper
+
+  module KeyWrapper = struct
+    type t = key_wrapper
+
+    let compare (Key key1) (Key key2) = Entry.compare key1 key2
+
+    let sexp_of_t (Key key) = Sexp.Atom (Entry.key_to_log_string key)
+
+    let hash (Key key) = Entry.hash key
+  end
 
   type entry = {
     frequency: int ref;
@@ -55,7 +67,7 @@ module Cache (Entry : Entry) = struct
   let make ~(max_size : size) : t =
     {
       capacity = max_size;
-      entries = Hashtbl.Poly.create ();
+      entries = Hashtbl.create (module KeyWrapper);
       can_collect = ref true;
       num_added = ref 0;
       num_collected = ref 0;

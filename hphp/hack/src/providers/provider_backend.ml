@@ -47,7 +47,33 @@ module Decl_cache_entry = struct
 
   type 'a value = 'a
 
-  let get_size ~key:_ ~value:_ = 1
+  let compare (type a1 b1) (a : a1 key) (b : b1 key) : int =
+    match (a, b) with
+    | (Fun_decl a, Fun_decl b) -> String.compare a b
+    | (Fun_decl _, _) -> -1
+    | (_, Fun_decl _) -> 1
+    | (Class_decl a, Class_decl b) -> String.compare a b
+    | (Class_decl _, _) -> -1
+    | (_, Class_decl _) -> 1
+    | (Typedef_decl a, Typedef_decl b) -> String.compare a b
+    | (Typedef_decl _, _) -> -1
+    | (_, Typedef_decl _) -> 1
+    | (Gconst_decl a, Gconst_decl b) -> String.compare a b
+    | (Gconst_decl _, _) -> -1
+    | (_, Gconst_decl _) -> 1
+    | (Module_decl a, Module_decl b) -> String.compare a b
+
+  let hash (type a1) (a : a1 key) : int =
+    let hsv = Hash.create () in
+    let hsv =
+      match a with
+      | Fun_decl a -> Hash.fold_string (Hash.fold_int hsv 1) a
+      | Class_decl a -> Hash.fold_string (Hash.fold_int hsv 2) a
+      | Typedef_decl a -> Hash.fold_string (Hash.fold_int hsv 3) a
+      | Gconst_decl a -> Hash.fold_string (Hash.fold_int hsv 4) a
+      | Module_decl a -> Hash.fold_string (Hash.fold_int hsv 5) a
+    in
+    Hash.get_hash_value hsv
 
   let key_to_log_string : type a. a key -> string =
    fun key ->
@@ -69,7 +95,13 @@ module Shallow_decl_cache_entry = struct
 
   type 'a value = 'a
 
-  let get_size ~key:_ ~value:_ = 1
+  let compare (type a1 b1) (a : a1 key) (b : b1 key) : int =
+    match (a, b) with
+    | (Shallow_class_decl a, Shallow_class_decl b) -> String.compare a b
+
+  let hash (type a1) (a : a1 key) : int =
+    match a with
+    | Shallow_class_decl a -> String.hash a
 
   let key_to_log_string : type a. a key -> string =
    (fun (Shallow_class_decl key) -> "[ClassShallow]" ^ key)
@@ -84,7 +116,13 @@ module Folded_class_cache_entry = struct
 
   type 'a value = 'a
 
-  let get_size ~key:_ ~value:_ = 1
+  let compare (type a1 b1) (a : a1 key) (b : b1 key) : int =
+    match (a, b) with
+    | (Folded_class_decl a, Folded_class_decl b) -> String.compare a b
+
+  let hash (type a1) (a : a1 key) : int =
+    match a with
+    | Folded_class_decl a -> String.hash a
 
   let key_to_log_string : type a. a key -> string =
    (fun (Folded_class_decl key) -> "[ClassFolded]" ^ key)
@@ -348,7 +386,7 @@ let set_local_memory_backend_with_defaults_for_test () : unit =
      they haven't been tuned and shouldn't be used in production. *)
   set_local_memory_backend_internal
     ~max_num_decls:5000
-    ~max_num_shallow_decls:(140 * 1024 * 1024)
+    ~max_num_shallow_decls:20000
 
 let get () : t = !backend_ref
 

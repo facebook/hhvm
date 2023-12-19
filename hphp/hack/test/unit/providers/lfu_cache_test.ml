@@ -6,6 +6,7 @@
  *
  *)
 
+open Hh_prelude
 open Asserter
 open OUnit2
 
@@ -20,11 +21,21 @@ module Cache_entry = struct
 
   type 'a value = 'a
 
-  let get_size : type a. key:a key -> value:a value -> Lfu_cache.size =
-   fun ~key ~value ->
-    match key with
-    | Int_key _ -> 1
-    | String_key _ -> String.length value
+  let compare (type ta tb) (a : ta key) (b : tb key) : int =
+    match (a, b) with
+    | (Int_key a, Int_key b) -> Int.compare a b
+    | (Int_key _, String_key _) -> -1
+    | (String_key _, Int_key _) -> 1
+    | (String_key a, String_key b) -> String.compare a b
+
+  let hash (type ta) (key : ta key) : int =
+    let hsv = Hash.create () in
+    let hsv =
+      match key with
+      | Int_key i -> Hash.fold_int (Hash.fold_int hsv 1) i
+      | String_key s -> Hash.fold_string (Hash.fold_int hsv 2) s
+    in
+    Hash.get_hash_value hsv
 
   let key_to_log_string : type a. a key -> string =
    fun key ->

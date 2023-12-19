@@ -50,7 +50,9 @@ module Decl_cache_entry : sig
 
   type 'a value = 'a
 
-  val get_size : key:'a key -> value:'a value -> int
+  val compare : 'a key -> 'b key -> int
+
+  val hash : 'a key -> int
 
   val key_to_log_string : 'a key -> string
 end
@@ -64,7 +66,9 @@ module Shallow_decl_cache_entry : sig
 
   type 'a value = 'a
 
-  val get_size : key:'a key -> value:'a value -> int
+  val compare : 'a key -> 'b key -> int
+
+  val hash : 'a key -> int
 
   val key_to_log_string : 'a key -> string
 end
@@ -78,7 +82,9 @@ module Folded_class_cache_entry : sig
 
   type 'a value = 'a
 
-  val get_size : key:'a key -> value:'a value -> int
+  val compare : 'a key -> 'b key -> int
+
+  val hash : 'a key -> int
 
   val key_to_log_string : 'a key -> string
 end

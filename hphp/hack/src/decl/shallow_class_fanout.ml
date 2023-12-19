@@ -53,16 +53,18 @@ let acc_member_fanouts ctx class_dep make_member changes fanout_acc =
 let get_minor_change_fanout
     ~(ctx : Provider_context.t)
     (changed_class : changed_class)
-    (member_diff : ClassDiff.member_diff) : Fanout.t =
+    (member_diff : ClassDiff.member_diff)
+    (fanout_acc : Fanout.t) : Fanout.t =
   let { consts; typeconsts; props; sprops; methods; smethods; constructor } =
     member_diff
   in
+  let { Fanout.changed; to_recheck; to_recheck_if_errors } = fanout_acc in
   let acc_fanout = acc_member_fanout ctx changed_class.dep in
   let acc_fanouts make_member changes fanout_acc =
     acc_member_fanouts ctx changed_class.dep make_member changes fanout_acc
   in
   let to_recheck =
-    DepSet.singleton changed_class.dep
+    DepSet.add to_recheck changed_class.dep
     |> acc_fanouts Dep.Member.const consts
     |> acc_fanouts Dep.Member.const typeconsts
     |> acc_fanouts Dep.Member.prop props
@@ -84,9 +86,9 @@ let get_minor_change_fanout
       to_recheck
   in
   {
-    Fanout.changed = DepSet.singleton changed_class.dep;
+    Fanout.changed = DepSet.add changed changed_class.dep;
     to_recheck;
-    to_recheck_if_errors = DepSet.make ();
+    to_recheck_if_errors;
   }
 
 let get_minor_change_fanout_legacy
@@ -183,11 +185,14 @@ let get_all_deps (ctx : Provider_context.t) (changed_class : changed_class) :
   Typing_deps.add_typing_deps mode changed_class.descendant_deps
 
 let get_maximum_fanout
-    (ctx : Provider_context.t) (changed_class : changed_class) : Fanout.t =
+    (ctx : Provider_context.t)
+    (changed_class : changed_class)
+    (fanout_acc : Fanout.t) : Fanout.t =
+  let { Fanout.changed; to_recheck; to_recheck_if_errors } = fanout_acc in
   {
-    Fanout.changed = DepSet.singleton changed_class.dep;
-    Fanout.to_recheck = get_all_deps ctx changed_class;
-    Fanout.to_recheck_if_errors = DepSet.make ();
+    Fanout.changed = DepSet.add changed changed_class.dep;
+    to_recheck = DepSet.union to_recheck @@ get_all_deps ctx changed_class;
+    to_recheck_if_errors;
   }
 
 (** Get the fanout of an added parent. *)
@@ -303,16 +308,22 @@ let get_added_parent_fanout
     }
 
 let get_added_parents_fanout
-    ctx (changed_class : changed_class) classish_kind added_parents member_diff
-    : Fanout.t =
-  let deps = get_minor_change_fanout ~ctx changed_class member_diff in
-  let deps =
+    ctx
+    (changed_class : changed_class)
+    classish_kind
+    added_parents
+    member_diff
+    fanout_acc : Fanout.t =
+  let fanout_acc =
+    get_minor_change_fanout ~ctx changed_class member_diff fanout_acc
+  in
+  let fanout_acc =
     SSet.fold
       added_parents
-      ~init:deps
+      ~init:fanout_acc
       ~f:(get_added_parent_fanout ctx changed_class classish_kind)
   in
-  deps
+  fanout_acc
 
 exception Do_max_fanout
 
@@ -321,7 +332,8 @@ let get_parent_changes_fanout
     (changed_class : changed_class)
     classish_kind
     (parent_changes : ClassDiff.parent_changes)
-    (member_diff : ClassDiff.member_diff) : Fanout.t =
+    (member_diff : ClassDiff.member_diff)
+    (fanout_acc : Fanout.t) : Fanout.t =
   let {
     ClassDiff.extends_changes;
     implements_changes;
@@ -378,14 +390,16 @@ let get_parent_changes_fanout
       classish_kind
       added_parents
       member_diff
+      fanout_acc
   with
-  | Do_max_fanout -> get_maximum_fanout ctx changed_class
+  | Do_max_fanout -> get_maximum_fanout ctx changed_class fanout_acc
 
 let get_shell_change_fanout
     ctx
     (changed_class : changed_class)
     (shell_change : ClassDiff.class_shell_change)
-    (member_diff : ClassDiff.member_diff) : Fanout.t =
+    (member_diff : ClassDiff.member_diff)
+    fanout_acc : Fanout.t =
   let {
     ClassDiff.old_classish_kind;
     parent_changes;
@@ -418,7 +432,7 @@ let get_shell_change_fanout
     || Option.is_some user_attributes_changes
     || Option.is_some enum_type_change
   then
-    get_maximum_fanout ctx changed_class
+    get_maximum_fanout ctx changed_class fanout_acc
   else
     match parent_changes with
     | Some parent_changes ->
@@ -428,38 +442,47 @@ let get_shell_change_fanout
         old_classish_kind
         parent_changes
         member_diff
+        fanout_acc
     | None ->
       (* If we get here, we have a major change but don't know what caused it.
        * Let's play safe and return maximum fanout.
        * This case would be observable in our telemetry anyway. *)
-      get_maximum_fanout ctx changed_class
+      get_maximum_fanout ctx changed_class fanout_acc
 
 let get_major_change_fanout
-    ctx (changed_class : changed_class) (change : ClassDiff.MajorChange.t) :
-    Fanout.t =
+    ctx
+    (changed_class : changed_class)
+    (change : ClassDiff.MajorChange.t)
+    fanout_acc : Fanout.t =
   match change with
   | ClassDiff.MajorChange.(Added | Removed | Unknown _) ->
-    get_maximum_fanout ctx changed_class
+    get_maximum_fanout ctx changed_class fanout_acc
   | ClassDiff.MajorChange.Modified (shell_change, member_diff) ->
-    get_shell_change_fanout ctx changed_class shell_change member_diff
+    get_shell_change_fanout
+      ctx
+      changed_class
+      shell_change
+      member_diff
+      fanout_acc
 
 let get_fanout ~(ctx : Provider_context.t) (changed_class : changed_class) :
     Fanout.t =
+  let fanout_acc = Fanout.empty in
   match changed_class.diff with
   | Major_change change ->
     if
       TypecheckerOptions.optimized_parent_fanout
         (Provider_context.get_tcopt ctx)
     then
-      get_major_change_fanout ctx changed_class change
+      get_major_change_fanout ctx changed_class change fanout_acc
     else
-      get_maximum_fanout ctx changed_class
+      get_maximum_fanout ctx changed_class fanout_acc
   | Minor_change minor_change ->
     if
       TypecheckerOptions.optimized_member_fanout
         (Provider_context.get_tcopt ctx)
     then
-      get_minor_change_fanout ~ctx changed_class minor_change
+      get_minor_change_fanout ~ctx changed_class minor_change fanout_acc
     else
       get_minor_change_fanout_legacy ~ctx changed_class minor_change
 

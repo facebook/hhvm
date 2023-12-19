@@ -523,11 +523,21 @@ let get_elems
   elements
 
 let invalidate_folded_classes
-    ctx workers ~bucket_size ~get_classes_in_file changed_classes =
+    ctx
+    workers
+    ~bucket_size
+    ~get_classes_in_file
+    (changed_classes : Shallow_class_fanout.changed_class list) =
   let invalidated =
-    changed_classes
-    |> Typing_deps.add_extend_deps (Provider_context.get_deps_mode ctx)
-    |> Shallow_class_fanout.class_names_from_deps ~ctx ~get_classes_in_file
+    List.fold
+      changed_classes
+      ~init:SSet.empty
+      ~f:(fun acc { Shallow_class_fanout.descendant_deps; _ } ->
+        Shallow_class_fanout.class_names_from_deps
+          ~ctx
+          ~get_classes_in_file
+          descendant_deps
+        |> SSet.union acc)
   in
   (match Provider_backend.get () with
   | Provider_backend.Rust_provider_backend be ->
@@ -603,8 +613,8 @@ let redo_type_decl
   in
   Hh_logger.log "Decl_redecl_service.redo_type_decl #3";
   let fanout =
-    let fanout =
-      Shallow_decl_compare.compute_class_fanout
+    let changes =
+      Shallow_decl_compare.compute_changes
         ctx
         ~during_init
         ~class_names:
@@ -618,7 +628,8 @@ let redo_type_decl
       workers
       ~bucket_size
       ~get_classes_in_file:get_classes
-      fanout.Fanout.changed;
+      changes;
+    let fanout = Shallow_decl_compare.compute_class_fanout ctx changes in
     Fanout.union fanout fanout_acc
   in
   remove_old_defs ctx all_old_defs all_elems;

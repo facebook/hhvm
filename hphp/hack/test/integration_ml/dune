@@ -60,6 +60,7 @@
   test_new_file
   test_property_initializer
   test_property_initializer2
+  test_remove_method
   test_server_hover
   test_serverConfig_overrides
   test_unbound_name

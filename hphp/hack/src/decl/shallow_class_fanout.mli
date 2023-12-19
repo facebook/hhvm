@@ -7,8 +7,14 @@
  *
  *)
 
-val fanout_of_changes :
-  ctx:Provider_context.t -> (string * ClassDiff.t) list -> Fanout.t
+type changed_class = {
+  name: string;
+  diff: ClassDiff.t;
+  dep: Typing_deps.Dep.t;
+  descendant_deps: Typing_deps.DepSet.t;
+}
+
+val fanout_of_changes : ctx:Provider_context.t -> changed_class list -> Fanout.t
 
 val class_names_from_deps :
   ctx:Provider_context.t ->

@@ -29,6 +29,7 @@ let tests =
     ("ide/remove_parent", run Test_remove_parent.test);
     ("ide/unsaved_changes", run Test_unsaved_changes.test);
     ("added_parent", run Test_added_parent.test);
+    ("remove_method", run Test_remove_method.test);
     ("capitalization", run Test_capitalization.test);
     ("coeffects", run Test_coeffects.test);
     ("decl_decl", run Test_decl_decl.test);

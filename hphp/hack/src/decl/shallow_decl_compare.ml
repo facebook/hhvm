@@ -12,6 +12,7 @@ open ClassDiff
 open Reordered_argument_collections
 open Shallow_decl_defs
 module VersionedSSet = Decl_compare.VersionedSSet
+module Dep = Typing_deps.Dep
 
 let diff_class_in_changed_file
     ctx
@@ -67,20 +68,20 @@ let compute_class_diffs
       | None -> acc)
 
 let untag_removed_members_in_depgraph
-    ~ctx (changes : (string * ClassDiff.t) list) =
+    ~ctx (changes : Shallow_class_fanout.changed_class list) =
   let removed_member_deps =
     List.fold
       changes
       ~init:(Typing_deps.DepSet.make ())
-      ~f:(fun deps_acc (class_name, diff) ->
+      ~f:(fun deps_acc changed_class ->
+        let { Shallow_class_fanout.name = _; diff; dep; descendant_deps = _ } =
+          changed_class
+        in
         match diff with
         | ClassDiff.(Major_change MajorChange.(Unknown _ | Added | Removed)) ->
           deps_acc
         | ClassDiff.(Major_change (MajorChange.Modified (_, member_diff)))
         | ClassDiff.Minor_change member_diff ->
-          let class_dep =
-            Typing_deps.Dep.make (Typing_deps.Dep.Type class_name)
-          in
           let {
             ClassDiff.consts;
             typeconsts;
@@ -101,7 +102,7 @@ let untag_removed_members_in_depgraph
               deps_acc
             | ClassDiff.Removed ->
               let member_dep =
-                Typing_deps.Dep.make_member_dep_from_type_dep class_dep member
+                Typing_deps.Dep.make_member_dep_from_type_dep dep member
               in
               Typing_deps.DepSet.add deps_acc member_dep
           in
@@ -152,12 +153,13 @@ let log_changes (changes : (string * ClassDiff.t) list) : unit =
               ]);
   ()
 
-let compute_class_fanout
+let compute_changes
     (ctx : Provider_context.t)
     ~during_init
     ~(class_names : VersionedSSet.diff)
     ~(old_decl_client_opt : Remote_old_decls_ffi.old_decl_client option)
-    (changed_files : Relative_path.t list) : Fanout.t =
+    (changed_files : Relative_path.t list) :
+    Shallow_class_fanout.changed_class list =
   let file_count = List.length changed_files in
   Hh_logger.log "Detecting changes to classes in %d files:" file_count;
 
@@ -165,9 +167,25 @@ let compute_class_fanout
     compute_class_diffs ctx ~during_init ~class_names ~old_decl_client_opt
   in
   log_changes changes;
+  List.map changes ~f:(fun (class_name, diff) ->
+      let class_dep = Dep.make (Dep.Type class_name) in
+      let descendant_deps =
+        Typing_deps.add_extend_deps
+          (Provider_context.get_deps_mode ctx)
+          (Typing_deps.DepSet.singleton class_dep)
+      in
+      {
+        Shallow_class_fanout.name = class_name;
+        diff;
+        dep = class_dep;
+        descendant_deps;
+      })
 
-  let fanout = Shallow_class_fanout.fanout_of_changes ~ctx changes in
+let compute_class_fanout
+    (ctx : Provider_context.t)
+    (changed_classes : Shallow_class_fanout.changed_class list) : Fanout.t =
+  let fanout = Shallow_class_fanout.fanout_of_changes ~ctx changed_classes in
   if TypecheckerOptions.optimized_member_fanout (Provider_context.get_tcopt ctx)
   then
-    untag_removed_members_in_depgraph ~ctx changes;
+    untag_removed_members_in_depgraph ~ctx changed_classes;
   fanout

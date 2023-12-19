@@ -42,8 +42,8 @@ impl Flag {
             Self::DummyTwo => 1,
             Self::DummyThree => 2,
             Self::OptimizedMemberFanout => 4,
-            Self::OptimizedParentFanout => 6,
-            Self::NewNamingTable => 7,
+            Self::OptimizedParentFanout => 5,
+            Self::NewNamingTable => 6,
         }
     }
 

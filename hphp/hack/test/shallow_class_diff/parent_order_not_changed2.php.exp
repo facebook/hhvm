@@ -1,6 +1,6 @@
 A: (Major_change
       (Modified (
-         { classish_kind = (Cclass Concrete);
+         { old_classish_kind = (Cclass Concrete);
            parent_changes =
            (Some { extends_changes = None;
                    implements_changes =

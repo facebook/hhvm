@@ -365,7 +365,7 @@ let get_shell_change_fanout
     (shell_change : ClassDiff.class_shell_change)
     (member_diff : ClassDiff.member_diff) : Fanout.t =
   let {
-    ClassDiff.classish_kind;
+    ClassDiff.old_classish_kind;
     parent_changes;
     type_parameters_change;
     kind_change;
@@ -403,7 +403,7 @@ let get_shell_change_fanout
       get_parent_changes_fanout
         ctx
         changed_class
-        classish_kind
+        old_classish_kind
         parent_changes
         member_diff
     | None ->

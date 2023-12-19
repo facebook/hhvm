@@ -47,7 +47,7 @@ module Api : sig
 
   val final : t -> bool
 
-  val const : t -> bool
+  val has_const_attribute : t -> bool
 
   val deferred_init_members : t -> SSet.t
 

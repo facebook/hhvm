@@ -703,7 +703,8 @@ module UserAttributes = struct
               contexts = [fn; cls; mthd; lambda; enumcls];
               autocomplete = false;
               doc =
-                "Marks methods and functions that can be called on a receiver of type `dynamic` with `dynamic` arguments. Requires the enable_sound_dynamic_type typechecking flag.";
+                "Marks methods and functions that can be called on a receiver of type `dynamic` with `dynamic` arguments."
+                ^ " Requires the enable_sound_dynamic_type typechecking flag.";
             } );
           ( uaNoAutoDynamic,
             {

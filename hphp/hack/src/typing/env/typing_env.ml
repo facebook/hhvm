@@ -583,6 +583,8 @@ let set_current_module env m =
 
 let get_current_module env = Option.map env.genv.current_module ~f:snd
 
+(** Register the current top-level structure as being dependent on the current
+    module *)
 let make_depend_on_current_module env =
   Option.iter
     Typing_env_types.(env.genv.current_module)
@@ -637,6 +639,12 @@ let mark_members_declared_in_depgraph env (c : _ Aast.class_) =
         Deps.mark_method_declared env ~is_static:m_static class_name name);
   List.iter c_xhp_attrs ~f:(fun (_ty, { cv_id = (_p, name); _ }, _tag, _el) ->
       Deps.mark_xhp_attribute_declared env class_name name);
+  ()
+
+let add_non_external_deps env (c : _ Aast.class_) =
+  make_depend_on_current_module env;
+  if TypecheckerOptions.optimized_member_fanout (get_tcopt env) then
+    mark_members_declared_in_depgraph env c;
   ()
 
 let set_internal env b = { env with genv = { env.genv with this_internal = b } }

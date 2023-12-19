@@ -1127,12 +1127,13 @@ let check_override
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
     env
 
-(* Constants and type constants with declared values in declared interfaces can never be
- * overridden by other inherited constants.
- * Constants from traits are taken into account only if the --enable-strict-const-semantics is enabled
+(* Constants and type constants with declared values in declared interfaces
+ * can never be overridden by other inherited constants.
+ * Constants from traits are taken into account only if the
+ * --enable-strict-const-semantics is enabled
  * @precondition: both constants must not be synthesized
  *)
-let conflict_with_declared_interface_or_trait
+let constant_conflict_with_declared_interface_or_trait
     ?(include_traits = true)
     env
     implements
@@ -1269,7 +1270,7 @@ let check_const_override
       (* Similar to detect_multiple_concrete_defs, we check if there are multiple
          concrete implementations of class constants with no override.
       *)
-      conflict_with_declared_interface_or_trait
+      constant_conflict_with_declared_interface_or_trait
         env
         implements
         parent_class
@@ -2091,7 +2092,7 @@ let check_typeconst_override
         (not is_context_constant)
         && (not tconst.ttc_synthesized)
         && (not parent_tconst.ttc_synthesized)
-        && conflict_with_declared_interface_or_trait
+        && constant_conflict_with_declared_interface_or_trait
              ~include_traits:false
              env
              implements

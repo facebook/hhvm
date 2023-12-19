@@ -276,8 +276,9 @@ val get_current_module : env -> string option
     module *)
 val make_depend_on_current_module : Typing_env_types.env -> unit
 
-val mark_members_declared_in_depgraph :
-  Typing_env_types.env -> Nast.class_ -> unit
+(** Update the dep graph with info inherent to the class,
+    e.g. its kind, module, declared members. *)
+val add_non_external_deps : Typing_env_types.env -> Nast.class_ -> unit
 
 val add_not_subtype_dep : Typing_env_types.env -> string -> unit
 

@@ -729,7 +729,7 @@ let equal_user_attr_params = [%derive.eq: Typing_defs.user_attribute_param list]
 let diff_class_shells (c1 : shallow_class) (c2 : shallow_class) :
     class_shell_change =
   {
-    classish_kind = c1.sc_kind;
+    old_classish_kind = c1.sc_kind;
     parent_changes =
       diff_parents (Parents.of_shallow_class c1) (Parents.of_shallow_class c2);
     type_parameters_change =

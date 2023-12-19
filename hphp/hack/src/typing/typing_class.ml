@@ -399,12 +399,17 @@ let method_def ~is_disposable env cls m =
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   { Tast_with_dynamic.under_normal_assumptions; under_dynamic_assumptions }
 
-(** Checks that extending the base class is legal - e.g. it is not final and not const. *)
+(** Checks that extending the base class is legal, i.e.:
+    - the parent is not final
+    - if the class is const, the parent should also be. *)
 let check_parent env class_def class_type =
   match Env.get_parent_class env with
   | Decl_entry.Found parent_type ->
     let position = fst class_def.c_name in
-    if Cls.const class_type && not (Cls.const parent_type) then
+    if
+      Cls.has_const_attribute class_type
+      && not (Cls.has_const_attribute parent_type)
+    then
       Typing_error_utils.add_typing_error
         ~env
         Typing_error.(primary @@ Primary.Self_const_parent_not position);
@@ -423,6 +428,9 @@ let check_parent env class_def class_type =
   | Decl_entry.NotYetAvailable ->
     ()
 
+(** If the class is sealed, check that the elements of the whitelist
+    are descendants of the class. Error or lint depending on option
+    enforce_sealed_subclasses. *)
 let sealed_subtype ctx (c : Nast.class_) ~is_enum ~hard_error ~env =
   let parent_name = snd c.c_name in
   let is_sealed (attr : Nast.user_attribute) =
@@ -493,6 +501,8 @@ let sealed_subtype ctx (c : Nast.class_) ~is_enum ~hard_error ~env =
     in
     List.iter sealed_attr.ua_params ~f:iter_item
 
+(** If the parent is sealed, check that the child being checked
+    is in the whitelist. *)
 let check_parent_sealed (child_pos, child_type) parent_type ~env =
   match Cls.sealed_whitelist parent_type with
   | None -> ()
@@ -519,6 +529,8 @@ let check_parent_sealed (child_pos, child_type) parent_type ~env =
       | (Ast_defs.Cenum, _) -> check `enum `use
     end
 
+(** If the parents are sealed, check that the child being checked
+    is in the whitelists. *)
 let check_parents_sealed env child_def child_type =
   let parents =
     match child_def.c_enum with
@@ -1392,6 +1404,17 @@ let check_class_parents_where_constraints env pc impl =
   in
   List.fold impl ~init:env ~f:check_where_constraints
 
+(** Any class that extends a class or implements an interface
+    that declares `<<__SupportDynamicType>>` must itself declare
+    `<<__SupportDynamicType>>`. This is checked elsewhere. But if any generic
+    parameters are marked `<<__RequireDynamic>>` then we must check that the
+    conditional support for dynamic is sound.
+
+  We require that:
+  - If t <: dynamic
+  - and C<T1,..,Tn> extends t
+  - then C<T1,...,Tn> <: dynamic
+  *)
 let check_generic_class_with_SupportDynamicType env c tc parents =
   let (pc, c_name) = c.c_name in
   let check_support_dynamic_type = Cls.get_support_dynamic_type tc in
@@ -1399,26 +1422,16 @@ let check_generic_class_with_SupportDynamicType env c tc parents =
     TCO.enable_sound_dynamic (Provider_context.get_tcopt (Env.get_ctx env))
     && check_support_dynamic_type
   then (
-    (* Any class that extends a class or implements an interface
-     * that declares <<__SupportDynamicType>> must itself declare
-     * <<__SupportDynamicType>>. This is checked elsewhere. But if any generic
-     * parameters are marked <<__RequireDynamic>> then we must check that the
-     * conditional support for dynamic is sound.
-     * We require that
-     *    If t <: dynamic
-     *    and C<T1,..,Tn> extends t
-     *    then C<T1,...,Tn> <: dynamic
-     *)
     let dynamic_ty =
       MakeType.supportdyn_mixed (Reason.Rdynamic_coercion (Reason.Rwitness pc))
     in
     let (env, ty_errs) =
-      List.fold parents ~init:(env, []) ~f:(fun (env, ty_errs) (_, ty) ->
-          let ((env, ty_err_opt1), lty) =
-            Phase.localize_no_subst env ~ignore_errors:true ty
+      List.fold parents ~init:(env, []) ~f:(fun (env, ty_errs) (_, parent_ty) ->
+          let ((env, ty_err_opt1), parent_lty) =
+            Phase.localize_no_subst env ~ignore_errors:true parent_ty
           in
           let (env, ty_err_opt2) =
-            match get_node lty with
+            match get_node parent_lty with
             | Tclass ((_, name), _, _) -> begin
               match Env.get_class env name with
               | Decl_entry.Found c when Cls.get_support_dynamic_type c ->
@@ -1426,7 +1439,7 @@ let check_generic_class_with_SupportDynamicType env c tc parents =
                   Typing_subtype.add_constraint
                     env
                     Ast_defs.Constraint_as
-                    lty
+                    parent_lty
                     dynamic_ty
                   @@ Some (Typing_error.Reasons_callback.unify_error_at pc)
                 in
@@ -1445,7 +1458,7 @@ let check_generic_class_with_SupportDynamicType env c tc parents =
                                 (Typing_print.full_strip_ns_decl
                                    ~verbose_fun:false
                                    env
-                                   ty))
+                                   parent_ty))
                             ~self_ty_name:
                               (lazy (Typing_print.full_strip_ns env self_ty)))
                   | _ -> (env, None)
@@ -1468,6 +1481,11 @@ let check_generic_class_with_SupportDynamicType env c tc parents =
   ) else
     env
 
+(** Check that the classish type being checked aligns with its
+    parents on the <<__SupportDynamicType>> attribute - if
+    a (non-trait) parent has the attribute, then the type should have
+    it too.
+    The opposite is also true, but not checked here. *)
 let check_SupportDynamicType env c tc =
   if TCO.enable_sound_dynamic (Provider_context.get_tcopt (Env.get_ctx env))
   then
@@ -1584,6 +1602,9 @@ let check_override_keyword env c tc =
   check_override_has_parent c tc ~env;
   check_used_methods_with_override env c tc
 
+(** If the class is sealed, check that the elements of the whitelist
+    are descendants of the class. Error or lint depending on option
+    enforce_sealed_subclasses. *)
 let check_sealed env c =
   let hard_error = TCO.enforce_sealed_subclasses (Env.get_tcopt env) in
   let is_enum = is_enum_or_enum_class c.c_kind in
@@ -1797,7 +1818,7 @@ let class_hierarchy_checks env c tc (parents : class_parents) =
     let (_ : env) =
       check_generic_class_with_SupportDynamicType env c tc (extends @ implements)
     in
-    if Cls.const tc then
+    if Cls.has_const_attribute tc then
       List.iter c.c_uses ~f:(check_non_const_trait_members pc env);
     let impl = extends @ implements @ uses in
     let impl =
@@ -1958,9 +1979,7 @@ let class_def ctx (c : _ class_) =
     let env =
       Env.set_support_dynamic_type env (Cls.get_support_dynamic_type tc)
     in
-    Env.make_depend_on_current_module env;
-    if TCO.optimized_member_fanout (Provider_context.get_tcopt ctx) then
-      Env.mark_members_declared_in_depgraph env c;
+    Env.add_non_external_deps env c;
     Typing_helpers.add_decl_errors ~env (Cls.decl_errors tc);
     Some (class_def_ env c tc)
 

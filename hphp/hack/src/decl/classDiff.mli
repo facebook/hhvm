@@ -88,7 +88,8 @@ type enum_type_change = {
 [@@deriving eq, show]
 
 type class_shell_change = {
-  classish_kind: Ast_defs.classish_kind;
+  old_classish_kind: Ast_defs.classish_kind;
+      (** The new classish kind will be in kind_change if it has changed. *)
   parent_changes: parent_changes option;
   type_parameters_change: unit NamedItemsListChange.t option;
   kind_change: KindChange.t option;

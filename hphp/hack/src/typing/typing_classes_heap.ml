@@ -55,7 +55,7 @@ module ApiShallow = struct
     let (c, _) = t in
     c.Decl_defs.dc_final
 
-  let const (decl, t, _ctx) =
+  let has_const_attribute (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Const @@ fun () ->
     let (c, _) = t in
     c.Decl_defs.dc_const

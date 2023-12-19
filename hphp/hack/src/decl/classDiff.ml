@@ -334,7 +334,7 @@ type enum_type_change = {
 [@@deriving eq, show { with_path = false }]
 
 type class_shell_change = {
-  classish_kind: Ast_defs.classish_kind;
+  old_classish_kind: Ast_defs.classish_kind;
   parent_changes: parent_changes option;
   type_parameters_change: unit NamedItemsListChange.t option;
   kind_change: KindChange.t option;
@@ -528,7 +528,7 @@ module ClassShellChangeCategory = struct
   end
 
   type t = {
-    classish_kind: Ast_defs.classish_kind;
+    old_classish_kind: Ast_defs.classish_kind;
     parent_changes_category: ParentsChangeCategory.t option;
     type_parameters_change_category: ListChange.t option;
     kind_change_category: KindChange.t option;
@@ -546,7 +546,7 @@ module ClassShellChangeCategory = struct
 
   let of_class_shell_change
       ({
-         classish_kind;
+         old_classish_kind;
          parent_changes;
          type_parameters_change;
          kind_change;
@@ -563,7 +563,7 @@ module ClassShellChangeCategory = struct
        } :
         class_shell_change) =
     {
-      classish_kind;
+      old_classish_kind;
       parent_changes_category =
         Option.map ParentsChangeCategory.of_parents_change parent_changes;
       type_parameters_change_category =
@@ -587,7 +587,7 @@ module ClassShellChangeCategory = struct
 
   let to_json
       {
-        classish_kind;
+        old_classish_kind;
         parent_changes_category;
         type_parameters_change_category;
         kind_change_category;
@@ -605,7 +605,7 @@ module ClassShellChangeCategory = struct
     let open Hh_json in
     JSON_Object
       [
-        ("classish_kind", classish_kind_to_json classish_kind);
+        ("old_classish_kind", classish_kind_to_json old_classish_kind);
         ( "parent_changes",
           Hh_json.opt_ ParentsChangeCategory.to_json parent_changes_category );
         ( "type_parameters_change",

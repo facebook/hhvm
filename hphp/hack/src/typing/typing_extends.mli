@@ -7,16 +7,22 @@
  *
  *)
 
-(** Checks that a classish type implements its interfaces, extends its base class, and
-    uses its traits.
-    [implements] is the list of interfaces the classish type directly implements.
-    [parents] is the list of direct ancestors and traits the class directly uses. *)
+(** [check_implements_extends_uses env ~implements ~parents type_]
+    checks that a classish type implements its interfaces,
+    extends its base class, and uses its traits.
+
+  This actually only checks member compatibility. Other hierarchy
+  checks like requirements (e.g. `require extends`) are checked
+  in Typing_class.
+
+  @param implements   the list of interfaces the classish type directly implements.
+  @param parents      the list of direct ancestors, including interfaces and
+                      traits, the class directly uses.
+  @param type_        the classish type to check.
+  *)
 val check_implements_extends_uses :
   Typing_env_types.env ->
-  (* All directly implemented interfaces *)
   implements:Typing_defs.decl_ty list ->
-  (* All direct parents (interfaces, base type, traits) *)
   parents:(Aast.hint * Typing_defs.decl_ty) list ->
-  (* The type to be checked *)
   Nast.class_ * Decl_provider.Class.t ->
   Typing_env_types.env

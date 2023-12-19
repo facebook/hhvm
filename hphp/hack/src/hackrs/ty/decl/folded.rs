@@ -182,8 +182,12 @@ pub struct FoldedClass<R: Reason> {
     pub name: TypeName,
     pub pos: R::Pos,
     pub kind: ClassishKind,
+    /// A final type cannot have children. Declared as `e.g. final class C {}`
     pub is_final: bool,
+    /// Whether the type has attribute __Const, meaning all properties
+    /// are immutable.
     pub is_const: bool,
+    /// Whether internal to a module, i.e. declared as e.g. `internal class C {}`
     pub is_internal: bool,
     pub is_xhp: bool,
     pub has_xhp_keyword: bool,
@@ -216,6 +220,7 @@ pub struct FoldedClass<R: Reason> {
     pub deferred_init_members: IndexSet<PropName>,
     pub decl_errors: Box<[DeclError<R::Pos>]>,
     pub docs_url: Option<String>,
+    /// Whether has attribute <<__UNSAFE_AllowMultipleInstantiations>>
     pub allow_multiple_instantiations: bool,
 }
 

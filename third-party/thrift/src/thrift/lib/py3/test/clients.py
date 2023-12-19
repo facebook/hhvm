@@ -291,16 +291,16 @@ class RpcOptionsTests(unittest.TestCase):
         options = RpcOptions()
         self.assertIsInstance(options.priority, Priority)
         options.priority = Priority.HIGH
-        self.assertEquals(options.priority, Priority.HIGH)
+        self.assertEqual(options.priority, Priority.HIGH)
         with self.assertRaises(TypeError):
             # pyre-fixme[8]: Attribute has type `Priority`; used as `int`.
             options.priority = 1
 
     def test_chunk_buffer_size(self) -> None:
         options = RpcOptions()
-        self.assertEquals(options.chunk_buffer_size, 100)  # default value
+        self.assertEqual(options.chunk_buffer_size, 100)  # default value
         options.chunk_buffer_size = 200
-        self.assertEquals(options.chunk_buffer_size, 200)
+        self.assertEqual(options.chunk_buffer_size, 200)
         with self.assertRaises(TypeError):
             # pyre-fixme[8]: Attribute has type `int`; used as `str`.
             options.chunk_buffer_size = "1"

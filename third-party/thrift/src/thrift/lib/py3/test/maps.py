@@ -97,7 +97,7 @@ class MapTests(unittest.TestCase):
         px["baz"] = {"wat": [4]}
         px["foo"] = dict(px["foo"])
         px["foo"]["bar"] = px["foo"]["bar"] + [5, 7, 8]
-        self.assertEquals(s["bar"], [0, 1])
+        self.assertEqual(s["bar"], [0, 1])
         # Now turn this crazy mixed structure back to Cython
         cx = StrStrIntListMapMap(px)
         # pyre-fixme[6]: Expected `Dict[str, List[int]]` for 2nd param but got

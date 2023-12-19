@@ -221,7 +221,7 @@ class StructTests(unittest.TestCase):
         self.assertLessEqual(x, y)
         self.assertGreater(y, x)
         self.assertGreaterEqual(y, x)
-        self.assertEquals([x, y], sorted([y, x]))
+        self.assertEqual([x, y], sorted([y, x]))
 
     def test_noncomparable(self) -> None:
         x = SlowCompare(field1="text", field2=10, field3=Color.red)

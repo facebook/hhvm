@@ -92,9 +92,22 @@ module Cache (Entry : Entry) : sig
     default:(unit -> 'a Entry.value option) ->
     'a Entry.value option
 
+  (* Check whether the item is present *)
+  val find : t -> key:'a Entry.key -> 'a Entry.value option
+
+  (** This uses [Entry.key_to_log_string] to get a list of all keys.
+  Solely for debugging/logging. *)
+  val keys_as_log_strings : t -> string list
+
   (** Remove the entry with the given key from the cache. If the key is not
   present, does nothing. *)
   val remove : t -> key:'a Entry.key -> unit
+
+  (** Normally whenever you [add] or [find_or_add], if the cache is too large, then
+  it will immediately do a collection. This function suppresses collections for the
+  duration of the lambda; once the lambda terminates (even via an exception), it also
+  checks whether the cache has become too large and if so does a collection then. *)
+  val without_collections : t -> f:(unit -> 'a) -> 'a
 
   (** The cache keeps track of how long it's spent doing cache overhead and how big it is *)
   val get_telemetry : t -> key:string -> Telemetry.t -> Telemetry.t

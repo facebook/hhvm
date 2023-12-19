@@ -227,6 +227,8 @@ a max number. This will be removed shortly. *)
 val set_local_memory_backend :
   max_num_decls:int -> max_num_shallow_decls:int -> unit
 
+val get_local_memory_telemetry : local_memory -> Telemetry.t
+
 val get : unit -> t
 
 val supports_eviction : t -> bool

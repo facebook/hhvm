@@ -52,11 +52,11 @@ module Decl_cache_entry = struct
   let key_to_log_string : type a. a key -> string =
    fun key ->
     match key with
-    | Fun_decl s -> "FunDecl" ^ s
-    | Class_decl s -> "ClassDecl" ^ s
-    | Typedef_decl s -> "TypedefDecl" ^ s
-    | Gconst_decl s -> "GconstDecl" ^ s
-    | Module_decl s -> "ModuleDecl" ^ s
+    | Fun_decl s -> "[FunDecl]" ^ s
+    | Class_decl s -> "[ClassDecl]" ^ s
+    | Typedef_decl s -> "[TypedefDecl]" ^ s
+    | Gconst_decl s -> "[GconstDecl]" ^ s
+    | Module_decl s -> "[ModuleDecl]" ^ s
 end
 
 module Cache (Entry : Lfu_cache.Entry) = Lfu_cache.Cache (Entry)
@@ -72,7 +72,7 @@ module Shallow_decl_cache_entry = struct
   let get_size ~key:_ ~value:_ = 1
 
   let key_to_log_string : type a. a key -> string =
-   (fun (Shallow_class_decl key) -> "ClasssShallow" ^ key)
+   (fun (Shallow_class_decl key) -> "[ClassShallow]" ^ key)
 end
 
 module Shallow_decl_cache = Cache (Shallow_decl_cache_entry)
@@ -87,7 +87,7 @@ module Folded_class_cache_entry = struct
   let get_size ~key:_ ~value:_ = 1
 
   let key_to_log_string : type a. a key -> string =
-   (fun (Folded_class_decl key) -> "ClassFolded" ^ key)
+   (fun (Folded_class_decl key) -> "[ClassFolded]" ^ key)
 end
 
 module Folded_class_cache = Cache (Folded_class_cache_entry)
@@ -218,6 +218,17 @@ let t_to_string (t : t) : string =
   | Local_memory _ -> "Local_memory"
   | Rust_provider_backend _ -> "Rust_provider_backend"
   | Analysis -> "Analysis"
+
+let get_local_memory_telemetry
+    { decl_cache; shallow_decl_cache; folded_class_cache; _ } : Telemetry.t =
+  Telemetry.create ()
+  |> Shallow_decl_cache.get_telemetry
+       shallow_decl_cache
+       ~key:"shallow_decl_cache"
+  |> Decl_cache.get_telemetry decl_cache ~key:"decl_cache"
+  |> Folded_class_cache.get_telemetry
+       folded_class_cache
+       ~key:"folded_class_cache"
 
 let backend_ref = ref Shared_memory
 

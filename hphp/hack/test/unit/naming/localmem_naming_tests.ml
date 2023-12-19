@@ -38,11 +38,11 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
   in
   Asserter.Int_asserter.assert_equals
     1
-    (Telemetry_test_utils.int_exn telemetry "get_ast.count")
+    (Telemetry_test_utils.int_exn telemetry "Ast_provider_get.count")
     "unsaved: compute_tast(class Foo) should have this many calls to get_ast";
   Asserter.Int_asserter.assert_equals
     1
-    (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
+    (Telemetry_test_utils.int_exn telemetry "Disk_cat.count")
     "unsaved: compute_tast(class Foo) should have this many calls to disk_cat";
   Asserter.String_asserter.assert_list_equals
     [
@@ -67,11 +67,11 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
   in
   Asserter.Int_asserter.assert_equals
     0
-    (Telemetry_test_utils.int_exn telemetry "get_ast.count")
+    (Telemetry_test_utils.int_exn telemetry "Ast_provider_get.count")
     "unsaved: compute_tast(class Foo1) should have this many calls to get_ast";
   Asserter.Int_asserter.assert_equals
     0
-    (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
+    (Telemetry_test_utils.int_exn telemetry "Disk_cat.count")
     "unsaved: compute_tast(class Foo1) should have this many calls to disk_cat";
   Asserter.String_asserter.assert_list_equals
     [
@@ -94,11 +94,11 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
   in
   Asserter.Int_asserter.assert_equals
     1
-    (Telemetry_test_utils.int_exn telemetry "get_ast.count")
+    (Telemetry_test_utils.int_exn telemetry "Ast_provider_get.count")
     "unsaved: compute_tast(class Foo again) should have this many calls to get_ast";
   Asserter.Int_asserter.assert_equals
     0
-    (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
+    (Telemetry_test_utils.int_exn telemetry "Disk_cat.count")
     "unsaved: compute_tast(class Foo again) should have this many calls to disk_cat";
   Asserter.String_asserter.assert_list_equals
     [

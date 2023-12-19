@@ -187,7 +187,7 @@ let compute_file_info
   Nast.get_def_names ast
 
 let get_ast_with_error ~(full : bool) ctx path =
-  Counters.count Counters.Category.Get_ast @@ fun () ->
+  Counters.count Counters.Category.Ast_provider_get @@ fun () ->
   let parse_from_disk_no_caching ~apply_file_filter =
     let absolute_path = Relative_path.to_absolute path in
     if (not apply_file_filter) || FindUtils.file_filter absolute_path then

@@ -151,16 +151,16 @@ let test_compute_tast_counting () =
 
   Asserter.Int_asserter.assert_equals
     expected_decling_count
-    (Telemetry_test_utils.int_exn telemetry "decling.count")
-    "There should be this many decling_count for shared_mem provider";
+    (Telemetry_test_utils.int_exn telemetry "Decl_provider_get.count")
+    "There should be this many Decl_provider_get for shared_mem provider";
 
   (* We'll read Bar.php from disk when we decl-parse it in order to compute the
      TAST of Foo.php, but we won't read Foo.php from disk to get its AST or
      decls, since we want to use the contents in the Provider_context entry. *)
   Asserter.Int_asserter.assert_equals
     1
-    (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
-    "There should be 1 disk_cat_count for shared_mem provider";
+    (Telemetry_test_utils.int_exn telemetry "Disk_cat.count")
+    "There should be 1 Disk_cat_count for shared_mem provider";
 
   true
 
@@ -188,12 +188,12 @@ let test_compute_tast_counting_local_mem () =
       in
       Asserter.Int_asserter.assert_equals
         expected_decling_count
-        (Telemetry_test_utils.int_exn telemetry "decling.count")
-        "There should be this many decling_count for local_memory provider";
+        (Telemetry_test_utils.int_exn telemetry "Decl_provider_get.count")
+        "There should be this many Decl_provider_get for local_memory provider";
       Asserter.Int_asserter.assert_equals
         1
-        (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
-        "There should be 1 disk_cat_count for local_memory_provider");
+        (Telemetry_test_utils.int_exn telemetry "Disk_cat.count")
+        "There should be 1 Disk_cat for local_memory_provider");
 
   true
 

@@ -10,22 +10,23 @@ module Category : sig
   (** Care: each of these entries adds up to telemetry in [HackEventLogger.ProfileTypeCheck.get_stats],
   and we should keep the number small... 5 to 10 items here are fine, but more will be a problem. *)
   type t =
-    | Decling
-        (** Decling is used when --config profile_decling=TopCounts; it's counted by all [Typing_classes_heap] decl accessors.
-            It measures cpu-time. *)
-    | Disk_cat
-        (** Disk_cat is counted every use of [Disk.cat] and measures wall-time. *)
-    | Get_ast
-        (** Get_ast is counted for [Ast_provider.get_ast_with_error], fetching the full ASTs of the files we're typechecking.
-            It is notionally inclusive of Disk_cat time, but it measures cpu-time and so
-            doesn't count the time spent waiting for IO. *)
-    | Get_decl
-        (** Get_decl is counted for [Direct_decl_utils.direct_decl_parse], fetching decls off disk of the types we depend upon.
-            It is notionally inclusive of Disk_cat time, but it measures cpu-time and so
-            doesn't count the time spent waiting for IO. *)
-    | Typecheck
-        (** Typecheck is counted for [Typing_top_level], typechecking top-level entity. It is inclusive of Get_ast and Get_decl time.
-            It measures cpu-time. *)
+    | Disk_cat  (** This is counted every use of [Disk.cat] *)
+    | Direct_decl_parse
+        (** This is counted every use of [Direct_decl_utils.direct_decl_parse{_and_cache}].
+        It often includes some [Disk_cat] time. *)
+    | Decl_provider_get
+        (** This measures every [Decl_provider.get_*] function. In cases where it's not already
+        in the cache, this will also include calls to [Direct_decl_parse] hence also [Disk_cat],
+        and also time to do decl-folding. *)
+    | Ast_provider_get
+        (** This measures every [Ast_provider.get_ast_with_error] call, for fetching the full ASTs of the files
+        we're typechecking. It is inclusive of [Disk_cat] time.
+        Note that this is *not* used for direct-decl-parsing. *)
+    | Typing_toplevel
+        (** This measures every [Typing_top_level] call. It will often include [Decl_provider_get]
+        and hence [Direct_decl_parse] and [Disk_cat] for all the decls it needs.
+        It doesn't include the call to [Ast_provider_get] for fetching the AST of the
+        file we're typechecking; that's already been done prior. *)
 end
 
 module CategorySet : Set.S with type elt = Category.t

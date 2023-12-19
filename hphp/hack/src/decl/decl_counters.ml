@@ -218,7 +218,7 @@ let count_decl
     (* CARE! This path must be highly performant. *)
     f None
   | HackEventLogger.PerFileProfilingConfig.DeclingTopCounts ->
-    Counters.count Counters.Category.Decling (fun () -> f None)
+    Counters.count Counters.Category.Decl_provider_get (fun () -> f None)
   | HackEventLogger.PerFileProfilingConfig.DeclingAllTelemetry { callstacks } ->
     let start_time = Unix.gettimeofday () in
     let start_cpu_time = Sys.time () in

@@ -61,7 +61,7 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
   let f = fd.fd_fun in
   let tcopt = Provider_context.get_tcopt ctx in
   Profile.measure_elapsed_time_and_report tcopt None fd.fd_name @@ fun () ->
-  Counters.count Counters.Category.Typecheck @@ fun () ->
+  Counters.count Counters.Category.Typing_toplevel @@ fun () ->
   Errors.run_with_span f.f_span @@ fun () ->
   let (_ : bool) =
     check_if_this_def_is_the_winner ctx FileInfo.Fun fd.fd_name
@@ -299,7 +299,7 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
   { Tast_with_dynamic.under_normal_assumptions; under_dynamic_assumptions }
 
 let class_def ctx class_ =
-  Counters.count Counters.Category.Typecheck @@ fun () ->
+  Counters.count Counters.Category.Typing_toplevel @@ fun () ->
   Errors.run_with_span class_.c_span @@ fun () ->
   if check_if_this_def_is_the_winner ctx FileInfo.Class class_.c_name then
     (* [Typing_class.class_def] is unusual in that it can't work properly
@@ -321,7 +321,7 @@ let typedef_def ctx typedef =
 let gconst_def ctx cst =
   let tcopt = Provider_context.get_tcopt ctx in
   Profile.measure_elapsed_time_and_report tcopt None cst.cst_name @@ fun () ->
-  Counters.count Counters.Category.Typecheck @@ fun () ->
+  Counters.count Counters.Category.Typing_toplevel @@ fun () ->
   Errors.run_with_span cst.cst_span @@ fun () ->
   let (_ : bool) =
     check_if_this_def_is_the_winner ctx FileInfo.Const cst.cst_name
@@ -388,7 +388,7 @@ let gconst_def ctx cst =
   }
 
 let module_def ctx md =
-  Counters.count Counters.Category.Typecheck @@ fun () ->
+  Counters.count Counters.Category.Typing_toplevel @@ fun () ->
   Errors.run_with_span md.md_span @@ fun () ->
   let (_ : bool) =
     check_if_this_def_is_the_winner ctx FileInfo.Module md.md_name

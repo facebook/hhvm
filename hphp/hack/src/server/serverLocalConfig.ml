@@ -264,6 +264,8 @@ type t = {
       (** POC: @ljw - if true, respect cancellation while work is in progress *)
   lsp_autocomplete_skip_hierarchy_checks: bool;
       (** POC: @ljw - if true, autocomplete skips hierarchy checks *)
+  lsp_prefetch_decls: bool;
+      (** POC: @ljw - if true, [Decl_provider.prefetch_and_lock_decls_needed_for_entry] will work *)
   autocomplete_sort_text: bool;
       (** POC: @mckenzie - if true, autocomplete sorts using sort text attribute *)
 }
@@ -360,6 +362,7 @@ let default =
     lsp_sticky_quarantine = false;
     lsp_cancellation = false;
     lsp_autocomplete_skip_hierarchy_checks = false;
+    lsp_prefetch_decls = false;
     autocomplete_sort_text = false;
   }
 
@@ -1088,6 +1091,9 @@ let load_
       ~default:default.lsp_autocomplete_skip_hierarchy_checks
       config
   in
+  let lsp_prefetch_decls =
+    bool_ "lsp_prefetch_decls" ~default:default.lsp_prefetch_decls config
+  in
   let autocomplete_sort_text =
     bool_
       "autocomplete_sort_text"
@@ -1214,6 +1220,7 @@ let load_
     lsp_sticky_quarantine;
     lsp_cancellation;
     lsp_autocomplete_skip_hierarchy_checks;
+    lsp_prefetch_decls;
     autocomplete_sort_text;
   }
 
@@ -1273,5 +1280,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       lsp_cancellation = options.lsp_cancellation;
       lsp_autocomplete_skip_hierarchy_checks =
         options.lsp_autocomplete_skip_hierarchy_checks;
+      lsp_prefetch_decls = options.lsp_prefetch_decls;
       autocomplete_sort_text = options.autocomplete_sort_text;
     }

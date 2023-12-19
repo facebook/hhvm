@@ -308,6 +308,8 @@ type t = {
       (** Controls behavior of [Provider_utils.respect_but_quarantine_unsaved_changes] *)
   tco_autocomplete_skip_hierarchy_checks: bool;
       (** Controls behavior of [Provider_context.with_tcopt_for_autocomplete] *)
+  tco_prefetch_decls: bool;
+      (** Controls behavior of [Decl_provider.prefetch_and_lock_decls_needed_for_entry] *)
   tco_autocomplete_sort_text: bool;
   po_nameof_precedence: bool;  (** Make nameof bind tighter *)
   po_strict_utf8: bool;  (** Require utf8 in source files *)
@@ -442,6 +444,7 @@ val set :
   ?po_disallow_direct_superglobals_refs:bool ->
   ?tco_sticky_quarantine:bool ->
   ?tco_autocomplete_skip_hierarchy_checks:bool ->
+  ?tco_prefetch_decls:bool ->
   ?tco_autocomplete_sort_text:bool ->
   ?po_nameof_precedence:bool ->
   ?po_strict_utf8:bool ->

@@ -510,6 +510,7 @@ let load ~silent options : t * ServerLocalConfig.t =
         ~tco_sticky_quarantine:local_config.lsp_sticky_quarantine
         ~tco_autocomplete_skip_hierarchy_checks:
           local_config.lsp_autocomplete_skip_hierarchy_checks
+        ~tco_prefetch_decls:local_config.lsp_prefetch_decls
         ~tco_autocomplete_sort_text:local_config.autocomplete_sort_text
         GlobalOptions.default
     in

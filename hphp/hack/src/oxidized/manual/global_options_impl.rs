@@ -165,6 +165,7 @@ impl Default for GlobalOptions {
             tco_use_old_decls_from_cas: false,
             tco_sticky_quarantine: false,
             tco_autocomplete_skip_hierarchy_checks: false,
+            tco_prefetch_decls: false,
             tco_autocomplete_sort_text: false,
             po_nameof_precedence: false,
             po_strict_utf8: false,

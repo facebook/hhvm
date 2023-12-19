@@ -50,7 +50,7 @@ class MySQLPDOTest extends PDOTest {
 		if (!$new_options)
 			return PDO_MYSQL_TEST_DSN . $addition;
 
-		$old_options = darray[];
+		$old_options = dict[];
 		$dsn = substr(PDO_MYSQL_TEST_DSN,
 			strpos(PDO_MYSQL_TEST_DSN, ':') + 1,
 			strlen(PDO_MYSQL_TEST_DSN));

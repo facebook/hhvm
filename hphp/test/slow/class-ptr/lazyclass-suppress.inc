@@ -24,8 +24,8 @@ class TType {
 }
 
 class ThriftStruct {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'str',
       'type' => \TType::STRING,
     ],
@@ -71,8 +71,8 @@ class NestedStructAdapter {
 };
 
 class Foo {
-  const SPEC = darray[
-    1 => darray[
+  const SPEC = dict[
+    1 => dict[
       'var' => 'nested',
       'type' => \TType::STRUCT,
       'class' => ThriftStruct::class,

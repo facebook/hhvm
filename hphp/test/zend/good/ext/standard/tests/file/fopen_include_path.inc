@@ -77,11 +77,11 @@ function teardown_relative_path() {
 
 abstract final class ZendGoodExtStandardTestsFileFopenIncludePathInc {
 	public static function reldirs() {
-		return varray["dir1", "dir2", "dir3"];
+		return vec["dir1", "dir2", "dir3"];
 	}
 
 	public static function newdirs() {
-		return varray[
+		return vec[
 			self::dir1(),
 			self::dir2(),
 			self::dir3(),

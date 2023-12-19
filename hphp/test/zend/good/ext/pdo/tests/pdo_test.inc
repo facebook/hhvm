@@ -33,7 +33,7 @@ class PDOTest {
 
 		// clean up any crufty test tables we might have left behind
 		// on a previous run
-		$test_tables = varray[
+		$test_tables = vec[
 			'test',
 			'test2',
 			'classtypes'

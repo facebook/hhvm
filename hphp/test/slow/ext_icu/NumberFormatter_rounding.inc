@@ -6,7 +6,7 @@ function test_rounding($locale, $digits, $mode = null) {
     $formatter->setAttribute(NumberFormatter::ROUNDING_MODE, $mode);
   }
 
-  $values = varray[
+  $values = vec[
     1.23,
     1.2327,
     1.2372,

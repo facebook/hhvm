@@ -56,9 +56,9 @@ class ServerClientTestCase
 
         $this->workerHandle = proc_open(
           $cmd,
-          varray[
-            varray['pipe', 'r'],
-            varray['pipe', 'w'],
+          vec[
+            vec['pipe', 'r'],
+            vec['pipe', 'w'],
             HH\stderr(),
           ],
           $pipes

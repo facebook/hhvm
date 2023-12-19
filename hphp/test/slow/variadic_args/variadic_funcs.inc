@@ -77,7 +77,7 @@ function variadic_hack_only(...$v) {
 function variadic_hack_some($x, ...$v) {
   echo "\n", '* ', __FUNCTION__, "\n";
   var_dump(1 + count($v));
-  var_dump(array_merge(varray[$x], $v));
+  var_dump(array_merge(vec[$x], $v));
 }
 
 class C {
@@ -103,7 +103,7 @@ class C {
   <<__DynamicallyCallable>>
   public function variadic_hack_some($x, ...$v) {
     echo "\n", '* ', __METHOD__, "\n";
-    var_dump(array_merge(varray[$x], $v));
+    var_dump(array_merge(vec[$x], $v));
   }
 
   <<__DynamicallyCallable>>
@@ -127,6 +127,6 @@ class C {
   <<__DynamicallyCallable>>
   public static function st_variadic_hack_some($x, ...$v) {
     echo "\n", '* ', __METHOD__, "\n";
-    var_dump(array_merge(varray[$x], $v));
+    var_dump(array_merge(vec[$x], $v));
   }
 }

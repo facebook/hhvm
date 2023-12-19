@@ -42,11 +42,11 @@ function ldap_connect_and_bind(
 
 function insert_dummy_data($link, $base) {
   // Create root if not there
-  $testBase = ldap_read($link, $base, '(objectClass=*)', varray['objectClass']);
+  $testBase = ldap_read($link, $base, '(objectClass=*)', vec['objectClass']);
   if (ldap_count_entries($link, $testBase) < 1) {
     ldap_add(
-      $link, "$base", darray[
-        "objectClass" => varray[
+      $link, "$base", dict[
+        "objectClass" => vec[
           "top",
           "organization",
           "dcObject"
@@ -55,13 +55,13 @@ function insert_dummy_data($link, $base) {
       ]
     );
   }
-  ldap_add($link, "o=test,$base", darray[
-    "objectClass" => varray[
+  ldap_add($link, "o=test,$base", dict[
+    "objectClass" => vec[
       "top",
       "organization"],
     "o" => "test",
   ]);
-  ldap_add($link, "cn=userA,$base", darray[
+  ldap_add($link, "cn=userA,$base", dict[
     "objectclass" => "person",
     "cn" => "userA",
     "sn" => "testSN1",
@@ -69,14 +69,14 @@ function insert_dummy_data($link, $base) {
     "telephoneNumber" => "xx-xx-xx-xx-xx",
     "description" => "user A",
   ]);
-  ldap_add($link, "cn=userB,$base", darray[
+  ldap_add($link, "cn=userB,$base", dict[
     "objectclass" => "person",
     "cn" => "userB",
     "sn" => "testSN2",
     "userPassword" => "oopsIDitItAgain",
     "description" => "user B",
   ]);
-  ldap_add($link, "cn=userC,cn=userB,$base", darray[
+  ldap_add($link, "cn=userC,cn=userB,$base", dict[
     "objectclass" => "person",
     "cn" => "userC",
     "sn" => "testSN3",

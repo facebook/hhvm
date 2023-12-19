@@ -1,11 +1,11 @@
 <?hh
 
 class A {
-  public darray $p2 = varray[1, 2, 3];
-  public AnyArray $p3 = varray[1, 2, 3];
-  public darray $p4 = varray[1, 2, 3];
-  public AnyArray $p5 = darray['a' => 1, 'b' => 2];
-  public varray $p6 = darray['a' => 1, 'b' => 2];
+  public darray $p2 = vec[1, 2, 3];
+  public AnyArray $p3 = vec[1, 2, 3];
+  public darray $p4 = vec[1, 2, 3];
+  public AnyArray $p5 = dict['a' => 1, 'b' => 2];
+  public varray $p6 = dict['a' => 1, 'b' => 2];
 
   public darray $p8 = CONDCONST6;
   public AnyArray $p9= CONDCONST4;
@@ -19,11 +19,11 @@ class A {
   public AAlias $p17 = CONDCONST5;
   public VAlias $p18 = CONDCONST5;
 
-  public static darray $s2 = varray[1, 2, 3];
-  public static AnyArray $s3 = varray[1, 2, 3];
-  public static darray $s4 = varray[1, 2, 3];
-  public static AnyArray $s5 = darray['a' => 1, 'b' => 2];
-  public static varray $s6 = darray['a' => 1, 'b' => 2];
+  public static darray $s2 = vec[1, 2, 3];
+  public static AnyArray $s3 = vec[1, 2, 3];
+  public static darray $s4 = vec[1, 2, 3];
+  public static AnyArray $s5 = dict['a' => 1, 'b' => 2];
+  public static varray $s6 = dict['a' => 1, 'b' => 2];
 
   public static darray $s8 = CONDCONST6;
   public static AnyArray $s9 = CONDCONST4;

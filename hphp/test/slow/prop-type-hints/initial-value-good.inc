@@ -22,9 +22,9 @@ class A {
   public string $p2 = 'abc';
   public bool $p3 = false;
   public float $p4 = 3.14;
-  public varray $p5a = varray[1, 2, 3]; /* TODO: remove */
-  public varray $p5b = varray[1, 2, 3];
-  public darray $p5c = darray[1 => 'a', 2 => 'b', 3 => 'c'];
+  public varray $p5a = vec[1, 2, 3]; /* TODO: remove */
+  public varray $p5b = vec[1, 2, 3];
+  public darray $p5c = dict[1 => 'a', 2 => 'b', 3 => 'c'];
   public ?resource $p6 = null;
   public nonnull $p7 = 123;
   public num $p8 = 456;
@@ -35,17 +35,17 @@ class A {
   public keyset $p13 = keyset['a', 'b', 'c'];
   public vec_or_dict $p14 = vec['a', 'b',' c'];
   public vec_or_dict $p15 = dict['a' => 100, 'b' => 200];
-  public AnyArray $p16 = varray[100, 200];
+  public AnyArray $p16 = vec[100, 200];
   public AnyArray $p17 = vec[100, 200];
   public AnyArray $p18 = dict[1 => 100, 2 => 200];
   public AnyArray $p19 = keyset[100, 200];
-  public varray $p20 = varray['val1', 'val2'];
-  public darray $p21 = darray['a' => 100, 'b' => 200];
-  public darray $p22 = darray['a' => 100, 'b' => 200];
-  public varray $p23 = varray['val1', 'val2'];
-  public varray_or_darray $p24 = varray[9, 8, 7];
-  public varray_or_darray $p25 = darray['a' => 100, 'b' => 200];
-  public varray_or_darray $p26 = darray['a' => 100, 'b' => 200]; /* TODO: remove */
+  public varray $p20 = vec['val1', 'val2'];
+  public darray $p21 = dict['a' => 100, 'b' => 200];
+  public darray $p22 = dict['a' => 100, 'b' => 200];
+  public varray $p23 = vec['val1', 'val2'];
+  public varray_or_darray $p24 = vec[9, 8, 7];
+  public varray_or_darray $p25 = dict['a' => 100, 'b' => 200];
+  public varray_or_darray $p26 = dict['a' => 100, 'b' => 200]; /* TODO: remove */
   public Vector $p27 = Vector{};
   public Map $p28 = Map{};
   public Enum1 $p29 = 'abc';
@@ -72,10 +72,10 @@ class A {
   public CondEnum1 $p50 = 181;
   public Traversable $p51 = vec[];
   public Traversable $p52 = dict[];
-  public Traversable $p53 = varray[];
+  public Traversable $p53 = vec[];
   public Alias12 $p54 = vec[];
   public Alias12 $p55 = dict[];
-  public Alias12 $p56 = varray[];
+  public Alias12 $p56 = vec[];
   public Alias12 $p57 = null;
 
   public int $p58 = INTCONST;
@@ -85,7 +85,7 @@ class A {
   public arraykey $p62 = STRCONST;
   public vec $p63 = vec[INTCONST, STRCONST, INTCONST];
   public dict $p64 = dict[STRCONST => INTCONST, INTCONST => STRCONST];
-  public varray $p65 = varray[INTCONST, STRCONST, INTCONST];
+  public varray $p65 = vec[INTCONST, STRCONST, INTCONST];
   public Enum1 $p66 = STRCONST;
   public Enum2 $p67 = INTCONST;
   public Enum3 $p68 = INTCONST;
@@ -112,7 +112,7 @@ class A {
   public arraykey $p88 = CONDCONST2;
   public vec $p89 = vec[CONDCONST1, CONDCONST2, CONDCONST1];
   public dict $p90 = dict[CONDCONST2 => CONDCONST1, CONDCONST1 => CONDCONST2];
-  public varray $p91 = varray[CONDCONST1, CONDCONST2, CONDCONST1];
+  public varray $p91 = vec[CONDCONST1, CONDCONST2, CONDCONST1];
   public Enum1 $p92 = CONDCONST2;
   public Enum2 $p93 = CONDCONST1;
   public Enum3 $p94 = CONDCONST1;
@@ -174,9 +174,9 @@ class A {
   public static string $s2 = 'abc';
   public static bool $s3 = false;
   public static float $s4 = 3.14;
-  public static varray $s5a = varray[1, 2, 3];
-  public static varray $s5b = varray[1, 2, 3];
-  public static darray $s5c = darray[1 => 'a', 2 => 'b', 3 => 'c'];
+  public static varray $s5a = vec[1, 2, 3];
+  public static varray $s5b = vec[1, 2, 3];
+  public static darray $s5c = dict[1 => 'a', 2 => 'b', 3 => 'c'];
   public static ?resource $s6 = null;
   public static nonnull $s7 = 123;
   public static num $s8 = 456;
@@ -187,17 +187,17 @@ class A {
   public static keyset $s13 = keyset['a', 'b', 'c'];
   public static vec_or_dict $s14 = vec['a', 'b',' c'];
   public static vec_or_dict $s15 = dict['a' => 100, 'b' => 200];
-  public static AnyArray $s16 = varray[100, 200];
+  public static AnyArray $s16 = vec[100, 200];
   public static AnyArray $s17 = vec[100, 200];
   public static AnyArray $s18 = dict[1 => 100, 2 => 200];
   public static AnyArray $s19 = keyset[100, 200];
-  public static varray $s20 = varray['val1', 'val2'];
-  public static darray $s21 = darray['a' => 100, 'b' => 200];
-  public static darray $s22 = darray['a' => 100, 'b' => 200];
-  public static varray $s23 = varray['val1', 'val2'];
-  public static varray_or_darray $s24 = varray[9, 8, 7];
-  public static varray_or_darray $s25 = darray['a' => 100, 'b' => 200];
-  public static varray_or_darray $s26 = darray['a' => 100, 'b' => 200]; /* TODO: delete */
+  public static varray $s20 = vec['val1', 'val2'];
+  public static darray $s21 = dict['a' => 100, 'b' => 200];
+  public static darray $s22 = dict['a' => 100, 'b' => 200];
+  public static varray $s23 = vec['val1', 'val2'];
+  public static varray_or_darray $s24 = vec[9, 8, 7];
+  public static varray_or_darray $s25 = dict['a' => 100, 'b' => 200];
+  public static varray_or_darray $s26 = dict['a' => 100, 'b' => 200]; /* TODO: delete */
   public static Vector $s27 = Vector{};
   public static Map $s28 = Map{};
   public static Enum1 $s29 = 'abc';
@@ -224,10 +224,10 @@ class A {
   public static CondEnum1 $s50 = 181;
   public static Traversable $s51 = vec[];
   public static Traversable $s52 = dict[];
-  public static Traversable $s53 = varray[];
+  public static Traversable $s53 = vec[];
   public static Alias12 $s54 = vec[];
   public static Alias12 $s55 = dict[];
-  public static Alias12 $s56 = varray[];
+  public static Alias12 $s56 = vec[];
   public static Alias12 $s57 = null;
 
   public static int $s58 = INTCONST;
@@ -237,7 +237,7 @@ class A {
   public static arraykey $s62 = STRCONST;
   public static vec $s63 = vec[INTCONST, STRCONST, INTCONST];
   public static dict $s64 = dict[STRCONST => INTCONST, INTCONST => STRCONST];
-  public static varray $s65 = varray[INTCONST, STRCONST, INTCONST];
+  public static varray $s65 = vec[INTCONST, STRCONST, INTCONST];
   public static Enum1 $s66 = STRCONST;
   public static Enum2 $s67 = INTCONST;
   public static Enum3 $s68 = INTCONST;
@@ -264,7 +264,7 @@ class A {
   public static arraykey $s88 = CONDCONST2;
   public static vec $s89 = vec[CONDCONST1, CONDCONST2, CONDCONST1];
   public static dict $s90 = dict[CONDCONST2 => CONDCONST1, CONDCONST1 => CONDCONST2];
-  public static varray $s91 = varray[CONDCONST1, CONDCONST2, CONDCONST1];
+  public static varray $s91 = vec[CONDCONST1, CONDCONST2, CONDCONST1];
   public static Enum1 $s92 = CONDCONST2;
   public static Enum2 $s93 = CONDCONST1;
   public static Enum3 $s94 = CONDCONST1;

@@ -1,3 +1,3 @@
 <?hh
 
-class C { public static $x = darray[0 => darray[]]; }
+class C { public static $x = dict[0 => dict[]]; }

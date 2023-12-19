@@ -30,7 +30,7 @@ class A {
   public vec $p10 = dict[1 => 100, 2 => 200, 3 => 300];
   public dict $p11 = vec['a', 'b'];
   public keyset $p12 = vec['a', 'b', 'c'];
-  public vec_or_dict $p13 = varray['a', 'b',' c'];
+  public vec_or_dict $p13 = vec['a', 'b',' c'];
   public AnyArray $p14 = null;
   public varray $p15 = vec['val1', 'val2'];
   public darray $p16 = dict['a' => 100, 'b' => 200];
@@ -65,7 +65,7 @@ class A {
   public Map $p44 = Vector{STRCONST};
   public arraykey $p45 = BOOLCONST;
   public vec $p46 = keyset[INTCONST, STRCONST, INTCONST];
-  public dict $p47 = darray[STRCONST => INTCONST, INTCONST => STRCONST];
+  public dict $p47 = dict[STRCONST => INTCONST, INTCONST => STRCONST];
   public AnyArray $p48 = vec[INTCONST, STRCONST, INTCONST];
   public Enum1 $p49 = INTCONST;
   public Enum2 $p50 = STRCONST;
@@ -120,7 +120,7 @@ class A {
   public static vec $s10 = dict[1 => 100, 2 => 200, 3 => 300];
   public static dict $s11 = vec['a', 'b'];
   public static keyset $s12 = vec['a', 'b', 'c'];
-  public static vec_or_dict $s13 = varray['a', 'b',' c'];
+  public static vec_or_dict $s13 = vec['a', 'b',' c'];
   public static AnyArray $s14 = null;
   public static varray $s15 = vec['val1', 'val2'];
   public static darray $s16 = dict['a' => 100, 'b' => 200];
@@ -155,7 +155,7 @@ class A {
   public static Map $s44 = Vector{STRCONST};
   public static arraykey $s45 = STRCONST;
   public static vec $s46 = keyset[INTCONST, STRCONST, INTCONST];
-  public static dict $s47 = darray[STRCONST => INTCONST, INTCONST => STRCONST];
+  public static dict $s47 = dict[STRCONST => INTCONST, INTCONST => STRCONST];
   public static AnyArray $s48 = vec[INTCONST, STRCONST, INTCONST];
   public static Enum1 $s49 = INTCONST;
   public static Enum2 $s50 = STRCONST;

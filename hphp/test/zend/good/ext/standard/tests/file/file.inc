@@ -242,7 +242,7 @@ function create_files( $file_path,
                        $file_extension = ".tmp"
                      )
 {
-  $return_value = darray['created' => 0, 'filled' => 0, 'perms_changed' => 0];
+  $return_value = dict['created' => 0, 'filled' => 0, 'perms_changed' => 0];
 
   //ensure that suffix is a +ve integer
   if ($name_suffix <= 0) {
@@ -359,7 +359,7 @@ function create_links($file_path,
                       $link_file_extension = ".tmp"
                      )
 {
-  $return_value = darray['created' => 0, 'filled' => 0, 'perms_changed' => 0];
+  $return_value = dict['created' => 0, 'filled' => 0, 'perms_changed' => 0];
   $tmp_name_suffix = $link_name_suffix;
   $src_filename = $file_path."/".$filename;
   switch( $link_type ) {
@@ -536,7 +536,7 @@ function compare_self_stat( AnyArray $stat )
   $return_value = true;
 
   // named keys present in a stat
-  $string_keys = varray["dev", "ino", "mode", "nlink", "uid", "gid",
+  $string_keys = vec["dev", "ino", "mode", "nlink", "uid", "gid",
                        "rdev", "size", "atime", "mtime", "ctime",
                        "blksize", "blocks"];
 
@@ -585,7 +585,7 @@ Description:
   $flag = specify true to dump the stat1 and stat2
 */
 
-$all_stat_keys = varray[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+$all_stat_keys = vec[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
                        "dev", "ino", "mode", "nlink", "uid", "gid",
                        "rdev", "size", "atime", "mtime", "ctime",
                        "blksize", "blocks"];

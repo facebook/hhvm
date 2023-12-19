@@ -199,9 +199,9 @@ class TestStruct5 {
 }
 
 class TestStruct6 {
-  public darray $p1 = darray[];
-  public varray $p2 = varray[];
-  public darray $p3 = darray[];
+  public darray $p1 = dict[];
+  public varray $p2 = vec[];
+  public darray $p3 = dict[];
 
   public dict $p4 = dict[];
   public vec $p5 = vec[];
@@ -277,9 +277,9 @@ class TestStruct7 {
   public Vector $p5 = Vector{};
   public Set $p6 = Set{};
 
-  public darray $p7 = darray[];
-  public varray $p8 = varray[];
-  public darray $p9 = darray[];
+  public darray $p7 = dict[];
+  public varray $p8 = vec[];
+  public darray $p9 = dict[];
 
   const SPEC = vec[
     dict['var' => 'p1',

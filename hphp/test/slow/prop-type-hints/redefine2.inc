@@ -11,9 +11,9 @@ type CondAlias = string;
 const CONDCONST2 = 999;
 const CONDCONST1 = 'zyzzy';
 const CONDCONST3 = keyset[1, 2, 3];
-const CONDCONST4 = varray[1, 2, 3];
-const CONDCONST5 = darray['a' => 100, 'b' => 200];
-const CONDCONST6 = varray[1, 2, 3];
+const CONDCONST4 = vec[1, 2, 3];
+const CONDCONST5 = dict['a' => 100, 'b' => 200];
+const CONDCONST6 = vec[1, 2, 3];
 
 type VAlias = vec;
 type DAlias = dict;

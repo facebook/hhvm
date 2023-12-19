@@ -27,12 +27,12 @@ function runTest($testController, $customArgs = '') {
   }
 }
 
-function fastcgi_request($host, $port, $path, $post = darray[], $headers = darray[], $extra_args = darray[]) {
+function fastcgi_request($host, $port, $path, $post = dict[], $headers = dict[], $extra_args = dict[]) {
   try {
     $client = new \Adoy\FastCGI\Client($host, $port);
     $content = http_build_query($post);
 
-    $args = array_merge(darray[
+    $args = array_merge(dict[
       'GATEWAY_INTERFACE' => 'FastCGI/1.0',
       'REQUEST_METHOD' => (!($post ?? false)) ? 'GET' : 'POST',
       'SERVER_SOFTWARE' => 'php/fcgiclient',

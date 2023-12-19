@@ -74,6 +74,6 @@ EOF;
   $client = new LocalSoapClient($filename);
   unlink($filename);
 
-  $client->__soapcall('test', varray[$param]);
+  $client->__soapcall('test', vec[$param]);
   var_dump(LocalSoapClient::$input);
 }

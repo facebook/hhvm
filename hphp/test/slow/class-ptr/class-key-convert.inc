@@ -75,11 +75,11 @@ function vec_fun() {
 
 function dvarray_fun() {
   echo "===dvarray:===\n";
-  $a = varray[];
+  $a = vec[];
   $a[] = Baz::class;
   var_dump($a);
   var_dump(array_keys($a));
-  $b = darray[Foo::class => Baz::class];
+  $b = dict[Foo::class => Baz::class];
   $b[Baz::class] = Foo::class;
   var_dump(array_keys($b));
 }

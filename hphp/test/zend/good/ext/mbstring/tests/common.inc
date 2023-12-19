@@ -37,7 +37,7 @@ function set_custom_error_handler() {
 
 // Var def for testing
 function t_ary() {
-	return darray[
+	return dict[
 		's1' => '���ܸ�EUC-JP��ʸ����',
 		's2' => 'English Text'
 		];

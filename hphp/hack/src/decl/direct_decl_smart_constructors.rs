@@ -2792,19 +2792,15 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
                 self.arena,
             ) {
-                Ok(text) if !self.opts.keep_user_attributes => {
-                    Node::StringLiteral(self.alloc((text, token_pos(self))))
-                }
-                _ => Node::Ignored(SK::Token(kind)),
+                Ok(text) => Node::StringLiteral(self.alloc((text, token_pos(self)))),
+                Err(_) => Node::Ignored(SK::Token(kind)),
             },
             TokenKind::NowdocStringLiteral => match escaper::unescape_nowdoc_in(
                 self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
                 self.arena,
             ) {
-                Ok(text) if !self.opts.keep_user_attributes => {
-                    Node::StringLiteral(self.alloc((text.into(), token_pos(self))))
-                }
-                _ => Node::Ignored(SK::Token(kind)),
+                Ok(text) => Node::StringLiteral(self.alloc((text.into(), token_pos(self)))),
+                Err(_) => Node::Ignored(SK::Token(kind)),
             },
             TokenKind::DecimalLiteral
             | TokenKind::OctalLiteral
@@ -3161,11 +3157,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         expr: Self::Output,
         _rparen: Self::Output,
     ) -> Self::Output {
-        if self.opts.keep_user_attributes {
-            Node::Ignored(SK::ParenthesizedExpression)
-        } else {
-            expr
-        }
+        expr
     }
 
     fn make_enum_class_label_expression(

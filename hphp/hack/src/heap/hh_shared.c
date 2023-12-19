@@ -1885,7 +1885,7 @@ value hh_mem(value key) {
 /*****************************************************************************/
 /* Deserializes the value pointed to by elt. */
 /*****************************************************************************/
-static CAMLprim value hh_deserialize(heap_entry_t *elt) {
+static value hh_deserialize(heap_entry_t *elt) {
   CAMLparam0();
   CAMLlocal1(result);
   size_t size = Entry_size(elt->header);
@@ -1894,17 +1894,17 @@ static CAMLprim value hh_deserialize(heap_entry_t *elt) {
   char *data = elt->data;
   if (uncompressed_size_exp) {
     data = malloc(uncompressed_size_exp);
-  size_t uncompressed_size = 0;
-  if (*compression) {
-    uncompressed_size = ZSTD_decompressDCtx(zstd_dctx, data, uncompressed_size_exp, src, size);
-  }
-  else {
-    uncompressed_size = LZ4_decompress_safe(
-      src,
-      data,
-      size,
-      uncompressed_size_exp);
-  }
+    size_t uncompressed_size = 0;
+    if (*compression) {
+      uncompressed_size = ZSTD_decompressDCtx(zstd_dctx, data, uncompressed_size_exp, src, size);
+    }
+    else {
+      uncompressed_size = LZ4_decompress_safe(
+          src,
+          data,
+          size,
+          uncompressed_size_exp);
+    }
     assert(uncompressed_size == uncompressed_size_exp);
     size = uncompressed_size;
   }

@@ -9,7 +9,6 @@ open Hh_prelude
 
 let find_in_direct_decl_parse ~cache_results ctx filename name extract_decl_opt
     =
-  (* TODO(ljw): unify this with shallow_find_in_direct_decl_parse *)
   let parse_result =
     if cache_results then
       Direct_decl_utils.direct_decl_parse_and_cache ctx filename
@@ -24,29 +23,6 @@ let find_in_direct_decl_parse ~cache_results ctx filename name extract_decl_opt
         | (decl_name, decl, _) when String.equal decl_name name ->
           extract_decl_opt decl
         | _ -> None)
-
-let shallow_find_in_direct_decl_parse ~fill_caches ctx path name =
-  let direct_decl_parse_and_cache ctx filename name =
-    match Direct_decl_utils.direct_decl_parse_and_cache ctx filename with
-    | None -> Decl_defs.raise_decl_not_found (Some filename) name
-    | Some parsed_file -> parsed_file.Direct_decl_utils.pfh_decls
-  in
-  let direct_decl_parse_parse ctx filename name =
-    match Direct_decl_utils.direct_decl_parse ctx filename with
-    | None -> Decl_defs.raise_decl_not_found (Some filename) name
-    | Some parsed_file -> parsed_file.Direct_decl_utils.pfh_decls
-  in
-  let f =
-    if fill_caches then
-      direct_decl_parse_and_cache
-    else
-      direct_decl_parse_parse
-  in
-  f ctx path name
-  |> List.find_map ~f:(function
-         | (n, Shallow_decl_defs.Class decl, _) when String.equal name n ->
-           Some decl
-         | _ -> None)
 
 let get_fun_without_pessimise (ctx : Provider_context.t) (fun_name : string) :
     Typing_defs.fun_elt Decl_entry.t =
@@ -302,7 +278,12 @@ let get_shallow_class (ctx : Provider_context.t) (name : string) :
       | Some path ->
         let open Option.Let_syntax in
         let* original_sc =
-          shallow_find_in_direct_decl_parse ~fill_caches:false ctx path name
+          find_in_direct_decl_parse
+            ~cache_results:false
+            ctx
+            path
+            name
+            Shallow_decl_defs.to_class_decl_opt
         in
         let sc =
           info.Provider_backend.pessimise_shallow_class path ~name original_sc
@@ -317,7 +298,12 @@ let get_shallow_class (ctx : Provider_context.t) (name : string) :
       (match Naming_provider.get_class_path ctx name with
       | None -> None
       | Some path ->
-        shallow_find_in_direct_decl_parse ~fill_caches:true ctx path name))
+        find_in_direct_decl_parse
+          ~cache_results:true
+          ctx
+          path
+          name
+          Shallow_decl_defs.to_class_decl_opt))
   | Provider_backend.Local_memory { Provider_backend.shallow_decl_cache; _ } ->
     Provider_backend.Shallow_decl_cache.find_or_add
       shallow_decl_cache
@@ -326,4 +312,9 @@ let get_shallow_class (ctx : Provider_context.t) (name : string) :
         match Naming_provider.get_class_path ctx name with
         | None -> None
         | Some path ->
-          shallow_find_in_direct_decl_parse ~fill_caches:true ctx path name)
+          find_in_direct_decl_parse
+            ~cache_results:true
+            ctx
+            path
+            name
+            Shallow_decl_defs.to_class_decl_opt)

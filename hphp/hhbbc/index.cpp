@@ -11233,8 +11233,6 @@ struct SubclassMetadata {
   ISStringToOneT<Meta> meta;
   // All classes to be processed
   std::vector<SString> all;
-  // Classes which are interfaces
-  ISStringSet interfaces;
 };
 
 // Metadata used to drive the init-types pass. This is produced from
@@ -11671,15 +11669,6 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
         assertx(std::adjacent_find(begin(all), end(all)) == end(all));
 
         for (size_t i = 0; i < all.size(); ++i) meta[all[i]].idx = i;
-      },
-      [&] {
-        for (auto& updates : allUpdates) {
-          for (auto& update : updates) {
-            auto u = boost::get<ClassUpdate>(&update);
-            if (!u || !u->isInterface) continue;
-            subclassMeta.interfaces.emplace(u->name);
-          }
-        }
       },
       [&] {
         for (auto& updates : allUpdates) {
@@ -13430,7 +13419,6 @@ struct SubclassWork {
     size_t cost{0};
   };
   std::vector<std::vector<Bucket>> buckets;
-  ISStringSet leafInterfaces;
 };
 
 /*
@@ -13735,9 +13723,6 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
           // If the leaf has no parent either, it will never be a dep,
           // so cannot promote it. Just treat it as a root.
           if (meta.parents.empty()) roots.emplace_back(l.cls);
-          if (subclassMeta.interfaces.count(l.cls)) {
-            out.leafInterfaces.emplace(l.cls);
-          }
         },
         [&] (Root r) {
           roots.emplace_back(r.cls);
@@ -13936,8 +13921,6 @@ void build_subclass_lists(IndexData& index,
   ISStringToOneT<UniquePtrRef<BuildSubclassListJob::Split>> splitsToRefs;
 
   ISStringToOneT<hphp_fast_set<FuncFamily2::Id>> funcFamilyDeps;
-
-  std::vector<InterfaceConflicts> ifaceConflicts;
 
   // Use the metadata to assign to rounds and buckets.
   auto work = build_subclass_lists_assign(std::move(meta));
@@ -14221,13 +14204,6 @@ void build_subclass_lists(IndexData& index,
   funcFamilyDeps.clear();
   work.buckets.clear();
   work.allSplits.clear();
-
-  // Leaf interfaces won't be processed by a Job, but their
-  // InterfaceConflicts are trivial.
-  for (auto const iface : work.leafInterfaces) {
-    ifaceConflicts.emplace_back(InterfaceConflicts{iface, 1});
-  }
-  work.leafInterfaces.clear();
 }
 
 //////////////////////////////////////////////////////////////////////

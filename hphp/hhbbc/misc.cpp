@@ -36,14 +36,18 @@ consistently_bucketize(const std::vector<SString>& items, size_t bucketSize) {
   // will contain "bucketSize" number of elements (rounding up).
   assertx(bucketSize > 0);
   auto const numBuckets = (items.size() + bucketSize - 1) / bucketSize;
+  return consistently_bucketize_by_num_buckets(items, numBuckets);
+}
 
-  // If bucketSize is 1, we don't need to consistently hash to
-  // achieve consistency.
-  if (bucketSize == 1) {
+std::vector<std::vector<SString>>
+consistently_bucketize_by_num_buckets(const std::vector<SString>& items, size_t numBuckets) {
+  using namespace folly::gen;
+  if (numBuckets == items.size()) {
     return from(items)
       | map([] (SString s) { return singleton_vec(s); })
       | as<std::vector>();
   }
+  if (numBuckets == 1) return singleton_vec(items);
 
   // Consistently hash the strings into their buckets indices.
   auto const indices = parallel::map(

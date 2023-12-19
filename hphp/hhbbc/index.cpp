@@ -7996,7 +7996,15 @@ assign_hierarchical_work(std::vector<SString> roots,
       return *d;
     }
   );
+  return build_hierarchical_work(buckets, numClasses, getDeps, getIdx);
+}
 
+template <typename GetDeps, typename GetIdx>
+std::vector<HierarchicalWorkBucket>
+build_hierarchical_work(std::vector<std::vector<SString>>& buckets,
+                        size_t numClasses,
+                        const GetDeps& getDeps,
+                        const GetIdx& getIdx) {
   struct DepHashState {
     std::mutex lock;
     size_t lowestHash{std::numeric_limits<size_t>::max()};
@@ -13461,12 +13469,158 @@ struct SubclassWork {
  *   the algorithm eventually terminates.
 */
 
+// Dependency information for a class or split node.
+struct DepData {
+  // Transitive dependencies (children) for this class.
+  ISStringSet deps;
+  // Any split nodes which are dependencies of this class.
+  ISStringSet edges;
+  // The number of direct children of this class which will be
+  // processed this round.
+  size_t processChildren{0};
+};
+
+
+// Given a set of roots, greedily add roots and their children to buckets
+// via DFS traversal.
+template <typename GetDeps>
+std::vector<HierarchicalWorkBucket>
+dfs_bucketize(SubclassMetadata& subclassMeta,
+              std::vector<SString> roots,
+              ISStringToOneT<std::vector<SString>>& splitImmDeps,
+              size_t kMaxBucketSize,
+              size_t maxClassIdx,
+              bool alwaysCreateNew,
+              const ISStringSet& leafs,
+              const ISStringSet& processed, // already processed
+              const GetDeps& getDeps) {
+  ISStringSet visited;
+  std::vector<std::vector<SString>> rootsToProcess;
+  rootsToProcess.emplace_back();
+  std::vector<size_t> rootsCost;
+
+  auto const depsSize = [&] (SString cls) {
+    return getDeps(cls, getDeps).deps.size();
+  };
+
+  size_t cost = 0;
+
+  auto finishBucket = [&]() {
+    if (!cost) return;
+    rootsToProcess.emplace_back();
+    rootsCost.emplace_back(cost);
+    cost = 0;
+  };
+
+  auto addRoot = [&](SString c) {
+    rootsToProcess.back().emplace_back(c);
+    cost += depsSize(c);
+  };
+
+  auto const processSubgraph = [&](SString cls) {
+    assertx(!processed.count(cls));
+
+    addRoot(cls);
+    for (auto const& child : getDeps(cls, getDeps).deps) {
+      if (processed.count(child)) continue;
+      if (visited.count(child)) continue;
+      visited.insert(child);
+      // Leaves use special leaf-promotion logic in assign_hierarchial_work
+      if (leafs.count(child)) continue;
+      addRoot(child);
+    }
+    if (cost < kMaxBucketSize) return;
+    finishBucket();
+  };
+
+  // Visit immediate children. Recurse until you find a node that has small
+  // enough transitive deps.
+  auto const visitSubgraph = [&](SString root, auto const& self) {
+    if (processed.count(root) || visited.count(root)) return false;
+    if (!depsSize(root)) return false;
+    auto progress = false;
+    visited.insert(root);
+
+    assertx(IMPLIES(splitImmDeps.count(root), depsSize(root) <= kMaxBucketSize));
+    if (depsSize(root) <= kMaxBucketSize) {
+      processSubgraph(root);
+      progress = true;
+    } else {
+      auto const immChildren = [&] {
+        auto const it = subclassMeta.meta.find(root);
+        if (it == end(subclassMeta.meta)) {
+          auto const it2 = splitImmDeps.find(root);
+          always_assert(it2 != end(splitImmDeps));
+          return it2->second;
+        }
+        return it->second.children;
+      }();
+      for (auto const& child : immChildren) progress |= self(child, self);
+    }
+    return progress;
+  };
+
+  // Sort the roots to keep it deterministic
+  std::sort(
+    begin(roots), end(roots),
+    [&] (SString& a, SString& b) {
+      return getDeps(a, getDeps).deps.size() > getDeps(b, getDeps).deps.size();
+    }
+  );
+
+  auto progress = false;
+  for (auto const& i : roots) {
+    assertx(depsSize(i)); // Should never be processing one leaf
+    progress |= visitSubgraph(i, visitSubgraph);
+  }
+  assertx(progress);
+  finishBucket();
+
+  if (rootsToProcess.back().empty()) rootsToProcess.pop_back();
+
+  auto buckets = parallel::gen(
+    rootsToProcess.size(),
+    [&] (size_t bucketIdx) {
+      auto numBuckets = (rootsCost[bucketIdx] + (kMaxBucketSize/2)) / kMaxBucketSize;
+      if (!numBuckets) numBuckets = 1;
+      return consistently_bucketize_by_num_buckets(rootsToProcess[bucketIdx],
+        alwaysCreateNew ? rootsToProcess[bucketIdx].size() : numBuckets);
+    }
+  );
+
+  std::vector<std::vector<SString>> flattened;
+  for (auto& b : buckets) {
+    flattened.insert(flattened.end(), b.begin(), b.end());
+  }
+
+  auto work = build_hierarchical_work(
+    flattened,
+    maxClassIdx,
+    [&] (SString c) {
+      auto const& deps = getDeps(c, getDeps).deps;
+      return std::make_pair(&deps, true);
+    },
+    [&] (SString c) -> Optional<size_t> {
+      if (!leafs.count(c)) return std::nullopt;
+      return subclassMeta.meta.at(c).idx;
+    }
+  );
+  return work;
+}
+
+// For each round:
+// While toProcess is not empty:
+// 1. Find transitive dep counts
+// 2. For each class, calculate splits, find roots, find rootLeafs
+// 3. For rootLeafs, consistently hash to make buckets
+// 4. For roots, assign subgraphs to buckets via greedy DFS. If buckets get too big,
+//    split them via consistent hashing.
 SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
   trace_time trace{"build subclass lists assign"};
   trace.ignore_client_stats();
 
   constexpr size_t kBucketSize = 2000;
-  constexpr size_t kMaxBucketSize = 20000;
+  constexpr size_t kMaxBucketSize = 25000;
 
   SubclassWork out;
 
@@ -13477,19 +13631,10 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
   // will have no dependencies.
   ISStringSet processed;
 
-  // Dependency information for a class or split node.
-  struct DepData {
-    // Transitive dependencies (children) for this class.
-    ISStringSet deps;
-    // Any split nodes which are dependencies of this class.
-    ISStringSet edges;
-    // The number of direct children of this class which will be
-    // processed this round.
-    size_t processChildren{0};
-  };
   ISStringToOneT<std::unique_ptr<DepData>> splitDeps;
   ISStringToOneT<std::unique_ptr<BuildSubclassListJob::Split>> splitPtrs;
   ISStringSet leafs;
+  ISStringToOneT<std::vector<SString>> splitImmDeps;
 
   // Keep creating rounds until all of the classes are assigned to a
   // bucket in a round.
@@ -13564,15 +13709,10 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
     // Process every remaining class in parallel and assign an action
     // to each:
 
-    // Do nothing with this class this round
-    struct Defer { SString cls; };
-    // This class is a leaf. Leafs never need to be processed (since
-    // their method families are already correct), but they may be
-    // dependencies, and need to be examined to create name-only func
-    // families.
-    struct Leaf { SString cls; };
     // This class will be processed this round and is a root.
     struct Root { SString cls; };
+    struct RootLeaf { SString cls; };
+    struct Child { SString cls; };
     // This class' children should be split. The class' child list
     // will be replaced with the new child list and splits created.
     struct Split {
@@ -13582,27 +13722,22 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
         SString name;
         std::unique_ptr<DepData> deps;
         std::unique_ptr<BuildSubclassListJob::Split> ptr;
+        std::vector<SString> children;
       };
       std::vector<Data> splits;
     };
-    using Action = boost::variant<Defer, Leaf, Root, Split>;
+    using Action = boost::variant<Root, Split, Child, RootLeaf>;
 
     auto const actions = parallel::map(
       toProcess,
       [&] (SString cls) {
         auto const& meta = subclassMeta.meta.at(cls);
-        // If the class has no children, it's a leaf. It never will be
-        // a root because it's information is already correct and
-        // doesn't need to be updated.
-        if (meta.children.empty()) return Action{ Leaf{cls} };
 
-        if (willProcess(cls)) return Action{ Root{cls} };
-
-        // The class isn't eligible and we won't split the
-        // children. Nothing to do here but defer it to another
-        // round. It's dependency size should shrink and make it
-        // eligible.
-        if (!willSplitChildren(cls)) return Action{ Defer{cls} };
+        if (!willSplitChildren(cls)) {
+          if (!meta.parents.empty()) return Action{ Child{cls} };
+          if (meta.children.empty()) return Action{ RootLeaf{cls} };
+          return Action{ Root{cls} };
+        }
 
         // Otherwise we're going to split some/all of this class'
         // children. Once we process those in this round, this class'
@@ -13662,9 +13797,11 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
 
             auto deps = std::make_unique<DepData>();
             auto split = std::make_unique<BuildSubclassListJob::Split>(name, cls);
+            std::vector<SString> children;
 
             for (auto const child : buckets[i]) {
               split->children.emplace_back(child);
+              children.emplace_back(child);
               auto const& childDeps = findDeps(child, findDeps).deps;
               deps->deps.insert(begin(childDeps), end(childDeps));
               deps->deps.emplace(child);
@@ -13677,7 +13814,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
             );
 
             splits.emplace_back(
-              Split::Data{name, std::move(deps), std::move(split)}
+              Split::Data{name, std::move(deps), std::move(split), std::move(children)}
             );
           }
           return splits;
@@ -13690,7 +13827,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
           if (willProcess(child)) continue;
           split.children.emplace_back(child);
         }
-        for (auto const& [name, _, _2] : split.splits) {
+        for (auto const& [name, _, _2, _3] : split.splits) {
           split.children.emplace_back(name);
         }
 
@@ -13701,38 +13838,33 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
     assertx(actions.size() == toProcess.size());
     std::vector<SString> roots;
     roots.reserve(actions.size());
-    // Clear the list of classes to process. It will be repopulated
-    // with any classes marked as Defer or Splits.
-    toProcess.clear();
+    std::vector<SString> rootLeafs;
 
     for (auto const& action : actions) {
       match<void>(
         action,
-        [&] (Defer d) { toProcess.emplace_back(d.cls); },
-        [&] (Leaf l) {
-          if (round > 0) return;
-
-          // Leafs have some special handling. Generally they're just
-          // deps, but they need to be examined for name-only
-          // entries. We only want this done for a leaf in one
-          // specific job (as a dep they can appear in multiple
-          // jobs). We'll use the dep promotion machinery to
-          // selectively promote these to roots in a certain job.
-          leafs.emplace(l.cls);
-          auto const& meta = subclassMeta.meta.at(l.cls);
-          // If the leaf has no parent either, it will never be a dep,
-          // so cannot promote it. Just treat it as a root.
-          if (meta.parents.empty()) roots.emplace_back(l.cls);
-        },
         [&] (Root r) {
+          assertx(!subclassMeta.meta.at(r.cls).children.empty());
           roots.emplace_back(r.cls);
+        },
+        [&] (RootLeaf r) {
+          assertx(subclassMeta.meta.at(r.cls).children.empty());
+          rootLeafs.emplace_back(r.cls);
+          leafs.emplace(r.cls);
+        },
+        [&] (Child n) {
+          auto const& meta = subclassMeta.meta.at(n.cls);
+          if (meta.children.empty()) leafs.emplace(n.cls);
         },
         [&] (const Split& s) {
           auto& meta = subclassMeta.meta.at(s.cls);
           meta.children = s.children;
-          toProcess.emplace_back(s.cls);
+          if (meta.parents.empty()) {
+            roots.emplace_back(s.cls);
+          }
           auto& splits = const_cast<std::vector<Split::Data>&>(s.splits);
-          for (auto& [name, deps, ptr] : splits) {
+          for (auto& [name, deps, ptr, children] : splits) {
+            splitImmDeps.emplace(name, children);
             roots.emplace_back(name);
             splitDeps.emplace(name, std::move(deps));
             splitPtrs.emplace(name, std::move(ptr));
@@ -13741,38 +13873,30 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
       );
     }
 
-    // We have a root set now. So use assign_hierarchical_work to turn
-    // it into a set of buckets:
+    auto work = dfs_bucketize(subclassMeta,
+                              roots,
+                              splitImmDeps,
+                              kMaxBucketSize,
+                              maxClassIdx,
+                              round > 0,
+                              leafs,
+                              processed,
+                              findDeps);
 
-    auto const bucketSize = [&] {
-      // Anything other than the first round tends to have a very
-      // small amount of items (but are relatively expensive). In that
-      // case, it's faster to try to assign everything to its own
-      // bucket.
-      if (out.buckets.empty() || roots.size() > kBucketSize) {
-        return kBucketSize;
-      }
-      return 1ul;
-    }();
-
-    auto const work = assign_hierarchical_work(
-      roots,
-      maxClassIdx,
-      bucketSize,
-      kMaxBucketSize,
-      [&] (SString c) {
-        auto const& deps = findDeps(c, findDeps).deps;
-        // Everything at this point is always instantiable.
-        return std::make_pair(&deps, true);
-      },
-      // Called to get the class index for promotion from a dependency
-      // to an output.
-      [&] (SString c) -> Optional<size_t> {
-        // We only promote leafs
-        if (!leafs.count(c)) return std::nullopt;
-        return subclassMeta.meta.at(c).idx;
+    // Bucketize root leafs.
+    // These are cheaper since we will only be calculating
+    // name-only func family entries.
+    auto rootLeafBuckets = consistently_bucketize(rootLeafs, kMaxBucketSize);
+    auto rootLeafWork = parallel::gen(
+      rootLeafBuckets.size(),
+      [&] (size_t idx) {
+        return HierarchicalWorkBucket{
+          std::move(rootLeafBuckets[idx])
+        };
       }
     );
+
+    work.insert(work.end(), rootLeafWork.begin(), rootLeafWork.end());
 
     std::vector<SString> markProcessed;
     markProcessed.reserve(actions.size());
@@ -13839,8 +13963,13 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
     // because we'd check it when building the buckets.
     processed.insert(begin(markProcessed), end(markProcessed));
 
-    assertx(std::none_of(begin(toProcess), end(toProcess),
-      [&] (SString c) { return processed.count(c); }));
+    toProcess.erase(
+      std::remove_if(
+        begin(toProcess), end(toProcess),
+        [&] (SString c) { return processed.count(c); }
+      ),
+      end(toProcess)
+    );
   }
 
   // Keep all split nodes created in the output

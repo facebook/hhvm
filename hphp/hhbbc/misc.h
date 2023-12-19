@@ -137,6 +137,10 @@ constexpr int kStatsBump = 50;
 std::vector<std::vector<SString>>
 consistently_bucketize(const std::vector<SString>&, size_t bucketSize);
 
+std::vector<std::vector<SString>>
+consistently_bucketize_by_num_buckets(const std::vector<SString>&,
+                                      size_t numBuckets);
+
 //////////////////////////////////////////////////////////////////////
 
 // Helper functions to produce a std::vector<T> from a single T

@@ -43,9 +43,7 @@ DEFAULT_HH_SERVER_FLAGS: List[str] = [
     "--config",
     "fetch_remote_old_decls=false",
     "--config",
-    "ss_force=prod_with_flag_on:optimized_member_fanout",
-    "--config",
-    "ss_force=prod_with_flag_on:optimized_parent_fanout",
+    "current_saved_state_rollout_flag_index=7",
 ]
 
 

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ae1bf378c79e3a0c7e772f6d6f923da2>>
+// @generated SignedSource<<6bf34b1048481a6ef1a097e97980512a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -43,6 +43,7 @@ pub struct SavedStateRollouts {
     pub dummy_three: bool,
     pub optimized_member_fanout: bool,
     pub optimized_parent_fanout: bool,
+    pub optimized_attribute_fanout: bool,
     pub new_naming_table: bool,
 }
 
@@ -76,6 +77,8 @@ pub enum Flag {
     OptimizedMemberFanout,
     #[rust_to_ocaml(name = "Optimized_parent_fanout")]
     OptimizedParentFanout,
+    #[rust_to_ocaml(name = "Optimized_attribute_fanout")]
+    OptimizedAttributeFanout,
     #[rust_to_ocaml(name = "New_naming_table")]
     NewNamingTable,
 }

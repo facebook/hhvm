@@ -14,6 +14,7 @@ type t = {
   dummy_three: bool;
   optimized_member_fanout: bool;
   optimized_parent_fanout: bool;
+  optimized_attribute_fanout: bool;
   new_naming_table: bool;
 }
 [@@deriving eq, show]
@@ -33,6 +34,7 @@ type flag =
   | Dummy_three
   | Optimized_member_fanout
   | Optimized_parent_fanout
+  | Optimized_attribute_fanout
   | New_naming_table
 [@@deriving show { with_path = false }]
 
@@ -150,7 +152,8 @@ let rollout_order =
   | Dummy_three -> 2
   | Optimized_member_fanout -> 4
   | Optimized_parent_fanout -> 5
-  | New_naming_table -> 6
+  | Optimized_attribute_fanout -> 6
+  | New_naming_table -> 7
 
 (** @param  get_default   typically external config reading, e.g. from JK *)
 let make
@@ -180,6 +183,7 @@ let make
     dummy_three = get_flag_value Dummy_three;
     optimized_member_fanout = get_flag_value Optimized_member_fanout;
     optimized_parent_fanout = get_flag_value Optimized_parent_fanout;
+    optimized_attribute_fanout = get_flag_value Optimized_attribute_fanout;
     new_naming_table = get_flag_value New_naming_table;
   }
 
@@ -200,6 +204,7 @@ let output t =
     dummy_three;
     optimized_member_fanout;
     optimized_parent_fanout;
+    optimized_attribute_fanout;
     new_naming_table;
   } =
     t
@@ -209,6 +214,7 @@ let output t =
   print_flag Dummy_three dummy_three;
   print_flag Optimized_member_fanout optimized_member_fanout;
   print_flag Optimized_parent_fanout optimized_parent_fanout;
+  print_flag Optimized_attribute_fanout optimized_attribute_fanout;
   print_flag New_naming_table new_naming_table;
   ()
 
@@ -223,6 +229,7 @@ let to_bit_array_string t : string =
     dummy_three;
     optimized_member_fanout;
     optimized_parent_fanout;
+    optimized_attribute_fanout;
     new_naming_table;
   } =
     t
@@ -232,6 +239,7 @@ let to_bit_array_string t : string =
   ^ s dummy_three
   ^ s optimized_member_fanout
   ^ s optimized_parent_fanout
+  ^ s optimized_attribute_fanout
   ^ s new_naming_table
 
 let to_hh_json t : Hh_json.json =
@@ -241,6 +249,7 @@ let to_hh_json t : Hh_json.json =
     dummy_three = _;
     optimized_member_fanout;
     optimized_parent_fanout;
+    optimized_attribute_fanout;
     new_naming_table;
   } =
     t
@@ -249,5 +258,6 @@ let to_hh_json t : Hh_json.json =
     [
       ("optimized_member_fanout", Hh_json.bool_ optimized_member_fanout);
       ("optimized_parent_fanout", Hh_json.bool_ optimized_parent_fanout);
+      ("optimized_attribute_fanout", Hh_json.bool_ optimized_attribute_fanout);
       ("new_naming_table", Hh_json.bool_ new_naming_table);
     ]

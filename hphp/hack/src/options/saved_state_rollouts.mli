@@ -14,6 +14,7 @@ type t = {
   dummy_three: bool;  (** Some documentation for dummy_three *)
   optimized_member_fanout: bool;
   optimized_parent_fanout: bool;
+  optimized_attribute_fanout: bool;
   new_naming_table: bool;
 }
 [@@deriving eq, show]

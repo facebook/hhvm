@@ -257,6 +257,10 @@ let optimized_parent_fanout t =
   GlobalOptions.(t.tco_saved_state.rollouts)
     .Saved_state_rollouts.optimized_parent_fanout
 
+let optimized_attribute_fanout t =
+  GlobalOptions.(t.tco_saved_state.rollouts)
+    .Saved_state_rollouts.optimized_attribute_fanout
+
 let dummy_one t =
   GlobalOptions.(t.tco_saved_state.rollouts).Saved_state_rollouts.dummy_one
 

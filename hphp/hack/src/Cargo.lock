@@ -4260,14 +4260,17 @@ version = "0.0.0"
 dependencies = [
  "ast_and_decl_parser",
  "bumpalo",
+ "crossbeam",
  "direct_decl_parser",
  "hh_hash",
  "ocamlrep",
  "ocamlrep_caml_builtins",
+ "ocamlrep_custom",
  "ocamlrep_ocamlpool",
  "oxidized",
  "oxidized_by_ref",
  "parser_core_types",
+ "rayon",
  "relative_path",
 ]
 

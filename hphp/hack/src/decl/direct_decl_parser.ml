@@ -99,3 +99,27 @@ let decls_to_addenda (parsed_file : parsed_file_with_hashes) :
       | None -> None
       | Some sia_kind ->
         Some { FileInfo.sia_name; sia_kind; sia_is_abstract; sia_is_final })
+
+module type Metadata = sig
+  type t
+end
+
+module Concurrent (Metadata : Metadata) = struct
+  type handle
+
+  type content = string option
+
+  external start :
+    opts:DeclParserOptions.t ->
+    root:Path.t ->
+    hhi:Path.t ->
+    tmp:Path.t ->
+    dummy:Path.t ->
+    handle = "hh_concurrent_parse_start_ffi"
+
+  external enqueue_next_and_get_earlier_results :
+    handle ->
+    (Relative_path.t * Metadata.t * content) list ->
+    (Relative_path.t * Metadata.t * parsed_file) option
+    = "hh_concurrent_parse_step_ffi"
+end

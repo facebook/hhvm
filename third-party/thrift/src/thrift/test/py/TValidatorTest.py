@@ -174,7 +174,7 @@ class ValidationTest(unittest.TestCase):
     def testAnnotations(self):
         self.assertTrue(hasattr(WithAnnotations, "thrift_field_annotations"))
         self.assertTrue(hasattr(WithAnnotations, "thrift_struct_annotations"))
-        self.assertEquals(
+        self.assertEqual(
             WithAnnotations.thrift_field_annotations,
             {
                 1: {
@@ -186,7 +186,7 @@ class ValidationTest(unittest.TestCase):
                 },
             },
         )
-        self.assertEquals(
+        self.assertEqual(
             WithAnnotations.thrift_struct_annotations,
             {
                 "test.struct_annotation": "ok",

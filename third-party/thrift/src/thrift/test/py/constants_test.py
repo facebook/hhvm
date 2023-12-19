@@ -21,29 +21,29 @@ class TestPythonConstants(unittest.TestCase):
     def testStrings(self):
         from .constants import constants
 
-        self.assertEquals(constants.apostrophe, "'")
-        self.assertEquals(constants.tripleApostrophe, "'''")
-        self.assertEquals(constants.quotationMark, '"')
-        self.assertEquals(constants.quote, 'this is a "quote"')
-        self.assertEquals(constants.backslash, "\\")
-        self.assertEquals(constants.escaped_a, "a")
+        self.assertEqual(constants.apostrophe, "'")
+        self.assertEqual(constants.tripleApostrophe, "'''")
+        self.assertEqual(constants.quotationMark, '"')
+        self.assertEqual(constants.quote, 'this is a "quote"')
+        self.assertEqual(constants.backslash, "\\")
+        self.assertEqual(constants.escaped_a, "a")
 
     def testDict(self):
         from .constants import constants
 
-        self.assertEquals(constants.escapeChars["apostrophe"], "'")
-        self.assertEquals(constants.escapeChars["quotationMark"], '"')
-        self.assertEquals(constants.escapeChars["backslash"], "\\")
-        self.assertEquals(constants.escapeChars["escaped_a"], "a")
-        self.assertEquals(constants.char2ascii["'"], 39)
-        self.assertEquals(constants.char2ascii['"'], 34)
-        self.assertEquals(constants.char2ascii["\\"], 92)
-        self.assertEquals(constants.char2ascii["a"], 97)
+        self.assertEqual(constants.escapeChars["apostrophe"], "'")
+        self.assertEqual(constants.escapeChars["quotationMark"], '"')
+        self.assertEqual(constants.escapeChars["backslash"], "\\")
+        self.assertEqual(constants.escapeChars["escaped_a"], "a")
+        self.assertEqual(constants.char2ascii["'"], 39)
+        self.assertEqual(constants.char2ascii['"'], 34)
+        self.assertEqual(constants.char2ascii["\\"], 92)
+        self.assertEqual(constants.char2ascii["a"], 97)
 
     def testStruct(self):
         from .constants import constants
 
-        self.assertEquals(constants.str2struct["foo"].bar, {"baz": "qux"})
+        self.assertEqual(constants.str2struct["foo"].bar, {"baz": "qux"})
 
 
 if __name__ == "__main__":

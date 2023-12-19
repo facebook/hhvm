@@ -28,35 +28,35 @@ class TestOptionalRequired(unittest.TestCase):
         r = Tricky1()
         w.im_default = 10
         write_to_read(w, r)
-        self.assertEquals(10, r.im_default)
+        self.assertEqual(10, r.im_default)
 
     def testSetOptional(self):
         w = Tricky2()
         r = Tricky2()
         w.im_optional = 10
         write_to_read(w, r)
-        self.assertEquals(10, r.im_optional)
+        self.assertEqual(10, r.im_optional)
 
     def testSetRequired(self):
         w = Tricky3()
         r = Tricky3()
         w.im_required = 10
         write_to_read(w, r)
-        self.assertEquals(10, r.im_required)
+        self.assertEqual(10, r.im_required)
 
     def testSetDefaultNull(self):
         w = Tricky1()
         r = Tricky1()
         w.im_default = None
         write_to_read(w, r)
-        self.assertEquals(None, r.im_default)
+        self.assertEqual(None, r.im_default)
 
     def testSetOptionalNull(self):
         w = Tricky2()
         r = Tricky2()
         w.im_optional = None
         write_to_read(w, r)
-        self.assertEquals(None, r.im_optional)
+        self.assertEqual(None, r.im_optional)
 
     def testSetRequiredNull(self):
         w = Tricky3()
@@ -69,13 +69,13 @@ class TestOptionalRequired(unittest.TestCase):
         w = Tricky1()
         r = Tricky1()
         write_to_read(w, r)
-        self.assertEquals(None, r.im_default)
+        self.assertEqual(None, r.im_default)
 
     def testSetOptionalDontSet(self):
         w = Tricky2()
         r = Tricky2()
         write_to_read(w, r)
-        self.assertEquals(None, r.im_optional)
+        self.assertEqual(None, r.im_optional)
 
     def testSetRequiredDontSet(self):
         w = Tricky3()
@@ -91,12 +91,12 @@ class TestOptionalRequired(unittest.TestCase):
         r.im_optional = 10
 
         write_to_read(w, r)
-        self.assertEquals(0, r.im_optional)
-        self.assertEquals(0, w.im_default)
+        self.assertEqual(0, r.im_optional)
+        self.assertEqual(0, w.im_default)
 
         write_to_read(r, w)
-        self.assertEquals(0, r.im_optional)
-        self.assertEquals(0, w.im_default)
+        self.assertEqual(0, r.im_optional)
+        self.assertEqual(0, w.im_default)
 
     def testMixDefaultAndRequired(self):
         w = Tricky1()
@@ -106,12 +106,12 @@ class TestOptionalRequired(unittest.TestCase):
         r.im_required = 10
 
         write_to_read(w, r)
-        self.assertEquals(0, r.im_required)
-        self.assertEquals(0, w.im_default)
+        self.assertEqual(0, r.im_required)
+        self.assertEqual(0, w.im_default)
 
         write_to_read(r, w)
-        self.assertEquals(0, r.im_required)
-        self.assertEquals(0, w.im_default)
+        self.assertEqual(0, r.im_required)
+        self.assertEqual(0, w.im_default)
 
 
 def write_to_read(write_struct, read_struct):

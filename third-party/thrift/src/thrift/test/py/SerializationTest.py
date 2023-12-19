@@ -96,8 +96,8 @@ class AbstractTest:
         if isinstance(self, SimpleJSONTest):
             return
         obj = self._deserialize(VersioningTestV2, self._serialize(self.v1obj))
-        self.assertEquals(obj.begin_in_both, self.v1obj.begin_in_both)
-        self.assertEquals(obj.end_in_both, self.v1obj.end_in_both)
+        self.assertEqual(obj.begin_in_both, self.v1obj.begin_in_both)
+        self.assertEqual(obj.end_in_both, self.v1obj.end_in_both)
 
     def testUnicodeString(self):
         if isinstance(self, SimpleJSONTest):
@@ -109,14 +109,14 @@ class AbstractTest:
         if isinstance(self, SimpleJSONTest):
             return
         obj = self._deserialize(VersioningTestV1, self._serialize(self.v2obj))
-        self.assertEquals(obj.begin_in_both, self.v2obj.begin_in_both)
-        self.assertEquals(obj.end_in_both, self.v2obj.end_in_both)
+        self.assertEqual(obj.begin_in_both, self.v2obj.begin_in_both)
+        self.assertEqual(obj.end_in_both, self.v2obj.end_in_both)
 
     def testDouble(self):
         if isinstance(self, SimpleJSONTest):
             return
         obj = self._deserialize(VersioningTestV2, self._serialize(self.v2obj))
-        self.assertEquals(obj.newdouble, self.v2obj.newdouble)
+        self.assertEqual(obj.newdouble, self.v2obj.newdouble)
 
 
 class NormalBinaryTest(AbstractTest, unittest.TestCase):
@@ -159,7 +159,7 @@ class AcceleratedFramedTest(unittest.TestCase):
         for part in parts:
             framed_writer.write(part)
             framed_writer.flush()
-        self.assertEquals(len(framed_buffer.getvalue()), len(data) + 8)
+        self.assertEqual(len(framed_buffer.getvalue()), len(data) + 8)
 
         # Recreate framed_buffer so we can read from it.
         framed_buffer = TTransport.TMemoryBuffer(framed_buffer.getvalue())

@@ -26,11 +26,11 @@ from thrift.test.UnionTest.ttypes import *
 class TestUnionStructs(unittest.TestCase):
     def test_init(self):
         u = TestUnion()
-        self.assertEquals(TestUnion.__EMPTY__, u.getType())
+        self.assertEqual(TestUnion.__EMPTY__, u.getType())
 
         v = TestUnion(string_field="test")
-        self.assertEquals(TestUnion.STRING_FIELD, v.getType())
-        self.assertEquals("test", v.value)
+        self.assertEqual(TestUnion.STRING_FIELD, v.getType())
+        self.assertEqual("test", v.value)
         self.assertNotEqual(u, v)
 
         try:
@@ -42,17 +42,17 @@ class TestUnionStructs(unittest.TestCase):
     def test_get_set(self):
         u = TestUnion()
         u.set_i32_field(10)
-        self.assertEquals(10, u.get_i32_field())
+        self.assertEqual(10, u.get_i32_field())
 
         v = TestUnion(i32_field=10)
-        self.assertEquals(u, v)
+        self.assertEqual(u, v)
 
         self.assertRaises(AssertionError, u.get_other_i32_field)
 
     def _test_json(self, j, v):
         u = TestUnion()
         u.readFromJson(json.dumps(j))
-        self.assertEquals(v, u)
+        self.assertEqual(v, u)
 
     def test_json(self):
         v = TestUnion(i32_field=123)
@@ -68,13 +68,13 @@ class TestUnionStructs(unittest.TestCase):
         used to construct the original object
         """
         v = TestUnion(i32_field=123)
-        self.assertEquals(v, eval(v.__repr__()))
+        self.assertEqual(v, eval(v.__repr__()))
 
         v = TestUnion()
-        self.assertEquals(v, eval(v.__repr__()))
+        self.assertEqual(v, eval(v.__repr__()))
 
         v = TestUnion(string_field="test")
-        self.assertEquals(v, eval(v.__repr__()))
+        self.assertEqual(v, eval(v.__repr__()))
 
     def _test_read_write(self, u, j):
         protocol_factory = TBinaryProtocol.TBinaryProtocolAcceleratedFactory()
@@ -86,7 +86,7 @@ class TestUnionStructs(unittest.TestCase):
         prot = protocol_factory.getProtocol(ndatabuf)
         v = u.__class__()
         v.read(prot)
-        self.assertEquals(v, j)
+        self.assertEqual(v, j)
 
     def test_read_write(self):
         l = [
@@ -108,7 +108,7 @@ class TestUnionStructs(unittest.TestCase):
         prot = protocol_factory.getProtocol(databuf)
         u.write(prot)
 
-        self.assertEquals(j, json.loads(databuf.getvalue().decode()))
+        self.assertEqual(j, json.loads(databuf.getvalue().decode()))
 
     def test_json_output(self):
         l = [

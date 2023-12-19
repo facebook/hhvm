@@ -28,27 +28,27 @@ class TestDefaultValues(unittest.TestCase):
         w = DefaultValues(def_reg=11, req_reg=22)
         r = DefaultValues()
         write_to_read(w, r)
-        self.assertEquals(r.def_reg, 11)
-        self.assertEquals(r.req_reg, 22)
-        self.assertEquals(r.def_val, 12)
-        self.assertEquals(r.req_val, 34)
-        self.assertEquals(r.opt_val, 56)
+        self.assertEqual(r.def_reg, 11)
+        self.assertEqual(r.req_reg, 22)
+        self.assertEqual(r.def_val, 12)
+        self.assertEqual(r.req_val, 34)
+        self.assertEqual(r.opt_val, 56)
         self.assertIsNone(r.opt_list_reg)
-        self.assertEquals(r.opt_list_val, [56, 78, 90])
+        self.assertEqual(r.opt_list_val, [56, 78, 90])
 
     def testDefaultsAreNotOnTheWire(self):
         w = DefaultValues(def_reg=11, req_reg=22)
         r = DefaultValues(def_reg=0, opt_reg=33, opt_val=44)
         write_to_read(w, r)
-        self.assertEquals(r.def_reg, 11)
-        self.assertEquals(r.opt_reg, 33)
-        self.assertEquals(r.opt_val, 44, "defaults are transmitted on the wire")
+        self.assertEqual(r.def_reg, 11)
+        self.assertEqual(r.opt_reg, 33)
+        self.assertEqual(r.opt_val, 44, "defaults are transmitted on the wire")
 
     def testCompoundDefaults(self):
         w = DefaultValues(def_reg=11, req_reg=22)
         r = DefaultValues(def_reg=0, req_reg=33, opt_list_val=[11, 22, 33])
         write_to_read(w, r)
-        self.assertEquals(
+        self.assertEqual(
             r.opt_list_val, [11, 22, 33], "defaults are transmitted on the wire"
         )
 

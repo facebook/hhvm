@@ -140,7 +140,7 @@ class AbstractTest:
             seq1 = seq1.encode("utf-8")
         if not isinstance(seq2, bytes):
             seq2 = seq2.encode("utf-8")
-        self.assertEquals(seq1, seq2)
+        self.assertEqual(seq1, seq2)
 
     def setUp(self):
         if self.ssl:
@@ -280,7 +280,7 @@ class HeaderTest(HeaderBase):
             self.client.testString("test")
             headers = htrans.get_headers()
             self.assertTrue("permanent" in headers)
-            self.assertEquals(headers["permanent"], "true")
+            self.assertEqual(headers["permanent"], "true")
 
             # Try with two transient headers
             htrans.set_header("transient1", "true")
@@ -288,11 +288,11 @@ class HeaderTest(HeaderBase):
             self.client.testString("test")
             headers = htrans.get_headers()
             self.assertTrue("permanent" in headers)
-            self.assertEquals(headers["permanent"], "true")
+            self.assertEqual(headers["permanent"], "true")
             self.assertTrue("transient1" in headers)
-            self.assertEquals(headers["transient1"], "true")
+            self.assertEqual(headers["transient1"], "true")
             self.assertTrue("transient2" in headers)
-            self.assertEquals(headers["transient2"], "true")
+            self.assertEqual(headers["transient2"], "true")
 
             # Add one, update one and delete one transient header
             htrans.set_header("transient2", "false")
@@ -300,12 +300,12 @@ class HeaderTest(HeaderBase):
             self.client.testString("test")
             headers = htrans.get_headers()
             self.assertTrue("permanent" in headers)
-            self.assertEquals(headers["permanent"], "true")
+            self.assertEqual(headers["permanent"], "true")
             self.assertTrue("transient1" not in headers)
             self.assertTrue("transient2" in headers)
-            self.assertEquals(headers["transient2"], "false")
+            self.assertEqual(headers["transient2"], "false")
             self.assertTrue("transient3" in headers)
-            self.assertEquals(headers["transient3"], "true")
+            self.assertEqual(headers["transient3"], "true")
 
 
 class HeaderAcceleratedCompactTest(HeaderBase):

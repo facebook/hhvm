@@ -539,7 +539,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
     const auto& after = data_.patch()->toThrift();
 
     using Ref = folly::remove_cvref_t<decltype(get<Id>(std::declval<T>()))>;
-    if (!type::is_optional_field<Ref>::value) {
+    if constexpr (!type::is_optional_field<Ref>::value) {
       // non-optional fields can not be removed
       return false;
     }

@@ -197,46 +197,57 @@ let get_added_parent_fanout
     classish_kind
     added_parent_name
     fanout_acc : Fanout.t =
-  (* This function is based on reasoning about how basic decl facts are altered
-   * by adding a parent.
-   * The kinds of facts we consider are:
-   * - subtyping relationships: t1 <: t2
-   * - member types: X::m : t
-   * Adding a parent Y to a type X should:
-   * - Add new subtyping relationships, but not remove any.
-   *   And therefore there should be no new subtyping errors.
-   * - For each member m in Y, possibly change the type of X::m.
-   *   The fanout should therefore include the fanout of X::m.
-   *
-   * So conclusion: fanout = union over m in Y of fanout(X::m)
-   * Which is what this function implements
-   *
-   * Caveat:
-   * Some typing derivations actually use facts like
-   * 'A is not a subtype of B', for example when inferring that two types
-   * are disjoint and a refinement results in type 'nothing'.
-   * These basics facts may be invalidated by adding parents.
-   * To handle this case,
-   * - whenever we fact 'A is not a subtype of X' for any X,
-   *   we add a 'NotSubtype' edge from A.
-   * - when detecting an added parent to A, we gather descendants of
-   *   A via Extends / RequireExtends edges, then follow any NotSubtype
-   *   edge from these descendants and collect these edges' ends to add to
-   *   the fanout. (This is done by the call to get_not_subtype_fanout below)
-   *)
   match Decl_provider.get_class ctx added_parent_name with
   | Decl_entry.NotYetAvailable
   | Decl_entry.DoesNotExist ->
     fanout_acc
   | Decl_entry.Found (cls : Decl_provider.class_decl) ->
     let { Fanout.changed; to_recheck; to_recheck_if_errors } = fanout_acc in
-    let acc_fanout member =
-      acc_member_fanout ctx changed_class.dep member Added
-    in
+    let { name = _; diff = _; dep; descendant_deps } = changed_class in
+    (* The type check performs two categories of checks:
+     * - function/method body checks
+     * - wellformedness/hierarchy checks
+     *
+     * We need to reason about both to figure out fanouts.
+     *
+     * # Hierarchy checks
+     *
+     * For hierarchy checks, precise fanout computation is
+     * tricky because there are a wide variety of checks.
+     * Most checks only consider information declared in direct parents,
+     * but some checks use information declared in non-direct ancestors,
+     * for example:
+     * - member override checks
+     * - requirement checks (e.g. `require extends`)
+     * - constructor consistency checks (using attribute __ConsistentConstruct
+     *   from remote ancestors)
+     * - dynamic support checks
+     * - multiple instantiation inheritence checks
+     *
+     * Since it's hard to keep track of those checks and more may be added
+     * in the future, we simply include all descendants in the fanout.
+     *)
+    let to_recheck = DepSet.union descendant_deps to_recheck in
+    (* # Function body checks
+     *
+     * Function body checks use two kinds of basic decl facts
+     * that can be affected by parent changes:
+     * - subtyping relationships: t1 <: t2
+     * - member types: X::m : t
+     * Adding a parent Y to a type X should:
+     * - Add new subtyping relationships, but not remove any.
+     *   And therefore there should be no new subtyping errors.
+     * - For each member m in Y, possibly change the type of X::m.
+     *   The fanout should therefore include the fanout of X::m.
+     *
+     * So conclusion: fanout = union over m in Y of fanout(X::m)
+     * Which is what this function implements
+     *)
+    let acc_fanout member = acc_member_fanout ctx dep member Added in
     let acc_fanouts make_member members =
       acc_member_fanouts
         ctx
-        changed_class.dep
+        dep
         make_member
         (List.map members ~f:(fun m -> (fst m, Added)) |> SMap.of_list)
     in
@@ -245,11 +256,8 @@ let get_added_parent_fanout
       |> List.filter ~f:(fun (name, _) ->
              not @@ String.equal name Naming_special_names.Members.mClass)
     in
-    let deps_acc =
+    let to_recheck =
       to_recheck
-      |> Typing_deps.get_not_subtype_fanout
-           (Provider_context.get_deps_mode ctx)
-           ~class_dep:changed_class.dep
       |> acc_fanouts Dep.Member.method_ (Decl_provider.Class.methods cls)
       |> acc_fanouts Dep.Member.smethod (Decl_provider.Class.smethods cls)
       |> acc_fanouts Dep.Member.prop (Decl_provider.Class.props cls)
@@ -257,20 +265,39 @@ let get_added_parent_fanout
       |> acc_fanouts Dep.Member.const consts
       |> acc_fanouts Dep.Member.const (Decl_provider.Class.typeconsts cls)
     in
-    let deps_acc =
+    let to_recheck =
       let (construct, _consistent_kind) = Decl_provider.Class.construct cls in
-      Option.fold construct ~init:deps_acc ~f:(fun deps_acc _construct ->
-          acc_fanout Dep.Member.constructor deps_acc)
+      Option.fold construct ~init:to_recheck ~f:(fun to_recheck _construct ->
+          acc_fanout Dep.Member.constructor to_recheck)
     in
-    let deps_acc =
+    let to_recheck =
       if Ast_defs.is_c_enum classish_kind && (not @@ List.is_empty consts) then
-        acc_fanout Dep.Member.all deps_acc
+        acc_fanout Dep.Member.all to_recheck
       else
-        deps_acc
+        to_recheck
+    in
+    (* Caveat:
+     * Some typing derivations actually use facts like
+     * 'A is not a subtype of B', for example when inferring that two types
+     * are disjoint and a refinement results in type 'nothing'.
+     * These basics facts may be invalidated by adding parents.
+     * To handle this case,
+     * - whenever we fact 'A is not a subtype of X' for any X,
+     *   we add a 'NotSubtype' edge from A.
+     * - when detecting an added parent to A, we gather descendants of
+     *   A via Extends / RequireExtends edges, then follow any NotSubtype
+     *   edge from these descendants and collect these edges' ends to add to
+     *   the fanout. (This is done by the call to get_not_subtype_fanout below)
+     *)
+    let to_recheck =
+      Typing_deps.get_not_subtype_fanout
+        (Provider_context.get_deps_mode ctx)
+        ~class_dep:dep
+        to_recheck
     in
     {
-      Fanout.changed = DepSet.add changed changed_class.dep;
-      to_recheck = deps_acc;
+      Fanout.changed = DepSet.add changed dep;
+      to_recheck;
       to_recheck_if_errors =
         DepSet.union to_recheck_if_errors (get_all_deps ctx changed_class);
     }
@@ -332,23 +359,18 @@ let get_parent_changes_fanout
                ->
               let {
                 ClassDiff.NamedItemsListChange.per_name_changes;
-                order_change;
+                order_change = _;
               } =
                 change
               in
-              if order_change then
-                (* Any change order can invalidate subtyping relationships
-                 * Due to the way we handle multiple instantiation inheritence. *)
-                raise Do_max_fanout
-              else
-                SMap.fold
-                  per_name_changes
-                  ~init:added_parents
-                  ~f:(fun name change added_parents ->
-                    match change with
-                    | ClassDiff.ValueChange.(Modified _ | Removed) ->
-                      raise Do_max_fanout
-                    | ClassDiff.ValueChange.Added -> SSet.add added_parents name)))
+              SMap.fold
+                per_name_changes
+                ~init:added_parents
+                ~f:(fun name change added_parents ->
+                  match change with
+                  | ClassDiff.ValueChange.(Modified _ | Removed) ->
+                    raise Do_max_fanout
+                  | ClassDiff.ValueChange.Added -> SSet.add added_parents name)))
     in
     get_added_parents_fanout
       ctx

@@ -46,10 +46,10 @@ val expand_type_and_narrow :
   (env * Typing_error.t option) * locl_ty
 
 val solve_to_equal_bound_or_wrt_variance :
-  env -> Reason.t -> int -> env * Typing_error.t option
+  env -> Reason.t -> Tvid.t -> env * Typing_error.t option
 
 val close_tyvars_and_solve : env -> env * Typing_error.t option
 
-val bind : env -> Ident.t -> locl_ty -> env * Typing_error.t option
+val bind : env -> Tvid.t -> locl_ty -> env * Typing_error.t option
 
-val try_bind_to_equal_bound : env -> Ident.t -> env * Typing_error.t option
+val try_bind_to_equal_bound : env -> Tvid.t -> env * Typing_error.t option

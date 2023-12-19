@@ -19,7 +19,7 @@ val full : env -> Typing_defs.locl_ty -> string
 
 val full_i : env -> Typing_defs.internal_type -> string
 
-val full_rec : env -> int -> Typing_defs.locl_ty -> string
+val full_rec : env -> Tvid.t -> Typing_defs.locl_ty -> string
 
 val full_strip_ns : env -> Typing_defs.locl_ty -> string
 

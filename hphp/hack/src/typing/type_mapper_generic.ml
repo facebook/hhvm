@@ -25,7 +25,7 @@ class type ['env] type_mapper_type =
 
     method on_reason : 'env -> Reason.t -> 'env * Reason.t
 
-    method on_tvar : 'env -> Reason.t -> int -> 'env * locl_ty
+    method on_tvar : 'env -> Reason.t -> Tvid.t -> 'env * locl_ty
 
     method on_tnonnull : 'env -> Reason.t -> 'env * locl_ty
 

@@ -35,6 +35,7 @@ type expr_tree_env = {
 
 type env = {
   expression_id_provider: Expression_id.provider;
+  tvar_id_provider: Tvid.provider;
   fresh_typarams: SSet.t;
   lenv: local_env;
   genv: genv;

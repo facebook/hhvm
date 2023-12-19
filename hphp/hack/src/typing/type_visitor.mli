@@ -37,7 +37,7 @@ class type ['a] decl_type_visitor_type =
 
     method on_tprim : 'a -> Typing_reason.decl_t -> Aast.tprim -> 'a
 
-    method on_tvar : 'a -> Typing_reason.decl_t -> Ident.t -> 'a
+    method on_tvar : 'a -> Typing_reason.decl_t -> Tvid.t -> 'a
 
     method on_type : 'a -> Typing_defs.decl_ty -> 'a
 
@@ -102,7 +102,7 @@ class type ['a] locl_type_visitor_type =
 
     method on_tprim : 'a -> Typing_reason.t -> Aast.tprim -> 'a
 
-    method on_tvar : 'a -> Typing_reason.t -> Ident.t -> 'a
+    method on_tvar : 'a -> Typing_reason.t -> Tvid.t -> 'a
 
     method on_type : 'a -> Typing_defs.locl_ty -> 'a
 

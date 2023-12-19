@@ -12,7 +12,7 @@ module Map = Type_mapper_generic
 
 type env = {
   (* the tyvar to be removed *)
-  tyvar: int;
+  tyvar: Tvid.t;
   (* why did we need to forget this type? *)
   forget_reason: Reason.t option;
 }
@@ -57,7 +57,7 @@ class forget_tyvar_mapper : forget_tyvar_mapper_type =
       this#result_opt env ity
 
     method! on_tvar env r var =
-      if Int.equal var env.tyvar then
+      if Tvid.equal var env.tyvar then
         ({ env with forget_reason = Some r }, mk (r, Tunion []))
       else
         (env, mk (r, Tvar var))

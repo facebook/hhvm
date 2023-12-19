@@ -43,8 +43,8 @@ val local_id_as_string : Local_id.t -> string
 
 val local_id_set_as_value : Local_id.Set.t -> value
 
-val var_as_string : int -> string
+val var_as_string : Tvid.t -> string
 
-val varset_as_value : ISet.t -> value
+val varset_as_value : Tvid.Set.t -> value
 
 val variant_as_value : SMap.key -> value -> value

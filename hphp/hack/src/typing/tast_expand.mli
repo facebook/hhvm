@@ -7,7 +7,7 @@
  *)
 
 val expand_ty :
-  ?var_hook:(Ident.t -> unit) ->
+  ?var_hook:(Tvid.t -> unit) ->
   ?pos:Pos.t ->
   Tast_env.env ->
   Typing_defs.locl_ty ->

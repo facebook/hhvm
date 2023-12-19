@@ -240,17 +240,17 @@ val add_type_expansion_check_cycles :
 (** Returns whether there was an attempt at expanding a cyclic type. *)
 val cyclic_expansion : expand_env -> bool
 
-val get_var : locl_phase ty -> Ident.t option
+val get_var : locl_phase ty -> Tvid.t option
 
 val get_class_type : locl_phase ty -> (pos_id * exact * locl_ty list) option
 
-val get_var_i : internal_type -> Ident.t option
+val get_var_i : internal_type -> Tvid.t option
 
 val is_tyvar : locl_phase ty -> bool
 
 val is_tyvar_i : internal_type -> bool
 
-val is_var_v : locl_phase ty -> Ident.t -> bool
+val is_var_v : locl_phase ty -> Tvid.t -> bool
 
 val is_generic : 'a ty -> bool
 
@@ -297,11 +297,11 @@ val is_constraint_type : internal_type -> bool
 val is_union_or_inter_type : locl_ty -> bool
 
 module InternalType : sig
-  val get_var : internal_type -> Ident.t option
+  val get_var : internal_type -> Tvid.t option
 
-  val is_var_v : internal_type -> v:Ident.t -> bool
+  val is_var_v : internal_type -> v:Tvid.t -> bool
 
-  val is_not_var_v : internal_type -> v:Ident.t -> bool
+  val is_not_var_v : internal_type -> v:Tvid.t -> bool
 end
 
 val this : Local_id.t

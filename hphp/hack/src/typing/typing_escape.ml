@@ -104,7 +104,7 @@ type remove_map = rigid_tvar -> elim_info option
 
 type refresh_env = {
   env: Typing_env_types.env;  (** the underlying typing env *)
-  tvars: Typing_error.Reasons_callback.t IMap.t;
+  tvars: Typing_error.Reasons_callback.t Tvid.Map.t;
       (** an accumulator used to remember all the type variabes
           that appeared when refreshing a type; the map is used as a
           set, and error callbacks are merely used for reporting *)
@@ -252,7 +252,7 @@ and refresh_type renv v ty_orig =
             } ),
       ch )
   | (_, Tvar v) ->
-    let renv = { renv with tvars = IMap.add v renv.on_error renv.tvars } in
+    let renv = { renv with tvars = Tvid.Map.add v renv.on_error renv.tvars } in
     (renv, ty_orig, Unchanged)
   | (r, Tgeneric (name, _ (* TODO(T70068435) assumes no args *))) -> begin
     (* look if the Tgeneric has to go away and kill it using its
@@ -497,14 +497,14 @@ let refresh_tvar tv (on_error : Typing_error.Reasons_callback.t) renv =
   renv
 
 let rec refresh_tvars seen renv =
-  if IMap.is_empty renv.tvars then
+  if Tvid.Map.is_empty renv.tvars then
     renv.env
   else
     let tvars = renv.tvars in
-    let renv = { renv with tvars = IMap.empty } in
-    let renv = IMap.fold refresh_tvar tvars renv in
-    let seen = IMap.fold (fun v _ -> ISet.add v) tvars seen in
-    let tvars = ISet.fold IMap.remove seen renv.tvars in
+    let renv = { renv with tvars = Tvid.Map.empty } in
+    let renv = Tvid.Map.fold refresh_tvar tvars renv in
+    let seen = Tvid.Map.fold (fun v _ -> Tvid.Set.add v) tvars seen in
+    let tvars = Tvid.Set.fold Tvid.Map.remove seen renv.tvars in
     let renv = { renv with tvars } in
     refresh_tvars seen renv
 
@@ -560,7 +560,7 @@ let refresh_env_and_type ~remove:(types, remove) ~pos env ty =
     let renv =
       {
         env;
-        tvars = IMap.empty;
+        tvars = Tvid.Map.empty;
         remove;
         on_error;
         scope_kind = (what, pos);
@@ -576,7 +576,7 @@ let refresh_env_and_type ~remove:(types, remove) ~pos env ty =
     in
     let renv = { renv with on_error } in
     let (renv, ty, _) = refresh_type renv Ast_defs.Covariant ty in
-    (refresh_tvars ISet.empty renv, ty)
+    (refresh_tvars Tvid.Set.empty renv, ty)
   )
 
 (********************************************************************)

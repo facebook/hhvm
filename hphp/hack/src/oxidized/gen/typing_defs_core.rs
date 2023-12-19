@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b0bdd19a9cda4551e7656fc0f8890a4b>>
+// @generated SignedSource<<3a1227b45d5371f9c18f66a2e7d2519f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -730,7 +730,7 @@ pub enum Ty_ {
     ///
     /// The second parameter is the list of type arguments to the type.
     Tnewtype(String, Vec<Ty>, Ty),
-    Tvar(ident::Ident),
+    Tvar(isize),
     /// This represents a type alias that lacks necessary type arguments. Given
     /// type Foo<T1,T2> = ...
     /// Tunappliedalias "Foo" stands for usages of plain Foo, without supplying

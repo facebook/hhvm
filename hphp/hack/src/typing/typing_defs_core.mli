@@ -348,7 +348,7 @@ and _ ty_ =
    *)
   | Tnewtype : string * 'phase ty list * 'phase ty -> 'phase ty_
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
-  | Tvar : Ident.t -> locl_phase ty_
+  | Tvar : Tvid.t -> locl_phase ty_
   (* This represents a type alias that lacks necessary type arguments. Given
    *   type Foo<T1,T2> = ...
    * Tunappliedalias "Foo" stands for usages of plain Foo, without supplying

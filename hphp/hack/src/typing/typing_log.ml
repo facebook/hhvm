@@ -586,6 +586,7 @@ let in_expr_tree_as_value env = function
 let env_as_value env =
   let {
     expression_id_provider = _;
+    tvar_id_provider = _;
     fresh_typarams;
     lenv;
     genv;
@@ -721,7 +722,7 @@ let log_new_tvar_for_new_object env p tvar cname tparam =
 
 let log_new_tvar_for_tconst env (p, tvar) (_p, tconstid) tvar_for_tconst =
   let message =
-    Printf.sprintf "Creating new type var for #%d::%s" tvar tconstid
+    Printf.sprintf "Creating new type var for #%s::%s" (Tvid.show tvar) tconstid
   in
   log_new_tvar env p tvar_for_tconst message
 
@@ -853,7 +854,7 @@ module GlobalInference = struct
   let log_merging_var env pos var =
     log_with_level env log_cat ~level:1 (fun () ->
         log_position pos (fun () ->
-            log_key (Printf.sprintf "merging type variable %d" var)))
+            log_key (Printf.sprintf "merging type variable #%s" (Tvid.show var))))
 end
 
 module GI = GlobalInference

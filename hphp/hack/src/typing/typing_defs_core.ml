@@ -382,7 +382,7 @@ and _ ty_ =
        * The second parameter is the list of type arguments to the type.
        *)
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
-  | Tvar : Ident.t -> locl_phase ty_
+  | Tvar : Tvid.t -> locl_phase ty_
   | Tunapplied_alias : string -> locl_phase ty_
       (** This represents a type alias that lacks necessary type arguments. Given
            type Foo<T1,T2> = ...
@@ -602,7 +602,7 @@ module Pp = struct
       Format.fprintf fmt "@])"
     | Tvar a0 ->
       Format.fprintf fmt "(@[<2>Tvar@ ";
-      Ident.pp fmt a0;
+      Tvid.pp fmt a0;
       Format.fprintf fmt "@])"
     | Tnewtype (a0, a1, a2) ->
       Format.fprintf fmt "(@[<2>Tnewtype (@,";
@@ -881,7 +881,7 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
       | n -> n
     end
     | (Tshape s1, Tshape s2) -> shape_type_compare s1 s2
-    | (Tvar v1, Tvar v2) -> compare v1 v2
+    | (Tvar v1, Tvar v2) -> Tvid.compare v1 v2
     | (Tunapplied_alias n1, Tunapplied_alias n2) -> String.compare n1 n2
     | (Taccess (ty1, id1), Taccess (ty2, id2)) -> begin
       match ty_compare ty1 ty2 with

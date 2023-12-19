@@ -923,7 +923,7 @@ module Full = struct
         in
         (fuel, d))
 
-  and locl_ty_ ~fuel : _ -> _ -> _ -> locl_phase ty_ -> Fuel.t * Doc.t =
+  and locl_ty_ ~fuel : _ -> _ -> penv -> locl_phase ty_ -> Fuel.t * Doc.t =
    fun to_doc st penv x ->
     let ty = locl_ty in
     let verbose = show_verbose penv in
@@ -963,27 +963,27 @@ module Full = struct
         (* For unsolved type variables, always show the type variable *)
         | (_, Tvar n') ->
           let tvar_doc =
-            if ISet.mem n' st then
+            if Tvid.Set.mem n' st then
               text "[rec]"
             else if !blank_tyvars then
               text "_"
             else
-              text ("#" ^ string_of_int n')
+              text ("#" ^ Tvid.show n')
           in
           (fuel, tvar_doc)
         | _ ->
           let prepend =
-            if ISet.mem n st then
+            if Tvid.Set.mem n st then
               text "[rec]"
             else if
               (* For hh_show_env we further show the type variable number *)
               show_verbose penv
             then
-              text ("#" ^ string_of_int n)
+              text ("#" ^ Tvid.show n)
             else
               Nothing
           in
-          let st = ISet.add n st in
+          let st = Tvid.Set.add n st in
           let (fuel, ty_doc) = ty ~fuel to_doc st penv ety in
           (fuel, Concat [prepend; ty_doc])
       end
@@ -1252,7 +1252,7 @@ module Full = struct
     | ConstraintType ty -> constraint_type ~fuel to_doc st penv ty
 
   let to_string ~fuel ~ty to_doc env x =
-    let (fuel, doc) = ty ~fuel to_doc ISet.empty env x in
+    let (fuel, doc) = ty ~fuel to_doc Tvid.Set.empty env x in
     let str = Libhackfmt.format_doc_unbroken format_env doc |> String.strip in
     (fuel, str)
 
@@ -1273,11 +1273,17 @@ module Full = struct
     | (_, []) -> (fuel, Nothing)
     | (Tgeneric (tparam, []), [(tparam', ck, typ)])
       when String.equal tparam tparam' ->
-      tparam_constraint ~fuel ~ty:locl_ty to_doc ISet.empty penv (ck, typ)
+      tparam_constraint ~fuel ~ty:locl_ty to_doc Tvid.Set.empty penv (ck, typ)
     | _ ->
       let to_tparam_constraint_doc ~fuel (tparam, ck, typ) =
         let (fuel, tparam_constraint_doc) =
-          tparam_constraint ~fuel ~ty:locl_ty to_doc ISet.empty penv (ck, typ)
+          tparam_constraint
+            ~fuel
+            ~ty:locl_ty
+            to_doc
+            Tvid.Set.empty
+            penv
+            (ck, typ)
         in
         let doc = Concat [text tparam; tparam_constraint_doc] in
         (fuel, doc)
@@ -1298,7 +1304,7 @@ module Full = struct
 
   let to_string_rec ~fuel penv n x =
     let (fuel, doc) =
-      locl_ty ~fuel text_strip_ns (ISet.add n ISet.empty) penv x
+      locl_ty ~fuel text_strip_ns (Tvid.Set.add n Tvid.Set.empty) penv x
     in
     let str = Libhackfmt.format_doc_unbroken format_env doc |> String.strip in
     (fuel, str)
@@ -1317,7 +1323,7 @@ module Full = struct
         ~fuel
         ~ty
         Doc.text
-        ISet.empty
+        Tvid.Set.empty
         Declenv
         ~verbose:false
         x
@@ -1381,7 +1387,7 @@ module Full = struct
             ~fuel
             ~ty
             text_strip_ns
-            ISet.empty
+            Tvid.Set.empty
             penv
             ~verbose:false
             ft
@@ -1392,7 +1398,7 @@ module Full = struct
         in
         (fuel, fun_doc)
       | ({ type_ = Property (_, name); _ }, _) ->
-        let (fuel, ty_doc) = ty ~fuel text_strip_ns ISet.empty penv x in
+        let (fuel, ty_doc) = ty ~fuel text_strip_ns Tvid.Set.empty penv x in
         let name =
           if String.is_prefix name ~prefix:"$" then
             (* Static property *)
@@ -1404,24 +1410,24 @@ module Full = struct
         let doc = Concat [ty_doc; Space; Doc.text name] in
         (fuel, doc)
       | ({ type_ = XhpLiteralAttr _; name; _ }, _) ->
-        let (fuel, ty_doc) = ty ~fuel text_strip_ns ISet.empty penv x in
+        let (fuel, ty_doc) = ty ~fuel text_strip_ns Tvid.Set.empty penv x in
         let doc =
           Concat
             [Doc.text "attribute"; Space; ty_doc; Space; text_strip_ns name]
         in
         (fuel, doc)
       | ({ type_ = ClassConst (_, name); _ }, _) ->
-        let (fuel, ty_doc) = ty ~fuel text_strip_ns ISet.empty penv x in
+        let (fuel, ty_doc) = ty ~fuel text_strip_ns Tvid.Set.empty penv x in
         let doc =
           Concat [Doc.text "const"; Space; ty_doc; Space; text_strip_ns name]
         in
         (fuel, doc)
       | ({ type_ = GConst; name; _ }, _)
       | ({ type_ = EnumClassLabel _; name; _ }, _) ->
-        let (fuel, ty_doc) = ty ~fuel text_strip_ns ISet.empty penv x in
+        let (fuel, ty_doc) = ty ~fuel text_strip_ns Tvid.Set.empty penv x in
         let doc = Concat [ty_doc; Space; text_strip_ns name] in
         (fuel, doc)
-      | _ -> ty ~fuel text_strip_ns ISet.empty penv x
+      | _ -> ty ~fuel text_strip_ns Tvid.Set.empty penv x
     in
     let (fuel, constraints) = constraints_for_type ~fuel text_strip_ns env x in
     let str =

@@ -1466,7 +1466,7 @@ and simplify_subtype_i
                   ~this_ty
                   ty_null
                   ty_super)
-        | (_, Tvar var_sub) when Ident.equal var_sub var_super -> valid env
+        | (_, Tvar var_sub) when Tvid.equal var_sub var_super -> valid env
         | _ -> begin
           match subtype_env.coerce with
           | Some cd ->
@@ -4824,7 +4824,7 @@ and simplify_disj env disj =
   (* Map a type variable to a list of lower and upper bound types. For any two types
      t1 and t2 both lower or upper in the list, it is not the case that t1 <: t2 or t2 <: t1.
   *)
-  let bound_map = ref IMap.empty in
+  let bound_map = ref Tvid.Map.empty in
   let process_bound ~is_lower ~coerce ~constr ty var =
     let ty =
       match ty with
@@ -4832,11 +4832,11 @@ and simplify_disj env disj =
         LoclType (transform_dynamic_upper_bound ~coerce env ty)
       | _ -> ty
     in
-    match IMap.find_opt var !bound_map with
-    | None -> bound_map := IMap.add var [(is_lower, ty, constr)] !bound_map
+    match Tvid.Map.find_opt var !bound_map with
+    | None -> bound_map := Tvid.Map.add var [(is_lower, ty, constr)] !bound_map
     | Some bounds ->
       let new_bounds = add_new_bound ~is_lower ~coerce ~constr ty bounds in
-      bound_map := IMap.add var new_bounds !bound_map
+      bound_map := Tvid.Map.add var new_bounds !bound_map
   in
   let rec fill_bound_map disj =
     match disj with
@@ -4867,7 +4867,7 @@ and simplify_disj env disj =
       @ rebuild_disj remaining to_process
   in
   let remaining = fill_bound_map disj in
-  let bounds = IMap.elements !bound_map in
+  let bounds = Tvid.Map.elements !bound_map in
   rebuild_disj remaining bounds
 
 and props_to_env
@@ -5400,15 +5400,15 @@ let is_type_disjoint env ty1 ty2 =
     match ity with
     | LoclType lty2 -> is_type_disjoint visited_tvyars env lty1 lty2
     | ConstraintType _ -> false
-  and is_tyvar_disjoint visited env (tyvar : int) ty =
+  and is_tyvar_disjoint visited env tyvar ty =
     let (visited_tyvars, visited_generics) = visited in
-    if ISet.mem tyvar visited_tyvars then
+    if Tvid.Set.mem tyvar visited_tyvars then
       (* There is a cyclic type variable bound, this will lead to a type error *)
       false
     else
       let bounds = Env.get_tyvar_upper_bounds env tyvar in
       is_intersection_itype_set_disjoint
-        (ISet.add tyvar visited_tyvars, visited_generics)
+        (Tvid.Set.add tyvar visited_tyvars, visited_generics)
         env
         bounds
         ty
@@ -5426,7 +5426,7 @@ let is_type_disjoint env ty1 ty2 =
         bounds
         ty
   in
-  is_type_disjoint (ISet.empty, SSet.empty) env ty1 ty2
+  is_type_disjoint (Tvid.Set.empty, SSet.empty) env ty1 ty2
 
 let decompose_subtype_add_bound
     ~coerce (env : env) (ty_sub : locl_ty) (ty_super : locl_ty) : env =

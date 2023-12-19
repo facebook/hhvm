@@ -22,15 +22,15 @@ module Helpers : sig
 
   val tint : locl_ty
 
-  val fresh_tyvar : env -> env * locl_ty * Ident.t
+  val fresh_tyvar : env -> env * locl_ty * Tvid.t
 
-  val union : env -> locl_ty -> locl_ty -> env * locl_ty * Ident.t
+  val union : env -> locl_ty -> locl_ty -> env * locl_ty * Tvid.t
 
-  val assert_tyvars_contain : env -> Ident.t list IMap.t -> unit
+  val assert_tyvars_contain : env -> Tvid.t list Tvid.Map.t -> unit
 
   val assert_ty_equal : locl_ty -> locl_ty -> unit
 
-  val assert_are_alias_for_another_var : env -> Ident.t list -> unit
+  val assert_are_alias_for_another_var : env -> Tvid.t list -> unit
 
   val show_env : env -> unit [@@warning "-unused-value-declaration"]
 end = struct
@@ -64,13 +64,13 @@ end = struct
   let assert_tyvar_occurs_in_tyvar ?(negate = false) env tv1 ~in_:tv2 =
     let error_message =
       Printf.sprintf
-        "Type var %d should %scontain type var %d"
-        tv2
+        "Type var #%s should %scontain type var #%s"
+        (Tvid.show tv2)
         (if negate then
           "not "
         else
           "")
-        tv1
+        (Tvid.show tv1)
     in
     assert_bool
       error_message
@@ -87,11 +87,11 @@ end = struct
     List.iter doesnt_contain ~f:(assert_tyvar_doesnt_occur_in_tyvar env ~in_:tv)
 
   let assert_tyvars_contain env contain_map =
-    let alltv = IMap.keys contain_map |> ISet.of_list in
-    IMap.iter
+    let alltv = Tvid.Map.keys contain_map |> Tvid.Set.of_list in
+    Tvid.Map.iter
       (fun v contains ->
         let doesnt_contain =
-          ISet.diff alltv (ISet.of_list contains) |> ISet.elements
+          Tvid.Set.diff alltv (Tvid.Set.of_list contains) |> Tvid.Set.elements
         in
         assert_tyvar_contains env v ~contains ~doesnt_contain)
       contain_map
@@ -102,8 +102,8 @@ end = struct
     List.iter vars ~f:(fun v ->
         assert_bool
           (Printf.sprintf
-             "Variable %d should be an alias for another variable."
-             v)
+             "Variable #%s should be an alias for another variable."
+             (Tvid.show v))
           (Inf.is_alias_for_another_var env.inference_env v))
 
   let show_env env = Log.hh_show_env Pos.none env
@@ -116,30 +116,32 @@ let int_union _test_ctx =
   let (env, tv1, n1) = fresh_tyvar env in
   let (env, tv2, n2) = fresh_tyvar env in
   let (env, tunion, nu) = union env tv1 tv2 in
-  assert_tyvars_contain env @@ IMap.of_list [(nu, [n1; n2]); (n1, []); (n2, [])];
+  assert_tyvars_contain env
+  @@ Tvid.Map.of_list [(nu, [n1; n2]); (n1, []); (n2, [])];
   let env = Env.add env n1 tint in
   let env = Env.add env n2 tint in
   let (env, etunion) = Env.expand_type env tunion in
   assert_ty_equal etunion tint;
-  assert_tyvars_contain env @@ IMap.of_list [(nu, []); (n1, []); (n2, [])]
+  assert_tyvars_contain env @@ Tvid.Map.of_list [(nu, []); (n1, []); (n2, [])]
 
 let alias_chain _ =
   let env = dummy_env in
   let (env, tv1, v1) = fresh_tyvar env in
   let (env, tv2, v2) = fresh_tyvar env in
   let env = Env.add env v2 tv1 in
-  assert_tyvars_contain env @@ IMap.of_list [(v1, []); (v2, [v1])];
+  assert_tyvars_contain env @@ Tvid.Map.of_list [(v1, []); (v2, [v1])];
   let (env, tv3, v3) = fresh_tyvar env in
   let env = Env.add env v3 tv2 in
-  assert_tyvars_contain env @@ IMap.of_list [(v1, []); (v2, [v1]); (v3, [v2])];
+  assert_tyvars_contain env
+  @@ Tvid.Map.of_list [(v1, []); (v2, [v1]); (v3, [v2])];
   let (env, tv4, v4) = fresh_tyvar env in
   let env = Env.add env v4 tv3 in
   let (env, _ty) = Env.expand_type env tv4 in
   assert_tyvars_contain env
-  @@ IMap.of_list [(v1, []); (v2, [v1]); (v3, [v1]); (v4, [v1])];
+  @@ Tvid.Map.of_list [(v1, []); (v2, [v1]); (v3, [v1]); (v4, [v1])];
   let env = Env.add env v1 tint in
   assert_tyvars_contain env
-  @@ IMap.of_list [(v1, []); (v2, []); (v3, []); (v4, [])];
+  @@ Tvid.Map.of_list [(v1, []); (v2, []); (v3, []); (v4, [])];
   assert_are_alias_for_another_var env [v2; v3; v4]
 
 let union_of_union _ =
@@ -151,7 +153,7 @@ let union_of_union _ =
   let (env, tv2r, v2r) = fresh_tyvar env in
   let (env, tvu2, vu2) = union env tv2l tv2r in
   assert_tyvars_contain env
-  @@ IMap.of_list
+  @@ Tvid.Map.of_list
        [
          (vu2, [v2l; v2r]);
          (vu1, [v1l; v1r]);
@@ -162,7 +164,7 @@ let union_of_union _ =
        ];
   let env = Env.add env v2l tvu1 in
   assert_tyvars_contain env
-  @@ IMap.of_list
+  @@ Tvid.Map.of_list
        [
          (vu2, [v2l; v2r]);
          (vu1, [v1l; v1r]);
@@ -173,7 +175,7 @@ let union_of_union _ =
        ];
   let env = Env.add env v1l tint in
   assert_tyvars_contain env
-  @@ IMap.of_list
+  @@ Tvid.Map.of_list
        [
          (vu2, [v2l; v2r]);
          (vu1, [v1r]);
@@ -184,7 +186,7 @@ let union_of_union _ =
        ];
   let env = Env.add env v2r tint in
   assert_tyvars_contain env
-  @@ IMap.of_list
+  @@ Tvid.Map.of_list
        [
          (vu2, [v2l]);
          (vu1, [v1r]);
@@ -195,7 +197,7 @@ let union_of_union _ =
        ];
   let env = Env.add env v1r tint in
   assert_tyvars_contain env
-  @@ IMap.of_list
+  @@ Tvid.Map.of_list
        [(vu2, []); (vu1, []); (v1l, []); (v1r, []); (v2l, []); (v2r, [])];
   let (env, ty1) = Env.expand_type env tvu1 in
   assert_ty_equal ty1 tint;
@@ -212,7 +214,7 @@ let union_of_union_w_chain1 _ =
   let (env, tv2r, v2r) = fresh_tyvar env in
   let (env, tvu2, vu2) = union env tv2l tv2r in
   assert_tyvars_contain env
-  @@ IMap.of_list
+  @@ Tvid.Map.of_list
        [
          (vu2, [v2l; v2r]);
          (vu1, [v1l; v1r]);
@@ -224,7 +226,7 @@ let union_of_union_w_chain1 _ =
   let (env, tvch1, vch1) = fresh_tyvar env in
   let env = Env.add env v2l tvch1 in
   assert_tyvars_contain env
-  @@ IMap.of_list
+  @@ Tvid.Map.of_list
        [
          (vu2, [v2l; v2r]);
          (vu1, [v1l; v1r]);
@@ -236,7 +238,7 @@ let union_of_union_w_chain1 _ =
        ];
   let env = Env.add env vch1 tvu1 in
   assert_tyvars_contain env
-  @@ IMap.of_list
+  @@ Tvid.Map.of_list
        [
          (vu2, [v2l; v2r]);
          (vu1, [v1l; v1r]);
@@ -248,7 +250,7 @@ let union_of_union_w_chain1 _ =
        ];
   let env = Env.add env v1l tint in
   assert_tyvars_contain env
-  @@ IMap.of_list
+  @@ Tvid.Map.of_list
        [
          (vu2, [v2l; v2r]);
          (vu1, [v1r]);
@@ -260,7 +262,7 @@ let union_of_union_w_chain1 _ =
        ];
   let env = Env.add env v2r tint in
   assert_tyvars_contain env
-  @@ IMap.of_list
+  @@ Tvid.Map.of_list
        [
          (vu2, [v2l]);
          (vu1, [v1r]);
@@ -272,7 +274,7 @@ let union_of_union_w_chain1 _ =
        ];
   let env = Env.add env v1r tint in
   assert_tyvars_contain env
-  @@ IMap.of_list
+  @@ Tvid.Map.of_list
        [
          (vu2, []);
          (vu1, []);
@@ -297,7 +299,7 @@ let union_of_union_w_chain2 _ =
   let (env, tv2r, v2r) = fresh_tyvar env in
   let (env, tvu2, vu2) = union env tv2l tv2r in
   assert_tyvars_contain env
-  @@ IMap.of_list
+  @@ Tvid.Map.of_list
        [
          (vu2, [v2l; v2r]);
          (vu1, [v1l; v1r]);
@@ -309,7 +311,7 @@ let union_of_union_w_chain2 _ =
   let (env, tvch1, vch1) = fresh_tyvar env in
   let env = Env.add env v2l tvch1 in
   assert_tyvars_contain env
-  @@ IMap.of_list
+  @@ Tvid.Map.of_list
        [
          (vu2, [v2l; v2r]);
          (vu1, [v1l; v1r]);
@@ -322,7 +324,7 @@ let union_of_union_w_chain2 _ =
   let (env, tvch2, vch2) = fresh_tyvar env in
   let env = Env.add env vch1 tvch2 in
   assert_tyvars_contain env
-  @@ IMap.of_list
+  @@ Tvid.Map.of_list
        [
          (vu2, [v2l; v2r]);
          (vu1, [v1l; v1r]);
@@ -335,7 +337,7 @@ let union_of_union_w_chain2 _ =
        ];
   let env = Env.add env vch2 tvu1 in
   assert_tyvars_contain env
-  @@ IMap.of_list
+  @@ Tvid.Map.of_list
        [
          (vu2, [v2l; v2r]);
          (vu1, [v1l; v1r]);
@@ -348,7 +350,7 @@ let union_of_union_w_chain2 _ =
        ];
   let env = Env.add env v1l tint in
   assert_tyvars_contain env
-  @@ IMap.of_list
+  @@ Tvid.Map.of_list
        [
          (vu2, [v2l; v2r]);
          (vu1, [v1r]);
@@ -361,7 +363,7 @@ let union_of_union_w_chain2 _ =
        ];
   let env = Env.add env v2r tint in
   assert_tyvars_contain env
-  @@ IMap.of_list
+  @@ Tvid.Map.of_list
        [
          (vu2, [v2l]);
          (vu1, [v1r]);
@@ -374,7 +376,7 @@ let union_of_union_w_chain2 _ =
        ];
   let env = Env.add env v1r tint in
   assert_tyvars_contain env
-  @@ IMap.of_list
+  @@ Tvid.Map.of_list
        [
          (vu2, []);
          (vu1, []);
@@ -396,15 +398,16 @@ let diamond _ =
   let (env, tvl, vl) = fresh_tyvar env in
   let (env, tvr, vr) = fresh_tyvar env in
   let (env, tvu, vu) = union env tvl tvr in
-  assert_tyvars_contain env @@ IMap.of_list [(vl, []); (vr, []); (vu, [vl; vr])];
+  assert_tyvars_contain env
+  @@ Tvid.Map.of_list [(vl, []); (vr, []); (vu, [vl; vr])];
   let (env, tv, v) = fresh_tyvar env in
   let env = Env.add env vl tv in
   let env = Env.add env vr tv in
   assert_tyvars_contain env
-  @@ IMap.of_list [(v, []); (vl, [v]); (vr, [v]); (vu, [vl; vr])];
+  @@ Tvid.Map.of_list [(v, []); (vl, [v]); (vr, [v]); (vu, [vl; vr])];
   let env = Env.add env v tint in
   assert_tyvars_contain env
-  @@ IMap.of_list [(v, []); (vl, []); (vr, []); (vu, [])];
+  @@ Tvid.Map.of_list [(v, []); (vl, []); (vr, []); (vu, [])];
   let (env, ty) = Env.expand_type env tvu in
   assert_ty_equal ty tint;
   assert_are_alias_for_another_var env [vl; vr]

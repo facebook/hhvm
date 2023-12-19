@@ -22,7 +22,7 @@ class type ['env] type_mapper_type =
     method on_reason : 'env -> Typing_reason.t -> 'env * Typing_reason.t
 
     method on_tvar :
-      'env -> Typing_reason.t -> int -> 'env * Typing_defs.locl_ty
+      'env -> Typing_reason.t -> Tvid.t -> 'env * Typing_defs.locl_ty
 
     method on_tnonnull : 'env -> Typing_reason.t -> 'env * Typing_defs.locl_ty
 

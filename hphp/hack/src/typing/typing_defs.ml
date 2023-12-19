@@ -400,7 +400,7 @@ let is_tyvar_i t = Option.is_some (get_var_i t)
 
 let is_var_v t v =
   match get_node t with
-  | Tvar v' when Ident.equal v v' -> true
+  | Tvar v' when Tvid.equal v v' -> true
   | _ -> false
 
 let is_generic t =

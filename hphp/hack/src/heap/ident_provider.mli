@@ -13,6 +13,8 @@ module Ident : sig
 
   module Map : WrappedMap_sig.S with type key = t
 
+  module Set : Set.S with type elt = t
+
   val is_immutable : t -> bool
 
   val make_immutable : t -> t

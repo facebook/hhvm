@@ -326,7 +326,7 @@ type simplify_unions =
   ?on_tyvar:
     (Typing_env_types.env ->
     Typing_reason.t ->
-    Ident.t ->
+    Tvid.t ->
     Typing_env_types.env * Typing_defs.locl_ty) ->
   Typing_defs.locl_ty ->
   Typing_env_types.env * Typing_defs.locl_ty
@@ -372,7 +372,7 @@ val simplify_unions :
   ?on_tyvar:
     (Typing_env_types.env ->
     Typing_reason.t ->
-    Ident.t ->
+    Tvid.t ->
     Typing_env_types.env * Typing_defs.locl_ty) ->
   Typing_defs.locl_ty ->
   Typing_env_types.env * Typing_defs.locl_ty
@@ -403,7 +403,7 @@ val simplify_intersections :
   ?on_tyvar:
     (Typing_env_types.env ->
     Typing_reason.t ->
-    int ->
+    Tvid.t ->
     Typing_env_types.env * Typing_defs.locl_ty) ->
   Typing_defs.locl_ty ->
   Typing_env_types.env * Typing_defs.locl_ty
@@ -413,7 +413,7 @@ type simplify_intersections =
   ?on_tyvar:
     (Typing_env_types.env ->
     Typing_reason.t ->
-    int ->
+    Tvid.t ->
     Typing_env_types.env * Typing_defs.locl_ty) ->
   Typing_defs.locl_ty ->
   Typing_env_types.env * Typing_defs.locl_ty

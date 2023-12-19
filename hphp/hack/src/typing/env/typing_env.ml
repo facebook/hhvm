@@ -97,20 +97,24 @@ let fresh_type_reason ?variance env p r =
   log_env_change_ "fresh_type_reason" env
   @@
   let (inference_env, res) =
-    Inf.fresh_type_reason ?variance env.inference_env p r
+    Inf.fresh_type_reason ?variance env.inference_env env.tvar_id_provider p r
   in
   ({ env with inference_env }, res)
 
 let fresh_type env p =
   log_env_change_ "fresh_type" env
   @@
-  let (inference_env, res) = Inf.fresh_type env.inference_env p in
+  let (inference_env, res) =
+    Inf.fresh_type env.inference_env env.tvar_id_provider p
+  in
   ({ env with inference_env }, res)
 
 let fresh_type_invariant env p =
   log_env_change_ "fresh_type_invariant" env
   @@
-  let (inference_env, res) = Inf.fresh_type_invariant env.inference_env p in
+  let (inference_env, res) =
+    Inf.fresh_type_invariant env.inference_env env.tvar_id_provider p
+  in
   ({ env with inference_env }, res)
 
 let fresh_type_error env p =
@@ -120,6 +124,7 @@ let fresh_type_error env p =
     Inf.fresh_type_reason
       ~variance:Ast_defs.Invariant
       env.inference_env
+      env.tvar_id_provider
       p
       (Reason.Rtype_variable_error p)
   in
@@ -132,6 +137,7 @@ let fresh_type_error_contravariant env p =
     Inf.fresh_type_reason
       ~variance:Ast_defs.Contravariant
       env.inference_env
+      env.tvar_id_provider
       p
       (Reason.Rtype_variable_error p)
   in
@@ -185,7 +191,7 @@ let simplify_occurrences env v =
   let rec simplify_occurrences env v ~seen_tyvars =
     let vars = Inf.get_tyvar_occurrences env.inference_env v in
     let (env, seen_tyvars) =
-      ISet.fold
+      Tvid.Set.fold
         (fun v' (env, seen_tyvars) ->
           (* This type variable is now solved and does not contain any unsolved
              type variable, so we can remove it from its occurrences. *)
@@ -201,11 +207,11 @@ let simplify_occurrences env v =
     in
     (env, seen_tyvars)
   and simplify_type_of_var env v ~seen_tyvars =
-    if ISet.mem v seen_tyvars then
+    if Tvid.Set.mem v seen_tyvars then
       (* TODO raise exception. *)
       (env, seen_tyvars)
     else
-      let seen_tyvars = ISet.add v seen_tyvars in
+      let seen_tyvars = Tvid.Set.add v seen_tyvars in
       match Inf.get_direct_binding env.inference_env v with
       | None -> failwith "Can only simplify type of bounded variables"
       | Some ty ->
@@ -225,7 +231,7 @@ let simplify_occurrences env v =
         simplify_occurrences env v ~seen_tyvars
   in
   if not @@ Inf.contains_unsolved_tyvars env.inference_env v then
-    fst @@ simplify_occurrences env v ~seen_tyvars:ISet.empty
+    fst @@ simplify_occurrences env v ~seen_tyvars:Tvid.Set.empty
   else
     env
 
@@ -319,7 +325,9 @@ let close_tyvars env =
   { env with inference_env = Inf.close_tyvars env.inference_env }
 
 let wrap_ty_in_var env r ty =
-  let (inference_env, res) = Inf.wrap_ty_in_var env.inference_env r ty in
+  let (inference_env, res) =
+    Inf.wrap_ty_in_var env.inference_env env.tvar_id_provider r ty
+  in
   ({ env with inference_env }, res)
 
 let next_cont_opt = Typing_env_types.next_cont_opt
@@ -1324,10 +1332,10 @@ let update_lost_info name blame env ty =
     let (env, ty) = expand_type env ty in
     match deref ty with
     | (_, Tvar v) ->
-      if ISet.mem v seen_tyvars then
+      if Tvid.Set.mem v seen_tyvars then
         ((env, seen_tyvars), ty)
       else
-        let seen_tyvars = ISet.add v seen_tyvars in
+        let seen_tyvars = Tvid.Set.add v seen_tyvars in
         let bs = get_tyvar_lower_bounds env v in
         let ((env, seen_tyvars), bs) =
           ITySet.fold_map bs ~init:(env, seen_tyvars) ~f:update_ty_i
@@ -1357,7 +1365,7 @@ let update_lost_info name blame env ty =
       let (r, ty) = deref_constraint_type ty in
       ((env, seen_tyvars), ConstraintType (mk_constraint_type (info r, ty)))
   in
-  let ((env, _seen_tyvars), ty) = update_ty (env, ISet.empty) ty in
+  let ((env, _seen_tyvars), ty) = update_ty (env, Tvid.Set.empty) ty in
   (env, ty)
 
 let forget_generic forget env blame =
@@ -1481,73 +1489,85 @@ let rec get_tyvars env (ty : locl_ty) = get_tyvars_i env (LoclType ty)
 and get_tyvars_i env (ty : internal_type) =
   let get_tyvars_union (env, acc_positive, acc_negative) ty =
     let (env, positive, negative) = get_tyvars env ty in
-    (env, ISet.union acc_positive positive, ISet.union acc_negative negative)
+    ( env,
+      Tvid.Set.union acc_positive positive,
+      Tvid.Set.union acc_negative negative )
   in
   let get_tyvars_param (env, acc_positive, acc_negative) fp =
     let (env, positive, negative) = get_tyvars env fp.fp_type.et_type in
     match get_fp_mode fp with
     (* Parameters are treated contravariantly *)
     | FPnormal ->
-      (env, ISet.union negative acc_positive, ISet.union positive acc_negative)
+      ( env,
+        Tvid.Set.union negative acc_positive,
+        Tvid.Set.union positive acc_negative )
     (* Inout parameters are both co- and contra-variant *)
     | FPinout ->
-      let tyvars = ISet.union negative positive in
-      (env, ISet.union tyvars acc_positive, ISet.union tyvars acc_negative)
+      let tyvars = Tvid.Set.union negative positive in
+      ( env,
+        Tvid.Set.union tyvars acc_positive,
+        Tvid.Set.union tyvars acc_negative )
   in
   let (env, ety) = expand_internal_type env ty in
   match ety with
   | LoclType ety ->
     (match get_node ety with
-    | Tvar v -> (env, ISet.singleton v, ISet.empty)
+    | Tvar v -> (env, Tvid.Set.singleton v, Tvid.Set.empty)
     | Tany _
     | Tnonnull
     | Tdynamic
     | Tprim _
     | Tneg _ ->
-      (env, ISet.empty, ISet.empty)
+      (env, Tvid.Set.empty, Tvid.Set.empty)
     | Toption ty -> get_tyvars env ty
     | Ttuple tyl
     | Tunion tyl
     | Tintersection tyl ->
-      List.fold_left tyl ~init:(env, ISet.empty, ISet.empty) ~f:get_tyvars_union
+      List.fold_left
+        tyl
+        ~init:(env, Tvid.Set.empty, Tvid.Set.empty)
+        ~f:get_tyvars_union
     | Tshape { s_fields = m; _ } ->
       TShapeMap.fold
         (fun _ { sft_ty; _ } res -> get_tyvars_union res sft_ty)
         m
-        (env, ISet.empty, ISet.empty)
+        (env, Tvid.Set.empty, Tvid.Set.empty)
     | Tfun ft ->
       let (env, params_positive, params_negative) =
         List.fold_left
           ft.ft_params
-          ~init:(env, ISet.empty, ISet.empty)
+          ~init:(env, Tvid.Set.empty, Tvid.Set.empty)
           ~f:get_tyvars_param
       in
       let (env, implicit_params_positive, implicit_params_negative) =
         match ft.ft_implicit_params.capability with
-        | CapDefaults _ -> (env, ISet.empty, ISet.empty)
+        | CapDefaults _ -> (env, Tvid.Set.empty, Tvid.Set.empty)
         | CapTy ty -> get_tyvars env ty
       in
       let (env, ret_positive, ret_negative) =
         get_tyvars env ft.ft_ret.et_type
       in
       ( env,
-        ISet.union
+        Tvid.Set.union
           implicit_params_positive
-          (ISet.union ret_positive params_positive),
-        ISet.union
+          (Tvid.Set.union ret_positive params_positive),
+        Tvid.Set.union
           implicit_params_negative
-          (ISet.union ret_negative params_negative) )
+          (Tvid.Set.union ret_negative params_negative) )
     | Tnewtype (name, tyl, _) ->
       if List.is_empty tyl then
-        (env, ISet.empty, ISet.empty)
+        (env, Tvid.Set.empty, Tvid.Set.empty)
       else begin
         match get_typedef env name with
         | Decl_entry.Found { td_tparams; _ } ->
           let variancel = List.map td_tparams ~f:(fun t -> t.tp_variance) in
-          get_tyvars_variance_list (env, ISet.empty, ISet.empty) variancel tyl
+          get_tyvars_variance_list
+            (env, Tvid.Set.empty, Tvid.Set.empty)
+            variancel
+            tyl
         | Decl_entry.DoesNotExist
         | Decl_entry.NotYetAvailable ->
-          (env, ISet.empty, ISet.empty)
+          (env, Tvid.Set.empty, Tvid.Set.empty)
       end
     | Tdependent (_, ty) -> get_tyvars env ty
     | Tgeneric (_, tyl) ->
@@ -1556,26 +1576,34 @@ and get_tyvars_i env (ty : internal_type) =
       let variancel =
         List.replicate ~num:(List.length tyl) Ast_defs.Invariant
       in
-      get_tyvars_variance_list (env, ISet.empty, ISet.empty) variancel tyl
+      get_tyvars_variance_list
+        (env, Tvid.Set.empty, Tvid.Set.empty)
+        variancel
+        tyl
     | Tclass ((_, cid), _, tyl) ->
       if List.is_empty tyl then
-        (env, ISet.empty, ISet.empty)
+        (env, Tvid.Set.empty, Tvid.Set.empty)
       else begin
         match get_class env cid with
         | Decl_entry.Found cls ->
           let variancel =
             List.map (Cls.tparams cls) ~f:(fun t -> t.tp_variance)
           in
-          get_tyvars_variance_list (env, ISet.empty, ISet.empty) variancel tyl
+          get_tyvars_variance_list
+            (env, Tvid.Set.empty, Tvid.Set.empty)
+            variancel
+            tyl
         | Decl_entry.DoesNotExist
         | Decl_entry.NotYetAvailable ->
-          (env, ISet.empty, ISet.empty)
+          (env, Tvid.Set.empty, Tvid.Set.empty)
       end
     | Tvec_or_dict (ty1, ty2) ->
       let (env, positive1, negative1) = get_tyvars env ty1 in
       let (env, positive2, negative2) = get_tyvars env ty2 in
-      (env, ISet.union positive1 positive2, ISet.union negative1 negative2)
-    | Tunapplied_alias _ -> (env, ISet.empty, ISet.empty)
+      ( env,
+        Tvid.Set.union positive1 positive2,
+        Tvid.Set.union negative1 negative2 )
+    | Tunapplied_alias _ -> (env, Tvid.Set.empty, Tvid.Set.empty)
     | Taccess (ty, _ids) -> get_tyvars env ty)
   | ConstraintType ty ->
     (match deref_constraint_type ty with
@@ -1583,23 +1611,23 @@ and get_tyvars_i env (ty : internal_type) =
       let (env, positive1, negative1) =
         List.fold_left
           d_required
-          ~init:(env, ISet.empty, ISet.empty)
+          ~init:(env, Tvid.Set.empty, Tvid.Set.empty)
           ~f:get_tyvars_union
       in
       let (env, positive2, negative2) =
         List.fold_left
           d_optional
-          ~init:(env, ISet.empty, ISet.empty)
+          ~init:(env, Tvid.Set.empty, Tvid.Set.empty)
           ~f:get_tyvars_union
       in
       let (env, positive3, negative3) =
         match d_variadic with
         | Some ty -> get_tyvars env ty
-        | None -> (env, ISet.empty, ISet.empty)
+        | None -> (env, Tvid.Set.empty, Tvid.Set.empty)
       in
       ( env,
-        ISet.union (ISet.union positive1 positive2) positive3,
-        ISet.union (ISet.union negative1 negative2) negative3 )
+        Tvid.Set.union (Tvid.Set.union positive1 positive2) positive3,
+        Tvid.Set.union (Tvid.Set.union negative1 negative2) negative3 )
     | (_, Thas_member hm) ->
       let { hm_type; hm_name = _; hm_class_id = _; hm_explicit_targs = _ } =
         hm
@@ -1609,24 +1637,26 @@ and get_tyvars_i env (ty : internal_type) =
       let { htm_id = _; htm_lower; htm_upper } = htm in
       let (env, poslo, neglo) = get_tyvars env htm_lower in
       let (env, posup, negup) = get_tyvars env htm_upper in
-      (env, ISet.union posup neglo, ISet.union poslo negup)
+      (env, Tvid.Set.union posup neglo, Tvid.Set.union poslo negup)
     | (_, Tcan_index ci) ->
       let (env, pos1, neg1) = get_tyvars env ci.ci_val in
       let (env, pos2, neg2) = get_tyvars env ci.ci_key in
-      (env, ISet.union pos1 pos2, ISet.union neg1 neg2)
+      (env, Tvid.Set.union pos1 pos2, Tvid.Set.union neg1 neg2)
     | (_, Tcan_traverse ct) ->
       let (env, pos1, neg1) = get_tyvars env ct.ct_val in
       let (env, pos2, neg2) =
         match ct.ct_key with
-        | None -> (env, ISet.empty, ISet.empty)
+        | None -> (env, Tvid.Set.empty, Tvid.Set.empty)
         | Some ct_key -> get_tyvars env ct_key
       in
-      (env, ISet.union pos1 pos2, ISet.union neg1 neg2)
+      (env, Tvid.Set.union pos1 pos2, Tvid.Set.union neg1 neg2)
     | (_, TCunion (lty, cty))
     | (_, TCintersection (lty, cty)) ->
       let (env, positive1, negative1) = get_tyvars env lty in
       let (env, positive2, negative2) = get_tyvars_i env (ConstraintType cty) in
-      (env, ISet.union positive1 positive2, ISet.union negative1 negative2))
+      ( env,
+        Tvid.Set.union positive1 positive2,
+        Tvid.Set.union negative1 negative2 ))
 
 and get_tyvars_variance_list (env, acc_positive, acc_negative) variancel tyl =
   match (variancel, tyl) with
@@ -1635,13 +1665,15 @@ and get_tyvars_variance_list (env, acc_positive, acc_negative) variancel tyl =
     let (acc_positive, acc_negative) =
       match variance with
       | Ast_defs.Covariant ->
-        (ISet.union acc_positive positive, ISet.union acc_negative negative)
+        ( Tvid.Set.union acc_positive positive,
+          Tvid.Set.union acc_negative negative )
       | Ast_defs.Contravariant ->
-        (ISet.union acc_positive negative, ISet.union acc_negative positive)
+        ( Tvid.Set.union acc_positive negative,
+          Tvid.Set.union acc_negative positive )
       | Ast_defs.Invariant ->
-        let positive_or_negative = ISet.union positive negative in
-        ( ISet.union acc_positive positive_or_negative,
-          ISet.union acc_negative positive_or_negative )
+        let positive_or_negative = Tvid.Set.union positive negative in
+        ( Tvid.Set.union acc_positive positive_or_negative,
+          Tvid.Set.union acc_negative positive_or_negative )
     in
     get_tyvars_variance_list (env, acc_positive, acc_negative) variancel tyl
   | _ -> (env, acc_positive, acc_negative)
@@ -1681,13 +1713,13 @@ and update_variance_of_tyvars_occurring_in_lower_bound env ty =
   | _ ->
     let (env, positive, negative) = get_tyvars_i env ty in
     let env =
-      ISet.fold
+      Tvid.Set.fold
         (fun var env -> set_tyvar_appears_covariantly env var)
         positive
         env
     in
     let env =
-      ISet.fold
+      Tvid.Set.fold
         (fun var env -> set_tyvar_appears_contravariantly env var)
         negative
         env
@@ -1701,13 +1733,13 @@ and update_variance_of_tyvars_occurring_in_upper_bound env ty =
   | _ ->
     let (env, positive, negative) = get_tyvars_i env ty in
     let env =
-      ISet.fold
+      Tvid.Set.fold
         (fun var env -> set_tyvar_appears_contravariantly env var)
         positive
         env
     in
     let env =
-      ISet.fold
+      Tvid.Set.fold
         (fun var env -> set_tyvar_appears_covariantly env var)
         negative
         env
@@ -1733,7 +1765,7 @@ let update_variance_after_bind env var ty =
   let appears_covariantly = get_tyvar_appears_covariantly env var in
   let (env, positive, negative) = get_tyvars env ty in
   let env =
-    ISet.fold
+    Tvid.Set.fold
       (fun var env ->
         let env =
           if appears_contravariantly then
@@ -1749,7 +1781,7 @@ let update_variance_after_bind env var ty =
       env
   in
   let env =
-    ISet.fold
+    Tvid.Set.fold
       (fun var env ->
         let env =
           if appears_contravariantly then
@@ -1782,19 +1814,19 @@ let set_tyvar_variance_i env ?(flip = false) ?(for_all_vars = false) ty =
     in
     let tyvars =
       if for_all_vars then
-        ISet.union positive negative |> ISet.elements
+        Tvid.Set.union positive negative |> Tvid.Set.elements
       else
         current
     in
     List.fold_left tyvars ~init:env ~f:(fun env var ->
         let env =
-          if ISet.mem var positive then
+          if Tvid.Set.mem var positive then
             set_tyvar_appears_covariantly env var
           else
             env
         in
         let env =
-          if ISet.mem var negative then
+          if Tvid.Set.mem var negative then
             set_tyvar_appears_contravariantly env var
           else
             env
@@ -1894,6 +1926,6 @@ module Log = struct
       (p_locl_ty : locl_ty -> string)
       (p_internal_type : internal_type -> string)
       (env : env)
-      (v : Ident.t) =
+      (v : Tvid.t) =
     Inf.Log.tyvar_to_json p_locl_ty p_internal_type env.inference_env v
 end

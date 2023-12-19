@@ -37,7 +37,7 @@ class type ['a] decl_type_visitor_type =
 
     method on_tprim : 'a -> decl_phase Reason.t_ -> Aast.tprim -> 'a
 
-    method on_tvar : 'a -> decl_phase Reason.t_ -> Ident.t -> 'a
+    method on_tvar : 'a -> decl_phase Reason.t_ -> Tvid.t -> 'a
 
     method on_type : 'a -> decl_ty -> 'a
 
@@ -176,7 +176,7 @@ class type ['a] locl_type_visitor_type =
 
     method on_tprim : 'a -> Reason.t -> Aast.tprim -> 'a
 
-    method on_tvar : 'a -> Reason.t -> Ident.t -> 'a
+    method on_tvar : 'a -> Reason.t -> Tvid.t -> 'a
 
     method on_tfun : 'a -> Reason.t -> locl_fun_type -> 'a
 

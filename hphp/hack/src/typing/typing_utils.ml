@@ -183,7 +183,7 @@ let (fold_union_ref : fold_union ref) = ref (not_implemented "fold_union")
 type simplify_unions =
   env ->
   ?approx_cancel_neg:bool ->
-  ?on_tyvar:(env -> Reason.t -> Ident.t -> env * locl_ty) ->
+  ?on_tyvar:(env -> Reason.t -> Tvid.t -> env * locl_ty) ->
   locl_ty ->
   env * locl_ty
 
@@ -212,7 +212,7 @@ let negate_type x = !negate_type_ref x
 
 type simplify_intersections =
   env ->
-  ?on_tyvar:(env -> Reason.t -> int -> env * locl_ty) ->
+  ?on_tyvar:(env -> Reason.t -> Tvid.t -> env * locl_ty) ->
   locl_ty ->
   env * locl_ty
 

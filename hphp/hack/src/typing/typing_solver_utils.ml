@@ -38,7 +38,7 @@ let remove_tyvar_from_lower_bound env var lower_bound =
   let rec remove env ty =
     let (env, ty) = Env.expand_type env ty in
     match deref ty with
-    | (_, Tvar v) when Ident.equal v var -> (env, MakeType.nothing Reason.none)
+    | (_, Tvar v) when Tvid.equal v var -> (env, MakeType.nothing Reason.none)
     | (r, Toption ty) ->
       let (env, ty) = remove env ty in
       (env, MakeType.nullable r ty)
@@ -104,7 +104,7 @@ let remove_tyvar_from_upper_bound env var upper_bound =
   let rec remove env ty =
     let (env, ty) = Env.expand_type env ty in
     match deref ty with
-    | (_, Tvar v) when Ident.equal v var -> (env, MakeType.mixed Reason.none)
+    | (_, Tvar v) when Tvid.equal v var -> (env, MakeType.mixed Reason.none)
     | (r, Toption ty) ->
       let (env, ty) = remove env ty in
       (env, MakeType.nullable r ty)
@@ -181,7 +181,7 @@ let var_occurs_in_ty env var ty =
       method! on_tvar (env, occurs) r v =
         let (env, ety) = Env.expand_var env r v in
         match get_node ety with
-        | Tvar v -> (env, Ident.equal v var)
+        | Tvar v -> (env, Tvid.equal v var)
         | _ -> this#on_type (env, occurs) ety
 
       method! on_type (env, occurs) ty =

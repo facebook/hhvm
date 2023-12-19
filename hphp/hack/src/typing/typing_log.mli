@@ -66,7 +66,7 @@ val log_new_tvar_for_new_object :
 
 val log_new_tvar_for_tconst :
   Typing_env_types.env ->
-  Pos.t * Ident.t ->
+  Pos.t * Tvid.t ->
   Typing_defs.pos_id ->
   Typing_defs.locl_ty ->
   unit
@@ -125,7 +125,7 @@ val log_sd_pass : ?level:int -> Typing_env_types.env -> Pos.t -> unit
 module GlobalInference : sig
   val log_merging_subgraph : Typing_env_types.env -> Pos.t -> unit
 
-  val log_merging_var : Typing_env_types.env -> Pos.t -> Ident.t -> unit
+  val log_merging_var : Typing_env_types.env -> Pos.t -> Tvid.t -> unit
 end
 
 module GI = GlobalInference

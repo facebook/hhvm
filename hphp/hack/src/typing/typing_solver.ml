@@ -580,7 +580,7 @@ let rec always_solve_tyvar_down ~freshen env r var =
     in
     let (env, ety) = Env.expand_var env r var in
     match get_node ety with
-    | Tvar var' when not (Ident.equal var var') ->
+    | Tvar var' when not (Tvid.equal var var') ->
       let (env, ty_err_opt3) = always_solve_tyvar_down ~freshen env r var in
       let ty_err_opt =
         Typing_error.multiple_opt
@@ -657,8 +657,8 @@ let solve_to_equal_bound_or_wrt_variance env r var =
           [
             Log_head
               ( Printf.sprintf
-                  "Typing_subtype.solve_to_equal_bound_or_wrt_variance #%d"
-                  var,
+                  "Typing_subtype.solve_to_equal_bound_or_wrt_variance #%s"
+                  (Tvid.show var),
                 [] );
           ]));
 
@@ -677,7 +677,7 @@ let solve_to_equal_bound_or_wrt_variance env r var =
     in
     let (env, ety) = Env.expand_var env r v in
     match get_node ety with
-    | Tvar v' when not (Ident.equal v v') ->
+    | Tvar v' when not (Tvid.equal v v') ->
       solve_until_concrete_ty env ty_errs v'
     | _ ->
       let ty_err_opt = Typing_error.multiple_opt ty_errs in
@@ -889,17 +889,17 @@ let expand_type_and_narrow
      * type so just return expanded type
      *)
     let has_tyvar = ref false in
-    let seen_tyvars = ref ISet.empty in
+    let seen_tyvars = ref Tvid.Set.empty in
     (* Simplify unions in ty, but when we encounter a type variable in the process,
        recursively replace it with the union of its lower bounds, effectively getting
        rid of all unsolved type variables in the union. *)
     let (env, concretized_ty) =
       Typing_union.simplify_unions env ty ~on_tyvar:(fun env r v ->
           has_tyvar := true;
-          if ISet.mem v !seen_tyvars then
+          if Tvid.Set.mem v !seen_tyvars then
             (env, MakeType.nothing r)
           else
-            let () = seen_tyvars := ISet.add v !seen_tyvars in
+            let () = seen_tyvars := Tvid.Set.add v !seen_tyvars in
             let lower_bounds =
               TySet.elements
               @@ Utils.filter_locl_types

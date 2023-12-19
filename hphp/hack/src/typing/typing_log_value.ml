@@ -53,9 +53,9 @@ let local_id_set_as_value s =
        s
        SSet.empty)
 
-let var_as_string v = Printf.sprintf "#%d" v
+let var_as_string (v : Tvid.t) = Printf.sprintf "#%s" (Tvid.show v)
 
 let varset_as_value s =
-  Set (ISet.fold (fun v s -> SSet.add (var_as_string v) s) s SSet.empty)
+  Set (Tvid.Set.fold (fun v s -> SSet.add (var_as_string v) s) s SSet.empty)
 
 let variant_as_value name v = make_map [(name, v)]

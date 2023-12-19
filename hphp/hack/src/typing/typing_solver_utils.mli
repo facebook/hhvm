@@ -11,20 +11,20 @@ open Typing_env_types
 val filter_locl_types : Internal_type_set.t -> Typing_set.t
 
 val remove_tyvar_from_lower_bound :
-  env -> Ident.t -> internal_type -> env * internal_type
+  env -> Tvid.t -> internal_type -> env * internal_type
 
 val remove_tyvar_from_lower_bounds :
-  env -> Ident.t -> Internal_type_set.t -> env * Internal_type_set.t
+  env -> Tvid.t -> Internal_type_set.t -> env * Internal_type_set.t
 
 val remove_tyvar_from_upper_bound :
-  env -> Ident.t -> internal_type -> env * internal_type
+  env -> Tvid.t -> internal_type -> env * internal_type
 
 val remove_tyvar_from_upper_bounds :
-  env -> Ident.t -> Internal_type_set.t -> env * Internal_type_set.t
+  env -> Tvid.t -> Internal_type_set.t -> env * Internal_type_set.t
 
-val remove_tyvar_from_bounds : env -> Ident.t -> env
+val remove_tyvar_from_bounds : env -> Tvid.t -> env
 
-val err_if_var_in_ty : env -> Ident.t -> locl_ty -> locl_ty
+val err_if_var_in_ty : env -> Tvid.t -> locl_ty -> locl_ty
 
 val err_if_var_in_ty_pure :
-  env -> Ident.t -> locl_ty -> locl_ty * Typing_error.t option
+  env -> Tvid.t -> locl_ty -> locl_ty * Typing_error.t option

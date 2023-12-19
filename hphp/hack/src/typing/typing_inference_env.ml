@@ -47,30 +47,11 @@ type tyvar_info = {
   solving_info: solving_info;
 }
 
-type tvenv = tyvar_info IMap.t
-
-type identifier = int [@@deriving eq]
-
-module Identifier_provider : sig
-  val reinitialize : unit -> unit
-
-  val make_identifier : unit -> identifier
-end = struct
-  let counter : int ref = ref 0
-
-  let reinitialize () =
-    counter := 0;
-    ()
-
-  let make_identifier () =
-    let identifier = !counter in
-    counter := !counter + 1;
-    identifier
-end
+type tvenv = tyvar_info Tvid.Map.t
 
 type t = {
   tvenv: tvenv;
-  tyvars_stack: (Pos.t * identifier list) list;
+  tyvars_stack: (Pos.t * Tvid.t list) list;
   subtype_prop: TL.subtype_prop;
   tyvar_occurrences: Typing_tyvar_occurrences.t;
 }
@@ -113,15 +94,15 @@ module Log = struct
         ("solving_info", solving_info_as_value solving_info);
       ]
 
-  let tvenv_as_value tvenv =
+  let tvenv_as_value (tvenv : tvenv) =
     Map
-      (IMap.fold
+      (Tvid.Map.fold
          (fun i tvinfo m ->
            SMap.add (var_as_string i) (tyvar_info_as_value tvinfo) m)
          tvenv
          SMap.empty)
 
-  let tyvars_stack_as_value tyvars_stack =
+  let tyvars_stack_as_value (tyvars_stack : (Pos.t * Tvid.t list) list) =
     List
       (List.map tyvars_stack ~f:(fun (_p, l) ->
            List (List.map l ~f:(fun i -> Atom (var_as_string i)))))
@@ -171,9 +152,9 @@ module Log = struct
       (p_locl_ty : locl_ty -> string)
       (p_internal_type : internal_type -> string)
       (env : t)
-      (v : identifier) =
+      (v : Tvid.t) =
     let open Hh_json in
-    match IMap.find_opt v env.tvenv with
+    match Tvid.Map.find_opt v env.tvenv with
     | None -> JSON_Null
     | Some { tyvar_pos; eager_solve_failed; solving_info } ->
       JSON_Object
@@ -185,7 +166,7 @@ module Log = struct
         ]
 end
 
-let empty_tvenv = IMap.empty
+let empty_tvenv = Tvid.Map.empty
 
 let empty_inference_env =
   {
@@ -211,10 +192,10 @@ let empty_tyvar_info pos =
     solving_info = TVIConstraints empty_tyvar_constraints;
   }
 
-let get_tyvar_info_opt env v = IMap.find_opt v env.tvenv
+let get_tyvar_info_opt env v = Tvid.Map.find_opt v env.tvenv
 
 let set_tyvar_info env v tvinfo =
-  { env with tvenv = IMap.add v tvinfo env.tvenv }
+  { env with tvenv = Tvid.Map.add v tvinfo env.tvenv }
 
 let get_solving_info_opt env var =
   match get_tyvar_info_opt env var with
@@ -252,7 +233,7 @@ solved to a type that itself contains unsolved type variables. *)
 let get_unsolved_vars_in_ty env ty =
   let gatherer =
     object
-      inherit [ISet.t] Type_visitor.locl_type_visitor
+      inherit [Tvid.Set.t] Type_visitor.locl_type_visitor
 
       method! on_tvar vars _r v =
         (* Add it if it has unsolved type vars or if it is itself unsolved. *)
@@ -260,12 +241,12 @@ let get_unsolved_vars_in_ty env ty =
           (not (tyvar_is_solved env v))
           || Occ.contains_unsolved_tyvars env.tyvar_occurrences v
         then
-          ISet.add v vars
+          Tvid.Set.add v vars
         else
           vars
     end
   in
-  gatherer#on_type ISet.empty ty
+  gatherer#on_type Tvid.Set.empty ty
 
 let make_tyvars_occur_in_tyvar env vars ~occur_in:x =
   {
@@ -310,17 +291,17 @@ let add env ?(tyvar_pos = Pos.none) v ty =
 let get_type env r v =
   let rec get r v aliases =
     let shorten_paths () =
-      ISet.fold (fun v' env -> add env v' (mk (r, Tvar v))) aliases env
+      Tvid.Set.fold (fun v' env -> add env v' (mk (r, Tvar v))) aliases env
     in
     match get_solving_info_opt env v with
     | Some (TVIType ty) -> begin
       match deref ty with
       | (r, Tvar v') ->
-        if ISet.mem v aliases then
+        if Tvid.Set.mem v aliases then
           raise
           @@ InconsistentTypeVarState
                "Two type variables are aliasing each other!";
-        get r v' (ISet.add v aliases)
+        get r v' (Tvid.Set.add v aliases)
       | _ ->
         let env = shorten_paths () in
         (env, ty)
@@ -330,7 +311,7 @@ let get_type env r v =
       let env = shorten_paths () in
       (env, mk (r, Tvar v))
   in
-  get r v ISet.empty
+  get r v Tvid.Set.empty
 
 let create_tyvar_constraints variance =
   let (appears_covariantly, appears_contravariantly) =
@@ -361,18 +342,18 @@ let add_current_tyvar ?variance env p v =
     { env with tyvars_stack = (expr_pos, v :: tyvars) :: rest }
   | _ -> env
 
-let fresh_type_reason ?variance env p r =
-  let v = Identifier_provider.make_identifier () in
+let fresh_type_reason ?variance env id_provider p r =
+  let v = Tvid.make id_provider in
   let env = add_current_tyvar ?variance env p v in
   (env, mk (r, Tvar v))
 
-let fresh_type ?variance env p =
-  fresh_type_reason env p (Reason.Rtype_variable p) ?variance
+let fresh_type ?variance env id_provider p =
+  fresh_type_reason env id_provider p (Reason.Rtype_variable p) ?variance
 
 let fresh_type_invariant = fresh_type ~variance:Ast_defs.Invariant
 
-let wrap_ty_in_var env r ty =
-  let v = Identifier_provider.make_identifier () in
+let wrap_ty_in_var env id_provider r ty =
+  let v = Tvid.make id_provider in
   let tvinfo =
     {
       tyvar_pos = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos;
@@ -409,14 +390,14 @@ let get_tyvar_constraints_exn env var =
     raise
     @@ InconsistentTypeVarState
          (Printf.sprintf
-            "Attempting to get constraints for non-existing type variable #%d."
-            var)
+            "Attempting to get constraints for non-existing type variable %s."
+            (Typing_log_value.var_as_string var))
   | Some (TVIType _) ->
     raise
     @@ InconsistentTypeVarState
          (Printf.sprintf
-            "Attempting to get constraints for already solved type variable #%d."
-            var)
+            "Attempting to get constraints for already solved type variable %s."
+            (Typing_log_value.var_as_string var))
   | Some (TVIConstraints constraints) -> constraints
 
 let set_tyvar_constraints env v tyvar_constraints =
@@ -640,10 +621,10 @@ let remove_tyvar_lower_bound env var lower_var =
     in
     set_tyvar_constraints env var { tvconstraints with lower_bounds }
 
-let get_vars (env : t) = IMap.keys env.tvenv
+let get_vars (env : t) = Tvid.Map.keys env.tvenv
 
-let get_unsolved_vars (env : t) : identifier list =
-  IMap.fold
+let get_unsolved_vars (env : t) : Tvid.t list =
+  Tvid.Map.fold
     (fun v tvinfo vars ->
       match tvinfo.solving_info with
       | TVIConstraints _ -> v :: vars
@@ -663,7 +644,7 @@ module Size = struct
         method! on_tvar acc r v =
           let (_, ty) = expand_var env r v in
           match get_node ty with
-          | Tvar v' when equal_identifier v' v -> acc
+          | Tvar v' when Tvid.equal v' v -> acc
           | _ -> super#on_type acc ty
       end
     in
@@ -731,8 +712,8 @@ module Size = struct
     let { tvenv; subtype_prop = _; tyvars_stack = _; tyvar_occurrences = _ } =
       env
     in
-    IMap.map (tyvar_info_size env) tvenv |> fun m ->
-    IMap.fold (fun _ x y -> x + y) m 0
+    Tvid.Map.map (tyvar_info_size env) tvenv |> fun m ->
+    Tvid.Map.fold (fun _ x y -> x + y) m 0
 end
 
 (* The following merging logic is used to gather all the information we have
@@ -806,14 +787,14 @@ let merge_tyvar_infos tvinfo1 tvinfo2 =
   }
 
 let merge_tyvars env v1 v2 =
-  if equal_identifier v1 v2 then
+  if Tvid.equal v1 v2 then
     env
   else
     let tvenv = env.tvenv in
-    let tvinfo1 = IMap.find v1 env.tvenv in
-    let tvinfo2 = IMap.find v2 env.tvenv in
+    let tvinfo1 = Tvid.Map.find v1 env.tvenv in
+    let tvinfo2 = Tvid.Map.find v2 env.tvenv in
     let tvinfo = merge_tyvar_infos tvinfo1 tvinfo2 in
-    let tvenv = IMap.add v2 tvinfo tvenv in
+    let tvenv = Tvid.Map.add v2 tvinfo tvenv in
     let env = { env with tvenv } in
     let env = add env v1 (mk (Reason.none, Tvar v2)) in
     let env = remove_tyvar_lower_bound env v2 v2 in
@@ -838,7 +819,7 @@ let simple_merge env1 env2 =
     env2
   in
   let tvenv =
-    IMap.merge
+    Tvid.Map.merge
       (fun _v tvinfo1 tvinfo2 ->
         match (tvinfo1, tvinfo2) with
         | (None, None) -> None
@@ -895,7 +876,7 @@ let is_alias_for_another_var env v =
   match get_solving_info_opt env v with
   | Some (TVIType ty) -> begin
     match get_node ty with
-    | Tvar v' when Int.( <> ) v v' -> true
+    | Tvar v' when not (Tvid.equal v v') -> true
     | _ -> false
   end
   | _ -> false
@@ -930,13 +911,15 @@ let tyvar_info_carries_information tvinfo =
 
 let compress env =
   let { tvenv; subtype_prop; tyvars_stack; tyvar_occurrences } = env in
-  let tvenv = IMap.filter (fun _k -> tyvar_info_carries_information) tvenv in
+  let tvenv =
+    Tvid.Map.filter (fun _k -> tyvar_info_carries_information) tvenv
+  in
   { tvenv; subtype_prop; tyvars_stack; tyvar_occurrences }
 
 let remove_var_from_bounds
     env v ~search_in_upper_bounds_of ~search_in_lower_bounds_of =
   let env =
-    ISet.fold
+    Tvid.Set.fold
       (fun v' env ->
         Option.fold
           (get_tyvar_upper_bounds_opt env v')
@@ -948,7 +931,7 @@ let remove_var_from_bounds
       env
   in
   let env =
-    ISet.fold
+    Tvid.Set.fold
       (fun v' env ->
         Option.fold
           (get_tyvar_lower_bounds_opt env v')
@@ -963,7 +946,7 @@ let remove_var_from_bounds
 
 let remove_var_from_tyvars_stack tyvars_stack var =
   List.map tyvars_stack ~f:(fun (p, vars) ->
-      (p, List.filter vars ~f:(fun v -> not (equal_identifier var v))))
+      (p, List.filter vars ~f:(fun v -> not (Tvid.equal var v))))
 
 let replace_var_by_ty_in_prop prop v ty =
   let rec replace prop =
@@ -1002,7 +985,7 @@ let remove_var env var ~search_in_upper_bounds_of ~search_in_lower_bounds_of =
   let (env, ty) = expand_var env Reason.none var in
   let { tvenv; tyvars_stack; tyvar_occurrences; subtype_prop } = env in
   let tyvar_occurrences = Occ.remove_var tyvar_occurrences var in
-  let tvenv = IMap.remove var tvenv in
+  let tvenv = Tvid.Map.remove var tvenv in
   let tyvars_stack = remove_var_from_tyvars_stack tyvars_stack var in
   let subtype_prop = replace_var_by_ty_in_prop subtype_prop var ty in
   { tvenv; tyvars_stack; tyvar_occurrences; subtype_prop }
@@ -1049,7 +1032,7 @@ let force_lazy_values_tyvar_info (tyvar_info : tyvar_info) =
   }
 
 let force_lazy_values_tvenv (tvenv : tvenv) =
-  IMap.map force_lazy_values_tyvar_info tvenv
+  Tvid.Map.map force_lazy_values_tyvar_info tvenv
 
 let force_lazy_values (env : t) =
   let { tvenv; tyvars_stack; subtype_prop; tyvar_occurrences } = env in

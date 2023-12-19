@@ -14,6 +14,7 @@ module Ident = struct
   type t = int [@@deriving ord, eq, hash, show]
 
   module Map = WrappedMap.Make (Int)
+  module Set = Stdlib.Set.Make (Int)
 
   let immutable_mask = 1 lsl 62
 

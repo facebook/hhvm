@@ -77,24 +77,28 @@ val fresh_type_error : env -> Pos.t -> env * locl_ty
 val fresh_type_error_contravariant : env -> Pos.t -> env * locl_ty
 
 (** What type variables are fresh in the current scope? *)
-val get_current_tyvars : env -> Ident.t list
+val get_current_tyvars : env -> Tvid.t list
 
 (** Close the current type variable scope.
     You might want to call [Typing_solver.close_tyvars_and_solve] instead. *)
 val close_tyvars : env -> env
 
-val add : env -> ?tyvar_pos:Pos.t -> int -> locl_ty -> env
+(** [add env v ty] addd the solution [ty] of a type variable [v] to the environment.
+    In other words, after calling [add], type variable [v] will
+    be associated to type [ty], and [get_type env r v] will return [(env, ty)]. *)
+val add : env -> ?tyvar_pos:Pos.t -> Tvid.t -> locl_ty -> env
 
-val make_tyvar_no_more_occur_in_tyvar : env -> int -> no_more_in:int -> env
+val make_tyvar_no_more_occur_in_tyvar :
+  env -> Tvid.t -> no_more_in:Tvid.t -> env
 
-val tyvar_is_solved : env -> int -> bool
+val tyvar_is_solved : env -> Tvid.t -> bool
 
 val wrap_ty_in_var :
   env -> Reason.t -> locl_ty -> Typing_env_types.env * locl_ty
 
-val get_type : env -> Reason.t -> int -> env * locl_ty
+val get_type : env -> Reason.t -> Tvid.t -> env * locl_ty
 
-val expand_var : env -> Reason.t -> Ident.t -> env * locl_ty
+val expand_var : env -> Reason.t -> Tvid.t -> env * locl_ty
 
 val expand_type : env -> locl_ty -> env * locl_ty
 
@@ -422,71 +426,71 @@ val get_generic_parameters : env -> string list
 
 val is_generic_parameter : env -> string -> bool
 
-val get_tyvar_pos : env -> Ident.t -> Pos.t
+val get_tyvar_pos : env -> Tvid.t -> Pos.t
 
 (* Get or add to bounds on type variables *)
-val get_tyvar_lower_bounds : env -> Ident.t -> Internal_type_set.t
+val get_tyvar_lower_bounds : env -> Tvid.t -> Internal_type_set.t
 
-val get_tyvar_upper_bounds : env -> Ident.t -> Internal_type_set.t
+val get_tyvar_upper_bounds : env -> Tvid.t -> Internal_type_set.t
 
-val set_tyvar_lower_bounds : env -> Ident.t -> Internal_type_set.t -> env
+val set_tyvar_lower_bounds : env -> Tvid.t -> Internal_type_set.t -> env
 
-val set_tyvar_upper_bounds : env -> Ident.t -> Internal_type_set.t -> env
+val set_tyvar_upper_bounds : env -> Tvid.t -> Internal_type_set.t -> env
 
 (* Optionally supply intersection or union operations to simplify the bounds *)
 val add_tyvar_upper_bound :
   ?intersect:(internal_type -> internal_type list -> internal_type list) ->
   env ->
-  Ident.t ->
+  Tvid.t ->
   internal_type ->
   env
 
 val add_tyvar_upper_bound_and_update_variances :
   ?intersect:(internal_type -> internal_type list -> internal_type list) ->
   env ->
-  Ident.t ->
+  Tvid.t ->
   internal_type ->
   env
 
 val add_tyvar_lower_bound :
   ?union:(internal_type -> internal_type list -> internal_type list) ->
   env ->
-  Ident.t ->
+  Tvid.t ->
   internal_type ->
   env
 
 val add_tyvar_lower_bound_and_update_variances :
   ?union:(internal_type -> internal_type list -> internal_type list) ->
   env ->
-  Ident.t ->
+  Tvid.t ->
   internal_type ->
   env
 
-val remove_tyvar_upper_bound : env -> Ident.t -> Ident.t -> env
+val remove_tyvar_upper_bound : env -> Tvid.t -> Tvid.t -> env
 
-val remove_tyvar_lower_bound : env -> Ident.t -> Ident.t -> env
+val remove_tyvar_lower_bound : env -> Tvid.t -> Tvid.t -> env
 
-val set_tyvar_appears_covariantly : env -> Ident.t -> env
+val set_tyvar_appears_covariantly : env -> Tvid.t -> env
 
-val set_tyvar_appears_contravariantly : env -> Ident.t -> env
+val set_tyvar_appears_contravariantly : env -> Tvid.t -> env
 
-val set_tyvar_eager_solve_fail : env -> Ident.t -> env
+val set_tyvar_eager_solve_fail : env -> Tvid.t -> env
 
-val get_tyvar_appears_covariantly : env -> Ident.t -> bool
+val get_tyvar_appears_covariantly : env -> Tvid.t -> bool
 
-val get_tyvar_appears_contravariantly : env -> Ident.t -> bool
+val get_tyvar_appears_contravariantly : env -> Tvid.t -> bool
 
-val get_tyvar_appears_invariantly : env -> Ident.t -> bool
+val get_tyvar_appears_invariantly : env -> Tvid.t -> bool
 
-val get_tyvar_eager_solve_fail : env -> Ident.t -> bool
+val get_tyvar_eager_solve_fail : env -> Tvid.t -> bool
 
-val get_tyvar_type_const : env -> int -> pos_id -> (pos_id * locl_ty) option
+val get_tyvar_type_const : env -> Tvid.t -> pos_id -> (pos_id * locl_ty) option
 
-val set_tyvar_type_const : env -> int -> pos_id -> locl_ty -> env
+val set_tyvar_type_const : env -> Tvid.t -> pos_id -> locl_ty -> env
 
-val get_tyvar_type_consts : env -> int -> (pos_id * locl_ty) SMap.t
+val get_tyvar_type_consts : env -> Tvid.t -> (pos_id * locl_ty) SMap.t
 
-val get_all_tyvars : env -> Ident.t list
+val get_all_tyvars : env -> Tvid.t list
 
 val fresh_param_name : env -> string -> env * string
 
@@ -534,7 +538,7 @@ val set_tyvar_variance_i :
 val set_tyvar_variance :
   env -> ?flip:bool -> ?for_all_vars:bool -> Typing_defs.locl_ty -> env
 
-val update_variance_after_bind : env -> int -> Typing_defs.locl_ty -> env
+val update_variance_after_bind : env -> Tvid.t -> Typing_defs.locl_ty -> env
 
 val is_consistent : env -> bool
 
@@ -555,9 +559,9 @@ val is_package_loaded : env -> string -> bool
 (** Remove solved variable from environment by replacing it by its binding. *)
 val remove_var :
   env ->
-  Ident.t ->
-  search_in_upper_bounds_of:ISet.t ->
-  search_in_lower_bounds_of:ISet.t ->
+  Tvid.t ->
+  search_in_upper_bounds_of:Tvid.Set.t ->
+  search_in_lower_bounds_of:Tvid.Set.t ->
   env
 
 module Log : sig
@@ -566,7 +570,7 @@ module Log : sig
     (locl_ty -> string) ->
     (internal_type -> string) ->
     env ->
-    Ident.t ->
+    Tvid.t ->
     Hh_json.json
 end
 

@@ -138,7 +138,7 @@ int main(int argc, char** argv) {
 
   try {
     // Create IOThreadPoolExecutor and extract event bases
-    std::shared_ptr<folly::IOThreadPoolExecutor> ioThreadPool =
+    std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreadPool =
         std::make_shared<folly::IOThreadPoolExecutor>(numThreads);
     auto ioThreads = mcrouter::extractEvbs(*ioThreadPool);
 

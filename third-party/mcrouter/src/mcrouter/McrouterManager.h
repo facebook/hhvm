@@ -34,7 +34,7 @@ class McrouterManager {
   CarbonRouterInstance<RouterInfo>* mcrouterGetCreate(
       folly::StringPiece persistenceId,
       const McrouterOptions& options,
-      std::shared_ptr<folly::IOThreadPoolExecutor> ioThreadPool = nullptr) {
+      std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreadPool = nullptr) {
     std::shared_ptr<CarbonRouterInstanceBase> mcrouterBase;
 
     {

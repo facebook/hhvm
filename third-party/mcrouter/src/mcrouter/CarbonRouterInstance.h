@@ -79,7 +79,7 @@ class CarbonRouterInstance
   static CarbonRouterInstance<RouterInfo>* init(
       folly::StringPiece persistenceId,
       const McrouterOptions& options,
-      std::shared_ptr<folly::IOThreadPoolExecutor> ioThreadPool);
+      std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreadPool);
 
   /**
    * If an instance with the given persistenceId already exists,
@@ -106,7 +106,7 @@ class CarbonRouterInstance
    */
   static std::shared_ptr<CarbonRouterInstance<RouterInfo>> create(
       McrouterOptions input_options,
-      std::shared_ptr<folly::IOThreadPoolExecutor> ioThreadPool = nullptr);
+      std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreadPool = nullptr);
 
   /**
    * Destroys ALL active instances for ALL RouterInfos.
@@ -157,11 +157,11 @@ class CarbonRouterInstance
   }
 
   void setIOThreadPool(
-      std::shared_ptr<folly::IOThreadPoolExecutor> ioThreadPool) {
+      std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreadPool) {
     proxyThreads_ = std::move(ioThreadPool);
   }
 
-  const folly::IOThreadPoolExecutor& getIOThreadPool() const {
+  const folly::IOThreadPoolExecutorBase& getIOThreadPool() const {
     return *proxyThreads_;
   }
 
@@ -197,7 +197,7 @@ class CarbonRouterInstance
    */
   std::vector<Proxy<RouterInfo>*> proxies_;
   std::vector<std::unique_ptr<folly::VirtualEventBase>> proxyEvbs_;
-  std::shared_ptr<folly::IOThreadPoolExecutor> proxyThreads_;
+  std::shared_ptr<folly::IOThreadPoolExecutorBase> proxyThreads_;
 
   /**
    * Indicates if evbs/IOThreadPoolExecutor has been created by McRouter or
@@ -211,7 +211,7 @@ class CarbonRouterInstance
    */
   static CarbonRouterInstance<RouterInfo>* createRaw(
       McrouterOptions input_options,
-      std::shared_ptr<folly::IOThreadPoolExecutor> ioThreadPool = nullptr);
+      std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreadPool = nullptr);
 
   explicit CarbonRouterInstance(McrouterOptions input_options);
 

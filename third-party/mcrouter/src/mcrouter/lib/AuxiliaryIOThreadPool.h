@@ -23,10 +23,10 @@ namespace mcrouter {
  */
 class AuxiliaryIOThreadPool {
  public:
-  folly::IOThreadPoolExecutor& getThreadPool();
+  folly::IOThreadPoolExecutorBase& getThreadPool();
 
  private:
-  std::unique_ptr<folly::IOThreadPoolExecutor> threadPool_;
+  std::unique_ptr<folly::IOThreadPoolExecutorBase> threadPool_;
   folly::once_flag initFlag_;
 };
 

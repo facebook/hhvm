@@ -67,7 +67,7 @@ TEST(CarbonRouterClient, basicUsageSameThreadClient) {
   // request-handling proxies, stats logging, and more.
   // Using createSameThreadClient() makes most sense in situations where the
   // user controls their own EventBases, as below.
-  std::shared_ptr<folly::IOThreadPoolExecutor> ioThreadPool =
+  std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreadPool =
       std::make_shared<folly::IOThreadPoolExecutor>(
           opts.num_proxies, opts.num_proxies);
   auto router = CarbonRouterInstance<MemcacheRouterInfo>::init(

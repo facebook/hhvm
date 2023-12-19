@@ -292,7 +292,7 @@ bool runServerDual(
     const McrouterStandaloneOptions& standaloneOpts,
     StandalonePreRunCb preRunCb) {
   using RequestHandlerType = RequestHandler<ServerOnRequest<RouterInfo>>;
-  std::shared_ptr<folly::IOThreadPoolExecutor> ioThreadPool;
+  std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreadPool;
   CarbonRouterInstance<RouterInfo>* router;
   std::shared_ptr<AsyncMcServer> asyncMcServer;
   std::shared_ptr<apache::thrift::ThriftServer> thriftServer;
@@ -496,7 +496,7 @@ bool runServer(
   AsyncMcServer::Options opts =
       detail::createAsyncMcServerOptions(mcrouterOpts, standaloneOpts);
 
-  std::shared_ptr<folly::IOThreadPoolExecutor> ioThreadPool;
+  std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreadPool;
   CarbonRouterInstance<RouterInfo>* router = nullptr;
   std::shared_ptr<AsyncMcServer> asyncMcServer;
   try {

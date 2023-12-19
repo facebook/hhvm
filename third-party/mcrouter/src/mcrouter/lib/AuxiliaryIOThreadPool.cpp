@@ -19,7 +19,7 @@ namespace {
 folly::Singleton<AuxiliaryIOThreadPool> gAuxiliaryIOThreadPool;
 } // namespace
 
-folly::IOThreadPoolExecutor& AuxiliaryIOThreadPool::getThreadPool() {
+folly::IOThreadPoolExecutorBase& AuxiliaryIOThreadPool::getThreadPool() {
   folly::call_once(initFlag_, [&] {
     threadPool_ = std::make_unique<folly::IOThreadPoolExecutor>(
         kNumIOThreads,

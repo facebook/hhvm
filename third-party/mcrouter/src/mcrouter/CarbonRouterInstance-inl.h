@@ -62,7 +62,7 @@ template <class RouterInfo>
 CarbonRouterInstance<RouterInfo>::init(
     folly::StringPiece persistenceId,
     const McrouterOptions& options,
-    std::shared_ptr<folly::IOThreadPoolExecutor> ioThreadPool) {
+    std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreadPool) {
   if (auto manager = detail::McrouterManager::getSingletonInstance()) {
     return manager->mcrouterGetCreate<RouterInfo>(
         persistenceId, options, ioThreadPool);
@@ -90,7 +90,7 @@ bool CarbonRouterInstance<RouterInfo>::hasInstance(
 template <class RouterInfo>
 CarbonRouterInstance<RouterInfo>* CarbonRouterInstance<RouterInfo>::createRaw(
     McrouterOptions input_options,
-    std::shared_ptr<folly::IOThreadPoolExecutor> ioThreadPool) {
+    std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreadPool) {
   extraValidateOptions(input_options);
   folly::Executor::KeepAlive<> auxThreadPool;
   if (auto threadPool = AuxiliaryCPUThreadPoolSingleton::try_get()) {
@@ -170,7 +170,7 @@ template <class RouterInfo>
 std::shared_ptr<CarbonRouterInstance<RouterInfo>>
 CarbonRouterInstance<RouterInfo>::create(
     McrouterOptions input_options,
-    std::shared_ptr<folly::IOThreadPoolExecutor> ioThreadPool) {
+    std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreadPool) {
   return folly::fibers::runInMainContext([&]() mutable {
     return std::shared_ptr<CarbonRouterInstance<RouterInfo>>(
         createRaw(std::move(input_options), std::move(ioThreadPool)),

@@ -23,7 +23,7 @@ struct InternalCarbonConnectionOptions {
   InternalCarbonConnectionOptions() = default;
   size_t maxOutstanding{1024};
   size_t maxOutstandingError{false};
-  std::shared_ptr<folly::IOThreadPoolExecutor> ioThreads{nullptr};
+  std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreads{nullptr};
 };
 
 template <class If>

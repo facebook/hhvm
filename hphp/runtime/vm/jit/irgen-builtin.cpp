@@ -1331,7 +1331,13 @@ SSATmp* opt_class_to_classname(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
   auto const c = params[0].value;
 
-  if (c->isA(TStr)) return c;
+  if (c->isA(TStr)) {
+    // See ext_hh.cpp. We inc-ref because the <<__Native>> PHP wrapper
+    // owns its parameter and dec-refs it when it returns. We rely on
+    // refcount-opts to drop the IncRef when the param is a static string.
+    gen(env, IncRef, c);
+    return c;
+  }
   if (c->isA(TLazyCls)) return gen(env, LdLazyClsName, c);
   if (c->isA(TCls)) return gen(env, LdClsName, c);
 

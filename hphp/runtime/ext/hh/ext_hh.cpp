@@ -1413,7 +1413,13 @@ TypedValue HHVM_FUNCTION(classname_to_class, TypedValue cname) {
 TypedValue HHVM_FUNCTION(class_to_classname, TypedValue cls) {
   switch (cls.m_type) {
     case KindOfPersistentString:
+      return cls;
     case KindOfString:
+      // The cls parameter is owned by the NativeImpl wrapper
+      // <<__Native>> function class_to_classname($cls)
+      // and it is dec-reffed when the wrapper returns, so
+      // we need to inc-ref it here to keep the returned value alive.
+      tvIncRefCountable(cls);
       return cls;
     case KindOfClass:
       return make_tv<KindOfPersistentString>(cls.m_data.pclass->name());

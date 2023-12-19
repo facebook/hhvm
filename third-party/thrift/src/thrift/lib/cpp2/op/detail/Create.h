@@ -34,7 +34,7 @@ namespace op {
 namespace detail {
 
 template <typename T>
-type::if_opt_type<T, bool> hasValue(const T& opt) {
+type::if_optional_field<T, bool> hasValue(const T& opt) {
   return opt.has_value();
 }
 template <typename T>
@@ -53,7 +53,7 @@ bool hasValue(terse_intern_boxed_field_ref<T&> val) {
 
 // If the given field is absent/unset/void.
 template <typename T>
-type::if_opt_type<T, bool> isAbsent(const T& opt) {
+type::if_optional_field<T, bool> isAbsent(const T& opt) {
   return !opt.has_value();
 }
 template <typename T>
@@ -85,7 +85,7 @@ constexpr bool isAbsent(std::shared_ptr<T>& ptr) {
   return ptr == nullptr;
 }
 
-template <typename T, typename = type::if_opt_type<T>>
+template <typename T, typename = type::if_optional_field<T>>
 auto ensureValue(T&& opt) -> decltype(opt.value()) {
   if (isAbsent(opt)) {
     opt.emplace();

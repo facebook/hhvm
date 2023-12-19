@@ -24,18 +24,18 @@ namespace type {
 
 // Helpers for detecting compatible optional types.
 template <typename T>
-struct is_optional_type : std::false_type {};
+struct is_optional_field : std::false_type {};
 template <typename T>
-struct is_optional_type<optional_field_ref<T>> : std::true_type {};
+struct is_optional_field<optional_field_ref<T>> : std::true_type {};
 template <typename T>
-struct is_optional_type<optional_boxed_field_ref<T>> : std::true_type {};
+struct is_optional_field<optional_boxed_field_ref<T>> : std::true_type {};
 
 template <typename U, typename R = void>
-using if_opt_type =
-    std::enable_if_t<is_optional_type<folly::remove_cvref_t<U>>::value, R>;
+using if_optional_field =
+    std::enable_if_t<is_optional_field<folly::remove_cvref_t<U>>::value, R>;
 template <typename U, typename R = void>
-using if_not_opt_type =
-    std::enable_if_t<!is_optional_type<folly::remove_cvref_t<U>>::value, R>;
+using if_not_optional_field =
+    std::enable_if_t<!is_optional_field<folly::remove_cvref_t<U>>::value, R>;
 
 } // namespace type
 } // namespace thrift

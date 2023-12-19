@@ -573,8 +573,7 @@ let redo_type_decl
     ~(bucket_size : int)
     (get_classes : Relative_path.t -> SSet.t)
     ~(previously_oldified_defs : FileInfo.names)
-    ~(defs : Decl_compare.VersionedNames.t Relative_path.Map.t)
-    ~(old_decl_client_opt : Remote_old_decls_ffi.old_decl_client option) :
+    ~(defs : Decl_compare.VersionedNames.t Relative_path.Map.t) :
     redo_type_decl_result =
   Hh_logger.log "Decl_redecl_service.redo_type_decl #1";
   let all_defs =
@@ -620,7 +619,6 @@ let redo_type_decl
         ~class_names:
           (Decl_compare.VersionedSSet.get_classes all_defs
           |> Decl_compare.VersionedSSet.diff)
-        ~old_decl_client_opt
         fnl
     in
     invalidate_folded_classes

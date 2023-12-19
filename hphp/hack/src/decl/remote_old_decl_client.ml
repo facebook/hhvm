@@ -126,7 +126,6 @@ let fetch_async ~hhconfig_version ~destination_path ~no_limit decl_hashes =
 
 let fetch_old_decls_via_file_hashes
     ~(ctx : Provider_context.t)
-    ~(old_decl_client_opt : Remote_old_decls_ffi.old_decl_client option)
     ~(db_path : Naming_sqlite.db_path)
     (names : string list) : Shallow_decl_defs.shallow_class option SMap.t =
   (* TODO(bobren): names should really be a list of deps *)
@@ -137,33 +136,25 @@ let fetch_old_decls_via_file_hashes
   in
   let popt = Provider_context.get_popt ctx in
   let opts = DeclParserOptions.from_parser_options popt in
-  match old_decl_client_opt with
-  | Some client ->
-    (match
-       Remote_old_decls_ffi.get_decls_via_file_hashes client opts file_hashes
-     with
-    | Ok named_old_decls ->
-      (* TODO(bobren) do funs typedefs consts and modules *)
-      let old_decls =
-        List.fold
-          ~init:SMap.empty
-          ~f:(fun acc ndecl ->
-            match ndecl with
-            | Shallow_decl_defs.NClass (name, cls) ->
-              SMap.add name (Some cls) acc
-            | _ -> acc)
-          named_old_decls
-      in
-      old_decls
-    | Error msg ->
-      Hh_logger.log "Error fetching remote decls: %s" msg;
-      SMap.empty)
-  | None -> SMap.empty
+  match Remote_old_decls_ffi.get_decls_via_file_hashes opts file_hashes with
+  | Ok named_old_decls ->
+    (* TODO(bobren) do funs typedefs consts and modules *)
+    let old_decls =
+      List.fold
+        ~init:SMap.empty
+        ~f:(fun acc ndecl ->
+          match ndecl with
+          | Shallow_decl_defs.NClass (name, cls) -> SMap.add name (Some cls) acc
+          | _ -> acc)
+        named_old_decls
+    in
+    old_decls
+  | Error msg ->
+    Hh_logger.log "Error fetching remote decls: %s" msg;
+    SMap.empty
 
-let fetch_old_decls
-    ~(ctx : Provider_context.t)
-    ~(old_decl_client_opt : Remote_old_decls_ffi.old_decl_client option)
-    (names : string list) : Shallow_decl_defs.shallow_class option SMap.t =
+let fetch_old_decls ~(ctx : Provider_context.t) (names : string list) :
+    Shallow_decl_defs.shallow_class option SMap.t =
   let db_path_opt = Utils.db_path_of_ctx ~ctx in
   match db_path_opt with
   | None -> SMap.empty
@@ -181,8 +172,7 @@ let fetch_old_decls
       in
       Hh_logger.log "Using old decls from CAS? %b" use_old_decls_from_cas;
       match use_old_decls_from_cas with
-      | true ->
-        fetch_old_decls_via_file_hashes ~ctx ~old_decl_client_opt ~db_path names
+      | true -> fetch_old_decls_via_file_hashes ~ctx ~db_path names
       | false ->
         (match decl_hashes with
         | [] -> SMap.empty

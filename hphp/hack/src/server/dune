@@ -206,7 +206,6 @@
  (libraries
   ci_util
   server_client_provider
-  remote_old_decls_ffi
   server_config
   server_notifier)
  (preprocess

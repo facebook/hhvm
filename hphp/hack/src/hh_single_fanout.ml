@@ -182,7 +182,6 @@ let compute_fanout
       (fun _ -> SSet.empty)
       ~previously_oldified_defs:FileInfo.empty_names
       ~defs:old_and_new_defs
-      ~old_decl_client_opt:None
   in
   fanout
 

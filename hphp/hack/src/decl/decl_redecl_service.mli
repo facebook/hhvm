@@ -29,7 +29,6 @@ val redo_type_decl :
   get_classes_in_file ->
   previously_oldified_defs:FileInfo.names ->
   defs:Decl_compare.VersionedNames.t Relative_path.Map.t ->
-  old_decl_client_opt:Remote_old_decls_ffi.old_decl_client option ->
   redo_type_decl_result
 
 (** Mark all provided [defs] as old, as long as they were not previously

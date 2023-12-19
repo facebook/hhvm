@@ -195,7 +195,6 @@ add_library(
     utils/Logging.cpp
     utils/ParseURL.cpp
     utils/RendezvousHash.cpp
-    utils/Time.cpp
     utils/TraceEventContext.cpp
     utils/TraceEvent.cpp
     utils/WheelTimerInstance.cpp

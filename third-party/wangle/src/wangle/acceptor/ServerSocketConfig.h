@@ -95,6 +95,15 @@ struct ServerSocketConfig {
     return false;
   }
 
+  bool hasProdCASignedCert() const {
+    for (const auto& cfg : sslContextConfigs) {
+      if (cfg.isProdCASigned) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * This should only be called from the evb thread.
    */

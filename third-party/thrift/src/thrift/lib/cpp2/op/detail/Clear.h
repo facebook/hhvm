@@ -409,10 +409,8 @@ struct ClearField<adapted_field_tag<Adapter, UTag, Struct, FieldId>>
                       Struct,
                       apache::thrift::field_id<FieldId>>::value) {
       field = nullptr;
-    } else {
-      if (field) {
-        ::apache::thrift::adapt_detail::clear<Adapter, FieldId>(*field, s);
-      }
+    } else if (field) {
+      ::apache::thrift::adapt_detail::clear<Adapter, FieldId>(*field, s);
     }
   }
   template <typename T>
@@ -421,10 +419,8 @@ struct ClearField<adapted_field_tag<Adapter, UTag, Struct, FieldId>>
                       Struct,
                       apache::thrift::field_id<FieldId>>::value) {
       field = nullptr;
-    } else {
-      if (field) {
-        ::apache::thrift::adapt_detail::clear<Adapter, FieldId>(*field, s);
-      }
+    } else if (field) {
+      ::apache::thrift::adapt_detail::clear<Adapter, FieldId>(*field, s);
     }
   }
 };

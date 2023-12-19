@@ -627,15 +627,11 @@ module Client = struct
 
   let edit_file (env : env) (suffix : string) (contents : string) :
       env * ServerCommandTypes.diagnostic_errors =
-    let message =
-      ClientIdeMessage.(
-        Did_open_or_change
-          (doc suffix contents, { should_calculate_errors = true }))
-    in
+    let message = ClientIdeMessage.(Did_open_or_change (doc suffix contents)) in
+    let (env, ()) = ClientIdeDaemon.Test.handle env message in
+    let message = ClientIdeMessage.(Diagnostics (doc suffix contents)) in
     let (env, diagnostics) = ClientIdeDaemon.Test.handle env message in
-    let diagnostics =
-      FileMap.singleton ("/" ^ suffix) (Option.value_exn diagnostics)
-    in
+    let diagnostics = FileMap.singleton ("/" ^ suffix) diagnostics in
     (env, diagnostics)
 
   let open_file (env : env) (suffix : string) :

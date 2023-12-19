@@ -699,28 +699,25 @@ let handle_request
         { istate with iopen_files = close_file istate.iopen_files path },
       Ok errors )
   (* didOpen or didChange *)
-  | ( During_init dstate,
-      Did_open_or_change ({ file_path; file_contents }, _should_calculate_errors)
-    ) ->
+  | (During_init dstate, Did_open_or_change { file_path; file_contents }) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
     let dstate = open_or_change_file_during_init dstate path file_contents in
-    (During_init dstate, Ok None)
-  | ( Initialized istate,
-      Did_open_or_change (document, { should_calculate_errors }) ) ->
+    (During_init dstate, Ok ())
+  | (Initialized istate, Did_open_or_change document) ->
+    let (iopen_files, _entry, _errors) =
+      update_file istate.iopen_files document
+    in
+    (Initialized { istate with iopen_files }, Ok ())
+  (* Pull diagnostics *)
+  | (Initialized istate, Diagnostics document) ->
     let (istate, ctx, entry, published_errors_ref) =
       update_file_ctx istate document
     in
-    let errors =
-      if should_calculate_errors then begin
-        let errors = get_user_facing_errors ~ctx ~entry in
-        published_errors_ref := Some errors;
-        Some (Errors.sort_and_finalize errors)
-      end else
-        None
-    in
-    (Initialized istate, Ok errors)
+    let errors = get_user_facing_errors ~ctx ~entry in
+    published_errors_ref := Some errors;
+    (Initialized istate, Ok (Errors.sort_and_finalize errors))
   (* Document Symbol *)
   | (During_init dstate, Document_symbol document) ->
     let (dopen_files, entry, _) = update_file dstate.dopen_files document in

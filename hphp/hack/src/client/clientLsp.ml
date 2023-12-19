@@ -4251,9 +4251,7 @@ let send_file_to_ide_and_defer_check
       ide_service
       ~tracking_id
       ~ref_unblocked_time
-      ClientIdeMessage.(
-        Did_open_or_change
-          ({ file_path; file_contents }, { should_calculate_errors = false }))
+      ClientIdeMessage.(Did_open_or_change { file_path; file_contents })
   in
   match !state with
   | Running renv ->
@@ -4981,23 +4979,18 @@ let handle_deferred_check
         ide_service
         ~tracking_id
         ~ref_unblocked_time
-        ClientIdeMessage.(
-          Did_open_or_change
-            ({ file_path; file_contents }, { should_calculate_errors = true }))
+        ClientIdeMessage.(Diagnostics { file_path; file_contents })
     in
-    (match errors with
-    | None -> Lwt.return_none
-    | Some errors ->
-      let new_state =
-        publish_and_report_after_recomputing_live_squiggles
-          !state
-          file_path
-          errors
-          ~trigger
-          ~ref_unblocked_time
-      in
-      state := new_state;
-      Lwt.return_none)
+    let new_state =
+      publish_and_report_after_recomputing_live_squiggles
+        !state
+        file_path
+        errors
+        ~trigger
+        ~ref_unblocked_time
+    in
+    state := new_state;
+    Lwt.return_none
 
 (** Called once a second but only when there are no pending messages from client
 or clientIdeDaemon *)

@@ -530,7 +530,7 @@ module CustomGraph = struct
     Mode.t -> Dep.t -> Dep.dep_kind -> string -> DepSet.t -> DepSet.t
     = "hh_get_member_fanout"
 
-  external get_not_subtype_fanout : Mode.t -> Dep.t -> DepSet.t -> DepSet.t
+  external get_not_subtype_fanout : Mode.t -> DepSet.t -> DepSet.t -> DepSet.t
     = "hh_get_not_subtype_fanout"
 
   external register_discovered_dep_edge : Dep.t -> Dep.t -> unit
@@ -991,8 +991,8 @@ let get_member_fanout mode ~class_dep member fanout_acc =
     member_name
     fanout_acc
 
-let get_not_subtype_fanout mode ~class_dep fanout_acc =
-  CustomGraph.get_not_subtype_fanout mode class_dep fanout_acc
+let get_not_subtype_fanout mode ~descendant_deps fanout_acc =
+  CustomGraph.get_not_subtype_fanout mode descendant_deps fanout_acc
 
 let dump_current_edge_buffer_in_memory_mode =
   CustomGraph.dump_current_edge_buffer

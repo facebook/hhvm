@@ -292,7 +292,7 @@ let get_added_parent_fanout
     let to_recheck =
       Typing_deps.get_not_subtype_fanout
         (Provider_context.get_deps_mode ctx)
-        ~class_dep:dep
+        ~descendant_deps
         to_recheck
     in
     {

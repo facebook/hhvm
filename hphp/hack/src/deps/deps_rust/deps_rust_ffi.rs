@@ -201,12 +201,12 @@ ocaml_ffi! {
 
     fn hh_get_not_subtype_fanout(
         mode: RawTypingDepsMode,
-        class_dep: Dep,
+        deps: Custom<DepSet>,
         fanout_acc: Custom<DepSet>,
     ) -> Custom<DepSet> {
         let mut fanout_acc = fanout_acc.clone();
         DEP_GRAPH.read(mode).get_not_subtype_fanout(
-            class_dep,
+            &deps,
             &mut fanout_acc,
         );
         Custom::from(fanout_acc.into())

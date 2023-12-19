@@ -285,7 +285,7 @@ bool PackageInfo::moduleInDeployment(const StringData* module,
 }
 
 bool PackageInfo::moduleInASoftPackage(const StringData* module) const {
-  if (!module || module->empty()) return false;
+  assertx(module && !module->empty());
   if (RO::RepoAuthoritative) return isModuleSoftDeployed(module);
   for (auto& [_, deployment] : deployments()) {
     if (moduleInDeployment(module, deployment, DeployKind::Soft)) {
@@ -303,7 +303,7 @@ folly::SharedMutex s_mutex;
 } // namespace
 
 bool PackageInfo::isModuleSoftDeployed(const StringData* module) const {
-  if (!module || module->empty()) return false;
+  assertx(module && !module->empty());
   if (auto const activeDeployment = getActiveDeployment()) {
     return moduleInDeployment(module, *activeDeployment, DeployKind::Soft);
   }

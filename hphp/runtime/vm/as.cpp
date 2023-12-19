@@ -3104,7 +3104,7 @@ void parse_module_use(AsmState& as) {
     as.error(".module must have a name");
   }
   as.in.expectWs(';');
-  if (as.ue->m_moduleName) {
+  if (as.ue->m_moduleName && !Module::isDefault(as.ue->m_moduleName)) {
     as.error("One file may not use multiple modules");
   }
   as.ue->m_moduleName = makeStaticString(name);

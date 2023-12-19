@@ -606,7 +606,7 @@ private:
   UserAttributeMap m_metaData;
   UserAttributeMap m_fileAttributes;
   std::unique_ptr<FatalInfo> m_fatalInfo{nullptr};
-  const StringData* m_moduleName{nullptr};
+  const StringData* m_moduleName{makeStaticString(Module::DEFAULT)};
   std::vector<DeclDep> m_deps;
 
   rds::Link<req::dynamic_bitset, rds::Mode::Normal> m_coverage;

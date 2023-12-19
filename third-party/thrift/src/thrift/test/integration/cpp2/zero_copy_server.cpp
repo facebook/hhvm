@@ -136,7 +136,7 @@ std::shared_ptr<folly::IOThreadPoolExecutorBase> getIOThreadPool(
               << FLAGS_mux_io_tp_num_max_events;
 
     folly::MuxIOThreadPoolExecutor::Options options;
-    options.setNumEVBs(FLAGS_mux_io_tp_num_evbs);
+    options.setNumEventBases(FLAGS_mux_io_tp_num_evbs);
     options.setWakeUpInterval(
         std::chrono::microseconds(FLAGS_mux_io_tp_num_wakeup_us));
     options.setMaxEvents(FLAGS_mux_io_tp_num_max_events);

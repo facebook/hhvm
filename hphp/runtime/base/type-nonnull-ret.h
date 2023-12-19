@@ -17,6 +17,7 @@
 #pragma once
 
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/record-replay.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-object.h"
@@ -27,15 +28,6 @@ namespace HPHP {
 
 template <class T, class I>
 struct NonNullReturnType {
-  // this function is needed only for recorder-replayer's sake
-  T* get_do_not_use() const {
-    return m_data;
-  }
-
-  // We don't really want a default constructor
-  // but are forced to declare one because HHVM record/replay would break otherwise
-  NonNullReturnType() = default;
-
   /*implicit*/ NonNullReturnType(I&& data) : m_data(data.detach()) {
     assertx(m_data != nullptr);
   }
@@ -45,6 +37,12 @@ struct NonNullReturnType {
     return NonNullReturnType(I::attach(data));
   }
 private:
+  // Add support for record-replay
+  friend struct Recorder;
+  friend String rr::serialize<NonNullReturnType>(const NonNullReturnType&);
+  NonNullReturnType() = default;
+  T* get() const { return m_data; }
+
   T* m_data;
 };
 

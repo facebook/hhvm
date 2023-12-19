@@ -38,6 +38,7 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/type-nonnull-ret.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
@@ -105,7 +106,7 @@ bool shouldRecordReplay(NativeFunction ptr) {
 }
 
 template<>
-String serialize(Variant value) {
+String serialize(const Variant& value) {
   TmpAssign _1{RO::NoticeFrequency, 0L};
   TmpAssign _2{RO::WarningFrequency, 0L};
   VariableSerializer vs{VariableSerializer::Type::DebuggerSerialize};
@@ -118,36 +119,36 @@ String serialize(Variant value) {
 
 template<>
 String serialize(bool value) {
-  return serialize<Variant>(value);
+  return serialize(Variant{value});
 }
 
 template<>
 String serialize(const char* value) {
-  return serialize<Variant>(value);
+  return serialize(Variant{value});
 }
 
 template<>
 String serialize(double value) {
-  return serialize<Variant>(value);
+  return serialize(Variant{value});
+}
+
+template<>
+String serialize(const folly::dynamic& value) {
+  return serialize(Variant{folly::toJson(value)});
 }
 
 template<>
 String serialize(int value) {
-  return serialize<Variant>(value);
+  return serialize(Variant{value});
 }
 
 template<>
-String serialize(folly::dynamic value) {
-  return serialize<Variant>(folly::toJson(value));
+String serialize(const req::ptr<Directory>& value) {
+  return serialize(value ? OptResource{value} : init_null());
 }
 
 template<>
-String serialize(req::ptr<Directory> value) {
-  return serialize<Variant>(value ? OptResource{value} : init_null());
-}
-
-template<>
-String serialize(req::ptr<File> value) {
+String serialize(const req::ptr<File>& value) {
   if (value && value->seekable()) {
     const auto pos{value->tell()};
     value->rewind();
@@ -157,80 +158,75 @@ String serialize(req::ptr<File> value) {
     } catch (const StringBufferLimitException&) {}
     value->seek(pos);
     if (!contents.isNull()) {
-      return serialize<Variant>(contents);
+      return serialize(Variant{contents});
     }
   }
-  return serialize<Variant>(init_null());
+  return serialize(init_null());
 }
 
 template<>
-String serialize(req::ptr<StreamContext> value) {
-  return serialize<Variant>(value ? OptResource{value} : init_null());
+String serialize(const req::ptr<StreamContext>& value) {
+  return serialize(value ? OptResource{value} : init_null());
 }
 
 template<>
-String serialize(std::exception_ptr value) {
+String serialize(const std::exception_ptr& value) {
   try {
     std::rethrow_exception(value);
   } catch (const req::root<Object>& e) {
-    return serialize<Variant>(e);
+    return serialize(Variant{e});
   } catch (const FatalErrorException& e) {
-    return serialize<Variant>(make_vec_array(
+    return serialize(Variant{make_vec_array(
       e.getMessage(),
       e.getBacktrace(),
       e.isRecoverable(),
       e.isSilent()
-    ));
+    )});
   } catch (...) {
-    return serialize<Variant>(init_null());
+    return serialize(init_null());
   }
 }
 
 template<>
 String serialize(std::int64_t value) {
-  return serialize<Variant>(value);
+  return serialize(Variant{value});
 }
 
 template<>
 String serialize(std::nullptr_t) {
-  return serialize<Variant>(init_null());
+  return serialize(init_null());
 }
 
 template<>
-String serialize(std::string_view value) {
-  return serialize<Variant>(value.data());
+String serialize(const std::string_view& value) {
+  return serialize(Variant{value.data()});
 }
 
 template<>
 String serialize(struct stat* value) {
   const auto ptr{std::bit_cast<const char*>(value)};
   const String str{StringData::Make(ptr, sizeof(*value), CopyStringMode{})};
-  return serialize<Variant>(str);
+  return serialize(Variant{str});
 }
 
 template<>
-String serialize(Array value) {
-  return serialize<Variant>(value);
+String serialize(const Array& value) {
+  return serialize(Variant{value});
 }
 
 template<>
-String serialize(ArrayArg value) {
+String serialize(const ArrayArg& value) {
+  return serialize(Variant{const_cast<ArrayArg&>(value).get()});
+}
+
+template<>
+String serialize(const ArrayRet& value) {
   return serialize(Variant{value.get()});
-}
-
-/* NB: We are not taking ownership here, so it should be ideally
-* String serialize(const ArrayRet& value)
-* we need to change the signature of serialize to make it const & type arg
-* to make it clear we are not taking ownership. Defering it to PIVV team
-*/
-template<>
-String serialize(ArrayRet value) {
-  return serialize(Array{value.get_do_not_use()});
 }
 
 template<>
 String serialize(const Class* value) {
-  return serialize<Variant>(const_cast<Class*>(value));
+  return serialize(Variant{const_cast<Class*>(value)});
 }
 
 template<>
@@ -243,57 +239,57 @@ String serialize(ObjectData* value) {
 }
 
 template<>
-String serialize(Object value) {
-  return serialize<ObjectData*>(value.get());
+String serialize(const Object& value) {
+  return serialize(value.get());
 }
 
 template<>
-String serialize(ObjectArg value) {
-  return serialize<ObjectData*>(value.get());
+String serialize(const ObjectArg& value) {
+  return serialize(const_cast<ObjectArg&>(value).get());
 }
 
 template<>
-String serialize(ObjectRet value) {
-  return serialize(Object{value.get_do_not_use()});
-}
-
-template<>
-String serialize(Optional<std::filesystem::path> value) {
-  return serialize<Variant>(value ? value->string() : init_null());
-}
-
-template<>
-String serialize(Optional<std::string> value) {
-  return serialize<Variant>(value ? *value : init_null());
-}
-
-template<>
-String serialize(Optional<AutoloadMap::FileResult> value) {
-  return serialize<Variant>(value ? Variant{value->path} : init_null());
-}
-
-template<>
-String serialize(OptResource value) {
-  return serialize<Variant>(value);
-}
-
-template<>
-String serialize(String value) {
-  return serialize<Variant>(value);
-}
-
-template<>
-String serialize(StringRet value) {
-  return serialize(String{value.get_do_not_use()});
-}
-
-template<>
-String serialize(StringArg value) {
+String serialize(const ObjectRet& value) {
   return serialize(Variant{value.get()});
 }
 
 template<>
-String serialize(TypedValue value) {
+String serialize(const Optional<std::filesystem::path>& value) {
+  return serialize(value ? value->string() : init_null());
+}
+
+template<>
+String serialize(const Optional<std::string>& value) {
+  return serialize(value ? *value : init_null());
+}
+
+template<>
+String serialize(const Optional<AutoloadMap::FileResult>& value) {
+  return serialize(value ? value->path : init_null());
+}
+
+template<>
+String serialize(const OptResource& value) {
+  return serialize(Variant{value});
+}
+
+template<>
+String serialize(const String& value) {
+  return serialize(Variant{value});
+}
+
+template<>
+String serialize(const StringRet& value) {
+  return serialize(Variant{value.get()});
+}
+
+template<>
+String serialize(const StringArg& value) {
+  return serialize(Variant{const_cast<StringArg&>(value).get()});
+}
+
+template<>
+String serialize(const TypedValue& value) {
   return serialize(Variant::wrap(value));
 }
 

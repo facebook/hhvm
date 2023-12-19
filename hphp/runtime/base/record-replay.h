@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <string_view>
+#include <type_traits>
 
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/object-data.h"
@@ -37,8 +38,11 @@ std::string_view getNativeFuncName(NativeFunction ptr);
 NativeFunction getNativeFuncPtr(std::string_view name);
 bool shouldRecordReplay(NativeFunction ptr);
 
-template<typename T>
+template<typename T, typename = std::enable_if_t<std::is_scalar_v<T>, void>>
 String serialize(T value);
+
+template<typename T, typename = std::enable_if_t<!std::is_scalar_v<T>, void>>
+String serialize(const T& value);
 
 template<typename T>
 T unserialize(const String& recordedValue);

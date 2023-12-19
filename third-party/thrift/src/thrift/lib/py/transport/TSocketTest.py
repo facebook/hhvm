@@ -41,7 +41,7 @@ class TSocketTest(unittest.TestCase):
                 read = client.read(len(text))
             self.assertFalse(conn.isOpen())
         self.assertFalse(server.isListening())
-        self.assertEquals(read, text)
+        self.assertEqual(read, text)
 
     def test_server_context_errors(self):
         # Make sure the TServerSocket context manager doesn't
@@ -50,7 +50,7 @@ class TSocketTest(unittest.TestCase):
             with TSocket.TServerSocket(port=0, family=socket.AF_INET6):
                 raise Exception("test_error")
 
-        self.assertRaisesRegexp(Exception, "test_error", do_test)
+        self.assertRaisesRegex(Exception, "test_error", do_test)
 
     def test_open_failure(self):
         # Bind a server socket to an address, but don't actually listen on it.
@@ -70,8 +70,8 @@ class TSocketTest(unittest.TestCase):
             except TTransport.TTransportException:
                 # sock.open() should not leave the file descriptor open
                 # when it fails
-                self.assertEquals(None, sock.handle)
-                self.assertEquals({}, sock.handles)
+                self.assertEqual(None, sock.handle)
+                self.assertEqual({}, sock.handles)
 
                 # Calling close() again on the socket should be a no-op,
                 # and shouldn't throw an error
@@ -116,7 +116,7 @@ class TSocketTest(unittest.TestCase):
                 conn.write(text)
             with server.accept() as client:
                 read = client.read(len(text))
-            self.assertEquals(read, text)
+            self.assertEqual(read, text)
 
     def test_bad_port(self):
         port = "bogus"
@@ -137,6 +137,6 @@ class TSocketTest(unittest.TestCase):
                     conn.write(text)
                 with server.accept() as client:
                     read = client.read(len(text))
-                self.assertEquals(read, text)
+                self.assertEqual(read, text)
             # The socket will not be cleaned up when the server has been shutdown.
             self.assertTrue(os.path.exists(unix_socket))

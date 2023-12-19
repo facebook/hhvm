@@ -17,11 +17,14 @@
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/net/NetworkSocket.h>
 #include <thrift/lib/cpp/async/TAsyncSSLSocket.h>
+#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/security/FizzPeeker.h>
 #include <thrift/lib/cpp2/security/SSLUtil.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 #include <wangle/acceptor/FizzAcceptorHandshakeHelper.h>
 #include <wangle/acceptor/SSLAcceptorHandshakeHelper.h>
+
+THRIFT_FLAG_DEFINE_int64(thrift_key_update_threshold, 0);
 
 namespace apache {
 namespace thrift {
@@ -130,6 +133,7 @@ FizzPeeker::getThriftHelper(
     return nullptr;
   }
   auto optionsCopy = options_;
+  optionsCopy.setkeyUpdateThreshold(THRIFT_FLAG(thrift_key_update_threshold));
   return folly::DelayedDestructionUniquePtr<ThriftFizzAcceptorHandshakeHelper>(
       new ThriftFizzAcceptorHandshakeHelper(
           context_,

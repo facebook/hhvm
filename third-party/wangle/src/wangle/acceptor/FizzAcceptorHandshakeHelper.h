@@ -186,6 +186,15 @@ class FizzHandshakeOptions {
   }
 
   /**
+   * setkeyUpdateThreshold_ configures the server to initiate a key update
+   * after encrypting a certain number of bytes using the same key.
+   */
+  FizzHandshakeOptions& setkeyUpdateThreshold(size_t flag) {
+    keyUpdateThreshold_ = flag;
+    return *this;
+  }
+
+  /**
    * `setPreferIoUringSocket` controls whether the accepted client connection
    * should be handled with an io_uring based transport.
    *
@@ -206,6 +215,7 @@ class FizzHandshakeOptions {
       nullptr};
   FizzLoggingCallback* loggingCallback_{nullptr};
   bool handshakeRecordAlignedReads_{false};
+  size_t keyUpdateThreshold_{0};
   bool preferIoUringSocket_{false};
   friend class FizzAcceptorHandshakeHelper;
 };
@@ -234,6 +244,7 @@ class FizzAcceptorHandshakeHelper
         tinfo_(tinfo),
         loggingCallback_(options.loggingCallback_),
         handshakeRecordAlignedReads_(options.handshakeRecordAlignedReads_),
+        keyUpdateThreshold_(options.keyUpdateThreshold_),
         preferIoUringSocket_(options.preferIoUringSocket_),
         transportOptions_(transportOptions) {
     DCHECK(context_);
@@ -312,6 +323,7 @@ class FizzAcceptorHandshakeHelper
   wangle::SSLErrorEnum sslError_{wangle::SSLErrorEnum::NO_ERROR};
   FizzLoggingCallback* loggingCallback_;
   bool handshakeRecordAlignedReads_{false};
+  size_t keyUpdateThreshold_{0};
 
   fizz::server::AttemptVersionFallback fallback_;
   bool preferIoUringSocket_{false};

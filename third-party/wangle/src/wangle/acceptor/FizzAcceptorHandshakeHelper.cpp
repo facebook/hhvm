@@ -92,6 +92,7 @@ AsyncFizzServer::UniquePtr FizzAcceptorHandshakeHelper::createFizzServer(
   AsyncFizzServer::UniquePtr fizzServer(new AsyncFizzServer(
       std::move(asyncTransport), fizzContext, extensions, options));
   fizzServer->setHandshakeRecordAlignedReads(handshakeRecordAlignedReads_);
+  fizzServer->setRekeyAfterWriting(keyUpdateThreshold_);
 
   return fizzServer;
 }

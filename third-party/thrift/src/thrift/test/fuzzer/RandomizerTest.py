@@ -173,7 +173,7 @@ class TestIntRandomizer(TestRandomizer):
         gen = self.get_randomizer(ttype, None, constraints)
         for _ in sm.xrange(cls.iterations):
             val = gen.generate()
-            self.assertEquals(val, constant)
+            self.assertEqual(val, constant)
 
     def testChoices(self):
         cls = self.__class__
@@ -319,7 +319,7 @@ class TestFloatRandomizer(TestRandomizer):
         gen = self.get_randomizer(self.randomizer_cls.ttype, None, constraints)
         for _ in sm.xrange(cls.iterations):
             val = gen.generate()
-            self.assertEquals(val, constant)
+            self.assertEqual(val, constant)
 
     def testChoices(self):
         cls = self.__class__
@@ -378,7 +378,7 @@ class TestStringRandomizer(TestRandomizer, unittest.TestCase):
         for _ in sm.xrange(cls.iterations):
             val = gen.generate()
             for _char in val:
-                self.assertEquals(0, len(val))
+                self.assertEqual(0, len(val))
 
     def testChoices(self):
         cls = self.__class__
@@ -471,7 +471,7 @@ class TestListRandomizer(TestRandomizer, unittest.TestCase):
 
         for _ in sm.xrange(cls.iterations):
             val = gen.generate()
-            self.assertEquals(len(val), 0)
+            self.assertEqual(len(val), 0)
 
     def testMaxLength(self):
         cls = self.__class__
@@ -553,7 +553,7 @@ class TestSetRandomizer(TestRandomizer, unittest.TestCase):
 
         for _ in sm.xrange(cls.iterations):
             val = gen.generate()
-            self.assertEquals(len(val), 0)
+            self.assertEqual(len(val), 0)
 
     def testElementConstraints(self):
         cls = self.__class__
@@ -597,7 +597,7 @@ class TestMapRandomizer(TestRandomizer, unittest.TestCase):
 
         for _ in sm.xrange(cls.iterations):
             val = gen.generate()
-            self.assertEquals(len(val), 0)
+            self.assertEqual(len(val), 0)
 
     def testKeyConstraints(self):
         cls = self.__class__
@@ -935,13 +935,13 @@ class TestListStructRandomizer(TestStructRandomizer, unittest.TestCase):
             for elem in val.a:
                 self.assertTrue(elem)
 
-            self.assertEquals(len(val.b), 0)
+            self.assertEqual(len(val.b), 0)
 
             for elem in val.d:
-                self.assertEquals(len(elem), 0)
+                self.assertEqual(len(elem), 0)
 
             for elem in val.e:
-                self.assertEquals(len(elem), 0)
+                self.assertEqual(len(elem), 0)
 
     def testSeeded(self):
         seeds = [
@@ -1026,7 +1026,7 @@ class TestListStructRandomizer(TestStructRandomizer, unittest.TestCase):
             self.assertIsNotNone(val)
             self.assertIsNotNone(val.c)
             for elem in val.c:
-                self.assertEquals(elem, constant)
+                self.assertEqual(elem, constant)
 
     def testListTypeConstraints(self):
         """
@@ -1189,7 +1189,7 @@ class TestStructRecursion(TestStructRandomizer, unittest.TestCase):
 
         val = gen.generate()
 
-        self.assertEquals(self.max_depth(val), 0)
+        self.assertEqual(self.max_depth(val), 0)
 
     def testDepthOne(self):
         cls = self.__class__

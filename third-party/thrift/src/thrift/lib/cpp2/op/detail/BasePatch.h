@@ -24,6 +24,7 @@
 #include <thrift/lib/cpp2/FieldRef.h>
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
+#include <thrift/lib/cpp2/type/Field.h>
 #include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/detail/Wrap.h>
 
@@ -172,7 +173,7 @@ class BaseAssignPatch : public BasePatch<Patch, Derived> {
 
   // A 'value' patch only applies to set optional values.
   template <typename U>
-  if_opt_type<folly::remove_cvref_t<U>> apply(U&& field) const {
+  type::if_opt_type<folly::remove_cvref_t<U>> apply(U&& field) const {
     if (field.has_value()) {
       derived().apply(*std::forward<U>(field));
     }
@@ -233,7 +234,7 @@ class BaseClearPatch : public BaseAssignPatch<Patch, Derived> {
 
   // Clear resets optional fields.
   template <typename U>
-  if_opt_type<folly::remove_cvref_t<U>> apply(U&& field) const {
+  type::if_opt_type<folly::remove_cvref_t<U>> apply(U&& field) const {
     if (data_.clear() == true && !hasAssign()) {
       field.reset();
     } else if (field.has_value()) {

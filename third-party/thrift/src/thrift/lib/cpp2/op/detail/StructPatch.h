@@ -23,6 +23,7 @@
 #include <thrift/lib/cpp2/op/Create.h>
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/op/detail/BasePatch.h>
+#include <thrift/lib/cpp2/type/Field.h>
 #include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
 
@@ -142,7 +143,8 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
 
   template <class Id>
   static constexpr bool is_optional_or_union_field_v =
-      is_optional_type<get_field_ref<T, Id>>::value || is_thrift_union_v<T>;
+      type::is_optional_type<get_field_ref<T, Id>>::value ||
+      is_thrift_union_v<T>;
 
   template <typename Id>
   void remove() {
@@ -537,7 +539,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
     const auto& after = data_.patch()->toThrift();
 
     using Ref = folly::remove_cvref_t<decltype(get<Id>(std::declval<T>()))>;
-    if (!is_optional_type<Ref>::value) {
+    if (!type::is_optional_type<Ref>::value) {
       // non-optional fields can not be removed
       return false;
     }

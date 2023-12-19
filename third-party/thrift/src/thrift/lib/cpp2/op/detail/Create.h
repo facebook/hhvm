@@ -17,13 +17,13 @@
 #pragma once
 
 #include <memory>
-#include <optional>
 #include <type_traits>
 
 #include <thrift/lib/cpp/Field.h>
 #include <thrift/lib/cpp2/Adapt.h>
 #include <thrift/lib/cpp2/FieldRef.h>
 #include <thrift/lib/cpp2/op/Get.h>
+#include <thrift/lib/cpp2/type/Field.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
@@ -33,29 +33,8 @@ namespace thrift {
 namespace op {
 namespace detail {
 
-// Helpers for detecting compatible optional types.
 template <typename T>
-struct is_optional_type : std::false_type {};
-template <typename T>
-struct is_optional_type<optional_field_ref<T>> : std::true_type {};
-template <typename T>
-struct is_optional_type<optional_boxed_field_ref<T>> : std::true_type {};
-template <typename T>
-struct is_optional_type<std::optional<T>> {
-  // FIXME: We added static_assert to check whether this specialization is
-  // actually used somewhere. If it's not used anywhere, we should remove it.
-  static_assert(sizeof(T) < 0, "");
-};
-
-template <typename U, typename R = void>
-using if_opt_type =
-    std::enable_if_t<is_optional_type<folly::remove_cvref_t<U>>::value, R>;
-template <typename U, typename R = void>
-using if_not_opt_type =
-    std::enable_if_t<!is_optional_type<folly::remove_cvref_t<U>>::value, R>;
-
-template <typename T>
-if_opt_type<T, bool> hasValue(const T& opt) {
+type::if_opt_type<T, bool> hasValue(const T& opt) {
   return opt.has_value();
 }
 template <typename T>
@@ -74,7 +53,7 @@ bool hasValue(terse_intern_boxed_field_ref<T&> val) {
 
 // If the given field is absent/unset/void.
 template <typename T>
-if_opt_type<T, bool> isAbsent(const T& opt) {
+type::if_opt_type<T, bool> isAbsent(const T& opt) {
   return !opt.has_value();
 }
 template <typename T>
@@ -106,7 +85,7 @@ constexpr bool isAbsent(std::shared_ptr<T>& ptr) {
   return ptr == nullptr;
 }
 
-template <typename T, typename = if_opt_type<T>>
+template <typename T, typename = type::if_opt_type<T>>
 auto ensureValue(T&& opt) -> decltype(opt.value()) {
   if (isAbsent(opt)) {
     opt.emplace();

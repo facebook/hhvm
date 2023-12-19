@@ -99,10 +99,10 @@ void AcceptRoutingHandler<Pipeline, R>::onRoutingData(
   auto acceptor = acceptors_[hash % acceptors_.size()];
 
   originalEvb->runInLoop(
-      [=, routingData = std::move(routingData)]() mutable {
+      [=, this, routingData = std::move(routingData)]() mutable {
         // Switch to the new acceptor's thread
         acceptor->getEventBase()->runInEventBaseThread(
-            [=, routingData = std::move(routingData)]() mutable {
+            [=, this, routingData = std::move(routingData)]() mutable {
               socket->attachEventBase(acceptor->getEventBase());
 
               auto routingHandler =

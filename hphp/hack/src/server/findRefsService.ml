@@ -441,11 +441,15 @@ let parallel_find_refs
       match (output, acc) with
       | (Ok output, Ok acc) -> Ok (List.rev_append output acc)
       | _ -> Error ())
-    ~next:(fun () ->
-      if should_cancel ~stream_file then
-        Bucket.Done
-      else
-        MultiWorker.next workers files ())
+    ~next:
+      (let next = MultiWorker.next workers files in
+       (* We create the "next" function just once, now; it will dole
+          out chunks of [files] each time it's asked, below. *)
+       fun () ->
+         if should_cancel ~stream_file then
+           Bucket.Done
+         else
+           next ())
 
 let get_definitions ctx action =
   List.map ~f:(fun (name, pos) ->

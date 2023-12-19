@@ -55,7 +55,7 @@ module ForcedFlags : sig
 
   (** Return the forced value of the current rollout flag, if any.
         Returning None means there is no forcing. *)
-  val rollout_flag_value : t option -> bool option
+  val rollout_flag_value : flag_name -> t option -> bool option
 
   (** Whether a specific flag is forced to be on. *)
   val is_forced : flag_name -> t option -> bool
@@ -91,10 +91,14 @@ end = struct
             | _ -> invalid ())
           | _ -> invalid ()))
 
-  let rollout_flag_value (force : t option) : bool option =
+  let rollout_flag_value (flag_name : flag_name) (force : t option) :
+      bool option =
     Option.map force ~f:(function
-        | Prod _ -> false
-        | Candidate -> true)
+        | Candidate -> true
+        | Prod forced ->
+          (match forced with
+          | None -> false
+          | Some forced -> String.equal forced flag_name))
 
   let is_forced (flag_name : flag_name) (force : t option) : bool =
     match force with
@@ -148,6 +152,7 @@ let rollout_order =
   | Optimized_parent_fanout -> 5
   | New_naming_table -> 6
 
+(** @param  get_default   typically external config reading, e.g. from JK *)
 let make
     ~current_rolled_out_flag_idx
     ~(deactivate_saved_state_rollout : bool)
@@ -158,7 +163,7 @@ let make
     let i = rollout_order flag in
     let flag_name = flag_name flag in
     if Int.equal current_rolled_out_flag_idx i then
-      ForcedFlags.rollout_flag_value force_prod_or_candidate
+      ForcedFlags.rollout_flag_value flag_name force_prod_or_candidate
       |> Option.value
            ~default:
              ((not deactivate_saved_state_rollout) && get_default flag_name)

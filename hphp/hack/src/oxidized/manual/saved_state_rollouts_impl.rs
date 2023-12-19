@@ -72,7 +72,7 @@ impl SavedStateRollouts {
             let i = flag.rollout_order();
             let flag_name = flag.flag_name();
             match current_rolled_out_flag_idx.cmp(&i) {
-                Ordering::Equal => match force_prod_or_candidate.rollout_flag_value() {
+                Ordering::Equal => match force_prod_or_candidate.rollout_flag_value(flag_name) {
                     Some(b) => Ok(b),
                     None => {
                         if deactivate_saved_state_rollout {
@@ -136,9 +136,12 @@ impl ForcedFlags {
 
     /// Return the forced value of the current rollout flag, if any.
     /// Returning None means there is no forcing.
-    fn rollout_flag_value(&self) -> Option<bool> {
+    fn rollout_flag_value(&self, flag_name: &str) -> Option<bool> {
         match self {
-            Self::Prod(_) => Some(false),
+            Self::Prod(forced) => match forced {
+                None => Some(false),
+                Some(forced) => Some(forced == flag_name),
+            },
             Self::Candidate => Some(true),
             Self::None => None,
         }

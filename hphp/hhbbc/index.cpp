@@ -11935,7 +11935,9 @@ struct BuildSubclassListJob {
   // edges between classes and splits, and func families (needed by
   // dependency classes). Leafs are like deps, except they'll be
   // considered as part of calculating the name-only func families
-  // (normal deps are not).
+  // because its possible for them to be disjoint from classes.
+  // (normal deps are not considered as their data is guaranteed to
+  // be included by a class).
   static Output
   run(Variadic<std::unique_ptr<ClassInfo2>> classes,
       Variadic<std::unique_ptr<ClassInfo2>> deps,

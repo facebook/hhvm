@@ -51,22 +51,22 @@ class UniversalNameTests(unittest.TestCase):
             validate_universal_hash_bytes(1, 8)
 
     def test_get_universal_hash_size(self) -> None:
-        self.assertEquals(get_universal_hash_size(UniversalHashAlgorithm.Sha2_256), 32)
+        self.assertEqual(get_universal_hash_size(UniversalHashAlgorithm.Sha2_256), 32)
 
     def test_get_universal_hash(self) -> None:
-        self.assertEquals(
+        self.assertEqual(
             get_universal_hash(UniversalHashAlgorithm.Sha2_256, "foo.com/my/type"),
             b"\tat$\x9c\xef\xad\xb5\xea\rE;\xcb3\xadTv\x01\xfb\xfe\xc4\xb2\xd7\x95\x92N\xebg\xd4[\xe6F",
         )
 
     def test_get_universal_hash_prefix(self) -> None:
-        self.assertEquals(get_universal_hash_prefix(b"a" * 32, 0), b"")
-        self.assertEquals(get_universal_hash_prefix(b"b" * 32, 8), b"b" * 8)
-        self.assertEquals(get_universal_hash_prefix(b"c" * 32, 32), b"c" * 32)
-        self.assertEquals(get_universal_hash_prefix(b"d" * 32, 33), b"d" * 32)
+        self.assertEqual(get_universal_hash_prefix(b"a" * 32, 0), b"")
+        self.assertEqual(get_universal_hash_prefix(b"b" * 32, 8), b"b" * 8)
+        self.assertEqual(get_universal_hash_prefix(b"c" * 32, 32), b"c" * 32)
+        self.assertEqual(get_universal_hash_prefix(b"d" * 32, 33), b"d" * 32)
 
     def test_maybe_get_universal_hash_prefix(self) -> None:
-        self.assertEquals(
+        self.assertEqual(
             len(
                 maybe_get_universal_hash_prefix(
                     UniversalHashAlgorithm.Sha2_256, "a" * 24, 0
@@ -74,7 +74,7 @@ class UniversalNameTests(unittest.TestCase):
             ),
             0,
         )
-        self.assertEquals(
+        self.assertEqual(
             len(
                 maybe_get_universal_hash_prefix(
                     UniversalHashAlgorithm.Sha2_256, "a" * 24, 8
@@ -82,7 +82,7 @@ class UniversalNameTests(unittest.TestCase):
             ),
             8,
         )
-        self.assertEquals(
+        self.assertEqual(
             len(
                 maybe_get_universal_hash_prefix(
                     UniversalHashAlgorithm.Sha2_256, "a" * 24, 23
@@ -90,7 +90,7 @@ class UniversalNameTests(unittest.TestCase):
             ),
             23,
         )
-        self.assertEquals(
+        self.assertEqual(
             len(
                 maybe_get_universal_hash_prefix(
                     UniversalHashAlgorithm.Sha2_256, "a" * 24, 24
@@ -98,7 +98,7 @@ class UniversalNameTests(unittest.TestCase):
             ),
             0,
         )
-        self.assertEquals(
+        self.assertEqual(
             len(
                 maybe_get_universal_hash_prefix(
                     UniversalHashAlgorithm.Sha2_256, "a" * 48, 32
@@ -106,7 +106,7 @@ class UniversalNameTests(unittest.TestCase):
             ),
             32,
         )
-        self.assertEquals(
+        self.assertEqual(
             len(
                 maybe_get_universal_hash_prefix(
                     UniversalHashAlgorithm.Sha2_256, "a" * 48, 33

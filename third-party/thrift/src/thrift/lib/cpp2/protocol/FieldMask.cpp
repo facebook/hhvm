@@ -59,6 +59,8 @@ Mask reverseMask(Mask mask) {
     case Mask::Type::__EMPTY__:
       folly::throw_exception<std::runtime_error>("Can not reverse empty masks");
   }
+  // This should be never reached.
+  std::terminate();
 }
 
 void clear(const Mask& mask, protocol::Object& obj) {

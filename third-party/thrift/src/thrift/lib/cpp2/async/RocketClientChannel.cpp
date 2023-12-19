@@ -765,7 +765,9 @@ RocketClientChannel::RocketClientChannel(
 }
 
 RocketClientChannel::~RocketClientChannel() {
-  DCHECK(!evb_ || evb_->isInEventBaseThread());
+  if (evb_) {
+    evb_->dcheckIsInEventBaseThread();
+  }
   unsetOnDetachable();
   closeNow();
 }
@@ -1090,13 +1092,16 @@ bool RocketClientChannel::preSendValidation(
 }
 
 ClientChannel::SaturationStatus RocketClientChannel::getSaturationStatus() {
-  DCHECK(evb_ && evb_->isInEventBaseThread());
+  DCHECK(evb_);
+  evb_->dcheckIsInEventBaseThread();
   return ClientChannel::SaturationStatus(
       inflightRequestsAndStreams(), maxInflightRequestsAndStreams_);
 }
 
 void RocketClientChannel::closeNow() {
-  DCHECK(!evb_ || evb_->isInEventBaseThread());
+  if (evb_) {
+    evb_->dcheckIsInEventBaseThread();
+  }
   rocket::RocketClient::closeNow(transport::TTransportException(
       transport::TTransportException::INTERRUPTED, "Client shutdown."));
 }
@@ -1117,7 +1122,9 @@ folly::AsyncTransport* FOLLY_NULLABLE RocketClientChannel::getTransport() {
 }
 
 bool RocketClientChannel::good() {
-  DCHECK(!evb_ || evb_->isInEventBaseThread());
+  if (evb_) {
+    evb_->dcheckIsInEventBaseThread();
+  }
   return isAlive();
 }
 
@@ -1126,7 +1133,9 @@ size_t RocketClientChannel::inflightRequestsAndStreams() const {
 }
 
 void RocketClientChannel::setTimeout(uint32_t timeoutMs) {
-  DCHECK(!evb_ || evb_->isInEventBaseThread());
+  if (evb_) {
+    evb_->dcheckIsInEventBaseThread();
+  }
   if (auto* transport = getTransport()) {
     transport->setSendTimeout(timeoutMs);
   }
@@ -1134,7 +1143,7 @@ void RocketClientChannel::setTimeout(uint32_t timeoutMs) {
 }
 
 void RocketClientChannel::attachEventBase(folly::EventBase* evb) {
-  DCHECK(evb->isInEventBaseThread());
+  evb->dcheckIsInEventBaseThread();
   if (getTransportWrapper()) {
     rocket::RocketClient::attachEventBase(*evb);
   }
@@ -1152,7 +1161,9 @@ void RocketClientChannel::detachEventBase() {
 }
 
 bool RocketClientChannel::isDetachable() {
-  DCHECK(!evb_ || evb_->isInEventBaseThread());
+  if (evb_) {
+    evb_->dcheckIsInEventBaseThread();
+  }
   auto* transport = getTransport();
   return !evb_ || !transport ||
       (rocket::RocketClient::isDetachable() && pendingInteractions_.empty());

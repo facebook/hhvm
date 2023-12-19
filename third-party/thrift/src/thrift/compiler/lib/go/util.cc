@@ -62,18 +62,11 @@ static const std::set<std::string> go_predeclared = {
     "false", "imag",   "iota",    "len",   "make",    "new",  "nil",
     "panic", "print",  "println", "real",  "recover", "true",
 };
-// TODO: remove after migration. These are strings protected in the legacy
-// generator... for no valid reason - they won't conflict with anything.
-static const std::set<std::string> compat_protected = {
-    "Error",
-    "String",
-};
 static const std::set<std::string> go_reserved_words = []() {
   std::set<std::string> set;
   set.insert(go_keywords.cbegin(), go_keywords.cend());
   set.insert(go_types.cbegin(), go_types.cend());
   set.insert(go_predeclared.cbegin(), go_predeclared.cend());
-  set.insert(compat_protected.cbegin(), compat_protected.cend());
   return set;
 }();
 

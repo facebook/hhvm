@@ -1098,5 +1098,29 @@ TYPED_TEST(AsyncFizzBaseTest, TestAlignedRecordReads) {
   EXPECT_GE(len, 1460);
 }
 
+TYPED_TEST(AsyncFizzBaseTest, TestKeyUpdate) {
+  size_t threshold = 20;
+  size_t small_write = 15;
+  size_t big_write = threshold;
+  this->setRekeyAfterWriting(threshold);
+
+  // If we perform an appWrite that exceeds or equals to the threshold,
+  // we initiate a key update
+  EXPECT_CALL(*this, initiateKeyUpdate(KeyUpdateRequest::update_not_requested));
+  this->wroteApplicationBytes(big_write);
+
+  // If the write does not exceed the threshold, we don't initiate a key update
+  EXPECT_CALL(*this, initiateKeyUpdate(KeyUpdateRequest::update_not_requested))
+      .Times(0);
+  this->wroteApplicationBytes(small_write);
+  EXPECT_EQ(this->appByteProcessedUnderKey_, small_write);
+
+  // If multiple appWrites' total bytes exceed the threshold,
+  // we initiate a key update
+  EXPECT_CALL(*this, initiateKeyUpdate(KeyUpdateRequest::update_not_requested));
+  this->wroteApplicationBytes(small_write);
+  EXPECT_EQ(this->appByteProcessedUnderKey_, 0);
+}
+
 } // namespace test
 } // namespace fizz

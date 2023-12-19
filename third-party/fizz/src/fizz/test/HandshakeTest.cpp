@@ -974,6 +974,68 @@ TEST_F(HandshakeTest, FuzzSendKeyUpdate) {
   }
 }
 
+TEST_F(HandshakeTest, ClientInitiateKeyUpdate) {
+  expectSuccess();
+  doHandshake();
+  verifyParameters();
+
+  // Client should perform a key update when bytes written exceeds threshold
+  auto prevClientSec = client_->getState().keyScheduler()->getSecret(
+      AppTrafficSecrets::ClientAppTraffic);
+  size_t rekeyThreshold = 20;
+  client_->setRekeyAfterWriting(rekeyThreshold);
+  auto iobuf = IOBuf::create(rekeyThreshold + 5);
+  iobuf->append(rekeyThreshold + 5);
+  auto writeExceedsThreshold = StringPiece(iobuf->coalesce());
+  expectServerRead(writeExceedsThreshold);
+  clientWrite(writeExceedsThreshold);
+  EXPECT_NE(
+      prevClientSec,
+      client_->getState().keyScheduler()->getSecret(
+          AppTrafficSecrets::ClientAppTraffic));
+
+  // If processed data does not exceed threshold, key update should not happen
+  prevClientSec = client_->getState().keyScheduler()->getSecret(
+      AppTrafficSecrets::ClientAppTraffic);
+  expectServerRead(" ");
+  clientWrite(" ");
+  EXPECT_EQ(
+      prevClientSec,
+      client_->getState().keyScheduler()->getSecret(
+          AppTrafficSecrets::ClientAppTraffic));
+}
+
+TEST_F(HandshakeTest, ServerInitiateKeyUpdate) {
+  expectSuccess();
+  doHandshake();
+  verifyParameters();
+
+  // Server should perform a key update when bytes written exceeds threshold
+  auto prevServerSec = server_->getState().keyScheduler()->getSecret(
+      AppTrafficSecrets::ServerAppTraffic);
+  size_t rekeyThreshold = 20;
+  server_->setRekeyAfterWriting(rekeyThreshold);
+  auto iobuf = IOBuf::create(rekeyThreshold + 5);
+  iobuf->append(rekeyThreshold + 5);
+  auto writeExceedsThreshold = StringPiece(iobuf->coalesce());
+  expectClientRead(writeExceedsThreshold);
+  serverWrite(writeExceedsThreshold);
+  EXPECT_NE(
+      prevServerSec,
+      server_->getState().keyScheduler()->getSecret(
+          AppTrafficSecrets::ServerAppTraffic));
+
+  // If processed data does not exceed threshold, key update should not happen
+  prevServerSec = server_->getState().keyScheduler()->getSecret(
+      AppTrafficSecrets::ServerAppTraffic);
+  expectClientRead(" ");
+  serverWrite(" ");
+  EXPECT_EQ(
+      prevServerSec,
+      server_->getState().keyScheduler()->getSecret(
+          AppTrafficSecrets::ServerAppTraffic));
+}
+
 INSTANTIATE_TEST_SUITE_P(
     SignatureSchemes,
     SigSchemeTest,

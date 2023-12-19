@@ -363,7 +363,7 @@ void AsyncFizzClientT<SM>::writeAppData(
       // it is, then flush them
       pendingHandshakeAppWrites_.push_back(std::move(w));
     } else {
-      fizzClient_.appWrite(std::move(w));
+      performAppWrite(std::move(w));
     }
   }
 }
@@ -508,7 +508,7 @@ AsyncFizzClientT<SM>::handleEarlyReject() {
         if (!earlyDataState_->resendBuffer.empty()) {
           AppWrite resend;
           resend.data = earlyDataState_->resendBuffer.move();
-          fizzClient_.appWrite(std::move(resend));
+          performAppWrite(std::move(resend));
         }
       } else {
         return folly::AsyncSocketException(
@@ -519,6 +519,13 @@ AsyncFizzClientT<SM>::handleEarlyReject() {
     }
   }
   return folly::none;
+}
+
+template <typename SM>
+void AsyncFizzClientT<SM>::performAppWrite(AppWrite w) {
+  auto size = w.data->computeChainDataLength();
+  fizzClient_.appWrite(std::move(w));
+  wroteApplicationBytes(size);
 }
 
 template <typename SM>
@@ -536,7 +543,7 @@ void AsyncFizzClientT<SM>::ActionMoveVisitor::operator()(
   while (!pendingHandshakeAppWrites.empty()) {
     auto w = std::move(pendingHandshakeAppWrites.front());
     pendingHandshakeAppWrites.pop_front();
-    client_.fizzClient_.appWrite(std::move(w));
+    client_.performAppWrite(std::move(w));
   }
 
   if (client_.earlyDataState_) {
@@ -555,7 +562,7 @@ void AsyncFizzClientT<SM>::ActionMoveVisitor::operator()(
     while (!client_.earlyDataState_->pendingAppWrites.empty()) {
       auto w = std::move(client_.earlyDataState_->pendingAppWrites.front());
       client_.earlyDataState_->pendingAppWrites.pop_front();
-      client_.fizzClient_.appWrite(std::move(w));
+      client_.performAppWrite(std::move(w));
     }
     client_.earlyDataState_.clear();
   }

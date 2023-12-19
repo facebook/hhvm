@@ -220,7 +220,9 @@ void AsyncFizzServerT<SM>::writeAppData(
   write.data = std::move(buf);
   write.flags = flags;
   write.aeadOptions = writeAeadOptions_;
+  auto size = write.data->computeChainDataLength();
   fizzServer_.appWrite(std::move(write));
+  wroteApplicationBytes(size);
 }
 
 template <typename SM>

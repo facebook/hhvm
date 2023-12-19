@@ -198,6 +198,9 @@ class AsyncFizzClientT : public AsyncFizzBase,
 
   folly::Optional<folly::AsyncSocketException> handleEarlyReject();
 
+  // Helper function to perform appWrite and check for key update.
+  void performAppWrite(AppWrite w);
+
   class ActionMoveVisitor {
    public:
     explicit ActionMoveVisitor(AsyncFizzClientT<SM>& client)

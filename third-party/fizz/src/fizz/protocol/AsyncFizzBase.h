@@ -323,6 +323,14 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
     }
   }
 
+  /**
+   * If set, after AsyncFizzBase has been used to write `bytes` worth of data,
+   * AsyncFizzBase will automatically initiate a key_update
+   */
+  void setRekeyAfterWriting(size_t bytes) {
+    keyUpdateThreshold_ = bytes;
+  }
+
   /*
    * Gets the client random associated with this connection. The CR can be
    * used as a transport agnostic identifier (for instance, for NSS keylogging)
@@ -459,9 +467,25 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
     }
   }
 
+  /**
+   * Called by derived classes after an AppWrite of `bytesWritten` bytes is
+   * performed.
+   */
+  void wroteApplicationBytes(size_t bytesWritten) {
+    appByteProcessedUnderKey_ += bytesWritten;
+    if (keyUpdateThreshold_ &&
+        appByteProcessedUnderKey_ >= keyUpdateThreshold_) {
+      appByteProcessedUnderKey_ = 0;
+      initiateKeyUpdate(KeyUpdateRequest::update_not_requested);
+    }
+  }
+
   folly::IOBufQueue transportReadBuf_{folly::IOBufQueue::cacheChainLength()};
   Aead::AeadOptions readAeadOptions_;
   Aead::AeadOptions writeAeadOptions_;
+
+  size_t appByteProcessedUnderKey_{0};
+  size_t keyUpdateThreshold_{0};
 
  private:
   class QueuedWriteRequest

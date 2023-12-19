@@ -101,7 +101,8 @@ type class_shell_change = {
   support_dynamic_type_change: BoolChange.t option;
   module_change: unit ValueChange.t option;
   xhp_enum_values_change: bool;
-  user_attributes_changes: unit NamedItemsListChange.t option;
+  user_attributes_changes:
+    unit NamedItemsListChange.t NamedItemsListChange.t option;
   enum_type_change: enum_type_change ValueChange.t option;
 }
 [@@deriving eq, show]

@@ -724,7 +724,17 @@ let diff_enum_type_options = diff_options ~diff:diff_enum_types
 let user_attribute_name_value { Typing_defs.ua_name = (_, name); ua_params } =
   (name, ua_params)
 
-let equal_user_attr_params = [%derive.eq: Typing_defs.user_attribute_param list]
+let diff_user_attribute_params
+    (attrs1 : Typing_defs_core.user_attribute_param list)
+    (attrs2 : Typing_defs_core.user_attribute_param list) :
+    unit NamedItemsListChange.t option =
+  diff_value_lists
+    attrs1
+    attrs2
+    ~equal:Typing_defs.equal_user_attribute_param
+    ~get_name_value:(fun param ->
+      (Typing_defs_core.user_attribute_param_to_string param, param))
+    ~diff:(diff_of_equal Typing_defs.equal_user_attribute_param)
 
 let diff_class_shells (c1 : shallow_class) (c2 : shallow_class) :
     class_shell_change =
@@ -757,7 +767,7 @@ let diff_class_shells (c1 : shallow_class) (c2 : shallow_class) :
         c2.sc_user_attributes
         ~equal:Typing_defs.equal_user_attribute
         ~get_name_value:user_attribute_name_value
-        ~diff:(diff_of_equal equal_user_attr_params);
+        ~diff:diff_user_attribute_params;
     enum_type_change = diff_enum_type_options c1.sc_enum_type c2.sc_enum_type;
   }
 

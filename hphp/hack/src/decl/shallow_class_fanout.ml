@@ -415,6 +415,103 @@ let get_parent_changes_fanout
            added_parents
            fanout_acc)
 
+let get_sealed_fanout
+    ctx
+    (changed_class : changed_class)
+    (attribute_change : unit NamedItemsListChange.t ValueChange.t)
+    (fanout_acc : Fanout.t) : Fanout.t =
+  let { name; dep; descendant_deps = _; diff = _ } = changed_class in
+  let { Fanout.changed; to_recheck; to_recheck_if_errors } = fanout_acc in
+  let changed = DepSet.add changed dep in
+  let (to_recheck, to_recheck_if_errors) =
+    match attribute_change with
+    | ValueChange.Added ->
+      let to_recheck =
+        Typing_deps.get_ideps
+          (Provider_context.get_deps_mode ctx)
+          (Dep.Extends name)
+        |> DepSet.union to_recheck
+      in
+      (to_recheck, to_recheck_if_errors)
+    | ValueChange.Removed ->
+      let to_recheck_if_errors =
+        Typing_deps.get_ideps
+          (Provider_context.get_deps_mode ctx)
+          (Dep.Extends name)
+        |> DepSet.union to_recheck_if_errors
+      in
+      (to_recheck, to_recheck_if_errors)
+    | ValueChange.Modified allow_list_changes ->
+      let { NamedItemsListChange.per_name_changes; order_change = _ } =
+        allow_list_changes
+      in
+      SMap.fold
+        per_name_changes
+        ~init:(to_recheck, to_recheck_if_errors)
+        ~f:(fun child_name change (to_recheck, to_recheck_if_errors) ->
+          let child_dep = Dep.make (Dep.Type child_name) in
+          match change with
+          | ValueChange.Added ->
+            let to_recheck_if_errors =
+              DepSet.add to_recheck_if_errors child_dep
+            in
+            (to_recheck, to_recheck_if_errors)
+          | ValueChange.Removed
+          | ValueChange.Modified () ->
+            let to_recheck = DepSet.add to_recheck child_dep in
+            (to_recheck, to_recheck_if_errors))
+  in
+  { Fanout.changed; to_recheck; to_recheck_if_errors }
+
+let get_user_attribute_fanout
+    ctx changed_class (attribute_name : string) attribute_change fanout_acc :
+    FM.t =
+  if String.equal attribute_name Naming_special_names.UserAttributes.uaSealed
+  then
+    FM.Fanout (get_sealed_fanout ctx changed_class attribute_change fanout_acc)
+  else if
+    List.mem
+      [
+        Naming_special_names.UserAttributes.uaDocs;
+        Naming_special_names.UserAttributes.uaAutocompleteSortText;
+      ]
+      attribute_name
+      ~equal:String.equal
+  then
+    FM.Fanout fanout_acc
+  else
+    match
+      SMap.find_opt Naming_special_names.UserAttributes.as_map attribute_name
+    with
+    | Some _ -> FM.Max_fanout
+    | None -> FM.Fanout fanout_acc
+
+let get_user_attributes_fanout
+    ctx
+    changed_class
+    (attribute_changes :
+      unit NamedItemsListChange.t NamedItemsListChange.t option)
+    (fanout_acc : Fanout.t) : FM.t =
+  if
+    TypecheckerOptions.optimized_attribute_fanout
+      (Provider_context.get_tcopt ctx)
+  then
+    match attribute_changes with
+    | None -> FM.Fanout fanout_acc
+    | Some attribute_changes ->
+      let { NamedItemsListChange.per_name_changes; order_change = _ } =
+        attribute_changes
+      in
+      SMap.fold
+        per_name_changes
+        ~init:(FM.Fanout fanout_acc)
+        ~f:(fun attr_name attr_change fanout_acc ->
+          let open FM.Infix in
+          fanout_acc
+          >>= get_user_attribute_fanout ctx changed_class attr_name attr_change)
+  else
+    FM.Max_fanout
+
 let all_or_nothing_bool (has_changed : bool) fanout_acc =
   if has_changed then
     FM.Max_fanout
@@ -462,13 +559,13 @@ let get_shell_change_fanout
   >>= all_or_nothing support_dynamic_type_change
   >>= all_or_nothing module_change
   >>= all_or_nothing enum_type_change
-  >>= all_or_nothing user_attributes_changes
   >>= all_or_nothing_bool xhp_enum_values_change
   >>= get_parent_changes_fanout
         ctx
         changed_class
         old_classish_kind
         parent_changes
+  >>= get_user_attributes_fanout ctx changed_class user_attributes_changes
   >>| get_minor_change_fanout ~ctx changed_class member_diff
 
 let get_major_change_fanout

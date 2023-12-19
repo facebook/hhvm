@@ -176,6 +176,13 @@ type user_attribute_param =
   | Int of string
 [@@deriving eq, hash, show]
 
+let user_attribute_param_to_string = function
+  | Classname s
+  | EnumClassLabel s
+  | String s
+  | Int s ->
+    s
+
 type user_attribute = {
   ua_name: pos_id;
   ua_params: user_attribute_param list;

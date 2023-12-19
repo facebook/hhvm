@@ -150,6 +150,8 @@ type user_attribute_param =
   | Int of string
 [@@deriving eq, hash, show]
 
+val user_attribute_param_to_string : user_attribute_param -> string
+
 type user_attribute = {
   ua_name: pos_id;
   ua_params: user_attribute_param list;

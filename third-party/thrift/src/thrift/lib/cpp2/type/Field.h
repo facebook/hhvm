@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include <optional>
-
 #include <thrift/lib/cpp2/FieldRef.h>
 
 namespace apache {
@@ -31,12 +29,6 @@ template <typename T>
 struct is_optional_type<optional_field_ref<T>> : std::true_type {};
 template <typename T>
 struct is_optional_type<optional_boxed_field_ref<T>> : std::true_type {};
-template <typename T>
-struct is_optional_type<std::optional<T>> {
-  // FIXME: We added static_assert to check whether this specialization is
-  // actually used somewhere. If it's not used anywhere, we should remove it.
-  static_assert(sizeof(T) < 0, "");
-};
 
 template <typename U, typename R = void>
 using if_opt_type =

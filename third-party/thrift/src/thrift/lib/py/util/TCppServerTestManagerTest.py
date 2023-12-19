@@ -123,14 +123,14 @@ class TestTCppServerTestManager(BaseTest):
         handler = self.Handler({7: "hello"})
         with TCppServerTestManager(handler) as server:
             data = self._perform_getDataById(server, 7)
-        self.assertEquals(data, "hello")
+        self.assertEqual(data, "hello")
 
     def test_with_processor(self):
         handler = self.Handler({7: "hello"})
         processor = TestService.Processor(handler)
         with TCppServerTestManager(processor) as server:
             data = self._perform_getDataById(server, 7)
-        self.assertEquals(data, "hello")
+        self.assertEqual(data, "hello")
 
     def test_with_server(self):
         handler = self.Handler({7: "hello"})
@@ -138,7 +138,7 @@ class TestTCppServerTestManager(BaseTest):
         server = TCppServerTestManager.make_server(processor)
         with TCppServerTestManager(server) as server:
             data = self._perform_getDataById(server, 7)
-        self.assertEquals(data, "hello")
+        self.assertEqual(data, "hello")
 
     def test_throw_populates_headers(self):
         handler = self.Handler({7: "hello"})
@@ -157,7 +157,7 @@ class TestTCppServerTestManager(BaseTest):
                 except UserException2:
                     pass
 
-                self.assertEquals(b"UserException2", transport.get_headers()[b"uex"])
+                self.assertEqual(b"UserException2", transport.get_headers()[b"uex"])
                 self.assertIn(b"Some message", transport.get_headers()[b"uexw"])
 
                 try:
@@ -166,7 +166,7 @@ class TestTCppServerTestManager(BaseTest):
                 except TApplicationException:
                     pass
 
-                self.assertEquals(
+                self.assertEqual(
                     b"TApplicationException", transport.get_headers()[b"uex"]
                 )
                 self.assertIn(b"a message!", transport.get_headers()[b"uexw"])
@@ -201,10 +201,10 @@ class TestTCppServerPriorities(BaseTest):
         processor = PriorityService.Processor(handler)
 
         # Did we parse annotations correctly
-        self.assertEquals(processor.get_priority("bestEffort"), TPriority.BEST_EFFORT)
-        self.assertEquals(processor.get_priority("normal"), TPriority.NORMAL)
-        self.assertEquals(processor.get_priority("important"), TPriority.IMPORTANT)
-        self.assertEquals(processor.get_priority("unspecified"), TPriority.HIGH)
+        self.assertEqual(processor.get_priority("bestEffort"), TPriority.BEST_EFFORT)
+        self.assertEqual(processor.get_priority("normal"), TPriority.NORMAL)
+        self.assertEqual(processor.get_priority("important"), TPriority.IMPORTANT)
+        self.assertEqual(processor.get_priority("unspecified"), TPriority.HIGH)
 
     def test_processor_child_priorities(self):
         handler = self.SubPriorityHandler()
@@ -212,14 +212,14 @@ class TestTCppServerPriorities(BaseTest):
 
         # Parent priorities present in extended services
         # Make sure parent service priorities don't leak to child services
-        self.assertEquals(processor.get_priority("bestEffort"), TPriority.BEST_EFFORT)
-        self.assertEquals(processor.get_priority("normal"), TPriority.NORMAL)
-        self.assertEquals(processor.get_priority("important"), TPriority.IMPORTANT)
-        self.assertEquals(processor.get_priority("unspecified"), TPriority.HIGH)
+        self.assertEqual(processor.get_priority("bestEffort"), TPriority.BEST_EFFORT)
+        self.assertEqual(processor.get_priority("normal"), TPriority.NORMAL)
+        self.assertEqual(processor.get_priority("important"), TPriority.IMPORTANT)
+        self.assertEqual(processor.get_priority("unspecified"), TPriority.HIGH)
 
         # Child methods
-        self.assertEquals(processor.get_priority("child_unspecified"), TPriority.NORMAL)
-        self.assertEquals(
+        self.assertEqual(processor.get_priority("child_unspecified"), TPriority.NORMAL)
+        self.assertEqual(
             processor.get_priority("child_highImportant"), TPriority.HIGH_IMPORTANT
         )
 

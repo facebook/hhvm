@@ -278,7 +278,7 @@ Proxy<RouterInfo>::getConfigLocked() const {
 template <class RouterInfo>
 std::shared_ptr<ProxyConfig<RouterInfo>> Proxy<RouterInfo>::swapConfig(
     std::shared_ptr<ProxyConfig<RouterInfo>> newConfig) {
-  folly::SharedMutex::WriteHolder lg(configLock_);
+  std::unique_lock lg(configLock_);
   auto old = std::move(config_);
   config_ = std::move(newConfig);
   return old;

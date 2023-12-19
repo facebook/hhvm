@@ -959,7 +959,7 @@ void AsyncMcServer::join() {
 }
 
 void AsyncMcServer::setTicketKeySeeds(wangle::TLSTicketKeySeeds seeds) {
-  folly::SharedMutex::WriteHolder writeGuard(tlsTicketKeySeedsLock_);
+  std::unique_lock writeGuard(tlsTicketKeySeedsLock_);
   tlsTicketKeySeeds_ = std::move(seeds);
 }
 

@@ -21,7 +21,7 @@ struct CallbackPool<Args...>::CallbackHandleImpl {
   CallbackHandleImpl(const CallbackHandleImpl&) = delete;
   CallbackHandleImpl& operator=(const CallbackHandleImpl&) = delete;
   ~CallbackHandleImpl() {
-    folly::SharedMutex::WriteHolder lck(data_->callbackLock);
+    std::unique_lock lck(data_->callbackLock);
     data_->callbacks.erase(this);
   }
 
@@ -33,7 +33,7 @@ struct CallbackPool<Args...>::CallbackHandleImpl {
 
   CallbackHandleImpl(std::shared_ptr<Data> data, OnUpdateFunc func)
       : data_(std::move(data)), func_(std::move(func)) {
-    folly::SharedMutex::WriteHolder lck(data_->callbackLock);
+    std::unique_lock lck(data_->callbackLock);
     data_->callbacks.insert(this);
   }
 };

@@ -51,7 +51,7 @@ Data Observable<Data>::get() {
 
 template <class Data>
 void Observable<Data>::set(Data data) {
-  folly::SharedMutex::WriteHolder lck(dataLock_);
+  std::unique_lock lck(dataLock_);
   auto old = std::move(data_);
   data_ = std::move(data);
   // no copy here, because old and data are passed by const reference

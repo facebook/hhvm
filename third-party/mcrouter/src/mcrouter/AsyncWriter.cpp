@@ -35,7 +35,7 @@ AsyncWriter::~AsyncWriter() {
 
 void AsyncWriter::stop() noexcept {
   {
-    folly::SharedMutex::WriteHolder lock(runLock_);
+    std::unique_lock lock(runLock_);
     if (stopped_) {
       return;
     }
@@ -53,7 +53,7 @@ void AsyncWriter::stop() noexcept {
 }
 
 bool AsyncWriter::start(folly::StringPiece threadName) {
-  folly::SharedMutex::WriteHolder lock(runLock_);
+  std::unique_lock lock(runLock_);
   if (thread_.joinable() || stopped_) {
     return false;
   }
@@ -110,7 +110,7 @@ bool AsyncWriter::run(std::function<void()> f) {
 }
 
 void AsyncWriter::increaseMaxQueueSize(size_t add) {
-  folly::SharedMutex::WriteHolder lock(runLock_);
+  std::unique_lock lock(runLock_);
   // Don't touch maxQueueSize_ if it's already unlimited (zero).
   if (maxQueueSize_ != 0) {
     maxQueueSize_ += add;
@@ -118,7 +118,7 @@ void AsyncWriter::increaseMaxQueueSize(size_t add) {
 }
 
 void AsyncWriter::makeQueueSizeUnlimited() {
-  folly::SharedMutex::WriteHolder lock(runLock_);
+  std::unique_lock lock(runLock_);
   maxQueueSize_ = 0;
 }
 

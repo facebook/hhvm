@@ -88,24 +88,24 @@ bool McSSLUtil::verifySSLWithDefaultBehavior(
 void McSSLUtil::setApplicationKtlsFunctions(
     SSLToKtlsFunction func,
     KtlsStatsFunction statsFunc) {
-  folly::SharedMutex::WriteHolder wh(getMutex());
+  std::unique_lock wh(getMutex());
   getKtlsFuncRef() = std::move(func);
   getKtlsStatsFuncRef() = std::move(statsFunc);
 }
 
 void McSSLUtil::setApplicationSSLVerifier(SSLVerifyFunction func) {
-  folly::SharedMutex::WriteHolder wh(getMutex());
+  std::unique_lock wh(getMutex());
   getAppFuncRef() = std::move(func);
 }
 
 void McSSLUtil::setClientIdentityHook(apache::thrift::ClientIdentityHook func) {
-  folly::SharedMutex::WriteHolder wh(getMutex());
+  std::unique_lock wh(getMutex());
   getClientIdentityHookFuncRef() = std::move(func);
 }
 
 void McSSLUtil::setDropCertificateX509PayloadFunction(
     DropCertificateX509PayloadFunction func) {
-  folly::SharedMutex::WriteHolder wh(getMutex());
+  std::unique_lock wh(getMutex());
   getDropCertificateX509PayloadFuncRef() = std::move(func);
 }
 

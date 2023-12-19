@@ -36,7 +36,7 @@ class ListTests(unittest.TestCase):
     def test_negative_indexes(self) -> None:
         length = len(int_list)
         for i in range(length):
-            self.assertEquals(int_list[i], int_list[i - length])
+            self.assertEqual(int_list[i], int_list[i - length])
 
         with self.assertRaises(IndexError):
             int_list[-length - 1]
@@ -61,13 +61,13 @@ class ListTests(unittest.TestCase):
         new_list = int_list + other_list
         self.assertIsInstance(new_list, list)
         # Insure the items from both lists are in the new_list
-        self.assertEquals(new_list, list(itertools.chain(int_list, other_list)))
+        self.assertEqual(new_list, list(itertools.chain(int_list, other_list)))
 
     def test_list_radd(self) -> None:
         other_list = [99, 88, 77, 66, 55]
         new_list = other_list + int_list
         self.assertIsInstance(new_list, list)
-        self.assertEquals(new_list, list(itertools.chain(other_list, int_list)))
+        self.assertEqual(new_list, list(itertools.chain(other_list, int_list)))
         # pyre-fixme[58]: special Thrift list supports concat with a tuple
         new_list = tuple(other_list) + int_list
         self.assertIsInstance(new_list, tuple)

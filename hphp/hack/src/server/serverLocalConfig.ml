@@ -361,8 +361,8 @@ let default =
     log_events_with_sandcastle_info = false;
     lsp_sticky_quarantine = false;
     lsp_cancellation = false;
-    lsp_autocomplete_skip_hierarchy_checks = false;
-    lsp_prefetch_decls = false;
+    lsp_autocomplete_skip_hierarchy_checks = true;
+    lsp_prefetch_decls = true;
     autocomplete_sort_text = false;
   }
 

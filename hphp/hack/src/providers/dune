@@ -70,7 +70,7 @@
 
 (library
  (name decl_provider)
- (modules decl_provider)
+ (modules decl_provider decl_provider_prefetch)
  (libraries
   counters
   decl_counters

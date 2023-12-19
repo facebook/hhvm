@@ -43,15 +43,42 @@ module Cache =
 
 let declare_folded_class (ctx : Provider_context.t) (name : type_key) :
     Decl_defs.decl_class_type * Decl_store.class_members option =
+  let f () =
+    match
+      Errors.run_in_decl_mode (fun () ->
+          Decl_folded_class.class_decl_if_missing ~sh:SharedMem.Uses ctx name)
+    with
+    | None -> Decl_defs.raise_decl_not_found None name
+    | Some decl_and_members -> decl_and_members
+  in
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> failwith "invalid"
-  | _ ->
-    (match
-       Errors.run_in_decl_mode (fun () ->
-           Decl_folded_class.class_decl_if_missing ~sh:SharedMem.Uses ctx name)
-     with
-    | None -> Decl_defs.raise_decl_not_found None name
-    | Some decl_and_members -> decl_and_members)
+  | Provider_backend.Local_memory local_memory
+    when TypecheckerOptions.tco_prefetch_decls (Provider_context.get_tcopt ctx)
+         && Option.is_none
+              (Provider_backend.Decl_cache.find
+                 local_memory.Provider_backend.decl_cache
+                 ~key:(Provider_backend.Decl_cache_entry.Class_decl name)) ->
+    let open Provider_backend in
+    Shallow_decl_cache.without_collections
+      local_memory.shallow_decl_cache
+      ~f:(fun () ->
+        Decl_cache.without_collections local_memory.decl_cache ~f:(fun () ->
+            let to_decl =
+              Decl_provider_prefetch.
+                {
+                  types_to_fold = [name];
+                  types_to_ty = [];
+                  funs = [];
+                  gconsts = [];
+                  modules = [];
+                }
+            in
+            let (_telemetry : Decl_provider_prefetch.telemetry) =
+              Decl_provider_prefetch.prefetch_decls ~ctx ~local_memory to_decl
+            in
+            f ()))
+  | _ -> f ()
 
 let lookup_or_populate_class_cache class_name populate =
   match Cache.get class_name with

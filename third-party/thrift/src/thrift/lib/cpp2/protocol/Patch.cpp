@@ -21,6 +21,7 @@
 #include <stdexcept>
 
 #include <fmt/core.h>
+#include <folly/Lazy.h>
 #include <folly/MapUtil.h>
 #include <folly/io/IOBufQueue.h>
 #include <folly/lang/Exception.h>
@@ -582,12 +583,28 @@ void insertFieldsToMask(
       insertNextMask(masks, value, id, id, recursive, view, getIncludesObjRef);
     }
   } else if (const auto* map = patchFields.if_map()) {
+    struct ValueIndices {
+      ValueIndex readValues;
+      ValueIndex writeValues;
+    };
+    auto indices = folly::lazy([&] {
+      return ValueIndices{
+          .readValues = buildValueIndex(masks.read),
+          .writeValues = buildValueIndex(masks.write),
+      };
+    });
+
+    auto getMapId = [](const ValueIndex& index, const Value& newKey) {
+      if (auto it = index.find(std::cref(newKey)); it != index.end()) {
+        return MapId{reinterpret_cast<int64_t>(&(it->get()))};
+      }
+      return MapId{reinterpret_cast<int64_t>(&newKey)};
+    };
     for (const auto& [key, value] : *map) {
       if (view) {
-        auto readId =
-            static_cast<int64_t>(findMapIdByValueAddress(masks.read, key));
+        auto readId = static_cast<int64_t>(getMapId(indices().readValues, key));
         auto writeId =
-            static_cast<int64_t>(findMapIdByValueAddress(masks.write, key));
+            static_cast<int64_t>(getMapId(indices().writeValues, key));
         insertNextMask(
             masks, value, readId, writeId, recursive, view, getIncludesMapRef);
       } else {

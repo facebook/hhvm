@@ -21,6 +21,7 @@
 #include <string_view>
 
 #include <folly/CppAttributes.h>
+#include <folly/container/F14Set.h>
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/thrift/gen-cpp2/field_mask_constants.h>
 #include <thrift/lib/thrift/gen-cpp2/field_mask_types.h>
@@ -148,4 +149,14 @@ std::string getStringFromValue(const Value& v);
 // If it doesn't exist, it returns the new MapId (pointer to the key).
 // Assumes the map mask uses pointers to keys.
 MapId findMapIdByValueAddress(const Mask& mask, const Value& key);
+
+using ValueIndex = folly::F14FastSet<
+    std::reference_wrapper<const Value>,
+    std::hash<Value>,
+    std::equal_to<Value>>;
+
+// Indexes the values referred to by the given mask by their value. The address
+// of the value is preserved by the index.
+ValueIndex buildValueIndex(const Mask& mask);
+
 } // namespace apache::thrift::protocol::detail

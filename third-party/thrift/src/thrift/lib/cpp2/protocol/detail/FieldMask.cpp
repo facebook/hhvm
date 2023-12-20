@@ -128,4 +128,19 @@ MapId findMapIdByValueAddress(const Mask& mask, const Value& newKey) {
       });
   return it == mapIdToMask.end() ? mapId : MapId{it->first};
 }
+
+ValueIndex buildValueIndex(const Mask& mask) {
+  ValueIndex index;
+  if (!(mask.includes_map_ref() || mask.excludes_map_ref())) {
+    return index;
+  }
+
+  const auto& mapIdToMask = mask.includes_map_ref() ? *mask.includes_map_ref()
+                                                    : *mask.excludes_map_ref();
+  index.reserve(mapIdToMask.size());
+  for (auto& [key, _] : mapIdToMask) {
+    index.insert(std::cref(*reinterpret_cast<Value*>(key)));
+  }
+  return index;
+}
 } // namespace apache::thrift::protocol::detail

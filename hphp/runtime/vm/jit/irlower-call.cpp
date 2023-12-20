@@ -554,22 +554,49 @@ void cgLdGenericsFromRClsMeth(IRLS& env, const IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
-  Vreg checkModulesEquality(Vout& v,IRLS& env, const IRInstruction* inst) {
-    auto const unit = v.makeReg();
+  Vreg checkModulesEquality(Vout& v, IRLS& env, const IRInstruction* inst) {
+    auto const sf = v.makeReg();
+    auto const callerModuleName = inst->extra<FuncData>()->func->moduleName();
+
     if (inst->src(0)->isA(TFunc)) {
       auto const func = srcLoc(env, inst, 0).reg();
-      v << load{func[Func::unitOff()], unit};
+      auto const targetModule = v.makeReg();
+
+      if (RO::RepoAuthoritative) {
+        auto const shared = v.makeReg();
+        auto const sfExtra = v.makeReg();
+        v << load{func[Func::sharedOff()], shared};
+        v << testlim{(int32_t)Func::hasExtendedSharedDataMask(),
+                     shared[Func::sharedAllFlags()], sfExtra};
+        cond(v, CC_Z, sfExtra, targetModule,
+          [&] (Vout& v) {
+            auto const tm1 = v.makeReg();
+            auto const unit = v.makeReg();
+            v << load{func[Func::unitOff()], unit};
+            v << load{unit[Unit::moduleNameOff()], tm1};
+            return tm1;
+          },
+          [&] (Vout& v) {
+            auto const tm2 = v.makeReg();
+            v << load{shared[Func::extendedSharedOriginalModuleName()], tm2};
+            return tm2;
+          });
+      } else {
+        auto const unit = v.makeReg();
+        v << load{func[Func::unitOff()], unit};
+        v << load{unit[Unit::moduleNameOff()], targetModule};
+      };
+      emitCmpLowPtr(v, sf, callerModuleName, targetModule);
     } else {
       assertx(inst->src(0)->isA(TCls));
+      auto const unit = v.makeReg();
       auto const cls = srcLoc(env, inst, 0).reg();
       auto const preclass = v.makeReg();
       v << load{cls[Class::preClassOff()], preclass};
       v << load{preclass[PreClass::unitOffset()], unit};
+      emitCmpLowPtr(v, sf, callerModuleName, unit[Unit::moduleNameOff()]);
     }
 
-    auto const callerModuleName = inst->extra<FuncData>()->func->moduleName();
-    auto const sf = v.makeReg();
-    emitCmpLowPtr(v, sf, callerModuleName, unit[Unit::moduleNameOff()]);
     return sf;
   }
 } // namespace

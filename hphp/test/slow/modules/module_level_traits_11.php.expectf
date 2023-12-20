@@ -1,0 +1,6 @@
+I am foo in C
+Accessing internal method C::bar in module MLT_A from module MLT_B is not allowed @ %s/module_level_traits_11.php:34
+I am static foo in C
+Accessing internal method C::sbar in module MLT_A from module MLT_B is not allowed @ %s/module_level_traits_11.php:40
+
+

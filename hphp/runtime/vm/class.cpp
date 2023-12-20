@@ -2232,11 +2232,12 @@ void Class::setMethods() {
         continue;
       }
     }
-    // Public traits cannot define internal methods.  Enforcing this property
-    // is especially important for traits labelled <<__ModuleLevelTraits>>
-    // (which are enforced to be public), as the jit would not handle correctly
-    // a call into an internal method of a <<__ModuleLevelTrait>>
-    if (isPublicTrait && method->isInternal()) {
+    // Public traits cannot define internal methods, as the jit would not
+    // handle correctly a call into an internal method, unless they have
+    // the <<__ModuleLevelTrait>> attribute.
+    if (isPublicTrait &&
+        (m_preClass->userAttributes().count(s___ModuleLevelTrait.get()) == 0)
+        && method->isInternal()) {
       raise_error(
         "Trait %s is public and therefore cannot define the internal method %s",
         m_preClass->name()->data(), method->name()->data());

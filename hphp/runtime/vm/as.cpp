@@ -3321,7 +3321,8 @@ void parse_default_value(FuncEmitter::ParamInfo& param, const StringData* str) {
   TypedValue tv;
   tvWriteUninit(tv);
   if (str->size() == 4) {
-    if (!istrcmp("null", str->data())) {
+    // match NULL or null without case-collision logging
+    if (!strcmp("NULL", str->data()) || !istrcmp("null", str->data())) {
       tvWriteNull(tv);
     } else if (!istrcmp("true", str->data())) {
       tv = make_tv<KindOfBoolean>(true);

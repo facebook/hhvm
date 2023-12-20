@@ -4408,6 +4408,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "saved_state_rollouts_ffi"
+version = "0.0.0"
+dependencies = [
+ "ocamlrep_ocamlpool",
+ "oxidized",
+]
+
+[[package]]
 name = "scheduled-thread-pool"
 version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"

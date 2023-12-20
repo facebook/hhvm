@@ -421,10 +421,7 @@ let load ~silent options : t * ServerLocalConfig.t =
   in
   let local_config =
     let current_rolled_out_flag_idx =
-      int_
-        "current_saved_state_rollout_flag_index"
-        ~default:Int.min_value
-        config
+      int_ "current_saved_state_rollout_flag_index" ~default:0 config
     in
     let deactivate_saved_state_rollout =
       bool_ "deactivate_saved_state_rollout" ~default:false config

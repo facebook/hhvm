@@ -209,7 +209,7 @@ impl HhConfig {
     ) -> Result<Self> {
         let current_rolled_out_flag_idx = hhconfig
             .get_int("current_saved_state_rollout_flag_index")
-            .unwrap_or(Ok(isize::MIN))?;
+            .unwrap_or(Ok(0))?;
         let deactivate_saved_state_rollout = hhconfig
             .get_bool("deactivate_saved_state_rollout")
             .unwrap_or(Ok(false))?;

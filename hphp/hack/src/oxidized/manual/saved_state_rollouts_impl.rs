@@ -11,7 +11,7 @@ use crate::gen::saved_state_rollouts::SavedStateRollouts;
 
 impl Default for SavedStateRollouts {
     fn default() -> Self {
-        Self::make(isize::MIN, false, None, |_| Ok(false)).expect("default had errors")
+        Self::make(0, false, None, |_| Ok(false)).expect("default had errors")
     }
 }
 
@@ -45,6 +45,19 @@ impl Flag {
             Self::OptimizedParentFanout => 5,
             Self::OptimizedAttributeFanout => 6,
             Self::NewNamingTable => 7,
+        }
+    }
+
+    pub fn get_current_rollout_flag(current_rollout_flag_index: isize) -> Option<Self> {
+        match current_rollout_flag_index {
+            0 => Some(Self::DummyOne),
+            1 => Some(Self::DummyTwo),
+            2 => Some(Self::DummyThree),
+            4 => Some(Self::OptimizedMemberFanout),
+            5 => Some(Self::OptimizedParentFanout),
+            6 => Some(Self::OptimizedAttributeFanout),
+            7 => Some(Self::NewNamingTable),
+            _ => None,
         }
     }
 

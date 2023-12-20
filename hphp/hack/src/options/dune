@@ -14,10 +14,27 @@
 (library
   (name saved_state_rollouts)
   (wrapped false)
-  (modules saved_state_rollouts)
-  (libraries utils_core)
+  (modules
+   saved_state_rollouts)
+  (libraries
+   saved_state_rollouts_rust
+   utils_core)
   (preprocess
     (pps ppx_deriving.std)))
+
+(library
+ (name saved_state_rollouts_rust)
+ (modules)
+ (wrapped false)
+ (foreign_archives saved_state_rollouts_ffi))
+
+(rule
+ (targets libsaved_state_rollouts_ffi.a)
+ (deps
+  (source_tree %{workspace_root}/hack/src))
+ (locks /cargo)
+ (action
+  (run %{workspace_root}/hack/scripts/invoke_cargo.sh saved_state_rollouts_ffi saved_state_rollouts_ffi)))
 
 (executable
  (name discover)

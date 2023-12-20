@@ -47,6 +47,7 @@ members = [
     "naming/cargo/naming_attributes",
     "naming/names_rust",
     "ocamlrep_marshal/cargo/ocamlrep_marshal_ffi_bindings",
+    "options",
     "oxidized",
     "oxidized_by_ref",
     "package/cargo",

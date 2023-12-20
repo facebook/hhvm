@@ -17,7 +17,9 @@
 (library
  (name typing_deps)
  (wrapped false)
- (modules typing_deps typing_deps_mode)
+ (modules
+  typing_deps
+  typing_deps_mode)
  (libraries
   collections
   decl_reference

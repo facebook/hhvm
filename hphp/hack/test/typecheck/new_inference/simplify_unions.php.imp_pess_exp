@@ -1,5 +1,5 @@
 File "simplify_unions.php", line 10, characters 3-13:
-  ~(<expr#1> as vec<C> | vec<nothing>)
+  ~(<expr#2> as vec<C> | vec<nothing>)
 File "simplify_unions.php", line 10, characters 3-13:[2]
   ~~vec<nothing>
 No errors

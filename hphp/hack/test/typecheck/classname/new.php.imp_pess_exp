@@ -9,7 +9,7 @@ File "new.php", line 30, characters 3-16:
 File "new.php", line 30, characters 3-16:[2]
   dynamic
 File "new.php", line 47, characters 5-18:
-  ~<expr#1> as T
+  ~<expr#5> as T
 File "new.php", line 17, characters 15-20:
 Can't use `new` on `classname<I>`; `__construct` arguments are not guaranteed to be consistent in child classes (Typing[4060])
   File "new.php", line 16, characters 25-25:

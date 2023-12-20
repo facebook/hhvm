@@ -1,0 +1,8 @@
+File "invariant-dep-1.php", line 52, characters 12-36:
+Invalid return type (Typing[4110])
+  File "invariant-dep-1.php", line 51, characters 6-7:
+  Expected `T0`
+  File "invariant-dep-1.php", line 9, characters 26-32:
+  But got `<expr#43>::T as TBox::T`
+  File "invariant-dep-1.php", line 52, characters 12-29:
+    where `<expr#43>` is a reference to this expression

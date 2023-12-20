@@ -1,5 +1,5 @@
 File "expr_id_bug.php", line 9, characters 3-20:
-  ~<expr#1>::T where <expr#1>::T as C::T
-File "expr_id_bug.php", line 11, characters 5-22:
   ~<expr#2>::T where <expr#2>::T as C::T
+File "expr_id_bug.php", line 11, characters 5-22:
+  ~<expr#5>::T where <expr#5>::T as C::T
 No errors

@@ -1,42 +1,42 @@
 File "lvar_expr_dependent.php", line 20, characters 5-22:
-  ~<expr#1>::T where <expr#1>::T as C::T
+  ~<expr#14>::T where <expr#14>::T as C::T
 File "lvar_expr_dependent.php", line 21, characters 5-22:
-  ~<expr#1>::T where <expr#1>::T as C::T
+  ~<expr#14>::T where <expr#14>::T as C::T
 File "lvar_expr_dependent.php", line 29, characters 5-28:
-  ~<expr#2>::T where <expr#2>::T as C::T
+  ~<expr#17>::T where <expr#17>::T as C::T
 File "lvar_expr_dependent.php", line 33, characters 5-21:
   I
 File "lvar_expr_dependent.php", line 34, characters 5-28:
-  ~<expr#2>::T where <expr#2>::T as C::T, <expr#2>::T as I::T
+  ~<expr#17>::T where <expr#17>::T as C::T, <expr#17>::T as I::T
 File "lvar_expr_dependent.php", line 41, characters 5-22:
-  ~<expr#3>::T where <expr#3>::T as C::T
+  ~<expr#21>::T where <expr#21>::T as C::T
 File "lvar_expr_dependent.php", line 27, characters 13-27:
 Invalid argument (Typing[4110])
   File "lvar_expr_dependent.php", line 13, characters 26-32:
-  Expected `<expr#1>::T`
+  Expected `<expr#14>::T`
   File "lvar_expr_dependent.php", line 27, characters 5-6:
-    where `<expr#1>` is a reference to this expression
+    where `<expr#14>` is a reference to this expression
   File "lvar_expr_dependent.php", line 12, characters 35-41:
-  But got `<expr#2>::T as C::T`
+  But got `<expr#17>::T as C::T`
   File "lvar_expr_dependent.php", line 27, characters 13-20:
-    where `<expr#2>` is a reference to this expression
+    where `<expr#17>` is a reference to this expression
 File "lvar_expr_dependent.php", line 28, characters 19-27:
 Invalid argument (Typing[4110])
   File "lvar_expr_dependent.php", line 13, characters 26-32:
-  Expected `<expr#2>::T`
+  Expected `<expr#17>::T`
   File "lvar_expr_dependent.php", line 28, characters 5-12:
-    where `<expr#2>` is a reference to this expression
+    where `<expr#17>` is a reference to this expression
   File "lvar_expr_dependent.php", line 12, characters 35-41:
-  But got `<expr#1>::T as C::T`
+  But got `<expr#14>::T as C::T`
   File "lvar_expr_dependent.php", line 28, characters 19-20:
-    where `<expr#1>` is a reference to this expression
+    where `<expr#14>` is a reference to this expression
 File "lvar_expr_dependent.php", line 42, characters 13-18:
 Invalid argument (Typing[4110])
   File "lvar_expr_dependent.php", line 13, characters 26-32:
-  Expected `<expr#3>::T`
+  Expected `<expr#21>::T`
   File "lvar_expr_dependent.php", line 42, characters 5-6:
-    where `<expr#3>` is a reference to this expression
+    where `<expr#21>` is a reference to this expression
   File "lvar_expr_dependent.php", line 12, characters 35-41:
-  But got `<expr#1>::T as C::T`
+  But got `<expr#14>::T as C::T`
   File "lvar_expr_dependent.php", line 38, characters 14-15:
-    where `<expr#1>` is a reference to this expression
+    where `<expr#14>` is a reference to this expression

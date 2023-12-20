@@ -3,9 +3,9 @@ Invalid argument (Typing[4110])
   File "super_constraint_9.php", line 7, characters 45-52:
   Expected `~Foo<_>`
   File "super_constraint_9.php", line 10, characters 28-35:
-  But got `<expr#1> as Foo<int>`
+  But got `<expr#3> as Foo<int>`
   File "super_constraint_9.php", line 12, characters 16-17:
-    where `<expr#1>` is a reference to this expression
+    where `<expr#3>` is a reference to this expression
 File "super_constraint_9.php", line 21, characters 16-20:
 Invalid argument (Typing[4110])
   File "super_constraint_9.php", line 16, characters 21-23:

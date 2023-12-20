@@ -5,9 +5,9 @@ File "class_prop_as_this.php", line 13, characters 5-21:
 File "class_prop_as_this.php", line 17, characters 5-19:
 Invalid assignment (Typing[4110])
   File "class_prop_as_this.php", line 7, characters 38-41:
-  Expected `<expr#1> as C`
+  Expected `<expr#10> as C`
   File "class_prop_as_this.php", line 17, characters 5-10:
-    where `<expr#1>` is a reference to this expression
+    where `<expr#10>` is a reference to this expression
   File "class_prop_as_this.php", line 9, characters 31-31:
   But got `C`
   File "class_prop_as_this.php", line 9, characters 24-24:

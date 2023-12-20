@@ -7,4 +7,4 @@ Invalid argument (Typing[4110])
   File "tc_in_enum_class.php", line 47, characters 23-25:
   Expected `int`
   File "tc_in_enum_class.php", line 91, characters 29-44:
-  But got `<expr#2>::T::TSource as IAntParent::T::TSource`
+  But got `<expr#8>::T::TSource as IAntParent::T::TSource`

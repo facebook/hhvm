@@ -9,8 +9,8 @@ Invalid return type (Typing[4110])
   File "escape_reason.php", line 12, characters 16-18:
   Expected `int`
   File "escape_reason.php", line 13, characters 9-27:
-  But got `arraykey` because `<expr#1>::T` escaped from lambda
+  But got `arraykey` because `<expr#4>::T` escaped from lambda
   File "escape_reason.php", line 5, characters 34-40:
-    where `<expr#1>::T` originates from
+    where `<expr#4>::T` originates from
   File "escape_reason.php", line 13, characters 16-22:
-    where `<expr#1>` is a reference to this expression
+    where `<expr#4>` is a reference to this expression

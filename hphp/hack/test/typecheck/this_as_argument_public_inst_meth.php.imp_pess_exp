@@ -1,0 +1,12 @@
+File "this_as_argument_public_inst_meth.php", line 20, characters 14-16:
+Invalid argument (Typing[4110])
+  File "this_as_argument_public_inst_meth.php", line 7, characters 23-26:
+  Expected `<expr#17> as C`
+  File "this_as_argument_public_inst_meth.php", line 20, characters 5-7:
+    where `<expr#17>` is a reference to this expression
+  File "this_as_argument_public_inst_meth.php", line 11, characters 24-24:
+  But got `C`
+  File "this_as_argument_public_inst_meth.php", line 11, characters 31-31:
+  Since `C` is not final
+  File "this_as_argument_public_inst_meth.php", line 11, characters 24-24:
+  this might not be a `C`

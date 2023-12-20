@@ -1,0 +1,10 @@
+File "method_swap_error.php", line 17, characters 14-23:
+Invalid argument (Typing[4110])
+  File "method_swap_error.php", line 12, characters 24-30:
+  Expected `<expr#31>::T`
+  File "method_swap_error.php", line 17, characters 5-7:
+    where `<expr#31>` is a reference to this expression
+  File "method_swap_error.php", line 8, characters 26-32:
+  But got `<expr#32>::T as X::T`
+  File "method_swap_error.php", line 17, characters 14-16:
+    where `<expr#32>` is a reference to this expression

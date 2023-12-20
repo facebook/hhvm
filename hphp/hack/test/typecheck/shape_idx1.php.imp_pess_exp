@@ -9,9 +9,9 @@ File "shape_idx1.php", line 22, characters 3-37:
 File "shape_idx1.php", line 19, characters 3-31:[2]
   ~null
 File "shape_idx1.php", line 20, characters 3-35:[2]
-  ~<expr#1> as A
+  ~<expr#17> as A
 File "shape_idx1.php", line 21, characters 3-32:[2]
   ~null
 File "shape_idx1.php", line 22, characters 3-37:[2]
-  ~<expr#2> as AB
+  ~<expr#18> as AB
 No errors

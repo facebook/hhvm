@@ -29,6 +29,8 @@ template <typename T>
 struct is_optional_field<optional_field_ref<T>> : std::true_type {};
 template <typename T>
 struct is_optional_field<optional_boxed_field_ref<T>> : std::true_type {};
+template <typename T>
+struct is_optional_field<union_field_ref<T>> : std::true_type {};
 
 template <typename U, typename R = void>
 using if_optional_field =

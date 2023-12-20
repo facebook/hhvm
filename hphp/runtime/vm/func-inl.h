@@ -538,11 +538,10 @@ inline bool Func::isInternal() const {
 }
 
 inline const StringData* Func::moduleName() const {
-  if (RO::EvalModuleLevelTraits) {
-    auto const ex = extShared();
-    if (ex && ex->m_originalModuleName) {
-      return ex->m_originalModuleName;
-    }
+  auto const ex = extShared();
+  if (RO::EvalModuleLevelTraits && ex) {
+    assertx(!unit()->moduleName() || ex->m_originalModuleName);
+    return ex->m_originalModuleName;
   }
   return unit()->moduleName();
 }

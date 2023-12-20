@@ -356,7 +356,9 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     if (!coeffectRules.empty()) ex->m_coeffectRules = coeffectRules;
     ex->m_coeffectEscapes = coeffectsInfo.second;
     ex->m_docComment = docComment;
-    ex->m_originalModuleName = originalModuleName;
+    ex->m_originalModuleName =
+      originalModuleName ? originalModuleName : LowStringPtr(unit.moduleName());
+    assertx(ex->m_originalModuleName);
   }
 
   std::vector<Func::ParamInfo> fParams;

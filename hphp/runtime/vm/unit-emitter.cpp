@@ -687,6 +687,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
 
   u->m_sn = m_sn;
   u->m_origFilepath = m_filepath;
+  u->m_moduleName = m_moduleName;
   u->m_sha1 = m_sha1;
   u->m_bcSha1 = m_bcSha1;
   for (auto const& pce : m_pceVec) {
@@ -702,7 +703,6 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
   u->m_constants = m_constants;
   u->m_metaData = m_metaData;
   u->m_fileAttributes = m_fileAttributes;
-  u->m_moduleName = m_moduleName;
   u->m_softDeployedRepoOnly = m_softDeployedRepoOnly;
   u->m_ICE = m_ICE;
   u->m_deps = m_deps;

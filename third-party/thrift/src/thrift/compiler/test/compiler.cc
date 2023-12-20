@@ -77,16 +77,17 @@ std::vector<diagnostic> extract_expected_diagnostics(
     auto line_end = std::find(it, source.end(), '\n');
 
     re2::StringPiece line(&*it, line_end - it);
-    re2::StringPiece type_match, message_match, line_num_match;
+    re2::StringPiece type_match, message_match, line_num_match, name_match;
     re2::RE2 diagnostic_pattern(
-        "#\\s*expected-(?P<type>error|warning)@?(?P<linenum>[+-]?\\d+)?:\\s*(?P<message>.*)$");
+        "#\\s*expected-(?P<type>error|warning)@?(?P<linenum>[+-]?\\d+)?:\\s*(?P<message>.*?)\\s*(?:\\[(?P<name>.*)\\])?$");
 
     if (re2::RE2::PartialMatch(
             line,
             diagnostic_pattern,
             &type_match,
             &line_num_match,
-            &message_match)) {
+            &message_match,
+            &name_match)) {
       diagnostic_level level = type_match.as_string() == "error"
           ? diagnostic_level::error
           : diagnostic_level::warning;
@@ -97,8 +98,9 @@ std::vector<diagnostic> extract_expected_diagnostics(
             ? line_num + std::stoi(ln_no_str)
             : std::stoi(ln_no_str);
       }
+      auto name = name_match.as_string();
       result.emplace_back(
-          level, message_match.as_string(), file_name, line_num);
+          level, message_match.as_string(), file_name, line_num, name);
     }
 
     if (line_end == source.end()) {

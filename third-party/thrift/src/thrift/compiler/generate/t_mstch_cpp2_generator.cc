@@ -27,6 +27,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <fmt/core.h>
 
+#include <thrift/compiler/ast/diagnostic_context.h>
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/gen/cpp/type_resolver.h>
 #include <thrift/compiler/generate/common.h>
@@ -34,7 +35,7 @@
 #include <thrift/compiler/generate/t_mstch_generator.h>
 #include <thrift/compiler/lib/cpp2/util.h>
 #include <thrift/compiler/lib/uri.h>
-#include <thrift/compiler/validator/validator.h>
+#include <thrift/compiler/sema/ast_validator.h>
 
 namespace apache {
 namespace thrift {
@@ -264,7 +265,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
   }
 
   void generate_program() override;
-  void fill_validator_list(validator_list&) const override;
+  void fill_validator_visitors(ast_validator&) const override;
   static std::string get_cpp2_namespace(const t_program* program);
   static std::string get_cpp2_unprefixed_namespace(const t_program* program);
   static mstch::array get_namespace_array(const t_program* program);
@@ -2713,72 +2714,66 @@ t_mstch_cpp2_generator::get_client_name_to_split_count() const {
   return ret;
 }
 
-class annotation_validator : public validator {
- public:
-  explicit annotation_validator(
-      const std::map<std::string, std::string>& options)
-      : options_(options) {}
-  using validator::visit;
-
-  /**
-   * Make sure there is no incompatible annotation.
-   */
-  bool visit(t_structured* s) override;
-
- private:
-  const std::map<std::string, std::string>& options_;
-};
-
-bool annotation_validator::visit(t_structured* s) {
-  if (cpp2::packed_isset(*s)) {
-    if (options_.count("tablebased") != 0) {
-      report_error(
-          *s,
-          "Tablebased serialization is incompatible with isset bitpacking for "
-          "struct `{}`",
-          s->get_name());
+// Make sure there is no incompatible annotation.
+void validate_struct_annotations(
+    diagnostic_context& ctx,
+    const t_structured& s,
+    const std::map<std::string, std::string>& options) {
+  if (cpp2::packed_isset(s)) {
+    if (options.count("tablebased") != 0) {
+      ctx.report(
+          s,
+          "tablebased-isset-bitpacking-rule",
+          diagnostic_level::error,
+          "Tablebased serialization is incompatible with isset bitpacking for struct `{}`",
+          s.get_name());
     }
   }
 
-  for (const auto& field : s->fields()) {
+  for (const auto& field : s.fields()) {
     if (cpp2::is_mixin(field)) {
       // Mixins cannot be refs
       if (cpp2::is_explicit_ref(&field)) {
-        report_error(
-            field, "Mixin field `{}` can not be a ref in cpp.", field.name());
+        ctx.report(
+            field,
+            "mixin-ref-rule",
+            diagnostic_level::error,
+            "Mixin field `{}` can not be a ref in cpp.",
+            field.name());
       }
     }
   }
-  return true;
 }
 
-class splits_validator : public validator {
+class validate_splits {
  public:
-  explicit splits_validator(
+  explicit validate_splits(
       int split_count,
       const std::unordered_map<std::string, int>& client_name_to_split_count)
       : split_count_(split_count),
         client_name_to_split_count_(client_name_to_split_count) {}
 
-  using validator::visit;
-
-  bool visit(t_program* program) override {
-    program_ = program;
+  void operator()(diagnostic_context& ctx, const t_program& program) {
     validate_type_cpp_splits(
-        program->structured_definitions().size() + program->enums().size());
-    validate_client_cpp_splits(program->services());
-    return true;
+        program.structured_definitions().size() + program.enums().size(),
+        ctx,
+        program);
+    validate_client_cpp_splits(program.services(), ctx);
   }
 
  private:
-  const t_program* program_ = nullptr;
   int split_count_ = 0;
   std::unordered_map<std::string, int> client_name_to_split_count_;
 
-  void validate_type_cpp_splits(const int32_t object_count) {
+  void validate_type_cpp_splits(
+      const int32_t object_count,
+      diagnostic_context& ctx,
+      const t_program& program) {
     if (split_count_ > object_count) {
-      report_error(
-          *program_,
+      ctx.report(
+          program,
+          "more-splits-than-objects-rule",
+          diagnostic_level::error,
           "`types_cpp_splits={}` is misconfigured: it can not be greater "
           "than the number of objects, which is {}.",
           split_count_,
@@ -2786,16 +2781,19 @@ class splits_validator : public validator {
     }
   }
 
-  void validate_client_cpp_splits(const std::vector<t_service*>& services) {
+  void validate_client_cpp_splits(
+      const std::vector<t_service*>& services, diagnostic_context& ctx) {
     if (client_name_to_split_count_.empty()) {
-      return; // A fast path.
+      return;
     }
     for (const t_service* s : services) {
       auto iter = client_name_to_split_count_.find(s->get_name());
       if (iter != client_name_to_split_count_.end() &&
           iter->second > static_cast<int32_t>(s->get_functions().size())) {
-        report_error(
+        ctx.report(
             *s,
+            "more-splits-than-functions-rule",
+            diagnostic_level::error,
             "`client_cpp_splits={}` (For service {}) is misconfigured: it "
             "can not be greater than the number of functions, which is {}.",
             iter->second,
@@ -2806,38 +2804,39 @@ class splits_validator : public validator {
   }
 };
 
-class lazy_field_validator : public validator {
- public:
-  using validator::visit;
-  bool visit(t_field* field) override {
-    if (cpp2::is_lazy(field)) {
-      auto t = field->get_type()->get_true_type();
-      const char* field_type = nullptr;
-      if (t->is_any_int() || t->is_bool() || t->is_byte()) {
-        field_type = "Integral field";
-      }
-      if (t->is_floating_point()) {
-        field_type = "Floating point field";
-      }
-      if (field_type) {
-        report_error(
-            *field,
-            "{} `{}` can not be marked as lazy, since doing so won't bring "
-            "any benefit.",
-            field_type,
-            field->get_name());
-      }
+void validate_lazy_fields(diagnostic_context& ctx, const t_field& field) {
+  if (cpp2::is_lazy(&field)) {
+    auto t = field.get_type()->get_true_type();
+    const char* field_type = nullptr;
+    if (t->is_any_int() || t->is_bool() || t->is_byte()) {
+      field_type = "Integral field";
     }
-    return true;
+    if (t->is_floating_point()) {
+      field_type = "Floating point field";
+    }
+    if (field_type) {
+      ctx.report(
+          field,
+          "no-lazy-int-float-field-rule",
+          diagnostic_level::error,
+          "{} `{}` can not be marked as lazy, since doing so won't bring "
+          "any benefit.",
+          field_type,
+          field.get_name());
+    }
   }
-};
+}
 
-void t_mstch_cpp2_generator::fill_validator_list(
-    validator_list& validators) const {
-  validators.add<annotation_validator>(options());
-  validators.add<splits_validator>(
-      get_split_count(options()), client_name_to_split_count_);
-  validators.add<lazy_field_validator>();
+void t_mstch_cpp2_generator::fill_validator_visitors(
+    ast_validator& validator) const {
+  validator.add_structured_definition_visitor(std::bind(
+      validate_struct_annotations,
+      std::placeholders::_1,
+      std::placeholders::_2,
+      options()));
+  validator.add_program_visitor(
+      validate_splits(get_split_count(options()), client_name_to_split_count_));
+  validator.add_field_visitor(validate_lazy_fields);
 }
 
 THRIFT_REGISTER_GENERATOR(mstch_cpp2, "cpp2", "");

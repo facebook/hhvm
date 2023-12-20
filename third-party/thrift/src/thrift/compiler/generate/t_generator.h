@@ -23,7 +23,7 @@
 
 #include <boost/filesystem.hpp>
 
-#include <thrift/compiler/validator/validator.h>
+#include <thrift/compiler/sema/ast_validator.h>
 
 namespace apache {
 namespace thrift {
@@ -56,7 +56,7 @@ class t_generator {
    */
   virtual void process_options(const std::map<std::string, std::string>&) {}
 
-  virtual void fill_validator_list(validator_list&) const {}
+  virtual void fill_validator_visitors(ast_validator&) const {}
 
   // Generate the program. Overridden by subclasses to implement program
   // generation.

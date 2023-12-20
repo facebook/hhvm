@@ -1104,90 +1104,80 @@ std::string py3_mstch_program::visit_type_with_typedef(
   return flatName;
 }
 
-// Generator-specific validator that enforces that a reserved key is not used as
-// a namespace component.
-class no_reserved_key_in_namespace_validator : public validator {
- public:
-  using validator::visit;
-
-  bool visit(t_program* prog) override {
-    validate(prog);
-    return true;
+// Generator-specific validator that enforces that a reserved key is not used
+// as a namespace component.
+void validate_no_reserved_key_in_namespace(
+    diagnostic_context& ctx, const t_program& prog) {
+  auto namespace_tokens = get_py3_namespace(&prog);
+  if (namespace_tokens.empty()) {
+    return;
+  }
+  for (const auto& component : namespace_tokens) {
+    if (get_python_reserved_names().find(component) !=
+        get_python_reserved_names().end()) {
+      ctx.report(
+          prog,
+          "reserved-keyword-in-namespace-rule",
+          diagnostic_level::error,
+          "Namespace '{}' contains reserved keyword '{}'",
+          fmt::join(namespace_tokens, "."),
+          component);
+    }
   }
 
- private:
-  void validate(t_program* prog) {
-    auto namespace_tokens = get_py3_namespace(prog);
-    if (namespace_tokens.empty()) {
-      return;
-    }
-    for (const auto& component : namespace_tokens) {
-      if (get_python_reserved_names().find(component) !=
-          get_python_reserved_names().end()) {
-        report_error(
-            *prog,
-            "Namespace '{}' contains reserved keyword '{}'",
-            fmt::join(namespace_tokens, "."),
-            component);
-      }
-    }
-
-    std::vector<std::string> components;
-    boost::split(components, prog->path(), boost::is_any_of("\\/."));
-    for (const auto& component : components) {
-      if (component == "include") {
-        report_error(
-            *prog,
-            "Path '{}' contains reserved keyword 'include'",
-            prog->path());
-      }
+  std::vector<std::string> components;
+  boost::split(components, prog.path(), boost::is_any_of("\\/."));
+  for (const auto& component : components) {
+    if (component == "include") {
+      ctx.report(
+          prog,
+          "no-reserved-keyword-in-namespace",
+          diagnostic_level::error,
+          "Path '{}' contains reserved keyword 'include'",
+          prog.path());
     }
   }
-};
+}
 
-// Generator-specific validator that enforces "name" and "value" are not used as
-// enum member or union field names (thrift-py3).
-class enum_member_union_field_names_validator : virtual public validator {
- public:
-  using validator::visit;
-
-  bool visit(t_enum* enm) override {
-    for (const t_enum_value* ev : enm->get_enum_values()) {
-      validate(ev, ev->get_name());
-    }
-    return true;
-  }
-
-  bool visit(t_structured* s) override {
-    if (!s->is_union()) {
-      return false;
-    }
-    for (const t_field& f : s->fields()) {
-      validate(&f, f.name());
-    }
-    return true;
-  }
-
- private:
-  void validate(const t_named* node, const std::string& name) {
-    auto pyname = node->get_annotation("py3.name", &name);
-    if (const t_const* annot =
-            node->find_structured_annotation_or_null(kPythonNameUri)) {
-      if (auto annotation_name =
-              annot->get_value_from_structured_annotation_or_null("name")) {
-        pyname = annotation_name->get_string();
-      }
-    }
-    if (pyname == "name" || pyname == "value") {
-      report_error(
-          *node,
-          "'{}' should not be used as an enum/union field name in thrift-py3. "
-          "Use a different name or annotate the field with "
-          "`(py3.name=\"<new_py_name>\")`",
-          pyname);
+// Generator-specific validator that enforces "name" and "value" are not used
+// as enum member or union field names (thrift-py3).
+namespace enum_member_union_field_names_validator {
+void validate(
+    const t_named& node, const std::string& name, diagnostic_context& ctx) {
+  auto pyname = node.get_annotation("py3.name", &name);
+  if (const t_const* annot =
+          node.find_structured_annotation_or_null(kPythonNameUri)) {
+    if (auto annotation_name =
+            annot->get_value_from_structured_annotation_or_null("name")) {
+      pyname = annotation_name->get_string();
     }
   }
-};
+  if (pyname == "name" || pyname == "value") {
+    ctx.report(
+        node,
+        "enum-member-union-field-names-rule",
+        diagnostic_level::error,
+        "'{}' should not be used as an enum/union field name in thrift-py3. "
+        "Use a different name or annotate the field with "
+        "`(py3.name=\"<new_py_name>\")`",
+        pyname);
+  }
+}
+bool validate_enum(diagnostic_context& ctx, const t_enum& enm) {
+  for (const t_enum_value& ev : enm.values()) {
+    validate(ev, ev.get_name(), ctx);
+  }
+  return true;
+}
+
+bool validate_union(diagnostic_context& ctx, const t_union& s) {
+  for (const t_field& f : s.fields()) {
+    validate(f, f.name(), ctx);
+  }
+  return true;
+}
+
+} // namespace enum_member_union_field_names_validator
 
 void py3_mstch_program::visit_type_single_service(const t_service* service) {
   for (const auto& function : service->functions()) {
@@ -1257,9 +1247,12 @@ class t_mstch_py3_generator : public t_mstch_generator {
     generate_services();
   }
 
-  void fill_validator_list(validator_list& vl) const override {
-    vl.add<no_reserved_key_in_namespace_validator>();
-    vl.add<enum_member_union_field_names_validator>();
+  void fill_validator_visitors(ast_validator& validator) const override {
+    validator.add_program_visitor(validate_no_reserved_key_in_namespace);
+    validator.add_enum_visitor(
+        enum_member_union_field_names_validator::validate_enum);
+    validator.add_union_visitor(
+        enum_member_union_field_names_validator::validate_union);
   }
 
   enum TypesFile { IsTypesFile, NotTypesFile };

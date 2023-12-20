@@ -29,11 +29,13 @@
 #include <boost/algorithm/string/split.hpp>
 #include <fmt/core.h>
 
+#include <thrift/compiler/ast/diagnostic_context.h>
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
 #include <thrift/compiler/lib/rust/util.h>
 #include <thrift/compiler/lib/uri.h>
+#include <thrift/compiler/sema/ast_validator.h>
 
 namespace apache {
 namespace thrift {
@@ -506,7 +508,7 @@ class t_mstch_rust_generator : public t_mstch_generator {
   std::string template_prefix() const override { return "rust"; }
 
   void generate_program() override;
-  void fill_validator_list(validator_list&) const override;
+  void fill_validator_visitors(ast_validator&) const override;
 
  private:
   void set_mstch_factories();
@@ -2264,60 +2266,67 @@ void t_mstch_rust_generator::set_mstch_factories() {
 }
 
 namespace {
-class annotation_validator : public validator {
- public:
-  explicit annotation_validator(const rust_codegen_options& options)
-      : options_(options) {}
-  using validator::visit;
-  bool visit(t_structured*) override;
-  bool visit(t_enum*) override;
-  bool visit(t_program*) override;
 
- private:
-  const rust_codegen_options& options_;
-};
-
-bool annotation_validator::visit(t_structured* s) {
-  if (!validate_rust_serde(*s)) {
-    report_error(*s, "`rust.serde` must be `true` or `false`");
+void validate_struct_annotations(
+    diagnostic_context& ctx,
+    const t_structured& s,
+    const rust_codegen_options& options) {
+  if (!validate_rust_serde(s)) {
+    ctx.report(
+        s,
+        "rust-serde-true-false-rule",
+        diagnostic_level::error,
+        "`rust.serde` must be `true` or `false`");
   }
 
-  for (auto& field : s->fields()) {
+  for (auto& field : s.fields()) {
     FieldKind kind = field_kind(field);
     bool box = node_is_boxed(field) || kind == FieldKind::Box;
     bool arc = node_is_arced(field) || kind == FieldKind::Arc;
     if (box && arc) {
-      report_error(
-          field, "Field `{}` cannot be both Box'ed and Arc'ed", field.name());
+      ctx.report(
+          field,
+          "rust-field-box-arc-rule",
+          diagnostic_level::error,
+          "Field `{}` cannot be both Box'ed and Arc'ed",
+          field.name());
     }
 
     if (node_has_adapter(field) &&
         (node_has_custom_rust_type(field) ||
-         rust_serde_enabled(options_, field))) {
-      report_error(
+         rust_serde_enabled(options, field))) {
+      ctx.report(
           field,
+          "rust-field-adapter-rule",
+          diagnostic_level::error,
           "Field `{}` cannot have both an adapter and `rust.type` or `rust.newtype` or `rust.serde = true`",
           field.name());
     }
   }
-  return true;
 }
 
-bool annotation_validator::visit(t_enum* e) {
-  if (!validate_rust_serde(*e)) {
-    report_error(*e, "`rust.serde` must be `true` or `false`");
+bool validate_enum_annotations(diagnostic_context& ctx, const t_enum& e) {
+  if (!validate_rust_serde(e)) {
+    ctx.report(
+        e,
+        "rust-serde-true-false-rule",
+        diagnostic_level::error,
+        "`rust.serde` must be `true` or `false`");
   }
   return true;
 }
 
-bool annotation_validator::visit(t_program* p) {
-  for (auto t : p->typedefs()) {
+bool validate_program_annotations(
+    diagnostic_context& ctx, const t_program& program) {
+  for (auto t : program.typedefs()) {
     if (node_has_adapter(*t)) {
       if (node_has_custom_rust_type(*t)) {
-        report_error(
+        ctx.report(
             *t,
+            "rust-typedef-adapter-rule",
+            diagnostic_level::error,
             "Typedef `{}` cannot have both an adapter and `rust.type` or `rust.newtype`",
-            (*t).name());
+            t->name());
       }
 
       // To be spec compliant, adapted typedefs can be composed only if they are
@@ -2341,10 +2350,12 @@ bool annotation_validator::visit(t_program* p) {
           step_through_typedefs(t->get_type(), true);
 
       if (node_has_adapter(*typedef_stepped)) {
-        report_error(
+        ctx.report(
             *t,
+            "rust-typedef-transitive-adapter-rule",
+            diagnostic_level::error,
             "Typedef `{}` cannot have a direct transitive adapter",
-            (*t).name());
+            t->name());
       }
     }
   }
@@ -2354,8 +2365,15 @@ bool annotation_validator::visit(t_program* p) {
 
 } // namespace
 
-void t_mstch_rust_generator::fill_validator_list(validator_list& l) const {
-  l.add<annotation_validator>(options_);
+void t_mstch_rust_generator::fill_validator_visitors(
+    ast_validator& validator) const {
+  validator.add_structured_definition_visitor(std::bind(
+      validate_struct_annotations,
+      std::placeholders::_1,
+      std::placeholders::_2,
+      options_));
+  validator.add_enum_visitor(validate_enum_annotations);
+  validator.add_program_visitor(validate_program_annotations);
 }
 
 THRIFT_REGISTER_GENERATOR(

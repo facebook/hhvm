@@ -744,7 +744,7 @@ TEST(CompilerTest, bitpack_with_tablebased_seriliazation) {
     include "thrift/annotation/cpp.thrift"
     struct A { 1: i32 i }
     @cpp.PackIsset
-      # expected-error@-1: Tablebased serialization is incompatible with isset bitpacking for struct `D`
+      # expected-error@-1: Tablebased serialization is incompatible with isset bitpacking for struct `D`  [tablebased-isset-bitpacking-rule]
     struct D { 1: i32 i }
   )",
       {"--gen", "mstch_cpp2:json,tablebased"});
@@ -944,7 +944,7 @@ TEST(CompilerTest, invalid_and_too_many_splits) {
 
   check_compile(
       R"(
-    # expected-error@-1: `types_cpp_splits=5` is misconfigured: it can not be greater than the number of objects, which is 4.
+    # expected-error@-1: `types_cpp_splits=5` is misconfigured: it can not be greater than the number of objects, which is 4. [more-splits-than-objects-rule]
     struct Foo { 1: i32 field }
     struct Bar { 1: i32 field }
     exception Baz { 1: i32 field }
@@ -992,7 +992,7 @@ TEST(CompilerTest, invalid_and_too_many_client_splits) {
       i32 func3(1: i32 num);
     }
     service MyService2 {
-      # expected-error@-1: `client_cpp_splits=3` (For service MyService2) is misconfigured: it can not be greater than the number of functions, which is 2.
+      # expected-error@-1: `client_cpp_splits=3` (For service MyService2) is misconfigured: it can not be greater than the number of functions, which is 2. [more-splits-than-functions-rule]
       i32 func1(1: i32 num);
       i32 func2(1: i32 num);
     }
@@ -1020,9 +1020,9 @@ TEST(CompilerTest, non_beneficial_lazy_fields) {
     typedef double FP
     struct A {
       1: i32 field (cpp.experimental.lazy); # expected-warning: The annotation cpp.experimental.lazy is deprecated. Please use @cpp.Lazy instead.
-        # expected-error@-1: Integral field `field` can not be marked as lazy, since doing so won't bring any benefit.
+        # expected-error@-1: Integral field `field` can not be marked as lazy, since doing so won't bring any benefit. [no-lazy-int-float-field-rule]
       2: FP field2 (cpp.experimental.lazy); # expected-warning: The annotation cpp.experimental.lazy is deprecated. Please use @cpp.Lazy instead.
-        # expected-error@-1: Floating point field `field2` can not be marked as lazy, since doing so won't bring any benefit.
+        # expected-error@-1: Floating point field `field2` can not be marked as lazy, since doing so won't bring any benefit. [no-lazy-int-float-field-rule]
     }
   )");
 }
@@ -1724,7 +1724,7 @@ TEST(CompilerTest, py3_enum_invalid_value_names) {
       R"(
     enum Foo {
       name = 1,
-        # expected-error@-1: 'name' should not be used as an enum/union field name in thrift-py3. Use a different name or annotate the field with `(py3.name="<new_py_name>")`
+        # expected-error@-1: 'name' should not be used as an enum/union field name in thrift-py3. Use a different name or annotate the field with `(py3.name="<new_py_name>")` [enum-member-union-field-names-rule]
       value = 2 (py3.name = "value_"),
         # expected-warning@-1: The annotation py3.name is deprecated. Please use @python.Name instead.
     }
@@ -1733,7 +1733,7 @@ TEST(CompilerTest, py3_enum_invalid_value_names) {
       name = 1 (py3.name = "name_"),
         # expected-warning@-1: The annotation py3.name is deprecated. Please use @python.Name instead.
       value = 2,
-        # expected-error@-1: 'value' should not be used as an enum/union field name in thrift-py3. Use a different name or annotate the field with `(py3.name="<new_py_name>")`
+        # expected-error@-1: 'value' should not be used as an enum/union field name in thrift-py3. Use a different name or annotate the field with `(py3.name="<new_py_name>")` [enum-member-union-field-names-rule]
     }
   )",
       {"--gen", "mstch_py3"});
@@ -1744,7 +1744,7 @@ TEST(CompilerTest, py3_invalid_field_names) {
       R"(
     union Foo {
       1: string name;
-        # expected-error@-1: 'name' should not be used as an enum/union field name in thrift-py3. Use a different name or annotate the field with `(py3.name="<new_py_name>")`
+        # expected-error@-1: 'name' should not be used as an enum/union field name in thrift-py3. Use a different name or annotate the field with `(py3.name="<new_py_name>")` [enum-member-union-field-names-rule]
       2: i32 value (py3.name = "value_");
         # expected-warning@-1: The annotation py3.name is deprecated. Please use @python.Name instead.
     }
@@ -1753,7 +1753,7 @@ TEST(CompilerTest, py3_invalid_field_names) {
       1: string name (py3.name = "name_");
         # expected-warning@-1: The annotation py3.name is deprecated. Please use @python.Name instead.
       2: i32 value;
-        # expected-error@-1: 'value' should not be used as an enum/union field name in thrift-py3. Use a different name or annotate the field with `(py3.name="<new_py_name>")`
+        # expected-error@-1: 'value' should not be used as an enum/union field name in thrift-py3. Use a different name or annotate the field with `(py3.name="<new_py_name>")` [enum-member-union-field-names-rule]
     }
   )",
       {"--gen", "mstch_py3"});

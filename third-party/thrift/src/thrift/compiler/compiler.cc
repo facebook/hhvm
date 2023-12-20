@@ -45,9 +45,9 @@
 #include <thrift/compiler/diagnostic.h>
 #include <thrift/compiler/generate/t_generator.h>
 #include <thrift/compiler/parse/parse_ast.h>
+#include <thrift/compiler/sema/ast_validator.h>
 #include <thrift/compiler/sema/standard_mutator.h>
 #include <thrift/compiler/sema/standard_validator.h>
-#include <thrift/compiler/validator/validator.h>
 
 namespace apache {
 namespace thrift {
@@ -484,7 +484,7 @@ std::unique_ptr<t_generator> create_generator(
  */
 bool validate_program(t_generator& generator, diagnostics_engine& diags) {
   bool success = true;
-  diagnostics_engine validator_diags(
+  diagnostic_context validator_diags(
       diags.source_mgr(),
       [&](diagnostic d) {
         if (d.level() == diagnostic_level::error) {
@@ -493,9 +493,9 @@ bool validate_program(t_generator& generator, diagnostics_engine& diags) {
         diags.report(std::move(d));
       },
       diags.params());
-  validator_list validators(validator_diags);
-  generator.fill_validator_list(validators);
-  validators.traverse(generator.get_program());
+  ast_validator validator;
+  generator.fill_validator_visitors(validator);
+  validator(validator_diags, *(generator.get_program()));
   return success;
 }
 
@@ -728,8 +728,6 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
   program_bundle->root_program()->set_include_prefix(
       get_include_path(gparams.targets, input_filename));
 
-  // Validate it!
-  validator::validate(program_bundle->root_program(), ctx);
   standard_validator()(ctx, *program_bundle->root_program());
   return ctx.has_errors() ? nullptr : std::move(program_bundle);
 }

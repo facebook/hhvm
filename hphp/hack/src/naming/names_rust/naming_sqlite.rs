@@ -757,15 +757,6 @@ impl Names {
         Ok(file_info_id)
     }
 
-    /// This removes an entry from the forward naming table.
-    /// TODO(ljw): reconcile with delete.
-    pub fn fwd_delete(&self, file_info_id: crate::FileInfoId) -> anyhow::Result<()> {
-        self.conn
-            .prepare_cached("DELETE FROM NAMING_FILE_INFO WHERE FILE_INFO_ID = ?")?
-            .execute(params![file_info_id])?;
-        Ok(())
-    }
-
     /// Wrapper around `build` (see its documentation); this wrapper is for when you
     /// want to pass file summaries as an iterator rather than send them over a channel.
     pub fn build_from_iterator(

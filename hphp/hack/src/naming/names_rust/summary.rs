@@ -132,3 +132,38 @@ impl SymbolRow {
         }
     }
 }
+
+#[derive(Clone, Debug)]
+pub struct SymbolRowNew {
+    pub hash: ToplevelSymbolHash,
+    pub canon_hash: ToplevelCanonSymbolHash,
+    pub decl_hash: DeclHash,
+    pub kind: NameType,
+    pub name: String,
+    pub sort_text: String,
+    pub path: RelativePath,
+    pub file_info_id: crate::FileInfoId,
+}
+
+impl SymbolRowNew {
+    /// This method walks the Decl structure to construct a hash for it
+    pub fn new(
+        path: RelativePath,
+        file_info_id: crate::FileInfoId,
+        name: &str,
+        decl: &Decl<'_>,
+        decl_hash: DeclHash,
+    ) -> Self {
+        let kind = decl.kind();
+        Self {
+            hash: ToplevelSymbolHash::new(kind, name),
+            canon_hash: ToplevelCanonSymbolHash::new(kind, name.to_owned()),
+            kind,
+            decl_hash,
+            name: name.to_string(),
+            sort_text: name.to_string(),
+            file_info_id,
+            path,
+        }
+    }
+}

@@ -13,3 +13,4 @@ pub use naming_sqlite::Names;
 pub use summary::DeclSummary;
 pub use summary::FileSummary;
 pub use summary::SymbolRow;
+pub use summary::SymbolRowNew;

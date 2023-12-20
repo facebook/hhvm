@@ -90,7 +90,9 @@ impl Names {
                 canon_hash INTEGER NOT NULL,
                 decl_hash INTEGER NOT NULL,
                 flags INTEGER NOT NULL,
-                file_info_id INTEGER NOT NULL
+                file_info_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                sort_text TEXT NULL
             );",
             params![],
         )?;
@@ -102,7 +104,9 @@ impl Names {
                 canon_hash INTEGER NOT NULL,
                 decl_hash INTEGER NOT NULL,
                 flags INTEGER NOT NULL,
-                file_info_id INTEGER NOT NULL
+                file_info_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                sort_text TEXT NULL
             );",
             params![],
         )?;
@@ -251,12 +255,12 @@ impl Names {
         save_result: &mut crate::SaveResult,
     ) -> anyhow::Result<()> {
         let mut insert_statement = self.conn.prepare_cached(
-            "INSERT INTO naming_symbols (hash, canon_hash, decl_hash, flags, file_info_id)
-            VALUES (?, ?, ?, ?, ?);",
+            "INSERT INTO naming_symbols (hash, canon_hash, decl_hash, flags, file_info_id, name, sort_text)
+            VALUES (?, ?, ?, ?, ?, ?, ?);",
         )?;
         let mut insert_overflow_statement = self.conn.prepare_cached(
-            "INSERT INTO naming_symbols_overflow (hash, canon_hash, decl_hash, flags, file_info_id)
-            VALUES (?, ?, ?, ?, ?);",
+            "INSERT INTO naming_symbols_overflow (hash, canon_hash, decl_hash, flags, file_info_id, name, sort_text)
+            VALUES (?, ?, ?, ?, ?, ?, ?);",
         )?;
         let mut delete_statement = self.conn.prepare_cached(
             "DELETE FROM naming_symbols
@@ -266,6 +270,8 @@ impl Names {
         let canon_hash = ToplevelCanonSymbolHash::new(item.name_type, item.symbol.clone());
         let decl_hash = item.hash;
         let kind = item.name_type;
+        let name = &item.symbol;
+        let sort_text = &item.symbol; // should probably read sort_text off the declaration/attribute
 
         if let Some(old) = self.get_row(symbol_hash)? {
             assert_eq!(symbol_hash, old.hash);
@@ -281,7 +287,9 @@ impl Names {
                     canon_hash,
                     old.decl_hash,
                     old.kind,
-                    old.file_info_id
+                    old.file_info_id,
+                    old.name,
+                    old.sort_text
                 ])?;
 
                 // insert new row into naming_symbols table
@@ -290,7 +298,9 @@ impl Names {
                     canon_hash,
                     decl_hash,
                     kind,
-                    file_info_id
+                    file_info_id,
+                    name,
+                    sort_text
                 ])?;
 
                 save_result
@@ -305,7 +315,9 @@ impl Names {
                     canon_hash,
                     decl_hash,
                     kind,
-                    file_info_id
+                    file_info_id,
+                    name,
+                    sort_text
                 ])?;
                 save_result.add_collision(kind, item.symbol, &old.path, path);
             }
@@ -316,7 +328,9 @@ impl Names {
                 canon_hash,
                 decl_hash,
                 kind,
-                file_info_id
+                file_info_id,
+                name,
+                sort_text
             ])?;
             save_result.checksum.addremove(symbol_hash, decl_hash, path);
             save_result.symbols_added += 1;
@@ -329,7 +343,7 @@ impl Names {
     pub fn get_overflow_rows_unordered(
         &self,
         symbol_hash: ToplevelSymbolHash,
-    ) -> anyhow::Result<Vec<crate::SymbolRow>> {
+    ) -> anyhow::Result<Vec<crate::SymbolRowNew>> {
         let select_statement = "
         SELECT
             naming_symbols_overflow.hash,
@@ -337,6 +351,8 @@ impl Names {
             naming_symbols_overflow.decl_hash,
             naming_symbols_overflow.flags,
             naming_symbols_overflow.file_info_id,
+            namimg_symbols_overflow.name,
+            naming_symbols_overflow.sort_text,
             naming_file_info.path_prefix_type,
             naming_file_info.path_suffix
         FROM
@@ -353,15 +369,17 @@ impl Names {
         let mut rows = select_statement.query(params![symbol_hash])?;
         let mut result = vec![];
         while let Some(row) = rows.next()? {
-            let prefix: crate::datatypes::SqlitePrefix = row.get(5)?;
-            let suffix: crate::datatypes::SqlitePathBuf = row.get(6)?;
+            let prefix: crate::datatypes::SqlitePrefix = row.get(7)?;
+            let suffix: crate::datatypes::SqlitePathBuf = row.get(8)?;
             let path = RelativePath::make(prefix.value, suffix.value);
-            result.push(crate::SymbolRow {
+            result.push(crate::SymbolRowNew {
                 hash: row.get(0)?,
                 canon_hash: row.get(1)?,
                 decl_hash: row.get(2)?,
                 kind: row.get(3)?,
                 file_info_id: row.get(4)?,
+                name: row.get(5)?,
+                sort_text: row.get(6)?,
                 path,
             });
         }
@@ -373,7 +391,7 @@ impl Names {
     pub fn get_row(
         &self,
         symbol_hash: ToplevelSymbolHash,
-    ) -> anyhow::Result<Option<crate::SymbolRow>> {
+    ) -> anyhow::Result<Option<crate::SymbolRowNew>> {
         let select_statement = "
         SELECT
             naming_symbols.hash,
@@ -381,6 +399,8 @@ impl Names {
             naming_symbols.decl_hash,
             naming_symbols.flags,
             naming_symbols.file_info_id,
+            naming_symbols.name,
+            naming_symbols.sort_text,
             naming_file_info.path_prefix_type,
             naming_file_info.path_suffix
         FROM
@@ -396,15 +416,17 @@ impl Names {
         let mut select_statement = self.conn.prepare_cached(select_statement)?;
         let result = select_statement
             .query_row(params![symbol_hash], |row| {
-                let prefix: crate::datatypes::SqlitePrefix = row.get(5)?;
-                let suffix: crate::datatypes::SqlitePathBuf = row.get(6)?;
+                let prefix: crate::datatypes::SqlitePrefix = row.get(7)?;
+                let suffix: crate::datatypes::SqlitePathBuf = row.get(8)?;
                 let path = RelativePath::make(prefix.value, suffix.value);
-                Ok(crate::SymbolRow {
+                Ok(crate::SymbolRowNew {
                     hash: row.get(0)?,
                     canon_hash: row.get(1)?,
                     decl_hash: row.get(2)?,
                     kind: row.get(3)?,
                     file_info_id: row.get(4)?,
+                    name: row.get(5)?,
+                    sort_text: row.get(6)?,
                     path,
                 })
             })
@@ -772,8 +794,8 @@ impl Names {
     pub fn rev_update(
         &self,
         symbol_hash: ToplevelSymbolHash,
-        winner: Option<&crate::SymbolRow>,
-        overflow: &[&crate::SymbolRow],
+        winner: Option<&crate::SymbolRowNew>,
+        overflow: &[&crate::SymbolRowNew],
     ) -> anyhow::Result<()> {
         self.conn
             .prepare("DELETE FROM naming_symbols WHERE hash = ?")?
@@ -782,23 +804,27 @@ impl Names {
             .prepare("DELETE FROM naming_symbols_overflow WHERE hash = ?")?
             .execute(params![symbol_hash])?;
         if let Some(symbol) = winner {
-            self.conn.prepare("INSERT INTO naming_symbols (hash, canon_hash, decl_hash, flags, file_info_id) VALUES (?,?,?,?,?)")?
+            self.conn.prepare("INSERT INTO naming_symbols (hash, canon_hash, decl_hash, flags, file_info_id, name, sort_text) VALUES (?,?,?,?,?, ?, ?)")?
             .execute(params![
                 symbol.hash,
                 symbol.canon_hash,
                 symbol.decl_hash,
                 symbol.kind,
-                symbol.file_info_id
+                symbol.file_info_id,
+                symbol.name,
+                symbol.sort_text
             ])?;
         }
         for symbol in overflow {
-            self.conn.prepare("INSERT INTO naming_symbols_overflow (hash, canon_hash, decl_hash, flags, file_info_id) VALUES (?,?,?,?,?)")?
+            self.conn.prepare("INSERT INTO naming_symbols_overflow (hash, canon_hash, decl_hash, flags, file_info_id, name, sort_text) VALUES (?,?,?,?,?, ?, ?)")?
             .execute(params![
                 symbol.hash,
                 symbol.canon_hash,
                 symbol.decl_hash,
                 symbol.kind,
-                symbol.file_info_id
+                symbol.file_info_id,
+                symbol.name,
+                symbol.sort_text
             ])?;
         }
 

@@ -1,11 +1,179 @@
-Notice: Evaluation of default arg initializer in func=func1, arg=p0 threw a PHP exception--this reflection call won't throw in future HHVMs! in %s on line %d
-string(55) "Function Foo::rbar expects a reified generic at index 0"
+Warning: Failed to eval default value of func1()'s $p0 argument for reflection, assigning NULL instead in %s on line %d
+vec(1) {
+  object(ReflectionParameter) (3) {
+    ["info"]=>
+    dict(12) {
+      ["index"]=>
+      int(0)
+      ["name"]=>
+      string(2) "p0"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["type_hint_builtin"]=>
+      bool(false)
+      ["function"]=>
+      string(5) "func1"
+      ["nullable"]=>
+      bool(true)
+      ["type_hint_nullable"]=>
+      bool(true)
+      ["default"]=>
+      NULL
+      ["defaultText"]=>
+      string(12) "Foo::rbar<_>"
+      ["attributes"]=>
+      dict(0) {
+      }
+      ["is_optional"]=>
+      bool(true)
+    }
+    ["name"]=>
+    string(2) "p0"
+    ["paramTypeInfo"]=>
+    dict(3) {
+      ["name"]=>
+      string(0) ""
+      ["nullable"]=>
+      bool(true)
+      ["builtin"]=>
+      bool(false)
+    }
+  }
+}
 
-Notice: Evaluation of default arg initializer in func=func2, arg=p0 threw a PHP exception--this reflection call won't throw in future HHVMs! in %s on line %d
-string(50) "Function rbaz expects a reified generic at index 0"
+Warning: Failed to eval default value of func2()'s $p0 argument for reflection, assigning NULL instead in %s on line %d
+vec(1) {
+  object(ReflectionParameter) (3) {
+    ["info"]=>
+    dict(12) {
+      ["index"]=>
+      int(0)
+      ["name"]=>
+      string(2) "p0"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["type_hint_builtin"]=>
+      bool(false)
+      ["function"]=>
+      string(5) "func2"
+      ["nullable"]=>
+      bool(true)
+      ["type_hint_nullable"]=>
+      bool(true)
+      ["default"]=>
+      NULL
+      ["defaultText"]=>
+      string(7) "rbaz<_>"
+      ["attributes"]=>
+      dict(0) {
+      }
+      ["is_optional"]=>
+      bool(true)
+    }
+    ["name"]=>
+    string(2) "p0"
+    ["paramTypeInfo"]=>
+    dict(3) {
+      ["name"]=>
+      string(0) ""
+      ["nullable"]=>
+      bool(true)
+      ["builtin"]=>
+      bool(false)
+    }
+  }
+}
 
-Notice: Evaluation of default arg initializer in func=func3, arg=p0 threw a PHP exception--this reflection call won't throw in future HHVMs! in %s on line %d
-string(73) "Cannot call the reified function 'Foo::rbar' without the reified generics"
+Warning: Failed to eval default value of func3()'s $p0 argument for reflection, assigning NULL instead in %s on line %d
+vec(1) {
+  object(ReflectionParameter) (3) {
+    ["info"]=>
+    dict(12) {
+      ["index"]=>
+      int(0)
+      ["name"]=>
+      string(2) "p0"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["type_hint_builtin"]=>
+      bool(false)
+      ["function"]=>
+      string(5) "func3"
+      ["nullable"]=>
+      bool(true)
+      ["type_hint_nullable"]=>
+      bool(true)
+      ["default"]=>
+      NULL
+      ["defaultText"]=>
+      string(11) "Foo::rbar()"
+      ["attributes"]=>
+      dict(0) {
+      }
+      ["is_optional"]=>
+      bool(true)
+    }
+    ["name"]=>
+    string(2) "p0"
+    ["paramTypeInfo"]=>
+    dict(3) {
+      ["name"]=>
+      string(0) ""
+      ["nullable"]=>
+      bool(true)
+      ["builtin"]=>
+      bool(false)
+    }
+  }
+}
 
-Notice: Evaluation of default arg initializer in func=func4, arg=p0 threw a PHP exception--this reflection call won't throw in future HHVMs! in %s on line %d
-string(68) "Cannot call the reified function 'rbaz' without the reified generics"
+Warning: Failed to eval default value of func4()'s $p0 argument for reflection, assigning NULL instead in %s on line %d
+vec(1) {
+  object(ReflectionParameter) (3) {
+    ["info"]=>
+    dict(12) {
+      ["index"]=>
+      int(0)
+      ["name"]=>
+      string(2) "p0"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["type_hint_builtin"]=>
+      bool(false)
+      ["function"]=>
+      string(5) "func4"
+      ["nullable"]=>
+      bool(true)
+      ["type_hint_nullable"]=>
+      bool(true)
+      ["default"]=>
+      NULL
+      ["defaultText"]=>
+      string(6) "rbaz()"
+      ["attributes"]=>
+      dict(0) {
+      }
+      ["is_optional"]=>
+      bool(true)
+    }
+    ["name"]=>
+    string(2) "p0"
+    ["paramTypeInfo"]=>
+    dict(3) {
+      ["name"]=>
+      string(0) ""
+      ["nullable"]=>
+      bool(true)
+      ["builtin"]=>
+      bool(false)
+    }
+  }
+}

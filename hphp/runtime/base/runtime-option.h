@@ -1405,7 +1405,7 @@ struct RuntimeOption {
    * 1 - Warn and retain current behavior                               \
    * 2 - Return null for parameter value                                \
    */                                                                   \
-  F(int32_t, FixDefaultArgReflection, 1)                                \
+  F(int32_t, FixDefaultArgReflection, 2)                                \
   F(int32_t, ServerOOMAdj, 0)                                           \
   F(std::string, PreludePath, "")                                       \
   F(uint32_t, NonSharedInstanceMemoCaches, 10)                          \

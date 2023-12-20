@@ -430,10 +430,6 @@ module Visitor_DEPRECATED = struct
 
       method on_continue : 'a -> 'a
 
-      method on_darray : 'a -> (targ * targ) option -> field list -> 'a
-
-      method on_varray : 'a -> targ option -> expr list -> 'a
-
       method on_do : 'a -> block -> expr -> 'a
 
       method on_expr : 'a -> expr -> 'a
@@ -810,8 +806,9 @@ module Visitor_DEPRECATED = struct
 
       method on_expr_ acc e =
         match e with
-        | Darray (tap, fieldl) -> this#on_darray acc tap fieldl
-        | Varray (ta, el) -> this#on_varray acc ta el
+        | Darray (tap, fieldl) ->
+          this#on_keyValCollection acc (Pos.none, Dict) tap fieldl
+        | Varray (ta, el) -> this#on_valCollection acc (Pos.none, Vec) ta el
         | Shape sh -> this#on_shape acc sh
         | True -> this#on_true acc
         | False -> this#on_false acc
@@ -893,25 +890,6 @@ module Visitor_DEPRECATED = struct
             end
           ~init:acc
           sm
-
-      method on_darray acc tap fieldl =
-        let acc =
-          match tap with
-          | Some (t1, t2) ->
-            let acc = this#on_targ acc t1 in
-            let acc = this#on_targ acc t2 in
-            acc
-          | None -> acc
-        in
-        List.fold_left fieldl ~f:this#on_field ~init:acc
-
-      method on_varray acc ta el =
-        let acc =
-          match ta with
-          | Some t -> this#on_targ acc t
-          | None -> acc
-        in
-        List.fold_left el ~f:this#on_expr ~init:acc
 
       method on_valCollection acc _ ta el =
         let acc =

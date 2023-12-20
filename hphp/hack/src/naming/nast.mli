@@ -234,8 +234,6 @@ module Visitor_DEPRECATED : sig
 
       method on_continue : 'a -> 'a
 
-      method on_darray : 'a -> (targ * targ) option -> field list -> 'a
-
       method on_declare_local : 'a -> Aast.lid -> hint -> expr option -> 'a
 
       method on_def : 'a -> def -> 'a
@@ -382,8 +380,6 @@ module Visitor_DEPRECATED : sig
 
       method on_valCollection :
         'a -> Aast.pos * Aast.vc_kind -> targ option -> expr list -> 'a
-
-      method on_varray : 'a -> targ option -> expr list -> 'a
 
       method on_while : 'a -> expr -> block -> 'a
 

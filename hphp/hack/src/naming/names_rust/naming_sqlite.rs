@@ -766,45 +766,6 @@ impl Names {
         Ok(())
     }
 
-    /// This updates the reverse naming-table NAMING_SYMBOLS and NAMING_SYMBOLS_OVERFLOW
-    /// by removing all old entries, then inserting the new entries.
-    /// TODO(ljw): remove previous implementations of insert_file_summary.
-    pub fn rev_update(
-        &self,
-        symbol_hash: ToplevelSymbolHash,
-        winner: Option<&crate::SymbolRow>,
-        overflow: &[&crate::SymbolRow],
-    ) -> anyhow::Result<()> {
-        self.conn
-            .prepare("DELETE FROM NAMING_SYMBOLS WHERE HASH = ?")?
-            .execute(params![symbol_hash])?;
-        self.conn
-            .prepare("DELETE FROM NAMING_SYMBOLS_OVERFLOW WHERE HASH = ?")?
-            .execute(params![symbol_hash])?;
-        if let Some(symbol) = winner {
-            self.conn.prepare("INSERT INTO NAMING_SYMBOLS (HASH, CANON_HASH, DECL_HASH, FLAGS, FILE_INFO_ID) VALUES (?,?,?,?,?)")?
-            .execute(params![
-                symbol.hash,
-                symbol.canon_hash,
-                symbol.decl_hash,
-                symbol.kind,
-                symbol.file_info_id
-            ])?;
-        }
-        for symbol in overflow {
-            self.conn.prepare("INSERT INTO NAMING_SYMBOLS_OVERFLOW (HASH, CANON_HASH, DECL_HASH, FLAGS, FILE_INFO_ID) VALUES (?,?,?,?,?)")?
-            .execute(params![
-                symbol.hash,
-                symbol.canon_hash,
-                symbol.decl_hash,
-                symbol.kind,
-                symbol.file_info_id
-            ])?;
-        }
-
-        Ok(())
-    }
-
     /// Wrapper around `build` (see its documentation); this wrapper is for when you
     /// want to pass file summaries as an iterator rather than send them over a channel.
     pub fn build_from_iterator(

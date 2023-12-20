@@ -19,6 +19,7 @@
 #include <type_traits>
 
 #include <thrift/lib/cpp2/FieldRef.h>
+#include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/op/Get.h>
 
 namespace apache {
@@ -40,7 +41,9 @@ struct is_optional_field_ref<union_field_ref<T>> : std::true_type {};
 // Helpers for detecting compatible optional field.
 template <typename T, typename Id>
 inline constexpr bool is_optional_field_v =
-    detail::is_optional_field_ref<op::get_field_ref<T, Id>>::value;
+    detail::is_optional_field_ref<op::get_field_ref<T, Id>>::value ||
+    ::apache::thrift::detail::qualifier::
+        is_cpp_ref_field_optional<T, op::get_field_id<T, Id>>::value;
 
 template <typename U, typename R = void>
 using if_optional_field = std::enable_if_t<

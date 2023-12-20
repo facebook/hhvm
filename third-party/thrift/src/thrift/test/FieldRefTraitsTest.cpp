@@ -176,6 +176,12 @@ static_assert(
 static_assert(!type::is_optional_field_v<
               terse_write::CppRefTerseStruct,
               type::field_id<4>>);
+// non-optional cpp.ref
+static_assert(
+    !type::is_optional_field_v<struct_list_i32_cpp_ref, type::field_id<1>>);
+static_assert(!type::is_optional_field_v<
+              struct_list_i32_shared_cpp_ref,
+              type::field_id<1>>);
 
 // optional
 static_assert(
@@ -183,6 +189,13 @@ static_assert(
 static_assert(type::is_optional_field_v<union_list_i32, type::field_id<1>>);
 static_assert(
     type::is_optional_field_v<struct_optional_list_i32_box, type::field_id<1>>);
+// optional cpp.ref
+static_assert(type::is_optional_field_v<
+              struct_optional_list_i32_cpp_ref,
+              type::field_id<1>>);
+static_assert(type::is_optional_field_v<
+              struct_optional_list_i32_shared_cpp_ref,
+              type::field_id<1>>);
 
 } // namespace
 } // namespace apache::thrift::test::testset

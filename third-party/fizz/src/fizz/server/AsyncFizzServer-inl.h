@@ -204,6 +204,7 @@ void AsyncFizzServerT<SM>::writeAppData(
     folly::AsyncTransportWrapper::WriteCallback* callback,
     std::unique_ptr<folly::IOBuf>&& buf,
     folly::WriteFlags flags) {
+  DelayedDestruction::DestructorGuard dg(this);
   if (!good()) {
     if (callback) {
       callback->writeErr(

@@ -869,11 +869,12 @@ Func* Func::load(const NamedFunc* ne, const StringData* name) {
 
 Func* Func::load(const StringData* name) {
   String normStr;
-  auto ne = NamedFunc::getOrCreate(name, &normStr);
-
-  // Try to fetch from cache
-  Func* func_ = ne->getCachedFunc();
-  if (LIKELY(func_ != nullptr)) return func_;
+  auto ne = NamedFunc::getNoCreate(name, &normStr);
+  if (ne != nullptr) {
+    // Try to fetch from NamedFunc cache
+    Func* func_ = ne->getCachedFunc();
+    if (LIKELY(func_ != nullptr)) return func_;
+  }
 
   // Normalize the namespace
   if (normStr) {
@@ -881,9 +882,12 @@ Func* Func::load(const StringData* name) {
   }
 
   // Autoload the function
-  return AutoloadHandler::s_instance->autoloadFunc(
-    const_cast<StringData*>(name)
-  ) ? ne->getCachedFunc() : nullptr;
+  auto& handler = AutoloadHandler::s_instance;
+  if (handler->autoloadFunc(const_cast<StringData*>(name))) {
+    if (!ne) ne = NamedFunc::getNoCreate(name, &normStr);
+    if (ne) return ne->getCachedFunc();
+  }
+  return nullptr;
 }
 
 namespace {

@@ -1022,9 +1022,9 @@ void validate_custom_cpp_type_annotations(
     if (has_real_annotation(*f)) {
       hasUnnamedCppType = true;
     }
-  } else if (auto f = dynamic_cast<const t_typedef*>(&node)) {
-    if (f->typedef_kind() == t_typedef::kind::defined &&
-        has_real_annotation(*f)) {
+  } else if (auto t = dynamic_cast<const t_typedef*>(&node)) {
+    if (t->typedef_kind() == t_typedef::kind::defined &&
+        has_real_annotation(*t)) {
       hasUnnamedCppType = true;
     }
   }

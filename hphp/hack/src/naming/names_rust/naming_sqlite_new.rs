@@ -85,58 +85,58 @@ impl Names {
     fn create_tables(conn: &mut Connection) -> anyhow::Result<()> {
         conn.execute(
             "
-            CREATE TABLE IF NOT EXISTS NAMING_SYMBOLS (
-                HASH INTEGER PRIMARY KEY NOT NULL,
-                CANON_HASH INTEGER NOT NULL,
-                DECL_HASH INTEGER NOT NULL,
-                FLAGS INTEGER NOT NULL,
-                FILE_INFO_ID INTEGER NOT NULL
+            CREATE TABLE IF NOT EXISTS naming_symbols (
+                hash INTEGER PRIMARY KEY NOT NULL,
+                canon_hash INTEGER NOT NULL,
+                decl_hash INTEGER NOT NULL,
+                flags INTEGER NOT NULL,
+                file_info_id INTEGER NOT NULL
             );",
             params![],
         )?;
 
         conn.execute(
             "
-            CREATE TABLE IF NOT EXISTS NAMING_SYMBOLS_OVERFLOW (
-                HASH INTEGER KEY NOT NULL,
-                CANON_HASH INTEGER NOT NULL,
-                DECL_HASH INTEGER NOT NULL,
-                FLAGS INTEGER NOT NULL,
-                FILE_INFO_ID INTEGER NOT NULL
+            CREATE TABLE IF NOT EXISTS naming_symbols_overflow (
+                hash INTEGER PRIMARY KEY NOT NULL,
+                canon_hash INTEGER NOT NULL,
+                decl_hash INTEGER NOT NULL,
+                flags INTEGER NOT NULL,
+                file_info_id INTEGER NOT NULL
             );",
             params![],
         )?;
 
         conn.execute(
             "
-            CREATE TABLE IF NOT EXISTS NAMING_FILE_INFO (
-                FILE_INFO_ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                FILE_DIGEST TEXT,
-                PATH_PREFIX_TYPE INTEGER NOT NULL,
-                PATH_SUFFIX TEXT NOT NULL,
-                TYPE_CHECKER_MODE INTEGER,
-                DECL_HASH INTEGER,
-                CLASSES TEXT,
-                CONSTS TEXT,
-                FUNS TEXT,
-                TYPEDEFS TEXT,
-                MODULES TEXT
+            CREATE TABLE IF NOT EXISTS naming_file_info (
+                file_info_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                file_digest TEXT,
+                path_prefix_type INTEGER NOT NULL,
+                path_suffix TEXT NOT NULL,
+                type_checker_mode INTEGER,
+                decl_hash INTEGER,
+                classes TEXT,
+                consts TEXT,
+                funs TEXT,
+                typedefs TEXT,
+                modules TEXT
             );",
             params![],
         )?;
 
         conn.execute(
             "
-            CREATE TABLE IF NOT EXISTS CHECKSUM (
-                ID INTEGER PRIMARY KEY,
-                CHECKSUM_VALUE INTEGER NOT NULL
+            CREATE TABLE IF NOT EXISTS checksum (
+                id INTEGER PRIMARY KEY,
+                checksum_value INTEGER NOT NULL
             );
             ",
             params![],
         )?;
 
         conn.execute(
-            "INSERT OR IGNORE INTO CHECKSUM (ID, CHECKSUM_VALUE) VALUES (0, 0);",
+            "INSERT OR IGNORE INTO checksum (id, checksum_value) VALUES (0, 0);",
             params![],
         )?;
 
@@ -144,10 +144,10 @@ impl Names {
         // hh_server and hh_single_type_check.
         conn.execute(
             "
-            CREATE TABLE IF NOT EXISTS NAMING_LOCAL_CHANGES(
-                ID INTEGER PRIMARY KEY,
-                LOCAL_CHANGES BLOB NOT NULL,
-                BASE_CONTENT_VERSION TEXT
+            CREATE TABLE IF NOT EXISTS naming_local_changes(
+                id INTEGER PRIMARY KEY,
+                local_changes BLOB NOT NULL,
+                base_content_version TEXT
             );",
             params![],
         )?;
@@ -157,7 +157,7 @@ impl Names {
         // random ID) needs only be unique.
         conn.execute(
             "
-            INSERT OR IGNORE INTO NAMING_LOCAL_CHANGES
+            INSERT OR IGNORE INTO naming_local_changes
             VALUES(0,X'8495a6be0000000100000000000000000000000040',?);",
             params![format!(
                 "{}-{}",
@@ -177,14 +177,14 @@ impl Names {
 
     pub fn create_indices(conn: &mut Connection) -> anyhow::Result<()> {
         conn.execute(
-            "CREATE UNIQUE INDEX IF NOT EXISTS FILE_INFO_PATH_IDX
-             ON NAMING_FILE_INFO (PATH_SUFFIX, PATH_PREFIX_TYPE);",
+            "CREATE UNIQUE INDEX IF NOT EXISTS file_info_path_idx
+             ON naming_file_info (path_suffix, path_prefix_type);",
             params![],
         )?;
 
         conn.execute(
-            "CREATE INDEX IF NOT EXISTS TYPES_CANON
-             ON NAMING_SYMBOLS (CANON_HASH);",
+            "CREATE INDEX IF NOT EXISTS types_canon
+             ON naming_symbols (canon_hash);",
             params![],
         )?;
 
@@ -194,13 +194,13 @@ impl Names {
     pub fn get_checksum(&self) -> anyhow::Result<Checksum> {
         Ok(self
             .conn
-            .prepare_cached("SELECT CHECKSUM_VALUE FROM CHECKSUM")?
+            .prepare_cached("SELECT checksum_value FROM checksum")?
             .query_row(params![], |row| row.get(0))?)
     }
 
     pub fn set_checksum(&self, checksum: Checksum) -> anyhow::Result<()> {
         self.conn
-            .prepare_cached("REPLACE INTO CHECKSUM (ID, CHECKSUM_VALUE) VALUES (0, ?);")?
+            .prepare_cached("REPLACE INTO checksum (id, checksum_value) VALUES (0, ?);")?
             .execute(params![checksum])?;
         Ok(())
     }
@@ -251,16 +251,16 @@ impl Names {
         save_result: &mut crate::SaveResult,
     ) -> anyhow::Result<()> {
         let mut insert_statement = self.conn.prepare_cached(
-            "INSERT INTO NAMING_SYMBOLS (HASH, CANON_HASH, DECL_HASH, FLAGS, FILE_INFO_ID)
+            "INSERT INTO naming_symbols (hash, canon_hash, decl_hash, flags, file_info_id)
             VALUES (?, ?, ?, ?, ?);",
         )?;
         let mut insert_overflow_statement = self.conn.prepare_cached(
-            "INSERT INTO NAMING_SYMBOLS_OVERFLOW (HASH, CANON_HASH, DECL_HASH, FLAGS, FILE_INFO_ID)
+            "INSERT INTO naming_symbols_overflow (hash, canon_hash, decl_hash, flags, file_info_id)
             VALUES (?, ?, ?, ?, ?);",
         )?;
         let mut delete_statement = self.conn.prepare_cached(
-            "DELETE FROM NAMING_SYMBOLS
-            WHERE HASH = ? AND FILE_INFO_ID = ?",
+            "DELETE FROM naming_symbols
+            WHERE hash = ? AND file_info_id = ?",
         )?;
         let symbol_hash = ToplevelSymbolHash::new(item.name_type, &item.symbol);
         let canon_hash = ToplevelCanonSymbolHash::new(item.name_type, item.symbol.clone());
@@ -332,21 +332,21 @@ impl Names {
     ) -> anyhow::Result<Vec<crate::SymbolRow>> {
         let select_statement = "
         SELECT
-            NAMING_SYMBOLS_OVERFLOW.HASH,
-            NAMING_SYMBOLS_OVERFLOW.CANON_HASH,
-            NAMING_SYMBOLS_OVERFLOW.DECL_HASH,
-            NAMING_SYMBOLS_OVERFLOW.FLAGS,
-            NAMING_SYMBOLS_OVERFLOW.FILE_INFO_ID,
-            NAMING_FILE_INFO.PATH_PREFIX_TYPE,
-            NAMING_FILE_INFO.PATH_SUFFIX
+            naming_symbols_overflow.hash,
+            naming_symbols_overflow.canon_hash,
+            naming_symbols_overflow.decl_hash,
+            naming_symbols_overflow.flags,
+            naming_symbols_overflow.file_info_id,
+            naming_file_info.path_prefix_type,
+            naming_file_info.path_suffix
         FROM
-            NAMING_SYMBOLS_OVERFLOW
+            naming_symbols_overflow
         LEFT JOIN
-            NAMING_FILE_INFO
+            naming_file_info
         ON
-            NAMING_SYMBOLS_OVERFLOW.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID
+            naming_symbols_overflow.file_info_id = naming_file_info.file_info_id
         WHERE
-            NAMING_SYMBOLS_OVERFLOW.HASH = ?
+            naming_symbols_overflow.hash = ?
         ";
 
         let mut select_statement = self.conn.prepare_cached(select_statement)?;
@@ -376,21 +376,21 @@ impl Names {
     ) -> anyhow::Result<Option<crate::SymbolRow>> {
         let select_statement = "
         SELECT
-            NAMING_SYMBOLS.HASH,
-            NAMING_SYMBOLS.CANON_HASH,
-            NAMING_SYMBOLS.DECL_HASH,
-            NAMING_SYMBOLS.FLAGS,
-            NAMING_SYMBOLS.FILE_INFO_ID,
-            NAMING_FILE_INFO.PATH_PREFIX_TYPE,
-            NAMING_FILE_INFO.PATH_SUFFIX
+            naming_symbols.hash,
+            naming_symbols.canon_hash,
+            naming_symbols.decl_hash,
+            naming_symbols.flags,
+            naming_symbols.file_info_id,
+            naming_file_info.path_prefix_type,
+            naming_file_info.path_suffix
         FROM
-            NAMING_SYMBOLS
+        naming_symbols
         LEFT JOIN
-            NAMING_FILE_INFO
+            naming_file_info
         ON
-            NAMING_SYMBOLS.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID
+            naming_symbols.file_info_id = naming_file_info.file_info_id
         WHERE
-            NAMING_SYMBOLS.HASH = ?
+            naming_symbols.hash = ?
         ";
 
         let mut select_statement = self.conn.prepare_cached(select_statement)?;
@@ -420,7 +420,7 @@ impl Names {
     ) -> anyhow::Result<Option<DeclHash>> {
         let result = self
             .conn
-            .prepare_cached("SELECT DECL_HASH FROM NAMING_SYMBOLS WHERE HASH = ?")?
+            .prepare_cached("SELECT decl_hash FROM naming_symbols WHERE hash = ?")?
             .query_row(params![symbol_hash], |row| row.get(0))
             .optional();
         Ok(result?)
@@ -434,17 +434,17 @@ impl Names {
     ) -> anyhow::Result<Option<(RelativePath, NameType)>> {
         let select_statement = "
         SELECT
-            NAMING_FILE_INFO.PATH_PREFIX_TYPE,
-            NAMING_FILE_INFO.PATH_SUFFIX,
-            NAMING_SYMBOLS.FLAGS
+            naming_file_info.path_prefix_type,
+            naming_file_info.path_suffix,
+            naming_symbols.flags
         FROM
-            NAMING_SYMBOLS
+            naming_symbols
         LEFT JOIN
-            NAMING_FILE_INFO
+            naming_file_info
         ON
-            NAMING_SYMBOLS.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID
+            naming_symbols.file_info_id = naming_file_info.file_info_id
         WHERE
-            NAMING_SYMBOLS.HASH = ?
+            naming_symbols.hash = ?
         LIMIT 1
         ";
 
@@ -480,16 +480,16 @@ impl Names {
     ) -> anyhow::Result<Option<RelativePath>> {
         let select_statement = "
         SELECT
-            NAMING_FILE_INFO.PATH_PREFIX_TYPE,
-            NAMING_FILE_INFO.PATH_SUFFIX
+            naming_file_info.path_prefix_type,
+            naming_file_info.path_suffix
         FROM
-            NAMING_SYMBOLS
+            naming_symbols
         LEFT JOIN
-            NAMING_FILE_INFO
+            naming_file_info
         ON
-            NAMING_SYMBOLS.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID
+            naming_symbols.file_info_id = naming_file_info.file_info_id
         WHERE
-        NAMING_SYMBOLS.CANON_HASH = ?
+        naming_symbols.canon_hash = ?
         ";
 
         let mut select_statement = self.conn.prepare_cached(select_statement)?;
@@ -516,16 +516,16 @@ impl Names {
     ) -> anyhow::Result<Option<String>> {
         let select_statement = "
         SELECT
-            NAMING_FILE_INFO.CLASSES,
-            NAMING_FILE_INFO.TYPEDEFS
+            naming_file_info.classes,
+            naming_file_info.typedefs
         FROM
-            NAMING_SYMBOLS
+            naming_symbols
         LEFT JOIN
-            NAMING_FILE_INFO
+            naming_file_info
         ON
-            NAMING_SYMBOLS.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID
+            naming_symbols.file_info_id = naming_file_info.file_info_id
         WHERE
-            NAMING_SYMBOLS.CANON_HASH = ?
+            naming_symbols.canon_hash = ?
         LIMIT 1
         ";
 
@@ -569,15 +569,15 @@ impl Names {
     ) -> anyhow::Result<Option<String>> {
         let select_statement = "
         SELECT
-            NAMING_FILE_INFO.FUNS
+            naming_file_info.FUNS
         FROM
-            NAMING_SYMBOLS
+            naming_symbols
         LEFT JOIN
-            NAMING_FILE_INFO
+            naming_file_info
         ON
-            NAMING_SYMBOLS.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID
+            naming_symbols.file_info_id = naming_file_info.file_info_id
         WHERE
-            NAMING_SYMBOLS.CANON_HASH = ?
+            naming_symbols.canon_hash = ?
         LIMIT 1
         ";
 
@@ -604,7 +604,7 @@ impl Names {
         &self,
         path: &RelativePath,
     ) -> anyhow::Result<Vec<(ToplevelSymbolHash, crate::FileInfoId)>> {
-        // The NAMING_FILE_INFO table stores e.g. "Classname1|Classname2|Classname3". This
+        // The naming_file_info table stores e.g. "Classname1|Classname2|Classname3". This
         // helper turns it into a vec of (ToplevelSymbolHash,file_info_id) pairs
         fn split(
             s: Option<String>,
@@ -625,9 +625,9 @@ impl Names {
         let mut results = vec![];
         self.conn
             .prepare_cached(
-                "SELECT CLASSES, CONSTS, FUNS, TYPEDEFS, MODULES, FILE_INFO_ID FROM NAMING_FILE_INFO
-                WHERE PATH_PREFIX_TYPE = ?
-                AND PATH_SUFFIX = ?",
+                "SELECT classes, consts, funs, typedefs, modules, file_info_id FROM naming_file_info
+                WHERE path_prefix_type = ?
+                AND path_suffix = ?",
             )?
             .query_row(params![path.prefix() as u8, path.path_str()], |row| {
                 let file_info_id: crate::FileInfoId = row.get(5)?;
@@ -659,17 +659,17 @@ impl Names {
 
         self.conn
             .prepare_cached(
-                "INSERT INTO NAMING_FILE_INFO(
-                FILE_DIGEST,
-                PATH_PREFIX_TYPE,
-                PATH_SUFFIX,
-                TYPE_CHECKER_MODE,
-                DECL_HASH,
-                CLASSES,
-                CONSTS,
-                FUNS,
-                TYPEDEFS,
-                MODULES
+                "INSERT INTO naming_file_info(
+                file_digest,
+                path_prefix_type,
+                path_suffix,
+                type_checker_mode,
+                decl_hash,
+                classes,
+                consts,
+                funs,
+                typedefs,
+                modules
             )
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10);",
             )?
@@ -712,9 +712,9 @@ impl Names {
         let file_info_id_opt = self
             .conn
             .prepare_cached(
-                "SELECT FILE_INFO_ID FROM NAMING_FILE_INFO
-                WHERE PATH_PREFIX_TYPE = ?
-                AND PATH_SUFFIX = ?",
+                "SELECT file_info_id FROM naming_file_info
+                WHERE path_prefix_type = ?
+                AND path_suffix = ?",
             )?
             .query_row(params![path.prefix() as u8, path.path_str()], |row| {
                 row.get::<usize, crate::FileInfoId>(0)
@@ -725,7 +725,7 @@ impl Names {
             Some(file_info_id) => file_info_id,
             None => {
                 self.conn
-                .prepare_cached("INSERT INTO NAMING_FILE_INFO(PATH_PREFIX_TYPE,PATH_SUFFIX) VALUES (?1, ?2);")?
+                .prepare_cached("INSERT INTO naming_file_info(path_prefix_type,path_suffix) VALUES (?1, ?2);")?
                 .execute(params![
                     path.prefix() as u8,
                     path.path_str(),
@@ -738,9 +738,9 @@ impl Names {
         self.conn
             .prepare_cached(
                 "
-                UPDATE NAMING_FILE_INFO
-                SET TYPE_CHECKER_MODE=?, DECL_HASH=?, CLASSES=?, CONSTS=?, FUNS=?, TYPEDEFS=?, MODULES=?
-                WHERE FILE_INFO_ID=?
+                UPDATE naming_file_info
+                SET type_checker_mode=?, decl_hash=?, classes=?, consts=?, funs=?, typedefs=?, modules=?
+                WHERE file_info_id=?
                 ",
             )?
             .execute(params![
@@ -761,12 +761,12 @@ impl Names {
     /// TODO(ljw): reconcile with delete.
     pub fn fwd_delete(&self, file_info_id: crate::FileInfoId) -> anyhow::Result<()> {
         self.conn
-            .prepare_cached("DELETE FROM NAMING_FILE_INFO WHERE FILE_INFO_ID = ?")?
+            .prepare_cached("DELETE FROM naming_file_info WHERE file_info_id = ?")?
             .execute(params![file_info_id])?;
         Ok(())
     }
 
-    /// This updates the reverse naming-table NAMING_SYMBOLS and NAMING_SYMBOLS_OVERFLOW
+    /// This updates the reverse naming-table naming_symbols and naming_symbols_overflow
     /// by removing all old entries, then inserting the new entries.
     /// TODO(ljw): remove previous implementations of insert_file_summary.
     pub fn rev_update(
@@ -776,13 +776,13 @@ impl Names {
         overflow: &[&crate::SymbolRow],
     ) -> anyhow::Result<()> {
         self.conn
-            .prepare("DELETE FROM NAMING_SYMBOLS WHERE HASH = ?")?
+            .prepare("DELETE FROM naming_symbols WHERE hash = ?")?
             .execute(params![symbol_hash])?;
         self.conn
-            .prepare("DELETE FROM NAMING_SYMBOLS_OVERFLOW WHERE HASH = ?")?
+            .prepare("DELETE FROM naming_symbols_overflow WHERE hash = ?")?
             .execute(params![symbol_hash])?;
         if let Some(symbol) = winner {
-            self.conn.prepare("INSERT INTO NAMING_SYMBOLS (HASH, CANON_HASH, DECL_HASH, FLAGS, FILE_INFO_ID) VALUES (?,?,?,?,?)")?
+            self.conn.prepare("INSERT INTO naming_symbols (hash, canon_hash, decl_hash, flags, file_info_id) VALUES (?,?,?,?,?)")?
             .execute(params![
                 symbol.hash,
                 symbol.canon_hash,
@@ -792,7 +792,7 @@ impl Names {
             ])?;
         }
         for symbol in overflow {
-            self.conn.prepare("INSERT INTO NAMING_SYMBOLS_OVERFLOW (HASH, CANON_HASH, DECL_HASH, FLAGS, FILE_INFO_ID) VALUES (?,?,?,?,?)")?
+            self.conn.prepare("INSERT INTO naming_symbols_overflow (hash, canon_hash, decl_hash, flags, file_info_id) VALUES (?,?,?,?,?)")?
             .execute(params![
                 symbol.hash,
                 symbol.canon_hash,

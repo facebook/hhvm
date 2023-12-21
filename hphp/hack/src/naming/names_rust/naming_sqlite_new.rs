@@ -720,65 +720,6 @@ impl Names {
         if s.is_empty() { None } else { Some(s) }
     }
 
-    /// This updates the forward naming table.
-    /// It will replace the existing entry (preserving file_info_id) if file was present,
-    /// or add a new entry (with new file_info_id) otherwise.
-    /// It returns the file_info_id.
-    /// Note: it never deletes a row.
-    /// TODO(ljw): reconcile with existing delete() and insert_file_info_and_get_file_id()
-    pub fn fwd_update(
-        &self,
-        path: &RelativePath,
-        file_summary: Option<&crate::FileSummary>,
-    ) -> anyhow::Result<crate::FileInfoId> {
-        let file_info_id_opt = self
-            .conn
-            .prepare_cached(
-                "SELECT file_info_id FROM naming_file_info
-                WHERE path_prefix_type = ?
-                AND path_suffix = ?",
-            )?
-            .query_row(params![path.prefix() as u8, path.path_str()], |row| {
-                row.get::<usize, crate::FileInfoId>(0)
-            })
-            .optional()?;
-
-        let file_info_id = match file_info_id_opt {
-            Some(file_info_id) => file_info_id,
-            None => {
-                self.conn
-                .prepare_cached("INSERT INTO naming_file_info(path_prefix_type,path_suffix) VALUES (?1, ?2);")?
-                .execute(params![
-                    path.prefix() as u8,
-                    path.path_str(),
-                ])?;
-                crate::FileInfoId::last_insert_rowid(&self.conn)
-            }
-        };
-
-        let _a = file_summary.and_then(|fs| Self::join_with_pipe(fs.classes()));
-        self.conn
-            .prepare_cached(
-                "
-                UPDATE naming_file_info
-                SET type_checker_mode=?, decl_hash=?, classes=?, consts=?, funs=?, typedefs=?, modules=?
-                WHERE file_info_id=?
-                ",
-            )?
-            .execute(params![
-                crate::datatypes::convert::mode_to_i64(file_summary.and_then(|fs| fs.mode)),
-                file_summary.map(|fs| fs.file_decls_hash),
-                file_summary.and_then(|fs| Self::join_with_pipe(fs.classes())),
-                file_summary.and_then(|fs| Self::join_with_pipe(fs.consts())),
-                file_summary.and_then(|fs| Self::join_with_pipe(fs.funs())),
-                file_summary.and_then(|fs| Self::join_with_pipe(fs.typedefs())),
-                file_summary.and_then(|fs| Self::join_with_pipe(fs.modules())),
-                file_info_id,
-            ])?;
-
-        Ok(file_info_id)
-    }
-
     /// Wrapper around `build` (see its documentation); this wrapper is for when you
     /// want to pass file summaries as an iterator rather than send them over a channel.
     pub fn build_from_iterator(

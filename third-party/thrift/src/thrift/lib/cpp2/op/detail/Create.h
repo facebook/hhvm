@@ -35,7 +35,7 @@ namespace detail {
 
 // If the given field is absent/unset/void.
 template <typename T>
-type::if_optional_field<T, bool> isAbsent(const T& opt) {
+type::if_optional_or_union_field_ref<T, bool> isAbsent(const T& opt) {
   return !opt.has_value();
 }
 template <typename T>
@@ -67,7 +67,7 @@ constexpr bool isAbsent(std::shared_ptr<T>& ptr) {
   return ptr == nullptr;
 }
 
-template <typename T, typename = type::if_optional_field<T>>
+template <typename T, typename = type::if_optional_or_union_field_ref<T>>
 auto ensureValue(T&& opt) -> decltype(opt.value()) {
   if (isAbsent(opt)) {
     opt.emplace();

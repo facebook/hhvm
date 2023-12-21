@@ -29,19 +29,19 @@ namespace type {
 
 // Helpers for detecting compatible optional field.
 template <typename T, typename Id>
-inline constexpr bool is_optional_field_v =
+inline constexpr bool is_optional_or_union_field_v =
     ::apache::thrift::detail::is_optional_or_union_field_ref_v<
         op::get_field_ref<T, Id>> ||
     ::apache::thrift::detail::qualifier::
         is_cpp_ref_field_optional<T, op::get_field_id<T, Id>>::value;
 
 template <typename U, typename R = void>
-using if_optional_field = std::enable_if_t<
+using if_optional_or_union_field_ref = std::enable_if_t<
     ::apache::thrift::detail::is_optional_or_union_field_ref_v<
         folly::remove_cvref_t<U>>,
     R>;
 template <typename U, typename R = void>
-using if_not_optional_field = std::enable_if_t<
+using if_not_optional_or_union_field_ref = std::enable_if_t<
     !::apache::thrift::detail::is_optional_or_union_field_ref_v<
         folly::remove_cvref_t<U>>,
     R>;

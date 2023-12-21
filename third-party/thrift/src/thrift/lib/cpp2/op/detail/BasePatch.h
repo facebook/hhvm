@@ -173,7 +173,8 @@ class BaseAssignPatch : public BasePatch<Patch, Derived> {
 
   // A 'value' patch only applies to set optional values.
   template <typename U>
-  type::if_optional_field<folly::remove_cvref_t<U>> apply(U&& field) const {
+  type::if_optional_or_union_field_ref<folly::remove_cvref_t<U>> apply(
+      U&& field) const {
     if (field.has_value()) {
       derived().apply(*std::forward<U>(field));
     }
@@ -234,7 +235,8 @@ class BaseClearPatch : public BaseAssignPatch<Patch, Derived> {
 
   // Clear resets optional fields.
   template <typename U>
-  type::if_optional_field<folly::remove_cvref_t<U>> apply(U&& field) const {
+  type::if_optional_or_union_field_ref<folly::remove_cvref_t<U>> apply(
+      U&& field) const {
     if (data_.clear() == true && !hasAssign()) {
       field.reset();
     } else if (field.has_value()) {

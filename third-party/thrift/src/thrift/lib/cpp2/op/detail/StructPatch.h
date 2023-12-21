@@ -176,7 +176,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   template <typename Id>
   bool modifies() const {
     return hasAssign() || data_.clear() == true ||
-        (getEnsure<Id>(data_) && type::is_optional_field_v<T, Id>) ||
+        (getEnsure<Id>(data_) && type::is_optional_or_union_field_v<T, Id>) ||
         !getRawPatch<Id>(data_.patchPrior()).empty() ||
         !getRawPatch<Id>(data_.patch()).empty();
   }
@@ -185,7 +185,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   std::enable_if_t<sizeof...(Ids) != 0, bool> modifies() const {
     // If hasAssign() == true, the whole struct (all fields) will be replaced.
     if (hasAssign() || data_.clear() == true ||
-        (getEnsure<Id>(data_) && type::is_optional_field_v<T, Id>)) {
+        (getEnsure<Id>(data_) && type::is_optional_or_union_field_v<T, Id>)) {
       return true;
     }
 
@@ -204,7 +204,8 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   }
   /// Same as `ensure()` method, except uses the provided default value.
   template <typename Id, typename U = FieldType<Id>>
-  std::enable_if_t<type::is_optional_field_v<T, Id>> ensure(U&& defaultVal) {
+  std::enable_if_t<type::is_optional_or_union_field_v<T, Id>> ensure(
+      U&& defaultVal) {
     if (maybeEnsure<Id>()) {
       if (patchPrior<Id>().toThrift().clear().value() &&
           !is_thrift_union_v<T>) {
@@ -230,7 +231,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   /// Returns the proper patch object for the given field.
   template <typename Id>
   decltype(auto) patchIfSet() {
-    if (!type::is_optional_field_v<T, Id>) {
+    if (!type::is_optional_or_union_field_v<T, Id>) {
       return patch<Id>();
     }
     ensurePatchable();
@@ -289,7 +290,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
 
         v.template patchIfSet<Id>(FieldPatchType{});
         v.template ensure<Id>();
-        if constexpr (type::is_optional_field_v<T, Id>) {
+        if constexpr (type::is_optional_or_union_field_v<T, Id>) {
           v.template ensure<Id>(FieldType<Id>{});
         }
         v.template patchIfSet<Id>(FieldPatchType{});
@@ -306,7 +307,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
     for_each_field_id<T>([&](auto id) {
       using Id = decltype(id);
       if (auto p = op::get<Id>(*data_.ensure())) {
-        if constexpr (type::is_optional_field_v<T, Id>) {
+        if constexpr (type::is_optional_or_union_field_v<T, Id>) {
           std::forward<Visitor>(v).template ensure<Id>(*p);
         } else {
           std::forward<Visitor>(v).template ensure<Id>();
@@ -533,7 +534,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
     const auto& ensure = *data_.ensure();
     const auto& after = data_.patch()->toThrift();
 
-    if constexpr (!type::is_optional_field_v<T, Id>) {
+    if constexpr (!type::is_optional_or_union_field_v<T, Id>) {
       // non-optional fields can not be removed
       return false;
     }

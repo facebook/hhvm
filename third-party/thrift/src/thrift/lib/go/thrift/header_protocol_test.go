@@ -57,7 +57,7 @@ func TestHeaderProtocolHeaders(t *testing.T) {
 		t.Fatalf("failed to read header, got: %s", v)
 	}
 
-	if proto2.PeerIdentity() != "batman" {
+	if proto2.peerIdentity() != "batman" {
 		t.Fatalf("failed to peer identity")
 	}
 }

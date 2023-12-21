@@ -106,7 +106,7 @@ func (t *HeaderTransport) SetIdentity(identity string) {
 	t.identity = identity
 }
 
-func (t *HeaderTransport) PeerIdentity() string {
+func (t *HeaderTransport) peerIdentity() string {
 	v, ok := t.ReadHeader(IdentityHeader)
 	vers, versok := t.ReadHeader(IDVersionHeader)
 	if ok && versok && vers == IDVersion {

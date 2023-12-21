@@ -207,11 +207,11 @@ func TestHeaderHeaders(t *testing.T) {
 	// make sure we prefer persistent headers
 	headerval, _ = trans2.ReadHeader("preferred_cheese")
 	assertEq(t, "gouda", headerval)
-	assertEq(t, "localhost", trans2.PeerIdentity())
+	assertEq(t, "localhost", trans2.peerIdentity())
 	assertEq(t, 5, len(trans2.ReadHeaders()))
 
 	trans2.readHeader.headers[IDVersionHeader] = "invalid"
-	assertEq(t, "", trans2.PeerIdentity())
+	assertEq(t, "", trans2.peerIdentity())
 
 	trans1.ClearPersistentHeaders()
 	assertEq(t, 0, len(trans1.PersistentHeaders()))

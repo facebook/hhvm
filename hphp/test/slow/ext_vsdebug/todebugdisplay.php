@@ -2,11 +2,11 @@
 <<__EntryPoint>> function main(): void {
 require(__DIR__ . '/common.inc');
 $path = __FILE__ . ".test";
-$breakpoints = varray[
-   darray[
+$breakpoints = vec[
+   dict[
      "path" => $path,
-     "breakpoints" => varray[
-       darray["line" => 14, "calibratedLine" => 14, "condition" => ""],
+     "breakpoints" => vec[
+       dict["line" => 14, "calibratedLine" => 14, "condition" => ""],
      ]]
    ];
 
@@ -19,31 +19,31 @@ skipMessages(count($breakpoints[0]{'breakpoints'}));
 verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0]);
 
 // Check thread stacks.
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "stackTrace",
   "type" => "request",
-  "arguments" => darray[
+  "arguments" => dict[
     "threadId" => 1
   ]
 ]);
 
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "response",
   "command" => "stackTrace",
   "request_seq" => $seq,
   "success" => true,
-  "body" => darray[
+  "body" => dict[
       "totalFrames" => 2,
-      "stackFrames" => varray[
-        darray[
-          "source" => darray["path" => $path, "name" => str_replace(".test", "", basename($path))],
+      "stackFrames" => vec[
+        dict[
+          "source" => dict["path" => $path, "name" => str_replace(".test", "", basename($path))],
           "id" => 1,
           "line" => 14,
           "name" => "innerFunc"
         ],
-        darray[
-          "source" => darray["path" => $path, "name" => str_replace(".test", "", basename($path))],
+        dict[
+          "source" => dict["path" => $path, "name" => str_replace(".test", "", basename($path))],
           "id" => 2,
           "line" => 17,
           "name" => "main"
@@ -54,43 +54,43 @@ checkObjEqualRecursively($msg, darray[
 );
 
 // Check threads.
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "threads",
   "type" => "request"]);
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "response",
   "command" => "threads",
   "request_seq" => $seq,
   "success" => true,
-  "body" => darray[
-    "threads" => varray[darray["name" => "Request 1", "id" => 1]]
+  "body" => dict[
+    "threads" => vec[dict["name" => "Request 1", "id" => 1]]
   ]
   ]);
 
 // Get scopes.
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "scopes",
   "type" => "request",
-  "arguments" => darray["frameId" => 1]]);
+  "arguments" => dict["frameId" => 1]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
 
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "response",
   "command" => "scopes",
   "request_seq" => $seq,
   "success" => true,
-  "body" => darray[
-    "scopes" => varray[
-      darray[
+  "body" => dict[
+    "scopes" => vec[
+      dict[
         "namedVariables" => 1,
         "name" => "Locals",
       ],
-      darray[
+      dict[
         "namedVariables" => 7,
         "name" => "Superglobals",
       ],
-      darray[
+      dict[
         "namedVariables" => 2,
         "name" => "Constants",
       ]
@@ -98,24 +98,24 @@ checkObjEqualRecursively($msg, darray[
   ]);
 
 // Get locals, only $a should be visible right here.
-$seq = sendVsCommand(darray[
+$seq = sendVsCommand(dict[
   "command" => "variables",
   "type" => "request",
-  "arguments" => darray["variablesReference" => 3]]);
+  "arguments" => dict["variablesReference" => 3]]);
 $msg = json_decode(getNextVsDebugMessage(), true);
 
 if (isset($msg['body']['variables'][0]['variablesReference'])) {
   throw new ErrorException('A class with a __toDebugDisplay method should not return variablesReference');
 }
 
-checkObjEqualRecursively($msg, darray[
+checkObjEqualRecursively($msg, dict[
   "type" => "response",
   "command" => "variables",
   "request_seq" => $seq,
   "success" => true,
-  "body" => darray[
-    "variables" => varray[
-      darray[
+  "body" => dict[
+    "variables" => vec[
+      dict[
         "type" => "A",
         "name" => "\$a",
         "value" => "A(42)",

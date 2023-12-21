@@ -18,12 +18,12 @@ class B extends A {
 function innerFunc() {
   $a = 1;
   $b = "Hello world";
-  $c = varray[1, 2, 3];
-  $d = varray[1, varray[2, 3]];
+  $c = vec[1, 2, 3];
+  $d = vec[1, vec[2, 3]];
 
   $bObj = new B();
   $bObj->aObj = new A();
-  $e = varray[$bObj, $bObj];
+  $e = vec[$bObj, $bObj];
 
   echo "hello world 1\n";
 }

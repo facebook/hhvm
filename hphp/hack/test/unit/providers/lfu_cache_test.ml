@@ -62,7 +62,19 @@ let test_insert _test_ctxt =
   Int_asserter.assert_option_equals
     (Some 2)
     (Cache.find_or_add cache ~key:(Int_key 1) ~default:(fun () -> None))
-    "Key should have been overwritten with value 2"
+    "Key should have been overwritten with value 2";
+  Cache.add cache ~key:(String_key "a") ~value:"aa";
+  let contents =
+    Cache.fold cache ~init:[] ~f:(fun (Cache.Element (key, value)) acc ->
+        match (key, value) with
+        | (Int_key k, v) -> Printf.sprintf "%d->%d" k v :: acc
+        | (String_key k, v) -> Printf.sprintf "%s->%s" k v :: acc)
+  in
+  String_asserter.assert_list_equals
+    ["1->2"; "a->aa"]
+    (List.sort contents ~compare:String.compare)
+    "Key should have these two values";
+  ()
 
 let test_insert_many _test_ctxt =
   let insert_random_entry i cache =

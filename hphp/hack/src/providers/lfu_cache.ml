@@ -62,6 +62,8 @@ module Cache (Entry : Entry) = struct
     num_collections: int ref;
   }
 
+  type element = Element : ('a Entry.key * 'a Entry.value) -> element
+
   let make_entry value = { frequency = ref 0; value }
 
   let make ~(max_size : size) : t =
@@ -200,6 +202,11 @@ module Cache (Entry : Entry) = struct
 
   let remove (t : t) ~(key : 'a Entry.key) : unit =
     Hashtbl.remove t.entries (Key key)
+
+  let fold (t : t) ~(init : 'acc) ~(f : element -> 'acc -> 'acc) : 'acc =
+    Hashtbl.fold t.entries ~init ~f:(fun ~key ~data acc ->
+        let (Key key, Value_wrapper value) = (key, data.value) in
+        f (Element (key, Obj.magic value)) acc)
 
   let get_telemetry (t : t) ~(key : string) (telemetry : Telemetry.t) :
       Telemetry.t =

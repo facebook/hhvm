@@ -61,6 +61,8 @@ end
 module Cache (Entry : Entry) : sig
   type t
 
+  type element = Element : ('a Entry.key * 'a Entry.value) -> element
+
   (** Construct a new cache which can store up to [max_size] of values. *)
   val make : max_size:size -> t
 
@@ -93,6 +95,8 @@ module Cache (Entry : Entry) : sig
 
   (* Check whether the item is present *)
   val find : t -> key:'a Entry.key -> 'a Entry.value option
+
+  val fold : t -> init:'acc -> f:(element -> 'acc -> 'acc) -> 'acc
 
   (** This uses [Entry.key_to_log_string] to get a list of all keys.
   Solely for debugging/logging. *)

@@ -320,7 +320,6 @@ let def_env ctx d =
   | SetNamespaceEnv _
   | SetModule _
   | FileAttributes _
-  (* TODO(T108206307) *)
   | Module _ ->
     empty ctx
 

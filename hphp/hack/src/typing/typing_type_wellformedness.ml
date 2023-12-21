@@ -663,6 +663,5 @@ let _toplevel_def tenv = function
   | SetNamespaceEnv _
   | FileAttributes _
   | SetModule _
-  (* TODO(T108206307) *)
   | Module _ ->
     []

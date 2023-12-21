@@ -33,6 +33,6 @@ function g(): void {
 
 module b; // ERROR: no such new module `b`
 
-// TODO(T108206307) You _need_ a top level symbol to attach a new module to in order
+// You _need_ a top level symbol to attach a new module to in order
 // to get an unbound new module name error.
 function h(): void {}

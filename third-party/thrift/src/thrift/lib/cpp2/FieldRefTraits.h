@@ -86,6 +86,11 @@ template <class T>
 inline constexpr bool is_shared_or_unique_ptr_v =
     is_unique_ptr_v<T> || is_shared_ptr_v<T>;
 
+template <class T>
+inline constexpr bool is_optional_or_union_field_ref_v =
+    is_optional_field_ref_v<T> || is_optional_boxed_field_ref_v<T> ||
+    is_union_field_ref_v<T>;
+
 } // namespace detail
 } // namespace thrift
 } // namespace apache

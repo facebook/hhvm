@@ -74,6 +74,10 @@ class AnyData : public detail::Wrap<AnyStruct> {
     get<infer_tag<T>>(v);
   }
 
+  bool isValid() const noexcept { return isValid(data_); }
+
+  static bool isValid(const AnyStruct& any) noexcept;
+
  private:
   friend bool operator==(AnyData lhs, AnyData rhs) noexcept {
     return lhs.data_ == rhs.data_;
@@ -131,6 +135,13 @@ void AnyData::get(native_type<Tag>& v) const {
     folly::throw_exception<std::runtime_error>(
         "Unsupported protocol: " + std::string(protocol().name()));
   }
+}
+
+inline bool AnyData::isValid(const AnyStruct& any) noexcept {
+  if (!any.data().is_set()) {
+    return true;
+  }
+  return any.type()->isValid() && !any.protocol()->empty();
 }
 
 } // namespace type

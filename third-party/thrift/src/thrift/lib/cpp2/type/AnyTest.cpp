@@ -146,5 +146,23 @@ TYPED_TEST(AnyTestFixture, BinaryProtocol) {
   any.get<TypeParam>(v);
   EXPECT_EQ(v, value);
 }
+
+TEST(AnyTest, isValid) {
+  AnyStruct builder;
+  // Any is empty, so it is valid
+  EXPECT_TRUE(AnyData::isValid(builder));
+
+  builder.data() = folly::IOBuf::wrapBufferAsValue("{}", 2);
+  // type and protocol are missing
+  EXPECT_FALSE(AnyData::isValid(builder));
+
+  builder.type() = struct_t<test::AnyTestStruct>{};
+  // protocol is missing
+  EXPECT_FALSE(AnyData::isValid(builder));
+
+  builder.protocol() = StandardProtocol::SimpleJson;
+  // All fields have valid values
+  EXPECT_TRUE(AnyData::isValid(builder));
+}
 } // namespace
 } // namespace apache::thrift::type

@@ -167,5 +167,51 @@ TEST(TypeTest, NameValidation) {
   EXPECT_THROW(Type::create<exception_c>("BadName"), std::invalid_argument);
 }
 
+TEST(TypeTest, isFull) {
+  Type type;
+  // empty type
+  EXPECT_FALSE(type.isFull());
+
+  auto& t = type.toThrift();
+  t.name()->set_listType();
+
+  // only checks fullness of params, if present
+  EXPECT_TRUE(type.isFull());
+  // ensures that appropriate number of params are present
+  EXPECT_FALSE(type.isValid());
+
+  TypeStruct params;
+  t.params().ensure().push_back(params);
+
+  // invalid params
+  EXPECT_FALSE(type.isFull());
+  EXPECT_FALSE(type.isValid());
+
+  t.params()[0].name()->set_boolType();
+  // valid params
+  EXPECT_TRUE(type.isFull());
+  EXPECT_TRUE(type.isValid());
+
+  params.name()->set_i32Type();
+  t.params().ensure().push_back(params);
+  // only checks fullness of params, if present
+  EXPECT_TRUE(type.isFull());
+  // ensures that appropriate number of params are present
+  // list only needs one param
+  EXPECT_FALSE(type.isValid());
+
+  t.params()->clear();
+  TypeUri uri;
+  uri.set_uri("BadName");
+  t.name()->set_structType() = uri;
+  // only checks if uri is present
+  EXPECT_TRUE(type.isFull());
+  // ensures that uri is valid
+  EXPECT_FALSE(type.isValid());
+
+  type = Type::create<struct_c>("domain.com/my/package/MyStruct");
+  // ensures that uri is valid
+  EXPECT_TRUE(type.isValid());
+}
 } // namespace
 } // namespace apache::thrift::type

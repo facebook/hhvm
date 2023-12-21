@@ -106,14 +106,20 @@ class Type : public detail::Wrap<TypeStruct> {
 
   // If the complete and non-empty type information is present.
   //
-  // Specifically, that all contained 'type name' values are not empty and
-  // have full, human-readable, Thrift URIs.
+  // Specifically, that all contained 'type name' values are not empty.
   bool isFull() const { return isFull(data_); }
 
+  // If the Type information is full, contains correct number of valid
+  // parameters and have full, human-readable, Thrift URIs.
+  bool isValid() const { return isFull(data_, true, true); }
+
  private:
-  static bool isFull(const TypeUri& typeUri);
-  static bool isFull(const TypeName& typeName);
-  static bool isFull(const TypeStruct& type);
+  static bool isFull(const TypeUri& typeUri, bool validate_uri);
+  static bool isFull(const TypeName& typeName, bool validate_uri);
+  static bool isFull(
+      const TypeStruct& type,
+      bool ensure_params = false,
+      bool validate_uri = false);
 
   friend bool operator==(Type lhs, Type rhs) noexcept {
     return lhs.data_ == rhs.data_;

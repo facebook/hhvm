@@ -22,20 +22,30 @@ namespace apache {
 namespace thrift {
 namespace type {
 
-bool Type::isFull(const TypeUri& typeUri) {
-  return typeUri.getType() == TypeUri::Type::uri;
+bool Type::isFull(const TypeUri& typeUri, bool validate_uri) {
+  if (typeUri.getType() != TypeUri::Type::uri) {
+    return false;
+  };
+  if (validate_uri) {
+    try {
+      checkName(typeUri.get_uri());
+    } catch (std::exception&) {
+      return false;
+    }
+  }
+  return true;
 }
 
-bool Type::isFull(const TypeName& typeName) {
+bool Type::isFull(const TypeName& typeName, bool validate_uri) {
   switch (typeName.getType()) {
     case TypeName::Type::enumType:
-      return isFull(*typeName.enumType_ref());
+      return isFull(*typeName.enumType_ref(), validate_uri);
     case TypeName::Type::structType:
-      return isFull(*typeName.structType_ref());
+      return isFull(*typeName.structType_ref(), validate_uri);
     case TypeName::Type::unionType:
-      return isFull(*typeName.unionType_ref());
+      return isFull(*typeName.unionType_ref(), validate_uri);
     case TypeName::Type::exceptionType:
-      return isFull(*typeName.exceptionType_ref());
+      return isFull(*typeName.exceptionType_ref(), validate_uri);
     case TypeName::Type::__EMPTY__:
       return false;
     default:
@@ -43,13 +53,32 @@ bool Type::isFull(const TypeName& typeName) {
   }
 }
 
-bool Type::isFull(const TypeStruct& type) {
-  for (const auto& param : *type.params()) {
-    if (!isFull(param)) {
+bool Type::isFull(
+    const TypeStruct& type, bool ensure_params, bool validate_uri) {
+  auto type_name = *type.name();
+  if (ensure_params) {
+    size_t expected_params_count = 0;
+    switch (type_name.getType()) {
+      case TypeName::Type::listType:
+      case TypeName::Type::setType:
+        expected_params_count = 1;
+        break;
+      case TypeName::Type::mapType:
+        expected_params_count = 2;
+        break;
+      default:
+        break;
+    }
+    if (expected_params_count != type.params()->size()) {
       return false;
     }
   }
-  return isFull(*type.name());
+  for (const auto& param : *type.params()) {
+    if (!isFull(param, ensure_params, validate_uri)) {
+      return false;
+    }
+  }
+  return isFull(type_name, validate_uri);
 }
 
 void Type::checkName(const std::string& name) {

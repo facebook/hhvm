@@ -9,6 +9,8 @@ license = "MIT"
 
 [lib]
 path = "saved_state_rollouts_ffi.rs"
+test = false
+doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]

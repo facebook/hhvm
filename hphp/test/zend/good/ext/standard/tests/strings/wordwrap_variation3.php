@@ -19,7 +19,7 @@ $fp = fopen(__FILE__, "r");
 
 
 // array with different values for break arg
-$values =  varray [
+$values =  vec[
 
   // integer values
   0,

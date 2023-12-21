@@ -11,7 +11,7 @@
 echo "*** Testing rsort() : variation ***\n";
 
 // bool value array
-$bool_values = varray [true, false, TRUE, FALSE];
+$bool_values = vec[true, false, TRUE, FALSE];
 
 echo "\n-- 'flag' value is defualt --\n";
 $temp_array = $bool_values;

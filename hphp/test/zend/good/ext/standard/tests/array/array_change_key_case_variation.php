@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$item = darray ["one" => 1, "two" => 2, "THREE" => 3, "FOUR" => "four"];
+$item = dict["one" => 1, "two" => 2, "THREE" => 3, "FOUR" => "four"];
 
 /* use 'case' argument other than CASE_LOWER & CASE_UPPER */
 try { var_dump(array_change_key_case($item, "CASE_UPPER"));  } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

@@ -17,7 +17,7 @@
 echo "*** Testing sort() : usage variations ***\n";
 
 // group of various arrays
-$various_arrays = varray [
+$various_arrays = vec[
   // negative/posative integers array
   vec[11, -11, 21, -21, 31, -31, 0, 41, -41],
 

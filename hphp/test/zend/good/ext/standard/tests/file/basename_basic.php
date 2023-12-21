@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$file_paths = varray [
+$file_paths = vec[
   /* simple paths (forward slashes) */
   "bar",
   "/foo/bar",

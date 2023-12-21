@@ -19,7 +19,7 @@ echo "*** Testing convert_uuencode() function: with unexpected inputs for 'data'
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values for $data
-$inputs =  varray [
+$inputs =  vec[
 
           // integer values
 /*1*/      0,

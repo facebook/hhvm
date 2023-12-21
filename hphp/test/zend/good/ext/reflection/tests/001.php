@@ -17,7 +17,7 @@ class ReflectionClassEx extends ReflectionClass
 <<__EntryPoint>> function main(): void {
 $r = new ReflectionClassEx('ReflectionClassEx');
 
-$exp = varray [
+$exp = vec[
   'UMLClass::__clone',
   'UMLClass::export',
   'UMLClass::__construct',

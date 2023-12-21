@@ -26,7 +26,7 @@ $array = dict["a" => "green", 0 => "red", 1 => "blue", 2 => "red", 3 => "orange"
 $fp = fopen(__FILE__, "r");
 
 //array of values to iterate over
-$preserve_keys = varray [
+$preserve_keys = vec[
 
        // int data
 /*1*/  0,

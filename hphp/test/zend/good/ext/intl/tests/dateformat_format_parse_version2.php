@@ -9,11 +9,11 @@ function ut_main()
 :mixed{
     $timezone = 'GMT+05:00';
 
-    $locale_arr = varray [
+    $locale_arr = vec[
         'en_US'
     ];
 
-    $datetype_arr = varray [
+    $datetype_arr = vec[
                 IntlDateFormatter::FULL,
                 IntlDateFormatter::LONG,
                 IntlDateFormatter::MEDIUM
@@ -22,7 +22,7 @@ function ut_main()
         $res_str = '';
 
 
-    $time_arr = varray [
+    $time_arr = vec[
         0,
         -1200000,
         1200000,
@@ -33,7 +33,7 @@ function ut_main()
         -3600
     ];
 
-    $localtime_arr1 = darray [
+    $localtime_arr1 = dict[
         'tm_sec' => 24 ,
         'tm_min' => 3,
         'tm_hour' => 19,
@@ -41,7 +41,7 @@ function ut_main()
         'tm_mon' => 3,
         'tm_year' => 105,
     ];
-    $localtime_arr2 = darray [
+    $localtime_arr2 = dict[
         'tm_sec' => 21,
         'tm_min' => 5,
         'tm_hour' => 7,
@@ -49,7 +49,7 @@ function ut_main()
         'tm_mon' => 7,
         'tm_year' => 205,
     ];
-    $localtime_arr3 = darray [
+    $localtime_arr3 = dict[
             'tm_sec' => 11,
             'tm_min' => 13,
             'tm_hour' => 0,
@@ -58,7 +58,7 @@ function ut_main()
             'tm_year' => -5
         ];
 
-    $localtime_arr = varray [
+    $localtime_arr = vec[
         $localtime_arr1,
         $localtime_arr2,
         $localtime_arr3

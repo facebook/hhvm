@@ -42,7 +42,7 @@ $numeric_string = <<<EOT
 EOT;
 
 // arrays passed to $input argument
-$inputs = varray [
+$inputs = vec[
 /*1*/  vec[1, 2, 2, 1], // with default keys and numeric values
        vec[1.1, 2.2, 1.1], // with default keys & float values
        vec[false, true, false], // with default keys and boolean values

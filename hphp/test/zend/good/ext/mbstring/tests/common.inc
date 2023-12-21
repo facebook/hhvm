@@ -7,7 +7,7 @@
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 
 	
-	$err_type = darray [
+	$err_type = dict[
 				1	=> "Error",			// E_ERROR
 				2	=> "Warning",			// E_WARINING
 				4	=> "Parsing Error",	// E_PARSE

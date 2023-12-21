@@ -32,7 +32,7 @@ Hello world
 EOT;
 
 // initializing the array
-$arrays = varray [
+$arrays = vec[
 
        // empty array
 /*1*/  vec[],

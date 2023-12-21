@@ -22,7 +22,7 @@ EOT;
 $chunklen = 6E+0;
 
 //different values for 'ending'
-$values = varray [
+$values = vec[
   "",  //empty
   " ",  //space
   "a",  //single char

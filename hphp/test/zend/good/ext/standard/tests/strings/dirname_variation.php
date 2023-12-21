@@ -20,7 +20,7 @@ function check_dirname( $paths ) :mixed{
    }
 }
 <<__EntryPoint>> function main(): void {
-$file_path_variations = varray [
+$file_path_variations = vec[
   /* home dir shortcut char */
   "~/home/user/bar",
   "~/home/user/bar/",

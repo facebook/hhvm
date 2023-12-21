@@ -20,7 +20,7 @@ $file_handle = fopen(__FILE__, "r");
 
 
 //array of values to iterate over
-$values =  darray [
+$values =  dict[
        // int data
     "0" =>  0,
     "1" =>  1,

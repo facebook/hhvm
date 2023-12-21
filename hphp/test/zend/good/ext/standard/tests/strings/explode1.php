@@ -7,7 +7,7 @@
 */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing explode() for basic operations ***\n";
-$delimiters = varray [
+$delimiters = vec[
   "",  // len=0
   NULL,
   "abcd",  // string

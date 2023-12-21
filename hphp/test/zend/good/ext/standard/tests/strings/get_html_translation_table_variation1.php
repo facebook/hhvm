@@ -17,7 +17,7 @@ $quote_style = ENT_COMPAT;
 $fp = fopen(__FILE__, "r");
 
 // array with different values
-$values =  varray [
+$values =  vec[
 
   // array values
   vec[],

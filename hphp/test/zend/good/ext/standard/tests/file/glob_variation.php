@@ -17,7 +17,7 @@ fclose($fp);
 $fp = fopen("$dirname/wonder;123456", "w");
 fclose($fp);
 
-$patterns = varray [
+$patterns = vec[
   "$dirname/*der*",
   "$dirname/?onder*",
   "$dirname/w*der?*",

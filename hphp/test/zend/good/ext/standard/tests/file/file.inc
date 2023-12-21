@@ -465,7 +465,7 @@ function delete_files($file_path,
                       $name_suffix = 1,
                       $file_extension = ".tmp")
 {
-  $return_value = darray ['deleted' => 0, 'notfound' => 0, 'failed' => 0];
+  $return_value = dict['deleted' => 0, 'notfound' => 0, 'failed' => 0];
 
   if ( $name_suffix < 1 )
     $name_suffix = 1;

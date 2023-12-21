@@ -27,7 +27,7 @@ $dfp = opendir ( dirname(__FILE__) );
 
 
 // other types in a array
-$not_bool_types = varray [
+$not_bool_types = vec[
   /* integers */
   0,
   1,

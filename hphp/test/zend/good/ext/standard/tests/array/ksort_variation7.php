@@ -14,7 +14,7 @@
 echo "*** Testing ksort() : usage variations ***\n";
 
 // array with diff sub arrays to be sorted 
-$various_arrays = darray [
+$various_arrays = dict[
   // null array
   1  => vec[],
 
@@ -25,7 +25,7 @@ $various_arrays = darray [
   3 => dict[4 => 44, 1 => 11, 3 => vec[64,61] ],
 
   // array contains sub arrays
-  4 => darray [ 3 => vec[33,-5,6], 1 => vec[11], 
+  4 => dict[ 3 => vec[33,-5,6], 1 => vec[11], 
                2 => vec[22,-55], 0  => vec[] ]
 ];
 

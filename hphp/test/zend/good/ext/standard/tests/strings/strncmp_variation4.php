@@ -20,7 +20,7 @@ $file_handle = fopen(__FILE__, "r");
 
 
 /* array with different values */
-$values =  varray [
+$values =  vec[
   /* integer values */
   0,
   1,

@@ -5,14 +5,14 @@ const MAX_32Bit = 2147483647;
 const MIN_64Bit = -9223372036854775807 - 1;
 const MIN_32Bit = -2147483647 - 1;
 <<__EntryPoint>> function main(): void {
-$validIdentical = varray [
+$validIdentical = vec[
 MAX_32Bit, vec[MAX_32Bit],
 MIN_32Bit, vec[MIN_32Bit],
 MAX_64Bit, vec[MAX_64Bit],
 MIN_64Bit, vec[MIN_64Bit],
 ];
 
-$invalidIdentical = varray [
+$invalidIdentical = vec[
 MAX_32Bit, vec["2147483647", "2147483647.0000000", 2.147483647e9, 2147483647.0, "2147483648", 2.1474836470001e9, MAX_32Bit - 1, MAX_32Bit + 1],
 MIN_32Bit, vec["-2147483648", "-2147483648.000", -2.147483648e9, -2147483648.0, "-2147483649", -2.1474836480001e9, MIN_32Bit -1, MIN_32Bit + 1],
 MAX_64Bit, vec[MAX_64Bit - 1, MAX_64Bit + 1],

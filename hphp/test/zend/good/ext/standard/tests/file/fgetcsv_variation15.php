@@ -11,7 +11,7 @@ echo "*** Testing fgetcsv() : with default enclosure ***\n";
 /* the array is with two elements in it. Each element should be read as 
    1st element is delimiter & 2nd element is csv fields 
 */
-$csv_lists = varray [
+$csv_lists = vec[
   vec[',', 'water,fruit'],
   vec[' ', 'water fruit'],
   vec[' ', '"water" "fruit"'],
@@ -22,7 +22,7 @@ $csv_lists = varray [
 $filename = sys_get_temp_dir().'/'.'fgetcsv_variation15.tmp';
 @unlink($filename);
 
-$file_modes = varray ["r","rb", "rt", "r+", "r+b", "r+t",
+$file_modes = vec["r","rb", "rt", "r+", "r+b", "r+t",
                      "a+", "a+b", "a+t",
                      "w+", "w+b", "w+t",
                      "x+", "x+b", "x+t"]; 

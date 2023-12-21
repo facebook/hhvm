@@ -16,7 +16,7 @@ function callback($a)
 echo "*** Testing array_map() : different arrays for 'arr1' argument ***\n";
 
 // different arrays
-$arrays = varray [
+$arrays = vec[
 /*1*/  vec[1, 2], // array with default keys and numeric values
        vec[1.1, 2.2], // array with default keys & float values
        vec[ vec[2], vec[1]], // sub arrays

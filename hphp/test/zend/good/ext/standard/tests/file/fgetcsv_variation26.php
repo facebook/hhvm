@@ -12,7 +12,7 @@ echo "*** Testing fgetcsv() : reading the files opened in write only mode ***\n"
    1st element is delimiter, 2nd element is enclosure 
    and 3rd element is csv fields
 */
-$csv_lists = varray [
+$csv_lists = vec[
   vec[',', '"', '"water",fruit'],
   vec[',', '"', '"water","fruit"'],
   vec[' ', '^', '^water^ ^fruit^'],
@@ -26,7 +26,7 @@ $csv_lists = varray [
 $filename = sys_get_temp_dir().'/'.'fgetcsv_variation26.tmp';
 @unlink($filename);
 
-$file_modes = varray ["w", "wb", "wt",
+$file_modes = vec["w", "wb", "wt",
                      "a", "ab", "at",
                      "x", "xb", "xt"];
 

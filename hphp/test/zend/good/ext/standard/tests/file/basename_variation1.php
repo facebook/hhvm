@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$prefixes = varray [
+$prefixes = vec[
 	
     // drive letters
 	"A:/",
@@ -18,7 +18,7 @@ $prefixes = varray [
 	"~\\",
 ];
 
-$paths = varray [
+$paths = vec[
 
 	"foo",
 	"foo/",

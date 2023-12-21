@@ -43,7 +43,7 @@ $numeric_string = <<<EOT
 EOT;
 
 // arrays passed to $arr1 argument
-$arrays = varray [
+$arrays = vec[
 /*1*/  vec[1, 2,], // with default keys and numeric values
        vec[1.1, 2.2], // with default keys & float values
        vec[false, true], // with default keys and boolean values

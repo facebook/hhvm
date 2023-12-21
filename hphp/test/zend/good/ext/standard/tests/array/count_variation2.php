@@ -19,7 +19,7 @@ class classA
 echo "*** Testing count() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$var = vec[1, 2, varray ['one', 'two']];
+$var = vec[1, 2, vec['one', 'two']];
 
 
 // heredoc string

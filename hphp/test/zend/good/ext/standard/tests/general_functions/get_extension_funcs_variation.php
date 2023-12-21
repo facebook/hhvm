@@ -19,7 +19,7 @@ echo "*** Testing get_extension_funcs() function: with unexpected inputs for 'mo
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values for $str
-$inputs =  varray [
+$inputs =  vec[
 
   // integer values
   0,

@@ -19,7 +19,7 @@ echo "*** Testing chr() function: with unexpected inputs for 'ascii' argument **
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values for $input
-$inputs =  varray [
+$inputs =  vec[
 
           // integer values
 /*1*/      0,

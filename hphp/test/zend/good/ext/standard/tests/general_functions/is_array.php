@@ -38,7 +38,7 @@ $dfp = opendir ( dirname(__FILE__) );
 
 
 // other types in a array
-$varient_arrays = varray [
+$varient_arrays = vec[
   /* integers */
   543915,
   -5322,

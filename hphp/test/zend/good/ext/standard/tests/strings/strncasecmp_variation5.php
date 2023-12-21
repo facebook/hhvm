@@ -25,7 +25,7 @@ $file_handle = fopen(__FILE__, "r");
 
 
 /* array with different values */
-$lengths =  varray [
+$lengths =  vec[
 
   /* float values */
   10.5,

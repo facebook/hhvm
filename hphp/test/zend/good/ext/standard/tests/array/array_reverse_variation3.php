@@ -28,7 +28,7 @@ $heredoc = <<<EOT
 Hello world
 EOT;
 
-$arrays = varray [
+$arrays = vec[
 /*1*/  vec[1, 2], // array with default keys and numeric values
        vec[1.1, 2.2], // array with default keys & float values
        vec[ vec[2], vec[1]], // sub arrays

@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : float formats with strings ***\n";
 
 // array of string type values
-$string_values = varray [
+$string_values = vec[
   "",
   '',
   "0",

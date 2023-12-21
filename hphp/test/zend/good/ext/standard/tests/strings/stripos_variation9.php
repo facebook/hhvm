@@ -20,7 +20,7 @@ echo "*** Testing stripos() function with unexpected values for haystack ***\n";
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values
-$haystacks =  varray [
+$haystacks =  vec[
 
   // integer values
   0,

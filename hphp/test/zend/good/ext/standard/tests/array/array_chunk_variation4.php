@@ -14,7 +14,7 @@ echo "*** Testing array_chunk() : usage variations ***\n";
 $size = 2;
 
 // input array
-$input_array = darray [
+$input_array = dict[
   "array1" => vec[],
   "array2" => vec[1, 2, 3],
   "array3" =>  vec[1]

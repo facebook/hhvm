@@ -19,7 +19,7 @@ class classA
 echo "*** Testing array_push() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$stack = varray [1, 2];
+$stack = vec[1, 2];
 
 
 // heredoc string

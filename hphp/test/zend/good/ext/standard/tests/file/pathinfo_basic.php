@@ -7,7 +7,7 @@ echo "*** Testing basic functions of pathinfo() ***\n";
 
 $file_path = dirname(__FILE__);
 
-$paths = varray [
+$paths = vec[
   /* Testing basic file notation */
   "$file_path/foo/symlink.link",
   "www.example.co.in",

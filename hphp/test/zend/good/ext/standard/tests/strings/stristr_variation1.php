@@ -18,7 +18,7 @@ echo "*** Testing stristr() function: with unexpected inputs for 'string' argume
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values for $input
-$inputs =  varray [
+$inputs =  vec[
 
           // integer values
 /*1*/      0,

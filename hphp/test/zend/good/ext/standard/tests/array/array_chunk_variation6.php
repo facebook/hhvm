@@ -15,7 +15,7 @@
 echo "*** Testing array_chunk() : usage variations ***\n";
 
 // input array
-$input_arrays = darray [
+$input_arrays = dict[
 
   // array without elements
   "array1" => vec[],

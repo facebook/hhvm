@@ -11,9 +11,9 @@
 echo "*** Testing array_merge() : basic functionality ***\n";
 
 //indexed array
-$array1 = varray ['zero', 'one', 'two'];
+$array1 = vec['zero', 'one', 'two'];
 //associative array
-$array2 = darray ['a' => 1, 'b' => 2, 'c' => 3];
+$array2 = dict['a' => 1, 'b' => 2, 'c' => 3];
 
 var_dump(array_merge($array1, $array2));
 

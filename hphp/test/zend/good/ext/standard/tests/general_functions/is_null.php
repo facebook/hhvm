@@ -29,7 +29,7 @@ $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
 
 // other types in a array
-$not_null_types = varray [
+$not_null_types = vec[
 /* integers */
   0,
   1,

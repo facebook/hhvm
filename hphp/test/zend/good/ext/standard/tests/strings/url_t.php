@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$sample_urls = varray [
+$sample_urls = vec[
 '',
 '64.246.30.37',
 'http://64.246.30.37',

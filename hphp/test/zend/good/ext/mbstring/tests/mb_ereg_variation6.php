@@ -40,7 +40,7 @@ function main_entry(): void {
   	echo "Could not set regex encoding to utf-8\n";
   }
 
-  $regex_char = darray ['\w+' => b'\w+',
+  $regex_char = dict['\w+' => b'\w+',
                        '\W+' => b'\W+',
                        '\s+' => b'\s+',
                        '\S+' => b'\S+',

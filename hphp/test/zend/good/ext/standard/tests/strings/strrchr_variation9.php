@@ -22,7 +22,7 @@ echo "*** Testing strrchr() function: with unexpected inputs for haystack ***\n"
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values
-$haystacks =  varray [
+$haystacks =  vec[
 
   // integer values
   0,
@@ -67,7 +67,7 @@ $haystacks =  varray [
 
 ];
 
-$needles =  varray [
+$needles =  vec[
   //integer numeric strings
   "0",
   "1",

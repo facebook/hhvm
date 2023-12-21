@@ -19,7 +19,7 @@ echo "*** Testing explode() function: with unexpected inputs for 'string' argume
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values for $string
-$strings =  varray [
+$strings =  vec[
 
           // integer values
 /*1*/      0,

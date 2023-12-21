@@ -19,7 +19,7 @@ $fp = fopen(__FILE__, "r");
 
 
 // array with different values as width
-$values =  varray [
+$values =  vec[
   // zerovalue for width
   0,
 

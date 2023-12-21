@@ -24,7 +24,7 @@ Hello world\t\n
 EOT;
 
 //array of values to iterate over
-$arrays = varray [
+$arrays = vec[
 
        // int data
 /*1*/  0,

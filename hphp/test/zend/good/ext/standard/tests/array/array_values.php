@@ -9,7 +9,7 @@ $basic_arr = vec[ 1, 2, 2.0, "asdasd", vec[1,2,3] ];
 var_dump( array_values($basic_arr) );
 
 echo "\n*** Testing array_values() on various arrays ***";
-$arrays = varray [
+$arrays = vec[
   vec[], 
   vec[0],
   vec[-1],

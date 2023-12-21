@@ -20,7 +20,7 @@ function entrypoint_function_exists_variation1(): void {
   $file_handle = fopen(__FILE__, "r");
 
   // array with different values for $str
-  $inputs =  varray [
+  $inputs =  vec[
 
     // integer values
     0,

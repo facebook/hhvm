@@ -14,7 +14,7 @@ $fp = fopen(__FILE__, "r");
 echo "--- Testing sizeof() with different array values for 'var' argument ---\n";
 
 // array containing different types of array values for 'var' argument
-$values = varray [
+$values = vec[
   /* 1  */  dict[0 => $fp, "resource" => $fp],
             vec[1, vec[3, 4, vec[6, vec[8]]]],
             dict["a" => 1, 'b' => 2, 0 => dict[ "c" =>3, 0 => dict[ "d" => 5]]],

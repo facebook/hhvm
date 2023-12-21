@@ -62,7 +62,7 @@ $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
 
 // other types in a array
-$not_strings = varray [
+$not_strings = vec[
   /* integers */
   0,
   1,

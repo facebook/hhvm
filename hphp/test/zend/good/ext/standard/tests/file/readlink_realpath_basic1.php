@@ -24,7 +24,7 @@ symlink("$file_path/readlink_realpath_basic1/home/readlink_realpath_basic1.tmp",
 
 
 echo "*** Testing readlink() and realpath(): with valid and invalid path ***\n";
-$linknames = varray [
+$linknames = vec[
   /* linknames resulting in valid paths */
   "$file_path/readlink_realpath_basic1/home/readlink_realpath_basic1_link.tmp",
   "$file_path/readlink_realpath_basic1/home/test/readlink_realpath_basic1_link.tmp",

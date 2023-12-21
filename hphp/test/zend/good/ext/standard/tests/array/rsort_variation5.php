@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing rsort() : variation ***\n";
 
-$various_arrays = varray [
+$various_arrays = vec[
 // group of escape sequences
 vec["\a", "\cx", "\e", "\f", "\n", "\t", "\xhh", "\ddd", "\v"],
 

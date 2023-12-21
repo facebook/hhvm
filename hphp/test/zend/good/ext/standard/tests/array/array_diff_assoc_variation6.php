@@ -18,7 +18,7 @@ $array = dict[0 => 'zero',
                 1 => 1,
                 'two' => 2.00000000000001];
 
-$inputs = varray [
+$inputs = vec[
 
 //default keys => string values
 /*1*/    vec['2.00000000000001', '1', 'zero', 'a'],
@@ -57,7 +57,7 @@ $inputs = varray [
               0 => 0.01E-9],
 
 //string keys => float values
-/*9*/    darray ['two' => 2.00000000000001,
+/*9*/    dict['two' => 2.00000000000001,
                '1' => 1.00,
                '0' =>0.01E-9]
 ];

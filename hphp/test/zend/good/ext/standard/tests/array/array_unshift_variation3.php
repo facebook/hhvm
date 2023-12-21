@@ -15,7 +15,7 @@ echo "*** Testing array_unshift() : different arrays for \$array argument ***\n"
 $var = 10;
 
 // different arrays to be passed to $array argument
-$arrays = varray [
+$arrays = vec[
 /*1*/  vec[1, 2], // array with default keys and numeric values
        vec[1.1, 2.2], // array with default keys & float values
        vec[ vec[2], vec[1]], // sub arrays

@@ -16,7 +16,7 @@ fclose($file_handle2);
 fclose($file_handle3);
 
 echo "\n*** Testing realpath() on filenames ***\n";
-$filenames = varray [
+$filenames = vec[
   /* filenames resulting in valid paths */
   "./realpath_basic3/home/realpath_basic3.tmp",
   "./realpath_basic3/realpath_basic3.tmp",

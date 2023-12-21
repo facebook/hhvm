@@ -13,7 +13,7 @@ echo "--- Testing sizeof() for all scalar types in default mode ---\n";
 $fp = fopen(__FILE__, "r");
 
 // array containing all scalar types
-$values = varray [
+$values = vec[
            // int values
   /* 1  */  0,
             1,

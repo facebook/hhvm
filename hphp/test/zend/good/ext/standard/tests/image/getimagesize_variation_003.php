@@ -5,7 +5,7 @@
  */
 
 <<__EntryPoint>> function main(): void {
-$file_types_array = darray [
+$file_types_array = dict[
     //File containing text string
     "File with text data" => "test.txt",
 

@@ -48,8 +48,8 @@ EOT;
   $fp = fopen(__FILE__, "r");
 
   // add arrays
-  $index_array = varray [1, 2, 3];
-  $assoc_array = darray ['one' => 1, 'two' => 2];
+  $index_array = vec[1, 2, 3];
+  $assoc_array = dict['one' => 1, 'two' => 2];
 
   //array of values to iterate over
   $inputs = dict[

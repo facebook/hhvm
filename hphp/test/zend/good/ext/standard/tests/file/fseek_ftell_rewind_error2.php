@@ -22,7 +22,7 @@ try { var_dump( ftell($fp, 10) ); } catch (Exception $e) { echo "\n".'Warning: '
 
 // test invalid arguments : non-resources
 echo "-- Testing ftell() with invalid arguments --\n";
-$invalid_args = varray [
+$invalid_args = vec[
   "string",
   10,
   10.5,

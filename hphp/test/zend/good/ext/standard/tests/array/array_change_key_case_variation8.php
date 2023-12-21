@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_change_key_case() : usage variations ***\n";
 
-$inputs = varray [
+$inputs = vec[
     // group of escape sequences
     dict['' => 1, '' => 2, "\a" => 3, "\cx" => 4, "\e" => 5, "\f" => 6, "\n" => 7, "\t" => 8, "\xhh" => 9, "\ddd" => 10, "\v" => 11],
 

@@ -23,7 +23,7 @@ echo "*** Testing strtr() function: with unexpected inputs for 'str' ***\n";
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values
-$strings =  varray [
+$strings =  vec[
 
           // integer values
 /*1*/      0,

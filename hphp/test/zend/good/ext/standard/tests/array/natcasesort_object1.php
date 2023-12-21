@@ -29,7 +29,7 @@ echo "*** Testing natcasesort() : object functionality ***\n";
 
 
 // array of string objects
-$unsorted_str_obj = varray [
+$unsorted_str_obj = vec[
   new for_string_natcasesort("axx"), new for_string_natcasesort("t"),
   new for_string_natcasesort("w"), new for_string_natcasesort("py"),
   new for_string_natcasesort("apple"), new for_string_natcasesort("Orange"),

@@ -39,14 +39,14 @@ class MyString
 echo "*** Testing ksort() : object functionality ***\n";
 
 // array of integer objects
-$unsorted_int_obj = darray [
+$unsorted_int_obj = dict[
   11 => new MyInteger(11), 66 =>  new MyInteger(66),
   23 => new MyInteger(23), -5 => new MyInteger(-5),
   1 => new MyInteger(0.001), 0 => new MyInteger(0)
 ];
 
 // array of string objects
-$unsorted_str_obj = darray [
+$unsorted_str_obj = dict[
   "axx" => new MyString("axx"), "t" => new MyString("t"),
   "w" => new MyString("w"), "py" => new MyString("py"),
   "apple" => new MyString("apple"), "Orange" => new MyString("Orange"),

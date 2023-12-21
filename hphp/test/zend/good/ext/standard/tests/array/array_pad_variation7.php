@@ -13,7 +13,7 @@
 echo "*** Testing array_pad() : Passing 2-D array to \$input argument ***\n";
 
 // initialize the 2-d array
-$input = varray [
+$input = vec[
   vec[1, 2, 3],
   vec["hello", 'world'],
   dict["one" => 1, "two" => 2]

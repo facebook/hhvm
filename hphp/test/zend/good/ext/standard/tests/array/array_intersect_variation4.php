@@ -52,7 +52,7 @@ $arr1 = dict[
 ];
 
 // arrays to be passed to $arr2 argument
-$arrays = varray [
+$arrays = vec[
 /*1*/  vec[1, 2], // array with default keys and numeric values
        vec[1.1, 2.2], // array with default keys & float values
        vec[false,true], // array with default keys and boolean values

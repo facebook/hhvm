@@ -11,8 +11,8 @@
 echo "*** Testing array_shift() : usage variations ***\n";
 
 $stack_first = vec[vec[1, 2, 3], 'one', 'two'];
-$last = varray [1, 2, 3];
-$stack_last = varray ['zero', 'one', $last ];
+$last = vec[1, 2, 3];
+$stack_last = vec['zero', 'one', $last ];
 echo "\n-- Before shift: --\n";
 echo "---- \$stack_first:\n";
 var_dump($stack_first);

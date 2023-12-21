@@ -17,7 +17,7 @@ fclose($fp);
 
 // test invalid arguments : non-resources
 echo "-- Testing fgetc() with invalid arguments --\n";
-$invalid_args = varray [
+$invalid_args = vec[
   "string",
   10,
   10.5,

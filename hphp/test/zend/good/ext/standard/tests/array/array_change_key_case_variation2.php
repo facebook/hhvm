@@ -12,7 +12,7 @@
 echo "*** Testing array_change_key_case() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$array = darray ['one' => 1, 'TWO' => 2, 'Three' => 3];
+$array = dict['one' => 1, 'TWO' => 2, 'Three' => 3];
 
 
 // heredoc string

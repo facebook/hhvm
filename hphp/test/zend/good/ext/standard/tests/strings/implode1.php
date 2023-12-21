@@ -13,7 +13,7 @@ class foo
 
 <<__EntryPoint>> function main(): void {
 echo "*** Testing implode() for basic opeartions ***\n";
-$arrays = varray [
+$arrays = vec[
   vec[1,2],
   vec[1.1,2.2],
   vec[false,true],
@@ -28,7 +28,7 @@ foreach ($arrays as $array) {
 
 echo "\n*** Testing implode() with variations of glue ***\n";
 /* checking possible variations */
-$pieces = varray [
+$pieces = vec[
   2,
   0,
   -639,
@@ -40,7 +40,7 @@ $pieces = varray [
   " ",
   "string\x00with\x00...\0"
 ];
-$glues = varray [
+$glues = vec[
   "TRUE",
   true,
   false,

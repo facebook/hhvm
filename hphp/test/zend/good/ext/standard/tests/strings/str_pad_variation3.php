@@ -22,7 +22,7 @@ echo "*** Testing str_pad() function: with unexpected inputs for 'pad_string' ar
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values for $input
-$pad_strings =  varray [
+$pad_strings =  vec[
 
           // integer values
 /*1*/      0,

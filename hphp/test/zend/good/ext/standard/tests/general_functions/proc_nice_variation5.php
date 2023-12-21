@@ -5,7 +5,7 @@ echo "*** Test substituting argument 1 with int values ***\n";
 
 
 
-$variation_array = darray [
+$variation_array = dict[
     'int 0' => 0,
     'int 1' => 1,
     'int 12345' => 12345,

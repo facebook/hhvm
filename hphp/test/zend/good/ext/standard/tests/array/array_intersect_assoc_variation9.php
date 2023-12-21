@@ -14,7 +14,7 @@
 echo "*** Testing array_intersect_assoc() : passing two dimensional array to both \$arr1 and \$arr2 arguments ***\n";
 
 // two dimensional arrays for $arr1 and $arr2 argument
-$arr1 = varray [
+$arr1 = vec[
 
   // arrays with default keys
   vec[1, 2, "hello", 'world'],
@@ -25,7 +25,7 @@ $arr1 = varray [
   dict["ten" => 10, "twenty" => 20.00, "thirty" => 30]
 ];
 
-$arr2 = varray [
+$arr2 = vec[
   vec[1, 2, 3, 4],
   dict[1 => "one", 2 => "two", 3 => "three"]
 ];

@@ -8,7 +8,7 @@ echo "*** Testing sprintf() : integer formats with float values ***\n";
 
 // array of float type values
 
-$float_values = varray [
+$float_values = vec[
   2147483648,
   0x800000001, // float value, beyond max positive int
   020000000001, // float value, beyond max positive int

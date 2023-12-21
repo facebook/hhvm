@@ -14,7 +14,7 @@ function entrypoint_str_replace_variation2(): void {
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)";
 
   /* needles in an array to be compared in the string $string */
-  $search_str = varray [
+  $search_str = vec[
     "Hello, World",
     'Hello, World',
     '!!Hello, World',

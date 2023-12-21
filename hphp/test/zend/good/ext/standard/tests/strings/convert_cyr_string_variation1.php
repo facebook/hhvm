@@ -19,7 +19,7 @@ echo "*** Testing convert_cyr_string() function: with unexpected inputs for 'str
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values for $str
-$inputs =  varray [
+$inputs =  vec[
 
           // integer values
 /*1*/      0,

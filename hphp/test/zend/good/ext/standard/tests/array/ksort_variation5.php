@@ -14,15 +14,15 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing ksort() : usage variations ***\n";
 
-$various_arrays = varray [
+$various_arrays = vec[
   // diff. escape sequence chars with key values
-  darray [ '' =>  null, '' => NULL, "\a" => "\a", "\cx" => "\cx", "\e" => "\e",
+  dict[ '' =>  null, '' => NULL, "\a" => "\a", "\cx" => "\cx", "\e" => "\e",
           "\f" => "\f", "\n" =>"\n", "\r" => "\r", "\t" => "\t", "\xhh" => "\xhh",
           "\ddd" => "\ddd", "\v" => "\v"
         ],
 
   // array containing different strings with key values
-  darray [ 'Lemon' => "lemoN", 'o' => "Orange", 'B' => "banana", 'Apple' => "apple", 'te' => "Test",
+  dict[ 'Lemon' => "lemoN", 'o' => "Orange", 'B' => "banana", 'Apple' => "apple", 'te' => "Test",
           't' => "TTTT", 'T' => "ttt", 'W' => "ww", 'X' => "x", 'x' => "X", 'O' => "oraNGe",
           'B' => "BANANA"
         ]

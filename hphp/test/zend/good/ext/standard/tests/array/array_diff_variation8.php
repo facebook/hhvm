@@ -31,7 +31,7 @@ Hello world
 EOT;
 
 // associative arrays with different values
-$inputs = varray [
+$inputs = vec[
        // arrays with integer values
 /*1*/  dict['0' => 0, '1' => 0],
        dict["one" => 1, 'two' => 2, "three" => 1, 4 => 1],

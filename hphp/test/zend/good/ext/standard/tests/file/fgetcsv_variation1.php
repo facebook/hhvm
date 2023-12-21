@@ -12,7 +12,7 @@ echo "*** Testing fgetcsv() : with all parameters specified ***\n";
    1st element is delimiter, 2nd element is enclosure 
    and 3rd element is csv fields
 */
-$csv_lists = varray [
+$csv_lists = vec[
   vec[',', '"', '"water",fruit'],
   vec[',', '"', '"water","fruit"'],
   vec[' ', '^', '^water^ ^fruit^'],
@@ -26,7 +26,7 @@ $csv_lists = varray [
 $filename = sys_get_temp_dir().'/'.'fgetcsv_variation1.tmp';
 @unlink($filename);
 
-$file_modes = varray ["r","rb", "rt", "r+", "r+b", "r+t",
+$file_modes = vec["r","rb", "rt", "r+", "r+b", "r+t",
                      "a+", "a+b", "a+t",
                      "w+", "w+b", "w+t",
                      "x+", "x+b", "x+t"]; 

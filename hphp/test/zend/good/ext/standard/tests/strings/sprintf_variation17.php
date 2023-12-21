@@ -11,7 +11,7 @@ $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
 
 // array of resource values
-$resource_values = varray [
+$resource_values = vec[
   $fp,
   $dfp
 ];

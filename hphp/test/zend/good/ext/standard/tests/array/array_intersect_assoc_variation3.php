@@ -44,7 +44,7 @@ $numeric_string = <<<EOT
 EOT;
 
 // arrays to be passed to $arr1 argument
-$arrays = varray [
+$arrays = vec[
 /*1*/  vec[1, 2], // with default keys and numeric values
        vec[1.1, 2.2], // with default keys & float values
        vec[false,true], // with default keys and boolean values
@@ -71,7 +71,7 @@ $arrays = varray [
 
 
 // array to be passsed to $arr2 argument
-$arr2 = darray [
+$arr2 = dict[
   0 => 1, 1 => 1.1, 2 => 2.2, 3 => "hello", 4 => "one", 5 => NULL, 6 => 2,
   7 => 'world', 8 => true,5 => false, 1 => 'aaaa\r', 9 => "aaaa\r",
   'h3' => $diff_whitespaces, 10 => $numeric_string,

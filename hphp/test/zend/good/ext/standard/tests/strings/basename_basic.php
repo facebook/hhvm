@@ -20,7 +20,7 @@ function check_basename( $path_arrays ) :mixed{
 }
 
 <<__EntryPoint>> function main(): void {
-$file_paths = varray [
+$file_paths = vec[
   /* simple paths */
   vec["bar"],
   vec["/foo/bar"],

@@ -45,7 +45,7 @@ function Hello_World() :mixed{
 }
 <<__EntryPoint>> function main(): void {
 echo "\n*** Testing is_callable() on defined functions ***\n";
-$defined_functions = varray [
+$defined_functions = vec[
   $functionVar1 = 'someFunction',
   $functionVar2 = 'x123',
   $functionVar3 = 'NULL',

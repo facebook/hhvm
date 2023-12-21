@@ -14,7 +14,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing sort() : usage variations ***\n";
 
-$various_arrays = varray [
+$various_arrays = vec[
   // group of escape sequences
   vec["\a", "\cx", "\e", "\f", "\n", "\r", "\t", "\xhh", "\ddd", "\v"],
 

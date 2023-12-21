@@ -16,7 +16,7 @@ $array1 = dict[
       'third' => dict[0 =>'zero'],
 ];
 
-$array2 = darray [
+$array2 = dict[
 
       'first' => dict['blue'  => 1, 'red'  => 2,],
 

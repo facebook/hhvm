@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$array = darray ["p" => 1, "q" => 2, "r" => 3, "s" => 4, "u" => 5, "v" => 6];
+$array = dict["p" => 1, "q" => 2, "r" => 3, "s" => 4, "u" => 5, "v" => 6];
 var_dump ($array);
 for ($i = 0; $i < (sizeof($array) + 1); $i++) {
     echo "[$i]\n";

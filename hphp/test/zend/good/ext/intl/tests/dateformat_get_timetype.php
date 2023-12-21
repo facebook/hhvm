@@ -7,7 +7,7 @@
 
 function ut_main()
 :mixed{
-    $timetype_arr = varray [
+    $timetype_arr = vec[
         IntlDateFormatter::FULL,
         IntlDateFormatter::LONG,
         IntlDateFormatter::MEDIUM,

@@ -17,7 +17,7 @@ $input = vec[1, 2, 3];
 $pad_size = 5;
 
 // initialize $pad_value
-$pad_value = varray [
+$pad_value = vec[
   vec[1],
   vec["hello", 'world'],
   dict["one" => 1, 'two' => 2]

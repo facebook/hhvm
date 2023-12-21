@@ -7,7 +7,7 @@
 echo "*** Testing json_decode() : basic functionality ***\n";
 
 // array with different values for $string
-$inputs =  varray [
+$inputs =  vec[
         '0',
         '123',
         '-123',

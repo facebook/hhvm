@@ -19,7 +19,7 @@ echo "*** Testing ord() function: with unexpected inputs for 'string' argument *
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values for $input
-$inputs =  varray [
+$inputs =  vec[
 
 /*1*/      0,
           1,

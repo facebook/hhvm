@@ -18,7 +18,7 @@ Hello world
 EOT;
 
 // different variations of associative arrays to be passed to $arr2 argument
-$arrays = varray [
+$arrays = vec[
 
        // empty array
 /*1*/  vec[],

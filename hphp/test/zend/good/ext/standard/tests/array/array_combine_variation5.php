@@ -31,7 +31,7 @@ Hello world
 EOT;
 
 // different variations of associative array
-$arrays = varray [
+$arrays = vec[
 
        // empty array
 /*1*/  vec[],

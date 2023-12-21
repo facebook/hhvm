@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_change_key_case() : usage variations ***\n";
 
-$input = darray ['one' => 'un', 'two' => 'deux', 'three' => 'trois'];
+$input = dict['one' => 'un', 'two' => 'deux', 'three' => 'trois'];
 
 echo "\n-- Call array_change_key_case() --\n";
 var_dump($result = array_change_key_case($input, CASE_UPPER));

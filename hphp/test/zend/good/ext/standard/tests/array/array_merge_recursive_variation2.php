@@ -32,7 +32,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $arr2 argument
-$arrays = varray [
+$arrays = vec[
 
        // int data
 /*1*/  0,

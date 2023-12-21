@@ -55,7 +55,7 @@ $dfp = opendir ( dirname(__FILE__) );
 closedir($dfp);
 
 // other types in an array
-$not_float_types = varray [
+$not_float_types = vec[
                    -2147483648, // max negative integer value
                    2147483648,  // max positive integer value
                    $fp,  // resource

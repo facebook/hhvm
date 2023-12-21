@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing strip_tags() : usage variations ***\n";
 
-$double_quote_string = varray [
+$double_quote_string = vec[
   "<html> \$ -> This represents the dollar sign</html><?hh echo hello ?>",
   "<html>\t\r\v The quick brown fo\fx jumped over the lazy dog</p>",
   "<a>This is a hyper text tag</a>",

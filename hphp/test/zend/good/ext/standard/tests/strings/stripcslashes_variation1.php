@@ -24,7 +24,7 @@ echo "*** Testing stripcslashes() : with non-string type argument ***\n";
 $file_handle = fopen(__FILE__, 'r');
 
 // array with different values
-$values =  varray [
+$values =  vec[
 
           // integer values
 /*1*/      0,

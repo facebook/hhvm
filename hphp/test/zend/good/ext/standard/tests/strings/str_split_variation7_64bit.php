@@ -18,7 +18,7 @@ string with 123,escape char \t.
 EOT;
 
 //different values for 'split_length'
-$values = varray [
+$values = vec[
   0,
   1,
   -123,  //negative integer

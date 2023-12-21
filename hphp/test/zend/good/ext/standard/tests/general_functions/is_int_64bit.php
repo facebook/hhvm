@@ -43,7 +43,7 @@ $dfp = opendir ( dirname(__FILE__) );
 
 
 // other types in a array
-$not_int_types = varray [
+$not_int_types = vec[
   /* float values */
   -2147483649, // float value
   2147483648,  // float value

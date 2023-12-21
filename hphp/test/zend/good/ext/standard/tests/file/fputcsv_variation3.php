@@ -12,7 +12,7 @@ echo "*** Testing fputcsv() : with enclosure as NULL ***\n";
    1st element is delimiter, 2nd element is enclosure
    and 3rd element is csv fields
 */
-$csv_lists = varray [
+$csv_lists = vec[
   vec[',', '"', vec['water','fruit'] ],
   vec[',', '"', vec['"water","fruit'] ],
   vec[',', '"', vec['"water","fruit"'] ],
@@ -27,7 +27,7 @@ $csv_lists = varray [
 
 $filename = sys_get_temp_dir().'/'.'fputcsv_variation3.tmp';
 
-$file_modes = varray ["r+", "r+b", "r+t",
+$file_modes = vec["r+", "r+b", "r+t",
                      "a+", "a+b", "a+t",
                      "w+", "w+b", "w+t",
                      "x+", "x+b", "x+t"];

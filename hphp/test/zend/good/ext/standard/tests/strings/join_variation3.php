@@ -11,7 +11,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing join() : usage variations ***\n";
 
-$pieces_arrays = varray [
+$pieces_arrays = vec[
   vec[1, 2], // array with default keys and numrice values
   vec[1.1, 2.2], // array with default keys & float values
   vec['Array', 'Array'], // former sub arrays

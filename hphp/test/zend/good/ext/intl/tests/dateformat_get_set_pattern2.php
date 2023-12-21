@@ -7,7 +7,7 @@
 
 function ut_main()
 :mixed{
-        $pattern_arr = varray [
+        $pattern_arr = vec[
                 'DD-MM-YYYY hh:mm:ss',
         'yyyy-DDD.hh:mm:ss z',
                 "yyyy/MM/dd",

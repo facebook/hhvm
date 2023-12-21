@@ -13,7 +13,7 @@ echo "*** Testing ctype_print() : usage variations ***\n";
 $orig = setlocale(LC_CTYPE, "C");
 
 $octal_values = vec[040, 041, 042, 043];
-$hex_values = varray [0x20, 0x21, 0x23, 0x24];
+$hex_values = vec[0x20, 0x21, 0x23, 0x24];
 
 echo "\n-- Octal Values --\n";
 $iterator = 1;

@@ -16,7 +16,7 @@ $input = vec[1, 2];
 
 
 //array of values to iterate over
-$values = varray [
+$values = vec[
 
         // float data
 /*1*/   10.5,

@@ -28,7 +28,7 @@ var_dump( fread($file_handle, $len) );
 
 // test invalid arguments : non-resources
 echo "-- Testing fread() with invalid arguments --\n";
-$invalid_args = varray [
+$invalid_args = vec[
   "string",
   10,
   10.5,

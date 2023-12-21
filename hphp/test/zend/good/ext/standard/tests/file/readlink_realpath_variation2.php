@@ -16,7 +16,7 @@ $fp = fopen($filename, "w");
 fclose($fp);
 
 echo "\n*** Testing readlink() and realpath() with linkname stored in an array ***\n";
-$link_arr = varray [
+$link_arr = vec[
   "$name_prefix////readlink_realpath_variation2/home/tests/link/readlink_realpath_variation2_link.tmp",
   "$name_prefix/./readlink_realpath_variation2/home/../home//tests//..//..//..//home//readlink_realpath_variation2_link.tmp/"
 ];

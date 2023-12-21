@@ -8,7 +8,7 @@
 echo "*** Testing convert_uudecode() : basic functionality ***\n";
 
 // array with different values for $string
-$strings =  varray [
+$strings =  vec[
 
   //double quoted strings
   "123",

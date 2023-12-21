@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$dates = varray [
+$dates = vec[
     "1999-10-13",
     "Oct 13  1999",
     "2000-01-19",

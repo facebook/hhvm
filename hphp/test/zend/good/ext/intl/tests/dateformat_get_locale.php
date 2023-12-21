@@ -7,7 +7,7 @@
 
 function ut_main()
 :mixed{
-    $locale_arr = varray [
+    $locale_arr = vec[
         'de-DE',
         'sl-IT-nedis',
         'en_UK',

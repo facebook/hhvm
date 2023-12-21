@@ -19,7 +19,7 @@ function check_basename( $path_arrays ) :mixed{
 }
 
 <<__EntryPoint>> function main(): void {
-$file_paths = varray [
+$file_paths = vec[
   /* simple paths */
   vec["bar"],
   vec["/foo/bar"],
@@ -63,7 +63,7 @@ $file_paths = varray [
   vec["/foo".chr(0)."bar/bar.gz"]
 ];
 
-$file_path_variations = varray [
+$file_path_variations = vec[
   /* paths with shortcut home dir char, with suffix variation */
   vec["~/home/user/bar"],
   vec["~/home/user/bar", ""],

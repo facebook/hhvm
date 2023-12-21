@@ -9,7 +9,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_search() with different haystack values ***\n";
 
-$misc_array = darray [
+$misc_array = dict[
   0 => 'a',
   'key' =>'d',
   1 => 3,

@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$list = darray [
+$list = dict[
   0 => 'aaa,bbb',
   1 => 'aaa,"bbb"',
   2 => '"aaa","bbb"',

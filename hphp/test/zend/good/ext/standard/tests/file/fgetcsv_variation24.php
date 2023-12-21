@@ -15,7 +15,7 @@ echo "*** Testing fgetcsv() : with two chars as enclosure & delimiter ***\n";
    1st element is delimiter, 2nd element is enclosure 
    and 3rd element is csv fields
 */
-$csv_lists = varray [
+$csv_lists = vec[
   vec[',', '"', '"water",fruit'],
   vec[',', '"', '"water","fruit"'],
   vec[' ', '^', '^water^ ^fruit^'],
@@ -29,7 +29,7 @@ $csv_lists = varray [
 $filename = sys_get_temp_dir().'/'.'fgetcsv_variation24.tmp';
 @unlink($filename);
 
-$file_modes = varray ["w+", "w+b", "w+t",
+$file_modes = vec["w+", "w+b", "w+t",
                      "x+", "x+b", "x+t"];
 
 $loop_counter = 1;

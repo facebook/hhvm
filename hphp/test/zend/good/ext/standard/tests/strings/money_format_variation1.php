@@ -26,7 +26,7 @@ echo "*** Testing money_format() function: with unexpected inputs for 'format' a
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values for $input
-$formats =  varray [
+$formats =  vec[
 
           // integer values
 /*1*/      0,

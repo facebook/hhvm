@@ -7,7 +7,7 @@ class C
 <<__EntryPoint>> function main(): void {
 $c = new C();
 
-$arr = darray [1 => 'a', 2 => 'b', 3 => 'c'];
+$arr = dict[1 => 'a', 2 => 'b', 3 => 'c'];
 
 // Works fine:
 foreach($arr as $x => $c->d)

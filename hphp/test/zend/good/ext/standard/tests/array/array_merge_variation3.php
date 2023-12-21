@@ -20,7 +20,7 @@ class classA
 echo "*** Testing array_merge() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$arr = varray [1, 2];
+$arr = vec[1, 2];
 
 
 // heredoc string

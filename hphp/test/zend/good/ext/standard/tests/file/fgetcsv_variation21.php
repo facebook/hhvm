@@ -14,7 +14,7 @@ echo "*** Testing fgetcsv() : with default enclosure, blank line ***\n";
 $filename = sys_get_temp_dir().'/'.'fgetcsv_variation21.tmp';
 @unlink($filename);
 
-$file_modes = varray ["r","rb", "rt", "r+", "r+b", "r+t",
+$file_modes = vec["r","rb", "rt", "r+", "r+b", "r+t",
                      "a+", "a+b", "a+t",
                      "w+", "w+b", "w+t",
                      "x+", "x+b", "x+t"]; 

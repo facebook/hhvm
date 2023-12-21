@@ -7,7 +7,7 @@
 
 function ut_main()
 :mixed{
-    $timezone_id_arr = varray [
+    $timezone_id_arr = vec[
         'America/New_York',
         'US/Pacific',
         'US/Central'

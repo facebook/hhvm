@@ -28,8 +28,8 @@ hello world
 EOT;
 
 // get different types of array
-$index_array = varray [1, 2, 3];
-$assoc_array = darray ['one' => 1, 'two' => 2];
+$index_array = vec[1, 2, 3];
+$assoc_array = dict['one' => 1, 'two' => 2];
 
 // get a resource variable
 $fp = fopen(__FILE__, "r");

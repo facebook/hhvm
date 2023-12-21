@@ -12,7 +12,7 @@
 echo "*** Testing array_merge() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$arr = darray ['one' => 1, 'two' => 2];
+$arr = dict['one' => 1, 'two' => 2];
 
 // heredoc string
 $heredoc = <<<EOT

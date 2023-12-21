@@ -5,7 +5,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing basic functions of pathinfo() ***\n";
 
-$paths = varray [
+$paths = vec[
             'c:\..\dir1',
             'c:\test\..\test2\.\adir\afile.txt',
             '/usr/include/../arpa/./inet.h',

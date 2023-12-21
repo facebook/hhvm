@@ -24,7 +24,7 @@ $haystack = "hello world";
 $needle = "world";
 
 // array with different values
-$offsets =  varray [
+$offsets =  vec[
 
   // float values
   1.5,

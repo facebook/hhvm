@@ -20,7 +20,7 @@ echo "*** Testing strrchr() function: with unexpected inputs for haystack and ne
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values
-$values =  varray [
+$values =  vec[
 
   // integer values
   0,

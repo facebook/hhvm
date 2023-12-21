@@ -16,7 +16,7 @@ $fields = vec[ vec['water_fruit\n'],
 
 $file = sys_get_temp_dir().'/'.'fputcsv_variation10.tmp';
 
-$file_modes = varray ["r+", "r+b", "r+t",
+$file_modes = vec["r+", "r+b", "r+t",
                      "a+", "a+b", "a+t",
                      "w+", "w+b", "w+t",
                      "x+", "x+b", "x+t"]; 

@@ -112,7 +112,7 @@ $fp = fopen(__FILE__, "r");
 $dfp = opendir( dirname(__FILE__) );
 
 
-$not_scalars = varray [
+$not_scalars = vec[
   new foo, //object
   $fp,  // resource
   $dfp,

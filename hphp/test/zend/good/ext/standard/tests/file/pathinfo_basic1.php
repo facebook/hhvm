@@ -5,7 +5,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing basic functions of pathinfo() ***\n";
 
-$paths = varray [
+$paths = vec[
   '',
   ' ',
   'c:',

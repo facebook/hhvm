@@ -5,8 +5,8 @@
  * Source code: ext/standard/array.c
 */
 
-function cb1 ($a) :mixed{return varray [$a];}
-function cb2 ($a,$b) :mixed{return varray [$a,$b];}
+function cb1 ($a) :mixed{return vec[$a];}
+function cb2 ($a,$b) :mixed{return vec[$a,$b];}
 
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : string keys ***\n";

@@ -21,7 +21,7 @@ $obj->MyNull = null;
 $obj->MyString = "Hello World";
 
 // array with different values for $string
-$inputs =  varray [
+$inputs =  vec[
 
         // integers
 /*1*/    0,

@@ -14,7 +14,7 @@ $fp_copy = $fp;
 $dfp_copy = $dfp;
   
 // array of resource types
-$resource_types = varray [
+$resource_types = vec[
   $fp_copy,
   $dfp_copy
 ];

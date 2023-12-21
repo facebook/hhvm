@@ -7,7 +7,7 @@
 
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_search() with different needle values ***\n";
-$arrays = varray [
+$arrays = vec[
   vec[0],
   dict["a" => "A", 2 => "B", "C" => 3, 4 => 4, "one" => 1, "" => NULL, 5 => "b", 6 => "ab", 7 => "abcd"],
   dict[0 => 4, 1 => dict[0 => 1, 2 => 3], "one" => 1, "5" => 5],
@@ -18,7 +18,7 @@ $arrays = varray [
   vec["abcd\tabcd\nabcd\rabcd\0abcdefghij"]
 ];
 
-$array_compare = varray [
+$array_compare = vec[
   4,
   "4",
   4.00,

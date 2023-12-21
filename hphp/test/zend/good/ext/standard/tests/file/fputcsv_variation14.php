@@ -13,7 +13,7 @@ echo "*** Testing fputcsv() : with enclosure & delimiter of two chars and file o
    1st element is delimiter, 2nd element is enclosure 
    and 3rd element is csv fields
 */
-$csv_lists = varray [
+$csv_lists = vec[
   vec[',', '"', vec['water,fruit'] ],
   vec[',', '"', vec['"water","fruit'] ],
   vec[',', '"', vec['"water","fruit"'] ],
@@ -27,7 +27,7 @@ $csv_lists = varray [
 ];
 $filename = sys_get_temp_dir().'/'.'fputcsv_variation14.tmp';
 
-$file_modes = varray ["r", "rb", "rt"];
+$file_modes = vec["r", "rb", "rt"];
 
 // create the file
 $file_handle = fopen($filename, "w" );

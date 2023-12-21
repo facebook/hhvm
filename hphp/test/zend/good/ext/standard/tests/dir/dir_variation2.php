@@ -32,7 +32,7 @@ hello world
 EOT;
 
 // unexpected values to be passed to $directory argument
-$unexpected_values = varray [
+$unexpected_values = vec[
        // int data
 /*1*/  0,
        1,

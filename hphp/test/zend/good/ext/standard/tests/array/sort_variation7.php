@@ -14,7 +14,7 @@
 echo "*** Testing sort() : usage variations ***\n";
 
 // bool value array
-$bool_values = varray [true, false, TRUE, FALSE];
+$bool_values = vec[true, false, TRUE, FALSE];
 
 echo "\n-- Testing sort() by supplying bool value array, 'flag' value is defualt --\n";
 $temp_array = $bool_values;

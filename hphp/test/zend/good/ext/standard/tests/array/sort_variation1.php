@@ -20,7 +20,7 @@ echo "*** Testing sort() : usage variations ***\n";
 $fp = fopen(__FILE__, "r");
 
 //array of values to iterate over
-$unexpected_values = varray [
+$unexpected_values = vec[
 
        // int data
 /*1*/  0,

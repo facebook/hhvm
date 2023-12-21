@@ -5,12 +5,12 @@ const MAX_32Bit = 2147483647;
 const MIN_64Bit = -9223372036854775807 - 1;
 const MIN_32Bit = -2147483647 - 1;
 <<__EntryPoint>> function main(): void {
-$validLessThan = varray [
+$validLessThan = vec[
 2147483646, vec[MAX_32Bit, "2147483647", "2147483647.001", 2.147483647e9, 2147483647.9],
 MIN_32Bit, vec[MIN_32Bit + 1, "-2147483647", "-2147483646.001", -2.1474836461e9, -2147483646.9],
 ];
 
-$invalidLessThan = varray [
+$invalidLessThan = vec[
 MAX_32Bit, vec["2147483646", 2.1474836460001e9, MAX_32Bit - 1],
 MIN_32Bit, vec[MIN_32Bit - 1, "-2147483649", -2.1474836480001e9]
 ];

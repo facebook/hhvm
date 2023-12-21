@@ -4,7 +4,7 @@ class try_class
 {
     static public function main ()
 :mixed    {
-        register_shutdown_function (varray ["self", "on_shutdown"]);
+        register_shutdown_function (vec["self", "on_shutdown"]);
     }
 
     static public function on_shutdown ()

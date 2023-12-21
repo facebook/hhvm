@@ -8,7 +8,7 @@
 echo "*** Testing getdate() : usage variation ***\n";
 
 //Timezones with required data for date_sunrise
-$inputs = varray [
+$inputs = vec[
         //GMT-11
         "Pacific/Samoa",
         //GMT-9

@@ -5,7 +5,7 @@
 $file_path = sys_get_temp_dir();
 // rename dirs across directories
 echo "\n*** Testing rename() : renaming directory across directories ***\n";
-$src_dirs = varray [
+$src_dirs = vec[
   /* Testing simple directory tree */
   "$file_path/rename_variation1/",
 

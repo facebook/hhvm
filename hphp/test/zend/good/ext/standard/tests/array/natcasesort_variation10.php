@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing natcasesort() : usage variations ***\n";
 
-$array_arg = varray ['img13', 'img20', 'img2', 'img1'];
+$array_arg = vec['img13', 'img20', 'img2', 'img1'];
 
 echo "\n-- Call natcasesort() --\n";
 var_dump(natcasesort(inout $array_arg));

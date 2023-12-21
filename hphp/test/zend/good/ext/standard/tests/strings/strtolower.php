@@ -22,7 +22,7 @@ var_dump(strtolower($str));
 
 echo "\n*** Testing strtolower() with various strings ***";
 /* strings to pass strtolower() */
-$strings = varray [
+$strings = vec[
   "",
   "string",
   "stRINg0234",

@@ -45,7 +45,7 @@ $unsorted_int_obj = vec[
 ];
 
 // array of string objects
-$unsorted_str_obj = varray [
+$unsorted_str_obj = vec[
   new for_string_rsort("axx"), new for_string_rsort("t"),
   new for_string_rsort("w"), new for_string_rsort("py"),
   new for_string_rsort("apple"), new for_string_rsort("Orange"),

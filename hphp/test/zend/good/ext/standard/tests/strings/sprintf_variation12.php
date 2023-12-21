@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : float formats with arrays ***\n";
 
 // array of array types
-$array_values = varray [
+$array_values = vec[
   vec[],
   vec[0],
   vec[1],

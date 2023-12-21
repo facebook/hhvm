@@ -12,8 +12,8 @@ echo "*** Testing ctype_alpha() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");
 
-$octal_values = varray [0101, 0102, 0103, 0104];
-$hex_values = varray   [0x41, 0x42, 0x43, 0x44];
+$octal_values = vec[0101, 0102, 0103, 0104];
+$hex_values = vec   [0x41, 0x42, 0x43, 0x44];
 
 echo "\n-- Octal Values --\n";
 $iterator = 1;

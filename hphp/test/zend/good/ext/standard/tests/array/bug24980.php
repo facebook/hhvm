@@ -24,7 +24,7 @@ function rmul($v, $w)
     return $v;
 }
 <<__EntryPoint>> function main(): void {
-$numbers = varray [2,3,5,7];
+$numbers = vec[2,3,5,7];
 $total = array_reduce($numbers, add_up<>);
 print "Total is $total\n";
 

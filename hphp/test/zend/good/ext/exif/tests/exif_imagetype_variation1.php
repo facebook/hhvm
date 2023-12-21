@@ -20,7 +20,7 @@ echo "*** Testing exif_imagetype() : different types for filename argument ***\n
 $file_handle = fopen(__FILE__, 'r');
 
 // array with different values
-$values =  varray [
+$values =  vec[
 
   // integer values
   0,

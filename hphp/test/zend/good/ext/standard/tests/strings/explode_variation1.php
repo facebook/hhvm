@@ -19,7 +19,7 @@ echo "*** Testing explode() function: with unexpected inputs for 'delimiter' arg
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values for $delimiter
-$delimiters =  varray [
+$delimiters =  vec[
 
           // integer values
 /*1*/      0,

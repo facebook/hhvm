@@ -16,7 +16,7 @@ echo "*** Testing array_unshift() : single quoted strings for \$var argument ***
 $array = dict['f' => "first", "s" => 'second', 0 => 1, 1 => 2.222];
 
 // different variations of single quoted strings to be passed to $var argument
-$vars = varray [
+$vars = vec[
   '\$ -> This represents the dollar sign. hello dollar!!!',
   '\t\r\v The quick brown fo\fx jumped over the lazy dog',
   'This is a text with special chars: \!\@\#\$\%\^\&\*\(\)\\',

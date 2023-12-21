@@ -8,7 +8,7 @@
 echo "*** Testing array_chunk() : basic functionality ***\n";
 $size = 2;
 
-$input_arrays = varray [
+$input_arrays = vec[
   // array with default keys - numeric values
   vec[1, 2, 3, 4, 5],
 

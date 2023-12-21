@@ -3,7 +3,7 @@
 $file = sys_get_temp_dir().'/'.'SplFileObject_fputcsv.csv';
 $fo = new SplFileObject($file, 'w');
 
-$list = darray [
+$list = dict[
   0 => 'aaa,bbb',
   1 => 'aaa,"bbb"',
   2 => '"aaa","bbb"',

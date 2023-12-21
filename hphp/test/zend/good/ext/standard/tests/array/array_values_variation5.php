@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_values() : usage variations ***\n";
 
-$input = darray ['one' => 'un', 'two' => 'deux', 'three' => 'trois'];
+$input = dict['one' => 'un', 'two' => 'deux', 'three' => 'trois'];
 
 echo "\n-- Call array_values() --\n";
 var_dump($result = array_values($input));

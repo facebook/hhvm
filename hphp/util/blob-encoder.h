@@ -120,6 +120,20 @@ public:
 
 //////////////////////////////////////////////////////////////////////
 
+template <typename T>
+auto maybe_reserve(T* t, size_t s) -> std::void_t<decltype(t->reserve(s))> {
+  t->reserve(s);
+}
+inline void maybe_reserve(...) {}
+
+template <typename T>
+auto maybe_shrink(T* t) -> std::void_t<decltype(t->shrink_to_fit())> {
+  t->shrink_to_fit();
+}
+inline void maybe_shrink(...) {}
+
+//////////////////////////////////////////////////////////////////////
+
 template <typename T> struct BlobEncoderHelper {};
 
 //////////////////////////////////////////////////////////////////////
@@ -697,13 +711,11 @@ struct BlobDecoder {
   template<typename T, typename A, typename... Extra>
   void decode(std::vector<T, A>& vec, Extra... extra) {
     decodeVecContainer(vec, extra...);
-    vec.shrink_to_fit();
   }
 
   template<typename T, typename A, typename... Extra>
   void decode(CompactVector<T, A>& vec, Extra... extra) {
     decodeVecContainer(vec, extra...);
-    vec.shrink_to_fit();
   }
 
   template<typename T, size_t S, size_t M, typename A, typename... Extra>
@@ -987,11 +999,13 @@ private:
     cont.clear();
     uint32_t size;
     decode(size);
+    maybe_reserve(&cont, size);
     for (uint32_t i = 0; i < size; ++i) {
       auto key = make<typename Cont::key_type>();
       auto val = make<typename Cont::mapped_type>(extra...);
       cont.emplace(std::move(key), std::move(val));
     }
+    maybe_shrink(&cont);
   }
 
   template<typename Cont, typename... Extra>
@@ -999,11 +1013,12 @@ private:
     cont.clear();
     uint32_t size;
     decode(size);
-    cont.reserve(size);
+    maybe_reserve(&cont, size);
     for (uint32_t i = 0; i < size; ++i) {
       auto val = make<typename Cont::value_type>(extra...);
       cont.emplace(std::move(val));
     }
+    maybe_shrink(&cont);
   }
 
   template<typename Cont, typename... Extra>
@@ -1011,10 +1026,12 @@ private:
     cont.clear();
     uint32_t size;
     decode(size);
+    maybe_reserve(&cont, size);
     for (uint32_t i = 0; i < size; ++i) {
       auto val = make<typename Cont::value_type>(extra...);
       cont.emplace(std::move(val));
     }
+    maybe_shrink(&cont);
   }
 
   template<typename Cont, typename... Extra>
@@ -1022,11 +1039,12 @@ private:
     cont.clear();
     uint32_t size;
     decode(size);
-    cont.reserve(size);
+    maybe_reserve(&cont, size);
     for (uint32_t i = 0; i < size; ++i) {
       auto val = make<typename Cont::value_type>(extra...);
       cont.emplace_back(std::move(val));
     }
+    maybe_shrink(&cont);
   }
 
   const unsigned char* m_start;

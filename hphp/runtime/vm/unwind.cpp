@@ -258,7 +258,7 @@ DEBUG_ONLY bool throwable_has_expected_props() {
   // to know.
   auto const isException = [&](const TypeConstraint& tc) {
     if (!tc.isUnresolved() && !tc.isSubObject()) return false;
-    auto const cls = Class::lookup(tc.anyNamedType());
+    auto const cls = tc.anyNamedType()->getCachedClass();
     return cls && cls == SystemLib::getThrowableClass();
   };
 

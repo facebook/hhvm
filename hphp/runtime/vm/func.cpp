@@ -838,10 +838,6 @@ void Func::def(Func* func) {
   raise_error(Strings::FUNCTION_ALREADY_DEFINED, func->name()->data());
 }
 
-Func* Func::lookup(const NamedFunc* ne) {
-  return ne->getCachedFunc();
-}
-
 Func* Func::lookup(const StringData* name) {
   const NamedFunc* ne = NamedFunc::getOrCreate(name);
   return ne->getCachedFunc();

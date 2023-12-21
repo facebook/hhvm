@@ -91,7 +91,7 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
     }
     auto targetNE = NamedType::getOrCreate(typeName);
 
-    if (auto klass = Class::lookup(targetNE)) {
+    if (auto klass = targetNE->getCachedClass()) {
       typeAliasFromClass(klass);
       continue;
     }
@@ -107,7 +107,7 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
         AutoloadHandler::s_instance->autoloadTypeOrTypeAlias(
           StrNR(const_cast<StringData*>(typeName))
         )) {
-      if (auto klass = Class::lookup(targetNE)) {
+      if (auto klass = targetNE->getCachedClass()) {
         typeAliasFromClass(klass);
         continue;
       }

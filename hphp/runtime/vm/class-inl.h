@@ -753,15 +753,11 @@ inline const StringData* classToStringHelper(const Class* cls,
 ///////////////////////////////////////////////////////////////////////////////
 // Lookup.
 
-inline Class* Class::lookup(const NamedType* ne) {
-  return ne->getCachedClass();
-}
-
 inline Class* Class::lookup(const StringData* name) {
   if (name->isSymbol()) {
     if (auto const result = name->getCachedClass()) return result;
   }
-  auto const result = lookup(NamedType::getOrCreate(name));
+  auto const result = NamedType::getOrCreate(name)->getCachedClass();
   if (name->isSymbol() && result && classHasPersistentRDS(result)) {
     const_cast<StringData*>(name)->setCachedClass(result);
   }

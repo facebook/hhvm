@@ -1502,12 +1502,9 @@ public:
   static Class* defClosure(const PreClass* preClass, bool cache);
 
   /*
-   * Look up the Class in this request with name `name', or with the name
-   * mapped to the NamedType `ne'.
-   *
+   * Look up the Class in this request with name `name'
    * Return nullptr if the class is not yet defined in this request.
    */
-  static Class* lookup(const NamedType* ne);
   static Class* lookup(const StringData* name);
 
   /*

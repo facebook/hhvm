@@ -89,10 +89,10 @@ struct CompactVector : private std::allocator_traits<Alloc>::template rebind_all
   void erase(iterator);
   void erase(iterator, iterator);
   iterator insert(iterator p, const T& v) { return insert_impl(p, 1, v); }
-  iterator insert(iterator p, T&& v) { return insert_impl(p, 1, std::move(v)); };
+  iterator insert(iterator p, T&& v) { return insert_impl(p, 1, std::move(v)); }
   iterator insert(iterator p, size_t num, const T& v) {
     return insert_impl(p, num, v);
-  };
+  }
   template<typename U>
   iterator insert(iterator p, U i1, U i2);
   void resize(size_type sz);

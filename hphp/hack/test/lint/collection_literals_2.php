@@ -1,5 +1,5 @@
 <?hh
 
 function f() {
-  return new Vector(varray[1]);
+  return new Vector(vec[1]);
 }

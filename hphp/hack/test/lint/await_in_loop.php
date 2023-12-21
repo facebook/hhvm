@@ -5,7 +5,7 @@ async function await_in_loop($k, $n) {
     await $v;
   }
 
-  $test_array = varray[];
+  $test_array = vec[];
   foreach ($k as $v) {
     $test_array[] = await $v;
   }

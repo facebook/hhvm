@@ -12,7 +12,7 @@ function test() {
 
 function test_syntax() {
   $x = X + Y;
-  $y = $x + varray[Y];
+  $y = $x + vec[Y];
   $x = array_concat($x, Y);
   $X = array_concat($x, Y);
   $X = array_merge_by_key($X, Y);

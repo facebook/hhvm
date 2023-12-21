@@ -7,12 +7,12 @@ function test() {
   new ImmVector(null);
   new ImmMap(null);
   new ImmSet(null);
-  new Vector(varray[]);
-  new Map(varray[]);
-  new Set(varray[]);
-  new ImmVector(varray[]);
-  new ImmMap(varray[]);
-  new ImmSet(varray[]);
+  new Vector(vec[]);
+  new Map(vec[]);
+  new Set(vec[]);
+  new ImmVector(vec[]);
+  new ImmMap(vec[]);
+  new ImmSet(vec[]);
   new Set(array_keys(X));
   new Vector(array_keys(X));
   new Set(array_values(X));

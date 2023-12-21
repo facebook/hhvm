@@ -487,17 +487,6 @@ void cmpLowPtrImpl(Vout& v, Vreg sf, const void* ptr, Vptr mem, size_t size) {
   }
 }
 
-void cmpLowPtrImpl(Vout& v, Vreg sf, const void* ptr, Vreg reg, size_t size) {
-  if (size == 8) {
-    v << cmpq{v.cns(ptr), reg, sf};
-  } else if (size == 4) {
-    auto const ptrImm = safe_cast<uint32_t>(reinterpret_cast<intptr_t>(ptr));
-    v << cmpl{v.cns(ptrImm), reg, sf};
-  } else {
-    not_implemented();
-  }
-}
-
 void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg, Vptr mem, size_t size) {
   if (size == 8) {
     v << cmpqm{reg, mem, sf};

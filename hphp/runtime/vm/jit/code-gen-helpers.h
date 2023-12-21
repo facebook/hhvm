@@ -227,7 +227,6 @@ Vreg emitLdObjClass(Vout& v, Vreg obj, Vreg d);
  * Internal helpers for LowPtr comparisons.
  */
 void cmpLowPtrImpl(Vout& v, Vreg sf, const void* ptr, Vptr mem, size_t size);
-void cmpLowPtrImpl(Vout& v, Vreg sf, const void* ptr, Vreg reg, size_t size);
 void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg, Vptr mem, size_t size);
 void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg1, Vreg reg2, size_t size);
 
@@ -237,11 +236,6 @@ void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg1, Vreg reg2, size_t size);
 template<class T>
 void emitCmpLowPtr(Vout& v, Vreg sf, const T* c, Vptr mem) {
   cmpLowPtrImpl(v, sf, c, mem, sizeof(LowPtr<T>));
-}
-
-template<class T>
-void emitCmpLowPtr(Vout& v, Vreg sf, const T* c, Vreg reg) {
-  cmpLowPtrImpl(v, sf, c, reg, sizeof(LowPtr<T>));
 }
 
 template<class T>

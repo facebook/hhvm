@@ -19,6 +19,5 @@ class C {
 
 <<__EntryPoint>>
 function main(): void {
-  include 'module_level_traits_module_a.inc';
   (new C())->foo();
 }

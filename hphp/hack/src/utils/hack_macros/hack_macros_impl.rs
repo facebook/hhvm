@@ -1400,7 +1400,7 @@ mod tests {
 
     #[test]
     fn test_ex13() {
-        assert_pat_eq(hack_expr_impl.parse2(quote!(EX r#"darray[a => 42]"#)), {
+        assert_pat_eq(hack_expr_impl.parse2(quote!(EX r#"dict[a => 42]"#)), {
             quote!({
                 use EX::ast::*;
                 let __hygienic_pos: Pos = Pos::NONE;
@@ -1408,9 +1408,10 @@ mod tests {
                 let __hygienic_tmp = Expr(
                     (),
                     __hygienic_pos.clone(),
-                    Expr_::Darray(Box::new((
+                    Expr_::KeyValCollection(Box::new((
+                        (__hygienic_pos.clone(), KvcKind::Dict),
                         None,
-                        vec![(
+                        vec![Field(
                             Expr(
                                 (),
                                 __hygienic_pos.clone(),

@@ -9,10 +9,8 @@ function main() :mixed{
   $values = dict[
     'vec[]' => vec[],
     'vec[$c]' => vec[$c],
-    'varray[]' => varray[],
-    'varray[$c]' => varray[$c],
-    'HH\\array_mark_legacy(varray[])' => HH\array_mark_legacy(varray[]),
-    'HH\\array_mark_legacy(varray[$c])' => HH\array_mark_legacy(varray[$c]),
+    'HH\\array_mark_legacy(vec[])' => HH\array_mark_legacy(vec[]),
+    'HH\\array_mark_legacy(vec[$c])' => HH\array_mark_legacy(vec[$c]),
   ];
   foreach ($values as $k1 => $v1) {
     print("----------------------------------------------------------\n");

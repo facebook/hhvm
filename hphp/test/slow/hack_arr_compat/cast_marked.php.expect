@@ -1,27 +1,27 @@
 
 =============================
-Testing: varray[]
+Testing: vec[]
 bool(false)
 bool(true)
 bool(true)
 bool(true)
 
 =============================
-Testing: varray[new C()]
+Testing: vec[new C()]
 bool(false)
 bool(true)
 bool(true)
 bool(true)
 
 =============================
-Testing: darray[]
+Testing: dict[]
 bool(false)
 bool(true)
 bool(true)
 bool(true)
 
 =============================
-Testing: darray[17 => new C()]
+Testing: dict[17 => new C()]
 bool(false)
 bool(true)
 bool(true)

@@ -1,42 +1,20 @@
 ----------------------------------------------------------
 vec[] === vec[]
 vec[] !== vec[$c]
-vec[] === varray[]
-vec[] !== varray[$c]
-vec[] === HH\array_mark_legacy(varray[])
-vec[] !== HH\array_mark_legacy(varray[$c])
+vec[] === HH\array_mark_legacy(vec[])
+vec[] !== HH\array_mark_legacy(vec[$c])
 ----------------------------------------------------------
 vec[$c] !== vec[]
 vec[$c] === vec[$c]
-vec[$c] !== varray[]
-vec[$c] === varray[$c]
-vec[$c] !== HH\array_mark_legacy(varray[])
-vec[$c] === HH\array_mark_legacy(varray[$c])
+vec[$c] !== HH\array_mark_legacy(vec[])
+vec[$c] === HH\array_mark_legacy(vec[$c])
 ----------------------------------------------------------
-varray[] === vec[]
-varray[] !== vec[$c]
-varray[] === varray[]
-varray[] !== varray[$c]
-varray[] === HH\array_mark_legacy(varray[])
-varray[] !== HH\array_mark_legacy(varray[$c])
+HH\array_mark_legacy(vec[]) === vec[]
+HH\array_mark_legacy(vec[]) !== vec[$c]
+HH\array_mark_legacy(vec[]) === HH\array_mark_legacy(vec[])
+HH\array_mark_legacy(vec[]) !== HH\array_mark_legacy(vec[$c])
 ----------------------------------------------------------
-varray[$c] !== vec[]
-varray[$c] === vec[$c]
-varray[$c] !== varray[]
-varray[$c] === varray[$c]
-varray[$c] !== HH\array_mark_legacy(varray[])
-varray[$c] === HH\array_mark_legacy(varray[$c])
-----------------------------------------------------------
-HH\array_mark_legacy(varray[]) === vec[]
-HH\array_mark_legacy(varray[]) !== vec[$c]
-HH\array_mark_legacy(varray[]) === varray[]
-HH\array_mark_legacy(varray[]) !== varray[$c]
-HH\array_mark_legacy(varray[]) === HH\array_mark_legacy(varray[])
-HH\array_mark_legacy(varray[]) !== HH\array_mark_legacy(varray[$c])
-----------------------------------------------------------
-HH\array_mark_legacy(varray[$c]) !== vec[]
-HH\array_mark_legacy(varray[$c]) === vec[$c]
-HH\array_mark_legacy(varray[$c]) !== varray[]
-HH\array_mark_legacy(varray[$c]) === varray[$c]
-HH\array_mark_legacy(varray[$c]) !== HH\array_mark_legacy(varray[])
-HH\array_mark_legacy(varray[$c]) === HH\array_mark_legacy(varray[$c])
+HH\array_mark_legacy(vec[$c]) !== vec[]
+HH\array_mark_legacy(vec[$c]) === vec[$c]
+HH\array_mark_legacy(vec[$c]) !== HH\array_mark_legacy(vec[])
+HH\array_mark_legacy(vec[$c]) === HH\array_mark_legacy(vec[$c])

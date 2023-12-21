@@ -23,8 +23,8 @@ function call_fbs($value, $flag) :mixed{
 <<__EntryPoint>>
 function main() :mixed{
   $arrays = dict[
-    'varray[]' => varray[],
-    'darray[]' => darray[],
+    'varray[]' => vec[],
+    'darray[]' => dict[],
     'vec[]'    => vec[],
     'dict[]'   => dict[],
     'keyset[]' => keyset[],

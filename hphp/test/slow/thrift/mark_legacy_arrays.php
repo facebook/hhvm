@@ -61,10 +61,10 @@ class TestStruct {
   ];
 
   public function __construct(
-    public varray<varray<string>> $varray = varray[],
-    public darray<string, darray<string, string>> $darray = darray[],
-    public darray<string, bool> $darraySet = darray[],
-    public varray<TestStruct> $structVarray = varray[],
+    public varray<varray<string>> $varray = vec[],
+    public darray<string, darray<string, string>> $darray = dict[],
+    public darray<string, bool> $darraySet = dict[],
+    public varray<TestStruct> $structVarray = vec[],
   )[] {}
   public static function withDefaultValues()[]: this {
     return new static();
@@ -74,10 +74,10 @@ class TestStruct {
 
 function struct(): TestStruct {
   $struct = new TestStruct();
-  $struct->varray = varray[varray['foo']];
-  $struct->darray = darray['foo' => darray['bar' => 'baz']];
-  $struct->darraySet = darray['foo' => true];
-  $struct->structVarray = varray[new TestStruct()];
+  $struct->varray = vec[vec['foo']];
+  $struct->darray = dict['foo' => dict['bar' => 'baz']];
+  $struct->darraySet = dict['foo' => true];
+  $struct->structVarray = vec[new TestStruct()];
   return $struct;
 }
 

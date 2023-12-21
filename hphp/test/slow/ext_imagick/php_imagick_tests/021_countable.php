@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>> function main(): void {
-$imagick = new Imagick(varray [
+$imagick = new Imagick(vec [
             'magick:rose',
             'magick:rose',
             'magick:rose',

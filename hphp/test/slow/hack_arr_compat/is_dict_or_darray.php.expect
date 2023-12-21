@@ -1,9 +1,7 @@
 === constant values ===
 is_dict_or_darray(null) = false
 is_dict_or_darray("abc") = false
-is_dict_or_darray(varray[1, 2, 3]) = false
 is_dict_or_darray(vec[1, 2, 3]) = false
-is_dict_or_darray(darray["a" => "a"]) = true
 is_dict_or_darray(dict["a" => "a"]) = true
 is_dict_or_darray(keyset[1, 2, 3]) = false
 is_dict_or_darray(Vector{1, 2, 3}) = false
@@ -11,9 +9,7 @@ is_dict_or_darray(Map{"a" => "a"}) = false
 === laundered values ===
 is_dict_or_darray(null) = false
 is_dict_or_darray("abc") = false
-is_dict_or_darray(varray[1, 2, 3]) = false
 is_dict_or_darray(vec[1, 2, 3]) = false
-is_dict_or_darray(darray["a" => "a"]) = true
 is_dict_or_darray(dict["a" => "a"]) = true
 is_dict_or_darray(keyset[1, 2, 3]) = false
 is_dict_or_darray(Vector{1, 2, 3}) = false

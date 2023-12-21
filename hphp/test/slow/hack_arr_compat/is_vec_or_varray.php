@@ -17,10 +17,8 @@ function main(): void {
     tuple(null, 'null'),
     tuple("abc", '"abc"'),
 
-    tuple(varray[1, 2, 3],  'varray[1, 2, 3]'),
     tuple(vec[1, 2, 3],  'vec[1, 2, 3]'),
 
-    tuple(darray["a" => "a"], 'darray["a" => "a"]'),
     tuple(dict["a" => "a"], 'dict["a" => "a"]'),
 
     tuple(keyset[1, 2, 3], 'keyset[1, 2, 3]'),

@@ -26,13 +26,13 @@ function test_darray(string $name, darray $array) :mixed{
 
 <<__EntryPoint>>
 function main() :mixed{
-  test_varray('varray[]', varray[]);
-  test_varray('varray[new C()]', varray[new C()]);
-  test_darray('darray[]', darray[]);
-  test_darray('darray[17 => new C()]', darray[17 => new C()]);
+  test_varray('vec[]', vec[]);
+  test_varray('vec[new C()]', vec[new C()]);
+  test_darray('dict[]', dict[]);
+  test_darray('dict[17 => new C()]', dict[17 => new C()]);
 
   print("\n=============================\nTesting: static marked varray\n");
-  $v = HH\array_mark_legacy(varray[]);
+  $v = HH\array_mark_legacy(vec[]);
   var_dump(HH\is_array_marked_legacy($v));
   var_dump(HH\is_array_marked_legacy(varray($v)));
   var_dump(HH\is_array_marked_legacy(darray($v)));
@@ -40,7 +40,7 @@ function main() :mixed{
   var_dump(HH\is_array_marked_legacy(dict($v)));
 
   print("\n=============================\nTesting: static marked darray\n");
-  $d = HH\array_mark_legacy(darray[]);
+  $d = HH\array_mark_legacy(dict[]);
   var_dump(HH\is_array_marked_legacy($d));
   var_dump(HH\is_array_marked_legacy(varray($d)));
   var_dump(HH\is_array_marked_legacy(darray($d)));

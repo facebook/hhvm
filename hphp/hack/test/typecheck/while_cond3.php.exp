@@ -1,5 +1,5 @@
 File "while_cond3.php", line 18, characters 3-4:
-Typing error (Typing[4110])
+Typing error (Typing[4429])
   File "while_cond3.php", line 18, characters 3-9:
   Expected `num` because this is used in an arithmetic operation
   File "while_cond3.php", line 12, characters 14-17:

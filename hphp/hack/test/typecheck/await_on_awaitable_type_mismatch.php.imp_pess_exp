@@ -7,7 +7,7 @@ Invalid return type (Typing[4110])
   File "await_on_awaitable_type_mismatch.php", line 13, characters 8-15:
   Here is why I think the argument is a `num`: this is a `num` because a type could not be determined here
 File "await_on_awaitable_type_mismatch.php", line 14, characters 14-15:
-Typing error (Typing[4110])
+Typing error (Typing[4429])
   File "await_on_awaitable_type_mismatch.php", line 14, characters 10-15:
   Expected `num` because this is used in an arithmetic operation
   File "await_on_awaitable_type_mismatch.php", line 12, characters 37-42:

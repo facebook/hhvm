@@ -59,11 +59,7 @@ let check_dynamic_or_enforce_int env p t r err =
 let check_like_num ?err p_exp p env ty =
   let err =
     match err with
-    | None ->
-      if TypecheckerOptions.math_new_code (Env.get_tcopt env) then
-        Typing_error.Callback.math_invalid_argument
-      else
-        Typing_error.Callback.unify_error
+    | None -> Typing_error.Callback.math_invalid_argument
     | Some err -> err
   in
   let et_type = MakeType.num (Reason.Rarith p_exp) in
@@ -350,11 +346,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
     when not contains_any ->
     let err =
       match bop with
-      | Ast_defs.Percent ->
-        if TypecheckerOptions.math_new_code (Env.get_tcopt env) then
-          Typing_error.Callback.math_invalid_argument
-        else
-          Typing_error.Callback.unify_error
+      | Ast_defs.Percent -> Typing_error.Callback.math_invalid_argument
       | _ -> Typing_error.Callback.bitwise_math_invalid_argument
     in
     let (env, _, err_opt1) =

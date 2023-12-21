@@ -1,11 +1,11 @@
 File "disallow_array_addition.php", line 4, characters 10-11:
-Typing error (Typing[4110])
+Typing error (Typing[4429])
   File "disallow_array_addition.php", line 4, characters 10-16:
   Expected `num` because this is used in an arithmetic operation
   File "disallow_array_addition.php", line 3, characters 14-24:
   But got `vec<int>`
 File "disallow_array_addition.php", line 4, characters 15-16:
-Typing error (Typing[4110])
+Typing error (Typing[4429])
   File "disallow_array_addition.php", line 4, characters 10-16:
   Expected `num` because this is used in an arithmetic operation
   File "disallow_array_addition.php", line 3, characters 30-40:

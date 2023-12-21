@@ -7084,7 +7084,7 @@ function expect_type_errors_inside(): void {
                                 "end": {"line": 4, "character": 9},
                             },
                             "severity": 1,
-                            "code": 4110,
+                            "code": 4429,
                             "source": "Hack",
                             "message": "Typing error",
                             "relatedInformation": [
@@ -7138,7 +7138,7 @@ function expect_type_errors_inside(): void {
                                 "end": {"line": 7, "character": 10},
                             },
                             "severity": 1,
-                            "code": 4110,
+                            "code": 4429,
                             "source": "Hack",
                             "message": "Typing error",
                             "relatedInformation": [
@@ -7276,7 +7276,7 @@ function expect_type_errors_inside(): void {
                                 "end": {"line": 2, "character": 2},
                             },
                             "severity": 1,
-                            "code": 4110,
+                            "code": 4429,
                             "source": "Hack",
                             "message": "Typing error",
                             "relatedInformation": [
@@ -7330,7 +7330,7 @@ function expect_type_errors_inside(): void {
                                 "end": {"line": 8, "character": 8},
                             },
                             "severity": 1,
-                            "code": 4110,
+                            "code": 4429,
                             "source": "Hack",
                             "message": "Typing error",
                             "relatedInformation": [

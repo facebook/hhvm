@@ -1,12 +1,12 @@
-File "do_cond2.php", line 15, characters 7-8:
-Typing error (Typing[4110])
-  File "do_cond2.php", line 15, characters 7-13:
-  Expected `num` because this is used in an arithmetic operation
-  File "do_cond2.php", line 16, characters 12-15:
-  But got `?int`
 File "do_cond2.php", line 17, characters 14-19:
 This comparison has invalid types.  Only comparisons in which both arguments are strings, nums, DateTime, or DateTimeImmutable are allowed (Typing[4240])
   File "do_cond2.php", line 16, characters 12-15:
   This is null
   File "do_cond2.php", line 17, characters 19-19:
   This is an int
+File "do_cond2.php", line 15, characters 7-8:
+Typing error (Typing[4429])
+  File "do_cond2.php", line 15, characters 7-13:
+  Expected `num` because this is used in an arithmetic operation
+  File "do_cond2.php", line 16, characters 12-15:
+  But got `?int`

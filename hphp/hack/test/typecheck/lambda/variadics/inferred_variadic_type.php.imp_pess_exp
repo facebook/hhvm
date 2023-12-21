@@ -2,18 +2,6 @@ File "inferred_variadic_type.php", line 41, characters 38-40:
 You are trying to access the method `foo` but this is an int (Typing[4062])
   File "inferred_variadic_type.php", line 15, characters 42-44:
   Definition is here
-File "inferred_variadic_type.php", line 37, characters 14-18:
-Typing error (Typing[4110])
-  File "inferred_variadic_type.php", line 37, characters 14-26:
-  Expected `num` because this is used in an arithmetic operation
-  File "inferred_variadic_type.php", line 15, characters 36-36:
-  But got `D`
-File "inferred_variadic_type.php", line 37, characters 14-18:
-Typing error (Typing[4110])
-  File "inferred_variadic_type.php", line 37, characters 14-26:
-  Expected `num` because this is used in an arithmetic operation
-  File "inferred_variadic_type.php", line 15, characters 39-39:
-  But got `C`
 File "inferred_variadic_type.php", line 37, characters 14-26:
 Invalid return type (Typing[4110])
   File "inferred_variadic_type.php", line 15, characters 48-50:
@@ -22,18 +10,6 @@ Invalid return type (Typing[4110])
   But got `float` because this is the result of an arithmetic operation with a `num` as the first argument, and no `float`s.
   File "inferred_variadic_type.php", line 36, characters 9-10:
   Here is why I think the argument is a `num`: this is a `num` (variadic argument)
-File "inferred_variadic_type.php", line 37, characters 22-26:
-Typing error (Typing[4110])
-  File "inferred_variadic_type.php", line 37, characters 14-26:
-  Expected `num` because this is used in an arithmetic operation
-  File "inferred_variadic_type.php", line 15, characters 36-36:
-  But got `D`
-File "inferred_variadic_type.php", line 37, characters 22-26:
-Typing error (Typing[4110])
-  File "inferred_variadic_type.php", line 37, characters 14-26:
-  Expected `num` because this is used in an arithmetic operation
-  File "inferred_variadic_type.php", line 15, characters 39-39:
-  But got `C`
 File "inferred_variadic_type.php", line 47, characters 19-26:
 Invalid argument (Typing[4110])
   File "inferred_variadic_type.php", line 46, characters 20-21:
@@ -44,3 +20,27 @@ File "inferred_variadic_type.php", line 43, characters 25-29:
 Was expecting an object but type is unknown (Typing[4297])
   File "inferred_variadic_type.php", line 43, characters 17-18:
   It is unknown because a type could not be determined here
+File "inferred_variadic_type.php", line 37, characters 14-18:
+Typing error (Typing[4429])
+  File "inferred_variadic_type.php", line 37, characters 14-26:
+  Expected `num` because this is used in an arithmetic operation
+  File "inferred_variadic_type.php", line 15, characters 36-36:
+  But got `D`
+File "inferred_variadic_type.php", line 37, characters 14-18:
+Typing error (Typing[4429])
+  File "inferred_variadic_type.php", line 37, characters 14-26:
+  Expected `num` because this is used in an arithmetic operation
+  File "inferred_variadic_type.php", line 15, characters 39-39:
+  But got `C`
+File "inferred_variadic_type.php", line 37, characters 22-26:
+Typing error (Typing[4429])
+  File "inferred_variadic_type.php", line 37, characters 14-26:
+  Expected `num` because this is used in an arithmetic operation
+  File "inferred_variadic_type.php", line 15, characters 36-36:
+  But got `D`
+File "inferred_variadic_type.php", line 37, characters 22-26:
+Typing error (Typing[4429])
+  File "inferred_variadic_type.php", line 37, characters 14-26:
+  Expected `num` because this is used in an arithmetic operation
+  File "inferred_variadic_type.php", line 15, characters 39-39:
+  But got `C`

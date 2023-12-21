@@ -324,9 +324,6 @@ impl HhConfig {
                 "locl_cache_node_threshold" => {
                     go.tco_locl_cache_node_threshold = parse_json(&value)?;
                 }
-                "math_new_code" => {
-                    go.tco_math_new_code = parse_json(&value)?;
-                }
                 "explicit_consistent_constructors" => {
                     go.tco_explicit_consistent_constructors = parse_json(&value)?;
                 }

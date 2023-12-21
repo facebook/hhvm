@@ -7,7 +7,7 @@ Invalid return type (Typing[4110])
   File "await_as_an_expression_awaiting_wrong_type.php", line 7, characters 11-22:
   Here is why I think the argument is a `num`: this is a `num` because a type could not be determined here
 File "await_as_an_expression_awaiting_wrong_type.php", line 7, characters 11-22:
-Typing error (Typing[4110])
+Typing error (Typing[4429])
   File "await_as_an_expression_awaiting_wrong_type.php", line 7, characters 10-40:
   Expected `num` because this is used in an arithmetic operation
   File "await_as_an_expression_awaiting_wrong_type.php", line 3, characters 34-39:

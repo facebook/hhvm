@@ -36,12 +36,6 @@ File "supportdynamic.bad.php", line 26, characters 16-39:
 Wrong number of type arguments (expected 1, got 2) (Typing[4101])
   File "supportdynamic.hhi", line 6, characters 11-20:
   Definition is here
-File "supportdynamic.bad.php", line 12, characters 3-5:
-Typing error (Typing[4110])
-  File "supportdynamic.bad.php", line 12, characters 3-9:
-  Expected `num` because this is used in an arithmetic operation
-  File "supportdynamic.bad.php", line 3, characters 26-32:
-  But got `nonnull`
 File "supportdynamic.bad.php", line 16, characters 12-14:
 Invalid `foreach` (Typing[4110])
   File "supportdynamic.bad.php", line 16, characters 12-14:
@@ -66,3 +60,9 @@ File "supportdynamic.bad.php", line 4, characters 3-8:
 This is not an object of type `KeyedContainer`, this is a value of type supportdyn<nonnull> (Typing[4324])
   File "supportdynamic.bad.php", line 3, characters 15-33:
   Definition is here
+File "supportdynamic.bad.php", line 12, characters 3-5:
+Typing error (Typing[4429])
+  File "supportdynamic.bad.php", line 12, characters 3-9:
+  Expected `num` because this is used in an arithmetic operation
+  File "supportdynamic.bad.php", line 3, characters 26-32:
+  But got `nonnull`

@@ -1,10 +1,10 @@
-File "trivial.php", line 12, characters 3-4:
-Typing error (Typing[4110])
-  File "trivial.php", line 12, characters 3-9:
-  Expected `num` because this is used in an arithmetic operation
-  File "trivial.php", line 9, characters 19-20:
-  But got `V`
 File "trivial.php", line 6, characters 3-8:
 This variable cannot be reassigned because it is used for a dependent context (Typing[4404])
 File "trivial.php", line 12, characters 3-9:
 This variable cannot be reassigned because it is used for a dependent context (Typing[4404])
+File "trivial.php", line 12, characters 3-4:
+Typing error (Typing[4429])
+  File "trivial.php", line 12, characters 3-9:
+  Expected `num` because this is used in an arithmetic operation
+  File "trivial.php", line 9, characters 19-20:
+  But got `V`

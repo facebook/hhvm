@@ -23,7 +23,7 @@ Cannot access an internal element from module `A` in the default module (Typing[
   File "module_typedef.php--A.php", line 9, characters 18-22:
   This is from module `A`
 File "module_typedef.php--still-A.php", line 6, characters 8-9:
-Typing error (Typing[4110])
+Typing error (Typing[4429])
   File "module_typedef.php--still-A.php", line 6, characters 8-13:
   Expected `num` because this is used in an arithmetic operation
   File "module_typedef.php--A.php", line 9, characters 18-22:

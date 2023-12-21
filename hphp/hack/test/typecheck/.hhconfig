@@ -11,7 +11,6 @@ disallow_silence = true
 check_redundant_generics = true
 disallow_func_ptrs_in_constants = true
 enable_strict_string_concat_interp = true
-math_new_code = true
 explicit_consistent_constructors = 1
 enable_strict_const_semantics = 4
 require_types_tco_require_types_class_consts = 1

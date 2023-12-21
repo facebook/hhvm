@@ -280,7 +280,6 @@ let parse_options () =
   let interpret_soft_types_as_like_types = ref false in
   let enable_strict_string_concat_interp = ref false in
   let ignore_unsafe_cast = ref false in
-  let math_new_code = ref false in
   let typeconst_concrete_concrete_error = ref false in
   let enable_strict_const_semantics = ref 0 in
   let strict_wellformedness = ref 0 in
@@ -683,10 +682,6 @@ let parse_options () =
       ( "--ignore-unsafe-cast",
         Arg.Set ignore_unsafe_cast,
         " Ignore unsafe_cast and retain the original type of the expression" );
-      ( "--math-new-code",
-        Arg.Set math_new_code,
-        " Use a new error code for math operations: addition, subtraction, division, multiplication, exponentiation"
-      );
       ( "--typeconst-concrete-concrete-error",
         Arg.Set typeconst_concrete_concrete_error,
         " Raise an error when a concrete type constant is overridden by a concrete type constant in a child class."
@@ -937,7 +932,7 @@ let parse_options () =
       ~tco_enable_strict_string_concat_interp:
         !enable_strict_string_concat_interp
       ~tco_ignore_unsafe_cast:!ignore_unsafe_cast
-      ~tco_math_new_code:!math_new_code
+      ~tco_math_new_code:true
       ~tco_typeconst_concrete_concrete_error:!typeconst_concrete_concrete_error
       ~tco_enable_strict_const_semantics:!enable_strict_const_semantics
       ~tco_strict_wellformedness:!strict_wellformedness

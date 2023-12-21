@@ -202,8 +202,6 @@ let set_function_references t b =
 let allowed_expression_tree_visitors t =
   t.GlobalOptions.tco_allowed_expression_tree_visitors
 
-let math_new_code t = t.GlobalOptions.tco_math_new_code
-
 let typeconst_concrete_concrete_error t =
   t.GlobalOptions.tco_typeconst_concrete_concrete_error
 

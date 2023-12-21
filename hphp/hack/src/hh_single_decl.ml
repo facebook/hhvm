@@ -527,7 +527,6 @@ let () =
       ignored_flag "--disallow-inst-meth";
       ignored_flag "--ignore-unsafe-cast";
       ignored_flag "--inc-dec-new-code";
-      ignored_flag "--math-new-code";
       ignored_flag "--disallow-partially-abstract-typeconst-definitions";
       ignored_flag "--typeconst-concrete-concrete-error";
       ignored_arg "--enable-strict-const-semantics";

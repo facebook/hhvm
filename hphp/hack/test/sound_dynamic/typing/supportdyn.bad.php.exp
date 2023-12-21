@@ -32,12 +32,6 @@ Invalid type hint (Typing[4062])
   You are trying to access the type constant `C` but this is a nonnull value
   File "supportdyn.bad.php", line 24, characters 21-27:
   Definition is here
-File "supportdyn.bad.php", line 15, characters 3-5:
-Typing error (Typing[4110])
-  File "supportdyn.bad.php", line 15, characters 3-9:
-  Expected `num` because this is used in an arithmetic operation
-  File "supportdyn.bad.php", line 6, characters 26-32:
-  But got `nonnull`
 File "supportdyn.bad.php", line 19, characters 12-14:
 Invalid `foreach` (Typing[4110])
   File "supportdyn.bad.php", line 19, characters 12-14:
@@ -80,3 +74,9 @@ File "supportdyn.bad.php", line 7, characters 3-8:
 This is not an object of type `KeyedContainer`, this is a value of type supportdyn<nonnull> (Typing[4324])
   File "supportdyn.bad.php", line 6, characters 15-33:
   Definition is here
+File "supportdyn.bad.php", line 15, characters 3-5:
+Typing error (Typing[4429])
+  File "supportdyn.bad.php", line 15, characters 3-9:
+  Expected `num` because this is used in an arithmetic operation
+  File "supportdyn.bad.php", line 6, characters 26-32:
+  But got `nonnull`

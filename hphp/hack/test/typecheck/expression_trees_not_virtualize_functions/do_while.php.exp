@@ -1,7 +1,7 @@
 File "do_while.php", line 8, characters 5-49:
 Expression trees do not support `do while` loops. Consider using a `while` loop instead. (Parsing[1002])
 File "do_while.php", line 9, characters 12-13:
-Typing error (Typing[4110])
+Typing error (Typing[4429])
   File "do_while.php", line 9, characters 12-17:
   Expected `num` because this is used in an arithmetic operation
   File "expr_tree.hhi", line 31, characters 37-46:

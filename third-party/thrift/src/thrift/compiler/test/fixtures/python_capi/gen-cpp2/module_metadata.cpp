@@ -417,7 +417,7 @@ StructMetadata<::test::fixtures::python_capi::MyStructPatchStruct>::gen(ThriftMe
   module_MyStructPatch.is_union() = false;
   static const auto* const
   module_MyStructPatch_fields = new std::array<EncodedThriftField, 6>{{
-    {1, "assign", true, std::make_unique<Struct<::test::fixtures::python_capi::MyStruct>>("module.MyStruct"), std::vector<ThriftConstStruct>{}},
+    {1, "assign", true, std::make_unique<Struct<::test::fixtures::python_capi::MyStruct>>("module.MyStruct"), std::vector<ThriftConstStruct>{*cvStruct("thrift.Box", {}).cv_struct_ref(), }},
     {2, "clear", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
     {3, "patchPrior", false, std::make_unique<Struct<::test::fixtures::python_capi::MyStructFieldPatchStruct>>("module.MyStructFieldPatch"), std::vector<ThriftConstStruct>{}},
     {5, "ensure", false, std::make_unique<Struct<::test::fixtures::python_capi::MyStructEnsureStruct>>("module.MyStructEnsureStruct"), std::vector<ThriftConstStruct>{}},
@@ -594,7 +594,7 @@ StructMetadata<::test::fixtures::python_capi::MyStructEnsureStruct>::gen(ThriftM
   module_MyStructEnsureStruct_fields = new std::array<EncodedThriftField, 8>{{
     {1, "inty", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
     {2, "stringy", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {3, "myItemy", true, std::make_unique<Struct<::test::fixtures::python_capi::MyDataItem>>("module.MyDataItem"), std::vector<ThriftConstStruct>{}},
+    {3, "myItemy", true, std::make_unique<Struct<::test::fixtures::python_capi::MyDataItem>>("module.MyDataItem"), std::vector<ThriftConstStruct>{*cvStruct("thrift.Box", {}).cv_struct_ref(), }},
     {4, "myEnumy", true, std::make_unique<Enum<::test::fixtures::python_capi::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{}},
     {5, "booly", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
     {6, "floatListy", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE)), std::vector<ThriftConstStruct>{}},
@@ -624,7 +624,7 @@ StructMetadata<::test::fixtures::python_capi::MyDataItemPatchStruct>::gen(Thrift
   module_MyDataItemPatch.is_union() = false;
   static const auto* const
   module_MyDataItemPatch_fields = new std::array<EncodedThriftField, 6>{{
-    {1, "assign", true, std::make_unique<Struct<::test::fixtures::python_capi::MyDataItem>>("module.MyDataItem"), std::vector<ThriftConstStruct>{}},
+    {1, "assign", true, std::make_unique<Struct<::test::fixtures::python_capi::MyDataItem>>("module.MyDataItem"), std::vector<ThriftConstStruct>{*cvStruct("thrift.Box", {}).cv_struct_ref(), }},
     {2, "clear", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
     {3, "patchPrior", false, std::make_unique<Struct<::test::fixtures::python_capi::MyDataItemFieldPatchStruct>>("module.MyDataItemFieldPatch"), std::vector<ThriftConstStruct>{}},
     {5, "ensure", false, std::make_unique<Struct<::test::fixtures::python_capi::MyDataItemEnsureStruct>>("module.MyDataItemEnsureStruct"), std::vector<ThriftConstStruct>{}},

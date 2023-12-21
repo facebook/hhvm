@@ -9229,9 +9229,6 @@ MyDataPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 MyDataPatch.thrift_struct_annotations = {
 }
 MyDataPatch.thrift_field_annotations = {
-  1: {
-    "thrift.box": "",
-  },
   3: {
     "rust.box": "",
   },
@@ -9331,9 +9328,6 @@ MyDataWithCustomDefaultPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 MyDataWithCustomDefaultPatch.thrift_struct_annotations = {
 }
 MyDataWithCustomDefaultPatch.thrift_field_annotations = {
-  1: {
-    "thrift.box": "",
-  },
   3: {
     "rust.box": "",
   },
@@ -9432,9 +9426,6 @@ InnerUnionPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 InnerUnionPatch.thrift_struct_annotations = {
 }
 InnerUnionPatch.thrift_field_annotations = {
-  1: {
-    "thrift.box": "",
-  },
 }
 
 def InnerUnionPatch__init__(self, assign=None, clear=None, patchPrior=None, ensure=None, patch=None,):
@@ -9491,9 +9482,6 @@ MyUnionPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 MyUnionPatch.thrift_struct_annotations = {
 }
 MyUnionPatch.thrift_field_annotations = {
-  1: {
-    "thrift.box": "",
-  },
 }
 
 def MyUnionPatch__init__(self, assign=None, clear=None, patchPrior=None, ensure=None, patch=None,):
@@ -9557,9 +9545,6 @@ MyStructPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 MyStructPatch.thrift_struct_annotations = {
 }
 MyStructPatch.thrift_field_annotations = {
-  1: {
-    "thrift.box": "",
-  },
   3: {
     "rust.box": "",
   },
@@ -10017,27 +10002,6 @@ MyStructEnsureStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 MyStructEnsureStruct.thrift_struct_annotations = {
 }
 MyStructEnsureStruct.thrift_field_annotations = {
-  -32: {
-    "thrift.box": "",
-  },
-  -25: {
-    "thrift.box": "",
-  },
-  -24: {
-    "thrift.box": "",
-  },
-  -13: {
-    "thrift.box": "",
-  },
-  -12: {
-    "thrift.box": "",
-  },
-  -11: {
-    "thrift.box": "",
-  },
-  1: {
-    "thrift.box": "",
-  },
 }
 
 def MyStructEnsureStruct__init__(self, structWithCustomDefault=None, i32WithCustomDefault=None, mapMap=None, listMap=None, optMapVal=None, optSetVal=None, optListVal=None, optLateStructVal=None, optStructVal=None, optEnumVal=None, optBinaryVal=None, optStringVal=None, optDoubleVal=None, optFloatVal=None, optI64Val=None, optI32Val=None, optI16Val=None, optByteVal=None, optBoolVal=None, lateStructVal=None, unionVal=None, structVal=None, enumVal=None, binaryVal=None, stringVal=None, doubleVal=None, floatVal=None, i64Val=None, i32Val=None, i16Val=None, byteVal=None, boolVal=None, structWithFieldCustomDefault=None,):
@@ -10129,9 +10093,6 @@ LateDefStructPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 LateDefStructPatch.thrift_struct_annotations = {
 }
 LateDefStructPatch.thrift_field_annotations = {
-  1: {
-    "thrift.box": "",
-  },
   3: {
     "rust.box": "",
   },
@@ -10199,9 +10160,6 @@ RecursivePatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 RecursivePatch.thrift_struct_annotations = {
 }
 RecursivePatch.thrift_field_annotations = {
-  1: {
-    "thrift.box": "",
-  },
   3: {
     "rust.box": "",
   },
@@ -10320,9 +10278,6 @@ BarPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 BarPatch.thrift_struct_annotations = {
 }
 BarPatch.thrift_field_annotations = {
-  1: {
-    "thrift.box": "",
-  },
   3: {
     "rust.box": "",
   },
@@ -10389,9 +10344,6 @@ BarEnsureStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 BarEnsureStruct.thrift_struct_annotations = {
 }
 BarEnsureStruct.thrift_field_annotations = {
-  -1: {
-    "thrift.box": "",
-  },
 }
 
 def BarEnsureStruct__init__(self, loop=None,):
@@ -10415,9 +10367,6 @@ LoopPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 LoopPatch.thrift_struct_annotations = {
 }
 LoopPatch.thrift_field_annotations = {
-  1: {
-    "thrift.box": "",
-  },
 }
 
 def LoopPatch__init__(self, assign=None, clear=None,):

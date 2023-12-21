@@ -83,16 +83,6 @@ t_field& doc(std::string txt, t_field& node) {
   return node;
 }
 
-// A fluent function to box a given field.
-t_field& box(t_field& node) {
-  node.set_qualifier(t_field_qualifier::optional);
-  // Box the field, if the underlying type is a struct.
-  if (dynamic_cast<const t_struct*>(node.type()->get_true_type())) {
-    node.set_annotation("thrift.box");
-  }
-  return node;
-}
-
 // A fluent function to set the cpp.template string on a given node.
 template <typename N>
 std::unique_ptr<N> cpp_template(
@@ -171,6 +161,25 @@ struct StructGen {
     auto adapter =
         std::make_unique<t_const>(&program_, annotation, "", std::move(value));
     generated.add_structured_annotation(std::move(adapter));
+  }
+
+  t_field& box(t_field& node) {
+    node.set_qualifier(t_field_qualifier::optional);
+    // Box the field, if the underlying type is a struct.
+    if (!dynamic_cast<const t_struct*>(node.type()->get_true_type())) {
+      return node;
+    }
+
+    const t_type* annotation =
+        dynamic_cast<const t_type*>(program_.scope()->find_by_uri(kBoxUri));
+    assert(annotation);
+
+    auto value = t_const_value::make_map();
+    value->set_ttype(*annotation);
+    auto box_annot =
+        std::make_unique<t_const>(&program_, annotation, "", std::move(value));
+    node.add_structured_annotation(std::move(box_annot));
+    return node;
   }
 
   t_field& intern_box(t_field& field) {
@@ -368,7 +377,7 @@ t_struct& patch_generator::add_ensure_struct(
     if (!field->type().resolved()) {
       continue;
     }
-    box(gen.field(field->id(), field->type(), field->name()));
+    gen.box(gen.field(field->id(), field->type(), field->name()));
   }
   return gen;
 }

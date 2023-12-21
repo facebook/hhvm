@@ -548,7 +548,18 @@
   "type" : "struct",
   "name" : "MyData"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.Box" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Box",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          },
           "clear" : {
             "name" : "clear",
             "docstring" : "Clears a value. Applies first.\n",
@@ -716,7 +727,18 @@
   "type" : "struct",
   "name" : "MyDataWithCustomDefault"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.Box" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Box",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          },
           "clear" : {
             "name" : "clear",
             "docstring" : "Clears a value. Applies first.\n",
@@ -884,7 +906,18 @@
   "type" : "struct",
   "name" : "InnerUnion"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.Box" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Box",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          },
           "clear" : {
             "name" : "clear",
             "docstring" : "Clears any set value. Applies first.\n",
@@ -1000,7 +1033,18 @@
   "type" : "struct",
   "name" : "MyUnion"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.Box" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Box",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          },
           "clear" : {
             "name" : "clear",
             "docstring" : "Clears any set value. Applies first.\n",
@@ -1157,7 +1201,18 @@
   "type" : "struct",
   "name" : "MyStruct"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.Box" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Box",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          },
           "clear" : {
             "name" : "clear",
             "docstring" : "Clears a value. Applies first.\n",
@@ -2488,7 +2543,18 @@
   "type" : "struct",
   "name" : "MyDataWithCustomDefault"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.Box" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Box",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          },
           "i32WithCustomDefault" : {
             "name" : "i32WithCustomDefault",
             "key" : -31,
@@ -2565,7 +2631,18 @@
   "type" : "struct",
   "name" : "LateDefStruct"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.Box" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Box",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          },
           "optStructVal" : {
             "name" : "optStructVal",
             "key" : -24,
@@ -2575,7 +2652,18 @@
   "type" : "struct",
   "name" : "MyData"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.Box" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Box",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          },
           "optEnumVal" : {
             "name" : "optEnumVal",
             "key" : -23,
@@ -2658,7 +2746,18 @@
   "type" : "struct",
   "name" : "LateDefStruct"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.Box" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Box",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          },
           "unionVal" : {
             "name" : "unionVal",
             "key" : -12,
@@ -2668,7 +2767,18 @@
   "type" : "struct",
   "name" : "MyUnion"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.Box" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Box",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          },
           "structVal" : {
             "name" : "structVal",
             "key" : -11,
@@ -2678,7 +2788,18 @@
   "type" : "struct",
   "name" : "MyData"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.Box" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Box",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          },
           "enumVal" : {
             "name" : "enumVal",
             "key" : -10,
@@ -2761,7 +2882,18 @@
   "type" : "struct",
   "name" : "MyData"
 }
-                  }
+            ,
+            "structured_annotations": {
+              "thrift.Box" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Box",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -2790,7 +2922,18 @@
   "type" : "struct",
   "name" : "LateDefStruct"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.Box" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Box",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          },
           "clear" : {
             "name" : "clear",
             "docstring" : "Clears a value. Applies first.\n",
@@ -2898,7 +3041,18 @@
   "type" : "struct",
   "name" : "Recursive"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.Box" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Box",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          },
           "clear" : {
             "name" : "clear",
             "docstring" : "Clears a value. Applies first.\n",
@@ -3084,7 +3238,18 @@
   "type" : "struct",
   "name" : "Bar"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.Box" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Box",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          },
           "clear" : {
             "name" : "clear",
             "docstring" : "Clears a value. Applies first.\n",
@@ -3197,7 +3362,18 @@
   "type" : "struct",
   "name" : "Loop"
 }
-                  }
+            ,
+            "structured_annotations": {
+              "thrift.Box" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Box",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -3226,7 +3402,18 @@
   "type" : "struct",
   "name" : "Loop"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.Box" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Box",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          },
           "clear" : {
             "name" : "clear",
             "docstring" : "Clears a value. Applies first.\n",

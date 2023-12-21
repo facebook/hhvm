@@ -3050,6 +3050,15 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
         ),
       ],
       'fields' => dict[
+        'assign' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
         'patchPrior' => shape(
           'field' => dict[],
           'type' => dict[
@@ -3750,6 +3759,15 @@ class MyDataWithCustomDefaultPatch implements \IThriftSyncStruct, \IThriftStruct
         ),
       ],
       'fields' => dict[
+        'assign' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
         'patchPrior' => shape(
           'field' => dict[],
           'type' => dict[
@@ -4400,6 +4418,15 @@ class InnerUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
         ),
       ],
       'fields' => dict[
+        'assign' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
         'patchPrior' => shape(
           'field' => dict[],
           'type' => dict[
@@ -4835,6 +4862,15 @@ class MyUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
         ),
       ],
       'fields' => dict[
+        'assign' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
         'patchPrior' => shape(
           'field' => dict[],
           'type' => dict[
@@ -5427,6 +5463,15 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
         ),
       ],
       'fields' => dict[
+        'assign' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
         'patchPrior' => shape(
           'field' => dict[],
           'type' => dict[
@@ -11207,6 +11252,69 @@ class MyStructEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadata
         ),
       ],
       'fields' => dict[
+        'structWithCustomDefault' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'optLateStructVal' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'optStructVal' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'lateStructVal' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'unionVal' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'structVal' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'structWithFieldCustomDefault' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }
@@ -11719,6 +11827,15 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
         ),
       ],
       'fields' => dict[
+        'assign' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
         'patchPrior' => shape(
           'field' => dict[],
           'type' => dict[
@@ -12248,6 +12365,15 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
         ),
       ],
       'fields' => dict[
+        'assign' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
         'patchPrior' => shape(
           'field' => dict[],
           'type' => dict[
@@ -13082,6 +13208,15 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
         ),
       ],
       'fields' => dict[
+        'assign' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
         'patchPrior' => shape(
           'field' => dict[],
           'type' => dict[
@@ -13407,7 +13542,12 @@ class BarEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
       ],
       'fields' => dict[
         'loop' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\facebook\thrift\op\AssignOnlyPatch' => \facebook\thrift\op\AssignOnlyPatch::fromShape(
               shape(
@@ -13566,7 +13706,12 @@ class LoopPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
       ],
       'fields' => dict[
         'assign' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\facebook\thrift\op\AssignOnlyPatch' => \facebook\thrift\op\AssignOnlyPatch::fromShape(
               shape(

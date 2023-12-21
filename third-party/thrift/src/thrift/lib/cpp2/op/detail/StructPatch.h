@@ -460,7 +460,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
   /// Assigns to the given field, ensuring first if needed.
   template <typename Id, typename U = F<Id>>
   void assign(U&& val) {
-    if (hasValue(data_.assign())) {
+    if (data_.assign().has_value()) {
       op::get<Id>(*data_.assign()) = std::forward<U>(val);
     } else {
       Base::template patch<Id>().assign(std::forward<U>(val));

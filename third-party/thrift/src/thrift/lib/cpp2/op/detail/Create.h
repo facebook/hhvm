@@ -33,24 +33,6 @@ namespace thrift {
 namespace op {
 namespace detail {
 
-template <typename T>
-type::if_optional_field<T, bool> hasValue(const T& opt) {
-  return opt.has_value();
-}
-template <typename T>
-bool hasValue(field_ref<T> val) {
-  return !thrift::empty(*val);
-}
-template <typename T>
-bool hasValue(terse_field_ref<T> val) {
-  return !thrift::empty(*val);
-}
-template <typename T>
-bool hasValue(terse_intern_boxed_field_ref<T&> val) {
-  // TODO: check whether val has default address first as short-cut
-  return !thrift::empty(*as_const_intern_box(val));
-}
-
 // If the given field is absent/unset/void.
 template <typename T>
 type::if_optional_field<T, bool> isAbsent(const T& opt) {

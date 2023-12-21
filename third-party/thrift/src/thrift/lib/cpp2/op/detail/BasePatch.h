@@ -198,7 +198,7 @@ class BaseAssignPatch : public BasePatch<Patch, Derived> {
   using Base::resetAnd;
   ~BaseAssignPatch() = default; // abstract base class
 
-  FOLLY_NODISCARD bool hasAssign() const { return hasValue(data_.assign()); }
+  FOLLY_NODISCARD bool hasAssign() const { return data_.assign().has_value(); }
   FOLLY_NODISCARD value_type& assignOr(value_type& value) noexcept {
     return hasAssign() ? *data_.assign() : value;
   }

@@ -28,4 +28,4 @@ class TestAsyncioRpcConnectionContext(unittest.TestCase):
 
         ret = context.getSockName()
 
-        self.assertEquals(ret, test_sock_laddr)
+        self.assertEqual(ret, test_sock_laddr)

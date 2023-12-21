@@ -260,6 +260,8 @@ type t = {
       (** POC: @catg, add sandcastle info to Scuba samples. *)
   lsp_sticky_quarantine: bool;
       (** POC: @ljw - if true, only exit quarantine when entering a new one *)
+  lsp_invalidation: bool;
+      (** POC: @ljw - controls how quarantine invalidates folded decls *)
   lsp_cancellation: bool;
       (** POC: @ljw - if true, respect cancellation while work is in progress *)
   lsp_autocomplete_skip_hierarchy_checks: bool;
@@ -360,6 +362,7 @@ let default =
     dump_tasts = [];
     log_events_with_sandcastle_info = false;
     lsp_sticky_quarantine = false;
+    lsp_invalidation = false;
     lsp_cancellation = true;
     lsp_autocomplete_skip_hierarchy_checks = true;
     lsp_prefetch_decls = true;
@@ -1082,6 +1085,9 @@ let load_
   let lsp_sticky_quarantine =
     bool_ "lsp_sticky_quarantine" ~default:default.lsp_sticky_quarantine config
   in
+  let lsp_invalidation =
+    bool_ "lsp_invalidation" ~default:default.lsp_invalidation config
+  in
   let lsp_cancellation =
     bool_ "lsp_cancellation" ~default:default.lsp_cancellation config
   in
@@ -1218,6 +1224,7 @@ let load_
     dump_tasts;
     log_events_with_sandcastle_info;
     lsp_sticky_quarantine;
+    lsp_invalidation;
     lsp_cancellation;
     lsp_autocomplete_skip_hierarchy_checks;
     lsp_prefetch_decls;
@@ -1277,6 +1284,7 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       zstd_decompress_by_file =
         GlobalOptions.(options.saved_state.loading.zstd_decompress_by_file);
       lsp_sticky_quarantine = options.lsp_sticky_quarantine;
+      lsp_invalidation = options.lsp_invalidation;
       lsp_cancellation = options.lsp_cancellation;
       lsp_autocomplete_skip_hierarchy_checks =
         options.lsp_autocomplete_skip_hierarchy_checks;

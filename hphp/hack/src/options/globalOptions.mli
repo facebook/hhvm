@@ -306,6 +306,8 @@ type t = {
       (** block accessing superglobals via their variable names *)
   tco_sticky_quarantine: bool;
       (** Controls behavior of [Provider_utils.respect_but_quarantine_unsaved_changes] *)
+  tco_lsp_invalidation: bool;
+      (** Controls how [Provicer_utils.respect_but_quarantine_unsaved_changes] invalidates folded decls *)
   tco_autocomplete_skip_hierarchy_checks: bool;
       (** Controls behavior of [Provider_context.with_tcopt_for_autocomplete] *)
   tco_prefetch_decls: bool;
@@ -443,6 +445,7 @@ val set :
   ?tco_log_exhaustivity_check:bool ->
   ?po_disallow_direct_superglobals_refs:bool ->
   ?tco_sticky_quarantine:bool ->
+  ?tco_lsp_invalidation:bool ->
   ?tco_autocomplete_skip_hierarchy_checks:bool ->
   ?tco_prefetch_decls:bool ->
   ?tco_autocomplete_sort_text:bool ->

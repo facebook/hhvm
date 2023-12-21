@@ -312,6 +312,8 @@ let tco_log_exhaustivity_check t = t.GlobalOptions.tco_log_exhaustivity_check
 
 let tco_sticky_quarantine t = t.GlobalOptions.tco_sticky_quarantine
 
+let tco_lsp_invalidation t = t.GlobalOptions.tco_lsp_invalidation
+
 let tco_autocomplete_skip_hierarchy_checks t =
   t.GlobalOptions.tco_autocomplete_skip_hierarchy_checks
 

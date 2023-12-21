@@ -23,6 +23,7 @@
 
 #include "hphp/util/hash-map.h"
 #include "hphp/util/hash-set.h"
+#include "hphp/util/tiny-vector.h"
 
 namespace HPHP {
 
@@ -55,7 +56,7 @@ struct PackageInfo {
   struct Deployment {
     PackageSet m_packages;
     PackageSet m_soft_packages;
-    std::vector<std::shared_ptr<re2::RE2>> m_domains;
+    TinyVector<const re2::RE2*> m_domains;
 
     template <typename SerDe> void serde(SerDe& sd) {
       sd(m_packages, stdltstr{})
@@ -65,9 +66,7 @@ struct PackageInfo {
       std::vector<std::string> patterns;
       if constexpr (SerDe::deserializing) {
         sd(patterns);
-        for (auto& s : patterns) {
-          m_domains.push_back(std::make_shared<re2::RE2>(s));
-        }
+        for (auto& s : patterns) m_domains.push_back(&compilePattern(s));
       } else {
         for (auto const& p : m_domains) patterns.push_back(p->pattern());
         sd(patterns);
@@ -121,6 +120,8 @@ private:
 
   bool moduleInPackages(const StringData* module,
                         const PackageSet& packageSet) const;
+
+  static const re2::RE2& compilePattern(const std::string&);
 
 public:
   PackageMap m_packages;

@@ -31,6 +31,26 @@
 
 namespace HPHP {
 
+// Most patterns are the same, so de-dup them and avoid creating
+// re2::RE2 instances.
+
+namespace {
+
+hphp_fast_map<std::string, std::unique_ptr<const re2::RE2>> s_patternCache;
+folly::SharedMutex s_patternCacheLock;
+
+}
+
+const re2::RE2& PackageInfo::compilePattern(const std::string& p) {
+  {
+    folly::SharedMutex::ReadHolder _{s_patternCacheLock};
+    if (auto const re = folly::get_ptr(s_patternCache, p)) return **re;
+  }
+  std::unique_lock _{s_patternCacheLock};
+  if (auto const re = folly::get_ptr(s_patternCache, p)) return **re;
+  return
+    *s_patternCache.try_emplace(p, std::make_unique<re2::RE2>(p)).first->second;
+}
 
 PackageInfo::PackageInfo(PackageMap& packages,
                          DeploymentMap& deployments)
@@ -79,9 +99,9 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
   }
 
   for (auto& d : info.deployments) {
-    std::vector<std::shared_ptr<re2::RE2>> domains;
+    TinyVector<const re2::RE2*> domains;
     for (auto& s : d.deployment.domains) {
-      domains.push_back(std::make_shared<re2::RE2>(std::string(s)));
+      domains.push_back(&compilePattern(std::string{s}));
     }
     deployments.emplace(std::string(d.name),
                         Deployment {
@@ -107,7 +127,7 @@ folly::dynamic mangleVecForCacheKey(const hphp_vector_string_set& data) {
 }
 
 folly::dynamic mangleVecForCacheKey(
-  const std::vector<std::shared_ptr<re2::RE2>>& data
+  const TinyVector<const re2::RE2*>& data
 ) {
   folly::dynamic result = folly::dynamic::array();
   for (auto& r : data) result.push_back(r->pattern());

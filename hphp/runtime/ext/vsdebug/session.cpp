@@ -307,7 +307,8 @@ unsigned int DebuggerSession::generateFrameId(
   return objectId;
 }
 
-FrameObject* DebuggerSession::getFrameObject(unsigned int objectId) {
+FrameObject* DebuggerSession::getFrameObject(int objectId) {
+  if (objectId < 0) return nullptr;
   auto object = getServerObject(objectId);
   if (object != nullptr) {
     if (object->objectType() != ServerObjectType::Frame) {
@@ -339,7 +340,6 @@ unsigned int DebuggerSession::generateScopeId(
   }
 
   ScopeObject* scope = new ScopeObject(objectId, requestId, depth, scopeType);
-  assertx(requestId == m_debugger->getCurrentThreadId());
   registerRequestObject(objectId, scope);
   return objectId;
 }

@@ -115,7 +115,10 @@ FrameObject* EvaluateCommand::getFrameObject(DebuggerSession* session) {
     return m_frameObj;
   }
 
-  m_frameObj = session->getFrameObject(m_frameId);
+  auto currFrameId = (m_frameId < 0 && m_debugger->isPaused()) ?
+    session->getCurrFrameId() : m_frameId;
+
+  m_frameObj = session->getFrameObject(currFrameId);
   return m_frameObj;
 }
 
@@ -162,6 +165,10 @@ bool EvaluateCommand::executeImpl(
   folly::dynamic& message = getMessage();
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
   const auto threadId = targetThreadId(session);
+
+  if (m_frameId < 0 && threadId != m_debugger->getCurrentThreadId()) {
+    throw DebuggerCommandException("Evaluate command running in wrong context");
+  }
 
   auto const rawExpression = tryGetString(args, "expression", "");
   auto const evalExpression = prepareEvalExpression(rawExpression);

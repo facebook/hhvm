@@ -244,11 +244,12 @@ private:
 
   FrameObject* getFrameObject(DebuggerSession* session);
 
-  unsigned int m_frameId;
+  int m_frameId;
   FrameObject* m_frameObj {nullptr};
 
   folly::dynamic getScopeDescription(
     DebuggerSession* session,
+    const FrameObject* frame,
     const char* displayName,
     ScopeType type,
     bool expensive
@@ -575,7 +576,7 @@ private:
                   bool success, const std::string& error,
                   const std::string& clientId, uint32_t sessionId,
                   int64_t before, int64_t after, bool bpHit);
-  unsigned int m_frameId;
+  int m_frameId;
   bool m_returnHhvmSerialization;
   FrameObject* m_frameObj {nullptr};
 };
@@ -705,7 +706,7 @@ private:
   static constexpr char* CompletionTypeValue = "value";
 
   FrameObject* getFrameObject(DebuggerSession* session);
-  unsigned int m_frameId;
+  int m_frameId;
   FrameObject* m_frameObj {nullptr};
 };
 

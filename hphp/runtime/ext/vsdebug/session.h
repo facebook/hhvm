@@ -54,7 +54,7 @@ struct DebuggerSession final {
   BreakpointManager* getBreakpointManager() { return m_breakpointMgr; }
 
   unsigned int generateFrameId(request_id_t requestId, int frameDepth);
-  FrameObject* getFrameObject(unsigned int objectId);
+  FrameObject* getFrameObject(int objectId);
 
   unsigned int generateScopeId(
     request_id_t requestId,
@@ -94,6 +94,9 @@ struct DebuggerSession final {
   std::string getClientId() const { return m_clientId; }
 
   uint32_t getSessionId() const { return m_sessionId; }
+
+  int getCurrFrameId() const { return m_currFrameId; }
+  void setCurrFrameId(int frameId) { m_currFrameId = frameId; }
 
   static constexpr int kCachedVariableKeyAll = -1;
   static constexpr int kCachedVariableKeyServerConsts = 1;
@@ -143,6 +146,11 @@ private:
   // are requested for each thread and frame, and unlikely to change while
   // the target is paused. Items in this cache are global, not per-request.
   std::unordered_map<int, folly::dynamic> m_globalVariableCache;
+
+  // Frame id of the last ScopesCommand run in this session.
+  // If the execution is paused, the EvaluateCommands will be executed in the
+  // context of this frame id.
+  int m_currFrameId {-1};
 
   std::string m_sandboxUser;
   std::string m_sandboxName;

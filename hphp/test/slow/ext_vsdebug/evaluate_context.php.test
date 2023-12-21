@@ -1,0 +1,10 @@
+<?hh
+
+function innerFunc(int $z) : void {
+  $a = $z + 1;
+  echo $a;
+}
+<<__EntryPoint>> function main() {
+$x = 1;
+innerFunc($x + 1);
+}

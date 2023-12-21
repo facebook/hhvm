@@ -65,16 +65,20 @@ bool ScopesCommand::executeImpl(
   folly::dynamic body = folly::dynamic::object;
   folly::dynamic scopes = folly::dynamic::array;
 
-  if (getFrameObject(session) != nullptr) {
+  if (auto const frame = getFrameObject(session)) {
+    session->setCurrFrameId(m_frameId);
     scopes.push_back(getScopeDescription(session,
+                                         frame,
                                          "Locals",
                                          ScopeType::Locals,
                                          false));
     scopes.push_back(getScopeDescription(session,
+                                         frame,
                                          "Superglobals",
                                          ScopeType::Superglobals,
                                          false));
     scopes.push_back(getScopeDescription(session,
+                                         frame,
                                          "Constants",
                                          ScopeType::ServerConstants,
                                          true));
@@ -89,14 +93,15 @@ bool ScopesCommand::executeImpl(
 
 folly::dynamic ScopesCommand::getScopeDescription(
   DebuggerSession* session,
+  const FrameObject* frame,
   const char* displayName,
   ScopeType type,
   bool expensive
 ) {
-  FrameObject* frame = getFrameObject(session);
   assert (frame != nullptr);
 
   request_id_t req = frame->m_requestId;
+  assertx(req == m_debugger->getCurrentThreadId());
   int depth = frame->m_frameDepth;
 
   folly::dynamic scope = folly::dynamic::object;

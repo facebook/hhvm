@@ -13,7 +13,7 @@ abstract final class PartialFormattingTest {
     bool $validate = false,
   ): Awaitable<?int> {
 
-    $nonsensical_maplike_array = darray[
+    $nonsensical_maplike_array = dict[
       "A Very Long Key Value For This Map" => "Here's a value of an appropriate length"
     ];
 
@@ -24,7 +24,7 @@ abstract final class PartialFormattingTest {
        *
        * MultilineComment1-2
        */
-      $errors = varray[];
+      $errors = vec[];
       $create_exception = null;
     }
 

@@ -163,14 +163,14 @@ function getArray(
   string, // strings
   string // strings
 > {
-  return darray["foo" => "bar"];
+  return dict["foo" => "bar"];
 }
 
 function getArray(
 ): array< string // strings
         , string // strings
         > {
-  return darray["foo" => "bar"];
+  return dict["foo" => "bar"];
 }
 
 function getDict(

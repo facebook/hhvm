@@ -6,7 +6,7 @@ class Foo {
       ->start()
       ->then($_ ==> $frosting_glazer->start())
       ->then($_ ==>
-        Future::wait(varray[
+        Future::wait(vec[
           $conveyor_belts->start(),
           $sprinkle_sprinkler->start(),
           $sauce_dripper->start(),
@@ -14,7 +14,7 @@ class Foo {
       ->catchError($cannot_get_conveyor_belt_running)
       ->then($_ ==> $tell_everyone_donuts_are_just_about_done())
       ->then($_ ==>
-        Future::wait(varray[
+        Future::wait(vec[
           $croissant_factory->start(),
           $giant_baking_ovens->start(),
           $butter_butterer->start(),
@@ -26,7 +26,7 @@ class Foo {
       ->restart()
       ->then($_ ==> $frosting_glazer->start())
       ->then($_ ==>
-        Future::wait(varray[
+        Future::wait(vec[
           $conveyor_belts->start(),
           $sprinkle_sprinkler->start(),
           $sauce_dripper->start(),
@@ -34,7 +34,7 @@ class Foo {
       ->catchError($cannot_get_conveyor_belt_running)
       ->then($_ ==> $tell_everyone_donuts_are_just_about_done())
       ->then($_ ==>
-        Future::wait(varray[
+        Future::wait(vec[
           $croissant_factory->start(),
           $giant_baking_ovens->start(),
           $butter_butterer->start(),
@@ -46,7 +46,7 @@ class Foo {
       ->restart()
       ->then($_ ==> $frosting_glazer->start())
       ->then($_ ==>
-        Future::wait(varray[
+        Future::wait(vec[
           $conveyor_belts->start(),
           $sprinkle_sprinkler->start(),
           $sauce_dripper->start(),
@@ -54,7 +54,7 @@ class Foo {
       ->catchError($cannot_get_conveyor_belt_running)
       ->then($_ ==> $tell_everyone_donuts_are_just_about_done())
       ->then($_ ==>
-        Future::wait(varray[
+        Future::wait(vec[
           $croissant_factory->start(),
           $giant_baking_ovens->start(),
           $butter_butterer->start(),
@@ -65,7 +65,7 @@ class Foo {
       ->catchError($cannot_get_conveyor_belt_running)
       ->then($_ ==> $tell_everyone_donuts_are_just_about_done())
       ->then($_ ==>
-        Future::wait(varray[
+        Future::wait(vec[
           $croissant_factory->start(),
           $giant_baking_ovens->start(),
           $butter_butterer->start(),
@@ -77,7 +77,7 @@ class Foo {
       ->restart()
       ->then($_ ==> $frosting_glazer->start())
       ->then($_ ==>
-        Future::wait(varray[
+        Future::wait(vec[
           $conveyor_belts->start(),
           $sprinkle_sprinkler->start(),
           $sauce_dripper->start(),
@@ -85,7 +85,7 @@ class Foo {
       ->catchError($cannot_get_conveyor_belt_running)
       ->then($_ ==> $tell_everyone_donuts_are_just_about_done())
       ->then($_ ==>
-        Future::wait(varray[
+        Future::wait(vec[
           $croissant_factory->start(),
           $giant_baking_ovens->start(),
           $butter_butterer->start(),

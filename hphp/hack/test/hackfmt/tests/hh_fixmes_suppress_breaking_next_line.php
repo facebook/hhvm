@@ -45,7 +45,7 @@ class    HasFixme          {
         + $is_still_formatted;
 
     /* HH_FIXME[4297] */
-    expect(PHPism_FIXME::varrayFuzzyEqualsDarray($config['foo'], varray[
+    expect(PHPism_FIXME::varrayFuzzyEqualsDarray($config['foo'], vec[
         'apples',
         'oranges',
         'kiwis',

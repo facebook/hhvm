@@ -1,7 +1,7 @@
 <?hh
 
 function fibonacci($pos){
-  $arr = varray[0, 1];
+  $arr = vec[0, 1];
   for ($i = 2; $i <= $pos; ++$i)
 
 

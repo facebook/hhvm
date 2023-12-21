@@ -1,9 +1,9 @@
 <?hh
 
 function foo() {
-  return varray[
+  return vec[
     // array begin:
-    varray[
+    vec[
       $long_identifier_one,
       $long_identifier_two,
       $long_identifier_three,
@@ -14,9 +14,9 @@ function foo() {
 }
 
 function foo() {
-  return varray[
+  return vec[
     // array begin:
-    varray[
+    vec[
       $long_identifier_one,
       $long_identifier_two,
       $long_identifier_three,
@@ -27,9 +27,9 @@ function foo() {
 }
 
 function foo() {
-  return varray[
+  return vec[
     /* array begin: */
-    varray[
+    vec[
       $long_identifier_one,
       $long_identifier_two,
       $long_identifier_three,

@@ -15,6 +15,7 @@
  */
 
 #include <thrift/lib/cpp2/type/Any.h>
+#include <thrift/lib/cpp2/type/AnyTesting.h>
 
 #include <folly/io/IOBuf.h>
 #include <folly/portability/GTest.h>
@@ -46,47 +47,7 @@ TEST(AnyTest, BaseApi) {
 template <typename>
 class AnyTestFixture : public ::testing::Test {};
 
-using Tags = ::testing::Types<
-    bool_t,
-    byte_t,
-    i16_t,
-    i32_t,
-    i64_t,
-    float_t,
-    double_t,
-    string_t,
-    binary_t,
-    list<i32_t>,
-    set<i32_t>,
-    map<i32_t, float_t>,
-    struct_t<test::AnyTestStruct>>;
 TYPED_TEST_SUITE(AnyTestFixture, Tags);
-
-template <class T>
-const native_type<T> tagToValue = 42;
-
-template <>
-const std::string tagToValue<string_t> = "42";
-
-template <>
-const std::string tagToValue<binary_t> = "42";
-
-template <>
-const std::vector<std::int32_t> tagToValue<list<i32_t>> = {4, 2};
-
-template <>
-const std::set<std::int32_t> tagToValue<set<i32_t>> = {4, 2};
-
-template <>
-const std::map<std::int32_t, float> tagToValue<map<i32_t, float_t>> = {
-    {4, 2}, {2, 4}};
-
-template <>
-const test::AnyTestStruct tagToValue<struct_t<test::AnyTestStruct>> = [] {
-  test::AnyTestStruct ret;
-  ret.foo() = 42;
-  return ret;
-}();
 
 TYPED_TEST(AnyTestFixture, ToAny) {
   const auto& value = tagToValue<TypeParam>;
@@ -100,7 +61,7 @@ TYPED_TEST(AnyTestFixture, ToAny) {
     any = AnyData::toAny(value);
     std::as_const(any).get(v1);
   } else {
-    any = AnyData::toAny<TypeParam>(value);
+    any = toAnyData<TypeParam>();
     std::as_const(any).get<TypeParam>(v1);
   }
   EXPECT_EQ(v1, value);
@@ -124,7 +85,7 @@ TYPED_TEST(AnyTestFixture, MoveToSemiAny) {
     // Rely on infer_tag if TypeParam is not string_t or binary_t
     any = AnyData::toAny(value);
   } else {
-    any = AnyData::toAny<TypeParam>(value);
+    any = toAnyData<TypeParam>();
   }
   auto anyCopy = any;
   auto semiAny = std::move(any).moveToSemiAny();
@@ -137,7 +98,7 @@ bool contains(std::string_view s, std::string_view pattern) {
 }
 
 TEST(AnyTest, GetTypeMismatch) {
-  auto any = AnyData::toAny(tagToValue<i32_t>);
+  auto any = toAnyData<i32_t>();
   int16_t i = 0;
   // We don't use EXPECT_THROW since we want to check the content
   try {
@@ -176,7 +137,7 @@ TYPED_TEST(AnyTestFixture, BinaryProtocol) {
     // Rely on infer_tag if TypeParam is not string_t or binary_t
     any = AnyData::toAny<StandardProtocol::Binary>(value);
   } else {
-    any = AnyData::toAny<TypeParam, StandardProtocol::Binary>(value);
+    any = toAnyData<TypeParam, StandardProtocol::Binary>();
   }
   EXPECT_EQ(any.type(), Type{TypeParam{}});
   EXPECT_EQ(any.protocol(), Protocol::get<StandardProtocol::Binary>());

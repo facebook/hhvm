@@ -985,8 +985,9 @@ let type_check_core genv env start_time ~check_reason cgroup_steps =
     ~experiments:genv.local_config.ServerLocalConfig.experiments
     ~desc:"serverTypeCheck"
     ~start_t:type_check_start_t;
-  Option.iter (Errors.as_telemetry ~limit:1000 env.errorl) ~f:(fun data ->
-      HackEventLogger.TypingErrors.log_errors ~type_check_end_id ~data);
+  HackEventLogger.TypingErrors.log_errors
+    ~type_check_end_id
+    ~data:(Errors.as_telemetry ~limit:1000 env.errorl);
   ( env,
     {
       CheckStats.reparse_count;

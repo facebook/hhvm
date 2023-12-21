@@ -866,7 +866,9 @@ let as_telemetry_summary : t -> Telemetry.t =
             ~n:5
             (drop_fixmed_errors_in_files errors))
 
-let as_telemetry_impl ~limit (errors : t) =
+let as_telemetry ~limit (errors : t) : Telemetry.t =
+  let errors = drop_fixmed_errors_in_files errors in
+  let total_count = error_count errors in
   let (errors, _, is_truncated) =
     Relative_path.Map.fold
       errors
@@ -912,18 +914,9 @@ let as_telemetry_impl ~limit (errors : t) =
           ~value:(List.map errors ~f:error_to_telemetry))
   in
   Telemetry.create ()
+  |> Telemetry.int_ ~key:"total_count" ~value:total_count
   |> Telemetry.bool_ ~key:"is_truncated" ~value:is_truncated
   |> Telemetry.object_ ~key:"by_file" ~value:by_file
-
-let as_telemetry ~limit (errors : t) : Telemetry.t option =
-  let errors = drop_fixmed_errors_in_files errors in
-  let total_count = error_count errors in
-  if total_count <= 0 then
-    None
-  else
-    Some
-      (as_telemetry_impl ~limit errors
-      |> Telemetry.int_ ~key:"total_count" ~value:total_count)
 
 (*****************************************************************************)
 (* Error code printing. *)

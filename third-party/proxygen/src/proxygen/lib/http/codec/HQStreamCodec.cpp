@@ -83,6 +83,7 @@ ParseResult HQStreamCodec::checkFrameAllowed(FrameType type) {
       if (transportDirection_ == TransportDirection::DOWNSTREAM) {
         return HTTP3::ErrorCode::HTTP_FRAME_UNEXPECTED;
       }
+      break;
     default:
       break;
   }

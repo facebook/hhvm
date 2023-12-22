@@ -107,7 +107,7 @@ struct Env {
 
   /*
    * Maintains a list of any instruction that failed to be adjusted because
-   * it was too far. Failing to adjust will trigger a retry and that insruction
+   * it was too far. Failing to adjust will trigger a retry and that instruction
    * will be relocated to a PIC form.
    */
   InstrSet& far;
@@ -553,7 +553,7 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
       env.meta.fallthru != srcAddr) {
     /*
      * Calculate the new offset and determine if it can be encoded
-     * in a PC relative instruciton or if it needs to be converted
+     * in a PC relative instruction or if it needs to be converted
      * to make use of an absolute target.
      * Note: Use the VIXL scratch registers when transforming. Their
      *       scope is just a single macroassembler directive, whereas
@@ -917,7 +917,7 @@ size_t relocateImpl(Env& env) {
         auto const alignPair = af.first->second;
         auto const alignInfo = alignment_info(alignPair.first);
 
-        // We want to prevent resizing of intstruction that are protected by
+        // We want to prevent resizing of instruction that are protected by
         // this alignment constraint.  Save the range of bytes that should
         // be protected.
         auto const low = srcAddr + alignInfo.offset;

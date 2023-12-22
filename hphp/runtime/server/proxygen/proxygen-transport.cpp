@@ -283,7 +283,7 @@ void ProxygenTransport::onHeadersComplete(
   } else if (method == HTTPMethod::HEAD) {
     m_method = Transport::Method::HEAD;
   } else if (method == HTTPMethod::CONNECT) {
-    sendErrorResponse(400 /* Bad Request */);
+    sendErrorResponse(501 /* Not Implemented */);
     return;
   } else {
     // looks like proxygen HTTP parser understands a few more methods
@@ -291,7 +291,7 @@ void ProxygenTransport::onHeadersComplete(
     //   TRACE, COPY, MOVE, MKACTIVITY, CHECKOUT, MERGE, MSEARCH, NOTIFY,
     //   SUBSCRIBE, UNSUBSCRIBE, PATCH
     m_method = Transport::Method::Unknown;
-    sendErrorResponse(400 /* Bad Request */);
+    sendErrorResponse(501 /* Not Implemented */);
     return;
   }
 

@@ -10514,12 +10514,12 @@ private:
     return finfo;
   }
 
-  static bool resolveOne(TypeConstraint& tc,
-                         const TypeConstraint& tv,
-                         SString firstEnum,
-                         ISStringSet* uses,
-                         bool isProp,
-                         bool isUnion) {
+  static bool resolve_one(TypeConstraint& tc,
+                          const TypeConstraint& tv,
+                          SString firstEnum,
+                          ISStringSet* uses,
+                          bool isProp,
+                          bool isUnion) {
     assertx(!tv.isUnion());
     // Whatever it's an alias of isn't valid, so leave unresolved.
     if (tv.isUnresolved()) return false;
@@ -10535,9 +10535,7 @@ private:
       }
       return nullptr;
     }();
-    if (isUnion) {
-      tc.unresolve();
-    }
+    if (isUnion) tc.unresolve();
     tc.resolveType(tv.type(), tv.isNullable(), value);
     assertx(IMPLIES(isProp, tc.validForProp()));
     if (uses && value) uses->emplace(value);
@@ -10588,7 +10586,7 @@ private:
         for (auto& tv : eachTypeConstraintInUnion(tm->value)) {
           TypeConstraint copy = tv;
           copy.addFlags(flags);
-          if (!resolveOne(copy, tv, tm->firstEnum, uses, isProp, true)) {
+          if (!resolve_one(copy, tv, tm->firstEnum, uses, isProp, true)) {
             return;
           }
           members.emplace_back(std::move(copy));
@@ -10599,7 +10597,7 @@ private:
 
       // This unresolved name resolves to a single type.
       assertx(!tm->value.isUnion());
-      resolveOne(tc, tm->value, tm->firstEnum, uses, isProp, false);
+      resolve_one(tc, tm->value, tm->firstEnum, uses, isProp, false);
       return;
     }
 
@@ -14399,6 +14397,7 @@ struct InitTypesJob {
       assertx(cls->name->isame(cinfo->name));
       assertx(cinfo->funcInfos.size() == cls->methods.size());
 
+      unresolve_missing(index, *cls);
       set_bad_initial_prop_values(index, *cls, *cinfo);
       for (size_t j = 0, size = cls->methods.size(); j < size; ++j) {
         auto const& func = cls->methods[j];
@@ -14415,6 +14414,7 @@ struct InitTypesJob {
       auto& finfo = finfos.vals[i];
       assertx(func->name == finfo->name);
       assertx(finfo->returnTy.is(BInitCell));
+      unresolve_missing(index, *func);
       finfo->returnTy = initial_return_type(index, *func);
     }
 
@@ -14432,6 +14432,35 @@ private:
     ISStringToOneT<const ClassInfo2*> classInfos;
     ISStringToOneT<const php::Class*> classes;
   };
+
+  static void unresolve_missing(const LocalIndex& index, TypeConstraint& tc) {
+    if (!tc.isSubObject()) return;
+    auto const name = tc.clsName();
+    if (index.classInfos.count(name)) return;
+    FTRACE(
+      4, "Unresolving type-constraint for '{}' because it does not exist\n",
+      name
+    );
+    tc.unresolve();
+  }
+
+  static void unresolve_missing(const LocalIndex& index, php::Func& func) {
+    for (auto& p : func.params) {
+      unresolve_missing(index, p.typeConstraint);
+      for (auto& ub : p.upperBounds.m_constraints) unresolve_missing(index, ub);
+    }
+    unresolve_missing(index, func.retTypeConstraint);
+    for (auto& ub : func.returnUBs.m_constraints) unresolve_missing(index, ub);
+  }
+
+  static void unresolve_missing(const LocalIndex& index, php::Class& cls) {
+    if (cls.attrs & AttrEnum) unresolve_missing(index, cls.enumBaseTy);
+    for (auto& meth : cls.methods) unresolve_missing(index, *meth);
+    for (auto& prop : cls.properties) {
+      unresolve_missing(index, prop.typeConstraint);
+      for (auto& ub : prop.ubs.m_constraints) unresolve_missing(index, ub);
+    }
+  }
 
   static Type initial_return_type(const LocalIndex& index, const php::Func& f) {
     auto const ty = [&] {

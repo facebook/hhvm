@@ -100,8 +100,8 @@ ETCH_LABEL(more_than_63bytes):
 	vmovdqu %ymm0, 0x20(%rcx)
 	addq	%rax, %rcx
 	subq	%rax, %rdx
-	je		ETCH_LABEL(EXIT_MEMSET)
-	
+	je		ETCH_LABEL(EXIT_MEMSET_VZEROUPPER)
+
 ETCH_ALIGN8
 ETCH_ALIGN4
 ETCH_LABEL(128byte_loop_data_guzzler):
@@ -112,6 +112,7 @@ ETCH_LABEL(128byte_loop_data_guzzler):
 	addq		$128, %rcx
 	subq		$128, %rdx
 	ja			ETCH_LABEL(128byte_loop_data_guzzler)
+ETCH_LABEL(EXIT_MEMSET_VZEROUPPER):
 	vzeroupper
 ETCH_LABEL(EXIT_MEMSET):
 	movq %r8, %rax

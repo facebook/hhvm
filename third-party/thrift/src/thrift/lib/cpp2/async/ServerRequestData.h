@@ -19,6 +19,7 @@
 #include <chrono>
 #include <cstdint>
 #include <optional>
+#include <utility>
 
 namespace apache::thrift {
 

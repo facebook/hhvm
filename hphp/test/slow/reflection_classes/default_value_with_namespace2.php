@@ -2,7 +2,7 @@
 namespace Foo {
   class Derived extends Bar\Base {
     const NUM = '42';
-    public function set($k = varray[\SORT_NUMERIC, varray[self::NUM], parent::STR]) :mixed{
+    public function set($k = vec[\SORT_NUMERIC, vec[self::NUM], parent::STR]) :mixed{
       \var_dump($k);
     }
   }

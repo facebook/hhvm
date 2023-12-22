@@ -4,15 +4,15 @@ namespace A {
   const B = 'c';
   class D {
     public function e($f = \PHP_VERSION, $g = B,
-                      $h = varray[\PHP_VERSION], $i = varray[B]) :mixed{
+                      $h = vec[\PHP_VERSION], $i = vec[B]) :mixed{
     }
   }
-  function j($k = \PHP_VERSION, $l = B, $m = varray[\PHP_VERSION], $n = varray[B]) :mixed{
+  function j($k = \PHP_VERSION, $l = B, $m = vec[\PHP_VERSION], $n = vec[B]) :mixed{
   }
 }
 namespace {
 <<__EntryPoint>> function main(): void {
-  $tests = varray[
+  $tests = vec[
     new ReflectionMethod('A\D', 'e'),
     new ReflectionFunction('A\j'),
   ];

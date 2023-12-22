@@ -10,7 +10,7 @@ class State { public static $staticX = 4; }
 /**
  * This is f's doc comment.
  */
-function f($a, inout $b, $c=null, $d=varray[1, 2, SOME_CONSTANT]) :mixed{
+function f($a, inout $b, $c=null, $d=vec[1, 2, SOME_CONSTANT]) :mixed{
   print "In f()\n";
   State::$staticX++;
   $x = State::$staticX;
@@ -33,7 +33,7 @@ function f($a, inout $b, $c=null, $d=varray[1, 2, SOME_CONSTANT]) :mixed{
 /**
  * This is g's doc comment.
  */
-function g($a=null, $b=varray[1, 2, 3], $c=SOME_CONSTANT) :mixed{
+function g($a=null, $b=vec[1, 2, 3], $c=SOME_CONSTANT) :mixed{
   print "In g($a, $b, $c)\n";
 }
 
@@ -336,7 +336,7 @@ function entrypoint_reflection(): void {
 
   print "--- get_declared_classes() ---\n";
   $a = array_flip(get_declared_classes());
-  $classes = varray["A", "B", "C"];
+  $classes = vec["A", "B", "C"];
   foreach ($classes as $c) {
     if (isset($a[$c])) {
       print "Found class $c\n";
@@ -347,7 +347,7 @@ function entrypoint_reflection(): void {
 
   print "--- get_declared_interfaces() ---\n";
   $a = array_flip(get_declared_interfaces());
-  $interfaces = varray["H", "I", "J", "K", "L"];
+  $interfaces = vec["H", "I", "J", "K", "L"];
   foreach ($interfaces as $i) {
     if (isset($a[$i])) {
       print "Found interface $i\n";

@@ -167,7 +167,7 @@ vec(4) {
         string(11) "some string"
       }
       ["defaultText"]=>
-      string(27) "varray[1, 2, SOME_CONSTANT]"
+      string(24) "vec[1, 2, SOME_CONSTANT]"
       ["attributes"]=>
       dict(0) {
       }

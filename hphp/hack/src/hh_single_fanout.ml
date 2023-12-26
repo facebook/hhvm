@@ -27,8 +27,7 @@ let deps_mode = Typing_deps_mode.InMemoryMode None
 let tcopt =
   {
     GlobalOptions.default with
-    GlobalOptions.tco_enable_modules = true;
-    tco_allow_all_files_for_module_declarations = true;
+    GlobalOptions.tco_allow_all_files_for_module_declarations = true;
     tco_saved_state =
       {
         GlobalOptions.default_saved_state with

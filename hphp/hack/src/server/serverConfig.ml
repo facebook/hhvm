@@ -342,7 +342,6 @@ let load_config config options =
     ?tco_pessimise_builtins:(bool_opt "pessimise_builtins" config)
     ?tco_enable_no_auto_dynamic:(bool_opt "enable_no_auto_dynamic" config)
     ?tco_skip_check_under_dynamic:(bool_opt "skip_check_under_dynamic" config)
-    ?tco_enable_modules:(bool_opt "enable_modules" config)
     ?tco_enable_function_references:
       (bool_opt "enable_function_references" config)
     ?po_interpret_soft_types_as_like_types:

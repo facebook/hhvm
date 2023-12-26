@@ -230,7 +230,6 @@ type t = {
       (** Disable parser-based readonly checking *)
   tco_enable_expression_trees: bool;
       (** Enable expression trees via unstable features flag *)
-  tco_enable_modules: bool;  (** Enable unstable feature: modules *)
   tco_enable_function_references: bool;
       (** Enable unstable feature: function references *)
   tco_allowed_expression_tree_visitors: string list;
@@ -410,7 +409,6 @@ val set :
   ?tco_ignore_unsafe_cast:bool ->
   ?tco_no_parser_readonly_check:bool ->
   ?tco_enable_expression_trees:bool ->
-  ?tco_enable_modules:bool ->
   ?tco_enable_function_references:bool ->
   ?tco_allowed_expression_tree_visitors:string list ->
   ?tco_math_new_code:bool ->

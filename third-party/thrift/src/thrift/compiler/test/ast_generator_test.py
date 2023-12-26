@@ -104,6 +104,7 @@ class AstGeneratorTest(unittest.TestCase):
 
                 const i16 answer = 42;
                 const Foo structured = {"int": 1};
+                const double coerced = 42;
                 """
             ),
         )
@@ -118,6 +119,11 @@ class AstGeneratorTest(unittest.TestCase):
             .objectValue.members[1]
             .i64Value,
             1,
+        )
+
+        self.assertEqual(ast.definitions[3].constDef.attrs.name, "coerced")
+        self.assertEqual(
+            ast.values[ast.definitions[3].constDef.value - 1].doubleValue, 42
         )
 
     def test_service(self):

@@ -22,6 +22,7 @@ type t = {
   uses: pos_id list;
   includes: pos_id list;
   soft_includes: pos_id list;
+  allow_directories: pos_id list;
 }
 [@@deriving eq, show]
 

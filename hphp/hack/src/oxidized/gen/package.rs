@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d1e5e6bf962ad33870bdc8cb8df5f08a>>
+// @generated SignedSource<<7eddde05ec5b1c4d7c59e03d9bb576a8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -61,6 +61,7 @@ pub struct Package {
     pub uses: Vec<PosId>,
     pub includes: Vec<PosId>,
     pub soft_includes: Vec<PosId>,
+    pub allow_directories: Vec<PosId>,
 }
 
 #[derive(

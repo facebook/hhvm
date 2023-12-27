@@ -25,6 +25,7 @@ pub struct Package {
     pub uses: Option<NameSet>,
     pub includes: Option<NameSet>,
     pub soft_includes: Option<NameSet>,
+    pub allow_directories: Option<NameSet>,
 }
 
 #[derive(Debug, Deserialize)]

@@ -1,0 +1,7 @@
+[packages]
+
+[packages.foo]
+uses = ["x.*"]
+includes = ["bar"]
+soft_includes=["baz"]
+allow_directories=["foo", "foo/*", "./foo", "./foo/*"]

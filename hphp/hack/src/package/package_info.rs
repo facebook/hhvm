@@ -195,4 +195,16 @@ mod test {
         assert_eq!(d.packages.as_ref().unwrap()[0].get_ref(), "c");
         assert_eq!(d.soft_packages.as_ref().unwrap()[0].get_ref(), "b");
     }
+
+    #[test]
+    fn test_allow_directories1() {
+        let contents = include_str!("tests/package-6.toml");
+        let info = PackageInfo::from_text(contents).unwrap();
+        let allow_dirs = info.packages()["foo"].allow_directories.as_ref().unwrap();
+        assert_eq!(allow_dirs.len(), 4);
+        assert_eq!(allow_dirs[0].get_ref(), "foo");
+        assert_eq!(allow_dirs[1].get_ref(), "foo/*");
+        assert_eq!(allow_dirs[2].get_ref(), "./foo");
+        assert_eq!(allow_dirs[3].get_ref(), "./foo/*");
+    }
 }

@@ -13,7 +13,7 @@ ocaml_ffi! {
         filename: String,
         source_text: String,
     ) -> Result<Vec<Package>, Errors> {
-        let info = match package::PackageInfo::from_text(&source_text) {
+        let info = match package::PackageInfo::from_text(&filename, &source_text) {
             Ok(info) => info,
             // TODO(T148525961): Send a proper error when packages.toml fails to parse
             Err(_) => return Ok(vec![]),

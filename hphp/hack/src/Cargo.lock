@@ -3553,6 +3553,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "hash",
+ "lazy_static",
  "once_cell",
  "serde",
  "toml 0.8.5",

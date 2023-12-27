@@ -101,8 +101,11 @@ impl HhConfig {
         } else {
             String::new()
         };
-        let package_info: PackageInfo =
-            PackageInfo::from_text(&package_contents).unwrap_or_default();
+        let package_info: PackageInfo = PackageInfo::from_text(
+            package_config_pathbuf.to_str().unwrap_or_default(),
+            &package_contents,
+        )
+        .unwrap_or_default();
         let custom_error_contents: String = if custom_error_config_path.exists() {
             let ctxt = || custom_error_config_path.as_path().display().to_string();
             let bytes = std::fs::read(&custom_error_config_path).with_context(ctxt)?;
@@ -160,8 +163,11 @@ impl HhConfig {
         } else {
             String::new()
         };
-        let package_info: PackageInfo =
-            PackageInfo::from_text(&package_contents).unwrap_or_default();
+        let package_info: PackageInfo = PackageInfo::from_text(
+            package_config_path.to_str().unwrap_or_default(),
+            &package_contents,
+        )
+        .unwrap_or_default();
 
         Ok((
             hh_conf_file,

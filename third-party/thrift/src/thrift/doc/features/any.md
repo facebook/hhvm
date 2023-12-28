@@ -192,3 +192,141 @@ In addition, we also provide runtime helpers in certain languages as specified b
 | Hack | [ThriftLazyAny](https://www.internalfb.com/code/www/flib/thrift/core/conformance/ThriftLazyAny.php?lines=140) |
 | Python | [AnyRegistry](https://github.com/facebook/fbthrift/blob/main/thrift/lib/python/any/any_registry.py) |
 | Java | [SerializedAny](https://github.com/facebook/fbthrift/blob/main/thrift/lib/java/runtime/src/main/java/com/facebook/thrift/any/SerializedAny.java) and [SerializedSemiAny](https://github.com/facebook/fbthrift/blob/main/thrift/lib/java/runtime/src/main/java/com/facebook/thrift/any/SerializedSemiAny.java)|
+
+## Usage Guide
+
+### Add Thrift Any in IDL
+```
+include "thrift/lib/thrift/any.thrift"
+
+struct Foo {
+1: any.Any any_field;
+}
+
+service ThriftStore {
+   void put(string id, any.Any value);
+   any.Any get(string id);
+}
+
+```
+
+### Create an AnyStruct Object
+
+<Tabs
+  groupId="creation"
+  defaultValue="C++"
+  values={[
+    {label: 'C++', value: 'C++'},
+    {label: 'Hack', value: 'Hack'},
+    {label: 'Python', value: 'Python'},
+    {label: 'Java', value: 'Java'},
+  ]}>
+  <TabItem value="C++">
+
+- **Using Type Registry, [recommended way for Thrift generated and primitive types] **
+  - Ensure that type and protocol are registered.
+```cpp
+#include <thrift/lib/cpp2/type/TypeRegistry.h>
+
+auto str = "MY STRING";
+auto registry = apache::thrift::type::TypeRegistry::generated();
+AnyData any_data = registry.store<apache::thrift::type::StandardProtocol::Compact>(str);
+
+// get AnyStruct from AnyData
+AnyStruct any_obj = any_data.toThrift();
+```
+- **Using Thrift provided Helpers**
+  - Only supports Binary and Compact protocols
+
+```cpp
+#include <thrift/lib/cpp2/type/Any.h>
+
+auto str = "MY STRING";
+
+// AnyData is a wrapper around AnyStruct.
+AnyData any_data = AnyData::toAny<StandardProtocol::Compact>(str);
+
+// get AnyStruct from AnyData
+AnyStruct any_obj = any_data.toThrift();
+```
+
+- Using raw structs (not recommended)
+  - User is responsible to ensure that `AnyStruct` created using raw struct is valid and has correct type/protocol information stored in it.
+
+```cpp
+#include <thrift/lib/thrift/gen-cpp2/any_types.h>
+
+auto str = "MY STRING";
+CompactProtocolWriter writer;
+folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
+writer.setOutput(&queue);
+::apache::thrift::op::encode<Tag>(writer, str);
+
+// `Any` is a type-alias for `AnyStruct`
+Any builder;
+builder.data() = queue.moveAsValue();
+builder.protocol() = StandardProtocol::Compact;
+builder.type() = Type::get<string_t>();
+```
+
+  </TabItem>
+  <TabItem value="Hack">
+
+- **Using Thrift provided Helpers**
+  - Only supports Binary, Compact and, SimpleJson protocols
+
+```php
+$str = "My String";
+$lazy_any = ThriftLazyAny::fromObject<string>($str);
+// For binary use `toAnyUsingBinarySerializer`, for compact/json use `toAny`
+$any_obj = $lazy_any->toAny(apache_thrift_type_standard_StandardProtocol::SimpleJson);
+```
+
+- Using raw structs (not recommended)
+  - User is responsible to ensure that `AnyStruct` created using raw struct is valid and has correct type/protocol information stored in it.
+
+```php
+$str = "My String";
+$type  = ThriftTypeStructAdapter::fromHackType<string>();
+$data = TBinarySerializer::serializeData($str, $type->toTypeSpec());
+$protocol = apache_thrift_type_rep_ProtocolUnion::fromShape(shape(
+            "standard" => apache_thrift_type_standard_StandardProtocol::Binary,
+          ));
+$any_obj = apache_thrift_type_AnyStruct::fromShape(
+            shape(
+              'type' =>  $type,
+              'protocol' => $protocol,
+              'data' => $data,
+            )
+          );
+```
+  </TabItem>
+  <TabItem value="Python">
+
+- **Using Type Registry, [recommended way for Thrift generated and primitive types] **
+  - Ensure that type and protocol are registered.
+
+```python
+from thrift.python.any.omni_registry import OmniAnyRegistry
+from your.module.path.thrift_types import MyStruct
+
+my_struct = MyStruct()
+my_any = AnyRegistry().store(my_struct)
+```
+
+  </TabItem>
+  <TabItem value="Java">
+
+- **Using Thrift provided Helpers**
+
+```java
+import com.facebook.thrift.any.Any
+
+// store `TestStruct` object within Any
+TestStruct st = new TestStruct.Builder().setBoolField(true).setIntField(9).build();
+Any<TestStruct> any =
+    new Any.Builder<>(st).setProtocol(StandardProtocol.COMPACT).useUri().build();
+AnyStruct any_obj = any.getAny();
+```
+  </TabItem>
+</Tabs>

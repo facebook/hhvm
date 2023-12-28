@@ -479,3 +479,83 @@ String str = received.get();
 ```
   </TabItem>
 </Tabs>
+
+### Forwarding AnyStruct without Deserializing
+
+```cpp
+ThriftStoreClient client;
+AnyStruct any_obj = client.get("old_key");
+client.put("new_key", any_obj);
+```
+
+### SemiAny <-> Any
+
+To promote `SemiAnyStruct` to `AnyStruct`, ensure that `type` and `protocol` fields are either already set in `SemiAnyStruct` or set these fields based on the data stored in SemiAny. Then create `AnyStruct` using any of the above described APIs.
+
+Helpers for this API are only available in C++ and Java.
+
+<Tabs
+  groupId="convert_to_types"
+  defaultValue="C++"
+  values={[
+    {label: 'C++', value: 'C++'},
+    {label: 'Java', value: 'Java'},
+  ]}>
+  <TabItem value="C++">
+
+- Using C++ helpers
+
+```cpp
+#include <thrift/lib/thrift/gen-cpp2/any_types.h>
+
+auto str = "My String";
+CompactProtocolWriter writer;
+folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
+writer.setOutput(&queue);
+apache::thrift::op::encode<Tag>(writer, str);
+
+SemiAny semi_any_obj;
+semi_any_obj.data() = queue.moveAsValue();
+semi_any_obj.protocol() = StandardProtocol::Compact;
+semi_any_obj.type() = Type::get<string_t>();
+
+// throws if the SemiAny is missing the type or protocol.
+AnyData data(semi_any_obj);
+
+// convert AnyData to SemiAny
+SemiAny obj2 = data.moveToSemiAny();
+```
+
+
+  </TabItem>
+  <TabItem value="Java">
+
+- Using Java helpers
+
+```java
+
+ByteBuf data = Unpooled.wrappedBuffer(new byte[] {30}); // get serialized data
+TypeStruct type = new TypeStruct.Builder().setName(TypeName.fromI32Type(Void.UNUSED)).build();
+StandardProtocol protocol = StandardProtocol.COMPACT;
+ProtocolUnion protocol_union = ProtocolUnion.fromStandard(protocol);
+
+// Both type and protocol are already present in SemiAny
+SemiAny semiAny = new SemiAny.Builder<>()
+                    .setData(data)
+                    .setType(type)
+                    .setProtocol(protocol_union)
+                    .build();
+Any any = semiAny.promote();
+
+// Only type is present in SemiAny
+SemiAny semiAny = new SemiAny.Builder<>().setData(data).setType(type).build();
+// Promote by providing StandardProtocol or ProtocolUnion
+Any any = semiAny.promote(protocol); // Or `semiAny.promote(protocol_union);`
+
+// Both type and protocol are missing in SemiAny
+SemiAny semiAny = new SemiAny.Builder<>().setData(data).build();
+// Promotes after setting the type and protocol
+Any any = semiAny.promote(type, protocol);
+```
+  </TabItem>
+</Tabs>

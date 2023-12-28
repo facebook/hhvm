@@ -30,23 +30,55 @@ namespace op {
 
 namespace detail {
 
-op::BoolPatch patchType(type::bool_t);
-op::BytePatch patchType(type::byte_t);
-op::I16Patch patchType(type::i16_t);
-op::I32Patch patchType(type::i32_t);
-op::I64Patch patchType(type::i64_t);
-op::FloatPatch patchType(type::float_t);
-op::DoublePatch patchType(type::double_t);
-op::StringPatch patchType(type::string_t);
-op::BinaryPatch patchType(type::binary_t);
-
 template <class T>
-StructPatch<::apache::thrift::detail::st::private_access::patch_struct<T>>
-    patchType(type::struct_t<T>);
+struct PatchType {};
 
+template <>
+struct PatchType<type::bool_t> {
+  using type = op::BoolPatch;
+};
+template <>
+struct PatchType<type::byte_t> {
+  using type = op::BytePatch;
+};
+template <>
+struct PatchType<type::i16_t> {
+  using type = op::I16Patch;
+};
+template <>
+struct PatchType<type::i32_t> {
+  using type = op::I32Patch;
+};
+template <>
+struct PatchType<type::i64_t> {
+  using type = op::I64Patch;
+};
+template <>
+struct PatchType<type::float_t> {
+  using type = op::FloatPatch;
+};
+template <>
+struct PatchType<type::double_t> {
+  using type = op::DoublePatch;
+};
+template <>
+struct PatchType<type::string_t> {
+  using type = op::StringPatch;
+};
+template <>
+struct PatchType<type::binary_t> {
+  using type = op::BinaryPatch;
+};
 template <class T>
-UnionPatch<::apache::thrift::detail::st::private_access::patch_struct<T>>
-    patchType(type::union_t<T>);
+struct PatchType<type::struct_t<T>> {
+  using type = StructPatch<
+      ::apache::thrift::detail::st::private_access::patch_struct<T>>;
+};
+template <class T>
+struct PatchType<type::union_t<T>> {
+  using type =
+      UnionPatch<::apache::thrift::detail::st::private_access::patch_struct<T>>;
+};
 
 } // namespace detail
 
@@ -68,7 +100,7 @@ UnionPatch<::apache::thrift::detail::st::private_access::patch_struct<T>>
 /// * patch = 2;          // Equivalent to calling patch.assign(2).
 /// * patch.apply(value); // Sets value to 2;
 template <typename T>
-using patch_type = decltype(detail::patchType(type::infer_tag<T>{}));
+using patch_type = typename detail::PatchType<type::infer_tag<T>>::type;
 
 template <typename T, typename = void>
 inline constexpr bool is_patch_v = false;

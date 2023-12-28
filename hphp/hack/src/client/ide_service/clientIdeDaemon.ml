@@ -267,11 +267,13 @@ let batch_update_naming_table_and_invalidate_caches
       ~sienv
       ~changes
   in
-  Provider_utils.invalidate_upon_change
-    ~ctx
-    ~local_memory
-    ~changes
-    ~entries:(Relative_path.Map.map open_files ~f:fst);
+  let (_ : Telemetry.t) =
+    Provider_utils.invalidate_upon_file_changes
+      ~ctx
+      ~local_memory
+      ~changes
+      ~entries:(Relative_path.Map.map open_files ~f:fst)
+  in
   (naming_table, sienv)
 
 (** An empty ctx with no entries *)

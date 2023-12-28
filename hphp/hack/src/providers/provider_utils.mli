@@ -22,9 +22,9 @@ hopefully we'll remove that dependency in future. *)
 val respect_but_quarantine_unsaved_changes :
   ctx:Provider_context.t -> f:(unit -> 'a) -> 'a
 
-val invalidate_upon_change :
+val invalidate_upon_file_changes :
   ctx:Provider_context.t ->
   local_memory:Provider_backend.local_memory ->
   changes:FileInfo.change list ->
   entries:Provider_context.entries ->
-  unit
+  Telemetry.t

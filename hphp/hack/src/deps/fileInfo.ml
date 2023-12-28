@@ -217,21 +217,17 @@ let empty_names =
 let name_set_of_idl idl =
   List.fold_left idl ~f:(fun acc (_, x, _) -> SSet.add x acc) ~init:SSet.empty
 
-let simplify info =
-  let {
-    ids = { funs; classes; typedefs; consts; modules };
-    file_mode = _;
-    comments = _;
-    position_free_decl_hash = _;
-  } =
-    info
-  in
-  let n_funs = name_set_of_idl funs in
-  let n_classes = name_set_of_idl classes in
-  let n_types = name_set_of_idl typedefs in
-  let n_consts = name_set_of_idl consts in
-  let n_modules = name_set_of_idl modules in
-  { n_funs; n_classes; n_types; n_consts; n_modules }
+let ids_to_names (ids : ids) : names =
+  let { funs; classes; typedefs; consts; modules } = ids in
+  {
+    n_funs = name_set_of_idl funs;
+    n_classes = name_set_of_idl classes;
+    n_types = name_set_of_idl typedefs;
+    n_consts = name_set_of_idl consts;
+    n_modules = name_set_of_idl modules;
+  }
+
+let simplify info = ids_to_names info.ids
 
 let to_saved info : saved =
   let {

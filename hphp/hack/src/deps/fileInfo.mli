@@ -157,6 +157,8 @@ val empty_names : names
 (*****************************************************************************)
 val simplify : t -> names
 
+val ids_to_names : ids -> names
+
 val merge_names : names -> names -> names
 
 val to_saved : t -> saved

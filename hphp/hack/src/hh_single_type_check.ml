@@ -2572,15 +2572,17 @@ let decl_and_run_mode
     in
     Typing_deps.add_dependency_callback ~name:"get_debug_trace" get_debug_trace
   | _ -> ());
-  let package_info =
+  let (package_config_errors, package_info) =
+    Errors.do_ @@ fun () ->
     match packages_config_path with
     | None -> PackageInfo.empty
     | Some _ ->
-      let (_errors, info) =
+      let (errors, info) =
         PackageConfig.load_and_parse
           ~pkgs_config_abs_path:packages_config_path
           ()
       in
+      Errors.iter errors ~f:Errors.add_error;
       info
   in
   let tcopt = { tcopt with GlobalOptions.tco_package_info = package_info } in
@@ -2599,7 +2601,6 @@ let decl_and_run_mode
         ~tcopt
         ~deps_mode:(Typing_deps_mode.InMemoryMode None)
   in
-
   (* We make the following call for the side-effect of updating ctx's "naming-table fallback"
      so it will look in the sqlite database for names it doesn't know.
      This function returns the forward naming table. *)
@@ -2629,7 +2630,10 @@ let decl_and_run_mode
                 ~consts:(ids_to_strings consts)
                 ~modules:(ids_to_strings modules))));
 
-  let (errors, files_info) = parse_name_and_decl ctx to_decl in
+  let (naming_and_parsing_errors, files_info) =
+    parse_name_and_decl ctx to_decl
+  in
+  let errors = Errors.merge package_config_errors naming_and_parsing_errors in
   handle_mode
     mode
     files

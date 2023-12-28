@@ -898,8 +898,20 @@ void RocketServerConnection::onEgressBuffered() {
     if (exceeds && rawSocket_->good()) {
       DestructorGuard dg(this);
       FB_LOG_EVERY_MS(ERROR, 1000) << fmt::format(
-          "Dropping connection: exceeded egress memory limit ({})",
-          getPeerAddress().describe());
+          "Dropping connection for ({}): exceeded egress memory limit ({}), required min increment size ({})",
+          getPeerAddress().describe(),
+          egressMemoryTracker_.getMemLimit(),
+          egressMemoryTracker_.getMinIncrementSize());
+      if (auto context = frameHandler_->getCpp2ConnContext()) {
+        THRIFT_CONNECTION_EVENT(exceeded_egress_mem_limit).log(*context, [&] {
+          folly::dynamic metadata = folly::dynamic::object;
+          metadata["mem_limit"] = egressMemoryTracker_.getMemLimit();
+          metadata["min_increment_size"] =
+              egressMemoryTracker_.getMinIncrementSize();
+          return metadata;
+        });
+      }
+
       rawSocket_->closeNow(); // triggers writeErr() events now
       return;
     }
@@ -1139,6 +1151,30 @@ void RocketServerConnection::resumeStreams() {
         },
         [](const auto&) {});
   }
+}
+
+bool RocketServerConnection::incMemoryUsage(uint32_t memSize) {
+  if (!ingressMemoryTracker_.increment(memSize)) {
+    ingressMemoryTracker_.decrement(memSize);
+    socket_->setReadCB(nullptr);
+    startDrain(DrainCompleteCode::EXCEEDED_INGRESS_MEM_LIMIT);
+    FB_LOG_EVERY_MS(ERROR, 1000) << fmt::format(
+        "Dropping connection for ({}): exceeded ingress memory limit ({}), required min increment size ({})",
+        getPeerAddress().describe(),
+        ingressMemoryTracker_.getMemLimit(),
+        ingressMemoryTracker_.getMinIncrementSize());
+    if (auto context = frameHandler_->getCpp2ConnContext()) {
+      THRIFT_CONNECTION_EVENT(exceeded_ingress_mem_limit).log(*context, [&] {
+        folly::dynamic metadata = folly::dynamic::object;
+        metadata["mem_limit"] = ingressMemoryTracker_.getMemLimit();
+        metadata["min_increment_size"] =
+            ingressMemoryTracker_.getMinIncrementSize();
+        return metadata;
+      });
+    }
+    return false;
+  }
+  return true;
 }
 
 } // namespace rocket

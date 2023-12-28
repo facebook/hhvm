@@ -67,6 +67,10 @@ class MemoryTracker : folly::MoveOnly {
 
   size_t getUsage() { return usage_; }
 
+  size_t getMemLimit() { return *limitObserver_; }
+
+  size_t getMinIncrementSize() { return *minObserver_; }
+
  private:
   size_t usage_{0};
   AtomicObserver limitObserver_;

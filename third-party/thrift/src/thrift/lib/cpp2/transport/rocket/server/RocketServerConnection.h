@@ -203,16 +203,7 @@ class RocketServerConnection final
     onWriteQuiescence_ = std::move(cb);
   }
 
-  bool incMemoryUsage(uint32_t memSize) {
-    if (!ingressMemoryTracker_.increment(memSize)) {
-      ingressMemoryTracker_.decrement(memSize);
-      socket_->setReadCB(nullptr);
-      startDrain(DrainCompleteCode::EXCEEDED_INGRESS_MEM_LIMIT);
-      return false;
-    } else {
-      return true;
-    }
-  }
+  bool incMemoryUsage(uint32_t memSize);
 
   void decMemoryUsage(uint32_t memSize) {
     ingressMemoryTracker_.decrement(memSize);

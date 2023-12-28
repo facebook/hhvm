@@ -85,9 +85,61 @@ it checks whether [changed_class_name] is in that folded decl's ancestor list.
 This might be costly if there are thousands of folded decls in cache,
 each with hundreds of ancestors. *)
 let invalidate_folded_decls_by_checking_each_ones_ancestor_list
-    ~local_memory _changed_class_name =
-  (* TODO(ljw): implement this *)
-  invalidate_all_folded_decls ~local_memory;
+    ~local_memory changed_class_name =
+  let open Provider_backend in
+  let { decl_cache; folded_class_cache; _ } = local_memory in
+  let matches_ty (ty : Typing_defs.decl_ty) =
+    match Typing_defs.get_node ty with
+    | Typing_defs.Tapply ((_pos, ty_name), _args) ->
+      String.equal changed_class_name ty_name
+    | _ -> false
+  in
+  let matches_dc (dc : Decl_defs.decl_class_type) =
+    let open Decl_defs in
+    SSet.mem changed_class_name dc.dc_extends
+    || SSet.mem changed_class_name dc.dc_req_ancestors_extends
+    || SSet.mem changed_class_name dc.dc_xhp_attr_deps
+    || SMap.mem changed_class_name dc.dc_ancestors
+    || List.exists dc.dc_req_ancestors ~f:(fun (_, ty) -> matches_ty ty)
+    || List.exists dc.dc_req_class_ancestors ~f:(fun (_, ty) -> matches_ty ty)
+  in
+
+  let (to_remove, to_keep) =
+    Folded_class_cache.fold
+      folded_class_cache
+      ~init:([changed_class_name], SSet.empty)
+      ~f:(fun
+           (Folded_class_cache.Element
+             (Folded_class_cache_entry.Folded_class_decl name, dc))
+           (to_remove, to_keep)
+         ->
+        if matches_dc dc then
+          (name :: to_remove, to_keep)
+        else
+          (to_remove, SSet.add name to_keep))
+  in
+  List.iter to_remove ~f:(fun name ->
+      Folded_class_cache.remove
+        folded_class_cache
+        ~key:(Folded_class_cache_entry.Folded_class_decl name);
+      Decl_cache.remove decl_cache ~key:(Decl_cache_entry.Class_decl name));
+  let to_remove =
+    Decl_cache.fold
+      decl_cache
+      ~init:[]
+      ~f:(fun (Decl_cache.Element (key, value)) to_remove ->
+        match (key, value) with
+        | (Decl_cache_entry.Class_decl name, (dc, _)) ->
+          if SSet.mem name to_keep then
+            to_remove
+          else if matches_dc dc then
+            name :: to_remove
+          else
+            to_remove
+        | _ -> to_remove)
+  in
+  List.iter to_remove ~f:(fun name ->
+      Decl_cache.remove decl_cache ~key:(Decl_cache_entry.Class_decl name));
   ()
 
 (** A signature might change because you're editing the signature in an unsaved file.

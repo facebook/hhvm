@@ -317,7 +317,8 @@ my_any = AnyRegistry().store(my_struct)
   </TabItem>
   <TabItem value="Java">
 
-- **Using Thrift provided Helpers**
+- **Using Thrift provided Helpers, [recommended way for Thrift generated and primitive types] **
+  - Ensure that type and protocol are registered.
 
 ```java
 import com.facebook.thrift.any.Any
@@ -327,6 +328,26 @@ TestStruct st = new TestStruct.Builder().setBoolField(true).setIntField(9).build
 Any<TestStruct> any =
     new Any.Builder<>(st).setProtocol(StandardProtocol.COMPACT).useUri().build();
 AnyStruct any_obj = any.getAny();
+```
+
+- Using raw structs (not recommended)
+  - User is responsible to ensure that `AnyStruct` created using raw struct is valid and has correct type/protocol information stored in it.
+
+```java
+import com.facebook.thrift.type_swift.AnyStruct;
+import com.facebook.thrift.type_swift.TypeStruct;
+import com.facebook.thrift.standard_type.StandardProtocol;
+
+ByteBuf data =  Unpooled.wrappedBuffer(new byte[] {30}); // get serialized data
+TypeStruct type = new TypeStruct.Builder().setName(TypeName.fromI32Type(Void.UNUSED)).build();
+StandardProtocol protocol = StandardProtocol.COMPACT;
+ProtocolUnion protocol_union = ProtocolUnion.fromStandard(protocol);
+
+AnyStruct any_obj = new AnyStruct.Builder()
+        .setData(data)
+        .setType(type)
+        .setProtocol(protocol_union)
+        .build();
 ```
   </TabItem>
 </Tabs>

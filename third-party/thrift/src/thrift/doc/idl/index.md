@@ -166,12 +166,6 @@ The following tokens serve as operators and punctuation in Thrift:
 ,       ;       @       =       +       -
 ```
 
-Thrift uses an optional comma (`,`) or semicolon (`;`) as delimiters in certain constructs such as parameter and field lists:
-
-```grammar
-delimiter ::=  ["," | ";"]
-```
-
 ## Thrift Files
 
 A Thrift file starts with an optional package declaration and a, possibly empty, sequence of include and namespace directives. It is followed by a sequence of definitions which can also be empty. There can be at most one package declaration and it is normally placed at the beginning of a source file.
@@ -796,9 +790,10 @@ const search_types.SearchKind SK = search_types.SearchKind.GROUPS;
 
 #### List and Map Initializers
 
-```
-list_initializer ::=  "[" (initializer delimiter)* "]"
-map_initializer  ::=  "{" (initializer ":" initializer)* "}"
+```grammar
+list_initializer ::=  "[" [(initializer ",")* initializer [","]] "]"
+map_initializer  ::=  "{" [(map_entry ",")* map_entry [","]] "}"
+map_entry        ::=  initializer ":" initializer
 ```
 
 Constants can also be of list, set, or map types.

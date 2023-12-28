@@ -2,6 +2,10 @@
 state: beta
 description: How to store any value
 ---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Thrift Any
 
 ## Overview
@@ -67,6 +71,97 @@ See `ProtocolUnion` defined in [`thrift/lib/thrift/type_rep.thrift`](https://git
 
 When utilizing custom protocols, it is necessary to provide a mapping between the protocol name/id and the native serializer. This mapping is language-specific and depends on what API is used to interact with `AnyStruct`.
 For eg: In C++, all custom protocols must be registered with the Type Registry when using it to load/store data within `AnyStruct`. However, when an `AnyStruct` is constructed/consumed directly, it is the user's responsibility to invoke the appropriate serializer based on the custom or standard protocol. This may involve writing a `switch` case to handle all the possible values in `ProtocolUnion`.
+
+### Registering types and protocols
+
+<Tabs
+  groupId="register"
+  defaultValue="C++"
+  values={[
+    {label: 'C++', value: 'C++'},
+    {label: 'Hack', value: 'Hack'},
+    {label: 'Python', value: 'Python'},
+    {label: 'Java', value: 'Java'}
+  ]}>
+  <TabItem value="C++">
+
+In C++, all types are registered along with a protocol/serializer pair. All registered serializers must either be owned by the `TypeRegistry` or out live all `TypeRegistry` that they have been registered with.
+
+```cpp
+// Generated registry with the Thrift generated types (in your dependency tree)
+// and primitive types already registered
+auto registry = TypeRegistry::generated();
+
+// Registering `FollyToStringSerializer` for type `double`
+test::FollyToStringSerializer<double_t> serializer;
+treg.registerSerializer(serializer, double_t{});
+
+// Registering type `list<double>` with compact protocol
+StdSerializer<list_t<double_t>, type::StandardProtocol::Compact> serializer;
+treg.registerSerializer(serializer, list_t<double_t>{});
+
+```
+  </TabItem>
+  <TabItem value="Hack">
+
+TypeRegistry in www uses `ThriftTypeInfo` class attribute. All classes with this attribute are registered automatically. Thrift generated classes/enums have this attribute enabled if a universal name is available for the corresponding Thrift type.
+
+Custom protocol to serializer mapping is only needed when (de)serializing using `ThriftLazyAny` helpers. Use `ThriftLazyAny::setIdToSerializer` or `ThriftLazyAny::setStringToSerializer` mapping.
+
+```php
+
+// registers FooStruct in TypeRegistry
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/my_unique_package/FooStruct'))>>
+class FooStruct implements \IThriftSyncStruct, \IThriftStructMetadata{ ...
+}
+
+public function customProtocolRegistry(string $uri) [write_props]: classname<TProtocolWritePropsSerializer> {
+...
+}
+
+$any_obj = ThriftLazyAny::fromObject<FooStruct>($foo_obj);
+// Registers custom protocol registry for current Object
+$any_obj->setStringToSerializer(customProtocolRegistry);
+```
+  </TabItem>
+  <TabItem value="Python">
+
+All thrift-python modules (in your dependency tree) are pre-registered in `OmniAnyRegistry`. To register types on demand, use `AnyRegistry`.
+
+Custom Protocols are not yet supported in Python TypeRegistry.
+
+```python
+from thrift.python.any.omni_registry import OmniAnyRegistry
+from thrift.python.any.any_registry import AnyRegistry
+
+# Register your module
+from your.module.path import thrift_types
+AnyRegistry().register_module(thrift_types)
+
+# Alternatively you can register a single type
+AnyRegistry().register_type(thrift_types.MyStruct)
+```
+  </TabItem>
+  <TabItem value="Java">
+In Java, all generated types (in your dependency tree) with universal name are registered.
+
+```java
+import com.facebook.thrift.any.Any
+
+class ThriftTest {
+private static ByteBuf mySerializer(Object o) {...}
+
+private static Object myDeserializer(TypeStruct typeStruct, ByteBuf data) {...}
+
+// Register custom serializer and deserializer
+Any.registerSerializer("my-serializer", ThriftTest::mySerializer);
+Any.registerDeserializer("my-serializer", ThriftTest::myDeserializer);
+}
+```
+Check [TypeRegistry.java](https://github.com/facebook/fbthrift/blob/main/thrift/lib/java/common/src/main/java/com/facebook/thrift/type/TypeRegistry.java) and [AbstractAny.java](https://github.com/facebook/fbthrift/blob/main/thrift/lib/java/runtime/src/main/java/com/facebook/thrift/any/AbstractAny.java) for details
+  </TabItem>
+</Tabs>
+
 
 ### Valid Any
 

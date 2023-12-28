@@ -330,3 +330,152 @@ AnyStruct any_obj = any.getAny();
 ```
   </TabItem>
 </Tabs>
+
+### Convert AnyStruct Object to Typed Value
+
+<Tabs
+  groupId="convert_to_types"
+  defaultValue="C++"
+  values={[
+    {label: 'C++', value: 'C++'},
+    {label: 'Hack', value: 'Hack'},
+    {label: 'Python', value: 'Python'},
+    {label: 'Java', value: 'Java'},
+  ]}>
+  <TabItem value="C++">
+
+- **Using Type Registry, [recommended way for Thrift generated and primitive types]**
+  - Ensure that type and protocol are registered.
+```cpp
+#include <thrift/lib/cpp2/type/TypeRegistry.h>
+
+// Receive Thrift Any object from a rpc or an API
+ThriftStoreClient client;
+AnyStruct any_obj = client.get("old_key");
+
+// Load generated registry
+auto registry = apache::thrift::type::TypeRegistry::generated();
+
+//wrap any_obj within AnyData
+AnyData any_data = AnyData(any_obj);
+
+// Load `double` value from `AnyStruct`
+double val;
+// can throw `std::bad_any_cast` if there is a type mismatch or type is not registered
+registry.load(any_data, val);
+
+// using `AnyValue`
+std::string str = registry.load(any_data).as<string_t>();
+
+// using `Ref`
+int32_t uval;
+rval = Ref::to<i32_t>(uval);
+registry.load(any_data, rval);
+```
+
+- **Using Thrift provided Helpers**
+  - Only supports Binary and Compact protocols
+
+```cpp
+#include <thrift/lib/cpp2/type/Any.h>
+
+// Receive Thrift Any object from a rpc or an API
+ThriftStoreClient client;
+AnyStruct any_obj = client.get("old_key");
+
+//wrap any_obj within AnyData
+AnyData any_data = AnyData(any_obj);
+
+// Get std::string from any_obj
+std::string str;
+any_data.get(str);
+```
+
+- Using raw structs (not recommended)
+
+```cpp
+#include <thrift/lib/thrift/gen-cpp2/any_types.h>
+
+// using a template function
+template <typename T>
+T getTypedValue(Any any_obj) { // `Any` is a type-alias for `AnyStruct` defined in `thrift/any.thrift`
+  using Tag = infer_tag<T>;
+  if (any_obj.type() != Type::get<Tag>()){
+    // type mismatch
+  }
+  T value;
+  if (protocol() == Protocol::get<StandardProtocol::Binary>()) {
+    BinaryProtocolReader reader;
+    reader.setInput(any_obj.data());
+    op::decode<Tag>(reader, value);
+  } else {....}
+
+  return value;
+}
+
+std::string val = getTypedValue<std::string>(any_obj);
+```
+  </TabItem>
+  <TabItem value="Hack">
+
+- **Using Thrift provided Helpers**
+  - Only supports Binary, Compact and, SimpleJson protocols
+
+```php
+// Receive Thrift Any object from a rpc or an API
+$client = await genThriftStoreClient();
+apache_thrift_type_AnyStruct $any_obj = await $client->get("old_key");
+
+// Convert AnyStruct to string value using helper class `ThriftLazyAny`
+$lazy_any = ThriftLazyAny::fromAnyStruct($any_obj);
+$str = $lazy_any->get<string>();
+```
+
+- Using raw structs (not recommended)
+
+```php
+// implement a method to get serializer from protocol union
+function getSerializer(apache_thrift_type_rep_ProtocolUnion $protocol_union) : TProtocolWritePropsSerializer {
+  switch ($protocol_union->getType()) {
+    ...
+  }
+}
+
+if (!Str\is_empty($any_obj->data) && $any_obj->type !== null && $any_obj->protocol !== null) {
+  $serializer = getSerializer($any_obj->protocol);
+  $mixed_val = $serializer::deserializeData($any_obj->data, $any_obj->type->toTypeSpec());
+  $val = $mixed_val as string; // cast to the expected type
+}
+```
+  </TabItem>
+  <TabItem value="Python">
+
+- **Using Type Registry, [recommended way for Thrift generated and primitive types] **
+  - Ensure that type and protocol are registered.
+
+```python
+from thrift.python.any.omni_registry import OmniAnyRegistry
+from your.module.path.thrift_types import MyStruct
+
+// Receive Thrift Any object from a rpc or an API
+async with get_sr_client(ThriftStoreClient, "tier") as client:
+  any_obj = await client.get("old_key");
+  loaded_obj = AnyRegistry().load(any_obj);
+```
+
+  </TabItem>
+  <TabItem value="Java">
+
+- **Using Thrift provided Helpers**
+
+```java
+import com.facebook.thrift.any.Any;
+
+AnyStruct any_obj; // AnyStruct received from rpc or API
+
+// Convert AnyStruct to string value using helper class `Any`
+Any<String> received = Any.wrap(any_obj);
+String str = received.get();
+```
+  </TabItem>
+</Tabs>

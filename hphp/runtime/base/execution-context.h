@@ -648,6 +648,8 @@ public:
   using InternalEventHookCallbackType = void(*)(const ActRec*,
                                                 InternalEventHook);
   InternalEventHookCallbackType m_internalEventHookCallback{nullptr};
+  req::fast_map<String, uint32_t, hphp_string_hash, hphp_string_isame>
+      m_internalEventHookNameMap;
 
 public:
   TypedValue m_headerCallback;

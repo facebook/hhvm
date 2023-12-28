@@ -432,6 +432,7 @@ let respect_but_quarantine_unsaved_changes
         Fixme_provider.local_changes_push_sharedmem_stack ();
         SharedMem.set_allow_hashtable_writes_by_current_process false
       | Provider_backend.Local_memory local ->
+        let start_time = Unix.gettimeofday () in
         let entries = Provider_context.get_entries ctx in
         Relative_path.Map.iter entries ~f:(fun _path entry ->
             let (_ : Nast.program) =
@@ -440,19 +441,34 @@ let respect_but_quarantine_unsaved_changes
                 ~entry
             in
             ());
-        if sticky_quarantine then begin
-          let (_ : Telemetry.t) = update_sticky_quarantine ctx local in
-          ()
-        end;
+        let telemetry =
+          if sticky_quarantine then
+            update_sticky_quarantine ctx local
+          else
+            Telemetry.create ()
+        in
         (* The method [update_sticky_quarantine] is guaranteed to leave [decls_reflect_this_file]
            to be Some only if it is identical to ctx.entries; in this case we satisfy the
            invariant already. But in case of None, we'll ensure the invariant here
            by removing affected decls -- remember the invariant is that "all decls present in the cache
            reflect truth ..." hence if we remove a decl then it trivially satisfies the invariant! *)
-        if Option.is_none !(local.Provider_backend.decls_reflect_this_file) then
-          invalidate_named_shallow_and_some_folded_decls_for_entry
-            local
-            (Provider_context.get_entries ctx)
+        let telemetry =
+          match !(local.Provider_backend.decls_reflect_this_file) with
+          | Some _ -> telemetry
+          | None ->
+            let start_time = Unix.gettimeofday () in
+            invalidate_named_shallow_and_some_folded_decls_for_entry
+              local
+              (Provider_context.get_entries ctx);
+            telemetry
+            |> Telemetry.duration ~key:"duration_nonsticky_ms" ~start_time
+        in
+        HackEventLogger.ProfileTypeCheck.quarantine
+          ~count:(Relative_path.Map.cardinal entries)
+          ~start_time
+          ~path:(Relative_path.Map.choose_opt entries |> Option.map ~f:fst)
+          telemetry;
+        ()
       | _ -> ()
     end;
     backend_pushed := true;

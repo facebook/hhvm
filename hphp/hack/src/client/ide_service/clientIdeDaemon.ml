@@ -260,6 +260,7 @@ let batch_update_naming_table_and_invalidate_caches
     ~(open_files :
        (Provider_context.entry * Errors.t option ref) Relative_path.Map.t)
     (changes : Relative_path.Set.t) : Naming_table.t * SearchUtils.si_env =
+  let start_time = Unix.gettimeofday () in
   let ClientIdeIncremental.{ changes; naming_table; sienv } =
     ClientIdeIncremental.update_naming_tables_and_si
       ~ctx
@@ -267,13 +268,18 @@ let batch_update_naming_table_and_invalidate_caches
       ~sienv
       ~changes
   in
-  let (_ : Telemetry.t) =
+  let telemetry =
     Provider_utils.invalidate_upon_file_changes
       ~ctx
       ~local_memory
       ~changes
       ~entries:(Relative_path.Map.map open_files ~f:fst)
   in
+  HackEventLogger.ProfileTypeCheck.invalidate
+    ~count:(List.length changes)
+    ~start_time
+    ~path:(List.hd changes |> Option.map ~f:(fun change -> change.FileInfo.path))
+    telemetry;
   (naming_table, sienv)
 
 (** An empty ctx with no entries *)
@@ -1224,6 +1230,7 @@ let handle_one_message_exn
     failwith ("Unexpected GotNamingTable in " ^ state_to_log_string state)
   | (_, Some (ClientRequest { ClientIdeMessage.tracking_id; message })) ->
     let unblocked_time = Unix.gettimeofday () in
+    HackEventLogger.serverless_ide_set_tracking_id tracking_id;
     (* Our caller has an exception handler which logs the exception.
        But we instead must fulfil our contract of responding to the client,
        even if we have an exception. Hence we need our own handler here. *)

@@ -186,6 +186,8 @@ let client_set_mode _ = ()
 
 let serverless_ide_set_root _ = ()
 
+let serverless_ide_set_tracking_id _ = ()
+
 let client_start _ = ()
 
 let client_stop _ = ()
@@ -568,6 +570,10 @@ module ProfileTypeCheck = struct
     ()
 
   let compute_tast ~path:_ ~telemetry:_ ~start_time:_ = ()
+
+  let quarantine ~count:_ ~start_time:_ ~path:_ _ = ()
+
+  let invalidate ~count:_ ~start_time:_ ~path:_ _ = ()
 end
 
 module CGroup = struct

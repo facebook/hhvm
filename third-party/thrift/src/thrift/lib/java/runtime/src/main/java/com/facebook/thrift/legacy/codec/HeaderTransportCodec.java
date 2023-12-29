@@ -30,6 +30,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
+import io.netty.util.ReferenceCountUtil;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -74,11 +75,22 @@ public final class HeaderTransportCodec extends ChannelDuplexHandler {
   public void channelRead(ChannelHandlerContext context, Object message) {
     if (message instanceof ByteBuf) {
       ByteBuf request = (ByteBuf) message;
-      if (request.isReadable()) {
-        context.fireChannelRead(decodeFrame(context.alloc(), request));
+      ThriftFrame frame = null;
+      try {
+        if (request.isReadable()) {
+          frame = decodeFrame(context.alloc(), request);
+        }
+      } catch (Throwable t) {
+        ReferenceCountUtil.safeRelease(request);
+        context.fireExceptionCaught(t);
+        return;
+      }
+      if (frame != null) {
+        context.fireChannelRead(frame);
         return;
       }
     }
+
     context.fireChannelRead(message);
   }
 

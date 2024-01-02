@@ -45,7 +45,7 @@ bool t_structured::try_append_field(std::unique_ptr<t_field>& field) {
   }
 
   if (!field->name().empty()) {
-    fields_by_name_.put(*field);
+    fields_by_name_[field->name()] = field.get();
   }
   fields_id_order_.emplace(existing.first, field.get());
 
@@ -85,7 +85,7 @@ void t_structured::append(std::unique_ptr<t_field> field) {
   // TODO(afuller): Figure out why some code relies on adding multiple id:0
   // fields, fix the code, and remove this hack.
   if (!field->get_name().empty()) {
-    fields_by_name_.put(*field);
+    fields_by_name_[field->name()] = field.get();
   }
   fields_raw_.push_back(field.get());
   fields_.push_back(std::move(field));

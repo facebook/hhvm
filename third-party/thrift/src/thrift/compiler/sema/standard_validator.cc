@@ -24,7 +24,6 @@
 #include <boost/algorithm/string/split.hpp>
 #include <fmt/ranges.h>
 
-#include <thrift/compiler/ast/name_index.h>
 #include <thrift/compiler/ast/t_enum.h>
 #include <thrift/compiler/ast/t_enum_value.h>
 #include <thrift/compiler/ast/t_field.h>
@@ -109,21 +108,23 @@ class redef_checker {
   // was derived, while `child` is the mixin field that caused the name to be
   // inherited.
   void check(std::string_view name, const t_named& node, const t_node& child) {
-    if (const auto* existing = seen_.put(name, node)) {
-      if (&node == &parent_ && existing == &parent_) {
-        // The degenerate case where parent_ is conflicting with itself.
-        report_redef_error(diags_, kind_, name, parent_, child, *existing);
-      } else {
-        diags_.error(
-            child,
-            "{} `{}.{}` and `{}.{}` can not have same name in `{}`.",
-            kind_,
-            node.name(),
-            name,
-            existing->name(),
-            name,
-            parent_.name());
-      }
+    const t_named* existing = insert(name, node);
+    if (!existing) {
+      return;
+    }
+    if (&node == &parent_ && existing == &parent_) {
+      // The degenerate case where parent_ is conflicting with itself.
+      report_redef_error(diags_, kind_, name, parent_, child, *existing);
+    } else {
+      diags_.error(
+          child,
+          "{} `{}.{}` and `{}.{}` can not have same name in `{}`.",
+          kind_,
+          node.name(),
+          name,
+          existing->name(),
+          name,
+          parent_.name());
     }
   }
 
@@ -132,7 +133,7 @@ class redef_checker {
   //
   // For example, all functions in an interface.
   void check(const t_named& child) {
-    if (const auto* existing = seen_.put(child)) {
+    if (const t_named* existing = insert(child.name(), child)) {
       report_redef_error(
           diags_, kind_, child.name(), parent_, child, *existing);
     }
@@ -146,11 +147,21 @@ class redef_checker {
   }
 
  private:
+  const t_named* insert(std::string_view name, const t_named& node) {
+    auto [it, success] = seen_.emplace(name, &node);
+    if (success) {
+      return nullptr;
+    }
+    const t_named* existing = it->second;
+    seen_[name] = &node;
+    return existing;
+  }
+
   diagnostics_engine& diags_;
   const char* kind_;
   const t_named& parent_;
 
-  name_index<t_named> seen_;
+  std::unordered_map<std::string_view, const t_named*> seen_;
 };
 
 // Helper for validating the adapters
@@ -283,7 +294,8 @@ class adapter_or_wrapper_checker {
 };
 
 struct service_metadata {
-  name_index<t_service> function_name_to_service;
+  std::unordered_map<std::string_view, const t_service*>
+      function_name_to_service;
 
   service_metadata(node_metadata_cache& cache, const t_service& node) {
     if (node.extends() != nullptr) {
@@ -293,23 +305,26 @@ struct service_metadata {
     }
     // Add all the directly defined functions.
     for (const auto& function : node.functions()) {
-      function_name_to_service.put(function.name(), node);
+      function_name_to_service[function.name()] = &node;
     }
   }
 };
 
 struct structured_metadata {
-  name_index<t_structured> field_name_to_parent;
+  std::unordered_map<std::string_view, const t_structured*>
+      field_name_to_parent;
 
   structured_metadata(node_metadata_cache& cache, const t_structured& node) {
     for (const auto& field : node.fields()) {
       if (const auto* mixin = get_mixin_type(field)) {
         // Add all the inherited mixin fields from field.
         auto mixin_metadata = cache.get<structured_metadata>(*mixin);
-        field_name_to_parent.put_all(mixin_metadata.field_name_to_parent);
+        for (auto [key, value] : mixin_metadata.field_name_to_parent) {
+          field_name_to_parent[key] = value;
+        }
       }
       // Add the directly defined field.
-      field_name_to_parent.put(field.name(), node);
+      field_name_to_parent[field.name()] = &node;
     }
   }
 };
@@ -330,13 +345,14 @@ void validate_extends_service_function_name_uniqueness(
   const auto& extends_metadata =
       ctx.cache().get<service_metadata>(*node.extends());
   for (const auto& function : node.functions()) {
-    if (const auto* existing_service =
-            extends_metadata.function_name_to_service.find(function.name())) {
+    auto service =
+        extends_metadata.function_name_to_service.find(function.name());
+    if (service != extends_metadata.function_name_to_service.end()) {
       ctx.error(
           function,
           "Function `{0}.{2}` redefines `{1}.{2}`.",
           node.name(),
-          existing_service->get_full_name(),
+          service->second->get_full_name(),
           function.name());
     }
   }
@@ -365,10 +381,9 @@ void validate_field_names_uniqueness(
     // Check any transtively defined fields via a mixin annotation.
     if (const auto* mixin = get_mixin_type(field)) {
       const auto& mixin_metadata = ctx.cache().get<structured_metadata>(*mixin);
-      mixin_metadata.field_name_to_parent.for_each(
-          [&](std::string_view name, const t_structured& parent) {
-            checker.check(name, parent, field);
-          });
+      for (auto [name, parent] : mixin_metadata.field_name_to_parent) {
+        checker.check(name, *parent, field);
+      }
     }
   }
 }

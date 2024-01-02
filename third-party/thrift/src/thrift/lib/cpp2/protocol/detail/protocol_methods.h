@@ -89,20 +89,17 @@ class Wrap;
 namespace detail {
 namespace pm {
 
-template <typename Container, typename Size>
-auto reserve_if_possible(Container* t, Size size)
-    -> decltype(t->reserve(size), std::true_type{}) {
-  // Workaround for libstdc++ < 7, resize to `size + 1` to avoid an extra
-  // rehash: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=71181.
-  // TODO: Remove once libstdc++ < 7 is not supported any longer.
-  Size extra = folly::kIsGlibcxx && folly::kGlibcxxVer < 7 ? 1 : 0;
-  t->reserve(size + extra);
-  return {};
-}
+template <typename C, typename... A>
+using detect_reserve = decltype(FOLLY_DECLVAL(C).reserve(FOLLY_DECLVAL(A)...));
 
-template <typename... T>
-std::false_type reserve_if_possible(T&&...) {
-  return {};
+template <typename Container, typename Size>
+auto reserve_if_possible(Container* t, Size size) {
+  if constexpr (folly::is_detected_v<detect_reserve, Container&, Size>) {
+    t->reserve(size);
+    return std::true_type{};
+  } else {
+    return std::false_type{};
+  }
 }
 
 // When possible, it is cheaper to avoid the call to back() after emplace_back()

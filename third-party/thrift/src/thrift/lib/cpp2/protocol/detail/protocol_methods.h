@@ -102,22 +102,9 @@ auto reserve_if_possible(Container* t, Size size) {
   }
 }
 
-// When possible, it is cheaper to avoid the call to back() after emplace_back()
-// for types where the cost is non-trivial (for example containers with small
-// object optimization). This provides a fallback for pre-C++17 containers. It
-// can be removed when C++17 is the minimum supported version.
 template <typename Container>
-auto emplace_back_default(Container& c) -> typename std::enable_if<
-    !std::is_same<decltype(c.emplace_back()), void>::value,
-    typename Container::reference>::type {
+typename Container::reference emplace_back_default(Container& c) {
   return c.emplace_back(detail::default_set_element(c));
-}
-template <typename Container>
-auto emplace_back_default(Container& c) -> typename std::enable_if<
-    std::is_same<decltype(c.emplace_back()), void>::value,
-    typename Container::reference>::type {
-  c.emplace_back(detail::default_set_element(c));
-  return c.back();
 }
 
 template <typename Container, typename Map>

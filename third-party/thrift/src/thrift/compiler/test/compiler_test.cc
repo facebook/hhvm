@@ -270,6 +270,16 @@ TEST(CompilerTest, void_as_initial_response_type) {
   )");
 }
 
+TEST(CompilerTest, enum) {
+  check_compile(R"(
+    enum Color {
+      RED = 1,
+      GREEN = 2; # expected-warning: unexpected ';'
+      BLUE = 3,
+    }
+  )");
+}
+
 TEST(CompilerTest, enum_wrong_default_value) {
   check_compile(R"(
     enum Color {

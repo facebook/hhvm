@@ -835,8 +835,7 @@ class parser {
 
   // enum_value:
   //   attributes
-  //   identifier ["=" integer] [deprecated_annotations] [comma_or_semicolon]
-  //   [inline_doc]
+  //   identifier ["=" integer] [deprecated_annotations] [","] [inline_doc]
   std::unique_ptr<t_enum_value> parse_enum_value() {
     auto range = track_range();
     auto attrs = parse_attributes();
@@ -845,7 +844,12 @@ class parser {
         ? boost::optional<int64_t>(parse_integer())
         : boost::none;
     try_parse_deprecated_annotations(attrs);
-    try_parse_comma_or_semicolon();
+    if (token_.kind == ',') {
+      consume_token();
+    } else if (token_.kind == ';') {
+      diags_.warning(token_.range.begin, "unexpected ';'");
+      consume_token();
+    }
     auto doc = try_parse_inline_doc();
     return actions_.on_enum_value(
         range, std::move(attrs), name, value, std::move(doc));

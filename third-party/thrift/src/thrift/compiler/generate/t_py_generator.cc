@@ -30,7 +30,6 @@
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
 
 #include <thrift/compiler/ast/t_typedef.h>
 #include <thrift/compiler/detail/system.h>
@@ -337,9 +336,9 @@ class t_py_generator : public t_concat_generator {
    * File streams
    */
 
-  boost::filesystem::ofstream f_types_;
-  boost::filesystem::ofstream f_consts_;
-  boost::filesystem::ofstream f_service_;
+  std::ofstream f_types_;
+  std::ofstream f_consts_;
+  std::ofstream f_service_;
 
   boost::filesystem::path package_dir_;
 
@@ -746,7 +745,8 @@ void t_py_generator::init_generator() {
   boost::filesystem::create_directory(package_dir_);
   while (true) {
     boost::filesystem::create_directory(package_dir_);
-    boost::filesystem::ofstream init_py(package_dir_ / "__init__.py");
+    // TODO: remove call to member native() after switching to std::filesystem
+    std::ofstream init_py((package_dir_ / "__init__.py").native());
     init_py << py_autogen_comment();
     init_py.close();
     if (module.empty()) {
@@ -764,16 +764,16 @@ void t_py_generator::init_generator() {
 
   // Make output file
   auto f_types_path = package_dir_ / "ttypes.py";
-  f_types_.open(f_types_path);
+  f_types_.open(f_types_path.native()); // TODO: remove call to member native()
   record_genfile(f_types_path);
 
   auto f_consts_path = package_dir_ / "constants.py";
-  f_consts_.open(f_consts_path);
+  f_consts_.open(f_consts_path.native()); // TODO: remove call to native()
   record_genfile(f_consts_path);
 
   auto f_init_path = package_dir_ / "__init__.py";
-  boost::filesystem::ofstream f_init;
-  f_init.open(f_init_path);
+  std::ofstream f_init;
+  f_init.open(f_init_path.native()); // TODO: remove call to member native()
   record_genfile(f_init_path);
   f_init << py_autogen_comment() << "__all__ = ['ttypes', 'constants'";
   for (const auto* tservice : program_->services()) {
@@ -2060,7 +2060,7 @@ void t_py_generator::generate_py_struct_writer(
 void t_py_generator::generate_service(const t_service* tservice) {
   string f_service_filename = rename_reserved_keywords(service_name_) + ".py";
   auto f_service_path = package_dir_ / f_service_filename;
-  f_service_.open(f_service_path);
+  f_service_.open(f_service_path.native()); // TODO: remove call to native()
   record_genfile(f_service_path);
 
   f_service_ << py_autogen_comment() << endl << py_imports() << endl;
@@ -2673,8 +2673,8 @@ void t_py_generator::generate_service_client(const t_service* tservice) {
 void t_py_generator::generate_service_remote(const t_service* tservice) {
   string f_remote_filename = service_name_ + "-remote";
   auto f_remote_path = package_dir_ / f_remote_filename;
-  boost::filesystem::ofstream f_remote;
-  f_remote.open(f_remote_path);
+  std::ofstream f_remote;
+  f_remote.open(f_remote_path.native()); // TODO: remove call to member native()
   record_genfile(f_remote_path);
 
   f_remote << "#!/usr/bin/env python\n"
@@ -2779,8 +2779,8 @@ void t_py_generator::generate_service_remote(const t_service* tservice) {
 void t_py_generator::generate_service_fuzzer(const t_service* /*tservice*/) {
   string f_fuzzer_filename = service_name_ + "-fuzzer";
   auto f_fuzzer_path = package_dir_ / f_fuzzer_filename;
-  boost::filesystem::ofstream f_fuzzer;
-  f_fuzzer.open(f_fuzzer_path);
+  std::ofstream f_fuzzer;
+  f_fuzzer.open(f_fuzzer_path.native()); // TODO: remove call to member native()
   record_genfile(f_fuzzer_path);
 
   f_fuzzer << "#!/usr/bin/env python\n"

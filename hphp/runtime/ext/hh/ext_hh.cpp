@@ -80,69 +80,79 @@ bool HHVM_FUNCTION(autoload_is_native) {
 
 namespace {
 
-Variant autoload_symbol_to_path(const String& symbol, AutoloadMap::KindOf kind) {
-  if (AutoloadHandler::s_instance->getAutoloadMap() == nullptr) {
-    SystemLib::throwInvalidOperationExceptionObject(
-      "Only available when autoloader is active");
-  }
-  auto pathRes = AutoloadHandler::s_instance->getFile(symbol, kind);
-  if (!pathRes) {
-    return null_string;
-  }
-  return pathRes->path;
+AutoloadMap& autoloadMap() {
+  auto map = AutoloadHandler::s_instance->getAutoloadMap();
+  if (map) return *map;
+  SystemLib::throwInvalidOperationExceptionObject(
+    "Only available when autoloader is active"
+  );
 }
 
 } // end anonymous namespace
 
 Variant HHVM_FUNCTION(autoload_type_to_path, const String& type) {
-  return autoload_symbol_to_path(type, AutoloadMap::KindOf::Type);
+  auto fileRes = autoloadMap().getTypeFile(type);
+  if (!fileRes) {
+    return Variant{Variant::NullInit{}};
+  } else {
+    return Variant{fileRes->path};
+  }
 }
 
 Variant HHVM_FUNCTION(autoload_function_to_path, const String& function) {
-  return autoload_symbol_to_path(function, AutoloadMap::KindOf::Function);
+  auto fileRes = autoloadMap().getFunctionFile(function);
+  if (!fileRes) {
+    return Variant{Variant::NullInit{}};
+  } else {
+    return Variant{fileRes->path};
+  }
 }
 
 Variant HHVM_FUNCTION(autoload_constant_to_path, const String& constant) {
-  return autoload_symbol_to_path(constant, AutoloadMap::KindOf::Constant);
+  auto fileRes = autoloadMap().getConstantFile(constant);
+  if (!fileRes) {
+    return Variant{Variant::NullInit{}};
+  } else {
+    return Variant{fileRes->path};
+  }
 }
 
 Variant HHVM_FUNCTION(autoload_module_to_path, const String& module) {
-  return autoload_symbol_to_path(module, AutoloadMap::KindOf::Module);
+  auto fileRes = autoloadMap().getModuleFile(module);
+  if (!fileRes) {
+    return Variant{Variant::NullInit{}};
+  } else {
+    return Variant{fileRes->path};
+  }
 }
 
 Variant HHVM_FUNCTION(autoload_type_alias_to_path, const String& typeAlias) {
-  return autoload_symbol_to_path(typeAlias, AutoloadMap::KindOf::TypeAlias);
-}
-
-namespace {
-
-AutoloadMap* autoloadMap() {
-  if (!HHVM_FN(autoload_is_native)()) {
-    SystemLib::throwInvalidOperationExceptionObject("Only available if using native autoloader");
+  auto fileRes = autoloadMap().getTypeAliasFile(typeAlias);
+  if (!fileRes) {
+    return Variant{Variant::NullInit{}};
+  } else {
+    return Variant{fileRes->path};
   }
-  return AutoloadHandler::s_instance->getAutoloadMap();
 }
-
-} // end anonymous namespace
 
 Array HHVM_FUNCTION(autoload_path_to_types, const String& path) {
-  return autoloadMap()->getFileTypes(path);
+  return autoloadMap().getFileTypes(path);
 }
 
 Array HHVM_FUNCTION(autoload_path_to_functions, const String& path) {
-  return autoloadMap()->getFileFunctions(path);
+  return autoloadMap().getFileFunctions(path);
 }
 
 Array HHVM_FUNCTION(autoload_path_to_constants, const String& path) {
-  return autoloadMap()->getFileConstants(path);
+  return autoloadMap().getFileConstants(path);
 }
 
 Array HHVM_FUNCTION(autoload_path_to_modules, const String& path) {
-  return autoloadMap()->getFileModules(path);
+  return autoloadMap().getFileModules(path);
 }
 
 Array HHVM_FUNCTION(autoload_path_to_type_aliases, const String& path) {
-  return autoloadMap()->getFileTypeAliases(path);
+  return autoloadMap().getFileTypeAliases(path);
 }
 
 bool HHVM_FUNCTION(could_include, const String& file) {

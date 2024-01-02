@@ -928,11 +928,8 @@ class parser {
     return list;
   }
 
-  // map_initializer: "{" map_initializer_contents? "}"
-  //
-  // map_initializer_contents:
-  //   (initializer ":" initializer comma_or_semicolon)*
-  //    initializer ":" initializer comma_or_semicolon?
+  // map_initializer: "{" [(map_entry ",")* map_entry [","]] "}"
+  // map_entry:       initializer ":" initializer
   std::unique_ptr<t_const_value> parse_map_initializer() {
     expect_and_consume('{');
     auto map = actions_.on_map_initializer();
@@ -941,7 +938,7 @@ class parser {
       expect_and_consume(':');
       auto value = parse_initializer();
       map->add_map(std::move(key), std::move(value));
-      if (!try_parse_comma_or_semicolon()) {
+      if (!try_consume_token(',')) {
         break;
       }
     }

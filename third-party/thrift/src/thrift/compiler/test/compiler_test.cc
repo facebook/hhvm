@@ -514,6 +514,16 @@ TEST(CompilerTest, enum_initializer) {
   )");
 }
 
+TEST(CompilerTest, map_initializer) {
+  check_compile(R"(
+    const map<i32, i32> m = {
+      1: 2,
+      3: 4; # expected-error: expected }
+      5: 6
+    };
+  )");
+}
+
 TEST(CompilerTest, struct_fields_wrong_type) {
   check_compile(R"(
     struct Annot {

@@ -28,7 +28,6 @@
 #include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/thrift/gen-cpp2/patch_types.h>
-#include <thrift/test/gen-cpp2/StructPatchTest_fatal_types.h>
 #include <thrift/test/gen-cpp2/StructPatchTest_types.h>
 #include <thrift/test/testset/Testset.h>
 #include <thrift/test/testset/gen-cpp2/testset_types_custom_protocol.h>

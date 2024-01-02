@@ -24,7 +24,6 @@
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/type/Testing.h>
 #include <thrift/lib/thrift/gen-cpp2/patch_types.h>
-#include <thrift/test/gen-cpp2/StructPatchTest_fatal_types.h>
 #include <thrift/test/gen-cpp2/StructPatchTest_types.h>
 
 namespace apache::thrift {

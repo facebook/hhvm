@@ -1472,16 +1472,8 @@ Client::Client(folly::Executor::KeepAlive<> executor,
   if (g_impl_hook &&
       m_options.m_useSubprocess != Options::UseSubprocess::Always) {
     m_impl = g_impl_hook(m_options, executor, *this);
-  }
-  // The hook can return nullptr even if registered. In each case, we
-  // have no special implementation to use.
-  if (!m_impl) {
-    // Use the subprocess implementation (which is always available),
-    // unless the Options specifies we shouldn't. If not, it's a fatal
-    // error.
-    if (m_options.m_useSubprocess == Options::UseSubprocess::Never) {
-      throw Error{"No non-subprocess impl available"};
-    }
+    if (!m_impl) throw Error{"No non-subprocess impl available"};
+  } else {
     m_impl = std::make_unique<SubprocessImpl>(m_options, *this);
   }
   FTRACE(2, "created \"{}\" impl\n", m_impl->name());

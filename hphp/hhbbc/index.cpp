@@ -16584,10 +16584,6 @@ void make_local(IndexData& index) {
 
   if (index.sample) {
     index.client->getStats().logSample("hhbbc", *index.sample);
-    index.sample->setStr(
-      "hhbbc_fellback",
-      index.client->fellback() ? "true" : "false"
-    );
   }
 
   index.disposeClient(

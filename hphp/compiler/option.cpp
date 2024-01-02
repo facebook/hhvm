@@ -66,8 +66,6 @@ bool Option::ForceEnableSymbolRefs = false;
 std::string Option::ExternWorkerUseCase;
 std::string Option::ExternWorkerFeaturesFile;
 std::string Option::ExternWorkerPath;
-bool Option::ExternWorkerForceSubprocess = false;
-bool Option::ExternWorkerAllowFallback = true;
 int Option::ExternWorkerTimeoutSecs = 0;
 bool Option::ExternWorkerUseExecCache = true;
 bool Option::ExternWorkerCleanup = true;
@@ -215,6 +213,8 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(ParserOptimisticStore, ini, config,
                "ParserOptimisticStore", ParserOptimisticStore);
 
+  // Use case id for remote extern worker implementation.
+  // If empty, use the builtin Subprocess impl.
   Config::Bind(ExternWorkerUseCase, ini, config, "ExternWorker.UseCase",
                ExternWorkerUseCase);
   Config::Bind(ExternWorkerFeaturesFile, ini, config,
@@ -222,12 +222,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   // If not set or empty, default to current_executable_path()
   Config::Bind(ExternWorkerPath, ini, config, "ExternWorker.Path",
                ExternWorkerPath);
-  // Kill switch for extern-worker. Disable all implementations except
-  // the builtin one.
-  Config::Bind(ExternWorkerForceSubprocess, ini, config,
-               "ExternWorker.ForceSubprocess", ExternWorkerForceSubprocess);
-  Config::Bind(ExternWorkerAllowFallback, ini, config,
-               "ExternWorker.AllowFallback", ExternWorkerAllowFallback);
   Config::Bind(ExternWorkerTimeoutSecs, ini, config, "ExternWorker.TimeoutSecs",
                ExternWorkerTimeoutSecs);
   Config::Bind(ExternWorkerUseExecCache, ini, config,

@@ -368,15 +368,14 @@ std::string client_stats(const extern_worker::Client::Stats& stats) {
   auto const loadCalls = stats.loadCalls.load();
 
   return folly::sformat(
-    "  Execs: {:,} ({:,}) total, {:,} cache-hits ({}), {:,} fallbacks\n"
+    "  Execs: {:,} ({:,}) total, {:,} cache-hits ({})\n"
     "  Workers: {} usage, {:,} cores ({}/core), {} max used, {} reserved\n"
-    "  Blobs: {:,} total, {:,} uploaded ({}), {:,} fallbacks\n"
+    "  Blobs: {:,} total, {:,} uploaded ({})\n"
     "  {:,} downloads ({}), {:,} throttles, (E: {} S: {} L: {}) avg latency\n",
     execCalls,
     execWorkItems,
     stats.execCacheHits.load(),
     pct(stats.execCacheHits.load(), execCalls),
-    stats.execFallbacks.load(),
     format_duration(std::chrono::microseconds{cpuUsecs}),
     allocatedCores,
     format_duration(
@@ -387,7 +386,6 @@ std::string client_stats(const extern_worker::Client::Stats& stats) {
     stats.blobs.load(),
     stats.blobsUploaded.load(),
     format_bytes(stats.blobBytesUploaded.load()),
-    stats.blobFallbacks.load(),
     stats.downloads.load(),
     format_bytes(stats.bytesDownloaded.load()),
     stats.throttles.load(),

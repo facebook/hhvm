@@ -814,11 +814,9 @@ Options makeExternWorkerOptions(const CompilerOptions& po) {
     .setUseCase(Option::ExternWorkerUseCase)
     .setFeaturesFile(Option::ExternWorkerFeaturesFile)
     .setWorkerPath(Option::ExternWorkerPath)
-    .setUseSubprocess(Option::ExternWorkerForceSubprocess
+    .setUseSubprocess(Option::ExternWorkerUseCase.empty()
                       ? Options::UseSubprocess::Always
-                      : Option::ExternWorkerAllowFallback
-                        ? Options::UseSubprocess::Fallback
-                        : Options::UseSubprocess::Never)
+                      : Options::UseSubprocess::Never)
     .setCacheExecs(Option::ExternWorkerUseExecCache)
     .setCleanup(Option::ExternWorkerCleanup)
     .setUseEdenFS(RO::EvalUseEdenFS)
@@ -877,7 +875,6 @@ void logPhaseStats(const std::string& phase, const Package& package,
   }
 
   stats.logSample(phase, sample);
-  sample.setStr(phase + "_fellback", client.fellback() ? "true" : "false");
 }
 
 namespace {
@@ -1101,7 +1098,6 @@ bool process(CompilerOptions &po) {
   sample.setInt("cas_connection_count", Option::ExternWorkerCasConnectionCount);
   sample.setInt("engine_connection_count", Option::ExternWorkerEngineConnectionCount);
   sample.setInt("ac_connection_count", Option::ExternWorkerAcConnectionCount);
-  sample.setInt("force_subprocess", Option::ExternWorkerForceSubprocess);
   sample.setInt("use_exec_cache", Option::ExternWorkerUseExecCache);
   sample.setInt("timeout_secs", Option::ExternWorkerTimeoutSecs);
   sample.setInt("cleanup", Option::ExternWorkerCleanup);

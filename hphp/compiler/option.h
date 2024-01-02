@@ -112,8 +112,6 @@ struct Option {
   static std::string ExternWorkerUseCase;
   static std::string ExternWorkerFeaturesFile;
   static std::string ExternWorkerPath;
-  static bool ExternWorkerForceSubprocess;
-  static bool ExternWorkerAllowFallback;
   static int ExternWorkerTimeoutSecs;
   static bool ExternWorkerUseExecCache;
   static bool ExternWorkerCleanup;

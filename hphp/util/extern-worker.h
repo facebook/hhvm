@@ -327,8 +327,6 @@ struct Options {
   // implementation. This uses fork+exec (and stores data on disk).
   enum class UseSubprocess {
     Always, // Always use subprocess
-    Fallback, // Attempt to use another backend, but if not available,
-              // use subprocess.
     Never // Never use subprocess. Throw error if nothing else is
           // available.
   };
@@ -452,7 +450,7 @@ struct Options {
     return *this;
   }
 
-  UseSubprocess m_useSubprocess{UseSubprocess::Fallback};
+  UseSubprocess m_useSubprocess{UseSubprocess::Always};
   std::filesystem::path m_workingDir{std::filesystem::temp_directory_path()};
   std::chrono::seconds m_timeout{std::chrono::minutes{15}};
   std::chrono::seconds m_minTTL{std::chrono::hours{3}};

@@ -315,7 +315,8 @@ struct protocol_methods;
   }                                                                          \
   template <typename Protocol>                                               \
   static std::size_t write(Protocol& protocol, const Type& in) {             \
-    if (std::is_same<type_class::Class, type_class::binary>::value ||        \
+    if constexpr (                                                           \
+        std::is_same<type_class::Class, type_class::binary>::value ||        \
         std::is_same<type_class::Class, type_class::string>::value) {        \
       return checked_container_size(protocol.write##Method(in));             \
     } else {                                                                 \

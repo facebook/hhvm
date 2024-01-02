@@ -300,28 +300,25 @@ let invalidate_upon_file_changes
   (* In the common scenario where a user has been working on a file and saves it,
      then [decls_reflect_this_file] will have the exact same pfh_hash
      as what we just read from disk and we can skip any invalidation! *)
-  let (kind, telemetry_opt) =
+  let (kind, telemetry_opt, tasts_to_invalidate) =
     match
       (changes, !(local_memory.Provider_backend.decls_reflect_this_file))
     with
-    | ([], _) -> ("no_changes", None)
+    | ([], _) -> ("no_changes", None, Relative_path.Map.empty)
     | ( [FileInfo.{ path; new_pfh_hash = Some pfh_hash; _ }],
         Some (path2, _, pfh_hash2) )
       when Relative_path.equal path path2 && Int64.equal pfh_hash pfh_hash2 ->
-      ("no_signature_changes", None)
+      let tasts_to_invalidate =
+        Relative_path.Map.filter entries ~f:(fun path2 _entry ->
+            not (Relative_path.equal path path2))
+      in
+      ("no_signature_changes", None, tasts_to_invalidate)
     | _ ->
       (* Otherwise, given the disk change, we have to restore the invariant
          that "local_memory decls if present reflect truth as of decls_reflect_this_file
          and all other files as they are on disk". Note that invalidating decls
-         will always work towards restoring that invariant! *)
+         will always work towards restoring that invariant!
 
-      (* In addition to decls, we also have derived facts in the form of TASTs.
-         We'll invalidate them all since we don't know which are affected. *)
-      Relative_path.Map.iter entries ~f:(fun _path entry ->
-          entry.Provider_context.tast <- None;
-          entry.Provider_context.all_errors <- None);
-
-      (* We also have to invalidate shallow and folded decls.
          I'm rolling out a new feature called "sticky_quarantine"
          which makes some scenarios faster, but at the cost of being
          more exposed to flaws in this [invalidate_upon_change] method.
@@ -352,14 +349,25 @@ let invalidate_upon_file_changes
             ~new_decls_to_diff:None
             symbols
         in
-        ("precise", Some telemetry)
+        ("precise", Some telemetry, entries)
       end else begin
         List.iter changes ~f:(fun { FileInfo.old_ids; _ } ->
             Option.iter old_ids ~f:(fun ids ->
                 invalidate_shallow_and_some_folded_decls local_memory ids));
-        ("imprecise", None)
+        ("imprecise", None, entries)
       end
   in
+
+  (* In addition to decls, we also have derived facts in the form of TASTs.
+     We'll invalidate them all since we don't know which are affected.
+     Only exception, calculated above, is that if [decls_reflect_this_file]
+     matches one of the entries, then its TAST is already correct and
+     needn't be invalidated. (This is the common case where you save
+     a file that you'd previously been editing). *)
+  Relative_path.Map.iter tasts_to_invalidate ~f:(fun _path entry ->
+      entry.Provider_context.tast <- None;
+      entry.Provider_context.all_errors <- None);
+
   Option.value telemetry_opt ~default:(Telemetry.create ())
   |> Telemetry.duration ~key:"invalidate_upon_file_changes_ms" ~start_time
   |> Telemetry.string_ ~key:"kind" ~value:kind

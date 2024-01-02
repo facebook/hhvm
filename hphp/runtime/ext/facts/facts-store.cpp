@@ -43,6 +43,7 @@
 #include "hphp/runtime/ext/facts/fact-extractor.h"
 #include "hphp/runtime/ext/facts/facts-store.h"
 #include "hphp/runtime/ext/facts/file-facts.h"
+#include "hphp/runtime/ext/facts/log-perf.h"
 #include "hphp/runtime/ext/facts/path-and-hash.h"
 #include "hphp/runtime/ext/facts/string-ptr.h"
 #include "hphp/runtime/ext/facts/symbol-map.h"
@@ -375,31 +376,6 @@ Array makeVecOfDynamic(DynamicIterable&& vector) {
   return ret.toArray();
 }
 
-template <typename F>
-auto logPerformance(std::string_view name, F&& func) {
-  using namespace std::chrono_literals;
-
-  auto t0 = std::chrono::steady_clock::now();
-  auto res = func();
-  auto tf = std::chrono::steady_clock::now();
-  auto elapsed =
-      std::chrono::duration<double, std::chrono::milliseconds::period>{tf - t0};
-  if (elapsed > 500ms) {
-    XLOGF(
-        DBG7,
-        "[SLOW] FactsStoreImpl::{} completed in {:.2} ms",
-        name,
-        elapsed.count());
-  } else {
-    XLOGF(
-        DBG8,
-        "FactsStoreImpl::{} completed in {:.2} ms",
-        name,
-        elapsed.count());
-  }
-  return res;
-}
-
 /**
  * The actual AutoloadMap. Stores one SymbolMap for each kind of symbol.
  */
@@ -493,37 +469,31 @@ struct FactsStoreImpl final
   }
 
   Variant getTypeName(const String& type) override {
-    return logPerformance(__func__, [&]() {
-      auto name = m_symbolMap.getTypeName(*type.get());
-      if (!name) {
-        return Variant{Variant::NullInit{}};
-      } else {
-        return Variant{name->get(), Variant::PersistentStrInit{}};
-      }
-    });
+    auto name = m_symbolMap.getTypeName(*type.get());
+    if (!name) {
+      return Variant{Variant::NullInit{}};
+    } else {
+      return Variant{name->get(), Variant::PersistentStrInit{}};
+    }
   }
 
   Variant getKind(const String& type) override {
-    return logPerformance(__func__, [&]() {
-      auto const kind = m_symbolMap.getKind(Symbol<SymKind::Type>{*type.get()});
-      auto const kindStr = typeKindToString(kind).get();
+    auto const kind = m_symbolMap.getKind(Symbol<SymKind::Type>{*type.get()});
+    auto const kindStr = typeKindToString(kind).get();
 
-      if (kindStr == nullptr || kindStr->empty()) {
-        return Variant{Variant::NullInit{}};
-      } else {
-        return Variant{kindStr, Variant::PersistentStrInit{}};
-      }
-    });
+    if (kindStr == nullptr || kindStr->empty()) {
+      return Variant{Variant::NullInit{}};
+    } else {
+      return Variant{kindStr, Variant::PersistentStrInit{}};
+    }
   }
 
   bool isTypeAbstract(const String& type) override {
-    return logPerformance(
-        __func__, [&]() { return m_symbolMap.isTypeAbstract(*type.get()); });
+    return m_symbolMap.isTypeAbstract(*type.get());
   }
 
   bool isTypeFinal(const String& type) override {
-    return logPerformance(
-        __func__, [&]() { return m_symbolMap.isTypeFinal(*type.get()); });
+    return m_symbolMap.isTypeFinal(*type.get());
   }
 
   Optional<AutoloadMap::FileResult> getTypeOrTypeAliasFile(
@@ -535,42 +505,33 @@ struct FactsStoreImpl final
   }
 
   Optional<AutoloadMap::FileResult> getTypeFile(const String& type) override {
-    return logPerformance(__func__, [&]() {
-      return getSymbolFile<SymKind::Type>(
-          type, [](SymbolMap& m, Symbol<SymKind::Type> s) {
-            return m.getTypeFile(s);
-          });
-    });
+    return getSymbolFile<SymKind::Type>(
+        type,
+        [](SymbolMap& m, Symbol<SymKind::Type> s) { return m.getTypeFile(s); });
   }
 
   Optional<AutoloadMap::FileResult> getFunctionFile(
       const String& function) override {
-    return logPerformance(__func__, [&]() {
-      return getSymbolFile<SymKind::Function>(
-          function, [](SymbolMap& m, Symbol<SymKind::Function> s) {
-            return m.getFunctionFile(s);
-          });
-    });
+    return getSymbolFile<SymKind::Function>(
+        function, [](SymbolMap& m, Symbol<SymKind::Function> s) {
+          return m.getFunctionFile(s);
+        });
   }
 
   Optional<AutoloadMap::FileResult> getConstantFile(
       const String& constant) override {
-    return logPerformance(__func__, [&]() {
-      return getSymbolFile<SymKind::Constant>(
-          constant, [](SymbolMap& m, Symbol<SymKind::Constant> s) {
-            return m.getConstantFile(s);
-          });
-    });
+    return getSymbolFile<SymKind::Constant>(
+        constant, [](SymbolMap& m, Symbol<SymKind::Constant> s) {
+          return m.getConstantFile(s);
+        });
   }
 
   Optional<AutoloadMap::FileResult> getTypeAliasFile(
       const String& typeAlias) override {
-    return logPerformance(__func__, [&]() {
-      return getSymbolFile<SymKind::Type>(
-          typeAlias, [](SymbolMap& m, Symbol<SymKind::Type> s) {
-            return m.getTypeAliasFile(s);
-          });
-    });
+    return getSymbolFile<SymKind::Type>(
+        typeAlias, [](SymbolMap& m, Symbol<SymKind::Type> s) {
+          return m.getTypeAliasFile(s);
+        });
   }
 
   Optional<AutoloadMap::FileResult> getModuleFile(
@@ -589,201 +550,151 @@ struct FactsStoreImpl final
   }
 
   Optional<fs::path> getTypeFile(std::string_view type) override {
-    return logPerformance(__func__, [&]() {
-      return getSymbolFile<SymKind::Type>(
-          type, [](SymbolMap& m, Symbol<SymKind::Type> s) {
-            return m.getTypeFile(s);
-          });
-    });
+    return getSymbolFile<SymKind::Type>(
+        type,
+        [](SymbolMap& m, Symbol<SymKind::Type> s) { return m.getTypeFile(s); });
   }
 
   Optional<fs::path> getFunctionFile(std::string_view func) override {
-    return logPerformance(__func__, [&]() {
-      return getSymbolFile<SymKind::Function>(
-          func, [](SymbolMap& m, Symbol<SymKind::Function> s) {
-            return m.getFunctionFile(s);
-          });
-    });
+    return getSymbolFile<SymKind::Function>(
+        func, [](SymbolMap& m, Symbol<SymKind::Function> s) {
+          return m.getFunctionFile(s);
+        });
   }
 
   Optional<fs::path> getConstantFile(std::string_view name) override {
-    return logPerformance(__func__, [&]() {
-      return getSymbolFile<SymKind::Constant>(
-          name, [](SymbolMap& m, Symbol<SymKind::Constant> s) {
-            return m.getConstantFile(s);
-          });
-    });
+    return getSymbolFile<SymKind::Constant>(
+        name, [](SymbolMap& m, Symbol<SymKind::Constant> s) {
+          return m.getConstantFile(s);
+        });
   }
 
   Optional<fs::path> getTypeAliasFile(std::string_view name) override {
-    return logPerformance(__func__, [&]() {
-      return getSymbolFile<SymKind::Type>(
-          name, [](SymbolMap& m, Symbol<SymKind::Type> s) {
-            return m.getTypeAliasFile(s);
-          });
-    });
+    return getSymbolFile<SymKind::Type>(
+        name, [](SymbolMap& m, Symbol<SymKind::Type> s) {
+          return m.getTypeAliasFile(s);
+        });
   }
 
-  Optional<fs::path> getModuleFile(std::string_view module) override {
+  Optional<fs::path> getModuleFile(std::string_view name) override {
     return getSymbolFile<SymKind::Module>(
-        module, [](SymbolMap& m, Symbol<SymKind::Module> s) {
+        name, [](SymbolMap& m, Symbol<SymKind::Module> s) {
           return m.getModuleFile(s);
         });
   }
 
   Array getFileTypes(const String& path) override {
-    return logPerformance(__func__, [&]() {
-      return getFileSymbols<SymKind::Type>(
-          path, [](SymbolMap& m, Path s) { return m.getFileTypes(s); });
-    });
+    return getFileSymbols<SymKind::Type>(
+        path, [](SymbolMap& m, Path s) { return m.getFileTypes(s); });
   }
 
   Array getFileFunctions(const String& path) override {
-    return logPerformance(__func__, [&]() {
-      return getFileSymbols<SymKind::Function>(
-          path, [](SymbolMap& m, Path s) { return m.getFileFunctions(s); });
-    });
+    return getFileSymbols<SymKind::Function>(
+        path, [](SymbolMap& m, Path s) { return m.getFileFunctions(s); });
   }
 
   Array getFileConstants(const String& path) override {
-    return logPerformance(__func__, [&]() {
-      return getFileSymbols<SymKind::Constant>(
-          path, [](SymbolMap& m, Path s) { return m.getFileConstants(s); });
-    });
+    return getFileSymbols<SymKind::Constant>(
+        path, [](SymbolMap& m, Path s) { return m.getFileConstants(s); });
   }
 
   Array getFileTypeAliases(const String& path) override {
-    return logPerformance(__func__, [&]() {
-      return getFileSymbols<SymKind::Type>(
-          path, [](SymbolMap& m, Path s) { return m.getFileTypeAliases(s); });
-    });
+    return getFileSymbols<SymKind::Type>(
+        path, [](SymbolMap& m, Path s) { return m.getFileTypeAliases(s); });
   }
 
   Array getFileModules(const String& path) override {
-    return logPerformance(__func__, [&]() {
-      return getFileSymbols<SymKind::Module>(
-          path, [](SymbolMap& m, Path s) { return m.getFileModules(s); });
-    });
+    return getFileSymbols<SymKind::Module>(
+        path, [](SymbolMap& m, Path s) { return m.getFileModules(s); });
   }
 
   Array getBaseTypes(const String& derivedType, const Variant& filters)
       override {
-    return logPerformance(__func__, [&]() {
-      return filterBaseTypes(
-          derivedType,
-          InheritanceFilterData::createFromShape(
-              filters.isArray() ? filters.getArrayData() : nullptr));
-    });
+    return filterBaseTypes(
+        derivedType,
+        InheritanceFilterData::createFromShape(
+            filters.isArray() ? filters.getArrayData() : nullptr));
   }
 
   Array getDerivedTypes(const String& baseType, const Variant& filters)
       override {
-    return logPerformance(__func__, [&]() {
-      return filterDerivedTypes(
-          baseType,
-          InheritanceFilterData::createFromShape(
-              filters.isArray() ? filters.getArrayData() : nullptr));
-    });
+    return filterDerivedTypes(
+        baseType,
+        InheritanceFilterData::createFromShape(
+            filters.isArray() ? filters.getArrayData() : nullptr));
   }
 
   Array getTypesWithAttribute(const String& attr) override {
-    return logPerformance(__func__, [&]() {
-      return makeVecOfString(m_symbolMap.getTypesWithAttribute(*attr.get()));
-    });
+    return makeVecOfString(m_symbolMap.getTypesWithAttribute(*attr.get()));
   }
 
   Array getTypeAliasesWithAttribute(const String& attr) override {
-    return logPerformance(__func__, [&]() {
-      return makeVecOfString(
-          m_symbolMap.getTypeAliasesWithAttribute(*attr.get()));
-    });
+    return makeVecOfString(
+        m_symbolMap.getTypeAliasesWithAttribute(*attr.get()));
   }
 
   Array getMethodsWithAttribute(const String& attr) override {
-    return logPerformance(__func__, [&]() {
-      if (UNLIKELY(!m_symbolMap.isAttrIndexed(*attr.get()))) {
-        HPHP::SystemLib::throwRuntimeExceptionObject(fmt::format(
-            "Queried attribute {} not found in IndexedMethodAttributes={}",
-            attr.get()->data(),
-            m_symbolMap.debugIndexedAttrs()));
-      }
-      return makeVecOfStringString(
-          m_symbolMap.getMethodsWithAttribute(*attr.get()));
-    });
+    if (UNLIKELY(!m_symbolMap.isAttrIndexed(*attr.get()))) {
+      HPHP::SystemLib::throwRuntimeExceptionObject(fmt::format(
+          "Queried attribute {} not found in IndexedMethodAttributes={}",
+          attr.get()->data(),
+          m_symbolMap.debugIndexedAttrs()));
+    }
+    return makeVecOfStringString(
+        m_symbolMap.getMethodsWithAttribute(*attr.get()));
   }
 
   Array getFilesWithAttribute(const String& attr) override {
-    return logPerformance(__func__, [&]() {
-      return makeVecOfString(m_symbolMap.getFilesWithAttribute(*attr.get()));
-    });
+    return makeVecOfString(m_symbolMap.getFilesWithAttribute(*attr.get()));
   }
 
   Array getFilesWithAttributeAndAnyValue(
       const String& attr,
       const folly::dynamic& value) override {
-    return logPerformance(__func__, [&]() {
-      return makeVecOfString(
-          m_symbolMap.getFilesWithAttributeAndAnyValue(*attr.get(), value));
-    });
+    return makeVecOfString(
+        m_symbolMap.getFilesWithAttributeAndAnyValue(*attr.get(), value));
   }
 
   Array getTypeAttributes(const String& type) override {
-    return logPerformance(__func__, [&]() {
-      return makeVecOfString(m_symbolMap.getAttributesOfType(*type.get()));
-    });
+    return makeVecOfString(m_symbolMap.getAttributesOfType(*type.get()));
   }
 
   Array getTypeAliasAttributes(const String& typeAlias) override {
-    return logPerformance(__func__, [&]() {
-      return makeVecOfString(
-          m_symbolMap.getAttributesOfTypeAlias(*typeAlias.get()));
-    });
+    return makeVecOfString(
+        m_symbolMap.getAttributesOfTypeAlias(*typeAlias.get()));
   }
 
   Array getMethodAttributes(const String& type, const String& method) override {
-    return logPerformance(__func__, [&]() {
-      return makeVecOfString(
-          m_symbolMap.getAttributesOfMethod(*type.get(), *method.get()));
-    });
+    return makeVecOfString(
+        m_symbolMap.getAttributesOfMethod(*type.get(), *method.get()));
   }
 
   Array getFileAttributes(const String& file) override {
-    return logPerformance(__func__, [&]() {
-      return makeVecOfString(
-          m_symbolMap.getAttributesOfFile(Path{*file.get()}));
-    });
+    return makeVecOfString(m_symbolMap.getAttributesOfFile(Path{*file.get()}));
   }
 
   Array getTypeAttrArgs(const String& type, const String& attribute) override {
-    return logPerformance(__func__, [&]() {
-      return makeVecOfDynamic(
-          m_symbolMap.getTypeAttributeArgs(*type.get(), *attribute.get()));
-    });
+    return makeVecOfDynamic(
+        m_symbolMap.getTypeAttributeArgs(*type.get(), *attribute.get()));
   }
 
   Array getTypeAliasAttrArgs(const String& typeAlias, const String& attribute)
       override {
-    return logPerformance(__func__, [&]() {
-      return makeVecOfDynamic(m_symbolMap.getTypeAliasAttributeArgs(
-          *typeAlias.get(), *attribute.get()));
-    });
+    return makeVecOfDynamic(m_symbolMap.getTypeAliasAttributeArgs(
+        *typeAlias.get(), *attribute.get()));
   }
 
   Array getMethodAttrArgs(
       const String& type,
       const String& method,
       const String& attribute) override {
-    return logPerformance(__func__, [&]() {
-      return makeVecOfDynamic(m_symbolMap.getMethodAttributeArgs(
-          *type.get(), *method.get(), *attribute.get()));
-    });
+    return makeVecOfDynamic(m_symbolMap.getMethodAttributeArgs(
+        *type.get(), *method.get(), *attribute.get()));
   }
 
   Array getFileAttrArgs(const String& file, const String& attribute) override {
-    return logPerformance(__func__, [&]() {
-      return makeVecOfDynamic(m_symbolMap.getFileAttributeArgs(
-          Path{*file.get()}, *attribute.get()));
-    });
+    return makeVecOfDynamic(
+        m_symbolMap.getFileAttributeArgs(Path{*file.get()}, *attribute.get()));
   }
 
   /**
@@ -1269,16 +1180,16 @@ std::shared_ptr<FactsStore> make_watcher_facts(
   for (auto& v : indexedMethodAttrsVec) {
     indexedMethodAttrs.insert(Symbol<SymKind::Type>{std::move(v)});
   }
-  auto map = std::make_shared<FactsStoreImpl>(
+  auto inner = std::make_shared<FactsStoreImpl>(
       std::move(root),
       std::move(dbOpener),
       std::move(watcher),
       std::move(suppressionFilePath),
       std::move(indexedMethodAttrs));
   if (shouldSubscribe) {
-    map->subscribe();
+    inner->subscribe();
   }
-  return map;
+  return FactsLogger::wrap(std::move(inner));
 }
 
 std::shared_ptr<FactsStore> make_trusted_facts(
@@ -1290,8 +1201,9 @@ std::shared_ptr<FactsStore> make_trusted_facts(
   for (auto& v : indexedMethodAttrsVec) {
     indexedMethodAttrs.insert(Symbol<SymKind::Type>{std::move(v)});
   }
-  return std::make_shared<FactsStoreImpl>(
+  auto inner = std::make_unique<FactsStoreImpl>(
       std::move(root), std::move(dbOpener), std::move(indexedMethodAttrs));
+  return FactsLogger::wrap(std::move(inner));
 }
 
 } // namespace Facts

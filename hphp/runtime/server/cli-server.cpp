@@ -1248,7 +1248,7 @@ bool CLIWrapper::chown(const String& path, const String& user) {
   try {
     UserInfo info(user.data());
     id = info.pw->pw_uid;
-  } catch (const Exception& ex) {
+  } catch (const Exception& ) {
     return false;
   }
   return cli_send_wire(m_cli_fd, "chown", path, id, (int64_t)-1) != -1;
@@ -1261,7 +1261,7 @@ bool CLIWrapper::chgrp(const String& path, const String& group) {
   try {
     GroupInfo info(group.data());
     id = info.gr->gr_gid;
-  } catch (const Exception& ex) {
+  } catch (const Exception& ) {
     return false;
   }
   return cli_send_wire(m_cli_fd, "chown", path, (int64_t)-1, id) != -1;

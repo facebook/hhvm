@@ -886,7 +886,7 @@ const ArrayData* staticallyResolveTypeStructure(
     auto newTS = TypeStructure::resolvePartial(
       ArrNR(ts), nullptr, declaringCls, persistent, partial, invalidType);
     if (persistent) return ArrayData::GetScalarArray(std::move(newTS));
-  } catch (Exception& e) {}
+  } catch (Exception& ) {}
   // We are here because either we threw in the resolution or it wasn't
   // persistent resolution which means we didn't really resolve it
   partial = true;

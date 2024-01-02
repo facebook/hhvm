@@ -876,7 +876,7 @@ bool HttpServer::startServer(bool pageServer) {
           m_adminServer->start();
         }
         return true;
-      } catch (FailedToListenException& e) {
+      } catch (FailedToListenException& ) {
         if (i == 0) {
           Logger::Info("shutting down old HPHP server by pid file");
         }
@@ -896,7 +896,7 @@ bool HttpServer::startServer(bool pageServer) {
           m_adminServer->start();
         }
         return true;
-      } catch (FailedToListenException& e) {
+      } catch (FailedToListenException& ) {
         if (pageServer && !RuntimeOption::ServerFileSocket.empty()) {
           if (i == 0) {
             Logger::Info("unlinking socket at %s",

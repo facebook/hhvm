@@ -91,7 +91,7 @@ func (p *{{service:go_name}}Processor) FunctionServiceMap() map[string]string {
 
 {{#program:gen_metadata?}}
 func (p *{{service:go_name}}Processor) GetThriftMetadata() *{{program:metadata_qualifier}}ThriftMetadata {
-    return GetThriftMetadata()
+    return GetThriftMetadataForService("{{service:scoped_name}}")
 }
 {{/program:gen_metadata?}}
 

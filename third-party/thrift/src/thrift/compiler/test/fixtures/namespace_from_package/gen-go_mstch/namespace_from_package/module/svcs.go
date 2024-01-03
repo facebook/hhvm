@@ -526,7 +526,7 @@ func (p *TestServiceProcessor) FunctionServiceMap() map[string]string {
 }
 
 func (p *TestServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
-    return GetThriftMetadata()
+    return GetThriftMetadataForService("module.TestService")
 }
 
 

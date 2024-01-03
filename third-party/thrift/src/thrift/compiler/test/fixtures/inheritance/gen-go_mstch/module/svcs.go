@@ -378,7 +378,7 @@ func (p *MyRootProcessor) FunctionServiceMap() map[string]string {
 }
 
 func (p *MyRootProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
-    return GetThriftMetadata()
+    return GetThriftMetadataForService("module.MyRoot")
 }
 
 
@@ -771,7 +771,7 @@ func NewMyNodeProcessor(handler MyNode) *MyNodeProcessor {
 }
 
 func (p *MyNodeProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
-    return GetThriftMetadata()
+    return GetThriftMetadataForService("module.MyNode")
 }
 
 
@@ -1164,7 +1164,7 @@ func NewMyLeafProcessor(handler MyLeaf) *MyLeafProcessor {
 }
 
 func (p *MyLeafProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
-    return GetThriftMetadata()
+    return GetThriftMetadataForService("module.MyLeaf")
 }
 
 

@@ -1001,7 +1001,7 @@ func (p *CProcessor) FunctionServiceMap() map[string]string {
 }
 
 func (p *CProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
-    return GetThriftMetadata()
+    return GetThriftMetadataForService("module.C")
 }
 
 

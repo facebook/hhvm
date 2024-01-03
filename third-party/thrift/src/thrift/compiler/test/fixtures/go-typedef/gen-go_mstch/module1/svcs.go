@@ -1264,7 +1264,7 @@ func (p *FinderProcessor) FunctionServiceMap() map[string]string {
 }
 
 func (p *FinderProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
-    return GetThriftMetadata()
+    return GetThriftMetadataForService("module1.Finder")
 }
 
 

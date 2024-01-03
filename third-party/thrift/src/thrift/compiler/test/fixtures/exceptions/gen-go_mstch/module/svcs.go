@@ -1725,7 +1725,7 @@ func (p *RaiserProcessor) FunctionServiceMap() map[string]string {
 }
 
 func (p *RaiserProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
-    return GetThriftMetadata()
+    return GetThriftMetadataForService("module.Raiser")
 }
 
 

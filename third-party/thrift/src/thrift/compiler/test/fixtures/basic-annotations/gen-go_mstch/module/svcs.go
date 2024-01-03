@@ -2387,7 +2387,7 @@ func (p *MyServiceProcessor) FunctionServiceMap() map[string]string {
 }
 
 func (p *MyServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
-    return GetThriftMetadata()
+    return GetThriftMetadataForService("module.MyService")
 }
 
 
@@ -3326,7 +3326,7 @@ func (p *MyServicePrioParentProcessor) FunctionServiceMap() map[string]string {
 }
 
 func (p *MyServicePrioParentProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
-    return GetThriftMetadata()
+    return GetThriftMetadataForService("module.MyServicePrioParent")
 }
 
 
@@ -3769,7 +3769,7 @@ func NewMyServicePrioChildProcessor(handler MyServicePrioChild) *MyServicePrioCh
 }
 
 func (p *MyServicePrioChildProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
-    return GetThriftMetadata()
+    return GetThriftMetadataForService("module.MyServicePrioChild")
 }
 
 
@@ -4260,7 +4260,7 @@ func (p *BadServiceProcessor) FunctionServiceMap() map[string]string {
 }
 
 func (p *BadServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
-    return GetThriftMetadata()
+    return GetThriftMetadataForService("module.BadService")
 }
 
 
@@ -5097,7 +5097,7 @@ func (p *FooBarBazServiceProcessor) FunctionServiceMap() map[string]string {
 }
 
 func (p *FooBarBazServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
-    return GetThriftMetadata()
+    return GetThriftMetadataForService("module.FooBarBazService")
 }
 
 

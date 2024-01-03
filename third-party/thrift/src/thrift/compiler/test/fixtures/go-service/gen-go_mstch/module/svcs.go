@@ -5159,7 +5159,7 @@ func (p *GetEntityProcessor) FunctionServiceMap() map[string]string {
 }
 
 func (p *GetEntityProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
-    return GetThriftMetadata()
+    return GetThriftMetadataForService("module.GetEntity")
 }
 
 

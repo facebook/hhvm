@@ -125,3 +125,26 @@ func GetServicesMetadata() map[string]*metadata.ThriftService {
 
     return allServicesMap
 }
+
+// GetThriftMetadataForService returns Thrift metadata for the given service.
+func GetThriftMetadataForService(scopedServiceName string) *metadata.ThriftMetadata {
+    thriftMetadata := GetThriftMetadata()
+
+    allServicesMap := thriftMetadata.GetServices()
+    relevantServicesMap := make(map[string]*metadata.ThriftService)
+
+    serviceMetadata := allServicesMap[scopedServiceName]
+    // Visit and record all recursive parents of the target service.
+    for serviceMetadata != nil {
+        relevantServicesMap[serviceMetadata.GetName()] = serviceMetadata
+        if serviceMetadata.IsSetParent() {
+            serviceMetadata = allServicesMap[serviceMetadata.GetParent()]
+        } else {
+            serviceMetadata = nil
+        }
+    }
+
+    thriftMetadata.SetServices(relevantServicesMap)
+
+    return thriftMetadata
+}

@@ -378,7 +378,7 @@ func (p *FooServiceProcessor) FunctionServiceMap() map[string]string {
 }
 
 func (p *FooServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
-    return GetThriftMetadata()
+    return GetThriftMetadataForService("module.FooService")
 }
 
 
@@ -941,7 +941,7 @@ func (p *FB303ServiceProcessor) FunctionServiceMap() map[string]string {
 }
 
 func (p *FB303ServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
-    return GetThriftMetadata()
+    return GetThriftMetadataForService("module.FB303Service")
 }
 
 
@@ -4150,7 +4150,7 @@ func (p *MyServiceProcessor) FunctionServiceMap() map[string]string {
 }
 
 func (p *MyServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
-    return GetThriftMetadata()
+    return GetThriftMetadataForService("module.MyService")
 }
 
 
@@ -5520,7 +5520,7 @@ func (p *DbMixedStackArgumentsProcessor) FunctionServiceMap() map[string]string 
 }
 
 func (p *DbMixedStackArgumentsProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
-    return GetThriftMetadata()
+    return GetThriftMetadataForService("module.DbMixedStackArguments")
 }
 
 

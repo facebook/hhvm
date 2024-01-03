@@ -975,7 +975,7 @@ func (p *SomeServiceProcessor) FunctionServiceMap() map[string]string {
 }
 
 func (p *SomeServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
-    return GetThriftMetadata()
+    return GetThriftMetadataForService("module.SomeService")
 }
 
 

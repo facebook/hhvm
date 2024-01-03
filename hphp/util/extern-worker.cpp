@@ -1500,8 +1500,8 @@ coro::Task<Ref<std::string>> Client::storeFile(fs::path path,
     >(requestId.elapsed()).count();
   };
 
-  auto ids = co_await tryWithImpl<IdVec>([&] (Impl& i) {
-    return i.store(
+  auto ids = co_await tryWithThrottling<IdVec>([&] {
+    return m_impl->store(
       requestId,
       PathVec{path},
       {},
@@ -1540,8 +1540,8 @@ Client::storeFile(std::vector<fs::path> paths,
   };
 
   auto const DEBUG_ONLY size = paths.size();
-  auto ids = co_await tryWithImpl<IdVec>([&] (Impl& i) {
-    return i.store(requestId, paths, {}, optimistic);
+  auto ids = co_await tryWithThrottling<IdVec>([&] {
+    return m_impl->store(requestId, paths, {}, optimistic);
   });
   assertx(ids.size() == size);
 

@@ -705,9 +705,6 @@ private:
   template <typename T, typename F>
   folly::coro::Task<T> tryWithThrottling(const F&);
 
-  template <typename T, typename F>
-  folly::coro::Task<T> tryWithImpl(const F&);
-
   template <typename T> static T unblobify(std::string&&);
   template <typename T> static std::string blobify(const T&);
 

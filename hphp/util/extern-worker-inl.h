@@ -368,14 +368,6 @@ folly::coro::Task<T> Client::tryWithThrottling(const F& f) {
     );
 }
 
-// Run the given callable F with the normal implementation.
-template <typename T, typename F>
-folly::coro::Task<T> Client::tryWithImpl(const F& f) {
-  co_return co_await tryWithThrottling<T>(
-    [&] { return f(*m_impl); }
-  );
-}
-
 template <typename T>
 folly::coro::Task<T> Client::load(Ref<T> r) {
   RequestId requestId{"load blob"};
@@ -576,10 +568,10 @@ folly::coro::Task<Ref<T>> Client::storeImpl(bool optimistic, T t) {
     >(requestId.elapsed()).count();
   };
 
-  auto ids = co_await tryWithImpl<IdVec>([&] (Impl& i) {
+  auto ids = co_await tryWithThrottling<IdVec>([&] {
     auto blob = blobify(t);
     FTRACE(2, "{} blob is {} bytes\n", requestId.tracePrefix(), blob.size());
-    return i.store(
+    return m_impl->store(
       requestId,
       {},
       BlobVec{std::move(blob)},
@@ -611,7 +603,7 @@ Client::storeImpl(bool optimistic,
     >(requestId.elapsed()).count();
   };
 
-  auto ids = co_await tryWithImpl<IdVec>([&] (Impl& i) {
+  auto ids = co_await tryWithThrottling<IdVec>([&] {
     BlobVec blobs{{ blobify(t), blobify(ts)... }};
     ONTRACE(4, [&] {
       for (auto const& b : blobs) {
@@ -619,7 +611,7 @@ Client::storeImpl(bool optimistic,
                requestId.tracePrefix(), b.size());
       }
     }());
-    return i.store(
+    return m_impl->store(
       requestId,
       {},
       std::move(blobs),
@@ -683,7 +675,7 @@ folly::coro::Task<std::vector<Ref<T>>> Client::storeMulti(std::vector<T> ts,
     >(requestId.elapsed()).count();
   };
 
-  auto ids = co_await tryWithImpl<IdVec>([&] (Impl& i) {
+  auto ids = co_await tryWithThrottling<IdVec>([&] {
     auto blobs = from(ts)
       | mapped([&] (const T& t) {
           auto blob = blobify(t);
@@ -693,7 +685,7 @@ folly::coro::Task<std::vector<Ref<T>>> Client::storeMulti(std::vector<T> ts,
         })
       | as<std::vector>();
     assertx(blobs.size() == ts.size());
-    return i.store(
+    return m_impl->store(
       requestId,
       {},
       std::move(blobs),
@@ -736,7 +728,7 @@ Client::storeMultiTuple(std::vector<std::tuple<T, Ts...>> ts,
     >(requestId.elapsed()).count();
   };
 
-  auto ids = co_await tryWithImpl<IdVec>([&] (Impl& i) {
+  auto ids = co_await tryWithThrottling<IdVec>([&] {
     // Map each tuple to a vector of RefIds, then concat all of the
     // vectors together to get one flat list.
     auto to_store = from(ts)
@@ -757,7 +749,7 @@ Client::storeMultiTuple(std::vector<std::tuple<T, Ts...>> ts,
       | concat
       | as<std::vector>();
     assertx(to_store.size() == ts.size() * tupleSize);
-    return i.store(
+    return m_impl->store(
       requestId,
       {},
       std::move(to_store),
@@ -894,8 +886,8 @@ Client::exec(const Job<C>& job,
   // OutputTypes).
   auto outputs = co_await folly::coro::co_invoke(
     [&] () -> folly::coro::Task<std::vector<RefValVec>> {
-      co_return co_await tryWithImpl<std::vector<RefValVec>>(
-          [&] (Impl& i) -> folly::coro::Task<std::vector<RefValVec>> {
+      co_return co_await tryWithThrottling<std::vector<RefValVec>>(
+          [&]() -> folly::coro::Task<std::vector<RefValVec>> {
             // Note we calculate the RefVals here within the
             // lambda. This lets us move them into the exec call
             // (so we don't need to copy in the common case where
@@ -904,7 +896,7 @@ Client::exec(const Job<C>& job,
             auto inputsRefVals = from(inputs)
               | mapped(toRefVals)
               | as<std::vector>();
-            co_return co_await i.exec(
+            co_return co_await m_impl->exec(
               requestId,
               job.name(),
               std::move(configRefVals),

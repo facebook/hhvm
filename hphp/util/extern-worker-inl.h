@@ -957,139 +957,6 @@ Client::exec(const Job<C>& job,
     >(requestId.elapsed()).count();
   };
 
-  // Return true if a Ref (or some container of them allowed as
-  // inputs) came from the fallback implementation. If so, we'll force
-  // everything to come from the fallback implementation (loading and
-  // storing as required), and exec on the fallback
-  // implementation. One fallback Ref "poisons" everything.
-  auto const isFallback = [] (auto const& r) {
-    using Type = std::remove_cv_t<std::remove_reference_t<decltype(r)>>;
-    if constexpr (IsVector<Type>::value) {
-      for (auto const& e : r) {
-        if (e.m_fromFallback) return true;
-      }
-      return false;
-    } else if constexpr (IsOptional<Type>::value) {
-      if (!r.has_value()) return false;
-      return r->m_fromFallback;
-    } else {
-      static_assert(IsRef<Type>::value);
-      return r.m_fromFallback;
-    }
-  };
-  auto const tupleIsFallback = [&] (auto const& tuple) {
-    auto f = false;
-    for_each(tuple, [&] (auto const& r) { f |= isFallback(r); });
-    return f;
-  };
-  auto const vecIsFallback = [&] (auto const& v) {
-    return std::any_of(v.begin(), v.end(), tupleIsFallback);
-  };
-
-  // Make all of the inputs come from the fallback
-  // implementation. This is a lambda because we might have to do it
-  // two different places.
-  auto const makeAllFallback = [&] () -> folly::coro::Task<void> {
-    // Vector of all RefIds which come from the non-fallback
-    // implementation.
-    IdVec ids;
-
-    // For every input, if the Ref doesn't come from the fallback
-    // implementation, add it to "ids".
-    auto const addNonFallback = [&] (auto const& r) {
-      using Type = std::remove_cv_t<std::remove_reference_t<decltype(r)>>;
-      if constexpr (IsVector<Type>::value) {
-        for (auto const& e : r) {
-          if (e.m_fromFallback) continue;
-          ids.emplace_back(e.m_id);
-        }
-      } else if constexpr (IsOptional<Type>::value) {
-        if (r.has_value() && !r->m_fromFallback) {
-          ids.emplace_back(r->m_id);
-        }
-      } else {
-        static_assert(IsRef<Type>::value);
-        if (!r.m_fromFallback) ids.emplace_back(r.m_id);
-      }
-    };
-    for_each(config, addNonFallback);
-    for (auto const& t : inputs) for_each(t, addNonFallback);
-
-    // If there's nothing there, everything is already from the
-    // fallback implementation, so we're done.
-    if (ids.empty()) co_return;
-
-    // Otherwise load just those from the non-fallback implementation
-    // (if this fails, there's nothing we can do).
-    auto const DEBUG_ONLY size = ids.size();
-    auto blobs = co_await
-      tryWithThrottling<BlobVec>(
-        [&] { return m_impl->load(requestId, ids); }
-      );
-    assertx(blobs.size() == size);
-
-    // Then store them with the fallback implementation.
-    auto stores = co_await
-      m_fallbackImpl.rawGet()->store(
-        requestId,
-        {},
-        std::move(blobs),
-        false
-      );
-    assertx(stores.size() == size);
-
-    // Iterate over all the inputs again. If the input came from the
-    // non-fallback implementation, then overwrite (in place) it's
-    // RefId with the new RefId we got from storing it in the fallback
-    // implementation.
-    size_t idx = 0;
-    auto const setToFallback = [&] (auto& r) {
-      using Type = std::remove_cv_t<std::remove_reference_t<decltype(r)>>;
-      if constexpr (IsVector<Type>::value) {
-        for (auto& e : r) {
-          if (e.m_fromFallback) continue;
-          assertx(idx < stores.size());
-          e.m_fromFallback = true;
-          e.m_id = std::move(stores[idx++]);
-        }
-      } else if constexpr (IsOptional<Type>::value) {
-        if (r.has_value() && !r->m_fromFallback) {
-          assertx(idx < stores.size());
-          r->m_fromFallback = true;
-          r->m_id = std::move(stores[idx++]);
-        }
-      } else {
-        static_assert(IsRef<Type>::value);
-        if (!r.m_fromFallback) {
-          assertx(idx < stores.size());
-          r.m_fromFallback = true;
-          r.m_id = std::move(stores[idx++]);
-        }
-      }
-    };
-    for_each(config, setToFallback);
-    for (auto& t : inputs) for_each(t, setToFallback);
-    assertx(idx == stores.size());
-
-    // At this point, all Refs should be from the fallback
-    // implementation.
-    co_return;
-  };
-
-  // Do we need to execute on the fallback implementation? If the
-  // fallback implementation isn't created, then obviously not (common
-  // case). Otherwise, if the main implementation is disabled, we're
-  // forced to. If any input RefId is from the fallback
-  // implementation, we're also forced to.
-  auto useFallback = false;
-  if (m_fallbackImpl.present() &&
-      (tupleIsFallback(config) || vecIsFallback(inputs))) {
-    // If we're executing on the fallback implementation, all inputs
-    // need to be from there.
-    co_await makeAllFallback();
-    useFallback = true;
-  }
-
   // RefVals are wrappers around a RefId. They provide the RefId,
   // along with the knowledge of whether that RefId corresponds to a
   // Variadic, Opt, or a normal type (the implementation does not know
@@ -1178,45 +1045,27 @@ Client::exec(const Job<C>& job,
   // OutputTypes).
   auto outputs = co_await folly::coro::co_invoke(
     [&] () -> folly::coro::Task<std::vector<RefValVec>> {
-      if (useFallback) {
-        ++m_stats->execFallbacks;
-        auto configRefVals = toRefVals(config);
-        auto inputsRefVals = from(inputs)
-          | mapped(toRefVals)
-          | as<std::vector>();
-        co_return co_await
-          m_fallbackImpl.rawGet()->exec(
-            requestId,
-            job.name(),
-            std::move(configRefVals),
-            std::move(inputsRefVals),
-            outputTypes,
-            finiTypes.get_pointer(),
-            metadata
-          );
-      } else {
-        // Not using the fallback executor.
-        co_return co_await tryWithImpl<std::vector<RefValVec>>(
-            [&] (Impl& i) -> folly::coro::Task<std::vector<RefValVec>> {
-              // Note we calculate the RefVals here within the
-              // lambda. This lets us move them into the exec call
-              // (so we don't need to copy in the common case where
-              // nothing fails).
-              auto configRefVals = toRefVals(config);
-              auto inputsRefVals = from(inputs)
-                | mapped(toRefVals)
-                | as<std::vector>();
-              co_return co_await i.exec(
-                requestId,
-                job.name(),
-                std::move(configRefVals),
-                std::move(inputsRefVals),
-                outputTypes,
-                finiTypes.get_pointer(),
-                metadata
-              );
-            });
-      }
+      // Not using the fallback executor.
+      co_return co_await tryWithImpl<std::vector<RefValVec>>(
+          [&] (Impl& i) -> folly::coro::Task<std::vector<RefValVec>> {
+            // Note we calculate the RefVals here within the
+            // lambda. This lets us move them into the exec call
+            // (so we don't need to copy in the common case where
+            // nothing fails).
+            auto configRefVals = toRefVals(config);
+            auto inputsRefVals = from(inputs)
+              | mapped(toRefVals)
+              | as<std::vector>();
+            co_return co_await i.exec(
+              requestId,
+              job.name(),
+              std::move(configRefVals),
+              std::move(inputsRefVals),
+              outputTypes,
+              finiTypes.get_pointer(),
+              metadata
+            );
+          });
     }
   );
 
@@ -1231,7 +1080,7 @@ Client::exec(const Job<C>& job,
       return from(*r)
         | move
         | mapped([&] (RefId&& id) {
-            return typename T::value_type{std::move(id), useFallback};
+            return typename T::value_type{std::move(id), false};
           })
         | as<std::vector>();
     } else if constexpr (IsOptional<T>::value) {
@@ -1242,12 +1091,12 @@ Client::exec(const Job<C>& job,
       >;
       static_assert(IsRef<Elem>::value);
       if (!r->has_value()) return std::nullopt;
-      return Elem{std::move(**r), useFallback};
+      return Elem{std::move(**r), false};
     } else {
       static_assert(IsRef<T>::value);
       auto r = boost::get<RefId>(&v);
       assertx(r);
-      return T{std::move(*r), useFallback};
+      return T{std::move(*r), false};
     }
   };
 

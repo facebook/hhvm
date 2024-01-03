@@ -1625,7 +1625,7 @@ std::string Client::Stats::toString(const std::string& phase,
 
   return folly::sformat(
     "  {}:{}\n"
-    "  Execs: {:,} ({:,}) total, {:,} cache-hits ({}), {:,} optimistically, {:,} fallback\n"
+    "  Execs: {:,} ({:,}) total, {:,} cache-hits ({}), {:,} optimistically\n"
     "  Files: {:,} total, {:,} read, {:,} queried, {:,} uploaded ({})\n"
     "  Blobs: {:,} total, {:,} queried, {:,} uploaded ({})\n"
     "  Cpu: {} usage, {:,} allocated cores ({}/core)\n"
@@ -1639,7 +1639,6 @@ std::string Client::Stats::toString(const std::string& phase,
     execCacheHits.load(),
     pct(execCacheHits.load(), execCalls_),
     optimisticExecs.load(),
-    execFallbacks.load(),
     files.load(),
     filesRead.load(),
     filesQueried.load(),
@@ -1669,7 +1668,6 @@ void Client::Stats::logSample(const std::string& phase,
   sample.setInt(phase + "_total_exec_work_items", execWorkItems.load());
   sample.setInt(phase + "_cache_hits", execCacheHits.load());
   sample.setInt(phase + "_optimistically", optimisticExecs.load());
-  sample.setInt(phase + "_fallbacks", execFallbacks.load());
 
   sample.setInt(phase + "_total_files", files.load());
   sample.setInt(phase + "_file_reads", filesRead.load());

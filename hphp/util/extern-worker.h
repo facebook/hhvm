@@ -645,8 +645,6 @@ struct Client {
       X(execWorkItems)                                                  \
       /* Execs which hit the result cache */                            \
       X(execCacheHits)                                                  \
-      /* Execs which fellback */                                        \
-      X(execFallbacks)                                                  \
       X(execCpuUsec)                                                    \
       X(execAllocatedCores)                                             \
       X(execMaxUsedMem)                                                 \

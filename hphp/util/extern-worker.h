@@ -244,16 +244,12 @@ struct RefId {
 template <typename T>
 struct Ref {
   const RefId& id() const { return m_id; }
-  // Whether this ref came from a "fallback" operation (see below with
-  // Client). This is exposed mainly for testing. Users shouldn't
-  // care.
-  bool fromFallback() const { return m_fromFallback; }
 
   // Cast the T this ref contains to a U. Any type can be casted to
   // any other type, so use with care. This breaks any type-safety the
   // ref provides.
   template <typename U> Ref<U> cast() const {
-    return Ref<U>{m_id, m_fromFallback};
+    return Ref<U>{m_id};
   }
 
   bool operator==(const Ref<T>& x) const { return m_id == x.m_id; }
@@ -261,9 +257,8 @@ struct Ref {
   bool operator<(const Ref<T>& x) const { return m_id < x.m_id; }
 
 private:
-  Ref(RefId, bool);
+  explicit Ref(RefId);
   RefId m_id;
-  bool m_fromFallback;
   friend struct Client;
   template <typename U> friend struct Ref;
 };

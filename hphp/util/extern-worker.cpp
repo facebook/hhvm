@@ -1502,7 +1502,6 @@ coro::Task<Ref<std::string>> Client::storeFile(fs::path path,
     >(requestId.elapsed()).count();
   };
 
-  auto wasFallback = false;
   auto ids = co_await tryWithImpl<IdVec>([&] (Impl& i) {
     return i.store(
       requestId,
@@ -1513,7 +1512,7 @@ coro::Task<Ref<std::string>> Client::storeFile(fs::path path,
   });
   assertx(ids.size() == 1);
 
-  Ref<std::string> ref{std::move(ids[0]), wasFallback};
+  Ref<std::string> ref{std::move(ids[0])};
   co_return ref;
 }
 
@@ -1543,7 +1542,6 @@ Client::storeFile(std::vector<fs::path> paths,
   };
 
   auto const DEBUG_ONLY size = paths.size();
-  auto wasFallback = false;
   auto ids = co_await tryWithImpl<IdVec>([&] (Impl& i) {
     return i.store(requestId, paths, {}, optimistic);
   });
@@ -1552,7 +1550,7 @@ Client::storeFile(std::vector<fs::path> paths,
   auto out = from(ids)
     | move
     | mapped([&] (auto&& id) {
-        return Ref<std::string>{std::move(id), wasFallback};
+        return Ref<std::string>{std::move(id)};
       })
     | as<std::vector>();
   co_return out;

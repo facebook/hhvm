@@ -292,9 +292,8 @@ inline std::string RefId::toString() const {
 //////////////////////////////////////////////////////////////////////
 
 template <typename T>
-inline Ref<T>::Ref(RefId id, bool fromFallback)
+inline Ref<T>::Ref(RefId id)
   : m_id{std::move(id)}
-  , m_fromFallback{fromFallback}
 {
   static_assert(!detail::IsMarker<T>::value,
                 "Special markers cannot be used in a Ref");
@@ -394,7 +393,7 @@ folly::coro::Task<T> Client::load(Ref<T> r) {
 
   // Get the appropriate implementation (it could have been created by
   // a fallback implementation), and forward the request to it.
-  auto& impl = r.m_fromFallback ? *m_fallbackImpl.rawGet() : *m_impl;
+  auto& impl = *m_impl;
   auto result = co_await tryWithThrottling<BlobVec>(
     [&] { return impl.load(requestId, IdVec{r.m_id}); }
   );
@@ -434,15 +433,10 @@ folly::coro::Task<std::tuple<T, Ts...>> Client::load(Ref<T> r, Ref<Ts>... rs) {
   for_each(
     std::make_tuple(std::move(r), std::move(rs)...),
     [&] (auto&& r, size_t idx) {
-      if (r.m_fromFallback) {
-        indexMappings.emplace(idx, std::make_pair(true, fallback.size()));
-        fallback.emplace_back(std::move(r.m_id));
-      } else {
-        if (idx != main.size()) {
-          indexMappings.emplace(idx, std::make_pair(false, main.size()));
-        }
-        main.emplace_back(std::move(r.m_id));
+      if (idx != main.size()) {
+        indexMappings.emplace(idx, std::make_pair(false, main.size()));
       }
+      main.emplace_back(std::move(r.m_id));
     }
   );
 
@@ -531,11 +525,7 @@ folly::coro::Task<std::vector<T>> Client::load(std::vector<Ref<T>> rs) {
   IdVec main;
   IdVec fallback;
   for (auto& r : rs) {
-    if (r.m_fromFallback) {
-      fallback.emplace_back(std::move(r.m_id));
-    } else {
-      main.emplace_back(std::move(r.m_id));
-    }
+    main.emplace_back(std::move(r.m_id));
   }
 
   auto const DEBUG_ONLY mainSize = main.size();
@@ -565,16 +555,10 @@ folly::coro::Task<std::vector<T>> Client::load(std::vector<Ref<T>> rs) {
   // same order their Refs were passed to this function. We can
   // reconstruct the order using the input Ref vector.
   size_t mainIdx = 0;
-  size_t fallbackIdx = 0;
-  for (auto const& r : rs) {
+  for (size_t i = 0; i < rs.size(); ++i) {
     auto& blob = [&] () -> std::string& {
-      if (r.m_fromFallback) {
-        assertx(fallbackIdx < fallbackBlobs.size());
-        return fallbackBlobs[fallbackIdx++];
-      } else {
-        assertx(mainIdx < mainBlobs.size());
-        return mainBlobs[mainIdx++];
-      }
+      assertx(mainIdx < mainBlobs.size());
+      return mainBlobs[mainIdx++];
     }();
     FTRACE(4, "{} blob #{} is {} bytes\n",
            requestId.tracePrefix(), out.size(), blob.size());
@@ -583,7 +567,6 @@ folly::coro::Task<std::vector<T>> Client::load(std::vector<Ref<T>> rs) {
   }
   assertx(out.size() == rs.size());
   assertx(mainIdx == mainBlobs.size());
-  assertx(fallbackIdx == fallbackBlobs.size());
 
   m_stats->downloads += rs.size();
   co_return out;
@@ -622,15 +605,10 @@ Client::load(std::vector<std::tuple<Ref<T>, Ref<Ts>...>> rs) {
       std::move(rs[i]),
       [&] (auto&& r, size_t tupleIdx) {
         auto const idx = i * tupleSize + tupleIdx;
-        if (r.m_fromFallback) {
-          indexMappings.emplace(idx, std::make_pair(true, fallback.size()));
-          fallback.emplace_back(std::move(r.m_id));
-        } else {
-          if (idx != main.size()) {
-            indexMappings.emplace(idx, std::make_pair(false, main.size()));
-          }
-          main.emplace_back(std::move(r.m_id));
+        if (idx != main.size()) {
+          indexMappings.emplace(idx, std::make_pair(false, main.size()));
         }
+        main.emplace_back(std::move(r.m_id));
       }
     );
   }
@@ -719,7 +697,6 @@ folly::coro::Task<Ref<T>> Client::storeImpl(bool optimistic, T t) {
     >(requestId.elapsed()).count();
   };
 
-  auto wasFallback = false;
   auto ids = co_await tryWithImpl<IdVec>([&] (Impl& i) {
     auto blob = blobify(t);
     FTRACE(2, "{} blob is {} bytes\n", requestId.tracePrefix(), blob.size());
@@ -732,7 +709,7 @@ folly::coro::Task<Ref<T>> Client::storeImpl(bool optimistic, T t) {
   });
   assertx(ids.size() == 1);
 
-  Ref<T> ref{std::move(ids[0]), wasFallback};
+  Ref<T> ref{std::move(ids[0])};
   co_return ref;
 }
 
@@ -755,7 +732,6 @@ Client::storeImpl(bool optimistic,
     >(requestId.elapsed()).count();
   };
 
-  auto wasFallback = false;
   auto ids = co_await tryWithImpl<IdVec>([&] (Impl& i) {
     BlobVec blobs{{ blobify(t), blobify(ts)... }};
     ONTRACE(4, [&] {
@@ -777,9 +753,7 @@ Client::storeImpl(bool optimistic,
   auto ret = typesToValues<OutTuple>(
     [&] (size_t idx, auto tag) {
       assertx(idx < ids.size());
-      return Ref<typename decltype(tag)::Type>{
-        std::move(ids[idx]), wasFallback
-      };
+      return Ref<typename decltype(tag)::Type>{std::move(ids[idx])};
     }
   );
   co_return ret;
@@ -830,7 +804,6 @@ folly::coro::Task<std::vector<Ref<T>>> Client::storeMulti(std::vector<T> ts,
     >(requestId.elapsed()).count();
   };
 
-  auto wasFallback = false;
   auto ids = co_await tryWithImpl<IdVec>([&] (Impl& i) {
     auto blobs = from(ts)
       | mapped([&] (const T& t) {
@@ -852,7 +825,7 @@ folly::coro::Task<std::vector<Ref<T>>> Client::storeMulti(std::vector<T> ts,
 
   auto out = from(ids)
     | move
-    | mapped([&] (RefId&& id) { return Ref<T>{std::move(id), wasFallback}; })
+    | mapped([&] (RefId&& id) { return Ref<T>{std::move(id)}; })
     | as<std::vector>();
   co_return out;
 }
@@ -884,7 +857,6 @@ Client::storeMultiTuple(std::vector<std::tuple<T, Ts...>> ts,
     >(requestId.elapsed()).count();
   };
 
-  auto wasFallback = false;
   auto ids = co_await tryWithImpl<IdVec>([&] (Impl& i) {
     // Map each tuple to a vector of RefIds, then concat all of the
     // vectors together to get one flat list.
@@ -926,9 +898,7 @@ Client::storeMultiTuple(std::vector<std::tuple<T, Ts...>> ts,
         return typesToValues<OutTuple>(
           [&] (size_t idx, auto tag) {
             assertx(idx < ids.size());
-            return Ref<typename decltype(tag)::Type>{
-              std::move(ids[idx]), wasFallback
-            };
+            return Ref<typename decltype(tag)::Type>{std::move(ids[idx])};
           }
         );
       })
@@ -1080,7 +1050,7 @@ Client::exec(const Job<C>& job,
       return from(*r)
         | move
         | mapped([&] (RefId&& id) {
-            return typename T::value_type{std::move(id), false};
+            return typename T::value_type{std::move(id)};
           })
         | as<std::vector>();
     } else if constexpr (IsOptional<T>::value) {
@@ -1091,12 +1061,12 @@ Client::exec(const Job<C>& job,
       >;
       static_assert(IsRef<Elem>::value);
       if (!r->has_value()) return std::nullopt;
-      return Elem{std::move(**r), false};
+      return Elem{std::move(**r)};
     } else {
       static_assert(IsRef<T>::value);
       auto r = boost::get<RefId>(&v);
       assertx(r);
-      return T{std::move(*r), false};
+      return T{std::move(*r)};
     }
   };
 

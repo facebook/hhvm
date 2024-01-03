@@ -27,7 +27,7 @@ namespace HPHP {
 namespace Facts {
 
 struct SQLiteAutoloadDB : AutoloadDB {
-  static std::shared_ptr<SQLiteAutoloadDB> get(const SQLiteKey& dbData);
+  static std::shared_ptr<SQLiteAutoloadDB> get(const SQLiteKey&);
 };
 
 } // namespace Facts

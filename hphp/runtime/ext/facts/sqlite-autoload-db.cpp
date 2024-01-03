@@ -655,13 +655,13 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
 
   ~SQLiteAutoloadDBImpl() override = default;
 
-  static std::shared_ptr<SQLiteAutoloadDB> get(const SQLiteKey& dbData) {
-    assertx(dbData.m_path.is_absolute());
+  static std::shared_ptr<SQLiteAutoloadDB> get(const SQLiteKey& key) {
+    assertx(key.m_path.is_absolute());
     auto db = [&]() {
       try {
-        return SQLite::connect(dbData.m_path.native(), dbData.m_mode);
+        return SQLite::connect(key.m_path.native(), key.m_mode);
       } catch (SQLiteExc& e) {
-        auto mode = (dbData.m_mode == SQLite::OpenMode::ReadWriteCreate)
+        auto mode = (key.m_mode == SQLite::OpenMode::ReadWriteCreate)
             ? "open or create"
             : "open";
 
@@ -672,14 +672,14 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
 #endif
             "Key: {} Reason: {}\n",
             mode,
-            dbData.toDebugString(),
+            key.toDebugString(),
             e.what());
         XLOG(ERR, exception_str);
         throw std::runtime_error{exception_str};
       }
     }();
 
-    switch (dbData.m_mode) {
+    switch (key.m_mode) {
       case SQLite::OpenMode::ReadOnly:
       case SQLite::OpenMode::ReadWrite:
         break;
@@ -687,17 +687,17 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
         // If we can create the DB, create it with the correct owner and
         // permissions.
         std::vector<fs::path> paths_to_create = {
-            dbData.m_path,
-            fs::path{dbData.m_path} += "-shm",
-            fs::path{dbData.m_path} += "-wal",
+            key.m_path,
+            fs::path{key.m_path} += "-shm",
+            fs::path{key.m_path} += "-wal",
         };
         for (const auto& path : paths_to_create) {
-          if (!createFileWithPerms(path, dbData.m_gid, dbData.m_perms)) {
+          if (!createFileWithPerms(path, key.m_gid, key.m_perms)) {
             XLOGF(
                 ERR,
                 "Failed createFileWithPerms for {}:  Debug data: {}",
                 path.native(),
-                dbData.toDebugString());
+                key.toDebugString());
           }
         }
         break;
@@ -720,7 +720,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
 
     db.setSynchronousLevel(SQLite::SynchronousLevel::OFF);
     {
-      XLOGF(INFO, "Trying to open SQLite DB at {}", dbData.m_path.native());
+      XLOGF(INFO, "Trying to open SQLite DB at {}", key.m_path.native());
       auto txn = db.begin();
       createSchema(txn);
       if (!db.isReadOnly()) {
@@ -728,7 +728,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
       }
       db.setBusyTimeout(60'000);
       txn.commit();
-      XLOGF(INFO, "Connected to SQLite DB at {}", dbData.m_path.native());
+      XLOGF(INFO, "Connected to SQLite DB at {}", key.m_path.native());
     }
 
     return std::make_shared<SQLiteAutoloadDBImpl>(std::move(db));

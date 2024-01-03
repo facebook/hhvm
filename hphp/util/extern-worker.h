@@ -638,9 +638,6 @@ struct Client {
       /* Number of bytes for files or blobs actually uploaded. */       \
       X(fileBytesUploaded)                                              \
       X(blobBytesUploaded)                                              \
-      /* Number of times we fell back when uploading a file or blob. */ \
-      X(fileFallbacks)                                                  \
-      X(blobFallbacks)                                                  \
       /* Number of blobs/bytes downloaded (because of a load call). */  \
       X(downloads)                                                      \
       X(bytesDownloaded)                                                \
@@ -723,7 +720,7 @@ private:
   folly::coro::Task<T> tryWithThrottling(const F&);
 
   template <typename T, typename F>
-  folly::coro::Task<T> tryWithFallback(const F&, bool&, bool noFallback = false);
+  folly::coro::Task<T> tryWithImpl(const F&);
 
   template <typename T> static T unblobify(std::string&&);
   template <typename T> static std::string blobify(const T&);

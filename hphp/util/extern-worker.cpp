@@ -1503,18 +1503,14 @@ coro::Task<Ref<std::string>> Client::storeFile(fs::path path,
   };
 
   auto wasFallback = false;
-  auto ids = co_await tryWithFallback<IdVec>(
-    [&] (Impl& i, bool isFallback) {
-      if (isFallback) ++m_stats->fileFallbacks;
-      return i.store(
-        requestId,
-        PathVec{path},
-        {},
-        optimistic
-      );
-    },
-    wasFallback
-  );
+  auto ids = co_await tryWithImpl<IdVec>([&] (Impl& i) {
+    return i.store(
+      requestId,
+      PathVec{path},
+      {},
+      optimistic
+    );
+  });
   assertx(ids.size() == 1);
 
   Ref<std::string> ref{std::move(ids[0]), wasFallback};
@@ -1548,13 +1544,9 @@ Client::storeFile(std::vector<fs::path> paths,
 
   auto const DEBUG_ONLY size = paths.size();
   auto wasFallback = false;
-  auto ids = co_await tryWithFallback<IdVec>(
-    [&] (Impl& i, bool isFallback) {
-      if (isFallback) m_stats->fileFallbacks += paths.size();
-      return i.store(requestId, paths, {}, optimistic);
-    },
-    wasFallback
-  );
+  auto ids = co_await tryWithImpl<IdVec>([&] (Impl& i) {
+    return i.store(requestId, paths, {}, optimistic);
+  });
   assertx(ids.size() == size);
 
   auto out = from(ids)
@@ -1634,8 +1626,8 @@ std::string Client::Stats::toString(const std::string& phase,
   return folly::sformat(
     "  {}:{}\n"
     "  Execs: {:,} ({:,}) total, {:,} cache-hits ({}), {:,} optimistically, {:,} fallback\n"
-    "  Files: {:,} total, {:,} read, {:,} queried, {:,} uploaded ({}), {:,} fallback\n"
-    "  Blobs: {:,} total, {:,} queried, {:,} uploaded ({}), {:,} fallback\n"
+    "  Files: {:,} total, {:,} read, {:,} queried, {:,} uploaded ({})\n"
+    "  Blobs: {:,} total, {:,} queried, {:,} uploaded ({})\n"
     "  Cpu: {} usage, {:,} allocated cores ({}/core)\n"
     "  Mem: {} max used, {} reserved\n"
     "  {:,} downloads ({}), {:,} throttles\n"
@@ -1653,12 +1645,10 @@ std::string Client::Stats::toString(const std::string& phase,
     filesQueried.load(),
     filesUploaded.load(),
     bytes(fileBytesUploaded.load()),
-    fileFallbacks.load(),
     blobs.load(),
     blobsQueried.load(),
     blobsUploaded.load(),
     bytes(blobBytesUploaded.load()),
-    blobFallbacks.load(),
     usecs(cpuUsecs),
     allocatedCores,
     usecs(allocatedCores ? (cpuUsecs / allocatedCores) : 0),
@@ -1686,13 +1676,11 @@ void Client::Stats::logSample(const std::string& phase,
   sample.setInt(phase + "_file_queries", filesQueried.load());
   sample.setInt(phase + "_file_stores", filesUploaded.load());
   sample.setInt(phase + "_file_stores_bytes", fileBytesUploaded.load());
-  sample.setInt(phase + "_file_fallbacks", fileFallbacks.load());
 
   sample.setInt(phase + "_total_blobs", blobs.load());
   sample.setInt(phase + "_blob_queries", blobsQueried.load());
   sample.setInt(phase + "_blob_stores", blobsUploaded.load());
   sample.setInt(phase + "_blob_stores_bytes", blobBytesUploaded.load());
-  sample.setInt(phase + "_blob_fallbacks", blobFallbacks.load());
 
   sample.setInt(phase + "_total_loads", downloads.load());
   sample.setInt(phase + "_total_loads_bytes", bytesDownloaded.load());

@@ -375,12 +375,9 @@ folly::coro::Task<T> Client::tryWithThrottling(const F& f) {
 
 // Run the given callable F with the normal implementation.
 template <typename T, typename F>
-folly::coro::Task<T> Client::tryWithFallback(const F& f,
-                                             bool& didFallback,
-                                             bool optimistic) {
-  didFallback = false;
+folly::coro::Task<T> Client::tryWithImpl(const F& f) {
   co_return co_await tryWithThrottling<T>(
-    [&] { return f(*m_impl, false); }
+    [&] { return f(*m_impl); }
   );
 }
 
@@ -723,20 +720,16 @@ folly::coro::Task<Ref<T>> Client::storeImpl(bool optimistic, T t) {
   };
 
   auto wasFallback = false;
-  auto ids = co_await tryWithFallback<IdVec>(
-    [&] (Impl& i, bool isFallback) {
-      if (isFallback) ++m_stats->blobFallbacks;
-      auto blob = blobify(t);
-      FTRACE(2, "{} blob is {} bytes\n", requestId.tracePrefix(), blob.size());
-      return i.store(
-        requestId,
-        {},
-        BlobVec{std::move(blob)},
-        optimistic
-      );
-    },
-    wasFallback
-  );
+  auto ids = co_await tryWithImpl<IdVec>([&] (Impl& i) {
+    auto blob = blobify(t);
+    FTRACE(2, "{} blob is {} bytes\n", requestId.tracePrefix(), blob.size());
+    return i.store(
+      requestId,
+      {},
+      BlobVec{std::move(blob)},
+      optimistic
+    );
+  });
   assertx(ids.size() == 1);
 
   Ref<T> ref{std::move(ids[0]), wasFallback};
@@ -763,25 +756,21 @@ Client::storeImpl(bool optimistic,
   };
 
   auto wasFallback = false;
-  auto ids = co_await tryWithFallback<IdVec>(
-    [&] (Impl& i, bool isFallback) {
-      if (isFallback) m_stats->blobFallbacks += (sizeof...(Ts) + 1);
-      BlobVec blobs{{ blobify(t), blobify(ts)... }};
-      ONTRACE(4, [&] {
-        for (auto const& b : blobs) {
-          FTRACE(4, "{} storing {} byte blob\n",
-                 requestId.tracePrefix(), b.size());
-        }
-      }());
-      return i.store(
-        requestId,
-        {},
-        std::move(blobs),
-        optimistic
-      );
-    },
-    wasFallback
-  );
+  auto ids = co_await tryWithImpl<IdVec>([&] (Impl& i) {
+    BlobVec blobs{{ blobify(t), blobify(ts)... }};
+    ONTRACE(4, [&] {
+      for (auto const& b : blobs) {
+        FTRACE(4, "{} storing {} byte blob\n",
+               requestId.tracePrefix(), b.size());
+      }
+    }());
+    return i.store(
+      requestId,
+      {},
+      std::move(blobs),
+      optimistic
+    );
+  });
   assertx(ids.size() == sizeof...(Ts) + 1);
 
   using OutTuple = std::tuple<T, Ts...>;
@@ -842,27 +831,23 @@ folly::coro::Task<std::vector<Ref<T>>> Client::storeMulti(std::vector<T> ts,
   };
 
   auto wasFallback = false;
-  auto ids = co_await tryWithFallback<IdVec>(
-    [&] (Impl& i, bool isFallback) {
-      if (isFallback) m_stats->blobFallbacks += ts.size();
-      auto blobs = from(ts)
-        | mapped([&] (const T& t) {
-            auto blob = blobify(t);
-            FTRACE(4, "{} storing {} byte blob\n",
-                   requestId.tracePrefix(), blob.size());
-            return blob;
-          })
-        | as<std::vector>();
-      assertx(blobs.size() == ts.size());
-      return i.store(
-        requestId,
-        {},
-        std::move(blobs),
-        optimistic
-      );
-    },
-    wasFallback
-  );
+  auto ids = co_await tryWithImpl<IdVec>([&] (Impl& i) {
+    auto blobs = from(ts)
+      | mapped([&] (const T& t) {
+          auto blob = blobify(t);
+          FTRACE(4, "{} storing {} byte blob\n",
+                 requestId.tracePrefix(), blob.size());
+          return blob;
+        })
+      | as<std::vector>();
+    assertx(blobs.size() == ts.size());
+    return i.store(
+      requestId,
+      {},
+      std::move(blobs),
+      optimistic
+    );
+  });
   assertx(ids.size() == ts.size());
 
   auto out = from(ids)
@@ -900,38 +885,34 @@ Client::storeMultiTuple(std::vector<std::tuple<T, Ts...>> ts,
   };
 
   auto wasFallback = false;
-  auto ids = co_await tryWithFallback<IdVec>(
-    [&] (Impl& i, bool isFallback) {
-      if (isFallback) m_stats->blobFallbacks += (ts.size() * tupleSize);
-      // Map each tuple to a vector of RefIds, then concat all of the
-      // vectors together to get one flat list.
-      auto blobs = from(ts)
-        | mapped([&] (auto const& tuple) {
-            BlobVec blobs;
-            blobs.reserve(tupleSize);
-            for_each(
-              tuple,
-              [&] (auto const& t) {
-                auto blob = blobify(t);
-                FTRACE(4, "{} storing {} byte blob\n",
-                       requestId.tracePrefix(), blob.size());
-                blobs.emplace_back(std::move(blob));
-              }
-            );
-            return fromCopy(std::move(blobs));
-          })
-        | concat
-        | as<std::vector>();
-      assertx(blobs.size() == ts.size() * tupleSize);
-      return i.store(
-        requestId,
-        {},
-        std::move(blobs),
-        optimistic
-      );
-    },
-    wasFallback
-  );
+  auto ids = co_await tryWithImpl<IdVec>([&] (Impl& i) {
+    // Map each tuple to a vector of RefIds, then concat all of the
+    // vectors together to get one flat list.
+    auto to_store = from(ts)
+      | mapped([&] (auto const& tuple) {
+          BlobVec blobs;
+          blobs.reserve(tupleSize);
+          for_each(
+            tuple,
+            [&] (auto const& t) {
+              auto blob = blobify(t);
+              FTRACE(4, "{} storing {} byte blob\n",
+                     requestId.tracePrefix(), blob.size());
+              blobs.emplace_back(std::move(blob));
+            }
+          );
+          return fromCopy(std::move(blobs));
+        })
+      | concat
+      | as<std::vector>();
+    assertx(to_store.size() == ts.size() * tupleSize);
+    return i.store(
+      requestId,
+      {},
+      std::move(to_store),
+      optimistic
+    );
+  });
   assertx(ids.size() == ts.size() * tupleSize);
 
   // Do the opposite to the output. Batch the output into the
@@ -1214,19 +1195,9 @@ Client::exec(const Job<C>& job,
             metadata
           );
       } else {
-        // Not using the fallback executor. Use tryWithFallback since
-        // the execution can fail.
-        co_return co_await
-          tryWithFallback<std::vector<RefValVec>>(
-            [&] (Impl& i, bool fallback)
-            -> folly::coro::Task<std::vector<RefValVec>> {
-              // If we've failed and we're now trying the fallback,
-              // we need to make all of the inputs be from the
-              // fallback executor.
-              if (fallback) {
-                ++m_stats->execFallbacks;
-                co_await makeAllFallback();
-              }
+        // Not using the fallback executor.
+        co_return co_await tryWithImpl<std::vector<RefValVec>>(
+            [&] (Impl& i) -> folly::coro::Task<std::vector<RefValVec>> {
               // Note we calculate the RefVals here within the
               // lambda. This lets us move them into the exec call
               // (so we don't need to copy in the common case where
@@ -1244,14 +1215,7 @@ Client::exec(const Job<C>& job,
                 finiTypes.get_pointer(),
                 metadata
               );
-            },
-            useFallback,
-            // Disable fallback if we're using optimistic
-            // stores. It's expected we'll get an exception thrown
-            // if everything isn't uploaded and we don't want to
-            // fallback in that case.
-            metadata.optimistic
-          );
+            });
       }
     }
   );

@@ -33,26 +33,10 @@ std::ostream& operator<<(std::ostream& os, const SmallPrefix& self) {
 }
 
 LowerBoundPrefixMapCommon::LowerBoundPrefixMapCommon(
-    const std::vector<std::string_view>& sortedUniquePrefixes) {
-  smallPrefixes_.reserve(sortedUniquePrefixes.size() + 1);
-  markers_.reserve(sortedUniquePrefixes.size() + 1);
-  previousPrefix_.reserve(sortedUniquePrefixes.size());
-
-  // total size
-  {
-    std::size_t size = 0;
-    for (const auto& p : sortedUniquePrefixes) {
-      size += p.size();
-    }
-    if (size >= std::numeric_limits<std::uint32_t>::max()) {
-      throw std::runtime_error(
-          "too many chars for LowerBoundPrefixMap: " + std::to_string(size));
-    }
-    chars_.resize(size);
-  }
-
-  char* cur = chars_.data();
-  markers_.push_back(0);
+    folly::string_tape sortedUniquePrefixes)
+    : fullPrefixes_(std::move(sortedUniquePrefixes)) {
+  smallPrefixes_.reserve(fullPrefixes_.size() + 1);
+  previousPrefix_.reserve(fullPrefixes_.size());
 
   // Adding an empty string with no matches.
   // This acts as a sentinel so we are always guranteed to find an
@@ -62,56 +46,45 @@ LowerBoundPrefixMapCommon::LowerBoundPrefixMapCommon(
   //       empty.
   smallPrefixes_.emplace(SmallPrefix(), IndexPair{0, 0});
 
-  for (const auto& prefix : sortedUniquePrefixes) {
+  for (std::size_t i = 0; i != fullPrefixes_.size(); ++i) {
+    const auto& prefix = fullPrefixes_[i];
+
     // Prefixes always come before lexicographically, so if there is one
     // we will find it.
     previousPrefix_.push_back(findPrefix(prefix));
 
-    // Add small prefix
-    {
-      std::uint32_t curPos = static_cast<std::uint32_t>(markers_.size() - 1);
+    // Add small prefix ---
+    // if it is there already - update existing, otherwise insert [i, i+1]
+    //
+    // NOTE: this single element emplace in a sorted_vector is reasonably fast,
+    //       because it's in the end. Unfortunately, we can't use hint for api
+    //       reasons.
+    auto [it, inserted] =
+        smallPrefixes_.insert({SmallPrefix{prefix}, IndexPair{i, i + 1}});
 
-      // NOTE: this single element emplace is reasonably fast,
-      //       because it's in the end. Unfortunately, if we were
-      //       to use a hint, we'd loose 'inserted' bool, which
-      //       makes the code clumsier. If it becomes necessary this
-      //       code can be written with vectors for better performance.
-      auto [it, inserted] = smallPrefixes_.insert(
-          {SmallPrefix{prefix}, IndexPair{curPos, curPos + 1}});
-
-      if (!inserted) {
-        // Prefixes match with the last one, so we need to
-        // update the range.
-        ++(it->second.second);
-      }
+    if (!inserted) {
+      ++(it->second.second);
     }
-
-    cur = std::copy(prefix.begin(), prefix.end(), cur);
-    markers_.push_back(static_cast<std::uint32_t>(cur - chars_.data()));
   }
-  chars_.resize(cur - chars_.data());
 }
 
 std::uint32_t LowerBoundPrefixMapCommon::findPrefix(
     std::string_view query) const noexcept {
   // Due to a sentinel - guaranteed to not be .begin()
-  auto lb = smallPrefixes_.upper_bound(SmallPrefix{query});
-  auto [roughFrom, roughTo] = std::prev(lb)->second;
+  auto afterPrefix = smallPrefixes_.upper_bound(SmallPrefix{query});
+  auto [roughFrom, roughTo] = std::prev(afterPrefix)->second;
 
   // Binary search complete strings between rough boundaries.
   // NOTE: which array we search - doesn't matter -
   //       we just want indexes.
   auto cur = std::upper_bound(
-                 markers_.begin() + roughFrom,
-                 markers_.begin() + roughTo,
-                 query,
-                 [&](std::string_view q, const auto& m) {
-                   auto i = static_cast<std::uint32_t>(&m - markers_.data());
-                   return q < str(i);
-                 }) -
-      markers_.begin();
+                 fullPrefixes_.begin() + roughFrom,
+                 fullPrefixes_.begin() + roughTo,
+                 query) -
+      fullPrefixes_.begin();
 
-  while (cur != 0 && !std_string_view_starts_with(query, str(cur - 1))) {
+  while (cur != 0 &&
+         !std_string_view_starts_with(query, fullPrefixes_[cur - 1])) {
     cur = previousPrefix_[cur - 1];
   }
 

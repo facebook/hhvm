@@ -10,6 +10,7 @@
 #include <folly/CPortability.h>
 #include <folly/Range.h>
 #include <folly/container/Iterator.h>
+#include <folly/container/tape.h>
 #include <folly/lang/Bits.h>
 #include <folly/sorted_vector_types.h>
 
@@ -102,8 +103,7 @@ class SmallPrefix {
 //
 struct LowerBoundPrefixMapCommon {
   LowerBoundPrefixMapCommon() = default;
-  explicit LowerBoundPrefixMapCommon(
-      const std::vector<std::string_view>& sortedUniquePrefixes);
+  explicit LowerBoundPrefixMapCommon(folly::string_tape sortedUniquePrefixes);
 
   // returns 1 based indexes, 0 if not found.
   std::uint32_t findPrefix(std::string_view query) const noexcept;
@@ -116,14 +116,7 @@ struct LowerBoundPrefixMapCommon {
   // NOTE: in theory folly::heap_vector_map should be better here
   //       but benchmarks do not support that idea.
   folly::sorted_vector_map<SmallPrefix, IndexPair> smallPrefixes_;
-
-  // All strings are stored contiguously in this buffer of chars, separated at
-  // markers_.
-  // markers_[0] == 0, markers_.back() == chars.size().
-  // This is sometimes known as a "tape"
-  // This is faster in the benchmarks and more cache local.
-  std::vector<char> chars_;
-  std::vector<std::uint32_t> markers_;
+  folly::string_tape fullPrefixes_; // sorted and unique
 
   // Each string might have a prefix also in the array.
   // a b ba baa bab
@@ -132,11 +125,6 @@ struct LowerBoundPrefixMapCommon {
   //     ^________|
   // This is the index of that prefix, base 1 (0 means absence).
   std::vector<std::uint32_t> previousPrefix_;
-
-  std::string_view str(std::uint32_t i) const {
-    const char* f = chars_.data() + markers_[i];
-    return std::string_view{f, markers_[i + 1] - markers_[i]};
-  }
 };
 
 template <typename Storage>
@@ -148,7 +136,7 @@ class LowerBoundPrefixMapReference {
       : storage_(storage), idx_(idx) {}
 
   [[nodiscard]] std::string_view key() const {
-    return storage_->searchLogic_.str(idx_);
+    return storage_->searchLogic_.fullPrefixes_[idx_];
   }
 
   [[nodiscard]] auto& value() const {
@@ -330,7 +318,7 @@ LowerBoundPrefixMap<T>::LowerBoundPrefixMap(
 
   folly::Range sortedUnique{rend.base(), prefix2value.end()};
 
-  std::vector<std::string_view> sortedPrefixes;
+  folly::string_tape sortedPrefixes;
   sortedPrefixes.reserve(sortedUnique.size());
   storage_.values_.reserve(sortedUnique.size());
 
@@ -339,7 +327,8 @@ LowerBoundPrefixMap<T>::LowerBoundPrefixMap(
     storage_.values_.emplace_back(std::move(value));
   }
 
-  storage_.searchLogic_ = detail::LowerBoundPrefixMapCommon(sortedPrefixes);
+  storage_.searchLogic_ =
+      detail::LowerBoundPrefixMapCommon(std::move(sortedPrefixes));
 }
 
 } // namespace facebook::memcache

@@ -501,11 +501,6 @@ struct Client {
   // storing.
   bool supportsOptimistic() const;
 
-  // If we've fallen back (for at least one action) to the built-in
-  // subprocess implementation (this is false if the implementation
-  // was subprocess to begin with).
-  bool fellback() const;
-
   // Loading. These take various different permutations of Refs, load
   // them, deserialize the blobs into the appropriate types, and
   // return the data in a matching format. Using the variations which
@@ -699,10 +694,8 @@ struct Client {
 
 private:
   std::unique_ptr<Impl> m_impl;
-  LockFreeLazy<std::unique_ptr<Impl>> m_fallbackImpl;
   Options m_options;
   Stats::Ptr m_stats;
-  folly::fibers::Semaphore m_fallbackSem;
 
   template <typename T> folly::coro::Task<Ref<T>> storeImpl(bool, T);
 

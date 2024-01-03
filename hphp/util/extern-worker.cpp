@@ -1461,7 +1461,6 @@ Client::Client(folly::Executor::KeepAlive<> executor,
                const Options& options)
   : m_options{options}
   , m_stats{std::make_shared<Stats>()}
-  , m_fallbackSem{1}
 {
   Timer _{"create impl"};
   // Look up which implementation to use. If a hook has been
@@ -1480,7 +1479,6 @@ Client::Client(folly::Executor::KeepAlive<> executor,
 Client::~Client() {
   Timer _{[&] { return folly::sformat("destroy impl {}", m_impl->name()); }};
   m_impl.reset();
-  m_fallbackImpl.reset();
 }
 
 coro::Task<Ref<std::string>> Client::storeFile(fs::path path,

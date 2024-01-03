@@ -355,10 +355,6 @@ inline bool Client::supportsOptimistic() const {
   return m_impl->supportsOptimistic();
 }
 
-inline bool Client::fellback() const {
-  return m_fallbackImpl.present();
-}
-
 // Run the given callable, retrying if Throttle is thrown, until the
 // configured retry limit is reached.
 template <typename T, typename F>
@@ -391,8 +387,7 @@ folly::coro::Task<T> Client::load(Ref<T> r) {
     >(requestId.elapsed()).count();
   };
 
-  // Get the appropriate implementation (it could have been created by
-  // a fallback implementation), and forward the request to it.
+  // Get the implementation, and forward the request to it.
   auto& impl = *m_impl;
   auto result = co_await tryWithThrottling<BlobVec>(
     [&] { return impl.load(requestId, IdVec{r.m_id}); }
@@ -410,8 +405,8 @@ folly::coro::Task<std::tuple<T, Ts...>> Client::load(Ref<T> r, Ref<Ts>... rs) {
   using namespace detail;
 
   RequestId requestId{"load blobs"};
-  FTRACE(2, "{} {} blobs requested\n",
-         requestId.tracePrefix(), sizeof...(Ts) + 1);
+  auto const numBlobs = sizeof...(Ts) + 1;
+  FTRACE(2, "{} {} blobs requested\n", requestId.tracePrefix(), numBlobs);
   ++m_stats->loadCalls;
   SCOPE_EXIT {
     m_stats->loadLatencyUsec += std::chrono::duration_cast<
@@ -419,89 +414,36 @@ folly::coro::Task<std::tuple<T, Ts...>> Client::load(Ref<T> r, Ref<Ts>... rs) {
     >(requestId.elapsed()).count();
   };
 
-  // Retrieve the ids from the Refs, and split them into a set from
-  // the main implementation, and a set from the fallback
-  // implementation.
-  IdVec main;
-  IdVec fallback;
-  // Keep the indices of the original list, so we can restore it
-  // afterwards. If a mapping isn't present,it's an identity mapping
-  // for the non-fallback implementation (which conveniently means we
-  // don't need to store anything for the common case of there being
-  // no fallbacks).
-  hphp_fast_map<size_t, std::pair<bool, size_t>> indexMappings;
-  for_each(
-    std::make_tuple(std::move(r), std::move(rs)...),
+  // Retrieve the ids from the Refs
+  IdVec ids;
+  ids.reserve(numBlobs);
+  for_each(std::make_tuple(std::move(r), std::move(rs)...),
     [&] (auto&& r, size_t idx) {
-      if (idx != main.size()) {
-        indexMappings.emplace(idx, std::make_pair(false, main.size()));
-      }
-      main.emplace_back(std::move(r.m_id));
+      ids.emplace_back(std::move(r.m_id));
     }
   );
 
-  auto const DEBUG_ONLY mainSize = main.size();
-  auto const DEBUG_ONLY fallbackSize = fallback.size();
-  assertx(mainSize + fallbackSize == sizeof...(Ts) + 1);
+  // Do the loads
+  auto blobs = co_await tryWithThrottling<BlobVec>(
+    [&] { return m_impl->load(requestId, ids); }
+  );
 
-  // Do the loads from either implementation (in the normal case, only
-  // one of these will be executed).
-  auto mainBlobs = !main.empty()
-    ? co_await
-        tryWithThrottling<BlobVec>(
-          [&] { return m_impl->load(requestId, main); }
-        )
-    : BlobVec{};
-  // Fallback impl cannot throttle
-  auto fallbackBlobs = !fallback.empty()
-    ? co_await m_fallbackImpl.rawGet()->load(requestId, std::move(fallback))
-    : BlobVec{};
-
-  assertx(mainBlobs.size() == mainSize);
-  assertx(fallbackBlobs.size() == fallbackSize);
+  assertx(blobs.size() == numBlobs);
   using OutTuple = std::tuple<T, Ts...>;
 
   // Now restore the results back into the output tuple.
-  auto ret = typesToValues<OutTuple>(
-    [&] (size_t idx, auto tag) {
-      assertx(idx < mainBlobs.size() + fallbackBlobs.size());
+  auto ret = typesToValues<OutTuple>([&] (size_t idx, auto tag) {
+    assertx(idx < blobs.size());
+    auto& blob = blobs[idx];
 
-      // For tuple position idx, use indexMappings to figure out which
-      // of mainBlobs or fallbackBlobs entry corresponds to this
-      // entry.
-      auto& blob = [&] () -> std::string& {
-        // In the common case, we'll have no mappings, and idx will be
-        // an identity mapping into mainBlobs.
-        if (indexMappings.empty()) {
-          assertx(idx < mainBlobs.size());
-          return mainBlobs[idx];
-        }
-        // Otherwise do the lookup.
-        auto const it = indexMappings.find(idx);
-        if (it == indexMappings.end()) {
-          // No entry means idx maps to idx in mainBlobs.
-          assertx(idx < mainBlobs.size());
-          return mainBlobs[idx];
-        }
-        // Otherwise use the entry to find the right blob.
-        if (it->second.first) {
-          assertx(it->second.second < fallbackBlobs.size());
-          return fallbackBlobs[it->second.second];
-        } else {
-          assertx(it->second.second < mainBlobs.size());
-          return mainBlobs[it->second.second];
-        }
-      }();
+    FTRACE(4, "{} blob #{} is {} bytes\n",
+           requestId.tracePrefix(), idx, blob.size());
+    m_stats->bytesDownloaded += blob.size();
+    // Turn it into the value.
+    return unblobify<typename decltype(tag)::Type>(std::move(blob));
+  });
 
-      FTRACE(4, "{} blob #{} is {} bytes\n",
-             requestId.tracePrefix(), idx, blob.size());
-      m_stats->bytesDownloaded += blob.size();
-      // Turn it into the value.
-      return unblobify<typename decltype(tag)::Type>(std::move(blob));
-    }
-  );
-
-  m_stats->downloads += (sizeof...(Ts) + 1);
+  m_stats->downloads += numBlobs;
   co_return ret;
 }
 
@@ -510,8 +452,7 @@ folly::coro::Task<std::vector<T>> Client::load(std::vector<Ref<T>> rs) {
   using namespace folly::gen;
 
   RequestId requestId{"load blobs"};
-  FTRACE(2, "{} {} blobs requested\n",
-         requestId.tracePrefix(), rs.size());
+  FTRACE(2, "{} {} blobs requested\n", requestId.tracePrefix(), rs.size());
   ++m_stats->loadCalls;
   SCOPE_EXIT {
     m_stats->loadLatencyUsec += std::chrono::duration_cast<
@@ -519,56 +460,35 @@ folly::coro::Task<std::vector<T>> Client::load(std::vector<Ref<T>> rs) {
     >(requestId.elapsed()).count();
   };
 
-  // Retrieve the RefId from the refs and split them into the ones
-  // which come from the main implementation and the fallback
-  // implementation.
-  IdVec main;
-  IdVec fallback;
+  // Retrieve the RefId from the refs
+  IdVec ids;
   for (auto& r : rs) {
-    main.emplace_back(std::move(r.m_id));
+    ids.emplace_back(std::move(r.m_id));
   }
 
-  auto const DEBUG_ONLY mainSize = main.size();
-  auto const DEBUG_ONLY fallbackSize = fallback.size();
-  assertx(mainSize + fallbackSize == rs.size());
+  auto const DEBUG_ONLY numBlobs = ids.size();
+  assertx(numBlobs == rs.size());
 
-  // Do the loads from either implementation (in the normal case, only
-  // one of these will be executed).
-  auto mainBlobs = !main.empty()
-    ? co_await
-        tryWithThrottling<BlobVec>(
-          [&] { return m_impl->load(requestId, main); }
-        )
-    : BlobVec{};
-  // Fallback impl cannot throttle
-  auto fallbackBlobs = !fallback.empty()
-    ? co_await m_fallbackImpl.rawGet()->load(requestId, std::move(fallback))
-    : BlobVec{};
-
-  assertx(mainBlobs.size() == mainSize);
-  assertx(fallbackBlobs.size() == fallbackSize);
+  // Do the loads
+  auto blobs = co_await tryWithThrottling<BlobVec>(
+    [&] { return m_impl->load(requestId, ids); }
+  );
+  assertx(blobs.size() == numBlobs);
 
   std::vector<T> out;
-  out.reserve(rs.size());
+  out.reserve(numBlobs);
 
-  // Stitch together mainBlobs and fallbackBlobs back together in the
-  // same order their Refs were passed to this function. We can
-  // reconstruct the order using the input Ref vector.
-  size_t mainIdx = 0;
-  for (size_t i = 0; i < rs.size(); ++i) {
-    auto& blob = [&] () -> std::string& {
-      assertx(mainIdx < mainBlobs.size());
-      return mainBlobs[mainIdx++];
-    }();
+  // Return blobs in the same order their Refs were passed to this function.
+  for (size_t i = 0; i < numBlobs; ++i) {
+    auto& blob = blobs[i];
     FTRACE(4, "{} blob #{} is {} bytes\n",
            requestId.tracePrefix(), out.size(), blob.size());
     m_stats->bytesDownloaded += blob.size();
     out.emplace_back(unblobify<T>(std::move(blob)));
   }
-  assertx(out.size() == rs.size());
-  assertx(mainIdx == mainBlobs.size());
+  assertx(out.size() == numBlobs);
 
-  m_stats->downloads += rs.size();
+  m_stats->downloads += numBlobs;
   co_return out;
 }
 
@@ -580,10 +500,11 @@ Client::load(std::vector<std::tuple<Ref<T>, Ref<Ts>...>> rs) {
 
   using OutTuple = std::tuple<T, Ts...>;
   auto constexpr tupleSize = std::tuple_size<OutTuple>{};
+  auto numTuples = rs.size();
 
   RequestId requestId{"load blobs"};
   FTRACE(2, "{} {} blobs requested\n",
-         requestId.tracePrefix(), rs.size() * tupleSize);
+         requestId.tracePrefix(), numTuples * tupleSize);
   ++m_stats->loadCalls;
   SCOPE_EXIT {
     m_stats->loadLatencyUsec += std::chrono::duration_cast<
@@ -592,79 +513,39 @@ Client::load(std::vector<std::tuple<Ref<T>, Ref<Ts>...>> rs) {
   };
 
   // This is a hybrid of the variadic case and the vector case:
-
-  // Retrieve the RefId from the refs and split them into the ones
-  // which come from the main implementation and the fallback
-  // implementation. "Flatten" out the refs into flat lists,
+  // Retrieve the RefId from the refs. "Flatten" out the refs into flat lists,
   // disregarding the tuple structure (which will be rebuilt later).
-  IdVec main;
-  IdVec fallback;
-  hphp_fast_map<size_t, std::pair<bool, size_t>> indexMappings;
-  for (size_t i = 0; i < rs.size(); ++i) {
-    for_each(
-      std::move(rs[i]),
+  IdVec ids;
+  for (size_t i = 0; i < numTuples; ++i) {
+    for_each(std::move(rs[i]),
       [&] (auto&& r, size_t tupleIdx) {
-        auto const idx = i * tupleSize + tupleIdx;
-        if (idx != main.size()) {
-          indexMappings.emplace(idx, std::make_pair(false, main.size()));
-        }
-        main.emplace_back(std::move(r.m_id));
+        ids.emplace_back(std::move(r.m_id));
       }
     );
   }
 
-  auto const DEBUG_ONLY mainSize = main.size();
-  auto const DEBUG_ONLY fallbackSize = fallback.size();
-  assertx(mainSize + fallbackSize == rs.size() * tupleSize);
+  auto const numBlobs = ids.size();
+  assertx(numBlobs == numTuples * tupleSize);
 
-  // Do the loads from either implementation (in the normal case, only
-  // one of these will be executed).
-  auto mainBlobs = !main.empty()
-    ? co_await
-        tryWithThrottling<BlobVec>(
-          [&] { return m_impl->load(requestId, main); }
-        )
-    : BlobVec{};
-  // Fallback impl cannot throttle
-  auto fallbackBlobs = !fallback.empty()
-    ? co_await m_fallbackImpl.rawGet()->load(requestId, std::move(fallback))
-    : BlobVec{};
+  // Do the loads
+  auto blobs = co_await tryWithThrottling<BlobVec>(
+    [&] { return m_impl->load(requestId, ids); }
+  );
+  assertx(blobs.size() == numBlobs);
 
-  assertx(mainBlobs.size() == mainSize);
-  assertx(fallbackBlobs.size() == fallbackSize);
-
-  // Now combine mainBlobs and fallbackBlobs back together, in the
-  // same order as their associated Refs were given (also restoring
-  // the tuple structure of the inputs).
+  // Now combine blobs back together, in the same order as their associated
+  // Refs were given (also restoring the tuple structure of the inputs).
   std::vector<OutTuple> out;
-  out.reserve(rs.size());
+  out.reserve(numTuples);
 
-  for (size_t i = 0; i < rs.size(); ++i) {
+  for (size_t i = 0; i < numTuples; ++i) {
     out.emplace_back(
       typesToValues<OutTuple>(
         [&] (size_t tupleIdx, auto tag) {
           // This is similar to logic for load(Ref<T>, Ref<T2>, ...)
           auto const idx = i * tupleSize + tupleIdx;
-          assertx(idx < mainBlobs.size() + fallbackBlobs.size());
-
-          auto& blob = [&] () -> std::string& {
-            if (indexMappings.empty()) {
-              assertx(idx < mainBlobs.size());
-              return mainBlobs[idx];
-            }
-            auto const it = indexMappings.find(idx);
-            if (it == indexMappings.end()) {
-              assertx(idx < mainBlobs.size());
-              return mainBlobs[idx];
-            }
-            if (it->second.first) {
-              assertx(it->second.second < fallbackBlobs.size());
-              return fallbackBlobs[it->second.second];
-            } else {
-              assertx(it->second.second < mainBlobs.size());
-              return mainBlobs[it->second.second];
-            }
-          }();
+          assertx(idx < blobs.size());
+          auto& blob = blobs[idx];
 
           FTRACE(4, "{} blob #{} is {} bytes\n",
                  requestId.tracePrefix(), idx, blob.size());
@@ -674,16 +555,14 @@ Client::load(std::vector<std::tuple<Ref<T>, Ref<Ts>...>> rs) {
       )
     );
   }
-  assertx(out.size() == rs.size());
-
-  m_stats->downloads += (rs.size() * tupleSize);
+  assertx(out.size() == numTuples);
+  m_stats->downloads += numBlobs;
   co_return out;
 }
 
 // All of the store functions are similar: Serialize the inputs into
-// blobs, call (with fallback) the store function on the
-// implementation, then wrap the output RefIds into Refs with the
-// appropriate types.
+// blobs, call the store function on the implementation, then wrap the
+// output RefIds into Refs with the appropriate types.
 
 template <typename T>
 folly::coro::Task<Ref<T>> Client::storeImpl(bool optimistic, T t) {
@@ -1015,7 +894,6 @@ Client::exec(const Job<C>& job,
   // OutputTypes).
   auto outputs = co_await folly::coro::co_invoke(
     [&] () -> folly::coro::Task<std::vector<RefValVec>> {
-      // Not using the fallback executor.
       co_return co_await tryWithImpl<std::vector<RefValVec>>(
           [&] (Impl& i) -> folly::coro::Task<std::vector<RefValVec>> {
             // Note we calculate the RefVals here within the

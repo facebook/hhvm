@@ -53,6 +53,8 @@ function autoload_constant_to_path(string $constant): ?string;
 function autoload_module_to_path(string $module): ?string;
 <<__Native>>
 function autoload_type_alias_to_path(string $type_alias): ?string;
+<<__Native>>
+function autoload_type_or_type_alias_to_path(string $type): ?string;
 
 /**
  * Get the types defined in the given path.

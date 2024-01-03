@@ -135,6 +135,15 @@ Variant HHVM_FUNCTION(autoload_type_alias_to_path, const String& typeAlias) {
   }
 }
 
+Variant HHVM_FUNCTION(autoload_type_or_type_alias_to_path, const String& type) {
+  auto fileRes = autoloadMap().getTypeOrTypeAliasFile(type);
+  if (!fileRes) {
+    return Variant{Variant::NullInit{}};
+  } else {
+    return Variant{fileRes->path};
+  }
+}
+
 Array HHVM_FUNCTION(autoload_path_to_types, const String& path) {
   return autoloadMap().getFileTypes(path);
 }
@@ -1586,6 +1595,7 @@ static struct HHExtension final : Extension {
     X(autoload_constant_to_path);
     X(autoload_module_to_path);
     X(autoload_type_alias_to_path);
+    X(autoload_type_or_type_alias_to_path);
     X(autoload_path_to_types);
     X(autoload_path_to_functions);
     X(autoload_path_to_constants);

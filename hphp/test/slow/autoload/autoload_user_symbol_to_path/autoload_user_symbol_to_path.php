@@ -9,7 +9,19 @@ function main(): void {
   var_dump(HH\autoload_type_to_path(
     A::class,
   ));
+  var_dump(HH\autoload_type_to_path(
+    'T',
+  ));
   var_dump(HH\autoload_type_alias_to_path(
+    A::class,
+  ));
+  var_dump(HH\autoload_type_alias_to_path(
+    'T',
+  ));
+  var_dump(HH\autoload_type_or_type_alias_to_path(
+    A::class,
+  ));
+  var_dump(HH\autoload_type_or_type_alias_to_path(
     'T',
   ));
   var_dump(HH\autoload_type_to_path(

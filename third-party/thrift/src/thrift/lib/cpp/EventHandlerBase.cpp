@@ -65,7 +65,7 @@ void TProcessorBase::addProcessorEventHandler(
   if (!handler) {
     return;
   }
-  folly::SharedMutex::WriteHolder lock{getRWMutex()};
+  std::unique_lock lock{getRWMutex()};
   assert(
       find(getHandlers().begin(), getHandlers().end(), handler) ==
       getHandlers().end());
@@ -74,7 +74,7 @@ void TProcessorBase::addProcessorEventHandler(
 
 void TProcessorBase::removeProcessorEventHandler(
     std::shared_ptr<TProcessorEventHandler> handler) {
-  folly::SharedMutex::WriteHolder lock{getRWMutex()};
+  std::unique_lock lock{getRWMutex()};
   assert(
       find(getHandlers().begin(), getHandlers().end(), handler) !=
       getHandlers().end());
@@ -126,7 +126,7 @@ void TClientBase::addClientEventHandler(
   if (!handler) {
     return;
   }
-  folly::SharedMutex::WriteHolder lock{getRWMutex()};
+  std::unique_lock lock{getRWMutex()};
   assert(
       find(getHandlers().begin(), getHandlers().end(), handler) ==
       getHandlers().end());
@@ -135,7 +135,7 @@ void TClientBase::addClientEventHandler(
 
 void TClientBase::removeClientEventHandler(
     std::shared_ptr<TProcessorEventHandler> handler) {
-  folly::SharedMutex::WriteHolder lock{getRWMutex()};
+  std::unique_lock lock{getRWMutex()};
   assert(
       find(getHandlers().begin(), getHandlers().end(), handler) !=
       getHandlers().end());

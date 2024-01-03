@@ -71,7 +71,7 @@ class Handler : public apache::thrift::ServiceHandler<DummyStatus>,
   }
 
   void setHealth(ServiceHealth value) {
-    folly::SharedMutex::WriteHolder guard{healthMutex_};
+    std::unique_lock guard{healthMutex_};
     serviceHealth_.setValue(value);
     folly::observer_detail::ObserverManager::waitForAllUpdates();
   }

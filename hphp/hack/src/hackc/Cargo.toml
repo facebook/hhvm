@@ -19,7 +19,7 @@ bc_to_ir = { version = "0.0.0", path = "ir/conversions/bc_to_ir" }
 bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 byte-unit = "4.0.14"
 bytecode_printer = { version = "0.0.0", path = "bytecode_printer" }
-clap = { version = "4.4.7", features = ["derive", "env", "string", "unicode", "wrap_help"] }
+clap = { version = "4.4.12", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 cmp = { version = "0.0.0", path = "utils/cmp" }
 compile = { version = "0.0.0", path = "compile/cargo/compile" }
 decl_parser = { version = "0.0.0", path = "../hackrs/decl_parser/cargo/decl_parser" }

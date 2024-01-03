@@ -419,7 +419,7 @@ dependencies = [
  "aast_parser",
  "ast_and_decl_parser",
  "bumpalo",
- "clap 4.4.7",
+ "clap 4.4.12",
  "criterion",
  "cst_and_decl_parser",
  "direct_decl_parser",
@@ -680,9 +680,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.4.7"
+version = "4.4.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac495e00dcec98c83465d5ad66c5c4fabd652fd6686e7c6269b117e729a6f17b"
+checksum = "dcfab8ba68f3668e89f6ff60f5b205cea56aa7b769451a59f34b8682f51c056d"
 dependencies = [
  "clap_builder",
  "clap_derive 4.4.7",
@@ -690,9 +690,9 @@ dependencies = [
 
 [[package]]
 name = "clap_builder"
-version = "4.4.7"
+version = "4.4.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c77ed9a32a62e6ca27175d00d29d05ca32e396ea1eb5fb01d8256b669cec7663"
+checksum = "fb7fb5e4e979aec3be7791562fcba452f94ad85e954da024396433e0e25a79e9"
 dependencies = [
  "anstream",
  "anstyle",
@@ -801,7 +801,7 @@ dependencies = [
  "bstr",
  "bumpalo",
  "bytecode_printer",
- "clap 4.4.7",
+ "clap 4.4.12",
  "decl_provider",
  "elab",
  "emit_unit",
@@ -1465,7 +1465,7 @@ name = "dump-opcodes"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "clap 4.4.7",
+ "clap 4.4.12",
  "emit_opcodes",
  "hhbc-gen",
  "quote",
@@ -1475,7 +1475,7 @@ dependencies = [
 name = "dump_saved_state_depgraph"
 version = "0.0.0"
 dependencies = [
- "clap 4.4.7",
+ "clap 4.4.12",
  "depgraph_reader",
  "indicatif",
 ]
@@ -2106,7 +2106,7 @@ dependencies = [
  "bumpalo",
  "byte-unit",
  "bytecode_printer",
- "clap 4.4.7",
+ "clap 4.4.12",
  "cmp",
  "compile",
  "decl_parser",
@@ -2327,7 +2327,7 @@ name = "hh_codegen"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "clap 4.4.7",
+ "clap 4.4.12",
  "hash",
  "proc-macro2",
  "quote",
@@ -2497,7 +2497,7 @@ name = "hhvm_options"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "clap 4.4.7",
+ "clap 4.4.12",
  "hdf",
  "hhvm_runtime_options",
 ]

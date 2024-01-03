@@ -13,7 +13,7 @@ path = "../../decl_repo_rust.rs"
 test = false
 
 [dependencies]
-clap = { version = "4.4.7", features = ["derive", "env", "string", "unicode", "wrap_help"] }
+clap = { version = "4.4.12", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 decl_parser = { version = "0.0.0", path = "../../decl_parser/cargo/decl_parser" }
 file_provider = { version = "0.0.0", path = "../../file_provider/cargo/file_provider" }
 find_utils = { version = "0.0.0", path = "../../../utils/find_utils" }

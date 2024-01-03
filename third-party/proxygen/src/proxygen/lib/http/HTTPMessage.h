@@ -56,8 +56,6 @@ struct HTTPPriority {
         incremental(incrementalIn),
         orderId(orderIdIn) {
   }
-
-  virtual ~HTTPPriority() = default;
 };
 
 inline bool operator==(const HTTPPriority& a, const HTTPPriority& b) {

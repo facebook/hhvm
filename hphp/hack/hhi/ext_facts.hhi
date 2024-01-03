@@ -87,6 +87,7 @@ namespace HH\Facts {
    *
    * Throw InvalidOperationException if Facts is not enabled.
    */
+  function module_to_path(string $module_name)[]: ?string;
   function type_to_path(string $type_name)[]: ?string;
   function function_to_path(string $function_name)[]: ?string;
   function constant_to_path(string $constant_name)[]: ?string;

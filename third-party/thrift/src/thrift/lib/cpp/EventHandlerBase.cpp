@@ -21,10 +21,6 @@ using std::remove;
 using std::shared_ptr;
 using std::vector;
 
-using RWMutex = folly::SharedMutex;
-using RLock = RWMutex::ReadHolder;
-using WLock = RWMutex::WriteHolder;
-
 namespace apache {
 namespace thrift {
 
@@ -57,7 +53,7 @@ EventHandlerBase::getEventHandlers() const {
 }
 
 TProcessorBase::TProcessorBase() {
-  RLock lock{getRWMutex()};
+  folly::SharedMutex::ReadHolder lock{getRWMutex()};
 
   for (const auto& handler : getHandlers()) {
     addNotNullEventHandler(handler);
@@ -69,7 +65,7 @@ void TProcessorBase::addProcessorEventHandler(
   if (!handler) {
     return;
   }
-  WLock lock{getRWMutex()};
+  folly::SharedMutex::WriteHolder lock{getRWMutex()};
   assert(
       find(getHandlers().begin(), getHandlers().end(), handler) ==
       getHandlers().end());
@@ -78,7 +74,7 @@ void TProcessorBase::addProcessorEventHandler(
 
 void TProcessorBase::removeProcessorEventHandler(
     std::shared_ptr<TProcessorEventHandler> handler) {
-  WLock lock{getRWMutex()};
+  folly::SharedMutex::WriteHolder lock{getRWMutex()};
   assert(
       find(getHandlers().begin(), getHandlers().end(), handler) !=
       getHandlers().end());
@@ -87,8 +83,8 @@ void TProcessorBase::removeProcessorEventHandler(
       getHandlers().end());
 }
 
-RWMutex& TProcessorBase::getRWMutex() {
-  static auto* mutex = new RWMutex{};
+folly::SharedMutex& TProcessorBase::getRWMutex() {
+  static auto* mutex = new folly::SharedMutex{};
   return *mutex;
 }
 
@@ -107,7 +103,7 @@ TClientBase::TClientBase(Options options) {
 
   // Automatically ask all registered factories to produce an event
   // handler, and attach the handlers
-  RLock lock{getRWMutex()};
+  folly::SharedMutex::ReadHolder lock{getRWMutex()};
 
   auto& handlers = getHandlers();
   size_t capacity = handlers.size();
@@ -130,7 +126,7 @@ void TClientBase::addClientEventHandler(
   if (!handler) {
     return;
   }
-  WLock lock{getRWMutex()};
+  folly::SharedMutex::WriteHolder lock{getRWMutex()};
   assert(
       find(getHandlers().begin(), getHandlers().end(), handler) ==
       getHandlers().end());
@@ -139,7 +135,7 @@ void TClientBase::addClientEventHandler(
 
 void TClientBase::removeClientEventHandler(
     std::shared_ptr<TProcessorEventHandler> handler) {
-  WLock lock{getRWMutex()};
+  folly::SharedMutex::WriteHolder lock{getRWMutex()};
   assert(
       find(getHandlers().begin(), getHandlers().end(), handler) !=
       getHandlers().end());
@@ -148,8 +144,8 @@ void TClientBase::removeClientEventHandler(
       getHandlers().end());
 }
 
-RWMutex& TClientBase::getRWMutex() {
-  static auto* mutex = new RWMutex{};
+folly::SharedMutex& TClientBase::getRWMutex() {
+  static auto* mutex = new folly::SharedMutex{};
   return *mutex;
 }
 

@@ -705,13 +705,6 @@ struct Client {
   Stats::Ptr getStatsPtr() const { return m_stats; }
   void resetStats() { m_stats->reset(); }
 
-  // Synthetically force a fallback event when storing data or
-  // executing a job, as if the implementation failed. This is for
-  // tests to force the fallback path to be exercised. You don't need
-  // this otherwise.
-  void forceFallback()   { m_forceFallback = true; }
-  void unforceFallback() { m_forceFallback = false; }
-
   struct Impl;
 
 private:
@@ -719,7 +712,6 @@ private:
   LockFreeLazy<std::unique_ptr<Impl>> m_fallbackImpl;
   Options m_options;
   Stats::Ptr m_stats;
-  bool m_forceFallback;
   folly::fibers::Semaphore m_fallbackSem;
 
   template <typename T> folly::coro::Task<Ref<T>> storeImpl(bool, T);
@@ -739,8 +731,6 @@ private:
   static const std::array<OutputType, 1> s_valOutputType;
   static const std::array<OutputType, 1> s_vecOutputType;
   static const std::array<OutputType, 1> s_optOutputType;
-
-  std::unique_ptr<Impl> makeFallbackImpl();
 
   TRACE_SET_MOD(extern_worker);
 };
@@ -765,11 +755,6 @@ struct Client::Impl {
   // Whether this impl supports optimistic uploading (or whether its
   // profitable to do so).
   virtual bool supportsOptimistic() const = 0;
-  // An implementation can declare itself "disabled" at any point (for
-  // example, due to some internal error). After that point, either
-  // Client will fail, or the fallback subprocess implementation will
-  // be used instead (depending on config).
-  virtual bool isDisabled() const = 0;
 
   // Load some number of RefIds, returning them as blobs (in the same
   // order as requested).

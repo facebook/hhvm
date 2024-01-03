@@ -349,11 +349,11 @@ inline std::string Client::session() const {
 }
 
 inline bool Client::usingSubprocess() const {
-  return m_impl->isSubprocess() || m_impl->isDisabled();
+  return m_impl->isSubprocess();
 }
 
 inline bool Client::supportsOptimistic() const {
-  return m_impl->supportsOptimistic() && !m_impl->isDisabled();
+  return m_impl->supportsOptimistic();
 }
 
 inline bool Client::fellback() const {
@@ -373,77 +373,15 @@ folly::coro::Task<T> Client::tryWithThrottling(const F& f) {
     );
 }
 
-// Run the given callable F with the normal implementation. If it
-// throws an Error, set didFallback to true, and attempt to re-run F
-// with the fallback implementation.
+// Run the given callable F with the normal implementation.
 template <typename T, typename F>
 folly::coro::Task<T> Client::tryWithFallback(const F& f,
                                              bool& didFallback,
                                              bool optimistic) {
-  // If we're forcing fallbacks, or if the main implementation has
-  // disabled itself, go straight to the fallback case.
-  Optional<std::string> errorMsg;
-  if (!m_forceFallback && !m_impl->isDisabled()) {
-    try {
-      // Attempt the normal implementation.
-      didFallback = false;
-      co_return co_await
-        tryWithThrottling<T>(
-          [&] { return f(*m_impl, false); }
-        );
-    } catch (const WorkerError& exn) {
-      // If the worker failed, we'll retry with fallback even if we're
-      // using optimistic mode.
-      if (m_impl->isSubprocess()) throw;
-      if (m_options.m_useSubprocess == Options::UseSubprocess::Never) throw;
-      errorMsg.emplace(exn.what());
-    } catch (const Error& exn) {
-      // It failed. If the main implementation *is* the subprocess
-      // implementation, there's no point in trying again. Just
-      // rethrow the error. Likewise, if Options has determined we
-      // shouldn't use the subprocess implementaiton, rethrow the
-      // error.
-      if (optimistic) throw;
-      if (m_impl->isSubprocess()) throw;
-      if (m_options.m_useSubprocess == Options::UseSubprocess::Never) throw;
-      errorMsg.emplace(exn.what());
-    }
-  }
-
-  // Fallback case:
-  didFallback = true;
-  co_await folly::coro::co_safe_point;
-  // Avoid thundering herd of fallbacks which all fail in the same way
-  // as the original (this is common if the workers are crashing due
-  // to a bug). m_fallbackSem controls the number of allowed
-  // concurrent fallbacks. If the fallback finishes successfully,
-  // we'll signal the semaphore twice (once if we throw). This means
-  // that successful fallbacks will allow for more fallbacks to be run
-  // in parallel. If things keep failing, we'll only run one at a
-  // time.
-  co_await m_fallbackSem.co_wait();
-  SCOPE_EXIT { m_fallbackSem.signal(); };
-  SCOPE_SUCCESS { m_fallbackSem.signal(); };
-  co_await folly::coro::co_safe_point;
-
-  // Check this again. The implementation could have disabled
-  // itself while using it above, and in that case, its the
-  // implementation's responsibility to print something to the
-  // log.
-  if (errorMsg && !m_impl->isDisabled()) {
-    Logger::FError(
-      "Error: \"{}\". Attempting to retry with local fallback...",
-      *errorMsg
-    );
-  }
-
-  // Make a fallback implementation if we haven't already
-  // (LockFreeLazy will ensure this), and call it. If it throws,
-  // nothing to be done, it will be propagated to the caller.
-  auto& fallback = *m_fallbackImpl.get([this] { return makeFallbackImpl(); });
-  auto ret = co_await f(fallback, true);
-  co_await folly::coro::co_safe_point;
-  co_return ret;
+  didFallback = false;
+  co_return co_await tryWithThrottling<T>(
+    [&] { return f(*m_impl, false); }
+  );
 }
 
 template <typename T>
@@ -1164,9 +1102,7 @@ Client::exec(const Job<C>& job,
   // implementation, we're also forced to.
   auto useFallback = false;
   if (m_fallbackImpl.present() &&
-      (m_impl->isDisabled() ||
-       tupleIsFallback(config) ||
-       vecIsFallback(inputs))) {
+      (tupleIsFallback(config) || vecIsFallback(inputs))) {
     // If we're executing on the fallback implementation, all inputs
     // need to be from there.
     co_await makeAllFallback();

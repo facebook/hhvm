@@ -903,7 +903,6 @@ struct SubprocessImpl : public Client::Impl {
 
   bool isSubprocess() const override { return true; }
   bool supportsOptimistic() const override { return false; }
-  bool isDisabled() const override { return false; }
 
   coro::Task<BlobVec> load(const RequestId&, IdVec) override;
   coro::Task<IdVec> store(const RequestId&, PathVec, BlobVec,
@@ -1462,7 +1461,6 @@ Client::Client(folly::Executor::KeepAlive<> executor,
                const Options& options)
   : m_options{options}
   , m_stats{std::make_shared<Stats>()}
-  , m_forceFallback{false}
   , m_fallbackSem{1}
 {
   Timer _{"create impl"};
@@ -1483,16 +1481,6 @@ Client::~Client() {
   Timer _{[&] { return folly::sformat("destroy impl {}", m_impl->name()); }};
   m_impl.reset();
   m_fallbackImpl.reset();
-}
-
-std::unique_ptr<Client::Impl> Client::makeFallbackImpl() {
-  // This will be called once from within LockFreeLazy, so we only
-  // emit this warning once.
-  Logger::Warning(
-    "Certain operations will use local fallback from this "
-    "point on and may run slower."
-  );
-  return std::make_unique<SubprocessImpl>(m_options, *this);
 }
 
 coro::Task<Ref<std::string>> Client::storeFile(fs::path path,

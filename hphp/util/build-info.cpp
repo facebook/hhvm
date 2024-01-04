@@ -38,7 +38,6 @@ std::mutex mtx;
 std::string repoSchema;
 std::string compiler;
 std::string buildid;
-std::string hhjsbabeltransform;
 int64_t timestamp;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -76,7 +75,6 @@ void readBuildInfo() {
 
   compiler = get("compiler_id");
   buildid = get("build_id");
-  hhjsbabeltransform = get("hhjs_babel_transform");
 
   try {
     timestamp = std::stoll(get("compiler_ts"));
@@ -118,11 +116,6 @@ int64_t compilerTimestamp() {
 folly::StringPiece buildId() {
   readBuildInfo();
   return buildid;
-}
-
-folly::StringPiece hhjsBabelTransform() {
-  readBuildInfo();
-  return hhjsbabeltransform;
 }
 
 void replacePlaceholders(std::string& s,

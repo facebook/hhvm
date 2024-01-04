@@ -14801,6 +14801,11 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
 
   auto typeBuckets = consistently_bucketize(
     [&] {
+      // Temporarily suppress case collision logging
+      auto oldLogLevel = RuntimeOption::EvalLogIsameCollisions;
+      RuntimeOption::EvalLogIsameCollisions = 0;
+      SCOPE_EXIT { RuntimeOption::EvalLogIsameCollisions = oldLogLevel; };
+
       std::vector<SString> roots;
       roots.reserve(meta.classes.size() + meta.funcs.size());
       for (auto const& [name, _] : meta.classes) {
@@ -15166,6 +15171,11 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
 
   std::vector<coro::TaskWithExecutor<void>> tasks;
   tasks.reserve(typeBuckets.size() + fixupBuckets.size() + 1);
+
+  // Temporarily suppress case collision logging
+  auto oldLogLevel = RuntimeOption::EvalLogIsameCollisions;
+  RuntimeOption::EvalLogIsameCollisions = 0;
+  SCOPE_EXIT { RuntimeOption::EvalLogIsameCollisions = oldLogLevel; };
 
   for (auto& work : typeBuckets) {
     tasks.emplace_back(
@@ -16540,14 +16550,21 @@ void make_local(IndexData& index) {
   // We're going to load ClassGraphs concurrently.
   ClassGraph::initConcurrent();
 
-  coro::blockingWait(coro::collectAllRange(
-    from(buckets)
-      | move
-      | map([&] (std::vector<SString> chunks) {
-          return run(std::move(chunks)).scheduleOn(index.executor->sticky());
-        })
-      | as<std::vector>()
-  ));
+  {
+    // Temporarily suppress case collision logging
+    auto oldLogLevel = RuntimeOption::EvalLogIsameCollisions;
+    RuntimeOption::EvalLogIsameCollisions = 0;
+    SCOPE_EXIT { RuntimeOption::EvalLogIsameCollisions = oldLogLevel; };
+
+    coro::blockingWait(coro::collectAllRange(
+      from(buckets)
+        | move
+        | map([&] (std::vector<SString> chunks) {
+            return run(std::move(chunks)).scheduleOn(index.executor->sticky());
+          })
+        | as<std::vector>()
+    ));
+  }
 
   // Deserialization done.
   ClassGraph::stopConcurrent();

@@ -13,3 +13,4 @@ mstch_swift src/module.thrift
 json src/module.thrift
 mstch_python src/module.thrift
 mstch_python_capi src/module.thrift
+starlark src/module.thrift

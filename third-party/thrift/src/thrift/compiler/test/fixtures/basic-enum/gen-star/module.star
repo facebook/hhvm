@@ -60,3 +60,10 @@ MyBigEnum = __MyBigEnum_enum__(
     NINETEEN = 19,
 )
 
+kOne = MyEnum.ONE
+
+enumNames = {
+  MyEnum.ONE: "one",
+  MyEnum.TWO: "two",
+}
+

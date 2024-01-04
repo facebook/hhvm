@@ -1,0 +1,54 @@
+{{#type:byte?}}{{value:integer_value}}{{/type:byte?}}{{!
+}}{{#type:i16?}}{{value:integer_value}}{{/type:i16?}}{{!
+}}{{#type:i32?}}{{value:integer_value}}{{/type:i32?}}{{!
+}}{{#type:i64?}}{{value:integer_value}}{{/type:i64?}}{{!
+}}{{#type:string?}}"{{value:string_value}}"{{/type:string?}}{{!
+}}{{#type:bool?}}{{!
+  }}{{#value:nonzero?}}True{{/value:nonzero?}}{{!
+  }}{{^value:nonzero?}}False{{/value:nonzero?}}{{!
+}}{{/type:bool?}}{{!
+}}{{#type:float?}}{{!
+  }}{{#value:double?}}{{value:double_value}}{{/value:double?}}{{!
+  }}{{#value:integer?}}{{value:integer_value}}.0{{/value:integer?}}{{!
+}}{{/type:float?}}{{!
+}}{{#type:double?}}{{!
+  }}{{#value:double?}}{{value:double_value}}{{/value:double?}}{{!
+  }}{{#value:integer?}}{{value:integer_value}}.0{{/value:integer?}}{{!
+}}{{/type:double?}}{{!
+
+  List constants
+}}{{#type:list?}}[
+{{#value:list_elements}}
+  {{#type:list_elem_type}}{{!
+    }}{{> consts/value}},{{!
+  }}{{/type:list_elem_type}}
+{{/value:list_elements}}
+]{{/type:list?}}{{!
+
+  Map constants
+}}{{#type:map?}}{
+{{#value:map_elements}}
+  {{#element:key}}{{!
+    }}{{#type:key_type}}{{!
+      }}{{> consts/value}}{{!
+    }}{{/type:key_type}}{{!
+  }}{{/element:key}}: {{!
+  }}{{#element:value}}{{!
+    }}{{#type:value_type}}{{!
+      }}{{> consts/value}}{{!
+    }}{{/type:value_type}}{{!
+  }}{{/element:value}},
+{{/value:map_elements}}
+}{{/type:map?}}{{!
+
+  Enum constants
+}}{{#type:enum?}}{{!
+  }}{{#type:enum}}{{!
+    }}{{#value:enum_value?}}{{!
+      }}{{#value:enum_value}}{{!
+        Known enum value with a name.
+        }}{{enum:name}}.{{enum_value:name}}{{!
+      }}{{/value:enum_value}}{{!
+    }}{{/value:enum_value?}}{{!
+  }}{{/type:enum}}{{!
+}}{{/type:enum?}}

@@ -1,0 +1,12 @@
+{{#program:constants}}{{!
+  }}{{#constant:type}}{{!
+    }}{{#type:starlark_supported?}}
+{{constant:name}} = {{!
+      }}{{#constant:value}}{{!
+        }}{{> consts/value}}{{!
+      }}{{/constant:value}}
+      {{!newline after constant}}
+
+    {{/type:starlark_supported?}}{{!
+  }}{{/constant:type}}{{!
+}}{{/program:constants}}

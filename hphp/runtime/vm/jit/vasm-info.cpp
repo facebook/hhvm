@@ -380,6 +380,7 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::inlinestart:
     case Vinstr::jcc:
     case Vinstr::jcci:
+    case Vinstr::interceptjcc:
     case Vinstr::jmp:
     case Vinstr::jmpi:
     case Vinstr::jmpm:

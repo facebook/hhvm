@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
+#include "hphp/runtime/vm/jit/tc-intercept.h"
 #include "hphp/runtime/vm/jit/tc-prologue.h"
 #include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/timer.h"
@@ -777,6 +778,12 @@ TranslationResult Translator::publish() {
 
 void Translator::publishMetaInternal() {
   assertx(transMeta.has_value());
+  if (!transMeta->fixups.interceptTCAs.empty()) {
+    auto interceptLock = lockGlobalIntercept();
+    for (auto& it : transMeta->fixups.interceptTCAs) {
+      tc::recordInterceptTCA(it.first, it.second);
+    }
+  }
   this->publishMetaImpl();
 }
 

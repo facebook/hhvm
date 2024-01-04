@@ -1968,24 +1968,6 @@ public:
     return deltaFits(delta, sz::dword);
   }
 
-  void jmpAuto(CodeAddress dest) {
-    auto delta = dest - (codeBlock.frontier() + 2);
-    if (deltaFits(delta, sz::byte)) {
-      jmp8(dest);
-    } else {
-      jmp(dest);
-    }
-  }
-
-  void jccAuto(ConditionCode cc, CodeAddress dest) {
-    auto delta = dest - (codeBlock.frontier() + 2);
-    if (deltaFits(delta, sz::byte)) {
-      jcc8(cc, dest);
-    } else {
-      jcc(cc, dest);
-    }
-  }
-
   void call(Label&);
   void jmp(Label&);
   void jmp8(Label&);
@@ -2061,6 +2043,18 @@ public:
     assert(call[0] == 0xE8);
     ssize_t diff = dest - (from + 5);
     *(int32_t*)(call + 1) = safe_cast<int32_t>(diff);
+  }
+
+  // rewrites jae into nop; jmp, preserving the target address
+  static void patchInterceptJcc(CodeAddress inst) {
+    assertx(inst[0] == 0x0f && inst[1] == 0x83);
+    *reinterpret_cast<uint16_t*>(inst) = 0xe990;
+  }
+
+  // rewrites nop; jmp into jae, preserving the target address
+  static void patchInterceptJmp(CodeAddress inst) {
+    assertx(inst[0] == 0x90 && inst[1] == 0xe9);
+    *reinterpret_cast<uint16_t*>(inst) = 0x830f;
   }
 
   void byte(uint8_t b) {

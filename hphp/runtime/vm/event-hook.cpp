@@ -108,14 +108,6 @@ void EventHook::DisableDebug() {
   clearSurpriseFlag(DebuggerHookFlag);
 }
 
-void EventHook::EnableIntercept() {
-  setSurpriseFlag(InterceptFlag);
-}
-
-void EventHook::DisableIntercept() {
-  clearSurpriseFlag(InterceptFlag);
-}
-
 struct ExecutingSetprofileCallbackGuard {
   ExecutingSetprofileCallbackGuard() {
     g_context->m_executingSetprofileCallback = true;
@@ -477,8 +469,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   assertx(!isResumed(ar));
 
   const Func* func = ar->func();
-  if (LIKELY(!func->maybeIntercepted())) return true;
-  assertx(func->isInterceptable());
+  assertx(func->isInterceptable() && func->maybeIntercepted());
 
   Variant* h = get_intercept_handler(func);
   if (!h) return true;
@@ -755,9 +746,10 @@ uint64_t EventHook::onFunctionCallJit(const ActRec* ar, int funcType) {
 bool EventHook::onFunctionCall(const ActRec* ar, int funcType,
                                EventHook::Source sourceType) {
   assertx(!isResumed(ar));
+  const Func* func = ar->func();
   auto const flags = handle_request_surprise();
-  if (flags & InterceptFlag) {
-    DEBUG_ONLY auto const func = ar->func();
+
+  if (func->maybeIntercepted() && is_intercepted(func)) {
     if (!RunInterceptHandler(const_cast<ActRec*>(ar))) {
       assertx(func->isInterceptable());
       return false;
@@ -776,7 +768,7 @@ bool EventHook::onFunctionCall(const ActRec* ar, int funcType,
   // It's not safe to run callbacks when we are in the middle of resolving a
   // constant since we maintain a static array with sentinel bits to detect
   // recursively defined constants which could be modified by a callback.
-  if (ar->func()->name() != s_86cinit.get()) {
+  if (func->name() != s_86cinit.get()) {
     // Memory Threhsold
     if (flags & MemThresholdFlag) {
       DoMemoryThresholdCallback();

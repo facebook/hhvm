@@ -206,6 +206,12 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
     }
   }
 
+  for (auto& it : meta.interceptTCAs) {
+    if (auto const adjusted = rel.adjustedAddressAfter(it.second)) {
+      it.second = adjusted;
+    }
+  }
+
   if (!meta.bcMap.empty()) {
     /*
      * Most of the time we want to adjust to a corresponding "before" address

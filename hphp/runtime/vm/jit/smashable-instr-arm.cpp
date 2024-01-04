@@ -309,6 +309,14 @@ void smashJcc(TCA inst, TCA target) {
   }
 }
 
+void smashInterceptJcc(TCA inst) {
+  not_implemented();
+}
+
+void smashInterceptJmp(TCA inst) {
+  not_implemented();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 uint64_t smashableMovqImm(TCA inst) {

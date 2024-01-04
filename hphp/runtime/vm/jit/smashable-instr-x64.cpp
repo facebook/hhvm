@@ -149,6 +149,14 @@ void smashJcc(TCA inst, TCA target) {
   X64Assembler::patchJcc(inst, inst, target);
 }
 
+void smashInterceptJcc(TCA inst) {
+  X64Assembler::patchInterceptJcc(inst);
+}
+
+void smashInterceptJmp(TCA inst) {
+  X64Assembler::patchInterceptJmp(inst);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 uint64_t smashableMovqImm(TCA inst) {

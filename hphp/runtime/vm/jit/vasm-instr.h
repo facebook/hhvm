@@ -318,6 +318,7 @@ struct Vunit;
   /* branches */\
   O(jcc, I(cc), U(sf), Dn)\
   O(jcci, I(cc) I(taken), U(sf), Dn)\
+  O(interceptjcc, I(cc), U(sf), Dn)\
   O(jmp, Inone, Un, Dn)\
   O(jmpr, Inone, U(target) U(args), Dn)\
   O(jmpm, Inone, U(target) U(args), Dn)\
@@ -1210,6 +1211,7 @@ struct storesd { VregDbl s; Vptr64 m; };
  */
 struct jcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; StringTag tag; };
 struct jcci { ConditionCode cc; VregSF sf; TCA taken; };
+struct interceptjcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; };
 struct jmp { Vlabel target; };
 struct jmpr { Vreg64 target; RegSet args; };
 struct jmpm { Vptr target; RegSet args; };

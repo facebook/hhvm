@@ -2878,10 +2878,10 @@ struct CheckHandleSurpriseEnterData : IRExtraData {
   {}
 
   std::string show() const {
-    return folly::format(
+    return folly::sformat(
       "{} checkStackOverflow={}",
       func->fullName(), checkStackOverflow
-    ).str();
+    );
   }
 
   bool equals(const CheckHandleSurpriseEnterData& o) const {

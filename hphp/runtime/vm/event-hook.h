@@ -16,6 +16,7 @@
 #pragma once
 
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/surprise-flags.h"
@@ -71,10 +72,13 @@ struct EventHook {
   static void DisableAsync();
   static void EnableDebug();
   static void DisableDebug();
-  static void EnableIntercept();
-  static void DisableIntercept();
 
   static void DoMemoryThresholdCallback();
+
+  static inline bool checkSurpriseFlagsAndIntercept(const Func* func) {
+    return checkSurpriseFlags() ||
+      (func->maybeIntercepted() && is_intercepted(func));
+  }
 
   /**
    * Event hooks -- interpreter entry points.
@@ -83,7 +87,7 @@ struct EventHook {
                                   int funcType,
                                   EventHook::Source sourceType) {
     ringbufferEnter(ar);
-    return UNLIKELY(checkSurpriseFlags())
+    return UNLIKELY(checkSurpriseFlagsAndIntercept(ar->func()))
       ? onFunctionCall(ar, funcType, sourceType) : true;
   }
   static inline void FunctionResumeAwait(const ActRec* ar,

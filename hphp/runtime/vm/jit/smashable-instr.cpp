@@ -89,7 +89,14 @@ void smashJcc(TCA inst, TCA target) {
   always_assert(target);
   return ARCH_SWITCH_CALL(smashJcc, inst, target);
 }
-
+void smashInterceptJcc(TCA inst) {
+  always_assert(inst);
+  return ARCH_SWITCH_CALL(smashInterceptJcc, inst);
+}
+void smashInterceptJmp(TCA inst) {
+  always_assert(inst);
+  return ARCH_SWITCH_CALL(smashInterceptJmp, inst);
+}
 uint64_t smashableMovqImm(TCA inst) {
   always_assert(inst);
   return ARCH_SWITCH_CALL(smashableMovqImm, inst);

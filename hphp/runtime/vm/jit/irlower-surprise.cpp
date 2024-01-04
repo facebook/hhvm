@@ -132,7 +132,11 @@ void cgCheckSurpriseFlagsEnter(IRLS& env, const IRInstruction* inst) {
 
   auto const done = v.makeBlock();
   auto const handleSurprise = label(env, inst->taken());
-  v << jcc{CC_AE, sf, {done, handleSurprise}};
+  if (extra->func->isInterceptable()) {
+    v << interceptjcc{CC_AE, sf, {done, handleSurprise}};
+  } else {
+    v << jcc{CC_AE, sf, {done, handleSurprise}};
+  }
   v = done;
 }
 

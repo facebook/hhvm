@@ -35,7 +35,12 @@ struct Variant;
 bool register_intercept(const String& name, const Variant& callback);
 
 /**
- * Check to see if it is actually intercepted for current request.
+ * Check to see if func is intercepted for current request.
+ */
+bool is_intercepted(const Func* func);
+
+/**
+ * If func is intercepted for the current request, return the handler.
  */
 Variant* get_intercept_handler(const Func* func);
 
@@ -44,6 +49,12 @@ Variant* get_intercept_handler(const Func* func);
  */
 bool handle_intercept(const Variant& handler, const String& name,
                       const Array& params, Variant& ret);
+
+/**
+ * When a request terminates, reset all the translations of all the functions
+ * intercepted by the request.
+ */
+void reset_all_intercepted_functions();
 
 ///////////////////////////////////////////////////////////////////////////////
 // fb_rename_function()

@@ -8,7 +8,7 @@ builtin_call_bad_arg.php:4:25
 [1]  4 |   fb_output_compression(3);
      5 | }
 
-/tmp/4a8hluw480/builtins_fb.hhi:82:5
+/tmp/9hWt19Cb5J/builtins_fb.hhi:82:5
     80 |   <<__PHPStdLib>>
     81 |   function fb_output_compression(
 [2] 82 |     bool $new_value,

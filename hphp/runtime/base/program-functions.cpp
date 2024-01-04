@@ -2855,6 +2855,12 @@ void hphp_context_exit() {
   // Run shutdown handlers. This may cause user code to run.
   g_thread_safe_locale_handler->reset();
 
+  // Reset the surprise flag checks of all the translations of all the
+  // functions intercepted by the current request.  Must be performed
+  // before shutting down the context as the list of intercepted functions
+  // of the request is stored in the RDS.
+  reset_all_intercepted_functions();
+
   auto const context = g_context.getNoCheck();
   context->onRequestShutdown();
 

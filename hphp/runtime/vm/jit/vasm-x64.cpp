@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/tracing.h"
 
 #include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/align-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -205,6 +206,7 @@ struct Vgen {
   void emit(const incqm& i) { a.prefix(i.m.mr()).incq(i.m); }
   void emit(const incwm& i) { a.prefix(i.m.mr()).incw(i.m); }
   void emit(const jcc& i);
+  void emit(const interceptjcc& i);
   void emit(const jcci& i);
   void emit(const jmp& i);
   void emit(const jmpr& i) { a.jmp(i.target); }
@@ -912,6 +914,15 @@ void Vgen<X64Asm>::emit(const jcc& i) {
     a.jcc(i.cc, a.frontier());
   }
   emit(jmp{i.targets[0]});
+}
+
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const interceptjcc& i) {
+  assertx(env.unit.context);
+  auto const funcId = env.unit.context->initSrcKey.funcID();
+  align(a.code(), &env.meta, Alignment::SmashIntercept, AlignContext::Live);
+  env.meta.setInterceptJccTCA(a.frontier(), funcId);
+  emit(jcc{i.cc, i.sf, {i.targets[0], i.targets[1]}, StringTag{}});
 }
 
 template<class X64Asm>

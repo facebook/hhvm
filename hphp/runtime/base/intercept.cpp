@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/vm/jit/tc-intercept.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/util/lock.h"
@@ -117,6 +118,7 @@ bool register_intercept(const String& name, const Variant& callback) {
     StructuredLog::log("hhvm_intercept_function", entry);
   }
 
+  auto interceptedFuncId = interceptedFunc->getFuncId();
 
   if (!callback.toBoolean()) {
     if (!s_intercept_data->empty()) {
@@ -126,24 +128,34 @@ bool register_intercept(const String& name, const Variant& callback) {
         // erase the map entry before destroying the value
         auto tmp = it->second;
         handlers.erase(it);
+        // Record that the current request does not intercept anymore interceptedFunc.
+        // If no other request intercepts interceptedFunc, then replace the forced `jmp`
+        // to the surprise stub with a conditional `jcc` in the TC translations of
+        // interceptedFunc.
+        jit::tc::stopInterceptFunc(interceptedFuncId);
       }
-    }
-
-    // We've cleared out all the intercepts, so we don't need to pay the
-    // surprise flag cost anymore
-    if (s_intercept_data->empty()) {
-      EventHook::DisableIntercept();
     }
 
     return true;
   }
 
-  EventHook::EnableIntercept();
-
   auto& handlers = s_intercept_data->intercept_handlers();
-  handlers[interceptedFunc] = callback;
+  auto [it, did_insert] = handlers.emplace(interceptedFunc, callback);
+  if (!did_insert) {
+    it->second = callback;
+  } else {
+    // The request didn't previously intercept this function: record this and
+    // replace the conditional `jcc` implementing the surprise flag check with a
+    // forced jmp to the surprise stub in all the TC translations of the function.
+    jit::tc::startInterceptFunc(interceptedFuncId);
+  };
   interceptedFunc->setMaybeIntercepted();
   return true;
+}
+
+bool is_intercepted(const Func* func) {
+  auto const h = get_intercept_handler(func);
+  return (h != nullptr);
 }
 
 Variant* get_intercept_handler(const Func* func) {
@@ -158,6 +170,15 @@ Variant* get_intercept_handler(const Func* func) {
     }
   }
   return nullptr;
+}
+
+void reset_all_intercepted_functions() {
+  if (!s_intercept_data->empty()) {
+    auto& handlers = s_intercept_data->intercept_handlers();
+    for (auto& h: handlers) {
+      jit::tc::stopInterceptFunc(h.first->getFuncId());
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

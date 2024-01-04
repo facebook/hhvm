@@ -46,6 +46,7 @@ enum Rank {
   RankWriteLease,
   RankCodeCache,
   RankCodeMetadata,
+  RankInterceptTable,
 
   RankStatCache,
 

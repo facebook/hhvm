@@ -48,6 +48,7 @@ void align(CodeBlock& cb, CGMeta* meta,
     { smashableAlignTo(), smashableCallLen(),     0 },                        \
     { smashableAlignTo(), smashableJmpLen(),      0 },                        \
     { smashableAlignTo(), smashableJccLen(),      0 },                        \
+    { smashableAlignTo(), smashableInterceptLen(), 0 }, /* InterceptJmp/Jcc */ \
   }
 
 #define DEFINE_ALIGN_TABLE(table) \

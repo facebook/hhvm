@@ -199,6 +199,10 @@ void CGMeta::setCallFuncId(TCA callRetAddr, FuncId funcId, TransKind kind) {
   callFuncIds.emplace_back(callRetAddr, funcId);
 }
 
+void CGMeta::setInterceptJccTCA(TCA jccAddr, FuncId funcId) {
+  interceptTCAs.emplace_back(funcId, jccAddr);
+}
+
 void CGMeta::process(
   GrowableVector<IncomingBranch>* inProgressTailBranches
 ) {
@@ -282,6 +286,7 @@ void CGMeta::clear() {
   inlineStacks.clear();
   jmpTransIDs.clear();
   callFuncIds.clear();
+  interceptTCAs.clear();
   literalsToPool.clear();
   literalAddrs.clear();
   veneers.clear();
@@ -304,6 +309,7 @@ bool CGMeta::empty() const {
     inlineStacks.empty() &&
     jmpTransIDs.empty() &&
     callFuncIds.empty() &&
+    interceptTCAs.empty() &&
     literalsToPool.empty() &&
     literalAddrs.empty() &&
     veneers.empty() &&

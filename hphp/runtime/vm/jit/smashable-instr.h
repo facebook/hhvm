@@ -48,6 +48,10 @@ struct CGMeta;
  *      - jcc
  *      - jcc_jmp:  A jcc followed contiguously by a jmp, both of which have
  *                  independently smashable targets.  Used for bindjcc1st.
+ *      - interceptjcc:  A jcc instruction that can be smashed into a sequence
+ *                       of nop; jmp instructions; the target is preserved.
+ *      - interceptjmp:  A sequence of nop; jmp instructions that can be smashed
+ *                       into a jcc instruction to the same target.
  *
  * Smashable instructions must have a statically known length (though they may
  * require nop-gap realignment when they are emitted).
@@ -61,6 +65,7 @@ size_t smashableCmpqLen();
 size_t smashableCallLen();
 size_t smashableJmpLen();
 size_t smashableJccLen();
+size_t smashableInterceptLen();
 
 /*
  * Boundry to align the smashables to (normally cache line size).
@@ -93,6 +98,8 @@ void smashCmpq(TCA inst, uint32_t imm);
 void smashCall(TCA inst, TCA target);
 void smashJmp(TCA inst, TCA target);
 void smashJcc(TCA inst, TCA target);
+void smashInterceptJcc(TCA inst);
+void smashInterceptJmp(TCA inst);
 
 /*
  * Extract instruction operands from assembly.

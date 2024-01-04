@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
+#include "hphp/runtime/vm/jit/tc-intercept.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 
 #include "hphp/util/arch.h"
@@ -189,6 +190,7 @@ Optional<SmashedCall> eraseSmashedCall(TCA start) {
  */
 void clearTCMaps(TCA start, TCA end) {
   auto const profData = jit::profData();
+  deleteRangeInterceptTCA(start, end);
   while (start < end) {
     bool isBranch, isNop, isCall;
     size_t instSz;

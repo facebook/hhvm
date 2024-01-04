@@ -76,3 +76,13 @@ service OneMethodOptOut {
   @rust.ServiceExn{anyhow_to_application_exn = false}
   string bar() throws (1: SomeError se);
 }
+
+union Bar {
+  1: i32 WithAnnotation (rust.name = "Annotated");
+  2: i32 WithoutAnnotation;
+}
+
+// @lint-ignore THRIFTCHECKS
+const Bar BAR1 = {WithAnnotation: 123};
+// @lint-ignore THRIFTCHECKS
+const Bar BAR2 = {WithoutAnnotation: 123};

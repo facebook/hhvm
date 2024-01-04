@@ -1626,10 +1626,27 @@ class mstch_rust_value : public mstch_base {
         const_value_->get_map().at(0).first->kind() == value_type::CV_STRING;
   }
   mstch::node union_variant() {
+    auto struct_type = dynamic_cast<const t_struct*>(type_);
+    if (!struct_type) {
+      return mstch::node();
+    }
+
     if (const_value_->get_map().empty()) {
       return mstch::node();
     }
-    return const_value_->get_map().at(0).first->get_string();
+
+    const auto& entry = const_value_->get_map().at(0);
+    const auto& variant = entry.first->get_string();
+
+    for (auto&& field : struct_type->fields()) {
+      if (field.name() == variant) {
+        if (!field.has_annotation("rust.name")) {
+          return variant;
+        }
+        return field.get_annotation("rust.name");
+      }
+    }
+    return mstch::node();
   }
   mstch::node union_value() {
     auto struct_type = dynamic_cast<const t_struct*>(type_);
@@ -1637,9 +1654,9 @@ class mstch_rust_value : public mstch_base {
       return mstch::node();
     }
 
-    auto entry = const_value_->get_map().at(0);
-    auto variant = entry.first->get_string();
-    auto content = entry.second;
+    const auto& entry = const_value_->get_map().at(0);
+    const auto& variant = entry.first->get_string();
+    const auto* content = entry.second;
 
     for (auto&& field : struct_type->fields()) {
       if (field.name() == variant) {

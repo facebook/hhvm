@@ -5,6 +5,7 @@
 #![recursion_limit = "100000000"]
 #![allow(non_camel_case_types, non_snake_case, non_upper_case_globals, unused_crate_dependencies, clippy::redundant_closure, clippy::type_complexity)]
 
+pub mod consts;
 pub mod services;
 
 pub mod errors;
@@ -116,6 +117,13 @@ impl ::std::fmt::Display for SomeError {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         write!(f, "{:?}", self)
     }
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+pub enum Bar {
+    Annotated(::std::primitive::i32),
+    WithoutAnnotation(::std::primitive::i32),
+    UnknownField(::std::primitive::i32),
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Foo)]
@@ -1004,6 +1012,115 @@ impl ::fbthrift::metadata::ThriftAnnotations for SomeError {
     }
 }
 
+
+
+impl ::std::default::Default for Bar {
+    fn default() -> Self {
+        Self::UnknownField(-1)
+    }
+}
+
+impl ::fbthrift::GetTType for Bar {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl<P> ::fbthrift::Serialize<P> for Bar
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("Bar");
+        match self {
+            Self::Annotated(inner) => {
+                p.write_field_begin("WithAnnotation", ::fbthrift::TType::I32, 1);
+                ::fbthrift::Serialize::write(inner, p);
+                p.write_field_end();
+            }
+            Self::WithoutAnnotation(inner) => {
+                p.write_field_begin("WithoutAnnotation", ::fbthrift::TType::I32, 2);
+                ::fbthrift::Serialize::write(inner, p);
+                p.write_field_end();
+            }
+            Self::UnknownField(_) => {}
+        }
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for Bar
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("WithAnnotation", ::fbthrift::TType::I32, 1),
+            ::fbthrift::Field::new("WithoutAnnotation", ::fbthrift::TType::I32, 2),
+        ];
+        let _ = p.read_struct_begin(|_| ())?;
+        let mut once = false;
+        let mut alt = ::std::option::Option::None;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32, once) {
+                (::fbthrift::TType::Stop, _, _) => break,
+                (::fbthrift::TType::I32, 1, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::Annotated(::fbthrift::Deserialize::read(p)?));
+                }
+                (::fbthrift::TType::I32, 2, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::WithoutAnnotation(::fbthrift::Deserialize::read(p)?));
+                }
+                (fty, _, false) => p.skip(fty)?,
+                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
+                    "Bar".to_string(),
+                    badty,
+                    badid,
+                ))),
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(alt.unwrap_or_default())
+    }
+}
+
+impl Bar {
+    /// Return current union variant name as a tuple of (Rust name, original name).
+    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+        match self {
+            Self::Annotated(_) => Some(("Annotated", "WithAnnotation")),
+            Self::WithoutAnnotation(_) => Some(("WithoutAnnotation", "WithoutAnnotation")),
+            Self::UnknownField(_) => None,
+        }
+    }
+}
+
+impl ::fbthrift::metadata::ThriftAnnotations for Bar {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+            },
+            2 => {
+            },
+            _ => {}
+        }
+
+        None
+    }
+}
 
 mod dot_dot {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]

@@ -3,3 +3,7 @@
 
 //! Thrift constant definitions for `module`.
 
+pub static BAR1: ::once_cell::sync::Lazy<crate::types::Bar> = ::once_cell::sync::Lazy::new(|| crate::types::Bar::Annotated(123));
+
+pub static BAR2: ::once_cell::sync::Lazy<crate::types::Bar> = ::once_cell::sync::Lazy::new(|| crate::types::Bar::WithoutAnnotation(123));
+

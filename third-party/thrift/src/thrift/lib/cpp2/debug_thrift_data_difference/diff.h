@@ -48,11 +48,11 @@ struct diff_output_callback {
       folly::StringPiece) const {
     out_ << path << ":\n";
     if (lhs) {
-      pretty_print<Tag>(out_, *lhs, "  ", lhs_.str());
+      facebook::thrift::pretty_print<Tag>(out_, *lhs, "  ", lhs_.str());
       out_ << "\n";
     }
     if (rhs) {
-      pretty_print<Tag>(out_, *rhs, "  ", rhs_.str());
+      facebook::thrift::pretty_print<Tag>(out_, *rhs, "  ", rhs_.str());
       out_ << "\n";
     }
   }

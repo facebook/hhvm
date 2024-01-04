@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
     auto instance = factory::create(name);
 
     instance.visit([](const auto& what) {
-      pretty_print(std::cout, what);
+      detail::pretty_print(std::cout, what);
       std::cout << std::endl;
     });
   }

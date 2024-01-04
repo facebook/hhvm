@@ -95,12 +95,12 @@ struct debug_output_callback {
     if (lhs) {
       out_ << "\n"
            << "  " << lhs_ << ":\n";
-      pretty_print<Tag>(out_, *lhs, "  ", "    ");
+      facebook::thrift::pretty_print<Tag>(out_, *lhs, "  ", "    ");
     }
     if (rhs) {
       out_ << "\n"
            << "  " << rhs_ << ":\n";
-      pretty_print<Tag>(out_, *rhs, "  ", "    ");
+      facebook::thrift::pretty_print<Tag>(out_, *rhs, "  ", "    ");
     }
     out_ << "\n";
   }

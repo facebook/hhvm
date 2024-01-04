@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
 
   for (std::string name; prompt(name);) {
     setter::set(name, instance);
-    pretty_print(std::cout, instance);
+    detail::pretty_print(std::cout, instance);
     std::cout << std::endl;
   }
 

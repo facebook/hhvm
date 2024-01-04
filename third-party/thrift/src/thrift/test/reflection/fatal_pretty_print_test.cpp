@@ -34,22 +34,22 @@ std::string adjust(std::string input) {
   return folly::rtrimWhitespace(folly::stripLeftMargin(std::move(input))).str();
 }
 
-#define TEST_IMPL_TC(TC, Expected, ...)                          \
-  do {                                                           \
-    std::ostringstream out;                                      \
-    if constexpr (std::is_void_v<TC>) {                          \
-      apache::thrift::pretty_print(out, __VA_ARGS__);            \
-    } else {                                                     \
-      apache::thrift::pretty_print<TC>(out, __VA_ARGS__);        \
-    }                                                            \
-    const auto actual = out.str();                               \
-                                                                 \
-    if (output_result::value) {                                  \
-      std::cout << "actual output: " << actual << std::endl      \
-                << "expected output: " << Expected << std::endl; \
-    }                                                            \
-                                                                 \
-    EXPECT_EQ(Expected, actual);                                 \
+#define TEST_IMPL_TC(TC, Expected, ...)                           \
+  do {                                                            \
+    std::ostringstream out;                                       \
+    if constexpr (std::is_void_v<TC>) {                           \
+      apache::thrift::detail::pretty_print(out, __VA_ARGS__);     \
+    } else {                                                      \
+      apache::thrift::detail::pretty_print<TC>(out, __VA_ARGS__); \
+    }                                                             \
+    const auto actual = out.str();                                \
+                                                                  \
+    if (output_result::value) {                                   \
+      std::cout << "actual output: " << actual << std::endl       \
+                << "expected output: " << Expected << std::endl;  \
+    }                                                             \
+                                                                  \
+    EXPECT_EQ(Expected, actual);                                  \
   } while (false)
 
 #define TEST_IMPL(Expected, ...) TEST_IMPL_TC(void, Expected, __VA_ARGS__)

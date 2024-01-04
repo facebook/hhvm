@@ -48,11 +48,11 @@ struct diff_output_callback {
       folly::StringPiece) const {
     out_ << path << ":\n";
     if (lhs) {
-      pretty_print<TC>(out_, *lhs, "  ", lhs_.str());
+      detail::pretty_print<TC>(out_, *lhs, "  ", lhs_.str());
       out_ << "\n";
     }
     if (rhs) {
-      pretty_print<TC>(out_, *rhs, "  ", rhs_.str());
+      detail::pretty_print<TC>(out_, *rhs, "  ", rhs_.str());
       out_ << "\n";
     }
   }

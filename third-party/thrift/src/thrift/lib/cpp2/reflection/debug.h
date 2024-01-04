@@ -108,12 +108,12 @@ struct debug_output_callback {
     if (lhs) {
       out_ << "\n"
            << "  " << lhs_ << ":\n";
-      pretty_print<TC>(out_, *lhs, "  ", "    ");
+      detail::pretty_print<TC>(out_, *lhs, "  ", "    ");
     }
     if (rhs) {
       out_ << "\n"
            << "  " << rhs_ << ":\n";
-      pretty_print<TC>(out_, *rhs, "  ", "    ");
+      detail::pretty_print<TC>(out_, *rhs, "  ", "    ");
     }
     out_ << "\n";
   }

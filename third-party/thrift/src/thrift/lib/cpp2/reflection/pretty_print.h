@@ -46,8 +46,7 @@
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/reflection/internal/pretty_print-inl-pre.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift::detail {
 
 /**
  * Pretty-prints an object to the given output stream using Thrift's reflection
@@ -115,8 +114,7 @@ template <typename... Args>
   return out.str();
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail
 
 #include <thrift/lib/cpp2/reflection/internal/pretty_print-inl-post.h>
 

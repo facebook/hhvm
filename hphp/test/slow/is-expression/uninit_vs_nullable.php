@@ -2,7 +2,7 @@
 
 function test() :mixed{
   try {
-    if (@$y is ?int) echo "Yes\n";
+    if ($y is ?int) echo "Yes\n";
   } catch (UndefinedVariableException $e) {
     var_dump($e->getMessage());
   }

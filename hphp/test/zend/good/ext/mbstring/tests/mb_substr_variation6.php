@@ -25,7 +25,7 @@ function main(): void {
    */
   for ($i = -60; $i <= 60; $i += 10) {
     try {
-      if (@$a || @$b) {
+      if ($a || $b) {
         $a = null;
         $b = null;
       }

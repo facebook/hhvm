@@ -108,7 +108,7 @@ function main(): void {
       vec[$object, 'null'],
       vec[$object, 'TRUE'],
       vec[$object, '123'],
-      vec[@$temp_class_obj->value, 100],
+      vec[$temp_class_obj->value, 100],
       vec[$object, 'func'],
       vec['object_class', 'foo1'],
     ];

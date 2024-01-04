@@ -22,7 +22,7 @@ $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXv
  */
 for ($i = -60; $i <= 60; $i += 10) {
     try {
-      if (@$a || @$b) {
+      if ($a || $b) {
         $a = null;
         $b = null;
       }

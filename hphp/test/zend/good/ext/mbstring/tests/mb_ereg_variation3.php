@@ -52,7 +52,7 @@ function main_entry(): void {
   $iterator = 1;
   $regs = null;
   foreach($character_classes as $string => $pattern) {
-  	if (is_array(@$regs)) {
+  	if (is_array($regs)) {
   		$regs = null;
   	}
   	// make sure any multibyte output is in base 64

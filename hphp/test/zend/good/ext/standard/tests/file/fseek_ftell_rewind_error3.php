@@ -44,7 +44,7 @@ var_dump(rewind($fp));
 // rewind on a file handle which is unset
 $file_handle = fopen(__FILE__, "r");
 unset($file_handle); //unset file handle
-try { var_dump( rewind(@$file_handle) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( rewind($file_handle) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
 }

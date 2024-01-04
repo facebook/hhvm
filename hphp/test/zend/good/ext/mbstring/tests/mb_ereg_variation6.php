@@ -56,7 +56,7 @@ function main_entry(): void {
   $regs_mb = null;
   foreach ($regex_char as $displayChar => $char) {
   	echo "\n--** Pattern is: $displayChar **--\n";
-  	if (@$regs_ascii || @$regs_mb) {
+  	if ($regs_ascii || $regs_mb) {
   		$regs_ascii = null;
   		$regs_mb = null;
   	}

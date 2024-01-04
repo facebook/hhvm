@@ -45,7 +45,7 @@ var_dump(fseek($fp,10));
 // fseek() on a file handle which is unset
 $file_handle = fopen(__FILE__, "r");
 unset($file_handle); //unset file handle
-try { var_dump( fseek(@$file_handle,10)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( fseek($file_handle,10)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
 }

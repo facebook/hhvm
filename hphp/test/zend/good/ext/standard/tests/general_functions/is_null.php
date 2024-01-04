@@ -11,8 +11,8 @@ $null_var2 = null;
 $valid_nulls = vec[
   NULL,
   null,
-  @$null_var1,
-  @$null_var2,
+  $null_var1,
+  $null_var2,
 ];
 /* loop to check that is_null() recognizes different
    null values, expected output: bool(true) */

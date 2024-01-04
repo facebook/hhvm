@@ -10,6 +10,7 @@
 #include <fizz/crypto/aead/OpenSSLEVPCipher.h>
 #include <fizz/extensions/delegatedcred/DelegatedCredentialCertManager.h>
 #include <fizz/extensions/delegatedcred/SelfDelegatedCredential.h>
+#include <fizz/protocol/OpenSSLFactory.h>
 #ifdef FIZZ_TOOL_ENABLE_BROTLI
 #include <fizz/compression/BrotliCertificateCompressor.h>
 #endif

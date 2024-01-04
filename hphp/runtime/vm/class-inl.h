@@ -814,7 +814,10 @@ inline Class* Class::get(const StringData* name, bool tryAutoload) {
   }
   auto const orig = name;
   String normStr;
-  auto ne = NamedType::getOrCreate(name, &normStr);
+  auto ne = NamedType::getNoCreate(name, &normStr);
+  if (!ne && !tryAutoload) {
+    return nullptr;
+  }
   if (normStr) {
     name = normStr.get();
   }

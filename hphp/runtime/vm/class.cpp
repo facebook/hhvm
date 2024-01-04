@@ -5085,12 +5085,14 @@ Class* Class::loadMissing(const NamedType* ne, const StringData* name) {
   VMRegAnchor _;
   CoeffectsAutoGuard _2;
   AutoloadHandler::s_instance->autoloadType(
-    StrNR(const_cast<StringData*>(name)));
-  return ne->getCachedClass();
+    StrNR(const_cast<StringData*>(name))
+  );
+  if (!ne) ne = NamedType::getNoCreate(name);
+  return ne ? ne->getCachedClass() : nullptr;
 }
 
 Class* Class::get(const NamedType* ne, const StringData *name, bool tryAutoload) {
-  Class *cls = ne->getCachedClass();
+  Class *cls = ne ? ne->getCachedClass() : nullptr;
   if (UNLIKELY(!cls)) {
     if (tryAutoload) {
       return loadMissing(ne, name);

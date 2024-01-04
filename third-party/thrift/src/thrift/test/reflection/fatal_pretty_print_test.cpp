@@ -54,7 +54,7 @@ std::string adjust(std::string input) {
 
 #define TEST_IMPL(Expected, ...) TEST_IMPL_TC(void, Expected, __VA_ARGS__)
 
-TEST(fatal_pretty_print, pretty_print) {
+TEST(FatalPrettyPrint, pretty_print) {
   structA a1;
   *a1.a() = 99;
   *a1.b() = "abc";
@@ -706,19 +706,19 @@ void ref_test() {
   TEST_IMPL(adjust(expectedStr2), v);
 }
 
-TEST(fatal_pretty_print, struct_ref_unique) {
+TEST(FatalPrettyPrint, struct_ref_unique) {
   ref_test<hasRefUnique, UniqueHelper>();
 }
 
-TEST(fatal_pretty_print, ref_shared) {
+TEST(FatalPrettyPrint, ref_shared) {
   ref_test<hasRefShared, SharedHelper>();
 }
 
-TEST(fatal_pretty_print, ref_shared_const) {
+TEST(FatalPrettyPrint, ref_shared_const) {
   ref_test<hasRefSharedConst, SharedConstHelper>();
 }
 
-TEST(fatal_pretty_print, optional_member) {
+TEST(FatalPrettyPrint, optional_member) {
   struct1 v;
   v.field1() = 4;
 
@@ -733,7 +733,7 @@ TEST(fatal_pretty_print, optional_member) {
   TEST_IMPL(adjust(expectedStr), v);
 }
 
-TEST(fatal_pretty_print, escape_strings) {
+TEST(FatalPrettyPrint, escape_strings) {
   structA s;
   s.b() = "foo\nbar";
   const char* expectedStr = R"(
@@ -744,7 +744,7 @@ TEST(fatal_pretty_print, escape_strings) {
   TEST_IMPL(adjust(expectedStr), s);
 }
 
-TEST(fatal_pretty_print, variant_ref_unique) {
+TEST(FatalPrettyPrint, variant_ref_unique) {
   variantHasRefUnique v;
   const char* expectedStr1 = R"(
     <variant>{
@@ -764,7 +764,7 @@ TEST(fatal_pretty_print, variant_ref_unique) {
   TEST_IMPL(adjust(expectedStr2), v);
 }
 
-TEST(fatal_pretty_print, tc_binary_iobuf) {
+TEST(FatalPrettyPrint, tc_binary_iobuf) {
   using tc = apache::thrift::type_class::binary;
   std::string x = "hello";
   std::string y = "world";

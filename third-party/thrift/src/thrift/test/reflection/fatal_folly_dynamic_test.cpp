@@ -359,7 +359,7 @@ std::pair<Struct3, std::string> test_data_1() {
   return std::make_pair(pod, json);
 }
 
-TEST(fatal_folly_dynamic, to_from_dynamic) {
+TEST(FatalFollyDynamic, to_from_dynamic) {
   const auto data = test_data_1<
       test_cpp2::cpp_reflection::struct3,
       test_cpp2::cpp_reflection::structA,
@@ -372,7 +372,7 @@ TEST(fatal_folly_dynamic, to_from_dynamic) {
   test_to_from(pod, json);
 }
 
-TEST(fatal_folly_dynamic, booleans) {
+TEST(FatalFollyDynamic, booleans) {
   const auto decode = [](const char* json) {
     return apache::thrift::from_dynamic<test_cpp2::cpp_reflection::structB>(
         folly::parseJson(json), apache::thrift::dynamic_format::PORTABLE);
@@ -387,7 +387,7 @@ TEST(fatal_folly_dynamic, booleans) {
   EXPECT_EQ(expected, decode(R"({ "c": 1.3, "d": true})"));
 }
 
-TEST(fatal_folly_dynamic, to_from_dynamic_compat) {
+TEST(FatalFollyDynamic, to_from_dynamic_compat) {
   const auto data = test_data_1<
       test_cpp2::cpp_compat::compat_struct3,
       test_cpp2::cpp_compat::compat_structA,
@@ -400,7 +400,7 @@ TEST(fatal_folly_dynamic, to_from_dynamic_compat) {
   test_to_from(pod, json);
 }
 
-TEST(fatal_folly_dynamic, to_from_dynamic_global) {
+TEST(FatalFollyDynamic, to_from_dynamic_global) {
   const auto data = test_data_1<
       ::global_struct3,
       ::global_structA,
@@ -413,7 +413,7 @@ TEST(fatal_folly_dynamic, to_from_dynamic_global) {
   test_to_from(pod, json);
 }
 
-TEST(fatal_folly_dynamic, to_from_dynamic_binary) {
+TEST(FatalFollyDynamic, to_from_dynamic_binary) {
   folly::dynamic actl = folly::dynamic::object;
   folly::dynamic expt = folly::dynamic::object;
 
@@ -541,21 +541,21 @@ void ref_test() {
   test_to_from(v, json2);
 }
 
-TEST(fatal_pretty_print, to_from_struct_ref_unique) {
+TEST(FatalPrettyPrint, to_from_struct_ref_unique) {
   ref_test<test_cpp2::cpp_reflection::hasRefUniqueSimple, UniqueHelper>();
 }
 
-TEST(fatal_pretty_print, to_from_struct_ref_shared) {
+TEST(FatalPrettyPrint, to_from_struct_ref_shared) {
   ref_test<test_cpp2::cpp_reflection::hasRefSharedSimple, SharedHelper>();
 }
 
-TEST(fatal_pretty_print, to_from_struct_ref_shared_const) {
+TEST(FatalPrettyPrint, to_from_struct_ref_shared_const) {
   ref_test<
       test_cpp2::cpp_reflection::hasRefSharedConstSimple,
       SharedConstHelper>();
 }
 
-TEST(fatal_folly_dynamic, to_from_variant_ref_unique) {
+TEST(FatalFollyDynamic, to_from_variant_ref_unique) {
   test_cpp2::cpp_reflection::variantHasRefUnique pod;
 
   test_cpp2::cpp_reflection::structA inner;
@@ -574,7 +574,7 @@ TEST(fatal_folly_dynamic, to_from_variant_ref_unique) {
   test_to_from(pod, json);
 }
 
-TEST(fatal_pretty_print, to_from_struct_box) {
+TEST(FatalPrettyPrint, to_from_struct_box) {
   test_cpp2::cpp_reflection::hasBoxSimple pod;
 
   auto& inner = pod.anOptionalStruct().ensure();
@@ -599,14 +599,14 @@ namespace test_cpp1 {
 namespace cpp_compat {} // namespace cpp_compat
 } // namespace test_cpp1
 
-TEST(fatal_folly_dynamic, optional_string) {
+TEST(FatalFollyDynamic, optional_string) {
   auto obj = apache::thrift::from_dynamic<global_struct1>(
       folly::dynamic::object("field1", "asdf"),
       apache::thrift::dynamic_format::PORTABLE);
   EXPECT_EQ("asdf", *obj.field1());
 }
 
-TEST(fatal_folly_dynamic, list_from_empty_object) {
+TEST(FatalFollyDynamic, list_from_empty_object) {
   // some dynamic languages (lua, php) conflate empty array and empty object;
   // check that we do not throw in such cases
   using type = global_structC;
@@ -625,7 +625,7 @@ TEST(fatal_folly_dynamic, list_from_empty_object) {
   EXPECT_EQ(0, member_meta::getter{}(obj).size());
 }
 
-TEST(fatal_folly_dynamic, set_from_empty_object) {
+TEST(FatalFollyDynamic, set_from_empty_object) {
   // some dynamic languages (lua, php) conflate empty array and empty object;
   // check that we do not throw in such cases
   using type = global_structC;
@@ -643,7 +643,7 @@ TEST(fatal_folly_dynamic, set_from_empty_object) {
   EXPECT_EQ(0, member_meta::getter{}(obj).size());
 }
 
-TEST(fatal_folly_dynamic, map_from_empty_array) {
+TEST(FatalFollyDynamic, map_from_empty_array) {
   // some dynamic languages (lua, php) conflate empty array and empty object;
   // check that we do not throw in such cases
   using type = global_structC;
@@ -663,7 +663,7 @@ TEST(fatal_folly_dynamic, map_from_empty_array) {
   EXPECT_EQ(0, member_meta::getter{}(obj).size());
 }
 
-TEST(fatal_folly_dynamic, from_iobuf) {
+TEST(FatalFollyDynamic, from_iobuf) {
   folly::dynamic dyn =
       folly::dynamic::object("buf", "foo")("bufInPlace", "bar");
   auto obj =
@@ -680,7 +680,7 @@ TEST(fatal_folly_dynamic, from_iobuf) {
   EXPECT_EQ(objEmpty.bufInPlace()->moveToFbString(), "");
 }
 
-TEST(fatal_folly_dynamic, to_iobuf) {
+TEST(FatalFollyDynamic, to_iobuf) {
   test_cpp2::cpp_reflection::StructWithIOBuf obj;
   obj.buf() = folly::IOBuf::copyBuffer("foo");
   obj.bufInPlace() = std::move(*folly::IOBuf::copyBuffer("bar"));
@@ -699,7 +699,7 @@ TEST(fatal_folly_dynamic, to_iobuf) {
 
 namespace {
 
-class fatal_folly_dynamic_enum : public ::testing::Test {
+class FatalFollyDynamicEnum : public ::testing::Test {
  protected:
   void SetUp() override {
     EXPECT_SAME< // sanity check
@@ -716,7 +716,7 @@ class fatal_folly_dynamic_enum : public ::testing::Test {
 };
 } // namespace
 
-TEST_F(fatal_folly_dynamic_enum, from_string_strict) {
+TEST_F(FatalFollyDynamicEnum, from_string_strict) {
   folly::dynamic dyn = folly::dynamic::object(member_name_s, "field0");
   auto obj = apache::thrift::from_dynamic<type>(
       dyn, apache::thrift::dynamic_format::PORTABLE);
@@ -728,7 +728,7 @@ TEST_F(fatal_folly_dynamic_enum, from_string_strict) {
       folly::ConversionError);
 }
 
-TEST_F(fatal_folly_dynamic_enum, from_integer_strict) {
+TEST_F(FatalFollyDynamicEnum, from_integer_strict) {
   folly::dynamic dyn = folly::dynamic::object(member_name_s, 0);
   auto obj = apache::thrift::from_dynamic<type>(
       dyn, apache::thrift::dynamic_format::JSON_1);
@@ -740,7 +740,7 @@ TEST_F(fatal_folly_dynamic_enum, from_integer_strict) {
       std::invalid_argument);
 }
 
-TEST_F(fatal_folly_dynamic_enum, from_string_lenient) {
+TEST_F(FatalFollyDynamicEnum, from_string_lenient) {
   folly::dynamic dyn = folly::dynamic::object(member_name_s, "field0");
   auto obj1 = apache::thrift::from_dynamic<type>(
       dyn,
@@ -756,7 +756,7 @@ TEST_F(fatal_folly_dynamic_enum, from_string_lenient) {
   EXPECT_EQ(global_enum1::field0, member_meta::getter{}(obj2));
 }
 
-TEST_F(fatal_folly_dynamic_enum, from_integer_lenient) {
+TEST_F(FatalFollyDynamicEnum, from_integer_lenient) {
   folly::dynamic dyn = folly::dynamic::object(member_name_s, 0);
   auto obj1 = apache::thrift::from_dynamic<type>(
       dyn,
@@ -772,7 +772,7 @@ TEST_F(fatal_folly_dynamic_enum, from_integer_lenient) {
   EXPECT_EQ(global_enum1::field0, member_meta::getter{}(obj2));
 }
 
-TEST(fatal_from_dynamic, struct_with_vector_bool) {
+TEST(FatalFromDynamic, struct_with_vector_bool) {
   folly::dynamic v = folly::dynamic::object();
   v["values"] = folly::dynamic::array(true, false, true, false);
   auto res = apache::thrift::from_dynamic<

@@ -783,8 +783,10 @@ void Translator::publishMetaInternal() {
     for (auto& it : transMeta->fixups.interceptTCAs) {
       tc::recordInterceptTCA(it.first, it.second);
     }
+    this->publishMetaImpl();
+  } else {
+    this->publishMetaImpl();
   }
-  this->publishMetaImpl();
 }
 
 void Translator::publishCodeInternal() {

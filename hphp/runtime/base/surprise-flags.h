@@ -40,9 +40,12 @@ enum SurpriseFlag : size_t {
   EventHookFlag        = 1ull << 51,
   PendingExceptionFlag = 1ull << 52,
   /*
-   * Remark: bit 53 used to be the InterceptFlag.  However fb_intercept2 does not
-   * rely anymore on surprise flags and bit 53 can be reused.
-  */
+   * Remark: bit 53 is the InterceptFlag and is relied upon by the legacy,
+   * surprise flag based, implementation of fb_intercept2.  Once the legacy
+   * implementation is removed bit 53 can be reused for other purposes.
+   */
+  InterceptFlag        = 1ull << 53,
+
   XenonSignalFlag      = 1ull << 54,
   AsyncEventHookFlag   = 1ull << 55,
 
@@ -86,6 +89,7 @@ enum SurpriseFlag : size_t {
     DebuggerHookFlag |
     DebuggerSignalFlag |
     EventHookFlag |
+    InterceptFlag |
     XenonSignalFlag |
     HeapSamplingFlag |
     IntervalTimerFlag |
@@ -159,4 +163,3 @@ inline size_t fetchAndClearSurpriseFlags() {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

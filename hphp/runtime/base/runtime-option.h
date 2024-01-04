@@ -1545,6 +1545,9 @@ struct RuntimeOption {
      setting it into a few super globals - including fully removing
      the existance of the $_COOKIE superglobal */                       \
   F(bool, DisableParsedCookies, false)                                  \
+  /* Enables the non-surprise flag based implementation of
+     fb_intercept2 */                                                   \
+  F(bool, FastMethodIntercept, false)                                   \
   /* */
 
 private:

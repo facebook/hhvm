@@ -132,7 +132,7 @@ void cgCheckSurpriseFlagsEnter(IRLS& env, const IRInstruction* inst) {
 
   auto const done = v.makeBlock();
   auto const handleSurprise = label(env, inst->taken());
-  if (extra->func->isInterceptable()) {
+  if (RO::EvalFastMethodIntercept && extra->func->isInterceptable()) {
     v << interceptjcc{CC_AE, sf, {done, handleSurprise}};
   } else {
     v << jcc{CC_AE, sf, {done, handleSurprise}};

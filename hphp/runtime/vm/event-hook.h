@@ -72,12 +72,18 @@ struct EventHook {
   static void DisableAsync();
   static void EnableDebug();
   static void DisableDebug();
+  static void EnableIntercept();
+  static void DisableIntercept();
 
   static void DoMemoryThresholdCallback();
 
   static inline bool checkSurpriseFlagsAndIntercept(const Func* func) {
-    return checkSurpriseFlags() ||
-      (func->maybeIntercepted() && is_intercepted(func));
+    if (RO::EvalFastMethodIntercept) {
+      return checkSurpriseFlags() ||
+        (func->maybeIntercepted() && is_intercepted(func));
+    } else {
+      return checkSurpriseFlags();
+    }
   }
 
   /**

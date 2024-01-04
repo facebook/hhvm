@@ -1,0 +1,10 @@
+----HANDLER----
+string(3) "foo"
+NULL
+vec(1) {
+  string(4) "Hey!"
+}
+---------------
+
+Fatal error: Uncaught exception 'RuntimeException' with message 'Mismatch between reifiedness of callee and callback' in %s:17
+%A

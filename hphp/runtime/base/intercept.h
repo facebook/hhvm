@@ -34,6 +34,11 @@ struct Variant;
  */
 bool register_intercept(const String& name, const Variant& callback);
 
+/* The legacy implementation of method intercept, based on surprise flags.
+ */
+bool register_intercept_surprise_flag(const String& name,
+                                      const Variant& callback);
+
 /**
  * Check to see if func is intercepted for current request.
  */

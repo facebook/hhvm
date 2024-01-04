@@ -1,0 +1,3 @@
+Fatal error: Uncaught exception 'BadMethodCallException' with message 'Cannot call the reified function 'foo' without the reified generics' in %s:25
+Stack trace:
+%A

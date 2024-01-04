@@ -108,6 +108,14 @@ void EventHook::DisableDebug() {
   clearSurpriseFlag(DebuggerHookFlag);
 }
 
+void EventHook::EnableIntercept() {
+  setSurpriseFlag(InterceptFlag);
+}
+
+void EventHook::DisableIntercept() {
+  clearSurpriseFlag(InterceptFlag);
+}
+
 struct ExecutingSetprofileCallbackGuard {
   ExecutingSetprofileCallbackGuard() {
     g_context->m_executingSetprofileCallback = true;
@@ -469,6 +477,9 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   assertx(!isResumed(ar));
 
   const Func* func = ar->func();
+  if (LIKELY(!RO::EvalFastMethodIntercept && !func->maybeIntercepted())) {
+    return true;
+  }
   assertx(func->isInterceptable() && func->maybeIntercepted());
 
   Variant* h = get_intercept_handler(func);
@@ -749,7 +760,8 @@ bool EventHook::onFunctionCall(const ActRec* ar, int funcType,
   const Func* func = ar->func();
   auto const flags = handle_request_surprise();
 
-  if (func->maybeIntercepted() && is_intercepted(func)) {
+  if ((RO::EvalFastMethodIntercept && func->maybeIntercepted() && is_intercepted(func))
+      || (!RO::EvalFastMethodIntercept && (flags & InterceptFlag))) {
     if (!RunInterceptHandler(const_cast<ActRec*>(ar))) {
       assertx(func->isInterceptable());
       return false;

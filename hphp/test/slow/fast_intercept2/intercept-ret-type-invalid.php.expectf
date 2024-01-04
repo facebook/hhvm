@@ -1,0 +1,5 @@
+string(1) "C"
+
+Fatal error: Uncaught exception 'RuntimeException' with message 'fb_intercept2 requires a darray to be returned' in %s:15
+Stack trace:
+%A

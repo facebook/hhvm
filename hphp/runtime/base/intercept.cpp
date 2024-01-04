@@ -66,6 +66,73 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(InterceptRequestData, s_intercept_data);
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool register_intercept_surprise_flags(const Variant& callback,
+                                       Func *const interceptedFunc) {
+  assertx(!RO::EvalFastMethodIntercept);
+
+  if (!callback.toBoolean()) {
+    if (!s_intercept_data->empty()) {
+      auto& handlers = s_intercept_data->intercept_handlers();
+      auto it = handlers.find(interceptedFunc);
+      if (it != handlers.end()) {
+        // erase the map entry before destroying the value
+        auto tmp = it->second;
+        handlers.erase(it);
+      }
+    }
+    // We've cleared out all the intercepts, so we don't need to pay the
+    // surprise flag cost anymore
+    if (s_intercept_data->empty()) {
+      EventHook::DisableIntercept();
+    }
+    return true;
+  }
+
+  EventHook::EnableIntercept();
+
+  auto& handlers = s_intercept_data->intercept_handlers();
+  handlers[interceptedFunc] = callback;
+  interceptedFunc->setMaybeIntercepted();
+  return true;
+}
+
+bool register_intercept_fast_method_intercept(const Variant& callback,
+                                              Func *const interceptedFunc) {
+  assertx(RO::EvalFastMethodIntercept);
+  auto interceptedFuncId = interceptedFunc->getFuncId();
+
+  if (!callback.toBoolean()) {
+    if (!s_intercept_data->empty()) {
+      auto& handlers = s_intercept_data->intercept_handlers();
+      auto it = handlers.find(interceptedFunc);
+      if (it != handlers.end()) {
+        // erase the map entry before destroying the value
+        auto tmp = it->second;
+        handlers.erase(it);
+        // Record that the current request does not intercept anymore interceptedFunc.
+        // If no other request intercepts interceptedFunc, then replace the forced `jmp`
+        // to the surprise stub with a conditional `jcc` in the TC translations of
+        // interceptedFunc.
+        jit::tc::stopInterceptFunc(interceptedFuncId);
+      }
+    }
+    return true;
+  }
+
+  auto& handlers = s_intercept_data->intercept_handlers();
+  auto [it, did_insert] = handlers.emplace(interceptedFunc, callback);
+  if (!did_insert) {
+    it->second = callback;
+  } else {
+    // The request didn't previously intercept this function: record this and
+    // replace the conditional `jcc` implementing the surprise flag check with a
+    // forced jmp to the surprise stub in all the TC translations of the function.
+    jit::tc::startInterceptFunc(interceptedFuncId);
+  };
+  interceptedFunc->setMaybeIntercepted();
+  return true;
+}
+
 bool register_intercept(const String& name, const Variant& callback) {
   SCOPE_EXIT {
     DEBUGGER_ATTACHED_ONLY(phpDebuggerInterceptRegisterHook(name));
@@ -107,9 +174,8 @@ bool register_intercept(const String& name, const Variant& callback) {
     }
   }
 
-  if (StructuredLog::enabled() &&
-    RuntimeOption::EvalDumpJitEnableRenameFunctionStats &&
-    StructuredLog::coinflip(RO::EvalJitInterceptFunctionLogRate)) {
+  if (RO::EvalDumpJitEnableRenameFunctionStats &&
+      StructuredLog::coinflip(RO::EvalJitInterceptFunctionLogRate)) {
     StructuredLogEntry entry;
     entry.setStr("intercepted_func", interceptedFunc->fullName()->data());
     addBacktraceToStructLog(
@@ -118,39 +184,11 @@ bool register_intercept(const String& name, const Variant& callback) {
     StructuredLog::log("hhvm_intercept_function", entry);
   }
 
-  auto interceptedFuncId = interceptedFunc->getFuncId();
-
-  if (!callback.toBoolean()) {
-    if (!s_intercept_data->empty()) {
-      auto& handlers = s_intercept_data->intercept_handlers();
-      auto it = handlers.find(interceptedFunc);
-      if (it != handlers.end()) {
-        // erase the map entry before destroying the value
-        auto tmp = it->second;
-        handlers.erase(it);
-        // Record that the current request does not intercept anymore interceptedFunc.
-        // If no other request intercepts interceptedFunc, then replace the forced `jmp`
-        // to the surprise stub with a conditional `jcc` in the TC translations of
-        // interceptedFunc.
-        jit::tc::stopInterceptFunc(interceptedFuncId);
-      }
-    }
-
-    return true;
-  }
-
-  auto& handlers = s_intercept_data->intercept_handlers();
-  auto [it, did_insert] = handlers.emplace(interceptedFunc, callback);
-  if (!did_insert) {
-    it->second = callback;
+  if (RO::EvalFastMethodIntercept) {
+    return register_intercept_fast_method_intercept(callback, interceptedFunc);
   } else {
-    // The request didn't previously intercept this function: record this and
-    // replace the conditional `jcc` implementing the surprise flag check with a
-    // forced jmp to the surprise stub in all the TC translations of the function.
-    jit::tc::startInterceptFunc(interceptedFuncId);
-  };
-  interceptedFunc->setMaybeIntercepted();
-  return true;
+    return register_intercept_surprise_flags(callback, interceptedFunc);
+  }
 }
 
 bool is_intercepted(const Func* func) {
@@ -173,7 +211,7 @@ Variant* get_intercept_handler(const Func* func) {
 }
 
 void reset_all_intercepted_functions() {
-  if (!s_intercept_data->empty()) {
+  if (RO::EvalFastMethodIntercept && !s_intercept_data->empty()) {
     auto& handlers = s_intercept_data->intercept_handlers();
     for (auto& h: handlers) {
       jit::tc::stopInterceptFunc(h.first->getFuncId());

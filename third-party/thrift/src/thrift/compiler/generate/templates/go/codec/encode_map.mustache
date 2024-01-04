@@ -28,9 +28,18 @@ if err := p.WriteMapBegin({{!
     return thrift.PrependError("error writing map begin: ", err)
 }
 for k, v := range item {
+    {{#type:key_type}}
+    {{^type:go_comparable?}}
+    if k == nil {
+        return fmt.Errorf("%T write map: nil key is not allowed.", item)
+    }
+
+    {{/type:go_comparable?}}
+    {{/type:key_type}}
+    {{! Use scopes to avoid multiple 'item' variable collisions }}
     {
-        item := k
         {{#type:key_type}}
+        item := {{^type:go_comparable?}}*{{/type:go_comparable?}}k
         {{> codec/encode}}
         {{/type:key_type}}
     }

@@ -27,6 +27,7 @@ if err := p.WriteListBegin({{!
     return thrift.PrependError("error writing list begin: ", err)
 }
 for _, v := range item {
+    {{! Use scope to avoid multiple 'item' variable collisions }}
     {
         item := v
         {{#type:list_elem_type}}

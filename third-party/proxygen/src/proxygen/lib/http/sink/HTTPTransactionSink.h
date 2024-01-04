@@ -106,6 +106,9 @@ class HTTPTransactionSink : public HTTPSink {
   void sendEOM() override {
     httpTransaction_->sendEOM();
   }
+  bool isEgressEOMSeen() override {
+    return httpTransaction_->isEgressEOMSeen();
+  }
   void sendAbort() override {
     httpTransaction_->sendAbort();
   }

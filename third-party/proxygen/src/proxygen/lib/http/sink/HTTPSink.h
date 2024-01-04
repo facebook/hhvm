@@ -66,6 +66,7 @@ class HTTPSink {
   virtual void sendChunkTerminator() = 0;
   virtual void sendTrailers(const HTTPHeaders& trailers) = 0;
   virtual void sendEOM() = 0;
+  virtual bool isEgressEOMSeen() = 0;
   virtual void sendAbort() = 0;
   virtual void updateAndSendPriority(HTTPPriority priority) = 0;
   enum class ByteEventFlags : uint8_t { ACK = 0x01, TX = 0x02 };

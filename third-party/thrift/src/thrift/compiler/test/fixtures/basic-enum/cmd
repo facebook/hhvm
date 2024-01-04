@@ -2,6 +2,6 @@ java_deprecated src/module.thrift
 json_experimental src/module.thrift
 mstch_cpp2 src/module.thrift
 mstch_py3 src/module.thrift
-mstch_rust src/module.thrift
+mstch_rust:deprecated_default_enum_min_i32 src/module.thrift
 mstch_java src/module.thrift
 starlark src/module.thrift

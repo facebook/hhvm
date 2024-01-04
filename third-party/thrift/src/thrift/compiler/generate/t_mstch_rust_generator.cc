@@ -577,6 +577,9 @@ class rust_mstch_program : public mstch_program {
     register_has_option(
         "program:deprecated_optional_with_default_is_some?",
         "deprecated_optional_with_default_is_some");
+    register_has_option(
+        "program:deprecated_default_enum_min_i32?",
+        "deprecated_default_enum_min_i32");
   }
   mstch::node rust_has_types() {
     return !program_->structs_and_unions().empty() ||
@@ -2400,6 +2403,8 @@ THRIFT_REGISTER_GENERATOR(
     "    noserver:        Don't emit server code\n"
     "    default_enum_zero:\n"
     "                     Default enum value is zero, conforming to the thrift spec\n"
+    "    deprecated_default_enum_min_i32:\n"
+    "                     Default enum value is i32::MIN. Deprecated, to be removed in future versions\n"
     "    deprecated_optional_with_default_is_some:\n"
     "                     Optionals with defaults initialized to `Some`. Deprecated, to be removed in future versions\n"
     "    include_prefix=: Set program:include_prefix.\n"

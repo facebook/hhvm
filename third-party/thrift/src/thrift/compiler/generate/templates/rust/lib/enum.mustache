@@ -64,12 +64,22 @@ impl ::fbthrift::ThriftEnum for {{enum:rust_name}} {
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for {{enum:rust_name}} {
     fn default() -> Self {
+        {{#program:deprecated_default_enum_min_i32?}}
+        {{#program:default_enum_zero?}}
+        ::std::compile_error!("Found thrift enum: `{{enum:rust_name}}`. The default thrift enum value in rust is changing to conform to the thrift standard. During the transition period, please set either `deprecated_default_enum_min_i32` to keep the old behavior or `default_enum_zero` to opt for the new one. Found: both flags are set");
+        {{/program:default_enum_zero?}}
+        {{/program:deprecated_default_enum_min_i32?}}
+        {{^program:deprecated_default_enum_min_i32?}}
+        {{^program:default_enum_zero?}}
+        ::std::compile_error!("Found thrift enum: `{{enum:rust_name}}`. The default thrift enum value in rust is changing to conform to the thrift standard. During the transition period, please set either `deprecated_default_enum_min_i32` to keep the old behavior or `default_enum_zero` to opt for the new one. Found: neither flag is set");
+        {{/program:default_enum_zero?}}
+        {{/program:deprecated_default_enum_min_i32?}}
         {{#program:default_enum_zero?}}
         Self(0)
         {{/program:default_enum_zero?}}
-        {{^program:default_enum_zero?}}
+        {{#program:deprecated_default_enum_min_i32?}}
         Self(::std::primitive::i32::MIN)
-        {{/program:default_enum_zero?}}
+        {{/program:deprecated_default_enum_min_i32?}}
     }
 }
 

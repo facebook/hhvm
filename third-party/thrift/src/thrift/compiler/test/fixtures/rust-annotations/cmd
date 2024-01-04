@@ -1,1 +1,1 @@
-mstch_rust src/module.thrift
+mstch_rust:deprecated_default_enum_min_i32 src/module.thrift

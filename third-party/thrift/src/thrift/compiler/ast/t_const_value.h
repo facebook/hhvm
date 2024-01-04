@@ -74,7 +74,7 @@ class t_const_value {
         set_bool(other.bool_val_);
         break;
       case CV_INTEGER:
-        set_integer(other.int_val_);
+        int_val_ = other.int_val_;
         break;
       case CV_DOUBLE:
         double_val_ = other.double_val_;
@@ -137,8 +137,6 @@ class t_const_value {
   void set_integer(int64_t val) {
     kind_ = CV_INTEGER;
     int_val_ = val;
-    // It is valid to initialize a double with an integer literal.
-    double_val_ = val;
   }
 
   int64_t get_integer() const {
@@ -152,7 +150,7 @@ class t_const_value {
   }
 
   double get_double() const {
-    assert(kind_ == CV_INTEGER || kind_ == CV_DOUBLE);
+    assert(kind_ == CV_DOUBLE);
     return double_val_;
   }
 

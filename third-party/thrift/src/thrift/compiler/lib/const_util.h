@@ -47,7 +47,9 @@ std::enable_if_t<std::is_integral_v<T>> hydrate_const(
 template <typename T>
 std::enable_if_t<std::is_floating_point_v<T>> hydrate_const(
     T& out, const t_const_value& val) {
-  out = val.get_double();
+  out = val.kind() == t_const_value::t_const_value_kind::CV_DOUBLE
+      ? val.get_double()
+      : val.get_integer();
 }
 inline void hydrate_const(std::string& out, const t_const_value& val) {
   out = val.get_string();
@@ -185,11 +187,17 @@ inline protocol::Value const_to_value(const t_const_value& val) {
       break;
     case t_type::type::t_float:
       ret.ensure_float();
-      ret.as_float() = val.get_double();
+      ret.as_float() =
+          val.kind() == t_const_value::t_const_value_kind::CV_DOUBLE
+          ? val.get_double()
+          : val.get_integer();
       break;
     case t_type::type::t_double:
       ret.ensure_double();
-      ret.as_double() = val.get_double();
+      ret.as_double() =
+          val.kind() == t_const_value::t_const_value_kind::CV_DOUBLE
+          ? val.get_double()
+          : val.get_integer();
       break;
     case t_type::type::t_string:
       ret.ensure_string();

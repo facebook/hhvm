@@ -17,12 +17,17 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/execution-context.h"
+
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/decl-provider.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/util/concurrent-lru-cache.h"
+#include "hphp/zend/zend-string.h"
 
 #include <fstream>
+#include <memory>
 
 TRACE_SET_MOD(decl);
 
@@ -126,6 +131,7 @@ const StaticString s_is_no_auto_likes("is_no_auto_likes");
 const StaticString s_is_no_dynamic("is_no_auto_dynamic");
 
 std::optional<hackc::DeclParserConfig> m_config;
+std::optional<std::string> m_root;
 
 void assertEnv() {
   if (RuntimeOption::RepoAuthoritative) {
@@ -135,12 +141,38 @@ void assertEnv() {
 }
 
 void initDeclConfig() {
-  if (!m_config.has_value()) {
+  if (!(m_config.has_value() && m_root.has_value())) {
     const RepoOptions& options = g_context->getRepoOptionsForCurrentFrame();
     hackc::DeclParserConfig config;
     options.flags().initDeclConfig(config);
     m_config = config;
+    m_root = options.dir();
   }
+}
+
+// Returns the pair of <sha1 Hash, and optional file contents>
+// We return file contents only if the file is not found in Eden
+// since we need it for computing the decls later.
+std::pair<SHA1, std::optional<std::string>> computeSHA1(
+    const std::string& filePath) {
+  // If we can get the hash from Eden, do that.
+  // else, compute from the file contents
+  initDeclConfig();
+  auto root = m_root.value();
+  auto edenHash = getHashForFile(filePath, root);
+  if (edenHash.has_value()) {
+    return std::make_pair(edenHash.value(), std::nullopt);
+  }
+
+  std::ifstream s(filePath);
+  if (!s.good()) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+        String("Couldn't open file: ") + filePath);
+  }
+  std::string text{
+      std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>()};
+  auto sha1 = HPHP::string_sha1(text);
+  return std::make_pair(SHA1{sha1}, std::move(text));
 }
 
 // Allocate an HPHP::String copied from a rust::String
@@ -190,7 +222,7 @@ void maybeSetBool(Array& info, bool fval, const StaticString& fname) {
 }
 
 /*
- * Maps the rust type constraints to their hack shape equivalent
+ * Maps the Rust type constraints to their Hack shape equivalent
  */
 Array populateTypeConstraints(
     const rust::Vec<hackc::ExtDeclTypeConstraint>& constraints) {
@@ -209,7 +241,7 @@ Array populateTypeConstraints(
 }
 
 /*
- * Maps the rust enum types to their hack shape equivalent
+ * Maps the Rust enum types to their Hack shape equivalent
  */
 Array populateEnumType(const rust::Vec<hackc::ExtDeclEnumType>& entypes) {
   if (entypes.empty()) {
@@ -228,7 +260,7 @@ Array populateEnumType(const rust::Vec<hackc::ExtDeclEnumType>& entypes) {
 }
 
 /*
- * Maps the rust attributes to their hack shape equivalent
+ * Maps the Rust attributes to their Hack shape equivalent
  */
 Array populateAttributes(const rust::Vec<hackc::ExtDeclAttribute>& attrs) {
   if (attrs.empty()) {
@@ -246,7 +278,7 @@ Array populateAttributes(const rust::Vec<hackc::ExtDeclAttribute>& attrs) {
 }
 
 /*
- * Maps the rust TParams to their hack shape equivalent
+ * Maps the Rust TParams to their Hack shape equivalent
  */
 Array populateTParams(const rust::Vec<hackc::ExtDeclTparam>& tparams) {
   if (tparams.empty()) {
@@ -268,7 +300,7 @@ Array populateTParams(const rust::Vec<hackc::ExtDeclTparam>& tparams) {
 }
 
 /*
- * Maps the rust class constants to their hack shape equivalent
+ * Maps the Rust class constants to their Hack shape equivalent
  */
 Array populateConstants(const rust::Vec<hackc::ExtDeclClassConst>& consts) {
   if (consts.empty()) {
@@ -287,7 +319,7 @@ Array populateConstants(const rust::Vec<hackc::ExtDeclClassConst>& consts) {
 }
 
 /*
- * Maps the rust class type consts to their hack shape equivalent
+ * Maps the Rust class type consts to their Hack shape equivalent
  */
 Array populateTypeConstants(
     const rust::Vec<hackc::ExtDeclClassTypeConst>& typeconsts) {
@@ -309,7 +341,7 @@ Array populateTypeConstants(
 }
 
 /*
- * Maps the rust properties to their hack shape equivalent
+ * Maps the Rust properties to their Hack shape equivalent
  */
 Array populateProps(const rust::Vec<hackc::ExtDeclProp>& props) {
   if (props.empty()) {
@@ -337,7 +369,7 @@ Array populateProps(const rust::Vec<hackc::ExtDeclProp>& props) {
 }
 
 /*
- * Maps the rust methods to their hack shape equivalent
+ * Maps the Rust methods to their Hack shape equivalent
  */
 Array populateMethodParams(const rust::Vec<hackc::ExtDeclMethodParam>& params) {
   if (params.empty()) {
@@ -360,7 +392,7 @@ Array populateMethodParams(const rust::Vec<hackc::ExtDeclMethodParam>& params) {
 }
 
 /*
- * Maps the rust method signatures (TFun) to their hack shape equivalent
+ * Maps the Rust method signatures (TFun) to their Hack shape equivalent
  */
 Array populateSignature(const rust::Vec<hackc::ExtDeclSignature>& sigs) {
   for (auto const& sig : sigs) {
@@ -399,7 +431,7 @@ Array populateSignature(const rust::Vec<hackc::ExtDeclSignature>& sigs) {
 }
 
 /*
- * Maps the rust methods to their hack shape equivalent
+ * Maps the Rust methods to their Hack shape equivalent
  */
 Array populateMethods(const rust::Vec<hackc::ExtDeclMethod>& meths) {
   if (meths.empty()) {
@@ -426,7 +458,7 @@ Array populateMethods(const rust::Vec<hackc::ExtDeclMethod>& meths) {
 }
 
 /*
- * Maps a rust class to its hack shape equivalent
+ * Maps a Rust class to its Hack shape equivalent
  */
 Array populateClass(const hackc::ExtDeclClass& kls) {
   Array info = Array::CreateDict();
@@ -481,7 +513,7 @@ Array populateClass(const hackc::ExtDeclClass& kls) {
 } // namespace
 
 /*
- * Maps the rust classes to their hack shape equivalent
+ * Maps the Rust classes to their Hack shape equivalent
  */
 Array populateClasses(const rust::Vec<hackc::ExtDeclClass>& classes) {
   if (classes.empty()) {
@@ -514,7 +546,7 @@ Array populateFileConsts(const rust::Vec<hackc::ExtDeclFileConst>& consts) {
 }
 
 /*
- * Maps the rust functions to their hack shape equivalent
+ * Maps the Rust functions to their Hack shape equivalent
  */
 Array populateFileFuncs(const rust::Vec<hackc::ExtDeclFileFunc>& funs) {
   if (funs.empty()) {
@@ -539,7 +571,7 @@ Array populateFileFuncs(const rust::Vec<hackc::ExtDeclFileFunc>& funs) {
 }
 
 /*
- * Maps the rust module definitions to their hack shape equivalent
+ * Maps the Rust module definitions to their Hack shape equivalent
  */
 Array populateModules(const rust::Vec<hackc::ExtDeclModule>& modules) {
   if (modules.empty()) {
@@ -558,7 +590,7 @@ Array populateModules(const rust::Vec<hackc::ExtDeclModule>& modules) {
 }
 
 /*
- * Maps the rust type definitions to their hack shape equivalent
+ * Maps the Rust type definitions to their Hack shape equivalent
  */
 Array populateTypedefs(const rust::Vec<hackc::ExtDeclTypeDef>& typedefs) {
   if (typedefs.empty()) {
@@ -585,7 +617,7 @@ Array populateTypedefs(const rust::Vec<hackc::ExtDeclTypeDef>& typedefs) {
 }
 
 /*
- * Maps the rust file to its hack shape equivalent
+ * Maps the Rust file to its Hack shape equivalent
  */
 Array populateFile(const hackc::ExtDeclFile& file) {
   Array info = Array::CreateDict();
@@ -605,6 +637,14 @@ Array populateFile(const hackc::ExtDeclFile& file) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+// Mapping of SHA1 of file contents to the Decls from hackc::parse_decls().
+// SHA1 is used as a cache key, invalidating if the file on disk changes.
+// LRU cache means we eventually evict entries for files that have changed.
+using FileDeclsCacheEntry =
+    std::pair<SHA1, std::shared_ptr<rust::Box<hackc::DeclsHolder>>>;
+using FileDeclsCache = ConcurrentLRUCache<std::string, FileDeclsCacheEntry>;
+static FileDeclsCache fileDeclsCache(2048);
+
 /*
   The native implementation of the FileDecls class. The class is accessible
   through Hack and exposes the methods of ext_decl extension to retrieve info.
@@ -620,35 +660,15 @@ struct FileDecls : SystemLib::ClassLoader<"HH\\FileDecls"> {
   ~FileDecls() {}
 
   void validateState() {
-    if (!this->declsHolder.has_value() || this->error != empty_string()) {
+    if (!this->declsHolder || this->error != empty_string()) {
       SystemLib::throwInvalidOperationExceptionObject(
           "FileDecls is in erroneous state");
     }
   }
 
   String error = empty_string();
-  std::optional<rust::Box<hackc::DeclsHolder>> declsHolder;
-
-  // Filename to DeclsHolder for hackc::parse_decls() results
-  static hphp_hash_map<std::string, FileDecls> m_cache;
+  std::shared_ptr<rust::Box<hackc::DeclsHolder>> declsHolder;
 };
-
-Object getDeclsObjectFromText(const String& text) {
-  assertEnv();
-  Object obj{FileDecls::classof()};
-  auto data = Native::data<FileDecls>(obj);
-  initDeclConfig();
-  try {
-    data->declsHolder = hackc::parse_decls(
-        m_config.value(),
-        "",
-        {(const uint8_t*)text.data(), (size_t)text.size()});
-  } catch (const std::exception& ex) {
-    data->error = ex.what();
-  }
-
-  return obj;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // API
@@ -658,28 +678,82 @@ Object getDeclsObjectFromText(const String& text) {
  * a new instance of FileDecls. This method may use a cache instead of parsing.
  */
 Object HHVM_STATIC_METHOD(FileDecls, parsePath, const String& path) {
+  assertEnv();
+  initDeclConfig();
   std::filesystem::path filePath{path.data()};
   if (!std::filesystem::exists(filePath)) {
     SystemLib::throwInvalidArgumentExceptionObject(
         String("File not found ") + path.data());
   };
 
-  std::ifstream s(filePath.native());
-  if (!s.good()) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-        String("Couldn't open file: ") + path.data());
+  // Check if we have already parsed this file
+  // and if the cache contains the result
+  // validated by the SHA1 hash of the file contents
+  FileDeclsCache::ConstAccessor acc;
+  auto const [sha1, textOpt] = computeSHA1(filePath);
+  if (fileDeclsCache.find(acc, filePath.native())) {
+    FileDeclsCacheEntry entry = *acc;
+    auto& [expectedSha1, decls] = entry;
+    if (expectedSha1 == sha1) {
+      Object obj{FileDecls::classof()};
+      auto data = Native::data<FileDecls>(obj);
+      data->declsHolder = std::move(decls);
+      return obj;
+    }
   }
-  std::string text{
-      std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>()};
 
-  return getDeclsObjectFromText(text);
+  std::string text;
+  if (textOpt.has_value()) {
+    text = textOpt.value();
+  } else {
+    std::ifstream s(filePath.native());
+    if (!s.good()) {
+      SystemLib::throwInvalidArgumentExceptionObject(
+          String("Couldn't open file: ") + path.data());
+    }
+    // Reading the file off disk makes us susceptible to tearing.
+    // Ideally, we can precompute file + hash and obtain file content via CAS
+    // but that is, as of now, unimplemented.
+    text = std::string{
+        std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>()};
+  }
+  Object obj{FileDecls::classof()};
+  auto data = Native::data<FileDecls>(obj);
+  initDeclConfig();
+  try {
+    data->declsHolder =
+        std::make_shared<rust::Box<hackc::DeclsHolder>>(hackc::parse_decls(
+            m_config.value(),
+            "",
+            {(const uint8_t*)text.data(), (size_t)text.size()}));
+  } catch (const std::exception& ex) {
+    data->error = ex.what();
+  }
+
+  auto ptr = data->declsHolder;
+  fileDeclsCache.insert(filePath.native(), {sha1, ptr});
+  return obj;
 }
 
 /*
  * Parses the provided text and returns a new instance of FileDecls.
  */
 Object HHVM_STATIC_METHOD(FileDecls, parseText, const String& text) {
-  return getDeclsObjectFromText(text);
+  assertEnv();
+  Object obj{FileDecls::classof()};
+  auto data = Native::data<FileDecls>(obj);
+  initDeclConfig();
+  try {
+    data->declsHolder =
+        std::make_shared<rust::Box<hackc::DeclsHolder>>(hackc::parse_decls(
+            m_config.value(),
+            "",
+            {(const uint8_t*)text.data(), (size_t)text.size()}));
+  } catch (const std::exception& ex) {
+    data->error = ex.what();
+  }
+
+  return obj;
 }
 
 /*
@@ -701,20 +775,20 @@ static bool HHVM_METHOD(FileDecls, hasType, const String& name) {
   }
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
-  return hackc::type_exists(*data->declsHolder.value(), toRustStr(name));
+  return hackc::type_exists(**data->declsHolder, toRustStr(name));
 }
 
 static Variant HHVM_METHOD(FileDecls, getFile) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
-  auto const decl = hackc::get_file(*data->declsHolder.value());
+  auto const decl = hackc::get_file(**data->declsHolder);
   return Variant(populateFile(decl));
 }
 
 static Array HHVM_METHOD(FileDecls, getClasses) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
-  return populateClasses(hackc::get_classes(*data->declsHolder.value()));
+  return populateClasses(hackc::get_classes(**data->declsHolder));
 }
 
 static Variant HHVM_METHOD(FileDecls, getClass, const String& name) {
@@ -723,16 +797,14 @@ static Variant HHVM_METHOD(FileDecls, getClass, const String& name) {
   }
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
-  auto const decls =
-      hackc::get_class(*data->declsHolder.value(), toRustStr(name));
+  auto const decls = hackc::get_class(**data->declsHolder, toRustStr(name));
   return decls.empty() ? init_null_variant : populateClass(decls[0]);
 }
 
 static Array HHVM_METHOD(FileDecls, getFileAttributes) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
-  return populateAttributes(
-      hackc::get_file_attributes(*data->declsHolder.value()));
+  return populateAttributes(hackc::get_file_attributes(**data->declsHolder));
 }
 
 static Variant HHVM_METHOD(FileDecls, getFileAttribute, const String& name) {
@@ -742,14 +814,14 @@ static Variant HHVM_METHOD(FileDecls, getFileAttribute, const String& name) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   auto const decls =
-      hackc::get_file_attribute(*data->declsHolder.value(), toRustStr(name));
+      hackc::get_file_attribute(**data->declsHolder, toRustStr(name));
   return decls.empty() ? init_null_variant : populateAttributes(decls)[0];
 }
 
 static Array HHVM_METHOD(FileDecls, getFileConsts) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
-  return populateFileConsts(hackc::get_file_consts(*data->declsHolder.value()));
+  return populateFileConsts(hackc::get_file_consts(**data->declsHolder));
 }
 
 static Variant HHVM_METHOD(FileDecls, getFileConst, const String& name) {
@@ -759,14 +831,14 @@ static Variant HHVM_METHOD(FileDecls, getFileConst, const String& name) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   auto const decls =
-      hackc::get_file_const(*data->declsHolder.value(), toRustStr(name));
+      hackc::get_file_const(**data->declsHolder, toRustStr(name));
   return decls.empty() ? init_null_variant : populateFileConsts(decls)[0];
 }
 
 static Array HHVM_METHOD(FileDecls, getFileFuncs) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
-  return populateFileFuncs(hackc::get_file_funcs(*data->declsHolder.value()));
+  return populateFileFuncs(hackc::get_file_funcs(**data->declsHolder));
 }
 
 static Variant HHVM_METHOD(FileDecls, getFileFunc, const String& name) {
@@ -775,15 +847,14 @@ static Variant HHVM_METHOD(FileDecls, getFileFunc, const String& name) {
   }
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
-  auto const decls =
-      hackc::get_file_func(*data->declsHolder.value(), toRustStr(name));
+  auto const decls = hackc::get_file_func(**data->declsHolder, toRustStr(name));
   return decls.empty() ? init_null_variant : populateFileFuncs(decls)[0];
 }
 
 static Array HHVM_METHOD(FileDecls, getFileModules) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
-  return populateModules(hackc::get_file_modules(*data->declsHolder.value()));
+  return populateModules(hackc::get_file_modules(**data->declsHolder));
 }
 
 static Variant HHVM_METHOD(FileDecls, getFileModule, const String& name) {
@@ -793,14 +864,14 @@ static Variant HHVM_METHOD(FileDecls, getFileModule, const String& name) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   auto const decls =
-      hackc::get_file_module(*data->declsHolder.value(), toRustStr(name));
+      hackc::get_file_module(**data->declsHolder, toRustStr(name));
   return decls.empty() ? init_null_variant : populateModules(decls)[0];
 }
 
 static Array HHVM_METHOD(FileDecls, getFileTypedefs) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
-  return populateTypedefs(hackc::get_file_typedefs(*data->declsHolder.value()));
+  return populateTypedefs(hackc::get_file_typedefs(**data->declsHolder));
 }
 
 static Variant HHVM_METHOD(FileDecls, getFileTypedef, const String& name) {
@@ -810,7 +881,7 @@ static Variant HHVM_METHOD(FileDecls, getFileTypedef, const String& name) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   auto const decls =
-      hackc::get_file_typedef(*data->declsHolder.value(), toRustStr(name));
+      hackc::get_file_typedef(**data->declsHolder, toRustStr(name));
   return decls.empty() ? init_null_variant : populateTypedefs(decls)[0];
 }
 
@@ -818,7 +889,7 @@ static Array HHVM_METHOD(FileDecls, getMethods, const String& kls) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   return populateMethods(
-      hackc::get_class_methods(*data->declsHolder.value(), toRustStr(kls)));
+      hackc::get_class_methods(**data->declsHolder, toRustStr(kls)));
 }
 
 static Variant
@@ -829,7 +900,7 @@ HHVM_METHOD(FileDecls, getMethod, const String& kls, const String& name) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   auto const decls = hackc::get_class_method(
-      *data->declsHolder.value(), toRustStr(kls), toRustStr(name));
+      **data->declsHolder, toRustStr(kls), toRustStr(name));
   return decls.empty() ? init_null_variant : populateMethods(decls)[0];
 }
 
@@ -837,7 +908,7 @@ static Array HHVM_METHOD(FileDecls, getStaticMethods, const String& kls) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   return populateMethods(
-      hackc::get_class_smethods(*data->declsHolder.value(), toRustStr(kls)));
+      hackc::get_class_smethods(**data->declsHolder, toRustStr(kls)));
 }
 
 static Variant
@@ -848,7 +919,7 @@ HHVM_METHOD(FileDecls, getStaticMethod, const String& kls, const String& name) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   auto const decls = hackc::get_class_smethod(
-      *data->declsHolder.value(), toRustStr(kls), toRustStr(name));
+      **data->declsHolder, toRustStr(kls), toRustStr(name));
   return decls.empty() ? init_null_variant : populateMethods(decls)[0];
 }
 
@@ -856,7 +927,7 @@ static Array HHVM_METHOD(FileDecls, getConsts, const String& kls) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   return populateConstants(
-      hackc::get_class_consts(*data->declsHolder.value(), toRustStr(kls)));
+      hackc::get_class_consts(**data->declsHolder, toRustStr(kls)));
 }
 
 static Variant
@@ -867,7 +938,7 @@ HHVM_METHOD(FileDecls, getConst, const String& kls, const String& name) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   auto const decls = hackc::get_class_const(
-      *data->declsHolder.value(), toRustStr(kls), toRustStr(name));
+      **data->declsHolder, toRustStr(kls), toRustStr(name));
   return decls.empty() ? init_null_variant : populateConstants(decls)[0];
 }
 
@@ -875,7 +946,7 @@ static Array HHVM_METHOD(FileDecls, getTypeconsts, const String& kls) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   return populateTypeConstants(
-      hackc::get_class_typeconsts(*data->declsHolder.value(), toRustStr(kls)));
+      hackc::get_class_typeconsts(**data->declsHolder, toRustStr(kls)));
 }
 
 static Variant
@@ -886,7 +957,7 @@ HHVM_METHOD(FileDecls, getTypeconst, const String& kls, const String& name) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   auto const decls = hackc::get_class_typeconst(
-      *data->declsHolder.value(), toRustStr(kls), toRustStr(name));
+      **data->declsHolder, toRustStr(kls), toRustStr(name));
   return decls.empty() ? init_null_variant : populateTypeConstants(decls)[0];
 }
 
@@ -894,7 +965,7 @@ static Array HHVM_METHOD(FileDecls, getProps, const String& kls) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   return populateProps(
-      hackc::get_class_props(*data->declsHolder.value(), toRustStr(kls)));
+      hackc::get_class_props(**data->declsHolder, toRustStr(kls)));
 }
 
 static Variant
@@ -905,7 +976,7 @@ HHVM_METHOD(FileDecls, getProp, const String& kls, const String& name) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   auto const decls = hackc::get_class_prop(
-      *data->declsHolder.value(), toRustStr(kls), toRustStr(name));
+      **data->declsHolder, toRustStr(kls), toRustStr(name));
   return decls.empty() ? init_null_variant : populateProps(decls)[0];
 }
 
@@ -913,7 +984,7 @@ static Array HHVM_METHOD(FileDecls, getStaticProps, const String& kls) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   return populateProps(
-      hackc::get_class_sprops(*data->declsHolder.value(), toRustStr(kls)));
+      hackc::get_class_sprops(**data->declsHolder, toRustStr(kls)));
 }
 
 static Variant
@@ -932,7 +1003,7 @@ HHVM_METHOD(FileDecls, getStaticProp, const String& kls, const String& name) {
   }
 
   auto const decls = hackc::get_class_sprop(
-      *data->declsHolder.value(), toRustStr(kls), toRustStr(norm_name));
+      **data->declsHolder, toRustStr(kls), toRustStr(norm_name));
   return decls.empty() ? init_null_variant : populateProps(decls)[0];
 }
 
@@ -940,7 +1011,7 @@ static Array HHVM_METHOD(FileDecls, getAttributes, const String& kls) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   return populateAttributes(
-      hackc::get_class_attributes(*data->declsHolder.value(), toRustStr(kls)));
+      hackc::get_class_attributes(**data->declsHolder, toRustStr(kls)));
 }
 
 static Variant
@@ -951,7 +1022,7 @@ HHVM_METHOD(FileDecls, getAttribute, const String& kls, const String& name) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   auto const decls = hackc::get_class_attribute(
-      *data->declsHolder.value(), toRustStr(kls), toRustStr(name));
+      **data->declsHolder, toRustStr(kls), toRustStr(name));
   return decls.empty() ? init_null_variant : populateAttributes(decls)[0];
 }
 

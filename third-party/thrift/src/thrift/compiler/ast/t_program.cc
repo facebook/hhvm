@@ -55,25 +55,26 @@ void t_program::add_definition(std::unique_ptr<t_named> definition) {
   }
 
   // Index the node.
-  if (auto* node = dynamic_cast<t_exception*>(definition.get())) {
-    structured_definitions_.push_back(node);
-    exceptions_.push_back(node);
-  } else if (auto* node = dynamic_cast<t_union*>(definition.get())) {
-    structured_definitions_.push_back(node);
-    structs_and_unions_.push_back(node);
-  } else if (auto* node = dynamic_cast<t_struct*>(definition.get())) {
-    structured_definitions_.push_back(node);
-    structs_and_unions_.push_back(node);
-  } else if (auto* node = dynamic_cast<t_interaction*>(definition.get())) {
-    interactions_.push_back(node);
-  } else if (auto* node = dynamic_cast<t_service*>(definition.get())) {
-    services_.push_back(node);
-  } else if (auto* node = dynamic_cast<t_enum*>(definition.get())) {
-    enums_.push_back(node);
-  } else if (auto* node = dynamic_cast<t_typedef*>(definition.get())) {
-    typedefs_.push_back(node);
-  } else if (auto* node = dynamic_cast<t_const*>(definition.get())) {
-    consts_.push_back(node);
+  auto* ptr = definition.get();
+  if (auto* exception_type = dynamic_cast<t_exception*>(ptr)) {
+    structured_definitions_.push_back(exception_type);
+    exceptions_.push_back(exception_type);
+  } else if (auto* union_type = dynamic_cast<t_union*>(ptr)) {
+    structured_definitions_.push_back(union_type);
+    structs_and_unions_.push_back(union_type);
+  } else if (auto* struct_type = dynamic_cast<t_struct*>(ptr)) {
+    structured_definitions_.push_back(struct_type);
+    structs_and_unions_.push_back(struct_type);
+  } else if (auto* interaction_type = dynamic_cast<t_interaction*>(ptr)) {
+    interactions_.push_back(interaction_type);
+  } else if (auto* service_type = dynamic_cast<t_service*>(ptr)) {
+    services_.push_back(service_type);
+  } else if (auto* enum_type = dynamic_cast<t_enum*>(ptr)) {
+    enums_.push_back(enum_type);
+  } else if (auto* typedef_type = dynamic_cast<t_typedef*>(ptr)) {
+    typedefs_.push_back(typedef_type);
+  } else if (auto* const_type = dynamic_cast<t_const*>(ptr)) {
+    consts_.push_back(const_type);
   }
 
   // Transfer ownership of the definition.

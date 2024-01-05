@@ -841,7 +841,7 @@ let main_internal
     in
     go ()
   | MODE_REWRITE_DECLARATIONS ->
-    DeclarationsRewriter.start ();
+    DeclarationsRewriter.start (Random.State.make_self_init ());
     Lwt.return (Exit_status.No_error, Telemetry.create ())
   | MODE_REWRITE_LAMBDA_PARAMETERS files ->
     let%lwt conn = connect args in

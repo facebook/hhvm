@@ -5081,6 +5081,7 @@ let main
            verbose_to_stderr = args.verbose;
            verbose_to_file = args.verbose;
            shm_handle;
+           client_lsp_log_fn;
          })
   in
   background_status_refresher ide_service;

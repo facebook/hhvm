@@ -310,4 +310,5 @@ type daemon_args = {
   verbose_to_stderr: bool;
   verbose_to_file: bool;
   shm_handle: SharedMem.handle;
+  client_lsp_log_fn: string;
 }

@@ -157,10 +157,11 @@ let set_state (t : t) (new_state : state) : unit =
   Lwt_condition.broadcast t.state_changed_cv ()
 
 let make (args : ClientIdeMessage.daemon_args) : t =
+  let log_fd = Daemon.fd_of_path args.ClientIdeMessage.client_lsp_log_fn in
   let daemon_handle =
     Daemon.spawn
       ~channel_mode:`pipe
-      (Unix.stdin, Unix.stdout, Unix.stderr)
+      (Daemon.null_fd (), log_fd, log_fd)
       ClientIdeDaemon.daemon_entry_point
       args
   in

@@ -27,7 +27,6 @@ if err := p.WriteSetBegin({{!
     return thrift.PrependError("error writing set begin: ", err)
 }
 for _, v := range item {
-    {{! Use scope to avoid multiple 'item' variable collisions }}
     {
         item := v
         {{#type:set_elem_type}}

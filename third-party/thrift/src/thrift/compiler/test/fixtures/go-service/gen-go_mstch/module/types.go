@@ -472,12 +472,8 @@ func (x *NonComparableStruct) writeField3(p thrift.Protocol) error {  // Baz
     return thrift.PrependError("error writing map begin: ", err)
 }
 for k, v := range item {
-    if k == nil {
-        return fmt.Errorf("%T write map: nil key is not allowed.", item)
-    }
-
     {
-        item := *k
+        item := k
         if err := item.Write(p); err != nil {
     return err
 }

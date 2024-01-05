@@ -1045,13 +1045,6 @@ fn p_simple_initializer<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Expr>
     }
 }
 
-fn p_member<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<(ast::Expr, ast::Expr)> {
-    match &node.children {
-        ElementInitializer(c) => Ok((p_expr(&c.key, env)?, p_expr(&c.value, env)?)),
-        _ => missing_syntax("darray intrinsic expression element", node, env),
-    }
-}
-
 fn expand_type_args<'a>(ty: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Hint>> {
     match &ty.children {
         TypeArguments(c) => could_map(&c.types, env, p_hint),
@@ -1765,7 +1758,12 @@ fn p_varray_intrinsic_expr<'a>(
         None => None,
         _ => missing_syntax("VarrayIntrinsicExpression type args", node, env)?,
     };
-    Ok(Expr_::mk_varray(targ, could_map(&c.members, env, p_expr)?))
+    let vec = Expr_::mk_val_collection(
+        (p_pos(&c.keyword, env), aast::VcKind::Vec),
+        targ,
+        could_map(&c.members, env, p_expr)?,
+    );
+    Ok(vec)
 }
 
 fn p_darray_intrinsic_expr<'a>(
@@ -1775,17 +1773,17 @@ fn p_darray_intrinsic_expr<'a>(
 ) -> Result<Expr_> {
     let hints = expand_type_args(&c.explicit_type, env)?;
     let hints = check_intrinsic_type_arg_varity(node, env, hints);
-    match hints {
-        Some(ast::CollectionTarg::CollectionTKV(tk, tv)) => Ok(Expr_::mk_darray(
-            Some((tk, tv)),
-            could_map(&c.members, env, p_member)?,
-        )),
-        None => Ok(Expr_::mk_darray(
-            None,
-            could_map(&c.members, env, p_member)?,
-        )),
-        _ => missing_syntax("DarrayIntrinsicExpression type args", node, env),
-    }
+    let targ = match hints {
+        Some(ast::CollectionTarg::CollectionTKV(tk, tv)) => Some((tk, tv)),
+        None => None,
+        _ => missing_syntax("DarrayIntrinsicExpression type args", node, env)?,
+    };
+    let dict = Expr_::mk_key_val_collection(
+        (p_pos(&c.keyword, env), aast::KvcKind::Dict),
+        targ,
+        could_map(&c.members, env, p_field)?,
+    );
+    Ok(dict)
 }
 
 fn p_list_expr<'a>(

@@ -10,7 +10,11 @@
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
-          [([4:3-20], (Expr ((), [4:3-19], (Binop { bop = (Eq None); lhs = ((), [4:3-5], (Lvar ([4:3-5], $x))); rhs = ((), [4:8-19], (Varray ((Some ((), ([4:15-16], Hwildcard))), []))) }))))] };
+          [([4:3-20],
+            (Expr
+               ((), [4:3-19], (Binop { bop = (Eq None); lhs = ((), [4:3-5], (Lvar ([4:3-5], $x))); rhs = ((), [4:8-19], (ValCollection (([4:8-14], Vec), (Some ((), ([4:15-16], Hwildcard))), []))) }))))
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
@@ -70,7 +74,9 @@
            [([16:3-23],
              (Expr
                 ((), [16:3-22],
-                 (Binop { bop = (Eq None); lhs = ((), [16:3-5], (Lvar ([16:3-5], $x))); rhs = ((), [16:8-22], (Darray ((Some (((), ([16:15-16], Hwildcard)), ((), ([16:18-19], Hwildcard)))), []))) }))))
+                 (Binop
+                    { bop = (Eq None); lhs = ((), [16:3-5], (Lvar ([16:3-5], $x)));
+                      rhs = ((), [16:8-22], (KeyValCollection (([16:8-14], Dict), (Some (((), ([16:15-16], Hwildcard)), ((), ([16:18-19], Hwildcard)))), []))) }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

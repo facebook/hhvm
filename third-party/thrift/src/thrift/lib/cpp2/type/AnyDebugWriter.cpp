@@ -79,12 +79,102 @@ uint32_t AnyDebugWriter::writeUnregisteredAny(const type::AnyStruct& any) {
   }
 }
 
+template <class ProtocolReader, typename Tag>
+type::native_type<Tag> AnyDebugWriter::decode(ProtocolReader& reader) {
+  type::native_type<Tag> value;
+  op::decode<Tag>(reader, value);
+  return value;
+}
+
 template <class ProtocolReader>
 uint32_t AnyDebugWriter::writeUnregisteredAnyImpl(
-    ProtocolReader&, const type::BaseType& type) {
+    ProtocolReader& reader, const type::BaseType& type) {
   switch (type) {
-    default:
-      return writeString("Unrecognized type");
+    case type::BaseType::Void:
+      return 0;
+    case type::BaseType::Bool:
+      return writeBool(decode<ProtocolReader, type::bool_t>(reader));
+    case type::BaseType::Byte:
+      return writeByte(decode<ProtocolReader, type::byte_t>(reader));
+    case type::BaseType::I16:
+      return writeI16(decode<ProtocolReader, type::i16_t>(reader));
+    case type::BaseType::I32:
+      return writeI32(decode<ProtocolReader, type::i32_t>(reader));
+    case type::BaseType::I64:
+      return writeI64(decode<ProtocolReader, type::i64_t>(reader));
+    case type::BaseType::Float:
+      return writeI64(decode<ProtocolReader, type::float_t>(reader));
+    case type::BaseType::Double:
+      return writeDouble(decode<ProtocolReader, type::double_t>(reader));
+    case type::BaseType::String:
+      return writeString(decode<ProtocolReader, type::string_t>(reader));
+    case type::BaseType::Binary:
+      return writeBinary(decode<ProtocolReader, type::binary_t>(reader));
+    case type::BaseType::List: {
+      uint32_t s = 0;
+      TType elemType;
+      uint32_t size;
+      reader.readListBegin(elemType, size);
+      s += writeListBegin(elemType, size);
+      for (uint32_t i = 0; i < size; ++i) {
+        s += writeUnregisteredAnyImpl(reader, type::toBaseType(elemType));
+      }
+      reader.readListEnd();
+      s += writeListEnd();
+      return s;
+    }
+    case type::BaseType::Set: {
+      uint32_t s = 0;
+      TType elemType;
+      uint32_t size;
+      reader.readSetBegin(elemType, size);
+      s += writeSetBegin(elemType, size);
+      for (uint32_t i = 0; i < size; ++i) {
+        s += writeUnregisteredAnyImpl(reader, type::toBaseType(elemType));
+      }
+      reader.readSetEnd();
+      s += writeSetEnd();
+      return s;
+    }
+    case type::BaseType::Map: {
+      uint32_t s = 0;
+      TType keyType;
+      TType valType;
+      uint32_t size;
+      reader.readMapBegin(keyType, valType, size);
+      s += writeMapBegin(keyType, valType, size);
+      for (uint32_t i = 0; i < size; ++i) {
+        s += writeUnregisteredAnyImpl(reader, type::toBaseType(keyType));
+        s += writeUnregisteredAnyImpl(reader, type::toBaseType(valType));
+      }
+      reader.readMapEnd();
+      s += writeMapEnd();
+      return s;
+    }
+    case type::BaseType::Enum:
+      return writeI32(decode<ProtocolReader, type::i32_t>(reader));
+    case type::BaseType::Struct:
+    case type::BaseType::Union:
+    case type::BaseType::Exception: {
+      uint32_t s = 0;
+      std::string name;
+      int16_t fid;
+      TType ftype;
+      reader.readStructBegin(name);
+      s += writeStructBegin(name.c_str());
+      while (true) {
+        reader.readFieldBegin(name, ftype, fid);
+        if (ftype == protocol::T_STOP) {
+          break;
+        }
+        s += writeFieldBegin(name.c_str(), ftype, fid);
+        s += writeUnregisteredAnyImpl(reader, type::toBaseType(ftype));
+        s += writeFieldEnd();
+      }
+      reader.readStructEnd();
+      s += writeStructEnd();
+      return s;
+    }
   }
 }
 } // namespace detail

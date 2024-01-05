@@ -35,6 +35,9 @@ class AnyDebugWriter : public DebugProtocolWriter {
   template <class ProtocolReader>
   uint32_t writeUnregisteredAnyImpl(
       ProtocolReader& reader, const type::BaseType& type);
+
+  template <class ProtocolReader, typename Tag>
+  type::native_type<Tag> decode(ProtocolReader& reader);
 };
 } // namespace detail
 

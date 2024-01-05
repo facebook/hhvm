@@ -23,7 +23,9 @@ namespace apache::thrift {
 TEST(AnyTest, any_struct_fields) {
   auto any = type::toAnyData<type::i16_t>();
   auto ret = anyDebugString(any);
-  EXPECT_NE(ret.find("3: data (i16) = \"Unrecognized type\""), ret.npos) << ret;
+  EXPECT_NE(
+      ret.find(fmt::format("3: data (i16) = {}", type::kMagicString)), ret.npos)
+      << ret;
 }
 
 template <typename>
@@ -31,19 +33,29 @@ class AnyTestFixture : public ::testing::Test {};
 
 TYPED_TEST_SUITE(AnyTestFixture, type::Tags);
 
+template <typename TypeParam>
 void verifyDebugString(const type::AnyData& any) {
   auto ret = anyDebugString(any);
-  EXPECT_NE(ret.find("Unrecognized type"), ret.npos) << ret;
+  auto check = [&](auto str) {
+    EXPECT_NE(ret.find(str), ret.npos) << ret << str;
+  };
+  if (std::is_same_v<TypeParam, type::byte_t>) {
+    check("0x75");
+  } else if (std::is_same_v<TypeParam, type::bool_t>) {
+    check("true");
+  } else {
+    check(type::kMagicString);
+  }
 }
 
 TYPED_TEST(AnyTestFixture, unregistered_compact) {
   auto any = type::toAnyData<TypeParam>();
-  verifyDebugString(any);
+  verifyDebugString<TypeParam>(any);
 }
 
 TYPED_TEST(AnyTestFixture, unregistered_binary) {
   auto any = type::toAnyData<TypeParam, type::StandardProtocol::Binary>();
-  verifyDebugString(any);
+  verifyDebugString<TypeParam>(any);
 }
 
 TYPED_TEST(AnyTestFixture, unregistered_json) {

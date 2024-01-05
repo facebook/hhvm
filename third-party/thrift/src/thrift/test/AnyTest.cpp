@@ -32,7 +32,7 @@ TEST(AnyTest, Registered) {
     constexpr auto kType = "facebook.com/thrift/test/AnyTestStruct";
     EXPECT_TRUE(isRegistered<StandardProtocol::Binary>(kType));
     EXPECT_TRUE(isRegistered<StandardProtocol::Compact>(kType));
-    EXPECT_FALSE(isRegistered<StandardProtocol::SimpleJson>(kType));
+    EXPECT_TRUE(isRegistered<StandardProtocol::SimpleJson>(kType));
     EXPECT_FALSE(isRegistered<StandardProtocol::Json>(kType));
   }
 
@@ -40,7 +40,7 @@ TEST(AnyTest, Registered) {
     constexpr auto kType = "facebook.com/thrift/test/AnyTestException";
     EXPECT_TRUE(isRegistered<StandardProtocol::Binary>(kType));
     EXPECT_TRUE(isRegistered<StandardProtocol::Compact>(kType));
-    EXPECT_FALSE(isRegistered<StandardProtocol::SimpleJson>(kType));
+    EXPECT_TRUE(isRegistered<StandardProtocol::SimpleJson>(kType));
     EXPECT_FALSE(isRegistered<StandardProtocol::Json>(kType));
   }
 

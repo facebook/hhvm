@@ -186,7 +186,11 @@ void TypeAlias::setResolvedTypeStructure(ArrayData* ad) {
 
 const TypeAlias* TypeAlias::lookup(const StringData* name,
                                    bool* persistent) {
-  auto ne = NamedType::getOrCreate(name);
+  auto ne = NamedType::getNoCreate(name);
+  if (!ne) {
+    if (persistent) *persistent = false;
+    return nullptr;
+  }
   auto target = ne->getCachedTypeAlias();
   if (persistent) *persistent = ne->isPersistentTypeAlias();
   return target;
@@ -194,19 +198,21 @@ const TypeAlias* TypeAlias::lookup(const StringData* name,
 
 const TypeAlias* TypeAlias::load(const StringData* name,
                                  bool* persistent) {
-  auto ne = NamedType::getOrCreate(name);
-  auto target = ne->getCachedTypeAlias();
+  auto ne = NamedType::getNoCreate(name);
+  auto target = ne ? ne->getCachedTypeAlias() : nullptr;
   if (!target) {
     if (AutoloadHandler::s_instance->autoloadTypeOrTypeAlias(
           StrNR(const_cast<StringData*>(name))
         )) {
-      target = ne->getCachedTypeAlias();
+      if (!ne) ne = NamedType::getNoCreate(name);
+      if (ne) target = ne->getCachedTypeAlias();
     } else {
+      if (persistent) *persistent = false;
       return nullptr;
     }
   }
 
-  if (persistent) *persistent = ne->isPersistentTypeAlias();
+  if (persistent) *persistent = ne ? ne->isPersistentTypeAlias() : false;
   return target;
 }
 

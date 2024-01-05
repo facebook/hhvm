@@ -182,6 +182,10 @@ let client_init ~init_id:_ ~from:_ ~custom_columns:_ _ = ()
 
 let serverless_ide_init ~init_id:_ = ()
 
+let serverless_ide_done _ = ()
+
+let serverless_ide_exit _ = ()
+
 let client_set_mode _ = ()
 
 let serverless_ide_set_root _ = ()

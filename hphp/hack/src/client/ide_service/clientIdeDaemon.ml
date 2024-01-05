@@ -9,6 +9,29 @@
 
 open Hh_prelude
 
+(** For debugging. When we get to [at_exit], we'll log what the current activities are. *)
+let dbg_current_activities : string list SMap.t ref = ref SMap.empty
+
+(** Each activity key is associated with up to five most recent timestamped activity values
+under that key. *)
+let dbg_set_activity ~(key : string) (value : string) : unit =
+  let history =
+    SMap.find_opt key !dbg_current_activities |> Option.value ~default:[]
+  in
+  let history =
+    Printf.sprintf "  %s %s" (Unix.gettimeofday () |> Utils.timestring) value
+    :: List.take history 4
+  in
+  dbg_current_activities := SMap.add key history !dbg_current_activities;
+  ()
+
+(** This prints a multiline string: for each activity key, the most recent activity values for that key. *)
+let dbg_dump_activity () : string =
+  SMap.bindings !dbg_current_activities
+  |> List.map ~f:(fun (key, history) ->
+         key :: List.rev history |> String.concat ~sep:"\n")
+  |> String.concat ~sep:"\n"
+
 (** These are messages on ClientIdeDaemon's internal message-queue *)
 type message =
   | ClientRequest : 'a ClientIdeMessage.tracked_t -> message
@@ -1219,7 +1242,16 @@ let handle_one_message_exn
     ~(out_fd : Lwt_unix.file_descr)
     ~(message_queue : message_queue)
     ~(state : state) : state option Lwt.t =
+  dbg_set_activity ~key:"handle" "popping";
   let%lwt message = Lwt_message_queue.pop message_queue in
+  dbg_set_activity
+    ~key:"handle"
+    (match message with
+    | None -> "none"
+    | Some (GotNamingTable (Ok _)) -> "got_naming_table_ok"
+    | Some (GotNamingTable (Error _)) -> "got_naming_table_err"
+    | Some (ClientRequest message) ->
+      ClientIdeMessage.tracked_t_to_string message);
   match (state, message) with
   | (_, None) ->
     Lwt.return_none (* exit loop if message_queue has been closed *)
@@ -1257,29 +1289,37 @@ let handle_one_message_exn
         let reason = ClientIdeUtils.make_rich_error "handle_request" ~e in
         (state, Error (ClientIdeUtils.to_lsp_error reason))
     in
+    dbg_set_activity ~key:"handle" "write_response";
     let%lwt () =
       write_message
         ~out_fd
         ~message:
           ClientIdeMessage.(Response { response; tracking_id; unblocked_time })
     in
+    dbg_set_activity ~key:"handle" "written_response";
     Lwt.return_some state
 
 let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
     unit Lwt.t =
   let rec flush_event_logger () : unit Lwt.t =
+    dbg_set_activity ~key:"flush" "sleep";
     let%lwt () = Lwt_unix.sleep 0.5 in
     HackEventLogger.Memory.profile_if_needed ();
+    dbg_set_activity ~key:"flush" "flush";
     Lwt.async EventLoggerLwt.flush;
+    dbg_set_activity ~key:"flush" "recheck";
     EventLogger.recheck_disk_files ();
     flush_event_logger ()
   in
   let rec pump_stdin (message_queue : message_queue) : unit Lwt.t =
+    dbg_set_activity ~key:"pump" "loop";
     let%lwt (message, is_queue_open) =
       try%lwt
+        dbg_set_activity ~key:"pump" "from_fd";
         let%lwt { ClientIdeMessage.tracking_id; message } =
           Marshal_tools_lwt.from_fd_with_preamble in_fd
         in
+        dbg_set_activity ~key:"pump" "push";
         let is_queue_open =
           Lwt_message_queue.push
             message_queue
@@ -1292,10 +1332,12 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
            over the FD which is handled above, or (2) by closing the FD which is handled here. Neither
            path is considered anomalous and neither will raise an exception.
            Note that closing the message-queue is how we tell handle_messages loop to terminate. *)
+        dbg_set_activity ~key:"pump" "eof";
         Lwt_message_queue.close message_queue;
         Lwt.return (ClientIdeMessage.Shutdown (), false)
       | exn ->
         let e = Exception.wrap exn in
+        dbg_set_activity ~key:"pump" ("exn " ^ Exception.get_ctor_string e);
         Lwt_message_queue.close message_queue;
         Exception.reraise e
     in
@@ -1308,16 +1350,26 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
       (pump_stdin [@tailcall]) message_queue
   in
   let rec handle_messages ({ message_queue; state } : t) : unit Lwt.t =
+    dbg_set_activity ~key:"handle" "loop";
     let%lwt next_state_opt =
       try%lwt
         let%lwt state = handle_one_message_exn ~out_fd ~message_queue ~state in
+        dbg_set_activity ~key:"handle" "done";
         Lwt.return state
       with
       | exn ->
         let e = Exception.wrap exn in
+        let is_write_error = is_outfd_write_error e in
+        dbg_set_activity
+          ~key:"handle"
+          (Printf.sprintf
+             "exn %s; is_write_error=%b"
+             (Exception.get_ctor_string e)
+             is_write_error);
         ClientIdeUtils.log_bug "handle_one_message" ~e ~telemetry:true;
-        if is_outfd_write_error e then exit 1;
+        if is_write_error then exit 1;
         (* if out_fd is down then there's no use continuing. *)
+        dbg_set_activity ~key:"handle" "exn continue";
         Lwt.return_some state
     in
     match next_state_opt with
@@ -1328,16 +1380,19 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
       (handle_messages [@tailcall]) { message_queue; state }
   in
   try%lwt
+    dbg_set_activity ~key:"main" "serve";
     let message_queue = Lwt_message_queue.create () in
     let flusher_promise = flush_event_logger () in
     let%lwt () = handle_messages { message_queue; state = Pending_init }
     and () = pump_stdin message_queue in
+    dbg_set_activity ~key:"main" "ending";
     Lwt.cancel flusher_promise;
     Lwt.return_unit
   with
   | exn ->
     let e = Exception.wrap exn in
     ClientIdeUtils.log_bug "fatal clientIdeDaemon" ~e ~telemetry:true;
+    dbg_set_activity ~key:"main" ("exception " ^ Exception.get_ctor_string e);
     Lwt.return_unit
 
 let daemon_main
@@ -1345,6 +1400,7 @@ let daemon_main
     (channels : ('a, 'b) Daemon.channel_pair) : unit =
   Folly.ensure_folly_init ();
   Printexc.record_backtrace true;
+  dbg_set_activity ~key:"main" "daemon_main";
   let (ic, oc) = channels in
   let in_fd = Lwt_unix.of_unix_file_descr (Daemon.descr_of_in_channel ic) in
   let out_fd = Lwt_unix.of_unix_file_descr (Daemon.descr_of_out_channel oc) in
@@ -1370,7 +1426,27 @@ let daemon_main
   (* in hh_shared.c, worker_id=0 is used for main process, and _id=1 for the first worker. *)
   SharedMem.connect args.ClientIdeMessage.shm_handle ~worker_id:1;
 
-  Lwt_utils.run_main (fun () -> serve ~in_fd ~out_fd)
+  Stdlib.at_exit (fun () ->
+      try
+        let activities = dbg_dump_activity () in
+        Hh_logger.log "SERVERLESS_IDE_EXIT\n%s" activities;
+        HackEventLogger.serverless_ide_exit activities
+      with
+      | _ -> ());
+  try
+    dbg_set_activity ~key:"main" "run_main";
+    Lwt_utils.run_main (fun () -> serve ~in_fd ~out_fd);
+    dbg_set_activity ~key:"main" "done";
+    Hh_logger.log "SERVERLESS_IDE_DONE(ok)";
+    HackEventLogger.serverless_ide_done None
+  with
+  | exn ->
+    let e = Exception.wrap exn in
+    dbg_set_activity ~key:"main" ("exn " ^ Exception.get_ctor_string e);
+    Hh_logger.log
+      "SERVERLESS_IDE_DONE(exn)\n%s"
+      (Exception.to_string e |> Exception.clean_stack);
+    HackEventLogger.serverless_ide_done (Some e)
 
 let daemon_entry_point : (ClientIdeMessage.daemon_args, unit, unit) Daemon.entry
     =

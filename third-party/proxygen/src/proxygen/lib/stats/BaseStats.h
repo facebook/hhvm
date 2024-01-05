@@ -81,12 +81,16 @@ class BaseStats {
       tlStat->add(value);
     }
   }
-  static void incrementOptionalCounter(std::optional<TLCounter>& tlCounter,
+
+  template <typename StatT>
+  static void incrementOptionalCounter(std::optional<StatT>& tlCounter,
                                        facebook::fb303::CounterType value) {
     if (tlCounter) {
       tlCounter->incrementValue(value);
     }
   }
+
+  static bool isAllTimeTimeseriesEnabled();
 };
 
 } // namespace proxygen

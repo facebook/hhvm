@@ -11,3 +11,8 @@
 DEFINE_bool(basestats_all_time_timeseries,
             false,
             "If true, BaseStats will use all-time aggregations");
+
+/*static*/
+bool proxygen::BaseStats::isAllTimeTimeseriesEnabled() {
+  return FLAGS_basestats_all_time_timeseries;
+}

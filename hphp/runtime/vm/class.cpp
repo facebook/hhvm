@@ -5046,8 +5046,10 @@ Class* Class::defClosure(const PreClass* preClass, bool cache) {
 
 Class* Class::load(const NamedType* ne, const StringData* name) {
   Class* cls;
-  if (LIKELY((cls = ne->getCachedClass()) != nullptr)) {
-    return cls;
+  if (LIKELY(ne != nullptr)) {
+    if (LIKELY((cls = ne->getCachedClass()) != nullptr)) {
+      return cls;
+    }
   }
   return loadMissing(ne, name);
 }

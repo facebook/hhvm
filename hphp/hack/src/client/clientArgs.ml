@@ -911,6 +911,7 @@ let parse_lsp_args () =
   in
   let from = ref "" in
   let config = ref [] in
+  let notebook_mode = ref false in
   let verbose = ref false in
   let ignore_hh_version = ref false in
   let naming_table = ref None in
@@ -923,6 +924,10 @@ let parse_lsp_args () =
       ("--ffp-autocomplete", Arg.Unit (fun () -> ()), " [legacy] no-op");
       Common_argspecs.ignore_hh_version ignore_hh_version;
       Common_argspecs.naming_table naming_table;
+      ( "--notebook-mode",
+        Arg.Set notebook_mode,
+        "Enable notebook mode, which is designed for use in notebooks. For example, this mode enables top-level statements."
+      );
       ("--ranked-autocomplete", Arg.Unit (fun () -> ()), " [legacy] no-op");
       ("--serverless-ide", Arg.Unit (fun () -> ()), " [legacy] no-op");
       ( "--verbose",
@@ -939,6 +944,7 @@ let parse_lsp_args () =
       config = !config;
       ignore_hh_version = !ignore_hh_version;
       naming_table = !naming_table;
+      notebook_mode = !notebook_mode;
       verbose = !verbose;
       root_from_cli = root;
     }

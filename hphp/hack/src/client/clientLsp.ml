@@ -19,6 +19,7 @@ type args = {
   config: (string * string) list;
   ignore_hh_version: bool;
   naming_table: string option;
+  notebook_mode: bool;
   verbose: bool;
   root_from_cli: Path.t;
 }
@@ -41,6 +42,7 @@ let env =
           config = [];
           ignore_hh_version = false;
           naming_table = None;
+          notebook_mode = false;
           verbose = false;
           root_from_cli = Path.dummy_path;
         };
@@ -1040,6 +1042,15 @@ let hack_symbol_definition_to_lsp_identifier_location
       title = Some (Utils.strip_ns symbol.SymbolDefinition.full_name);
     }
 
+(** See documentation for `args` field `notebook_mode` *)
+let diagnostics_to_exclude_from_notebooks =
+  SSet.of_list
+    [
+      "Hack does not support top level statements. Use the __EntryPoint attribute on a function instead";
+      "The function prep is deprecated: use await, see https://fburl.com/goodbye-prep";
+      "await cannot be used in a toplevel statement";
+    ]
+
 let hack_errors_to_lsp_diagnostic
     (filename : string) (errors : Errors.finalized_error list) :
     PublishDiagnostics.params =
@@ -1101,14 +1112,25 @@ let hack_errors_to_lsp_diagnostic
       relatedLocations = relatedInformation (* legacy FB extension *);
     }
   in
+  let should_include_diagnostic { Lsp.PublishDiagnostics.message; _ } =
+    not
+      (!env.args.notebook_mode
+      && SSet.mem message diagnostics_to_exclude_from_notebooks)
+  in
   (* The caller is required to give us a non-empty filename. If it is empty,
      the following path_to_lsp_uri will fall back to the default path - which
      is also empty - and throw, logging appropriate telemetry. *)
+  let diagnostics =
+    errors
+    |> List.map ~f:hack_error_to_lsp_diagnostic
+    |> List.filter ~f:should_include_diagnostic
+  in
+
   {
     Lsp.PublishDiagnostics.uri =
       path_string_to_lsp_uri filename ~default_path:"";
     isStatusFB = false;
-    diagnostics = List.map errors ~f:hack_error_to_lsp_diagnostic;
+    diagnostics;
   }
 
 (** Retrieves a TextDocumentItem for a given URI from editor_open_files,

@@ -13,6 +13,13 @@ type args = {
   config: (string * string) list;  (** --config overrides at the command-line *)
   ignore_hh_version: bool;
   naming_table: string option;
+  notebook_mode: bool;
+      (** Notebook mode. The *only* thing this does is filter out error messages that are not relevant for notebooks.
+      * Important:
+      * 1. The *key* difference between notebooks and IDEs is that top-level statements are allowed
+      * 2. To preserve (1) and keep our testing surface area small: do not propagate this option outside of ClientLsp:
+      * parsing, elab, type-checking, etc. should not know about notebooks.
+   *)
   verbose: bool;
       (** Extra logging, including logs per LSP message (voluminous!) *)
   root_from_cli: Path.t;

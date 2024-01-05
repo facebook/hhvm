@@ -7392,3 +7392,169 @@ function expect_type_errors_inside(): void {
             )
         )
         self.run_spec(spec, variables)
+
+    def test_notebook_mode(self) -> None:
+        """
+        Test that certain error messages are filtered out when the `--notebook-mode` argument
+        is passed to `hh lsp`: for example, **there should be no parse errors for top-level statements**
+        """
+        variables = self.write_hhconf_and_naming_table()
+        file_base_name = "notebook_mode.php"
+        php_file_uri = self.repo_file_uri(file_base_name)
+        contents = """<?hh
+
+async function gen_bool(): Awaitable<bool> {
+    return true;
+}
+$s = "";                // OK top-level statement, because we pass '--notebook-mode' to the LSP
+$s + 3;                 // Error, expected num but got string
+$i = await gen_bool();  // OK top-level await, because we pass '--notebook-mode' to the LSP
+$i + 3;                 // Error, expected num but got bool
+"""
+        variables.update({"php_file_uri": php_file_uri, "contents": contents})
+        spec = (
+            self.initialize_spec(LspTestSpec("notebook_mode"))
+            .write_to_disk(
+                comment="create file ${file_base_name}",
+                uri="${php_file_uri}",
+                contents="${contents}",
+                notify=False,
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${contents}",
+                    }
+                },
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 6, "character": 0},
+                                "end": {"line": 6, "character": 2},
+                            },
+                            "severity": 1,
+                            "code": 4429,
+                            "source": "Hack",
+                            "message": "Typing error",
+                            "relatedInformation": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 6, "character": 0},
+                                            "end": {"line": 6, "character": 6},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 5, "character": 5},
+                                            "end": {"line": 5, "character": 7},
+                                        },
+                                    },
+                                    "message": "But got string",
+                                },
+                            ],
+                            "relatedLocations": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 6, "character": 0},
+                                            "end": {"line": 6, "character": 6},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 5, "character": 5},
+                                            "end": {"line": 5, "character": 7},
+                                        },
+                                    },
+                                    "message": "But got string",
+                                },
+                            ],
+                        },
+                        {
+                            "range": {
+                                "start": {"line": 8, "character": 0},
+                                "end": {"line": 8, "character": 2},
+                            },
+                            "severity": 1,
+                            "code": 4429,
+                            "source": "Hack",
+                            "message": "Typing error",
+                            "relatedInformation": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 8, "character": 0},
+                                            "end": {"line": 8, "character": 6},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 2, "character": 37},
+                                            "end": {"line": 2, "character": 41},
+                                        },
+                                    },
+                                    "message": "But got bool",
+                                },
+                            ],
+                            "relatedLocations": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 8, "character": 0},
+                                            "end": {"line": 8, "character": 6},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 2, "character": 37},
+                                            "end": {"line": 2, "character": 41},
+                                        },
+                                    },
+                                    "message": "But got bool",
+                                },
+                            ],
+                        },
+                    ],
+                },
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .wait_for_notification(
+                comment="shutdown should clear out live squiggles",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [],
+                },
+            )
+        )
+        self.run_spec(spec, variables, lsp_extra_args=["--notebook-mode"])

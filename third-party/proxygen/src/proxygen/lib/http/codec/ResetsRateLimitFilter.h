@@ -15,7 +15,7 @@ namespace proxygen {
 
 class ResetsRateLimitFilter : public RateLimitFilter {
  public:
-  static const uint32_t kDefaultMaxEventsPerInterval = 200;
+  static const uint32_t kDefaultMaxEventsPerInterval = 10000;
   static const uint32_t kMaxEventsPerIntervalLowerBound = 100;
   static constexpr std::chrono::milliseconds kDefaultTimeoutDuration{1000};
 

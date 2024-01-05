@@ -2787,21 +2787,21 @@ void t_cocoa_generator::print_const_value(
   } else if (type->is_map()) {
     const t_type* ktype = ((t_map*)type)->get_key_type();
     const t_type* vtype = ((t_map*)type)->get_val_type();
-    const std::vector<std::pair<t_const_value*, t_const_value*>>& val =
+    const std::vector<std::pair<t_const_value*, t_const_value*>>& value_list =
         value->get_map();
     std::vector<std::pair<t_const_value*, t_const_value*>>::const_iterator
         v_iter;
-    if (defval)
+    if (defval) {
       out << "NSMutableDictionary *";
-    if (defval || is_property)
-      out << name
-          << " = [[[NSMutableDictionary alloc] initWithCapacity:" << val.size()
-          << "] autorelease_stub]; " << std::endl;
-    else
-      out << name
-          << " = [[NSMutableDictionary alloc] initWithCapacity:" << val.size()
-          << "]; " << std::endl;
-    for (v_iter = val.begin(); v_iter != val.end(); ++v_iter) {
+    }
+    if (defval || is_property) {
+      out << name << " = [[[NSMutableDictionary alloc] initWithCapacity:"
+          << value_list.size() << "] autorelease_stub]; " << std::endl;
+    } else {
+      out << name << " = [[NSMutableDictionary alloc] initWithCapacity:"
+          << value_list.size() << "]; " << std::endl;
+    }
+    for (v_iter = value_list.begin(); v_iter != value_list.end(); ++v_iter) {
       std::string key = render_const_value(out, ktype, v_iter->first, true);
       std::string val = render_const_value(out, vtype, v_iter->second, true);
       indent(out) << "[" << name << " setObject:" << val << " forKey:" << key
@@ -2810,36 +2810,41 @@ void t_cocoa_generator::print_const_value(
     out << std::endl;
   } else if (type->is_list()) {
     const t_type* etype = ((t_list*)type)->get_elem_type();
-    const std::vector<t_const_value*>& val = value->get_list();
+    const std::vector<t_const_value*>& value_list = value->get_list();
     std::vector<t_const_value*>::const_iterator v_iter;
-    if (defval)
+    if (defval) {
       out << "NSMutableArray *";
-    if (defval || is_property)
+    }
+    if (defval || is_property) {
+      out << name << " = [[[NSMutableArray alloc] initWithCapacity:"
+          << value_list.size() << "] autorelease_stub];" << std::endl;
+    } else {
       out << name
-          << " = [[[NSMutableArray alloc] initWithCapacity:" << val.size()
-          << "] autorelease_stub];" << std::endl;
-    else
-      out << name
-          << " = [[NSMutableArray alloc] initWithCapacity:" << val.size()
+          << " = [[NSMutableArray alloc] initWithCapacity:" << value_list.size()
           << "];" << std::endl;
-    for (v_iter = val.begin(); v_iter != val.end(); ++v_iter) {
+    }
+    for (v_iter = value_list.begin(); v_iter != value_list.end(); ++v_iter) {
       std::string val = render_const_value(out, etype, *v_iter, true);
       indent(out) << "[" << name << " addObject:" << val << "];" << std::endl;
     }
     out << std::endl;
   } else if (type->is_set()) {
     const t_type* etype = ((t_set*)type)->get_elem_type();
-    const std::vector<t_const_value*>& val = value->get_list();
+    const std::vector<t_const_value*>& value_list = value->get_list();
     std::vector<t_const_value*>::const_iterator v_iter;
-    if (defval)
+    if (defval) {
       out << "NSMutableSet *";
-    if (defval || is_property)
-      out << name << " = [[[NSMutableSet alloc] initWithCapacity:" << val.size()
+    }
+    if (defval || is_property) {
+      out << name
+          << " = [[[NSMutableSet alloc] initWithCapacity:" << value_list.size()
           << "] autorelease_stub];" << std::endl;
-    else
-      out << name << " = [[NSMutableSet alloc] initWithCapacity:" << val.size()
+    } else {
+      out << name
+          << " = [[NSMutableSet alloc] initWithCapacity:" << value_list.size()
           << "];" << std::endl;
-    for (v_iter = val.begin(); v_iter != val.end(); ++v_iter) {
+    }
+    for (v_iter = value_list.begin(); v_iter != value_list.end(); ++v_iter) {
       std::string val = render_const_value(out, etype, *v_iter, true);
       indent(out) << "[" << name << " addObject:" << val << "];" << std::endl;
     }

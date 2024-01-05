@@ -84,6 +84,7 @@ const StaticString s_imports("imports");
 const StaticString s_exports("exports");
 const StaticString s_methods("methods");
 const StaticString s_args("args");
+const StaticString s_subtypes("subtypes");
 
 // Bools
 const StaticString s_is_abstract("is_abstract");
@@ -104,6 +105,8 @@ const StaticString s_is_enforceable("is_enforceable");
 const StaticString s_is_reifiable("is_reifiable");
 const StaticString s_is_soft_type("is_soft_type");
 const StaticString s_is_soft_return_type("is_soft_return_type");
+const StaticString s_is_nullable("is_nullable");
+const StaticString s_is_optional("is_optional");
 
 // Method signature Bools
 const StaticString s_is_return_disposable("is_return_disposable");
@@ -635,6 +638,27 @@ Array populateFile(const hackc::ExtDeclFile& file) {
   return info;
 }
 
+Array populateTypeStructure(const hackc::ExtDeclTypeStructure& ts) {
+  Array subtypes = Array::CreateVec();
+  for (auto const& t : ts.subtypes) {
+    Array info = Array::CreateDict();
+    maybeSet(info, t.name, s_name, rustToString);
+    maybeSetBool(info, t.optional, s_is_optional);
+    info.set(s_type, populateTypeStructure(t.type_));
+    subtypes.append(info);
+  }
+
+  Array info = Array::CreateDict();
+  info.set(s_type, rustToString(ts.type_));
+  info.set(s_kind, rustToString(ts.kind));
+  maybeSetBool(info, ts.nullable, s_is_nullable);
+  if (!subtypes.empty()) {
+    info.set(s_subtypes, subtypes);
+  }
+
+  return info;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 // Mapping of SHA1 of file contents to the Decls from hackc::parse_decls().
@@ -754,6 +778,39 @@ Object HHVM_STATIC_METHOD(FileDecls, parseText, const String& text) {
   }
 
   return obj;
+}
+
+/*
+ * Parses a type expression and returns a type structure representation of it
+ */
+Variant HHVM_STATIC_METHOD(
+    FileDecls,
+    parseTypeExpression,
+    const String& type_expression) {
+  assertEnv();
+  Object obj{FileDecls::classof()};
+  auto data = Native::data<FileDecls>(obj);
+  initDeclConfig();
+
+  // The builtin sentinel
+  String text = "type _TS_SENTINEL = " + type_expression + ";";
+
+  try {
+    data->declsHolder =
+        std::make_shared<rust::Box<hackc::DeclsHolder>>(hackc::parse_decls(
+            m_config.value(),
+            "",
+            {(const uint8_t*)text.data(), (size_t)text.size()}));
+
+    auto const decls =
+        hackc::get_type_structure(**data->declsHolder, "_TS_SENTINEL");
+    if (decls.empty()) {
+      return init_null_variant;
+    }
+    return Variant(populateTypeStructure(decls.front()));
+  } catch (const std::exception& ex) {
+    return init_null_variant;
+  }
 }
 
 /*
@@ -1040,6 +1097,8 @@ struct DeclExtension final : Extension {
   void moduleInit() override {
     HHVM_STATIC_MALIAS(HH\\FileDecls, parseText, FileDecls, parseText);
     HHVM_STATIC_MALIAS(HH\\FileDecls, parsePath, FileDecls, parsePath);
+    HHVM_STATIC_MALIAS(
+        HH\\FileDecls, parseTypeExpression, FileDecls, parseTypeExpression);
     HHVM_MALIAS(HH\\FileDecls, getError, FileDecls, getError);
     HHVM_MALIAS(HH\\FileDecls, hasType, FileDecls, hasType);
     HHVM_MALIAS(HH\\FileDecls, getClass, FileDecls, getClass);

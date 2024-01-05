@@ -229,6 +229,21 @@ mod ffi {
     }
 
     #[derive(Debug, PartialEq)]
+    pub struct ExtDeclTypeStructureSubType {
+        name: String,
+        optional: bool,
+        type_: ExtDeclTypeStructure,
+    }
+
+    #[derive(Debug, PartialEq)]
+    pub struct ExtDeclTypeStructure {
+        type_: String,
+        nullable: bool,
+        kind: String,
+        subtypes: Vec<ExtDeclTypeStructureSubType>,
+    }
+
+    #[derive(Debug, PartialEq)]
     pub struct ExtDeclFileConst {
         name: String,
         type_: String,
@@ -466,6 +481,7 @@ mod ffi {
         ///
         /// Extract TypeDecls from DeclsHolder.
         fn get_file(decls: &DeclsHolder) -> ExtDeclFile;
+        fn get_type_structure(decls: &DeclsHolder, name: &str) -> Vec<ExtDeclTypeStructure>;
 
         fn get_classes(decls: &DeclsHolder) -> Vec<ExtDeclClass>;
         fn get_class(decls: &DeclsHolder, name: &str) -> Vec<ExtDeclClass>;
@@ -913,4 +929,8 @@ fn get_file_typedef(holder: &DeclsHolder, name: &str) -> Vec<ffi::ExtDeclTypeDef
 
 fn get_file(holder: &DeclsHolder) -> ffi::ExtDeclFile {
     ext_decl::get_file(&holder.parsed_file)
+}
+
+fn get_type_structure(holder: &DeclsHolder, name: &str) -> Vec<ffi::ExtDeclTypeStructure> {
+    ext_decl::get_type_structure(&holder.parsed_file, name)
 }

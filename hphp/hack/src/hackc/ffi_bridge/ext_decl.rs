@@ -21,7 +21,9 @@ use oxidized_by_ref::shallow_decl_defs::Typeconst;
 use oxidized_by_ref::typing_defs::ModuleReference;
 use oxidized_by_ref::typing_defs_core::Enforcement;
 use oxidized_by_ref::typing_defs_core::FunParams;
+use oxidized_by_ref::typing_defs_core::ShapeType;
 use oxidized_by_ref::typing_defs_core::Tparam;
+use oxidized_by_ref::typing_defs_core::TshapeFieldName;
 use oxidized_by_ref::typing_defs_core::Ty;
 use oxidized_by_ref::typing_defs_core::Ty_;
 use oxidized_by_ref::typing_defs_core::UserAttribute;
@@ -44,6 +46,8 @@ use crate::ffi::ExtDeclSignature;
 use crate::ffi::ExtDeclTparam;
 use crate::ffi::ExtDeclTypeConstraint;
 use crate::ffi::ExtDeclTypeDef;
+use crate::ffi::ExtDeclTypeStructure;
+use crate::ffi::ExtDeclTypeStructureSubType;
 
 fn find_class<'a>(parsed_file: &ParsedFile<'a>, symbol: &str) -> Option<&'a ShallowClass<'a>> {
     let input_symbol_formatted = symbol.starts_with('\\');
@@ -125,6 +129,15 @@ pub fn get_file_typedefs(parsed_file: &ParsedFile<'_>, name: &str) -> Vec<ExtDec
             internal: decl.internal,
             docs_url: str_or_empty(decl.docs_url),
         })
+        .collect()
+}
+
+pub fn get_type_structure(parsed_file: &ParsedFile<'_>, name: &str) -> Vec<ExtDeclTypeStructure> {
+    parsed_file
+        .decls
+        .typedefs()
+        .filter(|(cname, _)| name.is_empty() || name == strip_global_ns(cname))
+        .map(|(_cname, decl)| build_type_structure(decl.type_))
         .collect()
 }
 
@@ -497,6 +510,146 @@ fn get_signature(ty: Ty_<'_>) -> Vec<ExtDeclSignature> {
             }]
         }
         _ => Vec::new(),
+    }
+}
+
+fn build_unnamed_type_structure_subtype(ty: &&Ty<'_>) -> ExtDeclTypeStructureSubType {
+    ExtDeclTypeStructureSubType {
+        name: String::new(),
+        optional: false,
+        type_: build_type_structure(ty),
+    }
+}
+
+fn build_type_structure(outer_ty: &Ty<'_>) -> ExtDeclTypeStructure {
+    match outer_ty.1 {
+        Ty_::Taccess(_)
+        | Ty_::Tthis
+        | Ty_::Tany(_)
+        | Ty_::Tclass(_)
+        | Ty_::Tdynamic
+        | Ty_::Tgeneric(_)
+        | Ty_::Tmixed
+        | Ty_::Twildcard
+        | Ty_::Tnonnull
+        | Ty_::Tprim(_) => ExtDeclTypeStructure {
+            type_: extract_type_name(outer_ty),
+            kind: String::from("primitive"),
+            nullable: false,
+            subtypes: vec![],
+        },
+        Ty_::Tfun(_fun_type) => ExtDeclTypeStructure {
+            type_: extract_type_name(outer_ty),
+            kind: String::from("function"),
+            nullable: false,
+            subtypes: vec![],
+        },
+
+        // Pseudo Recursive
+        Ty_::Toption(ty) => {
+            let mut inner = build_type_structure(ty);
+            inner.nullable = true;
+            inner
+        }
+
+        Ty_::Tapply(&(_id, targs)) => ExtDeclTypeStructure {
+            type_: extract_type_name(outer_ty),
+            kind: String::from("apply"),
+            nullable: false,
+            subtypes: targs
+                .iter()
+                .map(build_unnamed_type_structure_subtype)
+                .collect(),
+        },
+        Ty_::Tlike(ty) => ExtDeclTypeStructure {
+            type_: extract_type_name(outer_ty),
+            kind: String::from("like"),
+            nullable: false,
+            subtypes: vec![build_unnamed_type_structure_subtype(&ty)],
+        },
+        Ty_::Tshape(&ShapeType {
+            origin: _,
+            unknown_value: _kind,
+            fields,
+        }) => {
+            let shape_fields = fields
+                .iter()
+                .map(
+                    |(shape_field, shape_field_type)| ExtDeclTypeStructureSubType {
+                        name: match shape_field.0 {
+                            TshapeFieldName::TSFlitStr(field_name) => field_name.1.to_string(),
+                            TshapeFieldName::TSFclassConst((_, field_name))
+                            | TshapeFieldName::TSFlitInt(field_name) => field_name.1.to_string(),
+                        },
+                        type_: build_type_structure(shape_field_type.ty),
+                        optional: shape_field_type.optional,
+                    },
+                )
+                .collect();
+
+            ExtDeclTypeStructure {
+                type_: extract_type_name(outer_ty),
+                kind: String::from("shape"),
+                nullable: false,
+                subtypes: shape_fields,
+            }
+        }
+        Ty_::TvecOrDict(&(tk, tv)) => ExtDeclTypeStructure {
+            type_: extract_type_name(outer_ty),
+            kind: String::from("refinement"),
+            nullable: false,
+            subtypes: vec![
+                ExtDeclTypeStructureSubType {
+                    name: String::from("keys"),
+                    optional: false,
+                    type_: build_type_structure(tk),
+                },
+                ExtDeclTypeStructureSubType {
+                    name: String::from("values"),
+                    optional: false,
+                    type_: build_type_structure(tv),
+                },
+            ],
+        },
+        Ty_::Ttuple(tys) => ExtDeclTypeStructure {
+            type_: extract_type_name(outer_ty),
+            kind: String::from("tuple"),
+            nullable: false,
+            subtypes: tys
+                .iter()
+                .map(build_unnamed_type_structure_subtype)
+                .collect(),
+        },
+        Ty_::Tintersection(tys) => ExtDeclTypeStructure {
+            type_: extract_type_name(outer_ty),
+            kind: String::from("intersection"),
+            nullable: false,
+            subtypes: tys
+                .iter()
+                .map(build_unnamed_type_structure_subtype)
+                .collect(),
+        },
+        Ty_::Tunion(tys) => ExtDeclTypeStructure {
+            type_: extract_type_name(outer_ty),
+            kind: String::from("union"),
+            nullable: false,
+            subtypes: tys
+                .iter()
+                .map(build_unnamed_type_structure_subtype)
+                .collect(),
+        },
+        Ty_::Trefinement(&(root_ty, _class_ref)) => ExtDeclTypeStructure {
+            type_: extract_type_name(outer_ty),
+            kind: String::from("refinement"),
+            nullable: false,
+            subtypes: vec![build_unnamed_type_structure_subtype(&root_ty)],
+        },
+        _ => ExtDeclTypeStructure {
+            type_: extract_type_name(outer_ty),
+            kind: String::from("other"),
+            nullable: false,
+            subtypes: vec![],
+        },
     }
 }
 

@@ -52,6 +52,17 @@ namespace HH {
   const string TYPEDEF_VISIBILITY_OPAQUE_MODULE = 'opaque_module';
   const string TYPEDEF_VISIBILITY_CASE_TYPE = 'case_type';
 
+  // Use constants TYPE_STRUCTURE_KIND_*
+  // primitive, function, shape, other, union, intersection, tuple
+  type ExtDeclTypeStructureKind = string;
+  const string TYPE_STRUCTURE_KIND_PRIMITIVE = "primitive";
+  const string TYPE_STRUCTURE_KIND_FUNCTION = "function";
+  const string TYPE_STRUCTURE_KIND_SHAPE = "shape";
+  const string TYPE_STRUCTURE_KIND_OTHER = "other";
+  const string TYPE_STRUCTURE_KIND_UNION = "union";
+  const string TYPE_STRUCTURE_KIND_INTERSECTION = "intersection";
+  const string TYPE_STRUCTURE_KIND_TUPLE = "tuple";
+
   /*
    * In all the following ExtDecl* shapes, all the boolean values
    * will only show up if their value is true. In a similar way all
@@ -252,6 +263,20 @@ namespace HH {
     ?'is_strict' => bool,
   );
 
+  type ExtDeclTypeStructure_ = mixed;
+  type ExtDeclTypeStructureSubType = shape(
+    ?'name' => string,
+    ?'optional' => bool,
+    'type' => ExtDeclTypeStructure_,
+  );
+
+  type ExtDeclTypeStructure = shape(
+    'type' => TypeExpr,
+    'kind' => ExtDeclTypeStructureKind,
+    ?'is_nullable' => bool,
+    ?'subtypes' => vec<ExtDeclTypeStructureSubType>,
+  );
+
   /** The FileDecls class parses a file and provides declaration information.
    */
   <<__NativeData>>
@@ -279,6 +304,16 @@ namespace HH {
      */
     <<__Native>>
     public static function parsePath(string $path)[]: FileDecls;
+
+    /*
+     * Parse a type expression into a nested shape.
+     *
+     * @param string $type_expression - the type expression to parse
+     * @return ExtDeclTypeStructure - a nested shape describing the type
+     *                                or null if the input is bad.
+     */
+    <<__Native>>
+    public static function parseTypeExpression(string $type_expression)[]: ?ExtDeclTypeStructure;
 
     /*
      * If there has been any error in parsing, the instance will throw

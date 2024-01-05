@@ -3580,15 +3580,15 @@ Variant HHVM_METHOD(DOMDocument, getElementById,
   return init_null();
 }
 
-Variant HHVM_METHOD(DOMDocument, getElementsByTagName,
-                    const String& name) {
+ObjectRet HHVM_METHOD(DOMDocument, getElementsByTagName,
+                      const String& name) {
   auto* data = Native::data<DOMNode>(this_);
   return newDOMNodeList(data->doc(), Object{this_}, 0, name);
 }
 
-Variant HHVM_METHOD(DOMDocument, getElementsByTagNameNS,
-                    const String& namespaceuri,
-                    const String& localname) {
+ObjectRet HHVM_METHOD(DOMDocument, getElementsByTagNameNS,
+                      const String& namespaceuri,
+                      const String& localname) {
   auto* data = Native::data<DOMNode>(this_);
   return newDOMNodeList(data->doc(), Object{this_}, 0, localname, namespaceuri);
 }
@@ -4172,24 +4172,22 @@ Variant HHVM_METHOD(DOMElement, getAttributeNode,
   return php_dom_create_object((xmlNodePtr)attrp, data->doc());
 }
 
-Object HHVM_METHOD(DOMElement, getAttributeNodeNS,
-                   const String& namespaceuri,
-                   const String& localname) {
+Variant HHVM_METHOD(DOMElement, getAttributeNodeNS,
+                    const String& namespaceuri,
+                    const String& localname) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr elemp = data->nodep();
   if (!elemp) {
     php_dom_throw_error(INVALID_STATE_ERR, 0);
-    return Object();
+    return init_null();
   }
   xmlAttrPtr attrp;
   attrp = xmlHasNsProp(elemp, (xmlChar*)localname.data(),
                        (xmlChar*)namespaceuri.data());
   if (attrp == nullptr) {
-    return Object();
+    return init_null();
   }
-  auto ret = php_dom_create_object((xmlNodePtr)attrp, data->doc());
-  if (ret.isObject()) return ret.toObject();
-  return Object();
+  return php_dom_create_object((xmlNodePtr)attrp, data->doc());
 }
 
 String HHVM_METHOD(DOMElement, getAttributeNS,

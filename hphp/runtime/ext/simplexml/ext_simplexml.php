@@ -118,7 +118,7 @@ class SimpleXMLElement implements ArrayAccess<mixed, mixed>, Traversable<mixed>,
    */
   <<__Native>>
   public function attributes(string $ns = "",
-                             bool $is_prefix = false): object;
+                             bool $is_prefix = false): ?\HH\object;
 
   /** @param string $qname
    * @param string $value
@@ -256,5 +256,5 @@ function simplexml_load_file(string $filename,
  * @return mixed - Returns a SimpleXMLElement or FALSE on failure.
  */
 <<__Native>>
-function simplexml_import_dom(object $node,
+function simplexml_import_dom(DOMNode $node,
                               string $class_name = "SimpleXMLElement"): mixed;

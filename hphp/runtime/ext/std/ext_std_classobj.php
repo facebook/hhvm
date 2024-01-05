@@ -106,7 +106,7 @@ function get_declared_traits(): varray<string>;
  *   NULL value.
  */
 <<__Native>>
-function get_object_vars(object $object)[]: darray<string, mixed>;
+function get_object_vars(\HH\object $object)[]: darray<string, mixed>;
 
 /**
  * Retrieves the parent class name for object or class

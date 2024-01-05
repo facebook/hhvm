@@ -558,12 +558,12 @@ class DOMDocument extends DOMNode {
    * @param string $name - The name of the tag to match on. The special value
    *   * matches all tags.
    *
-   * @return mixed - A new DOMNodeList object containing all the matched
+   * @return DOMNodeList - A new DOMNodeList object containing all the matched
    *   elements.
    *
    */
   <<__Native>>
-  public function getElementsByTagName(string $name): mixed;
+  public function getElementsByTagName(string $name): DOMNodeList;
 
   /**
    * Returns a DOMNodeList of all elements with a given local name and a
@@ -574,13 +574,15 @@ class DOMDocument extends DOMNode {
    * @param string $localname - The local name of the elements to match on.
    *   The special value * matches all local names.
    *
-   * @return mixed - A new DOMNodeList object containing all the matched
+   * @return DOMNodeList - A new DOMNodeList object containing all the matched
    *   elements.
    *
    */
   <<__Native>>
-  public function getElementsByTagNameNS(string $namespaceuri,
-                                  string $localname): mixed;
+  public function getElementsByTagNameNS(
+    string $namespaceuri,
+    string $localname,
+  ): DOMNodeList;
 
   /**
    * This function returns a copy of the node to import and associates it with
@@ -897,11 +899,14 @@ class DOMElement extends DOMNode {
    * @param string $namespaceuri - The namespace URI.
    * @param string $localname - The local name.
    *
-   * @return object - The attribute node.
+   * @return ?DOMNode - The attribute node.
    *
    */
   <<__Native>>
-  public function getAttributeNodeNS(string $namespaceuri, string $localname): object;
+  public function getAttributeNodeNS(
+    string $namespaceuri,
+    string $localname,
+  ): ?DOMNode;
 
   /**
    * Gets the value of the attribute in namespace namespaceURI with local name
@@ -925,12 +930,12 @@ class DOMElement extends DOMNode {
    * @param string $name - The tag name. Use * to return all elements within
    *   the element tree.
    *
-   * @return object - This function returns a new instance of the class
+   * @return DOMNodeList - This function returns a new instance of the class
    *   DOMNodeList of all matched elements.
    *
    */
   <<__Native>>
-  public function getElementsByTagName(string $name): object;
+  public function getElementsByTagName(string $name): DOMNodeList;
 
   /**
    * This function fetch all the descendant elements with a given localName
@@ -940,14 +945,16 @@ class DOMElement extends DOMNode {
    * @param string $localname - The local name. Use * to return all elements
    *   within the element tree.
    *
-   * @return object - This function returns a new instance of the class
+   * @return DOMNodeList - This function returns a new instance of the class
    *   DOMNodeList of all matched elements in the order in which they are
    *   encountered in a preorder traversal of this element tree.
    *
    */
   <<__Native>>
-  public function getElementsByTagNameNS(string $namespaceuri,
-                                  string $localname): object;
+  public function getElementsByTagNameNS(
+    string $namespaceuri,
+    string $localname,
+  ): DOMNodeList;
 
   /**
    * Indicates whether attribute named name exists as a member of the element.
@@ -1442,8 +1449,10 @@ function dom_document_create_entity_reference(DOMDocument $obj,
   return $obj->createEntityReference($name);
 }
 
-function dom_document_get_elements_by_tag_name(DOMDocument $obj,
-                                               string $name): mixed {
+function dom_document_get_elements_by_tag_name(
+  DOMDocument $obj,
+  string $name,
+): DOMNodeList {
   return $obj->getElementsByTagName($name);
 }
 
@@ -1466,9 +1475,11 @@ function dom_document_create_attribute_ns(DOMDocument $obj,
   return $obj->createAttributeNS($namespaceuri, $qualifiedname);
 }
 
-function dom_document_get_elements_by_tag_name_ns(DOMDocument $obj,
-                                                  string $namespaceuri,
-                                                  string $localname): mixed {
+function dom_document_get_elements_by_tag_name_ns(
+  DOMDocument $obj,
+  string $namespaceuri,
+  string $localname,
+): DOMNodeList {
   return $obj->getElementsByTagNameNS($namespaceuri, $localname);
 }
 
@@ -1757,8 +1768,10 @@ function dom_element_remove_attribute_node(DOMElement $obj,
   return $obj->removeAttributeNode($oldattr);
 }
 
-function dom_element_get_elements_by_tag_name(DOMElement $obj,
-                                              string $name): object {
+function dom_element_get_elements_by_tag_name(
+  DOMElement $obj,
+  string $name,
+): DOMNodeList {
   return $obj->getElementsByTagName($name);
 }
 
@@ -1783,7 +1796,7 @@ function dom_element_remove_attribute_ns(DOMElement $obj,
 
 function dom_element_get_attribute_node_ns(DOMElement $obj,
                                            string $namespaceuri,
-                                           string $localname): object {
+                                           string $localname): ?DOMNode {
   return $obj->getAttributeNodeNS($namespaceuri, $localname);
 }
 
@@ -1792,9 +1805,11 @@ function dom_element_set_attribute_node_ns(DOMElement $obj,
   return $obj->setAttributeNodeNS($newattr);
 }
 
-function dom_element_get_elements_by_tag_name_ns(DOMElement $obj,
-                                                 string $namespaceuri,
-                                                 string $localname): object {
+function dom_element_get_elements_by_tag_name_ns(
+  DOMElement $obj,
+  string $namespaceuri,
+  string $localname,
+): DOMNodeList {
   return $obj->getElementsByTagNameNS($namespaceuri, $localname);
 }
 

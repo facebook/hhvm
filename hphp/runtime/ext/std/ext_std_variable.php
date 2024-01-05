@@ -308,7 +308,7 @@ namespace HH {
    */
   <<__Native>>
   function object_prop_array(
-    \object $obj,
+    \HH\object $obj,
     bool $ignore_late_init = false,
   )[]: darray<string, mixed>;
 
@@ -319,7 +319,7 @@ namespace HH {
    * or is inaccessible in the current context.
    */
   <<__Native, \NoDoc>>
-  function is_late_init_prop_init(\object $obj, string $prop): bool;
+  function is_late_init_prop_init(\HH\object $obj, string $prop): bool;
 
   /*
    * Return true if the <<__LateInit>> static property (with name $prop) on the

@@ -157,8 +157,9 @@ TypedValue HHVM_FUNCTION(get_implicit_context, StringArg key) {
   not_reached();
 }
 
-Object HHVM_FUNCTION(get_whole_implicit_context) {
+Variant HHVM_FUNCTION(get_whole_implicit_context) {
   auto const obj = *ImplicitContext::activeCtx;
+  if (!obj) return init_null();
   return Object{obj};
 }
 

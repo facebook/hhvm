@@ -128,7 +128,7 @@ function clear_lsb_memoization(string $cls, ?string $func = null) : bool;
  * Clear memoization data on object instance
  */
 <<__Native("NoRecording")>>
-function clear_instance_memoization(object $obj) : bool;
+function clear_instance_memoization(\HH\object $obj) : bool;
 
 /**
  * Attach metadata to the caller's stack frame. The metadata can be retrieved

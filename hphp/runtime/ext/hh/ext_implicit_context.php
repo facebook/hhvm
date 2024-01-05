@@ -171,7 +171,7 @@ final class ImplicitContextData {}
 function get_implicit_context(string $key)[zoned]: mixed;
 
 <<__Native>>
-function get_whole_implicit_context()[zoned]: object /* ImplicitContextData */;
+function get_whole_implicit_context()[zoned]: ?ImplicitContextData;
 
 /**
  * Creates implicit context $context keyed by $key.
@@ -180,7 +180,7 @@ function get_whole_implicit_context()[zoned]: object /* ImplicitContextData */;
 function create_implicit_context(
   string $key,
   mixed $context,
-)[zoned]: object /* ImplicitContextData */;
+)[zoned]: ImplicitContextData;
 
 /*
  * Singleton memoization wrapper over create_special_implicit_context for

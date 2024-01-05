@@ -88,7 +88,7 @@ class IntlDateFormatter {
    * @return string - A string with result.
    */
   <<__Native>>
-  public static function FormatObject(object $obj,
+  public static function FormatObject(\HH\object $obj,
                                       mixed $format = NULL,
                                       ?string $locale = NULL): string;
 

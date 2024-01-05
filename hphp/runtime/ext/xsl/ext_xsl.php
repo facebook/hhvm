@@ -34,11 +34,11 @@ class XSLTProcessor {
 
   /* This method imports the stylesheet into the XSLTProcessor for
    * transformations.
-   * @param object $stylesheet - The imported style sheet as a DOMDocument or
-   * SimpleXMLElement object.
+   * @param object $stylesheet - The imported style sheet as a DOMDocument
+   * object.
    */
   <<__Native>>
-  public function importStylesheet(object $stylesheet): void;
+  public function importStylesheet(DOMDocument $stylesheet): void;
 
   /* This method enables the ability to use PHP functions as XSLT functions
    * within XSL stylesheets.
@@ -93,7 +93,7 @@ class XSLTProcessor {
    * @return mixed - The resulting DOMDocument or FALSE on error.
    */
   <<__Native>>
-  public function transformToDoc(object $doc): mixed;
+  public function transformToDoc(DOMNode $doc): mixed;
 
   /* Transforms the source node to an URI applying the stylesheet given by the
    * XSLTProcessor::importStylesheet() method.
@@ -103,8 +103,7 @@ class XSLTProcessor {
    * occurred.
    */
   <<__Native>>
-  public function transformToURI(object $doc,
-                          string $uri): mixed;
+  public function transformToURI(DOMDocument $doc, string $uri): mixed;
 
   /* Transforms the source node to a string applying the stylesheet given by the
    * XSLTProcessor::importStylesheet() method.
@@ -113,5 +112,5 @@ class XSLTProcessor {
    * error.
    */
   <<__Native>>
-  public function transformToXML(object $doc): mixed;
+  public function transformToXML(DOMDocument $doc): mixed;
 }

@@ -1506,12 +1506,12 @@ static String HHVM_METHOD(SimpleXMLElement, getName) {
   return empty_string();
 }
 
-static Object HHVM_METHOD(SimpleXMLElement, attributes,
-                          const String& ns /* = "" */,
-                          bool is_prefix /* = false */) {
+static Variant HHVM_METHOD(SimpleXMLElement, attributes,
+                           const String& ns /* = "" */,
+                           bool is_prefix /* = false */) {
   auto data = Native::data<SimpleXMLElement>(this_);
   if (data->iter.type == SXE_ITER_ATTRLIST) {
-    return Object(); /* attributes don't have attributes */
+    return init_null(); /* attributes don't have attributes */
   }
 
   xmlNodePtr node = data->nodep();

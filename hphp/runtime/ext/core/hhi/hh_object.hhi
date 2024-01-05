@@ -12,4 +12,6 @@
 // operations on them anyways.
 //
 // Claim both object and HH\object before we autoimport object into the HH ns.
-type object = dynamic;
+namespace HH {
+  type object = dynamic;
+}

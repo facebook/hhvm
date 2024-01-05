@@ -33,7 +33,7 @@ function hphp_invoke(string $name, mixed $params): mixed;
  * @return mixed - The result of the invoked method.
  */
 <<__Native("NoInjection", "NoRecording")>>
-function hphp_invoke_method(?object $obj, string $cls, string $name,
+function hphp_invoke_method(?\HH\object $obj, string $cls, string $name,
                             mixed $params): mixed;
 
 /**
@@ -45,7 +45,10 @@ function hphp_invoke_method(?object $obj, string $cls, string $name,
  * @return object - The newly created object
  */
 <<__Native("NoInjection")>>
-function hphp_create_object(string $name, ?varray<mixed> $params)[defaults]: object;
+function hphp_create_object(
+  string $name,
+  ?varray<mixed> $params,
+)[defaults]: \HH\object;
 
 /**
  * hphp_create_object_without_constructor() - Used by ReflectionClass to create
@@ -56,7 +59,7 @@ function hphp_create_object(string $name, ?varray<mixed> $params)[defaults]: obj
  * @return object - The newly created object
  */
 <<__Native("NoInjection")>>
-function hphp_create_object_without_constructor(string $name)[]: object;
+function hphp_create_object_without_constructor(string $name)[]: \HH\object;
 
 /**
  * hphp_get_property() - Used by ReflectionProperty to get the value of a
@@ -70,7 +73,7 @@ function hphp_create_object_without_constructor(string $name)[]: object;
  */
 <<__Native("NoInjection")>>
 function hphp_get_property(
-  object $obj,
+  \HH\object $obj,
   string $cls,
   string $prop,
 )[]: mixed;
@@ -87,7 +90,7 @@ function hphp_get_property(
  */
 <<__Native("NoInjection")>>
 function hphp_set_property(
-  object $obj,
+  \HH\object $obj,
   string $cls,
   string $prop,
   mixed $value,

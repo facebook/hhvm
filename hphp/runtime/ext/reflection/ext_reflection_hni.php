@@ -486,7 +486,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
   }
 
   <<__Native>>
-  private function __initClosure(object $closure)[write_this_props]: bool;
+  private function __initClosure(\HH\object $closure)[write_this_props]: bool;
 
   <<__Native>>
   private function __initName(string $name)[write_this_props]: bool;
@@ -604,7 +604,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
   }
 
   <<__Native>>
-  private function getClosureScopeClassname(object $closure)[]: ?string;
+  private function getClosureScopeClassname(\HH\object $closure)[]: ?string;
 
   public function getClosureScopeClass(): ?ReflectionClass {
     if ($this->closure &&
@@ -615,7 +615,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
   }
 
   <<__Native>>
-  private function getClosureThisObject(object $closure): ?object;
+  private function getClosureThisObject(\HH\object $closure): ?\HH\object;
 
   /**
    * Returns this pointer bound to closure.
@@ -1822,7 +1822,9 @@ class ReflectionClass implements Reflector {
   private static function getClassPropertyInfo(string $clsname)[]: dict;
 
   <<__Native>>
-  private function getDynamicPropertyInfos(object $obj)[]: dict<string, mixed>;
+  private function getDynamicPropertyInfos(
+    \HH\object $obj,
+  )[]: dict<string, mixed>;
 
   private function getOrderedPropertyInfos()[]: ConstMap<string, mixed> {
     $props_map = self::getPropsMapCache($this->getName());

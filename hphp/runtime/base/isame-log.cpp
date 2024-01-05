@@ -97,7 +97,6 @@ void eval_non_utf8_log(folly::StringPiece code) {
 
     FTRACE(1, "non-utf8 eval: {}\n", partial);
 
-    auto const rate = RO::EvalEvalNonUtf8SampleRate;
     if (doLog) {
       StructuredLogEntry sample;
       sample.force_init = true;
@@ -120,21 +119,7 @@ int istrcmp_log(const char* s1, const char* s2) {
     sample.setStr("event", "istrcmp");
     sample.setStr("lhs", s1);
     sample.setStr("rhs", s2);
-    StackTrace st(StackTrace::Force{});
-    sample.setStackTrace("stack", st);
-    VMRegAnchor _(VMRegAnchor::Soft);
-    if (regState() == VMRegState::CLEAN) {
-      if (auto const ar = jit::findVMFrameForDebug()) {
-        auto const frame = BTFrame::regular(ar, kInvalidOffset);
-        auto const trace = createCrashBacktrace(frame, (jit::CTCA) 0 /* rip? */);
-        auto const bt = stringify_backtrace(trace, true);
-        std::vector<folly::StringPiece> btlines;
-        for (auto s = bt.slice(); !s.empty();) {
-          btlines.emplace_back(s.split_step('\n'));
-        }
-        sample.setVec("php_backtrace", btlines);
-      }
-    }
+    log_fill_bt(sample);
     StructuredLog::log("hhvm_isame_collisions", sample);
   }
   return 0;

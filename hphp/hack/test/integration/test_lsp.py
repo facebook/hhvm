@@ -267,14 +267,14 @@ class TestLsp(TestCase[LspTestDriver]):
         spec: LspTestSpec,
         variables: Mapping[str, str],
         fall_back_to_full_index: bool = True,
+        lsp_extra_args: List[str] = [],
     ) -> None:
-        lsp_config_args = [
+        lsp_args = [
             "--config",
             f"ide_fall_back_to_full_index={str(fall_back_to_full_index).lower()}",
-        ]
-
+        ] + lsp_extra_args
         with LspCommandProcessor.create(
-            self.test_driver.test_env, lsp_config_args, self.test_driver.repo_dir
+            self.test_driver.test_env, lsp_args, self.test_driver.repo_dir
         ) as lsp_command_processor:
             (observed_transcript, error_details) = spec.run(
                 lsp_command_processor=lsp_command_processor, variables=variables

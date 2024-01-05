@@ -5,6 +5,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+open Hh_prelude
 
 val elaborate_program : (unit, unit) Aast.program -> Nast.program
 
@@ -18,4 +19,5 @@ val elaborate_gconst : (unit, unit) Aast.gconst -> Nast.gconst
 
 val elaborate_typedef : (unit, unit) Aast.typedef -> Nast.typedef
 
-val elaborate_stmt : (unit, unit) Aast.stmt -> Nast.stmt
+val elaborate_stmt :
+  ParserOptions.t -> ((unit, unit) Aast.stmt -> Nast.stmt) Staged.t

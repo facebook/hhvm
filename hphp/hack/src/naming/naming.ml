@@ -382,7 +382,9 @@ let fun_def_of_stmts ctx stmts : Nast.fun_def option =
         if TypecheckerOptions.rust_elab tcopt then
           Rust_elab_core.elab_stmt tcopt filename stmt
         else
-          let elab_ns = Naming_elaborate_namespaces_endo.elaborate_stmt
+          let elab_ns =
+            let popt = Provider_context.get_popt ctx in
+            unstage (Naming_elaborate_namespaces_endo.elaborate_stmt popt)
           and elab_capture = Naming_captures.elab_stmt
           and elab_typed_locals = Naming_typed_locals.elab_stmt
           and validate_await = Naming_validate_await.validate_stmt on_error

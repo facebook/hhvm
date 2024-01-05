@@ -480,5 +480,18 @@ let elaborate_gconst cst =
 let elaborate_typedef td =
   elaborate_namespaces#on_typedef (make_env td.Aast.t_namespace) td
 
-let elaborate_stmt stmt =
-  elaborate_namespaces#on_stmt (make_env Namespace_env.empty_with_default) stmt
+let elaborate_stmt popt : ((unit, unit) Aast.stmt -> Nast.stmt) Staged.t =
+  (* We add the auto-namespace map from parser options for top-level `stmt`s.
+     It would be expensive to store namespaces on `stmt`s (like we do for other defs such as `fun_def`)
+     because we use the same node type (`stmt`) for both top-level and non-top-level statements.
+  *)
+  let env =
+    let ns_ns_uses =
+      popt
+      |> ParserOptions.auto_namespace_map
+      |> SMap.of_list
+      |> SMap.union Namespace_env.(empty_with_default.ns_ns_uses)
+    in
+    make_env Namespace_env.{ empty_with_default with ns_ns_uses }
+  in
+  stage (elaborate_namespaces#on_stmt env)

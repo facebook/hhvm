@@ -892,6 +892,7 @@ std::string RuntimeOption::AutoloadDBGroup;
 std::string RuntimeOption::AutoloadLogging;
 bool RuntimeOption::AutoloadLoggingAllowPropagation;
 bool RuntimeOption::AutoloadRethrowExceptions = true;
+int RuntimeOption::DeclExtensionCacheSize = 500000;
 std::string RuntimeOption::FileCache;
 std::string RuntimeOption::DefaultDocument;
 std::string RuntimeOption::GlobalDocument;
@@ -2517,6 +2518,8 @@ void RuntimeOption::Load(
                  "Autoload.AllowLoggingPropagation", false);
     Config::Bind(AutoloadRethrowExceptions, ini, config,
                  "Autoload.RethrowExceptions", true);
+
+    Config::Bind(DeclExtensionCacheSize, ini, config, "Ext.Decl.CacheSize", 500000);
 
     Config::Bind(FileCache, ini, config, "Server.FileCache");
     Config::Bind(DefaultDocument, ini, config, "Server.DefaultDocument",

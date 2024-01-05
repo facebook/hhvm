@@ -590,6 +590,8 @@ struct RuntimeOption {
   static bool AutoloadLoggingAllowPropagation;
   static bool AutoloadRethrowExceptions;
 
+  static int DeclExtensionCacheSize;
+
   static std::string FileCache;
   static std::string DefaultDocument;
   static std::string GlobalDocument;

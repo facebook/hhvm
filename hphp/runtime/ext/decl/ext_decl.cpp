@@ -643,7 +643,7 @@ Array populateFile(const hackc::ExtDeclFile& file) {
 using FileDeclsCacheEntry =
     std::pair<SHA1, std::shared_ptr<rust::Box<hackc::DeclsHolder>>>;
 using FileDeclsCache = ConcurrentLRUCache<std::string, FileDeclsCacheEntry>;
-static FileDeclsCache fileDeclsCache(2048);
+static FileDeclsCache fileDeclsCache(RuntimeOption::DeclExtensionCacheSize);
 
 /*
   The native implementation of the FileDecls class. The class is accessible

@@ -757,7 +757,9 @@ inline Class* Class::lookup(const StringData* name) {
   if (name->isSymbol()) {
     if (auto const result = name->getCachedClass()) return result;
   }
-  auto const result = NamedType::getOrCreate(name)->getCachedClass();
+  auto const nt = NamedType::getNoCreate(name);
+  if (!nt) return nullptr;
+  auto const result = nt->getCachedClass();
   if (name->isSymbol() && result && classHasPersistentRDS(result)) {
     const_cast<StringData*>(name)->setCachedClass(result);
   }

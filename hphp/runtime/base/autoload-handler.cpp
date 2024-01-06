@@ -102,7 +102,6 @@ FactsStore* getFactsForRequest() {
 void AutoloadHandler::requestInit() {
   assertx(!m_map);
   assertx(!m_facts);
-  assertx(m_onPostAutoloadFunc.isNull());
   m_facts = getFactsForRequest();
   if (RuntimeOption::RepoAuthoritative) {
     m_map = s_repoAutoloadMap.get();
@@ -115,7 +114,6 @@ void AutoloadHandler::requestInit() {
 void AutoloadHandler::requestShutdown() {
   m_map = nullptr;
   m_facts = nullptr;
-  m_onPostAutoloadFunc.setNull();
 }
 
 namespace {
@@ -278,11 +276,7 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
     log_err(msg.c_str());
     err = msg;
   }
-  if (ok && checkExists()) {
-    onPostAutoload(kind, clsName);
-    return true;
-  }
-  return false;
+  return ok && checkExists();
 }
 
 template <class T>
@@ -373,33 +367,6 @@ void AutoloadHandler::setRepoAutoloadMap(std::unique_ptr<RepoAutoloadMap> map) {
   assertx(RO::RepoAuthoritative);
   assertx(!s_repoAutoloadMap);
   s_repoAutoloadMap = std::move(map);
-}
-
-void AutoloadHandler::setPostAutoloadHandler(Variant onPostAutoloadFunc) {
-  always_assert(!RO::RepoAuthoritative);
-  always_assert(
-    onPostAutoloadFunc.isFunc() ||
-    onPostAutoloadFunc.isObject() ||
-    onPostAutoloadFunc.isClsMeth());
-  m_onPostAutoloadFunc = std::move(onPostAutoloadFunc);
-}
-
-void AutoloadHandler::onPostAutoload(
-    AutoloadMap::KindOf kind, const String& clsName) {
-  if (m_onPostAutoloadFunc.isNull()) return;
-  // We're merging type aliases into types in the autoloader
-  switch (kind) {
-    case AutoloadMap::KindOf::Type:
-    case AutoloadMap::KindOf::TypeAlias:
-    case AutoloadMap::KindOf::TypeOrTypeAlias:
-      kind = AutoloadMap::KindOf::Type;
-      break;
-    default:
-      break;
-  }
-  Variant action = vm_call_user_func(
-    m_onPostAutoloadFunc,
-    make_vec_array(Variant{static_cast<uint8_t>(kind)}, clsName));
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -76,13 +76,6 @@ struct AutoloadHandler final : RequestEventHandler {
 
   static void setRepoAutoloadMap(std::unique_ptr<RepoAutoloadMap>);
 
-  /**
-   * Initialize a listener callback which will run after we autoload a symbol.
-   *
-   * Don't use this. We'll probably remove it.
-   */
-  void setPostAutoloadHandler(Variant onPostAutoloadFunc);
-
 private:
   /**
    * This method may return true on success or false on failure.
@@ -99,11 +92,6 @@ private:
   bool loadFromMap(const String& name, AutoloadMap::KindOf kind,
                    const T &checkExists);
 
-  /**
-   * Invoke `m_onPostAutoloadFunc` after autoloading a class.
-   */
-  void onPostAutoload(AutoloadMap::KindOf kind, const String& clsName);
-
 private:
 
   // The value of m_map determines which data structure, if any, we'll be
@@ -112,7 +100,6 @@ private:
   // queries (aka Facts) about the codebase.
   FactsStore* m_facts = nullptr;
   AutoloadMap* m_map = nullptr;
-  Variant m_onPostAutoloadFunc{Variant::NullInit{}};
 
   static std::unique_ptr<RepoAutoloadMap> s_repoAutoloadMap;
 };

@@ -31,6 +31,58 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Intermediate types for reporting
+ */
+struct ServerStatusProcessReport {
+  int64_t id;
+  std::string build;
+  std::string compiler;
+  bool debug;
+  int64_t now;
+  int64_t start;
+  int64_t up;
+};
+
+struct ServerStatusRequestMemoryReport {
+  int64_t currentUsage;
+  int64_t currentAlloc;
+  int64_t peakUsage;
+  int64_t peakAlloc;
+  int64_t limit;
+  int64_t currentMmUsage;
+};
+
+struct ServerStatusRequestIOReport {
+  std::string status;
+  int64_t duration;
+};
+
+struct ServerStatusRequestReport {
+  std::string vhost;
+  std::string url;
+  std::string endpoint;
+  std::string client;
+  int64_t start;
+  int64_t duration_ms;
+  ServerStatusRequestMemoryReport memory;
+  HPHP::Optional<ServerStatusRequestIOReport> io;
+};
+
+struct ServerStatusThreadReport {
+  int64_t id;
+  int64_t tid;
+  int64_t req;
+  int64_t bytes;
+  std::string mode;
+  HPHP::Optional<ServerStatusRequestReport> request;
+};
+
+struct ServerStatusReport {
+  ServerStatusProcessReport process;
+  std::vector<ServerStatusThreadReport> threads;
+};
+
 struct ServerStats {
 
   enum class ThreadMode {
@@ -60,6 +112,7 @@ public:
   static void SetThreadMode(ThreadMode mode);
   static ThreadMode GetThreadMode();
   static const char* ThreadModeString(ThreadMode mode);
+  static ServerStatusReport ReportStatus();
   static std::string ReportStatus(Writer::Format format);
 
   // io status functions

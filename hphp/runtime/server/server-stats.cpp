@@ -340,47 +340,23 @@ static std::string format_duration(timeval& duration) {
   return ret;
 }
 
-std::string ServerStats::ReportStatus(Writer::Format format) {
-  std::ostringstream out;
-  std::unique_ptr<Writer> w;
-  switch (format) {
-    case Writer::Format::XML:
-      w.reset(new XMLWriter(out));
-      break;
-    case Writer::Format::JSON:
-      w.reset(new JSONWriter(out));
-      break;
-    case Writer::Format::HTML:
-      w.reset(new HTMLWriter(out));
-      break;
-    default:
-      return "";
-  }
+ServerStatusReport ServerStats::ReportStatus() {
+  ServerStatusReport status{};
 
-  w->writeFileHeader();
-  w->beginObject("status");
+  status.process.id = (int64_t)getpid();
+  status.process.build = RuntimeOption::BuildId;
+  status.process.compiler = compilerId().begin();
 
-  w->beginObject("process");
-  w->writeEntry("id", (int64_t)getpid());
-  w->writeEntry("build", RuntimeOption::BuildId);
-  w->writeEntry("compiler", compilerId().begin());
-
-#ifndef NDEBUG
-  w->writeEntry("debug", "yes");
+#ifdef NDEBUG
+  status.process.debug = false;
+#else
+  status.process.debug = true;
 #endif
 
-  timeval up;
   time_t now = time(nullptr);
-  up.tv_sec = now - HttpServer::StartTime;
-  up.tv_usec = 0;
-  w->writeEntry("now", req::make<DateTime>(now)->
-                       toString(DateTime::DateFormatCookie).data());
-  w->writeEntry("start", req::make<DateTime>(HttpServer::StartTime)->
-                         toString(DateTime::DateFormatCookie).data());
-  w->writeEntry("up", format_duration(up));
-  w->endObject("process");
-
-  w->beginList("threads");
+  status.process.now = (int64_t)now;
+  status.process.start = HttpServer::StartTime;
+  status.process.up = now - HttpServer::StartTime;
 
   Lock lock(s_lock, false);
   timeval current;
@@ -398,39 +374,134 @@ std::string ServerStats::ReportStatus(Writer::Format format) {
       memset(&duration, 0, sizeof(duration));
     }
 
-    w->beginObject("thread");
-    w->writeEntry("id", (int64_t)ts.m_threadId);
-    w->writeEntry("tid", (int64_t)ts.m_threadPid);
-    w->writeEntry("req", ts.m_requestCount);
-    w->writeEntry("bytes", ts.m_writeBytes);
-    w->writeEntry("mode", ThreadModeString(ts.m_mode));
+    ServerStatusThreadReport thread{};
+    thread.id = (int64_t)ts.m_threadId;
+    thread.tid = (int64_t)ts.m_threadPid;
+    thread.req = ts.m_requestCount;
+    thread.bytes = ts.m_writeBytes;
+    thread.mode = ThreadModeString(ts.m_mode);
 
     if (ts.m_requestCount && (ts.m_mode != ThreadMode::Idling)) {
-      w->writeEntry("vhost", ts.m_vhost);
-      w->writeEntry("url", ts.m_url);
-      w->writeEntry("endpoint", ts.m_endpoint);
-      w->writeEntry("client", ts.m_clientIP);
-      w->writeEntry("start", req::make<DateTime>(ts.m_start.tv_sec)->
-                    toString(DateTime::DateFormatCookie).data());
-      w->writeEntry("duration", format_duration(duration));
+      ServerStatusRequestReport request{};
+      request.vhost = ts.m_vhost;
+      request.url = ts.m_url;
+      request.endpoint = ts.m_endpoint;
+      request.client = ts.m_clientIP;
+      request.start = ts.m_start.tv_sec;
+      request.duration_ms = (duration.tv_sec * 1000) + (duration.tv_usec / 1000);
 
       auto const stats = ts.m_mm->getStatsCopy();
-      w->beginObject("memory");
-      w->writeEntry("current usage", stats.usage());
-      w->writeEntry("current alloc", stats.capacity());
-      w->writeEntry("peak usage", stats.peakUsage);
-      w->writeEntry("peak alloc", stats.peakCap);
-      w->writeEntry("limit", ts.m_mm->getMemoryLimit());
-      w->writeEntry("current mm usage", stats.mmUsage());
-      w->endObject("memory");
+      ServerStatusRequestMemoryReport memory{};
+
+      memory.currentUsage = stats.usage();
+      memory.currentAlloc = stats.capacity();
+      memory.peakUsage = stats.peakUsage;
+      memory.peakAlloc = stats.peakCap;
+      memory.limit = ts.m_mm->getMemoryLimit();
+      memory.currentMmUsage = stats.mmUsage();
+
+      request.memory = std::move(memory);
 
       // Only in the event that we are currently in the process of an io, will
       // we output the iostatus, and ioInProcessDuationMicros
       if (ts.m_ioInProcess) {
-        timespec now;
-        Timer::GetMonotonicTime(now);
-        w->writeEntry("iostatus", std::string(ts.m_ioName) + " " + ts.m_ioAddr);
-        w->writeEntry("ioduration", gettime_diff_us(ts.m_ioStart, now));
+        timespec now_ts;
+        Timer::GetMonotonicTime(now_ts);
+        ServerStatusRequestIOReport io;
+
+        io.status = std::string(ts.m_ioName) + " " + ts.m_ioAddr;
+        io.duration = gettime_diff_us(ts.m_ioStart, now_ts);
+
+        request.io = std::move(io);
+      }
+      thread.request = std::move(request);
+    }
+    status.threads.emplace_back(thread);
+  }
+
+  return status;
+}
+
+std::string ServerStats::ReportStatus(Writer::Format format) {
+  std::ostringstream out;
+  std::unique_ptr<Writer> w;
+  switch (format) {
+    case Writer::Format::XML:
+      w.reset(new XMLWriter(out));
+      break;
+    case Writer::Format::JSON:
+      w.reset(new JSONWriter(out));
+      break;
+    case Writer::Format::HTML:
+      w.reset(new HTMLWriter(out));
+      break;
+    default:
+      return "";
+  }
+
+  ServerStatusReport status = ReportStatus();
+
+  w->writeFileHeader();
+  w->beginObject("status");
+
+  w->beginObject("process");
+  w->writeEntry("id", status.process.id);
+  w->writeEntry("build", status.process.build);
+  w->writeEntry("compiler", status.process.compiler);
+
+  if (status.process.debug) {
+    w->writeEntry("debug", "yes");
+  }
+
+  timeval up;
+  up.tv_sec = status.process.up;
+  up.tv_usec = 0;
+  w->writeEntry("now", req::make<DateTime>(status.process.now)->
+                       toString(DateTime::DateFormatCookie).data());
+  w->writeEntry("start", req::make<DateTime>(status.process.start)->
+                         toString(DateTime::DateFormatCookie).data());
+  w->writeEntry("up", format_duration(up));
+  w->endObject("process");
+
+  w->beginList("threads");
+
+  for (ServerStatusThreadReport thread : status.threads) {
+    w->beginObject("thread");
+    w->writeEntry("id", thread.id);
+    w->writeEntry("tid", thread.tid);
+    w->writeEntry("req", thread.req);
+    w->writeEntry("bytes", thread.bytes);
+    w->writeEntry("mode", thread.mode);
+
+    if (thread.request.has_value()) {
+      ServerStatusRequestReport request = thread.request.value();
+      w->writeEntry("vhost", request.vhost);
+      w->writeEntry("url", request.url);
+      w->writeEntry("endpoint", request.endpoint);
+      w->writeEntry("client", request.client);
+      w->writeEntry("start", req::make<DateTime>(request.start)->
+                    toString(DateTime::DateFormatCookie).data());
+      int64_t duration_ms = request.duration_ms;
+      timeval duration;
+      duration.tv_sec = duration_ms / 1000;
+      duration.tv_usec = (duration_ms % 1000) * 1000;
+      w->writeEntry("duration", format_duration(duration));
+
+      w->beginObject("memory");
+      w->writeEntry("current usage", request.memory.currentUsage);
+      w->writeEntry("current alloc", request.memory.currentAlloc);
+      w->writeEntry("peak usage", request.memory.peakUsage);
+      w->writeEntry("peak alloc", request.memory.peakAlloc);
+      w->writeEntry("limit", request.memory.limit);
+      w->writeEntry("current mm usage", request.memory.currentMmUsage);
+      w->endObject("memory");
+
+      // Only in the event that we are currently in the process of an io, will
+      // we output the iostatus, and ioInProcessDuationMicros
+      if (request.io.has_value()) {
+        ServerStatusRequestIOReport io = request.io.value();
+        w->writeEntry("iostatus", io.status);
+        w->writeEntry("ioduration", io.duration);
       }
     }
     w->endObject("thread");

@@ -1647,6 +1647,9 @@ public:
   static std::string Fb303ServerIP;
   static int Fb303ServerWorkerThreads;
   static int Fb303ServerPoolThreads;
+  static bool Fb303ServerEnableAclChecks;
+  static bool Fb303ServerEnforceAclChecks;
+  static std::string Fb303ServerIdentity;
 
   // Experimental thread tuning options, allows threads to be adjusted by
   // thread controller (host stats monitor). Maximum adjustment is defined by

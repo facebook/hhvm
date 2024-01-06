@@ -25,6 +25,8 @@ namespace detail {
 
 class AnyDebugWriter : public DebugProtocolWriter {
  public:
+  explicit AnyDebugWriter(bool try_unregistered_structs_as_any)
+      : try_unregistered_structs_as_any_(try_unregistered_structs_as_any) {}
   uint32_t write(const type::AnyStruct& any);
 
   uint32_t write(const type::AnyData& any);
@@ -38,6 +40,11 @@ class AnyDebugWriter : public DebugProtocolWriter {
 
   template <class ProtocolReader, typename Tag>
   type::native_type<Tag> decode(ProtocolReader& reader);
+
+  template <class ProtocolReader>
+  bool tryAsAny(ProtocolReader& reader);
+
+  bool try_unregistered_structs_as_any_;
 };
 } // namespace detail
 
@@ -46,6 +53,12 @@ class AnyDebugWriter : public DebugProtocolWriter {
  * human readable and nicely indented. Binary data inside the AnyStruct is
  * deserialized without schema, based on the Type information provided in
  * AnyStruct.
+ *
+ * `try_unregistered_structs_as_any` : When enabled, this flag triggers an
+ * attempt to convert each struct into an AnyStruct during schemaless
+ * deserialization of a struct. If a valid, non-empty AnyStruct is identified,
+ * it is treated as a nested AnyStruct and it's binary data will then
+ * recursively be deserialized into a human-readable format.
  *
  * It is write-only now and cannot deserialize from such a string. There is no
  * guarantee that the format won't change, it might be evolved in a
@@ -57,7 +70,9 @@ class AnyDebugWriter : public DebugProtocolWriter {
  * binary blob, which can be difficult to read.
  *
  */
-std::string anyDebugString(const type::AnyStruct& obj);
+std::string anyDebugString(
+    const type::AnyStruct& obj, bool try_unregistered_structs_as_any = false);
 
-std::string anyDebugString(const type::AnyData& obj);
+std::string anyDebugString(
+    const type::AnyData& obj, bool try_unregistered_structs_as_any = false);
 } // namespace apache::thrift

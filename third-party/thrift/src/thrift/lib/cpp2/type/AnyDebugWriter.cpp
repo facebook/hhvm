@@ -18,9 +18,10 @@
 
 namespace apache::thrift {
 
-std::string anyDebugString(const type::AnyStruct& obj) {
+std::string anyDebugString(
+    const type::AnyStruct& obj, bool try_unregistered_structs_as_any) {
   folly::IOBufQueue queue;
-  detail::AnyDebugWriter proto;
+  detail::AnyDebugWriter proto(try_unregistered_structs_as_any);
   proto.setOutput(&queue);
   proto.write(obj);
   std::unique_ptr<folly::IOBuf> buf = queue.move();
@@ -28,8 +29,9 @@ std::string anyDebugString(const type::AnyStruct& obj) {
   return std::string(reinterpret_cast<const char*>(br.data()), br.size());
 }
 
-std::string anyDebugString(const type::AnyData& obj) {
-  return anyDebugString(obj.toThrift());
+std::string anyDebugString(
+    const type::AnyData& obj, bool try_unregistered_structs_as_any) {
+  return anyDebugString(obj.toThrift(), try_unregistered_structs_as_any);
 }
 
 namespace detail {
@@ -65,17 +67,25 @@ uint32_t AnyDebugWriter::writeUnregisteredAny(const type::AnyStruct& any) {
   const type::Type& type = *any.type();
   type::BaseType baseType = type.baseType();
 
-  const folly::IOBuf& data = *any.data();
-  if (prot == type::Protocol::get<type::StandardProtocol::Binary>()) {
-    BinaryProtocolReader reader;
-    reader.setInput(&data);
-    return writeUnregisteredAnyImpl(reader, baseType);
-  } else if (prot == type::Protocol::get<type::StandardProtocol::Compact>()) {
-    CompactProtocolReader reader;
-    reader.setInput(&data);
-    return writeUnregisteredAnyImpl(reader, baseType);
+  // Nested AnyStructs
+  if (type == type::Type::get<type::struct_t<type::AnyStruct>>()) {
+    type::AnyData data{any};
+    type::AnyStruct nested_any;
+    data.get(nested_any);
+    return write(nested_any);
   } else {
-    return writeBinary(data);
+    const folly::IOBuf& data = *any.data();
+    if (prot == type::Protocol::get<type::StandardProtocol::Binary>()) {
+      BinaryProtocolReader reader;
+      reader.setInput(&data);
+      return writeUnregisteredAnyImpl(reader, baseType);
+    } else if (prot == type::Protocol::get<type::StandardProtocol::Compact>()) {
+      CompactProtocolReader reader;
+      reader.setInput(&data);
+      return writeUnregisteredAnyImpl(reader, baseType);
+    } else {
+      return writeBinary(data);
+    }
   }
 }
 
@@ -84,6 +94,26 @@ type::native_type<Tag> AnyDebugWriter::decode(ProtocolReader& reader) {
   type::native_type<Tag> value;
   op::decode<Tag>(reader, value);
   return value;
+}
+
+template <class ProtocolReader>
+bool AnyDebugWriter::tryAsAny(ProtocolReader& reader) {
+  auto cursor = reader.getCursor();
+  auto cur_pos = cursor.getCurrentPosition();
+  try {
+    type::AnyStruct any;
+    op::decode<type::struct_t<type::AnyStruct>>(reader, any);
+    if (!any.data()->empty() && type::AnyData::isValid(any)) {
+      write(any);
+      return true;
+    }
+  } catch (...) {
+  }
+
+  auto new_pos = cursor.getCurrentPosition();
+  cursor.retreat(new_pos - cur_pos);
+  reader.setInput(cursor);
+  return false;
 }
 
 template <class ProtocolReader>
@@ -154,6 +184,9 @@ uint32_t AnyDebugWriter::writeUnregisteredAnyImpl(
     case type::BaseType::Enum:
       return writeI32(decode<ProtocolReader, type::i32_t>(reader));
     case type::BaseType::Struct:
+      if (try_unregistered_structs_as_any_ && tryAsAny(reader)) {
+        return 0;
+      }
     case type::BaseType::Union:
     case type::BaseType::Exception: {
       uint32_t s = 0;

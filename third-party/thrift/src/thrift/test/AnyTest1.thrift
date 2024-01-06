@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
+include "thrift/lib/thrift/any.thrift"
+
+package "facebook.com/thrift/test"
+
 namespace cpp2 apache.thrift.test
 
 struct AnyTestStruct {
   1: i32 foo;
-} (thrift.uri = "facebook.com/thrift/test/AnyTestStruct")
+}
 
 exception AnyTestException {
   1: i32 foo;
-} (thrift.uri = "facebook.com/thrift/test/AnyTestException")
+}
+
+struct NestedAny {
+  1: any.Any any_field;
+}

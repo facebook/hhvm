@@ -20,6 +20,8 @@
 
 namespace apache::thrift {
 
+using apache::thrift::test::NestedAny;
+
 TEST(AnyTest, any_struct_fields) {
   auto any = type::toAnyData<type::i16_t>();
   auto ret = anyDebugString(any);
@@ -35,7 +37,7 @@ TYPED_TEST_SUITE(AnyTestFixture, type::Tags);
 
 template <typename TypeParam>
 void verifyDebugString(const type::AnyData& any) {
-  auto ret = anyDebugString(any);
+  auto ret = anyDebugString(any, true);
   auto check = [&](auto str) {
     EXPECT_NE(ret.find(str), ret.npos) << ret << str;
   };
@@ -53,8 +55,26 @@ TYPED_TEST(AnyTestFixture, unregistered_compact) {
   verifyDebugString<TypeParam>(any);
 }
 
+TYPED_TEST(AnyTestFixture, nested_compact) {
+  NestedAny obj;
+  obj.any_field() = type::toAnyData<TypeParam>().toThrift();
+
+  auto any = type::AnyData::toAny<type::struct_t<NestedAny>>(obj);
+  verifyDebugString<TypeParam>(any);
+}
+
 TYPED_TEST(AnyTestFixture, unregistered_binary) {
   auto any = type::toAnyData<TypeParam, type::StandardProtocol::Binary>();
+  verifyDebugString<TypeParam>(any);
+}
+
+TYPED_TEST(AnyTestFixture, nested_binary) {
+  NestedAny obj;
+  obj.any_field() =
+      type::toAnyData<TypeParam, type::StandardProtocol::Binary>().toThrift();
+
+  auto any = type::AnyData::
+      toAny<type::struct_t<NestedAny>, type::StandardProtocol::Binary>(obj);
   verifyDebugString<TypeParam>(any);
 }
 

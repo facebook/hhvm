@@ -31,6 +31,8 @@ class AnyDebugWriter : public DebugProtocolWriter {
 
   uint32_t write(const type::AnyData& any);
 
+  uint32_t write(const type::Type& type);
+
  private:
   uint32_t writeUnregisteredAny(const type::AnyStruct& any);
 

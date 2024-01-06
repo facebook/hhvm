@@ -22,12 +22,57 @@ namespace apache::thrift {
 
 using apache::thrift::test::NestedAny;
 
+std::string anyTypeDebugString(const type::Type& obj) {
+  folly::IOBufQueue queue;
+  detail::AnyDebugWriter proto(false);
+  proto.setOutput(&queue);
+  proto.write(obj);
+  std::unique_ptr<folly::IOBuf> buf = queue.move();
+  folly::ByteRange br = buf->coalesce();
+  return std::string(reinterpret_cast<const char*>(br.data()), br.size());
+}
+
+template <typename Tag>
+std::string tagToTypeString() {
+  return anyTypeDebugString(type::Type::get<Tag>());
+}
+
 TEST(AnyTest, any_struct_fields) {
   auto any = type::toAnyData<type::i16_t>();
   auto ret = anyDebugString(any);
+  EXPECT_NE(ret.find("1: type (struct) = \"i16\""), ret.npos) << ret;
+  EXPECT_NE(ret.find("2: protocol (struct) = \"Compact\""), ret.npos) << ret;
   EXPECT_NE(
       ret.find(fmt::format("3: data (i16) = {}", type::kMagicString)), ret.npos)
       << ret;
+}
+
+TEST(AnyTest, type_str) {
+  // valid TypeStruct created from Tags
+  EXPECT_EQ(tagToTypeString<type::i16_t>(), "\"i16\"");
+  EXPECT_EQ(tagToTypeString<type::i32_t>(), "\"i32\"");
+  EXPECT_EQ(tagToTypeString<type::bool_t>(), "\"bool\"");
+  EXPECT_EQ(tagToTypeString<type::byte_t>(), "\"byte\"");
+  EXPECT_EQ(tagToTypeString<type::string_t>(), "\"string\"");
+  EXPECT_EQ(tagToTypeString<type::binary_t>(), "\"binary\"");
+  EXPECT_EQ(tagToTypeString<type::list<type::i32_t>>(), "\"list<i32>\"");
+  EXPECT_EQ(tagToTypeString<type::set<type::i32_t>>(), "\"set<i32>\"");
+  EXPECT_EQ(
+      (tagToTypeString<type::map<type::i32_t, type::float_t>>()),
+      "\"map<i32,float>\"");
+  EXPECT_EQ(
+      tagToTypeString<type::struct_t<test::AnyTestStruct>>(),
+      fmt::format("\"struct<{}>\"", thrift::uri<test::AnyTestStruct>()));
+  EXPECT_EQ(
+      tagToTypeString<type::exception_t<test::AnyTestException>>(),
+      fmt::format("\"exception<{}>\"", thrift::uri<test::AnyTestException>()));
+
+  // invalid TypeStruct
+  auto map_type = type::Type::get<type::map<type::i32_t, type::float_t>>();
+  auto map_type_struct = map_type.toThrift();
+  map_type_struct.name().ensure().boolType_ref() = type::Void::Unused;
+  EXPECT_EQ(
+      anyTypeDebugString(type::Type(map_type_struct)), "\"bool<i32,float>\"");
 }
 
 template <typename>
@@ -48,6 +93,8 @@ void verifyDebugString(const type::AnyData& any) {
   } else {
     check(type::kMagicString);
   }
+  check(anyTypeDebugString(any.type()));
+  check(any.protocol().name());
 }
 
 TYPED_TEST(AnyTestFixture, unregistered_compact) {
@@ -93,6 +140,10 @@ TYPED_TEST(AnyTestFixture, unregistered_json) {
   auto encoded_str = folly::cEscape<std::string>(
       std::string(reinterpret_cast<const char*>(br.data()), br.size()));
   EXPECT_NE(ret.find(encoded_str.data()), ret.npos) << ret << encoded_str;
+  auto type_str = anyTypeDebugString(*any.type());
+  EXPECT_NE(ret.find(type_str), ret.npos) << ret << type_str;
+  auto protocol_str = any.protocol()->name();
+  EXPECT_NE(ret.find(protocol_str), ret.npos) << ret << protocol_str;
 }
 
 } // namespace apache::thrift

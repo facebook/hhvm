@@ -35,6 +35,88 @@ std::string anyDebugString(
 }
 
 namespace detail {
+namespace {
+
+std::string_view appendTypeUri(const type::TypeUri& uri) {
+  switch (uri.getType()) {
+    case apache::thrift::type::TypeUri::uri:
+      return *uri.uri_ref();
+    case apache::thrift::type::TypeUri::typeHashPrefixSha2_256:
+      return uri.typeHashPrefixSha2_256_ref()->c_str();
+    case apache::thrift::type::TypeUri::scopedName:
+    case apache::thrift::type::TypeUri::__EMPTY__:
+      return "(unspecified)";
+  }
+}
+
+void appendType(const type::TypeStruct& type, fmt::memory_buffer& buf);
+
+void appendTypeParams(
+    const std::vector<type::TypeStruct>& types, fmt::memory_buffer& buf) {
+  bool first = true;
+  for (const auto& t : types) {
+    if (!std::exchange(first, false)) {
+      buf.push_back(',');
+    }
+    appendType(t, buf);
+  }
+}
+
+std::string getTypeName(const type::TypeStruct& type) {
+  switch (type.name()->getType()) {
+    case type::TypeName::boolType:
+      return "bool";
+    case type::TypeName::byteType:
+      return "byte";
+    case type::TypeName::i16Type:
+      return "i16";
+    case type::TypeName::i32Type:
+      return "i32";
+    case type::TypeName::i64Type:
+      return "i64";
+    case type::TypeName::floatType:
+      return "float";
+    case type::TypeName::doubleType:
+      return "double";
+    case type::TypeName::stringType:
+      return "string";
+    case type::TypeName::binaryType:
+      return "binary";
+    case type::TypeName::enumType:
+      return fmt::format(
+          "enum<{}>", appendTypeUri(*type.name()->enumType_ref()));
+    case type::TypeName::typedefType:
+      return fmt::format(
+          "typedef<{}>", appendTypeUri(*type.name()->typedefType_ref()));
+    case type::TypeName::structType:
+      return fmt::format(
+          "struct<{}>", appendTypeUri(*type.name()->structType_ref()));
+    case type::TypeName::unionType:
+      return fmt::format(
+          "union<{}>", appendTypeUri(*type.name()->unionType_ref()));
+    case type::TypeName::exceptionType:
+      return fmt::format(
+          "exception<{}>", appendTypeUri(*type.name()->exceptionType_ref()));
+    case type::TypeName::listType:
+      return "list";
+    case type::TypeName::setType:
+      return "set";
+    case type::TypeName::mapType:
+      return "map";
+    case type::TypeName::__EMPTY__:
+      return "void";
+  }
+}
+
+void appendType(const type::TypeStruct& type, fmt::memory_buffer& buf) {
+  fmt::format_to(std::back_inserter(buf), "{}", getTypeName(type));
+  if (!type.get_params().empty()) {
+    buf.push_back('<');
+    appendTypeParams(type.get_params(), buf);
+    buf.push_back('>');
+  }
+}
+} // namespace
 
 uint32_t AnyDebugWriter::write(const type::AnyStruct& any) {
   uint32_t s = 0;
@@ -42,7 +124,24 @@ uint32_t AnyDebugWriter::write(const type::AnyStruct& any) {
   const type::Type& type = *any.type();
   type::BaseType baseType = type.baseType();
 
-  // TODO(rashmim): Add type and protocol fields
+  s += writeFieldBegin(
+      "type",
+      TType::T_STRUCT,
+      folly::to_underlying(
+          op::get_field_id<type::AnyStruct, apache::thrift::ident::type>::
+              value));
+  s += write(type);
+  s += writeFieldEnd();
+
+  s += writeFieldBegin(
+      "protocol",
+      TType::T_STRUCT,
+      folly::to_underlying(
+          op::get_field_id<type::AnyStruct, apache::thrift::ident::protocol>::
+              value));
+  s += writeString(any.protocol()->name());
+  s += writeFieldEnd();
+
   s += writeFieldBegin(
       "data",
       type::toTType(baseType),
@@ -209,6 +308,12 @@ uint32_t AnyDebugWriter::writeUnregisteredAnyImpl(
       return s;
     }
   }
+}
+
+uint32_t AnyDebugWriter::write(const type::Type& type) {
+  fmt::memory_buffer buf;
+  appendType(type.toThrift(), buf);
+  return writeString(fmt::to_string(buf));
 }
 } // namespace detail
 } // namespace apache::thrift

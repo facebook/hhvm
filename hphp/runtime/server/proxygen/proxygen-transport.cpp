@@ -24,6 +24,7 @@
 
 #include <algorithm>
 #include <folly/Range.h>
+#include <folly/container/Reserve.h>
 #include <memory>
 #include <set>
 
@@ -297,6 +298,7 @@ void ProxygenTransport::onHeadersComplete(
 
   const auto& headers = m_request->getHeaders();
   m_proxygenHeaders = &headers;
+  folly::grow_capacity_by(m_requestHeaders, headers.size());
   headers.forEach([&] (const std::string &header, const std::string &val) {
       m_requestHeaders[header.c_str()].push_back(val.c_str());
     });

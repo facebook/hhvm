@@ -833,6 +833,7 @@ fn cmp_unit(a_unit: &Unit<'_>, b_unit: &Unit<'_>) -> Result {
         missing_symbols: _,
         error_symbols: _,
         valid_utf8: _,
+        invalid_utf8_offset: _,
     } = a_unit;
     let Unit {
         adata: b_adata,
@@ -848,6 +849,7 @@ fn cmp_unit(a_unit: &Unit<'_>, b_unit: &Unit<'_>) -> Result {
         missing_symbols: _,
         error_symbols: _,
         valid_utf8: _,
+        invalid_utf8_offset: _,
     } = b_unit;
 
     cmp_map_t(a_adata, b_adata, cmp_eq).qualified("adata")?;

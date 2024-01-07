@@ -119,6 +119,7 @@ impl<'a> UnitBuilder<'a> {
             missing_symbols: Default::default(),
             error_symbols: Default::default(),
             valid_utf8: true,
+            invalid_utf8_offset: 0,
         }
     }
 

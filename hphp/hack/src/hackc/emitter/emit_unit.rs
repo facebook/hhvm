@@ -77,7 +77,19 @@ pub fn emit_fatal_unit<'arena>(
             loc: pos.into(),
             message: Str::new_str(alloc, msg.as_ref()),
         }),
-        ..Unit::default()
+        adata: Default::default(),
+        functions: Default::default(),
+        classes: Default::default(),
+        modules: Default::default(),
+        typedefs: Default::default(),
+        file_attributes: Default::default(),
+        module_use: Default::default(),
+        symbol_refs: Default::default(),
+        constants: Default::default(),
+        missing_symbols: Default::default(),
+        error_symbols: Default::default(),
+        valid_utf8: true,
+        invalid_utf8_offset: 0,
     })
 }
 
@@ -86,9 +98,9 @@ pub fn emit_unit<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     namespace: Arc<namespace_env::Env>,
     tast: &'a ast::Program,
-    valid_utf8: bool,
+    invalid_utf8_offset: Option<usize>,
 ) -> Result<Unit<'arena>> {
-    let result = emit_unit_(emitter, namespace, tast, valid_utf8);
+    let result = emit_unit_(emitter, namespace, tast, invalid_utf8_offset);
     match result {
         Err(e) => match e.into_kind() {
             ErrorKind::IncludeTimeFatalException(op, pos, msg) => {
@@ -156,7 +168,7 @@ fn emit_unit_<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     namespace: Arc<namespace_env::Env>,
     prog: &'a ast::Program,
-    valid_utf8: bool,
+    invalid_utf8_offset: Option<usize>,
 ) -> Result<Unit<'arena>> {
     let prog = prog.as_slice();
     let mut functions = emit_functions_from_program(emitter, prog)?;
@@ -230,7 +242,8 @@ fn emit_unit_<'a, 'arena, 'decl>(
         fatal,
         missing_symbols: Slice::fill_iter(emitter.alloc, missing_syms.into_iter()),
         error_symbols: Slice::fill_iter(emitter.alloc, error_syms.into_iter()),
-        valid_utf8,
+        valid_utf8: invalid_utf8_offset.is_none(),
+        invalid_utf8_offset: invalid_utf8_offset.unwrap_or(0),
     })
 }
 

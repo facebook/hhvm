@@ -69,7 +69,7 @@ TRACE_SET_MOD(unit_parse);
 
 UnitEmitterCacheHook g_unit_emitter_cache_hook = nullptr;
 
-void eval_non_utf8_log(folly::StringPiece code);
+void non_utf8_log(CodeSource, folly::StringPiece code, size_t);
 
 namespace {
 
@@ -206,8 +206,8 @@ CompilerResult hackc_compile(
   auto const bcSha1 = SHA1(hash_unit(*unit_wrapped));
   const hackc::hhbc::Unit* unit = hackCUnitRaw(unit_wrapped);
 
-  if (codeSource == CodeSource::Eval && !unit->valid_utf8) {
-    eval_non_utf8_log(code.data()) ;
+  if (codeSource != CodeSource::User && !unit->valid_utf8) {
+    non_utf8_log(codeSource, code.data(), unit->invalid_utf8_offset);
   }
 
   auto hackCResult = unitEmitterFromHackCUnitHandleErrors(

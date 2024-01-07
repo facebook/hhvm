@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/vm/jit/fixup.h"
+#include "hphp/runtime/vm/unit-parser.h"
 #include "hphp/util/stack-trace.h"
 
 namespace HPHP {
@@ -64,45 +65,37 @@ bool isame_log(const StringData* input, const StringData* arg) {
   return true;
 }
 
-void eval_non_utf8_log(folly::StringPiece code) {
+void non_utf8_log(CodeSource from, folly::StringPiece code, size_t badcharIdx) {
   auto const rate = RO::EvalEvalNonUtf8SampleRate;
   bool doLog = StructuredLog::coinflip(rate);
   bool doTrace = false;
   ONTRACE(1, { doTrace = true; });
 
   if (doLog || doTrace) {
-    // This doesn't necessarily match rust exactly - but should be good enough for
-    // reporting...
-    size_t badcharIdx = [&code]() -> size_t {
-      auto p = code.begin();
-      while (p < code.end()) {
-        int tail = 0;
-        uint8_t ch = *p++;
-        if ((ch & 0x80) == 0) { }
-        else if ((ch & 0xe0) == 0xc0) { tail = 1; }
-        else if ((ch & 0xf0) == 0xe0) { tail = 2; }
-        else if ((ch & 0xf8) == 0xf0) { tail = 3; }
-        else { return p - (code.begin() + 1); }
-        while (tail-- > 0) {
-          if ((*p++ & 0xc0) != 0x80) { return p - (code.begin() + 1); }
-        }
-      }
-      // Uh oh.
-      return 0;
-    }();
     constexpr size_t CONTEXT = 64;
     size_t start = std::max(badcharIdx, CONTEXT) - CONTEXT;
     size_t end = std::min(badcharIdx + CONTEXT, code.size());
     folly::StringPiece partial{code.begin() + start, code.begin() + end};
 
-    FTRACE(1, "non-utf8 eval: {}\n", partial);
+    FTRACE(1, "non-utf8 eval: bad={} '{}'\n", badcharIdx - start, partial);
 
     if (doLog) {
+      auto const code_source = [&] {
+        switch (from) {
+          case CodeSource::User: return "user";
+          case CodeSource::Eval: return "eval";
+          case CodeSource::Debugger: return "debugger";
+          case CodeSource::Systemlib: return "systemlib";
+          default: return "unknown";
+        }
+      }();
       StructuredLogEntry sample;
       sample.force_init = true;
       sample.setInt("sample_rate", rate);
       sample.setStr("event", "utf8");
       sample.setStr("lhs", partial);
+      sample.setInt("bad_utf8_index", badcharIdx - start);
+      sample.setStr("code_source", code_source);
       log_fill_bt(sample);
       StructuredLog::log("hhvm_isame_collisions", sample);
     }

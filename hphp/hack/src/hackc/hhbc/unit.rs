@@ -19,7 +19,7 @@ use crate::SrcLoc;
 use crate::SymbolRefs;
 use crate::Typedef;
 
-#[derive(Default, Debug, Serialize)]
+#[derive(Debug, Serialize)]
 #[repr(C)]
 pub struct Unit<'arena> {
     pub adata: Slice<'arena, Adata<'arena>>,
@@ -37,6 +37,7 @@ pub struct Unit<'arena> {
     // TODO(T120858428): Remove this field once non-utf8 is banned from the
     // parser.
     pub valid_utf8: bool,
+    pub invalid_utf8_offset: usize,
 }
 
 /// Fields used when a unit had compile-time errors that should be reported

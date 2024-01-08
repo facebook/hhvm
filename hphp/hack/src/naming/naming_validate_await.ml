@@ -103,8 +103,7 @@ and check_await_usage expr =
       combine_con (check_await_usage expr1) (check_await_usage expr2)
     (* Expressions with lists of sub-expressions that we can lift an await out of
        and run concurrently *)
-    | KeyValCollection (_, _, args)
-    | Darray (_, args) ->
+    | KeyValCollection (_, _, args) ->
       List.fold_right args ~init:NoAwait ~f:(fun (arg_k, arg_v) await1 ->
           let await2 =
             combine_con (check_await_usage arg_k) (check_await_usage arg_v)
@@ -112,8 +111,7 @@ and check_await_usage expr =
           combine_con await1 await2)
     | Tuple args
     | String2 args
-    | ValCollection (_, _, args)
-    | Varray (_, args) ->
+    | ValCollection (_, _, args) ->
       List.fold_right args ~init:NoAwait ~f:await_fold
     | Shape fields -> List.fold_right fields ~init:NoAwait ~f:await_fold_tuple
     | Call { func; targs = _; args; unpacked_arg } ->

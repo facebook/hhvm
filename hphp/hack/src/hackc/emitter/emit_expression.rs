@@ -484,8 +484,6 @@ pub fn emit_expr<'a, 'arena, 'decl>(
             Expr_::Call(c) => emit_call_expr(emitter, env, pos, None, false, c),
             Expr_::New(e) => emit_new(emitter, env, pos, e, false),
             Expr_::FunctionPointer(fp) => emit_function_pointer(emitter, env, pos, &fp.0, &fp.1),
-            Expr_::Darray(e) => emit_darray(emitter, env, pos, e, expression),
-            Expr_::Varray(e) => emit_varray(emitter, env, pos, e, expression),
             Expr_::Collection(e) => emit_named_collection_str(emitter, env, expression, e),
             Expr_::ValCollection(e) => emit_val_collection(emitter, env, pos, e, expression),
             Expr_::Pair(e) => emit_pair(emitter, env, pos, e, expression),
@@ -1029,7 +1027,7 @@ fn emit_shape<'a, 'arena, 'decl>(
     let fl = fl
         .iter()
         .map(|(f, e)| {
-            Ok((
+            Ok(aast::Field(
                 ast::Expr(
                     (),
                     pos.clone(),
@@ -1042,7 +1040,11 @@ fn emit_shape<'a, 'arena, 'decl>(
     emit_expr(
         emitter,
         env,
-        &ast::Expr((), pos.clone(), ast::Expr_::mk_darray(None, fl)),
+        &ast::Expr(
+            (),
+            pos.clone(),
+            ast::Expr_::KeyValCollection(Box::new(((pos.clone(), ast::KvcKind::Dict), None, fl))),
+        ),
     )
 }
 
@@ -1520,25 +1522,6 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
         }
         Expr_::KeyValCollection(v) if v.0.1 == ast::KvcKind::ImmMap => {
             emit_collection_helper(e, CollectionType::ImmMap)
-        }
-        Expr_::Varray(_) => {
-            let instrs = emit_value_only_collection(e, env, pos, fields, |v| {
-                Instruct::Opcode(Opcode::NewVec(v))
-            });
-            Ok(instrs?)
-        }
-        Expr_::Darray(_) => {
-            if is_struct_init(e, env, fields, false /* allow_numerics */)? {
-                let instrs = emit_struct_array(e, env, pos, fields, |alloc, _, arg| {
-                    let instr = instr::new_struct_dict(alloc, arg);
-                    Ok(emit_pos_then(pos, instr))
-                });
-                Ok(instrs?)
-            } else {
-                let constr = Instruct::Opcode(Opcode::NewDictArray(count));
-                let instrs = emit_array(e, env, pos, fields, constr);
-                Ok(instrs?)
-            }
         }
         _ => Err(Error::unrecoverable(
             "plain PHP arrays cannot be constructed",
@@ -3234,19 +3217,6 @@ fn emit_val_collection<'a, 'arena, 'decl>(
     emit_named_collection(emitter, env, pos, expression, &fields, collection_typ)
 }
 
-fn emit_varray<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
-    env: &Env<'a, 'arena>,
-    pos: &Pos,
-    e: &'a (Option<ast::Targ>, Vec<ast::Expr>),
-    expression: &ast::Expr,
-) -> Result<InstrSeq<'arena>> {
-    Ok(emit_pos_then(
-        pos,
-        emit_collection(emitter, env, expression, &mk_afvalues(&e.1), None)?,
-    ))
-}
-
 fn emit_class_get_expr<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
@@ -3262,25 +3232,6 @@ fn emit_class_get_expr<'a, 'arena, 'decl>(
         &e.1,
         ReadonlyOp::Mutable,
     )
-}
-
-fn emit_darray<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
-    env: &Env<'a, 'arena>,
-    pos: &Pos,
-    e: &'a (Option<(ast::Targ, ast::Targ)>, Vec<(ast::Expr, ast::Expr)>),
-    expression: &ast::Expr,
-) -> Result<InstrSeq<'arena>> {
-    Ok(emit_pos_then(
-        pos,
-        emit_collection(
-            emitter,
-            env,
-            expression,
-            &mk_afkvalues(e.1.iter().cloned()),
-            None,
-        )?,
-    ))
 }
 
 fn emit_obj_get_expr<'a, 'arena, 'decl>(
@@ -5856,8 +5807,6 @@ fn can_use_as_rhs_in_list_assignment(expr: &ast::Expr_) -> Result<bool> {
         | Expr_::Cast(_)
         | Expr_::Eif(_)
         | Expr_::Tuple(_)
-        | Expr_::Varray(_)
-        | Expr_::Darray(_)
         | Expr_::Collection(_)
         | Expr_::KeyValCollection(_)
         | Expr_::ValCollection(_)

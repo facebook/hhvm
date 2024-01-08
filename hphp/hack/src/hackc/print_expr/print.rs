@@ -592,8 +592,6 @@ fn print_expr(
             w.write_all(if *is_nullable { b" ?as " } else { b" as " })?;
             print_hint(w, true, hint)
         }
-        Expr_::Varray(va) => print_expr_varray(ctx, w, env, &va.1),
-        Expr_::Darray(da) => print_expr_darray(ctx, w, env, print_expr, &da.1),
         Expr_::Tuple(t) => write::wrap_by_(w, "varray[", "]", |w| {
             // A tuple is represented by a varray when using reflection.
             write::concat_by(w, ", ", t, |w, i| print_expr(ctx, w, env, i))
@@ -748,9 +746,10 @@ fn print_xml(
         return Err(syntax_error().into());
     } else {
         match (&es[0], &es[1]) {
-            (Expr(_, _, Expr_::Shape(attrs)), Expr(_, _, Expr_::Varray(children))) => {
-                (attrs, &children.1)
-            }
+            (
+                Expr(_, _, Expr_::Shape(attrs)),
+                Expr(_, _, Expr_::ValCollection(box ((_, ast::VcKind::Vec), _, children))),
+            ) => (attrs, children),
             _ => return Err(syntax_error().into()),
         }
     };

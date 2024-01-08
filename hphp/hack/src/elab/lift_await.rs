@@ -164,14 +164,7 @@ fn check_await_usage(expr: &Expr) -> AwaitUsage {
                 combine_con(check_await_usage(arg_k), check_await_usage(arg_v))
             })
             .fold(NoAwait, combine_con),
-        Expr_::Darray(box (_, args)) => args
-            .iter()
-            .map(|(arg_k, arg_v)| combine_con(check_await_usage(arg_k), check_await_usage(arg_v)))
-            .fold(NoAwait, combine_con),
-        Expr_::Tuple(args)
-        | Expr_::String2(args)
-        | Expr_::ValCollection(box (_, _, args))
-        | Expr_::Varray(box (_, args)) => args
+        Expr_::Tuple(args) | Expr_::String2(args) | Expr_::ValCollection(box (_, _, args)) => args
             .iter()
             .map(check_await_usage)
             .fold(NoAwait, combine_con),
@@ -565,16 +558,7 @@ impl LiftAwait {
                     self.extract_await(arg_v, con, seq, tmps)
                 }
             }
-            Expr_::Darray(box (_, args)) => {
-                for (arg_k, arg_v) in args {
-                    self.extract_await(arg_k, con, seq, tmps);
-                    self.extract_await(arg_v, con, seq, tmps)
-                }
-            }
-            Expr_::Tuple(args)
-            | Expr_::String2(args)
-            | Expr_::ValCollection(box (_, _, args))
-            | Expr_::Varray(box (_, args)) => {
+            Expr_::Tuple(args) | Expr_::String2(args) | Expr_::ValCollection(box (_, _, args)) => {
                 for arg in args {
                     self.extract_await(arg, con, seq, tmps)
                 }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7d19d33a499665517bc2e4b2130ec561>>
+// @generated SignedSource<<f004414403d9bc7a82b6f1efce0dba03>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -779,27 +779,6 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
     ) -> Result<(), P::Error> {
         #[inline]
         fn helper0<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node Box<(
-                Option<(Targ<Ex>, Targ<Ex>)>,
-                Vec<(Expr<Ex, En>, Expr<Ex, En>)>,
-            )>,
-            c: &mut P::Context,
-            v: &mut dyn Visitor<'node, Params = P>,
-        ) -> Result<(), P::Error> {
-            a.0.accept(c, v)?;
-            a.1.accept(c, v)
-        }
-        #[inline]
-        fn helper1<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node Box<(Option<Targ<Ex>>, Vec<Expr<Ex, En>>)>,
-            c: &mut P::Context,
-            v: &mut dyn Visitor<'node, Params = P>,
-        ) -> Result<(), P::Error> {
-            a.0.accept(c, v)?;
-            a.1.accept(c, v)
-        }
-        #[inline]
-        fn helper2<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node Box<((Pos, VcKind), Option<Targ<Ex>>, Vec<Expr<Ex, En>>)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
@@ -809,7 +788,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
             a.2.accept(c, v)
         }
         #[inline]
-        fn helper3<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper1<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node Box<(
                 (Pos, KvcKind),
                 Option<(Targ<Ex>, Targ<Ex>)>,
@@ -823,7 +802,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
             a.2.accept(c, v)
         }
         #[inline]
-        fn helper4<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper2<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node Box<(Expr<Ex, En>, Option<Expr<Ex, En>>)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
@@ -832,7 +811,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
             a.1.accept(c, v)
         }
         #[inline]
-        fn helper5<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper3<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node Box<(Expr<Ex, En>, Expr<Ex, En>, OgNullFlavor, PropOrMethod)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
@@ -843,7 +822,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
             a.3.accept(c, v)
         }
         #[inline]
-        fn helper6<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper4<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node Box<(ClassId<Ex, En>, ClassGetExpr<Ex, En>, PropOrMethod)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
@@ -853,7 +832,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
             a.2.accept(c, v)
         }
         #[inline]
-        fn helper7<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper5<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node Box<(ClassId<Ex, En>, Pstring)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
@@ -862,7 +841,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
             a.1.accept(c, v)
         }
         #[inline]
-        fn helper8<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper6<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node Box<(FunctionPtrId<Ex, En>, Vec<Targ<Ex>>)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
@@ -871,7 +850,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
             a.1.accept(c, v)
         }
         #[inline]
-        fn helper9<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper7<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node Box<(String, Expr<Ex, En>)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
@@ -880,7 +859,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
             a.1.accept(c, v)
         }
         #[inline]
-        fn helper10<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper8<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node Box<(Hint, Expr<Ex, En>)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
@@ -889,7 +868,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
             a.1.accept(c, v)
         }
         #[inline]
-        fn helper11<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper9<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node Box<(ast_defs::Uop, Expr<Ex, En>)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
@@ -898,7 +877,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
             a.1.accept(c, v)
         }
         #[inline]
-        fn helper12<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper10<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node Box<(Lid, Expr<Ex, En>, Expr<Ex, En>)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
@@ -908,7 +887,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
             a.2.accept(c, v)
         }
         #[inline]
-        fn helper13<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper11<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node Box<(Expr<Ex, En>, Option<Expr<Ex, En>>, Expr<Ex, En>)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
@@ -918,25 +897,25 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
             a.2.accept(c, v)
         }
         #[inline]
+        fn helper12<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+            a: &'node Box<(Expr<Ex, En>, Hint)>,
+            c: &mut P::Context,
+            v: &mut dyn Visitor<'node, Params = P>,
+        ) -> Result<(), P::Error> {
+            a.0.accept(c, v)?;
+            a.1.accept(c, v)
+        }
+        #[inline]
+        fn helper13<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+            a: &'node Box<(Expr<Ex, En>, Hint)>,
+            c: &mut P::Context,
+            v: &mut dyn Visitor<'node, Params = P>,
+        ) -> Result<(), P::Error> {
+            a.0.accept(c, v)?;
+            a.1.accept(c, v)
+        }
+        #[inline]
         fn helper14<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node Box<(Expr<Ex, En>, Hint)>,
-            c: &mut P::Context,
-            v: &mut dyn Visitor<'node, Params = P>,
-        ) -> Result<(), P::Error> {
-            a.0.accept(c, v)?;
-            a.1.accept(c, v)
-        }
-        #[inline]
-        fn helper15<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node Box<(Expr<Ex, En>, Hint)>,
-            c: &mut P::Context,
-            v: &mut dyn Visitor<'node, Params = P>,
-        ) -> Result<(), P::Error> {
-            a.0.accept(c, v)?;
-            a.1.accept(c, v)
-        }
-        #[inline]
-        fn helper16<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node Box<(
                 ClassId<Ex, En>,
                 Vec<Targ<Ex>>,
@@ -954,7 +933,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
             v.visit_ex(c, &a.4)
         }
         #[inline]
-        fn helper17<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper15<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node Box<(Fun_<Ex, En>, Vec<CaptureLid<Ex>>)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
@@ -963,7 +942,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
             a.1.accept(c, v)
         }
         #[inline]
-        fn helper18<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper16<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node Box<(ClassName, Vec<XhpAttribute<Ex, En>>, Vec<Expr<Ex, En>>)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
@@ -973,7 +952,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
             a.2.accept(c, v)
         }
         #[inline]
-        fn helper19<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper17<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node Box<(ImportFlavor, Expr<Ex, En>)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
@@ -982,7 +961,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
             a.1.accept(c, v)
         }
         #[inline]
-        fn helper20<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper18<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node Box<(ClassName, Option<CollectionTarg<Ex>>, Vec<Afield<Ex, En>>)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
@@ -992,7 +971,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
             a.2.accept(c, v)
         }
         #[inline]
-        fn helper21<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper19<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node Box<(ClassName, Pstring)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
@@ -1001,7 +980,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
             a.1.accept(c, v)
         }
         #[inline]
-        fn helper22<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper20<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node Box<(Option<(Targ<Ex>, Targ<Ex>)>, Expr<Ex, En>, Expr<Ex, En>)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
@@ -1011,7 +990,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
             a.2.accept(c, v)
         }
         #[inline]
-        fn helper23<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper21<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node Box<(Option<ClassName>, String)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
@@ -1020,7 +999,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
             a.1.accept(c, v)
         }
         #[inline]
-        fn helper24<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper22<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node Box<(Expr<Ex, En>, Ex, Ex, HoleSource)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
@@ -1034,11 +1013,9 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
             Expr_::Null => Ok(()),
             Expr_::True => Ok(()),
             Expr_::False => Ok(()),
-            Expr_::Darray(a) => helper0(a, c, v),
-            Expr_::Varray(a) => helper1(a, c, v),
             Expr_::Shape(a0) => a0.accept(c, v),
-            Expr_::ValCollection(a) => helper2(a, c, v),
-            Expr_::KeyValCollection(a) => helper3(a, c, v),
+            Expr_::ValCollection(a) => helper0(a, c, v),
+            Expr_::KeyValCollection(a) => helper1(a, c, v),
             Expr_::This => Ok(()),
             Expr_::Omitted => Ok(()),
             Expr_::Invalid(a0) => a0.accept(c, v),
@@ -1046,43 +1023,43 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
             Expr_::Lvar(a0) => a0.accept(c, v),
             Expr_::Dollardollar(a0) => a0.accept(c, v),
             Expr_::Clone(a0) => a0.accept(c, v),
-            Expr_::ArrayGet(a) => helper4(a, c, v),
-            Expr_::ObjGet(a) => helper5(a, c, v),
-            Expr_::ClassGet(a) => helper6(a, c, v),
-            Expr_::ClassConst(a) => helper7(a, c, v),
+            Expr_::ArrayGet(a) => helper2(a, c, v),
+            Expr_::ObjGet(a) => helper3(a, c, v),
+            Expr_::ClassGet(a) => helper4(a, c, v),
+            Expr_::ClassConst(a) => helper5(a, c, v),
             Expr_::Call(a0) => a0.accept(c, v),
-            Expr_::FunctionPointer(a) => helper8(a, c, v),
+            Expr_::FunctionPointer(a) => helper6(a, c, v),
             Expr_::Int(a0) => a0.accept(c, v),
             Expr_::Float(a0) => a0.accept(c, v),
             Expr_::String(a0) => a0.accept(c, v),
             Expr_::String2(a0) => a0.accept(c, v),
-            Expr_::PrefixedString(a) => helper9(a, c, v),
+            Expr_::PrefixedString(a) => helper7(a, c, v),
             Expr_::Yield(a0) => a0.accept(c, v),
             Expr_::Await(a0) => a0.accept(c, v),
             Expr_::ReadonlyExpr(a0) => a0.accept(c, v),
             Expr_::Tuple(a0) => a0.accept(c, v),
             Expr_::List(a0) => a0.accept(c, v),
-            Expr_::Cast(a) => helper10(a, c, v),
-            Expr_::Unop(a) => helper11(a, c, v),
+            Expr_::Cast(a) => helper8(a, c, v),
+            Expr_::Unop(a) => helper9(a, c, v),
             Expr_::Binop(a0) => a0.accept(c, v),
-            Expr_::Pipe(a) => helper12(a, c, v),
-            Expr_::Eif(a) => helper13(a, c, v),
-            Expr_::Is(a) => helper14(a, c, v),
+            Expr_::Pipe(a) => helper10(a, c, v),
+            Expr_::Eif(a) => helper11(a, c, v),
+            Expr_::Is(a) => helper12(a, c, v),
             Expr_::As(a0) => a0.accept(c, v),
-            Expr_::Upcast(a) => helper15(a, c, v),
-            Expr_::New(a) => helper16(a, c, v),
+            Expr_::Upcast(a) => helper13(a, c, v),
+            Expr_::New(a) => helper14(a, c, v),
             Expr_::Efun(a0) => a0.accept(c, v),
-            Expr_::Lfun(a) => helper17(a, c, v),
-            Expr_::Xml(a) => helper18(a, c, v),
-            Expr_::Import(a) => helper19(a, c, v),
-            Expr_::Collection(a) => helper20(a, c, v),
+            Expr_::Lfun(a) => helper15(a, c, v),
+            Expr_::Xml(a) => helper16(a, c, v),
+            Expr_::Import(a) => helper17(a, c, v),
+            Expr_::Collection(a) => helper18(a, c, v),
             Expr_::ExpressionTree(a0) => a0.accept(c, v),
             Expr_::Lplaceholder(a0) => a0.accept(c, v),
-            Expr_::MethodCaller(a) => helper21(a, c, v),
-            Expr_::Pair(a) => helper22(a, c, v),
+            Expr_::MethodCaller(a) => helper19(a, c, v),
+            Expr_::Pair(a) => helper20(a, c, v),
             Expr_::ETSplice(a0) => a0.accept(c, v),
-            Expr_::EnumClassLabel(a) => helper23(a, c, v),
-            Expr_::Hole(a) => helper24(a, c, v),
+            Expr_::EnumClassLabel(a) => helper21(a, c, v),
+            Expr_::Hole(a) => helper22(a, c, v),
             Expr_::Package(a0) => a0.accept(c, v),
             Expr_::Nameof(a0) => a0.accept(c, v),
         }

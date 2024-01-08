@@ -5,7 +5,7 @@ Some elements in this collection are incompatible (Typing[4110])
   File "xhp_constructor_check.php", line 14, characters 29-34:
   But got `string`
 File "xhp_constructor_check.php", line 17, characters 11-54:
-The values of this `darray` are incompatible (Typing[4110])
+The values of this `dict` are incompatible (Typing[4110])
   File "xhp_constructor_check.php", line 7, characters 26-28:
   Expected `int`
   File "xhp_constructor_check.php", line 14, characters 13-18:

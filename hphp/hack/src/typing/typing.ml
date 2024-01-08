@@ -3024,7 +3024,6 @@ end = struct
         | Valkind.Other -> MakeType.nothing (Reason.Rwitness p)
       in
       make_result env p Aast.Omitted ty
-    | Varray (th, el)
     | ValCollection (_, th, el) ->
       let ( get_expected_kind,
             name,
@@ -3067,14 +3066,6 @@ end = struct
               MakeType.class_type (Reason.Rwitness p) class_name [value_ty]),
             key_bound,
             pessimisable_builtin )
-        | Varray _ ->
-          ( get_vc_inst env p Vec,
-            "varray",
-            array_value,
-            (fun th elements -> Aast.ValCollection ((p, Vec), th, elements)),
-            (fun value_ty -> MakeType.vec (Reason.Rwitness p) value_ty),
-            None,
-            false )
         | _ ->
           (* The parent match makes this case impossible *)
           failwith "impossible match case"
@@ -3117,7 +3108,6 @@ end = struct
           subtype_val
       in
       make_result env p (make_expr th tel) (make_ty elem_ty)
-    | Darray (th, l)
     | KeyValCollection (_, th, l) ->
       let (get_expected_kind, name, make_expr, make_ty, pessimisable_builtin) =
         match e with
@@ -3132,13 +3122,6 @@ end = struct
             (match kind with
             | Dict -> false
             | _ -> true) )
-        | Darray _ ->
-          let name = "darray" in
-          ( get_kvc_inst env p Dict,
-            name,
-            (fun th pairs -> Aast.KeyValCollection ((p, Dict), th, pairs)),
-            (fun k v -> MakeType.dict (Reason.Rwitness p) k v),
-            false )
         | _ ->
           (* The parent match makes this case impossible *)
           failwith "impossible match case"
@@ -4551,15 +4534,7 @@ end = struct
             New
               ( _,
                 _,
-                [
-                  _;
-                  ( _,
-                    _,
-                    ( Varray (_, children)
-                    | ValCollection ((_, Vec), _, children) ) );
-                  _;
-                  _;
-                ],
+                [_; (_, _, ValCollection ((_, Vec), _, children)); _; _],
                 _,
                 _ ) ) ->
           (* Typing_xhp.rewrite_xml_into_new generates an AST node for a `varray[]` literal, which is interpreted as a vec[]  *)

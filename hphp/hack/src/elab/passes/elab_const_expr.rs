@@ -95,8 +95,6 @@ impl Pass for ElabConstExprPass {
                 | Expr_::String(_)
                 | Expr_::FunctionPointer(..)
                 | Expr_::Eif(..)
-                | Expr_::Darray(..)
-                | Expr_::Varray(..)
                 | Expr_::Tuple(..)
                 | Expr_::Shape(..)
                 | Expr_::Upcast(..) => Continue(()),

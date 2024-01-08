@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<59ccf8a76aa4001bdc1fbf48c534117b>>
+// @generated SignedSource<<73762735f99c4c29a47c5d51e51221ca>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -920,25 +920,6 @@ pub enum Expr_<'a, Ex, En> {
     ///
     ///     false
     False,
-    /// darray literal.
-    ///
-    ///     darray['x' => 0, 'y' => 1]
-    ///     darray<string, int>['x' => 0, 'y' => 1]
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(inline_tuple)]
-    Darray(
-        &'a (
-            Option<&'a (&'a Targ<'a, Ex>, &'a Targ<'a, Ex>)>,
-            &'a [(&'a Expr<'a, Ex, En>, &'a Expr<'a, Ex, En>)],
-        ),
-    ),
-    /// varray literal.
-    ///
-    ///     varray['hello', 'world']
-    ///     varray<string>['hello', 'world']
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(inline_tuple)]
-    Varray(&'a (Option<&'a Targ<'a, Ex>>, &'a [&'a Expr<'a, Ex, En>])),
     /// Shape literal.
     ///
     ///     shape('x' => 1, 'y' => 2)

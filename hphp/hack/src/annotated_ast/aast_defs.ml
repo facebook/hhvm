@@ -393,17 +393,6 @@ and ('ex, 'en) expr_ =
       (** Boolean literal.
        *
        *     false *)
-  | Darray of
-      ('ex targ * 'ex targ) option * (('ex, 'en) expr * ('ex, 'en) expr) list
-      (** darray literal.
-       *
-       *     darray['x' => 0, 'y' => 1]
-       *     darray<string, int>['x' => 0, 'y' => 1] *)
-  | Varray of 'ex targ option * ('ex, 'en) expr list
-      (** varray literal.
-       *
-       *     varray['hello', 'world']
-       *     varray<string>['hello', 'world'] *)
   | Shape of
       ((Ast_defs.shape_field_name[@transform.opaque]) * ('ex, 'en) expr) list
       (** Shape literal.

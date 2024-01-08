@@ -142,14 +142,6 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
                 context.get_rty(var_name)
             }
         }
-        Darray(d) => {
-            let (_, exprs) = &**d;
-            ro_expr_list2(context, exprs)
-        }
-        Varray(v) => {
-            let (_, exprs) = &**v;
-            ro_expr_list(context, exprs)
-        }
         Shape(fields) => ro_expr_list2(context, fields),
         ValCollection(v) => {
             let (_, _, exprs) = &**v;

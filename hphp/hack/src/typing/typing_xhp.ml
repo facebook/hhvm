@@ -199,9 +199,9 @@ let rewrite_xml_into_new pos sid attributes children =
   in
   let attributes =
     let attributes = List.mapi ~f:mk_attribute attributes in
-    ((), pos, Darray (None, attributes))
+    ((), pos, KeyValCollection ((pos, Dict), None, attributes))
   in
-  let children = ((), pos, Varray (None, children)) in
+  let children = ((), pos, ValCollection ((pos, Vec), None, children)) in
   let file = ((), pos, Aast.String "") in
   let line = ((), pos, Aast.Int "1") in
   let args = [attributes; children; file; line] in

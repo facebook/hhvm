@@ -1424,15 +1424,13 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                         Hole(&(expr, _, _, _)) => expr_to_ty(arena, expr),
 
                         ArrayGet(_) | As(_) | Await(_) | Binop(_) | Call(_) | Cast(_)
-                        | ClassConst(_) | ClassGet(_) | Clone(_) | Collection(_) | Darray(_)
+                        | ClassConst(_) | ClassGet(_) | Clone(_) | Collection(_)
                         | Dollardollar(_) | Efun(_) | Eif(_) | EnumClassLabel(_) | ETSplice(_)
                         | ExpressionTree(_) | FunctionPointer(_) | Id(_) | Import(_) | Is(_)
                         | KeyValCollection(_) | Lfun(_) | List(_) | Lplaceholder(_) | Lvar(_)
                         | MethodCaller(_) | New(_) | ObjGet(_) | Omitted | Pair(_) | Pipe(_)
                         | ReadonlyExpr(_) | Shape(_) | Tuple(_) | Upcast(_) | ValCollection(_)
-                        | Varray(_) | Xml(_) | Yield(_) | Invalid(_) | Package(_) | Nameof(_) => {
-                            None
-                        }
+                        | Xml(_) | Yield(_) | Invalid(_) | Package(_) | Nameof(_) => None,
                     }
                 }
                 Some(self.alloc(Ty(

@@ -93,7 +93,11 @@ fn rewrite_xml_<'arena, 'decl>(
                 (spread_id, attrs)
             });
     let attribute_map = Expr((), pos.clone(), Expr_::mk_shape(attributes));
-    let children_vec = Expr((), pos.clone(), Expr_::mk_varray(None, children));
+    let children_vec = Expr(
+        (),
+        pos.clone(),
+        Expr_::ValCollection(Box::new(((pos.clone(), ast::VcKind::Vec), None, children))),
+    );
     let filename = Expr(
         (),
         pos.clone(),

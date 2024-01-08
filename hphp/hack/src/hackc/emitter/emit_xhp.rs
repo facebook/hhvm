@@ -143,18 +143,19 @@ pub fn from_category_declaration<'a, 'arena, 'decl>(
 
 fn get_category_array(categories: &[&String]) -> Expr_ {
     // TODO: is this always 1?
-    Expr_::mk_darray(
+    Expr_::KeyValCollection(Box::new((
+        (Pos::NONE, KvcKind::Dict),
         None,
         categories
             .iter()
             .map(|&s| {
-                (
+                Field(
                     mk_expr(Expr_::String(s.clone().into())),
                     mk_expr(Expr_::Int("1".into())),
                 )
             })
             .collect(),
-    )
+    )))
 }
 
 fn emit_xhp_children_array(children: &[&XhpChild]) -> Result<Expr_> {
@@ -259,10 +260,11 @@ fn emit_xhp_child_decl(unary: &str, child: &XhpChild) -> Result<Expr_> {
 }
 
 fn get_array3(i0: Expr_, i1: Expr_, i2: Expr_) -> Result<Expr_> {
-    Ok(Expr_::mk_varray(
+    Ok(Expr_::ValCollection(Box::new((
+        (Pos::NONE, VcKind::Vec),
         None,
         vec![mk_expr(i0), mk_expr(i1), mk_expr(i2)],
-    ))
+    ))))
 }
 
 fn xhp_child_op_to_int(op: Option<&XhpChildOp>) -> usize {
@@ -297,7 +299,11 @@ fn emit_xhp_attribute_array<'arena>(
             None => Err(Error::unrecoverable(
                 "Xhp attribute that's supposed to be an enum but not really",
             )),
-            Some(es) => Ok(mk_expr(Expr_::mk_varray(None, es.to_vec()))),
+            Some(es) => Ok(mk_expr(Expr_::ValCollection(Box::new((
+                (Pos::NONE, VcKind::Vec),
+                None,
+                es.to_vec(),
+            ))))),
         }
     }
     fn get_attribute_array_values<'arena>(
@@ -356,18 +362,26 @@ fn emit_xhp_attribute_array<'arena>(
     fn emit_xhp_attribute<'arena>(
         alloc: &'arena bumpalo::Bump,
         xa: &XhpAttribute<'_>,
-    ) -> Result<(Expr, Expr)> {
+    ) -> Result<Field> {
         let k = mk_expr(Expr_::String(
             string_utils::clean(&((xa.class_var).id).1).into(),
         ));
-        let v = mk_expr(Expr_::mk_varray(None, inner_array(alloc, xa)?));
-        Ok((k, v))
+        let v = mk_expr(Expr_::ValCollection(Box::new((
+            (Pos::NONE, VcKind::Vec),
+            None,
+            inner_array(alloc, xa)?,
+        ))));
+        Ok(Field(k, v))
     }
     let xal_arr = xal
         .iter()
         .map(|x| emit_xhp_attribute(alloc, x))
         .collect::<Result<Vec<_>>>()?;
-    Ok(mk_expr(Expr_::mk_darray(None, xal_arr)))
+    Ok(mk_expr(Expr_::KeyValCollection(Box::new((
+        (Pos::NONE, KvcKind::Dict),
+        None,
+        xal_arr,
+    )))))
 }
 
 fn from_xhp_attribute_declaration_method<'a, 'arena, 'decl>(

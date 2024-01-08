@@ -658,8 +658,6 @@ let check =
       | (_, _, Shape _)
       | (_, _, EnumClassLabel _)
       | (_, _, ET_Splice _)
-      | (_, _, Darray _)
-      | (_, _, Varray _)
       | (_, _, Int _)
       | (_, _, Dollardollar _)
       | (_, _, String _)

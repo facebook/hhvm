@@ -626,7 +626,7 @@ let rec get_data_srcs_from_expr env ctx (tp, _, te) =
       List.fold list ~init:DataSourceSet.empty ~f:(fun cur_src_set e ->
           DataSourceSet.union cur_src_set (get_data_srcs_from_expr env ctx e))
   in
-  (* For a collection (Darray, Shape and KeyValCollection) that uses a list of expression
+  (* For a collection (Shape and KeyValCollection) that uses a list of expression
      pairs (e.g. dict[0 => $a, 1 => $b] uses the list [(0, $a); (1, $b)]), the function
      get_data_srcs_of_pair_expr_list gets the data source for the 2nd expression in each
      pair and do the union; specially, return NullOrEmpty if the list is empty (e.g. dict[]). *)
@@ -697,8 +697,6 @@ let rec get_data_srcs_from_expr env ctx (tp, _, te) =
         else
           DataSourceSet.singleton Unknown
       | _ -> DataSourceSet.singleton Unknown))
-  | Darray (_, tpl) -> get_data_srcs_of_pair_expr_list tpl
-  | Varray (_, el) -> get_data_srcs_of_expr_list el
   | Shape tpl -> get_data_srcs_of_pair_expr_list tpl
   | ValCollection (_, _, el) -> get_data_srcs_of_expr_list el
   | KeyValCollection (_, _, fl) -> get_data_srcs_of_pair_expr_list fl

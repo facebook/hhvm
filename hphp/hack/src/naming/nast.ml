@@ -806,9 +806,6 @@ module Visitor_DEPRECATED = struct
 
       method on_expr_ acc e =
         match e with
-        | Darray (tap, fieldl) ->
-          this#on_keyValCollection acc (Pos.none, Dict) tap fieldl
-        | Varray (ta, el) -> this#on_valCollection acc (Pos.none, Vec) ta el
         | Shape sh -> this#on_shape acc sh
         | True -> this#on_true acc
         | False -> this#on_false acc

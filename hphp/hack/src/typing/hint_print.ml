@@ -276,24 +276,6 @@ let pp_lid ppf lid =
 let rec pp_expr ppf (_, _, expr_) = pp_expr_ ppf expr_
 
 and pp_expr_ ppf = function
-  | Aast.Darray (kv_ty_opt, kvs) ->
-    Fmt.(
-      prefix (const string "darray")
-      @@ pair
-           ~sep:nop
-           (option @@ angles @@ pair ~sep:comma pp_targ pp_targ)
-           (brackets @@ list ~sep:comma @@ pair ~sep:fat_arrow pp_expr pp_expr))
-      ppf
-      (kv_ty_opt, kvs)
-  | Aast.Varray (k_ty_opt, ks) ->
-    Fmt.(
-      prefix (const string "varray")
-      @@ pair
-           ~sep:nop
-           (option @@ angles pp_targ)
-           (brackets @@ list ~sep:comma pp_expr))
-      ppf
-      (k_ty_opt, ks)
   | Aast.Shape flds ->
     Fmt.(
       prefix (const string "shape")

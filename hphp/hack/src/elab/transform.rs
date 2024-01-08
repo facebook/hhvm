@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e608b3e146d6fd164a66e63f57dec6b4>>
+// @generated SignedSource<<934f750baaac693622695beac011e438>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -644,8 +644,6 @@ impl Transform for Expr_ {
             Expr_::Null => {}
             Expr_::True => {}
             Expr_::False => {}
-            Expr_::Darray(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
-            Expr_::Varray(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
             Expr_::Shape(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
             Expr_::ValCollection(ref mut __binding_0) => {
                 __binding_0.transform(env, &mut pass.clone())

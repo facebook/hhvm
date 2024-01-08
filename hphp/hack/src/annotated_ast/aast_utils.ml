@@ -9,8 +9,6 @@
 let rec can_be_captured =
   let open Aast_defs in
   function
-  | Darray _
-  | Varray _
   | Shape _
   | ValCollection _
   | KeyValCollection _

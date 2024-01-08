@@ -588,8 +588,6 @@ let expr tenv ((), _p, e) =
   | Efun { ef_fun = f; _ } ->
     fun_ tenv f
   | Invalid _
-  | Darray _
-  | Varray _
   | Shape _
   | ValCollection _
   | KeyValCollection _

@@ -33,8 +33,6 @@ let stmt_name = function
   | A.Markup _ -> "Markup"
 
 let expr_name = function
-  | A.Darray _ -> "Darray"
-  | A.Varray _ -> "Varray"
   | A.Shape _ -> "Shape"
   | A.ValCollection _ -> "ValCollection"
   | A.KeyValCollection _ -> "KeyValCollection"

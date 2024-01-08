@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<03fe6d4fdb34238cc07efc98aa5d75e9>>
+// @generated SignedSource<<b3830bfe5a02f45533e8ae6e14b69ced>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -947,15 +947,6 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_false() -> Self {
         Expr_::False
     }
-    pub fn mk_darray(
-        p0: Option<(Targ<Ex>, Targ<Ex>)>,
-        p1: Vec<(Expr<Ex, En>, Expr<Ex, En>)>,
-    ) -> Self {
-        Expr_::Darray(Box::new((p0, p1)))
-    }
-    pub fn mk_varray(p0: Option<Targ<Ex>>, p1: Vec<Expr<Ex, En>>) -> Self {
-        Expr_::Varray(Box::new((p0, p1)))
-    }
     pub fn mk_shape(p0: Vec<(ast_defs::ShapeFieldName, Expr<Ex, En>)>) -> Self {
         Expr_::Shape(p0)
     }
@@ -1141,18 +1132,6 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn is_false(&self) -> bool {
         match self {
             Expr_::False => true,
-            _ => false,
-        }
-    }
-    pub fn is_darray(&self) -> bool {
-        match self {
-            Expr_::Darray(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_varray(&self) -> bool {
-        match self {
-            Expr_::Varray(..) => true,
             _ => false,
         }
     }
@@ -1448,23 +1427,6 @@ impl<Ex, En> Expr_<Ex, En> {
         match self {
             Expr_::Nameof(..) => true,
             _ => false,
-        }
-    }
-    pub fn as_darray(
-        &self,
-    ) -> Option<(
-        &Option<(Targ<Ex>, Targ<Ex>)>,
-        &Vec<(Expr<Ex, En>, Expr<Ex, En>)>,
-    )> {
-        match self {
-            Expr_::Darray(p0) => Some((&p0.0, &p0.1)),
-            _ => None,
-        }
-    }
-    pub fn as_varray(&self) -> Option<(&Option<Targ<Ex>>, &Vec<Expr<Ex, En>>)> {
-        match self {
-            Expr_::Varray(p0) => Some((&p0.0, &p0.1)),
-            _ => None,
         }
     }
     pub fn as_shape(&self) -> Option<&Vec<(ast_defs::ShapeFieldName, Expr<Ex, En>)>> {
@@ -1770,23 +1732,6 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn as_nameof(&self) -> Option<&ClassId<Ex, En>> {
         match self {
             Expr_::Nameof(p0) => Some(&p0),
-            _ => None,
-        }
-    }
-    pub fn as_darray_mut(
-        &mut self,
-    ) -> Option<(
-        &mut Option<(Targ<Ex>, Targ<Ex>)>,
-        &mut Vec<(Expr<Ex, En>, Expr<Ex, En>)>,
-    )> {
-        match self {
-            Expr_::Darray(p0) => Some((&mut p0.0, &mut p0.1)),
-            _ => None,
-        }
-    }
-    pub fn as_varray_mut(&mut self) -> Option<(&mut Option<Targ<Ex>>, &mut Vec<Expr<Ex, En>>)> {
-        match self {
-            Expr_::Varray(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
         }
     }
@@ -2130,23 +2075,6 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn as_nameof_mut(&mut self) -> Option<&mut ClassId<Ex, En>> {
         match self {
             Expr_::Nameof(p0) => Some(p0.as_mut()),
-            _ => None,
-        }
-    }
-    pub fn as_darray_into(
-        self,
-    ) -> Option<(
-        Option<(Targ<Ex>, Targ<Ex>)>,
-        Vec<(Expr<Ex, En>, Expr<Ex, En>)>,
-    )> {
-        match self {
-            Expr_::Darray(p0) => Some(((*p0).0, (*p0).1)),
-            _ => None,
-        }
-    }
-    pub fn as_varray_into(self) -> Option<(Option<Targ<Ex>>, Vec<Expr<Ex, En>>)> {
-        match self {
-            Expr_::Varray(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }

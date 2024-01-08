@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8dd3cfb1e075642272b60308c2994890>>
+// @generated SignedSource<<de01d023304a68310c505c7bec18f37a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -720,23 +720,6 @@ pub enum Expr_<Ex, En> {
     ///
     ///     false
     False,
-    /// darray literal.
-    ///
-    ///     darray['x' => 0, 'y' => 1]
-    ///     darray<string, int>['x' => 0, 'y' => 1]
-    #[rust_to_ocaml(inline_tuple)]
-    Darray(
-        Box<(
-            Option<(Targ<Ex>, Targ<Ex>)>,
-            Vec<(Expr<Ex, En>, Expr<Ex, En>)>,
-        )>,
-    ),
-    /// varray literal.
-    ///
-    ///     varray['hello', 'world']
-    ///     varray<string>['hello', 'world']
-    #[rust_to_ocaml(inline_tuple)]
-    Varray(Box<(Option<Targ<Ex>>, Vec<Expr<Ex, En>>)>),
     /// Shape literal.
     ///
     ///     shape('x' => 1, 'y' => 2)

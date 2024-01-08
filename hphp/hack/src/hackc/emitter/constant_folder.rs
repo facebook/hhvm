@@ -125,42 +125,6 @@ fn class_const_to_typed_value<'arena, 'decl>(
     Err(Error::UserDefinedConstant)
 }
 
-fn varray_to_typed_value<'arena, 'decl>(
-    emitter: &Emitter<'arena, 'decl>,
-    scope: &Scope<'_, 'arena>,
-    fields: &[ast::Expr],
-) -> Result<TypedValue<'arena>, Error> {
-    let tv_fields = emitter.alloc.alloc_slice_fill_iter(
-        fields
-            .iter()
-            .map(|x| expr_to_typed_value(emitter, scope, x))
-            .collect::<Result<Vec<_>, _>>()?
-            .into_iter(),
-    );
-    Ok(TypedValue::vec(tv_fields))
-}
-
-fn darray_to_typed_value<'arena, 'decl>(
-    emitter: &Emitter<'arena, 'decl>,
-    scope: &Scope<'_, 'arena>,
-    fields: &[(ast::Expr, ast::Expr)],
-) -> Result<TypedValue<'arena>, Error> {
-    //TODO: Improve. It's a bit silly having to use a std::vector::Vec
-    // here.
-    let tv_fields: Vec<(TypedValue<'arena>, TypedValue<'arena>)> = fields
-        .iter()
-        .map(|(k, v)| {
-            Ok((
-                key_expr_to_typed_value(emitter, scope, k)?,
-                expr_to_typed_value(emitter, scope, v)?,
-            ))
-        })
-        .collect::<Result<_, Error>>()?;
-    Ok(TypedValue::dict(emitter.alloc.alloc_slice_fill_iter(
-        update_duplicates_in_map(tv_fields),
-    )))
-}
-
 fn set_afield_to_typed_value_pair<'arena, 'decl>(
     e: &Emitter<'arena, 'decl>,
     scope: &Scope<'_, 'arena>,
@@ -337,9 +301,6 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
             Expr_::Null => Ok(TypedValue::Null),
             Expr_::String(s) => string_expr_to_typed_value(emitter, s),
             Expr_::Float(s) => float_expr_to_typed_value(emitter, s),
-
-            Expr_::Varray(fields) => varray_to_typed_value(emitter, scope, &fields.1),
-            Expr_::Darray(fields) => darray_to_typed_value(emitter, scope, &fields.1),
 
             Expr_::Id(id) if id.1 == math::NAN => Ok(TypedValue::float(std::f64::NAN)),
             Expr_::Id(id) if id.1 == math::INF => Ok(TypedValue::float(std::f64::INFINITY)),

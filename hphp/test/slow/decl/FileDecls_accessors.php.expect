@@ -331,7 +331,17 @@ dict(1) {
 NULL
 NULL
 === File Typedef
-vec(2) {
+vec(3) {
+  dict(4) {
+    ["name"]=>
+    string(14) "anotherTypeDef"
+    ["type"]=>
+    string(30) "shape('id' => OID_of<nothing>)"
+    ["visibility"]=>
+    string(11) "transparent"
+    ["module"]=>
+    string(8) "myModule"
+  }
   dict(4) {
     ["name"]=>
     string(13) "myGlobalType2"
@@ -358,6 +368,16 @@ dict(4) {
   string(13) "myGlobalType1"
   ["type"]=>
   string(32) "shape('a' => int, 'b' => string)"
+  ["visibility"]=>
+  string(11) "transparent"
+  ["module"]=>
+  string(8) "myModule"
+}
+dict(4) {
+  ["name"]=>
+  string(14) "anotherTypeDef"
+  ["type"]=>
+  string(30) "shape('id' => OID_of<nothing>)"
   ["visibility"]=>
   string(11) "transparent"
   ["module"]=>

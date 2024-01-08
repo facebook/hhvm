@@ -62,18 +62,16 @@ impl<R: Reason> Display for Ty_<R> {
                 trefinements(f, &r.refinement.consts)?;
                 write!(f, ")")
             }
-            Tunion(tys) => {
-                if tys.len() <= 1 {
-                    write!(f, "|")?;
-                }
-                list(f, "(", " | ", ")", tys.iter())
-            }
-            Tintersection(tys) => {
-                if tys.len() <= 1 {
-                    write!(f, "&")?;
-                }
-                list(f, "(", " & ", ")", tys.iter())
-            }
+            Tunion(tys) => match tys.len() {
+                0 => write!(f, "nothing"),
+                1 => write!(f, "(|{})", tys[0]),
+                _ => list(f, "(", " | ", ")", tys.iter()),
+            },
+            Tintersection(tys) => match tys.len() {
+                0 => write!(f, "mixed"),
+                1 => write!(f, "(&{})", tys[0]),
+                _ => list(f, "(", " & ", ")", tys.iter()),
+            },
             Tapply(params) => {
                 let (name, args) = &**params;
                 write!(f, "{}", strip_ns(name.id_ref()))?;

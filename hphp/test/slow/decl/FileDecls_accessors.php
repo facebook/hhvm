@@ -33,6 +33,8 @@ function main(): void {
   type myGlobalType1 = shape("a" => int, "b" => string);
   newtype myGlobalType2 = (float, float);
 
+  type anotherTypeDef = shape("id" => OID_of<nothing>);
+
   <<MyAttribute1("a","b"), MyAttribute2("a","b")>>
   class MyClass {
     const type MyTypeAlias1 = dict<string, MyClass>;
@@ -119,6 +121,7 @@ function main(): void {
   echo "=== File Typedef\n";
   var_dump($instance->getFileTypedefs());
   var_dump($instance->getFileTypedef('myGlobalType1'));
+  var_dump($instance->getFileTypedef('anotherTypeDef'));
   var_dump($instance->getFileTypedef('missing'));
   var_dump($instance->getFileTypedef(''));
 

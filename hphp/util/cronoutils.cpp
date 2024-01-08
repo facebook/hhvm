@@ -351,11 +351,11 @@ determine_periodicity(char *spec)
 /*
  */
 PERIODICITY
-parse_timespec(char *optarg, int *p_period_multiple)
+parse_timespec(char *optarg_2, int *p_period_multiple)
 {
     PERIODICITY		periodicity	= INVALID_PERIOD;
     int			period_multiple = 1;
-    char 		*p = optarg;
+    char 		*p = optarg_2;
 
     /* Skip leading whitespace */
 

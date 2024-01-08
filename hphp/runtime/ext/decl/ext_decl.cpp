@@ -28,6 +28,7 @@
 
 #include <fstream>
 #include <memory>
+#include <optional>
 
 TRACE_SET_MOD(decl);
 
@@ -133,9 +134,6 @@ const StaticString s_is_safe_global_variable("is_safe_global_variable");
 const StaticString s_is_no_auto_likes("is_no_auto_likes");
 const StaticString s_is_no_dynamic("is_no_auto_dynamic");
 
-std::optional<hackc::DeclParserConfig> m_config;
-std::optional<std::string> m_root;
-
 void assertEnv() {
   if (RuntimeOption::RepoAuthoritative) {
     SystemLib::throwInvalidOperationExceptionObject(
@@ -143,25 +141,32 @@ void assertEnv() {
   }
 }
 
-void initDeclConfig() {
-  if (!(m_config.has_value() && m_root.has_value())) {
-    const RepoOptions& options = g_context->getRepoOptionsForCurrentFrame();
-    hackc::DeclParserConfig config;
-    options.flags().initDeclConfig(config);
-    m_config = config;
-    m_root = options.dir();
-  }
+std::string getRepoRootForFile(const String& path) {
+  return RepoOptions::forFile(path.toCppString()).dir();
+}
+
+hackc::DeclParserConfig initDeclConfig(std::string& path) {
+  hackc::DeclParserConfig config;
+  auto opts = RepoOptions::forFile(path);
+  opts.flags().initDeclConfig(config);
+  return config;
+}
+
+hackc::DeclParserConfig initDeclConfig() {
+  hackc::DeclParserConfig config;
+  auto opts = *g_context->getRepoOptionsForRequest();
+  opts.flags().initDeclConfig(config);
+  return config;
 }
 
 // Returns the pair of <sha1 Hash, and optional file contents>
 // We return file contents only if the file is not found in Eden
 // since we need it for computing the decls later.
 std::pair<SHA1, std::optional<std::string>> computeSHA1(
-    const std::string& filePath) {
+    const std::string& filePath,
+    const std::string& root) {
   // If we can get the hash from Eden, do that.
   // else, compute from the file contents
-  initDeclConfig();
-  auto root = m_root.value();
   auto edenHash = getHashForFile(filePath, root);
   if (edenHash.has_value()) {
     return std::make_pair(edenHash.value(), std::nullopt);
@@ -703,18 +708,18 @@ struct FileDecls : SystemLib::ClassLoader<"HH\\FileDecls"> {
  */
 Object HHVM_STATIC_METHOD(FileDecls, parsePath, const String& path) {
   assertEnv();
-  initDeclConfig();
   std::filesystem::path filePath{path.data()};
   if (!std::filesystem::exists(filePath)) {
     SystemLib::throwInvalidArgumentExceptionObject(
         String("File not found ") + path.data());
   };
+  auto root = getRepoRootForFile(path);
 
   // Check if we have already parsed this file
   // and if the cache contains the result
   // validated by the SHA1 hash of the file contents
   FileDeclsCache::ConstAccessor acc;
-  auto const [sha1, textOpt] = computeSHA1(filePath);
+  auto const [sha1, textOpt] = computeSHA1(filePath, root);
   if (fileDeclsCache.find(acc, filePath.native())) {
     FileDeclsCacheEntry entry = *acc;
     auto& [expectedSha1, decls] = entry;
@@ -743,13 +748,11 @@ Object HHVM_STATIC_METHOD(FileDecls, parsePath, const String& path) {
   }
   Object obj{FileDecls::classof()};
   auto data = Native::data<FileDecls>(obj);
-  initDeclConfig();
+  auto config = initDeclConfig(root);
   try {
     data->declsHolder =
         std::make_shared<rust::Box<hackc::DeclsHolder>>(hackc::parse_decls(
-            m_config.value(),
-            "",
-            {(const uint8_t*)text.data(), (size_t)text.size()}));
+            config, "", {(const uint8_t*)text.data(), (size_t)text.size()}));
   } catch (const std::exception& ex) {
     data->error = ex.what();
   }
@@ -766,13 +769,11 @@ Object HHVM_STATIC_METHOD(FileDecls, parseText, const String& text) {
   assertEnv();
   Object obj{FileDecls::classof()};
   auto data = Native::data<FileDecls>(obj);
-  initDeclConfig();
+  auto config = initDeclConfig();
   try {
     data->declsHolder =
         std::make_shared<rust::Box<hackc::DeclsHolder>>(hackc::parse_decls(
-            m_config.value(),
-            "",
-            {(const uint8_t*)text.data(), (size_t)text.size()}));
+            config, "", {(const uint8_t*)text.data(), (size_t)text.size()}));
   } catch (const std::exception& ex) {
     data->error = ex.what();
   }
@@ -790,7 +791,7 @@ Variant HHVM_STATIC_METHOD(
   assertEnv();
   Object obj{FileDecls::classof()};
   auto data = Native::data<FileDecls>(obj);
-  initDeclConfig();
+  auto config = initDeclConfig();
 
   // The builtin sentinel
   String text = "type _TS_SENTINEL = " + type_expression + ";";
@@ -798,9 +799,7 @@ Variant HHVM_STATIC_METHOD(
   try {
     data->declsHolder =
         std::make_shared<rust::Box<hackc::DeclsHolder>>(hackc::parse_decls(
-            m_config.value(),
-            "",
-            {(const uint8_t*)text.data(), (size_t)text.size()}));
+            config, "", {(const uint8_t*)text.data(), (size_t)text.size()}));
 
     auto const decls =
         hackc::get_type_structure(**data->declsHolder, "_TS_SENTINEL");

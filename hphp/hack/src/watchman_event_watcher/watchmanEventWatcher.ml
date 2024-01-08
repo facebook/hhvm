@@ -286,10 +286,7 @@ let init_watchman root =
 
 let init root =
   let init_id = Random_id.short_string () in
-  HackEventLogger.init_watchman_event_watcher
-    root
-    init_id
-    ~always_add_sandcastle_info:false;
+  HackEventLogger.init_watchman_event_watcher root init_id;
   let lock_file = WatchmanEventWatcherConfig.lock root in
   if not (Lock.grab lock_file) then (
     Hh_logger.log "Can't grab lock; terminating.\n%!";

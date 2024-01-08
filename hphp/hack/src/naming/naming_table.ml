@@ -690,7 +690,6 @@ module SaveAsync = struct
       from a blob to the SQLite format. *)
   let save { blob_path; destination_path; root; init_id } : unit =
     HackEventLogger.init_batch_tool
-      ~always_add_sandcastle_info:false
       ~init_id
       ~root:(Path.make root)
       ~time:(Unix.gettimeofday ());

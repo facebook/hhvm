@@ -256,8 +256,6 @@ type t = {
       (** POC: @bobren, use new fancy compressed dep graph that is 25% the size of the old one *)
   use_old_decls_from_cas: bool;
       (** POC: @bobren, use old decls from CAS instead of memcache/manifold *)
-  log_events_with_sandcastle_info: bool;
-      (** POC: @catg, add sandcastle info to Scuba samples. *)
   lsp_sticky_quarantine: bool;
       (** POC: @ljw - if true, only exit quarantine when entering a new one *)
   lsp_invalidation: bool;
@@ -360,7 +358,6 @@ let default =
     ide_naming_table_update_threshold = 1000;
     dump_tast_hashes = false;
     dump_tasts = [];
-    log_events_with_sandcastle_info = false;
     lsp_sticky_quarantine = false;
     lsp_invalidation = false;
     lsp_cancellation = true;
@@ -1076,12 +1073,6 @@ let load_
     | None -> default.dump_tasts
     | Some path -> In_channel.read_lines path
   in
-  let log_events_with_sandcastle_info =
-    bool_
-      "log_events_with_sandcastle_info"
-      ~default:default.log_events_with_sandcastle_info
-      config
-  in
   let lsp_sticky_quarantine =
     bool_ "lsp_sticky_quarantine" ~default:default.lsp_sticky_quarantine config
   in
@@ -1222,7 +1213,6 @@ let load_
     ide_naming_table_update_threshold;
     dump_tast_hashes;
     dump_tasts;
-    log_events_with_sandcastle_info;
     lsp_sticky_quarantine;
     lsp_invalidation;
     lsp_cancellation;

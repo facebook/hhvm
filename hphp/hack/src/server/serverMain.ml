@@ -1188,8 +1188,6 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
       HackEventLogger.init_worker
         ~root
         ~hhconfig_version
-        ~always_add_sandcastle_info:
-          local_config.ServerLocalConfig.log_events_with_sandcastle_info
         ~init_id
         ~custom_columns:(ServerArgs.custom_telemetry_data options)
         ~rollout_flags:(ServerLocalConfig.to_rollout_flags local_config)
@@ -1203,8 +1201,6 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
         ~init_id
         ~custom_columns:(ServerArgs.custom_telemetry_data options)
         ~informant_managed
-        ~always_add_sandcastle_info:
-          local_config.ServerLocalConfig.log_events_with_sandcastle_info
         ~rollout_flags:(ServerLocalConfig.to_rollout_flags local_config)
         ~rollout_group:local_config.ServerLocalConfig.rollout_group
         ~time:(Unix.gettimeofday ())

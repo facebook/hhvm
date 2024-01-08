@@ -31,9 +31,6 @@ let init_event_logger root command ~init_id ~from config local_config : unit =
     ~init_id
     ~from
     ~custom_columns:(ClientCommand.get_custom_telemetry_data command)
-    ~always_add_sandcastle_info:
-      (Option.exists local_config ~f:(fun c ->
-           c.ServerLocalConfig.log_events_with_sandcastle_info))
     (Option.value root ~default:Path.dummy_path);
   Option.iter config ~f:(fun config ->
       HackEventLogger.set_hhconfig_version

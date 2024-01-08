@@ -121,24 +121,34 @@ struct LazyTwoWayMap {
     }
     return keys;
   }
+
   Keys getKeysForValue(Value value, const Keys& keysFromSource) noexcept {
-    VersionedKeys& versionedKeys = m_valueToKeys[value];
+    VersionedKeys* versionedKeys;
+    auto const it = m_valueToKeys.find(value);
+    if (it != m_valueToKeys.end()) {
+      versionedKeys = &it->second;
+    } else if (!keysFromSource.empty()) {
+      versionedKeys = &m_valueToKeys[value];
+    } else {
+      // Do not create an empty placeholder for a missing symbol
+      return {};
+    }
 
     // Data in the DB is always considered to be more stale than data in the
     // map, and gets a version number of 0.
     for (auto const& key : keysFromSource) {
-      versionedKeys.m_keys.insert({key, 0});
+      versionedKeys->m_keys.insert({key, 0});
     }
 
     // Mark our list of keys as filled from the DB
-    versionedKeys.m_complete = true;
+    versionedKeys->m_complete = true;
 
     // Remove keys from older versions of files past
-    removeStaleKeys(versionedKeys);
+    removeStaleKeys(*versionedKeys);
 
     Keys keys;
-    keys.reserve(versionedKeys.m_keys.size());
-    for (auto const& [key, _] : versionedKeys.m_keys) {
+    keys.reserve(versionedKeys->m_keys.size());
+    for (auto const& [key, _] : versionedKeys->m_keys) {
       keys.push_back(key);
     }
     return keys;

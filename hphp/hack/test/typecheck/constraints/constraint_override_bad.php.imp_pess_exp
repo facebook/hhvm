@@ -3,7 +3,7 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   File "constraint_override_bad.php", line 10, characters 19-21:
   Method `foo` has type `(function<T as mixed super B>(): ~T)` in `C`
   File "constraint_override_bad.php", line 5, characters 19-21:
-  But is has type `(function<T as mixed super C>(): ~T)` in parent `B`
+  But it has type `(function<T as mixed super C>(): ~T)` in parent `B`
   File "constraint_override_bad.php", line 10, characters 19-21:
   Type `(function<T as mixed super B>(): ~T)` is not a subtype of `(function<T as mixed super C>(): ~T)`
   File "constraint_override_bad.php", line 10, characters 23-23:

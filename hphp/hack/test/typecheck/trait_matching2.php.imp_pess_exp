@@ -3,7 +3,7 @@ The method `lol` is not compatible with the overridden method (Typing[4341])
   File "trait_matching2.php", line 23, characters 22-24:
   Method `lol` has type `(function(): string)` in `C`
   File "trait_matching2.php", line 13, characters 31-33:
-  But is has type `(function(): ~int)` in parent `MyTrait`
+  But it has type `(function(): ~int)` in parent `MyTrait`
   File "trait_matching2.php", line 23, characters 22-24:
   Type `(function(): string)` is not a subtype of `(function(): ~int)`
   File "trait_matching2.php", line 13, characters 38-40:

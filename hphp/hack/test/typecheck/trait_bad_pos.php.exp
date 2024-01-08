@@ -3,7 +3,7 @@ The method `f` is not compatible with the overridden method (Typing[4341])
   File "trait_bad_pos.php--child.php", line 3, characters 19-19:
   Method `f` has type `(function(string $x): void)` in `Child`
   File "trait_bad_pos.php--foo.php", line 3, characters 19-19:
-  But is has type `(function(int $x): void)` in parent `Foo`
+  But it has type `(function(int $x): void)` in parent `Foo`
   File "trait_bad_pos.php--child.php", line 3, characters 19-19:
   Type `(function(string $x): void)` is not a subtype of `(function(int $x): void)`
   File "trait_bad_pos.php--child.php", line 3, characters 21-26:

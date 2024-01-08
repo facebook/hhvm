@@ -3,7 +3,7 @@ The method `f` is not compatible with the overridden method (Typing[4341])
   File "private_override_in_trait.php", line 16, characters 19-19:
   Method `f` has type `(function(int $x): int)` in `B`
   File "private_override_in_trait.php", line 4, characters 20-20:
-  But is has type `(function(): void)` in parent `A`
+  But it has type `(function(): void)` in parent `A`
   File "private_override_in_trait.php", line 16, characters 19-19:
   Type `(function(int $x): int)` is not a subtype of `(function(): void)`
   File "private_override_in_trait.php", line 16, characters 19-19:

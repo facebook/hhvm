@@ -3,7 +3,7 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   File "simplify_error.php", line 13, characters 31-33:
   Method `foo` has type `(function(): T)` in `C`
   File "simplify_error.php", line 4, characters 31-33:
-  But is has type `(function(): this::T)` in parent `P<this::T>`
+  But it has type `(function(): this::T)` in parent `P<this::T>`
   File "simplify_error.php", line 13, characters 31-33:
   Type `(function(): T)` is not a subtype of `(function(): this::T)`
   File "simplify_error.php", line 7, characters 28-34:

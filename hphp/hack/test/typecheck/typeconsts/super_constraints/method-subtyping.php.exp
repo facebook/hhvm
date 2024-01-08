@@ -21,7 +21,7 @@ The method `returns_int` is not compatible with the overridden method (Typing[43
   File "method-subtyping.php", line 34, characters 19-29:
   Method `returns_int` has type `(function(): this::T)` in `B1`
   File "method-subtyping.php", line 13, characters 19-29:
-  But is has type `(function(): int)` in parent `A`
+  But it has type `(function(): int)` in parent `A`
   File "method-subtyping.php", line 34, characters 19-29:
   Type `(function(): this::T)` is not a subtype of `(function(): int)`
   File "method-subtyping.php", line 13, characters 34-36:

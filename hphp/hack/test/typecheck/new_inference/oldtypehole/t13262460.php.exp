@@ -3,7 +3,7 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   File "t13262460.php", line 18, characters 19-21:
   Method `foo` has type `(function<T as C>(): Action<T>)` in `C`
   File "t13262460.php", line 13, characters 19-21:
-  But is has type `(function<T as B>(): Action<T>)` in parent `B`
+  But it has type `(function<T as B>(): Action<T>)` in parent `B`
   File "t13262460.php", line 18, characters 19-21:
   Type `(function<T as C>(): Action<T>)` is not a subtype of `(function<T as B>(): Action<T>)`
   File "t13262460.php", line 18, characters 23-23:

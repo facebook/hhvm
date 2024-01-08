@@ -11,7 +11,7 @@ The method `get` is not compatible with the overridden method (Typing[4341])
   File "constraint_gen_fail3.php", line 24, characters 19-21:
   Method `get` has type `(function(): ?T)` in `U`
   File "constraint_gen_fail3.php", line 20, characters 19-21:
-  But is has type `(function(): ?A)` in parent `L<A>`
+  But it has type `(function(): ?A)` in parent `L<A>`
   File "constraint_gen_fail3.php", line 24, characters 19-21:
   Type `(function(): ?T)` is not a subtype of `(function(): ?A)`
   File "constraint_gen_fail3.php", line 23, characters 22-22:

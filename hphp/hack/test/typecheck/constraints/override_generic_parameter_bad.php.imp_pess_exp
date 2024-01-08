@@ -3,7 +3,7 @@ The method `get` is not compatible with the overridden method (Typing[4341])
   File "override_generic_parameter_bad.php", line 9, characters 25-27:
   Method `get` has type `(function(string $in): void)` in `C1`
   File "override_generic_parameter_bad.php", line 5, characters 19-21:
-  But is has type `(function<T as mixed>(T $in): void)` in parent `I1`
+  But it has type `(function<T as mixed>(T $in): void)` in parent `I1`
   File "override_generic_parameter_bad.php", line 9, characters 25-27:
   Type `(function(string $in): void)` is not a subtype of `(function<T as mixed>(T $in): void)`
   File "override_generic_parameter_bad.php", line 9, characters 29-34:

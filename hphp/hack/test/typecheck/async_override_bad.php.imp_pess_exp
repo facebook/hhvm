@@ -3,7 +3,7 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   File "async_override_bad.php", line 17, characters 19-21:
   Method `foo` has type `(function(): ~Awaitable<int>)` in `D`
   File "async_override_bad.php", line 5, characters 25-27:
-  But is has type `(async function(): Awaitable<int>)` in parent `C`
+  But it has type `(async function(): Awaitable<int>)` in parent `C`
   File "async_override_bad.php", line 17, characters 19-21:
   Type `(function(): ~Awaitable<int>)` is not a subtype of `(async function(): Awaitable<int>)`
   File "async_override_bad.php", line 5, characters 31-44:

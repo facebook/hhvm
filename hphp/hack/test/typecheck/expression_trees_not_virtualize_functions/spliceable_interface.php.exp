@@ -5,7 +5,7 @@ The method `visit` is not compatible with the overridden method (Typing[4341])
   File "spliceable_interface.php", line 6, characters 19-23:
   Method `visit` has type `(function(Code $v): ExampleDsl::TAst)` in `MySpliceableClass`
   File "expr_tree.hhi", line 207, characters 19-23:
-  But is has type `(function(ExampleDsl $v): ExampleDsl::TAst)` in parent `Spliceable<ExampleDsl, ExampleDsl::TAst, MySpliceableClass>`
+  But it has type `(function(ExampleDsl $v): ExampleDsl::TAst)` in parent `Spliceable<ExampleDsl, ExampleDsl::TAst, MySpliceableClass>`
   File "spliceable_interface.php", line 6, characters 19-23:
   Type `(function(Code $v): ExampleDsl::TAst)` is not a subtype of `(function(ExampleDsl $v): ExampleDsl::TAst)`
   File "spliceable_interface.php", line 6, characters 25-28:

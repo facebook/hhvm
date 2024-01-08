@@ -3,7 +3,7 @@ The method `f1` is not compatible with the overridden method (Typing[4341])
   File "var_args_inheritance2.php", line 17, characters 19-20:
   Method `f1` has type `(function(int $x, int $y, mixed $_...): void)` in `B`
   File "var_args_inheritance2.php", line 13, characters 19-20:
-  But is has type `(function(int $x, mixed $_...): void)` in parent `A`
+  But it has type `(function(int $x, mixed $_...): void)` in parent `A`
   File "var_args_inheritance2.php", line 17, characters 19-20:
   Type `(function(int $x, int $y, mixed $_...): void)` is not a subtype of `(function(int $x, mixed $_...): void)`
   File "var_args_inheritance2.php", line 17, characters 19-20:

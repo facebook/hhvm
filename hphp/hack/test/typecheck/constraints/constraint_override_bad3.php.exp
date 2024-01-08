@@ -3,7 +3,7 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   File "constraint_override_bad3.php", line 24, characters 19-21:
   Method `foo` has type `(function<Tf as GA<Tz>>(GB<Tf, Tz> $x): GC<Tf> where Tz as B)` in `BadSub`
   File "constraint_override_bad3.php", line 12, characters 19-21:
-  But is has type `(function<Tf as GA<Tz>>(GB<Tf, Tz> $x): GC<Tf> where Tz as GB<Tz, Tf>)` in parent `Super<Tz>`
+  But it has type `(function<Tf as GA<Tz>>(GB<Tf, Tz> $x): GC<Tf> where Tz as GB<Tz, Tf>)` in parent `Super<Tz>`
   File "constraint_override_bad3.php", line 24, characters 19-21:
   Type `(function<Tf as GA<Tz>>(GB<Tf, Tz> $x): GC<Tf> where Tz as B)` is not a subtype of `(function<Tf as GA<Tz>>(GB<Tf, Tz> $x): GC<Tf> where Tz as GB<Tz, Tf>)`
   File "constraint_override_bad3.php", line 24, characters 73-73:

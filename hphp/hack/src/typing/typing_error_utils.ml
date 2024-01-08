@@ -5907,7 +5907,7 @@ end = struct
                   origin_type) );
           ( member_parent_pos,
             Printf.sprintf
-              "But is has type %s in parent %s%s"
+              "But it has type %s in parent %s%s"
               member_parent_type
               parent_type
               (if String.equal member_parent_origin parent_name then

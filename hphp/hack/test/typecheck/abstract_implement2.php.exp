@@ -3,7 +3,7 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   File "abstract_implement2.php", line 21, characters 19-21:
   Method `foo` has type `(function(): int)` in `BClass`
   File "abstract_implement2.php", line 15, characters 19-21:
-  But is has type `(function(): bool)` in parent `AClass<bool>` and comes from ancestor or trait `IFace<T>`
+  But it has type `(function(): bool)` in parent `AClass<bool>` and comes from ancestor or trait `IFace<T>`
   File "abstract_implement2.php", line 21, characters 19-21:
   Type `(function(): int)` is not a subtype of `(function(): bool)`
   File "abstract_implement2.php", line 20, characters 29-32:

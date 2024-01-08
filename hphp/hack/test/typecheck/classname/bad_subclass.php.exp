@@ -3,7 +3,7 @@ The method `nameOfISubclass` is not compatible with the overridden method (Typin
   File "bad_subclass.php", line 18, characters 19-33:
   Method `nameOfISubclass` has type `(function(): classname<C_notI>)` in `BadSub`
   File "bad_subclass.php", line 8, characters 28-42:
-  But is has type `(function(): classname<I>)` in parent `Super`
+  But it has type `(function(): classname<I>)` in parent `Super`
   File "bad_subclass.php", line 18, characters 19-33:
   Type `(function(): classname<C_notI>)` is not a subtype of `(function(): classname<I>)`
   File "bad_subclass.php", line 8, characters 57-57:

@@ -3,7 +3,7 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   File "bad_inout_hint_parent7.php", line 11, characters 19-21:
   Method `foo` has type `(function(): ~(function(inout ~arraykey): ~void))` in `C2`
   File "bad_inout_hint_parent7.php", line 4, characters 19-21:
-  But is has type `(function(): ~(function(inout ~int): ~void))` in parent `C1`
+  But it has type `(function(): ~(function(inout ~int): ~void))` in parent `C1`
   File "bad_inout_hint_parent7.php", line 11, characters 19-21:
   Type `(function(): ~(function(inout ~arraykey): ~void))` is not a subtype of `(function(): ~(function(inout ~int): ~void))`
   File "bad_inout_hint_parent7.php", line 4, characters 42-44:

@@ -3,7 +3,7 @@ The method `cast` is not compatible with the overridden method (Typing[4341])
   File "generic_capture_bad.php", line 13, characters 19-22:
   Method `cast` has type `(function<TF>(TF $x): TF)` in `Bad2`
   File "generic_capture_bad.php", line 5, characters 28-31:
-  But is has type `(function<TF#0>(mixed $x): TF#0)` in parent `Bad<mixed>` and comes from ancestor or trait `Base<TF>`
+  But it has type `(function<TF#0>(mixed $x): TF#0)` in parent `Bad<mixed>` and comes from ancestor or trait `Base<TF>`
   File "generic_capture_bad.php", line 13, characters 19-22:
   Type `(function<TF>(TF $x): TF)` is not a subtype of `(function<TF#0>(mixed $x): TF#0)`
   File "generic_capture_bad.php", line 5, characters 33-34:

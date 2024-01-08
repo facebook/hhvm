@@ -15,7 +15,7 @@ Some members in class `F` are incompatible with those declared in type `NormalEn
   File "BuiltinEnum.hhi", line 117, characters 34-42:
   Method `getValues` has type `(function()[HH\Contexts\write_props]: dict<string, HH\MemberOf<F, ExBox>>)` in `F` and comes from ancestor or trait `HH\BuiltinEnumClass<HH\MemberOf<F, ExBox>>`
   File "BuiltinEnum.hhi", line 34, characters 34-42:
-  But is has type `(function()[]: dict<string, NormalEnum>)` in parent `NormalEnum` and comes from ancestor or trait `HH\BuiltinEnum<NormalEnum>`
+  But it has type `(function()[]: dict<string, NormalEnum>)` in parent `NormalEnum` and comes from ancestor or trait `HH\BuiltinEnum<NormalEnum>`
   File "BuiltinEnum.hhi", line 117, characters 34-42:
   Type `(function()[HH\Contexts\write_props]: dict<string, HH\MemberOf<F, ExBox>>)` is not a subtype of `(function()[]: dict<string, NormalEnum>)`
   File "BuiltinEnum.hhi", line 34, characters 45-46:

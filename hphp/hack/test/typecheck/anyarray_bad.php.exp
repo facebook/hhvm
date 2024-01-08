@@ -47,7 +47,7 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   File "anyarray_bad.php", line 25, characters 19-21:
   Method `foo` has type `(function(AnyArray<int, int> $f): void)` in `Child`
   File "anyarray_bad.php", line 21, characters 19-21:
-  But is has type `(function(AnyArray<arraykey, int> $f): void)` in parent `Parent_`
+  But it has type `(function(AnyArray<arraykey, int> $f): void)` in parent `Parent_`
   File "anyarray_bad.php", line 25, characters 19-21:
   Type `(function(AnyArray<int, int> $f): void)` is not a subtype of `(function(AnyArray<arraykey, int> $f): void)`
   File "anyarray_bad.php", line 25, characters 32-34:

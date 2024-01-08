@@ -3,7 +3,7 @@ The method `f` is not compatible with the overridden method (Typing[4341])
   File "trait_priv_extends1.php", line 17, characters 20-20:
   Method `f` has type `(function(): string)` in `C`
   File "trait_priv_extends1.php", line 5, characters 20-20:
-  But is has type `(function(): int)` in parent `T`
+  But it has type `(function(): int)` in parent `T`
   File "trait_priv_extends1.php", line 17, characters 20-20:
   Type `(function(): string)` is not a subtype of `(function(): int)`
   File "trait_priv_extends1.php", line 5, characters 25-27:

@@ -3,7 +3,7 @@ The method `__construct` is not compatible with the overridden method (Typing[43
   File "default_consistent_construct.php", line 7, characters 19-29:
   Method `__construct` has type `(function()[HH\Contexts\write_props]: void)` in `C`
   File "default_consistent_construct.php", line 4, characters 11-11:
-  But is has type `(function()[]: void)` in parent `I`
+  But it has type `(function()[]: void)` in parent `I`
   File "default_consistent_construct.php", line 7, characters 19-29:
   Type `(function()[HH\Contexts\write_props]: void)` is not a subtype of `(function()[]: void)`
   File "default_consistent_construct.php", line 4, characters 11-11:

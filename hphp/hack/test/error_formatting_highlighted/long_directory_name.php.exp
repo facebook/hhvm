@@ -1,6 +1,6 @@
 Typing[4341] The method f is not compatible with the overridden method [1]
 -> Method f has type (function(string $x): void) in Child [1]
--> But is has type (function(int $x): void) in parent Foo [2]
+-> But it has type (function(int $x): void) in parent Foo [2]
 -> Type (function(string $x): void) is not a subtype of (function(int $x): void) [1]
 -> Expected string [3]
 -> But got int [4]

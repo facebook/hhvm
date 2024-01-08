@@ -5,7 +5,7 @@ Some members in class `B` are incompatible with those declared in type `A` (Typi
   File "check_override_synthesized_traits.php", line 17, characters 19-21:
   Method `foo` has type `(function(string $_): void)` in `B` and comes from ancestor or trait `T2`
   File "check_override_synthesized_traits.php", line 4, characters 19-21:
-  But is has type `(function(int $_): void)` in parent `A`
+  But it has type `(function(int $_): void)` in parent `A`
   File "check_override_synthesized_traits.php", line 17, characters 19-21:
   Type `(function(string $_): void)` is not a subtype of `(function(int $_): void)`
   File "check_override_synthesized_traits.php", line 17, characters 23-28:

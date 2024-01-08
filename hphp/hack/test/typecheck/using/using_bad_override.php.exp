@@ -3,7 +3,7 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   File "using_bad_override.php", line 14, characters 19-21:
   Method `foo` has type `(function(mixed $h): void)` in `BadDerived1`
   File "using_bad_override.php", line 10, characters 19-21:
-  But is has type `(function(<<__AcceptDisposable>> mixed $h): void)` in parent `Base`
+  But it has type `(function(<<__AcceptDisposable>> mixed $h): void)` in parent `Base`
   File "using_bad_override.php", line 14, characters 19-21:
   Type `(function(mixed $h): void)` is not a subtype of `(function(<<__AcceptDisposable>> mixed $h): void)`
   File "using_bad_override.php", line 10, characters 51-52:
@@ -15,7 +15,7 @@ The method `bar` is not compatible with the overridden method (Typing[4341])
   File "using_bad_override.php", line 19, characters 19-21:
   Method `bar` has type `(function(<<__AcceptDisposable>> mixed $h): void)` in `BadDerived2`
   File "using_bad_override.php", line 11, characters 19-21:
-  But is has type `(function(mixed $h): void)` in parent `Base`
+  But it has type `(function(mixed $h): void)` in parent `Base`
   File "using_bad_override.php", line 19, characters 19-21:
   Type `(function(<<__AcceptDisposable>> mixed $h): void)` is not a subtype of `(function(mixed $h): void)`
   File "using_bad_override.php", line 19, characters 51-52:
@@ -27,7 +27,7 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   File "using_bad_override.php", line 31, characters 19-21:
   Method `foo` has type `(function(): void)` in `RBadDerived1`
   File "using_bad_override.php", line 27, characters 19-21:
-  But is has type `<<__ReturnDisposable>> (function(): void)` in parent `RBase`
+  But it has type `<<__ReturnDisposable>> (function(): void)` in parent `RBase`
   File "using_bad_override.php", line 31, characters 19-21:
   Type `(function(): void)` is not a subtype of `<<__ReturnDisposable>> (function(): void)`
   File "using_bad_override.php", line 27, characters 19-21:
@@ -39,7 +39,7 @@ The method `bar` is not compatible with the overridden method (Typing[4341])
   File "using_bad_override.php", line 38, characters 19-21:
   Method `bar` has type `<<__ReturnDisposable>> (function(): void)` in `RBadDerived2`
   File "using_bad_override.php", line 28, characters 19-21:
-  But is has type `(function(): void)` in parent `RBase`
+  But it has type `(function(): void)` in parent `RBase`
   File "using_bad_override.php", line 38, characters 19-21:
   Type `<<__ReturnDisposable>> (function(): void)` is not a subtype of `(function(): void)`
   File "using_bad_override.php", line 28, characters 19-21:

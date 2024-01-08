@@ -3,7 +3,7 @@ The method `getMyName` is not compatible with the overridden method (Typing[4341
   File "abstract_implement8.php", line 16, characters 19-27:
   Method `getMyName` has type `(function(): int)` in `A`
   File "abstract_implement8.php", line 12, characters 19-27:
-  But is has type `(function(): ~string)` in parent `Alpha`
+  But it has type `(function(): ~string)` in parent `Alpha`
   File "abstract_implement8.php", line 16, characters 19-27:
   Type `(function(): int)` is not a subtype of `(function(): ~string)`
   File "abstract_implement8.php", line 12, characters 32-37:

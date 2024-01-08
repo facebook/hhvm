@@ -9,7 +9,7 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   File "incompatible_interface.php", line 18, characters 19-21:
   Method `foo` has type `(function(): T)` in `B`
   File "incompatible_interface.php", line 13, characters 19-21:
-  But is has type `(function(): int)` in parent `A`
+  But it has type `(function(): int)` in parent `A`
   File "incompatible_interface.php", line 18, characters 19-21:
   Type `(function(): T)` is not a subtype of `(function(): int)`
   File "incompatible_interface.php", line 13, characters 26-28:

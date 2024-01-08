@@ -3,7 +3,7 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   File "gen4a.php", line 20, characters 19-21:
   Method `foo` has type `(function<T as mixed as B>(T $x): ~T)` in `B`
   File "gen4a.php", line 13, characters 19-21:
-  But is has type `(function<T as mixed as A>(T $x): ~T)` in parent `A`
+  But it has type `(function<T as mixed as A>(T $x): ~T)` in parent `A`
   File "gen4a.php", line 20, characters 19-21:
   Type `(function<T as mixed as B>(T $x): ~T)` is not a subtype of `(function<T as mixed as A>(T $x): ~T)`
   File "gen4a.php", line 20, characters 23-23:

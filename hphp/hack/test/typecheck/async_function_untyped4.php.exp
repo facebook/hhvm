@@ -5,7 +5,7 @@ The method `f` is not compatible with the overridden method (Typing[4341])
   File "async_function_untyped4.php", line 8, characters 25-25:
   Method `f` has type `(async function(): Awaitable<_>)` in `C1`
   File "async_function_untyped4.php", line 4, characters 19-19:
-  But is has type `(function(): int)` in parent `I1`
+  But it has type `(function(): int)` in parent `I1`
   File "async_function_untyped4.php", line 8, characters 25-25:
   Type `(async function(): Awaitable<_>)` is not a subtype of `(function(): int)`
   File "async_function_untyped4.php", line 4, characters 24-26:

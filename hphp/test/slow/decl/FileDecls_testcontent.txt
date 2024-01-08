@@ -40,3 +40,7 @@
     private function myMethod1(): void {}
     public function myMethod2(): void {}
   }
+
+  class :element {
+    attribute string color;
+  }

@@ -384,3 +384,54 @@ dict(2) {
 }
 NULL
 NULL
+=== XHP Classes
+dict(6) {
+  ["name"]=>
+  string(11) "xhp_element"
+  ["kind"]=>
+  string(5) "class"
+  ["module"]=>
+  string(8) "myModule"
+  ["is_strict"]=>
+  bool(true)
+  ["is_xhp"]=>
+  bool(true)
+  ["props"]=>
+  vec(1) {
+    dict(4) {
+      ["name"]=>
+      string(6) ":color"
+      ["type"]=>
+      string(7) "?string"
+      ["visibility"]=>
+      string(6) "public"
+      ["is_needs_init"]=>
+      bool(true)
+    }
+  }
+}
+dict(6) {
+  ["name"]=>
+  string(11) "xhp_element"
+  ["kind"]=>
+  string(5) "class"
+  ["module"]=>
+  string(8) "myModule"
+  ["is_strict"]=>
+  bool(true)
+  ["is_xhp"]=>
+  bool(true)
+  ["props"]=>
+  vec(1) {
+    dict(4) {
+      ["name"]=>
+      string(6) ":color"
+      ["type"]=>
+      string(7) "?string"
+      ["visibility"]=>
+      string(6) "public"
+      ["is_needs_init"]=>
+      bool(true)
+    }
+  }
+}

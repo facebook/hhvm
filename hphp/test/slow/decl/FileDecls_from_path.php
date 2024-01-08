@@ -81,4 +81,8 @@ function main(): void {
   var_dump($instance->getFileAttribute('MyFileAttribute'));
   var_dump($instance->getFileAttribute('missing'));
   var_dump($instance->getFileAttribute(''));
+
+  echo "=== XHP Classes\n";
+  var_dump($instance->getClass('xhp_element'));
+  var_dump($instance->getClass(':element'));
 }

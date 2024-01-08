@@ -893,6 +893,7 @@ std::string RuntimeOption::AutoloadLogging;
 bool RuntimeOption::AutoloadLoggingAllowPropagation;
 bool RuntimeOption::AutoloadRethrowExceptions = true;
 int RuntimeOption::DeclExtensionCacheSize = 500000;
+uint32_t RuntimeOption::AutoloadPerfSampleRate = 0;
 std::string RuntimeOption::FileCache;
 std::string RuntimeOption::DefaultDocument;
 std::string RuntimeOption::GlobalDocument;
@@ -2522,6 +2523,10 @@ void RuntimeOption::Load(
                  "Autoload.RethrowExceptions", true);
 
     Config::Bind(DeclExtensionCacheSize, ini, config, "Ext.Decl.CacheSize", 500000);
+
+    // Sample rate for Autoload & Facts API latency logging
+    Config::Bind(AutoloadPerfSampleRate, ini, config,
+                 "Autoload.PerfSampleRate", 0);
 
     Config::Bind(FileCache, ini, config, "Server.FileCache");
     Config::Bind(DefaultDocument, ini, config, "Server.DefaultDocument",

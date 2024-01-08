@@ -22,8 +22,14 @@ namespace HPHP::Facts {
 
 struct FactsLogger final : public FactsStore,
                            public std::enable_shared_from_this<FactsLogger> {
-  static std::shared_ptr<FactsStore> wrap(std::shared_ptr<FactsStore> inner);
-  explicit FactsLogger(std::shared_ptr<FactsStore> inner);
+  static std::shared_ptr<FactsStore> wrap(
+      std::shared_ptr<FactsStore> inner,
+      std::string_view impl,
+      uint32_t sampleRate);
+  FactsLogger(
+      std::shared_ptr<FactsStore> inner,
+      std::string_view impl,
+      uint32_t sampleRate);
   ~FactsLogger() override = default;
 
   FactsLogger(const FactsLogger&) = delete;
@@ -82,7 +88,13 @@ struct FactsLogger final : public FactsStore,
   Array getFileAttrArgs(const String& file, const String& attr) override;
 
  private:
+  template <typename F>
+  auto logPerf(std::string_view name, std::string_view key, F&& func) const;
+
+ private:
   std::shared_ptr<FactsStore> m_inner;
+  std::string m_impl;
+  uint32_t m_sampleRate;
 };
 
 } // namespace HPHP::Facts

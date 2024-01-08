@@ -40,6 +40,11 @@ struct StructuredLogEntry {
   void setVec(folly::StringPiece key,
               const std::vector<folly::StringPiece>& values);
   void setStackTrace(folly::StringPiece key, const StackTrace& st);
+
+  // Set the given key to a randomly generated UUID stable for this
+  // process lifetime.
+  void setProcessUuid(folly::StringPiece key);
+
   void clear();
 
   bool force_init{false};

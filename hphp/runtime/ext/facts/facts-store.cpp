@@ -1189,7 +1189,10 @@ std::shared_ptr<FactsStore> make_watcher_facts(
   if (shouldSubscribe) {
     inner->subscribe();
   }
-  return FactsLogger::wrap(std::move(inner));
+  return FactsLogger::wrap(
+      std::move(inner),
+      "ext_facts watcher",
+      RuntimeOption::AutoloadPerfSampleRate);
 }
 
 std::shared_ptr<FactsStore> make_trusted_facts(
@@ -1203,7 +1206,10 @@ std::shared_ptr<FactsStore> make_trusted_facts(
   }
   auto inner = std::make_unique<FactsStoreImpl>(
       std::move(root), std::move(dbOpener), std::move(indexedMethodAttrs));
-  return FactsLogger::wrap(std::move(inner));
+  return FactsLogger::wrap(
+      std::move(inner),
+      "ext_facts trusted",
+      RuntimeOption::AutoloadPerfSampleRate);
 }
 
 } // namespace Facts

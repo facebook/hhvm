@@ -18,6 +18,8 @@
 
 #include <sstream>
 
+#include <boost/uuid/uuid_io.hpp>
+#include <boost/uuid/uuid_generators.hpp>
 #include <folly/Random.h>
 #include <folly/json.h>
 
@@ -69,6 +71,13 @@ void StructuredLogEntry::setStackTrace(folly::StringPiece key,
     frame = folly::StringPiece(p, frame.end());
   }
   setVec(key, stackFrames);
+}
+
+void StructuredLogEntry::setProcessUuid(folly::StringPiece key) {
+  static std::string uuid{boost::uuids::to_string(
+    boost::uuids::random_generator()()
+  )};
+  setStr(key, uuid);
 }
 
 void StructuredLogEntry::clear() {

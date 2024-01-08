@@ -589,6 +589,7 @@ struct RuntimeOption {
   static std::string AutoloadLogging;
   static bool AutoloadLoggingAllowPropagation;
   static bool AutoloadRethrowExceptions;
+  static uint32_t AutoloadPerfSampleRate;
 
   static int DeclExtensionCacheSize;
 

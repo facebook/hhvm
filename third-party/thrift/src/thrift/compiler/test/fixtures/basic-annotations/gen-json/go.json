@@ -78,27 +78,6 @@
           "column" : 2
         }
       }
-    },
-    "NewType" : {
-      "lineno" : 46,
-      "is_exception" : false,
-      "is_union" : false,
-      "structured_annotations" : {
-        "scope.Typedef" : {  }
-      },
-      "fields" : {
-
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 46,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 47,
-          "column" : 18
-        }
-      }
     }
   }
 }

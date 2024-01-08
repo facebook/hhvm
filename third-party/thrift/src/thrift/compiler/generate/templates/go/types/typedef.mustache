@@ -19,9 +19,7 @@
   This template generates a thrift typedef
 
 }}
-type {{typedef:go_name}} {{!
-}}{{^typedef:go_newtype?}}= {{/typedef:go_newtype?}}{{!
-}}{{#typedef:type}}{{> common/type}}{{/typedef:type}}
+type {{typedef:go_name}} = {{#typedef:type}}{{> common/type}}{{/typedef:type}}
 
 {{! new function }}
 {{> types/typedef_method_new}}

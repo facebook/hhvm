@@ -15,10 +15,8 @@
  */
 
 include "module0.thrift"
-include "thrift/annotation/go.thrift"
 
 typedef string Plate
-@go.NewType
 typedef string State
 typedef i32 Year
 typedef list<string> Drivers

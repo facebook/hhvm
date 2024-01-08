@@ -334,105 +334,11 @@ func (x *Tag) String() string {
     return sb.String()
 }
 
-type NewType_ struct {
-}
-// Compile time interface enforcer
-var _ thrift.Struct = &NewType_{}
-
-func NewNewType_() *NewType_ {
-    return (&NewType_{})
-}
-
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewNewType_().Set<FieldNameFoo>().Set<FieldNameBar>()
-type NewType_Builder struct {
-    obj *NewType_
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewNewType_().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewNewType_Builder() *NewType_Builder {
-    return &NewType_Builder{
-        obj: NewNewType_(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewNewType_().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *NewType_Builder) Emit() *NewType_ {
-    var objCopy NewType_ = *x.obj
-    return &objCopy
-}
-
-func (x *NewType_) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("NewType"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
-    }
-
-    if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
-    }
-
-    if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *NewType_) Read(p thrift.Protocol) error {
-    if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
-    }
-
-    for {
-        _, wireType, id, err := p.ReadFieldBegin()
-        if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
-        }
-
-        if wireType == thrift.STOP {
-            break;
-        }
-
-        switch {
-        default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
-        }
-
-        if err := p.ReadFieldEnd(); err != nil {
-            return err
-        }
-    }
-
-    if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
-    }
-
-    return nil
-}
-
-func (x *NewType_) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("NewType_({")
-    sb.WriteString("})")
-
-    return sb.String()
-}
-
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)
 }) {
     registry.RegisterType("facebook.com/thrift/annotation/go/Name", func() any { return NewName() })
     registry.RegisterType("facebook.com/thrift/annotation/go/Tag", func() any { return NewTag() })
-    registry.RegisterType("facebook.com/thrift/annotation/go/NewType", func() any { return NewNewType_() })
 
 }

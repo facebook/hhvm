@@ -159,8 +159,6 @@ inline constexpr auto kHackModuleInternalUri =
 // go
 inline constexpr auto kGoNameUri = "facebook.com/thrift/annotation/go/Name";
 inline constexpr auto kGoTagUri = "facebook.com/thrift/annotation/go/Tag";
-inline constexpr auto kGoNewTypeUri =
-    "facebook.com/thrift/annotation/go/NewType";
 
 inline constexpr auto kGeneratePatchUri =
     "facebook.com/thrift/op/GeneratePatch";

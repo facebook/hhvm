@@ -44,7 +44,7 @@ if err != nil {
     return decodeResult, decodeErr
 }
 
-type State string
+type State = string
 
 func NewState() State {
     return ""

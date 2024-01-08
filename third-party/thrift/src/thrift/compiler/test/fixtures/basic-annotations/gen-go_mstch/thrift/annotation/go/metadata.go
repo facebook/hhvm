@@ -47,9 +47,6 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetType(premadeThriftType_string),
         },
     ),
-    metadata.NewThriftStruct().
-    SetName("go.NewType").
-    SetIsUnion(false),
 }
 
 var exceptionMetadatas = []*metadata.ThriftException{

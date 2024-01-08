@@ -38,10 +38,3 @@ struct Name {
 struct Tag {
   1: string tag;
 }
-
-// Annotation for declaring a typedef as a new type (rather than an alias).
-//
-//  type T1 = T2  // alias declaration
-//  type T1 T2    // type definition
-@scope.Typedef
-struct NewType {}

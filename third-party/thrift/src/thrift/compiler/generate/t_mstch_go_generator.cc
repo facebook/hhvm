@@ -746,7 +746,7 @@ class mstch_go_typedef : public mstch_typedef {
 };
 
 void t_mstch_go_generator::generate_program() {
-  out_dir_base_ = "gen-go_mstch";
+  out_dir_base_ = "gen-go";
   set_mstch_factories();
 
   const t_program* program = get_program();

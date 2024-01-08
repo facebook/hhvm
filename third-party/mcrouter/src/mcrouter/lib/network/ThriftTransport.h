@@ -145,9 +145,7 @@ class ThriftTransport : public ThriftTransportBase {
         "Router ", RouterInfo::name, " does not support thrift transport"));
   }
 
-  void resetClient() override final {
-    channel_->closeNow();
-  }
+  void resetClient() override final {}
 
   void setFlushList(FlushList* /* flushList */) override final {}
 };

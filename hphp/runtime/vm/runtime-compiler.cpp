@@ -110,7 +110,7 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
       forDebuggerEval
     );
     assertx(uc);
-    tracing::BlockNoTrace _{"unit-compiler-run"};
+    tracing::BlockNoTrace _2{"unit-compiler-run"};
     SCOPE_EXIT {
       if (!wasLoaded && loader.didLoad()) {
         tracing::updateName("unit-compiler-run-load");

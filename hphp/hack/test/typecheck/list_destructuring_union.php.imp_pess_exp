@@ -2,8 +2,4 @@ File "list_destructuring_union.php", line 7, characters 3-13:
   ~int
 File "list_destructuring_union.php", line 8, characters 3-13:
   ~string
-File "list_destructuring_union.php", line 7, characters 3-13:[2]
-  dynamic
-File "list_destructuring_union.php", line 8, characters 3-13:[2]
-  dynamic
 No errors

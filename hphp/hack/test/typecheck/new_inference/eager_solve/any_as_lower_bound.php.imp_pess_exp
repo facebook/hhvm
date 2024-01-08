@@ -1,7 +1,5 @@
 File "any_as_lower_bound.php", line 5, characters 3-87:
   (function(): ~(void | _))
-File "any_as_lower_bound.php", line 5, characters 3-87:[2]
-  dynamic
 File "any_as_lower_bound.php", line 4, characters 32-33:
 Was expecting a type hint (Typing[4032])
 File "any_as_lower_bound.php", line 5, characters 11-86:

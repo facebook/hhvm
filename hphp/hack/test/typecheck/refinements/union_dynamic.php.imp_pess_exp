@@ -2,8 +2,4 @@ File "union_dynamic.php", line 15, characters 3-13:
   ~S<int>
 File "union_dynamic.php", line 17, characters 3-13:
   ~int
-File "union_dynamic.php", line 15, characters 3-13:[2]
-  S<T#1>
-File "union_dynamic.php", line 17, characters 3-13:[2]
-  ~T#1
 No errors

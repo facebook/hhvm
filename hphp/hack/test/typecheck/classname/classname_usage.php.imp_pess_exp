@@ -1,13 +1,7 @@
 File "classname_usage.php", line 81, characters 3-15:
   ~string
-File "classname_usage.php", line 81, characters 3-15:[2]
-  dynamic
 File "classname_usage.php", line 86, characters 3-16:
   classname<T>
 File "classname_usage.php", line 88, characters 3-15:
   ~string
-File "classname_usage.php", line 86, characters 3-16:[2]
-  dynamic
-File "classname_usage.php", line 88, characters 3-15:[2]
-  dynamic
 No errors

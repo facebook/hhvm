@@ -1,9 +1,0 @@
-File "expression_dependent_types_and_final.php", line 10, characters 5-15:
-  int
-File "expression_dependent_types_and_final.php", line 11, characters 5-27:
-  IAmFinal
-File "expression_dependent_types_and_final.php", line 10, characters 5-15:[2]
-  dynamic
-File "expression_dependent_types_and_final.php", line 11, characters 5-27:[2]
-  IAmFinal
-No errors

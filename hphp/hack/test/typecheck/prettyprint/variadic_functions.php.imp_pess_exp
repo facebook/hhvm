@@ -1,17 +1,9 @@
 File "variadic_functions.php", line 7, characters 3-13:
   (function(mixed...): ~void)
-File "variadic_functions.php", line 7, characters 3-13:[2]
-  dynamic
 File "variadic_functions.php", line 10, characters 3-13:
   (function(int, mixed...): ~void)
-File "variadic_functions.php", line 10, characters 3-13:[2]
-  dynamic
 File "variadic_functions.php", line 15, characters 3-13:
   (function(int...): ~void)
-File "variadic_functions.php", line 15, characters 3-13:[2]
-  dynamic
 File "variadic_functions.php", line 20, characters 3-13:
   (function(int, string...): ~void)
-File "variadic_functions.php", line 20, characters 3-13:[2]
-  dynamic
 No errors

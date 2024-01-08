@@ -1,7 +1,5 @@
 File "new_generic.php", line 13, characters 3-16:
   Tobj as C<Targ>
-File "new_generic.php", line 13, characters 3-16:[2]
-  dynamic
 File "new_generic.php", line 18, characters 3-32:
   ~C<int>
 File "new_generic.php", line 19, characters 3-38:

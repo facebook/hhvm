@@ -18,24 +18,4 @@ File "typing_type_structure1.php", line 26, characters 5-30:
   (TypeStructure<~Vector<C<int>>>)
 File "typing_type_structure1.php", line 27, characters 5-28:
   classname<this>
-File "typing_type_structure1.php", line 18, characters 5-23:[2]
-  dynamic
-File "typing_type_structure1.php", line 19, characters 5-28:[2]
-  dynamic
-File "typing_type_structure1.php", line 20, characters 5-32:[2]
-  dynamic
-File "typing_type_structure1.php", line 21, characters 5-28:[2]
-  dynamic
-File "typing_type_structure1.php", line 22, characters 5-32:[2]
-  dynamic
-File "typing_type_structure1.php", line 23, characters 5-29:[2]
-  dynamic
-File "typing_type_structure1.php", line 24, characters 5-44:[2]
-  dynamic
-File "typing_type_structure1.php", line 25, characters 5-30:[2]
-  dynamic
-File "typing_type_structure1.php", line 26, characters 5-30:[2]
-  dynamic
-File "typing_type_structure1.php", line 27, characters 5-28:[2]
-  dynamic
 No errors

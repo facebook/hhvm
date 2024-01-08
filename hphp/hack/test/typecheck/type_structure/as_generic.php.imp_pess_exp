@@ -18,24 +18,4 @@ File "as_generic.php", line 13, characters 3-37:
   ?dict<arraykey, mixed>
 File "as_generic.php", line 14, characters 3-44:
   ?vec<mixed>
-File "as_generic.php", line 5, characters 3-22:[2]
-  dynamic
-File "as_generic.php", line 6, characters 3-36:[2]
-  ~null
-File "as_generic.php", line 7, characters 3-35:[2]
-  ~null
-File "as_generic.php", line 8, characters 3-40:[2]
-  ~null
-File "as_generic.php", line 9, characters 3-42:[2]
-  ~null
-File "as_generic.php", line 10, characters 3-42:[2]
-  ~null
-File "as_generic.php", line 11, characters 3-39:[2]
-  ~null
-File "as_generic.php", line 12, characters 3-41:[2]
-  ~null
-File "as_generic.php", line 13, characters 3-37:[2]
-  ~null
-File "as_generic.php", line 14, characters 3-44:[2]
-  ~null
 No errors

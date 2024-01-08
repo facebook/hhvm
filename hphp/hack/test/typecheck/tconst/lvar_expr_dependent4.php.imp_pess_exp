@@ -14,24 +14,4 @@ File "lvar_expr_dependent4.php", line 26, characters 5-22:
   ~<expr#14>::T where <expr#14>::T as C::T
 File "lvar_expr_dependent4.php", line 27, characters 5-22:
   ~<expr#15>::T where <expr#15>::T as C::T
-File "lvar_expr_dependent4.php", line 13, characters 5-22:[2]
-  ~<expr#16>::T where <expr#16>::T as C::T
-File "lvar_expr_dependent4.php", line 14, characters 5-22:[2]
-  ~<expr#16>::T where <expr#16>::T as C::T
-File "lvar_expr_dependent4.php", line 16, characters 5-22:[2]
-  ~<expr#17>::T where <expr#17>::T as C::T
-File "lvar_expr_dependent4.php", line 17, characters 5-22:[2]
-  ~<expr#17>::T where <expr#17>::T as C::T
-File "lvar_expr_dependent4.php", line 21, characters 7-24:[2]
-  dynamic
-File "lvar_expr_dependent4.php", line 22, characters 7-24:[2]
-  dynamic
-File "lvar_expr_dependent4.php", line 21, characters 7-24:[3]
-  dynamic
-File "lvar_expr_dependent4.php", line 22, characters 7-24:[3]
-  dynamic
-File "lvar_expr_dependent4.php", line 26, characters 5-22:[2]
-  dynamic
-File "lvar_expr_dependent4.php", line 27, characters 5-22:[2]
-  dynamic
 No errors

@@ -1,5 +1,0 @@
-File "array_append_unresolved_good.php", line 11, characters 3-13:
-  vec<(string | num)>
-File "array_append_unresolved_good.php", line 11, characters 3-13:[2]
-  dynamic
-No errors

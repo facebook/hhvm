@@ -16,18 +16,11 @@
 
 }}{{!
 
-  This template generates a thrift typedef
+  This template creates a New method for Thrift typedefs.
 
 }}
-type {{typedef:go_name}} {{!
-}}{{^typedef:go_newtype?}}= {{/typedef:go_newtype?}}{{!
-}}{{#typedef:type}}{{> common/type}}{{/typedef:type}}
-
-{{! new function }}
-{{> types/typedef_method_new}}
-
-{{! write (serialize) }}
-{{> types/typedef_method_write}}
-
-{{! read (deserialize) }}
-{{> types/typedef_method_read}}
+{{#typedef:type}}
+func {{typedef:go_qualified_new_func}}() {{#type:struct?}}*{{/type:struct?}}{{typedef:go_name}} {
+    return {{> common/natural_default_value}}
+}
+{{/typedef:type}}

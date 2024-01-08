@@ -1271,10 +1271,21 @@ public:
     return offsetof(SharedData, m_allFlags);
   }
 
+  static constexpr ptrdiff_t extendedSharedOriginalModuleName() {
+    return offsetof(ExtendedSharedData, m_originalModuleName);
+  }
+
   static uint32_t reifiedGenericsMask() {
     ExtendedSharedData::Flags mask;
     mask.m_allFlags = 0;
     mask.m_hasReifiedGenerics = true;
+    return mask.m_allFlags;
+  }
+
+  static uint32_t hasExtendedSharedDataMask() {
+    ExtendedSharedData::Flags mask;
+    mask.m_allFlags = 0;
+    mask.m_hasExtendedSharedData = true;
     return mask.m_allFlags;
   }
 

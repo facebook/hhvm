@@ -1,0 +1,1 @@
+Fatal error: Trait T1 is public and therefore cannot define the internal property x in %s/module_level_traits_sanity_3b.php on line 7

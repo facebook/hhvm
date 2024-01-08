@@ -1,0 +1,16 @@
+<?hh
+
+<<file:__EnableUnstableFeatures('module_level_traits')>>
+
+module MLT_A;
+
+<<__ModuleLevelTrait>>
+public trait T {
+  internal static function sbar() {
+    echo "I am static bar in T\n";
+  }
+
+  internal function bar() {
+    echo "I am bar in T\n";
+  }
+}

@@ -16,7 +16,6 @@
 
 #include <optional>
 #include <thrift/lib/cpp2/util/gtest/Matcher.h>
-#include <thrift/lib/cpp2/util/gtest/test/gen-cpp2/Matcher_fatal_types.h>
 #include <thrift/lib/cpp2/util/gtest/test/gen-cpp2/Matcher_types.h>
 
 #include <folly/portability/GTest.h>
@@ -42,7 +41,7 @@ TEST(MatcherTest, ThriftField) {
   EXPECT_THAT(p, ThriftField(&Person::id<>, Eq(42)));
 }
 
-TEST(MatcherTest_ThriftMacher, FieldRef) {
+TEST(MatcherTestThriftMacher, FieldRef) {
   namespace field = apache::thrift::ident;
   int value = 42;
 
@@ -53,7 +52,7 @@ TEST(MatcherTest_ThriftMacher, FieldRef) {
       EXPECT_THAT(p, ThriftField<field::id>(Eq(value + 1))), "");
 }
 
-TEST(MatcherTest_ThriftMacher, OptionalRef) {
+TEST(MatcherTestThriftMacher, OptionalRef) {
   namespace field = apache::thrift::ident;
   std::string value = "Zaphod";
   std::string wrong = "wrong";
@@ -85,7 +84,7 @@ TEST(MatcherTest, FiledRefPrintsCorrectly) {
   EXPECT_EQ(testing::PrintToString(p.id_ref()), "field_ref holding 42");
 }
 
-TEST(ThriftMacher_Union, MatchesIfActiveMemberIsCorrectAndInnerMatcherMatches) {
+TEST(ThriftMacherUnion, MatchesIfActiveMemberIsCorrectAndInnerMatcherMatches) {
   namespace field = apache::thrift::ident;
   auto r = Result();
 
@@ -106,7 +105,7 @@ TEST(ThriftMacher_Union, MatchesIfActiveMemberIsCorrectAndInnerMatcherMatches) {
       EXPECT_THAT(r, IsThriftUnionWith<field::success>(_)), "");
 }
 
-TEST(ThriftMacher_Union, Given_IsUnset_Then_NoTagMatches) {
+TEST(ThriftMacherUnion, Given_IsUnset_Then_NoTagMatches) {
   namespace field = apache::thrift::ident;
 
   auto r = Result();
@@ -117,7 +116,7 @@ TEST(ThriftMacher_Union, Given_IsUnset_Then_NoTagMatches) {
 }
 
 TEST(
-    ThriftMacher_Union,
+    ThriftMacherUnion,
     Given_UnionHasSameTypes_And_IsSet_Then_TagForActiveMemberMatches) {
   namespace field = apache::thrift::ident;
 
@@ -127,12 +126,12 @@ TEST(
   EXPECT_NONFATAL_FAILURE(EXPECT_THAT(r, IsThriftUnionWith<field::a>(_)), "");
 }
 
-TEST(MatcherTest_ThriftMacher, CanBindToRValueMatcher) {
+TEST(MatcherTestThriftMacher, CanBindToRValueMatcher) {
   namespace field = apache::thrift::ident;
   testing::Matcher<Person&&> _ = ThriftField<field::id>(testing::_);
 }
 
-TEST(ThriftMacher_Union, CanBindToRValueMatcher) {
+TEST(ThriftMacherUnion, CanBindToRValueMatcher) {
   namespace field = apache::thrift::ident;
   testing::Matcher<SameType&&> _ = IsThriftUnionWith<field::a>(testing::_);
 }

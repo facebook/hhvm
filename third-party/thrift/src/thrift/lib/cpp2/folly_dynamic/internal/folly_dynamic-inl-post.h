@@ -32,8 +32,6 @@ namespace facebook {
 namespace thrift {
 namespace detail {
 
-namespace {
-
 template <typename Id, typename T, typename R>
 struct Ensure {
   constexpr decltype(auto) operator()(Id id, T& obj) const {
@@ -58,8 +56,6 @@ template <typename Id, typename T>
 static constexpr decltype(auto) ensure(Id id, T& obj) {
   return Ensure<Id, T, apache::thrift::op::get_field_ref<T, Id>>{}(id, obj);
 }
-
-} // namespace
 
 template <typename T>
 struct dynamic_converter_impl<apache::thrift::type::enum_t<T>> {

@@ -98,23 +98,24 @@ class const_checker {
   void check(const t_type* type, const t_const_value* value) {
     type = type->get_true_type();
 
-    if (const auto concrete = dynamic_cast<const t_base_type*>(type)) {
-      check_base_type(concrete, value);
-      check_base_value(concrete, value);
-    } else if (const auto concrete = dynamic_cast<const t_enum*>(type)) {
-      check_enum(concrete, value);
-    } else if (const auto concrete = dynamic_cast<const t_union*>(type)) {
-      check_union(concrete, value);
-    } else if (const auto concrete = dynamic_cast<const t_exception*>(type)) {
-      check_exception(concrete, value);
-    } else if (const auto concrete = dynamic_cast<const t_struct*>(type)) {
-      check_struct(concrete, value);
-    } else if (const auto concrete = dynamic_cast<const t_map*>(type)) {
-      check_map(concrete, value);
-    } else if (const auto concrete = dynamic_cast<const t_list*>(type)) {
-      check_list(concrete, value);
-    } else if (const auto concrete = dynamic_cast<const t_set*>(type)) {
-      check_set(concrete, value);
+    if (const auto base_type = dynamic_cast<const t_base_type*>(type)) {
+      check_base_type(base_type, value);
+      check_base_value(base_type, value);
+    } else if (const auto enum_type = dynamic_cast<const t_enum*>(type)) {
+      check_enum(enum_type, value);
+    } else if (const auto union_type = dynamic_cast<const t_union*>(type)) {
+      check_union(union_type, value);
+    } else if (
+        const auto exception_type = dynamic_cast<const t_exception*>(type)) {
+      check_exception(exception_type, value);
+    } else if (const auto struct_type = dynamic_cast<const t_struct*>(type)) {
+      check_struct(struct_type, value);
+    } else if (const auto map_type = dynamic_cast<const t_map*>(type)) {
+      check_map(map_type, value);
+    } else if (const auto list_type = dynamic_cast<const t_list*>(type)) {
+      check_list(list_type, value);
+    } else if (const auto set_type = dynamic_cast<const t_set*>(type)) {
+      check_set(set_type, value);
     } else {
       assert(false); // Should be unreachable.
     }

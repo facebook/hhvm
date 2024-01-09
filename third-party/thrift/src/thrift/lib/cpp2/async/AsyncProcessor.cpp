@@ -163,8 +163,9 @@ void GeneratedAsyncProcessorBase::processInteraction(ServerRequest&& req) {
   apache::thrift::detail::ServerRequestHelper::setInternalPriority(
       request, source);
 
-  apache::thrift::detail::ServerRequestHelper::resourcePool(request)->accept(
-      std::move(request));
+  auto&& resourcePool =
+      apache::thrift::detail::ServerRequestHelper::resourcePool(request);
+  resourcePool->accept(std::move(request));
 }
 
 bool GeneratedAsyncProcessorBase::createInteraction(ServerRequest& req) {
@@ -805,7 +806,8 @@ bool HandlerCallbackBase::fulfillTilePromise(std::unique_ptr<Tile> ptr) {
     return false;
   }
 
-  auto fn = [ctx = reqCtx_,
+  auto fn = [connCtx = reqCtx_->getConnectionContext(),
+             interactionId = reqCtx_->getInteractionId(),
              interaction = std::move(interaction_),
              ptr = std::move(ptr),
              tm = getThreadManager_deprecated(),
@@ -819,8 +821,7 @@ bool HandlerCallbackBase::fulfillTilePromise(std::unique_ptr<Tile> ptr) {
     } else {
       static_cast<TilePromise&>(*interaction).fulfill(*tile, tm, *eb);
     }
-    ctx->getConnectionContext()->tryReplaceTile(
-        ctx->getInteractionId(), std::move(tile));
+    connCtx->tryReplaceTile(interactionId, std::move(tile));
   };
 
   eb_->runImmediatelyOrRunInEventBaseThread(std::move(fn));

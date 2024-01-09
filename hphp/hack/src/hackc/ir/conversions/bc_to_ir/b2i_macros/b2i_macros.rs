@@ -59,7 +59,6 @@ use syn::Token;
 /// The macro is more complicated than just the basic rewriter because Rust
 /// doesn't allow you to use a macro as the pattern for a match statement - so
 /// we have to rewrite the whole function so we can rewrite the match itself.
-///
 #[proc_macro_attribute]
 pub fn bc_to_ir(
     _attr: proc_macro::TokenStream,

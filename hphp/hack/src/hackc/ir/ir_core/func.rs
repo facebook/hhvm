@@ -205,7 +205,6 @@ impl TryCatchId {
 ///
 /// Exception frames are tracked as a separate tree structure made up of Blocks.
 /// Each exception frame says where to jump in the case of a thrown exception.
-///
 #[derive(Clone, Debug, Default)]
 pub struct Func<'a> {
     pub attributes: Vec<Attribute>,

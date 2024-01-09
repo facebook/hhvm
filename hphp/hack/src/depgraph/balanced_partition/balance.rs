@@ -226,7 +226,6 @@ fn compute_doc_move_gains<'a>(
 ///   about the exact ordering within either N section.
 /// - For P/N, we fully sort both sides (technically even this isn't required, but that
 ///   starts to get complicated).
-///
 fn partially_sort_move_gains<'a, 'b: 'a>(
     left_gains: &'a mut [(i64, &'b mut Doc)],
     right_gains: &'a mut [(i64, &'b mut Doc)],

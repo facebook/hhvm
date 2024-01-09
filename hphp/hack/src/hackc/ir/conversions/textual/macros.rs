@@ -45,7 +45,6 @@ use syn::Token;
 ///   }
 ///
 /// It also implements the Display trait for the enum.
-///
 #[proc_macro_error]
 #[proc_macro_derive(TextualDecl, attributes(decl, function))]
 pub fn textual_decl_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {

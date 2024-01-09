@@ -287,8 +287,8 @@ impl<'bump, K, V> AssocListMut<'bump, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use bumpalo::Bump;
     /// use arena_collections::AssocListMut;
+    /// use bumpalo::Bump;
     ///
     /// let b = Bump::new();
     /// let mut alist: AssocListMut<i32> = AssocListMut::new_in(&b);
@@ -311,8 +311,8 @@ impl<'bump, K, V> AssocListMut<'bump, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use bumpalo::Bump;
     /// use arena_collections::AssocListMut;
+    /// use bumpalo::Bump;
     ///
     /// let b = Bump::new();
     ///
@@ -345,8 +345,8 @@ impl<'bump, K, V> AssocListMut<'bump, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use bumpalo::Bump;
     /// use arena_collections::AssocListMut;
+    /// use bumpalo::Bump;
     ///
     /// let b = Bump::new();
     /// let mut alist = AssocListMut::new_in(&b);
@@ -371,8 +371,8 @@ impl<'bump, K, V> AssocListMut<'bump, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use bumpalo::Bump;
     /// use arena_collections::AssocListMut;
+    /// use bumpalo::Bump;
     ///
     /// let b = Bump::new();
     /// let mut alist = AssocListMut::new_in(&b);
@@ -412,8 +412,8 @@ impl<'bump, K, V> AssocListMut<'bump, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use bumpalo::Bump;
     /// use arena_collections::AssocListMut;
+    /// use bumpalo::Bump;
     ///
     /// let b = Bump::new();
     /// let mut alist = AssocListMut::new_in(&b);
@@ -445,8 +445,8 @@ impl<'bump, K, V> AssocListMut<'bump, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use bumpalo::Bump;
     /// use arena_collections::AssocListMut;
+    /// use bumpalo::Bump;
     ///
     /// let b = Bump::new();
     /// let mut alist = AssocListMut::new_in(&b);
@@ -478,8 +478,8 @@ impl<'bump, K, V> AssocListMut<'bump, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use bumpalo::Bump;
     /// use arena_collections::AssocListMut;
+    /// use bumpalo::Bump;
     ///
     /// let b = Bump::new();
     /// let mut alist = AssocListMut::new_in(&b);
@@ -506,8 +506,8 @@ impl<'bump, K, V> AssocListMut<'bump, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use bumpalo::Bump;
     /// use arena_collections::AssocListMut;
+    /// use bumpalo::Bump;
     ///
     /// let b = Bump::new();
     /// let mut alist = AssocListMut::new_in(&b);
@@ -531,8 +531,8 @@ impl<'bump, K, V> AssocListMut<'bump, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use bumpalo::Bump;
     /// use arena_collections::AssocListMut;
+    /// use bumpalo::Bump;
     ///
     /// let b = Bump::new();
     /// let mut alist = AssocListMut::new_in(&b);
@@ -553,8 +553,8 @@ impl<'bump, K, V> AssocListMut<'bump, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use bumpalo::Bump;
     /// use arena_collections::AssocListMut;
+    /// use bumpalo::Bump;
     ///
     /// let b = Bump::new();
     /// let mut alist = AssocListMut::new_in(&b);
@@ -577,8 +577,8 @@ impl<'bump, K, V> AssocListMut<'bump, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use bumpalo::Bump;
     /// use arena_collections::AssocListMut;
+    /// use bumpalo::Bump;
     ///
     /// let b = Bump::new();
     /// let mut alist = AssocListMut::new_in(&b);
@@ -597,8 +597,8 @@ impl<'bump, K, V> AssocListMut<'bump, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use bumpalo::Bump;
     /// use arena_collections::AssocListMut;
+    /// use bumpalo::Bump;
     ///
     /// let b = Bump::new();
     /// let mut alist = AssocListMut::new_in(&b);
@@ -617,8 +617,8 @@ impl<'bump, K, V> AssocListMut<'bump, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use bumpalo::Bump;
     /// use arena_collections::AssocListMut;
+    /// use bumpalo::Bump;
     ///
     /// let b = Bump::new();
     /// let mut alist = AssocListMut::new_in(&b);
@@ -635,8 +635,8 @@ impl<'bump, K, V> AssocListMut<'bump, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use bumpalo::Bump;
     /// use arena_collections::AssocListMut;
+    /// use bumpalo::Bump;
     ///
     /// let b = Bump::new();
     /// let mut alist = AssocListMut::new_in(&b);
@@ -708,8 +708,9 @@ impl<'a, K, V> SortedAssocList<'a, K, V> {
     /// # Examples
     ///
     /// ```
+    /// use arena_collections::AssocListMut;
+    /// use arena_collections::SortedAssocList;
     /// use bumpalo::Bump;
-    /// use arena_collections::{AssocListMut, SortedAssocList};
     ///
     /// let b = Bump::new();
     /// let mut alist = AssocListMut::new_in(&b);
@@ -734,8 +735,9 @@ impl<'a, K, V> SortedAssocList<'a, K, V> {
     /// # Examples
     ///
     /// ```
+    /// use arena_collections::AssocListMut;
+    /// use arena_collections::SortedAssocList;
     /// use bumpalo::Bump;
-    /// use arena_collections::{AssocListMut, SortedAssocList};
     ///
     /// let b = Bump::new();
     /// let mut alist = AssocListMut::new_in(&b);
@@ -760,8 +762,9 @@ impl<'a, K, V> SortedAssocList<'a, K, V> {
     /// # Examples
     ///
     /// ```
+    /// use arena_collections::AssocListMut;
+    /// use arena_collections::SortedAssocList;
     /// use bumpalo::Bump;
-    /// use arena_collections::{AssocListMut, SortedAssocList};
     ///
     /// let b = Bump::new();
     /// let mut alist = AssocListMut::new_in(&b);
@@ -784,8 +787,9 @@ impl<'a, K, V> SortedAssocList<'a, K, V> {
     /// # Examples
     ///
     /// ```
+    /// use arena_collections::AssocListMut;
+    /// use arena_collections::SortedAssocList;
     /// use bumpalo::Bump;
-    /// use arena_collections::{AssocListMut, SortedAssocList};
     ///
     /// let b = Bump::new();
     /// let mut alist = AssocListMut::new_in(&b);
@@ -811,8 +815,9 @@ impl<'a, K, V> SortedAssocList<'a, K, V> {
     /// # Examples
     ///
     /// ```
+    /// use arena_collections::AssocListMut;
+    /// use arena_collections::SortedAssocList;
     /// use bumpalo::Bump;
-    /// use arena_collections::{AssocListMut, SortedAssocList};
     ///
     /// let b = Bump::new();
     /// let mut alist = AssocListMut::new_in(&b);
@@ -834,8 +839,9 @@ impl<'a, K, V> SortedAssocList<'a, K, V> {
     /// # Examples
     ///
     /// ```
+    /// use arena_collections::AssocListMut;
+    /// use arena_collections::SortedAssocList;
     /// use bumpalo::Bump;
-    /// use arena_collections::{AssocListMut, SortedAssocList};
     ///
     /// let b = Bump::new();
     /// let mut alist = AssocListMut::new_in(&b);
@@ -856,8 +862,9 @@ impl<'a, K, V> SortedAssocList<'a, K, V> {
     /// # Examples
     ///
     /// ```
+    /// use arena_collections::AssocListMut;
+    /// use arena_collections::SortedAssocList;
     /// use bumpalo::Bump;
-    /// use arena_collections::{AssocListMut, SortedAssocList};
     ///
     /// let b = Bump::new();
     /// let mut alist = AssocListMut::new_in(&b);
@@ -875,8 +882,9 @@ impl<'a, K, V> SortedAssocList<'a, K, V> {
     /// # Examples
     ///
     /// ```
+    /// use arena_collections::AssocListMut;
+    /// use arena_collections::SortedAssocList;
     /// use bumpalo::Bump;
-    /// use arena_collections::{AssocListMut, SortedAssocList};
     ///
     /// let b = Bump::new();
     /// let mut alist = AssocListMut::new_in(&b);
@@ -898,8 +906,9 @@ impl<'a, K, V> SortedAssocList<'a, K, V> {
     /// # Examples
     ///
     /// ```
+    /// use arena_collections::AssocListMut;
+    /// use arena_collections::SortedAssocList;
     /// use bumpalo::Bump;
-    /// use arena_collections::{AssocListMut, SortedAssocList};
     ///
     /// let b = Bump::new();
     /// let mut alist = AssocListMut::new_in(&b);

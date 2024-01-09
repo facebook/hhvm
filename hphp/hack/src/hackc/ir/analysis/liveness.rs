@@ -275,7 +275,6 @@ impl LiveInstrs {
 ///
 /// dead_on_entry and referenced are mutually exclusive - no InstrId should
 /// appear in both sets.
-///
 #[derive(Debug, Default, Clone)]
 pub struct LiveBlockInfo {
     /// What InstrIds are live on entry to this block.

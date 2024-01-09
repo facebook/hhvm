@@ -17,7 +17,6 @@ use crate::strings::StringCache;
 /// Most of the outer structure of the hhbc::Unit maps 1:1 with ir::Unit. As a
 /// result the "interesting" work is in the conversion of the IR to bytecode
 /// when converting functions and methods (see `convert_func` in func.rs).
-///
 pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Unit<'a> {
     let strings = StringCache::new(alloc, Arc::clone(&ir_unit.strings));
 

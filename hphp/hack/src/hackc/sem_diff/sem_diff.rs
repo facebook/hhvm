@@ -43,7 +43,6 @@ use crate::helpers::*;
 /// destructured so an error can report where the difference occurred.
 ///
 /// The "interesting" bit happens in `body::compare_bodies()`.
-///
 pub fn sem_diff_unit<'arena>(a_unit: &Unit<'arena>, b_unit: &Unit<'arena>) -> Result<()> {
     let Unit {
         adata: a_adata,

@@ -87,7 +87,6 @@ pub enum TypeDecl<'a> {
 ///
 /// Further traversal into the type of Bar should it too be a type alias
 /// would be at a depth of two.
-///
 pub trait DeclProvider<'d>: std::fmt::Debug {
     /// Get a decl for the given type name and depth.
     /// * `symbol` - the name of the symbol being requested

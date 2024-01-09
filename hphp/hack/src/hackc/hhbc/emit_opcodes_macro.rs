@@ -7,7 +7,7 @@
 ///
 /// ```
 /// #[macros::emit_opcodes]
-/// enum MyCrazyOpcodes<'lifetime> { }
+/// enum MyCrazyOpcodes<'lifetime> {}
 /// ```
 ///
 /// The result will look something like this:
@@ -24,7 +24,6 @@
 /// as well.
 ///
 /// See emit_opcodes::tests::test_basic() for a more detailed example output.
-///
 #[proc_macro_attribute]
 pub fn emit_opcodes(
     _attrs: proc_macro::TokenStream,

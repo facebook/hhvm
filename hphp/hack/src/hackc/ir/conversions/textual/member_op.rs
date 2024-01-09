@@ -46,7 +46,6 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 ///   n1: *HackMixed = load n0.?.p1
 ///   n2 = hack_array_set(n1, k3, k4, v1)
 ///   store n1 <- n2: *HackMixed
-///
 pub(crate) fn write(
     state: &mut FuncState<'_, '_, '_>,
     iid: InstrId,
@@ -281,7 +280,6 @@ impl Pending {
 ///
 /// A member operation will consist of a call to write_base(), 0 or more calls
 /// to write_entry(), and a call to finish().
-///
 struct MemberOpEmitter<'a, 'b, 'c, 'd, L, O>
 where
     L: Iterator<Item = LocalId>,

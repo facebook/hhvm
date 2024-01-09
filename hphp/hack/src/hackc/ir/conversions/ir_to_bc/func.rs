@@ -32,7 +32,6 @@ use crate::strings::StringCache;
 /// BlockArgs (phi-nodes) are handled like a split instruction - by pushing args
 /// onto the stack before the jump and popping them off the stack in receiving
 /// block.
-///
 pub(crate) fn convert_func<'a>(
     mut func: ir::Func<'a>,
     strings: &StringCache<'a>,

@@ -45,7 +45,6 @@ use crate::work_queue::WorkQueue;
 ///
 /// Finally we compare the two sequences to make sure that they're equal or we
 /// return an Err (see `Sequence::compare()`).
-///
 pub(crate) fn compare_bodies<'arena, 'a>(
     path: &CodePath<'_>,
     body_a: &'arena hhbc::Body<'arena>,

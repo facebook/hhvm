@@ -281,7 +281,6 @@ pub(crate) enum Builtin {
     ///   a = ensure_unique(a)
     ///   a[b] = ensure_unique(a[b])
     ///   a[b][] = c
-    ///
     #[decl(fn hack_array_cow_append(...) -> *HackMixed)]
     HackArrayCowAppend,
     /// n-ary array "set".
@@ -294,7 +293,6 @@ pub(crate) enum Builtin {
     ///   a = ensure_unique(a)
     ///   a[b] = ensure_unique(a[b])
     ///   a[b][c] = d
-    ///
     #[decl(fn hack_array_cow_set(...) -> *HackMixed)]
     HackArrayCowSet,
     /// n-ary array "unset".
@@ -307,7 +305,6 @@ pub(crate) enum Builtin {
     ///   a = ensure_unique(a)
     ///   a[b] = ensure_unique(a[b])
     ///   unset a[b][c]
-    ///
     #[decl(fn hack_array_cow_unset(...) -> *HackMixed)]
     HackArrayCowUnset,
     /// n-ary array "get"
@@ -316,7 +313,6 @@ pub(crate) enum Builtin {
     /// the tail value.
     ///
     /// This is equivalent to `a[b][c]`.
-    ///
     #[decl(fn hack_array_get(...) -> *HackMixed)]
     HackArrayGet,
     /// Hack constants.
@@ -330,7 +326,6 @@ pub(crate) enum Builtin {
     ///
     /// This (when null_safe is false) is equivalent to:
     ///   base.?.{dynamic key}
-    ///
     #[decl(fn hack_prop_get(base: *HackMixed, key: *HackMixed, null_safe: int) -> *HackMixed)]
     HackPropGet,
     /// 1-ary prop "set".
@@ -341,7 +336,6 @@ pub(crate) enum Builtin {
     ///
     /// This (when null_safe is false) is equivalent to:
     ///   base.?.{dynamic key} = value
-    ///
     #[decl(fn hack_prop_set(base: *HackMixed, key: *HackMixed, null_safe: int, value: *HackMixed) -> void)]
     HackPropSet,
     /// Hhbc handlers.  See hphp/doc/bytecode.specification for docs.

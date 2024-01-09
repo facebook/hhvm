@@ -21,7 +21,6 @@ use ir_core::LocId;
 /// 2. Create the new empty blocks, then fill them in from the worklist. Order
 ///    doesn't matter because we recorded all BlockIds in step 1.
 /// 3. re-run rpo_sort().
-///
 pub fn split_critical_edges(func: &mut Func<'_>, rpo_sort: bool) {
     let pred_counts = analysis::compute_num_predecessors(
         func,

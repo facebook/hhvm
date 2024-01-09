@@ -10,7 +10,6 @@
 //! The functions in this file (as opposed to formatters.rs) print full (or
 //! more) lines of IR. As a result they mostly will be in the form
 //! `print_thing(thing: &Thing)`.
-//!
 
 use std::fmt::Display;
 use std::fmt::Error;

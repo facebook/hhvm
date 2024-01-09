@@ -44,7 +44,6 @@ use crate::strings::StringCache;
 /// In the future we should probably have a pass that attempts to move common
 /// pushes up to common locations (so if there's a common push in both targets
 /// of a branch, move the push before the branch).
-///
 pub(crate) fn run<'a>(func: Func<'a>, strings: &StringCache<'a>) -> Func<'a> {
     let liveness = analysis::LiveInstrs::compute(&func);
     trace!("LIVENESS: {liveness:?}");

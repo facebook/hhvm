@@ -40,7 +40,6 @@ type Result<T = AstValue, E = AstError> = std::result::Result<T, E>;
 ///    substitution ref we need to keep it in a form that preserves that
 ///    information and pass it up until we determine that it is or isn't
 ///    actually part of a substitution.
-///
 pub(crate) fn write_ast<T: Serialize + fmt::Debug>(
     exports: syn::Path,
     span: Span,

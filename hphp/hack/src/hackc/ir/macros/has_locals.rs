@@ -26,7 +26,6 @@ use crate::simple_type::SimpleType;
 use crate::util::InterestingFields;
 
 /// Builds a HasLocals impl.
-///
 pub(crate) fn build_has_locals(input: TokenStream) -> Result<TokenStream> {
     let input = syn::parse2::<DeriveInput>(input)?;
     match &input.data {

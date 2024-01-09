@@ -235,7 +235,6 @@ fn remove_common_args(func: &mut Func<'_>) {
 /// For example:
 ///   remove_multi([1, 2, 3, 4, 5, 6].iter(), [1, 3].iter())
 /// would return `[1, 3, 5, 6].iter()`
-///
 #[allow(unreachable_code, unused_variables)]
 fn remove_multi<T, I, R>(input: I, remove: R) -> impl Iterator<Item = T>
 where

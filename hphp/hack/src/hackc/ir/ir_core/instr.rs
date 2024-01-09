@@ -85,7 +85,6 @@ pub trait CanThrow {
 /// FIXME: Right now there are no types on these instructions - there really
 /// should be. Q: Should the type be on the Instr itself or embedded in the
 /// Func::instrs table?
-///
 #[derive(Clone, Debug, HasLoc, HasLocals, HasOperands, PartialEq, Eq)]
 pub enum Instr {
     Call(Box<Call>),

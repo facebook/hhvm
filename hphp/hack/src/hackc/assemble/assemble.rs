@@ -1077,7 +1077,6 @@ fn assemble_typed_value<'arena>(
 /// .functionrefs {
 ///    (identifier)+
 /// }
-///
 fn assemble_refs<'arena, 'a, T: 'arena, F>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,

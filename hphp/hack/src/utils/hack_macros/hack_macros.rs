@@ -61,7 +61,6 @@
 ///             Expr((), p.clone(), Expr_::Lvar(Lid(p.clone(), (0, "$bar")))),
 ///         )))
 ///     )
-///
 #[macro_export]
 macro_rules! hack_expr {
     ($($input:tt)*) => {

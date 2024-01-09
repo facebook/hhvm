@@ -33,7 +33,6 @@ const STACK_SIZE: usize = 16 * RED_ZONE; // 2MiB
 /// overflow. The called lambda continues to run on the same thread even
 /// when the stack is grown.
 /// ```
-///
 
 pub fn maybe_grow<T>(f: impl FnOnce() -> T) -> T {
     let sp = psm::stack_pointer();

@@ -40,7 +40,6 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 /// Classes are defined as:
 ///
 /// type NAME = [ properties*; ]
-///
 pub(crate) fn write_class(
     txf: &mut TextualFile<'_>,
     unit_state: &mut UnitState,

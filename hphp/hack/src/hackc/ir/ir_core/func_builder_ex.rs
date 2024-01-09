@@ -28,7 +28,6 @@ pub trait FuncBuilderEx {
     ///         f()
     ///         jmp false_br
     ///     false_br:
-    ///
     fn emit_if_then(&mut self, pred: ValueId, loc: LocId, f: impl FnOnce(&mut Self));
 
     /// Build a conditional:

@@ -1196,7 +1196,6 @@ impl FuncBuilder<'_, '_> {
     ///   foo(1, 2, 3, 4)
     ///
     /// If `this` is Some(_) then the curry will be a virtual call.
-    ///
     pub(crate) fn write_alloc_curry(
         &mut self,
         name: FunctionName,

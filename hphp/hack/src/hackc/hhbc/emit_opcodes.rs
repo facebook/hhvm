@@ -370,7 +370,6 @@ fn convert_imm_type(imm: &ImmType, lifetime: &Lifetime) -> TokenStream {
 ///     pub fn myc<'a>(arg1: i64, arg2: i64) -> InstrSeq<'a> {
 ///         instr(Instruct::Opcode(Opcode::MyC(arg1, arg2)))
 ///     }
-///
 pub fn define_instr_seq_helpers(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenStream> {
     // Foo => bar
     // Foo | Bar | Baz => default

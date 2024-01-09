@@ -50,7 +50,6 @@ type TokenIter = std::iter::Peekable<IntoIter>;
 ///
 /// See bottom of this file for tests which show examples of what code various
 /// patterns translate into.
-///
 #[cfg(not(test))]
 #[proc_macro]
 #[proc_macro_error::proc_macro_error]

@@ -14,13 +14,13 @@ use crate::typed_value::TypedValue;
 /// Attributes with a name from [naming_special_names::user_attributes] and
 /// a series of arguments.  Emitter code can match on an attribute as follows:
 /// ```
-///   use naming_special_names::user_attributes as ua;
-///   fn is_memoized(attr: &Attribute) -> bool {
-///      attr.is(ua::memoized)
-///   }
-///   fn has_dynamically_callable(attrs: &Vec<Attribute>) {
-///       attrs.iter().any(|a| a.name == ua::DYNAMICALLY_CALLABLE)
-///   }
+/// use naming_special_names::user_attributes as ua;
+/// fn is_memoized(attr: &Attribute) -> bool {
+///     attr.is(ua::memoized)
+/// }
+/// fn has_dynamically_callable(attrs: &Vec<Attribute>) {
+///     attrs.iter().any(|a| a.name == ua::DYNAMICALLY_CALLABLE)
+/// }
 /// ```
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash, Serialize)]

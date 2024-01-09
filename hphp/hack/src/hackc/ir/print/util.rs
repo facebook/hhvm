@@ -37,7 +37,6 @@ where
     ///
     /// is that in the first example the parentheses are always printed and in
     /// the second they're only printed if the iter is non-empty.
-    ///
     pub fn new(
         prefix: &'a str,
         infix: &'a str,

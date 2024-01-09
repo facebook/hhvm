@@ -30,7 +30,6 @@
 ///
 /// See print_opcode_derive::tests::test_basic() for a more detailed example
 /// output.
-///
 #[proc_macro_derive(PrintOpcode, attributes(print_opcode))]
 pub fn print_opcode_macro(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     match print_opcode_impl::build_print_opcode(input.into(), hhbc_gen::opcode_data()) {

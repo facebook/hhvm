@@ -32,7 +32,6 @@ use crate::context::LabelMap;
 ///       (section 5)
 ///     }
 ///     (section 6)
-///
 #[derive(Clone)]
 pub(crate) struct Sequence {
     pub kind: SequenceKind,

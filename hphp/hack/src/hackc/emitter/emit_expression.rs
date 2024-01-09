@@ -5201,7 +5201,6 @@ pub fn emit_set_range_expr<'a, 'arena, 'decl>(
 ///   Dim Warn EI:3
 ///   # Section 3, indexing the array using the value at stack position 0 (EC:0)
 ///   QueryM 1 CGet EC:0
-///
 fn emit_base<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,

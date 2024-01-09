@@ -13,7 +13,6 @@
 //! struct FmtThing { .. }
 //! impl Display for FmtThing { .. }
 //! ```
-//!
 
 use std::fmt::Display;
 use std::fmt::Formatter;

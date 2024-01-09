@@ -52,7 +52,6 @@ use crate::sequence::SequenceKind;
 ///
 /// The SSA pass is responsible for converting the SetVar and GetVar
 /// instructions into actual SSA form.
-///
 pub(crate) fn convert_sequence<'a, 'b>(ctx: &mut Context<'a, 'b>, addr: Addr) {
     assert_eq!(ctx.stack.len(), 0);
     let seq = ctx.addr_to_seq[&addr].clone();

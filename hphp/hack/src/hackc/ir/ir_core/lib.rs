@@ -25,7 +25,6 @@
 //!
 //! Funcs are composed of instructions (see `Instr` in instr.rs) and basic
 //! blocks (see `Block` in block.rs).
-//!
 
 pub mod block;
 pub mod class;

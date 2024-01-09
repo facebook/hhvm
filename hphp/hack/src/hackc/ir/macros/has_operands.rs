@@ -29,7 +29,6 @@ use crate::simple_type::SimpleType;
 use crate::util::InterestingFields;
 
 /// Builds a HasOperands impl.
-///
 pub(crate) fn build_has_operands(input: TokenStream) -> Result<TokenStream> {
     let input = syn::parse2::<DeriveInput>(input)?;
     match &input.data {

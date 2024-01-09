@@ -59,7 +59,6 @@ pub trait FromUsize {
 ///   impl PartialOrd for NAME;
 ///
 ///   impl From<NAME> for usize;
-///
 #[macro_export]
 macro_rules! newtype_int {
     ($name:ident, $num:ident, $hashmap:ident, $hashset:ident $(, $derive:ident)*) => {

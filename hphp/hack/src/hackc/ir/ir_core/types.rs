@@ -147,7 +147,6 @@ impl BaseType {
 ///   as "?int" would have:
 ///       ty: BaseType::Int,
 ///       modifiers: TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::Nullable
-///
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct EnforceableType {
     pub ty: BaseType,

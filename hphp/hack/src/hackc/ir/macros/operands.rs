@@ -45,7 +45,6 @@ use syn::Variant;
 /// //  - Otherwise you can specify `#[has_loc(n)]` where `n` is the index of the
 /// //    field to call `.loc_id()` on.  `#[has_loc(n)]` can also be used on the
 /// //    whole enum to provide a default index.
-///
 pub(crate) fn build_has_operands(input: TokenStream) -> Result<TokenStream> {
     let input = syn::parse2::<DeriveInput>(input)?;
     match &input.data {

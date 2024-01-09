@@ -1099,7 +1099,7 @@ class ReflectionClass implements Reflector {
     $this->name = $name;
   }
 
-  <<__Native>>
+  <<__Native("NoRecording")>>
   private function __init(string $name)[]: string;
 
   /**

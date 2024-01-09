@@ -384,7 +384,7 @@ class DOMCdataSection extends DOMText {
  */
 class DOMDocument extends DOMNode {
 
-  <<__Native>>
+  <<__Native("NoRecording")>>
   public function __construct(?string $version = null, ?string $encoding = null): void;
 
   /**
@@ -602,7 +602,7 @@ class DOMDocument extends DOMNode {
   /**
    * Internal helper function for load()/loadXML()
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   private function _load(string $arg, int $options,
                          bool $isFile): bool;
 

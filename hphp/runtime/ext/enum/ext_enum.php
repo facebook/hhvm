@@ -19,7 +19,7 @@ abstract class BuiltinEnum<+T as arraykey> {
    *
    * @return dict['CONST_NAME' => $value, ....]
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function getValues()[]: darray<string, T>;
 
   /**
@@ -28,13 +28,13 @@ abstract class BuiltinEnum<+T as arraykey> {
    *
    * @return dict[$value => 'CONST_NAME', ....]
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function getNames()[]: darray<T, string>;
 
   /**
    * Returns whether or not the value is defined as a constant.
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function isValid(mixed $value)[]: bool;
 
   /**
@@ -124,7 +124,7 @@ abstract class BuiltinEnumClass<+T> extends BuiltinAbstractEnumClass {
    *
    * @return array ('CONST_NAME' => $value, ....)
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function getValues()[write_props]: darray<string, T>;
 
   /* Has the same effects as getValues, thus [write_props] */

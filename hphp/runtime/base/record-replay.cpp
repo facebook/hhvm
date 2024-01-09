@@ -42,6 +42,7 @@
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
+#include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP::rr {
 
@@ -231,11 +232,13 @@ String serialize(const Class* value) {
 
 template<>
 String serialize(ObjectData* value) {
-  if (value != nullptr && value->instanceof("Generator")) {
-    return serialize(init_null());
-  } else {
-    return serialize(Variant{value});
+  if (value != nullptr) {
+    const auto ndi{value->getVMClass()->getNativeDataInfo()};
+    if (ndi && ndi->ctor_throws) {
+      return serialize(init_null());
+    }
   }
+  return serialize(Variant{value});
 }
 
 template<>
@@ -250,7 +253,7 @@ String serialize(const ObjectArg& value) {
 
 template<>
 String serialize(const ObjectRet& value) {
-  return serialize(Variant{value.get()});
+  return serialize(value.get());
 }
 
 template<>

@@ -34,13 +34,13 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/init-fini-node.h"
-#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/php-globals.h"
-#include "hphp/runtime/base/replayer.h"
+#include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-resource.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -624,15 +624,20 @@ void Recorder::onNativeCallArg(const String& arg) {
 void Recorder::onNativeCallEntry(NativeFunction ptr) {
   static LoggerHook loggerHook;
   m_nativeCalls.emplace_back().ptr = ptr;
+  m_nativeCalls.back().flags = stackLimitAndSurprise() & kSurpriseFlagMask;
   g_context->addStdoutHook(getStdoutHook());
   Logger::SetThreadHook(&loggerHook);
   m_enabled = false;
-
-  // TODO Disabling memory threshold until surprise flags are handled
-  tl_heap->setMemThresholdCallback(std::numeric_limits<std::size_t>::max());
 }
 
 void Recorder::onNativeCallExit() {
+  m_nativeCalls.back().flags ^= stackLimitAndSurprise() & kSurpriseFlagMask;
+  if (UNLIKELY(getSurpriseFlag(SurpriseFlag::SignaledFlag))) {
+    if (const auto signum{RID().getAndClearNextPendingSignal()}) {
+      m_nativeCalls.back().flags |= signum;
+      RID().sendSignal(signum);
+    }
+  }
   g_context->removeStdoutHook(getStdoutHook());
   Logger::SetThreadHook(nullptr);
   m_enabled = true;
@@ -688,9 +693,9 @@ std::vector<char> Recorder::toRecording() const {
   VecInit nativeCalls{numNativeCall};
   DictInit nativeFuncIds{numNativeCall};
   for (std::size_t i{0}; i < numNativeCall; i++) {
-    const auto [ptr, stdouts, args, ret, exc, wh]{m_nativeCalls.at(i)};
+    const auto [ptr, flags, stdouts, args, ret, exc, wh]{m_nativeCalls.at(i)};
     const auto id{std::bit_cast<std::int64_t>(ptr)};
-    nativeCalls.append(make_vec_array(id, stdouts, args, ret, exc, wh));
+    nativeCalls.append(make_vec_array(id, flags, stdouts, args, ret, exc, wh));
     nativeFuncIds.set(String{getNativeFuncName(ptr)}, id);
   }
   VecInit nativeEvents{m_nativeEvents.size()};

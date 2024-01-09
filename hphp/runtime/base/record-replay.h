@@ -75,6 +75,7 @@ struct MethodToFunc<m> {
 
 struct NativeCall {
   NativeFunction ptr{nullptr};
+  std::int64_t flags{0};
   Array stdouts{Array::CreateVec()};
   Array args{Array::CreateVec()};
   String ret{empty_string()};

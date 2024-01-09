@@ -2533,8 +2533,10 @@ function should_skip_test_simple(
     return 'skip-only_running_NON_remote_executable_tests';
   }
 
-  if (($options->record || $options->replay) && file_exists($test . ".norecord")) {
-    return 'skip-record';
+  if ($options->record || $options->replay) {
+    if (find_debug_config($test, 'hphpd.ini')) return 'skip-debugger';
+    if (file_exists("$test.norecord")) return 'skip-record';
+    if (file_exists("$test.verify")) return 'skip-verify';
   }
 
   return null;

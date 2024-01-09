@@ -2421,7 +2421,6 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
           (type == VariableSerializer::Type::Serialize ||
            type == VariableSerializer::Type::Internal ||
            type == VariableSerializer::Type::APCSerialize ||
-           type == VariableSerializer::Type::DebuggerSerialize ||
            type == VariableSerializer::Type::DebuggerDump)) {
         auto const cname = obj->getProp(
           nullctx,

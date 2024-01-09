@@ -37,11 +37,13 @@
 #include "hphp/runtime/base/object-iterator.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/req-ptr.h"
+#include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-resource.h"
@@ -70,7 +72,7 @@ std::string Replayer::getEntryPoint() {
 }
 
 FactsStore* Replayer::onGetFactsForRequest() {
-  return getFactsStore();
+  return get().m_factsStore.empty() ? nullptr : getFactsStore();
 }
 
 bool Replayer::onHasReceived() {
@@ -139,14 +141,15 @@ void Replayer::onRuntimeOptionLoad(IniSettingMap& ini, Hdf& hdf,
   }
   for (auto i{recording[String{"nativeCalls"}].asCArrRef().begin()}; i; ++i) {
     const auto call{i.second().asCArrRef()};
-    always_assert_flog(call.size() == 6, "{}", call.size());
+    always_assert_flog(call.size() == 7, "{}", call.size());
     replayer.m_nativeCalls.push_back(NativeCall{
       std::bit_cast<NativeFunction>(call[0].asInt64Val()),
-      call[1].asCArrRef(),
+      call[1].asInt64Val(),
       call[2].asCArrRef(),
-      call[3].asCStrRef(),
+      call[3].asCArrRef(),
       call[4].asCStrRef(),
-      static_cast<std::uint8_t>(call[5].asInt64Val()),
+      call[5].asCStrRef(),
+      static_cast<std::uint8_t>(call[6].asInt64Val()),
     });
   }
   for (auto i{recording[String{"nativeEvents"}].asCArrRef().begin()}; i; ++i) {
@@ -318,16 +321,21 @@ void Replayer::nativeArg(const String& recordedArg, const Class* arg) {
 }
 
 namespace {
-  // TODO This is an incomplete attempt to preserve references in nested objects
   void updateObject(ObjectData* from, ObjectData* to) {
     IteratePropMemOrder(
       from,
-      [to](Slot slot, const Class::Prop&, tv_rval value) {
+      [from, to](Slot slot, const Class::Prop&, tv_rval value) {
         const auto obj{value.val().pobj};
+        auto val{to->propLvalAtOffset(slot)};
         if (value.type() == DataType::Object && !obj->isCollection()) {
-          updateObject(obj, to->propLvalAtOffset(slot).val().pobj);
+          updateObject(obj, val.val().pobj);
+        } else if (value.type() == KindOfString && val.type() == KindOfObject) {
+          const auto fromCls{value.val().pstr};
+          const auto toCls{val.val().pobj->getClassName().get()};
+          always_assert_flog(fromCls->same(toCls), "{} != {}", fromCls, toCls);
+          tvSet(val.tv(), from->propLvalAtOffset(slot));
         } else {
-          tvSet(value.tv(), to->propLvalAtOffset(slot));
+          tvSet(value.tv(), val);
         }
         return false;
       },
@@ -342,8 +350,8 @@ namespace {
 template<>
 void Replayer::nativeArg(const String& recordedArg, ObjectData* arg) {
   const auto variant{unserialize<Variant>(recordedArg)};
-  if (variant.isNull()) {
-    return always_assert(serialize(Variant{arg}).isNull());
+  if (!variant.isObject()) {
+    return always_assert(serialize(arg) == recordedArg);
   }
   const auto object{variant.asCObjRef()};
   const auto cls{object->getVMClass()};
@@ -895,6 +903,10 @@ NativeCall Replayer::popNativeCall(NativeFunction ptr) {
   const auto& recordName{m_nativeFuncIds.at(call.ptr)};
   const auto recordPtr{getNativeFuncPtr(recordName)};
   always_assert_flog(recordPtr == ptr, "{} != {}", recordName, replayName);
+  stackLimitAndSurprise() ^= call.flags & kSurpriseFlagMask;
+  if (const auto signum{call.flags & ~kSurpriseFlagMask}; UNLIKELY(signum)) {
+    RID().sendSignal(signum);
+  }
   for (auto i{call.stdouts.begin()}; i; ++i) {
     g_context->write(i.second().asCStrRef());
   }

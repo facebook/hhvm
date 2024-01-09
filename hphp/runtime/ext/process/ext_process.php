@@ -109,7 +109,7 @@ function pcntl_setpriority(int $priority,
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function pcntl_signal(int $signo,
                       mixed $handler,
                       bool $restart_syscalls = true): bool;
@@ -297,5 +297,5 @@ function pcntl_wtermsig(int $status): int;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function pcntl_signal_dispatch(): bool;

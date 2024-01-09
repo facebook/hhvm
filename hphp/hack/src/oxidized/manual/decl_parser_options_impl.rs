@@ -25,6 +25,7 @@ impl DeclParserOptions {
             php5_compat_mode: false,
             hhvm_compat_mode: false,
             keep_user_attributes: false,
+            include_assignment_values: false,
         }
     }
 }

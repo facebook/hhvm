@@ -654,12 +654,14 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::ShallowClassConst<R> {
             name,
             ty,
             refs,
+            value,
         } = self;
         arena.alloc(obr::shallow_decl_defs::ShallowClassConst {
             abstract_: *kind,
             name: name.to_oxidized(arena),
             type_: ty.to_oxidized(arena),
             refs: refs.to_oxidized(arena),
+            value: value.as_deref().to_oxidized(arena),
         })
     }
 }
@@ -839,10 +841,11 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::ConstDecl<R> {
     type Output = &'a obr::shallow_decl_defs::ConstDecl<'a>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
-        let Self { pos, ty } = self;
+        let Self { pos, ty, value } = self;
         arena.alloc(obr::shallow_decl_defs::ConstDecl {
             pos: pos.to_oxidized(arena),
             type_: ty.to_oxidized(arena),
+            value: value.as_deref().to_oxidized(arena),
         })
     }
 }

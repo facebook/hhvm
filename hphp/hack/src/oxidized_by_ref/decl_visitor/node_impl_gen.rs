@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bcfa81b3cabc8f48d7d992f58eb6d264>>
+// @generated SignedSource<<fceb845bbf132c7660e6b3207f893260>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -67,6 +67,7 @@ impl<'a> Node<'a> for ShallowClassConst<'a> {
                 name: ref __binding_1,
                 type_: ref __binding_2,
                 refs: ref __binding_3,
+                value: ref __binding_4,
             } => {
                 {
                     __binding_0.accept(v)
@@ -77,7 +78,10 @@ impl<'a> Node<'a> for ShallowClassConst<'a> {
                 {
                     __binding_2.accept(v)
                 }
-                { __binding_3.accept(v) }
+                {
+                    __binding_3.accept(v)
+                }
+                { __binding_4.accept(v) }
             }
         }
     }
@@ -799,11 +803,15 @@ impl<'a> Node<'a> for ConstDecl<'a> {
             ConstDecl {
                 pos: ref __binding_0,
                 type_: ref __binding_1,
+                value: ref __binding_2,
             } => {
                 {
                     __binding_0.accept(v)
                 }
-                { __binding_1.accept(v) }
+                {
+                    __binding_1.accept(v)
+                }
+                { __binding_2.accept(v) }
             }
         }
     }

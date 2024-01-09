@@ -12,7 +12,8 @@
        sc_consts =
        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
           scc_name = ([4:13-14], "X");
-          scc_type = (Rhint ([4:9-12]), (Tprim Tint)); scc_refs = [] }
+          scc_type = (Rhint ([4:9-12]), (Tprim Tint)); scc_refs = [];
+          scc_value = None }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];

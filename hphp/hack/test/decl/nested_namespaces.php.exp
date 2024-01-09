@@ -101,6 +101,6 @@
         cd_type =
         (Rhint ([24:9-33]),
          (Tapply (([24:9-33], "\\MyNamespace\\MyVeryInnerNamespaceType"), 
-            [])))
-        }))
+            [])));
+        cd_value = None }))
   ]

@@ -100,24 +100,30 @@ NULL
 NULL
 === Consts
 vec(2) {
-  dict(2) {
+  dict(3) {
     ["name"]=>
     string(9) "MY_CONST1"
     ["type"]=>
     string(6) "string"
+    ["value"]=>
+    string(5) "'abc'"
   }
-  dict(2) {
+  dict(3) {
     ["name"]=>
     string(9) "MY_CONST2"
     ["type"]=>
     string(3) "int"
+    ["value"]=>
+    string(1) "1"
   }
 }
-dict(2) {
+dict(3) {
   ["name"]=>
   string(9) "MY_CONST1"
   ["type"]=>
   string(6) "string"
+  ["value"]=>
+  string(5) "'abc'"
 }
 NULL
 NULL
@@ -244,24 +250,30 @@ NULL
 NULL
 === File Consts
 vec(2) {
-  dict(2) {
+  dict(3) {
     ["name"]=>
     string(16) "MY_GLOBAL_CONST2"
     ["type"]=>
     string(6) "string"
+    ["value"]=>
+    string(5) "'one'"
   }
-  dict(2) {
+  dict(3) {
     ["name"]=>
     string(16) "MY_GLOBAL_CONST1"
     ["type"]=>
     string(3) "int"
+    ["value"]=>
+    string(1) "1"
   }
 }
-dict(2) {
+dict(3) {
   ["name"]=>
   string(16) "MY_GLOBAL_CONST1"
   ["type"]=>
   string(3) "int"
+  ["value"]=>
+  string(1) "1"
 }
 NULL
 NULL

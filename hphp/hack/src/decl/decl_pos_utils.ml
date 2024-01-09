@@ -383,6 +383,7 @@ struct
       scc_name = positioned_id scc.scc_name;
       scc_type = ty scc.scc_type;
       scc_refs = scc.scc_refs;
+      scc_value = scc.scc_value;
     }
 
   and shallow_typeconst stc =

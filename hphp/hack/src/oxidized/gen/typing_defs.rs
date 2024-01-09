@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8fe33c08163af3c6a002976e823a9f7f>>
+// @generated SignedSource<<b08d45e342feb031f7cceeb2fa66525b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -110,6 +110,7 @@ pub struct ClassConstRef(pub ClassConstFrom, pub String);
 pub struct ConstDecl {
     pub pos: pos_or_decl::PosOrDecl,
     pub type_: Ty,
+    pub value: Option<String>,
 }
 
 #[derive(

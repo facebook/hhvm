@@ -80,6 +80,7 @@ end
 type const_decl = {
   cd_pos: Pos_or_decl.t;
   cd_type: decl_ty;
+  cd_value: string option;
 }
 [@@deriving show, eq]
 

@@ -83,6 +83,7 @@ type shallow_class_const = {
   scc_name: Typing_defs.pos_id;
   scc_type: decl_ty;
   scc_refs: Typing_defs.class_const_ref list;
+  scc_value: string option;
 }
 [@@deriving eq, show]
 

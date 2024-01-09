@@ -102,6 +102,7 @@ File: dict [
         dict [
           'name' => 'MY_CONSTANT',
           'type' => 'string',
+          'value' => '\'abc\'',
         ],
       ],
       'props' => 

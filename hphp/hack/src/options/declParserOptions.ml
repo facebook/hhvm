@@ -15,6 +15,7 @@ type t = {
   php5_compat_mode: bool;
   hhvm_compat_mode: bool;
   keep_user_attributes: bool;
+  include_assignment_values: bool;
 }
 [@@deriving show]
 
@@ -30,6 +31,7 @@ let from_parser_options popt =
     php5_compat_mode = false;
     hhvm_compat_mode = false;
     keep_user_attributes = popt.po_keep_user_attributes;
+    include_assignment_values = false;
   }
 
 let default = from_parser_options ParserOptions.default

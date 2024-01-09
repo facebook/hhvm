@@ -29,7 +29,7 @@
               [(Rhint ([4:7-8]), (Tapply (([4:7-8], "\\A"), [])));
                 (Rhint ([4:3-6]), (Tprim Tint))]
               )));
-          scc_refs = [] };
+          scc_refs = []; scc_value = None };
          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([5:10-11], "Y");
            scc_type =
@@ -38,7 +38,7 @@
                [(Rhint ([5:10-11]), (Tapply (([5:10-11], "\\A"), [])));
                  (Rhint ([5:3-9]), (Tprim Tstring))]
                )));
-           scc_refs = [] }
+           scc_refs = []; scc_value = None }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
@@ -70,15 +70,15 @@
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([9:3-4], "X");
            scc_type = (Rwitness_from_decl ([9:7-8]), (Tprim Tint));
-           scc_refs = [] };
+           scc_refs = []; scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([10:3-4], "Y");
             scc_type = (Rwitness_from_decl ([10:7-14]), (Tprim Tstring));
-            scc_refs = [] };
+            scc_refs = []; scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([11:3-4], "Z");
             scc_type = (Rwitness_from_decl ([11:3-4]), Tany);
-            scc_refs = [((Typing_defs.From "\\B"), "X")] }
+            scc_refs = [((Typing_defs.From "\\B"), "X")]; scc_value = None }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
@@ -91,19 +91,21 @@
   ("\\I",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [14:1-22];
-        cd_type = (Rhint ([14:7-10]), (Tprim Tint)) }));
+        cd_type = (Rhint ([14:7-10]), (Tprim Tint)); cd_value = None }));
   ("\\S",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [14:1-22];
-        cd_type = (Rhint ([14:7-10]), (Tprim Tint)) }));
+        cd_type = (Rhint ([14:7-10]), (Tprim Tint)); cd_value = None }));
   ("\\J",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [15:1-18];
-        cd_type = (Rwitness_from_decl ([15:9-10]), (Tprim Tint)) }));
+        cd_type = (Rwitness_from_decl ([15:9-10]), (Tprim Tint));
+        cd_value = None }));
   ("\\T",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [15:1-18];
-        cd_type = (Rwitness_from_decl ([15:14-17]), (Tprim Tstring)) }));
+        cd_type = (Rwitness_from_decl ([15:14-17]), (Tprim Tstring));
+        cd_value = None }));
   ("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -118,18 +120,20 @@
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([18:13-15], "IC");
-           scc_type = (Rhint ([18:9-12]), (Tprim Tint)); scc_refs = [] };
+           scc_type = (Rhint ([18:9-12]), (Tprim Tint)); scc_refs = [];
+           scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([18:21-23], "SC");
-            scc_type = (Rhint ([18:9-12]), (Tprim Tint)); scc_refs = [] };
+            scc_type = (Rhint ([18:9-12]), (Tprim Tint)); scc_refs = [];
+            scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([19:9-11], "JC");
             scc_type = (Rwitness_from_decl ([19:12-13]), (Tprim Tint));
-            scc_refs = [] };
+            scc_refs = []; scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([19:15-17], "TC");
             scc_type = (Rwitness_from_decl ([19:20-23]), (Tprim Tstring));
-            scc_refs = [] }
+            scc_refs = []; scc_value = None }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];

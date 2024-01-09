@@ -356,6 +356,7 @@ impl<R: Reason> From<&obr::shallow_decl_defs::ShallowClassConst<'_>>
             name: scc.name.into(),
             ty: scc.type_.into(),
             refs: slice(scc.refs),
+            value: scc.value.map(Into::into),
         }
     }
 }
@@ -513,6 +514,7 @@ impl<R: Reason> From<&obr::shallow_decl_defs::ConstDecl<'_>> for shallow::ConstD
         Self {
             pos: x.pos.into(),
             ty: x.type_.into(),
+            value: x.value.map(Into::into),
         }
     }
 }

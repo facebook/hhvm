@@ -7,7 +7,7 @@
   ("\\Y",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [5:1-17];
-        cd_type = (Rhint ([5:7-10]), (Tprim Tint)) }));
+        cd_type = (Rhint ([5:7-10]), (Tprim Tint)); cd_value = None }));
   ("\\f",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;

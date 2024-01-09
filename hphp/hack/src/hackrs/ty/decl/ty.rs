@@ -604,6 +604,7 @@ pub struct ClassConstRef(pub ClassConstFrom, pub Symbol);
 pub struct ConstDecl<R: Reason> {
     pub pos: R::Pos,
     pub ty: Ty<R>,
+    pub value: Option<String>,
 }
 
 walkable!(ConstDecl<R> => [ty]);

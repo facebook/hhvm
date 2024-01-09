@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<52f19c9124fcb28239b0dfff931d0349>>
+// @generated SignedSource<<66ec320f6470a0eb5c8e1ed107840e23>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -54,6 +54,10 @@ pub struct ShallowClassConst<'a> {
     /// We don't yet have a similar mechanism for top-level const initializers.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub refs: &'a [typing_defs::ClassConstRef<'a>],
+    /// If DeclParserConfig option include_assignment_values is true,
+    /// The string value for the constant
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub value: Option<&'a str>,
 }
 impl<'a> TrivialDrop for ShallowClassConst<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ShallowClassConst<'arena>);

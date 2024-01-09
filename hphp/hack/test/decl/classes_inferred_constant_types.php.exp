@@ -13,19 +13,19 @@
        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
           scc_name = ([4:9-12], "FOO");
           scc_type = (Rwitness_from_decl ([4:15-17]), (Tprim Tint));
-          scc_refs = [] };
+          scc_refs = []; scc_value = None };
          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([5:9-12], "BAR");
            scc_type = (Rwitness_from_decl ([5:15-16]), (Tprim Tint));
-           scc_refs = [] };
+           scc_refs = []; scc_value = None };
          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([6:9-12], "BAZ");
            scc_type = (Rwitness_from_decl ([6:15-17]), (Tprim Tint));
-           scc_refs = [] };
+           scc_refs = []; scc_value = None };
          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([7:9-12], "QUX");
            scc_type = (Rwitness_from_decl ([7:16-19]), (Tprim Tstring));
-           scc_refs = [] }
+           scc_refs = []; scc_value = None }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = [];

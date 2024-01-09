@@ -1376,6 +1376,47 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         Some(self.alloc(aast::Expr((), pos, expr_)))
     }
 
+    fn node_to_str(&self, node: Node<'a>, semicolon: Node<'a>) -> &'a str {
+        let expr = self.node_to_expr(node);
+        match expr {
+            // Only some nodes have a simple translate to an expression
+            // Since some nodes *are* expressions, we prefer to write the
+            // to_string logic once for expressions
+            Some(expr) => self.expr_to_str(expr),
+
+            // This is usually complex shapes / vec / dict etc. and the
+            // actual value is NOT in the nodes so we have to yank the text
+            None => self
+                .str_from_utf8(self.source_text_at_pos(Pos::from_lnum_bol_offset(
+                    self.arena,
+                    self.filename,
+                    self.get_pos(node).to_start_and_end_lnum_bol_offset().1,
+                    self.get_pos(semicolon).to_start_and_end_lnum_bol_offset().0,
+                )))
+                .trim(),
+        }
+    }
+
+    fn expr_to_str(&self, expr: &aast::Expr<'a, (), ()>) -> &'a str {
+        match expr.2 {
+            // Simple literals (99% of the cases)
+            aast::Expr_::Int(s) => s,
+            aast::Expr_::Float(s) => s,
+            aast::Expr_::String(s) => {
+                // Always use single quotes for strings
+                bumpalo::format!(in self.arena, "'{}'", s).into_bump_str()
+            }
+            aast::Expr_::True => "true",
+            aast::Expr_::False => "false",
+            aast::Expr_::Null => "null",
+
+            // Default to actual text
+            // ... VariableExpression, BinaryExpression, SubscriptExpression,
+            //     FunctionCallExpression, ConditionalExpression ...
+            _ => self.str_from_utf8(self.source_text_at_pos(expr.1)),
+        }
+    }
+
     fn node_to_non_ret_ty(&self, node: Node<'a>) -> Option<&'a Ty<'a>> {
         self.node_to_ty_(node, false)
     }
@@ -3947,12 +3988,18 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                             let ty = ty
                                 .or_else(|| self.infer_const(name, initializer))
                                 .unwrap_or(TANY);
+
                             Some(Node::Const(self.alloc(
                                 shallow_decl_defs::ShallowClassConst {
                                     abstract_,
                                     name: id.into(),
                                     type_: ty,
                                     refs,
+                                    value: if self.opts.include_assignment_values {
+                                        Some(self.node_to_str(initializer, semicolon))
+                                    } else {
+                                        None
+                                    },
                                 },
                             )))
                         }
@@ -3978,8 +4025,18 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                                     .node_to_ty(hint)
                                     .or_else(|| self.infer_const(name, initializer))
                                     .unwrap_or_else(|| self.tany_with_pos(id_pos));
+
+                                let const_decl = ConstDecl {
+                                    pos,
+                                    type_: ty,
+                                    value: if self.opts.include_assignment_values {
+                                        Some(self.node_to_str(initializer, semicolon))
+                                    } else {
+                                        None
+                                    },
+                                };
                                 let this = Rc::make_mut(&mut self.state);
-                                this.add_const(id, this.alloc(ConstDecl { pos, type_: ty }));
+                                this.add_const(id, this.alloc(const_decl));
                             }
                         }
                         _ => {}
@@ -4972,7 +5029,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         name: Self::Output,
         _equal: Self::Output,
         value: Self::Output,
-        _semicolon: Self::Output,
+        semicolon: Self::Output,
     ) -> Self::Output {
         let refs = self.stop_accumulating_const_refs();
         let id = match self.expect_name(name) {
@@ -4988,6 +5045,11 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                     .infer_const(name, value)
                     .unwrap_or_else(|| self.tany_with_pos(id.0)),
                 refs,
+                value: if self.opts.include_assignment_values {
+                    Some(self.node_to_str(value, semicolon))
+                } else {
+                    None
+                },
             }),
         )
     }
@@ -5160,8 +5222,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         modifiers: Self::Output,
         type_: Self::Output,
         name: Self::Output,
-        _initializer: Self::Output,
-        _semicolon: Self::Output,
+        initializer: Self::Output,
+        semicolon: Self::Output,
     ) -> Self::Output {
         let refs = self.stop_accumulating_const_refs();
         let name = match self.expect_name(name) {
@@ -5203,6 +5265,11 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             name: name.into(),
             type_,
             refs,
+            value: if self.opts.include_assignment_values {
+                Some(self.node_to_str(initializer, semicolon))
+            } else {
+                None
+            },
         }))
     }
 

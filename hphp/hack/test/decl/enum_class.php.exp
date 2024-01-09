@@ -38,7 +38,7 @@
                [(Rhint ([6:7-8]), (Tapply (([6:7-8], "\\A"), [])));
                  (Rhint ([6:3-6]), (Tprim Tint))]
                )));
-           scc_refs = [] };
+           scc_refs = []; scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([7:7-8], "Y");
             scc_type =
@@ -47,7 +47,7 @@
                 [(Rhint ([7:7-8]), (Tapply (([7:7-8], "\\A"), [])));
                   (Rhint ([7:3-6]), (Tprim Tint))]
                 )));
-            scc_refs = [((Typing_defs.From "\\B"), "Y")] };
+            scc_refs = [((Typing_defs.From "\\B"), "Y")]; scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([8:7-8], "Z");
             scc_type =
@@ -56,7 +56,7 @@
                 [(Rhint ([8:7-8]), (Tapply (([8:7-8], "\\A"), [])));
                   (Rhint ([8:3-6]), (Tprim Tint))]
                 )));
-            scc_refs = [((Typing_defs.From "\\B"), "Y")] };
+            scc_refs = [((Typing_defs.From "\\B"), "Y")]; scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([9:7-8], "W");
             scc_type =
@@ -65,7 +65,7 @@
                 [(Rhint ([9:7-8]), (Tapply (([9:7-8], "\\A"), [])));
                   (Rhint ([9:3-6]), (Tprim Tint))]
                 )));
-            scc_refs = [((Typing_defs.From "\\C"), "w")] }
+            scc_refs = [((Typing_defs.From "\\C"), "w")]; scc_value = None }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
@@ -108,7 +108,7 @@
                [(Rhint ([12:12-13]), (Tapply (([12:12-13], "\\B"), [])));
                  (Rhint ([12:3-11]), (Tprim Tarraykey))]
                )));
-           scc_refs = [] }
+           scc_refs = []; scc_value = None }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];

@@ -12,10 +12,12 @@
        sc_consts =
        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
           scc_name = ([5:15-20], "MAX32");
-          scc_type = (Rhint ([5:11-14]), (Tprim Tint)); scc_refs = [] };
+          scc_type = (Rhint ([5:11-14]), (Tprim Tint)); scc_refs = [];
+          scc_value = None };
          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([6:15-20], "MAX64");
-           scc_type = (Rhint ([6:11-14]), (Tprim Tint)); scc_refs = [] }
+           scc_type = (Rhint ([6:11-14]), (Tprim Tint)); scc_refs = [];
+           scc_value = None }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
@@ -34,10 +36,12 @@
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([11:17-22], "MAX32");
-           scc_type = (Rhint ([11:13-16]), (Tprim Tint)); scc_refs = [] };
+           scc_type = (Rhint ([11:13-16]), (Tprim Tint)); scc_refs = [];
+           scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([12:17-22], "MAX64");
-            scc_type = (Rhint ([12:13-16]), (Tprim Tint)); scc_refs = [] }
+            scc_type = (Rhint ([12:13-16]), (Tprim Tint)); scc_refs = [];
+            scc_value = None }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];

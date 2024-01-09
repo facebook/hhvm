@@ -15,6 +15,7 @@ type t = {
   php5_compat_mode: bool;
   hhvm_compat_mode: bool;
   keep_user_attributes: bool;
+  include_assignment_values: bool;
 }
 [@@deriving show]
 

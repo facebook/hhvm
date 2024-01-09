@@ -1,29 +1,29 @@
 [("\\MY_CONST",
   (Shallow_decl_defs.Const
      { Typing_defs.cd_pos = [6:1-36];
-       cd_type = (Rhint ([6:7-13]), (Tprim Tstring)) }));
+       cd_type = (Rhint ([6:7-13]), (Tprim Tstring)); cd_value = None }));
   ("\\MY_CONST2",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [7:1-25];
-        cd_type = (Rhint ([7:7-10]), (Tprim Tint)) }));
+        cd_type = (Rhint ([7:7-10]), (Tprim Tint)); cd_value = None }));
   ("\\MY_CONST3",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [8:1-29];
-        cd_type = (Rhint ([8:7-12]), (Tprim Tfloat)) }));
+        cd_type = (Rhint ([8:7-12]), (Tprim Tfloat)); cd_value = None }));
   ("\\MY_CONST5",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [9:1-27];
-        cd_type = (Rhint ([9:7-10]), (Tprim Tnum)) }));
+        cd_type = (Rhint ([9:7-10]), (Tprim Tnum)); cd_value = None }));
   ("\\MY_CONST6",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [10:1-29];
-        cd_type = (Rhint ([10:7-11]), (Tprim Tbool)) }));
+        cd_type = (Rhint ([10:7-11]), (Tprim Tbool)); cd_value = None }));
   ("\\MY_VEC",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [11:1-31];
         cd_type =
         (Rhint ([11:7-15]),
          (Tapply (([11:7-10], "\\HH\\vec"),
-            [(Rhint ([11:11-14]), (Tprim Tint))])))
-        }))
+            [(Rhint ([11:11-14]), (Tprim Tint))])));
+        cd_value = None }))
   ]

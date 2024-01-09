@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a444e6fbef797706636a4c5193b730a0>>
+// @generated SignedSource<<6dbbf4151d8cf96471abad0bbd02b922>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -50,6 +50,9 @@ pub struct ShallowClassConst {
     /// for members of regular-enums and enum-class-enums to detect circularity of initializers.
     /// We don't yet have a similar mechanism for top-level const initializers.
     pub refs: Vec<typing_defs::ClassConstRef>,
+    /// If DeclParserConfig option include_assignment_values is true,
+    /// The string value for the constant
+    pub value: Option<String>,
 }
 
 #[derive(

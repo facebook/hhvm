@@ -76,6 +76,7 @@ pub fn get_file_consts(parsed_file: &ParsedFile<'_>, name: &str) -> Vec<ExtDeclF
         .map(|(cname, decl)| ExtDeclFileConst {
             name: fmt_type(cname),
             type_: extract_type_name(decl.type_),
+            value: str_or_empty(decl.value),
         })
         .collect()
 }
@@ -399,6 +400,7 @@ fn get_consts(consts: &[&ShallowClassConst<'_>], name: &str) -> Vec<ExtDeclClass
             name: fmt_type(c.name.1),
             type_: extract_type_name(c.type_),
             is_abstract: c.abstract_ != ClassConstKind::CCConcrete,
+            value: str_or_empty(c.value),
         })
         .collect()
 }

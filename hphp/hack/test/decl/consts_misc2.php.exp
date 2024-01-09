@@ -12,7 +12,8 @@
        sc_consts =
        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
           scc_name = ([5:13-14], "i");
-          scc_type = (Rhint ([5:9-12]), (Tprim Tint)); scc_refs = [] }
+          scc_type = (Rhint ([5:9-12]), (Tprim Tint)); scc_refs = [];
+          scc_value = None }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None;
@@ -79,11 +80,11 @@
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([7:25-26], "X");
            scc_type = (Rwitness_from_decl ([7:29-30]), (Tprim Tint));
-           scc_refs = [] };
+           scc_refs = []; scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([7:32-33], "Y");
             scc_type = (Rwitness_from_decl ([7:36-37]), (Tprim Tint));
-            scc_refs = [] }
+            scc_refs = []; scc_value = None }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
@@ -108,26 +109,30 @@
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([10:15-16], "A");
            scc_type = (Rhint ([10:9-14]), Tmixed);
-           scc_refs = [((Typing_defs.From "\\TestE"), "X")] };
+           scc_refs = [((Typing_defs.From "\\TestE"), "X")]; scc_value = None
+           };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([11:15-16], "B");
             scc_type = (Rhint ([11:9-14]), Tmixed);
             scc_refs =
             [((Typing_defs.From "\\TestE"), "X");
-              ((Typing_defs.From "\\TestE"), "Y")]
-            };
+              ((Typing_defs.From "\\TestE"), "Y")];
+            scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([12:15-16], "C");
             scc_type = (Rhint ([12:9-14]), Tmixed);
-            scc_refs = [((Typing_defs.From "\\TestE"), "X")] };
+            scc_refs = [((Typing_defs.From "\\TestE"), "X")];
+            scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([13:15-16], "D");
             scc_type = (Rhint ([13:9-14]), Tmixed);
-            scc_refs = [((Typing_defs.From "\\TestE"), "X")] };
+            scc_refs = [((Typing_defs.From "\\TestE"), "X")];
+            scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([14:15-16], "E");
             scc_type = (Rhint ([14:9-14]), Tmixed);
-            scc_refs = [((Typing_defs.From "\\TestC"), "class")] }
+            scc_refs = [((Typing_defs.From "\\TestC"), "class")];
+            scc_value = None }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
@@ -165,7 +170,7 @@
                  (Tapply (([18:10-12], "\\TestRefs2"), [])));
                  (Rhint ([18:3-9]), (Tprim Tstring))]
                )));
-           scc_refs = [] };
+           scc_refs = []; scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([19:10-12], "K2");
             scc_type =
@@ -175,7 +180,7 @@
                   (Tapply (([19:10-12], "\\TestRefs2"), [])));
                   (Rhint ([19:3-9]), (Tprim Tstring))]
                 )));
-            scc_refs = [] };
+            scc_refs = []; scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([20:9-10], "B");
             scc_type =
@@ -187,8 +192,8 @@
                 )));
             scc_refs =
             [(Typing_defs.Self, "K2");
-              ((Typing_defs.From "\\TestRefs2"), "K1")]
-            };
+              ((Typing_defs.From "\\TestRefs2"), "K1")];
+            scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([21:9-10], "F");
             scc_type =
@@ -198,7 +203,8 @@
                   (Tapply (([21:9-10], "\\TestRefs2"), [])));
                   (Rhint ([21:3-8]), Tmixed)]
                 )));
-            scc_refs = [((Typing_defs.From "\\TestC"), "i")] };
+            scc_refs = [((Typing_defs.From "\\TestC"), "i")];
+            scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([22:9-10], "G");
             scc_type =
@@ -208,7 +214,8 @@
                   (Tapply (([22:9-10], "\\TestRefs2"), [])));
                   (Rhint ([22:3-8]), Tmixed)]
                 )));
-            scc_refs = [((Typing_defs.From "\\TestC"), "i")] };
+            scc_refs = [((Typing_defs.From "\\TestC"), "i")];
+            scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([23:9-10], "H");
             scc_type =
@@ -218,7 +225,8 @@
                   (Tapply (([23:9-10], "\\TestRefs2"), [])));
                   (Rhint ([23:3-8]), Tmixed)]
                 )));
-            scc_refs = [((Typing_defs.From "\\TestC"), "i")] }
+            scc_refs = [((Typing_defs.From "\\TestC"), "i")];
+            scc_value = None }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];

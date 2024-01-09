@@ -1,0 +1,21 @@
+ == 
+
+FileConst::FileConst = 'asdfasdf'
+Random::X = 42
+Random::S = 'foo'
+FilePermission::Read = 4
+FilePermission::Write = FilePermission::Read >> 1
+FilePermission::Execute = FilePermission::Read >> 2
+FilePermission::SomeStr = 'asdf'
+MyClass::MY_CONSTANT_STR = 'abc'
+MyClass::MY_CONSTANT_INT = 1234
+MyClass::MY_CONSTANT_FLOAT = 0.314
+MyClass::MY_CONSTANT_BOOL = false
+MyClass::MY_CONSTANT_MIXED = vec["aa",22]
+MyClass::MY_CONSTANT_DICT = dict[]
+MyClass::MY_CONSTANT_NULL = null
+MyClass::MY_CONSTANT_SHAPE = shape( "f1" =>123,"f2"=>"abc")
+MyClass::MY_CONSTANT_REF_SELF = self::MY_CONSTANT_BOOL
+MyClass::MY_CONSTANT_REF_STATIC = static::MY_CONSTANT_BOOL
+MyClass::MY_CONSTANT_REF_NAMED = FilePermission::Read
+MyClass::MY_CONSTANT_REF_OP = FilePermission::Read + 5

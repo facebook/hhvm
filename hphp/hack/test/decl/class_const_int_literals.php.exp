@@ -12,16 +12,20 @@
        sc_consts =
        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
           scc_name = ([4:13-27], "MY_DECIMAL_INT");
-          scc_type = (Rhint ([4:9-12]), (Tprim Tint)); scc_refs = [] };
+          scc_type = (Rhint ([4:9-12]), (Tprim Tint)); scc_refs = [];
+          scc_value = None };
          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([5:13-25], "MY_OCTAL_INT");
-           scc_type = (Rhint ([5:9-12]), (Tprim Tint)); scc_refs = [] };
+           scc_type = (Rhint ([5:9-12]), (Tprim Tint)); scc_refs = [];
+           scc_value = None };
          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([6:13-23], "MY_HEX_INT");
-           scc_type = (Rhint ([6:9-12]), (Tprim Tint)); scc_refs = [] };
+           scc_type = (Rhint ([6:9-12]), (Tprim Tint)); scc_refs = [];
+           scc_value = None };
          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([7:13-26], "MY_BINARY_INT");
-           scc_type = (Rhint ([7:9-12]), (Tprim Tint)); scc_refs = [] }
+           scc_type = (Rhint ([7:9-12]), (Tprim Tint)); scc_refs = [];
+           scc_value = None }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];

@@ -109,6 +109,7 @@ mod ffi {
         enable_xhp_class_modifier: bool,
         php5_compat_mode: bool,
         hhvm_compat_mode: bool,
+        include_assignment_values: bool,
     }
 
     pub struct DeclsAndBlob {
@@ -247,6 +248,7 @@ mod ffi {
     pub struct ExtDeclFileConst {
         name: String,
         type_: String,
+        value: String,
     }
 
     #[derive(Debug, PartialEq)]
@@ -254,6 +256,7 @@ mod ffi {
         name: String,
         type_: String,
         is_abstract: bool,
+        value: String,
     }
     pub struct ExtDeclClassConstVec {
         pub vec: Vec<ExtDeclClassConst>,
@@ -713,6 +716,7 @@ pub fn parse_decls(
         enable_xhp_class_modifier: config.enable_xhp_class_modifier,
         php5_compat_mode: config.php5_compat_mode,
         hhvm_compat_mode: config.hhvm_compat_mode,
+        include_assignment_values: config.include_assignment_values,
         keep_user_attributes: true,
         ..Default::default()
     };

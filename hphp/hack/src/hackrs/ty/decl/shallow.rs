@@ -67,6 +67,10 @@ pub struct ShallowClassConst<R: Reason> {
     /// to detect circularity of initializers. We don't yet have a similar mechanism
     /// for top-level const initializers.
     pub refs: Box<[ClassConstRef]>,
+
+    /// If DeclParserConfig option include_assignment_values is true,
+    /// The string value for the constant
+    pub value: Option<String>,
 }
 
 walkable!(ShallowClassConst<R> => [ty]);

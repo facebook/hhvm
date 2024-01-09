@@ -1,31 +1,35 @@
 [("\\CInt",
   (Shallow_decl_defs.Const
      { Typing_defs.cd_pos = [4:1-16];
-       cd_type = (Rwitness_from_decl ([4:14-15]), (Tprim Tint)) }));
+       cd_type = (Rwitness_from_decl ([4:14-15]), (Tprim Tint));
+       cd_value = None }));
   ("\\CBool",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [6:1-20];
-        cd_type = (Rwitness_from_decl ([6:15-19]), (Tprim Tbool)) }));
+        cd_type = (Rwitness_from_decl ([6:15-19]), (Tprim Tbool));
+        cd_value = None }));
   ("\\Utild",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [10:1-18];
-        cd_type = (Rwitness_from_decl ([10:7-12]), Tany) }));
+        cd_type = (Rwitness_from_decl ([10:7-12]), Tany); cd_value = None }));
   ("\\Unot",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [13:1-20];
-        cd_type = (Rwitness_from_decl ([13:7-11]), Tany) }));
+        cd_type = (Rwitness_from_decl ([13:7-11]), Tany); cd_value = None }));
   ("\\Uplus",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [15:1-18];
-        cd_type = (Rwitness_from_decl ([15:15-17]), (Tprim Tint)) }));
+        cd_type = (Rwitness_from_decl ([15:15-17]), (Tprim Tint));
+        cd_value = None }));
   ("\\Uminus",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [17:1-19];
-        cd_type = (Rwitness_from_decl ([17:16-18]), (Tprim Tint)) }));
+        cd_type = (Rwitness_from_decl ([17:16-18]), (Tprim Tint));
+        cd_value = None }));
   ("\\FromConst",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [21:1-24];
-        cd_type = (Rwitness_from_decl ([21:7-16]), Tany) }));
+        cd_type = (Rwitness_from_decl ([21:7-16]), Tany); cd_value = None }));
   ("\\E",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -45,7 +49,8 @@
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([24:3-12], "FromConst");
-           scc_type = (Rwitness_from_decl ([24:3-12]), Tany); scc_refs = [] }
+           scc_type = (Rwitness_from_decl ([24:3-12]), Tany); scc_refs = [];
+           scc_value = None }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];

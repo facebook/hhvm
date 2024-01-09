@@ -1,5 +1,6 @@
 [("\\MUST_PREPARE",
   (Shallow_decl_defs.Const
      { Typing_defs.cd_pos = [4:1-27];
-       cd_type = (Rwitness_from_decl ([4:22-26]), (Tprim Tnull)) }))
+       cd_type = (Rwitness_from_decl ([4:22-26]), (Tprim Tnull));
+       cd_value = None }))
   ]

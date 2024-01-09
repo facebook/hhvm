@@ -86,6 +86,7 @@ namespace HH {
   type ExtDeclFileConst = shape(
     'name' => string,
     'type' => TypeExpr,
+    ?'value' => string,
   );
 
   type ExtDeclModule = shape(
@@ -126,6 +127,7 @@ namespace HH {
     'name' => string,
     'type' => TypeExpr,
     ?'is_abstract' => bool,
+    ?'value' => string,
   );
 
   // https://github.com/facebook/hhvm/issues/5594

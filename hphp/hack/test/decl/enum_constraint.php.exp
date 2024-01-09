@@ -18,7 +18,7 @@
        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
           scc_name = ([3:28-29], "X");
           scc_type = (Rwitness_from_decl ([3:30-33]), (Tprim Tstring));
-          scc_refs = [] }
+          scc_refs = []; scc_value = None }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
@@ -48,7 +48,7 @@
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([5:26-27], "X");
            scc_type = (Rwitness_from_decl ([5:28-29]), (Tprim Tint));
-           scc_refs = [] }
+           scc_refs = []; scc_value = None }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
@@ -83,7 +83,7 @@
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([7:27-28], "X");
            scc_type = (Rwitness_from_decl ([7:29-30]), (Tprim Tint));
-           scc_refs = [] }
+           scc_refs = []; scc_value = None }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
@@ -121,11 +121,11 @@
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([11:20-21], "X");
            scc_type = (Rwitness_from_decl ([11:22-23]), (Tprim Tint));
-           scc_refs = [] };
+           scc_refs = []; scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([11:25-26], "Y");
             scc_type = (Rwitness_from_decl ([11:27-30]), (Tprim Tstring));
-            scc_refs = [] }
+            scc_refs = []; scc_value = None }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
@@ -156,7 +156,7 @@
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([13:18-19], "X");
            scc_type = (Rwitness_from_decl ([13:18-19]), Tany);
-           scc_refs = [((Typing_defs.From "\\C"), "X")] }
+           scc_refs = [((Typing_defs.From "\\C"), "X")]; scc_value = None }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];

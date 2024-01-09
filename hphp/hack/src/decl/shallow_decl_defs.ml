@@ -182,6 +182,9 @@ type shallow_class_const = {
       (** This is a list of all scope-resolution operators "A::B" that are mentioned in the const initializer,
       for members of regular-enums and enum-class-enums to detect circularity of initializers.
       We don't yet have a similar mechanism for top-level const initializers. *)
+  scc_value: string option;
+      (** If DeclParserConfig option include_assignment_values is true,
+      The string value for the constant *)
 }
 [@@deriving eq, show]
 

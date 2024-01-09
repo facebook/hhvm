@@ -114,7 +114,7 @@ File root|module_hint.php--there.php
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([10:3-4], "A");
            scc_type = (Rwitness_from_decl ([10:7-8]), (Tprim Tint));
-           scc_refs = [] }
+           scc_refs = []; scc_value = None }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];

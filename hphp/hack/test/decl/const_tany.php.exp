@@ -1,5 +1,5 @@
 [("\\X",
   (Shallow_decl_defs.Const
      { Typing_defs.cd_pos = [5:1-21];
-       cd_type = (Rwitness_from_decl ([5:7-8]), Tany) }))
+       cd_type = (Rwitness_from_decl ([5:7-8]), Tany); cd_value = None }))
   ]

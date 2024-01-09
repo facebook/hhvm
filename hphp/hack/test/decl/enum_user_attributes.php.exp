@@ -18,11 +18,11 @@
        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
           scc_name = ([5:3-4], "A");
           scc_type = (Rwitness_from_decl ([5:7-10]), (Tprim Tstring));
-          scc_refs = [] };
+          scc_refs = []; scc_value = None };
          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([6:3-4], "B");
            scc_type = (Rwitness_from_decl ([6:7-10]), (Tprim Tstring));
-           scc_refs = [] }
+           scc_refs = []; scc_value = None }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];

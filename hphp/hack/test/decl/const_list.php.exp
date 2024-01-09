@@ -1,9 +1,9 @@
 [("\\X",
   (Shallow_decl_defs.Const
      { Typing_defs.cd_pos = [3:1-24];
-       cd_type = (Rhint ([3:7-10]), (Tprim Tint)) }));
+       cd_type = (Rhint ([3:7-10]), (Tprim Tint)); cd_value = None }));
   ("\\Y",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [3:1-24];
-        cd_type = (Rhint ([3:7-10]), (Tprim Tint)) }))
+        cd_type = (Rhint ([3:7-10]), (Tprim Tint)); cd_value = None }))
   ]

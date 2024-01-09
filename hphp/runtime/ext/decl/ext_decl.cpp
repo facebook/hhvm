@@ -86,6 +86,7 @@ const StaticString s_exports("exports");
 const StaticString s_methods("methods");
 const StaticString s_args("args");
 const StaticString s_subtypes("subtypes");
+const StaticString s_value("value");
 
 // Bools
 const StaticString s_is_abstract("is_abstract");
@@ -149,6 +150,7 @@ hackc::DeclParserConfig initDeclConfig(std::string& path) {
   hackc::DeclParserConfig config;
   auto opts = RepoOptions::forFile(path);
   opts.flags().initDeclConfig(config);
+  config.include_assignment_values = true;
   return config;
 }
 
@@ -156,6 +158,7 @@ hackc::DeclParserConfig initDeclConfig() {
   hackc::DeclParserConfig config;
   auto opts = *g_context->getRepoOptionsForRequest();
   opts.flags().initDeclConfig(config);
+  config.include_assignment_values = true;
   return config;
 }
 
@@ -321,6 +324,7 @@ Array populateConstants(const rust::Vec<hackc::ExtDeclClassConst>& consts) {
     info.set(s_name, rustToString(c.name));
     info.set(s_type, rustToString(c.type_));
     maybeSetBool(info, c.is_abstract, s_is_abstract);
+    maybeSet(info, c.value, s_value, rustToString);
     arr.append(info);
   }
   return arr.toArray();
@@ -548,6 +552,7 @@ Array populateFileConsts(const rust::Vec<hackc::ExtDeclFileConst>& consts) {
     Array info = Array::CreateDict();
     info.set(s_name, rustToString(c.name));
     info.set(s_type, rustToString(c.type_));
+    maybeSet(info, c.value, s_value, rustToString);
     arr.append(info);
   }
   return arr.toArray();

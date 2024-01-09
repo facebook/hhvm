@@ -180,18 +180,17 @@ static int accessSyscall(
   Stream::Wrapper* w = Stream::getWrapperFromURI(uri_or_path);
   if (!w) return -1;
 
-  if (useFileCache && (dynamic_cast<FileStreamWrapper*>(w)
-      || UNLIKELY(RO::EvalRecordReplay && w->isNormalFileStream()))) {
-    String path(uri_or_path);
-    if (UNLIKELY(StringUtil::IsFileUrl(uri_or_path.data()))) {
-      path = StringUtil::DecodeFileUrl(uri_or_path);
-      if (path.empty()) {
-        return -1;
-      }
+  String path(uri_or_path);
+  if (UNLIKELY(StringUtil::IsFileUrl(uri_or_path.data()))) {
+    path = StringUtil::DecodeFileUrl(uri_or_path);
+    if (path.empty()) {
+      return -1;
     }
+  }
+  if (useFileCache && dynamic_cast<FileStreamWrapper*>(w)) {
     return ::access(File::TranslatePathWithFileCache(path).data(), mode);
   }
-  return w->access(uri_or_path, mode);
+  return w->access(path, mode);
 }
 
 static int statSyscall(

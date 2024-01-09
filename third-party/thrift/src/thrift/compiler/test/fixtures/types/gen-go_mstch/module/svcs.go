@@ -757,8 +757,12 @@ func (x *respSomeServiceBinaryKeyedMap) writeField0(p thrift.Protocol) error {  
     return thrift.PrependError("error writing map begin: ", err)
 }
 for k, v := range item {
+    if k == nil {
+        return fmt.Errorf("%T write map: nil key is not allowed.", item)
+    }
+
     {
-        item := k
+        item := *k
         err := WriteTBinary(item, p)
 if err != nil {
     return err

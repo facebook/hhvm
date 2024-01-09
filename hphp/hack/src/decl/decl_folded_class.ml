@@ -796,6 +796,16 @@ let method_decl_eager
     | _ -> visibility (snd c.sc_name) c.sc_module m.sm_visibility
   in
   let support_dynamic_type = sm_support_dynamic_type m in
+  let parent_sort_text =
+    match SMap.find_opt id acc with
+    | Some ({ elt_sort_text = _ as parent_text; _ }, _) -> parent_text
+    | _ -> None
+  in
+  let sort_text =
+    match m.sm_sort_text with
+    | Some text -> Some text
+    | _ -> parent_sort_text
+  in
   let elt =
     {
       elt_flags =
@@ -816,7 +826,7 @@ let method_decl_eager
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_deprecated = m.sm_deprecated;
-      elt_sort_text = m.sm_sort_text;
+      elt_sort_text = sort_text;
     }
   in
   let fe =

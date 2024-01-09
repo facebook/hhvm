@@ -145,9 +145,20 @@ abstractness for determining priority of the method.
 It's possible to implement this boolean logic by just comparing
 the boolean tuples (is_concrete, is_non_synthesized) of each member,
 which we do in the OverridePrecedence module. *)
-let should_keep_old_sig (sig_, _) (old_sig, _) =
+let should_keep_old_sig
+    ((sig_, _) : Decl_defs.element * fun_elt option)
+    ((old_sig, _) : Decl_defs.element * fun_elt option) : bool =
   let precedence = OverridePrecedence.make (module Decl_defs_element) in
   OverridePrecedence.(precedence old_sig > precedence sig_)
+
+let get_updated_sort_text new_sig old_sig =
+  let (sig_decl_element, _) = new_sig in
+  let (old_sig_decl_element, _) = old_sig in
+  match
+    (sig_decl_element.elt_sort_text, old_sig_decl_element.elt_sort_text)
+  with
+  | (None, Some _text) -> old_sig_decl_element.elt_sort_text
+  | _ -> sig_decl_element.elt_sort_text
 
 let add_method name sig_ methods =
   match SMap.find_opt name methods with
@@ -155,15 +166,25 @@ let add_method name sig_ methods =
     (* The method didn't exist so far, let's add it *)
     SMap.add name sig_ methods
   | Some old_sig ->
+    let elt_sort_text = get_updated_sort_text sig_ old_sig in
     if should_keep_old_sig sig_ old_sig then
-      methods
+      let (old_sig_decl_element, old_sig_fun_element) = old_sig in
+      SMap.add
+        name
+        ({ old_sig_decl_element with elt_sort_text }, old_sig_fun_element)
+        methods
     (* Otherwise, we *are* overwriting a method definition. This is
      * OK when a naming conflict is parent class vs trait (trait
      * wins!), but not really OK when the naming conflict is trait vs
      * trait (we rely on HHVM to catch the error at runtime) *)
     else
       let sig_ = Tuple.T2.map_fst sig_ ~f:reset_elt_superfluous_override in
-      SMap.add name sig_ methods
+      let (sig_decl_element, sig_fun_element) = sig_ in
+      SMap.add
+        name
+        ({ sig_decl_element with elt_sort_text }, sig_fun_element)
+        methods
+(* take old and new sig, get sort texts recheck *)
 
 let add_methods methods' acc = SMap.fold add_method methods' acc
 

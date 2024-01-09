@@ -442,6 +442,7 @@ let rec prefetch_loop
   * Just like normal decl-fetching works, if ever we need part of the output of
     the direct-decl-parser for a file, then we take the opportunity to place
     all of the file's decls into [local_memory] caches.
+  * This function is robust against missing decls
 
   What does "incrementally fetches" mean? Say we have [to_fold="D"]. We might
   fetch the shallow-decl for D, then learn that it extends C, then fetch
@@ -463,6 +464,12 @@ let rec prefetch_loop
   Why "at least all the decls"? The pessimisation step walks the return type
   of functions in a subtle way. This function instead just blindly grabs everything
   mentioned in the return type.
+
+  Why "robust against missing decls"? This might arise in a few ways. First,
+  if the user writes "class C extends B {}" but B isn't yet defined, then
+  we simply won't fetch B. If the naming table thought that B was defined in b.php,
+  but a disk change has happened (and the naming table hasn't yet been updated)
+  then we'll parse the file if it exists, and either we'll find B or not.
 
   Sorry, our decl-caches are ugly. That's because [decl_cache] contains
   funs, typedefs, consts, modules (primitive things) and also folded-classes,

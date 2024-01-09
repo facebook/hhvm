@@ -262,11 +262,22 @@ impl Concurrent {
                 // decl. I'm going to optimize that case, so it ends up having
                 // identical implementation+performance to `hh_parse_decls_ffi` above,
                 // with no concurrency.
+                // Unwrap: guaranteed to succeed since len = 1
                 let (path, tag, content) = files.into_iter().next().unwrap();
                 let abspath = path.to_absolute(&self.ctx);
+                // If our caller didn't provide content, we'll try to read it ourselves.
+                // It's expected that sometimes the file doesn't exist, e.g. if it's a file that
+                // was deleted but we've been invoked before the naming-table has yet been updated.
+                // In that case we'll treat it as having empty contents, i.e. no decls.
+                //
+                // TODO: only "FileNotFound" should be swallowed; other errors should
+                // still be reported. (although in this case it doesn't matter much because
+                // we're only used in the Decl_provider_prefetch, which is a hint about which
+                // decls it can find, and the any absent decls here will be fetched again properly
+                // by Decl_provider itself with proper error reporting.)
                 let text = match content {
                     Some(content) => content.into_bytes(),
-                    None => std::fs::read(abspath).unwrap(),
+                    None => std::fs::read(abspath).unwrap_or_default(),
                 };
                 let arena = bumpalo::Bump::new();
                 let parsed_file = direct_decl_parser::parse_decls_for_typechecking(
@@ -319,7 +330,7 @@ impl Concurrent {
             rayon::spawn(move || {
                 let text = match content {
                     Some(content) => content.into_bytes(),
-                    None => std::fs::read(abspath).unwrap(),
+                    None => std::fs::read(abspath).unwrap_or_default(),
                 };
                 let arena = bumpalo::Bump::new();
                 // SAFETY: the effect of this transmute is that Rust no longer understands
@@ -351,6 +362,8 @@ impl Concurrent {
         // Block, until the first available completed workitem is done -- either
         // from the ones we just kicked off just now, or one from an earlier
         // call to this function.
+        // Unwrap safety: this only errors if the channel is empty and becomes disconnected, which
+        // cannot have happened by here, since self.{tx,rx} both exist.
         let (path, SendableOcamlPtrPtr(tag), decls_holder) = self.rx.recv().unwrap();
         self.outstanding -= 1;
 

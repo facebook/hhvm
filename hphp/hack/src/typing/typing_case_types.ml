@@ -41,6 +41,11 @@ module Tag = struct
         name: string;
         kind: class_kind;
       }
+    | LabelData  (** Corresponds to EnumClassLabel *)
+    | BuiltInData
+        (** Catch all for data types that are built into the runtime but not
+            exposed in the type system. Used primarily for soundly representing
+            the mixed type *)
   [@@deriving eq]
 
   let describe = function
@@ -60,6 +65,8 @@ module Tag = struct
       Printf.sprintf "instances of the class %s" @@ strip_ns name
     | InstanceOf { name; kind = Interface } ->
       Printf.sprintf "instances of the interface %s" @@ strip_ns name
+    | LabelData -> "enum class labels"
+    | BuiltInData -> "built-in values"
 
   let relation tag1 ~ctx:env tag2 =
     let open ApproxSet.Set_relation in
@@ -108,6 +115,8 @@ module Tag = struct
       IntData;
       FloatData;
       ObjectData;
+      LabelData;
+      BuiltInData;
     ]
 
   let all_tags = NullData :: all_nonnull_tags
@@ -536,6 +545,9 @@ module DataType = struct
     | Tnewtype (name, _, as_ty)
       when String.equal name Naming_special_names.Classes.cSupportDyn ->
       fromTy ~trail env as_ty
+    | Tnewtype (name, _, _)
+      when String.equal name Naming_special_names.Classes.cEnumClassLabel ->
+      Set.singleton ~reason:DataTypeReason.(make NoSubreason trail) LabelData
     | Tnewtype (name, tyl, as_ty) -> begin
       match Env.get_typedef env name with
       (* When determining the datatype associated with a type we should

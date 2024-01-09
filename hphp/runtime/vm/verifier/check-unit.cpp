@@ -63,7 +63,7 @@ struct UnitChecker {
   const UnitEmitter* m_unit;
   ErrorMode m_errmode;
 
-  StringToStringIMap m_createCls;
+  StringToStringTMap m_createCls;
 };
 
 const StaticString s_invoke("__invoke");
@@ -169,7 +169,7 @@ bool UnitChecker::checkPreClasses() {
     const auto& userAttrs = preclass->userAttributes();
 
     // Closures don't need constructors
-    if (preclass->parentName()->isame(s_Closure.get())) {
+    if (preclass->parentName()->tsame(s_Closure.get())) {
       ok &= checkClosure(preclass);
     }
 

@@ -47,22 +47,34 @@ void log_fill_bt(StructuredLogEntry& sample) {
   }
 }
 
-}
-
-bool isame_log(const StringData* input, const StringData* arg) {
-  FTRACE(1, "isame collision {} != {}\n", input->slice(), arg->slice());
-  auto const rate = RO::EvalIsameCollisionSampleRate;
+bool log_impl(const char* event, uint32_t rate,
+              folly::StringPiece lhs,
+              folly::StringPiece rhs) {
   if (StructuredLog::coinflip(rate)) {
     StructuredLogEntry sample;
     sample.force_init = true;
     sample.setInt("sample_rate", rate);
-    sample.setStr("event", "isame");
-    sample.setStr("lhs", input->slice());
-    sample.setStr("rhs", arg->slice());
+    sample.setStr("event", event);
+    sample.setStr("lhs", lhs);
+    sample.setStr("rhs", rhs);
     log_fill_bt(sample);
     StructuredLog::log("hhvm_isame_collisions", sample);
   }
   return true;
+}
+
+}
+
+bool tsame_log(const StringData* input, const StringData* arg) {
+  FTRACE(1, "tsame collision {} != {}\n", input->slice(), arg->slice());
+  return log_impl("tsame", RO::EvalTsameCollisionSampleRate, input->slice(),
+                  arg->slice());
+}
+
+bool fsame_log(const StringData* input, const StringData* arg) {
+  FTRACE(1, "fsame collision {} != {}\n", input->slice(), arg->slice());
+  return log_impl("fsame", RO::EvalFsameCollisionSampleRate, input->slice(),
+                  arg->slice());
 }
 
 void non_utf8_log(CodeSource from, folly::StringPiece code, size_t badcharIdx) {
@@ -102,19 +114,15 @@ void non_utf8_log(CodeSource from, folly::StringPiece code, size_t badcharIdx) {
   }
 }
 
-int istrcmp_log(const char* s1, const char* s2) {
-  FTRACE(1, "isame collision {} != {}\n", s1, s2);
-  auto const rate = RO::EvalIsameCollisionSampleRate;
-  if (StructuredLog::coinflip(rate)) {
-    StructuredLogEntry sample;
-    sample.force_init = true;
-    sample.setInt("sample_rate", rate);
-    sample.setStr("event", "istrcmp");
-    sample.setStr("lhs", s1);
-    sample.setStr("rhs", s2);
-    log_fill_bt(sample);
-    StructuredLog::log("hhvm_isame_collisions", sample);
-  }
+int tstrcmp_log(const char* s1, const char* s2) {
+  FTRACE(1, "tstrcmp collision {} != {}\n", s1, s2);
+  log_impl("tstrcmp", RO::EvalTsameCollisionSampleRate, s1, s2);
+  return 0;
+}
+
+int fstrcmp_log(const char* s1, const char* s2) {
+  FTRACE(1, "fstrcmp collision {} != {}\n", s1, s2);
+  log_impl("fstrcmp", RO::EvalFsameCollisionSampleRate, s1, s2);
   return 0;
 }
 

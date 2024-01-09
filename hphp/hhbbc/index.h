@@ -278,11 +278,11 @@ struct ConstIndex {
   Idx idx;
 
   bool operator==(const ConstIndex& o) const {
-    return idx == o.idx && cls->isame(o.cls);
+    return idx == o.idx && cls->tsame(o.cls);
   }
   bool operator<(const ConstIndex& o) const {
     if (idx != o.idx) return idx < o.idx;
-    return string_data_lti{}(cls, o.cls);
+    return string_data_lt_type{}(cls, o.cls);
   }
 
   struct Hasher {
@@ -329,7 +329,7 @@ struct MethRef {
   uint32_t idx{std::numeric_limits<uint32_t>::max()};
 
   bool operator==(const MethRef& o) const {
-    return cls->isame(o.cls) && idx == o.idx;
+    return cls->tsame(o.cls) && idx == o.idx;
   }
   bool operator!=(const MethRef& o) const {
     return !(*this == o);
@@ -342,7 +342,7 @@ struct MethRef {
     auto const hash1 = cls->hash();
     auto const hash2 = o.cls->hash();
     if (hash1 != hash2) return hash1 < hash2;
-    return string_data_lti{}(cls, o.cls);
+    return string_data_lt_type{}(cls, o.cls);
   }
 
   struct Hash {
@@ -900,10 +900,10 @@ struct TypeMapping {
   bool isTypeAlias;
 
   bool operator==(const TypeMapping& o) const {
-    return name->isame(o.name);
+    return name->tsame(o.name);
   }
   bool operator<(const TypeMapping& o) const {
-    return string_data_lti{}(name, o.name);
+    return string_data_lt_type{}(name, o.name);
   }
 
   template <typename SerDe> void serde(SerDe& sd) {
@@ -1066,13 +1066,13 @@ struct Index {
   /*
    * The names of all classes which has a 86*init function.
    */
-  const ISStringSet& classes_with_86inits() const;
+  const TSStringSet& classes_with_86inits() const;
 
   /*
    * The names of all top-level functions which are initializers for
    * "dynamic" constants.
    */
-  const ISStringSet& constant_init_funcs() const;
+  const FSStringSet& constant_init_funcs() const;
 
   /*
    * Access the php::Program this Index is analyzing.
@@ -1903,23 +1903,23 @@ struct AnalysisDeps {
   AnalysisDeps& operator|=(const AnalysisDeps&);
 
   template <typename SerDe> void serde(SerDe& sd) {
-    sd(funcs, string_data_lti{})
+    sd(funcs, string_data_lt_func{})
       (methods, std::less<>{})
-      (classes, string_data_lti{})
+      (classes, string_data_lt_type{})
       (clsConstants, std::less<>{})
       (constants, string_data_lt{})
-      (typeAliases, string_data_lti{})
+      (typeAliases, string_data_lt_type{})
       ;
   }
 
 private:
-  ISStringToOneT<Type> funcs;
+  FSStringToOneT<Type> funcs;
   hphp_fast_map<MethRef, Type, MethRef::Hash> methods;
 
-  ISStringSet classes;
+  TSStringSet classes;
   hphp_fast_set<ConstIndex, ConstIndex::Hasher> clsConstants;
   SStringSet constants;
-  ISStringSet typeAliases;
+  TSStringSet typeAliases;
 
   static Type merge(Type&, Type);
 
@@ -1978,14 +1978,14 @@ struct AnalysisChangeSet {
   void remove(const php::Func& f) { funcs.erase(f.name); }
 
   template <typename SerDe> void serde(SerDe& sd) {
-    sd(funcs, string_data_lti{})
+    sd(funcs, string_data_lt_func{})
       (methods, std::less<>{})
       (constants, string_data_lt{})
       (clsConstants, std::less<>{})
       ;
   }
 private:
-  ISStringToOneT<Type> funcs;
+  FSStringToOneT<Type> funcs;
   hphp_fast_map<MethRef, Type, MethRef::Hash> methods;
   SStringSet constants;
   hphp_fast_set<ConstIndex, ConstIndex::Hasher> clsConstants;
@@ -2012,15 +2012,15 @@ struct AnalysisInput {
   SString key() const { return m_key; }
 
   struct Meta {
-    ISStringSet badClasses;
-    ISStringSet badFuncs;
+    TSStringSet badClasses;
+    FSStringSet badFuncs;
     SStringSet badConstants;
-    ISStringSet badTypeAliases;
+    TSStringSet badTypeAliases;
     template <typename SerDe> void serde(SerDe& sd) {
-      sd(badClasses, string_data_lti{})
-        (badFuncs, string_data_lti{})
+      sd(badClasses, string_data_lt_type{})
+        (badFuncs, string_data_lt_func{})
         (badConstants, string_data_lt{})
-        (badTypeAliases, string_data_lti{})
+        (badTypeAliases, string_data_lt_type{})
         ;
     }
   };
@@ -2045,19 +2045,19 @@ struct AnalysisInput {
 private:
   SString m_key{nullptr};
 
-  ISStringToOneT<UniquePtrRef<php::Class>> classes;
-  ISStringToOneT<UniquePtrRef<php::Func>> funcs;
+  TSStringToOneT<UniquePtrRef<php::Class>> classes;
+  FSStringToOneT<UniquePtrRef<php::Func>> funcs;
   SStringToOneT<UniquePtrRef<php::Unit>> units;
 
-  ISStringToOneT<UniquePtrRef<php::ClassBytecode>> classBC;
-  ISStringToOneT<UniquePtrRef<php::FuncBytecode>> funcBC;
+  TSStringToOneT<UniquePtrRef<php::ClassBytecode>> classBC;
+  FSStringToOneT<UniquePtrRef<php::FuncBytecode>> funcBC;
 
-  ISStringToOneT<extern_worker::Ref<AnalysisIndexCInfo>> cinfos;
-  ISStringToOneT<extern_worker::Ref<AnalysisIndexFInfo>> finfos;
-  ISStringToOneT<extern_worker::Ref<AnalysisIndexMInfo>> minfos;
+  TSStringToOneT<extern_worker::Ref<AnalysisIndexCInfo>> cinfos;
+  FSStringToOneT<extern_worker::Ref<AnalysisIndexFInfo>> finfos;
+  TSStringToOneT<extern_worker::Ref<AnalysisIndexMInfo>> minfos;
 
-  ISStringToOneT<UniquePtrRef<php::Class>> depClasses;
-  ISStringToOneT<UniquePtrRef<php::Func>> depFuncs;
+  TSStringToOneT<UniquePtrRef<php::Class>> depClasses;
+  FSStringToOneT<UniquePtrRef<php::Func>> depFuncs;
   SStringToOneT<UniquePtrRef<php::Unit>> depUnits;
 
   Meta meta;
@@ -2075,13 +2075,13 @@ struct AnalysisOutput {
     std::vector<AnalysisDeps> funcDeps;
     std::vector<AnalysisDeps> classDeps;
     AnalysisChangeSet changed;
-    ISStringSet removedFuncs;
+    FSStringSet removedFuncs;
     template <typename SerDe> void serde(SerDe& sd) {
       ScopedStringDataIndexer _;
       sd(funcDeps)
         (classDeps)
         (changed)
-        (removedFuncs, string_data_lti{})
+        (removedFuncs, string_data_lt_func{})
         ;
     }
   };
@@ -2144,8 +2144,8 @@ private:
   // even if it changed, you don't need to be rescheduled (because you
   // would have picked up the change locally).
   struct ChangeGroup {
-    ISStringSet classes;
-    ISStringSet funcs;
+    TSStringSet classes;
+    FSStringSet funcs;
     SStringSet units;
   };
 
@@ -2189,14 +2189,14 @@ private:
     boost::dynamic_bitset<> cnsChanges;
   };
 
-  ISStringToOneT<FuncState> funcState;
-  ISStringToOneT<ClassState> classState;
+  FSStringToOneT<FuncState> funcState;
+  TSStringToOneT<ClassState> classState;
   SStringToOneNodeT<std::atomic<bool>> cnsChanged;
 
-  ISStringSet funcsToSchedule;
-  ISStringSet classesToSchedule;
+  FSStringSet funcsToSchedule;
+  TSStringSet classesToSchedule;
 
-  ISStringSet funcsToRemove;
+  FSStringSet funcsToRemove;
   std::mutex funcsToRemoveLock;
 };
 

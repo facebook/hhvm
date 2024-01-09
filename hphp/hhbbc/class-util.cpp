@@ -50,7 +50,7 @@ const StaticString
 bool has_magic_bool_conversion(SString clsName) {
   return
     collections::isTypeName(clsName) ||
-    clsName->isame(s_SimpleXMLElement.get());
+    clsName->tsame(s_SimpleXMLElement.get());
 }
 
 bool is_collection(res::Class cls) {
@@ -90,15 +90,15 @@ bool is_noflatten_trait(const php::Class* cls) {
 }
 
 bool is_closure_base(SString name) {
-  return name->isame(s_Closure.get());
+  return name->tsame(s_Closure.get());
 }
 
 bool is_closure_base(const php::Class& c) {
-  return c.name->isame(s_Closure.get());
+  return c.name->tsame(s_Closure.get());
 }
 
 bool is_closure(const php::Class& c) {
-  return c.parentName && c.parentName->isame(s_Closure.get());
+  return c.parentName && c.parentName->tsame(s_Closure.get());
 }
 
 bool is_closure_name(SString name) {

@@ -42,11 +42,11 @@ namespace {
 
 using InstanceCounts = tbb::concurrent_hash_map<const StringData*,
                                                 uint64_t,
-                                                StringDataHashICompare>;
+                                                StringDataHashTCompare>;
 using InstanceBitsMap = hphp_hash_map<const StringData*,
                                       unsigned,
                                       string_data_hash,
-                                      string_data_isame>;
+                                      string_data_tsame>;
 
 InstanceCounts s_instanceCounts;
 folly::SharedMutex s_instanceCountsLock;

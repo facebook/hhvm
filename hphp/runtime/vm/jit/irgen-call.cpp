@@ -61,7 +61,7 @@ void updateStackOffset(IRGS& env) {
 
 const Class* callContext(IRGS& env, const FCallArgs& fca, const Class* cls) {
   if (!fca.context) return curClass(env);
-  if (fca.context->isame(s_DynamicContextOverrideUnsafe.get())) {
+  if (fca.context->tsame(s_DynamicContextOverrideUnsafe.get())) {
     if (RO::RepoAuthoritative) PUNT(Bad-Dyn-Override);
     return cls;
   }

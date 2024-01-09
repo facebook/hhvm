@@ -101,7 +101,8 @@ struct StringPtr {
    * Case-insensitive exact string comparison.  (Numeric strings are
    * not treated specially.)
    */
-  bool isame(const StringPtr& s) const noexcept;
+  bool tsame(const StringPtr& s) const noexcept;
+  bool fsame(const StringPtr& s) const noexcept;
 
   const StringData* get() const noexcept {
     return m_impl;

@@ -3594,7 +3594,7 @@ SSATmp* simplifyCallBuiltin(State& env, const IRInstruction* inst) {
       if (cls->classof(c_Awaitable::classof())) {
         auto const genState = [&] (Opcode op, int64_t whstate) -> SSATmp* {
           // these methods all spring from the base class
-          assertx(callee->cls()->name()->isame(s_Awaitable.get()));
+          assertx(callee->cls()->name()->tsame(s_Awaitable.get()));
           auto const state = gen(env, LdWHState, thiz);
           return gen(env, op, state, cns(env, whstate));
         };

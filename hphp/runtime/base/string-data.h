@@ -455,7 +455,8 @@ struct StringData final : MaybeCountable,
    * DEPRECATED: use same_nocase() for case-insensitive strings that
    * are not language symbols.
    */
-  bool isame(const StringData* s) const;
+  bool tsame(const StringData* s) const;
+  bool fsame(const StringData* s) const;
 
   /*
    * Case-insensitive exact string comparison.  (Numeric strings are
@@ -589,10 +590,13 @@ void decRefStr(StringData* s);
  */
 struct string_data_hash;
 struct string_data_same;
-struct string_data_isame;
+struct string_data_tsame; // for type names
+struct string_data_fsame; // for func names
 struct string_data_lt;
-struct string_data_lti;
-struct string_data_hash_isame;
+struct string_data_lt_type; // for type names
+struct string_data_lt_func; // for func names
+struct string_data_hash_tsame; // for type names
+struct string_data_hash_fsame; // for func names
 
 //////////////////////////////////////////////////////////////////////
 

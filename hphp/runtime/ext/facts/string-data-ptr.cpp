@@ -61,14 +61,24 @@ bool StringPtr::same(const StringPtr& s) const noexcept {
   return m_impl->same(s.m_impl);
 }
 
-bool StringPtr::isame(const StringPtr& s) const noexcept {
+bool StringPtr::tsame(const StringPtr& s) const noexcept {
   if (m_impl == s.m_impl) {
     return true;
   }
   if (m_impl == nullptr || s.m_impl == nullptr) {
     return false;
   }
-  return m_impl->isame(s.m_impl);
+  return m_impl->tsame(s.m_impl);
+}
+
+bool StringPtr::fsame(const StringPtr& s) const noexcept {
+  if (m_impl == s.m_impl) {
+    return true;
+  }
+  if (m_impl == nullptr || s.m_impl == nullptr) {
+    return false;
+  }
+  return m_impl->fsame(s.m_impl);
 }
 
 StringPtr makeStringPtr(const StringData& s) {

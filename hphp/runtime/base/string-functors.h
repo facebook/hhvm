@@ -39,9 +39,15 @@ struct hphp_string_same {
   }
 };
 
-struct hphp_string_isame {
+struct hphp_string_tsame {
   bool operator()(const String& s1, const String& s2) const {
-    return s1.get()->isame(s2.get());
+    return s1.get()->tsame(s2.get());
+  }
+};
+
+struct hphp_string_fsame {
+  bool operator()(const String& s1, const String& s2) const {
+    return s1.get()->fsame(s2.get());
   }
 };
 
@@ -56,10 +62,21 @@ struct StringDataHashCompare {
   }
 };
 
-struct StringDataHashICompare {
+struct StringDataHashTCompare {
   bool equal(const StringData *s1, const StringData *s2) const {
     assertx(s1 && s2);
-    return s1->isame(s2);
+    return s1->tsame(s2);
+  }
+  size_t hash(const StringData *s) const {
+    assertx(s);
+    return s->hash();
+  }
+};
+
+struct StringDataHashFCompare {
+  bool equal(const StringData *s1, const StringData *s2) const {
+    assertx(s1 && s2);
+    return s1->fsame(s2);
   }
   size_t hash(const StringData *s) const {
     assertx(s);

@@ -78,7 +78,7 @@ struct BlockInfo {
 struct FuncChecker {
   FuncChecker(const FuncEmitter* func,
               ErrorMode mode,
-              StringToStringIMap& createCls);
+              StringToStringTMap& createCls);
   ~FuncChecker();
   bool checkOffsets();
   bool checkFlow();
@@ -169,7 +169,7 @@ struct FuncChecker {
   ErrorMode m_errmode;
   FlavorDesc* m_tmp_sig;
   Id m_last_rpo_id; // rpo_id of the last block visited
-  StringToStringIMap& m_createCls;
+  StringToStringTMap& m_createCls;
 };
 
 const StaticString s_invoke("__invoke");
@@ -230,7 +230,7 @@ bool checkNativeFunc(const FuncEmitter* func, ErrorMode mode) {
 }
 
 bool checkFunc(const FuncEmitter* func,
-               StringToStringIMap& createCls,
+               StringToStringTMap& createCls,
                ErrorMode mode) {
   if (mode == kVerbose) {
     pretty_print(func, std::cout);
@@ -292,7 +292,7 @@ bool mayTakeExnEdges(Op op) {
 
 FuncChecker::FuncChecker(const FuncEmitter* f,
                          ErrorMode mode,
-                         StringToStringIMap& createCls)
+                         StringToStringTMap& createCls)
 : m_func(f)
 , m_graph(0)
 , m_instrs(m_arena, f->bcPos() + 1)
@@ -1216,7 +1216,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       auto const name = m_func->ue().lookupLitstrCopy(getImm(pc, 1).u_SA);
       auto const preCls = [&] () -> const PreClassEmitter* {
         for (auto const pce : unit()->preclasses()) {
-          if (pce->name()->isame(name.get())) return pce;
+          if (pce->name()->tsame(name.get())) return pce;
         }
         return nullptr;
       }();
@@ -1231,7 +1231,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       }
       auto const [existing, emplaced] =
         m_createCls.emplace(preCls->name(), m_func->name);
-      if (!emplaced && !existing->second->isame(m_func->name)) {
+      if (!emplaced && !existing->second->fsame(m_func->name)) {
         ferror("Closure {} referenced in multiple funcs {} and {}\n",
                preCls->name(), existing->second, m_func->name);
         return false;

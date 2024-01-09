@@ -42,23 +42,24 @@ struct RepoAutoloadMapBuilder {
     Compare
   >;
 
-  using CaseInsensitiveMap = Map<string_data_isame>;
+  using TypeNameMap = Map<string_data_tsame>;
+  using FuncNameMap = Map<string_data_fsame>;
   using CaseSensitiveMap = Map<string_data_same>;
 
   friend struct FuncEmitter;
 
   void addUnit(const UnitEmitter& ue);
 
-  const CaseInsensitiveMap& getTypes() const;
-  const CaseInsensitiveMap& getFuncs() const;
+  const TypeNameMap& getTypes() const;
+  const FuncNameMap& getFuncs() const;
   const CaseSensitiveMap& getConstants() const;
-  const CaseInsensitiveMap& getTypeAliases() const;
+  const TypeNameMap& getTypeAliases() const;
   const CaseSensitiveMap& getModules() const;
 
 private:
-  CaseInsensitiveMap m_types;
-  CaseInsensitiveMap m_funcs;
-  CaseInsensitiveMap m_typeAliases;
+  TypeNameMap m_types;
+  FuncNameMap m_funcs;
+  TypeNameMap m_typeAliases;
   CaseSensitiveMap m_constants;
   CaseSensitiveMap m_modules;
 };

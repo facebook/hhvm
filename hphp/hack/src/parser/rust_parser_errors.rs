@@ -172,27 +172,29 @@ use NamespaceType::*;
 #[derive(Clone, Debug)]
 enum Strmap<X> {
     YesCase(HashMap<String, X>),
-    NoCase(HashMap<String, X>),
+    FuncCase(HashMap<String, X>),
+    TypeCase(HashMap<String, X>),
+    NsCase(HashMap<String, X>),
 }
 
 impl<X> Strmap<X> {
     fn mem(&self, k: &str) -> bool {
         match &self {
-            NoCase(m) => m.contains_key(&k.to_ascii_lowercase()),
+            FuncCase(m) | TypeCase(m) | NsCase(m) => m.contains_key(&k.to_ascii_lowercase()),
             YesCase(m) => m.contains_key(k),
         }
     }
 
     fn add(&mut self, k: &str, v: X) {
         match self {
-            NoCase(m) => m.insert(k.to_ascii_lowercase(), v),
+            FuncCase(m) | TypeCase(m) | NsCase(m) => m.insert(k.to_ascii_lowercase(), v),
             YesCase(m) => m.insert(k.to_string(), v),
         };
     }
 
     fn get(&self, k: &str) -> Option<&X> {
         match &self {
-            NoCase(m) => m.get(&k.to_ascii_lowercase()),
+            FuncCase(m) | TypeCase(m) | NsCase(m) => m.get(&k.to_ascii_lowercase()),
             YesCase(m) => m.get(k),
         }
     }
@@ -202,7 +204,9 @@ impl<X> Strmap<X> {
         F: Fn(&X) -> bool,
     {
         match self {
-            NoCase(m) => NoCase(m.into_iter().filter(|(_, x)| f(x)).collect()),
+            FuncCase(m) => FuncCase(m.into_iter().filter(|(_, x)| f(x)).collect()),
+            TypeCase(m) => TypeCase(m.into_iter().filter(|(_, x)| f(x)).collect()),
+            NsCase(m) => NsCase(m.into_iter().filter(|(_, x)| f(x)).collect()),
             YesCase(m) => YesCase(m.into_iter().filter(|(_, x)| f(x)).collect()),
         }
     }
@@ -211,14 +215,14 @@ impl<X> Strmap<X> {
 use crate::Strmap::*;
 
 fn empty_trait_require_clauses() -> Strmap<TokenKind> {
-    NoCase(HashMap::default())
+    TypeCase(HashMap::default())
 }
 
 #[derive(Clone, Debug)]
 struct UsedNames {
-    classes: Strmap<FirstUseOrDef>,    // NoCase
-    namespaces: Strmap<FirstUseOrDef>, // NoCase
-    functions: Strmap<FirstUseOrDef>,  // NoCase
+    classes: Strmap<FirstUseOrDef>,    // TypeCase
+    namespaces: Strmap<FirstUseOrDef>, // NsCase
+    functions: Strmap<FirstUseOrDef>,  // FuncCase
     constants: Strmap<FirstUseOrDef>,  // YesCase
     attributes: Strmap<FirstUseOrDef>, // YesCase
 }
@@ -226,9 +230,9 @@ struct UsedNames {
 impl UsedNames {
     fn empty() -> Self {
         Self {
-            classes: NoCase(HashMap::default()),
-            namespaces: NoCase(HashMap::default()),
-            functions: NoCase(HashMap::default()),
+            classes: TypeCase(HashMap::default()),
+            namespaces: NsCase(HashMap::default()),
+            functions: FuncCase(HashMap::default()),
             constants: YesCase(HashMap::default()),
             attributes: YesCase(HashMap::default()),
         }
@@ -5624,7 +5628,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         // Reset the function declarations
 
         let constants = std::mem::replace(&mut self.names.constants, YesCase(HashMap::default()));
-        let functions = std::mem::replace(&mut self.names.functions, NoCase(HashMap::default()));
+        let functions = std::mem::replace(&mut self.names.functions, FuncCase(HashMap::default()));
         let trait_require_clauses = std::mem::replace(
             &mut self.trait_require_clauses,
             empty_trait_require_clauses(),

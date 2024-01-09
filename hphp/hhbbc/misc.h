@@ -191,17 +191,24 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 /*
- * One-to-one case insensitive map, where the keys are static strings
- * and the values are some T.
+ * One-to-one case insensitive maps for types and funcs, where the keys
+ * are static strings and the values are some T.
  *
  * Elements are not stable under insert/erase.
  */
-template<class T> using ISStringToOneT =
+template<class T> using TSStringToOneT =
   hphp_fast_map<
     SString,
     T,
     string_data_hash,
-    string_data_isame
+    string_data_tsame
+  >;
+template<class T> using FSStringToOneT =
+  hphp_fast_map<
+    SString,
+    T,
+    string_data_hash,
+    string_data_fsame
   >;
 
 /*
@@ -221,8 +228,10 @@ template<class T> using SStringToOneT = hphp_fast_map<SString, T>;
  *
  * Elements are stable under insert/erase.
  */
-template<typename T> using ISStringToOneNodeT =
-  hphp_hash_map<SString, T, string_data_hash, string_data_isame>;
+template<typename T> using TSStringToOneNodeT =
+  hphp_hash_map<SString, T, string_data_hash, string_data_tsame>;
+template<typename T> using FSStringToOneNodeT =
+  hphp_hash_map<SString, T, string_data_hash, string_data_fsame>;
 
 /*
  * One-to-one case sensitive map, where the keys are static strings
@@ -253,9 +262,12 @@ template<class T> using SStringToOneConcurrentT =
  *
  * Concurrent insertions and lookups are supported.
  */
-template<class T> using ISStringToOneConcurrentT =
+template<class T> using TSStringToOneConcurrentT =
   folly_concurrent_hash_map_simd<SString, T,
-                                 string_data_hash, string_data_isame>;
+                                 string_data_hash, string_data_tsame>;
+template<class T> using FSStringToOneConcurrentT =
+  folly_concurrent_hash_map_simd<SString, T,
+                                 string_data_hash, string_data_fsame>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -266,12 +278,15 @@ using SStringSet = hphp_fast_set<SString>;
 /*
  * Case insensitive static string set.
  */
-using ISStringSet = hphp_fast_set<SString, string_data_hash, string_data_isame>;
+using TSStringSet = hphp_fast_set<SString, string_data_hash, string_data_tsame>;
+using FSStringSet = hphp_fast_set<SString, string_data_hash, string_data_fsame>;
 
 //////////////////////////////////////////////////////////////////////
 
 template<typename T>
-using ISStringToRef = ISStringToOneT<extern_worker::Ref<T>>;
+using TSStringToRef = TSStringToOneT<extern_worker::Ref<T>>;
+template<typename T>
+using FSStringToRef = FSStringToOneT<extern_worker::Ref<T>>;
 
 template<typename T>
 using SStringToRef = SStringToOneT<extern_worker::Ref<T>>;
@@ -285,7 +300,9 @@ template<typename T>
 using UniquePtrRef = extern_worker::Ref<std::unique_ptr<T>>;
 
 template<typename T>
-using ISStringToUniquePtrRef = ISStringToOneT<UniquePtrRef<T>>;
+using TSStringToUniquePtrRef = TSStringToOneT<UniquePtrRef<T>>;
+template<typename T>
+using FSStringToUniquePtrRef = FSStringToOneT<UniquePtrRef<T>>;
 
 template<typename T>
 using SStringToUniquePtrRef = SStringToOneT<UniquePtrRef<T>>;

@@ -91,7 +91,7 @@ bool checkUnit(const UnitEmitter*, ErrorMode mode = kStderr);
  *    imply bytecode restrictions.  (access This from static? etc).
  */
 bool checkFunc(const FuncEmitter*,
-               StringToStringIMap& createCls,
+               StringToStringTMap& createCls,
                ErrorMode mode = kStderr);
 
 /**

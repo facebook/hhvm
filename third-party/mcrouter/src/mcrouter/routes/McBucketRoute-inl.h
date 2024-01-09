@@ -17,9 +17,6 @@ namespace facebook::memcache::mcrouter {
  *   McBucketRoute Config:
  * - bucketize(bool)        - enable the bucketization
  * - total_buckets(int)     - total number of buckets
- * - bucketize_until(int)   - enable the handle for buckets until (exclusive)
- *                            this number. Must be less than total_buckets.
- *                            Needed for gradual migration.
  * - bucketization_keyspace - can be used to separate into multiple
  *                            bucketization domains decoupled from each other,
  *                            e.g. one keyspace for each Memache pool.

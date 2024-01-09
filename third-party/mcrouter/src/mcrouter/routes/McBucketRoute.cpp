@@ -20,12 +20,6 @@ McBucketRouteSettings parseMcBucketRouteSettings(const folly::dynamic& json) {
       1,
       std::numeric_limits<int64_t>::max());
 
-  auto bucketizeUntil = 0;
-  if (json.count("bucketize_until")) {
-    bucketizeUntil = parseInt(
-        *json.get_ptr("bucketize_until"), "bucketize_until", 0, totalBuckets);
-  }
-
   auto* bucketizationKeyspacePtr = json.get_ptr("bucketization_keyspace");
   checkLogic(
       bucketizationKeyspacePtr && bucketizationKeyspacePtr->isString(),
@@ -38,7 +32,6 @@ McBucketRouteSettings parseMcBucketRouteSettings(const folly::dynamic& json) {
   }
 
   settings.totalBuckets = totalBuckets;
-  settings.bucketizeUntil = bucketizeUntil;
   return settings;
 }
 } // namespace mcrouter

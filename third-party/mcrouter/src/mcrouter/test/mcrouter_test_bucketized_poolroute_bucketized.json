@@ -10,7 +10,6 @@
     "pool": "foo",
     "bucketize": true,
     "total_buckets": 1000,
-    "bucketize_until": 1000,
     "bucketization_keyspace": "test",
     "hash": "WeightedCh3"
   }

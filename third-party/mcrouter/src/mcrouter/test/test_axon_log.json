@@ -10,7 +10,6 @@
     "pool": "A",
     "protocol": "thrift",
     "bucketize": true,
-    "bucketize_until": 1000,
     "bucketization_keyspace": "test",
     "total_buckets": 1000,
     "hash": "WeightedCh3",

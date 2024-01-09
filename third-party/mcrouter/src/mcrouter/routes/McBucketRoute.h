@@ -19,7 +19,6 @@ namespace facebook::memcache::mcrouter {
 
 struct McBucketRouteSettings {
   size_t totalBuckets;
-  size_t bucketizeUntil;
   std::string salt;
   std::string bucketizationKeyspace;
 };
@@ -52,16 +51,14 @@ class McBucketRoute {
   McBucketRoute(RouteHandlePtr rh, McBucketRouteSettings& settings)
       : rh_(std::move(rh)),
         totalBuckets_(settings.totalBuckets),
-        bucketizeUntil_(settings.bucketizeUntil),
         salt_(settings.salt),
         ch3_(totalBuckets_),
         bucketizationKeyspace_(settings.bucketizationKeyspace) {}
 
   std::string routeName() const {
     return fmt::format(
-        "bucketize|total_buckets={}|bucketize_until={}|salt={}|bucketization_keyspace={}",
+        "bucketize|total_buckets={}|salt={}|bucketization_keyspace={}",
         totalBuckets_,
-        bucketizeUntil_,
         salt_,
         bucketizationKeyspace_);
   }
@@ -82,20 +79,16 @@ class McBucketRoute {
         return ch3_(getRoutingKey<Request>(req, this->salt_));
       }
     });
-    if (bucketId < bucketizeUntil_) {
-      if (auto* ctx = fiber_local<RouterInfo>::getTraverseCtx()) {
-        ctx->recordBucketizationData(
-            req.key_ref()->keyWithoutRoute().str(),
-            bucketId,
-            bucketizationKeyspace_);
-      }
-      return fiber_local<RouterInfo>::runWithLocals(
-          [this, &req, &t, bucketId]() {
-            fiber_local<RouterInfo>::setBucketId(bucketId);
-            return t(*rh_, req);
-          });
+    if (auto* ctx = fiber_local<RouterInfo>::getTraverseCtx()) {
+      ctx->recordBucketizationData(
+          req.key_ref()->keyWithoutRoute().str(),
+          bucketId,
+          bucketizationKeyspace_);
     }
-    return t(*rh_, req);
+    return fiber_local<RouterInfo>::runWithLocals([this, &req, &t, bucketId]() {
+      fiber_local<RouterInfo>::setBucketId(bucketId);
+      return t(*rh_, req);
+    });
   }
 
   template <class Request>
@@ -121,21 +114,17 @@ class McBucketRoute {
 
   template <class Request>
   ReplyT<Request> routeImpl(const Request& req, const size_t bucketId) const {
-    if (bucketId < bucketizeUntil_) {
-      auto proxy = &fiber_local<RouterInfo>::getSharedCtx()->proxy();
-      proxy->stats().increment(bucketized_routing_stat);
-      return fiber_local<RouterInfo>::runWithLocals([this, &req, bucketId]() {
-        fiber_local<RouterInfo>::setBucketId(bucketId);
-        return rh_->route(req);
-      });
-    }
-    return rh_->route(req);
+    auto proxy = &fiber_local<RouterInfo>::getSharedCtx()->proxy();
+    proxy->stats().increment(bucketized_routing_stat);
+    return fiber_local<RouterInfo>::runWithLocals([this, &req, bucketId]() {
+      fiber_local<RouterInfo>::setBucketId(bucketId);
+      return rh_->route(req);
+    });
   }
 
  private:
   const RouteHandlePtr rh_;
   const size_t totalBuckets_{0};
-  const size_t bucketizeUntil_{0};
   const std::string salt_;
   const Ch3HashFunc ch3_;
   const std::string bucketizationKeyspace_;

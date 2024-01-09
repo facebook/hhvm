@@ -65,7 +65,6 @@ const char* const kBucketizedSRRoute =
    "axonlog": false,
    "bucketize": true,
    "total_buckets": 1000,
-   "bucketize_until": 1000,
    "bucketization_keyspace": "tst"
 })";
 
@@ -79,7 +78,6 @@ const char* const kBucketizedPoolRoute =
    "axonlog": false,
    "bucketize": true,
    "total_buckets": 1000,
-   "bucketize_until": 1000,
    "bucketization_keyspace": "tst"
 })";
 
@@ -156,12 +154,12 @@ TEST(McRouteHandleProvider, bucketized_sr_route_and_mcreplay_asynclogRoutes) {
   auto rh = setup.getRoute(kBucketizedSRRoute);
   EXPECT_TRUE(rh != nullptr);
   EXPECT_EQ(
-      "bucketize|total_buckets=1000|bucketize_until=1000|salt=|bucketization_keyspace=tst",
+      "bucketize|total_buckets=1000|salt=|bucketization_keyspace=tst",
       rh->routeName());
   auto asynclogRoutes = setup.provider().releaseAsyncLogRoutes();
   EXPECT_EQ(1, asynclogRoutes.size());
   EXPECT_EQ(
-      "bucketize|total_buckets=1000|bucketize_until=1000|salt=|bucketization_keyspace=tst",
+      "bucketize|total_buckets=1000|salt=|bucketization_keyspace=tst",
       asynclogRoutes["test.asynclog"]->routeName());
 }
 
@@ -170,11 +168,11 @@ TEST(McRouteHandleProvider, bucketized_pool_route_and_mcreplay_asynclogRoutes) {
   auto rh = setup.getRoute(kBucketizedPoolRoute);
   EXPECT_TRUE(rh != nullptr);
   EXPECT_EQ(
-      "bucketize|total_buckets=1000|bucketize_until=1000|salt=|bucketization_keyspace=tst",
+      "bucketize|total_buckets=1000|salt=|bucketization_keyspace=tst",
       rh->routeName());
   auto asynclogRoutes = setup.provider().releaseAsyncLogRoutes();
   EXPECT_EQ(1, asynclogRoutes.size());
   EXPECT_EQ(
-      "bucketize|total_buckets=1000|bucketize_until=1000|salt=|bucketization_keyspace=tst",
+      "bucketize|total_buckets=1000|salt=|bucketization_keyspace=tst",
       asynclogRoutes["test.asynclog"]->routeName());
 }

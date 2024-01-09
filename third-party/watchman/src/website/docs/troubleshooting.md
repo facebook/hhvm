@@ -56,7 +56,7 @@ macOS has a similar internal limit and behavior when that limit is exceeded. If
 you're encountering a message like:
 
 ```
-Recrawled this watch 1 times, most recently because:
+Recrawled this watch 1 time, most recently because:
 /some/path: kFSEventStreamEventFlagUserDropped
 ```
 

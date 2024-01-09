@@ -28,7 +28,9 @@ void Root::scheduleRecrawl(const char* why) {
         info->warning = w_string::build(
             "Recrawled this watch ",
             info->recrawlCount,
-            " times, most recently because:\n",
+            " time",
+            info->recrawlCount != 1 ? "s" : "",
+            ", most recently because:\n",
             why,
             "To resolve, please review the information on\n",
             cfg_get_trouble_url(),

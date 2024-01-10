@@ -167,8 +167,13 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
 
   bool empty() const {
     bool b = true;
-    op::for_each_ordinal<T>(
-        [&](auto id) { b = b && !this->modifies<decltype(id)>(); });
+    op::for_each_ordinal<T>([&](auto id) {
+      using Id = decltype(id);
+      if constexpr (!apache::thrift::detail::is_shared_ptr_v<
+                        op::get_field_ref<T, Id>>) {
+        b = b && !this->modifies<Id>();
+      }
+    });
     return b;
   }
 
@@ -285,15 +290,17 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
       v.clear();
       for_each_field_id<T>([&](auto id) {
         using Id = decltype(id);
-        using FieldPatchType =
-            folly::remove_cvref_t<decltype(BaseEnsurePatch{}.patch<Id>())>;
-
-        v.template patchIfSet<Id>(FieldPatchType{});
-        v.template ensure<Id>();
-        if constexpr (type::is_optional_or_union_field_v<T, Id>) {
-          v.template ensure<Id>(FieldType<Id>{});
+        if constexpr (!apache::thrift::detail::is_shared_ptr_v<
+                          op::get_field_ref<T, Id>>) {
+          using FieldPatchType =
+              folly::remove_cvref_t<decltype(BaseEnsurePatch{}.patch<Id>())>;
+          v.template patchIfSet<Id>(FieldPatchType{});
+          v.template ensure<Id>();
+          if constexpr (type::is_optional_or_union_field_v<T, Id>) {
+            v.template ensure<Id>(FieldType<Id>{});
+          }
+          v.template patchIfSet<Id>(FieldPatchType{});
         }
-        v.template patchIfSet<Id>(FieldPatchType{});
       });
     }
 
@@ -306,11 +313,14 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
     // TODO: Optimize ensure for UnionPatch
     for_each_field_id<T>([&](auto id) {
       using Id = decltype(id);
-      if (auto p = op::get<Id>(*data_.ensure())) {
-        if constexpr (type::is_optional_or_union_field_v<T, Id>) {
-          std::forward<Visitor>(v).template ensure<Id>(*p);
-        } else {
-          std::forward<Visitor>(v).template ensure<Id>();
+      if constexpr (!apache::thrift::detail::is_shared_ptr_v<
+                        op::get_field_ref<T, Id>>) {
+        if (auto p = op::get<Id>(*data_.ensure())) {
+          if constexpr (type::is_optional_or_union_field_v<T, Id>) {
+            std::forward<Visitor>(v).template ensure<Id>(*p);
+          } else {
+            std::forward<Visitor>(v).template ensure<Id>();
+          }
         }
       }
     });
@@ -323,7 +333,10 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
             fieldId,
             [&](auto id) {
               using Id = decltype(id);
-              std::forward<Visitor>(v).template remove<Id>();
+              if constexpr (!apache::thrift::detail::is_shared_ptr_v<
+                                op::get_field_ref<T, Id>>) {
+                std::forward<Visitor>(v).template remove<Id>();
+              }
             },
             [] {
               // Ignore if the specified field is not part of the struct
@@ -373,15 +386,18 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
     if (data_.assign().has_value()) {
       for_each_field_id<T>([&](auto id) {
         using Id = decltype(id);
-        auto&& field = op::get<>(id, *data_.assign());
-        auto&& prior = getRawPatch<Id>(data_.patchPrior());
-        auto&& ensure = op::get<>(id, *data_.ensure());
-        auto&& after = getRawPatch<Id>(data_.patch());
-        if (isAbsent(field)) {
-          prior.toThrift().clear() = true;
-        } else {
-          ensure = {};
-          after.assign(std::move(*field));
+        if constexpr (!apache::thrift::detail::is_shared_ptr_v<
+                          op::get_field_ref<T, Id>>) {
+          auto&& field = op::get<>(id, *data_.assign());
+          auto&& prior = getRawPatch<Id>(data_.patchPrior());
+          auto&& ensure = op::get<>(id, *data_.ensure());
+          auto&& after = getRawPatch<Id>(data_.patch());
+          if (isAbsent(field)) {
+            prior.toThrift().clear() = true;
+          } else {
+            ensure = {};
+            after.assign(std::move(*field));
+          }
         }
       });
       // Unset assign.
@@ -506,24 +522,6 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
     return s;
   }
 
-  ~StructPatch() {
-    if (false) {
-      // Implement this check in destructor to make sure it's instantiated.
-      op::for_each_ordinal<T>([](auto id) {
-        static_assert(
-            !apache::thrift::detail::is_shared_or_unique_ptr_v<
-                op::get_field_ref<T, decltype(id)>>,
-            "Patching cpp.ref field is unsupported since we cannot distinguish "
-            "unqualified and optional fields. Why? The type of `foo.field()` "
-            "is `std::unique_ptr` regardless Whether field is optional or "
-            "unqualified. In addition, Thrift Patch has different behavior "
-            "between optional and unqualified fields, e.g. `PatchOp::Clear` "
-            "will clear an optional field, but set an unqualified field to the "
-            "intrinsic default.");
-      });
-    }
-  }
-
  private:
   using Base::data_;
 
@@ -556,8 +554,12 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
   std::unordered_set<FieldId> removedFields() const {
     auto removed = *data_.remove();
     op::for_each_field_id<T>([&](auto id) {
-      if (this->isRemoved<decltype(id)>()) {
-        removed.insert(id.value);
+      using Id = decltype(id);
+      if constexpr (!apache::thrift::detail::is_shared_ptr_v<
+                        op::get_field_ref<T, Id>>) {
+        if (this->isRemoved<Id>()) {
+          removed.insert(id.value);
+        }
       }
     });
     return removed;

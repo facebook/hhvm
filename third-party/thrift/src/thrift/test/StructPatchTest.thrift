@@ -66,6 +66,16 @@ struct MyStruct {
   28: optional map<string, string> optMapVal;
 
   29: LongList longList;
+
+  // These fields should not exist in field patch.
+  @cpp.Ref{type = cpp.RefType.Shared}
+  30: list<i32> sharedConst;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  31: optional list<i32> optSharedConst;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  32: list<i32> sharedMutable;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  33: optional list<i32> optSharedMutable;
 }
 
 // Intentionally defined after MyStruct, so it's patch types are generated after MyStruct's.

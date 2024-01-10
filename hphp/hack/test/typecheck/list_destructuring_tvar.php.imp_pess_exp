@@ -1,7 +1,7 @@
 File "list_destructuring_tvar.php", line 38, characters 7-18:
-  ~(A1 | B1)
+  (A1 | B1)
 File "list_destructuring_tvar.php", line 39, characters 7-18:
-  ~(A2 | B2)
+  (A2 | B2)
 File "list_destructuring_tvar.php", line 38, characters 7-18:[2]
   dynamic
 File "list_destructuring_tvar.php", line 39, characters 7-18:[2]

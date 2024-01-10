@@ -1580,7 +1580,19 @@ let check_argument_type_against_parameter_type_helper
     { param.fp_type with et_type = param_ty }
     Typing_error.Callback.unify_error
 
+(*
+ * Check a single argument type arg_ty against the function parameter type param.fp_type.
+ *
+ * For functions marked SupportDynamicType (if dynamic_func != None)
+ * we attempt a static check, and if that fails, we check against a like-type of param.fp_type.
+ *
+ * In the case that the argument type is already a like-type,
+ * and the parameter type is not, we just skip straight to this dynamic check, in order
+ * to avoid the situation where we make poor choices with generic parameters e.g. we
+ * attempt ~t <: T to get T:=~t rather than ~t <: ~T to get T := t.
+ *)
 let check_argument_type_against_parameter_type
+    ?(is_single_argument = false)
     ~dynamic_func
     env
     param
@@ -1605,20 +1617,27 @@ let check_argument_type_against_parameter_type
     | Ast_defs.Pinout pk_pos -> Pos.merge pk_pos pos
   in
   let (env, opt_e, used_dynamic) =
-    (* First try statically *)
-    let (env1, e1opt) =
-      check_argument_type_against_parameter_type_helper
-        ~dynamic_func:None
-        env
-        pos
-        param
-        dep_ty
-    in
-    if Option.is_some dynamic_func then
-      match e1opt with
-      | None -> (env1, None, false)
-      | Some e1 ->
-        let (env2, e2opt) =
+    if Option.is_none dynamic_func then
+      let (env, opt_e) =
+        check_argument_type_against_parameter_type_helper
+          ~dynamic_func:None
+          env
+          pos
+          param
+          dep_ty
+      in
+      (env, opt_e, false)
+    else
+      let check_dynamic_only =
+        (not is_single_argument)
+        && (not (TUtils.is_dynamic env param.fp_type.et_type))
+        && Option.is_some (Typing_utils.try_strip_dynamic env dep_ty)
+        && Option.is_none
+             (Typing_utils.try_strip_dynamic env param.fp_type.et_type)
+      in
+      if check_dynamic_only then
+        (* Only try dynamically *)
+        let (env, opt_e) =
           check_argument_type_against_parameter_type_helper
             ~dynamic_func
             env
@@ -1626,17 +1645,40 @@ let check_argument_type_against_parameter_type
             param
             dep_ty
         in
-        (match e2opt with
-        (* We used dynamic calling to get a successful check *)
-        | None -> (env2, None, true)
-        (* We failed on both, pick the one with fewest errors! (preferring static on a tie) *)
-        | Some e2 ->
-          if Typing_error.count e1 <= Typing_error.count e2 then
-            (env1, Some e1, false)
-          else
-            (env2, Some e2, true))
-    else
-      (env1, e1opt, false)
+        (env, opt_e, true)
+      else
+        let (env, opt_e, used_dynamic) =
+          (* First try statically *)
+          let (env1, e1opt) =
+            check_argument_type_against_parameter_type_helper
+              ~dynamic_func:None
+              env
+              pos
+              param
+              dep_ty
+          in
+          match e1opt with
+          | None -> (env1, None, false)
+          | Some e1 ->
+            let (env2, e2opt) =
+              check_argument_type_against_parameter_type_helper
+                ~dynamic_func
+                env
+                pos
+                param
+                dep_ty
+            in
+            (match e2opt with
+            (* We used dynamic calling to get a successful check *)
+            | None -> (env2, None, true)
+            (* We failed on both, pick the one with fewest errors! (preferring static on a tie) *)
+            | Some e2 ->
+              if Typing_error.count e1 <= Typing_error.count e2 then
+                (env1, Some e1, false)
+              else
+                (env2, Some e2, true))
+        in
+        (env, opt_e, used_dynamic)
   in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) opt_e;
   (env, mk_ty_mismatch_opt arg_ty param.fp_type.et_type opt_e, used_dynamic)
@@ -6419,6 +6461,7 @@ end = struct
               true
             | _ -> false
           in
+          let is_single_argument = List.length el = 1 in
           let get_next_param_info paraml =
             match paraml with
             | param :: paraml -> (false, Some param, paraml)
@@ -6560,6 +6603,7 @@ end = struct
               in
               let (env, ty_mismatch_opt, used_dynamic) =
                 check_argument_type_against_parameter_type
+                  ~is_single_argument
                   ~dynamic_func
                   env
                   param

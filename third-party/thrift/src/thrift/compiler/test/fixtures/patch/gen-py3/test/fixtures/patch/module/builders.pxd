@@ -89,3 +89,13 @@ cdef class Loop_Builder(thrift.py3.builder.StructBuilder):
     cdef public object bar
 
 
+cdef class RefFields_Builder(thrift.py3.builder.StructBuilder):
+    cdef public list unique
+    cdef public list shared_const
+    cdef public list shared_mustable
+    cdef public list opt_unique
+    cdef public list opt_shared_const
+    cdef public list opt_shared_mustable
+    cdef public list opt_box
+
+

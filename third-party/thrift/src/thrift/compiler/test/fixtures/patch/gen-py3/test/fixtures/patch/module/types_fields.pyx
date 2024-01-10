@@ -535,3 +535,76 @@ cdef class __Loop_FieldsSetter(__StructFieldsSetter):
             raise TypeError(f'bar is not a { _test_fixtures_patch_module_types.Bar !r}.')
         deref(self._struct_cpp_obj).bar_ref().assign(deref((<_test_fixtures_patch_module_types.Bar?> _fbthrift_value)._cpp_obj))
 
+
+@__cython.auto_pickle(False)
+cdef class __RefFields_FieldsSetter(__StructFieldsSetter):
+
+    @staticmethod
+    cdef __RefFields_FieldsSetter _fbthrift_create(_test_fixtures_patch_module_types.cRefFields* struct_cpp_obj):
+        cdef __RefFields_FieldsSetter __fbthrift_inst = __RefFields_FieldsSetter.__new__(__RefFields_FieldsSetter)
+        __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
+        __fbthrift_inst._setters[__cstring_view(<const char*>"unique")] = __RefFields_FieldsSetter._set_field_0
+        __fbthrift_inst._setters[__cstring_view(<const char*>"shared_const")] = __RefFields_FieldsSetter._set_field_1
+        __fbthrift_inst._setters[__cstring_view(<const char*>"shared_mustable")] = __RefFields_FieldsSetter._set_field_2
+        __fbthrift_inst._setters[__cstring_view(<const char*>"opt_unique")] = __RefFields_FieldsSetter._set_field_3
+        __fbthrift_inst._setters[__cstring_view(<const char*>"opt_shared_const")] = __RefFields_FieldsSetter._set_field_4
+        __fbthrift_inst._setters[__cstring_view(<const char*>"opt_shared_mustable")] = __RefFields_FieldsSetter._set_field_5
+        __fbthrift_inst._setters[__cstring_view(<const char*>"opt_box")] = __RefFields_FieldsSetter._set_field_6
+        return __fbthrift_inst
+
+    cdef void set_field(__RefFields_FieldsSetter self, const char* name, object value) except *:
+        cdef __cstring_view cname = __cstring_view(name)
+        cdef cumap[__cstring_view, __RefFields_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        if found == self._setters.end():
+            raise TypeError(f"invalid field name {name.decode('utf-8')}")
+        deref(found).second(self, value)
+
+    cdef void _set_field_0(self, _fbthrift_value) except *:
+        # for field unique
+        if _fbthrift_value is None:
+            __reset_field[_test_fixtures_patch_module_types.cRefFields](deref(self._struct_cpp_obj), 0)
+            return
+        assign_unique_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).unique_ref(), make_unique[vector[cint32_t]](deref(_test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj)))
+
+    cdef void _set_field_1(self, _fbthrift_value) except *:
+        # for field shared_const
+        if _fbthrift_value is None:
+            __reset_field[_test_fixtures_patch_module_types.cRefFields](deref(self._struct_cpp_obj), 1)
+            return
+        assign_shared_const_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).shared_const_ref(), const_pointer_cast(_test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj))
+
+    cdef void _set_field_2(self, _fbthrift_value) except *:
+        # for field shared_mustable
+        if _fbthrift_value is None:
+            __reset_field[_test_fixtures_patch_module_types.cRefFields](deref(self._struct_cpp_obj), 2)
+            return
+        assign_shared_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).shared_mustable_ref(), _test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj)
+
+    cdef void _set_field_3(self, _fbthrift_value) except *:
+        # for field opt_unique
+        if _fbthrift_value is None:
+            __reset_field[_test_fixtures_patch_module_types.cRefFields](deref(self._struct_cpp_obj), 3)
+            return
+        assign_unique_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).opt_unique_ref(), make_unique[vector[cint32_t]](deref(_test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj)))
+
+    cdef void _set_field_4(self, _fbthrift_value) except *:
+        # for field opt_shared_const
+        if _fbthrift_value is None:
+            __reset_field[_test_fixtures_patch_module_types.cRefFields](deref(self._struct_cpp_obj), 4)
+            return
+        assign_shared_const_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).opt_shared_const_ref(), const_pointer_cast(_test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj))
+
+    cdef void _set_field_5(self, _fbthrift_value) except *:
+        # for field opt_shared_mustable
+        if _fbthrift_value is None:
+            __reset_field[_test_fixtures_patch_module_types.cRefFields](deref(self._struct_cpp_obj), 5)
+            return
+        assign_shared_ptr[vector[cint32_t]](deref(self._struct_cpp_obj).opt_shared_mustable_ref(), _test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj)
+
+    cdef void _set_field_6(self, _fbthrift_value) except *:
+        # for field opt_box
+        if _fbthrift_value is None:
+            __reset_field[_test_fixtures_patch_module_types.cRefFields](deref(self._struct_cpp_obj), 6)
+            return
+        deref(self._struct_cpp_obj).opt_box_ref().assign(deref(_test_fixtures_patch_module_types.List__i32(_fbthrift_value)._cpp_obj))
+

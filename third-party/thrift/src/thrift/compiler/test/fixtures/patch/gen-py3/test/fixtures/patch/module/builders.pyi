@@ -107,3 +107,15 @@ class Loop_Builder(thrift.py3.builder.StructBuilder):
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
 
 
+class RefFields_Builder(thrift.py3.builder.StructBuilder):
+    unique: _typing.Optional[list]
+    shared_const: _typing.Optional[list]
+    shared_mustable: _typing.Optional[list]
+    opt_unique: _typing.Optional[list]
+    opt_shared_const: _typing.Optional[list]
+    opt_shared_mustable: _typing.Optional[list]
+    opt_box: _typing.Optional[list]
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
+
+

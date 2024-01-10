@@ -1337,6 +1337,160 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::test::fixtures::patch::RefFields>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::patch::RefFields>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace patch {
+
+const char* RefFields::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/patch/RefFields";
+}
+
+const folly::StringPiece RefFields::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<RefFields>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece RefFields::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<RefFields>::name;
+}
+
+RefFields::RefFields(const RefFields& srcObj) :
+    __fbthrift_field_unique(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::list<::apache::thrift::type_class::integral>>(srcObj.__fbthrift_field_unique)),
+    __fbthrift_field_shared_const(srcObj.__fbthrift_field_shared_const),
+    __fbthrift_field_shared_mustable(srcObj.__fbthrift_field_shared_mustable),
+    __fbthrift_field_opt_unique(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::list<::apache::thrift::type_class::integral>>(srcObj.__fbthrift_field_opt_unique)),
+    __fbthrift_field_opt_shared_const(srcObj.__fbthrift_field_opt_shared_const),
+    __fbthrift_field_opt_shared_mustable(srcObj.__fbthrift_field_opt_shared_mustable),
+    __fbthrift_field_opt_box(srcObj.__fbthrift_field_opt_box) {
+}
+
+RefFields& RefFields::operator=(const RefFields& other) {
+  RefFields tmp(other);
+  swap(*this, tmp);
+  return *this;
+}
+
+RefFields::RefFields() :
+      __fbthrift_field_unique(std::make_unique<::std::vector<::std::int32_t>>()),
+      __fbthrift_field_shared_const(std::make_shared<::std::vector<::std::int32_t>>()),
+      __fbthrift_field_shared_mustable(std::make_shared<::std::vector<::std::int32_t>>()) {
+}
+
+
+RefFields::~RefFields() {}
+
+RefFields::RefFields(FOLLY_MAYBE_UNUSED RefFields&& other) noexcept :
+    __fbthrift_field_unique(std::move(other.__fbthrift_field_unique)),
+    __fbthrift_field_shared_const(std::move(other.__fbthrift_field_shared_const)),
+    __fbthrift_field_shared_mustable(std::move(other.__fbthrift_field_shared_mustable)),
+    __fbthrift_field_opt_unique(std::move(other.__fbthrift_field_opt_unique)),
+    __fbthrift_field_opt_shared_const(std::move(other.__fbthrift_field_opt_shared_const)),
+    __fbthrift_field_opt_shared_mustable(std::move(other.__fbthrift_field_opt_shared_mustable)),
+    __fbthrift_field_opt_box(std::move(other.__fbthrift_field_opt_box)) {
+}
+
+RefFields& RefFields::operator=(FOLLY_MAYBE_UNUSED RefFields&& other) noexcept {
+    this->__fbthrift_field_unique = std::move(other.__fbthrift_field_unique);
+    this->__fbthrift_field_shared_const = std::move(other.__fbthrift_field_shared_const);
+    this->__fbthrift_field_shared_mustable = std::move(other.__fbthrift_field_shared_mustable);
+    this->__fbthrift_field_opt_unique = std::move(other.__fbthrift_field_opt_unique);
+    this->__fbthrift_field_opt_shared_const = std::move(other.__fbthrift_field_opt_shared_const);
+    this->__fbthrift_field_opt_shared_mustable = std::move(other.__fbthrift_field_opt_shared_mustable);
+    this->__fbthrift_field_opt_box = std::move(other.__fbthrift_field_opt_box);
+    return *this;
+}
+
+
+RefFields::RefFields(apache::thrift::FragileConstructor, ::std::unique_ptr<::std::vector<::std::int32_t>> unique__arg, ::std::shared_ptr<const ::std::vector<::std::int32_t>> shared_const__arg, ::std::shared_ptr<::std::vector<::std::int32_t>> shared_mustable__arg, ::std::unique_ptr<::std::vector<::std::int32_t>> opt_unique__arg, ::std::shared_ptr<const ::std::vector<::std::int32_t>> opt_shared_const__arg, ::std::shared_ptr<::std::vector<::std::int32_t>> opt_shared_mustable__arg, ::apache::thrift::detail::boxed_value_ptr<::std::vector<::std::int32_t>> opt_box__arg) :
+    __fbthrift_field_unique(std::move(unique__arg)),
+    __fbthrift_field_shared_const(std::move(shared_const__arg)),
+    __fbthrift_field_shared_mustable(std::move(shared_mustable__arg)),
+    __fbthrift_field_opt_unique(std::move(opt_unique__arg)),
+    __fbthrift_field_opt_shared_const(std::move(opt_shared_const__arg)),
+    __fbthrift_field_opt_shared_mustable(std::move(opt_shared_mustable__arg)),
+    __fbthrift_field_opt_box(std::move(opt_box__arg)) {
+}
+
+
+void RefFields::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_unique = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::vector<::std::int32_t>>>();
+  this->__fbthrift_field_shared_const = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::std::vector<::std::int32_t>>>();
+  this->__fbthrift_field_shared_mustable = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::std::vector<::std::int32_t>>>();
+  this->__fbthrift_field_opt_unique.reset();
+  this->__fbthrift_field_opt_shared_const.reset();
+  this->__fbthrift_field_opt_shared_mustable.reset();
+  this->__fbthrift_field_opt_box.reset();
+}
+
+void RefFields::__fbthrift_clear_terse_fields() {
+  this->__fbthrift_field_unique = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::vector<::std::int32_t>>>();
+  this->__fbthrift_field_shared_const = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::std::vector<::std::int32_t>>>();
+  this->__fbthrift_field_shared_mustable = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::std::vector<::std::int32_t>>>();
+}
+
+bool RefFields::__fbthrift_is_empty() const {
+  return this->__fbthrift_field_unique && ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(*this->__fbthrift_field_unique) &&
+ this->__fbthrift_field_shared_const && ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(*this->__fbthrift_field_shared_const) &&
+ this->__fbthrift_field_shared_mustable && ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(*this->__fbthrift_field_shared_mustable) &&
+ !(this->__fbthrift_field_opt_unique) &&
+ !(this->__fbthrift_field_opt_shared_const) &&
+ !(this->__fbthrift_field_opt_shared_mustable) &&
+ !(this->__fbthrift_field_opt_box);
+}
+
+bool RefFields::operator==(FOLLY_MAYBE_UNUSED const RefFields& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool RefFields::operator<(FOLLY_MAYBE_UNUSED const RefFields& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED RefFields& a, FOLLY_MAYBE_UNUSED RefFields& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_unique, b.__fbthrift_field_unique);
+  swap(a.__fbthrift_field_shared_const, b.__fbthrift_field_shared_const);
+  swap(a.__fbthrift_field_shared_mustable, b.__fbthrift_field_shared_mustable);
+  swap(a.__fbthrift_field_opt_unique, b.__fbthrift_field_opt_unique);
+  swap(a.__fbthrift_field_opt_shared_const, b.__fbthrift_field_opt_shared_const);
+  swap(a.__fbthrift_field_opt_shared_mustable, b.__fbthrift_field_opt_shared_mustable);
+  swap(a.__fbthrift_field_opt_box, b.__fbthrift_field_opt_box);
+}
+
+template void RefFields::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t RefFields::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t RefFields::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t RefFields::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void RefFields::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t RefFields::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t RefFields::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t RefFields::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // test::fixtures::patch
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::test::fixtures::patch::MyDataPatchStruct>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
@@ -6713,6 +6867,1646 @@ static_assert(
 
 }}} // test::fixtures::patch
 
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::patch::RefFieldsPatchStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::patch::RefFieldsPatchStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace patch {
+
+const char* RefFieldsPatchStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/patch/RefFieldsPatch";
+}
+
+const folly::StringPiece RefFieldsPatchStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<RefFieldsPatchStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece RefFieldsPatchStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<RefFieldsPatchStruct>::name;
+}
+
+RefFieldsPatchStruct::RefFieldsPatchStruct(const RefFieldsPatchStruct& srcObj) :
+    __fbthrift_field_assign(srcObj.__fbthrift_field_assign),
+    __fbthrift_field_clear(srcObj.__fbthrift_field_clear),
+    __fbthrift_field_patchPrior(srcObj.__fbthrift_field_patchPrior),
+    __fbthrift_field_ensure(srcObj.__fbthrift_field_ensure),
+    __fbthrift_field_patch(srcObj.__fbthrift_field_patch),
+    __fbthrift_field_remove(srcObj.__fbthrift_field_remove) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RefFieldsFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RefFieldsFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
+}
+
+RefFieldsPatchStruct& RefFieldsPatchStruct::operator=(const RefFieldsPatchStruct& other) {
+  RefFieldsPatchStruct tmp(other);
+  swap(*this, tmp);
+  return *this;
+}
+
+RefFieldsPatchStruct::RefFieldsPatchStruct() :
+      __fbthrift_field_clear() {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RefFieldsFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RefFieldsFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
+}
+
+
+RefFieldsPatchStruct::~RefFieldsPatchStruct() {}
+
+RefFieldsPatchStruct::RefFieldsPatchStruct(FOLLY_MAYBE_UNUSED RefFieldsPatchStruct&& other) noexcept :
+    __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
+    __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
+    __fbthrift_field_patchPrior(std::move(other.__fbthrift_field_patchPrior)),
+    __fbthrift_field_ensure(std::move(other.__fbthrift_field_ensure)),
+    __fbthrift_field_patch(std::move(other.__fbthrift_field_patch)),
+    __fbthrift_field_remove(std::move(other.__fbthrift_field_remove)) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RefFieldsFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RefFieldsFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
+}
+
+RefFieldsPatchStruct& RefFieldsPatchStruct::operator=(FOLLY_MAYBE_UNUSED RefFieldsPatchStruct&& other) noexcept {
+    this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
+    this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
+    this->__fbthrift_field_patchPrior = std::move(other.__fbthrift_field_patchPrior);
+    this->__fbthrift_field_ensure = std::move(other.__fbthrift_field_ensure);
+    this->__fbthrift_field_patch = std::move(other.__fbthrift_field_patch);
+    this->__fbthrift_field_remove = std::move(other.__fbthrift_field_remove);
+    return *this;
+}
+
+
+RefFieldsPatchStruct::RefFieldsPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::RefFields> assign__arg, bool clear__arg, ::test::fixtures::patch::RefFieldsFieldPatch patchPrior__arg, ::test::fixtures::patch::RefFieldsEnsureStruct ensure__arg, ::test::fixtures::patch::RefFieldsFieldPatch patch__arg, ::apache::thrift::op::FieldIdList remove__arg) :
+    __fbthrift_field_assign(std::move(assign__arg)),
+    __fbthrift_field_clear(std::move(clear__arg)),
+    __fbthrift_field_patchPrior(std::move(patchPrior__arg)),
+    __fbthrift_field_ensure(std::move(ensure__arg)),
+    __fbthrift_field_patch(std::move(patch__arg)),
+    __fbthrift_field_remove(std::move(remove__arg)) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RefFieldsFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RefFieldsFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
+}
+
+
+void RefFieldsPatchStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_assign.reset();
+  this->__fbthrift_field_clear = bool();
+  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RefFieldsFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
+  ::apache::thrift::clear(this->__fbthrift_field_ensure);
+  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RefFieldsFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
+}
+
+void RefFieldsPatchStruct::__fbthrift_clear_terse_fields() {
+  this->__fbthrift_field_clear = bool();
+  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RefFieldsFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
+  ::apache::thrift::detail::st::clear_terse_fields(this->__fbthrift_field_ensure);
+  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RefFieldsFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
+}
+
+bool RefFieldsPatchStruct::__fbthrift_is_empty() const {
+  return !(this->__fbthrift_field_assign) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_clear) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RefFieldsFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsFieldPatchStruct>>>(this->__fbthrift_field_patchPrior) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsEnsureStruct>>(this->__fbthrift_field_ensure) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RefFieldsFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsFieldPatchStruct>>>(this->__fbthrift_field_patch) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldIdListToSetAdapter, ::apache::thrift::type::list<::apache::thrift::type::i16_t>>>(this->__fbthrift_field_remove);
+}
+
+bool RefFieldsPatchStruct::operator==(FOLLY_MAYBE_UNUSED const RefFieldsPatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool RefFieldsPatchStruct::operator<(FOLLY_MAYBE_UNUSED const RefFieldsPatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::test::fixtures::patch::RefFieldsEnsureStruct& RefFieldsPatchStruct::get_ensure() const& {
+  return __fbthrift_field_ensure;
+}
+
+::test::fixtures::patch::RefFieldsEnsureStruct RefFieldsPatchStruct::get_ensure() && {
+  return std::move(__fbthrift_field_ensure);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED RefFieldsPatchStruct& a, FOLLY_MAYBE_UNUSED RefFieldsPatchStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
+  swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
+  swap(a.__fbthrift_field_patchPrior, b.__fbthrift_field_patchPrior);
+  swap(a.__fbthrift_field_ensure, b.__fbthrift_field_ensure);
+  swap(a.__fbthrift_field_patch, b.__fbthrift_field_patch);
+  swap(a.__fbthrift_field_remove, b.__fbthrift_field_remove);
+}
+
+template void RefFieldsPatchStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t RefFieldsPatchStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t RefFieldsPatchStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t RefFieldsPatchStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void RefFieldsPatchStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t RefFieldsPatchStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t RefFieldsPatchStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t RefFieldsPatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        RefFieldsPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::patch::RefFields>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        RefFieldsPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::patch::RefFieldsFieldPatch>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        RefFieldsPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::patch::RefFieldsEnsureStruct>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        RefFieldsPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::patch::RefFieldsFieldPatch>,
+    "inconsistent use of json option");
+
+}}} // test::fixtures::patch
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::patch::RefFieldsField1PatchStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::patch::RefFieldsField1PatchStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace patch {
+
+const char* RefFieldsField1PatchStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/patch/RefFieldsField1Patch";
+}
+
+const folly::StringPiece RefFieldsField1PatchStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<RefFieldsField1PatchStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece RefFieldsField1PatchStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<RefFieldsField1PatchStruct>::name;
+}
+
+RefFieldsField1PatchStruct::RefFieldsField1PatchStruct(const RefFieldsField1PatchStruct&) = default;
+RefFieldsField1PatchStruct& RefFieldsField1PatchStruct::operator=(const RefFieldsField1PatchStruct&) = default;
+RefFieldsField1PatchStruct::RefFieldsField1PatchStruct() :
+      __fbthrift_field_clear() {
+}
+
+
+RefFieldsField1PatchStruct::~RefFieldsField1PatchStruct() {}
+
+RefFieldsField1PatchStruct::RefFieldsField1PatchStruct(FOLLY_MAYBE_UNUSED RefFieldsField1PatchStruct&& other) noexcept :
+    __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
+    __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
+    __fbthrift_field_prepend(std::move(other.__fbthrift_field_prepend)),
+    __fbthrift_field_append(std::move(other.__fbthrift_field_append)),
+    __isset(other.__isset) {
+}
+
+RefFieldsField1PatchStruct& RefFieldsField1PatchStruct::operator=(FOLLY_MAYBE_UNUSED RefFieldsField1PatchStruct&& other) noexcept {
+    this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
+    this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
+    this->__fbthrift_field_prepend = std::move(other.__fbthrift_field_prepend);
+    this->__fbthrift_field_append = std::move(other.__fbthrift_field_append);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+RefFieldsField1PatchStruct::RefFieldsField1PatchStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int32_t> assign__arg, bool clear__arg, ::std::vector<::std::int32_t> prepend__arg, ::std::vector<::std::int32_t> append__arg) :
+    __fbthrift_field_assign(std::move(assign__arg)),
+    __fbthrift_field_clear(std::move(clear__arg)),
+    __fbthrift_field_prepend(std::move(prepend__arg)),
+    __fbthrift_field_append(std::move(append__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+
+void RefFieldsField1PatchStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_assign.clear();
+  this->__fbthrift_field_clear = bool();
+  this->__fbthrift_field_prepend.clear();
+  this->__fbthrift_field_append.clear();
+  __isset = {};
+}
+
+void RefFieldsField1PatchStruct::__fbthrift_clear_terse_fields() {
+  this->__fbthrift_field_clear = bool();
+  this->__fbthrift_field_prepend.clear();
+  this->__fbthrift_field_append.clear();
+}
+
+bool RefFieldsField1PatchStruct::__fbthrift_is_empty() const {
+  return !(this->__isset.get(0)) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_clear) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_prepend) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_append);
+}
+
+bool RefFieldsField1PatchStruct::operator==(FOLLY_MAYBE_UNUSED const RefFieldsField1PatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool RefFieldsField1PatchStruct::operator<(FOLLY_MAYBE_UNUSED const RefFieldsField1PatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::std::vector<::std::int32_t>* RefFieldsField1PatchStruct::get_assign() const& {
+  return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
+}
+
+::std::vector<::std::int32_t>* RefFieldsField1PatchStruct::get_assign() & {
+  return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
+}
+
+const ::std::vector<::std::int32_t>& RefFieldsField1PatchStruct::get_prepend() const& {
+  return __fbthrift_field_prepend;
+}
+
+::std::vector<::std::int32_t> RefFieldsField1PatchStruct::get_prepend() && {
+  return std::move(__fbthrift_field_prepend);
+}
+
+const ::std::vector<::std::int32_t>& RefFieldsField1PatchStruct::get_append() const& {
+  return __fbthrift_field_append;
+}
+
+::std::vector<::std::int32_t> RefFieldsField1PatchStruct::get_append() && {
+  return std::move(__fbthrift_field_append);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED RefFieldsField1PatchStruct& a, FOLLY_MAYBE_UNUSED RefFieldsField1PatchStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
+  swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
+  swap(a.__fbthrift_field_prepend, b.__fbthrift_field_prepend);
+  swap(a.__fbthrift_field_append, b.__fbthrift_field_append);
+  swap(a.__isset, b.__isset);
+}
+
+template void RefFieldsField1PatchStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t RefFieldsField1PatchStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t RefFieldsField1PatchStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t RefFieldsField1PatchStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void RefFieldsField1PatchStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t RefFieldsField1PatchStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t RefFieldsField1PatchStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t RefFieldsField1PatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // test::fixtures::patch
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::patch::RefFieldsField2PatchStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::patch::RefFieldsField2PatchStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace patch {
+
+const char* RefFieldsField2PatchStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/patch/RefFieldsField2Patch";
+}
+
+const folly::StringPiece RefFieldsField2PatchStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<RefFieldsField2PatchStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece RefFieldsField2PatchStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<RefFieldsField2PatchStruct>::name;
+}
+
+RefFieldsField2PatchStruct::RefFieldsField2PatchStruct(const RefFieldsField2PatchStruct&) = default;
+RefFieldsField2PatchStruct& RefFieldsField2PatchStruct::operator=(const RefFieldsField2PatchStruct&) = default;
+RefFieldsField2PatchStruct::RefFieldsField2PatchStruct() :
+      __fbthrift_field_clear() {
+}
+
+
+RefFieldsField2PatchStruct::~RefFieldsField2PatchStruct() {}
+
+RefFieldsField2PatchStruct::RefFieldsField2PatchStruct(FOLLY_MAYBE_UNUSED RefFieldsField2PatchStruct&& other) noexcept :
+    __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
+    __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
+    __fbthrift_field_prepend(std::move(other.__fbthrift_field_prepend)),
+    __fbthrift_field_append(std::move(other.__fbthrift_field_append)),
+    __isset(other.__isset) {
+}
+
+RefFieldsField2PatchStruct& RefFieldsField2PatchStruct::operator=(FOLLY_MAYBE_UNUSED RefFieldsField2PatchStruct&& other) noexcept {
+    this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
+    this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
+    this->__fbthrift_field_prepend = std::move(other.__fbthrift_field_prepend);
+    this->__fbthrift_field_append = std::move(other.__fbthrift_field_append);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+RefFieldsField2PatchStruct::RefFieldsField2PatchStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int32_t> assign__arg, bool clear__arg, ::std::vector<::std::int32_t> prepend__arg, ::std::vector<::std::int32_t> append__arg) :
+    __fbthrift_field_assign(std::move(assign__arg)),
+    __fbthrift_field_clear(std::move(clear__arg)),
+    __fbthrift_field_prepend(std::move(prepend__arg)),
+    __fbthrift_field_append(std::move(append__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+
+void RefFieldsField2PatchStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_assign.clear();
+  this->__fbthrift_field_clear = bool();
+  this->__fbthrift_field_prepend.clear();
+  this->__fbthrift_field_append.clear();
+  __isset = {};
+}
+
+void RefFieldsField2PatchStruct::__fbthrift_clear_terse_fields() {
+  this->__fbthrift_field_clear = bool();
+  this->__fbthrift_field_prepend.clear();
+  this->__fbthrift_field_append.clear();
+}
+
+bool RefFieldsField2PatchStruct::__fbthrift_is_empty() const {
+  return !(this->__isset.get(0)) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_clear) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_prepend) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_append);
+}
+
+bool RefFieldsField2PatchStruct::operator==(FOLLY_MAYBE_UNUSED const RefFieldsField2PatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool RefFieldsField2PatchStruct::operator<(FOLLY_MAYBE_UNUSED const RefFieldsField2PatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::std::vector<::std::int32_t>* RefFieldsField2PatchStruct::get_assign() const& {
+  return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
+}
+
+::std::vector<::std::int32_t>* RefFieldsField2PatchStruct::get_assign() & {
+  return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
+}
+
+const ::std::vector<::std::int32_t>& RefFieldsField2PatchStruct::get_prepend() const& {
+  return __fbthrift_field_prepend;
+}
+
+::std::vector<::std::int32_t> RefFieldsField2PatchStruct::get_prepend() && {
+  return std::move(__fbthrift_field_prepend);
+}
+
+const ::std::vector<::std::int32_t>& RefFieldsField2PatchStruct::get_append() const& {
+  return __fbthrift_field_append;
+}
+
+::std::vector<::std::int32_t> RefFieldsField2PatchStruct::get_append() && {
+  return std::move(__fbthrift_field_append);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED RefFieldsField2PatchStruct& a, FOLLY_MAYBE_UNUSED RefFieldsField2PatchStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
+  swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
+  swap(a.__fbthrift_field_prepend, b.__fbthrift_field_prepend);
+  swap(a.__fbthrift_field_append, b.__fbthrift_field_append);
+  swap(a.__isset, b.__isset);
+}
+
+template void RefFieldsField2PatchStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t RefFieldsField2PatchStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t RefFieldsField2PatchStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t RefFieldsField2PatchStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void RefFieldsField2PatchStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t RefFieldsField2PatchStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t RefFieldsField2PatchStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t RefFieldsField2PatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // test::fixtures::patch
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::patch::RefFieldsField3PatchStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::patch::RefFieldsField3PatchStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace patch {
+
+const char* RefFieldsField3PatchStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/patch/RefFieldsField3Patch";
+}
+
+const folly::StringPiece RefFieldsField3PatchStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<RefFieldsField3PatchStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece RefFieldsField3PatchStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<RefFieldsField3PatchStruct>::name;
+}
+
+RefFieldsField3PatchStruct::RefFieldsField3PatchStruct(const RefFieldsField3PatchStruct&) = default;
+RefFieldsField3PatchStruct& RefFieldsField3PatchStruct::operator=(const RefFieldsField3PatchStruct&) = default;
+RefFieldsField3PatchStruct::RefFieldsField3PatchStruct() :
+      __fbthrift_field_clear() {
+}
+
+
+RefFieldsField3PatchStruct::~RefFieldsField3PatchStruct() {}
+
+RefFieldsField3PatchStruct::RefFieldsField3PatchStruct(FOLLY_MAYBE_UNUSED RefFieldsField3PatchStruct&& other) noexcept :
+    __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
+    __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
+    __fbthrift_field_prepend(std::move(other.__fbthrift_field_prepend)),
+    __fbthrift_field_append(std::move(other.__fbthrift_field_append)),
+    __isset(other.__isset) {
+}
+
+RefFieldsField3PatchStruct& RefFieldsField3PatchStruct::operator=(FOLLY_MAYBE_UNUSED RefFieldsField3PatchStruct&& other) noexcept {
+    this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
+    this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
+    this->__fbthrift_field_prepend = std::move(other.__fbthrift_field_prepend);
+    this->__fbthrift_field_append = std::move(other.__fbthrift_field_append);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+RefFieldsField3PatchStruct::RefFieldsField3PatchStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int32_t> assign__arg, bool clear__arg, ::std::vector<::std::int32_t> prepend__arg, ::std::vector<::std::int32_t> append__arg) :
+    __fbthrift_field_assign(std::move(assign__arg)),
+    __fbthrift_field_clear(std::move(clear__arg)),
+    __fbthrift_field_prepend(std::move(prepend__arg)),
+    __fbthrift_field_append(std::move(append__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+
+void RefFieldsField3PatchStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_assign.clear();
+  this->__fbthrift_field_clear = bool();
+  this->__fbthrift_field_prepend.clear();
+  this->__fbthrift_field_append.clear();
+  __isset = {};
+}
+
+void RefFieldsField3PatchStruct::__fbthrift_clear_terse_fields() {
+  this->__fbthrift_field_clear = bool();
+  this->__fbthrift_field_prepend.clear();
+  this->__fbthrift_field_append.clear();
+}
+
+bool RefFieldsField3PatchStruct::__fbthrift_is_empty() const {
+  return !(this->__isset.get(0)) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_clear) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_prepend) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_append);
+}
+
+bool RefFieldsField3PatchStruct::operator==(FOLLY_MAYBE_UNUSED const RefFieldsField3PatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool RefFieldsField3PatchStruct::operator<(FOLLY_MAYBE_UNUSED const RefFieldsField3PatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::std::vector<::std::int32_t>* RefFieldsField3PatchStruct::get_assign() const& {
+  return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
+}
+
+::std::vector<::std::int32_t>* RefFieldsField3PatchStruct::get_assign() & {
+  return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
+}
+
+const ::std::vector<::std::int32_t>& RefFieldsField3PatchStruct::get_prepend() const& {
+  return __fbthrift_field_prepend;
+}
+
+::std::vector<::std::int32_t> RefFieldsField3PatchStruct::get_prepend() && {
+  return std::move(__fbthrift_field_prepend);
+}
+
+const ::std::vector<::std::int32_t>& RefFieldsField3PatchStruct::get_append() const& {
+  return __fbthrift_field_append;
+}
+
+::std::vector<::std::int32_t> RefFieldsField3PatchStruct::get_append() && {
+  return std::move(__fbthrift_field_append);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED RefFieldsField3PatchStruct& a, FOLLY_MAYBE_UNUSED RefFieldsField3PatchStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
+  swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
+  swap(a.__fbthrift_field_prepend, b.__fbthrift_field_prepend);
+  swap(a.__fbthrift_field_append, b.__fbthrift_field_append);
+  swap(a.__isset, b.__isset);
+}
+
+template void RefFieldsField3PatchStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t RefFieldsField3PatchStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t RefFieldsField3PatchStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t RefFieldsField3PatchStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void RefFieldsField3PatchStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t RefFieldsField3PatchStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t RefFieldsField3PatchStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t RefFieldsField3PatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // test::fixtures::patch
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::patch::RefFieldsField4PatchStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::patch::RefFieldsField4PatchStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace patch {
+
+const char* RefFieldsField4PatchStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/patch/RefFieldsField4Patch";
+}
+
+const folly::StringPiece RefFieldsField4PatchStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<RefFieldsField4PatchStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece RefFieldsField4PatchStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<RefFieldsField4PatchStruct>::name;
+}
+
+RefFieldsField4PatchStruct::RefFieldsField4PatchStruct(const RefFieldsField4PatchStruct&) = default;
+RefFieldsField4PatchStruct& RefFieldsField4PatchStruct::operator=(const RefFieldsField4PatchStruct&) = default;
+RefFieldsField4PatchStruct::RefFieldsField4PatchStruct() :
+      __fbthrift_field_clear() {
+}
+
+
+RefFieldsField4PatchStruct::~RefFieldsField4PatchStruct() {}
+
+RefFieldsField4PatchStruct::RefFieldsField4PatchStruct(FOLLY_MAYBE_UNUSED RefFieldsField4PatchStruct&& other) noexcept :
+    __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
+    __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
+    __fbthrift_field_prepend(std::move(other.__fbthrift_field_prepend)),
+    __fbthrift_field_append(std::move(other.__fbthrift_field_append)),
+    __isset(other.__isset) {
+}
+
+RefFieldsField4PatchStruct& RefFieldsField4PatchStruct::operator=(FOLLY_MAYBE_UNUSED RefFieldsField4PatchStruct&& other) noexcept {
+    this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
+    this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
+    this->__fbthrift_field_prepend = std::move(other.__fbthrift_field_prepend);
+    this->__fbthrift_field_append = std::move(other.__fbthrift_field_append);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+RefFieldsField4PatchStruct::RefFieldsField4PatchStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int32_t> assign__arg, bool clear__arg, ::std::vector<::std::int32_t> prepend__arg, ::std::vector<::std::int32_t> append__arg) :
+    __fbthrift_field_assign(std::move(assign__arg)),
+    __fbthrift_field_clear(std::move(clear__arg)),
+    __fbthrift_field_prepend(std::move(prepend__arg)),
+    __fbthrift_field_append(std::move(append__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+
+void RefFieldsField4PatchStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_assign.clear();
+  this->__fbthrift_field_clear = bool();
+  this->__fbthrift_field_prepend.clear();
+  this->__fbthrift_field_append.clear();
+  __isset = {};
+}
+
+void RefFieldsField4PatchStruct::__fbthrift_clear_terse_fields() {
+  this->__fbthrift_field_clear = bool();
+  this->__fbthrift_field_prepend.clear();
+  this->__fbthrift_field_append.clear();
+}
+
+bool RefFieldsField4PatchStruct::__fbthrift_is_empty() const {
+  return !(this->__isset.get(0)) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_clear) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_prepend) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_append);
+}
+
+bool RefFieldsField4PatchStruct::operator==(FOLLY_MAYBE_UNUSED const RefFieldsField4PatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool RefFieldsField4PatchStruct::operator<(FOLLY_MAYBE_UNUSED const RefFieldsField4PatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::std::vector<::std::int32_t>* RefFieldsField4PatchStruct::get_assign() const& {
+  return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
+}
+
+::std::vector<::std::int32_t>* RefFieldsField4PatchStruct::get_assign() & {
+  return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
+}
+
+const ::std::vector<::std::int32_t>& RefFieldsField4PatchStruct::get_prepend() const& {
+  return __fbthrift_field_prepend;
+}
+
+::std::vector<::std::int32_t> RefFieldsField4PatchStruct::get_prepend() && {
+  return std::move(__fbthrift_field_prepend);
+}
+
+const ::std::vector<::std::int32_t>& RefFieldsField4PatchStruct::get_append() const& {
+  return __fbthrift_field_append;
+}
+
+::std::vector<::std::int32_t> RefFieldsField4PatchStruct::get_append() && {
+  return std::move(__fbthrift_field_append);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED RefFieldsField4PatchStruct& a, FOLLY_MAYBE_UNUSED RefFieldsField4PatchStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
+  swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
+  swap(a.__fbthrift_field_prepend, b.__fbthrift_field_prepend);
+  swap(a.__fbthrift_field_append, b.__fbthrift_field_append);
+  swap(a.__isset, b.__isset);
+}
+
+template void RefFieldsField4PatchStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t RefFieldsField4PatchStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t RefFieldsField4PatchStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t RefFieldsField4PatchStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void RefFieldsField4PatchStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t RefFieldsField4PatchStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t RefFieldsField4PatchStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t RefFieldsField4PatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // test::fixtures::patch
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::patch::RefFieldsField5PatchStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::patch::RefFieldsField5PatchStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace patch {
+
+const char* RefFieldsField5PatchStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/patch/RefFieldsField5Patch";
+}
+
+const folly::StringPiece RefFieldsField5PatchStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<RefFieldsField5PatchStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece RefFieldsField5PatchStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<RefFieldsField5PatchStruct>::name;
+}
+
+RefFieldsField5PatchStruct::RefFieldsField5PatchStruct(const RefFieldsField5PatchStruct&) = default;
+RefFieldsField5PatchStruct& RefFieldsField5PatchStruct::operator=(const RefFieldsField5PatchStruct&) = default;
+RefFieldsField5PatchStruct::RefFieldsField5PatchStruct() :
+      __fbthrift_field_clear() {
+}
+
+
+RefFieldsField5PatchStruct::~RefFieldsField5PatchStruct() {}
+
+RefFieldsField5PatchStruct::RefFieldsField5PatchStruct(FOLLY_MAYBE_UNUSED RefFieldsField5PatchStruct&& other) noexcept :
+    __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
+    __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
+    __fbthrift_field_prepend(std::move(other.__fbthrift_field_prepend)),
+    __fbthrift_field_append(std::move(other.__fbthrift_field_append)),
+    __isset(other.__isset) {
+}
+
+RefFieldsField5PatchStruct& RefFieldsField5PatchStruct::operator=(FOLLY_MAYBE_UNUSED RefFieldsField5PatchStruct&& other) noexcept {
+    this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
+    this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
+    this->__fbthrift_field_prepend = std::move(other.__fbthrift_field_prepend);
+    this->__fbthrift_field_append = std::move(other.__fbthrift_field_append);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+RefFieldsField5PatchStruct::RefFieldsField5PatchStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int32_t> assign__arg, bool clear__arg, ::std::vector<::std::int32_t> prepend__arg, ::std::vector<::std::int32_t> append__arg) :
+    __fbthrift_field_assign(std::move(assign__arg)),
+    __fbthrift_field_clear(std::move(clear__arg)),
+    __fbthrift_field_prepend(std::move(prepend__arg)),
+    __fbthrift_field_append(std::move(append__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+
+void RefFieldsField5PatchStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_assign.clear();
+  this->__fbthrift_field_clear = bool();
+  this->__fbthrift_field_prepend.clear();
+  this->__fbthrift_field_append.clear();
+  __isset = {};
+}
+
+void RefFieldsField5PatchStruct::__fbthrift_clear_terse_fields() {
+  this->__fbthrift_field_clear = bool();
+  this->__fbthrift_field_prepend.clear();
+  this->__fbthrift_field_append.clear();
+}
+
+bool RefFieldsField5PatchStruct::__fbthrift_is_empty() const {
+  return !(this->__isset.get(0)) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_clear) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_prepend) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_append);
+}
+
+bool RefFieldsField5PatchStruct::operator==(FOLLY_MAYBE_UNUSED const RefFieldsField5PatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool RefFieldsField5PatchStruct::operator<(FOLLY_MAYBE_UNUSED const RefFieldsField5PatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::std::vector<::std::int32_t>* RefFieldsField5PatchStruct::get_assign() const& {
+  return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
+}
+
+::std::vector<::std::int32_t>* RefFieldsField5PatchStruct::get_assign() & {
+  return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
+}
+
+const ::std::vector<::std::int32_t>& RefFieldsField5PatchStruct::get_prepend() const& {
+  return __fbthrift_field_prepend;
+}
+
+::std::vector<::std::int32_t> RefFieldsField5PatchStruct::get_prepend() && {
+  return std::move(__fbthrift_field_prepend);
+}
+
+const ::std::vector<::std::int32_t>& RefFieldsField5PatchStruct::get_append() const& {
+  return __fbthrift_field_append;
+}
+
+::std::vector<::std::int32_t> RefFieldsField5PatchStruct::get_append() && {
+  return std::move(__fbthrift_field_append);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED RefFieldsField5PatchStruct& a, FOLLY_MAYBE_UNUSED RefFieldsField5PatchStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
+  swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
+  swap(a.__fbthrift_field_prepend, b.__fbthrift_field_prepend);
+  swap(a.__fbthrift_field_append, b.__fbthrift_field_append);
+  swap(a.__isset, b.__isset);
+}
+
+template void RefFieldsField5PatchStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t RefFieldsField5PatchStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t RefFieldsField5PatchStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t RefFieldsField5PatchStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void RefFieldsField5PatchStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t RefFieldsField5PatchStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t RefFieldsField5PatchStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t RefFieldsField5PatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // test::fixtures::patch
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::patch::RefFieldsField6PatchStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::patch::RefFieldsField6PatchStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace patch {
+
+const char* RefFieldsField6PatchStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/patch/RefFieldsField6Patch";
+}
+
+const folly::StringPiece RefFieldsField6PatchStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<RefFieldsField6PatchStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece RefFieldsField6PatchStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<RefFieldsField6PatchStruct>::name;
+}
+
+RefFieldsField6PatchStruct::RefFieldsField6PatchStruct(const RefFieldsField6PatchStruct&) = default;
+RefFieldsField6PatchStruct& RefFieldsField6PatchStruct::operator=(const RefFieldsField6PatchStruct&) = default;
+RefFieldsField6PatchStruct::RefFieldsField6PatchStruct() :
+      __fbthrift_field_clear() {
+}
+
+
+RefFieldsField6PatchStruct::~RefFieldsField6PatchStruct() {}
+
+RefFieldsField6PatchStruct::RefFieldsField6PatchStruct(FOLLY_MAYBE_UNUSED RefFieldsField6PatchStruct&& other) noexcept :
+    __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
+    __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
+    __fbthrift_field_prepend(std::move(other.__fbthrift_field_prepend)),
+    __fbthrift_field_append(std::move(other.__fbthrift_field_append)),
+    __isset(other.__isset) {
+}
+
+RefFieldsField6PatchStruct& RefFieldsField6PatchStruct::operator=(FOLLY_MAYBE_UNUSED RefFieldsField6PatchStruct&& other) noexcept {
+    this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
+    this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
+    this->__fbthrift_field_prepend = std::move(other.__fbthrift_field_prepend);
+    this->__fbthrift_field_append = std::move(other.__fbthrift_field_append);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+RefFieldsField6PatchStruct::RefFieldsField6PatchStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int32_t> assign__arg, bool clear__arg, ::std::vector<::std::int32_t> prepend__arg, ::std::vector<::std::int32_t> append__arg) :
+    __fbthrift_field_assign(std::move(assign__arg)),
+    __fbthrift_field_clear(std::move(clear__arg)),
+    __fbthrift_field_prepend(std::move(prepend__arg)),
+    __fbthrift_field_append(std::move(append__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+
+void RefFieldsField6PatchStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_assign.clear();
+  this->__fbthrift_field_clear = bool();
+  this->__fbthrift_field_prepend.clear();
+  this->__fbthrift_field_append.clear();
+  __isset = {};
+}
+
+void RefFieldsField6PatchStruct::__fbthrift_clear_terse_fields() {
+  this->__fbthrift_field_clear = bool();
+  this->__fbthrift_field_prepend.clear();
+  this->__fbthrift_field_append.clear();
+}
+
+bool RefFieldsField6PatchStruct::__fbthrift_is_empty() const {
+  return !(this->__isset.get(0)) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_clear) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_prepend) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_append);
+}
+
+bool RefFieldsField6PatchStruct::operator==(FOLLY_MAYBE_UNUSED const RefFieldsField6PatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool RefFieldsField6PatchStruct::operator<(FOLLY_MAYBE_UNUSED const RefFieldsField6PatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::std::vector<::std::int32_t>* RefFieldsField6PatchStruct::get_assign() const& {
+  return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
+}
+
+::std::vector<::std::int32_t>* RefFieldsField6PatchStruct::get_assign() & {
+  return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
+}
+
+const ::std::vector<::std::int32_t>& RefFieldsField6PatchStruct::get_prepend() const& {
+  return __fbthrift_field_prepend;
+}
+
+::std::vector<::std::int32_t> RefFieldsField6PatchStruct::get_prepend() && {
+  return std::move(__fbthrift_field_prepend);
+}
+
+const ::std::vector<::std::int32_t>& RefFieldsField6PatchStruct::get_append() const& {
+  return __fbthrift_field_append;
+}
+
+::std::vector<::std::int32_t> RefFieldsField6PatchStruct::get_append() && {
+  return std::move(__fbthrift_field_append);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED RefFieldsField6PatchStruct& a, FOLLY_MAYBE_UNUSED RefFieldsField6PatchStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
+  swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
+  swap(a.__fbthrift_field_prepend, b.__fbthrift_field_prepend);
+  swap(a.__fbthrift_field_append, b.__fbthrift_field_append);
+  swap(a.__isset, b.__isset);
+}
+
+template void RefFieldsField6PatchStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t RefFieldsField6PatchStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t RefFieldsField6PatchStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t RefFieldsField6PatchStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void RefFieldsField6PatchStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t RefFieldsField6PatchStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t RefFieldsField6PatchStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t RefFieldsField6PatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // test::fixtures::patch
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::patch::RefFieldsField7PatchStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::patch::RefFieldsField7PatchStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace patch {
+
+const char* RefFieldsField7PatchStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/patch/RefFieldsField7Patch";
+}
+
+const folly::StringPiece RefFieldsField7PatchStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<RefFieldsField7PatchStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece RefFieldsField7PatchStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<RefFieldsField7PatchStruct>::name;
+}
+
+RefFieldsField7PatchStruct::RefFieldsField7PatchStruct(const RefFieldsField7PatchStruct&) = default;
+RefFieldsField7PatchStruct& RefFieldsField7PatchStruct::operator=(const RefFieldsField7PatchStruct&) = default;
+RefFieldsField7PatchStruct::RefFieldsField7PatchStruct() :
+      __fbthrift_field_clear() {
+}
+
+
+RefFieldsField7PatchStruct::~RefFieldsField7PatchStruct() {}
+
+RefFieldsField7PatchStruct::RefFieldsField7PatchStruct(FOLLY_MAYBE_UNUSED RefFieldsField7PatchStruct&& other) noexcept :
+    __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
+    __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
+    __fbthrift_field_prepend(std::move(other.__fbthrift_field_prepend)),
+    __fbthrift_field_append(std::move(other.__fbthrift_field_append)),
+    __isset(other.__isset) {
+}
+
+RefFieldsField7PatchStruct& RefFieldsField7PatchStruct::operator=(FOLLY_MAYBE_UNUSED RefFieldsField7PatchStruct&& other) noexcept {
+    this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
+    this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
+    this->__fbthrift_field_prepend = std::move(other.__fbthrift_field_prepend);
+    this->__fbthrift_field_append = std::move(other.__fbthrift_field_append);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+RefFieldsField7PatchStruct::RefFieldsField7PatchStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int32_t> assign__arg, bool clear__arg, ::std::vector<::std::int32_t> prepend__arg, ::std::vector<::std::int32_t> append__arg) :
+    __fbthrift_field_assign(std::move(assign__arg)),
+    __fbthrift_field_clear(std::move(clear__arg)),
+    __fbthrift_field_prepend(std::move(prepend__arg)),
+    __fbthrift_field_append(std::move(append__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+
+void RefFieldsField7PatchStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_assign.clear();
+  this->__fbthrift_field_clear = bool();
+  this->__fbthrift_field_prepend.clear();
+  this->__fbthrift_field_append.clear();
+  __isset = {};
+}
+
+void RefFieldsField7PatchStruct::__fbthrift_clear_terse_fields() {
+  this->__fbthrift_field_clear = bool();
+  this->__fbthrift_field_prepend.clear();
+  this->__fbthrift_field_append.clear();
+}
+
+bool RefFieldsField7PatchStruct::__fbthrift_is_empty() const {
+  return !(this->__isset.get(0)) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_clear) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_prepend) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_append);
+}
+
+bool RefFieldsField7PatchStruct::operator==(FOLLY_MAYBE_UNUSED const RefFieldsField7PatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool RefFieldsField7PatchStruct::operator<(FOLLY_MAYBE_UNUSED const RefFieldsField7PatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::std::vector<::std::int32_t>* RefFieldsField7PatchStruct::get_assign() const& {
+  return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
+}
+
+::std::vector<::std::int32_t>* RefFieldsField7PatchStruct::get_assign() & {
+  return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
+}
+
+const ::std::vector<::std::int32_t>& RefFieldsField7PatchStruct::get_prepend() const& {
+  return __fbthrift_field_prepend;
+}
+
+::std::vector<::std::int32_t> RefFieldsField7PatchStruct::get_prepend() && {
+  return std::move(__fbthrift_field_prepend);
+}
+
+const ::std::vector<::std::int32_t>& RefFieldsField7PatchStruct::get_append() const& {
+  return __fbthrift_field_append;
+}
+
+::std::vector<::std::int32_t> RefFieldsField7PatchStruct::get_append() && {
+  return std::move(__fbthrift_field_append);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED RefFieldsField7PatchStruct& a, FOLLY_MAYBE_UNUSED RefFieldsField7PatchStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
+  swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
+  swap(a.__fbthrift_field_prepend, b.__fbthrift_field_prepend);
+  swap(a.__fbthrift_field_append, b.__fbthrift_field_append);
+  swap(a.__isset, b.__isset);
+}
+
+template void RefFieldsField7PatchStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t RefFieldsField7PatchStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t RefFieldsField7PatchStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t RefFieldsField7PatchStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void RefFieldsField7PatchStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t RefFieldsField7PatchStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t RefFieldsField7PatchStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t RefFieldsField7PatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // test::fixtures::patch
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::patch::RefFieldsFieldPatchStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::patch::RefFieldsFieldPatchStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace patch {
+
+const char* RefFieldsFieldPatchStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/patch/RefFieldsFieldPatch";
+}
+
+const folly::StringPiece RefFieldsFieldPatchStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<RefFieldsFieldPatchStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece RefFieldsFieldPatchStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<RefFieldsFieldPatchStruct>::name;
+}
+
+RefFieldsFieldPatchStruct::RefFieldsFieldPatchStruct(const RefFieldsFieldPatchStruct& srcObj) :
+    __fbthrift_field_unique(srcObj.__fbthrift_field_unique),
+    __fbthrift_field_shared_const(srcObj.__fbthrift_field_shared_const),
+    __fbthrift_field_shared_mustable(srcObj.__fbthrift_field_shared_mustable),
+    __fbthrift_field_opt_unique(srcObj.__fbthrift_field_opt_unique),
+    __fbthrift_field_opt_shared_const(srcObj.__fbthrift_field_opt_shared_const),
+    __fbthrift_field_opt_shared_mustable(srcObj.__fbthrift_field_opt_shared_mustable),
+    __fbthrift_field_opt_box(srcObj.__fbthrift_field_opt_box) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField1PatchStruct>, 1>(*__fbthrift_field_unique, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField2PatchStruct>, 2>(*__fbthrift_field_shared_const, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField3PatchStruct>, 3>(*__fbthrift_field_shared_mustable, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField4PatchStruct>, 4>(*__fbthrift_field_opt_unique, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField5PatchStruct>, 5>(*__fbthrift_field_opt_shared_const, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField6PatchStruct>, 6>(*__fbthrift_field_opt_shared_mustable, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField7PatchStruct>, 7>(*__fbthrift_field_opt_box, *this);
+}
+
+RefFieldsFieldPatchStruct& RefFieldsFieldPatchStruct::operator=(const RefFieldsFieldPatchStruct& other) {
+  RefFieldsFieldPatchStruct tmp(other);
+  swap(*this, tmp);
+  return *this;
+}
+
+RefFieldsFieldPatchStruct::RefFieldsFieldPatchStruct() :
+      __fbthrift_field_unique(::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField1Patch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField1PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField1PatchStruct>>>())),
+      __fbthrift_field_shared_const(::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField2Patch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField2PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField2PatchStruct>>>())),
+      __fbthrift_field_shared_mustable(::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField3Patch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField3PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField3PatchStruct>>>())),
+      __fbthrift_field_opt_unique(::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField4Patch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField4PatchStruct>>>())),
+      __fbthrift_field_opt_shared_const(::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField5Patch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField5PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField5PatchStruct>>>())),
+      __fbthrift_field_opt_shared_mustable(::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField6Patch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField6PatchStruct>>>())),
+      __fbthrift_field_opt_box(::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField7Patch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField7PatchStruct>>>())) {
+}
+
+
+RefFieldsFieldPatchStruct::~RefFieldsFieldPatchStruct() {}
+
+RefFieldsFieldPatchStruct::RefFieldsFieldPatchStruct(FOLLY_MAYBE_UNUSED RefFieldsFieldPatchStruct&& other) noexcept :
+    __fbthrift_field_unique(std::move(other.__fbthrift_field_unique)),
+    __fbthrift_field_shared_const(std::move(other.__fbthrift_field_shared_const)),
+    __fbthrift_field_shared_mustable(std::move(other.__fbthrift_field_shared_mustable)),
+    __fbthrift_field_opt_unique(std::move(other.__fbthrift_field_opt_unique)),
+    __fbthrift_field_opt_shared_const(std::move(other.__fbthrift_field_opt_shared_const)),
+    __fbthrift_field_opt_shared_mustable(std::move(other.__fbthrift_field_opt_shared_mustable)),
+    __fbthrift_field_opt_box(std::move(other.__fbthrift_field_opt_box)) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField1PatchStruct>, 1>(*__fbthrift_field_unique, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField2PatchStruct>, 2>(*__fbthrift_field_shared_const, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField3PatchStruct>, 3>(*__fbthrift_field_shared_mustable, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField4PatchStruct>, 4>(*__fbthrift_field_opt_unique, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField5PatchStruct>, 5>(*__fbthrift_field_opt_shared_const, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField6PatchStruct>, 6>(*__fbthrift_field_opt_shared_mustable, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField7PatchStruct>, 7>(*__fbthrift_field_opt_box, *this);
+}
+
+RefFieldsFieldPatchStruct& RefFieldsFieldPatchStruct::operator=(FOLLY_MAYBE_UNUSED RefFieldsFieldPatchStruct&& other) noexcept {
+    this->__fbthrift_field_unique = std::move(other.__fbthrift_field_unique);
+    this->__fbthrift_field_shared_const = std::move(other.__fbthrift_field_shared_const);
+    this->__fbthrift_field_shared_mustable = std::move(other.__fbthrift_field_shared_mustable);
+    this->__fbthrift_field_opt_unique = std::move(other.__fbthrift_field_opt_unique);
+    this->__fbthrift_field_opt_shared_const = std::move(other.__fbthrift_field_opt_shared_const);
+    this->__fbthrift_field_opt_shared_mustable = std::move(other.__fbthrift_field_opt_shared_mustable);
+    this->__fbthrift_field_opt_box = std::move(other.__fbthrift_field_opt_box);
+    return *this;
+}
+
+
+RefFieldsFieldPatchStruct::RefFieldsFieldPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField1Patch> unique__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField2Patch> shared_const__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField3Patch> shared_mustable__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField4Patch> opt_unique__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField5Patch> opt_shared_const__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField6Patch> opt_shared_mustable__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField7Patch> opt_box__arg) :
+    __fbthrift_field_unique(std::move(unique__arg)),
+    __fbthrift_field_shared_const(std::move(shared_const__arg)),
+    __fbthrift_field_shared_mustable(std::move(shared_mustable__arg)),
+    __fbthrift_field_opt_unique(std::move(opt_unique__arg)),
+    __fbthrift_field_opt_shared_const(std::move(opt_shared_const__arg)),
+    __fbthrift_field_opt_shared_mustable(std::move(opt_shared_mustable__arg)),
+    __fbthrift_field_opt_box(std::move(opt_box__arg)) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField1PatchStruct>, 1>(*__fbthrift_field_unique, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField2PatchStruct>, 2>(*__fbthrift_field_shared_const, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField3PatchStruct>, 3>(*__fbthrift_field_shared_mustable, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField4PatchStruct>, 4>(*__fbthrift_field_opt_unique, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField5PatchStruct>, 5>(*__fbthrift_field_opt_shared_const, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField6PatchStruct>, 6>(*__fbthrift_field_opt_shared_mustable, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField7PatchStruct>, 7>(*__fbthrift_field_opt_box, *this);
+}
+
+
+void RefFieldsFieldPatchStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_unique = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField1Patch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField1PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField1PatchStruct>>>());
+  this->__fbthrift_field_shared_const = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField2Patch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField2PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField2PatchStruct>>>());
+  this->__fbthrift_field_shared_mustable = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField3Patch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField3PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField3PatchStruct>>>());
+  this->__fbthrift_field_opt_unique = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField4Patch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField4PatchStruct>>>());
+  this->__fbthrift_field_opt_shared_const = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField5Patch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField5PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField5PatchStruct>>>());
+  this->__fbthrift_field_opt_shared_mustable = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField6Patch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField6PatchStruct>>>());
+  this->__fbthrift_field_opt_box = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField7Patch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField7PatchStruct>>>());
+}
+
+void RefFieldsFieldPatchStruct::__fbthrift_clear_terse_fields() {
+  this->__fbthrift_field_unique = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField1Patch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField1PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField1PatchStruct>>>());
+  this->__fbthrift_field_shared_const = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField2Patch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField2PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField2PatchStruct>>>());
+  this->__fbthrift_field_shared_mustable = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField3Patch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField3PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField3PatchStruct>>>());
+  this->__fbthrift_field_opt_unique = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField4Patch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField4PatchStruct>>>());
+  this->__fbthrift_field_opt_shared_const = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField5Patch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField5PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField5PatchStruct>>>());
+  this->__fbthrift_field_opt_shared_mustable = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField6Patch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField6PatchStruct>>>());
+  this->__fbthrift_field_opt_box = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField7Patch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField7PatchStruct>>>());
+}
+
+bool RefFieldsFieldPatchStruct::__fbthrift_is_empty() const {
+  return (this->__fbthrift_field_unique.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField1PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField1PatchStruct>>>() || ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField1PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField1PatchStruct>>>(*this->__fbthrift_field_unique)) &&
+ (this->__fbthrift_field_shared_const.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField2PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField2PatchStruct>>>() || ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField2PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField2PatchStruct>>>(*this->__fbthrift_field_shared_const)) &&
+ (this->__fbthrift_field_shared_mustable.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField3PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField3PatchStruct>>>() || ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField3PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField3PatchStruct>>>(*this->__fbthrift_field_shared_mustable)) &&
+ (this->__fbthrift_field_opt_unique.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField4PatchStruct>>>() || ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField4PatchStruct>>>(*this->__fbthrift_field_opt_unique)) &&
+ (this->__fbthrift_field_opt_shared_const.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField5PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField5PatchStruct>>>() || ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField5PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField5PatchStruct>>>(*this->__fbthrift_field_opt_shared_const)) &&
+ (this->__fbthrift_field_opt_shared_mustable.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField6PatchStruct>>>() || ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField6PatchStruct>>>(*this->__fbthrift_field_opt_shared_mustable)) &&
+ (this->__fbthrift_field_opt_box.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField7PatchStruct>>>() || ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField7PatchStruct>>>(*this->__fbthrift_field_opt_box));
+}
+
+bool RefFieldsFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const RefFieldsFieldPatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool RefFieldsFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const RefFieldsFieldPatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED RefFieldsFieldPatchStruct& a, FOLLY_MAYBE_UNUSED RefFieldsFieldPatchStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_unique, b.__fbthrift_field_unique);
+  swap(a.__fbthrift_field_shared_const, b.__fbthrift_field_shared_const);
+  swap(a.__fbthrift_field_shared_mustable, b.__fbthrift_field_shared_mustable);
+  swap(a.__fbthrift_field_opt_unique, b.__fbthrift_field_opt_unique);
+  swap(a.__fbthrift_field_opt_shared_const, b.__fbthrift_field_opt_shared_const);
+  swap(a.__fbthrift_field_opt_shared_mustable, b.__fbthrift_field_opt_shared_mustable);
+  swap(a.__fbthrift_field_opt_box, b.__fbthrift_field_opt_box);
+}
+
+template void RefFieldsFieldPatchStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t RefFieldsFieldPatchStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t RefFieldsFieldPatchStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t RefFieldsFieldPatchStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void RefFieldsFieldPatchStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t RefFieldsFieldPatchStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t RefFieldsFieldPatchStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t RefFieldsFieldPatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        RefFieldsFieldPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::patch::RefFieldsField1Patch>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        RefFieldsFieldPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::patch::RefFieldsField2Patch>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        RefFieldsFieldPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::patch::RefFieldsField3Patch>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        RefFieldsFieldPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::patch::RefFieldsField4Patch>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        RefFieldsFieldPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::patch::RefFieldsField5Patch>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        RefFieldsFieldPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::patch::RefFieldsField6Patch>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        RefFieldsFieldPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::patch::RefFieldsField7Patch>,
+    "inconsistent use of json option");
+
+}}} // test::fixtures::patch
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::patch::RefFieldsEnsureStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::patch::RefFieldsEnsureStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace patch {
+
+const char* RefFieldsEnsureStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/patch/RefFieldsEnsureStruct";
+}
+
+const folly::StringPiece RefFieldsEnsureStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<RefFieldsEnsureStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece RefFieldsEnsureStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<RefFieldsEnsureStruct>::name;
+}
+
+RefFieldsEnsureStruct::RefFieldsEnsureStruct(const RefFieldsEnsureStruct&) = default;
+RefFieldsEnsureStruct& RefFieldsEnsureStruct::operator=(const RefFieldsEnsureStruct&) = default;
+RefFieldsEnsureStruct::RefFieldsEnsureStruct() {
+}
+
+
+RefFieldsEnsureStruct::~RefFieldsEnsureStruct() {}
+
+RefFieldsEnsureStruct::RefFieldsEnsureStruct(FOLLY_MAYBE_UNUSED RefFieldsEnsureStruct&& other) noexcept :
+    __fbthrift_field_unique(std::move(other.__fbthrift_field_unique)),
+    __fbthrift_field_shared_const(std::move(other.__fbthrift_field_shared_const)),
+    __fbthrift_field_shared_mustable(std::move(other.__fbthrift_field_shared_mustable)),
+    __fbthrift_field_opt_unique(std::move(other.__fbthrift_field_opt_unique)),
+    __fbthrift_field_opt_shared_const(std::move(other.__fbthrift_field_opt_shared_const)),
+    __fbthrift_field_opt_shared_mustable(std::move(other.__fbthrift_field_opt_shared_mustable)),
+    __fbthrift_field_opt_box(std::move(other.__fbthrift_field_opt_box)),
+    __isset(other.__isset) {
+}
+
+RefFieldsEnsureStruct& RefFieldsEnsureStruct::operator=(FOLLY_MAYBE_UNUSED RefFieldsEnsureStruct&& other) noexcept {
+    this->__fbthrift_field_unique = std::move(other.__fbthrift_field_unique);
+    this->__fbthrift_field_shared_const = std::move(other.__fbthrift_field_shared_const);
+    this->__fbthrift_field_shared_mustable = std::move(other.__fbthrift_field_shared_mustable);
+    this->__fbthrift_field_opt_unique = std::move(other.__fbthrift_field_opt_unique);
+    this->__fbthrift_field_opt_shared_const = std::move(other.__fbthrift_field_opt_shared_const);
+    this->__fbthrift_field_opt_shared_mustable = std::move(other.__fbthrift_field_opt_shared_mustable);
+    this->__fbthrift_field_opt_box = std::move(other.__fbthrift_field_opt_box);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+RefFieldsEnsureStruct::RefFieldsEnsureStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int32_t> unique__arg, ::std::vector<::std::int32_t> shared_const__arg, ::std::vector<::std::int32_t> shared_mustable__arg, ::std::vector<::std::int32_t> opt_unique__arg, ::std::vector<::std::int32_t> opt_shared_const__arg, ::std::vector<::std::int32_t> opt_shared_mustable__arg, ::std::vector<::std::int32_t> opt_box__arg) :
+    __fbthrift_field_unique(std::move(unique__arg)),
+    __fbthrift_field_shared_const(std::move(shared_const__arg)),
+    __fbthrift_field_shared_mustable(std::move(shared_mustable__arg)),
+    __fbthrift_field_opt_unique(std::move(opt_unique__arg)),
+    __fbthrift_field_opt_shared_const(std::move(opt_shared_const__arg)),
+    __fbthrift_field_opt_shared_mustable(std::move(opt_shared_mustable__arg)),
+    __fbthrift_field_opt_box(std::move(opt_box__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+  __isset.set(folly::index_constant<3>(), true);
+  __isset.set(folly::index_constant<4>(), true);
+  __isset.set(folly::index_constant<5>(), true);
+  __isset.set(folly::index_constant<6>(), true);
+}
+
+
+void RefFieldsEnsureStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_unique.clear();
+  this->__fbthrift_field_shared_const.clear();
+  this->__fbthrift_field_shared_mustable.clear();
+  this->__fbthrift_field_opt_unique.clear();
+  this->__fbthrift_field_opt_shared_const.clear();
+  this->__fbthrift_field_opt_shared_mustable.clear();
+  this->__fbthrift_field_opt_box.clear();
+  __isset = {};
+}
+
+void RefFieldsEnsureStruct::__fbthrift_clear_terse_fields() {
+}
+
+bool RefFieldsEnsureStruct::__fbthrift_is_empty() const {
+  return !(this->__isset.get(0)) &&
+ !(this->__isset.get(1)) &&
+ !(this->__isset.get(2)) &&
+ !(this->__isset.get(3)) &&
+ !(this->__isset.get(4)) &&
+ !(this->__isset.get(5)) &&
+ !(this->__isset.get(6));
+}
+
+bool RefFieldsEnsureStruct::operator==(FOLLY_MAYBE_UNUSED const RefFieldsEnsureStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool RefFieldsEnsureStruct::operator<(FOLLY_MAYBE_UNUSED const RefFieldsEnsureStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::std::vector<::std::int32_t>* RefFieldsEnsureStruct::get_unique() const& {
+  return unique_ref().has_value() ? std::addressof(__fbthrift_field_unique) : nullptr;
+}
+
+::std::vector<::std::int32_t>* RefFieldsEnsureStruct::get_unique() & {
+  return unique_ref().has_value() ? std::addressof(__fbthrift_field_unique) : nullptr;
+}
+
+const ::std::vector<::std::int32_t>* RefFieldsEnsureStruct::get_shared_const() const& {
+  return shared_const_ref().has_value() ? std::addressof(__fbthrift_field_shared_const) : nullptr;
+}
+
+::std::vector<::std::int32_t>* RefFieldsEnsureStruct::get_shared_const() & {
+  return shared_const_ref().has_value() ? std::addressof(__fbthrift_field_shared_const) : nullptr;
+}
+
+const ::std::vector<::std::int32_t>* RefFieldsEnsureStruct::get_shared_mustable() const& {
+  return shared_mustable_ref().has_value() ? std::addressof(__fbthrift_field_shared_mustable) : nullptr;
+}
+
+::std::vector<::std::int32_t>* RefFieldsEnsureStruct::get_shared_mustable() & {
+  return shared_mustable_ref().has_value() ? std::addressof(__fbthrift_field_shared_mustable) : nullptr;
+}
+
+const ::std::vector<::std::int32_t>* RefFieldsEnsureStruct::get_opt_unique() const& {
+  return opt_unique_ref().has_value() ? std::addressof(__fbthrift_field_opt_unique) : nullptr;
+}
+
+::std::vector<::std::int32_t>* RefFieldsEnsureStruct::get_opt_unique() & {
+  return opt_unique_ref().has_value() ? std::addressof(__fbthrift_field_opt_unique) : nullptr;
+}
+
+const ::std::vector<::std::int32_t>* RefFieldsEnsureStruct::get_opt_shared_const() const& {
+  return opt_shared_const_ref().has_value() ? std::addressof(__fbthrift_field_opt_shared_const) : nullptr;
+}
+
+::std::vector<::std::int32_t>* RefFieldsEnsureStruct::get_opt_shared_const() & {
+  return opt_shared_const_ref().has_value() ? std::addressof(__fbthrift_field_opt_shared_const) : nullptr;
+}
+
+const ::std::vector<::std::int32_t>* RefFieldsEnsureStruct::get_opt_shared_mustable() const& {
+  return opt_shared_mustable_ref().has_value() ? std::addressof(__fbthrift_field_opt_shared_mustable) : nullptr;
+}
+
+::std::vector<::std::int32_t>* RefFieldsEnsureStruct::get_opt_shared_mustable() & {
+  return opt_shared_mustable_ref().has_value() ? std::addressof(__fbthrift_field_opt_shared_mustable) : nullptr;
+}
+
+const ::std::vector<::std::int32_t>* RefFieldsEnsureStruct::get_opt_box() const& {
+  return opt_box_ref().has_value() ? std::addressof(__fbthrift_field_opt_box) : nullptr;
+}
+
+::std::vector<::std::int32_t>* RefFieldsEnsureStruct::get_opt_box() & {
+  return opt_box_ref().has_value() ? std::addressof(__fbthrift_field_opt_box) : nullptr;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED RefFieldsEnsureStruct& a, FOLLY_MAYBE_UNUSED RefFieldsEnsureStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_unique, b.__fbthrift_field_unique);
+  swap(a.__fbthrift_field_shared_const, b.__fbthrift_field_shared_const);
+  swap(a.__fbthrift_field_shared_mustable, b.__fbthrift_field_shared_mustable);
+  swap(a.__fbthrift_field_opt_unique, b.__fbthrift_field_opt_unique);
+  swap(a.__fbthrift_field_opt_shared_const, b.__fbthrift_field_opt_shared_const);
+  swap(a.__fbthrift_field_opt_shared_mustable, b.__fbthrift_field_opt_shared_mustable);
+  swap(a.__fbthrift_field_opt_box, b.__fbthrift_field_opt_box);
+  swap(a.__isset, b.__isset);
+}
+
+template void RefFieldsEnsureStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t RefFieldsEnsureStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t RefFieldsEnsureStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t RefFieldsEnsureStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void RefFieldsEnsureStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t RefFieldsEnsureStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t RefFieldsEnsureStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t RefFieldsEnsureStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // test::fixtures::patch
+
 namespace test { namespace fixtures { namespace patch { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataFieldPatchStruct>, 3, ::test::fixtures::patch::MyDataFieldPatchStruct, ::test::fixtures::patch::MyDataPatchStruct>();
@@ -6780,6 +8574,16 @@ FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::BarFieldPatchStruct>, 6, ::test::fixtures::patch::BarFieldPatchStruct, ::test::fixtures::patch::BarPatchStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7, ::std::vector<::std::int16_t>, ::test::fixtures::patch::BarPatchStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::LoopPatchStruct>, -1, ::test::fixtures::patch::LoopPatchStruct, ::test::fixtures::patch::BarFieldPatchStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RefFieldsFieldPatchStruct>, 3, ::test::fixtures::patch::RefFieldsFieldPatchStruct, ::test::fixtures::patch::RefFieldsPatchStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RefFieldsFieldPatchStruct>, 6, ::test::fixtures::patch::RefFieldsFieldPatchStruct, ::test::fixtures::patch::RefFieldsPatchStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7, ::std::vector<::std::int16_t>, ::test::fixtures::patch::RefFieldsPatchStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField1PatchStruct>, 1, ::test::fixtures::patch::RefFieldsField1PatchStruct, ::test::fixtures::patch::RefFieldsFieldPatchStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField2PatchStruct>, 2, ::test::fixtures::patch::RefFieldsField2PatchStruct, ::test::fixtures::patch::RefFieldsFieldPatchStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField3PatchStruct>, 3, ::test::fixtures::patch::RefFieldsField3PatchStruct, ::test::fixtures::patch::RefFieldsFieldPatchStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField4PatchStruct>, 4, ::test::fixtures::patch::RefFieldsField4PatchStruct, ::test::fixtures::patch::RefFieldsFieldPatchStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField5PatchStruct>, 5, ::test::fixtures::patch::RefFieldsField5PatchStruct, ::test::fixtures::patch::RefFieldsFieldPatchStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField6PatchStruct>, 6, ::test::fixtures::patch::RefFieldsField6PatchStruct, ::test::fixtures::patch::RefFieldsFieldPatchStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField7PatchStruct>, 7, ::test::fixtures::patch::RefFieldsField7PatchStruct, ::test::fixtures::patch::RefFieldsFieldPatchStruct>();
 }
 }}}} // test::fixtures::patch
 namespace apache::thrift::detail::annotation {

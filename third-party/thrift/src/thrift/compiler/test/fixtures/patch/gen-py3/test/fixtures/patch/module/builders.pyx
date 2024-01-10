@@ -94,3 +94,15 @@ cdef class Loop_Builder(thrift.py3.builder.StructBuilder):
     def __iter__(self):
         yield "bar", self.bar
 
+cdef class RefFields_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _test_fixtures_patch_module_types.RefFields
+
+    def __iter__(self):
+        yield "unique", self.unique
+        yield "shared_const", self.shared_const
+        yield "shared_mustable", self.shared_mustable
+        yield "opt_unique", self.opt_unique
+        yield "opt_shared_const", self.opt_shared_const
+        yield "opt_shared_mustable", self.opt_shared_mustable
+        yield "opt_box", self.opt_box
+

@@ -291,15 +291,15 @@ public class RecursivePatch implements TBase, java.io.Serializable, Cloneable {
         case REMOVE:
           if (__field.type == TType.LIST) {
             {
-              TList _list238 = iprot.readListBegin();
-              tmp_remove = new ArrayList<Short>(Math.max(0, _list238.size));
-              for (int _i239 = 0; 
-                   (_list238.size < 0) ? iprot.peekList() : (_i239 < _list238.size); 
-                   ++_i239)
+              TList _list266 = iprot.readListBegin();
+              tmp_remove = new ArrayList<Short>(Math.max(0, _list266.size));
+              for (int _i267 = 0; 
+                   (_list266.size < 0) ? iprot.peekList() : (_i267 < _list266.size); 
+                   ++_i267)
               {
-                Short _elem240;
-                _elem240 = iprot.readI16();
-                tmp_remove.add(_elem240);
+                Short _elem268;
+                _elem268 = iprot.readI16();
+                tmp_remove.add(_elem268);
               }
               iprot.readListEnd();
             }
@@ -363,8 +363,8 @@ public class RecursivePatch implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(REMOVE_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.I16, this.remove.size()));
-        for (Short _iter241 : this.remove)        {
-          oprot.writeI16(_iter241);
+        for (Short _iter269 : this.remove)        {
+          oprot.writeI16(_iter269);
         }
         oprot.writeListEnd();
       }

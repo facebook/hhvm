@@ -11,7 +11,7 @@ import com.facebook.thrift.type.TypeList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class __fbthrift_TypeList_3e9614f3 implements TypeList {
+public class __fbthrift_TypeList_0841e9a0 implements TypeList {
 
   private static List<TypeMapping> list = new ArrayList<>();
 
@@ -29,6 +29,7 @@ public class __fbthrift_TypeList_3e9614f3 implements TypeList {
     add("test.dev/fixtures/patch/Recursive", "test.fixtures.patch.Recursive");
     add("test.dev/fixtures/patch/Bar", "test.fixtures.patch.Bar");
     add("test.dev/fixtures/patch/Loop", "test.fixtures.patch.Loop");
+    add("test.dev/fixtures/patch/RefFields", "test.fixtures.patch.RefFields");
     add("test.dev/fixtures/patch/MyDataPatch", "test.fixtures.patch.MyDataPatch");
     add("test.dev/fixtures/patch/MyDataFieldPatch", "test.fixtures.patch.MyDataFieldPatch");
     add("test.dev/fixtures/patch/MyDataEnsureStruct", "test.fixtures.patch.MyDataEnsureStruct");
@@ -61,6 +62,16 @@ public class __fbthrift_TypeList_3e9614f3 implements TypeList {
     add("test.dev/fixtures/patch/BarFieldPatch", "test.fixtures.patch.BarFieldPatch");
     add("test.dev/fixtures/patch/BarEnsureStruct", "test.fixtures.patch.BarEnsureStruct");
     add("test.dev/fixtures/patch/LoopPatch", "test.fixtures.patch.LoopPatch");
+    add("test.dev/fixtures/patch/RefFieldsPatch", "test.fixtures.patch.RefFieldsPatch");
+    add("test.dev/fixtures/patch/RefFieldsField1Patch", "test.fixtures.patch.RefFieldsField1Patch");
+    add("test.dev/fixtures/patch/RefFieldsField2Patch", "test.fixtures.patch.RefFieldsField2Patch");
+    add("test.dev/fixtures/patch/RefFieldsField3Patch", "test.fixtures.patch.RefFieldsField3Patch");
+    add("test.dev/fixtures/patch/RefFieldsField4Patch", "test.fixtures.patch.RefFieldsField4Patch");
+    add("test.dev/fixtures/patch/RefFieldsField5Patch", "test.fixtures.patch.RefFieldsField5Patch");
+    add("test.dev/fixtures/patch/RefFieldsField6Patch", "test.fixtures.patch.RefFieldsField6Patch");
+    add("test.dev/fixtures/patch/RefFieldsField7Patch", "test.fixtures.patch.RefFieldsField7Patch");
+    add("test.dev/fixtures/patch/RefFieldsFieldPatch", "test.fixtures.patch.RefFieldsFieldPatch");
+    add("test.dev/fixtures/patch/RefFieldsEnsureStruct", "test.fixtures.patch.RefFieldsEnsureStruct");
     add("test.dev/fixtures/patch/MyEnum", "test.fixtures.patch.MyEnum");
   }
 

@@ -291,15 +291,15 @@ public class MyDataWithCustomDefaultPatch implements TBase, java.io.Serializable
         case REMOVE:
           if (__field.type == TType.LIST) {
             {
-              TList _list41 = iprot.readListBegin();
-              tmp_remove = new ArrayList<Short>(Math.max(0, _list41.size));
-              for (int _i42 = 0; 
-                   (_list41.size < 0) ? iprot.peekList() : (_i42 < _list41.size); 
-                   ++_i42)
+              TList _list69 = iprot.readListBegin();
+              tmp_remove = new ArrayList<Short>(Math.max(0, _list69.size));
+              for (int _i70 = 0; 
+                   (_list69.size < 0) ? iprot.peekList() : (_i70 < _list69.size); 
+                   ++_i70)
               {
-                Short _elem43;
-                _elem43 = iprot.readI16();
-                tmp_remove.add(_elem43);
+                Short _elem71;
+                _elem71 = iprot.readI16();
+                tmp_remove.add(_elem71);
               }
               iprot.readListEnd();
             }
@@ -363,8 +363,8 @@ public class MyDataWithCustomDefaultPatch implements TBase, java.io.Serializable
       oprot.writeFieldBegin(REMOVE_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.I16, this.remove.size()));
-        for (Short _iter44 : this.remove)        {
-          oprot.writeI16(_iter44);
+        for (Short _iter72 : this.remove)        {
+          oprot.writeI16(_iter72);
         }
         oprot.writeListEnd();
       }

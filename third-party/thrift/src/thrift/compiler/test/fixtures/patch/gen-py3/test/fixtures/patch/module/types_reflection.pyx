@@ -704,6 +704,110 @@ cdef __StructSpec get_reflection__Loop():
         ),
     )
     return spec
+cdef __StructSpec get_reflection__RefFields():
+    cdef _test_fixtures_patch_module_types.RefFields defaults = _test_fixtures_patch_module_types.RefFields._fbthrift_create(
+        constant_shared_ptr[_test_fixtures_patch_module_types.cRefFields](
+            default_inst[_test_fixtures_patch_module_types.cRefFields]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="RefFields",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=1,
+            name="unique",
+            py_name="unique",
+            type=_test_fixtures_patch_module_types.List__i32,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=2,
+            name="shared_const",
+            py_name="shared_const",
+            type=_test_fixtures_patch_module_types.List__i32,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=3,
+            name="shared_mustable",
+            py_name="shared_mustable",
+            type=_test_fixtures_patch_module_types.List__i32,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=4,
+            name="opt_unique",
+            py_name="opt_unique",
+            type=_test_fixtures_patch_module_types.List__i32,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.OPTIONAL,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=5,
+            name="opt_shared_const",
+            py_name="opt_shared_const",
+            type=_test_fixtures_patch_module_types.List__i32,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.OPTIONAL,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=6,
+            name="opt_shared_mustable",
+            py_name="opt_shared_mustable",
+            type=_test_fixtures_patch_module_types.List__i32,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.OPTIONAL,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=7,
+            name="opt_box",
+            py_name="opt_box",
+            type=_test_fixtures_patch_module_types.List__i32,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.OPTIONAL,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    return spec
 cdef __ListSpec get_reflection__List__i16():
     return __ListSpec._fbthrift_create(
         value=int,
@@ -752,5 +856,11 @@ cdef __MapSpec get_reflection__Map__string_Recursive():
         key_kind=__NumberType.NOT_A_NUMBER,
         value=_test_fixtures_patch_module_types.Recursive,
         value_kind=__NumberType.NOT_A_NUMBER,
+    )
+
+cdef __ListSpec get_reflection__List__i32():
+    return __ListSpec._fbthrift_create(
+        value=int,
+        kind=__NumberType.I32,
     )
 

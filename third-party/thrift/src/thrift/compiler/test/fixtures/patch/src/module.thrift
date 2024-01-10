@@ -112,3 +112,20 @@ struct Loop {
   @patch.AssignOnlyPatch
   Bar bar;
 }
+
+struct RefFields {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<i32> unique;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  2: list<i32> shared_const;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  3: list<i32> shared_mustable;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  4: optional list<i32> opt_unique;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  5: optional list<i32> opt_shared_const;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  6: optional list<i32> opt_shared_mustable;
+  @thrift.Box
+  7: optional list<i32> opt_box;
+}

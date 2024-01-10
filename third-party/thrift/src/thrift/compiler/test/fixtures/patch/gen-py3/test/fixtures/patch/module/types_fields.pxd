@@ -155,3 +155,20 @@ cdef class __Loop_FieldsSetter(__StructFieldsSetter):
     cdef __Loop_FieldsSetter _fbthrift_create(_test_fixtures_patch_module_types.cLoop* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
 
+
+ctypedef void (*__RefFields_FieldsSetterFunc)(__RefFields_FieldsSetter, object) except *
+
+cdef class __RefFields_FieldsSetter(__StructFieldsSetter):
+    cdef _test_fixtures_patch_module_types.cRefFields* _struct_cpp_obj
+    cdef cumap[__cstring_view, __RefFields_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __RefFields_FieldsSetter _fbthrift_create(_test_fixtures_patch_module_types.cRefFields* struct_cpp_obj)
+    cdef void _set_field_0(self, _fbthrift_value) except *
+    cdef void _set_field_1(self, _fbthrift_value) except *
+    cdef void _set_field_2(self, _fbthrift_value) except *
+    cdef void _set_field_3(self, _fbthrift_value) except *
+    cdef void _set_field_4(self, _fbthrift_value) except *
+    cdef void _set_field_5(self, _fbthrift_value) except *
+    cdef void _set_field_6(self, _fbthrift_value) except *
+

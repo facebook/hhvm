@@ -32,6 +32,8 @@ cdef __StructSpec get_reflection__Bar()
 
 cdef __StructSpec get_reflection__Loop()
 
+cdef __StructSpec get_reflection__RefFields()
+
 cdef __ListSpec get_reflection__List__i16()
 
 cdef __SetSpec get_reflection__Set__string()
@@ -45,3 +47,5 @@ cdef __ListSpec get_reflection__List__Map__string_i32()
 cdef __MapSpec get_reflection__Map__string_Map__string_i32()
 
 cdef __MapSpec get_reflection__Map__string_Recursive()
+
+cdef __ListSpec get_reflection__List__i32()

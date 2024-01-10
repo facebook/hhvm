@@ -23,6 +23,7 @@ namespace patch {
   ::apache::thrift::detail::md::StructMetadata<Recursive>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Bar>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Loop>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<RefFields>::gen(metadata);
   return metadata;
 }
 } // namespace test

@@ -220,6 +220,34 @@ inline void reset_field<::test::fixtures::patch::Loop>(
 }
 
 template<>
+inline void reset_field<::test::fixtures::patch::RefFields>(
+    ::test::fixtures::patch::RefFields& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.unique_ref().reset();
+      return;
+    case 1:
+      obj.shared_const_ref().reset();
+      return;
+    case 2:
+      obj.shared_mustable_ref().reset();
+      return;
+    case 3:
+      obj.opt_unique_ref().reset();
+      return;
+    case 4:
+      obj.opt_shared_const_ref().reset();
+      return;
+    case 5:
+      obj.opt_shared_mustable_ref().reset();
+      return;
+    case 6:
+      obj.opt_box_ref().copy_from(default_inst<::test::fixtures::patch::RefFields>().opt_box_ref());
+      return;
+  }
+}
+
+template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::test::fixtures::patch::MyData>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
@@ -302,6 +330,16 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::test::fixtures::patch::Loop>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::test::fixtures::patch::RefFields>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

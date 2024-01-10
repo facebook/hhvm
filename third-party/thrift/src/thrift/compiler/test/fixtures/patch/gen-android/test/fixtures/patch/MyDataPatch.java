@@ -291,15 +291,15 @@ public class MyDataPatch implements TBase, java.io.Serializable, Cloneable {
         case REMOVE:
           if (__field.type == TType.LIST) {
             {
-              TList _list37 = iprot.readListBegin();
-              tmp_remove = new ArrayList<Short>(Math.max(0, _list37.size));
-              for (int _i38 = 0; 
-                   (_list37.size < 0) ? iprot.peekList() : (_i38 < _list37.size); 
-                   ++_i38)
+              TList _list65 = iprot.readListBegin();
+              tmp_remove = new ArrayList<Short>(Math.max(0, _list65.size));
+              for (int _i66 = 0; 
+                   (_list65.size < 0) ? iprot.peekList() : (_i66 < _list65.size); 
+                   ++_i66)
               {
-                Short _elem39;
-                _elem39 = iprot.readI16();
-                tmp_remove.add(_elem39);
+                Short _elem67;
+                _elem67 = iprot.readI16();
+                tmp_remove.add(_elem67);
               }
               iprot.readListEnd();
             }
@@ -363,8 +363,8 @@ public class MyDataPatch implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(REMOVE_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.I16, this.remove.size()));
-        for (Short _iter40 : this.remove)        {
-          oprot.writeI16(_iter40);
+        for (Short _iter68 : this.remove)        {
+          oprot.writeI16(_iter68);
         }
         oprot.writeListEnd();
       }

@@ -19,6 +19,7 @@ class LateDefStruct;
 class Recursive;
 class Bar;
 class Loop;
+class RefFields;
 class MyDataPatchStruct;
 class MyDataFieldPatchStruct;
 class MyDataEnsureStruct;
@@ -51,6 +52,16 @@ class BarPatchStruct;
 class BarFieldPatchStruct;
 class BarEnsureStruct;
 class LoopPatchStruct;
+class RefFieldsPatchStruct;
+class RefFieldsField1PatchStruct;
+class RefFieldsField2PatchStruct;
+class RefFieldsField3PatchStruct;
+class RefFieldsField4PatchStruct;
+class RefFieldsField5PatchStruct;
+class RefFieldsField6PatchStruct;
+class RefFieldsField7PatchStruct;
+class RefFieldsFieldPatchStruct;
+class RefFieldsEnsureStruct;
 }}} // test::fixtures::patch
 // END forward_declare
 

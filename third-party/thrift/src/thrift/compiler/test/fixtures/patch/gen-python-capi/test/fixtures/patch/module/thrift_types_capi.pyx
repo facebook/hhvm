@@ -92,6 +92,13 @@ cdef api int can_extract__test__fixtures__patch__module__Loop(object __obj) exce
 cdef api object init__test__fixtures__patch__module__Loop(object data):
     return __thrift_types.Loop._fbthrift_create(data)
 
+cdef api int can_extract__test__fixtures__patch__module__RefFields(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.RefFields) else 0
+
+
+cdef api object init__test__fixtures__patch__module__RefFields(object data):
+    return __thrift_types.RefFields._fbthrift_create(data)
+
 cdef api int can_extract__test__fixtures__patch__module__MyDataPatch(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyDataPatch) else 0
 
@@ -635,6 +642,176 @@ cdef api object construct__test__fixtures__patch__module__LoopPatch(__unique_ptr
 
 cdef api object init__test__fixtures__patch__module__LoopPatch(object data):
     return __thrift_types.LoopPatch._fbthrift_create(data)
+
+cdef api int can_extract__test__fixtures__patch__module__RefFieldsPatch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.RefFieldsPatch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsPatch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__RefFieldsPatch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.RefFieldsPatch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api object init__test__fixtures__patch__module__RefFieldsPatch(object data):
+    return __thrift_types.RefFieldsPatch._fbthrift_create(data)
+
+cdef api int can_extract__test__fixtures__patch__module__RefFieldsField1Patch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.RefFieldsField1Patch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsField1Patch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__RefFieldsField1Patch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.RefFieldsField1Patch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api object init__test__fixtures__patch__module__RefFieldsField1Patch(object data):
+    return __thrift_types.RefFieldsField1Patch._fbthrift_create(data)
+
+cdef api int can_extract__test__fixtures__patch__module__RefFieldsField2Patch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.RefFieldsField2Patch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsField2Patch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__RefFieldsField2Patch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.RefFieldsField2Patch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api object init__test__fixtures__patch__module__RefFieldsField2Patch(object data):
+    return __thrift_types.RefFieldsField2Patch._fbthrift_create(data)
+
+cdef api int can_extract__test__fixtures__patch__module__RefFieldsField3Patch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.RefFieldsField3Patch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsField3Patch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__RefFieldsField3Patch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.RefFieldsField3Patch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api object init__test__fixtures__patch__module__RefFieldsField3Patch(object data):
+    return __thrift_types.RefFieldsField3Patch._fbthrift_create(data)
+
+cdef api int can_extract__test__fixtures__patch__module__RefFieldsField4Patch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.RefFieldsField4Patch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsField4Patch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__RefFieldsField4Patch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.RefFieldsField4Patch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api object init__test__fixtures__patch__module__RefFieldsField4Patch(object data):
+    return __thrift_types.RefFieldsField4Patch._fbthrift_create(data)
+
+cdef api int can_extract__test__fixtures__patch__module__RefFieldsField5Patch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.RefFieldsField5Patch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsField5Patch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__RefFieldsField5Patch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.RefFieldsField5Patch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api object init__test__fixtures__patch__module__RefFieldsField5Patch(object data):
+    return __thrift_types.RefFieldsField5Patch._fbthrift_create(data)
+
+cdef api int can_extract__test__fixtures__patch__module__RefFieldsField6Patch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.RefFieldsField6Patch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsField6Patch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__RefFieldsField6Patch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.RefFieldsField6Patch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api object init__test__fixtures__patch__module__RefFieldsField6Patch(object data):
+    return __thrift_types.RefFieldsField6Patch._fbthrift_create(data)
+
+cdef api int can_extract__test__fixtures__patch__module__RefFieldsField7Patch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.RefFieldsField7Patch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsField7Patch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__RefFieldsField7Patch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.RefFieldsField7Patch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api object init__test__fixtures__patch__module__RefFieldsField7Patch(object data):
+    return __thrift_types.RefFieldsField7Patch._fbthrift_create(data)
+
+cdef api int can_extract__test__fixtures__patch__module__RefFieldsFieldPatch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.RefFieldsFieldPatch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsFieldPatch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__RefFieldsFieldPatch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.RefFieldsFieldPatch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api object init__test__fixtures__patch__module__RefFieldsFieldPatch(object data):
+    return __thrift_types.RefFieldsFieldPatch._fbthrift_create(data)
+
+cdef api int can_extract__test__fixtures__patch__module__RefFieldsEnsureStruct(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.RefFieldsEnsureStruct) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsEnsureStruct(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__RefFieldsEnsureStruct(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.RefFieldsEnsureStruct,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api object init__test__fixtures__patch__module__RefFieldsEnsureStruct(object data):
+    return __thrift_types.RefFieldsEnsureStruct._fbthrift_create(data)
 
 cdef api int can_extract__test__fixtures__patch__module__MyEnum(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyEnum) else 0

@@ -232,6 +232,24 @@ cdef extern from "thrift/compiler/test/fixtures/patch/src/gen-cpp2/module_types_
         __terse_field_ref[cBar] bar_ref "bar_ref" ()
 
 
+    cdef cppclass cRefFields "::test::fixtures::patch::RefFields":
+        cRefFields() except +
+        cRefFields(const cRefFields&) except +
+        bint operator==(cRefFields&)
+        bint operator!=(cRefFields&)
+        bint operator<(cRefFields&)
+        bint operator>(cRefFields&)
+        bint operator<=(cRefFields&)
+        bint operator>=(cRefFields&)
+        unique_ptr[vector[cint32_t]] unique_ref "unique_ref" ()
+        shared_ptr[const vector[cint32_t]] shared_const_ref "shared_const_ref" ()
+        shared_ptr[vector[cint32_t]] shared_mustable_ref "shared_mustable_ref" ()
+        unique_ptr[vector[cint32_t]] opt_unique_ref "opt_unique_ref" ()
+        shared_ptr[const vector[cint32_t]] opt_shared_const_ref "opt_shared_const_ref" ()
+        shared_ptr[vector[cint32_t]] opt_shared_mustable_ref "opt_shared_mustable_ref" ()
+        __optional_field_ref[vector[cint32_t]] opt_box_ref "opt_box_ref" ()
+
+
 
 
 cdef class MyData(thrift.py3.types.Struct):
@@ -399,6 +417,29 @@ cdef class Loop(thrift.py3.types.Struct):
     cdef _fbthrift_create(shared_ptr[cLoop])
 
 
+
+cdef class RefFields(thrift.py3.types.Struct):
+    cdef shared_ptr[cRefFields] _cpp_obj
+    cdef _fbthrift_types_fields.__RefFields_FieldsSetter _fields_setter
+    cdef inline object unique_impl(self)
+    cdef inline object shared_const_impl(self)
+    cdef inline object shared_mustable_impl(self)
+    cdef inline object opt_unique_impl(self)
+    cdef inline object opt_shared_const_impl(self)
+    cdef inline object opt_shared_mustable_impl(self)
+    cdef inline object opt_box_impl(self)
+    cdef List__i32 __fbthrift_cached_unique
+    cdef List__i32 __fbthrift_cached_shared_const
+    cdef List__i32 __fbthrift_cached_shared_mustable
+    cdef List__i32 __fbthrift_cached_opt_unique
+    cdef List__i32 __fbthrift_cached_opt_shared_const
+    cdef List__i32 __fbthrift_cached_opt_shared_mustable
+    cdef List__i32 __fbthrift_cached_opt_box
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cRefFields])
+
+
 cdef class List__i16(thrift.py3.types.List):
     cdef shared_ptr[vector[cint16_t]] _cpp_obj
     @staticmethod
@@ -447,5 +488,12 @@ cdef class Map__string_Recursive(thrift.py3.types.Map):
     cdef _fbthrift_create(shared_ptr[cmap[string,cRecursive]])
     @staticmethod
     cdef shared_ptr[cmap[string,cRecursive]] _make_instance(object items) except *
+
+cdef class List__i32(thrift.py3.types.List):
+    cdef shared_ptr[vector[cint32_t]] _cpp_obj
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[vector[cint32_t]])
+    @staticmethod
+    cdef shared_ptr[vector[cint32_t]] _make_instance(object items) except *
 
 

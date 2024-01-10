@@ -61,6 +61,11 @@ cdef api int can_extract__test__fixtures__patch__module__Loop(object) except -1
 
 cdef api object init__test__fixtures__patch__module__Loop(object data)
 
+cdef api int can_extract__test__fixtures__patch__module__RefFields(object) except -1
+
+
+cdef api object init__test__fixtures__patch__module__RefFields(object data)
+
 cdef api int can_extract__test__fixtures__patch__module__MyDataPatch(object) except -1
 
 cdef api __cIOBuf* extract__test__fixtures__patch__module__MyDataPatch(object) except NULL
@@ -316,6 +321,86 @@ cdef api __cIOBuf* extract__test__fixtures__patch__module__LoopPatch(object) exc
 cdef api object construct__test__fixtures__patch__module__LoopPatch(__unique_ptr[__cIOBuf])
 
 cdef api object init__test__fixtures__patch__module__LoopPatch(object data)
+
+cdef api int can_extract__test__fixtures__patch__module__RefFieldsPatch(object) except -1
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsPatch(object) except NULL
+
+cdef api object construct__test__fixtures__patch__module__RefFieldsPatch(__unique_ptr[__cIOBuf])
+
+cdef api object init__test__fixtures__patch__module__RefFieldsPatch(object data)
+
+cdef api int can_extract__test__fixtures__patch__module__RefFieldsField1Patch(object) except -1
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsField1Patch(object) except NULL
+
+cdef api object construct__test__fixtures__patch__module__RefFieldsField1Patch(__unique_ptr[__cIOBuf])
+
+cdef api object init__test__fixtures__patch__module__RefFieldsField1Patch(object data)
+
+cdef api int can_extract__test__fixtures__patch__module__RefFieldsField2Patch(object) except -1
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsField2Patch(object) except NULL
+
+cdef api object construct__test__fixtures__patch__module__RefFieldsField2Patch(__unique_ptr[__cIOBuf])
+
+cdef api object init__test__fixtures__patch__module__RefFieldsField2Patch(object data)
+
+cdef api int can_extract__test__fixtures__patch__module__RefFieldsField3Patch(object) except -1
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsField3Patch(object) except NULL
+
+cdef api object construct__test__fixtures__patch__module__RefFieldsField3Patch(__unique_ptr[__cIOBuf])
+
+cdef api object init__test__fixtures__patch__module__RefFieldsField3Patch(object data)
+
+cdef api int can_extract__test__fixtures__patch__module__RefFieldsField4Patch(object) except -1
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsField4Patch(object) except NULL
+
+cdef api object construct__test__fixtures__patch__module__RefFieldsField4Patch(__unique_ptr[__cIOBuf])
+
+cdef api object init__test__fixtures__patch__module__RefFieldsField4Patch(object data)
+
+cdef api int can_extract__test__fixtures__patch__module__RefFieldsField5Patch(object) except -1
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsField5Patch(object) except NULL
+
+cdef api object construct__test__fixtures__patch__module__RefFieldsField5Patch(__unique_ptr[__cIOBuf])
+
+cdef api object init__test__fixtures__patch__module__RefFieldsField5Patch(object data)
+
+cdef api int can_extract__test__fixtures__patch__module__RefFieldsField6Patch(object) except -1
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsField6Patch(object) except NULL
+
+cdef api object construct__test__fixtures__patch__module__RefFieldsField6Patch(__unique_ptr[__cIOBuf])
+
+cdef api object init__test__fixtures__patch__module__RefFieldsField6Patch(object data)
+
+cdef api int can_extract__test__fixtures__patch__module__RefFieldsField7Patch(object) except -1
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsField7Patch(object) except NULL
+
+cdef api object construct__test__fixtures__patch__module__RefFieldsField7Patch(__unique_ptr[__cIOBuf])
+
+cdef api object init__test__fixtures__patch__module__RefFieldsField7Patch(object data)
+
+cdef api int can_extract__test__fixtures__patch__module__RefFieldsFieldPatch(object) except -1
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsFieldPatch(object) except NULL
+
+cdef api object construct__test__fixtures__patch__module__RefFieldsFieldPatch(__unique_ptr[__cIOBuf])
+
+cdef api object init__test__fixtures__patch__module__RefFieldsFieldPatch(object data)
+
+cdef api int can_extract__test__fixtures__patch__module__RefFieldsEnsureStruct(object) except -1
+
+cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsEnsureStruct(object) except NULL
+
+cdef api object construct__test__fixtures__patch__module__RefFieldsEnsureStruct(__unique_ptr[__cIOBuf])
+
+cdef api object init__test__fixtures__patch__module__RefFieldsEnsureStruct(object data)
 
 cdef api int can_extract__test__fixtures__patch__module__MyEnum(object) except -1
 

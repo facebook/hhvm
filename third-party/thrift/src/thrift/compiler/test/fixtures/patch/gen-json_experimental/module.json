@@ -525,6 +525,158 @@
         "is_union" : false,
         "lineno" : 110
       },
+      "RefFields" : {
+        "name" : "RefFields",
+        "fields" : {
+          "unique" : {
+            "name" : "unique",
+            "key" : 1,
+            "lineno" : 117,
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+            ,
+            "structured_annotations": {
+              "cpp.Ref" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Ref",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+            "value" : {"type": 0}
+          }
+                }
+          },
+          "shared_const" : {
+            "name" : "shared_const",
+            "key" : 2,
+            "lineno" : 119,
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+            ,
+            "structured_annotations": {
+              "cpp.Ref" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Ref",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+            "value" : {"type": 1}
+          }
+                }
+          },
+          "shared_mustable" : {
+            "name" : "shared_mustable",
+            "key" : 3,
+            "lineno" : 121,
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+            ,
+            "structured_annotations": {
+              "cpp.Ref" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Ref",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+            "value" : {"type": 2}
+          }
+                }
+          },
+          "opt_unique" : {
+            "name" : "opt_unique",
+            "key" : 4,
+            "lineno" : 123,
+            "required" : "optional",
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+            ,
+            "structured_annotations": {
+              "cpp.Ref" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Ref",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+            "value" : {"type": 0}
+          }
+                }
+          },
+          "opt_shared_const" : {
+            "name" : "opt_shared_const",
+            "key" : 5,
+            "lineno" : 125,
+            "required" : "optional",
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+            ,
+            "structured_annotations": {
+              "cpp.Ref" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Ref",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+            "value" : {"type": 1}
+          }
+                }
+          },
+          "opt_shared_mustable" : {
+            "name" : "opt_shared_mustable",
+            "key" : 6,
+            "lineno" : 127,
+            "required" : "optional",
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+            ,
+            "structured_annotations": {
+              "cpp.Ref" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Ref",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+            "value" : {"type": 2}
+          }
+                }
+          },
+          "opt_box" : {
+            "name" : "opt_box",
+            "key" : 7,
+            "lineno" : 129,
+            "required" : "optional",
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+            ,
+            "structured_annotations": {
+              "thrift.Box" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Box",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 116
+      },
       "MyDataPatch" : {
         "name" : "MyDataPatch",
         "structured_annotations": {
@@ -3420,6 +3572,731 @@
             "key" : 2,
             "lineno" : 24,
             "type" : "bool"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 25
+      },
+      "RefFieldsPatch" : {
+        "name" : "RefFieldsPatch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : {"name": "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::RefFieldsPatchStruct>", "underlyingName": "RefFieldsPatchStruct", "extraNamespace": ""}
+      }
+        },
+        "fields" : {
+          "assign" : {
+            "name" : "assign",
+            "docstring" : "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned.\n\n",
+            "key" : 1,
+            "lineno" : 24,
+            "required" : "optional",
+            "type" : {
+  "type" : "struct",
+  "name" : "RefFields"
+}
+            ,
+            "structured_annotations": {
+              "thrift.Box" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Box",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          },
+          "clear" : {
+            "name" : "clear",
+            "docstring" : "Clears a value. Applies first.\n",
+            "key" : 2,
+            "lineno" : 24,
+            "type" : "bool"
+                  },
+          "patchPrior" : {
+            "name" : "patchPrior",
+            "docstring" : "Patches any previously set values. Applies second.\n",
+            "key" : 3,
+            "lineno" : 24,
+            "type" : {
+  "type" : "struct",
+  "name" : "RefFieldsFieldPatch"
+}
+                  },
+          "ensure" : {
+            "name" : "ensure",
+            "docstring" : "Initialize fields, using the given defaults. Applies third.\n",
+            "key" : 5,
+            "lineno" : 24,
+            "type" : {
+  "type" : "struct",
+  "name" : "RefFieldsEnsureStruct"
+}
+                  },
+          "patch" : {
+            "name" : "patch",
+            "docstring" : "Patches any set value, including newly set values. Applies last.\n",
+            "key" : 6,
+            "lineno" : 24,
+            "type" : {
+  "type" : "struct",
+  "name" : "RefFieldsFieldPatch"
+}
+                  },
+          "remove" : {
+            "name" : "remove",
+            "docstring" : "Removes entries, if present. Applies third.\n",
+            "key" : 7,
+            "lineno" : 24,
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i16"
+}
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 25
+      },
+      "RefFieldsField1Patch" : {
+        "name" : "RefFieldsField1Patch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : {"name": "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField1PatchStruct>", "underlyingName": "RefFieldsField1PatchStruct", "extraNamespace": ""}
+      }
+        },
+        "fields" : {
+          "assign" : {
+            "name" : "assign",
+            "docstring" : "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned.\n\n",
+            "key" : 1,
+            "lineno" : 24,
+            "required" : "optional",
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  },
+          "clear" : {
+            "name" : "clear",
+            "docstring" : "Clears a value. Applies first.\n",
+            "key" : 2,
+            "lineno" : 24,
+            "type" : "bool"
+                  },
+          "prepend" : {
+            "name" : "prepend",
+            "docstring" : "Prepends to the front of a given list.\n",
+            "key" : 8,
+            "lineno" : 24,
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  },
+          "append" : {
+            "name" : "append",
+            "docstring" : "Appends to the back of a given list.\n",
+            "key" : 9,
+            "lineno" : 24,
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 25
+      },
+      "RefFieldsField2Patch" : {
+        "name" : "RefFieldsField2Patch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : {"name": "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField2PatchStruct>", "underlyingName": "RefFieldsField2PatchStruct", "extraNamespace": ""}
+      }
+        },
+        "fields" : {
+          "assign" : {
+            "name" : "assign",
+            "docstring" : "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned.\n\n",
+            "key" : 1,
+            "lineno" : 24,
+            "required" : "optional",
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  },
+          "clear" : {
+            "name" : "clear",
+            "docstring" : "Clears a value. Applies first.\n",
+            "key" : 2,
+            "lineno" : 24,
+            "type" : "bool"
+                  },
+          "prepend" : {
+            "name" : "prepend",
+            "docstring" : "Prepends to the front of a given list.\n",
+            "key" : 8,
+            "lineno" : 24,
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  },
+          "append" : {
+            "name" : "append",
+            "docstring" : "Appends to the back of a given list.\n",
+            "key" : 9,
+            "lineno" : 24,
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 25
+      },
+      "RefFieldsField3Patch" : {
+        "name" : "RefFieldsField3Patch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : {"name": "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField3PatchStruct>", "underlyingName": "RefFieldsField3PatchStruct", "extraNamespace": ""}
+      }
+        },
+        "fields" : {
+          "assign" : {
+            "name" : "assign",
+            "docstring" : "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned.\n\n",
+            "key" : 1,
+            "lineno" : 24,
+            "required" : "optional",
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  },
+          "clear" : {
+            "name" : "clear",
+            "docstring" : "Clears a value. Applies first.\n",
+            "key" : 2,
+            "lineno" : 24,
+            "type" : "bool"
+                  },
+          "prepend" : {
+            "name" : "prepend",
+            "docstring" : "Prepends to the front of a given list.\n",
+            "key" : 8,
+            "lineno" : 24,
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  },
+          "append" : {
+            "name" : "append",
+            "docstring" : "Appends to the back of a given list.\n",
+            "key" : 9,
+            "lineno" : 24,
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 25
+      },
+      "RefFieldsField4Patch" : {
+        "name" : "RefFieldsField4Patch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : {"name": "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField4PatchStruct>", "underlyingName": "RefFieldsField4PatchStruct", "extraNamespace": ""}
+      }
+        },
+        "fields" : {
+          "assign" : {
+            "name" : "assign",
+            "docstring" : "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned.\n\n",
+            "key" : 1,
+            "lineno" : 24,
+            "required" : "optional",
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  },
+          "clear" : {
+            "name" : "clear",
+            "docstring" : "Clears a value. Applies first.\n",
+            "key" : 2,
+            "lineno" : 24,
+            "type" : "bool"
+                  },
+          "prepend" : {
+            "name" : "prepend",
+            "docstring" : "Prepends to the front of a given list.\n",
+            "key" : 8,
+            "lineno" : 24,
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  },
+          "append" : {
+            "name" : "append",
+            "docstring" : "Appends to the back of a given list.\n",
+            "key" : 9,
+            "lineno" : 24,
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 25
+      },
+      "RefFieldsField5Patch" : {
+        "name" : "RefFieldsField5Patch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : {"name": "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField5PatchStruct>", "underlyingName": "RefFieldsField5PatchStruct", "extraNamespace": ""}
+      }
+        },
+        "fields" : {
+          "assign" : {
+            "name" : "assign",
+            "docstring" : "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned.\n\n",
+            "key" : 1,
+            "lineno" : 24,
+            "required" : "optional",
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  },
+          "clear" : {
+            "name" : "clear",
+            "docstring" : "Clears a value. Applies first.\n",
+            "key" : 2,
+            "lineno" : 24,
+            "type" : "bool"
+                  },
+          "prepend" : {
+            "name" : "prepend",
+            "docstring" : "Prepends to the front of a given list.\n",
+            "key" : 8,
+            "lineno" : 24,
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  },
+          "append" : {
+            "name" : "append",
+            "docstring" : "Appends to the back of a given list.\n",
+            "key" : 9,
+            "lineno" : 24,
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 25
+      },
+      "RefFieldsField6Patch" : {
+        "name" : "RefFieldsField6Patch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : {"name": "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField6PatchStruct>", "underlyingName": "RefFieldsField6PatchStruct", "extraNamespace": ""}
+      }
+        },
+        "fields" : {
+          "assign" : {
+            "name" : "assign",
+            "docstring" : "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned.\n\n",
+            "key" : 1,
+            "lineno" : 24,
+            "required" : "optional",
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  },
+          "clear" : {
+            "name" : "clear",
+            "docstring" : "Clears a value. Applies first.\n",
+            "key" : 2,
+            "lineno" : 24,
+            "type" : "bool"
+                  },
+          "prepend" : {
+            "name" : "prepend",
+            "docstring" : "Prepends to the front of a given list.\n",
+            "key" : 8,
+            "lineno" : 24,
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  },
+          "append" : {
+            "name" : "append",
+            "docstring" : "Appends to the back of a given list.\n",
+            "key" : 9,
+            "lineno" : 24,
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 25
+      },
+      "RefFieldsField7Patch" : {
+        "name" : "RefFieldsField7Patch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : {"name": "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField7PatchStruct>", "underlyingName": "RefFieldsField7PatchStruct", "extraNamespace": ""}
+      }
+        },
+        "fields" : {
+          "assign" : {
+            "name" : "assign",
+            "docstring" : "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned.\n\n",
+            "key" : 1,
+            "lineno" : 24,
+            "required" : "optional",
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  },
+          "clear" : {
+            "name" : "clear",
+            "docstring" : "Clears a value. Applies first.\n",
+            "key" : 2,
+            "lineno" : 24,
+            "type" : "bool"
+                  },
+          "prepend" : {
+            "name" : "prepend",
+            "docstring" : "Prepends to the front of a given list.\n",
+            "key" : 8,
+            "lineno" : 24,
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  },
+          "append" : {
+            "name" : "append",
+            "docstring" : "Appends to the back of a given list.\n",
+            "key" : 9,
+            "lineno" : 24,
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 25
+      },
+      "RefFieldsFieldPatch" : {
+        "name" : "RefFieldsFieldPatch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RefFieldsFieldPatchStruct>", "underlyingName": "RefFieldsFieldPatchStruct", "extraNamespace": ""}
+      }
+        },
+        "fields" : {
+          "unique" : {
+            "name" : "unique",
+            "key" : 1,
+            "lineno" : 24,
+            "type" : {
+  "type" : "struct",
+  "name" : "RefFieldsField1Patch"
+}
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          },
+          "shared_const" : {
+            "name" : "shared_const",
+            "key" : 2,
+            "lineno" : 24,
+            "type" : {
+  "type" : "struct",
+  "name" : "RefFieldsField2Patch"
+}
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          },
+          "shared_mustable" : {
+            "name" : "shared_mustable",
+            "key" : 3,
+            "lineno" : 24,
+            "type" : {
+  "type" : "struct",
+  "name" : "RefFieldsField3Patch"
+}
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          },
+          "opt_unique" : {
+            "name" : "opt_unique",
+            "key" : 4,
+            "lineno" : 24,
+            "type" : {
+  "type" : "struct",
+  "name" : "RefFieldsField4Patch"
+}
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          },
+          "opt_shared_const" : {
+            "name" : "opt_shared_const",
+            "key" : 5,
+            "lineno" : 24,
+            "type" : {
+  "type" : "struct",
+  "name" : "RefFieldsField5Patch"
+}
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          },
+          "opt_shared_mustable" : {
+            "name" : "opt_shared_mustable",
+            "key" : 6,
+            "lineno" : 24,
+            "type" : {
+  "type" : "struct",
+  "name" : "RefFieldsField6Patch"
+}
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          },
+          "opt_box" : {
+            "name" : "opt_box",
+            "key" : 7,
+            "lineno" : 24,
+            "type" : {
+  "type" : "struct",
+  "name" : "RefFieldsField7Patch"
+}
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 25
+      },
+      "RefFieldsEnsureStruct" : {
+        "name" : "RefFieldsEnsureStruct",
+        "structured_annotations": {
+          "cpp.Frozen2Exclude" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Frozen2Exclude",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : {}
+      }
+        },
+        "fields" : {
+          "unique" : {
+            "name" : "unique",
+            "key" : 1,
+            "lineno" : 24,
+            "required" : "optional",
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  },
+          "shared_const" : {
+            "name" : "shared_const",
+            "key" : 2,
+            "lineno" : 24,
+            "required" : "optional",
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  },
+          "shared_mustable" : {
+            "name" : "shared_mustable",
+            "key" : 3,
+            "lineno" : 24,
+            "required" : "optional",
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  },
+          "opt_unique" : {
+            "name" : "opt_unique",
+            "key" : 4,
+            "lineno" : 24,
+            "required" : "optional",
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  },
+          "opt_shared_const" : {
+            "name" : "opt_shared_const",
+            "key" : 5,
+            "lineno" : 24,
+            "required" : "optional",
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  },
+          "opt_shared_mustable" : {
+            "name" : "opt_shared_mustable",
+            "key" : 6,
+            "lineno" : 24,
+            "required" : "optional",
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+                  },
+          "opt_box" : {
+            "name" : "opt_box",
+            "key" : 7,
+            "lineno" : 24,
+            "required" : "optional",
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
                   }
         },
         "is_exception" : false,

@@ -639,15 +639,15 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable, Co
         case REMOVE:
           if (__field.type == TType.LIST) {
             {
-              TList _list45 = iprot.readListBegin();
-              this.remove = new ArrayList<Short>(Math.max(0, _list45.size));
-              for (int _i46 = 0; 
-                   (_list45.size < 0) ? iprot.peekList() : (_i46 < _list45.size); 
-                   ++_i46)
+              TList _list73 = iprot.readListBegin();
+              this.remove = new ArrayList<Short>(Math.max(0, _list73.size));
+              for (int _i74 = 0; 
+                   (_list73.size < 0) ? iprot.peekList() : (_i74 < _list73.size); 
+                   ++_i74)
               {
-                short _elem47;
-                _elem47 = iprot.readI16();
-                this.remove.add(_elem47);
+                short _elem75;
+                _elem75 = iprot.readI16();
+                this.remove.add(_elem75);
               }
               iprot.readListEnd();
             }
@@ -701,8 +701,8 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable, Co
       oprot.writeFieldBegin(REMOVE_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.I16, this.remove.size()));
-        for (short _iter48 : this.remove)        {
-          oprot.writeI16(_iter48);
+        for (short _iter76 : this.remove)        {
+          oprot.writeI16(_iter76);
         }
         oprot.writeListEnd();
       }

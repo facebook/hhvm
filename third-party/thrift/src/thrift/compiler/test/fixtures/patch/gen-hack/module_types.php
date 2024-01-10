@@ -2778,6 +2778,557 @@ class Loop implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
 
 /**
  * Original thrift struct:-
+ * RefFields
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RefFields'))>>
+class RefFields implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'unique',
+      'is_terse' => true,
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    2 => shape(
+      'var' => 'shared_const',
+      'is_terse' => true,
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    3 => shape(
+      'var' => 'shared_mustable',
+      'is_terse' => true,
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    4 => shape(
+      'var' => 'opt_unique',
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    5 => shape(
+      'var' => 'opt_shared_const',
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    6 => shape(
+      'var' => 'opt_shared_mustable',
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    7 => shape(
+      'var' => 'opt_box',
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'unique' => 1,
+    'shared_const' => 2,
+    'shared_mustable' => 3,
+    'opt_unique' => 4,
+    'opt_shared_const' => 5,
+    'opt_shared_mustable' => 6,
+    'opt_box' => 7,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'unique' => ?Vector<int>,
+    ?'shared_const' => ?Vector<int>,
+    ?'shared_mustable' => ?Vector<int>,
+    ?'opt_unique' => ?Vector<int>,
+    ?'opt_shared_const' => ?Vector<int>,
+    ?'opt_shared_mustable' => ?Vector<int>,
+    ?'opt_box' => ?Vector<int>,
+  );
+
+  const type TShape = shape(
+    'unique' => vec<int>,
+    'shared_const' => vec<int>,
+    'shared_mustable' => vec<int>,
+    ?'opt_unique' => ?vec<int>,
+    ?'opt_shared_const' => ?vec<int>,
+    ?'opt_shared_mustable' => ?vec<int>,
+    ?'opt_box' => ?vec<int>,
+    ...
+  );
+  const int STRUCTURAL_ID = 7082271269182165768;
+  /**
+   * Original thrift field:-
+   * 1: list<i32> unique
+   */
+  public Vector<int> $unique;
+  /**
+   * Original thrift field:-
+   * 2: list<i32> shared_const
+   */
+  public Vector<int> $shared_const;
+  /**
+   * Original thrift field:-
+   * 3: list<i32> shared_mustable
+   */
+  public Vector<int> $shared_mustable;
+  /**
+   * Original thrift field:-
+   * 4: list<i32> opt_unique
+   */
+  public ?Vector<int> $opt_unique;
+  /**
+   * Original thrift field:-
+   * 5: list<i32> opt_shared_const
+   */
+  public ?Vector<int> $opt_shared_const;
+  /**
+   * Original thrift field:-
+   * 6: list<i32> opt_shared_mustable
+   */
+  public ?Vector<int> $opt_shared_mustable;
+  /**
+   * Original thrift field:-
+   * 7: list<i32> opt_box
+   */
+  public ?Vector<int> $opt_box;
+
+  public function __construct(?Vector<int> $unique = null, ?Vector<int> $shared_const = null, ?Vector<int> $shared_mustable = null, ?Vector<int> $opt_unique = null, ?Vector<int> $opt_shared_const = null, ?Vector<int> $opt_shared_mustable = null, ?Vector<int> $opt_box = null)[] {
+    $this->unique = $unique ?? Vector {};
+    $this->shared_const = $shared_const ?? Vector {};
+    $this->shared_mustable = $shared_mustable ?? Vector {};
+    $this->opt_unique = $opt_unique;
+    $this->opt_shared_const = $opt_shared_const;
+    $this->opt_shared_mustable = $opt_shared_mustable;
+    $this->opt_box = $opt_box;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'unique'),
+      Shapes::idx($shape, 'shared_const'),
+      Shapes::idx($shape, 'shared_mustable'),
+      Shapes::idx($shape, 'opt_unique'),
+      Shapes::idx($shape, 'opt_shared_const'),
+      Shapes::idx($shape, 'opt_shared_mustable'),
+      Shapes::idx($shape, 'opt_box'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'RefFields';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+    $this->unique = Vector {};
+    $this->shared_const = Vector {};
+    $this->shared_mustable = Vector {};
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.RefFields",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "unique",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "shared_const",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 3,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "shared_mustable",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 4,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "opt_unique",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 5,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "opt_shared_const",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 6,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "opt_shared_mustable",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 7,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "opt_box",
+              "is_optional" => true,
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+        'unique' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Ref' => \facebook\thrift\annotation\cpp\Ref::fromShape(
+              shape(
+                "type" => \facebook\thrift\annotation\cpp\RefType::Unique,
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'shared_const' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Ref' => \facebook\thrift\annotation\cpp\Ref::fromShape(
+              shape(
+                "type" => \facebook\thrift\annotation\cpp\RefType::Shared,
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'shared_mustable' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Ref' => \facebook\thrift\annotation\cpp\Ref::fromShape(
+              shape(
+                "type" => \facebook\thrift\annotation\cpp\RefType::SharedMutable,
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'opt_unique' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Ref' => \facebook\thrift\annotation\cpp\Ref::fromShape(
+              shape(
+                "type" => \facebook\thrift\annotation\cpp\RefType::Unique,
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'opt_shared_const' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Ref' => \facebook\thrift\annotation\cpp\Ref::fromShape(
+              shape(
+                "type" => \facebook\thrift\annotation\cpp\RefType::Shared,
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'opt_shared_mustable' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Ref' => \facebook\thrift\annotation\cpp\Ref::fromShape(
+              shape(
+                "type" => \facebook\thrift\annotation\cpp\RefType::SharedMutable,
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'opt_box' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      $shape['unique'] |> new Vector($$),
+      $shape['shared_const'] |> new Vector($$),
+      $shape['shared_mustable'] |> new Vector($$),
+      Shapes::idx($shape, 'opt_unique') === null ? null : ($shape['opt_unique'] |> new Vector($$)),
+      Shapes::idx($shape, 'opt_shared_const') === null ? null : ($shape['opt_shared_const'] |> new Vector($$)),
+      Shapes::idx($shape, 'opt_shared_mustable') === null ? null : ($shape['opt_shared_mustable'] |> new Vector($$)),
+      Shapes::idx($shape, 'opt_box') === null ? null : ($shape['opt_box'] |> new Vector($$)),
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'unique' => vec($this->unique),
+      'shared_const' => vec($this->shared_const),
+      'shared_mustable' => vec($this->shared_mustable),
+      'opt_unique' => $this->opt_unique
+        |> $$ === null ? null : vec($$),
+      'opt_shared_const' => $this->opt_shared_const
+        |> $$ === null ? null : vec($$),
+      'opt_shared_mustable' => $this->opt_shared_mustable
+        |> $$ === null ? null : vec($$),
+      'opt_box' => $this->opt_box
+        |> $$ === null ? null : vec($$),
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'unique') !== null) {
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['unique']);
+      $_container4 = Vector {};
+      foreach($_json3 as $_key1 => $_value2) {
+        $_elem5 = 0;
+        $_tmp6 = (int)$_value2;
+        if ($_tmp6 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem5 = (int)$_tmp6;
+        }
+        $_container4 []= $_elem5;
+      }
+      $this->unique = $_container4;
+    }
+    if (idx($parsed, 'shared_const') !== null) {
+      $_json10 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['shared_const']);
+      $_container11 = Vector {};
+      foreach($_json10 as $_key8 => $_value9) {
+        $_elem12 = 0;
+        $_tmp13 = (int)$_value9;
+        if ($_tmp13 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem12 = (int)$_tmp13;
+        }
+        $_container11 []= $_elem12;
+      }
+      $this->shared_const = $_container11;
+    }
+    if (idx($parsed, 'shared_mustable') !== null) {
+      $_json17 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['shared_mustable']);
+      $_container18 = Vector {};
+      foreach($_json17 as $_key15 => $_value16) {
+        $_elem19 = 0;
+        $_tmp20 = (int)$_value16;
+        if ($_tmp20 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem19 = (int)$_tmp20;
+        }
+        $_container18 []= $_elem19;
+      }
+      $this->shared_mustable = $_container18;
+    }
+    if (idx($parsed, 'opt_unique') !== null) {
+      $_json24 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['opt_unique']);
+      $_container25 = Vector {};
+      foreach($_json24 as $_key22 => $_value23) {
+        $_elem26 = 0;
+        $_tmp27 = (int)$_value23;
+        if ($_tmp27 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem26 = (int)$_tmp27;
+        }
+        $_container25 []= $_elem26;
+      }
+      $this->opt_unique = $_container25;
+    }
+    if (idx($parsed, 'opt_shared_const') !== null) {
+      $_json31 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['opt_shared_const']);
+      $_container32 = Vector {};
+      foreach($_json31 as $_key29 => $_value30) {
+        $_elem33 = 0;
+        $_tmp34 = (int)$_value30;
+        if ($_tmp34 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem33 = (int)$_tmp34;
+        }
+        $_container32 []= $_elem33;
+      }
+      $this->opt_shared_const = $_container32;
+    }
+    if (idx($parsed, 'opt_shared_mustable') !== null) {
+      $_json38 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['opt_shared_mustable']);
+      $_container39 = Vector {};
+      foreach($_json38 as $_key36 => $_value37) {
+        $_elem40 = 0;
+        $_tmp41 = (int)$_value37;
+        if ($_tmp41 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem40 = (int)$_tmp41;
+        }
+        $_container39 []= $_elem40;
+      }
+      $this->opt_shared_mustable = $_container39;
+    }
+    if (idx($parsed, 'opt_box') !== null) {
+      $_json45 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['opt_box']);
+      $_container46 = Vector {};
+      foreach($_json45 as $_key43 => $_value44) {
+        $_elem47 = 0;
+        $_tmp48 = (int)$_value44;
+        if ($_tmp48 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem47 = (int)$_tmp48;
+        }
+        $_container46 []= $_elem47;
+      }
+      $this->opt_box = $_container46;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
  * MyDataPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyDataPatch'))>>
@@ -13742,6 +14293,3271 @@ class LoopPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     }
     if (idx($parsed, 'clear') !== null) {
       $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * RefFieldsPatch
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RefFieldsPatch'))>>
+class RefFieldsPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'assign',
+      'type' => \TType::STRUCT,
+      'class' => \test\fixtures\patch\RefFields::class,
+    ),
+    2 => shape(
+      'var' => 'clear',
+      'is_terse' => true,
+      'type' => \TType::BOOL,
+    ),
+    3 => shape(
+      'var' => 'patchPrior',
+      'is_terse' => true,
+      'type' => \TType::STRUCT,
+      'class' => \test\fixtures\patch\RefFieldsFieldPatch::class,
+    ),
+    5 => shape(
+      'var' => 'ensure',
+      'is_terse' => true,
+      'type' => \TType::STRUCT,
+      'class' => \test\fixtures\patch\RefFieldsEnsureStruct::class,
+    ),
+    6 => shape(
+      'var' => 'patch',
+      'is_terse' => true,
+      'type' => \TType::STRUCT,
+      'class' => \test\fixtures\patch\RefFieldsFieldPatch::class,
+    ),
+    7 => shape(
+      'var' => 'remove',
+      'is_terse' => true,
+      'type' => \TType::LST,
+      'etype' => \TType::I16,
+      'elem' => shape(
+        'type' => \TType::I16,
+      ),
+      'format' => 'collection',
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'assign' => 1,
+    'clear' => 2,
+    'patchPrior' => 3,
+    'ensure' => 5,
+    'patch' => 6,
+    'remove' => 7,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'assign' => ?\test\fixtures\patch\RefFields,
+    ?'clear' => ?bool,
+    ?'patchPrior' => ?\test\fixtures\patch\RefFieldsFieldPatch,
+    ?'ensure' => ?\test\fixtures\patch\RefFieldsEnsureStruct,
+    ?'patch' => ?\test\fixtures\patch\RefFieldsFieldPatch,
+    ?'remove' => ?Vector<int>,
+  );
+
+  const int STRUCTURAL_ID = 6026224300918184310;
+  /**
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
+   * 
+   * Original thrift field:-
+   * 1: module.RefFields assign
+   */
+  public ?\test\fixtures\patch\RefFields $assign;
+  /**
+   * Clears a value. Applies first.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+  /**
+   * Patches any previously set values. Applies second.
+   * 
+   * Original thrift field:-
+   * 3: module.RefFieldsFieldPatch patchPrior
+   */
+  public ?\test\fixtures\patch\RefFieldsFieldPatch $patchPrior;
+  /**
+   * Initialize fields, using the given defaults. Applies third.
+   * 
+   * Original thrift field:-
+   * 5: module.RefFieldsEnsureStruct ensure
+   */
+  public ?\test\fixtures\patch\RefFieldsEnsureStruct $ensure;
+  /**
+   * Patches any set value, including newly set values. Applies last.
+   * 
+   * Original thrift field:-
+   * 6: module.RefFieldsFieldPatch patch
+   */
+  public ?\test\fixtures\patch\RefFieldsFieldPatch $patch;
+  /**
+   * Removes entries, if present. Applies third.
+   * 
+   * Original thrift field:-
+   * 7: patch.FieldIdList remove
+   */
+  public Vector<int> $remove;
+
+  public function __construct(?\test\fixtures\patch\RefFields $assign = null, ?bool $clear = null, ?\test\fixtures\patch\RefFieldsFieldPatch $patchPrior = null, ?\test\fixtures\patch\RefFieldsEnsureStruct $ensure = null, ?\test\fixtures\patch\RefFieldsFieldPatch $patch = null, ?Vector<int> $remove = null)[] {
+    $this->assign = $assign;
+    $this->clear = $clear ?? false;
+    $this->patchPrior = $patchPrior;
+    $this->ensure = $ensure;
+    $this->patch = $patch;
+    $this->remove = $remove ?? Vector {};
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
+      Shapes::idx($shape, 'patchPrior'),
+      Shapes::idx($shape, 'ensure'),
+      Shapes::idx($shape, 'patch'),
+      Shapes::idx($shape, 'remove'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'RefFieldsPatch';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+    $this->clear = false;
+    $this->patchPrior = null;
+    $this->ensure = null;
+    $this->patch = null;
+    $this->remove = Vector {};
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.RefFieldsPatch",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.RefFields",
+                    )
+                  ),
+                )
+              ),
+              "name" => "assign",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 3,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.RefFieldsFieldPatch",
+                    )
+                  ),
+                )
+              ),
+              "name" => "patchPrior",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 5,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.RefFieldsEnsureStruct",
+                    )
+                  ),
+                )
+              ),
+              "name" => "ensure",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 6,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.RefFieldsFieldPatch",
+                    )
+                  ),
+                )
+              ),
+              "name" => "patch",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 7,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "patch.FieldIdList",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_list" => \tmeta_ThriftListType::fromShape(
+                            shape(
+                              "valueType" => \tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
+                                )
+                              ),
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "remove",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::RefFieldsPatchStruct>",
+            "underlyingName" => "RefFieldsPatchStruct",
+            "extraNamespace" => "",
+          )
+        ),
+      ],
+      'fields' => dict[
+        'assign' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'patchPrior' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RefFieldsFieldPatchStruct>",
+                "underlyingName" => "RefFieldsFieldPatchStruct",
+                "extraNamespace" => "",
+              )
+            ),
+          ],
+        ),
+        'ensure' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\Frozen2Exclude' => \facebook\thrift\annotation\cpp\Frozen2Exclude::fromShape(
+              shape(
+              )
+            ),
+          ],
+        ),
+        'patch' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RefFieldsFieldPatchStruct>",
+                "underlyingName" => "RefFieldsFieldPatchStruct",
+                "extraNamespace" => "",
+              )
+            ),
+          ],
+        ),
+        'remove' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::FieldIdListToSetAdapter",
+              )
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'assign') !== null) {
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\patch\RefFields>($parsed['assign']));
+      $_tmp1 = \test\fixtures\patch\RefFields::withDefaultValues();
+      $_tmp1->readFromJson($_tmp0);
+      $this->assign = $_tmp1;
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
+    }
+    if (idx($parsed, 'patchPrior') !== null) {
+      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\patch\RefFieldsFieldPatch>($parsed['patchPrior']));
+      $_tmp3 = \test\fixtures\patch\RefFieldsFieldPatch::withDefaultValues();
+      $_tmp3->readFromJson($_tmp2);
+      $this->patchPrior = $_tmp3;
+    }
+    if (idx($parsed, 'ensure') !== null) {
+      $_tmp4 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\patch\RefFieldsEnsureStruct>($parsed['ensure']));
+      $_tmp5 = \test\fixtures\patch\RefFieldsEnsureStruct::withDefaultValues();
+      $_tmp5->readFromJson($_tmp4);
+      $this->ensure = $_tmp5;
+    }
+    if (idx($parsed, 'patch') !== null) {
+      $_tmp6 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\patch\RefFieldsFieldPatch>($parsed['patch']));
+      $_tmp7 = \test\fixtures\patch\RefFieldsFieldPatch::withDefaultValues();
+      $_tmp7->readFromJson($_tmp6);
+      $this->patch = $_tmp7;
+    }
+    if (idx($parsed, 'remove') !== null) {
+      $_json11 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['remove']);
+      $_container12 = Vector {};
+      foreach($_json11 as $_key9 => $_value10) {
+        $_elem13 = 0;
+        $_tmp14 = (int)$_value10;
+        if ($_tmp14 > 0x7fff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem13 = (int)$_tmp14;
+        }
+        $_container12 []= $_elem13;
+      }
+      $this->remove = $_container12;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * RefFieldsField1Patch
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RefFieldsField1Patch'))>>
+class RefFieldsField1Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'assign',
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    2 => shape(
+      'var' => 'clear',
+      'is_terse' => true,
+      'type' => \TType::BOOL,
+    ),
+    8 => shape(
+      'var' => 'prepend',
+      'is_terse' => true,
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    9 => shape(
+      'var' => 'append',
+      'is_terse' => true,
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'assign' => 1,
+    'clear' => 2,
+    'prepend' => 8,
+    'append' => 9,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'assign' => ?Vector<int>,
+    ?'clear' => ?bool,
+    ?'prepend' => ?Vector<int>,
+    ?'append' => ?Vector<int>,
+  );
+
+  const int STRUCTURAL_ID = 2937022562509798365;
+  /**
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
+   * 
+   * Original thrift field:-
+   * 1: list<i32> assign
+   */
+  public ?Vector<int> $assign;
+  /**
+   * Clears a value. Applies first.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+  /**
+   * Prepends to the front of a given list.
+   * 
+   * Original thrift field:-
+   * 8: list<i32> prepend
+   */
+  public Vector<int> $prepend;
+  /**
+   * Appends to the back of a given list.
+   * 
+   * Original thrift field:-
+   * 9: list<i32> append
+   */
+  public Vector<int> $append;
+
+  public function __construct(?Vector<int> $assign = null, ?bool $clear = null, ?Vector<int> $prepend = null, ?Vector<int> $append = null)[] {
+    $this->assign = $assign;
+    $this->clear = $clear ?? false;
+    $this->prepend = $prepend ?? Vector {};
+    $this->append = $append ?? Vector {};
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
+      Shapes::idx($shape, 'prepend'),
+      Shapes::idx($shape, 'append'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'RefFieldsField1Patch';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+    $this->clear = false;
+    $this->prepend = Vector {};
+    $this->append = Vector {};
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.RefFieldsField1Patch",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "assign",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 8,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "prepend",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 9,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "append",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField1PatchStruct>",
+            "underlyingName" => "RefFieldsField1PatchStruct",
+            "extraNamespace" => "",
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'assign') !== null) {
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['assign']);
+      $_container4 = Vector {};
+      foreach($_json3 as $_key1 => $_value2) {
+        $_elem5 = 0;
+        $_tmp6 = (int)$_value2;
+        if ($_tmp6 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem5 = (int)$_tmp6;
+        }
+        $_container4 []= $_elem5;
+      }
+      $this->assign = $_container4;
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
+    }
+    if (idx($parsed, 'prepend') !== null) {
+      $_json10 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['prepend']);
+      $_container11 = Vector {};
+      foreach($_json10 as $_key8 => $_value9) {
+        $_elem12 = 0;
+        $_tmp13 = (int)$_value9;
+        if ($_tmp13 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem12 = (int)$_tmp13;
+        }
+        $_container11 []= $_elem12;
+      }
+      $this->prepend = $_container11;
+    }
+    if (idx($parsed, 'append') !== null) {
+      $_json17 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['append']);
+      $_container18 = Vector {};
+      foreach($_json17 as $_key15 => $_value16) {
+        $_elem19 = 0;
+        $_tmp20 = (int)$_value16;
+        if ($_tmp20 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem19 = (int)$_tmp20;
+        }
+        $_container18 []= $_elem19;
+      }
+      $this->append = $_container18;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * RefFieldsField2Patch
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RefFieldsField2Patch'))>>
+class RefFieldsField2Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'assign',
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    2 => shape(
+      'var' => 'clear',
+      'is_terse' => true,
+      'type' => \TType::BOOL,
+    ),
+    8 => shape(
+      'var' => 'prepend',
+      'is_terse' => true,
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    9 => shape(
+      'var' => 'append',
+      'is_terse' => true,
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'assign' => 1,
+    'clear' => 2,
+    'prepend' => 8,
+    'append' => 9,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'assign' => ?Vector<int>,
+    ?'clear' => ?bool,
+    ?'prepend' => ?Vector<int>,
+    ?'append' => ?Vector<int>,
+  );
+
+  const int STRUCTURAL_ID = 2937022562509798365;
+  /**
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
+   * 
+   * Original thrift field:-
+   * 1: list<i32> assign
+   */
+  public ?Vector<int> $assign;
+  /**
+   * Clears a value. Applies first.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+  /**
+   * Prepends to the front of a given list.
+   * 
+   * Original thrift field:-
+   * 8: list<i32> prepend
+   */
+  public Vector<int> $prepend;
+  /**
+   * Appends to the back of a given list.
+   * 
+   * Original thrift field:-
+   * 9: list<i32> append
+   */
+  public Vector<int> $append;
+
+  public function __construct(?Vector<int> $assign = null, ?bool $clear = null, ?Vector<int> $prepend = null, ?Vector<int> $append = null)[] {
+    $this->assign = $assign;
+    $this->clear = $clear ?? false;
+    $this->prepend = $prepend ?? Vector {};
+    $this->append = $append ?? Vector {};
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
+      Shapes::idx($shape, 'prepend'),
+      Shapes::idx($shape, 'append'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'RefFieldsField2Patch';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+    $this->clear = false;
+    $this->prepend = Vector {};
+    $this->append = Vector {};
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.RefFieldsField2Patch",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "assign",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 8,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "prepend",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 9,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "append",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField2PatchStruct>",
+            "underlyingName" => "RefFieldsField2PatchStruct",
+            "extraNamespace" => "",
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'assign') !== null) {
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['assign']);
+      $_container4 = Vector {};
+      foreach($_json3 as $_key1 => $_value2) {
+        $_elem5 = 0;
+        $_tmp6 = (int)$_value2;
+        if ($_tmp6 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem5 = (int)$_tmp6;
+        }
+        $_container4 []= $_elem5;
+      }
+      $this->assign = $_container4;
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
+    }
+    if (idx($parsed, 'prepend') !== null) {
+      $_json10 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['prepend']);
+      $_container11 = Vector {};
+      foreach($_json10 as $_key8 => $_value9) {
+        $_elem12 = 0;
+        $_tmp13 = (int)$_value9;
+        if ($_tmp13 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem12 = (int)$_tmp13;
+        }
+        $_container11 []= $_elem12;
+      }
+      $this->prepend = $_container11;
+    }
+    if (idx($parsed, 'append') !== null) {
+      $_json17 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['append']);
+      $_container18 = Vector {};
+      foreach($_json17 as $_key15 => $_value16) {
+        $_elem19 = 0;
+        $_tmp20 = (int)$_value16;
+        if ($_tmp20 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem19 = (int)$_tmp20;
+        }
+        $_container18 []= $_elem19;
+      }
+      $this->append = $_container18;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * RefFieldsField3Patch
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RefFieldsField3Patch'))>>
+class RefFieldsField3Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'assign',
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    2 => shape(
+      'var' => 'clear',
+      'is_terse' => true,
+      'type' => \TType::BOOL,
+    ),
+    8 => shape(
+      'var' => 'prepend',
+      'is_terse' => true,
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    9 => shape(
+      'var' => 'append',
+      'is_terse' => true,
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'assign' => 1,
+    'clear' => 2,
+    'prepend' => 8,
+    'append' => 9,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'assign' => ?Vector<int>,
+    ?'clear' => ?bool,
+    ?'prepend' => ?Vector<int>,
+    ?'append' => ?Vector<int>,
+  );
+
+  const int STRUCTURAL_ID = 2937022562509798365;
+  /**
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
+   * 
+   * Original thrift field:-
+   * 1: list<i32> assign
+   */
+  public ?Vector<int> $assign;
+  /**
+   * Clears a value. Applies first.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+  /**
+   * Prepends to the front of a given list.
+   * 
+   * Original thrift field:-
+   * 8: list<i32> prepend
+   */
+  public Vector<int> $prepend;
+  /**
+   * Appends to the back of a given list.
+   * 
+   * Original thrift field:-
+   * 9: list<i32> append
+   */
+  public Vector<int> $append;
+
+  public function __construct(?Vector<int> $assign = null, ?bool $clear = null, ?Vector<int> $prepend = null, ?Vector<int> $append = null)[] {
+    $this->assign = $assign;
+    $this->clear = $clear ?? false;
+    $this->prepend = $prepend ?? Vector {};
+    $this->append = $append ?? Vector {};
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
+      Shapes::idx($shape, 'prepend'),
+      Shapes::idx($shape, 'append'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'RefFieldsField3Patch';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+    $this->clear = false;
+    $this->prepend = Vector {};
+    $this->append = Vector {};
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.RefFieldsField3Patch",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "assign",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 8,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "prepend",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 9,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "append",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField3PatchStruct>",
+            "underlyingName" => "RefFieldsField3PatchStruct",
+            "extraNamespace" => "",
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'assign') !== null) {
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['assign']);
+      $_container4 = Vector {};
+      foreach($_json3 as $_key1 => $_value2) {
+        $_elem5 = 0;
+        $_tmp6 = (int)$_value2;
+        if ($_tmp6 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem5 = (int)$_tmp6;
+        }
+        $_container4 []= $_elem5;
+      }
+      $this->assign = $_container4;
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
+    }
+    if (idx($parsed, 'prepend') !== null) {
+      $_json10 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['prepend']);
+      $_container11 = Vector {};
+      foreach($_json10 as $_key8 => $_value9) {
+        $_elem12 = 0;
+        $_tmp13 = (int)$_value9;
+        if ($_tmp13 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem12 = (int)$_tmp13;
+        }
+        $_container11 []= $_elem12;
+      }
+      $this->prepend = $_container11;
+    }
+    if (idx($parsed, 'append') !== null) {
+      $_json17 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['append']);
+      $_container18 = Vector {};
+      foreach($_json17 as $_key15 => $_value16) {
+        $_elem19 = 0;
+        $_tmp20 = (int)$_value16;
+        if ($_tmp20 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem19 = (int)$_tmp20;
+        }
+        $_container18 []= $_elem19;
+      }
+      $this->append = $_container18;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * RefFieldsField4Patch
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RefFieldsField4Patch'))>>
+class RefFieldsField4Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'assign',
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    2 => shape(
+      'var' => 'clear',
+      'is_terse' => true,
+      'type' => \TType::BOOL,
+    ),
+    8 => shape(
+      'var' => 'prepend',
+      'is_terse' => true,
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    9 => shape(
+      'var' => 'append',
+      'is_terse' => true,
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'assign' => 1,
+    'clear' => 2,
+    'prepend' => 8,
+    'append' => 9,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'assign' => ?Vector<int>,
+    ?'clear' => ?bool,
+    ?'prepend' => ?Vector<int>,
+    ?'append' => ?Vector<int>,
+  );
+
+  const int STRUCTURAL_ID = 2937022562509798365;
+  /**
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
+   * 
+   * Original thrift field:-
+   * 1: list<i32> assign
+   */
+  public ?Vector<int> $assign;
+  /**
+   * Clears a value. Applies first.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+  /**
+   * Prepends to the front of a given list.
+   * 
+   * Original thrift field:-
+   * 8: list<i32> prepend
+   */
+  public Vector<int> $prepend;
+  /**
+   * Appends to the back of a given list.
+   * 
+   * Original thrift field:-
+   * 9: list<i32> append
+   */
+  public Vector<int> $append;
+
+  public function __construct(?Vector<int> $assign = null, ?bool $clear = null, ?Vector<int> $prepend = null, ?Vector<int> $append = null)[] {
+    $this->assign = $assign;
+    $this->clear = $clear ?? false;
+    $this->prepend = $prepend ?? Vector {};
+    $this->append = $append ?? Vector {};
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
+      Shapes::idx($shape, 'prepend'),
+      Shapes::idx($shape, 'append'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'RefFieldsField4Patch';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+    $this->clear = false;
+    $this->prepend = Vector {};
+    $this->append = Vector {};
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.RefFieldsField4Patch",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "assign",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 8,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "prepend",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 9,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "append",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField4PatchStruct>",
+            "underlyingName" => "RefFieldsField4PatchStruct",
+            "extraNamespace" => "",
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'assign') !== null) {
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['assign']);
+      $_container4 = Vector {};
+      foreach($_json3 as $_key1 => $_value2) {
+        $_elem5 = 0;
+        $_tmp6 = (int)$_value2;
+        if ($_tmp6 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem5 = (int)$_tmp6;
+        }
+        $_container4 []= $_elem5;
+      }
+      $this->assign = $_container4;
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
+    }
+    if (idx($parsed, 'prepend') !== null) {
+      $_json10 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['prepend']);
+      $_container11 = Vector {};
+      foreach($_json10 as $_key8 => $_value9) {
+        $_elem12 = 0;
+        $_tmp13 = (int)$_value9;
+        if ($_tmp13 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem12 = (int)$_tmp13;
+        }
+        $_container11 []= $_elem12;
+      }
+      $this->prepend = $_container11;
+    }
+    if (idx($parsed, 'append') !== null) {
+      $_json17 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['append']);
+      $_container18 = Vector {};
+      foreach($_json17 as $_key15 => $_value16) {
+        $_elem19 = 0;
+        $_tmp20 = (int)$_value16;
+        if ($_tmp20 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem19 = (int)$_tmp20;
+        }
+        $_container18 []= $_elem19;
+      }
+      $this->append = $_container18;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * RefFieldsField5Patch
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RefFieldsField5Patch'))>>
+class RefFieldsField5Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'assign',
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    2 => shape(
+      'var' => 'clear',
+      'is_terse' => true,
+      'type' => \TType::BOOL,
+    ),
+    8 => shape(
+      'var' => 'prepend',
+      'is_terse' => true,
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    9 => shape(
+      'var' => 'append',
+      'is_terse' => true,
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'assign' => 1,
+    'clear' => 2,
+    'prepend' => 8,
+    'append' => 9,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'assign' => ?Vector<int>,
+    ?'clear' => ?bool,
+    ?'prepend' => ?Vector<int>,
+    ?'append' => ?Vector<int>,
+  );
+
+  const int STRUCTURAL_ID = 2937022562509798365;
+  /**
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
+   * 
+   * Original thrift field:-
+   * 1: list<i32> assign
+   */
+  public ?Vector<int> $assign;
+  /**
+   * Clears a value. Applies first.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+  /**
+   * Prepends to the front of a given list.
+   * 
+   * Original thrift field:-
+   * 8: list<i32> prepend
+   */
+  public Vector<int> $prepend;
+  /**
+   * Appends to the back of a given list.
+   * 
+   * Original thrift field:-
+   * 9: list<i32> append
+   */
+  public Vector<int> $append;
+
+  public function __construct(?Vector<int> $assign = null, ?bool $clear = null, ?Vector<int> $prepend = null, ?Vector<int> $append = null)[] {
+    $this->assign = $assign;
+    $this->clear = $clear ?? false;
+    $this->prepend = $prepend ?? Vector {};
+    $this->append = $append ?? Vector {};
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
+      Shapes::idx($shape, 'prepend'),
+      Shapes::idx($shape, 'append'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'RefFieldsField5Patch';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+    $this->clear = false;
+    $this->prepend = Vector {};
+    $this->append = Vector {};
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.RefFieldsField5Patch",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "assign",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 8,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "prepend",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 9,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "append",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField5PatchStruct>",
+            "underlyingName" => "RefFieldsField5PatchStruct",
+            "extraNamespace" => "",
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'assign') !== null) {
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['assign']);
+      $_container4 = Vector {};
+      foreach($_json3 as $_key1 => $_value2) {
+        $_elem5 = 0;
+        $_tmp6 = (int)$_value2;
+        if ($_tmp6 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem5 = (int)$_tmp6;
+        }
+        $_container4 []= $_elem5;
+      }
+      $this->assign = $_container4;
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
+    }
+    if (idx($parsed, 'prepend') !== null) {
+      $_json10 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['prepend']);
+      $_container11 = Vector {};
+      foreach($_json10 as $_key8 => $_value9) {
+        $_elem12 = 0;
+        $_tmp13 = (int)$_value9;
+        if ($_tmp13 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem12 = (int)$_tmp13;
+        }
+        $_container11 []= $_elem12;
+      }
+      $this->prepend = $_container11;
+    }
+    if (idx($parsed, 'append') !== null) {
+      $_json17 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['append']);
+      $_container18 = Vector {};
+      foreach($_json17 as $_key15 => $_value16) {
+        $_elem19 = 0;
+        $_tmp20 = (int)$_value16;
+        if ($_tmp20 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem19 = (int)$_tmp20;
+        }
+        $_container18 []= $_elem19;
+      }
+      $this->append = $_container18;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * RefFieldsField6Patch
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RefFieldsField6Patch'))>>
+class RefFieldsField6Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'assign',
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    2 => shape(
+      'var' => 'clear',
+      'is_terse' => true,
+      'type' => \TType::BOOL,
+    ),
+    8 => shape(
+      'var' => 'prepend',
+      'is_terse' => true,
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    9 => shape(
+      'var' => 'append',
+      'is_terse' => true,
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'assign' => 1,
+    'clear' => 2,
+    'prepend' => 8,
+    'append' => 9,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'assign' => ?Vector<int>,
+    ?'clear' => ?bool,
+    ?'prepend' => ?Vector<int>,
+    ?'append' => ?Vector<int>,
+  );
+
+  const int STRUCTURAL_ID = 2937022562509798365;
+  /**
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
+   * 
+   * Original thrift field:-
+   * 1: list<i32> assign
+   */
+  public ?Vector<int> $assign;
+  /**
+   * Clears a value. Applies first.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+  /**
+   * Prepends to the front of a given list.
+   * 
+   * Original thrift field:-
+   * 8: list<i32> prepend
+   */
+  public Vector<int> $prepend;
+  /**
+   * Appends to the back of a given list.
+   * 
+   * Original thrift field:-
+   * 9: list<i32> append
+   */
+  public Vector<int> $append;
+
+  public function __construct(?Vector<int> $assign = null, ?bool $clear = null, ?Vector<int> $prepend = null, ?Vector<int> $append = null)[] {
+    $this->assign = $assign;
+    $this->clear = $clear ?? false;
+    $this->prepend = $prepend ?? Vector {};
+    $this->append = $append ?? Vector {};
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
+      Shapes::idx($shape, 'prepend'),
+      Shapes::idx($shape, 'append'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'RefFieldsField6Patch';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+    $this->clear = false;
+    $this->prepend = Vector {};
+    $this->append = Vector {};
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.RefFieldsField6Patch",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "assign",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 8,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "prepend",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 9,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "append",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField6PatchStruct>",
+            "underlyingName" => "RefFieldsField6PatchStruct",
+            "extraNamespace" => "",
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'assign') !== null) {
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['assign']);
+      $_container4 = Vector {};
+      foreach($_json3 as $_key1 => $_value2) {
+        $_elem5 = 0;
+        $_tmp6 = (int)$_value2;
+        if ($_tmp6 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem5 = (int)$_tmp6;
+        }
+        $_container4 []= $_elem5;
+      }
+      $this->assign = $_container4;
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
+    }
+    if (idx($parsed, 'prepend') !== null) {
+      $_json10 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['prepend']);
+      $_container11 = Vector {};
+      foreach($_json10 as $_key8 => $_value9) {
+        $_elem12 = 0;
+        $_tmp13 = (int)$_value9;
+        if ($_tmp13 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem12 = (int)$_tmp13;
+        }
+        $_container11 []= $_elem12;
+      }
+      $this->prepend = $_container11;
+    }
+    if (idx($parsed, 'append') !== null) {
+      $_json17 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['append']);
+      $_container18 = Vector {};
+      foreach($_json17 as $_key15 => $_value16) {
+        $_elem19 = 0;
+        $_tmp20 = (int)$_value16;
+        if ($_tmp20 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem19 = (int)$_tmp20;
+        }
+        $_container18 []= $_elem19;
+      }
+      $this->append = $_container18;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * RefFieldsField7Patch
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RefFieldsField7Patch'))>>
+class RefFieldsField7Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'assign',
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    2 => shape(
+      'var' => 'clear',
+      'is_terse' => true,
+      'type' => \TType::BOOL,
+    ),
+    8 => shape(
+      'var' => 'prepend',
+      'is_terse' => true,
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    9 => shape(
+      'var' => 'append',
+      'is_terse' => true,
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'assign' => 1,
+    'clear' => 2,
+    'prepend' => 8,
+    'append' => 9,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'assign' => ?Vector<int>,
+    ?'clear' => ?bool,
+    ?'prepend' => ?Vector<int>,
+    ?'append' => ?Vector<int>,
+  );
+
+  const int STRUCTURAL_ID = 2937022562509798365;
+  /**
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
+   * 
+   * Original thrift field:-
+   * 1: list<i32> assign
+   */
+  public ?Vector<int> $assign;
+  /**
+   * Clears a value. Applies first.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+  /**
+   * Prepends to the front of a given list.
+   * 
+   * Original thrift field:-
+   * 8: list<i32> prepend
+   */
+  public Vector<int> $prepend;
+  /**
+   * Appends to the back of a given list.
+   * 
+   * Original thrift field:-
+   * 9: list<i32> append
+   */
+  public Vector<int> $append;
+
+  public function __construct(?Vector<int> $assign = null, ?bool $clear = null, ?Vector<int> $prepend = null, ?Vector<int> $append = null)[] {
+    $this->assign = $assign;
+    $this->clear = $clear ?? false;
+    $this->prepend = $prepend ?? Vector {};
+    $this->append = $append ?? Vector {};
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
+      Shapes::idx($shape, 'prepend'),
+      Shapes::idx($shape, 'append'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'RefFieldsField7Patch';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+    $this->clear = false;
+    $this->prepend = Vector {};
+    $this->append = Vector {};
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.RefFieldsField7Patch",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "assign",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 8,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "prepend",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 9,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "append",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField7PatchStruct>",
+            "underlyingName" => "RefFieldsField7PatchStruct",
+            "extraNamespace" => "",
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'assign') !== null) {
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['assign']);
+      $_container4 = Vector {};
+      foreach($_json3 as $_key1 => $_value2) {
+        $_elem5 = 0;
+        $_tmp6 = (int)$_value2;
+        if ($_tmp6 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem5 = (int)$_tmp6;
+        }
+        $_container4 []= $_elem5;
+      }
+      $this->assign = $_container4;
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
+    }
+    if (idx($parsed, 'prepend') !== null) {
+      $_json10 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['prepend']);
+      $_container11 = Vector {};
+      foreach($_json10 as $_key8 => $_value9) {
+        $_elem12 = 0;
+        $_tmp13 = (int)$_value9;
+        if ($_tmp13 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem12 = (int)$_tmp13;
+        }
+        $_container11 []= $_elem12;
+      }
+      $this->prepend = $_container11;
+    }
+    if (idx($parsed, 'append') !== null) {
+      $_json17 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['append']);
+      $_container18 = Vector {};
+      foreach($_json17 as $_key15 => $_value16) {
+        $_elem19 = 0;
+        $_tmp20 = (int)$_value16;
+        if ($_tmp20 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem19 = (int)$_tmp20;
+        }
+        $_container18 []= $_elem19;
+      }
+      $this->append = $_container18;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * RefFieldsFieldPatch
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RefFieldsFieldPatch'))>>
+class RefFieldsFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'unique',
+      'is_terse' => true,
+      'type' => \TType::STRUCT,
+      'class' => \test\fixtures\patch\RefFieldsField1Patch::class,
+    ),
+    2 => shape(
+      'var' => 'shared_const',
+      'is_terse' => true,
+      'type' => \TType::STRUCT,
+      'class' => \test\fixtures\patch\RefFieldsField2Patch::class,
+    ),
+    3 => shape(
+      'var' => 'shared_mustable',
+      'is_terse' => true,
+      'type' => \TType::STRUCT,
+      'class' => \test\fixtures\patch\RefFieldsField3Patch::class,
+    ),
+    4 => shape(
+      'var' => 'opt_unique',
+      'is_terse' => true,
+      'type' => \TType::STRUCT,
+      'class' => \test\fixtures\patch\RefFieldsField4Patch::class,
+    ),
+    5 => shape(
+      'var' => 'opt_shared_const',
+      'is_terse' => true,
+      'type' => \TType::STRUCT,
+      'class' => \test\fixtures\patch\RefFieldsField5Patch::class,
+    ),
+    6 => shape(
+      'var' => 'opt_shared_mustable',
+      'is_terse' => true,
+      'type' => \TType::STRUCT,
+      'class' => \test\fixtures\patch\RefFieldsField6Patch::class,
+    ),
+    7 => shape(
+      'var' => 'opt_box',
+      'is_terse' => true,
+      'type' => \TType::STRUCT,
+      'class' => \test\fixtures\patch\RefFieldsField7Patch::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'unique' => 1,
+    'shared_const' => 2,
+    'shared_mustable' => 3,
+    'opt_unique' => 4,
+    'opt_shared_const' => 5,
+    'opt_shared_mustable' => 6,
+    'opt_box' => 7,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'unique' => ?\test\fixtures\patch\RefFieldsField1Patch,
+    ?'shared_const' => ?\test\fixtures\patch\RefFieldsField2Patch,
+    ?'shared_mustable' => ?\test\fixtures\patch\RefFieldsField3Patch,
+    ?'opt_unique' => ?\test\fixtures\patch\RefFieldsField4Patch,
+    ?'opt_shared_const' => ?\test\fixtures\patch\RefFieldsField5Patch,
+    ?'opt_shared_mustable' => ?\test\fixtures\patch\RefFieldsField6Patch,
+    ?'opt_box' => ?\test\fixtures\patch\RefFieldsField7Patch,
+  );
+
+  const int STRUCTURAL_ID = 334553770816110674;
+  /**
+   * Original thrift field:-
+   * 1: module.RefFieldsField1Patch unique
+   */
+  public ?\test\fixtures\patch\RefFieldsField1Patch $unique;
+  /**
+   * Original thrift field:-
+   * 2: module.RefFieldsField2Patch shared_const
+   */
+  public ?\test\fixtures\patch\RefFieldsField2Patch $shared_const;
+  /**
+   * Original thrift field:-
+   * 3: module.RefFieldsField3Patch shared_mustable
+   */
+  public ?\test\fixtures\patch\RefFieldsField3Patch $shared_mustable;
+  /**
+   * Original thrift field:-
+   * 4: module.RefFieldsField4Patch opt_unique
+   */
+  public ?\test\fixtures\patch\RefFieldsField4Patch $opt_unique;
+  /**
+   * Original thrift field:-
+   * 5: module.RefFieldsField5Patch opt_shared_const
+   */
+  public ?\test\fixtures\patch\RefFieldsField5Patch $opt_shared_const;
+  /**
+   * Original thrift field:-
+   * 6: module.RefFieldsField6Patch opt_shared_mustable
+   */
+  public ?\test\fixtures\patch\RefFieldsField6Patch $opt_shared_mustable;
+  /**
+   * Original thrift field:-
+   * 7: module.RefFieldsField7Patch opt_box
+   */
+  public ?\test\fixtures\patch\RefFieldsField7Patch $opt_box;
+
+  public function __construct(?\test\fixtures\patch\RefFieldsField1Patch $unique = null, ?\test\fixtures\patch\RefFieldsField2Patch $shared_const = null, ?\test\fixtures\patch\RefFieldsField3Patch $shared_mustable = null, ?\test\fixtures\patch\RefFieldsField4Patch $opt_unique = null, ?\test\fixtures\patch\RefFieldsField5Patch $opt_shared_const = null, ?\test\fixtures\patch\RefFieldsField6Patch $opt_shared_mustable = null, ?\test\fixtures\patch\RefFieldsField7Patch $opt_box = null)[] {
+    $this->unique = $unique;
+    $this->shared_const = $shared_const;
+    $this->shared_mustable = $shared_mustable;
+    $this->opt_unique = $opt_unique;
+    $this->opt_shared_const = $opt_shared_const;
+    $this->opt_shared_mustable = $opt_shared_mustable;
+    $this->opt_box = $opt_box;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'unique'),
+      Shapes::idx($shape, 'shared_const'),
+      Shapes::idx($shape, 'shared_mustable'),
+      Shapes::idx($shape, 'opt_unique'),
+      Shapes::idx($shape, 'opt_shared_const'),
+      Shapes::idx($shape, 'opt_shared_mustable'),
+      Shapes::idx($shape, 'opt_box'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'RefFieldsFieldPatch';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+    $this->unique = null;
+    $this->shared_const = null;
+    $this->shared_mustable = null;
+    $this->opt_unique = null;
+    $this->opt_shared_const = null;
+    $this->opt_shared_mustable = null;
+    $this->opt_box = null;
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.RefFieldsFieldPatch",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.RefFieldsField1Patch",
+                    )
+                  ),
+                )
+              ),
+              "name" => "unique",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.RefFieldsField2Patch",
+                    )
+                  ),
+                )
+              ),
+              "name" => "shared_const",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 3,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.RefFieldsField3Patch",
+                    )
+                  ),
+                )
+              ),
+              "name" => "shared_mustable",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 4,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.RefFieldsField4Patch",
+                    )
+                  ),
+                )
+              ),
+              "name" => "opt_unique",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 5,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.RefFieldsField5Patch",
+                    )
+                  ),
+                )
+              ),
+              "name" => "opt_shared_const",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 6,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.RefFieldsField6Patch",
+                    )
+                  ),
+                )
+              ),
+              "name" => "opt_shared_mustable",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 7,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.RefFieldsField7Patch",
+                    )
+                  ),
+                )
+              ),
+              "name" => "opt_box",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RefFieldsFieldPatchStruct>",
+            "underlyingName" => "RefFieldsFieldPatchStruct",
+            "extraNamespace" => "",
+          )
+        ),
+      ],
+      'fields' => dict[
+        'unique' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\InternBox' => \facebook\thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField1PatchStruct>",
+                "underlyingName" => "RefFieldsField1PatchStruct",
+                "extraNamespace" => "",
+              )
+            ),
+          ],
+        ),
+        'shared_const' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\InternBox' => \facebook\thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField2PatchStruct>",
+                "underlyingName" => "RefFieldsField2PatchStruct",
+                "extraNamespace" => "",
+              )
+            ),
+          ],
+        ),
+        'shared_mustable' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\InternBox' => \facebook\thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField3PatchStruct>",
+                "underlyingName" => "RefFieldsField3PatchStruct",
+                "extraNamespace" => "",
+              )
+            ),
+          ],
+        ),
+        'opt_unique' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\InternBox' => \facebook\thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField4PatchStruct>",
+                "underlyingName" => "RefFieldsField4PatchStruct",
+                "extraNamespace" => "",
+              )
+            ),
+          ],
+        ),
+        'opt_shared_const' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\InternBox' => \facebook\thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField5PatchStruct>",
+                "underlyingName" => "RefFieldsField5PatchStruct",
+                "extraNamespace" => "",
+              )
+            ),
+          ],
+        ),
+        'opt_shared_mustable' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\InternBox' => \facebook\thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField6PatchStruct>",
+                "underlyingName" => "RefFieldsField6PatchStruct",
+                "extraNamespace" => "",
+              )
+            ),
+          ],
+        ),
+        'opt_box' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\InternBox' => \facebook\thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField7PatchStruct>",
+                "underlyingName" => "RefFieldsField7PatchStruct",
+                "extraNamespace" => "",
+              )
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'unique') !== null) {
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\patch\RefFieldsField1Patch>($parsed['unique']));
+      $_tmp1 = \test\fixtures\patch\RefFieldsField1Patch::withDefaultValues();
+      $_tmp1->readFromJson($_tmp0);
+      $this->unique = $_tmp1;
+    }
+    if (idx($parsed, 'shared_const') !== null) {
+      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\patch\RefFieldsField2Patch>($parsed['shared_const']));
+      $_tmp3 = \test\fixtures\patch\RefFieldsField2Patch::withDefaultValues();
+      $_tmp3->readFromJson($_tmp2);
+      $this->shared_const = $_tmp3;
+    }
+    if (idx($parsed, 'shared_mustable') !== null) {
+      $_tmp4 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\patch\RefFieldsField3Patch>($parsed['shared_mustable']));
+      $_tmp5 = \test\fixtures\patch\RefFieldsField3Patch::withDefaultValues();
+      $_tmp5->readFromJson($_tmp4);
+      $this->shared_mustable = $_tmp5;
+    }
+    if (idx($parsed, 'opt_unique') !== null) {
+      $_tmp6 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\patch\RefFieldsField4Patch>($parsed['opt_unique']));
+      $_tmp7 = \test\fixtures\patch\RefFieldsField4Patch::withDefaultValues();
+      $_tmp7->readFromJson($_tmp6);
+      $this->opt_unique = $_tmp7;
+    }
+    if (idx($parsed, 'opt_shared_const') !== null) {
+      $_tmp8 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\patch\RefFieldsField5Patch>($parsed['opt_shared_const']));
+      $_tmp9 = \test\fixtures\patch\RefFieldsField5Patch::withDefaultValues();
+      $_tmp9->readFromJson($_tmp8);
+      $this->opt_shared_const = $_tmp9;
+    }
+    if (idx($parsed, 'opt_shared_mustable') !== null) {
+      $_tmp10 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\patch\RefFieldsField6Patch>($parsed['opt_shared_mustable']));
+      $_tmp11 = \test\fixtures\patch\RefFieldsField6Patch::withDefaultValues();
+      $_tmp11->readFromJson($_tmp10);
+      $this->opt_shared_mustable = $_tmp11;
+    }
+    if (idx($parsed, 'opt_box') !== null) {
+      $_tmp12 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\patch\RefFieldsField7Patch>($parsed['opt_box']));
+      $_tmp13 = \test\fixtures\patch\RefFieldsField7Patch::withDefaultValues();
+      $_tmp13->readFromJson($_tmp12);
+      $this->opt_box = $_tmp13;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * RefFieldsEnsureStruct
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RefFieldsEnsureStruct'))>>
+class RefFieldsEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'unique',
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    2 => shape(
+      'var' => 'shared_const',
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    3 => shape(
+      'var' => 'shared_mustable',
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    4 => shape(
+      'var' => 'opt_unique',
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    5 => shape(
+      'var' => 'opt_shared_const',
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    6 => shape(
+      'var' => 'opt_shared_mustable',
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    7 => shape(
+      'var' => 'opt_box',
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'unique' => 1,
+    'shared_const' => 2,
+    'shared_mustable' => 3,
+    'opt_unique' => 4,
+    'opt_shared_const' => 5,
+    'opt_shared_mustable' => 6,
+    'opt_box' => 7,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'unique' => ?Vector<int>,
+    ?'shared_const' => ?Vector<int>,
+    ?'shared_mustable' => ?Vector<int>,
+    ?'opt_unique' => ?Vector<int>,
+    ?'opt_shared_const' => ?Vector<int>,
+    ?'opt_shared_mustable' => ?Vector<int>,
+    ?'opt_box' => ?Vector<int>,
+  );
+
+  const int STRUCTURAL_ID = 2581138148724286295;
+  /**
+   * Original thrift field:-
+   * 1: list<i32> unique
+   */
+  public ?Vector<int> $unique;
+  /**
+   * Original thrift field:-
+   * 2: list<i32> shared_const
+   */
+  public ?Vector<int> $shared_const;
+  /**
+   * Original thrift field:-
+   * 3: list<i32> shared_mustable
+   */
+  public ?Vector<int> $shared_mustable;
+  /**
+   * Original thrift field:-
+   * 4: list<i32> opt_unique
+   */
+  public ?Vector<int> $opt_unique;
+  /**
+   * Original thrift field:-
+   * 5: list<i32> opt_shared_const
+   */
+  public ?Vector<int> $opt_shared_const;
+  /**
+   * Original thrift field:-
+   * 6: list<i32> opt_shared_mustable
+   */
+  public ?Vector<int> $opt_shared_mustable;
+  /**
+   * Original thrift field:-
+   * 7: list<i32> opt_box
+   */
+  public ?Vector<int> $opt_box;
+
+  public function __construct(?Vector<int> $unique = null, ?Vector<int> $shared_const = null, ?Vector<int> $shared_mustable = null, ?Vector<int> $opt_unique = null, ?Vector<int> $opt_shared_const = null, ?Vector<int> $opt_shared_mustable = null, ?Vector<int> $opt_box = null)[] {
+    $this->unique = $unique;
+    $this->shared_const = $shared_const;
+    $this->shared_mustable = $shared_mustable;
+    $this->opt_unique = $opt_unique;
+    $this->opt_shared_const = $opt_shared_const;
+    $this->opt_shared_mustable = $opt_shared_mustable;
+    $this->opt_box = $opt_box;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'unique'),
+      Shapes::idx($shape, 'shared_const'),
+      Shapes::idx($shape, 'shared_mustable'),
+      Shapes::idx($shape, 'opt_unique'),
+      Shapes::idx($shape, 'opt_shared_const'),
+      Shapes::idx($shape, 'opt_shared_mustable'),
+      Shapes::idx($shape, 'opt_box'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'RefFieldsEnsureStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.RefFieldsEnsureStruct",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "unique",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "shared_const",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 3,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "shared_mustable",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 4,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "opt_unique",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 5,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "opt_shared_const",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 6,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "opt_shared_mustable",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 7,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "opt_box",
+              "is_optional" => true,
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\cpp\Frozen2Exclude' => \facebook\thrift\annotation\cpp\Frozen2Exclude::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'unique') !== null) {
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['unique']);
+      $_container4 = Vector {};
+      foreach($_json3 as $_key1 => $_value2) {
+        $_elem5 = 0;
+        $_tmp6 = (int)$_value2;
+        if ($_tmp6 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem5 = (int)$_tmp6;
+        }
+        $_container4 []= $_elem5;
+      }
+      $this->unique = $_container4;
+    }
+    if (idx($parsed, 'shared_const') !== null) {
+      $_json10 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['shared_const']);
+      $_container11 = Vector {};
+      foreach($_json10 as $_key8 => $_value9) {
+        $_elem12 = 0;
+        $_tmp13 = (int)$_value9;
+        if ($_tmp13 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem12 = (int)$_tmp13;
+        }
+        $_container11 []= $_elem12;
+      }
+      $this->shared_const = $_container11;
+    }
+    if (idx($parsed, 'shared_mustable') !== null) {
+      $_json17 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['shared_mustable']);
+      $_container18 = Vector {};
+      foreach($_json17 as $_key15 => $_value16) {
+        $_elem19 = 0;
+        $_tmp20 = (int)$_value16;
+        if ($_tmp20 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem19 = (int)$_tmp20;
+        }
+        $_container18 []= $_elem19;
+      }
+      $this->shared_mustable = $_container18;
+    }
+    if (idx($parsed, 'opt_unique') !== null) {
+      $_json24 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['opt_unique']);
+      $_container25 = Vector {};
+      foreach($_json24 as $_key22 => $_value23) {
+        $_elem26 = 0;
+        $_tmp27 = (int)$_value23;
+        if ($_tmp27 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem26 = (int)$_tmp27;
+        }
+        $_container25 []= $_elem26;
+      }
+      $this->opt_unique = $_container25;
+    }
+    if (idx($parsed, 'opt_shared_const') !== null) {
+      $_json31 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['opt_shared_const']);
+      $_container32 = Vector {};
+      foreach($_json31 as $_key29 => $_value30) {
+        $_elem33 = 0;
+        $_tmp34 = (int)$_value30;
+        if ($_tmp34 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem33 = (int)$_tmp34;
+        }
+        $_container32 []= $_elem33;
+      }
+      $this->opt_shared_const = $_container32;
+    }
+    if (idx($parsed, 'opt_shared_mustable') !== null) {
+      $_json38 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['opt_shared_mustable']);
+      $_container39 = Vector {};
+      foreach($_json38 as $_key36 => $_value37) {
+        $_elem40 = 0;
+        $_tmp41 = (int)$_value37;
+        if ($_tmp41 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem40 = (int)$_tmp41;
+        }
+        $_container39 []= $_elem40;
+      }
+      $this->opt_shared_mustable = $_container39;
+    }
+    if (idx($parsed, 'opt_box') !== null) {
+      $_json45 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['opt_box']);
+      $_container46 = Vector {};
+      foreach($_json45 as $_key43 => $_value44) {
+        $_elem47 = 0;
+        $_tmp48 = (int)$_value44;
+        if ($_tmp48 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem47 = (int)$_tmp48;
+        }
+        $_container46 []= $_elem47;
+      }
+      $this->opt_box = $_container46;
     }
   }
 

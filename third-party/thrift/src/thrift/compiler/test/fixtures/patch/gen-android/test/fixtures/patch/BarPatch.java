@@ -291,15 +291,15 @@ public class BarPatch implements TBase, java.io.Serializable, Cloneable {
         case REMOVE:
           if (__field.type == TType.LIST) {
             {
-              TList _list252 = iprot.readListBegin();
-              tmp_remove = new ArrayList<Short>(Math.max(0, _list252.size));
-              for (int _i253 = 0; 
-                   (_list252.size < 0) ? iprot.peekList() : (_i253 < _list252.size); 
-                   ++_i253)
+              TList _list280 = iprot.readListBegin();
+              tmp_remove = new ArrayList<Short>(Math.max(0, _list280.size));
+              for (int _i281 = 0; 
+                   (_list280.size < 0) ? iprot.peekList() : (_i281 < _list280.size); 
+                   ++_i281)
               {
-                Short _elem254;
-                _elem254 = iprot.readI16();
-                tmp_remove.add(_elem254);
+                Short _elem282;
+                _elem282 = iprot.readI16();
+                tmp_remove.add(_elem282);
               }
               iprot.readListEnd();
             }
@@ -363,8 +363,8 @@ public class BarPatch implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(REMOVE_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.I16, this.remove.size()));
-        for (Short _iter255 : this.remove)        {
-          oprot.writeI16(_iter255);
+        for (Short _iter283 : this.remove)        {
+          oprot.writeI16(_iter283);
         }
         oprot.writeListEnd();
       }

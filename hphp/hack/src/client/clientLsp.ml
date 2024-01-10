@@ -2236,6 +2236,7 @@ let make_ide_completion_response
         Option.is_some sort_text
         && !env.local_config.ServerLocalConfig.autocomplete_sort_text
       then
+        let () = HackEventLogger.using_sort_text_for_autocomplete () in
         sort_text
       else
         Some label

@@ -298,6 +298,8 @@ let glean_query_error
 
 let completion_call ~method_name:_ = ()
 
+let using_sort_text_for_autocomplete () = ()
+
 let ranked_autocomplete_duration ~start_time:_ = ()
 
 let ranked_autocomplete_request_duration ~start_time:_ = ()

@@ -3495,74 +3495,6 @@ class RefFieldsField1Patch(metaclass=_fbthrift_python_types.StructMeta):
         return thrift.util.converter.to_py_struct(py_deprecated_types.RefFieldsField1Patch, self)
 
 
-class RefFieldsField3Patch(metaclass=_fbthrift_python_types.StructMeta):
-    _fbthrift_SPEC = (
-        (
-            1,  # id
-            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "assign",  # name
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
-            None,  # default value
-            None,  # adapter info
-            False, # field type is primitive
-        ),
-        (
-            2,  # id
-            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
-            "clear",  # name
-            _fbthrift_python_types.typeinfo_bool,  # typeinfo
-            None,  # default value
-            None,  # adapter info
-            True, # field type is primitive
-        ),
-        (
-            8,  # id
-            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
-            "prepend",  # name
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
-            None,  # default value
-            None,  # adapter info
-            False, # field type is primitive
-        ),
-        (
-            9,  # id
-            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
-            "append",  # name
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
-            None,  # default value
-            None,  # adapter info
-            False, # field type is primitive
-        ),
-    )
-
-    @staticmethod
-    def __get_thrift_name__() -> str:
-        return "module.RefFieldsField3Patch"
-
-    @staticmethod
-    def __get_thrift_uri__():
-        return "test.dev/fixtures/patch/RefFieldsField3Patch"
-
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_metadata__struct_RefFieldsField3Patch()
-
-    def _to_python(self):
-        return self
-
-    def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.patch.module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.RefFieldsField3Patch, self)
-
-    def _to_py_deprecated(self):
-        import importlib
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.RefFieldsField3Patch, self)
-
-
 class RefFieldsField4Patch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         (
@@ -3629,74 +3561,6 @@ class RefFieldsField4Patch(metaclass=_fbthrift_python_types.StructMeta):
         py_deprecated_types = importlib.import_module("module.ttypes")
         import thrift.util.converter
         return thrift.util.converter.to_py_struct(py_deprecated_types.RefFieldsField4Patch, self)
-
-
-class RefFieldsField6Patch(metaclass=_fbthrift_python_types.StructMeta):
-    _fbthrift_SPEC = (
-        (
-            1,  # id
-            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "assign",  # name
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
-            None,  # default value
-            None,  # adapter info
-            False, # field type is primitive
-        ),
-        (
-            2,  # id
-            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
-            "clear",  # name
-            _fbthrift_python_types.typeinfo_bool,  # typeinfo
-            None,  # default value
-            None,  # adapter info
-            True, # field type is primitive
-        ),
-        (
-            8,  # id
-            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
-            "prepend",  # name
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
-            None,  # default value
-            None,  # adapter info
-            False, # field type is primitive
-        ),
-        (
-            9,  # id
-            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
-            "append",  # name
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
-            None,  # default value
-            None,  # adapter info
-            False, # field type is primitive
-        ),
-    )
-
-    @staticmethod
-    def __get_thrift_name__() -> str:
-        return "module.RefFieldsField6Patch"
-
-    @staticmethod
-    def __get_thrift_uri__():
-        return "test.dev/fixtures/patch/RefFieldsField6Patch"
-
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_metadata__struct_RefFieldsField6Patch()
-
-    def _to_python(self):
-        return self
-
-    def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.patch.module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.RefFieldsField6Patch, self)
-
-    def _to_py_deprecated(self):
-        import importlib
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.RefFieldsField6Patch, self)
 
 
 class RefFieldsField7Patch(metaclass=_fbthrift_python_types.StructMeta):
@@ -3779,28 +3643,10 @@ class RefFieldsFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             False, # field type is primitive
         ),
         (
-            3,  # id
-            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
-            "shared_mustable",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(RefFieldsField3Patch),  # typeinfo
-            None,  # default value
-            None,  # adapter info
-            False, # field type is primitive
-        ),
-        (
             4,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "opt_unique",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(RefFieldsField4Patch),  # typeinfo
-            None,  # default value
-            None,  # adapter info
-            False, # field type is primitive
-        ),
-        (
-            6,  # id
-            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
-            "opt_shared_mustable",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(RefFieldsField6Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -4058,12 +3904,8 @@ def _fbthrift_metadata__struct_RefFieldsPatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RefFieldsPatch()
 def _fbthrift_metadata__struct_RefFieldsField1Patch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RefFieldsField1Patch()
-def _fbthrift_metadata__struct_RefFieldsField3Patch():
-    return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RefFieldsField3Patch()
 def _fbthrift_metadata__struct_RefFieldsField4Patch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RefFieldsField4Patch()
-def _fbthrift_metadata__struct_RefFieldsField6Patch():
-    return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RefFieldsField6Patch()
 def _fbthrift_metadata__struct_RefFieldsField7Patch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_RefFieldsField7Patch()
 def _fbthrift_metadata__struct_RefFieldsFieldPatch():
@@ -4116,9 +3958,7 @@ _fbthrift_all_structs = [
     LoopPatch,
     RefFieldsPatch,
     RefFieldsField1Patch,
-    RefFieldsField3Patch,
     RefFieldsField4Patch,
-    RefFieldsField6Patch,
     RefFieldsField7Patch,
     RefFieldsFieldPatch,
     RefFieldsEnsureStruct,

@@ -47,7 +47,7 @@ def __EXPAND_THRIFT_SPEC(spec):
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'MyEnum', 'MyData', 'MyDataWithCustomDefault', 'InnerUnion', 'MyUnion', 'MyStruct', 'LateDefStruct', 'Recursive', 'Bar', 'Loop', 'RefFields', 'MyDataPatch', 'MyDataFieldPatch', 'MyDataEnsureStruct', 'MyDataWithCustomDefaultPatch', 'MyDataWithCustomDefaultFieldPatch', 'MyDataWithCustomDefaultEnsureStruct', 'InnerUnionPatch', 'InnerUnionFieldPatch', 'MyUnionPatch', 'MyUnionFieldPatch', 'MyStructPatch', 'MyStructField10Patch', 'MyStructField23Patch', 'MyStructField26Patch', 'MyStructField27Patch', 'MyStructField28Patch', 'MyStructField29Patch', 'MyStructField30Patch', 'MyStructField30Patch1', 'MyStructFieldPatch', 'MyStructEnsureStruct', 'LateDefStructPatch', 'LateDefStructFieldPatch', 'LateDefStructEnsureStruct', 'RecursivePatch', 'RecursiveField1Patch', 'RecursiveFieldPatch', 'RecursiveEnsureStruct', 'BarPatch', 'BarFieldPatch', 'BarEnsureStruct', 'LoopPatch', 'RefFieldsPatch', 'RefFieldsField1Patch', 'RefFieldsField3Patch', 'RefFieldsField4Patch', 'RefFieldsField6Patch', 'RefFieldsField7Patch', 'RefFieldsFieldPatch', 'RefFieldsEnsureStruct']
+__all__ = ['UTF8STRINGS', 'MyEnum', 'MyData', 'MyDataWithCustomDefault', 'InnerUnion', 'MyUnion', 'MyStruct', 'LateDefStruct', 'Recursive', 'Bar', 'Loop', 'RefFields', 'MyDataPatch', 'MyDataFieldPatch', 'MyDataEnsureStruct', 'MyDataWithCustomDefaultPatch', 'MyDataWithCustomDefaultFieldPatch', 'MyDataWithCustomDefaultEnsureStruct', 'InnerUnionPatch', 'InnerUnionFieldPatch', 'MyUnionPatch', 'MyUnionFieldPatch', 'MyStructPatch', 'MyStructField10Patch', 'MyStructField23Patch', 'MyStructField26Patch', 'MyStructField27Patch', 'MyStructField28Patch', 'MyStructField29Patch', 'MyStructField30Patch', 'MyStructField30Patch1', 'MyStructFieldPatch', 'MyStructEnsureStruct', 'LateDefStructPatch', 'LateDefStructFieldPatch', 'LateDefStructEnsureStruct', 'RecursivePatch', 'RecursiveField1Patch', 'RecursiveFieldPatch', 'RecursiveEnsureStruct', 'BarPatch', 'BarFieldPatch', 'BarEnsureStruct', 'LoopPatch', 'RefFieldsPatch', 'RefFieldsField1Patch', 'RefFieldsField4Patch', 'RefFieldsField7Patch', 'RefFieldsFieldPatch', 'RefFieldsEnsureStruct']
 
 class MyEnum:
   MyValue0 = 0
@@ -9673,7 +9673,7 @@ class RefFieldsField1Patch:
   def _to_py_deprecated(self):
     return self
 
-class RefFieldsField3Patch:
+class RefFieldsField4Patch:
   r"""
   Attributes:
    - assign: Assigns to a (set) value.
@@ -9769,7 +9769,7 @@ class RefFieldsField3Patch:
     if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
       oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
       return
-    oprot.writeStructBegin('RefFieldsField3Patch')
+    oprot.writeStructBegin('RefFieldsField4Patch')
     if self.assign != None:
       oprot.writeFieldBegin('assign', TType.LIST, 1)
       oprot.writeListBegin(TType.I32, len(self.assign))
@@ -9875,18 +9875,18 @@ class RefFieldsField3Patch:
     import importlib
     import thrift.python.converter
     python_types = importlib.import_module("test.fixtures.patch.module.thrift_types")
-    return thrift.python.converter.to_python_struct(python_types.RefFieldsField3Patch, self)
+    return thrift.python.converter.to_python_struct(python_types.RefFieldsField4Patch, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
     py3_types = importlib.import_module("test.fixtures.patch.module.types")
-    return thrift.py3.converter.to_py3_struct(py3_types.RefFieldsField3Patch, self)
+    return thrift.py3.converter.to_py3_struct(py3_types.RefFieldsField4Patch, self)
 
   def _to_py_deprecated(self):
     return self
 
-class RefFieldsField4Patch:
+class RefFieldsField7Patch:
   r"""
   Attributes:
    - assign: Assigns to a (set) value.
@@ -9982,7 +9982,7 @@ class RefFieldsField4Patch:
     if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
       oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
       return
-    oprot.writeStructBegin('RefFieldsField4Patch')
+    oprot.writeStructBegin('RefFieldsField7Patch')
     if self.assign != None:
       oprot.writeFieldBegin('assign', TType.LIST, 1)
       oprot.writeListBegin(TType.I32, len(self.assign))
@@ -10088,432 +10088,6 @@ class RefFieldsField4Patch:
     import importlib
     import thrift.python.converter
     python_types = importlib.import_module("test.fixtures.patch.module.thrift_types")
-    return thrift.python.converter.to_python_struct(python_types.RefFieldsField4Patch, self)
-
-  def _to_py3(self):
-    import importlib
-    import thrift.py3.converter
-    py3_types = importlib.import_module("test.fixtures.patch.module.types")
-    return thrift.py3.converter.to_py3_struct(py3_types.RefFieldsField4Patch, self)
-
-  def _to_py_deprecated(self):
-    return self
-
-class RefFieldsField6Patch:
-  r"""
-  Attributes:
-   - assign: Assigns to a (set) value.
-  
-  If set, all other operations are ignored.
-  
-  Note: Optional and union fields must be set before assigned.
-  
-   - clear: Clears a value. Applies first.
-   - prepend: Prepends to the front of a given list.
-   - append: Appends to the back of a given list.
-  """
-
-  thrift_spec = None
-  thrift_field_annotations = None
-  thrift_struct_annotations = None
-  __init__ = None
-  @staticmethod
-  def isUnion():
-    return False
-
-  def read(self, iprot):
-    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
-      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
-      return
-    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
-      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      if fid == 1:
-        if ftype == TType.LIST:
-          self.assign = []
-          (_etype929, _size926) = iprot.readListBegin()
-          if _size926 >= 0:
-            for _i930 in range(_size926):
-              _elem931 = iprot.readI32()
-              self.assign.append(_elem931)
-          else: 
-            while iprot.peekList():
-              _elem932 = iprot.readI32()
-              self.assign.append(_elem932)
-          iprot.readListEnd()
-        else:
-          iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.BOOL:
-          self.clear = iprot.readBool()
-        else:
-          iprot.skip(ftype)
-      elif fid == 8:
-        if ftype == TType.LIST:
-          self.prepend = []
-          (_etype936, _size933) = iprot.readListBegin()
-          if _size933 >= 0:
-            for _i937 in range(_size933):
-              _elem938 = iprot.readI32()
-              self.prepend.append(_elem938)
-          else: 
-            while iprot.peekList():
-              _elem939 = iprot.readI32()
-              self.prepend.append(_elem939)
-          iprot.readListEnd()
-        else:
-          iprot.skip(ftype)
-      elif fid == 9:
-        if ftype == TType.LIST:
-          self.append = []
-          (_etype943, _size940) = iprot.readListBegin()
-          if _size940 >= 0:
-            for _i944 in range(_size940):
-              _elem945 = iprot.readI32()
-              self.append.append(_elem945)
-          else: 
-            while iprot.peekList():
-              _elem946 = iprot.readI32()
-              self.append.append(_elem946)
-          iprot.readListEnd()
-        else:
-          iprot.skip(ftype)
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
-      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
-      return
-    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
-      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
-      return
-    oprot.writeStructBegin('RefFieldsField6Patch')
-    if self.assign != None:
-      oprot.writeFieldBegin('assign', TType.LIST, 1)
-      oprot.writeListBegin(TType.I32, len(self.assign))
-      for iter947 in self.assign:
-        oprot.writeI32(iter947)
-      oprot.writeListEnd()
-      oprot.writeFieldEnd()
-    if self.clear != None:
-      oprot.writeFieldBegin('clear', TType.BOOL, 2)
-      oprot.writeBool(self.clear)
-      oprot.writeFieldEnd()
-    if self.prepend != None:
-      oprot.writeFieldBegin('prepend', TType.LIST, 8)
-      oprot.writeListBegin(TType.I32, len(self.prepend))
-      for iter948 in self.prepend:
-        oprot.writeI32(iter948)
-      oprot.writeListEnd()
-      oprot.writeFieldEnd()
-    if self.append != None:
-      oprot.writeFieldBegin('append', TType.LIST, 9)
-      oprot.writeListBegin(TType.I32, len(self.append))
-      for iter949 in self.append:
-        oprot.writeI32(iter949)
-      oprot.writeListEnd()
-      oprot.writeFieldEnd()
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
-        raise ValueError(
-            'Unexpected keyword arguments: ' + extra_kwargs
-        )
-    json_obj = json
-    if is_text:
-      json_obj = loads(json)
-    if 'assign' in json_obj and json_obj['assign'] is not None:
-      self.assign = []
-      for _tmp_e950 in json_obj['assign']:
-        if _tmp_e950 > 0x7fffffff or _tmp_e950 < -0x80000000:
-          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.assign.append(_tmp_e950)
-    if 'clear' in json_obj and json_obj['clear'] is not None:
-      self.clear = json_obj['clear']
-    if 'prepend' in json_obj and json_obj['prepend'] is not None:
-      self.prepend = []
-      for _tmp_e951 in json_obj['prepend']:
-        if _tmp_e951 > 0x7fffffff or _tmp_e951 < -0x80000000:
-          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.prepend.append(_tmp_e951)
-    if 'append' in json_obj and json_obj['append'] is not None:
-      self.append = []
-      for _tmp_e952 in json_obj['append']:
-        if _tmp_e952 > 0x7fffffff or _tmp_e952 < -0x80000000:
-          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.append.append(_tmp_e952)
-
-  def __repr__(self):
-    L = []
-    padding = ' ' * 4
-    if self.assign is not None:
-      value = pprint.pformat(self.assign, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    assign=%s' % (value))
-    if self.clear is not None:
-      value = pprint.pformat(self.clear, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    clear=%s' % (value))
-    if self.prepend is not None:
-      value = pprint.pformat(self.prepend, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    prepend=%s' % (value))
-    if self.append is not None:
-      value = pprint.pformat(self.append, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    append=%s' % (value))
-    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
-
-  def __eq__(self, other):
-    if not isinstance(other, self.__class__):
-      return False
-
-    return self.__dict__ == other.__dict__ 
-
-  def __ne__(self, other):
-    return not (self == other)
-
-  def __dir__(self):
-    return (
-      'assign',
-      'clear',
-      'prepend',
-      'append',
-    )
-
-  __hash__ = object.__hash__
-
-  def _to_python(self):
-    import importlib
-    import thrift.python.converter
-    python_types = importlib.import_module("test.fixtures.patch.module.thrift_types")
-    return thrift.python.converter.to_python_struct(python_types.RefFieldsField6Patch, self)
-
-  def _to_py3(self):
-    import importlib
-    import thrift.py3.converter
-    py3_types = importlib.import_module("test.fixtures.patch.module.types")
-    return thrift.py3.converter.to_py3_struct(py3_types.RefFieldsField6Patch, self)
-
-  def _to_py_deprecated(self):
-    return self
-
-class RefFieldsField7Patch:
-  r"""
-  Attributes:
-   - assign: Assigns to a (set) value.
-  
-  If set, all other operations are ignored.
-  
-  Note: Optional and union fields must be set before assigned.
-  
-   - clear: Clears a value. Applies first.
-   - prepend: Prepends to the front of a given list.
-   - append: Appends to the back of a given list.
-  """
-
-  thrift_spec = None
-  thrift_field_annotations = None
-  thrift_struct_annotations = None
-  __init__ = None
-  @staticmethod
-  def isUnion():
-    return False
-
-  def read(self, iprot):
-    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
-      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
-      return
-    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
-      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      if fid == 1:
-        if ftype == TType.LIST:
-          self.assign = []
-          (_etype956, _size953) = iprot.readListBegin()
-          if _size953 >= 0:
-            for _i957 in range(_size953):
-              _elem958 = iprot.readI32()
-              self.assign.append(_elem958)
-          else: 
-            while iprot.peekList():
-              _elem959 = iprot.readI32()
-              self.assign.append(_elem959)
-          iprot.readListEnd()
-        else:
-          iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.BOOL:
-          self.clear = iprot.readBool()
-        else:
-          iprot.skip(ftype)
-      elif fid == 8:
-        if ftype == TType.LIST:
-          self.prepend = []
-          (_etype963, _size960) = iprot.readListBegin()
-          if _size960 >= 0:
-            for _i964 in range(_size960):
-              _elem965 = iprot.readI32()
-              self.prepend.append(_elem965)
-          else: 
-            while iprot.peekList():
-              _elem966 = iprot.readI32()
-              self.prepend.append(_elem966)
-          iprot.readListEnd()
-        else:
-          iprot.skip(ftype)
-      elif fid == 9:
-        if ftype == TType.LIST:
-          self.append = []
-          (_etype970, _size967) = iprot.readListBegin()
-          if _size967 >= 0:
-            for _i971 in range(_size967):
-              _elem972 = iprot.readI32()
-              self.append.append(_elem972)
-          else: 
-            while iprot.peekList():
-              _elem973 = iprot.readI32()
-              self.append.append(_elem973)
-          iprot.readListEnd()
-        else:
-          iprot.skip(ftype)
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
-      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
-      return
-    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
-      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
-      return
-    oprot.writeStructBegin('RefFieldsField7Patch')
-    if self.assign != None:
-      oprot.writeFieldBegin('assign', TType.LIST, 1)
-      oprot.writeListBegin(TType.I32, len(self.assign))
-      for iter974 in self.assign:
-        oprot.writeI32(iter974)
-      oprot.writeListEnd()
-      oprot.writeFieldEnd()
-    if self.clear != None:
-      oprot.writeFieldBegin('clear', TType.BOOL, 2)
-      oprot.writeBool(self.clear)
-      oprot.writeFieldEnd()
-    if self.prepend != None:
-      oprot.writeFieldBegin('prepend', TType.LIST, 8)
-      oprot.writeListBegin(TType.I32, len(self.prepend))
-      for iter975 in self.prepend:
-        oprot.writeI32(iter975)
-      oprot.writeListEnd()
-      oprot.writeFieldEnd()
-    if self.append != None:
-      oprot.writeFieldBegin('append', TType.LIST, 9)
-      oprot.writeListBegin(TType.I32, len(self.append))
-      for iter976 in self.append:
-        oprot.writeI32(iter976)
-      oprot.writeListEnd()
-      oprot.writeFieldEnd()
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
-        raise ValueError(
-            'Unexpected keyword arguments: ' + extra_kwargs
-        )
-    json_obj = json
-    if is_text:
-      json_obj = loads(json)
-    if 'assign' in json_obj and json_obj['assign'] is not None:
-      self.assign = []
-      for _tmp_e977 in json_obj['assign']:
-        if _tmp_e977 > 0x7fffffff or _tmp_e977 < -0x80000000:
-          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.assign.append(_tmp_e977)
-    if 'clear' in json_obj and json_obj['clear'] is not None:
-      self.clear = json_obj['clear']
-    if 'prepend' in json_obj and json_obj['prepend'] is not None:
-      self.prepend = []
-      for _tmp_e978 in json_obj['prepend']:
-        if _tmp_e978 > 0x7fffffff or _tmp_e978 < -0x80000000:
-          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.prepend.append(_tmp_e978)
-    if 'append' in json_obj and json_obj['append'] is not None:
-      self.append = []
-      for _tmp_e979 in json_obj['append']:
-        if _tmp_e979 > 0x7fffffff or _tmp_e979 < -0x80000000:
-          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.append.append(_tmp_e979)
-
-  def __repr__(self):
-    L = []
-    padding = ' ' * 4
-    if self.assign is not None:
-      value = pprint.pformat(self.assign, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    assign=%s' % (value))
-    if self.clear is not None:
-      value = pprint.pformat(self.clear, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    clear=%s' % (value))
-    if self.prepend is not None:
-      value = pprint.pformat(self.prepend, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    prepend=%s' % (value))
-    if self.append is not None:
-      value = pprint.pformat(self.append, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    append=%s' % (value))
-    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
-
-  def __eq__(self, other):
-    if not isinstance(other, self.__class__):
-      return False
-
-    return self.__dict__ == other.__dict__ 
-
-  def __ne__(self, other):
-    return not (self == other)
-
-  def __dir__(self):
-    return (
-      'assign',
-      'clear',
-      'prepend',
-      'append',
-    )
-
-  __hash__ = object.__hash__
-
-  def _to_python(self):
-    import importlib
-    import thrift.python.converter
-    python_types = importlib.import_module("test.fixtures.patch.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.RefFieldsField7Patch, self)
 
   def _to_py3(self):
@@ -10529,9 +10103,7 @@ class RefFieldsFieldPatch:
   r"""
   Attributes:
    - unique
-   - shared_mustable
    - opt_unique
-   - opt_shared_mustable
    - opt_box
   """
 
@@ -10561,22 +10133,10 @@ class RefFieldsFieldPatch:
           self.unique.read(iprot)
         else:
           iprot.skip(ftype)
-      elif fid == 3:
-        if ftype == TType.STRUCT:
-          self.shared_mustable = RefFieldsField3Patch()
-          self.shared_mustable.read(iprot)
-        else:
-          iprot.skip(ftype)
       elif fid == 4:
         if ftype == TType.STRUCT:
           self.opt_unique = RefFieldsField4Patch()
           self.opt_unique.read(iprot)
-        else:
-          iprot.skip(ftype)
-      elif fid == 6:
-        if ftype == TType.STRUCT:
-          self.opt_shared_mustable = RefFieldsField6Patch()
-          self.opt_shared_mustable.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 7:
@@ -10602,17 +10162,9 @@ class RefFieldsFieldPatch:
       oprot.writeFieldBegin('unique', TType.STRUCT, 1)
       self.unique.write(oprot)
       oprot.writeFieldEnd()
-    if self.shared_mustable != None:
-      oprot.writeFieldBegin('shared_mustable', TType.STRUCT, 3)
-      self.shared_mustable.write(oprot)
-      oprot.writeFieldEnd()
     if self.opt_unique != None:
       oprot.writeFieldBegin('opt_unique', TType.STRUCT, 4)
       self.opt_unique.write(oprot)
-      oprot.writeFieldEnd()
-    if self.opt_shared_mustable != None:
-      oprot.writeFieldBegin('opt_shared_mustable', TType.STRUCT, 6)
-      self.opt_shared_mustable.write(oprot)
       oprot.writeFieldEnd()
     if self.opt_box != None:
       oprot.writeFieldBegin('opt_box', TType.STRUCT, 7)
@@ -10636,15 +10188,9 @@ class RefFieldsFieldPatch:
     if 'unique' in json_obj and json_obj['unique'] is not None:
       self.unique = RefFieldsField1Patch()
       self.unique.readFromJson(json_obj['unique'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-    if 'shared_mustable' in json_obj and json_obj['shared_mustable'] is not None:
-      self.shared_mustable = RefFieldsField3Patch()
-      self.shared_mustable.readFromJson(json_obj['shared_mustable'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
     if 'opt_unique' in json_obj and json_obj['opt_unique'] is not None:
       self.opt_unique = RefFieldsField4Patch()
       self.opt_unique.readFromJson(json_obj['opt_unique'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-    if 'opt_shared_mustable' in json_obj and json_obj['opt_shared_mustable'] is not None:
-      self.opt_shared_mustable = RefFieldsField6Patch()
-      self.opt_shared_mustable.readFromJson(json_obj['opt_shared_mustable'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
     if 'opt_box' in json_obj and json_obj['opt_box'] is not None:
       self.opt_box = RefFieldsField7Patch()
       self.opt_box.readFromJson(json_obj['opt_box'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
@@ -10656,18 +10202,10 @@ class RefFieldsFieldPatch:
       value = pprint.pformat(self.unique, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    unique=%s' % (value))
-    if self.shared_mustable is not None:
-      value = pprint.pformat(self.shared_mustable, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    shared_mustable=%s' % (value))
     if self.opt_unique is not None:
       value = pprint.pformat(self.opt_unique, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    opt_unique=%s' % (value))
-    if self.opt_shared_mustable is not None:
-      value = pprint.pformat(self.opt_shared_mustable, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    opt_shared_mustable=%s' % (value))
     if self.opt_box is not None:
       value = pprint.pformat(self.opt_box, indent=0)
       value = padding.join(value.splitlines(True))
@@ -10686,9 +10224,7 @@ class RefFieldsFieldPatch:
   def __dir__(self):
     return (
       'unique',
-      'shared_mustable',
       'opt_unique',
-      'opt_shared_mustable',
       'opt_box',
     )
 
@@ -10744,105 +10280,105 @@ class RefFieldsEnsureStruct:
       if fid == 1:
         if ftype == TType.LIST:
           self.unique = []
-          (_etype983, _size980) = iprot.readListBegin()
-          if _size980 >= 0:
-            for _i984 in range(_size980):
-              _elem985 = iprot.readI32()
-              self.unique.append(_elem985)
+          (_etype929, _size926) = iprot.readListBegin()
+          if _size926 >= 0:
+            for _i930 in range(_size926):
+              _elem931 = iprot.readI32()
+              self.unique.append(_elem931)
           else: 
             while iprot.peekList():
-              _elem986 = iprot.readI32()
-              self.unique.append(_elem986)
+              _elem932 = iprot.readI32()
+              self.unique.append(_elem932)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.LIST:
           self.shared_const = []
-          (_etype990, _size987) = iprot.readListBegin()
-          if _size987 >= 0:
-            for _i991 in range(_size987):
-              _elem992 = iprot.readI32()
-              self.shared_const.append(_elem992)
+          (_etype936, _size933) = iprot.readListBegin()
+          if _size933 >= 0:
+            for _i937 in range(_size933):
+              _elem938 = iprot.readI32()
+              self.shared_const.append(_elem938)
           else: 
             while iprot.peekList():
-              _elem993 = iprot.readI32()
-              self.shared_const.append(_elem993)
+              _elem939 = iprot.readI32()
+              self.shared_const.append(_elem939)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 3:
         if ftype == TType.LIST:
           self.shared_mustable = []
-          (_etype997, _size994) = iprot.readListBegin()
-          if _size994 >= 0:
-            for _i998 in range(_size994):
-              _elem999 = iprot.readI32()
-              self.shared_mustable.append(_elem999)
+          (_etype943, _size940) = iprot.readListBegin()
+          if _size940 >= 0:
+            for _i944 in range(_size940):
+              _elem945 = iprot.readI32()
+              self.shared_mustable.append(_elem945)
           else: 
             while iprot.peekList():
-              _elem1000 = iprot.readI32()
-              self.shared_mustable.append(_elem1000)
+              _elem946 = iprot.readI32()
+              self.shared_mustable.append(_elem946)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 4:
         if ftype == TType.LIST:
           self.opt_unique = []
-          (_etype1004, _size1001) = iprot.readListBegin()
-          if _size1001 >= 0:
-            for _i1005 in range(_size1001):
-              _elem1006 = iprot.readI32()
-              self.opt_unique.append(_elem1006)
+          (_etype950, _size947) = iprot.readListBegin()
+          if _size947 >= 0:
+            for _i951 in range(_size947):
+              _elem952 = iprot.readI32()
+              self.opt_unique.append(_elem952)
           else: 
             while iprot.peekList():
-              _elem1007 = iprot.readI32()
-              self.opt_unique.append(_elem1007)
+              _elem953 = iprot.readI32()
+              self.opt_unique.append(_elem953)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 5:
         if ftype == TType.LIST:
           self.opt_shared_const = []
-          (_etype1011, _size1008) = iprot.readListBegin()
-          if _size1008 >= 0:
-            for _i1012 in range(_size1008):
-              _elem1013 = iprot.readI32()
-              self.opt_shared_const.append(_elem1013)
+          (_etype957, _size954) = iprot.readListBegin()
+          if _size954 >= 0:
+            for _i958 in range(_size954):
+              _elem959 = iprot.readI32()
+              self.opt_shared_const.append(_elem959)
           else: 
             while iprot.peekList():
-              _elem1014 = iprot.readI32()
-              self.opt_shared_const.append(_elem1014)
+              _elem960 = iprot.readI32()
+              self.opt_shared_const.append(_elem960)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 6:
         if ftype == TType.LIST:
           self.opt_shared_mustable = []
-          (_etype1018, _size1015) = iprot.readListBegin()
-          if _size1015 >= 0:
-            for _i1019 in range(_size1015):
-              _elem1020 = iprot.readI32()
-              self.opt_shared_mustable.append(_elem1020)
+          (_etype964, _size961) = iprot.readListBegin()
+          if _size961 >= 0:
+            for _i965 in range(_size961):
+              _elem966 = iprot.readI32()
+              self.opt_shared_mustable.append(_elem966)
           else: 
             while iprot.peekList():
-              _elem1021 = iprot.readI32()
-              self.opt_shared_mustable.append(_elem1021)
+              _elem967 = iprot.readI32()
+              self.opt_shared_mustable.append(_elem967)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 7:
         if ftype == TType.LIST:
           self.opt_box = []
-          (_etype1025, _size1022) = iprot.readListBegin()
-          if _size1022 >= 0:
-            for _i1026 in range(_size1022):
-              _elem1027 = iprot.readI32()
-              self.opt_box.append(_elem1027)
+          (_etype971, _size968) = iprot.readListBegin()
+          if _size968 >= 0:
+            for _i972 in range(_size968):
+              _elem973 = iprot.readI32()
+              self.opt_box.append(_elem973)
           else: 
             while iprot.peekList():
-              _elem1028 = iprot.readI32()
-              self.opt_box.append(_elem1028)
+              _elem974 = iprot.readI32()
+              self.opt_box.append(_elem974)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -10862,50 +10398,50 @@ class RefFieldsEnsureStruct:
     if self.unique != None:
       oprot.writeFieldBegin('unique', TType.LIST, 1)
       oprot.writeListBegin(TType.I32, len(self.unique))
-      for iter1029 in self.unique:
-        oprot.writeI32(iter1029)
+      for iter975 in self.unique:
+        oprot.writeI32(iter975)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.shared_const != None:
       oprot.writeFieldBegin('shared_const', TType.LIST, 2)
       oprot.writeListBegin(TType.I32, len(self.shared_const))
-      for iter1030 in self.shared_const:
-        oprot.writeI32(iter1030)
+      for iter976 in self.shared_const:
+        oprot.writeI32(iter976)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.shared_mustable != None:
       oprot.writeFieldBegin('shared_mustable', TType.LIST, 3)
       oprot.writeListBegin(TType.I32, len(self.shared_mustable))
-      for iter1031 in self.shared_mustable:
-        oprot.writeI32(iter1031)
+      for iter977 in self.shared_mustable:
+        oprot.writeI32(iter977)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.opt_unique != None:
       oprot.writeFieldBegin('opt_unique', TType.LIST, 4)
       oprot.writeListBegin(TType.I32, len(self.opt_unique))
-      for iter1032 in self.opt_unique:
-        oprot.writeI32(iter1032)
+      for iter978 in self.opt_unique:
+        oprot.writeI32(iter978)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.opt_shared_const != None:
       oprot.writeFieldBegin('opt_shared_const', TType.LIST, 5)
       oprot.writeListBegin(TType.I32, len(self.opt_shared_const))
-      for iter1033 in self.opt_shared_const:
-        oprot.writeI32(iter1033)
+      for iter979 in self.opt_shared_const:
+        oprot.writeI32(iter979)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.opt_shared_mustable != None:
       oprot.writeFieldBegin('opt_shared_mustable', TType.LIST, 6)
       oprot.writeListBegin(TType.I32, len(self.opt_shared_mustable))
-      for iter1034 in self.opt_shared_mustable:
-        oprot.writeI32(iter1034)
+      for iter980 in self.opt_shared_mustable:
+        oprot.writeI32(iter980)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.opt_box != None:
       oprot.writeFieldBegin('opt_box', TType.LIST, 7)
       oprot.writeListBegin(TType.I32, len(self.opt_box))
-      for iter1035 in self.opt_box:
-        oprot.writeI32(iter1035)
+      for iter981 in self.opt_box:
+        oprot.writeI32(iter981)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -10925,46 +10461,46 @@ class RefFieldsEnsureStruct:
       json_obj = loads(json)
     if 'unique' in json_obj and json_obj['unique'] is not None:
       self.unique = []
-      for _tmp_e1036 in json_obj['unique']:
-        if _tmp_e1036 > 0x7fffffff or _tmp_e1036 < -0x80000000:
+      for _tmp_e982 in json_obj['unique']:
+        if _tmp_e982 > 0x7fffffff or _tmp_e982 < -0x80000000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.unique.append(_tmp_e1036)
+        self.unique.append(_tmp_e982)
     if 'shared_const' in json_obj and json_obj['shared_const'] is not None:
       self.shared_const = []
-      for _tmp_e1037 in json_obj['shared_const']:
-        if _tmp_e1037 > 0x7fffffff or _tmp_e1037 < -0x80000000:
+      for _tmp_e983 in json_obj['shared_const']:
+        if _tmp_e983 > 0x7fffffff or _tmp_e983 < -0x80000000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.shared_const.append(_tmp_e1037)
+        self.shared_const.append(_tmp_e983)
     if 'shared_mustable' in json_obj and json_obj['shared_mustable'] is not None:
       self.shared_mustable = []
-      for _tmp_e1038 in json_obj['shared_mustable']:
-        if _tmp_e1038 > 0x7fffffff or _tmp_e1038 < -0x80000000:
+      for _tmp_e984 in json_obj['shared_mustable']:
+        if _tmp_e984 > 0x7fffffff or _tmp_e984 < -0x80000000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.shared_mustable.append(_tmp_e1038)
+        self.shared_mustable.append(_tmp_e984)
     if 'opt_unique' in json_obj and json_obj['opt_unique'] is not None:
       self.opt_unique = []
-      for _tmp_e1039 in json_obj['opt_unique']:
-        if _tmp_e1039 > 0x7fffffff or _tmp_e1039 < -0x80000000:
+      for _tmp_e985 in json_obj['opt_unique']:
+        if _tmp_e985 > 0x7fffffff or _tmp_e985 < -0x80000000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.opt_unique.append(_tmp_e1039)
+        self.opt_unique.append(_tmp_e985)
     if 'opt_shared_const' in json_obj and json_obj['opt_shared_const'] is not None:
       self.opt_shared_const = []
-      for _tmp_e1040 in json_obj['opt_shared_const']:
-        if _tmp_e1040 > 0x7fffffff or _tmp_e1040 < -0x80000000:
+      for _tmp_e986 in json_obj['opt_shared_const']:
+        if _tmp_e986 > 0x7fffffff or _tmp_e986 < -0x80000000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.opt_shared_const.append(_tmp_e1040)
+        self.opt_shared_const.append(_tmp_e986)
     if 'opt_shared_mustable' in json_obj and json_obj['opt_shared_mustable'] is not None:
       self.opt_shared_mustable = []
-      for _tmp_e1041 in json_obj['opt_shared_mustable']:
-        if _tmp_e1041 > 0x7fffffff or _tmp_e1041 < -0x80000000:
+      for _tmp_e987 in json_obj['opt_shared_mustable']:
+        if _tmp_e987 > 0x7fffffff or _tmp_e987 < -0x80000000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.opt_shared_mustable.append(_tmp_e1041)
+        self.opt_shared_mustable.append(_tmp_e987)
     if 'opt_box' in json_obj and json_obj['opt_box'] is not None:
       self.opt_box = []
-      for _tmp_e1042 in json_obj['opt_box']:
-        if _tmp_e1042 > 0x7fffffff or _tmp_e1042 < -0x80000000:
+      for _tmp_e988 in json_obj['opt_box']:
+        if _tmp_e988 > 0x7fffffff or _tmp_e988 < -0x80000000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.opt_box.append(_tmp_e1042)
+        self.opt_box.append(_tmp_e988)
 
   def __repr__(self):
     L = []
@@ -12627,37 +12163,6 @@ def RefFieldsField1Patch__setstate__(self, state):
 RefFieldsField1Patch.__getstate__ = lambda self: self.__dict__.copy()
 RefFieldsField1Patch.__setstate__ = RefFieldsField1Patch__setstate__
 
-all_structs.append(RefFieldsField3Patch)
-RefFieldsField3Patch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
-  (1, TType.LIST, 'assign', (TType.I32,None), None, 1, ), # 1
-  (2, TType.BOOL, 'clear', None, None, 3, ), # 2
-  (8, TType.LIST, 'prepend', (TType.I32,None), None, 3, ), # 8
-  (9, TType.LIST, 'append', (TType.I32,None), None, 3, ), # 9
-)))
-
-RefFieldsField3Patch.thrift_struct_annotations = {
-}
-RefFieldsField3Patch.thrift_field_annotations = {
-}
-
-def RefFieldsField3Patch__init__(self, assign=None, clear=None, prepend=None, append=None,):
-  self.assign = assign
-  self.clear = clear
-  self.prepend = prepend
-  self.append = append
-
-RefFieldsField3Patch.__init__ = RefFieldsField3Patch__init__
-
-def RefFieldsField3Patch__setstate__(self, state):
-  state.setdefault('assign', None)
-  state.setdefault('clear', None)
-  state.setdefault('prepend', None)
-  state.setdefault('append', None)
-  self.__dict__ = state
-
-RefFieldsField3Patch.__getstate__ = lambda self: self.__dict__.copy()
-RefFieldsField3Patch.__setstate__ = RefFieldsField3Patch__setstate__
-
 all_structs.append(RefFieldsField4Patch)
 RefFieldsField4Patch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.LIST, 'assign', (TType.I32,None), None, 1, ), # 1
@@ -12688,37 +12193,6 @@ def RefFieldsField4Patch__setstate__(self, state):
 
 RefFieldsField4Patch.__getstate__ = lambda self: self.__dict__.copy()
 RefFieldsField4Patch.__setstate__ = RefFieldsField4Patch__setstate__
-
-all_structs.append(RefFieldsField6Patch)
-RefFieldsField6Patch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
-  (1, TType.LIST, 'assign', (TType.I32,None), None, 1, ), # 1
-  (2, TType.BOOL, 'clear', None, None, 3, ), # 2
-  (8, TType.LIST, 'prepend', (TType.I32,None), None, 3, ), # 8
-  (9, TType.LIST, 'append', (TType.I32,None), None, 3, ), # 9
-)))
-
-RefFieldsField6Patch.thrift_struct_annotations = {
-}
-RefFieldsField6Patch.thrift_field_annotations = {
-}
-
-def RefFieldsField6Patch__init__(self, assign=None, clear=None, prepend=None, append=None,):
-  self.assign = assign
-  self.clear = clear
-  self.prepend = prepend
-  self.append = append
-
-RefFieldsField6Patch.__init__ = RefFieldsField6Patch__init__
-
-def RefFieldsField6Patch__setstate__(self, state):
-  state.setdefault('assign', None)
-  state.setdefault('clear', None)
-  state.setdefault('prepend', None)
-  state.setdefault('append', None)
-  self.__dict__ = state
-
-RefFieldsField6Patch.__getstate__ = lambda self: self.__dict__.copy()
-RefFieldsField6Patch.__setstate__ = RefFieldsField6Patch__setstate__
 
 all_structs.append(RefFieldsField7Patch)
 RefFieldsField7Patch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
@@ -12754,9 +12228,7 @@ RefFieldsField7Patch.__setstate__ = RefFieldsField7Patch__setstate__
 all_structs.append(RefFieldsFieldPatch)
 RefFieldsFieldPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'unique', [RefFieldsField1Patch, RefFieldsField1Patch.thrift_spec, False], None, 3, ), # 1
-  (3, TType.STRUCT, 'shared_mustable', [RefFieldsField3Patch, RefFieldsField3Patch.thrift_spec, False], None, 3, ), # 3
   (4, TType.STRUCT, 'opt_unique', [RefFieldsField4Patch, RefFieldsField4Patch.thrift_spec, False], None, 3, ), # 4
-  (6, TType.STRUCT, 'opt_shared_mustable', [RefFieldsField6Patch, RefFieldsField6Patch.thrift_spec, False], None, 3, ), # 6
   (7, TType.STRUCT, 'opt_box', [RefFieldsField7Patch, RefFieldsField7Patch.thrift_spec, False], None, 3, ), # 7
 )))
 
@@ -12765,20 +12237,16 @@ RefFieldsFieldPatch.thrift_struct_annotations = {
 RefFieldsFieldPatch.thrift_field_annotations = {
 }
 
-def RefFieldsFieldPatch__init__(self, unique=None, shared_mustable=None, opt_unique=None, opt_shared_mustable=None, opt_box=None,):
+def RefFieldsFieldPatch__init__(self, unique=None, opt_unique=None, opt_box=None,):
   self.unique = unique
-  self.shared_mustable = shared_mustable
   self.opt_unique = opt_unique
-  self.opt_shared_mustable = opt_shared_mustable
   self.opt_box = opt_box
 
 RefFieldsFieldPatch.__init__ = RefFieldsFieldPatch__init__
 
 def RefFieldsFieldPatch__setstate__(self, state):
   state.setdefault('unique', None)
-  state.setdefault('shared_mustable', None)
   state.setdefault('opt_unique', None)
-  state.setdefault('opt_shared_mustable', None)
   state.setdefault('opt_box', None)
   self.__dict__ = state
 

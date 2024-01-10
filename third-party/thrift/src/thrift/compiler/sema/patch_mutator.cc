@@ -393,8 +393,10 @@ t_struct& patch_generator::add_field_patch(
       continue;
     }
     // Skip generating field patch for cpp.ref fields with cpp.RefType.Shared
-    if (gen::cpp::find_ref_type(field) ==
-        gen::cpp::reference_type::shared_const) {
+    // and cpp.RefType.SharedMutable
+    auto ref_type = gen::cpp::find_ref_type(field);
+    if (ref_type == gen::cpp::reference_type::shared_const ||
+        ref_type == gen::cpp::reference_type::shared_mutable) {
       continue;
     }
 

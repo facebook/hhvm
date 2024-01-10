@@ -4239,7 +4239,7 @@
         }
       }
     },
-    "RefFieldsField3Patch" : {
+    "RefFieldsField4Patch" : {
       "lineno" : 25,
       "is_exception" : false,
       "is_union" : false,
@@ -4316,7 +4316,7 @@
         }
       }
     },
-    "RefFieldsField4Patch" : {
+    "RefFieldsField7Patch" : {
       "lineno" : 25,
       "is_exception" : false,
       "is_union" : false,
@@ -4393,160 +4393,6 @@
         }
       }
     },
-    "RefFieldsField6Patch" : {
-      "lineno" : 25,
-      "is_exception" : false,
-      "is_union" : false,
-      "fields" : {
-        "assign" : {
-          "type_enum" : "LIST",
-          "spec_args" : { "type_enum" : "I32", "spec_args" : null} ,
-          "required" : false,
-          "source_range" : {
-            "begin" : {
-              "line" : 24,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 24,
-              "column" : 21
-            }
-          }
-        },
-        "clear" : {
-          "type_enum" : "BOOL",
-          "spec_args" : null,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 24,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 24,
-              "column" : 21
-            }
-          }
-        },
-        "prepend" : {
-          "type_enum" : "LIST",
-          "spec_args" : { "type_enum" : "I32", "spec_args" : null} ,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 24,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 24,
-              "column" : 21
-            }
-          }
-        },
-        "append" : {
-          "type_enum" : "LIST",
-          "spec_args" : { "type_enum" : "I32", "spec_args" : null} ,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 24,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 24,
-              "column" : 21
-            }
-          }
-        }
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 25,
-          "column" : 17
-        },
-        "end" : {
-          "line" : 24,
-          "column" : 21
-        }
-      }
-    },
-    "RefFieldsField7Patch" : {
-      "lineno" : 25,
-      "is_exception" : false,
-      "is_union" : false,
-      "fields" : {
-        "assign" : {
-          "type_enum" : "LIST",
-          "spec_args" : { "type_enum" : "I32", "spec_args" : null} ,
-          "required" : false,
-          "source_range" : {
-            "begin" : {
-              "line" : 24,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 24,
-              "column" : 21
-            }
-          }
-        },
-        "clear" : {
-          "type_enum" : "BOOL",
-          "spec_args" : null,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 24,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 24,
-              "column" : 21
-            }
-          }
-        },
-        "prepend" : {
-          "type_enum" : "LIST",
-          "spec_args" : { "type_enum" : "I32", "spec_args" : null} ,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 24,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 24,
-              "column" : 21
-            }
-          }
-        },
-        "append" : {
-          "type_enum" : "LIST",
-          "spec_args" : { "type_enum" : "I32", "spec_args" : null} ,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 24,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 24,
-              "column" : 21
-            }
-          }
-        }
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 25,
-          "column" : 18
-        },
-        "end" : {
-          "line" : 24,
-          "column" : 21
-        }
-      }
-    },
     "RefFieldsFieldPatch" : {
       "lineno" : 25,
       "is_exception" : false,
@@ -4567,39 +4413,9 @@
             }
           }
         },
-        "shared_mustable" : {
-          "type_enum" : "STRUCT",
-          "spec_args" : "RefFieldsField3Patch",
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 24,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 24,
-              "column" : 21
-            }
-          }
-        },
         "opt_unique" : {
           "type_enum" : "STRUCT",
           "spec_args" : "RefFieldsField4Patch",
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 24,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 24,
-              "column" : 21
-            }
-          }
-        },
-        "opt_shared_mustable" : {
-          "type_enum" : "STRUCT",
-          "spec_args" : "RefFieldsField6Patch",
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -4631,7 +4447,7 @@
       "source_range" : {
         "begin" : {
           "line" : 25,
-          "column" : 19
+          "column" : 17
         },
         "end" : {
           "line" : 24,
@@ -4753,7 +4569,7 @@
       "source_range" : {
         "begin" : {
           "line" : 25,
-          "column" : 20
+          "column" : 18
         },
         "end" : {
           "line" : 24,

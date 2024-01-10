@@ -25,32 +25,24 @@ public final class RefFieldsFieldPatch implements com.facebook.thrift.payload.Th
     @ThriftConstructor
     public RefFieldsFieldPatch(
         @com.facebook.swift.codec.ThriftField(value=1, name="unique", requiredness=Requiredness.TERSE) final test.fixtures.patch.RefFieldsField1Patch unique,
-        @com.facebook.swift.codec.ThriftField(value=3, name="shared_mustable", requiredness=Requiredness.TERSE) final test.fixtures.patch.RefFieldsField3Patch sharedMustable,
         @com.facebook.swift.codec.ThriftField(value=4, name="opt_unique", requiredness=Requiredness.TERSE) final test.fixtures.patch.RefFieldsField4Patch optUnique,
-        @com.facebook.swift.codec.ThriftField(value=6, name="opt_shared_mustable", requiredness=Requiredness.TERSE) final test.fixtures.patch.RefFieldsField6Patch optSharedMustable,
         @com.facebook.swift.codec.ThriftField(value=7, name="opt_box", requiredness=Requiredness.TERSE) final test.fixtures.patch.RefFieldsField7Patch optBox
     ) {
         this.unique = unique;
-        this.sharedMustable = sharedMustable;
         this.optUnique = optUnique;
-        this.optSharedMustable = optSharedMustable;
         this.optBox = optBox;
     }
     
     @ThriftConstructor
     protected RefFieldsFieldPatch() {
       this.unique = test.fixtures.patch.RefFieldsField1Patch.defaultInstance();
-      this.sharedMustable = test.fixtures.patch.RefFieldsField3Patch.defaultInstance();
       this.optUnique = test.fixtures.patch.RefFieldsField4Patch.defaultInstance();
-      this.optSharedMustable = test.fixtures.patch.RefFieldsField6Patch.defaultInstance();
       this.optBox = test.fixtures.patch.RefFieldsField7Patch.defaultInstance();
     }
     
     public static class Builder {
         private test.fixtures.patch.RefFieldsField1Patch unique = test.fixtures.patch.RefFieldsField1Patch.defaultInstance();
-        private test.fixtures.patch.RefFieldsField3Patch sharedMustable = test.fixtures.patch.RefFieldsField3Patch.defaultInstance();
         private test.fixtures.patch.RefFieldsField4Patch optUnique = test.fixtures.patch.RefFieldsField4Patch.defaultInstance();
-        private test.fixtures.patch.RefFieldsField6Patch optSharedMustable = test.fixtures.patch.RefFieldsField6Patch.defaultInstance();
         private test.fixtures.patch.RefFieldsField7Patch optBox = test.fixtures.patch.RefFieldsField7Patch.defaultInstance();
     
         @com.facebook.swift.codec.ThriftField(value=1, name="unique", requiredness=Requiredness.TERSE)
@@ -61,14 +53,6 @@ public final class RefFieldsFieldPatch implements com.facebook.thrift.payload.Th
     
         public test.fixtures.patch.RefFieldsField1Patch getUnique() { return unique; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="shared_mustable", requiredness=Requiredness.TERSE)
-        public Builder setSharedMustable(test.fixtures.patch.RefFieldsField3Patch sharedMustable) {
-            this.sharedMustable = sharedMustable;
-            return this;
-        }
-    
-        public test.fixtures.patch.RefFieldsField3Patch getSharedMustable() { return sharedMustable; }
-    
             @com.facebook.swift.codec.ThriftField(value=4, name="opt_unique", requiredness=Requiredness.TERSE)
         public Builder setOptUnique(test.fixtures.patch.RefFieldsField4Patch optUnique) {
             this.optUnique = optUnique;
@@ -76,14 +60,6 @@ public final class RefFieldsFieldPatch implements com.facebook.thrift.payload.Th
         }
     
         public test.fixtures.patch.RefFieldsField4Patch getOptUnique() { return optUnique; }
-    
-            @com.facebook.swift.codec.ThriftField(value=6, name="opt_shared_mustable", requiredness=Requiredness.TERSE)
-        public Builder setOptSharedMustable(test.fixtures.patch.RefFieldsField6Patch optSharedMustable) {
-            this.optSharedMustable = optSharedMustable;
-            return this;
-        }
-    
-        public test.fixtures.patch.RefFieldsField6Patch getOptSharedMustable() { return optSharedMustable; }
     
             @com.facebook.swift.codec.ThriftField(value=7, name="opt_box", requiredness=Requiredness.TERSE)
         public Builder setOptBox(test.fixtures.patch.RefFieldsField7Patch optBox) {
@@ -96,9 +72,7 @@ public final class RefFieldsFieldPatch implements com.facebook.thrift.payload.Th
         public Builder() { }
         public Builder(RefFieldsFieldPatch other) {
             this.unique = other.unique;
-            this.sharedMustable = other.sharedMustable;
             this.optUnique = other.optUnique;
-            this.optSharedMustable = other.optSharedMustable;
             this.optBox = other.optBox;
         }
     
@@ -106,9 +80,7 @@ public final class RefFieldsFieldPatch implements com.facebook.thrift.payload.Th
         public RefFieldsFieldPatch build() {
             RefFieldsFieldPatch result = new RefFieldsFieldPatch (
                 this.unique,
-                this.sharedMustable,
                 this.optUnique,
-                this.optSharedMustable,
                 this.optBox
             );
             return result;
@@ -122,15 +94,9 @@ public final class RefFieldsFieldPatch implements com.facebook.thrift.payload.Th
     private final test.fixtures.patch.RefFieldsField1Patch unique;
     public static final int _UNIQUE = 1;
     private static final TField UNIQUE_FIELD_DESC = new TField("unique", TType.STRUCT, (short)1);
-        private final test.fixtures.patch.RefFieldsField3Patch sharedMustable;
-    public static final int _SHARED_MUSTABLE = 3;
-    private static final TField SHARED_MUSTABLE_FIELD_DESC = new TField("shared_mustable", TType.STRUCT, (short)3);
         private final test.fixtures.patch.RefFieldsField4Patch optUnique;
     public static final int _OPT_UNIQUE = 4;
     private static final TField OPT_UNIQUE_FIELD_DESC = new TField("opt_unique", TType.STRUCT, (short)4);
-        private final test.fixtures.patch.RefFieldsField6Patch optSharedMustable;
-    public static final int _OPT_SHARED_MUSTABLE = 6;
-    private static final TField OPT_SHARED_MUSTABLE_FIELD_DESC = new TField("opt_shared_mustable", TType.STRUCT, (short)6);
         private final test.fixtures.patch.RefFieldsField7Patch optBox;
     public static final int _OPT_BOX = 7;
     private static final TField OPT_BOX_FIELD_DESC = new TField("opt_box", TType.STRUCT, (short)7);
@@ -138,15 +104,9 @@ public final class RefFieldsFieldPatch implements com.facebook.thrift.payload.Th
       NAMES_TO_IDS.put("unique", 1);
       THRIFT_NAMES_TO_IDS.put("unique", 1);
       FIELD_METADATA.put(1, UNIQUE_FIELD_DESC);
-      NAMES_TO_IDS.put("sharedMustable", 3);
-      THRIFT_NAMES_TO_IDS.put("shared_mustable", 3);
-      FIELD_METADATA.put(3, SHARED_MUSTABLE_FIELD_DESC);
       NAMES_TO_IDS.put("optUnique", 4);
       THRIFT_NAMES_TO_IDS.put("opt_unique", 4);
       FIELD_METADATA.put(4, OPT_UNIQUE_FIELD_DESC);
-      NAMES_TO_IDS.put("optSharedMustable", 6);
-      THRIFT_NAMES_TO_IDS.put("opt_shared_mustable", 6);
-      FIELD_METADATA.put(6, OPT_SHARED_MUSTABLE_FIELD_DESC);
       NAMES_TO_IDS.put("optBox", 7);
       THRIFT_NAMES_TO_IDS.put("opt_box", 7);
       FIELD_METADATA.put(7, OPT_BOX_FIELD_DESC);
@@ -161,18 +121,8 @@ public final class RefFieldsFieldPatch implements com.facebook.thrift.payload.Th
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=3, name="shared_mustable", requiredness=Requiredness.TERSE)
-    public test.fixtures.patch.RefFieldsField3Patch getSharedMustable() { return sharedMustable; }
-    
-    
-    @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="opt_unique", requiredness=Requiredness.TERSE)
     public test.fixtures.patch.RefFieldsField4Patch getOptUnique() { return optUnique; }
-    
-    
-    @Nullable
-    @com.facebook.swift.codec.ThriftField(value=6, name="opt_shared_mustable", requiredness=Requiredness.TERSE)
-    public test.fixtures.patch.RefFieldsField6Patch getOptSharedMustable() { return optSharedMustable; }
     
     
     @Nullable
@@ -183,9 +133,7 @@ public final class RefFieldsFieldPatch implements com.facebook.thrift.payload.Th
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
         helper.add("unique", unique);
-        helper.add("sharedMustable", sharedMustable);
         helper.add("optUnique", optUnique);
-        helper.add("optSharedMustable", optSharedMustable);
         helper.add("optBox", optBox);
         return helper.toString();
     }
@@ -203,9 +151,7 @@ public final class RefFieldsFieldPatch implements com.facebook.thrift.payload.Th
     
         return
             Objects.equals(unique, other.unique) &&
-            Objects.equals(sharedMustable, other.sharedMustable) &&
             Objects.equals(optUnique, other.optUnique) &&
-            Objects.equals(optSharedMustable, other.optSharedMustable) &&
             Objects.equals(optBox, other.optBox) &&
             true;
     }
@@ -214,9 +160,7 @@ public final class RefFieldsFieldPatch implements com.facebook.thrift.payload.Th
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
             unique,
-            sharedMustable,
             optUnique,
-            optSharedMustable,
             optBox
         });
     }
@@ -242,26 +186,10 @@ public final class RefFieldsFieldPatch implements com.facebook.thrift.payload.Th
             TProtocolUtil.skip(oprot, __field.type);
           }
           break;
-        case _SHARED_MUSTABLE:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.patch.RefFieldsField3Patch sharedMustable = test.fixtures.patch.RefFieldsField3Patch.read0(oprot);
-            builder.setSharedMustable(sharedMustable);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
         case _OPT_UNIQUE:
           if (__field.type == TType.STRUCT) {
             test.fixtures.patch.RefFieldsField4Patch optUnique = test.fixtures.patch.RefFieldsField4Patch.read0(oprot);
             builder.setOptUnique(optUnique);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _OPT_SHARED_MUSTABLE:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.patch.RefFieldsField6Patch optSharedMustable = test.fixtures.patch.RefFieldsField6Patch.read0(oprot);
-            builder.setOptSharedMustable(optSharedMustable);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
           }
@@ -299,31 +227,11 @@ public final class RefFieldsFieldPatch implements com.facebook.thrift.payload.Th
         } else {
           p.rollback(structStart);
         }    
-      java.util.Objects.requireNonNull(sharedMustable, "sharedMustable must not be null");
-      structStart = p.mark();
-        oprot.writeFieldBegin(SHARED_MUSTABLE_FIELD_DESC);
-        pos = p.mark();
-        this.sharedMustable.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
       java.util.Objects.requireNonNull(optUnique, "optUnique must not be null");
       structStart = p.mark();
         oprot.writeFieldBegin(OPT_UNIQUE_FIELD_DESC);
         pos = p.mark();
         this.optUnique.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(optSharedMustable, "optSharedMustable must not be null");
-      structStart = p.mark();
-        oprot.writeFieldBegin(OPT_SHARED_MUSTABLE_FIELD_DESC);
-        pos = p.mark();
-        this.optSharedMustable.write0(oprot);
         if (p.mark() - pos > p.getEmptyStructSize()) {
           p.writeFieldEnd();    
         } else {

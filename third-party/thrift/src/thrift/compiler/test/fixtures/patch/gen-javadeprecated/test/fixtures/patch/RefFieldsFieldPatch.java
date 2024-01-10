@@ -27,20 +27,14 @@ import com.facebook.thrift.protocol.*;
 public class RefFieldsFieldPatch implements TBase, java.io.Serializable, Cloneable, Comparable<RefFieldsFieldPatch> {
   private static final TStruct STRUCT_DESC = new TStruct("RefFieldsFieldPatch");
   private static final TField UNIQUE_FIELD_DESC = new TField("unique", TType.STRUCT, (short)1);
-  private static final TField SHARED_MUSTABLE_FIELD_DESC = new TField("shared_mustable", TType.STRUCT, (short)3);
   private static final TField OPT_UNIQUE_FIELD_DESC = new TField("opt_unique", TType.STRUCT, (short)4);
-  private static final TField OPT_SHARED_MUSTABLE_FIELD_DESC = new TField("opt_shared_mustable", TType.STRUCT, (short)6);
   private static final TField OPT_BOX_FIELD_DESC = new TField("opt_box", TType.STRUCT, (short)7);
 
   public RefFieldsField1Patch unique;
-  public RefFieldsField3Patch shared_mustable;
   public RefFieldsField4Patch opt_unique;
-  public RefFieldsField6Patch opt_shared_mustable;
   public RefFieldsField7Patch opt_box;
   public static final int UNIQUE = 1;
-  public static final int SHARED_MUSTABLE = 3;
   public static final int OPT_UNIQUE = 4;
-  public static final int OPT_SHARED_MUSTABLE = 6;
   public static final int OPT_BOX = 7;
 
   // isset id assignments
@@ -51,12 +45,8 @@ public class RefFieldsFieldPatch implements TBase, java.io.Serializable, Cloneab
     Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
     tmpMetaDataMap.put(UNIQUE, new FieldMetaData("unique", TFieldRequirementType.DEFAULT, 
         new StructMetaData(TType.STRUCT, RefFieldsField1Patch.class)));
-    tmpMetaDataMap.put(SHARED_MUSTABLE, new FieldMetaData("shared_mustable", TFieldRequirementType.DEFAULT, 
-        new StructMetaData(TType.STRUCT, RefFieldsField3Patch.class)));
     tmpMetaDataMap.put(OPT_UNIQUE, new FieldMetaData("opt_unique", TFieldRequirementType.DEFAULT, 
         new StructMetaData(TType.STRUCT, RefFieldsField4Patch.class)));
-    tmpMetaDataMap.put(OPT_SHARED_MUSTABLE, new FieldMetaData("opt_shared_mustable", TFieldRequirementType.DEFAULT, 
-        new StructMetaData(TType.STRUCT, RefFieldsField6Patch.class)));
     tmpMetaDataMap.put(OPT_BOX, new FieldMetaData("opt_box", TFieldRequirementType.DEFAULT, 
         new StructMetaData(TType.STRUCT, RefFieldsField7Patch.class)));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
@@ -71,23 +61,17 @@ public class RefFieldsFieldPatch implements TBase, java.io.Serializable, Cloneab
 
   public RefFieldsFieldPatch(
       RefFieldsField1Patch unique,
-      RefFieldsField3Patch shared_mustable,
       RefFieldsField4Patch opt_unique,
-      RefFieldsField6Patch opt_shared_mustable,
       RefFieldsField7Patch opt_box) {
     this();
     this.unique = unique;
-    this.shared_mustable = shared_mustable;
     this.opt_unique = opt_unique;
-    this.opt_shared_mustable = opt_shared_mustable;
     this.opt_box = opt_box;
   }
 
   public static class Builder {
     private RefFieldsField1Patch unique;
-    private RefFieldsField3Patch shared_mustable;
     private RefFieldsField4Patch opt_unique;
-    private RefFieldsField6Patch opt_shared_mustable;
     private RefFieldsField7Patch opt_box;
 
     public Builder() {
@@ -98,18 +82,8 @@ public class RefFieldsFieldPatch implements TBase, java.io.Serializable, Cloneab
       return this;
     }
 
-    public Builder setShared_mustable(final RefFieldsField3Patch shared_mustable) {
-      this.shared_mustable = shared_mustable;
-      return this;
-    }
-
     public Builder setOpt_unique(final RefFieldsField4Patch opt_unique) {
       this.opt_unique = opt_unique;
-      return this;
-    }
-
-    public Builder setOpt_shared_mustable(final RefFieldsField6Patch opt_shared_mustable) {
-      this.opt_shared_mustable = opt_shared_mustable;
       return this;
     }
 
@@ -121,9 +95,7 @@ public class RefFieldsFieldPatch implements TBase, java.io.Serializable, Cloneab
     public RefFieldsFieldPatch build() {
       RefFieldsFieldPatch result = new RefFieldsFieldPatch();
       result.setUnique(this.unique);
-      result.setShared_mustable(this.shared_mustable);
       result.setOpt_unique(this.opt_unique);
-      result.setOpt_shared_mustable(this.opt_shared_mustable);
       result.setOpt_box(this.opt_box);
       return result;
     }
@@ -140,14 +112,8 @@ public class RefFieldsFieldPatch implements TBase, java.io.Serializable, Cloneab
     if (other.isSetUnique()) {
       this.unique = TBaseHelper.deepCopy(other.unique);
     }
-    if (other.isSetShared_mustable()) {
-      this.shared_mustable = TBaseHelper.deepCopy(other.shared_mustable);
-    }
     if (other.isSetOpt_unique()) {
       this.opt_unique = TBaseHelper.deepCopy(other.opt_unique);
-    }
-    if (other.isSetOpt_shared_mustable()) {
-      this.opt_shared_mustable = TBaseHelper.deepCopy(other.opt_shared_mustable);
     }
     if (other.isSetOpt_box()) {
       this.opt_box = TBaseHelper.deepCopy(other.opt_box);
@@ -182,30 +148,6 @@ public class RefFieldsFieldPatch implements TBase, java.io.Serializable, Cloneab
     }
   }
 
-  public RefFieldsField3Patch getShared_mustable() {
-    return this.shared_mustable;
-  }
-
-  public RefFieldsFieldPatch setShared_mustable(RefFieldsField3Patch shared_mustable) {
-    this.shared_mustable = shared_mustable;
-    return this;
-  }
-
-  public void unsetShared_mustable() {
-    this.shared_mustable = null;
-  }
-
-  // Returns true if field shared_mustable is set (has been assigned a value) and false otherwise
-  public boolean isSetShared_mustable() {
-    return this.shared_mustable != null;
-  }
-
-  public void setShared_mustableIsSet(boolean __value) {
-    if (!__value) {
-      this.shared_mustable = null;
-    }
-  }
-
   public RefFieldsField4Patch getOpt_unique() {
     return this.opt_unique;
   }
@@ -227,30 +169,6 @@ public class RefFieldsFieldPatch implements TBase, java.io.Serializable, Cloneab
   public void setOpt_uniqueIsSet(boolean __value) {
     if (!__value) {
       this.opt_unique = null;
-    }
-  }
-
-  public RefFieldsField6Patch getOpt_shared_mustable() {
-    return this.opt_shared_mustable;
-  }
-
-  public RefFieldsFieldPatch setOpt_shared_mustable(RefFieldsField6Patch opt_shared_mustable) {
-    this.opt_shared_mustable = opt_shared_mustable;
-    return this;
-  }
-
-  public void unsetOpt_shared_mustable() {
-    this.opt_shared_mustable = null;
-  }
-
-  // Returns true if field opt_shared_mustable is set (has been assigned a value) and false otherwise
-  public boolean isSetOpt_shared_mustable() {
-    return this.opt_shared_mustable != null;
-  }
-
-  public void setOpt_shared_mustableIsSet(boolean __value) {
-    if (!__value) {
-      this.opt_shared_mustable = null;
     }
   }
 
@@ -288,27 +206,11 @@ public class RefFieldsFieldPatch implements TBase, java.io.Serializable, Cloneab
       }
       break;
 
-    case SHARED_MUSTABLE:
-      if (__value == null) {
-        unsetShared_mustable();
-      } else {
-        setShared_mustable((RefFieldsField3Patch)__value);
-      }
-      break;
-
     case OPT_UNIQUE:
       if (__value == null) {
         unsetOpt_unique();
       } else {
         setOpt_unique((RefFieldsField4Patch)__value);
-      }
-      break;
-
-    case OPT_SHARED_MUSTABLE:
-      if (__value == null) {
-        unsetOpt_shared_mustable();
-      } else {
-        setOpt_shared_mustable((RefFieldsField6Patch)__value);
       }
       break;
 
@@ -330,14 +232,8 @@ public class RefFieldsFieldPatch implements TBase, java.io.Serializable, Cloneab
     case UNIQUE:
       return getUnique();
 
-    case SHARED_MUSTABLE:
-      return getShared_mustable();
-
     case OPT_UNIQUE:
       return getOpt_unique();
-
-    case OPT_SHARED_MUSTABLE:
-      return getOpt_shared_mustable();
 
     case OPT_BOX:
       return getOpt_box();
@@ -359,11 +255,7 @@ public class RefFieldsFieldPatch implements TBase, java.io.Serializable, Cloneab
 
     if (!TBaseHelper.equalsNobinary(this.isSetUnique(), that.isSetUnique(), this.unique, that.unique)) { return false; }
 
-    if (!TBaseHelper.equalsNobinary(this.isSetShared_mustable(), that.isSetShared_mustable(), this.shared_mustable, that.shared_mustable)) { return false; }
-
     if (!TBaseHelper.equalsNobinary(this.isSetOpt_unique(), that.isSetOpt_unique(), this.opt_unique, that.opt_unique)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetOpt_shared_mustable(), that.isSetOpt_shared_mustable(), this.opt_shared_mustable, that.opt_shared_mustable)) { return false; }
 
     if (!TBaseHelper.equalsNobinary(this.isSetOpt_box(), that.isSetOpt_box(), this.opt_box, that.opt_box)) { return false; }
 
@@ -372,7 +264,7 @@ public class RefFieldsFieldPatch implements TBase, java.io.Serializable, Cloneab
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {unique, shared_mustable, opt_unique, opt_shared_mustable, opt_box});
+    return Arrays.deepHashCode(new Object[] {unique, opt_unique, opt_box});
   }
 
   @Override
@@ -395,27 +287,11 @@ public class RefFieldsFieldPatch implements TBase, java.io.Serializable, Cloneab
     if (lastComparison != 0) { 
       return lastComparison;
     }
-    lastComparison = Boolean.valueOf(isSetShared_mustable()).compareTo(other.isSetShared_mustable());
-    if (lastComparison != 0) {
-      return lastComparison;
-    }
-    lastComparison = TBaseHelper.compareTo(shared_mustable, other.shared_mustable);
-    if (lastComparison != 0) { 
-      return lastComparison;
-    }
     lastComparison = Boolean.valueOf(isSetOpt_unique()).compareTo(other.isSetOpt_unique());
     if (lastComparison != 0) {
       return lastComparison;
     }
     lastComparison = TBaseHelper.compareTo(opt_unique, other.opt_unique);
-    if (lastComparison != 0) { 
-      return lastComparison;
-    }
-    lastComparison = Boolean.valueOf(isSetOpt_shared_mustable()).compareTo(other.isSetOpt_shared_mustable());
-    if (lastComparison != 0) {
-      return lastComparison;
-    }
-    lastComparison = TBaseHelper.compareTo(opt_shared_mustable, other.opt_shared_mustable);
     if (lastComparison != 0) { 
       return lastComparison;
     }
@@ -449,26 +325,10 @@ public class RefFieldsFieldPatch implements TBase, java.io.Serializable, Cloneab
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
-        case SHARED_MUSTABLE:
-          if (__field.type == TType.STRUCT) {
-            this.shared_mustable = new RefFieldsField3Patch();
-            this.shared_mustable.read(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
         case OPT_UNIQUE:
           if (__field.type == TType.STRUCT) {
             this.opt_unique = new RefFieldsField4Patch();
             this.opt_unique.read(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case OPT_SHARED_MUSTABLE:
-          if (__field.type == TType.STRUCT) {
-            this.opt_shared_mustable = new RefFieldsField6Patch();
-            this.opt_shared_mustable.read(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -503,19 +363,9 @@ public class RefFieldsFieldPatch implements TBase, java.io.Serializable, Cloneab
       this.unique.write(oprot);
       oprot.writeFieldEnd();
     }
-    if (this.shared_mustable != null) {
-      oprot.writeFieldBegin(SHARED_MUSTABLE_FIELD_DESC);
-      this.shared_mustable.write(oprot);
-      oprot.writeFieldEnd();
-    }
     if (this.opt_unique != null) {
       oprot.writeFieldBegin(OPT_UNIQUE_FIELD_DESC);
       this.opt_unique.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.opt_shared_mustable != null) {
-      oprot.writeFieldBegin(OPT_SHARED_MUSTABLE_FIELD_DESC);
-      this.opt_shared_mustable.write(oprot);
       oprot.writeFieldEnd();
     }
     if (this.opt_box != null) {
@@ -555,17 +405,6 @@ public class RefFieldsFieldPatch implements TBase, java.io.Serializable, Cloneab
     first = false;
     if (!first) sb.append("," + newLine);
     sb.append(indentStr);
-    sb.append("shared_mustable");
-    sb.append(space);
-    sb.append(":").append(space);
-    if (this.getShared_mustable() == null) {
-      sb.append("null");
-    } else {
-      sb.append(TBaseHelper.toString(this.getShared_mustable(), indent + 1, prettyPrint));
-    }
-    first = false;
-    if (!first) sb.append("," + newLine);
-    sb.append(indentStr);
     sb.append("opt_unique");
     sb.append(space);
     sb.append(":").append(space);
@@ -573,17 +412,6 @@ public class RefFieldsFieldPatch implements TBase, java.io.Serializable, Cloneab
       sb.append("null");
     } else {
       sb.append(TBaseHelper.toString(this.getOpt_unique(), indent + 1, prettyPrint));
-    }
-    first = false;
-    if (!first) sb.append("," + newLine);
-    sb.append(indentStr);
-    sb.append("opt_shared_mustable");
-    sb.append(space);
-    sb.append(":").append(space);
-    if (this.getOpt_shared_mustable() == null) {
-      sb.append("null");
-    } else {
-      sb.append(TBaseHelper.toString(this.getOpt_shared_mustable(), indent + 1, prettyPrint));
     }
     first = false;
     if (!first) sb.append("," + newLine);

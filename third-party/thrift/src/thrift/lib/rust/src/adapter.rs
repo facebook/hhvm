@@ -453,11 +453,15 @@ where
 /// struct MyInt(i64);
 ///
 /// impl From<MyInt> for i64 {
-///     fn from(v: MyInt) -> Self { v.0 }
+///     fn from(v: MyInt) -> Self {
+///         v.0
+///     }
 /// }
 ///
 /// impl From<i64> for MyInt {
-///     fn from(v: i64) -> Self { Self(v) }
+///     fn from(v: i64) -> Self {
+///         Self(v)
+///     }
 /// }
 ///
 /// struct MyIntAdapter;

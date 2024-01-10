@@ -88,7 +88,8 @@
 //! assert_eq!(i1, i2);
 //! assert_eq!(i1.get().v, 1);
 //! assert!(i1 != i3);
-//! assert_eq!(i3.v, -57); // Uses Deref
+//! // Uses Deref
+//! assert_eq!(i3.v, -57);
 //! # }
 //! ```
 //!

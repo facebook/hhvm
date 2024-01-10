@@ -171,13 +171,7 @@ use NamespaceType::*;
 // TODO: is there a more Rust idiomatic way to write this?
 #[derive(Clone, Debug)]
 enum Strmap<X> {
-    ConstCase(HashMap<String, X>),
-
-    /// Attribute names are type names, but for historical reasons we didn't
-    /// treat them as case-insensitive like normal type names. Since we are
-    /// migrating everything to case-sensitive, treat attributes specially.
-    AttrCase(HashMap<String, X>),
-
+    YesCase(HashMap<String, X>),
     FuncCase(HashMap<String, X>),
     TypeCase(HashMap<String, X>),
     NsCase(HashMap<String, X>),
@@ -187,21 +181,21 @@ impl<X> Strmap<X> {
     fn mem(&self, k: &str) -> bool {
         match &self {
             FuncCase(m) | TypeCase(m) | NsCase(m) => m.contains_key(&k.to_ascii_lowercase()),
-            ConstCase(m) | AttrCase(m) => m.contains_key(k),
+            YesCase(m) => m.contains_key(k),
         }
     }
 
     fn add(&mut self, k: &str, v: X) {
         match self {
             FuncCase(m) | TypeCase(m) | NsCase(m) => m.insert(k.to_ascii_lowercase(), v),
-            ConstCase(m) | AttrCase(m) => m.insert(k.to_string(), v),
+            YesCase(m) => m.insert(k.to_string(), v),
         };
     }
 
     fn get(&self, k: &str) -> Option<&X> {
         match &self {
             FuncCase(m) | TypeCase(m) | NsCase(m) => m.get(&k.to_ascii_lowercase()),
-            ConstCase(m) | AttrCase(m) => m.get(k),
+            YesCase(m) => m.get(k),
         }
     }
 
@@ -213,8 +207,7 @@ impl<X> Strmap<X> {
             FuncCase(m) => FuncCase(m.into_iter().filter(|(_, x)| f(x)).collect()),
             TypeCase(m) => TypeCase(m.into_iter().filter(|(_, x)| f(x)).collect()),
             NsCase(m) => NsCase(m.into_iter().filter(|(_, x)| f(x)).collect()),
-            ConstCase(m) => ConstCase(m.into_iter().filter(|(_, x)| f(x)).collect()),
-            AttrCase(m) => AttrCase(m.into_iter().filter(|(_, x)| f(x)).collect()),
+            YesCase(m) => YesCase(m.into_iter().filter(|(_, x)| f(x)).collect()),
         }
     }
 }
@@ -230,8 +223,8 @@ struct UsedNames {
     classes: Strmap<FirstUseOrDef>,    // TypeCase
     namespaces: Strmap<FirstUseOrDef>, // NsCase
     functions: Strmap<FirstUseOrDef>,  // FuncCase
-    constants: Strmap<FirstUseOrDef>,  // ConstCase
-    attributes: Strmap<FirstUseOrDef>, // AttrCase
+    constants: Strmap<FirstUseOrDef>,  // YesCase
+    attributes: Strmap<FirstUseOrDef>, // YesCase
 }
 
 impl UsedNames {
@@ -240,8 +233,8 @@ impl UsedNames {
             classes: TypeCase(HashMap::default()),
             namespaces: NsCase(HashMap::default()),
             functions: FuncCase(HashMap::default()),
-            constants: ConstCase(HashMap::default()),
-            attributes: AttrCase(HashMap::default()),
+            constants: YesCase(HashMap::default()),
+            attributes: YesCase(HashMap::default()),
         }
     }
 }
@@ -2376,8 +2369,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
-    // Only check the functions; invalid attributes on methods (like <<__EntryPoint>>)
-    // are caught elsewhere
+    // Only check the functions; invalid attributes on methods (like <<__EntryPoint>>) are caught elsewhere
     fn multiple_entrypoint_attribute_errors(&mut self, node: S<'a>) {
         match &node.children {
             FunctionDeclaration(f)
@@ -5635,7 +5627,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         // Reset the const declarations
         // Reset the function declarations
 
-        let constants = std::mem::replace(&mut self.names.constants, ConstCase(HashMap::default()));
+        let constants = std::mem::replace(&mut self.names.constants, YesCase(HashMap::default()));
         let functions = std::mem::replace(&mut self.names.functions, FuncCase(HashMap::default()));
         let trait_require_clauses = std::mem::replace(
             &mut self.trait_require_clauses,

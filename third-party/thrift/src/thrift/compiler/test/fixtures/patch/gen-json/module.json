@@ -4239,7 +4239,7 @@
         }
       }
     },
-    "RefFieldsField2Patch" : {
+    "RefFieldsField3Patch" : {
       "lineno" : 25,
       "is_exception" : false,
       "is_union" : false,
@@ -4316,7 +4316,7 @@
         }
       }
     },
-    "RefFieldsField3Patch" : {
+    "RefFieldsField4Patch" : {
       "lineno" : 25,
       "is_exception" : false,
       "is_union" : false,
@@ -4393,7 +4393,7 @@
         }
       }
     },
-    "RefFieldsField4Patch" : {
+    "RefFieldsField6Patch" : {
       "lineno" : 25,
       "is_exception" : false,
       "is_union" : false,
@@ -4470,7 +4470,7 @@
         }
       }
     },
-    "RefFieldsField5Patch" : {
+    "RefFieldsField7Patch" : {
       "lineno" : 25,
       "is_exception" : false,
       "is_union" : false,
@@ -4547,160 +4547,6 @@
         }
       }
     },
-    "RefFieldsField6Patch" : {
-      "lineno" : 25,
-      "is_exception" : false,
-      "is_union" : false,
-      "fields" : {
-        "assign" : {
-          "type_enum" : "LIST",
-          "spec_args" : { "type_enum" : "I32", "spec_args" : null} ,
-          "required" : false,
-          "source_range" : {
-            "begin" : {
-              "line" : 24,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 24,
-              "column" : 21
-            }
-          }
-        },
-        "clear" : {
-          "type_enum" : "BOOL",
-          "spec_args" : null,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 24,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 24,
-              "column" : 21
-            }
-          }
-        },
-        "prepend" : {
-          "type_enum" : "LIST",
-          "spec_args" : { "type_enum" : "I32", "spec_args" : null} ,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 24,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 24,
-              "column" : 21
-            }
-          }
-        },
-        "append" : {
-          "type_enum" : "LIST",
-          "spec_args" : { "type_enum" : "I32", "spec_args" : null} ,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 24,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 24,
-              "column" : 21
-            }
-          }
-        }
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 25,
-          "column" : 19
-        },
-        "end" : {
-          "line" : 24,
-          "column" : 21
-        }
-      }
-    },
-    "RefFieldsField7Patch" : {
-      "lineno" : 25,
-      "is_exception" : false,
-      "is_union" : false,
-      "fields" : {
-        "assign" : {
-          "type_enum" : "LIST",
-          "spec_args" : { "type_enum" : "I32", "spec_args" : null} ,
-          "required" : false,
-          "source_range" : {
-            "begin" : {
-              "line" : 24,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 24,
-              "column" : 21
-            }
-          }
-        },
-        "clear" : {
-          "type_enum" : "BOOL",
-          "spec_args" : null,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 24,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 24,
-              "column" : 21
-            }
-          }
-        },
-        "prepend" : {
-          "type_enum" : "LIST",
-          "spec_args" : { "type_enum" : "I32", "spec_args" : null} ,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 24,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 24,
-              "column" : 21
-            }
-          }
-        },
-        "append" : {
-          "type_enum" : "LIST",
-          "spec_args" : { "type_enum" : "I32", "spec_args" : null} ,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 24,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 24,
-              "column" : 21
-            }
-          }
-        }
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 25,
-          "column" : 20
-        },
-        "end" : {
-          "line" : 24,
-          "column" : 21
-        }
-      }
-    },
     "RefFieldsFieldPatch" : {
       "lineno" : 25,
       "is_exception" : false,
@@ -4709,21 +4555,6 @@
         "unique" : {
           "type_enum" : "STRUCT",
           "spec_args" : "RefFieldsField1Patch",
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 24,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 24,
-              "column" : 21
-            }
-          }
-        },
-        "shared_const" : {
-          "type_enum" : "STRUCT",
-          "spec_args" : "RefFieldsField2Patch",
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -4754,21 +4585,6 @@
         "opt_unique" : {
           "type_enum" : "STRUCT",
           "spec_args" : "RefFieldsField4Patch",
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 24,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 24,
-              "column" : 21
-            }
-          }
-        },
-        "opt_shared_const" : {
-          "type_enum" : "STRUCT",
-          "spec_args" : "RefFieldsField5Patch",
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -4815,7 +4631,7 @@
       "source_range" : {
         "begin" : {
           "line" : 25,
-          "column" : 21
+          "column" : 19
         },
         "end" : {
           "line" : 24,
@@ -4937,7 +4753,7 @@
       "source_range" : {
         "begin" : {
           "line" : 25,
-          "column" : 22
+          "column" : 20
         },
         "end" : {
           "line" : 24,

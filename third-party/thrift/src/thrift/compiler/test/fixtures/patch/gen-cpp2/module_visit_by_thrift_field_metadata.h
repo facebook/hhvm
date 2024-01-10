@@ -958,25 +958,6 @@ struct VisitByFieldId<::test::fixtures::patch::RefFieldsField1PatchStruct> {
 };
 
 template <>
-struct VisitByFieldId<::test::fixtures::patch::RefFieldsField2PatchStruct> {
-  template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
-    switch (fieldId) {
-    case 1:
-      return f(0, static_cast<T&&>(t).assign_ref());
-    case 2:
-      return f(1, static_cast<T&&>(t).clear_ref());
-    case 8:
-      return f(2, static_cast<T&&>(t).prepend_ref());
-    case 9:
-      return f(3, static_cast<T&&>(t).append_ref());
-    default:
-      throwInvalidThriftId(fieldId, "::test::fixtures::patch::RefFieldsField2PatchStruct");
-    }
-  }
-};
-
-template <>
 struct VisitByFieldId<::test::fixtures::patch::RefFieldsField3PatchStruct> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
@@ -1010,25 +991,6 @@ struct VisitByFieldId<::test::fixtures::patch::RefFieldsField4PatchStruct> {
       return f(3, static_cast<T&&>(t).append_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::patch::RefFieldsField4PatchStruct");
-    }
-  }
-};
-
-template <>
-struct VisitByFieldId<::test::fixtures::patch::RefFieldsField5PatchStruct> {
-  template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
-    switch (fieldId) {
-    case 1:
-      return f(0, static_cast<T&&>(t).assign_ref());
-    case 2:
-      return f(1, static_cast<T&&>(t).clear_ref());
-    case 8:
-      return f(2, static_cast<T&&>(t).prepend_ref());
-    case 9:
-      return f(3, static_cast<T&&>(t).append_ref());
-    default:
-      throwInvalidThriftId(fieldId, "::test::fixtures::patch::RefFieldsField5PatchStruct");
     }
   }
 };
@@ -1078,18 +1040,14 @@ struct VisitByFieldId<::test::fixtures::patch::RefFieldsFieldPatchStruct> {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).unique_ref());
-    case 2:
-      return f(1, static_cast<T&&>(t).shared_const_ref());
     case 3:
-      return f(2, static_cast<T&&>(t).shared_mustable_ref());
+      return f(1, static_cast<T&&>(t).shared_mustable_ref());
     case 4:
-      return f(3, static_cast<T&&>(t).opt_unique_ref());
-    case 5:
-      return f(4, static_cast<T&&>(t).opt_shared_const_ref());
+      return f(2, static_cast<T&&>(t).opt_unique_ref());
     case 6:
-      return f(5, static_cast<T&&>(t).opt_shared_mustable_ref());
+      return f(3, static_cast<T&&>(t).opt_shared_mustable_ref());
     case 7:
-      return f(6, static_cast<T&&>(t).opt_box_ref());
+      return f(4, static_cast<T&&>(t).opt_box_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::patch::RefFieldsFieldPatchStruct");
     }

@@ -677,23 +677,6 @@ cdef api object construct__test__fixtures__patch__module__RefFieldsField1Patch(_
 cdef api object init__test__fixtures__patch__module__RefFieldsField1Patch(object data):
     return __thrift_types.RefFieldsField1Patch._fbthrift_create(data)
 
-cdef api int can_extract__test__fixtures__patch__module__RefFieldsField2Patch(object __obj) except -1:
-    return 1 if isinstance(__obj, __thrift_types.RefFieldsField2Patch) else 0
-
-cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsField2Patch(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__test__fixtures__patch__module__RefFieldsField2Patch(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.RefFieldsField2Patch,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
-
-cdef api object init__test__fixtures__patch__module__RefFieldsField2Patch(object data):
-    return __thrift_types.RefFieldsField2Patch._fbthrift_create(data)
-
 cdef api int can_extract__test__fixtures__patch__module__RefFieldsField3Patch(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.RefFieldsField3Patch) else 0
 
@@ -727,23 +710,6 @@ cdef api object construct__test__fixtures__patch__module__RefFieldsField4Patch(_
 
 cdef api object init__test__fixtures__patch__module__RefFieldsField4Patch(object data):
     return __thrift_types.RefFieldsField4Patch._fbthrift_create(data)
-
-cdef api int can_extract__test__fixtures__patch__module__RefFieldsField5Patch(object __obj) except -1:
-    return 1 if isinstance(__obj, __thrift_types.RefFieldsField5Patch) else 0
-
-cdef api __cIOBuf* extract__test__fixtures__patch__module__RefFieldsField5Patch(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__test__fixtures__patch__module__RefFieldsField5Patch(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.RefFieldsField5Patch,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
-
-cdef api object init__test__fixtures__patch__module__RefFieldsField5Patch(object data):
-    return __thrift_types.RefFieldsField5Patch._fbthrift_create(data)
 
 cdef api int can_extract__test__fixtures__patch__module__RefFieldsField6Patch(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.RefFieldsField6Patch) else 0

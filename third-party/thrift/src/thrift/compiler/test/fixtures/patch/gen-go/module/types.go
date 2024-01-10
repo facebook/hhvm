@@ -24840,477 +24840,6 @@ func (x *RefFieldsField1Patch) String() string {
     return sb.String()
 }
 
-type RefFieldsField2Patch struct {
-    Assign []int32 `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
-    Clear bool `thrift:"clear,2" json:"clear" db:"clear"`
-    Prepend []int32 `thrift:"prepend,8" json:"prepend" db:"prepend"`
-    Append []int32 `thrift:"append,9" json:"append" db:"append"`
-}
-// Compile time interface enforcer
-var _ thrift.Struct = &RefFieldsField2Patch{}
-
-func NewRefFieldsField2Patch() *RefFieldsField2Patch {
-    return (&RefFieldsField2Patch{}).
-        SetClearNonCompat(false).
-        SetPrependNonCompat(make([]int32, 0)).
-        SetAppendNonCompat(make([]int32, 0))
-}
-
-func (x *RefFieldsField2Patch) GetAssignNonCompat() []int32 {
-    return x.Assign
-}
-
-func (x *RefFieldsField2Patch) GetAssign() []int32 {
-    if !x.IsSetAssign() {
-        return make([]int32, 0)
-    }
-
-    return x.Assign
-}
-
-func (x *RefFieldsField2Patch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
-func (x *RefFieldsField2Patch) GetClear() bool {
-    return x.Clear
-}
-
-func (x *RefFieldsField2Patch) GetPrependNonCompat() []int32 {
-    return x.Prepend
-}
-
-func (x *RefFieldsField2Patch) GetPrepend() []int32 {
-    if !x.IsSetPrepend() {
-        return make([]int32, 0)
-    }
-
-    return x.Prepend
-}
-
-func (x *RefFieldsField2Patch) GetAppendNonCompat() []int32 {
-    return x.Append
-}
-
-func (x *RefFieldsField2Patch) GetAppend() []int32 {
-    if !x.IsSetAppend() {
-        return make([]int32, 0)
-    }
-
-    return x.Append
-}
-
-func (x *RefFieldsField2Patch) SetAssignNonCompat(value []int32) *RefFieldsField2Patch {
-    x.Assign = value
-    return x
-}
-
-func (x *RefFieldsField2Patch) SetAssign(value []int32) *RefFieldsField2Patch {
-    x.Assign = value
-    return x
-}
-
-func (x *RefFieldsField2Patch) SetClearNonCompat(value bool) *RefFieldsField2Patch {
-    x.Clear = value
-    return x
-}
-
-func (x *RefFieldsField2Patch) SetClear(value bool) *RefFieldsField2Patch {
-    x.Clear = value
-    return x
-}
-
-func (x *RefFieldsField2Patch) SetPrependNonCompat(value []int32) *RefFieldsField2Patch {
-    x.Prepend = value
-    return x
-}
-
-func (x *RefFieldsField2Patch) SetPrepend(value []int32) *RefFieldsField2Patch {
-    x.Prepend = value
-    return x
-}
-
-func (x *RefFieldsField2Patch) SetAppendNonCompat(value []int32) *RefFieldsField2Patch {
-    x.Append = value
-    return x
-}
-
-func (x *RefFieldsField2Patch) SetAppend(value []int32) *RefFieldsField2Patch {
-    x.Append = value
-    return x
-}
-
-func (x *RefFieldsField2Patch) IsSetAssign() bool {
-    return x != nil && x.Assign != nil
-}
-
-func (x *RefFieldsField2Patch) IsSetPrepend() bool {
-    return x != nil && x.Prepend != nil
-}
-
-func (x *RefFieldsField2Patch) IsSetAppend() bool {
-    return x != nil && x.Append != nil
-}
-
-func (x *RefFieldsField2Patch) writeField1(p thrift.Protocol) error {  // Assign
-    if !x.IsSetAssign() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("assign", thrift.LIST, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetAssignNonCompat()
-    if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
-    return thrift.PrependError("error writing list begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteI32(item); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteListEnd(); err != nil {
-    return thrift.PrependError("error writing list end: ", err)
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *RefFieldsField2Patch) writeField2(p thrift.Protocol) error {  // Clear
-    if err := p.WriteFieldBegin("clear", thrift.BOOL, 2); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetClearNonCompat()
-    if err := p.WriteBool(item); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *RefFieldsField2Patch) writeField8(p thrift.Protocol) error {  // Prepend
-    if err := p.WriteFieldBegin("prepend", thrift.LIST, 8); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetPrependNonCompat()
-    if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
-    return thrift.PrependError("error writing list begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteI32(item); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteListEnd(); err != nil {
-    return thrift.PrependError("error writing list end: ", err)
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *RefFieldsField2Patch) writeField9(p thrift.Protocol) error {  // Append
-    if err := p.WriteFieldBegin("append", thrift.LIST, 9); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetAppendNonCompat()
-    if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
-    return thrift.PrependError("error writing list begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteI32(item); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteListEnd(); err != nil {
-    return thrift.PrependError("error writing list end: ", err)
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *RefFieldsField2Patch) readField1(p thrift.Protocol) error {  // Assign
-    _ /* elemType */, size, err := p.ReadListBegin()
-if err != nil {
-    return thrift.PrependError("error reading list begin: ", err)
-}
-
-listResult := make([]int32, 0, size)
-for i := 0; i < size; i++ {
-    var elem int32
-    {
-        result, err := p.ReadI32()
-if err != nil {
-    return err
-}
-        elem = result
-    }
-    listResult = append(listResult, elem)
-}
-
-if err := p.ReadListEnd(); err != nil {
-    return thrift.PrependError("error reading list end: ", err)
-}
-result := listResult
-
-    x.SetAssignNonCompat(result)
-    return nil
-}
-
-func (x *RefFieldsField2Patch) readField2(p thrift.Protocol) error {  // Clear
-    result, err := p.ReadBool()
-if err != nil {
-    return err
-}
-
-    x.SetClearNonCompat(result)
-    return nil
-}
-
-func (x *RefFieldsField2Patch) readField8(p thrift.Protocol) error {  // Prepend
-    _ /* elemType */, size, err := p.ReadListBegin()
-if err != nil {
-    return thrift.PrependError("error reading list begin: ", err)
-}
-
-listResult := make([]int32, 0, size)
-for i := 0; i < size; i++ {
-    var elem int32
-    {
-        result, err := p.ReadI32()
-if err != nil {
-    return err
-}
-        elem = result
-    }
-    listResult = append(listResult, elem)
-}
-
-if err := p.ReadListEnd(); err != nil {
-    return thrift.PrependError("error reading list end: ", err)
-}
-result := listResult
-
-    x.SetPrependNonCompat(result)
-    return nil
-}
-
-func (x *RefFieldsField2Patch) readField9(p thrift.Protocol) error {  // Append
-    _ /* elemType */, size, err := p.ReadListBegin()
-if err != nil {
-    return thrift.PrependError("error reading list begin: ", err)
-}
-
-listResult := make([]int32, 0, size)
-for i := 0; i < size; i++ {
-    var elem int32
-    {
-        result, err := p.ReadI32()
-if err != nil {
-    return err
-}
-        elem = result
-    }
-    listResult = append(listResult, elem)
-}
-
-if err := p.ReadListEnd(); err != nil {
-    return thrift.PrependError("error reading list end: ", err)
-}
-result := listResult
-
-    x.SetAppendNonCompat(result)
-    return nil
-}
-
-func (x *RefFieldsField2Patch) toString1() string {  // Assign
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
-}
-
-func (x *RefFieldsField2Patch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
-}
-
-func (x *RefFieldsField2Patch) toString8() string {  // Prepend
-    return fmt.Sprintf("%v", x.GetPrependNonCompat())
-}
-
-func (x *RefFieldsField2Patch) toString9() string {  // Append
-    return fmt.Sprintf("%v", x.GetAppendNonCompat())
-}
-
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField2Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type RefFieldsField2PatchBuilder struct {
-    obj *RefFieldsField2Patch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField2Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewRefFieldsField2PatchBuilder() *RefFieldsField2PatchBuilder {
-    return &RefFieldsField2PatchBuilder{
-        obj: NewRefFieldsField2Patch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField2Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField2PatchBuilder) Assign(value []int32) *RefFieldsField2PatchBuilder {
-    x.obj.Assign = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField2Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField2PatchBuilder) Clear(value bool) *RefFieldsField2PatchBuilder {
-    x.obj.Clear = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField2Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField2PatchBuilder) Prepend(value []int32) *RefFieldsField2PatchBuilder {
-    x.obj.Prepend = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField2Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField2PatchBuilder) Append(value []int32) *RefFieldsField2PatchBuilder {
-    x.obj.Append = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField2Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField2PatchBuilder) Emit() *RefFieldsField2Patch {
-    var objCopy RefFieldsField2Patch = *x.obj
-    return &objCopy
-}
-
-func (x *RefFieldsField2Patch) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("RefFieldsField2Patch"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
-    }
-
-    if err := x.writeField1(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField2(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField8(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField9(p); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
-    }
-
-    if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *RefFieldsField2Patch) Read(p thrift.Protocol) error {
-    if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
-    }
-
-    for {
-        _, wireType, id, err := p.ReadFieldBegin()
-        if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
-        }
-
-        if wireType == thrift.STOP {
-            break;
-        }
-
-        switch {
-        case (id == 1 && wireType == thrift.Type(thrift.LIST)):  // assign
-            if err := x.readField1(p); err != nil {
-                return err
-            }
-        case (id == 2 && wireType == thrift.Type(thrift.BOOL)):  // clear
-            if err := x.readField2(p); err != nil {
-                return err
-            }
-        case (id == 8 && wireType == thrift.Type(thrift.LIST)):  // prepend
-            if err := x.readField8(p); err != nil {
-                return err
-            }
-        case (id == 9 && wireType == thrift.Type(thrift.LIST)):  // append
-            if err := x.readField9(p); err != nil {
-                return err
-            }
-        default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
-        }
-
-        if err := p.ReadFieldEnd(); err != nil {
-            return err
-        }
-    }
-
-    if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
-    }
-
-    return nil
-}
-
-func (x *RefFieldsField2Patch) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("RefFieldsField2Patch({")
-    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("Prepend:%s ", x.toString8()))
-    sb.WriteString(fmt.Sprintf("Append:%s", x.toString9()))
-    sb.WriteString("})")
-
-    return sb.String()
-}
-
 type RefFieldsField3Patch struct {
     Assign []int32 `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
     Clear bool `thrift:"clear,2" json:"clear" db:"clear"`
@@ -26244,477 +25773,6 @@ func (x *RefFieldsField4Patch) String() string {
     var sb strings.Builder
 
     sb.WriteString("RefFieldsField4Patch({")
-    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("Prepend:%s ", x.toString8()))
-    sb.WriteString(fmt.Sprintf("Append:%s", x.toString9()))
-    sb.WriteString("})")
-
-    return sb.String()
-}
-
-type RefFieldsField5Patch struct {
-    Assign []int32 `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
-    Clear bool `thrift:"clear,2" json:"clear" db:"clear"`
-    Prepend []int32 `thrift:"prepend,8" json:"prepend" db:"prepend"`
-    Append []int32 `thrift:"append,9" json:"append" db:"append"`
-}
-// Compile time interface enforcer
-var _ thrift.Struct = &RefFieldsField5Patch{}
-
-func NewRefFieldsField5Patch() *RefFieldsField5Patch {
-    return (&RefFieldsField5Patch{}).
-        SetClearNonCompat(false).
-        SetPrependNonCompat(make([]int32, 0)).
-        SetAppendNonCompat(make([]int32, 0))
-}
-
-func (x *RefFieldsField5Patch) GetAssignNonCompat() []int32 {
-    return x.Assign
-}
-
-func (x *RefFieldsField5Patch) GetAssign() []int32 {
-    if !x.IsSetAssign() {
-        return make([]int32, 0)
-    }
-
-    return x.Assign
-}
-
-func (x *RefFieldsField5Patch) GetClearNonCompat() bool {
-    return x.Clear
-}
-
-func (x *RefFieldsField5Patch) GetClear() bool {
-    return x.Clear
-}
-
-func (x *RefFieldsField5Patch) GetPrependNonCompat() []int32 {
-    return x.Prepend
-}
-
-func (x *RefFieldsField5Patch) GetPrepend() []int32 {
-    if !x.IsSetPrepend() {
-        return make([]int32, 0)
-    }
-
-    return x.Prepend
-}
-
-func (x *RefFieldsField5Patch) GetAppendNonCompat() []int32 {
-    return x.Append
-}
-
-func (x *RefFieldsField5Patch) GetAppend() []int32 {
-    if !x.IsSetAppend() {
-        return make([]int32, 0)
-    }
-
-    return x.Append
-}
-
-func (x *RefFieldsField5Patch) SetAssignNonCompat(value []int32) *RefFieldsField5Patch {
-    x.Assign = value
-    return x
-}
-
-func (x *RefFieldsField5Patch) SetAssign(value []int32) *RefFieldsField5Patch {
-    x.Assign = value
-    return x
-}
-
-func (x *RefFieldsField5Patch) SetClearNonCompat(value bool) *RefFieldsField5Patch {
-    x.Clear = value
-    return x
-}
-
-func (x *RefFieldsField5Patch) SetClear(value bool) *RefFieldsField5Patch {
-    x.Clear = value
-    return x
-}
-
-func (x *RefFieldsField5Patch) SetPrependNonCompat(value []int32) *RefFieldsField5Patch {
-    x.Prepend = value
-    return x
-}
-
-func (x *RefFieldsField5Patch) SetPrepend(value []int32) *RefFieldsField5Patch {
-    x.Prepend = value
-    return x
-}
-
-func (x *RefFieldsField5Patch) SetAppendNonCompat(value []int32) *RefFieldsField5Patch {
-    x.Append = value
-    return x
-}
-
-func (x *RefFieldsField5Patch) SetAppend(value []int32) *RefFieldsField5Patch {
-    x.Append = value
-    return x
-}
-
-func (x *RefFieldsField5Patch) IsSetAssign() bool {
-    return x != nil && x.Assign != nil
-}
-
-func (x *RefFieldsField5Patch) IsSetPrepend() bool {
-    return x != nil && x.Prepend != nil
-}
-
-func (x *RefFieldsField5Patch) IsSetAppend() bool {
-    return x != nil && x.Append != nil
-}
-
-func (x *RefFieldsField5Patch) writeField1(p thrift.Protocol) error {  // Assign
-    if !x.IsSetAssign() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("assign", thrift.LIST, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetAssignNonCompat()
-    if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
-    return thrift.PrependError("error writing list begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteI32(item); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteListEnd(); err != nil {
-    return thrift.PrependError("error writing list end: ", err)
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *RefFieldsField5Patch) writeField2(p thrift.Protocol) error {  // Clear
-    if err := p.WriteFieldBegin("clear", thrift.BOOL, 2); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetClearNonCompat()
-    if err := p.WriteBool(item); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *RefFieldsField5Patch) writeField8(p thrift.Protocol) error {  // Prepend
-    if err := p.WriteFieldBegin("prepend", thrift.LIST, 8); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetPrependNonCompat()
-    if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
-    return thrift.PrependError("error writing list begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteI32(item); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteListEnd(); err != nil {
-    return thrift.PrependError("error writing list end: ", err)
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *RefFieldsField5Patch) writeField9(p thrift.Protocol) error {  // Append
-    if err := p.WriteFieldBegin("append", thrift.LIST, 9); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetAppendNonCompat()
-    if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
-    return thrift.PrependError("error writing list begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteI32(item); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteListEnd(); err != nil {
-    return thrift.PrependError("error writing list end: ", err)
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *RefFieldsField5Patch) readField1(p thrift.Protocol) error {  // Assign
-    _ /* elemType */, size, err := p.ReadListBegin()
-if err != nil {
-    return thrift.PrependError("error reading list begin: ", err)
-}
-
-listResult := make([]int32, 0, size)
-for i := 0; i < size; i++ {
-    var elem int32
-    {
-        result, err := p.ReadI32()
-if err != nil {
-    return err
-}
-        elem = result
-    }
-    listResult = append(listResult, elem)
-}
-
-if err := p.ReadListEnd(); err != nil {
-    return thrift.PrependError("error reading list end: ", err)
-}
-result := listResult
-
-    x.SetAssignNonCompat(result)
-    return nil
-}
-
-func (x *RefFieldsField5Patch) readField2(p thrift.Protocol) error {  // Clear
-    result, err := p.ReadBool()
-if err != nil {
-    return err
-}
-
-    x.SetClearNonCompat(result)
-    return nil
-}
-
-func (x *RefFieldsField5Patch) readField8(p thrift.Protocol) error {  // Prepend
-    _ /* elemType */, size, err := p.ReadListBegin()
-if err != nil {
-    return thrift.PrependError("error reading list begin: ", err)
-}
-
-listResult := make([]int32, 0, size)
-for i := 0; i < size; i++ {
-    var elem int32
-    {
-        result, err := p.ReadI32()
-if err != nil {
-    return err
-}
-        elem = result
-    }
-    listResult = append(listResult, elem)
-}
-
-if err := p.ReadListEnd(); err != nil {
-    return thrift.PrependError("error reading list end: ", err)
-}
-result := listResult
-
-    x.SetPrependNonCompat(result)
-    return nil
-}
-
-func (x *RefFieldsField5Patch) readField9(p thrift.Protocol) error {  // Append
-    _ /* elemType */, size, err := p.ReadListBegin()
-if err != nil {
-    return thrift.PrependError("error reading list begin: ", err)
-}
-
-listResult := make([]int32, 0, size)
-for i := 0; i < size; i++ {
-    var elem int32
-    {
-        result, err := p.ReadI32()
-if err != nil {
-    return err
-}
-        elem = result
-    }
-    listResult = append(listResult, elem)
-}
-
-if err := p.ReadListEnd(); err != nil {
-    return thrift.PrependError("error reading list end: ", err)
-}
-result := listResult
-
-    x.SetAppendNonCompat(result)
-    return nil
-}
-
-func (x *RefFieldsField5Patch) toString1() string {  // Assign
-    return fmt.Sprintf("%v", x.GetAssignNonCompat())
-}
-
-func (x *RefFieldsField5Patch) toString2() string {  // Clear
-    return fmt.Sprintf("%v", x.GetClearNonCompat())
-}
-
-func (x *RefFieldsField5Patch) toString8() string {  // Prepend
-    return fmt.Sprintf("%v", x.GetPrependNonCompat())
-}
-
-func (x *RefFieldsField5Patch) toString9() string {  // Append
-    return fmt.Sprintf("%v", x.GetAppendNonCompat())
-}
-
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField5Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-type RefFieldsField5PatchBuilder struct {
-    obj *RefFieldsField5Patch
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField5Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewRefFieldsField5PatchBuilder() *RefFieldsField5PatchBuilder {
-    return &RefFieldsField5PatchBuilder{
-        obj: NewRefFieldsField5Patch(),
-    }
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField5Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField5PatchBuilder) Assign(value []int32) *RefFieldsField5PatchBuilder {
-    x.obj.Assign = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField5Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField5PatchBuilder) Clear(value bool) *RefFieldsField5PatchBuilder {
-    x.obj.Clear = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField5Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField5PatchBuilder) Prepend(value []int32) *RefFieldsField5PatchBuilder {
-    x.obj.Prepend = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField5Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField5PatchBuilder) Append(value []int32) *RefFieldsField5PatchBuilder {
-    x.obj.Append = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsField5Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsField5PatchBuilder) Emit() *RefFieldsField5Patch {
-    var objCopy RefFieldsField5Patch = *x.obj
-    return &objCopy
-}
-
-func (x *RefFieldsField5Patch) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("RefFieldsField5Patch"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
-    }
-
-    if err := x.writeField1(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField2(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField8(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField9(p); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
-    }
-
-    if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *RefFieldsField5Patch) Read(p thrift.Protocol) error {
-    if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
-    }
-
-    for {
-        _, wireType, id, err := p.ReadFieldBegin()
-        if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
-        }
-
-        if wireType == thrift.STOP {
-            break;
-        }
-
-        switch {
-        case (id == 1 && wireType == thrift.Type(thrift.LIST)):  // assign
-            if err := x.readField1(p); err != nil {
-                return err
-            }
-        case (id == 2 && wireType == thrift.Type(thrift.BOOL)):  // clear
-            if err := x.readField2(p); err != nil {
-                return err
-            }
-        case (id == 8 && wireType == thrift.Type(thrift.LIST)):  // prepend
-            if err := x.readField8(p); err != nil {
-                return err
-            }
-        case (id == 9 && wireType == thrift.Type(thrift.LIST)):  // append
-            if err := x.readField9(p); err != nil {
-                return err
-            }
-        default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
-        }
-
-        if err := p.ReadFieldEnd(); err != nil {
-            return err
-        }
-    }
-
-    if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
-    }
-
-    return nil
-}
-
-func (x *RefFieldsField5Patch) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("RefFieldsField5Patch({")
     sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
     sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
     sb.WriteString(fmt.Sprintf("Prepend:%s ", x.toString8()))
@@ -27668,10 +26726,8 @@ func (x *RefFieldsField7Patch) String() string {
 
 type RefFieldsFieldPatch struct {
     Unique *RefFieldsField1Patch `thrift:"unique,1" json:"unique" db:"unique"`
-    SharedConst *RefFieldsField2Patch `thrift:"shared_const,2" json:"shared_const" db:"shared_const"`
     SharedMustable *RefFieldsField3Patch `thrift:"shared_mustable,3" json:"shared_mustable" db:"shared_mustable"`
     OptUnique *RefFieldsField4Patch `thrift:"opt_unique,4" json:"opt_unique" db:"opt_unique"`
-    OptSharedConst *RefFieldsField5Patch `thrift:"opt_shared_const,5" json:"opt_shared_const" db:"opt_shared_const"`
     OptSharedMustable *RefFieldsField6Patch `thrift:"opt_shared_mustable,6" json:"opt_shared_mustable" db:"opt_shared_mustable"`
     OptBox *RefFieldsField7Patch `thrift:"opt_box,7" json:"opt_box" db:"opt_box"`
 }
@@ -27681,10 +26737,8 @@ var _ thrift.Struct = &RefFieldsFieldPatch{}
 func NewRefFieldsFieldPatch() *RefFieldsFieldPatch {
     return (&RefFieldsFieldPatch{}).
         SetUniqueNonCompat(*NewRefFieldsField1Patch()).
-        SetSharedConstNonCompat(*NewRefFieldsField2Patch()).
         SetSharedMustableNonCompat(*NewRefFieldsField3Patch()).
         SetOptUniqueNonCompat(*NewRefFieldsField4Patch()).
-        SetOptSharedConstNonCompat(*NewRefFieldsField5Patch()).
         SetOptSharedMustableNonCompat(*NewRefFieldsField6Patch()).
         SetOptBoxNonCompat(*NewRefFieldsField7Patch())
 }
@@ -27699,18 +26753,6 @@ func (x *RefFieldsFieldPatch) GetUnique() *RefFieldsField1Patch {
     }
 
     return x.Unique
-}
-
-func (x *RefFieldsFieldPatch) GetSharedConstNonCompat() *RefFieldsField2Patch {
-    return x.SharedConst
-}
-
-func (x *RefFieldsFieldPatch) GetSharedConst() *RefFieldsField2Patch {
-    if !x.IsSetSharedConst() {
-        return nil
-    }
-
-    return x.SharedConst
 }
 
 func (x *RefFieldsFieldPatch) GetSharedMustableNonCompat() *RefFieldsField3Patch {
@@ -27735,18 +26777,6 @@ func (x *RefFieldsFieldPatch) GetOptUnique() *RefFieldsField4Patch {
     }
 
     return x.OptUnique
-}
-
-func (x *RefFieldsFieldPatch) GetOptSharedConstNonCompat() *RefFieldsField5Patch {
-    return x.OptSharedConst
-}
-
-func (x *RefFieldsFieldPatch) GetOptSharedConst() *RefFieldsField5Patch {
-    if !x.IsSetOptSharedConst() {
-        return nil
-    }
-
-    return x.OptSharedConst
 }
 
 func (x *RefFieldsFieldPatch) GetOptSharedMustableNonCompat() *RefFieldsField6Patch {
@@ -27783,16 +26813,6 @@ func (x *RefFieldsFieldPatch) SetUnique(value *RefFieldsField1Patch) *RefFieldsF
     return x
 }
 
-func (x *RefFieldsFieldPatch) SetSharedConstNonCompat(value RefFieldsField2Patch) *RefFieldsFieldPatch {
-    x.SharedConst = &value
-    return x
-}
-
-func (x *RefFieldsFieldPatch) SetSharedConst(value *RefFieldsField2Patch) *RefFieldsFieldPatch {
-    x.SharedConst = value
-    return x
-}
-
 func (x *RefFieldsFieldPatch) SetSharedMustableNonCompat(value RefFieldsField3Patch) *RefFieldsFieldPatch {
     x.SharedMustable = &value
     return x
@@ -27810,16 +26830,6 @@ func (x *RefFieldsFieldPatch) SetOptUniqueNonCompat(value RefFieldsField4Patch) 
 
 func (x *RefFieldsFieldPatch) SetOptUnique(value *RefFieldsField4Patch) *RefFieldsFieldPatch {
     x.OptUnique = value
-    return x
-}
-
-func (x *RefFieldsFieldPatch) SetOptSharedConstNonCompat(value RefFieldsField5Patch) *RefFieldsFieldPatch {
-    x.OptSharedConst = &value
-    return x
-}
-
-func (x *RefFieldsFieldPatch) SetOptSharedConst(value *RefFieldsField5Patch) *RefFieldsFieldPatch {
-    x.OptSharedConst = value
     return x
 }
 
@@ -27847,20 +26857,12 @@ func (x *RefFieldsFieldPatch) IsSetUnique() bool {
     return x != nil && x.Unique != nil
 }
 
-func (x *RefFieldsFieldPatch) IsSetSharedConst() bool {
-    return x != nil && x.SharedConst != nil
-}
-
 func (x *RefFieldsFieldPatch) IsSetSharedMustable() bool {
     return x != nil && x.SharedMustable != nil
 }
 
 func (x *RefFieldsFieldPatch) IsSetOptUnique() bool {
     return x != nil && x.OptUnique != nil
-}
-
-func (x *RefFieldsFieldPatch) IsSetOptSharedConst() bool {
-    return x != nil && x.OptSharedConst != nil
 }
 
 func (x *RefFieldsFieldPatch) IsSetOptSharedMustable() bool {
@@ -27881,26 +26883,6 @@ func (x *RefFieldsFieldPatch) writeField1(p thrift.Protocol) error {  // Unique
     }
 
     item := x.GetUniqueNonCompat()
-    if err := item.Write(p); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *RefFieldsFieldPatch) writeField2(p thrift.Protocol) error {  // SharedConst
-    if !x.IsSetSharedConst() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("shared_const", thrift.STRUCT, 2); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetSharedConstNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -27941,26 +26923,6 @@ func (x *RefFieldsFieldPatch) writeField4(p thrift.Protocol) error {  // OptUniq
     }
 
     item := x.GetOptUniqueNonCompat()
-    if err := item.Write(p); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *RefFieldsFieldPatch) writeField5(p thrift.Protocol) error {  // OptSharedConst
-    if !x.IsSetOptSharedConst() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("opt_shared_const", thrift.STRUCT, 5); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetOptSharedConstNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -28022,17 +26984,6 @@ if err != nil {
     return nil
 }
 
-func (x *RefFieldsFieldPatch) readField2(p thrift.Protocol) error {  // SharedConst
-    result := *NewRefFieldsField2Patch()
-err := result.Read(p)
-if err != nil {
-    return err
-}
-
-    x.SetSharedConstNonCompat(result)
-    return nil
-}
-
 func (x *RefFieldsFieldPatch) readField3(p thrift.Protocol) error {  // SharedMustable
     result := *NewRefFieldsField3Patch()
 err := result.Read(p)
@@ -28052,17 +27003,6 @@ if err != nil {
 }
 
     x.SetOptUniqueNonCompat(result)
-    return nil
-}
-
-func (x *RefFieldsFieldPatch) readField5(p thrift.Protocol) error {  // OptSharedConst
-    result := *NewRefFieldsField5Patch()
-err := result.Read(p)
-if err != nil {
-    return err
-}
-
-    x.SetOptSharedConstNonCompat(result)
     return nil
 }
 
@@ -28092,20 +27032,12 @@ func (x *RefFieldsFieldPatch) toString1() string {  // Unique
     return fmt.Sprintf("%v", x.GetUniqueNonCompat())
 }
 
-func (x *RefFieldsFieldPatch) toString2() string {  // SharedConst
-    return fmt.Sprintf("%v", x.GetSharedConstNonCompat())
-}
-
 func (x *RefFieldsFieldPatch) toString3() string {  // SharedMustable
     return fmt.Sprintf("%v", x.GetSharedMustableNonCompat())
 }
 
 func (x *RefFieldsFieldPatch) toString4() string {  // OptUnique
     return fmt.Sprintf("%v", x.GetOptUniqueNonCompat())
-}
-
-func (x *RefFieldsFieldPatch) toString5() string {  // OptSharedConst
-    return fmt.Sprintf("%v", x.GetOptSharedConstNonCompat())
 }
 
 func (x *RefFieldsFieldPatch) toString6() string {  // OptSharedMustable
@@ -28124,14 +27056,6 @@ func (x *RefFieldsFieldPatch) DefaultGetUnique() *RefFieldsField1Patch {
     return x.Unique
 }
 
-// Deprecated: Use NewRefFieldsFieldPatch().GetSharedConst() instead.
-func (x *RefFieldsFieldPatch) DefaultGetSharedConst() *RefFieldsField2Patch {
-    if !x.IsSetSharedConst() {
-        return NewRefFieldsField2Patch()
-    }
-    return x.SharedConst
-}
-
 // Deprecated: Use NewRefFieldsFieldPatch().GetSharedMustable() instead.
 func (x *RefFieldsFieldPatch) DefaultGetSharedMustable() *RefFieldsField3Patch {
     if !x.IsSetSharedMustable() {
@@ -28146,14 +27070,6 @@ func (x *RefFieldsFieldPatch) DefaultGetOptUnique() *RefFieldsField4Patch {
         return NewRefFieldsField4Patch()
     }
     return x.OptUnique
-}
-
-// Deprecated: Use NewRefFieldsFieldPatch().GetOptSharedConst() instead.
-func (x *RefFieldsFieldPatch) DefaultGetOptSharedConst() *RefFieldsField5Patch {
-    if !x.IsSetOptSharedConst() {
-        return NewRefFieldsField5Patch()
-    }
-    return x.OptSharedConst
 }
 
 // Deprecated: Use NewRefFieldsFieldPatch().GetOptSharedMustable() instead.
@@ -28196,13 +27112,6 @@ func (x *RefFieldsFieldPatchBuilder) Unique(value *RefFieldsField1Patch) *RefFie
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewRefFieldsFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsFieldPatchBuilder) SharedConst(value *RefFieldsField2Patch) *RefFieldsFieldPatchBuilder {
-    x.obj.SharedConst = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *RefFieldsFieldPatchBuilder) SharedMustable(value *RefFieldsField3Patch) *RefFieldsFieldPatchBuilder {
     x.obj.SharedMustable = value
     return x
@@ -28212,13 +27121,6 @@ func (x *RefFieldsFieldPatchBuilder) SharedMustable(value *RefFieldsField3Patch)
 // e.g NewRefFieldsFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *RefFieldsFieldPatchBuilder) OptUnique(value *RefFieldsField4Patch) *RefFieldsFieldPatchBuilder {
     x.obj.OptUnique = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewRefFieldsFieldPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *RefFieldsFieldPatchBuilder) OptSharedConst(value *RefFieldsField5Patch) *RefFieldsFieldPatchBuilder {
-    x.obj.OptSharedConst = value
     return x
 }
 
@@ -28252,19 +27154,11 @@ func (x *RefFieldsFieldPatch) Write(p thrift.Protocol) error {
         return err
     }
 
-    if err := x.writeField2(p); err != nil {
-        return err
-    }
-
     if err := x.writeField3(p); err != nil {
         return err
     }
 
     if err := x.writeField4(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField5(p); err != nil {
         return err
     }
 
@@ -28306,20 +27200,12 @@ func (x *RefFieldsFieldPatch) Read(p thrift.Protocol) error {
             if err := x.readField1(p); err != nil {
                 return err
             }
-        case (id == 2 && wireType == thrift.Type(thrift.STRUCT)):  // shared_const
-            if err := x.readField2(p); err != nil {
-                return err
-            }
         case (id == 3 && wireType == thrift.Type(thrift.STRUCT)):  // shared_mustable
             if err := x.readField3(p); err != nil {
                 return err
             }
         case (id == 4 && wireType == thrift.Type(thrift.STRUCT)):  // opt_unique
             if err := x.readField4(p); err != nil {
-                return err
-            }
-        case (id == 5 && wireType == thrift.Type(thrift.STRUCT)):  // opt_shared_const
-            if err := x.readField5(p); err != nil {
                 return err
             }
         case (id == 6 && wireType == thrift.Type(thrift.STRUCT)):  // opt_shared_mustable
@@ -28357,10 +27243,8 @@ func (x *RefFieldsFieldPatch) String() string {
 
     sb.WriteString("RefFieldsFieldPatch({")
     sb.WriteString(fmt.Sprintf("Unique:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("SharedConst:%s ", x.toString2()))
     sb.WriteString(fmt.Sprintf("SharedMustable:%s ", x.toString3()))
     sb.WriteString(fmt.Sprintf("OptUnique:%s ", x.toString4()))
-    sb.WriteString(fmt.Sprintf("OptSharedConst:%s ", x.toString5()))
     sb.WriteString(fmt.Sprintf("OptSharedMustable:%s ", x.toString6()))
     sb.WriteString(fmt.Sprintf("OptBox:%s", x.toString7()))
     sb.WriteString("})")
@@ -29251,10 +28135,8 @@ func RegisterTypes(registry interface {
     registry.RegisterType("test.dev/fixtures/patch/LoopPatch", func() any { return NewLoopPatch() })
     registry.RegisterType("test.dev/fixtures/patch/RefFieldsPatch", func() any { return NewRefFieldsPatch() })
     registry.RegisterType("test.dev/fixtures/patch/RefFieldsField1Patch", func() any { return NewRefFieldsField1Patch() })
-    registry.RegisterType("test.dev/fixtures/patch/RefFieldsField2Patch", func() any { return NewRefFieldsField2Patch() })
     registry.RegisterType("test.dev/fixtures/patch/RefFieldsField3Patch", func() any { return NewRefFieldsField3Patch() })
     registry.RegisterType("test.dev/fixtures/patch/RefFieldsField4Patch", func() any { return NewRefFieldsField4Patch() })
-    registry.RegisterType("test.dev/fixtures/patch/RefFieldsField5Patch", func() any { return NewRefFieldsField5Patch() })
     registry.RegisterType("test.dev/fixtures/patch/RefFieldsField6Patch", func() any { return NewRefFieldsField6Patch() })
     registry.RegisterType("test.dev/fixtures/patch/RefFieldsField7Patch", func() any { return NewRefFieldsField7Patch() })
     registry.RegisterType("test.dev/fixtures/patch/RefFieldsFieldPatch", func() any { return NewRefFieldsFieldPatch() })

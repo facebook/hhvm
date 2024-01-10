@@ -23,6 +23,7 @@
 #include <thrift/compiler/ast/diagnostic_context.h>
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/gen/cpp/namespace_resolver.h>
+#include <thrift/compiler/lib/cpp2/util.h>
 #include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/standard_mutator_stage.h>
 
@@ -391,6 +392,12 @@ t_struct& patch_generator::add_field_patch(
     if (!field.type().resolved()) {
       continue;
     }
+    // Skip generating field patch for cpp.ref fields with cpp.RefType.Shared
+    if (gen::cpp::find_ref_type(field) ==
+        gen::cpp::reference_type::shared_const) {
+      continue;
+    }
+
     if (t_type_ref patch_type =
             find_patch_type(get_field_annotation(annot, field), orig, field)) {
       types[field.id()] = patch_type;

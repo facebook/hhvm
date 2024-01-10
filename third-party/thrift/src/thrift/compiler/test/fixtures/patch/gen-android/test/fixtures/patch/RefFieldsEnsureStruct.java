@@ -232,15 +232,15 @@ public class RefFieldsEnsureStruct implements TBase, java.io.Serializable, Clone
         case UNIQUE:
           if (__field.type == TType.LIST) {
             {
-              TList _list372 = iprot.readListBegin();
-              tmp_unique = new ArrayList<Integer>(Math.max(0, _list372.size));
-              for (int _i373 = 0; 
-                   (_list372.size < 0) ? iprot.peekList() : (_i373 < _list372.size); 
-                   ++_i373)
+              TList _list348 = iprot.readListBegin();
+              tmp_unique = new ArrayList<Integer>(Math.max(0, _list348.size));
+              for (int _i349 = 0; 
+                   (_list348.size < 0) ? iprot.peekList() : (_i349 < _list348.size); 
+                   ++_i349)
               {
-                Integer _elem374;
-                _elem374 = iprot.readI32();
-                tmp_unique.add(_elem374);
+                Integer _elem350;
+                _elem350 = iprot.readI32();
+                tmp_unique.add(_elem350);
               }
               iprot.readListEnd();
             }
@@ -251,15 +251,15 @@ public class RefFieldsEnsureStruct implements TBase, java.io.Serializable, Clone
         case SHARED_CONST:
           if (__field.type == TType.LIST) {
             {
-              TList _list375 = iprot.readListBegin();
-              tmp_shared_const = new ArrayList<Integer>(Math.max(0, _list375.size));
-              for (int _i376 = 0; 
-                   (_list375.size < 0) ? iprot.peekList() : (_i376 < _list375.size); 
-                   ++_i376)
+              TList _list351 = iprot.readListBegin();
+              tmp_shared_const = new ArrayList<Integer>(Math.max(0, _list351.size));
+              for (int _i352 = 0; 
+                   (_list351.size < 0) ? iprot.peekList() : (_i352 < _list351.size); 
+                   ++_i352)
               {
-                Integer _elem377;
-                _elem377 = iprot.readI32();
-                tmp_shared_const.add(_elem377);
+                Integer _elem353;
+                _elem353 = iprot.readI32();
+                tmp_shared_const.add(_elem353);
               }
               iprot.readListEnd();
             }
@@ -270,15 +270,15 @@ public class RefFieldsEnsureStruct implements TBase, java.io.Serializable, Clone
         case SHARED_MUSTABLE:
           if (__field.type == TType.LIST) {
             {
-              TList _list378 = iprot.readListBegin();
-              tmp_shared_mustable = new ArrayList<Integer>(Math.max(0, _list378.size));
-              for (int _i379 = 0; 
-                   (_list378.size < 0) ? iprot.peekList() : (_i379 < _list378.size); 
-                   ++_i379)
+              TList _list354 = iprot.readListBegin();
+              tmp_shared_mustable = new ArrayList<Integer>(Math.max(0, _list354.size));
+              for (int _i355 = 0; 
+                   (_list354.size < 0) ? iprot.peekList() : (_i355 < _list354.size); 
+                   ++_i355)
               {
-                Integer _elem380;
-                _elem380 = iprot.readI32();
-                tmp_shared_mustable.add(_elem380);
+                Integer _elem356;
+                _elem356 = iprot.readI32();
+                tmp_shared_mustable.add(_elem356);
               }
               iprot.readListEnd();
             }
@@ -289,15 +289,15 @@ public class RefFieldsEnsureStruct implements TBase, java.io.Serializable, Clone
         case OPT_UNIQUE:
           if (__field.type == TType.LIST) {
             {
-              TList _list381 = iprot.readListBegin();
-              tmp_opt_unique = new ArrayList<Integer>(Math.max(0, _list381.size));
-              for (int _i382 = 0; 
-                   (_list381.size < 0) ? iprot.peekList() : (_i382 < _list381.size); 
-                   ++_i382)
+              TList _list357 = iprot.readListBegin();
+              tmp_opt_unique = new ArrayList<Integer>(Math.max(0, _list357.size));
+              for (int _i358 = 0; 
+                   (_list357.size < 0) ? iprot.peekList() : (_i358 < _list357.size); 
+                   ++_i358)
               {
-                Integer _elem383;
-                _elem383 = iprot.readI32();
-                tmp_opt_unique.add(_elem383);
+                Integer _elem359;
+                _elem359 = iprot.readI32();
+                tmp_opt_unique.add(_elem359);
               }
               iprot.readListEnd();
             }
@@ -308,15 +308,15 @@ public class RefFieldsEnsureStruct implements TBase, java.io.Serializable, Clone
         case OPT_SHARED_CONST:
           if (__field.type == TType.LIST) {
             {
-              TList _list384 = iprot.readListBegin();
-              tmp_opt_shared_const = new ArrayList<Integer>(Math.max(0, _list384.size));
-              for (int _i385 = 0; 
-                   (_list384.size < 0) ? iprot.peekList() : (_i385 < _list384.size); 
-                   ++_i385)
+              TList _list360 = iprot.readListBegin();
+              tmp_opt_shared_const = new ArrayList<Integer>(Math.max(0, _list360.size));
+              for (int _i361 = 0; 
+                   (_list360.size < 0) ? iprot.peekList() : (_i361 < _list360.size); 
+                   ++_i361)
               {
-                Integer _elem386;
-                _elem386 = iprot.readI32();
-                tmp_opt_shared_const.add(_elem386);
+                Integer _elem362;
+                _elem362 = iprot.readI32();
+                tmp_opt_shared_const.add(_elem362);
               }
               iprot.readListEnd();
             }
@@ -327,15 +327,15 @@ public class RefFieldsEnsureStruct implements TBase, java.io.Serializable, Clone
         case OPT_SHARED_MUSTABLE:
           if (__field.type == TType.LIST) {
             {
-              TList _list387 = iprot.readListBegin();
-              tmp_opt_shared_mustable = new ArrayList<Integer>(Math.max(0, _list387.size));
-              for (int _i388 = 0; 
-                   (_list387.size < 0) ? iprot.peekList() : (_i388 < _list387.size); 
-                   ++_i388)
+              TList _list363 = iprot.readListBegin();
+              tmp_opt_shared_mustable = new ArrayList<Integer>(Math.max(0, _list363.size));
+              for (int _i364 = 0; 
+                   (_list363.size < 0) ? iprot.peekList() : (_i364 < _list363.size); 
+                   ++_i364)
               {
-                Integer _elem389;
-                _elem389 = iprot.readI32();
-                tmp_opt_shared_mustable.add(_elem389);
+                Integer _elem365;
+                _elem365 = iprot.readI32();
+                tmp_opt_shared_mustable.add(_elem365);
               }
               iprot.readListEnd();
             }
@@ -346,15 +346,15 @@ public class RefFieldsEnsureStruct implements TBase, java.io.Serializable, Clone
         case OPT_BOX:
           if (__field.type == TType.LIST) {
             {
-              TList _list390 = iprot.readListBegin();
-              tmp_opt_box = new ArrayList<Integer>(Math.max(0, _list390.size));
-              for (int _i391 = 0; 
-                   (_list390.size < 0) ? iprot.peekList() : (_i391 < _list390.size); 
-                   ++_i391)
+              TList _list366 = iprot.readListBegin();
+              tmp_opt_box = new ArrayList<Integer>(Math.max(0, _list366.size));
+              for (int _i367 = 0; 
+                   (_list366.size < 0) ? iprot.peekList() : (_i367 < _list366.size); 
+                   ++_i367)
               {
-                Integer _elem392;
-                _elem392 = iprot.readI32();
-                tmp_opt_box.add(_elem392);
+                Integer _elem368;
+                _elem368 = iprot.readI32();
+                tmp_opt_box.add(_elem368);
               }
               iprot.readListEnd();
             }
@@ -393,8 +393,8 @@ public class RefFieldsEnsureStruct implements TBase, java.io.Serializable, Clone
         oprot.writeFieldBegin(UNIQUE_FIELD_DESC);
         {
           oprot.writeListBegin(new TList(TType.I32, this.unique.size()));
-          for (Integer _iter393 : this.unique)          {
-            oprot.writeI32(_iter393);
+          for (Integer _iter369 : this.unique)          {
+            oprot.writeI32(_iter369);
           }
           oprot.writeListEnd();
         }
@@ -406,8 +406,8 @@ public class RefFieldsEnsureStruct implements TBase, java.io.Serializable, Clone
         oprot.writeFieldBegin(SHARED_CONST_FIELD_DESC);
         {
           oprot.writeListBegin(new TList(TType.I32, this.shared_const.size()));
-          for (Integer _iter394 : this.shared_const)          {
-            oprot.writeI32(_iter394);
+          for (Integer _iter370 : this.shared_const)          {
+            oprot.writeI32(_iter370);
           }
           oprot.writeListEnd();
         }
@@ -419,8 +419,8 @@ public class RefFieldsEnsureStruct implements TBase, java.io.Serializable, Clone
         oprot.writeFieldBegin(SHARED_MUSTABLE_FIELD_DESC);
         {
           oprot.writeListBegin(new TList(TType.I32, this.shared_mustable.size()));
-          for (Integer _iter395 : this.shared_mustable)          {
-            oprot.writeI32(_iter395);
+          for (Integer _iter371 : this.shared_mustable)          {
+            oprot.writeI32(_iter371);
           }
           oprot.writeListEnd();
         }
@@ -432,8 +432,8 @@ public class RefFieldsEnsureStruct implements TBase, java.io.Serializable, Clone
         oprot.writeFieldBegin(OPT_UNIQUE_FIELD_DESC);
         {
           oprot.writeListBegin(new TList(TType.I32, this.opt_unique.size()));
-          for (Integer _iter396 : this.opt_unique)          {
-            oprot.writeI32(_iter396);
+          for (Integer _iter372 : this.opt_unique)          {
+            oprot.writeI32(_iter372);
           }
           oprot.writeListEnd();
         }
@@ -445,8 +445,8 @@ public class RefFieldsEnsureStruct implements TBase, java.io.Serializable, Clone
         oprot.writeFieldBegin(OPT_SHARED_CONST_FIELD_DESC);
         {
           oprot.writeListBegin(new TList(TType.I32, this.opt_shared_const.size()));
-          for (Integer _iter397 : this.opt_shared_const)          {
-            oprot.writeI32(_iter397);
+          for (Integer _iter373 : this.opt_shared_const)          {
+            oprot.writeI32(_iter373);
           }
           oprot.writeListEnd();
         }
@@ -458,8 +458,8 @@ public class RefFieldsEnsureStruct implements TBase, java.io.Serializable, Clone
         oprot.writeFieldBegin(OPT_SHARED_MUSTABLE_FIELD_DESC);
         {
           oprot.writeListBegin(new TList(TType.I32, this.opt_shared_mustable.size()));
-          for (Integer _iter398 : this.opt_shared_mustable)          {
-            oprot.writeI32(_iter398);
+          for (Integer _iter374 : this.opt_shared_mustable)          {
+            oprot.writeI32(_iter374);
           }
           oprot.writeListEnd();
         }
@@ -471,8 +471,8 @@ public class RefFieldsEnsureStruct implements TBase, java.io.Serializable, Clone
         oprot.writeFieldBegin(OPT_BOX_FIELD_DESC);
         {
           oprot.writeListBegin(new TList(TType.I32, this.opt_box.size()));
-          for (Integer _iter399 : this.opt_box)          {
-            oprot.writeI32(_iter399);
+          for (Integer _iter375 : this.opt_box)          {
+            oprot.writeI32(_iter375);
           }
           oprot.writeListEnd();
         }

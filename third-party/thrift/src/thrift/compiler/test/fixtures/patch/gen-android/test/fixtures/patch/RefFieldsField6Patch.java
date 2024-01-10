@@ -200,15 +200,15 @@ public class RefFieldsField6Patch implements TBase, java.io.Serializable, Clonea
         case ASSIGN:
           if (__field.type == TType.LIST) {
             {
-              TList _list348 = iprot.readListBegin();
-              tmp_assign = new ArrayList<Integer>(Math.max(0, _list348.size));
-              for (int _i349 = 0; 
-                   (_list348.size < 0) ? iprot.peekList() : (_i349 < _list348.size); 
-                   ++_i349)
+              TList _list324 = iprot.readListBegin();
+              tmp_assign = new ArrayList<Integer>(Math.max(0, _list324.size));
+              for (int _i325 = 0; 
+                   (_list324.size < 0) ? iprot.peekList() : (_i325 < _list324.size); 
+                   ++_i325)
               {
-                Integer _elem350;
-                _elem350 = iprot.readI32();
-                tmp_assign.add(_elem350);
+                Integer _elem326;
+                _elem326 = iprot.readI32();
+                tmp_assign.add(_elem326);
               }
               iprot.readListEnd();
             }
@@ -226,15 +226,15 @@ public class RefFieldsField6Patch implements TBase, java.io.Serializable, Clonea
         case PREPEND:
           if (__field.type == TType.LIST) {
             {
-              TList _list351 = iprot.readListBegin();
-              tmp_prepend = new ArrayList<Integer>(Math.max(0, _list351.size));
-              for (int _i352 = 0; 
-                   (_list351.size < 0) ? iprot.peekList() : (_i352 < _list351.size); 
-                   ++_i352)
+              TList _list327 = iprot.readListBegin();
+              tmp_prepend = new ArrayList<Integer>(Math.max(0, _list327.size));
+              for (int _i328 = 0; 
+                   (_list327.size < 0) ? iprot.peekList() : (_i328 < _list327.size); 
+                   ++_i328)
               {
-                Integer _elem353;
-                _elem353 = iprot.readI32();
-                tmp_prepend.add(_elem353);
+                Integer _elem329;
+                _elem329 = iprot.readI32();
+                tmp_prepend.add(_elem329);
               }
               iprot.readListEnd();
             }
@@ -245,15 +245,15 @@ public class RefFieldsField6Patch implements TBase, java.io.Serializable, Clonea
         case APPEND:
           if (__field.type == TType.LIST) {
             {
-              TList _list354 = iprot.readListBegin();
-              tmp_append = new ArrayList<Integer>(Math.max(0, _list354.size));
-              for (int _i355 = 0; 
-                   (_list354.size < 0) ? iprot.peekList() : (_i355 < _list354.size); 
-                   ++_i355)
+              TList _list330 = iprot.readListBegin();
+              tmp_append = new ArrayList<Integer>(Math.max(0, _list330.size));
+              for (int _i331 = 0; 
+                   (_list330.size < 0) ? iprot.peekList() : (_i331 < _list330.size); 
+                   ++_i331)
               {
-                Integer _elem356;
-                _elem356 = iprot.readI32();
-                tmp_append.add(_elem356);
+                Integer _elem332;
+                _elem332 = iprot.readI32();
+                tmp_append.add(_elem332);
               }
               iprot.readListEnd();
             }
@@ -289,8 +289,8 @@ public class RefFieldsField6Patch implements TBase, java.io.Serializable, Clonea
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
         {
           oprot.writeListBegin(new TList(TType.I32, this.assign.size()));
-          for (Integer _iter357 : this.assign)          {
-            oprot.writeI32(_iter357);
+          for (Integer _iter333 : this.assign)          {
+            oprot.writeI32(_iter333);
           }
           oprot.writeListEnd();
         }
@@ -306,8 +306,8 @@ public class RefFieldsField6Patch implements TBase, java.io.Serializable, Clonea
       oprot.writeFieldBegin(PREPEND_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.I32, this.prepend.size()));
-        for (Integer _iter358 : this.prepend)        {
-          oprot.writeI32(_iter358);
+        for (Integer _iter334 : this.prepend)        {
+          oprot.writeI32(_iter334);
         }
         oprot.writeListEnd();
       }
@@ -317,8 +317,8 @@ public class RefFieldsField6Patch implements TBase, java.io.Serializable, Clonea
       oprot.writeFieldBegin(APPEND_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.I32, this.append.size()));
-        for (Integer _iter359 : this.append)        {
-          oprot.writeI32(_iter359);
+        for (Integer _iter335 : this.append)        {
+          oprot.writeI32(_iter335);
         }
         oprot.writeListEnd();
       }

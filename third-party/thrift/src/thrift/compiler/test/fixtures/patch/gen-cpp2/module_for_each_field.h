@@ -552,17 +552,6 @@ struct ForEachField<::test::fixtures::patch::RefFieldsField1PatchStruct> {
 };
 
 template <>
-struct ForEachField<::test::fixtures::patch::RefFieldsField2PatchStruct> {
-  template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    f(0, static_cast<T&&>(t).assign_ref()...);
-    f(1, static_cast<T&&>(t).clear_ref()...);
-    f(2, static_cast<T&&>(t).prepend_ref()...);
-    f(3, static_cast<T&&>(t).append_ref()...);
-  }
-};
-
-template <>
 struct ForEachField<::test::fixtures::patch::RefFieldsField3PatchStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
@@ -575,17 +564,6 @@ struct ForEachField<::test::fixtures::patch::RefFieldsField3PatchStruct> {
 
 template <>
 struct ForEachField<::test::fixtures::patch::RefFieldsField4PatchStruct> {
-  template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    f(0, static_cast<T&&>(t).assign_ref()...);
-    f(1, static_cast<T&&>(t).clear_ref()...);
-    f(2, static_cast<T&&>(t).prepend_ref()...);
-    f(3, static_cast<T&&>(t).append_ref()...);
-  }
-};
-
-template <>
-struct ForEachField<::test::fixtures::patch::RefFieldsField5PatchStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).assign_ref()...);
@@ -622,12 +600,10 @@ struct ForEachField<::test::fixtures::patch::RefFieldsFieldPatchStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).unique_ref()...);
-    f(1, static_cast<T&&>(t).shared_const_ref()...);
-    f(2, static_cast<T&&>(t).shared_mustable_ref()...);
-    f(3, static_cast<T&&>(t).opt_unique_ref()...);
-    f(4, static_cast<T&&>(t).opt_shared_const_ref()...);
-    f(5, static_cast<T&&>(t).opt_shared_mustable_ref()...);
-    f(6, static_cast<T&&>(t).opt_box_ref()...);
+    f(1, static_cast<T&&>(t).shared_mustable_ref()...);
+    f(2, static_cast<T&&>(t).opt_unique_ref()...);
+    f(3, static_cast<T&&>(t).opt_shared_mustable_ref()...);
+    f(4, static_cast<T&&>(t).opt_box_ref()...);
   }
 };
 

@@ -312,10 +312,6 @@ var (
         metadata.NewThriftStructType().
             SetName("module.RefFieldsField1Patch"),
             )
-    premadeThriftType_module_RefFieldsField2Patch = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.RefFieldsField2Patch"),
-            )
     premadeThriftType_module_RefFieldsField3Patch = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.RefFieldsField3Patch"),
@@ -323,10 +319,6 @@ var (
     premadeThriftType_module_RefFieldsField4Patch = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.RefFieldsField4Patch"),
-            )
-    premadeThriftType_module_RefFieldsField5Patch = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.RefFieldsField5Patch"),
             )
     premadeThriftType_module_RefFieldsField6Patch = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
@@ -1786,33 +1778,6 @@ var structMetadatas = []*metadata.ThriftStruct{
         },
     ),
     metadata.NewThriftStruct().
-    SetName("module.RefFieldsField2Patch").
-    SetIsUnion(false).
-    SetFields(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("assign").
-    SetIsOptional(true).
-    SetType(premadeThriftType_list_i32),
-            metadata.NewThriftField().
-    SetId(2).
-    SetName("clear").
-    SetIsOptional(false).
-    SetType(premadeThriftType_bool),
-            metadata.NewThriftField().
-    SetId(8).
-    SetName("prepend").
-    SetIsOptional(false).
-    SetType(premadeThriftType_list_i32),
-            metadata.NewThriftField().
-    SetId(9).
-    SetName("append").
-    SetIsOptional(false).
-    SetType(premadeThriftType_list_i32),
-        },
-    ),
-    metadata.NewThriftStruct().
     SetName("module.RefFieldsField3Patch").
     SetIsUnion(false).
     SetFields(
@@ -1841,33 +1806,6 @@ var structMetadatas = []*metadata.ThriftStruct{
     ),
     metadata.NewThriftStruct().
     SetName("module.RefFieldsField4Patch").
-    SetIsUnion(false).
-    SetFields(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("assign").
-    SetIsOptional(true).
-    SetType(premadeThriftType_list_i32),
-            metadata.NewThriftField().
-    SetId(2).
-    SetName("clear").
-    SetIsOptional(false).
-    SetType(premadeThriftType_bool),
-            metadata.NewThriftField().
-    SetId(8).
-    SetName("prepend").
-    SetIsOptional(false).
-    SetType(premadeThriftType_list_i32),
-            metadata.NewThriftField().
-    SetId(9).
-    SetName("append").
-    SetIsOptional(false).
-    SetType(premadeThriftType_list_i32),
-        },
-    ),
-    metadata.NewThriftStruct().
-    SetName("module.RefFieldsField5Patch").
     SetIsUnion(false).
     SetFields(
         []*metadata.ThriftField{
@@ -1958,11 +1896,6 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetIsOptional(false).
     SetType(premadeThriftType_module_RefFieldsField1Patch),
             metadata.NewThriftField().
-    SetId(2).
-    SetName("shared_const").
-    SetIsOptional(false).
-    SetType(premadeThriftType_module_RefFieldsField2Patch),
-            metadata.NewThriftField().
     SetId(3).
     SetName("shared_mustable").
     SetIsOptional(false).
@@ -1972,11 +1905,6 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("opt_unique").
     SetIsOptional(false).
     SetType(premadeThriftType_module_RefFieldsField4Patch),
-            metadata.NewThriftField().
-    SetId(5).
-    SetName("opt_shared_const").
-    SetIsOptional(false).
-    SetType(premadeThriftType_module_RefFieldsField5Patch),
             metadata.NewThriftField().
     SetId(6).
     SetName("opt_shared_mustable").

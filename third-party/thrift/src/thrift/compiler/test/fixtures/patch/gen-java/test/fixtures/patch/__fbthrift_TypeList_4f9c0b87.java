@@ -11,7 +11,7 @@ import com.facebook.thrift.type.TypeList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class __fbthrift_TypeList_0841e9a0 implements TypeList {
+public class __fbthrift_TypeList_4f9c0b87 implements TypeList {
 
   private static List<TypeMapping> list = new ArrayList<>();
 
@@ -64,10 +64,8 @@ public class __fbthrift_TypeList_0841e9a0 implements TypeList {
     add("test.dev/fixtures/patch/LoopPatch", "test.fixtures.patch.LoopPatch");
     add("test.dev/fixtures/patch/RefFieldsPatch", "test.fixtures.patch.RefFieldsPatch");
     add("test.dev/fixtures/patch/RefFieldsField1Patch", "test.fixtures.patch.RefFieldsField1Patch");
-    add("test.dev/fixtures/patch/RefFieldsField2Patch", "test.fixtures.patch.RefFieldsField2Patch");
     add("test.dev/fixtures/patch/RefFieldsField3Patch", "test.fixtures.patch.RefFieldsField3Patch");
     add("test.dev/fixtures/patch/RefFieldsField4Patch", "test.fixtures.patch.RefFieldsField4Patch");
-    add("test.dev/fixtures/patch/RefFieldsField5Patch", "test.fixtures.patch.RefFieldsField5Patch");
     add("test.dev/fixtures/patch/RefFieldsField6Patch", "test.fixtures.patch.RefFieldsField6Patch");
     add("test.dev/fixtures/patch/RefFieldsField7Patch", "test.fixtures.patch.RefFieldsField7Patch");
     add("test.dev/fixtures/patch/RefFieldsFieldPatch", "test.fixtures.patch.RefFieldsFieldPatch");

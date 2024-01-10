@@ -261,19 +261,9 @@ struct assign;
 struct clear;
 struct prepend;
 struct append;
-struct assign;
-struct clear;
-struct prepend;
-struct append;
-struct assign;
-struct clear;
-struct prepend;
-struct append;
 struct unique;
-struct shared_const;
 struct shared_mustable;
 struct opt_unique;
-struct opt_shared_const;
 struct opt_shared_mustable;
 struct opt_box;
 struct unique;
@@ -1269,45 +1259,9 @@ APACHE_THRIFT_DEFINE_ACCESSOR(prepend);
 #define APACHE_THRIFT_ACCESSOR_append
 APACHE_THRIFT_DEFINE_ACCESSOR(append);
 #endif
-#ifndef APACHE_THRIFT_ACCESSOR_assign
-#define APACHE_THRIFT_ACCESSOR_assign
-APACHE_THRIFT_DEFINE_ACCESSOR(assign);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_clear
-#define APACHE_THRIFT_ACCESSOR_clear
-APACHE_THRIFT_DEFINE_ACCESSOR(clear);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_prepend
-#define APACHE_THRIFT_ACCESSOR_prepend
-APACHE_THRIFT_DEFINE_ACCESSOR(prepend);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_append
-#define APACHE_THRIFT_ACCESSOR_append
-APACHE_THRIFT_DEFINE_ACCESSOR(append);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_assign
-#define APACHE_THRIFT_ACCESSOR_assign
-APACHE_THRIFT_DEFINE_ACCESSOR(assign);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_clear
-#define APACHE_THRIFT_ACCESSOR_clear
-APACHE_THRIFT_DEFINE_ACCESSOR(clear);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_prepend
-#define APACHE_THRIFT_ACCESSOR_prepend
-APACHE_THRIFT_DEFINE_ACCESSOR(prepend);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_append
-#define APACHE_THRIFT_ACCESSOR_append
-APACHE_THRIFT_DEFINE_ACCESSOR(append);
-#endif
 #ifndef APACHE_THRIFT_ACCESSOR_unique
 #define APACHE_THRIFT_ACCESSOR_unique
 APACHE_THRIFT_DEFINE_ACCESSOR(unique);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_shared_const
-#define APACHE_THRIFT_ACCESSOR_shared_const
-APACHE_THRIFT_DEFINE_ACCESSOR(shared_const);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_shared_mustable
 #define APACHE_THRIFT_ACCESSOR_shared_mustable
@@ -1316,10 +1270,6 @@ APACHE_THRIFT_DEFINE_ACCESSOR(shared_mustable);
 #ifndef APACHE_THRIFT_ACCESSOR_opt_unique
 #define APACHE_THRIFT_ACCESSOR_opt_unique
 APACHE_THRIFT_DEFINE_ACCESSOR(opt_unique);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_opt_shared_const
-#define APACHE_THRIFT_ACCESSOR_opt_shared_const
-APACHE_THRIFT_DEFINE_ACCESSOR(opt_shared_const);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_opt_shared_mustable
 #define APACHE_THRIFT_ACCESSOR_opt_shared_mustable
@@ -1458,10 +1408,8 @@ class BarEnsureStruct;
 class LoopPatchStruct;
 class RefFieldsPatchStruct;
 class RefFieldsField1PatchStruct;
-class RefFieldsField2PatchStruct;
 class RefFieldsField3PatchStruct;
 class RefFieldsField4PatchStruct;
-class RefFieldsField5PatchStruct;
 class RefFieldsField6PatchStruct;
 class RefFieldsField7PatchStruct;
 class RefFieldsFieldPatchStruct;
@@ -17275,319 +17223,6 @@ unsigned long RefFieldsField1PatchStruct::read(Protocol_* iprot) {
 using RefFieldsField1Patch = ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField1PatchStruct>, ::test::fixtures::patch::RefFieldsField1PatchStruct>;
 
 
-class RefFieldsField2PatchStruct final  {
- private:
-  friend struct ::apache::thrift::detail::st::struct_private_access;
-  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
-
-  //  used by a static_assert in the corresponding source
-  static constexpr bool __fbthrift_cpp2_gen_json = false;
-  static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const char* __fbthrift_thrift_uri();
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
-  using __fbthrift_reflection_ident_list = folly::tag_t<
-    ::apache::thrift::ident::assign,
-    ::apache::thrift::ident::clear,
-    ::apache::thrift::ident::prepend,
-    ::apache::thrift::ident::append
-  >;
-
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,8,9};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::list<::apache::thrift::type::i32_t>,
-    ::apache::thrift::type::bool_t,
-    ::apache::thrift::type::list<::apache::thrift::type::i32_t>,
-    ::apache::thrift::type::list<::apache::thrift::type::i32_t>
-  >;
-
-  static constexpr std::size_t __fbthrift_field_size_v = 4;
-
-  template<class T>
-  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
-
-  template<class T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template<class T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
-  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_id_list
-    )
-  >;
-  void __fbthrift_clear();
-  void __fbthrift_clear_terse_fields();
-  bool __fbthrift_is_empty() const;
-
- public:
-  using __fbthrift_cpp2_type = RefFieldsField2PatchStruct;
-  static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-
-
- public:
-
-  RefFieldsField2PatchStruct();
-
-  // FragileConstructor for use in initialization lists only.
-  [[deprecated("This constructor is deprecated")]]
-  RefFieldsField2PatchStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int32_t> assign__arg, bool clear__arg, ::std::vector<::std::int32_t> prepend__arg, ::std::vector<::std::int32_t> append__arg);
-
-  RefFieldsField2PatchStruct(RefFieldsField2PatchStruct&&) noexcept;
-
-  RefFieldsField2PatchStruct(const RefFieldsField2PatchStruct& src);
-
-
-  RefFieldsField2PatchStruct& operator=(RefFieldsField2PatchStruct&&) noexcept;
-  RefFieldsField2PatchStruct& operator=(const RefFieldsField2PatchStruct& src);
-
-  ~RefFieldsField2PatchStruct();
-
- private:
-  ::std::vector<::std::int32_t> __fbthrift_field_assign;
- private:
-  bool __fbthrift_field_clear;
- private:
-  ::std::vector<::std::int32_t> __fbthrift_field_prepend;
- private:
-  ::std::vector<::std::int32_t> __fbthrift_field_append;
- private:
-  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
-
- public:
-
-  bool operator==(const RefFieldsField2PatchStruct&) const;
-  bool operator<(const RefFieldsField2PatchStruct&) const;
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> assign_ref() const& {
-    return {this->__fbthrift_field_assign, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> assign_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_assign), __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> assign_ref() & {
-    return {this->__fbthrift_field_assign, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> assign_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_assign), __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> assign() const& {
-    return {this->__fbthrift_field_assign, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> assign() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_assign), __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> assign() & {
-    return {this->__fbthrift_field_assign, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> assign() && {
-    return {static_cast<T&&>(this->__fbthrift_field_assign), __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = bool>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> clear_ref() const& {
-    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_clear};
-  }
-
-  template <typename..., typename T = bool>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> clear_ref() const&& {
-    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_clear)};
-  }
-
-  template <typename..., typename T = bool>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> clear_ref() & {
-    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_clear};
-  }
-
-  template <typename..., typename T = bool>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> clear_ref() && {
-    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_clear)};
-  }
-
-  template <typename..., typename T = bool>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> clear() const& {
-    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_clear};
-  }
-
-  template <typename..., typename T = bool>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> clear() const&& {
-    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_clear)};
-  }
-
-  template <typename..., typename T = bool>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> clear() & {
-    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_clear};
-  }
-
-  template <typename..., typename T = bool>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> clear() && {
-    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_clear)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> prepend_ref() const& {
-    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_prepend};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> prepend_ref() const&& {
-    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_prepend)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> prepend_ref() & {
-    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_prepend};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> prepend_ref() && {
-    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_prepend)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> prepend() const& {
-    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_prepend};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> prepend() const&& {
-    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_prepend)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> prepend() & {
-    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_prepend};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> prepend() && {
-    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_prepend)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> append_ref() const& {
-    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_append};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> append_ref() const&& {
-    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_append)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> append_ref() & {
-    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_append};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> append_ref() && {
-    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_append)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> append() const& {
-    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_append};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> append() const&& {
-    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_append)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> append() & {
-    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_append};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> append() && {
-    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_append)};
-  }
-  const ::std::vector<::std::int32_t>* get_assign() const&;
-  ::std::vector<::std::int32_t>* get_assign() &;
-  ::std::vector<::std::int32_t>* get_assign() && = delete;
-
-  template <typename T_RefFieldsField2PatchStruct_assign_struct_setter = ::std::vector<::std::int32_t>>
-  [[deprecated("Use `FOO.assign_ref() = BAR;` instead of `FOO.set_assign(BAR);`")]]
-  ::std::vector<::std::int32_t>& set_assign(T_RefFieldsField2PatchStruct_assign_struct_setter&& assign_) {
-    assign_ref() = std::forward<T_RefFieldsField2PatchStruct_assign_struct_setter>(assign_);
-    return __fbthrift_field_assign;
-  }
-
-  bool get_clear() const {
-    return __fbthrift_field_clear;
-  }
-
-  [[deprecated("Use `FOO.clear_ref() = BAR;` instead of `FOO.set_clear(BAR);`")]]
-  bool& set_clear(bool clear_) {
-    clear_ref() = clear_;
-    return __fbthrift_field_clear;
-  }
-  const ::std::vector<::std::int32_t>& get_prepend() const&;
-  ::std::vector<::std::int32_t> get_prepend() &&;
-
-  template <typename T_RefFieldsField2PatchStruct_prepend_struct_setter = ::std::vector<::std::int32_t>>
-  [[deprecated("Use `FOO.prepend_ref() = BAR;` instead of `FOO.set_prepend(BAR);`")]]
-  ::std::vector<::std::int32_t>& set_prepend(T_RefFieldsField2PatchStruct_prepend_struct_setter&& prepend_) {
-    prepend_ref() = std::forward<T_RefFieldsField2PatchStruct_prepend_struct_setter>(prepend_);
-    return __fbthrift_field_prepend;
-  }
-  const ::std::vector<::std::int32_t>& get_append() const&;
-  ::std::vector<::std::int32_t> get_append() &&;
-
-  template <typename T_RefFieldsField2PatchStruct_append_struct_setter = ::std::vector<::std::int32_t>>
-  [[deprecated("Use `FOO.append_ref() = BAR;` instead of `FOO.set_append(BAR);`")]]
-  ::std::vector<::std::int32_t>& set_append(T_RefFieldsField2PatchStruct_append_struct_setter&& append_) {
-    append_ref() = std::forward<T_RefFieldsField2PatchStruct_append_struct_setter>(append_);
-    return __fbthrift_field_append;
-  }
-
-  template <class Protocol_>
-  unsigned long read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t serializedSize(Protocol_ const* prot_) const;
-  template <class Protocol_>
-  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
-  template <class Protocol_>
-  uint32_t write(Protocol_* prot_) const;
-
- private:
-  template <class Protocol_>
-  void readNoXfer(Protocol_* iprot);
-
-  friend class ::apache::thrift::Cpp2Ops<RefFieldsField2PatchStruct>;
-  friend void swap(RefFieldsField2PatchStruct& a, RefFieldsField2PatchStruct& b);
-};
-
-template <class Protocol_>
-unsigned long RefFieldsField2PatchStruct::read(Protocol_* iprot) {
-  auto _xferStart = iprot->getCursorPosition();
-  readNoXfer(iprot);
-  return iprot->getCursorPosition() - _xferStart;
-}
-
-using RefFieldsField2Patch = ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField2PatchStruct>, ::test::fixtures::patch::RefFieldsField2PatchStruct>;
-
-
 class RefFieldsField3PatchStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -18212,319 +17847,6 @@ unsigned long RefFieldsField4PatchStruct::read(Protocol_* iprot) {
 }
 
 using RefFieldsField4Patch = ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField4PatchStruct>, ::test::fixtures::patch::RefFieldsField4PatchStruct>;
-
-
-class RefFieldsField5PatchStruct final  {
- private:
-  friend struct ::apache::thrift::detail::st::struct_private_access;
-  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
-
-  //  used by a static_assert in the corresponding source
-  static constexpr bool __fbthrift_cpp2_gen_json = false;
-  static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static const char* __fbthrift_thrift_uri();
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
-  using __fbthrift_reflection_ident_list = folly::tag_t<
-    ::apache::thrift::ident::assign,
-    ::apache::thrift::ident::clear,
-    ::apache::thrift::ident::prepend,
-    ::apache::thrift::ident::append
-  >;
-
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,8,9};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::list<::apache::thrift::type::i32_t>,
-    ::apache::thrift::type::bool_t,
-    ::apache::thrift::type::list<::apache::thrift::type::i32_t>,
-    ::apache::thrift::type::list<::apache::thrift::type::i32_t>
-  >;
-
-  static constexpr std::size_t __fbthrift_field_size_v = 4;
-
-  template<class T>
-  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
-
-  template<class T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template<class T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
-  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_id_list
-    )
-  >;
-  void __fbthrift_clear();
-  void __fbthrift_clear_terse_fields();
-  bool __fbthrift_is_empty() const;
-
- public:
-  using __fbthrift_cpp2_type = RefFieldsField5PatchStruct;
-  static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-
-
- public:
-
-  RefFieldsField5PatchStruct();
-
-  // FragileConstructor for use in initialization lists only.
-  [[deprecated("This constructor is deprecated")]]
-  RefFieldsField5PatchStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int32_t> assign__arg, bool clear__arg, ::std::vector<::std::int32_t> prepend__arg, ::std::vector<::std::int32_t> append__arg);
-
-  RefFieldsField5PatchStruct(RefFieldsField5PatchStruct&&) noexcept;
-
-  RefFieldsField5PatchStruct(const RefFieldsField5PatchStruct& src);
-
-
-  RefFieldsField5PatchStruct& operator=(RefFieldsField5PatchStruct&&) noexcept;
-  RefFieldsField5PatchStruct& operator=(const RefFieldsField5PatchStruct& src);
-
-  ~RefFieldsField5PatchStruct();
-
- private:
-  ::std::vector<::std::int32_t> __fbthrift_field_assign;
- private:
-  bool __fbthrift_field_clear;
- private:
-  ::std::vector<::std::int32_t> __fbthrift_field_prepend;
- private:
-  ::std::vector<::std::int32_t> __fbthrift_field_append;
- private:
-  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
-
- public:
-
-  bool operator==(const RefFieldsField5PatchStruct&) const;
-  bool operator<(const RefFieldsField5PatchStruct&) const;
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> assign_ref() const& {
-    return {this->__fbthrift_field_assign, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> assign_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_assign), __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> assign_ref() & {
-    return {this->__fbthrift_field_assign, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> assign_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_assign), __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> assign() const& {
-    return {this->__fbthrift_field_assign, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> assign() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_assign), __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> assign() & {
-    return {this->__fbthrift_field_assign, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> assign() && {
-    return {static_cast<T&&>(this->__fbthrift_field_assign), __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = bool>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> clear_ref() const& {
-    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_clear};
-  }
-
-  template <typename..., typename T = bool>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> clear_ref() const&& {
-    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_clear)};
-  }
-
-  template <typename..., typename T = bool>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> clear_ref() & {
-    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_clear};
-  }
-
-  template <typename..., typename T = bool>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> clear_ref() && {
-    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_clear)};
-  }
-
-  template <typename..., typename T = bool>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> clear() const& {
-    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_clear};
-  }
-
-  template <typename..., typename T = bool>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> clear() const&& {
-    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_clear)};
-  }
-
-  template <typename..., typename T = bool>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> clear() & {
-    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_clear};
-  }
-
-  template <typename..., typename T = bool>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> clear() && {
-    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_clear)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> prepend_ref() const& {
-    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_prepend};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> prepend_ref() const&& {
-    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_prepend)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> prepend_ref() & {
-    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_prepend};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> prepend_ref() && {
-    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_prepend)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> prepend() const& {
-    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_prepend};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> prepend() const&& {
-    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_prepend)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> prepend() & {
-    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_prepend};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> prepend() && {
-    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_prepend)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> append_ref() const& {
-    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_append};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> append_ref() const&& {
-    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_append)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> append_ref() & {
-    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_append};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> append_ref() && {
-    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_append)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> append() const& {
-    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_append};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> append() const&& {
-    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_append)};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> append() & {
-    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_append};
-  }
-
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> append() && {
-    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_append)};
-  }
-  const ::std::vector<::std::int32_t>* get_assign() const&;
-  ::std::vector<::std::int32_t>* get_assign() &;
-  ::std::vector<::std::int32_t>* get_assign() && = delete;
-
-  template <typename T_RefFieldsField5PatchStruct_assign_struct_setter = ::std::vector<::std::int32_t>>
-  [[deprecated("Use `FOO.assign_ref() = BAR;` instead of `FOO.set_assign(BAR);`")]]
-  ::std::vector<::std::int32_t>& set_assign(T_RefFieldsField5PatchStruct_assign_struct_setter&& assign_) {
-    assign_ref() = std::forward<T_RefFieldsField5PatchStruct_assign_struct_setter>(assign_);
-    return __fbthrift_field_assign;
-  }
-
-  bool get_clear() const {
-    return __fbthrift_field_clear;
-  }
-
-  [[deprecated("Use `FOO.clear_ref() = BAR;` instead of `FOO.set_clear(BAR);`")]]
-  bool& set_clear(bool clear_) {
-    clear_ref() = clear_;
-    return __fbthrift_field_clear;
-  }
-  const ::std::vector<::std::int32_t>& get_prepend() const&;
-  ::std::vector<::std::int32_t> get_prepend() &&;
-
-  template <typename T_RefFieldsField5PatchStruct_prepend_struct_setter = ::std::vector<::std::int32_t>>
-  [[deprecated("Use `FOO.prepend_ref() = BAR;` instead of `FOO.set_prepend(BAR);`")]]
-  ::std::vector<::std::int32_t>& set_prepend(T_RefFieldsField5PatchStruct_prepend_struct_setter&& prepend_) {
-    prepend_ref() = std::forward<T_RefFieldsField5PatchStruct_prepend_struct_setter>(prepend_);
-    return __fbthrift_field_prepend;
-  }
-  const ::std::vector<::std::int32_t>& get_append() const&;
-  ::std::vector<::std::int32_t> get_append() &&;
-
-  template <typename T_RefFieldsField5PatchStruct_append_struct_setter = ::std::vector<::std::int32_t>>
-  [[deprecated("Use `FOO.append_ref() = BAR;` instead of `FOO.set_append(BAR);`")]]
-  ::std::vector<::std::int32_t>& set_append(T_RefFieldsField5PatchStruct_append_struct_setter&& append_) {
-    append_ref() = std::forward<T_RefFieldsField5PatchStruct_append_struct_setter>(append_);
-    return __fbthrift_field_append;
-  }
-
-  template <class Protocol_>
-  unsigned long read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t serializedSize(Protocol_ const* prot_) const;
-  template <class Protocol_>
-  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
-  template <class Protocol_>
-  uint32_t write(Protocol_* prot_) const;
-
- private:
-  template <class Protocol_>
-  void readNoXfer(Protocol_* iprot);
-
-  friend class ::apache::thrift::Cpp2Ops<RefFieldsField5PatchStruct>;
-  friend void swap(RefFieldsField5PatchStruct& a, RefFieldsField5PatchStruct& b);
-};
-
-template <class Protocol_>
-unsigned long RefFieldsField5PatchStruct::read(Protocol_* iprot) {
-  auto _xferStart = iprot->getCursorPosition();
-  readNoXfer(iprot);
-  return iprot->getCursorPosition() - _xferStart;
-}
-
-using RefFieldsField5Patch = ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField5PatchStruct>, ::test::fixtures::patch::RefFieldsField5PatchStruct>;
 
 
 class RefFieldsField6PatchStruct final  {
@@ -19166,26 +18488,22 @@ class RefFieldsFieldPatchStruct final  {
   static const folly::StringPiece __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::unique,
-    ::apache::thrift::ident::shared_const,
     ::apache::thrift::ident::shared_mustable,
     ::apache::thrift::ident::opt_unique,
-    ::apache::thrift::ident::opt_shared_const,
     ::apache::thrift::ident::opt_shared_mustable,
     ::apache::thrift::ident::opt_box
   >;
 
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7};
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,3,4,6,7};
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField1PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField1PatchStruct>>,
-    ::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField2PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField2PatchStruct>>,
     ::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField3PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField3PatchStruct>>,
     ::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField4PatchStruct>>,
-    ::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField5PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField5PatchStruct>>,
     ::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField6PatchStruct>>,
     ::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField7PatchStruct>>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 7;
+  static constexpr std::size_t __fbthrift_field_size_v = 5;
 
   template<class T>
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
@@ -19219,7 +18537,7 @@ class RefFieldsFieldPatchStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  RefFieldsFieldPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField1Patch> unique__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField2Patch> shared_const__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField3Patch> shared_mustable__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField4Patch> opt_unique__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField5Patch> opt_shared_const__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField6Patch> opt_shared_mustable__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField7Patch> opt_box__arg);
+  RefFieldsFieldPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField1Patch> unique__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField3Patch> shared_mustable__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField4Patch> opt_unique__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField6Patch> opt_shared_mustable__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField7Patch> opt_box__arg);
 
   RefFieldsFieldPatchStruct(RefFieldsFieldPatchStruct&&) noexcept;
   RefFieldsFieldPatchStruct(const RefFieldsFieldPatchStruct& src);
@@ -19233,13 +18551,9 @@ class RefFieldsFieldPatchStruct final  {
  private:
   ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField1Patch> __fbthrift_field_unique;
  private:
-  ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField2Patch> __fbthrift_field_shared_const;
- private:
   ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField3Patch> __fbthrift_field_shared_mustable;
  private:
   ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField4Patch> __fbthrift_field_opt_unique;
- private:
-  ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField5Patch> __fbthrift_field_opt_shared_const;
  private:
   ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField6Patch> __fbthrift_field_opt_shared_mustable;
  private:
@@ -19288,46 +18602,6 @@ class RefFieldsFieldPatchStruct final  {
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField1Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> unique() && {
     return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_unique), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField1PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField1PatchStruct>>>};
-  }
-
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField2Patch>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> shared_const_ref() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_shared_const, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField2PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField2PatchStruct>>>};
-  }
-
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField2Patch>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> shared_const_ref() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_shared_const), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField2PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField2PatchStruct>>>};
-  }
-
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField2Patch>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> shared_const_ref() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_shared_const, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField2PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField2PatchStruct>>>};
-  }
-
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField2Patch>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> shared_const_ref() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_shared_const), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField2PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField2PatchStruct>>>};
-  }
-
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField2Patch>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> shared_const() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_shared_const, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField2PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField2PatchStruct>>>};
-  }
-
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField2Patch>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> shared_const() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_shared_const), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField2PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField2PatchStruct>>>};
-  }
-
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField2Patch>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> shared_const() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_shared_const, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField2PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField2PatchStruct>>>};
-  }
-
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField2Patch>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> shared_const() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_shared_const), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField2PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField2PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField3Patch>>
@@ -19408,46 +18682,6 @@ class RefFieldsFieldPatchStruct final  {
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField4Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> opt_unique() && {
     return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_opt_unique), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField4PatchStruct>>>};
-  }
-
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField5Patch>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> opt_shared_const_ref() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_opt_shared_const, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField5PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField5PatchStruct>>>};
-  }
-
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField5Patch>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> opt_shared_const_ref() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_opt_shared_const), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField5PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField5PatchStruct>>>};
-  }
-
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField5Patch>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> opt_shared_const_ref() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_opt_shared_const, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField5PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField5PatchStruct>>>};
-  }
-
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField5Patch>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> opt_shared_const_ref() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_opt_shared_const), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField5PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField5PatchStruct>>>};
-  }
-
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField5Patch>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> opt_shared_const() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_opt_shared_const, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField5PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField5PatchStruct>>>};
-  }
-
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField5Patch>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> opt_shared_const() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_opt_shared_const), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField5PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField5PatchStruct>>>};
-  }
-
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField5Patch>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> opt_shared_const() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_opt_shared_const, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField5PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField5PatchStruct>>>};
-  }
-
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField5Patch>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> opt_shared_const() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_opt_shared_const), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField5PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField5PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RefFieldsField6Patch>>

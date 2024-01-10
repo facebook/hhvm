@@ -1,8 +1,3 @@
-__AllowMultipleInstantiations
-  INSERT __AllowMultipleInstantiations
-  built-in attribute
-SORT TEXT: none
-  Allows implementing this interface with multiple instantiations, e.g. `implements I<int>, I<string>`
 __ConsistentConstruct
   INSERT __ConsistentConstruct
   built-in attribute
@@ -28,7 +23,7 @@ __EnableMethodTraitDiamond
   built-in attribute
 SORT TEXT: none
   Allows a trait to be `use`d more than once. This is useful in large class hierarchies, where you can end up using the same trait on via multiple paths, producing 'diamond inheritance'.
-  
+
   This requires methods to unambiguous: each method definition must occur in exactly one trait.
 __Sealed
   INSERT __Sealed

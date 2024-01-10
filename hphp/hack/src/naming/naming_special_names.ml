@@ -376,8 +376,6 @@ module UserAttributes = struct
 
   let uaStrictSwitch = "__StrictSwitch"
 
-  let uaAllowMultipleInstantiations = "__AllowMultipleInstantiations"
-
   let uaUnsafeAllowMultipleInstantiations =
     "__UNSAFE_AllowMultipleInstantiations"
 
@@ -391,13 +389,6 @@ module UserAttributes = struct
     AttributeKinds.(
       SMap.of_list
         [
-          ( uaAllowMultipleInstantiations,
-            {
-              contexts = [cls];
-              autocomplete = true;
-              doc =
-                "Allows implementing this interface with multiple instantiations, e.g. `implements I<int>, I<string>`";
-            } );
           ( uaUnsafeAllowMultipleInstantiations,
             {
               contexts = [cls];

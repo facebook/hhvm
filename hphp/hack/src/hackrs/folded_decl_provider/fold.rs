@@ -916,9 +916,8 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         let is_const = self.has_user_attribute(*sn::user_attributes::uaConst);
         let is_module_level_trait =
             self.has_user_attribute(*sn::user_attributes::uaModuleLevelTrait);
-        let allow_multiple_instantiations = self
-            .has_user_attribute(*sn::user_attributes::uaAllowMultipleInstantiations)
-            || self.has_user_attribute(*sn::user_attributes::uaUnsafeAllowMultipleInstantiations);
+        let allow_multiple_instantiations =
+            self.has_user_attribute(*sn::user_attributes::uaUnsafeAllowMultipleInstantiations);
 
         let fc = Arc::new(FoldedClass {
             name: self.child.name.id(),

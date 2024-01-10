@@ -1151,11 +1151,8 @@ and class_decl
       dc_docs_url = c.sc_docs_url;
       dc_allow_multiple_instantiations =
         Attributes.mem
-          SN.UserAttributes.uaAllowMultipleInstantiations
-          c.sc_user_attributes
-        || Attributes.mem
-             SN.UserAttributes.uaUnsafeAllowMultipleInstantiations
-             c.sc_user_attributes;
+          SN.UserAttributes.uaUnsafeAllowMultipleInstantiations
+          c.sc_user_attributes;
     }
   in
   let filter_snd map = SMap.filter_map (fun _k v -> snd v) map in

@@ -229,8 +229,6 @@ pub mod members {
 }
 
 pub mod user_attributes {
-    pub const ALLOW_MULTIPLE_INSTANTIATIONS: &str = "__AllowMultipleInstantiations";
-
     pub const UNSAFE_ALLOW_MULTIPLE_INSTANTIATIONS: &str = "__UNSAFE_AllowMultipleInstantiations";
 
     pub const OVERRIDE: &str = "__Override";

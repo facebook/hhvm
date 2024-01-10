@@ -1395,5 +1395,137 @@ TEST(StructPatchTest, Remove) {
   EXPECT_FALSE(data.data3().has_value());
 }
 
+TEST(StructPatchTest, UniqueRefStruct) {
+  {
+    // Empty patch.
+    UniqueRefStruct before, after;
+    UniqueRefStructPatch patch;
+    patch.apply(before);
+    EXPECT_EQ(before, after);
+  }
+  {
+    // Assign.
+    UniqueRefStruct before, after;
+    after.def_field_ref() =
+        std::make_unique<std::vector<int32_t>>(std::vector<int32_t>{42});
+    after.opt_field_ref() =
+        std::make_unique<std::vector<int32_t>>(std::vector<int32_t>{42});
+    UniqueRefStructPatch patch;
+    patch = after;
+    patch.apply(before);
+    EXPECT_EQ(before, after);
+  }
+  {
+    // Clear.
+    UniqueRefStruct before, after;
+    before.def_field_ref() =
+        std::make_unique<std::vector<int32_t>>(std::vector<int32_t>{42});
+    before.opt_field_ref() =
+        std::make_unique<std::vector<int32_t>>(std::vector<int32_t>{42});
+    UniqueRefStructPatch patch;
+    patch.clear();
+    patch.apply(before);
+    EXPECT_EQ(before, after);
+  }
+  {
+    // Patch Prior.
+    UniqueRefStruct before, after;
+    before.def_field_ref() =
+        std::make_unique<std::vector<int32_t>>(std::vector<int32_t>{42});
+    before.opt_field_ref() =
+        std::make_unique<std::vector<int32_t>>(std::vector<int32_t>{42});
+    after.def_field_ref() =
+        std::make_unique<std::vector<int32_t>>(std::vector<int32_t>{1});
+    after.opt_field_ref() =
+        std::make_unique<std::vector<int32_t>>(std::vector<int32_t>{2});
+    UniqueRefStructPatch patch;
+    patch.patchIfSet<ident::def_field>() = {1};
+    patch.patchIfSet<ident::opt_field>() = {2};
+    patch.apply(before);
+    EXPECT_EQ(before, after);
+  }
+  {
+    // Patch Prior - clear.
+    UniqueRefStruct before, after;
+    before.def_field_ref() =
+        std::make_unique<std::vector<int32_t>>(std::vector<int32_t>{42});
+    before.opt_field_ref() =
+        std::make_unique<std::vector<int32_t>>(std::vector<int32_t>{42});
+    after.def_field_ref() = std::make_unique<std::vector<int32_t>>();
+    after.opt_field_ref() = std::make_unique<std::vector<int32_t>>();
+    UniqueRefStructPatch patch;
+    patch.patchIfSet<ident::def_field>().clear();
+    patch.patchIfSet<ident::opt_field>().clear();
+    patch.apply(before);
+    EXPECT_EQ(before, after);
+  }
+  {
+    // Patch Prior - unset.
+    UniqueRefStruct before, after;
+    UniqueRefStructPatch patch;
+    patch.patchIfSet<ident::def_field>() = {1};
+    patch.patchIfSet<ident::opt_field>() = {2};
+    patch.apply(before);
+    EXPECT_EQ(*before.def_field_ref(), std::vector<int32_t>{1});
+    EXPECT_FALSE(before.opt_field_ref());
+  }
+  {
+    // Ensure.
+    UniqueRefStruct before, after;
+    after.def_field_ref() = std::make_unique<std::vector<int32_t>>();
+    after.opt_field_ref() = std::make_unique<std::vector<int32_t>>();
+    UniqueRefStructPatch patch;
+    patch.ensure<ident::def_field>();
+    patch.ensure<ident::opt_field>();
+    patch.apply(before);
+    EXPECT_EQ(before, after);
+  }
+  {
+    // Patch After.
+    UniqueRefStruct before, after;
+    after.def_field_ref() =
+        std::make_unique<std::vector<int32_t>>(std::vector<int32_t>{42});
+    after.opt_field_ref() =
+        std::make_unique<std::vector<int32_t>>(std::vector<int32_t>{42});
+    UniqueRefStructPatch patch;
+    patch.patch<ident::def_field>() = {42};
+    patch.patch<ident::opt_field>() = {42};
+    patch.apply(before);
+    EXPECT_EQ(before, after);
+  }
+  {
+    // Patch After - clear.
+    UniqueRefStruct before, after;
+    before.def_field_ref() =
+        std::make_unique<std::vector<int32_t>>(std::vector<int32_t>{42});
+    before.opt_field_ref() =
+        std::make_unique<std::vector<int32_t>>(std::vector<int32_t>{42});
+    after.def_field_ref() = std::make_unique<std::vector<int32_t>>();
+    after.opt_field_ref() = std::make_unique<std::vector<int32_t>>();
+    UniqueRefStructPatch patch;
+    patch.patch<ident::def_field>().clear();
+    patch.patch<ident::opt_field>().clear();
+    patch.apply(before);
+    EXPECT_EQ(before, after);
+  }
+  {
+    // Patch After - append.
+    UniqueRefStruct before, after;
+    before.def_field_ref() =
+        std::make_unique<std::vector<int32_t>>(std::vector<int32_t>{42});
+    before.opt_field_ref() =
+        std::make_unique<std::vector<int32_t>>(std::vector<int32_t>{42});
+    after.def_field_ref() =
+        std::make_unique<std::vector<int32_t>>(std::vector<int32_t>{42, 43});
+    after.opt_field_ref() =
+        std::make_unique<std::vector<int32_t>>(std::vector<int32_t>{42, 43});
+    UniqueRefStructPatch patch;
+    patch.patch<ident::def_field>().append({43});
+    patch.patch<ident::opt_field>().append({43});
+    patch.apply(before);
+    EXPECT_EQ(before, after);
+  }
+}
+
 } // namespace
 } // namespace apache::thrift

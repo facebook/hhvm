@@ -130,7 +130,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
     template <class Id, class Field>
     void ensure(const Field& def) {
       if (isAbsent(op::get<Id>(v))) {
-        op::get<Id>(v) = def;
+        op::ensure<Id>(v) = def;
       }
     }
 

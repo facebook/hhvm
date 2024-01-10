@@ -149,3 +149,10 @@ struct Ter {
   @thrift.TerseWrite
   1: i32 field;
 }
+
+struct UniqueRefStruct {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<i32> def_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: optional list<i32> opt_field;
+}

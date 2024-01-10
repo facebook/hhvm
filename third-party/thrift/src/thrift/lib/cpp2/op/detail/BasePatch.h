@@ -186,6 +186,12 @@ class BaseAssignPatch : public BasePatch<Patch, Derived> {
       derived().apply(*field);
     }
   }
+  template <typename U>
+  void apply(std::unique_ptr<U>& field) const {
+    if (field) {
+      derived().apply(*field);
+    }
+  }
 
   Derived& operator=(const value_type& val) { return (assign(val), derived()); }
   Derived& operator=(value_type&& val) {

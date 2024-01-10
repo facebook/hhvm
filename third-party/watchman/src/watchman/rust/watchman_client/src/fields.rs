@@ -282,8 +282,8 @@ define_field!(
 /// list of field names:
 ///
 /// ```
-/// use watchman_client::prelude::*;
 /// use serde::Deserialize;
+/// use watchman_client::prelude::*;
 ///
 /// query_result_type! {
 ///     struct NameAndHash {

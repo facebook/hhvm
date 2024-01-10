@@ -736,9 +736,9 @@ pub enum ContentSha1Hex {
 /// use watchman_client::prelude::*;
 /// #[derive(Deserialize, Debug, Clone)]
 /// struct NameAndType {
-///    name: std::path::PathBuf,
-///    #[serde(rename = "type")]
-///    file_type: FileType,
+///     name: std::path::PathBuf,
+///     #[serde(rename = "type")]
+///     file_type: FileType,
 /// }
 /// ```
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]

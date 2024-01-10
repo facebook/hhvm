@@ -693,7 +693,7 @@ let main_internal
              ~value:status.Rpc.Server_status.last_recheck_stats
       in
       Lwt.return (exit_status, telemetry)
-  | MODE_STATUS_SINGLE filenames ->
+  | MODE_STATUS_SINGLE { filenames; show_tast } ->
     let file_input filename =
       match filename with
       | "-" ->
@@ -708,8 +708,7 @@ let main_internal
            {
              file_names = file_inputs;
              max_errors = args.max_errors;
-             return_expanded_tast =
-               local_config.ServerLocalConfig.dump_tast_hashes;
+             return_expanded_tast = show_tast;
            })
     in
     (match tasts with

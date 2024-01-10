@@ -127,6 +127,7 @@ let parse_check_args cmd ~from_default =
   let force_dormant_start = ref false in
   let from = ref from_default in
   let show_spinner = ref None in
+  let show_tast = ref false in
   let gen_saved_ignore_type_errors = ref false in
   let ignore_hh_version = ref false in
   let save_64bit = ref None in
@@ -167,14 +168,15 @@ let parse_check_args cmd ~from_default =
     end
   in
   let add_single x = single_files := x :: !single_files in
-  let set_mode_from_single_files () =
+  let set_mode_from_single_files (show_tast : bool) =
     match !single_files with
     | [] -> ()
     | single_files ->
       (match !mode with
       | Some (MODE_POPULATE_REMOTE_DECLS None) ->
         mode := Some (MODE_POPULATE_REMOTE_DECLS (Some single_files))
-      | _ -> set_mode (MODE_STATUS_SINGLE single_files))
+      | _ ->
+        set_mode (MODE_STATUS_SINGLE { filenames = single_files; show_tast }))
   in
   (* parse args *)
   let usage =
@@ -620,6 +622,10 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
         Arg.String add_single,
         "<path> Return errors in file with provided name (give '-' for stdin)"
       );
+      ( "--show-tast",
+        Arg.Unit (fun () -> show_tast := true),
+        " in combination with `--single`, output the TASTs of the file along with TAST hashes."
+      );
       ("--sort-results", Arg.Set sort_results, " sort output for CST search.");
       ( "--stats",
         Arg.Unit (fun () -> set_mode MODE_STATS),
@@ -719,7 +725,7 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
     exit 0
   );
 
-  set_mode_from_single_files ();
+  set_mode_from_single_files !show_tast;
   let mode = Option.value !mode ~default:MODE_STATUS in
   (* fixups *)
   let (root, paths) =

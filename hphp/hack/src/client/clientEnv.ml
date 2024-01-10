@@ -13,6 +13,11 @@ type rename_mode =
   | Method
   | Unspecified
 
+type status_single = {
+  filenames: string list;
+  show_tast: bool;
+}
+
 type client_mode =
   | MODE_XHP_AUTOCOMPLETE_SNIPPET of string
   | MODE_CST_SEARCH of string list option
@@ -53,7 +58,7 @@ type client_mode =
   | MODE_SERVER_RAGE
   | MODE_STATS
   | MODE_STATUS
-  | MODE_STATUS_SINGLE of string list (* filenames *)
+  | MODE_STATUS_SINGLE of status_single
   | MODE_TYPE_AT_POS of string
   | MODE_TYPE_AT_POS_BATCH of string list
   | MODE_TYPE_ERROR_AT_POS of string

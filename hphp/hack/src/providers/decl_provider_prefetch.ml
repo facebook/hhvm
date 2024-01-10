@@ -399,14 +399,24 @@ let rec prefetch_loop
     in
     Direct_decl_utils.cache_decls ctx earlier_file earlier_decls;
     (* Now that the decls are in cache, we're unblocked to revisit those decls and from
-       them explore further what we need to continue prep. *)
-    let visited =
-      List.fold earlier_to_fold ~init:visited ~f:(fun v name ->
-          { v with v_fold = SSet.remove name v.v_fold })
+       them explore further what we need to continue prep.
+       But, only if they truly are in cache! e.g. if we wanted a decl from a file,
+       but the file is absent, then it won't have been added to the cache and there's no use
+       re-visiting it. *)
+    let earlier_found =
+      earlier_decls |> List.map ~f:(fun (name, _, _) -> name) |> SSet.of_list
     in
     let visited =
-      List.fold earlier_to_ty ~init:visited ~f:(fun v name ->
-          { v with v_ty = SSet.remove name v.v_ty })
+      earlier_to_fold
+      |> List.filter ~f:(fun name -> SSet.mem name earlier_found)
+      |> List.fold ~init:visited ~f:(fun v name ->
+             { v with v_fold = SSet.remove name v.v_fold })
+    in
+    let visited =
+      earlier_to_ty
+      |> List.filter ~f:(fun name -> SSet.mem name earlier_found)
+      |> List.fold ~init:visited ~f:(fun v name ->
+             { v with v_ty = SSet.remove name v.v_ty })
     in
     let to_decl =
       {

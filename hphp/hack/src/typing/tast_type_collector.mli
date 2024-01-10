@@ -6,7 +6,7 @@
  *
  *)
 
-type collected_type = Tast_env.env * Typing_defs.phase_ty [@@deriving show]
+type collected_type = Tast_env.env * Typing_defs.phase_ty
 
 val collect_types :
   Provider_context.t ->

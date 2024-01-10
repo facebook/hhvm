@@ -25,13 +25,9 @@ type class_or_typedef_result =
     {!Tast.program} (and thus available to {!Tast_visitor}). Most of the
     persisted information comes from {!Typing_env.save}. *)
 
-let show_env _ = "<env>"
-
-let pp_env _ _ = Printf.printf "%s\n" "<env>"
-
 type env = Typing_env_types.env
 
-type t = env [@@deriving show]
+type t = env
 
 exception Not_in_class
 

@@ -7,9 +7,9 @@
  *
  *)
 
-type env [@@deriving show]
+type env
 
-type t = env [@@deriving show]
+type t = env
 
 exception Not_in_class
 

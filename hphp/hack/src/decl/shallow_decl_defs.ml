@@ -23,6 +23,19 @@ let set_bit bit value flags =
 module PropFlags = struct
   type t = int [@@deriving eq]
 
+  type record = {
+    abstract: bool;
+    const: bool;
+    lateinit: bool;
+    lsb: bool;
+    needs_init: bool;
+    php_std_lib: bool;
+    readonly: bool;
+    safe_global_variable: bool;
+    no_auto_likes: bool;
+  }
+  [@@deriving show]
+
   let empty = 0
 
   let abstract_bit    = 1 lsl 0
@@ -55,6 +68,19 @@ module PropFlags = struct
   let set_safe_global_variable = set_bit safe_global_variable_bit
   let set_no_auto_likes = set_bit no_auto_likes_bit
 
+  let to_record flags : record =
+    {
+      abstract = get_abstract flags;
+      const = get_const flags;
+      lateinit = get_lateinit flags;
+      lsb = get_lsb flags;
+      needs_init = get_needs_init flags;
+      php_std_lib = get_php_std_lib flags;
+      readonly = get_readonly flags;
+      safe_global_variable = get_safe_global_variable flags;
+      no_auto_likes = get_no_auto_likes flags;
+    }
+
   let make
       ~abstract
       ~const
@@ -78,27 +104,7 @@ module PropFlags = struct
     |> set_no_auto_likes no_auto_likes
 
   let pp fmt t =
-    if t = empty then
-      Format.pp_print_string fmt "(empty)"
-    else (
-      Format.fprintf fmt "@[<2>";
-      let sep = ref false in
-      let print s =
-        if !sep then Format.fprintf fmt " |@ ";
-        Format.pp_print_string fmt s;
-        sep := true
-      in
-      if get_abstract t then print "abstract";
-      if get_const t then print "const";
-      if get_lateinit t then print "lateinit";
-      if get_lsb t then print "lsb";
-      if get_needs_init t then print "needs_init";
-      if get_php_std_lib t then print "php_std_lib";
-      if get_readonly t then print "readonly";
-      if get_safe_global_variable t then print "safe_global_variable";
-      if get_no_auto_likes t then print "no_auto_likes";
-      Format.fprintf fmt "@,@]"
-    )
+    pp_record fmt (to_record t)
 
   let show = Format.asprintf "%a" pp
 end
@@ -106,6 +112,16 @@ end
 
 module MethodFlags = struct
   type t = int [@@deriving eq]
+
+  type record = {
+    abstract: bool;
+    final: bool;
+    override: bool;
+    dynamicallycallable: bool;
+    php_std_lib: bool;
+    support_dynamic_type: bool;
+  }
+  [@@deriving show]
 
   let empty = 0
 
@@ -130,6 +146,16 @@ module MethodFlags = struct
   let set_php_std_lib            = set_bit php_std_lib_bit
   let set_support_dynamic_type = set_bit support_dynamic_type_bit
 
+  let to_record t : record =
+  {
+    abstract = get_abstract t;
+    final = get_final t;
+    override = get_override t;
+    dynamicallycallable = get_dynamicallycallable t;
+    php_std_lib = get_php_std_lib t;
+    support_dynamic_type     = get_support_dynamic_type t;
+  }
+
   let make
       ~abstract
       ~final
@@ -147,24 +173,7 @@ module MethodFlags = struct
     |> set_support_dynamic_type support_dynamic_type
 
   let pp fmt t =
-    if t = empty then
-      Format.pp_print_string fmt "(empty)"
-    else (
-      Format.fprintf fmt "@[<2>";
-      let sep = ref false in
-      let print s =
-        if !sep then Format.fprintf fmt " |@ ";
-        Format.pp_print_string fmt s;
-        sep := true
-      in
-      if get_abstract t then print "abstract";
-      if get_final t then print "final";
-      if get_override t then print "override";
-      if get_dynamicallycallable t then print "dynamicallycallable";
-      if get_php_std_lib t then print "php_std_lib";
-      if get_support_dynamic_type t then print "support_dynamic_type";
-      Format.fprintf fmt "@,@]"
-    )
+    pp_record fmt (to_record t)
 
   let show = Format.asprintf "%a" pp
 end

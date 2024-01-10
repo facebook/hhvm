@@ -284,10 +284,6 @@ val is_has_member : constraint_type -> bool
   - [true] result is complete but potentially unsound.  *)
 val is_denotable : locl_ty -> bool
 
-val show_phase_ty : 'a -> string
-
-val pp_phase_ty : 'a -> 'b -> Base.unit
-
 val is_locl_type : internal_type -> bool
 
 val reason : internal_type -> locl_phase Reason.t_

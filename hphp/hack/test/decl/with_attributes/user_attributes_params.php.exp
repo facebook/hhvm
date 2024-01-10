@@ -29,7 +29,11 @@
                   support_dynamic_type = false; is_memoized = false;
                   variadic = false };
                 ft_cross_package = None }));
-          sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+          sm_visibility = Public; sm_deprecated = None;
+          sm_flags =
+          { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+            override = false; dynamicallycallable = false;
+            php_std_lib = false; support_dynamic_type = false };
           sm_attributes =
           [{ Typing_defs_core.ua_name = ([4:5-8], "\\Foo");
              ua_params = [(Typing_defs_core.String "hi there")] }
@@ -53,7 +57,11 @@
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
                  ft_cross_package = None }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
            sm_attributes =
            [{ Typing_defs_core.ua_name = ([7:5-8], "\\Foo");
               ua_params =
@@ -78,7 +86,11 @@
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
                  ft_cross_package = None }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
            sm_attributes =
            [{ Typing_defs_core.ua_name = ([10:5-8], "\\Foo");
               ua_params =
@@ -105,7 +117,11 @@
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
                  ft_cross_package = None }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
            sm_attributes =
            [{ Typing_defs_core.ua_name = ([13:5-8], "\\Foo");
               ua_params = [(Typing_defs_core.Classname "\\SomeClass")] }
@@ -129,7 +145,11 @@
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
                  ft_cross_package = None }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
            sm_attributes =
            [{ Typing_defs_core.ua_name = ([16:5-8], "\\Foo"); ua_params = []
               }
@@ -153,7 +173,11 @@
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
                  ft_cross_package = None }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
            sm_attributes =
            [{ Typing_defs_core.ua_name = ([19:5-8], "\\Foo");
               ua_params = [(Typing_defs_core.String "barBaz")] }

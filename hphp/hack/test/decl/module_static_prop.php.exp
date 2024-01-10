@@ -28,7 +28,13 @@ File root|module_static_prop.php--A.php
        sc_sprops =
        [{ Shallow_decl_defs.sp_name = ([8:23-25], "$x"); sp_xhp_attr = None;
           sp_type = (Rhint ([8:19-22]), (Tprim Tint));
-          sp_visibility = Internal; sp_flags = (empty) }
+          sp_visibility = Internal;
+          sp_flags =
+          { Shallow_decl_defs.PropFlags.abstract = false; const = false;
+            lateinit = false; lsb = false; needs_init = false;
+            php_std_lib = false; readonly = false;
+            safe_global_variable = false; no_auto_likes = false }
+          }
          ];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));

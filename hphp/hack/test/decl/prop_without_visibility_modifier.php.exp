@@ -14,7 +14,13 @@
        [{ Shallow_decl_defs.sp_name = ([4:16-18], "$b"); sp_xhp_attr = None;
           sp_type =
           (Rhint ([4:10-15]), (Toption (Rhint ([4:11-15]), (Tprim Tbool))));
-          sp_visibility = Public; sp_flags = needs_init }
+          sp_visibility = Public;
+          sp_flags =
+          { Shallow_decl_defs.PropFlags.abstract = false; const = false;
+            lateinit = false; lsb = false; needs_init = true;
+            php_std_lib = false; readonly = false;
+            safe_global_variable = false; no_auto_likes = false }
+          }
          ];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }))

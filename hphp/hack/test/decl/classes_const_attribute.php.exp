@@ -12,7 +12,13 @@
        sc_props =
        [{ Shallow_decl_defs.sp_name = ([5:40-42], "p"); sp_xhp_attr = None;
           sp_type = (Rhint ([5:31-39]), (Tprim Tarraykey));
-          sp_visibility = Public; sp_flags = abstract | const | needs_init }
+          sp_visibility = Public;
+          sp_flags =
+          { Shallow_decl_defs.PropFlags.abstract = true; const = true;
+            lateinit = false; lsb = false; needs_init = true;
+            php_std_lib = false; readonly = false;
+            safe_global_variable = false; no_auto_likes = false }
+          }
          ];
        sc_sprops = []; sc_constructor = None; sc_static_methods = [];
        sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
@@ -32,7 +38,13 @@
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([9:26-28], "p"); sp_xhp_attr = None;
            sp_type = (Rhint ([9:22-25]), (Tprim Tint));
-           sp_visibility = Public; sp_flags = const }
+           sp_visibility = Public;
+           sp_flags =
+           { Shallow_decl_defs.PropFlags.abstract = false; const = true;
+             lateinit = false; lsb = false; needs_init = false;
+             php_std_lib = false; readonly = false;
+             safe_global_variable = false; no_auto_likes = false }
+           }
           ];
         sc_sprops = []; sc_constructor = None; sc_static_methods = [];
         sc_methods = []; sc_user_attributes = []; sc_enum_type = None;

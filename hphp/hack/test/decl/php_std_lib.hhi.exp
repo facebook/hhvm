@@ -36,14 +36,26 @@
         [{ Shallow_decl_defs.sp_name = ([9:16-18], "x"); sp_xhp_attr = None;
            sp_type =
            (Rhint ([9:11-15]), (Toption (Rhint ([9:12-15]), (Tprim Tint))));
-           sp_visibility = Private; sp_flags = php_std_lib }
+           sp_visibility = Private;
+           sp_flags =
+           { Shallow_decl_defs.PropFlags.abstract = false; const = false;
+             lateinit = false; lsb = false; needs_init = false;
+             php_std_lib = true; readonly = false;
+             safe_global_variable = false; no_auto_likes = false }
+           }
           ];
         sc_sprops =
         [{ Shallow_decl_defs.sp_name = ([12:23-25], "$y");
            sp_xhp_attr = None;
            sp_type =
            (Rhint ([12:18-22]), (Toption (Rhint ([12:19-22]), (Tprim Tint))));
-           sp_visibility = Private; sp_flags = php_std_lib }
+           sp_visibility = Private;
+           sp_flags =
+           { Shallow_decl_defs.PropFlags.abstract = false; const = false;
+             lateinit = false; lsb = false; needs_init = false;
+             php_std_lib = true; readonly = false;
+             safe_global_variable = false; no_auto_likes = false }
+           }
           ];
         sc_constructor = None;
         sc_static_methods =
@@ -66,7 +78,11 @@
                    variadic = false };
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None;
-           sm_flags = php_std_lib; sm_attributes = []; sm_sort_text = None }
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = true; support_dynamic_type = false };
+           sm_attributes = []; sm_sort_text = None }
           ];
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([15:19-20], "f");
@@ -88,7 +104,11 @@
                    variadic = false };
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None;
-           sm_flags = php_std_lib; sm_attributes = []; sm_sort_text = None }
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = true; support_dynamic_type = false };
+           sm_attributes = []; sm_sort_text = None }
           ];
         sc_user_attributes =
         [{ Typing_defs_core.ua_name = ([6:3-14], "__PHPStdLib");

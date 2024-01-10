@@ -29,7 +29,11 @@
                   support_dynamic_type = false; is_memoized = false;
                   variadic = false };
                 ft_cross_package = None }));
-          sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+          sm_visibility = Public; sm_deprecated = None;
+          sm_flags =
+          { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+            override = false; dynamicallycallable = false;
+            php_std_lib = false; support_dynamic_type = false };
           sm_attributes = []; sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([5:19-29], "closeDoors");
            sm_type =
@@ -49,7 +53,11 @@
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
                  ft_cross_package = None }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
            sm_attributes = []; sm_sort_text = None }
          ];
        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
@@ -85,7 +93,11 @@
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
                  ft_cross_package = None }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = abstract;
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = true; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
            sm_attributes = []; sm_sort_text = None }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
@@ -125,7 +137,11 @@
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
                  ft_cross_package = None }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
            sm_attributes = []; sm_sort_text = None }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
@@ -161,7 +177,11 @@
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
                  ft_cross_package = None }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = abstract;
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = true; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
            sm_attributes = []; sm_sort_text = None }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
@@ -201,7 +221,11 @@
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
                  ft_cross_package = None }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
            sm_attributes = []; sm_sort_text = None }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
@@ -245,7 +269,11 @@
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
                  ft_cross_package = None }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
            sm_attributes = []; sm_sort_text = None };
           { Shallow_decl_defs.sm_name = ([45:19-30], "startEngine");
             sm_type =
@@ -265,7 +293,11 @@
                     support_dynamic_type = false; is_memoized = false;
                     variadic = false };
                   ft_cross_package = None }));
-            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+            sm_visibility = Public; sm_deprecated = None;
+            sm_flags =
+            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+              override = false; dynamicallycallable = false;
+              php_std_lib = false; support_dynamic_type = false };
             sm_attributes = []; sm_sort_text = None }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }))

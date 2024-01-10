@@ -32,7 +32,11 @@
           sm_visibility = Public;
           sm_deprecated =
           (Some "The method foo is deprecated: use bar() instead");
-          sm_flags = (empty); sm_attributes = []; sm_sort_text = None };
+          sm_flags =
+          { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+            override = false; dynamicallycallable = false;
+            php_std_lib = false; support_dynamic_type = false };
+          sm_attributes = []; sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([8:19-22], "bar");
            sm_type =
            (Rwitness_from_decl ([8:19-22]),
@@ -51,7 +55,11 @@
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
                  ft_cross_package = None }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
            sm_attributes = []; sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([11:19-22], "baz");
            sm_type =
@@ -71,7 +79,11 @@
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
                  ft_cross_package = None }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
            sm_attributes = []; sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([14:19-23], "foo2");
            sm_type =
@@ -94,7 +106,11 @@
            sm_visibility = Public;
            sm_deprecated =
            (Some "The method foo2 is deprecated: use bar2() instead");
-           sm_flags = (empty); sm_attributes = []; sm_sort_text = None }
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
+           sm_attributes = []; sm_sort_text = None }
          ];
        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
   ("\\foo",

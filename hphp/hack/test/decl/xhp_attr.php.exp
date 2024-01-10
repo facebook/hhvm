@@ -30,47 +30,100 @@
            sp_xhp_attr = None;
            sp_type =
            (Rhint ([6:10-17]), (Toption (Rhint ([6:11-17]), (Tprim Tstring))));
-           sp_visibility = Public; sp_flags = needs_init };
+           sp_visibility = Public;
+           sp_flags =
+           { Shallow_decl_defs.PropFlags.abstract = false; const = false;
+             lateinit = false; lsb = false; needs_init = true;
+             php_std_lib = false; readonly = false;
+             safe_global_variable = false; no_auto_likes = false }
+           };
           { Shallow_decl_defs.sp_name = ([15:18-24], "after");
             sp_xhp_attr = None;
             sp_type =
             (Rhint ([15:10-17]),
              (Toption (Rhint ([15:11-17]), (Tprim Tstring))));
-            sp_visibility = Public; sp_flags = needs_init };
+            sp_visibility = Public;
+            sp_flags =
+            { Shallow_decl_defs.PropFlags.abstract = false; const = false;
+              lateinit = false; lsb = false; needs_init = true;
+              php_std_lib = false; readonly = false;
+              safe_global_variable = false; no_auto_likes = false }
+            };
           { Shallow_decl_defs.sp_name = ([7:17-18], ":a");
             sp_xhp_attr = (Some { xa_tag = None; xa_has_default = true });
             sp_type = (Rhint ([7:13-16]), (Tprim Tint));
-            sp_visibility = Public; sp_flags = (empty) };
+            sp_visibility = Public;
+            sp_flags =
+            { Shallow_decl_defs.PropFlags.abstract = false; const = false;
+              lateinit = false; lsb = false; needs_init = false;
+              php_std_lib = false; readonly = false;
+              safe_global_variable = false; no_auto_likes = false }
+            };
           { Shallow_decl_defs.sp_name = ([8:17-18], ":b");
             sp_xhp_attr = (Some { xa_tag = None; xa_has_default = false });
             sp_type =
             (Rhint ([8:13-16]), (Toption (Rhint ([8:13-16]), (Tprim Tint))));
-            sp_visibility = Public; sp_flags = needs_init };
+            sp_visibility = Public;
+            sp_flags =
+            { Shallow_decl_defs.PropFlags.abstract = false; const = false;
+              lateinit = false; lsb = false; needs_init = true;
+              php_std_lib = false; readonly = false;
+              safe_global_variable = false; no_auto_likes = false }
+            };
           { Shallow_decl_defs.sp_name = ([9:17-18], ":c");
             sp_xhp_attr =
             (Some { xa_tag = (Some Required); xa_has_default = false });
             sp_type = (Rhint ([9:13-16]), (Tprim Tint));
-            sp_visibility = Public; sp_flags = needs_init };
+            sp_visibility = Public;
+            sp_flags =
+            { Shallow_decl_defs.PropFlags.abstract = false; const = false;
+              lateinit = false; lsb = false; needs_init = true;
+              php_std_lib = false; readonly = false;
+              safe_global_variable = false; no_auto_likes = false }
+            };
           { Shallow_decl_defs.sp_name = ([10:18-19], ":d");
             sp_xhp_attr = (Some { xa_tag = None; xa_has_default = true });
             sp_type =
             (Rhint ([10:13-17]), (Toption (Rhint ([10:14-17]), (Tprim Tint))));
-            sp_visibility = Public; sp_flags = (empty) };
+            sp_visibility = Public;
+            sp_flags =
+            { Shallow_decl_defs.PropFlags.abstract = false; const = false;
+              lateinit = false; lsb = false; needs_init = false;
+              php_std_lib = false; readonly = false;
+              safe_global_variable = false; no_auto_likes = false }
+            };
           { Shallow_decl_defs.sp_name = ([11:29-30], ":e");
             sp_xhp_attr = (Some { xa_tag = None; xa_has_default = false });
             sp_type =
             (Rhint ([11:13-28]),
              (Toption (Rhint ([11:13-28]), (Tprim Tstring))));
-            sp_visibility = Public; sp_flags = needs_init };
+            sp_visibility = Public;
+            sp_flags =
+            { Shallow_decl_defs.PropFlags.abstract = false; const = false;
+              lateinit = false; lsb = false; needs_init = true;
+              php_std_lib = false; readonly = false;
+              safe_global_variable = false; no_auto_likes = false }
+            };
           { Shallow_decl_defs.sp_name = ([12:17-18], ":f");
             sp_xhp_attr =
             (Some { xa_tag = (Some LateInit); xa_has_default = false });
             sp_type = (Rhint ([12:13-16]), (Tprim Tint));
-            sp_visibility = Public; sp_flags = needs_init };
+            sp_visibility = Public;
+            sp_flags =
+            { Shallow_decl_defs.PropFlags.abstract = false; const = false;
+              lateinit = false; lsb = false; needs_init = true;
+              php_std_lib = false; readonly = false;
+              safe_global_variable = false; no_auto_likes = false }
+            };
           { Shallow_decl_defs.sp_name = ([13:19-20], ":g");
             sp_xhp_attr = (Some { xa_tag = None; xa_has_default = false });
             sp_type = (Rhint ([13:13-18]), Tmixed); sp_visibility = Public;
-            sp_flags = needs_init }
+            sp_flags =
+            { Shallow_decl_defs.PropFlags.abstract = false; const = false;
+              lateinit = false; lsb = false; needs_init = true;
+              php_std_lib = false; readonly = false;
+              safe_global_variable = false; no_auto_likes = false }
+            }
           ];
         sc_sprops = []; sc_constructor = None; sc_static_methods = [];
         sc_methods = []; sc_user_attributes = []; sc_enum_type = None;

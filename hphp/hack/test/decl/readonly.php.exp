@@ -85,12 +85,24 @@
         [{ Shallow_decl_defs.sp_name = ([14:23-25], "x"); sp_xhp_attr = None;
            sp_type =
            (Rhint ([14:19-22]), (Tapply (([14:19-22], "\\Foo"), [])));
-           sp_visibility = Public; sp_flags = needs_init | readonly };
+           sp_visibility = Public;
+           sp_flags =
+           { Shallow_decl_defs.PropFlags.abstract = false; const = false;
+             lateinit = false; lsb = false; needs_init = true;
+             php_std_lib = false; readonly = true;
+             safe_global_variable = false; no_auto_likes = false }
+           };
           { Shallow_decl_defs.sp_name = ([17:25-27], "y");
             sp_xhp_attr = None;
             sp_type =
             (Rhint ([17:21-24]), (Tapply (([17:21-24], "\\Foo"), [])));
-            sp_visibility = Public; sp_flags = needs_init | readonly }
+            sp_visibility = Public;
+            sp_flags =
+            { Shallow_decl_defs.PropFlags.abstract = false; const = false;
+              lateinit = false; lsb = false; needs_init = true;
+              php_std_lib = false; readonly = true;
+              safe_global_variable = false; no_auto_likes = false }
+            }
           ];
         sc_sprops = [];
         sc_constructor =
@@ -129,7 +141,12 @@
                         variadic = false };
                       ft_cross_package = None }));
                 sm_visibility = Public; sm_deprecated = None;
-                sm_flags = (empty); sm_attributes = []; sm_sort_text = None });
+                sm_flags =
+                { Shallow_decl_defs.MethodFlags.abstract = false;
+                  final = false; override = false;
+                  dynamicallycallable = false; php_std_lib = false;
+                  support_dynamic_type = false };
+                sm_attributes = []; sm_sort_text = None });
         sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([21:28-34], "getFoo");
@@ -179,7 +196,11 @@
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
                  ft_cross_package = None }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
            sm_attributes = []; sm_sort_text = None }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }))

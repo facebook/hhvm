@@ -470,10 +470,6 @@ let is_has_member t =
   | (_, Thas_member _) -> true
   | _ -> false
 
-let show_phase_ty _ = "<phase_ty>"
-
-let pp_phase_ty _ _ = Printf.printf "%s\n" "<phase_ty>"
-
 let is_locl_type = function
   | LoclType _ -> true
   | _ -> false

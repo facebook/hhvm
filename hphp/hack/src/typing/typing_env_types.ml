@@ -13,36 +13,12 @@ open Typing_defs
 
 type locl_ty = Typing_defs.locl_ty
 
-[@@@warning "-32"]
-
-let show_local_id_set_t _ = "<local_id_set_t>"
-
-let pp_local_id_set_t _ _ = Printf.printf "%s\n" "<local_id_set_t>"
-
 type local_id_set_t = Local_id.Set.t
-
-let show_local_env _ = "<local_env>"
-
-let pp_local_env _ _ = Printf.printf "%s\n" "<local_env>"
 
 type local_env = {
   per_cont_env: Typing_per_cont_env.t;
   local_using_vars: local_id_set_t;
 }
-
-let show_env _ = "<env>"
-
-let pp_env _ _ = Printf.printf "%s\n" "<env>"
-
-let show_genv _ = "<genv>"
-
-let pp_genv _ _ = Printf.printf "%s\n" "<genv>"
-
-let show_tfun _ = "<tfun>"
-
-let pp_tfun _ _ = Printf.printf "%s\n" "<tfun>"
-
-[@@@warning "+32"]
 
 type expr_tree_env = {
   dsl: Aast.hint;

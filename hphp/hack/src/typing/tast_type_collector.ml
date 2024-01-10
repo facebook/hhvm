@@ -9,7 +9,7 @@
 
 open Hh_prelude
 
-type collected_type = Tast_env.env * Typing_defs.phase_ty [@@deriving show]
+type collected_type = Tast_env.env * Typing_defs.phase_ty
 
 let type_collector =
   object (self)

@@ -40,7 +40,11 @@
                   support_dynamic_type = false; is_memoized = false;
                   variadic = false };
                 ft_cross_package = None }));
-          sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+          sm_visibility = Public; sm_deprecated = None;
+          sm_flags =
+          { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+            override = false; dynamicallycallable = false;
+            php_std_lib = false; support_dynamic_type = false };
           sm_attributes = []; sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([5:26-28], "f2");
            sm_type =
@@ -65,7 +69,11 @@
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
                  ft_cross_package = None }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
            sm_attributes = []; sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([6:26-28], "f3");
            sm_type =
@@ -91,7 +99,11 @@
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
                  ft_cross_package = None }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
            sm_attributes = []; sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([7:32-37], "genf4");
            sm_type =
@@ -115,7 +127,11 @@
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
                  ft_cross_package = None }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
            sm_attributes = []; sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([8:26-28], "f5");
            sm_type =
@@ -135,7 +151,11 @@
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
                  ft_cross_package = None }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
            sm_attributes = []; sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([9:26-28], "f6");
            sm_type =
@@ -164,7 +184,11 @@
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
                  ft_cross_package = None }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
            sm_attributes = []; sm_sort_text = None }
          ];
        sc_methods = []; sc_user_attributes = []; sc_enum_type = None;

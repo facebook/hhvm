@@ -40,3 +40,18 @@
     ounit2
     default_injector_config
     ))
+
+(test
+ (name decl_prefetch_test)
+ (modes exe byte_complete)
+ (link_flags
+  (:standard
+   (:include ../../../src/dune_config/ld-opts.sexp)))
+ (modules decl_prefetch_test)
+ (libraries
+    asserter
+    unit_test_common_provider
+    decl_provider
+    ounit2
+    default_injector_config
+    ))

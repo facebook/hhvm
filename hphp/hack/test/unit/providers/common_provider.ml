@@ -72,12 +72,16 @@ let make_entry_ctx env path contents =
   let ctx = make_empty_ctx env in
   Provider_context.add_or_overwrite_entry_contents ~ctx ~path ~contents
 
+(** Note: this function does NOT set up Hhi/Tmp properly. It'd make the test
+irritatingly slow to have to write hhi to disk. Instead it just sets up Hhi
+to point to the same place as root, and none of the hhi are present. *)
 let run_test (repo : (Relative_path.t * string) list) ~(f : env -> unit) : unit
     =
   let tcopt =
     GlobalOptions.set
       ~tco_sticky_quarantine:true
       ~tco_lsp_invalidation:true
+      ~tco_prefetch_decls:true
       GlobalOptions.default
   in
   Provider_backend.set_local_memory_backend_with_defaults_for_test ();
@@ -90,6 +94,8 @@ let run_test (repo : (Relative_path.t * string) list) ~(f : env -> unit) : unit
   let ctx = make_empty_ctx env in
   Tempfile.with_real_tempdir (fun path ->
       Relative_path.set_path_prefix Relative_path.Root path;
+      Relative_path.set_path_prefix Relative_path.Tmp path;
+      Relative_path.set_path_prefix Relative_path.Hhi path;
       (* Lay down disk files and initialize the reverse naming table *)
       List.iter repo ~f:(fun (path, contents) ->
           Disk.write_file ~file:(Relative_path.to_absolute path) ~contents;

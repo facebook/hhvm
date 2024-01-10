@@ -56,15 +56,21 @@ class UtilsGivenTargetTestCase(base.TestHHVMBinary):
 
 class UtilsGivenFrameTestCase(base.TestHHVMBinary):
     def setUp(self):
-        super().setUp(test_file="quick/method2.php", interp = True)
+        super().setUp(test_file="quick/method2.php", interp=True)
 
-    def test_get(self):
+    def test_get_global(self):
         self.run_until_breakpoint("lookupObjMethod")
         g_code = utils.Global("HPHP::jit::tc::g_code", self.target)
         try:
             utils.get(g_code, "m_threadLocalStart")
         except Exception:
             self.fail("Unable to get m_threadLocalStart from HPHP::jit::tc::g_code")
+
+    def test_get_thread_local(self):
+        self.run_until_breakpoint("lookupObjMethod")
+        tl_base = utils.Global("HPHP::rds::tl_base", self.target)
+        self.assertTrue(tl_base.IsValid())
+        self.assertTrue(tl_base.GetError().Success())
 
     def test_nameof_func(self):
         self.run_commands(["b lookupObjMethod", "continue", "thread step-out"])

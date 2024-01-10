@@ -24,9 +24,7 @@ namespace req {
 
 // Map from case-insensitive String keys to T, with iter/ref stability
 template<typename T>
-using StringTMap = req::hash_map<String,T,hphp_string_hash,hphp_string_tsame>;
-template<typename T>
-using StringFMap = req::hash_map<String,T,hphp_string_hash,hphp_string_fsame>;
+using StringIMap = req::hash_map<String,T,hphp_string_hash,hphp_string_isame>;
 
 // Fast, case-sensitive String keys, no ref/iter stability
 template<typename T>

@@ -247,7 +247,7 @@ void dump_index(const std::string& dir,
     std::sort(
       begin(classes), end(classes),
       [] (const php::Class* a, const php::Class* b) {
-        return string_data_lt_type{}(a->name, b->name);
+        return string_data_lti{}(a->name, b->name);
       }
     );
 

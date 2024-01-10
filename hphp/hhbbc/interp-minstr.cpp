@@ -2275,7 +2275,7 @@ void in(ISS& env, const bc::QueryM& op) {
       if (last->op == Op::BaseC) {
         if (auto const prev = last_op(env, 1)) {
           if (prev->op == Op::FCallFuncD &&
-              prev->FCallFuncD.str2->fsame(s_type_structure.get()) &&
+              prev->FCallFuncD.str2->isame(s_type_structure.get()) &&
               prev->FCallFuncD.fca.numArgs() == 2) {
             auto const params = prev->FCallFuncD.fca.numArgs();
             rewind(env, op); // querym

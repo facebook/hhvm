@@ -632,24 +632,24 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
     const char* stripped = str + 3;
     switch (len - 3) {
       case 3:
-        strip = (!tstrcmp(stripped, "int") ||
-                 !tstrcmp(stripped, "num"));
+        strip = (!istrcmp(stripped, "int") ||
+                 !istrcmp(stripped, "num"));
         break;
       case 4:
-        strip = (!tstrcmp(stripped, "bool") ||
-                 !tstrcmp(stripped, "this") ||
-                 !tstrcmp(stripped, "null"));
+        strip = (!istrcmp(stripped, "bool") ||
+                 !istrcmp(stripped, "this") ||
+                 !istrcmp(stripped, "null"));
         break;
-      case 5: strip = !tstrcmp(stripped, "float"); break;
-      case 6: strip = !tstrcmp(stripped, "string"); break;
+      case 5: strip = !istrcmp(stripped, "float"); break;
+      case 6: strip = !istrcmp(stripped, "string"); break;
       case 7:
-        strip = (!tstrcmp(stripped, "nonnull") ||
-                 !tstrcmp(stripped, "nothing"));
+        strip = (!istrcmp(stripped, "nonnull") ||
+                 !istrcmp(stripped, "nothing"));
         break;
       case 8:
-        strip = (!tstrcmp(stripped, "resource") ||
-                 !tstrcmp(stripped, "noreturn") ||
-                 !tstrcmp(stripped, "arraykey"));
+        strip = (!istrcmp(stripped, "resource") ||
+                 !istrcmp(stripped, "noreturn") ||
+                 !istrcmp(stripped, "arraykey"));
         break;
       default:
         break;
@@ -992,16 +992,16 @@ TypeConstraint::maybeInequivalentForProp(const TypeConstraint& other) const {
 
   // If one side is unresolved then the best we can do is check the typeName.
   if (isUnresolved() || other.isUnresolved()) {
-    return !typeName()->tsame(other.typeName());
+    return !typeName()->isame(other.typeName());
   }
 
   if (isUnion() || other.isUnion()) {
     // unions in property position must match nominally.
-    return !typeName()->tsame(other.typeName());
+    return !typeName()->isame(other.typeName());
   }
 
   if (isSubObject() && other.isSubObject()) {
-    return !clsName()->tsame(other.clsName());
+    return !clsName()->isame(other.clsName());
   }
   if (isSubObject() || other.isSubObject()) return true;
 
@@ -1015,13 +1015,13 @@ bool TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
   if (isSoft() != other.isSoft()) return false;
 
   if (isSubObject() && other.isSubObject()) {
-    return clsName()->tsame(other.clsName());
+    return clsName()->isame(other.clsName());
   }
 
   if ((isSubObject() || isUnresolved() || isUnion()) &&
       (other.isSubObject() || other.isUnresolved() || isUnion()) &&
       isNullable() == other.isNullable() &&
-      typeName()->tsame(other.typeName())) {
+      typeName()->isame(other.typeName())) {
     // We can avoid having to resolve the type-hint if they have the same name.
     // TODO: take advantage of clsName() if one of them is object
     return true;
@@ -1032,7 +1032,7 @@ bool TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
 
   if (resolved0.isUnion() || resolved1.isUnion()) {
     // unions in property position must match nominally.
-    return resolved0.typeName()->tsame(other.typeName());
+    return resolved0.typeName()->isame(other.typeName());
   }
 
   auto const simplify = [&] (const TypeConstraint& tc) -> std::tuple<AnnotType, const StringData*, bool> {
@@ -1229,7 +1229,7 @@ bool TypeConstraint::checkImpl(tv_rval val,
     auto const tryCls = [&](const StringData* clsName, const NamedType* ne) {
       // Perfect match seems common enough to be worth skipping the hash
       // table lookup.
-      if (clsName->tsame(val.val().pobj->getVMClass()->name())) return true;
+      if (clsName->isame(val.val().pobj->getVMClass()->name())) return true;
 
       assertx(ne);
       auto const cls = ne->getCachedClass();
@@ -1378,7 +1378,7 @@ bool TypeConstraint::alwaysPasses(const StringData* checkedClsName) const {
 
   auto const tryCls = [&](const StringData* clsName, const NamedType* ne) {
     // Same name is always a match.
-    if (clsName->tsame(checkedClsName)) return true;
+    if (clsName->isame(checkedClsName)) return true;
 
     assertx(ne);
     auto const c1 = Class::lookup(checkedClsName);

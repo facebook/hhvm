@@ -596,7 +596,7 @@ const ConstantMap& getConstants() {
 // Class Constants
 
 using ClassConstantMapMap = hphp_hash_map<const StringData*, ConstantMap,
-                      string_data_hash, string_data_tsame>;
+                      string_data_hash, string_data_isame>;
 extern ClassConstantMapMap s_class_constant_map;
 
 inline

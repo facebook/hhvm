@@ -39,7 +39,7 @@ using ClassPropPair = std::pair<const StringData*, const StringData*>;
 struct ClassPropPairHashCompare {
   bool equal(const ClassPropPair& p1, const ClassPropPair& p2) const {
     assertx(p1.first && p1.second && p2.first && p2.second);
-    return p1.first->tsame(p2.first) && p1.second->same(p2.second);
+    return p1.first->isame(p2.first) && p1.second->same(p2.second);
   }
   size_t hash(const std::pair<const StringData*, const StringData*>& p) const {
     assertx(p.first && p.second);

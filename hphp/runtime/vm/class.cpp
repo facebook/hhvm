@@ -672,7 +672,7 @@ Class::Avail Class::avail(Class*& parent,
   for (size_t i = 0; i < m_declInterfaces.size(); i++) {
     auto di = m_declInterfaces[i].get();
     const StringData* pdi = m_preClass.get()->interfaces()[i];
-    assertx(pdi->tsame(di->name()));
+    assertx(pdi->isame(di->name()));
 
     PreClass *pint = di->m_preClass.get();
     Class* interface = Class::get(pint->namedType(), pdi,
@@ -765,7 +765,7 @@ const Class* Class::commonAncestor(const Class* cls) const {
 const Class* Class::getClassDependency(const StringData* name) const {
   for (auto idx = m_classVecLen; idx--; ) {
     auto cls = m_classVec[idx];
-    if (cls->name()->tsame(name)) return cls;
+    if (cls->name()->isame(name)) return cls;
   }
 
   return m_interfaces.lookupDefault(name, nullptr);
@@ -3900,7 +3900,7 @@ void Class::setInterfaces() {
     if ((!interfacesBuilder.contains(s_StringishObject.get()) ||
          !interfacesBuilder.contains(s_Stringish.get())) &&
         (!(attrs() & AttrInterface) ||
-         !m_preClass->name()->tsame(s_StringishObject.get()))) {
+         !m_preClass->name()->isame(s_StringishObject.get()))) {
 
       // Add Stringish & XHP child (All StringishObjects are also XHPChild)
       const auto maybe_add = [&](StaticString name) {
@@ -3912,7 +3912,7 @@ void Class::setInterfaces() {
       };
       maybe_add(s_StringishObject);
       maybe_add(s_Stringish);
-      if (!m_preClass->name()->tsame(s_XHPChild.get())) {
+      if (!m_preClass->name()->isame(s_XHPChild.get())) {
         maybe_add(s_XHPChild);
       }
     }

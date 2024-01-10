@@ -174,7 +174,7 @@ bool caseTypeIsType(
 ) {
   if (!inputCaseType) return false;
   if (!typeCaseType) return false;
-  if (!inputCaseType->tsame(typeCaseType)) {
+  if (!inputCaseType->isame(typeCaseType)) {
     return false;
   }
 
@@ -300,7 +300,7 @@ bool typeStructureIsType(
       if (!classname_field.is_init()) return false;
       assertx(isStringType(classname_field.type()));
       auto const name = classname_field.val().pstr;
-      if (!name->tsame(get_ts_classname(type))) return false;
+      if (!name->isame(get_ts_classname(type))) return false;
       auto const inputGenerics = getGenericTypesOpt(input);
       auto const typeGenerics = getGenericTypesOpt(type);
       if (!inputGenerics) {
@@ -1046,7 +1046,7 @@ bool typeStructureCouldBeNonStatic(const ArrayData* ts) {
     case TypeStructure::Kind::T_reifiedtype:
       return true;
     case TypeStructure::Kind::T_unresolved: {
-      if (get_ts_classname(ts)->tsame(s_hh_this.get())) return true;
+      if (get_ts_classname(ts)->isame(s_hh_this.get())) return true;
       bool genericsCouldBeNonStatic = false;
       auto const generics = ts->get(s_generic_types.get());
       if (generics.is_init()) {

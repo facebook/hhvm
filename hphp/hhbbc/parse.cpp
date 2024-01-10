@@ -91,7 +91,7 @@ struct ParseUnitState {
     SString,
     php::Func*,
     string_data_hash,
-    string_data_tsame
+    string_data_isame
   > createClMap;
 
   struct SrcLocHash {
@@ -845,14 +845,14 @@ void add_stringish(php::Class* cls) {
   // __toString() function, so we mirror that here to make sure
   // analysis of interfaces is correct.  All StringishObjects are also
   // XHPChild, so handle it here as well.
-  if (cls->attrs & AttrInterface && cls->name->tsame(s_StringishObject.get())) {
+  if (cls->attrs & AttrInterface && cls->name->isame(s_StringishObject.get())) {
     return;
   }
 
   bool hasXHP = false;
   for (auto& iface : cls->interfaceNames) {
-    if (iface->tsame(s_StringishObject.get())) return;
-    if (iface->tsame(s_XHPChild.get())) { hasXHP = true; }
+    if (iface->isame(s_StringishObject.get())) return;
+    if (iface->isame(s_XHPChild.get())) { hasXHP = true; }
   }
 
   const auto has_toString = std::any_of(
@@ -863,7 +863,7 @@ void add_stringish(php::Class* cls) {
     FTRACE(2, "Adding Stringish, StringishObject and XHPChild to {}\n",
            cls->name->data());
     cls->interfaceNames.push_back(s_StringishObject.get());
-    if (!hasXHP && !cls->name->tsame(s_XHPChild.get())) {
+    if (!hasXHP && !cls->name->isame(s_XHPChild.get())) {
       cls->interfaceNames.push_back(s_XHPChild.get());
     }
   }
@@ -1178,7 +1178,7 @@ ParsedUnit parse_unit(const UnitEmitter& ue) {
     // Make sure all closures in our createClMap (which are just
     // strings) actually exist in this unit (CreateCls should not be
     // referring to classes outside of their unit).
-    TSStringSet classes;
+    ISStringSet classes;
     for (auto const& c : ret.classes) classes.emplace(c->name);
     for (auto const [name, _] : puState.createClMap) {
       always_assert(classes.count(name));

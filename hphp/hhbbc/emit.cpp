@@ -507,7 +507,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
       OpInfo<bc::opcode> data{inst.opcode};                      \
       if (RuntimeOption::EnableIntrinsicsExtension) {            \
         if (Op::opcode == Op::FCallFuncD &&                      \
-            inst.FCallFuncD.str2->fsame(                         \
+            inst.FCallFuncD.str2->isame(                         \
               s_hhbbc_fail_verification.get())) {                \
           fe.emitOp(Op::CheckProp);                              \
           fe.emitInt32(                                          \
@@ -1097,7 +1097,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
       continue;
     }
     if (cconst.kind == ConstModifiers::Kind::Context) {
-      assertx(cconst.cls->tsame(cls.name));
+      assertx(cconst.cls->isame(cls.name));
       assertx(!cconst.resolvedTypeStructure);
       assertx(cconst.invariance == php::Const::Invariance::None);
       pce->addContextConstant(
@@ -1107,7 +1107,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
         cconst.isFromTrait
       );
     } else if (!cconst.val.has_value()) {
-      assertx(cconst.cls->tsame(cls.name));
+      assertx(cconst.cls->isame(cls.name));
       assertx(!cconst.resolvedTypeStructure);
       assertx(cconst.invariance == php::Const::Invariance::None);
       pce->addAbstractConstant(
@@ -1119,7 +1119,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
       needs86cinit |= cconst.val->m_type == KindOfUninit;
       pce->addConstant(
         cconst.name,
-        cconst.cls->tsame(cls.name) ? nullptr : cconst.cls,
+        cconst.cls->isame(cls.name) ? nullptr : cconst.cls,
         &cconst.val.value(),
         ArrNR{cconst.resolvedTypeStructure},
         cconst.kind,

@@ -242,21 +242,21 @@ Class* vm_decode_class_from_name(
   Class* ctx,
   DecodeFlags flags) {
   Class* cls = nullptr;
-  if (clsName.get()->tsame(s_self.get())) {
+  if (clsName.get()->isame(s_self.get())) {
     if (ctx) {
       cls = ctx;
     }
     if (!nameContainsClass) {
       forwarding = true;
     }
-  } else if (clsName.get()->tsame(s_parent.get())) {
+  } else if (clsName.get()->isame(s_parent.get())) {
     if (ctx && ctx->parent()) {
       cls = ctx->parent();
     }
     if (!nameContainsClass) {
       forwarding = true;
     }
-  } else if (clsName.get()->tsame(s_static.get())) {
+  } else if (clsName.get()->isame(s_static.get())) {
     if (ar && ar->func()->cls()) {
       if (ar->hasThis()) {
         cls = ar->getThis()->getVMClass();
@@ -276,8 +276,8 @@ Class* vm_decode_class_from_name(
   } else {
     if (flags == DecodeFlags::Warn && nameContainsClass) {
       String nameClass = funcName.substr(0, funcName.find("::"));
-      if (nameClass.get()->tsame(s_self.get())   ||
-          nameClass.get()->tsame(s_static.get())) {
+      if (nameClass.get()->isame(s_self.get())   ||
+          nameClass.get()->isame(s_static.get())) {
         raise_warning("behavior of call_user_func(array('%s', '%s')) "
                       "is undefined", clsName.data(), funcName.data());
       }
@@ -551,7 +551,7 @@ vm_decode_function(const_variant_ref function,
     if (nameContainsClass) {
       String c = name.substr(0, pos);
       name = name.substr(pos + 2);
-      if (c.get()->tsame(s_self.get())) {
+      if (c.get()->isame(s_self.get())) {
         if (cls) {
           cc = cls;
         } else if (ctx) {
@@ -560,7 +560,7 @@ vm_decode_function(const_variant_ref function,
         if (!this_) {
           forwarding = true;
         }
-      } else if (c.get()->tsame(s_parent.get())) {
+      } else if (c.get()->isame(s_parent.get())) {
         if (cls) {
           cc = cls->parent();
         } else if (ctx && ctx->parent()) {
@@ -569,7 +569,7 @@ vm_decode_function(const_variant_ref function,
         if (!this_) {
           forwarding = true;
         }
-      } else if (c.get()->tsame(s_static.get())) {
+      } else if (c.get()->isame(s_static.get())) {
         if (ar && ar->func()->cls()) {
           if (ar->hasThis()) {
             cc = ar->getThis()->getVMClass();

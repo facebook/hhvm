@@ -597,7 +597,7 @@ private:
     const StringData*,
     PreClassPtr,
     string_data_hash,
-    string_data_tsame
+    string_data_isame
   > m_nameToPreClass; // Lookup PreClass by name
 
   int64_t m_sn{-1};             // Note: could be 32-bit

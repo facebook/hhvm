@@ -124,15 +124,7 @@ struct Symbol {
    * autoloader.
    */
   bool operator==(const Symbol<k>& o) const noexcept {
-    switch (k) {
-      case SymKind::Type:
-        return m_name.tsame(o.m_name);
-      case SymKind::Function:
-        return m_name.fsame(o.m_name);
-      case SymKind::Constant:
-      case SymKind::Module:
-        return m_name.same(o.m_name);
-    }
+    return isCaseSensitive(k) ? m_name.same(o.m_name) : m_name.isame(o.m_name);
   }
 
   /**

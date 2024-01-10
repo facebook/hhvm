@@ -28,7 +28,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 using HhvmStrToTypeMap = hphp_hash_map<
-  const StringData*, AnnotType, string_data_hash, string_data_tsame
+  const StringData*, AnnotType, string_data_hash, string_data_isame
 >;
 
 using StdStrToTypeMap = hphp_string_imap<AnnotType>;
@@ -99,8 +99,8 @@ const AnnotType* nameToAnnotType(const StringData* typeName) {
 
 namespace {
 
-bool tsame(folly::StringPiece a, folly::StringPiece b) {
-  return a.size() == b.size() && !tstrcmp(a.data(), b.data());
+bool isame(folly::StringPiece a, folly::StringPiece b) {
+  return a.size() == b.size() && !istrcmp(a.data(), b.data());
 }
 
 }
@@ -111,7 +111,7 @@ bool interface_supports_non_objects(const StringData* s) {
 
 bool interface_supports_non_objects(folly::StringPiece s) {
   return interface_supports_arrlike(s) ||
-         tsame(s, s_Stringish.slice());
+         isame(s, s_Stringish.slice());
 }
 
 bool interface_supports_arrlike(const StringData* s) {
@@ -119,11 +119,11 @@ bool interface_supports_arrlike(const StringData* s) {
 }
 
 bool interface_supports_arrlike(folly::StringPiece s) {
-  return tsame(s, s_HH_Traversable.slice()) ||
-         tsame(s, s_HH_KeyedTraversable.slice()) ||
-         tsame(s, s_HH_Container.slice()) ||
-         tsame(s, s_HH_KeyedContainer.slice()) ||
-         tsame(s, s_XHPChild.slice());
+  return isame(s, s_HH_Traversable.slice()) ||
+         isame(s, s_HH_KeyedTraversable.slice()) ||
+         isame(s, s_HH_Container.slice()) ||
+         isame(s, s_HH_KeyedContainer.slice()) ||
+         isame(s, s_XHPChild.slice());
 }
 
 bool interface_supports_string(const StringData* s) {
@@ -131,8 +131,8 @@ bool interface_supports_string(const StringData* s) {
 }
 
 bool interface_supports_string(folly::StringPiece s) {
-  return tsame(s, s_XHPChild.slice()) ||
-         tsame(s, s_Stringish.slice());
+  return isame(s, s_XHPChild.slice()) ||
+         isame(s, s_Stringish.slice());
 }
 
 bool interface_supports_int(const StringData* s) {
@@ -140,7 +140,7 @@ bool interface_supports_int(const StringData* s) {
 }
 
 bool interface_supports_int(folly::StringPiece s) {
-  return tsame(s, s_XHPChild.slice());
+  return isame(s, s_XHPChild.slice());
 }
 
 bool interface_supports_double(const StringData* s) {
@@ -148,7 +148,7 @@ bool interface_supports_double(const StringData* s) {
 }
 
 bool interface_supports_double(folly::StringPiece s) {
-  return tsame(s, s_XHPChild.slice());
+  return isame(s, s_XHPChild.slice());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

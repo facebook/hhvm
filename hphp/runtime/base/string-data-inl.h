@@ -163,43 +163,24 @@ inline bool StringData::same(const StringData* s) const {
   return wordsame(data(), s->data(), m_len);
 }
 
-bool tsame_log(const StringData*, const StringData*);
-bool fsame_log(const StringData*, const StringData*);
-int tstrcmp_log(const char* s1, const char* s2);
-int fstrcmp_log(const char* s1, const char* s2);
+bool isame_log(const StringData*, const StringData*);
+int istrcmp_log(const char* s1, const char* s2);
 
-inline int tstrcmp(const char* s1, const char* s2) {
+inline int istrcmp(const char* s1, const char* s2) {
   auto order = strcmp(s1, s2);
   if (order == 0) return 0;
-  if (RO::EvalLogTsameCollisions >= 2) return order;
+  if (RO::EvalLogIsameCollisions >= 2) return order;
   order = strcasecmp(s1, s2);
   if (order != 0) return order;
-  return RO::EvalLogTsameCollisions != 1 || tstrcmp_log(s1, s2);
+  return RO::EvalLogIsameCollisions != 1 || istrcmp_log(s1, s2);
 }
 
-inline int fstrcmp(const char* s1, const char* s2) {
-  auto order = strcmp(s1, s2);
-  if (order == 0) return 0;
-  if (RO::EvalLogFsameCollisions >= 2) return order;
-  order = strcasecmp(s1, s2);
-  if (order != 0) return order;
-  return RO::EvalLogFsameCollisions != 1 || fstrcmp_log(s1, s2);
-}
-
-inline bool StringData::tsame(const StringData* s) const {
+inline bool StringData::isame(const StringData* s) const {
   assertx(s);
   if (this == s || same(s)) return true;
-  if (m_len != s->m_len || RO::EvalLogTsameCollisions >= 2) return false;
+  if (m_len != s->m_len || RO::EvalLogIsameCollisions >= 2) return false;
   if (!bstrcaseeq(data(), s->data(), m_len)) return false;
-  return RO::EvalLogTsameCollisions != 1 || tsame_log(this, s);
-}
-
-inline bool StringData::fsame(const StringData* s) const {
-  assertx(s);
-  if (this == s || same(s)) return true;
-  if (m_len != s->m_len || RO::EvalLogFsameCollisions >= 2) return false;
-  if (!bstrcaseeq(data(), s->data(), m_len)) return false;
-  return RO::EvalLogFsameCollisions != 1 || fsame_log(this, s);
+  return RO::EvalLogIsameCollisions != 1 || isame_log(this, s);
 }
 
 inline bool StringData::same_nocase(const StringData* s) const {
@@ -228,17 +209,10 @@ struct string_data_same {
   }
 };
 
-struct string_data_tsame {
+struct string_data_isame {
   bool operator()(const StringData *s1, const StringData *s2) const {
     assertx(s1 && s2);
-    return s1->tsame(s2);
-  }
-};
-
-struct string_data_fsame {
-  bool operator()(const StringData *s1, const StringData *s2) const {
-    assertx(s1 && s2);
-    return s1->fsame(s2);
+    return s1->isame(s2);
   }
 };
 
@@ -263,30 +237,15 @@ struct string_data_lt {
   }
 };
 
-// Compare type names
-struct string_data_lt_type {
+struct string_data_lti {
   bool operator()(const StringData *s1, const StringData *s2) const {
     return bstrcasecmp(s1->data(), s1->size(), s2->data(), s2->size()) < 0;
   }
 };
 
-// Compare function names
-struct string_data_lt_func {
-  bool operator()(const StringData *s1, const StringData *s2) const {
-    return bstrcasecmp(s1->data(), s1->size(), s2->data(), s2->size()) < 0;
-  }
-};
-
-struct string_data_hash_tsame {
+struct string_data_hash_isame {
   bool equal(const StringData* s1, const StringData* s2) const {
-    return s1->tsame(s2);
-  }
-  size_t hash(const StringData* s) const { return s->hash(); }
-};
-
-struct string_data_hash_fsame {
-  bool equal(const StringData* s1, const StringData* s2) const {
-    return s1->fsame(s2);
+    return s1->isame(s2);
   }
   size_t hash(const StringData* s) const { return s->hash(); }
 };

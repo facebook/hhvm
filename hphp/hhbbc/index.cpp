@@ -1507,7 +1507,7 @@ struct ClassGraph::SerdeState {
 
 struct ClassGraph::Table {
   // Node map to ensure pointer stability.
-  TSStringToOneNodeT<Node> nodes;
+  ISStringToOneNodeT<Node> nodes;
   // Mapping of one node equivalent to another when only considering
   // regular subclasses. No entry if the mapping is an identity or to
   // a subclass (which is common). Stored separately to save memory
@@ -1750,7 +1750,7 @@ struct ClassGraph::UnlockedSerdeImpl {
   std::pair<Node*, bool> create(SString name) const {
     auto& n = table().nodes[name];
     if (n.name) {
-      assertx(n.name->tsame(name));
+      assertx(n.name->isame(name));
       return std::make_pair(&n, false);
     }
     n.name = name;
@@ -1763,7 +1763,7 @@ struct ClassGraph::UnlockedSerdeImpl {
       "Attempting to retrieve missing ClassGraph node '{}'",
       name
     );
-    assertx(n->name->tsame(name));
+    assertx(n->name->isame(name));
     return *n;
   }
   void setEquiv(Node& n, Node& e) const {
@@ -1797,7 +1797,7 @@ struct ClassGraph::LockedSerdeImpl {
     // Called when we find an existing node. We cannot safely return
     // this node until FlagWait is cleared.
     auto const wait = [&] (Node& n) {
-      assertx(n.name->tsame(name));
+      assertx(n.name->isame(name));
       while (true) {
         Node::CIAndFlags f{n.ci.load()};
         if (!(f.tag() & FlagWait)) return std::make_pair(&n, false);
@@ -1852,7 +1852,7 @@ struct ClassGraph::LockedSerdeImpl {
       "Attempting to retrieve missing ClassGraph node '{}'",
       name
     );
-    assertx(n->name->tsame(name));
+    assertx(n->name->isame(name));
     // FlagWait shouldn't be set here because we shouldn't call get()
     // until a node and all of it's dependents are created.
     assertx(!(n->flags() & FlagWait));
@@ -2098,7 +2098,7 @@ void ClassGraph::setCInfo(ClassInfo& ci) {
 }
 
 bool ClassGraph::operator<(ClassGraph h) const {
-  return string_data_lt_type{}(this_->name, h.this_->name);
+  return string_data_lti{}(this_->name, h.this_->name);
 }
 
 ClassGraph ClassGraph::withoutNonRegular() const {
@@ -2720,7 +2720,7 @@ bool ClassGraph::betterNode(const Node* n1, const Node* n2) {
   // according to name.
   if (n1->isMissing()) {
     if (!n2->isMissing()) return false;
-    return string_data_lt_type{}(n1->name, n2->name);
+    return string_data_lti{}(n1->name, n2->name);
   } else if (n2->isMissing()) {
     return true;
   }
@@ -2728,7 +2728,7 @@ bool ClassGraph::betterNode(const Node* n1, const Node* n2) {
   // Nodes with complete children are better than those that don't.
   if (!n1->hasCompleteChildren()) {
     if (n2->hasCompleteChildren()) return false;
-    return string_data_lt_type{}(n1->name, n2->name);
+    return string_data_lti{}(n1->name, n2->name);
   } else if (!n2->hasCompleteChildren()) {
     return true;
   }
@@ -2753,7 +2753,7 @@ bool ClassGraph::betterNode(const Node* n1, const Node* n2) {
   auto const w1 = weight(n1);
   auto const w2 = weight(n2);
   if (w1 != w2) return w1 < w2;
-  return string_data_lt_type{}(n1->name, n2->name);
+  return string_data_lti{}(n1->name, n2->name);
 }
 
 // Union together two sets of intersected classes.
@@ -3239,7 +3239,7 @@ ClassGraph ClassGraph::get(SString name) {
     "Attempting to retrieve missing ClassGraph node '{}'",
     name
   );
-  assertx(n->name->tsame(name));
+  assertx(n->name->isame(name));
   return ClassGraph{ n };
 }
 
@@ -3255,7 +3255,7 @@ ClassGraph ClassGraph::getOrCreate(SString name) {
     n->second.name = name;
     n->second.setFlags(FlagMissing);
   } else {
-    assertx(n->second.name->tsame(name));
+    assertx(n->second.name->isame(name));
   }
   return ClassGraph{ &n->second };
 }
@@ -3272,7 +3272,7 @@ ClassGraph ClassGraph::getMissing(SString name) {
     n->second.name = name;
     n->second.setFlags(FlagMissing);
   } else {
-    assertx(n->second.name->tsame(name));
+    assertx(n->second.name->isame(name));
     assertx(n->second.flags() == FlagMissing);
   }
   return ClassGraph{ &n->second };
@@ -3505,7 +3505,7 @@ std::vector<ClassGraph::Node*> ClassGraph::sort(const hphp_fast_set<Node*>& v) {
     [] (const Node* a, const Node* b) {
       assertx(a->name);
       assertx(b->name);
-      return string_data_lt_type{}(a->name, b->name);
+      return string_data_lti{}(a->name, b->name);
     }
   );
   return sorted;
@@ -5198,29 +5198,29 @@ struct Index::IndexData {
   // php::Program data for that. Any associated bytecode is stored
   // separately.
   SStringToOneT<UniquePtrRef<php::Unit>>   unitRefs;
-  TSStringToOneT<UniquePtrRef<php::Class>> classRefs;
-  FSStringToOneT<UniquePtrRef<php::Func>>  funcRefs;
+  ISStringToOneT<UniquePtrRef<php::Class>> classRefs;
+  ISStringToOneT<UniquePtrRef<php::Func>>  funcRefs;
 
   // Maps class name to the extern-worker ref representing the class's
   // associated ClassInfo2. Only has entries for instantiable classes.
-  TSStringToOneT<UniquePtrRef<ClassInfo2>> classInfoRefs;
+  ISStringToOneT<UniquePtrRef<ClassInfo2>> classInfoRefs;
 
   // Maps func name (global functions, not methods) to the
   // extern-worked ref representing the func's associated
   // FuncInfo2. The FuncInfo2 for methods are stored in their parent
   // ClassInfo2.
-  FSStringToOneT<UniquePtrRef<FuncInfo2>> funcInfoRefs;
+  ISStringToOneT<UniquePtrRef<FuncInfo2>> funcInfoRefs;
 
   // Maps class/func names to the extern-worker ref representing the
   // bytecode for that class or (global) function. The bytecode of all
   // of a class' methods are stored together.
-  TSStringToOneT<UniquePtrRef<php::ClassBytecode>> classBytecodeRefs;
-  FSStringToOneT<UniquePtrRef<php::FuncBytecode>> funcBytecodeRefs;
+  ISStringToOneT<UniquePtrRef<php::ClassBytecode>> classBytecodeRefs;
+  ISStringToOneT<UniquePtrRef<php::FuncBytecode>> funcBytecodeRefs;
 
   // Uninstantiable classes do not have ClassInfo2s, but their methods
   // still have FuncInfo2s. Since we don't have a ClassInfo2 to store
   // them on, we do it separately.
-  TSStringToOneT<UniquePtrRef<MethodsWithoutCInfo>> uninstantiableClsMethRefs;
+  ISStringToOneT<UniquePtrRef<MethodsWithoutCInfo>> uninstantiableClsMethRefs;
 
   // Func family entries representing all methods with a particular
   // name.
@@ -5232,28 +5232,28 @@ struct Index::IndexData {
 
   // Maps classes and functions to the names of closures defined
   // within.
-  TSStringToOneT<TSStringSet> classToClosures;
-  FSStringToOneT<TSStringSet> funcToClosures;
+  ISStringToOneT<ISStringSet> classToClosures;
+  ISStringToOneT<ISStringSet> funcToClosures;
 
   // Maps entities to the unit they were declared in.
-  TSStringToOneT<SString> classToUnit;
-  FSStringToOneT<SString> funcToUnit;
-  TSStringToOneT<SString> typeAliasToUnit;
+  ISStringToOneT<SString> classToUnit;
+  ISStringToOneT<SString> funcToUnit;
+  ISStringToOneT<SString> typeAliasToUnit;
   // If bool is true, then the constant is "dynamic" and has an
   // associated 86cinit function.
   SStringToOneT<std::pair<SString, bool>> constantToUnit;
 
   // All the classes that have a 86*init function.
-  TSStringSet classesWith86Inits;
+  ISStringSet classesWith86Inits;
   // All the 86cinit functions for "dynamic" top-level constants.
-  FSStringSet constantInitFuncs;
+  ISStringSet constantInitFuncs;
 
   std::unique_ptr<php::Program> program;
 
-  TSStringToOneT<php::Class*>      classes;
-  FSStringToOneT<php::Func*>       funcs;
-  TSStringToOneT<php::TypeAlias*>  typeAliases;
-  TSStringToOneT<php::Class*>      enums;
+  ISStringToOneT<php::Class*>      classes;
+  ISStringToOneT<php::Func*>       funcs;
+  ISStringToOneT<php::TypeAlias*>  typeAliases;
+  ISStringToOneT<php::Class*>      enums;
   SStringToOneT<php::Constant*>    constants;
   SStringToOneT<php::Module*>      modules;
   SStringToOneT<php::Unit*>        units;
@@ -5286,7 +5286,7 @@ struct Index::IndexData {
    * It may not exists if we would fatal when defining the class. That could
    * happen for if the inheritance is bad or __Sealed or other things.
    */
-  TSStringToOneT<ClassInfo*> classInfo;
+  ISStringToOneT<ClassInfo*> classInfo;
 
   /*
    * All the ClassInfos, stored in no particular order.
@@ -5347,7 +5347,7 @@ struct Index::IndexData {
    * Map from interfaces to their assigned vtable slots, computed in
    * compute_iface_vtables().
    */
-  TSStringToOneT<Slot> ifaceSlotMap;
+  ISStringToOneT<Slot> ifaceSlotMap;
 
   hphp_hash_map<
     const php::Class*,
@@ -5428,25 +5428,25 @@ struct AnalysisIndex::IndexData {
   std::vector<SString> funcNames;
   std::vector<SString> unitNames;
 
-  TSStringToOneT<std::unique_ptr<php::Class>> classes;
-  TSStringToOneT<std::unique_ptr<ClassInfo2>> cinfos;
-  TSStringToOneT<std::unique_ptr<MethodsWithoutCInfo>> minfos;
+  ISStringToOneT<std::unique_ptr<php::Class>> classes;
+  ISStringToOneT<std::unique_ptr<ClassInfo2>> cinfos;
+  ISStringToOneT<std::unique_ptr<MethodsWithoutCInfo>> minfos;
 
-  FSStringToOneT<std::unique_ptr<php::Func>> funcs;
-  FSStringToOneT<std::unique_ptr<FuncInfo2>> finfos;
+  ISStringToOneT<std::unique_ptr<php::Func>> funcs;
+  ISStringToOneT<std::unique_ptr<FuncInfo2>> finfos;
 
   SStringToOneT<std::unique_ptr<php::Unit>> units;
 
   SStringToOneT<php::Constant*> constants;
-  TSStringToOneT<php::TypeAlias*> typeAliases;
+  ISStringToOneT<php::TypeAlias*> typeAliases;
 
   std::vector<FuncInfo2*> finfosByIdx;
 
   // Anything on these lists is known to definitely not exist.
-  TSStringSet badClasses;
-  FSStringSet badFuncs;
+  ISStringSet badClasses;
+  ISStringSet badFuncs;
   SStringSet badConstants;
-  TSStringSet badTypeAliases;
+  ISStringSet badTypeAliases;
 
   SStringSet dynamicConstants;
 
@@ -5523,7 +5523,7 @@ struct DepTracker {
     if (!index.frozen) return;
     auto const fc = context();
     auto& d = deps[fc];
-    if (!(fc.right() && fc.right()->name->tsame(c.name)) && d.add(c)) {
+    if (!(fc.right() && fc.right()->name->isame(c.name)) && d.add(c)) {
       FTRACE(2, "{} now depends on class {}\n", HHBBC::show(fc), c.name);
     }
     // Class either exists or not and won't change within the job, so
@@ -5731,11 +5731,11 @@ private:
       [] (FuncOrCls fc1, FuncOrCls fc2) {
         if (auto const f1 = fc1.left()) {
           auto const f2 = fc2.left();
-          return !f2 || string_data_lt_func{}(f1->name, f2->name);
+          return !f2 || string_data_lti{}(f1->name, f2->name);
         }
         auto const c1 = fc1.right();
         auto const c2 = fc2.right();
-        return c2 && string_data_lt_type{}(c1->name, c2->name);
+        return c2 && string_data_lti{}(c1->name, c2->name);
       }
     );
     Trace::Indent _;
@@ -6154,9 +6154,9 @@ struct InterfaceConflicts {
   // The number of classes which implements this interface (used to
   // prioritize lower slots for more heavily used interfaces).
   size_t usage{0};
-  TSStringSet conflicts;
+  ISStringSet conflicts;
   template <typename SerDe> void serde(SerDe& sd) {
-    sd(name)(usage)(conflicts, string_data_lt_type{});
+    sd(name)(usage)(conflicts, string_data_lti{});
   }
 };
 
@@ -6175,7 +6175,7 @@ void compute_iface_vtables(IndexData& index,
     end(conflicts),
     [&] (const InterfaceConflicts& a, const InterfaceConflicts& b) {
       if (a.usage != b.usage) return a.usage > b.usage;
-      return string_data_lt_type{}(a.name, b.name);
+      return string_data_lti{}(a.name, b.name);
     }
   );
 
@@ -6272,7 +6272,7 @@ struct CheckClassInfoInvariantsJob {
     // information.
     always_assert(cinfo->classGraph);
     always_assert(!cinfo->classGraph.isMissing());
-    always_assert(cinfo->classGraph.name()->tsame(cinfo->name));
+    always_assert(cinfo->classGraph.name()->isame(cinfo->name));
     always_assert(cinfo->classGraph.cinfo2() == cinfo.get());
     if (is_closure_base(cinfo->name)) {
       // The closure base class is special. We don't store it's
@@ -6335,7 +6335,7 @@ struct CheckClassInfoInvariantsJob {
     for (auto const& [name, mte] : cinfo->methods) {
       // Interface method tables should only contain its own methods.
       if (cls->attrs & AttrInterface) {
-        always_assert(mte.meth().cls->tsame(cinfo->name));
+        always_assert(mte.meth().cls->isame(cinfo->name));
       }
 
       // AttrNoOverride implies noOverrideRegular
@@ -6351,7 +6351,7 @@ struct CheckClassInfoInvariantsJob {
         always_assert(!mte.noOverrideRegular());
       }
 
-      if (cinfo->name->tsame(s_Closure.get()) || is_closure_name(cinfo->name)) {
+      if (cinfo->name->isame(s_Closure.get()) || is_closure_name(cinfo->name)) {
         always_assert(mte.attrs & AttrNoOverride);
       }
 
@@ -6422,7 +6422,7 @@ struct CheckClassInfoInvariantsJob {
       // Closures have no children.
       auto const subclasses = cinfo->classGraph.children();
       always_assert(subclasses.size() == 1);
-      always_assert(subclasses[0].name()->tsame(cinfo->name));
+      always_assert(subclasses[0].name()->isame(cinfo->name));
     } else if (cinfo->classGraph.hasCompleteChildren()) {
       // Otherwise the children list is non-empty, contains this
       // class, and contains only unique elements.
@@ -6431,7 +6431,7 @@ struct CheckClassInfoInvariantsJob {
         std::find_if(
           begin(subclasses),
           end(subclasses),
-          [&] (ClassGraph g) { return g.name()->tsame(cinfo->name); }
+          [&] (ClassGraph g) { return g.name()->isame(cinfo->name); }
         ) != end(subclasses)
       );
       auto cpy = subclasses;
@@ -6448,7 +6448,7 @@ struct CheckClassInfoInvariantsJob {
       always_assert(bases.size() == 1);
     } else if (is_closure_name(cinfo->name)) {
       always_assert(bases.size() == 2);
-      always_assert(bases[0].name()->tsame(s_Closure.get()));
+      always_assert(bases[0].name()->isame(s_Closure.get()));
     }
 
     return true;
@@ -6474,7 +6474,7 @@ struct CheckFuncFamilyInvariantsJob {
 
       // Every method should be sorted in its respective list. We
       // should never see a method for the same Class more than once.
-      TSStringSet classes;
+      ISStringSet classes;
       Optional<MethRef> lastReg;
       Optional<MethRef> lastPrivate;
       Optional<MethRef> lastNonReg;
@@ -6626,7 +6626,7 @@ void check_local_invariants(const IndexData& index, const ClassInfo* cinfo) {
 
   always_assert(cinfo->classGraph);
   always_assert(!cinfo->classGraph.isMissing());
-  always_assert(cinfo->classGraph.name()->tsame(cinfo->cls->name));
+  always_assert(cinfo->classGraph.name()->isame(cinfo->cls->name));
   always_assert(cinfo->classGraph.cinfo() == cinfo);
   if (is_closure_base(cinfo->cls->name)) {
     // The closure base class is special. We don't store it's children
@@ -6683,7 +6683,7 @@ void check_local_invariants(const IndexData& index, const ClassInfo* cinfo) {
     auto const& m = cinfo->cls->methods[idx];
     auto const it = cinfo->methods.find(m->name);
     always_assert(it != cinfo->methods.end());
-    always_assert(it->second.meth().cls->tsame(cinfo->cls->name));
+    always_assert(it->second.meth().cls->isame(cinfo->cls->name));
     always_assert(it->second.meth().idx == idx);
 
     // Every method (except for constructors and special methods
@@ -6759,7 +6759,7 @@ void check_local_invariants(const IndexData& index, const ClassInfo* cinfo) {
   for (auto const& [name, mte] : cinfo->methods) {
     // Interface method tables should only contain its own methods.
     if (cinfo->cls->attrs & AttrInterface) {
-      always_assert(mte.meth().cls->tsame(cinfo->cls->name));
+      always_assert(mte.meth().cls->isame(cinfo->cls->name));
     } else {
       // Non-interface method tables should not contain any methods
       // defined by an interface.
@@ -6931,7 +6931,7 @@ void check_local_invariants(const IndexData& index, const ClassInfo* cinfo) {
     // Closures have no children.
     auto const subclasses = cinfo->classGraph.children();
     always_assert(subclasses.size() == 1);
-    always_assert(subclasses[0].name()->tsame(cinfo->cls->name));
+    always_assert(subclasses[0].name()->isame(cinfo->cls->name));
   } else if (cinfo->classGraph.hasCompleteChildren()) {
     // Otherwise the children list is non-empty, contains this
     // class, and contains only unique elements.
@@ -6940,7 +6940,7 @@ void check_local_invariants(const IndexData& index, const ClassInfo* cinfo) {
       std::find_if(
         begin(subclasses),
         end(subclasses),
-        [&] (ClassGraph g) { return g.name()->tsame(cinfo->cls->name); }
+        [&] (ClassGraph g) { return g.name()->isame(cinfo->cls->name); }
       ) != end(subclasses)
     );
     auto cpy = subclasses;
@@ -6957,7 +6957,7 @@ void check_local_invariants(const IndexData& index, const ClassInfo* cinfo) {
     always_assert(bases.size() == 1);
   } else if (is_closure_name(cinfo->cls->name)) {
     always_assert(bases.size() == 2);
-    always_assert(bases[0].name()->tsame(s_Closure.get()));
+    always_assert(bases[0].name()->isame(s_Closure.get()));
   }
 }
 
@@ -6985,7 +6985,7 @@ void check_local_invariants(const IndexData& data, const FuncFamily& ff) {
         [&] {
           if (last.inRegular() && !pf.inRegular()) return true;
           if (!last.inRegular() && pf.inRegular()) return false;
-          return string_data_lt_type{}(last.ptr()->cls->name, pf.ptr()->cls->name);
+          return string_data_lti{}(last.ptr()->cls->name, pf.ptr()->cls->name);
         }()
       );
     }
@@ -7991,7 +7991,7 @@ assign_hierarchical_work(std::vector<SString> roots,
   auto buckets = split_buckets(
     consistently_bucketize(roots, bucketSize),
     maxSize,
-    [&] (SString cls) -> const TSStringSet& {
+    [&] (SString cls) -> const ISStringSet& {
       auto const [d, _] = getDeps(cls);
       return *d;
     }
@@ -8027,7 +8027,7 @@ build_hierarchical_work(std::vector<std::vector<SString>>& buckets,
       auto& bucket = buckets[bucketIdx];
 
       // Gather up all dependencies for this bucket
-      TSStringSet deps;
+      ISStringSet deps;
       for (auto const cls : bucket) {
         auto const d = getDeps(cls).first;
         deps.insert(begin(*d), end(*d));
@@ -8106,10 +8106,10 @@ build_hierarchical_work(std::vector<std::vector<SString>>& buckets,
       bucket.erase(bucketEnd, end(bucket));
 
       // Keep deterministic ordering. Make sure there's no duplicates.
-      std::sort(bucket.begin(), bucket.end(), string_data_lt_type{});
-      std::sort(depOut.begin(), depOut.end(), string_data_lt_type{});
+      std::sort(bucket.begin(), bucket.end(), string_data_lti{});
+      std::sort(depOut.begin(), depOut.end(), string_data_lti{});
       std::sort(uninstantiable.begin(), uninstantiable.end(),
-                string_data_lt_type{});
+                string_data_lti{});
       assertx(std::adjacent_find(bucket.begin(), bucket.end()) == bucket.end());
       assertx(std::adjacent_find(depOut.begin(), depOut.end()) == depOut.end());
       assertx(
@@ -8153,7 +8153,7 @@ struct FlattenJob {
   struct OutputMeta {
     // Classes which have been determined to be uninstantiable
     // (therefore have no result output data).
-    TSStringSet uninstantiable;
+    ISStringSet uninstantiable;
     // New closures produced from trait flattening. Such new closures
     // will require "fixups" in the php::Program data.
     struct NewClosure {
@@ -8174,24 +8174,24 @@ struct FlattenJob {
     };
     std::vector<Parents> parents;
     // Classes which are interfaces.
-    TSStringSet interfaces;
+    ISStringSet interfaces;
     // Classes which have 86init functions. A class can gain a 86init
     // from flattening even if it didn't have it before.
-    TSStringSet with86init;
+    ISStringSet with86init;
     // The types used by the type-constraints of input classes and
     // functions.
-    std::vector<TSStringSet> classTypeUses;
-    std::vector<TSStringSet> funcTypeUses;
+    std::vector<ISStringSet> classTypeUses;
+    std::vector<ISStringSet> funcTypeUses;
     std::vector<InterfaceConflicts> interfaceConflicts;
     template <typename SerDe> void serde(SerDe& sd) {
       ScopedStringDataIndexer _;
-      sd(uninstantiable, string_data_lt_type{})
+      sd(uninstantiable, string_data_lti{})
         (newClosures)
         (parents)
-        (interfaces, string_data_lt_type{})
-        (with86init, string_data_lt_type{})
-        (classTypeUses, string_data_lt_type{})
-        (funcTypeUses, string_data_lt_type{})
+        (interfaces, string_data_lti{})
+        (with86init, string_data_lti{})
+        (classTypeUses, string_data_lti{})
+        (funcTypeUses, string_data_lti{})
         (interfaceConflicts)
         ;
     }
@@ -8279,7 +8279,7 @@ struct FlattenJob {
     auto const worklist = prepare(
       index,
       [&] {
-        TSStringToOneT<php::Class*> out;
+        ISStringToOneT<php::Class*> out;
         out.reserve(classes.vals.size() + deps.vals.size());
         for (auto const& c : classes.vals) {
           always_assert(out.emplace(c->name, c.get()).second);
@@ -8320,7 +8320,7 @@ struct FlattenJob {
       }
 
       ITRACE(5, "adding state for class '{}' to local index\n", cls->name);
-      assertx(cinfo->name->tsame(cls->name));
+      assertx(cinfo->name->isame(cls->name));
 
       // We might look up this class when flattening itself, so add it
       // to the local index before we start.
@@ -8341,14 +8341,14 @@ struct FlattenJob {
       std::sort(
         begin(cinfoIt->second->closures),
         end(cinfoIt->second->closures),
-        string_data_lt_type{}
+        string_data_lti{}
       );
 
       // Trait flattening may produce new closures, so those need to
       // be added to the local index as well.
       for (auto& [c, i] : closures) {
         ITRACE(5, "adding state for closure '{}' to local index\n", c->name);
-        assertx(c->name->tsame(i->name));
+        assertx(c->name->isame(i->name));
         assertx(is_closure(*c));
         assertx(i->closures.empty());
         always_assert(index.m_classes.emplace(c->name, c.get()).second);
@@ -8362,7 +8362,7 @@ struct FlattenJob {
     Variadic<std::unique_ptr<ClassInfo2>> outInfos;
     Variadic<std::unique_ptr<MethodsWithoutCInfo>> outMethods;
     OutputMeta outMeta;
-    TSStringSet outNames;
+    ISStringSet outNames;
 
     outClasses.vals.reserve(classes.vals.size() + newClosures.size());
     outInfos.vals.reserve(classes.vals.size() + newClosures.size());
@@ -8397,7 +8397,7 @@ struct FlattenJob {
     // Do the processing which relies on a fully accessible
     // LocalIndex
 
-    TSStringToOneT<InterfaceConflicts> ifaceConflicts;
+    ISStringToOneT<InterfaceConflicts> ifaceConflicts;
     for (auto& cls : classes.vals) {
       auto const cinfoIt = index.m_classInfos.find(cls->name);
       if (cinfoIt == end(index.m_classInfos) || !isContextInstantiable(*cls)) {
@@ -8453,7 +8453,7 @@ struct FlattenJob {
       begin(outMeta.interfaceConflicts),
       end(outMeta.interfaceConflicts),
       [] (auto const& c1, auto const& c2) {
-        return string_data_lt_type{}(c1.name, c2.name);
+        return string_data_lti{}(c1.name, c2.name);
       }
     );
 
@@ -8463,7 +8463,7 @@ struct FlattenJob {
       [] (const std::unique_ptr<php::Class>& a,
           const std::unique_ptr<php::Class>& b) {
         if (a->unit != b->unit) return string_data_lt{}(a->unit, b->unit);
-        return string_data_lt_type{}(a->name, b->name);
+        return string_data_lti{}(a->name, b->name);
       }
     );
 
@@ -8674,22 +8674,22 @@ private:
   struct LocalIndex {
     const php::Class* m_ctx{nullptr};
 
-    TSStringToOneT<const php::Class*> m_classes;
-    TSStringToOneT<std::unique_ptr<ClassInfo2>> m_classInfos;
-    TSStringToOneT<std::unique_ptr<State>> m_states;
+    ISStringToOneT<const php::Class*> m_classes;
+    ISStringToOneT<std::unique_ptr<ClassInfo2>> m_classInfos;
+    ISStringToOneT<std::unique_ptr<State>> m_states;
 
     hphp_fast_map<
       const php::Class*,
       hphp_fast_set<const php::Class*>
     > m_classClosures;
 
-    TSStringSet m_uninstantiable;
+    ISStringSet m_uninstantiable;
 
-    TSStringToOneT<TypeMapping> m_typeMappings;
-    TSStringSet m_missingTypes;
+    ISStringToOneT<TypeMapping> m_typeMappings;
+    ISStringSet m_missingTypes;
 
     const php::Class& cls(SString name) const {
-      if (m_ctx->name->tsame(name)) return *m_ctx;
+      if (m_ctx->name->isame(name)) return *m_ctx;
       auto const it = m_classes.find(name);
       always_assert_flog(
         it != m_classes.end(),
@@ -8773,7 +8773,7 @@ private:
    */
   static std::vector<php::Class*> prepare(
     LocalIndex& index,
-    const TSStringToOneT<php::Class*>& classes
+    const ISStringToOneT<php::Class*>& classes
   ) {
     // We might not have any classes if we're just processing funcs.
     if (classes.empty()) return {};
@@ -8847,7 +8847,7 @@ private:
       worklist.begin(),
       worklist.end(),
       [] (const php::Class* c1, const php::Class* c2) {
-        return string_data_lt_type{}(c1->name, c2->name);
+        return string_data_lti{}(c1->name, c2->name);
       }
     );
 
@@ -8931,7 +8931,7 @@ private:
                                                State& state) {
     if (debug && (is_closure(cls) || is_closure_base(cls))) {
       if (is_closure(cls)) {
-        always_assert(cls.parentName->tsame(s_Closure.get()));
+        always_assert(cls.parentName->isame(s_Closure.get()));
       } else {
         always_assert(!cls.parentName);
       }
@@ -8981,7 +8981,7 @@ private:
 
     if (cls.parentName) {
       assertx(!is_closure_base(cls));
-      assertx(is_closure(cls) == cls.parentName->tsame(s_Closure.get()));
+      assertx(is_closure(cls) == cls.parentName->isame(s_Closure.get()));
 
       if (index.uninstantiable(cls.parentName)) {
         ITRACE(2,
@@ -9141,7 +9141,7 @@ private:
       for (auto const clo : *closures) {
         assertx(is_closure(*clo));
         assertx(
-          clo->closureContextCls && clo->closureContextCls->tsame(cls.name)
+          clo->closureContextCls && clo->closureContextCls->isame(cls.name)
         );
         // Ensure closures have been processed already
         if (debug) index.cls(clo->name);
@@ -9153,7 +9153,7 @@ private:
       begin(state.m_parents),
       end(state.m_parents),
       [] (const php::Class* a, const php::Class* b) {
-        return string_data_lt_type{}(a->name, b->name);
+        return string_data_lti{}(a->name, b->name);
       }
     );
     state.m_parents.erase(
@@ -9189,7 +9189,7 @@ private:
       if (is_closure(cls)) {
         always_assert(is_closure_name(cls.name));
         always_assert(state.m_parents.size() == 1);
-        always_assert(state.m_parents[0]->name->tsame(s_Closure.get()));
+        always_assert(state.m_parents[0]->name->isame(s_Closure.get()));
         always_assert(!(cls.attrs & AttrNoReifiedInit));
       } else {
         always_assert(state.m_parents.empty());
@@ -9252,7 +9252,7 @@ private:
       it->second.m_data.parr,
       [&] (TypedValue v) {
         assertx(tvIsStringLike(v));
-        if (tvAssertStringLike(v)->tsame(cinfo.name)) {
+        if (tvAssertStringLike(v)->isame(cinfo.name)) {
           allowed = true;
           return true;
         }
@@ -9359,7 +9359,7 @@ private:
     auto const& prev = prevTuple.prop;
     auto const prevSrc = prevTuple.src;
 
-    if (cinfo.name->tsame(prevSrc)) {
+    if (cinfo.name->isame(prevSrc)) {
       if ((prev.attrs ^ prop.attrs) &
           (AttrStatic | AttrPublic | AttrProtected | AttrPrivate) ||
           (!(prop.attrs & AttrSystemInitialValue) &&
@@ -9496,7 +9496,7 @@ private:
       * above.
       */
       auto const& existing = cinfo.clsConstants.find(c.name);
-      if (existing->second.cls->tsame(c.cls)) {
+      if (existing->second.cls->isame(c.cls)) {
         state.m_traitCns.emplace_back(c);
         state.m_traitCns.back().isFromTrait = true;
       }
@@ -9523,7 +9523,7 @@ private:
 
     for (auto const name : sortedClsConstants) {
       auto& cnsIdx = cinfo.clsConstants.find(name)->second;
-      if (cnsIdx.cls->tsame(cls.name)) continue;
+      if (cnsIdx.cls->isame(cls.name)) continue;
 
       auto const& cns = index.cns(cnsIdx);
       if (!cns.isAbstract || !cns.val) continue;
@@ -9593,7 +9593,7 @@ private:
     auto& existingIdx = it->second;
 
     // Same constant (from an interface via two different paths) is ok
-    if (existingIdx.cls->tsame(cnsIdx.cls)) return true;
+    if (existingIdx.cls->isame(cnsIdx.cls)) return true;
 
     auto const& existingCnsCls = index.cls(existingIdx.cls);
     auto const& existing = index.cns(existingIdx);
@@ -9638,7 +9638,7 @@ private:
           !((cnsCls.attrs & AttrInterface) && fromTrait)) {
         auto const& cls = index.cls(cinfo.name);
         for (auto const iface : cls.interfaceNames) {
-          if (existingIdx.cls->tsame(iface)) {
+          if (existingIdx.cls->isame(iface)) {
             ITRACE(
               2,
               "Adding constant failed for `{}' because "
@@ -9953,7 +9953,7 @@ private:
         } else {
           assertx(!cinfo.missingMethods.count(mdata.name));
           if (attrs & AttrAbstract) continue;
-          if (emplaced.first->second.meth().cls->tsame(cls.name)) continue;
+          if (emplaced.first->second.meth().cls->isame(cls.name)) continue;
           if (!overridden(emplaced.first->second, MethRef { *method }, attrs)) {
             return false;
           }
@@ -10260,7 +10260,7 @@ private:
     std::vector<std::pair<SString, MethTabEntry*>> toAdd;
     for (auto& [name, mte] : cinfo.methods) {
       if (!mte.topLevel()) continue;
-      if (mte.meth().cls->tsame(cls.name)) continue;
+      if (mte.meth().cls->isame(cls.name)) continue;
       assertx(index.cls(mte.meth().cls).attrs & AttrTrait);
       toAdd.emplace_back(name, &mte);
     }
@@ -10380,7 +10380,7 @@ private:
       begin(state.m_parents),
       end(state.m_parents),
       [] (const php::Class* a, const php::Class* b) {
-        return string_data_lt_type{}(a->name, b->name);
+        return string_data_lti{}(a->name, b->name);
       }
     );
     state.m_parents.erase(
@@ -10397,13 +10397,13 @@ private:
         if (!is_special_method_name(clone->name)) {
           auto it = cinfo.methods.find(clone->name);
           assertx(it != cinfo.methods.end());
-          assertx(!it->second.meth().cls->tsame(cls.name));
+          assertx(!it->second.meth().cls->isame(cls.name));
           it->second.setMeth(MethRef { cls.name, clone->clsIdx });
         } else {
           auto const [existing, emplaced] =
             cinfo.methods.emplace(clone->name, MethTabEntry { *clone });
           if (!emplaced) {
-            assertx(existing->second.meth().cls->tsame(cls.name));
+            assertx(existing->second.meth().cls->isame(cls.name));
             if (clone->name != s_86cinit.get()) {
               auto const idx = existing->second.meth().idx;
               clone->clsIdx = idx;
@@ -10440,7 +10440,7 @@ private:
         ITRACE(4, "- closure {} as {}\n", orig->name, clo->name);
         assertx(is_closure(*orig));
         assertx(is_closure(*clo));
-        assertx(clo->closureContextCls->tsame(cls.name));
+        assertx(clo->closureContextCls->isame(cls.name));
         assertx(clo->unit == cls.unit);
 
         assertx(clo->usedTraitNames.empty());
@@ -10450,7 +10450,7 @@ private:
         assertx(cloState.m_traitCns.empty());
         assertx(cloState.m_cnsFromTrait.empty());
         assertx(cloState.m_parents.size() == 1);
-        assertx(cloState.m_parents[0]->name->tsame(s_Closure.get()));
+        assertx(cloState.m_parents[0]->name->isame(s_Closure.get()));
 
         cinfo.closures.emplace_back(clo->name);
         newClosures.emplace_back(
@@ -10462,7 +10462,7 @@ private:
         newClosures.begin(),
         newClosures.end(),
         [] (auto const& p1, auto const& p2) {
-          return string_data_lt_type{}(p1.cls->name, p2.cls->name);
+          return string_data_lti{}(p1.cls->name, p2.cls->name);
         }
       );
     }
@@ -10522,7 +10522,7 @@ private:
   static bool resolve_one(TypeConstraint& tc,
                           const TypeConstraint& tv,
                           SString firstEnum,
-                          TSStringSet* uses,
+                          ISStringSet* uses,
                           bool isProp,
                           bool isUnion) {
     assertx(!tv.isUnion());
@@ -10553,7 +10553,7 @@ private:
   static void update_type_constraint(const LocalIndex& index,
                                      TypeConstraint& tc,
                                      bool isProp,
-                                     TSStringSet* uses) {
+                                     ISStringSet* uses) {
     always_assert(IMPLIES(isProp, tc.validForProp()));
 
     if (!tc.isUnresolved()) {
@@ -10616,7 +10616,7 @@ private:
 
   static void update_type_constraints(const LocalIndex& index,
                                       php::Func& func,
-                                      TSStringSet* uses) {
+                                      ISStringSet* uses) {
     for (auto& p : func.params) {
       update_type_constraint(index, p.typeConstraint, false, uses);
       for (auto& ub : p.upperBounds.m_constraints) {
@@ -10631,7 +10631,7 @@ private:
 
   static void update_type_constraints(const LocalIndex& index,
                                       php::Class& cls,
-                                      TSStringSet* uses) {
+                                      ISStringSet* uses) {
     if (cls.attrs & AttrEnum) {
       update_type_constraint(index, cls.enumBaseTy, false, uses);
     }
@@ -10683,7 +10683,7 @@ private:
         if (prop.attrs & (AttrStatic | AttrPrivate)) return true;
 
         for (auto const base : cinfo.classGraph.bases()) {
-          if (base.name()->tsame(cls.name)) continue;
+          if (base.name()->isame(cls.name)) continue;
 
           auto& baseCInfo = index.classInfo(base.name());
           auto& baseCls = index.cls(base.name());
@@ -10795,7 +10795,7 @@ Job<FlattenJob> s_flattenJob;
 // Input class metadata to be turned into work buckets.
 struct IndexFlattenMetadata {
   struct ClassMeta {
-    TSStringSet deps;
+    ISStringSet deps;
     std::vector<SString> closures;
     // All types mentioned in type-constraints in this class.
     std::vector<SString> unresolvedTypes;
@@ -10804,7 +10804,7 @@ struct IndexFlattenMetadata {
     bool uninstantiable{false};
     SString closureContext{nullptr};
   };
-  TSStringToOneT<ClassMeta> cls;
+  ISStringToOneT<ClassMeta> cls;
   // All classes to be flattened
   std::vector<SString> allCls;
   // Mapping of units to classes which should be deleted from that
@@ -10816,9 +10816,9 @@ struct IndexFlattenMetadata {
     // All types mentioned in type-constraints in this func.
     std::vector<SString> unresolvedTypes;
   };
-  FSStringToOneT<FuncMeta> func;
+  ISStringToOneT<FuncMeta> func;
   std::vector<SString> allFuncs;
-  TSStringToOneT<TypeMapping> typeMappings;
+  ISStringToOneT<TypeMapping> typeMappings;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -10842,7 +10842,7 @@ void flatten_type_mappings(IndexData& index,
   auto resolved = parallel::map(
     work,
     [&] (const TypeMapping* typeMapping) {
-      Optional<TSStringSet> seen;
+      Optional<ISStringSet> seen;
       TypeConstraintFlags flags =
         typeMapping->value.flags() & (TypeConstraintFlags::Nullable
                                       | TypeConstraintFlags::TypeVar
@@ -10919,7 +10919,7 @@ void flatten_type_mappings(IndexData& index,
                   "invalid enum type {}{}\n",
                   typeMapping->name,
                   annotName(next_type),
-                  firstEnum->tsame(typeMapping->name)
+                  firstEnum->isame(typeMapping->name)
                     ? "" : folly::sformat(" (via {})", firstEnum)
                 );
                 tvu.emplace_back(AnnotType::Unresolved, tc.flags() | flags, name);
@@ -10950,7 +10950,7 @@ void flatten_type_mappings(IndexData& index,
               "non-existent type '{}'{}\n",
               typeMapping->name,
               name,
-              (firstEnum && !firstEnum->tsame(typeMapping->name))
+              (firstEnum && !firstEnum->isame(typeMapping->name))
                 ? folly::sformat(" (via {})", firstEnum) : ""
             );
             tvu.emplace_back(AnnotType::Unresolved, tc.flags() | flags, name);
@@ -10993,7 +10993,7 @@ void flatten_type_mappings(IndexData& index,
       4, "Type-mapping '{}' flattened to {}{}\n",
       name,
       after.value.debugName(),
-      (after.firstEnum && !after.firstEnum->tsame(name))
+      (after.firstEnum && !after.firstEnum->isame(name))
         ? folly::sformat(" (via {})", after.firstEnum) : ""
     );
     if (after.value.isUnresolved() && meta.cls.count(name)) {
@@ -11041,7 +11041,7 @@ flatten_classes_assign(IndexFlattenMetadata& meta) {
   // calculated lazily. LockFreeLazy ensures that multiple classes can
   // access this concurrently and safely calculate it on demand.
   struct DepLookup {
-    TSStringSet deps;
+    ISStringSet deps;
     // Whether this class is instantiable
     bool instantiable{false};
   };
@@ -11049,7 +11049,7 @@ flatten_classes_assign(IndexFlattenMetadata& meta) {
 
   // Look up all of the transitive dependencies for the given class.
   auto const findAllDeps = [&] (SString cls,
-                                TSStringSet& visited,
+                                ISStringSet& visited,
                                 auto const& self) -> const DepLookup& {
     static const DepLookup empty;
 
@@ -11127,7 +11127,7 @@ flatten_classes_assign(IndexFlattenMetadata& meta) {
     [&] (SString cls) {
       auto& clsMeta = meta.cls.at(cls);
       if (!clsMeta.closureContext) return;
-      TSStringSet visited;
+      ISStringSet visited;
       auto const& lookup =
         findAllDeps(clsMeta.closureContext, visited, findAllDeps);
       if (!lookup.instantiable) {
@@ -11165,7 +11165,7 @@ flatten_classes_assign(IndexFlattenMetadata& meta) {
     kBucketSize,
     kMaxBucketSize,
     [&] (SString c) {
-      TSStringSet visited;
+      ISStringSet visited;
       auto const& lookup = findAllDeps(c, visited, findAllDeps);
       return std::make_pair(&lookup.deps, lookup.instantiable);
     },
@@ -11241,7 +11241,7 @@ struct SubclassMetadata {
     std::vector<SString> parents;
     size_t idx; // Index into all classes vector.
   };
-  TSStringToOneT<Meta> meta;
+  ISStringToOneT<Meta> meta;
   // All classes to be processed
   std::vector<SString> all;
 };
@@ -11252,12 +11252,12 @@ struct InitTypesMetadata {
   struct ClsMeta {
     // Dependencies of the class. A dependency is a class in a
     // property/param/return type-hint.
-    TSStringSet deps;
-    TSStringSet candidateRegOnlyEquivs;
+    ISStringSet deps;
+    ISStringSet candidateRegOnlyEquivs;
   };
   struct FuncMeta {
     // Same as ClsMeta, but for the func
-    TSStringSet deps;
+    ISStringSet deps;
   };
   // Modifications to make to an unit
   struct Fixup {
@@ -11267,8 +11267,8 @@ struct InitTypesMetadata {
       sd(addClass)(removeFunc);
     }
   };
-  TSStringToOneT<ClsMeta> classes;
-  FSStringToOneT<FuncMeta> funcs;
+  ISStringToOneT<ClsMeta> classes;
+  ISStringToOneT<FuncMeta> funcs;
   SStringToOneT<Fixup> fixups;
   SStringToOneT<std::vector<FuncFamilyEntry>> nameOnlyFF;
 };
@@ -11287,7 +11287,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     UniquePtrRef<ClassInfo2> cinfo;
     SString unitToAddTo;
     SString closureContext;
-    TSStringSet typeUses;
+    ISStringSet typeUses;
     bool isInterface{false};
     bool has86init{false};
     CompactVector<SString> parents;
@@ -11296,7 +11296,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     SString name;
     UniquePtrRef<php::Func> func;
     UniquePtrRef<FuncInfo2> finfo;
-    TSStringSet typeUses;
+    ISStringSet typeUses;
   };
   struct MethodUpdate {
     SString name;
@@ -11308,7 +11308,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
   tbb::concurrent_hash_map<
     SString,
     InterfaceConflicts,
-    string_data_hash_tsame
+    string_data_hash_isame
   > ifaceConflicts;
 
   auto const run = [&] (FlattenClassesWork work) -> coro::Task<UpdateVec> {
@@ -11352,7 +11352,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     std::vector<TypeMapping> typeMappings;
     std::vector<SString> missingTypes;
     {
-      TSStringSet seen;
+      ISStringSet seen;
 
       auto const addUnresolved = [&] (SString u) {
         if (!seen.emplace(u).second) return;
@@ -11384,10 +11384,10 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       std::sort(
         begin(typeMappings), end(typeMappings),
         [] (const TypeMapping& a, const TypeMapping& b) {
-          return string_data_lt_type{}(a.name, b.name);
+          return string_data_lti{}(a.name, b.name);
         }
       );
-      std::sort(begin(missingTypes), end(missingTypes), string_data_lt_type{});
+      std::sort(begin(missingTypes), end(missingTypes), string_data_lti{});
     }
 
     auto [typeMappingsRef, missingTypesRef, config] = co_await
@@ -11675,7 +11675,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
           }
         }
 
-        std::sort(begin(all), end(all), string_data_lt_type{});
+        std::sort(begin(all), end(all), string_data_lti{});
         // Make sure there's no duplicates:
         assertx(std::adjacent_find(begin(all), end(all)) == end(all));
 
@@ -11833,7 +11833,7 @@ struct BuildSubclassListJob {
     // The classes for whom isMocked would be true due to one of the
     // classes making up this Data. The classes in this set may not
     // necessarily be also part of this Data.
-    TSStringSet mockedClasses;
+    ISStringSet mockedClasses;
 
     bool hasConstProp{false};
     bool hasReifiedGeneric{false};
@@ -11848,7 +11848,7 @@ struct BuildSubclassListJob {
     template <typename SerDe> void serde(SerDe& sd) {
       sd(methods, string_data_lt{})
         (propsWithImplicitNullable, string_data_lt{})
-        (mockedClasses, string_data_lt_type{})
+        (mockedClasses, string_data_lti{})
         (hasConstProp)
         (hasReifiedGeneric)
         (isSubMocked)
@@ -12188,31 +12188,31 @@ protected:
 
   struct LocalIndex {
     // All ClassInfos, whether inputs or dependencies.
-    TSStringToOneT<ClassInfo2*> classInfos;
+    ISStringToOneT<ClassInfo2*> classInfos;
     // All splits, whether inputs or dependencies.
-    TSStringToOneT<Split*> splits;
+    ISStringToOneT<Split*> splits;
     // All php::Class, whether inputs or dependencies.
-    TSStringToOneT<php::Class*> classes;
+    ISStringToOneT<php::Class*> classes;
 
     // ClassInfos and splits which are inputs (IE, we want to
     // calculate data for).
-    TSStringSet top;
+    ISStringSet top;
 
     // Aggregated data for an input
-    TSStringToOneT<Data> aggregateData;
+    ISStringToOneT<Data> aggregateData;
 
     // Mapping of input ClassInfos/splits to all of their subclasses
     // present in this Job. Some of the children may be splits, which
     // means some subset of the children were processed in another
     // Job.
-    TSStringToOneT<std::vector<SString>> children;
+    ISStringToOneT<std::vector<SString>> children;
 
     // The leafs in this job. This isn't necessarily an actual leaf,
     // but one whose children haven't been provided in this job
     // (because they've already been processed). Classes which are
     // leafs have information in their ClassInfo2 which reflect all of
     // their subclasses, otherwise just their own information.
-    TSStringSet leafs;
+    ISStringSet leafs;
 
     // All func families available in this Job, either from inputs, or
     // created during processing.
@@ -12402,7 +12402,7 @@ protected:
   // all transitive subclasses.
   static void build_children(LocalIndex& index,
                              const std::vector<EdgeToSplit>& edges) {
-    TSStringToOneT<TSStringSet> children;
+    ISStringToOneT<ISStringSet> children;
     // First record direct children. This can be inferred from the
     // parents of all present ClassInfos:
 
@@ -12462,10 +12462,10 @@ protected:
     // Calculate the indegree for all children. The indegree for a given node
     // differs depending on the top used, so these are calculated separately.
     auto const getIndegree = [&](SString root) {
-      TSStringSet visited;
-      TSStringSet toExplore{root};
-      TSStringSet toExploreNext;
-      TSStringToOneT<uint32_t> indegree;
+      ISStringSet visited;
+      ISStringSet toExplore{root};
+      ISStringSet toExploreNext;
+      ISStringToOneT<uint32_t> indegree;
 
       while (!toExplore.empty()) {
         toExploreNext.clear();
@@ -12847,7 +12847,7 @@ protected:
   // while processing children recursively
   static Data aggregate_data(LocalIndex& index,
                              SString top,
-                             TSStringSet& calculatedAcc) {
+                             ISStringSet& calculatedAcc) {
     assertx(index.top.contains(top));
 
     auto const& children = [&]() -> const std::vector<SString>& {
@@ -12866,7 +12866,7 @@ protected:
     Data data;
     auto first = true;
     // Set of children calculated for current top to ensure we don't duplicate work.
-    TSStringSet calculatedForTop;
+    ISStringSet calculatedForTop;
 
     // For each child of the class/split (for classes this includes
     // the top class itself), we create a Data, then union it together
@@ -12882,7 +12882,7 @@ protected:
       }
 
       auto childData = [&]() {
-        if (index.top.contains(child) && !child->tsame(top)) {
+        if (index.top.contains(child) && !child->isame(top)) {
           return aggregate_data(index, child, calculatedForTop);
         } else {
           calculatedForTop.emplace(child);
@@ -12906,7 +12906,7 @@ protected:
 
    // Obtain a Data for the given class/split named "top".
   static Data aggregate_data(LocalIndex& index, SString top) {
-    TSStringSet calculated;
+    ISStringSet calculated;
     return aggregate_data(index, top, calculated);
   }
 
@@ -13421,7 +13421,7 @@ protected:
 Job<BuildSubclassListJob> s_buildSubclassJob;
 
 struct SubclassWork {
-  TSStringToOneT<std::unique_ptr<BuildSubclassListJob::Split>> allSplits;
+  ISStringToOneT<std::unique_ptr<BuildSubclassListJob::Split>> allSplits;
   struct Bucket {
     std::vector<SString> classes;
     std::vector<SString> deps;
@@ -13477,9 +13477,9 @@ struct SubclassWork {
 // Dependency information for a class or split node.
 struct DepData {
   // Transitive dependencies (children) for this class.
-  TSStringSet deps;
+  ISStringSet deps;
   // Any split nodes which are dependencies of this class.
-  TSStringSet edges;
+  ISStringSet edges;
   // The number of direct children of this class which will be
   // processed this round.
   size_t processChildren{0};
@@ -13492,14 +13492,14 @@ template <typename GetDeps>
 std::vector<HierarchicalWorkBucket>
 dfs_bucketize(SubclassMetadata& subclassMeta,
               std::vector<SString> roots,
-              TSStringToOneT<std::vector<SString>>& splitImmDeps,
+              ISStringToOneT<std::vector<SString>>& splitImmDeps,
               size_t kMaxBucketSize,
               size_t maxClassIdx,
               bool alwaysCreateNew,
-              const TSStringSet& leafs,
-              const TSStringSet& processed, // already processed
+              const ISStringSet& leafs,
+              const ISStringSet& processed, // already processed
               const GetDeps& getDeps) {
-  TSStringSet visited;
+  ISStringSet visited;
   std::vector<std::vector<SString>> rootsToProcess;
   rootsToProcess.emplace_back();
   std::vector<size_t> rootsCost;
@@ -13634,17 +13634,17 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
   // A processed class/split is considered processed once it's
   // assigned to a bucket in a round. Once considered processed, it
   // will have no dependencies.
-  TSStringSet processed;
+  ISStringSet processed;
 
-  TSStringToOneT<std::unique_ptr<DepData>> splitDeps;
-  TSStringToOneT<std::unique_ptr<BuildSubclassListJob::Split>> splitPtrs;
-  TSStringSet leafs;
-  TSStringToOneT<std::vector<SString>> splitImmDeps;
+  ISStringToOneT<std::unique_ptr<DepData>> splitDeps;
+  ISStringToOneT<std::unique_ptr<BuildSubclassListJob::Split>> splitPtrs;
+  ISStringSet leafs;
+  ISStringToOneT<std::vector<SString>> splitImmDeps;
 
   // Keep creating rounds until all of the classes are assigned to a
   // bucket in a round.
   auto toProcess = std::move(subclassMeta.all);
-  TSStringSet tp;
+  ISStringSet tp;
   if (debug) tp.insert(toProcess.begin(), toProcess.end());
 
   for (size_t round = 0; !toProcess.empty(); ++round) {
@@ -13782,7 +13782,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
               return buckets;
             }(),
             kMaxBucketSize,
-            [&] (SString child) -> const TSStringSet& {
+            [&] (SString child) -> const ISStringSet& {
               return findDeps(child, findDeps).deps;
             }
           );
@@ -13815,7 +13815,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
             std::sort(
               begin(split->children),
               end(split->children),
-              string_data_lt_type{}
+              string_data_lti{}
             );
 
             splits.emplace_back(
@@ -13948,12 +13948,12 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
         begin(bucket.edges), end(bucket.edges),
         [] (const BuildSubclassListJob::EdgeToSplit& a,
             const BuildSubclassListJob::EdgeToSplit& b) {
-          if (string_data_lt_type{}(a.cls, b.cls)) return true;
-          if (string_data_lt_type{}(b.cls, a.cls)) return false;
-          return string_data_lt_type{}(a.split, b.split);
+          if (string_data_lti{}(a.cls, b.cls)) return true;
+          if (string_data_lti{}(b.cls, a.cls)) return false;
+          return string_data_lti{}(a.split, b.split);
         }
       );
-      std::sort(begin(bucket.leafs), end(bucket.leafs), string_data_lt_type{});
+      std::sort(begin(bucket.leafs), end(bucket.leafs), string_data_lti{});
     }
 
     std::sort(
@@ -14052,9 +14052,9 @@ void build_subclass_lists(IndexData& index,
 
   // Mapping of splits to their Ref. We only upload a split when we're
   // going to run a job which it is part of the output.
-  TSStringToOneT<UniquePtrRef<BuildSubclassListJob::Split>> splitsToRefs;
+  ISStringToOneT<UniquePtrRef<BuildSubclassListJob::Split>> splitsToRefs;
 
-  FSStringToOneT<hphp_fast_set<FuncFamily2::Id>> funcFamilyDeps;
+  ISStringToOneT<hphp_fast_set<FuncFamily2::Id>> funcFamilyDeps;
 
   // Use the metadata to assign to rounds and buckets.
   auto work = build_subclass_lists_assign(std::move(meta));
@@ -14094,11 +14094,11 @@ void build_subclass_lists(IndexData& index,
     // We shouldn't get closures or Closure in any of this.
     if (debug) {
       for (auto const c : bucket.classes) {
-        always_assert(!c->tsame(s_Closure.get()));
+        always_assert(!c->isame(s_Closure.get()));
         always_assert(!is_closure_name(c));
       }
       for (auto const c : bucket.deps) {
-        always_assert(!c->tsame(s_Closure.get()));
+        always_assert(!c->isame(s_Closure.get()));
         always_assert(!is_closure_name(c));
       }
     }
@@ -14399,7 +14399,7 @@ struct InitTypesJob {
     for (size_t i = 0, size = classes.vals.size(); i < size; ++i) {
       auto& cls = classes.vals[i];
       auto& cinfo = cinfos.vals[i];
-      assertx(cls->name->tsame(cinfo->name));
+      assertx(cls->name->isame(cinfo->name));
       assertx(cinfo->funcInfos.size() == cls->methods.size());
 
       unresolve_missing(index, *cls);
@@ -14434,8 +14434,8 @@ struct InitTypesJob {
 private:
 
   struct LocalIndex {
-    TSStringToOneT<const ClassInfo2*> classInfos;
-    TSStringToOneT<const php::Class*> classes;
+    ISStringToOneT<const ClassInfo2*> classInfos;
+    ISStringToOneT<const php::Class*> classes;
   };
 
   static void unresolve_missing(const LocalIndex& index, TypeConstraint& tc) {
@@ -14807,9 +14807,9 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
   auto typeBuckets = consistently_bucketize(
     [&] {
       // Temporarily suppress case collision logging
-      auto oldLogLevel = RuntimeOption::EvalLogTsameCollisions;
-      RuntimeOption::EvalLogTsameCollisions = 0;
-      SCOPE_EXIT { RuntimeOption::EvalLogTsameCollisions = oldLogLevel; };
+      auto oldLogLevel = RuntimeOption::EvalLogIsameCollisions;
+      RuntimeOption::EvalLogIsameCollisions = 0;
+      SCOPE_EXIT { RuntimeOption::EvalLogIsameCollisions = oldLogLevel; };
 
       std::vector<SString> roots;
       roots.reserve(meta.classes.size() + meta.funcs.size());
@@ -14886,7 +14886,7 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
     std::vector<UniquePtrRef<FuncInfo2>> finfos;
     std::vector<UniquePtrRef<ClassInfo2>> cinfoDeps;
 
-    TSStringSet roots;
+    ISStringSet roots;
     std::vector<SString> classNames;
     std::vector<SString> funcNames;
 
@@ -15014,7 +15014,7 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
     for (auto const unit : units) {
       auto f = std::move(meta.fixups.at(unit));
       assertx(!f.addClass.empty() || !f.removeFunc.empty());
-      std::sort(f.addClass.begin(), f.addClass.end(), string_data_lt_type{});
+      std::sort(f.addClass.begin(), f.addClass.end(), string_data_lti{});
       std::sort(f.removeFunc.begin(), f.removeFunc.end(), string_data_lt{});
       fixups.emplace_back(std::move(f));
     }
@@ -15178,14 +15178,9 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
   tasks.reserve(typeBuckets.size() + fixupBuckets.size() + 1);
 
   // Temporarily suppress case collision logging
-  auto oldTypeLogLevel = RuntimeOption::EvalLogTsameCollisions;
-  auto oldFuncLogLevel = RuntimeOption::EvalLogFsameCollisions;
-  RuntimeOption::EvalLogTsameCollisions = 0;
-  RuntimeOption::EvalLogFsameCollisions = 0;
-  SCOPE_EXIT {
-    RuntimeOption::EvalLogTsameCollisions = oldTypeLogLevel;
-    RuntimeOption::EvalLogFsameCollisions = oldFuncLogLevel;
-  };
+  auto oldLogLevel = RuntimeOption::EvalLogIsameCollisions;
+  RuntimeOption::EvalLogIsameCollisions = 0;
+  SCOPE_EXIT { RuntimeOption::EvalLogIsameCollisions = oldLogLevel; };
 
   for (auto& work : typeBuckets) {
     tasks.emplace_back(
@@ -15728,7 +15723,7 @@ void make_class_infos_local(
         [] (FuncFamily::PossibleFunc a, const FuncFamily::PossibleFunc b) {
           if (a.inRegular() && !b.inRegular()) return true;
           if (!a.inRegular() && b.inRegular()) return false;
-          return string_data_lt_type{}(a.ptr()->cls->name, b.ptr()->cls->name);
+          return string_data_lti{}(a.ptr()->cls->name, b.ptr()->cls->name);
         }
       );
       funcs.shrink_to_fit();
@@ -16562,14 +16557,9 @@ void make_local(IndexData& index) {
 
   {
     // Temporarily suppress case collision logging
-    auto oldTypeLogLevel = RuntimeOption::EvalLogTsameCollisions;
-    auto oldFuncLogLevel = RuntimeOption::EvalLogFsameCollisions;
-    RuntimeOption::EvalLogTsameCollisions = 0;
-    RuntimeOption::EvalLogFsameCollisions = 0;
-    SCOPE_EXIT {
-      RuntimeOption::EvalLogTsameCollisions = oldTypeLogLevel;
-      RuntimeOption::EvalLogFsameCollisions = oldFuncLogLevel;
-    };
+    auto oldLogLevel = RuntimeOption::EvalLogIsameCollisions;
+    RuntimeOption::EvalLogIsameCollisions = 0;
+    SCOPE_EXIT { RuntimeOption::EvalLogIsameCollisions = oldLogLevel; };
 
     coro::blockingWait(coro::collectAllRange(
       from(buckets)
@@ -16758,11 +16748,11 @@ const CoroAsyncValue<Ref<Config>>& Index::configRef() const {
 
 //////////////////////////////////////////////////////////////////////
 
-const TSStringSet& Index::classes_with_86inits() const {
+const ISStringSet& Index::classes_with_86inits() const {
   return m_data->classesWith86Inits;
 }
 
-const FSStringSet& Index::constant_init_funcs() const {
+const ISStringSet& Index::constant_init_funcs() const {
   return m_data->constantInitFuncs;
 }
 
@@ -19387,11 +19377,11 @@ std::vector<V> map_to_sorted_vec(const hphp_fast_map<SString, V, H, E>& m,
 }
 
 std::vector<SString> AnalysisInput::classNames() const {
-  return map_to_sorted_key_vec(classes, string_data_lt_type{});
+  return map_to_sorted_key_vec(classes, string_data_lti{});
 }
 
 std::vector<SString> AnalysisInput::funcNames() const {
-  return map_to_sorted_key_vec(funcs, string_data_lt_func{});
+  return map_to_sorted_key_vec(funcs, string_data_lti{});
 }
 
 std::vector<SString> AnalysisInput::unitNames() const {
@@ -19414,16 +19404,16 @@ std::vector<SString> AnalysisInput::minfoNames() const {
 
 AnalysisInput::Tuple AnalysisInput::toTuple(Ref<Meta> meta) const {
   return Tuple{
-    map_to_sorted_vec(classes, string_data_lt_type{}),
-    map_to_sorted_vec(funcs, string_data_lt_func{}),
+    map_to_sorted_vec(classes, string_data_lti{}),
+    map_to_sorted_vec(funcs, string_data_lti{}),
     map_to_sorted_vec(units, string_data_lt{}),
-    map_to_sorted_vec(classBC, string_data_lt_type{}),
-    map_to_sorted_vec(funcBC, string_data_lt_func{}),
-    map_to_sorted_vec(cinfos, string_data_lt_type{}),
-    map_to_sorted_vec(finfos, string_data_lt_func{}),
-    map_to_sorted_vec(minfos, string_data_lt_type{}),
-    map_to_sorted_vec(depClasses, string_data_lt_type{}),
-    map_to_sorted_vec(depFuncs, string_data_lt_func{}),
+    map_to_sorted_vec(classBC, string_data_lti{}),
+    map_to_sorted_vec(funcBC, string_data_lti{}),
+    map_to_sorted_vec(cinfos, string_data_lti{}),
+    map_to_sorted_vec(finfos, string_data_lti{}),
+    map_to_sorted_vec(minfos, string_data_lti{}),
+    map_to_sorted_vec(depClasses, string_data_lti{}),
+    map_to_sorted_vec(depFuncs, string_data_lti{}),
     map_to_sorted_vec(depUnits, string_data_lt{}),
     std::move(meta)
   };
@@ -20168,7 +20158,7 @@ void AnalysisScheduler::addDepsToInput(AnalysisInput& input) const {
   auto const add = [&] (SString n,
                         const DepState& depState,
                         SString unit,
-                        const TSStringSet& closures) {
+                        const ISStringSet& closures) {
     for (auto const clo : closures) {
       addDepClassToInput(clo, n, true, input);
     }
@@ -20229,7 +20219,7 @@ std::vector<AnalysisInput> AnalysisScheduler::schedule(size_t bucketSize) {
     end(classesToSchedule)
   };
 
-  SStringToOneT<FSStringSet> unitsToFuncs;
+  SStringToOneT<ISStringSet> unitsToFuncs;
   for (auto const func : funcsToSchedule) {
     if (Constant::nameFromFuncName(func)) {
       auto const unit = index.m_data->funcToUnit.at(func);
@@ -20281,8 +20271,8 @@ namespace {
 // If we optimized a top-level constant's value to a scalar, we no
 // longer need the associated 86cinit function. This fixes up the
 // metadata to remove it.
-FSStringSet strip_unneeded_constant_inits(AnalysisIndex::IndexData& index) {
-  FSStringSet stripped;
+ISStringSet strip_unneeded_constant_inits(AnalysisIndex::IndexData& index) {
+  ISStringSet stripped;
   for (auto const name : index.funcNames) {
     auto const cnsName = Constant::nameFromFuncName(name);
     if (!cnsName) continue;
@@ -20346,7 +20336,7 @@ AnalysisIndex::AnalysisIndex(
   m_data->badConstants = std::move(meta.badConstants);
   m_data->badTypeAliases = std::move(meta.badTypeAliases);
 
-  TSStringSet depClassNames;
+  ISStringSet depClassNames;
   depClassNames.reserve(depClasses.size());
 
   m_data->classNames.reserve(classes.size());
@@ -20366,7 +20356,7 @@ AnalysisIndex::AnalysisIndex(
     depClassNames.emplace(name);
   }
 
-  FSStringSet depFuncNames;
+  ISStringSet depFuncNames;
   depFuncNames.reserve(depFuncs.size());
 
   m_data->funcNames.reserve(funcs.size());
@@ -20440,7 +20430,7 @@ AnalysisIndex::AnalysisIndex(
     auto& cls = m_data->classes.at(bc->cls);
     always_assert(bc->methodBCs.size() == cls->methods.size());
     for (size_t i = 0, size = bc->methodBCs.size(); i < size; ++i) {
-      always_assert(bc->methodBCs[i].name == cls->methods[i]->name); // XXX split diff
+      always_assert(bc->methodBCs[i].name->isame(cls->methods[i]->name));
       cls->methods[i]->rawBlocks = std::move(bc->methodBCs[i].bc);
     }
   }

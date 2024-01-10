@@ -41,16 +41,10 @@ struct String;
  * StringData* comparison for AtomicHashMap entries, where -1, -2, and -3 are
  * used as magic values. Optimized for comparisons between static strings.
  */
-struct ahm_string_data_tsame {
+struct ahm_string_data_isame {
   bool operator()(const StringData *s1, const StringData *s2) const {
     assertx(int64_t(s2) > 0);  // RHS is never a magic value.
-    return s1 == s2 || (int64_t(s1) > 0 && s1->tsame(s2));
-  }
-};
-struct ahm_string_data_fsame {
-  bool operator()(const StringData *s1, const StringData *s2) const {
-    assertx(int64_t(s2) > 0);  // RHS is never a magic value.
-    return s1 == s2 || (int64_t(s1) > 0 && s1->fsame(s2));
+    return s1 == s2 || (int64_t(s1) > 0 && s1->isame(s2));
   }
 };
 
@@ -81,7 +75,7 @@ struct NamedType {
   using Map = folly::AtomicHashMap<const StringData*,
                                NamedType,
                                string_data_hash,
-                               ahm_string_data_tsame,
+                               ahm_string_data_isame,
                                LowAllocator<char>>;
 
   /////////////////////////////////////////////////////////////////////////////
@@ -221,7 +215,7 @@ struct NamedFunc {
   using Map = folly::AtomicHashMap<const StringData*,
                                NamedFunc,
                                string_data_hash,
-                               ahm_string_data_fsame,
+                               ahm_string_data_isame,
                                LowAllocator<char>>;
 
   /////////////////////////////////////////////////////////////////////////////

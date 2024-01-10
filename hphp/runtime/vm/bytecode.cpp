@@ -3876,7 +3876,7 @@ JitResumeAddr fcallObjMethodImpl(bool retToJit, PC origpc, PC& pc,
   auto cls = obj->getVMClass();
   auto const ctx = [&] {
     if (!fca.context) return arGetContextClass(vmfp());
-    if (fca.context->tsame(s_DynamicContextOverrideUnsafe.get())) {
+    if (fca.context->isame(s_DynamicContextOverrideUnsafe.get())) {
       if (RO::RepoAuthoritative) {
         raise_error("Cannot use dynamic_meth_caller_force() in repo-mode");
       }
@@ -4135,7 +4135,7 @@ JitResumeAddr fcallClsMethodImpl(bool retToJit, PC origpc, PC& pc,
                                  bool logAsDynamicCall = true) {
   auto const ctx = [&] {
     if (!fca.context) return liveClass();
-    if (fca.context->tsame(s_DynamicContextOverrideUnsafe.get())) {
+    if (fca.context->isame(s_DynamicContextOverrideUnsafe.get())) {
       if (RO::RepoAuthoritative) {
         raise_error("Cannot use dynamic_meth_caller_force() in repo-mode");
       }

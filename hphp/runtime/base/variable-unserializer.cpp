@@ -409,7 +409,7 @@ bool isWhitelistClass(const String& requestedClassName,
       auto allowedClassName = iter.second().toString();
       auto const matches = includeSubclasses
         ? HHVM_FN(is_a)(requestedClassName, allowedClassName, true)
-        : allowedClassName.get()->tsame(requestedClassName.get());
+        : allowedClassName.get()->isame(requestedClassName.get());
       if (matches) return true;
     }
   }
@@ -660,7 +660,7 @@ static const StaticString
  */
 const StringData* getAlternateCollectionName(const StringData* clsName) {
   using ClsNameMap = hphp_hash_map<const StringData*, const StringData*,
-                        string_data_hash, string_data_tsame>;
+                        string_data_hash, string_data_isame>;
 
   auto getAltMap = [] {
     using SStringPair = std::pair<StaticString, StaticString>;

@@ -359,7 +359,7 @@ static bool isConstructor(const Func* func) {
   if (func->name() == s___construct.get()) { return true; }
   /* A same named function is not a constructor in a trait */
   if (pcls->attrs() & AttrTrait) return false;
-  return func->name()->fsame(pcls->name());
+  return pcls->name()->isame(func->name());
 }
 
 static const Class* get_prototype_class_from_interfaces(const Class *cls,
@@ -933,8 +933,8 @@ static Array get_function_user_attributes(const Func* func) {
     auto const attrName = StrNR(it->first).asString();
     // __Memoize and LSB attributes may contain EnumClassLabels
     if (func->isMemoizeWrapper() &&
-        (attrName.get()->tsame(s_Memoize.get()) ||
-         attrName.get()->tsame(s_MemoizeLSB.get()))) {
+        (attrName.get()->isame(s_Memoize.get()) ||
+         attrName.get()->isame(s_MemoizeLSB.get()))) {
       assertx(tvIsVec(it->second));
       auto const ad = it->second.m_data.parr;
       VecInit args(ad->size());
@@ -1512,7 +1512,7 @@ static Array HHVM_STATIC_METHOD(
   // At each step, we fetch from the PreClass is important because the
   // order in which getMethods returns matters
   req::StringFastSet visitedMethods;
-  req::StringTFastSet visitedInterfaces;
+  req::StringIFastSet visitedInterfaces;
   auto st = Array::CreateKeyset();
 
   auto add = [&] (const Func* m) {

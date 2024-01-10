@@ -421,17 +421,11 @@ private:
     };
   }
 
-  using TMap = folly_concurrent_hash_map_simd<
+  using IMap = folly_concurrent_hash_map_simd<
     const StringData*,
     const StringData*,
     string_data_hash,
-    string_data_tsame
-  >;
-  using FMap = folly_concurrent_hash_map_simd<
-    const StringData*,
-    const StringData*,
-    string_data_hash,
-    string_data_fsame
+    string_data_isame
   >;
   using Map = folly_concurrent_hash_map_simd<
     const StringData*,
@@ -440,10 +434,10 @@ private:
     string_data_same
   >;
 
-  TMap enums;
-  TMap classes;
-  FMap funcs;
-  TMap typeAliases;
+  IMap enums;
+  IMap classes;
+  IMap funcs;
+  IMap typeAliases;
   Map constants;
   Map modules;
   Map units;

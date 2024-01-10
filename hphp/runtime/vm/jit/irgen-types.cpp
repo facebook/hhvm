@@ -84,16 +84,16 @@ SSATmp* ldClassSafe(IRGS& env, const StringData* className) {
 SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
                           SSATmp* checkCls) {
   assertx(src->isA(TObj));
-  if (s_Awaitable.get()->tsame(className)) {
+  if (s_Awaitable.get()->isame(className)) {
     return gen(env, IsWaitHandle, src);
   }
-  if (s_StringishObject.get()->tsame(className)) {
+  if (s_StringishObject.get()->isame(className)) {
     return gen(env, HasToString, src);
   }
 
   auto knownCls = checkCls->hasConstVal(TCls) ? checkCls->clsVal() : nullptr;
   assertx(IMPLIES(knownCls, classIsPersistentOrCtxParent(env, knownCls)));
-  assertx(IMPLIES(knownCls, knownCls->name()->tsame(className)));
+  assertx(IMPLIES(knownCls, knownCls->name()->isame(className)));
 
   auto const srcType = src->type();
 
@@ -107,7 +107,7 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
     auto const cls = srcType.clsSpec().cls();
     if (!env.irb->constrainValue(src, GuardConstraint(cls).setWeak()) &&
         ((knownCls && cls->classof(knownCls)) ||
-         cls->name()->tsame(className))) {
+         cls->name()->isame(className))) {
       return cns(env, true);
     }
   }

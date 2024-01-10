@@ -126,7 +126,7 @@ Variant unsetProp(const Object& obj, const String& name) {
 bool cmpNPA::operator()(const PropAccessor* pa1,
                         const PropAccessor* pa2) const {
   // Hack property names are case sensitive; use a collision-logging compare.
-  return fstrcmp(pa1->name, pa2->name) == 0;
+  return istrcmp(pa1->name, pa2->name) == 0;
 }
 
 } // namespace HPHP::Native

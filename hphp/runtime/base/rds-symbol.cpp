@@ -134,7 +134,7 @@ struct SymbolEq : boost::static_visitor<bool> {
   >::type operator()(const T&, const U&) const { return false; }
 
   bool operator()(LinkName k1, LinkName k2) const {
-    return strcmp(k1.type, k2.type) == 0 && k1.name->tsame(k2.name);
+    return strcmp(k1.type, k2.type) == 0 && k1.name->isame(k2.name);
   }
   bool operator()(LinkID k1, LinkID k2) const {
     return strcmp(k1.type, k2.type) == 0;
@@ -143,7 +143,7 @@ struct SymbolEq : boost::static_visitor<bool> {
   bool operator()(ClsConstant k1, ClsConstant k2) const {
     assertx(k1.clsName->isStatic() && k1.cnsName->isStatic());
     assertx(k2.clsName->isStatic() && k2.cnsName->isStatic());
-    return k1.clsName->tsame(k2.clsName) &&
+    return k1.clsName->isame(k2.clsName) &&
            k1.cnsName == k2.cnsName;
   }
 
@@ -164,9 +164,9 @@ struct SymbolEq : boost::static_visitor<bool> {
     assertx(t1.clsName->isStatic() && t2.clsName->isStatic());
     assertx(t1.methName->isStatic() && t2.methName->isStatic());
     assertx(t1.ctxName->isStatic() && t2.ctxName->isStatic());
-    return t1.clsName->tsame(t2.clsName) &&
+    return t1.clsName->isame(t2.clsName) &&
            t1.methName == t2.methName &&
-           t1.ctxName->tsame(t2.ctxName);
+           t1.ctxName->isame(t2.ctxName);
   }
 
   bool operator()(SPropCache k1, SPropCache k2) const {

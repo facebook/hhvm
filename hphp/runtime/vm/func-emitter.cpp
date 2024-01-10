@@ -690,13 +690,13 @@ int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
     Variant userAttrVal = it.second();
     if (userAttrVal.isString()) {
       String userAttrStrVal = userAttrVal.toString();
-      if (userAttrStrVal.get()->tsame(s_nofcallbuiltin.get())) {
+      if (userAttrStrVal.get()->isame(s_nofcallbuiltin.get())) {
         attrs_ |= AttrNoFCallBuiltin;
-      } else if (userAttrStrVal.get()->tsame(s_noinjection.get())) {
+      } else if (userAttrStrVal.get()->isame(s_noinjection.get())) {
         attrs_ |= AttrNoInjection;
-      } else if (userAttrStrVal.get()->tsame(s_norecording.get())) {
+      } else if (userAttrStrVal.get()->isame(s_norecording.get())) {
         attrs_ |= AttrNoRecording;
-      } else if (userAttrStrVal.get()->tsame(s_opcodeimpl.get())) {
+      } else if (userAttrStrVal.get()->isame(s_opcodeimpl.get())) {
         ret |= Native::AttrOpCodeImpl;
       }
     }

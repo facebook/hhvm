@@ -55,12 +55,12 @@ void RepoAutoloadMapBuilder::addUnit(const UnitEmitter& ue) {
   }
 }
 
-const RepoAutoloadMapBuilder::TypeNameMap&
+const RepoAutoloadMapBuilder::CaseInsensitiveMap&
 RepoAutoloadMapBuilder::getTypes() const {
   return m_types;
 }
 
-const RepoAutoloadMapBuilder::FuncNameMap&
+const RepoAutoloadMapBuilder::CaseInsensitiveMap&
 RepoAutoloadMapBuilder::getFuncs() const {
   return m_funcs;
 }
@@ -70,7 +70,7 @@ RepoAutoloadMapBuilder::getConstants() const {
   return m_constants;
 }
 
-const RepoAutoloadMapBuilder::TypeNameMap&
+const RepoAutoloadMapBuilder::CaseInsensitiveMap&
 RepoAutoloadMapBuilder::getTypeAliases() const {
   return m_typeAliases;
 }

@@ -1163,7 +1163,7 @@ bool HHVM_FUNCTION(fb_intercept2, const String& name, const Variant& handler) {
 bool HHVM_FUNCTION(fb_rename_function, const String& orig_func_name,
                                        const String& new_func_name) {
   if (orig_func_name.empty() || new_func_name.empty() ||
-      orig_func_name.get()->fsame(new_func_name.get())) {
+      orig_func_name.get()->isame(new_func_name.get())) {
     raise_invalid_argument_warning("unable to rename %s", orig_func_name.data());
     return false;
   }

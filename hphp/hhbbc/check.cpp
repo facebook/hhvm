@@ -153,7 +153,7 @@ bool check(const php::Func& f) {
   if (f.isClosureBody) {
     assertx(f.cls);
     assertx(f.cls->parentName);
-    assertx(f.cls->parentName->tsame(s_Closure.get()));
+    assertx(f.cls->parentName->isame(s_Closure.get()));
   }
 
   assertx(checkExnTree(f));

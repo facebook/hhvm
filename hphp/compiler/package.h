@@ -381,15 +381,10 @@ struct UnitIndex final {
     extern_worker::Ref<Package::UnitDecls> declsRef;
   };
 
-  using TMap = folly_concurrent_hash_map_simd<
+  using IMap = folly_concurrent_hash_map_simd<
     const StringData*, std::shared_ptr<Locations>,
     string_data_hash,
-    string_data_tsame
-  >;
-  using FMap = folly_concurrent_hash_map_simd<
-    const StringData*, std::shared_ptr<Locations>,
-    string_data_hash,
-    string_data_fsame
+    string_data_isame
   >;
   using Map = folly_concurrent_hash_map_simd<
     const StringData*, std::shared_ptr<Locations>
@@ -399,8 +394,8 @@ struct UnitIndex final {
   // symbol that is present in this index.
   bool containsAnyMissing(const Package::ParseMetaVec& parseMetas) const;
 
-  TMap types;
-  FMap funcs;
+  IMap types;
+  IMap funcs;
   Map constants;
   Map modules;
 };

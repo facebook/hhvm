@@ -36,17 +36,13 @@ namespace {
 using SymbolMap = hphp_fast_map<const StringData*,
                                 std::shared_ptr<hackc::DeclsAndBlob>>;
 /** Represents a case insensitive version of [SymbolMap] */
-using TSymbolMap = hphp_fast_map<const StringData*,
+using ISymbolMap = hphp_fast_map<const StringData*,
                                  std::shared_ptr<hackc::DeclsAndBlob>,
                                  string_data_hash,
-                                 string_data_tsame>;
-using FSymbolMap = hphp_fast_map<const StringData*,
-                                 std::shared_ptr<hackc::DeclsAndBlob>,
-                                 string_data_hash,
-                                 string_data_fsame>;
+                                 string_data_isame>;
 
-TSymbolMap s_types;
-FSymbolMap s_functions;
+ISymbolMap s_types;
+ISymbolMap s_functions;
 SymbolMap s_constants;
 SymbolMap s_modules;
 

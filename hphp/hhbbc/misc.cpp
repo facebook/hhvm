@@ -71,7 +71,7 @@ consistently_bucketize_by_num_buckets(const std::vector<SString>& items, size_t 
   parallel::for_each(
     buckets,
     [] (std::vector<SString>& bucket) {
-      std::sort(begin(bucket), end(bucket), string_data_lt_type{});
+      std::sort(begin(bucket), end(bucket), string_data_lti{});
     }
   );
 

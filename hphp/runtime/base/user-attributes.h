@@ -39,7 +39,7 @@ private:
   using Map = folly::sorted_vector_map<
     LowStringPtr,
     TypedValue,
-    string_data_lt_type,
+    string_data_lti,
     VMAllocator<value_type>,
     void,
     folly::fbvector<value_type, VMAllocator<value_type>>

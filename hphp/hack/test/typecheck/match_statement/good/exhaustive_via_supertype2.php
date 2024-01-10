@@ -5,17 +5,17 @@
 
 final class A {}
 
-<<__Sealed(B1::class, B2::class)>>
+<<__Sealed(B1::class, B2::class, B3::class)>>
 interface IB {}
 final class B1 implements IB {}
 final class B2 implements IB {}
+final class B3 implements IB {}
 
-case type AB = A | IB;
+case type AB1B2 = A | B1 | B2;
 
-function test(AB $ab): void {
+function test(AB1B2 $ab): void {
   match ($ab) {
     _: A => hh_expect<A>($ab);
-    _: B1 => hh_expect<B1>($ab);
-    _: B2 => hh_expect<B2>($ab);
+    _: IB => hh_expect<IB>($ab);
   }
 }

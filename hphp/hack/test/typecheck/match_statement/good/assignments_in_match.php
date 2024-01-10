@@ -1,7 +1,7 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('case_types')>>
-<<file:__EnableUnstableFeatures('match_statements')>>
+<<file: __EnableUnstableFeatures('case_types')>>
+<<file: __EnableUnstableFeatures('match_statements')>>
 
 final class A {}
 final class B {}

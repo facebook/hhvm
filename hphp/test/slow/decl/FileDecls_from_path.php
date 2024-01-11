@@ -85,4 +85,10 @@ function main(): void {
   echo "=== XHP Classes\n";
   var_dump($instance->getClass('xhp_element'));
   var_dump($instance->getClass(':element'));
+
+  echo "=== Complex Attributes\n";
+  var_dump($instance->getAttribute('ComplexAttributeClass', 'ComplexAttr1'));
+  var_dump($instance->getAttribute('ComplexAttributeClass', 'ComplexAttr2'));
+  var_dump($instance->getAttribute('ComplexAttributeClass', 'ComplexAttr3'));
+  var_dump($instance->getAttribute('ComplexAttributeClass', 'ComplexAttr4'));
 }

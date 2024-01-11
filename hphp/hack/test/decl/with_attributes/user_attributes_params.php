@@ -18,4 +18,16 @@ class C {
 
   <<Foo('bar'.Baz::class)>>
   public function attrConcat() {}
+
+  <<Foo(vec[1, 2, 3])>>
+  public function attrVec() {}
+
+  <<Foo(dict['a' => 1, 'b' => 2])>>
+  public function attrDict() {}
+
+  <<Foo(keyset[1, 2, 3])>>
+  public function attrKeyset() {}
+
+  <<Foo(shape('a' => 1, 'b' => 2))>>
+  public function attrShape() {}
 }

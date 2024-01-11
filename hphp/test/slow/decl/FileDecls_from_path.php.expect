@@ -447,3 +447,20 @@ dict(6) {
     }
   }
 }
+=== Complex Attributes
+dict(1) {
+  ["name"]=>
+  string(12) "ComplexAttr1"
+}
+dict(1) {
+  ["name"]=>
+  string(12) "ComplexAttr2"
+}
+dict(1) {
+  ["name"]=>
+  string(12) "ComplexAttr3"
+}
+dict(1) {
+  ["name"]=>
+  string(12) "ComplexAttr4"
+}

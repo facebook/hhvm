@@ -561,7 +561,6 @@ class rust_mstch_program : public mstch_program {
             {"program:rust_gen_native_metadata?",
              &rust_mstch_program::rust_gen_native_metadata},
         });
-    register_has_option("program:default_enum_zero?", "default_enum_zero");
     register_has_option(
         "program:deprecated_optional_with_default_is_some?",
         "deprecated_optional_with_default_is_some");
@@ -2389,8 +2388,6 @@ THRIFT_REGISTER_GENERATOR(
     "Rust",
     "    serde:           Derive serde Serialize/Deserialize traits for types\n"
     "    noserver:        Don't emit server code\n"
-    "    default_enum_zero:\n"
-    "                     Default enum value is zero, conforming to the thrift spec\n"
     "    deprecated_default_enum_min_i32:\n"
     "                     Default enum value is i32::MIN. Deprecated, to be removed in future versions\n"
     "    deprecated_optional_with_default_is_some:\n"

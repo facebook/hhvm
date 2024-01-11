@@ -1,1 +1,1 @@
-mstch_rust:default_enum_zero src/module.thrift
+mstch_rust src/module.thrift

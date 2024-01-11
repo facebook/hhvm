@@ -41,8 +41,8 @@ TEST(OQSKeyExchangeTest, GetKeyShareBeforeGenerationTest) {
 }
 
 TEST(OQSKeyExchangeTest, InvalidExternalInputTest) {
-  auto clientKex = OQSClientKeyExchange(OQS_KEM_alg_hqc_128);
-  auto serverKex = OQSServerKeyExchange(OQS_KEM_alg_hqc_128);
+  auto clientKex = OQSClientKeyExchange(OQS_KEM_alg_kyber_512);
+  auto serverKex = OQSServerKeyExchange(OQS_KEM_alg_kyber_512);
   auto wrongClientKex = OQSClientKeyExchange(OQS_KEM_alg_kyber_768);
   auto wrongServerKex = OQSServerKeyExchange(OQS_KEM_alg_kyber_768);
 

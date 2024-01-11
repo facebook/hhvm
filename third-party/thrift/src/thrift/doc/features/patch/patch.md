@@ -26,16 +26,79 @@ How mutations for Thrift values are represented, manipulated, and applied. It ca
 
 ## Enable Patch
 
-To enable Patch, `@patch.GeneratePatch` annotation **must** be used recursively on package or struct level.
+Use `thrift_patch_library` buck build rule to enable Patch. It takes
+three arguments
 
-There are 2 representations of a Patch — Static Patch and Dynamic Patch. Both have identical wire format, though they have different requirements and provide different APIs. In general, Static Patch is preferred unless you can not include the generated thrift header.
+| Argument            | Description                                             | Example                            |
+| ------------------- | ------------------------------------------------------- | ---------------------------------- |
+| thrift_library_name | The name of thrift_library that contains the srcs.      | "my_rule"                          |
+| thrift_library_srcs | The thrift source files that we want to generate Patch. | ["foo.thrift", "bar.thrift"]       |
+| thrift_library_deps | The build rules that patch depends on.                  | ["//path/to/foo", "//path/to/bar"] |
 
-* Static Patch, or Schema-full Patch, is generated from Thrift codegen and has 1:1 mapping to Thrift type.
-    * Pros: More user-friendly APIs (e.g., be able to modify patch based on field name, user can’t generate invalid patch).
-    * Cons: Requires thrift file to be available (e.g., `<thrift_file>_types.h` must be included in C++).
-* Dynamic Patch, or Schema-less Patch, is a schema-less representation of static patch that is consumed with dynamic type `protocol::Object`.
-    * Pros: Can be used without thrift file.
-    * Cons: Less user-friendly APIs.
+### Example
+
+In TARGETS, for
+
+```
+thrift_library(
+  name = "foo",
+  languages = ['cpp2'],
+  srcs = {"foo.thrift": []},
+  deps = ["//path/to/bar"]
+)
+```
+
+Add the following build rule to build patch target
+
+```
+thrift_patch_library(
+  thrift_library_name = "foo",
+  thrift_library_srcs = ["foo.thrift"],
+  thrift_library_deps = ["//path/to/bar"],
+)
+```
+
+So that this can be used later in C++
+
+```
+// MyService.cpp
+#include "path/to/gen-cpp2/foo_patch_types.h"
+
+auto createPatch() {
+  apache::thrift::op::patch_type<Foo> patch;
+  patch.patch<ident::message>() += "suffix";
+  return patch;
+}
+```
+
+Dependencies can be included automatically via autodeps.
+
+### Dynamic Patch
+
+There are 2 representations of a Patch — Static Patch and Dynamic Patch. Both
+have identical wire format, though they have different requirements and provide
+different APIs. In general, Static Patch is preferred unless you can not include
+the generated thrift header.
+
+- Static Patch, or Schema-full Patch, is generated from Thrift codegen and has
+  1:1 mapping to Thrift type.
+  - Pros: More user-friendly APIs (e.g., be able to modify patch based on field
+    name, user can’t generate invalid patch).
+  - Cons: Requires thrift file to be available (e.g.,
+    `<thrift_file>_patch_types.h` must be included in C++).
+    You need to recursively enable to all Thrift file dependencies.
+- Dynamic Patch, or Schema-less Patch, is a schema-less representation of static
+  patch that is consumed with dynamic type `protocol::Object`.
+  - Pros: Can be used without thrift file.
+  - Cons: Less user-friendly APIs.
+
+### Deprecated workflow
+
+There is also a deprecated workflow which you can enable Patch via
+`@patch.GeneratePatch` annotation.
+
+When this annotation is used, the corresponding Patch struct will be generated directly in the original thrift file.
+This workflow is deprecated and it should not be used for new files.
 
 ## C++ Static Patch
 

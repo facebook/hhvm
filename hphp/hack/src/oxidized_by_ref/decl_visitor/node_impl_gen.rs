@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fceb845bbf132c7660e6b3207f893260>>
+// @generated SignedSource<<c0c8685516afffd8d43ffde9330fdc41>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -530,6 +530,7 @@ impl<'a> Node<'a> for FunParam<'a> {
                 name: ref __binding_1,
                 type_: ref __binding_2,
                 flags: ref __binding_3,
+                def_value: ref __binding_4,
             } => {
                 {
                     __binding_0.accept(v)
@@ -540,7 +541,10 @@ impl<'a> Node<'a> for FunParam<'a> {
                 {
                     __binding_2.accept(v)
                 }
-                { __binding_3.accept(v) }
+                {
+                    __binding_3.accept(v)
+                }
+                { __binding_4.accept(v) }
             }
         }
     }

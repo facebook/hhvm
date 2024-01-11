@@ -447,6 +447,7 @@ struct
         parameter_type: t;
         parameter_name: t;
         parameter_default_value: t;
+        parameter_parameter_end: t;
       }
     | VariadicParameter of {
         variadic_parameter_call_convention: t;

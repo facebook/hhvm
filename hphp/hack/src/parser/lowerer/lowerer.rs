@@ -3800,6 +3800,7 @@ fn p_fun_param<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::FunParam> {
             type_,
             name,
             default_value,
+            parameter_end: _parameter_end,
         }) => {
             let (is_variadic, name) = match &name.children {
                 DecoratedExpression(DecoratedExpressionChildren {

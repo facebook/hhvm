@@ -63,6 +63,7 @@ let make_param_ty env param =
           (has_accept_disposable_attribute param.param_user_attributes)
         ~has_default:(Option.is_some param.param_expr)
         ~readonly:(Option.is_some param.param_readonly);
+    fp_def_value = None;
   }
 
 let ret_from_fun_kind ?(is_constructor = false) env (pos : pos) kind hint =

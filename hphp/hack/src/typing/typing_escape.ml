@@ -218,7 +218,9 @@ and refresh_type renv v ty_orig =
     in
     let param_v = Ast_defs.swap_variance v in
     let ft_param
-        renvch ({ fp_type; fp_pos = _; fp_name = _; fp_flags = _ } as fp) =
+        renvch
+        ({ fp_type; fp_pos = _; fp_name = _; fp_flags = _; fp_def_value = _ } as
+        fp) =
       let (renvch, fp_type) = enforced_ty renvch param_v fp_type in
       (renvch, { fp with fp_type })
     in

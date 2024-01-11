@@ -66,8 +66,8 @@ File root|module_enums.php--X.php
                    (Rhint ([12:22-23]), (Tapply (([12:22-23], "\\X"), []))) };
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = false; has_default = false; readonly = false }
-                 }
+                   inout = false; has_default = false; readonly = false };
+                 fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [12:19-21]) };
               ft_ret =
@@ -100,8 +100,8 @@ File root|module_enums.php--X.php
                    (Rhint ([15:13-14]), (Tapply (([15:13-14], "\\X"), []))) };
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = false; has_default = false; readonly = false }
-                 }
+                   inout = false; has_default = false; readonly = false };
+                 fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [15:10-12]) };
               ft_ret =
@@ -183,8 +183,8 @@ File root|module_enums.php--Y.php
                   (Rhint ([6:13-14]), (Tapply (([6:13-14], "\\X"), []))) };
                 fp_flags =
                 { Typing_defs_flags.FunParam.accept_disposable = false;
-                  inout = false; has_default = false; readonly = false }
-                }
+                  inout = false; has_default = false; readonly = false };
+                fp_def_value = None }
                ];
              ft_implicit_params = { capability = (CapDefaults [6:10-12]) };
              ft_ret =
@@ -243,8 +243,8 @@ File root|module_enums.php--no-module.php
                   (Rhint ([3:13-14]), (Tapply (([3:13-14], "\\X"), []))) };
                 fp_flags =
                 { Typing_defs_flags.FunParam.accept_disposable = false;
-                  inout = false; has_default = false; readonly = false }
-                }
+                  inout = false; has_default = false; readonly = false };
+                fp_def_value = None }
                ];
              ft_implicit_params = { capability = (CapDefaults [3:10-12]) };
              ft_ret =

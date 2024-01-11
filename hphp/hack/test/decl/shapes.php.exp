@@ -44,8 +44,8 @@
                    };
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = false; has_default = false; readonly = false }
-                 }
+                   inout = false; has_default = false; readonly = false };
+                 fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [5:10-21]) };
               ft_ret =
@@ -83,8 +83,8 @@
                    };
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = false; has_default = false; readonly = false }
-                 }
+                   inout = false; has_default = false; readonly = false };
+                 fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [9:10-23]) };
               ft_ret =
@@ -139,8 +139,8 @@
                    };
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = false; has_default = false; readonly = false }
-                 }
+                   inout = false; has_default = false; readonly = false };
+                 fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [15:10-23]) };
               ft_ret =

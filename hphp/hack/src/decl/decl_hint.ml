@@ -157,6 +157,7 @@ and hint_ p env = function
             ~accept_disposable:false
             ~has_default:false
             ~readonly;
+        fp_def_value = None;
       }
     in
     let readonly_opt ro =

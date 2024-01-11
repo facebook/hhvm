@@ -6976,6 +6976,7 @@ end = struct
                 fp_name = None;
                 fp_type = MakeType.enforced ty;
                 fp_flags = flags;
+                fp_def_value = None;
               }
             in
             let ft_arity =

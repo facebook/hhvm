@@ -42,6 +42,7 @@ pub struct FunParam<R: Reason> {
     pub pos: R::Pos,
     pub name: Option<Symbol>,
     pub ty: Ty<R>,
+    pub def_value: Option<String>,
 }
 
 walkable!(FunParam<R> => [ty]);
@@ -508,6 +509,7 @@ impl<'a, R: Reason> ToOxidized<'a> for FunParam<R> {
                 type_: &*arena.alloc(self.ty.to_oxidized(arena)),
             }),
             flags: oxidized::typing_defs_flags::FunParamFlags::from_bits_truncate(0),
+            def_value: self.def_value.as_deref().to_oxidized(arena),
         }
     }
 }
@@ -598,6 +600,7 @@ mod tests {
             pos: NPos::none(),
             name: None,
             ty: Ty::var(NReason::none(), tv0.clone()),
+            def_value: None,
         }];
         let ret = Ty::var(NReason::none(), tv1.clone());
 
@@ -624,6 +627,7 @@ mod tests {
                     pos: NPos::none(),
                     name: None,
                     ty: ty_fn1,
+                    def_value: None,
                 }],
                 flags: FunTypeFlags::empty(),
                 ret: Ty::var(NReason::none(), tv2.clone()),

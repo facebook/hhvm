@@ -20,7 +20,7 @@ function printNameValue(string $kls, mixed $x): void {
 function main(): void {
   // Get the autoloader to initialize
   HH\autoload_is_native();
-  // === FileDecls should fail parsing this text
+
   $instance = HH\FileDecls::parseText('
   const string FileConst = "asdfasdf";
   enum FilePermission: mixed as mixed {
@@ -48,6 +48,15 @@ function main(): void {
     const bool MY_CONSTANT_REF_STATIC = static::MY_CONSTANT_BOOL;
     const int MY_CONSTANT_REF_NAMED = FilePermission::Read;
     const int MY_CONSTANT_REF_OP = FilePermission::Read + 5;
+
+    private function fnWithOptional(
+      int $nodefault,
+      ?int $nullint = null,
+      ?string $str = "asdf",
+      mixed $emptyvec = vec[],
+      vec<int> $vecint = vec[10,20],
+      shape(...) $someshape = shape("yes" => true)
+    ): void {}
   }');
 
   echo " == \n\n";
@@ -56,4 +65,10 @@ function main(): void {
   printNameValues("FilePermission", $instance->getConsts("FilePermission"));
   printNameValues("MyClass", $instance->getConsts("MyClass"));
 
+  $params = $instance->getMethod('MyClass', 'fnWithOptional')['signature']['params'] ?? vec[];
+  foreach ($params as $x) {
+    if ((bool)idx($x, 'has_default')) {
+      echo $x['name'].' = '.($x['default_value'] ?? '(no value)')."\n";
+    }
+  }
 }

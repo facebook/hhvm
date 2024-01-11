@@ -707,6 +707,7 @@ let schema : schema_node list =
           ("type", ZeroOrOne (Aggregate Specifier));
           ("name", Aggregate Expression);
           ("default_value", ZeroOrOne (Just "SimpleInitializer"));
+          ("parameter_end", ZeroOrOne Token);
         ];
     };
     {

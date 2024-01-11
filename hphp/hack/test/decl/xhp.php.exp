@@ -70,8 +70,8 @@
                    (Rhint ([7:34-37]), (Tapply (([7:34-37], "\\xhp"), []))) };
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = false; has_default = false; readonly = false }
-                 }
+                   inout = false; has_default = false; readonly = false };
+                 fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [7:10-33]) };
               ft_ret =

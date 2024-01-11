@@ -13,8 +13,8 @@
                   et_type = (Rhint ([5:21-24]), (Tprim Tint)) };
                 fp_flags =
                 { Typing_defs_flags.FunParam.accept_disposable = false;
-                  inout = false; has_default = false; readonly = false }
-                }
+                  inout = false; has_default = false; readonly = false };
+                fp_def_value = None }
                ];
              ft_implicit_params = { capability = (CapDefaults [5:10-20]) };
              ft_ret =
@@ -56,8 +56,8 @@
                    et_type = (Rhint ([7:23-24]), (Tgeneric ("T", []))) };
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
-                   inout = false; has_default = false; readonly = false }
-                 }
+                   inout = false; has_default = false; readonly = false };
+                 fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [7:10-11]) };
               ft_ret =
@@ -115,8 +115,8 @@
                       };
                     fp_flags =
                     { Typing_defs_flags.FunParam.accept_disposable = false;
-                      inout = false; has_default = false; readonly = false }
-                    }
+                      inout = false; has_default = false; readonly = false };
+                    fp_def_value = None }
                    ];
                  ft_implicit_params =
                  { capability = (CapDefaults [14:19-20]) };

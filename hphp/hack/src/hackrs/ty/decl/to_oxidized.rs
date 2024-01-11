@@ -289,6 +289,7 @@ impl<'a, R: Reason> ToOxidized<'a> for FunParam<R, Ty<R>> {
             name: self.name.to_oxidized(arena),
             type_: self.ty.to_oxidized(arena),
             flags: self.flags,
+            def_value: self.def_value.as_deref().to_oxidized(arena),
         })
     }
 }

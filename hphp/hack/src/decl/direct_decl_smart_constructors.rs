@@ -748,6 +748,7 @@ pub struct FunParamDecl<'a> {
     name: Option<&'a str>,
     variadic: bool,
     initializer: Node<'a>,
+    parameter_end: Node<'a>,
 }
 
 #[derive(Debug)]
@@ -927,6 +928,9 @@ pub enum Node<'a> {
     // in tracking down the reason it was ignored.
     Ignored(SyntaxKind),
 
+    // Missing is an ignored node with an offset
+    Missing(usize),
+
     // For tokens with a fixed width (like `using`), we also keep its offset in
     // the source text, so that we can reference the text of the token if it's
     // (erroneously) used as an identifier (e.g., `function using() {}`).
@@ -1012,7 +1016,7 @@ impl<'a> smart_constructors::NodeType for Node<'a> {
         ) || matches!(self, Node::Ignored(SK::ScopeResolutionExpression))
     }
     fn is_missing(&self) -> bool {
-        matches!(self, Node::Ignored(SK::Missing))
+        matches!(self, Node::Ignored(SK::Missing) | Node::Missing(..))
     }
     fn is_variable_expression(&self) -> bool {
         matches!(self, Node::Ignored(SK::VariableExpression))
@@ -1116,7 +1120,10 @@ impl<'a> Node<'a> {
     }
 
     fn is_ignored(&self) -> bool {
-        matches!(self, Node::Ignored(..) | Node::IgnoredToken(..))
+        matches!(
+            self,
+            Node::Ignored(..) | Node::IgnoredToken(..) | Node::Missing(..)
+        )
     }
 
     fn is_present(&self) -> bool {
@@ -1377,6 +1384,13 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
     }
 
     fn node_to_str(&self, node: Node<'a>, semicolon: Node<'a>) -> &'a str {
+        self.node_to_str_wpos(
+            node,
+            self.get_pos(semicolon).to_start_and_end_lnum_bol_offset().0,
+        )
+    }
+
+    fn node_to_str_wpos(&self, node: Node<'a>, end: (usize, usize, usize)) -> &'a str {
         let expr = self.node_to_expr(node);
         match expr {
             // Only some nodes have a simple translate to an expression
@@ -1391,7 +1405,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                     self.arena,
                     self.filename,
                     self.get_pos(node).to_start_and_end_lnum_bol_offset().1,
-                    self.get_pos(semicolon).to_start_and_end_lnum_bol_offset().0,
+                    end,
                 )))
                 .trim(),
         }
@@ -1948,6 +1962,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                             name,
                             variadic,
                             initializer,
+                            parameter_end,
                         }) => {
                             let attributes = self.to_attributes(attributes);
 
@@ -2027,6 +2042,23 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                                     type_,
                                 }),
                                 flags,
+                                def_value: if self.opts.include_assignment_values
+                                    && initializer.is_present()
+                                {
+                                    let end = match parameter_end {
+                                        Node::Missing(offset) => {
+                                            self.source_text.offset_to_file_pos_triple(offset)
+                                        }
+                                        _ => {
+                                            self.get_pos(initializer)
+                                                .to_start_and_end_lnum_bol_offset()
+                                                .1
+                                        }
+                                    };
+                                    Some(self.node_to_str_wpos(initializer, end))
+                                } else {
+                                    None
+                                },
                             });
                             params.push(param);
                         }
@@ -2971,8 +3003,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         error
     }
 
-    fn make_missing(&mut self, _: usize) -> Self::Output {
-        Node::Ignored(SK::Missing)
+    fn make_missing(&mut self, offset: usize) -> Self::Output {
+        Node::Missing(offset)
     }
 
     fn make_list(&mut self, mut items: Vec<Self::Output>, _: usize) -> Self::Output {
@@ -3724,6 +3756,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         hint: Self::Output,
         name: Self::Output,
         initializer: Self::Output,
+        parameter_end: Self::Output,
     ) -> Self::Output {
         let (variadic, pos, name) = match name {
             Node::ListItem(&(ellipsis, id)) => {
@@ -3771,6 +3804,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             name,
             variadic,
             initializer,
+            parameter_end,
         }))
     }
 
@@ -3793,6 +3827,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 name: None,
                 variadic: true,
                 initializer: Node::Ignored(SK::Missing),
+                parameter_end: Node::Ignored(SK::Missing),
             }),
         )
     }
@@ -3936,7 +3971,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         // Keep the name if it's an IgnoredToken rather than an Ignored. An
         // IgnoredToken here should always be an error, but it's better to treat
         // a keyword as a name than to claim the function has no name at all.
-        let name = if matches!(name, Node::Ignored(..)) {
+        let name = if matches!(name, Node::Ignored(..) | Node::Missing(..)) {
             left_paren
         } else {
             name
@@ -5712,6 +5747,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                     type_: param_type,
                 }),
                 flags,
+                def_value: None, // Not supported for closures
             })
         };
 
@@ -5784,6 +5820,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             name: Some(""),
             variadic: false,
             initializer: Node::Ignored(SK::Missing),
+            parameter_end: Node::Ignored(SK::Missing),
         }))
     }
 

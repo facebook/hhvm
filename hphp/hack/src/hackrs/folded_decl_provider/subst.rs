@@ -153,6 +153,7 @@ impl<'a, R: Reason> Substitution<'a, R> {
                         pos: fp.pos.clone(),
                         name: fp.name,
                         flags: fp.flags,
+                        def_value: fp.def_value.clone(),
                     })
                     .collect::<Box<[_]>>();
                 let ret = subst.instantiate_possibly_enforced_ty(&ft.ret);

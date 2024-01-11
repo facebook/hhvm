@@ -261,8 +261,8 @@ where
         Node(self.0.make_decorated_expression(decorator.0, expression.0), self.1.make_decorated_expression(decorator.1, expression.1))
     }
 
-    fn make_parameter_declaration(&mut self, attribute: Self::Output, visibility: Self::Output, call_convention: Self::Output, readonly: Self::Output, type_: Self::Output, name: Self::Output, default_value: Self::Output) -> Self::Output {
-        Node(self.0.make_parameter_declaration(attribute.0, visibility.0, call_convention.0, readonly.0, type_.0, name.0, default_value.0), self.1.make_parameter_declaration(attribute.1, visibility.1, call_convention.1, readonly.1, type_.1, name.1, default_value.1))
+    fn make_parameter_declaration(&mut self, attribute: Self::Output, visibility: Self::Output, call_convention: Self::Output, readonly: Self::Output, type_: Self::Output, name: Self::Output, default_value: Self::Output, parameter_end: Self::Output) -> Self::Output {
+        Node(self.0.make_parameter_declaration(attribute.0, visibility.0, call_convention.0, readonly.0, type_.0, name.0, default_value.0, parameter_end.0), self.1.make_parameter_declaration(attribute.1, visibility.1, call_convention.1, readonly.1, type_.1, name.1, default_value.1, parameter_end.1))
     }
 
     fn make_variadic_parameter(&mut self, call_convention: Self::Output, type_: Self::Output, ellipsis: Self::Output) -> Self::Output {

@@ -466,8 +466,8 @@ SyntaxVariant::DecoratedExpression (DecoratedExpressionChildren{decorator,expres
 ss.serialize_field("decorated_expression_expression", &self.with(expression))?;
       ss.end()
 } 
-SyntaxVariant::ParameterDeclaration (ParameterDeclarationChildren{attribute,visibility,call_convention,readonly,type_,name,default_value} ) => {
-      let mut ss = s.serialize_struct("", 8)?;
+SyntaxVariant::ParameterDeclaration (ParameterDeclarationChildren{attribute,visibility,call_convention,readonly,type_,name,default_value,parameter_end} ) => {
+      let mut ss = s.serialize_struct("", 9)?;
       ss.serialize_field("kind", "parameter_declaration")?;
       ss.serialize_field("parameter_attribute", &self.with(attribute))?;
 ss.serialize_field("parameter_visibility", &self.with(visibility))?;
@@ -476,6 +476,7 @@ ss.serialize_field("parameter_readonly", &self.with(readonly))?;
 ss.serialize_field("parameter_type", &self.with(type_))?;
 ss.serialize_field("parameter_name", &self.with(name))?;
 ss.serialize_field("parameter_default_value", &self.with(default_value))?;
+ss.serialize_field("parameter_parameter_end", &self.with(parameter_end))?;
       ss.end()
 } 
 SyntaxVariant::VariadicParameter (VariadicParameterChildren{call_convention,type_,ellipsis} ) => {

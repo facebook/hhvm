@@ -406,7 +406,8 @@ module Full = struct
       st
       penv
       ~verbose
-      ({ fp_name; fp_type; fp_flags; fp_pos = _ } : 'a ty fun_param) =
+      ({ fp_name; fp_type; fp_flags; fp_pos = _; fp_def_value = _ } :
+        'a ty fun_param) =
     let {
       Typing_defs_flags.FunParam.accept_disposable;
       inout;
@@ -2075,6 +2076,7 @@ module Json = struct
                     (* Dummy values: these aren't currently serialized. *)
                     fp_pos = Pos_or_decl.none;
                     fp_name = None;
+                    fp_def_value = None;
                   })
           in
           params >>= fun ft_params ->

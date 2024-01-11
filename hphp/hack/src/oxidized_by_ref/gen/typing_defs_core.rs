@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7f17996790dc9c3f89e690f3995a558b>>
+// @generated SignedSource<<83155bb097076ffa0633785baf4ae03d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -430,6 +430,8 @@ pub struct FunParam<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub type_: &'a PossiblyEnforcedTy<'a>,
     pub flags: typing_defs_flags::fun_param::FunParam,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub def_value: Option<&'a str>,
 }
 impl<'a> TrivialDrop for FunParam<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(FunParam<'arena>);

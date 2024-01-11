@@ -51,6 +51,7 @@ let rec strip_ty ty =
           (* Dummy values: these aren't currently serialized. *)
           fp_pos = Pos_or_decl.none;
           fp_name = None;
+          fp_def_value = None;
         }
       in
       let ft_params = List.map ft_params ~f:strip_param in

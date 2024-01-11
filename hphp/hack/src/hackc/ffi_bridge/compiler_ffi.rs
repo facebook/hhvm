@@ -149,6 +149,7 @@ mod ffi {
         is_inout: bool,
         has_default: bool,
         is_readonly: bool,
+        def_value: String,
     }
 
     #[derive(Debug, PartialEq)]

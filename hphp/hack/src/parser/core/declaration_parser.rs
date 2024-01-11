@@ -1703,6 +1703,8 @@ where
         };
         let name = self.parse_decorated_variable_opt();
         let default = self.parse_simple_initializer_opt();
+        let parameter_end = self.pos();
+        let parameter_end_token = self.sc_mut().make_missing(parameter_end);
         self.sc_mut().make_parameter_declaration(
             attrs,
             visibility,
@@ -1711,6 +1713,7 @@ where
             type_specifier,
             name,
             default,
+            parameter_end_token,
         )
     }
 

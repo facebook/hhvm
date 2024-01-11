@@ -944,6 +944,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           parameter_type = param_type;
           parameter_name = name;
           parameter_default_value = default;
+          parameter_parameter_end = _prend;
         } ->
       Concat
         [

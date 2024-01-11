@@ -216,9 +216,9 @@ class ['env] deep_type_mapper =
       (env, cstr)
 
     method private on_param env param =
-      let { fp_pos; fp_name; fp_type; fp_flags } = param in
+      let { fp_pos; fp_name; fp_type; fp_flags; fp_def_value } = param in
       let (env, fp_type) = this#on_possibly_enforced_ty env fp_type in
-      let param = { fp_pos; fp_name; fp_type; fp_flags } in
+      let param = { fp_pos; fp_name; fp_type; fp_flags; fp_def_value } in
       (env, param)
 
     method private on_capability env c =

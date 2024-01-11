@@ -511,7 +511,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ParameterDeclaration(x) => {
-                get_index(7).and_then(|index| { match index {
+                get_index(8).and_then(|index| { match index {
                         0 => Some(&x.attribute),
                     1 => Some(&x.visibility),
                     2 => Some(&x.call_convention),
@@ -519,6 +519,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     4 => Some(&x.type_),
                     5 => Some(&x.name),
                     6 => Some(&x.default_value),
+                    7 => Some(&x.parameter_end),
                         _ => None,
                     }
                 })

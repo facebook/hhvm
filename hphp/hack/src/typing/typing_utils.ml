@@ -680,6 +680,7 @@ let default_fun_param ?(pos = Pos_or_decl.none) ty : 'a fun_param =
         ~accept_disposable:false
         ~has_default:false
         ~readonly:false;
+    fp_def_value = None;
   }
 
 let tany = Env.tany

@@ -1272,6 +1272,7 @@ module WithToken (Token : TokenType) = struct
             parameter_type;
             parameter_name;
             parameter_default_value;
+            parameter_parameter_end;
           } ->
         let acc = f acc parameter_attribute in
         let acc = f acc parameter_visibility in
@@ -1280,6 +1281,7 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc parameter_type in
         let acc = f acc parameter_name in
         let acc = f acc parameter_default_value in
+        let acc = f acc parameter_parameter_end in
         acc
       | VariadicParameter
           {
@@ -3120,6 +3122,7 @@ module WithToken (Token : TokenType) = struct
             parameter_type;
             parameter_name;
             parameter_default_value;
+            parameter_parameter_end;
           } ->
         [
           parameter_attribute;
@@ -3129,6 +3132,7 @@ module WithToken (Token : TokenType) = struct
           parameter_type;
           parameter_name;
           parameter_default_value;
+          parameter_parameter_end;
         ]
       | VariadicParameter
           {
@@ -4896,6 +4900,7 @@ module WithToken (Token : TokenType) = struct
             parameter_type;
             parameter_name;
             parameter_default_value;
+            parameter_parameter_end;
           } ->
         [
           "parameter_attribute";
@@ -4905,6 +4910,7 @@ module WithToken (Token : TokenType) = struct
           "parameter_type";
           "parameter_name";
           "parameter_default_value";
+          "parameter_parameter_end";
         ]
       | VariadicParameter
           {
@@ -6815,6 +6821,7 @@ module WithToken (Token : TokenType) = struct
             parameter_type;
             parameter_name;
             parameter_default_value;
+            parameter_parameter_end;
           ] ) ->
         ParameterDeclaration
           {
@@ -6825,6 +6832,7 @@ module WithToken (Token : TokenType) = struct
             parameter_type;
             parameter_name;
             parameter_default_value;
+            parameter_parameter_end;
           }
       | ( SyntaxKind.VariadicParameter,
           [
@@ -8953,7 +8961,8 @@ module WithToken (Token : TokenType) = struct
           parameter_readonly
           parameter_type
           parameter_name
-          parameter_default_value =
+          parameter_default_value
+          parameter_parameter_end =
         let syntax =
           ParameterDeclaration
             {
@@ -8964,6 +8973,7 @@ module WithToken (Token : TokenType) = struct
               parameter_type;
               parameter_name;
               parameter_default_value;
+              parameter_parameter_end;
             }
         in
         let value = ValueBuilder.value_from_syntax syntax in

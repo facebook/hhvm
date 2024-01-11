@@ -229,6 +229,7 @@ type 'ty fun_param = {
   fp_name: string option;
   fp_type: 'ty possibly_enforced_ty;
   fp_flags: Typing_defs_flags.FunParam.t;
+  fp_def_value: string option;
 }
 [@@deriving eq, hash, show { with_path = false }]
 

@@ -555,6 +555,7 @@ pub struct FunParam<R: Reason, TY> {
     pub name: Option<Symbol>,
     pub ty: PossiblyEnforcedTy<TY>,
     pub flags: FunParamFlags,
+    pub def_value: Option<String>,
 }
 
 walkable!(impl<R: Reason, TY> for FunParam<R, TY> => [ty]);

@@ -125,6 +125,7 @@ const StaticString s_is_variadic("is_variadic");
 const StaticString s_is_accept_disposable("is_accept_disposable");
 const StaticString s_is_inout("is_inout");
 const StaticString s_has_default("has_default");
+const StaticString s_default_value("default_value");
 const StaticString s_is_readonly("is_readonly");
 const StaticString s_is_const("is_const");
 const StaticString s_is_lateinit("is_lateinit");
@@ -398,6 +399,7 @@ Array populateMethodParams(const rust::Vec<hackc::ExtDeclMethodParam>& params) {
     maybeSetBool(info, param.is_inout, s_is_inout);
     maybeSetBool(info, param.has_default, s_has_default);
     maybeSetBool(info, param.is_readonly, s_is_readonly);
+    maybeSet(info, param.def_value, s_default_value, rustToString);
     arr.append(info);
   }
   return arr.toArray();

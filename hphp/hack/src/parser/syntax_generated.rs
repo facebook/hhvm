@@ -538,7 +538,7 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_parameter_declaration(_: &C, parameter_attribute: Self, parameter_visibility: Self, parameter_call_convention: Self, parameter_readonly: Self, parameter_type: Self, parameter_name: Self, parameter_default_value: Self) -> Self {
+    fn make_parameter_declaration(_: &C, parameter_attribute: Self, parameter_visibility: Self, parameter_call_convention: Self, parameter_readonly: Self, parameter_type: Self, parameter_name: Self, parameter_default_value: Self, parameter_parameter_end: Self) -> Self {
         let syntax = SyntaxVariant::ParameterDeclaration(Box::new(ParameterDeclarationChildren {
             parameter_attribute,
             parameter_visibility,
@@ -547,6 +547,7 @@ where
             parameter_type,
             parameter_name,
             parameter_default_value,
+            parameter_parameter_end,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
@@ -2432,7 +2433,7 @@ where
                 acc
             },
             SyntaxVariant::ParameterDeclaration(x) => {
-                let ParameterDeclarationChildren { parameter_attribute, parameter_visibility, parameter_call_convention, parameter_readonly, parameter_type, parameter_name, parameter_default_value } = *x;
+                let ParameterDeclarationChildren { parameter_attribute, parameter_visibility, parameter_call_convention, parameter_readonly, parameter_type, parameter_name, parameter_default_value, parameter_parameter_end } = *x;
                 let acc = f(parameter_attribute, acc);
                 let acc = f(parameter_visibility, acc);
                 let acc = f(parameter_call_convention, acc);
@@ -2440,6 +2441,7 @@ where
                 let acc = f(parameter_type, acc);
                 let acc = f(parameter_name, acc);
                 let acc = f(parameter_default_value, acc);
+                let acc = f(parameter_parameter_end, acc);
                 acc
             },
             SyntaxVariant::VariadicParameter(x) => {
@@ -4041,7 +4043,8 @@ where
                  decorated_expression_decorator: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::ParameterDeclaration, 7) => SyntaxVariant::ParameterDeclaration(Box::new(ParameterDeclarationChildren {
+             (SyntaxKind::ParameterDeclaration, 8) => SyntaxVariant::ParameterDeclaration(Box::new(ParameterDeclarationChildren {
+                 parameter_parameter_end: ts.pop().unwrap(),
                  parameter_default_value: ts.pop().unwrap(),
                  parameter_name: ts.pop().unwrap(),
                  parameter_type: ts.pop().unwrap(),
@@ -5033,7 +5036,7 @@ where
             SyntaxVariant::TypeConstDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.type_const_attribute_spec, 10) },
             SyntaxVariant::ContextConstDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.context_const_modifiers, 9) },
             SyntaxVariant::DecoratedExpression(x) => unsafe { std::slice::from_raw_parts(&x.decorated_expression_decorator, 2) },
-            SyntaxVariant::ParameterDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.parameter_attribute, 7) },
+            SyntaxVariant::ParameterDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.parameter_attribute, 8) },
             SyntaxVariant::VariadicParameter(x) => unsafe { std::slice::from_raw_parts(&x.variadic_parameter_call_convention, 3) },
             SyntaxVariant::OldAttributeSpecification(x) => unsafe { std::slice::from_raw_parts(&x.old_attribute_specification_left_double_angle, 3) },
             SyntaxVariant::AttributeSpecification(x) => unsafe { std::slice::from_raw_parts(&x.attribute_specification_attributes, 1) },
@@ -5225,7 +5228,7 @@ where
             SyntaxVariant::TypeConstDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.type_const_attribute_spec, 10) },
             SyntaxVariant::ContextConstDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.context_const_modifiers, 9) },
             SyntaxVariant::DecoratedExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.decorated_expression_decorator, 2) },
-            SyntaxVariant::ParameterDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.parameter_attribute, 7) },
+            SyntaxVariant::ParameterDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.parameter_attribute, 8) },
             SyntaxVariant::VariadicParameter(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.variadic_parameter_call_convention, 3) },
             SyntaxVariant::OldAttributeSpecification(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.old_attribute_specification_left_double_angle, 3) },
             SyntaxVariant::AttributeSpecification(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.attribute_specification_attributes, 1) },
@@ -5801,6 +5804,7 @@ pub struct ParameterDeclarationChildren<T, V> {
     pub parameter_type: Syntax<T, V>,
     pub parameter_name: Syntax<T, V>,
     pub parameter_default_value: Syntax<T, V>,
+    pub parameter_parameter_end: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -7688,7 +7692,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ParameterDeclaration(x) => {
-                get_index(7).and_then(|index| { match index {
+                get_index(8).and_then(|index| { match index {
                         0 => Some(&x.parameter_attribute),
                     1 => Some(&x.parameter_visibility),
                     2 => Some(&x.parameter_call_convention),
@@ -7696,6 +7700,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     4 => Some(&x.parameter_type),
                     5 => Some(&x.parameter_name),
                     6 => Some(&x.parameter_default_value),
+                    7 => Some(&x.parameter_parameter_end),
                         _ => None,
                     }
                 })

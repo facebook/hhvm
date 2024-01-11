@@ -917,7 +917,8 @@
         { "field_name" : "readonly" },
         { "field_name" : "type" },
         { "field_name" : "name" },
-        { "field_name" : "default_value" }
+        { "field_name" : "default_value" },
+        { "field_name" : "parameter_end" }
       ] },
     { "kind_name" : "VariadicParameter",
       "type_name" : "variadic_parameter",

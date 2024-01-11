@@ -309,6 +309,7 @@ fn get_method_params(params: &FunParams<'_>) -> Vec<ExtDeclMethodParam> {
             is_inout: p.flags.is_inout(),
             has_default: p.flags.has_default(),
             is_readonly: p.flags.is_readonly(),
+            def_value: str_or_empty(p.def_value),
         })
         .collect()
 }

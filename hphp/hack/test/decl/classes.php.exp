@@ -163,16 +163,16 @@
                       et_type = (Rhint ([15:5-11]), (Tprim Tstring)) };
                     fp_flags =
                     { Typing_defs_flags.FunParam.accept_disposable = false;
-                      inout = false; has_default = false; readonly = false }
-                    };
+                      inout = false; has_default = false; readonly = false };
+                    fp_def_value = None };
                    { fp_pos = [16:9-14]; fp_name = (Some "$arg2");
                      fp_type =
                      { et_enforced = Typing_defs_core.Unenforced;
                        et_type = (Rhint ([16:5-8]), (Tprim Tint)) };
                      fp_flags =
                      { Typing_defs_flags.FunParam.accept_disposable = false;
-                       inout = false; has_default = false; readonly = false }
-                     }
+                       inout = false; has_default = false; readonly = false };
+                     fp_def_value = None }
                    ];
                  ft_implicit_params =
                  { capability = (CapDefaults [14:25-40]) };
@@ -313,8 +313,8 @@
                          fp_flags =
                          { Typing_defs_flags.FunParam.accept_disposable =
                            false; inout = false; has_default = false;
-                           readonly = false }
-                         };
+                           readonly = false };
+                         fp_def_value = None };
                         { fp_pos = [30:22-32]; fp_name = (Some "$protected");
                           fp_type =
                           { et_enforced = Typing_defs_core.Unenforced;
@@ -322,8 +322,8 @@
                           fp_flags =
                           { Typing_defs_flags.FunParam.accept_disposable =
                             false; inout = false; has_default = false;
-                            readonly = false }
-                          };
+                            readonly = false };
+                          fp_def_value = None };
                         { fp_pos = [31:19-26]; fp_name = (Some "$public");
                           fp_type =
                           { et_enforced = Typing_defs_core.Unenforced;
@@ -331,8 +331,8 @@
                           fp_flags =
                           { Typing_defs_flags.FunParam.accept_disposable =
                             false; inout = false; has_default = false;
-                            readonly = false }
-                          };
+                            readonly = false };
+                          fp_def_value = None };
                         { fp_pos = [32:19-30];
                           fp_name = (Some "$hasDefault");
                           fp_type =
@@ -341,8 +341,8 @@
                           fp_flags =
                           { Typing_defs_flags.FunParam.accept_disposable =
                             false; inout = false; has_default = true;
-                            readonly = false }
-                          }
+                            readonly = false };
+                          fp_def_value = None }
                         ];
                       ft_implicit_params =
                       { capability = (CapDefaults [28:19-30]) };

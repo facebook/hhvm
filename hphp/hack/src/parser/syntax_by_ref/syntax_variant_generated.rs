@@ -599,6 +599,7 @@ pub struct ParameterDeclarationChildren<'a, T, V> {
     pub type_: Syntax<'a, T, V>,
     pub name: Syntax<'a, T, V>,
     pub default_value: Syntax<'a, T, V>,
+    pub parameter_end: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]

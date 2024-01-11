@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3a1227b45d5371f9c18f66a2e7d2519f>>
+// @generated SignedSource<<9eafc0d87b2cea13de6f4bf5ee107bbd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -500,6 +500,7 @@ pub struct FunParam {
     pub name: Option<String>,
     pub type_: PossiblyEnforcedTy,
     pub flags: typing_defs_flags::fun_param::FunParam,
+    pub def_value: Option<String>,
 }
 
 #[rust_to_ocaml(attr = "deriving (eq, hash, (show { with_path = false }))")]

@@ -44,8 +44,8 @@
                         fp_flags =
                         { Typing_defs_flags.FunParam.accept_disposable =
                           false; inout = false; has_default = false;
-                          readonly = false }
-                        }
+                          readonly = false };
+                        fp_def_value = None }
                        ];
                      ft_implicit_params =
                      { capability = (CapDefaults [5:19-30]) };

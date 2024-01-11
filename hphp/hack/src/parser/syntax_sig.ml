@@ -316,6 +316,7 @@ module type Syntax_S = sig
         parameter_type: t;
         parameter_name: t;
         parameter_default_value: t;
+        parameter_parameter_end: t;
       }
     | VariadicParameter of {
         variadic_parameter_call_convention: t;
@@ -1253,7 +1254,7 @@ module type Syntax_S = sig
 
   val make_decorated_expression : t -> t -> t
 
-  val make_parameter_declaration : t -> t -> t -> t -> t -> t -> t -> t
+  val make_parameter_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_variadic_parameter : t -> t -> t -> t
 

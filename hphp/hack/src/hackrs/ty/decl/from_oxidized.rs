@@ -279,6 +279,7 @@ impl<R: Reason> From<&obr::typing_defs_core::FunParam<'_>> for ty::FunParam<R, T
             name: fp.name.map(Into::into),
             ty: fp.type_.into(),
             flags: fp.flags,
+            def_value: fp.def_value.map(Into::into),
         }
     }
 }

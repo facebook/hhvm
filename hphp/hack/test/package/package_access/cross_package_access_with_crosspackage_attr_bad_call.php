@@ -3,7 +3,7 @@
 new module a {}     // package pkg1
 //// a.php
 <?hh
-<<file:__EnableUnstableFeatures('package')>>
+
 module a;
 class A {
   <<__CrossPackage("pkg2")>>

@@ -7,7 +7,7 @@ new module b.b1 {}  // package pkg2
 
 //// a.php
 <?hh
-<<file:__EnableUnstableFeatures('package')>>
+
 module a;
 
 interface IA {
@@ -45,7 +45,7 @@ class F implements IA  {
 
 //// b.php
 <?hh
-<<file:__EnableUnstableFeatures('package')>>
+
 module b.b1;
 // package pkg2 includes pkg1, so this is okay
 //

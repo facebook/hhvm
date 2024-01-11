@@ -20,12 +20,15 @@ public function f4(): void {}
 
 //// c.php
 <?hh
-<<file:__EnableUnstableFeatures('package')>>
+
 module c;
 public function test_err() : void {
    while (true) {
       invariant(package pkg1, "");
       f1(); // ok; pkg1 has been loaded
+      f4(); // error; pkg4 has not yet been loaded
+
+      invariant(package_exists("pkg1"), "");
       f4(); // error; pkg4 has not yet been loaded
 
       invariant(package pkg4, "");

@@ -12,7 +12,7 @@ public function f1(): void {}
 
 //// c.php
 <?hh
-<<file:__EnableUnstableFeatures('package')>>
+
 module c;
 public function test(): void {
   if (!(package pkg1)) {

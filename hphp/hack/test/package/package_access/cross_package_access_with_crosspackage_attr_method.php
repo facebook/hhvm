@@ -20,7 +20,7 @@ function pkg3_call(): void {}
 
 //// a.php
 <?hh
-<<file:__EnableUnstableFeatures('package')>>
+
 module a;
 
 class A {

@@ -23,7 +23,7 @@ public function f4(): void {}
 
 //// c.php
 <?hh
-<<file:__EnableUnstableFeatures('package')>>
+
 module c;
 public class C {
   public function test() : void {

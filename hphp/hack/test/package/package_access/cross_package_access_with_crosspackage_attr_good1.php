@@ -12,7 +12,7 @@ public function f1(): void {}
 
 //// c.php
 <?hh
-<<file:__EnableUnstableFeatures('package')>>
+
 module c;
 <<__CrossPackage("pkg1")>>
 public function test() : void {

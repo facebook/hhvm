@@ -66,4 +66,7 @@ namespace HH {
   function class_meth_get_method(mixed $class_meth)[]: string;
   function meth_caller_get_class(mixed $meth_caller)[]: string;
   function meth_caller_get_method(mixed $meth_caller)[]: string;
+  // Hack specific existence functions
+  function module_exists(string $module_name, bool $autoload = true)[]: bool;
+  function package_exists(string $name): bool;
 }

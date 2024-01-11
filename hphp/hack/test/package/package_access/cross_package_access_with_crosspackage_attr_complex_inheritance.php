@@ -8,7 +8,7 @@ new module b.b1 {}  // package pkg2
 
 //// a.php
 <?hh
-<<file:__EnableUnstableFeatures('package')>>
+
 module a;
 
 class A {

@@ -135,7 +135,7 @@ impl UnstableFeatures {
             UnstableFeatures::RequireClass => OngoingRelease,
             UnstableFeatures::NewtypeSuperBounds => Unstable,
             UnstableFeatures::ExpressionTreeBlocks => OngoingRelease,
-            UnstableFeatures::Package => Preview,
+            UnstableFeatures::Package => OngoingRelease,
             UnstableFeatures::CaseTypes => Preview,
             UnstableFeatures::ModuleLevelTraits => OngoingRelease,
             UnstableFeatures::TypedLocalVariables => Preview,
@@ -1997,7 +1997,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         ));
                     }
                     if sn::user_attributes::is_cross_package(n) {
-                        self.check_can_use_feature(node, &UnstableFeatures::Package);
                         self.check_cross_package_args_are_string_literals(node);
                     }
                 }
@@ -5475,9 +5474,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         Cow::Owned("You cannot declare $this as a typed local.".to_string()),
                     ));
                 }
-            }
-            PackageExpression(_) => {
-                self.check_can_use_feature(node, &UnstableFeatures::Package);
             }
             ClassArgsTypeSpecifier(_) => {
                 self.check_can_use_feature(node, &UnstableFeatures::ClassType);

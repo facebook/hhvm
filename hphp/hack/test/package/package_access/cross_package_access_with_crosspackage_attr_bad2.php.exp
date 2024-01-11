@@ -1,8 +1,8 @@
 Parsing[1002] This is an invalid use of '__CrossPackage' because this is not a literal string expression [1]
 
 cross_package_access_with_crosspackage_attr_bad2.php:4:18
-    2 | <<file:__EnableUnstableFeatures('package')>>
-    3 | 
+    2 |
+    3 |
 [1] 4 | <<__CrossPackage(123)>> // parse error
     5 | function test() : void {}
 

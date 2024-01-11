@@ -24,27 +24,29 @@ namespace thrift {
 namespace rocket {
 
 // C++20 concept
-// template <typename Strategy>
-// concept ParserStrategy = requires (Strategy s) {
-// { s.getReadBuffer(std::declval<void**>(), std::declval<size_t*>()) } ->
-// std::same_as<void>; { s.readDataAvailable(std::declval<size_t>()) } ->
-// std::same_as<void>; {
-// s.readBufferAvailable(std::declval<std::unique_ptr<folly::IOBuf>>()) } ->
-// std::same_as<void>;
-//};
-template <class T, template <typename> class Strategy>
-class ParserStrategy : private Strategy<T> {
+// template <typename T>
+// concept ParserStrategyConcept = requires(T t, void** bufReturn, size_t*
+// lenReturn, std::unique_ptr<folly::IOBuf> buf) {
+//     { t.getReadBuffer(bufReturn, lenReturn) } -> std::same_as<void>;
+//     { t.readDataAvailable(lenReturn) } -> std::same_as<void>;
+//     { t.readBufferAvailable(std::move(buf)) } -> std::same_as<void>;
+// };
+template <class T, template <typename...> class Strategy, typename... Args>
+class ParserStrategy : private Strategy<T, Args...> {
  public:
-  explicit ParserStrategy(T& owner) : Strategy<T>(owner) {}
+  explicit ParserStrategy(T& owner, Args... args)
+      : Strategy<T, Args...>(owner, args...) {}
 
   void getReadBuffer(void** bufReturn, size_t* lenReturn) {
-    Strategy<T>::getReadBuffer(bufReturn, lenReturn);
+    Strategy<T, Args...>::getReadBuffer(bufReturn, lenReturn);
   }
 
-  void readDataAvailable(size_t len) { Strategy<T>::readDataAvailable(len); }
+  void readDataAvailable(size_t len) {
+    Strategy<T, Args...>::readDataAvailable(len);
+  }
 
   void readBufferAvailable(std::unique_ptr<folly::IOBuf> buf) {
-    Strategy<T>::readBufferAvailable(std::move(buf));
+    Strategy<T, Args...>::readBufferAvailable(std::move(buf));
   }
 };
 

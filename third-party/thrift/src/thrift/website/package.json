@@ -58,6 +58,7 @@
     "@sideway/formula": "^3.0.1",
     "d3-color": "^3.1.0",
     "eta": "^2.0.0",
+    "follow-redirects": "^1.15.4",
     "got": "^11.8.5",
     "json5": "^2.2.2",
     "http-cache-semantics": "^4.1.1",

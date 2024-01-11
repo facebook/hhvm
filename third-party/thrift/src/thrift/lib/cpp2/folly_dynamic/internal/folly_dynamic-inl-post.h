@@ -23,6 +23,7 @@
 #include <folly/io/IOBufQueue.h>
 
 #include <thrift/lib/cpp/Thrift.h>
+#include <thrift/lib/cpp2/Adapt.h>
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Create.h>
 #include <thrift/lib/cpp2/op/Get.h>
@@ -322,11 +323,11 @@ struct dynamic_converter_impl<apache::thrift::type::struct_t<T>> {
 };
 
 template <typename Tag, typename Struct, int16_t FieldId>
-struct dynamic_converter_impl<apache::thrift::type::field<
-    Tag,
-    apache::thrift::FieldContext<Struct, FieldId>>> {
+struct dynamic_converter_impl_field {
   static void to(
       folly::dynamic& out, Struct const& input, dynamic_format format) {
+    using Id = apache::thrift::field_id<FieldId>;
+
     folly::StringPiece fieldName = apache::thrift::op::get_name_v<Struct, Id>;
     if (const auto* ref = apache::thrift::op::getValueOrNull(
             apache::thrift::op::get<Id>(input))) {
@@ -335,6 +336,16 @@ struct dynamic_converter_impl<apache::thrift::type::field<
                    apache::thrift::op::get_field_ref<Struct, Id>>) {
       out[fieldName] = nullptr;
     }
+  }
+};
+
+template <typename Tag, typename Struct, int16_t FieldId>
+struct dynamic_converter_impl<apache::thrift::type::field<
+    Tag,
+    apache::thrift::FieldContext<Struct, FieldId>>> {
+  static void to(
+      folly::dynamic& out, Struct const& input, dynamic_format format) {
+    dynamic_converter_impl_field<Tag, Struct, FieldId>::to(out, input, format);
   }
 
   static void from(
@@ -349,6 +360,56 @@ struct dynamic_converter_impl<apache::thrift::type::field<
  private:
   using Id = apache::thrift::field_id<FieldId>;
   static constexpr auto id = Id{};
+};
+
+template <typename Adapter, typename Tag, typename Struct, int16_t FieldId>
+struct dynamic_converter_impl<apache::thrift::type::field<
+    apache::thrift::type::adapted<Adapter, Tag>,
+    apache::thrift::FieldContext<Struct, FieldId>>> {
+  static void to(
+      folly::dynamic& out, Struct const& input, dynamic_format format) {
+    dynamic_converter_impl_field<
+        apache::thrift::type::adapted<Adapter, Tag>,
+        Struct,
+        FieldId>::to(out, input, format);
+  }
+
+  static void from(
+      Struct& s,
+      const folly::dynamic& input,
+      dynamic_format format,
+      format_adherence adherence) {
+    using Id = apache::thrift::field_id<FieldId>;
+    using FieldType = apache::thrift::op::get_native_type<Struct, Id>;
+
+    std::remove_cvref_t<
+        apache::thrift::adapt_detail::thrift_t<Adapter, FieldType>>
+        temp;
+    dynamic_converter_impl<Tag>::from(temp, input, format, adherence);
+    apache::thrift::op::get<Id>(s) =
+        apache::thrift::adapt_detail::fromThriftField<Adapter, FieldId>(
+            std::move(temp), s);
+  }
+};
+
+template <typename Adapter, typename Tag>
+struct dynamic_converter_impl<apache::thrift::type::adapted<Adapter, Tag>> {
+  template <typename T>
+  static void to(folly::dynamic& out, T const& input, dynamic_format format) {
+    dynamic_converter_impl<Tag>::to(out, Adapter::toThrift(input), format);
+  }
+
+  template <typename T>
+  static void from(
+      T& out,
+      const folly::dynamic& input,
+      dynamic_format format,
+      format_adherence adherence) {
+    std::remove_cvref_t<apache::thrift::adapt_detail::thrift_t<Adapter, T>>
+        temp;
+    dynamic_converter_impl<Tag>::from(temp, input, format, adherence);
+    out = Adapter::fromThrift(std::move(temp));
+  }
 };
 
 template <>

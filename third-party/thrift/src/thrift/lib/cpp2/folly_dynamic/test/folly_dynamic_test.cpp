@@ -29,6 +29,7 @@
 
 #include <thrift/lib/cpp2/reflection/helpers.h>
 #include <thrift/lib/cpp2/reflection/internal/test_helpers.h>
+#include <thrift/test/gen-cpp2/adapter_types.h>
 #include <thrift/test/reflection/gen-cpp2/compat_fatal_types.h>
 #include <thrift/test/reflection/gen-cpp2/global_fatal_types.h>
 #include <thrift/test/reflection/gen-cpp2/reflection_fatal_types.h>
@@ -40,12 +41,12 @@ using facebook::thrift::format_adherence;
 namespace facebook {
 namespace thrift {
 
-template <typename T>
+template <typename T, typename Tag = apache::thrift::type::infer_tag<T>>
 void test_to_from(T const& pod, const folly::dynamic& json) {
   std::ostringstream log;
   try {
     log.str("to_dynamic(PORTABLE):\n");
-    const auto actual = to_dynamic(pod, dynamic_format::PORTABLE);
+    const auto actual = to_dynamic<Tag>(pod, dynamic_format::PORTABLE);
     if (actual != json) {
       log << "actual: " << folly::toPrettyJson(actual) << std::endl
           << "expected: " << folly::toPrettyJson(json);
@@ -58,11 +59,11 @@ void test_to_from(T const& pod, const folly::dynamic& json) {
   }
   try {
     log.str("from_dynamic(PORTABLE):\n");
-    const auto actual = from_dynamic<T>(json, dynamic_format::PORTABLE);
+    const auto actual = from_dynamic<Tag, T>(json, dynamic_format::PORTABLE);
     if (actual != pod) {
-      pretty_print(log << "actual: ", actual);
+      pretty_print<Tag>(log << "actual: ", actual);
       log << std::endl;
-      pretty_print(log << "expected: ", pod);
+      pretty_print<Tag>(log << "expected: ", pod);
       log << std::endl;
       LOG(ERROR) << log.str();
     }
@@ -73,10 +74,10 @@ void test_to_from(T const& pod, const folly::dynamic& json) {
   }
   try {
     log.str("from_dynamic(PORTABLE)/to_dynamic(PORTABLE):\n");
-    const auto from = from_dynamic<T>(json, dynamic_format::PORTABLE);
-    const auto to = to_dynamic(from, dynamic_format::PORTABLE);
+    const auto from = from_dynamic<Tag, T>(json, dynamic_format::PORTABLE);
+    const auto to = to_dynamic<Tag>(from, dynamic_format::PORTABLE);
     if (json != to) {
-      pretty_print(log << "from: ", from);
+      pretty_print<Tag>(log << "from: ", from);
       log << std::endl
           << "to: " << folly::toPrettyJson(to) << std::endl
           << "expected: " << folly::toPrettyJson(json);
@@ -89,13 +90,13 @@ void test_to_from(T const& pod, const folly::dynamic& json) {
   }
   try {
     log.str("to_dynamic(PORTABLE)/from_dynamic(PORTABLE):\n");
-    const auto to = to_dynamic(pod, dynamic_format::PORTABLE);
-    const auto from = from_dynamic<T>(to, dynamic_format::PORTABLE);
+    const auto to = to_dynamic<Tag>(pod, dynamic_format::PORTABLE);
+    const auto from = from_dynamic<Tag, T>(to, dynamic_format::PORTABLE);
     if (pod != from) {
       log << "to: " << folly::toPrettyJson(to) << std::endl;
-      pretty_print(log << "from: ", from);
+      pretty_print<Tag>(log << "from: ", from);
       log << std::endl;
-      pretty_print(log << "expected: ", pod);
+      pretty_print<Tag>(log << "expected: ", pod);
       log << std::endl;
       LOG(ERROR) << log.str();
     }
@@ -106,14 +107,14 @@ void test_to_from(T const& pod, const folly::dynamic& json) {
   }
   try {
     log.str("to_dynamic(PORTABLE)/from_dynamic(PORTABLE,LENIENT):\n");
-    const auto to = to_dynamic(pod, dynamic_format::PORTABLE);
-    const auto from = from_dynamic<T>(
+    const auto to = to_dynamic<Tag>(pod, dynamic_format::PORTABLE);
+    const auto from = from_dynamic<Tag, T>(
         to, dynamic_format::PORTABLE, format_adherence::LENIENT);
     if (pod != from) {
       log << "to: " << folly::toPrettyJson(to) << std::endl;
-      pretty_print(log << "from: ", from);
+      pretty_print<Tag>(log << "from: ", from);
       log << std::endl;
-      pretty_print(log << "expected: ", pod);
+      pretty_print<Tag>(log << "expected: ", pod);
       log << std::endl;
       LOG(ERROR) << log.str();
     }
@@ -124,14 +125,14 @@ void test_to_from(T const& pod, const folly::dynamic& json) {
   }
   try {
     log.str("to_dynamic(PORTABLE)/from_dynamic(JSON_1,LENIENT):\n");
-    const auto to = to_dynamic(pod, dynamic_format::PORTABLE);
-    const auto from =
-        from_dynamic<T>(to, dynamic_format::JSON_1, format_adherence::LENIENT);
+    const auto to = to_dynamic<Tag>(pod, dynamic_format::PORTABLE);
+    const auto from = from_dynamic<Tag, T>(
+        to, dynamic_format::JSON_1, format_adherence::LENIENT);
     if (pod != from) {
       log << "to: " << folly::toPrettyJson(to) << std::endl;
-      pretty_print(log << "from: ", from);
+      pretty_print<Tag>(log << "from: ", from);
       log << std::endl;
-      pretty_print(log << "expected: ", pod);
+      pretty_print<Tag>(log << "expected: ", pod);
       log << std::endl;
       LOG(ERROR) << log.str();
     }
@@ -142,14 +143,14 @@ void test_to_from(T const& pod, const folly::dynamic& json) {
   }
   try {
     log.str("to_dynamic(JSON_1)/from_dynamic(PORTABLE,LENIENT):\n");
-    const auto to = to_dynamic(pod, dynamic_format::JSON_1);
-    const auto from = from_dynamic<T>(
+    const auto to = to_dynamic<Tag>(pod, dynamic_format::JSON_1);
+    const auto from = from_dynamic<Tag, T>(
         to, dynamic_format::PORTABLE, format_adherence::LENIENT);
     if (pod != from) {
       log << "to: " << folly::toPrettyJson(to) << std::endl;
-      pretty_print(log << "from: ", from);
+      pretty_print<Tag>(log << "from: ", from);
       log << std::endl;
-      pretty_print(log << "expected: ", pod);
+      pretty_print<Tag>(log << "expected: ", pod);
       log << std::endl;
       LOG(ERROR) << log.str();
     }
@@ -160,14 +161,14 @@ void test_to_from(T const& pod, const folly::dynamic& json) {
   }
   try {
     log.str("to_dynamic(JSON_1)/from_dynamic(JSON_1,LENIENT):\n");
-    const auto to = to_dynamic(pod, dynamic_format::JSON_1);
-    const auto from =
-        from_dynamic<T>(to, dynamic_format::JSON_1, format_adherence::LENIENT);
+    const auto to = to_dynamic<Tag>(pod, dynamic_format::JSON_1);
+    const auto from = from_dynamic<Tag, T>(
+        to, dynamic_format::JSON_1, format_adherence::LENIENT);
     if (pod != from) {
       log << "to: " << folly::toPrettyJson(to) << std::endl;
-      pretty_print(log << "from: ", from);
+      pretty_print<Tag>(log << "from: ", from);
       log << std::endl;
-      pretty_print(log << "expected: ", pod);
+      pretty_print<Tag>(log << "expected: ", pod);
       log << std::endl;
       LOG(ERROR) << log.str();
     }
@@ -573,6 +574,61 @@ TEST(PrettyPrint, to_from_struct_box) {
 
   const auto json = folly::parseJson(rawJson);
   test_to_from(pod, json);
+}
+
+TEST(FollyDynamic, struct_with_adapted_field) {
+  using apache::thrift::test::AdaptedWithContext;
+  using apache::thrift::test::Wrapper;
+
+  using test_cpp2::cpp_reflection::IntStruct;
+  using test_cpp2::cpp_reflection::StructWithAdaptedField;
+
+  IntStruct intStruct;
+
+  StructWithAdaptedField pod;
+  pod.meta() = "non-meta";
+  intStruct.field() = 2;
+  pod.typeAdapted() = Wrapper<IntStruct>{.value = intStruct};
+  intStruct.field() = 3;
+  pod.fieldAdapted() =
+      AdaptedWithContext<IntStruct, StructWithAdaptedField, 3>{intStruct};
+  pod.typeAdapted2() = Wrapper<int64_t>{.value = 4};
+  pod.DoubleAdapted() =
+      AdaptedWithContext<Wrapper<int64_t>, StructWithAdaptedField, 5>{
+          Wrapper<int64_t>{.value = 5}};
+
+  const auto jsonString = folly::stripLeftMargin(R"({
+    "meta": "non-meta",
+    "typeAdapted": {
+      "field": 2
+    },
+    "fieldAdapted": {
+      "field": 3
+    },
+    "typeAdapted2": 4,
+    "DoubleAdapted": 5
+  })");
+  const auto json = folly::parseJson(jsonString);
+
+  test_to_from(pod, json);
+}
+
+TEST(FollyDynamic, adapted_struct) {
+  using apache::thrift::test::basic::TypedefOfDirect;
+  using apache::thrift::test::basic::detail::DirectlyAdaptedStruct;
+
+  TypedefOfDirect pod;
+  pod.value.data() = 1;
+
+  const auto jsonString = folly::stripLeftMargin(R"({
+    "data": 1
+  })");
+  const auto json = folly::parseJson(jsonString);
+
+  using Tag = apache::thrift::type::adapted<
+      apache::thrift::test::TemplatedTestAdapter,
+      apache::thrift::type::struct_t<DirectlyAdaptedStruct>>;
+  test_to_from<TypedefOfDirect, Tag>(pod, json);
 }
 
 } // namespace thrift

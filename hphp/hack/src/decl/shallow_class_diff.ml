@@ -126,7 +126,7 @@ let diff_members
     match diff with
     | None when module_changed && Member.is_internal m1 && Member.is_internal m2
       ->
-      Some Modified
+      Some (Modified MemberModification.Other)
     | None
     | Some _ ->
       diff
@@ -200,7 +200,7 @@ module ClassConst : Member_S with type t = shallow_class_const = struct
     then
       Some Changed_inheritance
     else
-      Some Modified
+      Some (Modified MemberModification.Other)
 
   let is_private _ = false
 
@@ -224,7 +224,7 @@ module TypeConst : Member_S with type t = shallow_typeconst = struct
       match (tc1.stc_kind, tc2.stc_kind) with
       | (TCAbstract _, TCAbstract _)
       | (TCConcrete _, TCConcrete _) ->
-        Some Modified
+        Some (Modified MemberModification.Other)
       | (_, (TCAbstract _ | TCConcrete _)) -> Some Changed_inheritance
 
   let is_private _ = false
@@ -250,7 +250,7 @@ module Prop : Member_S with type t = shallow_prop = struct
     then
       Some Changed_inheritance
     else
-      Some Modified
+      Some (Modified MemberModification.Other)
 
   let is_private p : bool =
     Aast_defs.equal_visibility p.sp_visibility Aast_defs.Private
@@ -280,7 +280,18 @@ module Method : Member_S with type t = shallow_method = struct
     then
       Some Changed_inheritance
     else
-      Some Modified
+      let member_modification =
+        let is_async (ty : Typing_defs.decl_ty) : bool =
+          match Typing_defs.get_node ty with
+          | Typing_defs.Tfun fun_type -> Typing_defs.Flags.get_ft_async fun_type
+          | _ -> false
+        in
+        match (is_async m1.sm_type, is_async m2.sm_type) with
+        | (false, true) -> MemberModification.Asyncified
+        | (true, false) -> MemberModification.Deasyncified
+        | _ -> MemberModification.Other
+      in
+      Some (Modified member_modification)
 
   let is_private m : bool =
     Aast_defs.equal_visibility m.sm_visibility Aast_defs.Private

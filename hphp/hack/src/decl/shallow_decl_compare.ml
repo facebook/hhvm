@@ -89,7 +89,7 @@ let untag_removed_members_in_depgraph
           let acc_removed_member member change deps_acc =
             match change with
             | ClassDiff.Added
-            | ClassDiff.Modified
+            | ClassDiff.Modified _
             | ClassDiff.Changed_inheritance
             | ClassDiff.Private_change_not_in_trait ->
               deps_acc

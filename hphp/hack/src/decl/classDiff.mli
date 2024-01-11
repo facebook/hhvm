@@ -7,12 +7,21 @@
  *
  *)
 
+module MemberModification : sig
+  type t =
+    | Asyncified
+    | Deasyncified
+    | Other
+  [@@deriving eq, ord, show { with_path = false }, yojson_of]
+end
+
 type member_change =
   | Added
   | Removed
-  | Changed_inheritance (* Modified in a way that affects inheritance *)
-  | Modified (* Modified in a way that does not affect inheritance *)
-  | Private_change_not_in_trait (* Added/removed a private member *)
+  | Changed_inheritance  (** Modified in a way that affects inheritance *)
+  | Modified of MemberModification.t
+      (** Modified in a way that does not affect inheritance *)
+  | Private_change_not_in_trait  (** Added/removed a private member *)
 [@@deriving eq, show]
 
 type constructor_change = member_change option [@@deriving eq]

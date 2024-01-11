@@ -9,18 +9,34 @@
 
 open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
+module MemberModification = struct
+  type t =
+    | Asyncified
+    | Deasyncified
+    | Other
+  [@@deriving eq, ord, show { with_path = false }, yojson_of]
+end
+
+module MemberModificationSet = struct
+  include Set.Make (MemberModification)
+
+  let yojson_of_t t =
+    elements t |> yojson_of_list MemberModification.yojson_of_t
+end
+
 type member_change =
   | Added
   | Removed
-  | Changed_inheritance (* Modified in a way that affects inheritance *)
-  | Modified (* Modified in a way that does not affect inheritance *)
-  | Private_change_not_in_trait (* Added/removed a private member *)
+  | Changed_inheritance  (** Modified in a way that affects inheritance *)
+  | Modified of MemberModification.t
+      (** Modified in a way that does not affect inheritance *)
+  | Private_change_not_in_trait  (** Added/removed a private member *)
 [@@deriving eq, show { with_path = false }, yojson_of]
 
 (** Order member_change values by corresponding fanout size. *)
 let ord_member_change = function
   | Private_change_not_in_trait -> 0
-  | Modified -> 1
+  | Modified _ -> 1
   | Changed_inheritance -> 2
   | Added -> 3
   | Removed -> 4
@@ -69,7 +85,7 @@ let method_or_property_change_affects_descendants member_change =
   | Removed
   | Changed_inheritance ->
     true
-  | Modified
+  | Modified _
   | Private_change_not_in_trait ->
     false
 
@@ -80,7 +96,7 @@ module MembersChangeCategory = struct
     some_added: bool;
     some_removed: bool;
     some_changed_inheritance: bool;
-    some_modified: bool;
+    some_modified: MemberModificationSet.t;
     some_private_change: bool;
   }
   [@@deriving yojson_of]
@@ -90,7 +106,7 @@ module MembersChangeCategory = struct
       some_added = false;
       some_removed = false;
       some_changed_inheritance = false;
-      some_modified = false;
+      some_modified = MemberModificationSet.empty;
       some_private_change = false;
     }
 
@@ -106,7 +122,12 @@ module MembersChangeCategory = struct
              | Removed -> { acc with some_removed = true }
              | Changed_inheritance ->
                { acc with some_changed_inheritance = true }
-             | Modified -> { acc with some_modified = true }
+             | Modified modif ->
+               {
+                 acc with
+                 some_modified =
+                   MemberModificationSet.add modif acc.some_modified;
+               }
              | Private_change_not_in_trait ->
                { acc with some_private_change = true })
            changes

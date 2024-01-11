@@ -81,7 +81,7 @@ let acc_member_fanout ctx class_dep member change fanout_acc =
   | Added
   | Removed
   | Changed_inheritance
-  | Modified ->
+  | Modified _ ->
     Typing_deps.get_member_fanout
       (Provider_context.get_deps_mode ctx)
       ~class_dep
@@ -123,7 +123,7 @@ let get_minor_change_fanout
       SMap.exists consts ~f:(fun _name change ->
           method_or_property_change_affects_descendants change)
     then
-      acc_fanout Dep.Member.all Modified to_recheck
+      acc_fanout Dep.Member.all (Modified MemberModification.Other) to_recheck
     else
       to_recheck
   in

@@ -54,14 +54,12 @@ let test () =
 
   (* Local caches need to be invalidated whenever things are removed from shared
    * memory (to avoid getting cached old versions of declarations) *)
-  let memory_cap = None in
   let check_info =
     {
       Typing_service_types.init_id = "";
       check_reason = "test";
       log_errors = false;
       recheck_id = Some "";
-      use_max_typechecker_worker_memory_for_decl_deferral = false;
       per_file_profiling = HackEventLogger.PerFileProfilingConfig.default;
       memtrace_dir = None;
     }
@@ -73,7 +71,6 @@ let test () =
       (Telemetry.create ())
       [bar_path]
       ~root:None
-      ~memory_cap
       ~longlived_workers:false
       ~use_distc:false
       ~hh_distc_fanout_threshold:None
@@ -87,7 +84,6 @@ let test () =
       telemetry
       [bar_path]
       ~root:None
-      ~memory_cap
       ~longlived_workers:false
       ~use_distc:false
       ~hh_distc_fanout_threshold:None
@@ -102,7 +98,6 @@ let test () =
       telemetry
       [foo_path]
       ~root:None
-      ~memory_cap
       ~longlived_workers:false
       ~use_distc:false
       ~hh_distc_fanout_threshold:None
@@ -116,7 +111,6 @@ let test () =
       telemetry
       [foo_path]
       ~root:None
-      ~memory_cap
       ~longlived_workers:false
       ~use_distc:false
       ~hh_distc_fanout_threshold:None

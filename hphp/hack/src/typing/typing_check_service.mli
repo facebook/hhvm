@@ -39,7 +39,6 @@ val go :
   Telemetry.t ->
   Relative_path.t list ->
   root:Path.t option ->
-  memory_cap:int option ->
   longlived_workers:bool ->
   use_distc:bool ->
   hh_distc_fanout_threshold:int option ->
@@ -55,7 +54,6 @@ val go_with_interrupt :
   Relative_path.t list ->
   root:Path.t option ->
   interrupt:'env MultiWorker.interrupt_config ->
-  memory_cap:int option ->
   longlived_workers:bool ->
   use_distc:bool ->
   hh_distc_fanout_threshold:int option ->

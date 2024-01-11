@@ -42,7 +42,6 @@ impl Default for GlobalOptions {
             tco_experimental_features: s_set::SSet::new(),
             tco_migration_flags: s_set::SSet::new(),
             tco_num_local_workers: None,
-            tco_max_typechecker_worker_memory_mb: None,
             tco_defer_class_declaration_threshold: None,
             tco_locl_cache_capacity: 30,
             tco_locl_cache_node_threshold: 10_000,

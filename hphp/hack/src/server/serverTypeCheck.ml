@@ -308,9 +308,6 @@ let do_type_checking
   if Relative_path.(Set.mem files_to_check default) then
     Hh_logger.log "WARNING: rechecking definition in a dummy file";
   let interrupt = get_interrupt_config genv env in
-  let memory_cap =
-    genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
-  in
   let longlived_workers =
     genv.local_config.ServerLocalConfig.longlived_workers
   in
@@ -348,7 +345,6 @@ let do_type_checking
         (files_to_check |> Relative_path.Set.elements)
         ~root
         ~interrupt
-        ~memory_cap
         ~longlived_workers
         ~use_distc
         ~hh_distc_fanout_threshold
@@ -829,19 +825,9 @@ let type_check_core genv env start_time ~check_reason cgroup_steps =
          ~key:"typecheck_lazy_check_later_count"
          ~value:(Relative_path.Set.cardinal lazy_check_later)
     |> Telemetry.int_opt
-         ~key:"typecheck_mem_cap"
-         ~value:
-           genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
-    |> Telemetry.int_opt
          ~key:"typecheck_defer_decl_threshold"
          ~value:
            genv.local_config.ServerLocalConfig.defer_class_declaration_threshold
-    |> Telemetry.bool_
-         ~key:"use_max_typechecker_worker_memory_for_decl_deferral"
-         ~value:
-           genv.local_config
-             .ServerLocalConfig
-              .use_max_typechecker_worker_memory_for_decl_deferral
     |> Telemetry.bool_
          ~key:"enable_type_check_filter_files"
          ~value:

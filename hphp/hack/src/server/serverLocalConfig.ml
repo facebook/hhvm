@@ -162,11 +162,6 @@ type t = {
   ide_symbolindex_search_provider: string;
       (** Selects a search provider for autocomplete and symbol search *)
   predeclare_ide: bool;
-  max_typechecker_worker_memory_mb: int option;
-      (** if set, the worker will stop early at the end of a file if its heap exceeds this number *)
-  use_max_typechecker_worker_memory_for_decl_deferral: bool;
-      (** if set, the worker will perform the same check as for [max_typechecker_worker_memory_mb] after each decl
-      and, if over the limit, will defer *)
   longlived_workers: bool;
   hg_aware: bool;
   hg_aware_parsing_restart_threshold: int;
@@ -301,8 +296,6 @@ let default =
     prechecked_files = false;
     enable_type_check_filter_files = false;
     predeclare_ide = false;
-    max_typechecker_worker_memory_mb = None;
-    use_max_typechecker_worker_memory_for_decl_deferral = false;
     longlived_workers = false;
     hg_aware = false;
     hg_aware_parsing_restart_threshold = 0;
@@ -674,15 +667,6 @@ let load_
       "predeclare_ide"
       ~default:default.predeclare_ide
       ~current_version
-      config
-  in
-  let max_typechecker_worker_memory_mb =
-    int_opt "max_typechecker_worker_memory_mb" config
-  in
-  let use_max_typechecker_worker_memory_for_decl_deferral =
-    bool_
-      "use_max_typechecker_worker_memory_for_decl_deferral"
-      ~default:default.use_max_typechecker_worker_memory_for_decl_deferral
       config
   in
   let longlived_workers =
@@ -1121,8 +1105,6 @@ let load_
     enable_type_check_filter_files;
     ide_symbolindex_search_provider;
     predeclare_ide;
-    max_typechecker_worker_memory_mb;
-    use_max_typechecker_worker_memory_for_decl_deferral;
     longlived_workers;
     hg_aware;
     hg_aware_parsing_restart_threshold;
@@ -1203,10 +1185,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
           options.saved_state.loading.log_saved_state_age_and_distance);
       fetch_remote_old_decls = options.fetch_remote_old_decls;
       max_workers = Option.value options.max_workers ~default:(-1);
-      max_typechecker_worker_memory_mb =
-        Option.value options.max_typechecker_worker_memory_mb ~default:(-1);
-      use_max_typechecker_worker_memory_for_decl_deferral =
-        options.use_max_typechecker_worker_memory_for_decl_deferral;
       specify_manifold_api_key = options.specify_manifold_api_key;
       remote_old_decls_no_limit = options.remote_old_decls_no_limit;
       populate_member_heaps = options.populate_member_heaps;

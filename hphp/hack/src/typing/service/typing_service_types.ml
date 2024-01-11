@@ -153,7 +153,6 @@ type check_info = {
   check_reason: string;
   log_errors: bool;
   recheck_id: string option;
-  use_max_typechecker_worker_memory_for_decl_deferral: bool;
   per_file_profiling: HackEventLogger.PerFileProfilingConfig.t;
   memtrace_dir: string option;
 }

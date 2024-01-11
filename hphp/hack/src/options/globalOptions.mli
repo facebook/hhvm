@@ -55,8 +55,6 @@ type t = {
       (** If set to 0, only the type check delegate's logic will be used.
         If the delegate fails to type check, the typing check service as a whole
         will fail. *)
-  tco_max_typechecker_worker_memory_mb: int option;
-      (** If set, typechecker workers will quit after they exceed this limit *)
   tco_defer_class_declaration_threshold: int option;
       (** If set, defers class declarations after N lazy declarations; if not set,
         always lazily declares classes not already in cache. *)
@@ -322,7 +320,6 @@ val set :
   ?tco_experimental_features:SSet.t ->
   ?tco_migration_flags:SSet.t ->
   ?tco_num_local_workers:int ->
-  ?tco_max_typechecker_worker_memory_mb:int ->
   ?tco_defer_class_declaration_threshold:int ->
   ?tco_locl_cache_capacity:int ->
   ?tco_locl_cache_node_threshold:int ->

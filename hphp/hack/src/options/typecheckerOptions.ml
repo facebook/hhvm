@@ -13,9 +13,6 @@ type t = GlobalOptions.t [@@deriving eq, show]
 
 let num_local_workers t = t.GlobalOptions.tco_num_local_workers
 
-let max_typechecker_worker_memory_mb t =
-  t.GlobalOptions.tco_max_typechecker_worker_memory_mb
-
 let defer_class_declaration_threshold t =
   t.GlobalOptions.tco_defer_class_declaration_threshold
 

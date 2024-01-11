@@ -76,7 +76,6 @@ let test () =
       check_reason = "test_interrupt";
       log_errors = false;
       recheck_id = Some "";
-      use_max_typechecker_worker_memory_for_decl_deferral = false;
       per_file_profiling = HackEventLogger.PerFileProfilingConfig.default;
       memtrace_dir = None;
     }
@@ -89,7 +88,6 @@ let test () =
       fnl
       ~root:None
       ~interrupt
-      ~memory_cap:None
       ~longlived_workers:false
       ~use_distc:false
       ~hh_distc_fanout_threshold:None

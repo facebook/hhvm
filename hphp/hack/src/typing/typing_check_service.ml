@@ -300,12 +300,7 @@ let process_one_workitem
     (fn : workitem)
     ({ errors; map_reduce_data; tally; stats } : workitem_accumulator) :
     TypingProgress.progress_outcome * workitem_accumulator =
-  let decl_cap_mb =
-    if check_info.use_max_typechecker_worker_memory_for_decl_deferral then
-      memory_cap
-    else
-      None
-  in
+  let decl_cap_mb = None in
   let workitem_cap_mb = Option.value memory_cap ~default:Int.max_value in
   let type_check_twice =
     check_info.per_file_profiling
@@ -1035,7 +1030,6 @@ let go_with_interrupt
     (fnl : Relative_path.t list)
     ~(root : Path.t option)
     ~(interrupt : 'a MultiThreadedCall.interrupt_config)
-    ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(use_distc : bool)
     ~(hh_distc_fanout_threshold : int option)
@@ -1143,7 +1137,7 @@ let go_with_interrupt
         telemetry
         fnl
         ~interrupt
-        ~memory_cap
+        ~memory_cap:(Some 500 (* megabytes *))
         ~longlived_workers
         ~check_info
         ~typecheck_info
@@ -1167,7 +1161,6 @@ let go
     (telemetry : Telemetry.t)
     (fnl : Relative_path.t list)
     ~(root : Path.t option)
-    ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(use_distc : bool)
     ~(hh_distc_fanout_threshold : int option)
@@ -1181,7 +1174,6 @@ let go
       fnl
       ~root
       ~interrupt
-      ~memory_cap
       ~longlived_workers
       ~use_distc
       ~hh_distc_fanout_threshold

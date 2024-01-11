@@ -118,9 +118,6 @@ let get_check_info ~check_reason ~log_errors (genv : genv) env :
     check_reason;
     log_errors;
     recheck_id = env.init_env.recheck_id;
-    use_max_typechecker_worker_memory_for_decl_deferral =
-      genv.local_config
-        .ServerLocalConfig.use_max_typechecker_worker_memory_for_decl_deferral;
     per_file_profiling = genv.local_config.ServerLocalConfig.per_file_profiling;
     memtrace_dir = genv.local_config.ServerLocalConfig.memtrace_dir;
   }

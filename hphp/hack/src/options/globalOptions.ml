@@ -76,7 +76,6 @@ type t = {
   tco_experimental_features: SSet.t;
   tco_migration_flags: SSet.t;
   tco_num_local_workers: int option;
-  tco_max_typechecker_worker_memory_mb: int option;
   tco_defer_class_declaration_threshold: int option;
   tco_locl_cache_capacity: int;
   tco_locl_cache_node_threshold: int;
@@ -210,7 +209,6 @@ let default =
     tco_experimental_features = SSet.empty;
     tco_migration_flags = SSet.empty;
     tco_num_local_workers = None;
-    tco_max_typechecker_worker_memory_mb = None;
     tco_defer_class_declaration_threshold = None;
     tco_locl_cache_capacity = 30;
     tco_locl_cache_node_threshold = 10_000;
@@ -346,7 +344,6 @@ let set
     ?tco_experimental_features
     ?tco_migration_flags
     ?tco_num_local_workers
-    ?tco_max_typechecker_worker_memory_mb
     ?tco_defer_class_declaration_threshold
     ?tco_locl_cache_capacity
     ?tco_locl_cache_node_threshold
@@ -486,10 +483,6 @@ let set
       setting tco_migration_flags options.tco_migration_flags;
     tco_num_local_workers =
       setting_opt tco_num_local_workers options.tco_num_local_workers;
-    tco_max_typechecker_worker_memory_mb =
-      setting_opt
-        tco_max_typechecker_worker_memory_mb
-        options.tco_max_typechecker_worker_memory_mb;
     tco_defer_class_declaration_threshold =
       setting_opt
         tco_defer_class_declaration_threshold

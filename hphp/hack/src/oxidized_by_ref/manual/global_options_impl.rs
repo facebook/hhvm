@@ -30,7 +30,6 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_experimental_features: s_set::SSet::empty(),
     tco_migration_flags: s_set::SSet::empty(),
     tco_num_local_workers: None,
-    tco_max_typechecker_worker_memory_mb: None,
     tco_defer_class_declaration_threshold: None,
     so_naming_sqlite_path: None,
     po_auto_namespace_map: &[],

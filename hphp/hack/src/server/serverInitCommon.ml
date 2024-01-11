@@ -212,9 +212,6 @@ let defer_or_do_type_check
       telemetry = typecheck_telemetry;
       _;
     } =
-      let memory_cap =
-        genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
-      in
       let longlived_workers =
         genv.local_config.ServerLocalConfig.longlived_workers
       in
@@ -231,7 +228,6 @@ let defer_or_do_type_check
         (Telemetry.create ())
         files_to_check
         ~root
-        ~memory_cap
         ~longlived_workers
         ~use_distc
         ~hh_distc_fanout_threshold

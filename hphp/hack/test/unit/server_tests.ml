@@ -236,11 +236,12 @@ let test_quarantine () =
   let { Common_setup.ctx; foo_path; foo_contents; nonexistent_path; _ } =
     Common_setup.setup ~sqlite:false tcopt_with_defer ~xhp_as:`Namespaces
   in
+  let ctx_orig = ctx in
 
   (* simple case *)
   let (ctx, _foo_entry) =
     Provider_context.add_or_overwrite_entry_contents
-      ~ctx
+      ~ctx:ctx_orig
       ~path:foo_path
       ~contents:foo_contents
   in
@@ -272,7 +273,7 @@ let test_quarantine () =
   (* add a non-existent file; should fail *)
   let (ctx2, _nonexistent_entry) =
     Provider_context.add_or_overwrite_entry_contents
-      ~ctx
+      ~ctx:ctx_orig
       ~path:nonexistent_path
       ~contents:""
   in

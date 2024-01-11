@@ -483,6 +483,11 @@ let respect_but_quarantine_unsaved_changes
       | Provider_backend.Local_memory local ->
         let start_time = Unix.gettimeofday () in
         let entries = Provider_context.get_entries ctx in
+        if Relative_path.Map.cardinal entries <> 1 then
+          HackEventLogger.invariant_violation_bug
+            ~data_int:
+              (Provider_context.get_entries ctx |> Relative_path.Map.cardinal)
+            "Should only enter quarantine with exactly one entry";
         Relative_path.Map.iter entries ~f:(fun _path entry ->
             let (_ : Nast.program) =
               Ast_provider.compute_ast

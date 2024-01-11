@@ -47,11 +47,10 @@ two reasons:
 
 To create a new entry for a file, use [Provider_context.add_entry].
 
-There should generally be no more than one or two entries inside the
-[Provider_context.t] at a given time. Be careful not to try to store every
-single file's data in memory at once. Once you're done processing a file (e.g.
-you have the TAST and don't need to access further data), then you should
-discard the [entry] and the [Provider_context.t] that it came from.
+There should generally be no more than one entry inside the [Provider_context.t]
+at a given time. Once you're done processing a file (e.g. you have the TAST and
+don't need to access further data), then you should discard the [entry] and the
+[Provider_context.t] that it came from.
 
 All of these fields are monotonic, unless otherwise noted. They only
 transition forward through states, never backwards (e.g. from None -> Some),
@@ -70,7 +69,7 @@ type entry = {
   mutable ast_errors: Errors.t option;  (** same invariant as parser_return *)
   mutable cst: PositionedSyntaxTree.t option;
   mutable tast: Tast.program Tast_with_dynamic.t option;
-      (** NOT monotonic: depends on the decls of other files. *)
+      (** NOT monotonic: depends on the decls of other files. See invariants in Provider_utils.mli. *)
   mutable all_errors: Errors.t option;
       (** NOT monotonic for the same reason as [tast]. *)
   mutable symbols: Relative_path.t SymbolOccurrence.t list option;

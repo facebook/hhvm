@@ -297,6 +297,9 @@ let invalidate_upon_file_changes
     Provider_context.get_tcopt ctx |> TypecheckerOptions.tco_sticky_quarantine
   in
 
+  (* The purpose+invariants of this function are documented in the module-level comment
+     in Provider_utils.mli. *)
+
   (* In the common scenario where a user has been working on a file and saves it,
      then [decls_reflect_this_file] will have the exact same pfh_hash
      as what we just read from disk and we can skip any invalidation! *)
@@ -455,22 +458,8 @@ let respect_but_quarantine_unsaved_changes
   let sticky_quarantine =
     Provider_context.get_tcopt ctx |> TypecheckerOptions.tco_sticky_quarantine
   in
-  (* Normally we satisfy the invariant that "every shallow+folded decl present in the
-     provider-backend reflects truth as it is on disk". The definition of quarantine is
-     that "during quarantine, every decl present reflects truth as it is in ctx.entries for those
-     files that have entries, and the previous truth for all others."
-
-     The feature "sticky_quarantine" is used only for the local backend. It uses a different
-     invariant: "every decl present in the local backend reflects truth as it is in [decls_reflect_this_file]
-     for the file mentioned there if any, and reflects truth as it is on disk for all other files".
-     And during quarantine, again truth from ctx.entries overrides that previous truth.
-     (Note that if ctx.entries agrees with [decls_reflect_this_file], then entering and leaving
-     quarantine is a no-op!)
-
-     This function will (1) enter quarantine, (2) do the callback "f",
-     (3) leave quarantine. If an exception arises during step (1,2) then nevertheless
-     we guarantee that quarantine is safely left. If an exception arises during
-     step (3) then we'll raise an exception but the program state has become unstable... *)
+  (* Explanation for the invariants+operation of this function are in the module-level
+     comments in Provider_utils.mli. *)
   let enter_quarantine_exn () =
     begin
       match Provider_context.get_backend ctx with

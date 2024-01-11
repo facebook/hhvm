@@ -2927,7 +2927,7 @@ void isTypeStructImpl(ISS& env, SArray inputTS) {
     case TypeStructure::Kind::T_unresolved: {
       auto classname = get_ts_classname(ts);
       auto const has_generics = ts->exists(s_generic_types);
-      if (!has_generics && classname->isame(s_this.get())) {
+      if (!has_generics && classname->tsame(s_this.get())) {
         return reduce(env, bc::PopC {}, bc::IsLateBoundCls {});
       }
       auto const rcls = env.index.resolve_class(classname);
@@ -3960,7 +3960,7 @@ const StaticString
 
 bool isBadContext(const FCallArgs& fca) {
   return fca.context() &&
-    fca.context()->isame(s_DynamicContextOverrideUnsafe.get());
+    fca.context()->tsame(s_DynamicContextOverrideUnsafe.get());
 }
 
 Context getCallContext(const ISS& env, const FCallArgs& fca) {

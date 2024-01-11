@@ -596,7 +596,7 @@ bool handle_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
     ? makeStaticString(folly::sformat("{}::{}", func->cls->name, func->name))
     : func->name;
   auto result = [&]() -> TypeOrReduced {
-#define X(x, y) if (name->isame(s_##x.get())) return builtin_##x(env, func, fca);
+#define X(x, y) if (name->fsame(s_##x.get())) return builtin_##x(env, func, fca);
     SPECIAL_BUILTINS
     return NoReduced{};
 #undef X

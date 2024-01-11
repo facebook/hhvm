@@ -411,7 +411,7 @@ std::string show(const Unit& unit, const Index& index) {
   std::sort(
     begin(classes), end(classes),
     [] (const php::Class* a, const php::Class* b) {
-      return string_data_lti{}(a->name, b->name);
+      return string_data_lt_type{}(a->name, b->name);
     }
   );
   std::sort(

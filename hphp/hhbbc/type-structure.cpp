@@ -374,16 +374,16 @@ Type name_to_cls_type(ResolveCtx& ctx, SString name) {
   };
 
   if (ctx.selfCls) {
-    if (name->isame(s_hh_this.get())) {
+    if (name->tsame(s_hh_this.get())) {
       if (ctx.thisCls) return resolveCls(ctx.thisCls);
       auto const rcls = ctx.index->resolve_class(ctx.selfCls->name);
       if (!rcls) return TBottom;
       return subCls(*rcls);
     }
 
-    if (name->isame(s_self.get())) return resolveCls(ctx.selfCls);
+    if (name->tsame(s_self.get())) return resolveCls(ctx.selfCls);
 
-    if (name->isame(s_parent.get())) {
+    if (name->tsame(s_parent.get())) {
       if (!ctx.selfCls->parentName) return TBottom;
       return resolveStr(ctx.selfCls->parentName);
     }
@@ -473,7 +473,7 @@ Resolution resolve_arraylike(ResolveCtx& ctx, TS::Kind kind, SArray ts) {
 
 Resolution resolve_typevar(ResolveCtx& ctx, SArray ts) {
   auto const name = get_ts_name(ts);
-  if (name->isame(s_wildcard.get())) {
+  if (name->tsame(s_wildcard.get())) {
     return Resolution { dict_val(ts), false };
   }
   if (!ctx.generics) return Resolution { TDictN, false };
@@ -672,7 +672,7 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
       .set(s_classname, make_tv<KindOfPersistentString>(n));
   };
 
-  if (clsName->isame(s_callable.get())) {
+  if (clsName->tsame(s_callable.get())) {
     return setKindAndName(TS::Kind::T_class, clsName)
       .optCopy(s_typevars, ts)
       .optCopy(s_alias, ts)
@@ -700,7 +700,7 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
   };
 
   if (ctx.selfCls) {
-    if (clsName->isame(s_hh_this.get())) {
+    if (clsName->tsame(s_hh_this.get())) {
       if (ctx.thisCls) {
         return resolvedCls(ctx.thisCls->name, ctx.thisCls->attrs, true);
       }
@@ -726,11 +726,11 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
       return *resolution;
     }
 
-    if (clsName->isame(s_self.get())) {
+    if (clsName->tsame(s_self.get())) {
       return resolvedCls(ctx.selfCls->name, ctx.selfCls->attrs, false);
     }
 
-    if (clsName->isame(s_parent.get())) {
+    if (clsName->tsame(s_parent.get())) {
       if (!ctx.selfCls->parentName) return Resolution { TBottom, true };
       auto const rcls = ctx.index->resolve_class(ctx.selfCls->parentName);
       if (!rcls) return Resolution { TBottom, true };

@@ -737,7 +737,7 @@ struct WholeProgramInput::Key::Impl {
   };
 
   using UnresolvedTypes =
-    hphp_fast_set<SString, string_data_hash, string_data_isame>;
+    hphp_fast_set<SString, string_data_hash, string_data_tsame>;
 
   struct FailInfo {
     LSString message;
@@ -763,7 +763,7 @@ struct WholeProgramInput::Key::Impl {
       sd(name)
         (unit)
         (methCaller)
-        (unresolvedTypes, string_data_lti{})
+        (unresolvedTypes, string_data_lt_type{})
         ;
     }
   };
@@ -794,7 +794,7 @@ struct WholeProgramInput::Key::Impl {
         (closureDeclInFunc)
         (has86init)
         (typeMapping)
-        (unresolvedTypes, string_data_lti{})
+        (unresolvedTypes, string_data_lt_type{})
         ;
     }
   };
@@ -938,12 +938,12 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
          const TypeIntersectionConstraint* ubs = nullptr) {
     // Skip names which match the current class name. We don't need to
     // report these as it's implicit.
-    if (tc.isUnresolved() && (!cls || !cls->name->isame(tc.typeName()))) {
+    if (tc.isUnresolved() && (!cls || !cls->name->tsame(tc.typeName()))) {
       u.emplace(tc.typeName());
     }
     if (!ubs) return;
     for (auto const& ub : ubs->m_constraints) {
-      if (ub.isUnresolved() && (!cls || !cls->name->isame(ub.typeName()))) {
+      if (ub.isUnresolved() && (!cls || !cls->name->tsame(ub.typeName()))) {
         u.emplace(ub.typeName());
       }
     }

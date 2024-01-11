@@ -26,9 +26,14 @@
 (library
  (name classDiff)
  (modules classDiff)
- (libraries decl_defs typing_defs)
+ (libraries
+  decl_defs
+  typing_defs
+  yojson)
  (preprocess
-  (pps ppx_deriving.std)))
+  (pps
+   ppx_deriving.std
+   ppx_yojson_conv)))
 
 (library
  (name decl)

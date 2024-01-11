@@ -138,7 +138,6 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_use_type_alias_heap: false,
     tco_populate_dead_unsafe_cast_heap: false,
     po_disallow_static_constants_in_default_func_args: false,
-    tco_load_hack_64_distc_saved_state: false,
     tco_rust_elab: false,
     dump_tast_hashes: false,
     dump_tasts: vec![],

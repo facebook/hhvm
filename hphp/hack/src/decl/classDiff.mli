@@ -142,4 +142,4 @@ val method_or_property_change_affects_descendants : member_change -> bool
 val max_constructor_change :
   constructor_change -> constructor_change -> constructor_change
 
-val to_category_json : t -> Hh_json.json
+val to_category_json : t -> Yojson.Safe.t

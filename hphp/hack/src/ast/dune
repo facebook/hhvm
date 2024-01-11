@@ -2,6 +2,15 @@
  (name ast)
  (wrapped false)
  (modules ast_defs)
- (libraries file_info namespace_env naming_special_names visitors_runtime)
+ (libraries
+  file_info
+  namespace_env
+  naming_special_names
+  visitors_runtime)
  (preprocess
-  (pps visitors.ppx ppx_hash ppx_transform ppx_deriving.std)))
+  (pps
+   ppx_deriving.std
+   ppx_hash
+   ppx_transform
+   ppx_yojson_conv
+   visitors.ppx)))

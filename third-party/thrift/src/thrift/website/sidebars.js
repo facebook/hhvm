@@ -309,6 +309,7 @@ module.exports = {
           id: 'fb/server/index',
         },
         items: [
+          'fb/server/howto',
           'fb/server/server-lifecycle',
           'fb/server/background-tasks',
           'fb/server/flavors-of-main',

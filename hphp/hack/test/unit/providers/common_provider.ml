@@ -81,7 +81,6 @@ let run_test (repo : (Relative_path.t * string) list) ~(f : env -> unit) : unit
     GlobalOptions.set
       ~tco_sticky_quarantine:true
       ~tco_lsp_invalidation:true
-      ~tco_prefetch_decls:true
       GlobalOptions.default
   in
   Provider_backend.set_local_memory_backend_with_defaults_for_test ();

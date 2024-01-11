@@ -198,7 +198,6 @@ type t = {
   po_disallow_direct_superglobals_refs: bool;
   tco_sticky_quarantine: bool;
   tco_lsp_invalidation: bool;
-  tco_prefetch_decls: bool;
   tco_autocomplete_sort_text: bool;
   po_nameof_precedence: bool;
   po_strict_utf8: bool;
@@ -333,7 +332,6 @@ let default =
     po_disallow_direct_superglobals_refs = false;
     tco_sticky_quarantine = false;
     tco_lsp_invalidation = false;
-    tco_prefetch_decls = false;
     tco_autocomplete_sort_text = false;
     po_nameof_precedence = false;
     po_strict_utf8 = false;
@@ -466,7 +464,6 @@ let set
     ?po_disallow_direct_superglobals_refs
     ?tco_sticky_quarantine
     ?tco_lsp_invalidation
-    ?tco_prefetch_decls
     ?tco_autocomplete_sort_text
     ?po_nameof_precedence
     ?po_strict_utf8
@@ -810,7 +807,6 @@ let set
       setting tco_sticky_quarantine options.tco_sticky_quarantine;
     tco_lsp_invalidation =
       setting tco_lsp_invalidation options.tco_lsp_invalidation;
-    tco_prefetch_decls = setting tco_prefetch_decls options.tco_prefetch_decls;
     tco_autocomplete_sort_text =
       setting tco_autocomplete_sort_text options.tco_autocomplete_sort_text;
     po_nameof_precedence =

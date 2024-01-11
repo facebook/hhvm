@@ -72,7 +72,6 @@ type rollout_flags = {
   zstd_decompress_by_file: bool;
   lsp_sticky_quarantine: bool;
   lsp_invalidation: bool;
-  lsp_prefetch_decls: bool;
   autocomplete_sort_text: bool;
 }
 

@@ -54,7 +54,7 @@ let declare_folded_class (ctx : Provider_context.t) (name : type_key) :
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Local_memory local_memory
-    when TypecheckerOptions.tco_prefetch_decls (Provider_context.get_tcopt ctx)
+    when Disk.is_real_disk
          && Option.is_none
               (Provider_backend.Decl_cache.find
                  local_memory.Provider_backend.decl_cache

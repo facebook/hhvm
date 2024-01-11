@@ -338,8 +338,9 @@ const t_type* step_through_typedefs(const t_type* t, bool break_on_adapter) {
 }
 
 bool node_has_custom_rust_type(const t_named& node) {
-  return node.has_annotation("rust.type") ||
-      node.has_annotation("rust.newtype");
+  return node.find_structured_annotation_or_null(
+             "facebook.com/thrift/annotation/rust/Type") ||
+      node.has_annotation("rust.type") || node.has_annotation("rust.newtype");
 }
 
 // NOTE: a transitive _adapter_ is different from a transitive _annotation_. A

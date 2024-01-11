@@ -734,7 +734,8 @@
                       "line_number":12
                     }
                   },
-                  "parameter_default_value":{"kind":"missing"}
+                  "parameter_default_value":{"kind":"missing"},
+                  "parameter_parameter_end":{"kind":"missing"}
                 },
                 "list_separator":{"kind":"missing"}
               }

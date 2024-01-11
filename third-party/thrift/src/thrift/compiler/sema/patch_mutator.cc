@@ -589,13 +589,21 @@ t_struct& patch_generator::gen_patch(
   // All value patches have an assign and clear field.
   gen.assign(type);
   gen.clear();
+  const auto* ttype = type->get_true_type();
 
   if (annot.type()->uri() == kAssignOnlyPatchUri) {
+    if (dynamic_cast<const t_list*>(ttype)) {
+      ctx_.error("List patch can not be AssignOnly");
+      return gen;
+    }
+    if (dynamic_cast<const t_set*>(ttype)) {
+      ctx_.error("Set patch can not be AssignOnly");
+      return gen;
+    }
     gen.set_adapter("AssignPatchAdapter");
     return gen;
   }
 
-  const auto* ttype = type->get_true_type();
   if (auto* list = dynamic_cast<const t_list*>(ttype)) {
     // TODO(afuller): support 'replace' op.
     gen.prepend(type);

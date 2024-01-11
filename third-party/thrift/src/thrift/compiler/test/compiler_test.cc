@@ -1778,3 +1778,23 @@ TEST(CompilerTest, py3_invalid_field_names) {
   )",
       {"--gen", "mstch_py3"});
 }
+
+TEST(CompilerTest, assign_only_patch) {
+  check_compile(R"(
+    include "thrift/lib/thrift/patch.thrift"
+
+    @patch.GeneratePatch
+    package "meta.com/thrift/test"
+
+    struct MyStruct {
+          # expected-error@-1: List patch can not be AssignOnly
+          # expected-error@-2: Set patch can not be AssignOnly
+        @patch.AssignOnlyPatch
+        1: list<i32> field1;
+        @patch.AssignOnlyPatch
+        2: set<i32> field2;
+        @patch.AssignOnlyPatch
+        3: map<i32, string> field3;
+    }
+  )");
+}

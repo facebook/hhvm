@@ -50,15 +50,18 @@ struct BatchDeclProvider final: hackc::DeclProvider {
   // Maps from Name to serialized inside the UnitDecls given in the
   // constructor.
   using Map = hphp_fast_map<const StringData*, const std::string&>;
-  using IMap = hphp_fast_map<
-    const StringData*, const std::string&, string_data_hash, string_data_isame
+  using TMap = hphp_fast_map<
+    const StringData*, const std::string&, string_data_hash, string_data_tsame
+  >;
+  using FMap = hphp_fast_map<
+    const StringData*, const std::string&, string_data_hash, string_data_fsame
   >;
 
   // Symbols requested but not found
   Package::DeclNames m_missing;
 
-  IMap m_types;
-  IMap m_funcs;
+  TMap m_types;
+  FMap m_funcs;
   Map m_constants;
   Map m_modules;
 };

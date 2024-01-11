@@ -4162,32 +4162,6 @@ let is_cancellation_of_request ~message { Jsonrpc.json; _ } : bool =
      with
     | M.Is_response -> false)
 
-(** LEGACY FUNCTION, to be deleted once we roll out lsp_cancellation *)
-let cancel_if_has_pending_cancel_request
-    (client : Jsonrpc.t) (message : lsp_message) : unit =
-  match message with
-  | ResponseMessage _ -> ()
-  | NotificationMessage _ -> ()
-  | RequestMessage _ ->
-    (* Scan the queue for any pending (future) cancellation messages that are requesting
-       cancellation of the same id as our current request *)
-    let pending_cancel_request_opt =
-      Jsonrpc.find_already_queued_message
-        client
-        ~f:(is_cancellation_of_request ~message)
-    in
-    (* If there is a future cancellation request, we won't even embark upon this message *)
-    if Option.is_some pending_cancel_request_opt then
-      raise
-        (Error.LspException
-           {
-             Error.code = Error.RequestCancelled;
-             message = "request cancelled";
-             data = None;
-           })
-    else
-      ()
-
 (** This will run [f] but wrap it up in a way that respects cancellation:
 1. If there's already a cancellation request for [message] in the queue, then we'll
 just raise [RequestCancelled] Lsp exception immediately.
@@ -5125,32 +5099,20 @@ let main
       let%lwt result_telemetry_opt =
         match event with
         | Client_message (metadata, message) ->
-          if !env.local_config.ServerLocalConfig.lsp_cancellation then begin
-            (* Note: the function [respect_cancellation] requires the invariant that it not be called
-               concurrently with itself. That's satisfied because here in the ClientLsp main loop
-               is the only place we call it, and the main loop isn't concurrent. *)
-            respect_cancellation
-              client
-              ~predicate:(is_cancellation_of_request ~message)
-              ~f:(fun () ->
-                handle_client_message
-                  ~state
-                  ~client
-                  ~ide_service
-                  ~metadata
-                  ~message
-                  ~ref_unblocked_time)
-          end else begin
-            (* TODO(ljw): delete this branch once we roll out lsp_cancellation *)
-            cancel_if_has_pending_cancel_request client message;
-            handle_client_message
-              ~state
-              ~client
-              ~ide_service
-              ~metadata
-              ~message
-              ~ref_unblocked_time
-          end
+          (* Note: the function [respect_cancellation] requires the invariant that it not be called
+             concurrently with itself. That's satisfied because here in the ClientLsp main loop
+             is the only place we call it, and the main loop isn't concurrent. *)
+          respect_cancellation
+            client
+            ~predicate:(is_cancellation_of_request ~message)
+            ~f:(fun () ->
+              handle_client_message
+                ~state
+                ~client
+                ~ide_service
+                ~metadata
+                ~message
+                ~ref_unblocked_time)
         | Daemon_notification notification ->
           handle_daemon_notification
             ~state

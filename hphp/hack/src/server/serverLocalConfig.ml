@@ -260,8 +260,6 @@ type t = {
       (** POC: @ljw - if true, only exit quarantine when entering a new one *)
   lsp_invalidation: bool;
       (** POC: @ljw - controls how quarantine invalidates folded decls *)
-  lsp_cancellation: bool;
-      (** POC: @ljw - if true, respect cancellation while work is in progress *)
   lsp_prefetch_decls: bool;
       (** POC: @ljw - if true, [Decl_provider.prefetch_and_lock_decls_needed_for_entry] will work *)
   autocomplete_sort_text: bool;
@@ -358,7 +356,6 @@ let default =
     dump_tasts = [];
     lsp_sticky_quarantine = false;
     lsp_invalidation = false;
-    lsp_cancellation = true;
     lsp_prefetch_decls = true;
     autocomplete_sort_text = false;
   }
@@ -1076,9 +1073,6 @@ let load_
   let lsp_invalidation =
     bool_ "lsp_invalidation" ~default:default.lsp_invalidation config
   in
-  let lsp_cancellation =
-    bool_ "lsp_cancellation" ~default:default.lsp_cancellation config
-  in
   let lsp_prefetch_decls =
     bool_ "lsp_prefetch_decls" ~default:default.lsp_prefetch_decls config
   in
@@ -1206,7 +1200,6 @@ let load_
     dump_tasts;
     lsp_sticky_quarantine;
     lsp_invalidation;
-    lsp_cancellation;
     lsp_prefetch_decls;
     autocomplete_sort_text;
   }
@@ -1265,7 +1258,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
         GlobalOptions.(options.saved_state.loading.zstd_decompress_by_file);
       lsp_sticky_quarantine = options.lsp_sticky_quarantine;
       lsp_invalidation = options.lsp_invalidation;
-      lsp_cancellation = options.lsp_cancellation;
       lsp_prefetch_decls = options.lsp_prefetch_decls;
       autocomplete_sort_text = options.autocomplete_sort_text;
     }

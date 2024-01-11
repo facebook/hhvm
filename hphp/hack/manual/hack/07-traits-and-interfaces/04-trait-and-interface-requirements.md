@@ -8,9 +8,10 @@ To introduce a trait requirement, you can have one or more of the following in y
 
 ```Hack no-extract
 require extends <class name>;
-require class <class name>;
 require implements <interface name>;
 ```
+
+*Note:* the experimental `require class <class name>;` trait constraint is discussed [below](#traits__the-require-class-trait-constraints-experimental).
 
 To introduce an interface requirement, you can have one or more of following in your interface:
 
@@ -107,14 +108,19 @@ function run(): void {
 }
 ```
 
-The `require extends` constraints should be taken literally: the class that uses the trait *must* be a **strict** sub-class of that in the `require extends` constraint.
+**NOTE**: `require extends` should be taken literally. The class *must* extend the required class; thus the actual required class
+**does not** meet that requirement. This is to avoid some subtle circular dependencies when checking requirements.
 
-A `require class <class name>;` constraint in a trait specifies that the trait can only be used by the
+#### The `require class` trait constraints (experimental)
+
+A `require class <class name>;` trait constraint in a trait specifies that the trait can only be used by the
 _non-generic, _final_, class `<class name>`.  This contrasts with the `require extends t;` constraints that allow the trait to be used by an arbitrary _strict_ subtype of `t`.
 By relaxing the strict subtype constraint of `require extends`, `require class` constraints allow splitting the implementation of a class into a
 class and one (or multiple) traits, as in the following:
 
 ```Hack
+<<file:__EnableUnstableFeatures('require_class')>>
+
 trait T {
   require class C;
   public function foo(): void {

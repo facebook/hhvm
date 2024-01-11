@@ -73,7 +73,6 @@ type rollout_flags = {
   lsp_sticky_quarantine: bool;
   lsp_invalidation: bool;
   lsp_cancellation: bool;
-  lsp_autocomplete_skip_hierarchy_checks: bool;
   lsp_prefetch_decls: bool;
   autocomplete_sort_text: bool;
 }

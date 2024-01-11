@@ -2267,93 +2267,6 @@ let key_exists env pos shape field =
         let field_name = TShapeField.of_ast Pos_or_decl.of_raw_pos field_name in
         Typing_shapes.refine_shape field_name pos env shape_ty)
 
-(** Add a fresh type parameter to [env] with a name starting [prefix]
-    and a constraint on [ty]. *)
-let synthesize_type_param env p prefix ty =
-  let (env, name) =
-    match get_node ty with
-    (* Don't generate another fresh generic off an existing fresh generic *)
-    | Tgeneric (n, _) when Env.is_fresh_generic_parameter n -> (env, n)
-    | _ ->
-      let (env, name) = Env.fresh_param_name env prefix in
-      let env = Env.add_upper_bound_global env name ty in
-      let env = Env.add_lower_bound_global env name ty in
-      (env, name)
-  in
-  let hint = (p, Aast.Habstr (name, [])) in
-  (hint, env)
-
-(** Transform calls to MyVisitor::makeTree with [f]. *)
-let rec rewrite_expr_tree_maketree env expr f =
-  let (pos, p, expr_) = expr in
-  let (env, expr_) =
-    match expr_ with
-    | Call
-        ({
-           func =
-             ( fun_pos,
-               p,
-               (Lfun (fun_, idl) | Efun { ef_fun = fun_; ef_use = idl; _ }) );
-           _;
-         } as call_expr) ->
-      (* Express tree literals containing splices use an anonymous
-         function that returns the makeTree call.
-
-          (function() {
-             $0splice1 = "whatever";
-             return MyVisitor::makeTree(...);
-          })()
-      *)
-      let map_stmt env s =
-        match s with
-        | (pos, Return (Some expr)) ->
-          let (env, expr) = rewrite_expr_tree_maketree env expr f in
-          (env, (pos, Return (Some expr)))
-        | _ -> (env, s)
-      in
-
-      let (env, body_ast) = List.map_env env fun_.f_body.fb_ast ~f:map_stmt in
-      let fun_ = { fun_ with f_body = { fb_ast = body_ast } } in
-
-      (env, Call { call_expr with func = (fun_pos, p, Lfun (fun_, idl)) })
-    | Call _ ->
-      (* The desugarer might give us a simple call to makeTree, so we
-         can process it immediately. *)
-      f env expr_
-    | _ -> (env, expr_)
-  in
-  (env, (pos, p, expr_))
-
-(** Given [expr], a runtime expression for an expression tree, add a
-    type parameter to the makeTree call.
-
-    This enables expression tree visitors to use phantom type
-    parameters. The visitor can be defined with __Explicit.
-
-        public static function makeTree<<<__Explicit>> TInfer>(...) { ... }
-
-     Userland calls to this method must provide an explicit type.
-
-        MyVisitor::makeTree<MyVisitorInt>(...);
-
-    For expression tree literals, we run type inference and provide a
-    synthesized type parameter to the desugared runtime expression.
-
-        MyVisitor`1`; // we infer MyVisitorInt
-        // we add this constrained type parameter:
-        MyVisitor::makeTree<TInfer#1>(...) where TInfer#1 = MyVisitorInt
-
- *)
-let maketree_with_type_param env p expr expected_ty =
-  let (hint_virtual, env) = synthesize_type_param env p "TInfer" expected_ty in
-  let rewrite_expr env expr =
-    match expr with
-    | Call e -> (env, Call { e with targs = [((), hint_virtual)] })
-    | e -> (env, e)
-  in
-
-  rewrite_expr_tree_maketree env expr rewrite_expr
-
 module EnumClassLabelOps = struct
   type result =
     | Success of Tast.expr * locl_ty
@@ -10174,6 +10087,94 @@ and Expression_tree : sig
   val expression_tree :
     env -> pos -> (unit, unit) expression_tree -> env * Tast.expr * locl_ty
 end = struct
+  (** Add a fresh type parameter to [env] with a name starting [prefix]
+    and a constraint on [ty]. *)
+  let synthesize_type_param env p prefix ty =
+    let (env, name) =
+      match get_node ty with
+      (* Don't generate another fresh generic off an existing fresh generic *)
+      | Tgeneric (n, _) when Env.is_fresh_generic_parameter n -> (env, n)
+      | _ ->
+        let (env, name) = Env.fresh_param_name env prefix in
+        let env = Env.add_upper_bound_global env name ty in
+        let env = Env.add_lower_bound_global env name ty in
+        (env, name)
+    in
+    let hint = (p, Aast.Habstr (name, [])) in
+    (hint, env)
+
+  (** Transform calls to MyVisitor::makeTree with [f]. *)
+  let rec rewrite_expr_tree_maketree env expr f =
+    let (pos, p, expr_) = expr in
+    let (env, expr_) =
+      match expr_ with
+      | Call
+          ({
+             func =
+               ( fun_pos,
+                 p,
+                 (Lfun (fun_, idl) | Efun { ef_fun = fun_; ef_use = idl; _ }) );
+             _;
+           } as call_expr) ->
+        (* Express tree literals containing splices use an anonymous
+           function that returns the makeTree call.
+
+            (function() {
+               $0splice1 = "whatever";
+               return MyVisitor::makeTree(...);
+            })()
+        *)
+        let map_stmt env s =
+          match s with
+          | (pos, Return (Some expr)) ->
+            let (env, expr) = rewrite_expr_tree_maketree env expr f in
+            (env, (pos, Return (Some expr)))
+          | _ -> (env, s)
+        in
+
+        let (env, body_ast) = List.map_env env fun_.f_body.fb_ast ~f:map_stmt in
+        let fun_ = { fun_ with f_body = { fb_ast = body_ast } } in
+
+        (env, Call { call_expr with func = (fun_pos, p, Lfun (fun_, idl)) })
+      | Call _ ->
+        (* The desugarer might give us a simple call to makeTree, so we
+           can process it immediately. *)
+        f env expr_
+      | _ -> (env, expr_)
+    in
+    (env, (pos, p, expr_))
+
+  (** Given [expr], a runtime expression for an expression tree, add a
+    type parameter to the makeTree call.
+
+    This enables expression tree visitors to use phantom type
+    parameters. The visitor can be defined with __Explicit.
+
+        public static function makeTree<<<__Explicit>> TInfer>(...) { ... }
+
+     Userland calls to this method must provide an explicit type.
+
+        MyVisitor::makeTree<MyVisitorInt>(...);
+
+    For expression tree literals, we run type inference and provide a
+    synthesized type parameter to the desugared runtime expression.
+
+        MyVisitor`1`; // we infer MyVisitorInt
+        // we add this constrained type parameter:
+        MyVisitor::makeTree<TInfer#1>(...) where TInfer#1 = MyVisitorInt
+
+ *)
+  let maketree_with_type_param env p expr expected_ty =
+    let (hint_virtual, env) =
+      synthesize_type_param env p "TInfer" expected_ty
+    in
+    let rewrite_expr env expr =
+      match expr with
+      | Call e -> (env, Call { e with targs = [((), hint_virtual)] })
+      | e -> (env, e)
+    in
+    rewrite_expr_tree_maketree env expr rewrite_expr
+
   let expression_tree env p et =
     let {
       et_hint;

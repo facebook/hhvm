@@ -199,38 +199,25 @@ bool get_annotation_property_bool(
   return false;
 }
 
-std::string get_type_annotation(const t_field* field) {
-  if (const t_const* annot = field->find_structured_annotation_or_null(
+std::string get_type_annotation(const t_named* node) {
+  if (const t_const* annot = node->find_structured_annotation_or_null(
           "facebook.com/thrift/annotation/rust/Type")) {
     return get_annotation_property_string(annot, "name");
+  }
+
+  if (const t_type* type = dynamic_cast<const t_type*>(node)) {
+    return t_typedef::get_first_annotation(type, {"rust.type"});
   }
 
   return "";
 }
 
-std::string get_type_annotation(const t_type* type) {
-  if (const t_const* annot = t_typedef::get_first_structured_annotation_or_null(
-          type, "facebook.com/thrift/annotation/rust/Type")) {
-    return get_annotation_property_string(annot, "name");
-  }
-
-  return t_typedef::get_first_annotation(type, {"rust.type"});
+bool has_type_annotation(const t_named* node) {
+  return !get_type_annotation(node).empty();
 }
 
-bool has_type_annotation(const t_field* field) {
-  return !get_type_annotation(field).empty();
-}
-
-bool has_type_annotation(const t_type* type) {
-  return !get_type_annotation(type).empty();
-}
-
-bool has_nonstandard_type_annotation(const t_field* field) {
-  return get_type_annotation(field).find("::") != std::string::npos;
-}
-
-bool has_nonstandard_type_annotation(const t_type* type) {
-  return get_type_annotation(type).find("::") != std::string::npos;
+bool has_nonstandard_type_annotation(const t_named* node) {
+  return get_type_annotation(node).find("::") != std::string::npos;
 }
 
 void parse_include_srcs(

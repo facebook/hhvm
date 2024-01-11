@@ -1267,7 +1267,7 @@ TEST(CompilerTest, terse_write_annotation) {
       2: optional i64 field2;
       @thrift.TerseWrite
         # expected-error@-1: `@thrift.TerseWrite` cannot be used with qualified fields
-        # expected-warning@-2: Required field is deprecated: `field3`.
+        # expected-warning@-2: The 'required' qualifier is deprecated and ignored by most language implementations. Leave the field unqualified instead.
       3: required i64 field3;
     }
 
@@ -1403,8 +1403,8 @@ TEST(CompilerTest, inject_metadata_fields_annotation) {
           # expected-error@-1: Field `field1` is already defined for `Injected5`.
         2: optional i64 field2;
         3: required i64 field3;
-          # expected-warning@-1: Required field is deprecated: `field3`.
-          # expected-warning@-2: Required field is deprecated: `field3`.
+          # expected-warning@-1: The 'required' qualifier is deprecated and ignored by most language implementations. Leave the field unqualified instead.
+          # expected-warning@-2: The 'required' qualifier is deprecated and ignored by most language implementations. Leave the field unqualified instead.
     }
 
     @internal.InjectMetadataFields{type="foo.Fields"}

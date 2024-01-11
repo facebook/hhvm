@@ -499,7 +499,10 @@ void validate_mixin_field_attributes(
 
 void validate_required_field(diagnostic_context& ctx, const t_field& field) {
   if (field.qualifier() == t_field_qualifier::required) {
-    ctx.warning(field, "Required field is deprecated: `{}`.", field.name());
+    ctx.warning(
+        field,
+        "The 'required' qualifier is deprecated and ignored by most language implementations."
+        " Leave the field unqualified instead.");
   }
 }
 

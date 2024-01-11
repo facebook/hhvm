@@ -1184,7 +1184,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
         GlobalOptions.(
           options.saved_state.loading.log_saved_state_age_and_distance);
       fetch_remote_old_decls = options.fetch_remote_old_decls;
-      max_workers = Option.value options.max_workers ~default:(-1);
       specify_manifold_api_key = options.specify_manifold_api_key;
       remote_old_decls_no_limit = options.remote_old_decls_no_limit;
       populate_member_heaps = options.populate_member_heaps;

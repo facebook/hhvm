@@ -44,7 +44,6 @@ let serialize_globals () = Serialized_globals
 type rollout_flags = {
   log_saved_state_age_and_distance: bool;
   fetch_remote_old_decls: bool;
-  max_workers: int;
   specify_manifold_api_key: bool;
   populate_member_heaps: bool;
   shm_use_sharded_hashtbl: bool;

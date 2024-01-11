@@ -362,9 +362,9 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
   HackEventLogger.set_rollout_group local_config.ServerLocalConfig.rollout_group;
 
   Provider_backend.set_local_memory_backend
-    ~max_num_decls:local_config.ServerLocalConfig.ide_max_num_decls
-    ~max_num_shallow_decls:
-      local_config.ServerLocalConfig.ide_max_num_shallow_decls;
+    ~max_num_decls:5000
+    ~max_num_folded_class_decls:5000
+    ~max_num_shallow_class_decls:20000;
   let local_memory =
     match Provider_backend.get () with
     | Provider_backend.Local_memory local_memory -> local_memory
@@ -1462,9 +1462,7 @@ module Test = struct
     let local_config = ServerLocalConfig.default in
     let tcopt = ServerConfig.typechecker_options config in
     let popt = ServerConfig.parser_options config in
-    Provider_backend.set_local_memory_backend
-      ~max_num_decls:1000
-      ~max_num_shallow_decls:1000;
+    Provider_backend.set_local_memory_backend_with_defaults_for_test ();
     let local_memory =
       match Provider_backend.get () with
       | Provider_backend.Local_memory local_memory -> local_memory

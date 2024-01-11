@@ -356,13 +356,16 @@ let make_decl_store_from_local_memory
   }
 
 let set_local_memory_backend_internal
-    ~(max_num_decls : int) ~(max_num_shallow_decls : int) : unit =
+    ~(max_num_decls : int)
+    ~(max_num_folded_class_decls : int)
+    ~(max_num_shallow_class_decls : int) : unit =
   let local_memory =
     {
       decl_cache = Decl_cache.make ~max_size:max_num_decls;
-      folded_class_cache = Folded_class_cache.make ~max_size:max_num_decls;
+      folded_class_cache =
+        Folded_class_cache.make ~max_size:max_num_folded_class_decls;
       shallow_decl_cache =
-        Shallow_decl_cache.make ~max_size:max_num_shallow_decls;
+        Shallow_decl_cache.make ~max_size:max_num_shallow_class_decls;
       decls_reflect_this_file = ref None;
       reverse_naming_table_delta = Reverse_naming_table_delta.make ();
       fixmes = empty_fixmes;
@@ -374,19 +377,26 @@ let set_local_memory_backend_internal
   ()
 
 let set_local_memory_backend
-    ~(max_num_decls : int) ~(max_num_shallow_decls : int) =
+    ~(max_num_decls : int)
+    ~(max_num_folded_class_decls : int)
+    ~(max_num_shallow_class_decls : int) =
   Hh_logger.log
-    "Provider_backend.Local_memory cache sizes: max_num_decls=%d max_num_shallow_decls=%d"
+    "Provider_backend.Local_memory cache sizes: max_num_decls=%d max_num_folded_class_decls=%d max_num_shallow_class_decls=%d"
     max_num_decls
-    max_num_shallow_decls;
-  set_local_memory_backend_internal ~max_num_decls ~max_num_shallow_decls
+    max_num_folded_class_decls
+    max_num_shallow_class_decls;
+  set_local_memory_backend_internal
+    ~max_num_decls
+    ~max_num_folded_class_decls
+    ~max_num_shallow_class_decls
 
 let set_local_memory_backend_with_defaults_for_test () : unit =
   (* These are all arbitrary, so that test can spin up the backend easily;
      they haven't been tuned and shouldn't be used in production. *)
   set_local_memory_backend_internal
     ~max_num_decls:5000
-    ~max_num_shallow_decls:20000
+    ~max_num_folded_class_decls:5000
+    ~max_num_shallow_class_decls:20000
 
 let get () : t = !backend_ref
 

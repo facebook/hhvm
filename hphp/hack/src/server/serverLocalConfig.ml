@@ -159,8 +159,6 @@ type t = {
       which files to ignore. This flag is not expected to be
       rolled out broadly, rather it is meant to be used by
       power users only. *)
-  ide_max_num_decls: int;  (** tuning of clientIdeDaemon local cache *)
-  ide_max_num_shallow_decls: int;  (** tuning of clientIdeDaemon local cache *)
   ide_symbolindex_search_provider: string;
       (** Selects a search provider for autocomplete and symbol search *)
   predeclare_ide: bool;
@@ -302,8 +300,6 @@ let default =
     trace_parsing = false;
     prechecked_files = false;
     enable_type_check_filter_files = false;
-    ide_max_num_decls = 5000;
-    ide_max_num_shallow_decls = 10000;
     predeclare_ide = false;
     max_typechecker_worker_memory_mb = None;
     use_max_typechecker_worker_memory_for_decl_deferral = false;
@@ -671,15 +667,6 @@ let load_
       "enable_type_check_filter_files"
       ~default:default.enable_type_check_filter_files
       ~current_version
-      config
-  in
-  let ide_max_num_decls =
-    int_ "ide_max_num_decls" ~default:default.ide_max_num_decls config
-  in
-  let ide_max_num_shallow_decls =
-    int_
-      "ide_max_num_shallow_decls"
-      ~default:default.ide_max_num_shallow_decls
       config
   in
   let predeclare_ide =
@@ -1132,8 +1119,6 @@ let load_
     trace_parsing;
     prechecked_files;
     enable_type_check_filter_files;
-    ide_max_num_decls;
-    ide_max_num_shallow_decls;
     ide_symbolindex_search_provider;
     predeclare_ide;
     max_typechecker_worker_memory_mb;
@@ -1217,8 +1202,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
         GlobalOptions.(
           options.saved_state.loading.log_saved_state_age_and_distance);
       fetch_remote_old_decls = options.fetch_remote_old_decls;
-      ide_max_num_decls = options.ide_max_num_decls;
-      ide_max_num_shallow_decls = options.ide_max_num_shallow_decls;
       max_workers = Option.value options.max_workers ~default:(-1);
       max_typechecker_worker_memory_mb =
         Option.value options.max_typechecker_worker_memory_mb ~default:(-1);

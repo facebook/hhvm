@@ -227,11 +227,24 @@ val set_rust_backend : Rust_provider_backend.t -> unit
 
 val set_local_memory_backend_with_defaults_for_test : unit -> unit
 
-(** TODO(ljw): for now, max_num_shallow_decls accepts a special value "-1"
-which reflects the status quo ante, a max size of 140mb in bytes rather than
-a max number. This will be removed shortly. *)
+(** Numbers for decls, folded_decls and shallow_decls... Imagine this codebase:
+class A {}  class B : A {}  class C : B {}  typedef D = C    function f():void {}
+
+* When it needs the decl for function f, it obtains the decl from the direct-decl-parser
+  and stores it in [max_num_decls]. Likewise gconsts, modules, typedefs.
+* When it needs the decl for class C, that decl consists of a pair (folded-decl-of-C, lazy-members)
+  and is also stored in [max_num_decls].
+* When it needs the folded class decl for C, which is stored in [max_num_folded_decls], it computes
+  this from the shallow decl of C (stored in [max_num_shallow_class_decls]) plus the folded class decl
+  for ancestor B (again stored in [max_num_folded_decls]).
+
+Thus, "new C()" will fetch the decl for class C, needed [C] in the decls cache, [A,B,C] in the
+folded class decls cache, and [A,B,C] in the shallow class decls cache. *)
 val set_local_memory_backend :
-  max_num_decls:int -> max_num_shallow_decls:int -> unit
+  max_num_decls:int ->
+  max_num_folded_class_decls:int ->
+  max_num_shallow_class_decls:int ->
+  unit
 
 val get_local_memory_telemetry : local_memory -> Telemetry.t
 

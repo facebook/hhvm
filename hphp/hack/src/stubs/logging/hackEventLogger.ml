@@ -44,8 +44,6 @@ let serialize_globals () = Serialized_globals
 type rollout_flags = {
   log_saved_state_age_and_distance: bool;
   fetch_remote_old_decls: bool;
-  ide_max_num_decls: int;
-  ide_max_num_shallow_decls: int;
   max_typechecker_worker_memory_mb: int;
   max_workers: int;
   use_max_typechecker_worker_memory_for_decl_deferral: bool;

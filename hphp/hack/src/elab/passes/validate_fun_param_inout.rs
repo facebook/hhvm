@@ -27,7 +27,7 @@ impl Pass for ValidateFunParamInoutPass {
 }
 
 fn check_params(env: &Env, id: &Id, attrs: &UserAttributes, params: &[FunParam]) {
-    let in_as_set_function = sn::members::AS_LOWERCASE_SET.contains(id.name());
+    let in_as_set_function = sn::members::AS_SET.contains(id.name());
     let has_memoize_user_attr = has_memoize_user_attr(attrs);
     // We can skip the check entirely if neither condition is true since we would never
     // raise an error

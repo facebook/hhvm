@@ -132,7 +132,6 @@ pub mod collections {
 }
 
 pub mod members {
-    use hash::HashMap;
     use hash::HashSet;
     use lazy_static::lazy_static;
 
@@ -175,7 +174,7 @@ pub mod members {
     pub const __WAKEUP: &str = "__wakeup";
 
     lazy_static! {
-        static ref AS_SET: HashSet<&'static str> = vec![
+        pub static ref AS_SET: HashSet<&'static str> = vec![
             __CONSTRUCT,
             __DESTRUCT,
             __CALL,
@@ -196,25 +195,10 @@ pub mod members {
         ]
         .into_iter()
         .collect();
-        pub static ref AS_LOWERCASE_SET: HashSet<String> = {
-            AS_SET
-                .iter()
-                .fold(HashSet::<String>::default(), |mut set, special_name| {
-                    set.insert(special_name.to_ascii_lowercase());
-                    set
-                })
-        };
-        pub static ref UNSUPPORTED_MAP: HashMap<String, &'static str> = {
+        pub static ref UNSUPPORTED_SET: HashSet<&'static str> =
             vec![__CALL, __CALL_STATIC, __GET, __ISSET, __SET, __UNSET]
-                .iter()
-                .fold(
-                    HashMap::<String, &'static str>::default(),
-                    |mut set, special_name| {
-                        set.insert(special_name.to_ascii_lowercase(), special_name);
-                        set
-                    },
-                )
-        };
+                .into_iter()
+                .collect();
     }
 
     /* Any data- or aria- attribute is always valid, even if it is not declared
@@ -1206,8 +1190,6 @@ pub mod modules {
 #[cfg(test)]
 mod test {
     use crate::members::is_special_xhp_attribute;
-    use crate::members::AS_LOWERCASE_SET;
-    use crate::members::UNSUPPORTED_MAP;
     use crate::special_idents::is_tmp_var;
     use crate::typehints::is_namespace_with_reserved_hh_name;
 
@@ -1218,18 +1200,6 @@ mod test {
         assert!(!is_tmp_var("О БОЖЕ"));
 
         assert!(is_tmp_var("__tmp$Blah"));
-    }
-
-    #[test]
-    fn test_members_as_lowercase_set() {
-        assert!(AS_LOWERCASE_SET.contains("__tostring"));
-        assert!(!AS_LOWERCASE_SET.contains("__toString"));
-    }
-
-    #[test]
-    fn test_members_unsupported_map() {
-        assert_eq!(UNSUPPORTED_MAP.get("__callstatic"), Some(&"__callStatic"));
-        assert!(!UNSUPPORTED_MAP.contains_key("__callStatic"));
     }
 
     #[test]

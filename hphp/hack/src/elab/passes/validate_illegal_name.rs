@@ -136,5 +136,5 @@ fn check_illegal_member_variable_class(env: &Env, id: &Id) {
 }
 
 fn is_magic(nm: &str) -> bool {
-    nm != sn::members::__TO_STRING && sn::members::AS_LOWERCASE_SET.contains(nm)
+    nm != sn::members::__TO_STRING && sn::members::AS_SET.contains(nm)
 }

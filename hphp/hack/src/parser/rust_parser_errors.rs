@@ -1384,7 +1384,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn is_clone(&self, label: S<'_>) -> bool {
-        self.text(label).eq_ignore_ascii_case(sn::members::__CLONE)
+        self.text(label) == sn::members::__CLONE
     }
 
     fn class_constructor_has_static(&self, node: S<'_>) -> bool {
@@ -1440,10 +1440,11 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     fn async_magic_method(&self, node: S<'_>) -> bool {
         match &node.children {
             FunctionDeclarationHeader(node) => {
-                let name = self.text(&node.name).to_ascii_lowercase();
+                // Method names are case sensitive.
+                let name = self.text(&node.name);
                 match name {
-                    _ if name.eq_ignore_ascii_case(sn::members::__DISPOSE_ASYNC) => false,
-                    _ if sn::members::AS_LOWERCASE_SET.contains(&name) => {
+                    sn::members::__DISPOSE_ASYNC => false,
+                    _ if sn::members::AS_SET.contains(&name) => {
                         list_contains_predicate(|x| x.is_async(), &node.modifiers)
                     }
                     _ => false,
@@ -1555,13 +1556,11 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
     fn unsupported_magic_method_errors(&mut self, node: S<'a>) {
         if let FunctionDeclarationHeader(x) = &node.children {
-            let name = self.text(&x.name).to_ascii_lowercase();
-            let unsupported = sn::members::UNSUPPORTED_MAP.get(&name);
-
-            if let Some(unsupported) = unsupported {
+            let name = self.text(&x.name);
+            if sn::members::UNSUPPORTED_SET.contains(&name) {
                 self.errors.push(make_error_from_node(
                     node,
-                    errors::unsupported_magic_method(unsupported),
+                    errors::unsupported_magic_method(name),
                 ));
             }
         }
@@ -2241,7 +2240,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             false
         } else {
             self.first_parent_function_name()
-                .map_or(false, |s| s.eq_ignore_ascii_case(sn::members::__CONSTRUCT))
+                .map_or(false, |s| s == sn::members::__CONSTRUCT)
         }
     }
 
@@ -2614,13 +2613,11 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn is_in_unyieldable_magic_method(&self) -> bool {
-        self.first_parent_function_name().map_or(false, |s| {
-            let s = s.to_ascii_lowercase();
-            match s {
-                _ if s == sn::members::__INVOKE => false,
-                _ => sn::members::AS_LOWERCASE_SET.contains(&s),
-            }
-        })
+        self.first_parent_function_name()
+            .map_or(false, |s| match s {
+                sn::members::__INVOKE => false,
+                _ => sn::members::AS_SET.contains(&s),
+            })
     }
 
     fn check_disallowed_variables(&mut self, node: S<'a>) {

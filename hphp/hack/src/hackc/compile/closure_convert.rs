@@ -1149,7 +1149,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
         pos: &Pos,
     ) -> Result<Expr_> {
         let force = if let Expr_::Id(ref id) = x.func.2 {
-            strip_id(id).eq_ignore_ascii_case("hh\\dynamic_meth_caller_force")
+            strip_id(id).eq_ignore_ascii_case("HH\\dynamic_meth_caller_force")
         } else {
             false
         };
@@ -1629,8 +1629,8 @@ fn strip_unsafe_casts(e: &mut Expr_) -> Expr_ {
 fn is_dyn_meth_caller(x: &CallExpr) -> bool {
     if let Expr_::Id(ref id) = (x.func).2 {
         let name = strip_id(id);
-        name.eq_ignore_ascii_case("hh\\dynamic_meth_caller")
-            || name.eq_ignore_ascii_case("hh\\dynamic_meth_caller_force")
+        name.eq_ignore_ascii_case("HH\\dynamic_meth_caller")
+            || name.eq_ignore_ascii_case("HH\\dynamic_meth_caller_force")
     } else {
         false
     }
@@ -1639,7 +1639,7 @@ fn is_dyn_meth_caller(x: &CallExpr) -> bool {
 fn is_meth_caller(x: &CallExpr) -> bool {
     if let Expr_::Id(ref id) = x.func.2 {
         let name = strip_id(id);
-        name.eq_ignore_ascii_case("hh\\meth_caller") || name.eq_ignore_ascii_case("meth_caller")
+        name.eq_ignore_ascii_case("HH\\meth_caller") || name.eq_ignore_ascii_case("meth_caller")
     } else {
         false
     }

@@ -69,7 +69,7 @@ fn is_readonly_expr(e: &ast::Expr) -> bool {
 fn set_bytes_kind(name: &str) -> Option<SetRange> {
     lazy_static! {
         static ref RE: Regex =
-            Regex::new(r#"(?i)^hh\\set_bytes(_rev)?_([a-z0-9]+)(_vec)?$"#).unwrap();
+            Regex::new(r#"(?i)^HH\\set_bytes(_rev)?_([a-z0-9]+)(_vec)?$"#).unwrap();
     }
     RE.captures(name).and_then(|groups| {
         let op = if groups.get(1).is_some() {

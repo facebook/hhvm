@@ -264,7 +264,7 @@ fn hint_to_type_constraint<'arena>(
                 [] if s == "\\HH\\dynamic"
                     || s == "\\HH\\mixed"
                     || (skipawaitable && is_awaitable(s))
-                    || (s.eq_ignore_ascii_case("\\hh\\void") && !is_typedef(kind)) =>
+                    || (s.eq_ignore_ascii_case("\\HH\\void") && !is_typedef(kind)) =>
                 {
                     return Ok(Constraint::default());
                 }

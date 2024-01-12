@@ -209,8 +209,8 @@ fn valid_for_prop(tc: &Constraint<'_>) -> bool {
     match &tc.name {
         Nothing => true,
         Just(s) => {
-            !(s.unsafe_as_str().eq_ignore_ascii_case("hh\\nothing")
-                || s.unsafe_as_str().eq_ignore_ascii_case("hh\\noreturn")
+            !(s.unsafe_as_str().eq_ignore_ascii_case("HH\\nothing")
+                || s.unsafe_as_str().eq_ignore_ascii_case("HH\\noreturn")
                 || s.unsafe_as_str().eq_ignore_ascii_case("callable"))
         }
     }

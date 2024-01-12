@@ -361,12 +361,6 @@ enum class NamedGroup : uint16_t {
    */
   secp521r1_x25519 = 510,
 
-  /**
-   * Experimental, currently aligning with boringssl for inter-op purposes. See
-   * https://github.com/open-quantum-safe/boringssl/blob/master/include/openssl/ssl.h#L2406
-   */
-  secp384r1_bikel3 = 12091,
-
   // Standardized algorithms. See
   // https://datatracker.ietf.org/doc/html/draft-ietf-tls-hybrid-design-05#section-5
 

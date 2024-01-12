@@ -36,7 +36,6 @@ INSTANTIATE_TEST_SUITE_P(
     HybridKeyExchangeHandshakeTest,
     Values(
         NamedGroup::secp521r1_x25519,
-        NamedGroup::secp384r1_bikel3,
         NamedGroup::x25519_kyber512,
         NamedGroup::secp256r1_kyber512,
         NamedGroup::x25519_kyber768_draft00,

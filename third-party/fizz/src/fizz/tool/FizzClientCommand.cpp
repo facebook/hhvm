@@ -87,8 +87,7 @@ void printUsage() {
     << " -echbase64 echConfigList (base64 encoded string of echconfigs.)"
     << "                          (The echconfigs file argument must match the ECH Config List format specified in the ECH RFC.)\n"
 #ifdef FIZZ_TOOL_ENABLE_OQS
-    << " -hybridkex               (Use experimental hybrid key exchange. Currently the only supported named groups under\n"
-    << "                          this mode are secp384r1_bikel3 and secp521r1_x25519)\n"
+    << " -hybridkex               (Use experimental hybrid key exchange. See Types.h for available hybrid named groups.)\n"
 #endif
 #ifdef FIZZ_TOOL_ENABLE_IO_URING
     << " -io_uring                (use io_uring for I/O. Default: false)\n"

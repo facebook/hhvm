@@ -114,9 +114,21 @@ void Cpp2Worker::onNewConnectionThatMayThrow(
 
   auto* observer = server_->getObserver();
   uint32_t maxConnection = server_->getMaxConnections();
+  auto numIOWorkers = server_->getNumIOWorkerThreads();
   if (maxConnection > 0 &&
       (getConnectionManager()->getNumConnections() >=
-       maxConnection / server_->getNumIOWorkerThreads())) {
+       maxConnection / numIOWorkers)) {
+    FB_LOG_EVERY_MS(ERROR, 1000) << fmt::format(
+        "Total number of connections exceeds the limit: {}. Number of IO workers: {}.",
+        maxConnection,
+        numIOWorkers);
+    THRIFT_CONNECTION_EVENT(exceeded_max_connection_limit)
+        .log(*server_, *addr, [maxConnection, numIOWorkers] {
+          folly::dynamic metadata = folly::dynamic::object;
+          metadata["max_num_connections"] = maxConnection;
+          metadata["num_io_workers"] = numIOWorkers;
+          return metadata;
+        });
     if (observer) {
       observer->connDropped();
       observer->connRejected();

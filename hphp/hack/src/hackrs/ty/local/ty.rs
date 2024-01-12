@@ -468,7 +468,6 @@ impl<'a, R: Reason> ToOxidized<'a> for FunType<R> {
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
         use oxidized_by_ref::typing_defs::FunType as OFunType;
-        use oxidized_by_ref::typing_defs::PossiblyEnforcedTy as OPossiblyEnforcedTy;
         let FunType {
             tparams,
             params,
@@ -485,10 +484,7 @@ impl<'a, R: Reason> ToOxidized<'a> for FunType<R> {
                     oxidized_by_ref::pos::Pos::none(),
                 ),
             }),
-            ret: &*arena.alloc(OPossiblyEnforcedTy {
-                enforced: oxidized::typing_defs_core::Enforcement::Enforced,
-                type_: &*arena.alloc(ret.to_oxidized(arena)),
-            }),
+            ret: &*arena.alloc(ret.to_oxidized(arena)),
             flags: flags.clone(),
             cross_package: None,
         }
@@ -500,14 +496,10 @@ impl<'a, R: Reason> ToOxidized<'a> for FunParam<R> {
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
         use oxidized_by_ref::typing_defs::FunParam as OFunParam;
-        use oxidized_by_ref::typing_defs::PossiblyEnforcedTy as OPossiblyEnforcedTy;
         OFunParam {
             pos: self.pos.to_oxidized(arena),
             name: self.name.map(|n| n.to_oxidized(arena)),
-            type_: &*arena.alloc(OPossiblyEnforcedTy {
-                enforced: oxidized::typing_defs_core::Enforcement::Enforced,
-                type_: &*arena.alloc(self.ty.to_oxidized(arena)),
-            }),
+            type_: &*arena.alloc(self.ty.to_oxidized(arena)),
             flags: oxidized::typing_defs_flags::FunParamFlags::from_bits_truncate(0),
             def_value: self.def_value.as_deref().to_oxidized(arena),
         }

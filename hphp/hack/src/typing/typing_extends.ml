@@ -759,11 +759,11 @@ let check_multiple_concrete_definitions
  * the declared return type
  *)
 let get_return_value_type ft =
-  match (get_ft_async ft, deref ft.ft_ret.et_type) with
+  match (get_ft_async ft, deref ft.ft_ret) with
   | (true, (_, Tapply ((_, class_name), [inner_ty])))
     when String.equal class_name SN.Classes.cAwaitable ->
     inner_ty
-  | _ -> ft.ft_ret.et_type
+  | _ -> ft.ft_ret
 
 let maybe_poison_ancestors
     env
@@ -808,11 +808,9 @@ let maybe_poison_ancestors
      * then we need to "copy down" any intersection, so record this in the log
      *)
     | (Unenforced, Unenforced) ->
-      let child_pos =
-        Pos_or_decl.unsafe_to_raw_pos (get_pos ft_child.ft_ret.et_type)
-      in
+      let child_pos = Pos_or_decl.unsafe_to_raw_pos (get_pos ft_child.ft_ret) in
       let parent_pos =
-        Pos_or_decl.unsafe_to_raw_pos (get_pos ft_parent.ft_ret.et_type)
+        Pos_or_decl.unsafe_to_raw_pos (get_pos ft_parent.ft_ret)
       in
       let p = Pos.to_absolute parent_pos in
       let s = Printf.sprintf "!,%s,%d" (Pos.filename p) (Pos.line p) in
@@ -843,7 +841,7 @@ let maybe_poison_ancestors
                self_ty)
         in
         let child_pos =
-          Pos_or_decl.unsafe_to_raw_pos (get_pos ft_child.ft_ret.et_type)
+          Pos_or_decl.unsafe_to_raw_pos (get_pos ft_child.ft_ret)
         in
         let enforced_parent_ty =
           Typing_partial_enforcement.get_enforced_type
@@ -893,8 +891,7 @@ let maybe_poison_ancestors
                         match get_node fty with
                         | Tfun { ft_ret; _ } ->
                           let pos =
-                            Pos_or_decl.unsafe_to_raw_pos
-                              (get_pos ft_ret.et_type)
+                            Pos_or_decl.unsafe_to_raw_pos (get_pos ft_ret)
                           in
                           (* The ^ denotes poisoning *)
                           Typing_log.log_pessimise_poisoned_return
@@ -1703,7 +1700,7 @@ let default_constructor_ce class_ =
       ft_where_constraints = [];
       ft_params = [];
       ft_implicit_params = { capability = CapTy (MakeType.mixed r) };
-      ft_ret = { et_type = MakeType.void r; et_enforced = Unenforced };
+      ft_ret = MakeType.void r;
       ft_flags = Typing_defs_flags.Fun.default;
       ft_cross_package = None;
     }

@@ -16,9 +16,6 @@ open Typing_defs
 let rec strip_ty ty =
   let (reason, ty) = deref ty in
   let strip_tyl tyl = List.map tyl ~f:strip_ty in
-  let strip_possibly_enforced_ty et =
-    { et with et_type = strip_ty et.et_type }
-  in
   let ty =
     match ty with
     | Tany _
@@ -39,7 +36,7 @@ let rec strip_ty ty =
     | Tclass (sid, exact, tyl) -> Tclass (sid, exact, strip_tyl tyl)
     | Tfun { ft_params; ft_implicit_params = { capability }; ft_ret; _ } ->
       let strip_param ({ fp_type; _ } as fp) =
-        let fp_type = strip_possibly_enforced_ty fp_type in
+        let fp_type = strip_ty fp_type in
         {
           fp_type;
           fp_flags =
@@ -63,7 +60,7 @@ let rec strip_ty ty =
             | CapDefaults p -> CapDefaults p);
         }
       in
-      let ft_ret = strip_possibly_enforced_ty ft_ret in
+      let ft_ret = strip_ty ft_ret in
       Tfun
         {
           ft_params;

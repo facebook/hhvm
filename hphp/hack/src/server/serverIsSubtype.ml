@@ -73,8 +73,8 @@ let rec validate_free_type env locl_ty =
   | Tvec_or_dict (kty, vty) ->
     validate_free_type env kty @ validate_free_type env vty
   | Tfun tfun ->
-    validate_l env (List.map tfun.ft_params ~f:(fun fp -> fp.fp_type.et_type))
-    @ validate_free_type env tfun.ft_ret.et_type
+    validate_l env (List.map tfun.ft_params ~f:(fun fp -> fp.fp_type))
+    @ validate_free_type env tfun.ft_ret
   | Tshape { s_origin = _origin; s_unknown_value = _kind; s_fields = fm } ->
     let field_tys =
       List.map (TShapeMap.values fm) ~f:(fun field -> field.sft_ty)

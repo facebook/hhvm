@@ -32,11 +32,11 @@ let get_snippet ctx name ty =
                else
                  ""
              in
-             let ty = Tast_env.print_ty tast_env param.fp_type.et_type in
+             let ty = Tast_env.print_ty tast_env param.fp_type in
              Printf.sprintf "%s %s%s" ty prefix name)
       |> String.concat ~sep:", "
     in
-    let ret_type = Tast_env.print_ty tast_env ft.ft_ret.et_type in
+    let ret_type = Tast_env.print_ty tast_env ft.ft_ret in
     Printf.sprintf "%s(%s): %s" name param_snippet ret_type
   | _ -> Printf.sprintf "%s: %s" name (Tast_env.print_ty tast_env ty)
 

@@ -29,9 +29,7 @@ File root|module_attr.php--here.php
         (Tfun
            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
              ft_implicit_params = { capability = (CapDefaults [4:10-13]) };
-             ft_ret =
-             { et_enforced = Typing_defs_core.Unenforced;
-               et_type = (Rhint ([4:16-20]), (Tprim Tvoid)) };
+             ft_ret = (Rhint ([4:16-20]), (Tprim Tvoid));
              ft_flags =
              { Typing_defs_flags.Fun.return_disposable = false;
                async = false; generator = false; fun_kind = FSync;
@@ -80,9 +78,7 @@ File root|module_attr.php--there.php
            (Tfun
               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                 ft_implicit_params = { capability = (CapDefaults [5:19-22]) };
-                ft_ret =
-                { et_enforced = Typing_defs_core.Unenforced;
-                  et_type = (Rhint ([5:25-29]), (Tprim Tvoid)) };
+                ft_ret = (Rhint ([5:25-29]), (Tprim Tvoid));
                 ft_flags =
                 { Typing_defs_flags.Fun.return_disposable = false;
                   async = false; generator = false; fun_kind = FSync;

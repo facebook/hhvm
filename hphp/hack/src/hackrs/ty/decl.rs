@@ -43,7 +43,6 @@ pub use ty::ConsistentKind;
 pub use ty::EnumType;
 pub use ty::FunParam;
 pub use ty::FunType;
-pub use ty::PossiblyEnforcedTy;
 pub use ty::Prim;
 pub use ty::RefinedConst;
 pub use ty::RefinedConstBound;

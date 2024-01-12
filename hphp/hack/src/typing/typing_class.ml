@@ -30,7 +30,7 @@ let is_literal_with_trivially_inferable_type (_, _, e) =
 
 let method_dynamically_callable env cls m params_decl_ty return =
   let env = { env with checked = Tast.CUnderDynamicAssumptions } in
-  let ret_locl_ty = return.Typing_env_return_info.return_type.et_type in
+  let ret_locl_ty = return.Typing_env_return_info.return_type in
   (* Here the body of the method is typechecked again to ensure it is safe
    * to call it from a dynamic context (eg. under dyn..dyn->dyn assumptions).
    * The code below must be kept in sync with with the method_def checks.
@@ -38,8 +38,7 @@ let method_dynamically_callable env cls m params_decl_ty return =
   let make_dynamic pos = MakeType.dynamic (Reason.Rsupport_dynamic_type pos) in
   let dynamic_return_ty = make_dynamic (get_pos ret_locl_ty) in
   let dynamic_return_info =
-    Typing_env_return_info.
-      { return with return_type = MakeType.unenforced dynamic_return_ty }
+    Typing_env_return_info.{ return with return_type = dynamic_return_ty }
   in
   let (env, param_tys) =
     Typing_param.make_param_local_tys
@@ -280,7 +279,7 @@ let method_def ~is_disposable env cls m =
       param_tys
       m.m_params
   in
-  let ret_locl_ty = return.Typing_env_return_info.return_type.et_type in
+  let ret_locl_ty = return.Typing_env_return_info.return_type in
   let env = set_tyvars_variance_in_callable env ret_locl_ty param_tys in
   let local_tpenv = Env.get_tpenv env in
   let disable =
@@ -356,7 +355,7 @@ let method_def ~is_disposable env cls m =
          ~this_class:(Some cls)
          env_with_require_dynamic
          params_decl_ty
-         return.Typing_env_return_info.return_type.et_type
+         return.Typing_env_return_info.return_type
   in
   let method_def_of_dynamic
       (dynamic_env, dynamic_params, dynamic_body, dynamic_return_ty) =
@@ -1066,7 +1065,7 @@ let class_const_def ~in_enum_class c cls env cc =
   let tcopt = Env.get_tcopt env in
   Profile.measure_elapsed_time_and_report tcopt (Some env) cc.cc_id @@ fun () ->
   let { cc_type = h; cc_id = id; cc_kind = k; _ } = cc in
-  let (env, hint_ty, opt_expected) =
+  let (env, hint_ty, opt_expected, et_enforced) =
     match h with
     | None ->
       begin
@@ -1093,14 +1092,14 @@ let class_const_def ~in_enum_class c cls env cc =
               Naming_error.(to_user_error @@ Missing_typehint (fst id))
       end;
       let (env, ty) = Env.fresh_type env (fst id) in
-      (env, MakeType.unenforced ty, None)
+      (env, ty, None, Unenforced)
     | Some h ->
       let ty = Decl_hint.hint env.decl_env h in
-      let ty =
+      let (et_enforced, ty) =
         Typing_enforceability.compute_enforced_ty ~this_class:(Some cls) env ty
       in
       let ((env, ty_err_opt), ty) =
-        Phase.localize_possibly_enforced_no_subst env ~ignore_errors:false ty
+        Phase.localize_no_subst env ~ignore_errors:false ty
       in
       Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
       (* Removing the HH\MemberOf wrapper in case of enum classes so the
@@ -1108,18 +1107,18 @@ let class_const_def ~in_enum_class c cls env cc =
        *)
       let opt_ty =
         if in_enum_class then
-          match get_node ty.et_type with
+          match get_node ty with
           | Tnewtype (memberof, [_; et_type], _)
             when String.equal memberof SN.Classes.cMemberOf ->
-            { ty with et_type }
+            et_type
           | _ -> ty
         else
           ty
       in
       ( env,
         ty,
-        Some (ExpectedTy.make_and_allow_coercion (fst id) Reason.URhint opt_ty)
-      )
+        Some (ExpectedTy.make_and_allow_coercion (fst id) Reason.URhint opt_ty),
+        et_enforced )
   in
   let check env ty' =
     (* Lifted out to closure to illustrate which variables are captured *)
@@ -1129,6 +1128,7 @@ let class_const_def ~in_enum_class c cls env cc =
       env
       ty'
       hint_ty
+      et_enforced
       Typing_error.Callback.class_constant_value_does_not_match_hint
   in
   let type_and_check env e =
@@ -1156,7 +1156,7 @@ let class_const_def ~in_enum_class c cls env cc =
           expr env ?expected:opt_expected e |> triple_to_pair)
       in
       let (te, ty') =
-        match deref hint_ty.et_type with
+        match deref hint_ty with
         | (r, Tnewtype (memberof, [enum_name; _], _))
           when String.equal memberof SN.Classes.cMemberOf ->
           let lift r ty = mk (r, Tnewtype (memberof, [enum_name; ty], ty)) in
@@ -1173,14 +1173,14 @@ let class_const_def ~in_enum_class c cls env cc =
        * in HHI files so it may just be a placeholder, therefore we don't care
        * about checking the value and simply pass it through *)
       let (env, te, _ty) = Typing.expr env e in
-      ((env, None), CCConcrete te, hint_ty.et_type)
+      ((env, None), CCConcrete te, hint_ty)
     | CCConcrete e ->
       let (env, te, ty') = type_and_check env e in
       (env, Aast.CCConcrete te, ty')
     | CCAbstract (Some default) ->
       let (env, tdefault, ty') = type_and_check env default in
       (env, CCAbstract (Some tdefault), ty')
-    | CCAbstract None -> ((env, None), CCAbstract None, hint_ty.et_type)
+    | CCAbstract None -> ((env, None), CCAbstract None, hint_ty)
   in
   let (env, user_attributes) =
     if Ast_defs.is_c_class c.Aast.c_kind || Ast_defs.is_c_trait c.Aast.c_kind
@@ -1225,25 +1225,22 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
     match decl_cty with
     | None -> (env, None)
     | Some decl_cty ->
-      let decl_cty =
+      let (et_enforced, decl_cty) =
         Typing_enforceability.compute_enforced_ty
           ~this_class:(Some cls)
           env
           decl_cty
       in
       let ((env, ty_err_opt), cty) =
-        Phase.localize_possibly_enforced_no_subst
-          env
-          ~ignore_errors:false
-          decl_cty
+        Phase.localize_no_subst env ~ignore_errors:false decl_cty
       in
       let cty =
-        match cty.et_enforced with
+        match et_enforced with
         | Enforced when is_none cv.cv_xhp_attr -> cty
         | _ ->
           let add_like = (not is_noautodynamic) && not no_auto_likes in
           if TCO.everything_sdt env.genv.tcopt && add_like then
-            { cty with et_type = TUtils.make_like env cty.et_type }
+            TUtils.make_like env cty
           else (
             if add_like then
               Typing_log.log_pessimise_prop env (fst cv.cv_id) (snd cv.cv_id);
@@ -1276,6 +1273,7 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
             env
             ty
             cty
+            Enforced (* TODO akenn: flow this in *)
             Typing_error.Callback
             .class_property_initializer_type_does_not_match_hint
       in
@@ -1308,8 +1306,7 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
 
   let ((cv_type_ty, _) as cv_type) =
     match expected with
-    | Some expected ->
-      (expected.ExpectedTy.ty.et_type, hint_of_type_hint cv.cv_type)
+    | Some expected -> (expected.ExpectedTy.ty, hint_of_type_hint cv.cv_type)
     | None -> Tast.dummy_type_hint (hint_of_type_hint cv.cv_type)
   in
   (* if the class implements dynamic, then check that the type of the property

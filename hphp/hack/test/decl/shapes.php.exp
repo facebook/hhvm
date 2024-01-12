@@ -27,21 +27,17 @@
               ft_params =
               [{ fp_pos = [5:56-61]; fp_name = (Some "$arg1");
                  fp_type =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type =
-                   (Rhint ([5:22-55]),
-                    (Tshape
-                       { s_origin = Typing_defs_core.Missing_origin;
-                         s_fields =
-                         { (Typing_defs_core.TSFlit_str ([5:28-31], "x")) ->
-                           { sft_optional = false;
-                             sft_ty = (Rhint ([5:35-40]), (Tprim Tfloat)) };
-                           (Typing_defs_core.TSFlit_str ([5:42-45], "y")) ->
-                           { sft_optional = false;
-                             sft_ty = (Rhint ([5:49-54]), (Tprim Tfloat)) } };
-                         s_unknown_value = (Rhint ([Pos.none]), (Tunion []))
-                         }))
-                   };
+                 (Rhint ([5:22-55]),
+                  (Tshape
+                     { s_origin = Typing_defs_core.Missing_origin;
+                       s_fields =
+                       { (Typing_defs_core.TSFlit_str ([5:28-31], "x")) ->
+                         { sft_optional = false;
+                           sft_ty = (Rhint ([5:35-40]), (Tprim Tfloat)) };
+                         (Typing_defs_core.TSFlit_str ([5:42-45], "y")) ->
+                         { sft_optional = false;
+                           sft_ty = (Rhint ([5:49-54]), (Tprim Tfloat)) } };
+                       s_unknown_value = (Rhint ([Pos.none]), (Tunion [])) }));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; has_default = false; readonly = false };
@@ -49,11 +45,7 @@
                 ];
               ft_implicit_params = { capability = (CapDefaults [5:10-21]) };
               ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type =
-                (Rhint ([5:64-74]),
-                 (Tapply (([5:64-74], "\\Coordinate"), [])))
-                };
+              (Rhint ([5:64-74]), (Tapply (([5:64-74], "\\Coordinate"), [])));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;
@@ -76,11 +68,8 @@
               ft_params =
               [{ fp_pos = [10:14-19]; fp_name = (Some "$arg1");
                  fp_type =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type =
-                   (Rhint ([10:3-13]),
-                    (Tapply (([10:3-13], "\\Coordinate"), [])))
-                   };
+                 (Rhint ([10:3-13]),
+                  (Tapply (([10:3-13], "\\Coordinate"), [])));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; has_default = false; readonly = false };
@@ -88,20 +77,17 @@
                 ];
               ft_implicit_params = { capability = (CapDefaults [9:10-23]) };
               ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type =
-                (Rhint ([11:4-42]),
-                 (Tshape
-                    { s_origin = Typing_defs_core.Missing_origin;
-                      s_fields =
-                      { (Typing_defs_core.TSFlit_str ([11:10-13], "x")) ->
-                        { sft_optional = false;
-                          sft_ty = (Rhint ([11:17-22]), (Tprim Tfloat)) };
-                        (Typing_defs_core.TSFlit_str ([11:24-27], "y")) ->
-                        { sft_optional = false;
-                          sft_ty = (Rhint ([11:31-36]), (Tprim Tfloat)) } };
-                      s_unknown_value = (Rhint ([11:38-41]), Tmixed) }))
-                };
+              (Rhint ([11:4-42]),
+               (Tshape
+                  { s_origin = Typing_defs_core.Missing_origin;
+                    s_fields =
+                    { (Typing_defs_core.TSFlit_str ([11:10-13], "x")) ->
+                      { sft_optional = false;
+                        sft_ty = (Rhint ([11:17-22]), (Tprim Tfloat)) };
+                      (Typing_defs_core.TSFlit_str ([11:24-27], "y")) ->
+                      { sft_optional = false;
+                        sft_ty = (Rhint ([11:31-36]), (Tprim Tfloat)) } };
+                    s_unknown_value = (Rhint ([11:38-41]), Tmixed) }));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;
@@ -130,13 +116,10 @@
               ft_params =
               [{ fp_pos = [15:34-39]; fp_name = (Some "$arg1");
                  fp_type =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type =
-                   (Rhint ([15:27-33]),
-                    (Ttuple
-                       [(Rhint ([15:28-29]), (Tgeneric ("T", [])));
-                         (Rhint ([15:31-32]), (Tgeneric ("T", [])))]))
-                   };
+                 (Rhint ([15:27-33]),
+                  (Ttuple
+                     [(Rhint ([15:28-29]), (Tgeneric ("T", [])));
+                       (Rhint ([15:31-32]), (Tgeneric ("T", [])))]));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; has_default = false; readonly = false };
@@ -144,13 +127,10 @@
                 ];
               ft_implicit_params = { capability = (CapDefaults [15:10-23]) };
               ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type =
-                (Rhint ([15:42-48]),
-                 (Ttuple
-                    [(Rhint ([15:43-44]), (Tgeneric ("T", [])));
-                      (Rhint ([15:46-47]), (Tgeneric ("T", [])))]))
-                };
+              (Rhint ([15:42-48]),
+               (Ttuple
+                  [(Rhint ([15:43-44]), (Tgeneric ("T", [])));
+                    (Rhint ([15:46-47]), (Tgeneric ("T", [])))]));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;

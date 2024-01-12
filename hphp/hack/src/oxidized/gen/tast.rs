@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3c15f7b78d4b889f6d402fbf3956ec34>>
+// @generated SignedSource<<8213fc6d15e08d60fab83f2a2e972dfa>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -16,7 +16,6 @@ use ocamlrep::FromOcamlRepIn;
 use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
-pub use typing_defs::PossiblyEnforcedTy;
 pub use typing_defs::Ty;
 pub use typing_defs::ValKind;
 

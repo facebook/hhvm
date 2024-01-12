@@ -106,8 +106,6 @@ const StaticString s_is_dyncall("is_dynamically_callable");
 const StaticString s_is_ctx("is_ctx");
 const StaticString s_is_enforceable("is_enforceable");
 const StaticString s_is_reifiable("is_reifiable");
-const StaticString s_is_soft_type("is_soft_type");
-const StaticString s_is_soft_return_type("is_soft_return_type");
 const StaticString s_is_nullable("is_nullable");
 const StaticString s_is_optional("is_optional");
 
@@ -409,7 +407,6 @@ Array populateMethodParams(const rust::Vec<hackc::ExtDeclMethodParam>& params) {
     Array info = Array::CreateDict();
     info.set(s_name, rustToString(param.name));
     info.set(s_type, rustToString(param.type_));
-    maybeSetBool(info, !param.enforced_type, s_is_soft_type);
     maybeSetBool(info, param.accept_disposable, s_is_accept_disposable);
     maybeSetBool(info, param.is_inout, s_is_inout);
     maybeSetBool(info, param.has_default, s_has_default);
@@ -435,7 +432,6 @@ Array populateSignature(const rust::Vec<hackc::ExtDeclSignature>& sigs) {
         sig.where_constraints,
         s_where_constraints,
         populateTypeConstraints);
-    maybeSetBool(info, !sig.return_enforced, s_is_soft_return_type);
     maybeSet(info, sig.params, s_params, populateMethodParams);
     maybeSet(info, sig.implicit_params, s_implicit_params, rustToString);
     maybeSet(info, sig.cross_package, s_cross_package, rustToString);

@@ -98,7 +98,7 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
         List.fold_left
           ~f:this#on_type
           ~init:acc
-          (List.map ft_params ~f:(fun x -> x.fp_type.et_type))
+          (List.map ft_params ~f:(fun x -> x.fp_type))
       in
       let tparams =
         List.map ft_tparams ~f:(fun t -> List.map t.tp_constraints ~f:snd)
@@ -109,7 +109,7 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
           ~f:(fun acc tp -> List.fold ~f:this#on_type ~init:acc tp)
           ~init:acc
       in
-      this#on_type acc ft_ret.et_type
+      this#on_type acc ft_ret
 
     method on_tapply acc _ _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
 
@@ -233,7 +233,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
         List.fold_left
           ~f:this#on_type
           ~init:acc
-          (List.map ft_params ~f:(fun x -> x.fp_type.et_type))
+          (List.map ft_params ~f:(fun x -> x.fp_type))
       in
       let tparams =
         List.map ft_tparams ~f:(fun t -> List.map t.tp_constraints ~f:snd)
@@ -244,7 +244,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
           ~f:(fun acc tp -> List.fold ~f:this#on_type ~init:acc tp)
           ~init:acc
       in
-      this#on_type acc ft_ret.et_type
+      this#on_type acc ft_ret
 
     method on_tgeneric acc _ _ tyl =
       List.fold_left tyl ~f:this#on_type ~init:acc

@@ -376,7 +376,7 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
       empty
   | Tfun ft ->
     let get_typarams_param acc fp =
-      let tp = get_typarams fp.fp_type.et_type in
+      let tp = get_typarams fp.fp_type in
       let tp =
         match get_fp_mode fp with
         (* Parameters behave contravariantly *)
@@ -395,7 +395,7 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
       | CapDefaults _ -> empty
       | CapTy ty -> get_typarams ty
     in
-    let ret = get_typarams ft.ft_ret.et_type in
+    let ret = get_typarams ft.ft_ret in
     let get_typarams_constraint acc (ck, ty) =
       union
         acc

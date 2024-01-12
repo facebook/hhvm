@@ -19,7 +19,6 @@ open Typing_env_types
 open Aast
 module Env = Typing_env
 module SN = Naming_special_names
-module MakeType = Typing_make_type
 
 module ExpectedTy : sig
   [@@@warning "-32"]
@@ -27,7 +26,7 @@ module ExpectedTy : sig
   type t = private {
     pos: Pos.t;
     reason: Typing_reason.ureason;
-    ty: locl_possibly_enforced_ty;
+    ty: locl_ty;
     coerce: Typing_logic.coercion_direction option;
   }
   [@@deriving show]
@@ -42,15 +41,14 @@ module ExpectedTy : sig
     t
 
   (* We will allow coercion to this expected type, if et_enforced=Enforced *)
-  val make_and_allow_coercion :
-    Pos.t -> Typing_reason.ureason -> locl_possibly_enforced_ty -> t
+  val make_and_allow_coercion : Pos.t -> Typing_reason.ureason -> locl_ty -> t
 
   (* If type is an unsolved type variable, don't create an expected type *)
   val make_and_allow_coercion_opt :
     Typing_env_types.env ->
     Pos.t ->
     Typing_reason.ureason ->
-    locl_possibly_enforced_ty ->
+    locl_ty ->
     t option
 end = struct
   (* Some mutually recursive inference functions in typing.ml pass around an ~expected argument that
@@ -59,13 +57,13 @@ end = struct
   type t = {
     pos: Pos.t;
     reason: Typing_reason.ureason;
-    ty: locl_possibly_enforced_ty;
+    ty: locl_ty;
     coerce: Typing_logic.coercion_direction option;
   }
   [@@deriving show]
 
   let make_and_allow_coercion_opt env pos reason ty =
-    let (_env, ety) = Env.expand_type env ty.et_type in
+    let (_env, ety) = Env.expand_type env ty in
     match get_node ety with
     | Tvar v when Internal_type_set.is_empty (Env.get_tyvar_upper_bounds env v)
       ->
@@ -75,9 +73,7 @@ end = struct
   let make_and_allow_coercion pos reason ty = { pos; reason; ty; coerce = None }
 
   let make ?coerce pos reason locl_ty =
-    let res =
-      make_and_allow_coercion pos reason (MakeType.unenforced locl_ty)
-    in
+    let res = make_and_allow_coercion pos reason locl_ty in
     match coerce with
     | None -> res
     | Some coerce -> { res with coerce }

@@ -60,7 +60,7 @@ let rec of_decl_ty (ty : decl_ty) : string =
     Printf.sprintf
       "(function(%s): %s)"
       (String.concat ~sep:", " params)
-      (of_enforced_ty f.ft_ret)
+      (of_decl_ty f.ft_ret)
   | Tgeneric (name, args)
   | Tapply ((_, name), args) ->
     let name = Utils.strip_all_ns name in
@@ -97,9 +97,7 @@ let rec of_decl_ty (ty : decl_ty) : string =
       (of_decl_ty ty)
       (Class_refinement.to_string of_decl_ty rs)
 
-and of_enforced_ty et : string = of_decl_ty et.et_type
-
-and of_fun_param fp : string = of_enforced_ty fp.fp_type
+and of_fun_param fp : string = of_decl_ty fp.fp_type
 
 and of_shape_field (name : tshape_field_name) sft : string =
   let name_s =
@@ -119,7 +117,7 @@ and of_shape_field (name : tshape_field_name) sft : string =
 
 let param_source (param : decl_ty fun_param) ~(variadic : bool) : string =
   let name = Option.value param.fp_name ~default:"$_" in
-  let ty_s = of_decl_ty param.fp_type.et_type in
+  let ty_s = of_decl_ty param.fp_type in
   Printf.sprintf
     "%s %s%s"
     ty_s
@@ -164,8 +162,8 @@ let of_method (name : string) (meth : class_elt) ~is_static ~is_override :
     match ty_ with
     | Tfun ft ->
       ( params_source ~variadic:(get_ft_variadic ft) ft.ft_params,
-        of_decl_ty ft.ft_ret.et_type,
-        (if is_awaitable ft.ft_ret.et_type then
+        of_decl_ty ft.ft_ret,
+        (if is_awaitable ft.ft_ret then
           "async "
         else
           ""),

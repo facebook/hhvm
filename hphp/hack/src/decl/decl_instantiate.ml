@@ -148,10 +148,10 @@ and instantiate_ subst x =
     in
     let params =
       List.map ft.ft_params ~f:(fun param ->
-          let ty = instantiate_possibly_enforced_ty subst param.fp_type in
+          let ty = instantiate subst param.fp_type in
           { param with fp_type = ty })
     in
-    let ret = instantiate_possibly_enforced_ty subst ft.ft_ret in
+    let ret = instantiate subst ft.ft_ret in
     let tparams =
       List.map tparams ~f:(fun t ->
           {
@@ -190,9 +190,6 @@ and instantiate_ subst x =
     let tyl = List.map tyl ~f:(instantiate subst) in
     let ty = instantiate subst ty in
     Tnewtype (name, tyl, ty)
-
-and instantiate_possibly_enforced_ty subst et =
-  { et_type = instantiate subst et.et_type; et_enforced = et.et_enforced }
 
 let instantiate_ce subst ({ ce_type = x; _ } as ce) =
   { ce with ce_type = lazy (instantiate subst (Lazy.force x)) }

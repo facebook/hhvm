@@ -22,8 +22,6 @@ open Hh_prelude
  *)
 type ty = Typing_defs.locl_ty [@@deriving hash, show]
 
-type possibly_enforced_ty = Typing_defs.locl_possibly_enforced_ty
-
 type decl_ty = Typing_defs.decl_ty [@@deriving show]
 
 type val_kind = Typing_defs.val_kind

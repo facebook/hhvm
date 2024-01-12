@@ -217,17 +217,10 @@ type 'ty capability =
 type 'ty fun_implicit_params = { capability: 'ty capability }
 [@@deriving eq, hash, show { with_path = false }]
 
-type 'ty possibly_enforced_ty = {
-  et_enforced: enforcement;
-      (** True if consumer of this type enforces it at runtime *)
-  et_type: 'ty;
-}
-[@@deriving eq, hash, show { with_path = false }]
-
 type 'ty fun_param = {
   fp_pos: Pos_or_decl.t; [@hash.ignore] [@equal (fun _ _ -> true)]
   fp_name: string option;
-  fp_type: 'ty possibly_enforced_ty;
+  fp_type: 'ty;
   fp_flags: Typing_defs_flags.FunParam.t;
   fp_def_value: string option;
 }
@@ -242,8 +235,7 @@ type 'ty fun_type = {
   ft_where_constraints: 'ty where_constraint list;
   ft_params: 'ty fun_params;
   ft_implicit_params: 'ty fun_implicit_params;
-  ft_ret: 'ty possibly_enforced_ty;
-      (** Carries through the sync/async information from the aast *)
+  ft_ret: 'ty;  (** Carries through the sync/async information from the aast *)
   ft_flags: Typing_defs_flags.Fun.t;
   ft_cross_package: cross_package_decl;
 }
@@ -1062,7 +1054,7 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     } =
       fty2
     in
-    match possibly_enforced_ty_compare ret1 ret2 with
+    match ty_compare ret1 ret2 with
     | 0 -> begin
       match ft_params_compare params1 params2 with
       | 0 -> begin
@@ -1118,23 +1110,10 @@ and tyl_compare :
   in
   List.compare (ty_compare ~normalize_lists) tyl1 tyl2
 
-and possibly_enforced_ty_compare :
-    type a.
-    ?normalize_lists:bool ->
-    a ty possibly_enforced_ty ->
-    a ty possibly_enforced_ty ->
-    int =
- fun ?(normalize_lists = false) ety1 ety2 ->
-  match ty_compare ~normalize_lists ety1.et_type ety2.et_type with
-  | 0 -> compare_enforcement ety1.et_enforced ety2.et_enforced
-  | n -> n
-
 and ft_param_compare :
     type a. ?normalize_lists:bool -> a ty fun_param -> a ty fun_param -> int =
  fun ?(normalize_lists = false) param1 param2 ->
-  match
-    possibly_enforced_ty_compare ~normalize_lists param1.fp_type param2.fp_type
-  with
+  match ty_compare ~normalize_lists param1.fp_type param2.fp_type with
   | 0 -> Typing_defs_flags.FunParam.compare param1.fp_flags param2.fp_flags
   | n -> n
 
@@ -1195,10 +1174,6 @@ type locl_where_constraint = locl_ty where_constraint
 type decl_fun_type = decl_ty fun_type [@@deriving eq]
 
 type locl_fun_type = locl_ty fun_type
-
-type decl_possibly_enforced_ty = decl_ty possibly_enforced_ty [@@deriving eq]
-
-type locl_possibly_enforced_ty = locl_ty possibly_enforced_ty [@@deriving show]
 
 type decl_fun_param = decl_ty fun_param [@@deriving eq]
 

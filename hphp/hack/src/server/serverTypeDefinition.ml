@@ -37,7 +37,7 @@ let go_common
       | Tunion ty_lst ->
         List.fold ty_lst ~init:acc ~f:(fun a y -> handle_type a y)
       | Tfun fn_type ->
-        let ret_type = fn_type.ft_ret.et_type in
+        let ret_type = fn_type.ft_ret in
         begin
           match get_node ret_type with
           | Tprim _ ->

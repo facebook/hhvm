@@ -8,18 +8,14 @@
            { ft_tparams = []; ft_where_constraints = [];
              ft_params =
              [{ fp_pos = [3:27-29]; fp_name = (Some "$x");
-                fp_type =
-                { et_enforced = Typing_defs_core.Unenforced;
-                  et_type = (Rhint ([3:23-26]), (Tprim Tint)) };
+                fp_type = (Rhint ([3:23-26]), (Tprim Tint));
                 fp_flags =
                 { Typing_defs_flags.FunParam.accept_disposable = false;
                   inout = false; has_default = false; readonly = false };
                 fp_def_value = None }
                ];
              ft_implicit_params = { capability = (CapDefaults [3:10-11]) };
-             ft_ret =
-             { et_enforced = Typing_defs_core.Unenforced;
-               et_type = (Rhint ([3:32-46]), (Tprim Tint)) };
+             ft_ret = (Rhint ([3:32-46]), (Tprim Tint));
              ft_flags =
              { Typing_defs_flags.Fun.return_disposable = false;
                async = false; generator = false; fun_kind = FSync;

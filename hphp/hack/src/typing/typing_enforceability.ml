@@ -82,21 +82,18 @@ let get_enforced ~this_class env ~explicitly_untrusted ty =
 let compute_enforced_ty
     ~this_class env ?(explicitly_untrusted = false) (ty : decl_ty) =
   let et_enforced = get_enforced ~this_class env ~explicitly_untrusted ty in
-  { et_type = ty; et_enforced }
+  (et_enforced, ty)
 
 let compute_enforced_and_pessimize_ty
     ~this_class env ?(explicitly_untrusted = false) (ty : decl_ty) =
   compute_enforced_ty ~this_class env ~explicitly_untrusted ty
 
-let handle_awaitable_return
-    ~this_class env ft_fun_kind (ft_ret : decl_possibly_enforced_ty) =
-  let { et_type = return_type; _ } = ft_ret in
-  match (ft_fun_kind, get_node return_type) with
-  | (Ast_defs.FAsync, Tapply ((_, name), [inner_ty]))
+let handle_awaitable_return ~this_class env ft_fun_kind (ft_ret : decl_ty) =
+  match (ft_fun_kind, get_node ft_ret) with
+  | (Ast_defs.FAsync, Tapply ((_, name), [_inner_ty]))
     when String.equal name Naming_special_names.Classes.cAwaitable ->
-    let { et_enforced; _ } = compute_enforced_ty ~this_class env inner_ty in
-    { et_type = return_type; et_enforced }
-  | _ -> compute_enforced_and_pessimize_ty ~this_class env return_type
+    ft_ret
+  | _ -> snd (compute_enforced_and_pessimize_ty ~this_class env ft_ret)
 
 let compute_enforced_and_pessimize_fun_type ~this_class env (ft : decl_fun_type)
     =
@@ -106,14 +103,14 @@ let compute_enforced_and_pessimize_fun_type ~this_class env (ft : decl_fun_type)
   let ft_params =
     List.map
       ~f:(fun fp ->
-        let { fp_type = { et_type; _ }; _ } = fp in
+        let { fp_type; _ } = fp in
         let f =
           if equal_param_mode (get_fp_mode fp) FPinout then
             compute_enforced_and_pessimize_ty ~this_class
           else
             compute_enforced_ty ~this_class
         in
-        let fp_type = f env et_type in
+        let (_, fp_type) = f env fp_type in
         { fp with fp_type })
       ft_params
   in

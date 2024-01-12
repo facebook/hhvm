@@ -71,14 +71,11 @@
                  ft_implicit_params =
                  { capability = (CapDefaults [10:22-30]) };
                  ft_ret =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type =
-                   (Rhint ([10:34-46]),
-                    (Taccess
-                       ((Rhint ([10:34-46]),
-                         (Tapply (([5:13-17], "\\:Foo"), []))),
-                        [([10:40-46], "TProps")])))
-                   };
+                 (Rhint ([10:34-46]),
+                  (Taccess
+                     ((Rhint ([10:34-46]),
+                       (Tapply (([5:13-17], "\\:Foo"), []))),
+                      [([10:40-46], "TProps")])));
                  ft_flags =
                  { Typing_defs_flags.Fun.return_disposable = false;
                    async = false; generator = false; fun_kind = FSync;

@@ -62,18 +62,6 @@ val localize_no_subst :
   (env * Typing_error.t option) * locl_ty
 
 (**
- Transform a declaration phase type with enforcement flag
- into a localized type, with no substitution for generic parameters and [this].
-
- [ignore_errors] silences errors because those errors have already fired
- and/or are not appropriate at the time we call localize. *)
-val localize_possibly_enforced_no_subst :
-  env ->
-  ignore_errors:bool ->
-  decl_possibly_enforced_ty ->
-  (env * Typing_error.t option) * locl_possibly_enforced_ty
-
-(**
  Transform a type hint into a localized type, with no substitution for generic
  parameters and [this].
 

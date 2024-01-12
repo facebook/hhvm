@@ -36,7 +36,7 @@ let is_int env t =
  *   (2) Check if it's dynamic
  *)
 let check_dynamic_or_enforce_int env p t r err =
-  let et_type = MakeType.int r in
+  let ty = MakeType.int r in
   let (env, ty_err_opt) =
     Typing_coercion.coerce_type
       ~coerce_for_op:true
@@ -44,11 +44,12 @@ let check_dynamic_or_enforce_int env p t r err =
       Reason.URnone
       env
       t
-      { et_type; et_enforced = Enforced }
+      ty
+      Enforced
       err
   in
   Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
-  let ty_mismatch = Option.map ty_err_opt ~f:Fn.(const (t, et_type)) in
+  let ty_mismatch = Option.map ty_err_opt ~f:Fn.(const (t, ty)) in
   (env, Typing_utils.is_dynamic env t, ty_mismatch)
 
 (** [check_like_num p_exp p env ty] ensures that [ty] is a subtype of num or ~num.
@@ -62,8 +63,8 @@ let check_like_num ?err p_exp p env ty =
     | None -> Typing_error.Callback.math_invalid_argument
     | Some err -> err
   in
-  let et_type = MakeType.num (Reason.Rarith p_exp) in
-  Typing_coercion.coerce_type_like_strip p Reason.URnone env ty et_type err
+  let num_ty = MakeType.num (Reason.Rarith p_exp) in
+  Typing_coercion.coerce_type_like_strip p Reason.URnone env ty num_ty err
 
 (** [expand_type_and_narrow_to_numeric ~allow_nothing env p ty] forces the
   solving of [ty] to a numeric type, based on its lower bounds. If allow_nothing

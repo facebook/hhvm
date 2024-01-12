@@ -190,12 +190,10 @@ and expand_ visited ctx (ty : decl_ty) : decl_ty * cyclic_td_usage list =
     let (params, cycles1) =
       List.unzip
       @@ List.map ft.ft_params ~f:(fun param ->
-             let (ty, cycles) =
-               expand_possibly_enforced_ty visited ctx param.fp_type
-             in
+             let (ty, cycles) = expand_ visited ctx param.fp_type in
              ({ param with fp_type = ty }, cycles))
     in
-    let (ret, cycles2) = expand_possibly_enforced_ty visited ctx ft.ft_ret in
+    let (ret, cycles2) = expand_ visited ctx ft.ft_ret in
     let (tparams, cycles3) =
       List.unzip
       @@ List.map tparams ~f:(fun t ->
@@ -229,11 +227,6 @@ and expand_ visited ctx (ty : decl_ty) : decl_ty * cyclic_td_usage list =
     let (tyl, cycles1) = List.unzip @@ List.map tyl ~f:(expand_ visited ctx) in
     let (ty, cycles2) = expand_ visited ctx ty in
     (mk (r, Tnewtype (name, tyl, ty)), List.concat cycles1 @ cycles2)
-
-and expand_possibly_enforced_ty visited ctx et :
-    decl_ty possibly_enforced_ty * cyclic_td_usage list =
-  let (ty, cycles) = expand_ visited ctx et.et_type in
-  ({ et_type = ty; et_enforced = et.et_enforced }, cycles)
 
 let expand_typedef ?(force_expand = false) ctx r name ty_argl =
   let visited = SSet.empty in

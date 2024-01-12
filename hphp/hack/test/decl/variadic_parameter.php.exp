@@ -9,46 +9,37 @@
              ft_params =
              [{ fp_pos = [3:42-44]; fp_name = (Some "$f");
                 fp_type =
-                { et_enforced = Typing_defs_core.Unenforced;
-                  et_type =
-                  (Rhint ([3:15-41]),
-                   (Tfun
-                      { ft_tparams = []; ft_where_constraints = [];
-                        ft_params =
-                        [{ fp_pos = [3:25-30]; fp_name = None;
-                           fp_type =
-                           { et_enforced = Typing_defs_core.Unenforced;
-                             et_type = (Rhint ([3:25-30]), Tmixed) };
-                           fp_flags =
-                           { Typing_defs_flags.FunParam.accept_disposable =
-                             false; inout = false; has_default = false;
-                             readonly = false };
-                           fp_def_value = None }
-                          ];
-                        ft_implicit_params =
-                        { capability = (CapDefaults [3:15-41]) };
-                        ft_ret =
-                        { et_enforced = Typing_defs_core.Unenforced;
-                          et_type = (Rhint ([3:36-40]), (Tprim Tvoid)) };
-                        ft_flags =
-                        { Typing_defs_flags.Fun.return_disposable = false;
-                          async = false; generator = false; fun_kind = FSync;
-                          instantiated_targs = false;
-                          is_function_pointer = false;
-                          returns_readonly = false; readonly_this = false;
-                          support_dynamic_type = false; is_memoized = false;
-                          variadic = true };
-                        ft_cross_package = None }))
-                  };
+                (Rhint ([3:15-41]),
+                 (Tfun
+                    { ft_tparams = []; ft_where_constraints = [];
+                      ft_params =
+                      [{ fp_pos = [3:25-30]; fp_name = None;
+                         fp_type = (Rhint ([3:25-30]), Tmixed);
+                         fp_flags =
+                         { Typing_defs_flags.FunParam.accept_disposable =
+                           false; inout = false; has_default = false;
+                           readonly = false };
+                         fp_def_value = None }
+                        ];
+                      ft_implicit_params =
+                      { capability = (CapDefaults [3:15-41]) };
+                      ft_ret = (Rhint ([3:36-40]), (Tprim Tvoid));
+                      ft_flags =
+                      { Typing_defs_flags.Fun.return_disposable = false;
+                        async = false; generator = false; fun_kind = FSync;
+                        instantiated_targs = false;
+                        is_function_pointer = false;
+                        returns_readonly = false; readonly_this = false;
+                        support_dynamic_type = false; is_memoized = false;
+                        variadic = true };
+                      ft_cross_package = None }));
                 fp_flags =
                 { Typing_defs_flags.FunParam.accept_disposable = false;
                   inout = false; has_default = false; readonly = false };
                 fp_def_value = None }
                ];
              ft_implicit_params = { capability = (CapDefaults [3:10-14]) };
-             ft_ret =
-             { et_enforced = Typing_defs_core.Unenforced;
-               et_type = (Rhint ([3:47-51]), (Tprim Tvoid)) };
+             ft_ret = (Rhint ([3:47-51]), (Tprim Tvoid));
              ft_flags =
              { Typing_defs_flags.Fun.return_disposable = false;
                async = false; generator = false; fun_kind = FSync;

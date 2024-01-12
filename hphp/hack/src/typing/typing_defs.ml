@@ -575,9 +575,8 @@ let rec is_denotable ty =
     TShapeMap.for_all (fun _ { sft_ty; _ } -> is_denotable sft_ty) sm
     && unknown_field_type_is_denotable unknown_field_type
   | Tfun { ft_params; ft_ret; _ } ->
-    is_denotable ft_ret.et_type
-    && List.for_all ft_params ~f:(fun { fp_type; _ } ->
-           is_denotable fp_type.et_type)
+    is_denotable ft_ret
+    && List.for_all ft_params ~f:(fun { fp_type; _ } -> is_denotable fp_type)
   | Toption ty -> is_denotable ty
   | Tgeneric (nm, _) ->
     not

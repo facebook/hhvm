@@ -584,16 +584,10 @@ and union_funs ~approx_cancel_neg env fty1 fty2 =
     Typing_defs_flags.Fun.equal fty1.ft_flags fty2.ft_flags
     && Int.equal (ft_params_compare fty1.ft_params fty2.ft_params) 0
   then
-    let (env, ft_ret) =
-      union_possibly_enforced_tys ~approx_cancel_neg env fty1.ft_ret fty2.ft_ret
-    in
+    let (env, ft_ret) = union ~approx_cancel_neg env fty1.ft_ret fty2.ft_ret in
     (env, { fty1 with ft_ret })
   else
     raise Dont_simplify
-
-and union_possibly_enforced_tys ~approx_cancel_neg env ety1 ety2 =
-  let (env, et_type) = union ~approx_cancel_neg env ety1.et_type ety2.et_type in
-  (env, { ety1 with et_type })
 
 and union_class ~approx_cancel_neg env name tyl1 tyl2 =
   let tparams =

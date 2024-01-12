@@ -55,7 +55,7 @@ let make_param_ty env param =
         None
       else
         Some param.param_name);
-    fp_type = { et_type = ty; et_enforced = Unenforced };
+    fp_type = ty;
     fp_flags =
       make_fp_flags
         ~mode

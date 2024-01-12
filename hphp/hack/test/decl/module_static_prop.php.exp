@@ -47,9 +47,7 @@ File root|module_static_prop.php--A.php
          (Tfun
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [12:10-11]) };
-              ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([12:15-19]), (Tprim Tvoid)) };
+              ft_ret = (Rhint ([12:15-19]), (Tprim Tvoid));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;
@@ -73,9 +71,7 @@ File root|module_static_prop.php--B.php
         (Tfun
            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
              ft_implicit_params = { capability = (CapDefaults [8:10-11]) };
-             ft_ret =
-             { et_enforced = Typing_defs_core.Unenforced;
-               et_type = (Rhint ([8:15-19]), (Tprim Tvoid)) };
+             ft_ret = (Rhint ([8:15-19]), (Tprim Tvoid));
              ft_flags =
              { Typing_defs_flags.Fun.return_disposable = false;
                async = false; generator = false; fun_kind = FSync;
@@ -99,9 +95,7 @@ File root|module_static_prop.php--no-module.php
         (Tfun
            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
              ft_implicit_params = { capability = (CapDefaults [4:10-14]) };
-             ft_ret =
-             { et_enforced = Typing_defs_core.Unenforced;
-               et_type = (Rhint ([4:18-22]), (Tprim Tvoid)) };
+             ft_ret = (Rhint ([4:18-22]), (Tprim Tvoid));
              ft_flags =
              { Typing_defs_flags.Fun.return_disposable = false;
                async = false; generator = false; fun_kind = FSync;

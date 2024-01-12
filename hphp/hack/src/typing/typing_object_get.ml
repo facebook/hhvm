@@ -310,14 +310,9 @@ let rec make_nullable_member_type env ~is_method id_pos pos ty =
     match deref ty with
     | (r, Tfun tf) ->
       let (env, ty) =
-        make_nullable_member_type
-          ~is_method:false
-          env
-          id_pos
-          pos
-          tf.ft_ret.et_type
+        make_nullable_member_type ~is_method:false env id_pos pos tf.ft_ret
       in
-      (env, mk (r, Tfun { tf with ft_ret = { tf.ft_ret with et_type = ty } }))
+      (env, mk (r, Tfun { tf with ft_ret = ty }))
     | (r, Tunion (_ :: _ as tyl)) ->
       let (env, tyl) =
         List.map_env env tyl ~f:(fun env ty ->
@@ -373,9 +368,9 @@ let rec this_appears_covariantly ~contra env ty =
   | Tintersection tyl ->
     List.exists tyl ~f:(this_appears_covariantly ~contra env)
   | Tfun ft ->
-    this_appears_covariantly ~contra env ft.ft_ret.et_type
+    this_appears_covariantly ~contra env ft.ft_ret
     || List.exists ft.ft_params ~f:(fun fp ->
-           this_appears_covariantly ~contra:(not contra) env fp.fp_type.et_type)
+           this_appears_covariantly ~contra:(not contra) env fp.fp_type)
   | Tshape { s_fields = fm; _ } ->
     let fields = TShapeMap.elements fm in
     List.exists fields ~f:(fun (_, f) ->
@@ -839,7 +834,7 @@ and obj_get_concrete_class_with_member_info
       ((env, ty_err_opt), ft_ty, explicit_targs, Unenforced, lval_mismatch)
     | _ ->
       let is_xhp_attr = Option.is_some (get_ce_xhp_attr member_info) in
-      let { et_type; et_enforced } =
+      let (et_enforced, et_type) =
         Typing_enforceability.compute_enforced_and_pessimize_ty
           ~this_class:(Some class_info)
           env
@@ -897,14 +892,14 @@ and obj_get_concrete_class_with_member_info
           Typing_error.Callback.(
             (with_side_effect ~eff unify_error [@alert "-deprecated"]))
         in
-        let ety = { et_type = member_ty; et_enforced } in
         let (env, coerce_ty_err_opt) =
           Typing_coercion.coerce_type
             p
             ur
             env
             ty
-            (TUtils.make_like_if_enforced env ety)
+            (TUtils.make_like_if_enforced env et_enforced member_ty)
+            et_enforced
             err
         in
         let coerce_ty_mismatch =
@@ -988,8 +983,7 @@ and obj_get_concrete_class_without_member_info
         ft_params = [];
         ft_implicit_params =
           { capability = CapTy (MakeType.intersection Reason.Rnone []) };
-        ft_ret =
-          { et_type = MakeType.void Reason.Rnone; et_enforced = Unenforced };
+        ft_ret = MakeType.void Reason.Rnone;
         ft_flags = Typing_defs_flags.Fun.default;
         ft_cross_package = None;
       }

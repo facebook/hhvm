@@ -673,7 +673,7 @@ let default_fun_param ?(pos = Pos_or_decl.none) ty : 'a fun_param =
   {
     fp_pos = pos;
     fp_name = None;
-    fp_type = { et_type = ty; et_enforced = Unenforced };
+    fp_type = ty;
     fp_flags =
       make_fp_flags
         ~mode:FPnormal
@@ -865,13 +865,13 @@ let make_like ?reason env ty =
     in
     MakeType.locl_like r ty
 
-let make_like_if_enforced env ety =
-  match ety.et_enforced with
+let make_like_if_enforced env et_enforced et_type =
+  match et_enforced with
   | Enforced
     when TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
          && Env.get_support_dynamic_type env ->
-    { ety with et_type = make_like env ety.et_type }
-  | _ -> ety
+    make_like env et_type
+  | _ -> et_type
 
 let rec is_capability ty =
   match get_node ty with
@@ -927,8 +927,7 @@ let rec recompose_like_type env orig_ty =
         let (env, ty2) = recompose_like_type env ty1 in
         (env, MakeType.locl_like (get_reason ty) ty2)))
   | Tfun ft ->
-    let (env, et_type) = recompose_like_type env ft.ft_ret.et_type in
-    let ft_ret = { ft.ft_ret with et_type } in
+    let (env, ft_ret) = recompose_like_type env ft.ft_ret in
     (env, mk (get_reason ty, Tfun { ft with ft_ret }))
   | Tnewtype (n, _, ty1) when String.equal n SN.Classes.cSupportDyn ->
     let (env, ty1) = recompose_like_type env ty1 in

@@ -261,17 +261,6 @@ impl<R: Reason> From<&obr::typing_defs::FunType<'_>> for ty::FunType<R, Ty<R>> {
     }
 }
 
-impl<R: Reason> From<&obr::typing_defs_core::PossiblyEnforcedTy<'_>>
-    for decl::ty::PossiblyEnforcedTy<Ty<R>>
-{
-    fn from(ty: &obr::typing_defs_core::PossiblyEnforcedTy<'_>) -> Self {
-        Self {
-            ty: ty.type_.into(),
-            enforced: ty.enforced,
-        }
-    }
-}
-
 impl<R: Reason> From<&obr::typing_defs_core::FunParam<'_>> for ty::FunParam<R, Ty<R>> {
     fn from(fp: &obr::typing_defs_core::FunParam<'_>) -> Self {
         Self {

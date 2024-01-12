@@ -62,7 +62,7 @@ let lambda_decl_in_env (env : Decl_env.env) (f : Nast.fun_) :
             ft_where_constraints = [];
             ft_params = params;
             ft_implicit_params = { capability };
-            ft_ret = { et_type = ret_ty; et_enforced = Unenforced };
+            ft_ret = ret_ty;
             ft_flags =
               Typing_defs_flags.Fun.make
                 f.f_fun_kind

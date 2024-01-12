@@ -41,7 +41,7 @@ let get_static_meth
   end
 
 let funopt_is_noreturn = function
-  | Some { ft_ret = { et_type; _ }; _ } -> is_prim Tnoreturn et_type
+  | Some { ft_ret; _ } -> is_prim Tnoreturn ft_ret
   | _ -> false
 
 let static_meth_is_noreturn env ci meth_id =
@@ -74,8 +74,6 @@ let expression_exits env (_, _, e) =
 
 let is_noreturn env =
   let (_env, ret_ty) =
-    Env.expand_type
-      env
-      (Env.get_return env).Typing_env_return_info.return_type.et_type
+    Env.expand_type env (Env.get_return env).Typing_env_return_info.return_type
   in
   is_prim Tnoreturn ret_ty

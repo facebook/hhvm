@@ -212,23 +212,19 @@ and refresh_type renv v ty_orig =
     let (renv, ty1, changed) = refresh_type renv v ty1 in
     (renv, mk (r, Toption ty1), changed)
   | (r, Tfun ft) ->
-    let enforced_ty (renv, changed) v ({ et_type; et_enforced = _ } as et) =
-      let (renv, et_type, changed') = refresh_type renv v et_type in
-      ((renv, changed || changed'), { et with et_type })
-    in
     let param_v = Ast_defs.swap_variance v in
     let ft_param
-        renvch
+        (renv, changed)
         ({ fp_type; fp_pos = _; fp_name = _; fp_flags = _; fp_def_value = _ } as
         fp) =
-      let (renvch, fp_type) = enforced_ty renvch param_v fp_type in
-      (renvch, { fp with fp_type })
+      let (renv, fp_type, changed') = refresh_type renv param_v fp_type in
+      ((renv, changed || changed'), { fp with fp_type })
     in
-    let (renvch, ft_params) =
+    let ((renv, changed), ft_params) =
       List.map_env (renv, Unchanged) ft.ft_params ~f:ft_param
     in
-    let ((renv, changed), ft_ret) = enforced_ty renvch v ft.ft_ret in
-    (renv, mk (r, Tfun { ft with ft_params; ft_ret }), changed)
+    let (renv, ft_ret, changed') = refresh_type renv v ft.ft_ret in
+    (renv, mk (r, Tfun { ft with ft_params; ft_ret }), changed || changed')
   | (r, Ttuple l) ->
     let (renv, l, changed) = refresh_types renv v l in
     (renv, mk (r, Ttuple l), changed)

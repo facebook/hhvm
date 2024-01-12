@@ -33,11 +33,8 @@
               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                 ft_implicit_params = { capability = (CapDefaults [7:19-20]) };
                 ft_ret =
-                { et_enforced = Typing_defs_core.Unenforced;
-                  et_type =
-                  (Rhint ([7:24-31]),
-                   (Taccess ((Rhint ([7:24-31]), Tthis), [([7:30-31], "T")])))
-                  };
+                (Rhint ([7:24-31]),
+                 (Taccess ((Rhint ([7:24-31]), Tthis), [([7:30-31], "T")])));
                 ft_flags =
                 { Typing_defs_flags.Fun.return_disposable = false;
                   async = false; generator = false; fun_kind = FSync;
@@ -60,12 +57,9 @@
                  ft_implicit_params =
                  { capability = (CapDefaults [11:19-20]) };
                  ft_ret =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type =
-                   (Rhint ([11:24-32]),
-                    (Taccess
-                       ((Rhint ([11:24-32]), Tthis), [([11:30-32], "T2")])))
-                   };
+                 (Rhint ([11:24-32]),
+                  (Taccess
+                     ((Rhint ([11:24-32]), Tthis), [([11:30-32], "T2")])));
                  ft_flags =
                  { Typing_defs_flags.Fun.return_disposable = false;
                    async = false; generator = false; fun_kind = FSync;
@@ -114,16 +108,13 @@
                  ft_params =
                  [{ fp_pos = [20:60-68]; fp_name = (Some "$request");
                     fp_type =
-                    { et_enforced = Typing_defs_core.Unenforced;
-                      et_type =
-                      (Rhint ([20:40-59]),
-                       (Taccess
-                          ((Rhint ([20:40-59]),
-                            (Taccess
-                               ((Rhint ([20:40-59]), Tthis),
-                                [([20:46-56], "TConstType")]))),
-                           [([20:58-59], "T")])))
-                      };
+                    (Rhint ([20:40-59]),
+                     (Taccess
+                        ((Rhint ([20:40-59]),
+                          (Taccess
+                             ((Rhint ([20:40-59]), Tthis),
+                              [([20:46-56], "TConstType")]))),
+                         [([20:58-59], "T")])));
                     fp_flags =
                     { Typing_defs_flags.FunParam.accept_disposable = false;
                       inout = false; has_default = false; readonly = false };
@@ -132,13 +123,10 @@
                  ft_implicit_params =
                  { capability = (CapDefaults [20:28-39]) };
                  ft_ret =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type =
-                   (Rhint ([20:71-87]),
-                    (Taccess
-                       ((Rhint ([20:71-87]), Tthis),
-                        [([20:77-87], "TConstType")])))
-                   };
+                 (Rhint ([20:71-87]),
+                  (Taccess
+                     ((Rhint ([20:71-87]), Tthis),
+                      [([20:77-87], "TConstType")])));
                  ft_flags =
                  { Typing_defs_flags.Fun.return_disposable = false;
                    async = false; generator = false; fun_kind = FSync;

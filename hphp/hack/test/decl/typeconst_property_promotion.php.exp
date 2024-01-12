@@ -40,12 +40,9 @@
                      ft_params =
                      [{ fp_pos = [6:21-23]; fp_name = (Some "$a");
                         fp_type =
-                        { et_enforced = Typing_defs_core.Unenforced;
-                          et_type =
-                          (Rhint ([6:13-20]),
-                           (Taccess
-                              ((Rhint ([6:13-20]), Tthis), [([6:19-20], "T")])))
-                          };
+                        (Rhint ([6:13-20]),
+                         (Taccess
+                            ((Rhint ([6:13-20]), Tthis), [([6:19-20], "T")])));
                         fp_flags =
                         { Typing_defs_flags.FunParam.accept_disposable =
                           false; inout = false; has_default = false;
@@ -54,10 +51,7 @@
                        ];
                      ft_implicit_params =
                      { capability = (CapDefaults [5:19-30]) };
-                     ft_ret =
-                     { et_enforced = Typing_defs_core.Unenforced;
-                       et_type =
-                       (Rwitness_from_decl ([5:19-30]), (Tprim Tvoid)) };
+                     ft_ret = (Rwitness_from_decl ([5:19-30]), (Tprim Tvoid));
                      ft_flags =
                      { Typing_defs_flags.Fun.return_disposable = false;
                        async = false; generator = false; fun_kind = FSync;

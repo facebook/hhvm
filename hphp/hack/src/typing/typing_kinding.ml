@@ -93,10 +93,10 @@ module Locl_Inst = struct
       in
       let params =
         List.map ft.ft_params ~f:(fun param ->
-            let ty = instantiate_possibly_enforced_ty subst param.fp_type in
+            let ty = instantiate subst param.fp_type in
             { param with fp_type = ty })
       in
-      let ret = instantiate_possibly_enforced_ty subst ft.ft_ret in
+      let ret = instantiate subst ft.ft_ret in
       let tparams =
         List.map tparams ~f:(fun t ->
             {
@@ -141,9 +141,6 @@ module Locl_Inst = struct
     | Taccess (ty, ids) ->
       let ty = instantiate subst ty in
       Taccess (ty, ids)
-
-  and instantiate_possibly_enforced_ty subst et =
-    { et_type = instantiate subst et.et_type; et_enforced = et.et_enforced }
 end
 
 (* TODO(T70068435)
@@ -341,13 +338,6 @@ module Simple = struct
       )
     | _ -> check_well_kinded ~in_signature env tyarg nkind
 
-  and check_possibly_enforced_ty ~in_signature env enf_ty =
-    check_well_kinded_type
-      ~allow_missing_targs:false
-      ~in_signature
-      env
-      enf_ty.et_type
-
   and check_well_kinded_type
       ~allow_missing_targs ~in_signature env (ty : decl_ty) =
     let (r, ty_) = deref ty in
@@ -395,9 +385,8 @@ module Simple = struct
     | Tshape { s_fields = map; _ } ->
       TShapeMap.iter (fun _ sft -> check sft.sft_ty) map
     | Tfun ft ->
-      check_possibly_enforced_ty ~in_signature env ft.ft_ret;
-      List.iter ft.ft_params ~f:(fun p ->
-          check_possibly_enforced_ty ~in_signature env p.fp_type)
+      check ft.ft_ret;
+      List.iter ft.ft_params ~f:(fun p -> check p.fp_type)
     (* FIXME shall we inspect tparams and where_constraints *)
     (* List.iter ft.ft_where_constraints (fun (ty1, _, ty2) -> check ty1; check ty2 ); *)
     | Tgeneric (name, targs) -> begin

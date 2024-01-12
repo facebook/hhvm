@@ -88,7 +88,7 @@ let make_param_local_ty ~dynamic_mode ~no_auto_likes env decl_hint param =
   | None -> (env, None)
   | Some hint ->
     let ((env, ty_err_opt), ty) =
-      let { et_type = ty; et_enforced } =
+      let (et_enforced, ty) =
         Typing_enforceability.compute_enforced_and_pessimize_ty
           ~this_class:(Env.get_self_class env |> Decl_entry.to_option)
           ~explicitly_untrusted:param.param_is_variadic

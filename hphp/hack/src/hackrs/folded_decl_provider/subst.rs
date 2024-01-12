@@ -14,7 +14,6 @@ use ty::decl::ClassRefinement;
 use ty::decl::ConcreteTypeconst;
 use ty::decl::FunParam;
 use ty::decl::FunType;
-use ty::decl::PossiblyEnforcedTy;
 use ty::decl::RefinedConst;
 use ty::decl::RefinedConstBound;
 use ty::decl::ShapeFieldType;
@@ -149,14 +148,14 @@ impl<'a, R: Reason> Substitution<'a, R> {
                     .params
                     .iter()
                     .map(|fp| FunParam {
-                        ty: subst.instantiate_possibly_enforced_ty(&fp.ty),
+                        ty: subst.instantiate(&fp.ty),
                         pos: fp.pos.clone(),
                         name: fp.name,
                         flags: fp.flags,
                         def_value: fp.def_value.clone(),
                     })
                     .collect::<Box<[_]>>();
-                let ret = subst.instantiate_possibly_enforced_ty(&ft.ret);
+                let ret = subst.instantiate(&ft.ret);
                 let tparams = tparams
                     .iter()
                     .map(|tp| Tparam {
@@ -239,16 +238,6 @@ impl<'a, R: Reason> Substitution<'a, R> {
         RefinedConst {
             bound,
             is_ctx: rc.is_ctx,
-        }
-    }
-
-    fn instantiate_possibly_enforced_ty(
-        &self,
-        et: &PossiblyEnforcedTy<Ty<R>>,
-    ) -> PossiblyEnforcedTy<Ty<R>> {
-        PossiblyEnforcedTy {
-            ty: self.instantiate(&et.ty),
-            enforced: et.enforced,
         }
     }
 

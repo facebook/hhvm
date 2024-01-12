@@ -8,11 +8,9 @@ vec(2) {
     ["visibility"]=>
     string(7) "private"
     ["signature"]=>
-    dict(2) {
+    dict(1) {
       ["return_type"]=>
       string(4) "void"
-      ["is_soft_return_type"]=>
-      bool(true)
     }
   }
   dict(4) {
@@ -23,11 +21,9 @@ vec(2) {
     ["visibility"]=>
     string(6) "public"
     ["signature"]=>
-    dict(2) {
+    dict(1) {
       ["return_type"]=>
       string(4) "void"
-      ["is_soft_return_type"]=>
-      bool(true)
     }
   }
 }
@@ -39,11 +35,9 @@ dict(4) {
   ["visibility"]=>
   string(7) "private"
   ["signature"]=>
-  dict(2) {
+  dict(1) {
     ["return_type"]=>
     string(4) "void"
-    ["is_soft_return_type"]=>
-    bool(true)
   }
 }
 NULL
@@ -58,11 +52,9 @@ vec(2) {
     ["visibility"]=>
     string(7) "private"
     ["signature"]=>
-    dict(2) {
+    dict(1) {
       ["return_type"]=>
       string(4) "void"
-      ["is_soft_return_type"]=>
-      bool(true)
     }
   }
   dict(4) {
@@ -73,11 +65,9 @@ vec(2) {
     ["visibility"]=>
     string(6) "public"
     ["signature"]=>
-    dict(2) {
+    dict(1) {
       ["return_type"]=>
       string(4) "void"
-      ["is_soft_return_type"]=>
-      bool(true)
     }
   }
 }
@@ -89,11 +79,9 @@ dict(4) {
   ["visibility"]=>
   string(7) "private"
   ["signature"]=>
-  dict(2) {
+  dict(1) {
     ["return_type"]=>
     string(4) "void"
-    ["is_soft_return_type"]=>
-    bool(true)
   }
 }
 NULL
@@ -287,11 +275,9 @@ vec(2) {
     ["module"]=>
     string(8) "myModule"
     ["signature"]=>
-    dict(2) {
+    dict(1) {
       ["return_type"]=>
       string(3) "int"
-      ["is_soft_return_type"]=>
-      bool(true)
     }
   }
   dict(4) {
@@ -302,11 +288,9 @@ vec(2) {
     ["module"]=>
     string(8) "myModule"
     ["signature"]=>
-    dict(2) {
+    dict(1) {
       ["return_type"]=>
       string(4) "void"
-      ["is_soft_return_type"]=>
-      bool(true)
     }
   }
 }
@@ -318,11 +302,9 @@ dict(4) {
   ["module"]=>
   string(8) "myModule"
   ["signature"]=>
-  dict(2) {
+  dict(1) {
     ["return_type"]=>
     string(3) "int"
-    ["is_soft_return_type"]=>
-    bool(true)
   }
 }
 NULL

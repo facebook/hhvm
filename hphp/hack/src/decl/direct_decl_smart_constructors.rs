@@ -56,7 +56,6 @@ use oxidized_by_ref::typing_defs::ClassConstKind;
 use oxidized_by_ref::typing_defs::ClassRefinement;
 use oxidized_by_ref::typing_defs::ConcreteTypeconst;
 use oxidized_by_ref::typing_defs::ConstDecl;
-use oxidized_by_ref::typing_defs::Enforcement;
 use oxidized_by_ref::typing_defs::EnumType;
 use oxidized_by_ref::typing_defs::FunElt;
 use oxidized_by_ref::typing_defs::FunImplicitParams;
@@ -67,7 +66,6 @@ use oxidized_by_ref::typing_defs::ParamMode;
 use oxidized_by_ref::typing_defs::PosByteString;
 use oxidized_by_ref::typing_defs::PosId;
 use oxidized_by_ref::typing_defs::PosString;
-use oxidized_by_ref::typing_defs::PossiblyEnforcedTy;
 use oxidized_by_ref::typing_defs::RefinedConst;
 use oxidized_by_ref::typing_defs::RefinedConstBound;
 use oxidized_by_ref::typing_defs::RefinedConstBounds;
@@ -1925,10 +1923,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             where_constraints,
             params,
             implicit_params,
-            ret: self.alloc(PossiblyEnforcedTy {
-                enforced: Enforcement::Unenforced,
-                type_,
-            }),
+            ret: type_,
             flags,
             cross_package,
         });
@@ -2037,10 +2032,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                             let param = self.alloc(FunParam {
                                 pos,
                                 name,
-                                type_: self.alloc(PossiblyEnforcedTy {
-                                    enforced: Enforcement::Unenforced,
-                                    type_,
-                                }),
+                                type_,
                                 flags,
                                 def_value: if self.opts.include_assignment_values
                                     && initializer.is_present()
@@ -2213,19 +2205,13 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             Ty_::Tfun(fun_type) => {
                 let convert_param = |param: &'a FunParam<'a>| {
                     self.alloc(FunParam {
-                        type_: self.alloc(PossiblyEnforcedTy {
-                            enforced: param.type_.enforced,
-                            type_: self.convert_tapply_to_tgeneric(param.type_.type_),
-                        }),
+                        type_: self.convert_tapply_to_tgeneric(param.type_),
                         ..*param
                     })
                 };
                 let params = self.slice(fun_type.params.iter().copied().map(convert_param));
                 let implicit_params = fun_type.implicit_params;
-                let ret = self.alloc(PossiblyEnforcedTy {
-                    enforced: fun_type.ret.enforced,
-                    type_: self.convert_tapply_to_tgeneric(fun_type.ret.type_),
-                });
+                let ret = self.convert_tapply_to_tgeneric(fun_type.ret);
                 Ty_::Tfun(self.alloc(FunType {
                     params,
                     implicit_params,
@@ -2586,7 +2572,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         // The divergence here from the lowerer comes from using oxidized_by_ref instead of oxidized
         let mut ty_by_param: BTreeMap<&str, (Ty<'a>, &'a Pos<'a>)> = params
             .iter()
-            .filter_map(|param| Some((param.name?, (param.type_.type_.clone(), param.pos))))
+            .filter_map(|param| Some((param.name?, (param.type_.clone(), param.pos))))
             .collect();
 
         for context_ty in context_tys {
@@ -2652,11 +2638,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         let params = self.slice(params.iter().copied().map(|param| match param.name {
             None => param,
             Some(name) => match ty_by_param.get(name) {
-                Some((type_, _)) if param.type_.type_ != type_ => self.alloc(FunParam {
-                    type_: self.alloc(PossiblyEnforcedTy {
-                        type_: self.alloc(type_.clone()),
-                        ..*param.type_
-                    }),
+                Some((type_, _)) if param.type_ != type_ => self.alloc(FunParam {
+                    type_: self.alloc(type_.clone()),
                     ..*param
                 }),
                 _ => param,
@@ -5742,10 +5725,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             self.alloc(FunParam {
                 pos,
                 name: None,
-                type_: self.alloc(PossiblyEnforcedTy {
-                    enforced: Enforcement::Unenforced,
-                    type_: param_type,
-                }),
+                type_: param_type,
                 flags,
                 def_value: None, // Not supported for closures
             })
@@ -5784,10 +5764,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             where_constraints: &[],
             params,
             implicit_params,
-            ret: self.alloc(PossiblyEnforcedTy {
-                enforced: Enforcement::Unenforced,
-                type_: pess_return_type,
-            }),
+            ret: pess_return_type,
             flags,
             cross_package: None,
         }));

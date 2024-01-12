@@ -13,7 +13,8 @@ val coerce_type :
   Typing_defs.Reason.ureason ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
-  Typing_defs.locl_ty Typing_defs.possibly_enforced_ty ->
+  Typing_defs.locl_ty ->
+  Typing_defs.enforcement ->
   Typing_error.Callback.t ->
   Typing_env_types.env * Typing_error.t option
 
@@ -33,5 +34,5 @@ val try_coerce :
   ?coerce:Typing_logic.coercion_direction option ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
-  Typing_defs.locl_ty Typing_defs.possibly_enforced_ty ->
+  Typing_defs.locl_ty ->
   Typing_env_types.env option

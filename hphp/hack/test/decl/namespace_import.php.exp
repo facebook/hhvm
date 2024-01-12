@@ -29,11 +29,8 @@
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [15:12-16]) };
               ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type =
-                (Rhint ([15:20-24]),
-                 (Tapply (([15:20-24], "\\NS1\\NS2\\T"), [])))
-                };
+              (Rhint ([15:20-24]),
+               (Tapply (([15:20-24], "\\NS1\\NS2\\T"), [])));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;

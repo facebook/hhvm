@@ -274,7 +274,8 @@ let idx_without_default env ~expr_pos ~shape_pos shape_ty field_name =
         Reason.URparam
         env
         shape_ty
-        { et_type = super_shape; et_enforced = Unenforced }
+        super_shape
+        Unenforced
         Typing_error.Callback.unify_error
     in
     let (env, res) = TUtils.union env res (MakeType.null Reason.Rnone) in
@@ -570,7 +571,7 @@ let check_shape_keys_validity env keys =
     env
 
 let update_param : decl_fun_param -> decl_ty -> decl_fun_param =
- (fun param ty -> { param with fp_type = { param.fp_type with et_type = ty } })
+ (fun param ty -> { param with fp_type = ty })
 
 (* For function Shapes::idx called with a literal
  * field name, transform the decl function type from the hhi file
@@ -602,7 +603,7 @@ let transform_idx_fun_ty (field_name : tshape_field_name) nargs fty =
     | [param1; param2; param3] -> (param1, param2, param3)
     | _ -> failwith "Expected 3 parameters for Shapes::idx in hhi file"
   in
-  let rret = get_reason fty.ft_ret.et_type in
+  let rret = get_reason fty.ft_ret in
   let field_ty : decl_ty =
     MakeType.generic (Reason.Rwitness_from_decl param1.fp_pos) "Tv"
   in
@@ -627,16 +628,16 @@ let transform_idx_fun_ty (field_name : tshape_field_name) nargs fty =
     | 3 ->
       (* Third parameter should have type Tv *)
       let param3 =
-        let r3 = get_reason param1.fp_type.et_type in
+        let r3 = get_reason param1.fp_type in
         update_param param3 (MakeType.generic r3 "Tv")
       in
       (* Return type should be Tv *)
       let ret = MakeType.generic rret "Tv" in
       ([param1; param2; param3], ret)
     (* Shouldn't happen! *)
-    | _ -> (fty.ft_params, fty.ft_ret.et_type)
+    | _ -> (fty.ft_params, fty.ft_ret)
   in
-  { fty with ft_params = params; ft_ret = { fty.ft_ret with et_type = ret } }
+  { fty with ft_params = params; ft_ret = ret }
 
 (* For function Shapes::at called with a literal
  * field name, transform the decl function type from the hhi file

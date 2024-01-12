@@ -156,7 +156,7 @@ let create_handler _ctx =
     inherit Tast_visitor.handler_base
 
     method! at_Call env { func = (fx_ty, pos, _); args; _ } =
-      let extract_param_types param : T.locl_ty = param.T.fp_type.T.et_type in
+      let extract_param_types param : T.locl_ty = param.T.fp_type in
       let extract_arg_types (_, arg_exp) : T.locl_ty = Tast.get_type arg_exp in
       let check ft =
         let param_names_and_types =

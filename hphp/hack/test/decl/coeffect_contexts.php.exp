@@ -66,9 +66,7 @@
                 ft_implicit_params =
                 { capability =
                   (CapTy (Rhint ([8:32-34]), (Tintersection []))) };
-                ft_ret =
-                { et_enforced = Typing_defs_core.Unenforced;
-                  et_type = (Rhint ([8:36-40]), (Tprim Tvoid)) };
+                ft_ret = (Rhint ([8:36-40]), (Tprim Tvoid));
                 ft_flags =
                 { Typing_defs_flags.Fun.return_disposable = false;
                   async = false; generator = false; fun_kind = FSync;
@@ -99,9 +97,7 @@
                                [])))
                             ])))
                    };
-                 ft_ret =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type = (Rhint ([9:49-53]), (Tprim Tvoid)) };
+                 ft_ret = (Rhint ([9:49-53]), (Tprim Tvoid));
                  ft_flags =
                  { Typing_defs_flags.Fun.return_disposable = false;
                    async = false; generator = false; fun_kind = FSync;
@@ -136,9 +132,7 @@
                                 [])))
                             ])))
                    };
-                 ft_ret =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type = (Rhint ([10:62-66]), (Tprim Tvoid)) };
+                 ft_ret = (Rhint ([10:62-66]), (Tprim Tvoid));
                  ft_flags =
                  { Typing_defs_flags.Fun.return_disposable = false;
                    async = false; generator = false; fun_kind = FSync;

@@ -48,17 +48,14 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
             reason
             t_env
             ty_have
-            (MakeType.enforced ty_expect)
+            ty_expect
+            Enforced
             Typing_error.Callback.index_type_mismatch
         in
         Option.is_some ty_err_opt
       else
         Option.is_none
-          (Typing_coercion.try_coerce
-             ~coerce:None
-             t_env
-             ty_have
-             (MakeType.enforced ty_expect))
+          (Typing_coercion.try_coerce ~coerce:None t_env ty_have ty_expect)
     in
     if not got_error then
       Ok ()

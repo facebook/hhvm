@@ -97,11 +97,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
         return =
           {
             (* Actually should get set straight away anyway *)
-            Typing_env_return_info.return_type =
-              {
-                et_type = mk (Reason.Rnone, Tunion []);
-                et_enforced = Unenforced;
-              };
+            Typing_env_return_info.return_type = mk (Reason.Rnone, Tunion []);
             return_disposable = false;
           };
         params = Local_id.Map.empty;

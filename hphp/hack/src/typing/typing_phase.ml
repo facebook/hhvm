@@ -931,11 +931,6 @@ and localize_with_kind
       let (env, ty) = Env.fresh_type_error env Pos.none in
       ((env, None), ty)
 
-(* Recursive localizations of function types do not make judgements about enforceability *)
-and localize_possibly_enforced_ty ~ety_env env ety =
-  let (env, et_type) = localize ~ety_env env ety.et_type in
-  (env, { ety with et_type })
-
 and localize_cstr_ty ~ety_env env ty tp_name =
   let (env, ty) = localize ~ety_env env ty in
   let ty =
@@ -1080,27 +1075,12 @@ and localize_ft
       (env, ty_err_opt)
     | None -> (env, None)
   in
-  let variadic_index =
-    if get_ft_variadic ft then
-      List.length ft.ft_params - 1
-    else
-      -1
-  in
   let (((env, _), variadic_params_ty_err_opt), params) =
     List.map_env_ty_err_opt
       (env, 0)
       ft.ft_params
       ~f:(fun (env, i) param ->
-        let ((env, ty_err_opt), ty) =
-          localize_possibly_enforced_ty ~ety_env env param.fp_type
-        in
-        (* HHVM does not enforce types on vararg parameters yet *)
-        let ty =
-          if i = variadic_index then
-            { et_type = ty.et_type; et_enforced = Unenforced }
-          else
-            ty
-        in
+        let ((env, ty_err_opt), ty) = localize ~ety_env env param.fp_type in
         (((env, i + 1), ty_err_opt), { param with fp_type = ty }))
       ~combine_ty_errs:Typing_error.multiple_opt
   in
@@ -1114,9 +1094,7 @@ and localize_ft
     in
     (env, { capability })
   in
-  let ((env, ret_ty_err_opt), ret) =
-    localize_possibly_enforced_ty ~ety_env env ft.ft_ret
-  in
+  let ((env, ret_ty_err_opt), ret) = localize ~ety_env env ft.ft_ret in
   let ft =
     set_ft_ftk
       ft
@@ -1596,10 +1574,6 @@ let localize_no_subst env ~ignore_errors ty =
              (Pos_or_decl.unsafe_to_raw_pos @@ get_pos ty)))
     ~wildcard_action:Wildcard_illegal
     ty
-
-let localize_possibly_enforced_no_subst env ~ignore_errors ety =
-  let (env, et_type) = localize_no_subst env ~ignore_errors ety.et_type in
-  (env, { ety with et_type })
 
 let localize_targs_and_check_constraints
     ~exact

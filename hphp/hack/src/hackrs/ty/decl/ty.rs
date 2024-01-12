@@ -527,7 +527,7 @@ pub struct FunType<R: Reason, TY> {
     pub params: FunParams<R, TY>,
     pub implicit_params: FunImplicitParams<R, TY>,
     /// Carries through the sync/async information from the aast
-    pub ret: PossiblyEnforcedTy<TY>,
+    pub ret: TY,
     pub flags: typing_defs_flags::FunTypeFlags,
     pub cross_package: Option<Symbol>,
 }
@@ -538,22 +538,11 @@ walkable!(impl<R: Reason, TY> for FunType<R, TY> => [
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[derive(ToOcamlRep, FromOcamlRep)]
-#[serde(bound = "TY: Serialize + DeserializeOwned")]
-pub struct PossiblyEnforcedTy<TY> {
-    /// True if consumer of this type enforces it at runtime
-    pub enforced: Enforcement,
-    pub ty: TY,
-}
-
-walkable!(impl<R: Reason, TY> for PossiblyEnforcedTy<TY> => [ty]);
-
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
-#[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason, TY: Serialize + DeserializeOwned")]
 pub struct FunParam<R: Reason, TY> {
     pub pos: R::Pos,
     pub name: Option<Symbol>,
-    pub ty: PossiblyEnforcedTy<TY>,
+    pub ty: TY,
     pub flags: FunParamFlags,
     pub def_value: Option<String>,
 }

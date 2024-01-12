@@ -128,8 +128,7 @@ let sound_dynamic_interface_check ~this_class env params_decl_ty ret_locl_ty =
 
 let sound_dynamic_interface_check_from_fun_ty ~this_class env fun_ty =
   let params_decl_ty =
-    List.map fun_ty.ft_params ~f:(fun fun_param ->
-        Some fun_param.fp_type.et_type)
+    List.map fun_ty.ft_params ~f:(fun fun_param -> Some fun_param.fp_type)
   in
   let ret_locl_ty =
     snd
@@ -139,14 +138,10 @@ let sound_dynamic_interface_check_from_fun_ty ~this_class env fun_ty =
          env
          ~supportdyn:false
          ~hint_pos:Pos.none
-         ~explicit:(Some fun_ty.ft_ret.et_type)
+         ~explicit:(Some fun_ty.ft_ret)
          ~default:None)
   in
-  sound_dynamic_interface_check
-    ~this_class
-    env
-    params_decl_ty
-    ret_locl_ty.et_type
+  sound_dynamic_interface_check ~this_class env params_decl_ty ret_locl_ty
 
 (* Given t, construct ~t.
  * acc is a boolean that remains false if no change was made (e.g. t = dynamic)
@@ -219,12 +214,10 @@ let rec try_push_like env ty =
       else
         None )
   | (r, Tfun ft) ->
-    let (changed, ret_ty) = make_like env false ft.ft_ret.et_type in
+    let (changed, ret_ty) = make_like env false ft.ft_ret in
     ( env,
       if changed then
-        Some
-          (mk
-             (r, Tfun { ft with ft_ret = { ft.ft_ret with et_type = ret_ty } }))
+        Some (mk (r, Tfun { ft with ft_ret = ret_ty }))
       else
         None )
   | (r, Tshape { s_origin = _; s_unknown_value = kind; s_fields = fields }) ->
@@ -302,9 +295,8 @@ let rec strip_covariant_like env ty =
       let (env, tyl) = List.map_env env ~f:strip_covariant_like tyl in
       (env, mk (r, Ttuple tyl))
     | (r, Tfun ft) ->
-      let (env, ret_ty) = strip_covariant_like env ft.ft_ret.et_type in
-      ( env,
-        mk (r, Tfun { ft with ft_ret = { ft.ft_ret with et_type = ret_ty } }) )
+      let (env, ret_ty) = strip_covariant_like env ft.ft_ret in
+      (env, mk (r, Tfun { ft with ft_ret = ret_ty }))
     | (r, Tshape { s_origin = _; s_unknown_value = kind; s_fields = fields }) ->
       let strip_shape_field env _name { sft_optional; sft_ty } =
         let (env, sft_ty) = strip_covariant_like env sft_ty in

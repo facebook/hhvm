@@ -68,16 +68,13 @@
               ft_params =
               [{ fp_pos = [9:23-25]; fp_name = (Some "$c");
                  fp_type =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type =
-                   (Rhint ([9:15-22]),
-                    (Tapply (([9:15-16], "\\C"),
-                       [(Rhint ([9:17-21]),
-                         (Tapply (([9:17-18], "\\C"),
-                            [(Rhint ([9:19-20]), Twildcard)])))
-                         ]
-                       )))
-                   };
+                 (Rhint ([9:15-22]),
+                  (Tapply (([9:15-16], "\\C"),
+                     [(Rhint ([9:17-21]),
+                       (Tapply (([9:17-18], "\\C"),
+                          [(Rhint ([9:19-20]), Twildcard)])))
+                       ]
+                     )));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; has_default = false; readonly = false };
@@ -85,12 +82,9 @@
                 ];
               ft_implicit_params = { capability = (CapDefaults [9:10-14]) };
               ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type =
-                (Rhint ([9:28-32]),
-                 (Tapply (([9:28-29], "\\C"),
-                    [(Rhint ([9:30-31]), Twildcard)])))
-                };
+              (Rhint ([9:28-32]),
+               (Tapply (([9:28-29], "\\C"), [(Rhint ([9:30-31]), Twildcard)]
+                  )));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;

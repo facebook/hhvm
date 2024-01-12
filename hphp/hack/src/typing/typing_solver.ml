@@ -118,10 +118,10 @@ let rec freshen_inside_ty env ty =
             } ) )
   (* Functions are covariant in return type, contravariant in parameter types *)
   | Tfun ft ->
-    let (env, ft_ret) = freshen_possibly_enforced_ty env ft.ft_ret in
+    let (env, ft_ret) = freshen_ty env ft.ft_ret in
     let (env, ft_params) =
       List.map_env env ft.ft_params ~f:(fun env p ->
-          let (env, fp_type) = freshen_possibly_enforced_ty env p.fp_type in
+          let (env, fp_type) = freshen_ty env p.fp_type in
           (env, { p with fp_type }))
     in
     (env, mk (r, Tfun { ft with ft_ret; ft_params }))
@@ -172,10 +172,6 @@ and freshen_ty env ty =
     Env.fresh_type_error env (get_pos ty |> Pos_or_decl.unsafe_to_raw_pos)
   else
     Env.fresh_type_invariant env (get_pos ty |> Pos_or_decl.unsafe_to_raw_pos)
-
-and freshen_possibly_enforced_ty env ety =
-  let (env, et_type) = freshen_ty env ety.et_type in
-  (env, { ety with et_type })
 
 and freshen_tparams env variancel tyl =
   match (variancel, tyl) with

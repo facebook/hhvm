@@ -1502,7 +1502,7 @@ and get_tyvars_i env (ty : internal_type) =
       Tvid.Set.union acc_negative negative )
   in
   let get_tyvars_param (env, acc_positive, acc_negative) fp =
-    let (env, positive, negative) = get_tyvars env fp.fp_type.et_type in
+    let (env, positive, negative) = get_tyvars env fp.fp_type in
     match get_fp_mode fp with
     (* Parameters are treated contravariantly *)
     | FPnormal ->
@@ -1552,9 +1552,7 @@ and get_tyvars_i env (ty : internal_type) =
         | CapDefaults _ -> (env, Tvid.Set.empty, Tvid.Set.empty)
         | CapTy ty -> get_tyvars env ty
       in
-      let (env, ret_positive, ret_negative) =
-        get_tyvars env ft.ft_ret.et_type
-      in
+      let (env, ret_positive, ret_negative) = get_tyvars env ft.ft_ret in
       ( env,
         Tvid.Set.union
           implicit_params_positive

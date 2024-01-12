@@ -144,7 +144,6 @@ mod ffi {
     pub struct ExtDeclMethodParam {
         name: String,
         type_: String,
-        enforced_type: bool,
         accept_disposable: bool,
         is_inout: bool,
         has_default: bool,
@@ -157,7 +156,6 @@ mod ffi {
         tparams: Vec<ExtDeclTparam>,
         where_constraints: Vec<ExtDeclTypeConstraint>,
         return_type: String,
-        return_enforced: bool,
         params: Vec<ExtDeclMethodParam>,
         implicit_params: String,
         cross_package: String,

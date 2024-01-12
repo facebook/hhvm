@@ -138,11 +138,11 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
         let (env, tyl) = List.map_env env tyl ~f:make_ts in
         (env, acc_field_with_type (mk (r, Ttuple tyl)))
       | (TSFlit_str (_, "param_types"), _, (r, Tfun funty)) ->
-        let tyl = List.map funty.ft_params ~f:(fun x -> x.fp_type.et_type) in
+        let tyl = List.map funty.ft_params ~f:(fun x -> x.fp_type) in
         let (env, tyl) = List.map_env env tyl ~f:make_ts in
         (env, acc_field_with_type (mk (r, Ttuple tyl)))
       | (TSFlit_str (_, "return_type"), _, (r, Tfun funty)) ->
-        let (env, ty) = make_ts env funty.ft_ret.et_type in
+        let (env, ty) = make_ts env funty.ft_ret in
         (env, acc_field_with_type (mk (r, Ttuple [ty])))
       | ( TSFlit_str (_, "fields"),
           _,

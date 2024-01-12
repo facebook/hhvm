@@ -51,7 +51,7 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
     Printf.sprintf
       "(function(%s): %s)"
       (String.concat ~sep:", " params)
-      (print_ty_exn ft.ft_ret.et_type)
+      (print_ty_exn ft.ft_ret)
   | Ttuple tyl -> "(" ^ print_tyl_exn tyl ^ ")"
   | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } ->
     let fields = List.map (TShapeMap.elements fdm) ~f:print_shape_field_exn in
@@ -78,8 +78,8 @@ and print_tyl_exn tyl = String.concat ~sep:", " (List.map tyl ~f:print_ty_exn)
 
 and print_fun_param_exn param =
   match get_fp_mode param with
-  | FPinout -> "inout " ^ print_ty_exn param.fp_type.et_type
-  | _ -> print_ty_exn param.fp_type.et_type
+  | FPinout -> "inout " ^ print_ty_exn param.fp_type
+  | _ -> print_ty_exn param.fp_type
 
 and print_shape_field_exn (name, { sft_optional; sft_ty; _ }) =
   Printf.sprintf

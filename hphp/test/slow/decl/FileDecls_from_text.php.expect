@@ -46,7 +46,6 @@ File: dict [
                 'reified' => 'erased',
               ],
             ],
-            'is_soft_return_type' => true,
             'implicit_params' => 'mixed',
             'is_async' => true,
           ],
@@ -72,13 +71,11 @@ File: dict [
           'signature' => 
           dict [
             'return_type' => 'void',
-            'is_soft_return_type' => true,
             'params' => 
             vec [
               dict [
                 'name' => '$arg',
                 'type' => 'MySimpleTypeAlias',
-                'is_soft_type' => true,
                 'is_inout' => true,
               ],
             ],
@@ -146,18 +143,15 @@ File: dict [
         'signature' => 
         dict [
           'return_type' => 'void',
-          'is_soft_return_type' => true,
           'params' => 
           vec [
             dict [
               'name' => '$first',
               'type' => 'string',
-              'is_soft_type' => true,
             ],
             dict [
               'name' => '$remainder',
               'type' => 'string',
-              'is_soft_type' => true,
             ],
           ],
           'implicit_params' => 'mixed',

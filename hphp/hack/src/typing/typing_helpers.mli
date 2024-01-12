@@ -10,7 +10,7 @@ module ExpectedTy : sig
   type t = private {
     pos: Pos.t;
     reason: Typing_reason.ureason;
-    ty: Typing_defs.locl_possibly_enforced_ty;
+    ty: Typing_defs.locl_ty;
     coerce: Typing_logic.coercion_direction option;
   }
 
@@ -22,13 +22,13 @@ module ExpectedTy : sig
     t
 
   val make_and_allow_coercion :
-    Pos.t -> Typing_reason.ureason -> Typing_defs.locl_possibly_enforced_ty -> t
+    Pos.t -> Typing_reason.ureason -> Typing_defs.locl_ty -> t
 
   val make_and_allow_coercion_opt :
     Typing_env_types.env ->
     Pos.t ->
     Typing_reason.ureason ->
-    Typing_defs.locl_possibly_enforced_ty ->
+    Typing_defs.locl_ty ->
     t option
 end
 

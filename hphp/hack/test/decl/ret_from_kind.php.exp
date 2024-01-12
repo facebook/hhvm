@@ -8,12 +8,9 @@
            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
              ft_implicit_params = { capability = (CapDefaults [4:16-29]) };
              ft_ret =
-             { et_enforced = Typing_defs_core.Unenforced;
-               et_type =
-               (Rret_fun_kind_from_decl ([4:16-29], FAsync),
-                (Tapply (([4:16-29], "\\HH\\Awaitable"),
-                   [(Rwitness_from_decl ([4:16-29]), Tany)])))
-               };
+             (Rret_fun_kind_from_decl ([4:16-29], FAsync),
+              (Tapply (([4:16-29], "\\HH\\Awaitable"),
+                 [(Rwitness_from_decl ([4:16-29]), Tany)])));
              ft_flags =
              { Typing_defs_flags.Fun.return_disposable = false; async = true;
                generator = false; fun_kind = FAsync;
@@ -35,15 +32,12 @@
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [7:10-27]) };
               ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type =
-                (Rret_fun_kind_from_decl ([7:10-27], FGenerator),
-                 (Tapply (([7:10-27], "\\Generator"),
-                    [(Rwitness_from_decl ([7:10-27]), Tany);
-                      (Rwitness_from_decl ([7:10-27]), Tany);
-                      (Rwitness_from_decl ([7:10-27]), Tany)]
-                    )))
-                };
+              (Rret_fun_kind_from_decl ([7:10-27], FGenerator),
+               (Tapply (([7:10-27], "\\Generator"),
+                  [(Rwitness_from_decl ([7:10-27]), Tany);
+                    (Rwitness_from_decl ([7:10-27]), Tany);
+                    (Rwitness_from_decl ([7:10-27]), Tany)]
+                  )));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = true; fun_kind = FGenerator;
@@ -65,15 +59,12 @@
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [12:16-39]) };
               ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type =
-                (Rret_fun_kind_from_decl ([12:16-39], FAsyncGenerator),
-                 (Tapply (([12:16-39], "\\HH\\AsyncGenerator"),
-                    [(Rwitness_from_decl ([12:16-39]), Tany);
-                      (Rwitness_from_decl ([12:16-39]), Tany);
-                      (Rwitness_from_decl ([12:16-39]), Tany)]
-                    )))
-                };
+              (Rret_fun_kind_from_decl ([12:16-39], FAsyncGenerator),
+               (Tapply (([12:16-39], "\\HH\\AsyncGenerator"),
+                  [(Rwitness_from_decl ([12:16-39]), Tany);
+                    (Rwitness_from_decl ([12:16-39]), Tany);
+                    (Rwitness_from_decl ([12:16-39]), Tany)]
+                  )));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = true; generator = true; fun_kind = FAsyncGenerator;

@@ -190,7 +190,7 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
       param_tys
       f.f_params
   in
-  let env = set_tyvars_variance_in_callable env return_ty.et_type param_tys in
+  let env = set_tyvars_variance_in_callable env return_ty param_tys in
   let local_tpenv = Env.get_tpenv env in
   let disable =
     Naming_attributes.mem
@@ -227,7 +227,7 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
       Aast.f_readonly_this = f.f_readonly_this;
       Aast.f_span = f.f_span;
       Aast.f_readonly_ret = f.f_readonly_ret;
-      Aast.f_ret = (return_ty.et_type, ret_hint);
+      Aast.f_ret = (return_ty, ret_hint);
       Aast.f_params = typed_params;
       Aast.f_ctxs = f.f_ctxs;
       Aast.f_unsafe_ctxs = f.f_unsafe_ctxs;
@@ -288,7 +288,7 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
           (Some fd.fd_name)
           f
           params_decl_ty
-          return_ty.et_type
+          return_ty
       in
       (under_normal_assumptions, Some (fundef_of_dynamic dynamic_components))
     else
@@ -340,11 +340,11 @@ let gconst_def ctx cst =
       (te, (env, None))
     | (Some hint, _) ->
       let ty = Decl_hint.hint env.decl_env hint in
-      let ty =
+      let (enforced, ty) =
         Typing_enforceability.compute_enforced_ty ~this_class:None env ty
       in
       let ((env, ty_err_opt1), dty) =
-        Phase.localize_possibly_enforced_no_subst env ~ignore_errors:false ty
+        Phase.localize_no_subst env ~ignore_errors:false ty
       in
       let (env, te, value_type) =
         let expected =
@@ -359,6 +359,7 @@ let gconst_def ctx cst =
           env
           value_type
           dty
+          enforced
           Typing_error.Callback.unify_error
       in
       let ty_err_opt =

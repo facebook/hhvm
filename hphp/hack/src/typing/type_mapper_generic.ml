@@ -217,7 +217,7 @@ class ['env] deep_type_mapper =
 
     method private on_param env param =
       let { fp_pos; fp_name; fp_type; fp_flags; fp_def_value } = param in
-      let (env, fp_type) = this#on_possibly_enforced_ty env fp_type in
+      let (env, fp_type) = this#on_type env fp_type in
       let param = { fp_pos; fp_name; fp_type; fp_flags; fp_def_value } in
       (env, param)
 
@@ -254,7 +254,7 @@ class ['env] deep_type_mapper =
       let (env, ft_implicit_params) =
         this#on_fun_implicit_params env ft_implicit_params
       in
-      let (env, ft_ret) = this#on_possibly_enforced_ty env ft_ret in
+      let (env, ft_ret) = this#on_type env ft_ret in
       let ft =
         {
           ft_tparams;
@@ -316,12 +316,6 @@ class ['env] deep_type_mapper =
       | Some x ->
         let (env, x) = this#on_type env x in
         (env, Some x)
-
-    method private on_possibly_enforced_ty
-        env (x : locl_ty possibly_enforced_ty) =
-      let { et_type; et_enforced } = x in
-      let (env, et_type) = this#on_type env et_type in
-      (env, { et_type; et_enforced })
   end
 
 class type ['env] constraint_type_mapper_type =

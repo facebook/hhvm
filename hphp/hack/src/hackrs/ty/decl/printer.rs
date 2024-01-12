@@ -164,15 +164,6 @@ impl<R: Reason, TY: Display> Display for FunParam<R, TY> {
     }
 }
 
-impl<TY: Display> Display for PossiblyEnforcedTy<TY> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        if self.enforced == Enforcement::Enforced {
-            write!(f, "enforced ")?;
-        }
-        write!(f, "{}", self.ty)
-    }
-}
-
 fn trefinements<TY: Display>(
     f: &mut Formatter<'_>,
     consts: &BTreeMap<pos::TypeConstName, RefinedConst<TY>>,

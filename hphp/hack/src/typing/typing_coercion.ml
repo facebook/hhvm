@@ -48,32 +48,32 @@ let coerce_type_impl
     env
     ty_have
     ty_expect
+    ty_expect_enforced
     (on_error : Typing_error.Reasons_callback.t option) =
-  let is_expected_enforced = equal_enforcement ty_expect.et_enforced Enforced in
+  let is_expected_enforced = equal_enforcement ty_expect_enforced Enforced in
   if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
     if coerce_for_op && is_expected_enforced then
       (* If the coercion is for a built-in operation, then we want to allow it to apply to
          dynamic *)
       let tunion =
         Typing_make_type.locl_like
-          (Reason.Rdynamic_coercion (get_reason ty_expect.et_type))
-          ty_expect.et_type
+          (Reason.Rdynamic_coercion (get_reason ty_expect))
+          ty_expect
       in
       Typing_utils.sub_type ~coerce:None env ty_have tunion on_error
     else
-      let (env, ety_expect) = Typing_env.expand_type env ty_expect.et_type in
+      let (env, ety_expect) = Typing_env.expand_type env ty_expect in
       match get_node ety_expect with
       | Tdynamic ->
         Typing_utils.sub_type
           ~coerce:(Some Typing_logic.CoerceToDynamic)
           env
           ty_have
-          ty_expect.et_type
+          ty_expect
           on_error
-      | _ ->
-        Typing_utils.sub_type ~coerce env ty_have ty_expect.et_type on_error
+      | _ -> Typing_utils.sub_type ~coerce env ty_have ty_expect on_error
   else
-    let (env, ety_expect) = Typing_env.expand_type env ty_expect.et_type in
+    let (env, ety_expect) = Typing_env.expand_type env ty_expect in
     let (env, ety_have) = Typing_env.expand_type env ty_have in
     match (get_node ety_have, get_node ety_expect) with
     | (_, Tdynamic) -> (env, None)
@@ -82,9 +82,9 @@ let coerce_type_impl
       Typing_utils.sub_type_with_dynamic_as_bottom
         env
         ty_have
-        ty_expect.et_type
+        ty_expect
         on_error
-    | _ -> Typing_utils.sub_type env ty_have ty_expect.et_type on_error
+    | _ -> Typing_utils.sub_type env ty_have ty_expect on_error
 
 let coerce_type
     ?(coerce_for_op = false)
@@ -94,6 +94,7 @@ let coerce_type
     env
     ty_have
     ty_expect
+    ty_expect_enforced
     (on_error : Typing_error.Callback.t) =
   Typing_log.(
     log_with_level env "typing" ~level:2 (fun () ->
@@ -104,11 +105,17 @@ let coerce_type
             Log_head
               ( "Typing_coercion.coerce_type ",
                 [
-                  Log_type ("ty_expect", ty_expect.et_type);
+                  Log_type ("ty_expect", ty_expect);
                   Log_type ("ty_have", ty_have);
                 ] );
           ]));
-  coerce_type_impl ~coerce_for_op ~coerce env ty_have ty_expect
+  coerce_type_impl
+    ~coerce_for_op
+    ~coerce
+    env
+    ty_have
+    ty_expect
+    ty_expect_enforced
   @@ Some
        (Typing_error.Reasons_callback.with_claim
           on_error
@@ -122,7 +129,8 @@ let coerce_type_like_strip
       ~coerce:None
       env
       ty_have
-      { et_type = ty_expect; et_enforced = Unenforced }
+      ty_expect
+      Unenforced
     @@ Some
          (Typing_error.Reasons_callback.with_claim
             on_error
@@ -151,7 +159,8 @@ let coerce_type_like_strip
         Reason.URnone
         env2
         ty_have
-        { et_type = like_ty; et_enforced = Unenforced }
+        like_ty
+        Unenforced
         Typing_error.Callback.unify_error
     in
     (match ty_err_opt_like with
@@ -172,7 +181,13 @@ let try_coerce ?(coerce = None) env ty_have ty_expect =
     |> Option.value ~default:Pos.none
   in
   let res =
-    coerce_type_impl ~coerce ~coerce_for_op:false env ty_have ty_expect
+    coerce_type_impl
+      ~coerce
+      ~coerce_for_op:false
+      env
+      ty_have
+      ty_expect
+      Enforced (* TODO akenn: flow in *)
     @@ Some (Typing_error.Reasons_callback.unify_error_at pos)
   in
   match res with

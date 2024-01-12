@@ -501,8 +501,9 @@ val make_like :
  *)
 val make_like_if_enforced :
   Typing_env_types.env ->
-  Typing_defs.locl_possibly_enforced_ty ->
-  Typing_defs.locl_possibly_enforced_ty
+  Typing_defs.enforcement ->
+  Typing_defs.locl_ty ->
+  Typing_defs.locl_ty
 
 val is_capability : Typing_defs.locl_ty -> bool
 

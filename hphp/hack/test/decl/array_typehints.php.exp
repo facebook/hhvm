@@ -8,14 +8,11 @@
            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
              ft_implicit_params = { capability = (CapDefaults [3:10-12]) };
              ft_ret =
-             { et_enforced = Typing_defs_core.Unenforced;
-               et_type =
-               (Rhint ([3:16-35]),
-                (Tapply (([3:16-22], "\\HH\\dict"),
-                   [(Rhint ([3:23-26]), (Tprim Tint));
-                     (Rhint ([3:28-34]), (Tprim Tstring))]
-                   )))
-               };
+             (Rhint ([3:16-35]),
+              (Tapply (([3:16-22], "\\HH\\dict"),
+                 [(Rhint ([3:23-26]), (Tprim Tint));
+                   (Rhint ([3:28-34]), (Tprim Tstring))]
+                 )));
              ft_flags =
              { Typing_defs_flags.Fun.return_disposable = false;
                async = false; generator = false; fun_kind = FSync;
@@ -37,12 +34,9 @@
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [8:10-12]) };
               ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type =
-                (Rhint ([8:16-22]),
-                 (Tapply (([8:16-22], "\\HH\\vec"),
-                    [(Rhint ([8:16-22]), Tany)])))
-                };
+              (Rhint ([8:16-22]),
+               (Tapply (([8:16-22], "\\HH\\vec"), [(Rhint ([8:16-22]), Tany)]
+                  )));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;
@@ -64,12 +58,9 @@
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [12:10-12]) };
               ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type =
-                (Rhint ([12:16-27]),
-                 (Tapply (([12:16-22], "\\HH\\vec"),
-                    [(Rhint ([12:23-26]), (Tprim Tint))])))
-                };
+              (Rhint ([12:16-27]),
+               (Tapply (([12:16-22], "\\HH\\vec"),
+                  [(Rhint ([12:23-26]), (Tprim Tint))])));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;
@@ -91,13 +82,9 @@
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [17:10-12]) };
               ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type =
-                (Rhint ([17:16-22]),
-                 (Tapply (([17:16-22], "\\HH\\dict"),
-                    [(Rhint ([17:16-22]), Tany); (Rhint ([17:16-22]), Tany)]
-                    )))
-                };
+              (Rhint ([17:16-22]),
+               (Tapply (([17:16-22], "\\HH\\dict"),
+                  [(Rhint ([17:16-22]), Tany); (Rhint ([17:16-22]), Tany)])));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;
@@ -119,14 +106,11 @@
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [21:10-12]) };
               ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type =
-                (Rhint ([21:16-35]),
-                 (Tapply (([21:16-22], "\\HH\\dict"),
-                    [(Rhint ([21:23-26]), (Tprim Tint));
-                      (Rhint ([21:28-34]), (Tprim Tstring))]
-                    )))
-                };
+              (Rhint ([21:16-35]),
+               (Tapply (([21:16-22], "\\HH\\dict"),
+                  [(Rhint ([21:23-26]), (Tprim Tint));
+                    (Rhint ([21:28-34]), (Tprim Tstring))]
+                  )));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;
@@ -148,13 +132,10 @@
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [26:10-13]) };
               ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type =
-                (Rhint ([26:17-33]),
-                 (Tvec_or_dict
-                    (Rvec_or_dict_key ([26:17-33]), (Tprim Tarraykey)),
-                    (Rhint ([26:17-33]), Tany)))
-                };
+              (Rhint ([26:17-33]),
+               (Tvec_or_dict
+                  (Rvec_or_dict_key ([26:17-33]), (Tprim Tarraykey)),
+                  (Rhint ([26:17-33]), Tany)));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;
@@ -176,13 +157,10 @@
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [30:10-13]) };
               ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type =
-                (Rhint ([30:17-38]),
-                 (Tvec_or_dict
-                    (Rvec_or_dict_key ([30:17-38]), (Tprim Tarraykey)),
-                    (Rhint ([30:34-37]), (Tprim Tint))))
-                };
+              (Rhint ([30:17-38]),
+               (Tvec_or_dict
+                  (Rvec_or_dict_key ([30:17-38]), (Tprim Tarraykey)),
+                  (Rhint ([30:34-37]), (Tprim Tint))));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;
@@ -204,12 +182,9 @@
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [34:10-13]) };
               ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type =
-                (Rhint ([34:17-46]),
-                 (Tvec_or_dict (Rhint ([34:34-37]), (Tprim Tint)),
-                    (Rhint ([34:39-45]), (Tprim Tstring))))
-                };
+              (Rhint ([34:17-46]),
+               (Tvec_or_dict (Rhint ([34:34-37]), (Tprim Tint)),
+                  (Rhint ([34:39-45]), (Tprim Tstring))));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;
@@ -230,9 +205,7 @@
          (Tfun
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [38:10-13]) };
-              ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([38:17-52]), Tany) };
+              ft_ret = (Rhint ([38:17-52]), Tany);
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;

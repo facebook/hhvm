@@ -40,9 +40,7 @@
                      ft_implicit_params =
                      { capability = (CapDefaults [10:19-30]) };
                      ft_ret =
-                     { et_enforced = Typing_defs_core.Unenforced;
-                       et_type =
-                       (Rwitness_from_decl ([10:19-30]), (Tprim Tvoid)) };
+                     (Rwitness_from_decl ([10:19-30]), (Tprim Tvoid));
                      ft_flags =
                      { Typing_defs_flags.Fun.return_disposable = false;
                        async = false; generator = false; fun_kind = FSync;
@@ -95,9 +93,7 @@
                       ft_implicit_params =
                       { capability = (CapDefaults [20:19-30]) };
                       ft_ret =
-                      { et_enforced = Typing_defs_core.Unenforced;
-                        et_type =
-                        (Rwitness_from_decl ([20:19-30]), (Tprim Tvoid)) };
+                      (Rwitness_from_decl ([20:19-30]), (Tprim Tvoid));
                       ft_flags =
                       { Typing_defs_flags.Fun.return_disposable = false;
                         async = false; generator = false; fun_kind = FSync;
@@ -147,9 +143,7 @@
                     { ft_tparams = []; ft_where_constraints = [];
                       ft_params =
                       [{ fp_pos = [26:55-57]; fp_name = (Some "$x");
-                         fp_type =
-                         { et_enforced = Typing_defs_core.Unenforced;
-                           et_type = (Rhint ([26:51-54]), (Tprim Tint)) };
+                         fp_type = (Rhint ([26:51-54]), (Tprim Tint));
                          fp_flags =
                          { Typing_defs_flags.FunParam.accept_disposable =
                            false; inout = false; has_default = false;
@@ -159,9 +153,7 @@
                       ft_implicit_params =
                       { capability = (CapDefaults [26:19-30]) };
                       ft_ret =
-                      { et_enforced = Typing_defs_core.Unenforced;
-                        et_type =
-                        (Rwitness_from_decl ([26:19-30]), (Tprim Tvoid)) };
+                      (Rwitness_from_decl ([26:19-30]), (Tprim Tvoid));
                       ft_flags =
                       { Typing_defs_flags.Fun.return_disposable = false;
                         async = false; generator = false; fun_kind = FSync;

@@ -8,15 +8,12 @@
            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
              ft_implicit_params = { capability = (CapDefaults [3:10-11]) };
              ft_ret =
-             { et_enforced = Typing_defs_core.Unenforced;
-               et_type =
-               (Rhint ([3:15-43]),
-                (Tapply (([3:15-24], "\\Generator"),
-                   [(Rhint ([3:25-29]), (Tprim Tbool));
-                     (Rhint ([3:31-37]), (Tprim Tstring));
-                     (Rhint ([3:39-42]), (Tprim Tint))]
-                   )))
-               };
+             (Rhint ([3:15-43]),
+              (Tapply (([3:15-24], "\\Generator"),
+                 [(Rhint ([3:25-29]), (Tprim Tbool));
+                   (Rhint ([3:31-37]), (Tprim Tstring));
+                   (Rhint ([3:39-42]), (Tprim Tint))]
+                 )));
              ft_flags =
              { Typing_defs_flags.Fun.return_disposable = false;
                async = false; generator = true; fun_kind = FGenerator;
@@ -37,9 +34,7 @@
          (Tfun
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [7:10-11]) };
-              ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([7:15-19]), (Tprim Tvoid)) };
+              ft_ret = (Rhint ([7:15-19]), (Tprim Tvoid));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;
@@ -60,9 +55,7 @@
          (Tfun
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [13:10-11]) };
-              ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([13:15-19]), (Tprim Tvoid)) };
+              ft_ret = (Rhint ([13:15-19]), (Tprim Tvoid));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;
@@ -84,12 +77,9 @@
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [19:16-17]) };
               ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type =
-                (Rhint ([19:21-36]),
-                 (Tapply (([19:21-30], "\\HH\\Awaitable"),
-                    [(Rhint ([19:31-35]), (Tprim Tvoid))])))
-                };
+              (Rhint ([19:21-36]),
+               (Tapply (([19:21-30], "\\HH\\Awaitable"),
+                  [(Rhint ([19:31-35]), (Tprim Tvoid))])));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = true; generator = false; fun_kind = FAsync;
@@ -111,14 +101,11 @@
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [26:16-17]) };
               ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type =
-                (Rhint ([26:21-52]),
-                 (Tapply (([26:21-39], "\\HH\\AsyncKeyedIterator"),
-                    [(Rhint ([26:40-46]), (Tprim Tstring));
-                      (Rhint ([26:48-51]), (Tprim Tint))]
-                    )))
-                };
+              (Rhint ([26:21-52]),
+               (Tapply (([26:21-39], "\\HH\\AsyncKeyedIterator"),
+                  [(Rhint ([26:40-46]), (Tprim Tstring));
+                    (Rhint ([26:48-51]), (Tprim Tint))]
+                  )));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = true; generator = true; fun_kind = FAsyncGenerator;

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<83155bb097076ffa0633785baf4ae03d>>
+// @generated SignedSource<<bcb54d5fe436c42b1659888d923aca89>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -391,33 +391,6 @@ arena_deserializer::impl_deserialize_in_arena!(FunImplicitParams<'arena>);
     ToOcamlRep
 )]
 #[rust_to_ocaml(attr = "deriving (eq, hash, (show { with_path = false }))")]
-#[rust_to_ocaml(prefix = "et_")]
-#[repr(C)]
-pub struct PossiblyEnforcedTy<'a> {
-    /// True if consumer of this type enforces it at runtime
-    pub enforced: oxidized::typing_defs_core::Enforcement,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub type_: &'a Ty<'a>,
-}
-impl<'a> TrivialDrop for PossiblyEnforcedTy<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(PossiblyEnforcedTy<'arena>);
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(attr = "deriving (eq, hash, (show { with_path = false }))")]
 #[rust_to_ocaml(prefix = "fp_")]
 #[repr(C)]
 pub struct FunParam<'a> {
@@ -428,7 +401,7 @@ pub struct FunParam<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: Option<&'a str>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub type_: &'a PossiblyEnforcedTy<'a>,
+    pub type_: &'a Ty<'a>,
     pub flags: typing_defs_flags::fun_param::FunParam,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub def_value: Option<&'a str>,
@@ -469,7 +442,7 @@ pub struct FunType<'a> {
     pub implicit_params: &'a FunImplicitParams<'a>,
     /// Carries through the sync/async information from the aast
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub ret: &'a PossiblyEnforcedTy<'a>,
+    pub ret: &'a Ty<'a>,
     pub flags: typing_defs_flags::fun::Fun,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub cross_package: CrossPackageDecl<'a>,

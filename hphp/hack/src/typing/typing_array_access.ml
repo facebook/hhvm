@@ -178,7 +178,6 @@ let check_arraykey_index error env pos container_ty index_ty =
     let container_info = info_of_type container_ty in
     let index_info = info_of_type index_ty in
     let ty_arraykey = MakeType.arraykey (Reason.Ridx_dict pos) in
-    let ty_expected = { et_type = ty_arraykey; et_enforced = Enforced } in
     (* If we have an error in coercion here, we will add a `Hole` indicating the
        actual and expected type. The `Hole` may then be used in a codemod to
        add a call to `UNSAFE_CAST` so we need to consider what type we expect.
@@ -215,7 +214,8 @@ let check_arraykey_index error env pos container_ty index_ty =
         reason
         env
         ty_actual
-        ty_expected
+        ty_arraykey
+        Enforced
       @@ Typing_error.Callback.always base_error
     in
     let (ty_mismatch, e2) =
@@ -387,7 +387,7 @@ let rec array_get
           e2
           ty2
       in
-      let type_index env p ty_have ty_expect reason =
+      let type_index env p ty_have ty_expect enforced_expect reason =
         Typing_log.(
           log_with_level env "typing" ~level:1 (fun () ->
               log_types
@@ -398,7 +398,7 @@ let rec array_get
                     ( "array_get/type_index",
                       [
                         Log_type ("ty_have", ty_have);
-                        Log_type ("ty_expect", ty_expect.et_type);
+                        Log_type ("ty_expect", ty_expect);
                       ] );
                 ]));
         let (env, ty_err_opt) =
@@ -409,11 +409,10 @@ let rec array_get
             env
             ty_have
             ty_expect
+            enforced_expect
             Typing_error.Callback.index_type_mismatch
         in
-        let ty_mismatch =
-          mk_ty_mismatch_res ty_have ty_expect.et_type ty_err_opt
-        in
+        let ty_mismatch = mk_ty_mismatch_res ty_have ty_expect ty_err_opt in
         ((env, ty_err_opt), ty_mismatch)
       in
       let got_dynamic () =
@@ -442,9 +441,9 @@ let rec array_get
             err_witness env expr_pos
         in
         let (_, p2, _) = e2 in
-        let ty1 = MakeType.enforced (MakeType.int (Reason.Ridx_vector p2)) in
+        let ty1 = MakeType.int (Reason.Ridx_vector p2) in
         let ((env, ty_err_opt), idx_err_res) =
-          type_index env expr_pos ty2 ty1 (Reason.index_class cn)
+          type_index env expr_pos ty2 ty1 Enforced (Reason.index_class cn)
         in
         Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
         (env, (ty, dflt_arr_res, idx_err_res))
@@ -483,12 +482,7 @@ let rec array_get
             if String.equal cn SN.Collections.cMap then
               let (env, k) = Env.expand_type env k in
               let (env, k) = maybe_pessimise_type env k in
-              type_index
-                env
-                expr_pos
-                ty2
-                (MakeType.enforced k)
-                (Reason.index_class cn)
+              type_index env expr_pos ty2 k Enforced (Reason.index_class cn)
             else
               let (env, res) = check_arraykey_index_read env expr_pos ty1 ty2 in
               ((env, None), res)
@@ -535,9 +529,9 @@ let rec array_get
             err_witness env expr_pos
         in
         let (_, p2, _) = e2 in
-        let ty1 = MakeType.enforced (MakeType.int (Reason.Ridx (p2, r))) in
+        let ty1 = MakeType.int (Reason.Ridx (p2, r)) in
         let ((env, ty_err1), idx_err_res) =
-          type_index env expr_pos ty2 ty1 (Reason.index_class cn)
+          type_index env expr_pos ty2 ty1 Enforced (Reason.index_class cn)
         in
         Option.iter ty_err1 ~f:(Typing_error_utils.add_typing_error ~env);
         (env, (ty, dflt_arr_res, idx_err_res))
@@ -569,9 +563,9 @@ let rec array_get
       | Tprim Tstring ->
         let ty = MakeType.string (Reason.Rwitness expr_pos) in
         let (_, p2, _) = e2 in
-        let ty1 = MakeType.enforced (MakeType.int (Reason.Ridx (p2, r))) in
+        let ty1 = MakeType.int (Reason.Ridx (p2, r)) in
         let ((env, ty_err1), idx_err_res) =
-          type_index env expr_pos ty2 ty1 Reason.index_array
+          type_index env expr_pos ty2 ty1 Enforced Reason.index_array
         in
         Option.iter ty_err1 ~f:(Typing_error_utils.add_typing_error ~env);
         (env, (ty, dflt_arr_res, idx_err_res))
@@ -975,19 +969,19 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
           match check_set_value env expr_pos ty1 ty2 with
           | (_, Error _) as err_res -> err_res
           | (env, _) ->
-            let (env, tv') =
+            let (env, tv', enforced) =
               let ak_t = MakeType.arraykey (Reason.Ridx_vector expr_pos) in
               let (env, tv) = maybe_pessimise_type env tv in
               if TUtils.is_sub_type_for_union env ak_t tv then
                 (* hhvm will enforce that the key is an arraykey, so if
                    $x : Set<arraykey>, then it should be allowed to
                    set $x[] = e where $d : dynamic. *)
-                (env, MakeType.enforced tv)
+                (env, tv, Enforced)
               else
                 (* It is unsound to allow $x[] = e if $x : Set<string>
                    since the dynamic $d might be an int and hhvm wouldn't
                    complain.*)
-                (env, MakeType.unenforced tv)
+                (env, tv, Unenforced)
             in
             let (env, ty_err_opt) =
               Typing_coercion.coerce_type
@@ -997,6 +991,7 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
                 env
                 ty2
                 tv'
+                enforced
                 Typing_error.Callback.unify_error
             in
             Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
@@ -1095,7 +1090,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
             @@ Primary.Array_get_arity
                  { pos = expr_pos; name; decl_pos = Reason.to_pos r })
       in
-      let type_index env p ty_have ty_expect reason =
+      let type_index env p ty_have ty_expect enforced reason =
         let (env, ty_err_opt) =
           Typing_coercion.coerce_type
             ~coerce_for_op:true
@@ -1104,11 +1099,10 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
             env
             ty_have
             ty_expect
+            enforced
             Typing_error.Callback.index_type_mismatch
         in
-        let ty_mismatch =
-          mk_ty_mismatch_res ty_have ty_expect.et_type ty_err_opt
-        in
+        let ty_mismatch = mk_ty_mismatch_res ty_have ty_expect ty_err_opt in
         ((env, ty_err_opt), ty_mismatch)
       in
       let got_dynamic () =
@@ -1140,9 +1134,9 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
         in
         let (env, tv) = maybe_make_supportdyn r env ~supportdyn tv in
         let (_, p, _) = key in
-        let tk = MakeType.enforced (MakeType.int (Reason.Ridx_vector p)) in
+        let tk = MakeType.int (Reason.Ridx_vector p) in
         let ((env, ty_err1), idx_err) =
-          type_index env expr_pos tkey tk (Reason.index_class cn)
+          type_index env expr_pos tkey tk Enforced (Reason.index_class cn)
         in
         let (env, ty_err2) =
           Typing_ops.sub_type
@@ -1168,9 +1162,9 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
             err_witness env expr_pos
         in
         let (_, p, _) = key in
-        let tk = MakeType.enforced (MakeType.int (Reason.Ridx_vector p)) in
+        let tk = MakeType.int (Reason.Ridx_vector p) in
         let ((env, ty_err1), idx_err) =
-          type_index env expr_pos tkey tk (Reason.index_class cn)
+          type_index env expr_pos tkey tk Enforced (Reason.index_class cn)
         in
         let (env, tv) = maybe_make_supportdyn r env ~supportdyn tv in
         let (env, tv') = Typing_union.union env tv ty2 in
@@ -1190,7 +1184,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
             (ty, (env, ty))
         in
         let (env, tv) = maybe_make_supportdyn r env ~supportdyn tv in
-        let (env, tk) =
+        let (env, enforced, tk) =
           let (_, p, _) = key in
           let ak_t = MakeType.arraykey (Reason.Ridx_vector p) in
           let (env, tk) = maybe_pessimise_type env tk in
@@ -1199,15 +1193,15 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
                $x : Map<arraykey, t>, then it should be allowed to
                set $x[$d] = e where $d : dynamic. NB above, we don't need
                to check that tk <: arraykey, because the Map ensures that. *)
-            (env, MakeType.enforced tk)
+            (env, Enforced, tk)
           else
             (* It is unsound to allow $x[$d] = e if $x : Map<string, t>
                since the dynamic $d might be an int and hhvm wouldn't
                complain.*)
-            (env, MakeType.unenforced tk)
+            (env, Unenforced, tk)
         in
         let ((env, ty_err1), idx_err2) =
-          type_index env expr_pos tkey tk (Reason.index_class cn)
+          type_index env expr_pos tkey tk enforced (Reason.index_class cn)
         in
         let idx_err =
           match (idx_err1, idx_err2) with
@@ -1349,10 +1343,10 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
         got_dynamic ()
       | Tprim Tstring ->
         let (_, p, _) = key in
-        let tk = MakeType.enforced (MakeType.int (Reason.Ridx (p, r))) in
+        let tk = MakeType.int (Reason.Ridx (p, r)) in
         let tv = MakeType.string (Reason.Rwitness expr_pos) in
         let ((env, ty_err1), idx_err) =
-          type_index env expr_pos tkey tk Reason.index_array
+          type_index env expr_pos tkey tk Enforced Reason.index_array
         in
         let (env, tv') = maybe_pessimise_type env tv in
         let (env, ty_err2) =

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c0c8685516afffd8d43ffde9330fdc41>>
+// @generated SignedSource<<672c19b4dd798b4d5b4babc8049f0182>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -498,24 +498,6 @@ impl<'a> Node<'a> for FunImplicitParams<'a> {
             FunImplicitParams {
                 capability: ref __binding_0,
             } => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for PossiblyEnforcedTy<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_possibly_enforced_ty(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            PossiblyEnforcedTy {
-                enforced: ref __binding_0,
-                type_: ref __binding_1,
-            } => {
-                {
-                    __binding_0.accept(v)
-                }
-                { __binding_1.accept(v) }
-            }
         }
     }
 }
@@ -1300,17 +1282,6 @@ impl<'a> Node<'a> for ClassConstKind {
         match self {
             ClassConstKind::CCAbstract(ref __binding_0) => __binding_0.accept(v),
             ClassConstKind::CCConcrete => {}
-        }
-    }
-}
-impl<'a> Node<'a> for Enforcement {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_enforcement(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            Enforcement::Unenforced => {}
-            Enforcement::Enforced => {}
         }
     }
 }

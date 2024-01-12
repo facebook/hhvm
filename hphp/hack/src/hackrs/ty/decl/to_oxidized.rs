@@ -269,17 +269,6 @@ impl<'a, R: Reason> ToOxidized<'a> for FunType<R, Ty<R>> {
     }
 }
 
-impl<'a, R: Reason> ToOxidized<'a> for PossiblyEnforcedTy<Ty<R>> {
-    type Output = &'a obr::typing_defs::PossiblyEnforcedTy<'a>;
-
-    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
-        arena.alloc(obr::typing_defs::PossiblyEnforcedTy {
-            enforced: self.enforced,
-            type_: self.ty.to_oxidized(arena),
-        })
-    }
-}
-
 impl<'a, R: Reason> ToOxidized<'a> for FunParam<R, Ty<R>> {
     type Output = &'a obr::typing_defs::FunParam<'a>;
 

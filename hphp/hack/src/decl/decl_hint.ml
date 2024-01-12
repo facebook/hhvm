@@ -150,7 +150,7 @@ and hint_ p env = function
       {
         fp_pos = Decl_env.make_decl_pos env p;
         fp_name = None;
-        fp_type = possibly_enforced_hint env x;
+        fp_type = hint env x;
         fp_flags =
           make_fp_flags
             ~mode:kind
@@ -170,7 +170,7 @@ and hint_ p env = function
       let (_pos, capability) = aast_contexts_to_decl_capability env ctxs p in
       { capability }
     in
-    let ret = possibly_enforced_hint env h in
+    let ret = hint env h in
     let (variadic, paraml) =
       match vh with
       | Some t -> (true, paraml @ [make_param t None])
@@ -287,9 +287,3 @@ and hint_ p env = function
   | Hvar _ ->
     Errors.internal_error p "Unexpected context hint";
     Tunion []
-
-and possibly_enforced_hint env h =
-  (* Initially we assume that a type is not enforced at runtime.
-   * We refine this during localization
-   *)
-  { et_enforced = Unenforced; et_type = hint env h }

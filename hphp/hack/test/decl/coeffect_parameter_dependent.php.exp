@@ -50,9 +50,7 @@
                 ];
               ft_params =
               [{ fp_pos = [7:14-16]; fp_name = (Some "$a");
-                 fp_type =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type = (Rhint ([7:14-16]), (Tgeneric ("T/$a", []))) };
+                 fp_type = (Rhint ([7:14-16]), (Tgeneric ("T/$a", [])));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; has_default = false; readonly = false };
@@ -61,9 +59,7 @@
               ft_implicit_params =
               { capability =
                 (CapTy (Rhint ([7:18-23]), (Tgeneric ("T/[$a::C]", [])))) };
-              ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([7:26-30]), (Tprim Tvoid)) };
+              ft_ret = (Rhint ([7:26-30]), (Tprim Tvoid));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;
@@ -105,11 +101,8 @@
               ft_params =
               [{ fp_pos = [9:22-24]; fp_name = (Some "$a");
                  fp_type =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type =
-                   (Rhint ([9:19-21]),
-                    (Toption (Rhint ([9:22-24]), (Tgeneric ("T/$a", [])))))
-                   };
+                 (Rhint ([9:19-21]),
+                  (Toption (Rhint ([9:22-24]), (Tgeneric ("T/$a", [])))));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; has_default = false; readonly = false };
@@ -118,9 +111,7 @@
               ft_implicit_params =
               { capability =
                 (CapTy (Rhint ([9:26-31]), (Tgeneric ("T/[$a::C]", [])))) };
-              ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([9:34-38]), (Tprim Tvoid)) };
+              ft_ret = (Rhint ([9:34-38]), (Tprim Tvoid));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;
@@ -162,11 +153,8 @@
               ft_params =
               [{ fp_pos = [11:20-22]; fp_name = (Some "$a");
                  fp_type =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type =
-                   (Rhint ([11:17-19]),
-                    (Tlike (Rhint ([11:20-22]), (Tgeneric ("T/$a", [])))))
-                   };
+                 (Rhint ([11:17-19]),
+                  (Tlike (Rhint ([11:20-22]), (Tgeneric ("T/$a", [])))));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; has_default = false; readonly = false };
@@ -175,9 +163,7 @@
               ft_implicit_params =
               { capability =
                 (CapTy (Rhint ([11:24-29]), (Tgeneric ("T/[$a::C]", [])))) };
-              ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([11:32-36]), (Tprim Tvoid)) };
+              ft_ret = (Rhint ([11:32-36]), (Tprim Tvoid));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;
@@ -219,14 +205,10 @@
               ft_params =
               [{ fp_pos = [13:28-30]; fp_name = (Some "$a");
                  fp_type =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type =
-                   (Rhint ([13:24-27]),
-                    (Tlike
-                       (Rhint ([13:25-27]),
-                        (Toption
-                           (Rhint ([13:28-30]), (Tgeneric ("T/$a", [])))))))
-                   };
+                 (Rhint ([13:24-27]),
+                  (Tlike
+                     (Rhint ([13:25-27]),
+                      (Toption (Rhint ([13:28-30]), (Tgeneric ("T/$a", [])))))));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; has_default = false; readonly = false };
@@ -235,9 +217,7 @@
               ft_implicit_params =
               { capability =
                 (CapTy (Rhint ([13:32-37]), (Tgeneric ("T/[$a::C]", [])))) };
-              ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([13:40-44]), (Tprim Tvoid)) };
+              ft_ret = (Rhint ([13:40-44]), (Tprim Tvoid));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9eafc0d87b2cea13de6f4bf5ee107bbd>>
+// @generated SignedSource<<3a5fc48381b913695ed02638112c2b6f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -467,30 +467,6 @@ pub struct FunImplicitParams {
     ToOcamlRep
 )]
 #[rust_to_ocaml(attr = "deriving (eq, hash, (show { with_path = false }))")]
-#[rust_to_ocaml(prefix = "et_")]
-#[repr(C)]
-pub struct PossiblyEnforcedTy {
-    /// True if consumer of this type enforces it at runtime
-    pub enforced: Enforcement,
-    pub type_: Ty,
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(attr = "deriving (eq, hash, (show { with_path = false }))")]
 #[rust_to_ocaml(prefix = "fp_")]
 #[repr(C)]
 pub struct FunParam {
@@ -498,7 +474,7 @@ pub struct FunParam {
     #[rust_to_ocaml(attr = "equal fun _ -> fun _ -> true")]
     pub pos: pos_or_decl::PosOrDecl,
     pub name: Option<String>,
-    pub type_: PossiblyEnforcedTy,
+    pub type_: Ty,
     pub flags: typing_defs_flags::fun_param::FunParam,
     pub def_value: Option<String>,
 }
@@ -531,7 +507,7 @@ pub struct FunType {
     pub params: FunParams,
     pub implicit_params: FunImplicitParams,
     /// Carries through the sync/async information from the aast
-    pub ret: PossiblyEnforcedTy,
+    pub ret: Ty,
     pub flags: typing_defs_flags::fun::Fun,
     pub cross_package: CrossPackageDecl,
 }

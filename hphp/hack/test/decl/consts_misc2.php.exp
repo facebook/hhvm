@@ -25,9 +25,7 @@
               { ft_tparams = []; ft_where_constraints = [];
                 ft_params =
                 [{ fp_pos = [4:32-34]; fp_name = (Some "$x");
-                   fp_type =
-                   { et_enforced = Typing_defs_core.Unenforced;
-                     et_type = (Rhint ([4:28-31]), (Tprim Tint)) };
+                   fp_type = (Rhint ([4:28-31]), (Tprim Tint));
                    fp_flags =
                    { Typing_defs_flags.FunParam.accept_disposable = false;
                      inout = false; has_default = false; readonly = false };
@@ -44,9 +42,7 @@
                               [])))
                            ])))
                   };
-                ft_ret =
-                { et_enforced = Typing_defs_core.Unenforced;
-                  et_type = (Rhint ([4:50-53]), (Tprim Tint)) };
+                ft_ret = (Rhint ([4:50-53]), (Tprim Tint));
                 ft_flags =
                 { Typing_defs_flags.Fun.return_disposable = false;
                   async = false; generator = false; fun_kind = FSync;

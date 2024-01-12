@@ -180,10 +180,6 @@ let intersection r tyl =
 
 let function_ref r ty = mk (r, Tnewtype (SN.Classes.cFunctionRef, [ty], ty))
 
-let unenforced ty = { et_type = ty; et_enforced = Unenforced }
-
-let enforced ty = { et_type = ty; et_enforced = Enforced }
-
 let has_member r ~name ~ty ~class_id ~explicit_targs =
   ConstraintType
     (mk_constraint_type

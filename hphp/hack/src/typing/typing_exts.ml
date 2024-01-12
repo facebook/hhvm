@@ -71,13 +71,9 @@ let lookup_magic_type (env : env) use_pos (class_ : locl_ty) (fname : string) :
           {
             fty with
             ft_ret =
-              {
-                fty.ft_ret with
-                et_type =
-                  (match get_node fty.ft_ret.et_type with
-                  | Tlike ty -> ty
-                  | _ -> fty.ft_ret.et_type);
-              };
+              (match get_node fty.ft_ret with
+              | Tlike ty -> ty
+              | _ -> fty.ft_ret);
           }
         in
         let ety_env = empty_expand_env in
@@ -95,9 +91,7 @@ let lookup_magic_type (env : env) use_pos (class_ : locl_ty) (fname : string) :
     in
     begin
       match ce_type with
-      | Some
-          ( (env, ty_err_opt),
-            { ft_params = pars; ft_ret = { et_type = ty; _ }; _ } ) ->
+      | Some ((env, ty_err_opt), { ft_params = pars; ft_ret = ty; _ }) ->
         Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
         let (env, ty) = Env.expand_type env ty in
         let ty_opt =
@@ -130,11 +124,11 @@ let parse_printf_string env s pos (class_ : locl_ty) : env * locl_fun_params =
     in
     let add_reason =
       List.map ~f:(fun p ->
-          let et_type =
-            p.fp_type.et_type
+          let fp_type =
+            p.fp_type
             |> map_reason ~f:(fun r -> Reason.Rformat (pos, snippet, r))
           in
-          { p with fp_type = { p.fp_type with et_type } })
+          { p with fp_type })
     in
     match lookup_magic_type env pos class_ fname with
     | (env, Some (good_args, None)) ->
@@ -220,11 +214,11 @@ let retype_magic_func
   let rec f env param_types (args : (Ast_defs.param_kind * Nast.expr) list) :
       env * locl_fun_params option =
     match (param_types, args) with
-    | ([{ fp_type = { et_type; _ }; _ }], [(_, (_, _, Null))])
-      when is_some (get_possibly_like_format_string_type_arg et_type) ->
+    | ([{ fp_type; _ }], [(_, (_, _, Null))])
+      when is_some (get_possibly_like_format_string_type_arg fp_type) ->
       (env, None)
-    | ([({ fp_type = { et_type; _ }; _ } as fp)], (_, arg) :: _) -> begin
-      match get_possibly_like_format_string_type_arg et_type with
+    | ([({ fp_type; _ } as fp)], (_, arg) :: _) -> begin
+      match get_possibly_like_format_string_type_arg fp_type with
       | Some type_arg ->
         (match const_string_of env arg with
         | (env, Right str) ->
@@ -232,14 +226,7 @@ let retype_magic_func
           let (env, argl) = parse_printf_string env str pos type_arg in
           ( env,
             Some
-              ({
-                 fp with
-                 fp_type =
-                   {
-                     et_type = mk (get_reason et_type, Tprim Tstring);
-                     et_enforced = Unenforced;
-                   };
-               }
+              ({ fp with fp_type = mk (get_reason fp_type, Tprim Tstring) }
               :: argl) )
         | (env, Left pos) ->
           Typing_error_utils.add_typing_error

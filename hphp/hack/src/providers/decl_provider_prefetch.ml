@@ -246,7 +246,7 @@ let next_missing_types
     | Tvec_or_dict (_, ty)
     | Tlike ty ->
       do_ty d goal (acc, visited) ty
-    | Tfun { ft_ret = { et_type = ty; _ }; ft_flags; _ } -> begin
+    | Tfun { ft_ret = ty; ft_flags; _ } -> begin
       match get_node ty with
       | Tapply ((_, name), [ty])
         when Typing_defs_flags.Fun.async ft_flags

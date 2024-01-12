@@ -182,8 +182,6 @@ struct
 
   and constraint_ x = List.map ~f:(fun (ck, x) -> (ck, ty x)) x
 
-  and possibly_enforced_ty et = { et with et_type = ty et.et_type }
-
   and capability = function
     | CapTy cap -> CapTy (ty cap)
     | CapDefaults p -> CapDefaults (pos_or_decl p)
@@ -199,7 +197,7 @@ struct
         List.map ft.ft_where_constraints ~f:where_constraint;
       ft_params = List.map ft.ft_params ~f:fun_param;
       ft_implicit_params = fun_implicit_params ft.ft_implicit_params;
-      ft_ret = possibly_enforced_ty ft.ft_ret;
+      ft_ret = ty ft.ft_ret;
     }
 
   and shape_type { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm }
@@ -218,11 +216,7 @@ struct
   and where_constraint (ty1, c, ty2) = (ty ty1, c, ty ty2)
 
   and fun_param param =
-    {
-      param with
-      fp_pos = pos_or_decl param.fp_pos;
-      fp_type = possibly_enforced_ty param.fp_type;
-    }
+    { param with fp_pos = pos_or_decl param.fp_pos; fp_type = ty param.fp_type }
 
   and class_const cc =
     {

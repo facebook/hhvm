@@ -43,24 +43,18 @@
                  ft_params =
                  [{ fp_pos = [9:39-42]; fp_name = (Some "$a1");
                     fp_type =
-                    { et_enforced = Typing_defs_core.Unenforced;
-                      et_type =
-                      (Rhint ([9:32-38]),
-                       (Tapply (([9:32-33], "\\A"),
-                          [(Rhint ([9:34-37]), (Tprim Tint))])))
-                      };
+                    (Rhint ([9:32-38]),
+                     (Tapply (([9:32-33], "\\A"),
+                        [(Rhint ([9:34-37]), (Tprim Tint))])));
                     fp_flags =
                     { Typing_defs_flags.FunParam.accept_disposable = false;
                       inout = false; has_default = false; readonly = false };
                     fp_def_value = None };
                    { fp_pos = [9:51-54]; fp_name = (Some "$a2");
                      fp_type =
-                     { et_enforced = Typing_defs_core.Unenforced;
-                       et_type =
-                       (Rhint ([9:44-50]),
-                        (Tapply (([9:44-45], "\\A"),
-                           [(Rhint ([9:46-49]), (Tprim Tint))])))
-                       };
+                     (Rhint ([9:44-50]),
+                      (Tapply (([9:44-45], "\\A"),
+                         [(Rhint ([9:46-49]), (Tprim Tint))])));
                      fp_flags =
                      { Typing_defs_flags.FunParam.accept_disposable = false;
                        inout = false; has_default = false; readonly = false };
@@ -68,9 +62,7 @@
                    ];
                  ft_implicit_params =
                  { capability = (CapDefaults [9:19-31]) };
-                 ft_ret =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type = (Rhint ([9:58-62]), (Tprim Tvoid)) };
+                 ft_ret = (Rhint ([9:58-62]), (Tprim Tvoid));
                  ft_flags =
                  { Typing_defs_flags.Fun.return_disposable = false;
                    async = false; generator = false; fun_kind = FSync;
@@ -109,12 +101,9 @@
                  ft_params =
                  [{ fp_pos = [17:30-32]; fp_name = (Some "$a");
                     fp_type =
-                    { et_enforced = Typing_defs_core.Unenforced;
-                      et_type =
-                      (Rhint ([17:23-29]),
-                       (Tapply (([17:23-24], "\\A"),
-                          [(Rhint ([17:25-28]), (Tprim Tint))])))
-                      };
+                    (Rhint ([17:23-29]),
+                     (Tapply (([17:23-24], "\\A"),
+                        [(Rhint ([17:25-28]), (Tprim Tint))])));
                     fp_flags =
                     { Typing_defs_flags.FunParam.accept_disposable = false;
                       inout = false; has_default = false; readonly = false };
@@ -122,9 +111,7 @@
                    ];
                  ft_implicit_params =
                  { capability = (CapDefaults [17:19-22]) };
-                 ft_ret =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type = (Rhint ([17:36-40]), (Tprim Tvoid)) };
+                 ft_ret = (Rhint ([17:36-40]), (Tprim Tvoid));
                  ft_flags =
                  { Typing_defs_flags.Fun.return_disposable = false;
                    async = false; generator = false; fun_kind = FSync;
@@ -147,12 +134,9 @@
                   ft_params =
                   [{ fp_pos = [20:30-32]; fp_name = (Some "$a");
                      fp_type =
-                     { et_enforced = Typing_defs_core.Unenforced;
-                       et_type =
-                       (Rhint ([20:23-29]),
-                        (Tapply (([20:23-24], "\\A"),
-                           [(Rhint ([20:25-28]), (Tprim Tint))])))
-                       };
+                     (Rhint ([20:23-29]),
+                      (Tapply (([20:23-24], "\\A"),
+                         [(Rhint ([20:25-28]), (Tprim Tint))])));
                      fp_flags =
                      { Typing_defs_flags.FunParam.accept_disposable = false;
                        inout = false; has_default = false; readonly = false };
@@ -160,9 +144,7 @@
                     ];
                   ft_implicit_params =
                   { capability = (CapDefaults [20:19-22]) };
-                  ft_ret =
-                  { et_enforced = Typing_defs_core.Unenforced;
-                    et_type = (Rhint ([20:36-40]), (Tprim Tvoid)) };
+                  ft_ret = (Rhint ([20:36-40]), (Tprim Tvoid));
                   ft_flags =
                   { Typing_defs_flags.Fun.return_disposable = false;
                     async = false; generator = false; fun_kind = FSync;

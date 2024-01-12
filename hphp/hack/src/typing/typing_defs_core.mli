@@ -201,16 +201,10 @@ type 'ty capability =
 type 'ty fun_implicit_params = { capability: 'ty capability }
 [@@deriving hash, show]
 
-type 'ty possibly_enforced_ty = {
-  et_enforced: enforcement;
-  et_type: 'ty;
-}
-[@@deriving hash, show]
-
 type 'ty fun_param = {
   fp_pos: Pos_or_decl.t;
   fp_name: string option;
-  fp_type: 'ty possibly_enforced_ty;
+  fp_type: 'ty;
   fp_flags: Typing_defs_flags.FunParam.t;
   fp_def_value: string option;
 }
@@ -224,7 +218,7 @@ type 'ty fun_type = {
   ft_where_constraints: 'ty where_constraint list;
   ft_params: 'ty fun_params;
   ft_implicit_params: 'ty fun_implicit_params;
-  ft_ret: 'ty possibly_enforced_ty;
+  ft_ret: 'ty;
   ft_flags: Typing_defs_flags.Fun.t;
   ft_cross_package: cross_package_decl;
 }
@@ -508,10 +502,6 @@ type locl_where_constraint = locl_ty where_constraint
 type decl_fun_type = decl_ty fun_type [@@deriving eq]
 
 type locl_fun_type = locl_ty fun_type
-
-type decl_possibly_enforced_ty = decl_ty possibly_enforced_ty [@@deriving eq]
-
-type locl_possibly_enforced_ty = locl_ty possibly_enforced_ty [@@deriving show]
 
 type decl_fun_param = decl_ty fun_param [@@deriving eq]
 

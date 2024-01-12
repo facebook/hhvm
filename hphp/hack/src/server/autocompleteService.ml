@@ -771,7 +771,7 @@ let fun_accepts_first_arg (env : Tast_env.env) (f : fun_elt) (arg_ty : locl_ty)
     | Some first_param ->
       let (env, ety_env) = fresh_expand_env env ft.ft_tparams in
       let (env, first_param) =
-        Tast_env.localize env ety_env first_param.fp_type.et_type
+        Tast_env.localize env ety_env first_param.fp_type
       in
       (match get_node first_param with
       | Tvar _ ->
@@ -1036,9 +1036,7 @@ let autocomplete_enum_class_label_call env f args =
     let ty_args = zip_truncate args ft_params in
     List.iter
       ~f:(fun (arg, arg_ty) ->
-        match
-          (arg, get_node (expand_and_strip_dynamic env arg_ty.fp_type.et_type))
-        with
+        match (arg, get_node (expand_and_strip_dynamic env arg_ty.fp_type)) with
         | ( (_, (_, p, Aast.EnumClassLabel (None, n))),
             Typing_defs.Tnewtype (ty_name, [enum_ty; member_ty], _) )
           when is_enum_class_label_ty_name ty_name && is_auto_complete n ->
@@ -1192,9 +1190,7 @@ let autocomplete_shape_literal_in_call
             match shape_field_autocomplete_prefix name with
             | Some prefix ->
               (* This shape key is being autocompleted. *)
-              let (_, ty_) =
-                Typing_defs_core.deref expected_ty.fp_type.et_type
-              in
+              let (_, ty_) = Typing_defs_core.deref expected_ty.fp_type in
               (match ty_ with
               | Tshape { s_fields = fields; _ } ->
                 (* This parameter is known to be a concrete shape type. *)
@@ -1413,7 +1409,7 @@ let autocomplete_enum_value_in_call env (ft : Typing_defs.locl_fun_type) args :
     ~f:(fun (arg, expected_ty) ->
       match arg with
       | (_, _, Aast.Id (pos, id)) when matches_auto_complete_suffix id ->
-        let ty = expand_and_strip_dynamic env expected_ty.fp_type.et_type in
+        let ty = expand_and_strip_dynamic env expected_ty.fp_type in
         let (_, ty_) = Typing_defs_core.deref ty in
         let replace_pos = replace_pos_of_id (pos, id) in
 
@@ -1429,7 +1425,7 @@ let autocomplete_enum_value_in_call env (ft : Typing_defs.locl_fun_type) args :
         | _ -> ())
       | (_, _, Aast.Class_const ((_, _, Aast.CI _name), (pos, id)))
         when matches_auto_complete_suffix id ->
-        let ty = expand_and_strip_dynamic env expected_ty.fp_type.et_type in
+        let ty = expand_and_strip_dynamic env expected_ty.fp_type in
         let (_, ty_) = Typing_defs_core.deref ty in
         let replace_pos = replace_pos_of_id (pos, id) in
 

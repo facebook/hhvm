@@ -53,19 +53,14 @@
               ft_params =
               [{ fp_pos = [17:18-20]; fp_name = (Some "$x");
                  fp_type =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type =
-                   (Rhint ([17:14-17]), (Tapply (([17:14-17], "\\C\\X"), [])))
-                   };
+                 (Rhint ([17:14-17]), (Tapply (([17:14-17], "\\C\\X"), [])));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; has_default = false; readonly = false };
                  fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [17:12-13]) };
-              ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([17:23-27]), (Tprim Tvoid)) };
+              ft_ret = (Rhint ([17:23-27]), (Tprim Tvoid));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;

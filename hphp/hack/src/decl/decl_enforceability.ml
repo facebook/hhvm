@@ -559,8 +559,7 @@ let maybe_pessimise_type ~reason ~is_xhp_attr ~this_class ctx ty =
   else
     ty
 
-let update_return_ty ft ty =
-  { ft with ft_ret = { et_type = ty; et_enforced = Unenforced } }
+let update_return_ty ft ty = { ft with ft_ret = ty }
 
 type fun_kind =
   | Function
@@ -578,15 +577,11 @@ let pessimise_param_type fp =
     {
       fp with
       fp_type =
-        {
-          et_enforced = Unenforced;
-          et_type =
-            make_like_type
-              ~reason:(Reason.Rpessimised_inout fp.fp_pos)
-              ~intersect_with:None
-              ~return_from_async:false
-              fp.fp_type.et_type;
-        };
+        make_like_type
+          ~reason:(Reason.Rpessimised_inout fp.fp_pos)
+          ~intersect_with:None
+          ~return_from_async:false
+          fp.fp_type;
     }
 
 (*
@@ -617,7 +612,7 @@ let pessimise_fun_type ~fun_kind ~this_class ~no_auto_likes ctx p ty =
       mk (get_reason ty, Tfun ft)
     else
       let return_from_async = get_ft_async ft in
-      let ret_ty = ft.ft_ret.et_type in
+      let ret_ty = ft.ft_ret in
       let ft =
         { ft with ft_params = List.map ft.ft_params ~f:pessimise_param_type }
       in

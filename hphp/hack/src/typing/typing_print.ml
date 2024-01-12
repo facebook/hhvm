@@ -343,9 +343,7 @@ module Full = struct
         | (_, FTKinstantiated_targs) ->
           list ~fuel "<" (tparam ~ty to_doc st penv) tparams ">")
     in
-    let (fuel, return_doc) =
-      possibly_enforced_ty ~fuel ~ty to_doc st penv ft_ret
-    in
+    let (fuel, return_doc) = ty ~fuel to_doc st penv ft_ret in
     let (fuel, capabilities_doc) =
       fun_implicit_params ~fuel to_doc st penv ft_tparams ft_implicit_params
     in
@@ -383,22 +381,6 @@ module Full = struct
     in
     (fuel, return_disposable_doc, async_doc, tparams_doc)
 
-  and possibly_enforced_ty ~fuel ~ty to_doc st penv { et_enforced; et_type } =
-    let (fuel, d) = ty ~fuel to_doc st penv et_type in
-    let d =
-      Concat
-        [
-          (if show_verbose penv then
-            match et_enforced with
-            | Enforced -> text "enforced" ^^ Space
-            | Unenforced -> Nothing
-          else
-            Nothing);
-          d;
-        ]
-    in
-    (fuel, d)
-
   and fun_param
       ~fuel
       ~ty
@@ -416,15 +398,15 @@ module Full = struct
     } =
       Typing_defs_flags.FunParam.as_record fp_flags
     in
-    let (fuel, d) = ty ~fuel to_doc st penv fp_type.et_type in
+    let (fuel, d) = ty ~fuel to_doc st penv fp_type in
     let (fuel, d) =
       match (fp_name, d) with
-      | (None, _) -> possibly_enforced_ty ~fuel ~ty to_doc st penv fp_type
+      | (None, _) -> ty ~fuel to_doc st penv fp_type
       | (Some param_name, Text ("_", 1)) ->
         (* Handle the case of missing a type by not printing it *)
         (fuel, text param_name)
       | (Some param_name, _) ->
-        let (fuel, d) = possibly_enforced_ty ~fuel ~ty to_doc st penv fp_type in
+        let (fuel, d) = ty ~fuel to_doc st penv fp_type in
         let d = Concat [d; Space; text param_name] in
         (fuel, d)
     in
@@ -1749,7 +1731,7 @@ module Json = struct
         obj
         @@ callconv (get_fp_mode fp)
         @ readonly_param (get_fp_readonly fp)
-        @ typ fp.fp_type.et_type
+        @ typ fp.fp_type
       in
       let readonly_this ro =
         if ro then
@@ -1769,7 +1751,7 @@ module Json = struct
       @ readonly_this (get_ft_readonly_this ft)
       @ params ft.ft_params
       @ readonly_ret (get_ft_returns_readonly ft)
-      @ result ft.ft_ret.et_type
+      @ result ft.ft_ret
     | (p, Tvec_or_dict (ty1, ty2)) ->
       obj @@ kind p "vec_or_dict" @ args [ty1; ty2]
     (* TODO akenn *)
@@ -2066,7 +2048,7 @@ module Json = struct
                 >>= fun param_type ->
                 Ok
                   {
-                    fp_type = { et_type = param_type; et_enforced = Unenforced };
+                    fp_type = param_type;
                     fp_flags =
                       make_fp_flags
                         ~mode:callconv
@@ -2088,7 +2070,7 @@ module Json = struct
                  ft_params;
                  ft_implicit_params =
                    { capability = CapDefaults Pos_or_decl.none };
-                 ft_ret = { et_type = ft_ret; et_enforced = Unenforced };
+                 ft_ret;
                  (* Dummy values: these aren't currently serialized. *)
                  ft_tparams = [];
                  ft_where_constraints = [];

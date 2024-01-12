@@ -16,7 +16,7 @@ val make_info :
   Ast_defs.fun_kind ->
   Nast.user_attribute list ->
   env ->
-  Typing_defs.locl_possibly_enforced_ty ->
+  Typing_defs.locl_ty ->
   Typing_env_return_info.t
 
 val implicit_return :
@@ -43,14 +43,11 @@ val make_return_type :
    * e.g. implicit void (for constructors), or contextual type (for lambdas)
    *)
   default:Typing_defs.locl_ty option ->
-  env * Typing_defs.locl_possibly_enforced_ty
+  env * Typing_defs.locl_ty
 
 (** For async functions, strip Awaitable<_> from the return type *)
 val strip_awaitable :
-  Ast_defs.fun_kind ->
-  env ->
-  Typing_defs.locl_possibly_enforced_ty ->
-  Typing_defs.locl_possibly_enforced_ty
+  Ast_defs.fun_kind -> env -> Typing_defs.locl_ty -> Typing_defs.locl_ty
 
 val fun_implicit_return :
   env -> Ast_defs.pos -> Typing_defs.locl_ty -> Ast_defs.fun_kind -> env

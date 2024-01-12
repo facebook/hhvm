@@ -13,7 +13,7 @@ module SN = Naming_special_names
 module MakeType = Typing_make_type
 
 let update_param : decl_fun_param -> decl_ty -> decl_fun_param =
- (fun param ty -> { param with fp_type = { param.fp_type with et_type = ty } })
+ (fun param ty -> { param with fp_type = ty })
 
 let wrap_with_like_type (pessimise : bool) (ty : decl_ty) =
   if pessimise then
@@ -44,7 +44,7 @@ let transform_idx_fun_ty :
     | [param1; param2; param3] -> (param1, param2, param3)
     | _ -> failwith "Expected 3 parameters for idx in hhi file"
   in
-  let rret = get_reason fty.ft_ret.et_type in
+  let rret = get_reason fty.ft_ret in
   let (params, ret) =
     match nargs with
     | 2 ->
@@ -55,7 +55,7 @@ let transform_idx_fun_ty :
     | 3 ->
       (* Third parameter should have type Tv *)
       let param3 =
-        let r3 = get_reason param1.fp_type.et_type in
+        let r3 = get_reason param1.fp_type in
         update_param param3 (MakeType.generic r3 "Tv")
       in
       (* Return type should be Tv *)
@@ -63,9 +63,9 @@ let transform_idx_fun_ty :
       let ret = wrap_with_like_type pessimise ret in
       ([param1; param2; param3], ret)
     (* Shouldn't happen! *)
-    | _ -> (fty.ft_params, fty.ft_ret.et_type)
+    | _ -> (fty.ft_params, fty.ft_ret)
   in
-  { fty with ft_params = params; ft_ret = { fty.ft_ret with et_type = ret } }
+  { fty with ft_params = params; ft_ret = ret }
 
 (** Transform the types of special functions whose type is not denotable in hack, e.g. idx *)
 let transform_special_fun_ty :

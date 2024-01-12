@@ -34,18 +34,14 @@ File root|module_hint.php--here.php
               { ft_tparams = []; ft_where_constraints = [];
                 ft_params =
                 [{ fp_pos = [7:29-31]; fp_name = (Some "$m");
-                   fp_type =
-                   { et_enforced = Typing_defs_core.Unenforced;
-                     et_type = (Rhint ([7:23-28]), Tmixed) };
+                   fp_type = (Rhint ([7:23-28]), Tmixed);
                    fp_flags =
                    { Typing_defs_flags.FunParam.accept_disposable = false;
                      inout = false; has_default = false; readonly = false };
                    fp_def_value = None }
                   ];
                 ft_implicit_params = { capability = (CapDefaults [7:19-22]) };
-                ft_ret =
-                { et_enforced = Typing_defs_core.Unenforced;
-                  et_type = (Rhint ([7:33-37]), (Tprim Tvoid)) };
+                ft_ret = (Rhint ([7:33-37]), (Tprim Tvoid));
                 ft_flags =
                 { Typing_defs_flags.Fun.return_disposable = false;
                   async = false; generator = false; fun_kind = FSync;
@@ -147,11 +143,8 @@ File root|module_hint.php--everywhere.php
              ft_params =
              [{ fp_pos = [3:23-25]; fp_name = (Some "$x");
                 fp_type =
-                { et_enforced = Typing_defs_core.Unenforced;
-                  et_type =
-                  (Rhint ([3:20-22]),
-                   (Toption (Rhint ([3:21-22]), (Tgeneric ("T", [])))))
-                  };
+                (Rhint ([3:20-22]),
+                 (Toption (Rhint ([3:21-22]), (Tgeneric ("T", [])))));
                 fp_flags =
                 { Typing_defs_flags.FunParam.accept_disposable = false;
                   inout = false; has_default = false; readonly = false };
@@ -159,11 +152,8 @@ File root|module_hint.php--everywhere.php
                ];
              ft_implicit_params = { capability = (CapDefaults [3:10-16]) };
              ft_ret =
-             { et_enforced = Typing_defs_core.Unenforced;
-               et_type =
-               (Rhint ([3:27-29]),
-                (Toption (Rhint ([3:28-29]), (Tgeneric ("T", [])))))
-               };
+             (Rhint ([3:27-29]),
+              (Toption (Rhint ([3:28-29]), (Tgeneric ("T", [])))));
              ft_flags =
              { Typing_defs_flags.Fun.return_disposable = false;
                async = false; generator = false; fun_kind = FSync;

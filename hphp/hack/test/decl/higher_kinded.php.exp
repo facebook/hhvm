@@ -72,12 +72,9 @@
               ft_params =
               [{ fp_pos = [7:35-46]; fp_name = (Some "$collection");
                  fp_type =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type =
-                   (Rhint ([7:28-34]),
-                    (Tgeneric ("TC",
-                       [(Rhint ([7:31-33]), (Tgeneric ("TV", [])))])))
-                   };
+                 (Rhint ([7:28-34]),
+                  (Tgeneric ("TC",
+                     [(Rhint ([7:31-33]), (Tgeneric ("TV", [])))])));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; has_default = false; readonly = false };
@@ -85,12 +82,9 @@
                 ];
               ft_implicit_params = { capability = (CapDefaults [7:10-16]) };
               ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type =
-                (Rhint ([7:49-56]),
-                 (Tapply (([7:49-52], "\\HH\\vec"),
-                    [(Rhint ([7:53-55]), (Tgeneric ("TV", [])))])))
-                };
+              (Rhint ([7:49-56]),
+               (Tapply (([7:49-52], "\\HH\\vec"),
+                  [(Rhint ([7:53-55]), (Tgeneric ("TV", [])))])));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;

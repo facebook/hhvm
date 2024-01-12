@@ -2252,9 +2252,7 @@ and simplify_subtype_i
                *   iff
                *   dynamic <D: ty1 & ... & dynamic <D: tyn & ty <D: dynamic
                *)
-              let ty_dyn_enf =
-                { et_enforced = Unenforced; et_type = ty_super }
-              in
+              let ty_dyn_enf = ty_super in
               env
               (* Contravariant subtyping on parameters *)
               |> simplify_supertype_params_with_variadic
@@ -2265,7 +2263,7 @@ and simplify_subtype_i
               simplify_subtype
                 ~subtype_env
                 ~sub_supportdyn
-                ft_sub.ft_ret.et_type
+                ft_sub.ft_ret
                 ty_super
           | (_, Ttuple tyl) ->
             List.fold_left
@@ -4151,17 +4149,15 @@ and simplify_subtype_params
       (* When overriding in Sound Dynamic, we treat any dynamic-aware subtype of dynamic as a
        * subtype of the dynamic type itself
        *)
-      match get_node ty_super.et_type with
+      match get_node ty_super with
       | Tdynamic
         when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
              && for_override ->
         { subtype_env with coerce = Some TL.CoerceToDynamic }
       | _ -> subtype_env
     in
-    let simplify_subtype_possibly_enforced =
-      simplify_subtype_possibly_enforced
-        ~subtype_env:subtype_env_for_param
-        ~sub_supportdyn:None
+    let simplify_subtype_for_param =
+      simplify_subtype ~subtype_env:subtype_env_for_param ~sub_supportdyn:None
     in
     (* Check that the calling conventions of the params are compatible. *)
     env
@@ -4174,20 +4170,17 @@ and simplify_subtype_params
             | (FPinout, FPinout) ->
               (* Inout parameters are invariant wrt subtyping for function types. *)
               env
-              |> simplify_subtype_possibly_enforced ty_super ty_sub
-              &&& simplify_subtype_possibly_enforced ty_sub ty_super
-            | _ -> env |> simplify_subtype_possibly_enforced ty_sub ty_super
+              |> simplify_subtype_for_param ty_super ty_sub
+              &&& simplify_subtype_for_param ty_sub ty_super
+            | _ -> env |> simplify_subtype_for_param ty_sub ty_super
         end
     &&& simplify_subtype_params subl superl variadic_sub_ty variadic_super_ty
 
 and simplify_subtype_params_with_variadic
     ~(subtype_env : subtype_env)
     (subl : locl_fun_param list)
-    (variadic_ty : locl_possibly_enforced_ty)
+    (variadic_ty : locl_ty)
     env =
-  let simplify_subtype_possibly_enforced =
-    simplify_subtype_possibly_enforced ~subtype_env
-  in
   let simplify_subtype_params_with_variadic =
     simplify_subtype_params_with_variadic ~subtype_env
   in
@@ -4195,7 +4188,7 @@ and simplify_subtype_params_with_variadic
   | [] -> valid env
   | { fp_type = sub; _ } :: subl ->
     env
-    |> simplify_subtype_possibly_enforced ~sub_supportdyn:None sub variadic_ty
+    |> simplify_subtype ~subtype_env ~sub_supportdyn:None sub variadic_ty
     &&& simplify_subtype_params_with_variadic subl variadic_ty
 
 and simplify_subtype_implicit_params
@@ -4232,11 +4225,8 @@ and simplify_subtype_implicit_params
 and simplify_supertype_params_with_variadic
     ~(subtype_env : subtype_env)
     (superl : locl_fun_param list)
-    (variadic_ty : locl_possibly_enforced_ty)
+    (variadic_ty : locl_ty)
     env =
-  let simplify_subtype_possibly_enforced =
-    simplify_subtype_possibly_enforced ~subtype_env
-  in
   let simplify_supertype_params_with_variadic =
     simplify_supertype_params_with_variadic ~subtype_env
   in
@@ -4244,7 +4234,7 @@ and simplify_supertype_params_with_variadic
   | [] -> valid env
   | { fp_type = super; _ } :: superl ->
     env
-    |> simplify_subtype_possibly_enforced ~sub_supportdyn:None variadic_ty super
+    |> simplify_subtype ~subtype_env ~sub_supportdyn:None variadic_ty super
     &&& simplify_supertype_params_with_variadic superl variadic_ty
 
 and simplify_param_modes ~subtype_env param1 param2 env =
@@ -4547,10 +4537,6 @@ and simplify_subtype_funs_attributes
       res
   | (_, _) -> res
 
-and simplify_subtype_possibly_enforced
-    ~(subtype_env : subtype_env) ~sub_supportdyn et_sub et_super =
-  simplify_subtype ~subtype_env ~sub_supportdyn et_sub.et_type et_super.et_type
-
 (* This implements basic subtyping on non-generic function types:
  *   (1) return type behaves covariantly
  *   (2) parameter types behave contravariantly
@@ -4588,7 +4574,7 @@ and simplify_subtype_funs
   &&&
   (* Finally do covariant subtyping on return type *)
   if check_return then
-    let super_ty = liken ~super_like env ft_super.ft_ret.et_type in
+    let super_ty = liken ~super_like env ft_super.ft_ret in
     let subtype_env =
       if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt && for_override
       then
@@ -4607,11 +4593,7 @@ and simplify_subtype_funs
       else
         subtype_env
     in
-    simplify_subtype
-      ~subtype_env
-      ~sub_supportdyn:None
-      ft_sub.ft_ret.et_type
-      super_ty
+    simplify_subtype ~subtype_env ~sub_supportdyn:None ft_sub.ft_ret super_ty
   else
     valid
 

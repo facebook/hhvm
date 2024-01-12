@@ -20,7 +20,6 @@ use oxidized_by_ref::shallow_decl_defs::ShallowProp;
 use oxidized_by_ref::shallow_decl_defs::ShallowTypeconst;
 use oxidized_by_ref::shallow_decl_defs::Typeconst;
 use oxidized_by_ref::typing_defs::ModuleReference;
-use oxidized_by_ref::typing_defs_core::Enforcement;
 use oxidized_by_ref::typing_defs_core::FunParams;
 use oxidized_by_ref::typing_defs_core::ShapeType;
 use oxidized_by_ref::typing_defs_core::Tparam;
@@ -303,8 +302,7 @@ fn get_method_params(params: &FunParams<'_>) -> Vec<ExtDeclMethodParam> {
         .iter()
         .map(|p| ExtDeclMethodParam {
             name: str_or_empty(p.name),
-            type_: extract_type_name(p.type_.type_),
-            enforced_type: p.type_.enforced == Enforcement::Enforced,
+            type_: extract_type_name(p.type_),
             accept_disposable: p.flags.accepts_disposable(),
             is_inout: p.flags.is_inout(),
             has_default: p.flags.has_default(),
@@ -496,8 +494,7 @@ fn get_signature(ty: Ty_<'_>) -> Vec<ExtDeclSignature> {
             vec![ExtDeclSignature {
                 tparams: get_typed_params(ft.tparams),
                 where_constraints: get_where_contraints(ft.where_constraints),
-                return_type: extract_type_name(ft.ret.type_),
-                return_enforced: ft.ret.enforced == Enforcement::Enforced,
+                return_type: extract_type_name(ft.ret),
                 params: get_method_params(ft.params),
                 implicit_params,
                 cross_package: str_or_empty(ft.cross_package),

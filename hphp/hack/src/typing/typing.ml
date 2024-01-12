@@ -282,7 +282,7 @@ end = struct
       ~strip_supportdyn
       ~pessimisable_builtin
       env
-      ExpectedTy.{ pos = p; reason = ur; ty = { et_type = ty; _ }; _ } =
+      ExpectedTy.{ pos = p; reason = ur; ty; _ } =
     let (env, res) = unbox ~strip_supportdyn ~pessimisable_builtin env ty in
     match res with
     | None -> (env, None)
@@ -464,8 +464,7 @@ let rec is_return_disposable_fun_type env ty =
   match get_node ty with
   | Tfun ft ->
     get_ft_return_disposable ft
-    || Option.is_some
-         (Typing_disposable.is_disposable_type env ft.ft_ret.et_type)
+    || Option.is_some (Typing_disposable.is_disposable_type env ft.ft_ret)
   | Tnewtype (n, _, ty) when String.equal n SN.Classes.cFunctionRef ->
     is_return_disposable_fun_type env ty
   | _ -> false
@@ -510,15 +509,10 @@ let check_expected_ty_res
             env
             [
               Log_head
-                ( Printf.sprintf
-                    "Typing.check_expected_ty %s enforced=%s"
-                    message
-                    (match ty.et_enforced with
-                    | Unenforced -> "unenforced"
-                    | Enforced -> "enforced"),
+                ( Printf.sprintf "Typing.check_expected_ty %s" message,
                   [
                     Log_type ("inferred_ty", inferred_ty);
-                    Log_type ("expected_ty", ty.et_type);
+                    Log_type ("expected_ty", ty);
                   ] );
             ]));
     let (env, ty_err_opt) =
@@ -530,6 +524,7 @@ let check_expected_ty_res
         env
         inferred_ty
         ty
+        Enforced (* TODO AKENN: flow this in *)
         Typing_error.Callback.unify_error
     in
     Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
@@ -916,7 +911,8 @@ let xhp_attribute_decl_ty env sid obj attr =
       ureason
       env
       valty
-      (MakeType.unenforced declty)
+      declty
+      Unenforced
       Typing_error.Callback.xhp_attribute_does_not_match_hint
   in
   let ty_mismatch_opt = mk_ty_mismatch_opt valty declty e2 in
@@ -939,7 +935,8 @@ let closure_check_param env param =
         Reason.URhint
         env
         paramty.Typing_local_types.ty
-        (MakeType.unenforced hty)
+        hty
+        Unenforced
         Typing_error.Callback.unify_error
     in
     Option.iter ty_err_opt2 ~f:(Typing_error_utils.add_typing_error ~env);
@@ -1026,7 +1023,8 @@ let coerce_to_throwable pos env exn_ty =
     Reason.URthrow
     env
     exn_ty
-    { et_type = throwable_ty; et_enforced = Enforced }
+    throwable_ty
+    Enforced
     Typing_error.Callback.unify_error
 
 (* Bind lvar to ty and, if a hint is supplied, ty must be a subtype of it.
@@ -1552,7 +1550,7 @@ let check_argument_type_against_parameter_type_helper
                 | Some Supportdyn_function -> "sd"
                 | Some Like_function -> "~"),
                 [
-                  Log_type ("param_ty", param.fp_type.et_type);
+                  Log_type ("param_ty", param.fp_type);
                   Log_type ("arg_ty", arg_ty);
                 ] );
           ]));
@@ -1564,12 +1562,10 @@ let check_argument_type_against_parameter_type_helper
          For like functions, they have to check both sides. *)
       match dyn_func_kind with
       | Supportdyn_function ->
-        MakeType.locl_like
-          (get_reason param.fp_type.et_type)
-          param.fp_type.et_type
-      | Like_function -> param.fp_type.et_type
+        MakeType.locl_like (get_reason param.fp_type) param.fp_type
+      | Like_function -> param.fp_type
     end
-    | None -> param.fp_type.et_type
+    | None -> param.fp_type
   in
   Typing_coercion.coerce_type
     ~coerce:None
@@ -1577,7 +1573,8 @@ let check_argument_type_against_parameter_type_helper
     Reason.URparam
     env
     arg_ty
-    { param.fp_type with et_type = param_ty }
+    param_ty
+    Enforced
     Typing_error.Callback.unify_error
 
 (*
@@ -1630,10 +1627,9 @@ let check_argument_type_against_parameter_type
     else
       let check_dynamic_only =
         (not is_single_argument)
-        && (not (TUtils.is_dynamic env param.fp_type.et_type))
+        && (not (TUtils.is_dynamic env param.fp_type))
         && Option.is_some (Typing_utils.try_strip_dynamic env dep_ty)
-        && Option.is_none
-             (Typing_utils.try_strip_dynamic env param.fp_type.et_type)
+        && Option.is_none (Typing_utils.try_strip_dynamic env param.fp_type)
       in
       if check_dynamic_only then
         (* Only try dynamically *)
@@ -1681,7 +1677,7 @@ let check_argument_type_against_parameter_type
         (env, opt_e, used_dynamic)
   in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) opt_e;
-  (env, mk_ty_mismatch_opt arg_ty param.fp_type.et_type opt_e, used_dynamic)
+  (env, mk_ty_mismatch_opt arg_ty param.fp_type opt_e, used_dynamic)
 
 let bad_call env p ty =
   if not (TUtils.is_tyvar_error env ty) then
@@ -2505,6 +2501,7 @@ end = struct
         env
         ty
         ety
+        Enforced
         Typing_error.Callback.unify_error
     in
     begin
@@ -2521,6 +2518,7 @@ end = struct
             env
             ty
             ety_like
+            Enforced
             Typing_error.Callback.unify_error
         in
         (env2, err2, true)
@@ -2581,7 +2579,7 @@ end = struct
       begin
         match expected with
         | None -> ()
-        | Some ExpectedTy.{ reason = r; ty = { et_type = ty; _ }; _ } ->
+        | Some ExpectedTy.{ reason = r; ty; _ } ->
           Typing_log.(
             log_with_level env "typing" ~level:1 (fun () ->
                 log_types
@@ -2756,23 +2754,23 @@ end = struct
               TCO.enable_sound_dynamic (Env.get_tcopt env)
               && (explicit || do_pessimise_builtin || Option.is_some bound)
             then
-              Typing_array_access.pessimise_type env ety.et_type
+              Typing_array_access.pessimise_type env ety
             else
-              (env, ety.et_type)
+              (env, ety)
           in
           let expected_with_implicit_like =
             Some ExpectedTy.(make pos reason like_ty)
           in
           let (env, supertype) =
             if explicit then
-              (env, ety.et_type)
+              (env, ety)
             else
               (* Extract the underlying type from the expected type.
                * If it's an intersection, pick up the type under the like
                * e.g. For ~int & arraykey we want to pick up int
                * Otherwise, just strip the like.
                *)
-              match get_node ety.et_type with
+              match get_node ety with
               | Tintersection tyl ->
                 let (had_dynamic, tyl) =
                   List.map_env false tyl ~f:(fun had_dynamic ty ->
@@ -2785,12 +2783,12 @@ end = struct
                   let (env, ty) =
                     Inter.simplify_intersections
                       env
-                      (mk (get_reason ety.et_type, Tintersection tyl))
+                      (mk (get_reason ety, Tintersection tyl))
                   in
                   (env, ty)
                 else
-                  (env, ety.et_type)
-              | _ -> (env, TUtils.strip_dynamic env ety.et_type)
+                  (env, ety)
+              | _ -> (env, TUtils.strip_dynamic env ety)
           in
           (env, expected_with_implicit_like, supertype)
         end
@@ -2828,14 +2826,14 @@ end = struct
                 pos
                 reason
                 ty
-                (MakeType.unenforced supertype)
+                supertype
                 ety_like
               (* Shouldn't happen *)
             | _ -> (env, None, false)
           else
-            let (env, ety) =
+            let (env, ety, et_enforced) =
               if coerce_for_op then
-                (env, MakeType.enforced supertype)
+                (env, supertype, Enforced)
               else
                 match expected_with_implicit_like with
                 | None ->
@@ -2845,8 +2843,9 @@ end = struct
                     else
                       (env, supertype)
                   in
-                  (env, MakeType.unenforced supertype)
-                | Some e -> (env, e.ExpectedTy.ty)
+                  (env, supertype, Unenforced)
+                | Some e ->
+                  (env, e.ExpectedTy.ty, Enforced (* TODO akenn: flow in *))
             in
             let (env, ty_err_opt) =
               Typing_coercion.coerce_type
@@ -2857,6 +2856,7 @@ end = struct
                 env
                 ty
                 ety
+                et_enforced
                 Typing_error.Callback.unify_error
             in
             (env, ty_err_opt, false)
@@ -4093,7 +4093,8 @@ end = struct
           Reason.URdynamic_prop
           env
           ty1
-          (MakeType.unenforced (MakeType.dynamic (Reason.Rwitness p)))
+          (MakeType.dynamic (Reason.Rwitness p))
+          Unenforced
           Typing_error.Callback.unify_error
       in
       Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
@@ -4122,10 +4123,10 @@ end = struct
         Env.get_return env
       in
       let send =
-        match get_node expected_return.et_type with
+        match get_node expected_return with
         | Tclass (_, _, _ :: _ :: send :: _) -> send
         | Tdynamic when Tast.is_under_dynamic_assumptions env.checked ->
-          expected_return.et_type
+          expected_return
         | _ ->
           Errors.internal_error p "Return type is not a generator";
           MakeType.union (Reason.Ryield_send p) []
@@ -4164,6 +4165,7 @@ end = struct
           env
           rty
           expected_return
+          Enforced (* TODO akenn: flow in *)
           Typing_error.Callback.unify_error
       in
       Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
@@ -4571,7 +4573,7 @@ end = struct
       let (env, expect_label, lty_opt) =
         match expected with
         | Some ety ->
-          let (env, lty) = Env.expand_type env ety.ExpectedTy.ty.et_type in
+          let (env, lty) = Env.expand_type env ety.ExpectedTy.ty in
           let expect_label =
             match get_node (TUtils.strip_dynamic env lty) with
             | Tnewtype (name, _, _) ->
@@ -4697,7 +4699,7 @@ end = struct
       let* splice_ty =
         match get_node fun_ty with
         | Tfun { ft_params = [_; _; splice_ty]; _ } ->
-          return @@ splice_ty.fp_type.et_type
+          return @@ splice_ty.fp_type
         | _ -> None
       in
       return @@ lazy (error_reason ~splice_ty ~ty ~dsl_name env)
@@ -5013,7 +5015,7 @@ end = struct
       else
         (MakeType.arraykey (Reason.Ridx_dict pos), Reason.index_class class_name)
     in
-    let ty_expected = { et_type = ty_arraykey; et_enforced = Enforced } in
+    let ty_expected = ty_arraykey in
     let ((env, ty_err_opt), te) =
       (* If we have an error in coercion here, we will add a `Hole` indicating the
            actual and expected type. The `Hole` may then be used in a codemod to
@@ -5039,6 +5041,7 @@ end = struct
           env
           ty_actual
           ty_expected
+          Enforced (* TODO akenn: flow in *)
           Typing_error.Callback.unify_error
       in
       let (ty_mismatch_opt, e2) =
@@ -5207,7 +5210,7 @@ end = struct
       let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
       let ty =
         match get_node fty with
-        | Tfun ft -> ft.ft_ret.et_type
+        | Tfun ft -> ft.ft_ret
         | _ -> ty_ (Reason.Rwitness p)
       in
       let (env, te) =
@@ -5966,7 +5969,7 @@ end = struct
               ~support_dynamic_type:false
               ~is_memoized:false
               ~variadic:false;
-          ft_ret = MakeType.unenforced (MakeType.void r);
+          ft_ret = MakeType.void r;
           ft_cross_package = None;
         }
       in
@@ -6071,7 +6074,7 @@ end = struct
        *     but otherwise unify the argument type with the parameter hint
        *)
       let (env, _te, _ty) =
-        Assign.assign_ pos Reason.URparam_inout env e pos fp_type.et_type
+        Assign.assign_ pos Reason.URparam_inout env e pos fp_type
       in
       env
     | _ -> env
@@ -6363,10 +6366,8 @@ end = struct
           let (env, ft) = Typing_exts.retype_magic_func env ft el in
           let (env, var_param) = variadic_param env ft in
           (* Force subtype with expected result *)
-          let env =
-            check_expected_ty "Call result" env ft.ft_ret.et_type expected
-          in
-          let env = Env.set_tyvar_variance env ft.ft_ret.et_type in
+          let env = check_expected_ty "Call result" env ft.ft_ret expected in
+          let env = Env.set_tyvar_variance env ft.ft_ret in
           let is_lambda (_, _, e) =
             match e with
             | Efun _
@@ -6439,7 +6440,7 @@ end = struct
             | Some param ->
               (* First check if the parameter is a HH\EnumClass\Label.  *)
               let (env, label_type) =
-                let ety = param.fp_type.et_type in
+                let ety = param.fp_type in
                 let (env, ety) = Env.expand_type env ety in
                 let is_label env ety =
                   match get_node (TUtils.strip_dynamic env ety) with
@@ -6488,20 +6489,15 @@ end = struct
                   let (env, pess_type) =
                     match dynamic_func with
                     | Some Supportdyn_function ->
-                      Typing_array_access.pessimise_type
-                        env
-                        param.fp_type.et_type
-                    | _ -> (env, param.fp_type.et_type)
+                      Typing_array_access.pessimise_type env param.fp_type
+                    | _ -> (env, param.fp_type)
                   in
                   let expected =
                     ExpectedTy.make_and_allow_coercion_opt
                       env
                       pos
                       Reason.URparam
-                      {
-                        et_type = pess_type;
-                        et_enforced = param.fp_type.et_enforced;
-                      }
+                      pess_type
                   in
                   expr
                     ~expected
@@ -6547,16 +6543,16 @@ end = struct
                     List.fold
                       ~init:env
                       ~f:(fun env param ->
-                        Env.set_tyvar_variance env param.fp_type.et_type)
+                        Env.set_tyvar_variance env param.fp_type)
                       ft_params
                   in
-                  Env.set_tyvar_variance env ft_ret.et_type ~flip:true
+                  Env.set_tyvar_variance env ft_ret ~flip:true
                 | Tnewtype (name, [ty], _)
                   when String.equal name SN.Classes.cSupportDyn ->
                   set_params_variance env ty
                 | _ -> env
               in
-              set_params_variance env param.fp_type.et_type
+              set_params_variance env param.fp_type
             | None -> env
           in
           (* Given an expected function type ft, check types for the non-unpacked
@@ -6842,9 +6838,8 @@ end = struct
           in
           let ret =
             match dynamic_func with
-            | Some _ when used_dynamic ->
-              MakeType.locl_like r2 ft.ft_ret.et_type
-            | _ -> ft.ft_ret.et_type
+            | Some _ when used_dynamic -> MakeType.locl_like r2 ft.ft_ret
+            | _ -> ft.ft_ret
           in
           (env, (tel, typed_unpack_element, ret, should_forget_fakes))
         | (r, Tvar _) when TCO.method_call_inference (Env.get_tcopt env) ->
@@ -6887,7 +6882,7 @@ end = struct
               {
                 fp_pos = Pos_or_decl.of_raw_pos pos;
                 fp_name = None;
-                fp_type = MakeType.enforced ty;
+                fp_type = ty;
                 fp_flags = flags;
                 fp_def_value = None;
               }
@@ -6917,7 +6912,7 @@ end = struct
               | None -> return_ty
               | Some r -> MakeType.awaitable r return_ty
             in
-            let ft_ret = MakeType.enforced return_ty in
+            let ft_ret = return_ty in
             let ft_flags =
               (* Keep supertype as permissive as possible: *)
               Typing_defs_flags.Fun.make
@@ -6979,19 +6974,11 @@ end = struct
              * t <: T <: supportdyn<mixed> which is more precise.
              *)
             | Tfun ft
-              when Option.is_some
-                     (TUtils.try_strip_dynamic env ft.ft_ret.et_type)
+              when Option.is_some (TUtils.try_strip_dynamic env ft.ft_ret)
                    && List.length el = 1 ->
               let ft_params =
                 List.map ft.ft_params ~f:(fun fp ->
-                    {
-                      fp with
-                      fp_type =
-                        {
-                          fp.fp_type with
-                          et_type = TUtils.make_like env fp.fp_type.et_type;
-                        };
-                    })
+                    { fp with fp_type = TUtils.make_like env fp.fp_type })
               in
               let ty = mk (get_reason ty, Tfun { ft with ft_params }) in
               call
@@ -7314,7 +7301,7 @@ end = struct
     let (env, fty) = Env.expand_type env fty in
     let fty =
       map_ty fty ~f:(function
-          | Tfun ft -> Tfun { ft with ft_ret = MakeType.unenforced ty }
+          | Tfun ft -> Tfun { ft with ft_ret = ty }
           | ty -> ty)
     in
     let (env, te) =
@@ -7524,7 +7511,7 @@ end = struct
           Typing_return.implicit_return
             env
             pos
-            ~expected:expected_return.et_type
+            ~expected:expected_return
             ~actual:rty
             ~hint_pos:None
             ~is_async:false
@@ -7565,12 +7552,11 @@ end = struct
           env
           rty
           return_type
+          Enforced (* TODO akenn: flow in *)
           Typing_error.Callback.unify_error
       in
       Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
-      let ty_mismatch_opt =
-        mk_ty_mismatch_opt rty return_type.et_type ty_err_opt
-      in
+      let ty_mismatch_opt = mk_ty_mismatch_opt rty return_type ty_err_opt in
       let env = LEnv.move_and_merge_next_in_cont ~join_pos:pos env C.Exit in
       (env, Aast.Return (Some (hole_on_ty_mismatch ~ty_mismatch_opt te)))
     | Do (b, e) ->
@@ -8327,12 +8313,11 @@ end = struct
           match opt_ty1 with
           | None -> None
           | Some ty1 ->
-            let ty1_enforced = { et_type = ty1; et_enforced = enforced } in
             ExpectedTy.make_and_allow_coercion_opt
               env
               param.param_pos
               Reason.URparam
-              ty1_enforced
+              ty1
         in
         let (env, (te, ty2)) =
           let reason = Reason.Rwitness param.param_pos in
@@ -8371,13 +8356,15 @@ end = struct
               else
                 ty1
             in
+            (* TODO akenn: pass in enforced to function *)
             let (env, ty_err_opt) =
               Typing_coercion.coerce_type
                 param.param_pos
                 Reason.URhint
                 env
                 ty2
-                { et_type = like_ty1; et_enforced = enforced }
+                like_ty1
+                enforced
                 Typing_error.Callback.parameter_default_value_wrong_type
             in
             Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
@@ -8593,7 +8580,7 @@ end = struct
           then
             env
           else
-            Typing_return.fun_implicit_return env pos ret.et_type f_kind
+            Typing_return.fun_implicit_return env pos ret f_kind
         in
         let env =
           Env.set_fun_tast_info env Tast.{ has_implicit_return; has_readonly }
@@ -8631,7 +8618,7 @@ end = struct
         f.f_fun_kind
         f.f_user_attributes
         env
-        (MakeType.unenforced dynamic_return_ty)
+        dynamic_return_ty
     in
     let (env, param_tys) =
       Typing_param.make_param_local_tys
@@ -8709,14 +8696,11 @@ end = struct
             ~remove:escaping
             ~pos:lambda_pos
             env
-            ft.ft_ret.et_type
+            ft.ft_ret
         else
-          (env, ft.ft_ret.et_type)
+          (env, ft.ft_ret)
       in
-      ( env,
-        ( te,
-          { ft with ft_ret = { ft.ft_ret with et_type = ret_ty } },
-          support_dynamic_type ) )
+      (env, (te, { ft with ft_ret = ret_ty }, support_dynamic_type))
     in
     type_closure @@ fun env ->
     let nb = f.f_body in
@@ -8828,14 +8812,10 @@ end = struct
                   {
                     fp with
                     fp_type =
-                      {
-                        fp.fp_type with
-                        et_type =
-                          TUtils.make_like
-                            ~reason:(Reason.Rpessimised_inout fp.fp_pos)
-                            env
-                            fp.fp_type.et_type;
-                      };
+                      TUtils.make_like
+                        ~reason:(Reason.Rpessimised_inout fp.fp_pos)
+                        env
+                        fp.fp_type;
                   }
                 | _ -> fp);
         }
@@ -8869,7 +8849,7 @@ end = struct
         let remaining_params =
           List.drop non_variadic_ft_params (List.length f.f_params - 1)
         in
-        List.map ~f:(fun param -> param.fp_type.et_type) remaining_params
+        List.map ~f:(fun param -> param.fp_type) remaining_params
       in
       let r = Reason.Rvar_param varg.param_pos in
       let union = Tunion (tyl @ remaining_types) in
@@ -8882,7 +8862,7 @@ end = struct
           get_ft_variadic ft )
       with
       | (Some arg, true) ->
-        make_variadic_arg env arg [(List.last_exn ft.ft_params).fp_type.et_type]
+        make_variadic_arg env arg [(List.last_exn ft.ft_params).fp_type]
       | (Some arg, false) -> make_variadic_arg env arg []
       | (_, _) -> (env, [])
     in
@@ -8894,7 +8874,7 @@ end = struct
       List.fold_left
         ~f:(closure_bind_param params)
         ~init:(env, [])
-        (List.map non_variadic_ft_params ~f:(fun x -> x.fp_type.et_type))
+        (List.map non_variadic_ft_params ~f:(fun x -> x.fp_type))
     in
     let env = List.fold_left ~f:closure_bind_opt_param ~init:env !params in
     let env =
@@ -8931,11 +8911,11 @@ end = struct
     let ety_env = { ety_env with wildcard_action = Wildcard_fresh_tyvar } in
     let this_class = Env.get_self_class env |> Decl_entry.to_option in
     let params_decl_ty =
-      List.map decl_ft.ft_params ~f:(fun { fp_type = { et_type; _ }; _ } ->
-          if Typing_defs.is_wildcard et_type then
+      List.map decl_ft.ft_params ~f:(fun { fp_type; _ } ->
+          if Typing_defs.is_wildcard fp_type then
             None
           else
-            Some et_type)
+            Some fp_type)
     in
     (* Do we need to re-check the body of the lambda under dynamic assumptions? *)
     let sdt_dynamic_check_required =
@@ -8982,11 +8962,7 @@ end = struct
       if not has_implicit_return then
         env
       else
-        Typing_return.fun_implicit_return
-          env
-          lambda_pos
-          hret.et_type
-          f.f_fun_kind
+        Typing_return.fun_implicit_return env lambda_pos hret f.f_fun_kind
     in
     (* For an SDT lambda that doesn't have a second check under dynamic assumptions,
      * and with an inferred return type, we must check that the return type supports dynamic *)
@@ -9000,7 +8976,7 @@ end = struct
           SubType.sub_type
             ~coerce:(Some Typing_logic.CoerceToDynamic)
             env
-            hret.et_type
+            hret
             (MakeType.dynamic
                (Reason.Rsupport_dynamic_type (Pos_or_decl.of_raw_pos hint_pos)))
           @@ Some (Typing_error.Reasons_callback.unify_error_at hint_pos)
@@ -9023,7 +8999,7 @@ end = struct
              None
              f
              params_decl_ty
-             hret.et_type;
+             hret;
         (* The following modification is independent from the line above that
            does the dynamic check. Check status is changed to dynamic assumptions
            within the call above. Because we don't store alternative lambdas in
@@ -9038,7 +9014,7 @@ end = struct
         Aast.f_annotation = Env.save local_tpenv env;
         Aast.f_readonly_this = f.f_readonly_this;
         Aast.f_span = f.f_span;
-        Aast.f_ret = (hret.et_type, hint_of_type_hint f.f_ret);
+        Aast.f_ret = (hret, hint_of_type_hint f.f_ret);
         Aast.f_readonly_ret = f.f_readonly_ret;
         Aast.f_fun_kind = f.f_fun_kind;
         Aast.f_user_attributes = user_attributes;
@@ -9194,8 +9170,7 @@ end = struct
              we use the expected type instead. Otherwise, declared type takes
              precedence. *)
           let resolved_ft_param =
-            if Typing_defs.is_wildcard declared_decl_ft_param.fp_type.et_type
-            then
+            if Typing_defs.is_wildcard declared_decl_ft_param.fp_type then
               { declared_ft_param with fp_type = expected_ft_param.fp_type }
             else
               declared_ft_param
@@ -9233,9 +9208,9 @@ end = struct
       in
       (* Don't bother passing in `void` if there is no explicit return *)
       let ret_ty =
-        match get_node expected_ft.ft_ret.et_type with
+        match get_node expected_ft.ft_ret with
         | Tprim Tvoid when not is_explicit -> None
-        | _ -> Some expected_ft.ft_ret.et_type
+        | _ -> Some expected_ft.ft_ret
       in
       Typing_log.increment_feature_count env FL.Lambda.contextual_params;
       check_body_under_known_params ~supportdyn env ?ret_ty expected_ft
@@ -9287,13 +9262,10 @@ end = struct
           let replace_non_declared_type declared_decl_ft_param declared_ft_param
               =
             let is_undeclared =
-              Typing_defs.is_wildcard declared_decl_ft_param.fp_type.et_type
+              Typing_defs.is_wildcard declared_decl_ft_param.fp_type
             in
             if is_undeclared then
-              let enforced_ty =
-                { et_enforced = Unenforced; et_type = param_type }
-              in
-              { declared_ft_param with fp_type = enforced_ty }
+              { declared_ft_param with fp_type = param_type }
             else
               declared_ft_param
           in
@@ -9326,7 +9298,7 @@ end = struct
           check_body_under_known_params
             ~supportdyn
             env
-            ~ret_ty:declared_ft.ft_ret.et_type
+            ~ret_ty:declared_ft.ft_ret
             declared_ft
       )
 end
@@ -10641,7 +10613,8 @@ end = struct
         ur
         env
         ty2
-        (MakeType.unenforced ty1)
+        ty1
+        Unenforced
         Typing_error.Callback.unify_error
     in
     Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
@@ -10865,7 +10838,8 @@ end = struct
             ur
             env
             ty2
-            (MakeType.unenforced exp_real_type)
+            exp_real_type
+            Unenforced
             Typing_error.Callback.unify_error
         in
         Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
@@ -11504,7 +11478,7 @@ end = struct
                 (env, fty, Unenforced, explicit_targs)
               (* unused *)
               | _ ->
-                let { et_type; et_enforced } =
+                let (et_enforced, et_type) =
                   Typing_enforceability.compute_enforced_and_pessimize_ty
                     ~this_class:(Some class_)
                     env
@@ -11516,8 +11490,6 @@ end = struct
                 Option.iter
                   ~f:(Typing_error_utils.add_typing_error ~env)
                   ty_err_opt;
-                (* TODO(T52753871) make function just return possibly_enforced_ty
-                 * after considering intersection case *)
                 (env, member_ty, et_enforced, [])
             in
             let (env, member_ty) =
@@ -11541,7 +11513,6 @@ end = struct
               else
                 (env, member_ty)
             in
-            let ety = { et_type = member_ty; et_enforced } in
             let (env, rval_err) =
               match coerce_from_ty with
               | None -> (env, None)
@@ -11552,7 +11523,8 @@ end = struct
                     ur
                     env
                     ty
-                    (TUtils.make_like_if_enforced env ety)
+                    (TUtils.make_like_if_enforced env et_enforced member_ty)
+                    et_enforced
                     Typing_error.Callback.unify_error
                 in
                 Option.iter

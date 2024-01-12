@@ -16,7 +16,6 @@ let strip_decl_prefix =
       "DeclFunParam";
       "DeclFunParams";
       "DeclFunType";
-      "DeclPossiblyEnforcedTy";
       "DeclTparam";
       "DeclTy";
       "DeclWhereConstraint";
@@ -61,8 +60,6 @@ let to_string for_open id =
       let ty =
         if String.equal ty "LoclTy" then
           "Ty"
-        else if String.equal ty "LoclPossiblyEnforcedTy" then
-          "PossiblyEnforcedTy"
         else if SSet.mem ty strip_decl_prefix then
           String.chop_prefix_exn ty ~prefix:"Decl"
         else

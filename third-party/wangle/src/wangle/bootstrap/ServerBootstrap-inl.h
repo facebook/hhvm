@@ -384,7 +384,6 @@ class ServerWorkerPool : public folly::IOThreadPoolExecutorBase::IOObserver {
           sockets,
       std::shared_ptr<ServerSocketFactory> socketFactory)
       : workers_(std::make_shared<WorkerMap>()),
-        workersMutex_(std::make_shared<Mutex>()),
         acceptorFactory_(acceptorFactory),
         sockets_(sockets),
         socketFactory_(socketFactory) {}
@@ -404,7 +403,7 @@ class ServerWorkerPool : public folly::IOThreadPoolExecutorBase::IOObserver {
   using Mutex = folly::SharedMutexReadPriority;
 
   std::shared_ptr<WorkerMap> workers_;
-  std::shared_ptr<Mutex> workersMutex_;
+  mutable Mutex workersMutex_;
   std::shared_ptr<AcceptorFactory> acceptorFactory_;
   std::shared_ptr<std::vector<std::shared_ptr<folly::AsyncSocketBase>>>
       sockets_;
@@ -413,7 +412,7 @@ class ServerWorkerPool : public folly::IOThreadPoolExecutorBase::IOObserver {
 
 template <typename F>
 void ServerWorkerPool::forEachWorker(F&& f) const {
-  Mutex::ReadHolder holder(workersMutex_.get());
+  Mutex::ReadHolder holder(workersMutex_);
   for (const auto& kv : *workers_) {
     f(kv.second.get());
   }
@@ -421,7 +420,7 @@ void ServerWorkerPool::forEachWorker(F&& f) const {
 
 template <typename F>
 void ServerWorkerPool::forRandomWorker(F&& f) const {
-  Mutex::ReadHolder holder(workersMutex_.get());
+  Mutex::ReadHolder holder(workersMutex_);
   DCHECK(workers_->size());
   f((*workers_)[folly::Random::rand32(workers_->size())].second.get());
 }

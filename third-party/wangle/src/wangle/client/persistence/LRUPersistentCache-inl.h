@@ -21,6 +21,7 @@
 #include <folly/ScopeGuard.h>
 #include <folly/json.h>
 #include <folly/portability/SysTime.h>
+#include <folly/synchronization/Lock.h>
 #include <folly/system/ThreadName.h>
 #include <atomic>
 #include <cerrno>
@@ -40,8 +41,7 @@ LRUPersistentCache<K, V, MutexT>::LRUPersistentCache(
   if (persistence) {
     std::shared_ptr<CachePersistence> sharedPersistence(std::move(persistence));
     {
-      typename wangle::CacheLockGuard<MutexT>::Write writeLock(
-          persistenceLock_);
+      std::unique_lock writeLock(persistenceLock_);
       std::swap(persistence_, sharedPersistence);
     }
   }
@@ -116,7 +116,7 @@ void LRUPersistentCache<K, V, MutexT>::put(const K& key, const V& val) {
 
 template <typename K, typename V, typename MutexT>
 bool LRUPersistentCache<K, V, MutexT>::hasPendingUpdates() {
-  typename wangle::CacheLockGuard<MutexT>::Read readLock(persistenceLock_);
+  folly::hybrid_lock readLock(persistenceLock_);
   if (!persistence_) {
     return false;
   }
@@ -217,14 +217,14 @@ bool LRUPersistentCache<K, V, MutexT>::syncNow(CachePersistence& persistence) {
 template <typename K, typename V, typename MutexT>
 std::shared_ptr<CachePersistence>
 LRUPersistentCache<K, V, MutexT>::getPersistence() {
-  typename wangle::CacheLockGuard<MutexT>::Read readLock(persistenceLock_);
+  folly::hybrid_lock readLock(persistenceLock_);
   return persistence_;
 }
 
 template <typename K, typename V, typename MutexT>
 void LRUPersistentCache<K, V, MutexT>::setPersistenceHelper(
     bool syncVersion) noexcept {
-  typename wangle::CacheLockGuard<MutexT>::Write writeLock(persistenceLock_);
+  std::unique_lock writeLock(persistenceLock_);
   if (persistenceLoadedSemaphore_.ready()) {
     return;
   }

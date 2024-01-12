@@ -25,7 +25,6 @@
 #include <folly/portability/GTest.h>
 #include <folly/synchronization/Baton.h>
 #include <wangle/client/persistence/LRUPersistentCache.h>
-#include <wangle/client/persistence/SharedMutexCacheLockGuard.h>
 
 using namespace folly;
 using namespace std;

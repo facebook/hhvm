@@ -20,13 +20,14 @@
 
 #include <folly/DynamicConverter.h>
 #include <folly/Likely.h>
+#include <folly/synchronization/Lock.h>
 
 namespace wangle {
 
 template <typename K, typename V, typename M>
 folly::Optional<V> LRUInMemoryCache<K, V, M>::get(const K& key) {
   // need to take a write lock since get modifies the LRU
-  typename wangle::CacheLockGuard<M>::Write writeLock(cacheLock_);
+  std::unique_lock writeLock(cacheLock_);
   auto itr = cache_.find(key);
   if (itr != cache_.end()) {
     return folly::Optional<V>(itr->second);
@@ -36,14 +37,14 @@ folly::Optional<V> LRUInMemoryCache<K, V, M>::get(const K& key) {
 
 template <typename K, typename V, typename M>
 void LRUInMemoryCache<K, V, M>::put(const K& key, const V& val) {
-  typename wangle::CacheLockGuard<M>::Write writeLock(cacheLock_);
+  std::unique_lock writeLock(cacheLock_);
   cache_.set(key, val);
   incrementVersion();
 }
 
 template <typename K, typename V, typename M>
 bool LRUInMemoryCache<K, V, M>::remove(const K& key) {
-  typename wangle::CacheLockGuard<M>::Write writeLock(cacheLock_);
+  std::unique_lock writeLock(cacheLock_);
   size_t nErased = cache_.erase(key);
   if (nErased > 0) {
     incrementVersion();
@@ -54,13 +55,13 @@ bool LRUInMemoryCache<K, V, M>::remove(const K& key) {
 
 template <typename K, typename V, typename M>
 size_t LRUInMemoryCache<K, V, M>::size() const {
-  typename wangle::CacheLockGuard<M>::Read readLock(cacheLock_);
+  folly::hybrid_lock readLock(cacheLock_);
   return cache_.size();
 }
 
 template <typename K, typename V, typename M>
 void LRUInMemoryCache<K, V, M>::clear() {
-  typename wangle::CacheLockGuard<M>::Write writeLock(cacheLock_);
+  std::unique_lock writeLock(cacheLock_);
   if (cache_.empty()) {
     return;
   }
@@ -70,7 +71,7 @@ void LRUInMemoryCache<K, V, M>::clear() {
 
 template <typename K, typename V, typename M>
 CacheDataVersion LRUInMemoryCache<K, V, M>::getVersion() const {
-  typename wangle::CacheLockGuard<M>::Read readLock(cacheLock_);
+  folly::hybrid_lock readLock(cacheLock_);
   return version_;
 }
 
@@ -78,7 +79,7 @@ template <typename K, typename V, typename M>
 CacheDataVersion LRUInMemoryCache<K, V, M>::loadData(
     const folly::dynamic& data) noexcept {
   bool updated = false;
-  typename wangle::CacheLockGuard<M>::Write writeLock(cacheLock_);
+  std::unique_lock writeLock(cacheLock_);
   try {
     for (const auto& kv : data) {
       cache_.set(folly::convertTo<K>(kv[0]), folly::convertTo<V>(kv[1]));
@@ -101,7 +102,7 @@ CacheDataVersion LRUInMemoryCache<K, V, M>::loadData(
 template <typename K, typename V, typename M>
 folly::Optional<std::pair<folly::dynamic, CacheDataVersion>>
 LRUInMemoryCache<K, V, M>::convertToKeyValuePairs() noexcept {
-  typename wangle::CacheLockGuard<M>::Read readLock(cacheLock_);
+  folly::hybrid_lock readLock(cacheLock_);
   try {
     folly::dynamic dynObj = folly::dynamic::array;
     for (const auto& kv : cache_) {

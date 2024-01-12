@@ -24,7 +24,7 @@ namespace wangle {
 void ServerWorkerPool::registerEventBase(folly::EventBase& evb) {
   auto worker = acceptorFactory_->newAcceptor(&evb);
   {
-    Mutex::WriteHolder holder(workersMutex_.get());
+    Mutex::WriteHolder holder(workersMutex_);
     workers_->push_back({&evb, worker});
   }
 
@@ -39,7 +39,7 @@ void ServerWorkerPool::registerEventBase(folly::EventBase& evb) {
 
 void ServerWorkerPool::unregisterEventBase(folly::EventBase& evb) {
   auto worker = [&]() -> std::shared_ptr<Acceptor> {
-    Mutex::WriteHolder holder(workersMutex_.get());
+    Mutex::WriteHolder holder(workersMutex_);
     for (auto it = workers_->begin(); it != workers_->end(); ++it) {
       if (it->first != &evb) {
         continue;

@@ -636,7 +636,7 @@ public:
   uint64_t m_setprofileFlags;
   bool m_executingSetprofileCallback;
   req::fast_set<String,
-                hphp_string_hash, hphp_string_isame> m_setprofileFunctions;
+                hphp_string_hash, hphp_string_fsame> m_setprofileFunctions;
 public:
   enum class InternalEventHook: uint8_t {
     Call = 0,

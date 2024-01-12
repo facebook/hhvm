@@ -60,11 +60,11 @@ inline bool contains(const C &c, T e) {
   return c.find(e) != c.end();
 }
 
-using StringToStringIMap = hphp_fast_map<
+using StringToStringTMap = hphp_fast_map<
   const StringData*,
   const StringData*,
   string_data_hash,
-  string_data_isame
+  string_data_tsame
 >;
 
 }} // namespace HPHP::Verifier

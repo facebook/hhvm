@@ -40,7 +40,8 @@ struct RepoFileIndex;
 struct RepoGlobalData;
 struct SHA1;
 struct StringData;
-struct string_data_isame;
+struct string_data_tsame;
+struct string_data_fsame;
 struct string_data_same;
 struct UnitEmitter;
 

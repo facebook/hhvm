@@ -92,7 +92,15 @@ struct StringData {
   bool same(const StringData& o) const noexcept {
     return m_impl == o.m_impl;
   }
-  bool isame(const StringData& o) const noexcept {
+  bool tsame(const StringData& o) const noexcept {
+    auto lower = [](const std::string& _s) {
+      std::string s = _s;
+      std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+      return s;
+    };
+    return lower(m_impl) == lower(o.m_impl);
+  }
+  bool fsame(const StringData& o) const noexcept {
     auto lower = [](const std::string& _s) {
       std::string s = _s;
       std::transform(s.begin(), s.end(), s.begin(), ::tolower);
@@ -142,7 +150,23 @@ bool StringPtr::StringPtr::same(const StringPtr& s) const noexcept {
   return *m_impl->impl() == *s.m_impl->impl();
 }
 
-bool StringPtr::StringPtr::isame(const StringPtr& s) const noexcept {
+bool StringPtr::StringPtr::tsame(const StringPtr& s) const noexcept {
+  if (m_impl->impl() == s.m_impl->impl()) {
+    return true;
+  }
+  if (m_impl->impl() == nullptr || s.m_impl->impl() == nullptr) {
+    return false;
+  }
+  if (m_impl->impl()->size() != s.m_impl->impl()->size()) {
+    return false;
+  }
+  return bstrcaseeq(
+      m_impl->impl()->c_str(),
+      s.m_impl->impl()->c_str(),
+      m_impl->impl()->size());
+}
+
+bool StringPtr::StringPtr::fsame(const StringPtr& s) const noexcept {
   if (m_impl->impl() == s.m_impl->impl()) {
     return true;
   }

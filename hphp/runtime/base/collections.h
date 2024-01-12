@@ -182,7 +182,7 @@ COLLECTIONS_ALL_TYPES(X)
  * collection type.
  */
 inline Optional<CollectionType> stringToType(const StringData* name) {
-#define X(type) if (name->isame(s_##type.get())) return CollectionType::type;
+#define X(type) if (name->tsame(s_##type.get())) return CollectionType::type;
 COLLECTIONS_ALL_TYPES(X)
 #undef X
   return std::nullopt;

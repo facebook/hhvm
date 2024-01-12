@@ -1104,8 +1104,8 @@ getLayoutSensitiveCall(const IRGS& env, SrcKey sk) {
   auto const cls  = sk.unit()->lookupLitstrId(getImm(sk.pc(), 1).u_SA);
   auto const meth = sk.unit()->lookupLitstrId(getImm(sk.pc(), 2).u_SA);
 
-  if (!cls->isame(s_HH_Shapes.get()) &&
-      !cls->isame(s_HH_Readonly_Shapes.get())) {
+  if (!cls->tsame(s_HH_Shapes.get()) &&
+      !cls->tsame(s_HH_Readonly_Shapes.get())) {
     return std::nullopt;
   }
 

@@ -3322,12 +3322,12 @@ void parse_default_value(FuncEmitter::ParamInfo& param, const StringData* str) {
   tvWriteUninit(tv);
   if (str->size() == 4) {
     // match NULL or null without case-collision logging
-    if (!strcmp("NULL", str->data()) || !istrcmp("null", str->data())) {
+    if (!strcmp("NULL", str->data()) || !tstrcmp("null", str->data())) {
       tvWriteNull(tv);
-    } else if (!istrcmp("true", str->data())) {
+    } else if (!tstrcmp("true", str->data())) {
       tv = make_tv<KindOfBoolean>(true);
     }
-  } else if (str->size() == 5 && !istrcmp("false", str->data())) {
+  } else if (str->size() == 5 && !tstrcmp("false", str->data())) {
     tv = make_tv<KindOfBoolean>(false);
   }
   auto utype = param.typeConstraint.underlyingDataType();

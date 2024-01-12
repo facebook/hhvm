@@ -9,6 +9,7 @@
 #include <proxygen/httpclient/samples/httperf2/Client.h>
 
 #include <boost/cast.hpp>
+#include <fizz/protocol/CertUtils.h>
 #include <folly/FileUtil.h>
 #include <folly/io/SocketOptionMap.h>
 #include <folly/portability/OpenSSL.h>

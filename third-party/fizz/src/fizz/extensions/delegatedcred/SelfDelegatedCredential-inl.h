@@ -16,7 +16,7 @@ template <KeyType T>
 SelfDelegatedCredentialImpl<T>::InternalSelfCert::InternalSelfCert(
     std::vector<folly::ssl::X509UniquePtr> certs,
     folly::ssl::EvpPkeyUniquePtr privateKey)
-    : SelfCertImpl<T>(std::move(certs)) {
+    : OpenSSLSelfCertImpl<T>(std::move(certs)) {
   if (certs_.empty()) {
     throw std::runtime_error("Must supply at least 1 cert");
   }

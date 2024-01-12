@@ -9,6 +9,7 @@
 
 #include <fizz/client/FizzClientContext.h>
 #include <fizz/client/SynchronizedLruPskCache.h>
+#include <fizz/protocol/CertUtils.h>
 #include <fizz/protocol/DefaultCertificateVerifier.h>
 #include <fizz/server/FizzServerContext.h>
 #include <fizz/server/TicketCodec.h>

@@ -17,6 +17,7 @@
 #include <fizz/client/SynchronizedLruPskCache.h>
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/experimental/ktls/AsyncFizzBaseKTLS.h>
+#include <fizz/protocol/CertUtils.h>
 #include <fizz/protocol/Certificate.h>
 #include <fizz/protocol/test/Mocks.h>
 #include <fizz/server/AeadTicketCipher.h>

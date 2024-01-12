@@ -6,6 +6,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+#include <fizz/protocol/CertUtils.h>
 #include <fizz/protocol/OpenSSLFactory.h>
 
 namespace fizz {
@@ -80,4 +81,11 @@ std::unique_ptr<HandshakeContext> OpenSSLFactory::makeHandshakeContext(
       throw std::runtime_error("hs: not implemented");
   }
 }
+
+std::shared_ptr<PeerCert> OpenSSLFactory::makePeerCert(
+    CertificateEntry certEntry,
+    bool /*leaf*/) const {
+  return CertUtils::makePeerCert(std::move(certEntry.cert_data));
+}
+
 } // namespace fizz

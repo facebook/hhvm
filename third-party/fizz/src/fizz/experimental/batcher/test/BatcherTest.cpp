@@ -10,6 +10,8 @@
 #include <fizz/experimental/batcher/Batcher.h>
 #include <fizz/experimental/client/BatchSignaturePeerCert.h>
 #include <fizz/experimental/server/BatchSignatureAsyncSelfCert.h>
+#include <fizz/protocol/OpenSSLPeerCertImpl.h>
+#include <fizz/protocol/OpenSSLSelfCertImpl.h>
 #include <fizz/server/State.h>
 #include <fizz/server/test/Mocks.h>
 #include <folly/portability/GTest.h>
@@ -56,7 +58,7 @@ TEST(BatchSignatureTest, TestSynchronizedBatcherSingleThread) {
   useMockRandom();
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kRSACertificate));
-  auto certificate = std::make_shared<SelfCertImpl<KeyType::RSA>>(
+  auto certificate = std::make_shared<OpenSSLSelfCertImpl<KeyType::RSA>>(
       getPrivateKey(kRSAKey), std::move(certs));
 
   auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
@@ -89,7 +91,7 @@ TEST(BatchSignatureTest, TestSynchronizedBatcherMultiThread) {
   size_t numMsgThreshold = 3;
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kRSACertificate));
-  auto certificate = std::make_shared<SelfCertImpl<KeyType::RSA>>(
+  auto certificate = std::make_shared<OpenSSLSelfCertImpl<KeyType::RSA>>(
       getPrivateKey(kRSAKey), std::move(certs));
 
   auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
@@ -122,7 +124,7 @@ TEST(BatchSignatureTest, TestSynchronizedBatcherWithSelfCertP256) {
   size_t numMsgThreshold = 3;
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kP256Certificate));
-  auto certificate = std::make_shared<SelfCertImpl<KeyType::P256>>(
+  auto certificate = std::make_shared<OpenSSLSelfCertImpl<KeyType::P256>>(
       getPrivateKey(kP256Key), std::move(certs));
   auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
       numMsgThreshold, certificate, CertificateVerifyContext::Server);
@@ -150,8 +152,8 @@ TEST(BatchSignatureTest, TestSynchronizedBatcherWithSelfCertP256) {
   }
 
   // verify
-  auto peerCert =
-      std::make_shared<PeerCertImpl<KeyType::P256>>(getCert(kP256Certificate));
+  auto peerCert = std::make_shared<OpenSSLPeerCertImpl<KeyType::P256>>(
+      getCert(kP256Certificate));
   BatchSignaturePeerCert batchPeerCert(peerCert);
   for (size_t i = 0; i < results.size(); i++) {
     batchPeerCert.verify(
@@ -167,7 +169,7 @@ TEST(BatchSignatureTest, TestThreadLocalBatcher) {
 
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kRSACertificate));
-  auto certificate = std::make_shared<SelfCertImpl<KeyType::RSA>>(
+  auto certificate = std::make_shared<OpenSSLSelfCertImpl<KeyType::RSA>>(
       getPrivateKey(kRSAKey), std::move(certs));
   auto batcher = std::make_shared<ThreadLocalBatcher<Sha256>>(
       2, certificate, CertificateVerifyContext::Server);
@@ -202,7 +204,7 @@ TEST(BatchSignatureTest, TestThreadLocalBatcher) {
 TEST(BatchSignatureTest, TestThreadLocalBatcherWithSelfCertP256) {
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kP256Certificate));
-  auto certificate = std::make_shared<SelfCertImpl<KeyType::P256>>(
+  auto certificate = std::make_shared<OpenSSLSelfCertImpl<KeyType::P256>>(
       getPrivateKey(kP256Key), std::move(certs));
   auto batcher = std::make_shared<ThreadLocalBatcher<Sha256>>(
       3, certificate, CertificateVerifyContext::Server);
@@ -248,8 +250,8 @@ TEST(BatchSignatureTest, TestThreadLocalBatcherWithSelfCertP256) {
     t.join();
   }
   // verify
-  auto peerCert =
-      std::make_shared<PeerCertImpl<KeyType::P256>>(getCert(kP256Certificate));
+  auto peerCert = std::make_shared<OpenSSLPeerCertImpl<KeyType::P256>>(
+      getCert(kP256Certificate));
   BatchSignaturePeerCert batchPeerCert(peerCert);
   for (size_t i = 0; i < results.size(); i++) {
     batchPeerCert.verify(

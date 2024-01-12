@@ -10,6 +10,7 @@
 
 #include <fizz/protocol/DefaultCertificateVerifier.h>
 #include <fizz/protocol/test/Utilities.h>
+#include <folly/ssl/OpenSSLCertUtils.h>
 
 namespace fizz {
 namespace test {

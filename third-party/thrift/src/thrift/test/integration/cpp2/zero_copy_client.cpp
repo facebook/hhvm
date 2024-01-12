@@ -28,6 +28,7 @@
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 
+#include <fizz/protocol/CertUtils.h>
 #include <thrift/test/integration/cpp2/gen-cpp2/ZeroCopyServiceAsyncClient.h>
 
 enum ChannelType {

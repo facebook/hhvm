@@ -6,6 +6,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 #include <fizz/extensions/delegatedcred/DelegatedCredentialUtils.h>
+#include <fizz/protocol/CertUtils.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
 
 namespace fizz {

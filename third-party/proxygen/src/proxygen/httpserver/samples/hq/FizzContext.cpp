@@ -10,6 +10,7 @@
 
 #include <fizz/compression/ZlibCertificateDecompressor.h>
 #include <fizz/compression/ZstdCertificateDecompressor.h>
+#include <fizz/protocol/CertUtils.h>
 #include <fizz/server/AeadTicketCipher.h>
 #include <fizz/server/CertManager.h>
 #include <fizz/server/TicketCodec.h>

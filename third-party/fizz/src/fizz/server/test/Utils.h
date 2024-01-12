@@ -9,8 +9,10 @@
 
 #include <fizz/crypto/aead/AESGCM128.h>
 #include <fizz/crypto/aead/OpenSSLEVPCipher.h>
+#include <fizz/protocol/CertUtils.h>
 #include <fizz/protocol/DefaultCertificateVerifier.h>
 #include <fizz/protocol/OpenSSLFactory.h>
+#include <fizz/protocol/OpenSSLSelfCertImpl.h>
 #include <fizz/protocol/test/Utilities.h>
 #include <fizz/server/AsyncFizzServer.h>
 #include <fizz/server/TicketTypes.h>
@@ -39,7 +41,7 @@ class FizzTestServer : public folly::AsyncServerSocket::AcceptCallback {
         fizz::test::createCert("fizz-test-selfsign", false, nullptr);
     std::vector<folly::ssl::X509UniquePtr> certChain;
     certChain.push_back(std::move(certData.cert));
-    auto fizzCert = std::make_unique<SelfCertImpl<KeyType::P256>>(
+    auto fizzCert = std::make_unique<OpenSSLSelfCertImpl<KeyType::P256>>(
         std::move(certData.key), std::move(certChain));
     auto certManager = std::make_unique<CertManager>();
     certManager->addCert(std::move(fizzCert), true);

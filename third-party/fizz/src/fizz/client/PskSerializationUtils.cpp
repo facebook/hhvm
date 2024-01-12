@@ -3,6 +3,7 @@
 #include "fizz/client/PskSerializationUtils.h"
 
 #include <fizz/record/Types.h>
+#include <folly/ssl/OpenSSLCertUtils.h>
 
 using namespace folly;
 

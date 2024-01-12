@@ -11,6 +11,7 @@
 #include <fizz/crypto/Utils.h>
 #include <fizz/crypto/aead/AESGCM128.h>
 #include <fizz/crypto/aead/OpenSSLEVPCipher.h>
+#include <fizz/protocol/OpenSSLSelfCertImpl.h>
 #include <fizz/server/AsyncFizzServer.h>
 #include <fizz/server/TicketTypes.h>
 #include <folly/String.h>
@@ -254,17 +255,17 @@ class BogoTestClient : public AsyncSocket::ConnectCallback,
   Optional<bool> success_;
 };
 
-class TestRsaCert : public SelfCertImpl<KeyType::RSA> {
+class TestRsaCert : public OpenSSLSelfCertImpl<KeyType::RSA> {
  public:
-  using SelfCertImpl<KeyType::RSA>::SelfCertImpl;
+  using OpenSSLSelfCertImpl<KeyType::RSA>::OpenSSLSelfCertImpl;
   std::string getIdentity() const override {
     return "testrsacert";
   }
 };
 
-class TestP256Cert : public SelfCertImpl<KeyType::P256> {
+class TestP256Cert : public OpenSSLSelfCertImpl<KeyType::P256> {
  public:
-  using SelfCertImpl<KeyType::P256>::SelfCertImpl;
+  using OpenSSLSelfCertImpl<KeyType::P256>::OpenSSLSelfCertImpl;
   std::string getIdentity() const override {
     return "testp256cert";
   }

@@ -15,7 +15,8 @@ PeerDelegatedCredential<T>::PeerDelegatedCredential(
     folly::ssl::X509UniquePtr cert,
     folly::ssl::EvpPkeyUniquePtr pubKey,
     DelegatedCredential credential)
-    : PeerCertImpl<T>(std::move(cert)), credential_(std::move(credential)) {
+    : OpenSSLPeerCertImpl<T>(std::move(cert)),
+      credential_(std::move(credential)) {
   this->signature_.setKey(std::move(pubKey));
 }
 
@@ -33,11 +34,12 @@ void PeerDelegatedCredential<T>::verify(
   }
 
   // Verify signature
-  auto parentCert =
-      std::make_unique<PeerCertImpl<T>>(PeerCertImpl<T>::getX509());
+  auto parentCert = std::make_unique<OpenSSLPeerCertImpl<T>>(
+      OpenSSLPeerCertImpl<T>::getX509());
   auto credSignBuf = DelegatedCredentialUtils::prepareSignatureBuffer(
       credential_,
-      folly::ssl::OpenSSLCertUtils::derEncode(*PeerCertImpl<T>::getX509()));
+      folly::ssl::OpenSSLCertUtils::derEncode(
+          *OpenSSLPeerCertImpl<T>::getX509()));
 
   try {
     parentCert->verify(
@@ -53,7 +55,7 @@ void PeerDelegatedCredential<T>::verify(
   }
 
   // Call the parent verify method
-  PeerCertImpl<T>::verify(
+  OpenSSLPeerCertImpl<T>::verify(
       scheme, context, std::move(toBeSigned), std::move(signature));
 }
 

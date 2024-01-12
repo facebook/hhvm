@@ -21,6 +21,7 @@
 #ifdef FIZZ_TOOL_ENABLE_OQS
 #include <fizz/experimental/protocol/HybridKeyExFactory.h>
 #endif
+#include <fizz/protocol/CertUtils.h>
 #include <fizz/protocol/DefaultCertificateVerifier.h>
 #include <fizz/tool/CertificateVerifiers.h>
 #include <fizz/tool/FizzCommandCommon.h>

@@ -14,6 +14,7 @@
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/extensions/delegatedcred/DelegatedCredentialUtils.h>
 #include <fizz/extensions/delegatedcred/SelfDelegatedCredential.h>
+#include <fizz/protocol/OpenSSLSelfCertImpl.h>
 
 using namespace folly;
 
@@ -52,8 +53,8 @@ class SelfDelegatedCredentialTest : public Test {
  public:
   void SetUp() override {
     CryptoUtils::init();
-    parentCert_ =
-        std::make_unique<SelfCertImpl<KeyType::P256>>(getKey(), getCertVec());
+    parentCert_ = std::make_unique<OpenSSLSelfCertImpl<KeyType::P256>>(
+        getKey(), getCertVec());
   }
 
 #if FIZZ_OPENSSL_HAS_ED25519
@@ -208,7 +209,7 @@ class SelfDelegatedCredentialTest : public Test {
     return cred;
   }
 
-  std::unique_ptr<SelfCertImpl<KeyType::P256>> parentCert_;
+  std::unique_ptr<OpenSSLSelfCertImpl<KeyType::P256>> parentCert_;
 };
 
 TEST_F(SelfDelegatedCredentialTest, TestConstruction) {

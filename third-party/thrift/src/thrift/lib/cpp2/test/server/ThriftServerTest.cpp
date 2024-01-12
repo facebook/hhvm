@@ -27,6 +27,7 @@
 #include <fmt/core.h>
 
 #include <fizz/client/AsyncFizzClient.h>
+#include <fizz/protocol/CertUtils.h>
 #include <folly/CPortability.h>
 #include <folly/Conv.h>
 #include <folly/ExceptionWrapper.h>

@@ -19,6 +19,8 @@
 #ifdef FIZZ_TOOL_ENABLE_ZSTD
 #include <fizz/compression/ZstdCertificateCompressor.h>
 #endif
+#include <fizz/protocol/CertUtils.h>
+#include <fizz/protocol/OpenSSLSelfCertImpl.h>
 #include <fizz/protocol/test/Utilities.h>
 #include <fizz/server/AsyncFizzServer.h>
 #include <fizz/server/SlidingBloomReplayCache.h>
@@ -1126,7 +1128,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
     auto certData = fizz::test::createCert("fizz-self-signed", false, nullptr);
     std::vector<folly::ssl::X509UniquePtr> certChain;
     certChain.push_back(std::move(certData.cert));
-    auto cert = std::make_unique<SelfCertImpl<KeyType::P256>>(
+    auto cert = std::make_unique<OpenSSLSelfCertImpl<KeyType::P256>>(
         std::move(certData.key), std::move(certChain), compressors);
     certManager->addCert(std::move(cert), true);
   }

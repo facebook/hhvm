@@ -9,13 +9,13 @@
 #pragma once
 
 #include <fizz/extensions/delegatedcred/Types.h>
-#include <fizz/protocol/Certificate.h>
+#include <fizz/protocol/OpenSSLPeerCertImpl.h>
 
 namespace fizz {
 namespace extensions {
 
 template <KeyType T>
-class PeerDelegatedCredential : public PeerCertImpl<T> {
+class PeerDelegatedCredential : public OpenSSLPeerCertImpl<T> {
  public:
   explicit PeerDelegatedCredential(
       folly::ssl::X509UniquePtr cert,

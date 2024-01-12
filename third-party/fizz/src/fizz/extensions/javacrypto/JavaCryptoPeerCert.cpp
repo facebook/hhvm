@@ -8,6 +8,7 @@
 
 #include <fizz/extensions/javacrypto/JavaCryptoPeerCert.h>
 #include <fizz/extensions/javacrypto/JniUtils.h>
+#include <fizz/protocol/CertUtils.h>
 
 namespace fizz {
 

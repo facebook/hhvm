@@ -9,6 +9,8 @@
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/experimental/batcher/Batcher.h>
 #include <fizz/experimental/server/BatchSignatureAsyncSelfCert.h>
+#include <fizz/protocol/OpenSSLPeerCertImpl.h>
+#include <fizz/protocol/OpenSSLSelfCertImpl.h>
 #include <fizz/protocol/test/Mocks.h>
 #include <fizz/server/test/Mocks.h>
 #include <folly/portability/GTest.h>
@@ -117,7 +119,7 @@ TEST(BatchSignatureAsyncSelfCertTest, TestSignAndVerifyP256) {
   // sign
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kP256Certificate));
-  auto certificate = std::make_shared<SelfCertImpl<KeyType::P256>>(
+  auto certificate = std::make_shared<OpenSSLSelfCertImpl<KeyType::P256>>(
       getPrivateKey(kP256Key), std::move(certs));
   auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
       1, certificate, CertificateVerifyContext::Server);
@@ -128,7 +130,7 @@ TEST(BatchSignatureAsyncSelfCertTest, TestSignAndVerifyP256) {
       SignatureScheme::ecdsa_secp256r1_sha256,
       CertificateVerifyContext::Server,
       folly::IOBuf::copyBuffer(folly::StringPiece("Message1")));
-  PeerCertImpl<KeyType::P256> peerCert(getCert(kP256Certificate));
+  OpenSSLPeerCertImpl<KeyType::P256> peerCert(getCert(kP256Certificate));
   peerCert.verify(
       SignatureScheme::ecdsa_secp256r1_sha256,
       CertificateVerifyContext::Server,
@@ -154,7 +156,7 @@ TEST(BatchSignatureAsyncSelfCertTest, TestSignAndVerifyRSA) {
   // sign
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kRSACertificate));
-  auto certificate = std::make_shared<SelfCertImpl<KeyType::RSA>>(
+  auto certificate = std::make_shared<OpenSSLSelfCertImpl<KeyType::RSA>>(
       getPrivateKey(kRSAKey), std::move(certs));
   auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
       1, certificate, CertificateVerifyContext::Server);
@@ -165,7 +167,7 @@ TEST(BatchSignatureAsyncSelfCertTest, TestSignAndVerifyRSA) {
       SignatureScheme::rsa_pss_sha256,
       CertificateVerifyContext::Server,
       folly::IOBuf::copyBuffer(folly::StringPiece("Message1")));
-  PeerCertImpl<KeyType::RSA> peerCert(getCert(kRSACertificate));
+  OpenSSLPeerCertImpl<KeyType::RSA> peerCert(getCert(kRSACertificate));
   peerCert.verify(
       SignatureScheme::rsa_pss_sha256,
       CertificateVerifyContext::Server,
@@ -191,7 +193,7 @@ TEST(BatchSignatureAsyncSelfCertTest, TestUnsuportedHash) {
   // sign
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kP384Certificate));
-  auto certificate = std::make_shared<SelfCertImpl<KeyType::P384>>(
+  auto certificate = std::make_shared<OpenSSLSelfCertImpl<KeyType::P384>>(
       getPrivateKey(kP384Key), std::move(certs));
   auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
       1, certificate, CertificateVerifyContext::Server);

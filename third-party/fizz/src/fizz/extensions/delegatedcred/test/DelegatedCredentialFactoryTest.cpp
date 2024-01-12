@@ -13,6 +13,7 @@
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/extensions/delegatedcred/DelegatedCredentialFactory.h>
 #include <fizz/extensions/delegatedcred/PeerDelegatedCredential.h>
+#include <fizz/protocol/OpenSSLPeerCertImpl.h>
 #include <fizz/protocol/clock/test/Mocks.h>
 
 using namespace folly;
@@ -144,7 +145,7 @@ TEST_F(DelegatedCredentialFactoryTest, TestCredentialParsingNonLeaf) {
   auto entry = generateEntry();
   auto cert = factory_.makePeerCert(std::move(entry), false);
   EXPECT_TRUE(cert);
-  EXPECT_TRUE(typeid(*cert) == typeid(PeerCertImpl<KeyType::P256>));
+  EXPECT_TRUE(typeid(*cert) == typeid(OpenSSLPeerCertImpl<KeyType::P256>));
 }
 
 TEST_F(DelegatedCredentialFactoryTest, TestCredentialNoX509Extension) {
@@ -195,7 +196,7 @@ TEST_F(DelegatedCredentialFactoryTest, TestCredentialNoCertEntryExtension) {
   entry.extensions.clear();
   auto cert = factory_.makePeerCert(std::move(entry), true);
   EXPECT_TRUE(cert);
-  EXPECT_TRUE(typeid(*cert) == typeid(PeerCertImpl<KeyType::P256>));
+  EXPECT_TRUE(typeid(*cert) == typeid(OpenSSLPeerCertImpl<KeyType::P256>));
 }
 
 TEST_F(DelegatedCredentialFactoryTest, TestCertExpiredCredential) {

@@ -7,6 +7,7 @@
  */
 
 #include <fizz/server/TicketCodec.h>
+#include <folly/ssl/OpenSSLCertUtils.h>
 
 namespace fizz {
 std::string toString(fizz::server::CertificateStorage storage) {

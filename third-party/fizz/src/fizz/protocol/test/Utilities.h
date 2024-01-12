@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <fizz/protocol/Certificate.h>
+#include <fizz/protocol/OpenSSLPeerCertImpl.h>
 
 namespace fizz {
 namespace test {
@@ -120,7 +120,7 @@ inline CertAndKey createCert(std::string cn, bool ca, CertAndKey* issuer) {
 }
 
 inline std::shared_ptr<PeerCert> getPeerCert(const CertAndKey& cert) {
-  return std::make_shared<PeerCertImpl<KeyType::P256>>(
+  return std::make_shared<OpenSSLPeerCertImpl<KeyType::P256>>(
       folly::ssl::X509UniquePtr(X509_dup(cert.cert.get())));
 }
 

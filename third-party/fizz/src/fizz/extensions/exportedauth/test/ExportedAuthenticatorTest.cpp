@@ -11,6 +11,7 @@
 
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/extensions/exportedauth/ExportedAuthenticator.h>
+#include <fizz/protocol/OpenSSLSelfCertImpl.h>
 #include <fizz/protocol/test/Mocks.h>
 #include <fizz/protocol/test/TestMessages.h>
 #include <fizz/record/Extensions.h>
@@ -169,7 +170,8 @@ TEST_F(ValidateAuthenticatorTest, TestValidateValidAuthenticator) {
   auto key = fizz::test::getPrivateKey(kP256Key);
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(std::move(cert));
-  SelfCertImpl<KeyType::P256> certificate(std::move(key), std::move(certs));
+  OpenSSLSelfCertImpl<KeyType::P256> certificate(
+      std::move(key), std::move(certs));
   auto authenticatorRequest = folly::IOBuf::copyBuffer(unhexlify(authrequest_));
   auto handshakeContext =
       folly::IOBuf::copyBuffer(unhexlify(handshakeContext_));
@@ -205,7 +207,8 @@ TEST_F(ValidateAuthenticatorTest, TestValidateEmptyAuthenticator) {
   auto key = fizz::test::getPrivateKey(kP256Key);
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(std::move(cert));
-  SelfCertImpl<KeyType::P256> certificate(std::move(key), std::move(certs));
+  OpenSSLSelfCertImpl<KeyType::P256> certificate(
+      std::move(key), std::move(certs));
   schemes_.clear();
   auto authenticatorRequest = folly::IOBuf::copyBuffer(unhexlify(authrequest_));
   auto handshakeContext =

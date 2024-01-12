@@ -57,12 +57,6 @@ class DefaultFactory : public Factory {
     return RandomBufGenerator(count).generateRandom();
   }
 
-  [[nodiscard]] std::shared_ptr<PeerCert> makePeerCert(
-      CertificateEntry certEntry,
-      bool /*leaf*/) const override {
-    return CertUtils::makePeerCert(std::move(certEntry.cert_data));
-  }
-
   [[nodiscard]] std::shared_ptr<Cert> makeIdentityOnlyCert(
       std::string ident) const override {
     return std::make_shared<IdentityCert>(std::move(ident));

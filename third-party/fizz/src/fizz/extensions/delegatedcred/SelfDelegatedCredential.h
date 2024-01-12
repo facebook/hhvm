@@ -8,7 +8,7 @@
 
 #pragma once
 #include <fizz/extensions/delegatedcred/Types.h>
-#include <fizz/protocol/Certificate.h>
+#include <fizz/protocol/OpenSSLSelfCertImpl.h>
 
 namespace fizz {
 namespace extensions {
@@ -25,10 +25,11 @@ class SelfDelegatedCredential : public SelfCert {
 //
 // The inheritance is a bit funny cause we want to derive from SelfCert directly
 // to inherit the pure virtual base (for tests) but we also want the
-// implementation to inherit from SelfCertImpl (to share logic). To achieve that
-// without diamond inheritance, the implementation class derives from the
-// interface, and it has an internal private class that derives from the
-// corresponding SelfCertImpl class to provide the implementation logic.
+// implementation to inherit from OpenSSLSelfCertImpl (to share logic). To
+// achieve that without diamond inheritance, the implementation class derives
+// from the interface, and it has an internal private class that derives from
+// the corresponding OpenSSLSelfCertImpl class to provide the implementation
+// logic.
 template <KeyType T>
 class SelfDelegatedCredentialImpl : public SelfDelegatedCredential {
  public:
@@ -63,15 +64,15 @@ class SelfDelegatedCredentialImpl : public SelfDelegatedCredential {
   const DelegatedCredential& getDelegatedCredential() const override;
 
  private:
-  class InternalSelfCert : public SelfCertImpl<T> {
+  class InternalSelfCert : public OpenSSLSelfCertImpl<T> {
    public:
     ~InternalSelfCert() override = default;
 
     InternalSelfCert(
         std::vector<folly::ssl::X509UniquePtr> certs,
         folly::ssl::EvpPkeyUniquePtr privateKey);
-    using SelfCertImpl<T>::certs_;
-    using SelfCertImpl<T>::signature_;
+    using OpenSSLSelfCertImpl<T>::certs_;
+    using OpenSSLSelfCertImpl<T>::signature_;
   };
   InternalSelfCert selfCertImpl_;
   DelegatedCredential credential_;

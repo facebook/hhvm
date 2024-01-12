@@ -17,6 +17,7 @@
 #include <thrift/conformance/stresstest/client/ClientFactory.h>
 
 #include <fizz/client/AsyncFizzClient.h>
+#include <fizz/protocol/CertUtils.h>
 #include <folly/FileUtil.h>
 #include <folly/experimental/io/AsyncIoUringSocket.h>
 #include <folly/experimental/io/IoUringBackend.h>

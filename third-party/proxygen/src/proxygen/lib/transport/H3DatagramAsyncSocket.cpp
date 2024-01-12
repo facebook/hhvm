@@ -8,6 +8,7 @@
 
 #include <proxygen/lib/transport/H3DatagramAsyncSocket.h>
 
+#include <fizz/protocol/CertUtils.h>
 #include <folly/FileUtil.h>
 #include <quic/common/udpsocket/FollyQuicAsyncUDPSocket.h>
 #include <quic/fizz/client/handshake/FizzClientQuicHandshakeContext.h>

@@ -68,8 +68,8 @@ TEST(SecondaryAuthManagerTest, Authenticator) {
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(std::move(cert));
   std::unique_ptr<fizz::SelfCert> certPtr =
-      std::make_unique<SelfCertImpl<KeyType::P256>>(std::move(key),
-                                                    std::move(certs));
+      std::make_unique<OpenSSLSelfCertImpl<KeyType::P256>>(std::move(key),
+                                                           std::move(certs));
   EXPECT_NE(certPtr, nullptr);
   SecondaryAuthManager authManager(std::move(certPtr));
   // Genearte an authenticator request.

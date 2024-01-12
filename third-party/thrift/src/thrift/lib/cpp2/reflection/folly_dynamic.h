@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef THRIFT_FATAL_FOLLY_DYNAMIC_H_
-#define THRIFT_FATAL_FOLLY_DYNAMIC_H_ 1
+#pragma once
 
 #include <type_traits>
 #include <utility>
@@ -105,7 +104,10 @@ enum class format_adherence {
  * @author: Marcelo Juchem <marcelo@fb.com>
  */
 template <typename TC, typename T>
-void to_dynamic(folly::dynamic& out, T&& input, dynamic_format format) {
+[[deprecated(
+    "Use facebook::thrift::to_dynamic from <thrift/lib/cpp2/folly_dynamic/folly_dynamic.h>"
+    "supporting adapters and not requiring old reflection")]] void
+to_dynamic(folly::dynamic& out, T&& input, dynamic_format format) {
   using impl = apache::thrift::detail::dynamic_converter_impl<TC>;
 
   static_assert(
@@ -114,7 +116,10 @@ void to_dynamic(folly::dynamic& out, T&& input, dynamic_format format) {
   impl::to(out, std::forward<T>(input), format);
 }
 template <typename T>
-void to_dynamic(folly::dynamic& out, T&& input, dynamic_format format) {
+[[deprecated(
+    "Use facebook::thrift::to_dynamic from <thrift/lib/cpp2/folly_dynamic/folly_dynamic.h>"
+    "supporting adapters and not requiring old reflection")]] void
+to_dynamic(folly::dynamic& out, T&& input, dynamic_format format) {
   using TC = reflect_type_class_of_thrift_class<folly::remove_cvref_t<T>>;
   return to_dynamic<TC>(out, std::forward<T>(input), format);
 }
@@ -129,7 +134,10 @@ void to_dynamic(folly::dynamic& out, T&& input, dynamic_format format) {
  * @author: Marcelo Juchem <marcelo@fb.com>
  */
 template <typename TC, typename T>
-folly::dynamic to_dynamic(T&& input, dynamic_format format) {
+[[deprecated(
+    "Use facebook::thrift::to_dynamic from <thrift/lib/cpp2/folly_dynamic/folly_dynamic.h>"
+    "supporting adapters and not requiring old reflection")]] folly::dynamic
+to_dynamic(T&& input, dynamic_format format) {
   folly::dynamic result(folly::dynamic::object);
 
   to_dynamic<TC>(result, std::forward<T>(input), format);
@@ -137,7 +145,10 @@ folly::dynamic to_dynamic(T&& input, dynamic_format format) {
   return result;
 }
 template <typename T>
-folly::dynamic to_dynamic(T&& input, dynamic_format format) {
+[[deprecated(
+    "Use facebook::thrift::to_dynamic from <thrift/lib/cpp2/folly_dynamic/folly_dynamic.h>"
+    "supporting adapters and not requiring old reflection")]] folly::dynamic
+to_dynamic(T&& input, dynamic_format format) {
   folly::dynamic result(folly::dynamic::object);
 
   to_dynamic(result, std::forward<T>(input), format);
@@ -157,7 +168,10 @@ folly::dynamic to_dynamic(T&& input, dynamic_format format) {
  * @author: Marcelo Juchem <marcelo@fb.com>
  */
 template <typename TC, typename T>
-void from_dynamic(
+[[deprecated(
+    "Use facebook::thrift::from_dynamic from <thrift/lib/cpp2/folly_dynamic/folly_dynamic.h>"
+    "supporting adapters and not requiring old reflection")]] void
+from_dynamic(
     T& out,
     const folly::dynamic& input,
     dynamic_format format,
@@ -170,7 +184,10 @@ void from_dynamic(
   impl::from(out, input, format, adherence);
 }
 template <typename T>
-void from_dynamic(
+[[deprecated(
+    "Use facebook::thrift::from_dynamic from <thrift/lib/cpp2/folly_dynamic/folly_dynamic.h>"
+    "supporting adapters and not requiring old reflection")]] void
+from_dynamic(
     T& out,
     const folly::dynamic& input,
     dynamic_format format,
@@ -201,7 +218,10 @@ void from_dynamic(
  * @author: Marcelo Juchem <marcelo@fb.com>
  */
 template <typename TC, typename T>
-T from_dynamic(
+[[deprecated(
+    "Use facebook::thrift::from_dynamic from <thrift/lib/cpp2/folly_dynamic/folly_dynamic.h>"
+    "supporting adapters and not requiring old reflection")]] T
+from_dynamic(
     const folly::dynamic& input,
     dynamic_format format,
     format_adherence adherence = format_adherence::STRICT) {
@@ -212,7 +232,10 @@ T from_dynamic(
   return result;
 }
 template <typename T>
-T from_dynamic(
+[[deprecated(
+    "Use facebook::thrift::from_dynamic from <thrift/lib/cpp2/folly_dynamic/folly_dynamic.h>"
+    "supporting adapters and not requiring old reflection")]] T
+from_dynamic(
     const folly::dynamic& input,
     dynamic_format format,
     format_adherence adherence = format_adherence::STRICT) {
@@ -237,5 +260,3 @@ T from_dynamic(
 } // namespace apache
 
 #include <thrift/lib/cpp2/reflection/internal/folly_dynamic-inl-post.h>
-
-#endif // THRIFT_FATAL_FOLLY_DYNAMIC_H_

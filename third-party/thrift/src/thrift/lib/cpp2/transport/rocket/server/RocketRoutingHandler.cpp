@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <chrono>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketRoutingHandler.h>
 
 #ifndef _WIN32
@@ -34,6 +35,8 @@
 #include <thrift/lib/cpp2/transport/rocket/server/ThriftRocketServerHandler.h>
 
 THRIFT_FLAG_DEFINE_bool(rocket_set_idle_connection_timeout, true);
+THRIFT_FLAG_DEFINE_int64(
+    socket_process_time_us_logging_threshold, 10 * 1000 * 1000); // 10s
 
 namespace apache {
 namespace thrift {
@@ -153,6 +156,33 @@ void RocketRoutingHandler::handleConnection(
       /* connectionAgeTimeout */ true);
 
   if (auto* observer = server->getObserver()) {
+    if (auto threshold = THRIFT_FLAG(socket_process_time_us_logging_threshold);
+        threshold > 0) {
+      auto now = std::chrono::steady_clock::now();
+      auto dur = now - tinfo.timeBeforeEnqueue;
+      auto durCnt =
+          std::chrono::duration_cast<std::chrono::microseconds>(dur).count();
+      if (durCnt > threshold) {
+        THRIFT_CONNECTION_EVENT(insane_socket_process_time)
+            .log(*server, *address, [&tinfo, now, durCnt] {
+              folly::dynamic metadata = folly::dynamic::object;
+              auto beforeEnqueue =
+                  tinfo.timeBeforeEnqueue.time_since_epoch().count();
+              auto afterDequeue = tinfo.acceptTime.time_since_epoch().count();
+              metadata["time_before_enqueue_since_epoch"] = beforeEnqueue;
+              metadata["time_after_dequeue_since_epoch"] = afterDequeue;
+              metadata["socket_queue_time_us"] =
+                  std::chrono::duration_cast<std::chrono::microseconds>(
+                      tinfo.acceptTime - tinfo.timeBeforeEnqueue)
+                      .count();
+              metadata["socket_sucess_process_time_us"] = durCnt;
+              metadata["now_since_epoch"] = now.time_since_epoch().count();
+              metadata["ssl_setup_time_ms"] = tinfo.sslSetupTime.count();
+              return metadata;
+            });
+      }
+    }
+
     observer->connAccepted(tinfo);
     observer->activeConnections(
         connectionManager->getNumConnections() *

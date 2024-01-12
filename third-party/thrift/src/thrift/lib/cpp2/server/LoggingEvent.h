@@ -97,6 +97,10 @@ class ConnectionEventHandler : public LoggingEventHandler {
 
   virtual void log(
       const ConnectionLoggingContext&, DynamicFieldsCallback = {}) {}
+  virtual void log(
+      const ThriftServer& /* server */,
+      const folly::SocketAddress& /* clientAddr */,
+      DynamicFieldsCallback = {}) {}
 
   virtual void logSampled(
       const ConnectionLoggingContext&,

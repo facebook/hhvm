@@ -17,6 +17,7 @@
 #include <fcntl.h>
 #include <signal.h>
 
+#include <folly/io/async/AsyncServerSocket.h>
 #include <thrift/lib/cpp2/server/IOUringUtil.h>
 
 #include <thrift/lib/cpp2/server/ThriftServer.h>
@@ -31,6 +32,7 @@
 #include <folly/Conv.h>
 #include <folly/Memory.h>
 #include <folly/ScopeGuard.h>
+#include <folly/String.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/executors/IOThreadPoolDeadlockDetectorObserver.h>
 #include <folly/executors/thread_factory/InitThreadFactory.h>
@@ -464,6 +466,57 @@ void ThriftServer::configureIOUring() {
 #endif
 }
 
+class ThriftServer::ConnectionEventCallback
+    : public folly::AsyncServerSocket::ConnectionEventCallback {
+ public:
+  ConnectionEventCallback(const ThriftServer& thriftServer)
+      : thriftServer_(thriftServer) {}
+
+  void onConnectionAccepted(
+      const folly::NetworkSocket,
+      const folly::SocketAddress&) noexcept override {}
+
+  void onConnectionAcceptError(const int err) noexcept override {
+    THRIFT_CONNECTION_EVENT(server_socket_connection_accept_error)
+        .log(thriftServer_, {}, [&] {
+          folly::dynamic metadata = folly::dynamic::object;
+          metadata["errno"] = err;
+          metadata["errstr"] = folly::errnoStr(err);
+          return metadata;
+        });
+  }
+
+  void onConnectionDropped(
+      const folly::NetworkSocket /* socket */,
+      const folly::SocketAddress& clientAddr,
+      const std::string& errorMsg) noexcept override {
+    FB_LOG_EVERY_MS(ERROR, 1000) << "Connection dropped, reason: " << errorMsg;
+    THRIFT_CONNECTION_EVENT(server_socket_connection_dropped)
+        .log(thriftServer_, clientAddr, [&] {
+          folly::dynamic metadata = folly::dynamic::object;
+          metadata["error_msg"] = errorMsg;
+          return metadata;
+        });
+  }
+
+  void onConnectionEnqueuedForAcceptorCallback(
+      const folly::NetworkSocket,
+      const folly::SocketAddress&) noexcept override {}
+
+  void onConnectionDequeuedByAcceptorCallback(
+      const folly::NetworkSocket,
+      const folly::SocketAddress&) noexcept override {}
+
+  void onBackoffStarted() noexcept override {}
+
+  void onBackoffEnded() noexcept override {}
+
+  void onBackoffError() noexcept override {}
+
+ private:
+  const ThriftServer& thriftServer_;
+};
+
 void ThriftServer::setup() {
   ensureProcessedServiceDescriptionInitialized();
 
@@ -578,6 +631,7 @@ void ThriftServer::setup() {
     // we enable zerocopy for the server socket if the
     // zeroCopyEnableFunc_ is valid
     bool useZeroCopy = !!zeroCopyEnableFunc_;
+    connEventCallback_ = std::make_unique<ConnectionEventCallback>(*this);
     for (auto& socket : getSockets()) {
       auto* evb = socket->getEventBase();
       evb->runImmediatelyOrRunInEventBaseThreadAndWait([&] {
@@ -587,6 +641,9 @@ void ThriftServer::setup() {
         socket->setQueueTimeout(getSocketQueueTimeout());
         if (callbackAssignFunc_) {
           socket->setCallbackAssignFunction(std::move(callbackAssignFunc_));
+        }
+        if (connEventCallback_) {
+          socket->setConnectionEventCallback(connEventCallback_.get());
         }
 
         try {
@@ -1412,6 +1469,8 @@ void ThriftServer::stopListening() {
       auto eb = socket->getEventBase();
       eb->runInEventBaseThread([socket = std::move(socket), doneGuard] {
         socket->pauseAccepting();
+        // unset connection event callback
+        socket->setConnectionEventCallback(nullptr);
       });
     }
   }

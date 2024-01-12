@@ -241,6 +241,8 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
    */
   std::shared_ptr<wangle::AcceptorFactory> acceptorFactory_;
   std::shared_ptr<wangle::SharedSSLContextManager> sharedSSLContextManager_;
+  class ConnectionEventCallback;
+  std::unique_ptr<ConnectionEventCallback> connEventCallback_;
 
   void handleSetupFailure(void);
 

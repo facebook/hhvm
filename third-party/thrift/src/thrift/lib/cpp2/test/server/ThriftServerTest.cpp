@@ -3538,6 +3538,7 @@ TEST(ThriftServer, SocketQueueTimeout) {
       // ThriftServer is set up. The underlying timeout behavior is covered
       // by AsyncServerSocket tests.
       EXPECT_EQ(*socket->getQueueTimeout(), expectedTimeout);
+      EXPECT_NE(nullptr, socket->getConnectionEventCallback());
     }
   };
 

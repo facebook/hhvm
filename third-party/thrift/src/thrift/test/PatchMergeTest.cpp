@@ -309,6 +309,8 @@ TEST(PatchMergeTest, StructPatch) {
   ops.push_back(
       [](MyStructPatch& patch) { (patch.ensure<ident::optStringVal>()); });
   ops.push_back(
+      [](MyStructPatch& patch) { (patch.remove<ident::optStringVal>()); });
+  ops.push_back(
       [](MyStructPatch& patch) { (patch.ensure<ident::optStringVal>("10")); });
   for (auto f : genStringPatchOps<op::StringPatch>()) {
     ops.push_back(

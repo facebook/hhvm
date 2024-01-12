@@ -142,8 +142,18 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   };
 
   template <typename Id>
-  void remove() {
-    // TODO(dokwon): implement and make it public.
+  void removeImpl() {
+    ensurePatchable();
+    Base::toThrift().remove()->insert(op::get_field_id_v<T, Id>);
+  }
+
+  template <typename Id>
+  std::enable_if_t<!type::is_optional_or_union_field_v<T, Id>> remove() {
+    // Usually for non-optional field, it should not be removable.
+    // This can only happen if the field was optional when creating the Patch,
+    // but later we changed the field to non-optional.
+    // In this case we should set it to intrinsic default when removing it.
+    removeImpl<Id>();
   }
 
  public:
@@ -175,6 +185,13 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
       }
     });
     return b;
+  }
+
+  template <typename Id>
+  std::enable_if_t<
+      type::is_optional_or_union_field_v<T, Id> && !is_thrift_union_v<T>>
+  remove() {
+    removeImpl<Id>();
   }
 
   /// Returns if the patch modifies the given field.
@@ -412,6 +429,22 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
       // ensured value.
       op::clear<Id>(*data_.ensure());
     }
+
+    if constexpr (!is_thrift_union_v<T>) {
+      auto removeRef = Base::toThrift().remove();
+      auto iter = removeRef->find(op::get_field_id_v<T, Id>);
+      if (iter != removeRef->end()) {
+        // If the current patch removed the field and now we want to ensure it,
+        // we should clear it in patch prior and then ensure it.
+        removeRef->erase(iter);
+        patchPrior<Id>().reset();
+        patchAfter<Id>().reset();
+        patchPrior<Id>().toThrift().clear() = true;
+        getEnsure<Id>(data_).emplace();
+        return true;
+      }
+    }
+
     if (ensures<Id>()) {
       return false;
     }
@@ -531,6 +564,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
     const auto& prior = data_.patchPrior()->toThrift();
     const auto& ensure = *data_.ensure();
     const auto& after = data_.patch()->toThrift();
+    const auto& remove = *data_.remove();
 
     if constexpr (!type::is_optional_or_union_field_v<T, Id>) {
       // non-optional fields can not be removed
@@ -547,7 +581,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
       return true;
     }
 
-    return false;
+    return remove.count(op::get_field_id_v<T, Id>);
   }
 
   // Combine fields from PatchOp::Clear and PatchOp::Remove operations

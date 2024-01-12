@@ -222,6 +222,42 @@ TEST(StructPatchTest, Patch) {
   test::expectPatch(patch, testValue(), {});
 }
 
+TEST(StructPatchTest, RemoveField) {
+  MyStruct value;
+  value.optBoolVal() = true;
+  value.optByteVal() = 2;
+  value.optI16Val() = 2;
+  value.optI32Val() = 3;
+  value.optI64Val() = 4;
+  value.optFloatVal() = 5;
+  value.optDoubleVal() = 6;
+  value.optStringVal() = "_hi_";
+  value.optStructVal().ensure().data1() = "BaNa";
+
+  MyStructPatch patch;
+  patch.remove<ident::optBoolVal>();
+  patch.remove<ident::optByteVal>();
+  patch.remove<ident::optI16Val>();
+  patch.remove<ident::optI32Val>();
+  patch.remove<ident::optI64Val>();
+  patch.remove<ident::optFloatVal>();
+  patch.remove<ident::optDoubleVal>();
+  patch.remove<ident::optStringVal>();
+  patch.remove<ident::optStructVal>();
+
+  test::expectPatch(patch, value, {});
+}
+
+template <typename T, typename Id>
+concept isFieldRemovable = requires {
+  T{}.template remove<Id>();
+};
+
+TEST(StructPatchTest, OnlyOptionalFieldCanBeRemoved) {
+  EXPECT_TRUE((isFieldRemovable<MyStructPatch, ident::optI32Val>));
+  EXPECT_FALSE((isFieldRemovable<MyStructPatch, ident::i32Val>));
+}
+
 TEST(StructPatchTest, ClearAssign) {
   auto patch = MyStructPatch::createClear();
   EXPECT_TRUE(patch.modifies<ident::structVal>());

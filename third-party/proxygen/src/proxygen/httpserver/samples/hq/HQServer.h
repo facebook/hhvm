@@ -46,13 +46,13 @@ class HQServer {
 
   void setStatsFactory(
       std::unique_ptr<quic::QuicTransportStatsCallbackFactory>&& statsFactory) {
-    statsFactory_ = std::move(statsFactory);
+    CHECK(server_);
+    server_->setTransportStatsCallbackFactory(std::move(statsFactory));
   }
 
  private:
   HQServerParams params_;
   std::shared_ptr<quic::QuicServer> server_;
-  std::unique_ptr<quic::QuicTransportStatsCallbackFactory> statsFactory_;
 };
 
 class ScopedHQServer {

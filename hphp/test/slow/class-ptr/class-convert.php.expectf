@@ -9,6 +9,8 @@ string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+
+Notice: Implicit Class to string conversion for string conversion in %s/class-convert.php on line 21
 string(3) "bar"
 bool(true)
 int(3)
@@ -45,6 +47,8 @@ string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+
+Notice: Implicit Class to string conversion for string conversion in %s/class-convert.php on line 21
 string(3) "bar"
 bool(true)
 int(3)
@@ -81,6 +85,8 @@ string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+
+Notice: Implicit Class to string conversion for string conversion in %s/class-convert.php on line 21
 string(3) "bar"
 bool(true)
 int(3)
@@ -117,6 +123,8 @@ string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+
+Notice: Implicit Class to string conversion for string conversion in %s/class-convert.php on line 21
 string(3) "bar"
 bool(true)
 int(3)
@@ -153,6 +161,8 @@ string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+
+Notice: Implicit Class to string conversion for string conversion in %s/class-convert.php on line 21
 string(3) "bar"
 bool(true)
 int(3)
@@ -189,6 +199,8 @@ string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+
+Notice: Implicit Class to string conversion for string conversion in %s/class-convert.php on line 21
 string(3) "bar"
 bool(true)
 int(3)
@@ -225,6 +237,8 @@ string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+
+Notice: Implicit Class to string conversion for string conversion in %s/class-convert.php on line 21
 string(3) "bar"
 bool(true)
 int(3)
@@ -261,6 +275,8 @@ string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+
+Notice: Implicit Class to string conversion for string conversion in %s/class-convert.php on line 21
 string(3) "bar"
 bool(true)
 int(3)
@@ -297,6 +313,8 @@ string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+
+Notice: Implicit Class to string conversion for string conversion in %s/class-convert.php on line 21
 string(3) "bar"
 bool(true)
 int(3)
@@ -333,6 +351,8 @@ string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+
+Notice: Implicit Class to string conversion for string conversion in %s/class-convert.php on line 21
 string(3) "bar"
 bool(true)
 int(3)

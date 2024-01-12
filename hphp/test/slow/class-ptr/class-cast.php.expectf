@@ -1,0 +1,16 @@
+string(3) "Foo"
+bool(true)
+float(0)
+int(0)
+Exception: String to vec conversion
+
+Notice: Implicit Class to string conversion for string conversion in %s/class-cast.php on line 14
+string(3) "Foo"
+bool(true)
+
+Notice: Implicit Class to string conversion for float conversion in %s/class-cast.php on line 22
+float(0)
+
+Notice: Implicit Class to string conversion for int conversion in %s/class-cast.php on line 26
+int(0)
+Exception: Lazy class to vec conversion

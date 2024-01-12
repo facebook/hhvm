@@ -1,6 +1,3 @@
--vRuntime.Eval.RaiseClassConversionNoticeSampleRate=1
--vRuntime.Eval.ClassAsStringVarDump=false
--vRuntime.Eval.ClassAsStringVarExport=false
 -vRuntime.Eval.ClassPassesClassname=true
 -vRuntime.Eval.CoeffectEnforcementLevels.zoned=0
 --inputs=__DIR__/lazyclass-suppress.inc

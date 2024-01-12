@@ -285,18 +285,42 @@ bool(true)
 bool(true)
 
 Test 6
-bool(true)
-bool(true)
-bool(false)
-bool(true)
-bool(false)
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 22
 bool(true)
 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 23
 bool(true)
-bool(true)
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 24
 bool(false)
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 25
 bool(true)
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 26
 bool(false)
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 27
+bool(true)
+
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 22
+bool(true)
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 23
+bool(true)
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 24
+bool(false)
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 25
+bool(true)
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 26
+bool(false)
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 27
 bool(true)
 
 Test 7
@@ -388,3 +412,4 @@ Cannot compare HH\keyset and lazy class using a relational operator
 Cannot compare HH\keyset and lazy class using a relational operator
 Cannot compare HH\keyset and lazy class using a relational operator
 Cannot compare HH\keyset and lazy class using a relational operator
+

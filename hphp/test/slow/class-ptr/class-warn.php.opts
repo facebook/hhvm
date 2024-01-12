@@ -1,2 +1,4 @@
--vEval.CheckPropTypeHints=3 -vEval.ClassIsStringNotices=1 -vEval.ClassStringHintNoticesSampleRate=1 -vEval.RaiseClassConversionNoticeSampleRate=1
+-vEval.CheckPropTypeHints=3
+-vEval.ClassIsStringNotices=1
+-vEval.ClassStringHintNoticesSampleRate=1
 -vEval.ClassAsStringVarDump=false

@@ -5,12 +5,6 @@ class Props {
   public static string $b;
 }
 
-function wrap($fun) :mixed{
-  try {
-    $fun();
-  } catch (Exception $e) { echo "caught: ".$e->getMessage()."\n"; }
-}
-
 class foo {}
 class bar {}
 class baz {}
@@ -57,8 +51,10 @@ function main() :mixed{
   var_dump(baz(), is_string(baz()), baz() is string, baz() as string);
   var_dump(buz(), is_string(buz()), buz() is string, buz() as string);
 
-  wrap(() ==> (new Props)->a = buz());
-  wrap(() ==> Props::$b = buz());
+  $f1 = () ==> (new Props)->a = buz();
+  $f1();
+  $f2 = () ==> Props::$b = buz();
+  $f2();
 
   $x = __hhvm_intrinsics\create_class_pointer('foo');             var_dump(io(inout $x, inout $x));
   $y = 'foo';                     var_dump(io(inout $y, inout $y));
@@ -68,8 +64,6 @@ function main() :mixed{
 }
 <<__EntryPoint>>
 function main_entry(): void {
-
-  set_error_handler(($_n, $str) ==> { throw new Exception($str); });
 
   for ($i = 0; $i < 10; $i++) main();
 }

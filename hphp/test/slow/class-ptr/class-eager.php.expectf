@@ -1,11 +1,11 @@
-string(3) "Bar"
+class(Bar)
 bool(true)
 string(3) "Bar"
 vec(2) {
-  string(3) "Bar"
+  class(Bar)
   NULL
 }
-string(3) "Foo"
+class(Foo)
 string(2) "sm"
 int(10)
 string(1) "m"

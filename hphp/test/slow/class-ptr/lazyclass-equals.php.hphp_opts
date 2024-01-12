@@ -1,3 +1,1 @@
--vRuntime.Eval.RaiseClassConversionNoticeSampleRate=1
--vRuntime.Eval.ClassAsStringVarDump=false
 -vRuntime.Eval.ClassPassesClassname=true

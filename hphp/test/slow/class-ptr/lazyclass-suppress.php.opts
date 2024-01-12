@@ -1,5 +1,2 @@
--vEval.RaiseClassConversionNoticeSampleRate=1
--vEval.ClassAsStringVarDump=false
--vEval.ClassAsStringVarExport=false
 -vEval.ClassPassesClassname=true
 -vEval.CoeffectEnforcementLevels.zoned=0

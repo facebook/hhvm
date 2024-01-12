@@ -4459,6 +4459,7 @@ end = struct
             | `Dynamic -> None
             | `Class (_, class_info, _) -> Some class_info)
       in
+      let before_new_lenv = env.lenv in
       let (env, te, obj) =
         (* New statements derived from Xml literals are of the following form:
          *
@@ -4501,9 +4502,20 @@ end = struct
              not typecheck. *)
           []
       in
+      (* We restored the local environment to the state prior to typechecking the
+         XHP literal as a constructor call. Otherwise, refinement and their
+         invalidations will be executed twice.
+
+         This works specifically because when XHP literals are desugared,
+         attributes are the first argument. If children were typechecked first,
+         they could have caused legitimate invalidation of fake members making
+         restoration of environment unsound. *)
+      let after_new_lenv = env.lenv in
+      let env = { env with lenv = before_new_lenv } in
       let (env, typed_attrs) =
         Xhp_attribute.xhp_attribute_exprs env class_info attrl sid obj
       in
+      let env = { env with lenv = after_new_lenv } in
       let txml = Aast.Xml (sid, typed_attrs, tchildren) in
       (match class_info with
       | None ->

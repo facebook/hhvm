@@ -1,0 +1,9 @@
+File "xhp_attribute_refinement_typehole.php", line 28, characters 16-23:
+Invalid argument (Typing[4110])
+  File "xhp_attribute_refinement_typehole.php", line 22, characters 23-28:
+  Expected `string`
+  File "xhp_attribute_refinement_typehole.php", line 4, characters 10-16:
+  But got `?string`
+  File "xhp_attribute_refinement_typehole.php", line 27, characters 4-6:
+  All the local information about `$c->prop` has been invalidated during this call.
+This is a limitation of the type-checker; use a local if that's the problem.

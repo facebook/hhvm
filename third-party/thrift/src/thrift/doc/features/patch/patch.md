@@ -26,14 +26,18 @@ How mutations for Thrift values are represented, manipulated, and applied. It ca
 
 ## Enable Patch
 
-Use `thrift_patch_library` buck build rule to enable Patch. It takes
-three arguments
+Use `thrift_patch_library` buck build rule to enable Patch. Internally, it will
+create a `thrift_library` buile rule that contains the patch structs in thrift
+file `[thrift_file_name]_patch.thrift`. It takes the following arguments
 
 | Argument            | Description                                             | Example                            |
 | ------------------- | ------------------------------------------------------- | ---------------------------------- |
 | thrift_library_name | The name of thrift_library that contains the srcs.      | "my_rule"                          |
 | thrift_library_srcs | The thrift source files that we want to generate Patch. | ["foo.thrift", "bar.thrift"]       |
 | thrift_library_deps | The build rules that patch depends on.                  | ["//path/to/foo", "//path/to/bar"] |
+| languages           | Same as the `languages` argument in thrift_library.     | ["cpp2", "python"]                 |
+
+Any extra arguments will be forwarded to the internal Patch's thrift_library.
 
 ### Example
 
@@ -55,6 +59,20 @@ thrift_patch_library(
   thrift_library_name = "foo",
   thrift_library_srcs = ["foo.thrift"],
   thrift_library_deps = ["//path/to/bar"],
+  languages = ['cpp2'],
+  thrift_cpp2_options = ['any'],
+)
+```
+
+Internally, this will generate
+
+```
+thrift_library(
+  name = "foo_patch",
+  srcs = {"foo_patch.thrift": []},
+  deps = [":foo", "//path/to/bar_patch"],
+  languages = ['cpp2'],
+  thrift_cpp2_options = ['any'],
 )
 ```
 

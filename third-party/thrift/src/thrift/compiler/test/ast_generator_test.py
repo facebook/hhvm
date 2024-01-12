@@ -51,21 +51,24 @@ class AstGeneratorTest(unittest.TestCase):
         self.maxDiff = None
 
     def run_thrift(self, file):
-        argsx = [
-            thrift2ast,
-            "--gen",
-            "ast:protocol=compact,source_ranges",
-            "-o",
-            self.tmp,
-            "-I",
-            resources.path(__package__, "implicit_includes"),
-            file,
-        ]
-        p = subprocess.run(argsx, capture_output=True)
-        print("exit status:", p.returncode)
-        print("stdout:", p.stdout.decode())
-        print("stderr:", p.stderr.decode())
-        self.assertEqual(p.returncode, 0)
+        with resources.as_file(
+            resources.files(__package__).joinpath("implicit_includes")
+        ) as inc:
+            argsx = [
+                thrift2ast,
+                "--gen",
+                "ast:protocol=compact,source_ranges",
+                "-o",
+                self.tmp,
+                "-I",
+                str(inc),
+                file,
+            ]
+            p = subprocess.run(argsx, capture_output=True)
+            print("exit status:", p.returncode)
+            print("stdout:", p.stdout.decode())
+            print("stderr:", p.stderr.decode())
+            self.assertEqual(p.returncode, 0)
 
         with open(self.tmp + "/gen-ast/" + file[:-7] + ".ast", "rb") as f:
             encoded = f.read()

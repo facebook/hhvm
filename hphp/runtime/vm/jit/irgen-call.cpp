@@ -1306,7 +1306,6 @@ void emitModuleBoundaryCheckKnown(IRGS& env, const Func* symbol) {
   if (symbol->moduleName() == caller->moduleName()) return;
 
   auto const callee = cns(env, symbol);
-  assertx(callee->hasConstVal());
   auto const data = OptClassAndFuncData { curClass(env), caller };
   if (symbol->isInternal()) {
     gen(env, RaiseModuleBoundaryViolation, data, callee);
@@ -1323,7 +1322,6 @@ void emitModuleBoundaryCheckKnown(IRGS& env, const Class* symbol) {
   if (symbol->moduleName() == caller->moduleName()) return;
 
   auto const callee = cns(env, symbol);
-  assertx(callee->hasConstVal());
   auto const data = OptClassAndFuncData { curClass(env), caller };
   if (symbol->isInternal()) {
     gen(env, RaiseModuleBoundaryViolation, data, callee);

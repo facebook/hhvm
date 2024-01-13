@@ -20,7 +20,6 @@
 #include <cstdio>
 #include <fstream>
 #include <optional>
-#include <vector>
 
 #include <folly/dynamic.h>
 #include <folly/json.h>
@@ -34,6 +33,7 @@
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/object-iterator.h"
 #include "hphp/runtime/base/php-globals.h"
@@ -49,6 +49,7 @@
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-resource.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
@@ -60,6 +61,8 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/native.h"
+#include "hphp/runtime/vm/unit-emitter.h"
+#include "hphp/system/systemlib.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/blob-encoder.h"
 #include "hphp/util/optional.h"
@@ -93,6 +96,23 @@ std::string Replayer::getEntryPoint() {
     const auto server{replayer.m_globals[String{"_SERVER"}].asCArrRef()};
     return server[String{"SCRIPT_FILENAME"}].asCStrRef().toCppString();
   }
+}
+
+const std::vector<const Unit*>& Replayer::getUnits() {
+  static const auto units_{[] {
+    std::vector<const Unit*> units;
+    for (const auto& ue : SystemLib::claimRegisteredUnitEmitters()) {
+      units.emplace_back(ue->create().release());
+    };
+    for (auto i{get().m_unitSns.begin()}; i; ++i) {
+      const auto path{i.first().asCStrRef().get()};
+      if (!FileUtil::isSystemName(path->data())) {
+        units.emplace_back(lookupUnit(path, "/", nullptr, nullptr, false));
+      }
+    }
+    return units;
+  }()};
+  return units_;
 }
 
 FactsStore* Replayer::onGetFactsForRequest() {

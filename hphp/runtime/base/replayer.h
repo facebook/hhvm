@@ -25,6 +25,7 @@
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include <folly/ScopeGuard.h>
 
@@ -39,6 +40,7 @@
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/vm/unit.h"
 #include "hphp/util/hdf.h"
 
 namespace HPHP {
@@ -50,6 +52,7 @@ namespace Stream { struct Wrapper; }
 struct Replayer {
   Replayer();
   static std::string getEntryPoint();
+  static const std::vector<const Unit*>& getUnits();
   static HPHP::FactsStore* onGetFactsForRequest();
   static bool onHasReceived();
   static std::int64_t onParse(const String& filename);

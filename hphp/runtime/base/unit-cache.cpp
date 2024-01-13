@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/record-replay.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
@@ -397,7 +397,7 @@ Optional<String> loadFileContents(const char* path,
   if (wrapper) {
     // We only allow normal file streams, which cannot re-enter
     assertx(wrapper->isNormalFileStream());
-    TmpAssign __{RO::WarningFrequency, 0L};
+    rr::ErrorSuppressor __;
     if (auto const f = wrapper->open(String{path}, "r", 0, nullptr)) {
       return f->read();
     }

@@ -1569,7 +1569,6 @@ void VariableSerializer::serializeFunc(const Func* func) {
         );
       }
     case Type::Serialize:
-    case Type::Internal:
       if (func->isMethCaller()) {
         SystemLib::throwInvalidOperationExceptionObject(
           VarNR{s_invalidMethCallerSerde.get()}
@@ -1577,6 +1576,7 @@ void VariableSerializer::serializeFunc(const Func* func) {
       }
       invalidFuncConversion("string");
       break;
+    case Type::Internal:
     case Type::DebuggerSerialize:
       m_buf->append("f:");
       m_buf->append(name->size());
@@ -1784,12 +1784,23 @@ void VariableSerializer::serializeClsMeth(
     }
 
     case Type::Serialize:
-    case Type::Internal:
-    case Type::APCSerialize:
-    case Type::DebuggerSerialize: {
+    case Type::APCSerialize: {
       SystemLib::throwInvalidOperationExceptionObject(
         "Unable to serialize class meth pointer"
       );
+    }
+    case Type::Internal:
+    case Type::DebuggerSerialize: {
+      m_buf->append("m:");
+      m_buf->append(clsName->size());
+      m_buf->append(":\"");
+      m_buf->append(clsName->data(), clsName->size());
+      m_buf->append("\":");
+      m_buf->append(funcName->size());
+      m_buf->append(":\"");
+      m_buf->append(funcName->data(), funcName->size());
+      m_buf->append("\";");
+      break;
     }
   }
 }

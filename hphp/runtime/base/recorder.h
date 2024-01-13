@@ -31,9 +31,11 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/record-replay.h"
 #include "hphp/runtime/base/req-hash-map.h"
+#include "hphp/runtime/base/req-memory.h"
 #include "hphp/runtime/base/req-optional.h"
 #include "hphp/runtime/base/req-vector.h"
 #include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-nonnull-ret.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -51,6 +53,8 @@ struct Recorder {
     virtual void write(const std::vector<char>& recording) = 0;
   };
 
+  Recorder();
+  static void onCompileSystemlibString(const std::string& filename);
   static void onGetFactsForRequest(FactsStore*& map);
   static void onHasReceived(bool received);
   static void onProcessSleepEvents(std::int64_t now);
@@ -58,6 +62,8 @@ struct Recorder {
   static void onRuntimeOptionLoad(const IniSettingMap& ini, const Hdf& hdf,
                                   const std::string& cmd);
   static void onTryReceiveSome(c_ExternalThreadEventWaitHandle* received);
+  static void onUserErrorHandlerEntry(const std::string& msg, Variant bt,
+                                      int errnum, bool swallowExceptions);
   static void onVisitEntitiesToInvalidate();
   static void onVisitEntitiesToInvalidateFast();
   static void onVisitEntity(const std::string& entity);
@@ -99,19 +105,19 @@ struct Recorder {
   static Recorder* get();
   static HPHP::FactsStore* getFactsStore();
   static StdoutHook* getStdoutHook();
-  static Stream::Wrapper* getStreamWrapper();
-  void onNativeCallArg(const String& arg);
-  void onNativeCallEntry(NativeFunction ptr);
+  static req::unique_ptr<Stream::Wrapper> getStreamWrapper();
+  void onNativeCallArg(std::size_t call, const String& arg);
+  std::size_t onNativeCallEntry(NativeFunction ptr);
   void onNativeCallExit();
-  void onNativeCallReturn(const String& ret);
-  void onNativeCallThrow(std::exception_ptr exc);
-  void onNativeCallWaitHandle(c_Awaitable* wh);
+  void onNativeCallReturn(std::size_t call, const String& ret);
+  void onNativeCallThrow(std::size_t call, std::exception_ptr exc);
+  void onNativeCallWaitHandle(std::size_t call, c_Awaitable* wh);
   void resolveWaitHandles();
   std::vector<char> toRecording() const;
 
   template<typename R, typename... A>
   R recordNativeCall(R(*f)(A...), NativeFunction ptr, A&&... args) {
-    onNativeCallEntry(ptr);
+    const auto call{onNativeCallEntry(ptr)};
     std::conditional_t<std::is_void_v<R>, std::nullptr_t, R> ret;
     std::exception_ptr exc;
     try {
@@ -123,13 +129,13 @@ struct Recorder {
     } catch (...) {
       exc = std::current_exception();
     }
-    (onNativeCallArg(rr::serialize(std::forward<A>(args))), ...);
+    (onNativeCallArg(call, rr::serialize(std::forward<A>(args))), ...);
     if (exc) {
-      onNativeCallThrow(exc);
+      onNativeCallThrow(call, exc);
       std::rethrow_exception(exc);
     } else {
       ObjectData* obj{nullptr};
-      if constexpr (std::is_same_v<R, Object>) {
+      if constexpr (std::is_same_v<R, Object> || std::is_same_v<R, ObjectRet>) {
         obj = ret.get();
       } else if constexpr (std::is_same_v<R, Variant>) {
         if (ret.isObject()) {
@@ -137,9 +143,9 @@ struct Recorder {
         }
       }
       if (obj != nullptr && obj->isWaitHandle()) {
-        onNativeCallWaitHandle(std::bit_cast<c_Awaitable*>(obj));
+        onNativeCallWaitHandle(call, std::bit_cast<c_Awaitable*>(obj));
       } else {
-        onNativeCallReturn(rr::serialize(ret));
+        onNativeCallReturn(call, rr::serialize(ret));
       }
       if constexpr (!std::is_void_v<R>) {
         return ret;
@@ -149,14 +155,14 @@ struct Recorder {
 
   bool m_enabled;
   Array m_factsStore;
+  Array m_globals;
   req::vector<rr::NativeCall> m_nativeCalls;
   req::vector<rr::NativeEvent> m_nativeEvents;
   std::size_t m_nextThreadCreationOrder;
   HPHP::FactsStore* m_parentFactsStore;
-  Stream::Wrapper* m_parentStreamWrapper;
   req::hash_map<c_Awaitable*, std::size_t> m_pendingWaitHandleToNativeCall;
-  Array m_serverGlobal;
-  Array m_streamWrapper;
+  req::unique_ptr<Stream::Wrapper> m_streamWrapper;
+  Array m_streamWrapperCalls;
   req::hash_map<const c_ExternalThreadEventWaitHandle*, std::size_t> m_threads;
 };
 

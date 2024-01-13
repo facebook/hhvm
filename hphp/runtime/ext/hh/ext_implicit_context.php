@@ -195,7 +195,7 @@ function create_ic_inaccessible_context()[] {
  * Returns the currently implicit context hash or empty string if
  * no implicit context is set
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function get_implicit_context_memo_key()[zoned]: string;
 
 } // namespace ImplicitContext_Private

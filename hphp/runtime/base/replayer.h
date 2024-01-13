@@ -48,9 +48,11 @@ struct DebuggerHook;
 namespace Stream { struct Wrapper; }
 
 struct Replayer {
+  Replayer();
   static std::string getEntryPoint();
   static HPHP::FactsStore* onGetFactsForRequest();
   static bool onHasReceived();
+  static std::int64_t onParse(const String& filename);
   static std::int64_t onProcessSleepEvents();
   static c_ExternalThreadEventWaitHandle* onReceiveSomeUntil();
   static void onRuntimeOptionLoad(IniSettingMap& ini, Hdf& hdf,
@@ -71,6 +73,7 @@ struct Replayer {
 
  private:
   struct DebuggerHook;
+  struct Exception;
   struct ExternalThreadEvent;
   struct FactsStore;
   struct StreamWrapper;
@@ -106,7 +109,7 @@ struct Replayer {
     const auto call{popNativeCall(ptr)};
     std::int64_t i{-1};
     (nativeArg<A>(call.args[++i].asCStrRef(), std::forward<A>(args)), ...);
-    if constexpr (std::is_same_v<R, Object>) {
+    if constexpr (std::is_same_v<R, Object> || std::is_same_v<R, ObjectRet>) {
       if (call.wh) {
         return makeWaitHandle(call);
       }
@@ -121,14 +124,15 @@ struct Replayer {
   HPHP::DebuggerHook* m_debuggerHook;
   std::string m_entryPoint;
   Array m_factsStore;
+  Array m_globals;
   bool m_inNativeCall;
   std::deque<rr::NativeCall> m_nativeCalls;
   std::deque<rr::NativeEvent> m_nativeEvents;
   std::unordered_map<NativeFunction, std::string> m_nativeFuncIds;
   std::size_t m_nextThreadCreationOrder;
-  Array m_serverGlobal;
   Array m_streamWrapper;
   std::unordered_map<std::size_t, c_ExternalThreadEventWaitHandle*> m_threads;
+  Array m_unitSns;
 };
 
 template<typename R, typename... A, R(*f)(A...)>

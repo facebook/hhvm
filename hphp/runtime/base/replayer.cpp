@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/directory.h"
+#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/object-data.h"
@@ -67,8 +68,31 @@ namespace HPHP {
 
 using namespace rr;
 
+namespace {
+  static Replayer replayer;
+} // namespace
+
+Replayer::Replayer() :
+  m_debuggerHook{nullptr},
+  m_entryPoint{},
+  m_factsStore{},
+  m_globals{},
+  m_inNativeCall{false},
+  m_nativeCalls{},
+  m_nativeEvents{},
+  m_nativeFuncIds{},
+  m_nextThreadCreationOrder{0},
+  m_streamWrapper{},
+  m_threads{},
+  m_unitSns{} {}
+
 std::string Replayer::getEntryPoint() {
-  return get().m_entryPoint;
+  if (!replayer.m_entryPoint.empty()) {
+    return replayer.m_entryPoint;
+  } else {
+    const auto server{replayer.m_globals[String{"_SERVER"}].asCArrRef()};
+    return server[String{"SCRIPT_FILENAME"}].asCStrRef().toCppString();
+  }
 }
 
 FactsStore* Replayer::onGetFactsForRequest() {
@@ -76,7 +100,6 @@ FactsStore* Replayer::onGetFactsForRequest() {
 }
 
 bool Replayer::onHasReceived() {
-  auto& replayer{get()};
   const auto event{std::move(replayer.m_nativeEvents.front())};
   replayer.m_nativeEvents.pop_front();
   always_assert(event.type == NativeEvent::Type::HAS_RECEIVED);
@@ -84,8 +107,12 @@ bool Replayer::onHasReceived() {
   return event.value[0].asBooleanVal();
 }
 
+std::int64_t Replayer::onParse(const String& filename) {
+  always_assert_flog(replayer.m_unitSns.exists(filename), "{}", filename);
+  return replayer.m_unitSns[filename].asInt64Val();
+}
+
 std::int64_t Replayer::onProcessSleepEvents() {
-  auto& replayer{get()};
   const auto event{std::move(replayer.m_nativeEvents.front())};
   replayer.m_nativeEvents.pop_front();
   always_assert(event.type == NativeEvent::Type::PROCESS_SLEEP_EVENTS);
@@ -94,7 +121,6 @@ std::int64_t Replayer::onProcessSleepEvents() {
 }
 
 c_ExternalThreadEventWaitHandle* Replayer::onReceiveSomeUntil() {
-  auto& replayer{get()};
   const auto event{std::move(replayer.m_nativeEvents.front())};
   replayer.m_nativeEvents.pop_front();
   always_assert(event.type == NativeEvent::Type::RECEIVE_SOME_UNTIL);
@@ -111,7 +137,6 @@ c_ExternalThreadEventWaitHandle* Replayer::onReceiveSomeUntil() {
 
 void Replayer::onRuntimeOptionLoad(IniSettingMap& ini, Hdf& hdf,
                                    const std::string& path) {
-  auto& replayer{get()};
   std::ifstream ifs{path, std::ios::binary | std::ios::ate};
   always_assert_flog(!ifs.fail(), "{}", path);
   std::vector<char> data(static_cast<std::size_t>(ifs.tellg()));
@@ -123,16 +148,15 @@ void Replayer::onRuntimeOptionLoad(IniSettingMap& ini, Hdf& hdf,
   const ArrayData* ptr;
   BlobEncoderHelper<decltype(ptr)>::serde(decoder, ptr, true);
   const Array recording{const_cast<ArrayData*>(ptr)};
-  const auto header{recording[String{"header"}].asCArrRef()};
-  const auto compilerId{header[String{"compilerId"}].asCStrRef()};
+  const auto compilerId{recording[String{"compilerId"}].asCStrRef()};
   // TODO Enable compiler ID assertion after replay completes successfully.
   // always_assert_flog(compilerId == HPHP::compilerId(), "{}", compilerId);
-  replayer.m_entryPoint = header[String{"entryPoint"}].asCStrRef().c_str();
-  Hdf newHdf;
-  newHdf.fromString(header[String{"hdf"}].asCStrRef().c_str());
-  IniSettingMap newIni{header[String{"ini"}].asCArrRef()};
-  replayer.m_serverGlobal = header[String{"serverGlobal"}].asCArrRef();
+  replayer.m_entryPoint = recording[String{"entryPoint"}].asCStrRef().c_str();
   replayer.m_factsStore = recording[String("factsStore")].asCArrRef();
+  replayer.m_globals = recording[String{"globals"}].asCArrRef();
+  Hdf newHdf;
+  newHdf.fromString(recording[String{"hdf"}].asCStrRef().c_str());
+  IniSettingMap newIni{recording[String{"ini"}].asCArrRef()};
   std::unordered_map<std::uintptr_t, NativeFunction> nativeFuncRecordToReplayId;
   for (auto i{recording[String("nativeFuncIds")].asCArrRef().begin()}; i; ++i) {
     const auto id{std::bit_cast<NativeFunction>(i.second().asInt64Val())};
@@ -141,15 +165,16 @@ void Replayer::onRuntimeOptionLoad(IniSettingMap& ini, Hdf& hdf,
   }
   for (auto i{recording[String{"nativeCalls"}].asCArrRef().begin()}; i; ++i) {
     const auto call{i.second().asCArrRef()};
-    always_assert_flog(call.size() == 7, "{}", call.size());
+    always_assert_flog(call.size() == 8, "{}", call.size());
     replayer.m_nativeCalls.push_back(NativeCall{
       std::bit_cast<NativeFunction>(call[0].asInt64Val()),
       call[1].asInt64Val(),
       call[2].asCArrRef(),
       call[3].asCArrRef(),
-      call[4].asCStrRef(),
+      call[4].asCArrRef(),
       call[5].asCStrRef(),
-      static_cast<std::uint8_t>(call[6].asInt64Val()),
+      call[6].asCStrRef(),
+      static_cast<std::uint8_t>(call[7].asInt64Val()),
     });
   }
   for (auto i{recording[String{"nativeEvents"}].asCArrRef().begin()}; i; ++i) {
@@ -161,9 +186,11 @@ void Replayer::onRuntimeOptionLoad(IniSettingMap& ini, Hdf& hdf,
     });
   }
   replayer.m_streamWrapper = recording[String("streamWrapper")].asCArrRef();
+  replayer.m_unitSns = recording[String("unitSns")].asCArrRef();
   RuntimeOption::Load(newIni, newHdf, {}, {}, nullptr, replayer.m_entryPoint);
   RO::EvalRecordSampleRate = 0;
   RO::EvalReplay = true;
+  RO::EvalUnitPrefetcherMaxThreads = 0;
   hdf = newHdf;
   ini = newIni;
   if (RO::RepoAuthoritative) {
@@ -174,7 +201,6 @@ void Replayer::onRuntimeOptionLoad(IniSettingMap& ini, Hdf& hdf,
 }
 
 c_ExternalThreadEventWaitHandle* Replayer::onTryReceiveSome() {
-  auto& replayer{get()};
   const auto event{std::move(replayer.m_nativeEvents.front())};
   replayer.m_nativeEvents.pop_front();
   always_assert(event.type == NativeEvent::Type::TRY_RECEIVE_SOME);
@@ -190,7 +216,6 @@ c_ExternalThreadEventWaitHandle* Replayer::onTryReceiveSome() {
 }
 
 void Replayer::onVisitEntitiesToInvalidate(const Variant& visitor) {
-  auto& replayer{get()};
   const auto event{std::move(replayer.m_nativeEvents.front())};
   replayer.m_nativeEvents.pop_front();
   always_assert(event.type == NativeEvent::Type::VISIT_ENTITIES_TO_INVALIDATE);
@@ -200,7 +225,6 @@ void Replayer::onVisitEntitiesToInvalidate(const Variant& visitor) {
 }
 
 void Replayer::onVisitEntitiesToInvalidateFast(const Variant& visitor) {
-  auto& replayer{get()};
   const auto event{std::move(replayer.m_nativeEvents.front())};
   replayer.m_nativeEvents.pop_front();
   always_assert(event.type ==
@@ -211,7 +235,6 @@ void Replayer::onVisitEntitiesToInvalidateFast(const Variant& visitor) {
 }
 
 void Replayer::requestExit() {
-  auto& replayer{get()};
   Stream::setThreadLocalFileHandler(nullptr);
   always_assert_flog(replayer.m_nativeCalls.empty(), "{}",
     replayer.m_nativeCalls.size());
@@ -225,7 +248,7 @@ void Replayer::requestInit() {
 }
 
 void Replayer::setDebuggerHook(HPHP::DebuggerHook* debuggerHook) {
-  get().m_debuggerHook = debuggerHook;
+  replayer.m_debuggerHook = debuggerHook;
 }
 
 template<>
@@ -442,9 +465,10 @@ struct Replayer::DebuggerHook final : public HPHP::DebuggerHook {
   }
 
   void onRequestInit() override {
-    auto& replayer{get()};
-    const Variant serverGlobal{replayer.m_serverGlobal.detach()};
-    php_global_set(StaticString{"_SERVER"}, serverGlobal);
+    const auto globals{replayer.m_globals};
+    for (auto i{replayer.m_globals.begin()}; i; ++i) {
+      php_global_set(StaticString{i.first().asCStrRef().c_str()}, i.second());
+    }
     HPHP::DebuggerHook::detach();
     if (auto debuggerHook{replayer.m_debuggerHook}; debuggerHook != nullptr) {
       HPHP::DebuggerHook::s_activeHook = debuggerHook;
@@ -455,6 +479,11 @@ struct Replayer::DebuggerHook final : public HPHP::DebuggerHook {
       debuggerHook->onRequestInit();
     }
   }
+};
+
+struct Replayer::Exception final : public ExtendedException {
+  Exception(const std::string& message, ArrayData* backtrace) :
+    ExtendedException(message, backtrace) {}
 };
 
 struct Replayer::ExternalThreadEvent final : public AsioExternalThreadEvent {
@@ -488,7 +517,6 @@ struct Replayer::FactsStore final : public HPHP::FactsStore {
   template<typename R, typename C, typename... A>
   static auto wrap(R(C::*)(A...), const char* name) {
     return [=](A... args) -> R {
-      auto& replayer{get()};
       const auto key{serialize(make_vec_array(name, serialize(args)...))};
       always_assert_flog(replayer.m_factsStore.exists(key), "{}", key);
       return unserialize<R>(replayer.m_factsStore[key].asCStrRef());
@@ -748,7 +776,6 @@ struct Replayer::StreamWrapper final : public Stream::Wrapper {
   template<typename R, typename C, typename P, typename... A>
   static auto wrap(R(C::*)(P, A...), const char* name) {
     return [=](P path, A... args) -> R {
-      auto& replayer{get()};
       const auto key{serialize(make_vec_array(name, path, serialize(args)...))};
       always_assert_flog(replayer.m_streamWrapper.exists(key), "{}", key);
       return unserialize<R>(replayer.m_streamWrapper[key].asCStrRef());
@@ -758,7 +785,6 @@ struct Replayer::StreamWrapper final : public Stream::Wrapper {
   template<typename R, typename C, typename P>
   static auto wrap(R(C::*)(P, struct stat*), const char* name) {
     return [=](P path, struct stat* buf) -> R {
-      auto& replayer{get()};
       const auto key{serialize(make_vec_array(name, path))};
       always_assert_flog(replayer.m_streamWrapper.exists(key), "{}", key);
       const auto array{unserialize<Array>(
@@ -842,7 +868,6 @@ struct Replayer::StreamWrapper final : public Stream::Wrapper {
 };
 
 Replayer& Replayer::get() {
-  static Replayer replayer;
   return replayer;
 }
 
@@ -909,6 +934,22 @@ NativeCall Replayer::popNativeCall(NativeFunction ptr) {
   }
   for (auto i{call.stdouts.begin()}; i; ++i) {
     g_context->write(i.second().asCStrRef());
+  }
+  for (auto i{call.errs.begin()}; i; ++i) {
+    const auto err{unserialize<Array>(i.second().asCStrRef())};
+    always_assert_flog(err.size() == 4, "{}", err.size());
+    const auto message{err[0].asCStrRef().toCppString()};
+    const auto errnum{err[2].asInt64Val()};
+    const auto swallowExceptions{err[3].asBooleanVal()};
+    m_inNativeCall = false;
+    if (const auto backtrace{err[1]}; backtrace.isArray()) {
+      const Exception e{message, backtrace.asCArrRef().get()};
+      g_context->callUserErrorHandler(e, errnum, swallowExceptions);
+    } else {
+      const HPHP::Exception e{message};
+      g_context->callUserErrorHandler(e, errnum, swallowExceptions);
+    }
+    m_inNativeCall = true;
   }
   return call;
 }

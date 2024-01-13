@@ -47,6 +47,13 @@ String serialize(const T& value);
 template<typename T>
 T unserialize(const String& recordedValue);
 
+struct ErrorSuppressor {
+  ErrorSuppressor();
+  ~ErrorSuppressor();
+ private:
+  std::int64_t m_level;
+};
+
 template<auto m>
 struct MethodToFunc;
 
@@ -78,6 +85,7 @@ struct NativeCall {
   std::int64_t flags{0};
   Array stdouts{Array::CreateVec()};
   Array args{Array::CreateVec()};
+  Array errs{Array::CreateVec()};
   String ret{empty_string()};
   String exc{empty_string()};
   std::uint8_t wh{0};

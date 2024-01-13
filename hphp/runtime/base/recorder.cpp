@@ -82,8 +82,26 @@ namespace {
   static std::string g_entryPoint;
   static std::string g_hdf;
   static std::string g_ini;
+  static std::vector<std::string> g_systemlibs;
   static Recorder::Writer* g_writer{&g_defaultWriter};
 } // namespace
+
+Recorder::Recorder() :
+  m_enabled{false},
+  m_factsStore{},
+  m_globals{},
+  m_nativeCalls{},
+  m_nativeEvents{},
+  m_nextThreadCreationOrder{0},
+  m_parentFactsStore{nullptr},
+  m_pendingWaitHandleToNativeCall{},
+  m_streamWrapper{},
+  m_streamWrapperCalls{},
+  m_threads{} {}
+
+void Recorder::onCompileSystemlibString(const std::string& filename) {
+  g_systemlibs.emplace_back(filename);
+}
 
 void Recorder::onGetFactsForRequest(HPHP::FactsStore*& map) {
   if (const auto recorder{get()}; UNLIKELY(recorder && recorder->m_enabled)) {
@@ -136,6 +154,20 @@ void Recorder::onTryReceiveSome(c_ExternalThreadEventWaitHandle* received) {
   }
 }
 
+void Recorder::onUserErrorHandlerEntry(const std::string& msg,
+                                       Variant bt, int errnum,
+                                       bool swallowExceptions) {
+  const auto recorder{get()};
+  if (UNLIKELY(recorder && !recorder->m_nativeCalls.empty())) {
+    auto& call{recorder->m_nativeCalls.back()};
+    if (UNLIKELY(call.ret.empty() && call.exc.empty() && call.wh == 0)) {
+      const auto err{make_vec_array(msg, bt, errnum, swallowExceptions)};
+      call.errs.append(serialize(err));
+      recorder->onNativeCallExit();
+    }
+  }
+}
+
 void Recorder::onVisitEntitiesToInvalidate() {
   if (const auto recorder{get()}; UNLIKELY(recorder && recorder->m_enabled)) {
     auto& event{recorder->m_nativeEvents.emplace_back()};
@@ -159,22 +191,23 @@ void Recorder::onVisitEntity(const std::string& entity) {
 void Recorder::requestExit() {
   if (UNLIKELY(m_enabled)) {
     resolveWaitHandles();
-    Stream::setThreadLocalFileHandler(m_parentStreamWrapper);
     try {
+      ErrorSuppressor _;
       g_writer->write(toRecording());
     } catch (...) {
       // TODO Record failure to record
     }
+    Stream::setThreadLocalFileHandler(nullptr);
     m_enabled = false;
     m_factsStore.clear();
+    m_globals.clear();
     m_nativeCalls.clear();
     m_nativeEvents.clear();
     m_nextThreadCreationOrder = 0;
     m_parentFactsStore = nullptr;
-    m_parentStreamWrapper = nullptr;
     m_pendingWaitHandleToNativeCall.clear();
-    m_serverGlobal.clear();
-    m_streamWrapper.clear();
+    m_streamWrapper = nullptr;
+    m_streamWrapperCalls.clear();
     m_threads.clear();
   }
 }
@@ -183,19 +216,16 @@ void Recorder::requestInit() {
   switch (HPHP::Treadmill::sessionKind()) {
     case HPHP::Treadmill::SessionKind::CLISession:
     case HPHP::Treadmill::SessionKind::HttpRequest:
-      if (folly::Random::oneIn64(RO::EvalRecordSampleRate)) {
-        const auto& url{RO::EvalRecordSampleUrl};
-        m_enabled = url.empty() || url == g_context->getRequestUrl();
-      }
       break;
     default:
-      break;
+      return;
   }
-  if (UNLIKELY(m_enabled)) {
+  if (UNLIKELY(m_enabled = folly::Random::oneIn64(RO::EvalRecordSampleRate))) {
     m_factsStore = Array::CreateDict();
-    m_parentStreamWrapper = Stream::getThreadLocalFileHandler();
-    m_streamWrapper = Array::CreateDict();
-    Stream::setThreadLocalFileHandler(getStreamWrapper());
+    m_globals = Array::CreateDict();
+    m_streamWrapper = getStreamWrapper();
+    m_streamWrapperCalls = Array::CreateDict();
+    Stream::setThreadLocalFileHandler(m_streamWrapper.get());
     TmpAssign _{RO::EvalJitDisabledByVSDebug, false};
     HPHP::DebuggerHook::attach<DebuggerHook>();
   }
@@ -212,9 +242,13 @@ struct Recorder::DebuggerHook final : public HPHP::DebuggerHook {
   }
 
   void onRequestInit() override {
-    const auto serverGlobal{php_global(StaticString{"_SERVER"}).asCArrRef()};
-    for (auto i{serverGlobal.begin()}; i; ++i) {
-      Recorder::get()->m_serverGlobal.set(i.first(), i.second());
+    auto& recorder{*Recorder::get()};
+    for (auto s : {"_ENV", "_FILES", "_GET", "_POST", "_REQUEST", "_SERVER"}) {
+      auto globals{Array::CreateDict()};
+      for (auto i{php_global(StaticString{s}).asCArrRef().begin()}; i; ++i) {
+        globals.set(i.first(), i.second());
+      }
+      recorder.m_globals.set(String{s}, globals);
     }
     HPHP::DebuggerHook::detach();
   }
@@ -502,12 +536,13 @@ struct Recorder::StreamWrapper final : public Stream::Wrapper {
   template<typename R, typename C, typename P, typename... A>
   static auto wrap(R(C::*m)(P, A...), const char* name) {
     return [=](P path, A... args) -> R {
-      Stream::setThreadLocalFileHandler(get()->m_parentStreamWrapper);
+      const auto recorder{get()};
+      Stream::setThreadLocalFileHandler(nullptr);
       const auto wrapper{Stream::getWrapperFromURI(path)};
-      Stream::setThreadLocalFileHandler(getStreamWrapper());
+      Stream::setThreadLocalFileHandler(recorder->m_streamWrapper.get());
       const auto ret{(wrapper->*m)(path, std::forward<A>(args)...)};
       const auto key{serialize(make_vec_array(name, path, serialize(args)...))};
-      get()->m_streamWrapper.set(key, serialize(ret));
+      recorder->m_streamWrapperCalls.set(key, serialize(ret));
       return ret;
     };
   }
@@ -515,12 +550,13 @@ struct Recorder::StreamWrapper final : public Stream::Wrapper {
   template<typename R, typename C, typename P>
   static auto wrap(R(C::*m)(P, struct stat*), const char* name) {
     return [=](P path, struct stat* buf) -> R {
-      Stream::setThreadLocalFileHandler(get()->m_parentStreamWrapper);
+      const auto recorder{get()};
+      Stream::setThreadLocalFileHandler(nullptr);
       const auto wrapper{Stream::getWrapperFromURI(path)};
-      Stream::setThreadLocalFileHandler(getStreamWrapper());
+      Stream::setThreadLocalFileHandler(recorder->m_streamWrapper.get());
       const auto ret{(wrapper->*m)(path, buf)};
       const auto key{serialize(make_vec_array(name, path))};
-      get()->m_streamWrapper.set(key, serialize(
+      recorder->m_streamWrapperCalls.set(key, serialize(
         make_vec_array(ret, serialize(buf))));
       return ret;
     };
@@ -612,22 +648,22 @@ Recorder::StdoutHook* Recorder::getStdoutHook() {
   return &stdoutHook;
 }
 
-Stream::Wrapper* Recorder::getStreamWrapper() {
-  static StreamWrapper streamWrapper;
-  return &streamWrapper;
+req::unique_ptr<Stream::Wrapper> Recorder::getStreamWrapper() {
+  return req::make_unique<StreamWrapper>();
 }
 
-void Recorder::onNativeCallArg(const String& arg) {
-  m_nativeCalls.back().args.append(arg);
+void Recorder::onNativeCallArg(std::size_t call, const String& arg) {
+  m_nativeCalls[call].args.append(arg);
 }
 
-void Recorder::onNativeCallEntry(NativeFunction ptr) {
+std::size_t Recorder::onNativeCallEntry(NativeFunction ptr) {
   static LoggerHook loggerHook;
   m_nativeCalls.emplace_back().ptr = ptr;
   m_nativeCalls.back().flags = stackLimitAndSurprise() & kSurpriseFlagMask;
   g_context->addStdoutHook(getStdoutHook());
   Logger::SetThreadHook(&loggerHook);
   m_enabled = false;
+  return m_nativeCalls.size() - 1;
 }
 
 void Recorder::onNativeCallExit() {
@@ -643,29 +679,29 @@ void Recorder::onNativeCallExit() {
   m_enabled = true;
 }
 
-void Recorder::onNativeCallReturn(const String& ret) {
-  m_nativeCalls.back().ret = ret;
+void Recorder::onNativeCallReturn(std::size_t call, const String& ret) {
+  m_nativeCalls[call].ret = ret;
   onNativeCallExit();
 }
 
-void Recorder::onNativeCallThrow(std::exception_ptr exc) {
-  m_nativeCalls.back().exc = serialize(exc);
+void Recorder::onNativeCallThrow(std::size_t call, std::exception_ptr exc) {
+  m_nativeCalls[call].exc = serialize(exc);
   onNativeCallExit();
 }
 
-void Recorder::onNativeCallWaitHandle(c_Awaitable* wh) {
+void Recorder::onNativeCallWaitHandle(std::size_t call, c_Awaitable* wh) {
   resolveWaitHandles();
-  m_nativeCalls.back().wh = static_cast<std::uint8_t>(wh->getKind()) + 1;
+  m_nativeCalls[call].wh = static_cast<std::uint8_t>(wh->getKind()) + 1;
   switch (wh->getKind()) {
     case c_Awaitable::Kind::ExternalThreadEvent:
       m_threads[wh->asExternalThreadEvent()] = m_nextThreadCreationOrder++;
       [[fallthrough]];
     case c_Awaitable::Kind::Static:
-      m_pendingWaitHandleToNativeCall[wh] = m_nativeCalls.size() - 1;
+      m_pendingWaitHandleToNativeCall[wh] = call;
       wh->incRefCount();
       break;
     case c_Awaitable::Kind::Sleep:
-      m_nativeCalls.back().ret = serialize(
+      m_nativeCalls[call].ret = serialize(
         wh->asSleep()->getWakeTime().time_since_epoch().count());
       break;
     default:
@@ -693,29 +729,48 @@ std::vector<char> Recorder::toRecording() const {
   VecInit nativeCalls{numNativeCall};
   DictInit nativeFuncIds{numNativeCall};
   for (std::size_t i{0}; i < numNativeCall; i++) {
-    const auto [ptr, flags, stdouts, args, ret, exc, wh]{m_nativeCalls.at(i)};
+    const auto [ptr, flag, out, args, errs, ret, exc, wh]{m_nativeCalls.at(i)};
     const auto id{std::bit_cast<std::int64_t>(ptr)};
-    nativeCalls.append(make_vec_array(id, flags, stdouts, args, ret, exc, wh));
+    nativeCalls.append(make_vec_array(id, flag, out, args, errs, ret, exc, wh));
     nativeFuncIds.set(String{getNativeFuncName(ptr)}, id);
   }
   VecInit nativeEvents{m_nativeEvents.size()};
   for (const auto& [type, value] : m_nativeEvents) {
     nativeEvents.append(make_vec_array(static_cast<std::int64_t>(type), value));
   }
+  Array unitSns{empty_dict_array()};
+  if (RO::RepoAuthoritative) {
+    for (const auto& path : g_systemlibs) {
+      unitSns.set(StrNR{path}, lookupSyslibUnit(StrNR{path}.get())->sn());
+    }
+    for (const auto& [path, info] : g_context->m_evaledFiles) {
+      unitSns.set(StrNR{path}, info.unit->sn());
+    }
+  } else {
+    std::int64_t sn{-1};
+    for (const auto& path : g_systemlibs) {
+      unitSns.set(StrNR{path}, ++sn);
+    }
+    const auto wrapper{Stream::getThreadLocalFileHandler()};
+    for (const auto& [path, _] : g_context->m_evaledFiles) {
+      wrapper->realpath(StrNR{path});
+      wrapper->stat(StrNR{path}, std::make_unique<struct stat>().get());
+      unitSns.set(StrNR{path}, ++sn);
+    }
+  }
   BlobEncoder encoder;
   make_dict_array(
-    "header", make_dict_array(
-      "compilerId", compilerId(),
-      "entryPoint", g_entryPoint,
-      "hdf", g_hdf,
-      "ini", unserialize<Array>(g_ini),
-      "serverGlobal", m_serverGlobal
-    ),
+    "compilerId", compilerId(),
+    "entryPoint", g_entryPoint,
     "factsStore", m_factsStore,
+    "globals", m_globals,
+    "hdf", g_hdf,
+    "ini", unserialize<Array>(g_ini),
     "nativeCalls", nativeCalls.toArray(),
     "nativeEvents", nativeEvents.toArray(),
     "nativeFuncIds", nativeFuncIds.toArray(),
-    "streamWrapper", m_streamWrapper
+    "streamWrapper", m_streamWrapperCalls,
+    "unitSns", unitSns
   ).serde(encoder);
   auto recording{encoder.take()};
   const auto recordingSize{recording.size()};

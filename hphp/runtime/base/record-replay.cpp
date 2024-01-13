@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/mem-file.h"
@@ -108,8 +109,7 @@ bool shouldRecordReplay(NativeFunction ptr) {
 
 template<>
 String serialize(const Variant& value) {
-  TmpAssign _1{RO::NoticeFrequency, 0L};
-  TmpAssign _2{RO::WarningFrequency, 0L};
+  ErrorSuppressor _;
   VariableSerializer vs{VariableSerializer::Type::DebuggerSerialize};
   try {
     return vs.serializeValue(value, true);
@@ -298,9 +298,8 @@ String serialize(const TypedValue& value) {
 
 template<>
 Variant unserialize(const String& recordedValue) {
-  TmpAssign _1{RO::NoticeFrequency, 0L};
-  TmpAssign _2{RO::WarningFrequency, 0L};
-  TmpAssign _3{RO::EvalCheckPropTypeHints, 0};
+  ErrorSuppressor _1;
+  TmpAssign _2{RO::EvalCheckPropTypeHints, 0};
   return VariableUnserializer{
     recordedValue.data(),
     static_cast<std::size_t>(recordedValue.size()),
@@ -487,4 +486,25 @@ TypedValue unserialize(const String& recordedValue) {
   return unserialize<Variant>(recordedValue).detach();
 }
 
-} // namespace HPHP
+ErrorSuppressor::ErrorSuppressor() {
+  if (!g_context.isNull()) {
+    g_context->pushUserErrorHandler(init_null(), 0);
+    g_context->pushUserExceptionHandler(init_null());
+  }
+  if (!RequestInfo::s_requestInfo.isNull()) {
+    m_level = RID().getErrorReportingLevel();
+    RID().setErrorReportingLevel(0);
+  }
+}
+
+ErrorSuppressor::~ErrorSuppressor() {
+  if (!RequestInfo::s_requestInfo.isNull()) {
+    RID().setErrorReportingLevel(m_level);
+  }
+  if (!g_context.isNull()) {
+    g_context->popUserExceptionHandler();
+    g_context->popUserErrorHandler();
+  }
+}
+
+} // namespace HPHP::rr

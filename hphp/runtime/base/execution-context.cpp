@@ -878,6 +878,10 @@ bool ExecutionContext::callUserErrorHandler(const Exception& e, int errnum,
       ErrorStateHelper esh(this, ErrorState::ExecutingUserHandler);
       m_deferredErrors = empty_vec_array();
       SCOPE_EXIT { m_deferredErrors = empty_vec_array(); };
+      if (UNLIKELY(RO::EvalRecordReplay && RO::EvalRecordSampleRate)) {
+        Recorder::onUserErrorHandlerEntry(
+          e.getMessage(), backtrace, errnum, swallowExceptions);
+      }
       if (!same(vm_call_user_func
                 (m_userErrorHandlers.back().first,
                  make_vec_array(errnum, String(e.getMessage()),

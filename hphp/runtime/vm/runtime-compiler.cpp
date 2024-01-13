@@ -17,8 +17,11 @@
 #include "hphp/runtime/vm/runtime-compiler.h"
 
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/recorder.h"
+#include "hphp/runtime/base/replayer.h"
 #include "hphp/runtime/base/repo-autoload-map.h"
 #include "hphp/runtime/base/request-info.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/unit-cache.h"
 
@@ -32,6 +35,7 @@
 
 #include "hphp/zend/zend-string.h"
 
+#include <folly/Likely.h>
 #include <folly/Range.h>
 
 namespace HPHP {
@@ -127,6 +131,13 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
 
   assertx(ue);
   ue->logDeclInfo();
+
+  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalReplay && ue->m_sn == -1)) {
+    if (codeSource != CodeSource::Eval) {
+      ue->m_sn = Replayer::onParse(filename);
+    }
+  }
+
   return ue;
 }
 
@@ -186,6 +197,11 @@ Unit* compile_systemlib_string(const char* s, size_t sz,
                                const char* fname,
                                const Extension* extension) {
   assertx(fname && fname[0] == '/' && fname[1] == ':');
+
+  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalRecordSampleRate)) {
+    Recorder::onCompileSystemlibString(fname);
+  }
+
   if (RuntimeOption::RepoAuthoritative &&
       !(RO::EvalRecordReplay && RO::EvalReplay)) {
     if (auto u = lookupSyslibUnit(makeStaticString(fname))) {

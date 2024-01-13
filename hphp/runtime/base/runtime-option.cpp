@@ -257,15 +257,15 @@ struct CachedRepoOptions {
 };
 
 struct RepoOptionCacheKey {
-  bool wrapped;
+  Stream::Wrapper* wrapper;
   std::string filename;
 };
 struct RepoOptionCacheKeyCompare {
   bool equal(const RepoOptionCacheKey& k1, const RepoOptionCacheKey& k2) const {
-    return k1.wrapped == k2.wrapped && k1.filename == k2.filename;
+    return k1.wrapper == k2.wrapper && k1.filename == k2.filename;
   }
   size_t hash(const RepoOptionCacheKey& k) const {
-    return std::hash<bool>()(k.wrapped) ^
+    return std::hash<Stream::Wrapper*>()(k.wrapper) ^
            hash_string_cs_unsafe(k.filename.c_str(), k.filename.size());
   }
 };
@@ -444,7 +444,7 @@ const RepoOptions& RepoOptions::forFile(const std::string& path) {
 
   auto const test = [&] (const std::string& path) -> const RepoOptions* {
     RepoOptionCache::const_accessor rpathAcc;
-    const RepoOptionCacheKey key {(bool)wrapper, path};
+    const RepoOptionCacheKey key {wrapper, path};
     if (!s_repoOptionCache.find(rpathAcc, key)) return nullptr;
     RepoOptionStats st(path, wrapper);
     if (st.missing()) {
@@ -483,7 +483,7 @@ const RepoOptions& RepoOptions::forFile(const std::string& path) {
     RepoOptionStats st(path, wrapper);
     if (st.missing()) return false;
     RepoOptionCache::const_accessor rpathAcc;
-    const RepoOptionCacheKey key {(bool)wrapper, path};
+    const RepoOptionCacheKey key {wrapper, path};
     s_repoOptionCache.insert(rpathAcc, key);
     ret = set(rpathAcc, path, st);
     return true;
@@ -1345,6 +1345,9 @@ std::map<std::string, std::string> RuntimeOption::CustomSettings;
 
 static void setResourceLimit(int resource, const IniSetting::Map& ini,
                              const Hdf& rlimit, const char* nodeName) {
+  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalReplay)) {
+    return;
+  }
   if (!Config::GetString(ini, rlimit, nodeName).empty()) {
     struct rlimit rl;
     getrlimit(resource, &rl);

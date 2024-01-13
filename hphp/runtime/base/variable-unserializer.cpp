@@ -43,6 +43,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
@@ -1223,6 +1224,16 @@ void VariableUnserializer::unserializeVariant(
   case 'f': // Func
     if (m_type == VariableUnserializer::Type::DebuggerSerialize) {
       tvMove(make_tv<KindOfFunc>(Func::load(unserializeString().get())), self);
+      break;
+    } else {
+      throwUnknownType(type);
+    }
+  case 'm': // ClsMeth
+    if (m_type == VariableUnserializer::Type::DebuggerSerialize) {
+      const auto cls{Class::load(unserializeString().get())};
+      expectChar(':');
+      const auto func{cls->lookupMethod(unserializeString().get())};
+      tvMove(make_tv<KindOfClsMeth>(ClsMethDataRef::create(cls, func)), self);
       break;
     } else {
       throwUnknownType(type);

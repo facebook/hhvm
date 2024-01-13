@@ -154,7 +154,7 @@ function connection_timeout(): int;
  * @return mixed - Returns the value of the constant, or NULL if the constant
  * is not defined.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function constant(string $name): mixed;
 
 /** Checks whether the given constant exists and is defined.  If you want to

@@ -2239,6 +2239,10 @@ void t_mstch_rust_generator::generate_program() {
     }
   } else if (crate_name_option) {
     namespace_rust = *crate_name_option;
+  } else if (
+      boost::optional<std::string> default_crate_name_option =
+          get_option("default_crate_name")) {
+    namespace_rust = *default_crate_name_option;
   } else {
     namespace_rust = program_->name();
   }

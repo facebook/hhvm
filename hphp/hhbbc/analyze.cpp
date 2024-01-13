@@ -262,6 +262,9 @@ prepare_incompleteQ(const IIndex& index,
           ctx.func->params[locId].isVariadic ? TVec : TUninit;
       }
     }
+    // If a DV-init's param has an entry state of Bottom, then none of
+    // the following DV-inits are reachable.
+    if (entryState->locals[paramId].is(BBottom)) break;
   }
 
   if (!entryState->unreachable) {

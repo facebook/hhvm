@@ -2334,6 +2334,42 @@ void in(ISS& env, const bc::CGetS& op) {
   push(env, std::move(lookup.ty));
 }
 
+namespace {
+
+bool is_module_outside_active_deployment(const php::Unit& unit) {
+  auto const moduleName = unit.moduleName;
+  auto const& packageInfo = unit.packageInfo;
+  if (auto const activeDeployment = packageInfo.getActiveDeployment()) {
+    return !packageInfo.moduleInDeployment(
+      moduleName, *activeDeployment, DeployKind::Hard);
+  }
+  return false;
+}
+
+bool module_check_always_passes(ISS& env, const php::Class& cls) {
+  auto const unit = env.index.lookup_class_unit(cls);
+  if (is_module_outside_active_deployment(*unit)) return false;
+  if (!(cls.attrs & AttrInternal)) return true;
+  return unit->moduleName == env.index.lookup_func_unit(*env.ctx.func)->moduleName;
+}
+
+bool module_check_always_passes(ISS& env, const res::Class& rcls) {
+  if (auto const cls = rcls.cls()) {
+    return module_check_always_passes(env, *cls);
+  }
+  return false;
+}
+
+bool module_check_always_passes(ISS& env, const DCls& dcls) {
+  if (!dcls.isIsect()) return module_check_always_passes(env, dcls.cls());
+  for (auto const cls : dcls.isect()) {
+    if (module_check_always_passes(env, cls)) return true;
+  }
+  return false;
+}
+
+} // namespace
+
 void in(ISS& env, const bc::ClassGetC& op) {
   auto const t = topC(env);
 
@@ -2354,7 +2390,12 @@ void in(ISS& env, const bc::ClassGetC& op) {
 
   if (auto const clsname = getNameFromType(t)) {
     if (auto const rcls = env.index.resolve_class(clsname)) {
-      effect_free(env);
+      auto const will_raise_str_to_cls_notice = t.subtypeOf(BStr) &&
+        RO::EvalRaiseStrToClsConversionNoticeSampleRate > 0;
+      if (!will_raise_str_to_cls_notice &&
+          module_check_always_passes(env, *rcls)) {
+        effect_free(env);
+      }
       push(env, clsExact(*rcls));
       return;
     }
@@ -3530,34 +3571,6 @@ bool fcallCanSkipCoeffectsCheck(ISS& env,
                               });
 }
 
-namespace {
-
-bool is_module_outside_active_deployment(const php::Unit* unit) {
-  auto const moduleName = unit->moduleName;
-  auto const& packageInfo = unit->packageInfo;
-  if (auto const activeDeployment = packageInfo.getActiveDeployment()) {
-    return !packageInfo.moduleInDeployment(
-      moduleName, *activeDeployment, DeployKind::Hard);
-  }
-  return false;
-}
-
-bool module_check_always_passes(ISS& env, const php::Class* cls) {
-  auto const unit = env.index.lookup_class_unit(*cls);
-  if (is_module_outside_active_deployment(unit)) return false;
-  if (!(cls->attrs & AttrInternal)) return true;
-  return unit->moduleName == env.index.lookup_func_unit(*env.ctx.func)->moduleName;
-}
-
-bool module_check_always_passes(ISS& env, const res::Class& rcls) {
-  if (auto const cls = rcls.cls()) {
-    return module_check_always_passes(env, cls);
-  }
-  return false;
-}
-
-} // namespace
-
 template<typename FCallWithFCA>
 bool fcallOptimizeChecks(
   ISS& env,
@@ -4470,6 +4483,7 @@ void in(ISS& env, const bc::FCallClsMethod& op) {
     !RuntimeOption::EvalLogKnownMethodsAsDynamicCalls &&
       op.subop3 == IsLogAsDynamicCallOp::DontLogAsDynamicCall;
   if (is_specialized_cls(clsTy) && dcls_of(clsTy).isExact() &&
+      module_check_always_passes(env, dcls_of(clsTy)) &&
       (!rfunc.mightCareAboutDynCalls() || skipLogAsDynamicCall)) {
     auto const clsName = dcls_of(clsTy).cls().name();
     return reduce(
@@ -4530,7 +4544,7 @@ void in(ISS& env, const bc::FCallClsMethodM& op) {
     !RuntimeOption::EvalLogKnownMethodsAsDynamicCalls &&
       op.subop3 == IsLogAsDynamicCallOp::DontLogAsDynamicCall;
   if (is_specialized_cls(clsTy) && dcls_of(clsTy).isExact() &&
-      module_check_always_passes(env, dcls_of(clsTy).cls()) &&
+      module_check_always_passes(env, dcls_of(clsTy)) &&
       (!rfunc.mightCareAboutDynCalls() ||
         !maybeDynamicCall ||
         skipLogAsDynamicCall
@@ -4581,7 +4595,7 @@ void fcallClsMethodSImpl(ISS& env, const Op& op, SString methName, bool dynamic,
   auto moduleCheck = [&] {
     auto const func = rfunc.exactFunc();
     assertx(func);
-    return module_check_always_passes(env, func->cls);
+    return module_check_always_passes(env, *(func->cls));
   };
 
   if (rfunc.exactFunc() && op.str2->empty() && moduleCheck()) {
@@ -4673,7 +4687,7 @@ void in(ISS& env, const bc::NewObjS& op) {
 
   auto const& dcls = dcls_of(cls);
   if (dcls.isExact() && !dcls.cls().couldHaveReifiedGenerics() &&
-      module_check_always_passes(env, dcls.cls()) &&
+      module_check_always_passes(env, dcls) &&
       (!dcls.cls().couldBeOverridden() ||
        equivalently_refined(cls, unctx(cls)))) {
     return reduce(env, bc::NewObjD { dcls.cls().name() });
@@ -4694,7 +4708,7 @@ void in(ISS& env, const bc::NewObj& op) {
 
   auto const& dcls = dcls_of(cls);
   if (dcls.isExact() && !dcls.cls().mightCareAboutDynConstructs() &&
-      module_check_always_passes(env, dcls.cls())) {
+      module_check_always_passes(env, dcls)) {
     return reduce(
       env,
       bc::PopC {},

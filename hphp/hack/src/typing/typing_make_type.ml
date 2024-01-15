@@ -163,6 +163,12 @@ let nullable : type a. a Reason.t_ -> a ty -> a ty =
   | Tunion [] -> null r
   | _ -> mk (r, Toption ty)
 
+let nullable_i r ty =
+  match ty with
+  | LoclType t -> LoclType (nullable r t)
+  | ConstraintType t ->
+    ConstraintType (mk_constraint_type (r, TCunion (null r, t)))
+
 let apply r id tyl = mk (r, Tapply (id, tyl))
 
 let tuple r tyl = mk (r, Ttuple tyl)

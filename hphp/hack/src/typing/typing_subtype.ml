@@ -1619,6 +1619,23 @@ and simplify_subtype_i
                 match get_node ty with
                 | Tvar v ->
                   let lower_bounds = Env.get_tyvar_lower_bounds env v in
+                  let (nulls, nonnulls) =
+                    ITySet.partition
+                      (fun ty ->
+                        match ty with
+                        | LoclType t -> is_prim Aast.Tnull t
+                        | _ -> false)
+                      lower_bounds
+                  in
+                  (* Make sure that lower bounds [null;t] intersects with ?t upper bound *)
+                  let lower_bounds =
+                    if ITySet.is_empty nulls then
+                      nonnulls
+                    else
+                      ITySet.map
+                        (fun t -> MakeType.nullable_i Reason.Rnone t)
+                        nonnulls
+                  in
                   let upper_bounds = Env.get_tyvar_upper_bounds env v in
                   let bounds = ITySet.inter lower_bounds upper_bounds in
                   let bounds_list = ITySet.elements bounds in

@@ -524,8 +524,10 @@ let ignore_promise_but_handle_failure
               ("stack", string_ stack);
             ]
         in
+        let code = Lsp.Error.InternalError in
         HackEventLogger.client_lsp_exception
           ~root:!env.root
+          ~code:(Lsp.Error.code_to_enum code, Lsp.Error.show_code code)
           ~message:"Unhandled exception"
           ~data_opt:(Some data)
           ~source:"lsp_misc";
@@ -1796,12 +1798,16 @@ let hack_log_error
       ~start_queue_time:metadata.timestamp
       ~start_hh_server_state:""
       ~start_handle_time:unblocked_time
+      ~code:
+        (Lsp.Error.code_to_enum e.Error.code, Lsp.Error.show_code e.Error.code)
       ~message:e.Error.message
       ~data_opt:e.Error.data
       ~source
   | _ ->
     HackEventLogger.client_lsp_exception
       ~root:!env.root
+      ~code:
+        (Lsp.Error.code_to_enum e.Error.code, Lsp.Error.show_code e.Error.code)
       ~message:e.Error.message
       ~data_opt:e.Error.data
       ~source

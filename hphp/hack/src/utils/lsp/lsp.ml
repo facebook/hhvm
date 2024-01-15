@@ -431,7 +431,7 @@ module Error = struct
     | UnknownErrorCode [@value -32001]
     | RequestCancelled [@value -32800]
     | ContentModified [@value -32801]
-  [@@deriving show, enum]
+  [@@deriving show { with_path = false }, enum]
 
   type t = {
     code: code;

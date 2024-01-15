@@ -225,6 +225,7 @@ let client_lsp_method_exception
     ~start_queue_time:_
     ~start_hh_server_state:_
     ~start_handle_time:_
+    ~code:_
     ~message:_
     ~data_opt:_
     ~source:_ =
@@ -242,7 +243,7 @@ let client_lsp_recheck
 
 let serverless_ide_bug ~message:_ ~data:_ = ()
 
-let client_lsp_exception ~root:_ ~message:_ ~data_opt:_ ~source:_ = ()
+let client_lsp_exception ~root:_ ~code:_ ~message:_ ~data_opt:_ ~source:_ = ()
 
 let serverless_ide_startup ?count:_ ~start_time:_ _ = ()
 

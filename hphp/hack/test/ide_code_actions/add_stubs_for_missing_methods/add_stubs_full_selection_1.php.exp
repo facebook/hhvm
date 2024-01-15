@@ -1,0 +1,38 @@
+Code actions available:
+------------------------------------------
+Add stubs for missing interface methods (CodeActionKind: quickfix) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"\n  public function someMethod(): void {}\n",
+          "range":{"end":{"character":61,"line":6},"start":{"character":61,"line":6}}
+        }
+      ]
+    }
+  },
+  "kind":"quickfix",
+  "title":"Add stubs for missing interface methods"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+interface TheInterface {
+  public function someMethod(): void;
+}
+
+class C implements /*range-start*/TheInterface/*range-end*/ {
+  public function someMethod(): void {}
+
+  public function bar(): void {
+    3 + true;
+  }
+}
+

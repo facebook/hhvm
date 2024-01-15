@@ -419,7 +419,8 @@ let parse_options () =
             set_mode
               (Ide_code_actions { title_prefix; use_snippet_edits = true })
               ()),
-        "<title_prefix> Apply a code action with the given title prefix to the given file, where the selection is indicated with markers in comments (see tests)"
+        "<title_prefix> Apply a code action with the given title prefix to the given file, where the selection is indicated with markers in comments: "
+        ^ "`/*range-start*/the_code_here/*range-end*/` or `^ at-caret` with the caret pointing to the previous line."
       );
       ( "--ide-code-actions-no-experimental-capabilities",
         Arg.String
@@ -1485,14 +1486,26 @@ let find_ide_range_exn src : Ide_api_types.range =
     Ide_api_types.{ st; ed }
   in
 
-  find_ide_range_from_start_end_comments src
-  |> Option.value_exn
-       ~message:
-         (Printf.sprintf
-            "could not find pair '%s','%s' nor '%s'"
-            start_marker
-            end_marker
-            hover_at_caret_marker)
+  let find_ide_range_from_caret_comment src : Ide_api_types.range option =
+    let find_ide_pos marker =
+      let+ (line, column) = caret_pos src marker in
+      Ide_api_types.{ line; column }
+    in
+    let+ st = find_ide_pos hover_at_caret_marker in
+    Ide_api_types.{ st; ed = st }
+  in
+
+  match find_ide_range_from_start_end_comments src with
+  | Some r -> r
+  | None ->
+    find_ide_range_from_caret_comment src
+    |> Option.value_exn
+         ~message:
+           (Printf.sprintf
+              "could not find pair '%s','%s' nor '%s'"
+              start_marker
+              end_marker
+              hover_at_caret_marker)
 
 (**
  * Compute TASTs for some files, then expand all type variables.

@@ -14,6 +14,6 @@ mstch_python src/a.thrift
 mstch_python_capi src/a.thrift
 mstch_python src/with_containers.thrift
 mstch_python_capi src/with_containers.thrift
-mstch_rust:deprecated_default_enum_min_i32 src/module.thrift
+mstch_rust src/module.thrift
 mstch_java src/module.thrift
 py:json src/module.thrift

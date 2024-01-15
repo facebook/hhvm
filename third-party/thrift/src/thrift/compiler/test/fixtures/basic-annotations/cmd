@@ -4,7 +4,7 @@ java_deprecated src/module.thrift
 hack:json,server=1,shapes=1,shapes_allow_unknown_fields=1 src/module.thrift
 mstch_cpp2:deprecated_unstructured_annotations_in_metadata src/module.thrift
 mstch_go src/module.thrift
-mstch_rust:deprecated_default_enum_min_i32 src/module.thrift
+mstch_rust src/module.thrift
 mstch_java src/module.thrift
 mstch_py3 src/module.thrift
 json:annotate src/module.thrift

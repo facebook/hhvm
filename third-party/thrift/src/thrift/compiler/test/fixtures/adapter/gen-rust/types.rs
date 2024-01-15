@@ -542,7 +542,7 @@ impl ::fbthrift::ThriftEnum for Color {
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for Color {
     fn default() -> Self {
-        Self(::std::primitive::i32::MIN)
+        Self(0)
     }
 }
 
@@ -663,7 +663,7 @@ impl ::fbthrift::ThriftEnum for ThriftAdaptedEnum {
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for ThriftAdaptedEnum {
     fn default() -> Self {
-        Self(::std::primitive::i32::MIN)
+        Self(0)
     }
 }
 

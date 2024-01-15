@@ -4,6 +4,6 @@ mstch_go src/module.thrift
 mstch_py3 src/module.thrift
 mstch_python src/module.thrift
 mstch_python_capi src/module.thrift
-mstch_rust:deprecated_default_enum_min_i32 src/module.thrift
+mstch_rust src/module.thrift
 go src/module.thrift
 py src/module.thrift

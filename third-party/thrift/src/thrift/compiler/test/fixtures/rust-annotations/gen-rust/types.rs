@@ -160,7 +160,7 @@ impl ::fbthrift::ThriftEnum for EnumWithDerives {
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for EnumWithDerives {
     fn default() -> Self {
-        Self(::std::primitive::i32::MIN)
+        Self(0)
     }
 }
 

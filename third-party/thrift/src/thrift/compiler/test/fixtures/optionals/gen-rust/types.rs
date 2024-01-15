@@ -99,7 +99,7 @@ impl ::fbthrift::ThriftEnum for Animal {
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for Animal {
     fn default() -> Self {
-        Self(::std::primitive::i32::MIN)
+        Self(0)
     }
 }
 

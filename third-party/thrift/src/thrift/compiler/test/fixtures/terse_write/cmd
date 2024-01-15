@@ -8,7 +8,7 @@ mstch_cpp2:deprecated_terse_writes src/deprecated_terse_write.thrift
 mstch_go src/terse_write.thrift
 mstch_cpp2 src/terse_write.thrift
 mstch_py3 src/terse_write.thrift
-mstch_rust:deprecated_default_enum_min_i32 src/terse_write.thrift
+mstch_rust src/terse_write.thrift
 mstch_java src/terse_write.thrift
 py:json src/terse_write.thrift
 mstch_python src/terse_write.thrift

@@ -1429,60 +1429,70 @@ let compute_tasts_by_name ?(drop_fixmed = true) ctx files_info interesting_files
   ( List.fold (nast_errors :: tast_errors) ~init:Errors.empty ~f:Errors.merge,
     tasts )
 
+let caret_pos (src : string) (marker : string) : (int * int) option =
+  String.split_lines src
+  |> List.findi ~f:(fun _ line -> String.is_substring line ~substring:marker)
+  |> Option.map ~f:(fun (line_num, line_src) ->
+         let col_num =
+           String.lfindi line_src ~f:(fun _ c ->
+               match c with
+               | '^' -> true
+               | _ -> false)
+         in
+         (line_num, Option.value_exn col_num + 1))
+
 (* Given source code containing a caret marker (e.g. "^ hover-at-caret"), return
    the line and column of the position indicated. *)
-let caret_pos (src : string) (marker : string) : int * int =
-  let lines = String.split_lines src in
-  match
-    List.findi lines ~f:(fun _ line ->
-        String.is_substring line ~substring:marker)
-  with
-  | Some (line_num, line_src) ->
-    let col_num =
-      String.lfindi line_src ~f:(fun _ c ->
-          match c with
-          | '^' -> true
-          | _ -> false)
-    in
-    (line_num, Option.value_exn col_num + 1)
-  | None ->
-    failwith
-      (Printf.sprintf
-         "Could not find any occurrence of '%s' in source code"
-         marker)
+let caret_pos_exn (src : string) (marker : string) : int * int =
+  caret_pos src marker
+  |> Option.value_exn
+       ~message:
+         (Printf.sprintf
+            "Could not find any occurrence of '%s' in source code"
+            marker)
 
-(* Given source code containing the patterns [start_marker] and [end_marker], calculate the range between the markers *)
-let find_ide_range src : Ide_api_types.range =
+let find_ide_range_exn src : Ide_api_types.range =
+  let open Option.Let_syntax in
   let start_marker = "/*range-start*/" in
   let end_marker = "/*range-end*/" in
-  let lines = String.split_lines src in
-  let find_line marker =
-    List.findi lines ~f:(fun _ line ->
-        String.is_substring line ~substring:marker)
-  in
-  let find_marker marker after_or_before =
-    let (line_zero_indexed, start_line_src) =
-      find_line marker
-      |> Option.value_exn
-           ~message:(Format.sprintf "couldn't find marker %s" marker)
+  let hover_at_caret_marker = "^ at-caret" in
+
+  (* Given source code containing the patterns /*range-start*/ and /*range-end*/, calculate the range between the markers *)
+  let find_ide_range_from_start_end_comments src : Ide_api_types.range option =
+    let lines = String.split_lines src in
+    let find_line marker =
+      List.findi lines ~f:(fun _ line ->
+          String.is_substring line ~substring:marker)
     in
-    let line = line_zero_indexed + 1 in
-    let column =
-      let marker_start =
-        Str.search_forward (Str.regexp_string marker) start_line_src 0
+    let find_marker marker after_or_before =
+      let+ (line_zero_indexed, start_line_src) = find_line marker in
+      let line = line_zero_indexed + 1 in
+      let column =
+        let marker_start =
+          Str.search_forward (Str.regexp_string marker) start_line_src 0
+        in
+        let column_adjustment =
+          match after_or_before with
+          | `After -> String.length marker + 1
+          | `Before -> 1
+        in
+        marker_start + column_adjustment
       in
-      let column_adjustment =
-        match after_or_before with
-        | `After -> String.length marker + 1
-        | `Before -> 1
-      in
-      marker_start + column_adjustment
+      Ide_api_types.{ line; column }
     in
-    Ide_api_types.{ line; column }
+    let* st = find_marker start_marker `After in
+    let+ ed = find_marker end_marker `Before in
+    Ide_api_types.{ st; ed }
   in
-  let st = find_marker start_marker `After in
-  let ed = find_marker end_marker `Before in
-  Ide_api_types.{ st; ed }
+
+  find_ide_range_from_start_end_comments src
+  |> Option.value_exn
+       ~message:
+         (Printf.sprintf
+            "could not find pair '%s','%s' nor '%s'"
+            start_marker
+            end_marker
+            hover_at_caret_marker)
 
 (**
  * Compute TASTs for some files, then expand all type variables.
@@ -2018,7 +2028,7 @@ let handle_mode
     let path = expect_single_file () in
     let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
     let src = Provider_context.read_file_contents_exn entry in
-    let range = find_ide_range src in
+    let range = find_ide_range_exn src in
     Code_actions_cli_lib.run ctx entry range ~title_prefix ~use_snippet_edits
   | Find_local (line, char) ->
     let filename = expect_single_file () in
@@ -2348,7 +2358,7 @@ let handle_mode
       | Some (line, column) -> (line, column)
       | None ->
         let src = Provider_context.read_file_contents_exn entry in
-        caret_pos src "^ hover-at-caret"
+        caret_pos_exn src "^ hover-at-caret"
     in
     let results = ServerHover.go_quarantined ~ctx ~entry ~line ~column in
     let formatted_results =
@@ -2419,7 +2429,7 @@ let handle_mode
     let path = expect_single_file () in
     let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
     let src = Provider_context.read_file_contents_exn entry in
-    let (line, column) = caret_pos src "^ type-hierarchy-at-caret" in
+    let (line, column) = caret_pos_exn src "^ type-hierarchy-at-caret" in
     let results =
       ServerTypeHierarchy.go_quarantined ~ctx ~entry ~line ~column
     in

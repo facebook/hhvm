@@ -105,13 +105,12 @@ auto variant_try_get(V& variant) -> decltype(std::addressof(
  * @author: Marcelo Juchem <marcelo@fb.com>
  */
 template <typename V, typename T>
-folly::remove_cvref_t<T>& variant_set(V& variant, T&& value) {
+void variant_set(V& variant, T&& value) {
   using type = folly::remove_cvref_t<T>;
   using by_type =
       typename apache::thrift::detail::variant_helper<type, V>::by_type;
 
   by_type::template set<type>(variant, std::forward<T>(value));
-  return by_type::template get<type>(variant);
 }
 
 } // namespace thrift

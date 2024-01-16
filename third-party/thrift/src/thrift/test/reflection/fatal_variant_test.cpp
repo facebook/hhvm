@@ -89,20 +89,19 @@ TEST(FatalVariant, variant_try_get) {
 }
 
 TEST(FatalVariant, variant_set) {
-#define TEST_IMPL2(TYPE, FIELD, VALUE, ...)                                 \
-  do {                                                                      \
-    union1 u;                                                               \
-    TYPE value{VALUE};                                                      \
-    TYPE const expected{VALUE};                                             \
-                                                                            \
-    auto& result = apache::thrift::variant_set(u, __VA_ARGS__(value));      \
-                                                                            \
-    ASSERT_EQ(union1::Type::FIELD, u.getType());                            \
-    EXPECT_EQ(std::addressof(u.mutable_##FIELD()), std::addressof(result)); \
-    EXPECT_EQ(expected, u.get_##FIELD());                                   \
-    EXPECT_SAME<                                                            \
-        TYPE&,                                                              \
-        decltype(apache::thrift::variant_set(u, __VA_ARGS__(value)))>();    \
+#define TEST_IMPL2(TYPE, FIELD, VALUE, ...)                              \
+  do {                                                                   \
+    union1 u;                                                            \
+    TYPE value{VALUE};                                                   \
+    TYPE const expected{VALUE};                                          \
+                                                                         \
+    apache::thrift::variant_set(u, __VA_ARGS__(value));                  \
+                                                                         \
+    ASSERT_EQ(union1::Type::FIELD, u.getType());                         \
+    EXPECT_EQ(expected, u.get_##FIELD());                                \
+    EXPECT_SAME<                                                         \
+        void,                                                            \
+        decltype(apache::thrift::variant_set(u, __VA_ARGS__(value)))>(); \
   } while (false)
 
 #define TEST_IMPL(TYPE, FIELD, VALUE)                         \

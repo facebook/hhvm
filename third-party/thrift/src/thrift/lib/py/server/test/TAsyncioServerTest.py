@@ -269,7 +269,7 @@ class TAsyncioServerTest(unittest.TestCase):
             for f in asyncio.as_completed(futures):
                 result = await f
                 results_in_arrival_order.append(result)
-            self.assertEquals(["1", "2", "3"], results_in_arrival_order)
+            self.assertEqual(["1", "2", "3"], results_in_arrival_order)
 
     @contextmanager
     def server_in_background_thread(self, sock):

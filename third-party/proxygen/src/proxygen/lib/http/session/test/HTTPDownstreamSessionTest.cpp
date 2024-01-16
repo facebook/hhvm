@@ -18,6 +18,7 @@
 #include <folly/io/async/TimeoutManager.h>
 #include <folly/io/async/test/MockAsyncTransport.h>
 #include <folly/portability/GTest.h>
+#include <proxygen/lib/http/codec/ControlMessageRateLimitFilter.h>
 #include <proxygen/lib/http/codec/DirectErrorsRateLimitFilter.h>
 #include <proxygen/lib/http/codec/HTTPCodecFactory.h>
 #include <proxygen/lib/http/codec/test/TestUtils.h>
@@ -3730,7 +3731,7 @@ TEST_F(HTTP2DownstreamSessionTest, TestPriorityFCBlocked) {
 
 TEST_F(HTTP2DownstreamSessionTest, TestHeadersRateLimitExceeded) {
   httpSession_->setRateLimitParams(
-      RateLimitFilter::Type::HEADERS, 100, std::chrono::seconds(0));
+      RateLimiter::Type::HEADERS, 100, std::chrono::seconds(0));
 
   std::vector<std::unique_ptr<testing::StrictMock<MockHTTPHandler>>> handlers;
   for (int i = 0; i < 100; i++) {
@@ -3756,12 +3757,12 @@ TEST_F(HTTP2DownstreamSessionTest, TestControlMsgRateLimitExceeded) {
   auto streamid = clientCodec_->createStream();
 
   httpSession_->setRateLimitParams(
-      RateLimitFilter::Type::MISC_CONTROL_MSGS, 100, std::chrono::seconds(0));
+      RateLimiter::Type::MISC_CONTROL_MSGS, 100, std::chrono::seconds(0));
 
   // Send 97 PRIORITY, 1 SETTINGS, and 3 PING frames. This should exceed the
   // limit of 10, causing us to drop the connection.
   for (uint32_t i = 0;
-       i < ControlMessageRateLimitFilter::kMaxEventsPerIntervalLowerBound - 3;
+       i < ControlMessageRateLimiter::kMaxEventsPerIntervalLowerBound - 3;
        i++) {
     clientCodec_->generatePriority(
         requests_, streamid, HTTPMessage::HTTP2Priority(0, false, 3));
@@ -3785,14 +3786,12 @@ TEST_F(HTTP2DownstreamSessionTest, TestControlMsgResetRateLimitTouched) {
   auto streamid = clientCodec_->createStream();
 
   httpSession_->setRateLimitParams(
-      ControlMessageRateLimitFilter::Type::MISC_CONTROL_MSGS,
-      10,
-      milliseconds(0));
+      ControlMessageRateLimiter::Type::MISC_CONTROL_MSGS, 10, milliseconds(0));
 
   // Send 97 PRIORITY, 1 SETTINGS, and 2 PING frames. This doesn't exceed the
   // limit of 10.
   for (uint32_t i = 0;
-       i < ControlMessageRateLimitFilter::kMaxEventsPerIntervalLowerBound - 3;
+       i < ControlMessageRateLimiter::kMaxEventsPerIntervalLowerBound - 3;
        i++) {
     clientCodec_->generatePriority(
         requests_, streamid, HTTPMessage::HTTP2Priority(0, false, 3));
@@ -3830,7 +3829,7 @@ TEST_F(HTTP2DownstreamSessionTest, TestControlMsgResetRateLimitTouched) {
 }
 
 TEST_F(HTTP2DownstreamSessionTest, DirectErrorHandlingLimitTouched) {
-  httpSession_->setRateLimitParams(RateLimitFilter::Type::DIRECT_ERROR_HANDLING,
+  httpSession_->setRateLimitParams(RateLimiter::Type::DIRECT_ERROR_HANDLING,
                                    10,
                                    std::chrono::milliseconds(0));
 
@@ -3838,7 +3837,7 @@ TEST_F(HTTP2DownstreamSessionTest, DirectErrorHandlingLimitTouched) {
   // this doesn't exceed the limit, this should not cause the connection
   // to be dropped.
   for (uint32_t i = 0;
-       i < DirectErrorsRateLimitFilter::kMaxEventsPerIntervalLowerBound;
+       i < DirectErrorsRateLimiter::kMaxEventsPerIntervalLowerBound;
        i++) {
     auto req = getGetRequest();
     // Invalid method, causes the error to be handled directly
@@ -3866,14 +3865,14 @@ TEST_F(HTTP2DownstreamSessionTest, DirectErrorHandlingLimitTouched) {
 }
 
 TEST_F(HTTP2DownstreamSessionTest, DirectErrorHandlingLimitExceeded) {
-  httpSession_->setRateLimitParams(RateLimitFilter::Type::DIRECT_ERROR_HANDLING,
+  httpSession_->setRateLimitParams(RateLimiter::Type::DIRECT_ERROR_HANDLING,
                                    10,
                                    std::chrono::milliseconds(0));
 
   // Send eleven messages, each of which causes direct error handling. Since
   // this exceeds the limit, the connection should be dropped.
   for (uint32_t i = 0;
-       i < DirectErrorsRateLimitFilter::kMaxEventsPerIntervalLowerBound + 1;
+       i < DirectErrorsRateLimiter::kMaxEventsPerIntervalLowerBound + 1;
        i++) {
     auto req = getGetRequest();
     // Invalid method, causes the error to be handled directly

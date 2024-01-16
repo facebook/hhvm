@@ -14,7 +14,7 @@
 
 namespace proxygen {
 
-std::string_view RateLimitFilter::toStr(Type type) {
+std::string_view RateLimiter::toStr(Type type) {
   switch (type) {
     case Type::HEADERS:
       return "headers";
@@ -29,25 +29,24 @@ std::string_view RateLimitFilter::toStr(Type type) {
   }
 }
 
-std::unique_ptr<RateLimitFilter> RateLimitFilter::createRateLimitFilter(
+std::unique_ptr<RateLimiter> RateLimiter::createRateLimiter(
     Type type, folly::HHWheelTimer* timer, HTTPSessionStats* httpSessionStats) {
   switch (type) {
     case Type::HEADERS:
-      return std::make_unique<HeadersRateLimitFilter>(timer, httpSessionStats);
+      return std::make_unique<HeadersRateLimiter>(timer, httpSessionStats);
     case Type::MISC_CONTROL_MSGS:
-      return std::make_unique<ControlMessageRateLimitFilter>(timer,
-                                                             httpSessionStats);
+      return std::make_unique<ControlMessageRateLimiter>(timer,
+                                                         httpSessionStats);
     case Type::RSTS:
-      return std::make_unique<ResetsRateLimitFilter>(timer, httpSessionStats);
+      return std::make_unique<ResetsRateLimiter>(timer, httpSessionStats);
     case Type::DIRECT_ERROR_HANDLING:
-      return std::make_unique<DirectErrorsRateLimitFilter>(timer,
-                                                           httpSessionStats);
+      return std::make_unique<DirectErrorsRateLimiter>(timer, httpSessionStats);
     default:
       return nullptr;
   }
 }
 
-bool RateLimitFilter::incrementNumEventsInCurrentInterval() {
+bool RateLimiter::incrementNumEventsInCurrentInterval() {
   if (numEventsInCurrentInterval_ == 0) {
     // The first control message (or first after a reset) schedules the next
     // reset timer
@@ -63,31 +62,20 @@ bool RateLimitFilter::incrementNumEventsInCurrentInterval() {
   return rateLimitExceeded;
 }
 
-void RateLimitFilter::setSessionStats(HTTPSessionStats* httpSessionStats) {
+void RateLimiter::setSessionStats(HTTPSessionStats* httpSessionStats) {
   httpSessionStats_ = httpSessionStats;
 }
 
-void RateLimitFilter::setParams(uint32_t maxEventsInInterval,
-                                std::chrono::milliseconds timeoutDuration) {
+void RateLimiter::setParams(uint32_t maxEventsInInterval,
+                            std::chrono::milliseconds timeoutDuration) {
   maxEventsInInterval_ = maxEventsInInterval;
   timeoutDuration_ = timeoutDuration;
 }
 
-void RateLimitFilter::attachThreadLocals(folly::HHWheelTimer* timer) {
-  timer_ = timer;
+void RateLimiter::callbackCanceled() noexcept {
 }
 
-void RateLimitFilter::detachThreadLocals() {
-  cancelTimeout();
-  timer_ = nullptr;
-  // Free pass when switching threads
-  numEventsInCurrentInterval_ = 0;
-}
-
-void RateLimitFilter::callbackCanceled() noexcept {
-}
-
-void RateLimitFilter::timeoutExpired() noexcept {
+void RateLimiter::timeoutExpired() noexcept {
   recordNumEventsInCurrentInterval(numEventsInCurrentInterval_);
   numEventsInCurrentInterval_ = 0;
 }

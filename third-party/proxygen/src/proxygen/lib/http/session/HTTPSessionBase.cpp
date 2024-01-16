@@ -73,23 +73,12 @@ void HTTPSessionBase::setSessionStats(HTTPSessionStats* stats) {
 }
 
 void HTTPSessionBase::setRateLimitParams(
-    RateLimitFilter::Type type,
+    RateLimiter::Type type,
     uint32_t maxEventsPerInterval,
     std::chrono::milliseconds intervalDuration) {
-  uint32_t typeIndex = folly::to_underlying(type);
-  CHECK_LT(typeIndex, folly::to_underlying(RateLimitFilter::Type::MAX))
-      << "Out of bounds access to rate limit filter array";
-  RateLimitFilter* rateLimitFilter = rateLimitFilters_.at(typeIndex);
-  if (rateLimitFilter) {
-    uint32_t maxEventsPerIntervalLowerBound =
-        rateLimitFilter->getMaxEventsPerInvervalLowerBound();
-    if (maxEventsPerInterval < maxEventsPerIntervalLowerBound) {
-      LOG(WARNING) << "Invalid maxEventsPerInterval for event "
-                   << RateLimitFilter::toStr(type) << ": "
-                   << maxEventsPerInterval;
-      maxEventsPerInterval = maxEventsPerIntervalLowerBound;
-    }
-    rateLimitFilter->setParams(maxEventsPerInterval, intervalDuration);
+  if (rateLimitFilter_) {
+    rateLimitFilter_->setRateLimitParams(
+        type, maxEventsPerInterval, intervalDuration);
   }
 }
 

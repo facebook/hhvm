@@ -12,40 +12,17 @@
 
 namespace proxygen {
 
-class DirectErrorsRateLimitFilter : public RateLimitFilter {
+class DirectErrorsRateLimiter : public RateLimiter {
  public:
   static const uint32_t kDefaultMaxEventsPerInterval = 100;
   static const uint32_t kMaxEventsPerIntervalLowerBound = 50;
   static constexpr std::chrono::milliseconds kDefaultTimeoutDuration{100};
 
-  explicit DirectErrorsRateLimitFilter(folly::HHWheelTimer* timer,
-                                       HTTPSessionStats* httpSessionStats)
-      : RateLimitFilter(timer, httpSessionStats) {
+  explicit DirectErrorsRateLimiter(folly::HHWheelTimer* timer,
+                                   HTTPSessionStats* httpSessionStats)
+      : RateLimiter(timer, httpSessionStats) {
     maxEventsInInterval_ = kDefaultMaxEventsPerInterval;
     timeoutDuration_ = kDefaultTimeoutDuration;
-  }
-
-  void onError(HTTPCodec::StreamID streamID,
-               const HTTPException& error,
-               bool newTxn) override {
-    // We only rate limit stream errors with no codec status code.
-    // These may trigger a direct HTTP response.
-    if (streamID == 0 || error.hasCodecStatusCode()) {
-      callback_->onError(streamID, error, newTxn);
-    } else {
-      if (incrementNumEventsInCurrentInterval()) {
-        HTTPException ex(
-            HTTPException::Direction::INGRESS_AND_EGRESS,
-            folly::to<std::string>(
-                "dropping connection due to too many newly created txns  when "
-                "directly handling errors, num direct error handling cases = ",
-                numEventsInCurrentInterval_));
-        ex.setProxygenError(kErrorDropped);
-        callback_->onError(0, ex, true);
-      } else {
-        callback_->onError(streamID, error, newTxn);
-      }
-    }
   }
 
   void recordNumEventsInCurrentInterval(uint32_t /* numEvents */) override {

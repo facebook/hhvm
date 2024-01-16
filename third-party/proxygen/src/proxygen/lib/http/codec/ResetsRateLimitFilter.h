@@ -13,25 +13,17 @@
 
 namespace proxygen {
 
-class ResetsRateLimitFilter : public RateLimitFilter {
+class ResetsRateLimiter : public RateLimiter {
  public:
   static const uint32_t kDefaultMaxEventsPerInterval = 10000;
   static const uint32_t kMaxEventsPerIntervalLowerBound = 100;
   static constexpr std::chrono::milliseconds kDefaultTimeoutDuration{1000};
 
-  explicit ResetsRateLimitFilter(folly::HHWheelTimer* timer,
-                                 HTTPSessionStats* httpSessionStats)
-      : RateLimitFilter(timer, httpSessionStats) {
+  explicit ResetsRateLimiter(folly::HHWheelTimer* timer,
+                             HTTPSessionStats* httpSessionStats)
+      : RateLimiter(timer, httpSessionStats) {
     maxEventsInInterval_ = kDefaultMaxEventsPerInterval;
     timeoutDuration_ = kDefaultTimeoutDuration;
-  }
-
-  void onAbort(HTTPCodec::StreamID streamID, ErrorCode code) override {
-    if (!incrementNumEventsInCurrentInterval()) {
-      callback_->onAbort(streamID, code);
-    } else {
-      sendErrorCallback(http2::FrameType::RST_STREAM);
-    }
   }
 
   void recordNumEventsInCurrentInterval(uint32_t numEvents) override {
@@ -48,20 +40,6 @@ class ResetsRateLimitFilter : public RateLimitFilter {
 
   uint32_t getMaxEventsPerInvervalLowerBound() const override {
     return kMaxEventsPerIntervalLowerBound;
-  }
-
- private:
-  void sendErrorCallback(http2::FrameType frameType) {
-    HTTPException ex(
-        HTTPException::Direction::INGRESS_AND_EGRESS,
-        folly::to<std::string>(
-            "dropping connection due to too many control messages, num "
-            "control messages = ",
-            numEventsInCurrentInterval_,
-            ", most recent frame type = ",
-            getFrameTypeString(http2::FrameType::RST_STREAM)));
-    ex.setProxygenError(kErrorDropped);
-    callback_->onError(0, ex, true);
   }
 };
 

@@ -17,11 +17,8 @@
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/tracing/ScopedTraceSection.h>
 #include <proxygen/lib/http/HTTPHeaderSize.h>
-#include <proxygen/lib/http/codec/DirectErrorsRateLimitFilter.h>
 #include <proxygen/lib/http/codec/HTTP2Codec.h>
 #include <proxygen/lib/http/codec/HTTPChecks.h>
-#include <proxygen/lib/http/codec/HeadersRateLimitFilter.h>
-#include <proxygen/lib/http/codec/ResetsRateLimitFilter.h>
 #include <proxygen/lib/http/session/HTTPSessionController.h>
 #include <proxygen/lib/http/session/HTTPSessionStats.h>
 #include <wangle/acceptor/ConnectionManager.h>
@@ -226,10 +223,14 @@ void HTTPSession::setupCodec() {
   }
   if (codec_->supportsParallelRequests() && sock_ &&
       codec_->getTransportDirection() == TransportDirection::DOWNSTREAM) {
-    addRateLimitFilter(RateLimitFilter::Type::HEADERS);
-    addRateLimitFilter(RateLimitFilter::Type::DIRECT_ERROR_HANDLING);
-    addRateLimitFilter(RateLimitFilter::Type::MISC_CONTROL_MSGS);
-    addRateLimitFilter(RateLimitFilter::Type::RSTS);
+    auto rateLimitFilter = std::make_unique<RateLimitFilter>(
+        &getEventBase()->timer(), sessionStats_);
+    rateLimitFilter->addRateLimiter(RateLimiter::Type::HEADERS);
+    rateLimitFilter->addRateLimiter(RateLimiter::Type::DIRECT_ERROR_HANDLING);
+    rateLimitFilter->addRateLimiter(RateLimiter::Type::MISC_CONTROL_MSGS);
+    rateLimitFilter->addRateLimiter(RateLimiter::Type::RSTS);
+    rateLimitFilter_ = rateLimitFilter.get();
+    codec_.addFilters(std::move(rateLimitFilter));
   }
 
   codec_.setCallback(this);
@@ -299,10 +300,8 @@ void HTTPSession::setSessionStats(HTTPSessionStats* stats) {
     byteEventTracker_->setTTLBAStats(stats);
   }
 
-  for (auto* rateLimitFilter : rateLimitFilters_) {
-    if (rateLimitFilter) {
-      rateLimitFilter->setSessionStats(stats);
-    }
+  if (rateLimitFilter_) {
+    rateLimitFilter_->setSessionStats(stats);
   }
 }
 

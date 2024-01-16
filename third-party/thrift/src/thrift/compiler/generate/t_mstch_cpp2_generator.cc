@@ -926,11 +926,11 @@ bool check_container_needs_op_encode(const t_type& type) {
   const auto* true_type = type.get_true_type();
   if (auto container = dynamic_cast<const t_list*>(true_type)) {
     return needs_op_encode(*container->elem_type());
-  } else if (auto container = dynamic_cast<const t_set*>(true_type)) {
-    return needs_op_encode(*container->elem_type());
-  } else if (auto container = dynamic_cast<const t_map*>(true_type)) {
-    return needs_op_encode(*container->key_type()) ||
-        needs_op_encode(*container->val_type());
+  } else if (auto container_2 = dynamic_cast<const t_set*>(true_type)) {
+    return needs_op_encode(*container_2->elem_type());
+  } else if (auto container_2 = dynamic_cast<const t_map*>(true_type)) {
+    return needs_op_encode(*container_2->key_type()) ||
+        needs_op_encode(*container_2->val_type());
   }
   return false;
 }
@@ -1603,8 +1603,8 @@ class cpp_mstch_struct : public mstch_struct {
         const t_struct* strct =
             dynamic_cast<const t_struct*>(type->get_true_type());
         assert(strct);
-        for (const auto& field : strct->fields()) {
-          size_t field_align = compute_alignment(&field, memo);
+        for (const auto& field_2 : strct->fields()) {
+          size_t field_align = compute_alignment(&field_2, memo);
           align = std::max(align, field_align);
           if (align == kMaxAlign) {
             // No need to continue because the struct already has the maximum

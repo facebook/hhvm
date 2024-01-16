@@ -155,8 +155,9 @@ struct RootQueryInfo : serde::Object {
     x("state", state);
     x("client-pid", client_pid);
     x("request-id", request_id);
-    x.skip_if(
-        "query", query, [](const auto& query) { return !query.has_value(); });
+    x.skip_if("query", query, [](const auto& query_2) {
+      return !query_2.has_value();
+    });
   }
 };
 

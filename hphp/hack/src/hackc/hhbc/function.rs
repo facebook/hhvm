@@ -29,7 +29,7 @@ pub struct Function<'arena> {
 }
 
 bitflags! {
-    #[derive(Default, Serialize)]
+    #[derive(Default, Serialize, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Copy)]
     #[repr(C)]
     pub struct FunctionFlags: u8 {
         const ASYNC =          1 << 0;

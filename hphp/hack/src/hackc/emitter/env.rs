@@ -28,7 +28,7 @@ use oxidized::ast;
 use oxidized::namespace_env::Env as NamespaceEnv;
 
 bitflags! {
-    #[derive(Default)]
+    #[derive(Default, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Copy)]
     pub struct Flags: u8 {
         const NEEDS_LOCAL_THIS =    0b0000_0001;
         const IN_TRY =              0b0000_0010;

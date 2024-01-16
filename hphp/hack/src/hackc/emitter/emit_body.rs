@@ -66,6 +66,7 @@ pub struct Args<'a, 'arena> {
 }
 
 bitflags! {
+    #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Copy)]
     pub struct Flags: u8 {
         const HAS_COEFFECTS_LOCAL = 1 << 0;
         const SKIP_AWAITABLE = 1 << 1;

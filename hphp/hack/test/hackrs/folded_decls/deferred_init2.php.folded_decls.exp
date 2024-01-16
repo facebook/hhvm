@@ -5,7 +5,9 @@ FoldedClass {
     ),
     props: {
         "t": FoldedElement {
-            flags: FINAL | NEEDS_INIT,
+            flags: ClassEltFlags(
+                8194,
+            ),
             origin: "\\A",
             visibility: Public,
             deprecated: None,
@@ -45,7 +47,9 @@ FoldedClass {
     },
     props: {
         "t": FoldedElement {
-            flags: FINAL | NEEDS_INIT,
+            flags: ClassEltFlags(
+                8194,
+            ),
             origin: "\\A",
             visibility: Public,
             deprecated: None,

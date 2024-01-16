@@ -16,6 +16,7 @@ pub struct ProgramSpecificOptions {
 }
 
 bitflags! {
+    #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Copy)]
     struct Flags: u16 {
         const SOFT_AS_LIKE = 1 << 0;
         const HKT_ENABLED = 1 << 1;

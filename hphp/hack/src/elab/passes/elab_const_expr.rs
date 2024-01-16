@@ -33,7 +33,7 @@ pub struct ElabConstExprPass {
 }
 
 bitflags! {
-    #[derive(Default)]
+    #[derive(Default, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Copy)]
     struct Flags: u8 {
         const IN_ENUM_CLASS = 1 << 0;
         const ENFORCE_CONST_EXPR = 1 << 1;

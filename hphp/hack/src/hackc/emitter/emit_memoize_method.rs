@@ -577,6 +577,7 @@ struct Args<'r, 'ast, 'arena> {
 }
 
 bitflags! {
+    #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Copy)]
     pub struct Flags: u8 {
         const IS_STATIC = 1 << 1;
         const IS_REIFIED = 1 << 2;

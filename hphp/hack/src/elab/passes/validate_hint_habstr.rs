@@ -30,7 +30,7 @@ pub struct ValidateHintHabstrPass {
 }
 
 bitflags! {
-    #[derive(Default)]
+    #[derive(Default, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Copy)]
     struct Flags: u8 {
         const IN_METHOD_OR_FUN = 1 << 0;
         const IN_WHERE_CONSTRAINT = 1 << 1;

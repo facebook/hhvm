@@ -201,6 +201,7 @@ pub(super) fn emit_return<'a, 'arena, 'decl>(
 }
 
 bitflags! {
+    #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Copy)]
     pub(super) struct EmitBreakOrContinueFlags: u8 {
         const IS_BREAK =            0b01;
         const IN_FINALLY_EPILOGUE = 0b10;

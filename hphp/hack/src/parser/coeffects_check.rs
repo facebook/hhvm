@@ -162,6 +162,7 @@ fn has_ignore_coeffect_local_errors_attr(attrs: &[aast::UserAttribute<(), ()>]) 
 }
 
 bitflags! {
+    #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Copy)]
     pub struct ContextFlags: u16 {
         /// Hack, very roughly, has three contexts in which you can see an
         /// expression:

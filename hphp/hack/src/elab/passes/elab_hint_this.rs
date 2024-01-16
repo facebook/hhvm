@@ -38,7 +38,7 @@ enum Context {
 }
 
 bitflags! {
-    #[derive(Default)]
+    #[derive(Default, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Copy)]
     struct Flags: u8 {
         const FORBID_THIS= 1 << 0;
         const IS_TOP_LEVEL_HACCESS_ROOT= 1 << 1;

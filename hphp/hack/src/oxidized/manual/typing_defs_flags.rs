@@ -11,9 +11,10 @@ use crate::xhp_attribute::XhpAttribute;
 
 // NB: Keep the values of these flags in sync with typing_defs_flags.ml.
 
+#[derive(EqModuloPos, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Clone, Copy)]
+pub struct FunTypeFlags(u16);
 bitflags! {
-    #[derive(EqModuloPos)]
-    pub struct FunTypeFlags: u16 {
+    impl FunTypeFlags: u16 {
         const RETURN_DISPOSABLE      = 1 << 0;
         const IS_COROUTINE           = 1 << 3;
         const ASYNC                  = 1 << 4;
@@ -28,9 +29,10 @@ bitflags! {
     }
 }
 
+#[derive(EqModuloPos, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Clone, Copy)]
+pub struct FunParamFlags(u16);
 bitflags! {
-    #[derive(EqModuloPos)]
-    pub struct FunParamFlags: u16 {
+    impl FunParamFlags: u16 {
         const ACCEPT_DISPOSABLE      = 1 << 0;
         const INOUT                  = 1 << 1;
         const HAS_DEFAULT            = 1 << 2;
@@ -38,9 +40,10 @@ bitflags! {
     }
 }
 
+#[derive(EqModuloPos, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Clone, Copy)]
+pub struct ClassEltFlags(u16);
 bitflags! {
-    #[derive(EqModuloPos)]
-    pub struct ClassEltFlags: u16 {
+    impl ClassEltFlags: u16 {
         const ABSTRACT                 = 1 << 0;
         const FINAL                    = 1 << 1;
         const SUPERFLUOUS_OVERRIDE     = 1 << 2;
@@ -61,7 +64,7 @@ bitflags! {
         const NEEDS_INIT               = 1 << 13;
         const SAFE_GLOBAL_VARIABLE     = 1 << 14;
 
-        const XA_FLAGS_MASK = Self::XA_HAS_DEFAULT.bits | Self::XA_TAG_REQUIRED.bits | Self::XA_TAG_LATEINIT.bits;
+        const XA_FLAGS_MASK = Self::XA_HAS_DEFAULT.bits() | Self::XA_TAG_REQUIRED.bits() | Self::XA_TAG_LATEINIT.bits();
     }
 }
 

@@ -78,6 +78,7 @@ pub enum Outputs {
 }
 
 bitflags! {
+    #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Copy)]
     pub struct InstrFlags: u32 {
         const NF = 0b00000001;
         const TF = 0b00000010;

@@ -20,7 +20,7 @@ pub struct ElabHintHaccessPass {
 }
 
 bitflags! {
-    #[derive(Default)]
+    #[derive(Default, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Copy)]
     struct Flags: u8 {
         const IN_CONTEXT = 1 << 0;
         const IN_HACCESS = 1 << 1;

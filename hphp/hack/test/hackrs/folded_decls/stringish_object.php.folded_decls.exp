@@ -10,7 +10,9 @@ FoldedClass {
     },
     methods: {
         "__toString": FoldedElement {
-            flags: (empty),
+            flags: ClassEltFlags(
+                0,
+            ),
             origin: "\\A",
             visibility: Public,
             deprecated: None,
@@ -40,7 +42,9 @@ FoldedClass {
     },
     methods: {
         "__toString": FoldedElement {
-            flags: ABSTRACT,
+            flags: ClassEltFlags(
+                1,
+            ),
             origin: "\\B",
             visibility: Public,
             deprecated: None,
@@ -68,7 +72,9 @@ FoldedClass {
     },
     methods: {
         "__toString": FoldedElement {
-            flags: ABSTRACT,
+            flags: ClassEltFlags(
+                1,
+            ),
             origin: "\\SomeOtherC",
             visibility: Public,
             deprecated: None,
@@ -98,7 +104,9 @@ FoldedClass {
     },
     methods: {
         "__toString": FoldedElement {
-            flags: (empty),
+            flags: ClassEltFlags(
+                0,
+            ),
             origin: "\\TA",
             visibility: Public,
             deprecated: None,

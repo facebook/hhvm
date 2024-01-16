@@ -24,7 +24,7 @@ pub struct ValidateCoroutinePass {
     flags: Flags,
 }
 bitflags! {
-    #[derive(Default)]
+    #[derive(Default, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Copy)]
     struct Flags: u8 {
         const IS_SYNC = 1 << 0;
         const IS_GENERATOR = 1 << 1;

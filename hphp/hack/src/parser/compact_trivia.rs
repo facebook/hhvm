@@ -12,6 +12,7 @@ use crate::trivia_factory::SimpleTriviaFactory;
 use crate::trivia_kind::TriviaKind;
 
 bitflags! {
+    #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Copy)]
     pub struct TriviaKinds : u8 {
         const WHITE_SPACE        = 1 << TriviaKind::WhiteSpace as u8;
         const END_OF_LINE        = 1 << TriviaKind::EndOfLine as u8;

@@ -8,9 +8,10 @@ use eq_modulo_pos::EqModuloPos;
 
 // NB: Keep the values of these flags in sync with shallow_decl_defs.ml.
 
+#[derive(EqModuloPos, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Copy)]
+pub struct MethodFlags(u8);
 bitflags! {
-    #[derive(EqModuloPos)]
-    pub struct MethodFlags: u8 {
+    impl MethodFlags: u8 {
         const ABSTRACT            = 1 << 0;
         const FINAL               = 1 << 1;
         const OVERRIDE            = 1 << 2;

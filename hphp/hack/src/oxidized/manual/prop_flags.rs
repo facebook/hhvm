@@ -8,9 +8,10 @@ use eq_modulo_pos::EqModuloPos;
 
 // NB: Keep the values of these flags in sync with shallow_decl_defs.ml.
 
+#[derive(EqModuloPos, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Copy)]
+pub struct PropFlags(u16);
 bitflags! {
-    #[derive(EqModuloPos)]
-    pub struct PropFlags: u16 {
+    impl PropFlags: u16 {
         const ABSTRACT    = 1 << 0;
         const CONST       = 1 << 1;
         const LATEINIT    = 1 << 2;

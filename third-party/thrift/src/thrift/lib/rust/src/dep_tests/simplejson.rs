@@ -475,6 +475,21 @@ fn test_serde_compat_empty_union() -> Result<()> {
 }
 
 #[test]
+fn test_serde_compat_deser_errors() -> Result<()> {
+    // Historically, serde deserialization for unions is stricter than simplejson.
+    // It returns an error on mising or unknown variants
+    assert!(serde_json::from_str::<Un>("{}").is_err());
+    assert!(serde_json::from_str::<Un>(r#"{"NotAVariant":{}}"#).is_err());
+
+    // On the other hand, serde deserialization for structs is similar to simplejson.
+    // It tolerates missing or unknown fields
+    assert!(serde_json::from_str::<UnOne>("{}").is_ok());
+    assert!(serde_json::from_str::<UnOne>(r#"{"one":1,"NotAField":2}"#).is_ok());
+
+    Ok(())
+}
+
+#[test]
 fn test_multiple_deser() -> Result<()> {
     // Tests that we don't too eagerly advance the buffer
     let b1 = Basic {

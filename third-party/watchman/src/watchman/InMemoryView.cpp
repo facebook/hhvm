@@ -1224,9 +1224,9 @@ void InMemoryView::warmContentCache() {
             f->stat.mtime};
 
         log(DBG, "warmContentCache: lookup ", key.relativePath, "\n");
-        auto f = caches_.contentHashCache.get(key);
+        auto f_2 = caches_.contentHashCache.get(key);
         if (syncContentCacheWarming_) {
-          futures.emplace_back(std::move(f));
+          futures.emplace_back(std::move(f_2));
         }
         ++n;
       }

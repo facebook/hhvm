@@ -146,14 +146,14 @@ inline void FuncEmitter::setNumLiveIterators(Id id) {
   m_nextFreeIterator = id;
 }
 
-inline bool FuncEmitter::hasVar(const StringData* name) const {
-  assertx(name != nullptr);
-  return m_localNames.contains(name);
+inline bool FuncEmitter::hasVar(const StringData* name_2) const {
+  assertx(name_2 != nullptr);
+  return m_localNames.contains(name_2);
 }
 
-inline Id FuncEmitter::lookupVarId(const StringData* name) const {
-  assertx(hasVar(name));
-  return m_localNames.find(name)->second;
+inline Id FuncEmitter::lookupVarId(const StringData* name_2) const {
+  assertx(hasVar(name_2));
+  return m_localNames.find(name_2)->second;
 }
 
 inline void FuncEmitter::freeIterator(Id id) {
@@ -161,9 +161,9 @@ inline void FuncEmitter::freeIterator(Id id) {
   assertx(id == m_nextFreeIterator);
 }
 
-inline void FuncEmitter::appendParam(const StringData* name,
+inline void FuncEmitter::appendParam(const StringData* name_2,
                                      const ParamInfo& info) {
-  allocVarId(name);
+  allocVarId(name_2);
   params.push_back(info);
 }
 

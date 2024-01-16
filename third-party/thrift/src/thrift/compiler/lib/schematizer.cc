@@ -87,9 +87,10 @@ void schematizer::add_definition(
   definition->add_map(val("name"), val(node.name()));
   if (!node.uri().empty()) {
     definition->add_map(val("uri"), val(node.uri()));
-  } else if (auto program_from_node = dynamic_cast<const t_program*>(&node)) {
-    if (!program_from_node->package().empty()) {
-      definition->add_map(val("uri"), val(program_from_node->package().name()));
+  } else if (auto program_from_node_2 = dynamic_cast<const t_program*>(&node)) {
+    if (!program_from_node_2->package().empty()) {
+      definition->add_map(
+          val("uri"), val(program_from_node_2->package().name()));
     }
   }
 
@@ -360,7 +361,7 @@ void schematize_recursively(
       break;
     }
     case t_type::type::t_structured: {
-      auto new_schema = generator->gen_schema(
+      auto new_schema_2 = generator->gen_schema(
           static_cast<const t_structured&>(*resolved_type));
       std::string def_type = [&] {
         if (resolved_type->is_union()) {
@@ -371,7 +372,7 @@ void schematize_recursively(
           return "structDef";
         }
       }();
-      add_as_definition(*defns_schema, def_type, std::move(new_schema));
+      add_as_definition(*defns_schema, def_type, std::move(new_schema_2));
       break;
     }
     default:

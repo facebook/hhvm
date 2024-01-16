@@ -168,6 +168,8 @@ bool tsame_log(const StringData*, const StringData*);
 bool fsame_log(const StringData*, const StringData*);
 int tstrcmp_log(const char* s1, const char* s2);
 int fstrcmp_log(const char* s1, const char* s2);
+int tstrcmp_log_slice(folly::StringPiece s1, folly::StringPiece s2);
+int fstrcmp_log_slice(folly::StringPiece s1, folly::StringPiece s2);
 
 inline int tstrcmp(const char* s1, const char* s2) {
   auto order = strcmp(s1, s2);
@@ -185,6 +187,30 @@ inline int fstrcmp(const char* s1, const char* s2) {
   order = strcasecmp(s1, s2);
   if (order != 0) return order;
   return RO::EvalLogFsameCollisions != 1 || fstrcmp_log(s1, s2);
+}
+
+inline int tstrcmp_slice(folly::StringPiece s1, folly::StringPiece s2) {
+  auto minlen = std::min(s1.size(), s2.size());
+  auto order = memcmp(s1.data(), s2.data(), minlen);
+  if (order == 0 || RO::EvalLogTsameCollisions >= 2) {
+    return s1.size() < s2.size() ? -1 :
+           s1.size() > s2.size() ? 1 : 0;
+  }
+  order = bstrcasecmp(s1.data(), s1.size(), s2.data(), s2.size());
+  if (order != 0) return order;
+  return RO::EvalLogTsameCollisions != 1 || tstrcmp_log_slice(s1, s2);
+}
+
+inline int fstrcmp_slice(folly::StringPiece s1, folly::StringPiece s2) {
+  auto minlen = std::min(s1.size(), s2.size());
+  auto order = memcmp(s1.data(), s2.data(), minlen);
+  if (order == 0 || RO::EvalLogFsameCollisions >= 2) {
+    return s1.size() < s2.size() ? -1 :
+           s1.size() > s2.size() ? 1 : 0;
+  }
+  order = bstrcasecmp(s1.data(), s1.size(), s2.data(), s2.size());
+  if (order != 0) return order;
+  return RO::EvalLogFsameCollisions != 1 || fstrcmp_log_slice(s1, s2);
 }
 
 inline bool StringData::tsame(const StringData* s) const {
@@ -267,14 +293,14 @@ struct string_data_lt {
 // Compare type names
 struct string_data_lt_type {
   bool operator()(const StringData *s1, const StringData *s2) const {
-    return bstrcasecmp(s1->data(), s1->size(), s2->data(), s2->size()) < 0;
+    return tstrcmp_slice(s1->slice(), s2->slice()) < 0;
   }
 };
 
 // Compare function names
 struct string_data_lt_func {
   bool operator()(const StringData *s1, const StringData *s2) const {
-    return bstrcasecmp(s1->data(), s1->size(), s2->data(), s2->size()) < 0;
+    return fstrcmp_slice(s1->slice(), s2->slice()) < 0;
   }
 };
 

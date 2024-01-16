@@ -126,4 +126,16 @@ int fstrcmp_log(const char* s1, const char* s2) {
   return 0;
 }
 
+int tstrcmp_log_slice(folly::StringPiece s1, folly::StringPiece s2) {
+  FTRACE(1, "tstrcmp_slice collision {} != {}\n", s1, s2);
+  log_impl("tstrcmp_slice", RO::EvalTsameCollisionSampleRate, s1, s2);
+  return 0;
+}
+
+int fstrcmp_log_slice(folly::StringPiece s1, folly::StringPiece s2) {
+  FTRACE(1, "fstrcmp_slice collision {} != {}\n", s1, s2);
+  log_impl("fstrcmp_slice", RO::EvalFsameCollisionSampleRate, s1, s2);
+  return 0;
+}
+
 }

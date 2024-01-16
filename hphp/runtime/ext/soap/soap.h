@@ -154,8 +154,7 @@ DECLARE_EXTERN_REQUEST_LOCAL(SoapData, s_soap_data);
 // types used by SoapServer
 
 struct soapFunctions {
-  Array ft;
-  Array ftOriginal;
+  req::vector_set<String, hphp_string_hash, hphp_string_fsame> funcs;
   bool functions_all;
 };
 

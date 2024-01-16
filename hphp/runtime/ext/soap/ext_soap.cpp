@@ -2055,8 +2055,7 @@ void HHVM_METHOD(SoapServer, addFunction,
     funcs = func.toArray();
   } else if (func.isInteger()) {
     if (func.toInt64() == SOAP_FUNCTIONS_ALL) {
-      data->m_soap_functions.ft.clear();
-      data->m_soap_functions.ftOriginal.clear();
+      data->m_soap_functions.funcs.clear();
       data->m_soap_functions.functions_all = true;
     } else {
       raise_warning("Invalid value passed");
@@ -2071,13 +2070,15 @@ void HHVM_METHOD(SoapServer, addFunction,
         return;
       }
       String function_name = iter.second().toString();
+      // Lookup function, autoload if necessary.
       if (!HHVM_FN(function_exists)(function_name)) {
         raise_warning("Tried to add a non existent function '%s'",
                         function_name.data());
         return;
       }
-      data->m_soap_functions.ft.set(HHVM_FN(strtolower)(function_name), 1);
-      data->m_soap_functions.ftOriginal.set(function_name, 1);
+      // Latch the correct-case function name so we correctly log collisions
+      auto f = Func::lookup(function_name.get());
+      data->m_soap_functions.funcs.emplace(f->nameStr());
     }
   }
 }
@@ -2098,12 +2099,14 @@ Variant HHVM_METHOD(SoapServer, getfunctions) {
     IterateV(funcs1.get(), [&](TypedValue tv) { init.append(tv); });
     IterateV(funcs2.get(), [&](TypedValue tv) { init.append(tv); });
     return init.toArray();
-  } else if (!data->m_soap_functions.ft.empty()) {
-    return Variant::attach(
-      HHVM_FN(array_keys)(
-        make_array_like_tv(data->m_soap_functions.ftOriginal.get())
-      )
-    );
+  } else if (!data->m_soap_functions.funcs.empty()) {
+    // Iterate m_soap_functions.funcs in original insertion order
+    VecInit init(data->m_soap_functions.funcs.size());
+    for (auto it = data->m_soap_functions.funcs.rbegin();
+         it != data->m_soap_functions.funcs.rend(); ++it) {
+      init.append(*it);
+    }
+    return init.toArray();
   } else {
     return empty_vec_array();
   }
@@ -2125,8 +2128,8 @@ static bool valid_function(SoapServer *server, Object &soap_obj,
     cls = soap_obj->getVMClass();
   } else if (server->m_soap_functions.functions_all) {
     return HHVM_FN(function_exists)(fn_name);
-  } else if (!server->m_soap_functions.ft.empty()) {
-    return server->m_soap_functions.ft.exists(HHVM_FN(strtolower)(fn_name));
+  } else if (!server->m_soap_functions.funcs.empty()) {
+    return server->m_soap_functions.funcs.contains(fn_name);
   } else {
     return false;
   }

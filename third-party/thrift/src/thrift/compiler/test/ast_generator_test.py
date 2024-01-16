@@ -41,6 +41,7 @@ def write_file(path, content):
         f.write(content)
 
 
+@unittest.skipIf(sys.platform.startswith("win"), "Windows is not supported")
 class AstGeneratorTest(unittest.TestCase):
     def setUp(self):
         tmp = tempfile.mkdtemp()

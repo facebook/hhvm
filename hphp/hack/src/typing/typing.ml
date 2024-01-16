@@ -2036,10 +2036,12 @@ let refine_and_simplify_intersection
     in
     let rec is_enforced hint_ty =
       match get_node hint_ty with
-      | Toption ty -> is_enforced ty
+      | Toption ty -> is_nonnull ty || is_enforced ty
       | Tclass (_, _, [])
       | Tprim _ ->
         true
+      | Tshape { s_fields = expected_fdm; _ } ->
+        TShapeMap.for_all (fun _name ty -> is_enforced ty.sft_ty) expected_fdm
       | _ -> false
     in
     (* If the hint is fully enforced, keep that information around *)

@@ -749,8 +749,8 @@ void HTTPSession::onMessageBegin(HTTPCodec::StreamID streamID,
     // txns haven't completed yet. Pause reads until they complete
     DCHECK_GE(transactions_.size(), 2);
     std::map<HTTPCodec::StreamID, HTTPTransaction*> sortedTxns;
-    for (auto& x : transactions_) {
-      sortedTxns.emplace(x.first, &x.second);
+    for (auto& x_2 : transactions_) {
+      sortedTxns.emplace(x_2.first, &x_2.second);
     }
     for (auto it = ++sortedTxns.rbegin(); it != sortedTxns.rend(); ++it) {
       DCHECK(it->second->isIngressEOMSeen());

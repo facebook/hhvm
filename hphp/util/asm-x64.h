@@ -226,15 +226,15 @@ struct IndexedDispReg {
   MemoryRef operator*() const;
   MemoryRef operator[](intptr_t disp) const;
 
-  IndexedDispReg operator+(intptr_t disp) const {
+  IndexedDispReg operator+(intptr_t disp_2) const {
     auto ret = *this;
-    ret.disp += disp;
+    ret.disp += disp_2;
     return ret;
   }
 
-  IndexedDispReg operator-(intptr_t disp) const {
+  IndexedDispReg operator-(intptr_t disp_2) const {
     auto ret = *this;
-    ret.disp -= disp;
+    ret.disp -= disp_2;
     return ret;
   }
 

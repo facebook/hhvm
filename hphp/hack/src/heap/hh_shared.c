@@ -1075,11 +1075,6 @@ value hh_get_handle(void) {
   CAMLreturn(connector);
 }
 
-value hh_get_worker_id(void) {
-  CAMLparam0();
-  CAMLreturn(Val_int(worker_id));
-}
-
 /*****************************************************************************/
 /* Counter
  *

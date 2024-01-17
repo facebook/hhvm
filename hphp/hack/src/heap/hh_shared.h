@@ -14,12 +14,11 @@ CAMLprim value hh_shared_init(
     value shm_dir_val,
     value num_workers_val
 );
-CAMLprim value hh_check_heap_overflow(void);
+value hh_check_heap_overflow(void);
 /* Must be called by every worker before any operation is performed. */
-CAMLprim value hh_connect(value connector, value worker_id_val);
+value hh_connect(value connector, value worker_id_val);
 /* Can only be called after init or after earlier connect. */
-CAMLprim value hh_get_handle(void);
-CAMLprim value hh_get_worker_id(void);
+value hh_get_handle(void);
 
 /*****************************************************************************/
 /* Heap diagnostics. */

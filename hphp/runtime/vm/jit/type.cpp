@@ -1015,7 +1015,11 @@ Type typeFromTCImpl(const HPHP::TypeConstraint& tc,
       case A::ArrayKey:   return TInt | TStr;
       case A::VecOrDict:  return TVec | TDict;
       case A::ArrayLike:  return TArrLike;
-      case A::Classname:  return TStr | TCls | TLazyCls;
+      case A::Classname:
+        if (!RO::EvalClassPassesClassname) {
+          return TStr;
+        }
+        return TStr | TCls | TLazyCls;
       case A::This:       return getThisType();
       case A::Nothing:
       case A::NoReturn:   return TBottom;

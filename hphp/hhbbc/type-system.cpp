@@ -4405,8 +4405,10 @@ Type from_hni_constraint(SString s) {
   if (!tstrcmp(p, annotTypeName(AnnotType::ArrayLike))) {
     return union_of(std::move(ret), TArrLike);
   }
-  if (!tstrcmp(p, annotTypeName(AnnotType::Classname)) &&
-      RuntimeOption::EvalClassPassesClassname) {
+  if (!tstrcmp(p, annotTypeName(AnnotType::Classname))) {
+    if (!RO::EvalClassPassesClassname) {
+      return union_of(ret, TStr);
+    }
     return union_of(ret, union_of(TStr, union_of(TCls, TLazyCls)));
   }
   if (!tstrcmp(p, annotTypeName(AnnotType::Mixed)))    return TInitCell;

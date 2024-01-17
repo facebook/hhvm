@@ -5,11 +5,11 @@ string(3) "Foo"
 Notice: Implicit Class to string conversion for return of foo1() in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 29
 string(3) "Foo"
 
-Notice: Implicit Class to string conversion for argument 1 passed to foo2() in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 67
-string(3) "Foo"
+Warning: Argument 1 to foo2() must be of type @HH\classname, lazy class given in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 67
+class(Foo)
 
-Notice: Implicit Class to string conversion for return of foo2() in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 34
-string(3) "Foo"
+Warning: Value returned from function foo2() must be of type @HH\classname, lazy class given in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 34
+class(Foo)
 
 Notice: Implicit Class to string conversion for argument 1 passed to foo3() in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 68
 string(3) "Foo"
@@ -17,11 +17,11 @@ string(3) "Foo"
 Notice: Implicit Class to string conversion for return of foo3() in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 39
 string(3) "Foo"
 
-Notice: Implicit Class to string conversion for argument 1 passed to foo4() in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 70
-string(3) "Foo"
+Warning: Argument 1 to foo4() must be of type @HH\classname, lazy class given in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 70
+class(Foo)
 
-Notice: Implicit Class to string conversion for argument 1 returned from foo4() as an inout parameter in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 45
-string(3) "Baz"
+Warning: Argument 1 returned from foo4() as an inout parameter must be of type @HH\classname, lazy class given in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 45
+class(Baz)
 
 Notice: Implicit Class to string conversion for argument 1 passed to foo5() in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 72
 string(3) "Foo"
@@ -33,10 +33,10 @@ class(Foo)
 class(Foo)
 class(Foo)
 
-Notice: Implicit Class to string conversion for argument 1 passed to foo7() in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 76
+Warning: Argument 1 to foo7() must be of type @HH\classname, lazy class given in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 76
 
 Notice: Implicit Class to string conversion for argument 2 passed to foo7() in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 76
-string(3) "Foo"
+class(Foo)
 string(3) "Foo"
 
 Notice: Implicit Class to string conversion for return of foo7() in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 61
@@ -49,7 +49,7 @@ Notice: Implicit Class to string conversion for property p1 in %s/test/slow/clas
 
 Notice: Implicit Class to string conversion for property p2 in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 25
 
-Notice: Implicit Class to string conversion for property p3 in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 25
+Warning: Property 'Bar::p3' declared as type @HH\classname, lazy class assigned in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 25
 
 Notice: Implicit Class to string conversion for property p4 in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 25
 
@@ -57,7 +57,7 @@ Notice: Implicit Class to string conversion for property lp1 in %s/test/slow/cla
 
 Notice: Implicit Class to string conversion for property lp2 in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 25
 
-Notice: Implicit Class to string conversion for property lp3 in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 25
+Warning: Property 'Bar::lp3' declared as type @HH\classname, lazy class assigned in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 25
 
 Notice: Implicit Class to string conversion for property lp4 in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 25
 
@@ -65,7 +65,7 @@ Notice: Implicit Class to string conversion for property sp1 in %s/test/slow/cla
 
 Notice: Implicit Class to string conversion for property sp2 in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 79
 
-Notice: Implicit Class to string conversion for property sp3 in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 79
+Warning: Static property 'Bar::sp3' declared as type @HH\classname, lazy class assigned in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 79
 
 Notice: Implicit Class to string conversion for property sp4 in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 79
 
@@ -73,7 +73,7 @@ Notice: Implicit Class to string conversion for property slp1 in %s/test/slow/cl
 
 Notice: Implicit Class to string conversion for property slp2 in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 79
 
-Notice: Implicit Class to string conversion for property slp3 in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 79
+Warning: Static property 'Bar::slp3' declared as type @HH\classname, lazy class assigned in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 79
 
 Notice: Implicit Class to string conversion for property slp4 in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 79
 string(3) "Baz"
@@ -84,10 +84,10 @@ string(3) "Baz"
 
 Notice: Implicit Class to string conversion for property p2 in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 84
 string(3) "Foo"
-string(3) "Baz"
+class(Baz)
 
-Notice: Implicit Class to string conversion for property p3 in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 87
-string(3) "Foo"
+Warning: Property 'Bar::p3' declared as type @HH\classname, lazy class assigned in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 87
+class(Foo)
 string(3) "Baz"
 
 Notice: Implicit Class to string conversion for property p4 in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 90
@@ -100,11 +100,11 @@ string(3) "Baz"
 
 Notice: Implicit Class to string conversion for property sp2 in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 96
 string(3) "Foo"
+class(Baz)
+
+Warning: Static property 'Bar::sp3' declared as type @HH\classname, lazy class assigned in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 99
+class(Foo)
 string(3) "Baz"
 
-Notice: Implicit Class to string conversion for property sp3 in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 99
-string(3) "Foo"
-string(3) "Baz"
-
-Notice: Implicit Class to string conversion for property sp3 in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 102
+Warning: Static property 'Bar::sp3' declared as type @HH\classname, lazy class assigned in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 102
 string(3) "Baz"

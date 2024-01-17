@@ -2012,7 +2012,9 @@ Type builtinOutType(const Func* builtin, uint32_t i) {
     case AnnotMetaType::ArrayLike:
       return TArrLike;
     case AnnotMetaType::Classname:
-      assertx(RO::EvalClassPassesClassname);
+      if (!RO::EvalClassPassesClassname) {
+        return TStr;
+      }
       return TStr | TCls | TLazyCls;
     case AnnotMetaType::Nonnull:
     case AnnotMetaType::NoReturn:

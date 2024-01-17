@@ -212,7 +212,7 @@ function classname_from_string_unsafe(string $classname)[]: mixed;
 <<__Native>>
 function classname_to_class(readonly mixed $cn)[]: mixed;
 <<__Native>>
-function class_to_classname(readonly mixed $cn)[]: mixed;
+function class_to_classname(readonly classname<mixed> $cn)[]: classname<mixed>;
 
 /**
  * Begin collecting code coverage on all subsequent calls into files in $files

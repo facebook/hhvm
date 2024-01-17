@@ -1548,6 +1548,9 @@ ConstraintType type_from_constraint_impl(const TypeConstraint& tc,
           TriBool::Yes
         };
       case AnnotMetaType::Classname:
+        if (!RO::EvalClassPassesClassname) {
+          return exact(TStr);
+        }
         return C{
           RO::EvalClassnameNoticesSampleRate > 0 ?
             TStr : union_of(TStr, TCls, TLazyCls),

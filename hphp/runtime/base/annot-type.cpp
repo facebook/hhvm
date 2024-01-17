@@ -78,10 +78,8 @@ static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
       { kAnnotTypeVarrayOrDarrayStr,         AnnotType::VecOrDict },
       { annotTypeName(AnnotType::VecOrDict), AnnotType::VecOrDict },
       { annotTypeName(AnnotType::ArrayLike), AnnotType::ArrayLike },
+      { annotTypeName(AnnotType::Classname), AnnotType::Classname },
     };
-    if (RO::EvalClassPassesClassname) {
-      pairs.push_back({ annotTypeName(AnnotType::Classname), AnnotType::Classname });
-    }
     for (unsigned i = 0; i < pairs.size(); ++i) {
       mappedPairs.first[makeStaticString(pairs[i].name)] = pairs[i].type;
       mappedPairs.second[pairs[i].name] = pairs[i].type;
@@ -233,6 +231,9 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     case AnnotMetaType::Classname:
       if (isStringType(dt)) return AnnotAction::Pass;
       if (isClassType(dt) || isLazyClassType(dt)) {
+        if (!RO::EvalClassPassesClassname) {
+          return AnnotAction::Fail;
+        }
         return RO::EvalClassnameNoticesSampleRate > 0 ?
           AnnotAction::WarnClassname : AnnotAction::Pass;
       }

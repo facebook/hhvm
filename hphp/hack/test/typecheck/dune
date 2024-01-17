@@ -19,21 +19,6 @@
       --error-format plain)))
 
 (rule
-    (alias decl_compare)
-          (deps %{exe:../../src/hh_single_type_check.exe}
-          %{project_root}/hack/test/verify.py
-          %{project_root}/hack/test/review.sh
-          %{project_root}/hack/test/hhi/coeffects.hhi
-          %{project_root}/hack/test/hhi/expr_tree.hhi
-          %{project_root}/hack/test/hhi/XHPTest.hhi
-          (glob_files_rec %{project_root}/hack/test/typecheck/**.decl_exp)
-          (glob_files_rec %{project_root}/hack/test/typecheck/**.php)
-          (glob_files_rec %{project_root}/hack/test/typecheck/**HH_FLAGS))
-        (action (run %{project_root}/hack/test/verify.py %{project_root}/hack/test/typecheck
-          --program %{exe:../../src/hh_single_type_check.exe}
-          --batch --out-extension .decl_out --expect-extension .decl_exp --flags --decl-compare)))
-
-(rule
     (alias typecheck_w_timeout)
           (deps %{exe:../../src/hh_single_type_check.exe}
           %{project_root}/hack/test/verify.py
@@ -53,10 +38,3 @@
       --flags
       --enable-sound-dynamic-type
       --error-format plain)))
-
-
-(alias
-  (name runtest)
-  (deps
-    (alias typecheck)
-    (alias decl_compare)))

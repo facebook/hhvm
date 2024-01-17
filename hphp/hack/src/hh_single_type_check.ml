@@ -61,7 +61,6 @@ type mode =
   | Dump_tast
   | Find_refs of int * int
   | Highlight_refs of int * int
-  | Decl_compare
   | Shallow_class_diff
   | Go_to_impl of int * int
   | Hover of (int * int) option
@@ -482,10 +481,6 @@ let parse_options () =
                (fun column -> set_mode (Highlight_refs (!line, column)) ());
            ]),
         "<pos> Highlight all usages of a symbol at given line and column" );
-      ( "--decl-compare",
-        Arg.Unit (set_mode Decl_compare),
-        " Test comparison functions used in incremental mode on declarations"
-        ^ " in provided file" );
       ( "--shallow-class-diff",
         Arg.Unit (set_mode Shallow_class_diff),
         " Test shallow class comparison used in incremental mode on shallow class declarations"
@@ -1185,14 +1180,6 @@ let parse_name_and_decl ctx files_contents =
 
       files_info)
 
-(** This function is used solely for its side-effect of putting decls into shared-mem *)
-let add_decls_to_heap ctx files_contents =
-  Errors.ignore_ (fun () ->
-      let files_info = parse_and_name ctx files_contents in
-      Relative_path.Map.iter files_info ~f:(fun fn _ ->
-          Decl.make_env ~sh:SharedMem.Uses ctx fn));
-  ()
-
 (** This function doesn't have side-effects. Its sole job is to return shallow decls. *)
 let get_shallow_decls ctx filename file_contents :
     Shallow_decl_defs.shallow_class SMap.t =
@@ -1232,149 +1219,6 @@ let test_shallow_class_diff ctx filename =
   in
   List.iter diffs ~f:(fun (cid, diff) ->
       Format.printf "%s: %a@." cid (Format.pp_print_option ClassDiff.pp) diff)
-
-let add_newline contents =
-  (* this is used for incremental mode to change all the positions, so we
-     basically want a prepend; there's a few cases we need to handle:
-     - empty file
-     - header line: apppend after header
-     - shebang and header: append after header
-     - shebang only, no header (e.g. .hack file): append after shebang
-     - no header or shebang (e.g. .hack file): prepend
-  *)
-  let after_shebang =
-    if String.is_prefix contents ~prefix:"#!" then
-      String.index_exn contents '\n' + 1
-    else
-      0
-  in
-  let after_header =
-    if
-      String.length contents > after_shebang + 2
-      && String.equal (String.sub contents ~pos:after_shebang ~len:2) "<?"
-    then
-      String.index_from_exn contents after_shebang '\n' + 1
-    else
-      after_shebang
-  in
-  String.sub contents ~pos:0 ~len:after_header
-  ^ "\n"
-  ^ String.sub
-      contents
-      ~pos:after_header
-      ~len:(String.length contents - after_header)
-
-(* Might raise because of Option.value_exn *)
-let get_decls defs =
-  ( SSet.fold
-      (fun x acc ->
-        Option.value_exn ~message:"Decl not found" (Decl_heap.Typedefs.get x)
-        :: acc)
-      defs.FileInfo.n_types
-      [],
-    SSet.fold
-      (fun x acc ->
-        Option.value_exn ~message:"Decl not found" (Decl_heap.Funs.get x) :: acc)
-      defs.FileInfo.n_funs
-      [],
-    SSet.fold
-      (fun x acc ->
-        Option.value_exn ~message:"Decl not found" (Decl_heap.Classes.get x)
-        :: acc)
-      defs.FileInfo.n_classes
-      [] )
-
-let fail_comparison s =
-  raise
-    (Failure
-       (Printf.sprintf "Comparing %s failed!\n" s
-       ^ "It's likely that you added new positions to decl types "
-       ^ "without updating Decl_pos_utils.NormalizeSig\n"))
-
-let compare_typedefs t1 t2 =
-  let t1 = Decl_pos_utils.NormalizeSig.typedef t1 in
-  let t2 = Decl_pos_utils.NormalizeSig.typedef t2 in
-  if Poly.(t1 <> t2) then fail_comparison "typedefs"
-
-let compare_funs f1 f2 =
-  let f1 = Decl_pos_utils.NormalizeSig.fun_elt f1 in
-  let f2 = Decl_pos_utils.NormalizeSig.fun_elt f2 in
-  if Poly.(f1 <> f2) then fail_comparison "funs"
-
-let compare_classes c1 c2 =
-  if Decl_compare.class_big_diff c1 c2 then fail_comparison "class_big_diff";
-
-  let c1 = Decl_pos_utils.NormalizeSig.class_type c1 in
-  let c2 = Decl_pos_utils.NormalizeSig.class_type c2 in
-  let is_unchanged = Decl_compare.ClassDiff.compare c1 c2 in
-  if not is_unchanged then fail_comparison "ClassDiff";
-
-  let is_unchanged = Decl_compare.ClassEltDiff.compare c1 c2 in
-  match is_unchanged with
-  | `Changed -> fail_comparison "ClassEltDiff"
-  | _ -> ()
-
-let test_decl_compare ctx filenames builtins files_contents files_info =
-  (* skip some edge cases that we don't handle now... ugly! *)
-  if String.equal (Relative_path.suffix filenames) "capitalization3.php" then
-    ()
-  else if String.equal (Relative_path.suffix filenames) "capitalization4.php"
-  then
-    ()
-  else
-    (* do not analyze builtins over and over *)
-    let files_info =
-      Relative_path.Map.fold
-        builtins
-        ~f:
-          begin
-            (fun k _ acc -> Relative_path.Map.remove acc k)
-          end
-        ~init:files_info
-    in
-    let files =
-      Relative_path.Map.fold
-        files_info
-        ~f:(fun k _ acc -> Relative_path.Set.add acc k)
-        ~init:Relative_path.Set.empty
-    in
-    let defs =
-      Relative_path.Map.fold
-        files_info
-        ~f:
-          begin
-            fun _ names1 names2 ->
-              FileInfo.(merge_names (simplify names1) names2)
-          end
-        ~init:FileInfo.empty_names
-    in
-    let (typedefs1, funs1, classes1) = get_decls defs in
-    (* For the purpose of this test, we can ignore other heaps *)
-    Ast_provider.remove_batch files;
-
-    let get_classes path =
-      match Relative_path.Map.find_opt files_info path with
-      | None -> SSet.empty
-      | Some info ->
-        SSet.of_list
-        @@ List.map info.FileInfo.ids.FileInfo.classes ~f:(fun (_, x, _) -> x)
-    in
-    (* We need to oldify, not remove, for ClassEltDiff to work *)
-    Decl_redecl_service.oldify_decls_and_remove_descendants
-      ctx
-      None
-      get_classes
-      ~bucket_size:1
-      ~defs
-      ~collect_garbage:false;
-
-    let files_contents = Relative_path.Map.map files_contents ~f:add_newline in
-    add_decls_to_heap ctx files_contents;
-    let (typedefs2, funs2, classes2) = get_decls defs in
-    List.iter2_exn typedefs1 typedefs2 ~f:compare_typedefs;
-    List.iter2_exn funs1 funs2 ~f:compare_funs;
-    List.iter2_exn classes1 classes2 ~f:compare_classes;
-    ()
 
 let compute_nasts ctx files_info interesting_files =
   let nasts = create_nasts ctx files_info in
@@ -2213,34 +2057,6 @@ let handle_mode
               in
               write_error_list error_format errors oc max_errors)
         ))
-  | Decl_compare when batch_mode ->
-    (* For each file in our batch, run typechecking serially.
-       Reset the heaps every time in between. *)
-    iter_over_files (fun filename ->
-        let oc =
-          Out_channel.create (Relative_path.to_absolute filename ^ ".decl_out")
-        in
-        Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-            let files_contents =
-              Relative_path.Map.filter files_contents ~f:(fun k _v ->
-                  Relative_path.equal k filename)
-            in
-            let (_, individual_file_info) =
-              parse_name_and_decl ctx files_contents
-            in
-            try
-              test_decl_compare
-                ctx
-                filename
-                builtins
-                files_contents
-                individual_file_info;
-              Out_channel.output_string oc ""
-            with
-            | e ->
-              let msg = Exn.to_string e in
-              Out_channel.output_string oc msg);
-        Out_channel.close oc)
   | Errors ->
     (* Don't typecheck builtins *)
     let errors =
@@ -2248,10 +2064,6 @@ let handle_mode
     in
     print_error_list error_format errors max_errors;
     if not (List.is_empty errors) then exit 2
-  | Decl_compare ->
-    let filename = expect_single_file () in
-    (* Might raise because of Option.value_exn *)
-    test_decl_compare ctx filename builtins files_contents files_info
   | Shallow_class_diff ->
     print_errors_if_present parse_errors;
     let filename = expect_single_file () in

@@ -5,7 +5,7 @@ function test_connect() :mixed{
 }
 
 function test_connect_and_query() :mixed{
-   AsyncMysqlClient::connectAndQuery(darray(vec[]), "x",1,"x","y","z", new stdClass, dict[]);
+   AsyncMysqlClient::connectAndQuery(vec[], "x",1,"x","y","z", new stdClass, dict[]);
 }
 
 function test_connect_with_opts() :mixed{

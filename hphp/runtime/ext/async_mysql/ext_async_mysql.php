@@ -169,8 +169,8 @@ final class AsyncMysqlClient {
    * retrieval, and the former has the query results
    */
   <<__Native>>
-    public static function connectAndQuery(
-                                        AnyArray<arraykey, string> $queries,
+  public static function connectAndQuery(
+                                        vec<string> $queries,
                                         string $host,
                                         int $port,
                                         string $dbname,
@@ -318,7 +318,7 @@ class AsyncMysqlConnectionPool {
 
   <<__Native>>
   public function connectAndQuery(
-    AnyArray<arraykey, string> $queries,
+    vec<string> $queries,
     string $host,
     int $port,
     string $dbname,
@@ -457,7 +457,7 @@ final class AsyncMysqlConnection {
    *           `AsyncMysqlQueryResult` objects.
    */
   <<__Native>>
-  public function multiQuery(AnyArray<arraykey, mixed> $queries,
+  public function multiQuery(vec<string> $queries,
                       int $timeout_micros = -1,
                       dict<string, string> $query_attributes = dict[],
                       ):

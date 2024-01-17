@@ -267,7 +267,7 @@ namespace HH {
    * from 0 to N-1, in that order.
    */
   <<__Native, __IsFoldable>>
-  function is_list_like(readonly AnyArray<arraykey, mixed> $var)[]: bool;
+  function is_list_like(readonly mixed $var)[]: bool;
 
   <<__Native, __IsFoldable>>
   function is_meth_caller(readonly mixed $var)[]: bool;

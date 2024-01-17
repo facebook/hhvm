@@ -83,14 +83,14 @@ function array_combine(
  * array_count_values() returns an array using the values of the input array
  *   as keys and their frequency in input as values.
  *
- * @param AnyArray $input - The array of values to count
+ * @param Container $input - The array of values to count
  *
  * @return mixed - Returns an associative array of values from input as keys
  *   and their count as value.
  *
  */
 <<__Native, __IsFoldable>>
-function array_count_values(AnyArray<arraykey, mixed> $input)[]: mixed;
+function array_count_values(mixed $input)[]: mixed;
 
 /**
  * Fills an array with the value of the value parameter, using the values of

@@ -80,7 +80,7 @@ namespace {
     ): Awaitable<AsyncMysqlConnection> {}
 
     static public function connectAndQuery(
-      Traversable<string> $queries,
+      vec<string> $queries,
       string $host,
       int $port,
       string $dbname,
@@ -118,7 +118,7 @@ namespace {
     ): Awaitable<AsyncMysqlConnection> {}
 
     public function connectAndQuery(
-      Traversable<string> $queries,
+      vec<string> $queries,
       string $host,
       int $port,
       string $dbname,
@@ -190,7 +190,7 @@ namespace {
       \HH\Lib\SQL\Query $query,
     ): Awaitable<AsyncMysqlQueryResult>;
     public function multiQuery(
-      Traversable<string> $query,
+      vec<string> $queries,
       int $timeout_micros = -1,
       dict<string, string> $query_attributes = dict[],
     ): \HH\FIXME\MISSING_RETURN_TYPE {}

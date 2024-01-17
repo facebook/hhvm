@@ -1,0 +1,269 @@
+[("\\IFoo",
+  (Shallow_decl_defs.Class
+     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+       sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+       sc_has_xhp_keyword = false; sc_kind = Cinterface; sc_module = None;
+       sc_name = ([3:11-15], "\\IFoo"); sc_tparams = [];
+       sc_where_constraints = []; sc_extends = []; sc_uses = [];
+       sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+       sc_xhp_marked_empty = false; sc_req_extends = [];
+       sc_req_implements = []; sc_req_class = []; sc_implements = [];
+       sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+       sc_props = []; sc_sprops = []; sc_constructor = None;
+       sc_static_methods =
+       [{ Shallow_decl_defs.sm_name = ([6:26-32], "getFoo");
+          sm_type =
+          (Rwitness_from_decl ([6:26-32]),
+           (Tfun
+              { ft_tparams = []; ft_where_constraints = []; ft_params = [];
+                ft_implicit_params = { capability = (CapDefaults [6:26-32]) };
+                ft_ret = (Rhint ([6:37-43]), (Tprim Tstring));
+                ft_flags =
+                { Typing_defs_flags.Fun.return_disposable = false;
+                  async = false; generator = false; fun_kind = FSync;
+                  instantiated_targs = false; is_function_pointer = false;
+                  returns_readonly = false; readonly_this = false;
+                  support_dynamic_type = false; is_memoized = false;
+                  variadic = false };
+                ft_cross_package = None }));
+          sm_visibility = Public; sm_deprecated = None;
+          sm_flags =
+          { Shallow_decl_defs.MethodFlags.abstract = true; final = false;
+            override = false; dynamicallycallable = false;
+            php_std_lib = false; support_dynamic_type = false };
+          sm_attributes = []; sm_sort_text = (Some "2getFoo") };
+         { Shallow_decl_defs.sm_name = ([9:26-32], "getBar");
+           sm_type =
+           (Rwitness_from_decl ([9:26-32]),
+            (Tfun
+               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
+                 ft_implicit_params =
+                 { capability = (CapDefaults [9:26-32]) };
+                 ft_ret = (Rhint ([9:37-43]), (Tprim Tstring));
+                 ft_flags =
+                 { Typing_defs_flags.Fun.return_disposable = false;
+                   async = false; generator = false; fun_kind = FSync;
+                   instantiated_targs = false; is_function_pointer = false;
+                   returns_readonly = false; readonly_this = false;
+                   support_dynamic_type = false; is_memoized = false;
+                   variadic = false };
+                 ft_cross_package = None }));
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = true; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
+           sm_attributes = []; sm_sort_text = (Some "1getBar") }
+         ];
+       sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
+       sc_docs_url = None }));
+  ("\\IBaz",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+        sc_has_xhp_keyword = false; sc_kind = Cinterface; sc_module = None;
+        sc_name = ([13:11-15], "\\IBaz"); sc_tparams = [];
+        sc_where_constraints = []; sc_extends = []; sc_uses = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_xhp_marked_empty = false; sc_req_extends = [];
+        sc_req_implements = []; sc_req_class = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods =
+        [{ Shallow_decl_defs.sm_name = ([15:26-32], "getFoo");
+           sm_type =
+           (Rwitness_from_decl ([15:26-32]),
+            (Tfun
+               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
+                 ft_implicit_params =
+                 { capability = (CapDefaults [15:26-32]) };
+                 ft_ret = (Rhint ([15:37-43]), (Tprim Tstring));
+                 ft_flags =
+                 { Typing_defs_flags.Fun.return_disposable = false;
+                   async = false; generator = false; fun_kind = FSync;
+                   instantiated_targs = false; is_function_pointer = false;
+                   returns_readonly = false; readonly_this = false;
+                   support_dynamic_type = false; is_memoized = false;
+                   variadic = false };
+                 ft_cross_package = None }));
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = true; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
+           sm_attributes = []; sm_sort_text = None };
+          { Shallow_decl_defs.sm_name = ([17:26-32], "getBar");
+            sm_type =
+            (Rwitness_from_decl ([17:26-32]),
+             (Tfun
+                { ft_tparams = []; ft_where_constraints = []; ft_params = [];
+                  ft_implicit_params =
+                  { capability = (CapDefaults [17:26-32]) };
+                  ft_ret = (Rhint ([17:37-43]), (Tprim Tstring));
+                  ft_flags =
+                  { Typing_defs_flags.Fun.return_disposable = false;
+                    async = false; generator = false; fun_kind = FSync;
+                    instantiated_targs = false; is_function_pointer = false;
+                    returns_readonly = false; readonly_this = false;
+                    support_dynamic_type = false; is_memoized = false;
+                    variadic = false };
+                  ft_cross_package = None }));
+            sm_visibility = Public; sm_deprecated = None;
+            sm_flags =
+            { Shallow_decl_defs.MethodFlags.abstract = true; final = false;
+              override = false; dynamicallycallable = false;
+              php_std_lib = false; support_dynamic_type = false };
+            sm_attributes = []; sm_sort_text = None }
+          ];
+        sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
+        sc_docs_url = None }));
+  ("\\ABC",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_abstract = true; sc_is_xhp = false; sc_internal = false;
+        sc_has_xhp_keyword = false; sc_kind = (Cclass Abstract);
+        sc_module = None; sc_name = ([21:16-19], "\\ABC"); sc_tparams = [];
+        sc_where_constraints = []; sc_extends = []; sc_uses = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_xhp_marked_empty = false; sc_req_extends = [];
+        sc_req_implements = []; sc_req_class = [];
+        sc_implements =
+        [(Rhint ([21:31-35]), (Tapply (([21:31-35], "\\IFoo"), [])));
+          (Rhint ([21:37-41]), (Tapply (([21:37-41], "\\IBaz"), [])))];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods =
+        [{ Shallow_decl_defs.sm_name = ([23:26-32], "getFoo");
+           sm_type =
+           (Rwitness_from_decl ([23:26-32]),
+            (Tfun
+               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
+                 ft_implicit_params =
+                 { capability = (CapDefaults [23:26-32]) };
+                 ft_ret = (Rhint ([23:37-43]), (Tprim Tstring));
+                 ft_flags =
+                 { Typing_defs_flags.Fun.return_disposable = false;
+                   async = false; generator = false; fun_kind = FSync;
+                   instantiated_targs = false; is_function_pointer = false;
+                   returns_readonly = false; readonly_this = false;
+                   support_dynamic_type = false; is_memoized = false;
+                   variadic = false };
+                 ft_cross_package = None }));
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
+           sm_attributes = []; sm_sort_text = None };
+          { Shallow_decl_defs.sm_name = ([27:26-32], "getBar");
+            sm_type =
+            (Rwitness_from_decl ([27:26-32]),
+             (Tfun
+                { ft_tparams = []; ft_where_constraints = []; ft_params = [];
+                  ft_implicit_params =
+                  { capability = (CapDefaults [27:26-32]) };
+                  ft_ret = (Rhint ([27:37-43]), (Tprim Tstring));
+                  ft_flags =
+                  { Typing_defs_flags.Fun.return_disposable = false;
+                    async = false; generator = false; fun_kind = FSync;
+                    instantiated_targs = false; is_function_pointer = false;
+                    returns_readonly = false; readonly_this = false;
+                    support_dynamic_type = false; is_memoized = false;
+                    variadic = false };
+                  ft_cross_package = None }));
+            sm_visibility = Public; sm_deprecated = None;
+            sm_flags =
+            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+              override = false; dynamicallycallable = false;
+              php_std_lib = false; support_dynamic_type = false };
+            sm_attributes = []; sm_sort_text = None }
+          ];
+        sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
+        sc_docs_url = None }));
+  ("\\DEF",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_abstract = true; sc_is_xhp = false; sc_internal = false;
+        sc_has_xhp_keyword = false; sc_kind = (Cclass Abstract);
+        sc_module = None; sc_name = ([33:16-19], "\\DEF"); sc_tparams = [];
+        sc_where_constraints = []; sc_extends = []; sc_uses = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_xhp_marked_empty = false; sc_req_extends = [];
+        sc_req_implements = []; sc_req_class = [];
+        sc_implements =
+        [(Rhint ([33:31-35]), (Tapply (([33:31-35], "\\IBaz"), [])));
+          (Rhint ([33:37-41]), (Tapply (([33:37-41], "\\IFoo"), [])))];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods =
+        [{ Shallow_decl_defs.sm_name = ([35:26-32], "getFoo");
+           sm_type =
+           (Rwitness_from_decl ([35:26-32]),
+            (Tfun
+               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
+                 ft_implicit_params =
+                 { capability = (CapDefaults [35:26-32]) };
+                 ft_ret = (Rhint ([35:37-43]), (Tprim Tstring));
+                 ft_flags =
+                 { Typing_defs_flags.Fun.return_disposable = false;
+                   async = false; generator = false; fun_kind = FSync;
+                   instantiated_targs = false; is_function_pointer = false;
+                   returns_readonly = false; readonly_this = false;
+                   support_dynamic_type = false; is_memoized = false;
+                   variadic = false };
+                 ft_cross_package = None }));
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
+           sm_attributes = []; sm_sort_text = None };
+          { Shallow_decl_defs.sm_name = ([39:26-32], "getBar");
+            sm_type =
+            (Rwitness_from_decl ([39:26-32]),
+             (Tfun
+                { ft_tparams = []; ft_where_constraints = []; ft_params = [];
+                  ft_implicit_params =
+                  { capability = (CapDefaults [39:26-32]) };
+                  ft_ret = (Rhint ([39:37-43]), (Tprim Tstring));
+                  ft_flags =
+                  { Typing_defs_flags.Fun.return_disposable = false;
+                    async = false; generator = false; fun_kind = FSync;
+                    instantiated_targs = false; is_function_pointer = false;
+                    returns_readonly = false; readonly_this = false;
+                    support_dynamic_type = false; is_memoized = false;
+                    variadic = false };
+                  ft_cross_package = None }));
+            sm_visibility = Public; sm_deprecated = None;
+            sm_flags =
+            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+              override = false; dynamicallycallable = false;
+              php_std_lib = false; support_dynamic_type = false };
+            sm_attributes = []; sm_sort_text = None }
+          ];
+        sc_methods =
+        [{ Shallow_decl_defs.sm_name = ([43:19-24], "three");
+           sm_type =
+           (Rwitness_from_decl ([43:19-24]),
+            (Tfun
+               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
+                 ft_implicit_params =
+                 { capability = (CapDefaults [43:19-24]) };
+                 ft_ret = (Rhint ([43:28-32]), (Tprim Tvoid));
+                 ft_flags =
+                 { Typing_defs_flags.Fun.return_disposable = false;
+                   async = false; generator = false; fun_kind = FSync;
+                   instantiated_targs = false; is_function_pointer = false;
+                   returns_readonly = false; readonly_this = false;
+                   support_dynamic_type = false; is_memoized = false;
+                   variadic = false };
+                 ft_cross_package = None }));
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false };
+           sm_attributes = []; sm_sort_text = None }
+          ];
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }))
+  ]

@@ -1,0 +1,203 @@
+FoldedClass {
+    name: "\\IFoo",
+    kind: Cinterface,
+    static_methods: {
+        "getFoo": FoldedElement {
+            flags: ClassEltFlags(
+                1,
+            ),
+            origin: "\\IFoo",
+            visibility: Public,
+            deprecated: None,
+            sort_text: Some(
+                "2getFoo",
+            ),
+        },
+        "getBar": FoldedElement {
+            flags: ClassEltFlags(
+                1,
+            ),
+            origin: "\\IFoo",
+            visibility: Public,
+            deprecated: None,
+            sort_text: Some(
+                "1getBar",
+            ),
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: HH\classname<this>,
+            origin: "\\IFoo",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\IBaz",
+    kind: Cinterface,
+    static_methods: {
+        "getFoo": FoldedElement {
+            flags: ClassEltFlags(
+                1,
+            ),
+            origin: "\\IBaz",
+            visibility: Public,
+            deprecated: None,
+            sort_text: None,
+        },
+        "getBar": FoldedElement {
+            flags: ClassEltFlags(
+                1,
+            ),
+            origin: "\\IBaz",
+            visibility: Public,
+            deprecated: None,
+            sort_text: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: HH\classname<this>,
+            origin: "\\IBaz",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\ABC",
+    kind: Cclass(
+        Abstract,
+    ),
+    substs: {
+        "\\IBaz": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\ABC",
+            from_req_extends: false,
+        },
+        "\\IFoo": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\ABC",
+            from_req_extends: false,
+        },
+    },
+    ancestors: {
+        "\\IBaz": IBaz,
+        "\\IFoo": IFoo,
+    },
+    static_methods: {
+        "getFoo": FoldedElement {
+            flags: ClassEltFlags(
+                0,
+            ),
+            origin: "\\ABC",
+            visibility: Public,
+            deprecated: None,
+            sort_text: Some(
+                "2getFoo",
+            ),
+        },
+        "getBar": FoldedElement {
+            flags: ClassEltFlags(
+                0,
+            ),
+            origin: "\\ABC",
+            visibility: Public,
+            deprecated: None,
+            sort_text: Some(
+                "1getBar",
+            ),
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: HH\classname<this>,
+            origin: "\\ABC",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\DEF",
+    kind: Cclass(
+        Abstract,
+    ),
+    substs: {
+        "\\IFoo": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\DEF",
+            from_req_extends: false,
+        },
+        "\\IBaz": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\DEF",
+            from_req_extends: false,
+        },
+    },
+    ancestors: {
+        "\\IFoo": IFoo,
+        "\\IBaz": IBaz,
+    },
+    methods: {
+        "three": FoldedElement {
+            flags: ClassEltFlags(
+                0,
+            ),
+            origin: "\\DEF",
+            visibility: Public,
+            deprecated: None,
+            sort_text: None,
+        },
+    },
+    static_methods: {
+        "getFoo": FoldedElement {
+            flags: ClassEltFlags(
+                0,
+            ),
+            origin: "\\DEF",
+            visibility: Public,
+            deprecated: None,
+            sort_text: Some(
+                "2getFoo",
+            ),
+        },
+        "getBar": FoldedElement {
+            flags: ClassEltFlags(
+                0,
+            ),
+            origin: "\\DEF",
+            visibility: Public,
+            deprecated: None,
+            sort_text: Some(
+                "1getBar",
+            ),
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: HH\classname<this>,
+            origin: "\\DEF",
+            refs: [],
+        },
+    },
+}

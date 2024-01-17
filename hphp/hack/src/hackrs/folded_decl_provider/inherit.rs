@@ -83,6 +83,14 @@ impl<R: Reason> Inherited<R> {
                 && new_sig.is_synthesized()
     }
 
+    fn get_updated_sort_text(new_sig: &FoldedElement, old_sig: &FoldedElement) -> Option<String> {
+        let updated_sort_text = match (&new_sig.sort_text, &old_sig.sort_text) {
+            (None, Some(_text)) => &old_sig.sort_text,
+            _ => &new_sig.sort_text,
+        };
+        updated_sort_text.clone()
+    }
+
     fn add_constructor(&mut self, constructor: Constructor) {
         let elt = match (constructor.elt.as_ref(), self.constructor.elt.take()) {
             (None, self_ctor) => self_ctor,
@@ -135,8 +143,13 @@ impl<R: Reason> Inherited<R> {
                 entry.insert(fe);
             }
             Entry::Occupied(mut entry) => {
+                let updated_sort_text = Self::get_updated_sort_text(&fe, entry.get());
                 if !Self::should_keep_old_sig(&fe, entry.get()) {
                     fe.set_is_superfluous_override(false);
+                    fe = FoldedElement {
+                        sort_text: updated_sort_text,
+                        ..fe
+                    };
                     entry.insert(fe);
                 } else {
                     // Otherwise, we *are* overwriting a method
@@ -145,6 +158,7 @@ impl<R: Reason> Inherited<R> {
                     // wins!), but not really OK when the naming
                     // conflict is trait vs trait (we rely on HHVM
                     // to catch the error at runtime).
+                    entry.get_mut().sort_text = updated_sort_text;
                 }
             }
         }

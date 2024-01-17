@@ -353,6 +353,18 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             (_, v) => self.visibility(cls, self.child.module.as_ref().map(Positioned::id), v),
         };
 
+        let sort_text = match sm.sort_text.to_owned() {
+            Some(text) => Some(text),
+            _ => match methods.get(&meth) {
+                Some(FoldedElement {
+                    sort_text: Some(parent_text),
+                    ..
+                }) => Some(parent_text),
+                _ => None,
+            }
+            .cloned(),
+        };
+
         let meth_flags = &sm.flags;
         let flag_args = ClassEltFlagsArgs {
             xhp_attr: None,
@@ -374,7 +386,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             visibility: vis,
             deprecated: sm.deprecated,
             flags: ClassEltFlags::new(flag_args),
-            sort_text: sm.sort_text.to_owned(),
+            sort_text,
         };
 
         methods.insert(meth, elt);

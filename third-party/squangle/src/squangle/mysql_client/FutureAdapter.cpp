@@ -140,7 +140,8 @@ template <typename ResultType, typename Operation, typename QueryResult>
 folly::SemiFuture<ResultType> toSemiFutureHelper(
     std::shared_ptr<Operation> op) {
   // Run pre-query callbacks
-  return handlePreQueryCallback<Operation>(*op)
+  auto& opRef = *op; // take a reference so we can move it in deferValue
+  return handlePreQueryCallback<Operation>(opRef)
       // Then run the query
       .deferValue([op = std::move(op)](auto&& /* unused */) {
         return handleRunQuery<ResultType>(std::move(op));

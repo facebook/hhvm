@@ -1361,7 +1361,7 @@ Ret SymbolMap::readOrUpdate(
 
 template <SymKind k>
 Path SymbolMap::getSymbolPath(Symbol<k> symbol) {
-  auto symbolPath = [this](auto const& paths) -> Path {
+  auto symbolPath = [](auto const& paths) -> Path {
     if (UNLIKELY(paths.empty())) {
       return Path{nullptr};
     } else {

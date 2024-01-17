@@ -81,7 +81,7 @@ resumeTarget();
 verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0]);
 resumeTarget();
 
-checkForOutput($testProcess, "hello world 15\n", "stdout");
+checkForOutput($testProcess, "hello world 104\n", "stdout");
 vsDebugCleanup($testProcess);
 
 echo "OK!\n";

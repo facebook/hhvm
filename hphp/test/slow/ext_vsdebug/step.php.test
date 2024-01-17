@@ -15,8 +15,12 @@ function foo() {
 }
 <<__EntryPoint>> function main() {
 echo "hello world 1\n";
-$a = foo();
-$b = foo();
+$a = foo() + fizz(42);
+$b = fizz(foo());
 $c = foo();
 echo "hello world ".($a + $b + $c)."\n";
+}
+
+function fizz($x) {
+  return $x * 2;
 }

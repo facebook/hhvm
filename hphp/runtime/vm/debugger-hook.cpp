@@ -244,6 +244,9 @@ void phpDebuggerFuncEntryHook(const ActRec* ar, bool isResume) {
   TRACE(4, "Func: %s, isResume: %d, flow depth: %d, stack depth: %lu\n",
             ar->func()->fullName()->data(), isResume,
             req_data.getDebuggerFlowDepth(), req_data.getDebuggerStackDepth());
+  if (!isResume && req_data.getDebuggerStepOut() == StepOutState::Out) {
+    req_data.setDebuggerStepOut(StepOutState::Stepping);
+  }
 }
 
 // Hook called on function exit. onOpcode handles function exit breakpoints,

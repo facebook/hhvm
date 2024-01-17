@@ -370,7 +370,7 @@ void Acceptor::startHandshakeManager(
   manager->start(std::move(sslSock));
 }
 
-static std::string logContext(folly::AsyncTransport& transport) {
+[[maybe_unused]] std::string logContext(folly::AsyncTransport& transport) {
   std::string localAddr;
   std::string remoteAddr;
   int socketFd = -1;

@@ -577,6 +577,7 @@ void Cpp2Worker::dispatchRequest(
         if (result) {
           auto errorCode = errorCodeFromTapplicationException(
               result.value().applicationException().getType());
+          // @lint-ignore CLANGTIDY bugprone-use-after-move
           serverRequest.request()->sendErrorWrapped(
               folly::exception_wrapper(
                   folly::in_place,

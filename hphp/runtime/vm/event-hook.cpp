@@ -644,7 +644,7 @@ void EventHook::onFunctionEnter(const ActRec* ar, int funcType,
 
   // Debugger hook
   if (flags & DebuggerHookFlag) {
-    DEBUGGER_ATTACHED_ONLY(phpDebuggerFuncEntryHook(ar));
+    DEBUGGER_ATTACHED_ONLY(phpDebuggerFuncEntryHook(ar, isResume));
   }
 }
 
@@ -727,7 +727,7 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
 
   // Debugger hook
   if (flags & DebuggerHookFlag) {
-    DEBUGGER_ATTACHED_ONLY(phpDebuggerFuncExitHook(ar));
+    DEBUGGER_ATTACHED_ONLY(phpDebuggerFuncExitHook(ar, isSuspend));
   }
 }
 

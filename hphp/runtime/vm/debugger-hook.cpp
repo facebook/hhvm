@@ -237,16 +237,25 @@ void phpDebuggerRequestInitHook() {
 
 // Hook called on function entry. Since function entry breakpoints are handled
 // by onOpcode, this just handles pushing the active line breakpoint
-void phpDebuggerFuncEntryHook(const ActRec* /*ar*/) {
-  RID().pushActiveLineBreak();
+void phpDebuggerFuncEntryHook(const ActRec* ar, bool isResume) {
+  auto &req_data = RID();
+  req_data.pushActiveLineBreak();
+  TRACE(4, "in phpDebuggerFuncEntryHook()\n");
+  TRACE(4, "Func: %s, isResume: %d, flow depth: %d, stack depth: %lu\n",
+            ar->func()->fullName()->data(), isResume,
+            req_data.getDebuggerFlowDepth(), req_data.getDebuggerStackDepth());
 }
 
 // Hook called on function exit. onOpcode handles function exit breakpoints,
 // this just handles stack-related manipulations. This handles returns,
 // suspends, and exceptions.
-void phpDebuggerFuncExitHook(const ActRec* /*ar*/) {
+void phpDebuggerFuncExitHook(const ActRec* ar, bool isSuspend) {
   auto& req_data = RID();
   req_data.popActiveLineBreak();
+  TRACE(4, "in phpDebuggerFuncExitHook()\n");
+  TRACE(4, "Func: %s, isSuspend: %d, flow depth: %d, stack depth: %lu\n",
+            ar->func()->fullName()->data(), isSuspend,
+            req_data.getDebuggerFlowDepth(), req_data.getDebuggerStackDepth());
 
   // If the step out command is active and if our stack depth has decreased,
   // we are out of the function being stepped out of

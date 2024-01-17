@@ -236,8 +236,8 @@ inline bool isDebuggerAttachedProcess() {
 // execution indefinitely within one of these hooks.
 void phpDebuggerOpcodeHook(const unsigned char* pc);
 void phpDebuggerRequestInitHook();
-void phpDebuggerFuncEntryHook(const ActRec* ar);
-void phpDebuggerFuncExitHook(const ActRec* ar);
+void phpDebuggerFuncEntryHook(const ActRec* ar, bool isResume);
+void phpDebuggerFuncExitHook(const ActRec* ar, bool isSuspend);
 void phpDebuggerExceptionThrownHook(ObjectData* exception);
 void phpDebuggerExceptionHandlerHook() noexcept;
 void phpDebuggerErrorHook(const ExtendedException& ee,

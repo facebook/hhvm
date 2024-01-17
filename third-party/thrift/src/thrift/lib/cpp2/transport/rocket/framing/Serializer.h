@@ -117,8 +117,8 @@ class HeaderSerializer {
   size_t writeBE(T value) {
     constexpr auto size = sizeof(T);
     if (FOLLY_LIKELY(canWrite(size))) {
-      T* target = reinterpret_cast<T*>(buf_ + pos_);
-      *target = folly::Endian::big(value);
+      T big_endian_value = folly::Endian::big(value);
+      std::memcpy(buf_ + pos_, &big_endian_value, size);
       incrementPosition(size);
       return size;
     }

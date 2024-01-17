@@ -47,7 +47,7 @@ inline constexpr type::Ordinal get_ordinal_v = get_ordinal<T, Id>::value;
 
 /// Calls the given function with ordinal<1> to ordinal<N>.
 template <typename T, typename F>
-void for_each_ordinal(F&& f) {
+constexpr void for_each_ordinal(F&& f) {
   detail::for_each_ordinal_impl(
       std::forward<F>(f), std::make_integer_sequence<size_t, size_v<T>>{});
 }
@@ -197,7 +197,7 @@ struct GetOrdinalImpl<type::field<TypeTag, FieldContext<Struct, Id>>, Tag>
     : GetOrdinalImpl<field_id<Id>, Tag> {};
 
 template <size_t... I, typename F>
-void for_each_ordinal_impl(F&& f, std::index_sequence<I...>) {
+constexpr void for_each_ordinal_impl(F&& f, std::index_sequence<I...>) {
   // This doesn't use fold expression (from C++17) as this file is used in
   // C++14 environment as well.
   int unused[] = {0, (f(type::detail::pos_to_ordinal<I>{}), 0)...};

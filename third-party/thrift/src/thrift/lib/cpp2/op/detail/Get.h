@@ -36,7 +36,7 @@ template <typename Id, typename Tag>
 struct GetOrdinalImpl;
 
 template <size_t... I, typename F>
-void for_each_ordinal_impl(F&& f, std::index_sequence<I...>);
+constexpr void for_each_ordinal_impl(F&& f, std::index_sequence<I...>);
 
 template <typename F, size_t I = 0>
 using ord_result_t =

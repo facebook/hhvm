@@ -50,11 +50,8 @@ void emitClassGetC(IRGS& env) {
     return;
   }
 
-  if (name->isA(TStr) && RO::EvalRaiseStrToClsConversionNoticeSampleRate) {
-    gen(env,
-        RaiseStrToClassNotice,
-        SampleRateData { RO::EvalRaiseStrToClsConversionNoticeSampleRate },
-        name);
+  if (name->isA(TStr) && RO::EvalRaiseStrToClsConversionNoticeSampleRate > 0) {
+    gen(env, RaiseStrToClassNotice, name);
   }
 
   auto const cls = ldCls(env, name);

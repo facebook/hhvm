@@ -156,6 +156,19 @@ std::string get_import_name(
   return program_name;
 }
 
+std::string multifile_module_name(const t_program* program) {
+  const std::string& namespace_rust = program->get_namespace("rust");
+
+  // If source file has `namespace rust cratename.modulename` then modulename.
+  auto separator = namespace_rust.find('.');
+  if (separator != std::string::npos) {
+    return namespace_rust.substr(separator + 1);
+  }
+
+  // Otherwise, the module is named after the source file, modulename.thrift.
+  return mangle(program->name());
+}
+
 bool node_is_boxed(const t_named& node) {
   return node.has_annotation("rust.box") || node.has_annotation("thrift.box") ||
       node.find_structured_annotation_or_null(kBoxUri);
@@ -577,7 +590,7 @@ class rust_mstch_program : public mstch_program {
   mstch::node rust_types() {
     auto types = "::" + options_.types_crate;
     if (options_.multifile_mode) {
-      types += "::" + mangle(program_->name());
+      types += "::" + multifile_module_name(program_);
     }
     return types;
   }
@@ -608,7 +621,7 @@ class rust_mstch_program : public mstch_program {
   mstch::node rust_multifile() { return options_.multifile_mode; }
   mstch::node rust_crate() {
     if (options_.multifile_mode) {
-      return "crate::" + mangle(program_->name());
+      return "crate::" + multifile_module_name(program_);
     }
     return std::string("crate");
   }
@@ -2201,7 +2214,7 @@ void t_mstch_rust_generator::generate_program() {
       options_.types_include_srcs, get_option("types_include_srcs"));
 
   if (options_.multifile_mode) {
-    options_.current_crate = "crate::" + mangle(program_->name());
+    options_.current_crate = "crate::" + multifile_module_name(program_);
   } else {
     options_.current_crate = "crate";
   }
@@ -2219,9 +2232,9 @@ void t_mstch_rust_generator::generate_program() {
     std::vector<std::string> pieces;
     boost::split(pieces, namespace_rust, boost::is_any_of("."));
     if (options_.multifile_mode) {
-      if (pieces.size() != 2) {
+      if (pieces.size() > 2) {
         throw std::runtime_error(fmt::format(
-            "`namespace rust {}`: namespace for multi-file Thrift library must have 2 pieces separated by '.'",
+            "`namespace rust {}`: namespace for multi-file Thrift library must have 1 piece, or 2 pieces separated by '.'",
             namespace_rust));
       }
     } else {

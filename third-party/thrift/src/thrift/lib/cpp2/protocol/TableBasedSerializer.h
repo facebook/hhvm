@@ -113,10 +113,11 @@ struct UnionExt {
   VoidFuncPtr clear;
 
   ptrdiff_t unionTypeOffset;
-  int (*getActiveId)(const void*);
-  void (*setActiveId)(void*, int);
 
-  // Value initializes using placement new into the member.
+  int (*getActiveId)(const void* /* object */);
+  void (*setActiveId)(void* /* object */, int /* fieldId */);
+
+  // Value initialized using placement new into the member.
   // Generated code should order this list by fields key order.
   VoidFuncPtr initMember[];
 };
@@ -132,14 +133,28 @@ struct UnionExtN {
 };
 
 struct StructInfo {
+  /**
+   * Number of fields in `fieldInfos`.
+   */
   std::int16_t numFields;
+
   const char* name;
+
   // This should be set to nullptr when not a union.
   const UnionExt* unionExt = nullptr;
-  bool (*getIsset)(const void*, ptrdiff_t);
-  void (*setIsset)(void*, ptrdiff_t, bool);
+
+  bool (*getIsset)(const void* /* object */, ptrdiff_t /* offset */);
+  void (*setIsset)(void* /* object */, ptrdiff_t /* offset */, bool /*set */);
+
   // Use for other languages to pass in additional information.
   const void* customExt;
+
+  /**
+   * Holds `numFields` entries.
+   *
+   * The memory for these entries is sequentially allocated with instances of
+   * `StructInfo`, so this field MUST be the last in this struct.
+   */
   FieldInfo fieldInfos[];
 };
 

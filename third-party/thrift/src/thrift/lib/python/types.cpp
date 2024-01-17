@@ -33,16 +33,133 @@ constexpr const size_t kFieldOffset = sizeof(PyObject*);
 
 namespace {
 
+/***
+ * Imports the thrift python types module, and returns true iff it succeeded.
+ */
 bool ensure_module_imported() {
   static ::folly::python::import_cache_nocapture import(
       ::import_thrift__python__types);
   return import();
 }
 
+/**
+ * Throws an exception if the thrift python types module could not be imported.
+ */
 void ensureImportOrThrow() {
   if (!ensure_module_imported()) {
     throw std::runtime_error("import_thrift__python__types failed");
   }
+}
+
+/**
+ * Returns the appropriate default value for a thrift field of the given type.
+ *
+ * The returned value will either be the one provided by the user (in the Thrift
+ * IDL), or the standard default value for the given `typeInfo`.
+ *
+ * @param `index` of the field in `userDefaultValues`, i.e. insertion order (NOT
+ *        field ID).
+ *
+ * @throws if the thrift python types module could not be imported.
+ */
+UniquePyObjectPtr getDefaultValue(
+    const detail::TypeInfo* typeInfo,
+    const FieldValueMap& userDefaultValues,
+    int16_t index) {
+  ensureImportOrThrow();
+
+  // 1. If the user explicitly provided a default value, use it.
+  auto userDefaultValueIt = userDefaultValues.find(index);
+  if (userDefaultValueIt != userDefaultValues.end()) {
+    PyObject* value = userDefaultValueIt->second;
+    Py_INCREF(value);
+    return UniquePyObjectPtr(value);
+  }
+
+  // 2. Check local cache for an existing default value.
+  static folly::Indestructible<
+      std::unordered_map<const detail::TypeInfo*, PyObject*>>
+      defaultValueCache;
+  auto cachedDefaultValueIt = defaultValueCache->find(typeInfo);
+  if (cachedDefaultValueIt != defaultValueCache->end()) {
+    UniquePyObjectPtr value(UniquePyObjectPtr(cachedDefaultValueIt->second));
+    Py_INCREF(value.get());
+    return value;
+  }
+
+  // 3. No cached value found. Determine the default value, and update cache (if
+  // applicable).
+  UniquePyObjectPtr value;
+  bool addValueToCache = true;
+  switch (typeInfo->type) {
+    case protocol::TType::T_BYTE:
+    case protocol::TType::T_I16:
+    case protocol::TType::T_I32:
+    case protocol::TType::T_I64:
+      // For integral values, the default is `0L`.
+      value = UniquePyObjectPtr(PyLong_FromLong(0));
+      break;
+    case protocol::TType::T_DOUBLE:
+    case protocol::TType::T_FLOAT:
+      // For floating point values, the default is `0d`.
+      value = UniquePyObjectPtr(PyFloat_FromDouble(0));
+      break;
+    case protocol::TType::T_BOOL:
+      // For booleans, the default is `false`.
+      value = UniquePyObjectPtr(Py_False);
+      Py_INCREF(Py_False);
+      break;
+    case protocol::TType::T_STRING:
+      // For strings, the default value is the empty string (or, if `IOBuf`s are
+      // used, an empty `IOBuf`).
+      switch (*static_cast<const detail::StringFieldType*>(typeInfo->typeExt)) {
+        case detail::StringFieldType::String:
+        case detail::StringFieldType::StringView:
+        case detail::StringFieldType::Binary:
+        case detail::StringFieldType::BinaryStringView:
+          value = UniquePyObjectPtr(PyBytes_FromString(""));
+          break;
+        case detail::StringFieldType::IOBuf:
+        case detail::StringFieldType::IOBufPtr:
+        case detail::StringFieldType::IOBufObj:
+          auto buf = create_IOBuf(folly::IOBuf::create(0));
+          value = UniquePyObjectPtr(buf);
+          addValueToCache = false;
+          break;
+      }
+      break;
+    case protocol::TType::T_LIST:
+    case protocol::TType::T_MAP:
+      // For lists and maps, the default value is an empty tuple.
+      value = UniquePyObjectPtr(PyTuple_New(0));
+      break;
+    case protocol::TType::T_SET:
+      // For sets, the default value is an empty `frozenset`.
+      value = UniquePyObjectPtr(PyFrozenSet_New(nullptr));
+      break;
+    case protocol::TType::T_STRUCT: {
+      // For struct and unions, the default value is a (recursively)
+      // default-initialized instance.
+      auto structInfo =
+          static_cast<const detail::StructInfo*>(typeInfo->typeExt);
+      value = UniquePyObjectPtr(
+          structInfo->unionExt != nullptr
+              ? createUnionTuple()
+              : createStructTupleWithDefaultValues(*structInfo));
+      break;
+    }
+    default:
+      LOG(FATAL) << "invalid typeInfo TType " << typeInfo->type;
+  }
+  if (value == nullptr) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+
+  if (addValueToCache) {
+    defaultValueCache->emplace(typeInfo, value.get());
+    Py_INCREF(value.get());
+  }
+  return value;
 }
 
 } // namespace
@@ -60,103 +177,22 @@ PyObject* createUnionTuple() {
   return tuple.release();
 }
 
-UniquePyObjectPtr getDefaultValue(
-    const detail::TypeInfo* typeInfo,
-    const FieldValueMap& userValueMap,
-    int16_t index) {
-  ensureImportOrThrow();
-  auto userValueFound = userValueMap.find(index);
-  if (userValueFound != userValueMap.end()) {
-    auto value = userValueFound->second;
-    Py_INCREF(value);
-    return UniquePyObjectPtr(value);
-  }
-  static folly::Indestructible<
-      std::unordered_map<const detail::TypeInfo*, PyObject*>>
-      defaultValueMap;
-  auto defaultValueFound = defaultValueMap->find(typeInfo);
-  bool emplace = true;
-  UniquePyObjectPtr value;
-  if (defaultValueFound == defaultValueMap->end()) {
-    switch (typeInfo->type) {
-      case protocol::TType::T_BYTE:
-      case protocol::TType::T_I16:
-      case protocol::TType::T_I32:
-      case protocol::TType::T_I64:
-        value = UniquePyObjectPtr(PyLong_FromLong(0));
-        break;
-      case protocol::TType::T_DOUBLE:
-      case protocol::TType::T_FLOAT:
-        value = UniquePyObjectPtr(PyFloat_FromDouble(0));
-        break;
-      case protocol::TType::T_BOOL:
-        value = UniquePyObjectPtr(Py_False);
-        Py_INCREF(Py_False);
-        break;
-      case protocol::TType::T_STRING:
-        switch (
-            *static_cast<const detail::StringFieldType*>(typeInfo->typeExt)) {
-          case detail::StringFieldType::String:
-          case detail::StringFieldType::StringView:
-          case detail::StringFieldType::Binary:
-          case detail::StringFieldType::BinaryStringView:
-            value = UniquePyObjectPtr(PyBytes_FromString(""));
-            break;
-          case detail::StringFieldType::IOBuf:
-          case detail::StringFieldType::IOBufPtr:
-          case detail::StringFieldType::IOBufObj:
-            auto buf = create_IOBuf(folly::IOBuf::create(0));
-            value = UniquePyObjectPtr(buf);
-            emplace = false;
-            break;
-        }
-        break;
-      case protocol::TType::T_LIST:
-      case protocol::TType::T_MAP:
-        value = UniquePyObjectPtr(PyTuple_New(0));
-        break;
-      case protocol::TType::T_SET:
-        value = UniquePyObjectPtr(PyFrozenSet_New(nullptr));
-        break;
-      case protocol::TType::T_STRUCT: {
-        auto structInfo =
-            static_cast<const detail::StructInfo*>(typeInfo->typeExt);
-        value = UniquePyObjectPtr(
-            structInfo->unionExt != nullptr ? createUnionTuple()
-                                            : createStructTuple(*structInfo));
-        break;
-      }
-      default:
-        LOG(FATAL) << "invalid typeInfo TType " << typeInfo->type;
-    }
-    if (!value) {
-      THRIFT_PY3_CHECK_ERROR();
-    }
-    if (emplace) {
-      defaultValueMap->emplace(typeInfo, value.get());
-      Py_INCREF(value.get());
-    }
-  } else {
-    value = UniquePyObjectPtr(defaultValueFound->second);
-    Py_INCREF(value.get());
-  }
-  return value;
-}
-
 PyObject* createStructTuple(int16_t numFields) {
+  // Allocate and 0-initialize numFields bytes.
   UniquePyObjectPtr issetArr{PyBytes_FromStringAndSize(nullptr, numFields)};
-  if (!issetArr) {
+  if (issetArr == nullptr) {
     return nullptr;
   }
   char* flags = PyBytes_AsString(issetArr.get());
-  if (!flags) {
+  if (flags == nullptr) {
     return nullptr;
   }
   for (Py_ssize_t i = 0; i < numFields; ++i) {
     flags[i] = '\0';
   }
-  // create a tuple with the first element as a bytearray for isset flags, and
-  // the rest numFields for struct fields.
+
+  // Create tuple, with isset byte array as first element (followed by
+  // `numFields` uninitialized elements).
   PyObject* tuple{PyTuple_New(numFields + 1)};
   if (tuple == nullptr) {
     return nullptr;
@@ -165,16 +201,19 @@ PyObject* createStructTuple(int16_t numFields) {
   return tuple;
 }
 
-PyObject* createStructTuple(const detail::StructInfo& structInfo) {
-  auto numFields = structInfo.numFields;
+PyObject* createStructTupleWithDefaultValues(
+    const detail::StructInfo& structInfo) {
+  const int16_t numFields = structInfo.numFields;
   UniquePyObjectPtr tuple{createStructTuple(numFields)};
-  if (!tuple) {
+  if (tuple == nullptr) {
     THRIFT_PY3_CHECK_ERROR();
   }
+
+  // Initialize tuple[1:numFields+1] with default field values.
   const auto& defaultValues =
       *static_cast<const FieldValueMap*>(structInfo.customExt);
   for (int i = 0; i < numFields; ++i) {
-    auto fieldInfo = structInfo.fieldInfos[i];
+    const detail::FieldInfo& fieldInfo = structInfo.fieldInfos[i];
     if (fieldInfo.qualifier == detail::FieldQualifier::Optional) {
       PyTuple_SET_ITEM(tuple.get(), i + 1, Py_None);
       Py_INCREF(Py_None);
@@ -201,7 +240,7 @@ void setStructIsset(void* object, int16_t index, bool set) {
 void* setStruct(void* object, const detail::TypeInfo& typeInfo) {
   return setPyObject(
       object,
-      UniquePyObjectPtr{createStructTuple(
+      UniquePyObjectPtr{createStructTupleWithDefaultValues(
           *static_cast<const detail::StructInfo*>(typeInfo.typeExt))});
 }
 

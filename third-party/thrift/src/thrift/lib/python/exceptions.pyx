@@ -16,7 +16,7 @@ import copy
 
 from cython.operator cimport dereference as deref
 from thrift.python.serializer cimport cserialize, cdeserialize
-from thrift.python.types cimport StructInfo, createStructTuple, set_struct_field
+from thrift.python.types cimport StructInfo, createStructTupleWithDefaultValues, set_struct_field
 from libcpp.vector cimport vector
 from libcpp.utility cimport move as cmove
 
@@ -165,7 +165,7 @@ class GeneratedErrorMeta(type):
 cdef class GeneratedError(Error):
     def __cinit__(self):
         cdef StructInfo info = self._fbthrift_struct_info
-        self._fbthrift_data = createStructTuple(
+        self._fbthrift_data = createStructTupleWithDefaultValues(
             info.cpp_obj.get().getStructInfo()
         )
 

@@ -73,8 +73,35 @@ inline T convInt(V v) {
 
 PyObject* createUnionTuple();
 
+/***
+ * Returns a new "struct tuple" whose field elements are uninitialized.
+ *
+ * The returned tuple has `numFields + 1` elements.
+ *
+ * The first element is a bytearray of `numFields` bytes, all of which are
+ * initialized to 0. It is typically meant to be used as an array of isset
+ * flags.
+ *
+ * The remaining `numFields` elements of the tuple are uninitialized.
+ *
+ * See also: `createStructTupleWithDefaultValues()`.
+ */
 PyObject* createStructTuple(int16_t numFields);
-PyObject* createStructTuple(const detail::StructInfo& structInfo);
+
+/**
+ * Returns a new "struct tuple" with all its elements initialized.
+ *
+ * As in `createStructTuple()`, the first element of the tuple is a
+ * 0-initialized bytearray with `numFields` bytes (to be used as isset flags).
+ *
+ * However, the remaining elements (1 through `numFields + 1`) are initialized
+ * with the appropriate default value for the corresponding field. The order
+ * corresponds to the order of fields in the given `structInfo` (i.e., the
+ * insertion order, NOT the field ids).
+ *
+ */
+PyObject* createStructTupleWithDefaultValues(
+    const detail::StructInfo& structInfo);
 
 void setStructIsset(void* object, int16_t index, bool set);
 
@@ -404,22 +431,68 @@ class DynamicStructInfo {
 
   ~DynamicStructInfo();
 
+  /**
+   * Returns the underlying `StructInfo`, populated with all field infos and
+   * values added via the `addField*()` methods.
+   */
   const detail::StructInfo& getStructInfo() const { return *structInfo_; }
 
+  /**
+   * Adds information for a new field to the underlying `StructInfo`.
+   *
+   * The order of `FieldInfo` in the underlying `StructInfo` corresponds to the
+   * order in which this method is called. Calling this method more than the
+   * `numFields` value specified at construction time results in undefined
+   * behavior.
+   */
   void addFieldInfo(
       detail::FieldID id,
       detail::FieldQualifier qualifier,
       const char* name,
       const detail::TypeInfo* typeInfo);
 
+  /**
+   * Sets the value for the field with the given `index`.
+   *
+   * The given `fieldValue` will be included in the underlying
+   * `StructInfo::customExt`, at the given `index`.
+   *
+   * If `fieldValue` is `nullptr`, behavior is undefined.
+   */
   void addFieldValue(int16_t index, PyObject* fieldValue);
 
   bool isUnion() const { return structInfo_->unionExt != nullptr; }
 
  private:
+  /**
+   * Pointer to a region of memory that holds a `StructInfo` followed by
+   * `numFields` instances of `FieldInfo` (accessible through
+   * `structInfo->fieldInfos`).
+   *
+   * ------------------------------------------------
+   * | StructInfo    |  FieldInfo | ... | FieldInfo |
+   * ------------------------------------------------
+   * ^                      (numFields times)
+   *
+   * The `customExt` field of this StructInfo points to `fieldValues_`.
+   */
   detail::StructInfo* structInfo_;
+
   std::string name_;
+
+  /**
+   * Names of the fields added via `addFieldInfo()`, in the order they were
+   * added.
+   *
+   * The same order is used for the corresponding `FieldInfo` entries in
+   * `structInfo_`.
+   */
   std::vector<std::string> fieldNames_;
+
+  /**
+   * Default values (if any) for each field (indexed by field position in
+   * `fieldNames_`).
+   */
   FieldValueMap fieldValues_;
 };
 

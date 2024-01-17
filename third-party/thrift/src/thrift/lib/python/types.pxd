@@ -51,7 +51,7 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
         cMapTypeInfo(cTypeInfo& keyInfo, cTypeInfo& valInfo)
         const cTypeInfo* get()
 
-    cdef object createStructTuple(const cStructInfo& structInfo) except+
+    cdef object createStructTupleWithDefaultValues(const cStructInfo& structInfo) except+
     cdef object createUnionTuple() except+
     cdef cTypeInfo createStructTypeInfo(const cDynamicStructInfo& structInfo) except+
     cdef void setStructIsset(object, int index, bint set) except+

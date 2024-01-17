@@ -172,34 +172,102 @@ StructOrError = cython.fused_type(Struct, GeneratedError)
 
 
 cdef class StructInfo:
-    def __cinit__(self, name, fields):
+    """
+    Stores information for a specific Thrift Struct class.
+
+    Instance Variables:
+        fields: Set containing the specifications of each field in this Thrift
+            struct. Each field is represented as a tuple with the following
+            structure:
+
+            (
+                id (int): The field ID specified in the IDL.
+
+                qualifier (FieldQualifier enum): Unqualified, Optional, ...
+
+                name (str); The name of the Thrift struct, as specified in the
+                    IDL.
+
+                type_info: Type information object corresponding to this field
+                    (eg. typeinfo_string, ListTypeInfo, SetTypeInfo, etc.), OR
+                    a callable (eg. lambda) that returns such an object (useful
+                        to handle types with dependencies in arbitrary order).
+
+                default_value: custom default value specified in the IDL, or
+                    None. If present, this can also be a callable which will be
+                    called (exactly once) to obtain the default value.
+
+                adapter_info: if the field has an adapter, or None.
+
+                is_primitive (bool): Whether the field has a "orimitive" type,
+                    such as: bool, byte, i16, i32, i62, double, float.
+            )
+
+        cpp_obj: cDynamicStructInfo for this struct.
+
+        type_infos: Tuple whose size matches the number of fields in the Thrift
+            struct. Initialized by calling `fill()`.
+
+        name_to_index: Dict[str (field name), int (index in `fields`).].
+            Initialized by calling `fill()`.
+    """
+
+    def __cinit__(self, name: str, fields):
+        """
+        Stores information for a Thrift Struct class with the given name.
+
+        Args:
+            name (str): Name of the Thrift Struct (as specified in IDL)
+            fields (Set[Tuple]): Field spec tuples. See class docstring above.
+        """
         self.fields = fields
-        cdef int16_t size = len(fields)
+        cdef int16_t num_fields = len(fields)
         self.cpp_obj = make_unique[cDynamicStructInfo](
             PyUnicode_AsUTF8(name),
-            size,
-            False,
+            num_fields,
+            False, # isUnion
         )
-        self.type_infos = PyTuple_New(size)
+        self.type_infos = PyTuple_New(num_fields)
         self.name_to_index = {}
 
     cdef void fill(self) except *:
-        cdef cDynamicStructInfo* info_ptr = self.cpp_obj.get()
+        """
+        Completes the initialization of this instance by populating all
+        information relative to this Struct's fields.
+
+        Must be called exactly once, after `__cinit__()` but before any other
+        method.
+
+        Upon successful return, the following attributes are fully initialized:
+          - `self.type_infos`
+          - `self.name_to_index`
+          - field infos in the `self.cpp_obj` (see
+            `DynamicStructInfo::addFieldInfo()`)
+        """
+
+        cdef cDynamicStructInfo* dynamic_struct_info = self.cpp_obj.get()
         type_infos = self.type_infos
         for idx, (id, qualifier, name, type_info, *_) in enumerate(self.fields):
             # type_info can be a lambda function so types with dependencies
-            # won't need to be defined in order
+            # won't need to be defined in order, see class docstring above.
             if PyCallable_Check(type_info):
                 type_info = type_info()
+
             Py_INCREF(type_info)
             PyTuple_SET_ITEM(type_infos, idx, type_info)
             self.name_to_index[name] = idx
-            info_ptr.addFieldInfo(
+            dynamic_struct_info.addFieldInfo(
                 id, qualifier, PyUnicode_AsUTF8(name), getCTypeInfo(type_info)
             )
 
     cdef void store_field_values(self) except *:
-        cdef cDynamicStructInfo* info_ptr = self.cpp_obj.get()
+        """
+        Initializes the default values of fields in this Struct.
+
+        Upon successful return, the field value(s) in `self.cpp_obj` are
+        iniitalized (see `DynamicStructInfo::addFieldValue()`).
+        """
+        cdef cDynamicStructInfo* dynamic_struct_info = self.cpp_obj.get()
         for idx, field in enumerate(self.fields):
             default_value = field[4]
             if default_value is None:
@@ -210,7 +278,7 @@ cdef class StructInfo:
             if isinstance(type_info, AdaptedTypeInfo):
                 type_info = (<AdaptedTypeInfo>type_info)._orig_type_info
             default_value = type_info.to_internal_data(default_value)
-            info_ptr.addFieldValue(idx, default_value)
+            dynamic_struct_info.addFieldValue(idx, default_value)
 
 
 cdef class UnionInfo:
@@ -226,7 +294,7 @@ cdef class UnionInfo:
         self.name_to_index = {}
 
     cdef void fill(self) except *:
-        cdef cDynamicStructInfo* info_ptr = self.cpp_obj.get()
+        cdef cDynamicStructInfo* dynamic_struct_info = self.cpp_obj.get()
         for idx, (id, qualifier, name, type_info, _, adapter_info, _) in enumerate(self.fields):
             # type_info can be a lambda function so types with dependencies
             # won't need to be defined in order
@@ -235,7 +303,7 @@ cdef class UnionInfo:
             self.type_infos[id] = type_info
             self.id_to_adapter_info[id] = adapter_info
             self.name_to_index[name] = idx
-            info_ptr.addFieldInfo(
+            dynamic_struct_info.addFieldInfo(
                 id, qualifier, PyUnicode_AsUTF8(name), getCTypeInfo(type_info)
             )
 
@@ -453,6 +521,20 @@ cdef class AdaptedTypeInfo:
 
 
 cdef void set_struct_field(tuple struct_tuple, int16_t index, value) except *:
+    """
+    Updates the given `struct_tuple` to have the given `value` for the field at
+    the given `index`.
+
+    The "isset" byte for the corresponding field (i.e., the `index`-th byte of
+     the first element of `struct_tuple` is set to 1.
+
+     Args:
+        struct_tuple: see `createStructTupleWithDefaultValues()`
+        index: field index, as defined by its insertion order in the parent
+            `StructInfo` (this is not the field id).
+        value: new value for this field.
+
+    """
     setStructIsset(struct_tuple, index, 1)
     old_value = struct_tuple[index + 1]
     Py_INCREF(value)
@@ -480,67 +562,92 @@ cdef api object _get_exception_fbthrift_data(object generated_error):
     return (<GeneratedError> generated_error)._fbthrift_data
 
 cdef class Struct(StructOrUnion):
+    """
+    Base class for all generated classes corresponding to a Thrift struct in
+    thrift-python.
+
+    Instance variables:
+        _fbthrift_data: "struct tuple" that holds the "isset" flag array and
+            values for all fields. See `createStructTupleWithDefaultValues()`.
+
+        _fbthrift_field_cache: Tuple
+    """
+
     def __cinit__(self):
-        cdef StructInfo info = self._fbthrift_struct_info
-        self._fbthrift_data = createStructTuple(
-            info.cpp_obj.get().getStructInfo()
+        cdef StructInfo struct_info = self._fbthrift_struct_info
+        self._fbthrift_data = createStructTupleWithDefaultValues(
+            struct_info.cpp_obj.get().getStructInfo()
         )
-        self._fbthrift_field_cache = PyTuple_New(len(info.fields))
+        self._fbthrift_field_cache = PyTuple_New(len(struct_info.fields))
 
     def __init__(self, **kwargs):
-        cdef StructInfo info = self._fbthrift_struct_info
+        """
+
+        Args:
+            **kwargs: names and values of the Thrift fields to set for this
+                 instance. All names must match declared fields of this Thrift
+                 Struct (or a `TypeError` will be raised).
+        """
+        cdef StructInfo struct_info = self._fbthrift_struct_info
         for name, value in kwargs.items():
-            index = info.name_to_index.get(name)
-            if index is None:
+            field_index = struct_info.name_to_index.get(name)
+            if field_index is None:
                 raise TypeError(f"__init__() got an unexpected keyword argument '{name}'")
             if value is None:
                 continue
-            # field adapter
-            adapter_info = info.fields[index][5]
+
+            field_spec = struct_info.fields[field_index]
+
+            # Handle field w/ adapter
+            adapter_info = field_spec[5]
             if adapter_info is not None:
                 adapter_class, transitive_annotation = adapter_info
-                field_id = info.fields[index][0]
+                field_id = field_spec[0]
                 value = adapter_class.to_thrift_field(
                     value,
                     field_id,
                     self,
                     transitive_annotation=transitive_annotation(),
                 )
+
             set_struct_field(
                 self._fbthrift_data,
-                index,
-                info.type_infos[index].to_internal_data(value),
+                field_index,
+                struct_info.type_infos[field_index].to_internal_data(value),
             )
         self._fbthrift_populate_primitive_fields()
 
     def __call__(self, **kwargs):
         if not kwargs:
             return self
-        cdef StructInfo info = self._fbthrift_struct_info
+        cdef StructInfo struct_info = self._fbthrift_struct_info
         tp = type(self)
         cdef Struct new_inst = tp.__new__(tp)
         not_found = object()
-        for name, index in info.name_to_index.items():
-            value = kwargs.pop(name, not_found)
+        isset_flags = self._fbthrift_data[0]
+        for field_name, field_index in struct_info.name_to_index.items():
+            value = kwargs.pop(field_name, not_found)
             if value is None:  # reset to default value, no change needed
                 continue
             if value is not_found:  # copy the old value if needed
-                if self._fbthrift_data[0][index] == 0: # old field not set, so keep default
+                if isset_flags[field_index] == 0:
+                    # old field not set, so keep default
                     continue
-                value_to_copy = self._fbthrift_data[index + 1]
+                value_to_copy = self._fbthrift_data[field_index + 1]
             else:  # new assigned value
-                adapter_info = info.fields[index][5]
+                field_spec = struct_info.fields[field_index]
+                adapter_info = field_spec[5]
                 if adapter_info:
                     adapter_class, transitive_annotation = adapter_info
-                    field_id = info.fields[index][0]
+                    field_id = field_spec[0]
                     value = adapter_class.to_thrift_field(
                         value,
                         field_id,
                         self,
                         transitive_annotation=transitive_annotation(),
                     )
-                value_to_copy = info.type_infos[index].to_internal_data(value)
-            set_struct_field(new_inst._fbthrift_data, index, value_to_copy)
+                value_to_copy = struct_info.type_infos[field_index].to_internal_data(value)
+            set_struct_field(new_inst._fbthrift_data, field_index, value_to_copy)
         if kwargs:
             raise TypeError(f"__call__() got an expected keyword argument '{kwargs.keys()[0]}'")
         new_inst._fbthrift_populate_primitive_fields()
@@ -637,6 +744,11 @@ cdef class Struct(StructOrUnion):
         return py_value
 
     cdef _fbthrift_populate_primitive_fields(self):
+        """
+        Copies the values of all primitive fields from the underlying struct
+        tuple (`_fbthrift_primitive_types`), or None if n/a, to instance
+        attributes with the same names.
+        """
         for index, name, type_info in self._fbthrift_primitive_types:
             data = self._fbthrift_data[index + 1]
             val = type_info.to_python_value(data) if data is not None else None
@@ -844,28 +956,67 @@ cdef make_fget_union(type_value, adapter_info):
     return property(lambda self: (<Union>self)._fbthrift_get_field_value(type_value))
 
 
-def _fbthrift_setattr(name, _):
+def _fbthrift_readonly_setattr(name, _):
+    """Setter for read-only attributes, always throws AttributeError."""
     raise AttributeError(f"can't set attribute '{name}'")
 
 
 class StructMeta(type):
+    """Metaclass for all generated Thrift Struct types."""
+
     def __new__(cls, cls_name, bases, dct):
+        """
+        Returns a new Thrift Struct class with the given name and members.
+
+        Args:
+            cls_name (str): Name of the Thrift Struct, as specified in the
+                Thrift IDL.
+            bases: unused (expected to always be empty).
+            dct (Dict): class members, including the SPEC for this class under
+                the key '_fbthrift_SPEC'.
+
+        Returns:
+            A new class, with the given `cls_name`, corresponding to a Thrift
+            Struct. The returned class inherits from `Struct` and provides
+            (read-only) properties for all non-primitive fields (including any
+            adapted fields) specified in the SPEC.
+
+            The returned class will also have the following additional class
+            attributes, meant for internal (Thrift) processing:
+
+            _fbthrift_struct_info: StructInfo
+
+            _fbthrift_primitive_types:
+                List[Tuple[int (index in fields), str (field name), type_info]]
+                for all primitive (and non-adapted) fields.
+        """
+        # Set[Tuple (field spec)]. See `StructInfo` class docstring for the
+        # contents of the field spec tuples.
         fields = dct.pop('_fbthrift_SPEC')
+
         num_fields = len(fields)
         dct["_fbthrift_struct_info"] = StructInfo(cls_name, fields)
+
+        # List[Tuple[int (index in fields), str (field name), type_info]]
         primitive_types = []
+
+        # List[Tuple[int (index in fields), str (field name)]]
         non_primitive_types = []
+
         slots = []
-        for i, f in enumerate(fields):
-            slots.append(f[2])
-            # if adapter info or not primitive type
-            if f[5] is not None or not f[6]:
-                non_primitive_types.append((i, f[2]))
+        for i, (id, qualifier, name, type_info, default_value, adapter_info, is_primitive) in enumerate(fields):
+            slots.append(name)
+
+            # if field has an adapter or is not primitive type, consider as "non-primitive"
+            if adapter_info is not None or not is_primitive:
+                non_primitive_types.append((i, name))
             else:
-                primitive_types.append((i, f[2], f[3]))
+                primitive_types.append((i, name, type_info))
+
         dct["_fbthrift_primitive_types"] = primitive_types
         dct["__slots__"] = slots
         klass = super().__new__(cls, cls_name, (Struct,), dct)
+
         for field_index, field_name in non_primitive_types:
             type.__setattr__(
                 klass,
@@ -876,13 +1027,25 @@ class StructMeta(type):
                     field_name,
                 )
             )
-        klass.__setattr__ = _fbthrift_setattr
+        klass.__setattr__ = _fbthrift_readonly_setattr
         return klass
 
     def _fbthrift_fill_spec(cls):
+        """
+        Completes initialization of all specs for this Struct class.
+
+        This should be called once, after all generated classes (unions and
+        structs) for a given module have been created.
+        """
         (<StructInfo>cls._fbthrift_struct_info).fill()
 
     def _fbthrift_store_field_values(cls):
+        """
+        Initializes the default values of fields (if any) for this Struct.
+
+        This should be called once, after `_fbthrift_fill_spec()` has been
+        called for all generated classes (unions and structs) in a module.
+        """
         (<StructInfo>cls._fbthrift_struct_info).store_field_values()
 
     def __dir__(cls):
@@ -891,6 +1054,12 @@ class StructMeta(type):
         )
 
     def __iter__(cls):
+        """
+        Iterating over Thrift generated Struct classes yields the names of the
+        fields in the struct.
+
+        Should not be called prior to `_fbthrift_fill_spec()`.
+        """
         for name in (<StructInfo>cls._fbthrift_struct_info).name_to_index.keys():
             yield name, None
 
@@ -1279,13 +1448,29 @@ cdef class Map(Container):
 Mapping.register(Map)
 
 
-# To support dependent classes not defined in order.
-# If struct A has a field of type struct B, but the generated class A is
-# defined before B, we are not able to populate the specs for A as part of the
-# class creation.
 # We will create all the classes first then call fill_specs after that so
 # dependancies can be properly solved.
 def fill_specs(*struct_types):
+    """
+    Completes the initialization of the given Thrift-generated Struct (and
+    Union) classes.
+
+
+    This is called at the end of the modules that define the corresponding
+    generated types (i.e., the `thrift_types.py` files), after the given classes
+    have been created but not yet fully initialized. It provides support for
+    dependent classes being defined in arbitrary order.
+
+    If struct A has a field of type struct B, but the generated class A is
+    defined before B, we are not able to populate the specs for A as part of the
+    class creation, hence this call.
+
+    Args:
+        *struct_types: Sequence of class objects, each one of which corresponds
+        to either a `Struct` (i.e., created by/instance of `StructMeta`) or a
+        `Union` (i.e., created by/instance of `UnionMeta`).
+    """
+
     for cls in struct_types:
         cls._fbthrift_fill_spec()
 

@@ -17,7 +17,7 @@
 #include <thrift/compiler/source_location.h>
 
 #include <boost/filesystem.hpp>
-#include <fmt/ranges.h>
+#include <fmt/core.h>
 
 #include <assert.h>
 #include <errno.h>
@@ -227,10 +227,7 @@ source_manager::path_or_error source_manager::find_include_file(
   // File was not found.
   return source_manager::path_or_error{
       std::in_place_index<1>,
-      fmt::format(
-          "Could not find include file {} in {}",
-          filename,
-          fmt::join(sp, ", "))};
+      fmt::format("Could not find include file {}", filename)};
 }
 
 std::optional<std::string> source_manager::found_include_file(

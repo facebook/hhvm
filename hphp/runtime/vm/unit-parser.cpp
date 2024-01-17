@@ -53,7 +53,6 @@
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/embedded-data.h"
 #include "hphp/util/gzip.h"
-#include "hphp/util/hackc-log.h"
 #include "hphp/util/light-process.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/match.h"

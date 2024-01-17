@@ -1143,6 +1143,9 @@ struct ValidateAnnotationPositions {
 };
 
 void deprecate_annotations(diagnostic_context& ctx, const t_named& node) {
+  auto erlang = [](std::string_view name) {
+    return fmt::format("facebook.com/thrift/annotation/erlang/{}", name);
+  };
   // cpp[2].ref[_type] are handled in dedicated validators.
   static std::map<std::string, std::string> deprecations = {
       {"cpp.type", kCppTypeUri},
@@ -1177,6 +1180,10 @@ void deprecate_annotations(diagnostic_context& ctx, const t_named& node) {
       {"thrift.uri", kUriUri},
       {"serial", kSerialUri},
       {"priority", kPriorityUri},
+      {"erl.name", erlang("NameOverride")},
+      {"erl.struct_repr", erlang("StructRepr")},
+      {"erl.default_value", erlang("DefaultValue")},
+      {"iq.node_type", erlang("Iq")},
   };
 
   for (const auto& [k, v] : node.annotations()) {

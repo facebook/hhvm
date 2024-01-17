@@ -394,6 +394,38 @@ class structure_annotations {
         to_add.insert(fmt::format("@go.Tag{{tag = '{}'}}", data.value));
         fm_.add_include("thrift/annotation/go.thrift");
       }
+
+      // erlang
+      if (name == "erl.name") {
+        to_remove.emplace_back(name, data);
+        to_add.insert(fmt::format(
+            "@annotations.NameOverride{{name = \"{}\"}}", data.value));
+        fm_.add_include("thrift/facebook/erlang/annotations.thrift");
+      }
+      if (name == "erl.struct_repr") {
+        to_remove.emplace_back(name, data);
+        to_add.insert(fmt::format(
+            "@annotations.StructRepr{{repr = {}}}",
+            data.value == "record" ? "annotations.StructReprType.RECORD"
+                                   : "annotations.StructReprType.MAP"));
+        fm_.add_include("thrift/facebook/erlang/annotations.thrift");
+      }
+      if (name == "erl.default_value") {
+        to_remove.emplace_back(name, data);
+        to_add.insert(fmt::format(
+            "@annotations.DefaultValue{{value = \"{}\"}}", data.value));
+        fm_.add_include("thrift/facebook/erlang/annotations.thrift");
+      }
+      if (name == "iq.node_type") {
+        to_remove.emplace_back(name, data);
+        to_add.insert(fmt::format(
+            "@annotations.Iq{{node_type = {}}}",
+            data.value == "xmlcdata" ? "annotations.IqNodeType.XMLCDATA"
+                : data.value == "xmlnode"
+                ? "annotations.IqNodeType.XMLNODE"
+                : "annotations.IqNodeType.XMLATTRIBUTE"));
+        fm_.add_include("thrift/facebook/erlang/annotations.thrift");
+      }
     }
 
     if (!to_remove.empty() && to_remove.size() == node.annotations().size()) {

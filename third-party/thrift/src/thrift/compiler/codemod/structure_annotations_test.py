@@ -376,3 +376,40 @@ class HoistAnnotatedTypes(unittest.TestCase):
                 """
             ),
         )
+
+    def test_erlang(self):
+        write_file(
+            "foo.thrift",
+            textwrap.dedent(
+                """\
+                struct S {
+                    1: i32 field1 (iq.node_type = "xmlattribute");
+                } (erl.struct_repr = 'record', erl.name = 'T')
+
+                enum E {QUX = 1} (erl.default_value = "QUX")
+
+                """
+            ),
+        )
+
+        binary = pkg_resources.resource_filename(__name__, "codemod")
+        run_binary(binary, "foo.thrift")
+
+        self.assertEqual(
+            self.trim(read_file("foo.thrift")),
+            self.trim(
+                """\
+                include "thrift/facebook/erlang/annotations.thrift"
+
+                @annotations.NameOverride{name = "T"}
+                @annotations.StructRepr{repr = annotations.StructReprType.RECORD}
+                struct S {
+                    @annotations.Iq{node_type = annotations.IqNodeType.XMLATTRIBUTE}
+                    1: i32 field1 ;
+                }
+
+                @annotations.DefaultValue{value = "QUX"}
+                enum E {QUX = 1}
+                """
+            ),
+        )

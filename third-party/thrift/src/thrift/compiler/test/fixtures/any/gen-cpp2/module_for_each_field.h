@@ -14,7 +14,7 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct ForEachField<::cpp2::MyStruct> {
+struct ForEachField<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).myString_ref()...);
@@ -22,7 +22,7 @@ struct ForEachField<::cpp2::MyStruct> {
 };
 
 template <>
-struct ForEachField<::cpp2::MyUnion> {
+struct ForEachField<::facebook::thrift::compiler::test::fixtures::any::MyUnion> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).myString_ref()...);
@@ -30,7 +30,7 @@ struct ForEachField<::cpp2::MyUnion> {
 };
 
 template <>
-struct ForEachField<::cpp2::MyException> {
+struct ForEachField<::facebook::thrift::compiler::test::fixtures::any::MyException> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).myString_ref()...);

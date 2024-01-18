@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
+
+package "facebook.com/thrift/compiler/test/fixtures/any"
+
+@cpp.Adapter{name = '::my::Adapter1'}
 struct MyStruct {
   1: string myString;
-} (thrift.uri = "facebook.com/thrift/compiler/test/fixtures/any/MyStruct")
+}
 
 union MyUnion {
   1: string myString;
-} (thrift.uri = "facebook.com/thrift/compiler/test/fixtures/any/MyUnion")
+}
 
 exception MyException {
   1: string myString;
-} (thrift.uri = "facebook.com/thrift/compiler/test/fixtures/any/MyException")
+}

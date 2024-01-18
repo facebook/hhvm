@@ -16,21 +16,21 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct TccStructTraits<::cpp2::MyStruct> {
+struct TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
-struct TccStructTraits<::cpp2::MyUnion> {
+struct TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::MyUnion> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
-struct TccStructTraits<::cpp2::MyException> {
+struct TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::MyException> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
@@ -41,7 +41,8 @@ struct TccStructTraits<::cpp2::MyException> {
 } // namespace thrift
 } // namespace apache
 
-namespace cpp2 {
+namespace facebook { namespace thrift { namespace compiler { namespace test { namespace fixtures { namespace any {
+namespace detail {
 
 template <class Protocol_>
 void MyStruct::readNoXfer(Protocol_* iprot) {
@@ -161,6 +162,7 @@ extern template void MyStruct::readNoXfer<>(apache::thrift::CompactProtocolReade
 extern template uint32_t MyStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
 extern template uint32_t MyStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 extern template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+} // namespace detail
 
 
 template <class Protocol_>
@@ -388,4 +390,4 @@ extern template uint32_t MyException::serializedSize<>(apache::thrift::CompactPr
 extern template uint32_t MyException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+}}}}}} // facebook::thrift::compiler::test::fixtures::any

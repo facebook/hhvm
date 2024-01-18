@@ -38,11 +38,13 @@ APACHE_THRIFT_DEFINE_ACCESSOR(myString);
 
 // END declare_enums
 // BEGIN forward_declare
-namespace cpp2 {
+namespace facebook { namespace thrift { namespace compiler { namespace test { namespace fixtures { namespace any {
+namespace detail {
 class MyStruct;
+} // namespace detail
 class MyUnion;
 class MyException;
-} // cpp2
+}}}}}} // facebook::thrift::compiler::test::fixtures::any
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -52,13 +54,14 @@ namespace apache::thrift::detail::qualifier {
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace cpp2 {
+namespace facebook { namespace thrift { namespace compiler { namespace test { namespace fixtures { namespace any {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+namespace detail {
 class MyStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -213,6 +216,9 @@ unsigned long MyStruct::read(Protocol_* iprot) {
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;
 }
+} // namespace detail
+
+using MyStruct = ::apache::thrift::adapt_detail::adapted_t<::my::Adapter1, ::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct>;
 
 
 class MyUnion final  {
@@ -612,7 +618,7 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
   uint32_t write(Protocol_* prot_) const;
 
   const char* what() const noexcept override {
-    return "::cpp2::MyException";
+    return "::facebook::thrift::compiler::test::fixtures::any::MyException";
   }
 
  private:
@@ -631,14 +637,14 @@ unsigned long MyException::read(Protocol_* iprot) {
 }
 
 
-} // cpp2
+}}}}}} // facebook::thrift::compiler::test::fixtures::any
 
 namespace apache { namespace thrift {
 
-template <> struct TEnumDataStorage<::cpp2::MyUnion::Type>;
+template <> struct TEnumDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type>;
 
-template <> struct TEnumTraits<::cpp2::MyUnion::Type> {
-  using type = ::cpp2::MyUnion::Type;
+template <> struct TEnumTraits<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type> {
+  using type = ::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type;
 
   static constexpr std::size_t const size = 1;
   static folly::Range<type const*> const values;

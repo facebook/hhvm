@@ -27,7 +27,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::cpp2::MyStruct>::gen(ThriftMetadata& metadata) {
+StructMetadata<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.MyStruct", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
@@ -48,10 +48,11 @@ StructMetadata<::cpp2::MyStruct>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_MyStruct.fields()->push_back(std::move(field));
   }
+  module_MyStruct.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::my::Adapter1")}}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::cpp2::MyUnion>::gen(ThriftMetadata& metadata) {
+StructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyUnion>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.MyUnion", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
@@ -75,7 +76,7 @@ StructMetadata<::cpp2::MyUnion>::gen(ThriftMetadata& metadata) {
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::cpp2::MyException>::gen(ThriftMetadata& metadata) {
+StructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.MyException", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
@@ -99,7 +100,7 @@ StructMetadata<::cpp2::MyException>::gen(ThriftMetadata& metadata) {
   return res.first->second;
 }
 
-void ExceptionMetadata<::cpp2::MyException>::gen(ThriftMetadata& metadata) {
+void ExceptionMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>::gen(ThriftMetadata& metadata) {
   auto res = metadata.exceptions()->emplace("module.MyException", ::apache::thrift::metadata::ThriftException{});
   if (!res.second) {
     return;

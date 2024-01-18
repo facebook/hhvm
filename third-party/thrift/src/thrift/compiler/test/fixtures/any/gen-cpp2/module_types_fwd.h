@@ -7,9 +7,11 @@
 #pragma once
 
 // BEGIN forward_declare
-namespace cpp2 {
+namespace facebook { namespace thrift { namespace compiler { namespace test { namespace fixtures { namespace any {
+namespace detail {
 class MyStruct;
+} // namespace detail
 class MyUnion;
 class MyException;
-} // cpp2
+}}}}}} // facebook::thrift::compiler::test::fixtures::any
 // END forward_declare

@@ -33,54 +33,54 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
-THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::MyStruct>::name = "MyStruct";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct>::name = "MyStruct";
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct>::fields_names = {{
   "myString",
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::MyStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::MyStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct>::fields_types = {{
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct>::storage_names = {{
   "__fbthrift_field_myString",
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::MyStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::MyUnion>::name = "MyUnion";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyUnion>::fields_names = {{
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyUnion>::name = "MyUnion";
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyUnion>::fields_names = {{
   "myString",
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::MyUnion>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyUnion>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::MyUnion>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyUnion>::fields_types = {{
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyUnion>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyUnion>::storage_names = {{
   "myString",
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::MyUnion>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyUnion>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::MyException>::name = "MyException";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyException>::fields_names = {{
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyException>::name = "MyException";
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyException>::fields_names = {{
   "myString",
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::MyException>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyException>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::MyException>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyException>::fields_types = {{
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyException>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyException>::storage_names = {{
   "__fbthrift_field_myString",
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::MyException>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyException>::isset_indexes = {{
   0,
 }};
 

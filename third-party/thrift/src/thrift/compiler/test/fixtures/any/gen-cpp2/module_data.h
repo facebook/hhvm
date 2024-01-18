@@ -12,8 +12,8 @@
 
 namespace apache { namespace thrift {
 
-template <> struct TEnumDataStorage<::cpp2::MyUnion::Type> {
-  using type = ::cpp2::MyUnion::Type;
+template <> struct TEnumDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type> {
+  using type = ::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type;
   static constexpr const std::size_t size = 1;
   static constexpr std::array<type, size> values = {{
       type::myString,
@@ -23,7 +23,7 @@ template <> struct TEnumDataStorage<::cpp2::MyUnion::Type> {
   }};
 };
 
-template <> struct TStructDataStorage<::cpp2::MyStruct> {
+template <> struct TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct> {
   static constexpr const std::size_t fields_size = 1;
   static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
@@ -39,7 +39,7 @@ template <> struct TStructDataStorage<::cpp2::MyStruct> {
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::cpp2::MyUnion> {
+template <> struct TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyUnion> {
   static constexpr const std::size_t fields_size = 1;
   static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
@@ -55,7 +55,7 @@ template <> struct TStructDataStorage<::cpp2::MyUnion> {
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::cpp2::MyException> {
+template <> struct TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyException> {
   static constexpr const std::size_t fields_size = 1;
   static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;

@@ -14,7 +14,7 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct VisitUnion<::cpp2::MyUnion> {
+struct VisitUnion<::facebook::thrift::compiler::test::fixtures::any::MyUnion> {
 
   template <typename F, typename T>
   decltype(auto) operator()(FOLLY_MAYBE_UNUSED F&& f, T&& t) const {

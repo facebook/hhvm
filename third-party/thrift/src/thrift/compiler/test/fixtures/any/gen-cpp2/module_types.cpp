@@ -12,7 +12,7 @@
 
 #include "thrift/compiler/test/fixtures/any/gen-cpp2/module_data.h"
 
-namespace cpp2 {
+namespace facebook { namespace thrift { namespace compiler { namespace test { namespace fixtures { namespace any {
 // Static-init time registration for dynamically-linked libraries.
 //
 // To include in statically-linked libraries, link whole (e.g. --whole-archive)
@@ -41,17 +41,17 @@ void __fbthrift_static_init_MyException() {
         apache::thrift::conformance::StandardProtocol::Binary>(),
     false);
 }
-} // cpp2
+}}}}}} // facebook::thrift::compiler::test::fixtures::any
 
 namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::cpp2::MyStruct>::translateFieldName(
+void TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::MyStruct>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -64,7 +64,8 @@ void TccStructTraits<::cpp2::MyStruct>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace cpp2 {
+namespace facebook { namespace thrift { namespace compiler { namespace test { namespace fixtures { namespace any {namespace detail {
+
 
 const char* MyStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/compiler/test/fixtures/any/MyStruct";
@@ -142,17 +143,18 @@ template uint32_t MyStruct::serializedSize<>(apache::thrift::CompactProtocolWrit
 template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+} // namespace detail
+}}}}}} // facebook::thrift::compiler::test::fixtures::any
 
 namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::cpp2::MyUnion>::translateFieldName(
+void TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::MyUnion>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::MyUnion>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyUnion>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -167,18 +169,18 @@ void TccStructTraits<::cpp2::MyUnion>::translateFieldName(
 
 namespace apache { namespace thrift {
 
-folly::Range<::cpp2::MyUnion::Type const*> const TEnumTraits<::cpp2::MyUnion::Type>::values = folly::range(TEnumDataStorage<::cpp2::MyUnion::Type>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::cpp2::MyUnion::Type>::names = folly::range(TEnumDataStorage<::cpp2::MyUnion::Type>::names);
+folly::Range<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type const*> const TEnumTraits<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type>::values = folly::range(TEnumDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type>::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type>::names = folly::range(TEnumDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type>::names);
 
-bool TEnumTraits<::cpp2::MyUnion::Type>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type>::findName(type value, folly::StringPiece* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::cpp2::MyUnion::Type>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Type>::findValue(folly::StringPiece name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
-namespace cpp2 {
+namespace facebook { namespace thrift { namespace compiler { namespace test { namespace fixtures { namespace any {
 
 const char* MyUnion::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/compiler/test/fixtures/any/MyUnion";
@@ -242,17 +244,17 @@ template uint32_t MyUnion::serializedSize<>(apache::thrift::CompactProtocolWrite
 template uint32_t MyUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+}}}}}} // facebook::thrift::compiler::test::fixtures::any
 
 namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::cpp2::MyException>::translateFieldName(
+void TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::MyException>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::MyException>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyException>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -265,7 +267,7 @@ void TccStructTraits<::cpp2::MyException>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace cpp2 {
+namespace facebook { namespace thrift { namespace compiler { namespace test { namespace fixtures { namespace any {
 
 const char* MyException::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/compiler/test/fixtures/any/MyException";
@@ -343,11 +345,11 @@ template uint32_t MyException::serializedSize<>(apache::thrift::CompactProtocolW
 template uint32_t MyException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // cpp2
+}}}}}} // facebook::thrift::compiler::test::fixtures::any
 
-namespace cpp2 { namespace {
+namespace facebook { namespace thrift { namespace compiler { namespace test { namespace fixtures { namespace any { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
 }
-}} // cpp2
+}}}}}}} // facebook::thrift::compiler::test::fixtures::any
 namespace apache::thrift::detail::annotation {
 }

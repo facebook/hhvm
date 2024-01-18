@@ -14,40 +14,40 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct VisitByFieldId<::cpp2::MyStruct> {
+struct VisitByFieldId<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).myString_ref());
     default:
-      throwInvalidThriftId(fieldId, "::cpp2::MyStruct");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::cpp2::MyUnion> {
+struct VisitByFieldId<::facebook::thrift::compiler::test::fixtures::any::MyUnion> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).myString_ref());
     default:
-      throwInvalidThriftId(fieldId, "::cpp2::MyUnion");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::compiler::test::fixtures::any::MyUnion");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::cpp2::MyException> {
+struct VisitByFieldId<::facebook::thrift::compiler::test::fixtures::any::MyException> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).myString_ref());
     default:
-      throwInvalidThriftId(fieldId, "::cpp2::MyException");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::compiler::test::fixtures::any::MyException");
     }
   }
 };

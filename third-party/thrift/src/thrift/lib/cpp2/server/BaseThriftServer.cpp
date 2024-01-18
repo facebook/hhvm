@@ -103,6 +103,7 @@ BaseThriftServer::processModulesSpecification(ModulesSpecification&& specs) {
   // For backward compatibility, we need to keep the set of globally registered
   // event handlers. The assumption we are making here is that no event handlers
   // are registered globally after the server is initialized.
+  std::unique_lock lock{TProcessorBase::getRWMutex()};
   for (const auto& handler : TProcessorBase::getHandlers()) {
     result.coalescedLegacyEventHandlers.push_back(handler.unwrap());
   }

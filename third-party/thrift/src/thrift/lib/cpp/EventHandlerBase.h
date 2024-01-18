@@ -73,11 +73,10 @@ class TProcessorBase : public EventHandlerBase {
   static std::vector<folly::not_null_shared_ptr<TProcessorEventHandler>>&
   getHandlers();
 
+  static folly::SharedMutex& getRWMutex();
+
  protected:
   ~TProcessorBase() override = default;
-
- private:
-  static folly::SharedMutex& getRWMutex();
 };
 
 /**

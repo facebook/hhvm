@@ -1298,27 +1298,22 @@ SSATmp* opt_classname_to_class(IRGS& env, const ParamPrep& params) {
     emitModuleBoundaryCheckFrom(env, clsTmp, caller, false);
 
     if (RO::EvalDynamicallyReferencedNoticeSampleRate > 0) {
-      if (!clsTmp) return nullptr;
-      auto const cls = clsTmp->type().clsSpec().cls();
-      if (!cls) return nullptr;
-      auto const clsName = cls->name();
-      ifThen(
-        env,
-        [&] (Block* taken) {
-          auto const data = AttrData { AttrDynamicallyReferenced };
-          gen(env, JmpZero, taken, gen(env, ClassHasAttr, data, clsTmp));
-        },
-        [&] {
-          hint(env, Block::Hint::Unlikely);
-          std::string msg;
-          string_printf(msg, Strings::MISSING_DYNAMICALLY_REFERENCED,
-                        clsName->data());
-          gen(env,
-              RaiseNotice,
-              SampleRateData { RO::EvalDynamicallyReferencedNoticeSampleRate },
-              cns(env, makeStaticString(msg)));
+      if (clsTmp->hasConstVal()) {
+        if (!clsTmp->clsVal()->isDynamicallyReferenced()) {
+          gen(env, RaiseMissingDynamicallyReferenced, clsTmp);
         }
-      );
+      } else {
+        ifThen(
+          env,
+          [&] (Block* taken) {
+            auto const data = AttrData { AttrDynamicallyReferenced };
+            gen(env, JmpZero, taken, gen(env, ClassHasAttr, data, clsTmp));
+          },
+          [&] {
+            hint(env, Block::Hint::Unlikely);
+            gen(env, RaiseMissingDynamicallyReferenced, clsTmp);
+          });
+      }
     }
 
     return clsTmp;

@@ -23,7 +23,11 @@ if (BUILD_SHARED_LIBS)
     endif()
 endif()
 
-target_link_libraries(libhttperf2 PUBLIC proxygen)
+target_link_libraries(
+    libhttperf2 PUBLIC
+    proxygenhqloggerhelper
+    proxygen
+)
 
 install(
     TARGETS libhttperf2
@@ -36,7 +40,6 @@ add_executable(proxygen_httperf2 Main.cpp)
 target_link_libraries(
     proxygen_httperf2 PUBLIC
     libhttperf2
-    proxygenhqloggerhelper
 )
 target_compile_options(
     proxygen_httperf2 PRIVATE

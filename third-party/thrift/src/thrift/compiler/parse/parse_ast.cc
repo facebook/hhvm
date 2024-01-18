@@ -969,6 +969,7 @@ class ast_builder : public parser_actions {
     auto const_value = std::make_unique<t_const_value>();
     const_value->set_map();
     const_value->set_ttype(new_type_ref(fmt::to_string(name), nullptr, range));
+    const_value->set_ref_range(range);
     return const_value;
   }
 

@@ -37,7 +37,6 @@ void match_type_with_const_value(
     const t_type* long_type,
     t_const_value* value) {
   const t_type* type = long_type->get_true_type();
-  value->set_ttype(t_type_ref::from_req_ptr(type));
   if (type->is_list()) {
     auto* elem_type = dynamic_cast<const t_list*>(type)->get_elem_type();
     for (auto list_val : value->get_list()) {
@@ -60,6 +59,13 @@ void match_type_with_const_value(
   }
   if (type->is_struct()) {
     const auto* structured = dynamic_cast<const t_structured*>(type);
+    if (auto ttype = value->ttype(); ttype && ttype->get_true_type() != type) {
+      ctx.error(
+          value->ref_range().begin,
+          "type mismatch: expected {}, got {}",
+          type->get_full_name(),
+          ttype->get_full_name());
+    }
     for (const auto& [map_key, map_val] : value->get_map()) {
       bool resolved = map_key->kind() != t_const_value::CV_IDENTIFIER;
       auto name = resolved ? map_key->get_string() : map_key->get_identifier();
@@ -102,6 +108,7 @@ void match_type_with_const_value(
   if (type->is_base_type() && value->is_enum()) {
     value->set_enum_value(nullptr);
   }
+  value->set_ttype(t_type_ref::from_req_ptr(type));
 }
 
 static void match_annotation_types_with_const_values(

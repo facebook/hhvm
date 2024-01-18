@@ -401,6 +401,9 @@ TEST(CompilerTest, const_wrong_type) {
     const map<string, i32> badValMap = {1: "str"};
       # expected-error@-1: type error: const `badValMap<key>` was declared as string.
       # expected-error@-2: type error: const `badValMap<val>` was declared as i32.
+    struct A {}
+    struct B {}
+    const A wrongStruct = B{}; # expected-error: type mismatch: expected test.A, got test.B
   )");
 }
 
@@ -529,13 +532,18 @@ TEST(CompilerTest, struct_fields_wrong_type) {
     struct Annot {
       1: i32 val;
       2: list<string> otherVal;
+      3: F structField;
     }
+    struct F {}
+    struct G {}
 
-    @Annot{val="hi", otherVal=5}
+    @Annot{val="hi", otherVal=5, structField=G{}}
       # expected-error@-1: type error: const `.val` was declared as i32.
       # expected-warning@-2: type error: const `.otherVal` was declared as list. This will become an error in future versions of thrift.
+      # expected-error@-3: type mismatch: expected test.F, got test.G
     struct BadFields {
       1: i32 badInt = "str"; # expected-error: type error: const `badInt` was declared as i32.
+      2: F badStruct = G{}; # expected-error: type mismatch: expected test.F, got test.G
     }
   )");
 }

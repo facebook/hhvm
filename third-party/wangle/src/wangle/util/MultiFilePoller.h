@@ -122,7 +122,7 @@ class MultiFilePoller {
   };
 
   // The following data structures are protected by the mutex.
-  folly::SharedMutex rwlock_;
+  mutable folly::SharedMutex rwlock_;
   size_t lastCallbackId_ = 0;
   std::unordered_map<std::string, std::vector<size_t>> pathsToCallbackIds_;
   std::unordered_map<size_t, CallbackDetail> idsToCallbacks_;

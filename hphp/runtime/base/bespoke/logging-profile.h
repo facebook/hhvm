@@ -257,7 +257,7 @@ struct LoggingProfile {
 
   // The content of the logging profile that can be freed after layout selection.
   struct LoggingProfileData {
-    folly::SharedMutex mapLock;
+    mutable folly::SharedMutex mapLock;
     std::atomic<uint64_t> sampleCount = 0;
     std::atomic<uint64_t> loggingArraysEmitted = 0;
     LoggingArray* staticLoggingArray = nullptr;

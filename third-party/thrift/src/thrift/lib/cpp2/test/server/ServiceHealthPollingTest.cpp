@@ -80,7 +80,7 @@ class Handler : public apache::thrift::ServiceHandler<DummyStatus>,
   folly::observer::SimpleObservable<ServiceHealth> serviceHealth_;
   folly::observer::Observer<ServiceHealth> serviceHealthObserver_{
       serviceHealth_.getObserver()};
-  folly::SharedMutex healthMutex_;
+  mutable folly::SharedMutex healthMutex_;
   folly::Synchronized<folly::coro::Baton, std::mutex> polled_;
 };
 

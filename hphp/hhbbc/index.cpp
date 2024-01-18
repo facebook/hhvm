@@ -1515,9 +1515,9 @@ struct ClassGraph::Table {
   hphp_fast_map<Node*, Node*> regOnlyEquivs;
   AnalysisIndex::IndexData* index{nullptr};
   struct Locking {
-    folly::SharedMutex table;
+    mutable folly::SharedMutex table;
     std::array<std::mutex, 2048> nodes;
-    folly::SharedMutex equivs;
+    mutable folly::SharedMutex equivs;
   };
   // If present, we're doing concurrent deserialization.
   Optional<Locking> locking;

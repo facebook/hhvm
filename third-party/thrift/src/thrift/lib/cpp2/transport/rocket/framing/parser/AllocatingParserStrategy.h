@@ -16,7 +16,11 @@
 
 #pragma once
 
+#if __has_include(<memory_resource>)
+#define SUPPORT_ALLOCATING_PARSER_STRATEGY 1
+
 #include <memory>
+#include <memory_resource>
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Serializer.h>
@@ -36,16 +40,16 @@ namespace rocket {
  * `RocketServerConnection`. Their corresponding `handleFrame` methods take care
  * the rest of rocket frame parsing.
  */
-template <class T, class Allocator = std::allocator<std::uint8_t>>
+
+template <
+    class T,
+    class Allocator = std::pmr::polymorphic_allocator<std::uint8_t>>
 class AllocatingParserStrategy {
   using Traits = std::allocator_traits<Allocator>;
-  using ElemType = typename Traits::value_type;
-  static_assert(
-      sizeof(ElemType) == sizeof(std::uint8_t),
-      "Passed in Allocator doesn't operate on bytes");
+  using ElemType = std::uint8_t;
 
  public:
-  explicit AllocatingParserStrategy(T& owner, Allocator allocator = Allocator())
+  explicit AllocatingParserStrategy(T& owner, Allocator& allocator)
       : owner_(owner),
         allocator_(allocator),
         minBufferSize_(THRIFT_FLAG(rocket_allocating_parser_min_buffer_size)) {
@@ -147,7 +151,7 @@ class AllocatingParserStrategy {
 
  private:
   T& owner_;
-  FOLLY_ATTR_NO_UNIQUE_ADDRESS Allocator allocator_;
+  Allocator& allocator_;
 
   // size_ is number of bytes already written into currently allocated buffer.
   // size_ will be incremented when readDataAvailable(nbytes) is called.
@@ -206,3 +210,5 @@ class AllocatingParserStrategy {
 } // namespace rocket
 } // namespace thrift
 } // namespace apache
+
+#endif // __has_include(<memory_resource>)

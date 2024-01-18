@@ -37,9 +37,13 @@ class FakeOwner {
   uint32_t memoryCounter_ = 0;
 };
 
+#ifdef SUPPORT_ALLOCATING_PARSER_STRATEGY
+std::pmr::polymorphic_allocator<std::uint8_t> alloc =
+    std::pmr::polymorphic_allocator();
+
 TEST(AllocatingParserStrategyTest, testAppendFrame) {
   FakeOwner owner;
-  AllocatingParserStrategy<FakeOwner> parser(owner);
+  AllocatingParserStrategy<FakeOwner> parser(owner, alloc);
 
   void* buf;
   size_t lenReturn;
@@ -82,7 +86,7 @@ TEST(AllocatingParserStrategyTest, testAppendFrame) {
 
 TEST(AllocatingParserStrategyTest, testAppendLessThanFullFrame) {
   FakeOwner owner;
-  AllocatingParserStrategy<FakeOwner> parser(owner);
+  AllocatingParserStrategy<FakeOwner> parser(owner, alloc);
 
   void* buf;
   size_t lenReturn;
@@ -110,7 +114,7 @@ TEST(AllocatingParserStrategyTest, testAppendLessThanFullFrame) {
 
 TEST(AllocatingParserStrategyTest, testAppendTwice) {
   FakeOwner owner;
-  AllocatingParserStrategy<FakeOwner> parser(owner);
+  AllocatingParserStrategy<FakeOwner> parser(owner, alloc);
 
   void* buf;
   size_t lenReturn;
@@ -146,7 +150,7 @@ TEST(AllocatingParserStrategyTest, testAppendTwice) {
 
 TEST(AllocatingParserStrategyTest, testAppendMultiple) {
   FakeOwner owner;
-  AllocatingParserStrategy<FakeOwner> parser(owner);
+  AllocatingParserStrategy<FakeOwner> parser(owner, alloc);
 
   void* buf;
   size_t lenReturn;
@@ -194,7 +198,7 @@ TEST(AllocatingParserStrategyTest, testAppendMultiple) {
 
 TEST(AllocatingParserStrategyTest, testManyFrames) {
   FakeOwner owner;
-  AllocatingParserStrategy<FakeOwner> parser(owner);
+  AllocatingParserStrategy<FakeOwner> parser(owner, alloc);
 
   {
     void* buf;
@@ -262,7 +266,7 @@ TEST(AllocatingParserStrategyTest, testManyFrames) {
 
 TEST(AllocatingParserStrategyTest, testSmallFrame) {
   FakeOwner owner;
-  AllocatingParserStrategy<FakeOwner> parser(owner);
+  AllocatingParserStrategy<FakeOwner> parser(owner, alloc);
 
   void* buf;
   size_t lenReturn;
@@ -317,7 +321,7 @@ TEST(AllocatingParserStrategyTest, testSmallFrame) {
 
 TEST(AllocatingParserStrategyTest, testTinyFrame) {
   FakeOwner owner;
-  AllocatingParserStrategy<FakeOwner> parser(owner);
+  AllocatingParserStrategy<FakeOwner> parser(owner, alloc);
 
   void* buf;
   size_t lenReturn;
@@ -392,8 +396,7 @@ TEST(AllocatingParserStrategyTest, testTinyFrame) {
 TEST(AllocatingParserStrategyTest, testManyTinyFrame) {
   THRIFT_FLAG_SET_MOCK(rocket_allocating_parser_min_buffer_size, 64);
   FakeOwner owner;
-  AllocatingParserStrategy<FakeOwner> parser(
-      owner, std::allocator<std::uint8_t>());
+  AllocatingParserStrategy<FakeOwner> parser(owner, alloc);
 
   void* buf;
   size_t lenReturn;
@@ -446,8 +449,7 @@ TEST(AllocatingParserStrategyTest, testManyTinyFrame) {
 TEST(AllocatingParserStrategyTest, testManyTinyFrameWithIncompleteFrame) {
   THRIFT_FLAG_SET_MOCK(rocket_allocating_parser_min_buffer_size, 64);
   FakeOwner owner;
-  AllocatingParserStrategy<FakeOwner> parser(
-      owner, std::allocator<std::uint8_t>());
+  AllocatingParserStrategy<FakeOwner> parser(owner, alloc);
 
   void* buf;
   size_t lenReturn;
@@ -517,3 +519,5 @@ TEST(AllocatingParserStrategyTest, testManyTinyFrameWithIncompleteFrame) {
 } // namespace rocket
 } // namespace thrift
 } // namespace apache
+
+#endif // SUPPORT_ALLOCATING_PARSER_STRATEGY

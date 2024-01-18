@@ -1,3 +1,2 @@
--vAllVolatile=true
 -d hhvm.php7.all=0
 --inputs=__DIR__/static_prop_eval_order.inc

@@ -1326,16 +1326,15 @@ function exec_with_timeout(string $cmd,
   return tuple($error, false);
 }
 
-function repo_mode_compile(Options $options, string $test): bool {
+function repo_mode_compile(Options $options, string $test): (string, bool) {
   $hphp = hphp_cmd($options, $test);
   list($output, $success) = exec_with_timeout($hphp);
   if ($success && repo_separate($options, $test)) {
     $hhbbc = hhbbc_cmd($options, $test);
-    list($output, $success) = exec_with_timeout($hhbbc);
+    list($separate_output, $success) = exec_with_timeout($hhbbc);
+    $output = $output . $separate_output;
   }
-  if ($success) return true;
-  Status::writeDiff($test, $output);
-  return false;
+  return tuple($output, $success);
 }
 
 
@@ -3270,7 +3269,7 @@ function run_config_server(Options $options, string $test): mixed {
   }
   curl_close($ch);
 
-  return run_config_post($output, $test, $options, false);
+  return run_config_post(null, $output, $test, $options, false);
 }
 
 function run_config_cli(
@@ -3302,6 +3301,7 @@ function replace_object_resource_ids(string $str, string $replacement): string {
 }
 
 function run_config_post(
+  ?string $pre_output,
   string $output,
   string $test,
   Options $options,
@@ -3331,13 +3331,23 @@ function run_config_post(
     }
   }
 
+  $prep = ($output) ==> {
+    $output = trim($output);
+    if ($pre_output is nonnull) {
+      $output = $pre_output . $output;
+    }
+    return $output;
+  };
   if (!$repeats) {
-    $split = vec[trim($output)];
+    $split = vec[$prep($output)];
   } else {
-    $split = array_map(trim<>, explode(MULTI_REQUEST_SEP, $output));
+    $split = array_map($prep, explode(MULTI_REQUEST_SEP, $output));
   }
 
   $output = str_replace(MULTI_REQUEST_SEP, '', $output);
+  if ($pre_output is nonnull) {
+    $output = $pre_output . $output;
+  }
   file_put_contents(Status::getTestWorkingDir($test) . '/out', $output);
 
   if ($repeats > 0 && count($split) != $repeats) {
@@ -3407,14 +3417,15 @@ function run_foreach_config(
   string $test,
   vec<string> $cmds,
   dict<string, mixed> $cmd_env,
-  bool $assert_verify = false
+  bool $assert_verify = false,
+  ?string $pre_output = null
 ): bool {
   invariant(count($cmds) > 0, "run_foreach_config: no modes");
   $result = false;
   foreach ($cmds as $cmd) {
     $output = run_config_cli($test, $cmd, $cmd_env, $assert_verify);
     if ($output is null) return false;
-    $result = run_config_post($output, $test, $options, $assert_verify);
+    $result = run_config_post($pre_output, $output, $test, $options, $assert_verify);
     if (!$result) return $result;
   }
   return $result;
@@ -3548,7 +3559,11 @@ function run_repo_test(
     }
   }
 
-  if (!repo_mode_compile($options, $test)) return false;
+  list($repo_output, $repo_success) = repo_mode_compile($options, $test);
+  if (!$repo_success) {
+    Status::writeDiff($test, $repo_output);
+    return false;
+  }
 
   if ($options->hhbbc2) {
     invariant(
@@ -3591,7 +3606,7 @@ function run_repo_test(
     $hhvm[0] = jit_serialize_option($hhvm[0], $test, $options, false);
   }
 
-  return run_foreach_config($options, $test, $hhvm, $hhvm_env);
+  return run_foreach_config($options, $test, $hhvm, $hhvm_env, false, $repo_output);
 }
 
 function num_cpus(): int {

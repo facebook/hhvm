@@ -20,14 +20,6 @@ dynamically even without a literal string. When turned off, some dynamic
 function calls may fail, if compiler is not able to tell that function may be
 invoked dynamically. Recommend to turn on this switch.
 
-= AllVolatile
-
-Default is false. When turned on, order-dependent function or class declaration
-vs. existence testing can work. When turned off, some function_exists(),
-class_exists(), get_defined_functions() or get_declared_classes() may return
-different results than PHP does. Most programs don't have dependencies on their
-behaviors, so this is recommended to leave as off.
-
 = EnableEval
 
 Default is 0, eval() will throw a fatal error. When 1, eval() is supported in

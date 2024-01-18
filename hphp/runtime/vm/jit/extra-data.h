@@ -3195,6 +3195,7 @@ X(ThrowMustBeReadonlyException, ClassData);
 X(ThrowMustBeValueTypeException,ClassData);
 X(LdCoeffectFunParamNaive,      ParamData);
 X(RaiseNotice,                  SampleRateData);
+X(RaiseStrToClassNotice,        SampleRateData);
 X(LdCls,                        LdClsFallbackData);
 X(LdClsCached,                  LdClsFallbackData);
 

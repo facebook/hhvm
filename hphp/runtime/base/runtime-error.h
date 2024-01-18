@@ -203,7 +203,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void raise_str_to_class_notice(const StringData* name);
+void raise_str_to_class_notice(const StringData* name, uint32_t sampleRate);
 
 /*
  * class_meth compact notices.

@@ -2334,11 +2334,10 @@ ReqBindJmp and CallFuncEntry.
   or cleared states.
   Can only be used in memoized wrapper functions.
 
-| RaiseStrToClassNotice, ND, S(Str), NF
+| RaiseStrToClassNotice<sample rate>, ND, S(Str), NF
 
-  Raise a notice if a class is being loaded from a string e.g. in a `$c::f()`
-  expression where $c is a string. S0 contains the string. Notice is sampled at
-  a rate set by the `RaiseStrToClsConversionNoticeSampleRate` runtime option.
+  Raise a notice if a string is implicitly converted to a class, sampled 1 out
+  of "sample rate" times
 
 | CheckClsMethFunc, ND, S(Func), NF
 

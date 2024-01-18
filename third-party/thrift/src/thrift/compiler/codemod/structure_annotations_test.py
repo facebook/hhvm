@@ -399,16 +399,16 @@ class HoistAnnotatedTypes(unittest.TestCase):
             self.trim(read_file("foo.thrift")),
             self.trim(
                 """\
-                include "thrift/facebook/erlang/annotations.thrift"
+                include "thrift/facebook/erlang/annotation.thrift"
 
-                @annotations.NameOverride{name = "T"}
-                @annotations.StructRepr{repr = annotations.StructReprType.RECORD}
+                @annotation.NameOverride{name = "T"}
+                @annotation.StructRepr{repr = annotation.StructReprType.RECORD}
                 struct S {
-                    @annotations.Iq{node_type = annotations.IqNodeType.XMLATTRIBUTE}
+                    @annotation.Iq{node_type = annotation.IqNodeType.XMLATTRIBUTE}
                     1: i32 field1 ;
                 }
 
-                @annotations.DefaultValue{value = "QUX"}
+                @annotation.DefaultValue{value = "QUX"}
                 enum E {QUX = 1}
                 """
             ),

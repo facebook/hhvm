@@ -399,32 +399,32 @@ class structure_annotations {
       if (name == "erl.name") {
         to_remove.emplace_back(name, data);
         to_add.insert(fmt::format(
-            "@annotations.NameOverride{{name = \"{}\"}}", data.value));
-        fm_.add_include("thrift/facebook/erlang/annotations.thrift");
+            "@annotation.NameOverride{{name = \"{}\"}}", data.value));
+        fm_.add_include("thrift/facebook/erlang/annotation.thrift");
       }
       if (name == "erl.struct_repr") {
         to_remove.emplace_back(name, data);
         to_add.insert(fmt::format(
-            "@annotations.StructRepr{{repr = {}}}",
-            data.value == "record" ? "annotations.StructReprType.RECORD"
-                                   : "annotations.StructReprType.MAP"));
-        fm_.add_include("thrift/facebook/erlang/annotations.thrift");
+            "@annotation.StructRepr{{repr = {}}}",
+            data.value == "record" ? "annotation.StructReprType.RECORD"
+                                   : "annotation.StructReprType.MAP"));
+        fm_.add_include("thrift/facebook/erlang/annotation.thrift");
       }
       if (name == "erl.default_value") {
         to_remove.emplace_back(name, data);
         to_add.insert(fmt::format(
-            "@annotations.DefaultValue{{value = \"{}\"}}", data.value));
-        fm_.add_include("thrift/facebook/erlang/annotations.thrift");
+            "@annotation.DefaultValue{{value = \"{}\"}}", data.value));
+        fm_.add_include("thrift/facebook/erlang/annotation.thrift");
       }
       if (name == "iq.node_type") {
         to_remove.emplace_back(name, data);
         to_add.insert(fmt::format(
-            "@annotations.Iq{{node_type = {}}}",
-            data.value == "xmlcdata" ? "annotations.IqNodeType.XMLCDATA"
+            "@annotation.Iq{{node_type = {}}}",
+            data.value == "xmlcdata" ? "annotation.IqNodeType.XMLCDATA"
                 : data.value == "xmlnode"
-                ? "annotations.IqNodeType.XMLNODE"
-                : "annotations.IqNodeType.XMLATTRIBUTE"));
-        fm_.add_include("thrift/facebook/erlang/annotations.thrift");
+                ? "annotation.IqNodeType.XMLNODE"
+                : "annotation.IqNodeType.XMLATTRIBUTE"));
+        fm_.add_include("thrift/facebook/erlang/annotation.thrift");
       }
     }
 

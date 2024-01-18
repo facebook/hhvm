@@ -18,7 +18,6 @@
 
 #include <thrift/lib/cpp2/reflection/internal/test_helpers.h>
 #include <thrift/lib/cpp2/reflection/populator.h>
-#include <thrift/lib/cpp2/reflection/serializer.h>
 #include <thrift/test/reflection/fatal_serialization_common.h>
 #include <thrift/test/reflection/gen-cpp2/simple_reflection_fatal_types.h>
 #include <thrift/test/reflection/gen-cpp2/simple_reflection_types.h>

@@ -2289,12 +2289,6 @@ ReqBindJmp and CallFuncEntry.
   raise a warning or throw an exception indicating that the class specified in
   S0 was constructed dynamically (and should not be).
 
-| RaiseMissingDynamicallyReferenced, ND, S(Cls), NF
-
-  Raise a notice that the provided class (result of classname_to_class) is
-  missing the `<<__DynamicallyReferenced>>` attribute. Notice is sampled at a
-  rate set by the `DynamicallyReferencedNoticeSampleRate` runtime option.
-
 | RaiseCoeffectsCallViolation<func>, ND, S(Int) S(Int), NF
 
   Depending on the setting of the `CoeffectEnforcementLevels` runtime option,

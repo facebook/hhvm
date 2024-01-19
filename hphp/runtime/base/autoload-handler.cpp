@@ -290,7 +290,7 @@ AutoloadHandler::loadFromMap(const String& clsName,
 }
 
 bool AutoloadHandler::autoloadFunc(StringData* name) {
-  tracing::BlockNoTrace _{(m_map) ? "autoload-native" : "autoload"};
+  tracing::BlockNoTrace _{(m_map) ? "autoload-func" : "no-autoload-func"};
   return m_map &&
     loadFromMap(String{name},
                 AutoloadMap::KindOf::Function,
@@ -298,7 +298,7 @@ bool AutoloadHandler::autoloadFunc(StringData* name) {
 }
 
 bool AutoloadHandler::autoloadConstant(StringData* name) {
-  tracing::BlockNoTrace _{(m_map) ? "autoload-native" : "autoload"};
+  tracing::BlockNoTrace _{(m_map) ? "autoload-const" : "no-autoload-const"};
   return m_map &&
     loadFromMap(String{name},
                 AutoloadMap::KindOf::Constant,
@@ -306,14 +306,14 @@ bool AutoloadHandler::autoloadConstant(StringData* name) {
 }
 
 bool AutoloadHandler::autoloadTypeAlias(const String& name) {
-  tracing::BlockNoTrace _{(m_map) ? "autoload-native" : "autoload"};
+  tracing::BlockNoTrace _{(m_map) ? "autoload-typedef" : "no-autoload-typedef"};
   return m_map &&
     loadFromMap(name, AutoloadMap::KindOf::TypeAlias,
                 TypeAliasExistsChecker(name));
 }
 
 bool AutoloadHandler::autoloadModule(StringData* name) {
-  tracing::BlockNoTrace _{(m_map) ? "autoload-native" : "autoload"};
+  tracing::BlockNoTrace _{(m_map) ? "autoload-module" : "no-autoload-module"};
   return m_map &&
     loadFromMap(String{name},
                 AutoloadMap::KindOf::Module,

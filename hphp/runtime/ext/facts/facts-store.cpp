@@ -818,7 +818,11 @@ struct FactsStoreImpl final
       throw UpdateExc{"Shutting down"};
     }
 
-    tracing::Block _{"autoload-update-parse-results"};
+    tracing::Block _{"autoload-update-parse-results", [&] {
+                       return tracing::Props{}
+                           .add("fresh", delta.m_fresh)
+                           .add("delta_size", delta.m_files.size());
+                     }};
     bool isFresh = delta.m_fresh;
     Clock lastClock = *delta.m_lastClock;
     Clock newClock = delta.m_newClock;

@@ -53,8 +53,8 @@ BaseThriftServer::makeCPUConcurrencyControllerConfigInternal() {
       [mockConfig = mockCPUConcurrencyControllerConfig_.getObserver(),
        config = detail::makeCPUConcurrencyControllerConfig(
            this)]() -> CPUConcurrencyController::Config {
-        if (auto config = **mockConfig) {
-          return *config;
+        if (auto config_2 = **mockConfig) {
+          return *config_2;
         }
         return **config;
       });

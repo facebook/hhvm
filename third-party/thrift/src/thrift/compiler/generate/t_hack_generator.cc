@@ -2929,8 +2929,8 @@ void t_hack_generator::generate_php_type_spec(
   }
 
   // Check the wrapper before resolving typedefs.
-  auto [wrapper, name, ns] = find_hack_wrapper(t);
-  if (wrapper) {
+  auto [owrapper, oname, ons] = find_hack_wrapper(t);
+  if (owrapper) {
     indent(out) << "'is_type_wrapped' => true,\n";
   }
   t = t->get_true_type();
@@ -4483,8 +4483,8 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
   std::string adapter;
   if (auto annotation = find_hack_field_adapter(field)) {
     adapter = *annotation;
-  } else if (auto annotation = find_hack_adapter(field.get_type())) {
-    adapter = *annotation;
+  } else if (auto annotation_2 = find_hack_adapter(field.get_type())) {
+    adapter = *annotation_2;
   }
 
   const t_type* t = field.type()->get_true_type();

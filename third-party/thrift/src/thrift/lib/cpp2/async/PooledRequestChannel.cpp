@@ -35,8 +35,8 @@ struct InteractionState {
       if (self->refcount.fetch_sub(1, std::memory_order_acq_rel) == 1) {
         std::move(self->keepAlive)
             .add([id = std::move(self->id),
-                  implPtr = std::move(self->impl)](auto&& keepAlive) mutable {
-              auto* channel = implPtr->get(*keepAlive);
+                  implPtr = std::move(self->impl)](auto&& keepAlive_2) mutable {
+              auto* channel = implPtr->get(*keepAlive_2);
               if (channel) {
                 (*channel)->terminateInteraction(std::move(id));
               } else {

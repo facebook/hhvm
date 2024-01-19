@@ -536,21 +536,22 @@ void Cpp2Worker::dispatchRequest(
             DCHECK(!std::holds_alternative<std::monostate>(poolResult));
           }
 
-          if (auto* reject = std::get_if<ServerRequestRejection>(&poolResult)) {
-            handleServerRequestRejection(serverRequest, *reject);
+          if (auto* reject_2 =
+                  std::get_if<ServerRequestRejection>(&poolResult)) {
+            handleServerRequestRejection(serverRequest, *reject_2);
             return;
           }
 
-          auto resourcePoolHandle =
+          auto resourcePoolHandle_2 =
               std::get_if<std::reference_wrapper<const ResourcePoolHandle>>(
                   &poolResult);
           DCHECK(serverConfigs->resourcePoolSet().hasResourcePool(
-              *resourcePoolHandle));
+              *resourcePoolHandle_2));
           resourcePool = &serverConfigs->resourcePoolSet().resourcePool(
-              *resourcePoolHandle);
+              *resourcePoolHandle_2);
           // Allow the priority to override the default resource pool
           if (priority != concurrency::NORMAL &&
-              resourcePoolHandle->get().index() ==
+              resourcePoolHandle_2->get().index() ==
                   ResourcePoolHandle::kDefaultAsyncIndex) {
             resourcePool = &serverConfigs->resourcePoolSet()
                                 .resourcePoolByPriority_deprecated(priority);

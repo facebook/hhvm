@@ -104,8 +104,8 @@ RocketClient::RocketClient(
       setupFrame_(std::move(setupFrame)) {
   DCHECK(socket_ != nullptr);
   socket_->setReadCB(&parser_);
-  if (auto socket = dynamic_cast<folly::AsyncSocket*>(socket_.get())) {
-    socket->setCloseOnFailedWrite(false);
+  if (auto socket_2 = dynamic_cast<folly::AsyncSocket*>(socket_.get())) {
+    socket_2->setCloseOnFailedWrite(false);
   }
   evb_->runOnDestruction(eventBaseDestructionCallback_);
   // Get or create flush manager from EventBaseLocal

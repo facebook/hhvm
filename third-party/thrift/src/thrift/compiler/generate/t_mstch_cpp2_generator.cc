@@ -924,13 +924,13 @@ bool needs_op_encode(const t_type& type);
 
 bool check_container_needs_op_encode(const t_type& type) {
   const auto* true_type = type.get_true_type();
-  if (auto container = dynamic_cast<const t_list*>(true_type)) {
-    return needs_op_encode(*container->elem_type());
-  } else if (auto container_2 = dynamic_cast<const t_set*>(true_type)) {
-    return needs_op_encode(*container_2->elem_type());
-  } else if (auto container_2 = dynamic_cast<const t_map*>(true_type)) {
-    return needs_op_encode(*container_2->key_type()) ||
-        needs_op_encode(*container_2->val_type());
+  if (auto list_container = dynamic_cast<const t_list*>(true_type)) {
+    return needs_op_encode(*list_container->elem_type());
+  } else if (auto set_container = dynamic_cast<const t_set*>(true_type)) {
+    return needs_op_encode(*set_container->elem_type());
+  } else if (auto map_container = dynamic_cast<const t_map*>(true_type)) {
+    return needs_op_encode(*map_container->key_type()) ||
+        needs_op_encode(*map_container->val_type());
   }
   return false;
 }

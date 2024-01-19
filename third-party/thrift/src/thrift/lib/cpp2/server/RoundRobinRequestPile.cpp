@@ -26,27 +26,25 @@ RoundRobinRequestPile::Options::getDefaultPileSelectionFunc(
     unsigned defaultPriority) {
   DCHECK(numBucketsPerPriority.size());
   unsigned priorityLimit = numBucketsPerPriority.size() - 1;
-  PileSelectionFunction pileSelectionFunction{
-      [defaultPriority, priorityLimit](
-          const ServerRequest& request) -> std::pair<unsigned, unsigned> {
-        unsigned priority =
-            static_cast<unsigned>(request.requestContext()->getCallPriority());
-        if (priority <= priorityLimit) {
-          return std::make_pair(static_cast<uint64_t>(priority), 0);
-        }
-        if (request.methodMetadata()) {
-          if (auto prio = request.methodMetadata()->priority) {
-            priority = static_cast<unsigned>(*prio);
-          } else {
-            priority = defaultPriority;
-          }
+  return [defaultPriority, priorityLimit](
+             const ServerRequest& request) -> std::pair<unsigned, unsigned> {
+    unsigned priority =
+        static_cast<unsigned>(request.requestContext()->getCallPriority());
+    if (priority <= priorityLimit) {
+      return std::make_pair(static_cast<uint64_t>(priority), 0);
+    }
+    if (request.methodMetadata()) {
+      if (auto prio = request.methodMetadata()->priority) {
+        priority = static_cast<unsigned>(*prio);
+      } else {
+        priority = defaultPriority;
+      }
 
-        } else {
-          priority = defaultPriority;
-        }
-        return std::make_pair(static_cast<uint64_t>(priority), 0);
-      }};
-  return pileSelectionFunction;
+    } else {
+      priority = defaultPriority;
+    }
+    return std::make_pair(static_cast<uint64_t>(priority), 0);
+  };
 }
 
 void RoundRobinRequestPile::Consumer::operator()(

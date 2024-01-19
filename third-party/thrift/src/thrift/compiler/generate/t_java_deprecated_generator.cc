@@ -348,10 +348,10 @@ void t_java_deprecated_generator::print_const_value(
             "type error: " + type->get_name() + " has no field " +
             v_iter->first->get_string());
       }
-      string val = render_const_value(out, name, field_type, v_iter->second);
+      string val_2 = render_const_value(out, name, field_type, v_iter->second);
       indent(out) << name << ".";
       std::string cap_name = get_cap_name(v_iter->first->get_string());
-      out << "set" << cap_name << "(" << val << ");" << endl;
+      out << "set" << cap_name << "(" << val_2 << ");" << endl;
     }
     if (!in_static) {
       indent_down();
@@ -370,8 +370,8 @@ void t_java_deprecated_generator::print_const_value(
     vector<pair<t_const_value*, t_const_value*>>::const_iterator v_iter;
     for (v_iter = val.begin(); v_iter != val.end(); ++v_iter) {
       string key = render_const_value(out, name, ktype, v_iter->first);
-      string val = render_const_value(out, name, vtype, v_iter->second);
-      indent(out) << name << ".put(" << key << ", " << val << ");" << endl;
+      string val_2 = render_const_value(out, name, vtype, v_iter->second);
+      indent(out) << name << ".put(" << key << ", " << val_2 << ");" << endl;
     }
     if (!in_static) {
       indent_down();
@@ -393,8 +393,8 @@ void t_java_deprecated_generator::print_const_value(
     const vector<t_const_value*>& val = value->get_list();
     vector<t_const_value*>::const_iterator v_iter;
     for (v_iter = val.begin(); v_iter != val.end(); ++v_iter) {
-      string val = render_const_value(out, name, etype, *v_iter);
-      indent(out) << name << ".add(" << val << ");" << endl;
+      string val_2 = render_const_value(out, name, etype, *v_iter);
+      indent(out) << name << ".add(" << val_2 << ");" << endl;
     }
     if (!in_static) {
       indent_down();

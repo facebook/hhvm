@@ -483,11 +483,11 @@ void ApplyPatch::operator()(const Object& patch, Object& value) const {
       }
     };
 
-    if (const auto* p = to_remove->if_set()) {
+    if (const auto* p_set = to_remove->if_set()) {
       // TODO: Remove this after migrating to List
-      remove(*p);
-    } else if (const auto* p = to_remove->if_list()) {
-      remove(*p);
+      remove(*p_set);
+    } else if (const auto* p_list = to_remove->if_list()) {
+      remove(*p_list);
     } else {
       throw std::runtime_error(fmt::format(
           "The `PatchOp::Remove` field in struct/union patch is not `set<i16>`/`list<i16>` but `{}`",

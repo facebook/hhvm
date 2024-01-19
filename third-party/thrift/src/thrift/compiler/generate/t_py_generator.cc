@@ -2734,16 +2734,17 @@ void t_py_generator::generate_service_remote(const t_service* tservice) {
       f_remote << "[";
       const vector<t_field*>& args = fn->params().get_members();
       bool first = true;
-      for (vector<t_field*>::const_iterator it = args.begin(); it != args.end();
-           ++it) {
+      for (vector<t_field*>::const_iterator it_2 = args.begin();
+           it_2 != args.end();
+           ++it_2) {
         if (first) {
           first = false;
         } else {
           f_remote << ", ";
         }
-        f_remote << "('" << thrift_type_name((*it)->get_type()) << "', '"
-                 << (*it)->get_name() << "', '"
-                 << thrift_type_name((*it)->get_type()->get_true_type())
+        f_remote << "('" << thrift_type_name((*it_2)->get_type()) << "', '"
+                 << (*it_2)->get_name() << "', '"
+                 << thrift_type_name((*it_2)->get_type()->get_true_type())
                  << "')";
       }
       f_remote << "]),\n";

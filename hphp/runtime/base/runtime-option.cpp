@@ -1375,16 +1375,6 @@ static void normalizePath(std::string &path) {
   }
 }
 
-static String todayDate() {
-  time_t rawtime;
-  struct tm timeinfo;
-  char buf[256];
-  time(&rawtime);
-  localtime_r(&rawtime, &timeinfo);
-  strftime(buf, sizeof(buf), "%Y-%m-%d", &timeinfo);
-  return buf;
-}
-
 static bool matchShard(
   bool enableShards,
   const std::string& hostname,
@@ -1412,9 +1402,7 @@ static bool matchShard(
 
   auto input = hostname;
   if (hdfPattern.exists("ShardSalt")) {
-    auto salt = Config::GetString(ini, hdfPattern, "ShardSalt", "", false);
-    salt = string_replace(salt, "%{date}", todayDate()).toCppString();
-    input += salt;
+    input += Config::GetString(ini, hdfPattern, "ShardSalt", "", false);
   }
 
   auto const md5 = Md5Digest(input.data(), input.size());

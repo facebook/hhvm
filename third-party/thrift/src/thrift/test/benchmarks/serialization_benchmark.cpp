@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <cstdint>
 #include <map>
 #include <vector>
 #include <folly/Benchmark.h>
@@ -22,6 +23,7 @@
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/test/benchmarks/gen-cpp2/serialization_benchmark_types.h>
+#include <thrift/test/benchmarks/serialization_benchmark_generated.h>
 
 namespace apache::thrift::benchmarks {
 
@@ -116,6 +118,150 @@ BENCHMARK(TBinaryRoundTripBaseline) {
   serialize_with_protocol_writer<Struct1, BinaryProtocolWriter>(s, queue);
   auto other = Struct1{};
   deserialize_with_protocol_reader<Struct1, BinaryProtocolReader>(other, queue);
+}
+
+BENCHMARK(FlatBuffersSerialization) {
+  // Create a FlatBufferBuilder object
+  flatbuffers::FlatBufferBuilder builder(2048);
+
+  // Create a StringToUByteMap objects
+  std::vector<flatbuffers::Offset<StringToUByteMap>> field4;
+  for (int i = 0; i < 10; i++) {
+    auto key = builder.CreateString("key" + std::to_string(i));
+    auto value = static_cast<uint8_t>(i);
+    auto stringToUByteMap = CreateStringToUByteMap(builder, key, value);
+    field4.push_back(stringToUByteMap);
+  }
+
+  // Create a FBStruct1 object
+  std::vector<flatbuffers::Offset<flatbuffers::String>> field3;
+  for (int i = 0; i < 10; i++) {
+    auto field3Value = builder.CreateString("item " + std::to_string(i));
+    field3.push_back(field3Value);
+  }
+  auto field3Vector = builder.CreateVector(field3);
+  auto field4Vector = builder.CreateVector(field4);
+
+  auto fbStruct1 = CreateFBStruct1(
+      builder,
+      1,
+      builder.CreateString("hello, world"),
+      field3Vector,
+      field4Vector);
+
+  // Finish the buffer and get a pointer to the root object
+  builder.Finish(fbStruct1);
+}
+
+BENCHMARK(FlatBuffersDerialization) {
+  flatbuffers::FlatBufferBuilder builder(2048);
+  void* bufferPointer;
+  BENCHMARK_SUSPEND {
+    // Create a FlatBufferBuilder object
+
+    // Create a StringToUByteMap objects
+    std::vector<flatbuffers::Offset<StringToUByteMap>> field4;
+    for (int i = 0; i < 10; i++) {
+      auto key = builder.CreateString("key" + std::to_string(i));
+      auto value = static_cast<uint8_t>(i);
+      auto stringToUByteMap = CreateStringToUByteMap(builder, key, value);
+      field4.push_back(stringToUByteMap);
+    }
+
+    // Create a FBStruct1 object
+    std::vector<flatbuffers::Offset<flatbuffers::String>> field3;
+    for (int i = 0; i < 10; i++) {
+      auto field3Value = builder.CreateString("item " + std::to_string(i));
+      field3.push_back(field3Value);
+    }
+    auto field3Vector = builder.CreateVector(field3);
+    auto field4Vector = builder.CreateVector(field4);
+
+    auto fbStruct1 = CreateFBStruct1(
+        builder,
+        1,
+        builder.CreateString("hello, world"),
+        field3Vector,
+        field4Vector);
+
+    // Finish the buffer and get a pointer to the root object
+    builder.Finish(fbStruct1);
+    bufferPointer = builder.GetBufferPointer();
+  }
+
+  // Deserialize the buffer
+  const auto* fbStruct1Root = flatbuffers::GetRoot<FBStruct1>(bufferPointer);
+
+  // Access the fields of the structs
+  fbStruct1Root->field_1();
+  fbStruct1Root->field_2()->str();
+  // Access the elements of the field_3 vector
+  for (flatbuffers::uoffset_t i = 0; i < fbStruct1Root->field_3()->size();
+       i++) {
+    fbStruct1Root->field_3()->Get(i)->str();
+  }
+
+  // Access the elements of the field_4 vector
+  for (flatbuffers::uoffset_t i = 0; i < fbStruct1Root->field_4()->size();
+       i++) {
+    auto mapEntry = fbStruct1Root->field_4()->Get(i);
+    mapEntry->key()->str();
+    mapEntry->value();
+  }
+}
+
+BENCHMARK(FlatBuffersRoundTrip) {
+  // Create a FlatBufferBuilder object
+  flatbuffers::FlatBufferBuilder builder(2048);
+
+  // Create a StringToUByteMap objects
+  std::vector<flatbuffers::Offset<StringToUByteMap>> field4;
+  for (int i = 0; i < 10; i++) {
+    auto key = builder.CreateString("key" + std::to_string(i));
+    auto value = static_cast<uint8_t>(i);
+    auto stringToUByteMap = CreateStringToUByteMap(builder, key, value);
+    field4.push_back(stringToUByteMap);
+  }
+
+  // Create a FBStruct1 object
+  std::vector<flatbuffers::Offset<flatbuffers::String>> field3;
+  for (int i = 0; i < 10; i++) {
+    auto field3Value = builder.CreateString("item " + std::to_string(i));
+    field3.push_back(field3Value);
+  }
+  auto field3Vector = builder.CreateVector(field3);
+  auto field4Vector = builder.CreateVector(field4);
+
+  auto fbStruct1 = CreateFBStruct1(
+      builder,
+      1,
+      builder.CreateString("hello, world"),
+      field3Vector,
+      field4Vector);
+
+  // Finish the buffer and get a pointer to the root object
+  builder.Finish(fbStruct1);
+  auto bufferPointer = builder.GetBufferPointer();
+
+  // Deserialize the buffer
+  const auto* fbStruct1Root = flatbuffers::GetRoot<FBStruct1>(bufferPointer);
+
+  // Access the fields of the structs
+  fbStruct1Root->field_1();
+  fbStruct1Root->field_2()->str();
+  // Access the elements of the field_3 vector
+  for (flatbuffers::uoffset_t i = 0; i < fbStruct1Root->field_3()->size();
+       i++) {
+    fbStruct1Root->field_3()->Get(i)->str();
+  }
+
+  // Access the elements of the field_4 vector
+  for (flatbuffers::uoffset_t i = 0; i < fbStruct1Root->field_4()->size();
+       i++) {
+    auto mapEntry = fbStruct1Root->field_4()->Get(i);
+    mapEntry->key()->str();
+    mapEntry->value();
+  }
 }
 
 } // namespace apache::thrift::benchmarks

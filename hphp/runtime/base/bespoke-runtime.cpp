@@ -81,7 +81,7 @@ RuntimeStruct* RuntimeStruct::registerRuntimeStruct(
   }
 
   {
-    folly::SharedMutex::ReadHolder lock{s_mapLock};
+    std::shared_lock lock{s_mapLock};
     auto it = s_runtimeStrMap.find(stableIdentifier.get());
     if (it != s_runtimeStrMap.end()) {
       auto const runtimeStruct = it->second;
@@ -206,7 +206,7 @@ RuntimeStruct* RuntimeStruct::findById(const StringData* stableIdentifier) {
   assertx(allowBespokeArrayLikes());
   assertx(stableIdentifier->isStatic());
 
-  folly::SharedMutex::ReadHolder lock{s_mapLock};
+  std::shared_lock lock{s_mapLock};
   auto const runtimeStruct = s_runtimeStrMap[stableIdentifier];
   assertx(runtimeStruct);
   return runtimeStruct;
@@ -215,7 +215,7 @@ RuntimeStruct* RuntimeStruct::findById(const StringData* stableIdentifier) {
 void RuntimeStruct::eachRuntimeStruct(std::function<void(RuntimeStruct*)> fn) {
   assertx(allowBespokeArrayLikes());
 
-  folly::SharedMutex::ReadHolder lock{s_mapLock};
+  std::shared_lock lock{s_mapLock};
   for (auto& it : s_runtimeStrMap) fn(it.second);
 }
 

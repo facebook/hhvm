@@ -76,7 +76,7 @@ KeyOrder KeyOrder::pop() const {
 KeyOrder KeyOrder::Make(const KeyOrderData& ko) {
   auto trimmedKeyOrder = trimKeyOrder(ko);
   {
-    folly::SharedMutex::ReadHolder rlock{s_keyOrderLock};
+    std::shared_lock rlock{s_keyOrderLock};
     auto it = s_profilingKeyOrders.find(trimmedKeyOrder);
     if (it != s_profilingKeyOrders.end()) return KeyOrder{&*it};
   }

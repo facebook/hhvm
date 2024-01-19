@@ -96,7 +96,7 @@ struct TransProfCounters {
    */
   template <typename K>
   Optional<T> getFirstCounter(const K& key) {
-    folly::SharedMutex::ReadHolder lock(m_lock);
+    std::shared_lock lock(m_lock);
     auto const& opt = findIndices(key);
     if (opt == std::nullopt) return std::nullopt;
     auto const& indices = opt.value();
@@ -111,7 +111,7 @@ struct TransProfCounters {
    */
   template <typename K>
   jit::vector<T> getCounters(const K& key, jit::vector<M>& meta) const {
-    folly::SharedMutex::ReadHolder lock(m_lock);
+    std::shared_lock lock(m_lock);
     meta.clear();
     jit::vector<T> counters;
     auto const& opt = findIndices(key);

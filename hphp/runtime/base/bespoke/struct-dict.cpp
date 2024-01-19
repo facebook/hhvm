@@ -186,7 +186,7 @@ const StructLayout* StructLayout::GetLayout(
     const FieldVector& fv, bool create) {
 	if (fv.empty()) return nullptr;
   {
-    folly::SharedMutex::ReadHolder rlock{s_fieldVectorLock};
+    std::shared_lock rlock{s_fieldVectorLock};
     auto const it = s_fieldVectorToIdx.find(fv);
     if (it != s_fieldVectorToIdx.end()) return As(FromIndex(it->second));
   }

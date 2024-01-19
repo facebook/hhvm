@@ -138,7 +138,7 @@ ArrayData* getStaticArray(LoggingProfileKey key) {
 template <typename M, typename L, typename K>
 size_t incrementCounter(M& map, L& mutex, K key) {
   {
-    folly::SharedMutex::ReadHolder lock{mutex};
+    std::shared_lock lock{mutex};
     auto it = map.find(key);
     if (it != map.end()) {
       it->second.value++;
@@ -354,7 +354,7 @@ void LoggingProfile::logEvent(ArrayOp op, const StringData* k, TypedValue v) {
 void LoggingProfile::logEventImpl(const EventKey& key) {
   // Hold the read mutex for the duration of the mutation so that profiling
   // cannot be interrupted until the mutation is complete.
-  folly::SharedMutex::ReadHolder lock{s_profilingLock};
+  std::shared_lock lock{s_profilingLock};
   if (!s_profiling.load(std::memory_order_acquire)) return;
 
   assertx(data);
@@ -377,7 +377,7 @@ void LoggingProfile::logEntryTypes(EntryTypes before, EntryTypes after) {
   if (!RO::EvalEmitBespokeMonotypes) return;
   // Hold the read mutex for the duration of the mutation so that profiling
   // cannot be interrupted until the mutation is complete.
-  folly::SharedMutex::ReadHolder lock{s_profilingLock};
+  std::shared_lock lock{s_profilingLock};
   if (!s_profiling.load(std::memory_order_acquire)) return;
 
   assertx(data);
@@ -389,7 +389,7 @@ void LoggingProfile::logEntryTypes(EntryTypes before, EntryTypes after) {
 void LoggingProfile::logKeyOrders(const KeyOrder& ko) {
   // Hold the read mutex for the duration of the mutation so that profiling
   // cannot be interrupted until the mutation is complete.
-  folly::SharedMutex::ReadHolder lock{s_profilingLock};
+  std::shared_lock lock{s_profilingLock};
   if (!s_profiling.load(std::memory_order_acquire)) return;
 
   assertx(data);
@@ -497,7 +497,7 @@ void SinkProfile::setLayouts(SinkLayouts sls) {
 }
 
 void SinkProfile::update(const ArrayData* ad) {
-  folly::SharedMutex::ReadHolder lock{s_profilingLock};
+  std::shared_lock lock{s_profilingLock};
   if (!s_profiling.load(std::memory_order_acquire)) return;
 
   assertx(data);
@@ -1140,7 +1140,7 @@ LoggingProfile* getLoggingProfile(LoggingProfileKey key) {
 
   // Hold the read mutex while we're constructing the new profile so that we
   // cannot stop profiling until this mutation is complete.
-  folly::SharedMutex::ReadHolder lock{s_profilingLock};
+  std::shared_lock lock{s_profilingLock};
   if (!s_profiling.load(std::memory_order_acquire)) return nullptr;
 
   auto profile = std::make_unique<LoggingProfile>(key);
@@ -1217,7 +1217,7 @@ SinkProfile* getSinkProfile(TransID id, SrcKey sk) {
 
   // Hold the read mutex while we're constructing the new profile so that we
   // cannot stop profiling until this mutation is complete.
-  folly::SharedMutex::ReadHolder lock{s_profilingLock};
+  std::shared_lock lock{s_profilingLock};
   if (!s_profiling.load(std::memory_order_acquire)) return nullptr;
 
   auto profile = std::make_unique<SinkProfile>(key);

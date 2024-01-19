@@ -69,7 +69,7 @@ template<class Init, class Uninit>
 void ifInitElse(Init init, Uninit uninit) {
   if (g_initFlag.load(std::memory_order_acquire)) return init();
 
-  folly::SharedMutex::ReadHolder l(g_clsInitLock);
+  std::shared_lock l(g_clsInitLock);
 
   if (g_initFlag.load(std::memory_order_acquire)) {
     init();

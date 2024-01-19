@@ -294,7 +294,7 @@ void ProfData::addTargetProfile(const ProfData::TargetProfileInfo& info) {
 
 std::vector<ProfData::TargetProfileInfo> ProfData::getTargetProfiles(
   TransID transID) const {
-  folly::SharedMutex::ReadHolder lock{m_targetProfilesLock};
+  std::shared_lock lock{m_targetProfilesLock};
   auto it = m_targetProfiles.find(transID);
   if (it != m_targetProfiles.end()) {
     return it->second;

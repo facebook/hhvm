@@ -44,7 +44,7 @@ const TransRec* getTransRec(TCA tca) {
   if (!enabled()) return nullptr;
   TransRec* ret = nullptr;
   {
-    folly::SharedMutex::ReadHolder guard(s_lock);
+    std::shared_lock guard(s_lock);
     auto it = s_transDB.upper_bound(tca);
     if (it == s_transDB.begin()) {
       return nullptr;

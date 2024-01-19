@@ -42,7 +42,7 @@ std::vector<const char*> s_tag_to_string;
 
 StringTag tag_from_string(const char* str) {
   { // Return the tag if we've already cached this string.
-    SharedMutex::ReadHolder l(s_mutex);
+    std::shared_lock l(s_mutex);
     auto const it = s_string_to_tag.find(str);
     if (it != s_string_to_tag.end()) return it->second;
   }
@@ -64,7 +64,7 @@ StringTag tag_from_string(const char* str) {
 const char* string_from_tag(StringTag tag) {
   if (tag == 0) return nullptr;
 
-  SharedMutex::ReadHolder l(s_mutex);
+  std::shared_lock l(s_mutex);
   assertx(tag <= s_tag_to_string.size());
   return s_tag_to_string[tag - 1];
 }

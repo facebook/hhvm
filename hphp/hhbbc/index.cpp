@@ -1812,7 +1812,7 @@ struct ClassGraph::LockedSerdeImpl {
     // already exists.
     {
       auto const n = [&] {
-        folly::SharedMutex::ReadHolder _{t.locking->table};
+        std::shared_lock _{t.locking->table};
         return folly::get_ptr(t.nodes, name);
       }();
       // It already exists, wait on FlagWait and then return.
@@ -1845,7 +1845,7 @@ struct ClassGraph::LockedSerdeImpl {
   }
   Node& get(SString name) const {
     auto& t = table();
-    folly::SharedMutex::ReadHolder _{t.locking->table};
+    std::shared_lock _{t.locking->table};
     auto n = folly::get_ptr(t.nodes, name);
     always_assert_flog(
       n,
@@ -1861,7 +1861,7 @@ struct ClassGraph::LockedSerdeImpl {
   void setEquiv(Node& n, Node& e) const {
     auto& t = table();
     {
-      folly::SharedMutex::ReadHolder _{t.locking->equivs};
+      std::shared_lock _{t.locking->equivs};
       if (auto const old = folly::get_default(t.regOnlyEquivs, &n)) {
         assertx(old == &e);
         return;

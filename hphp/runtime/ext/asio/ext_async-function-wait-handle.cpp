@@ -45,7 +45,7 @@ folly::SharedMutex s_asyncFrameLock;
 
 AsyncFrameId getAsyncFrameId(SrcKey sk) {
   {
-    folly::SharedMutex::ReadHolder lock(s_asyncFrameLock);
+    std::shared_lock lock(s_asyncFrameLock);
     auto const it = s_asyncFrameMap.find(sk);
     if (it != s_asyncFrameMap.end()) return it->second;
     if (s_numAsyncFrameIds > kMaxAsyncFrameId) return kInvalidAsyncFrameId;

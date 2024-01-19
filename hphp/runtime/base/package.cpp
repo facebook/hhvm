@@ -43,7 +43,7 @@ folly::SharedMutex s_patternCacheLock;
 
 const re2::RE2& PackageInfo::compilePattern(const std::string& p) {
   {
-    folly::SharedMutex::ReadHolder _{s_patternCacheLock};
+    std::shared_lock _{s_patternCacheLock};
     if (auto const re = folly::get_ptr(s_patternCache, p)) return **re;
   }
   std::unique_lock _{s_patternCacheLock};
@@ -334,7 +334,7 @@ bool PackageInfo::violatesDeploymentBoundary(const StringData* module) const {
   if (!RO::EvalEnforceDeployment) return false;
   if (auto const activeDeployment = getActiveDeployment()) {
     if (RO::RepoAuthoritative) {
-      folly::SharedMutex::ReadHolder lock(s_mutex);
+      std::shared_lock lock(s_mutex);
       auto it = m_moduleInActiveDeployment.find(module);
       if (it != m_moduleInActiveDeployment.end()) return !it->second;
     }

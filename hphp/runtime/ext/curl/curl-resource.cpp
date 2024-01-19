@@ -1438,7 +1438,7 @@ CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
     if (!cainfo.empty()) {
       auto const store = [&] () -> X509_STORE* {
         {
-          folly::SharedMutex::ReadHolder lock(s_mutex);
+          std::shared_lock lock(s_mutex);
           auto const iter = s_certCache.find(cainfo);
           if (iter != s_certCache.end()) return iter->second;
         }

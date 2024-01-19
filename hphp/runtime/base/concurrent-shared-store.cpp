@@ -400,7 +400,7 @@ bool ConcurrentTableSharedStore::eraseImpl(const char* key,
                                            ExpSet::accessor* expAcc) {
   assertx(key);
 
-  SharedMutex::ReadHolder l(m_lock);
+  std::shared_lock l(m_lock);
   Map::accessor acc;
   if (!m_vars.find(acc, key)) {
     return false;
@@ -615,7 +615,7 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value, bool 
   if (s_hotCache.get(keyStr.get(), value, hotIdx, pure)) return true;
   const StoreValue *sval;
   APCHandle *svar = nullptr;
-  SharedMutex::ReadHolder l(m_lock);
+  std::shared_lock l(m_lock);
   bool promoteObj = false;
   bool needsToLocal = false;
   {
@@ -665,7 +665,7 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value, bool 
 int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
                                         bool& found) {
   found = false;
-  SharedMutex::ReadHolder l(m_lock);
+  std::shared_lock l(m_lock);
 
   Map::accessor acc;
   if (!m_vars.find(acc, tagStringData(key.get()))) {
@@ -706,7 +706,7 @@ int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
 
 bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
                                      int64_t val) {
-  SharedMutex::ReadHolder l(m_lock);
+  std::shared_lock l(m_lock);
 
   Map::accessor acc;
   if (!m_vars.find(acc, tagStringData(key.get()))) {
@@ -736,7 +736,7 @@ bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
 
 bool ConcurrentTableSharedStore::exists(const String& keyStr) {
   if (s_hotCache.hasValue(keyStr.get())) return true;
-  SharedMutex::ReadHolder l(m_lock);
+  std::shared_lock l(m_lock);
   {
     Map::const_accessor acc;
     if (checkExpire(keyStr, acc)) {
@@ -748,7 +748,7 @@ bool ConcurrentTableSharedStore::exists(const String& keyStr) {
 
 int64_t ConcurrentTableSharedStore::size(const String& key, bool& found) {
   found = false;
-  SharedMutex::ReadHolder l(m_lock);
+  std::shared_lock l(m_lock);
 
   Map::accessor acc;
   if (!m_vars.find(acc, tagStringData(key.get()))) {
@@ -774,7 +774,7 @@ static int64_t apply_ttl_limit(int64_t ttl) {
 }
 
 bool ConcurrentTableSharedStore::extendTTL(const String& key, int64_t new_ttl) {
-  SharedMutex::ReadHolder l(m_lock);
+  std::shared_lock l(m_lock);
   Map::accessor acc;
   if (!m_vars.find(acc, tagStringData(key.get()))) {
     return false;
@@ -837,7 +837,7 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
   char* const kcp = strdup(key.data());
 
   {
-  SharedMutex::ReadHolder l(m_lock);
+  std::shared_lock l(m_lock);
   bool present;
   time_t expiry = 0;
   {

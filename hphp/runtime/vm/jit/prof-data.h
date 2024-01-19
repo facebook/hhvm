@@ -309,12 +309,12 @@ struct ProfData {
   TransID allocTransID();
 
   size_t numTransRecs() {
-    folly::SharedMutex::ReadHolder lock{m_transLock};
+    std::shared_lock lock{m_transLock};
     return m_transRecs.size();
   }
 
   ProfTransRec* transRec(TransID id) {
-    folly::SharedMutex::ReadHolder lock{m_transLock};
+    std::shared_lock lock{m_transLock};
     return m_transRecs.at(id).get();
   }
   const ProfTransRec* transRec(TransID id) const {
@@ -323,14 +323,14 @@ struct ProfData {
 
   template<class L>
   void forEachTransRec(L&& body) {
-    folly::SharedMutex::ReadHolder lock{m_transLock};
+    std::shared_lock lock{m_transLock};
     for (auto& rec : m_transRecs) {
       if (rec) body(rec.get());
     }
   }
 
   TransIDVec funcProfTransIDs(FuncId funcId) const {
-    folly::SharedMutex::ReadHolder lock{m_funcProfTransLock};
+    std::shared_lock lock{m_funcProfTransLock};
     auto it = m_funcProfTrans.find(funcId);
     if (it == m_funcProfTrans.end()) return TransIDVec{};
 
@@ -341,7 +341,7 @@ struct ProfData {
    * The absolute number of times that a translation executed.
    */
   int64_t transCounter(TransID id) const {
-    folly::SharedMutex::ReadHolder lock{m_transLock};
+    std::shared_lock lock{m_transLock};
     assertx(id < m_transRecs.size());
     auto const counter = m_counters.get(id);
     auto const initVal = m_counters.getDefault();

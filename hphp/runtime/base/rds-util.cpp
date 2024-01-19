@@ -54,7 +54,7 @@ bindConstMemoCache(const Func* func, const Class* cls,
 }
 
 void clearConstMemoCache(const Func* func, const Class* cls) {
-  folly::SharedMutex::ReadHolder rlock{s_constMemoLock};
+  std::shared_lock rlock{s_constMemoLock};
   auto const range = s_funcToConstMemoCaches.equal_range(std::pair{func, cls});
   for (auto p = range.first; p != range.second; ++p) {
     auto const link = p->second;

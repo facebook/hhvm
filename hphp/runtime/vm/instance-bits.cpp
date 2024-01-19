@@ -92,7 +92,7 @@ void profile(const StringData* name) {
 
   // The extra layer of locking is here so that InstanceBits::init can safely
   // iterate over s_instanceCounts while building its map of names to bits.
-  SharedMutex::ReadHolder l(s_instanceCountsLock);
+  std::shared_lock l(s_instanceCountsLock);
   InstanceCounts::accessor acc;
   if (!s_instanceCounts.insert(acc, InstanceCounts::value_type(name, inc))) {
     acc->second += inc;

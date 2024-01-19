@@ -236,6 +236,8 @@ let get_handle () =
   in
   (get_handle_internal_handle (), snd)
 
+external get_worker_id : unit -> int = "hh_get_worker_id"
+
 external set_allow_removes : bool -> unit = "hh_set_allow_removes"
 
 external set_allow_hashtable_writes_by_current_process : bool -> unit

@@ -85,6 +85,9 @@ val connect : handle -> worker_id:int -> unit
     process hasn't yet connected to shared memory *)
 val get_handle : unit -> handle
 
+(** Get the worker id (starting from 1). 0 is the master process *)
+val get_worker_id : unit -> int
+
 (** Allow or disallow remove operations. *)
 val set_allow_removes : bool -> unit
 

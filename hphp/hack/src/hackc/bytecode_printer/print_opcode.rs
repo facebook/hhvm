@@ -17,7 +17,6 @@ use hhbc::ClassName;
 use hhbc::CollectionType;
 use hhbc::ConstName;
 use hhbc::ContCheckOp;
-use hhbc::Dummy;
 use hhbc::FCallArgs;
 use hhbc::FatalOp;
 use hhbc::FloatBits;
@@ -122,7 +121,6 @@ impl<'a, 'b> PrintOpcode<'a, 'b> {
         w: &mut dyn Write,
         cases: &[Str<'_>],
         targets: &[Label],
-        _dummy_imm: &Dummy,
     ) -> Result<()> {
         if cases.len() != targets.len() {
             return Err(Error::new(

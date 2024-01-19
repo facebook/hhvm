@@ -787,7 +787,6 @@ fn convert_control_flow<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) 
         Opcode::SSwitch {
             ref cases,
             ref targets,
-            _0: _,
         } => {
             let s1 = ctx.pop();
             let stack_size = ctx.spill_stack();

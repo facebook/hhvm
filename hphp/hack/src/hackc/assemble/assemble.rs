@@ -1969,7 +1969,6 @@ fn assemble_sswitch<'arena>(
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::SSwitch {
         cases: Slice::from_vec(alloc, cases),
         targets: Slice::from_vec(alloc, targets),
-        _0: hhbc::Dummy::DEFAULT,
     }))
 }
 

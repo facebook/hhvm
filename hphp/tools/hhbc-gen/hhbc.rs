@@ -343,11 +343,8 @@ mod fixups {
             "SSwitch" => vec![
                 // Instead of using a single [(String, Label)] field in HHAS we
                 // split the cases and targets.
-                // One of the immediates needs to be "_0" to satisfy opcodes
-                // translator macro in the HackC Translator.
                 add_flag(InstrFlags::AS_STRUCT),
                 insert_imm(0, "cases", ImmType::ARR(Box::new(ImmType::SA))),
-                insert_imm(2, "_0", ImmType::DUMMY),
                 replace_imm("targets", ImmType::SLA, ImmType::BLA),
             ],
             "UnsetM" => vec![

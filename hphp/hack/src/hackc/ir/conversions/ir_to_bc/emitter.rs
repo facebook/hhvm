@@ -1108,11 +1108,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                         .map(|bid| self.labeler.lookup_or_insert_bid(bid)),
                 );
 
-                self.push_opcode(Opcode::SSwitch {
-                    cases,
-                    targets,
-                    _0: Dummy::DEFAULT,
-                });
+                self.push_opcode(Opcode::SSwitch { cases, targets });
             }
             Terminator::Throw(_src, _) => {
                 self.push_opcode(Opcode::Throw);

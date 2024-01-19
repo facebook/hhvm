@@ -396,11 +396,7 @@ pub mod instr {
         let cases = alloc
             .alloc_slice_fill_iter(cases.into_iter().map(|(s, _)| Str::from(s)))
             .into();
-        instr(Instruct::Opcode(Opcode::SSwitch {
-            cases,
-            targets,
-            _0: Dummy::DEFAULT,
-        }))
+        instr(Instruct::Opcode(Opcode::SSwitch { cases, targets }))
     }
 
     pub fn string<'a>(alloc: &'a bumpalo::Bump, litstr: impl Into<String>) -> InstrSeq<'a> {

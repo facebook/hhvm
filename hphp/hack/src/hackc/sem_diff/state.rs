@@ -420,7 +420,6 @@ impl<'arena, 'a> State<'arena, 'a> {
             Instruct::Opcode(Opcode::SSwitch {
                 ref cases,
                 ref targets,
-                _0: _,
             }) => self.step_s_switch(builder, cases, targets),
 
             Instruct::Opcode(Opcode::Enter(label) | Opcode::Jmp(label)) => {
@@ -1073,7 +1072,6 @@ impl<'arena, 'a> State<'arena, 'a> {
         let instr = NodeInstr::Opcode(Opcode::SSwitch {
             cases: cases.clone(),
             targets: Slice::empty(),
-            _0: Dummy::DEFAULT,
         });
         self.seq_push(builder, instr, inputs);
         self.ip = InstrPtr::None;

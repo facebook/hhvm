@@ -894,9 +894,24 @@ void handleOA(TranslationState& ts, T subop) {
 #define BODY(name) UNUSED auto const body = o.name;
 #define NO_BODY(...)
 
+// Conditionally create a body variable if this opcode has inputs we need to
+// access off of it. For opcodes with no inputs (NA), there is no body struct
+// created, so calling o.name as above will fail. You can see the C-headers
+// for all opcodes in P1053747912.
+//
+// Use __VA_ARGS__ as a workaround to expand MAYBE_IMM_#imm.
+// Without this, it would expand to:
+// MAYBE_IMM_NABODY(Await)  \\ garbage
+// instead of:
+// MAYBE_IMM_NA -> NO_ -> NO_BODY(Await)
 #define GEN_BODY2(id, name) id##BODY(name)
 #define GEN_BODY(...) GEN_BODY2(__VA_ARGS__)
 
+// Rust cbindgen generates C headers for opcode structs that look like
+// P1053747912. These headers are stored in hhbc-ast.h which is included
+// in a few places in HHVM. We generate emitters for the opcodes
+// using opcodes.h, which is also what HackC uses to generate these rust
+// structs, with a few differences noted in hhbc.rs.
 #define O(name, imm, pop, push, flags)                                 \
   void translateOpcode##name(TranslationState& ts, const Opcode& o) {  \
     ITRACE(5, "translate Opcode {} \n", #name);                        \

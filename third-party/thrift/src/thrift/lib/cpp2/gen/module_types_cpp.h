@@ -34,6 +34,7 @@
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/op/Compare.h>
+#include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
 
 namespace apache {
 namespace thrift {
@@ -216,6 +217,7 @@ struct copy_field_rec<type_class::list<ValueTypeClass>> {
   template <typename T>
   T operator()(T const& t) const {
     T result;
+    ::apache::thrift::detail::pm::reserve_if_possible(&result, t.size());
     for (const auto& e : t) {
       result.push_back(copy_field<ValueTypeClass>(e));
     }
@@ -228,6 +230,7 @@ struct copy_field_rec<type_class::set<ValueTypeClass>> {
   template <typename T>
   T operator()(T const& t) const {
     T result;
+    ::apache::thrift::detail::pm::reserve_if_possible(&result, t.size());
     for (const auto& e : t) {
       result.emplace_hint(result.end(), copy_field<ValueTypeClass>(e));
     }
@@ -240,6 +243,7 @@ struct copy_field_rec<type_class::map<KeyTypeClass, MappedTypeClass>> {
   template <typename T>
   T operator()(T const& t) const {
     T result;
+    ::apache::thrift::detail::pm::reserve_if_possible(&result, t.size());
     for (const auto& pair : t) {
       result.emplace_hint(
           result.end(),

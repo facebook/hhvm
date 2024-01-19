@@ -71,6 +71,9 @@ class TestEventHandler : public TProcessorEventHandler {
     }
   }
 
+  bool wantNonPerRequestCallbacks() const override {
+    return wantNonPerRequestCallbacks_.load();
+  }
   void onInteractionTerminate(void* ctx, int64_t id) override {
     LOG(INFO) << fmt::format("onInteractionTerminate({})", id);
     ASSERT_TRUE(ctx);
@@ -82,9 +85,13 @@ class TestEventHandler : public TProcessorEventHandler {
   }
 
   size_t countInteractions() const { return ids_.rlock()->size(); }
+  void setWantNonPerRequestCallbacks(bool val) {
+    wantNonPerRequestCallbacks_.store(val);
+  }
 
  private:
   folly::Synchronized<std::unordered_set<UniqueInteractionId>> ids_;
+  std::atomic_bool wantNonPerRequestCallbacks_{true};
 };
 
 class TestHandler : public ServiceHandler<test::Calculator> {
@@ -119,6 +126,17 @@ TEST(TProcessorEventHandlerTest, BasicInteraction) {
     EXPECT_EQ(add.sync_getPrimitive(), 12);
   }
   EXPECT_EQ(eventHandler->countInteractions(), 0);
+
+  eventHandler->setWantNonPerRequestCallbacks(false);
+  {
+    ScopedServerInterfaceThread runner(std::make_shared<TestHandler>());
+    auto client = runner.newClient<apache::thrift::Client<test::Calculator>>();
+    client->sync_newAddition();
+    // destruct and trigger interaction termination
+  }
+  EXPECT_EQ(eventHandler->countInteractions(), 1)
+      << "onInteractionTerminate shouldn't be called "
+         "when wantNonPerRequestCallbacks is false";
 }
 
 TEST(TProcessorEventHandlerTest, MultipleInteractions) {

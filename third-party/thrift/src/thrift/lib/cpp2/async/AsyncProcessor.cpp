@@ -332,14 +332,46 @@ std::unique_ptr<Tile> GeneratedAsyncProcessorBase::createInteractionImpl(
   return nullptr;
 }
 
+namespace {
+/**
+ * Call this version to only invoke handlers that explicitly okays
+ * callbacks from non-per-request contexts.
+ * @see TProcessorEventHandler::wantNonPerRequestCallbacks
+ */
+ContextStack::UniquePtr getContextStackForNonPerRequestCallbacks(
+    const std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>&
+        allHandlers,
+    const char* serviceName,
+    const char* method,
+    TConnectionContext* connectionContext) {
+  if (!allHandlers || allHandlers->empty()) {
+    return nullptr;
+  }
+  auto handlersForNonPerRequestCallbacks =
+      std::make_shared<std::vector<std::shared_ptr<TProcessorEventHandler>>>();
+  std::copy_if(
+      allHandlers->begin(),
+      allHandlers->end(),
+      std::back_inserter(*handlersForNonPerRequestCallbacks),
+      [](const auto& handler) {
+        return handler->wantNonPerRequestCallbacks();
+      });
+  return ContextStack::create(
+      handlersForNonPerRequestCallbacks,
+      serviceName,
+      method,
+      connectionContext);
+}
+} // namespace
+
 void GeneratedAsyncProcessorBase::terminateInteraction(
     int64_t id, Cpp2ConnContext& conn, folly::EventBase& eb) noexcept {
   eb.dcheckIsInEventBaseThread();
 
   if (auto tile = conn.removeTile(id)) {
     Tile::onTermination(std::move(tile), eb);
-    auto ctxStack =
-        getContextStack(getServiceName(), "#terminateInteraction", &conn);
+    auto ctxStack = getContextStackForNonPerRequestCallbacks(
+        handlers_, getServiceName(), "#terminateInteraction", &conn);
     if (ctxStack) {
       ctxStack->onInteractionTerminate(id);
     }
@@ -359,8 +391,8 @@ void GeneratedAsyncProcessorBase::destroyAllInteractions(
   for (auto& [id, tile] : conn.tiles_) {
     ids.push_back(id);
   }
-  auto ctxStack =
-      getContextStack(getServiceName(), "#terminateInteraction", &conn);
+  auto ctxStack = getContextStackForNonPerRequestCallbacks(
+      handlers_, getServiceName(), "#terminateInteraction", &conn);
   for (auto id : ids) {
     if (conn.removeTile(id) && ctxStack) {
       ctxStack->onInteractionTerminate(id);

@@ -124,9 +124,24 @@ class TProcessorEventHandler {
       void* /*ctx*/, const char* /*fn_name*/, uint32_t /*bytes*/) {}
 
   /**
-   * Called when an interaction is terminated.
+   * Called when an interaction is terminated (not necessarily
+   * part of a thrift request, unlike the other callbacks).
+   * Must override `wantNonPerRequestCallbacks` to true to receive callbacks.
    */
   virtual void onInteractionTerminate(void* /*ctx*/, int64_t /*id*/) {}
+
+  /**
+   * defaults to false.
+   *
+   * When false, `getContext` is only called as part of a thrift request
+   * (meaning typically has a connection + header + folly::RequestContext
+   * available etc).
+   * When true, `getContext` is also called as part of a non-thrift request,
+   * such as interaction terminate. Impl must init/free contexts without
+   * assuming the existence of per-request objects like header /
+   * folly::RequestContext.
+   */
+  virtual bool wantNonPerRequestCallbacks() const { return false; }
 
   /**
    * Called if the handler throws an undeclared exception.

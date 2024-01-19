@@ -33,7 +33,7 @@ class ThriftStruct {
 
   public string $str;
 
-  public function __construct(string $str) {
+  public function __construct(string $str)[] {
     $this->str = $str;
   }
 

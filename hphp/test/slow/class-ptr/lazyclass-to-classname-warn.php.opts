@@ -1,4 +1,1 @@
--vEval.ClassPassesClassname=true
 -vEval.ClassnameNoticesSampleRate=1
--vEval.ClassStringHintNoticesSampleRate=1
--vEval.CheckPropTypeHints=3

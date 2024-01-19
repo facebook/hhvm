@@ -1,3 +1,1 @@
--vRuntime.Eval.ClassPassesClassname=true
--vRuntime.Eval.CoeffectEnforcementLevels.zoned=0
 --inputs=__DIR__/lazyclass-suppress.inc

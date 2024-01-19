@@ -1,3 +1,5 @@
+
+Notice: Implicit Class to string conversion for return of CPublic::in_str_implicit() in %s/module.inc on line 7
 Accessing internal class CInternal in module c from the default module is not allowed
 Accessing internal class CInternal in module c from the default module is not allowed
 class(CInternal)

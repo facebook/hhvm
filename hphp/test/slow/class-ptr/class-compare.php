@@ -4,7 +4,7 @@ class foobar {}
 function foobar() :mixed{}
 class StrObj {
   public function __construct(private string $s)[] {}
-  public function __toString(): string { return $this->s; }
+  public function __toString()[]: string { return $this->s; }
 }
 class Wrapper { public function __construct(private mixed $w)[] {} }
 

@@ -1,4 +1,6 @@
 string(5) "hello"
+
+Notice: Implicit Class to string conversion for argument 1 passed to foo() in %s/class-stringish.php on line 16
 string(4) "main"
 
 Catchable fatal error: Argument 1 passed to fooObj() must implement interface StringishObject, class given in %s/class-stringish.php on line 17

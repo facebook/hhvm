@@ -1,3 +1,5 @@
+
+Notice: Implicit Class to string conversion for return of APublic::in_str_implicit() in %s/module-pair-a.inc on line 7
 Accessing internal class AInternal in module a from module b is not allowed
 Accessing internal class AInternal in module a from module b is not allowed
 class(AInternal)

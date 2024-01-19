@@ -1,0 +1,12 @@
+
+Notice: Implicit Class to string conversion for argument 2 passed to is_a() in %s/lazyclass-hierarchy.php on line 7
+bool(false)
+
+Notice: Implicit Class to string conversion for argument 2 passed to is_a() in %s/lazyclass-hierarchy.php on line 7
+bool(true)
+
+Notice: Implicit Class to string conversion for argument 2 passed to is_a() in %s/lazyclass-hierarchy.php on line 7
+bool(false)
+
+Notice: Implicit Class to string conversion for argument 2 passed to is_a() in %s/lazyclass-hierarchy.php on line 7
+bool(false)

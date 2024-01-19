@@ -1,3 +1,2 @@
 string(1) "t"
-Warning: Implicit Class to string conversion for argument 1 passed to __hhvm_intrinsics\create_class_pointer()
 class(X)

@@ -74,7 +74,7 @@ function dummy_dict_await(): Awaitable;
 function dummy_int_upper_bound<T as int>(): T;
 
 <<__Native>>
-function create_class_pointer(string $name): mixed;
+function create_class_pointer(mixed $name): mixed;
 
 <<__Native>>
 function create_clsmeth_pointer(string $cls, string $meth): mixed;

@@ -356,8 +356,20 @@ int64_t HHVM_FUNCTION(dummy_int_upper_bound) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(create_class_pointer, StringArg name) {
-  auto const cls = Class::load(name.get());
+Variant HHVM_FUNCTION(create_class_pointer, TypedValue name) {
+  auto const cls = [&] {
+    switch (name.m_type) {
+      case KindOfString:
+      case KindOfPersistentString:
+        return Class::load(name.m_data.pstr);
+      case KindOfLazyClass:
+        return Class::load(name.m_data.plazyclass.name());
+      case KindOfClass:
+        return name.m_data.pclass;
+      default:
+        return static_cast<Class*>(nullptr);
+    }
+  }();
   return cls ? Variant{cls} : init_null();
 }
 

@@ -11,6 +11,8 @@ bool(true)
 
 Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/lazyclass-equals.php on line 9
 bool(true)
+
+Notice: Implicit Class to string conversion for argument 1 passed to Foo::doTestString() in %s/test/slow/class-ptr/lazyclass-equals.php on line 29
 string(3) "Foo"
 
 Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/lazyclass-equals.php on line 16
@@ -26,6 +28,8 @@ bool(true)
 
 Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/lazyclass-equals.php on line 41
 bool(true)
+
+Notice: Implicit Class to string conversion for argument 1 passed to __invoke() in %s/test/slow/class-ptr/lazyclass-equals.php on line 50
 string(3) "Foo"
 
 Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/lazyclass-equals.php on line 47

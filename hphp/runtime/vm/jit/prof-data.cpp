@@ -239,6 +239,10 @@ std::atomic<size_t> ProfData::s_prevProfSize{0};
 
 ServiceData::ExportedCounter* ProfData::s_optimized_funcs_counter =
   ServiceData::createCounter("jit.optimized_funcs");
+ServiceData::ExportedCounter* ProfData::s_tried_deserialze =
+  ServiceData::createCounter("jit.tried_deser");
+ServiceData::ExportedCounter* ProfData::s_deserialize_succ =
+  ServiceData::createCounter("jit.succeeded_deser");
 
 RDS_LOCAL_NO_CHECK(ProfData*, rl_profData)(nullptr);
 

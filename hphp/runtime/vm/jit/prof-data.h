@@ -264,8 +264,7 @@ struct ProfData {
   }
   static void setTriedDeserialization() {
     s_triedDeserialization.store(true, std::memory_order_relaxed);
-    static auto tried_deser = ServiceData::createCounter("jit.tried_deser");
-    tried_deser->setValue(1);
+    s_tried_deserialze->setValue(1);
   }
 
   static bool wasDeserialized() {
@@ -287,10 +286,7 @@ struct ProfData {
     s_tag.store(makeStaticString(tag), std::memory_order_relaxed);
     s_buildTime.store(buildTime, std::memory_order_relaxed);
     s_wasDeserialized.store(true, std::memory_order_relaxed);
-    static auto was_deser_typo = ServiceData::createCounter("jit.suceeded_deser");
-    static auto was_deser = ServiceData::createCounter("jit.succeeded_deser");
-    was_deser_typo->setValue(1);
-    was_deser->setValue(1);
+    s_deserialize_succ->setValue(1);
   }
 
   static size_t prevProfSize() {
@@ -680,6 +676,12 @@ struct ProfData {
    * profiling counter for number of optimized funcs
    */
   static ServiceData::ExportedCounter* s_optimized_funcs_counter;
+
+  /*
+   * Counters to indicate jumpstart attempt/success.
+   */
+  static ServiceData::ExportedCounter* s_tried_deserialze;
+  static ServiceData::ExportedCounter* s_deserialize_succ;
 };
 
 //////////////////////////////////////////////////////////////////////

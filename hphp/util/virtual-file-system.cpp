@@ -91,6 +91,15 @@ struct FileEntry {
   }
 };
 
+struct PathCompare {
+  bool equal(const std::string& s1, const std::string& s2) const {
+    return s1 == s2;
+  }
+  size_t hash(const std::string& s) const {
+    return hash_string_cs_software(s.c_str(), s.size());
+  }
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 
 }
@@ -181,7 +190,7 @@ void VirtualFileSystemWriter::finish() {
     assertx(ret.second);
   }
 
-  m_data->hashMapIndex<VirtualFileSystem::Entry, true>(
+  m_data->hashMapIndex<VirtualFileSystem::Entry, PathCompare>(
     Indexes::PATH_TO_ENTRY, entries, [](auto const& it) { return it.first; },
     [](auto const& it) { return &it.second; });
 
@@ -203,7 +212,7 @@ ServiceData::ExportedCounter* s_fileCount =
 ////////////////////////////////////////////////////////////////////////////////
 // Reader state
 struct VirtualFileSystem::Data : Blob::Reader<Chunks, Indexes> {
-  Blob::CaseSensitiveHashMapIndex pathToEntryIndex;
+  Blob::HashMapIndex<PathCompare> pathToEntryIndex;
 
   using PathToEntryMap = folly_concurrent_hash_map_simd<std::string, Entry>;
   mutable PathToEntryMap pathToEntryCache{};
@@ -287,7 +296,7 @@ VirtualFileSystem::VirtualFileSystem(const std::string& path,
   }
 
   data.pathToEntryIndex =
-    data.hashMapIndex<true>(Indexes::PATH_TO_ENTRY);
+    data.hashMapIndex<PathCompare>(Indexes::PATH_TO_ENTRY);
 }
 
 VirtualFileSystem::~VirtualFileSystem() {}

@@ -191,45 +191,6 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// We can't use the hardware accelerated hash functions because different
-// hardware has different hash functions. We need a hash function that is stable
-// between different hardware implementations.
-
-namespace {
-
-struct caseSensitiveCompare {
-  bool equal(const std::string& s1, const std::string& s2) const {
-    return s1 == s2;
-  }
-  size_t hash(const std::string& s) const {
-    return hash_string_cs_software(s.c_str(), s.size());
-  }
-};
-
-struct caseInsensitiveCompare {
-  bool equal(const std::string& s1, const std::string& s2) const {
-    return s1.size() == s2.size() &&
-      strncasecmp(s1.data(), s2.data(), s1.size()) == 0;
-  }
-  size_t hash(const std::string& s) const {
-    return hash_string_i_software(s.c_str(), s.size());
-  }
-};
-
-template <bool CaseSensitive, std::enable_if_t<CaseSensitive>* = nullptr>
-caseSensitiveCompare getCompare() {
-  return caseSensitiveCompare();
-}
-
-template <bool CaseSensitive, std::enable_if_t<!CaseSensitive>* = nullptr>
-caseInsensitiveCompare getCompare() {
-  return caseInsensitiveCompare();
-}
-
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 // Blob of data containing the sizes of the various sections. This is
 // stored near the beginning of the file and can be used to compute
 // offsets for the sections. Since we don't know the sizes until after
@@ -370,7 +331,7 @@ struct Writer {
   *     return data
   * return null
   */
-  template <typename T, bool CaseSensitive, typename L, typename KF, typename VF>
+  template <typename T, typename KeyCompare, typename L, typename KF, typename VF>
   void hashMapIndex(INDEX index, L& list, KF key_lambda, VF value_lambda) {
     BlobEncoder indexBlob;
     BlobEncoder dataBlob;
@@ -383,7 +344,7 @@ struct Writer {
     using Bucket = std::vector<Item>;
     auto buckets = std::vector<Bucket>(num_buckets);
 
-    auto compare = getCompare<CaseSensitive>();
+    auto compare = KeyCompare{};
 
     for (auto const& it : list) {
       auto key = key_lambda(it);
@@ -558,14 +519,14 @@ struct Reader {
     }
   }
 
-  template <bool CaseSensitive>
-  Blob::HashMapIndex<CaseSensitive> hashMapIndex(INDEX index) {
+  template <typename KeyCompare>
+  Blob::HashMapIndex<KeyCompare> hashMapIndex(INDEX index) {
     auto i = uint32_t(index);
     auto indexOffset = offsets.indexes[i * 2];
     auto indexSize = sizes.indexes[i * 2];
     auto dataOffset = offsets.indexes[i * 2 + 1];
     auto dataSize = sizes.indexes[i * 2 + 1];
-    return Blob::HashMapIndex<CaseSensitive>(
+    return Blob::HashMapIndex<KeyCompare>(
       Blob::Bounds { indexOffset, indexSize },
       Blob::Bounds { dataOffset, dataSize });
   }
@@ -580,20 +541,20 @@ struct Reader {
                            Blob::Bounds { dataOffset, dataSize });
   }
 
-  template <typename T, bool CaseSensitive>
-  Optional<T> getFromIndex(const Blob::HashMapIndex<CaseSensitive>& map,
+  template <typename T, typename KeyCompare>
+  Optional<T> getFromIndex(const Blob::HashMapIndex<KeyCompare>& map,
                            const std::string& key) const {
     if (map.size == 0) {
       return {};
     }
 
-    auto compare = getCompare<CaseSensitive>();
+    auto compare = KeyCompare{};
 
     auto hash = compare.hash(key);
     auto bucket = hash % map.size;
 
-    typename Blob::HashMapIndex<CaseSensitive>::Bucket currentOffset;
-    typename Blob::HashMapIndex<CaseSensitive>::Bucket nextOffset;
+    typename Blob::HashMapIndex<KeyCompare>::Bucket currentOffset;
+    typename Blob::HashMapIndex<KeyCompare>::Bucket nextOffset;
     assertx(sizeof(currentOffset) * bucket < map.indexBounds.size);
     assertx(sizeof(currentOffset) * bucket + sizeof(currentOffset) * 2
             <= map.indexBounds.size);

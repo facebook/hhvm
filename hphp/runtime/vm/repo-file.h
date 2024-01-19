@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "hphp/runtime/base/isame-log.h"
 #include "hphp/runtime/vm/source-location.h"
 
 #include "hphp/util/blob.h"
@@ -237,9 +238,9 @@ struct RepoFile {
 
   // Get the RepoUnitInfo for a specific key in a specific map.
   // The map must point to RepoBounds containing the bounds for RepoUnitInfo
-  template <bool CaseSensitive>
+  template <typename KeyCompare>
   static const RepoUnitInfo* findUnitInfo(
-    const Blob::HashMapIndex<CaseSensitive>& map, const StringData* key);
+    const Blob::HashMapIndex<KeyCompare>& map, const StringData* key);
 
   // Get all the symbols for a specific path
   static const RepoUnitSymbols* findUnitSymbols(const StringData* path);
@@ -306,5 +307,42 @@ private:
 
 using StringOrToken = TokenOrPtr<const StringData>;
 using ArrayOrToken = TokenOrPtr<const ArrayData>;
+
+///////////////////////////////////////////////////////////////////////////////
+
+// We can't use the hardware accelerated hash functions because different
+// hardware has different hash functions. We need a hash function that is stable
+// between different hardware implementations.
+
+struct CaseSensitiveCompare {
+  bool equal(const std::string& s1, const std::string& s2) const {
+    return s1 == s2;
+  }
+  size_t hash(const std::string& s) const {
+    return hash_string_cs_software(s.c_str(), s.size());
+  }
+};
+
+struct TypeNameCompare {
+  bool equal(const std::string& s1, const std::string& s2) const {
+    return tstrcmp_slice(s1, s2) == 0;
+  }
+  size_t hash(const std::string& s) const {
+    return hash_string_i_software(s.c_str(), s.size());
+  }
+};
+
+struct FuncNameCompare {
+  bool equal(const std::string& s1, const std::string& s2) const {
+    return fstrcmp_slice(s1, s2) == 0;
+  }
+  size_t hash(const std::string& s) const {
+    return hash_string_i_software(s.c_str(), s.size());
+  }
+};
+
+using CaseSensitiveHashMapIndex = Blob::HashMapIndex<CaseSensitiveCompare>;
+using HashMapTypeIndex = Blob::HashMapIndex<TypeNameCompare>;
+using HashMapFuncIndex = Blob::HashMapIndex<FuncNameCompare>;
 
 }

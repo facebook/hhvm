@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #pragma once
+#include "hphp/runtime/base/isame-log.h"
 #include "hphp/util/assertions.h"
 
 namespace HPHP {
@@ -162,55 +163,6 @@ inline bool StringData::same(const StringData* s) const {
   assertx(uintptr_t(data()) % 8 == 0);
   assertx(uintptr_t(s->data()) % 8 == 0);
   return wordsame(data(), s->data(), m_len);
-}
-
-bool tsame_log(const StringData*, const StringData*);
-bool fsame_log(const StringData*, const StringData*);
-int tstrcmp_log(const char* s1, const char* s2);
-int fstrcmp_log(const char* s1, const char* s2);
-int tstrcmp_log_slice(folly::StringPiece s1, folly::StringPiece s2);
-int fstrcmp_log_slice(folly::StringPiece s1, folly::StringPiece s2);
-
-inline int tstrcmp(const char* s1, const char* s2) {
-  auto order = strcmp(s1, s2);
-  if (order == 0) return 0;
-  if (RO::EvalLogTsameCollisions >= 2) return order;
-  order = strcasecmp(s1, s2);
-  if (order != 0) return order;
-  return RO::EvalLogTsameCollisions != 1 || tstrcmp_log(s1, s2);
-}
-
-inline int fstrcmp(const char* s1, const char* s2) {
-  auto order = strcmp(s1, s2);
-  if (order == 0) return 0;
-  if (RO::EvalLogFsameCollisions >= 2) return order;
-  order = strcasecmp(s1, s2);
-  if (order != 0) return order;
-  return RO::EvalLogFsameCollisions != 1 || fstrcmp_log(s1, s2);
-}
-
-inline int tstrcmp_slice(folly::StringPiece s1, folly::StringPiece s2) {
-  auto minlen = std::min(s1.size(), s2.size());
-  auto order = memcmp(s1.data(), s2.data(), minlen);
-  if (order == 0 || RO::EvalLogTsameCollisions >= 2) {
-    return s1.size() < s2.size() ? -1 :
-           s1.size() > s2.size() ? 1 : 0;
-  }
-  order = bstrcasecmp(s1.data(), s1.size(), s2.data(), s2.size());
-  if (order != 0) return order;
-  return RO::EvalLogTsameCollisions != 1 || tstrcmp_log_slice(s1, s2);
-}
-
-inline int fstrcmp_slice(folly::StringPiece s1, folly::StringPiece s2) {
-  auto minlen = std::min(s1.size(), s2.size());
-  auto order = memcmp(s1.data(), s2.data(), minlen);
-  if (order == 0 || RO::EvalLogFsameCollisions >= 2) {
-    return s1.size() < s2.size() ? -1 :
-           s1.size() > s2.size() ? 1 : 0;
-  }
-  order = bstrcasecmp(s1.data(), s1.size(), s2.data(), s2.size());
-  if (order != 0) return order;
-  return RO::EvalLogFsameCollisions != 1 || fstrcmp_log_slice(s1, s2);
 }
 
 inline bool StringData::tsame(const StringData* s) const {

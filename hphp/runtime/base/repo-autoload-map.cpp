@@ -36,11 +36,11 @@ namespace {
 }
 
 RepoAutoloadMap::RepoAutoloadMap(
-    Blob::CaseInsensitiveHashMapIndex types,
-    Blob::CaseInsensitiveHashMapIndex functions,
-    Blob::CaseSensitiveHashMapIndex constants,
-    Blob::CaseInsensitiveHashMapIndex typeAliases,
-    Blob::CaseSensitiveHashMapIndex modules)
+    HashMapTypeIndex types,
+    HashMapFuncIndex functions,
+    CaseSensitiveHashMapIndex constants,
+    HashMapTypeIndex typeAliases,
+    CaseSensitiveHashMapIndex modules)
   : m_types{std::move(types)},
     m_functions{std::move(functions)},
     m_constants{std::move(constants)},
@@ -67,9 +67,9 @@ RepoAutoloadMap::RepoAutoloadMap(
           m_modules.dataBounds.size);
 }
 
-template <bool CaseSensitive>
+template <typename KeyCompare>
 static Optional<AutoloadMap::FileResult> getPathFromSymbol(
-    const Blob::HashMapIndex<CaseSensitive>& map,
+    const Blob::HashMapIndex<KeyCompare>& map,
     const String& name) {
   auto info = RepoFile::findUnitInfo(map, name.get());
   if (!info) {
@@ -82,9 +82,9 @@ static Optional<AutoloadMap::FileResult> getPathFromSymbol(
   return {AutoloadMap::FileResult(StrNR(path), info)};
 }
 
-template <bool CaseSensitive>
+template <typename KeyCompare>
 static Optional<fs::path> getPathFromSymbol(
-    const Blob::HashMapIndex<CaseSensitive>& map,
+    const Blob::HashMapIndex<KeyCompare>& map,
     std::string_view name) {
   auto fileRes = getPathFromSymbol(map, StrNR(makeStaticString(name)));
   if (!fileRes) return {};

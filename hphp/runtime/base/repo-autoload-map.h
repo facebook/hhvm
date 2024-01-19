@@ -38,11 +38,11 @@ namespace HPHP {
 struct RepoAutoloadMap final : AutoloadMap {
 
   explicit RepoAutoloadMap(
-    Blob::CaseInsensitiveHashMapIndex types,
-    Blob::CaseInsensitiveHashMapIndex functions,
-    Blob::CaseSensitiveHashMapIndex constants,
-    Blob::CaseInsensitiveHashMapIndex typeAliases,
-    Blob::CaseSensitiveHashMapIndex modules);
+    HashMapTypeIndex types,
+    HashMapFuncIndex functions,
+    CaseSensitiveHashMapIndex constants,
+    HashMapTypeIndex typeAliases,
+    CaseSensitiveHashMapIndex modules);
 
   Optional<AutoloadMap::FileResult> getTypeOrTypeAliasFile(const String& typeName) override;
   Optional<AutoloadMap::FileResult> getTypeFile(const String& typeName) override;
@@ -71,11 +71,11 @@ struct RepoAutoloadMap final : AutoloadMap {
   }
 
 private:
-  Blob::CaseInsensitiveHashMapIndex m_types;
-  Blob::CaseInsensitiveHashMapIndex m_functions;
-  Blob::CaseSensitiveHashMapIndex m_constants;
-  Blob::CaseInsensitiveHashMapIndex m_typeAliases;
-  Blob::CaseSensitiveHashMapIndex m_modules;
+  HashMapTypeIndex m_types;
+  HashMapFuncIndex m_functions;
+  CaseSensitiveHashMapIndex m_constants;
+  HashMapTypeIndex m_typeAliases;
+  CaseSensitiveHashMapIndex m_modules;
 };
 
 } // HPHP

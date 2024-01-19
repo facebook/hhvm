@@ -48,16 +48,16 @@ struct AutoloadMap {
   };
 
   struct FileResult {
-    String path;
-    const RepoUnitInfo* info;
+    String m_path;
+    const RepoUnitInfo* m_info;
 
     FileResult(String path, const RepoUnitInfo* info)
-      : path(path), info(info) {}
-    explicit FileResult(String path): path(path), info(nullptr) {}
+      : m_path(path), m_info(info) {}
+    explicit FileResult(String path): m_path(path), m_info(nullptr) {}
 
     FileResult& operator=(String path) {
-      this->path = path;
-      this->info = nullptr;
+      m_path = path;
+      m_info = nullptr;
       return *this;
     }
   };

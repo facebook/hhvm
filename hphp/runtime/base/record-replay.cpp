@@ -268,7 +268,7 @@ String serialize(const Optional<std::string>& value) {
 
 template<>
 String serialize(const Optional<AutoloadMap::FileResult>& value) {
-  return serialize(value ? value->path : init_null());
+  return serialize(value ? value->m_path : init_null());
 }
 
 template<>

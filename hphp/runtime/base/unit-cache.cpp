@@ -1114,7 +1114,7 @@ void prefetchSymbolRefs(SymbolRefs symbols, const Unit* loadingUnit) {
       // defines the symbol via its "failure" function.
       if (auto const pathRes =
           AutoloadHandler::s_instance->getFile(StrNR{name}, k)) {
-        paths.insert(makeStaticString(pathRes->path));
+        paths.insert(makeStaticString(pathRes->m_path));
       }
     }
   };

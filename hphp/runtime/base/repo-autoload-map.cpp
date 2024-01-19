@@ -88,7 +88,7 @@ static Optional<fs::path> getPathFromSymbol(
     std::string_view name) {
   auto fileRes = getPathFromSymbol(map, StrNR(makeStaticString(name)));
   if (!fileRes) return {};
-  return fileRes->path.toCppString();
+  return fileRes->m_path.toCppString();
 }
 
 static Array getSymbolFromPath(const String& path, RepoSymbolType type) {

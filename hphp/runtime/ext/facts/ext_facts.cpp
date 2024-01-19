@@ -604,7 +604,7 @@ Variant HHVM_FUNCTION(facts_type_to_path, const String& typeName) {
   if (!fileRes) {
     return Variant{Variant::NullInit{}};
   } else {
-    return Variant{fileRes->path};
+    return Variant{fileRes->m_path};
   }
 }
 
@@ -615,7 +615,7 @@ Variant HHVM_FUNCTION(
   if (!fileRes) {
     return Variant{Variant::NullInit{}};
   } else {
-    return Variant{fileRes->path};
+    return Variant{fileRes->m_path};
   }
 }
 
@@ -624,7 +624,7 @@ Variant HHVM_FUNCTION(facts_function_to_path, const String& functionName) {
   if (!fileRes) {
     return Variant{Variant::NullInit{}};
   } else {
-    return Variant{fileRes->path};
+    return Variant{fileRes->m_path};
   }
 }
 
@@ -633,7 +633,7 @@ Variant HHVM_FUNCTION(facts_constant_to_path, const String& constantName) {
   if (!fileRes) {
     return Variant{Variant::NullInit{}};
   } else {
-    return Variant{fileRes->path};
+    return Variant{fileRes->m_path};
   }
 }
 
@@ -642,7 +642,7 @@ Variant HHVM_FUNCTION(facts_module_to_path, const String& moduleName) {
   if (!fileRes) {
     return Variant{Variant::NullInit{}};
   } else {
-    return Variant{fileRes->path};
+    return Variant{fileRes->m_path};
   }
 }
 
@@ -651,7 +651,7 @@ Variant HHVM_FUNCTION(facts_type_alias_to_path, const String& typeAliasName) {
   if (!fileRes) {
     return Variant{Variant::NullInit{}};
   } else {
-    return Variant{fileRes->path};
+    return Variant{fileRes->m_path};
   }
 }
 

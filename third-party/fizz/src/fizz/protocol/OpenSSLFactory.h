@@ -10,6 +10,7 @@
 
 #include <fizz/crypto/Sha256.h>
 #include <fizz/crypto/Sha384.h>
+#include <fizz/crypto/Sha512.h>
 #include <fizz/crypto/aead/AEGISCipher.h>
 #include <fizz/crypto/aead/AESGCM128.h>
 #include <fizz/crypto/aead/AESGCM256.h>

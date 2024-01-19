@@ -99,7 +99,7 @@ std::unique_ptr<Aead> getCipher(CipherSuite suite) {
     case CipherSuite::TLS_AEGIS_128L_SHA256:
       cipher = AEGISCipher::make128L();
       break;
-    case CipherSuite::TLS_AEGIS_256_SHA384:
+    case CipherSuite::TLS_AEGIS_256_SHA512:
       cipher = AEGISCipher::make256();
       break;
 #endif

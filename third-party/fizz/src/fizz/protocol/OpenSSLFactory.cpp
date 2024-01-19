@@ -40,7 +40,7 @@ std::unique_ptr<Aead> OpenSSLFactory::makeAead(CipherSuite cipher) const {
     case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
       return OpenSSLEVPCipher::makeCipher<AESOCB128>();
 #if FIZZ_BUILD_AEGIS
-    case CipherSuite::TLS_AEGIS_256_SHA384:
+    case CipherSuite::TLS_AEGIS_256_SHA512:
       return AEGISCipher::make256();
     case CipherSuite::TLS_AEGIS_128L_SHA256:
       return AEGISCipher::make128L();
@@ -59,8 +59,9 @@ std::unique_ptr<KeyDerivation> OpenSSLFactory::makeKeyDeriver(
     case CipherSuite::TLS_AEGIS_128L_SHA256:
       return KeyDerivationImpl::make<Sha256>(getHkdfPrefix());
     case CipherSuite::TLS_AES_256_GCM_SHA384:
-    case CipherSuite::TLS_AEGIS_256_SHA384:
       return KeyDerivationImpl::make<Sha384>(getHkdfPrefix());
+    case CipherSuite::TLS_AEGIS_256_SHA512:
+      return KeyDerivationImpl::make<Sha512>(getHkdfPrefix());
     default:
       throw std::runtime_error("ks: not implemented");
   }
@@ -75,7 +76,7 @@ std::unique_ptr<HandshakeContext> OpenSSLFactory::makeHandshakeContext(
     case CipherSuite::TLS_AEGIS_128L_SHA256:
       return std::make_unique<HandshakeContextImpl<Sha256>>(getHkdfPrefix());
     case CipherSuite::TLS_AES_256_GCM_SHA384:
-    case CipherSuite::TLS_AEGIS_256_SHA384:
+    case CipherSuite::TLS_AEGIS_256_SHA512:
       return std::make_unique<HandshakeContextImpl<Sha384>>(getHkdfPrefix());
     default:
       throw std::runtime_error("hs: not implemented");

@@ -20,7 +20,7 @@ inline CipherSuite parse(folly::StringPiece s) {
       {"TLS_AES_128_OCB_SHA256_EXPERIMENTAL",
        CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL},
       {"TLS_AEGIS_128L_SHA256", CipherSuite::TLS_AEGIS_128L_SHA256},
-      {"TLS_AEGIS_256_SHA384", CipherSuite::TLS_AEGIS_256_SHA384}};
+      {"TLS_AEGIS_256_SHA512", CipherSuite::TLS_AEGIS_256_SHA512}};
 
   auto location = stringToCiphers.find(s);
   if (location != stringToCiphers.end()) {

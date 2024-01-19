@@ -17,9 +17,10 @@ HashFunction getHashFunction(CipherSuite cipher) {
     case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:
     case CipherSuite::TLS_AEGIS_128L_SHA256:
       return HashFunction::Sha256;
-    case CipherSuite::TLS_AEGIS_256_SHA384:
     case CipherSuite::TLS_AES_256_GCM_SHA384:
       return HashFunction::Sha384;
+    case CipherSuite::TLS_AEGIS_256_SHA512:
+      return HashFunction::Sha512;
   }
   throw std::runtime_error("unknown cipher suite");
 }

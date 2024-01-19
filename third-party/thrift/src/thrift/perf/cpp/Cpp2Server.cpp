@@ -121,9 +121,10 @@ int main(int argc, char* argv[]) {
     // workers.
     wangle::TLSTicketKeySeeds seeds;
     for (auto* seed : {&seeds.oldSeeds, &seeds.currentSeeds, &seeds.newSeeds}) {
-      auto randomData = folly::Random::secureRandom<uint64_t>();
-      auto asHex = folly::hexlify(folly::ByteRange(
-          (const unsigned char*)&randomData, sizeof(uint64_t)));
+      auto buf = folly::IOBuf::create(32);
+      buf->append(32);
+      folly::Random::secureRandom(buf->writableData(), buf->length());
+      auto asHex = folly::hexlify(folly::ByteRange(buf->data(), buf->length()));
       seed->push_back(std::move(asHex));
     }
     server->setTicketSeeds(std::move(seeds));

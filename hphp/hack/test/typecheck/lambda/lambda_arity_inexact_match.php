@@ -12,7 +12,7 @@ class C {
 
   public static function example1(): ?string {
     return self::funcApply(
-      function(int $x): string {
+      function(int $x, vec<int> $s = vec[]): string {
         return 'string';
       },
       10,
@@ -20,7 +20,11 @@ class C {
     );
   }
 
-  public static function viaReturn(): (function(int, string, bool): void) {
+  public static function viaReturn(): (function(int, string): void) {
+    return (int $_i, string $_s = '') ==> {};
+  }
+
+  public static function viaReturn2(): (function(int): void) {
     return (int $_i, string $_s = '') ==> {};
   }
 }

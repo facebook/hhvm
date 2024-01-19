@@ -1436,24 +1436,36 @@ let check_arity ?(did_unpack = false) env pos pos_def ft (arity : int) =
 let check_lambda_arity env lambda_pos def_pos lambda_ft expected_ft =
   match (get_ft_variadic lambda_ft, get_ft_variadic expected_ft) with
   | (false, false) ->
-    let expected = Typing_defs.arity_min expected_ft in
-    let actual = Typing_defs.arity_min lambda_ft in
-    let prim_err_opt =
-      if actual < expected then
-        Some
-          (Typing_error.Primary.Typing_too_few_args
-             { expected; actual; pos = lambda_pos; decl_pos = def_pos })
-      (* Errors.typing_too_few_args expected_min lambda_min lambda_pos def_pos; *)
-      else if actual > expected then
-        Some
-          (Typing_error.Primary.Typing_too_many_args
-             { expected; actual; pos = lambda_pos; decl_pos = def_pos })
-      (* Errors.typing_too_many_args expected_minlambda_min lambda_pos def_pos *)
-      else
-        None
-    in
-    Option.iter prim_err_opt ~f:(fun err ->
-        Typing_error_utils.add_typing_error ~env @@ Typing_error.primary err)
+    (* what's the fewest arguments this type can take *)
+    let expected_min = Typing_defs.arity_min expected_ft in
+    let actual_min = Typing_defs.arity_min lambda_ft in
+    (* what's the most arguments this type can take (assuming no variadics) *)
+    let expected_max = List.length expected_ft.ft_params in
+    let actual_max = List.length lambda_ft.ft_params in
+    (* actual must be able to take at least as many args as expected expects
+     * and require no more than expected requires *)
+    if actual_max < expected_max then
+      Typing_error_utils.add_typing_error ~env
+      @@ Typing_error.primary
+           (Typing_error.Primary.Typing_too_few_args
+              {
+                expected = expected_max;
+                actual = actual_max;
+                pos = lambda_pos;
+                decl_pos = def_pos;
+              });
+    (* Errors.typing_too_few_args expected_max lambda_max lambda_pos def_pos; *)
+    if actual_min > expected_min then
+      Typing_error_utils.add_typing_error ~env
+      @@ Typing_error.primary
+           (Typing_error.Primary.Typing_too_many_args
+              {
+                expected = expected_min;
+                actual = actual_min;
+                pos = lambda_pos;
+                decl_pos = def_pos;
+              })
+    (* Errors.typing_too_many_args expected_min lambda_min lambda_pos def_pos *)
   | (_, _) -> ()
 
 (* The variadic capture argument is an array listing the passed

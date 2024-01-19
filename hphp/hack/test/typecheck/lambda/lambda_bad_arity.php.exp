@@ -1,4 +1,8 @@
 File "lambda_bad_arity.php", line 15, characters 7-65:
 Too few arguments (required 2 but got 1) (Typing[4104])
-File "lambda_bad_arity.php", line 6, characters 5-32:
-Definition is here
+  File "lambda_bad_arity.php", line 6, characters 5-32:
+  Definition is here
+File "lambda_bad_arity.php", line 24, characters 12-44:
+Too few arguments (required 3 but got 2) (Typing[4104])
+  File "lambda_bad_arity.php", line 23, characters 39-73:
+  Definition is here

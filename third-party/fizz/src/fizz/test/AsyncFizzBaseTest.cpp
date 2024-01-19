@@ -1120,6 +1120,9 @@ TYPED_TEST(AsyncFizzBaseTest, TestKeyUpdate) {
   EXPECT_CALL(*this, initiateKeyUpdate(KeyUpdateRequest::update_not_requested));
   this->wroteApplicationBytes(small_write);
   EXPECT_EQ(this->appByteProcessedUnderKey_, 0);
+
+  // Make sure the rekey threshold stays the same
+  EXPECT_EQ(this->getRekeyAfterWriting(), threshold);
 }
 
 } // namespace test

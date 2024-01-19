@@ -332,6 +332,12 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   }
 
   /*
+   * Gets the threshold value set for automatic key update
+   */
+  size_t getRekeyAfterWriting() const {
+    return keyUpdateThreshold_;
+  }
+  /*
    * Gets the client random associated with this connection. The CR can be
    * used as a transport agnostic identifier (for instance, for NSS keylogging)
    */

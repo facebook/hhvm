@@ -48,7 +48,8 @@ class Parser final : public folly::AsyncTransport::ReadCallback,
       T& owner
 #ifdef SUPPORT_ALLOCATING_PARSER_STRATEGY
       ,
-      std::shared_ptr<std::pmr::polymorphic_allocator<std::uint8_t>> alloc = nullptr
+      std::shared_ptr<std::pmr::polymorphic_allocator<std::uint8_t>> alloc =
+          nullptr
 #endif
       )
       : owner_(owner),

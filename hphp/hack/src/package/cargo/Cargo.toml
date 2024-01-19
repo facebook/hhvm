@@ -19,3 +19,4 @@ toml = "0.8.4"
 
 [dev-dependencies]
 lazy_static = "1.4"
+regex = "1.9.2"

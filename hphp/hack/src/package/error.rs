@@ -6,6 +6,7 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result;
 use std::ops::Range;
+use std::path::PathBuf;
 
 use toml::Spanned;
 
@@ -25,6 +26,10 @@ pub enum Error {
         missing_pkgs: Vec<Spanned<String>>,
         soft: bool,
     },
+    InvalidAllowDirectory {
+        abs_path: PathBuf,
+        span: (usize, usize),
+    },
 }
 
 impl Error {
@@ -40,6 +45,14 @@ impl Error {
         let Range { start, end } = x.span();
         Self::DuplicateUse {
             name: x.get_ref().into(),
+            span: (start, end),
+        }
+    }
+
+    pub fn invalid_allow_directory(abs_path: PathBuf, span: Range<usize>) -> Self {
+        let Range { start, end } = span;
+        Self::InvalidAllowDirectory {
+            abs_path,
             span: (start, end),
         }
     }
@@ -62,7 +75,8 @@ impl Error {
         match self {
             Self::DuplicateUse { span, .. }
             | Self::UndefinedInclude { span, .. }
-            | Self::IncompleteDeployment { span, .. } => *span,
+            | Self::IncompleteDeployment { span, .. }
+            | Self::InvalidAllowDirectory { span, .. } => *span,
         }
     }
 
@@ -103,6 +117,9 @@ impl Display for Error {
                         write!(f, "{}, ", pkg.get_ref())?;
                     }
                 }
+            }
+            Self::InvalidAllowDirectory { abs_path, .. } => {
+                write!(f, "allow_directory {} does not exist", abs_path.display())?;
             }
         };
         Ok(())

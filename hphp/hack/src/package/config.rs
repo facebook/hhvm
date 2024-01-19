@@ -101,7 +101,7 @@ impl Config {
 // The function takes a starting set of package names and a PackageMap, and
 // returns two HashSets: one with packages included by the starting set (transitive closure),
 // and the other with packages soft-included by the starting set (transitive closure) but not included.
-pub fn analyze_includes<'a>(
+fn analyze_includes<'a>(
     starting_set: &'a NameSet,
     package_map: &'a PackageMap,
 ) -> (HashSet<&'a Spanned<String>>, HashSet<&'a Spanned<String>>) {

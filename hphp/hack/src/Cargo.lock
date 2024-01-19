@@ -3557,6 +3557,7 @@ dependencies = [
  "hash",
  "lazy_static",
  "once_cell",
+ "regex",
  "serde",
  "toml 0.8.5",
 ]

@@ -2,6 +2,12 @@
 
 [packages.foo]
 uses = ["x.*"]
-includes = ["bar"]
-soft_includes=["baz"]
-allow_directories=["foo", "foo/*", "./foo", "./foo/*"]
+allow_directories=["foo", "foo/*", "./foo", "./foo/*"] # well-formed but nonexistent paths
+
+[packages.bar]
+uses = ["y.*"]
+allow_directories=[
+    "../tests",  # ok
+    "../*",      # ok
+    "bar*",      # ill-formed and nonexistent
+]

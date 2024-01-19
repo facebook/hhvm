@@ -11,7 +11,6 @@ use hash::IndexSet;
 use once_cell::sync::Lazy;
 use serde::Deserialize;
 use toml::Spanned;
-
 // Preserve the order for ease of testing
 // Alternatively, we could use HashMap for performance
 pub type PackageMap = IndexMap<Spanned<String>, Package>;
@@ -70,5 +69,10 @@ impl Iterator for NameSet {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.0.iter().next().cloned()
+    }
+}
+impl NameSet {
+    pub fn take(&mut self, value: &Spanned<String>) -> Option<Spanned<String>> {
+        self.0.take(value)
     }
 }

@@ -37,94 +37,138 @@ void match_type_with_const_value(
     const t_type* long_type,
     t_const_value* value) {
   const t_type* type = long_type->get_true_type();
-  if (type->is_list()) {
-    auto* elem_type = dynamic_cast<const t_list*>(type)->get_elem_type();
-    for (auto list_val : value->get_list()) {
-      match_type_with_const_value(ctx, program, elem_type, list_val);
-    }
-  }
-  if (type->is_set()) {
-    auto* elem_type = dynamic_cast<const t_set*>(type)->get_elem_type();
-    for (auto set_val : value->get_list()) {
-      match_type_with_const_value(ctx, program, elem_type, set_val);
-    }
-  }
-  if (type->is_map()) {
-    auto* key_type = dynamic_cast<const t_map*>(type)->get_key_type();
-    auto* val_type = dynamic_cast<const t_map*>(type)->get_val_type();
-    for (auto map_val : value->get_map()) {
-      match_type_with_const_value(ctx, program, key_type, map_val.first);
-      match_type_with_const_value(ctx, program, val_type, map_val.second);
-    }
-  }
-  if (type->is_struct()) {
-    const auto* structured = dynamic_cast<const t_structured*>(type);
-    if (auto ttype = value->ttype(); ttype && ttype->get_true_type() != type) {
-      ctx.error(
-          value->ref_range().begin,
-          "type mismatch: expected {}, got {}",
-          type->get_full_name(),
-          ttype->get_full_name());
-    }
-    for (const auto& [map_key, map_val] : value->get_map()) {
-      bool resolved = map_key->kind() != t_const_value::CV_IDENTIFIER;
-      auto name = resolved ? map_key->get_string() : map_key->get_identifier();
-      auto field = structured->get_field_by_name(name);
-      if (!field) {
-        // Error reported by const_checker.
-        return;
+  switch (type->get_type_value()) {
+    case t_type::type::t_list: {
+      auto* elem_type = dynamic_cast<const t_list*>(type)->get_elem_type();
+      for (auto list_val : value->get_list()) {
+        match_type_with_const_value(ctx, program, elem_type, list_val);
       }
-      if (!resolved) {
-        map_key->set_string(name);
-      }
-      match_type_with_const_value(ctx, program, field->get_type(), map_val);
+      break;
     }
-  }
-  // Set constant value types as enums when they are declared with integers
-  if (type->is_enum() && !value->is_enum()) {
-    value->set_is_enum();
-    auto enm = dynamic_cast<const t_enum*>(type);
-    value->set_enum(enm);
-    if (value->kind() == t_const_value::CV_INTEGER) {
-      if (const auto* enum_value = enm->find_value(value->get_integer())) {
-        value->set_enum_value(enum_value);
+    case t_type::type::t_set: {
+      auto* elem_type = dynamic_cast<const t_set*>(type)->get_elem_type();
+      for (auto set_val : value->get_list()) {
+        match_type_with_const_value(ctx, program, elem_type, set_val);
       }
-    } else if (value->kind() == t_const_value::CV_IDENTIFIER) {
-      // Resolve enum values defined after use.
-      const std::string& id = value->get_identifier();
-      const t_const* constant = program.scope()->find_constant(id);
-      if (!constant) {
-        constant = program.scope()->find_constant(program.name() + "." + id);
+      break;
+    }
+    case t_type::type::t_map: {
+      auto* key_type = dynamic_cast<const t_map*>(type)->get_key_type();
+      auto* val_type = dynamic_cast<const t_map*>(type)->get_val_type();
+      for (auto map_val : value->get_map()) {
+        match_type_with_const_value(ctx, program, key_type, map_val.first);
+        match_type_with_const_value(ctx, program, val_type, map_val.second);
       }
-      if (!constant) {
+      break;
+    }
+    case t_type::type::t_structured: {
+      const auto* structured = dynamic_cast<const t_structured*>(type);
+      if (auto ttype = value->ttype();
+          ttype && ttype->get_true_type() != type) {
         ctx.error(
-            value->ref_range().begin, "use of undeclared identifier '{}'", id);
-        return;
+            value->ref_range().begin,
+            "type mismatch: expected {}, got {}",
+            type->get_full_name(),
+            ttype->get_full_name());
       }
-      value->assign(t_const_value(*constant->value()));
+      for (const auto& [map_key, map_val] : value->get_map()) {
+        bool resolved = map_key->kind() != t_const_value::CV_IDENTIFIER;
+        auto name =
+            resolved ? map_key->get_string() : map_key->get_identifier();
+        auto field = structured->get_field_by_name(name);
+        if (!field) {
+          // Error reported by const_checker.
+          return;
+        }
+        if (!resolved) {
+          map_key->set_string(name);
+        }
+        match_type_with_const_value(ctx, program, field->get_type(), map_val);
+      }
+      break;
     }
+    case t_type::type::t_enum:
+      // Set constant value types as enums when they are declared with integers
+      // or identifiers.
+      if (!value->is_enum()) {
+        value->set_is_enum();
+        auto enm = dynamic_cast<const t_enum*>(type);
+        value->set_enum(enm);
+        if (value->kind() == t_const_value::CV_INTEGER) {
+          if (const auto* enum_value = enm->find_value(value->get_integer())) {
+            value->set_enum_value(enum_value);
+          }
+        } else if (value->kind() == t_const_value::CV_IDENTIFIER) {
+          // Resolve enum values defined after use.
+          const std::string& id = value->get_identifier();
+          const t_const* constant = program.scope()->find_constant(id);
+          if (!constant) {
+            constant =
+                program.scope()->find_constant(program.name() + "." + id);
+          }
+          if (!constant) {
+            ctx.error(
+                value->ref_range().begin,
+                "use of undeclared identifier '{}'",
+                id);
+            return;
+          }
+          value->assign(t_const_value(*constant->value()));
+        }
+      }
+      break;
+    case t_type::type::t_bool:
+    case t_type::type::t_byte:
+    case t_type::type::t_i16:
+    case t_type::type::t_i32:
+    case t_type::type::t_i64:
+    case t_type::type::t_float:
+    case t_type::type::t_double:
+    case t_type::type::t_string:
+    case t_type::type::t_binary:
+      // Remove enum_value if type is a base_type to use the integer instead.
+      if (value->is_enum()) {
+        value->set_enum_value(nullptr);
+      }
+      break;
+    case t_type::type::t_void:
+    case t_type::type::t_service:
+    case t_type::type::t_stream:
+    case t_type::type::t_program:
+      assert(false);
   }
-  // Remove enum_value if type is a base_type to use the integer instead
-  if (type->is_base_type() && value->is_enum()) {
-    value->set_enum_value(nullptr);
-  }
+
   value->set_ttype(t_type_ref::from_req_ptr(type));
+}
+
+void maybe_match_type_with_const_value(
+    diagnostic_context& ctx,
+    mutator_context& mCtx,
+    const t_type* type,
+    t_const_value* value) {
+  if (type == nullptr || value == nullptr) {
+    return;
+  }
+
+  match_type_with_const_value(ctx, mCtx.program(), type, value);
+}
+
+void match_const_type_with_value(
+    diagnostic_context& ctx, mutator_context& mCtx, t_const& const_node) {
+  maybe_match_type_with_const_value(
+      ctx, mCtx, const_node.type(), const_node.value());
+}
+
+void match_field_type_with_default_value(
+    diagnostic_context& ctx, mutator_context& mCtx, t_field& field_node) {
+  maybe_match_type_with_const_value(
+      ctx, mCtx, field_node.get_type(), field_node.get_default_value());
 }
 
 static void match_annotation_types_with_const_values(
     diagnostic_context& ctx, mutator_context& mCtx, t_named& node) {
   for (t_const& tconst : node.structured_annotations()) {
-    const t_type* const type = tconst.type();
-    if (type == nullptr) {
-      continue;
-    }
-
-    t_const_value* const value = tconst.value();
-    if (value == nullptr) {
-      continue;
-    }
-
-    match_type_with_const_value(ctx, mCtx.program(), type, value);
+    maybe_match_type_with_const_value(ctx, mCtx, tconst.type(), tconst.value());
   }
 }
 
@@ -413,31 +457,6 @@ void lower_type_annotations(
     program.add_unnamed_typedef(std::move(unnamed));
   }
 }
-
-void maybe_match_type_with_const_value(
-    diagnostic_context& ctx,
-    mutator_context& mCtx,
-    const t_type* type,
-    t_const_value* value) {
-  if (type == nullptr || value == nullptr) {
-    return;
-  }
-
-  match_type_with_const_value(ctx, mCtx.program(), type, value);
-}
-
-void const_to_const_value(
-    diagnostic_context& ctx, mutator_context& mCtx, t_const& const_node) {
-  maybe_match_type_with_const_value(
-      ctx, mCtx, const_node.type(), const_node.value());
-}
-
-void field_to_const_value(
-    diagnostic_context& ctx, mutator_context& mCtx, t_field& field_node) {
-  maybe_match_type_with_const_value(
-      ctx, mCtx, field_node.get_type(), field_node.get_value());
-}
-
 } // namespace
 
 ast_mutators standard_mutators(bool use_legacy_type_ref_resolution) {
@@ -463,8 +482,8 @@ ast_mutators standard_mutators(bool use_legacy_type_ref_resolution) {
     main.add_const_visitor(&generate_const_schema);
     main.add_enum_visitor(&generate_enum_schema);
     main.add_typedef_visitor(&generate_typedef_schema);
-    main.add_const_visitor(&const_to_const_value);
-    main.add_field_visitor(&field_to_const_value);
+    main.add_const_visitor(&match_const_type_with_value);
+    main.add_field_visitor(&match_field_type_with_default_value);
     main.add_definition_visitor(&match_annotation_types_with_const_values);
   }
 

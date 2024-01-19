@@ -68,6 +68,14 @@ void ThriftFizzAcceptorHandshakeHelper::fizzHandshakeSuccess(
         std::make_shared<std::string>(*handshakeLogging->clientSni);
   }
 
+  // TODO(T173985721) We intend on enabling automatic rekeying for all Fizz
+  // connections regardless of ciphersuite
+  auto negotiatedCipher = transport->getCipher();
+  if (negotiatedCipher == fizz::CipherSuite::TLS_AEGIS_128L_SHA256 ||
+      negotiatedCipher == fizz::CipherSuite::TLS_AEGIS_256_SHA512) {
+    transport->setRekeyAfterWriting(keyUpdateThreshold_);
+  }
+
   auto appProto = transport->getApplicationProtocol();
 
   if (loggingCallback_) {

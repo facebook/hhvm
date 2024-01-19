@@ -90,16 +90,12 @@ struct StreamChangesSinceParams {
   2: eden.JournalPosition fromPosition;
 }
 
-struct GlobFilter {
-  1: list<string> globs; // a list of globs
-}
-
 /**
  * Argument to streamSelectedChangesSince API
  */
 struct StreamSelectedChangesSinceParams {
   1: StreamChangesSinceParams changesParams;
-  2: GlobFilter filter;
+  2: list<string> globs;
 }
 
 struct TraceTaskEventsRequest {}

@@ -98,6 +98,9 @@ else()
   list(APPEND FIZZ_INCLUDE_DIRECTORIES ${LIBEVENT_INCLUDE_DIR})
 endif()
 
+# Fizz build time options
+option(FIZZ_BUILD_AEGIS "Compiles Fizz with AEGIS support (experimental)" OFF)
+
 configure_file(fizz-config.h.in ${CMAKE_CURRENT_BINARY_DIR}/generated/fizz/fizz-config.h)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/generated/fizz/fizz-config.h DESTINATION ${INCLUDE_INSTALL_DIR}/fizz/)
 
@@ -155,7 +158,6 @@ foreach(dir ${FIZZ_TEST_HEADER_DIRS})
     ${headers})
 endforeach()
 
-option(FIZZ_BUILD_AEGIS "Compiles Fizz with AEGIS support (experimental)" OFF)
 
 
 if(FIZZ_BUILD_AEGIS)

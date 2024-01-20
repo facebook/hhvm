@@ -107,8 +107,13 @@ ProxyConfig<RouterInfo>::ProxyConfig(
     partialConfigs_ = provider.releasePartialConfigs();
   }
   accessPoints_ = provider.releaseAccessPoints();
-  auto readBool = [&](std::string_view key, bool defaultValue) {
-    if (auto* j = json.get_ptr(key)) {
+
+  auto jRoutingOptions = json.get_ptr("routing_options");
+  auto readBool = [&jRoutingOptions](std::string_view key, bool defaultValue) {
+    if (!jRoutingOptions) {
+      return defaultValue;
+    }
+    if (auto* j = jRoutingOptions->get_ptr(key)) {
       return parseBool(*j, key);
     }
     return defaultValue;

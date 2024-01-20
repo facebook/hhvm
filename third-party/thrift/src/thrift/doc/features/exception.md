@@ -13,12 +13,6 @@ A **declared** exception is an exception struct defined in IDL. Interfaces can d
 
 An **undeclared** exception is thrown by Thrift methods that are wrapped into a generic [TApplicationException](https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp/TApplicationException.h) or [TTransportException](https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp/transport/TTransportException.h) and passed to the client. It is similar to throwing generic exceptions (e.g. `Exception` or `std::exception`) and is generally discouraged since it is too general to carry sufficient information. It is highly encouraged to avoid as much as possible throwing undeclared exceptions.
 
-### Exception Message
-
-A custom (human-readable) exception message may be specified in a field, by
-annotating it with
-[`@thrift.ExceptionMessage`](/idl/annotations.md#thrift-annotations).
-
 ## Error Classification
 ### Kind
 Thrift Error can be classified into three categories: **Transient**, **Stateful**, and **Permanent**.

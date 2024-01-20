@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/type-alias-emitter.h"
 #include "hphp/runtime/vm/unit-gen-helpers.h"
+#include "hphp/util/hash-map.h"
 #include "hphp/zend/zend-string.h"
 
 #include <folly/Range.h>
@@ -115,7 +116,7 @@ struct TranslationState {
 
   // In whole program mode it isn't possible to lookup a litstr in the global
   // table while emitting, so keep a lookaside of litstrs seen by the assembler.
-  std::unordered_map<Id, const StringData*> litstrMap;
+  hphp_fast_map<Id, const StringData*> litstrMap;
 
   // Max local id encountered. Must be unsigned to match u32 representation
   // in HackC.

@@ -82,10 +82,6 @@ function main(): void {
   var_dump($instance->getFileAttribute('missing'));
   var_dump($instance->getFileAttribute(''));
 
-  echo "=== XHP Classes\n";
-  var_dump($instance->getClass('xhp_element'));
-  var_dump($instance->getClass(':element'));
-
   echo "=== Complex Attributes\n";
   var_dump($instance->getAttribute('ComplexAttributeClass', 'ComplexAttr1'));
   var_dump($instance->getAttribute('ComplexAttributeClass', 'ComplexAttr2'));

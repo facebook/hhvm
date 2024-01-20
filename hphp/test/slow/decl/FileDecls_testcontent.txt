@@ -41,10 +41,6 @@
     public function myMethod2(): void {}
   }
 
-  class :element {
-    attribute string color;
-  }
-
   <<ComplexAttr1(dict['type' => '3pd']),
     ComplexAttr2(vec[1, 2, 3]),
     ComplexAttr3(shape('k' => 'v')),

@@ -6,7 +6,6 @@
 
 use hhbc_string_utils::mangle_xhp_id;
 use hhbc_string_utils::strip_global_ns;
-use hhbc_string_utils::unmangle;
 use oxidized_by_ref::ast_defs::Id;
 use oxidized_by_ref::direct_decl_parser::ParsedFile;
 use oxidized_by_ref::file_info::Mode;
@@ -242,8 +241,7 @@ pub fn get_classes(parsed_file: &ParsedFile<'_>) -> Vec<ExtDeclClass> {
 }
 
 pub fn get_class(parsed_file: &ParsedFile<'_>, name: &str) -> Option<ExtDeclClass> {
-    let name = unmangle(name.into());
-    let class_opt = find_class(parsed_file, &name);
+    let class_opt = find_class(parsed_file, name);
     Some(get_class_impl(class_opt?))
 }
 

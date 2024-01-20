@@ -9,6 +9,7 @@ mod file_info;
 pub use file_info::*;
 
 pub mod prim_defs;
+#[allow(unused_imports)]
 pub use prim_defs::*;
 
 mod s_set {

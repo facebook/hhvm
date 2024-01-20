@@ -20,4 +20,5 @@ mod syntax_children_iterator_generated;
 mod syntax_serialize_generated;
 mod syntax_type_impl_generated;
 
+#[allow(unused_imports)]
 pub use syntax_serialize_generated::*;

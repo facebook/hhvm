@@ -16,6 +16,7 @@ use pos::Symbol;
 use pos::ToOxidized;
 use pos::TypeName;
 
+#[allow(unused_imports)]
 pub use crate::decl;
 pub use crate::decl::ty::Exact;
 pub use crate::decl::ty::Prim;

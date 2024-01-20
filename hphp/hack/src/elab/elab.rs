@@ -34,6 +34,7 @@ mod prelude {
     pub(crate) use crate::elab_utils;
     pub use crate::env::Env;
     pub use crate::pass::Pass;
+    #[allow(unused_imports)]
     pub use crate::transform::Transform;
 }
 

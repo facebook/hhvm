@@ -90,6 +90,7 @@ impl<'a, S> HasArena<'a> for State<'_, 'a, S> {
     }
 }
 
+#[allow(unused_imports)]
 pub use crate::decl_mode_smart_constructors_generated::*;
 
 pub struct DeclModeSmartConstructors<'s, 'a, S, T, V, TF> {

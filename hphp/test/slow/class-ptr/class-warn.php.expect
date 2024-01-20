@@ -32,6 +32,7 @@ bool(true)
 bool(true)
 class(buz)
 notice(Closure$main): Implicit Class to string conversion for property a
+notice(Closure$main#2): Implicit string to Class conversion for classname Props
 notice(Closure$main#2): Implicit Class to string conversion for property b
 notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
@@ -87,6 +88,7 @@ bool(true)
 bool(true)
 class(buz)
 notice(Closure$main): Implicit Class to string conversion for property a
+notice(Closure$main#2): Implicit string to Class conversion for classname Props
 notice(Closure$main#2): Implicit Class to string conversion for property b
 notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
@@ -142,6 +144,7 @@ bool(true)
 bool(true)
 class(buz)
 notice(Closure$main): Implicit Class to string conversion for property a
+notice(Closure$main#2): Implicit string to Class conversion for classname Props
 notice(Closure$main#2): Implicit Class to string conversion for property b
 notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
@@ -197,6 +200,7 @@ bool(true)
 bool(true)
 class(buz)
 notice(Closure$main): Implicit Class to string conversion for property a
+notice(Closure$main#2): Implicit string to Class conversion for classname Props
 notice(Closure$main#2): Implicit Class to string conversion for property b
 notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
@@ -252,6 +256,7 @@ bool(true)
 bool(true)
 class(buz)
 notice(Closure$main): Implicit Class to string conversion for property a
+notice(Closure$main#2): Implicit string to Class conversion for classname Props
 notice(Closure$main#2): Implicit Class to string conversion for property b
 notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
@@ -307,6 +312,7 @@ bool(true)
 bool(true)
 class(buz)
 notice(Closure$main): Implicit Class to string conversion for property a
+notice(Closure$main#2): Implicit string to Class conversion for classname Props
 notice(Closure$main#2): Implicit Class to string conversion for property b
 notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
@@ -362,6 +368,7 @@ bool(true)
 bool(true)
 class(buz)
 notice(Closure$main): Implicit Class to string conversion for property a
+notice(Closure$main#2): Implicit string to Class conversion for classname Props
 notice(Closure$main#2): Implicit Class to string conversion for property b
 notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
@@ -417,6 +424,7 @@ bool(true)
 bool(true)
 class(buz)
 notice(Closure$main): Implicit Class to string conversion for property a
+notice(Closure$main#2): Implicit string to Class conversion for classname Props
 notice(Closure$main#2): Implicit Class to string conversion for property b
 notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
@@ -472,6 +480,7 @@ bool(true)
 bool(true)
 class(buz)
 notice(Closure$main): Implicit Class to string conversion for property a
+notice(Closure$main#2): Implicit string to Class conversion for classname Props
 notice(Closure$main#2): Implicit Class to string conversion for property b
 notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
@@ -527,6 +536,7 @@ bool(true)
 bool(true)
 class(buz)
 notice(Closure$main): Implicit Class to string conversion for property a
+notice(Closure$main#2): Implicit string to Class conversion for classname Props
 notice(Closure$main#2): Implicit Class to string conversion for property b
 notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"

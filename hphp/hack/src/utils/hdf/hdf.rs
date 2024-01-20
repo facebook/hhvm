@@ -12,6 +12,7 @@ pub(crate) mod ffi {
         fn hdf_first_child(parent: &Hdf) -> Result<UniquePtr<Hdf>>;
         fn hdf_next(hdf: &Hdf) -> Result<UniquePtr<Hdf>>;
         fn hdf_name(hdf: &Hdf) -> Result<String>;
+        fn hdf_child_names(hdf: &Hdf) -> Result<Vec<String>>;
 
         fn append(self: Pin<&mut Hdf>, filename: &CxxString) -> Result<()>;
         fn fromString(self: Pin<&mut Hdf>, input: &CxxString) -> Result<()>;
@@ -68,6 +69,7 @@ mod test {
         assert!(!b.configGetBool(false).unwrap());
         assert!(b.configGetBool(true).unwrap());
         assert!(c.configGetBool(false).unwrap());
+        assert_eq!(ffi::hdf_child_names(&hdf).unwrap(), vec!["a"]);
     }
 
     #[test]

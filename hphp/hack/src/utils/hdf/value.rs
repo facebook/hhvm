@@ -193,6 +193,13 @@ impl Value {
         })
     }
 
+    pub fn get_child_names(&self) -> Result<Vec<String>> {
+        match ffi::hdf_child_names(&self.inner) {
+            Ok(names) => Ok(names),
+            Err(e) => Err(e.into()),
+        }
+    }
+
     /// Return the string values of child nodes.
     /// Fails on internal Hdf parsing errors or Utf8 validation checks.
     pub fn values(self) -> Result<Vec<String>> {

@@ -104,7 +104,7 @@ CompactVector<Trace::BumpRelease> bumpTraceFunctions(const Func* func) {
     if (it == RuntimeOption::TraceFunctions.end()) return opt();
     folly::StringPiece name = *it;
     if (name.size() >= funcName.size() &&
-        bstrcaseeq(name.data(), funcName.data(), funcName.size())) {
+        fstrcmp_slice(funcName, name.subpiece(0, funcName.size())) == 0) {
       if (name.size() == funcName.size()) return def();
       if (name[funcName.size()] != ';') return opt();
       name.advance(funcName.size() + 1);

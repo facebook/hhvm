@@ -698,7 +698,7 @@ void ExecutionContext::onShutdownPostSend() {
     } catch (...) {
       try {
         bump_counter_and_rethrow(true /* isPsp */);
-      } catch (const ExitException& e) {
+      } catch (const ExitException&) {
         // do nothing
       } catch (const Exception& e) {
         onFatalError(e);
@@ -2146,11 +2146,11 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
     errorString << e.getMessage().c_str();
     errorString << "\n";
     stack = ExtendedLogger::StringOfStackTrace(e.getBacktrace());
-  } catch (ExitException& e) {
+  } catch (ExitException&) {
     errorString << s_exit.data();
     errorString << " : ";
     errorString << *rl_exit_code;
-  } catch (Eval::DebuggerException& e) {
+  } catch (Eval::DebuggerException&) {
   } catch (Exception& e) {
     errorString << s_cppException.data();
     errorString << " : ";

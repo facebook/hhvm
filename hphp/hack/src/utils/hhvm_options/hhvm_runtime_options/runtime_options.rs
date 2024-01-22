@@ -1,6 +1,5 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-use std::borrow::Cow;
 use std::fs;
 
 use anyhow::Result;
@@ -8,6 +7,7 @@ use byteorder::ByteOrder;
 use byteorder::NetworkEndian;
 use md5::Digest;
 use md5::Md5;
+use regex::Regex;
 
 use crate::cxx_ffi;
 
@@ -64,12 +64,12 @@ pub fn apply_tier_overrides_with_params(
     );
 
     let check_patterns = |hdf: &hdf::Value| -> Result<bool> {
-        Ok(match_hdf_pattern(hostname, hdf, "machine", "")?
-            && match_hdf_pattern(tier, hdf, "tier", "")?
-            && match_hdf_pattern(task, hdf, "task", "")?
-            && match_hdf_pattern(tiers, hdf, "tiers", "m")?
-            && match_hdf_pattern(tags, hdf, "tags", "m")?
-            && match_hdf_pattern(cpu, hdf, "cpu", "")?)
+        Ok(match_hdf_pattern(hostname, hdf, "machine", false)?
+            && match_hdf_pattern(tier, hdf, "tier", false)?
+            && match_hdf_pattern(task, hdf, "task", false)?
+            && match_hdf_pattern(tiers, hdf, "tiers", true)?
+            && match_hdf_pattern(tags, hdf, "tags", true)?
+            && match_hdf_pattern(cpu, hdf, "cpu", false)?)
     };
 
     let mut enable_shards = true;
@@ -161,23 +161,30 @@ fn create_seed(input: &str) -> Result<i64> {
 }
 
 // Config::matchHdfPattern()
-#[allow(clippy::todo)]
-fn match_hdf_pattern(_value: &str, config: &hdf::Value, name: &str, suffix: &str) -> Result<bool> {
+fn match_hdf_pattern(
+    value: &str,
+    config: &hdf::Value,
+    name: &str,
+    multiline: bool,
+) -> Result<bool> {
     let pattern = config.get_str(name)?.unwrap_or_default();
     if !pattern.is_empty() {
-        let _pattern: Cow<'_, str> = if suffix.is_empty() {
-            pattern.into()
+        // In hhvm we would error withut a / prefix or suffix on the pattern
+        // This is maintained here to ensure compatability with HHVM.
+        let pattern = pattern
+            .strip_prefix('/')
+            .ok_or_else(|| anyhow::anyhow!("{pattern}: should have a / prefix"))?
+            .strip_suffix('/')
+            .ok_or_else(|| anyhow::anyhow!("{pattern}: should have a / suffix"))?;
+        let re = if multiline {
+            Regex::new(format!("(?m:{pattern})").as_str())?
         } else {
-            format!("{}{}", pattern, suffix).into()
+            Regex::new(pattern)?
         };
-        todo!();
-        //-- Variant ret = preg_match(String(pattern.c_str(), pattern.size(),
-        //--                                 CopyString),
-        //--                          String(value.c_str(), value.size(),
-        //--                                 CopyString));
-        //-- if (ret.toInt64() <= 0) {
-        //--   return false;
-        //-- }
+        if !re.is_match(value) {
+            return Ok(false);
+        }
+        log::info!("Matched {name} pattern: {pattern}");
     }
     Ok(true)
 }
@@ -241,6 +248,65 @@ fn test_get_seed() -> Result<()> {
     assert!(match_shard(enabled, hostname, &config, Some(1))?);
     assert!(!match_shard(enabled, hostname, &config, Some(2))?);
     assert!(match_shard(enabled, hostname, &config, Some(11))?);
+
+    Ok(())
+}
+
+#[test]
+fn test_match_hdf_pattern() -> Result<()> {
+    let mut hdf = hdf::Value::default();
+    // Selector pattern not in the config tree should return true
+    assert!(match_hdf_pattern("", &hdf, "task", false)?);
+
+    hdf.set_hdf("task = //")?;
+    assert!(match_hdf_pattern("i/can/be/anything", &hdf, "task", false)?);
+
+    hdf.set_hdf("task = /test\\/matches/")?;
+    assert!(match_hdf_pattern("test/matches/true", &hdf, "task", false)?);
+    assert!(!match_hdf_pattern("no/match/false", &hdf, "task", false)?);
+
+    // Test multiline
+    let tags = "hhvm\nmatch_me3\nfoo\nbaz";
+    hdf.set_hdf("tags = /^match_me3$/")?;
+    assert!(match_hdf_pattern(tags, &hdf, "tags", true)?);
+    assert!(!match_hdf_pattern(tags, &hdf, "tags", false)?);
+
+    Ok(())
+}
+
+#[test]
+fn test_match_hdf_bad_regex() -> Result<()> {
+    let mut hdf = hdf::Value::default();
+
+    let cases = [
+        // HHVM specific requirements
+        ("test\\/nobody/", "should have a / prefix"),
+        ("/test\\/nobody", "should have a / suffix"),
+        // Regex bad patterns
+        ("/i_am(broken/", "unclosed group"),
+        ("/i_am(broken\\)/", "unclosed group"),
+        ("/i_am[broken/", "unclosed character class"),
+        ("/i_am[broken\\]/", "unclosed character class"),
+        ("/*/", "repetition operator missing expression"),
+    ];
+
+    for (pattern, err_substr) in cases.iter() {
+        hdf.set_hdf(&format!("task = {pattern}"))?;
+        let err_str = match_hdf_pattern("unused", &hdf, "task", false)
+            .unwrap_err()
+            .to_string();
+        assert!(
+            err_str.contains(err_substr),
+            "Expected {err_str} to contain '{err_substr}' for pattern '{pattern}'",
+        );
+        let err_str = match_hdf_pattern("unused", &hdf, "task", true)
+            .unwrap_err()
+            .to_string();
+        assert!(
+            err_str.contains(err_substr),
+            "Expected {err_str} to contain '{err_substr}' for pattern '{pattern}'",
+        );
+    }
 
     Ok(())
 }

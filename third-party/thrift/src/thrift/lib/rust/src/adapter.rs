@@ -493,7 +493,7 @@ where
     }
 
     fn from_thrift(value: Self::StandardType) -> Result<Self::AdaptedType, Self::Error> {
-        Self::AdaptedType::try_from(value)
+        Ok(Self::AdaptedType::from(value))
     }
 }
 

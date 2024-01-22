@@ -37,6 +37,11 @@ void match_type_with_const_value(
     const t_type* long_type,
     t_const_value* value) {
   const t_type* type = long_type->get_true_type();
+  if (!type) {
+    // type is unresolved, which will fail in validation.
+    return;
+  }
+
   switch (type->get_type_value()) {
     case t_type::type::t_list: {
       auto* elem_type = dynamic_cast<const t_list*>(type)->get_elem_type();

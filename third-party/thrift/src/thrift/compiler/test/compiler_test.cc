@@ -565,11 +565,27 @@ TEST(CompilerTest, undefined_type) {
   )");
 }
 
+TEST(CompilerTest, undefined_const) {
+  check_compile(R"(
+    const Type c = 42; # expected-error: Type `test.Type` not defined.
+  )");
+}
+
+TEST(CompilerTest, undefined_const_external) {
+  check_compile(R"(
+    const bad.Type d = 42; # expected-error: Type `bad.Type` not defined.
+  )");
+}
+
 TEST(CompilerTest, undefined_annotation) {
   check_compile(R"(
     @BadAnnotation # expected-error: Type `test.BadAnnotation` not defined.
     struct S {}
+  )");
+}
 
+TEST(CompilerTest, undefined_annotation_external) {
+  check_compile(R"(
     @bad.Annotation # expected-error: Type `bad.Annotation` not defined.
     struct T {}
   )");

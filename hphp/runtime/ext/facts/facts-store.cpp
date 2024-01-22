@@ -33,6 +33,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/request-injection-data.h"
+#include "hphp/runtime/base/sandbox-events.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -713,9 +714,15 @@ struct FactsStoreImpl final
               delta.m_files.size());
           auto sharedThis = weakThis.lock();
           if (!sharedThis) {
+            rareSboxEvent("facts-store", "subscribe weakThis==null", "");
             return;
           }
-          sharedThis->update();
+          timeSboxEvent(
+              RO::AutoloadPerfSampleRate,
+              "facts-store",
+              "subscribe update",
+              "",
+              [&] { sharedThis->update(); });
         });
   }
 
@@ -743,6 +750,8 @@ struct FactsStoreImpl final
             INFO,
             "Suppression file found at {}, not updating native Facts.",
             suppressionFilePath.native());
+        rareSboxEvent(
+            "facts-store", "update supressed", suppressionFilePath.native());
         return {};
       }
     }
@@ -774,6 +783,7 @@ struct FactsStoreImpl final
                       "Exception while querying watcher: {}",
                       delta.exception().what());
                   XLOG(ERR) << msg;
+                  rareSboxEvent("facts-store", "update watcher exception", msg);
                   throw UpdateExc{msg};
                 }
                 return updateWithDelta(std::move(delta.value()));
@@ -788,8 +798,7 @@ struct FactsStoreImpl final
           auto lastWatchmanQueryStart = m_lastWatchmanQueryStart.load();
           if (UNLIKELY(lastWatchmanQueryStart < updateStart)) {
             auto currentTime = std::chrono::steady_clock::now();
-            XLOGF(
-                ERR,
+            auto msg = folly::sformat(
                 "Stale update. Last Watchman query was {}ms ago, but update was only {}ms ago.",
                 std::chrono::duration_cast<
                     std::chrono::duration<double, std::milli>>(
@@ -799,15 +808,25 @@ struct FactsStoreImpl final
                     std::chrono::duration<double, std::milli>>(
                     currentTime - updateStart)
                     .count());
+            XLOG(ERR, msg);
+            rareSboxEvent("facts-store", msg, "");
           }
           assertx(updateStart < lastWatchmanQueryStart);
+          auto queryMicros = std::chrono::duration_cast<std::chrono::duration<
+              double,
+              std::chrono::microseconds::period>>(
+                                 lastWatchmanQueryStart - updateStart)
+                                 .count();
+          logSboxEvent(
+              RO::AutoloadPerfSampleRate,
+              "facts-store",
+              "watchman query",
+              m_root.native(),
+              queryMicros);
           XLOGF(
-              INFO,
+              DBG0,
               "update waited {}ms for a Watchman query to return.",
-              std::chrono::duration_cast<
-                  std::chrono::duration<double, std::milli>>(
-                  lastWatchmanQueryStart - updateStart)
-                  .count());
+              queryMicros / 1000);
           return res;
         })
         .semi();

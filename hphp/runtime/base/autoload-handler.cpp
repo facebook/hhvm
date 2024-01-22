@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/repo-autoload-map.h"
+#include "hphp/runtime/base/sandbox-events.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/unit.h"
@@ -89,6 +90,9 @@ FactsStore* getFactsForRequest() {
     return map;
   } catch (const std::exception& e) {
     auto repoRoot = repoOptions->dir();
+    rareSboxEvent("autoload-handler",
+        folly::sformat("getFactsForRequest: {}", e.what()),
+        repoRoot.native());
     Logger::FError(
         "Failed to update native autoloader, not natively autoloading {}. {}\n",
         repoRoot.native(),

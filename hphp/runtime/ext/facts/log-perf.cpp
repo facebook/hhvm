@@ -15,8 +15,9 @@
 */
 #include "hphp/runtime/ext/facts/log-perf.h"
 #include <folly/logging/xlog.h>
+#include "hphp/runtime/base/autoload-map.h"
+#include "hphp/runtime/base/sandbox-events.h"
 #include "hphp/runtime/base/type-variant.h"
-#include "hphp/util/struct-log.h"
 
 namespace HPHP::Facts {
 
@@ -47,26 +48,8 @@ auto FactsLogger::logPerf(
     std::string_view method,
     std::string_view key,
     F&& func) const {
-  using namespace std::chrono_literals;
-  auto t0 = std::chrono::steady_clock::now();
-  SCOPE_EXIT {
-    if (StructuredLog::coinflip(m_sampleRate)) {
-      auto tf = std::chrono::steady_clock::now();
-      auto elapsed =
-          std::chrono::duration<double, std::chrono::microseconds::period>{
-              tf - t0};
-      StructuredLogEntry ent;
-      ent.force_init = true;
-      ent.setProcessUuid("hhvm_uuid");
-      ent.setInt("sample_rate", m_sampleRate);
-      ent.setStr("source", m_impl);
-      ent.setStr("event", method);
-      ent.setStr("key", key);
-      ent.setInt("duration_us", elapsed.count());
-      StructuredLog::log("hhvm_sandbox_events", ent);
-    }
-  };
-  return func();
+  return timeSboxEvent(
+      m_sampleRate, m_impl, method, key, std::forward<F>(func));
 }
 
 void FactsLogger::ensureUpdated() {

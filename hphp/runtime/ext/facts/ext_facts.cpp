@@ -40,7 +40,7 @@
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/config.h"
-#include "hphp/runtime/base/init-fini-node.h"
+#include "hphp/runtime/base/sandbox-events.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-type.h"
@@ -391,6 +391,7 @@ FactsStore* SqliteAutoloadMapFactory::getForOptions(
       return {std::move(mk)};
     } catch (const RepoOptionsParseExc& e) {
       XLOG(ERR) << e.what();
+      rareSboxEvent("ext_facts", "RepoOptionsParseExc", e.what());
       return std::nullopt;
     }
   }();
@@ -421,6 +422,8 @@ FactsStore* SqliteAutoloadMapFactory::getForOptions(
   };
 
   if (mapKey->m_dbKey.m_mode == SQLite::OpenMode::ReadOnly) {
+    rareSboxEvent(
+        "ext_facts", "getForOptions opening trusted store", mapKey->toString());
     XLOGF(
         DBG0,
         "Loading {} from trusted Autoload DB at {}",
@@ -445,6 +448,8 @@ FactsStore* SqliteAutoloadMapFactory::getForOptions(
   // Prefetch a FactsDB if we don't have one, while guarded by m_mutex
   prefetchDb(mapKey->m_root, mapKey->m_dbKey);
 
+  rareSboxEvent(
+      "ext_facts", "getForOptions opening mutable store", mapKey->toString());
   return m_stores
       .insert(
           {*mapKey,
@@ -480,8 +485,11 @@ void SqliteAutoloadMapFactory::garbageCollectUnusedAutoloadMaps(
       XLOG(INFO) << "Evicting SqliteAutoloadMap: " << mapKey.toString();
       auto it = m_stores.find(mapKey);
       if (it != m_stores.end()) {
+        rareSboxEvent("ext_facts", __func__, mapKey.toString());
         maps.push_back(std::move(it->second));
         m_stores.erase(it);
+      } else {
+        rareSboxEvent("ext_facts", "evict unknown mapkey", mapKey.toString());
       }
       m_lastUsed.erase(mapKey);
     }
@@ -579,6 +587,7 @@ Variant HHVM_FUNCTION(facts_db_path, const String& rootStr) {
   }();
   if (!root) {
     XLOG(ERR) << "Error resolving " << rootStr.slice();
+    rareSboxEvent("ext_facts", "facts_db_path bad root", rootStr.slice());
     return Variant{Variant::NullInit{}};
   }
   assertx(root->is_absolute());
@@ -591,6 +600,10 @@ Variant HHVM_FUNCTION(facts_db_path, const String& rootStr) {
     return Variant{
         Facts::SqliteAutoloadMapKey::get(repoOptions).m_dbKey.m_path.native()};
   } catch (const Facts::RepoOptionsParseExc& e) {
+    rareSboxEvent(
+        "ext_facts",
+        folly::sformat("facts_db_path {}", rootStr.slice()),
+        e.what());
     throw_invalid_operation_exception(makeStaticString(e.what()));
   }
 }

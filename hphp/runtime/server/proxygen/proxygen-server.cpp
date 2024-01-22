@@ -367,7 +367,7 @@ void ProxygenServer::start(bool beginAccepting) {
       socketSetupSucceeded = true;
       Logger::Info("inheritfd: successfully inherited fd %d for server",
                    m_accept_sock);
-    } catch (const std::exception& ex) {
+    } catch (const std::exception&) {
       Logger::Warning("inheritfd: failed to inherit fd %d for server",
                       m_accept_sock);
     }
@@ -383,7 +383,7 @@ void ProxygenServer::start(bool beginAccepting) {
         socketSetupSucceeded = true;
         Logger::Info("takeover: using takeover fd %d for server",
                      m_accept_sock);
-      } catch (const std::exception& ex) {
+      } catch (const std::exception&) {
         Logger::Warning("takeover: failed to takeover fd %d for server",
                         m_accept_sock);
       }

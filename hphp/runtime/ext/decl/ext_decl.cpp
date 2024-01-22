@@ -816,7 +816,7 @@ Variant HHVM_STATIC_METHOD(
       return init_null_variant;
     }
     return Variant(populateTypeStructure(decls.front()));
-  } catch (const std::exception& ex) {
+  } catch (const std::exception&) {
     return init_null_variant;
   }
 }

@@ -1,5 +1,6 @@
 use bstr::BString;
 use naming_special_names_rust::classes;
+use naming_special_names_rust::coeffects;
 use naming_special_names_rust::expression_trees as et;
 use naming_special_names_rust::pseudo_functions;
 use naming_special_names_rust::special_idents;
@@ -14,8 +15,10 @@ use oxidized::aast_visitor::VisitorMut;
 use oxidized::ast;
 use oxidized::ast::ClassId;
 use oxidized::ast::ClassId_;
+use oxidized::ast::Contexts;
 use oxidized::ast::Expr;
 use oxidized::ast::Expr_;
+use oxidized::ast::Fun_;
 use oxidized::ast::Hint_;
 use oxidized::ast::Sid;
 use oxidized::ast::Stmt;
@@ -831,15 +834,60 @@ fn rewrite_expr(
                     ],
                     &pos,
                 );
-                let virtual_expr = Expr(
+                let is_property_lhs = matches!(
+                    rewritten_lhs.virtual_expr,
+                    Expr(_, _, Expr_::ObjGet(box (_, _, _, oxidized::aast::PropOrMethod::IsProp)))
+                );
+                let mut virtual_expr = Expr(
                     (),
-                    pos,
+                    pos.clone(),
                     Binop(Box::new(aast::Binop {
                         bop,
                         lhs: rewritten_lhs.virtual_expr,
                         rhs: rewritten_rhs.virtual_expr,
                     })),
                 );
+                if is_property_lhs {
+                    virtual_expr = Expr(
+                        (),
+                        pos.clone(),
+                        Lfun(Box::new((
+                            Fun_ {
+                                span: pos.clone(),
+                                readonly_this: None,
+                                annotation: (),
+                                readonly_ret: None,
+                                ret: aast::TypeHint((), None),
+                                params: vec![],
+                                ctxs: Some(Contexts(
+                                    pos.clone(),
+                                    vec![ast::Hint(
+                                        pos.clone(),
+                                        Box::new(Hint_::Happly(
+                                            ast::Id(
+                                                pos.clone(),
+                                                coeffects::WRITE_PROPS.to_string(),
+                                            ),
+                                            vec![],
+                                        )),
+                                    )],
+                                )),
+                                unsafe_ctxs: None,
+                                body: aast::FuncBody {
+                                    fb_ast: aast::Block(vec![aast::Stmt(
+                                        pos,
+                                        aast::Stmt_::Expr(Box::new(virtual_expr)),
+                                    )]),
+                                },
+                                fun_kind: FunKind::FSync,
+                                user_attributes: aast::UserAttributes(vec![]),
+                                external: false,
+                                doc_comment: None,
+                            },
+                            vec![],
+                        ))),
+                    );
+                }
                 RewriteResult {
                     virtual_expr,
                     desugar_expr,
@@ -1274,7 +1322,7 @@ fn rewrite_expr(
             }
         }
         // Source: MyDsl`($x) ==> { ... }`
-        // Virtualized: ($x) ==> { ...; return MyDsl::voidType(); }
+        // Virtualized: ($x)[] ==> { ...; return MyDsl::voidType(); }
         //   if no `return expr;` statements.
         // Desugared: $0v->visitLambda(new ExprPos(...), vec['$x'], vec[...]).
         Lfun(lf) => {
@@ -1351,6 +1399,7 @@ fn rewrite_expr(
                 &pos,
             );
             fun_.body.fb_ast = ast::Block(virtual_body_stmts);
+            fun_.ctxs = Some(Contexts(pos.clone(), vec![]));
 
             let virtual_expr = _virtualize_lambda(
                 visitor_name,

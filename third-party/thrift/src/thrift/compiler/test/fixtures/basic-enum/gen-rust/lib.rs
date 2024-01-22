@@ -5,6 +5,7 @@
 #![allow(non_camel_case_types, non_snake_case, non_upper_case_globals, unused_crate_dependencies, clippy::all)]
 
 pub use self::consts::*;
+#[allow(unused_imports)]
 pub use self::errors::*;
 pub use self::types::*;
 

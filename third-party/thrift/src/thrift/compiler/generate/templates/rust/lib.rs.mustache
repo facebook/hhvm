@@ -33,6 +33,7 @@ include!("{{program:include_src}}");
 {{#program:constants?}}
 pub use self::consts::*;
 {{/program:constants?}}
+#[allow(unused_imports)]
 pub use self::errors::*;{{!
 }}{{#program:types?}}
 pub use self::types::*;{{!

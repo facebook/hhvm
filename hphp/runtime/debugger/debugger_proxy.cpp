@@ -504,13 +504,7 @@ struct DebuggerStdoutHook final : ExecutionContext::StdoutHook {
   explicit DebuggerStdoutHook(StringBuffer& sb) : sb(sb) {}
   void operator()(const char* s, int len) override {
     TRACE(2, "DebuggerProxy::append_stdout\n");
-    if (s_stdout_color) {
-      sb.append(s_stdout_color);
-    }
     sb.append(s, len);
-    if (s_stdout_color) {
-      sb.append(ANSI_COLOR_END);
-    }
   }
 };
 

@@ -16,12 +16,9 @@
 
 #pragma once
 
-#if __has_include(<memory_resource>)
-#define SUPPORT_ALLOCATING_PARSER_STRATEGY 1
-
 #include <memory>
-#include <memory_resource>
 #include <folly/io/IOBuf.h>
+#include <folly/memory/MemoryResource.h>
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Serializer.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Util.h>
@@ -32,6 +29,13 @@ namespace apache {
 namespace thrift {
 namespace rocket {
 
+#if FOLLY_HAS_MEMORY_RESOURCE
+using ParserAllocatorType =
+    folly::detail::std_pmr::polymorphic_allocator<std::uint8_t>;
+#else
+using ParserAllocatorType = std::allocator<std::uint8_t>;
+#endif
+
 /**
  * An extension to ParserStrategy that allocates a buffer using a std::allocator
  * rather than the folly::IOBuf chain based on the size of the frame. Does not
@@ -41,9 +45,7 @@ namespace rocket {
  * the rest of rocket frame parsing.
  */
 
-template <
-    class T,
-    class Allocator = std::pmr::polymorphic_allocator<std::uint8_t>>
+template <class T, class Allocator = ParserAllocatorType>
 class AllocatingParserStrategy {
   using Traits = std::allocator_traits<Allocator>;
   using ElemType = std::uint8_t;
@@ -210,5 +212,3 @@ class AllocatingParserStrategy {
 } // namespace rocket
 } // namespace thrift
 } // namespace apache
-
-#endif // __has_include(<memory_resource>)

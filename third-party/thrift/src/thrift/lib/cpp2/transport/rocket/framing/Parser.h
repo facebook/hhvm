@@ -45,41 +45,23 @@ class Parser final : public folly::AsyncTransport::ReadCallback,
                      public folly::HHWheelTimer::Callback {
  public:
   explicit Parser(
-      T& owner
-#ifdef SUPPORT_ALLOCATING_PARSER_STRATEGY
-      ,
-      std::shared_ptr<std::pmr::polymorphic_allocator<std::uint8_t>> alloc =
-          nullptr
-#endif
-      )
+      T& owner, std::shared_ptr<ParserAllocatorType> alloc = nullptr)
       : owner_(owner),
         readBuffer_(folly::IOBuf::CreateOp(), bufferSize_),
         useStrategyParser_(THRIFT_FLAG(rocket_strategy_parser)),
         useAllocatingStrategyParser_(
-            THRIFT_FLAG(rocket_allocating_strategy_parser))
-#ifdef SUPPORT_ALLOCATING_PARSER_STRATEGY
-        ,
-        allocator_(
-            alloc ? alloc
-                  : std::make_shared<
-                        std::pmr::polymorphic_allocator<std::uint8_t>>())
-#endif
-  {
+            THRIFT_FLAG(rocket_allocating_strategy_parser)),
+        allocator_(alloc ? alloc : std::make_shared<ParserAllocatorType>()) {
     if (useStrategyParser_) {
       frameLengthParser_ =
           std::make_unique<ParserStrategy<T, FrameLengthParserStrategy>>(
               owner_);
     }
-#ifdef SUPPORT_ALLOCATING_PARSER_STRATEGY
     if (useAllocatingStrategyParser_) {
-      allocatingParser_ = std::make_unique<ParserStrategy<
-          T,
-          AllocatingParserStrategy,
-          std::pmr::polymorphic_allocator<std::uint8_t>>>(owner_, *allocator_);
+      allocatingParser_ = std::make_unique<
+          ParserStrategy<T, AllocatingParserStrategy, ParserAllocatorType>>(
+          owner_, *allocator_);
     }
-#else
-    DCHECK(!useAllocatingStrategyParser_);
-#endif
   }
 
   ~Parser() override {
@@ -146,14 +128,10 @@ class Parser final : public folly::AsyncTransport::ReadCallback,
       frameLengthParser_;
 
   bool useAllocatingStrategyParser_{false};
-#ifdef SUPPORT_ALLOCATING_PARSER_STRATEGY
-  std::shared_ptr<std::pmr::polymorphic_allocator<std::uint8_t>> allocator_;
-  std::unique_ptr<ParserStrategy<
-      T,
-      AllocatingParserStrategy,
-      std::pmr::polymorphic_allocator<std::uint8_t>>>
+  std::shared_ptr<ParserAllocatorType> allocator_;
+  std::unique_ptr<
+      ParserStrategy<T, AllocatingParserStrategy, ParserAllocatorType>>
       allocatingParser_;
-#endif
 };
 
 } // namespace rocket

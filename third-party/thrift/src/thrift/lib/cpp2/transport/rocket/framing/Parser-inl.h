@@ -114,13 +114,9 @@ void Parser<T>::getReadBuffer(void** bufout, size_t* lenout) {
   blockResize_ = true;
   if (useStrategyParser_) {
     frameLengthParser_->getReadBuffer(bufout, lenout);
-  }
-#ifdef SUPPORT_ALLOCATING_PARSER_STRATEGY
-  else if (useAllocatingStrategyParser_) {
+  } else if (useAllocatingStrategyParser_) {
     allocatingParser_->getReadBuffer(bufout, lenout);
-  }
-#endif
-  else {
+  } else {
     getReadBufferOld(bufout, lenout);
   }
 }
@@ -132,13 +128,9 @@ void Parser<T>::readDataAvailable(size_t nbytes) noexcept {
   try {
     if (useStrategyParser_) {
       frameLengthParser_->readDataAvailable(nbytes);
-    }
-#ifdef SUPPORT_ALLOCATING_PARSER_STRATEGY
-    else if (useAllocatingStrategyParser_) {
+    } else if (useAllocatingStrategyParser_) {
       allocatingParser_->readDataAvailable(nbytes);
-    }
-#endif
-    else {
+    } else {
       readDataAvailableOld(nbytes);
     }
   } catch (...) {
@@ -181,14 +173,10 @@ void Parser<T>::readBufferAvailable(
   try {
     if (useStrategyParser_) {
       frameLengthParser_->readBufferAvailable(std::move(buf));
-    }
-#ifdef SUPPORT_ALLOCATING_PARSER_STRATEGY
-    else if (useAllocatingStrategyParser_) {
+    } else if (useAllocatingStrategyParser_) {
       // Will throw not implemented runtime exception
       allocatingParser_->readBufferAvailable(std::move(buf));
-    }
-#endif
-    else {
+    } else {
       readBufQueue_.append(std::move(buf));
       while (!readBufQueue_.empty()) {
         if (readBufQueue_.chainLength() <

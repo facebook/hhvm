@@ -37,9 +37,7 @@ class FakeOwner {
   uint32_t memoryCounter_ = 0;
 };
 
-#ifdef SUPPORT_ALLOCATING_PARSER_STRATEGY
-std::pmr::polymorphic_allocator<std::uint8_t> alloc =
-    std::pmr::polymorphic_allocator();
+ParserAllocatorType alloc = ParserAllocatorType();
 
 TEST(AllocatingParserStrategyTest, testAppendFrame) {
   FakeOwner owner;
@@ -519,5 +517,3 @@ TEST(AllocatingParserStrategyTest, testManyTinyFrameWithIncompleteFrame) {
 } // namespace rocket
 } // namespace thrift
 } // namespace apache
-
-#endif // SUPPORT_ALLOCATING_PARSER_STRATEGY

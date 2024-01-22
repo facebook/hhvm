@@ -16,6 +16,4 @@
 
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/AllocatingParserStrategy.h>
 
-#ifdef SUPPORT_ALLOCATING_PARSER_STRATEGY
 THRIFT_FLAG_DEFINE_int64(rocket_allocating_parser_min_buffer_size, 16);
-#endif

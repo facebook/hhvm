@@ -1463,7 +1463,7 @@ size_t relocate(RelocationInfo& rel,
     try {
       Env env(rel, srcBlock, destBlock, start, end, meta, exitAddr, far);
       return relocateImpl(env);
-    } catch (JmpOutOfRange& j) {
+    } catch (JmpOutOfRange&) {
     }
   }
 }

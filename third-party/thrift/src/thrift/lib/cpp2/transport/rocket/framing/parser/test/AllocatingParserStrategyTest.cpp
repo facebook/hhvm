@@ -514,6 +514,55 @@ TEST(AllocatingParserStrategyTest, testManyTinyFrameWithIncompleteFrame) {
   EXPECT_EQ(frame3->length(), testFrameLen3);
 }
 
+#if FOLLY_HAS_MEMORY_RESOURCE
+TEST(AllocatingParserStrategyTest, testWithAllocatorFromSharedPtr) {
+  char poolBuf[10'000];
+  folly::detail::std_pmr::monotonic_buffer_resource pool(
+      poolBuf, sizeof(poolBuf));
+  ParserAllocatorType alloc(&pool);
+  FakeOwner owner;
+  AllocatingParserStrategy<FakeOwner> parser(owner, alloc);
+
+  void* buf;
+  size_t lenReturn;
+  parser.getReadBuffer(&buf, &lenReturn);
+  EXPECT_EQ(lenReturn, parser.getMinBufferSize());
+  EXPECT_EQ(parser.getCurrentBufferSize(), parser.getMinBufferSize());
+
+  static constexpr size_t kTestFrameLength = 20;
+
+  HeaderSerializer serializer(static_cast<uint8_t*>(buf), lenReturn);
+  serializer.writeFrameOrMetadataSize(kTestFrameLength);
+  parser.readDataAvailable(Serializer::kBytesForFrameOrMetadataLength);
+
+  EXPECT_EQ(parser.getSize(), Serializer::kBytesForFrameOrMetadataLength);
+  EXPECT_EQ(parser.getFrameLength(), kTestFrameLength);
+  EXPECT_EQ(
+      parser.getCurrentBufferSize(),
+      kTestFrameLength + Serializer::kBytesForFrameOrMetadataLength);
+  EXPECT_EQ(
+      owner.memoryCounter_,
+      kTestFrameLength + Serializer::kBytesForFrameOrMetadataLength);
+  EXPECT_EQ(owner.frames_.size(), 0);
+
+  parser.getReadBuffer(&buf, &lenReturn);
+  EXPECT_EQ(lenReturn, kTestFrameLength);
+
+  std::string b(kTestFrameLength, 'b');
+  memcpy(static_cast<uint8_t*>(buf), b.data(), kTestFrameLength);
+
+  parser.readDataAvailable(kTestFrameLength);
+
+  EXPECT_EQ(parser.getSize(), 0);
+  EXPECT_EQ(parser.getFrameLength(), 0);
+  EXPECT_EQ(owner.memoryCounter_, 0);
+  ASSERT_EQ(owner.frames_.size(), 1);
+
+  const folly::IOBuf& frame = *owner.frames_[0];
+  EXPECT_EQ(frame.length(), kTestFrameLength);
+}
+#endif
+
 } // namespace rocket
 } // namespace thrift
 } // namespace apache

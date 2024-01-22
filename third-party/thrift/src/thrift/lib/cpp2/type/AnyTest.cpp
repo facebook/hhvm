@@ -113,11 +113,11 @@ TEST(AnyTest, GetTypeMismatch) {
 
 TEST(AnyTest, UnsupportedProtocol) {
   SemiAny builder;
-  builder.type() = struct_t<test::AnyTestStruct>{};
+  builder.type() = struct_t<test::detail::AnyTestStruct>{};
   builder.protocol() = StandardProtocol::SimpleJson;
   builder.data() = folly::IOBuf::wrapBufferAsValue("{}", 2);
   AnyData any(builder);
-  test::AnyTestStruct strct;
+  test::detail::AnyTestStruct strct;
   // We don't use EXPECT_THROW since we want to check the content
   try {
     any.get(strct);
@@ -156,7 +156,7 @@ TEST(AnyTest, isValid) {
   // type and protocol are missing
   EXPECT_FALSE(AnyData::isValid(builder));
 
-  builder.type() = struct_t<test::AnyTestStruct>{};
+  builder.type() = struct_t<test::detail::AnyTestStruct>{};
   // protocol is missing
   EXPECT_FALSE(AnyData::isValid(builder));
 

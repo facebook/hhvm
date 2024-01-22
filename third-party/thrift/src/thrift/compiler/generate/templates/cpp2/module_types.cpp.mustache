@@ -37,7 +37,7 @@
 void __fbthrift_static_init_<%struct:cpp_underlying_name%>() {
   FOLLY_MAYBE_UNUSED static bool init = (
     apache::thrift::conformance::detail::registerGeneratedStruct<
-        <%struct:cpp_underlying_name%>,
+        <%#struct:extra_namespace%><%struct:extra_namespace%>::<%/struct:extra_namespace%><%struct:cpp_underlying_name%>,
 <%#program:json?%>
         apache::thrift::conformance::StandardProtocol::SimpleJson,
 <%/program:json?%>

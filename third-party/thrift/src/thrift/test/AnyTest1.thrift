@@ -16,10 +16,15 @@
 
 include "thrift/lib/thrift/any.thrift"
 
+include "thrift/annotation/cpp.thrift"
+
+cpp_include "thrift/test/AdapterTest.h"
+
 package "facebook.com/thrift/test"
 
 namespace cpp2 apache.thrift.test
 
+@cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
 struct AnyTestStruct {
   1: i32 foo;
 }

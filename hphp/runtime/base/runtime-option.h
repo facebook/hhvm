@@ -847,6 +847,12 @@ struct RuntimeOption {
   /* 0 = No notices, 1 = Log case collisions, 2 = Reject case insensitive */ \
   F(uint32_t, LogTsameCollisions, 0)                                    \
   F(uint32_t, LogFsameCollisions, 0)                                    \
+  /* CheckBuiltinParamTypeHints
+   * 0 - Do not check parameter type hints of builtins
+   * 1 - Treat builtin parameter type hints as <<__Soft>>
+   * 2 - Enforce builtin parameter type hints
+   */                                                                   \
+  F(int32_t, CheckBuiltinParamTypeHints, 0)                             \
   /*
     CheckPropTypeHints:
     0 - No checks or enforcement of property type hints.

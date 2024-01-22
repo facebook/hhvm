@@ -1,0 +1,1 @@
+Catchable fatal error: Argument 1 passed to __hhvm_intrinsics\dummy_dict_builtin() must be an instance of HH\dict, HH\vec given in %s on line 5

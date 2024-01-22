@@ -1125,8 +1125,10 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
 Type typeFromFuncParam(const Func* func, uint32_t paramId) {
   assertx(paramId < func->numNonVariadicParams());
 
-  // Builtins use a separate non-standard mechanism.
-  if (func->isCPPBuiltin()) return TInitCell;
+  if (func->isCPPBuiltin() && RO::EvalCheckBuiltinParamTypeHints <= 1) {
+    // Type unknown if builtin parameter type hints not enforced.
+    return TInitCell;
+  }
 
   auto const getThisType = [&] {
     return func->cls() ? Type::SubObj(func->cls()) : TBottom;

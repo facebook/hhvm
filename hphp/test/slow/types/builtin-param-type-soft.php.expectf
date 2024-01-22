@@ -1,0 +1,8 @@
+
+Warning: Argument 1 to __hhvm_intrinsics\dummy_dict_builtin() must be of type HH\dict, HH\vec given in %s on line 5
+
+Fatal error: Uncaught exception 'RuntimeException' with message '__hhvm_intrinsics\dummy_dict_builtin() expects parameter 1 to be dict, vec given' in %s:5
+Stack trace:
+#0 %s(5): __hhvm_intrinsics\dummy_dict_builtin()
+#1 (): main()
+#2 {main}

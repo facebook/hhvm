@@ -16,7 +16,6 @@ bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
 bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 emit_opcodes_macro = { version = "0.0.0", path = "../emit_opcodes_macro" }
 ffi = { version = "0.0.0", path = "../../../../utils/ffi" }
-hash = { version = "0.0.0", path = "../../../../utils/hash" }
 hhbc_string_utils = { version = "0.0.0", path = "../../../utils/cargo/hhbc_string_utils" }
 hhvm_hhbc_defs_ffi = { version = "0.0.0", path = "../../../hhvm_cxx/hhvm_hhbc_defs" }
 hhvm_types_ffi = { version = "0.0.0", path = "../../../hhvm_cxx/hhvm_types" }

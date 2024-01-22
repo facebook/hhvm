@@ -2,10 +2,13 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+#![feature(box_patterns)]
 
 use ffi::Just;
 use ffi::Maybe;
 use hash::IndexSet;
+use hhbc::Label;
+use hhbc::Param;
 use naming_special_names_rust::emitter_special_functions;
 use naming_special_names_rust::special_idents;
 use oxidized::aast;
@@ -16,9 +19,6 @@ use oxidized::aast_visitor::Node;
 use oxidized::aast_visitor::Visitor;
 use oxidized::ast::*;
 use oxidized::ast_defs;
-
-use crate::Label;
-use crate::Param;
 
 type SSet = std::collections::BTreeSet<String>;
 

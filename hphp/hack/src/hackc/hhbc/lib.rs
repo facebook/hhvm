@@ -11,7 +11,6 @@ mod body;
 mod class;
 mod coeffects;
 mod constant;
-pub mod decl_vars;
 mod function;
 mod id;
 mod instruct;

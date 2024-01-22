@@ -12,6 +12,7 @@ path = "../../closure_convert.rs"
 
 [dependencies]
 bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
+decl_vars = { version = "0.0.0", path = "../../../emitter/cargo/decl_vars" }
 env = { version = "0.0.0", path = "../../../emitter/cargo/env" }
 error = { version = "0.0.0", path = "../../../error/cargo/error" }
 global_state = { version = "0.0.0", path = "../../../emitter/cargo/global_state" }

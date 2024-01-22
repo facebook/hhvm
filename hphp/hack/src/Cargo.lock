@@ -751,6 +751,7 @@ name = "closure_convert"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "decl_vars",
  "env",
  "error",
  "global_state",
@@ -1286,6 +1287,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "decl_vars"
+version = "0.0.0"
+dependencies = [
+ "ffi",
+ "hash",
+ "hhbc",
+ "naming_special_names_rust",
+ "oxidized",
+]
+
+[[package]]
 name = "delta_log"
 version = "0.0.0"
 dependencies = [
@@ -1584,6 +1596,7 @@ dependencies = [
  "constant_folder",
  "core_utils_rust",
  "decl_provider",
+ "decl_vars",
  "emit_pos",
  "emit_type_hint",
  "env",
@@ -2431,7 +2444,6 @@ dependencies = [
  "bumpalo",
  "emit_opcodes_macro",
  "ffi",
- "hash",
  "hhbc_string_utils",
  "hhvm_hhbc_defs_ffi",
  "hhvm_types_ffi",
@@ -4189,10 +4201,10 @@ version = "0.0.0"
 dependencies = [
  "closure_convert",
  "constant_folder",
+ "decl_vars",
  "env",
  "error",
  "hack_macros",
- "hhbc",
  "naming_special_names_rust",
  "oxidized",
  "relative_path",

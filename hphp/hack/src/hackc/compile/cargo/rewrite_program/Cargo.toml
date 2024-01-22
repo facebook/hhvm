@@ -13,10 +13,10 @@ path = "../../rewrite_program.rs"
 [dependencies]
 closure_convert = { version = "0.0.0", path = "../closure_convert" }
 constant_folder = { version = "0.0.0", path = "../../../emitter/cargo/constant_folder" }
+decl_vars = { version = "0.0.0", path = "../../../emitter/cargo/decl_vars" }
 env = { version = "0.0.0", path = "../../../emitter/cargo/env" }
 error = { version = "0.0.0", path = "../../../error/cargo/error" }
 hack_macros = { version = "0.0.0", path = "../../../../utils/hack_macros/cargo/hack_macros" }
-hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 relative_path = { version = "0.0.0", path = "../../../../utils/rust/relative_path" }

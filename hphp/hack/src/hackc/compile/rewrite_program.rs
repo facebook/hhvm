@@ -12,7 +12,6 @@ use error::Error;
 use error::Result;
 use hack_macros::hack_expr;
 use hack_macros::hack_stmt;
-use hhbc::decl_vars;
 use naming_special_names_rust::modules as special_modules;
 use oxidized::ast;
 use oxidized::ast::Def;

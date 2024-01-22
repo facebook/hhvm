@@ -18,7 +18,6 @@ use ffi::Maybe::*;
 use ffi::Slice;
 use ffi::Str;
 use hash::HashSet;
-use hhbc::decl_vars;
 use hhbc::Body;
 use hhbc::FCallArgs;
 use hhbc::FCallArgsFlags;

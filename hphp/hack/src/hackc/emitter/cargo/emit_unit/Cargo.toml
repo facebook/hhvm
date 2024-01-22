@@ -18,6 +18,7 @@ bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 constant_folder = { version = "0.0.0", path = "../constant_folder" }
 core_utils_rust = { version = "0.0.0", path = "../../../../utils/core" }
 decl_provider = { version = "0.0.0", path = "../../../decl_provider" }
+decl_vars = { version = "0.0.0", path = "../decl_vars" }
 emit_pos = { version = "0.0.0", path = "../emit_pos" }
 emit_type_hint = { version = "0.0.0", path = "../emit_type_hint" }
 env = { version = "0.0.0", path = "../env" }

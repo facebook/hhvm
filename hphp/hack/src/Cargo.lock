@@ -2510,10 +2510,12 @@ name = "hhvm_runtime_options"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "byteorder",
  "cxx",
  "cxx-build",
  "hdf",
  "log",
+ "md-5",
 ]
 
 [[package]]

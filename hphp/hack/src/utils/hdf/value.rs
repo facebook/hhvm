@@ -160,6 +160,15 @@ impl Value {
         }
     }
 
+    /// Gets the value and converts the value to a i64 according to HDF rules.
+    /// If the value doesn't exist, return the default value.
+    pub fn get_int64_or(&self, name: &str, or_default: i64) -> Result<i64> {
+        match self.get(name)? {
+            Some(v) => Ok(v.inner.configGetInt64(or_default)?),
+            None => Ok(or_default),
+        }
+    }
+
     /// Return the utf8 string value of this node, if it exists.
     /// Returns an error for Hdf internal errors or failed utf8 validation.
     pub fn as_str(&self) -> Result<Option<String>> {

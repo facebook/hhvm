@@ -20,6 +20,7 @@ pub(crate) mod ffi {
 
         fn configGetBool(self: &Hdf, or_default: bool) -> Result<bool>;
         fn configGetUInt32(self: &Hdf, or_default: u32) -> Result<u32>;
+        fn configGetInt64(self: &Hdf, or_default: i64) -> Result<i64>;
         unsafe fn configGet(self: &Hdf, or_default: *const c_char) -> Result<*const c_char>;
         fn exists(self: &Hdf) -> Result<bool>;
         fn toString(self: &Hdf) -> Result<*const c_char>;

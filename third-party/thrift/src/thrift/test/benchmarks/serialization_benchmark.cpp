@@ -62,6 +62,26 @@ inline void deserialize_with_protocol_reader(T& t, folly::IOBufQueue& queue) {
   t.read(&reader);
 }
 
+struct RawStruct {
+  int32_t field_1;
+  std::string field_2;
+  std::vector<std::string> field_3;
+  std::map<std::string, int32_t> field_4;
+};
+
+BENCHMARK(RawStructCreationBaseline) {
+  RawStruct s;
+  s.field_1 = 1;
+  s.field_2 = "hello, world";
+  s.field_3.reserve(kDefaultListSize);
+  for (int i = 0; i < kDefaultListSize; ++i) {
+    s.field_3.push_back("item " + std::to_string(i));
+  }
+  for (int i = 0; i < kDefaultMapSize; ++i) {
+    s.field_4["key " + std::to_string(i)] = i;
+  }
+}
+
 BENCHMARK(TCompactSerializationBaseline) {
   folly::IOBufQueue queue;
   auto s = Struct1{};

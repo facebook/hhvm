@@ -7,4 +7,5 @@ function main() :mixed{
   var_dump(package_exists('bar'));
   var_dump(package_exists('baz'));
   var_dump(package_exists('foobar')); // not real
+  var_dump(package_exists('bat'));    // soft deployed
 }

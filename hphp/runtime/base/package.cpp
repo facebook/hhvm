@@ -195,7 +195,8 @@ bool PackageInfo::isPackageInActiveDeployment(const StringData* package) const {
   auto const activeDeployment = getActiveDeployment();
   // If there's no active deployment, return whether package exists at all
   if (!activeDeployment) return packages().contains(package->toCppString());
-  return activeDeployment->m_packages.contains(package->toCppString());
+  return activeDeployment->m_packages.contains(package->toCppString())
+         || activeDeployment->m_soft_packages.contains(package->toCppString());
 }
 
 namespace {

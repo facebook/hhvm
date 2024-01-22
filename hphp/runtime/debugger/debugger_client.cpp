@@ -803,13 +803,13 @@ void DebuggerClient::run() {
     bool reconnect = false;
     try {
       eventLoop(TopLevel, DebuggerCommand::KindOfNone, "Main client loop");
-    } catch (DebuggerClientExitException& e) { /* normal exit */
-    } catch (DebuggerServerLostException& e) {
+    } catch (DebuggerClientExitException&) { /* normal exit */
+    } catch (DebuggerServerLostException&) {
       // Loss of connection
       TRACE_RB(1, "DebuggerClient::run: server lost exception\n");
       usageLogEvent("DebuggerServerLostException", m_commandCanonical);
       reconnect = true;
-    } catch (DebuggerProtocolException& e) {
+    } catch (DebuggerProtocolException&) {
       // Bad or unexpected data. Give reconnect a shot, it could help...
       TRACE_RB(1, "DebuggerClient::run: protocol exception\n");
       usageLogEvent("DebuggerProtocolException", m_commandCanonical);
@@ -1263,7 +1263,7 @@ void DebuggerClient::console() {
             error("command \"" + m_command + "\" not found");
             m_command.clear();
           }
-        } catch (DebuggerConsoleExitException& e) {
+        } catch (DebuggerConsoleExitException&) {
           return;
         }
       }
@@ -1280,7 +1280,7 @@ void DebuggerClient::console() {
             record(line);
             m_command = m_prevCmd;
             process(); // replay the same command
-          } catch (DebuggerConsoleExitException& e) {
+          } catch (DebuggerConsoleExitException&) {
             return;
           }
           break;
@@ -2352,7 +2352,7 @@ void DebuggerClient::loadConfig() {
       config.open(Process::GetHomeDirectory() + LegacyConfigFileName);
       needToWriteFile = true;
     }
-  } catch (const HdfException& e) {
+  } catch (const HdfException&) {
     // Good, they have migrated already
   }
 

@@ -417,11 +417,11 @@ pub fn make_body<'a, 'arena, 'decl>(
 
     Ok(Body {
         body_instrs,
-        decl_vars: Slice::fill_iter(alloc, decl_vars.into_iter()),
+        decl_vars: Slice::fill_iter(alloc, decl_vars),
         num_iters,
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
-        upper_bounds: Slice::fill_iter(alloc, upper_bounds.into_iter()),
+        upper_bounds: Slice::fill_iter(alloc, upper_bounds),
         shadowed_tparams: Slice::fill_iter(
             alloc,
             shadowed_tparams
@@ -722,7 +722,7 @@ pub fn emit_generics_upper_bounds<'arena>(
             [] => None,
             _ => Some(UpperBound {
                 name: Str::new_str(alloc, get_tp_name(tparam)),
-                bounds: Slice::fill_iter(alloc, ubs.into_iter()),
+                bounds: Slice::fill_iter(alloc, ubs),
             }),
         }
     };

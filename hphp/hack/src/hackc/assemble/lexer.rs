@@ -728,7 +728,7 @@ mod test {
         // Is there a better way, maybe to verify the string in the bail?
         let s = b".srloc 3:7,3:22";
         let alloc = Bump::default();
-        assert!(matches!(assemble::assemble_from_bytes(&alloc, s), Ok(_)))
+        assert!(assemble::assemble_from_bytes(&alloc, s).is_ok())
     }
 
     #[test]
@@ -736,7 +736,7 @@ mod test {
     fn no_fpath_semicolon_shouldnt_parse() {
         let s = br#".filepath "aaaa""#;
         let alloc = Bump::default();
-        assert!(matches!(assemble::assemble_from_bytes(&alloc, s), Ok(_)))
+        assert!(assemble::assemble_from_bytes(&alloc, s).is_ok())
     }
 
     #[test]
@@ -744,7 +744,7 @@ mod test {
     fn fpath_wo_file_shouldnt_parse() {
         let s = br#".filepath aaa"#;
         let alloc = Bump::default();
-        assert!(matches!(assemble::assemble_from_bytes(&alloc, s), Ok(_)))
+        assert!(assemble::assemble_from_bytes(&alloc, s).is_ok())
     }
 
     #[test]

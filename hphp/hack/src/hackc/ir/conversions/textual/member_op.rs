@@ -239,7 +239,7 @@ impl Pending {
             Pending::ArrayAppend { base, dim } => {
                 let base_value = base.load(state)?;
                 let params = std::iter::once(base_value.into())
-                    .chain(dim.into_iter())
+                    .chain(dim)
                     .chain(std::iter::once(src.into()))
                     .collect_vec();
                 let base_value = state.call_builtin(hack::Builtin::HackArrayCowAppend, params)?;
@@ -248,7 +248,7 @@ impl Pending {
             Pending::ArrayGet { base, dim } => {
                 let base_value = base.load(state)?;
                 let params = std::iter::once(base_value.into())
-                    .chain(dim.into_iter())
+                    .chain(dim)
                     .chain(std::iter::once(src.into()))
                     .collect_vec();
                 let base_value = state.call_builtin(hack::Builtin::HackArrayCowSet, params)?;
@@ -533,7 +533,7 @@ where
                 bail!("Cannot use [] with vecs for reading in an lvalue context")
             }
             Pending::ArrayGet { .. } => {
-                let base = pending.read(self.state)?.into();
+                let base = pending.read(self.state)?;
                 (base, key, op)
             }
         };

@@ -520,7 +520,7 @@ mod test {
             it.next(),
             Some(Instr::Terminator(Terminator::Ret(..)))
         ));
-        assert!(matches!(it.next(), None));
+        assert!(it.next().is_none());
     }
 
     #[test]
@@ -641,6 +641,6 @@ mod test {
             it.next(),
             Some(Instr::Terminator(Terminator::Ret(..)))
         ));
-        assert!(matches!(it.next(), None));
+        assert!(it.next().is_none());
     }
 }

@@ -101,11 +101,11 @@ struct UnitBuilder<'a> {
 impl<'a> UnitBuilder<'a> {
     fn into_unit(self, alloc: &'a Bump) -> hhbc::Unit<'a> {
         hhbc::Unit {
-            adata: Slice::fill_iter(alloc, self.adatas.into_iter()),
-            functions: Slice::fill_iter(alloc, self.funcs.into_iter()),
-            classes: Slice::fill_iter(alloc, self.classes.into_iter()),
-            typedefs: Slice::fill_iter(alloc, self.typedefs.into_iter()),
-            file_attributes: Slice::fill_iter(alloc, self.file_attributes.into_iter()),
+            adata: Slice::fill_iter(alloc, self.adatas),
+            functions: Slice::fill_iter(alloc, self.funcs),
+            classes: Slice::fill_iter(alloc, self.classes),
+            typedefs: Slice::fill_iter(alloc, self.typedefs),
+            file_attributes: Slice::fill_iter(alloc, self.file_attributes),
             modules: Slice::from_vec(alloc, self.modules),
             module_use: self.module_use.into(),
             symbol_refs: hhbc::SymbolRefs {
@@ -114,7 +114,7 @@ impl<'a> UnitBuilder<'a> {
                 constants: self.constant_refs.unwrap_or_default(),
                 includes: self.include_refs.unwrap_or_default(),
             },
-            constants: Slice::fill_iter(alloc, self.constants.into_iter()),
+            constants: Slice::fill_iter(alloc, self.constants),
             fatal: self.fatal.into(),
             missing_symbols: Default::default(),
             error_symbols: Default::default(),

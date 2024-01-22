@@ -199,7 +199,7 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
     );
 
     Ok(Method {
-        attributes: Slice::fill_iter(alloc, attributes.into_iter()),
+        attributes: Slice::fill_iter(alloc, attributes),
         visibility: Visibility::from(method.visibility),
         name,
         body,

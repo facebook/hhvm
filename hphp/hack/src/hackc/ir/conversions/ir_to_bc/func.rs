@@ -63,7 +63,7 @@ pub(crate) fn convert_func<'a>(
 
     let return_type_info = crate::types::convert(&func.return_type, strings);
 
-    let decl_vars = Slice::fill_iter(strings.alloc, decl_vars.into_iter());
+    let decl_vars = Slice::fill_iter(strings.alloc, decl_vars);
 
     let params = Slice::fill_iter(
         strings.alloc,

@@ -166,7 +166,7 @@ fn compute_func_params<'a, 'b>(
     let this_param = textual::Param {
         name: VarName::Local(this_lid),
         attrs: None,
-        ty: this_ty.into(),
+        ty: this_ty,
     };
     result.push((this_param, this_lid));
 

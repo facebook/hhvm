@@ -67,7 +67,7 @@ pub fn from_ast<'arena, 'decl>(
     };
     Ok(Attribute {
         name: e.alloc.alloc_str(fully_qualified_id).into(),
-        arguments: e.alloc.alloc_slice_fill_iter(arguments.into_iter()).into(),
+        arguments: e.alloc.alloc_slice_fill_iter(arguments).into(),
     })
 }
 

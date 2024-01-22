@@ -44,7 +44,7 @@ pub fn emit_module<'a, 'arena, 'decl>(
     let doc_comment = ast_module.doc_comment.clone();
 
     Ok(Module {
-        attributes: Slice::fill_iter(alloc, attributes.into_iter()),
+        attributes: Slice::fill_iter(alloc, attributes),
         name,
         span,
         doc_comment: Maybe::from(doc_comment.map(|c| Str::new_str(alloc, &c.1))),

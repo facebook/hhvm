@@ -542,7 +542,7 @@ impl ProfileAcc {
             other.global_strings.is_empty(),
         ) {
             (false, false) => {
-                self.global_strings.extend(other.global_strings.into_iter());
+                self.global_strings.extend(other.global_strings);
             }
             (true, false) => {
                 self.global_strings = other.global_strings;

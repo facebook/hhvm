@@ -256,8 +256,7 @@ fn shape_to_typed_value<'arena, 'decl>(
                 let value = expr_to_typed_value(emitter, scope, expr)?;
                 Ok(DictEntry { key, value })
             })
-            .collect::<Result<Vec<_>, _>>()?
-            .into_iter(),
+            .collect::<Result<Vec<_>, _>>()?,
     );
     Ok(TypedValue::dict(a))
 }
@@ -273,7 +272,7 @@ pub fn vec_to_typed_value<'arena, 'decl>(
         .iter()
         .map(|f| value_afield_to_typed_value(e, scope, f))
         .collect();
-    let fields = e.alloc.alloc_slice_fill_iter(tv_fields?.into_iter());
+    let fields = e.alloc.alloc_slice_fill_iter(tv_fields?);
     Ok(TypedValue::vec(fields))
 }
 
@@ -372,8 +371,7 @@ fn valcollection_keyset_expr_to_typed_value<'arena, 'decl>(
             .collect::<Result<Vec<_>, _>>()?
             .into_iter()
             .unique()
-            .collect::<Vec<_>>()
-            .into_iter(),
+            .collect::<Vec<_>>(),
     );
     Ok(TypedValue::keyset(keys))
 }
@@ -421,9 +419,7 @@ fn valcollection_vec_expr_to_typed_value<'arena, 'decl>(
         x.2.iter()
             .map(|e| expr_to_typed_value(emitter, scope, e))
             .collect::<Result<_, _>>()?;
-    Ok(TypedValue::vec(
-        emitter.alloc.alloc_slice_fill_iter(v.into_iter()),
-    ))
+    Ok(TypedValue::vec(emitter.alloc.alloc_slice_fill_iter(v)))
 }
 
 fn tuple_expr_to_typed_value<'arena, 'decl>(
@@ -435,9 +431,7 @@ fn tuple_expr_to_typed_value<'arena, 'decl>(
         .iter()
         .map(|e| expr_to_typed_value(emitter, scope, e))
         .collect::<Result<_, _>>()?;
-    Ok(TypedValue::vec(
-        emitter.alloc.alloc_slice_fill_iter(v.into_iter()),
-    ))
+    Ok(TypedValue::vec(emitter.alloc.alloc_slice_fill_iter(v)))
 }
 
 fn set_expr_to_typed_value<'arena, 'decl>(
@@ -493,8 +487,7 @@ fn keyset_expr_to_typed_value<'arena, 'decl>(
             .collect::<Result<Vec<_>, _>>()?
             .into_iter()
             .unique()
-            .collect::<Vec<_>>()
-            .into_iter(),
+            .collect::<Vec<_>>(),
     );
     Ok(TypedValue::keyset(keys))
 }

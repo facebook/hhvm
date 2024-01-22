@@ -378,7 +378,7 @@ impl LowerInstrs<'_> {
             FuncInfo::Function(_) => {}
         };
 
-        ops.extend(Self::get_locals(builder, locals, loc).into_iter());
+        ops.extend(Self::get_locals(builder, locals, loc));
         ops
     }
 

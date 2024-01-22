@@ -138,7 +138,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
     let attrs = get_attrs_for_fun(emitter, fd, &attributes, false, has_variadic);
 
     Ok(Function {
-        attributes: Slice::fill_iter(alloc, attributes.into_iter()),
+        attributes: Slice::fill_iter(alloc, attributes),
         name: original_id,
         body,
         span: Span::from_pos(&f.span),

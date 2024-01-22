@@ -871,7 +871,7 @@ pub fn emit_await<'a, 'arena, 'decl>(
     let ast::Expr(_, _, e) = expr;
     let can_inline_gen_functions = !emitter
         .options()
-        .function_is_renamable(emitter_special_functions::GENA.into());
+        .function_is_renamable(emitter_special_functions::GENA);
     match e.as_call() {
         Some(ast::CallExpr {
             func: ast::Expr(_, _, ast::Expr_::Id(id)),

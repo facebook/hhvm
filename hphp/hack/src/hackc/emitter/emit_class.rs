@@ -125,7 +125,7 @@ fn make_86method<'arena, 'decl>(
 
     Ok(Method {
         body,
-        attributes: Slice::fill_iter(alloc, attributes.into_iter()),
+        attributes: Slice::fill_iter(alloc, attributes),
         name,
         flags,
         span,
@@ -547,11 +547,14 @@ pub fn emit_class<'a, 'arena, 'decl>(
 
     let mut attributes = emit_attribute::from_asts(emitter, &ast_class.user_attributes)?;
     if !is_closure {
-        attributes
-            .extend(emit_attribute::add_reified_attribute(alloc, &ast_class.tparams).into_iter());
-        attributes.extend(
-            emit_attribute::add_reified_parent_attribute(&env, &ast_class.extends).into_iter(),
-        )
+        attributes.extend(emit_attribute::add_reified_attribute(
+            alloc,
+            &ast_class.tparams,
+        ));
+        attributes.extend(emit_attribute::add_reified_parent_attribute(
+            &env,
+            &ast_class.extends,
+        ))
     }
 
     let is_const = hhbc::has_const(attributes.as_ref());
@@ -793,14 +796,14 @@ pub fn emit_class<'a, 'arena, 'decl>(
         None
     };
     let needs_no_reifiedinit = reified_init_method.is_some() && ast_class.extends.is_empty();
-    additional_methods.extend(reified_init_method.into_iter());
-    additional_methods.extend(pinit_method.into_iter());
-    additional_methods.extend(sinit_method.into_iter());
-    additional_methods.extend(linit_method.into_iter());
-    additional_methods.extend(cinit_method.into_iter());
+    additional_methods.extend(reified_init_method);
+    additional_methods.extend(pinit_method);
+    additional_methods.extend(sinit_method);
+    additional_methods.extend(linit_method);
+    additional_methods.extend(cinit_method);
 
     let mut methods = emit_method::from_asts(emitter, ast_class, &ast_class.methods)?;
-    methods.extend(additional_methods.into_iter());
+    methods.extend(additional_methods);
     let (ctxconsts, tconsts): (Vec<_>, Vec<_>) =
         ast_class.typeconsts.iter().partition(|x| x.is_ctx);
     let type_constants = tconsts
@@ -861,22 +864,22 @@ pub fn emit_class<'a, 'arena, 'decl>(
 
     add_symbol_refs(emitter, base.as_ref(), &implements, &uses, &requirements);
     Ok(Class {
-        attributes: Slice::fill_iter(alloc, attributes.into_iter()),
+        attributes: Slice::fill_iter(alloc, attributes),
         base: Maybe::from(base),
-        implements: Slice::fill_iter(alloc, implements.into_iter()),
-        enum_includes: Slice::fill_iter(alloc, enum_includes.into_iter()),
+        implements: Slice::fill_iter(alloc, implements),
+        enum_includes: Slice::fill_iter(alloc, enum_includes),
         name,
         span,
         flags,
         doc_comment: Maybe::from(doc_comment.map(|c| Str::new_str(alloc, &c.1))),
-        uses: Slice::fill_iter(alloc, uses.into_iter()),
-        methods: Slice::fill_iter(alloc, methods.into_iter()),
+        uses: Slice::fill_iter(alloc, uses),
+        methods: Slice::fill_iter(alloc, methods),
         enum_type: Maybe::from(enum_type),
-        upper_bounds: Slice::fill_iter(alloc, upper_bounds.into_iter()),
+        upper_bounds: Slice::fill_iter(alloc, upper_bounds),
         properties: Slice::fill_iter(alloc, properties.into_iter().map(|p| p.prop)),
-        requirements: Slice::fill_iter(alloc, requirements.into_iter()),
-        type_constants: Slice::fill_iter(alloc, type_constants.into_iter()),
-        ctx_constants: Slice::fill_iter(alloc, ctx_constants.into_iter()),
+        requirements: Slice::fill_iter(alloc, requirements),
+        type_constants: Slice::fill_iter(alloc, type_constants),
+        ctx_constants: Slice::fill_iter(alloc, ctx_constants),
         constants: Slice::fill_iter(alloc, constants.into_iter().map(|(c, _)| c)),
     })
 }

@@ -37,6 +37,6 @@ impl<'a> AdataCache<'a> {
     }
 
     pub(crate) fn finish(self) -> Slice<'a, hhbc::Adata<'a>> {
-        Slice::fill_iter(self.alloc, self.adata.into_iter())
+        Slice::fill_iter(self.alloc, self.adata)
     }
 }

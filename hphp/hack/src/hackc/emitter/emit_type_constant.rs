@@ -166,9 +166,7 @@ fn shape_info_to_typed_value<'arena>(
             shape_field_to_entry(alloc, opts, tparams, targ_map, type_refinement_in_hint, sfi)
         })
         .collect::<Result<Vec<_>>>()?;
-    Ok(TypedValue::dict(
-        alloc.alloc_slice_fill_iter(info.into_iter()),
-    ))
+    Ok(TypedValue::dict(alloc.alloc_slice_fill_iter(info)))
 }
 
 fn shape_allows_unknown_fields<'arena>(si: &NastShapeInfo) -> Option<DictEntry<'arena>> {
@@ -572,5 +570,5 @@ fn hints_to_type_constant<'arena>(
         .iter()
         .map(|h| hint_to_type_constant(alloc, opts, tparams, targ_map, h, type_refinement_in_hint))
         .collect::<Result<Vec<_>>>()
-        .map(|hs| TypedValue::vec(alloc.alloc_slice_fill_iter(hs.into_iter())))
+        .map(|hs| TypedValue::vec(alloc.alloc_slice_fill_iter(hs)))
 }

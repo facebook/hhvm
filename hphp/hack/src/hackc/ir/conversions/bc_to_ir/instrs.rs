@@ -423,7 +423,7 @@ fn member_op_mutates_stack_base(op: &instr::MemberOp) -> bool {
         | FinalOp::SetOpM { .. } => true,
     };
 
-    let base_key_is_element_access = op.intermediate_ops.get(0).map_or_else(
+    let base_key_is_element_access = op.intermediate_ops.first().map_or_else(
         || op.final_op.key().map_or(true, |k| k.is_element_access()),
         |dim| dim.key.is_element_access(),
     );

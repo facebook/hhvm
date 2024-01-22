@@ -1248,7 +1248,7 @@ fn member_op_may_mutate_stack_base(member_op: &instr::MemberOp) -> bool {
         FinalOp::SetOpM { .. } => true,
     };
 
-    let base_key_is_element_access = member_op.intermediate_ops.get(0).map_or_else(
+    let base_key_is_element_access = member_op.intermediate_ops.first().map_or_else(
         || {
             member_op
                 .final_op

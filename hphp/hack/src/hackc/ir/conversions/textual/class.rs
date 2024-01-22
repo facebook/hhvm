@@ -244,7 +244,7 @@ impl ClassState<'_, '_, '_> {
         let ty = convert_ty(&type_info.enforced, &self.unit_state.strings);
 
         fields.push(textual::Field {
-            name: name.into(),
+            name,
             ty: ty.into(),
             visibility,
             attributes: tx_attributes,
@@ -267,7 +267,7 @@ impl ClassState<'_, '_, '_> {
         let params = vec![textual::Param {
             name: VarName::Local(this_lid),
             attrs: None,
-            ty: static_ty.into(),
+            ty: static_ty,
         }];
         let attributes = textual::FuncAttributes::default();
 

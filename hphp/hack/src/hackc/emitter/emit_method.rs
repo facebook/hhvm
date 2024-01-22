@@ -323,7 +323,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
         has_variadic,
     );
     Ok(Method {
-        attributes: Slice::fill_iter(emitter.alloc, attributes.into_iter()),
+        attributes: Slice::fill_iter(emitter.alloc, attributes),
         visibility: Visibility::from(visibility),
         name,
         body,

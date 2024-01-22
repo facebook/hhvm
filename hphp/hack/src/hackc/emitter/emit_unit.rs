@@ -230,18 +230,18 @@ fn emit_unit_<'a, 'arena, 'decl>(
     }
 
     Ok(Unit {
-        classes: Slice::fill_iter(emitter.alloc, classes.into_iter()),
-        modules: Slice::fill_iter(emitter.alloc, modules.into_iter()),
-        functions: Slice::fill_iter(emitter.alloc, functions.into_iter()),
-        typedefs: Slice::fill_iter(emitter.alloc, typedefs.into_iter()),
-        constants: Slice::fill_iter(emitter.alloc, constants.into_iter()),
-        adata: Slice::fill_iter(emitter.alloc, adata.into_iter()),
-        file_attributes: Slice::fill_iter(emitter.alloc, file_attributes.into_iter()),
+        classes: Slice::fill_iter(emitter.alloc, classes),
+        modules: Slice::fill_iter(emitter.alloc, modules),
+        functions: Slice::fill_iter(emitter.alloc, functions),
+        typedefs: Slice::fill_iter(emitter.alloc, typedefs),
+        constants: Slice::fill_iter(emitter.alloc, constants),
+        adata: Slice::fill_iter(emitter.alloc, adata),
+        file_attributes: Slice::fill_iter(emitter.alloc, file_attributes),
         module_use,
         symbol_refs,
         fatal,
-        missing_symbols: Slice::fill_iter(emitter.alloc, missing_syms.into_iter()),
-        error_symbols: Slice::fill_iter(emitter.alloc, error_syms.into_iter()),
+        missing_symbols: Slice::fill_iter(emitter.alloc, missing_syms),
+        error_symbols: Slice::fill_iter(emitter.alloc, error_syms),
         valid_utf8: invalid_utf8_offset.is_none(),
         invalid_utf8_offset: invalid_utf8_offset.unwrap_or(0),
     })

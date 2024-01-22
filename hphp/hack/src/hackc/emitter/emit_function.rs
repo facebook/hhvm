@@ -170,7 +170,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
     let attrs =
         emit_memoize_function::get_attrs_for_fun(e, fd, &user_attrs, memoized, has_variadic);
     let normal_function = Function {
-        attributes: Slice::fill_iter(alloc, user_attrs.into_iter()),
+        attributes: Slice::fill_iter(alloc, user_attrs),
         name: FunctionName::new(Str::new_str(alloc, renamed_id.unsafe_as_str())),
         span: Span::from_pos(&f.span),
         coeffects,

@@ -268,10 +268,10 @@ struct SymbolRefsState<'arena> {
 impl<'arena> SymbolRefsState<'arena> {
     fn to_hhas(self, alloc: &'arena bumpalo::Bump) -> SymbolRefs<'arena> {
         SymbolRefs {
-            includes: Slice::new(alloc.alloc_slice_fill_iter(self.includes.into_iter())),
-            constants: Slice::new(alloc.alloc_slice_fill_iter(self.constants.into_iter())),
-            functions: Slice::new(alloc.alloc_slice_fill_iter(self.functions.into_iter())),
-            classes: Slice::new(alloc.alloc_slice_fill_iter(self.classes.into_iter())),
+            includes: Slice::new(alloc.alloc_slice_fill_iter(self.includes)),
+            constants: Slice::new(alloc.alloc_slice_fill_iter(self.constants)),
+            functions: Slice::new(alloc.alloc_slice_fill_iter(self.functions)),
+            classes: Slice::new(alloc.alloc_slice_fill_iter(self.classes)),
         }
     }
 }

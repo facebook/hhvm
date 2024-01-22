@@ -83,7 +83,7 @@ bool TerminateThreadsCommand::executeImpl(DebuggerSession* /*session*/,
         dispatchRequest(requestId);
       }
     }
-  } catch (std::out_of_range& e) {
+  } catch (std::out_of_range&) {
   }
 
   // Do not resume target.

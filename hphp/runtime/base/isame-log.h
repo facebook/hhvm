@@ -33,20 +33,18 @@ int fstrcmp_log_slice(folly::StringPiece s1, folly::StringPiece s2);
 
 inline int tstrcmp(const char* s1, const char* s2) {
   auto order = strcmp(s1, s2);
-  if (order == 0) return 0;
-  if (RO::EvalLogTsameCollisions >= 2) return order;
+  if (order == 0 || RO::EvalLogTsameCollisions >= 2) return order;
   order = strcasecmp(s1, s2);
-  if (order != 0) return order;
-  return RO::EvalLogTsameCollisions != 1 || tstrcmp_log(s1, s2);
+  if (order != 0 || RO::EvalLogTsameCollisions == 0) return order;
+  return tstrcmp_log(s1, s2);
 }
 
 inline int fstrcmp(const char* s1, const char* s2) {
   auto order = strcmp(s1, s2);
-  if (order == 0) return 0;
-  if (RO::EvalLogFsameCollisions >= 2) return order;
+  if (order == 0 || RO::EvalLogFsameCollisions >= 2) return order;
   order = strcasecmp(s1, s2);
-  if (order != 0) return order;
-  return RO::EvalLogFsameCollisions != 1 || fstrcmp_log(s1, s2);
+  if (order != 0 || RO::EvalLogFsameCollisions == 0) return order;
+  return fstrcmp_log(s1, s2);
 }
 
 inline int tstrcmp_slice(folly::StringPiece s1, folly::StringPiece s2) {
@@ -57,8 +55,8 @@ inline int tstrcmp_slice(folly::StringPiece s1, folly::StringPiece s2) {
            s1.size() > s2.size() ? 1 : 0;
   }
   order = bstrcasecmp(s1.data(), s1.size(), s2.data(), s2.size());
-  if (order != 0) return order;
-  return RO::EvalLogTsameCollisions != 1 || tstrcmp_log_slice(s1, s2);
+  if (order != 0 || RO::EvalLogTsameCollisions == 0) return order;
+  return tstrcmp_log_slice(s1, s2);
 }
 
 inline int fstrcmp_slice(folly::StringPiece s1, folly::StringPiece s2) {
@@ -69,7 +67,7 @@ inline int fstrcmp_slice(folly::StringPiece s1, folly::StringPiece s2) {
            s1.size() > s2.size() ? 1 : 0;
   }
   order = bstrcasecmp(s1.data(), s1.size(), s2.data(), s2.size());
-  if (order != 0) return order;
-  return RO::EvalLogFsameCollisions != 1 || fstrcmp_log_slice(s1, s2);
+  if (order != 0 || RO::EvalLogFsameCollisions == 0) return order;
+  return fstrcmp_log_slice(s1, s2);
 }
 }

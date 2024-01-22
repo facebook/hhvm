@@ -1121,7 +1121,7 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
         case AnnotAction::ConvertClass:
         case AnnotAction::WarnLazyClass:
         case AnnotAction::ConvertLazyClass:
-          // verifyFail will deal with the conversion/warning
+          // verify*Fail will deal with the conversion/warning
           return false;
         case AnnotAction::WarnClassname:
           if (folly::Random::oneIn(RO::EvalClassnameNoticesSampleRate)) {
@@ -1344,7 +1344,7 @@ bool TypeConstraint::checkImpl(tv_rval val,
     case AnnotAction::ConvertClass:
     case AnnotAction::WarnLazyClass:
     case AnnotAction::ConvertLazyClass:
-      // verifyFail will deal with the conversion/warning
+      // verify*Fail will deal with the conversion/warning
       return false;
     case AnnotAction::WarnClassname:
       if (folly::Random::oneIn(RO::EvalClassnameNoticesSampleRate)) {
@@ -1669,19 +1669,6 @@ MaybeDataType TypeConstraint::asSystemlibType() const {
   return underlyingDataType();
 }
 
-void TypeConstraint::verifyParamFail(tv_lval val,
-                                     const Class* ctx,
-                                     const Func* func,
-                                     int paramNums) const {
-  verifyFail(val, ctx, func, paramNums);
-  assertx(
-    isSoft() ||
-    isThis() ||
-    (RO::EvalEnforceGenericsUB < 2 && isUpperBound()) ||
-    check(val, ctx)
-  );
-}
-
 void TypeConstraint::verifyOutParamFail(TypedValue* c,
                                         const Class* ctx,
                                         const Func* func,
@@ -1746,50 +1733,18 @@ void TypeConstraint::validForPropFail(const Class* declCls,
   );
 }
 
-void TypeConstraint::verifyFail(tv_lval c, const Class* ctx, const Func* func,
-                                int id) const {
+void TypeConstraint::verifyParamFail(tv_lval c,
+                                     const Class* ctx,
+                                     const Func* func,
+                                     int id) const {
+  assertx(id != ReturnId);
   auto const tcInfo = [&] {
-    if (id == ReturnId) {
-      return folly::sformat("return of {}()", func->fullName());
-    } else {
-      return folly::sformat("argument {} passed to {}()", id+1, func->fullName());
-    }
+    return folly::sformat("argument {} passed to {}()", id+1, func->fullName());
   };
   if (tryCommonCoercions(c, ctx, nullptr, tcInfo)) return;
 
   std::string name = displayName(func->cls());
   auto const givenType = describe_actual_type(c);
-
-  // Handle return type constraint failures
-  if (id == ReturnId) {
-    std::string msg;
-    if (func->isClosureBody()) {
-      msg =
-        folly::format(
-          "Value returned from {}closure must be of type {}, {} given",
-          func->isAsync() ? "async " : "",
-          name,
-          givenType
-        ).str();
-    } else {
-      msg =
-        folly::format(
-          "Value returned from {}{} {}() must be {} {}, {} given",
-          func->isAsync() ? "async " : "",
-          func->preClass() ? "method" : "function",
-          func->fullName(),
-          isUpperBound() ? "upper-bounded by" : "of type",
-          name,
-          givenType
-        ).str();
-    }
-    if (!isSoft() && (!isUpperBound() || RuntimeOption::EvalEnforceGenericsUB >= 2)) {
-      raise_return_typehint_error(msg);
-    } else {
-      raise_warning_unsampled(msg);
-    }
-    return;
-  }
 
   // Handle parameter type constraint failures
   if (isExtended() &&
@@ -1843,6 +1798,51 @@ void TypeConstraint::verifyFail(tv_lval c, const Class* ctx, const Func* func,
         raise_typehint_error(msg);
       }
     }
+  }
+
+  assertx(
+    isSoft() ||
+    isThis() ||
+    (RO::EvalEnforceGenericsUB < 2 && isUpperBound()) ||
+    check(c, ctx)
+  );
+}
+
+void TypeConstraint::verifyReturnFail(tv_lval c, const Class* ctx,
+                                      const Func* func) const {
+  auto const tcInfo = [&] {
+    return folly::sformat("return of {}()", func->fullName());
+  };
+  if (tryCommonCoercions(c, ctx, nullptr, tcInfo)) return;
+
+  std::string name = displayName(func->cls());
+  auto const givenType = describe_actual_type(c);
+
+  std::string msg;
+  if (func->isClosureBody()) {
+    msg =
+      folly::format(
+        "Value returned from {}closure must be of type {}, {} given",
+        func->isAsync() ? "async " : "",
+        name,
+        givenType
+      ).str();
+  } else {
+    msg =
+      folly::format(
+        "Value returned from {}{} {}() must be {} {}, {} given",
+        func->isAsync() ? "async " : "",
+        func->preClass() ? "method" : "function",
+        func->fullName(),
+        isUpperBound() ? "upper-bounded by" : "of type",
+        name,
+        givenType
+      ).str();
+  }
+  if (!isSoft() && (!isUpperBound() || RuntimeOption::EvalEnforceGenericsUB >= 2)) {
+    raise_return_typehint_error(msg);
+  } else {
+    raise_warning_unsampled(msg);
   }
 }
 

@@ -500,11 +500,9 @@ struct TypeConstraint {
                           const Class* ctx,
                           const Func* func,
                           int paramNum) const;
-  void verifyReturnFail(TypedValue* tv,
+  void verifyReturnFail(tv_lval val,
                         const Class* ctx,
-                        const Func* func) const {
-    verifyFail(tv, ctx, func, ReturnId);
-  }
+                        const Func* func) const;
   // TODO(T61738946): We can take a tv_rval here once we remove support for
   // coercing class_meth types.
   void verifyPropFail(const Class* thisCls, const Class* declCls,
@@ -561,11 +559,6 @@ private:
   bool checkNamedTypeNonObj(tv_rval val) const;
 
   template <bool> static bool checkTypeAliasImpl(const ClassConstraint& oc, const Class* type);
-
-  void verifyFail(tv_lval val,
-                  const Class* ctx,
-                  const Func* func,
-                  int id) const;
 
   bool checkStringCompatible() const;
 

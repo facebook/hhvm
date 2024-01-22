@@ -645,9 +645,9 @@ ArrayData* loadClsTypeCnsHelper(
   if (no_throw_on_undefined) {
     try {
       typeCns = cls->clsCnsGet(name, ConstModifiers::Kind::Type);
-    } catch (Exception& e) {
+    } catch (Exception&) {
       return getFake();
-    } catch (Object& e) {
+    } catch (Object&) {
       return getFake();
     }
   } else {

@@ -49,16 +49,6 @@ struct RepoGlobalData {
   int32_t CheckPropTypeHints = 0;
 
   /*
-   * Indicates whether a repo was compiled assumming that UpperBound type-hints
-   * will be verified by the parameter type verification and VerifyReturnType
-   * instructions at runtime.
-   *
-   * This changes program behavior because this type hints that are checked
-   * at runtime will enable additional HHBBC optimizations.
-   */
-  bool HardGenericsUB = false;
-
-  /*
    * Indicates whether hex strings (e.g. "0x20") can be used for numeric
    * operations, e.g. ("0x20" + 1)
    */
@@ -221,7 +211,6 @@ struct RepoGlobalData {
     sd(InitialTypeTableSize)
       (InitialFuncTableSize)
       (InitialStaticStringTableSize)
-      (HardGenericsUB)
       (CheckPropTypeHints)
       (PHP7_NoHexNumerics)
       (PHP7_Substr)

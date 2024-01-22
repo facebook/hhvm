@@ -15,6 +15,6 @@ class Sub2 <T as Fooable as string> extends Sup {
 }
 
 <<__EntryPoint>> function main() :mixed{
-  $o1 = new Sub1;
-  $o2 = new Sub2;
+  var_dump(new Sub1);
+  var_dump(new Sub2);
 }

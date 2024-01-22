@@ -58,8 +58,6 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
   RO::NonInterceptableFunctions                    = NonInterceptableFunctions;
   RO::EvalStrictUtf8Mode                           = StrictUtf8Mode;
 
-  if (HardGenericsUB) RO::EvalEnforceGenericsUB = 2;
-
   if (!RO::EvalBuildMayNoticeOnMethCallerHelperIsObject) {
     RO::EvalNoticeOnMethCallerHelperIsObject = false;
   }
@@ -87,7 +85,6 @@ std::string show(const RepoGlobalData& gd) {
   SHOW(InitialFuncTableSize);
   SHOW(InitialStaticStringTableSize);
   SHOW(CheckPropTypeHints);
-  SHOW(HardGenericsUB);
   SHOW(PHP7_NoHexNumerics);
   SHOW(PHP7_Builtins);
   SHOW(PHP7_Substr);

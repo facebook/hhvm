@@ -1,5 +1,5 @@
-Warning: Argument 1 to foobar1() must be upper-bounded by ?Bar, float given in %s/async-ub.php on line 17
+Warning: Argument 1 to foobar1() must be upper-bounded by @?Bar, float given in %s/async-ub.php on line 17
 
-Warning: Value returned from async function foobar1() must be upper-bounded by ?Bar, float given in %s/async-ub.php on line 4
+Warning: Value returned from async function foobar1() must be upper-bounded by @?Bar, float given in %s/async-ub.php on line 4
 float(2.2)
 float(0)

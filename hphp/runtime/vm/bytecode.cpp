@@ -3328,11 +3328,9 @@ OPTBLD_INLINE void iopSetS(ReadonlyOp op) {
     auto const& sprop = cls->staticProperties()[slot];
     auto const& tc = sprop.typeConstraint;
     if (tc.isCheckable()) tc.verifyStaticProperty(tv1, cls, sprop.cls, name);
-    if (RuntimeOption::EvalEnforceGenericsUB > 0) {
-      for (auto const& ub : sprop.ubs.m_constraints) {
-        if (ub.isCheckable()) {
-          ub.verifyStaticProperty(tv1, cls, sprop.cls, name);
-        }
+    for (auto const& ub : sprop.ubs.m_constraints) {
+      if (ub.isCheckable()) {
+        ub.verifyStaticProperty(tv1, cls, sprop.cls, name);
       }
     }
   }

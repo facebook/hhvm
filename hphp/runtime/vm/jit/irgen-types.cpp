@@ -208,7 +208,6 @@ void verifyTypeImpl(IRGS& env,
   // Ensure that we should bother checking the type at all. If it's uncheckable
   // (because it's an unenforcible type) then just return.
   if (!tc.isCheckable()) return;
-  assertx(!tc.isUpperBound() || RuntimeOption::EvalEnforceGenericsUB != 0);
 
   auto const genThisCls = [&]() {
     return tc.isThis() ? getThisCls() : cns(env, nullptr);
@@ -219,8 +218,7 @@ void verifyTypeImpl(IRGS& env,
 
     auto const failHard = RuntimeOption::RepoAuthoritative
       && !tc.isSoft()
-      && !tc.isThis()
-      && (!tc.isUpperBound() || RuntimeOption::EvalEnforceGenericsUB >= 2);
+      && !tc.isThis();
     return fail(val, thisCls, failHard);
   };
 
@@ -1640,8 +1638,7 @@ void verifyPropType(IRGS& env,
       },
       [&] (SSATmp* val, SSATmp*, bool hard) { // Check failure
         auto const failHard =
-          hard && RuntimeOption::EvalCheckPropTypeHints >= 3 &&
-          (!tc->isUpperBound() || RuntimeOption::EvalEnforceGenericsUB >= 2);
+          hard && RuntimeOption::EvalCheckPropTypeHints >= 3;
         gen(
           env,
           failHard ? VerifyPropFailHard : VerifyPropFail,
@@ -1671,10 +1668,8 @@ void verifyPropType(IRGS& env,
     );
   };
   verifyFunc(tc);
-  if (RuntimeOption::EvalEnforceGenericsUB > 0) {
-    for (auto const& ub : ubs->m_constraints) {
-      verifyFunc(&ub);
-    }
+  for (auto const& ub : ubs->m_constraints) {
+    verifyFunc(&ub);
   }
 }
 

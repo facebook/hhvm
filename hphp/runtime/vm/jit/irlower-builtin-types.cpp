@@ -173,12 +173,10 @@ static TypedValue verifyPropAll(const Class* cls, Slot slot, TypedValue val) {
     val = verifyPropImpl(cls, slot, &tc, val);
     assertx(tvIsPlausible(val));
   }
-  if (RuntimeOption::EvalEnforceGenericsUB > 0) {
-    for (auto const& ub : prop.ubs.m_constraints) {
-      if (ub.isCheckable()) {
-        val = verifyPropImpl(cls, slot, &ub, val);
-        assertx(tvIsPlausible(val));
-      }
+  for (auto const& ub : prop.ubs.m_constraints) {
+    if (ub.isCheckable()) {
+      val = verifyPropImpl(cls, slot, &ub, val);
+      assertx(tvIsPlausible(val));
     }
   }
   return val;
@@ -209,12 +207,10 @@ static TypedValue verifySPropAll(const Class* cls, Slot slot, TypedValue val) {
     val = verifySPropImpl(cls, slot, &tc, val);
     assertx(tvIsPlausible(val));
   }
-  if (RuntimeOption::EvalEnforceGenericsUB > 0) {
-    for (auto const& ub : prop.ubs.m_constraints) {
-      if (ub.isCheckable()) {
-        val = verifySPropImpl(cls, slot, &ub, val);
-        assertx(tvIsPlausible(val));
-      }
+  for (auto const& ub : prop.ubs.m_constraints) {
+    if (ub.isCheckable()) {
+      val = verifySPropImpl(cls, slot, &ub, val);
+      assertx(tvIsPlausible(val));
     }
   }
   return val;

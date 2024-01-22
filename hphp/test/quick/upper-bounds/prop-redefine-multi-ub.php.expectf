@@ -1,3 +1,4 @@
-Warning: Upper-bound string of Sub2::x has no equivalent upper-bound in Sup in %s/test/quick/upper-bounds/prop-redefine-multi-ub.php on line 19
+object(Sub1) (0) {
+}
 
-Warning: Upper-bound Barable of Sup::x has no equivalent upper-bound in Sub2 in %s/test/quick/upper-bounds/prop-redefine-multi-ub.php on line 19
+Catchable fatal error: Upper-bound string of Sub2::x has no equivalent upper-bound in Sup in %s/prop-redefine-multi-ub.php on line 19

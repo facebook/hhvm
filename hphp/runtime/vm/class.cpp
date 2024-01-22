@@ -940,11 +940,9 @@ void Class::initSProps() const {
             sProp.name
           );
         }
-        if (RuntimeOption::EvalEnforceGenericsUB > 0) {
-          for (auto const& ub : sProp.ubs.m_constraints) {
-            if (ub.isCheckable()) {
-              ub.verifyStaticProperty(&val, this, sProp.cls, sProp.name);
-            }
+        for (auto const& ub : sProp.ubs.m_constraints) {
+          if (ub.isCheckable()) {
+            ub.verifyStaticProperty(&val, this, sProp.cls, sProp.name);
           }
         }
       }
@@ -1015,11 +1013,9 @@ void Class::checkPropInitialValues() const {
     if (type(rval) == KindOfUninit) continue;
     auto tv = rval.tv();
     if (tc.isCheckable()) tc.verifyProperty(&tv, this, prop.cls, prop.name);
-    if (RuntimeOption::EvalEnforceGenericsUB > 0) {
-      for (auto const& ub : prop.ubs.m_constraints) {
-        if (ub.isCheckable()) {
-          ub.verifyProperty(&tv, this, prop.cls, prop.name);
-        }
+    for (auto const& ub : prop.ubs.m_constraints) {
+      if (ub.isCheckable()) {
+        ub.verifyProperty(&tv, this, prop.cls, prop.name);
       }
     }
 
@@ -1092,8 +1088,7 @@ void Class::checkPropTypeRedefinition(Slot slot) const {
     );
   }
 
-  if (RuntimeOption::EvalEnforceGenericsUB > 0 &&
-      (!prop.ubs.isTop() || !oldProp.ubs.isTop())) {
+  if (!prop.ubs.isTop() || !oldProp.ubs.isTop()) {
     std::vector<TypeConstraint> newTCs = {newTC};
     for (auto const& ub : prop.ubs.m_constraints) newTCs.push_back(ub);
     std::vector<TypeConstraint> oldTCs = {oldTC};
@@ -1407,17 +1402,13 @@ Class::PropValLookup Class::getSPropIgnoreLateInit(
           auto skipCheck =
             !decl.typeConstraint.isCheckable() ||
             decl.typeConstraint.isSoft() ||
-            (decl.typeConstraint.isUpperBound() &&
-             RuntimeOption::EvalEnforceGenericsUB < 2) ||
             (sProp->m_type == KindOfNull &&
              !(decl.attrs & AttrNoImplicitNullable));
 
           auto res = skipCheck ? true : decl.typeConstraint.assertCheck(sProp);
-          if (RuntimeOption::EvalEnforceGenericsUB >= 2) {
-            for (auto const& ub : decl.ubs.m_constraints) {
-              if (ub.isCheckable() && !ub.isSoft()) {
-                res = res && ub.assertCheck(sProp);
-              }
+          for (auto const& ub : decl.ubs.m_constraints) {
+            if (ub.isCheckable() && !ub.isSoft()) {
+              res = res && ub.assertCheck(sProp);
             }
           }
           return res;
@@ -3536,11 +3527,9 @@ void Class::checkPrePropVal(XProp& prop, const PreClass::Prop* preProp) {
 
   auto const alwaysPassesAll = [&] {
     if (!tc.alwaysPasses(&tv)) return false;
-    if (RuntimeOption::EvalEnforceGenericsUB > 0) {
-      auto const& ubs = preProp->upperBounds();
-      for (auto const& ub : ubs.m_constraints) {
-        if (!ub.alwaysPasses(&tv)) return false;
-      }
+    auto const& ubs = preProp->upperBounds();
+    for (auto const& ub : ubs.m_constraints) {
+      if (!ub.alwaysPasses(&tv)) return false;
     }
     return true;
   }();

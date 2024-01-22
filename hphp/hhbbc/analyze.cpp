@@ -1425,10 +1425,7 @@ ConstraintType type_from_constraint_impl(const TypeConstraint& tc,
                                          const Self& self) {
   using C = ConstraintType;
 
-  assertx(IMPLIES(
-    !tc.isCheckable(),
-    tc.isMixed() || (tc.isUpperBound() && RO::EvalEnforceGenericsUB == 0)
-  ));
+  assertx(IMPLIES(!tc.isCheckable(), tc.isMixed()));
 
   auto ty = [&] {
     auto const exact = [&] (const Type& t) {
@@ -1572,7 +1569,7 @@ ConstraintType type_from_constraint_impl(const TypeConstraint& tc,
   // Soft type-constraints can potentially allow anything, so its
   // upper-bound is maximal. We might still be able to optimize away
   // the check if the lower bound is satisfied.
-  if (tc.isSoft() || (RO::EvalEnforceGenericsUB < 2 && tc.isUpperBound())) {
+  if (tc.isSoft()) {
     ty.upper = TInitCell;
     ty.maybeMixed = true;
   }

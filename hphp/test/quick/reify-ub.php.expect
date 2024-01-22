@@ -1,9 +1,6 @@
-string(62) "Argument 1 to foo() must be upper-bounded by num, string given"
-string(1) "a"
-string(67) "Argument 1 to Bar::baz() must be upper-bounded by num, string given"
-string(1) "a"
+string(69) "Argument 1 passed to foo() must be upper-bounded by num, string given"
+string(74) "Argument 1 passed to Bar::baz() must be upper-bounded by num, string given"
 string(67) "Argument 1 passed to foo() must be an instance of string, int given"
 string(72) "Argument 1 passed to Bar::baz() must be an instance of string, int given"
 int(1)
 string(80) "Value returned from function foobar() must be upper-bounded by num, string given"
-string(71) "Value returned from function foobar() must be of type int, string given"

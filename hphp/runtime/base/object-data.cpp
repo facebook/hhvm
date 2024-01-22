@@ -76,7 +76,6 @@ void verifyTypeHint(const Class* thisCls,
   if (prop->typeConstraint.isCheckable()) {
     prop->typeConstraint.verifyProperty(val, thisCls, prop->cls, prop->name);
   }
-  if (RuntimeOption::EvalEnforceGenericsUB <= 0) return;
   for (auto const& ub : prop->ubs.m_constraints) {
     if (ub.isCheckable()) {
       ub.verifyProperty(val, thisCls, prop->cls, prop->name);
@@ -130,8 +129,6 @@ bool ObjectData::assertTypeHint(tv_rval prop, Slot slot) const {
   if (RuntimeOption::EvalCheckPropTypeHints <= 2) return true;
   if (!propDecl.typeConstraint.isCheckable() ||
       propDecl.typeConstraint.isSoft()) return true;
-  if (propDecl.typeConstraint.isUpperBound() &&
-      RuntimeOption::EvalEnforceGenericsUB < 2) return true;
   if (prop.type() == KindOfNull && !(propDecl.attrs & AttrNoImplicitNullable)) {
     return true;
   }
@@ -139,7 +136,6 @@ bool ObjectData::assertTypeHint(tv_rval prop, Slot slot) const {
     return true;
   }
   if (!assertATypeHint(propDecl.typeConstraint, prop)) return false;
-  if (RuntimeOption::EvalEnforceGenericsUB <= 2) return true;
   for (auto const& ub : propDecl.ubs.m_constraints) {
     if (!assertATypeHint(ub, prop)) return false;
   }

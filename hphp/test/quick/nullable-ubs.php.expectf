@@ -3,17 +3,17 @@ NULL
 NULL
 int(1)
 
-Warning: Argument 1 to foo() must be upper-bounded by ?int, string given in %s/nullable-ubs.php on line 24
+Warning: Argument 1 to foo() must be upper-bounded by @?int, string given in %s/nullable-ubs.php on line 24
 
-Warning: Value returned from function foo() must be upper-bounded by ?int, string given in %s/nullable-ubs.php on line 4
+Warning: Value returned from function foo() must be upper-bounded by @?int, string given in %s/nullable-ubs.php on line 4
 string(1) "a"
 
-Warning: Argument 1 to Bar::baz() must be upper-bounded by ?int, string given in %s/nullable-ubs.php on line 25
+Warning: Argument 1 to Bar::baz() must be upper-bounded by @?int, string given in %s/nullable-ubs.php on line 25
 
-Warning: Value returned from method Bar::baz() must be upper-bounded by ?int, string given in %s/nullable-ubs.php on line 9
+Warning: Value returned from method Bar::baz() must be upper-bounded by @?int, string given in %s/nullable-ubs.php on line 9
 string(1) "b"
 
-Warning: Argument 1 to foobar() must be upper-bounded by ?Baz, string given in %s/nullable-ubs.php on line 26
+Warning: Argument 1 to foobar() must be upper-bounded by @?Baz, string given in %s/nullable-ubs.php on line 26
 
-Warning: Value returned from function foobar() must be upper-bounded by ?Baz, string given in %s/nullable-ubs.php on line 15
+Warning: Value returned from function foobar() must be upper-bounded by @?Baz, string given in %s/nullable-ubs.php on line 15
 string(1) "c"

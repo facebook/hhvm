@@ -7477,9 +7477,7 @@ PropMergeResult prop_tc_effects(const Index& index,
   auto result = check(prop.typeConstraint, val);
   // If we're not checking generics upper-bounds, or if we already
   // know we'll fail, we're done.
-  if (!checkUB ||
-      RuntimeOption::EvalEnforceGenericsUB <= 0 ||
-      result.throws == TriBool::Yes) {
+  if (!checkUB || result.throws == TriBool::Yes) {
     return result;
   }
 

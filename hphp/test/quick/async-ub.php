@@ -1,6 +1,6 @@
 <?hh
 type Bar = int;
-async function foobar1<T as Bar>(?T $b): Awaitable<?T> {
+async function foobar1<T as Bar>(<<__Soft>>?T $b): <<__Soft>>Awaitable<?T> {
   return $b + 1;
 }
 

@@ -115,9 +115,7 @@ Type knownTypeForProp(const Class::Prop& prop,
                       const Class* ctx,
                       bool ignoreLateInit) {
   auto knownType = TCell;
-  if (RuntimeOption::EvalCheckPropTypeHints >= 3 &&
-      (!prop.typeConstraint.isUpperBound() ||
-       RuntimeOption::EvalEnforceGenericsUB >= 2)) {
+  if (RuntimeOption::EvalCheckPropTypeHints >= 3) {
     knownType = typeFromPropTC(prop.typeConstraint, propCls, ctx, false);
     if (!(prop.attrs & AttrNoImplicitNullable)) knownType |= TInitNull;
   }

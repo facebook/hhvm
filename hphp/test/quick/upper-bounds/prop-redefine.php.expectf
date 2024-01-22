@@ -1,2 +1,1 @@
-Warning: Type-hint of 'Sub::x' must be upper-bounded by num (as in class Sup), not int in %s/test/quick/upper-bounds/prop-redefine.php on line 12
-int(10)
+Catchable fatal error: Type-hint of 'Sub::x' must be upper-bounded by num (as in class Sup), not int in %s/prop-redefine.php on line 12

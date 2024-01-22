@@ -990,10 +990,7 @@ Type typeFromTCImpl(const HPHP::TypeConstraint& tc,
                     TGetThisType getThisType,
                     const Class* ctx,
                     bool useObjectForUnresolved = false) {
-  if (!tc.isCheckable() || tc.isSoft() ||
-      (tc.isUpperBound() && RuntimeOption::EvalEnforceGenericsUB < 2)) {
-    return TCell;
-  }
+  if (!tc.isCheckable() || tc.isSoft()) return TCell;
 
   using A = AnnotType;
   auto const atToType = [&](AnnotType at) {

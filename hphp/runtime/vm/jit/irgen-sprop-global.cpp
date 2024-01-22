@@ -65,9 +65,7 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
   auto const& prop = cls->staticProperties()[slot];
 
   auto knownType = TCell;
-  if (RuntimeOption::EvalCheckPropTypeHints >= 3 &&
-      (!prop.typeConstraint.isUpperBound() ||
-       RuntimeOption::EvalEnforceGenericsUB >= 2)) {
+  if (RuntimeOption::EvalCheckPropTypeHints >= 3) {
     knownType = typeFromPropTC(prop.typeConstraint, cls, ctx, true);
     if (!(prop.attrs & AttrNoImplicitNullable)) knownType |= TInitNull;
   }

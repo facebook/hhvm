@@ -26,9 +26,17 @@ function foobar<reify T as num>(T $x): T {
     }
   );
 
-  foo<string>('a'); // reify check passes, ub fails
+  try {
+    foo<string>('a'); // reify check passes, ub fails
+  } catch (Exception $e) {
+    var_dump($e->getMessage());
+  }
   $o = new Bar<string>;
-  $o->baz('a'); // reify check passes, ub fails
+  try {
+    $o->baz('a'); // reify check passes, ub fails
+  } catch (Exception $e) {
+    var_dump($e->getMessage());
+  }
   try {
     foo<string>(1); // reify check fails, ub passes
   } catch (Exception $e) {

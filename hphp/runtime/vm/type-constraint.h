@@ -302,8 +302,7 @@ struct TypeConstraint {
     return (hasConstraint()
             && !isMixed()
             && !isTypeVar()
-            && !isTypeConstant()
-            && !(isUpperBound() && RuntimeOption::EvalEnforceGenericsUB == 0))
+            && !isTypeConstant())
       || isUnion();
   }
 
@@ -760,9 +759,6 @@ inline bool setOpNeedsTypeCheck(const TypeConstraint& tc,
                                 SetOpOp op,
                                 tv_rval lhs) {
   if (RuntimeOption::EvalCheckPropTypeHints <= 0 || !tc.isCheckable()) {
-    return false;
-  }
-  if (RuntimeOption::EvalEnforceGenericsUB <= 0 && tc.isUpperBound()) {
     return false;
   }
   if (op != SetOpOp::ConcatEqual) return true;

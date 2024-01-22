@@ -1,5 +1,0 @@
--vRuntime.Eval.CheckPropTypeHints=3
--vRuntime.Eval.EnforceGenericsUB=0
---inputs=__DIR__/prop-type-alias.inc
---inputs=__DIR__/prop-ub-class-1.inc
---inputs=__DIR__/prop-ub-class-2.inc

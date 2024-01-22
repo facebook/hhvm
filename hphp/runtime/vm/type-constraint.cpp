@@ -1689,7 +1689,7 @@ void TypeConstraint::verifyOutParamFail(TypedValue* c,
       describe_actual_type(c)
   );
 
-  if (!isSoft() && (!isUpperBound() || RuntimeOption::EvalEnforceGenericsUB >= 2)) {
+  if (!isSoft()) {
     raise_return_typehint_error(msg);
   } else {
     raise_warning_unsampled(msg);
@@ -1747,9 +1747,7 @@ void TypeConstraint::verifyParamFail(tv_lval c,
   auto const givenType = describe_actual_type(c);
 
   // Handle parameter type constraint failures
-  if (isExtended() &&
-      (isSoft() ||
-      (isUpperBound() && RuntimeOption::EvalEnforceGenericsUB < 2))) {
+  if (isExtended() && isSoft()) {
     // Soft extended type hints raise warnings instead of recoverable
     // errors, to ease migration.
     raise_warning_unsampled(
@@ -1779,11 +1777,7 @@ void TypeConstraint::verifyParamFail(tv_lval c,
           isUpperBound() ? "be upper-bounded by" : "implement",
           name, givenType
         ).str();
-      if (isUpperBound() && RuntimeOption::EvalEnforceGenericsUB < 2) {
-        raise_warning_unsampled(msg);
-      } else {
-        raise_typehint_error(msg);
-      }
+      raise_typehint_error(msg);
     } else {
       auto const msg =
         folly::format(
@@ -1792,18 +1786,13 @@ void TypeConstraint::verifyParamFail(tv_lval c,
           isUpperBound() ? "upper-bounded by" : "an instance of",
           name, givenType
         ).str();
-      if (isUpperBound() && RuntimeOption::EvalEnforceGenericsUB < 2) {
-        raise_warning_unsampled(msg);
-      } else {
-        raise_typehint_error(msg);
-      }
+      raise_typehint_error(msg);
     }
   }
 
   assertx(
     isSoft() ||
     isThis() ||
-    (RO::EvalEnforceGenericsUB < 2 && isUpperBound()) ||
     check(c, ctx)
   );
 }
@@ -1839,7 +1828,7 @@ void TypeConstraint::verifyReturnFail(tv_lval c, const Class* ctx,
         givenType
       ).str();
   }
-  if (!isSoft() && (!isUpperBound() || RuntimeOption::EvalEnforceGenericsUB >= 2)) {
+  if (!isSoft()) {
     raise_return_typehint_error(msg);
   } else {
     raise_warning_unsampled(msg);

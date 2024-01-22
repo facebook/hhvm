@@ -125,9 +125,7 @@ void raise_property_typehint_error(const std::string& msg,
                                    bool isSoft, bool isUB) {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
 
-  if (RuntimeOption::EvalCheckPropTypeHints == 1 ||
-      isSoft ||
-      (isUB && RuntimeOption::EvalEnforceGenericsUB < 2)) {
+  if (RuntimeOption::EvalCheckPropTypeHints == 1 || isSoft) {
     raise_warning_unsampled(msg);
     return;
   }

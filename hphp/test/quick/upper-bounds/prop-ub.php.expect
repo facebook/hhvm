@@ -1,0 +1,21 @@
+Warning: Property 'Foo1::x' upper-bounded by type num, null assigned
+
+Warning: Property 'Foo2::y' upper-bounded by type ?BarBar, string assigned
+
+Warning: Property 'Foo3::z' upper-bounded by type @num, string assigned
+
+Warning: Static property 'Foo4::sx' upper-bounded by type ?num, string assigned
+
+Warning: Static property 'Foo5::sy' upper-bounded by type BarBar, null assigned
+
+Warning: Property 'Foo::x' upper-bounded by type num, HH\vec assigned
+
+Warning: Property 'Foo::y' upper-bounded by type ?BarBar, NoBar assigned
+
+Warning: Static property 'Foo::sx' upper-bounded by type ?num, string assigned
+
+Warning: Static property 'Foo::sy' upper-bounded by type BarBar, HH\vec assigned
+
+Warning: Property 'Foo::z' upper-bounded by type @num, HH\vec assigned
+
+Warning: Property 'Foo::w' upper-bounded by type BarBar, null assigned

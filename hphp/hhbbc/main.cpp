@@ -232,7 +232,6 @@ RepoGlobalData get_global_data() {
 
   auto gd                        = RepoGlobalData{};
   gd.Signature                   = nanos.count();
-  gd.HardGenericsUB              = RuntimeOption::EvalEnforceGenericsUB >= 2;
   gd.CheckPropTypeHints          = RuntimeOption::EvalCheckPropTypeHints;
   gd.PHP7_NoHexNumerics          = RuntimeOption::PHP7_NoHexNumerics;
   gd.PHP7_Substr                 = RuntimeOption::PHP7_Substr;
@@ -676,7 +675,6 @@ void process_init(const Options& o,
   RO::EvalNoticeOnBuiltinDynamicCalls     = gd.NoticeOnBuiltinDynamicCalls;
   RO::EvalHackArrCompatSerializeNotices   = gd.HackArrCompatSerializeNotices;
   RO::EvalIsVecNotices                    = gd.IsVecNotices;
-  RO::EvalEnforceGenericsUB               = gd.HardGenericsUB ? 2 : 1;
 
   options.SourceRootForFileBC             = gd.SourceRootForFileBC;
 }

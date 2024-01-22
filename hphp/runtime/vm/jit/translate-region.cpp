@@ -575,7 +575,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       try {
         irgs.skipSurpriseCheck = emitedSurpriseCheck;
         translateInstr(irgs, inst);
-      } catch (const RetryIRGen& e) {
+      } catch (const RetryIRGen&) {
         return TranslateResult::Retry;
       } catch (const FailedIRGen& exn) {
         ProfSrcKey psk2{canonTransID(irgs.profTransIDs), sk};

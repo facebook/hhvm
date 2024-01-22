@@ -648,6 +648,7 @@ static bool sendAdminCommand(const char* cmd) {
       curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
       curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
       curl_easy_setopt(curl, CURLOPT_TIMEOUT, 3);
+      curl_easy_setopt(curl, CURLOPT_USERAGENT, "hhvm-internal/1.0");
       auto code = curl_easy_perform(curl);
       curl_easy_cleanup(curl);
       if (code == CURLE_OK) {

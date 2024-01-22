@@ -17,6 +17,7 @@
 package com.facebook.swift.service.stats;
 
 import com.facebook.nifty.core.NiftyMetrics;
+import com.facebook.thrift.util.resources.RpcResources;
 import io.airlift.stats.DecayCounter;
 import io.airlift.stats.Distribution;
 import io.airlift.stats.ExponentialDecay;
@@ -269,6 +270,9 @@ public class ServerStats {
         (key, value) -> {
           counters.put(THRIFT + key, Math.round(value.getAvg()));
         });
+
+    // Add counters for the off loop scheduler
+    counters.putAll(RpcResources.getOffLoopSchedulerStats());
     return counters;
   }
 

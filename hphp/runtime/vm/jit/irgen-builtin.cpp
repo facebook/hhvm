@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/enum-cache.h"
-#include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/isame-log.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -1341,12 +1341,12 @@ SSATmp* opt_class_to_classname(IRGS& env, const ParamPrep& params) {
 
 //////////////////////////////////////////////////////////////////////
 
-// Whitelists of builtins that we have optimized HHIR emitters for.
-// The first whitelist here simply lets us look up the functions above.
+// Allowlists of builtins that we have optimized HHIR emitters for.
+// The first allowlist here simply lets us look up the functions above.
 
 using OptEmitFn = SSATmp* (*)(IRGS& env, const ParamPrep& params);
 
-const hphp_fast_string_imap<OptEmitFn> s_opt_emit_fns{
+const hphp_fast_string_fmap<OptEmitFn> s_opt_emit_fns{
   {"is_a", opt_is_a},
   {"is_subclass_of", opt_is_subclass_of},
   {"method_exists", opt_method_exists},
@@ -1368,11 +1368,11 @@ const hphp_fast_string_imap<OptEmitFn> s_opt_emit_fns{
   {"chr", opt_chr},
   {"is_numeric", opt_is_numeric},
   {"hphp_debug_caller_info", opt_hphp_debug_caller_info},
-  {"hh\\array_key_cast", opt_array_key_cast},
-  {"hh\\type_structure", opt_type_structure},
-  {"hh\\type_structure_no_throw", opt_type_structure_no_throw},
-  {"hh\\type_structure_classname", opt_type_structure_classname},
-  {"hh\\is_list_like", opt_is_list_like},
+  {"HH\\array_key_cast", opt_array_key_cast},
+  {"HH\\type_structure", opt_type_structure},
+  {"HH\\type_structure_no_throw", opt_type_structure_no_throw},
+  {"HH\\type_structure_classname", opt_type_structure_classname},
+  {"HH\\is_list_like", opt_is_list_like},
   {"HH\\is_dict_or_darray", opt_is_dict_or_darray},
   {"HH\\is_vec_or_varray", opt_is_vec_or_varray},
   {"HH\\Lib\\_Private\\Native\\first", opt_container_first},
@@ -1398,10 +1398,10 @@ const hphp_fast_string_imap<OptEmitFn> s_opt_emit_fns{
   {"hphp_debug_caller_identifier", opt_hphp_debug_caller_identifier},
 };
 
-// This second whitelist, a subset of the first, records which parameter
+// This second allowlist, a subset of the first, records which parameter
 // (if any) we need a vanilla input for to generate optimized HHIR.
 
-const hphp_fast_string_imap<int> s_vanilla_params{
+const hphp_fast_string_fmap<int> s_vanilla_params{
   {"HH\\Lib\\_Private\\Native\\first", 0},
   {"HH\\Lib\\_Private\\Native\\last", 0},
   {"HH\\Lib\\_Private\\Native\\first_key", 0},

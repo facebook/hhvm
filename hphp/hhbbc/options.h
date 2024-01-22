@@ -18,6 +18,7 @@
 #include <string>
 #include <utility>
 
+#include "hphp/runtime/base/isame-log.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/hash-set.h"
@@ -28,7 +29,7 @@ namespace HPHP::HHBBC {
 //////////////////////////////////////////////////////////////////////
 
 // Map case-insensitive class name => Set<case-sensitive method name>
-using MethodMap = hphp_fast_string_imap<hphp_fast_string_set>;
+using MethodMap = hphp_fast_string_tmap<hphp_fast_string_set>;
 
 //////////////////////////////////////////////////////////////////////
 

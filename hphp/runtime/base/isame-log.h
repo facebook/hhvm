@@ -20,6 +20,7 @@
 #include <folly/Range.h>
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/bstring.h"
+#include "hphp/util/hash-map.h"
 
 namespace HPHP {
 
@@ -70,4 +71,33 @@ inline int fstrcmp_slice(folly::StringPiece s1, folly::StringPiece s2) {
   if (order != 0 || RO::EvalLogFsameCollisions == 0) return order;
   return fstrcmp_log_slice(s1, s2);
 }
+
+struct string_eqstrt {
+  bool operator()(const std::string &s1, const std::string &s2) const {
+    return tstrcmp_slice(s1, s2) == 0;
+  }
+};
+
+struct string_eqstrf {
+  bool operator()(const std::string &s1, const std::string &s2) const {
+    return fstrcmp_slice(s1, s2) == 0;
+  }
+};
+
+template<typename T>
+using hphp_string_tmap =
+  hphp_hash_map<std::string, T, string_hashi, string_eqstrt>;
+
+template<typename T>
+using hphp_string_fmap =
+  hphp_hash_map<std::string, T, string_hashi, string_eqstrf>;
+
+template<typename T>
+using hphp_fast_string_tmap =
+  hphp_fast_map<std::string, T, string_hashi, string_eqstrt>;
+
+template<typename T>
+using hphp_fast_string_fmap =
+  hphp_fast_map<std::string, T, string_hashi, string_eqstrf>;
+
 }

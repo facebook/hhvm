@@ -60,6 +60,7 @@ class {{struct:name}}{{#struct:exception?}}(Thrift.TException){{/struct:exceptio
     ) -> None:
         ...
 
+    {{^struct:union?}}
     {{#struct:fields}}
     {{#field:type}}
     @__property__
@@ -69,6 +70,7 @@ class {{struct:name}}{{#struct:exception?}}(Thrift.TException){{/struct:exceptio
     def {{field:py_name}}(self, value: {{> common/OptionalFieldType}}) -> None: ...
     {{/field:type}}
     {{/struct:fields}}
+    {{/struct:union?}}
 
     {{#struct:union?}}
     def getType(self) -> int: ...

@@ -197,7 +197,7 @@ ALWAYS_INLINE void hash128(const void *key, size_t len, uint64_t seed,
   case  2: k1 ^= uint64_t(getblock8<caseSensitive>(tail,  1)) << 8;
   case  1: k1 ^= uint64_t(getblock8<caseSensitive>(tail,  0)) << 0;
            k1 *= c1; k1  = ROTL64(k1,31); k1 *= c2; h1 ^= k1;
-  };
+  }
 
   //----------
   // finalization

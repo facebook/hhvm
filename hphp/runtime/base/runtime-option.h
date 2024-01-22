@@ -865,7 +865,7 @@ struct RuntimeOption {
   /* Enables enforcing upper-bounds for generic types
      1 => warning, 2 => error
   */                                                                    \
-  F(int32_t, EnforceGenericsUB,        1)                               \
+  F(int32_t, EnforceGenericsUB,        2)                               \
   /* WarnOnTooManyArguments:
    * 0 -> no warning, 1 -> warning, 2 -> exception
    */                                                                   \

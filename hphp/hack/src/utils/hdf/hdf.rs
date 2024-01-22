@@ -17,6 +17,7 @@ pub(crate) mod ffi {
         fn append(self: Pin<&mut Hdf>, filename: &CxxString) -> Result<()>;
         fn fromString(self: Pin<&mut Hdf>, input: &CxxString) -> Result<()>;
         fn remove(self: &Hdf, name: &CxxString) -> Result<()>;
+        fn copy(self: Pin<&mut Hdf>, dest: &Hdf) -> Result<()>;
 
         fn configGetBool(self: &Hdf, or_default: bool) -> Result<bool>;
         fn configGetUInt32(self: &Hdf, or_default: u32) -> Result<u32>;

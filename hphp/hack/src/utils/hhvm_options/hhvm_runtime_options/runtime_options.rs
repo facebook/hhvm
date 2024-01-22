@@ -40,7 +40,10 @@ pub fn apply_tier_overrides(config: hdf::Value) -> Result<hdf::Value> {
         .and_then(|tiers| fs::read_to_string(tiers).ok())
         .unwrap_or_else(|| "".to_owned());
 
-    apply_tier_overrides_with_params(config, &hostname, &tier, &task, &cpu, &tiers, &tags, None)
+    let results = apply_tier_overrides_with_params(
+        config, &hostname, &tier, &task, &cpu, &tiers, &tags, None,
+    )?;
+    Ok(results.0)
 }
 
 pub fn apply_tier_overrides_with_params(
@@ -52,7 +55,7 @@ pub fn apply_tier_overrides_with_params(
     tiers: &String,
     tags: &String,
     predefined_shard_value: Option<i64>,
-) -> Result<hdf::Value> {
+) -> Result<(hdf::Value, Vec<String>)> {
     log::debug!(
         "Matching tiers using: machine='{}', tier='{}', task='{}', cpu='{}', tiers='{}', tags='{}'",
         hostname,
@@ -62,6 +65,7 @@ pub fn apply_tier_overrides_with_params(
         tiers,
         tags
     );
+    let mut matched_tiers = vec![];
 
     let check_patterns = |hdf: &hdf::Value| -> Result<bool> {
         Ok(match_hdf_pattern(hostname, hdf, "machine", false)?
@@ -75,40 +79,53 @@ pub fn apply_tier_overrides_with_params(
     let mut enable_shards = true;
 
     if let Some(tiers) = config.get("Tiers")? {
-        for tier in tiers.into_children()? {
-            let tier = tier?;
-            if check_patterns(&tier)?
-                && (!tier.contains_key("exclude")?
-                    || !tier
-                        .get("exclude")?
-                        .map_or(Ok(false), |v| check_patterns(&v))?)
-                && match_shard(enable_shards, hostname, &tier, predefined_shard_value)?
-            {
-                log::info!("Matched tier: {}", tier.name()?);
+        for tier_name in tiers.get_child_names()? {
+            if let Some(tier) = tiers.get(&tier_name)? {
+                if check_patterns(&tier)?
+                    && (!tier.contains_key("exclude")?
+                        || !tier
+                            .get("exclude")?
+                            .map_or(Ok(false), |v| check_patterns(&v))?)
+                    && match_shard(enable_shards, hostname, &tier, predefined_shard_value)?
+                {
+                    log::info!("Matched tier: {}", tier.name()?);
+                    matched_tiers.push(tier.name()?);
 
-                if enable_shards && tier.get_bool_or("DisableShards", false)? {
-                    log::info!("Sharding is disabled.");
-                    enable_shards = false;
-                }
-
-                if let Some(remove) = tier.get("clear")? {
-                    for s in remove.values()? {
-                        config.remove(&s)?;
+                    if enable_shards && tier.get_bool_or("DisableShards", false)? {
+                        log::info!("Sharding is disabled.");
+                        enable_shards = false;
                     }
+
+                    if let Some(remove) = tier.get("clear")? {
+                        for s in remove.values()? {
+                            config.remove(&s)?;
+                        }
+                    }
+
+                    if let Some(overwrite) = tier.get("overwrite")? {
+                        log::info!(
+                            "Applying overrides for tier: {}",
+                            tier.name().unwrap_or_default()
+                        );
+                        config.copy(&overwrite)?;
+                    } else {
+                        log::info!(
+                            "No overrides found for tier: {} {:?}",
+                            tier.name().unwrap_or_default(),
+                            tier,
+                        );
+                    }
+                    // no break here, so we can continue to match more overwrites
                 }
 
-                //-- config.copy(tier["overwrite"]);
-                // no break here, so we can continue to match more overwrites
+                // Avoid lint errors about unvisited nodes when the tier does not match.
+                //-- tier["DisableShards"].setVisited();
+                //-- tier["clear"].setVisited();
+                //-- tier["overwrite"].setVisited();
             }
-
-            // Avoid lint errors about unvisited nodes when the tier does not match.
-            //-- tier["DisableShards"].setVisited();
-            //-- tier["clear"].setVisited();
-            //-- tier["overwrite"].setVisited();
         }
     }
-
-    Ok(config)
+    Ok((config, matched_tiers))
 }
 
 fn match_shard(
@@ -189,124 +206,316 @@ fn match_hdf_pattern(
     Ok(true)
 }
 
-#[test]
-fn test_match_shard() -> Result<()> {
-    // From HHVM
-    // Checking Shard = 4; Input = test_hostnamebespoke; Seed = 190005716; ShardCount = 100; Value = 16
-    assert_eq!(create_seed("test_hostnamebespoke")?, 190005716);
-    // From HHVM
-    // Checking Shard = 0; Input = test_hostnamenoinline; Seed = 44676460; ShardCount = 1000; Value = 460
-    assert_eq!(create_seed("test_hostnamenoinline")?, 44676460);
+#[cfg(test)]
+mod test {
+    use super::*;
 
-    Ok(())
-}
+    #[test]
+    fn test_match_shard() -> Result<()> {
+        // From HHVM
+        // Checking Shard = 4; Input = test_hostnamebespoke; Seed = 190005716; ShardCount = 100; Value = 16
+        assert_eq!(create_seed("test_hostnamebespoke")?, 190005716);
+        // From HHVM
+        // Checking Shard = 0; Input = test_hostnamenoinline; Seed = 44676460; ShardCount = 1000; Value = 460
+        assert_eq!(create_seed("test_hostnamenoinline")?, 44676460);
 
-#[test]
-fn test_get_seed() -> Result<()> {
-    let hostname = "test_hostname";
-    let enabled = true;
-    let disabled = false;
-    assert_eq!(create_seed(hostname)? % 100, 81);
-    assert_eq!(create_seed("test_hostnamebespoke")? % 100, 16);
-
-    let mut config = hdf::Value::default();
-
-    // Config with no Shard should be true
-    assert!(match_shard(enabled, hostname, &config, None)?);
-
-    // With Shard
-
-    // Invalid
-    config.set_hdf("Shard = -1")?;
-    assert!(match_shard(disabled, hostname, &config, None)?);
-    config.set_hdf("Shard = 100")?;
-    assert!(match_shard(disabled, hostname, &config, None)?);
-
-    // Valid
-    config.set_hdf("Shard = 80")?;
-    assert!(match_shard(disabled, hostname, &config, None)?);
-    assert!(!match_shard(enabled, hostname, &config, None)?);
-
-    config.set_hdf("Shard = 81")?;
-    assert!(match_shard(enabled, hostname, &config, None)?);
-
-    // With salt
-    config.set_hdf("Shard = 0\nShardSalt = bespoke")?;
-    assert!(!match_shard(enabled, hostname, &config, None)?);
-    config.set_hdf("Shard = 16")?;
-    assert!(match_shard(enabled, hostname, &config, None)?);
-
-    // With custom ShardCount and Salt
-    config.set_hdf("Shard = 5\nShardCount = 10")?;
-    assert!(!match_shard(enabled, hostname, &config, None)?);
-    config.set_hdf("Shard = 6")?;
-    assert!(match_shard(enabled, hostname, &config, None)?);
-
-    // Precomputed shards cutoff 1 (non-prod behavior) and ShardCount 10
-    config.set_hdf("Shard = 1")?;
-    assert!(match_shard(enabled, hostname, &config, Some(0))?);
-    assert!(match_shard(enabled, hostname, &config, Some(1))?);
-    assert!(!match_shard(enabled, hostname, &config, Some(2))?);
-    assert!(match_shard(enabled, hostname, &config, Some(11))?);
-
-    Ok(())
-}
-
-#[test]
-fn test_match_hdf_pattern() -> Result<()> {
-    let mut hdf = hdf::Value::default();
-    // Selector pattern not in the config tree should return true
-    assert!(match_hdf_pattern("", &hdf, "task", false)?);
-
-    hdf.set_hdf("task = //")?;
-    assert!(match_hdf_pattern("i/can/be/anything", &hdf, "task", false)?);
-
-    hdf.set_hdf("task = /test\\/matches/")?;
-    assert!(match_hdf_pattern("test/matches/true", &hdf, "task", false)?);
-    assert!(!match_hdf_pattern("no/match/false", &hdf, "task", false)?);
-
-    // Test multiline
-    let tags = "hhvm\nmatch_me3\nfoo\nbaz";
-    hdf.set_hdf("tags = /^match_me3$/")?;
-    assert!(match_hdf_pattern(tags, &hdf, "tags", true)?);
-    assert!(!match_hdf_pattern(tags, &hdf, "tags", false)?);
-
-    Ok(())
-}
-
-#[test]
-fn test_match_hdf_bad_regex() -> Result<()> {
-    let mut hdf = hdf::Value::default();
-
-    let cases = [
-        // HHVM specific requirements
-        ("test\\/nobody/", "should have a / prefix"),
-        ("/test\\/nobody", "should have a / suffix"),
-        // Regex bad patterns
-        ("/i_am(broken/", "unclosed group"),
-        ("/i_am(broken\\)/", "unclosed group"),
-        ("/i_am[broken/", "unclosed character class"),
-        ("/i_am[broken\\]/", "unclosed character class"),
-        ("/*/", "repetition operator missing expression"),
-    ];
-
-    for (pattern, err_substr) in cases.iter() {
-        hdf.set_hdf(&format!("task = {pattern}"))?;
-        let err_str = match_hdf_pattern("unused", &hdf, "task", false)
-            .unwrap_err()
-            .to_string();
-        assert!(
-            err_str.contains(err_substr),
-            "Expected {err_str} to contain '{err_substr}' for pattern '{pattern}'",
-        );
-        let err_str = match_hdf_pattern("unused", &hdf, "task", true)
-            .unwrap_err()
-            .to_string();
-        assert!(
-            err_str.contains(err_substr),
-            "Expected {err_str} to contain '{err_substr}' for pattern '{pattern}'",
-        );
+        Ok(())
     }
 
-    Ok(())
+    #[test]
+    fn test_get_seed() -> Result<()> {
+        let hostname = "test_hostname";
+        let enabled = true;
+        let disabled = false;
+        assert_eq!(create_seed(hostname)? % 100, 81);
+        assert_eq!(create_seed("test_hostnamebespoke")? % 100, 16);
+
+        let mut config = hdf::Value::default();
+
+        // Config with no Shard should be true
+        assert!(match_shard(enabled, hostname, &config, None)?);
+
+        // With Shard
+
+        // Invalid
+        config.set_hdf("Shard = -1")?;
+        assert!(match_shard(disabled, hostname, &config, None)?);
+        config.set_hdf("Shard = 100")?;
+        assert!(match_shard(disabled, hostname, &config, None)?);
+
+        // Valid
+        config.set_hdf("Shard = 80")?;
+        assert!(match_shard(disabled, hostname, &config, None)?);
+        assert!(!match_shard(enabled, hostname, &config, None)?);
+
+        config.set_hdf("Shard = 81")?;
+        assert!(match_shard(enabled, hostname, &config, None)?);
+
+        // With salt
+        config.set_hdf("Shard = 0\nShardSalt = bespoke")?;
+        assert!(!match_shard(enabled, hostname, &config, None)?);
+        config.set_hdf("Shard = 16")?;
+        assert!(match_shard(enabled, hostname, &config, None)?);
+
+        // With custom ShardCount and Salt
+        config.set_hdf("Shard = 5\nShardCount = 10")?;
+        assert!(!match_shard(enabled, hostname, &config, None)?);
+        config.set_hdf("Shard = 6")?;
+        assert!(match_shard(enabled, hostname, &config, None)?);
+
+        // Precomputed shards cutoff 1 (non-prod behavior) and ShardCount 10
+        config.set_hdf("Shard = 1")?;
+        assert!(match_shard(enabled, hostname, &config, Some(0))?);
+        assert!(match_shard(enabled, hostname, &config, Some(1))?);
+        assert!(!match_shard(enabled, hostname, &config, Some(2))?);
+        assert!(match_shard(enabled, hostname, &config, Some(11))?);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_match_hdf_pattern() -> Result<()> {
+        let mut hdf = hdf::Value::default();
+        // Selector pattern not in the config tree should return true
+        assert!(match_hdf_pattern("", &hdf, "task", false)?);
+
+        hdf.set_hdf("task = //")?;
+        assert!(match_hdf_pattern("i/can/be/anything", &hdf, "task", false)?);
+
+        hdf.set_hdf("task = /test\\/matches/")?;
+        assert!(match_hdf_pattern("test/matches/true", &hdf, "task", false)?);
+        assert!(!match_hdf_pattern("no/match/false", &hdf, "task", false)?);
+
+        // Test multiline
+        let tags = "hhvm\nmatch_me3\nfoo\nbaz";
+        hdf.set_hdf("tags = /^match_me3$/")?;
+        assert!(match_hdf_pattern(tags, &hdf, "tags", true)?);
+        assert!(!match_hdf_pattern(tags, &hdf, "tags", false)?);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_match_hdf_bad_regex() -> Result<()> {
+        let mut hdf = hdf::Value::default();
+
+        let cases = [
+            // HHVM specific requirements
+            ("test\\/nobody/", "should have a / prefix"),
+            ("/test\\/nobody", "should have a / suffix"),
+            // Regex bad patterns
+            ("/i_am(broken/", "unclosed group"),
+            ("/i_am(broken\\)/", "unclosed group"),
+            ("/i_am[broken/", "unclosed character class"),
+            ("/i_am[broken\\]/", "unclosed character class"),
+            ("/*/", "repetition operator missing expression"),
+        ];
+
+        for (pattern, err_substr) in cases.iter() {
+            hdf.set_hdf(&format!("task = {pattern}"))?;
+            let err_str = match_hdf_pattern("unused", &hdf, "task", false)
+                .unwrap_err()
+                .to_string();
+            assert!(
+                err_str.contains(err_substr),
+                "Expected {err_str} to contain '{err_substr}' for pattern '{pattern}'",
+            );
+            let err_str = match_hdf_pattern("unused", &hdf, "task", true)
+                .unwrap_err()
+                .to_string();
+            assert!(
+                err_str.contains(err_substr),
+                "Expected {err_str} to contain '{err_substr}' for pattern '{pattern}'",
+            );
+        }
+
+        Ok(())
+    }
+
+    fn get_complex_hdf() -> hdf::Value {
+        let hdf_raw_str = r#"
+            Eval {
+                strA = hello
+                strB = world
+                intA = 1
+                intB = 2
+            }
+
+            Tiers {
+                disable_shards {
+                    tags = /no_shards/
+                    DisableShards = true
+                    overwrite { # don't blow up on empty overwrites
+                    }
+                }
+
+                foo_tier {
+                    tags = /^foo$/
+                    clear {
+                        * = Eval.strA
+                    }
+                    overwrite {
+                        Eval.strB = foo
+                    }
+                }
+
+                bar_tier {
+                    task = /.*\/bar\/.*/
+                    clear {
+                        * = Eval.intA
+                    }
+                    overwrite {
+                        Eval.strB = bar
+                    }
+                }
+
+                baz_tier {
+                    tags = /^baz$/
+                    Shard = 5
+                    overwrite {
+                        Eval.strA = shard
+                    }
+                }
+            }
+        "#;
+
+        let mut hdf = hdf::Value::default();
+        hdf.set_hdf(hdf_raw_str).unwrap();
+        hdf
+    }
+
+    #[test]
+    fn test_into_children_loop() -> Result<()> {
+        let hdf = get_complex_hdf();
+        let hdf2 = get_complex_hdf();
+
+        // There currently is a bug with this unknown why so we
+        // end up using names list to traverse the children nodes
+        // Keeping this here to figure out the issue as other usages of
+        // into_children may be vulnerable to this when using accessors
+        // on the child.
+        let tiers = hdf.get("Tiers")?.unwrap();
+        for tier in tiers.into_children()? {
+            let tier = tier?;
+            // This is the buggy part where non-extant keys but directly accessed are fine
+            // For some reason this mutates the tier node and sets the key while direct
+            // access doesn't.
+            assert!(tier.contains_key("i_dont_exist")?);
+            assert!(tier.get("i_dont_exist")?.is_some());
+
+            let tier2 = hdf2.get(&format!("Tiers.{}", tier.name()?))?.unwrap();
+            assert!(!tier2.contains_key("i_dont_exist")?);
+            assert!(tier2.get("i_dont_exist")?.is_none());
+            assert!(!tier2.contains_key("i_dont_exist")?);
+        }
+
+        Ok(())
+    }
+
+    fn check_tier_overrides(
+        task: Option<String>,
+        tags: Option<String>,
+        str_a: Option<String>,
+        str_b: Option<String>,
+        int_a: Option<u32>,
+        int_b: Option<u32>,
+        shard: Option<i64>,
+        expected_matches: Vec<String>,
+    ) -> Result<()> {
+        let (hdf, matched_tiers) = apply_tier_overrides_with_params(
+            get_complex_hdf(),
+            &"hostname".into(),
+            &"tier".into(),
+            &task.unwrap_or("task".into()),
+            &"cpu".into(),
+            &"tiers".into(),
+            &tags.unwrap_or("tags".into()),
+            shard,
+        )?;
+        assert_eq!(hdf.get_str("Eval.strA")?, str_a);
+        assert_eq!(hdf.get_str("Eval.strB")?, str_b);
+        assert_eq!(hdf.get_uint32("Eval.intA")?, int_a);
+        assert_eq!(hdf.get_uint32("Eval.intB")?, int_b);
+        assert_eq!(matched_tiers, expected_matches);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_apply_tier_overrides() -> Result<()> {
+        // No overrides
+        check_tier_overrides(
+            None,
+            None,
+            Some("hello".into()),
+            Some("world".into()),
+            Some(1),
+            Some(2),
+            None,
+            vec![],
+        )?;
+
+        // Match on foo_tier
+        // No overrides
+        check_tier_overrides(
+            None,
+            Some("foo".into()),
+            None,
+            Some("foo".into()),
+            Some(1),
+            Some(2),
+            None,
+            vec!["foo_tier".into()],
+        )?;
+
+        // Match on bar_tier
+        check_tier_overrides(
+            Some("my/bar/task".into()),
+            None,
+            Some("hello".into()),
+            Some("bar".into()),
+            None,
+            Some(2),
+            None,
+            vec!["bar_tier".into()],
+        )?;
+
+        // Match on baz in shard
+        check_tier_overrides(
+            None,
+            Some("baz".into()),
+            Some("shard".into()),
+            Some("world".into()),
+            Some(1),
+            Some(2),
+            Some(5),
+            vec!["baz_tier".into()],
+        )?;
+
+        // Match on baz in not in shard
+        check_tier_overrides(
+            None,
+            Some("baz".into()),
+            Some("hello".into()),
+            Some("world".into()),
+            Some(1),
+            Some(2),
+            Some(6),
+            vec![],
+        )?;
+
+        // Match on no_shard and baz in not in shard but applied
+        check_tier_overrides(
+            None,
+            Some("no_shards\nbaz".into()),
+            Some("shard".into()),
+            Some("world".into()),
+            Some(1),
+            Some(2),
+            Some(6),
+            vec!["disable_shards".into(), "baz_tier".into()],
+        )?;
+
+        Ok(())
+    }
 }

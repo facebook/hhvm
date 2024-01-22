@@ -233,6 +233,10 @@ impl Value {
         let_cxx_string!(name = name);
         Ok(self.inner.remove(&name)?)
     }
+
+    pub fn copy(&mut self, src: &Value) -> Result<()> {
+        Ok(self.inner.pin_mut().copy(&src.inner)?)
+    }
 }
 
 pub struct Children {
@@ -389,6 +393,28 @@ mod test {
             format!("{:?}", hdf),
             "a {\n  b {\n    c = d\n  }\n  q = g\n  c {\n    q = f\n  }\n}\nq = h\n"
         );
+    }
+
+    #[test]
+    fn test_copy() -> Result<()> {
+        let mut hdf = Value::default();
+        let mut hdf2 = Value::default();
+
+        hdf.set_hdf("Eval.bool = True")?;
+        hdf.set_hdf("Eval.text = foo")?;
+        hdf2.set_hdf("Override.Eval.bool = False")?;
+        hdf2.set_hdf("Override.Eval.bool2 = True")?;
+        hdf2.set_hdf("Override.Eval.text = bar")?;
+        hdf.copy(&hdf2.get("Override")?.unwrap())?;
+        assert_eq!(hdf.get_bool("Eval.bool")?, Some(false));
+        assert_eq!(hdf.get_bool("Eval.bool2")?, Some(true));
+        assert_eq!(hdf.get_str("Eval.text")?, Some("bar".into()));
+        assert_eq!(
+            format!("{:?}", hdf),
+            "Eval {\n  bool = False\n  text = bar\n  bool2 = True\n}\n"
+        );
+
+        Ok(())
     }
 
     #[test]

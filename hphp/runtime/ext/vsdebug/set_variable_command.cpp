@@ -353,7 +353,7 @@ void SetVariableCommand::setVariableValue(
     case KindOfInt64:
       try {
         val(typedVariable).num = std::stoi(value, nullptr, 0);
-      } catch (std::exception &e) {
+      } catch (std::exception &) {
         throw DebuggerCommandException("Invalid value specified.");
       }
       break;
@@ -361,7 +361,7 @@ void SetVariableCommand::setVariableValue(
     case KindOfDouble:
       try {
         val(typedVariable).dbl = std::stod(value);
-      } catch (std::exception &e) {
+      } catch (std::exception &) {
         throw DebuggerCommandException("Invalid value specified.");
       }
       break;

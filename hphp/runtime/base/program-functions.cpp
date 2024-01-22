@@ -414,7 +414,7 @@ static void handle_exception_append_bt(std::string& errorMsg,
 void bump_counter_and_rethrow(bool isPsp) {
   try {
     throw;
-  } catch (const RequestTimeoutException& e) {
+  } catch (const RequestTimeoutException&) {
     if (isPsp) {
       static auto requestTimeoutPSPCounter = ServiceData::createTimeSeries(
         "requests_timed_out_psp", {ServiceData::StatsType::COUNT});
@@ -427,7 +427,7 @@ void bump_counter_and_rethrow(bool isPsp) {
       ServerStats::Log("request.timed_out.non_psp", 1);
     }
     throw;
-  } catch (const RequestCPUTimeoutException& e) {
+  } catch (const RequestCPUTimeoutException&) {
     if (isPsp) {
       static auto requestCPUTimeoutPSPCounter = ServiceData::createTimeSeries(
         "requests_cpu_timed_out_psp", {ServiceData::StatsType::COUNT});
@@ -440,7 +440,7 @@ void bump_counter_and_rethrow(bool isPsp) {
       ServerStats::Log("request.cpu_timed_out.non_psp", 1);
     }
     throw;
-  } catch (const RequestMemoryExceededException& e) {
+  } catch (const RequestMemoryExceededException&) {
     if (isPsp) {
       static auto requestMemoryExceededPSPCounter =
         ServiceData::createTimeSeries(
@@ -495,7 +495,7 @@ static void handle_exception_helper(bool& ret,
 
   try {
     bump_counter_and_rethrow(false /* isPsp */);
-  } catch (const Eval::DebuggerException& e) {
+  } catch (const Eval::DebuggerException&) {
     throw;
   } catch (const ExitException& e) {
     if (where == ContextOfException::ReqInit) {
@@ -2139,7 +2139,7 @@ static int execute_program_impl(int argc, char** argv) {
             prepare_args(new_argc, new_argv, *client_args, nullptr);
           }
           restart = true;
-        } catch (const Eval::DebuggerClientExitException& e) {
+        } catch (const Eval::DebuggerClientExitException&) {
           execute_command_line_end(false, nullptr);
           break; // end user quitting debugger
         }
@@ -2643,7 +2643,7 @@ static void handle_exception(bool& ret, ExecutionContext* context,
          where == ContextOfException::ReqInit);
   try {
     handle_exception_helper(ret, context, errorMsg, where, error, richErrorMsg);
-  } catch (const ExitException& e) {
+  } catch (const ExitException&) {
     // Got an ExitException during exception handling, handle
     // similarly to the case below but don't call obEndAll().
   } catch (...) {

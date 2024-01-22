@@ -71,7 +71,7 @@ uint64_t murmur_hash_64A(const void* const key, const size_t len,
         case 2: h ^= (uint64_t)data[1] << 8;
         case 1: h ^= (uint64_t)data[0];
                 h *= m;
-    };
+    }
 
     h ^= h >> r;
     h *= m;

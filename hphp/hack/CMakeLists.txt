@@ -176,11 +176,11 @@ add_custom_command(
     ${INVOKE_CARGO} dump-opcodes dump-opcodes --exe &&
     ${INVOKE_CARGO} dump-opcodes dump-opcodes --bin dump_opcodes
       -o "${RUST_OPCODES}"
-  COMMENT "Generating Rust opcode struct for cbindgen to use to generate hhbc-ast.h"
+  COMMENT "Generating Rust opcode struct for cbindgen to use to generate hhbc-unit.h"
   DEPENDS "${OPCODE_DATA}"
 )
 
-set(HHBC_AST_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/hackc/hhbc-ast.h")
+set(HHBC_AST_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/hackc/hhbc-unit.h")
 set(FFI_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/utils/ffi.h")
 set(NAMING_SPECIAL_NAMES_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/naming/naming-special-names.h")
 set(TYPE_CONSTRAINT_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/vm/type-constraint-flags.h")
@@ -206,7 +206,7 @@ add_custom_command(
       --includes "${FFI_HEADER},${NAMING_SPECIAL_NAMES_HEADER},${TYPE_CONSTRAINT_HEADER},${ATTR_HEADER},${FCALL_HEADER},${HHBC_HEADER}"
       ${HHBC_AST_SRCS}
   DEPENDS rustc cargo "${RUST_OPCODES}"
-  COMMENT "Generating hhbc-ast.h"
+  COMMENT "Generating hhbc-unit.h"
 )
 
 add_custom_target(

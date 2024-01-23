@@ -36,7 +36,7 @@
 #include <folly/system/ThreadName.h>
 
 #include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
-#include "hphp/hack/src/hackc/hhbc-ast.h"
+#include "hphp/hack/src/hackc/hhbc-unit.h"
 #include "hphp/hack/src/parser/ffi_bridge/parser_ffi.rs.h"
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/autoload-handler.h"

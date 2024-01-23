@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/hack/src/hackc/hhbc-ast.h"
+#include "hphp/hack/src/hackc/hhbc-unit.h"
 #include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/vm/coeffects.h"
 

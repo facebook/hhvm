@@ -17,7 +17,7 @@
 #pragma once
 
 #include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
-#include "hphp/hack/src/hackc/hhbc-ast.h"
+#include "hphp/hack/src/hackc/hhbc-unit.h"
 #include "hphp/runtime/vm/native-func-table.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 

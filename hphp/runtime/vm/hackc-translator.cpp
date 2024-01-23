@@ -909,7 +909,7 @@ void handleOA(TranslationState& ts, T subop) {
 #define GEN_BODY(...) GEN_BODY2(__VA_ARGS__)
 
 // Rust cbindgen generates C headers for opcode structs that look like
-// P1053747912. These headers are stored in hhbc-ast.h which is included
+// P1053747912. These headers are stored in hhbc-unit.h which is included
 // in a few places in HHVM. We generate emitters for the opcodes
 // using opcodes.h, which is also what HackC uses to generate these rust
 // structs, with a few differences noted in hhbc.rs.

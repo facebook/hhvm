@@ -38,7 +38,7 @@ void FastCGIAcceptor::onNewConnection(
   folly::SocketAddress localAddress;
   try {
     sock->getLocalAddress(&localAddress);
-  } catch (std::system_error& e) {
+  } catch (std::system_error&) {
     // If getSockName fails it's bad news; abort the connection
     return;
   }

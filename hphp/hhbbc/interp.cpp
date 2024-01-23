@@ -4545,10 +4545,8 @@ void in(ISS& env, const bc::FCallClsMethodM& op) {
       op.subop3 == IsLogAsDynamicCallOp::DontLogAsDynamicCall;
   if (is_specialized_cls(clsTy) && dcls_of(clsTy).isExact() &&
       module_check_always_passes(env, dcls_of(clsTy)) &&
-      (!rfunc.mightCareAboutDynCalls() ||
-        !maybeDynamicCall ||
-        skipLogAsDynamicCall
-      )
+      (RO::EvalRaiseStrToClsConversionNoticeSampleRate == 0 || !maybeDynamicCall) &&
+      (!rfunc.mightCareAboutDynCalls() || skipLogAsDynamicCall)
   ) {
     auto const clsName = dcls_of(clsTy).cls().name();
     return reduce(

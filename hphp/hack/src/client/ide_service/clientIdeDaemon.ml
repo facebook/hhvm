@@ -1136,14 +1136,6 @@ let handle_request
           ServerSignatureHelp.go_quarantined ~ctx ~entry ~line ~column)
     in
     (Initialized istate, Ok results)
-  (* Type Hierarchy *)
-  | (Initialized istate, Type_Hierarchy (document, { line; column })) ->
-    let (istate, ctx, entry, _) = update_file_ctx istate document in
-    let results =
-      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          ServerTypeHierarchy.go_quarantined ~ctx ~entry ~line ~column)
-    in
-    (Initialized istate, Ok results)
   (* AutoClose *)
   | (Initialized istate, AutoClose (document, { line; column })) ->
     let (istate, ctx, entry, _) = update_file_ctx istate document in

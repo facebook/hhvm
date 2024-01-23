@@ -886,55 +886,6 @@ module SignatureHelp = struct
   }
 end
 
-(* Document Type Hierarchy request, method="textDocument/typeHierarchy" *)
-module TypeHierarchy = struct
-  type params = TextDocumentPositionParams.t
-
-  type memberKind =
-    | Method [@value 1]
-    | SMethod [@value 2]
-    | Property [@value 3]
-    | SProperty [@value 4]
-    | Const [@value 5]
-  [@@deriving enum]
-
-  type memberEntry = {
-    name: string;
-    snippet: string;
-    kind: memberKind;
-    uri: DocumentUri.t;
-    range: range;
-    origin: string;
-  }
-
-  type entryKind =
-    | Class [@value 1]
-    | Interface [@value 2]
-    | Enum [@value 3]
-    | Trait [@value 4]
-  [@@deriving enum]
-
-  type ancestorEntry =
-    | AncestorName of string
-    | AncestorDetails of {
-        name: string;
-        kind: entryKind;
-        uri: DocumentUri.t;
-        range: range;
-      }
-
-  type hierarchyEntry = {
-    name: string;
-    uri: DocumentUri.t;
-    range: range;
-    kind: entryKind;
-    ancestors: ancestorEntry list;
-    members: memberEntry list;
-  }
-
-  type result = hierarchyEntry option
-end
-
 (** Auto close tag request, method="flow/autoCloseJsx"
     This is a non-standard LSP extension. *)
 module AutoCloseJsx = struct
@@ -1087,7 +1038,6 @@ type lsp_request =
   | RenameRequest of Rename.params
   | DocumentCodeLensRequest of DocumentCodeLens.params
   | SignatureHelpRequest of SignatureHelp.params
-  | TypeHierarchyRequest of TypeHierarchy.params
   | AutoCloseRequest of AutoCloseJsx.params
   | HackTestStartServerRequestFB
   | HackTestStopServerRequestFB
@@ -1123,7 +1073,6 @@ type lsp_result =
   | RenameResult of Rename.result
   | DocumentCodeLensResult of DocumentCodeLens.result
   | SignatureHelpResult of SignatureHelp.result
-  | TypeHierarchyResult of TypeHierarchy.result
   | AutoCloseResult of AutoCloseJsx.result
   | HackTestStartServerResultFB
   | HackTestStopServerResultFB
@@ -1222,5 +1171,4 @@ let lsp_result_to_log_string = function
   | RegisterCapabilityRequestResult -> "RegisterCapabilityRequestResult"
   | WillSaveWaitUntilResult _ -> "WillSaveWaitUntilResult"
   | ErrorResult _ -> "ErrorResult"
-  | TypeHierarchyResult _ -> "TypeHierarchyResult"
   | AutoCloseResult _ -> "AutoCloseResult"

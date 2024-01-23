@@ -68,7 +68,6 @@ type mode =
   | Refactor_sound_dynamic of string * string * string
   | RemoveDeadUnsafeCasts
   | CountImpreciseTypes
-  | Get_type_hierarchy
   | Map_reduce_mode
 
 type options = {
@@ -775,9 +774,6 @@ let parse_options () =
       ( "--custom-error-config-path",
         Arg.String (fun s -> custom_error_config_path := Some s),
         " Config file for custom error messages" );
-      ( "--get-type-hierarchy-at-caret",
-        Arg.Unit (set_mode Get_type_hierarchy),
-        " Produce type hierarchy at caret location" );
       ( "--map-reduce",
         Arg.Unit (set_mode Map_reduce_mode),
         " Run the map reducers and print the result" );
@@ -2250,16 +2246,6 @@ let handle_mode
       in
       let json = Count_imprecise_types.json_of_results results in
       Printf.printf "%s" (Hh_json.json_to_string json)
-  | Get_type_hierarchy ->
-    let path = expect_single_file () in
-    let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
-    let src = Provider_context.read_file_contents_exn entry in
-    let (line, column) = caret_pos_exn src "^ type-hierarchy-at-caret" in
-    let results =
-      ServerTypeHierarchy.go_quarantined ~ctx ~entry ~line ~column
-    in
-    let json = ServerTypeHierarchy.json_of_results ~results in
-    Printf.printf "%s" (Hh_json.json_to_string ~pretty:true json)
   | Map_reduce_mode ->
     let (errors, tasts) = compute_tasts_by_name ctx files_info files_contents in
     print_errors_if_present (parse_errors @ Errors.get_sorted_error_list errors);

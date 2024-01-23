@@ -3178,81 +3178,6 @@ let do_documentRename2 ~ide_calculated_patches ~hh_edits : Lsp.lsp_result * int
   in
   (RenameResult { WorkspaceEdit.changes }, result_count)
 
-let hack_type_hierarchy_to_lsp
-    (filename : string) (type_hierarchy : ServerTypeHierarchyTypes.result) :
-    Lsp.TypeHierarchy.result =
-  let hack_member_kind_to_lsp = function
-    | ServerTypeHierarchyTypes.Method -> Lsp.TypeHierarchy.Method
-    | ServerTypeHierarchyTypes.SMethod -> Lsp.TypeHierarchy.SMethod
-    | ServerTypeHierarchyTypes.Property -> Lsp.TypeHierarchy.Property
-    | ServerTypeHierarchyTypes.SProperty -> Lsp.TypeHierarchy.SProperty
-    | ServerTypeHierarchyTypes.Const -> Lsp.TypeHierarchy.Const
-  in
-  let hack_member_entry_to_Lsp (entry : ServerTypeHierarchyTypes.memberEntry) :
-      Lsp.TypeHierarchy.memberEntry =
-    let Lsp.Location.{ uri; range } =
-      hack_pos_to_lsp_location
-        entry.ServerTypeHierarchyTypes.pos
-        ~default_path:filename
-    in
-    let open ServerTypeHierarchyTypes in
-    Lsp.TypeHierarchy.
-      {
-        name = entry.name;
-        snippet = entry.snippet;
-        uri;
-        range;
-        kind = hack_member_kind_to_lsp entry.kind;
-        origin = entry.origin;
-      }
-  in
-  let hack_enty_kind_to_lsp = function
-    | ServerTypeHierarchyTypes.Class -> Lsp.TypeHierarchy.Class
-    | ServerTypeHierarchyTypes.Interface -> Lsp.TypeHierarchy.Interface
-    | ServerTypeHierarchyTypes.Trait -> Lsp.TypeHierarchy.Trait
-    | ServerTypeHierarchyTypes.Enum -> Lsp.TypeHierarchy.Enum
-  in
-  let hack_ancestor_entry_to_Lsp
-      (entry : ServerTypeHierarchyTypes.ancestorEntry) :
-      Lsp.TypeHierarchy.ancestorEntry =
-    match entry with
-    | ServerTypeHierarchyTypes.AncestorName name ->
-      Lsp.TypeHierarchy.AncestorName name
-    | ServerTypeHierarchyTypes.AncestorDetails entry ->
-      let Lsp.Location.{ uri; range } =
-        hack_pos_to_lsp_location entry.pos ~default_path:filename
-      in
-      Lsp.TypeHierarchy.AncestorDetails
-        {
-          name = entry.name;
-          uri;
-          range;
-          kind = hack_enty_kind_to_lsp entry.kind;
-        }
-  in
-  let hack_hierarchy_entry_to_Lsp
-      (entry : ServerTypeHierarchyTypes.hierarchyEntry) :
-      Lsp.TypeHierarchy.hierarchyEntry =
-    let Lsp.Location.{ uri; range } =
-      hack_pos_to_lsp_location
-        entry.ServerTypeHierarchyTypes.pos
-        ~default_path:filename
-    in
-    let open ServerTypeHierarchyTypes in
-    Lsp.TypeHierarchy.
-      {
-        name = entry.name;
-        uri;
-        range;
-        kind = hack_enty_kind_to_lsp entry.kind;
-        ancestors = List.map entry.ancestors ~f:hack_ancestor_entry_to_Lsp;
-        members = List.map entry.members ~f:hack_member_entry_to_Lsp;
-      }
-  in
-  match type_hierarchy with
-  | None -> None
-  | Some h -> Some (hack_hierarchy_entry_to_Lsp h)
-
 let do_autoclose
     (ide_service : ClientIdeService.t ref)
     (tracking_id : string)
@@ -3268,27 +3193,6 @@ let do_autoclose
       (ClientIdeMessage.AutoClose (document, location))
   in
   Lwt.return result
-
-let do_typeHierarchy
-    (ide_service : ClientIdeService.t ref)
-    (tracking_id : string)
-    (ref_unblocked_time : float ref)
-    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
-    (params : TypeHierarchy.params) : TypeHierarchy.result Lwt.t =
-  let (document, location) = get_document_location editor_open_files params in
-  let filename =
-    lsp_uri_to_path
-      params.TextDocumentPositionParams.textDocument.TextDocumentIdentifier.uri
-  in
-  let%lwt result =
-    ide_rpc
-      ide_service
-      ~tracking_id
-      ~ref_unblocked_time
-      (ClientIdeMessage.Type_Hierarchy (document, location))
-  in
-  let converted = hack_type_hierarchy_to_lsp filename result in
-  Lwt.return converted
 
 (** TEMPORARY VALIDATION FOR IDE_STANDALONE. TODO(ljw): delete this once ide_standalone ships T92870399 *)
 let validate_error_TEMPORARY
@@ -4855,24 +4759,6 @@ let handle_client_message
           ~message
       in
       Lwt.return_none
-    (* typeHierarchy request *)
-    | (_, RequestMessage (id, TypeHierarchyRequest params)) ->
-      let%lwt () = cancel_if_stale client timestamp short_timeout in
-      let%lwt result =
-        do_typeHierarchy
-          ide_service
-          tracking_id
-          ref_unblocked_time
-          editor_open_files
-          params
-      in
-      respond_jsonrpc ~powered_by:Serverless_ide id (TypeHierarchyResult result);
-      let result_count =
-        match result with
-        | None -> 0
-        | Some _result -> 1
-      in
-      Lwt.return_some (make_result_telemetry result_count)
     (* autoclose request *)
     | (_, RequestMessage (id, AutoCloseRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in

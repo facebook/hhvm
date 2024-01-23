@@ -181,8 +181,6 @@ type _ t =
       use_snippet_edits: bool;
     }
       -> Lsp.CodeActionResolve.result t
-  | Type_Hierarchy : document * location -> ServerTypeHierarchyTypes.result t
-      (** Handles "textDocument/typeHierarchy" LSP messages *)
   | AutoClose : document * location -> string option t
 
 let t_to_string : type a. a t -> string = function
@@ -242,8 +240,6 @@ let t_to_string : type a. a t -> string = function
     Printf.sprintf "Find_references(%s)" (Path.to_string file_path)
   | Rename ({ file_path; _ }, _, _, _) ->
     Printf.sprintf "Rename(%s)" (Path.to_string file_path)
-  | Type_Hierarchy ({ file_path; _ }, _) ->
-    Printf.sprintf "Type_Hierarchy(%s)" (Path.to_string file_path)
   | AutoClose ({ file_path; _ }, _) ->
     Printf.sprintf "AutoClose(%s)" (Path.to_string file_path)
 

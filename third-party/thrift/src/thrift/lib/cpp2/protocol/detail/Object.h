@@ -424,9 +424,8 @@ void parseValueInplace(
         prot.readBinary(binaryValue);
         break;
       }
-      std::string str;
-      prot.readString(str);
-      result.emplace_string(str);
+      auto& stringValue = result.emplace_string();
+      prot.readString(stringValue);
       break;
     }
     case protocol::T_STRUCT: {

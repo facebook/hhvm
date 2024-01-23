@@ -1,9 +1,7 @@
 <?hh
 
 function errHandler($errno, $errmsg, $file, $line) :mixed{
-  $errmsg = str_replace('long', 'integer', $errmsg);
-  printf("WARNING: $errmsg\n");
-  return true;
+  throw new Exception($errmsg);
 }
 
 function check($kind, $builtin_fn) :mixed{
@@ -16,7 +14,7 @@ function check($kind, $builtin_fn) :mixed{
 
 <<__EntryPoint>>
 function main_type_coersion_hh() :mixed{
-set_error_handler(errHandler<>, E_WARNING);
+set_error_handler(errHandler<>);
 
 check("Boolean", function ($v) { return sha1("abc", $v); });
 check("Int64", function ($v) { return str_pad("abc", $v); });

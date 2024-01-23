@@ -1,26 +1,26 @@
-Warning: Using an empty Initialization Vector (iv) is potentially insecure and not recommended in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 8
+Warning: Using an empty Initialization Vector (iv) is potentially insecure and not recommended in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 18
 string(44) "yof6cPPH4mLee6TOc0YQSrh4dvywMqxGUyjp0lV6+aM="
 string(44) "yof6cPPH4mLee6TOc0YQSrh4dvywMqxGUyjp0lV6+aM="
 bool(false)
 
-Warning: Unknown cipher algorithm in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 12
+Warning: Unknown cipher algorithm in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 22
 bool(false)
 bool(false)
 
-Warning: Unknown cipher algorithm in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 14
+Warning: Unknown cipher algorithm in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 24
 bool(false)
 
-Warning: Unknown cipher algorithm in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 15
+Warning: Unknown cipher algorithm in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 25
 bool(false)
 
-Warning: Unknown cipher algorithm in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 16
+Warning: Unknown cipher algorithm in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 26
 bool(false)
 
-Warning: openssl_decrypt() expects parameter 1 to be string, vec given in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 17
+Warning: Argument 1 passed to openssl_decrypt() must be an instance of string, HH\vec given in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 27
 
-Warning: openssl_decrypt() expects parameter 2 to be string, vec given in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 18
+Warning: Argument 2 passed to openssl_decrypt() must be an instance of string, HH\vec given in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 28
 
-Warning: openssl_decrypt() expects parameter 3 to be string, vec given in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 19
+Warning: Argument 3 passed to openssl_decrypt() must be an instance of string, HH\vec given in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 29
 
-Warning: The authenticated tag cannot be provided for cipher that does not support AEAD in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 22
+Warning: The authenticated tag cannot be provided for cipher that does not support AEAD in %s/test/slow/php7_backported/ext_openssl/openssl_decrypt_error.php on line 32
 string(44) "yof6cPPH4mLee6TOc0YQSrh4dvywMqxGUyjp0lV6+aM="

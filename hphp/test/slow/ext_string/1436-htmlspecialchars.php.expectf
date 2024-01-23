@@ -4,16 +4,16 @@ string(0) ""
 string(0) ""
 NULL
 
-Warning: htmlspecialchars() expects parameter 1 to be string, null given in %s/test/slow/ext_string/1436-htmlspecialchars.php on line 20
+Warning: Argument 1 passed to htmlspecialchars() must be an instance of string, null given in %s/test/slow/ext_string/1436-htmlspecialchars.php on line 24
 dict(1) {
   ["str"]=>
   string(3) "aaa"
 }
 
-Warning: htmlspecialchars() expects parameter 1 to be string, dict given in %s/test/slow/ext_string/1436-htmlspecialchars.php on line 20
+Warning: Argument 1 passed to htmlspecialchars() must be an instance of string, HH\dict given in %s/test/slow/ext_string/1436-htmlspecialchars.php on line 24
 int(42)
 
-Warning: htmlspecialchars() expects parameter 1 to be string, integer given in %s/test/slow/ext_string/1436-htmlspecialchars.php on line 20
+Warning: Argument 1 passed to htmlspecialchars() must be an instance of string, int given in %s/test/slow/ext_string/1436-htmlspecialchars.php on line 24
 float(1.234)
 
-Warning: htmlspecialchars() expects parameter 1 to be string, double given in %s/test/slow/ext_string/1436-htmlspecialchars.php on line 20
+Warning: Argument 1 passed to htmlspecialchars() must be an instance of string, float given in %s/test/slow/ext_string/1436-htmlspecialchars.php on line 24

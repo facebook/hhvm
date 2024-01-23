@@ -25,11 +25,7 @@ function main(): void {
   );
   __hhvm_intrinsics\debug_var_dump_lazy_class($z);
 
-  try {
-    HH\class_to_classname(
-      __hhvm_intrinsics\launder_value(3)
-    );
-  } catch (InvalidArgumentException $_) {
-    echo "Bad input\n";
-  }
+  HH\class_to_classname(
+    __hhvm_intrinsics\launder_value(3)
+  );
 }

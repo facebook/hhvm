@@ -97,6 +97,10 @@ function test16() :mixed{
 
 <<__EntryPoint>>
 function main() :mixed{
+  set_error_handler(($errno, $errstr, ...) ==> {
+    throw new Exception($errstr);
+  });
+
   $tests = vec[
     test1<>,
     test2<>,

@@ -4,9 +4,7 @@
 <<__EntryPoint>>
 function main_get_html_trans_table_bad() :mixed{
 $encodings = vec[
-  null,
   '',
-  5
 ];
 
 foreach ($encodings as $encoding) {

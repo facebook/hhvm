@@ -1,19 +1,24 @@
 <?hh
-<<__EntryPoint>> function main(): void {
-$magick = new Imagick('magick:rose');
-$iterator = new ImagickPixelIterator($magick);
+<<__EntryPoint>>
+function main(): void {
+  set_error_handler(($errno, $errstr, ...) ==> {
+    throw new Exception($errstr);
+  });
 
-try {
-  $dummy = new ImagickPixelIterator(new ImagickPixel);
-} catch (Exception $ex) {
-  echo "__construct\n";
-}
+  $magick = new Imagick('magick:rose');
+  $iterator = new ImagickPixelIterator($magick);
 
-try {
-  $iterator->setIteratorRow(-1);
-} catch (Exception $ex) {
-  echo "setIteratorRow\n";
-}
+  try {
+    $dummy = new ImagickPixelIterator(new ImagickPixel);
+  } catch (Exception $ex) {
+    echo "__construct\n";
+  }
 
-echo "==DONE==\n";
+  try {
+    $iterator->setIteratorRow(-1);
+  } catch (Exception $ex) {
+    echo "setIteratorRow\n";
+  }
+
+  echo "==DONE==\n";
 }

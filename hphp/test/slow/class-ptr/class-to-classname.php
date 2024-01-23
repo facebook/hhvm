@@ -17,9 +17,5 @@ function main(): void {
   $z = HH\class_to_classname($z);
   __hhvm_intrinsics\debug_var_dump_lazy_class($z);
 
-  try {
-    HH\class_to_classname(3);
-  } catch (InvalidArgumentException $_) {
-    echo "Bad input\n";
-  }
+  HH\class_to_classname(3);
 }

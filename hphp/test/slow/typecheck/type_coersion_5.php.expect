@@ -1,145 +1,146 @@
+
 Boolean
 Builtin:
 User:
 Builtin:
-WARNING: sha1() expects parameter 2 to be boolean, integer given
+WARNING: Argument 2 passed to sha1() must be an instance of bool, int given
 User:
-WARNING: Argument 1 to {closure}() must be of type @boolean, integer given
+WARNING: Argument 1 to __invoke() must be of type @bool, int given
 Builtin:
-WARNING: sha1() expects parameter 2 to be boolean, double given
+WARNING: Argument 2 passed to sha1() must be an instance of bool, float given
 User:
-WARNING: Argument 1 to {closure}() must be of type @boolean, float given
+WARNING: Argument 1 to __invoke() must be of type @bool, float given
 Builtin:
-WARNING: sha1() expects parameter 2 to be boolean, string given
+WARNING: Argument 2 passed to sha1() must be an instance of bool, string given
 User:
-WARNING: Argument 1 to {closure}() must be of type @boolean, string given
+WARNING: Argument 1 to __invoke() must be of type @bool, string given
 Builtin:
-WARNING: sha1() expects parameter 2 to be boolean, vec given
+WARNING: Argument 2 passed to sha1() must be an instance of bool, HH\vec given
 User:
-WARNING: Argument 1 to {closure}() must be of type @boolean, HH\vec given
+WARNING: Argument 1 to __invoke() must be of type @bool, HH\vec given
 Builtin:
-WARNING: sha1() expects parameter 2 to be boolean, null given
+WARNING: Argument 2 passed to sha1() must be an instance of bool, null given
 User:
-WARNING: Argument 1 to {closure}() must be of type @boolean, null given
+WARNING: Argument 1 to __invoke() must be of type @bool, null given
 
 Int64
 Builtin:
-WARNING: str_pad() expects parameter 2 to be integer, boolean given
+WARNING: Argument 2 passed to str_pad() must be an instance of int, bool given
 User:
-WARNING: Argument 1 to {closure}() must be of type @integer, boolean given
+WARNING: Argument 1 to __invoke() must be of type @int, bool given
 Builtin:
 User:
 Builtin:
-WARNING: str_pad() expects parameter 2 to be integer, double given
+WARNING: Argument 2 passed to str_pad() must be an instance of int, float given
 User:
-WARNING: Argument 1 to {closure}() must be of type @integer, float given
+WARNING: Argument 1 to __invoke() must be of type @int, float given
 Builtin:
-WARNING: str_pad() expects parameter 2 to be integer, string given
+WARNING: Argument 2 passed to str_pad() must be an instance of int, string given
 User:
-WARNING: Argument 1 to {closure}() must be of type @integer, string given
+WARNING: Argument 1 to __invoke() must be of type @int, string given
 Builtin:
-WARNING: str_pad() expects parameter 2 to be integer, vec given
+WARNING: Argument 2 passed to str_pad() must be an instance of int, HH\vec given
 User:
-WARNING: Argument 1 to {closure}() must be of type @integer, HH\vec given
+WARNING: Argument 1 to __invoke() must be of type @int, HH\vec given
 Builtin:
-WARNING: str_pad() expects parameter 2 to be integer, null given
+WARNING: Argument 2 passed to str_pad() must be an instance of int, null given
 User:
-WARNING: Argument 1 to {closure}() must be of type @integer, null given
+WARNING: Argument 1 to __invoke() must be of type @int, null given
 
 Double
 Builtin:
-WARNING: number_format() expects parameter 1 to be double, boolean given
+WARNING: Argument 1 passed to number_format() must be an instance of float, bool given
 User:
-WARNING: Argument 1 to {closure}() must be of type @float, boolean given
+WARNING: Argument 1 to __invoke() must be of type @float, bool given
 Builtin:
-WARNING: number_format() expects parameter 1 to be double, integer given
+WARNING: Argument 1 passed to number_format() must be an instance of float, int given
 User:
-WARNING: Argument 1 to {closure}() must be of type @float, integer given
+WARNING: Argument 1 to __invoke() must be of type @float, int given
 Builtin:
 User:
 Builtin:
-WARNING: number_format() expects parameter 1 to be double, string given
+WARNING: Argument 1 passed to number_format() must be an instance of float, string given
 User:
-WARNING: Argument 1 to {closure}() must be of type @float, string given
+WARNING: Argument 1 to __invoke() must be of type @float, string given
 Builtin:
-WARNING: number_format() expects parameter 1 to be double, vec given
+WARNING: Argument 1 passed to number_format() must be an instance of float, HH\vec given
 User:
-WARNING: Argument 1 to {closure}() must be of type @float, HH\vec given
+WARNING: Argument 1 to __invoke() must be of type @float, HH\vec given
 Builtin:
-WARNING: number_format() expects parameter 1 to be double, null given
+WARNING: Argument 1 passed to number_format() must be an instance of float, null given
 User:
-WARNING: Argument 1 to {closure}() must be of type @float, null given
+WARNING: Argument 1 to __invoke() must be of type @float, null given
 
 String
 Builtin:
-WARNING: rtrim() expects parameter 1 to be string, boolean given
+WARNING: Argument 1 passed to rtrim() must be an instance of string, bool given
 User:
-WARNING: Argument 1 to {closure}() must be of type @string, boolean given
+WARNING: Argument 1 to __invoke() must be of type @string, bool given
 Builtin:
-WARNING: rtrim() expects parameter 1 to be string, integer given
+WARNING: Argument 1 passed to rtrim() must be an instance of string, int given
 User:
-WARNING: Argument 1 to {closure}() must be of type @string, integer given
+WARNING: Argument 1 to __invoke() must be of type @string, int given
 Builtin:
-WARNING: rtrim() expects parameter 1 to be string, double given
+WARNING: Argument 1 passed to rtrim() must be an instance of string, float given
 User:
-WARNING: Argument 1 to {closure}() must be of type @string, float given
+WARNING: Argument 1 to __invoke() must be of type @string, float given
 Builtin:
 User:
 Builtin:
-WARNING: rtrim() expects parameter 1 to be string, vec given
+WARNING: Argument 1 passed to rtrim() must be an instance of string, HH\vec given
 User:
-WARNING: Argument 1 to {closure}() must be of type @string, HH\vec given
+WARNING: Argument 1 to __invoke() must be of type @string, HH\vec given
 Builtin:
-WARNING: rtrim() expects parameter 1 to be string, null given
+WARNING: Argument 1 passed to rtrim() must be an instance of string, null given
 User:
-WARNING: Argument 1 to {closure}() must be of type @string, null given
+WARNING: Argument 1 to __invoke() must be of type @string, null given
 
 varray
 Builtin:
-WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, boolean given
+WARNING: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, bool given
 User:
-WARNING: Argument 1 to {closure}() must be of type @HH\varray, boolean given
+WARNING: Argument 1 to __invoke() must be of type @HH\varray, bool given
 Builtin:
-WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, integer given
+WARNING: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, int given
 User:
-WARNING: Argument 1 to {closure}() must be of type @HH\varray, integer given
+WARNING: Argument 1 to __invoke() must be of type @HH\varray, int given
 Builtin:
-WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, double given
+WARNING: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, float given
 User:
-WARNING: Argument 1 to {closure}() must be of type @HH\varray, float given
+WARNING: Argument 1 to __invoke() must be of type @HH\varray, float given
 Builtin:
-WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, string given
+WARNING: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, string given
 User:
-WARNING: Argument 1 to {closure}() must be of type @HH\varray, string given
+WARNING: Argument 1 to __invoke() must be of type @HH\varray, string given
 Builtin:
 User:
 Builtin:
-WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, null given
+WARNING: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, null given
 User:
-WARNING: Argument 1 to {closure}() must be of type @HH\varray, null given
+WARNING: Argument 1 to __invoke() must be of type @HH\varray, null given
 
 Object
 Builtin:
-WARNING: get_object_vars() expects parameter 1 to be object, boolean given
+WARNING: Argument 1 passed to get_object_vars() must be an instance of HH\object, bool given
 User:
-WARNING: Argument 1 to {closure}() must be of type @object, boolean given
+WARNING: Argument 1 to __invoke() must be of type @object, bool given
 Builtin:
-WARNING: get_object_vars() expects parameter 1 to be object, integer given
+WARNING: Argument 1 passed to get_object_vars() must be an instance of HH\object, int given
 User:
-WARNING: Argument 1 to {closure}() must be of type @object, integer given
+WARNING: Argument 1 to __invoke() must be of type @object, int given
 Builtin:
-WARNING: get_object_vars() expects parameter 1 to be object, double given
+WARNING: Argument 1 passed to get_object_vars() must be an instance of HH\object, float given
 User:
-WARNING: Argument 1 to {closure}() must be of type @object, float given
+WARNING: Argument 1 to __invoke() must be of type @object, float given
 Builtin:
-WARNING: get_object_vars() expects parameter 1 to be object, string given
+WARNING: Argument 1 passed to get_object_vars() must be an instance of HH\object, string given
 User:
-WARNING: Argument 1 to {closure}() must be of type @object, string given
+WARNING: Argument 1 to __invoke() must be of type @object, string given
 Builtin:
-WARNING: get_object_vars() expects parameter 1 to be object, vec given
+WARNING: Argument 1 passed to get_object_vars() must be an instance of HH\object, HH\vec given
 User:
-WARNING: Argument 1 to {closure}() must be of type @object, HH\vec given
+WARNING: Argument 1 to __invoke() must be of type @object, HH\vec given
 Builtin:
-WARNING: get_object_vars() expects parameter 1 to be object, null given
+WARNING: Argument 1 passed to get_object_vars() must be an instance of HH\object, null given
 User:
-WARNING: Argument 1 to {closure}() must be of type @object, null given
+WARNING: Argument 1 to __invoke() must be of type @object, null given

@@ -41,7 +41,7 @@ string(47) "Could not unwrap OpaqueValue: id does not match"
 string(47) "Could not unwrap OpaqueValue: id does not match"
 string(47) "Could not unwrap OpaqueValue: id does not match"
 string(19) "Invalid OpaqueValue"
-string(82) "__SystemLib\unwrap_opaque_value() expects parameter 2 to be resource, object given"
+string(102) "Argument 2 passed to __SystemLib\unwrap_opaque_value() must be an instance of resource, stdClass given"
 vec(3) {
   int(1)
   int(2)

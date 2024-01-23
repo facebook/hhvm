@@ -1,0 +1,9 @@
+Warning: Argument 3 to DateTime::createFromFormat() must be of type ?DateTimeZone, X given
+Warning: Argument 1 passed to DateTime::setTimezone() must be an instance of DateTimeZone, X given
+Warning: Argument 1 passed to DateTimeZone::getOffset() must implement interface DateTimeInterface, DateTimeZone given
+int(7200)
+Warning: Argument 1 passed to DateTime::add() must be an instance of DateInterval, DateTimeZone given
+Warning: Argument 1 passed to DateTime::sub() must be an instance of DateInterval, DateTimeZone given
+Warning: DateTime::diff() expects parameter 1 to be DateTimeInterface, X given
+Warning: Argument 1 passed to date_format() must be an instance of DateTime, X given
+Warning: Argument 2 to date_create() must be of type ?DateTimeZone, X given

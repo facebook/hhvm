@@ -33,10 +33,14 @@ function main() :mixed{
 
 
 <<__EntryPoint>>
-function main_is_subclass_of_opt() :mixed{
-main();
-main();
-main();
+function main_is_subclass_of_opt(): void {
+  set_error_handler(($errno, $errstr, ...) ==> {
+    throw new Exception($errstr);
+  });
 
-var_dump(main());
+  main();
+  main();
+  main();
+
+  var_dump(main());
 }

@@ -5,6 +5,9 @@ use namespace HH\Lib\_Private\_Str;
 
 <<__EntryPoint>>
 function main(): void {
+  set_error_handler(($errno, $errstr, ...) ==> {
+    throw new Exception($errstr);
+  });
   $en_gb = L\newlocale_all('en_GB.UTF-8');
   $fr_fr = L\newlocale_all('fr_FR.UTF-8');
   print _Str\vsprintf_l($en_gb, "%f\n", vec[1.23]);

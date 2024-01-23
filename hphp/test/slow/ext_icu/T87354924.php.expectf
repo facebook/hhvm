@@ -1,0 +1,3 @@
+
+Warning: Argument 1 to IntlTimeZone::hasSameRules() must be of type IntlTimeZone, stdClass given in %s on line 5
+Invalid argument. Expected IntlTimeZone, received stdClass

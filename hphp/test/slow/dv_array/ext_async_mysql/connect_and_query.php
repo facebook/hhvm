@@ -13,7 +13,7 @@ try {
   );
   HH\Asio\join(
     AsyncMysqlClient::connectAndQuery(
-      Vector{"SELECT id FROM `lolwhut` WHERE id IN (1)"},
+      vec["SELECT id FROM `lolwhut` WHERE id IN (1)"],
       "127.0.0.1",
       80,
       "fakedb",

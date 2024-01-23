@@ -7,5 +7,5 @@
 
 <<__EntryPoint>>
 function main_dom_document_save_htm_l_error2() :mixed{
-try { (new DOMDocument())->saveHTML(true); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  (new DOMDocument())->saveHTML(true);
 }

@@ -13,17 +13,17 @@ dict is tuple: false
 
 =====================================
 Builtin errors:
-Passing boolean to darray: __hhvm_intrinsics\dummy_darray_builtin() expects parameter 1 to be dict, boolean given
-Passing darray to boolean: json_decode() expects parameter 2 to be boolean, dict given
+Passing boolean to darray: Argument 1 passed to __hhvm_intrinsics\dummy_darray_builtin() must be an instance of HH\darray, bool given
+Passing darray to boolean: Argument 2 passed to json_decode() must be an instance of bool, HH\dict given
 
 =====================================
 Builtins:
 Passing vec to varray: []
-Passing vec to darray: __hhvm_intrinsics\dummy_darray_builtin() expects parameter 1 to be dict, vec given
-Passing dict to varray: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, dict given
+Passing vec to darray: Argument 1 passed to __hhvm_intrinsics\dummy_darray_builtin() must be an instance of HH\darray, HH\vec given
+Passing dict to varray: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, HH\dict given
 Passing dict to darray: {}
-Passing clsmeth to varray: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, clsmeth given
-Passing clsmeth to darray: __hhvm_intrinsics\dummy_darray_builtin() expects parameter 1 to be dict, clsmeth given
+Passing clsmeth to varray: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, clsmeth given
+Passing clsmeth to darray: Argument 1 passed to __hhvm_intrinsics\dummy_darray_builtin() must be an instance of HH\darray, clsmeth given
 
 =====================================
 Comparisons:
@@ -187,34 +187,21 @@ Invalid vec key: expected a key of type int, string given
 =====================================
 Typehints:
 "varray to varray: OK!"
-
-Catchable fatal error: Argument 1 passed to takes_darray() must be an instance of HH\darray, HH\vec given in %s/specialization.php on line %d
-
-Catchable fatal error: Argument 1 passed to takes_varray() must be an instance of HH\varray, HH\dict given in %s/specialization.php on line %d
+Argument 1 passed to takes_darray() must be an instance of HH\darray, HH\vec given
+Argument 1 passed to takes_varray() must be an instance of HH\varray, HH\dict given
 "darray to darray: OK!"
-
-Catchable fatal error: Argument 1 passed to takes_varray() must be an instance of HH\varray, clsmeth given in %s/specialization.php on line %d
-
-Catchable fatal error: Argument 1 passed to takes_darray() must be an instance of HH\darray, clsmeth given in %s/specialization.php on line %d
+Argument 1 passed to takes_varray() must be an instance of HH\varray, clsmeth given
+Argument 1 passed to takes_darray() must be an instance of HH\darray, clsmeth given
 []
-
-Catchable fatal error: Value returned from function returns_darray() must be of type HH\darray, HH\vec given in %s/specialization.php on line %d
-
-Catchable fatal error: Value returned from function returns_varray() must be of type HH\varray, HH\dict given in %s/specialization.php on line %d
+Value returned from function returns_darray() must be of type HH\darray, HH\vec given
+Value returned from function returns_varray() must be of type HH\varray, HH\dict given
 {}
-
-Catchable fatal error: Value returned from function returns_varray() must be of type HH\varray, clsmeth given in %s/specialization.php on line %d
-
-Catchable fatal error: Value returned from function returns_darray() must be of type HH\darray, clsmeth given in %s/specialization.php on line %d
+Value returned from function returns_varray() must be of type HH\varray, clsmeth given
+Value returned from function returns_darray() must be of type HH\darray, clsmeth given
 []
-
-Catchable fatal error: Property 'C::d' declared as type ?HH\darray, HH\vec assigned in %s/specialization.php on line %d
-
-Catchable fatal error: Property 'C::v' declared as type ?HH\varray, HH\dict assigned in %s/specialization.php on line %d
+Property 'C::d' declared as type ?HH\darray, HH\vec assigned
+Property 'C::v' declared as type ?HH\varray, HH\dict assigned
 {}
-
-Catchable fatal error: Property 'C::v' declared as type ?HH\varray, clsmeth assigned in %s/specialization.php on line %d
-
-Catchable fatal error: Property 'C::d' declared as type ?HH\darray, clsmeth assigned in %s/specialization.php on line %d
-
-Catchable fatal error: Type-hint of 'D::d' must be ?HH\darray (as in class C), not ?HH\varray in %s/specialization.php on line %d
+Property 'C::v' declared as type ?HH\varray, clsmeth assigned
+Property 'C::d' declared as type ?HH\darray, clsmeth assigned
+Type-hint of 'D::d' must be ?HH\darray (as in class C), not ?HH\varray

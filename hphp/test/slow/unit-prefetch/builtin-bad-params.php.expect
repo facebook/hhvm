@@ -1,2 +1,2 @@
-Caught exception... HH\prefetch_units() expects parameter 1 to be keyset, vec given
+Caught exception... Argument 1 passed to HH\prefetch_units() must be an instance of HH\keyset, HH\vec given
 Caught exception... Paths must contain only strings

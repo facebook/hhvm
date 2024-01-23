@@ -7,16 +7,20 @@ function test_is_nan($v) :mixed{
 
 <<__EntryPoint>>
 function main_bad_coercion() :mixed{
-$values = vec[
-  0,
-  '0',
-  '0a',
-  ' 0a',
-  ' 0',
-  '00:00:01',
-];
+  set_error_handler(($errno, $errstr, ...) ==> {
+    throw new Exception($errstr);
+});
 
-foreach ($values as $v) {
-  test_is_nan($v);
-}
+  $values = vec[
+    0,
+    '0',
+    '0a',
+    ' 0a',
+    ' 0',
+    '00:00:01',
+  ];
+
+  foreach ($values as $v) {
+    test_is_nan($v);
+  }
 }

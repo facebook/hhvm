@@ -1,0 +1,6 @@
+string(1) "C"
+string(1) "C"
+string(1) "C"
+string(1) "C"
+
+Catchable fatal error: Argument 1 passed to HH\class_to_classname() must be an instance of HH\classname, int given in %s on line 20

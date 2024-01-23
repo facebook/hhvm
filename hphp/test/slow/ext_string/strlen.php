@@ -7,7 +7,12 @@ class StrlenTest {
   }
 }
 
-function main() :mixed{
+<<__EntryPoint>>
+function main(): void {
+  set_error_handler(($errno, $errstr, ...) ==> {
+    throw new Exception($errstr);
+  });
+
   try { var_dump(strlen()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
   try { var_dump(strlen(null)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
@@ -37,10 +42,4 @@ function main() :mixed{
   var_dump(strlen("array()"));
   var_dump(strlen("array('str')"));
   var_dump(strlen("new stdClass()"));
-}
-
-
-<<__EntryPoint>>
-function main_strlen() :mixed{
-main();
 }

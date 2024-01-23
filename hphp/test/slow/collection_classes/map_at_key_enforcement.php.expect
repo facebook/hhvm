@@ -1,4 +1,4 @@
-string(24) "InvalidArgumentException"
-string(55) "Only integer keys and string keys may be used with Maps"
-string(24) "InvalidArgumentException"
-string(55) "Only integer keys and string keys may be used with Maps"
+string(9) "Exception"
+string(80) "Argument 1 passed to HH\Map::get() must be upper-bounded by arraykey, bool given"
+string(9) "Exception"
+string(79) "Argument 1 passed to HH\Map::at() must be upper-bounded by arraykey, bool given"

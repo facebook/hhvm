@@ -3,4 +3,4 @@ int(0)
 int(-1)
 int(-1)
 
-Warning: error_reporting() expects parameter 1 to be integer, string given in %s/test/slow/hni/nullable-coerce.php on line 12
+Catchable fatal error: Argument 1 to error_reporting() must be of type ?int, string given in %s/test/slow/hni/nullable-coerce.php on line 12

@@ -56,6 +56,11 @@ function main($f) :mixed{
     var_dump($e->getMessage());
   }
 }
-<<__EntryPoint>> function main_entry(): void {
-main(2.241987);
+
+<<__EntryPoint>>
+function main_entry(): void {
+  set_error_handler(($errno, $errstr, ...) ==> {
+    throw new Exception($errstr);
+  });
+  main(2.241987);
 }

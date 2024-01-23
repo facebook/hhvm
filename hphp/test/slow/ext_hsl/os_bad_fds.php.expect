@@ -15,15 +15,15 @@ lseek:
 --- Not an FD ---
 PHP7 engine exceptions (required): 1
 close:
-- Caught exception: 0 (TypeError - "Expected an HSL FileDescriptor, got instance of class 'NotAnFD'")
+- Caught exception: 0 (TypeError - "Argument 1 passed to HH\Lib\_Private\_OS\close() must be an instance of HH\Lib\OS\FileDescriptor, NotAnFD given")
 lseek:
-- Caught exception: 0 (TypeError - "Expected an HSL FileDescriptor, got instance of class 'NotAnFD'")
+- Caught exception: 0 (TypeError - "Argument 1 passed to HH\Lib\_Private\_OS\lseek() must be an instance of HH\Lib\OS\FileDescriptor, NotAnFD given")
 getpeername:
-- Caught exception: 0 (TypeError - "Expected an HSL FileDescriptor, got instance of class 'NotAnFD'")
+- Caught exception: 0 (TypeError - "Argument 1 passed to HH\Lib\_Private\_OS\getpeername() must be an instance of HH\Lib\OS\FileDescriptor, NotAnFD given")
 --- null ---
 close:
-- Caught exception: 0 (TypeError - "HH\Lib\_Private\_OS\close() expects parameter 1 to be object, null given")
+- Caught exception: 0 (TypeError - "Argument 1 passed to HH\Lib\_Private\_OS\close() must be an instance of HH\Lib\OS\FileDescriptor, null given")
 lseek:
-- Caught exception: 0 (TypeError - "HH\Lib\_Private\_OS\lseek() expects parameter 1 to be object, null given")
+- Caught exception: 0 (TypeError - "Argument 1 passed to HH\Lib\_Private\_OS\lseek() must be an instance of HH\Lib\OS\FileDescriptor, null given")
 getpeername:
-- Caught exception: 0 (TypeError - "HH\Lib\_Private\_OS\getpeername() expects parameter 1 to be object, null given")
+- Caught exception: 0 (TypeError - "Argument 1 passed to HH\Lib\_Private\_OS\getpeername() must be an instance of HH\Lib\OS\FileDescriptor, null given")

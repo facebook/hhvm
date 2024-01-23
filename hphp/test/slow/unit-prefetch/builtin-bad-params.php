@@ -4,7 +4,11 @@
 namespace BuiltinBadParams;
 
 <<__EntryPoint>>
-function main() :mixed{
+function main(): mixed {
+  \set_error_handler(($errno, $errstr, ...) ==> {
+    throw new \Exception($errstr);
+  });
+
   try {
     \HH\prefetch_units(vec[], false);
   } catch (\Exception $e) {

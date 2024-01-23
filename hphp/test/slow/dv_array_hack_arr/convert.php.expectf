@@ -397,18 +397,32 @@ dict(2) {
 bool(false)
 bool(true)
 ============== test_indirect (HH\varray) ==================
+
+Warning: Argument 1 to HH\varray() must be of type HH\Traversable, null given in %s on line 76
 Exception: Null to vec conversion
 ============== test_indirect (HH\varray) ==================
+
+Warning: Argument 1 to HH\varray() must be of type HH\Traversable, bool given in %s on line 76
 Exception: Bool to vec conversion
 ============== test_indirect (HH\varray) ==================
+
+Warning: Argument 1 to HH\varray() must be of type HH\Traversable, bool given in %s on line 76
 Exception: Bool to vec conversion
 ============== test_indirect (HH\varray) ==================
+
+Warning: Argument 1 to HH\varray() must be of type HH\Traversable, string given in %s on line 76
 Exception: String to vec conversion
 ============== test_indirect (HH\varray) ==================
+
+Warning: Argument 1 to HH\varray() must be of type HH\Traversable, int given in %s on line 76
 Exception: Int to vec conversion
 ============== test_indirect (HH\varray) ==================
+
+Warning: Argument 1 to HH\varray() must be of type HH\Traversable, string given in %s on line 76
 Exception: String to vec conversion
 ============== test_indirect (HH\varray) ==================
+
+Warning: Argument 1 to HH\varray() must be of type HH\Traversable, float given in %s on line 76
 Exception: Double to vec conversion
 ============== test_indirect (HH\varray) ==================
 vec(0) {
@@ -472,8 +486,12 @@ vec(3) {
 bool(true)
 bool(false)
 ============== test_indirect (HH\varray) ==================
+
+Warning: Argument 1 to HH\varray() must be of type HH\Traversable, %SFile given in %s on line 76
 Exception: Resource to vec conversion
 ============== test_indirect (HH\varray) ==================
+
+Warning: Argument 1 to HH\varray() must be of type HH\Traversable, stdClass given in %s on line 76
 Exception: Non-iterable object to vec conversion
 ============== test_indirect (HH\varray) ==================
 vec(3) {
@@ -573,18 +591,32 @@ vec(2) {
 bool(true)
 bool(false)
 ============== test_indirect (HH\darray) ==================
+
+Warning: Argument 1 to HH\darray() must be of type HH\KeyedTraversable, null given in %s on line 76
 Exception: Null to dict conversion
 ============== test_indirect (HH\darray) ==================
+
+Warning: Argument 1 to HH\darray() must be of type HH\KeyedTraversable, bool given in %s on line 76
 Exception: Bool to dict conversion
 ============== test_indirect (HH\darray) ==================
+
+Warning: Argument 1 to HH\darray() must be of type HH\KeyedTraversable, bool given in %s on line 76
 Exception: Bool to dict conversion
 ============== test_indirect (HH\darray) ==================
+
+Warning: Argument 1 to HH\darray() must be of type HH\KeyedTraversable, string given in %s on line 76
 Exception: String to dict conversion
 ============== test_indirect (HH\darray) ==================
+
+Warning: Argument 1 to HH\darray() must be of type HH\KeyedTraversable, int given in %s on line 76
 Exception: Int to dict conversion
 ============== test_indirect (HH\darray) ==================
+
+Warning: Argument 1 to HH\darray() must be of type HH\KeyedTraversable, string given in %s on line 76
 Exception: String to dict conversion
 ============== test_indirect (HH\darray) ==================
+
+Warning: Argument 1 to HH\darray() must be of type HH\KeyedTraversable, float given in %s on line 76
 Exception: Double to dict conversion
 ============== test_indirect (HH\darray) ==================
 dict(0) {
@@ -664,10 +696,16 @@ dict(3) {
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
+
+Warning: Argument 1 to HH\darray() must be of type HH\KeyedTraversable, %SFile given in %s on line 76
 Exception: Resource to dict conversion
 ============== test_indirect (HH\darray) ==================
+
+Warning: Argument 1 to HH\darray() must be of type HH\KeyedTraversable, stdClass given in %s on line 76
 Exception: Non-iterable object to dict conversion
 ============== test_indirect (HH\darray) ==================
+
+Warning: Argument 1 to HH\darray() must be of type HH\KeyedTraversable, IterableObj given in %s on line 76
 dict(3) {
   [100]=>
   string(3) "abc"
@@ -679,8 +717,12 @@ dict(3) {
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
+
+Warning: Argument 1 to HH\darray() must be of type HH\KeyedTraversable, ThrowIterableObj given in %s on line 76
 Exception: ThrowIterableObj
 ============== test_indirect (HH\darray) ==================
+
+Warning: Argument 1 to HH\darray() must be of type HH\KeyedTraversable, AggregateObj given in %s on line 76
 dict(3) {
   [100]=>
   string(3) "abc"

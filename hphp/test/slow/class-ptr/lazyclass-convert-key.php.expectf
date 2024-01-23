@@ -71,9 +71,9 @@ bool(false)
 Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 30
 int(42)
 
-Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 31
+Notice: Implicit Class to string conversion for argument 1 passed to HH\Map::setNative() in %s/test/slow/class-ptr/class-key-convert.inc on line 31
 
-Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 32
+Notice: Implicit Class to string conversion for argument 1 passed to HH\Map::get() in %s/test/slow/class-ptr/class-key-convert.inc on line 32
 int(10)
 ===vec:===
 vec(2) {

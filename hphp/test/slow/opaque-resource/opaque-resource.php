@@ -2,6 +2,10 @@
 
 <<__EntryPoint>>
 function main() :mixed{
+  set_error_handler(($errno, $errstr, ...) ==> {
+    throw new Exception($errstr);
+  });
+
   $o1 = __SystemLib\create_opaque_value(42, vec[1, 2, 3]);
   $o2 = __SystemLib\create_opaque_value(1337, vec[1, 2, 3]);
 

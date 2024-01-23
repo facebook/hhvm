@@ -68,7 +68,7 @@ NULL
 Warning: Invalid argument: simplexml_load_string() expects parameter 2 to be a class name derived from SimpleXMLElement, 'stdClass' given in %s/test/slow/invalid_argument/1381.php on line %d
 NULL
 
-Warning: stream_get_contents() expects parameter 1 to be resource, string given in %s/test/slow/invalid_argument/1381.php on line %d
+Warning: Argument 1 passed to stream_get_contents() must be an instance of resource, string given
 
 Warning: Invalid argument: length (negative): -1 in %s/test/slow/invalid_argument/1381.php on line %d
 bool(false)

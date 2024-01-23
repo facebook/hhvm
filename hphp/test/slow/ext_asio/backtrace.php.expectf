@@ -1,0 +1,9 @@
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+
+Catchable fatal error: Argument 1 passed to HH\Asio\backtrace() must be an instance of HH\Awaitable, CatWrapper given in %s on line 112

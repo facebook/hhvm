@@ -9,6 +9,6 @@ bool(true)
 bool(false)
 bool(true)
 bool(true)
-string(52) "strlen() expects parameter 1 to be string, vec given"
-string(55) "strlen() expects parameter 1 to be string, object given"
-string(55) "strlen() expects parameter 1 to be string, object given"
+string(73) "Argument 1 passed to strlen() must be an instance of string, HH\vec given"
+string(68) "Argument 1 passed to strlen() must be an instance of string, A given"
+string(68) "Argument 1 passed to strlen() must be an instance of string, B given"

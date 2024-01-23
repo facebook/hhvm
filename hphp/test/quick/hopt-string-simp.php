@@ -88,19 +88,23 @@ function foo14() :mixed{
   }
 }
 
-<<__EntryPoint>> function main(): void {
-var_dump(foo1());
-var_dump(foo2());
-var_dump(foo3());
-var_dump(foo4());
-var_dump(foo5());
-var_dump(foo6());
-var_dump(foo7());
-var_dump(foo8());
-var_dump(foo9());
-var_dump(foo10());
-var_dump(foo11());
-var_dump(foo12());
-var_dump(foo13());
-var_dump(foo14());
+<<__EntryPoint>>
+function main(): void {
+  set_error_handler(($errno, $errstr, ...) ==> {
+    throw new Exception($errstr);
+  });
+  var_dump(foo1());
+  var_dump(foo2());
+  var_dump(foo3());
+  var_dump(foo4());
+  var_dump(foo5());
+  var_dump(foo6());
+  var_dump(foo7());
+  var_dump(foo8());
+  var_dump(foo9());
+  var_dump(foo10());
+  var_dump(foo11());
+  var_dump(foo12());
+  var_dump(foo13());
+  var_dump(foo14());
 }

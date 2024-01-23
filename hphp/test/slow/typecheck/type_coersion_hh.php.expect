@@ -1,42 +1,43 @@
+
 Boolean
-WARNING: sha1() expects parameter 2 to be boolean, integer given
-WARNING: sha1() expects parameter 2 to be boolean, double given
-WARNING: sha1() expects parameter 2 to be boolean, string given
-WARNING: sha1() expects parameter 2 to be boolean, vec given
-WARNING: sha1() expects parameter 2 to be boolean, null given
+WARNING: Argument 2 passed to sha1() must be an instance of bool, int given
+WARNING: Argument 2 passed to sha1() must be an instance of bool, float given
+WARNING: Argument 2 passed to sha1() must be an instance of bool, string given
+WARNING: Argument 2 passed to sha1() must be an instance of bool, HH\vec given
+WARNING: Argument 2 passed to sha1() must be an instance of bool, null given
 
 Int64
-WARNING: str_pad() expects parameter 2 to be integer, boolean given
-WARNING: str_pad() expects parameter 2 to be integer, double given
-WARNING: str_pad() expects parameter 2 to be integer, string given
-WARNING: str_pad() expects parameter 2 to be integer, vec given
-WARNING: str_pad() expects parameter 2 to be integer, null given
+WARNING: Argument 2 passed to str_pad() must be an instance of int, bool given
+WARNING: Argument 2 passed to str_pad() must be an instance of int, float given
+WARNING: Argument 2 passed to str_pad() must be an instance of int, string given
+WARNING: Argument 2 passed to str_pad() must be an instance of int, HH\vec given
+WARNING: Argument 2 passed to str_pad() must be an instance of int, null given
 
 Double
-WARNING: number_format() expects parameter 1 to be double, boolean given
-WARNING: number_format() expects parameter 1 to be double, integer given
-WARNING: number_format() expects parameter 1 to be double, string given
-WARNING: number_format() expects parameter 1 to be double, vec given
-WARNING: number_format() expects parameter 1 to be double, null given
+WARNING: Argument 1 passed to number_format() must be an instance of float, bool given
+WARNING: Argument 1 passed to number_format() must be an instance of float, int given
+WARNING: Argument 1 passed to number_format() must be an instance of float, string given
+WARNING: Argument 1 passed to number_format() must be an instance of float, HH\vec given
+WARNING: Argument 1 passed to number_format() must be an instance of float, null given
 
 String
-WARNING: rtrim() expects parameter 1 to be string, boolean given
-WARNING: rtrim() expects parameter 1 to be string, integer given
-WARNING: rtrim() expects parameter 1 to be string, double given
-WARNING: rtrim() expects parameter 1 to be string, vec given
-WARNING: rtrim() expects parameter 1 to be string, null given
+WARNING: Argument 1 passed to rtrim() must be an instance of string, bool given
+WARNING: Argument 1 passed to rtrim() must be an instance of string, int given
+WARNING: Argument 1 passed to rtrim() must be an instance of string, float given
+WARNING: Argument 1 passed to rtrim() must be an instance of string, HH\vec given
+WARNING: Argument 1 passed to rtrim() must be an instance of string, null given
 
 varray
-WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, boolean given
-WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, integer given
-WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, double given
-WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, string given
-WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, null given
+WARNING: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, bool given
+WARNING: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, int given
+WARNING: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, float given
+WARNING: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, string given
+WARNING: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, null given
 
 Object
-WARNING: get_object_vars() expects parameter 1 to be object, boolean given
-WARNING: get_object_vars() expects parameter 1 to be object, integer given
-WARNING: get_object_vars() expects parameter 1 to be object, double given
-WARNING: get_object_vars() expects parameter 1 to be object, string given
-WARNING: get_object_vars() expects parameter 1 to be object, vec given
-WARNING: get_object_vars() expects parameter 1 to be object, null given
+WARNING: Argument 1 passed to get_object_vars() must be an instance of HH\object, bool given
+WARNING: Argument 1 passed to get_object_vars() must be an instance of HH\object, int given
+WARNING: Argument 1 passed to get_object_vars() must be an instance of HH\object, float given
+WARNING: Argument 1 passed to get_object_vars() must be an instance of HH\object, string given
+WARNING: Argument 1 passed to get_object_vars() must be an instance of HH\object, HH\vec given
+WARNING: Argument 1 passed to get_object_vars() must be an instance of HH\object, null given

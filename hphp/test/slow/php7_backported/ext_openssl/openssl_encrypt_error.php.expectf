@@ -1,17 +1,17 @@
-Warning: Unknown cipher algorithm in %s/test/slow/php7_backported/ext_openssl/openssl_encrypt_error.php on line 11
+Warning: Unknown cipher algorithm in %s/test/slow/php7_backported/ext_openssl/openssl_encrypt_error.php on line 21
 bool(false)
 
-Warning: openssl_encrypt() expects parameter 1 to be string, object given in %s/test/slow/php7_backported/ext_openssl/openssl_encrypt_error.php on line 12
+Warning: Argument 1 passed to openssl_encrypt() must be an instance of string, stdClass given in %s/test/slow/php7_backported/ext_openssl/openssl_encrypt_error.php on line 22
 
-Warning: openssl_encrypt() expects parameter 2 to be string, object given in %s/test/slow/php7_backported/ext_openssl/openssl_encrypt_error.php on line 13
+Warning: Argument 2 passed to openssl_encrypt() must be an instance of string, stdClass given in %s/test/slow/php7_backported/ext_openssl/openssl_encrypt_error.php on line 23
 
-Warning: openssl_encrypt() expects parameter 3 to be string, object given in %s/test/slow/php7_backported/ext_openssl/openssl_encrypt_error.php on line 14
+Warning: Argument 3 passed to openssl_encrypt() must be an instance of string, stdClass given in %s/test/slow/php7_backported/ext_openssl/openssl_encrypt_error.php on line 24
 
-Warning: openssl_encrypt() expects parameter 1 to be string, vec given in %s/test/slow/php7_backported/ext_openssl/openssl_encrypt_error.php on line 15
+Warning: Argument 1 passed to openssl_encrypt() must be an instance of string, HH\vec given in %s/test/slow/php7_backported/ext_openssl/openssl_encrypt_error.php on line 25
 
-Warning: openssl_encrypt() expects parameter 2 to be string, vec given in %s/test/slow/php7_backported/ext_openssl/openssl_encrypt_error.php on line 16
+Warning: Argument 2 passed to openssl_encrypt() must be an instance of string, HH\vec given in %s/test/slow/php7_backported/ext_openssl/openssl_encrypt_error.php on line 26
 
-Warning: openssl_encrypt() expects parameter 3 to be string, vec given in %s/test/slow/php7_backported/ext_openssl/openssl_encrypt_error.php on line 17
+Warning: Argument 3 passed to openssl_encrypt() must be an instance of string, HH\vec given in %s/test/slow/php7_backported/ext_openssl/openssl_encrypt_error.php on line 27
 
-Warning: The authenticated tag cannot be provided for cipher that does not support AEAD in %s/test/slow/php7_backported/ext_openssl/openssl_encrypt_error.php on line 20
+Warning: The authenticated tag cannot be provided for cipher that does not support AEAD in %s/test/slow/php7_backported/ext_openssl/openssl_encrypt_error.php on line 30
 string(44) "iPR4HulskuaP5Z6me5uImk6BqVyJG73+63tkPauVZYk="

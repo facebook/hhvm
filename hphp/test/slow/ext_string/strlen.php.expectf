@@ -1,30 +1,30 @@
-Warning: strlen() expects exactly 1 parameter, 0 given in %s/test/slow/ext_string/strlen.php on line 11
+Warning: strlen() expects exactly 1 parameter, 0 given in %s/strlen.php on line 16
 
-Warning: strlen() expects parameter 1 to be string, null given in %s/test/slow/ext_string/strlen.php on line 13
+Warning: Argument 1 passed to strlen() must be an instance of string, null given in %s/strlen.php on line 18
 
-Warning: strlen() expects parameter 1 to be string, boolean given in %s/test/slow/ext_string/strlen.php on line 14
+Warning: Argument 1 passed to strlen() must be an instance of string, bool given in %s/strlen.php on line 19
 
-Warning: strlen() expects parameter 1 to be string, boolean given in %s/test/slow/ext_string/strlen.php on line 15
+Warning: Argument 1 passed to strlen() must be an instance of string, bool given in %s/strlen.php on line 20
 
-Warning: strlen() expects parameter 1 to be string, integer given in %s/test/slow/ext_string/strlen.php on line 17
+Warning: Argument 1 passed to strlen() must be an instance of string, int given in %s/strlen.php on line 22
 
-Warning: strlen() expects parameter 1 to be string, double given in %s/test/slow/ext_string/strlen.php on line 18
+Warning: Argument 1 passed to strlen() must be an instance of string, float given in %s/strlen.php on line 23
 
-Warning: strlen() expects parameter 1 to be string, double given in %s/test/slow/ext_string/strlen.php on line 19
+Warning: Argument 1 passed to strlen() must be an instance of string, float given in %s/strlen.php on line 24
 
-Warning: strlen() expects parameter 1 to be string, vec given in %s/test/slow/ext_string/strlen.php on line 21
+Warning: Argument 1 passed to strlen() must be an instance of string, HH\vec given in %s/strlen.php on line 26
 
-Warning: strlen() expects parameter 1 to be string, vec given in %s/test/slow/ext_string/strlen.php on line 22
+Warning: Argument 1 passed to strlen() must be an instance of string, HH\vec given in %s/strlen.php on line 27
 
-Warning: strlen() expects parameter 1 to be string, vec given in %s/test/slow/ext_string/strlen.php on line 24
+Warning: Argument 1 passed to strlen() must be an instance of string, HH\vec given in %s/strlen.php on line 29
 
-Warning: strlen() expects parameter 1 to be string, dict given in %s/test/slow/ext_string/strlen.php on line 25
+Warning: Argument 1 passed to strlen() must be an instance of string, HH\dict given in %s/strlen.php on line 30
 
-Warning: strlen() expects parameter 1 to be string, keyset given in %s/test/slow/ext_string/strlen.php on line 26
+Warning: Argument 1 passed to strlen() must be an instance of string, HH\keyset given in %s/strlen.php on line 31
 
-Warning: strlen() expects parameter 1 to be string, object given in %s/test/slow/ext_string/strlen.php on line 28
+Warning: Argument 1 passed to strlen() must be an instance of string, stdClass given in %s/strlen.php on line 33
 
-Warning: strlen() expects parameter 1 to be string, object given in %s/test/slow/ext_string/strlen.php on line 29
+Warning: Argument 1 passed to strlen() must be an instance of string, StrlenTest given in %s/strlen.php on line 34
 int(4)
 int(4)
 int(5)

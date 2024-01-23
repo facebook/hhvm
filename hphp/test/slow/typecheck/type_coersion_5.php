@@ -1,9 +1,11 @@
 <?hh
 
 function errHandler($errno, $errmsg, $file, $line) :mixed{
-  $errmsg = str_replace('long', 'integer', $errmsg);
-  printf("WARNING: ".fix_err($errmsg, false)."\n");
-  return true;
+  if (HH\Lib\Str\contains($errmsg, "@")) {
+    printf("WARNING: ".$errmsg."\n");
+    return true;
+  }
+  throw new Exception($errmsg);
 }
 
 function check($kind, $builtin_fn, $user_fn) :mixed{
@@ -18,22 +20,20 @@ function check($kind, $builtin_fn, $user_fn) :mixed{
 
 
 <<__EntryPoint>>
-function main_type_coersion_5() :mixed{
-require_once('fix_exceptions.inc');
+function main_type_coersion_5(): mixed {
+  set_error_handler(errHandler<>, E_ALL);
 
-set_error_handler(errHandler<>, E_ALL);
-
-check("Boolean", function ($v) { return sha1("abc", $v); },
-      function (<<__Soft>> bool $v) { });
-check("Int64", function ($v) { return str_pad("abc", $v); },
-      function (<<__Soft>> int $v) { });
-check("Double", function ($v) { return number_format($v); },
-      function (<<__Soft>> float $v) { });
-check("String", function ($v) { return rtrim($v); },
-      function (<<__Soft>> string $v) { });
-check("varray",
-      function ($v) { return __hhvm_intrinsics\dummy_varray_builtin($v); },
-      function (<<__Soft>> varray $v) { });
-check("Object", function ($v) { return get_object_vars($v); },
-      function (<<__Soft>> object $v) { });
+  check("Boolean", function ($v) { return sha1("abc", $v); },
+        function (<<__Soft>> bool $v) { });
+  check("Int64", function ($v) { return str_pad("abc", $v); },
+        function (<<__Soft>> int $v) { });
+  check("Double", function ($v) { return number_format($v); },
+        function (<<__Soft>> float $v) { });
+  check("String", function ($v) { return rtrim($v); },
+        function (<<__Soft>> string $v) { });
+  check("varray",
+        function ($v) { return __hhvm_intrinsics\dummy_varray_builtin($v); },
+        function (<<__Soft>> varray $v) { });
+  check("Object", function ($v) { return get_object_vars($v); },
+        function (<<__Soft>> object $v) { });
 }

@@ -1,7 +1,9 @@
-Warning: mysql_next_result() expects parameter 1 to be resource, integer given in %s/bogus_connection.php on line 7
 
-Warning: mysql_fetch_result() expects parameter 1 to be resource, integer given in %s/bogus_connection.php on line 8
 
-Warning: mysql_more_results() expects parameter 1 to be resource, integer given in %s/bogus_connection.php on line 9
+Warning: Argument 1 to mysql_next_result() must be of type ?resource, int given in %s/bogus_connection.php on line 11
 
-Warning: mysql_multi_query() expects parameter 2 to be resource, integer given in %s/bogus_connection.php on line 10
+Warning: Argument 1 to mysql_fetch_result() must be of type ?resource, int given in %s/bogus_connection.php on line 12
+
+Warning: Argument 1 to mysql_more_results() must be of type ?resource, int given in %s/bogus_connection.php on line 13
+
+Warning: Argument 2 to mysql_multi_query() must be of type ?resource, int given in %s/bogus_connection.php on line 14

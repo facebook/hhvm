@@ -1,16 +1,16 @@
-Invalid object. Expected DOMNode, received stdClass
-Invalid object. Expected DOMNode, received stdClass
-Invalid object. Expected DOMNode, received stdClass
-Invalid object. Expected DOMNode, received stdClass
-Invalid object. Expected DOMNode, received stdClass
-Invalid object. Expected DOMNode, received stdClass
-Invalid object. Expected DOMNode, received stdClass
-Invalid object. Expected DOMNode, received stdClass
-Invalid object. Expected DOMNode, received stdClass
-Invalid object. Expected DOMNode, received stdClass
-Invalid object. Expected DOMNode, received stdClass
-Invalid object. Expected DOMNode, received stdClass
-Invalid object. Expected DOMNode, received stdClass
-Invalid object. Expected DOMNode, received stdClass
-Invalid object. Expected DOMNode, received stdClass
-Invalid object. Expected DOMNode, received stdClass
+Argument 1 passed to DOMNode::isSameNode() must be an instance of DOMNode, stdClass given
+Argument 1 passed to DOMDocument::importNode() must be an instance of DOMNode, stdClass given
+Argument 1 to DOMDocument::saveHTML() must be of type ?DOMNode, stdClass given
+Argument 1 to DOMDocument::saveXML() must be of type ?DOMNode, stdClass given
+Argument 1 passed to DOMElement::removeAttributeNode() must be an instance of DOMAttr, stdClass given
+Argument 1 passed to DOMElement::setAttributeNode() must be an instance of DOMAttr, stdClass given
+Argument 1 passed to DOMElement::setAttributeNodeNS() must be an instance of DOMAttr, stdClass given
+Argument 1 passed to DOMElement::setIDAttributeNode() must be an instance of DOMAttr, stdClass given
+Argument 3 to DOMImplementation::createDocument() must be of type ?DOMDocumentType, stdClass given
+Argument 1 passed to DOMNode::insertBefore() must be an instance of DOMNode, stdClass given
+Argument 2 to DOMNode::insertBefore() must be of type ?DOMNode, stdClass given
+Argument 1 passed to DOMNode::removeChild() must be an instance of DOMNode, stdClass given
+Argument 1 passed to DOMNode::replaceChild() must be an instance of DOMNode, stdClass given
+Argument 2 passed to DOMNode::replaceChild() must be an instance of DOMNode, stdClass given
+Argument 2 to DOMXPath::evaluate() must be of type ?DOMNode, stdClass given
+Argument 2 to DOMXPath::query() must be of type ?DOMNode, stdClass given

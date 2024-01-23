@@ -48,7 +48,10 @@ function parameters() :mixed{
 
 
 <<__EntryPoint>>
-function main_builtin_annotations() :mixed{
-return_values();
-parameters();
+function main_builtin_annotations(): void {
+  set_error_handler(($errno, $errstr, ...) ==> {
+    throw new Exception($errstr);
+  });
+  return_values();
+  parameters();
 }

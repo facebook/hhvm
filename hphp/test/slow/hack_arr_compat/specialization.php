@@ -117,15 +117,6 @@ function test_varray_ops() :mixed{
   }
 }
 
-// We're testing many fatal errors here; we do so by keeping a count and
-// running the test multiple times (since a fatal ends the test...)
-function get_count() :mixed{
-  $count = __hhvm_intrinsics\apc_fetch_no_check('count');
-  $count = $count ? $count : 0;
-  apc_store('count', $count + 1);
-  return $count;
-}
-
 function takes_varray(varray $x) :mixed{ return 'varray to varray: OK!'; }
 function takes_darray(darray $x) :mixed{ return 'darray to darray: OK!'; }
 function returns_varray($fn): varray { return $fn(); }
@@ -139,35 +130,36 @@ class D extends C {
 }
 
 // Test that regular Hack function typehints are enforced.
-function test_typehint_enforcement(int $count) :mixed{
-  if (!$count) print("\n=====================================\nTypehints:\n");
+function test_typehint_enforcement() :mixed{
+  print("\n=====================================\nTypehints:\n");
   $clsmeth = ClsMethTest::fn<>;
   foreach (vec[vec[], dict[], $clsmeth] as $input) {
-    if (!($count--)) run(() ==> takes_varray($input));
-    if (!($count--)) run(() ==> takes_darray($input));
+    run(() ==> takes_varray($input));
+    run(() ==> takes_darray($input));
   }
   foreach (vec[vec[], dict[], $clsmeth] as $input) {
-    if (!($count--)) run(() ==> returns_varray(() ==> $input));
-    if (!($count--)) run(() ==> returns_darray(() ==> $input));
+    run(() ==> returns_varray(() ==> $input));
+    run(() ==> returns_darray(() ==> $input));
   }
   $c = new C();
   foreach (vec[vec[], dict[], $clsmeth] as $input) {
-    if (!($count--)) run(() ==> $c->v = $input);
-    if (!($count--)) run(() ==> $c->d = $input);
+    run(() ==> $c->v = $input);
+    run(() ==> $c->d = $input);
   }
-  if (!($count--)) $d = new D();
+  run(() ==> new D());
 }
 
 <<__EntryPoint>>
 function main() :mixed{
-  $count = get_count();
-  if (!$count) {
-    test_as_is_shape_tuple();
-    test_builtin_error_messages();
-    test_builtin_enforcement();
-    test_darray_varray_comparisons();
-    test_varray_implicit_append();
-    test_varray_ops();
-  }
-  test_typehint_enforcement($count);
+  set_error_handler(($errno, $errstr, ...) ==> {
+    throw new Exception($errstr);
+  });
+
+  test_as_is_shape_tuple();
+  test_builtin_error_messages();
+  test_builtin_enforcement();
+  test_darray_varray_comparisons();
+  test_varray_implicit_append();
+  test_varray_ops();
+  test_typehint_enforcement();
 }

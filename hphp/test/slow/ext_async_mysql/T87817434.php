@@ -19,6 +19,10 @@ function test_pool_connect_with_opts() :mixed{
 
 <<__EntryPoint>>
 function main(): void {
+  set_error_handler(($errno, $errstr, ...) ==> {
+    throw new Exception($errstr);
+  });
+
   $tests = vec[
       test_connect<>,
       test_connect_and_query<>,

@@ -10,6 +10,9 @@ function wrap($fn) :mixed{
 
 <<__EntryPoint>>
 function main(): void {
+  set_error_handler(($errno, $errstr, ...) ==> {
+    throw new Exception($errstr);
+  });
   $map = Map { 42 => 'foo' };
   wrap(() ==> $map->get(false));
   wrap(() ==> $map->at(false));

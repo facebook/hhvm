@@ -1,5 +1,5 @@
 string(21) "Undefined variable: x"
-string(56) "strlen() expects parameter 1 to be string, boolean given"
-string(53) "strlen() expects parameter 1 to be string, null given"
-string(56) "strlen() expects parameter 1 to be string, boolean given"
+string(71) "Argument 1 passed to strlen() must be an instance of string, bool given"
+string(71) "Argument 1 passed to strlen() must be an instance of string, null given"
+string(71) "Argument 1 passed to strlen() must be an instance of string, bool given"
 done

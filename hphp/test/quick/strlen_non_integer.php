@@ -49,12 +49,16 @@ function main2() :mixed{
     var_dump($e->getMessage());
   }
 }
-<<__EntryPoint>> function main_entry(): void {
-set_error_handler(none<>);
 
-main();
-main();
-main2();
+<<__EntryPoint>>
+function main_entry(): void {
+  set_error_handler(($errno, $errstr, ...) ==> {
+    throw new Exception($errstr);
+  });
 
-echo "done\n";
+  main();
+  main();
+  main2();
+
+  echo "done\n";
 }

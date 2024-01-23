@@ -109,12 +109,7 @@ async function testBacktrace(): Awaitable<void> {
   var_dump(!($bt ?? false));
 
   // try backtracing something, that is not a wait handle
-  try {
-    $bt = HH\Asio\backtrace($cat);
-    var_dump(false);
-  } catch (InvalidArgumentException $e) {
-    var_dump(true);
-  }
+  $bt = HH\Asio\backtrace($cat);
 }
 
 

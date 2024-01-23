@@ -12,19 +12,10 @@ abstract final class TestAsyncMysqlConn {
     } catch (Exception $_) {}
   }
 }
-<<__EntryPoint>> function main(): void {
-$pool = new AsyncMysqlConnectionPool(dict['foo' => null]);
-var_dump($pool->getPoolStats());
+<<__EntryPoint>>
+function main(): void {
+  $pool = new AsyncMysqlConnectionPool(dict['foo' => null]);
+  var_dump($pool->getPoolStats());
 
-$inputs = vec[
-  vec[],
-  dict[],
-  Vector {},
-  dict[],
-  vec[],
-];
-
-foreach ($inputs as $i) {
-  TestAsyncMysqlConn::testMultiQuery($i);
-}
+  TestAsyncMysqlConn::testMultiQuery(vec[]);
 }

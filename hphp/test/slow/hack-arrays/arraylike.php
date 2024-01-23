@@ -42,38 +42,38 @@ function test_builtins($a, $b, $c, $d, $e, $f, $g) :mixed{
 
   try {
     __hhvm_intrinsics\dummy_arraylike_builtin(null);
-  } catch (Exception $e) {
-    echo "Exception: {$e->getMessage()}\n";
+  } catch (Exception $exc) {
+    echo "Exception: {$exc->getMessage()}\n";
   }
   try {
     __hhvm_intrinsics\dummy_arraylike_builtin(42);
-  } catch (Exception $e) {
-    echo "Exception: {$e->getMessage()}\n";
+  } catch (Exception $exc) {
+    echo "Exception: {$exc->getMessage()}\n";
   }
   try {
     __hhvm_intrinsics\dummy_arraylike_builtin(tuple(true, false));
-  } catch (Exception $e) {
-    echo "Exception: {$e->getMessage()}\n";
+  } catch (Exception $exc) {
+    echo "Exception: {$exc->getMessage()}\n";
   }
   try {
     __hhvm_intrinsics\dummy_arraylike_builtin(shape('a' => true, 'b' => false));
-  } catch (Exception $e) {
-    echo "Exception: {$e->getMessage()}\n";
+  } catch (Exception $exc) {
+    echo "Exception: {$exc->getMessage()}\n";
   }
   try {
     __hhvm_intrinsics\dummy_arraylike_builtin(vec[]);
-  } catch (Exception $e) {
-    echo "Exception: {$e->getMessage()}\n";
+  } catch (Exception $exc) {
+    echo "Exception: {$exc->getMessage()}\n";
   }
   try {
     __hhvm_intrinsics\dummy_arraylike_builtin(dict[]);
-  } catch (Exception $e) {
-    echo "Exception: {$e->getMessage()}\n";
+  } catch (Exception $exc) {
+    echo "Exception: {$exc->getMessage()}\n";
   }
   try {
     __hhvm_intrinsics\dummy_arraylike_builtin(vec[]);
-  } catch (Exception $e) {
-    echo "Exception: {$e->getMessage()}\n";
+  } catch (Exception $exc) {
+    echo "Exception: {$exc->getMessage()}\n";
   }
 
   call_arraylike_builtin($a);
@@ -85,7 +85,12 @@ function test_builtins($a, $b, $c, $d, $e, $f, $g) :mixed{
   call_arraylike_builtin($g);
 }
 
-function main() :mixed{
+<<__EntryPoint>>
+function main(): void {
+  set_error_handler(($errno, $errstr, ...) ==> {
+    throw new Exception($errstr);
+  });
+
   takes_arraylike(darray(dict[42 => 'lol']));
   takes_arraylike(vec['lol']);
   takes_arraylike(dict[42 => 'lol']);
@@ -109,10 +114,4 @@ function main() :mixed{
     dict[],
     vec[]
   );
-}
-
-
-<<__EntryPoint>>
-function main_arraylike() :mixed{
-main();
 }

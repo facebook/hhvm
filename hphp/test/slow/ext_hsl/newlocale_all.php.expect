@@ -7,4 +7,4 @@ Trying '0' locale (return)
 string(36) "HH\Lib\Locale\InvalidLocaleException"
 string(32) "Magic locales are not supported."
 Trying int 0 locale (type error)
-HH\Lib\_Private\_Locale\newlocale_all() expects parameter 1 to be string, integer given
+Argument 1 passed to HH\Lib\_Private\_Locale\newlocale_all() must be an instance of string, int given

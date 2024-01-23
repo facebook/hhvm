@@ -14,7 +14,7 @@ notice(bar): Implicit Class to string conversion for string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(strlen): Implicit Class to string conversion for argument 1 passed to strlen()
+notice(bar): Implicit Class to string conversion for argument 1 passed to strlen()
 int(3)
 notice(baz): Implicit Class to string conversion for return of baz()
 notice(baz): Implicit Class to string conversion for return of baz()
@@ -70,7 +70,7 @@ notice(bar): Implicit Class to string conversion for string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(strlen): Implicit Class to string conversion for argument 1 passed to strlen()
+notice(bar): Implicit Class to string conversion for argument 1 passed to strlen()
 int(3)
 notice(baz): Implicit Class to string conversion for return of baz()
 notice(baz): Implicit Class to string conversion for return of baz()
@@ -126,7 +126,7 @@ notice(bar): Implicit Class to string conversion for string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(strlen): Implicit Class to string conversion for argument 1 passed to strlen()
+notice(bar): Implicit Class to string conversion for argument 1 passed to strlen()
 int(3)
 notice(baz): Implicit Class to string conversion for return of baz()
 notice(baz): Implicit Class to string conversion for return of baz()
@@ -182,7 +182,7 @@ notice(bar): Implicit Class to string conversion for string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(strlen): Implicit Class to string conversion for argument 1 passed to strlen()
+notice(bar): Implicit Class to string conversion for argument 1 passed to strlen()
 int(3)
 notice(baz): Implicit Class to string conversion for return of baz()
 notice(baz): Implicit Class to string conversion for return of baz()
@@ -238,7 +238,7 @@ notice(bar): Implicit Class to string conversion for string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(strlen): Implicit Class to string conversion for argument 1 passed to strlen()
+notice(bar): Implicit Class to string conversion for argument 1 passed to strlen()
 int(3)
 notice(baz): Implicit Class to string conversion for return of baz()
 notice(baz): Implicit Class to string conversion for return of baz()
@@ -294,7 +294,7 @@ notice(bar): Implicit Class to string conversion for string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(strlen): Implicit Class to string conversion for argument 1 passed to strlen()
+notice(bar): Implicit Class to string conversion for argument 1 passed to strlen()
 int(3)
 notice(baz): Implicit Class to string conversion for return of baz()
 notice(baz): Implicit Class to string conversion for return of baz()
@@ -350,7 +350,7 @@ notice(bar): Implicit Class to string conversion for string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(strlen): Implicit Class to string conversion for argument 1 passed to strlen()
+notice(bar): Implicit Class to string conversion for argument 1 passed to strlen()
 int(3)
 notice(baz): Implicit Class to string conversion for return of baz()
 notice(baz): Implicit Class to string conversion for return of baz()
@@ -406,7 +406,7 @@ notice(bar): Implicit Class to string conversion for string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(strlen): Implicit Class to string conversion for argument 1 passed to strlen()
+notice(bar): Implicit Class to string conversion for argument 1 passed to strlen()
 int(3)
 notice(baz): Implicit Class to string conversion for return of baz()
 notice(baz): Implicit Class to string conversion for return of baz()
@@ -462,7 +462,7 @@ notice(bar): Implicit Class to string conversion for string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(strlen): Implicit Class to string conversion for argument 1 passed to strlen()
+notice(bar): Implicit Class to string conversion for argument 1 passed to strlen()
 int(3)
 notice(baz): Implicit Class to string conversion for return of baz()
 notice(baz): Implicit Class to string conversion for return of baz()
@@ -518,7 +518,7 @@ notice(bar): Implicit Class to string conversion for string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(strlen): Implicit Class to string conversion for argument 1 passed to strlen()
+notice(bar): Implicit Class to string conversion for argument 1 passed to strlen()
 int(3)
 notice(baz): Implicit Class to string conversion for return of baz()
 notice(baz): Implicit Class to string conversion for return of baz()

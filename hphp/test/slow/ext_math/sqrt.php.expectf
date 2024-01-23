@@ -1,5 +1,6 @@
-Warning: sqrt() expects parameter 1 to be double, string given in %s/test/slow/ext_math/sqrt.php on line 7
 
-Warning: sqrt() expects parameter 1 to be double, string given in %s/test/slow/ext_math/sqrt.php on line 8
+Warning: Argument 1 passed to sqrt() must be an instance of float, string given in %s/test/slow/ext_math/sqrt.php on line 7
 
-Warning: sqrt() expects parameter 1 to be double, vec given in %s/test/slow/ext_math/sqrt.php on line 9
+Warning: Argument 1 passed to sqrt() must be an instance of float, string given in %s/test/slow/ext_math/sqrt.php on line 8
+
+Warning: Argument 1 passed to sqrt() must be an instance of float, HH\vec given in %s/test/slow/ext_math/sqrt.php on line 9

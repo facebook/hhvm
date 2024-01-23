@@ -22,7 +22,7 @@ void clientKeyShareGenerationBench(uint64_t n, NamedGroup namedGroup) {
   BENCHMARK_SUSPEND {
     auto f = std::make_unique<HybridKeyExFactory>();
     kex = f->makeKeyExchange(namedGroup, Factory::KeyExchangeMode::Client);
-  };
+  }
   std::unique_ptr<folly::IOBuf> keyShare;
   for (uint64_t i = 0; i < n; i++) {
     kex->generateKeyPair();
@@ -49,7 +49,7 @@ void serverSharedSecretDerivationBench(uint64_t n, NamedGroup namedGroup) {
       clientKeyShareIOBuf.push_back(fakeClientKex->getKeyShare());
       clientKeyShare.push_back(clientKeyShareIOBuf[i]->coalesce());
     }
-  };
+  }
   std::unique_ptr<folly::IOBuf> keyShare;
   for (uint64_t i = 0; i < n; i++) {
     kex->generateKeyPair();
@@ -80,7 +80,7 @@ void clientSharedSecretDerivationBench(uint64_t n, NamedGroup namedGroup) {
       serverKeyShareIOBuf.push_back(fakeServerKex->getKeyShare());
       serverKeyShare.push_back(serverKeyShareIOBuf[i]->coalesce());
     }
-  };
+  }
   std::unique_ptr<folly::IOBuf> keyShare;
   for (uint64_t i = 0; i < n; i++) {
     keyShare = kex->generateSharedSecret(serverKeyShare[i]);

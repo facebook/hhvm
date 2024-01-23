@@ -101,7 +101,7 @@ struct ExportedTimeSeries;
 namespace detail {
 template <class ClassWithPrivateDestructor>
 struct FriendDeleter;
-};
+}
 
 enum class StatsType { AVG, SUM, RATE, COUNT, PCT };
 
@@ -303,7 +303,7 @@ struct ExportedHistogram {
   const std::vector<double> m_exportPercentiles;
 };
 
-};  // namespace ServiceData
+}  // namespace ServiceData
 
 ///////////////////////////////////////////////////////////////////////////////
 }

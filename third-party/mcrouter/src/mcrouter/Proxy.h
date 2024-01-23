@@ -192,7 +192,7 @@ class Proxy : public ProxyBase {
   bool beingDestroyed_{false};
 
   /** Read/write lock for config pointer */
-  folly::SharedMutex configLock_;
+  mutable folly::SharedMutex configLock_;
   std::shared_ptr<ProxyConfig<RouterInfo>> config_;
 
   typename RouterInfo::RouterStats requestStats_;

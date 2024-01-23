@@ -42,7 +42,7 @@ struct CallbackPool<Args...>::CallbackHandleImpl {
 template <typename... Args>
 struct CallbackPool<Args...>::Data {
   std::set<CallbackHandleImpl*> callbacks;
-  folly::SharedMutex callbackLock;
+  mutable folly::SharedMutex callbackLock;
 };
 
 /* CallbackPool */

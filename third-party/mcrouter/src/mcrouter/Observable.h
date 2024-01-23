@@ -82,7 +82,7 @@ class Observable {
   CallbackPool<const Data&, const Data&> pool_;
   Data data_;
 
-  folly::SharedMutex dataLock_;
+  mutable folly::SharedMutex dataLock_;
 };
 } // namespace mcrouter
 } // namespace memcache

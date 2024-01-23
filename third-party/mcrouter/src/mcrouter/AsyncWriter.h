@@ -85,7 +85,7 @@ class AsyncWriter {
   size_t maxQueueSize_;
   std::atomic<size_t> queueSize_{0};
   std::atomic<bool> stopped_{false};
-  folly::SharedMutex runLock_;
+  mutable folly::SharedMutex runLock_;
 
   folly::fibers::FiberManager fiberManager_;
   folly::EventBase eventBase_;

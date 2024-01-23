@@ -19536,7 +19536,9 @@ void AnalysisScheduler::recordChanges(const AnalysisChangeSet& changed,
 
 // Update the dependencies stored in the scheduler to take into
 // account the new set of dependencies reported by an analysis job.
-void AnalysisScheduler::updateDepState(AnalysisOutput& output, ChangeGroup g) {
+void AnalysisScheduler::updateDepState(AnalysisOutput& output,
+                                       const FSStringSet& removed,
+                                       ChangeGroup g) {
   // Every entity in the same analysis job will share the same
   // ChangeGroup, so use a std::shared_ptr here so we can share it
   // among all of them.
@@ -19568,6 +19570,21 @@ void AnalysisScheduler::updateDepState(AnalysisOutput& output, ChangeGroup g) {
       name
     );
     update(it->second.depState, std::move(output.meta.funcDeps[i]));
+  }
+
+  // Remove deps for any removed functions, to avoid them spuriously
+  // being rescheduled again.
+  for (auto const name : removed) {
+    auto it = funcState.find(name);
+    always_assert_flog(
+      it != end(funcState),
+      "Trying to reset deps for un-tracked func {}",
+      name
+    );
+    auto& state = it->second.depState;
+    assertx(!state.group);
+    assertx(!state.newDeps);
+    state.deps.reset();
   }
 }
 
@@ -19628,7 +19645,7 @@ void AnalysisScheduler::record(AnalysisOutput output) {
   group.units.insert(begin(output.unitNames), end(output.unitNames));
 
   recordChanges(output.meta.changed, group);
-  updateDepState(output, std::move(group));
+  updateDepState(output, output.meta.removedFuncs, std::move(group));
 
   // If the analysis job optimized away any 86cinit functions, record
   // that here so they can be later removed from our tables.

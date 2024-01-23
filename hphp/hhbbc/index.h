@@ -2156,7 +2156,7 @@ private:
   void resetChanges();
 
   void recordChanges(const AnalysisChangeSet&, const ChangeGroup&);
-  void updateDepState(AnalysisOutput&, ChangeGroup);
+  void updateDepState(AnalysisOutput&, const FSStringSet&, ChangeGroup);
 
   void addClassToInput(SString, AnalysisInput&) const;
   void addFuncToInput(SString, AnalysisInput&) const;

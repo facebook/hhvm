@@ -19,16 +19,16 @@ w_string watchman_dir::getFullPath() const {
   return getFullPathToChild(w_string_piece());
 }
 
-watchman_file* watchman_dir::getChildFile(w_string_piece name) const {
-  auto it = files.find(name);
+watchman_file* watchman_dir::getChildFile(w_string_piece name_2) const {
+  auto it = files.find(name_2);
   if (it == files.end()) {
     return nullptr;
   }
   return it->second.get();
 }
 
-watchman_dir* watchman_dir::getChildDir(w_string_piece name) const {
-  auto it = dirs.find(name);
+watchman_dir* watchman_dir::getChildDir(w_string_piece name_2) const {
+  auto it = dirs.find(name_2);
   if (it == dirs.end()) {
     return nullptr;
   }

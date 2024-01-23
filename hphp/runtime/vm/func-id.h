@@ -103,4 +103,4 @@ template<> class FormatValue<HPHP::FuncId> {
   private:
     HPHP::FuncId m_id;
 };
-};
+}

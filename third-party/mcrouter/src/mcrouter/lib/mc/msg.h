@@ -116,7 +116,7 @@ static inline const char* mc_op_to_string(const mc_op_t op) {
       return "gats";
     case mc_nops:
       return "unknown";
-  };
+  }
   return "unknown";
 }
 

@@ -690,7 +690,7 @@ static void validateGroups(const std::vector<KeyShareEntry>& client_shares) {
 }
 
 static std::tuple<NamedGroup, Optional<Buf>> negotiateGroup(
-    ProtocolVersion version,
+    ProtocolVersion /*version*/,
     const ClientHello& chlo,
     const std::vector<NamedGroup>& supportedGroups) {
   auto groups = getExtension<SupportedGroups>(chlo.extensions);
@@ -747,7 +747,7 @@ static HelloRetryRequest getHelloRetryRequest(
     CipherSuite cipher,
     NamedGroup group,
     Buf legacySessionId,
-    HandshakeContext& handshakeContext) {
+    HandshakeContext& /*handshakeContext*/) {
   HelloRetryRequest hrr;
   hrr.legacy_version = ProtocolVersion::tls_1_2;
   hrr.legacy_session_id_echo = std::move(legacySessionId);

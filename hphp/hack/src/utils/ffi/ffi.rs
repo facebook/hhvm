@@ -178,13 +178,6 @@ impl<U, V, W, X> std::convert::From<(U, V, W, X)> for Quadruple<U, V, W, X> {
         Quadruple(u, v, w, x)
     }
 }
-// [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>` safety]
-// -------------------------------------------------------
-// If we assume construction via the factory functions
-// `BumpSliceMut<'a, T>::new()` and `Slice<'a, T>::new()` then we know
-// that the contained members are safe to use with
-// `from_raw_parts_mut`/`from_raw_parts`. We rely on this in the
-// implementation of traits such as `Eq` and friends.
 
 #[repr(C)]
 /// A type to substitute for `&'a[T]`.
@@ -361,8 +354,7 @@ impl<'a, T> std::convert::From<&'a mut [T]> for Slice<'a, T> {
 
 impl<'a, T: PartialEq> PartialEq for Slice<'a, T> {
     fn eq(&self, other: &Self) -> bool {
-        // Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
-        // safety].
+        // Safety: See [Note: `Slice<'a, T>` safety].
         let left = unsafe { from_raw_parts(self.data, self.len) };
         let right = unsafe { from_raw_parts(other.data, other.len) };
         left.eq(right)
@@ -371,24 +363,21 @@ impl<'a, T: PartialEq> PartialEq for Slice<'a, T> {
 impl<'a, T: Eq> Eq for Slice<'a, T> {}
 impl<'a, T: Hash> Hash for Slice<'a, T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        // Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
-        // safety].
+        // Safety: See [Note: `Slice<'a, T>` safety].
         let me = unsafe { from_raw_parts(self.data, self.len) };
         me.hash(state);
     }
 }
 impl<'a, T: Ord> Ord for Slice<'a, T> {
     fn cmp(&self, other: &Self) -> Ordering {
-        // Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
-        // safety].
+        // Safety: See [Note: `Slice<'a, T>` safety].
         let left = unsafe { from_raw_parts(self.data, self.len) };
         let right = unsafe { from_raw_parts(other.data, other.len) };
         left.cmp(right)
     }
 }
 impl<'a, T: PartialOrd> PartialOrd for Slice<'a, T> {
-    // Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
-    // safety].
+    // Safety: See [Note: Slice<'a, T>` safety].
     fn partial_cmp(&self, other: &Self) -> std::option::Option<Ordering> {
         let left = unsafe { from_raw_parts(self.data, self.len) };
         let right = unsafe { from_raw_parts(other.data, other.len) };
@@ -463,114 +452,6 @@ impl<'a> std::convert::From<&'a mut str> for Slice<'a, u8> {
     }
 }
 
-#[derive(Debug)]
-#[repr(C)]
-/// A type for an arena backed `&'a mut[T]`. Similar to `Slice<'a, T>`
-/// but with mutable contents and an allocator reference (enabling
-/// `Clone` support).
-// Safety: Initialize from an `&'arena [T]` where the memory is owned
-// by `alloc`. Use `BumpSliceMut<'a, T>::new()`.
-pub struct BumpSliceMut<'a, T> {
-    data: *mut T,
-    len: usize,
-    alloc: &'a bumpalo::Bump,
-    marker: std::marker::PhantomData<&'a ()>,
-}
-impl<'a, T> BumpSliceMut<'a, T> {
-    // Safety: `t` must be owned by `alloc`.
-    pub fn new(alloc: &'a bumpalo::Bump, t: &'a mut [T]) -> Self {
-        BumpSliceMut {
-            data: t.as_mut_ptr(),
-            len: t.len(),
-            alloc,
-            marker: std::marker::PhantomData,
-        }
-    }
-
-    #[inline]
-    pub fn is_empty(&self) -> bool {
-        self.as_ref().is_empty()
-    }
-
-    pub fn alloc(&self) -> &'a bumpalo::Bump {
-        self.alloc
-    }
-
-    #[inline]
-    pub fn len(&self) -> usize {
-        self.as_ref().len()
-    }
-
-    #[inline]
-    pub fn iter(&self) -> std::slice::Iter<'_, T> {
-        self.as_ref().iter()
-    }
-
-    #[inline]
-    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, T> {
-        self.as_mut().iter_mut()
-    }
-
-    #[inline]
-    pub fn get(&self, index: usize) -> Option<&T> {
-        self.as_ref().get(index)
-    }
-}
-impl<'a, T> std::ops::Index<usize> for BumpSliceMut<'a, T> {
-    type Output = T;
-
-    #[inline]
-    fn index(&self, i: usize) -> &T {
-        &self.as_ref()[i]
-    }
-}
-impl<'a, T> std::ops::IndexMut<usize> for BumpSliceMut<'a, T> {
-    #[inline]
-    fn index_mut(&mut self, i: usize) -> &mut T {
-        &mut self.as_mut()[i]
-    }
-}
-impl<'a, T: PartialEq> PartialEq for BumpSliceMut<'a, T> {
-    fn eq(&self, other: &Self) -> bool {
-        self.iter().zip(other.iter()).all(|(a, b)| a == b)
-    }
-}
-impl<'a, T: Eq> Eq for BumpSliceMut<'a, T> {}
-impl<'a, T: Hash> Hash for BumpSliceMut<'a, T> {
-    fn hash<H: Hasher>(&self, hasher: &mut H) {
-        for i in self.iter() {
-            i.hash(hasher);
-        }
-    }
-}
-
-impl<'a, T> AsRef<[T]> for BumpSliceMut<'a, T> {
-    fn as_ref<'r>(&'r self) -> &'r [T] {
-        // Safety:
-        // - We assume 'a: 'r
-        // - Assumes `self` has been constructed via
-        //   `BumpSliceMut<'a, T>::new()` from some `&'a[T]` and so the
-        //   call to `from_raw_parts` is a valid.
-        unsafe { std::slice::from_raw_parts(self.data, self.len) }
-    }
-}
-impl<'a, T> AsMut<[T]> for BumpSliceMut<'a, T> {
-    fn as_mut<'r>(&'r mut self) -> &'r mut [T] {
-        // Safety:
-        // - We assume 'a: 'r
-        // - Assumes `self` has been constructed via
-        //   `BumpSliceMut<'a, T>::new()` from some `&'a[T]` and so the
-        //   call to `from_raw_parts_mut` is a valid.
-        unsafe { std::slice::from_raw_parts_mut(self.data, self.len) }
-    }
-}
-impl<'arena, T: 'arena + Clone> Clone for BumpSliceMut<'arena, T> {
-    fn clone(&self) -> Self {
-        let alloc = self.alloc();
-        BumpSliceMut::new(alloc, alloc.alloc_slice_clone(self.as_ref()))
-    }
-}
-
 /// A ReprC view of Vec<u8>. The underlying Vec is owned by this object.
 #[repr(C)]
 pub struct Bytes {
@@ -620,13 +501,6 @@ mod tests {
         let Pair(u, v) = Pair::from((2, "foo"));
         assert_eq!(u, 2);
         assert_eq!(v, "foo")
-    }
-
-    #[test]
-    fn test_02() {
-        let alloc: bumpalo::Bump = bumpalo::Bump::new();
-        let mut buf = bumpalo::vec![in &alloc; 1, 2, 3];
-        let _s = BumpSliceMut::new(&alloc, buf.as_mut_slice());
     }
 
     #[test]

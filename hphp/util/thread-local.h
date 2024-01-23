@@ -138,7 +138,7 @@ private:
   }
   ThreadLocalManager() : m_key(0) {
     ThreadLocalCreateKey(&m_key, ThreadLocalManager::OnThreadExit);
-  };
+  }
   static void OnThreadExit(void *p);
   pthread_key_t m_key;
 };

@@ -2074,10 +2074,7 @@ void emitFCallClsMethodM(IRGS& env, FCallArgs fca, const StringData* clsHint,
     if (name->isA(TCls)) return name;
     if (name->isA(TStr) &&
       RO::EvalRaiseStrToClsConversionNoticeSampleRate > 0) {
-      gen(env,
-          RaiseStrToClassNotice,
-          SampleRateData { RO::EvalRaiseStrToClsConversionNoticeSampleRate },
-          name);
+      gen(env, RaiseStrToClassNotice, name);
     }
     auto const ret = name->isA(TObj) ?
       gen(env, LdObjClass, name) : ldCls(env, name);

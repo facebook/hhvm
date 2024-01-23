@@ -547,8 +547,8 @@ void raise_message(ErrorMode mode,
   raise_notice_helper(mode, skipTop, msg);
 }
 
-void raise_str_to_class_notice(const StringData* name, uint32_t sampleRate) {
-  if (folly::Random::oneIn(sampleRate)) {
+void raise_str_to_class_notice(const StringData* name) {
+  if (folly::Random::oneIn(RO::EvalRaiseStrToClsConversionNoticeSampleRate)) {
     raise_notice("Implicit string to Class conversion for classname %s",
                  name->data());
   }

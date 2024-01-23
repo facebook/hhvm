@@ -608,10 +608,10 @@ OuterECHClientHello encryptClientHello(
 
 ClientHello decryptECHWithContext(
     const ClientHello& clientHelloOuter,
-    const ECHConfig& echConfig,
-    HpkeSymmetricCipherSuite& cipherSuite,
-    std::unique_ptr<folly::IOBuf> encapsulatedKey,
-    uint8_t configId,
+    const ECHConfig& /*echConfig*/,
+    HpkeSymmetricCipherSuite& /*cipherSuite*/,
+    std::unique_ptr<folly::IOBuf> /*encapsulatedKey*/,
+    uint8_t /*configId*/,
     std::unique_ptr<folly::IOBuf> encryptedCh,
     ECHVersion version,
     std::unique_ptr<hpke::HpkeContext>& context) {

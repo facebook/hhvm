@@ -852,7 +852,7 @@ struct RuntimeOption {
    * 1 - Treat builtin parameter type hints as <<__Soft>>
    * 2 - Enforce builtin parameter type hints
    */                                                                   \
-  F(int32_t, CheckBuiltinParamTypeHints, 0)                             \
+  F(int32_t, CheckBuiltinParamTypeHints, 1)                             \
   /*
     CheckPropTypeHints:
     0 - No checks or enforcement of property type hints.

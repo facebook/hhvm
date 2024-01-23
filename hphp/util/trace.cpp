@@ -177,9 +177,9 @@ CompactVector<BumpRelease> bumpSpec(folly::StringPiece traceSpec) {
 
   Init::InitFromSpec(traceSpec, modules.data());
   CompactVector<BumpRelease> result;
-  for (int i = 0; i < NumModules; i++) {
-    if (modules[i]) {
-      result.emplace_back(static_cast<Module>(i), -modules[i]);
+  for (int i_2 = 0; i_2 < NumModules; i_2++) {
+    if (modules[i_2]) {
+      result.emplace_back(static_cast<Module>(i_2), -modules[i_2]);
     }
   }
   return result;

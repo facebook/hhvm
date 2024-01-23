@@ -85,7 +85,7 @@ class AtomicQueueOrPtr {
         return;
       default:
         folly::assume_unreachable();
-    };
+    }
   }
   AtomicQueueOrPtr(const AtomicQueueOrPtr&) = delete;
   AtomicQueueOrPtr& operator=(const AtomicQueueOrPtr&) = delete;

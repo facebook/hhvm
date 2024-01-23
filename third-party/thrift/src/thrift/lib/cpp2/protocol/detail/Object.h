@@ -362,66 +362,72 @@ struct ValueHelper<TT, std::enable_if_t<kIsStructured<TT>>> {
   }
 };
 
+template <class Protocol>
+Value parseValue(Protocol& prot, TType arg_type, bool string_to_binary = true);
+
 // Schemaless deserialization of thrift serialized data of specified
 // thrift type into conformance::Value
 // Protocol: protocol to use eg. apache::thrift::BinaryProtocolReader
 // TODO: handle jsonprotocol
 template <class Protocol>
-Value parseValue(Protocol& prot, TType arg_type, bool string_to_binary = true) {
-  Value result;
+void parseValueInplace(
+    Protocol& prot,
+    TType arg_type,
+    Value& result,
+    bool string_to_binary = true) {
   switch (arg_type) {
     case protocol::T_BOOL: {
       bool boolv;
       prot.readBool(boolv);
       result.emplace_bool(boolv);
-      return result;
+      break;
     }
     case protocol::T_BYTE: {
       int8_t bytev = 0;
       prot.readByte(bytev);
       result.emplace_byte(bytev);
-      return result;
+      break;
     }
     case protocol::T_I16: {
       int16_t i16;
       prot.readI16(i16);
       result.emplace_i16(i16);
-      return result;
+      break;
     }
     case protocol::T_I32: {
       int32_t i32;
       prot.readI32(i32);
       result.emplace_i32(i32);
-      return result;
+      break;
     }
     case protocol::T_I64: {
       int64_t i64;
       prot.readI64(i64);
       result.emplace_i64(i64);
-      return result;
+      break;
     }
     case protocol::T_DOUBLE: {
       double dub;
       prot.readDouble(dub);
       result.emplace_double(dub);
-      return result;
+      break;
     }
     case protocol::T_FLOAT: {
       float flt;
       prot.readFloat(flt);
       result.emplace_float(flt);
-      return result;
+      break;
     }
     case protocol::T_STRING: {
       if (string_to_binary) {
         auto& binaryValue = result.ensure_binary();
         prot.readBinary(binaryValue);
-        return result;
+        break;
       }
       std::string str;
       prot.readString(str);
       result.emplace_string(str);
-      return result;
+      break;
     }
     case protocol::T_STRUCT: {
       std::string name;
@@ -438,7 +444,7 @@ Value parseValue(Protocol& prot, TType arg_type, bool string_to_binary = true) {
         prot.readFieldEnd();
       }
       prot.readStructEnd();
-      return result;
+      break;
     }
     case protocol::T_MAP: {
       TType keyType;
@@ -452,7 +458,7 @@ Value parseValue(Protocol& prot, TType arg_type, bool string_to_binary = true) {
         mapValue[std::move(key)] = parseValue(prot, valType, string_to_binary);
       }
       prot.readMapEnd();
-      return result;
+      break;
     }
     case protocol::T_SET: {
       TType elemType;
@@ -464,7 +470,7 @@ Value parseValue(Protocol& prot, TType arg_type, bool string_to_binary = true) {
         setValue.insert(parseValue(prot, elemType, string_to_binary));
       }
       prot.readSetEnd();
-      return result;
+      break;
     }
     case protocol::T_LIST: {
       TType elemType;
@@ -476,12 +482,19 @@ Value parseValue(Protocol& prot, TType arg_type, bool string_to_binary = true) {
         listValue.push_back(parseValue(prot, elemType, string_to_binary));
       }
       prot.readListEnd();
-      return result;
+      break;
     }
     default: {
       TProtocolException::throwInvalidSkipType(arg_type);
     }
   }
+}
+
+template <class Protocol>
+Value parseValue(Protocol& prot, TType arg_type, bool string_to_binary) {
+  Value result;
+  parseValueInplace(prot, arg_type, result, string_to_binary);
+  return result;
 }
 
 struct MaskedDecodeResultValue {

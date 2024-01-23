@@ -799,6 +799,22 @@ class BitmaskEnum implements \IThriftSyncStruct, \IThriftStructMetadata {
 
 /**
  * Specifies the field where the exception message is stored.
+ * 
+ * The "exception message" is typically a human-readable description of the
+ * exception. It is made available to the exception-handling code via standard,
+ * language-dependent APIs of the generated code, such as:
+ *   - [`std::exception::what()`](https://en.cppreference.com/w/cpp/error/exception/what)
+ *      in C++.
+ *   - [`Throwable.getMessage()`](https://docs.oracle.com/javase/8/docs/api/java/lang/Throwable.html#getMessage--)
+ *     in Java.
+ *   - etc.
+ * 
+ * This annotation can be specified on at most one field of an
+ * [exception definition](https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#exceptions),
+ * whose type must be `string`.
+ * 
+ * If an exception definition does not specify this anotation for any field, the
+ * exception message returned by the aforementioned APIs is unspecified.
  *
  * Original thrift struct:-
  * ExceptionMessage

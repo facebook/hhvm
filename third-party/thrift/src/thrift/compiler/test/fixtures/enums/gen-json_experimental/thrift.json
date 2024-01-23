@@ -26,31 +26,31 @@
         "constants" : {
           "HIGH_IMPORTANT" : {
             "name" : "HIGH_IMPORTANT",
-            "lineno" : 219,
+            "lineno" : 235,
             "value" : 0
           },
           "HIGH" : {
             "name" : "HIGH",
-            "lineno" : 220,
+            "lineno" : 236,
             "value" : 1
           },
           "IMPORTANT" : {
             "name" : "IMPORTANT",
-            "lineno" : 221,
+            "lineno" : 237,
             "value" : 2
           },
           "NORMAL" : {
             "name" : "NORMAL",
-            "lineno" : 222,
+            "lineno" : 238,
             "value" : 3
           },
           "BEST_EFFORT" : {
             "name" : "BEST_EFFORT",
-            "lineno" : 223,
+            "lineno" : 239,
             "value" : 4
           }
         },
-        "lineno" : 218
+        "lineno" : 234
       }
       },
   "structs" :
@@ -299,10 +299,10 @@
         "value" : {}
       }
         },
-        "docstring" : "Specifies the field where the exception message is stored.\n",
+        "docstring" : "Specifies the field where the exception message is stored.\n\nThe \"exception message\" is typically a human-readable description of the\nexception. It is made available to the exception-handling code via standard,\nlanguage-dependent APIs of the generated code, such as:\n  - [`std::exception::what()`](https://en.cppreference.com/w/cpp/error/exception/what)\n     in C++.\n  - [`Throwable.getMessage()`](https://docs.oracle.com/javase/8/docs/api/java/lang/Throwable.html#getMessage--)\n    in Java.\n  - etc.\n\nThis annotation can be specified on at most one field of an\n[exception definition](https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#exceptions),\nwhose type must be `string`.\n\nIf an exception definition does not specify this anotation for any field, the\nexception message returned by the aforementioned APIs is unspecified.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 171
+        "lineno" : 187
       },
       "GenerateRuntimeSchema" : {
         "name" : "GenerateRuntimeSchema",
@@ -360,14 +360,14 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 186,
+            "lineno" : 202,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 179
+        "lineno" : 195
       },
       "InternBox" : {
         "name" : "InternBox",
@@ -391,7 +391,7 @@
         "docstring" : "Indicates that a field's value should never be stored on the stack, and that\nidentical values can be shared in immutable contexts.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 193
+        "lineno" : 209
       },
       "Serial" : {
         "name" : "Serial",
@@ -408,7 +408,7 @@
         "docstring" : "Indicates that an interaction's methods should be processed sequentially.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 200
+        "lineno" : 216
       },
       "Uri" : {
         "name" : "Uri",
@@ -427,14 +427,14 @@
           "value" : {
             "name" : "value",
             "key" : 1,
-            "lineno" : 208,
+            "lineno" : 224,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 206
+        "lineno" : 222
       },
       "Priority" : {
         "name" : "Priority",
@@ -453,7 +453,7 @@
           "level" : {
             "name" : "level",
             "key" : 1,
-            "lineno" : 216,
+            "lineno" : 232,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -463,7 +463,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 214
+        "lineno" : 230
       },
       "DeprecatedUnvalidatedAnnotations" : {
         "name" : "DeprecatedUnvalidatedAnnotations",
@@ -482,7 +482,7 @@
           "items" : {
             "name" : "items",
             "key" : 1,
-            "lineno" : 231,
+            "lineno" : 247,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
@@ -493,7 +493,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 229
+        "lineno" : 245
       }
       },
   "source_path" : "thrift/annotation/thrift",

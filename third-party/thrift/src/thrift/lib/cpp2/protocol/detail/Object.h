@@ -477,9 +477,9 @@ void parseValueInplace(
       uint32_t size;
       prot.readListBegin(elemType, size);
       auto& listValue = result.ensure_list();
-      listValue.reserve(size);
-      for (uint32_t i = 0; i < size; i++) {
-        listValue.push_back(parseValue(prot, elemType, string_to_binary));
+      listValue.resize(size);
+      for (auto& v : listValue) {
+        parseValueInplace(prot, elemType, v, string_to_binary);
       }
       prot.readListEnd();
       break;

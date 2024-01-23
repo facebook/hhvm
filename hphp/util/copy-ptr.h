@@ -117,11 +117,11 @@ private:
 
   static refcount_type* get_ref_ptr(T* p) {
     return (refcount_type*)((char*)p - data_offset());
-  };
+  }
 
   static uint32_t get_ref(T* p) {
     return get_ref_ptr(p)->load(std::memory_order_relaxed);
-  };
+  }
 
   static void dec_ref(T* p) {
     if (!p) return;

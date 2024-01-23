@@ -21,7 +21,7 @@ class OpenSSLPeerCertImpl : public PeerCert {
 
   ~OpenSSLPeerCertImpl() override = default;
 
-  std::string getIdentity() const override;
+  [[nodiscard]] std::string getIdentity() const override;
 
   void verify(
       SignatureScheme scheme,
@@ -29,7 +29,7 @@ class OpenSSLPeerCertImpl : public PeerCert {
       folly::ByteRange toBeSigned,
       folly::ByteRange signature) const override;
 
-  folly::ssl::X509UniquePtr getX509() const override;
+  [[nodiscard]] folly::ssl::X509UniquePtr getX509() const override;
 
  protected:
   OpenSSLSignature<T> signature_;

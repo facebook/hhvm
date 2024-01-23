@@ -30,24 +30,24 @@ class OpenSSLSelfCertImpl : public SelfCert {
 
   ~OpenSSLSelfCertImpl() override = default;
 
-  std::string getIdentity() const override;
+  [[nodiscard]] std::string getIdentity() const override;
 
-  std::vector<std::string> getAltIdentities() const override;
+  [[nodiscard]] std::vector<std::string> getAltIdentities() const override;
 
-  std::vector<SignatureScheme> getSigSchemes() const override;
+  [[nodiscard]] std::vector<SignatureScheme> getSigSchemes() const override;
 
-  CertificateMsg getCertMessage(
+  [[nodiscard]] CertificateMsg getCertMessage(
       Buf certificateRequestContext = nullptr) const override;
 
-  CompressedCertificate getCompressedCert(
+  [[nodiscard]] CompressedCertificate getCompressedCert(
       CertificateCompressionAlgorithm algo) const override;
 
-  Buf sign(
+  [[nodiscard]] Buf sign(
       SignatureScheme scheme,
       CertificateVerifyContext context,
       folly::ByteRange toBeSigned) const override;
 
-  folly::ssl::X509UniquePtr getX509() const override;
+  [[nodiscard]] folly::ssl::X509UniquePtr getX509() const override;
 
  protected:
   // Allows derived classes to handle init

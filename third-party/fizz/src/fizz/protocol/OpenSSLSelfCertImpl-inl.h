@@ -30,7 +30,7 @@ OpenSSLSelfCertImpl<T>::OpenSSLSelfCertImpl(
     std::vector<folly::ssl::X509UniquePtr> certs,
     const std::vector<std::shared_ptr<fizz::CertificateCompressor>>&
         compressors) {
-  if (certs.size() == 0) {
+  if (certs.empty()) {
     throw std::runtime_error("Must supply at least 1 cert");
   }
   if (X509_check_private_key(certs[0].get(), pkey.get()) != 1) {

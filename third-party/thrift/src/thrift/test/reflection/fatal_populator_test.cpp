@@ -39,10 +39,10 @@ TYPED_TEST(MultiProtocolTest, test_structs_populate) {
   for (int i = 0; i < 100; i++) {
     struct7 a, b;
     populator::populate(a, opts, rng);
-    serializer_write(a, this->writer);
+    a.write(&this->writer);
     this->prep_read();
     this->debug_buffer();
-    serializer_read(b, this->reader);
+    b.read(&this->reader);
 
     ASSERT_EQ(*a.field1(), *b.field1());
     ASSERT_EQ(*a.field2(), *b.field2());
@@ -80,10 +80,10 @@ TYPED_TEST(MultiProtocolTest, test_unions_populate) {
   for (int i = 0; i < 100; i++) {
     union1 a, b;
     populator::populate(a, opts, rng);
-    serializer_write(a, this->writer);
+    a.write(&this->writer);
     this->prep_read();
     this->debug_buffer();
-    serializer_read(b, this->reader);
+    b.read(&this->reader);
 
     ASSERT_EQ(a, b);
   }

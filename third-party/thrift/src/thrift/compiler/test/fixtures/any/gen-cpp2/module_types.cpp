@@ -20,7 +20,7 @@ namespace facebook { namespace thrift { namespace compiler { namespace test { na
 void __fbthrift_static_init_MyStruct() {
   FOLLY_MAYBE_UNUSED static bool init = (
     apache::thrift::conformance::detail::registerGeneratedStruct<
-        detail::MyStruct,
+        MyStruct,
         apache::thrift::conformance::StandardProtocol::Compact,
         apache::thrift::conformance::StandardProtocol::Binary>(),
     false);

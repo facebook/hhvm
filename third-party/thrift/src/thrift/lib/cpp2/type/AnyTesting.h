@@ -41,7 +41,7 @@ using Tags = ::testing::Types<
     list<i32_t>,
     set<i32_t>,
     map<i32_t, float_t>,
-    struct_t<test::detail::AnyTestStruct>>;
+    struct_t<test::AnyTestStruct>>;
 
 template <class T>
 inline const native_type<T> tagToValue = kMagicNumber;
@@ -70,9 +70,9 @@ inline const std::map<std::int32_t, float> tagToValue<map<i32_t, float_t>> = {
     {0, 0}, {kMagicNumber, 0}};
 
 template <>
-inline const test::detail::AnyTestStruct
-    tagToValue<struct_t<test::detail::AnyTestStruct>> = [] {
-      test::detail::AnyTestStruct ret;
+inline const test::AnyTestStruct tagToValue<struct_t<test::AnyTestStruct>> =
+    [] {
+      test::AnyTestStruct ret;
       ret.foo() = kMagicNumber;
       return ret;
     }();

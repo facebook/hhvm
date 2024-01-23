@@ -61,9 +61,8 @@ TEST(AnyTest, type_str) {
       (tagToTypeString<type::map<type::i32_t, type::float_t>>()),
       "\"map<i32,float>\"");
   EXPECT_EQ(
-      tagToTypeString<type::struct_t<test::detail::AnyTestStruct>>(),
-      fmt::format(
-          "\"struct<{}>\"", thrift::uri<test::detail::AnyTestStruct>()));
+      tagToTypeString<type::struct_t<test::AnyTestStruct>>(),
+      fmt::format("\"struct<{}>\"", thrift::uri<test::AnyTestStruct>()));
   EXPECT_EQ(
       tagToTypeString<type::exception_t<test::AnyTestException>>(),
       fmt::format("\"exception<{}>\"", thrift::uri<test::AnyTestException>()));

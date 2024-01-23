@@ -26,7 +26,7 @@ namespace {
 
 TEST(ThrfitTypeInfoTest, GetGeneratedThriftTypeInfo) {
   EXPECT_EQ(
-      conformance::getGeneratedThriftTypeInfo<detail::AnyTestStruct>().uri(),
+      conformance::getGeneratedThriftTypeInfo<AnyTestStruct>().uri(),
       "facebook.com/thrift/test/AnyTestStruct");
   EXPECT_EQ(
       conformance::getGeneratedThriftTypeInfo<AnyTestUnion>().uri(),

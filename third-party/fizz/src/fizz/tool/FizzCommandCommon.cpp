@@ -173,11 +173,8 @@ folly::Optional<folly::dynamic> readECHConfigsJson(std::string echFile) {
 folly::Optional<ech::ECHConfigList> parseECHConfigsBase64(
     std::string echConfigListBase64) {
   std::vector<ech::ECHConfig> echConfigs;
-  echConfigListBase64.erase(
-      std::remove(echConfigListBase64.begin(), echConfigListBase64.end(), '\n'),
-      echConfigListBase64.cend());
-  auto configBuf =
-      folly::IOBuf::copyBuffer(folly::base64Decode(echConfigListBase64));
+  auto configBuf = folly::IOBuf::copyBuffer(
+      folly::base64Decode(folly::trimWhitespace(echConfigListBase64)));
   folly::io::Cursor cursor(configBuf.get());
   return decode<ech::ECHConfigList>(cursor);
 }

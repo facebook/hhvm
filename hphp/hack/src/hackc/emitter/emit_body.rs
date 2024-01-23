@@ -411,7 +411,7 @@ pub fn make_body<'a, 'arena, 'decl>(
     emitter.clear_named_locals();
 
     let params = Slice::fill_iter(alloc, params.into_iter().map(|(p, _)| p));
-    let body_instrs = body_instrs.compact(alloc);
+    let body_instrs = body_instrs.to_slice(alloc);
     let stack_depth = stack_depth::compute_stack_depth(params.as_ref(), body_instrs.as_ref())
         .map_err(error::Error::from_error)?;
 

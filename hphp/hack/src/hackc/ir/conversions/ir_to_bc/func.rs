@@ -119,7 +119,7 @@ pub(crate) fn convert_func<'a>(
             .map(|name| strings.lookup_class_name(*name).as_ffi_str()),
     );
 
-    let body_instrs = body_instrs.compact(strings.alloc);
+    let body_instrs = body_instrs.to_slice(strings.alloc);
     let stack_depth =
         stack_depth::compute_stack_depth(params.as_ref(), body_instrs.as_ref()).unwrap();
 

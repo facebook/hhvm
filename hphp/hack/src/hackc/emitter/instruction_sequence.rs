@@ -491,32 +491,48 @@ impl<'a> InstrSeq<'a> {
         ListIter::new(self).map(|s| s.len()).sum()
     }
 
-    pub fn compact(self, alloc: &'a bumpalo::Bump) -> Slice<'a, Instruct<'a>> {
+    fn compact_tail(v: &mut [Instruct<'a>], mut start: usize) -> usize {
+        if start > 0 && Self::is_srcloc(&v[start - 1]) {
+            // previous compacted range ends with a SrcLoc;
+            // back up so we can compact it if eligible.
+            start -= 1;
+        };
+        let mut i = start;
+        for j in start..v.len() {
+            if Self::is_srcloc(&v[j]) && j + 1 < v.len() && Self::is_srcloc(&v[j + 1]) {
+                // skip v[j]
+            } else {
+                if i < j {
+                    // move v[j] -> v[i], leaving an arbitrary placeholder
+                    // that will be overwritten or truncated.
+                    v[i] = std::mem::replace(&mut v[j], Instruct::Pseudo(Pseudo::Break));
+                }
+                i += 1;
+            }
+        }
+        i
+    }
+
+    pub fn to_slice(self, alloc: &'a bumpalo::Bump) -> Slice<'a, Instruct<'a>> {
         let mut v = bumpalo::collections::Vec::with_capacity_in(self.full_len(), alloc);
         for list in IntoListIter::new(self) {
-            let len = v.len();
-            let start = if len > 0 && Self::is_srcloc(&v[len - 1]) {
-                // v ends with a SrcLoc; back up so we can compact it if eligible.
-                len - 1
-            } else {
-                len
-            };
+            let start = v.len();
             v.extend(list);
-            let mut i = start;
-            let len = v.len();
-            for j in start..len {
-                if Self::is_srcloc(&v[j]) && j + 1 < len && Self::is_srcloc(&v[j + 1]) {
-                    // skip v[j]
-                } else {
-                    if i < j {
-                        v[i] = v[j].clone();
-                    }
-                    i += 1;
-                }
-            }
-            v.truncate(i);
+            let end = Self::compact_tail(&mut v[..], start);
+            v.truncate(end);
         }
         Slice::new(v.into_bump_slice())
+    }
+
+    pub fn to_vec(self) -> Vec<Instruct<'a>> {
+        let mut v = Vec::with_capacity(self.full_len());
+        for list in IntoListIter::new(self) {
+            let start = v.len();
+            v.extend(list);
+            let end = Self::compact_tail(&mut v[..], start);
+            v.truncate(end);
+        }
+        v
     }
 
     /// Test whether `i` is of case `Pseudo::SrcLoc`.

@@ -453,8 +453,11 @@ void parseValueInplace(
       prot.readMapBegin(keyType, valType, size);
       mapValue.reserve(size);
       for (uint32_t i = 0; i < size; i++) {
-        auto key = parseValue(prot, keyType, string_to_binary);
-        mapValue[std::move(key)] = parseValue(prot, valType, string_to_binary);
+        parseValueInplace(
+            prot,
+            valType,
+            mapValue[parseValue(prot, keyType, string_to_binary)],
+            string_to_binary);
       }
       prot.readMapEnd();
       break;

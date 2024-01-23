@@ -1231,7 +1231,7 @@ using std::string;
   type RuntimeOption::Eval ## name = type(def);
 EVALFLAGS();
 #undef F
-hphp_string_imap<TypedValue> RuntimeOption::ConstantFunctions;
+hphp_string_map<TypedValue> RuntimeOption::ConstantFunctions;
 
 bool RuntimeOption::RecordCodeCoverage = false;
 std::string RuntimeOption::CodeCoverageOutputFile;

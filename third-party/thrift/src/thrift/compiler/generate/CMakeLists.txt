@@ -40,6 +40,8 @@ list(REMOVE_ITEM GENERATOR_FILES t_ast_generator.cc)
 
 add_library(compiler_generators STATIC ${GENERATOR_FILES}
             ${CMAKE_CURRENT_BINARY_DIR}/templates.cc)
+set_target_properties(compiler_generators PROPERTIES
+                      POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
 target_link_libraries(
   compiler_generators
   compiler_ast

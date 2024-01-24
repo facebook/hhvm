@@ -232,7 +232,7 @@ fn emit_unit_<'a, 'arena, 'decl>(
     Ok(Unit {
         classes: classes.into(),
         modules: modules.into(),
-        functions: Slice::fill_iter(emitter.alloc, functions),
+        functions: functions.into(),
         typedefs: typedefs.into(),
         constants: constants.into(),
         adata: Slice::fill_iter(emitter.alloc, adata),

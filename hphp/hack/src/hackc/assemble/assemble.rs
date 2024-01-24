@@ -102,7 +102,7 @@ impl<'a> UnitBuilder<'a> {
     fn into_unit(self, alloc: &'a Bump) -> hhbc::Unit<'a> {
         hhbc::Unit {
             adata: Slice::fill_iter(alloc, self.adatas),
-            functions: Slice::fill_iter(alloc, self.funcs),
+            functions: self.funcs.into(),
             classes: self.classes.into(),
             typedefs: self.typedefs.into(),
             file_attributes: Slice::fill_iter(alloc, self.file_attributes),

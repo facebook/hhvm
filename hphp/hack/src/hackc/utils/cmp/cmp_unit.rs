@@ -878,13 +878,7 @@ fn cmp_unit(a_unit: &Unit<'_>, b_unit: &Unit<'_>) -> Result {
     )
     .qualified("module_use")?;
 
-    cmp_map_t(
-        a_functions.as_arena_ref(),
-        b_functions.as_arena_ref(),
-        cmp_function,
-    )
-    .qualified("functions")?;
-
+    cmp_map_t(a_functions, b_functions, cmp_function).qualified("functions")?;
     cmp_map_t(a_classes, b_classes, cmp_class).qualified("classes")?;
 
     Ok(())

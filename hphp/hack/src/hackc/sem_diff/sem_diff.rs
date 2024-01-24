@@ -135,8 +135,8 @@ pub fn sem_diff_unit(a_unit: &Unit<'_>, b_unit: &Unit<'_>) -> Result<()> {
 
     sem_diff_map_t(
         &path.qualified("functions"),
-        a_functions.as_arena_ref(),
-        b_functions.as_arena_ref(),
+        a_functions,
+        b_functions,
         |path, a, b| sem_diff_function(path, a, &a_adata, b, &b_adata),
     )?;
 

@@ -24,7 +24,7 @@ use crate::Typedef;
 #[repr(C)]
 pub struct Unit<'arena> {
     pub adata: Slice<'arena, Adata<'arena>>,
-    pub functions: Slice<'arena, Function<'arena>>,
+    pub functions: Vector<Function<'arena>>,
     pub classes: Vector<Class<'arena>>,
     pub modules: Vector<Module<'arena>>,
     pub typedefs: Vector<Typedef<'arena>>,

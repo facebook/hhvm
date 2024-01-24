@@ -161,7 +161,7 @@ fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit<'_>) -> Result<
     newline(w)?;
     print_module_use(w, &prog.module_use)?;
     concat(w, prog.adata, |w, a| print_adata_region(ctx, w, a))?;
-    concat(w, prog.functions, |w, f| print_fun_def(ctx, w, f))?;
+    concat(w, &prog.functions, |w, f| print_fun_def(ctx, w, f))?;
     concat(w, &prog.classes, |w, cd| print_class_def(ctx, w, cd))?;
     concat(w, &prog.modules, |w, cd| print_module_def(ctx, w, cd))?;
     concat(w, &prog.constants, |w, c| print_constant(ctx, w, c))?;

@@ -449,7 +449,7 @@ function date_isodate_set(DateTime $datetime,
 }
 
 <<__Native>>
-function date_format(DateTime $datetime, string $format): mixed;
+function date_format(DateTimeInterface $datetime, string $format): mixed;
 
 function date_modify(DateTime $datetime, string $modify): void {
   $datetime->modify($modify);

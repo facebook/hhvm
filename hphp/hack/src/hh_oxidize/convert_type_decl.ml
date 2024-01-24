@@ -685,7 +685,7 @@ let type_declaration ~mutual_rec name td =
     then
       failwith
         (Printf.sprintf
-           "Type %s::%s can implement Copy but is not specified in the copy_types file. Please add it."
+           "Type %s::%s can implement Copy but is not specified in the copy_types.txt and/or extern_types.txt file. Please add it."
            (curr_module_name ())
            name);
     let additional_derives =

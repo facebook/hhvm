@@ -49,37 +49,37 @@ TEST(AllocatingParserStrategyTest, testAppendFrame) {
   EXPECT_EQ(lenReturn, parser.getMinBufferSize());
   EXPECT_EQ(parser.getCurrentBufferSize(), parser.getMinBufferSize());
 
-  size_t testFrameLength = 20;
+  static constexpr size_t kTestFrameLength = 20;
 
   HeaderSerializer serializer(static_cast<uint8_t*>(buf), lenReturn);
-  serializer.writeFrameOrMetadataSize(testFrameLength);
+  serializer.writeFrameOrMetadataSize(kTestFrameLength);
   parser.readDataAvailable(Serializer::kBytesForFrameOrMetadataLength);
 
   EXPECT_EQ(parser.getSize(), Serializer::kBytesForFrameOrMetadataLength);
-  EXPECT_EQ(parser.getFrameLength(), testFrameLength);
+  EXPECT_EQ(parser.getFrameLength(), kTestFrameLength);
   EXPECT_EQ(
       parser.getCurrentBufferSize(),
-      testFrameLength + Serializer::kBytesForFrameOrMetadataLength);
+      kTestFrameLength + Serializer::kBytesForFrameOrMetadataLength);
   EXPECT_EQ(
       owner.memoryCounter_,
-      testFrameLength + Serializer::kBytesForFrameOrMetadataLength);
-  EXPECT_EQ(owner.frames_.size(), 0);
+      kTestFrameLength + Serializer::kBytesForFrameOrMetadataLength);
+  ASSERT_EQ(owner.frames_.size(), 0);
 
   parser.getReadBuffer(&buf, &lenReturn);
-  EXPECT_EQ(lenReturn, testFrameLength);
+  EXPECT_EQ(lenReturn, kTestFrameLength);
 
-  std::string b(testFrameLength, 'b');
-  memcpy(static_cast<uint8_t*>(buf), b.data(), testFrameLength);
+  std::string b(kTestFrameLength, 'b');
+  memcpy(static_cast<uint8_t*>(buf), b.data(), kTestFrameLength);
 
-  parser.readDataAvailable(testFrameLength);
+  parser.readDataAvailable(kTestFrameLength);
 
   EXPECT_EQ(parser.getSize(), 0);
   EXPECT_EQ(parser.getFrameLength(), 0);
   EXPECT_EQ(owner.memoryCounter_, 0);
-  EXPECT_EQ(owner.frames_.size(), 1);
+  ASSERT_EQ(owner.frames_.size(), 1);
 
-  auto frame = std::move(owner.frames_[0]);
-  EXPECT_EQ(frame->length(), testFrameLength);
+  const folly::IOBuf& frame = *owner.frames_[0];
+  EXPECT_EQ(frame.length(), kTestFrameLength);
 }
 
 TEST(AllocatingParserStrategyTest, testAppendLessThanFullFrame) {
@@ -90,10 +90,10 @@ TEST(AllocatingParserStrategyTest, testAppendLessThanFullFrame) {
   size_t lenReturn;
   parser.getReadBuffer(&buf, &lenReturn);
 
-  size_t testFrameLength = 20;
+  static constexpr size_t kTestFrameLength = 20;
 
   HeaderSerializer serializer(static_cast<uint8_t*>(buf), lenReturn);
-  serializer.writeFrameOrMetadataSize(testFrameLength);
+  serializer.writeFrameOrMetadataSize(kTestFrameLength);
   parser.readDataAvailable(Serializer::kBytesForFrameOrMetadataLength);
 
   std::string b(10, 'b');
@@ -103,11 +103,11 @@ TEST(AllocatingParserStrategyTest, testAppendLessThanFullFrame) {
   parser.readDataAvailable(10);
 
   EXPECT_EQ(parser.getSize(), 10 + Serializer::kBytesForFrameOrMetadataLength);
-  EXPECT_EQ(parser.getFrameLength(), testFrameLength);
+  EXPECT_EQ(parser.getFrameLength(), kTestFrameLength);
   EXPECT_EQ(
       owner.memoryCounter_,
-      testFrameLength + Serializer::kBytesForFrameOrMetadataLength);
-  EXPECT_EQ(owner.frames_.size(), 0);
+      kTestFrameLength + Serializer::kBytesForFrameOrMetadataLength);
+  ASSERT_EQ(owner.frames_.size(), 0);
 }
 
 TEST(AllocatingParserStrategyTest, testAppendTwice) {
@@ -118,10 +118,10 @@ TEST(AllocatingParserStrategyTest, testAppendTwice) {
   size_t lenReturn;
   parser.getReadBuffer(&buf, &lenReturn);
 
-  size_t testFrameLength = 20;
+  static constexpr size_t kTestFrameLength = 20;
 
   HeaderSerializer serializer(static_cast<uint8_t*>(buf), lenReturn);
-  serializer.writeFrameOrMetadataSize(testFrameLength);
+  serializer.writeFrameOrMetadataSize(kTestFrameLength);
   parser.readDataAvailable(Serializer::kBytesForFrameOrMetadataLength);
 
   std::string first(10, 'b');
@@ -130,11 +130,11 @@ TEST(AllocatingParserStrategyTest, testAppendTwice) {
   parser.readDataAvailable(10);
 
   EXPECT_EQ(parser.getSize(), 10 + Serializer::kBytesForFrameOrMetadataLength);
-  EXPECT_EQ(parser.getFrameLength(), testFrameLength);
+  EXPECT_EQ(parser.getFrameLength(), kTestFrameLength);
   EXPECT_EQ(
       owner.memoryCounter_,
-      testFrameLength + Serializer::kBytesForFrameOrMetadataLength);
-  EXPECT_EQ(owner.frames_.size(), 0);
+      kTestFrameLength + Serializer::kBytesForFrameOrMetadataLength);
+  ASSERT_EQ(owner.frames_.size(), 0);
 
   std::string second(10, 'c');
   memcpy(&static_cast<uint8_t*>(buf)[10], second.data(), 10);
@@ -143,7 +143,7 @@ TEST(AllocatingParserStrategyTest, testAppendTwice) {
   EXPECT_EQ(parser.getSize(), 0);
   EXPECT_EQ(parser.getFrameLength(), 0);
   EXPECT_EQ(owner.memoryCounter_, 0);
-  EXPECT_EQ(owner.frames_.size(), 1);
+  ASSERT_EQ(owner.frames_.size(), 1);
 }
 
 TEST(AllocatingParserStrategyTest, testAppendMultiple) {
@@ -154,10 +154,10 @@ TEST(AllocatingParserStrategyTest, testAppendMultiple) {
   size_t lenReturn;
   parser.getReadBuffer(&buf, &lenReturn);
 
-  size_t testFrameLength = 20;
+  static constexpr size_t kTestFrameLength = 20;
 
   HeaderSerializer serializer(static_cast<uint8_t*>(buf), lenReturn);
-  serializer.writeFrameOrMetadataSize(testFrameLength);
+  serializer.writeFrameOrMetadataSize(kTestFrameLength);
   parser.readDataAvailable(Serializer::kBytesForFrameOrMetadataLength);
 
   std::string first(10, 'b');
@@ -166,11 +166,11 @@ TEST(AllocatingParserStrategyTest, testAppendMultiple) {
   parser.readDataAvailable(10);
 
   EXPECT_EQ(parser.getSize(), 13);
-  EXPECT_EQ(parser.getFrameLength(), testFrameLength);
+  EXPECT_EQ(parser.getFrameLength(), kTestFrameLength);
   EXPECT_EQ(
       owner.memoryCounter_,
-      testFrameLength + Serializer::kBytesForFrameOrMetadataLength);
-  EXPECT_EQ(owner.frames_.size(), 0);
+      kTestFrameLength + Serializer::kBytesForFrameOrMetadataLength);
+  ASSERT_EQ(owner.frames_.size(), 0);
 
   std::string second(5, 'c');
   memcpy(&static_cast<uint8_t*>(buf)[10], second.data(), 5);
@@ -178,11 +178,11 @@ TEST(AllocatingParserStrategyTest, testAppendMultiple) {
 
   EXPECT_EQ(
       parser.getSize(), 10 + 5 + Serializer::kBytesForFrameOrMetadataLength);
-  EXPECT_EQ(parser.getFrameLength(), testFrameLength);
+  EXPECT_EQ(parser.getFrameLength(), kTestFrameLength);
   EXPECT_EQ(
       owner.memoryCounter_,
-      testFrameLength + Serializer::kBytesForFrameOrMetadataLength);
-  EXPECT_EQ(owner.frames_.size(), 0);
+      kTestFrameLength + Serializer::kBytesForFrameOrMetadataLength);
+  ASSERT_EQ(owner.frames_.size(), 0);
 
   std::string third(5, 'd');
   memcpy(&static_cast<uint8_t*>(buf)[10 + 5], third.data(), 5);
@@ -191,7 +191,7 @@ TEST(AllocatingParserStrategyTest, testAppendMultiple) {
   EXPECT_EQ(parser.getSize(), 0);
   EXPECT_EQ(parser.getFrameLength(), 0);
   EXPECT_EQ(owner.memoryCounter_, 0);
-  EXPECT_EQ(owner.frames_.size(), 1);
+  ASSERT_EQ(owner.frames_.size(), 1);
 }
 
 TEST(AllocatingParserStrategyTest, testManyFrames) {
@@ -202,63 +202,63 @@ TEST(AllocatingParserStrategyTest, testManyFrames) {
     void* buf;
     size_t lenReturn;
     parser.getReadBuffer(&buf, &lenReturn);
-    size_t testFrameLength = 20;
+    static constexpr size_t kTestFrameLength = 20;
 
     HeaderSerializer serializer(static_cast<uint8_t*>(buf), lenReturn);
-    serializer.writeFrameOrMetadataSize(testFrameLength);
+    serializer.writeFrameOrMetadataSize(kTestFrameLength);
     parser.readDataAvailable(Serializer::kBytesForFrameOrMetadataLength);
     parser.getReadBuffer(&buf, &lenReturn);
-    std::string b(testFrameLength, 'b');
-    memcpy(static_cast<uint8_t*>(buf), b.data(), testFrameLength);
+    std::string b(kTestFrameLength, 'b');
+    memcpy(static_cast<uint8_t*>(buf), b.data(), kTestFrameLength);
 
-    parser.readDataAvailable(testFrameLength);
+    parser.readDataAvailable(kTestFrameLength);
 
     EXPECT_EQ(parser.getSize(), 0);
     EXPECT_EQ(parser.getFrameLength(), 0);
     EXPECT_EQ(owner.memoryCounter_, 0);
-    EXPECT_EQ(owner.frames_.size(), 1);
+    ASSERT_EQ(owner.frames_.size(), 1);
   }
 
   {
     void* buf;
     size_t lenReturn;
     parser.getReadBuffer(&buf, &lenReturn);
-    size_t testFrameLength = 20;
+    static constexpr size_t kTestFrameLength = 20;
 
     HeaderSerializer serializer(static_cast<uint8_t*>(buf), lenReturn);
-    serializer.writeFrameOrMetadataSize(testFrameLength);
+    serializer.writeFrameOrMetadataSize(kTestFrameLength);
     parser.readDataAvailable(Serializer::kBytesForFrameOrMetadataLength);
     parser.getReadBuffer(&buf, &lenReturn);
-    std::string b(testFrameLength, 'b');
-    memcpy(static_cast<uint8_t*>(buf), b.data(), testFrameLength);
+    std::string b(kTestFrameLength, 'b');
+    memcpy(static_cast<uint8_t*>(buf), b.data(), kTestFrameLength);
 
-    parser.readDataAvailable(testFrameLength);
+    parser.readDataAvailable(kTestFrameLength);
 
     EXPECT_EQ(parser.getSize(), 0);
     EXPECT_EQ(parser.getFrameLength(), 0);
     EXPECT_EQ(owner.memoryCounter_, 0);
-    EXPECT_EQ(owner.frames_.size(), 2);
+    ASSERT_EQ(owner.frames_.size(), 2);
   }
 
   {
     void* buf;
     size_t lenReturn;
     parser.getReadBuffer(&buf, &lenReturn);
-    size_t testFrameLength = 20;
+    static constexpr size_t kTestFrameLength = 20;
 
     HeaderSerializer serializer(static_cast<uint8_t*>(buf), lenReturn);
-    serializer.writeFrameOrMetadataSize(testFrameLength);
+    serializer.writeFrameOrMetadataSize(kTestFrameLength);
     parser.readDataAvailable(Serializer::kBytesForFrameOrMetadataLength);
     parser.getReadBuffer(&buf, &lenReturn);
-    std::string b(testFrameLength, 'b');
-    memcpy(static_cast<uint8_t*>(buf), b.data(), testFrameLength);
+    std::string b(kTestFrameLength, 'b');
+    memcpy(static_cast<uint8_t*>(buf), b.data(), kTestFrameLength);
 
-    parser.readDataAvailable(testFrameLength);
+    parser.readDataAvailable(kTestFrameLength);
 
     EXPECT_EQ(parser.getSize(), 0);
     EXPECT_EQ(parser.getFrameLength(), 0);
     EXPECT_EQ(owner.memoryCounter_, 0);
-    EXPECT_EQ(owner.frames_.size(), 3);
+    ASSERT_EQ(owner.frames_.size(), 3);
   }
 }
 
@@ -272,37 +272,37 @@ TEST(AllocatingParserStrategyTest, testSmallFrame) {
   EXPECT_EQ(lenReturn, parser.getMinBufferSize());
   EXPECT_EQ(parser.getCurrentBufferSize(), parser.getMinBufferSize());
 
-  size_t testFrameLength = 12;
+  static constexpr size_t kTestFrameLength = 12;
 
   HeaderSerializer serializer(static_cast<uint8_t*>(buf), lenReturn);
-  serializer.writeFrameOrMetadataSize(testFrameLength);
+  serializer.writeFrameOrMetadataSize(kTestFrameLength);
   parser.readDataAvailable(Serializer::kBytesForFrameOrMetadataLength);
 
   EXPECT_EQ(parser.getSize(), Serializer::kBytesForFrameOrMetadataLength);
-  EXPECT_EQ(parser.getFrameLength(), testFrameLength);
+  EXPECT_EQ(parser.getFrameLength(), kTestFrameLength);
   EXPECT_EQ(parser.getCurrentBufferSize(), parser.getMinBufferSize());
   EXPECT_EQ(
       owner.memoryCounter_,
-      testFrameLength + Serializer::kBytesForFrameOrMetadataLength);
-  EXPECT_EQ(owner.frames_.size(), 0);
+      kTestFrameLength + Serializer::kBytesForFrameOrMetadataLength);
+  ASSERT_EQ(owner.frames_.size(), 0);
 
   parser.getReadBuffer(&buf, &lenReturn);
   EXPECT_EQ(lenReturn, parser.getMinBufferSize() - 3);
 
-  std::string b(testFrameLength, 'b');
-  memcpy(static_cast<uint8_t*>(buf), b.data(), testFrameLength);
+  std::string b(kTestFrameLength, 'b');
+  memcpy(static_cast<uint8_t*>(buf), b.data(), kTestFrameLength);
 
   // The follow call to readDataAvailable() should trigger parser to handover
   // buffer to owner via handleFrame call even current buffer is not full.
-  parser.readDataAvailable(testFrameLength);
+  parser.readDataAvailable(kTestFrameLength);
 
   EXPECT_EQ(parser.getSize(), 0);
   EXPECT_EQ(parser.getFrameLength(), 0);
   EXPECT_EQ(owner.memoryCounter_, 0);
-  EXPECT_EQ(owner.frames_.size(), 1);
+  ASSERT_EQ(owner.frames_.size(), 1);
 
-  auto frame = std::move(owner.frames_[0]);
-  EXPECT_EQ(frame->length(), testFrameLength);
+  const folly::IOBuf& frame = *owner.frames_[0];
+  EXPECT_EQ(frame.length(), kTestFrameLength);
 
   parser.getReadBuffer(&buf, &lenReturn);
   EXPECT_EQ(lenReturn, 16); // a new buffer is allocated by parser
@@ -314,7 +314,7 @@ TEST(AllocatingParserStrategyTest, testSmallFrame) {
   EXPECT_EQ(parser.getSize(), 1);
   EXPECT_EQ(parser.getFrameLength(), 0);
   EXPECT_EQ(owner.memoryCounter_, 0);
-  EXPECT_EQ(owner.frames_.size(), 1);
+  ASSERT_EQ(owner.frames_.size(), 1);
 }
 
 TEST(AllocatingParserStrategyTest, testTinyFrame) {
@@ -327,68 +327,68 @@ TEST(AllocatingParserStrategyTest, testTinyFrame) {
   EXPECT_EQ(lenReturn, parser.getMinBufferSize());
   EXPECT_EQ(parser.getCurrentBufferSize(), parser.getMinBufferSize());
 
-  size_t testFrameLength = 8;
+  static constexpr size_t kTestFrameLength = 8;
 
   HeaderSerializer serializer1(static_cast<uint8_t*>(buf), lenReturn);
-  serializer1.writeFrameOrMetadataSize(testFrameLength);
+  serializer1.writeFrameOrMetadataSize(kTestFrameLength);
   parser.readDataAvailable(Serializer::kBytesForFrameOrMetadataLength);
 
   EXPECT_EQ(parser.getSize(), Serializer::kBytesForFrameOrMetadataLength);
-  EXPECT_EQ(parser.getFrameLength(), testFrameLength);
+  EXPECT_EQ(parser.getFrameLength(), kTestFrameLength);
   EXPECT_EQ(parser.getCurrentBufferSize(), parser.getMinBufferSize());
-  EXPECT_EQ(owner.memoryCounter_, testFrameLength + 3);
-  EXPECT_EQ(owner.frames_.size(), 0);
+  EXPECT_EQ(owner.memoryCounter_, kTestFrameLength + 3);
+  ASSERT_EQ(owner.frames_.size(), 0);
 
   parser.getReadBuffer(&buf, &lenReturn);
   EXPECT_EQ(
       lenReturn,
       parser.getMinBufferSize() - Serializer::kBytesForFrameOrMetadataLength);
 
-  std::string b(testFrameLength, 'b');
-  memcpy(static_cast<uint8_t*>(buf), b.data(), testFrameLength);
+  std::string b(kTestFrameLength, 'b');
+  memcpy(static_cast<uint8_t*>(buf), b.data(), kTestFrameLength);
 
   // The follow call to readDataAvailable() should trigger parser to handover
   // buffer to owner via handleFrame call even current buffer is not full.
-  parser.readDataAvailable(testFrameLength);
+  parser.readDataAvailable(kTestFrameLength);
 
   EXPECT_EQ(parser.getSize(), 0);
   EXPECT_EQ(parser.getFrameLength(), 0);
   EXPECT_EQ(owner.memoryCounter_, 0);
-  EXPECT_EQ(owner.frames_.size(), 1);
+  ASSERT_EQ(owner.frames_.size(), 1);
 
   parser.getReadBuffer(&buf, &lenReturn);
   EXPECT_EQ(lenReturn, parser.getMinBufferSize());
 
-  size_t newTestFrameLength = 29;
+  static constexpr size_t kNewTestFrameLength = 29;
   HeaderSerializer serializer2(static_cast<uint8_t*>(buf), lenReturn);
-  serializer2.writeFrameOrMetadataSize(newTestFrameLength);
+  serializer2.writeFrameOrMetadataSize(kNewTestFrameLength);
 
   // frameLength compututation should be triggered.q
   parser.readDataAvailable(Serializer::kBytesForFrameOrMetadataLength);
 
   EXPECT_EQ(parser.getSize(), Serializer::kBytesForFrameOrMetadataLength);
-  EXPECT_EQ(parser.getFrameLength(), newTestFrameLength);
+  EXPECT_EQ(parser.getFrameLength(), kNewTestFrameLength);
   EXPECT_EQ(
       parser.getCurrentBufferSize(),
-      newTestFrameLength + Serializer::kBytesForFrameOrMetadataLength);
+      kNewTestFrameLength + Serializer::kBytesForFrameOrMetadataLength);
   EXPECT_EQ(
       owner.memoryCounter_,
-      newTestFrameLength + Serializer::kBytesForFrameOrMetadataLength);
-  EXPECT_EQ(owner.frames_.size(), 1);
+      kNewTestFrameLength + Serializer::kBytesForFrameOrMetadataLength);
+  ASSERT_EQ(owner.frames_.size(), 1);
 
-  auto frame = std::move(owner.frames_[0]);
-  EXPECT_EQ(frame->length(), testFrameLength);
+  const folly::IOBuf& frame = *owner.frames_[0];
+  EXPECT_EQ(frame.length(), kTestFrameLength);
 
   parser.getReadBuffer(&buf, &lenReturn);
-  EXPECT_EQ(lenReturn, newTestFrameLength);
+  EXPECT_EQ(lenReturn, kNewTestFrameLength);
   std::string c(2, 'c');
   memcpy(static_cast<uint8_t*>(buf), b.data(), 2);
   parser.readDataAvailable(2);
 
   EXPECT_EQ(parser.getSize(), 2 + Serializer::kBytesForFrameOrMetadataLength);
-  EXPECT_EQ(parser.getFrameLength(), newTestFrameLength);
-  EXPECT_EQ(owner.memoryCounter_, newTestFrameLength + 3);
-  EXPECT_EQ(owner.frames_.size(), 1);
+  EXPECT_EQ(parser.getFrameLength(), kNewTestFrameLength);
+  EXPECT_EQ(owner.memoryCounter_, kNewTestFrameLength + 3);
+  ASSERT_EQ(owner.frames_.size(), 1);
 }
 
 TEST(AllocatingParserStrategyTest, testManyTinyFrame) {
@@ -402,46 +402,46 @@ TEST(AllocatingParserStrategyTest, testManyTinyFrame) {
   EXPECT_EQ(lenReturn, parser.getMinBufferSize());
   EXPECT_EQ(parser.getCurrentBufferSize(), parser.getMinBufferSize());
 
-  size_t testFrameLen1 = 7;
-  size_t testFrameLen2 = 19;
-  size_t testFrameLen3 = 12;
+  static constexpr size_t kTestFrameLen1 = 7;
+  static constexpr size_t kTestFrameLen2 = 19;
+  static constexpr size_t kTestFrameLen3 = 12;
 
   HeaderSerializer serializer1(static_cast<uint8_t*>(buf), lenReturn);
-  serializer1.writeFrameOrMetadataSize(testFrameLen1);
+  serializer1.writeFrameOrMetadataSize(kTestFrameLen1);
   size_t bytesWritten = Serializer::kBytesForFrameOrMetadataLength;
-  std::string t1(testFrameLen1, 'b');
-  memcpy(&static_cast<uint8_t*>(buf)[bytesWritten], t1.data(), testFrameLen1);
-  bytesWritten += testFrameLen1;
+  std::string t1(kTestFrameLen1, 'b');
+  memcpy(&static_cast<uint8_t*>(buf)[bytesWritten], t1.data(), kTestFrameLen1);
+  bytesWritten += kTestFrameLen1;
 
   HeaderSerializer serializer2(
       &static_cast<uint8_t*>(buf)[bytesWritten], lenReturn);
-  serializer2.writeFrameOrMetadataSize(testFrameLen2);
+  serializer2.writeFrameOrMetadataSize(kTestFrameLen2);
   bytesWritten += Serializer::kBytesForFrameOrMetadataLength;
-  std::string t2(testFrameLen2, 'c');
-  memcpy(&static_cast<uint8_t*>(buf)[bytesWritten], t2.data(), testFrameLen2);
-  bytesWritten += testFrameLen2;
+  std::string t2(kTestFrameLen2, 'c');
+  memcpy(&static_cast<uint8_t*>(buf)[bytesWritten], t2.data(), kTestFrameLen2);
+  bytesWritten += kTestFrameLen2;
 
   HeaderSerializer serializer3(
       &static_cast<uint8_t*>(buf)[bytesWritten], lenReturn);
-  serializer3.writeFrameOrMetadataSize(testFrameLen3);
+  serializer3.writeFrameOrMetadataSize(kTestFrameLen3);
   bytesWritten += Serializer::kBytesForFrameOrMetadataLength;
-  std::string t3(testFrameLen3, 'd');
-  memcpy(&static_cast<uint8_t*>(buf)[bytesWritten], t3.data(), testFrameLen3);
-  bytesWritten += testFrameLen3;
+  std::string t3(kTestFrameLen3, 'd');
+  memcpy(&static_cast<uint8_t*>(buf)[bytesWritten], t3.data(), kTestFrameLen3);
+  bytesWritten += kTestFrameLen3;
 
   parser.readDataAvailable(bytesWritten);
 
   EXPECT_EQ(parser.getSize(), 0);
   EXPECT_EQ(parser.getFrameLength(), 0);
   EXPECT_EQ(owner.memoryCounter_, 0);
-  EXPECT_EQ(owner.frames_.size(), 3);
+  ASSERT_EQ(owner.frames_.size(), 3);
 
-  auto frame1 = std::move(owner.frames_[0]);
-  EXPECT_EQ(frame1->length(), testFrameLen1);
-  auto frame2 = std::move(owner.frames_[1]);
-  EXPECT_EQ(frame2->length(), testFrameLen2);
-  auto frame3 = std::move(owner.frames_[2]);
-  EXPECT_EQ(frame3->length(), testFrameLen3);
+  const folly::IOBuf& frame1 = *owner.frames_[0];
+  EXPECT_EQ(frame1.length(), kTestFrameLen1);
+  const folly::IOBuf& frame2 = *owner.frames_[1];
+  EXPECT_EQ(frame2.length(), kTestFrameLen2);
+  const folly::IOBuf& frame3 = *owner.frames_[2];
+  EXPECT_EQ(frame3.length(), kTestFrameLen3);
 }
 
 TEST(AllocatingParserStrategyTest, testManyTinyFrameWithIncompleteFrame) {
@@ -455,37 +455,37 @@ TEST(AllocatingParserStrategyTest, testManyTinyFrameWithIncompleteFrame) {
   EXPECT_EQ(lenReturn, parser.getMinBufferSize());
   EXPECT_EQ(parser.getCurrentBufferSize(), parser.getMinBufferSize());
 
-  size_t testFrameLen1 = 7;
-  size_t testFrameLen2 = 19;
-  size_t testFrameLen3 = 12;
-  size_t testFrameLen4 = 183;
+  static constexpr size_t kTestFrameLen1 = 7;
+  static constexpr size_t kTestFrameLen2 = 19;
+  static constexpr size_t kTestFrameLen3 = 12;
+  static constexpr size_t kTestFrameLen4 = 183;
 
   HeaderSerializer serializer1(static_cast<uint8_t*>(buf), lenReturn);
-  serializer1.writeFrameOrMetadataSize(testFrameLen1);
+  serializer1.writeFrameOrMetadataSize(kTestFrameLen1);
   size_t bytesWritten = Serializer::kBytesForFrameOrMetadataLength;
-  std::string t1(testFrameLen1, 'b');
-  memcpy(&static_cast<uint8_t*>(buf)[bytesWritten], t1.data(), testFrameLen1);
-  bytesWritten += testFrameLen1;
+  std::string t1(kTestFrameLen1, 'b');
+  memcpy(&static_cast<uint8_t*>(buf)[bytesWritten], t1.data(), kTestFrameLen1);
+  bytesWritten += kTestFrameLen1;
 
   HeaderSerializer serializer2(
       &static_cast<uint8_t*>(buf)[bytesWritten], lenReturn - bytesWritten);
-  serializer2.writeFrameOrMetadataSize(testFrameLen2);
+  serializer2.writeFrameOrMetadataSize(kTestFrameLen2);
   bytesWritten += Serializer::kBytesForFrameOrMetadataLength;
-  std::string t2(testFrameLen2, 'c');
-  memcpy(&static_cast<uint8_t*>(buf)[bytesWritten], t2.data(), testFrameLen2);
-  bytesWritten += testFrameLen2;
+  std::string t2(kTestFrameLen2, 'c');
+  memcpy(&static_cast<uint8_t*>(buf)[bytesWritten], t2.data(), kTestFrameLen2);
+  bytesWritten += kTestFrameLen2;
 
   HeaderSerializer serializer3(
       &static_cast<uint8_t*>(buf)[bytesWritten], lenReturn - bytesWritten);
-  serializer3.writeFrameOrMetadataSize(testFrameLen3);
+  serializer3.writeFrameOrMetadataSize(kTestFrameLen3);
   bytesWritten += Serializer::kBytesForFrameOrMetadataLength;
-  std::string t3(testFrameLen3, 'd');
-  memcpy(&static_cast<uint8_t*>(buf)[bytesWritten], t3.data(), testFrameLen3);
-  bytesWritten += testFrameLen3;
+  std::string t3(kTestFrameLen3, 'd');
+  memcpy(&static_cast<uint8_t*>(buf)[bytesWritten], t3.data(), kTestFrameLen3);
+  bytesWritten += kTestFrameLen3;
 
   HeaderSerializer serializer4(
       &static_cast<uint8_t*>(buf)[bytesWritten], lenReturn - bytesWritten);
-  serializer4.writeFrameOrMetadataSize(testFrameLen4);
+  serializer4.writeFrameOrMetadataSize(kTestFrameLen4);
   bytesWritten += Serializer::kBytesForFrameOrMetadataLength;
   size_t incompleteTestDataLen = 4;
   std::string t4Incomplete(incompleteTestDataLen, 'e');
@@ -500,18 +500,18 @@ TEST(AllocatingParserStrategyTest, testManyTinyFrameWithIncompleteFrame) {
   EXPECT_EQ(
       parser.getSize(),
       incompleteTestDataLen + Serializer::kBytesForFrameOrMetadataLength);
-  EXPECT_EQ(parser.getFrameLength(), testFrameLen4);
+  EXPECT_EQ(parser.getFrameLength(), kTestFrameLen4);
   EXPECT_EQ(
       owner.memoryCounter_,
-      testFrameLen4 + Serializer::kBytesForFrameOrMetadataLength);
-  EXPECT_EQ(owner.frames_.size(), 3);
+      kTestFrameLen4 + Serializer::kBytesForFrameOrMetadataLength);
+  ASSERT_EQ(owner.frames_.size(), 3);
 
-  auto frame1 = std::move(owner.frames_[0]);
-  EXPECT_EQ(frame1->length(), testFrameLen1);
-  auto frame2 = std::move(owner.frames_[1]);
-  EXPECT_EQ(frame2->length(), testFrameLen2);
-  auto frame3 = std::move(owner.frames_[2]);
-  EXPECT_EQ(frame3->length(), testFrameLen3);
+  const folly::IOBuf& frame1 = *owner.frames_[0];
+  EXPECT_EQ(frame1.length(), kTestFrameLen1);
+  const folly::IOBuf& frame2 = *owner.frames_[1];
+  EXPECT_EQ(frame2.length(), kTestFrameLen2);
+  const folly::IOBuf& frame3 = *owner.frames_[2];
+  EXPECT_EQ(frame3.length(), kTestFrameLen3);
 }
 
 #if FOLLY_HAS_MEMORY_RESOURCE

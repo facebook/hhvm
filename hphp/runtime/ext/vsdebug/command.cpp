@@ -42,7 +42,7 @@ bool VSCommand::tryGetBool(
   try {
     const auto& val = message[key];
     return val.isBool() ? val.getBool() : defaultValue;
-  } catch (std::out_of_range& e) {
+  } catch (std::out_of_range&) {
     // Value not present in dynamic.
     return defaultValue;
   }
@@ -60,7 +60,7 @@ const std::string VSCommand::tryGetString(
   try {
     const auto& val = message[key];
     return val.isString() ? val.getString() : defaultValue;
-  } catch (std::out_of_range& e) {
+  } catch (std::out_of_range&) {
     // Value not present in dynamic.
     return defaultValue;
   }
@@ -78,7 +78,7 @@ const folly::dynamic& VSCommand::tryGetObject(
   try {
     const auto& val = message[key];
     return val.isObject() ? val : defaultValue;
-  } catch (std::out_of_range& e) {
+  } catch (std::out_of_range&) {
     // Value not present in dynamic.
     return defaultValue;
   }
@@ -95,7 +95,7 @@ const folly::dynamic& VSCommand::tryGetArray(
       if (val.isArray()) {
         return val;
       }
-    } catch (std::out_of_range& e) {
+    } catch (std::out_of_range&) {
     }
   }
 
@@ -114,7 +114,7 @@ int64_t VSCommand::tryGetInt(
   try {
     const auto& val = message[key];
     return val.isInt() ? val.asInt() : defaultValue;
-  } catch (std::out_of_range& e) {
+  } catch (std::out_of_range&) {
     // Value not present in dynamic.
     return defaultValue;
   }

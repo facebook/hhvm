@@ -344,7 +344,7 @@ struct SinkProfile {
   // The content of the sink profile that can be released after layout
   // selection.
   struct SinkProfileData {
-    folly::SharedMutex mapLock;
+    mutable folly::SharedMutex mapLock;
 
     std::atomic<uint64_t> arrCounts[kNumArrTypes] = {};
     std::atomic<uint64_t> keyCounts[kNumKeyTypes] = {};

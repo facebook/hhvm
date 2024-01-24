@@ -395,7 +395,7 @@ private:
 
 private:
   Map m_vars;
-  folly::SharedMutex m_lock;
+  mutable folly::SharedMutex m_lock;
   /*
    * m_expQueue is a queue of keys to be expired. We purge items from
    * it every n (configurable) apc_stores.

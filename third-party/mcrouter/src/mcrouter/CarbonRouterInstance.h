@@ -36,6 +36,39 @@ class McrouterManager;
 class ProxyThread;
 
 /**
+ * Class to to read CPU metrics of the mcrouter proxy threads
+ * based on a FunctionScheduler
+ */
+class CpuStatsWorker {
+ public:
+  CpuStatsWorker(
+      std::chrono::milliseconds timeIntervalMs,
+      std::shared_ptr<folly::FunctionScheduler> scheduler,
+      const folly::IOThreadPoolExecutorBase& proxyThreads);
+
+  ~CpuStatsWorker();
+
+  /*
+   * Returns a size_t in range [0,100] measuring the average CPU
+   * of the proxy threads over the specified timeIntervalMs window.
+   */
+  size_t getAvgCpu() {
+    return avgCpu_;
+  }
+
+ private:
+  size_t avgCpu_{0};
+  std::shared_ptr<folly::FunctionScheduler> scheduler_;
+  std::chrono::steady_clock::time_point startMs_;
+  std::chrono::nanoseconds usedCpuTime_{0};
+  const folly::IOThreadPoolExecutorBase& proxyThreads_;
+  static constexpr int kWorkerStartDelayMs_ = 1000;
+  static constexpr std::string_view kCpuStatsWorkerName_ = "cpu-stats_worker";
+
+  void calculateCpuStats();
+};
+
+/**
  * A single mcrouter instance.  A mcrouter instance has a single config,
  * but might run across multiple threads.
  */
@@ -144,6 +177,10 @@ class CarbonRouterInstance
 
   ProxyBase* getProxyBase(size_t index) const override final;
 
+  size_t getProxyCpu() const override final {
+    return cpuStatsWorker_->getAvgCpu();
+  }
+
   /**
    * @return  nullptr if index is >= opts.num_proxies,
    *   pointer to the proxy otherwise.
@@ -163,6 +200,10 @@ class CarbonRouterInstance
 
   const folly::IOThreadPoolExecutorBase& getIOThreadPool() const {
     return *proxyThreads_;
+  }
+
+  void resetCpuStatsWorker() {
+    cpuStatsWorker_.reset();
   }
 
   CarbonRouterInstance(const CarbonRouterInstance&) = delete;
@@ -198,6 +239,9 @@ class CarbonRouterInstance
   std::vector<Proxy<RouterInfo>*> proxies_;
   std::vector<std::unique_ptr<folly::VirtualEventBase>> proxyEvbs_;
   std::shared_ptr<folly::IOThreadPoolExecutorBase> proxyThreads_;
+
+  // Worker thread to calculate avg cpu across proxy threads
+  std::unique_ptr<CpuStatsWorker> cpuStatsWorker_;
 
   /**
    * Indicates if evbs/IOThreadPoolExecutor has been created by McRouter or

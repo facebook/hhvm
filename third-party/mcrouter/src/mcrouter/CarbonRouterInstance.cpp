@@ -41,6 +41,43 @@ void freeAllRouters() {
     manager->freeAllMcrouters();
   }
 }
+
+CpuStatsWorker::CpuStatsWorker(
+    std::chrono::milliseconds timeIntervalMs,
+    std::shared_ptr<folly::FunctionScheduler> scheduler,
+    const folly::IOThreadPoolExecutorBase& proxyThreads)
+    : scheduler_(scheduler),
+      startMs_(std::chrono::steady_clock::time_point::min()),
+      proxyThreads_(proxyThreads) {
+  if (timeIntervalMs.count() > 0) {
+    scheduler->addFunction(
+        [this]() { this->calculateCpuStats(); },
+        timeIntervalMs, /* monitoring interval in ms */
+        kCpuStatsWorkerName_,
+        std::chrono::milliseconds{
+            kWorkerStartDelayMs_} /* start delay in ms */);
+  }
+}
+
+CpuStatsWorker::~CpuStatsWorker() {
+  scheduler_->cancelFunctionAndWait(kCpuStatsWorkerName_);
+}
+
+void CpuStatsWorker::calculateCpuStats() {
+  auto end = std::chrono::steady_clock::now();
+  auto currUsedCpuTime = proxyThreads_.getUsedCpuTime();
+  if (usedCpuTime_.count() > 0 &&
+      startMs_ > std::chrono::steady_clock::time_point::min()) {
+    auto timeDeltaNs =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(end - startMs_)
+            .count();
+    auto cpuDeltaNs = (currUsedCpuTime - usedCpuTime_).count();
+    avgCpu_ = 100 * cpuDeltaNs / (timeDeltaNs * proxyThreads_.numThreads());
+  }
+  // Store values for next iteration
+  usedCpuTime_ = currUsedCpuTime;
+  startMs_ = end;
+}
 } // namespace mcrouter
 } // namespace memcache
 } // namespace facebook

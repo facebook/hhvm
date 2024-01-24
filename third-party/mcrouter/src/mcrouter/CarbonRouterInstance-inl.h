@@ -338,6 +338,11 @@ CarbonRouterInstance<RouterInfo>::spinUp() {
     }
   }
 
+  cpuStatsWorker_ = std::make_unique<CpuStatsWorker>(
+      std::chrono::milliseconds(opts_.proxy_cpu_monitor_ms),
+      functionScheduler(),
+      getIOThreadPool());
+
   configuredFromDisk_.store(configuringFromDisk, std::memory_order_relaxed);
 
   startTime_.store(time(nullptr), std::memory_order_relaxed);
@@ -371,6 +376,7 @@ CarbonRouterInstance<RouterInfo>::CarbonRouterInstance(
 
 template <class RouterInfo>
 void CarbonRouterInstance<RouterInfo>::shutdownImpl() noexcept {
+  resetCpuStatsWorker();
   joinAuxiliaryThreads();
   proxyEvbs_.clear();
   resetMetadata();

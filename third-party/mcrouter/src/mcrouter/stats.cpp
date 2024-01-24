@@ -581,6 +581,8 @@ void prepare_stats(CarbonRouterInstanceBase& router, stat_t* stats) {
   }
 
   if (router.opts().num_proxies > 0) {
+    // Set the number of proxy threads
+    stat_set(stats, num_proxies_stat, router.opts().num_proxies);
     stat_div(stats, duration_us_stat, router.opts().num_proxies);
     stat_div(stats, duration_get_us_stat, router.opts().num_proxies);
     stat_div(stats, duration_update_us_stat, router.opts().num_proxies);

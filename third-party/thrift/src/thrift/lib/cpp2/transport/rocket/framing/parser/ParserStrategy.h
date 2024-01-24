@@ -34,8 +34,7 @@ namespace rocket {
 template <class T, template <typename...> class Strategy, typename... Args>
 class ParserStrategy : private Strategy<T, Args...> {
  public:
-  explicit ParserStrategy(T& owner, Args... args)
-      : Strategy<T, Args...>(owner, args...) {}
+  using Strategy<T, Args...>::Strategy;
 
   void getReadBuffer(void** bufReturn, size_t* lenReturn) {
     Strategy<T, Args...>::getReadBuffer(bufReturn, lenReturn);

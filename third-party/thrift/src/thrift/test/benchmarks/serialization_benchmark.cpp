@@ -33,6 +33,7 @@ namespace apache::thrift::benchmarks {
 
 constexpr int kDefaultListSize = 10;
 constexpr int kDefaultMapSize = 10;
+constexpr size_t kMinAllocBytes = 2048;
 
 inline void populate_struct_baseline(
     Struct1& s,
@@ -53,6 +54,10 @@ inline void populate_struct_baseline(
 template <class T, class ProtocolWriter>
 inline void serialize_with_protocol_writer(T& t, folly::IOBufQueue& queue) {
   ProtocolWriter writer;
+  BENCHMARK_SUSPEND {
+    auto buf = folly::IOBuf::create(kMinAllocBytes);
+    queue.append(std::move(buf));
+  }
   writer.setOutput(&queue);
   t.write(&writer);
 }
@@ -289,10 +294,13 @@ BENCHMARK(FlatBuffersRoundTrip) {
 }
 
 BENCHMARK(SBESerializationBenchmark) {
-  char buffer[1024] = {};
+  char* buffer = nullptr;
+
+  BENCHMARK_SUSPEND { buffer = new char[kMinAllocBytes]; }
+
   auto field_2_str = "hello, world";
   SBEStruct1 struct1;
-  struct1.wrapForEncode(buffer, 0, 1024)
+  struct1.wrapForEncode(buffer, 0, kMinAllocBytes)
       .field_1(1)
       .putField_2(field_2_str, sizeof(field_2_str));
 
@@ -306,14 +314,18 @@ BENCHMARK(SBESerializationBenchmark) {
     field_4.map_value(static_cast<uint8_t>(i));
     field_4.putMap_key("key" + std::to_string(i));
   }
+
+  BENCHMARK_SUSPEND { delete[] buffer; }
 }
 
 BENCHMARK(SBEDeserializationBenchmark) {
-  char buffer[1024] = {};
+  char* buffer = nullptr;
+
   BENCHMARK_SUSPEND {
+    buffer = new char[kMinAllocBytes];
     auto field_2_str = "hello, world";
     SBEStruct1 struct1;
-    struct1.wrapForEncode(buffer, 0, 1024)
+    struct1.wrapForEncode(buffer, 0, kMinAllocBytes)
         .field_1(1)
         .putField_2(field_2_str, sizeof(field_2_str));
 
@@ -334,7 +346,7 @@ BENCHMARK(SBEDeserializationBenchmark) {
       0,
       SBEStruct1::sbeBlockLength(),
       SBEStruct1::sbeSchemaVersion(),
-      sizeof(buffer));
+      kMinAllocBytes);
 
   (void)other.field_1();
   (void)other.field_2();
@@ -348,14 +360,17 @@ BENCHMARK(SBEDeserializationBenchmark) {
   while (field_4.hasNext()) {
     (void)field_4.next();
   }
+
+  BENCHMARK_SUSPEND { delete[] buffer; }
 }
 
 BENCHMARK(SBERoundTripBenchmark) {
-  char buffer[1024] = {};
+  char* buffer = nullptr;
   {
+    buffer = new char[kMinAllocBytes];
     auto field_2_str = "hello, world";
     SBEStruct1 struct1;
-    struct1.wrapForEncode(buffer, 0, 1024)
+    struct1.wrapForEncode(buffer, 0, kMinAllocBytes)
         .field_1(1)
         .putField_2(field_2_str, sizeof(field_2_str));
 
@@ -377,7 +392,7 @@ BENCHMARK(SBERoundTripBenchmark) {
         0,
         SBEStruct1::sbeBlockLength(),
         SBEStruct1::sbeSchemaVersion(),
-        sizeof(buffer));
+        kMinAllocBytes);
 
     (void)other.field_1();
     (void)other.field_2();
@@ -392,6 +407,8 @@ BENCHMARK(SBERoundTripBenchmark) {
       (void)field_4.next();
     }
   }
+
+  BENCHMARK_SUSPEND { delete[] buffer; }
 }
 
 } // namespace apache::thrift::benchmarks

@@ -104,7 +104,7 @@ impl<'a> UnitBuilder<'a> {
             adata: Slice::fill_iter(alloc, self.adatas),
             functions: Slice::fill_iter(alloc, self.funcs),
             classes: Slice::fill_iter(alloc, self.classes),
-            typedefs: Slice::fill_iter(alloc, self.typedefs),
+            typedefs: self.typedefs.into(),
             file_attributes: Slice::fill_iter(alloc, self.file_attributes),
             modules: Slice::from_vec(alloc, self.modules),
             module_use: self.module_use.into(),

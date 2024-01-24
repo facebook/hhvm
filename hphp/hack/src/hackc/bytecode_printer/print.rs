@@ -165,7 +165,7 @@ fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit<'_>) -> Result<
     concat(w, prog.classes, |w, cd| print_class_def(ctx, w, cd))?;
     concat(w, prog.modules, |w, cd| print_module_def(ctx, w, cd))?;
     concat(w, &prog.constants, |w, c| print_constant(ctx, w, c))?;
-    concat(w, prog.typedefs, |w, td| print_typedef(ctx, w, td))?;
+    concat(w, &prog.typedefs, |w, td| print_typedef(ctx, w, td))?;
     print_file_attributes(ctx, w, prog.file_attributes.as_ref())?;
     print_include_region(w, &prog.symbol_refs.includes)?;
     print_symbol_ref_regions(ctx, w, &prog.symbol_refs)?;

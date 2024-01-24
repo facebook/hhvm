@@ -33,13 +33,12 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Un
     let mut unit = unit.finish();
 
     unit.file_attributes = convert_attributes(ir_unit.file_attributes, &strings);
-    unit.typedefs = Slice::fill_iter(
-        alloc,
-        ir_unit
-            .typedefs
-            .into_iter()
-            .map(|td| crate::types::convert_typedef(td, &strings)),
-    );
+    unit.typedefs = ir_unit
+        .typedefs
+        .into_iter()
+        .map(|td| crate::types::convert_typedef(td, &strings))
+        .collect::<Vec<_>>()
+        .into();
     unit.constants = ir_unit
         .constants
         .into_iter()

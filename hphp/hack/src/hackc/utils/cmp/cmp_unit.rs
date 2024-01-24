@@ -885,12 +885,7 @@ fn cmp_unit(a_unit: &Unit<'_>, b_unit: &Unit<'_>) -> Result {
     )
     .qualified("functions")?;
 
-    cmp_map_t(
-        a_classes.as_arena_ref(),
-        b_classes.as_arena_ref(),
-        cmp_class,
-    )
-    .qualified("classes")?;
+    cmp_map_t(a_classes, b_classes, cmp_class).qualified("classes")?;
 
     Ok(())
 }

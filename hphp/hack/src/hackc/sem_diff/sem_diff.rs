@@ -142,8 +142,8 @@ pub fn sem_diff_unit(a_unit: &Unit<'_>, b_unit: &Unit<'_>) -> Result<()> {
 
     sem_diff_map_t(
         &path.qualified("classes"),
-        a_classes.as_arena_ref(),
-        b_classes.as_arena_ref(),
+        a_classes,
+        b_classes,
         |path, a, b| sem_diff_class(path, a, &a_adata, b, &b_adata),
     )?;
 

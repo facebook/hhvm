@@ -81,14 +81,14 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Un
 pub(crate) struct UnitBuilder<'a> {
     pub adata_cache: AdataCache<'a>,
     pub functions: bumpalo::collections::Vec<'a, hhbc::Function<'a>>,
-    pub classes: bumpalo::collections::Vec<'a, hhbc::Class<'a>>,
+    pub classes: Vec<hhbc::Class<'a>>,
 }
 
 impl<'a> UnitBuilder<'a> {
     fn new_in(alloc: &'a bumpalo::Bump) -> Self {
         Self {
             adata_cache: AdataCache::new(alloc),
-            classes: bumpalo::collections::Vec::new_in(alloc),
+            classes: Default::default(),
             functions: bumpalo::collections::Vec::new_in(alloc),
         }
     }
@@ -97,7 +97,7 @@ impl<'a> UnitBuilder<'a> {
         hhbc::Unit {
             adata: self.adata_cache.finish(),
             functions: self.functions.into_bump_slice().into(),
-            classes: self.classes.into_bump_slice().into(),
+            classes: self.classes.into(),
             typedefs: Default::default(),
             file_attributes: Default::default(),
             modules: Default::default(),

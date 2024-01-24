@@ -98,7 +98,8 @@ RequestRpcMetadata makeRequestRpcMetadata(
 
   if (rpcOptions.getContextPropMask()) {
     folly::dynamic logMessages = folly::dynamic::object();
-    auto frameworkMetadata = makeFrameworkMetadata(rpcOptions, logMessages);
+    auto frameworkMetadata = makeFrameworkMetadata(
+        rpcOptions, logMessages, metadata.otherMetadata_ref().ensure());
     if (frameworkMetadata) {
       metadata.frameworkMetadata_ref() = std::move(frameworkMetadata);
     }

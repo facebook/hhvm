@@ -50,7 +50,9 @@ using namespace apache::thrift;
 namespace apache::thrift::detail {
 
 std::unique_ptr<folly::IOBuf> makeFrameworkMetadataHook(
-    const RpcOptions&, folly::dynamic&) {
+    const RpcOptions&,
+    folly::dynamic&,
+    folly::F14NodeMap<std::string, std::string>&) {
   return folly::IOBuf::copyBuffer("some_content");
 }
 
@@ -58,8 +60,9 @@ THRIFT_PLUGGABLE_FUNC_SET(
     std::unique_ptr<folly::IOBuf>,
     makeFrameworkMetadata,
     const RpcOptions& rpcOptions,
-    folly::dynamic& logMessages) {
-  return makeFrameworkMetadataHook(rpcOptions, logMessages);
+    folly::dynamic& logMessages,
+    folly::F14NodeMap<std::string, std::string>& headers) {
+  return makeFrameworkMetadataHook(rpcOptions, logMessages, headers);
 }
 } // namespace apache::thrift::detail
 

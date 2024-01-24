@@ -29,7 +29,8 @@ THRIFT_PLUGGABLE_FUNC_SET(
     std::unique_ptr<folly::IOBuf>,
     makeFrameworkMetadata,
     const RpcOptions& rpcOptions,
-    folly::dynamic&) {
+    folly::dynamic&,
+    folly::F14NodeMap<std::string, std::string>&) {
   EXPECT_EQ(rpcOptions.getShardId(), "123");
   return folly::IOBuf::copyBuffer(std::string("linked"));
 }

@@ -31,7 +31,8 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
     std::unique_ptr<folly::IOBuf>,
     makeFrameworkMetadata,
     const RpcOptions&,
-    folly::dynamic& logMessages);
+    folly::dynamic& logMessages,
+    folly::F14NodeMap<std::string, std::string>& headers);
 
 THRIFT_PLUGGABLE_FUNC_DECLARE(const std::string&, getFrameworkMetadataHttpKey);
 

@@ -163,8 +163,8 @@ ThriftClient::createRequestMetadata(
   }
 
   folly::dynamic logMessages = folly::dynamic::object();
-  auto frameworkMetadata =
-      detail::makeFrameworkMetadata(rpcOptions, logMessages);
+  auto frameworkMetadata = detail::makeFrameworkMetadata(
+      rpcOptions, logMessages, otherMetadata.ensure());
   if (frameworkMetadata) {
     metadata.frameworkMetadata_ref() = std::move(frameworkMetadata);
   }

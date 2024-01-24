@@ -239,10 +239,12 @@ struct StringOp : BaseOp<Tag> {
     prepend(self, *val);
   }
 
-#define TRY_OP(ACCUM_TO, TRY_ON, TAG, OP)           \
-  if (const auto* ptr##TAG = TRY_ON.tryAs<TAG>()) { \
-    return OP(ref(ACCUM_TO), *ptr##TAG);            \
-  }
+#define TRY_OP(ACCUM_TO, TRY_ON, TAG, OP)             \
+  do {                                                \
+    if (const auto* ptr##TAG = TRY_ON.tryAs<TAG>()) { \
+      return OP(ref(ACCUM_TO), *ptr##TAG);            \
+    }                                                 \
+  } while (false)
 
   static folly::partial_ordering compare(const void* lhs, const Dyn& rhs) {
     StringCompare cmp;

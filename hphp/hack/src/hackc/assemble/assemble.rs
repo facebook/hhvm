@@ -106,7 +106,7 @@ impl<'a> UnitBuilder<'a> {
             classes: Slice::fill_iter(alloc, self.classes),
             typedefs: self.typedefs.into(),
             file_attributes: Slice::fill_iter(alloc, self.file_attributes),
-            modules: Slice::from_vec(alloc, self.modules),
+            modules: self.modules.into(),
             module_use: self.module_use.into(),
             symbol_refs: hhbc::SymbolRefs {
                 functions: self.func_refs.unwrap_or_default(),

@@ -26,7 +26,7 @@ pub struct Unit<'arena> {
     pub adata: Slice<'arena, Adata<'arena>>,
     pub functions: Slice<'arena, Function<'arena>>,
     pub classes: Slice<'arena, Class<'arena>>,
-    pub modules: Slice<'arena, Module<'arena>>,
+    pub modules: Vector<Module<'arena>>,
     pub typedefs: Vector<Typedef<'arena>>,
     pub file_attributes: Slice<'arena, Attribute<'arena>>,
     pub module_use: Maybe<Str<'arena>>,

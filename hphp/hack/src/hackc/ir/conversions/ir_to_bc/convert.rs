@@ -45,17 +45,19 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Un
         .map(|c| crate::constant::convert_hack_constant(c, &strings))
         .collect::<Vec<_>>()
         .into();
-    unit.modules = Slice::fill_iter(
-        alloc,
-        ir_unit.modules.into_iter().map(|module| hhbc::Module {
+    unit.modules = ir_unit
+        .modules
+        .into_iter()
+        .map(|module| hhbc::Module {
             attributes: convert_attributes(module.attributes, &strings),
             name: strings.lookup_class_name(module.name),
             span: module.src_loc.to_span(),
             doc_comment: module.doc_comment.into(),
             exports: Maybe::Nothing, // TODO
             imports: Maybe::Nothing, // TODO
-        }),
-    );
+        })
+        .collect::<Vec<_>>()
+        .into();
     unit.module_use = ir_unit.module_use.into();
     unit.symbol_refs = convert_symbol_refs(alloc, &ir_unit.symbol_refs);
 

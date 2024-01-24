@@ -474,6 +474,29 @@ impl<T> Default for Vector<T> {
     }
 }
 
+impl<T> AsRef<[T]> for Vector<T> {
+    fn as_ref(&self) -> &[T] {
+        self.as_slice()
+    }
+}
+
+impl<T> std::ops::Deref for Vector<T> {
+    type Target = [T];
+
+    fn deref(&self) -> &Self::Target {
+        self.as_slice()
+    }
+}
+
+impl<'a, T> IntoIterator for &'a Vector<T> {
+    type Item = &'a T;
+    type IntoIter = std::slice::Iter<'a, T>;
+
+    fn into_iter(self) -> std::slice::Iter<'a, T> {
+        self.as_slice().iter()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

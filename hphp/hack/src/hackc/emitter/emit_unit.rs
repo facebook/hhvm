@@ -234,7 +234,7 @@ fn emit_unit_<'a, 'arena, 'decl>(
         modules: Slice::fill_iter(emitter.alloc, modules),
         functions: Slice::fill_iter(emitter.alloc, functions),
         typedefs: Slice::fill_iter(emitter.alloc, typedefs),
-        constants: Slice::fill_iter(emitter.alloc, constants),
+        constants: constants.into(),
         adata: Slice::fill_iter(emitter.alloc, adata),
         file_attributes: Slice::fill_iter(emitter.alloc, file_attributes),
         module_use,

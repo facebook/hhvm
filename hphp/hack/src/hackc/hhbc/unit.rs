@@ -31,7 +31,7 @@ pub struct Unit<'arena> {
     pub file_attributes: Slice<'arena, Attribute<'arena>>,
     pub module_use: Maybe<Str<'arena>>,
     pub symbol_refs: SymbolRefs<'arena>,
-    pub constants: Slice<'arena, Constant<'arena>>,
+    pub constants: Vector<Constant<'arena>>,
     pub fatal: Maybe<Fatal<'arena>>,
     pub missing_symbols: Vector<Str<'arena>>,
     pub error_symbols: Vector<Str<'arena>>,

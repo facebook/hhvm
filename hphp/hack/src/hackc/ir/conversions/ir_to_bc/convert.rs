@@ -40,13 +40,12 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Un
             .into_iter()
             .map(|td| crate::types::convert_typedef(td, &strings)),
     );
-    unit.constants = Slice::fill_iter(
-        alloc,
-        ir_unit
-            .constants
-            .into_iter()
-            .map(|c| crate::constant::convert_hack_constant(c, &strings)),
-    );
+    unit.constants = ir_unit
+        .constants
+        .into_iter()
+        .map(|c| crate::constant::convert_hack_constant(c, &strings))
+        .collect::<Vec<_>>()
+        .into();
     unit.modules = Slice::fill_iter(
         alloc,
         ir_unit.modules.into_iter().map(|module| hhbc::Module {

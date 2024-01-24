@@ -114,7 +114,7 @@ impl<'a> UnitBuilder<'a> {
                 constants: self.constant_refs.unwrap_or_default(),
                 includes: self.include_refs.unwrap_or_default(),
             },
-            constants: Slice::fill_iter(alloc, self.constants),
+            constants: self.constants.into(),
             fatal: self.fatal.into(),
             missing_symbols: Default::default(),
             error_symbols: Default::default(),

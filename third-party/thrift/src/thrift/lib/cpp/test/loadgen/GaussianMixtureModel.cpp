@@ -32,18 +32,18 @@ GaussianMixtureModel::GaussianMixtureModel(const folly::dynamic& cfgDict) {
   logTransformed = cfgDict["log_transformed"].getBool();
   CHECK(gmmCfgDict.isObject());
   nComponents = gmmCfgDict["n_components"].getInt();
-  auto mus = gmmCfgDict["mus"];
-  auto sigmas = gmmCfgDict["sigmas"];
+  auto mus_2 = gmmCfgDict["mus_2"];
+  auto sigmas_2 = gmmCfgDict["sigmas_2"];
   auto weights = gmmCfgDict["weights"];
   double weightCumsum = 0;
-  CHECK_EQ(nComponents, mus.size());
-  CHECK_EQ(nComponents, sigmas.size());
+  CHECK_EQ(nComponents, mus_2.size());
+  CHECK_EQ(nComponents, sigmas_2.size());
   CHECK_EQ(nComponents, weights.size());
   for (uint32_t idx = 0; idx < nComponents; ++idx) {
     weightCumsum += weights[idx].getDouble();
     weightsCumsum.push_back(weightCumsum);
-    double mean = mus[idx].getDouble();
-    double sigma = sigmas[idx].getDouble();
+    double mean = mus_2[idx].getDouble();
+    double sigma = sigmas_2[idx].getDouble();
     this->mus.push_back(mean);
     this->sigmas.push_back(sigma);
   }

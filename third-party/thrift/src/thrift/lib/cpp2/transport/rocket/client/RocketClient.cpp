@@ -313,7 +313,7 @@ void RocketClient::handleStreamChannelFrame(
           "Streaming contract violation: {}. Closing the connection.",
           std::move(status).getErrorMsg())));
       break;
-  };
+  }
 }
 
 template <typename CallbackType>

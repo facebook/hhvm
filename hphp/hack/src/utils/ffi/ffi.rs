@@ -149,36 +149,6 @@ impl<U> std::convert::From<Maybe<U>> for Option<U> {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Debug, Hash, Serialize)]
-#[repr(C)]
-/// A tuple of two elements.
-pub struct Pair<U, V>(pub U, pub V);
-impl<U, V> std::convert::From<(U, V)> for Pair<U, V> {
-    fn from((u, v): (U, V)) -> Self {
-        Pair(u, v)
-    }
-}
-
-#[derive(Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Debug, Hash, Serialize)]
-#[repr(C)]
-/// A tuple of three elements.
-pub struct Triple<U, V, W>(pub U, pub V, pub W);
-impl<U, V, W> std::convert::From<(U, V, W)> for Triple<U, V, W> {
-    fn from((u, v, w): (U, V, W)) -> Self {
-        Triple(u, v, w)
-    }
-}
-
-#[derive(Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Debug, Hash)]
-#[repr(C)]
-/// A tuple of four elements.
-pub struct Quadruple<U, V, W, X>(pub U, pub V, pub W, pub X);
-impl<U, V, W, X> std::convert::From<(U, V, W, X)> for Quadruple<U, V, W, X> {
-    fn from((u, v, w, x): (U, V, W, X)) -> Self {
-        Quadruple(u, v, w, x)
-    }
-}
-
 #[repr(C)]
 /// A type to substitute for `&'a[T]`.
 // Safety: Must be initialized from an `&[T]`. Use `Slice<'a,
@@ -497,26 +467,11 @@ mod tests {
     }
 
     #[test]
-    fn test_01() {
-        let Pair(u, v) = Pair::from((2, "foo"));
-        assert_eq!(u, 2);
-        assert_eq!(v, "foo")
-    }
-
-    #[test]
     fn test_03() {
         let alloc: bumpalo::Bump = bumpalo::Bump::new();
         let data = bumpalo::vec![in &alloc; 1, 2, 3].into_bump_slice();
         let s = Slice::new(data);
         let t = Slice::new(data);
         assert_eq!(s, t)
-    }
-
-    #[test]
-    fn test_04() {
-        let Triple(u, v, w) = Triple::from((2, "foo", 1.0e-2));
-        assert_eq!(u, 2);
-        assert_eq!(v, "foo");
-        assert_eq!(w, 1.0e-2);
     }
 }

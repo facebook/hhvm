@@ -1,0 +1,6 @@
+Fatal error: Uncaught exception 'HH\InvariantException' with message 'Package baz should be loaded' in %s/invalid-meth.php:7
+Stack trace:
+#0 %s/invalid-meth.php(7): HH\invariant_violation()
+#1 %s/invalid-meth.php(13): B::bar()
+#2 (): main()
+#3 {main}

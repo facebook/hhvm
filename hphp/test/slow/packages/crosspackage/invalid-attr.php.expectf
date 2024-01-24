@@ -1,0 +1,1 @@
+Fatal error: The '__CrossPackage' attribute expects exactly 1 argument, 2 given. in %s/invalid-attr.php on line 7

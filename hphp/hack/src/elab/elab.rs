@@ -467,6 +467,8 @@ fn elaborate_for_codegen<T: Transform>(env: &Env, node: &mut T, opts: &CodegenOp
     if opts.textual_remove_memoize {
         passes.push(Box::<passes::remove_memo_attr::RemoveMemoAttr>::default());
     }
+    // Insert assertion that the package being cross-package accessed is loaded
+    passes.push(Box::<passes::elab_cross_package::ElabCrossPackagePass>::default());
 
     let mut passes = pass::Passes { passes };
     node.transform(env, &mut passes);

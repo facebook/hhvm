@@ -1,0 +1,5 @@
+Fatal error: Uncaught exception 'HH\InvariantException' with message 'Package baz should be loaded' in %s/invalid-func.php:5
+Stack trace:
+#0 %s/invalid-func.php(5): HH\invariant_violation()
+#1 (): foo()
+#2 {main}

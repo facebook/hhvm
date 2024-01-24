@@ -240,8 +240,8 @@ fn emit_unit_<'a, 'arena, 'decl>(
         module_use,
         symbol_refs,
         fatal,
-        missing_symbols: Slice::fill_iter(emitter.alloc, missing_syms),
-        error_symbols: Slice::fill_iter(emitter.alloc, error_syms),
+        missing_symbols: missing_syms.into(),
+        error_symbols: error_syms.into(),
         valid_utf8: invalid_utf8_offset.is_none(),
         invalid_utf8_offset: invalid_utf8_offset.unwrap_or(0),
     })

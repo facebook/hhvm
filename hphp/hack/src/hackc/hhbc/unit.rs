@@ -6,6 +6,7 @@
 use ffi::Maybe;
 use ffi::Slice;
 use ffi::Str;
+use ffi::Vector;
 use serde::Serialize;
 
 use crate::Adata;
@@ -32,8 +33,8 @@ pub struct Unit<'arena> {
     pub symbol_refs: SymbolRefs<'arena>,
     pub constants: Slice<'arena, Constant<'arena>>,
     pub fatal: Maybe<Fatal<'arena>>,
-    pub missing_symbols: Slice<'arena, Str<'arena>>,
-    pub error_symbols: Slice<'arena, Str<'arena>>,
+    pub missing_symbols: Vector<Str<'arena>>,
+    pub error_symbols: Vector<Str<'arena>>,
     // TODO(T120858428): Remove this field once non-utf8 is banned from the
     // parser.
     pub valid_utf8: bool,

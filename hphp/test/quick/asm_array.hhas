@@ -15,7 +15,7 @@
   NullUninit
     String "arr"
     String "ClassWithArray"
-    ClassGetC
+    ClassGetC Normal
     CGetS Any
   FCallFuncD <> 1 1 "" "" - "" "var_dump"
   PopC
@@ -28,7 +28,7 @@
     String "arr"
     Int 2
     CGetL $x
-    ClassGetC
+    ClassGetC Normal
     BaseSC 2 0 Warn Any
     QueryM 3 CGet EC:1 Any
   FCallFuncD <> 1 1 "" "" - "" "var_dump"

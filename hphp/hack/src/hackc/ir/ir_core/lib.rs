@@ -49,6 +49,7 @@ pub mod unit;
 pub use hhbc::AsTypeStructExceptionKind;
 pub use hhbc::BareThisOp;
 pub use hhbc::CcParam;
+pub use hhbc::ClassGetCMode;
 pub use hhbc::ClassName;
 pub use hhbc::ClassishKind;
 pub use hhbc::CollectionType;

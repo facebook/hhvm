@@ -200,6 +200,18 @@ impl Display for FmtBid<'_> {
     }
 }
 
+pub(crate) struct FmtClassGetCMode(pub ClassGetCMode);
+
+impl Display for FmtClassGetCMode {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        let s = match self.0 {
+            ClassGetCMode::Normal => "normal",
+            _ => panic!("bad ClassGetCMode value"),
+        };
+        f.write_str(s)
+    }
+}
+
 pub(crate) struct FmtCollectionType(pub(crate) CollectionType);
 
 impl Display for FmtCollectionType {

@@ -121,6 +121,13 @@ struct RepoGlobalData {
   /* Whether implicit class conversions can raise a notice */
   uint32_t RaiseClassConversionNoticeSampleRate = 0;
 
+  /* Whether classname_to_class raises notice if <<__DynamicallyReferenced>>
+   * is missing on a class definition. */
+  uint32_t DynamicallyReferencedNoticeSampleRate = 0;
+
+  /* Whether operations like $c::foo() raise a notice when $c is a string */
+  uint32_t RaiseStrToClsConversionNoticeSampleRate = 0;
+
   /* Whether classname type-hint accepts (lazy) classes */
   bool ClassPassesClassname = false;
 
@@ -233,6 +240,8 @@ struct RepoGlobalData {
       (EmitClsMethPointers)
       (IsVecNotices)
       (RaiseClassConversionNoticeSampleRate)
+      (DynamicallyReferencedNoticeSampleRate)
+      (RaiseStrToClsConversionNoticeSampleRate)
       (ClassPassesClassname)
       (ClassnameNoticesSampleRate)
       (StringPassesClass)

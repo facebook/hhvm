@@ -167,6 +167,7 @@ pub mod instr {
     use hhbc::AdataId;
     use hhbc::AsTypeStructExceptionKind;
     use hhbc::BareThisOp;
+    use hhbc::ClassGetCMode;
     use hhbc::ClassName;
     use hhbc::CollectionType;
     use hhbc::ConstName;

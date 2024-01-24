@@ -470,7 +470,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 Opcode::CheckProp(prop)
             }
             Hhbc::CheckThis(_) => Opcode::CheckThis,
-            Hhbc::ClassGetC(_, _) => Opcode::ClassGetC,
+            Hhbc::ClassGetC(_, mode, _) => Opcode::ClassGetC(mode),
             Hhbc::ClassGetTS(_, _) => Opcode::ClassGetTS,
             Hhbc::ClassHasReifiedGenerics(_, _) => Opcode::ClassHasReifiedGenerics,
             Hhbc::ClassName(..) => Opcode::ClassName,

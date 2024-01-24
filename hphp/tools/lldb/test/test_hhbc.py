@@ -164,25 +164,25 @@ class HHBCTestCase2(base.TestHHVMBinary):
             "+1: NullUninit",
             "+2: String 0",  # 0=>"arr"
             "+7: String 1",  # 1=>"ClassWithArray"
-            "+12: ClassGetC",
-            "+13: CGetS 0",  # 0=>Any (a subop)
-            "+15: FCallFuncD <> 1 1 \"\" \"\" - \"\" 2",  # 2=>"var_dump"
-            "+22: PopC",
-            "+23: String 1",  # 1=>"ClassWithArray"
-            "+28: SetL L:0",
-            "+30: PopC",
-            "+31: NullUninit",
+            "+12: ClassGetC 0", # 0=>"Normal"
+            "+14: CGetS 0",  # 0=>Any (a subop)
+            "+16: FCallFuncD <> 1 1 \"\" \"\" - \"\" 2",  # 2=>"var_dump"
+            "+23: PopC",
+            "+24: String 1",  # 1=>"ClassWithArray"
+            "+29: SetL L:0",
+            "+31: PopC",
             "+32: NullUninit",
-            "+33: String 0",  # 0=>"arr"
-            "+38: Int 2",
-            "+47: CGetL L:0:0",
-            "+50: ClassGetC",
-            "+51: BaseSC 2 0 1 0",  # 1=>Warn 0=>Any
-            "+56: QueryM 3 0 EC:1 Any",  # 0=>CGet
-            "+62: FCallFuncD <> 1 1 \"\" \"\" - \"\" 2",  # 2=>"var_dump"
-            "+69: PopC",
-            "+70: True",
-            "+71: RetC",
+            "+33: NullUninit",
+            "+34: String 0",  # 0=>"arr"
+            "+39: Int 2",
+            "+48: CGetL L:0:0",
+            "+51: ClassGetC 0", # 0=>"Normal"
+            "+53: BaseSC 2 0 1 0",  # 1=>Warn 0=>Any
+            "+58: QueryM 3 0 EC:1 Any",  # 0=>CGet
+            "+64: FCallFuncD <> 1 1 \"\" \"\" - \"\" 2",  # 2=>"var_dump"
+            "+71: PopC",
+            "+72: True",
+            "+73: RetC",
         ]
 
         output_lines = output.strip().split("\n")

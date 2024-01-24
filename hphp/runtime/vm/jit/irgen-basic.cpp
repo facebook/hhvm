@@ -31,7 +31,7 @@
 
 namespace HPHP::jit::irgen {
 
-void emitClassGetC(IRGS& env) {
+void emitClassGetC(IRGS& env, ClassGetCMode mode) {
   auto const name = topC(env);
   if (!name->type().subtypeOfAny(TObj, TCls, TStr, TLazyCls)) {
     interpOne(env);

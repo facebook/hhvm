@@ -4,7 +4,7 @@
   .srcloc 14:8,14:9;
   String "c"
   String "Foo"
-  ClassGetC
+  ClassGetC Normal
   .srcloc 14:21,14:29;
   NewObjD "Bar"
   Dup
@@ -22,7 +22,7 @@
   .srcloc 15:8,15:9;
   String "c"
   String "Foo"
-  ClassGetC
+  ClassGetC Normal
   .srcloc 15:24,15:24;
   Int 2
   .srcloc 15:3,15:20;

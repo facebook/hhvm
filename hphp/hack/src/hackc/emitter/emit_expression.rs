@@ -21,6 +21,7 @@ use ffi::Str;
 use hash::HashSet;
 use hhbc::AsTypeStructExceptionKind;
 use hhbc::BareThisOp;
+use hhbc::ClassGetCMode;
 use hhbc::CollectionType;
 use hhbc::FCallArgs;
 use hhbc::FCallArgsFlags;
@@ -2221,7 +2222,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                         InstrSeq::gather(vec![
                             instr::push_l(meth),
                             instr::push_l(cls),
-                            instr::class_get_c(),
+                            instr::class_get_c(ClassGetCMode::Normal),
                             instr::f_call_cls_method(
                                 IsLogAsDynamicCallOp::LogAsDynamicCall,
                                 fcall_args,
@@ -2244,7 +2245,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                         InstrSeq::gather(vec![
                             instr::push_l(meth),
                             instr::push_l(cls),
-                            instr::class_get_c(),
+                            instr::class_get_c(ClassGetCMode::Normal),
                             instr::f_call_cls_method(
                                 IsLogAsDynamicCallOp::LogAsDynamicCall,
                                 fcall_args,
@@ -2880,12 +2881,12 @@ fn emit_class_meth_native<'a, 'arena, 'decl>(
         ]),
         ClassExpr::Reified(ast_defs::Id(pos, name)) if !has_generics => InstrSeq::gather(vec![
             get_reified_var_cexpr(e, env, &pos, &name)?,
-            instr::class_get_c(),
+            instr::class_get_c(ClassGetCMode::Normal),
             instr::resolve_cls_method(method_name),
         ]),
         ClassExpr::Reified(ast_defs::Id(pos, name)) => InstrSeq::gather(vec![
             get_reified_var_cexpr(e, env, &pos, &name)?,
-            instr::class_get_c(),
+            instr::class_get_c(ClassGetCMode::Normal),
             emit_generics(e)?,
             instr::resolve_r_cls_method(method_name),
         ]),
@@ -3483,7 +3484,7 @@ fn emit_known_class_id<'arena, 'decl>(
     let cid = hhbc::ClassName::from_ast_name_and_mangle(alloc, &id.1);
     let cid_string = instr::string(alloc, cid.unsafe_as_str());
     e.add_class_ref(cid);
-    InstrSeq::gather(vec![cid_string, instr::class_get_c()])
+    InstrSeq::gather(vec![cid_string, instr::class_get_c(ClassGetCMode::Normal)])
 }
 
 fn emit_load_class_ref<'a, 'arena, 'decl>(
@@ -3504,12 +3505,12 @@ fn emit_load_class_ref<'a, 'arena, 'decl>(
         ClassExpr::Expr(expr) => InstrSeq::gather(vec![
             emit_pos(pos),
             emit_expr(e, env, &expr)?,
-            instr::class_get_c(),
+            instr::class_get_c(ClassGetCMode::Normal),
         ]),
         ClassExpr::Reified(ast::Id(p, name)) => InstrSeq::gather(vec![
             emit_pos(pos),
             get_reified_var_cexpr(e, env, &p, &name)?,
-            instr::class_get_c(),
+            instr::class_get_c(ClassGetCMode::Normal),
         ]),
     };
     Ok(emit_pos_then(pos, instrs))
@@ -6325,7 +6326,7 @@ fn emit_class_expr<'a, 'arena, 'decl>(
                 InstrSeq::gather(vec![
                     cexpr_local,
                     scope::stash_top_in_unnamed_local(e, load_prop)?,
-                    instr::class_get_c(),
+                    instr::class_get_c(ClassGetCMode::Normal),
                 ]),
             )
         }

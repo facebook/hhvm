@@ -54,7 +54,7 @@
 .function N do_test(N $who) {
   .declvars $obj;
   CGetL $who
-  ClassGetC
+  ClassGetC Normal
   ClsCns "BAR"
   String "\n"
   Concat
@@ -63,7 +63,7 @@
 
   String "foo"
   CGetL $who
-  ClassGetC
+  ClassGetC Normal
   CGetS Any
   String "\n"
   Concat
@@ -71,7 +71,7 @@
   PopC
 
   CGetL $who
-  ClassGetC
+  ClassGetC Normal
   NewObj
   Dup
   NullUninit

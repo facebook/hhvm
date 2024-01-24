@@ -984,6 +984,12 @@ static const char* SpecialClsRef_names[] = {
 #undef REF
 };
 
+static const char* ClassGetCMode_names[] = {
+#define MODE(x) #x,
+  CLASS_GET_C_MODES
+#undef MODE
+};
+
 static const char* ReadonlyOp_names[] = {
 #define OP(x) #x,
   READONLY_OPS
@@ -1064,6 +1070,7 @@ X(AsTypeStructExceptionKind,
 X(MOpMode,        static_cast<int>(MOpMode::None))
 X(ContCheckOp,    static_cast<int>(ContCheckOp::IgnoreStarted))
 X(SpecialClsRef,  static_cast<int>(SpecialClsRef::SelfCls))
+X(ClassGetCMode,  static_cast<int>(ClassGetCMode::Normal))
 X(IsLogAsDynamicCallOp,
                   static_cast<int>(IsLogAsDynamicCallOp::LogAsDynamicCall))
 X(ReadonlyOp,     static_cast<int>(ReadonlyOp::Any))

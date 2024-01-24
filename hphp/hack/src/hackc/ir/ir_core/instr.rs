@@ -12,6 +12,7 @@ use strum::Display;
 use crate::AsTypeStructExceptionKind;
 use crate::BareThisOp;
 use crate::BlockId;
+use crate::ClassGetCMode;
 use crate::ClassId;
 use crate::CollectionType;
 use crate::ConstId;
@@ -402,6 +403,8 @@ impl HasEdges for MemoGetEager {
     }
 }
 
+/// Hhbc variant parameters should be in the order:
+/// ValueId (or [ValueId]), … constants …, LocId
 #[derive(Clone, Debug, HasLoc, HasLocals, HasOperands, Display, PartialEq, Eq)]
 pub enum Hhbc {
     AKExists([ValueId; 2], LocId),
@@ -437,7 +440,7 @@ pub enum Hhbc {
     CheckClsRGSoft(ValueId, LocId),
     CheckProp(PropId, LocId),
     CheckThis(LocId),
-    ClassGetC(ValueId, LocId),
+    ClassGetC(ValueId, ClassGetCMode, LocId),
     ClassGetTS(ValueId, LocId),
     ClassHasReifiedGenerics(ValueId, LocId),
     ClassName(ValueId, LocId),

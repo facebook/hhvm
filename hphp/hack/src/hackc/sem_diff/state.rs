@@ -1397,7 +1397,7 @@ fn is_checkpoint_instr(instr: &NodeInstr<'_>) -> bool {
             | Opcode::CheckClsReifiedGenericMismatch
             | Opcode::CheckClsRGSoft
             | Opcode::CheckThis
-            | Opcode::ClassGetC
+            | Opcode::ClassGetC(..)
             | Opcode::ClassGetTS
             | Opcode::ClassHasReifiedGenerics
             | Opcode::ClassName
@@ -1593,7 +1593,7 @@ fn clean_opcode<'arena>(opcode: &Opcode<'arena>) -> Opcode<'arena> {
         | Opcode::CheckClsReifiedGenericMismatch
         | Opcode::CheckClsRGSoft
         | Opcode::CheckThis
-        | Opcode::ClassGetC
+        | Opcode::ClassGetC(_)
         | Opcode::ClassGetTS
         | Opcode::ClassHasReifiedGenerics
         | Opcode::ClassName

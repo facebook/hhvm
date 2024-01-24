@@ -235,7 +235,7 @@ where
             | Opcode::CheckClsRGSoft
             | Opcode::CheckProp(..)
             | Opcode::CheckThis
-            | Opcode::ClassGetC
+            | Opcode::ClassGetC(..)
             | Opcode::ClassGetTS
             | Opcode::ClassHasReifiedGenerics
             | Opcode::ClassName

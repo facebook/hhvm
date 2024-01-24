@@ -82,6 +82,12 @@ pub mod ffi {
 
     #[repr(u8)]
     #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
+    enum ClassGetCMode {
+        Normal,
+    }
+
+    #[repr(u8)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum MOpMode {
         None,
         Warn,
@@ -229,6 +235,7 @@ pub mod ffi {
     unsafe extern "C++" {
         include!("hphp/hack/src/hackc/hhvm_cxx/hhvm_hhbc_defs/as-hhbc-ffi.h");
         type BareThisOp;
+        type ClassGetCMode;
         type CollectionType;
         type ContCheckOp;
         type FatalOp;

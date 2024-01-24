@@ -98,7 +98,7 @@ impl LocalInfo {
             | Opcode::CheckClsReifiedGenericMismatch
             | Opcode::CheckClsRGSoft
             | Opcode::CheckThis
-            | Opcode::ClassGetC
+            | Opcode::ClassGetC(..)
             | Opcode::ClassGetTS
             | Opcode::ClassHasReifiedGenerics
             | Opcode::ClassName

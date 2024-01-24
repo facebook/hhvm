@@ -328,7 +328,7 @@ fn is_cow_instr(instr: &NodeInstr<'_>) -> bool {
             | Opcode::CheckClsReifiedGenericMismatch
             | Opcode::CheckClsRGSoft
             | Opcode::CheckThis
-            | Opcode::ClassGetC
+            | Opcode::ClassGetC(..)
             | Opcode::ClassGetTS
             | Opcode::ClassHasReifiedGenerics
             | Opcode::ClassName

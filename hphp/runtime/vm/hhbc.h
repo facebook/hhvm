@@ -485,6 +485,7 @@ const char* subopToName(TypeStructEnforceKind);
 const char* subopToName(AsTypeStructExceptionKind);
 const char* subopToName(ContCheckOp);
 const char* subopToName(SpecialClsRef);
+const char* subopToName(ClassGetCMode);
 const char* subopToName(IsLogAsDynamicCallOp);
 const char* subopToName(ReadonlyOp);
 

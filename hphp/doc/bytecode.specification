@@ -1330,9 +1330,12 @@ CGetS <readonly op>    [C C:Class]  ->  [C]
   instruction throws a fatal error. Otherwise, this instruction pushes the
   static property onto the stack as a cell.
 
-ClassGetC                          [C]  ->  [C:Class]
+ClassGetC <mode>                   [C]  ->  [C:Class]
 
-  Fetch class. This instruction checks if $1 is a string, object, or class. If
+  Fetch class. This instruction has different modes selected by the %1 enum.
+
+  Normal mode:
+  This instruction checks if $1 is a string, object, or class. If
   a class, it pushes the input unchanged. If a string, it checks if $1 is the
   name of a defined class. If so, the class is pushed. If not, this instruction
   will invoke the autoload facility passing in $1, and then it will again check

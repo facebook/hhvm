@@ -76,6 +76,15 @@ enum class SpecialClsRef : uint8_t {
 #undef REF
 };
 
+#define CLASS_GET_C_MODES                                           \
+  MODE(Normal) /* Result of compiling expressions like $c::foo() */ \
+
+enum class ClassGetCMode : uint8_t {
+#define MODE(op) op,
+  CLASS_GET_C_MODES
+#undef MODE
+};
+
 #define M_OP_MODES                                 \
   MODE(None)                                       \
   MODE(Warn)                                       \

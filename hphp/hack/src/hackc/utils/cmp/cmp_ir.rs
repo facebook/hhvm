@@ -913,6 +913,9 @@ fn cmp_instr_hhbc(
         (Hhbc::Silence(_, x0, _), Hhbc::Silence(_, x1, _)) => {
             cmp_eq(x0, x1).qualified("Silence param x")?;
         }
+        (Hhbc::ClassGetC(x0, _, _), Hhbc::ClassGetC(x1, _, _)) => {
+            cmp_eq(x0, x1).qualified("ClassGetC param x")?;
+        }
 
         // These have no params that weren't already checked.
         (Hhbc::AKExists(_, _), _)
@@ -943,7 +946,7 @@ fn cmp_instr_hhbc(
         | (Hhbc::CheckClsReifiedGenericMismatch(_, _), _)
         | (Hhbc::CheckClsRGSoft(_, _), _)
         | (Hhbc::CheckThis(_), _)
-        | (Hhbc::ClassGetC(_, _), _)
+        | (Hhbc::ClassGetC(_, _, _), _)
         | (Hhbc::ClassGetTS(_, _), _)
         | (Hhbc::ClassHasReifiedGenerics(_, _), _)
         | (Hhbc::ClassName(_, _), _)

@@ -187,6 +187,7 @@ inline const char* prettytype(AsTypeStructExceptionKind) {
 inline const char* prettytype(ReadonlyOp) { return "ReadonlyOp"; }
 inline const char* prettytype(ContCheckOp) { return "ContCheckOp"; }
 inline const char* prettytype(SpecialClsRef) { return "SpecialClsRef"; }
+inline const char* prettytype(ClassGetCMode) { return "ClassGetCMode"; }
 inline const char* prettytype(CollectionType) { return "CollectionType"; }
 inline const char* prettytype(IsLogAsDynamicCallOp) {
   return "IsLogAsDynamicCallOp";
@@ -2252,7 +2253,7 @@ OPTBLD_INLINE void iopEnumClassLabel(Id id) {
   vmStack().pushEnumClassLabel(label);
 }
 
-OPTBLD_INLINE void iopClassGetC() {
+OPTBLD_INLINE void iopClassGetC(ClassGetCMode mode) {
   auto const cell = vmStack().topC();
   if (isStringType(cell->m_type)) {
     raise_str_to_class_notice(cell->m_data.pstr);

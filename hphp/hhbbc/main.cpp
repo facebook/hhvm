@@ -261,6 +261,10 @@ RepoGlobalData get_global_data() {
   gd.IsVecNotices = RuntimeOption::EvalIsVecNotices;
   gd.RaiseClassConversionNoticeSampleRate =
     RuntimeOption::EvalRaiseClassConversionNoticeSampleRate;
+  gd.DynamicallyReferencedNoticeSampleRate =
+    RuntimeOption::EvalDynamicallyReferencedNoticeSampleRate;
+  gd.RaiseStrToClsConversionNoticeSampleRate =
+    RuntimeOption::EvalRaiseStrToClsConversionNoticeSampleRate;
   gd.ClassPassesClassname =
     RuntimeOption::EvalClassPassesClassname;
   gd.ClassnameNoticesSampleRate =

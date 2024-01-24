@@ -795,9 +795,12 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func<'_>, hhbc: &
         Hhbc::CheckThis(_) => {
             write!(w, "check_this")?;
         }
-        Hhbc::ClassGetC(vid, _) => {
-            write!(w, "class_get_c {}", FmtVid(func, vid, verbose, strings))?
-        }
+        Hhbc::ClassGetC(vid, mode, _) => write!(
+            w,
+            "class_get_c {} {}",
+            FmtClassGetCMode(mode),
+            FmtVid(func, vid, verbose, strings)
+        )?,
         Hhbc::ClassGetTS(vid, _) => {
             write!(w, "class_get_ts {}", FmtVid(func, vid, verbose, strings))?
         }

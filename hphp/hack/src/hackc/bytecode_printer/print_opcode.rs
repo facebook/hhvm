@@ -13,6 +13,7 @@ use hash::HashSet;
 use hhbc::AdataId;
 use hhbc::AsTypeStructExceptionKind;
 use hhbc::BareThisOp;
+use hhbc::ClassGetCMode;
 use hhbc::ClassName;
 use hhbc::CollectionType;
 use hhbc::ConstName;
@@ -174,6 +175,7 @@ macro_rules! print_with_debug {
 }
 
 print_with_debug!(print_bare_this_op, BareThisOp);
+print_with_debug!(print_class_get_c_mode, ClassGetCMode);
 print_with_debug!(print_collection_type, CollectionType);
 print_with_debug!(print_cont_check_op, ContCheckOp);
 print_with_debug!(print_fatal_op, FatalOp);

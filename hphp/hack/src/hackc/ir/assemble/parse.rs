@@ -16,6 +16,7 @@ use ir_core::Attribute;
 use ir_core::BareThisOp;
 use ir_core::BaseType;
 use ir_core::BlockId;
+use ir_core::ClassGetCMode;
 use ir_core::ClassId;
 use ir_core::CollectionType;
 use ir_core::ConstId;
@@ -307,6 +308,15 @@ pub(crate) fn parse_bare_this_op(tokenizer: &mut Tokenizer<'_>) -> Result<BareTh
             "notice" => BareThisOp::Notice,
             "no_notice" => BareThisOp::NoNotice,
             "never_null" => BareThisOp::NeverNull,
+            _ => return None,
+        })
+    })
+}
+
+pub(crate) fn parse_class_get_c_kind(tokenizer: &mut Tokenizer<'_>) -> Result<ClassGetCMode> {
+    parse_enum(tokenizer, "ClassGetCMode", |t| {
+        Some(match t {
+            "normal" => ClassGetCMode::Normal,
             _ => return None,
         })
     })

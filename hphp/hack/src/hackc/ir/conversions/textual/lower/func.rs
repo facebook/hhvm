@@ -6,6 +6,7 @@
 use std::sync::Arc;
 
 use ir::instr::Hhbc;
+use ir::ClassGetCMode;
 use ir::Constant;
 use ir::Func;
 use ir::FuncBuilder;
@@ -171,7 +172,11 @@ fn rewrite_86sinit(builder: &mut FuncBuilder<'_>, method_info: &MethodInfo<'_>) 
 
     // Now emit the static properties.
     let cls_name = builder.emit_constant(Constant::String(class.name.id));
-    let cls = builder.emit(Instr::Hhbc(Hhbc::ClassGetC(cls_name, loc)));
+    let cls = builder.emit(Instr::Hhbc(Hhbc::ClassGetC(
+        cls_name,
+        ClassGetCMode::Normal,
+        loc,
+    )));
     for prop in &class.properties {
         if !prop.flags.is_static() {
             continue;

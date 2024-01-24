@@ -163,7 +163,7 @@
   String "printing this string"
   String "print_it"
   String "Base"
-  ClassGetC
+  ClassGetC Normal
   FCallClsMethod <> 1 1 "" "" - "" "" LogAsDynamicCall
   PopC
 

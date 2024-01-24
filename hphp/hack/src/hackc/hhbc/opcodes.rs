@@ -11,6 +11,7 @@ use serde::Serialize;
 use crate::AdataId;
 use crate::AsTypeStructExceptionKind;
 use crate::BareThisOp;
+use crate::ClassGetCMode;
 use crate::ClassName;
 use crate::CollectionType;
 use crate::ConstName;

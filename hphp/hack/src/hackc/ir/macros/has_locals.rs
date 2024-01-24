@@ -39,6 +39,7 @@ fn field_might_contain_buried_local_id(ty: &SimpleType<'_>) -> bool {
     if let Some(ident) = ty.get_ident() {
         !(ident == "BlockId"
             || ident == "BareThisOp"
+            || ident == "ClassGetCMode"
             || ident == "ClassId"
             || ident == "CmpOp"
             || ident == "CollectionType"

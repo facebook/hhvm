@@ -134,6 +134,11 @@ folly::Range<const T*> range(Slice<T> const& s) {
   return folly::range(s.data, s.data + s.len);
 }
 
+template <class T>
+folly::Range<const T*> range(Vector<T> const& s) {
+  return folly::range(s.data, s.data + s.len);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // hhbc::Maybe helpers
 

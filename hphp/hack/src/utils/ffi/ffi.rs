@@ -7,6 +7,7 @@ use std::cmp::Ordering;
 use std::fmt;
 use std::hash::Hash;
 use std::hash::Hasher;
+use std::ptr::NonNull;
 use std::slice::from_raw_parts;
 
 use bstr::BStr;
@@ -422,34 +423,54 @@ impl<'a> std::convert::From<&'a mut str> for Slice<'a, u8> {
     }
 }
 
-/// A ReprC view of Vec<u8>. The underlying Vec is owned by this object.
+/// A ReprC view of Vec<T>. The underlying Vec is owned by this object.
 #[repr(C)]
-pub struct Bytes {
-    pub data: *mut u8,
-    pub len: usize,
-    pub cap: usize,
+pub struct Vector<T> {
+    data: NonNull<T>,
+    len: usize,
+    cap: usize,
 }
 
-impl From<Vec<u8>> for Bytes {
-    fn from(bytes: Vec<u8>) -> Self {
-        let mut leaked_bytes = std::mem::ManuallyDrop::new(bytes);
+impl<T> From<Vec<T>> for Vector<T> {
+    fn from(v: Vec<T>) -> Self {
+        let mut leaked = std::mem::ManuallyDrop::new(v);
         Self {
-            data: leaked_bytes.as_mut_ptr(),
-            len: leaked_bytes.len(),
-            cap: leaked_bytes.capacity(),
+            data: NonNull::new(leaked.as_mut_ptr()).unwrap(),
+            len: leaked.len(),
+            cap: leaked.capacity(),
         }
     }
 }
 
-impl Bytes {
-    pub unsafe fn as_slice(&self) -> &[u8] {
-        std::slice::from_raw_parts(self.data, self.len)
+impl<T> Vector<T> {
+    pub fn as_slice(&self) -> &[T] {
+        // Safety: data and len haven't been modified since constructing self
+        unsafe { std::slice::from_raw_parts(self.data.as_ptr(), self.len) }
     }
 }
 
-impl std::ops::Drop for Bytes {
+impl<T> std::ops::Drop for Vector<T> {
     fn drop(&mut self) {
-        let _ = unsafe { Vec::from_raw_parts(self.data, self.len, self.cap) };
+        // Safety: data, len, and cap haven't been modified since constructing self
+        let _ = unsafe { Vec::from_raw_parts(self.data.as_ptr(), self.len, self.cap) };
+    }
+}
+
+impl<T: std::fmt::Debug> std::fmt::Debug for Vector<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Debug::fmt(self.as_slice(), f)
+    }
+}
+
+impl<T: Serialize> Serialize for Vector<T> {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        self.as_slice().serialize(serializer)
+    }
+}
+
+impl<T> Default for Vector<T> {
+    fn default() -> Self {
+        Self::from(Vec::default())
     }
 }
 

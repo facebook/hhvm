@@ -16,8 +16,8 @@
 
 pub mod ffi;
 
-pub use crate::ffi::Bytes;
 pub use crate::ffi::Maybe;
 pub use crate::ffi::Maybe::*;
 pub use crate::ffi::Slice;
 pub use crate::ffi::Str;
+pub use crate::ffi::Vector;

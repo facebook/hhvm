@@ -182,6 +182,11 @@
 // 8 unsigned bits and Windows 32 signed bits.
 #define HPHP_EXIT_FAILURE 127
 
+// When HHVM server fails to shutdown within a timeout, we forcefully
+//exit the process with this exit code, similar to an unclean exit
+// upon SIGTERM (signal 15).
+#define HPHP_SHUTDOWN_TIMEOUT (128 + 15)
+
 //////////////////////////////////////////////////////////////////////
 
 #ifdef HHVM_FACEBOOK

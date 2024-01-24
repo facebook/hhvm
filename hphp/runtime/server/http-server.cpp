@@ -530,7 +530,7 @@ void HttpServer::stop(const char* stopReason) {
           pthread_setschedparam(pthread_self(), SCHED_RR, &param);
           /* sleep override */
           std::this_thread::sleep_for(std::chrono::seconds{totalWait});
-          _Exit(HPHP_EXIT_FAILURE);
+          _Exit(HPHP_SHUTDOWN_TIMEOUT);
         });
       killer.detach();
     }

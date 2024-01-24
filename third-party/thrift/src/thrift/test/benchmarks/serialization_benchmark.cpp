@@ -20,8 +20,7 @@
 #include <folly/Benchmark.h>
 #include <folly/init/Init.h>
 #include <folly/io/Cursor.h>
-#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
-#include <thrift/lib/cpp2/protocol/CompactProtocol.h>
+#include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/test/benchmarks/gen-cpp2/serialization_benchmark_types.h>
 #include <thrift/test/benchmarks/sbe_generated_flyweights/GroupSizeEncoding.h>
 #include <thrift/test/benchmarks/sbe_generated_flyweights/MessageHeader.h>
@@ -35,40 +34,41 @@ constexpr int kDefaultListSize = 10;
 constexpr int kDefaultMapSize = 10;
 constexpr size_t kMinAllocBytes = 2048;
 
-inline void populate_struct_baseline(
-    Struct1& s,
-    int list_size = kDefaultListSize,
-    int map_size = kDefaultMapSize) {
+Struct1 populate_struct_baseline() {
+  Struct1 s;
   s.field_1() = 1;
   s.field_2() = "hello, world";
 
-  for (int i = 0; i < list_size; ++i) {
+  for (int i = 0; i < kDefaultListSize; ++i) {
     s.field_3()->push_back("item " + std::to_string(i));
   }
 
-  for (int i = 0; i < map_size; ++i) {
+  for (int i = 0; i < kDefaultMapSize; ++i) {
     s.field_4()["key " + std::to_string(i)] = i;
   }
+  return s;
 }
 
-template <class T, class ProtocolWriter>
-inline void serialize_with_protocol_writer(T& t, folly::IOBufQueue& queue) {
+template <class ProtocolWriter, class T>
+folly::IOBufQueue serialize_with_protocol_writer(T&& t) {
+  folly::IOBufQueue queue;
   ProtocolWriter writer;
   BENCHMARK_SUSPEND {
     auto buf = folly::IOBuf::create(kMinAllocBytes);
     queue.append(std::move(buf));
   }
   writer.setOutput(&queue);
-  t.write(&writer);
+  std::forward<T>(t).write(&writer);
+  return queue;
 }
 
 template <class T, class ProtocolReader>
-inline void deserialize_with_protocol_reader(T& t, folly::IOBufQueue& queue) {
+T deserialize_with_protocol_reader(const std::unique_ptr<folly::IOBuf>& iobuf) {
+  T t;
   ProtocolReader reader;
-  auto iobuf = queue.move();
-  auto cursor = folly::io::Cursor(iobuf.get());
-  reader.setInput(cursor);
+  reader.setInput(folly::io::Cursor(iobuf.get()));
   t.read(&reader);
+  return t;
 }
 
 struct RawStruct {
@@ -91,62 +91,44 @@ BENCHMARK(RawStructCreationBaseline) {
   }
 }
 
+template <class ProtocolWriter>
+folly::IOBufQueue populate_and_serialize() {
+  return serialize_with_protocol_writer<ProtocolWriter>(
+      populate_struct_baseline());
+}
+
 BENCHMARK(TCompactSerializationBaseline) {
-  folly::IOBufQueue queue;
-  auto s = Struct1{};
-  populate_struct_baseline(s);
-  serialize_with_protocol_writer<Struct1, CompactProtocolWriter>(s, queue);
+  populate_and_serialize<CompactProtocolWriter>();
 }
 
 BENCHMARK(TCompactDeserializationBaseline) {
-  folly::IOBufQueue queue;
-  BENCHMARK_SUSPEND {
-    auto s = Struct1{};
-    populate_struct_baseline(s);
-    serialize_with_protocol_writer<Struct1, CompactProtocolWriter>(s, queue);
-  }
-
-  auto other = Struct1{};
+  folly::BenchmarkSuspender susp;
+  auto queue = populate_and_serialize<CompactProtocolWriter>();
+  susp.dismiss();
   deserialize_with_protocol_reader<Struct1, CompactProtocolReader>(
-      other, queue);
+      queue.move());
 }
 
 BENCHMARK(TCompactRoundTripBaseline) {
-  folly::IOBufQueue queue;
-  auto s = Struct1{};
-  populate_struct_baseline(s);
-  serialize_with_protocol_writer<Struct1, CompactProtocolWriter>(s, queue);
-  auto other = Struct1{};
+  auto queue = populate_and_serialize<CompactProtocolWriter>();
   deserialize_with_protocol_reader<Struct1, CompactProtocolReader>(
-      other, queue);
+      queue.move());
 }
 
 BENCHMARK(TBinarySerializationBaseline) {
-  folly::IOBufQueue queue;
-  auto s = Struct1{};
-  populate_struct_baseline(s);
-  serialize_with_protocol_writer<Struct1, BinaryProtocolWriter>(s, queue);
+  populate_and_serialize<BinaryProtocolWriter>();
 }
 
 BENCHMARK(TBinaryDeserializationBaseline) {
-  folly::IOBufQueue queue;
-  BENCHMARK_SUSPEND {
-    auto s = Struct1{};
-    populate_struct_baseline(s);
-    serialize_with_protocol_writer<Struct1, BinaryProtocolWriter>(s, queue);
-  }
-
-  auto other = Struct1{};
-  deserialize_with_protocol_reader<Struct1, BinaryProtocolReader>(other, queue);
+  folly::BenchmarkSuspender susp;
+  auto queue = populate_and_serialize<BinaryProtocolWriter>();
+  susp.dismiss();
+  deserialize_with_protocol_reader<Struct1, BinaryProtocolReader>(queue.move());
 }
 
 BENCHMARK(TBinaryRoundTripBaseline) {
-  folly::IOBufQueue queue;
-  auto s = Struct1{};
-  populate_struct_baseline(s);
-  serialize_with_protocol_writer<Struct1, BinaryProtocolWriter>(s, queue);
-  auto other = Struct1{};
-  deserialize_with_protocol_reader<Struct1, BinaryProtocolReader>(other, queue);
+  auto queue = populate_and_serialize<BinaryProtocolWriter>();
+  deserialize_with_protocol_reader<Struct1, BinaryProtocolReader>(queue.move());
 }
 
 BENCHMARK(FlatBuffersSerialization) {

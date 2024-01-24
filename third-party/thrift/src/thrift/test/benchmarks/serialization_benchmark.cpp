@@ -23,6 +23,10 @@
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/test/benchmarks/gen-cpp2/serialization_benchmark_types.h>
+#include <thrift/test/benchmarks/sbe_generated_flyweights/GroupSizeEncoding.h>
+#include <thrift/test/benchmarks/sbe_generated_flyweights/MessageHeader.h>
+#include <thrift/test/benchmarks/sbe_generated_flyweights/SBEStruct1.h>
+#include <thrift/test/benchmarks/sbe_generated_flyweights/VarStringEncoding.h>
 #include <thrift/test/benchmarks/serialization_benchmark_generated.h>
 
 namespace apache::thrift::benchmarks {
@@ -281,6 +285,112 @@ BENCHMARK(FlatBuffersRoundTrip) {
     auto mapEntry = fbStruct1Root->field_4()->Get(i);
     mapEntry->key()->str();
     mapEntry->value();
+  }
+}
+
+BENCHMARK(SBESerializationBenchmark) {
+  char buffer[1024] = {};
+  auto field_2_str = "hello, world";
+  SBEStruct1 struct1;
+  struct1.wrapForEncode(buffer, 0, 1024)
+      .field_1(1)
+      .putField_2(field_2_str, sizeof(field_2_str));
+
+  auto& field_3 = struct1.field_3();
+  for (int i = 0; i < kDefaultListSize; i++) {
+    field_3.putList_entry("item " + std::to_string(i));
+  }
+
+  auto& field_4 = struct1.field_4();
+  for (int i = 0; i < kDefaultListSize; i++) {
+    field_4.map_value(static_cast<uint8_t>(i));
+    field_4.putMap_key("key" + std::to_string(i));
+  }
+}
+
+BENCHMARK(SBEDeserializationBenchmark) {
+  char buffer[1024] = {};
+  BENCHMARK_SUSPEND {
+    auto field_2_str = "hello, world";
+    SBEStruct1 struct1;
+    struct1.wrapForEncode(buffer, 0, 1024)
+        .field_1(1)
+        .putField_2(field_2_str, sizeof(field_2_str));
+
+    auto& field_3 = struct1.field_3();
+    for (int i = 0; i < kDefaultListSize; i++) {
+      field_3.putList_entry("item " + std::to_string(i));
+    }
+
+    auto& field_4 = struct1.field_4();
+    for (int i = 0; i < kDefaultListSize; i++) {
+      field_4.map_value(static_cast<uint8_t>(i));
+      field_4.putMap_key("key" + std::to_string(i));
+    }
+  }
+  SBEStruct1 other;
+  other.wrapForDecode(
+      buffer,
+      0,
+      SBEStruct1::sbeBlockLength(),
+      SBEStruct1::sbeSchemaVersion(),
+      sizeof(buffer));
+
+  (void)other.field_1();
+  (void)other.field_2();
+
+  auto& field_3 = other.field_3();
+  while (field_3.hasNext()) {
+    (void)field_3.next();
+  }
+
+  auto& field_4 = other.field_4();
+  while (field_4.hasNext()) {
+    (void)field_4.next();
+  }
+}
+
+BENCHMARK(SBERoundTripBenchmark) {
+  char buffer[1024] = {};
+  {
+    auto field_2_str = "hello, world";
+    SBEStruct1 struct1;
+    struct1.wrapForEncode(buffer, 0, 1024)
+        .field_1(1)
+        .putField_2(field_2_str, sizeof(field_2_str));
+
+    auto& field_3 = struct1.field_3();
+    for (int i = 0; i < kDefaultListSize; i++) {
+      field_3.putList_entry("item " + std::to_string(i));
+    }
+
+    auto& field_4 = struct1.field_4();
+    for (int i = 0; i < kDefaultListSize; i++) {
+      field_4.map_value(static_cast<uint8_t>(i));
+      field_4.putMap_key("key" + std::to_string(i));
+    }
+  }
+  {
+    SBEStruct1 other;
+    other.wrapForDecode(
+        buffer,
+        0,
+        SBEStruct1::sbeBlockLength(),
+        SBEStruct1::sbeSchemaVersion(),
+        sizeof(buffer));
+
+    (void)other.field_1();
+    (void)other.field_2();
+
+    auto& field_3 = other.field_3();
+    while (field_3.hasNext()) {
+      (void)field_3.next();
+    }
+
+    auto& field_4 = other.field_4();
+    while (field_4.hasNext()) {
+      (void)field_4.next();
+    }
   }
 }
 

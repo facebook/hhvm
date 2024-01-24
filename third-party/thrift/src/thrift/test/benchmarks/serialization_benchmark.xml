@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+ To generate the flyweights:
+ In you home directory
+ git clone https://github.com/real-logic/simple-binary-encoding.git
+ cd simple-binary-encoding
+ ./gradlew
+ cd ~/simple-binary-encoding/sbe-all/build/libs
+ /usr/local/java-runtime/11/bin/java -Dsbe.target.language=Cpp \
+  -jar ./sbe-all-1.31.0-SNAPSHOT.jar ~/fbsource/fbcode/thrift/test/benchmarks/serialization_benchmark.xml
+
+This will generate code into ~/simple-binary-encoding/sbe-all/build/libs/apache_thrift_benchmarks
+-->
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   xmlns:xi="http://www.w3.org/2001/XInclude"
+                   package="apache.thrift.benchmarks"
+                   id="1"
+                   version="0"
+                   semanticVersion="5.2"
+                   description="Serialization Benchmark Structs"
+                   byteOrder="littleEndian"
+                   semanticType="cpp2">
+
+    <types>
+        <composite name="messageHeader" description="Message identifiers and length of message root.">
+          <type name="blockLength" primitiveType="uint16"/>
+          <type name="templateId" primitiveType="uint16"/>
+          <type name="schemaId" primitiveType="uint16"/>
+          <type name="version" primitiveType="uint16"/>
+        </composite>
+        <composite name="groupSizeEncoding" description="Repeating group dimensions.">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="numInGroup" primitiveType="uint16"/>
+        </composite>
+        <composite name="varStringEncoding" description="Variable length UTF-8 String.">
+            <type name="length" primitiveType="uint32" maxValue="1073741824"/>
+            <type name="varData" primitiveType="uint8" length="0" characterEncoding="UTF-8"/>
+        </composite>
+        <composite name="varAsciiEncoding" description="Variable length ASCII String.">
+            <type name="length" primitiveType="uint32" maxValue="1073741824"/>
+            <type name="varData" primitiveType="uint8" length="0" characterEncoding="ASCII"/>
+        </composite>
+        <composite name="varDataEncoding" description="Variable length binary blob.">
+            <type name="length" primitiveType="uint32" maxValue="1073741824"/>
+            <type name="varData" primitiveType="uint8" length="0"/>
+        </composite>
+    </types>
+    <sbe:message name="SBEStruct1" id="1" description="Simple Binary Encoding Struct1 for testing">
+        <field name="field_1" id="1" type="int32" />
+        <group name="field_3" id="3" dimensionType="groupSizeEncoding">
+            <data name="list_entry" id="100" type="varStringEncoding" />
+        </group>
+        <group name="field_4" id="4" dimensionType="groupSizeEncoding">
+            <field name="map_value" id="101" type="int8"/>
+            <data name="map_key" id="102" type="varStringEncoding" />
+        </group>
+        <data name="field_2" id="2" type="varStringEncoding" />
+    </sbe:message>
+</sbe:messageSchema>

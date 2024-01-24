@@ -204,12 +204,6 @@ class CarbonRouterInstanceBase {
   virtual ProxyBase* getProxyBase(size_t index) const = 0;
 
   /**
-   * Returns a size_t in range [0,100] measuring the average CPU
-   * of the proxy threads over the specified timeIntervalMs window.
-   */
-  virtual size_t getProxyCpu() const = 0;
-
-  /**
    * Bump and return the index of the next proxy to be used by clients.
    */
   size_t nextProxyIndex();

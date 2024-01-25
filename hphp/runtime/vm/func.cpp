@@ -839,8 +839,8 @@ void Func::def(Func* func) {
 }
 
 Func* Func::lookup(const StringData* name) {
-  const NamedFunc* ne = NamedFunc::getOrCreate(name);
-  return ne->getCachedFunc();
+  const NamedFunc* ne = NamedFunc::getNoCreate(name);
+  return ne ? ne->getCachedFunc() : nullptr;
 }
 
 Func* Func::lookupBuiltin(const StringData* name) {
@@ -848,8 +848,7 @@ Func* Func::lookupBuiltin(const StringData* name) {
   // beginning of every request (if JitEnableRenameFunction or interception is
   // enabled). In either case, they're unique, so they should be present in the
   // NamedFunc.
-  auto const ne = NamedFunc::getOrCreate(name);
-  auto const f = ne->getCachedFunc();
+  auto const f = Func::lookup(name);
   return (f && f->isPersistent() && f->isBuiltin()) ? f : nullptr;
 }
 

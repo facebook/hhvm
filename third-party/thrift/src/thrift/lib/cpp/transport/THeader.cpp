@@ -266,7 +266,7 @@ bool THeader::isFramed(CLIENT_TYPE type) {
       return true;
     default:
       return false;
-  };
+  }
 }
 
 unique_ptr<IOBuf> THeader::removeNonHeader(
@@ -290,7 +290,7 @@ unique_ptr<IOBuf> THeader::removeNonHeader(
     default:
       // Fallback to sniffing out the magic for Header
       return nullptr;
-  };
+  }
 }
 
 unique_ptr<IOBuf> THeader::removeHeader(

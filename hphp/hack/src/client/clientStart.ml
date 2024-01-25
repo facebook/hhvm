@@ -257,7 +257,7 @@ let should_start env =
     MonitorRpc.
       {
         force_dormant_start = false;
-        pipe_name = ServerController.(pipe_type_to_string Default);
+        pipe_name = MonitorRpc.(pipe_type_to_string Default);
       }
   in
   let tracker = Connection_tracker.create () in

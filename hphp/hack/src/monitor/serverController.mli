@@ -5,14 +5,6 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-
-type pipe_type =
-  | Default
-  | Priority
-  | Force_dormant_start_only
-
-val pipe_type_to_string : pipe_type -> string
-
 type server_start_options = ServerArgs.options
 
 (** Start the server. Optionally takes in the exit code of the previously

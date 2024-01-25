@@ -6,6 +6,15 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+type pipe_type =
+  | Default
+  | Priority
+  | Force_dormant_start_only
+
+let pipe_type_to_string = function
+  | Default -> "default"
+  | Priority -> "priority"
+  | Force_dormant_start_only -> "force_dormant_start_only"
 
 type handoff_options = {
   (* If server is dormant because it is waiting for Informant to start one,

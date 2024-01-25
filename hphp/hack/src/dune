@@ -126,7 +126,7 @@
   file_content
   gen_deps
   hhi
-  hh_server_monitor
+  monitor_client_api
   lwt_utils
   parent
   server

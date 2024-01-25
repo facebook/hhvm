@@ -9,6 +9,7 @@
   libancillary
   logging
   marshal_tools
+  monitor_client_api
   hh_server_monitor
   messages
   monitor_rpc

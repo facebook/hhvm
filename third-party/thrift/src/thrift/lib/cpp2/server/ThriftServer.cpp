@@ -1669,7 +1669,7 @@ folly::coro::CancellableAsyncScope& ThriftServer::getGlobalAsyncScope() {
 }
 #endif
 
-void ThriftServer::setGlobalServer(ThriftServer* server) {
+/* static */ void ThriftServer::setGlobalServer(ThriftServer* server) {
   globalServer = server;
 }
 

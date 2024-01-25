@@ -57,6 +57,7 @@
 #include <thrift/lib/cpp2/server/StatusServerInterface.h>
 #include <thrift/lib/cpp2/server/ThreadManagerLoggingWrapper.h>
 #include <thrift/lib/cpp2/server/ThriftServerConfig.h>
+#include <thrift/lib/cpp2/transport/rocket/framing/parser/AllocatingParserStrategy.h>
 
 namespace wangle {
 class ConnectionManager;
@@ -312,6 +313,12 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   std::shared_ptr<server::TServerEventHandler> eventHandler_;
   std::vector<std::shared_ptr<server::TServerEventHandler>> eventHandlers_;
 
+  // TODO: T176242251 we use unique_ptr and just pass raw pointer / reference in
+  // rocket's stack. If the object is owned by ThriftServer, then we know it
+  // will outlive every RocketServerConnection (and related) objects.
+  std::shared_ptr<rocket::ParserAllocatorType> customAllocatorForParser_{
+      nullptr};
+
   friend ThriftServerConfig& detail::getThriftServerConfig(BaseThriftServer&);
   friend const InterceptorData& detail::getInterceptorData(BaseThriftServer&);
 
@@ -505,6 +512,26 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   void addServerEventHandler(
       std::shared_ptr<server::TServerEventHandler> eventHandler) {
     eventHandlers_.push_back(eventHandler);
+  }
+
+  /**
+   * Returns a reference to the custom allocator used by the server when parsing
+   * Thrift frames.
+   */
+  std::shared_ptr<rocket::ParserAllocatorType> getCustomAllocatorForParser() {
+    return customAllocatorForParser_;
+  }
+
+  /**
+   * Sets the custom allocator used by the server. The allocator is use by the
+   * server to allocate memory for the IOBufs when parsing incoming frames.
+   *
+   * @param customAllocator A unique pointer to the custom allocator. The
+   * BaseThriftServer will take over the ownership
+   */
+  void setCustomAllocatorForParser(
+      std::shared_ptr<rocket::ParserAllocatorType> customParserAllocator) {
+    customAllocatorForParser_ = std::move(customParserAllocator);
   }
 
   /**

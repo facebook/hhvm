@@ -83,7 +83,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_get_five.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -191,7 +191,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_add_five.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -300,7 +300,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_do_nothing.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -411,7 +411,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_concat.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -521,7 +521,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_get_value.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -629,7 +629,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_negate.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -737,7 +737,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_tiny.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -845,7 +845,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_small.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -953,7 +953,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_big.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -1061,7 +1061,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_two.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -1170,7 +1170,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_expected_exception.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -1279,7 +1279,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_unexpected_exception.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -1387,7 +1387,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_sum_i16_list.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -1495,7 +1495,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_sum_i32_list.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -1603,7 +1603,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_sum_i64_list.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -1713,7 +1713,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_concat_many.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -1823,7 +1823,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_count_structs.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -1931,7 +1931,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_sum_set.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -2039,7 +2039,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_contains_word.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -2149,7 +2149,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_get_map_value.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -2259,7 +2259,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_map_length.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -2367,7 +2367,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_sum_map_values.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -2475,7 +2475,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_complex_sum_i32.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -2585,7 +2585,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_repeat_name.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -2697,7 +2697,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_get_struct.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -2809,7 +2809,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_fib.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -2921,7 +2921,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_unique_words.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -3033,7 +3033,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_words_count.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -3143,7 +3143,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_set_enum.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -3253,7 +3253,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_list_of_lists.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -3365,7 +3365,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_word_character_frequency.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -3477,7 +3477,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_list_of_sets.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -3587,7 +3587,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_nested_map_argument.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -3697,7 +3697,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_make_sentence.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -3809,7 +3809,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_get_union.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -3921,7 +3921,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_get_keys.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -4031,7 +4031,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_lookup_double.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -4141,7 +4141,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_retrieve_binary.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -4253,7 +4253,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_contain_binary.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -4365,7 +4365,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_contain_enum.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -4477,7 +4477,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_get_binary_union_struct.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
@@ -4589,7 +4589,7 @@ determineInvocationType:
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_get_struct_hidden.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:

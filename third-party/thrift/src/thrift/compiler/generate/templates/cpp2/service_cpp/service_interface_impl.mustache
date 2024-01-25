@@ -113,7 +113,7 @@ determineInvocationType:
 <%#service:interaction?%>
         __fbthrift_invocation_<%function:cpp_name%>.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::SemiFuture, std::memory_order_relaxed);
 <%/service:interaction?%>
-        FOLLY_FALLTHROUGH;
+        [[fallthrough]];
 #endif // FOLLY_HAS_COROUTINES
       }
 <%^service:interaction?%>

@@ -84,6 +84,7 @@ pub mod ffi {
     #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum ClassGetCMode {
         Normal,
+        ExplicitConversion,
     }
 
     #[repr(u8)]

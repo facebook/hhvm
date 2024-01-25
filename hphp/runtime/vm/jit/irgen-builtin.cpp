@@ -1275,53 +1275,6 @@ SSATmp* opt_get_implicit_context_memo_key(IRGS& env, const ParamPrep& params) {
   );
 }
 
-SSATmp* opt_classname_to_class(IRGS& env, const ParamPrep& params) {
-  if (params.size() != 1) return nullptr;
-  auto const cn = params[0].value;
-
-  if (cn->isA(TCls)) return cn;
-  if (cn->isA(TLazyCls)) {
-    // TODO(T168044199) this case should be eliminated by nameof-ing bad lazy classes
-    return ldCls(env, cn, LdClsFallback::THROW_CLASSNAME_TO_CLASS_LAZYCLASS);
-  }
-  if (cn->isA(TStr)) {
-    if (inlineDepth(env) == 0) {
-      return nullptr; // no caller info for module check
-    }
-
-    // The caller of HH\classname_to_class needs to be able to access this
-    // symbol, unlike dynamic $c::f() case where caller = curFunc(env)
-    auto const clsTmp = ldCls(env, cn,
-                              LdClsFallback::THROW_CLASSNAME_TO_CLASS_STRING);
-    auto const frame = env.inlineState.frames.back();
-    auto const caller = frame.callerSk.func();
-    emitModuleBoundaryCheckFrom(env, clsTmp, caller, false);
-
-    if (RO::EvalDynamicallyReferencedNoticeSampleRate > 0) {
-      if (clsTmp->hasConstVal()) {
-        if (!clsTmp->clsVal()->isDynamicallyReferenced()) {
-          gen(env, RaiseMissingDynamicallyReferenced, clsTmp);
-        }
-      } else {
-        ifThen(
-          env,
-          [&] (Block* taken) {
-            auto const data = AttrData { AttrDynamicallyReferenced };
-            gen(env, JmpZero, taken, gen(env, ClassHasAttr, data, clsTmp));
-          },
-          [&] {
-            hint(env, Block::Hint::Unlikely);
-            gen(env, RaiseMissingDynamicallyReferenced, clsTmp);
-          });
-      }
-    }
-
-    return clsTmp;
-  }
-
-  return nullptr;
-}
-
 SSATmp* opt_class_to_classname(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
   auto const c = params[0].value;
@@ -1393,7 +1346,6 @@ const hphp_fast_string_fmap<OptEmitFn> s_opt_emit_fns{
   {"HH\\meth_caller_get_method", opt_meth_caller_get_method},
   {"HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key",
      opt_get_implicit_context_memo_key},
-  {"HH\\classname_to_class", opt_classname_to_class},
   {"HH\\class_to_classname", opt_class_to_classname},
   {"hphp_debug_caller_identifier", opt_hphp_debug_caller_identifier},
 };

@@ -317,6 +317,7 @@ pub(crate) fn parse_class_get_c_kind(tokenizer: &mut Tokenizer<'_>) -> Result<Cl
     parse_enum(tokenizer, "ClassGetCMode", |t| {
         Some(match t {
             "normal" => ClassGetCMode::Normal,
+            "explicit_conversion" => ClassGetCMode::ExplicitConversion,
             _ => return None,
         })
     })

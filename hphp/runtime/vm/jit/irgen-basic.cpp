@@ -33,7 +33,21 @@ namespace HPHP::jit::irgen {
 
 void emitClassGetC(IRGS& env, ClassGetCMode mode) {
   auto const name = topC(env);
-  if (!name->type().subtypeOfAny(TObj, TCls, TStr, TLazyCls)) {
+
+  if (name->isA(TObj)) {
+    switch (mode) {
+      case ClassGetCMode::Normal:
+        popC(env);
+        push(env, gen(env, LdObjClass, name));
+        decRef(env, name);
+        return;
+      case ClassGetCMode::ExplicitConversion:
+        interpOne(env);
+        return;
+    }
+  }
+
+  if (!name->type().subtypeOfAny(TCls, TStr, TLazyCls)) {
     interpOne(env);
     return;
   }
@@ -44,17 +58,44 @@ void emitClassGetC(IRGS& env, ClassGetCMode mode) {
     return;
   }
 
-  if (name->isA(TObj)) {
-    push(env, gen(env, LdObjClass, name));
-    decRef(env, name);
-    return;
-  }
+  auto const cls = [&] {
+    switch (mode) {
+      case ClassGetCMode::Normal:
+        if (RO::EvalRaiseStrToClsConversionNoticeSampleRate > 0
+            && name->isA(TStr)) {
+          gen(env, RaiseStrToClassNotice, name);
+        }
+        return ldCls(env, name);
+      case ClassGetCMode::ExplicitConversion:
+        // HH\classname_to_class throws a catchable InvalidArgumentException
+        // instead of raising a fatal error
+        if (name->isA(TStr)) {
+          auto const cls = ldCls(env, name, LdClsFallback::THROW_CLASSNAME_TO_CLASS_STRING);
+          if (RO::EvalDynamicallyReferencedNoticeSampleRate > 0) {
+            if (cls->hasConstVal() &&
+                !cls->clsVal()->isDynamicallyReferenced()) {
+              gen(env, RaiseMissingDynamicallyReferenced, cls);
+            } else {
+              ifThen(
+                env,
+                [&] (Block* taken) {
+                  auto const data = AttrData { AttrDynamicallyReferenced };
+                  gen(env, JmpZero, taken, gen(env, ClassHasAttr, data, cls));
+                },
+                [&] {
+                  hint(env, Block::Hint::Unlikely);
+                  gen(env, RaiseMissingDynamicallyReferenced, cls);
+                }
+              );
+            }
+          }
+          return cls;
+        } else { // TLazyCls
+          return ldCls(env, name, LdClsFallback::THROW_CLASSNAME_TO_CLASS_LAZYCLASS);
+        }
+    }
+  }();
 
-  if (name->isA(TStr) && RO::EvalRaiseStrToClsConversionNoticeSampleRate > 0) {
-    gen(env, RaiseStrToClassNotice, name);
-  }
-
-  auto const cls = ldCls(env, name);
   decRef(env, name);
   if (name->isA(TStr)) emitModuleBoundaryCheck(env, cls, false);
   push(env, cls);

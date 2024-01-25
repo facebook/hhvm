@@ -1389,46 +1389,6 @@ Class* getClass(TypedValue cls) {
 
 }
 
-TypedValue HHVM_FUNCTION(classname_to_class, TypedValue cname) {
-  auto const fail = [&](const char* k, const char* n) {
-    std::string msg;
-    string_printf(msg, Strings::CLASSNAME_TO_CLASS_NOEXIST_EXCEPTION, k, n);
-    SystemLib::throwInvalidArgumentExceptionObject(msg);
-  };
-  switch (cname.m_type) {
-    case KindOfPersistentString:
-    case KindOfString:
-    {
-      auto const name = cname.m_data.pstr;
-      auto const caller = fromCaller(
-        [] (const BTFrame& frm) { return frm.func(); }
-      );
-      auto const c = Class::resolve(name, caller);
-      if (!c) fail("string", name->data());
-      if (folly::Random::oneIn(RO::EvalDynamicallyReferencedNoticeSampleRate) &&
-          !c->isDynamicallyReferenced()) {
-        raise_notice(Strings::MISSING_DYNAMICALLY_REFERENCED, name->data());
-      }
-      return make_tv<KindOfClass>(c);
-    }
-    case KindOfClass:
-      return cname;
-    case KindOfLazyClass:
-    {
-      auto const name = cname.m_data.plazyclass.name();
-      auto const c = Class::load(name);
-      if (!c) fail("lazy class", name->data());
-      return make_tv<KindOfClass>(c);
-    }
-    default:
-      SystemLib::throwInvalidArgumentExceptionObject(
-        folly::sformat(
-          "Invalid argument type {} passed to {}", cname.m_type, __FUNCTION__+2)
-      );
-  }
-  not_reached();
-}
-
 TypedValue HHVM_FUNCTION(class_to_classname, TypedValue cls) {
   switch (cls.m_type) {
     case KindOfPersistentString:
@@ -1616,7 +1576,6 @@ static struct HHExtension final : Extension {
     X(dynamic_class_meth);
     X(dynamic_class_meth_force);
     X(classname_from_string_unsafe);
-    X(classname_to_class);
     X(class_to_classname);
     X(enable_per_file_coverage);
     X(disable_per_file_coverage);

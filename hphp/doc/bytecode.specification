@@ -1344,6 +1344,14 @@ ClassGetC <mode>                   [C]  ->  [C:Class]
   class of the object. If $1 is not any of the above cases, this instruction
   throws a fatal error.
 
+  ExplicitConversion mode:
+  This is an explicit str-to-class conversion through HH\classname_to_class().
+  Checks if $1 is a string, class, or lazy class; objects are not admitted and
+  classes pointers are pushed unchanged. When $1 is a string, we check whether
+  the target class has the <<__DynamicallyReferenced>> attribute and raise a
+  sampled notice otherwise. If the target class fails to load, we throw a
+  catchable InvalidArgumentException.
+
 ClassGetTS                         [C:Dict]  ->  [C:Class, C:StaticVec|Null]
 
   Fetch class from type-structure. This instruction checks if $1 is a valid

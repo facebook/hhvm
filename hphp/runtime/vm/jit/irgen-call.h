@@ -56,11 +56,6 @@ Type callOutType(const Func* callee, uint32_t index);
  * Emits instructions to check and enforce module boundary violations
  */
 void emitModuleBoundaryCheck(IRGS&, SSATmp* symbol, bool func = true);
-/**
- * Same as above, but takes caller as a param instead of using curFunc
- */
-void emitModuleBoundaryCheckFrom(IRGS&, SSATmp* symbol, const Func* caller,
-                                 bool func);
 
 void emitModuleBoundaryCheckKnown(IRGS&, const Class* symbol);
 void emitModuleBoundaryCheckKnown(IRGS&, const Func* symbol);

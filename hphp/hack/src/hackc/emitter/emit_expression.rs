@@ -2701,6 +2701,16 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 format!("__SystemLib\\unwrap_opaque_value() expects exactly 2 parameters, {} given", nargs),
             )),
         },
+        ("HH\\classname_to_class", _) => match *args {
+            [ref cname] => Ok(Some(InstrSeq::gather(vec![
+                emit_expr(e, env, error::expect_normal_paramkind(cname)?)?,
+                instr::class_get_c(ClassGetCMode::ExplicitConversion),
+            ]))),
+            _ => Err(Error::fatal_runtime(
+                pos,
+                format!("classname_to_class() expects exactly 1 parameter, {} given", nargs),
+            )),
+        },
         ("HH\\global_set", _) => match *args {
             [ref gkey, ref gvalue] => Ok(Some(InstrSeq::gather(vec![
                 emit_expr(e, env, error::expect_normal_paramkind(gkey)?)?,

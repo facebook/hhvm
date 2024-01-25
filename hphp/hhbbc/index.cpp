@@ -4238,6 +4238,18 @@ bool Class::mightCareAboutDynConstructs() const {
   }
 }
 
+bool Class::mightCareAboutDynamicallyReferenced() const {
+  if (RuntimeOption::EvalDynamicallyReferencedNoticeSampleRate == 0) return false;
+  graph().ensureCInfo();
+  if (auto const ci = cinfo()) {
+    return !(ci->cls->attrs & AttrDynamicallyReferenced);
+  } else if (auto const ci = cinfo2()) {
+    return !ci->cls || !(ci->cls->attrs & AttrDynamicallyReferenced);
+  } else {
+    return true;
+  }
+}
+
 bool Class::couldHaveConstProp() const {
   graph().ensureCInfo();
   if (auto const ci = cinfo()) {

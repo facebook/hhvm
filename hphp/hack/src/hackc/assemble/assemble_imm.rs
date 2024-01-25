@@ -24,7 +24,10 @@ assemble_imm_for_enum!(
     ]
 );
 
-assemble_imm_for_enum!(hhbc::ClassGetCMode, [ClassGetCMode::Normal,]);
+assemble_imm_for_enum!(
+    hhbc::ClassGetCMode,
+    [ClassGetCMode::Normal, ClassGetCMode::ExplicitConversion,]
+);
 
 assemble_imm_for_enum!(
     hhbc::CollectionType,

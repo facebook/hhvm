@@ -1277,8 +1277,9 @@ void fcallFuncStr(IRGS& env, const FCallArgs& fca) {
 
 } // namespace
 
-void emitDeploymentBoundaryCheckFrom(IRGS& env, SSATmp* symbol, const Func* caller) {
+void emitDeploymentBoundaryCheck(IRGS& env, SSATmp* symbol) {
   if (!RO::EvalEnforceDeployment) return;
+  auto const caller = curFunc(env);
   if (env.unit.packageInfo().violatesDeploymentBoundary(*caller)) return;
   ifThen(
     env,
@@ -1293,11 +1294,6 @@ void emitDeploymentBoundaryCheckFrom(IRGS& env, SSATmp* symbol, const Func* call
       gen(env, RaiseDeploymentBoundaryViolation, data, symbol);
     }
   );
-}
-
-void emitDeploymentBoundaryCheck(IRGS& env, SSATmp* symbol) {
-  auto const caller = curFunc(env);
-  emitDeploymentBoundaryCheckFrom(env, symbol, caller);
 }
 
 template <typename T>
@@ -1345,38 +1341,6 @@ void emitModuleBoundaryCheckKnown(IRGS& env, const Class::SProp* prop) {
   }
 }
 
-void emitModuleBoundaryCheckFrom(IRGS& env, SSATmp* symbol, const Func* caller,
-                                 bool func) {
-  ifThenElse(
-    env,
-    [&] (Block* skip) {
-      auto const data = AttrData { AttrInternal };
-      auto const internal =
-        gen(env, func ? FuncHasAttr : ClassHasAttr, data, symbol);
-      gen(env, JmpZero, skip, internal);
-    },
-    [&] {
-      ifElse(
-        env,
-        [&] (Block* skip) {
-          auto violate =
-            gen(env, CallViolatesModuleBoundary, FuncData { caller }, symbol);
-          gen(env, JmpZero, skip, violate);
-        },
-        [&] {
-          hint(env, Block::Hint::Unlikely);
-          auto const data = OptClassAndFuncData { curClass(env), caller };
-          gen(env, RaiseModuleBoundaryViolation, data, symbol);
-          emitDeploymentBoundaryCheckFrom(env, symbol, caller);
-        }
-      );
-    },
-    [&] {
-      emitDeploymentBoundaryCheckFrom(env, symbol, caller);
-    }
-  );
-}
-
 void emitModuleBoundaryCheck(IRGS& env, SSATmp* symbol, bool func /* = true */) {
   auto const caller = curFunc(env);
   if (symbol->hasConstVal()) {
@@ -1386,7 +1350,34 @@ void emitModuleBoundaryCheck(IRGS& env, SSATmp* symbol, bool func /* = true */) 
       emitModuleBoundaryCheckKnown(env, symbol->clsVal());
     }
   } else {
-    emitModuleBoundaryCheckFrom(env, symbol, caller, func);
+    ifThenElse(
+      env,
+      [&] (Block* skip) {
+        auto const data = AttrData { AttrInternal };
+        auto const internal =
+          gen(env, func ? FuncHasAttr : ClassHasAttr, data, symbol);
+        gen(env, JmpZero, skip, internal);
+      },
+      [&] {
+        ifElse(
+          env,
+          [&] (Block* skip) {
+            auto violate =
+              gen(env, CallViolatesModuleBoundary, FuncData { caller }, symbol);
+            gen(env, JmpZero, skip, violate);
+          },
+          [&] {
+            hint(env, Block::Hint::Unlikely);
+            auto const data = OptClassAndFuncData { curClass(env), caller };
+            gen(env, RaiseModuleBoundaryViolation, data, symbol);
+            emitDeploymentBoundaryCheck(env, symbol);
+          }
+        );
+      },
+      [&] {
+        emitDeploymentBoundaryCheck(env, symbol);
+      }
+    );
   }
 }
 

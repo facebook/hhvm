@@ -78,6 +78,7 @@ enum class SpecialClsRef : uint8_t {
 
 #define CLASS_GET_C_MODES                                           \
   MODE(Normal) /* Result of compiling expressions like $c::foo() */ \
+  MODE(ExplicitConversion) /* Result of HH\classname_to_class() */
 
 enum class ClassGetCMode : uint8_t {
 #define MODE(op) op,

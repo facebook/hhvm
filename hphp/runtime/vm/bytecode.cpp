@@ -978,12 +978,48 @@ void checkModuleBoundaryViolation(const Class& cls) {
 
 } // namespace
 
-static inline Class* lookupClsRef(TypedValue* input) {
+static inline Class* classnameToClass(TypedValue* input) {
+  auto const explicitFail = [&](const char* k, const char* n) {
+    std::string msg;
+    string_printf(msg, Strings::CLASSNAME_TO_CLASS_NOEXIST_EXCEPTION, k, n);
+    SystemLib::throwInvalidArgumentExceptionObject(msg);
+  };
+
   if (tvIsString(input)) {
-    if (Class* class_ = Class::resolve(input->m_data.pstr, vmfp()->func())) {
+    auto const name = input->m_data.pstr;
+    if (Class* class_ = Class::resolve(name, vmfp()->func())) {
+      if (folly::Random::oneIn(RO::EvalDynamicallyReferencedNoticeSampleRate) &&
+          !class_->isDynamicallyReferenced()) {
+        raise_notice(Strings::MISSING_DYNAMICALLY_REFERENCED, name->data());
+      }
       return class_;
     }
-    raise_error(Strings::UNKNOWN_CLASS, input->m_data.pstr->data());
+    explicitFail("string", name->data());
+  }
+  if (tvIsLazyClass(input)) {
+    auto const name = input->m_data.plazyclass.name();
+    // We skip module checks for lazy-classes
+    if (Class* class_ = Class::load(name)) {
+      return class_;
+    }
+    explicitFail("lazy class", name->data());
+  }
+  if (tvIsClass(input)) return input->m_data.pclass;
+
+  SystemLib::throwInvalidArgumentExceptionObject(
+    folly::sformat(
+      "Invalid argument type {} passed to classname_to_class", input->m_type)
+  );
+}
+
+static inline Class* lookupClsRef(TypedValue* input) {
+  if (tvIsString(input)) {
+    auto const name = input->m_data.pstr;
+    raise_str_to_class_notice(name);
+    if (Class* class_ = Class::resolve(name, vmfp()->func())) {
+      return class_;
+    }
+    raise_error(Strings::UNKNOWN_CLASS, name->data());
   }
   if (tvIsLazyClass(input)) {
     // We skip module checks for lazy-classes
@@ -2255,10 +2291,14 @@ OPTBLD_INLINE void iopEnumClassLabel(Id id) {
 
 OPTBLD_INLINE void iopClassGetC(ClassGetCMode mode) {
   auto const cell = vmStack().topC();
-  if (isStringType(cell->m_type)) {
-    raise_str_to_class_notice(cell->m_data.pstr);
-  }
-  auto const cls = lookupClsRef(cell);
+  auto const cls = [&] {
+    switch (mode) {
+      case ClassGetCMode::Normal:
+        return lookupClsRef(cell);
+      case ClassGetCMode::ExplicitConversion:
+        return classnameToClass(cell);
+    }
+  }();
   vmStack().popC();
   vmStack().pushClass(cls);
 }
@@ -4214,9 +4254,6 @@ iopFCallClsMethodM(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
                   const StringData* methName) {
   auto const cell = vmStack().topC();
   auto isString = isStringType(cell->m_type);
-  if (isString) {
-    raise_str_to_class_notice(cell->m_data.pstr);
-  }
   auto const cls = lookupClsRef(cell);
   vmStack().popC();
   auto const methNameC = const_cast<StringData*>(methName);

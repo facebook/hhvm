@@ -569,6 +569,12 @@ struct Class {
   bool mightCareAboutDynConstructs() const;
 
   /*
+   * Returns whether this class will raise a notice if it is loaded with
+   * HH\class_to_classname;
+   */
+  bool mightCareAboutDynamicallyReferenced() const;
+
+  /*
    * Whether this class (or clases derived from it) could have const props.
    */
   bool couldHaveConstProp() const;

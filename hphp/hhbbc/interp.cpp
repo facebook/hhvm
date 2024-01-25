@@ -2371,6 +2371,7 @@ bool module_check_always_passes(ISS& env, const DCls& dcls) {
 } // namespace
 
 void in(ISS& env, const bc::ClassGetC& op) {
+  auto const kind = static_cast<ClassGetCMode>(op.subop1);
   auto const t = topC(env);
 
   if (t.subtypeOf(BCls)) return reduce(env);
@@ -2383,16 +2384,30 @@ void in(ISS& env, const bc::ClassGetC& op) {
   }
 
   if (t.subtypeOf(BObj)) {
-    effect_free(env);
-    push(env, objcls(t));
-    return;
+    switch (kind) {
+      case ClassGetCMode::Normal:
+        effect_free(env);
+        push(env, objcls(t));
+        return;
+      case ClassGetCMode::ExplicitConversion:
+        unreachable(env);
+        push(env, TBottom);
+        return;
+    }
   }
 
   if (auto const clsname = getNameFromType(t)) {
     if (auto const rcls = env.index.resolve_class(clsname)) {
-      auto const will_raise_str_to_cls_notice = t.subtypeOf(BStr) &&
-        RO::EvalRaiseStrToClsConversionNoticeSampleRate > 0;
-      if (!will_raise_str_to_cls_notice &&
+      auto const may_raise = t.subtypeOf(BStr) && [&] {
+        switch (kind) {
+          case ClassGetCMode::Normal:
+            return RO::EvalRaiseStrToClsConversionNoticeSampleRate > 0;
+          case ClassGetCMode::ExplicitConversion:
+            return rcls->mightCareAboutDynamicallyReferenced();
+        }
+      }();
+
+      if (!may_raise &&
           module_check_always_passes(env, *rcls)) {
         effect_free(env);
       }

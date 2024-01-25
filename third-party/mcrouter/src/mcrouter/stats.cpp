@@ -262,7 +262,6 @@ void init_stats(stat_t* stats) {
     s.data _data_assignment;                             \
   }
 #define STUI(name, value, agg) STAT(name, stat_uint64, agg, .uint64 = value)
-#define STUIR(name, value, agg) STAT(name, stat_uint64, agg, .uint64 = value)
 #define STSI(name, value, agg) STAT(name, stat_int64, agg, .int64 = value)
 #define STSS(name, value, agg) \
   STAT(name, stat_string, agg, .string = (char*)value)
@@ -271,7 +270,6 @@ void init_stats(stat_t* stats) {
 #include "stat_list.h"
 #undef STAT
 #undef STUI
-#undef STUIR
 #undef STSI
 #undef STSS
 #undef EXTERNAL_STAT

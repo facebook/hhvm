@@ -19,7 +19,6 @@ namespace mcrouter {
 /* Create struct of external stats */
 #define STAT(name, ...)
 #define STUI STAT
-#define STUIR STAT
 #define STSI STAT
 #define STSS STAT
 #define EXTERNAL_STAT(name) uint64_t name{0};
@@ -30,7 +29,6 @@ struct ExternalStatsData {
 };
 #undef STAT
 #undef STUI
-#undef STUIR
 #undef STSI
 #undef STSS
 #undef EXTERNAL_STAT

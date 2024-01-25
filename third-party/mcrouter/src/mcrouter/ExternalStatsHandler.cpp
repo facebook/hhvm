@@ -13,7 +13,6 @@ namespace mcrouter {
 
 #define STAT(name, ...)
 #define STUI STAT
-#define STUIR STAT
 #define STSI STAT
 #define STSS STAT
 #define EXTERNAL_STAT(name) {#name, name},
@@ -24,7 +23,6 @@ ExternalStatsData::operator std::unordered_map<std::string, uint64_t>() const {
 }
 #undef STAT
 #undef STUI
-#undef STUIR
 #undef STSI
 #undef STSS
 #undef EXTERNAL_STAT

@@ -30,7 +30,6 @@ namespace mcrouter {
 // define stat_name_t
 #define STAT(name, ...) name##_stat,
 #define STUI STAT
-#define STUIR STAT
 #define STSI STAT
 #define STSS STAT
 #define EXTERNAL_STAT(name)
@@ -40,7 +39,6 @@ enum stat_name_t {
 };
 #undef STAT
 #undef STUI
-#undef STUIR
 #undef STSI
 #undef STSS
 #undef EXTERNAL_STAT
@@ -127,11 +125,6 @@ stat_incr(stat_t* stats, stat_name_t stat_num, int64_t amount) {
 }
 
 FOLLY_ALWAYS_INLINE void
-stat_decr(stat_t* stats, stat_name_t stat_num, int64_t amount) {
-  stat_incr(stats, stat_num, -amount);
-}
-
-FOLLY_ALWAYS_INLINE void
 stat_incr(stat_t* stats, stat_name_t stat_num, double amount) {
   auto ref = folly::make_atomic_ref(stats[stat_num].data.dbl);
   ref.store(
@@ -164,11 +157,6 @@ void stat_set(stat_t* stats, stat_name_t stat_num, double value) {
 FOLLY_ALWAYS_INLINE uint64_t
 stat_get_uint64(stat_t* stats, stat_name_t stat_num) {
   return folly::make_atomic_ref(stats[stat_num].data.uint64)
-      .load(std::memory_order_relaxed);
-}
-
-FOLLY_ALWAYS_INLINE double stat_get_dbl(stat_t* stats, stat_name_t stat_num) {
-  return folly::make_atomic_ref(stats[stat_num].data.dbl)
       .load(std::memory_order_relaxed);
 }
 

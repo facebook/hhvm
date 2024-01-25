@@ -1822,3 +1822,30 @@ TEST(CompilerTest, assign_only_patch) {
     }
   )");
 }
+
+TEST(CompilerTest, alias_enum) {
+  check_compile(R"(
+    typedef Enum MyEnum
+    enum Enum {
+      ONE = 1,
+    }
+    struct MyStruct {
+      1: MyEnum field = MyEnum.ONE;
+    }
+  )");
+}
+
+TEST(CompilerTest, alias_enum_in_external_const) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["foo.thrift"] = "enum E {Val = 0}";
+  name_contents_map["bar.thrift"] = R"(
+    include "foo.thrift"
+    typedef foo.E MyEnum
+    const MyEnum val = MyEnum.Val;
+  )";
+  name_contents_map["baz.thrift"] = R"(
+    include "bar.thrift"
+    const bar.MyEnum val = bar.val;
+  )";
+  check_compile(name_contents_map, "baz.thrift");
+}

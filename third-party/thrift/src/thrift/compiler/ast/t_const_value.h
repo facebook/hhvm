@@ -94,6 +94,7 @@ class t_const_value {
         break;
       case CV_IDENTIFIER:
         string_val_ = other.string_val_;
+        program_ = other.program_;
         break;
     }
   }
@@ -109,11 +110,12 @@ class t_const_value {
   }
 
   static std::unique_ptr<t_const_value> make_identifier(
-      source_location loc, std::string id) {
+      source_location loc, std::string id, const t_program& program) {
     auto value = std::make_unique<t_const_value>();
     value->kind_ = CV_IDENTIFIER;
     value->ref_range_ = {loc, loc + id.size()};
     value->string_val_ = std::move(id);
+    value->program_ = &program;
     return value;
   }
 
@@ -227,6 +229,12 @@ class t_const_value {
   void set_ref_range(source_range rng) { ref_range_ = rng; }
   source_range ref_range() const { return ref_range_; }
 
+  const t_program& program() const {
+    assert(kind_ == CV_IDENTIFIER);
+    assert(program_);
+    return *program_;
+  }
+
  private:
   // Use a vector of pairs to store the contents of the map so that we
   // preserve thrift-file ordering when generating per-language source.
@@ -244,6 +252,8 @@ class t_const_value {
 
   t_const_value_kind kind_ = CV_BOOL;
   t_const* owner_ = nullptr;
+  const t_program* program_ = nullptr; // If this is an identifier, the program
+                                       // where the reference appears.
   t_type_ref ttype_;
   // If this value is cloned from a referenced const, contains the range of that
   // reference.

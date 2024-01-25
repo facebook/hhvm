@@ -756,14 +756,6 @@ class ast_builder : public parser_actions {
     auto typedef_node = std::make_unique<t_typedef>(
         &program_, fmt::to_string(name.str), std::move(type));
     set_attributes(*typedef_node, std::move(attrs), range);
-    auto* true_type = typedef_node->get_true_type();
-    if (true_type && true_type->is_enum()) {
-      for (const auto& value :
-           static_cast<const t_enum*>(true_type)->consts()) {
-        scope_->add_enum_value(
-            program_.scope_name(*typedef_node, value), &value);
-      }
-    }
     add_definition(std::move(typedef_node));
   }
 
@@ -921,7 +913,7 @@ class ast_builder : public parser_actions {
       result->set_ref_range({name.loc, name.loc + name.str.size()});
       return result;
     }
-    return t_const_value::make_identifier(name.loc, name_str);
+    return t_const_value::make_identifier(name.loc, name_str, program_);
   }
 
   std::unique_ptr<t_const_value> on_integer(

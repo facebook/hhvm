@@ -12,7 +12,6 @@ open ClientEnv
 open Utils
 open ClientRename
 open Ocaml_overrides
-module Rpc = ServerCommandTypes
 module SyntaxTree =
   Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
 
@@ -246,13 +245,15 @@ let main_internal
     (Exit_status.t * Telemetry.t) Lwt.t =
   match args.mode with
   | MODE_LIST_FILES ->
-    let%lwt (infol, telemetry) = rpc args @@ Rpc.LIST_FILES_WITH_ERRORS in
+    let%lwt (infol, telemetry) =
+      rpc args @@ ServerCommandTypes.LIST_FILES_WITH_ERRORS
+    in
     List.iter infol ~f:(Printf.printf "%s\n");
     Lwt.return (Exit_status.No_error, telemetry)
   | MODE_FIND_CLASS_REFS name ->
     let%lwt results =
       rpc_with_retry args
-      @@ Rpc.FIND_REFS (ServerCommandTypes.Find_refs.Class name)
+      @@ ServerCommandTypes.FIND_REFS (ServerCommandTypes.Find_refs.Class name)
     in
     print_refs results ~json:args.output_json;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
@@ -292,7 +293,9 @@ let main_internal
           | Some _ -> raise Exit_status.(Exit_with Input_error))
         name
     in
-    let%lwt results = rpc_with_retry args @@ Rpc.FIND_REFS action in
+    let%lwt results =
+      rpc_with_retry args @@ ServerCommandTypes.FIND_REFS action
+    in
     print_refs results ~json:args.output_json;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
   | MODE_POPULATE_REMOTE_DECLS files ->
@@ -303,12 +306,15 @@ let main_internal
           (List.map ~f:(fun path ->
                Relative_path.create_detect_prefix (expand_path path)))
     in
-    let%lwt (_, telemetry) = rpc args (Rpc.POPULATE_REMOTE_DECLS files) in
+    let%lwt (_, telemetry) =
+      rpc args (ServerCommandTypes.POPULATE_REMOTE_DECLS files)
+    in
     Lwt.return (Exit_status.No_error, telemetry)
   | MODE_GO_TO_IMPL_CLASS class_name ->
     let%lwt results =
       rpc_with_retry args
-      @@ Rpc.GO_TO_IMPL (ServerCommandTypes.Find_refs.Class class_name)
+      @@ ServerCommandTypes.GO_TO_IMPL
+           (ServerCommandTypes.Find_refs.Class class_name)
     in
     print_refs results ~json:args.output_json;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
@@ -324,18 +330,24 @@ let main_internal
     in
     (match action with
     | ServerCommandTypes.Find_refs.Member _ ->
-      let%lwt results = rpc_with_retry args @@ Rpc.GO_TO_IMPL action in
+      let%lwt results =
+        rpc_with_retry args @@ ServerCommandTypes.GO_TO_IMPL action
+      in
       print_refs results ~json:args.output_json;
       Lwt.return (Exit_status.No_error, Telemetry.create ())
     | _ ->
       Printf.eprintf "Invalid input\n";
       Lwt.return (Exit_status.Input_error, Telemetry.create ()))
   | MODE_IDE_FIND_REFS_BY_SYMBOL arg ->
-    let%lwt results = rpc_with_retry args @@ Rpc.IDE_FIND_REFS_BY_SYMBOL arg in
+    let%lwt results =
+      rpc_with_retry args @@ ServerCommandTypes.IDE_FIND_REFS_BY_SYMBOL arg
+    in
     FindRefsWireFormat.IdeShellout.to_string results |> print_endline;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
   | MODE_IDE_GO_TO_IMPL_BY_SYMBOL arg ->
-    let%lwt results = rpc_with_retry args @@ Rpc.IDE_GO_TO_IMPL_BY_SYMBOL arg in
+    let%lwt results =
+      rpc_with_retry args @@ ServerCommandTypes.IDE_GO_TO_IMPL_BY_SYMBOL arg
+    in
     FindRefsWireFormat.IdeShellout.to_string results |> print_endline;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
   | MODE_DUMP_SYMBOL_INFO files ->
@@ -353,7 +365,8 @@ let main_internal
     let (new_name, action, symbol_definition) = Rename.string_to_args arg in
     let%lwt results =
       rpc_with_retry args
-      @@ Rpc.IDE_RENAME_BY_SYMBOL (action, new_name, symbol_definition)
+      @@ ServerCommandTypes.IDE_RENAME_BY_SYMBOL
+           (action, new_name, symbol_definition)
     in
     begin
       match results with
@@ -367,7 +380,9 @@ let main_internal
       Printf.eprintf "Must use --json\n%!";
       raise Exit_status.(Exit_with Input_error)
     end;
-    let%lwt (result, telemetry) = rpc args @@ Rpc.IDENTIFY_SYMBOL arg in
+    let%lwt (result, telemetry) =
+      rpc args @@ ServerCommandTypes.IDENTIFY_SYMBOL arg
+    in
     let definition_to_json (d : string SymbolDefinition.t) : Hh_json.json =
       Hh_json.JSON_Object
         [
@@ -395,7 +410,8 @@ let main_internal
       ServerCommandTypes.FileContent (Sys_utils.read_stdin_to_string ())
     in
     let%lwt (result, telemetry) =
-      rpc args @@ Rpc.IDENTIFY_FUNCTION (file, content, line, char)
+      rpc args
+      @@ ServerCommandTypes.IDENTIFY_FUNCTION (file, content, line, char)
     in
     ClientGetDefinition.go result args.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
@@ -420,7 +436,9 @@ let main_internal
         Printf.eprintf "Invalid position\n";
         raise Exit_status.(Exit_with Input_error)
     in
-    let%lwt (ty, telemetry) = rpc args @@ Rpc.INFER_TYPE (fn, line, char) in
+    let%lwt (ty, telemetry) =
+      rpc args @@ ServerCommandTypes.INFER_TYPE (fn, line, char)
+    in
     ClientTypeAtPos.go ty args.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
   | MODE_TYPE_AT_POS_BATCH positions ->
@@ -447,13 +465,15 @@ let main_internal
             raise Exit_status.(Exit_with Input_error))
     in
     let%lwt (responses, telemetry) =
-      rpc args @@ Rpc.INFER_TYPE_BATCH positions
+      rpc args @@ ServerCommandTypes.INFER_TYPE_BATCH positions
     in
     List.iter responses ~f:print_endline;
     Lwt.return (Exit_status.No_error, telemetry)
   | MODE_IS_SUBTYPE ->
     let stdin = Sys_utils.read_stdin_to_string () in
-    let%lwt (response, telemetry) = rpc args @@ Rpc.IS_SUBTYPE stdin in
+    let%lwt (response, telemetry) =
+      rpc args @@ ServerCommandTypes.IS_SUBTYPE stdin
+    in
     (match response with
     | Ok str ->
       Printf.printf "%s" str;
@@ -484,15 +504,15 @@ let main_internal
         raise Exit_status.(Exit_with Input_error)
     in
     let%lwt (ty, telemetry) =
-      rpc args @@ Rpc.INFER_TYPE_ERROR (fn, line, char)
+      rpc args @@ ServerCommandTypes.INFER_TYPE_ERROR (fn, line, char)
     in
     ClientTypeErrorAtPos.go ty args.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
   | MODE_TAST_HOLES arg ->
     let parse_hole_filter = function
-      | "any" -> Some Rpc.Tast_hole.Any
-      | "typing" -> Some Rpc.Tast_hole.Typing
-      | "cast" -> Some Rpc.Tast_hole.Cast
+      | "any" -> Some ServerCommandTypes.Tast_hole.Any
+      | "typing" -> Some ServerCommandTypes.Tast_hole.Typing
+      | "cast" -> Some ServerCommandTypes.Tast_hole.Cast
       | _ -> None
     in
 
@@ -512,7 +532,7 @@ let main_internal
           | _ ->
             let fn = expand_path part in
             (* No hole source specified; default to `Typing` *)
-            (ServerCommandTypes.FileName fn, Rpc.Tast_hole.Typing))
+            (ServerCommandTypes.FileName fn, ServerCommandTypes.Tast_hole.Typing))
         | _ -> raise Exit
       with
       | Exit ->
@@ -527,7 +547,7 @@ let main_internal
         Exception.reraise e
     in
     let%lwt (ty, telemetry) =
-      rpc args @@ Rpc.TAST_HOLES (filename, hole_src_opt)
+      rpc args @@ ServerCommandTypes.TAST_HOLES (filename, hole_src_opt)
     in
     ClientTastHoles.go ty ~print_file:false args.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
@@ -540,22 +560,28 @@ let main_internal
       |> String.split ~on:'\n'
       |> List.map ~f:expand_path
     in
-    let%lwt (holes, telemetry) = rpc args @@ Rpc.TAST_HOLES_BATCH files in
+    let%lwt (holes, telemetry) =
+      rpc args @@ ServerCommandTypes.TAST_HOLES_BATCH files
+    in
     ClientTastHoles.go holes ~print_file:true args.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
   | MODE_FUN_DEPS_AT_POS_BATCH positions ->
     let positions = parse_positions positions in
-    let%lwt (responses, telemetry) = rpc args @@ Rpc.FUN_DEPS_BATCH positions in
+    let%lwt (responses, telemetry) =
+      rpc args @@ ServerCommandTypes.FUN_DEPS_BATCH positions
+    in
     List.iter responses ~f:print_endline;
     Lwt.return (Exit_status.No_error, telemetry)
   | MODE_DEPS_OUT_AT_POS_BATCH positions ->
     let positions = parse_positions positions in
-    let%lwt (responses, telemetry) = rpc args @@ Rpc.DEPS_OUT_BATCH positions in
+    let%lwt (responses, telemetry) =
+      rpc args @@ ServerCommandTypes.DEPS_OUT_BATCH positions
+    in
     List.iter responses ~f:print_endline;
     Lwt.return (Exit_status.No_error, telemetry)
   | MODE_XHP_AUTOCOMPLETE_SNIPPET cls ->
     let%lwt (result, telemetry) =
-      rpc args @@ Rpc.XHP_AUTOCOMPLETE_SNIPPET cls
+      rpc args @@ ServerCommandTypes.XHP_AUTOCOMPLETE_SNIPPET cls
     in
     let _ =
       match result with
@@ -590,7 +616,7 @@ let main_internal
   | MODE_METHOD_JUMP_CHILDREN class_ ->
     let filter = ServerCommandTypes.Method_jumps.No_filter in
     let%lwt (results, telemetry) =
-      rpc args @@ Rpc.METHOD_JUMP (class_, filter, true)
+      rpc args @@ ServerCommandTypes.METHOD_JUMP (class_, filter, true)
     in
     ClientMethodJumps.go results true args.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
@@ -603,7 +629,7 @@ let main_internal
         raise Exit_status.(Exit_with Input_error)
     in
     let%lwt (results, telemetry) =
-      rpc args @@ Rpc.METHOD_JUMP (class_, filter, false)
+      rpc args @@ ServerCommandTypes.METHOD_JUMP (class_, filter, false)
     in
     ClientMethodJumps.go results false args.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
@@ -616,19 +642,21 @@ let main_internal
         raise Exit_status.(Exit_with Input_error)
     in
     let%lwt (results, telemetry) =
-      rpc args @@ Rpc.METHOD_JUMP_BATCH (classes, filter)
+      rpc args @@ ServerCommandTypes.METHOD_JUMP_BATCH (classes, filter)
     in
     ClientMethodJumps.go results false args.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
   | MODE_IN_MEMORY_DEP_TABLE_SIZE ->
-    let%lwt (result, telemetry) = rpc args @@ Rpc.IN_MEMORY_DEP_TABLE_SIZE in
+    let%lwt (result, telemetry) =
+      rpc args @@ ServerCommandTypes.IN_MEMORY_DEP_TABLE_SIZE
+    in
     ClientResultPrinter.Int_printer.go result args.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
   | MODE_SAVE_NAMING path ->
     let () = Sys_utils.mkdir_p (Filename.dirname path) in
     let path = Path.make path in
     let%lwt (result, telemetry) =
-      rpc args @@ Rpc.SAVE_NAMING (Path.to_string path)
+      rpc args @@ ServerCommandTypes.SAVE_NAMING (Path.to_string path)
     in
     SaveNamingResultPrinter.go result args.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
@@ -639,7 +667,8 @@ let main_internal
     let path = Path.make path in
     let%lwt (result, telemetry) =
       rpc args
-      @@ Rpc.SAVE_STATE (Path.to_string path, args.gen_saved_ignore_type_errors)
+      @@ ServerCommandTypes.SAVE_STATE
+           (Path.to_string path, args.gen_saved_ignore_type_errors)
     in
     SaveStateResultPrinter.go result args.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
@@ -649,7 +678,7 @@ let main_internal
       if prechecked then
         Lwt.return ((), Telemetry.create ())
       else
-        rpc args Rpc.NO_PRECHECKED_FILES
+        rpc args ServerCommandTypes.NO_PRECHECKED_FILES
     in
     (* We don't do streaming errors under [output_json]: our contract
        with the outside world is that if a caller uses [output_json] then they
@@ -658,7 +687,7 @@ let main_internal
        We don't do streaming errors under [not prechecked]. That's because the
        [go_streaming] contract is to report on a typecheck that reflects all *file*
        changes up until now; it has no guarantee that the typecheck will reflects our
-       preceding call to Rpc.NO_PRECHECKED_FILES. *)
+       preceding call to ServerCommandTypes.NO_PRECHECKED_FILES. *)
     let use_streaming =
       local_config.ServerLocalConfig.consume_streaming_errors
       && (not args.output_json)
@@ -674,7 +703,7 @@ let main_internal
       Lwt.return (exit_status, telemetry)
     else
       let%lwt (status, telemetry) =
-        rpc args (Rpc.STATUS { max_errors = args.max_errors })
+        rpc args (ServerCommandTypes.STATUS { max_errors = args.max_errors })
       in
       let exit_status =
         ClientCheckStatus.go
@@ -690,7 +719,7 @@ let main_internal
         |> Telemetry.object_ ~key:"no_prechecked" ~value:telemetry1
         |> Telemetry.object_opt
              ~key:"last_recheck_stats"
-             ~value:status.Rpc.Server_status.last_recheck_stats
+             ~value:status.ServerCommandTypes.Server_status.last_recheck_stats
       in
       Lwt.return (exit_status, telemetry)
   | MODE_STATUS_SINGLE { filenames; show_tast } ->
@@ -704,7 +733,7 @@ let main_internal
     let%lwt (((error_list, dropped_count), tasts), telemetry) =
       rpc
         args
-        (Rpc.STATUS_SINGLE
+        (ServerCommandTypes.STATUS_SINGLE
            {
              file_names = file_inputs;
              max_errors = args.max_errors;
@@ -728,7 +757,8 @@ let main_internal
       {
         error_list;
         dropped_count;
-        Rpc.Server_status.liveness = Rpc.Live_status;
+        ServerCommandTypes.Server_status.liveness =
+          ServerCommandTypes.Live_status;
         last_recheck_stats = None;
       }
     in
@@ -748,7 +778,7 @@ let main_internal
         "Usage: hh --search this_is_just_to_check_liveness_of_hh_server";
       Lwt.return (Exit_status.Input_error, Telemetry.create ())
     end else begin
-      let%lwt ((), telemetry) = rpc args @@ Rpc.CHECK_LIVENESS in
+      let%lwt ((), telemetry) = rpc args @@ ServerCommandTypes.CHECK_LIVENESS in
       if args.output_json then print_endline "[]";
       Lwt.return (Exit_status.No_error, telemetry)
     end
@@ -761,7 +791,9 @@ let main_internal
         prerr_endline "Note: --lint expects a list of filenames to check.";
         Lwt.return (Exit_status.No_error, Telemetry.create ())
       | _ ->
-        let%lwt (results, telemetry) = rpc args @@ Rpc.LINT fnl in
+        let%lwt (results, telemetry) =
+          rpc args @@ ServerCommandTypes.LINT fnl
+        in
         ClientLint.go results args.output_json args.error_format;
         Lwt.return (Exit_status.No_error, telemetry)
     end
@@ -776,7 +808,7 @@ let main_internal
     let make_item { title; data } =
       JSON_Object [("name", JSON_String title); ("contents", JSON_String data)]
     in
-    let%lwt (items, telemetry) = rpc args Rpc.RAGE in
+    let%lwt (items, telemetry) = rpc args ServerCommandTypes.RAGE in
     json_to_string (JSON_Array (List.map items ~f:make_item)) |> print_endline;
     Lwt.return (Exit_status.No_error, telemetry)
   | MODE_LINT_STDIN filename -> begin
@@ -787,17 +819,21 @@ let main_internal
     | Some filename ->
       let contents = Sys_utils.read_stdin_to_string () in
       let%lwt (results, telemetry) =
-        rpc args @@ Rpc.LINT_STDIN { ServerCommandTypes.filename; contents }
+        rpc args
+        @@ ServerCommandTypes.LINT_STDIN
+             { ServerCommandTypes.filename; contents }
       in
       ClientLint.go results args.output_json args.error_format;
       Lwt.return (Exit_status.No_error, telemetry)
   end
   | MODE_LINT_ALL code ->
-    let%lwt (results, telemetry) = rpc args @@ Rpc.LINT_ALL code in
+    let%lwt (results, telemetry) =
+      rpc args @@ ServerCommandTypes.LINT_ALL code
+    in
     ClientLint.go results args.output_json args.error_format;
     Lwt.return (Exit_status.No_error, telemetry)
   | MODE_STATS ->
-    let%lwt (stats, telemetry) = rpc args @@ Rpc.STATS in
+    let%lwt (stats, telemetry) = rpc args @@ ServerCommandTypes.STATS in
     print_string @@ Hh_json.json_to_multiline (Stats.to_json stats);
     Lwt.return (Exit_status.No_error, telemetry)
   | MODE_REMOVE_DEAD_FIXMES codes ->
@@ -806,7 +842,8 @@ let main_internal
      *)
     let%lwt conn = connect args in
     let%lwt (response, telemetry) =
-      ClientConnect.rpc conn ~desc:args.desc @@ Rpc.REMOVE_DEAD_FIXMES codes
+      ClientConnect.rpc conn ~desc:args.desc
+      @@ ServerCommandTypes.REMOVE_DEAD_FIXMES codes
     in
     begin
       match response with
@@ -821,10 +858,12 @@ let main_internal
         Lwt.return (Exit_status.No_error, telemetry)
     end
   | MODE_REMOVE_DEAD_UNSAFE_CASTS ->
-    let status_cmd = Rpc.STATUS { max_errors = args.max_errors } in
+    let status_cmd =
+      ServerCommandTypes.STATUS { max_errors = args.max_errors }
+    in
     let rec go () =
       let%lwt (response, telemetry) =
-        rpc args @@ Rpc.REMOVE_DEAD_UNSAFE_CASTS
+        rpc args @@ ServerCommandTypes.REMOVE_DEAD_UNSAFE_CASTS
       in
       match response with
       | `Error msg ->
@@ -846,7 +885,7 @@ let main_internal
     let%lwt conn = connect args in
     let%lwt (patches, telemetry) =
       ClientConnect.rpc conn ~desc:args.desc
-      @@ Rpc.REWRITE_LAMBDA_PARAMETERS files
+      @@ ServerCommandTypes.REWRITE_LAMBDA_PARAMETERS files
     in
     if args.output_json then
       print_patches_json patches
@@ -855,7 +894,9 @@ let main_internal
     Lwt.return (Exit_status.No_error, telemetry)
   | MODE_FORMAT (from, to_) ->
     let content = Sys_utils.read_stdin_to_string () in
-    let%lwt (result, telemetry) = rpc args @@ Rpc.FORMAT (content, from, to_) in
+    let%lwt (result, telemetry) =
+      rpc args @@ ServerCommandTypes.FORMAT (content, from, to_)
+    in
     ClientFormat.go result args.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
   | MODE_FULL_FIDELITY_PARSE file ->
@@ -864,7 +905,7 @@ let main_internal
     let do_it_on_server = false in
     let%lwt (results, telemetry) =
       if do_it_on_server then
-        rpc args @@ Rpc.DUMP_FULL_FIDELITY_PARSE file
+        rpc args @@ ServerCommandTypes.DUMP_FULL_FIDELITY_PARSE file
       else
         let file = Relative_path.create Relative_path.Dummy file in
         let source_text = Full_fidelity_source_text.from_file file in
@@ -882,7 +923,9 @@ let main_internal
     let sort_results = args.sort_results in
     let input = Sys_utils.read_stdin_to_string () |> Hh_json.json_of_string in
     let%lwt (result, telemetry) =
-      rpc args @@ Rpc.CST_SEARCH { Rpc.sort_results; input; files_to_search }
+      rpc args
+      @@ ServerCommandTypes.CST_SEARCH
+           { ServerCommandTypes.sort_results; input; files_to_search }
     in
     begin
       match result with
@@ -895,7 +938,9 @@ let main_internal
     end
   | MODE_FILE_LEVEL_DEPENDENCIES ->
     let paths = filter_real_paths args.paths in
-    let%lwt (responses, telemetry) = rpc args @@ Rpc.FILE_DEPENDENTS paths in
+    let%lwt (responses, telemetry) =
+      rpc args @@ ServerCommandTypes.FILE_DEPENDENTS paths
+    in
     if args.output_json then
       Hh_json.(
         let json_path_list =
@@ -907,11 +952,13 @@ let main_internal
       List.iter responses ~f:(Printf.printf "%s\n");
     Lwt.return (Exit_status.No_error, telemetry)
   | MODE_VERBOSE verbose ->
-    let%lwt ((), telemetry) = rpc args @@ Rpc.VERBOSE verbose in
+    let%lwt ((), telemetry) = rpc args @@ ServerCommandTypes.VERBOSE verbose in
     Lwt.return (Exit_status.No_error, telemetry)
   | MODE_DEPS_IN_AT_POS_BATCH positions ->
     let positions = parse_positions positions in
-    let%lwt results = rpc_with_retry_list args @@ Rpc.DEPS_IN_BATCH positions in
+    let%lwt results =
+      rpc_with_retry_list args @@ ServerCommandTypes.DEPS_IN_BATCH positions
+    in
     List.iter results ~f:(fun s -> print_refs s ~json:true);
     Lwt.return (Exit_status.No_error, Telemetry.create ())
 

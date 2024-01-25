@@ -13,64 +13,6 @@ open ServerCommandTypes
 
 exception Nonfatal_rpc_exception of Exception.t * ServerEnv.env
 
-(** Some client commands require full check to be run in order to update global
-state that they depend on *)
-let rpc_command_needs_full_check : type a. a t -> bool =
- fun msg ->
-  match msg with
-  (* global error list is not updated during small checks *)
-  | STATUS _ -> true
-  | LIST_FILES_WITH_ERRORS
-  | REMOVE_DEAD_FIXMES _
-  | REMOVE_DEAD_UNSAFE_CASTS ->
-    true (* need same information as STATUS *)
-  | REWRITE_LAMBDA_PARAMETERS _ -> true
-  (* Finding references/implementations uses global dependency table *)
-  | FIND_REFS _ -> true
-  | GO_TO_IMPL _ -> true
-  | IDE_FIND_REFS_BY_SYMBOL _ -> true
-  | IDE_GO_TO_IMPL_BY_SYMBOL _ -> true
-  | METHOD_JUMP (_, _, find_children) -> find_children (* uses find refs *)
-  | SAVE_NAMING _ -> false
-  | SAVE_STATE _ -> true
-  (* Codebase-wide rename, uses find references *)
-  | RENAME _ -> true
-  | IDE_RENAME_BY_SYMBOL _ -> true
-  (* Same case as Ai commands *)
-  | IN_MEMORY_DEP_TABLE_SIZE -> true
-  | NO_PRECHECKED_FILES -> true
-  | POPULATE_REMOTE_DECLS _ -> false
-  | STATS -> false
-  | STATUS_SINGLE _ -> false
-  | INFER_TYPE _ -> false
-  | INFER_TYPE_BATCH _ -> false
-  | INFER_TYPE_ERROR _ -> false
-  | IS_SUBTYPE _ -> false
-  | TAST_HOLES _ -> false
-  | TAST_HOLES_BATCH _ -> false
-  | XHP_AUTOCOMPLETE_SNIPPET _ -> true
-  | IDENTIFY_FUNCTION _ -> false
-  | IDENTIFY_SYMBOL _ -> false
-  | METHOD_JUMP_BATCH _ -> false
-  | DUMP_SYMBOL_INFO _ -> false
-  | LINT _ -> false
-  | LINT_STDIN _ -> false
-  | LINT_ALL _ -> false
-  | FORMAT _ -> false
-  | DUMP_FULL_FIDELITY_PARSE _ -> false
-  | RAGE -> false
-  | CST_SEARCH _ -> false
-  | CHECK_LIVENESS -> false
-  | FUN_DEPS_BATCH _ -> false
-  | DEPS_OUT_BATCH _ -> false
-  | FILE_DEPENDENTS _ -> true
-  | IDENTIFY_TYPES _ -> false
-  | VERBOSE _ -> false
-  | DEPS_IN_BATCH _ -> true
-
-let use_priority_pipe (type a) (command : a ServerCommandTypes.t) : bool =
-  not (rpc_command_needs_full_check command)
-
 let reason = ServerCommandTypesUtils.debug_describe_cmd
 
 (****************************************************************************)

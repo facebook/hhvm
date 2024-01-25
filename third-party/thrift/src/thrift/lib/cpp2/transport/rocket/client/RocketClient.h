@@ -75,7 +75,8 @@ class RocketClient : public virtual folly::DelayedDestruction,
   static Ptr create(
       folly::EventBase& evb,
       folly::AsyncTransport::UniquePtr socket,
-      std::unique_ptr<SetupFrame> setupFrame);
+      std::unique_ptr<SetupFrame> setupFrame,
+      std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr = nullptr);
 
   using WriteSuccessCallback = RequestContext::WriteSuccessCallback;
   class RequestResponseCallback : public WriteSuccessCallback {
@@ -439,7 +440,8 @@ class RocketClient : public virtual folly::DelayedDestruction,
   RocketClient(
       folly::EventBase& evb,
       folly::AsyncTransport::UniquePtr socket,
-      std::unique_ptr<SetupFrame> setupFrame);
+      std::unique_ptr<SetupFrame> setupFrame,
+      std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr = nullptr);
 
  private:
   template <class OnError>

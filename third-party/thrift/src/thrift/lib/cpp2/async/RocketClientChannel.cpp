@@ -754,12 +754,13 @@ rocket::SetupFrame RocketClientChannel::makeSetupFrame(
 RocketClientChannel::RocketClientChannel(
     folly::EventBase* eventBase,
     folly::AsyncTransport::UniquePtr socket,
-    RequestSetupMetadata meta)
+    RequestSetupMetadata meta,
+    std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr)
     : rocket::RocketClient(
           *eventBase,
           std::move(socket),
-          std::make_unique<rocket::SetupFrame>(
-              makeSetupFrame(std::move(meta)))),
+          std::make_unique<rocket::SetupFrame>(makeSetupFrame(std::move(meta))),
+          allocatorPtr),
       evb_(eventBase) {
   apache::thrift::detail::hookForClientTransport(getTransport());
 }

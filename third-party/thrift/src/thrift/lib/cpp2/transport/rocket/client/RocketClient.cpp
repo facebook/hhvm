@@ -93,11 +93,12 @@ folly::exception_wrapper makeContractViolation(std::string msg) {
 RocketClient::RocketClient(
     folly::EventBase& evb,
     folly::AsyncTransport::UniquePtr socket,
-    std::unique_ptr<SetupFrame> setupFrame)
+    std::unique_ptr<SetupFrame> setupFrame,
+    std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr)
     : evb_(&evb),
       writeLoopCallback_(*this),
       socket_(std::move(socket)),
-      parser_(*this),
+      parser_(*this, allocatorPtr),
       detachableLoopCallback_(*this),
       closeLoopCallback_(*this),
       eventBaseDestructionCallback_(*this),
@@ -124,8 +125,10 @@ RocketClient::~RocketClient() {
 RocketClient::Ptr RocketClient::create(
     folly::EventBase& evb,
     folly::AsyncTransport::UniquePtr socket,
-    std::unique_ptr<SetupFrame> setupFrame) {
-  return Ptr(new RocketClient(evb, std::move(socket), std::move(setupFrame)));
+    std::unique_ptr<SetupFrame> setupFrame,
+    std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr) {
+  return Ptr(new RocketClient(
+      evb, std::move(socket), std::move(setupFrame), std::move(allocatorPtr)));
 }
 
 void RocketClient::handleFrame(std::unique_ptr<folly::IOBuf> frame) {

@@ -152,7 +152,8 @@ class RocketClientChannel final : public ClientChannel,
   RocketClientChannel(
       folly::EventBase* evb,
       folly::AsyncTransport::UniquePtr socket,
-      RequestSetupMetadata meta);
+      RequestSetupMetadata meta,
+      std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr = nullptr);
 
   RocketClientChannel(const RocketClientChannel&) = delete;
   RocketClientChannel& operator=(const RocketClientChannel&) = delete;

@@ -38,9 +38,13 @@ func NewSerialChannel(protocol Protocol) *SerialChannel {
 	}
 }
 
-func (c *SerialChannel) sendMsg(method string, request IRequest, msgType MessageType) (int32, error) {
+func (c *SerialChannel) sendMsg(ctx context.Context, method string, request IRequest, msgType MessageType) (int32, error) {
 	c.seqID++
 	seqID := c.seqID
+
+	if err := setHeaders(ctx, c.protocol.Transport()); err != nil {
+		return seqID, err
+	}
 
 	if err := c.protocol.WriteMessageBegin(method, msgType, seqID); err != nil {
 		return seqID, err
@@ -119,7 +123,7 @@ func (c *SerialChannel) Call(ctx context.Context, method string, request IReques
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	seqID, err := c.sendMsg(method, request, CALL)
+	seqID, err := c.sendMsg(ctx, method, request, CALL)
 	if err != nil {
 		return err
 	}
@@ -138,7 +142,7 @@ func (c *SerialChannel) Oneway(ctx context.Context, method string, request IRequ
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	_, err := c.sendMsg(method, request, ONEWAY)
+	_, err := c.sendMsg(ctx, method, request, ONEWAY)
 	if err != nil {
 		return err
 	}

@@ -47,6 +47,7 @@ const (
 	SSL_ERROR                   = 12
 	COULD_NOT_BIND              = 13
 	NETWORK_ERROR               = 15
+	INVALID_HEADERS_TYPE        = 16
 )
 
 type transportException struct {

@@ -84,6 +84,7 @@ class RocketServerConnection final
     size_t egressBufferBackpressureThreshold{0};
     double egressBufferBackpressureRecoveryFactor{0.0};
     const folly::SocketOptionMap* socketOptions{nullptr};
+    std::shared_ptr<rocket::ParserAllocatorType> parserAllocator{nullptr};
   };
 
   RocketServerConnection(
@@ -316,7 +317,7 @@ class RocketServerConnection final
   folly::AsyncSocket* const rawSocket_;
   folly::SocketAddress peerAddress_;
 
-  Parser<RocketServerConnection> parser_{*this};
+  Parser<RocketServerConnection> parser_;
   std::unique_ptr<RocketServerHandler> frameHandler_;
   bool setupFrameReceived_{false};
   folly::F14NodeMap<

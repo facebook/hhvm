@@ -70,6 +70,7 @@ RocketServerConnection::RocketServerConnection(
       rawSocket_(
           socket_ ? socket_->getUnderlyingTransport<folly::AsyncSocket>()
                   : nullptr),
+      parser_(*this, cfg.parserAllocator),
       frameHandler_(std::move(frameHandler)),
       streamStarvationTimeout_(cfg.streamStarvationTimeout),
       egressBufferBackpressureThreshold_(cfg.egressBufferBackpressureThreshold),

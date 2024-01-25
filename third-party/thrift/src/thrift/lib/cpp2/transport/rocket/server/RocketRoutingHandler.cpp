@@ -140,6 +140,7 @@ void RocketRoutingHandler::handleConnection(
   cfg.egressBufferBackpressureRecoveryFactor =
       server->getEgressBufferRecoveryFactor();
   cfg.socketOptions = &server->getPerConnectionSocketOptions();
+  cfg.parserAllocator = server->getCustomAllocatorForParser();
 
   auto* const sockPtr = sock.get();
   auto* const connection = new rocket::RocketServerConnection(

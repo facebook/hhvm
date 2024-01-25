@@ -32,6 +32,8 @@ val gconst_def : Provider_context.t -> Nast.gconst -> Tast.gconst
 
 val module_def : Provider_context.t -> Nast.module_def -> Tast.module_def
 
+val set_module_def : Provider_context.t -> Nast.sid -> Tast.sid
+
 (** Run typing on the given named AST (NAST) to produced a typed AST (TAST).
 
 Set [do_tast_checks] to [false] to skip running TAST checks on the resulting

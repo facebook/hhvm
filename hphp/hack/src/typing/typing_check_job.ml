@@ -91,9 +91,24 @@ let check_module (ctx : Provider_context.t) ~(full_ast : Nast.module_def) :
       Tast_check.def ctx def;
       Some def)
 
+let check_set_module (ctx : Provider_context.t) module_membership :
+    Tast.def option =
+  Option.bind module_membership ~f:(fun (_, md) ->
+      handle_exn_as_error (fst md) (fun () ->
+          let def = Aast.SetModule (Typing_toplevel.set_module_def ctx md) in
+          Some def))
+
 let calc_errors_and_tast ctx ?(drop_fixmed = true) fn ~full_ast :
     Errors.t * Tast.by_names =
-  let { Nast.funs; classes; typedefs; constants; modules; stmts } =
+  let {
+    Nast.funs;
+    classes;
+    typedefs;
+    constants;
+    modules;
+    stmts;
+    module_membership;
+  } =
     Nast.get_defs full_ast
   in
   let calc_tast
@@ -114,6 +129,8 @@ let calc_errors_and_tast ctx ?(drop_fixmed = true) fn ~full_ast :
       let typedef_tasts = calc_tast check_typedef typedefs in
       let gconst_tasts = calc_tast check_const constants in
       let module_tasts = calc_tast check_module modules in
+      (* For now we only want to generate nast errors on a module membership *)
+      let _setmodule_tast = check_set_module ctx module_membership in
       (* For now we only want to elaborate/validate top-level statements to
          generate errors but not typecheck *)
       let _stmts = stmts |> List.map ~f:snd |> Naming.fun_def_of_stmts ctx in

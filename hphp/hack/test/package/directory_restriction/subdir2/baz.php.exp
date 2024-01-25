@@ -1,0 +1,16 @@
+NastCheck[3103] Module baz must be inside the allowed directories list [1]
+-> The allowed directories list is defined here [2]
+-> But baz is in */directory_restriction/subdir2/baz.php [1]
+
+baz.php:2:8
+     1 | <?hh
+[1]  2 | module baz;
+
+../PACKAGES.toml:13:20
+    11 | [packages.baz]
+    12 | uses=["baz.*"]
+[2] 13 | allow_directories=["./subdir1"]
+    14 |
+    15 | [packages.default]
+
+1 error found.

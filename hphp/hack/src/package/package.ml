@@ -36,6 +36,17 @@ let get_package_pos pkg = fst pkg.name
 
 let get_package_name pkg = snd pkg.name
 
+let get_allow_directories_span pkg =
+  match pkg.allow_directories with
+  | [] -> Pos.none
+  | hd :: tl ->
+    let last =
+      match List.rev tl with
+      | [] -> hd
+      | l :: _ -> l
+    in
+    Pos.btw (fst hd) (fst last)
+
 let includes pkg1 pkg2 =
   List.exists
     ~f:(fun (_, name) -> String.equal name @@ get_package_name pkg2)
@@ -55,3 +66,12 @@ let relationship pkg1 pkg2 =
     Soft_includes
   else
     Unrelated
+
+let module_in_allowed_dirs (pkg : t) (file : Path.t) =
+  let dir = Path.(to_string @@ dirname file) in
+  List.is_empty pkg.allow_directories
+  || List.exists pkg.allow_directories ~f:(fun (_, allowed) ->
+         match Sys_utils.realpath allowed with
+         | None ->
+           String.is_prefix dir ~prefix:(String_utils.rstrip allowed "/*")
+         | Some allowed -> String.equal dir allowed)

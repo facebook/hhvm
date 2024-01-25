@@ -28,3 +28,7 @@ val get_package_name : t -> string
 val get_package_pos : t -> Pos.t
 
 val relationship : t -> t -> package_relationship
+
+val module_in_allowed_dirs : t -> Path.t -> bool
+
+val get_allow_directories_span : t -> Pos.t

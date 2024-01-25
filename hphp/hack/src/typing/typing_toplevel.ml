@@ -411,6 +411,34 @@ let module_def ctx md =
     Aast.md_file_attributes = file_attributes;
   }
 
+let set_module_def ctx (pos, md) =
+  Counters.count Counters.Category.Typing_toplevel @@ fun () ->
+  Errors.run_with_span pos @@ fun () ->
+  let file = Pos.filename pos in
+  let env = Typing_env_types.empty ctx file ~droot:None in
+  begin
+    Relative_path.to_absolute file
+    |> Sys_utils.realpath
+    |> Option.iter ~f:(fun realpath ->
+           match Env.get_package_for_module env md with
+           | Some package
+             when not
+                  @@ Package.module_in_allowed_dirs package (Path.make realpath)
+             ->
+             Errors.add_error
+               Nast_check_error.(
+                 to_user_error
+                 @@ Module_outside_allowed_dirs
+                      {
+                        md_name = md;
+                        md_pos = pos;
+                        pkg_pos = Package.get_allow_directories_span package;
+                        md_file = realpath;
+                      })
+           | _ -> ())
+  end;
+  (pos, md)
+
 let nast_to_tast ~(do_tast_checks : bool) ctx nast :
     Tast.program Tast_with_dynamic.t =
   let convert_def def =
@@ -454,7 +482,9 @@ let nast_to_tast ~(do_tast_checks : bool) ctx nast :
       Some
         (Tast_with_dynamic.mk_without_dynamic @@ Aast.Module (module_def ctx md))
     | SetModule sm ->
-      Some (Tast_with_dynamic.mk_without_dynamic @@ Aast.SetModule sm)
+      Some
+        (Tast_with_dynamic.mk_without_dynamic
+        @@ Aast.SetModule (set_module_def ctx sm))
     | Namespace _
     | NamespaceUse _
     | SetNamespaceEnv _

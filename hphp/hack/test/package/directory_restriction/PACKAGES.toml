@@ -1,0 +1,16 @@
+[packages]
+
+[packages.foo]
+uses=["foo.*"]
+allow_directories=["./subdir1/*"]
+
+[packages.bar]
+uses=["bar.*"]
+allow_directories=["subdir1", "subdir2"]
+
+[packages.baz]
+uses=["baz.*"]
+allow_directories=["./subdir1"]
+
+[packages.default]
+uses=["*"]

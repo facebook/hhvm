@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<627c906c3afc284fc1345b0b17258d0b>>
+// @generated SignedSource<<39df0a4cf72c5f0ce8d1bc18850083d0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -297,4 +297,11 @@ pub enum NastCheckError {
     LateinitWithDefault(pos::Pos),
     #[rust_to_ocaml(name = "Missing_assign")]
     MissingAssign(pos::Pos),
+    #[rust_to_ocaml(name = "Module_outside_allowed_dirs")]
+    ModuleOutsideAllowedDirs {
+        md_pos: pos::Pos,
+        md_name: String,
+        md_file: String,
+        pkg_pos: pos::Pos,
+    },
 }

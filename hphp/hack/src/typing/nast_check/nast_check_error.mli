@@ -180,5 +180,11 @@ type t =
     }
   | Lateinit_with_default of Pos.t
   | Missing_assign of Pos.t
+  | Module_outside_allowed_dirs of {
+      md_pos: Pos.t;
+      md_name: string;
+      md_file: string;
+      pkg_pos: Pos.t;
+    }
 
 val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t

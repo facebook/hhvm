@@ -1,0 +1,2 @@
+<?hh
+module baz;

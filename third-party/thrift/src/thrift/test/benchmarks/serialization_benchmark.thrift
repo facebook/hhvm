@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
+
 namespace cpp2 apache.thrift.benchmarks
 
 struct Struct1 {
@@ -21,4 +23,9 @@ struct Struct1 {
   2: optional string field_2;
   3: list<string> field_3;
   4: map<string, byte> field_4;
+}
+
+struct Wrapper {
+  @cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+  1: binary data;
 }

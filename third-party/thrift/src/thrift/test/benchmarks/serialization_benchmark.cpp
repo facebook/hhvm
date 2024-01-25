@@ -97,8 +97,20 @@ folly::IOBufQueue populate_and_serialize() {
       populate_struct_baseline());
 }
 
+template <class ProtocolWriter>
+folly::IOBufQueue populate_wrapper_and_serialize() {
+  auto queue = populate_and_serialize<ProtocolWriter>();
+  Wrapper wrapper;
+  wrapper.data() = queue.move();
+  return serialize_with_protocol_writer<ProtocolWriter>(wrapper);
+}
+
 BENCHMARK(TCompactSerializationBaseline) {
   populate_and_serialize<CompactProtocolWriter>();
+}
+
+BENCHMARK_RELATIVE(TCompactSerializationWithBinaryField) {
+  populate_wrapper_and_serialize<CompactProtocolWriter>();
 }
 
 BENCHMARK(TCompactDeserializationBaseline) {
@@ -109,14 +121,38 @@ BENCHMARK(TCompactDeserializationBaseline) {
       queue.move());
 }
 
+BENCHMARK_RELATIVE(TCompactDeserializationWithBinaryField) {
+  folly::BenchmarkSuspender susp;
+  auto queue = populate_wrapper_and_serialize<CompactProtocolWriter>();
+  susp.dismiss();
+  auto wrapper =
+      deserialize_with_protocol_reader<Wrapper, CompactProtocolReader>(
+          queue.move());
+  deserialize_with_protocol_reader<Struct1, CompactProtocolReader>(
+      *wrapper.data());
+}
+
 BENCHMARK(TCompactRoundTripBaseline) {
   auto queue = populate_and_serialize<CompactProtocolWriter>();
   deserialize_with_protocol_reader<Struct1, CompactProtocolReader>(
       queue.move());
 }
 
+BENCHMARK_RELATIVE(TCompactRoundTripWithBinaryField) {
+  auto queue = populate_wrapper_and_serialize<CompactProtocolWriter>();
+  auto wrapper =
+      deserialize_with_protocol_reader<Wrapper, CompactProtocolReader>(
+          queue.move());
+  deserialize_with_protocol_reader<Struct1, CompactProtocolReader>(
+      *wrapper.data());
+}
+
 BENCHMARK(TBinarySerializationBaseline) {
   populate_and_serialize<BinaryProtocolWriter>();
+}
+
+BENCHMARK_RELATIVE(TBinarySerializationWithBinaryField) {
+  populate_wrapper_and_serialize<BinaryProtocolWriter>();
 }
 
 BENCHMARK(TBinaryDeserializationBaseline) {
@@ -126,9 +162,29 @@ BENCHMARK(TBinaryDeserializationBaseline) {
   deserialize_with_protocol_reader<Struct1, BinaryProtocolReader>(queue.move());
 }
 
+BENCHMARK_RELATIVE(TBinaryDeserializationWithBinaryField) {
+  folly::BenchmarkSuspender susp;
+  auto queue = populate_wrapper_and_serialize<BinaryProtocolWriter>();
+  susp.dismiss();
+  auto wrapper =
+      deserialize_with_protocol_reader<Wrapper, BinaryProtocolReader>(
+          queue.move());
+  deserialize_with_protocol_reader<Struct1, BinaryProtocolReader>(
+      *wrapper.data());
+}
+
 BENCHMARK(TBinaryRoundTripBaseline) {
   auto queue = populate_and_serialize<BinaryProtocolWriter>();
   deserialize_with_protocol_reader<Struct1, BinaryProtocolReader>(queue.move());
+}
+
+BENCHMARK_RELATIVE(TBinaryRoundTripWithBinaryField) {
+  auto queue = populate_wrapper_and_serialize<BinaryProtocolWriter>();
+  auto wrapper =
+      deserialize_with_protocol_reader<Wrapper, BinaryProtocolReader>(
+          queue.move());
+  deserialize_with_protocol_reader<Struct1, BinaryProtocolReader>(
+      *wrapper.data());
 }
 
 BENCHMARK(FlatBuffersSerialization) {

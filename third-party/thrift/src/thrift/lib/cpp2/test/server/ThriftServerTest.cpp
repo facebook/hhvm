@@ -98,6 +98,7 @@ using folly::test::find_resource;
 using std::string;
 
 THRIFT_FLAG_DECLARE_bool(server_rocket_upgrade_enabled);
+THRIFT_FLAG_DECLARE_bool(rocket_allocating_strategy_parser);
 DECLARE_int32(thrift_cpp2_protocol_reader_string_limit);
 namespace {
 constexpr auto kForcedQueueTimeout = 10ms /*ms*/;
@@ -3488,6 +3489,53 @@ TEST(ThriftServer, RocketOverQuic) {
   client.sync_sendResponse(response, 64);
   EXPECT_EQ(response, "test64");
 }
+
+#if FOLLY_HAS_MEMORY_RESOURCE
+class AccountingMemoryPool : public folly::detail::std_pmr::memory_resource {
+ public:
+  size_t allocated = 0;
+  size_t deallocated = 0;
+
+ protected:
+  void* do_allocate(std::size_t bytes, std::size_t alignment) override {
+    allocated += bytes;
+    return folly::detail::std_pmr::new_delete_resource()->allocate(
+        bytes, alignment);
+  }
+
+  [[nodiscard]] bool do_is_equal(const folly::detail::std_pmr::memory_resource&
+                                     other) const noexcept override {
+    return this == &other;
+  }
+
+  void do_deallocate(
+      void* p, std::size_t bytes, std::size_t alignment) override {
+    deallocated += bytes;
+    return folly::detail::std_pmr::new_delete_resource()->deallocate(
+        p, bytes, alignment);
+  }
+};
+
+TEST(ThriftServer, CustomParserAllocatorTest) {
+  THRIFT_FLAG_SET_MOCK(rocket_allocating_strategy_parser, true);
+  AccountingMemoryPool pool;
+  auto alloc = std::make_shared<rocket::ParserAllocatorType>(&pool);
+
+  ScopedServerInterfaceThread runner(
+      std::make_shared<TestInterface>(), [alloc](ThriftServer& server) {
+        server.setCustomAllocatorForParser(alloc);
+      });
+
+  auto client = runner.newClient<apache::thrift::Client<TestService>>();
+
+  std::string request(4096, 'a');
+  std::string response;
+  client->sync_echoRequest(response, request);
+
+  EXPECT_TRUE(pool.allocated > 0);
+  EXPECT_TRUE(pool.deallocated > 0);
+}
+#endif
 
 TEST(ThriftServer, AlpnNotAllowMismatch) {
   auto server = std::static_pointer_cast<ThriftServer>(

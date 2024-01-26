@@ -90,9 +90,7 @@ class t_scope {
   // Get a (poetically unresolved) reference to given type, declared in the
   // given program.
   t_type_ref ref_type(
-      const t_program& program,
-      const std::string& name,
-      const source_range& range);
+      t_program& program, const std::string& name, const source_range& range);
 
   node_list_view<t_placeholder_typedef> placeholder_typedefs() {
     return placeholder_typedefs_;

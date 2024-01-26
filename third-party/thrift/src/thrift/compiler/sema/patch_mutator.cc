@@ -479,7 +479,9 @@ t_type_ref patch_generator::find_patch_type(
     // TODO(afuller): This look up hack only works for 'built-in' patch types.
     // Use a shared uri type registry instead.
     t_type_ref result = annot.type()->program()->scope()->ref_type(
-        *annot.type()->program(), name, parent.src_range());
+        const_cast<t_program&>(*annot.type()->program()),
+        name,
+        parent.src_range());
     if (auto* ph = result.get_unresolved_type()) {
       // Set the location info, in case the type can't be resolved later.
       ph->set_src_range(parent.src_range());
@@ -501,7 +503,7 @@ t_type_ref patch_generator::find_patch_type(
     // Try to look up by Name.
     // Look for it in the same program as the type itself.
     t_type_ref result = program_.scope()->ref_type(
-        *structured->program(),
+        const_cast<t_program&>(*structured->program()),
         structured->name() + "Patch",
         parent.src_range());
     if (auto* ph = result.get_unresolved_type()) {

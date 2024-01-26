@@ -122,7 +122,7 @@ DeviousBaton::onBatonMessageData(BatonMessageState& state,
       consumed += padLen->second;
       state.paddingRemaining = padLen->first;
       state.state = BatonMessageState::PAD;
-      FOLLY_FALLTHROUGH;
+      [[fallthrough]];
     }
     case BatonMessageState::PAD: {
       auto skipped = cursor.skipAtMost(state.paddingRemaining);
@@ -133,7 +133,7 @@ DeviousBaton::onBatonMessageData(BatonMessageState& state,
         break;
       }
       state.state = BatonMessageState::BATON;
-      FOLLY_FALLTHROUGH;
+      [[fallthrough]];
     }
     case BatonMessageState::BATON: {
       if (cursor.isAtEnd()) {
@@ -144,7 +144,7 @@ DeviousBaton::onBatonMessageData(BatonMessageState& state,
       LOG(INFO) << "Parsed baton=" << uint64_t(state.baton);
       consumed += 1;
       state.state = BatonMessageState::DONE;
-      FOLLY_FALLTHROUGH;
+      [[fallthrough]];
     }
     case BatonMessageState::DONE:
       if (!state.bufQueue.empty() && !cursor.isAtEnd()) {

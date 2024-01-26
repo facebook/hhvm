@@ -31,7 +31,7 @@ namespace {
   <<__PHPStdLib>>
   function get_class_vars(string $class_name): \HH\FIXME\MISSING_RETURN_TYPE;
   function get_class(
-    readonly HH\FIXME\MISSING_PARAM_TYPE $object,
+    readonly nonnull /* object */ $object,
   )[]: \HH\FIXME\MISSING_RETURN_TYPE;
   function get_parent_class(
     HH\FIXME\MISSING_PARAM_TYPE $object = null,

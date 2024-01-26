@@ -328,7 +328,10 @@ function __cast_and_compare(mixed $l, mixed $r, COMPARISON_TYPE $ctype)[]: int {
           $ctype === COMPARISON_TYPE::GT &&
           \is_object($ri) &&
           \is_object($li) &&
-          (\get_class($li) !== \get_class($ri) || $li is \Closure) &&
+          (
+            \get_class($li as nonnull) !== \get_class($ri as nonnull) ||
+            $li is \Closure
+          ) &&
           !($li is \DateTimeInterface && $ri is \DateTimeInterface)
         ) {
           // flip the result :p

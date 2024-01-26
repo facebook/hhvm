@@ -1658,10 +1658,12 @@ public:
   static std::string Fb303ServerIdentity;
 
   // Experimental thread tuning options, allows threads to be adjusted by
-  // thread controller (host stats monitor). Maximum adjustment is defined by
-  // the `ThreadTuneAdjustmentPct` of the configured thread count, and the step
-  // size is defined by `ThreadTuneStepPct`. Thread tuning is turned off when
-  // `ThreadTuneAdjustmentPct` is set to 0 (default).
+  // thread controller (host stats monitor). `ThreadTuneDebug` is meant to allow
+  // additional debugging metrics/logs to be exported. Maximum adjustment is
+  // defined by the `ThreadTuneAdjustmentPct` of the configured thread count,
+  // and the step size is defined by `ThreadTuneStepPct`. Thread tuning is
+  // turned off when `ThreadTuneAdjustmentPct` is set to 0 (default).
+  static bool ThreadTuneDebug;
   static double ThreadTuneAdjustmentPct;
   static double ThreadTuneStepPct;
 #endif

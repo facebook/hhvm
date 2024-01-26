@@ -110,7 +110,7 @@ static NEOERR *_alloc_hdf (HDF **hdf, const char *name, size_t nlen,
       free((*hdf));
       (*hdf) = NULL;
       return nerr_raise (NERR_NOMEM,
-	  "Unable to allocate memory for hdf element: %s", name);
+         "Unable to allocate memory for hdf element: %s", name);
     }
     strncpy((*hdf)->name, name, nlen);
     (*hdf)->name[nlen] = '\0';
@@ -123,11 +123,11 @@ static NEOERR *_alloc_hdf (HDF **hdf, const char *name, size_t nlen,
       (*hdf)->value = strdup(value);
       if ((*hdf)->value == NULL)
       {
-	free((*hdf)->name);
-	free((*hdf));
-	(*hdf) = NULL;
-	return nerr_raise (NERR_NOMEM,
-	    "Unable to allocate memory for hdf element %s", name);
+        free((*hdf)->name);
+        free((*hdf));
+        (*hdf) = NULL;
+        return nerr_raise (NERR_NOMEM,
+            "Unable to allocate memory for hdf element %s", name);
       }
     }
     else
@@ -253,14 +253,14 @@ static int _walk_hdf (HDF *hdf, const char *name, HDF **node, NEOERR** err)
     {
       while (hp != NULL)
       {
-	if (hp->name && (x == hp->name_len) && !strncmp(hp->name, n, x))
-	{
-	  break;
-	}
-	else
-	{
-	  hp = hp->next;
-	}
+        if (hp->name && (x == hp->name_len) && !strncmp(hp->name, n, x))
+        {
+          break;
+        }
+        else
+        {
+          hp = hp->next;
+        }
       }
     }
     if (hp == NULL)
@@ -387,8 +387,8 @@ static NEOERR* _set_value (HDF *hdf, const char *name, const char *value,
       hdf->alloc_value = 1;
       hdf->value = strdup(value);
       if (hdf->value == NULL)
-	return nerr_raise (NERR_NOMEM, "Unable to duplicate value %s for %s",
-	    value, hdf->name);
+        return nerr_raise (NERR_NOMEM, "Unable to duplicate value %s for %s",
+            value, hdf->name);
     }
     else
     {
@@ -420,7 +420,7 @@ static NEOERR* _set_value (HDF *hdf, const char *name, const char *value,
     {
       if (hp && hp->name && (x == hp->name_len) && !strncmp (hp->name, n, x))
       {
-	goto skip_search;
+        goto skip_search;
       }
     }
 
@@ -439,13 +439,13 @@ static NEOERR* _set_value (HDF *hdf, const char *name, const char *value,
     {
       while (hp != NULL)
       {
-	if (hp->name && (x == hp->name_len) && !strncmp(hp->name, n, x))
-	{
-	  break;
-	}
-	hs = hp;
-	hp = hp->next;
-	count++;
+        if (hp->name && (x == hp->name_len) && !strncmp(hp->name, n, x))
+        {
+          break;
+        }
+        hs = hp;
+        hp = hp->next;
+        count++;
       }
     }
 
@@ -464,32 +464,32 @@ skip_search:
        * at the last part of the HDF name) */
       if (s != NULL)
       {
-	/* intersitial */
-	err = _alloc_hdf (&hp, n, x, NULL, 0, 0, hdf->top);
+        /* intersitial */
+        err = _alloc_hdf (&hp, n, x, NULL, 0, 0, hdf->top);
       }
       else
       {
-	err = _alloc_hdf (&hp, n, x, value, dupl, wf, hdf->top);
+        err = _alloc_hdf (&hp, n, x, value, dupl, wf, hdf->top);
       }
       if (err != STATUS_OK)
-	return nerr_pass (err);
+        return nerr_pass (err);
       if (hn->child == NULL)
-	hn->child = hp;
+        hn->child = hp;
       else
-	hs->next = hp;
+        hs->next = hp;
       hn->last_child = hp;
 
       /* This is the point at which we convert to a hash table
        * at this level, if we're over the count */
       if (count > FORCE_HASH_AT && hn->hash == NULL)
       {
-	err = _hdf_hash_level(hn);
-	if (err) return nerr_pass(err);
+        err = _hdf_hash_level(hn);
+        if (err) return nerr_pass(err);
       }
       else if (hn->hash != NULL)
       {
-	err = ne_hash_insert(hn->hash, hp, hp);
-	if (err) return nerr_pass(err);
+        err = ne_hash_insert(hn->hash, hp, hp);
+        if (err) return nerr_pass(err);
       }
     }
     else if (s == NULL)
@@ -498,29 +498,29 @@ skip_search:
        * name, then we update the value of the node */
       if (hp->value != value)
       {
-	if (hp->alloc_value)
-	{
-	  free(hp->value);
-	  hp->value = NULL;
-	}
-	if (value == NULL)
-	{
-	  hp->alloc_value = 0;
-	  hp->value = NULL;
-	}
-	else if (dupl)
-	{
-	  hp->alloc_value = 1;
-	  hp->value = strdup(value);
-	  if (hp->value == NULL)
-	    return nerr_raise (NERR_NOMEM, "Unable to duplicate value %s for %s",
-		value, name);
-	}
-	else
-	{
-	  hp->alloc_value = wf;
-	  hp->value = (char *)value;
-	}
+        if (hp->alloc_value)
+        {
+          free(hp->value);
+          hp->value = NULL;
+        }
+        if (value == NULL)
+        {
+          hp->alloc_value = 0;
+          hp->value = NULL;
+        }
+        else if (dupl)
+        {
+          hp->alloc_value = 1;
+          hp->value = strdup(value);
+          if (hp->value == NULL)
+            return nerr_raise (NERR_NOMEM, "Unable to duplicate value %s for %s",
+                value, name);
+        }
+        else
+        {
+          hp->alloc_value = wf;
+          hp->value = (char *)value;
+        }
       }
     }
     /* At this point, we're done if there is not more HDF name space to
@@ -591,8 +591,8 @@ NEOERR* hdf_remove_tree (HDF *hdf, const char *name)
       }
       else
       {
-	ln = hp;
-	hp = hp->next;
+        ln = hp;
+        hp = hp->next;
       }
     }
     if (hp == NULL)
@@ -748,30 +748,30 @@ static NEOERR* hdf_dump_cb(HDF *hdf, const char *prefix, int dtype, int lvl,
     {
       if (prefix && (dtype == DUMP_TYPE_DOTTED))
       {
-	err = dump_cbf(rock, "%s.%s", prefix, hdf->name);
+        err = dump_cbf(rock, "%s.%s", prefix, hdf->name);
       }
       else
       {
-	err = dump_cbf(rock, "%s%s", whsp, hdf->name);
+        err = dump_cbf(rock, "%s%s", whsp, hdf->name);
       }
       if (err) return nerr_pass (err);
       if (strchr (hdf->value, '\n'))
       {
-	int vlen = strlen(hdf->value);
+        int vlen = strlen(hdf->value);
 
-	while (strstr(hdf->value, ml) || ((vlen > ml_len) && !strncmp(hdf->value + vlen - ml_len + 1, ml, strlen(ml) - 1)))
-	{
-	  gen_ml_break(ml, sizeof(ml));
-	  ml_len = strlen(ml);
-	}
-	if (hdf->value[strlen(hdf->value)-1] != '\n')
-	  err = dump_cbf(rock, " << %s%s%s", ml+1, hdf->value, ml);
-	else
-	  err = dump_cbf(rock, " << %s%s%s", ml+1, hdf->value, ml+1);
+        while (strstr(hdf->value, ml) || ((vlen > ml_len) && !strncmp(hdf->value + vlen - ml_len + 1, ml, strlen(ml) - 1)))
+        {
+          gen_ml_break(ml, sizeof(ml));
+          ml_len = strlen(ml);
+        }
+        if (hdf->value[strlen(hdf->value)-1] != '\n')
+          err = dump_cbf(rock, " << %s%s%s", ml+1, hdf->value, ml);
+        else
+          err = dump_cbf(rock, " << %s%s%s", ml+1, hdf->value, ml+1);
       }
       else
       {
-	err = dump_cbf(rock, " %c %s\n", op, hdf->value);
+        err = dump_cbf(rock, " %c %s\n", op, hdf->value);
       }
       if (err) return nerr_pass (err);
     }
@@ -783,23 +783,23 @@ static NEOERR* hdf_dump_cb(HDF *hdf, const char *prefix, int dtype, int lvl,
         p = (char *) malloc (p_len);
         snprintf (p, p_len, "%s.%s", prefix, hdf->name);
 
-	err = hdf_dump_cb (hdf, p, dtype, lvl+1, rock, dump_cbf);
-	free(p);
+        err = hdf_dump_cb (hdf, p, dtype, lvl+1, rock, dump_cbf);
+        free(p);
       }
       else
       {
-	if (hdf->name && (dtype != DUMP_TYPE_DOTTED))
-	{
-	  err = dump_cbf(rock, "%s%s {\n", whsp, hdf->name);
-	  if (err) return nerr_pass (err);
-	  err = hdf_dump_cb (hdf, hdf->name, dtype, lvl+1, rock, dump_cbf);
-	  if (err) return nerr_pass (err);
-	  err = dump_cbf(rock, "%s}\n", whsp);
-	}
-	else
-	{
-	  err = hdf_dump_cb (hdf, hdf->name, dtype, lvl+1, rock, dump_cbf);
-	}
+        if (hdf->name && (dtype != DUMP_TYPE_DOTTED))
+        {
+          err = dump_cbf(rock, "%s%s {\n", whsp, hdf->name);
+          if (err) return nerr_pass (err);
+          err = hdf_dump_cb (hdf, hdf->name, dtype, lvl+1, rock, dump_cbf);
+          if (err) return nerr_pass (err);
+          err = dump_cbf(rock, "%s}\n", whsp);
+        }
+        else
+        {
+          err = hdf_dump_cb (hdf, hdf->name, dtype, lvl+1, rock, dump_cbf);
+        }
       }
       if (err) return nerr_pass (err);
     }
@@ -953,7 +953,7 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
     {
       if (include_handle == INCLUDE_ERROR)
       {
-	return nerr_raise (NERR_PARSE,
+        return nerr_raise (NERR_PARSE,
                            "[%d]: #include not supported in string parse",
                            *lineno);
       }
@@ -1008,8 +1008,8 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
       if (strcmp(s, "}"))
       {
         err = nerr_raise(NERR_PARSE,
-	    "[%s:%d] Trailing garbage on line following }: %s", path, *lineno,
-	    line->buf);
+            "[%s:%d] Trailing garbage on line following }: %s", path, *lineno,
+            line->buf);
         return err;
       }
       return STATUS_OK;
@@ -1068,18 +1068,18 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
             c = hdf_obj_next(c);
           }
         }
-	if (err != STATUS_OK)
+        if (err != STATUS_OK)
         {
           return nerr_pass_ctx(err, "In file %s:%d", path, *lineno);
         }
       } else if (s[0] == '=') /* assignment */
       {
-	*s = '\0';
-	name = neos_strip(name);
-	s++;
-	value = neos_strip(s);
-	err = _set_value (hdf, name, value, 1, 1, NULL);
-	if (err != STATUS_OK)
+        *s = '\0';
+        name = neos_strip(name);
+        s++;
+        value = neos_strip(s);
+        err = _set_value (hdf, name, value, 1, 1, NULL);
+        if (err != STATUS_OK)
         {
           return nerr_pass_ctx(err, "In file %s:%d", path, *lineno);
         }
@@ -1098,90 +1098,90 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
       }
       else if (s[0] == '{') /* deeper */
       {
-	*s = '\0';
-	name = neos_strip(name);
-	lower = hdf_get_obj (hdf, name, &err);
-	if (lower == NULL)
-	{
-	  err = _set_value (hdf, name, NULL, 1, 1, &lower);
-	}
-	else
-	{
-	  err = _set_value (lower, NULL, lower->value, 1, 1, NULL);
-	}
-	if (err != STATUS_OK)
+        *s = '\0';
+        name = neos_strip(name);
+        lower = hdf_get_obj (hdf, name, &err);
+        if (lower == NULL)
+        {
+          err = _set_value (hdf, name, NULL, 1, 1, &lower);
+        }
+        else
+        {
+          err = _set_value (lower, NULL, lower->value, 1, 1, NULL);
+        }
+        if (err != STATUS_OK)
         {
           return nerr_pass_ctx(err, "In file %s:%d", path, *lineno);
         }
-	err = _hdf_read_string (lower, str, line, path, lineno, include_handle,
+        err = _hdf_read_string (lower, str, line, path, lineno, include_handle,
                                 1);
-	if (err != STATUS_OK)
+        if (err != STATUS_OK)
         {
           return nerr_pass_ctx(err, "In file %s:%d", path, *lineno);
         }
       }
       else if (s[0] == '<' && s[1] == '<') /* multi-line assignment */
       {
-	char *m;
-	int msize = 0;
-	int mmax = 128;
-	int l;
+        char *m;
+        int msize = 0;
+        int mmax = 128;
+        int l;
 
-	*s = '\0';
-	name = neos_strip(name);
-	s+=2;
-	value = neos_strip(s);
-	l = strlen(value);
-	if (l == 0)
+        *s = '\0';
+        name = neos_strip(name);
+        s+=2;
+        value = neos_strip(s);
+        l = strlen(value);
+        if (l == 0)
         {
-	  err = nerr_raise(NERR_PARSE,
-	      "[%s:%d] No multi-assignment terminator given: %s", path, *lineno,
-	      line->buf);
+          err = nerr_raise(NERR_PARSE,
+            "[%s:%d] No multi-assignment terminator given: %s", path, *lineno,
+            line->buf);
           return err;
         }
-	m = (char *) malloc (mmax * sizeof(char));
-	if (m == NULL)
+        m = (char *) malloc (mmax * sizeof(char));
+        if (m == NULL)
         {
-	  return nerr_raise(NERR_NOMEM,
-	    "[%s:%d] Unable to allocate memory for multi-line assignment to %s",
-	    path, *lineno, name);
+          return nerr_raise(NERR_NOMEM,
+            "[%s:%d] Unable to allocate memory for multi-line assignment to %s",
+            path, *lineno, name);
         }
-	while (_copy_line (str, m+msize, mmax-msize) != 0)
-	{
+        while (_copy_line (str, m+msize, mmax-msize) != 0)
+        {
           (*lineno)++;
-	  if (!strncmp(value, m+msize, l) && isspace(m[msize+l]))
-	  {
-	    m[msize] = '\0';
-	    break;
-	  }
-	  msize += strlen(m+msize);
-	  if (msize + l + 10 > mmax)
-	  {
-	    void *new_ptr;
-	    mmax += 128;
-	    new_ptr = realloc (m, mmax * sizeof(char));
-	    if (new_ptr == NULL)
-	    {
-        free(m);
-	      return nerr_raise(NERR_NOMEM,
-		  "[%s:%d] Unable to allocate memory for multi-line assignment to %s: size=%d",
-		  path, *lineno, name, mmax);
-      }
-      m = (char *) new_ptr;
-	  }
-	}
-	err = _set_value (hdf, name, m, 0, 1, NULL);
-	if (err != STATUS_OK)
-	{
-	  free (m);
+          if (!strncmp(value, m+msize, l) && isspace(m[msize+l]))
+          {
+            m[msize] = '\0';
+            break;
+          }
+          msize += strlen(m+msize);
+          if (msize + l + 10 > mmax)
+          {
+            void *new_ptr;
+            mmax += 128;
+            new_ptr = realloc (m, mmax * sizeof(char));
+            if (new_ptr == NULL)
+            {
+              free(m);
+              return nerr_raise(NERR_NOMEM,
+                "[%s:%d] Unable to allocate memory for multi-line assignment to %s: size=%d",
+                path, *lineno, name, mmax);
+            }
+            m = (char *) new_ptr;
+          }
+        }
+        err = _set_value (hdf, name, m, 0, 1, NULL);
+        if (err != STATUS_OK)
+        {
+          free (m);
           return nerr_pass_ctx(err, "In file %s:%d", path, *lineno);
-	}
+        }
 
       }
       else
       {
-	err = nerr_raise(NERR_PARSE, "[%s:%d] Unable to parse line %s", path,
-	    *lineno, line->buf);
+        err = nerr_raise(NERR_PARSE, "[%s:%d] Unable to parse line %s", path,
+            *lineno, line->buf);
         return err;
       }
     }

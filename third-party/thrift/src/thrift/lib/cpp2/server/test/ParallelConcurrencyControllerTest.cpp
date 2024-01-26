@@ -525,7 +525,7 @@ TEST_P(ParallelConcurrencyControllerTest, InternalPrioritization) {
 
     ka->add([&]() { blockingBaton.wait(); });
 
-    auto client = runner.newClient<TestServiceAsyncClient>();
+    auto client = runner.newClient<apache::thrift::Client<TestService>>();
 
     auto res = client->semifuture_echoInt(0);
 
@@ -626,7 +626,7 @@ TEST(ParallelConcurrencyControllerTest, FinishCallbackExecptionSafe) {
 
   ScopedServerInterfaceThread runner(handler, config);
 
-  auto client = runner.newClient<TestServiceAsyncClient>();
+  auto client = runner.newClient<apache::thrift::Client<TestService>>();
 
   auto& thriftServer = dynamic_cast<ThriftServer&>(runner.getThriftServer());
   auto& rpSet = thriftServer.resourcePoolSet();

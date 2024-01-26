@@ -281,7 +281,7 @@ TEST(RoundRobinRequestPileTest, requestCount) {
   ConcurrencyControllerInterface& cc = *rp.concurrencyController();
   cc.setExecutionLimitRequests(0);
 
-  auto client = runner.newClient<TestServiceAsyncClient>();
+  auto client = runner.newClient<apache::thrift::Client<TestService>>();
 
   client->semifuture_echoInt(0);
 

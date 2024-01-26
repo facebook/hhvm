@@ -161,7 +161,7 @@ TEST(ThriftServer, OnewayDeferredHandlerTest) {
   ScopedServerInterfaceThread runner(handler);
 
   handler->done.reset();
-  auto client = runner.newClient<TestServiceAsyncClient>();
+  auto client = runner.newClient<apache::thrift::Client<TestService>>();
   client->sync_noResponse(100);
   ASSERT_TRUE(handler->done.try_wait_for(std::chrono::seconds(1)));
 }
@@ -169,7 +169,7 @@ TEST(ThriftServer, OnewayDeferredHandlerTest) {
 TEST(ThriftServer, ResponseTooBigTest) {
   ScopedServerInterfaceThread runner(std::make_shared<TestInterface>());
   runner.getThriftServer().setMaxResponseSize(4096);
-  auto client = runner.newClient<TestServiceAsyncClient>();
+  auto client = runner.newClient<apache::thrift::Client<TestService>>();
 
   std::string request(4096, 'a');
   std::string response;
@@ -894,7 +894,7 @@ TEST(ThriftServerDeathTest, LongShutdown_DumpSnapshot) {
         long_shutdown::requestedDumpSnapshotDelay = 1s;
         long_shutdown::actualDumpSnapshotDelay = 0ms;
 
-        auto client = runner.newClient<TestServiceAsyncClient>();
+        auto client = runner.newClient<apache::thrift::Client<TestService>>();
         client->semifuture_noResponse(0).get();
         ready.wait();
       }),
@@ -922,7 +922,7 @@ TEST(ThriftServerDeathTest, LongShutdown_DumpSnapshotTimeout) {
         long_shutdown::requestedDumpSnapshotDelay = 500ms;
         long_shutdown::actualDumpSnapshotDelay = 60s;
 
-        auto client = runner.newClient<TestServiceAsyncClient>();
+        auto client = runner.newClient<apache::thrift::Client<TestService>>();
         client->semifuture_noResponse(0).get();
         ready.wait();
       }),
@@ -970,7 +970,7 @@ class HeaderOrRocketTest : public testing::Test {
         [&](auto socket) mutable { return makeChannel(std::move(socket)); });
   }
   auto makeClient(ScopedServerInterfaceThread& runner, folly::EventBase* evb) {
-    return runner.newClient<TestServiceAsyncClient>(
+    return runner.newClient<apache::thrift::Client<TestService>>(
         evb,
         [&](auto socket) mutable { return makeChannel(std::move(socket)); });
   }
@@ -3007,7 +3007,7 @@ TEST(ThriftServerTest, QueueTimeHeaderTest) {
   auto handler = std::make_shared<QueueTimeTestHandler>();
   ScopedServerInterfaceThread runner(handler);
   folly::EventBase eb;
-  auto client = runner.newClient<TestServiceAsyncClient>(
+  auto client = runner.newClient<apache::thrift::Client<TestService>>(
       &eb, RocketClientChannel::newChannel);
   // Queue a task on the runner's ThreadManager to block it from
   // executing the Thrift request.
@@ -3681,7 +3681,7 @@ TEST(ThriftServer, PerConnectionSocketOptions) {
     server.setPerConnectionSocketOptions(std::move(socketOptions));
   });
 
-  auto client = runner.newClient<TestServiceAsyncClient>();
+  auto client = runner.newClient<apache::thrift::Client<TestService>>();
   client->sync_voidResponse();
 
   EXPECT_EQ(handler->soKeepAlive, 1);
@@ -3797,7 +3797,7 @@ TEST(ThriftServer, acceptConnection) {
   };
   ScopedServerInterfaceThread runner(std::make_shared<Interface1>());
 
-  auto client1 = runner.newClient<TestServiceAsyncClient>();
+  auto client1 = runner.newClient<apache::thrift::Client<TestService>>();
   EXPECT_EQ("echo", client1->semifuture_echoRequest("echo").get());
 
   folly::NetworkSocket fds_rocket[2];

@@ -492,9 +492,11 @@ end)
 
 (** Graph management in the new system with custom file format. *)
 module CustomGraph = struct
+  (* from deps_rust_ffi.rs *)
   external hh_custom_dep_graph_register_custom_types : unit -> unit
     = "hh_custom_dep_graph_register_custom_types"
 
+  (* from hh_shared.h *)
   external assert_master : unit -> unit = "hh_assert_master"
 
   let allow_reads_ref = ref false

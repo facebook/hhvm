@@ -25,6 +25,7 @@ pub(crate) mod ffi {
         unsafe fn configGet(self: &Hdf, or_default: *const c_char) -> Result<*const c_char>;
         fn exists(self: &Hdf) -> Result<bool>;
         fn toString(self: &Hdf) -> Result<*const c_char>;
+        fn isWildcardName(self: &Hdf) -> Result<bool>;
 
         // Only used in tests
         #[allow(dead_code)]

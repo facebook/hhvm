@@ -510,6 +510,11 @@ std::string Hdf::getName(bool markVisited /* = true */) const {
   return name ? name : "";
 }
 
+bool Hdf::isWildcardName() const {
+  HDF *hdf = getRaw();
+  return hdf_is_wildcard(hdf) != 0;
+}
+
 std::string Hdf::getFullPath() const {
   std::string fullpath;
   if (m_path.empty()) {

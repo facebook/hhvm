@@ -185,6 +185,7 @@ struct Hdf {
    */
   std::string getFullPath() const;
   std::string getName(bool markVisited = true) const;
+  bool isWildcardName() const;
 
   /**
    * Get this node's parent.

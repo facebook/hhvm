@@ -43,6 +43,7 @@ struct _hdf
   struct _hdf *last_child;
 
   int visited;
+  int is_wildcard;
 };
 
 /*
@@ -115,6 +116,11 @@ void hdf_set_visited (HDF *hdf, int visited);
  * Function: hdf_is_visited - Return a node visited or not
  */
 int hdf_is_visited (HDF *hdf);
+
+/*
+ * Function: hdf_is_wildcard - Returns if a node's name is from a wildcard
+ */
+int hdf_is_wildcard (HDF *hdf);
 
 /*
  * Function: hdf_obj_child - Return the first child of a dataset node

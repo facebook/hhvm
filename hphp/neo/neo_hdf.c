@@ -91,7 +91,7 @@ static UINT32 hash_hdf_hash(const void *a)
 }
 
 static NEOERR *_alloc_hdf (HDF **hdf, const char *name, size_t nlen,
-                           const char *value, int dupl, int wf, HDF *top)
+                           const char *value, int dupl, int wf, HDF *top, int wc)
 {
   *hdf = calloc (1, sizeof (HDF));
   if (*hdf == NULL)
@@ -100,6 +100,7 @@ static NEOERR *_alloc_hdf (HDF **hdf, const char *name, size_t nlen,
   }
 
   (*hdf)->top = top;
+  (*hdf)->is_wildcard = wc;
 
   if (name != NULL)
   {
@@ -191,7 +192,7 @@ NEOERR* hdf_init (HDF **hdf)
   if (err != STATUS_OK)
     return nerr_pass (err);
 
-  err = _alloc_hdf (&my_hdf, NULL, 0, NULL, 0, 0, NULL);
+  err = _alloc_hdf (&my_hdf, NULL, 0, NULL, 0, 0, NULL, 0);
   if (err != STATUS_OK)
     return nerr_pass (err);
 
@@ -304,6 +305,10 @@ int hdf_is_visited (HDF *hdf) {
   return hdf ? hdf->visited : 0;
 }
 
+int hdf_is_wildcard (HDF *hdf) {
+  return hdf ? hdf->is_wildcard : 0;
+}
+
 HDF* hdf_obj_child (HDF *hdf, NEOERR** err)
 {
   if (hdf == NULL) return NULL;
@@ -347,7 +352,7 @@ NEOERR* _hdf_hash_level(HDF *hdf)
 }
 
 static NEOERR* _set_value (HDF *hdf, const char *name, const char *value,
-                           int dupl, int wf, HDF **set_node)
+                           int dupl, int wf, HDF **set_node, int wc)
 {
   NEOERR *err;
   HDF *hn, *hp, *hs;
@@ -465,11 +470,11 @@ skip_search:
       if (s != NULL)
       {
         /* intersitial */
-        err = _alloc_hdf (&hp, n, x, NULL, 0, 0, hdf->top);
+        err = _alloc_hdf (&hp, n, x, NULL, 0, 0, hdf->top, 0);
       }
       else
       {
-        err = _alloc_hdf (&hp, n, x, value, dupl, wf, hdf->top);
+        err = _alloc_hdf (&hp, n, x, value, dupl, wf, hdf->top, wc);
       }
       if (err != STATUS_OK)
         return nerr_pass (err);
@@ -543,7 +548,7 @@ skip_search:
 
 NEOERR* hdf_set_value (HDF *hdf, const char *name, const char *value)
 {
-  return nerr_pass(_set_value (hdf, name, value, 1, 1, NULL));
+  return nerr_pass(_set_value (hdf, name, value, 1, 1, NULL, 0));
 }
 
 NEOERR* hdf_get_node (HDF *hdf, const char *name, HDF **ret)
@@ -553,7 +558,7 @@ NEOERR* hdf_get_node (HDF *hdf, const char *name, HDF **ret)
   if (*ret == NULL)
   {
     if (err != STATUS_OK) return err;
-    return nerr_pass(_set_value (hdf, name, NULL, 0, 1, ret));
+    return nerr_pass(_set_value (hdf, name, NULL, 0, 1, ret, 0));
   }
   return STATUS_OK;
 }
@@ -641,7 +646,7 @@ static NEOERR * _copy_nodes (HDF *dest, HDF *src)
   while (st != NULL)
   {
     if (err) return nerr_pass(err);
-    err = _set_value(dest, st->name, st->value, 1, 1, &dt);
+    err = _set_value(dest, st->name, st->value, 1, 1, &dt, st->is_wildcard);
     if (err) {
       return nerr_pass(err);
     }
@@ -665,7 +670,7 @@ NEOERR* hdf_copy (HDF *dest, const char *name, HDF *src)
   {
     if (err) return err;
     if (err) return nerr_pass(err);
-    err = _set_value (dest, name, src->value, 1, 1, &node);
+    err = _set_value (dest, name, src->value, 1, 1, &node, src->is_wildcard);
     if (err) {
       return nerr_pass(err);
     }
@@ -939,6 +944,7 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
   HDF *lower;
   char *s;
   char *name, *value;
+  int is_wildcard;
 
   while (**str != '\0')
   {
@@ -948,6 +954,7 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
     if (err) return nerr_pass(err);
     (*lineno)++;
     s = line->buf;
+    is_wildcard = 0;
     SKIPWS(s);
     if (!strncmp(s, "#include ", 9) && include_handle != INCLUDE_IGNORE)
     {
@@ -1028,6 +1035,7 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
         }
         snprintf(num, 256, "%d", counter++);
         name = num;
+        is_wildcard = 1;
       } else {
         int saw_star = 0;
         while (*s && (isalnum(*s) || *s == '_' || *s == '.' || *s == '\\')) {
@@ -1041,6 +1049,7 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
             *s++ = '\0';
             snprintf(num, 256, "%s%i", name, counter++);
             name = num;
+            is_wildcard = 1;
             saw_star = 1;
           }
         }
@@ -1078,7 +1087,7 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
         name = neos_strip(name);
         s++;
         value = neos_strip(s);
-        err = _set_value (hdf, name, value, 1, 1, NULL);
+        err = _set_value (hdf, name, value, 1, 1, NULL, is_wildcard);
         if (err != STATUS_OK)
         {
           return nerr_pass_ctx(err, "In file %s:%d", path, *lineno);
@@ -1103,11 +1112,11 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
         lower = hdf_get_obj (hdf, name, &err);
         if (lower == NULL)
         {
-          err = _set_value (hdf, name, NULL, 1, 1, &lower);
+          err = _set_value (hdf, name, NULL, 1, 1, &lower, is_wildcard);
         }
         else
         {
-          err = _set_value (lower, NULL, lower->value, 1, 1, NULL);
+          err = _set_value (lower, NULL, lower->value, 1, 1, NULL, is_wildcard);
         }
         if (err != STATUS_OK)
         {
@@ -1170,7 +1179,7 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
             m = (char *) new_ptr;
           }
         }
-        err = _set_value (hdf, name, m, 0, 1, NULL);
+        err = _set_value (hdf, name, m, 0, 1, NULL, is_wildcard);
         if (err != STATUS_OK)
         {
           free (m);

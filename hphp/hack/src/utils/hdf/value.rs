@@ -194,6 +194,17 @@ impl Value {
         Ok(ffi::hdf_name(&self.inner)?)
     }
 
+    /// Return this node's name as read by the config, this detects
+    /// when a wildcard name exists and returns '*' instead of the internal
+    /// numeric index.
+    /// Fails on internal Hdf parsing errors or Utf8 validation checks.
+    pub fn name_as_read(&self) -> Result<String> {
+        if self.inner.isWildcardName()? {
+            return Ok("*".into());
+        }
+        Ok(ffi::hdf_name(&self.inner)?)
+    }
+
     /// Convert self to an iterator over children, if possible.
     /// Fails on internal Hdf parsing errors.
     pub fn into_children(self) -> Result<Children> {
@@ -478,5 +489,55 @@ a.b.c="d;e"
             IniLine::parse("a=b").ok(),
             Some(IniLine::KeyValue("a", "b".into()))
         );
+    }
+
+    #[test]
+    fn test_wildcard_names() -> Result<()> {
+        let mut hdf = Value::default();
+        hdf.set_hdf(
+            r#"
+            foo {
+                * => zero
+                * => one
+                # This is a dangerous config because if next after this if * => three
+                # occurs foo.2 will be replaced with three
+                2 => two
+            }
+            bar.* => two
+            bar.* => three
+            bar.4 => four
+        }
+        "#,
+        )?;
+
+        let node = hdf.get("foo")?.unwrap();
+        assert_eq!(node.name()?, "foo");
+        assert_eq!(node.name_as_read()?, "foo");
+
+        let node = hdf.get("foo.0")?.unwrap();
+        assert_eq!(node.name()?, "0");
+        assert_eq!(node.name_as_read()?, "*");
+        let node = hdf.get("foo.1")?.unwrap();
+        assert_eq!(node.name()?, "1");
+        assert_eq!(node.name_as_read()?, "*");
+        let node = hdf.get("foo.2")?.unwrap();
+        assert_eq!(node.name()?, "2");
+        assert_eq!(node.name_as_read()?, "2");
+
+        let node = hdf.get("bar")?.unwrap();
+        assert_eq!(node.name()?, "bar");
+        assert_eq!(node.name_as_read()?, "bar");
+
+        let node = hdf.get("bar.2")?.unwrap();
+        assert_eq!(node.name()?, "2");
+        assert_eq!(node.name_as_read()?, "*");
+        let node = hdf.get("bar.3")?.unwrap();
+        assert_eq!(node.name()?, "3");
+        assert_eq!(node.name_as_read()?, "*");
+        let node = hdf.get("bar.4")?.unwrap();
+        assert_eq!(node.name()?, "4");
+        assert_eq!(node.name_as_read()?, "4");
+
+        Ok(())
     }
 }

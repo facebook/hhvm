@@ -85,7 +85,8 @@ class t_scope {
         redefined_enum_values_.end();
   }
 
-  std::string get_fully_qualified_enum_value_names(const std::string& name);
+  std::string get_fully_qualified_enum_value_names(
+      const std::string& name) const;
 
   // Get a (poetically unresolved) reference to given type, declared in the
   // given program.

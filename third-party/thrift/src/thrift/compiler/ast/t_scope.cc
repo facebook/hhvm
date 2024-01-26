@@ -107,15 +107,14 @@ void t_scope::add_enum_value(std::string name, const t_const* constant) {
 }
 
 std::string t_scope::get_fully_qualified_enum_value_names(
-    const std::string& name) {
+    const std::string& name) const {
   // Get just the enum value name from name, which is
   // PROGRAM_NAME.ENUM_VALUE_NAME.
   auto name_split = split_string_by_periods(name);
   if (name_split.empty()) {
     return "";
   }
-  return join_strings_by_commas(
-      enum_values_[name_split[name_split.size() - 1]]);
+  return join_strings_by_commas(enum_values_.at(name_split.back()));
 }
 
 } // namespace compiler

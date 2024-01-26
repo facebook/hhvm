@@ -98,9 +98,6 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata {
     return 'Foo';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -293,9 +290,6 @@ class FooUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUn
       (string)$this->_type,
     );
     return $this->str_field as nonnull;
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

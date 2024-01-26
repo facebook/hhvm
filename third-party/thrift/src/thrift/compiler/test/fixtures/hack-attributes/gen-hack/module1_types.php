@@ -125,9 +125,6 @@ class MyThriftStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     return 'MyThriftStruct';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -280,9 +277,6 @@ class MySecondThriftStruct implements \IThriftSyncStruct, \IThriftStructMetadata
     return 'MySecondThriftStruct';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -420,9 +414,6 @@ class MyThirdThriftStruct implements \IThriftSyncStruct, \IThriftStructMetadata 
 
   public function getName()[]: string {
     return 'MyThirdThriftStruct';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -616,9 +607,6 @@ class UnionTesting implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
     return $this->bar as nonnull;
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -806,9 +794,6 @@ class UnionTestingStructured implements \IThriftSyncStruct, \IThriftStructMetada
       (string)$this->_type,
     );
     return $this->bar as nonnull;
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

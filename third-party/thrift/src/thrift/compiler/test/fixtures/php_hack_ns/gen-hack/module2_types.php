@@ -113,9 +113,6 @@ class FBStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     return 'FBStruct';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(

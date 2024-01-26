@@ -53,9 +53,6 @@ class CustomException extends \TException implements \IThriftSyncStruct, \IThrif
     return 'CustomException';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {
     return tmeta_ThriftException::fromShape(
       shape(

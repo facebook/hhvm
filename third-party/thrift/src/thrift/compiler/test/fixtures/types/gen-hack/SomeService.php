@@ -242,9 +242,6 @@ class SomeService_bounce_map_args implements \IThriftSyncStruct, \IThriftStructM
     return 'SomeService_bounce_map_args';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -381,9 +378,6 @@ class SomeService_bounce_map_result extends \ThriftSyncStructWithResult implemen
     return 'SomeService_bounce_map_result';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -514,9 +508,6 @@ class SomeService_binary_keyed_map_args implements \IThriftSyncStruct, \IThriftS
     return 'SomeService_binary_keyed_map_args';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -628,9 +619,6 @@ class SomeService_binary_keyed_map_result extends \ThriftSyncStructWithResult im
 
   public function getName()[]: string {
     return 'SomeService_binary_keyed_map_result';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

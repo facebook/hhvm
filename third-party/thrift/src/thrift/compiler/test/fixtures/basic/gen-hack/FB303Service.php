@@ -350,9 +350,6 @@ class FB303Service_renamed_rpc implements \IThriftSyncStruct, \IThriftStructMeta
     return 'FB303Service_renamed_rpc';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -466,9 +463,6 @@ class FB303Service_renamed_rpc_result extends \ThriftSyncStructWithResult implem
 
   public function getName()[]: string {
     return 'FB303Service_renamed_rpc_result';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

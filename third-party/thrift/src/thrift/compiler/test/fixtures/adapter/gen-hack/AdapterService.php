@@ -220,9 +220,6 @@ class AdapterService_count_args implements \IThriftSyncStruct, \IThriftStructMet
     return 'AdapterService_count_args';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -303,9 +300,6 @@ class AdapterService_count_result extends \ThriftSyncStructWithResult implements
 
   public function getName()[]: string {
     return 'AdapterService_count_result';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -403,9 +397,6 @@ class AdapterService_adaptedTypes_args implements \IThriftSyncStruct, \IThriftSt
 
   public function getName()[]: string {
     return 'AdapterService_adaptedTypes_args';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -524,9 +515,6 @@ class AdapterService_adaptedTypes_result extends \ThriftSyncStructWithResult imp
 
   public function getName()[]: string {
     return 'AdapterService_adaptedTypes_result';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

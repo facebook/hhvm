@@ -124,9 +124,6 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata {
     return 'Foo';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -336,9 +333,6 @@ class Baz extends \TException implements \IThriftSyncStruct, \IThriftExceptionMe
     return 'Baz';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {
     return tmeta_ThriftException::fromShape(
       shape(
@@ -470,9 +464,6 @@ class OptBaz extends \TException implements \IThriftSyncStruct, \IThriftExceptio
 
   public function getName()[]: string {
     return 'OptBaz';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {

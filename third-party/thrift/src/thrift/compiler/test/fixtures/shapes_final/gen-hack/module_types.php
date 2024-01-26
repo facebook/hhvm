@@ -174,9 +174,6 @@ class Union implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion
     return $this->stringValue as nonnull;
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -284,9 +281,6 @@ class A implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
 
   public function getName()[]: string {
     return 'A';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1171,9 +1165,6 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
 
   public function getName()[]: string {
     return 'B';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

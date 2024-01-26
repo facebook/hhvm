@@ -46,9 +46,6 @@ class Py3Hidden implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
     return 'Py3Hidden';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -129,9 +126,6 @@ class Flags implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapi
 
   public function getName()[]: string {
     return 'Flags';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -228,9 +222,6 @@ class Name implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
 
   public function getName()[]: string {
     return 'Name';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -398,9 +389,6 @@ class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
     return 'Adapter';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -543,9 +531,6 @@ class UseCAPI implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
 
   public function getName()[]: string {
     return 'UseCAPI';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

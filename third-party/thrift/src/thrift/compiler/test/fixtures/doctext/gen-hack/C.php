@@ -313,9 +313,6 @@ class C_f_args implements \IThriftSyncStruct, \IThriftStructMetadata {
     return 'C_f_args';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -366,9 +363,6 @@ class C_f_result extends \ThriftSyncStructWithoutResult implements \IThriftStruc
 
   public function getName()[]: string {
     return 'C_f_result';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -453,9 +447,6 @@ class C_thing_args implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   public function getName()[]: string {
     return 'C_thing_args';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -574,9 +565,6 @@ class C_thing_result extends \ThriftSyncStructWithResult implements \IThriftStru
     return 'C_thing_result';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -663,9 +651,6 @@ class C_numbers_args implements \IThriftSyncStruct, \IThriftStructMetadata {
     return 'C_numbers_args';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -727,9 +712,6 @@ class C_numbers_StreamResponse extends \ThriftSyncStructWithResult implements \I
 
   public function getName()[]: string {
     return 'C_numbers_StreamResponse';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -804,9 +786,6 @@ class C_numbers_FirstResponse extends \ThriftSyncStructWithoutResult implements 
 
   public function getName()[]: string {
     return 'C_numbers_FirstResponse';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

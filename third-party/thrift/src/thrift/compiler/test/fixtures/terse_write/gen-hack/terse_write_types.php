@@ -77,9 +77,6 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     return 'MyStruct';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -786,9 +783,6 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     return $this->struct_field as nonnull;
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -1216,9 +1210,6 @@ class MyStructWithCustomDefault implements \IThriftSyncStruct, \IThriftStructMet
     return 'MyStructWithCustomDefault';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -1283,7 +1274,7 @@ class MyStructWithCustomDefault implements \IThriftSyncStruct, \IThriftStructMet
  * StructLevelTerseStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/terse_write/StructLevelTerseStruct'))>>
-class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -1972,7 +1963,7 @@ class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetada
  * FieldLevelTerseStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/terse_write/FieldLevelTerseStruct'))>>
-class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -3362,7 +3353,7 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
  * TerseStructWithCustomDefault
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/terse_write/TerseStructWithCustomDefault'))>>
-class TerseStructWithCustomDefault implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class TerseStructWithCustomDefault implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -4017,7 +4008,7 @@ class TerseStructWithCustomDefault implements \IThriftSyncStruct, \IThriftStruct
  * AdaptedFields
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/terse_write/AdaptedFields'))>>
-class AdaptedFields implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class AdaptedFields implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -4292,7 +4283,7 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
  * WrappedFields
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/terse_write/WrappedFields'))>>
-class WrappedFields implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftShapishAsyncStruct {
+class WrappedFields implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftShapishAsyncStruct, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -4437,7 +4428,7 @@ class WrappedFields implements \IThriftAsyncStruct, \IThriftStructMetadata, \ITh
  * TerseException
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/terse_write/TerseException'))>>
-class TerseException extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
+class TerseException extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[

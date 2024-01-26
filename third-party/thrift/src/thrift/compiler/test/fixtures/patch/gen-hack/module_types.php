@@ -43,7 +43,7 @@ class MyEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
  * MyData
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyData'))>>
-class MyData implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class MyData implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -195,7 +195,7 @@ class MyData implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShap
  * MyDataWithCustomDefault
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyDataWithCustomDefault'))>>
-class MyDataWithCustomDefault implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class MyDataWithCustomDefault implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -438,9 +438,6 @@ class InnerUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
       (string)$this->_type,
     );
     return $this->innerOption as nonnull;
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -686,9 +683,6 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     return $this->option3 as nonnull;
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -801,7 +795,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
  * MyStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStruct'))>>
-class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -2288,9 +2282,6 @@ class LateDefStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
     return 'LateDefStruct';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -2337,7 +2328,7 @@ class LateDefStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
  * Recursive
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/Recursive'))>>
-class Recursive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class Recursive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -2506,7 +2497,7 @@ class Recursive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
  * Bar
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/Bar'))>>
-class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -2644,7 +2635,7 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
  * Loop
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/Loop'))>>
-class Loop implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class Loop implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -2781,7 +2772,7 @@ class Loop implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
  * RefFields
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RefFields'))>>
-class RefFields implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class RefFields implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -3332,7 +3323,7 @@ class RefFields implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
  * MyDataPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyDataPatch'))>>
-class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -3719,7 +3710,7 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
  * MyDataFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyDataFieldPatch'))>>
-class MyDataFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class MyDataFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -3959,9 +3950,6 @@ class MyDataEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     return 'MyDataEnsureStruct';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -4041,7 +4029,7 @@ class MyDataEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
  * MyDataWithCustomDefaultPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyDataWithCustomDefaultPatch'))>>
-class MyDataWithCustomDefaultPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class MyDataWithCustomDefaultPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -4428,7 +4416,7 @@ class MyDataWithCustomDefaultPatch implements \IThriftSyncStruct, \IThriftStruct
  * MyDataWithCustomDefaultFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyDataWithCustomDefaultFieldPatch'))>>
-class MyDataWithCustomDefaultFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class MyDataWithCustomDefaultFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -4668,9 +4656,6 @@ class MyDataWithCustomDefaultEnsureStruct implements \IThriftSyncStruct, \IThrif
     return 'MyDataWithCustomDefaultEnsureStruct';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -4750,7 +4735,7 @@ class MyDataWithCustomDefaultEnsureStruct implements \IThriftSyncStruct, \IThrif
  * InnerUnionPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/InnerUnionPatch'))>>
-class InnerUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class InnerUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -5062,7 +5047,7 @@ class InnerUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
  * InnerUnionFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/InnerUnionFieldPatch'))>>
-class InnerUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class InnerUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -5194,7 +5179,7 @@ class InnerUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata
  * MyUnionPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyUnionPatch'))>>
-class MyUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class MyUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -5506,7 +5491,7 @@ class MyUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
  * MyUnionFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyUnionFieldPatch'))>>
-class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -5745,7 +5730,7 @@ class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
  * MyStructPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructPatch'))>>
-class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -6132,7 +6117,7 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
  * MyStructField10Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField10Patch'))>>
-class MyStructField10Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class MyStructField10Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -6282,7 +6267,7 @@ class MyStructField10Patch implements \IThriftSyncStruct, \IThriftStructMetadata
  * MyStructField23Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField23Patch'))>>
-class MyStructField23Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class MyStructField23Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -6432,7 +6417,7 @@ class MyStructField23Patch implements \IThriftSyncStruct, \IThriftStructMetadata
  * MyStructField26Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField26Patch'))>>
-class MyStructField26Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class MyStructField26Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -6714,7 +6699,7 @@ class MyStructField26Patch implements \IThriftSyncStruct, \IThriftStructMetadata
  * MyStructField27Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField27Patch'))>>
-class MyStructField27Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class MyStructField27Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -6981,7 +6966,7 @@ class MyStructField27Patch implements \IThriftSyncStruct, \IThriftStructMetadata
  * MyStructField28Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField28Patch'))>>
-class MyStructField28Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class MyStructField28Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -7462,7 +7447,7 @@ class MyStructField28Patch implements \IThriftSyncStruct, \IThriftStructMetadata
  * MyStructField29Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField29Patch'))>>
-class MyStructField29Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class MyStructField29Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -7831,7 +7816,7 @@ class MyStructField29Patch implements \IThriftSyncStruct, \IThriftStructMetadata
  * MyStructField30Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField30Patch'))>>
-class MyStructField30Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class MyStructField30Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -8414,7 +8399,7 @@ class MyStructField30Patch implements \IThriftSyncStruct, \IThriftStructMetadata
  * MyStructField30Patch1
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField30Patch1'))>>
-class MyStructField30Patch1 implements \IThriftSyncStruct, \IThriftStructMetadata {
+class MyStructField30Patch1 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -8910,7 +8895,7 @@ class MyStructField30Patch1 implements \IThriftSyncStruct, \IThriftStructMetadat
  * MyStructFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructFieldPatch'))>>
-class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -11272,9 +11257,6 @@ class MyStructEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadata
     return 'MyStructEnsureStruct';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -12109,7 +12091,7 @@ class MyStructEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadata
  * LateDefStructPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/LateDefStructPatch'))>>
-class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -12525,9 +12507,6 @@ class LateDefStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetad
     return 'LateDefStructFieldPatch';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -12602,9 +12581,6 @@ class LateDefStructEnsureStruct implements \IThriftSyncStruct, \IThriftStructMet
     return 'LateDefStructEnsureStruct';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -12647,7 +12623,7 @@ class LateDefStructEnsureStruct implements \IThriftSyncStruct, \IThriftStructMet
  * RecursivePatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RecursivePatch'))>>
-class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -13034,7 +13010,7 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
  * RecursiveField1Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RecursiveField1Patch'))>>
-class RecursiveField1Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class RecursiveField1Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -13216,7 +13192,7 @@ class RecursiveField1Patch implements \IThriftSyncStruct, \IThriftStructMetadata
  * RecursiveFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RecursiveFieldPatch'))>>
-class RecursiveFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class RecursiveFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -13401,9 +13377,6 @@ class RecursiveEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadat
     return 'RecursiveEnsureStruct';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -13490,7 +13463,7 @@ class RecursiveEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadat
  * BarPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/BarPatch'))>>
-class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -13877,7 +13850,7 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
  * BarFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/BarFieldPatch'))>>
-class BarFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class BarFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -14053,9 +14026,6 @@ class BarEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     return 'BarEnsureStruct';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -14136,7 +14106,7 @@ class BarEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
  * LoopPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/LoopPatch'))>>
-class LoopPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class LoopPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -14303,7 +14273,7 @@ class LoopPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
  * RefFieldsPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RefFieldsPatch'))>>
-class RefFieldsPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class RefFieldsPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -14690,7 +14660,7 @@ class RefFieldsPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
  * RefFieldsField1Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RefFieldsField1Patch'))>>
-class RefFieldsField1Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class RefFieldsField1Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -14972,7 +14942,7 @@ class RefFieldsField1Patch implements \IThriftSyncStruct, \IThriftStructMetadata
  * RefFieldsField4Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RefFieldsField4Patch'))>>
-class RefFieldsField4Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class RefFieldsField4Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -15254,7 +15224,7 @@ class RefFieldsField4Patch implements \IThriftSyncStruct, \IThriftStructMetadata
  * RefFieldsField7Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RefFieldsField7Patch'))>>
-class RefFieldsField7Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class RefFieldsField7Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -15536,7 +15506,7 @@ class RefFieldsField7Patch implements \IThriftSyncStruct, \IThriftStructMetadata
  * RefFieldsFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RefFieldsFieldPatch'))>>
-class RefFieldsFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class RefFieldsFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -15930,9 +15900,6 @@ class RefFieldsEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadat
 
   public function getName()[]: string {
     return 'RefFieldsEnsureStruct';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

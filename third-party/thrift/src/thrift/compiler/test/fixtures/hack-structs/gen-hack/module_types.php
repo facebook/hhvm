@@ -54,9 +54,6 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     return 'MyStruct';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -146,9 +143,6 @@ class MySecondStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     return 'MySecondStruct';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -236,9 +230,6 @@ class MyThirdStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   public function getName()[]: string {
     return 'MyThirdStruct';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -331,9 +322,6 @@ class MyFourthStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     return 'MyFourthStruct';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -423,9 +411,6 @@ class MyFifthStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     return 'MyFifthStruct';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -512,9 +497,6 @@ trait MySixthStructTrait implements \IThriftSyncStruct, \IThriftStructMetadata {
     return 'MySixthStruct';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -598,9 +580,6 @@ trait MySeventhStructTrait implements \IThriftSyncStruct, \IThriftStructMetadata
 
   public function getName()[]: string {
     return 'MySeventhStruct';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

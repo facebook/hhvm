@@ -267,6 +267,7 @@ class t_hack_generator : public t_concat_generator {
   bool is_async_shapish_struct(const t_structured* tstruct);
   bool is_async_type(const t_type* type, bool check_nested_structs);
   bool is_async_field(const t_field& field, bool check_nested_structs);
+  bool has_clear_terse_fields(const t_structured* tstruct);
 
   void generate_php_struct_definition(
       std::ofstream& out,
@@ -330,6 +331,7 @@ class t_hack_generator : public t_concat_generator {
       const std::string& struct_hack_name,
       bool is_async_struct,
       bool is_async_shapish_struct,
+      bool add_clear_terse_fields_interface,
       const std::string& struct_hack_name_with_ns);
   void generate_php_struct_constructor(
       std::ofstream& out,
@@ -4365,6 +4367,7 @@ void t_hack_generator::generate_php_struct_methods(
     const std::string& struct_hack_name,
     bool is_async_struct,
     bool is_async_shapish_struct,
+    bool add_clear_terse_fields_interface,
     const std::string& struct_hack_name_with_ns) {
   if (is_async_struct) {
     generate_php_struct_default_constructor(
@@ -4423,8 +4426,10 @@ void t_hack_generator::generate_php_struct_methods(
       out << ";\n" << indent() << "}\n\n";
     }
   }
-  generate_php_struct_clear_terse_fields(
-      out, tstruct, type, struct_hack_name_with_ns);
+  if (add_clear_terse_fields_interface) {
+    generate_php_struct_clear_terse_fields(
+        out, tstruct, type, struct_hack_name_with_ns);
+  }
   generate_php_struct_metadata_method(out, tstruct);
   generate_php_struct_structured_annotations_method(out, tstruct);
 
@@ -4673,11 +4678,23 @@ void t_hack_generator::generate_php_struct_default_constructor(
   out << "\n";
 }
 
+bool t_hack_generator::has_clear_terse_fields(const t_structured* tstruct) {
+  for (const auto& field : tstruct->fields()) {
+    if (!skip_codegen(&field) &&
+        field.qualifier() == t_field_qualifier::terse) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void t_hack_generator::generate_php_struct_clear_terse_fields(
     std::ofstream& out,
     const t_structured* tstruct,
     ThriftStructType type,
     const std::string& struct_hack_name_with_ns) {
+  assert(has_clear_terse_fields(tstruct));
+
   out << indent()
       << "public function clearTerseFields()[write_props]: void {\n";
   indent_up();
@@ -5174,6 +5191,11 @@ void t_hack_generator::_generate_php_struct_definition(
     }
   }
 
+  bool add_clear_terse_fields_interface = has_clear_terse_fields(tstruct);
+  if (add_clear_terse_fields_interface) {
+    out << ", \\IThriftStructWithClearTerseFields";
+  }
+
   out << " {\n";
   indent_up();
 
@@ -5222,6 +5244,7 @@ void t_hack_generator::_generate_php_struct_definition(
       name,
       is_async,
       is_async_shapish,
+      add_clear_terse_fields_interface,
       struct_hack_name_with_ns);
 
   indent_down();

@@ -52,9 +52,6 @@ class structured_annotation_included implements \IThriftSyncStruct, \IThriftStru
     return 'structured_annotation_included';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(

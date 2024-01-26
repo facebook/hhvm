@@ -506,9 +506,6 @@ class DbMixedStackArguments_getDataByKey0_args implements \IThriftSyncStruct, \I
     return 'DbMixedStackArguments_getDataByKey0_args';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -609,9 +606,6 @@ class DbMixedStackArguments_getDataByKey0_result extends \ThriftSyncStructWithRe
     return 'DbMixedStackArguments_getDataByKey0_result';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -700,9 +694,6 @@ class DbMixedStackArguments_getDataByKey1_args implements \IThriftSyncStruct, \I
 
   public function getName()[]: string {
     return 'DbMixedStackArguments_getDataByKey1_args';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -803,9 +794,6 @@ class DbMixedStackArguments_getDataByKey1_result extends \ThriftSyncStructWithRe
 
   public function getName()[]: string {
     return 'DbMixedStackArguments_getDataByKey1_result';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

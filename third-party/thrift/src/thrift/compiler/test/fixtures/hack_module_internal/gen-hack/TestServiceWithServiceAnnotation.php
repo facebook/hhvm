@@ -209,9 +209,6 @@ class TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation_args impl
     return 'TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation_args';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -273,9 +270,6 @@ class TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation_result ex
 
   public function getName()[]: string {
     return 'TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation_result';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -343,9 +337,6 @@ class TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation2_args imp
     return 'TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation2_args';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -396,9 +387,6 @@ class TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation2_result e
 
   public function getName()[]: string {
     return 'TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation2_result';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

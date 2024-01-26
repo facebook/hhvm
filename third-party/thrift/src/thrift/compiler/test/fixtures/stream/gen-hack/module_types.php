@@ -40,9 +40,6 @@ class FooStreamEx extends \TException implements \IThriftSyncStruct, \IThriftExc
     return 'FooStreamEx';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {
     return tmeta_ThriftException::fromShape(
       shape(
@@ -99,9 +96,6 @@ class FooEx extends \TException implements \IThriftSyncStruct, \IThriftException
     return 'FooEx';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {
     return tmeta_ThriftException::fromShape(
       shape(
@@ -156,9 +150,6 @@ class FooEx2 extends \TException implements \IThriftSyncStruct, \IThriftExceptio
 
   public function getName()[]: string {
     return 'FooEx2';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {

@@ -59,9 +59,6 @@ class Name implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
     return 'Name';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -183,9 +180,6 @@ class Tag implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
 
   public function getName()[]: string {
     return 'Tag';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

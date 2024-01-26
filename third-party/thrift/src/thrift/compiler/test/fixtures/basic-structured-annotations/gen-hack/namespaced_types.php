@@ -54,9 +54,6 @@ class structured_annotation_with_namespace implements \IThriftSyncStruct, \IThri
     return 'structured_annotation_with_namespace';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(

@@ -163,9 +163,6 @@ class FooService_ping_args implements \IThriftSyncStruct, \IThriftStructMetadata
     return 'FooService_ping_args';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -240,9 +237,6 @@ class FooService_ping_result extends \ThriftSyncStructWithResult implements \ITh
 
   public function getName()[]: string {
     return 'FooService_ping_result';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

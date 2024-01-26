@@ -52,9 +52,6 @@ class InitialResponse implements \IThriftSyncStruct, \IThriftStructMetadata {
     return 'InitialResponse';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -135,9 +132,6 @@ class FinalResponse implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   public function getName()[]: string {
     return 'FinalResponse';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -222,9 +216,6 @@ class SinkPayload implements \IThriftSyncStruct, \IThriftStructMetadata {
     return 'SinkPayload';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -305,9 +296,6 @@ class CompatibleWithKeywordSink implements \IThriftSyncStruct, \IThriftStructMet
 
   public function getName()[]: string {
     return 'CompatibleWithKeywordSink';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -393,9 +381,6 @@ class InitialException extends \TException implements \IThriftSyncStruct, \IThri
     return 'InitialException';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {
     return tmeta_ThriftException::fromShape(
       shape(
@@ -478,9 +463,6 @@ class SinkException1 extends \TException implements \IThriftSyncStruct, \IThrift
     return 'SinkException1';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {
     return tmeta_ThriftException::fromShape(
       shape(
@@ -561,9 +543,6 @@ class SinkException2 extends \TException implements \IThriftSyncStruct, \IThrift
 
   public function getName()[]: string {
     return 'SinkException2';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {

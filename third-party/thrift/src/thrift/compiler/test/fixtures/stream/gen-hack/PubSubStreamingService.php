@@ -605,9 +605,6 @@ class PubSubStreamingService_returnstream_args implements \IThriftSyncStruct, \I
     return 'PubSubStreamingService_returnstream_args';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -695,9 +692,6 @@ class PubSubStreamingService_returnstream_StreamResponse extends \ThriftSyncStru
     return 'PubSubStreamingService_returnstream_StreamResponse';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -763,9 +757,6 @@ class PubSubStreamingService_returnstream_FirstResponse extends \ThriftSyncStruc
     return 'PubSubStreamingService_returnstream_FirstResponse';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -825,9 +816,6 @@ class PubSubStreamingService_streamthrows_args implements \IThriftSyncStruct, \I
 
   public function getName()[]: string {
     return 'PubSubStreamingService_streamthrows_args';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -916,9 +904,6 @@ class PubSubStreamingService_streamthrows_StreamResponse extends \ThriftSyncStru
     return 'PubSubStreamingService_streamthrows_StreamResponse';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1005,9 +990,6 @@ class PubSubStreamingService_streamthrows_FirstResponse extends \ThriftSyncStruc
     return 'PubSubStreamingService_streamthrows_FirstResponse';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1067,9 +1049,6 @@ class PubSubStreamingService_servicethrows_args implements \IThriftSyncStruct, \
 
   public function getName()[]: string {
     return 'PubSubStreamingService_servicethrows_args';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1148,9 +1127,6 @@ class PubSubStreamingService_servicethrows_StreamResponse extends \ThriftSyncStr
     return 'PubSubStreamingService_servicethrows_StreamResponse';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1224,9 +1200,6 @@ class PubSubStreamingService_servicethrows_FirstResponse extends \ThriftSyncStru
 
   public function getName()[]: string {
     return 'PubSubStreamingService_servicethrows_FirstResponse';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1313,9 +1286,6 @@ class PubSubStreamingService_servicethrows2_args implements \IThriftSyncStruct, 
     return 'PubSubStreamingService_servicethrows2_args';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1390,9 +1360,6 @@ class PubSubStreamingService_servicethrows2_StreamResponse extends \ThriftSyncSt
 
   public function getName()[]: string {
     return 'PubSubStreamingService_servicethrows2_StreamResponse';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1478,9 +1445,6 @@ class PubSubStreamingService_servicethrows2_FirstResponse extends \ThriftSyncStr
 
   public function getName()[]: string {
     return 'PubSubStreamingService_servicethrows2_FirstResponse';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1585,9 +1549,6 @@ class PubSubStreamingService_boththrows_args implements \IThriftSyncStruct, \ITh
     return 'PubSubStreamingService_boththrows_args';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1672,9 +1633,6 @@ class PubSubStreamingService_boththrows_StreamResponse extends \ThriftSyncStruct
 
   public function getName()[]: string {
     return 'PubSubStreamingService_boththrows_StreamResponse';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1773,9 +1731,6 @@ class PubSubStreamingService_boththrows_FirstResponse extends \ThriftSyncStructW
     return 'PubSubStreamingService_boththrows_FirstResponse';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1858,9 +1813,6 @@ class PubSubStreamingService_responseandstreamstreamthrows_args implements \IThr
 
   public function getName()[]: string {
     return 'PubSubStreamingService_responseandstreamstreamthrows_args';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1947,9 +1899,6 @@ class PubSubStreamingService_responseandstreamstreamthrows_StreamResponse extend
 
   public function getName()[]: string {
     return 'PubSubStreamingService_responseandstreamstreamthrows_StreamResponse';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -2049,9 +1998,6 @@ class PubSubStreamingService_responseandstreamstreamthrows_FirstResponse extends
     return 'PubSubStreamingService_responseandstreamstreamthrows_FirstResponse';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -2124,9 +2070,6 @@ class PubSubStreamingService_responseandstreamservicethrows_args implements \ITh
 
   public function getName()[]: string {
     return 'PubSubStreamingService_responseandstreamservicethrows_args';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -2203,9 +2146,6 @@ class PubSubStreamingService_responseandstreamservicethrows_StreamResponse exten
 
   public function getName()[]: string {
     return 'PubSubStreamingService_responseandstreamservicethrows_StreamResponse';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -2292,9 +2232,6 @@ class PubSubStreamingService_responseandstreamservicethrows_FirstResponse extend
 
   public function getName()[]: string {
     return 'PubSubStreamingService_responseandstreamservicethrows_FirstResponse';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -2392,9 +2329,6 @@ class PubSubStreamingService_responseandstreamboththrows_args implements \IThrif
     return 'PubSubStreamingService_responseandstreamboththrows_args';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -2479,9 +2413,6 @@ class PubSubStreamingService_responseandstreamboththrows_StreamResponse extends 
 
   public function getName()[]: string {
     return 'PubSubStreamingService_responseandstreamboththrows_StreamResponse';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -2591,9 +2522,6 @@ class PubSubStreamingService_responseandstreamboththrows_FirstResponse extends \
     return 'PubSubStreamingService_responseandstreamboththrows_FirstResponse';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -2698,9 +2626,6 @@ class PubSubStreamingService_returnstreamFast_args implements \IThriftSyncStruct
     return 'PubSubStreamingService_returnstreamFast_args';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -2788,9 +2713,6 @@ class PubSubStreamingService_returnstreamFast_StreamResponse extends \ThriftSync
     return 'PubSubStreamingService_returnstreamFast_StreamResponse';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -2854,9 +2776,6 @@ class PubSubStreamingService_returnstreamFast_FirstResponse extends \ThriftSyncS
 
   public function getName()[]: string {
     return 'PubSubStreamingService_returnstreamFast_FirstResponse';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

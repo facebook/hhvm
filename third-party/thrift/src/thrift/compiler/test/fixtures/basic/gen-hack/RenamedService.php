@@ -334,9 +334,6 @@ class FooService_simple_rpc_args implements \IThriftSyncStruct, \IThriftStructMe
     return 'FooService_simple_rpc_args';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -405,9 +402,6 @@ class FooService_simple_rpc_result extends \ThriftSyncStructWithoutResult implem
 
   public function getName()[]: string {
     return 'FooService_simple_rpc_result';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

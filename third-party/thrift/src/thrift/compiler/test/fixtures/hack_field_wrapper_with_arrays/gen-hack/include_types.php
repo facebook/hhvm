@@ -51,9 +51,6 @@ class AnnotationStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \I
     return 'AnnotationStruct';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -163,9 +160,6 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
 
   public function getName()[]: string {
     return 'MyStruct';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -556,9 +550,6 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
 
   public function getName()[]: string {
     return 'MyNestedStruct';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1334,9 +1325,6 @@ class MyComplexStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \I
 
   public function getName()[]: string {
     return 'MyComplexStruct';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

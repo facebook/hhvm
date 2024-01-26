@@ -106,9 +106,6 @@ class MyException1 extends \TException implements \IThriftSyncStruct, \IThriftEx
     return 'MyException1';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {
     return tmeta_ThriftException::fromShape(
       shape(
@@ -227,9 +224,6 @@ class MyException2 extends \TException implements \IThriftSyncStruct, \IThriftEx
 
   public function getName()[]: string {
     return 'MyException2';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {
@@ -351,9 +345,6 @@ class MyException3 extends \TException implements \IThriftSyncStruct, \IThriftEx
     return 'MyException3';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {
     return tmeta_ThriftException::fromShape(
       shape(
@@ -473,9 +464,6 @@ class MyException4 extends \TException implements \IThriftSyncStruct, \IThriftEx
     return 'MyException4';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {
     return tmeta_ThriftException::fromShape(
       shape(
@@ -584,9 +572,6 @@ class MyException5 extends \TException implements \IThriftSyncStruct, \IThriftEx
 
   public function getName()[]: string {
     return 'MyException5';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {

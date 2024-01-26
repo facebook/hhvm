@@ -83,9 +83,6 @@ class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     return 'TestStruct';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(

@@ -132,9 +132,6 @@ class structured_annotation_with_default implements \IThriftSyncStruct, \IThrift
     return 'structured_annotation_with_default';
   }
 
-  public function clearTerseFields()[write_props]: void {
-  }
-
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -369,9 +366,6 @@ class structured_annotation_recursive implements \IThriftAsyncStruct, \IThriftSt
 
   public function getName()[]: string {
     return 'structured_annotation_recursive';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -668,9 +662,6 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
 
   public function getName()[]: string {
     return 'MyStruct';
-  }
-
-  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

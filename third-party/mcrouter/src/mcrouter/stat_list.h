@@ -154,6 +154,8 @@ STAT(asynclog_duration_us, stat_double, 0, .dbl = 0.0)
 STAT(axon_proxy_duration_us, stat_double, 0, .dbl = 0.0)
 // Number of proxy threads
 STUI(num_proxies, 0, 1)
+// Average CPU across proxies
+STUI(proxy_cpu, 0, 1)
 // Proxy requests that are currently being routed.
 STUI(proxy_reqs_processing, 0, 1)
 // Proxy requests queued up and not routed yet

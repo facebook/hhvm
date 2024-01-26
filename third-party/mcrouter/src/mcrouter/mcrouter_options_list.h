@@ -924,6 +924,15 @@ MCROUTER_OPTION_INTEGER(
     no_short,
     "1 in S non-error connection samples will be logged")
 
+MCROUTER_OPTION_INTEGER(
+    uint32_t,
+    proxy_cpu_monitor_ms,
+    0,
+    "proxy-cpu-monitor-ms",
+    no_short,
+    "Measure proxy CPU utilization every proxy_cpu_monitor_ms milliseconds. "
+    "0 means disabled.")
+
 #ifdef ADDITIONAL_OPTIONS_FILE
 #include ADDITIONAL_OPTIONS_FILE
 #endif

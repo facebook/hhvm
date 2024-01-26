@@ -25,6 +25,7 @@
 
 #include "hphp/runtime/test/test-context.h"
 
+#include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/server/compression.h"
 
 #include "hphp/util/brotli.h"
@@ -314,7 +315,7 @@ struct ResponseCompressorTest : Test {
     RuntimeOption::BrotliCompressionEnabled = false;
     RuntimeOption::BrotliChunkedCompressionEnabled = false;
     RuntimeOption::ZstdCompressionEnabled = false;
-    RuntimeOption::ServerAddVaryEncoding = true;
+    Cfg::Server::AddVaryEncoding = true;
   }
 
   void TearDown() override {}
@@ -1076,7 +1077,7 @@ TEST_F(ResponseCompressorTest, testGetResponseHeadersCompressed) {
 }
 
 TEST_F(ResponseCompressorTest, testGetResponseHeadersCompressedNoVary) {
-  RuntimeOption::ServerAddVaryEncoding = false;
+  Cfg::Server::AddVaryEncoding = false;
   auto mockPtr = std::make_unique<MockResponseCompressor>(&mh);
   auto& mock = *mockPtr;
   std::vector<std::unique_ptr<ResponseCompressor>> vec;

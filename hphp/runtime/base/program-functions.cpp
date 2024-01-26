@@ -25,6 +25,8 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/configs/errorhandling.h"
+#include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/extended-logger.h"
@@ -1098,10 +1100,10 @@ static int start_server(const std::string &username) {
     XboxRequestHandler::GetAccessLog().fini();
   };
 
-  if (RuntimeOption::ServerInternalWarmupThreads > 0) {
+  if (Cfg::Server::InternalWarmupThreads > 0) {
     HttpServer::CheckMemAndWait();
     InitFiniNode::WarmupConcurrentStart(
-      RuntimeOption::ServerInternalWarmupThreads);
+      Cfg::Server::InternalWarmupThreads);
   }
 
   HttpServer::CheckMemAndWait();
@@ -1117,7 +1119,7 @@ static int start_server(const std::string &username) {
     HttpServer::Server->runAdminServerOrExitProcess();
   }
 
-  if (RuntimeOption::ServerInternalWarmupThreads > 0) {
+  if (Cfg::Server::InternalWarmupThreads > 0) {
     BootStats::Block timer("concurrentWaitForEnd", true);
     InitFiniNode::WarmupConcurrentWaitForEnd();
   }
@@ -1128,9 +1130,9 @@ static int start_server(const std::string &username) {
     Logger::Info("Warming up");
     if (!RuntimeOption::EvalJitProfileWarmupRequests) profileWarmupStart();
     SCOPE_EXIT { profileWarmupEnd(); };
-    InternalWarmupRequestPlayer(RuntimeOption::ServerWarmupThreadCount,
-                                RuntimeOption::ServerDedupeWarmupRequests)
-      .runAfterDelay(RuntimeOption::ServerWarmupRequests);
+    InternalWarmupRequestPlayer(Cfg::Server::WarmupThreadCount,
+                                Cfg::Server::DedupeWarmupRequests)
+      .runAfterDelay(Cfg::Server::WarmupRequests);
   }
   BootStats::mark("warmup");
 
@@ -1180,7 +1182,7 @@ static int start_server(const std::string &username) {
 }
 
 static void logSettings() {
-  if (RuntimeOption::ServerLogSettingsOnStartup) {
+  if (Cfg::Server::LogSettingsOnStartup) {
     Logger::Info("Settings: %s\n",
                  folly::toJson(IniSetting::GetAllAsDynamic()).c_str());
   }
@@ -2022,7 +2024,7 @@ static int execute_program_impl(int argc, char** argv) {
                           info->m_fatalLoc);
       }
     } catch (const FatalErrorException& e) {
-      RuntimeOption::CallUserHandlerOnFatals = false;
+      Cfg::ErrorHandling::CallUserHandlerOnFatals = false;
       RuntimeOption::AlwaysLogUnhandledExceptions = false;
       g_context->onFatalError(e);
       return HPHP_EXIT_FAILURE;

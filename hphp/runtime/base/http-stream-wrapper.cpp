@@ -16,9 +16,9 @@
 
 #include "hphp/runtime/base/http-stream-wrapper.h"
 
+#include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/url-file.h"
@@ -46,7 +46,7 @@ const StaticString
 req::ptr<File> HttpStreamWrapper::open(const String& filename,
                                        const String& mode, int /*options*/,
                                        const req::ptr<StreamContext>& context) {
-  if (RuntimeOption::ServerHttpSafeMode && !is_cli_server_mode()) {
+  if (Cfg::Server::HttpSafeMode && !is_cli_server_mode()) {
     return nullptr;
   }
 

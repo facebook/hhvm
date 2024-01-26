@@ -17,6 +17,7 @@
 #include "hphp/runtime/server/fastcgi/fastcgi-server.h"
 
 #include "hphp/runtime/server/http-server.h"
+#include "hphp/runtime/base/configs/server.h"
 
 namespace HPHP {
 
@@ -71,10 +72,10 @@ FastCGIServer::FastCGIServer(const std::string &address,
     m_worker(&m_eventBaseManager),
     m_dispatcher(workers, workers,
                  RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
-                 RuntimeOption::ServerThreadDropStack,
+                 Cfg::Server::ThreadDropStack,
                  this,
                  RuntimeOption::ServerThreadJobLIFOSwitchThreshold,
-                 RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds,
+                 Cfg::Server::ThreadJobMaxQueuingMilliSeconds,
                  RequestPriority::k_numPriorities) {
   folly::SocketAddress sock_addr;
   if (useFileSocket) {

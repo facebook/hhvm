@@ -215,7 +215,7 @@ void MemoryManager::refreshStatsHelperExceeded() {
   setSurpriseFlag(MemExceededFlag);
   RID().setRequestOOMFlag();
   m_couldOOM = false;
-  if (RuntimeOption::LogNativeStackOnOOM) {
+  if (Cfg::ErrorHandling::LogNativeStackOnOOM) {
     log_native_stack("Exceeded memory limit");
   }
   if (m_profctx.flag) {

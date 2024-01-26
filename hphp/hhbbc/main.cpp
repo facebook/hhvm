@@ -33,6 +33,7 @@
 #include <folly/String.h>
 #include <folly/portability/Unistd.h>
 
+#include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/variable-serializer.h"
@@ -232,10 +233,12 @@ RepoGlobalData get_global_data() {
 
   auto gd                        = RepoGlobalData{};
   gd.Signature                   = nanos.count();
+
+#define C(Config, Name, ...) gd.Name = Config;
+CONFIGS_FOR_REPOGLOBALDATA()
+#undef C
+
   gd.CheckPropTypeHints          = RuntimeOption::EvalCheckPropTypeHints;
-  gd.PHP7_NoHexNumerics          = RuntimeOption::PHP7_NoHexNumerics;
-  gd.PHP7_Substr                 = RuntimeOption::PHP7_Substr;
-  gd.PHP7_Builtins               = RuntimeOption::PHP7_Builtins;
   gd.EnableIntrinsicsExtension   = RuntimeOption::EnableIntrinsicsExtension;
   gd.ForbidDynamicCallsToFunc    = RuntimeOption::EvalForbidDynamicCallsToFunc;
   gd.ForbidDynamicCallsToClsMeth =

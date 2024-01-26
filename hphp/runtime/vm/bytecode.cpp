@@ -43,6 +43,7 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/base/configs/errorhandling.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-util.h"
@@ -3960,7 +3961,7 @@ static void throw_call_non_object(const char* methodName,
   folly::format(&msg, "Call to a member function {}() on a non-object ({})",
     methodName, typeName);
 
-  if (RuntimeOption::ThrowExceptionOnBadMethodCall) {
+  if (Cfg::ErrorHandling::ThrowExceptionOnBadMethodCall) {
     SystemLib::throwBadMethodCallExceptionObject(String(msg));
   }
   raise_fatal_error(msg.c_str());

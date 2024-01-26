@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/server/fastcgi/fastcgi-transport.h"
+#include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/server/fastcgi/fastcgi-server.h"
 #include "hphp/runtime/server/http-protocol.h"
@@ -243,7 +244,7 @@ void FastCGITransport::onHeadersComplete() {
     m_docRoot += '/';
   }
 
-  if (m_scriptName.empty() || RuntimeOption::ServerFixPathInfo) {
+  if (m_scriptName.empty() || Cfg::Server::FixPathInfo) {
     // According to php-fpm, some servers don't set SCRIPT_FILENAME. In
     // this case, it uses PATH_TRANSLATED.
     // Added runtime option to change m_scriptFilename to s_pathTran

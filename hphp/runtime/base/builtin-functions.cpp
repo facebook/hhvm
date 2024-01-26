@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/code-coverage.h"
+#include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-util.h"
@@ -984,7 +985,7 @@ void throw_parameter_wrong_type(TypedValue tv,
                                 const StringData* expected_type) {
   auto const msg = param_type_error_message(
     callee->name()->data(), arg_num, expected_type->data(), tv);
-  if (RuntimeOption::PHP7_EngineExceptions) {
+  if (Cfg::PHP7::EngineExceptions) {
     SystemLib::throwTypeErrorObject(msg);
   }
   SystemLib::throwRuntimeExceptionObject(msg);

@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/string-buffer.h"
@@ -874,7 +875,7 @@ static bool string_substr_check(int len, int64_t& f, int64_t& l) {
 TypedValue HHVM_FUNCTION(substr, StringArg str, int64_t start, int64_t length) {
   auto const size = str.get()->size();
   if (!string_substr_check(size, start, length)) {
-    if (RuntimeOption::PHP7_Substr && size == start) {
+    if (Cfg::PHP7::Substr && size == start) {
       return make_tv<KindOfPersistentString>(empty_string_ref.get());
     } else {
       return make_tv<KindOfBoolean>(false);

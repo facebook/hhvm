@@ -21,6 +21,7 @@
 #include <zlib.h>
 
 namespace proxygen {
+class HeaderIndexingStrategy;
 
 /**
  * Configuration for a single Acceptor.
@@ -100,6 +101,9 @@ struct AcceptorConfiguration : public wangle::ServerSocketConfig {
    * Determines if HTTP2 ping is enabled on connection
    **/
   bool HTTP2PingEnabled{false};
+
+  /* Strategy for which headers to insert into HPACK/QPACK dynamic table */
+  const HeaderIndexingStrategy* headerIndexingStrategy{nullptr};
 };
 
 } // namespace proxygen

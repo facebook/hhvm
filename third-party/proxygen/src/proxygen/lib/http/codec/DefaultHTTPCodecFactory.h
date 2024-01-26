@@ -10,10 +10,13 @@
 #include <proxygen/lib/http/codec/HTTPCodecFactory.h>
 
 namespace proxygen {
+class HeaderIndexingStrategy;
 
 class DefaultHTTPCodecFactory : public HTTPCodecFactory {
  public:
-  explicit DefaultHTTPCodecFactory(bool forceHTTP1xCodecTo1_1);
+  explicit DefaultHTTPCodecFactory(
+      bool forceHTTP1xCodecTo1_1,
+      const HeaderIndexingStrategy* strat = nullptr);
   ~DefaultHTTPCodecFactory() override = default;
 
   /**
@@ -29,6 +32,7 @@ class DefaultHTTPCodecFactory : public HTTPCodecFactory {
 
  protected:
   bool forceHTTP1xCodecTo1_1_{false};
+  const HeaderIndexingStrategy* headerIndexingStrategy_;
 };
 
 } // namespace proxygen

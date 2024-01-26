@@ -28,6 +28,9 @@ std::unique_ptr<HTTPCodec> HTTPDefaultSessionCodecFactory::getCodec(
   if (!isTLS && alwaysUseHTTP2_) {
     auto codec = std::make_unique<HTTP2Codec>(direction);
     codec->setStrictValidation(useStrictValidation());
+    if (accConfig_.headerIndexingStrategy) {
+      codec->setHeaderIndexingStrategy(accConfig_.headerIndexingStrategy);
+    }
     return codec;
   } else if (nextProtocol.empty() ||
              HTTP1xCodec::supportsNextProtocol(nextProtocol)) {
@@ -43,6 +46,9 @@ std::unique_ptr<HTTPCodec> HTTPDefaultSessionCodecFactory::getCodec(
              nextProtocol == http2::kProtocolExperimentalString) {
     auto codec = std::make_unique<HTTP2Codec>(direction);
     codec->setStrictValidation(useStrictValidation());
+    if (accConfig_.headerIndexingStrategy) {
+      codec->setHeaderIndexingStrategy(accConfig_.headerIndexingStrategy);
+    }
     return codec;
   } else {
     VLOG(2) << "Client requested unrecognized next protocol " << nextProtocol;

@@ -14,8 +14,10 @@
 
 namespace proxygen {
 
-DefaultHTTPCodecFactory::DefaultHTTPCodecFactory(bool forceHTTP1xCodecTo1_1)
-    : forceHTTP1xCodecTo1_1_(forceHTTP1xCodecTo1_1) {
+DefaultHTTPCodecFactory::DefaultHTTPCodecFactory(
+    bool forceHTTP1xCodecTo1_1, const HeaderIndexingStrategy* strat)
+    : forceHTTP1xCodecTo1_1_(forceHTTP1xCodecTo1_1),
+      headerIndexingStrategy_(strat) {
 }
 
 std::unique_ptr<HTTPCodec> DefaultHTTPCodecFactory::getCodec(
@@ -29,6 +31,9 @@ std::unique_ptr<HTTPCodec> DefaultHTTPCodecFactory::getCodec(
       chosenProto == proxygen::http2::kProtocolExperimentalString) {
     auto codec = std::make_unique<HTTP2Codec>(direction);
     codec->setStrictValidation(useStrictValidation());
+    if (headerIndexingStrategy_) {
+      codec->setHeaderIndexingStrategy(headerIndexingStrategy_);
+    }
     return codec;
   } else {
     if (!chosenProto.empty() &&

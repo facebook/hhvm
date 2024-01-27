@@ -35,13 +35,13 @@
   }
 
 #define DEFINE_UNION_STATIC_UNION_IMPL(type, name, var) \
-  DECLARE_UNION_STATIC_UNION_IMPL(type, name) var;
+  DECLARE_UNION_STATIC_UNION_IMPL(type, name) var
 
 #define DEFINE_UNION_STATIC_UNION_CONST_IMPL(type, name, var) \
-  DECLARE_UNION_STATIC_UNION_IMPL(type, name) const var;
+  DECLARE_UNION_STATIC_UNION_IMPL(type, name) const var
 
 #define DEFINE_UNION_STATIC_UNION_CONST_ARRAY_IMPL(type, size, name, var) \
-  DECLARE_UNION_STATIC_UNION_ARRAY_IMPL(type, size, name) const var;
+  DECLARE_UNION_STATIC_UNION_ARRAY_IMPL(type, size, name) const var
 
 #if defined(_MSC_VER) && !defined(__clang__)
 #define ATTRIBUTE_CONSTRUCTOR
@@ -96,24 +96,24 @@
 // versions are provided. If you need to do custom construction, like using a
 // brace-enclosed initializer list, use the NO_INIT variant and then define
 // your own __attribute__((__constructor__)) function to do the initialization.
-#define DEFINE_UNION_STATIC(type, name, var)      \
-  DEFINE_UNION_STATIC_UNION_IMPL(type, name, var) \
+#define DEFINE_UNION_STATIC(type, name, var)       \
+  DEFINE_UNION_STATIC_UNION_IMPL(type, name, var); \
   DEFINE_UNION_STATIC_CONSTRUCTOR_IMPL(type, name, var)
 
 #define DEFINE_UNION_STATIC_ARGS(type, name, var, ...) \
-  DEFINE_UNION_STATIC_UNION_IMPL(type, name, var)      \
+  DEFINE_UNION_STATIC_UNION_IMPL(type, name, var);     \
   DEFINE_UNION_STATIC_CONSTRUCTOR_ARG_IMPL(type, name, var, __VA_ARGS__)
 
 #define DEFINE_UNION_STATIC_NO_INIT(type, name, var) \
   DEFINE_UNION_STATIC_UNION_IMPL(type, name, var)
 
 // Same as the above three except used to create a const union.
-#define DEFINE_UNION_STATIC_CONST(type, name, var)      \
-  DEFINE_UNION_STATIC_UNION_CONST_IMPL(type, name, var) \
+#define DEFINE_UNION_STATIC_CONST(type, name, var)       \
+  DEFINE_UNION_STATIC_UNION_CONST_IMPL(type, name, var); \
   DEFINE_UNION_STATIC_CONSTRUCTOR_IMPL(type, name, var)
 
 #define DEFINE_UNION_STATIC_CONST_ARGS(type, name, var, ...) \
-  DEFINE_UNION_STATIC_UNION_CONST_IMPL(type, name, var)      \
+  DEFINE_UNION_STATIC_UNION_CONST_IMPL(type, name, var);     \
   DEFINE_UNION_STATIC_CONSTRUCTOR_ARG_IMPL(type, name, var, __VA_ARGS__)
 
 #define DEFINE_UNION_STATIC_CONST_NO_INIT(type, name, var) \

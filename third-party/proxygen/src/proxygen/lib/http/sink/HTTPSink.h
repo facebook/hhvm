@@ -44,10 +44,11 @@ class HTTPSink {
   [[nodiscard]] virtual CodecProtocol getCodecProtocol() const = 0;
   [[nodiscard]] virtual const folly::SocketAddress& getLocalAddress() const = 0;
   [[nodiscard]] virtual const folly::SocketAddress& getPeerAddress() const = 0;
+  [[nodiscard]] virtual const folly::AsyncTransportCertificate*
+  getPeerCertificate() const = 0;
   [[nodiscard]] virtual folly::Optional<HTTPPriority> getHTTPPriority()
       const = 0;
-  [[nodiscard]] virtual const folly::AsyncTransport* getTCPTransport()
-      const = 0;
+  [[nodiscard]] virtual int getTCPTransportFD() const = 0;
   [[nodiscard]] virtual quic::QuicSocket* getQUICTransport() const = 0;
   [[nodiscard]] virtual std::chrono::seconds getSessionIdleDuration() const = 0;
   virtual void getCurrentFlowControlInfo(FlowControlInfo*) const = 0;

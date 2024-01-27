@@ -13,6 +13,27 @@
 
 namespace proxygen {
 
+int HTTPTransactionSink::getTCPTransportFD() const {
+  auto transport = httpTransaction_->getTransport().getUnderlyingTransport();
+  const folly::AsyncSocket* sock = nullptr;
+  if (transport) {
+    sock = transport->getUnderlyingTransport<folly::AsyncSocket>();
+  }
+  if (sock) {
+    return sock->getNetworkSocket().toFd();
+  }
+  return -1;
+}
+
+const folly::AsyncTransportCertificate*
+HTTPTransactionSink::getPeerCertificate() const {
+  auto transport = httpTransaction_->getTransport().getUnderlyingTransport();
+  if (transport) {
+    return transport->getPeerCertificate();
+  }
+  return nullptr;
+}
+
 quic::QuicSocket* HTTPTransactionSink::getQUICTransport() const {
   auto session = httpTransaction_->getTransport().getHTTPSessionBase();
   if (auto hqSession = dynamic_cast<HQSession*>(session)) {

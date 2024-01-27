@@ -49,9 +49,9 @@ class HTTPTransactionSink : public HTTPSink {
   [[nodiscard]] const folly::SocketAddress& getPeerAddress() const override {
     return httpTransaction_->getPeerAddress();
   }
-  [[nodiscard]] const folly::AsyncTransport* getTCPTransport() const override {
-    return httpTransaction_->getTransport().getUnderlyingTransport();
-  }
+  [[nodiscard]] const folly::AsyncTransportCertificate* getPeerCertificate()
+      const override;
+  [[nodiscard]] int getTCPTransportFD() const override;
   [[nodiscard]] quic::QuicSocket* getQUICTransport() const override;
   [[nodiscard]] std::chrono::seconds getSessionIdleDuration() const override {
     return sessionIdleDuration_;

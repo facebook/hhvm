@@ -118,19 +118,6 @@ impl<'arena> ClassName<'arena> {
         ))
     }
 
-    pub fn from_ast_name_and_mangle_for_module(
-        alloc: &'arena bumpalo::Bump,
-        s: impl std::convert::Into<std::string::String>,
-    ) -> Self {
-        ClassName(Str::new_str(
-            alloc,
-            &format!(
-                "__module_{}",
-                hhbc_string_utils::strip_global_ns(&hhbc_string_utils::mangle(s.into()))
-            ),
-        ))
-    }
-
     pub fn unsafe_to_unmangled_str(&self) -> std::borrow::Cow<'arena, str> {
         std::borrow::Cow::from(hhbc_string_utils::unmangle(self.unsafe_as_str().into()))
     }

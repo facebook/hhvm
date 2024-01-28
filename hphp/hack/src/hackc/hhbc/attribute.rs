@@ -121,24 +121,8 @@ fn is_dynamically_callable<'arena>(attr: &Attribute<'arena>) -> bool {
     is(ua::DYNAMICALLY_CALLABLE, attr)
 }
 
-fn is_native<'arena>(attr: &Attribute<'arena>) -> bool {
-    is(ua::NATIVE, attr)
-}
-
 fn is_enum_class<'arena>(attr: &Attribute<'arena>) -> bool {
     is(ua::ENUM_CLASS, attr)
-}
-
-fn is_memoize<'arena>(attr: &Attribute<'arena>) -> bool {
-    ua::is_memoized(attr.name.unsafe_as_str())
-}
-
-fn is_memoize_lsb<'arena>(attr: &Attribute<'arena>) -> bool {
-    attr.name.unsafe_as_str() == ua::MEMOIZE_LSB
-}
-
-pub fn has_native<'arena>(attrs: &[Attribute<'arena>]) -> bool {
-    has(attrs, is_native)
 }
 
 pub fn has_enum_class<'arena>(attrs: &[Attribute<'arena>]) -> bool {
@@ -175,14 +159,6 @@ pub fn has_provenance_skip_frame<'arena>(attrs: &[Attribute<'arena>]) -> bool {
 
 pub fn has_dynamically_callable<'arena>(attrs: &[Attribute<'arena>]) -> bool {
     has(attrs, is_dynamically_callable)
-}
-
-pub fn has_is_memoize<'arena>(attrs: &[Attribute<'arena>]) -> bool {
-    has(attrs, is_memoize)
-}
-
-pub fn has_is_memoize_lsb<'arena>(attrs: &[Attribute<'arena>]) -> bool {
-    has(attrs, is_memoize_lsb)
 }
 
 pub fn deprecation_info<'a, 'arena>(

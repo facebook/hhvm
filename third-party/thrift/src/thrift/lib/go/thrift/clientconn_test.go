@@ -17,6 +17,7 @@
 package thrift
 
 import (
+	"context"
 	"errors"
 	"testing"
 )
@@ -74,6 +75,10 @@ func (f *fakeOproto) WriteMessageEnd() error {
 	return nil
 }
 
+func (f *fakeOproto) Transport() Transport {
+	return NewMemoryBuffer()
+}
+
 func (f *fakeOproto) Flush() error {
 	if f.errOnFlush {
 		return errFakeOprotoFlush
@@ -127,11 +132,13 @@ func TestSendMsgError(t *testing.T) {
 			expected: errFakeOprotoFlush,
 		},
 	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	for i, testCase := range testCases {
 		cc := ClientConn{oproto: testCase.oproto}
 
-		if err := cc.SendMsg("foobar", testCase.request, CALL); err.Error() != testCase.expected.Error() {
+		if err := cc.SendMsg(ctx, "foobar", testCase.request, CALL); err.Error() != testCase.expected.Error() {
 			t.Errorf("#%d: expected call to SendMsg to return \"%+v\"; got \"%+v\"", i, testCase.expected, err)
 		}
 	}
@@ -176,10 +183,13 @@ func TestRecvMsgError(t *testing.T) {
 		},
 	}
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	for i, testCase := range testCases {
 		cc := ClientConn{iproto: testCase.iproto}
 
-		if err := cc.RecvMsg("foobar", testCase.response); err.Error() != testCase.expected.Error() {
+		if err := cc.RecvMsg(ctx, "foobar", testCase.response); err.Error() != testCase.expected.Error() {
 			t.Errorf("#%d: expected call to RecvMsg to return \"%+v\"; got \"%+v\"", i, testCase.expected, err)
 		}
 	}

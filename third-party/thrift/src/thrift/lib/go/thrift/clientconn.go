@@ -17,6 +17,7 @@
 package thrift
 
 import (
+	"context"
 	"fmt"
 )
 
@@ -81,8 +82,12 @@ func (cc *ClientConn) IsOpen() bool {
 }
 
 // SendMsg sends a request to a given thrift endpoint
-func (cc *ClientConn) SendMsg(method string, req IRequest, msgType MessageType) error {
+func (cc *ClientConn) SendMsg(ctx context.Context, method string, req IRequest, msgType MessageType) error {
 	cc.seqID++
+
+	if err := setHeaders(ctx, cc.oproto.Transport()); err != nil {
+		return err
+	}
 
 	if err := cc.oproto.WriteMessageBegin(method, msgType, cc.seqID); err != nil {
 		return err
@@ -100,7 +105,7 @@ func (cc *ClientConn) SendMsg(method string, req IRequest, msgType MessageType) 
 }
 
 // RecvMsg receives the response from a call to a thrift endpoint
-func (cc *ClientConn) RecvMsg(method string, res IResponse) error {
+func (cc *ClientConn) RecvMsg(ctx context.Context, method string, res IResponse) error {
 	recvMethod, mTypeID, seqID, err := cc.iproto.ReadMessageBegin()
 
 	if err != nil {

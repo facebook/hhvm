@@ -63,34 +63,29 @@ pub(crate) fn convert_func<'a>(
 
     let return_type_info = crate::types::convert(&func.return_type, strings);
 
-    let decl_vars = Slice::fill_iter(strings.alloc, decl_vars);
-
-    let params = Slice::fill_iter(
-        strings.alloc,
-        func.params.into_iter().map(|param| {
-            let name = strings.lookup_ffi_str(param.name);
-            let user_attributes = convert::convert_attributes(param.user_attributes, strings);
-            let default_value = param
-                .default_value
-                .map(|dv| {
-                    let label = labeler.lookup_bid(dv.init);
-                    hhbc::DefaultValue {
-                        label,
-                        expr: dv.expr,
-                    }
-                })
-                .into();
-            hhbc::Param {
-                name,
-                is_variadic: param.is_variadic,
-                is_inout: param.is_inout,
-                is_readonly: param.is_readonly,
-                user_attributes,
-                type_info: crate::types::convert(&param.ty, strings),
-                default_value,
-            }
-        }),
-    );
+    let params = Vec::from_iter(func.params.into_iter().map(|param| {
+        let name = strings.lookup_ffi_str(param.name);
+        let user_attributes = convert::convert_attributes(param.user_attributes, strings);
+        let default_value = param
+            .default_value
+            .map(|dv| {
+                let label = labeler.lookup_bid(dv.init);
+                hhbc::DefaultValue {
+                    label,
+                    expr: dv.expr,
+                }
+            })
+            .into();
+        hhbc::Param {
+            name,
+            is_variadic: param.is_variadic,
+            is_inout: param.is_inout,
+            is_readonly: param.is_readonly,
+            user_attributes,
+            type_info: crate::types::convert(&param.ty, strings),
+            default_value,
+        }
+    }));
 
     let doc_comment = func.doc_comment.into();
 
@@ -112,27 +107,25 @@ pub(crate) fn convert_func<'a>(
         }),
     );
 
-    let shadowed_tparams = Slice::fill_iter(
-        strings.alloc,
+    let shadowed_tparams = Vec::from_iter(
         func.shadowed_tparams
             .iter()
             .map(|name| strings.lookup_class_name(*name).as_ffi_str()),
     );
 
-    let body_instrs = body_instrs.to_slice(strings.alloc);
-    let stack_depth =
-        stack_depth::compute_stack_depth(params.as_ref(), body_instrs.as_ref()).unwrap();
+    let body_instrs = body_instrs.to_vec();
+    let stack_depth = stack_depth::compute_stack_depth(params.as_ref(), &body_instrs).unwrap();
 
     hhbc::Body {
-        body_instrs,
-        decl_vars,
+        body_instrs: body_instrs.into(),
+        decl_vars: decl_vars.into(),
         doc_comment,
         is_memoize_wrapper: func.is_memoize_wrapper,
         is_memoize_wrapper_lsb: func.is_memoize_wrapper_lsb,
         num_iters: func.num_iters,
-        params,
+        params: params.into(),
         return_type_info,
-        shadowed_tparams,
+        shadowed_tparams: shadowed_tparams.into(),
         upper_bounds,
         stack_depth,
     }

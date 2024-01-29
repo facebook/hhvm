@@ -532,7 +532,7 @@ fn assemble_method<'arena>(
 fn assemble_shadowed_tparams<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-) -> Result<Slice<'arena, Str<'arena>>> {
+) -> Result<Vec<Str<'arena>>> {
     token_iter.expect(Token::is_open_curly)?;
     let mut stp = Vec::new();
     while token_iter.peek_is(Token::is_identifier) {
@@ -542,7 +542,7 @@ fn assemble_shadowed_tparams<'arena>(
         }
     }
     token_iter.expect(Token::is_close_curly)?;
-    Ok(Slice::from_vec(alloc, stp))
+    Ok(stp)
 }
 
 fn assemble_method_flags(token_iter: &mut Lexer<'_>) -> Result<hhbc::MethodFlags> {
@@ -1417,7 +1417,7 @@ fn assemble_params<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     decl_map: &mut DeclMap<'arena>,
-) -> Result<Slice<'arena, hhbc::Param<'arena>>> {
+) -> Result<Vec<hhbc::Param<'arena>>> {
     token_iter.expect(Token::is_open_paren)?;
     let mut params = Vec::new();
     while !token_iter.peek_is(Token::is_close_paren) {
@@ -1427,7 +1427,7 @@ fn assemble_params<'arena>(
         }
     }
     token_iter.expect(Token::is_close_paren)?;
-    Ok(Slice::from_vec(alloc, params))
+    Ok(params)
 }
 
 /// a: [user_attributes]? inout? readonly? ...?<type_info>?name (= default_value)?
@@ -1489,14 +1489,14 @@ fn assemble_body<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     decl_map: &mut DeclMap<'arena>,
-    params: Slice<'arena, hhbc::Param<'arena>>,
+    params: Vec<hhbc::Param<'arena>>,
     return_type_info: Maybe<hhbc::TypeInfo<'arena>>,
-    shadowed_tparams: Slice<'arena, Str<'arena>>,
+    shadowed_tparams: Vec<Str<'arena>>,
     upper_bounds: Slice<'arena, hhbc::UpperBound<'arena>>,
 ) -> Result<(hhbc::Body<'arena>, hhbc::Coeffects<'arena>)> {
     let mut doc_comment = Maybe::Nothing;
     let mut instrs = Vec::new();
-    let mut decl_vars = Slice::default();
+    let mut decl_vars = Vec::new();
     let mut num_iters = 0;
     let mut coeff = hhbc::Coeffects::default();
     let mut is_memoize_wrapper = false;
@@ -1528,7 +1528,6 @@ fn assemble_body<'arena>(
                     token_iter.error("Cannot have more than one .declvars per function body")
                 );
             }
-
             decl_vars = assemble_decl_vars(alloc, token_iter, decl_map)?;
         } else if token_iter.peek_is(is_coeffects_decl) {
             coeff = assemble_coeffects(alloc, token_iter)?;
@@ -1543,18 +1542,17 @@ fn assemble_body<'arena>(
         instrs.push(assemble_instr(alloc, token_iter, decl_map, &mut tcb_count)?);
     }
     token_iter.expect(Token::is_close_curly)?;
-    let body_instrs = Slice::from_vec(alloc, instrs);
-    let stack_depth = stack_depth::compute_stack_depth(params.as_ref(), body_instrs.as_ref())?;
+    let stack_depth = stack_depth::compute_stack_depth(&params, &instrs)?;
     let tr = hhbc::Body {
-        body_instrs,
-        decl_vars,
+        body_instrs: instrs.into(),
+        decl_vars: decl_vars.into(),
         num_iters,
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
         doc_comment,
-        params,
+        params: params.into(),
         return_type_info,
-        shadowed_tparams,
+        shadowed_tparams: shadowed_tparams.into(),
         stack_depth,
         upper_bounds,
     };
@@ -1752,7 +1750,7 @@ fn assemble_decl_vars<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     decl_map: &mut DeclMap<'arena>,
-) -> Result<Slice<'arena, Str<'arena>>> {
+) -> Result<Vec<Str<'arena>>> {
     token_iter.expect_str(Token::is_decl, ".declvars")?;
     let mut var_names = Vec::new();
     while !token_iter.peek_is(Token::is_semicolon) {
@@ -1762,7 +1760,7 @@ fn assemble_decl_vars<'arena>(
         decl_map.insert(var_nm, decl_map.len().try_into().unwrap());
     }
     token_iter.expect(Token::is_semicolon)?;
-    Ok(Slice::from_vec(alloc, var_names))
+    Ok(var_names)
 }
 
 #[assemble_opcode_macro::assemble_opcode]

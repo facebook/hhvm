@@ -494,7 +494,7 @@ fn print_method_def(ctx: &Context<'_>, w: &mut dyn Write, method_def: &Method<'_
     let body = &method_def.body;
     newline(w)?;
     w.write_all(b"  .method ")?;
-    print_shadowed_tparams(w, body.shadowed_tparams)?;
+    print_shadowed_tparams(w, &body.shadowed_tparams)?;
     print_upper_bounds_(w, body.upper_bounds)?;
     w.write_all(b" ")?;
     print_special_and_user_attrs(
@@ -842,7 +842,7 @@ fn print_body(
     if !body.decl_vars.is_empty() {
         ctx.newline(w)?;
         w.write_all(b".declvars ")?;
-        concat_by(w, " ", body.decl_vars, |w, var| {
+        concat_by(w, " ", &body.decl_vars, |w, var| {
             if var.iter().all(is_bareword_char) {
                 w.write_all(var)
             } else {

@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::Slice;
 use hhbc::Instruct;
 use hhbc::Pseudo;
 
@@ -514,17 +513,8 @@ impl<'a> InstrSeq<'a> {
         i
     }
 
-    pub fn to_slice(self, alloc: &'a bumpalo::Bump) -> Slice<'a, Instruct<'a>> {
-        let mut v = bumpalo::collections::Vec::with_capacity_in(self.full_len(), alloc);
-        for list in IntoListIter::new(self) {
-            let start = v.len();
-            v.extend(list);
-            let end = Self::compact_tail(&mut v[..], start);
-            v.truncate(end);
-        }
-        Slice::new(v.into_bump_slice())
-    }
-
+    /// Flatten self into a contiguous Vec of instructions, with SrcLocs compacted
+    /// to only preserve the final SrcLoc in any consecutive sequence.
     pub fn to_vec(self) -> Vec<Instruct<'a>> {
         let mut v = Vec::with_capacity(self.full_len());
         for list in IntoListIter::new(self) {
@@ -536,7 +526,7 @@ impl<'a> InstrSeq<'a> {
         v
     }
 
-    /// Test whether `i` is of case `Pseudo::SrcLoc`.
+    /// Test whether `instruction` is of case `Pseudo::SrcLoc`.
     fn is_srcloc(instruction: &Instruct<'a>) -> bool {
         matches!(instruction, Instruct::Pseudo(Pseudo::SrcLoc(_)))
     }

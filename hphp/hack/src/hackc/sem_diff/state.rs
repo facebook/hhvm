@@ -1159,8 +1159,7 @@ impl<'arena, 'a> State<'arena, 'a> {
     pub(crate) fn instr_at(&self, ip: InstrPtr) -> Option<&'arena Instruct<'arena>> {
         ip.into_option().and_then(|ip| {
             let idx = ip.as_usize();
-            let instrs = self.body.hhbc_body.body_instrs.as_arena_ref();
-            instrs.get(idx)
+            self.body.hhbc_body.body_instrs.get(idx)
         })
     }
 

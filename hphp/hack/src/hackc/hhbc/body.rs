@@ -6,6 +6,7 @@
 use ffi::Maybe;
 use ffi::Slice;
 use ffi::Str;
+use ffi::Vector;
 use serde::Serialize;
 
 use crate::Instruct;
@@ -17,14 +18,14 @@ use crate::UpperBound;
 #[repr(C)]
 pub struct Body<'arena> {
     /// Must have been compacted with InstrSeq::compact_iter().
-    pub body_instrs: Slice<'arena, Instruct<'arena>>,
-    pub decl_vars: Slice<'arena, Str<'arena>>,
+    pub body_instrs: Vector<Instruct<'arena>>,
+    pub decl_vars: Vector<Str<'arena>>,
     pub num_iters: usize,
     pub is_memoize_wrapper: bool,
     pub is_memoize_wrapper_lsb: bool,
     pub upper_bounds: Slice<'arena, UpperBound<'arena>>,
-    pub shadowed_tparams: Slice<'arena, Str<'arena>>,
-    pub params: Slice<'arena, Param<'arena>>,
+    pub shadowed_tparams: Vector<Str<'arena>>,
+    pub params: Vector<Param<'arena>>,
     pub return_type_info: Maybe<TypeInfo<'arena>>,
     pub doc_comment: Maybe<Str<'arena>>,
     /// The statically computed stack depth for this Body. This can be computed

@@ -390,45 +390,48 @@ pub fn make_body<'a, 'arena, 'decl>(
 
     // Pretty-print the DV initializer expression as a Hack source code string,
     // to make it available for reflection.
-    params.iter_mut().for_each(|(p, default_value)| {
-        p.default_value = Maybe::from(default_value.as_ref().map(|(label, expr)| {
-            use print_expr::Context;
-            let ctx = Context::new(emitter);
-            let expr_env = body_env.as_ref();
-            let mut buf = Vec::new();
-            let expr = print_expr::print_expr(&ctx, &mut buf, &expr_env, expr).map_or_else(
-                |e| Str::new_str(alloc, &e.to_string()),
-                |_| Str::from_vec(alloc, buf),
-            );
-            hhbc::DefaultValue {
-                label: *label,
-                expr,
-            }
-        }));
-    });
+    let params = params
+        .into_iter()
+        .map(|(mut p, default_value)| {
+            p.default_value = Maybe::from(default_value.as_ref().map(|(label, expr)| {
+                use print_expr::Context;
+                let ctx = Context::new(emitter);
+                let expr_env = body_env.as_ref();
+                let mut buf = Vec::new();
+                let expr = print_expr::print_expr(&ctx, &mut buf, &expr_env, expr).map_or_else(
+                    |e| Str::new_str(alloc, &e.to_string()),
+                    |_| Str::from_vec(alloc, buf),
+                );
+                hhbc::DefaultValue {
+                    label: *label,
+                    expr,
+                }
+            }));
+            p
+        })
+        .collect::<Vec<_>>();
 
     // Now that we're done with this function, clear the named_local table.
     emitter.clear_named_locals();
 
-    let params = Slice::fill_iter(alloc, params.into_iter().map(|(p, _)| p));
-    let body_instrs = body_instrs.to_slice(alloc);
-    let stack_depth = stack_depth::compute_stack_depth(params.as_ref(), body_instrs.as_ref())
+    let body_instrs = body_instrs.to_vec();
+    let stack_depth = stack_depth::compute_stack_depth(params.as_ref(), &body_instrs)
         .map_err(error::Error::from_error)?;
 
     Ok(Body {
-        body_instrs,
-        decl_vars: Slice::fill_iter(alloc, decl_vars),
+        body_instrs: body_instrs.into(),
+        decl_vars: decl_vars.into(),
         num_iters,
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
         upper_bounds: Slice::fill_iter(alloc, upper_bounds),
-        shadowed_tparams: Slice::fill_iter(
-            alloc,
+        shadowed_tparams: Vec::from_iter(
             shadowed_tparams
                 .into_iter()
                 .map(|s| Str::new_str(alloc, &s)),
-        ),
-        params,
+        )
+        .into(),
+        params: params.into(),
         return_type_info: return_type_info.into(),
         doc_comment: doc_comment.map(|c| Str::new_str(alloc, &c.1)).into(),
         stack_depth,

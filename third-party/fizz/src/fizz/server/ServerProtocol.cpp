@@ -74,7 +74,7 @@ FIZZ_DECLARE_EVENT_HANDLER(
     StateEnum::ExpectingCertificate,
     Event::Certificate,
     StateEnum::ExpectingCertificateVerify,
-    StateEnum::ExpectingFinished)
+    StateEnum::ExpectingFinished);
 
 FIZZ_DECLARE_EVENT_HANDLER(
     ServerTypes,

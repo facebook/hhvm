@@ -61,7 +61,7 @@ class EventHandler : public EventHandlerBase<SM, state, event> {
     static typename sm::Actions handle(                                  \
         const typename sm::State&,                                       \
         typename sm::Param param);                                       \
-  };
+  }
 
 template <typename SM>
 typename StateMachine<SM>::EventHandlerFun StateMachine<SM>::getHandler(

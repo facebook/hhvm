@@ -380,7 +380,7 @@ fn assemble_class<'arena>(
         type_constants: type_constants.into(),
         ctx_constants: ctx_constants.into(),
         requirements: requirements.into(),
-        upper_bounds,
+        upper_bounds: upper_bounds.into(),
         doc_comment,
         flags,
     };
@@ -1188,9 +1188,9 @@ fn assemble_span(token_iter: &mut Lexer<'_>) -> Result<hhbc::Span> {
 fn assemble_upper_bounds<'arena>(
     token_iter: &mut Lexer<'_>,
     alloc: &'arena Bump,
-) -> Result<Slice<'arena, hhbc::UpperBound<'arena>>> {
+) -> Result<Vec<hhbc::UpperBound<'arena>>> {
     parse!(token_iter, "{" <ubs:assemble_upper_bound(alloc),*> "}");
-    Ok(Slice::from_vec(alloc, ubs))
+    Ok(ubs)
 }
 
 /// Ex: (T as <"HH\\int" "HH\\int" upper_bound>)
@@ -1201,7 +1201,7 @@ fn assemble_upper_bound<'arena>(
     parse!(token_iter, "(" <id:id> "as" <tis:assemble_type_info(alloc, TypeInfoKind::NotEnumOrTypeDef),*> ")");
     Ok(hhbc::UpperBound {
         name: id.into_ffi_str(alloc),
-        bounds: Slice::from_vec(alloc, tis),
+        bounds: tis.into(),
     })
 }
 
@@ -1492,7 +1492,7 @@ fn assemble_body<'arena>(
     params: Vec<hhbc::Param<'arena>>,
     return_type_info: Maybe<hhbc::TypeInfo<'arena>>,
     shadowed_tparams: Vec<Str<'arena>>,
-    upper_bounds: Slice<'arena, hhbc::UpperBound<'arena>>,
+    upper_bounds: Vec<hhbc::UpperBound<'arena>>,
 ) -> Result<(hhbc::Body<'arena>, hhbc::Coeffects<'arena>)> {
     let mut doc_comment = Maybe::Nothing;
     let mut instrs = Vec::new();
@@ -1554,7 +1554,7 @@ fn assemble_body<'arena>(
         return_type_info,
         shadowed_tparams: shadowed_tparams.into(),
         stack_depth,
-        upper_bounds,
+        upper_bounds: upper_bounds.into(),
     };
     Ok((tr, coeff))
 }

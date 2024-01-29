@@ -424,7 +424,7 @@ pub fn make_body<'a, 'arena, 'decl>(
         num_iters,
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
-        upper_bounds: Slice::fill_iter(alloc, upper_bounds),
+        upper_bounds: upper_bounds.into(),
         shadowed_tparams: Vec::from_iter(
             shadowed_tparams
                 .into_iter()
@@ -725,7 +725,7 @@ pub fn emit_generics_upper_bounds<'arena>(
             [] => None,
             _ => Some(UpperBound {
                 name: Str::new_str(alloc, get_tp_name(tparam)),
-                bounds: Slice::fill_iter(alloc, ubs),
+                bounds: ubs.into(),
             }),
         }
     };

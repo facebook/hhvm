@@ -89,23 +89,19 @@ pub(crate) fn convert_func<'a>(
 
     let doc_comment = func.doc_comment.into();
 
-    let upper_bounds = Slice::fill_iter(
-        strings.alloc,
-        func.tparams.iter().map(|(name, tparam)| {
-            let name = strings.lookup_class_name(*name);
-            let bounds = Slice::fill_iter(
-                strings.alloc,
-                tparam
-                    .bounds
-                    .iter()
-                    .map(|ty| crate::types::convert(ty, strings).unwrap()),
-            );
-            hhbc::UpperBound {
-                name: name.as_ffi_str(),
-                bounds,
-            }
-        }),
-    );
+    let upper_bounds = Vec::from_iter(func.tparams.iter().map(|(name, tparam)| {
+        let name = strings.lookup_class_name(*name);
+        let bounds = Vec::from_iter(
+            tparam
+                .bounds
+                .iter()
+                .map(|ty| crate::types::convert(ty, strings).unwrap()),
+        );
+        hhbc::UpperBound {
+            name: name.as_ffi_str(),
+            bounds: bounds.into(),
+        }
+    }));
 
     let shadowed_tparams = Vec::from_iter(
         func.shadowed_tparams
@@ -126,7 +122,7 @@ pub(crate) fn convert_func<'a>(
         params: params.into(),
         return_type_info,
         shadowed_tparams: shadowed_tparams.into(),
-        upper_bounds,
+        upper_bounds: upper_bounds.into(),
         stack_depth,
     }
 }

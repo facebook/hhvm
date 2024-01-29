@@ -875,7 +875,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         uses: uses.into(),
         methods: methods.into(),
         enum_type: Maybe::from(enum_type),
-        upper_bounds: Slice::fill_iter(alloc, upper_bounds),
+        upper_bounds: upper_bounds.into(),
         properties: Vec::from_iter(properties.into_iter().map(|p| p.prop)).into(),
         requirements: requirements.into(),
         type_constants: type_constants.into(),

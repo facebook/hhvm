@@ -67,16 +67,10 @@ pub(crate) fn convert_class<'a>(
             .map(|tc| convert_type_constant(tc, strings)),
     );
 
-    let upper_bounds = Slice::fill_iter(
-        alloc,
-        upper_bounds.iter().map(|(name, tys)| hhbc::UpperBound {
-            name: *name,
-            bounds: Slice::fill_iter(
-                alloc,
-                tys.iter().map(|ty| types::convert(ty, strings).unwrap()),
-            ),
-        }),
-    );
+    let upper_bounds = Vec::from_iter(upper_bounds.iter().map(|(name, tys)| hhbc::UpperBound {
+        name: *name,
+        bounds: Vec::from_iter(tys.iter().map(|ty| types::convert(ty, strings).unwrap())).into(),
+    }));
 
     let base = base.map(|base| strings.lookup_class_name(base)).into();
 
@@ -122,7 +116,7 @@ pub(crate) fn convert_class<'a>(
         requirements: requirements.into(),
         span: src_loc.to_span(),
         type_constants: type_constants.into(),
-        upper_bounds,
+        upper_bounds: upper_bounds.into(),
         uses: uses.into(),
     };
     unit.classes.push(class);

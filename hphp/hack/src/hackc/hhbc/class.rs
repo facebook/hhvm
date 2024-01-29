@@ -53,7 +53,7 @@ pub struct Class<'arena> {
     pub type_constants: Vector<TypeConstant<'arena>>,
     pub ctx_constants: Vector<CtxConstant<'arena>>,
     pub requirements: Vector<Requirement<'arena>>,
-    pub upper_bounds: Slice<'arena, UpperBound<'arena>>,
+    pub upper_bounds: Vector<UpperBound<'arena>>,
     pub doc_comment: Maybe<Str<'arena>>,
     pub flags: Attr,
 }

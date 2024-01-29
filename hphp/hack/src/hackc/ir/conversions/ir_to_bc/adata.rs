@@ -1,6 +1,5 @@
 use std::sync::Arc;
 
-use ffi::Slice;
 use hash::HashMap;
 
 use crate::strings::StringCache;
@@ -36,7 +35,7 @@ impl<'a> AdataCache<'a> {
         self.adata[*idx].id
     }
 
-    pub(crate) fn finish(self) -> Slice<'a, hhbc::Adata<'a>> {
-        Slice::fill_iter(self.alloc, self.adata)
+    pub(crate) fn finish(self) -> Vec<hhbc::Adata<'a>> {
+        self.adata
     }
 }

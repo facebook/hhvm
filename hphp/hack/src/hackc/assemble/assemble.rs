@@ -101,7 +101,7 @@ struct UnitBuilder<'a> {
 impl<'a> UnitBuilder<'a> {
     fn into_unit(self, alloc: &'a Bump) -> hhbc::Unit<'a> {
         hhbc::Unit {
-            adata: Slice::fill_iter(alloc, self.adatas),
+            adata: self.adatas.into(),
             functions: self.funcs.into(),
             classes: self.classes.into(),
             typedefs: self.typedefs.into(),

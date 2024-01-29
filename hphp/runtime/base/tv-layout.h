@@ -326,12 +326,12 @@ struct Tv7Up : public LayoutBase<Tv7Up,
       };
 
       switch (rem) {
-      case 1: { assertx(*type++ == 0); FOLLY_FALLTHROUGH; }
-      case 2: { assertx(*type++ == 0); FOLLY_FALLTHROUGH; }
-      case 3: { assertx(*type++ == 0); FOLLY_FALLTHROUGH; }
-      case 4: { assertx(*type++ == 0); FOLLY_FALLTHROUGH; }
-      case 5: { assertx(*type++ == 0); FOLLY_FALLTHROUGH; }
-      case 6: { assertx(*type++ == 0); FOLLY_FALLTHROUGH; }
+      case 1: { assertx(*type++ == 0); [[fallthrough]]; }
+      case 2: { assertx(*type++ == 0); [[fallthrough]]; }
+      case 3: { assertx(*type++ == 0); [[fallthrough]]; }
+      case 4: { assertx(*type++ == 0); [[fallthrough]]; }
+      case 5: { assertx(*type++ == 0); [[fallthrough]]; }
+      case 6: { assertx(*type++ == 0); [[fallthrough]]; }
       case 0:
         break;
       default:

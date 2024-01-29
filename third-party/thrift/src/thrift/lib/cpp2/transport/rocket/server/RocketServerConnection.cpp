@@ -448,9 +448,9 @@ void RocketServerConnection::handleUntrackedFrame(
       return;
     }
     case FrameType::CANCEL:
-      FOLLY_FALLTHROUGH;
+      [[fallthrough]];
     case FrameType::REQUEST_N:
-      FOLLY_FALLTHROUGH;
+      [[fallthrough]];
     case FrameType::ERROR:
       return;
 

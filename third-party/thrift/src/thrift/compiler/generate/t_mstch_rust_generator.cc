@@ -44,9 +44,11 @@ namespace compiler {
 namespace rust {
 
 struct rust_codegen_options {
-  // Name that the main crate uses to refer to its dependency on the types
-  // crate.
+  // Names that the main crate uses to refer to its dependency on the other
+  // crates.
   std::string types_crate;
+  std::string clients_crate;
+  std::string services_crate;
 
   // Key: package name according to Thrift.
   // Value: rust_crate_name to use in generated code.
@@ -529,6 +531,8 @@ class rust_mstch_program : public mstch_program {
         {
             {"program:types?", &rust_mstch_program::rust_has_types},
             {"program:types", &rust_mstch_program::rust_types},
+            {"program:clients?", &rust_mstch_program::rust_has_clients},
+            {"program:servers?", &rust_mstch_program::rust_has_servers},
             {"program:structsOrEnums?",
              &rust_mstch_program::rust_structs_or_enums},
             {"program:nonexhaustiveStructs?",
@@ -594,6 +598,10 @@ class rust_mstch_program : public mstch_program {
     }
     return types;
   }
+
+  mstch::node rust_has_clients() { return !options_.clients_crate.empty(); }
+
+  mstch::node rust_has_servers() { return !options_.services_crate.empty(); }
 
   mstch::node rust_structs_or_enums() {
     return !program_->structs_and_unions().empty() ||
@@ -2190,6 +2198,16 @@ void t_mstch_rust_generator::generate_program() {
   if (auto types_crate_flag = get_option("types_crate")) {
     options_.types_crate =
         boost::algorithm::replace_all_copy(*types_crate_flag, "-", "_");
+  }
+
+  if (auto clients_crate_flag = get_option("clients_crate")) {
+    options_.clients_crate =
+        boost::algorithm::replace_all_copy(*clients_crate_flag, "-", "_");
+  }
+
+  if (auto services_crate_flag = get_option("services_crate")) {
+    options_.services_crate =
+        boost::algorithm::replace_all_copy(*services_crate_flag, "-", "_");
   }
 
   if (auto cratemap_flag = get_option("cratemap")) {

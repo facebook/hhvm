@@ -41,10 +41,10 @@ pub use self::types::*;{{!
 }}{{!
 }}{{#program:types?}}
 
-pub use {{program:types}} as types;{{!
-}}{{/program:types?}}{{#program:constants?}}
-pub use {{program:types}}::consts as consts;{{!
-}}{{/program:constants?}}{{!
+pub use {{program:types}} as types;
+{{/program:types?}}{{#program:constants?}}
+pub use {{program:types}}::consts as consts;
+{{/program:constants?}}{{!
 }}{{#program:structs}}{{!
     }}{{#struct:has_adapter?}}{{!
     }}{{>lib/adapter/struct}}{{!
@@ -55,12 +55,16 @@ pub use {{program:types}}::consts as consts;{{!
 #[doc(hidden)]
 pub mod dependencies;
 pub use {{program:types}}::services as services;
+{{#program:clients?}}
 pub mod client;
+pub mod mock;
+{{/program:clients?}}
+{{#program:servers?}}
 pub mod server;
-pub mod mock;{{!
-}}{{/program:services?}}
-pub use {{program:types}}::errors as errors;{{!
-}}{{#program:nonstandardTypes?}}
+{{/program:servers?}}
+{{/program:services?}}
+pub use {{program:types}}::errors as errors;
+{{#program:nonstandardTypes?}}
 
 pub(crate) mod r#impl {{>lib/block}}{{>lib/mod.impl}}}{{!
 }}{{/program:nonstandardTypes?}}

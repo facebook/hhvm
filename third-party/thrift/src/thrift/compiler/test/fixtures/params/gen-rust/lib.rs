@@ -6,11 +6,7 @@
 
 #[allow(unused_imports)]
 pub use self::errors::*;
-
 #[doc(hidden)]
 pub mod dependencies;
 pub use ::::services as services;
-pub mod client;
-pub mod server;
-pub mod mock;
 pub use ::::errors as errors;

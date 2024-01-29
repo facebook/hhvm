@@ -128,13 +128,16 @@ ProxyConfig<RouterInfo>::ProxyConfig(
 
   bool enablePolicyMapV2 = readBool("enable_policy_map_v2", false);
 
+  bool enableAsyncDlBroadcast = readBool("enable_async_dl_broadcast", false);
+
   proxyRoute_ = std::make_shared<ProxyRoute<RouterInfo>>(
       proxy,
       routeSelectors,
       RootRouteRolloutOpts{
           .enablePolicyMapV2 = enablePolicyMapV2,
           .enableDeleteDistribution = enableDeleteDistribution,
-          .enableCrossRegionDeleteRpc = enableCrossRegionDeleteRpc});
+          .enableCrossRegionDeleteRpc = enableCrossRegionDeleteRpc,
+          .enableAsyncDlBroadcast = enableAsyncDlBroadcast});
   serviceInfo_ = std::make_shared<ServiceInfo<RouterInfo>>(proxy, *this);
 }
 

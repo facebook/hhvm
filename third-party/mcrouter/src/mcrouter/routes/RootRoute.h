@@ -30,6 +30,7 @@ struct RootRouteRolloutOpts {
   bool enablePolicyMapV2 = false;
   bool enableDeleteDistribution = false;
   bool enableCrossRegionDeleteRpc = true;
+  bool enableAsyncDlBroadcast = false;
 };
 
 template <class RouterInfo>
@@ -52,7 +53,8 @@ class RootRoute {
             rolloutOpts.enablePolicyMapV2),
         defaultRoute_(opts_.default_route),
         enableDeleteDistribution_(rolloutOpts.enableDeleteDistribution),
-        enableCrossRegionDeleteRpc_(rolloutOpts.enableCrossRegionDeleteRpc) {}
+        enableCrossRegionDeleteRpc_(rolloutOpts.enableCrossRegionDeleteRpc),
+        enableAsyncDlBroadcast_(rolloutOpts.enableAsyncDlBroadcast) {}
 
   template <class Request>
   bool traverse(
@@ -130,6 +132,7 @@ class RootRoute {
   RoutingPrefix defaultRoute_;
   bool enableDeleteDistribution_;
   bool enableCrossRegionDeleteRpc_;
+  bool enableAsyncDlBroadcast_;
 
   template <class Request>
   FOLLY_ALWAYS_INLINE ReplyT<Request> getTargetsAndRoute(
@@ -243,12 +246,20 @@ class RootRoute {
     }
     if (enableDeleteDistribution_ &&
         req.key_ref()->routingPrefix() == kBroadcastPrefix) {
-      return fiber_local<RouterInfo>::runWithLocals([&req, &rh]() {
-        // DistributionRoute will read empty string as "broadcast", i.e.
-        // distribute to all regions:
-        fiber_local<RouterInfo>::setDistributionTargetRegion("");
-        return rh[0]->route(req);
-      });
+      if (enableAsyncDlBroadcast_) {
+        auto reqCopy = std::make_shared<const McDeleteRequest>(req);
+        auto r = rh[0];
+        folly::fibers::addTask([r, reqCopy]() { r->route(*reqCopy); });
+        // for async return carbon::Result::NOTFOUND:
+        return createReply(DefaultReply, req);
+      } else {
+        return fiber_local<RouterInfo>::runWithLocals([&req, &rh]() {
+          // DistributionRoute will read empty string as "broadcast", i.e.
+          // distribute to all regions:
+          fiber_local<RouterInfo>::setDistributionTargetRegion("");
+          return rh[0]->route(req);
+        });
+      }
     } else {
       return rh[0]->route(req);
     }

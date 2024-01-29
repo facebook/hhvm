@@ -224,7 +224,7 @@ void raise_call_to_undefined(const StringData* name, const Class* cls) {
 }
 
 void raise_resolve_class_undefined(const StringData* name) {
-  raise_error("Failure to resolve undefined class %s", name->data());
+  raise_error(Strings::FAILED_RESOLVE_CLASS, name->data());
 }
 
 void raise_recoverable_error(const char *fmt, ...) {

@@ -859,10 +859,10 @@ class MyUnion final  {
 
   MyUnion& operator=(MyUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
+        __fbthrift_clear();
         return *this;
       }
       case Type::bool_field:
@@ -938,7 +938,7 @@ class MyUnion final  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     apache::thrift::clear(rhs);
@@ -947,11 +947,11 @@ class MyUnion final  {
 
   MyUnion& operator=(const MyUnion& rhs) {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
-        return *this;
+        __fbthrift_clear();
+        break;
       }
       case Type::bool_field:
       {
@@ -1026,7 +1026,7 @@ class MyUnion final  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     return *this;

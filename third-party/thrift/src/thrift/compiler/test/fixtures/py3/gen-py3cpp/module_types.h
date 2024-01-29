@@ -950,10 +950,10 @@ class AdaptedUnion final  {
 
   AdaptedUnion& operator=(AdaptedUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
+        __fbthrift_clear();
         return *this;
       }
       case Type::best:
@@ -964,7 +964,7 @@ class AdaptedUnion final  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     apache::thrift::clear(rhs);
@@ -973,11 +973,11 @@ class AdaptedUnion final  {
 
   AdaptedUnion& operator=(const AdaptedUnion& rhs) {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
-        return *this;
+        __fbthrift_clear();
+        break;
       }
       case Type::best:
       {
@@ -987,7 +987,7 @@ class AdaptedUnion final  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     return *this;
@@ -2509,10 +2509,10 @@ class BinaryUnion final  {
 
   BinaryUnion& operator=(BinaryUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
+        __fbthrift_clear();
         return *this;
       }
       case Type::iobuf_val:
@@ -2523,7 +2523,7 @@ class BinaryUnion final  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     apache::thrift::clear(rhs);
@@ -2532,11 +2532,11 @@ class BinaryUnion final  {
 
   BinaryUnion& operator=(const BinaryUnion& rhs) {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
-        return *this;
+        __fbthrift_clear();
+        break;
       }
       case Type::iobuf_val:
       {
@@ -2546,7 +2546,7 @@ class BinaryUnion final  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     return *this;

@@ -1384,10 +1384,10 @@ class Baz final  {
 
   Baz& operator=(Baz&& rhs) noexcept {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
+        __fbthrift_clear();
         return *this;
       }
       case Type::intField:
@@ -1418,7 +1418,7 @@ class Baz final  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     apache::thrift::clear(rhs);
@@ -1427,11 +1427,11 @@ class Baz final  {
 
   Baz& operator=(const Baz& rhs) {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
-        return *this;
+        __fbthrift_clear();
+        break;
       }
       case Type::intField:
       {
@@ -1461,7 +1461,7 @@ class Baz final  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     return *this;
@@ -6017,10 +6017,10 @@ class ThriftAdaptTestUnion final  {
 
   ThriftAdaptTestUnion& operator=(ThriftAdaptTestUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
+        __fbthrift_clear();
         return *this;
       }
       case Type::delay:
@@ -6036,7 +6036,7 @@ class ThriftAdaptTestUnion final  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     apache::thrift::clear(rhs);
@@ -6045,11 +6045,11 @@ class ThriftAdaptTestUnion final  {
 
   ThriftAdaptTestUnion& operator=(const ThriftAdaptTestUnion& rhs) {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
-        return *this;
+        __fbthrift_clear();
+        break;
       }
       case Type::delay:
       {
@@ -6064,7 +6064,7 @@ class ThriftAdaptTestUnion final  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     return *this;

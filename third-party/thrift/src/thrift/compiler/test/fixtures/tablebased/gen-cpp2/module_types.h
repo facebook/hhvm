@@ -1195,10 +1195,10 @@ class ExampleUnion final  {
 
   ExampleUnion& operator=(ExampleUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
+        __fbthrift_clear();
         return *this;
       }
       case Type::fieldA:
@@ -1214,7 +1214,7 @@ class ExampleUnion final  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     apache::thrift::clear(rhs);
@@ -1223,11 +1223,11 @@ class ExampleUnion final  {
 
   ExampleUnion& operator=(const ExampleUnion& rhs) {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
-        return *this;
+        __fbthrift_clear();
+        break;
       }
       case Type::fieldA:
       {
@@ -1242,7 +1242,7 @@ class ExampleUnion final  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     return *this;

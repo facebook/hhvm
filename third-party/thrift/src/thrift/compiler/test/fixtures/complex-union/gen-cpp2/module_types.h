@@ -311,10 +311,10 @@ class ComplexUnion final  {
 
   ComplexUnion& operator=(ComplexUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
+        __fbthrift_clear();
         return *this;
       }
       case Type::intValue:
@@ -350,7 +350,7 @@ class ComplexUnion final  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     apache::thrift::clear(rhs);
@@ -359,11 +359,11 @@ class ComplexUnion final  {
 
   ComplexUnion& operator=(const ComplexUnion& rhs) {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
-        return *this;
+        __fbthrift_clear();
+        break;
       }
       case Type::intValue:
       {
@@ -398,7 +398,7 @@ class ComplexUnion final  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     return *this;
@@ -926,10 +926,10 @@ class ListUnion final  {
 
   ListUnion& operator=(ListUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
+        __fbthrift_clear();
         return *this;
       }
       case Type::intListValue:
@@ -945,7 +945,7 @@ class ListUnion final  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     apache::thrift::clear(rhs);
@@ -954,11 +954,11 @@ class ListUnion final  {
 
   ListUnion& operator=(const ListUnion& rhs) {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
-        return *this;
+        __fbthrift_clear();
+        break;
       }
       case Type::intListValue:
       {
@@ -973,7 +973,7 @@ class ListUnion final  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     return *this;
@@ -1262,10 +1262,10 @@ class DataUnion final  {
 
   DataUnion& operator=(DataUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
+        __fbthrift_clear();
         return *this;
       }
       case Type::binaryData:
@@ -1281,7 +1281,7 @@ class DataUnion final  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     apache::thrift::clear(rhs);
@@ -1290,11 +1290,11 @@ class DataUnion final  {
 
   DataUnion& operator=(const DataUnion& rhs) {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
-        return *this;
+        __fbthrift_clear();
+        break;
       }
       case Type::binaryData:
       {
@@ -1309,7 +1309,7 @@ class DataUnion final  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     return *this;
@@ -1860,10 +1860,10 @@ class ValUnion final  {
 
   ValUnion& operator=(ValUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
+        __fbthrift_clear();
         return *this;
       }
       case Type::v1:
@@ -1879,7 +1879,7 @@ class ValUnion final  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     apache::thrift::clear(rhs);
@@ -1888,11 +1888,11 @@ class ValUnion final  {
 
   ValUnion& operator=(const ValUnion& rhs) {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
-        return *this;
+        __fbthrift_clear();
+        break;
       }
       case Type::v1:
       {
@@ -1907,7 +1907,7 @@ class ValUnion final  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     return *this;
@@ -2196,10 +2196,10 @@ class VirtualComplexUnion  {
 
   VirtualComplexUnion& operator=(VirtualComplexUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
+        __fbthrift_clear();
         return *this;
       }
       case Type::thingOne:
@@ -2215,7 +2215,7 @@ class VirtualComplexUnion  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     apache::thrift::clear(rhs);
@@ -2224,11 +2224,11 @@ class VirtualComplexUnion  {
 
   VirtualComplexUnion& operator=(const VirtualComplexUnion& rhs) {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
-        return *this;
+        __fbthrift_clear();
+        break;
       }
       case Type::thingOne:
       {
@@ -2243,7 +2243,7 @@ class VirtualComplexUnion  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     return *this;
@@ -2643,10 +2643,10 @@ class NonCopyableUnion final  {
 
   NonCopyableUnion& operator=(NonCopyableUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
+        __fbthrift_clear();
         return *this;
       }
       case Type::s:
@@ -2657,7 +2657,7 @@ class NonCopyableUnion final  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     apache::thrift::clear(rhs);

@@ -16,10 +16,10 @@
 
 %>  <%struct:cpp_underlying_name%>& operator=(<%struct:cpp_underlying_name%>&& rhs) noexcept {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
+        __fbthrift_clear();
         return *this;
       }
 <%#struct:fields%>
@@ -37,7 +37,7 @@
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     apache::thrift::clear(rhs);
@@ -47,11 +47,11 @@
 
   <%struct:cpp_underlying_name%>& operator=(const <%struct:cpp_underlying_name%>& rhs) {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
-        return *this;
+        __fbthrift_clear();
+        break;
       }
 <%#struct:fields%>
       case Type::<%field:cpp_name%>:
@@ -68,7 +68,7 @@
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     return *this;

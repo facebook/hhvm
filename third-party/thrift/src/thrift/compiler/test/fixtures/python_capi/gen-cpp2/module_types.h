@@ -5770,10 +5770,10 @@ class Shallot final  {
 
   Shallot& operator=(Shallot&& rhs) noexcept {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
+        __fbthrift_clear();
         return *this;
       }
       case Type::myEnum:
@@ -5814,7 +5814,7 @@ class Shallot final  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     apache::thrift::clear(rhs);
@@ -5823,11 +5823,11 @@ class Shallot final  {
 
   Shallot& operator=(const Shallot& rhs) {
     if (this == &rhs) { return *this; }
-    __fbthrift_clear();
     switch (rhs.getType()) {
       case Type::__EMPTY__:
       {
-        return *this;
+        __fbthrift_clear();
+        break;
       }
       case Type::myEnum:
       {
@@ -5867,7 +5867,7 @@ class Shallot final  {
       default:
       {
         assert(false);
-        break;
+        __fbthrift_clear();
       }
     }
     return *this;

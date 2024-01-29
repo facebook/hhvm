@@ -1401,7 +1401,7 @@ void translateRuleName(VMCompactVector<LowStringPtr>& names, Str name) {
   }
 }
 
-Optional<HPHP::Module::RuleSet> translateRules(Slice<hhbc::Rule> rules) {
+Optional<HPHP::Module::RuleSet> translateRules(const Vector<hhbc::Rule>& rules) {
   HPHP::Module::RuleSet result;
   auto rules_ = range(rules);
   for (auto const& r : rules_) {
@@ -1438,12 +1438,12 @@ void translateModule(TranslationState& ts, const hhbc::Module& m) {
   translateUserAttributes(m.attributes, userAttrs);
 
   Optional<HPHP::Module::RuleSet> exports = maybeOrNullOptional(m.exports,
-    [&](Slice<hhbc::Rule> export_lst) {
+    [&](const Vector<hhbc::Rule>& export_lst) {
       return translateRules(export_lst);
     }
   );
   Optional<HPHP::Module::RuleSet> imports = maybeOrNullOptional(m.imports,
-    [&](Slice<hhbc::Rule> import_lst) {
+    [&](const Vector<hhbc::Rule>& import_lst) {
       return translateRules(import_lst);
     }
   );

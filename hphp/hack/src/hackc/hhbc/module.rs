@@ -6,6 +6,7 @@
 use ffi::Maybe;
 use ffi::Slice;
 use ffi::Str;
+use ffi::Vector;
 use serde::Serialize;
 
 use crate::Attribute;
@@ -34,6 +35,6 @@ pub struct Module<'arena> {
     pub name: ClassName<'arena>,
     pub span: Span,
     pub doc_comment: Maybe<Str<'arena>>,
-    pub exports: Maybe<Slice<'arena, Rule<'arena>>>,
-    pub imports: Maybe<Slice<'arena, Rule<'arena>>>,
+    pub exports: Maybe<Vector<Rule<'arena>>>,
+    pub imports: Maybe<Vector<Rule<'arena>>>,
 }

@@ -52,13 +52,13 @@ pub fn emit_module<'a, 'arena, 'decl>(
             ast_module
                 .exports
                 .as_ref()
-                .map(|v| Slice::fill_iter(alloc, v.iter().map(|r| emit_rule(alloc, r)))),
+                .map(|v| Vec::from_iter(v.iter().map(|r| emit_rule(alloc, r))).into()),
         ),
         imports: Maybe::from(
             ast_module
                 .imports
                 .as_ref()
-                .map(|v| Slice::fill_iter(alloc, v.iter().map(|r| emit_rule(alloc, r)))),
+                .map(|v| Vec::from_iter(v.iter().map(|r| emit_rule(alloc, r))).into()),
         ),
     })
 }

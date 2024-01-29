@@ -11,8 +11,8 @@ use std::write;
 
 use ffi::Maybe;
 use ffi::Maybe::*;
-use ffi::Slice;
 use ffi::Str;
+use ffi::Vector;
 use hash::HashSet;
 use hhbc::Adata;
 use hhbc::Attribute;
@@ -594,10 +594,10 @@ fn print_class_def<'arena>(
     newline(w)
 }
 
-fn print_rules(w: &mut dyn Write, rules: &Slice<'_, Rule<'_>>) -> Result<()> {
+fn print_rules(w: &mut dyn Write, rules: &[Rule<'_>]) -> Result<()> {
     let mut first = true;
 
-    for rule in rules.as_ref().iter() {
+    for rule in rules.iter() {
         if first {
             first = false;
         } else {
@@ -620,11 +620,7 @@ fn print_rules(w: &mut dyn Write, rules: &Slice<'_, Rule<'_>>) -> Result<()> {
     Ok(())
 }
 
-fn print_named_rules(
-    w: &mut dyn Write,
-    name: &str,
-    rules: Maybe<&Slice<'_, Rule<'_>>>,
-) -> Result<()> {
+fn print_named_rules(w: &mut dyn Write, name: &str, rules: Maybe<&Vector<Rule<'_>>>) -> Result<()> {
     if let Just(v) = rules {
         newline(w)?;
         write!(w, ".{} [", name)?;

@@ -51,7 +51,7 @@ void HQByteEventTracker::onByteEventWrittenToSocket(const ByteEvent& event) {
   const auto& streamOffset = event.getByteOffset();
   switch (event.eventType_) {
     case ByteEvent::FIRST_BYTE:
-      FOLLY_FALLTHROUGH;
+      [[fallthrough]];
     case ByteEvent::LAST_BYTE: {
       // install TX callback
       {

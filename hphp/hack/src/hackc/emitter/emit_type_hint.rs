@@ -454,7 +454,7 @@ pub fn hint_to_type_info_union<'arena>(
     nullable: bool,
     tparams: &[&str],
     hint: &Hint,
-) -> Result<ffi::Slice<'arena, TypeInfo<'arena>>> {
+) -> Result<Vec<TypeInfo<'arena>>> {
     let Hint(_, h) = hint;
     let mut result = vec![];
     match &**h {
@@ -479,7 +479,7 @@ pub fn hint_to_type_info_union<'arena>(
             hint,
         )?),
     }
-    Ok(ffi::Slice::from_vec(alloc, result))
+    Ok(result)
 }
 
 pub fn hint_to_class<'arena>(alloc: &'arena bumpalo::Bump, hint: &Hint) -> hhbc::ClassName<'arena> {

@@ -314,7 +314,7 @@ fn assemble_typedef<'arena>(
     Ok(hhbc::Typedef {
         name,
         attributes,
-        type_info_union,
+        type_info_union: type_info_union.into(),
         type_structure,
         span,
         attrs,
@@ -1343,9 +1343,9 @@ fn assemble_type_info<'arena>(
 fn assemble_type_info_union<'arena>(
     token_iter: &mut Lexer<'_>,
     alloc: &'arena Bump,
-) -> Result<Slice<'arena, hhbc::TypeInfo<'arena>>> {
+) -> Result<Vec<hhbc::TypeInfo<'arena>>> {
     parse!(token_iter, <tis:assemble_type_info(alloc, TypeInfoKind::TypeDef),*>);
-    Ok(Slice::from_vec(alloc, tis))
+    Ok(tis)
 }
 
 /// Ex: <"HH\\void" N >

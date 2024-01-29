@@ -58,14 +58,8 @@ fn convert_type<'a>(ty: &ir::TypeInfo, strings: &StringCache<'a>) -> TypeInfo<'a
     }
 }
 
-fn convert_types<'a>(
-    tis: &[ir::TypeInfo],
-    strings: &StringCache<'a>,
-) -> ffi::Slice<'a, TypeInfo<'a>> {
-    ffi::Slice::fill_iter(
-        strings.alloc,
-        tis.iter().map(|ti| convert_type(ti, strings)),
-    )
+fn convert_types<'a>(tis: &[ir::TypeInfo], strings: &StringCache<'a>) -> Vec<TypeInfo<'a>> {
+    tis.iter().map(|ti| convert_type(ti, strings)).collect()
 }
 
 fn base_type_string(ty: &ir::BaseType) -> Option<Str<'static>> {
@@ -128,7 +122,7 @@ pub(crate) fn convert_typedef<'a>(td: ir::Typedef, strings: &StringCache<'a>) ->
     hhbc::Typedef {
         name,
         attributes,
-        type_info_union,
+        type_info_union: type_info_union.into(),
         type_structure,
         span,
         attrs,

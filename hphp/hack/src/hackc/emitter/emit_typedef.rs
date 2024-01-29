@@ -62,7 +62,7 @@ fn emit_typedef<'a, 'arena, 'decl>(
             type_structure_res.map(|type_structure| Typedef {
                 name,
                 attributes: emitter.alloc.alloc_slice_fill_iter(attributes).into(),
-                type_info_union,
+                type_info_union: type_info_union.into(),
                 type_structure,
                 span,
                 attrs,

@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Slice;
+use ffi::Vector;
 use hhvm_types_ffi::ffi::Attr;
 use serde::Serialize;
 
@@ -18,7 +19,7 @@ use crate::TypedValue;
 pub struct Typedef<'arena> {
     pub name: ClassName<'arena>,
     pub attributes: Slice<'arena, Attribute<'arena>>,
-    pub type_info_union: Slice<'arena, TypeInfo<'arena>>,
+    pub type_info_union: Vector<TypeInfo<'arena>>,
     pub type_structure: TypedValue<'arena>,
     pub span: Span,
     pub attrs: Attr,

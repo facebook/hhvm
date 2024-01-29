@@ -10,8 +10,8 @@ use std::os::unix::ffi::OsStrExt;
 use std::path::Path;
 
 use bstr::BString;
-use ffi::Slice;
 use ffi::Str;
+use ffi::Vector;
 use relative_path::RelativePath;
 use serde::Serialize;
 
@@ -26,10 +26,10 @@ use crate::FunctionName;
 #[derive(Default, Clone, Debug, Serialize)]
 #[repr(C)]
 pub struct SymbolRefs<'arena> {
-    pub includes: Slice<'arena, IncludePath<'arena>>,
-    pub constants: Slice<'arena, ConstName<'arena>>,
-    pub functions: Slice<'arena, FunctionName<'arena>>,
-    pub classes: Slice<'arena, ClassName<'arena>>,
+    pub includes: Vector<IncludePath<'arena>>,
+    pub constants: Vector<ConstName<'arena>>,
+    pub functions: Vector<FunctionName<'arena>>,
+    pub classes: Vector<ClassName<'arena>>,
 }
 
 /// NOTE(hrust): order matters (hhbc_hhas write includes in sorted order)

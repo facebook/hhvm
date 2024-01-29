@@ -480,6 +480,19 @@ impl<T> AsRef<[T]> for Vector<T> {
     }
 }
 
+impl<T: Clone> Clone for Vector<T> {
+    fn clone(&self) -> Self {
+        self.as_slice().to_vec().into()
+    }
+}
+
+impl<T: Eq> Eq for Vector<T> {}
+impl<T: PartialEq> PartialEq for Vector<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.as_slice().eq(other.as_slice())
+    }
+}
+
 impl<T> std::ops::Deref for Vector<T> {
     type Target = [T];
 

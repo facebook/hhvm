@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Maybe;
-use ffi::Slice;
 use ffi::Str;
 use hhbc::Attribute;
 use hhbc::Body;
@@ -110,10 +109,7 @@ impl MapName for hhbc::UpperBound<'_> {
 /// Currently, some includes aren't printed out. So this is like the cmp_slice without a length check.
 /// T126391106: BCP drops information
 /// T126543346: Difficult to verify IncludeRootRelative
-fn cmp_includes(
-    a: &Slice<'_, hhbc::IncludePath<'_>>,
-    b: &Slice<'_, hhbc::IncludePath<'_>>,
-) -> Result {
+fn cmp_includes(a: &[hhbc::IncludePath<'_>], b: &[hhbc::IncludePath<'_>]) -> Result {
     for bv in b.iter() {
         if !a.iter().any(|av| cmp_include(av, bv).is_ok()) {
             bail!("{:?} has no matching includes", bv);

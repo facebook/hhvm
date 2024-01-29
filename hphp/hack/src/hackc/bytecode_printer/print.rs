@@ -172,7 +172,7 @@ fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit<'_>) -> Result<
     Ok(())
 }
 
-fn print_include_region(w: &mut dyn Write, includes: &Slice<'_, IncludePath<'_>>) -> Result<()> {
+fn print_include_region(w: &mut dyn Write, includes: &[IncludePath<'_>]) -> Result<()> {
     fn print_include(w: &mut dyn Write, inc: &IncludePath<'_>) -> Result<()> {
         let (s1, s2) = inc.extract_str();
         write!(w, "\n  {}{}", s1, s2)?;

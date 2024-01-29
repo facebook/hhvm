@@ -83,15 +83,15 @@ fn assemble_from_toks<'arena>(
 #[derive(Default)]
 struct UnitBuilder<'a> {
     adatas: Vec<hhbc::Adata<'a>>,
-    class_refs: Option<Slice<'a, hhbc::ClassName<'a>>>,
+    class_refs: Option<Vec<hhbc::ClassName<'a>>>,
     classes: Vec<hhbc::Class<'a>>,
-    constant_refs: Option<Slice<'a, hhbc::ConstName<'a>>>,
+    constant_refs: Option<Vec<hhbc::ConstName<'a>>>,
     constants: Vec<hhbc::Constant<'a>>,
     fatal: Option<hhbc::Fatal<'a>>,
     file_attributes: Vec<hhbc::Attribute<'a>>,
-    func_refs: Option<Slice<'a, hhbc::FunctionName<'a>>>,
+    func_refs: Option<Vec<hhbc::FunctionName<'a>>>,
     funcs: Vec<hhbc::Function<'a>>,
-    include_refs: Option<Slice<'a, hhbc::IncludePath<'a>>>,
+    include_refs: Option<Vec<hhbc::IncludePath<'a>>>,
     module_use: Option<Str<'a>>,
     modules: Vec<hhbc::Module<'a>>,
     type_constants: Vec<hhbc::TypeConstant<'a>>,
@@ -109,10 +109,10 @@ impl<'a> UnitBuilder<'a> {
             modules: self.modules.into(),
             module_use: self.module_use.into(),
             symbol_refs: hhbc::SymbolRefs {
-                functions: self.func_refs.unwrap_or_default(),
-                classes: self.class_refs.unwrap_or_default(),
-                constants: self.constant_refs.unwrap_or_default(),
-                includes: self.include_refs.unwrap_or_default(),
+                functions: self.func_refs.unwrap_or_default().into(),
+                classes: self.class_refs.unwrap_or_default().into(),
+                constants: self.constant_refs.unwrap_or_default().into(),
+                includes: self.include_refs.unwrap_or_default().into(),
             },
             constants: self.constants.into(),
             fatal: self.fatal.into(),
@@ -1082,7 +1082,7 @@ fn assemble_refs<'arena, 'a, T: 'arena, F>(
     token_iter: &mut Lexer<'_>,
     name_str: &str,
     assemble_name: F,
-) -> Result<Slice<'arena, T>>
+) -> Result<Vec<T>>
 where
     F: Fn(&mut Lexer<'_>, &'arena Bump) -> Result<T>,
 {
@@ -1093,7 +1093,7 @@ where
         names.push(assemble_name(token_iter, alloc)?);
     }
     token_iter.expect(Token::is_close_curly)?;
-    Ok(Slice::from_vec(alloc, names))
+    Ok(names)
 }
 
 /// A function def is composed of the following:

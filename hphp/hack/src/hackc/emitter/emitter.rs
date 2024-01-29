@@ -13,7 +13,6 @@ use std::sync::Arc;
 use ast_scope::Scope;
 use decl_provider::DeclProvider;
 use decl_provider::MemoProvider;
-use ffi::Slice;
 use ffi::Str;
 use global_state::GlobalState;
 use hash::IndexSet;
@@ -233,7 +232,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
 
     pub fn finish_symbol_refs(&mut self) -> SymbolRefs<'arena> {
         let state = std::mem::take(&mut self.symbol_refs_state);
-        state.to_hhas(self.alloc)
+        state.to_hhas()
     }
 }
 
@@ -266,12 +265,12 @@ struct SymbolRefsState<'arena> {
 }
 
 impl<'arena> SymbolRefsState<'arena> {
-    fn to_hhas(self, alloc: &'arena bumpalo::Bump) -> SymbolRefs<'arena> {
+    fn to_hhas(self) -> SymbolRefs<'arena> {
         SymbolRefs {
-            includes: Slice::new(alloc.alloc_slice_fill_iter(self.includes)),
-            constants: Slice::new(alloc.alloc_slice_fill_iter(self.constants)),
-            functions: Slice::new(alloc.alloc_slice_fill_iter(self.functions)),
-            classes: Slice::new(alloc.alloc_slice_fill_iter(self.classes)),
+            includes: Vec::from_iter(self.includes).into(),
+            constants: Vec::from_iter(self.constants).into(),
+            functions: Vec::from_iter(self.functions).into(),
+            classes: Vec::from_iter(self.classes).into(),
         }
     }
 }

@@ -59,7 +59,7 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Un
         .collect::<Vec<_>>()
         .into();
     unit.module_use = ir_unit.module_use.into();
-    unit.symbol_refs = convert_symbol_refs(alloc, &ir_unit.symbol_refs);
+    unit.symbol_refs = convert_symbol_refs(&ir_unit.symbol_refs);
 
     if let Some(ir::Fatal { op, loc, message }) = ir_unit.fatal.as_ref() {
         let op = match *op {
@@ -113,20 +113,12 @@ impl<'a> UnitBuilder<'a> {
     }
 }
 
-fn convert_symbol_refs<'a>(
-    alloc: &'a bumpalo::Bump,
-    symbol_refs: &ir::unit::SymbolRefs<'a>,
-) -> hhbc::SymbolRefs<'a> {
-    let classes = Slice::fill_iter(alloc, symbol_refs.classes.iter().cloned());
-    let constants = Slice::fill_iter(alloc, symbol_refs.constants.iter().cloned());
-    let functions = Slice::fill_iter(alloc, symbol_refs.functions.iter().cloned());
-    let includes = Slice::fill_iter(alloc, symbol_refs.includes.iter().cloned());
-
+fn convert_symbol_refs<'a>(symbol_refs: &ir::unit::SymbolRefs<'a>) -> hhbc::SymbolRefs<'a> {
     hhbc::SymbolRefs {
-        classes,
-        constants,
-        functions,
-        includes,
+        classes: symbol_refs.classes.clone().into(),
+        constants: symbol_refs.constants.clone().into(),
+        functions: symbol_refs.functions.clone().into(),
+        includes: symbol_refs.includes.clone().into(),
     }
 }
 

@@ -37,23 +37,20 @@ pub(crate) fn convert_class<'a>(
         uses,
     } = class;
 
-    let requirements: Slice<'a, hhbc::Requirement<'a>> = Slice::fill_iter(
-        alloc,
-        (requirements.iter()).map(|ir::class::Requirement { name, kind }| {
+    let requirements = Vec::from_iter((requirements.iter()).map(
+        |ir::class::Requirement { name, kind }| {
             let name = strings.lookup_class_name(*name);
             hhbc::Requirement { name, kind: *kind }
-        }),
-    );
+        },
+    ));
 
-    let ctx_constants = Slice::fill_iter(
-        alloc,
+    let ctx_constants = Vec::from_iter(
         ctx_constants
             .iter()
             .map(|ctx| convert_ctx_constant(alloc, ctx)),
     );
 
-    let enum_includes = Slice::fill_iter(
-        alloc,
+    let enum_includes = Vec::from_iter(
         enum_includes
             .into_iter()
             .map(|id| strings.lookup_class_name(id)),
@@ -64,8 +61,7 @@ pub(crate) fn convert_class<'a>(
         .map(|et| types::convert(et, strings).unwrap())
         .into();
 
-    let type_constants = Slice::fill_iter(
-        alloc,
+    let type_constants = Vec::from_iter(
         type_constants
             .into_iter()
             .map(|tc| convert_type_constant(tc, strings)),
@@ -84,8 +80,7 @@ pub(crate) fn convert_class<'a>(
 
     let base = base.map(|base| strings.lookup_class_name(base)).into();
 
-    let implements = Slice::fill_iter(
-        alloc,
+    let implements = Vec::from_iter(
         implements
             .iter()
             .map(|interface| strings.lookup_class_name(*interface)),
@@ -93,13 +88,9 @@ pub(crate) fn convert_class<'a>(
 
     let name = strings.lookup_class_name(name);
 
-    let uses = Slice::fill_iter(
-        alloc,
-        uses.into_iter().map(|use_| strings.lookup_class_name(use_)),
-    );
+    let uses = Vec::from_iter(uses.into_iter().map(|use_| strings.lookup_class_name(use_)));
 
-    let methods = Slice::fill_iter(
-        alloc,
+    let methods = Vec::from_iter(
         methods
             .into_iter()
             .map(|method| crate::func::convert_method(method, strings, &mut unit.adata_cache)),
@@ -108,31 +99,31 @@ pub(crate) fn convert_class<'a>(
     let class = hhbc::Class {
         attributes: convert::convert_attributes(attributes, strings),
         base,
-        constants: Slice::fill_iter(
-            alloc,
+        constants: Vec::from_iter(
             constants
                 .into_iter()
                 .map(|c| crate::constant::convert_hack_constant(c, strings)),
-        ),
-        ctx_constants,
+        )
+        .into(),
+        ctx_constants: ctx_constants.into(),
         doc_comment: doc_comment.into(),
-        enum_includes,
+        enum_includes: enum_includes.into(),
         enum_type,
         flags,
-        implements,
-        methods,
+        implements: implements.into(),
+        methods: methods.into(),
         name,
-        properties: Slice::fill_iter(
-            alloc,
+        properties: Vec::from_iter(
             properties
                 .into_iter()
                 .map(|prop| convert_property(prop, strings)),
-        ),
-        requirements,
+        )
+        .into(),
+        requirements: requirements.into(),
         span: src_loc.to_span(),
-        type_constants,
+        type_constants: type_constants.into(),
         upper_bounds,
-        uses,
+        uses: uses.into(),
     };
     unit.classes.push(class);
 }

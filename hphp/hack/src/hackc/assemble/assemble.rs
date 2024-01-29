@@ -368,18 +368,18 @@ fn assemble_class<'arena>(
     let hhas_class = hhbc::Class {
         attributes,
         base,
-        implements,
-        enum_includes,
+        implements: implements.into(),
+        enum_includes: enum_includes.into(),
         name,
         span,
-        uses,
+        uses: uses.into(),
         enum_type,
-        methods: Slice::from_vec(alloc, methods),
-        properties: Slice::from_vec(alloc, properties),
-        constants: Slice::from_vec(alloc, constants),
-        type_constants: Slice::from_vec(alloc, type_constants),
-        ctx_constants: Slice::from_vec(alloc, ctx_constants),
-        requirements: Slice::from_vec(alloc, requirements),
+        methods: methods.into(),
+        properties: properties.into(),
+        constants: constants.into(),
+        type_constants: type_constants.into(),
+        ctx_constants: ctx_constants.into(),
+        requirements: requirements.into(),
         upper_bounds,
         doc_comment,
         flags,
@@ -724,7 +724,7 @@ fn assemble_imp_or_enum_includes<'arena>(
     token_iter: &mut Lexer<'_>,
     alloc: &'arena Bump,
     imp_or_inc: &str,
-) -> Result<Slice<'arena, hhbc::ClassName<'arena>>> {
+) -> Result<Vec<hhbc::ClassName<'arena>>> {
     let mut classes = Vec::new();
     if token_iter.next_is_str(Token::is_identifier, imp_or_inc) {
         token_iter.expect(Token::is_open_paren)?;
@@ -733,7 +733,7 @@ fn assemble_imp_or_enum_includes<'arena>(
         }
         token_iter.expect(Token::is_close_paren)?;
     }
-    Ok(Slice::from_vec(alloc, classes))
+    Ok(classes)
 }
 
 /// Ex: .doc """doc""";
@@ -751,12 +751,12 @@ fn assemble_doc_comment<'arena>(
 fn assemble_uses<'arena>(
     token_iter: &mut Lexer<'_>,
     alloc: &'arena Bump,
-) -> Result<Slice<'arena, hhbc::ClassName<'arena>>> {
+) -> Result<Vec<hhbc::ClassName<'arena>>> {
     let classes = parse!(token_iter, [
         ".use": ".use" <classes:assemble_class_name(alloc)*> ";" { classes } ;
         else: { Vec::new() } ;
     ]);
-    Ok(Slice::from_vec(alloc, classes))
+    Ok(classes)
 }
 
 /// Ex: .enum_ty <type_info>

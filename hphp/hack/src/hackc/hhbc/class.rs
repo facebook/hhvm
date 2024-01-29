@@ -6,6 +6,7 @@
 use ffi::Maybe;
 use ffi::Slice;
 use ffi::Str;
+use ffi::Vector;
 use hhvm_types_ffi::ffi::Attr;
 use serde::Serialize;
 
@@ -40,18 +41,18 @@ pub struct Requirement<'arena> {
 pub struct Class<'arena> {
     pub attributes: Slice<'arena, Attribute<'arena>>,
     pub base: Maybe<ClassName<'arena>>,
-    pub implements: Slice<'arena, ClassName<'arena>>,
-    pub enum_includes: Slice<'arena, ClassName<'arena>>,
+    pub implements: Vector<ClassName<'arena>>,
+    pub enum_includes: Vector<ClassName<'arena>>,
     pub name: ClassName<'arena>,
     pub span: Span,
-    pub uses: Slice<'arena, ClassName<'arena>>,
+    pub uses: Vector<ClassName<'arena>>,
     pub enum_type: Maybe<TypeInfo<'arena>>,
-    pub methods: Slice<'arena, Method<'arena>>,
-    pub properties: Slice<'arena, Property<'arena>>,
-    pub constants: Slice<'arena, Constant<'arena>>,
-    pub type_constants: Slice<'arena, TypeConstant<'arena>>,
-    pub ctx_constants: Slice<'arena, CtxConstant<'arena>>, // TODO(SF, 2021-0811): CtxConstant is part of Steve's Coeffect work
-    pub requirements: Slice<'arena, Requirement<'arena>>,
+    pub methods: Vector<Method<'arena>>,
+    pub properties: Vector<Property<'arena>>,
+    pub constants: Vector<Constant<'arena>>,
+    pub type_constants: Vector<TypeConstant<'arena>>,
+    pub ctx_constants: Vector<CtxConstant<'arena>>,
+    pub requirements: Vector<Requirement<'arena>>,
     pub upper_bounds: Slice<'arena, UpperBound<'arena>>,
     pub doc_comment: Maybe<Str<'arena>>,
     pub flags: Attr,

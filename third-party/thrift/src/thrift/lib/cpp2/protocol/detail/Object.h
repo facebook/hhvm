@@ -806,6 +806,49 @@ void writeRawMapValue(
   prot.writeRaw(*value.data());
 }
 
+template <class Protocol>
+void serializeObject(
+    Protocol& prot,
+    const Object& obj,
+    MaskedProtocolData& protocolData,
+    MaskedData& maskedData) {
+  if (!maskedData.fields_ref()) {
+    throw std::runtime_error("incompatible value and maskedData");
+  }
+  prot.writeStructBegin("");
+  // It is more efficient to serialize with sorted field ids.
+  std::set<FieldId> fieldIds{};
+  for (const auto& [fieldId, _] : obj) {
+    fieldIds.insert(FieldId{fieldId});
+  }
+  for (const auto& [fieldId, _] : *maskedData.fields_ref()) {
+    fieldIds.insert(fieldId);
+  }
+
+  for (auto fieldId : fieldIds) {
+    if (!obj.contains(fieldId)) {
+      // no need to serialize the value
+      writeRawField(prot, fieldId, protocolData, maskedData);
+      continue;
+    }
+    // get type from value
+    const auto& fieldVal = obj.at(fieldId);
+    auto fieldType = getTType(fieldVal);
+    prot.writeFieldBegin("", fieldType, folly::to_underlying(fieldId));
+    // just serialize the value
+    if (folly::get_ptr(*maskedData.fields_ref(), fieldId) == nullptr) {
+      serializeValue(prot, fieldVal);
+    } else { // recursively serialize value with maskedData
+      auto& nextMaskedData = maskedData.fields_ref().value()[fieldId];
+      serializeValue(prot, fieldVal, protocolData, nextMaskedData);
+    }
+    prot.writeFieldEnd();
+  }
+  prot.writeFieldStop();
+  prot.writeStructEnd();
+  return;
+}
+
 // We can assume that if value type is a struct, fields in maskedData is
 // active, and if value type is a map, values in maskedData is active.
 // It throws a runtime error if value and maskedData are incompatible.
@@ -817,41 +860,7 @@ void serializeValue(
     MaskedData& maskedData) {
   switch (value.getType()) {
     case Value::Type::objectValue: {
-      if (!maskedData.fields_ref()) {
-        throw std::runtime_error("incompatible value and maskedData");
-      }
-      prot.writeStructBegin("");
-      // It is more efficient to serialize with sorted field ids.
-      std::set<FieldId> fieldIds{};
-      for (const auto& [fieldId, _] : value.as_object()) {
-        fieldIds.insert(FieldId{fieldId});
-      }
-      for (const auto& [fieldId, _] : *maskedData.fields_ref()) {
-        fieldIds.insert(fieldId);
-      }
-
-      for (auto fieldId : fieldIds) {
-        if (!value.as_object().contains(fieldId)) {
-          // no need to serialize the value
-          writeRawField(prot, fieldId, protocolData, maskedData);
-          continue;
-        }
-        // get type from value
-        const auto& fieldVal = value.as_object().at(fieldId);
-        auto fieldType = getTType(fieldVal);
-        prot.writeFieldBegin("", fieldType, folly::to_underlying(fieldId));
-        // just serialize the value
-        if (folly::get_ptr(*maskedData.fields_ref(), fieldId) == nullptr) {
-          serializeValue(prot, fieldVal);
-        } else { // recursively serialize value with maskedData
-          auto& nextMaskedData = maskedData.fields_ref().value()[fieldId];
-          serializeValue(prot, fieldVal, protocolData, nextMaskedData);
-        }
-        prot.writeFieldEnd();
-      }
-      prot.writeFieldStop();
-      prot.writeStructEnd();
-      return;
+      return serializeObject(prot, value.as_object(), protocolData, maskedData);
     }
     case Value::Type::mapValue: {
       if (!maskedData.values_ref()) {

@@ -126,16 +126,14 @@ std::unique_ptr<folly::IOBuf> serializeObject(
   Protocol prot;
   folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
   prot.setOutput(&queue);
-  Value val;
-  val.emplace_object(obj);
   if (protocolData.data()->full_ref()) { // entire object is not parsed
     const EncodedValue& value = detail::getByValueId(
         *protocolData.values(), protocolData.data()->full_ref().value());
     prot.writeRaw(*value.data());
   } else if (!protocolData.data()->fields_ref()) { // entire object is parsed
-    detail::serializeValue(prot, val);
+    detail::serializeObject(prot, obj);
   } else { // use both object and masked data to serialize
-    detail::serializeValue(prot, val, protocolData, *protocolData.data());
+    detail::serializeObject(prot, obj, protocolData, *protocolData.data());
   }
   return queue.move();
 }

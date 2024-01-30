@@ -22,7 +22,7 @@ std::shared_ptr<RowFields> EphemeralRowFields::makeBufferedFields() const {
   }
   std::vector<std::string> field_names;
   std::vector<std::string> table_names;
-  folly::StringKeyedUnorderedMap<int> field_name_map;
+  folly::F14NodeMap<std::string, int> field_name_map;
   std::vector<uint64_t> mysql_field_flags;
   std::vector<enum_field_types> mysql_field_types;
 

@@ -125,7 +125,7 @@ class Row {
 class RowFields {
  public:
   RowFields(
-      folly::StringKeyedUnorderedMap<int>&& field_name_map,
+      folly::F14NodeMap<std::string, int>&& field_name_map,
       std::vector<std::string>&& field_names,
       std::vector<std::string>&& table_names,
       std::vector<uint64_t>&& mysql_field_flags,
@@ -197,7 +197,7 @@ class RowFields {
 
  private:
   size_t num_fields_;
-  const folly::StringKeyedUnorderedMap<int> field_name_map_;
+  const folly::F14NodeMap<std::string, int> field_name_map_;
   const std::vector<std::string> field_names_;
   const std::vector<std::string> table_names_;
   const std::vector<uint64_t> mysql_field_flags_;

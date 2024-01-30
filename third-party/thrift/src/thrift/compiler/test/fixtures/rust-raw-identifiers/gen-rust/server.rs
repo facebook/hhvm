@@ -3,6 +3,13 @@
 
 //! Server definitions for `mod`.
 
+#![recursion_limit = "100000000"]
+#![allow(non_camel_case_types, non_snake_case, non_upper_case_globals, unused_crate_dependencies, unused_imports, clippy::all)]
+
+pub(crate) use crate as server;
+pub(crate) use ::::{self as types, services};
+
+
 #[::async_trait::async_trait]
 pub trait Foo: ::std::marker::Send + ::std::marker::Sync + 'static {
     async fn r#return(

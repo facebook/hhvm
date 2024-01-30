@@ -59,7 +59,7 @@ pub use {{program:types}}::services as services;
 pub use {{program:clients}}::{self as client, mock};
 {{/program:clients?}}
 {{#program:servers?}}
-pub mod server;
+pub use {{program:servers}} as server;
 {{/program:servers?}}
 {{/program:services?}}
 pub use {{program:types}}::errors as errors;

@@ -534,6 +534,7 @@ class rust_mstch_program : public mstch_program {
             {"program:clients?", &rust_mstch_program::rust_has_clients},
             {"program:clients", &rust_mstch_program::rust_clients},
             {"program:servers?", &rust_mstch_program::rust_has_servers},
+            {"program:servers", &rust_mstch_program::rust_servers},
             {"program:structsOrEnums?",
              &rust_mstch_program::rust_structs_or_enums},
             {"program:nonexhaustiveStructs?",
@@ -611,6 +612,14 @@ class rust_mstch_program : public mstch_program {
   }
 
   mstch::node rust_has_servers() { return !options_.services_crate.empty(); }
+
+  mstch::node rust_servers() {
+    auto servers = "::" + options_.services_crate;
+    if (options_.multifile_mode) {
+      servers += "::" + multifile_module_name(program_);
+    }
+    return servers;
+  }
 
   mstch::node rust_structs_or_enums() {
     return !program_->structs_and_unions().empty() ||

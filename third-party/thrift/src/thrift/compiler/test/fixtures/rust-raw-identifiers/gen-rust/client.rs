@@ -9,9 +9,7 @@
 pub mod mock;
 
 pub(crate) use crate as client;
-pub(crate) use :: as types;
-use ::::errors;
-use ::::services;
+pub(crate) use ::::{self as types, errors, services};
 
 pub(crate) mod dependencies {
 }

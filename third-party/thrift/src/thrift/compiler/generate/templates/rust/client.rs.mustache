@@ -30,9 +30,7 @@
 pub mod mock;
 
 pub(crate) use {{program:crate}} as client;
-pub(crate) use {{program:types}} as types;
-use {{program:types}}::errors;
-use {{program:types}}::services;
+pub(crate) use {{program:types}}::{self as types, errors, services};
 
 pub(crate) mod dependencies {
     {{#program:includes}}

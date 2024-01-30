@@ -301,6 +301,7 @@ void stopRequest() {
     entry.setInt(
       "basis_points_exclusive_us",
       10000 * toUS(kv.second.m_exclusive_total) / toUS(active.m_total));
+    entry.setProcessUuid("hhvm_uuid");
 
     for (auto const& point : kv.second.m_points) {
       entry.setInt(point.first, point.second);

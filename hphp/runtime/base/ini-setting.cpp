@@ -921,6 +921,7 @@ void logSettings() {
   ent.setInt("server_mode", RO::ServerExecutionMode() ? 1 : 0);
   ent.setInt("sample_rate", RO::EvalStartOptionLogRate);
   ent.setInt("hash", hash);
+  ent.setProcessUuid("hhvm_uuid");
   IniSetting::Log(ent,
                   RO::EvalStartOptionLogOptions,
                   RO::EvalStartOptionLogExcludeOptions);

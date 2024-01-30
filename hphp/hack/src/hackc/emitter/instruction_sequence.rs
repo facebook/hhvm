@@ -391,11 +391,14 @@ pub mod instr {
         instr(Instruct::Opcode(Opcode::SSwitch { cases, targets }))
     }
 
-    pub fn string<'a>(alloc: &'a bumpalo::Bump, litstr: impl Into<String>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcode::String(Str::from(
-            bumpalo::collections::String::from_str_in(litstr.into().as_str(), alloc)
-                .into_bump_str(),
-        ))))
+    /// Make a String instruction when the litstr is already arena allocated
+    pub fn string_lit<'a>(litstr: Str<'a>) -> InstrSeq<'a> {
+        instr(Instruct::Opcode(Opcode::String(litstr)))
+    }
+
+    /// Copy the given litstr to the arena, and make a String instruction
+    pub fn string<'a>(alloc: &'a bumpalo::Bump, litstr: impl AsRef<[u8]>) -> InstrSeq<'a> {
+        string_lit(Str::from(alloc.alloc_slice_copy(litstr.as_ref())))
     }
 
     pub fn switch<'a>(targets: Vec<Label>) -> InstrSeq<'a> {

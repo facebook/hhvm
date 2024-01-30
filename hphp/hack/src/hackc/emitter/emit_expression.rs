@@ -433,10 +433,8 @@ pub fn emit_nameof<'a, 'arena, 'decl>(
     let cexpr = ClassExpr::class_id_to_class_expr(emitter, &env.scope, false, true, class_id);
     match cexpr {
         ClassExpr::Id(ast_defs::Id(_, cname)) => {
-            let classid =
-                hhbc::ClassName::from_ast_name_and_mangle(emitter.alloc, cname).as_ffi_str();
-
-            emit_adata::typed_value_into_instr(emitter, TypedValue::string(classid))
+            let classid = hhbc::ClassName::from_ast_name_and_mangle(emitter.alloc, cname);
+            Ok(instr::string_lit(classid.as_ffi_str()))
         }
         ClassExpr::Special(_) => Ok(InstrSeq::gather(vec![
             emit_load_class_ref(emitter, env, &class_id.1, cexpr)?,
@@ -3483,7 +3481,7 @@ fn emit_known_class_id<'arena, 'decl>(
     id: &ast_defs::Id,
 ) -> InstrSeq<'arena> {
     let cid = hhbc::ClassName::from_ast_name_and_mangle(alloc, &id.1);
-    let cid_string = instr::string(alloc, cid.unsafe_as_str());
+    let cid_string = instr::string_lit(cid.as_ffi_str());
     e.add_class_ref(cid);
     InstrSeq::gather(vec![cid_string, instr::class_get_c(ClassGetCMode::Normal)])
 }

@@ -19,6 +19,7 @@
 #include <atomic>
 #include <cassert>
 #include <chrono>
+#include <filesystem>
 #include <map>
 #include <string>
 #include <vector>
@@ -31,8 +32,9 @@
 #include <pthread.h>
 #include <signal.h>
 
-#include "process-cpu.h"
-#include "process-host.h"
+#include "hphp/util/process-cpu.h"
+#include "hphp/util/process-host.h"
+#include "hphp/util/optional.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -104,6 +106,26 @@ struct ProcStatus {
   static void update();
 };
 
+/*
+* Information about system pressure (cpu, io, memory) read from
+* /proc/pressure/{cpu,io,memory}
+*
+* PSI docs: https://facebookmicrosites.github.io/psi/docs/overview
+*/
+struct Pressure {
+  // Pressure over the last 10, 60, and 300 seconds respectively
+  double avg10;
+  double avg60;
+  double avg300;
+  // Total number of accumulated microseconds
+  uint64_t total;
+};
+
+struct ProcPressure {
+  Optional<Pressure> some;
+  Optional<Pressure> full;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace Process {
@@ -156,6 +178,10 @@ int64_t GetMemUsageMb();
  * runnable, but not running because the CPUs were busy.
  */
 int64_t GetSystemCPUDelayMS();
+
+ProcPressure GetCPUPressure(const std::filesystem::path& path = "/proc/pressure/cpu");
+ProcPressure GetIOPressure(const std::filesystem::path& path = "/proc/pressure/io");
+ProcPressure GetMemoryPressure(const std::filesystem::path& path = "/proc/pressure/memory");
 
 /**
  * Get the number of threads running in the current process.

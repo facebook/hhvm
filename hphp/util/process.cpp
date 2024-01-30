@@ -35,11 +35,18 @@
 
 #include <filesystem>
 #include <set>
+#include <fstream>
 
 #include "hphp/util/hugetlb.h"
 #include "hphp/util/managed-arena.h"
 #include "hphp/util/text-color.h"
 #include "hphp/util/user-info.h"
+
+namespace {
+  const std::string kCpu = "cpu";
+  const std::string kIo = "io";
+  const std::string kMemory = "memory";
+}
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -144,6 +151,63 @@ int64_t Process::GetSystemCPUDelayMS() {
   return totalCpuDelay / 1000000;
 }
 
+ProcPressure getProcPressure(const std::filesystem::path &path) {
+  ProcPressure procPressure;
+
+  // Helper function to parse a single line from the pressure file. Expected to
+  // be called with the entire line as input, for example:
+  // some avg10=0.01 avg60=0.01 avg300=0.01 total=12345
+  const auto parseLine = [](const std::string_view &line) -> Pressure {
+    // Drop the 'some|full' + space prefix and load into parts
+    std::vector<std::string> parts;
+    folly::split(' ', line.substr(5), parts);
+
+    assertx(parts.size() == 4); // Expect 4 metrics
+
+    Pressure pressure;
+    for (const auto &part : parts) {
+      std::vector<std::string> subparts;
+      folly::split('=', part, subparts);
+      assertx(subparts.size() == 2); // Expect 2 values
+      if (subparts[0] == "avg10") {
+        pressure.avg10 = folly::to<double>(subparts[1]);
+      } else if (subparts[0] == "avg60") {
+        pressure.avg60 = folly::to<double>(subparts[1]);
+      } else if (subparts[0] == "avg300") {
+        pressure.avg300 = folly::to<double>(subparts[1]);
+      } else if (subparts[0] == "total") {
+        pressure.total = folly::to<uint64_t>(subparts[1]);
+      }
+    }
+    return pressure;
+  };
+
+  std::ifstream file(path);
+  if (file.is_open()) {
+    std::string line;
+    while (std::getline(file, line)) {
+      if (line.starts_with("some")) {
+        procPressure.some = parseLine(line);
+      } else if (line.starts_with("full")) {
+        procPressure.full = parseLine(line);
+      }
+    }
+  }
+
+  return procPressure;
+}
+
+ProcPressure Process::GetCPUPressure(const std::filesystem::path &path) {
+  return getProcPressure(path);
+}
+
+ProcPressure Process::GetIOPressure(const std::filesystem::path &path) {
+  return getProcPressure(path);
+}
+
+ProcPressure Process::GetMemoryPressure(const std::filesystem::path &path) {
+  return getProcPressure(path);
+}
 
 int Process::GetNumThreads() {
   ProcStatus::update();

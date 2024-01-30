@@ -62,6 +62,14 @@ const t_enum_value* t_enum::find_value(int32_t value) const {
   return nullptr;
 }
 
+const t_const* t_enum::find_const_by_name(std::string_view name) const {
+  auto itr = consts_by_name_.find(name);
+  if (itr != consts_by_name_.end()) {
+    return itr->second;
+  }
+  return nullptr;
+}
+
 void t_enum::update_unused(int32_t val) {
   if (unused_ != val) {
     return;

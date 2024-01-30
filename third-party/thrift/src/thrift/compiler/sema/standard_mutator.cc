@@ -112,6 +112,22 @@ void match_type_with_const_value(
                 program.scope()->find_constant(value->program().scope_name(id));
           }
           if (!constant) {
+            // Try to resolve enum values from typedefs.
+            auto last_dot_pos = id.find_last_of('.');
+            std::string enum_name = id.substr(0, last_dot_pos);
+            if (std::count(enum_name.begin(), enum_name.end(), '.') == 0) {
+              enum_name = value->program().scope_name(enum_name);
+            }
+            if (auto* def = dynamic_cast<const t_type*>(
+                    program.scope()->find(enum_name))) {
+              if (auto* enum_def =
+                      dynamic_cast<const t_enum*>(def->get_true_type())) {
+                constant =
+                    enum_def->find_const_by_name(id.substr(last_dot_pos + 1));
+              }
+            }
+          }
+          if (!constant) {
             ctx.error(
                 value->ref_range().begin,
                 "use of undeclared identifier '{}'",
@@ -463,17 +479,6 @@ void lower_type_annotations(
   }
 }
 
-void alias_enum_values(diagnostic_context&, mutator_context&, t_typedef& node) {
-  const t_type* true_type = node.get_true_type();
-  if (!true_type || !true_type->is_enum()) {
-    return;
-  }
-
-  const t_program* program = node.program();
-  for (const t_const& value : static_cast<const t_enum*>(true_type)->consts()) {
-    program->scope()->add_enum_value(program->scope_name(node, value), &value);
-  }
-}
 } // namespace
 
 ast_mutators standard_mutators(bool use_legacy_type_ref_resolution) {
@@ -485,7 +490,6 @@ ast_mutators standard_mutators(bool use_legacy_type_ref_resolution) {
     initial.add_function_visitor(&normalize_return_type);
     initial.add_definition_visitor(&set_generated);
     initial.add_definition_visitor(&lower_deprecated_annotations);
-    initial.add_typedef_visitor(&alias_enum_values);
   }
 
   {

@@ -49,12 +49,16 @@ let lint_and_filter tcopt code acc fnl =
   List.filter lint_errs ~f:(fun err -> Lints_core.get_code err = code)
 
 let lint_all genv ctx code =
+  let tcopt = Provider_context.get_tcopt ctx in
+  let sample_rate = TypecheckerOptions.typecheck_sample_rate tcopt in
   let next =
     compose
       (fun lst ->
         lst
         |> List.map ~f:(fun fn ->
                { filename = RP.create RP.Root fn; contents = None })
+        |> List.filter ~f:(fun { filename; _ } ->
+               FindUtils.sample_filter ~sample_rate filename)
         |> Hack_bucket.of_list)
       (genv.indexer FindUtils.is_hack)
   in

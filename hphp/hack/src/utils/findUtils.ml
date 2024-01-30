@@ -71,3 +71,9 @@ let post_watchman_filter_from_fully_qualified_raw_updates
   let updates = Relative_path.(relativize_set Root updates) in
   Relative_path.Set.filter updates ~f:(fun update ->
       file_filter (Relative_path.to_absolute update))
+
+(* Hash file name and return true for [sample_rate] fraction of hashes *)
+let sample_filter ~sample_rate x =
+  Float.(
+    float (Base.String.hash (Relative_path.suffix x) mod 1000000)
+    <= sample_rate *. 1000000.0)

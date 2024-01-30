@@ -1058,12 +1058,7 @@ let go_with_interrupt
       fnl
     else
       let result =
-        BigList.filter
-          ~f:(fun x ->
-            Float.(
-              float (Base.String.hash (Relative_path.suffix x) mod 1000000)
-              <= sample_rate *. 1000000.0))
-          fnl
+        BigList.filter ~f:(FindUtils.sample_filter ~sample_rate) fnl
       in
       Hh_logger.log
         "Sampling %f percent of files: %d out of %d"

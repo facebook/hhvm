@@ -1,6 +1,6 @@
 use anyhow::bail;
 use anyhow::Result;
-use ffi::Slice;
+use ffi::Vector;
 use hhbc::Opcode;
 use itertools::Itertools;
 use log::trace;
@@ -501,8 +501,8 @@ fn sem_diff_fca<'arena>(
 
     fn cmp_slice_where_empty_is_all_false(
         path: &CodePath<'_>,
-        a: &Slice<'_, bool>,
-        b: &Slice<'_, bool>,
+        a: &Vector<bool>,
+        b: &Vector<bool>,
     ) -> Result<()> {
         match (a.is_empty(), b.is_empty()) {
             (true, true) => {}

@@ -16,7 +16,6 @@ use anyhow::Context;
 use anyhow::Result;
 use bumpalo::Bump;
 use ffi::Maybe;
-use ffi::Slice;
 use ffi::Str;
 use hash::HashMap;
 use hhvm_types_ffi::Attr;
@@ -1876,22 +1875,20 @@ pub(crate) fn assemble_fcallargsflags(token_iter: &mut Lexer<'_>) -> Result<hhbc
 }
 
 /// "(0|1)*"
-pub(crate) fn assemble_inouts_or_readonly<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<Slice<'arena, bool>> {
+pub(crate) fn assemble_inouts_or_readonly(token_iter: &mut Lexer<'_>) -> Result<Vec<bool>> {
     let tok = token_iter.expect_token()?;
     let literal = tok.into_str_literal()?;
     debug_assert!(literal[0] == b'"' && literal[literal.len() - 1] == b'"');
-    let tr: Result<Vec<bool>, _> = literal[1..literal.len() - 1] //trims the outer "", which are guaranteed b/c of str token
+    // trim the outer "", which are guaranteed b/c of str token
+    let tr = literal[1..literal.len() - 1]
         .iter()
         .map(|c| match *c {
             b'0' => Ok(false),
             b'1' => Ok(true),
             _ => Err(tok.error("Non 0/1 character in inouts/readonlys")),
         })
-        .collect();
-    Ok(Slice::from_vec(alloc, tr?))
+        .collect::<Result<_>>()?;
+    Ok(tr)
 }
 
 /// - or a label

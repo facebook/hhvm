@@ -12,7 +12,6 @@ use env::emitter::Emitter;
 use env::Env;
 use error::Error;
 use error::Result;
-use ffi::Slice;
 use ffi::Str;
 use hhbc::Body;
 use hhbc::Coeffects;
@@ -323,8 +322,8 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
             fcall_flags,
             1,
             param_count as u32,
-            Slice::empty(),
-            Slice::empty(),
+            vec![],
+            vec![],
             async_eager_target,
             None,
         )
@@ -445,8 +444,8 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
         FCallArgsFlags::default(),
         1,
         0,
-        Slice::empty(),
-        Slice::empty(),
+        vec![],
+        vec![],
         if args.flags.contains(Flags::IS_ASYNC) {
             Some(eager_set)
         } else {

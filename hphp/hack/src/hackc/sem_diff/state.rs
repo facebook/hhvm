@@ -6,7 +6,6 @@ use std::rc::Rc;
 use anyhow::anyhow;
 use anyhow::bail;
 use anyhow::Result;
-use ffi::Slice;
 use ffi::Str;
 use hash::HashMap;
 use hhbc::AdataId;
@@ -823,15 +822,15 @@ impl<'arena, 'a> State<'arena, 'a> {
         ) -> FCallArgs<'arena> {
             // Turn a non-empty, all-false slice into an empty slice.
             let inouts = if !inouts.is_empty() && !inouts.iter().any(|x| *x) {
-                Slice::from(&[][..])
+                Default::default()
             } else {
-                *inouts
+                inouts.clone()
             };
             // Turn a non-empty, all-false slice into an empty slice.
             let readonly = if !readonly.is_empty() && !readonly.iter().any(|x| *x) {
-                Slice::from(&[][..])
+                Default::default()
             } else {
-                *readonly
+                readonly.clone()
             };
             FCallArgs {
                 flags: *flags,

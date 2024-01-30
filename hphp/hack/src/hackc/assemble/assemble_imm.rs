@@ -250,8 +250,8 @@ impl<'arena> AssembleImm<'arena, hhbc::FCallArgs<'arena>> for Lexer<'_> {
         let fcargflags = assemble::assemble_fcallargsflags(self)?;
         let num_args = self.expect_and_get_number()?;
         let num_rets = self.expect_and_get_number()?;
-        let inouts = assemble::assemble_inouts_or_readonly(alloc, self)?;
-        let readonly = assemble::assemble_inouts_or_readonly(alloc, self)?;
+        let inouts = assemble::assemble_inouts_or_readonly(self)?;
+        let readonly = assemble::assemble_inouts_or_readonly(self)?;
         let async_eager_target = assemble::assemble_async_eager_target(self)?;
         let context = assemble::assemble_fcall_context(alloc, self)?;
         let fcargs = hhbc::FCallArgs::new(

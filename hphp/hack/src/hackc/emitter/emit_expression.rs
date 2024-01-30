@@ -16,7 +16,6 @@ use env::Env;
 use env::Flags as EnvFlags;
 use error::Error;
 use error::Result;
-use ffi::Slice;
 use ffi::Str;
 use hash::HashSet;
 use hhbc::AsTypeStructExceptionKind;
@@ -927,8 +926,8 @@ fn inline_gena_call<'a, 'arena, 'decl>(
                     FCallArgsFlags::default(),
                     1,
                     1,
-                    Slice::empty(),
-                    Slice::empty(),
+                    vec![],
+                    vec![],
                     Some(async_eager_label),
                     None,
                 ),
@@ -2044,8 +2043,8 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                                         FCallArgsFlags::default(),
                                         1,
                                         1,
-                                        Slice::empty(),
-                                        Slice::empty(),
+                                        vec![],
+                                        vec![],
                                         None,
                                         None,
                                     );
@@ -2450,15 +2449,15 @@ fn get_fcall_args_common<'arena, T>(
     flags.set(FCallArgsFlags::EnforceMutableReturn, !readonly_return);
     flags.set(FCallArgsFlags::EnforceReadonlyThis, readonly_this);
     let readonly_args = if args.iter().any(readonly_predicate) {
-        Slice::fill_iter(alloc, args.iter().map(readonly_predicate))
+        args.iter().map(readonly_predicate).collect()
     } else {
-        Slice::empty()
+        vec![]
     };
     FCallArgs::new(
         flags,
         1 + args.iter().filter(|e| is_inout_arg(e)).count() as u32,
         args.len() as u32,
-        Slice::fill_iter(alloc, args.iter().map(is_inout_arg)),
+        args.iter().map(is_inout_arg).collect(),
         readonly_args,
         async_eager_label,
         context
@@ -3657,15 +3656,7 @@ fn emit_new_obj_reified_instrs<'a, 'b, 'arena, 'decl>(
             instr::null_uninit(),
             ts,
             instr::f_call_obj_method_d(
-                FCallArgs::new(
-                    FCallArgsFlags::default(),
-                    1,
-                    1,
-                    Slice::empty(),
-                    Slice::empty(),
-                    None,
-                    None,
-                ),
+                FCallArgs::new(FCallArgsFlags::default(), 1, 1, vec![], vec![], None, None),
                 hhbc::MethodName::from_raw_string(env.arena, INIT_METH_NAME),
             ),
             instr::pop_c(),
@@ -3701,15 +3692,7 @@ fn emit_new_obj_reified_instrs<'a, 'b, 'arena, 'decl>(
             instr::null_uninit(),
             instr::c_get_l(ts_local),
             instr::f_call_func_d(
-                FCallArgs::new(
-                    FCallArgsFlags::default(),
-                    1,
-                    1,
-                    Slice::empty(),
-                    Slice::empty(),
-                    None,
-                    None,
-                ),
+                FCallArgs::new(FCallArgsFlags::default(), 1, 1, vec![], vec![], None, None),
                 hhbc::FunctionName::from_raw_string(env.arena, "count"),
             ),
             instr::int(0),

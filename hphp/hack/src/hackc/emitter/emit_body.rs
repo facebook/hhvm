@@ -15,7 +15,6 @@ use error::Error;
 use error::Result;
 use ffi::Maybe;
 use ffi::Maybe::*;
-use ffi::Slice;
 use ffi::Str;
 use hash::HashSet;
 use hhbc::Body;
@@ -598,15 +597,7 @@ pub fn emit_deprecation_info<'a, 'arena>(
                     instr::int(sampling_rate),
                     instr::int(error_code),
                     instr::f_call_func_d(
-                        FCallArgs::new(
-                            FCallArgsFlags::default(),
-                            1,
-                            3,
-                            Slice::empty(),
-                            Slice::empty(),
-                            None,
-                            None,
-                        ),
+                        FCallArgs::new(FCallArgsFlags::default(), 1, 3, vec![], vec![], None, None),
                         hhbc::FunctionName::from_raw_string(alloc, "trigger_sampled_error"),
                     ),
                     instr::pop_c(),

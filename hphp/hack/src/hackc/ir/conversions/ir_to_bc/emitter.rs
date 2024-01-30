@@ -7,7 +7,6 @@ use std::collections::VecDeque;
 use std::fmt::Display;
 use std::sync::Arc;
 
-use ffi::Slice;
 use ffi::Str;
 use hash::HashMap;
 use hhbc::Dummy;
@@ -192,11 +191,7 @@ pub(crate) struct InstrEmitter<'a, 'b> {
     adata_id_map: &'b AdataIdMap<'a>,
 }
 
-fn convert_indexes_to_bools<'a>(
-    alloc: &'a bumpalo::Bump,
-    total_len: usize,
-    indexes: Option<&[u32]>,
-) -> Slice<'a, bool> {
+fn convert_indexes_to_bools(total_len: usize, indexes: Option<&[u32]>) -> Vec<bool> {
     let mut buf: Vec<bool> = Vec::with_capacity(total_len);
     if !indexes.map_or(true, |indexes| indexes.is_empty()) {
         buf.resize(total_len, false);
@@ -206,7 +201,7 @@ fn convert_indexes_to_bools<'a>(
             }
         }
     }
-    Slice::from_vec(alloc, buf)
+    buf
 }
 
 impl<'a, 'b> InstrEmitter<'a, 'b> {
@@ -305,16 +300,8 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
             num_args -= call.flags.contains(FCallArgsFlags::HasGenerics) as u32;
 
             let num_rets = call.num_rets;
-            let inouts = convert_indexes_to_bools(
-                self.strings.alloc,
-                num_args as usize,
-                call.inouts.as_deref(),
-            );
-            let readonly = convert_indexes_to_bools(
-                self.strings.alloc,
-                num_args as usize,
-                call.readonly.as_deref(),
-            );
+            let inouts = convert_indexes_to_bools(num_args as usize, call.inouts.as_deref());
+            let readonly = convert_indexes_to_bools(num_args as usize, call.readonly.as_deref());
 
             let context = self.strings.lookup_ffi_str(call.context);
 
@@ -329,8 +316,8 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 async_eager_target,
                 num_args,
                 num_rets,
-                inouts,
-                readonly,
+                inouts: inouts.into(),
+                readonly: readonly.into(),
                 context,
             }
         };

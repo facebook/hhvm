@@ -12,7 +12,6 @@ use error::Error;
 use error::Result;
 use ffi::Maybe;
 use ffi::Maybe::*;
-use ffi::Slice;
 use ffi::Str;
 use hhbc::Class;
 use hhbc::ClassName;
@@ -425,15 +424,7 @@ fn emit_reified_init_body<'a, 'arena, 'decl>(
             instr::null_uninit(),
             generic_arr,
             instr::f_call_cls_method_sd(
-                FCallArgs::new(
-                    FCallArgsFlags::default(),
-                    1,
-                    1,
-                    Slice::empty(),
-                    Slice::empty(),
-                    None,
-                    None,
-                ),
+                FCallArgs::new(FCallArgsFlags::default(), 1, 1, vec![], vec![], None, None),
                 SpecialClsRef::ParentCls,
                 hhbc::MethodName::from_raw_string(alloc, INIT_METH_NAME),
             ),

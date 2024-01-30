@@ -10,7 +10,6 @@ use emit_pos::emit_pos_then;
 use env::emitter::Emitter;
 use env::Env;
 use error::Result;
-use ffi::Slice;
 use ffi::Str;
 use hhbc::Attribute;
 use hhbc::Body;
@@ -235,8 +234,8 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
             fcall_flags,
             1,
             param_count as u32,
-            Slice::empty(),
-            Slice::empty(),
+            vec![],
+            vec![],
             if is_async { Some(eager_set) } else { None },
             None,
         )
@@ -331,8 +330,8 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
         FCallArgsFlags::default(),
         1,
         0,
-        Slice::empty(),
-        Slice::empty(),
+        vec![],
+        vec![],
         if is_async { Some(eager_set) } else { None },
         None,
     );

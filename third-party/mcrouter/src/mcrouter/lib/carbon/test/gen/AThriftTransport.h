@@ -17,6 +17,8 @@
 #include <exception>
 #include <memory>
 
+#include <folly/io/async/AsyncSSLSocket.h>
+#include <mcrouter/lib/network/AsyncTlsToPlaintextSocket.h>
 #include <mcrouter/lib/network/RpcStatsContext.h>
 #include <mcrouter/lib/network/ThriftTransport.h>
 #include <mcrouter/McrouterFiberContext.h>
@@ -193,8 +195,20 @@ class ThriftTransport<carbon::test::A::ARouterInfo> : public ThriftTransportMeth
       if (auto* channel = static_cast<apache::thrift::RocketClientChannel*>(
             thriftClient_->getChannel())) {
         if (auto* transport = channel->getTransport()) {
-          if (auto* socket = transport->getUnderlyingTransport<folly::AsyncSocket>()) {
-            socket->cancelConnect();
+          const auto securityMech =
+              connectionOptions_.accessPoint->getSecurityMech();
+          if (securityMech == SecurityMech::TLS) {
+            if (auto* socket = transport->getUnderlyingTransport<folly::AsyncSSLSocket>()) {
+              socket->cancelConnect();
+            }
+          } else if (securityMech == SecurityMech::TLS_TO_PLAINTEXT) {
+            if (auto* socket = transport->getUnderlyingTransport<AsyncTlsToPlaintextSocket>()) {
+              socket->getUnderlyingTransport<AsyncTlsToPlaintextSocket>()->closeNow();
+            }
+          } else if (securityMech == SecurityMech::NONE) {
+            if (auto* socket = transport->getUnderlyingTransport<folly::AsyncSocket>()) {
+              socket->cancelConnect();
+            }
           }
         }
         // Reset the callback to avoid the following cycle:

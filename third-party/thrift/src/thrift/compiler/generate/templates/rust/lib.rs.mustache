@@ -31,18 +31,23 @@ include!("{{program:include_src}}");
 {{/program:lib_include_srcs}}
 
 {{#program:constants?}}
+#[doc(inline)]
 pub use self::consts::*;
 {{/program:constants?}}
 #[allow(unused_imports)]
+#[doc(no_inline)]
 pub use self::errors::*;{{!
 }}{{#program:types?}}
+#[doc(inline)]
 pub use self::types::*;{{!
 }}{{/program:types?}}{{!
 }}{{!
 }}{{#program:types?}}
 
+#[doc(inline)]
 pub use {{program:types}} as types;
 {{/program:types?}}{{#program:constants?}}
+#[doc(inline)]
 pub use {{program:types}}::consts as consts;
 {{/program:constants?}}{{!
 }}{{#program:structs}}{{!
@@ -54,14 +59,18 @@ pub use {{program:types}}::consts as consts;
 
 #[doc(hidden)]
 pub mod dependencies;
+#[doc(inline)]
 pub use {{program:types}}::services as services;
 {{#program:clients?}}
+#[doc(inline)]
 pub use {{program:clients}}::{self as client, mock};
 {{/program:clients?}}
 {{#program:servers?}}
+#[doc(inline)]
 pub use {{program:servers}} as server;
 {{/program:servers?}}
 {{/program:services?}}
+#[doc(inline)]
 pub use {{program:types}}::errors as errors;
 {{#program:nonstandardTypes?}}
 

@@ -5,10 +5,14 @@
 #![allow(non_camel_case_types, non_snake_case, non_upper_case_globals, unused_crate_dependencies, clippy::all)]
 
 #[allow(unused_imports)]
+#[doc(no_inline)]
 pub use self::errors::*;
+#[doc(inline)]
 pub use self::types::*;
 
+#[doc(inline)]
 pub use :: as types;
+#[doc(inline)]
 pub use ::::errors as errors;
 
 pub(crate) mod r#impl {

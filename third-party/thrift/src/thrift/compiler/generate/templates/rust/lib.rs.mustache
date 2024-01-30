@@ -56,8 +56,7 @@ pub use {{program:types}}::consts as consts;
 pub mod dependencies;
 pub use {{program:types}}::services as services;
 {{#program:clients?}}
-pub mod client;
-pub mod mock;
+pub use {{program:clients}}::{self as client, mock};
 {{/program:clients?}}
 {{#program:servers?}}
 pub mod server;

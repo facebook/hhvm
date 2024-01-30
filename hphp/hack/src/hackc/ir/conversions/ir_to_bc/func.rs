@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::Slice;
 use hhbc::Method;
 use log::trace;
 
@@ -140,7 +139,7 @@ pub(crate) fn convert_function<'a>(
     let attributes =
         convert::convert_attributes(std::mem::take(&mut function.func.attributes), strings);
     let attrs = function.func.attrs;
-    let coeffects = convert_coeffects(strings.alloc, &function.func.coeffects);
+    let coeffects = convert_coeffects(&function.func.coeffects);
     let body = convert_func(function.func, strings, &mut unit.adata_cache);
     let hhas_func = hhbc::Function {
         attributes: attributes.into(),
@@ -162,7 +161,7 @@ pub(crate) fn convert_method<'a>(
     trace!("convert_method {}", method.name.as_bstr(&strings.interner));
     let span = method.func.loc(method.func.loc_id).to_span();
     let attrs = method.func.attrs;
-    let coeffects = convert_coeffects(strings.alloc, &method.func.coeffects);
+    let coeffects = convert_coeffects(&method.func.coeffects);
     let attributes =
         convert::convert_attributes(std::mem::take(&mut method.func.attributes), strings);
     let body = convert_func(method.func, strings, adata);
@@ -178,29 +177,19 @@ pub(crate) fn convert_method<'a>(
     }
 }
 
-fn convert_coeffects<'a>(
-    alloc: &'a bumpalo::Bump,
-    coeffects: &ir::Coeffects<'a>,
-) -> hhbc::Coeffects<'a> {
-    let static_coeffects = Slice::fill_iter(alloc, coeffects.static_coeffects.iter().copied());
-    let unenforced_static_coeffects =
-        Slice::fill_iter(alloc, coeffects.unenforced_static_coeffects.iter().copied());
-    let fun_param = Slice::fill_iter(alloc, coeffects.fun_param.iter().copied());
-    let cc_param = Slice::fill_iter(alloc, coeffects.cc_param.iter().copied());
-    let cc_this = Slice::fill_iter(
-        alloc,
-        coeffects.cc_this.iter().map(|inner| hhbc::CcThis {
-            types: Slice::fill_iter(alloc, inner.types.iter().copied()),
-        }),
-    );
-    let cc_reified = Slice::fill_iter(
-        alloc,
-        coeffects.cc_reified.iter().map(|inner| hhbc::CcReified {
-            is_class: inner.is_class,
-            index: inner.index,
-            types: Slice::fill_iter(alloc, inner.types.iter().copied()),
-        }),
-    );
+fn convert_coeffects<'a>(coeffects: &ir::Coeffects<'a>) -> hhbc::Coeffects<'a> {
+    let static_coeffects = coeffects.static_coeffects.clone();
+    let unenforced_static_coeffects = coeffects.unenforced_static_coeffects.clone();
+    let fun_param = coeffects.fun_param.clone();
+    let cc_param = coeffects.cc_param.clone();
+    let cc_this = Vec::from_iter(coeffects.cc_this.iter().map(|inner| hhbc::CcThis {
+        types: inner.types.clone().into(),
+    }));
+    let cc_reified = Vec::from_iter(coeffects.cc_reified.iter().map(|inner| hhbc::CcReified {
+        is_class: inner.is_class,
+        index: inner.index,
+        types: inner.types.clone().into(),
+    }));
     let closure_parent_scope = coeffects.closure_parent_scope;
     let generator_this = coeffects.generator_this;
     let caller = coeffects.caller;

@@ -231,7 +231,7 @@ fn from_ctx_constant<'a, 'arena>(
     let name = tc.name.1.to_string();
     let (recognized, unrecognized) = match &tc.kind {
         ClassTypeconst::TCAbstract(ast::ClassAbstractTypeconst { default: None, .. }) => {
-            (Slice::empty(), Slice::empty())
+            (vec![], vec![])
         }
         ClassTypeconst::TCAbstract(ast::ClassAbstractTypeconst {
             default: Some(hint),
@@ -239,14 +239,11 @@ fn from_ctx_constant<'a, 'arena>(
         })
         | ClassTypeconst::TCConcrete(ast::ClassConcreteTypeconst { c_tc_type: hint }) => {
             let x = Coeffects::from_ctx_constant(hint);
-            let r: Slice<'arena, Str<'_>> = Slice::from_vec(
-                alloc,
+            let r: Vec<Str<'_>> =
                 x.0.iter()
                     .map(|ctx| Str::new_str(alloc, &ctx.to_string()))
-                    .collect(),
-            );
-            let u: Slice<'arena, Str<'_>> =
-                Slice::from_vec(alloc, x.1.iter().map(|s| Str::new_str(alloc, s)).collect());
+                    .collect();
+            let u: Vec<Str<'_>> = x.1.iter().map(|s| Str::new_str(alloc, s)).collect();
             (r, u)
         }
     };
@@ -256,8 +253,8 @@ fn from_ctx_constant<'a, 'arena>(
     };
     Ok(CtxConstant {
         name: Str::new_str(alloc, &name),
-        recognized,
-        unrecognized,
+        recognized: recognized.into(),
+        unrecognized: unrecognized.into(),
         is_abstract,
     })
 }
@@ -490,7 +487,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
             Visibility::Public,
             false, // is_abstract
             Span::from_pos(&ast_class.span),
-            Coeffects::pure(alloc),
+            Coeffects::pure(),
             instrs,
         )?))
     }
@@ -528,7 +525,7 @@ fn make_init_method<'arena, 'decl>(
             Visibility::Private,
             false, // is_abstract
             span,
-            Coeffects::pure(alloc),
+            Coeffects::pure(),
             instrs,
         )?))
     } else {

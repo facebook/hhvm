@@ -388,8 +388,8 @@ fn assemble_class<'arena>(
 }
 
 /// Defined in 'hack/src/naming/naming_special_names.rs`
-fn is_enforced_static_coeffect(d: &Slice<'_, u8>) -> bool {
-    match d.as_ref() {
+fn is_enforced_static_coeffect(d: &[u8]) -> bool {
+    match d {
         b"pure" | b"defaults" | b"rx" | b"zoned" | b"write_props" | b"rx_local" | b"zoned_with"
         | b"zoned_local" | b"zoned_shallow" | b"leak_safe_local" | b"leak_safe_shallow"
         | b"leak_safe" | b"read_globals" | b"globals" | b"write_this_props" | b"rx_shallow" => true,
@@ -411,15 +411,15 @@ fn assemble_ctx_constant<'arena>(
     // .ctx has slice of recognized and unrecognized constants.
     // Making an assumption that recognized ~~ static coeffects and
     // unrecognized ~~ unenforced static coeffects
-    let (r, u) = tokens
+    let (r, u): (Vec<_>, Vec<_>) = tokens
         .into_iter()
         .map(|tok| tok.into_ffi_str(alloc))
-        .partition(is_enforced_static_coeffect);
+        .partition(|s| is_enforced_static_coeffect(s));
 
     Ok(hhbc::CtxConstant {
         name,
-        recognized: Slice::from_vec(alloc, r),
-        unrecognized: Slice::from_vec(alloc, u),
+        recognized: r.into(),
+        unrecognized: u.into(),
         is_abstract,
     })
 }
@@ -1615,12 +1615,12 @@ fn assemble_coeffects<'arena>(
     }
 
     Ok(hhbc::Coeffects::new(
-        Slice::from_vec(alloc, scs),
-        Slice::from_vec(alloc, uscs),
-        Slice::from_vec(alloc, fun_param),
-        Slice::from_vec(alloc, cc_param),
-        Slice::from_vec(alloc, cc_this),
-        Slice::from_vec(alloc, cc_reified),
+        scs,
+        uscs,
+        fun_param,
+        cc_param,
+        cc_this,
+        cc_reified,
         closure_parent_scope,
         generator_this,
         caller,
@@ -1705,7 +1705,7 @@ fn assemble_coeffects_cc_this<'arena>(
     }
     token_iter.expect(Token::is_semicolon)?;
     cc_this.push(hhbc::CcThis {
-        types: Slice::from_vec(alloc, params),
+        types: params.into(),
     });
     Ok(())
 }
@@ -1727,7 +1727,7 @@ fn assemble_coeffects_cc_reified<'arena>(
     cc_reified.push(hhbc::CcReified {
         is_class,
         index,
-        types: Slice::from_vec(alloc, types),
+        types: types.into(),
     });
     Ok(())
 }

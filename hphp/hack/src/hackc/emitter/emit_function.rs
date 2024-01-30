@@ -96,18 +96,18 @@ pub fn emit_function<'a, 'arena, 'decl>(
 
     let mut coeffects = Coeffects::from_ast(alloc, f.ctxs.as_ref(), &f.params, &fd.tparams, vec![]);
     if is_meth_caller {
-        coeffects = coeffects.with_caller(alloc)
+        coeffects = coeffects.with_caller()
     }
     if e.systemlib()
         && (fd.name.1 == "\\HH\\Coeffects\\backdoor"
             || fd.name.1 == "\\HH\\Coeffects\\backdoor_async")
     {
-        coeffects = coeffects.with_backdoor(alloc)
+        coeffects = coeffects.with_backdoor()
     }
     if e.systemlib()
         && (fd.name.1 == "\\HH\\Coeffects\\fb\\backdoor_to_globals_leak_safe__DO_NOT_USE")
     {
-        coeffects = coeffects.with_backdoor_globals_leak_safe(alloc)
+        coeffects = coeffects.with_backdoor_globals_leak_safe()
     }
     let ast_body = &f.body.fb_ast;
     let deprecation_info = hhbc::deprecation_info(user_attrs.iter());

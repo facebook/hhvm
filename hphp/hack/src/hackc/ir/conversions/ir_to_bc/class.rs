@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Maybe;
-use ffi::Slice;
 
 use crate::convert;
 use crate::convert::UnitBuilder;
@@ -12,7 +11,6 @@ use crate::strings::StringCache;
 use crate::types;
 
 pub(crate) fn convert_class<'a>(
-    alloc: &'a bumpalo::Bump,
     unit: &mut UnitBuilder<'a>,
     class: ir::Class<'a>,
     strings: &StringCache<'a>,
@@ -44,11 +42,7 @@ pub(crate) fn convert_class<'a>(
         },
     ));
 
-    let ctx_constants = Vec::from_iter(
-        ctx_constants
-            .iter()
-            .map(|ctx| convert_ctx_constant(alloc, ctx)),
-    );
+    let ctx_constants = Vec::from_iter(ctx_constants.iter().map(|ctx| convert_ctx_constant(ctx)));
 
     let enum_includes = Vec::from_iter(
         enum_includes
@@ -137,14 +131,11 @@ fn convert_property<'a>(src: ir::Property<'a>, strings: &StringCache<'a>) -> hhb
     }
 }
 
-fn convert_ctx_constant<'a>(
-    alloc: &'a bumpalo::Bump,
-    ctx: &ir::CtxConstant<'a>,
-) -> hhbc::CtxConstant<'a> {
+fn convert_ctx_constant<'a>(ctx: &ir::CtxConstant<'a>) -> hhbc::CtxConstant<'a> {
     hhbc::CtxConstant {
         name: ctx.name,
-        recognized: Slice::fill_iter(alloc, ctx.recognized.iter().cloned()),
-        unrecognized: Slice::fill_iter(alloc, ctx.unrecognized.iter().cloned()),
+        recognized: ctx.recognized.clone().into(),
+        unrecognized: ctx.unrecognized.clone().into(),
         is_abstract: ctx.is_abstract,
     }
 }

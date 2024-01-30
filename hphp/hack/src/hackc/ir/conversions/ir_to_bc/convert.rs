@@ -22,7 +22,7 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Un
     let mut unit = UnitBuilder::new_in(alloc);
 
     for cls in ir_unit.classes.into_iter() {
-        crate::class::convert_class(alloc, &mut unit, cls, &strings);
+        crate::class::convert_class(&mut unit, cls, &strings);
     }
 
     for function in ir_unit.functions.into_iter() {

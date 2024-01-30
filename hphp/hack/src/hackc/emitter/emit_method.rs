@@ -194,9 +194,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
         let parent_coeffects = emitter
             .global_state()
             .get_lambda_coeffects_of_scope(&class.name.1, &method.name.1);
-        parent_coeffects.map_or(Coeffects::default(), |pc| {
-            pc.inherit_to_child_closure(emitter.alloc)
-        })
+        parent_coeffects.map_or(Coeffects::default(), |pc| pc.inherit_to_child_closure())
     } else {
         Coeffects::from_ast(
             emitter.alloc,
@@ -208,7 +206,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
     };
 
     if is_closure_body && coeffects.is_86caller() {
-        coeffects = coeffects.with_caller(emitter.alloc)
+        coeffects = coeffects.with_caller()
     }
 
     if is_native_opcode_impl
@@ -226,7 +224,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
         match (class.name.1.as_str(), method.name.1.as_str()) {
             ("\\__SystemLib\\MethCallerHelper", members::__INVOKE)
             | ("\\__SystemLib\\DynMethCallerHelper", members::__INVOKE) => {
-                coeffects = coeffects.with_caller(emitter.alloc)
+                coeffects = coeffects.with_caller()
             }
             _ => {}
         }

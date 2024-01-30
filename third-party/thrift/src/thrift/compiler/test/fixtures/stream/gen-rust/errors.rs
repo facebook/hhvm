@@ -134,7 +134,7 @@ pub mod pub_sub_streaming_service {
     #[derive(Debug)]
     pub enum StreamthrowsStreamError {
         e(crate::types::FooStreamEx),
-        ApplicationException(::fbthrift::types::ApplicationException),
+        ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
 
@@ -226,7 +226,7 @@ pub mod pub_sub_streaming_service {
     #[derive(Debug)]
     pub enum ServicethrowsError {
         e(crate::types::FooEx),
-        ApplicationException(::fbthrift::types::ApplicationException),
+        ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
 
@@ -363,7 +363,7 @@ pub mod pub_sub_streaming_service {
     pub enum Servicethrows2Error {
         e1(crate::types::FooEx),
         e2(crate::types::FooEx2),
-        ApplicationException(::fbthrift::types::ApplicationException),
+        ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
 
@@ -528,7 +528,7 @@ pub mod pub_sub_streaming_service {
     #[derive(Debug)]
     pub enum BoththrowsError {
         e(crate::types::FooEx),
-        ApplicationException(::fbthrift::types::ApplicationException),
+        ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
 
@@ -648,7 +648,7 @@ pub mod pub_sub_streaming_service {
     #[derive(Debug)]
     pub enum BoththrowsStreamError {
         e(crate::types::FooStreamEx),
-        ApplicationException(::fbthrift::types::ApplicationException),
+        ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
 
@@ -773,7 +773,7 @@ pub mod pub_sub_streaming_service {
     #[derive(Debug)]
     pub enum ResponseandstreamstreamthrowsStreamError {
         e(crate::types::FooStreamEx),
-        ApplicationException(::fbthrift::types::ApplicationException),
+        ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
 
@@ -865,7 +865,7 @@ pub mod pub_sub_streaming_service {
     #[derive(Debug)]
     pub enum ResponseandstreamservicethrowsError {
         e(crate::types::FooEx),
-        ApplicationException(::fbthrift::types::ApplicationException),
+        ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
 
@@ -1001,7 +1001,7 @@ pub mod pub_sub_streaming_service {
     #[derive(Debug)]
     pub enum ResponseandstreamboththrowsError {
         e(crate::types::FooEx),
-        ApplicationException(::fbthrift::types::ApplicationException),
+        ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
 
@@ -1121,7 +1121,7 @@ pub mod pub_sub_streaming_service {
     #[derive(Debug)]
     pub enum ResponseandstreamboththrowsStreamError {
         e(crate::types::FooStreamEx),
-        ApplicationException(::fbthrift::types::ApplicationException),
+        ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
 

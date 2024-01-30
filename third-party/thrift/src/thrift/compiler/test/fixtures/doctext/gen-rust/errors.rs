@@ -90,7 +90,7 @@ pub mod c {
     #[derive(Debug)]
     pub enum ThingError {
         bang(crate::types::Bang),
-        ApplicationException(::fbthrift::types::ApplicationException),
+        ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
 

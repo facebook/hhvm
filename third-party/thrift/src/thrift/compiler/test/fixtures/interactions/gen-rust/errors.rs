@@ -25,7 +25,7 @@ pub mod my_interaction {
     #[derive(Debug)]
     pub enum FrobnicateError {
         ex(crate::types::CustomException),
-        ApplicationException(::fbthrift::types::ApplicationException),
+        ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
 

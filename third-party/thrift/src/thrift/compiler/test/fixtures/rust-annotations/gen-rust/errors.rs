@@ -41,7 +41,7 @@ pub mod all_methods {
     #[derive(Debug)]
     pub enum BarError {
         se(crate::types::SomeError),
-        ApplicationException(::fbthrift::types::ApplicationException),
+        ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
 
@@ -178,7 +178,7 @@ pub mod one_method {
     #[derive(Debug)]
     pub enum BarError {
         se(crate::types::SomeError),
-        ApplicationException(::fbthrift::types::ApplicationException),
+        ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
 
@@ -315,7 +315,7 @@ pub mod one_method_opt_out {
     #[derive(Debug)]
     pub enum BarError {
         se(crate::types::SomeError),
-        ApplicationException(::fbthrift::types::ApplicationException),
+        ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
 

@@ -82,7 +82,7 @@ pub mod raiser {
         b(crate::types::Banal),
         f(crate::types::Fiery),
         s(crate::types::Serious),
-        ApplicationException(::fbthrift::types::ApplicationException),
+        ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
 
@@ -255,7 +255,7 @@ pub mod raiser {
         f(crate::types::Fiery),
         b(crate::types::Banal),
         s(crate::types::Serious),
-        ApplicationException(::fbthrift::types::ApplicationException),
+        ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
 

@@ -25,7 +25,7 @@ pub mod my_service {
     #[derive(Debug)]
     pub enum PingError {
         myExcept(crate::types::MyException),
-        ApplicationException(::fbthrift::types::ApplicationException),
+        ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
 

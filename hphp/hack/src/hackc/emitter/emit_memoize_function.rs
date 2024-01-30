@@ -87,7 +87,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
         .collect::<Vec<_>>();
     let params = emit_param::from_asts(emitter, &mut tparams, true, &scope, &f.params)?;
     let mut attributes = emit_attribute::from_asts(emitter, &f.user_attributes)?;
-    attributes.extend(emit_attribute::add_reified_attribute(alloc, &fd.tparams));
+    attributes.extend(emit_attribute::add_reified_attribute(&fd.tparams));
     let return_type_info = emit_body::emit_return_type_info(
         alloc,
         &tparams,
@@ -138,7 +138,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
     let attrs = get_attrs_for_fun(emitter, fd, &attributes, false, has_variadic);
 
     Ok(Function {
-        attributes: Slice::fill_iter(alloc, attributes),
+        attributes: attributes.into(),
         name: original_id,
         body,
         span: Span::from_pos(&f.span),

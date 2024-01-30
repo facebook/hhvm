@@ -67,7 +67,7 @@ pub fn from_ast<'arena, 'decl>(
     };
     Ok(Attribute {
         name: e.alloc.alloc_str(fully_qualified_id).into(),
-        arguments: e.alloc.alloc_slice_fill_iter(arguments).into(),
+        arguments: arguments.into(),
     })
 }
 
@@ -75,10 +75,7 @@ pub fn from_ast<'arena, 'decl>(
 /// parameters. The arguments to __Reified are number of type parameters
 /// followed by the indicies of these reified type parameters and whether they
 /// are soft reified or not
-pub fn add_reified_attribute<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    tparams: &[a::Tparam],
-) -> Option<Attribute<'arena>> {
+pub fn add_reified_attribute<'arena>(tparams: &[a::Tparam]) -> Option<Attribute<'arena>> {
     let reified_data: Vec<(usize, bool, bool)> = tparams
         .iter()
         .enumerate()
@@ -98,9 +95,7 @@ pub fn add_reified_attribute<'arena>(
 
     let name = "__Reified".into();
     let bool2i64 = |b| b as i64;
-    // NOTE(hrust) hopefully faster than .into_iter().flat_map(...).collect()
-    let mut arguments =
-        bumpalo::collections::vec::Vec::with_capacity_in(reified_data.len() * 3 + 1, alloc);
+    let mut arguments = Vec::with_capacity(reified_data.len() * 3 + 1);
     arguments.push(TypedValue::Int(tparams.len() as i64));
     for (i, soft, warn) in reified_data.into_iter() {
         arguments.push(TypedValue::Int(i as i64));
@@ -109,7 +104,7 @@ pub fn add_reified_attribute<'arena>(
     }
     Some(Attribute {
         name,
-        arguments: arguments.into_bump_slice().into(),
+        arguments: arguments.into(),
     })
 }
 
@@ -121,7 +116,7 @@ pub fn add_reified_parent_attribute<'a, 'arena>(
         if emit_expression::has_non_tparam_generics(env, hl) {
             return Some(Attribute {
                 name: "__HasReifiedParent".into(),
-                arguments: ffi::Slice::empty(),
+                arguments: vec![].into(),
             });
         }
     }

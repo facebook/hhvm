@@ -81,7 +81,7 @@ pub(crate) fn convert_func<'a>(
             is_variadic: param.is_variadic,
             is_inout: param.is_inout,
             is_readonly: param.is_readonly,
-            user_attributes,
+            user_attributes: user_attributes.into(),
             type_info: crate::types::convert(&param.ty, strings),
             default_value,
         }
@@ -143,7 +143,7 @@ pub(crate) fn convert_function<'a>(
     let coeffects = convert_coeffects(strings.alloc, &function.func.coeffects);
     let body = convert_func(function.func, strings, &mut unit.adata_cache);
     let hhas_func = hhbc::Function {
-        attributes,
+        attributes: attributes.into(),
         body,
         coeffects,
         flags: function.flags,
@@ -167,7 +167,7 @@ pub(crate) fn convert_method<'a>(
         convert::convert_attributes(std::mem::take(&mut method.func.attributes), strings);
     let body = convert_func(method.func, strings, adata);
     hhbc::Method {
-        attributes,
+        attributes: attributes.into(),
         name: strings.lookup_method_name(method.name),
         body,
         span,

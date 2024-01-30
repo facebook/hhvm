@@ -493,6 +493,12 @@ impl<T: PartialEq> PartialEq for Vector<T> {
     }
 }
 
+impl<T: Hash> Hash for Vector<T> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.as_slice().hash(state);
+    }
+}
+
 impl<T> std::ops::Deref for Vector<T> {
     type Target = [T];
 

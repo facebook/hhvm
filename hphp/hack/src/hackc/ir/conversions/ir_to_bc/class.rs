@@ -91,7 +91,7 @@ pub(crate) fn convert_class<'a>(
     );
 
     let class = hhbc::Class {
-        attributes: convert::convert_attributes(attributes, strings),
+        attributes: convert::convert_attributes(attributes, strings).into(),
         base,
         constants: Vec::from_iter(
             constants
@@ -126,7 +126,7 @@ fn convert_property<'a>(src: ir::Property<'a>, strings: &StringCache<'a>) -> hhb
     hhbc::Property {
         name: strings.lookup_prop_name(src.name),
         flags: src.flags,
-        attributes: convert::convert_attributes(src.attributes, strings),
+        attributes: convert::convert_attributes(src.attributes, strings).into(),
         visibility: src.visibility,
         initial_value: src
             .initial_value

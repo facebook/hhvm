@@ -125,7 +125,7 @@ fn make_86method<'arena, 'decl>(
 
     Ok(Method {
         body,
-        attributes: Slice::fill_iter(alloc, attributes),
+        attributes: attributes.into(),
         name,
         flags,
         span,
@@ -473,7 +473,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
             is_variadic: false,
             is_inout: false,
             is_readonly: false,
-            user_attributes: Slice::empty(),
+            user_attributes: Default::default(),
             type_info: Just(TypeInfo::make(Just("HH\\varray".into()), tc)),
             default_value: Nothing,
         }];
@@ -547,10 +547,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
 
     let mut attributes = emit_attribute::from_asts(emitter, &ast_class.user_attributes)?;
     if !is_closure {
-        attributes.extend(emit_attribute::add_reified_attribute(
-            alloc,
-            &ast_class.tparams,
-        ));
+        attributes.extend(emit_attribute::add_reified_attribute(&ast_class.tparams));
         attributes.extend(emit_attribute::add_reified_parent_attribute(
             &env,
             &ast_class.extends,
@@ -734,7 +731,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
             is_variadic: false,
             is_inout: false,
             is_readonly: false,
-            user_attributes: Slice::empty(),
+            user_attributes: Default::default(),
             type_info: Nothing, // string?
             default_value: Nothing,
         }];
@@ -864,7 +861,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
 
     add_symbol_refs(emitter, base.as_ref(), &implements, &uses, &requirements);
     Ok(Class {
-        attributes: Slice::fill_iter(alloc, attributes),
+        attributes: attributes.into(),
         base: Maybe::from(base),
         implements: implements.into(),
         enum_includes: enum_includes.into(),

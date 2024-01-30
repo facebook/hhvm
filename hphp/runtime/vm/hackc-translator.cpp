@@ -317,7 +317,8 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
 ///////////////////////////////////////////////////////////////////////////////
 // Field translaters
 
-void translateUserAttributes(Slice<hhbc::Attribute> attributes, UserAttributeMap& userAttrs) {
+void translateUserAttributes(const Vector<hhbc::Attribute>& attributes,
+                             UserAttributeMap& userAttrs) {
   Trace::Indent indent;
   auto attrs = range(attributes);
   for (auto const& attr : attrs) {

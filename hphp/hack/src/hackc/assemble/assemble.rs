@@ -77,7 +77,7 @@ fn assemble_from_toks<'arena>(
         unit.assemble_decl(alloc, token_iter)?;
     }
 
-    Ok((unit.into_unit(alloc), fp))
+    Ok((unit.into_unit(), fp))
 }
 
 #[derive(Default)]
@@ -99,13 +99,13 @@ struct UnitBuilder<'a> {
 }
 
 impl<'a> UnitBuilder<'a> {
-    fn into_unit(self, alloc: &'a Bump) -> hhbc::Unit<'a> {
+    fn into_unit(self) -> hhbc::Unit<'a> {
         hhbc::Unit {
             adata: self.adatas.into(),
             functions: self.funcs.into(),
             classes: self.classes.into(),
             typedefs: self.typedefs.into(),
-            file_attributes: Slice::fill_iter(alloc, self.file_attributes),
+            file_attributes: self.file_attributes.into(),
             modules: self.modules.into(),
             module_use: self.module_use.into(),
             symbol_refs: hhbc::SymbolRefs {
@@ -257,7 +257,7 @@ fn assemble_module<'arena>(
     );
 
     Ok(hhbc::Module {
-        attributes,
+        attributes: attributes.into(),
         name,
         span,
         doc_comment,
@@ -313,7 +313,7 @@ fn assemble_typedef<'arena>(
     let (attrs, attributes) = attrs;
     Ok(hhbc::Typedef {
         name,
-        attributes,
+        attributes: attributes.into(),
         type_info_union: type_info_union.into(),
         type_structure,
         span,
@@ -366,7 +366,7 @@ fn assemble_class<'arena>(
     parse!(token_iter, "}");
 
     let hhas_class = hhbc::Class {
-        attributes,
+        attributes: attributes.into(),
         base,
         implements: implements.into(),
         enum_includes: enum_includes.into(),
@@ -517,7 +517,7 @@ fn assemble_method<'arena>(
     let visibility =
         determine_visibility(&attrs).map_err(|e| method_tok.unwrap().error(e.to_string()))?;
     let met = hhbc::Method {
-        attributes,
+        attributes: attributes.into(),
         visibility,
         name,
         body,
@@ -585,7 +585,7 @@ fn assemble_property<'arena>(
     Ok(hhbc::Property {
         name,
         flags,
-        attributes,
+        attributes: attributes.into(),
         visibility,
         initial_value,
         type_info,
@@ -1130,7 +1130,7 @@ fn assemble_function<'arena>(
         upper_bounds,
     )?;
     let hhas_func = hhbc::Function {
-        attributes,
+        attributes: attributes.into(),
         name,
         body,
         span,
@@ -1210,10 +1210,7 @@ fn assemble_upper_bound<'arena>(
 fn assemble_special_and_user_attrs<'arena>(
     token_iter: &mut Lexer<'_>,
     alloc: &'arena Bump,
-) -> Result<(
-    hhvm_types_ffi::ffi::Attr,
-    Slice<'arena, hhbc::Attribute<'arena>>,
-)> {
+) -> Result<(hhvm_types_ffi::ffi::Attr, Vec<hhbc::Attribute<'arena>>)> {
     let mut user_atts = Vec::new();
     let mut tr = hhvm_types_ffi::ffi::Attr::AttrNone;
     if token_iter.next_is(Token::is_open_bracket) {
@@ -1229,7 +1226,6 @@ fn assemble_special_and_user_attrs<'arena>(
         token_iter.expect(Token::is_close_bracket)?;
     }
     // If no special and user attrs then no [] printed
-    let user_atts = Slice::from_vec(alloc, user_atts);
     Ok((tr, user_atts))
 }
 
@@ -1299,7 +1295,10 @@ fn assemble_user_attr<'arena>(
     token_iter.expect(Token::is_open_paren)?;
     let arguments = assemble_user_attr_args(alloc, token_iter)?;
     token_iter.expect(Token::is_close_paren)?;
-    Ok(hhbc::Attribute { name, arguments })
+    Ok(hhbc::Attribute {
+        name,
+        arguments: arguments.into(),
+    })
 }
 
 /// Printed as follows (print_attributes in bcp)
@@ -1307,10 +1306,10 @@ fn assemble_user_attr<'arena>(
 fn assemble_user_attr_args<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-) -> Result<Slice<'arena, hhbc::TypedValue<'arena>>> {
+) -> Result<Vec<hhbc::TypedValue<'arena>>> {
     let tok = token_iter.peek().copied();
     if let hhbc::TypedValue::Vec(sl) = assemble_triple_quoted_typed_value(token_iter, alloc)? {
-        Ok(sl)
+        Ok(sl.iter().cloned().collect())
     } else {
         Err(tok
             .unwrap()
@@ -1437,16 +1436,13 @@ fn assemble_param<'arena>(
     decl_map: &mut DeclMap<'arena>,
 ) -> Result<hhbc::Param<'arena>> {
     let mut ua_vec = Vec::new();
-    let user_attributes = {
-        if token_iter.peek_is(Token::is_open_bracket) {
-            token_iter.expect(Token::is_open_bracket)?;
-            while !token_iter.peek_is(Token::is_close_bracket) {
-                ua_vec.push(assemble_user_attr(token_iter, alloc)?);
-            }
-            token_iter.expect(Token::is_close_bracket)?;
+    if token_iter.peek_is(Token::is_open_bracket) {
+        token_iter.expect(Token::is_open_bracket)?;
+        while !token_iter.peek_is(Token::is_close_bracket) {
+            ua_vec.push(assemble_user_attr(token_iter, alloc)?);
         }
-        Slice::from_vec(alloc, ua_vec)
-    };
+        token_iter.expect(Token::is_close_bracket)?;
+    }
     let is_inout = token_iter.next_is_str(Token::is_identifier, "inout");
     let is_readonly = token_iter.next_is_str(Token::is_identifier, "readonly");
     let is_variadic = token_iter.next_is(Token::is_variadic);
@@ -1460,7 +1456,7 @@ fn assemble_param<'arena>(
         is_variadic,
         is_inout,
         is_readonly,
-        user_attributes,
+        user_attributes: ua_vec.into(),
         type_info,
         default_value,
     })

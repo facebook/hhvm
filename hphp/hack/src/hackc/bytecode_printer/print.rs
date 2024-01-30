@@ -776,7 +776,7 @@ fn print_attribute(ctx: &Context<'_>, w: &mut dyn Write, a: &Attribute<'_>) -> R
         Adata::VEC_PREFIX,
         a.arguments.len()
     )?;
-    concat(w, a.arguments, |w, arg| print_adata(ctx, w, arg))?;
+    concat(w, &a.arguments, |w, arg| print_adata(ctx, w, arg))?;
     w.write_all(b"}\"\"\")")
 }
 

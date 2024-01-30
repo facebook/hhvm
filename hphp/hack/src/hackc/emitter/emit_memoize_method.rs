@@ -140,10 +140,7 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
     scope.push_item(ScopeItem::Class(ast_scope::Class::new_ref(class)));
     scope.push_item(ScopeItem::Method(ast_scope::Method::new_ref(method)));
     let mut attributes = emit_attribute::from_asts(emitter, &method.user_attributes)?;
-    attributes.extend(emit_attribute::add_reified_attribute(
-        alloc,
-        &method.tparams,
-    ));
+    attributes.extend(emit_attribute::add_reified_attribute(&method.tparams));
     let is_async = method.fun_kind.is_fasync();
     // __Memoize is not allowed on lambdas, so we never need to inherit the rx
     // level from the declaring scope when we're in a Memoize wrapper
@@ -199,7 +196,7 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
     );
 
     Ok(Method {
-        attributes: Slice::fill_iter(alloc, attributes),
+        attributes: attributes.into(),
         visibility: Visibility::from(method.visibility),
         name,
         body,

@@ -373,7 +373,7 @@ pub fn make_body<'a, 'arena, 'decl>(
     opt_env: Option<&Env<'a, 'arena>>,
 ) -> Result<Body<'arena>> {
     if emitter.options().compiler_flags.relabel {
-        label_rewriter::relabel_function(alloc, &mut params, &mut body_instrs);
+        label_rewriter::relabel_function(&mut params, &mut body_instrs);
     }
     let num_iters = if is_memoize_wrapper {
         0

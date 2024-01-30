@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use emit_opcodes_macro::Targets;
-use ffi::Slice;
 use ffi::Str;
+use ffi::Vector;
 use serde::Serialize;
 
 use crate::AdataId;

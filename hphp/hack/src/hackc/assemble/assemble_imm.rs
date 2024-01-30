@@ -7,8 +7,8 @@ use anyhow::bail;
 use anyhow::Result;
 use assemble_opcode_macro::assemble_imm_for_enum;
 use bumpalo::Bump;
-use ffi::Slice;
 use ffi::Str;
+use ffi::Vector;
 
 use crate::assemble;
 use crate::assemble::DeclMap;
@@ -467,35 +467,35 @@ impl<'arena> AssembleImm<'arena, hhbc::PropName<'arena>> for Lexer<'_> {
     }
 }
 
-impl<'arena> AssembleImm<'arena, Slice<'arena, hhbc::Label>> for Lexer<'_> {
+impl<'arena> AssembleImm<'arena, Vector<hhbc::Label>> for Lexer<'_> {
     fn assemble_imm(
         &mut self,
-        alloc: &'arena Bump,
+        _: &'arena Bump,
         _: &DeclMap<'arena>,
-    ) -> Result<Slice<'arena, hhbc::Label>> {
+    ) -> Result<Vector<hhbc::Label>> {
         let mut labels = Vec::new();
         self.expect(Token::is_lt)?;
         while !self.peek_is(Token::is_gt) {
             labels.push(assemble::assemble_label(self)?)
         }
         self.expect(Token::is_gt)?;
-        Ok(Slice::from_vec(alloc, labels))
+        Ok(labels.into())
     }
 }
 
-impl<'arena> AssembleImm<'arena, Slice<'arena, Str<'arena>>> for Lexer<'_> {
+impl<'arena> AssembleImm<'arena, Vector<Str<'arena>>> for Lexer<'_> {
     fn assemble_imm(
         &mut self,
         alloc: &'arena Bump,
         _: &DeclMap<'arena>,
-    ) -> Result<Slice<'arena, Str<'arena>>> {
+    ) -> Result<Vector<Str<'arena>>> {
         self.expect(Token::is_lt)?;
         let mut d = Vec::new();
         while !self.peek_is(Token::is_gt) {
             d.push(assemble::assemble_unescaped_unquoted_str(alloc, self)?);
         }
         self.expect(Token::is_gt)?;
-        Ok(Slice::from_vec(alloc, d))
+        Ok(d.into())
     }
 }
 

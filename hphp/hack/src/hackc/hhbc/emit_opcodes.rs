@@ -304,11 +304,11 @@ fn convert_imm_type(imm: &ImmType, lifetime: &Lifetime) -> TokenStream {
         ImmType::AA => quote!(AdataId<#lifetime>),
         ImmType::ARR(sub) => {
             let sub_ty = convert_imm_type(sub, lifetime);
-            quote!(Slice<#lifetime, #sub_ty>)
+            quote!(Vector<#sub_ty>)
         }
         ImmType::BA => quote!(Label),
         ImmType::BA2 => quote!([Label; 2]),
-        ImmType::BLA => quote!(Slice<#lifetime, Label>),
+        ImmType::BLA => quote!(Vector<Label>),
         ImmType::DA => quote!(FloatBits),
         ImmType::DUMMY => quote!(Dummy),
         ImmType::FCA => quote!(FCallArgs<#lifetime>),
@@ -332,8 +332,8 @@ fn convert_imm_type(imm: &ImmType, lifetime: &Lifetime) -> TokenStream {
         }
         ImmType::RATA => quote!(RepoAuthType<#lifetime>),
         ImmType::SA => quote!(Str<#lifetime>),
-        ImmType::SLA => quote!(Slice<#lifetime, SwitchLabel>),
-        ImmType::VSA => quote!(Slice<#lifetime, Str<#lifetime>>),
+        ImmType::SLA => quote!(Vector<SwitchLabel>),
+        ImmType::VSA => quote!(Vector<Str<#lifetime>>),
     }
 }
 
@@ -597,10 +597,10 @@ mod tests {
                     TestAsStruct { str1: Str<'a>, str2: Str<'a> },
                     // --------------------
                     TestAA(AdataId<'a>),
-                    TestARR(Slice<'a, Str<'a>>),
+                    TestARR(Vector<Str<'a>>),
                     TestBA(Label),
                     TestBA2([Label; 2]),
-                    TestBLA(Slice<'a, Label>),
+                    TestBLA(Vector<Label>),
                     TestDA(FloatBits),
                     TestFCA(FCallArgs<'a>),
                     TestI64A(i64),
@@ -616,8 +616,8 @@ mod tests {
                     TestOAL(OaSubType<'a>),
                     TestRATA(RepoAuthType<'a>),
                     TestSA(Str<'a>),
-                    TestSLA(Slice<'a, SwitchLabel>),
-                    TestVSA(Slice<'a, Str<'a>>),
+                    TestSLA(Vector<SwitchLabel>),
+                    TestVSA(Vector<Str<'a>>),
                 }
                 impl<'a> MyOps<'a> {
                     pub fn variant_name(&self) -> &'static str {

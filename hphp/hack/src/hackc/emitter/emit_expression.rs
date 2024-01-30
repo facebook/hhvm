@@ -1396,11 +1396,7 @@ fn emit_struct_array<
     'a,
     'arena,
     'decl,
-    C: FnOnce(
-        &'arena bumpalo::Bump,
-        &mut Emitter<'arena, 'decl>,
-        &'arena [&'arena str],
-    ) -> Result<InstrSeq<'arena>>,
+    C: FnOnce(&'arena [&'arena str]) -> Result<InstrSeq<'arena>>,
 >(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
@@ -1450,7 +1446,7 @@ fn emit_struct_array<
     Ok(InstrSeq::gather(vec![
         InstrSeq::gather(value_instrs),
         emit_pos(pos),
-        ctor(alloc, e, keys_)?,
+        ctor(keys_)?,
     ]))
 }
 
@@ -1464,9 +1460,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
     let count = fields.len() as u32;
     let emit_dict = |e: &mut Emitter<'arena, 'decl>| {
         if is_struct_init(e, env, fields, true)? {
-            emit_struct_array(e, env, pos, fields, |alloc, _, x| {
-                Ok(instr::new_struct_dict(alloc, x))
-            })
+            emit_struct_array(e, env, pos, fields, |x| Ok(instr::new_struct_dict(x)))
         } else {
             let ctor = Instruct::Opcode(Opcode::NewDictArray(count));
             emit_array(e, env, pos, fields, ctor)
@@ -1475,9 +1469,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
     let emit_collection_helper = |e: &mut Emitter<'arena, 'decl>, ctype| {
         if is_struct_init(e, env, fields, true)? {
             Ok(InstrSeq::gather(vec![
-                emit_struct_array(e, env, pos, fields, |alloc, _, x| {
-                    Ok(instr::new_struct_dict(alloc, x))
-                })?,
+                emit_struct_array(e, env, pos, fields, |x| Ok(instr::new_struct_dict(x)))?,
                 emit_pos(pos),
                 instr::col_from_array(ctype),
             ]))

@@ -733,8 +733,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
             default_value: Nothing,
         }];
         let default_label = emitter.label_gen_mut().next_regular();
-        let mut cases =
-            bumpalo::collections::Vec::with_capacity_in(initialized_constants.len() + 1, alloc);
+        let mut cases = Vec::with_capacity(initialized_constants.len() + 1);
         for (name, label, _) in &initialized_constants {
             let n: &str = alloc.alloc_str((*name).unsafe_as_str());
             cases.push((n, *label))
@@ -744,7 +743,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         let instrs = InstrSeq::gather(vec![
             emit_pos::emit_pos(pos),
             instr::c_get_l(param_local),
-            instr::s_switch(alloc, cases),
+            instr::s_switch(cases),
             InstrSeq::gather(
                 initialized_constants
                     .into_iter()

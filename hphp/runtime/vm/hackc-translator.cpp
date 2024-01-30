@@ -700,7 +700,7 @@ void handleNLA(TranslationState& ts, const Local& local) {
   ts.fe->emitNamedLocal(loc);
 }
 
-void handleBLA(TranslationState& ts, const Slice<Label>& labels) {
+void handleBLA(TranslationState& ts, const Vector<Label>& labels) {
   ts.fe->emitIVA(labels.len);
   auto targets = range(labels);
   for (auto const& t : targets) {
@@ -725,7 +725,7 @@ void handleITA(TranslationState& ts, const hhbc::IterArgs& ita) {
   encodeIterArgs(*ts.fe, ia);
 }
 
-void handleVSA(TranslationState& ts, const Slice<Str>& arr) {
+void handleVSA(TranslationState& ts, const Vector<Str>& arr) {
   ts.fe->emitIVA(arr.len);
   auto strings = range(arr);
   for (auto const& s : strings) {

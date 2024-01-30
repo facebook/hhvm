@@ -1960,8 +1960,8 @@ fn assemble_sswitch<'arena>(
     }
     token_iter.expect(Token::is_gt)?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::SSwitch {
-        cases: Slice::from_vec(alloc, cases),
-        targets: Slice::from_vec(alloc, targets),
+        cases: cases.into(),
+        targets: targets.into(),
     }))
 }
 

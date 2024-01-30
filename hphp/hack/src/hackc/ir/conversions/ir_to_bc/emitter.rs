@@ -586,11 +586,8 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
             Hhbc::NewObjS(clsref, _) => Opcode::NewObjS(clsref),
             Hhbc::NewPair(..) => Opcode::NewPair,
             Hhbc::NewStructDict(ref keys, _, _) => {
-                let keys = Slice::fill_iter(
-                    self.strings.alloc,
-                    keys.iter().map(|key| self.strings.lookup_ffi_str(*key)),
-                );
-                Opcode::NewStructDict(keys)
+                let keys = Vec::from_iter(keys.iter().map(|key| self.strings.lookup_ffi_str(*key)));
+                Opcode::NewStructDict(keys.into())
             }
             Hhbc::NewVec(ref vids, _) => Opcode::NewVec(vids.len() as u32),
             Hhbc::Not(..) => Opcode::Not,
@@ -1080,33 +1077,29 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 ref targets,
                 ..
             } => {
-                let targets = Slice::fill_iter(
-                    self.strings.alloc,
+                let targets = Vec::from_iter(
                     targets
                         .iter()
                         .copied()
                         .map(|bid| self.labeler.lookup_or_insert_bid(bid)),
                 );
-
-                self.push_opcode(Opcode::Switch(bounded, base, targets));
+                self.push_opcode(Opcode::Switch(bounded, base, targets.into()));
             }
             Terminator::SSwitch {
                 ref cases,
                 ref targets,
                 ..
             } => {
-                let cases = Slice::fill_iter(
-                    self.strings.alloc,
-                    cases.iter().map(|case| self.strings.lookup_ffi_str(*case)),
-                );
+                let cases =
+                    Vec::from_iter(cases.iter().map(|case| self.strings.lookup_ffi_str(*case)))
+                        .into();
 
-                let targets = Slice::fill_iter(
-                    self.strings.alloc,
+                let targets = Vec::from_iter(
                     targets
                         .iter()
-                        .copied()
-                        .map(|bid| self.labeler.lookup_or_insert_bid(bid)),
-                );
+                        .map(|bid| self.labeler.lookup_or_insert_bid(*bid)),
+                )
+                .into();
 
                 self.push_opcode(Opcode::SSwitch { cases, targets });
             }

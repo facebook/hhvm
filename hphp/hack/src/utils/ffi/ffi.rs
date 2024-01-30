@@ -181,8 +181,11 @@ impl<'a, T: serde::Serialize> Serialize for Slice<'a, T> {
         self.as_arena_ref().serialize(serializer)
     }
 }
-// Send+Sync Safety: Slice is no more mutable than T
+
+// Sync Safety: Slice<T> is safe to access from other threads if T is
 unsafe impl<'a, T: Sync> Sync for Slice<'a, T> {}
+
+// Sync Safety: Slice<T> is safe to move to other threads if T is
 unsafe impl<'a, T: Send> Send for Slice<'a, T> {}
 
 impl<'a, T: fmt::Debug> Slice<'a, T> {
@@ -431,6 +434,12 @@ pub struct Vector<T> {
     cap: usize,
 }
 
+// Sync Safety: Vector<T> is safe to access from other threads if T is
+unsafe impl<T: Sync> Sync for Vector<T> {}
+
+// Sync Safety: Vector<T> is safe to move to other threads if T is
+unsafe impl<T: Send> Send for Vector<T> {}
+
 impl<T> From<Vec<T>> for Vector<T> {
     fn from(v: Vec<T>) -> Self {
         let mut leaked = std::mem::ManuallyDrop::new(v);
@@ -454,6 +463,11 @@ impl<T> Vector<T> {
     pub fn as_slice(&self) -> &[T] {
         // Safety: data and len haven't been modified since constructing self
         unsafe { std::slice::from_raw_parts(self.data.as_ptr(), self.len) }
+    }
+
+    pub fn as_mut_slice(&mut self) -> &mut [T] {
+        // Safety: data and len haven't been modified since constructing self
+        unsafe { std::slice::from_raw_parts_mut(self.data.as_ptr(), self.len) }
     }
 }
 

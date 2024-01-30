@@ -147,6 +147,14 @@ Vreg materializeConstVal(Vout& v, Type ty);
 Vreg emitCmpRefCount(Vout& v, Immed s0, Vreg s1);
 
 /*
+ * Compares an object's address with the threshold kUncountedMaxAddr,
+ * returns the status flag. If addr_encodes_persistency is true, zero flag is
+ * set for non-refcounted objects.
+ */
+Vreg emitIsValRefCountedByPointer(Vout& v, Vreg s);
+Vreg emitIsValRefCountedByPointer(Vout& v, Vptr m);
+
+/*
  * Store `s0' to the reference count of the given object.
  */
 void emitStoreRefCount(Vout& v, Immed s0, Vreg s1);

@@ -188,7 +188,12 @@ ALWAYS_INLINE bool Countable::checkCountZ() const {
 }
 
 ALWAYS_INLINE bool MaybeCountable::isRefCounted() const {
-  return m_count >= 0;
+  if constexpr (addr_encodes_persistency) {
+    auto const p = const_cast<MaybeCountable*>(this);
+    return reinterpret_cast<uintptr_t>(p) >> kUncountedMaxShift;
+  } else {
+    return m_count >= 0;
+  }
 }
 
 ALWAYS_INLINE bool Countable::isRefCounted() const {

@@ -175,8 +175,18 @@ void emitSpecializedTypeTest(Vout& v, IRLS& /*env*/, Type type, Loc dataSrc,
   }
 
   if (type == TStaticStr) {
-    auto const sf = emitCmpRefCount(v, StaticValue, dataSrc);
-    doJcc(CC_E, sf);
+    auto const [sf, cc] = [&] {
+      if constexpr (addr_encodes_persistency) {
+        // This will be true for Uncounted strings,
+        // but this code should never be generated for Uncounted strings.
+        auto const sf = emitIsValRefCountedByPointer(v, dataSrc);
+        return std::make_pair(sf, CC_Z);
+      } else {
+        auto const sf = emitCmpRefCount(v, StaticValue, dataSrc);
+        return std::make_pair(sf, CC_E);
+      }
+    }();
+    doJcc(cc, sf);
     return;
   }
 

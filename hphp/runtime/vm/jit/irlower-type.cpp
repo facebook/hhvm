@@ -137,8 +137,16 @@ void cgCheckType(IRLS& env, const IRInstruction* inst) {
       src->type().maybe(typeParam)) {
     assertx(src->type().maybe(TPersistent));
 
-    auto const sf = emitCmpRefCount(v, 0, srcData);
-    doJcc(CC_L, sf);
+    auto const [sf, cc] = [&] {
+      if constexpr (addr_encodes_persistency) {
+        auto const sf = emitIsValRefCountedByPointer(v, srcData);
+        return std::make_pair(sf, CC_Z);
+      } else {
+        auto const sf = emitCmpRefCount(v, 0, srcData);
+        return std::make_pair(sf, CC_L);
+      }
+    }();
+    doJcc(cc, sf);
     doMov();
     return;
   }

@@ -21,41 +21,38 @@
                        (Expr ((), [6:7-10], (Binop { bop = (Eq None); lhs = ((), [6:7-10], (Lvar ([6:7-10], $0fp0))); rhs = ((), [6:7-10], (FunctionPointer ((FP_id ([6:7-10], "\\foo")), []))) }))))];
                      et_virtualized_expr =
                      ((), [4:14-8:4],
-                      (Call
-                         { func =
-                           ((), [4:14-8:4],
-                            (Efun
-                               { ef_fun =
-                                 { f_span = [4:14-8:4]; f_readonly_this = None; 
-                                   f_annotation = (); f_readonly_ret = None; 
-                                   f_ret = ((), None); f_params = []; 
-                                   f_ctxs = None; f_unsafe_ctxs = None;
-                                   f_body =
-                                   { fb_ast =
-                                     [([4:14-8:4],
-                                       (Return
-                                          (Some ((), [4:14-8:4],
-                                                 (Call
-                                                    { func = ((), [4:14-8:4], (Class_const (((), [4:14-8:4], (CI ([4:14-8:4], "\\ExampleDsl"))), ([4:14-8:4], "lambdaType")))); 
-                                                      targs = [];
-                                                      args =
-                                                      [(Pnormal,
-                                                        ((), [4:14-8:4],
-                                                         (Lfun (
-                                                            { f_span = [4:14-8:4]; 
-                                                              f_readonly_this = None; 
-                                                              f_annotation = (); 
-                                                              f_readonly_ret = None; 
-                                                              f_ret = ((), None); 
-                                                              f_params = []; 
-                                                              f_ctxs = (Some ([4:14-8:4], [])); 
-                                                              f_unsafe_ctxs = None;
-                                                              f_body =
-                                                              { fb_ast =
-                                                                [([5:5-7:6],
-                                                                  (For (
-                                                                    [((), [5:10-16],
-                                                                    (Binop
+                      (Efun
+                         { ef_fun =
+                           { f_span = [4:14-8:4]; f_readonly_this = None; 
+                             f_annotation = (); f_readonly_ret = None; 
+                             f_ret = ((), None); f_params = []; f_ctxs = (Some ([4:14-8:4], [([4:14-8:4], (Happly (([4:14-8:4], "\\HH\\Contexts\\defaults"), [])))])); 
+                             f_unsafe_ctxs = None;
+                             f_body =
+                             { fb_ast =
+                               [([4:14-8:4],
+                                 (Return
+                                    (Some ((), [4:14-8:4],
+                                           (Call
+                                              { func = ((), [4:14-8:4], (Class_const (((), [4:14-8:4], (CI ([4:14-8:4], "\\ExampleDsl"))), ([4:14-8:4], "lambdaType")))); 
+                                                targs = [];
+                                                args =
+                                                [(Pnormal,
+                                                  ((), [4:14-8:4],
+                                                   (Lfun (
+                                                      { f_span = [4:14-8:4]; 
+                                                        f_readonly_this = None; 
+                                                        f_annotation = (); 
+                                                        f_readonly_ret = None; 
+                                                        f_ret = ((), None); 
+                                                        f_params = []; 
+                                                        f_ctxs = None; 
+                                                        f_unsafe_ctxs = None;
+                                                        f_body =
+                                                        { fb_ast =
+                                                          [([5:5-7:6],
+                                                            (For (
+                                                               [((), [5:10-16],
+                                                                 (Binop
                                                                     { bop = (Eq None); 
                                                                     lhs = ((), [5:10-12], (Lvar ([5:10-12], $i)));
                                                                     rhs =
@@ -66,14 +63,16 @@
                                                                     { func = ((), [5:15-16], (Class_const (((), [5:15-16], (CI ([5:15-16], "\\ExampleDsl"))), ([5:15-16], "intType")))); 
                                                                     targs = []; 
                                                                     args = []; 
-                                                                    unpacked_arg = None })) }))],
-                                                                    (Some (
+                                                                    unpacked_arg = None })) }))
+                                                                 ],
+                                                               (Some (
+                                                               (), [5:18-22],
+                                                               (Call
+                                                                  { func =
+                                                                    (
                                                                     (), [5:18-22],
                                                                     (
-                                                                    Call
-                                                                    { func =
-                                                                    ((), [5:18-22],
-                                                                    (Obj_get (
+                                                                    Obj_get (
                                                                     ((), [5:18-22],
                                                                     (Call
                                                                     { func = ((), [5:18-22], (Class_const (((), [5:18-22], (CI ([5:18-22], "\\ExampleDsl"))), ([5:18-22], "boolType")))); 
@@ -84,8 +83,8 @@
                                                                     targs = []; 
                                                                     args = []; 
                                                                     unpacked_arg = None }))),
-                                                                    [((), [5:24-35],
-                                                                    (Binop
+                                                               [((), [5:24-35],
+                                                                 (Binop
                                                                     { bop = (Eq None); 
                                                                     lhs = ((), [5:24-26], (Lvar ([5:24-26], $i)));
                                                                     rhs =
@@ -105,11 +104,14 @@
                                                                     targs = []; 
                                                                     args = []; 
                                                                     unpacked_arg = None })))]; 
-                                                                    unpacked_arg = None })) }))],
-                                                                    [([6:7-13],
-                                                                    (Expr
-                                                                    ((), [6:7-12],
-                                                                    (Call
+                                                                    unpacked_arg = None })) }))
+                                                                 ],
+                                                               [([6:7-13],
+                                                                 (Expr
+                                                                    (
+                                                                    (), [6:7-12],
+                                                                    (
+                                                                    Call
                                                                     { func =
                                                                     ((), [6:7-12],
                                                                     (Call
@@ -128,33 +130,32 @@
                                                                     unpacked_arg = None })); 
                                                                     targs = []; 
                                                                     args = []; 
-                                                                    unpacked_arg = None }))))])));
-                                                                  ([4:14-8:4],
-                                                                   (Return
-                                                                    (Some (
-                                                                    (), [4:14-8:4],
-                                                                    (
-                                                                    Call
-                                                                    { func = ((), [4:14-8:4], (Class_const (((), [4:14-8:4], (CI ([4:14-8:4], "\\ExampleDsl"))), ([4:14-8:4], "voidType"))));
+                                                                    unpacked_arg = None }))))
+                                                                 ]
+                                                               )));
+                                                            ([4:14-8:4],
+                                                             (Return
+                                                                (Some (
+                                                                (), [4:14-8:4],
+                                                                (Call
+                                                                   { func = ((), [4:14-8:4], (Class_const (((), [4:14-8:4], (CI ([4:14-8:4], "\\ExampleDsl"))), ([4:14-8:4], "voidType"))));
                                                                     targs = []; 
                                                                     args = []; 
                                                                     unpacked_arg = None })))))
-                                                                  ]
-                                                                };
-                                                              f_fun_kind = FSync; 
-                                                              f_user_attributes = []; 
-                                                              f_external = false; 
-                                                              f_doc_comment = None },
-                                                            [((), ([6:7-10], $0fp0))]))))
-                                                        ];
-                                                      unpacked_arg = None })))))
-                                       ]
-                                     };
-                                   f_fun_kind = FSync; f_user_attributes = []; 
-                                   f_external = false; f_doc_comment = None };
-                                 ef_use = [((), ([4:3-13], $0fp0))]; 
-                                 ef_closure_class_name = None }));
-                           targs = []; args = []; unpacked_arg = None }));
+                                                            ]
+                                                          };
+                                                        f_fun_kind = FSync; 
+                                                        f_user_attributes = []; 
+                                                        f_external = false; 
+                                                        f_doc_comment = None },
+                                                      [((), ([6:7-10], $0fp0))]))))
+                                                  ];
+                                                unpacked_arg = None })))))
+                                 ]
+                               };
+                             f_fun_kind = FSync; f_user_attributes = []; 
+                             f_external = false; f_doc_comment = None };
+                           ef_use = [((), ([4:3-13], $0fp0))]; ef_closure_class_name = None }));
                      et_runtime_expr =
                      ((), [4:14-8:4],
                       (Call

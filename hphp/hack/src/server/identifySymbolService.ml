@@ -427,20 +427,12 @@ let visitor =
       let e =
         match virtualized_expr_ with
         | Aast.(
-            Call
+            Efun
               {
-                func =
-                  ( _,
-                    _,
-                    Efun
-                      {
-                        ef_fun =
-                          { f_body = { fb_ast = [(_, Return (Some e))]; _ }; _ };
-                        _;
-                      } );
+                ef_fun = { f_body = { fb_ast = [(_, Return (Some e))]; _ }; _ };
                 _;
               }) ->
-          (* The virtualized expression is wrapped in an invoked
+          (* The virtualized expression is wrapped in a
              lambda to help check unbound variables, which leads to
              unwanted closure info in hovers. Use the inner
              expression directly. *)

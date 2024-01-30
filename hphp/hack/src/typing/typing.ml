@@ -6625,10 +6625,7 @@ end = struct
               Typing_coeffects.get_type ft.ft_implicit_params.capability
             in
             let should_skip_check =
-              (not (TCO.call_coeffects (Env.get_tcopt env)))
-              (* When inside an expression tree, expressions are virtualized and
-                 thus never executed. Safe to skip coeffect checks in this case. *)
-              || Env.is_in_expr_tree env
+              not (TCO.call_coeffects (Env.get_tcopt env))
             in
             if should_skip_check then
               (env, None)
@@ -10280,7 +10277,21 @@ end = struct
       | _ -> (env, ty)
     in
 
+    let rec get_ret env ty =
+      let (env, ty) = Env.expand_type env ty in
+      match deref ty with
+      | (_, Tfun ft) -> (env, ft.ft_ret)
+      | (_, Tnewtype (name, [ty'], _))
+        when String.equal name SN.Classes.cSupportDyn ->
+        get_ret env ty'
+      | _ -> (env, ty_virtual)
+    in
+    let (env, ty_virtual) = get_ret env ty_virtual in
     let (env, ty_virtual) = strip_all_likes env ty_virtual in
+    let t_virtualized_expr =
+      match t_virtualized_expr with
+      | (_, pos, ast) -> (ty_virtual, pos, ast)
+    in
 
     (* Given the runtime expression:
 

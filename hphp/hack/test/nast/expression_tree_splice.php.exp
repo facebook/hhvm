@@ -26,59 +26,52 @@
                      et_function_pointers = [];
                      et_virtualized_expr =
                      ((), [4:14-32],
-                      (Call
-                         { func =
-                           ((), [4:14-32],
-                            (Efun
-                               { ef_fun =
-                                 { f_span = [4:14-32]; f_readonly_this = None; 
-                                   f_annotation = (); f_readonly_ret = None; 
-                                   f_ret = ((), None); f_params = []; 
-                                   f_ctxs = None; f_unsafe_ctxs = None;
-                                   f_body =
-                                   { fb_ast =
-                                     [([4:14-32],
-                                       (Return
-                                          (Some ((), [4:14-32],
-                                                 (Call
-                                                    { func =
-                                                      ((), [4:14-32],
-                                                       (Obj_get (
+                      (Efun
+                         { ef_fun =
+                           { f_span = [4:14-32]; f_readonly_this = None; 
+                             f_annotation = (); f_readonly_ret = None; 
+                             f_ret = ((), None); f_params = []; f_ctxs = (Some ([4:14-32], [([4:14-32], (Happly (([4:14-32], "\\HH\\Contexts\\defaults"), [])))])); 
+                             f_unsafe_ctxs = None;
+                             f_body =
+                             { fb_ast =
+                               [([4:14-32],
+                                 (Return
+                                    (Some ((), [4:14-32],
+                                           (Call
+                                              { func =
+                                                ((), [4:14-32],
+                                                 (Obj_get (
+                                                    ((), [4:14-20],
+                                                     (Call
+                                                        { func =
                                                           ((), [4:14-20],
-                                                           (Call
-                                                              { func =
-                                                                ((), [4:14-20],
-                                                                 (Obj_get (
-                                                                    (
-                                                                    (), [4:14-15],
-                                                                    (
-                                                                    Call
-                                                                    { func = ((), [4:14-15], (Class_const (((), [4:14-15], (CI ([4:14-15], "\\ExampleDsl"))), ([4:14-15], "intType")))); 
+                                                           (Obj_get (
+                                                              ((), [4:14-15],
+                                                               (Call
+                                                                  { func = ((), [4:14-15], (Class_const (((), [4:14-15], (CI ([4:14-15], "\\ExampleDsl"))), ([4:14-15], "intType")))); 
                                                                     targs = []; 
                                                                     args = []; 
-                                                                    unpacked_arg = None })), (
-                                                                    (), [4:14-20], (Id ([4:14-20], "__plus"))), OG_nullthrows, Is_method)));
-                                                                targs = [];
-                                                                args =
-                                                                [(Pnormal,
-                                                                  ((), [4:18-20],
-                                                                   (Call
-                                                                    { func = ((), [4:18-20], (Class_const (((), [4:18-20], (CI ([4:18-20], "\\ExampleDsl"))), ([4:18-20], "intType")))); 
-                                                                    targs = []; 
-                                                                    args = []; 
-                                                                    unpacked_arg = None })))
-                                                                  ];
-                                                                unpacked_arg = None })),
-                                                          ((), [4:14-32], (Id ([4:14-32], "__plus"))), OG_nullthrows, Is_method)));
-                                                      targs = []; args = [(Pnormal, ((), [4:23-32], (ET_Splice ((), [4:25-31], (Lvar ([4:25-31], $0splice0))))))]; 
-                                                      unpacked_arg = None })))))
-                                       ]
-                                     };
-                                   f_fun_kind = FSync; f_user_attributes = []; 
-                                   f_external = false; f_doc_comment = None };
-                                 ef_use = [((), ([4:3-13], $0splice0))]; 
-                                 ef_closure_class_name = None }));
-                           targs = []; args = []; unpacked_arg = None }));
+                                                                    unpacked_arg = None })),
+                                                              ((), [4:14-20], (Id ([4:14-20], "__plus"))), OG_nullthrows, Is_method)));
+                                                          targs = [];
+                                                          args =
+                                                          [(Pnormal,
+                                                            ((), [4:18-20],
+                                                             (Call
+                                                                { func = ((), [4:18-20], (Class_const (((), [4:18-20], (CI ([4:18-20], "\\ExampleDsl"))), ([4:18-20], "intType")))); 
+                                                                  targs = []; 
+                                                                  args = []; 
+                                                                  unpacked_arg = None })))
+                                                            ];
+                                                          unpacked_arg = None })),
+                                                    ((), [4:14-32], (Id ([4:14-32], "__plus"))), OG_nullthrows, Is_method)));
+                                                targs = []; args = [(Pnormal, ((), [4:23-32], (ET_Splice ((), [4:25-31], (Lvar ([4:25-31], $0splice0))))))]; 
+                                                unpacked_arg = None })))))
+                                 ]
+                               };
+                             f_fun_kind = FSync; f_user_attributes = []; 
+                             f_external = false; f_doc_comment = None };
+                           ef_use = [((), ([4:3-13], $0splice0))]; ef_closure_class_name = None }));
                      et_runtime_expr =
                      ((), [4:14-32],
                       (Call

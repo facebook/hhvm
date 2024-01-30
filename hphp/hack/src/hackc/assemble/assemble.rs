@@ -977,11 +977,11 @@ fn assemble_typed_value<'arena>(
 
             pub fn build<'arena>(
                 &self,
-                content: Slice<'arena, hhbc::TypedValue<'arena>>,
+                content: Vec<hhbc::TypedValue<'arena>>,
             ) -> hhbc::TypedValue<'arena> {
                 match self {
-                    VecOrKeyset::Vec => hhbc::TypedValue::Vec(content),
-                    VecOrKeyset::Keyset => hhbc::TypedValue::Keyset(content),
+                    VecOrKeyset::Vec => hhbc::TypedValue::Vec(content.into()),
+                    VecOrKeyset::Keyset => hhbc::TypedValue::Keyset(content.into()),
                 }
             }
         }
@@ -1003,8 +1003,7 @@ fn assemble_typed_value<'arena>(
                 tv_vec.push(tv);
             }
             let src = expect(src, b"}")?;
-            let slice = Slice::from_vec(alloc, tv_vec);
-            Ok((src, v_or_k.build(slice)))
+            Ok((src, v_or_k.build(tv_vec)))
         }
 
         /// D:(D.len):{p1_0; p1_1; ...; pD.len_0; pD.len_1}
@@ -1026,7 +1025,7 @@ fn assemble_typed_value<'arena>(
                 tv_vec.push(hhbc::DictEntry { key, value })
             }
             let src = expect(src, b"}")?;
-            Ok((src, hhbc::TypedValue::Dict(Slice::from_vec(alloc, tv_vec))))
+            Ok((src, hhbc::TypedValue::Dict(tv_vec.into())))
         }
 
         fn deserialize_tv<'arena, 'a>(
@@ -1308,8 +1307,8 @@ fn assemble_user_attr_args<'arena>(
     token_iter: &mut Lexer<'_>,
 ) -> Result<Vec<hhbc::TypedValue<'arena>>> {
     let tok = token_iter.peek().copied();
-    if let hhbc::TypedValue::Vec(sl) = assemble_triple_quoted_typed_value(token_iter, alloc)? {
-        Ok(sl.iter().cloned().collect())
+    if let hhbc::TypedValue::Vec(vals) = assemble_triple_quoted_typed_value(token_iter, alloc)? {
+        Ok(vals.into())
     } else {
         Err(tok
             .unwrap()

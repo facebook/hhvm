@@ -442,6 +442,14 @@ impl<T> From<Vec<T>> for Vector<T> {
     }
 }
 
+impl<T> From<Vector<T>> for Vec<T> {
+    fn from(v: Vector<T>) -> Self {
+        // Safety: data, len, and cap haven't been modified since constructing self
+        let v = std::mem::ManuallyDrop::new(v);
+        unsafe { Vec::from_raw_parts(v.data.as_ptr(), v.len, v.cap) }
+    }
+}
+
 impl<T> Vector<T> {
     pub fn as_slice(&self) -> &[T] {
         // Safety: data and len haven't been modified since constructing self

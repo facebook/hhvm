@@ -6,7 +6,6 @@
 use std::sync::Arc;
 
 use ffi::Maybe;
-use ffi::Slice;
 use hhbc::Fatal;
 
 use crate::adata::AdataCache;
@@ -146,32 +145,30 @@ pub(crate) fn convert_typed_value<'a>(
     tv: &ir::TypedValue,
     strings: &StringCache<'a>,
 ) -> hhbc::TypedValue<'a> {
-    match *tv {
+    match tv {
         ir::TypedValue::Uninit => hhbc::TypedValue::Uninit,
-        ir::TypedValue::Int(v) => hhbc::TypedValue::Int(v),
-        ir::TypedValue::Bool(v) => hhbc::TypedValue::Bool(v),
-        ir::TypedValue::Float(v) => hhbc::TypedValue::Float(v),
-        ir::TypedValue::String(v) => hhbc::TypedValue::String(strings.lookup_ffi_str(v)),
+        ir::TypedValue::Int(v) => hhbc::TypedValue::Int(*v),
+        ir::TypedValue::Bool(v) => hhbc::TypedValue::Bool(*v),
+        ir::TypedValue::Float(v) => hhbc::TypedValue::Float(*v),
+        ir::TypedValue::String(v) => hhbc::TypedValue::String(strings.lookup_ffi_str(*v)),
         ir::TypedValue::LazyClass(v) => {
-            hhbc::TypedValue::LazyClass(strings.lookup_class_name(v).as_ffi_str())
+            hhbc::TypedValue::LazyClass(strings.lookup_class_name(*v).as_ffi_str())
         }
         ir::TypedValue::Null => hhbc::TypedValue::Null,
-        ir::TypedValue::Vec(ref vs) => hhbc::TypedValue::Vec(Slice::fill_iter(
-            strings.alloc,
-            vs.iter().map(|v| convert_typed_value(v, strings)),
-        )),
-        ir::TypedValue::Keyset(ref vs) => hhbc::TypedValue::Keyset(Slice::fill_iter(
-            strings.alloc,
-            vs.iter().map(|v| convert_array_key(v, strings)),
-        )),
-        ir::TypedValue::Dict(ref vs) => hhbc::TypedValue::Dict(Slice::fill_iter(
-            strings.alloc,
-            vs.iter().map(|(k, v)| {
+        ir::TypedValue::Vec(ref vs) => hhbc::TypedValue::Vec(
+            Vec::from_iter(vs.iter().map(|v| convert_typed_value(v, strings))).into(),
+        ),
+        ir::TypedValue::Keyset(ref vs) => hhbc::TypedValue::Keyset(
+            Vec::from_iter(vs.iter().map(|v| convert_array_key(v, strings))).into(),
+        ),
+        ir::TypedValue::Dict(ref vs) => hhbc::TypedValue::Dict(
+            Vec::from_iter(vs.iter().map(|(k, v)| {
                 let key = convert_array_key(k, strings);
                 let value = convert_typed_value(v, strings);
                 hhbc::Entry { key, value }
-            }),
-        )),
+            }))
+            .into(),
+        ),
     }
 }
 

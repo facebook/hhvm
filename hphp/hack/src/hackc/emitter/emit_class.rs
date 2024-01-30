@@ -383,7 +383,7 @@ fn emit_reified_extends_params<'a, 'arena, 'decl>(
         },
         _ => {}
     }
-    let tv = TypedValue::Vec(Slice::empty());
+    let tv = TypedValue::Vec(Default::default());
     emit_adata::typed_value_into_instr(e, tv)
 }
 

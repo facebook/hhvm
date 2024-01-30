@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::Slice;
 use ffi::Str;
+use ffi::Vector;
 use serde::Serialize;
 
 /// Raw IEEE floating point bits. We use this rather than f64 so that
@@ -64,9 +64,9 @@ pub enum TypedValue<'arena> {
     LazyClass(Str<'arena>),
     Null,
     // Hack arrays: vectors, keysets, and dictionaries
-    Vec(Slice<'arena, TypedValue<'arena>>),
-    Keyset(Slice<'arena, TypedValue<'arena>>),
-    Dict(Slice<'arena, Entry<TypedValue<'arena>, TypedValue<'arena>>>),
+    Vec(Vector<TypedValue<'arena>>),
+    Keyset(Vector<TypedValue<'arena>>),
+    Dict(Vector<Entry<TypedValue<'arena>, TypedValue<'arena>>>),
 }
 
 // This is declared as a generic type to work around cbindgen's topo-sort,
@@ -86,15 +86,15 @@ impl<'arena> TypedValue<'arena> {
         Self::String(x.into())
     }
 
-    pub fn vec(x: impl Into<Slice<'arena, TypedValue<'arena>>>) -> Self {
+    pub fn vec(x: Vec<TypedValue<'arena>>) -> Self {
         Self::Vec(x.into())
     }
 
-    pub fn keyset(x: impl Into<Slice<'arena, TypedValue<'arena>>>) -> Self {
+    pub fn keyset(x: Vec<TypedValue<'arena>>) -> Self {
         Self::Keyset(x.into())
     }
 
-    pub fn dict(x: impl Into<Slice<'arena, DictEntry<'arena>>>) -> Self {
+    pub fn dict(x: Vec<DictEntry<'arena>>) -> Self {
         Self::Dict(x.into())
     }
 

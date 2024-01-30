@@ -378,6 +378,14 @@ class QueryResult {
         current_row_in_block_ = 0;
       }
     }
+    Iterator operator+(int n) {
+      Iterator it = *this;
+      for (auto ii = 0; ii < n; ++ii) {
+        ++it;
+      }
+
+      return it;
+    }
     const Row dereference() const {
       return row_block_vector_->at(current_block_number_)
           .getRow(current_row_in_block_);

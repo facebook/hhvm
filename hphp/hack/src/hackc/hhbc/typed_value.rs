@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ffi::Slice;
 use ffi::Str;
 use ffi::Vector;
 use serde::Serialize;
@@ -60,7 +61,8 @@ pub enum TypedValue<'arena> {
     Bool(bool),
     /// Hack, C++, PHP, and Caml floats are IEEE754 64-bit
     Float(FloatBits),
-    String(Str<'arena>),
+    /// Hack strings are plain bytes with no utf-8 guarantee
+    String(Slice<'arena, u8>),
     LazyClass(Str<'arena>),
     Null,
     // Hack arrays: vectors, keysets, and dictionaries
@@ -82,7 +84,7 @@ pub struct Entry<K, V> {
 pub type DictEntry<'a> = Entry<TypedValue<'a>, TypedValue<'a>>;
 
 impl<'arena> TypedValue<'arena> {
-    pub fn string(x: impl Into<Str<'arena>>) -> Self {
+    pub fn string(x: impl Into<Slice<'arena, u8>>) -> Self {
         Self::String(x.into())
     }
 
@@ -98,8 +100,8 @@ impl<'arena> TypedValue<'arena> {
         Self::Dict(x.into())
     }
 
-    pub fn alloc_string(s: impl AsRef<str>, alloc: &'arena bumpalo::Bump) -> Self {
-        Self::String((alloc.alloc_str(s.as_ref()) as &str).into())
+    pub fn alloc_string(s: impl AsRef<[u8]>, alloc: &'arena bumpalo::Bump) -> Self {
+        Self::String((alloc.alloc_slice_copy(s.as_ref())).into())
     }
 
     pub fn float(f: f64) -> Self {

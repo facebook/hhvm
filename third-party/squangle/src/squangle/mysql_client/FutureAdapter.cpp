@@ -106,10 +106,10 @@ folly::SemiFuture<std::pair<ResultType, AsyncPostQueryCallback>> handleRunQuery(
       promise;
   auto future = promise->getSemiFuture();
 
-  op->setCallback(resultAppender([promise](
-                                     Operation& op,
-                                     auto query_result,
-                                     QueryCallbackReason reason) mutable {
+  op->chainCallback(resultAppender([promise](
+                                       Operation& op,
+                                       auto query_result,
+                                       QueryCallbackReason reason) mutable {
     handleQueryCompletion<ResultType>(
         op, std::move(query_result), reason, *promise);
   }));

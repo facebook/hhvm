@@ -1384,6 +1384,19 @@ class QueryOperation : public FetchOperation {
   void setCallback(QueryCallback cb) {
     buffered_query_callback_ = std::move(cb);
   }
+  void chainCallback(QueryCallback cb) {
+    auto origCb = std::move(buffered_query_callback_);
+    if (origCb) {
+      cb = [origCb = std::move(origCb), cb = std::move(cb)](
+               QueryOperation& op,
+               QueryResult* result,
+               QueryCallbackReason reason) {
+        origCb(op, result, reason);
+        cb(op, result, reason);
+      };
+    }
+    setCallback(cb);
+  }
 
   // Steal all rows.  Only valid if there is no callback.  Inefficient
   // for large result sets.
@@ -1479,6 +1492,19 @@ class MultiQueryOperation : public FetchOperation {
   // indicating the query is complete.
   void setCallback(MultiQueryCallback cb) {
     buffered_query_callback_ = std::move(cb);
+  }
+  void chainCallback(MultiQueryCallback cb) {
+    auto origCb = std::move(buffered_query_callback_);
+    if (origCb) {
+      cb = [origCb = std::move(origCb), cb = std::move(cb)](
+               MultiQueryOperation& op,
+               QueryResult* result,
+               QueryCallbackReason reason) {
+        origCb(op, result, reason);
+        cb(op, result, reason);
+      };
+    }
+    setCallback(cb);
   }
 
   // Steal all rows. Only valid if there is no callback. Inefficient

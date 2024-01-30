@@ -110,7 +110,16 @@ class Connection {
   FOLLY_NODISCARD static folly::SemiFuture<DbQueryResult> querySemiFuture(
       std::unique_ptr<Connection> conn,
       Query&& query,
+      QueryCallback&& cb,
       QueryOptions&& options = QueryOptions());
+
+  FOLLY_NODISCARD static folly::SemiFuture<DbQueryResult> querySemiFuture(
+      std::unique_ptr<Connection> conn,
+      Query&& query,
+      QueryOptions&& options = QueryOptions()) {
+    return querySemiFuture(
+        std::move(conn), std::move(query), nullptr, std::move(options));
+  }
 
   template <typename... Args>
   [[deprecated(
@@ -121,13 +130,33 @@ class Connection {
   multiQuerySemiFuture(
       std::unique_ptr<Connection> conn,
       Query&& query,
+      MultiQueryCallback&& cb,
+      QueryOptions&& options = QueryOptions());
+
+  FOLLY_NODISCARD static folly::SemiFuture<DbMultiQueryResult>
+  multiQuerySemiFuture(
+      std::unique_ptr<Connection> conn,
+      Query&& query,
+      QueryOptions&& options = QueryOptions()) {
+    return multiQuerySemiFuture(
+        std::move(conn), std::move(query), nullptr, std::move(options));
+  }
+
+  FOLLY_NODISCARD static folly::SemiFuture<DbMultiQueryResult>
+  multiQuerySemiFuture(
+      std::unique_ptr<Connection> conn,
+      std::vector<Query>&& queries,
+      MultiQueryCallback&& cb,
       QueryOptions&& options = QueryOptions());
 
   FOLLY_NODISCARD static folly::SemiFuture<DbMultiQueryResult>
   multiQuerySemiFuture(
       std::unique_ptr<Connection> conn,
       std::vector<Query>&& queries,
-      QueryOptions&& options = QueryOptions());
+      QueryOptions&& options = QueryOptions()) {
+    return multiQuerySemiFuture(
+        std::move(conn), std::move(queries), nullptr, std::move(options));
+  }
 
   [[deprecated("Replaced by the SemiFuture APIs")]] static folly::Future<
       DbMultiQueryResult>
@@ -601,6 +630,13 @@ DbQueryResult Connection::query(Query&& args);
 
 template <>
 DbQueryResult Connection::query(Query&& args, QueryOptions&& options);
+
+template <>
+DbQueryResult Connection::query(Query&& args, QueryCallback&& cb);
+
+template <>
+DbQueryResult
+Connection::query(Query&& args, QueryCallback&& cb, QueryOptions&& options);
 
 template <typename... Args>
 DbQueryResult Connection::query(Args&&... args) {

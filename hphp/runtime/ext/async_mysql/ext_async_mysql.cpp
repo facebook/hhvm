@@ -614,7 +614,7 @@ static Object newAsyncMysqlConnectAndQueryEvent(
             }
             event->opFinished();
           };
-          query_op->setCallback(am::resultAppender(appender_callback));
+          query_op->setCallback(am::resultAppender(std::move(appender_callback)));
           query_op->run();
         } catch (...) {
           Logger::Error("Unexpected exception while executing Query");
@@ -1034,7 +1034,7 @@ Object AsyncMysqlConnection::query(
       event->setClientStats(clientPtr->collectPerfStats());
       event->opFinished();
     };
-    op->setCallback(am::resultAppender(appender_callback));
+    op->setCallback(am::resultAppender(std::move(appender_callback)));
     op->run();
 
     return Object{event->getWaitHandle()};
@@ -1116,7 +1116,7 @@ static Object HHVM_METHOD(
       event->setClientStats(clientPtr->collectPerfStats());
       event->opFinished();
     };
-    op->setCallback(am::resultAppender(appender_callback));
+    op->setCallback(am::resultAppender(std::move(appender_callback)));
     op->run();
 
     return Object{event->getWaitHandle()};

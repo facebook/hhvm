@@ -12,8 +12,8 @@ namespace facebook {
 namespace common {
 namespace mysql_client {
 
-QueryCallback resultAppender(const QueryAppenderCallback& callback) {
-  return [callback](
+QueryCallback resultAppender(QueryAppenderCallback&& callback) {
+  return [callback = std::move(callback)](
              QueryOperation& op, QueryResult* res, QueryCallbackReason reason) {
     if (reason != QueryCallbackReason::RowsFetched) {
       QueryResult result{0};
@@ -26,8 +26,8 @@ QueryCallback resultAppender(const QueryAppenderCallback& callback) {
   };
 }
 
-MultiQueryCallback resultAppender(const MultiQueryAppenderCallback& callback) {
-  return [callback](
+MultiQueryCallback resultAppender(MultiQueryAppenderCallback&& callback) {
+  return [callback = std::move(callback)](
              MultiQueryOperation& op,
              QueryResult* res,
              QueryCallbackReason reason) {

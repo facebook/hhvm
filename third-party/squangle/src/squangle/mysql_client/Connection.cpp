@@ -211,10 +211,14 @@ std::shared_ptr<MultiQueryStreamOperation> Connection::beginMultiQueryStreaming(
 folly::SemiFuture<DbQueryResult> Connection::querySemiFuture(
     std::unique_ptr<Connection> conn,
     Query&& query,
+    QueryCallback&& cb,
     QueryOptions&& options) {
   conn->mergePersistentQueryAttributes(options.getAttributes());
   auto op = beginQuery(std::move(conn), std::move(query));
   op->setAttributes(std::move(options.getAttributes()));
+  if (cb) {
+    op->setCallback(std::move(cb));
+  }
   return toSemiFuture(std::move(op));
 }
 
@@ -228,20 +232,28 @@ folly::Future<DbQueryResult> Connection::queryFuture(
 folly::SemiFuture<DbMultiQueryResult> Connection::multiQuerySemiFuture(
     std::unique_ptr<Connection> conn,
     Query&& args,
+    MultiQueryCallback&& cb,
     QueryOptions&& options) {
   conn->mergePersistentQueryAttributes(options.getAttributes());
   auto op = beginMultiQuery(std::move(conn), std::move(args));
   op->setAttributes(std::move(options.getAttributes()));
+  if (cb) {
+    op->setCallback(std::move(cb));
+  }
   return toSemiFuture(std::move(op));
 }
 
 folly::SemiFuture<DbMultiQueryResult> Connection::multiQuerySemiFuture(
     std::unique_ptr<Connection> conn,
     std::vector<Query>&& args,
+    MultiQueryCallback&& cb,
     QueryOptions&& options) {
   conn->mergePersistentQueryAttributes(options.getAttributes());
   auto op = beginMultiQuery(std::move(conn), std::move(args));
   op->setAttributes(std::move(options.getAttributes()));
+  if (cb) {
+    op->setCallback(std::move(cb));
+  }
   return toSemiFuture(std::move(op));
 }
 
@@ -258,12 +270,16 @@ folly::Future<DbMultiQueryResult> Connection::multiQueryFuture(
 }
 
 template <>
-DbQueryResult Connection::query(Query&& query, QueryOptions&& options) {
+DbQueryResult
+Connection::query(Query&& query, QueryCallback&& cb, QueryOptions&& options) {
   auto op = beginAnyQuery<QueryOperation>(
       Operation::ConnectionProxy(Operation::ReferencedConnection(this)),
       std::move(query));
   mergePersistentQueryAttributes(options.getAttributes());
   op->setAttributes(std::move(options.getAttributes()));
+  if (cb) {
+    op->setCallback(std::move(cb));
+  }
   SCOPE_EXIT {
     operation_in_progress_ = false;
   };
@@ -310,14 +326,29 @@ DbQueryResult Connection::query(Query&& query) {
 }
 
 template <>
+DbQueryResult Connection::query(Query&& query, QueryOptions&& options) {
+  return Connection::query(
+      std::move(query), (QueryCallback) nullptr, std::move(options));
+}
+
+template <>
+DbQueryResult Connection::query(Query&& query, QueryCallback&& cb) {
+  return Connection::query(std::move(query), std::move(cb), QueryOptions());
+}
+
+template <>
 DbMultiQueryResult Connection::multiQuery(
     std::vector<Query>&& queries,
+    MultiQueryCallback&& cb,
     QueryOptions&& options) {
   auto op = beginAnyQuery<MultiQueryOperation>(
       Operation::ConnectionProxy(Operation::ReferencedConnection(this)),
       std::move(queries));
   mergePersistentQueryAttributes(options.getAttributes());
   op->setAttributes(std::move(options.getAttributes()));
+  if (cb) {
+    op->setCallback(std::move(cb));
+  }
   auto guard = folly::makeGuard([&] { operation_in_progress_ = false; });
 
   operation_in_progress_ = true;
@@ -355,6 +386,21 @@ DbMultiQueryResult Connection::multiQuery(
         .get();
   }
   return result;
+}
+
+template <>
+DbMultiQueryResult Connection::multiQuery(
+    std::vector<Query>&& queries,
+    MultiQueryCallback&& cb) {
+  return multiQuery(std::move(queries), std::move(cb), QueryOptions());
+}
+
+template <>
+DbMultiQueryResult Connection::multiQuery(
+    std::vector<Query>&& queries,
+    QueryOptions&& options) {
+  return multiQuery(
+      std::move(queries), (MultiQueryCallback) nullptr, std::move(options));
 }
 
 template <>

@@ -28,9 +28,9 @@ typedef std::function<
     void(MultiQueryOperation&, std::vector<QueryResult>, QueryCallbackReason)>
     MultiQueryAppenderCallback;
 
-QueryCallback resultAppender(const QueryAppenderCallback& callback);
+QueryCallback resultAppender(QueryAppenderCallback&& callback);
 
-MultiQueryCallback resultAppender(const MultiQueryAppenderCallback& callback);
+MultiQueryCallback resultAppender(MultiQueryAppenderCallback&& callback);
 } // namespace mysql_client
 } // namespace common
 } // namespace facebook

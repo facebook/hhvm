@@ -303,7 +303,7 @@ class RocketClient : public virtual folly::DelayedDestruction,
               storage_ & kPointerMask));
         default:
           folly::assume_unreachable();
-      };
+      }
     }
 
     ServerCallbackUniquePtr& operator=(

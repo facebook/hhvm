@@ -1,0 +1,26 @@
+File "invalid_disjoint_check_static_methods.php", line 16, characters 13-59:
+This call to 'contains' will always return the same value, because type Map<string, mixed> is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check_static_methods.php", line 26, characters 10-28:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check_static_methods.php", line 30, characters 10-28:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check_static_methods.php", line 33, characters 10-28:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check_static_methods.php", line 36, characters 10-28:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check_static_methods.php", line 39, characters 10-28:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check_static_methods.php", line 42, characters 10-28:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check_static_methods.php", line 45, characters 10-28:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check_static_methods.php", line 48, characters 10-28:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check_static_methods.php", line 51, characters 10-28:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type Baz. (Lint[5638])
+File "invalid_disjoint_check_static_methods.php", line 54, characters 10-28:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type <expr#3> as Bar. (Lint[5638])
+File "invalid_disjoint_check_static_methods.php", line 57, characters 10-28:
+This call to 'contains' will always return the same value, because type Bar is disjoint from type Foo. (Lint[5638])
+File "invalid_disjoint_check_static_methods.php", line 105, characters 10-28:
+This call to 'contains' will always return the same value, because type string is disjoint from type EnumInt. (Lint[5638])

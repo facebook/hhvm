@@ -1,0 +1,2 @@
+File "disjoint_awaitable.php", line 19, characters 5-26:
+This call to 'toEqual' will always return the same value, because type Awaitable<int> is disjoint from type int. (Lint[5638])

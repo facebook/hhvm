@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<dea63625accd2c734206a8e4117899b2>>
+// @generated SignedSource<<28cadf10988c83f3ec1a6a3b3583f08a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1309,7 +1309,8 @@ impl<P: Params> NodeMut<P> for HfParamInfo {
         v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
         self.kind.accept(c, v)?;
-        self.readonlyness.accept(c, v)
+        self.readonlyness.accept(c, v)?;
+        self.optional.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for Hint {
@@ -1636,6 +1637,24 @@ impl<P: Params> NodeMut<P> for OgNullFlavor {
         match self {
             OgNullFlavor::OGNullthrows => Ok(()),
             OgNullFlavor::OGNullsafe => Ok(()),
+        }
+    }
+}
+impl<P: Params> NodeMut<P> for OptionalKind {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_optional_kind(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            OptionalKind::Optional => Ok(()),
         }
     }
 }

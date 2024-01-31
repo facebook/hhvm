@@ -687,9 +687,14 @@ fn p_closure_parameter<'a>(
 ) -> Result<(ast::Hint, Option<ast::HfParamInfo>)> {
     match &node.children {
         ClosureParameterTypeSpecifier(c) => {
+            let optional = map_optional(&c.optional, env, p_optional)?;
             let kind = p_param_kind(&c.call_convention, env)?;
             let readonlyness = map_optional(&c.readonly, env, p_readonly)?;
-            let info = Some(ast::HfParamInfo { kind, readonlyness });
+            let info = Some(ast::HfParamInfo {
+                kind,
+                readonlyness,
+                optional,
+            });
             let hint = p_hint(&c.type_, env)?;
             Ok((hint, info))
         }
@@ -3771,6 +3776,13 @@ fn p_readonly<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ReadonlyKind> {
     match token_kind(node) {
         Some(TK::Readonly) => Ok(ast::ReadonlyKind::Readonly),
         _ => missing_syntax("readonly", node, env),
+    }
+}
+
+fn p_optional<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::OptionalKind> {
+    match token_kind(node) {
+        Some(TK::Optional) => Ok(ast::OptionalKind::Optional),
+        _ => missing_syntax("optional", node, env),
     }
 }
 

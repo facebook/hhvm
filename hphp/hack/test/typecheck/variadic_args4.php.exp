@@ -1,11 +1,11 @@
 File "variadic_args4.php", line 8, characters 19-22:
 The method `meth` is not compatible with the overridden method (Typing[4341])
   File "variadic_args4.php", line 8, characters 19-22:
-  Method `meth` has type `(function(mixed $x = _): void)` in `C2`
+  Method `meth` has type `(function(optional mixed $x): void)` in `C2`
   File "variadic_args4.php", line 4, characters 19-22:
   But it has type `(function(mixed $args...): void)` in parent `C1`
   File "variadic_args4.php", line 8, characters 19-22:
-  Type `(function(mixed $x = _): void)` is not a subtype of `(function(mixed $args...): void)`
+  Type `(function(optional mixed $x): void)` is not a subtype of `(function(mixed $args...): void)`
   File "variadic_args4.php", line 8, characters 19-22:
   Should have a variadic argument
   File "variadic_args4.php", line 4, characters 19-22:

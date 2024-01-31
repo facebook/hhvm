@@ -164,6 +164,8 @@ let passes =
     Naming_validate_module.pass on_error;
     (* Validate that there are no top-level statements *)
     Naming_validate_toplevel_statement.pass on_error;
+    (* Validate use of `optional` in function type hints *)
+    Naming_validate_function_hint_optional_parameters.pass on_error;
   ]
 
 (* If we don't delegate to Rust, then all naming passes are done here in OCaml.

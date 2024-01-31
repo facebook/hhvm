@@ -1,0 +1,28 @@
+File "function_type_hint_optional_args.php", line 50, characters 18-61:
+Optional parameter cannot precede non-optional parameter (Parsing[1002])
+File "function_type_hint_optional_args.php", line 52, characters 3-62:
+Optional parameter cannot precede non-optional parameter (Parsing[1002])
+File "function_type_hint_optional_args.php", line 54, characters 43-47:
+Optional parameter cannot be inout (Parsing[1002])
+File "function_type_hint_optional_args.php", line 38, characters 11-19:
+Invalid argument (Typing[4040])
+  File "function_type_hint_optional_args.php", line 28, characters 10-16:
+  Too few arguments (required 3 but got 1)
+  File "function_type_hint_optional_args.php", line 11, characters 3-55:
+  Because of this definition
+File "function_type_hint_optional_args.php", line 40, characters 11-20:
+Invalid argument (Typing[4041])
+  File "function_type_hint_optional_args.php", line 29, characters 10-17:
+  Too many mandatory arguments (expected 1 but got 3)
+  File "function_type_hint_optional_args.php", line 11, characters 3-55:
+  Because of this definition
+File "function_type_hint_optional_args.php", line 19, characters 3-21:
+Too many arguments (expected 3 but got 4) (Typing[4105])
+  File "function_type_hint_optional_args.php", line 11, characters 3-55:
+  Definition is here
+File "function_type_hint_optional_args.php", line 17, characters 9-13:
+Invalid argument (Typing[4110])
+  File "function_type_hint_optional_args.php", line 11, characters 27-32:
+  Expected `string`
+  File "function_type_hint_optional_args.php", line 17, characters 9-13:
+  But got `bool`

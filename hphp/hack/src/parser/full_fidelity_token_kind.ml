@@ -203,6 +203,7 @@ type t =
   | Internal
   | Package
   | Let
+  | Optional
   (* Variable text tokens *)
   | ErrorToken
   | Name
@@ -417,6 +418,7 @@ let from_string keyword ~only_reserved =
   | "internal" when not only_reserved -> Some Internal
   | "package" -> Some Package
   | "let" when not only_reserved -> Some Let
+  | "optional" when not only_reserved -> Some Optional
   | _ -> None
 
 let to_string kind =
@@ -606,6 +608,7 @@ let to_string kind =
   | Internal -> "internal"
   | Package -> "package"
   | Let -> "let"
+  | Optional -> "optional"
   (* Variable text tokens *)
   | ErrorToken -> "error_token"
   | Name -> "name"

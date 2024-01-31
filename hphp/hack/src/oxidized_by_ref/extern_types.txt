@@ -19,6 +19,7 @@ oxidized::aast_defs::KvcKind
 oxidized::aast_defs::MutableReturn
 oxidized::aast_defs::NsKind
 oxidized::aast_defs::OgNullFlavor
+oxidized::aast_defs::OptionalKind
 oxidized::aast_defs::ParamMutability
 oxidized::aast_defs::PropOrMethod
 oxidized::aast_defs::ReadonlyKind
@@ -43,6 +44,7 @@ oxidized::aast::IsVariadic
 oxidized::aast::KvcKind
 oxidized::aast::NsKind
 oxidized::aast::OgNullFlavor
+oxidized::aast::OptionalKind
 oxidized::aast::ParamMutability
 oxidized::aast::PropOrMethod
 oxidized::aast::ReadonlyKind
@@ -61,6 +63,7 @@ oxidized::ast_defs::ClassishKind
 oxidized::ast_defs::ConstraintKind
 oxidized::ast_defs::FunKind
 oxidized::ast_defs::OgNullFlavor
+oxidized::ast_defs::OptionalKind
 oxidized::ast_defs::PropOrMethod
 oxidized::ast_defs::ReadonlyKind
 oxidized::ast_defs::Reified

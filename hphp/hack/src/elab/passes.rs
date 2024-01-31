@@ -51,6 +51,7 @@ pub mod validate_expr_function_pointer;
 pub mod validate_expr_list;
 pub mod validate_fun_param_inout;
 pub mod validate_fun_params;
+pub mod validate_function_hint_optional_parameters;
 pub mod validate_global_const;
 pub mod validate_hint_habstr;
 pub mod validate_hint_hrefinement;

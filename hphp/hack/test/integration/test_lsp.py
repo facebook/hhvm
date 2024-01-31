@@ -373,7 +373,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         {
                             "label": "doStuff",
                             "kind": 2,
-                            "detail": "function(int $x, int $y = _): void",
+                            "detail": "function(int $x, optional int $y): void",
                             "sortText": "doStuff",
                             "insertTextFormat": 2,
                             "textEdit": {
@@ -449,7 +449,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         {
                             "label": "doStuff",
                             "kind": 2,
-                            "detail": "function(int $x = _, int $y = _): void",
+                            "detail": "function(optional int $x, optional int $y): void",
                             "sortText": "doStuff",
                             "insertTextFormat": 1,
                             "textEdit": {

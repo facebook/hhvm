@@ -1,7 +1,7 @@
 // Defined in namespace C
 function any<T>(
   Traversable<int> $traversable,
-  ?(function(int): ~bool) $predicate = _
+  optional ?(function(int): ~bool) $predicate
 )[ctx $predicate]: bool
 Returns true if the given predicate returns true for any element of the
 given Traversable. If no predicate is provided, it defaults to casting the

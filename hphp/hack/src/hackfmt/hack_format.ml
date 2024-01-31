@@ -2331,12 +2331,15 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         ]
     | Syntax.ClosureParameterTypeSpecifier
         {
+          closure_parameter_optional = optional;
           closure_parameter_call_convention = callconv;
           closure_parameter_readonly = readonly;
           closure_parameter_type = cp_type;
         } ->
       Concat
         [
+          t env optional;
+          when_present optional space;
           t env callconv;
           when_present callconv space;
           t env readonly;

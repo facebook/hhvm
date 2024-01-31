@@ -740,6 +740,7 @@ pub struct FunParamDecl<'a> {
     attributes: Node<'a>,
     visibility: Node<'a>,
     kind: ParamMode,
+    optional: bool,
     readonly: bool,
     hint: Node<'a>,
     pos: &'a Pos<'a>,
@@ -1951,6 +1952,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                             attributes,
                             visibility,
                             kind,
+                            optional,
                             readonly,
                             hint,
                             pos,
@@ -2010,7 +2012,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                                 ParamMode::FPnormal => {}
                             };
 
-                            if initializer.is_present() {
+                            if optional || initializer.is_present() {
                                 flags |= FunParamFlags::HAS_DEFAULT;
                             }
                             if variadic {
@@ -2968,7 +2970,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             | TokenKind::Ctx
             | TokenKind::Readonly
             | TokenKind::Internal
-            | TokenKind::Global => Node::Token(FixedWidthToken::new(kind, token.start_offset())),
+            | TokenKind::Global
+            | TokenKind::Optional => Node::Token(FixedWidthToken::new(kind, token.start_offset())),
             _ if kind.fixed_width().is_some() => {
                 Node::IgnoredToken(FixedWidthToken::new(kind, token.start_offset()))
             }
@@ -3781,6 +3784,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             attributes,
             visibility,
             kind,
+            optional: initializer.is_present(),
             readonly: is_readonly,
             hint,
             pos,
@@ -3802,6 +3806,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 attributes: Node::Ignored(SK::Missing),
                 visibility: Node::Ignored(SK::Missing),
                 kind: ParamMode::FPnormal,
+                optional: false,
                 readonly: false,
                 hint,
                 pos: self
@@ -5715,6 +5720,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 }
             };
 
+            if fp.optional {
+                flags |= FunParamFlags::HAS_DEFAULT;
+            }
             if fp.readonly {
                 flags |= FunParamFlags::READONLY;
             }
@@ -5778,6 +5786,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
 
     fn make_closure_parameter_type_specifier(
         &mut self,
+        optional: Self::Output,
         inout: Self::Output,
         readonly: Self::Output,
         hint: Self::Output,
@@ -5792,6 +5801,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             visibility: Node::Ignored(SK::Missing),
             kind,
             hint,
+            optional: optional.is_token(TokenKind::Optional),
             readonly: readonly.is_token(TokenKind::Readonly),
             pos: self.get_pos(hint),
             name: Some(""),

@@ -1279,11 +1279,11 @@ pub trait FlattenSmartConstructors: SmartConstructors
         }
     }
 
-    fn make_closure_parameter_type_specifier(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output) -> Self::Output {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
+    fn make_closure_parameter_type_specifier(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output) -> Self::Output {
+        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero(SyntaxKind::ClosureParameterTypeSpecifier)
         } else {
-          self.flatten(SyntaxKind::ClosureParameterTypeSpecifier, vec!(arg0, arg1, arg2))
+          self.flatten(SyntaxKind::ClosureParameterTypeSpecifier, vec!(arg0, arg1, arg2, arg3))
         }
     }
 

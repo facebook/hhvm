@@ -63,7 +63,7 @@
            [([9:3-25],
              (Throw
                 ((Exception), [9:9-24],
-                 (New (((Exception), [9:13-22], (CI ([9:13-22], "\\Exception"))), [], [], None, ((function(string $message = _, int $code = _, ?Exception $previous = _)[]: void)))))))
+                 (New (((Exception), [9:13-22], (CI ([9:13-22], "\\Exception"))), [], [], None, ((function(optional string $message, optional int $code, optional ?Exception $previous)[]: void)))))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([8:10-11], "__SupportDynamicType"); ua_params = [] }]; 
@@ -96,7 +96,7 @@
            [([13:3-25],
              (Throw
                 ((Exception), [13:9-24],
-                 (New (((Exception), [13:13-22], (CI ([13:13-22], "\\Exception"))), [], [], None, ((function(string $message = _, int $code = _, ?Exception $previous = _)[]: void)))))))
+                 (New (((Exception), [13:13-22], (CI ([13:13-22], "\\Exception"))), [], [], None, ((function(optional string $message, optional int $code, optional ?Exception $previous)[]: void)))))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([12:10-11], "__SupportDynamicType"); ua_params = [] }]; 
@@ -178,7 +178,7 @@
            [([9:3-25],
              (Throw
                 ((Exception), [9:9-24],
-                 (New (((Exception), [9:13-22], (CI ([9:13-22], "\\Exception"))), [], [], None, ((function(string $message = _, int $code = _, ?Exception $previous = _)[]: void)))))))
+                 (New (((Exception), [9:13-22], (CI ([9:13-22], "\\Exception"))), [], [], None, ((function(optional string $message, optional int $code, optional ?Exception $previous)[]: void)))))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([8:10-11], "__SupportDynamicType"); ua_params = [] }]; 
@@ -211,7 +211,7 @@
            [([13:3-25],
              (Throw
                 ((Exception), [13:9-24],
-                 (New (((Exception), [13:13-22], (CI ([13:13-22], "\\Exception"))), [], [], None, ((function(string $message = _, int $code = _, ?Exception $previous = _)[]: void)))))))
+                 (New (((Exception), [13:13-22], (CI ([13:13-22], "\\Exception"))), [], [], None, ((function(optional string $message, optional int $code, optional ?Exception $previous)[]: void)))))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([12:10-11], "__SupportDynamicType"); ua_params = [] }]; 

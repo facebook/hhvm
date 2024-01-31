@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<934f750baaac693622695beac011e438>>
+// @generated SignedSource<<13e1edbecb55b0a5639ad078586781a2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2581,6 +2581,9 @@ const _: () = {
 };
 const _: () = {
     impl Transform for ReadonlyKind {}
+};
+const _: () = {
+    impl Transform for OptionalKind {}
 };
 const _: () = {
     impl Transform for OgNullFlavor {}

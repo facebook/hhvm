@@ -62,7 +62,7 @@
            [([9:3-26],
              (Throw
                 ((Exception), [9:9-25],
-                 (New (((Exception), [9:13-23], (CI ([9:13-23], "\\Exception"))), [], [], None, ((function(string $message = _, int $code = _, ?Exception $previous = _)[]: void)))))))
+                 (New (((Exception), [9:13-23], (CI ([9:13-23], "\\Exception"))), [], [], None, ((function(optional string $message, optional int $code, optional ?Exception $previous)[]: void)))))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([8:10-13], "__SupportDynamicType"); ua_params = [] }]; 
@@ -175,7 +175,7 @@
            [([9:3-26],
              (Throw
                 ((Exception), [9:9-25],
-                 (New (((Exception), [9:13-23], (CI ([9:13-23], "\\Exception"))), [], [], None, ((function(string $message = _, int $code = _, ?Exception $previous = _)[]: void)))))))
+                 (New (((Exception), [9:13-23], (CI ([9:13-23], "\\Exception"))), [], [], None, ((function(optional string $message, optional int $code, optional ?Exception $previous)[]: void)))))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([8:10-13], "__SupportDynamicType"); ua_params = [] }]; 

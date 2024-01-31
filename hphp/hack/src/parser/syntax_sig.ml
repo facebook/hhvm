@@ -939,6 +939,7 @@ module type Syntax_S = sig
         closure_outer_right_paren: t;
       }
     | ClosureParameterTypeSpecifier of {
+        closure_parameter_optional: t;
         closure_parameter_call_convention: t;
         closure_parameter_readonly: t;
         closure_parameter_type: t;
@@ -1475,7 +1476,7 @@ module type Syntax_S = sig
   val make_closure_type_specifier :
     t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
-  val make_closure_parameter_type_specifier : t -> t -> t -> t
+  val make_closure_parameter_type_specifier : t -> t -> t -> t -> t
 
   val make_type_refinement : t -> t -> t -> t -> t -> t
 

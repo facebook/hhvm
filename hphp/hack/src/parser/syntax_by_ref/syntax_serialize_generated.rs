@@ -1429,10 +1429,11 @@ ss.serialize_field("closure_return_type", &self.with(return_type))?;
 ss.serialize_field("closure_outer_right_paren", &self.with(outer_right_paren))?;
       ss.end()
 } 
-SyntaxVariant::ClosureParameterTypeSpecifier (ClosureParameterTypeSpecifierChildren{call_convention,readonly,type_} ) => {
-      let mut ss = s.serialize_struct("", 4)?;
+SyntaxVariant::ClosureParameterTypeSpecifier (ClosureParameterTypeSpecifierChildren{optional,call_convention,readonly,type_} ) => {
+      let mut ss = s.serialize_struct("", 5)?;
       ss.serialize_field("kind", "closure_parameter_type_specifier")?;
-      ss.serialize_field("closure_parameter_call_convention", &self.with(call_convention))?;
+      ss.serialize_field("closure_parameter_optional", &self.with(optional))?;
+ss.serialize_field("closure_parameter_call_convention", &self.with(call_convention))?;
 ss.serialize_field("closure_parameter_readonly", &self.with(readonly))?;
 ss.serialize_field("closure_parameter_type", &self.with(type_))?;
       ss.end()

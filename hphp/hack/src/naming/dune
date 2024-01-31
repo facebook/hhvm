@@ -193,6 +193,7 @@
   naming_validate_consistent_construct
   naming_validate_dynamic_hint
   naming_validate_fun_params
+  naming_validate_function_hint_optional_parameters
   naming_validate_like_hint
   naming_validate_module
   naming_validate_supportdyn

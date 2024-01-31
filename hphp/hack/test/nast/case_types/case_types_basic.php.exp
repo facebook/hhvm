@@ -12,7 +12,7 @@
             ([4:66-83],
              (Hfun
                 { hf_is_readonly = None; hf_param_tys = [([4:76-78], (Habstr ("T2", [])))]; 
-                  hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })]; 
+                  hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None })]; 
                   hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([4:81-82], (Habstr ("T", []))); 
                   hf_is_readonly_return = None }))
             ]));

@@ -18,8 +18,8 @@ Errors:
                      (Happly (([4:23-46], "\\HH\\supportdyn"),
                         [([4:23-46],
                           (Hfun
-                             { hf_is_readonly = None; hf_param_tys = [([4:34-37], (Hprim Tint))]; 
-                               hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })]; 
+                             { hf_is_readonly = None; hf_param_tys = [([4:34-37], (Hprim Tint))];
+                               hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None })]; 
                                hf_variadic_ty = None; hf_ctxs = None; 
                                hf_return_ty = ([4:41-45], (Hlike ([4:41-45], (Hprim Tvoid)))); 
                                hf_is_readonly_return = None }))
@@ -33,7 +33,7 @@ Errors:
           [([5:3-25],
             (Throw
                ((Exception), [5:9-24],
-                (New (((Exception), [5:13-22], (CI ([5:13-22], "\\Exception"))), [], [], None, ((function(string $message = _, int $code = _, ?Exception $previous = _)[]: void)))))))
+                (New (((Exception), [5:13-22], (CI ([5:13-22], "\\Exception"))), [], [], None, ((function(optional string $message, optional int $code, optional ?Exception $previous)[]: void)))))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-13], "__SupportDynamicType"); ua_params = [] }; { ua_name = ([2:3-7], "__Rx"); ua_params = [] }]; 

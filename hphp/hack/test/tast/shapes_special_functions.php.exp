@@ -49,7 +49,7 @@
                  ((int), [7:3-26],
                   (Call
                      { func =
-                       (((function<Tv>(?shape(?'x' => int, ...) $shape, arraykey $index, int $default = _)[]: int)), [7:3-14],
+                       (((function<Tv>(?shape(?'x' => int, ...) $shape, arraykey $index, optional int $default)[]: int)), [7:3-14],
                         (Class_const (((Shapes), [7:3-9], (CI ([7:3-9], "\\HH\\Shapes"))), ([7:11-14], "idx"))));
                        targs = [((int), ([7:11-14], Hwildcard))];
                        args =
@@ -118,7 +118,7 @@
                  ((~int), [7:3-26],
                   (Call
                      { func =
-                       (((function<Tv>(?shape(?'x' => int, ...) $shape, arraykey $index, int $default = _)[]: int)), [7:3-14],
+                       (((function<Tv>(?shape(?'x' => int, ...) $shape, arraykey $index, optional int $default)[]: int)), [7:3-14],
                         (Class_const (((Shapes), [7:3-9], (CI ([7:3-9], "\\HH\\Shapes"))), ([7:11-14], "idx"))));
                        targs = [((int), ([7:11-14], Hwildcard))];
                        args = [(Pnormal, ((dynamic), [7:15-17], (Lvar ([7:15-17], $p)))); (Pnormal, ((string), [7:19-22], (String "x"))); (Pnormal, ((int), [7:24-25], (Int "3")))];

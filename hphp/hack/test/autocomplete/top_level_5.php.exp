@@ -4,5 +4,5 @@ FunctionCredential
 SORT TEXT: none
 function_exists
   INSERT function_exists(${1:\$function_name})
-  (function(string $function_name, bool $autoload = _)[]: bool)
+  (function(string $function_name, optional bool $autoload)[]: bool)
 SORT TEXT: none

@@ -190,6 +190,10 @@ where
         self.is_specific_token(TokenKind::Inout)
     }
 
+    pub fn is_optional(&self) -> bool {
+        self.is_specific_token(TokenKind::Optional)
+    }
+
     pub fn is_this(&self) -> bool {
         self.is_specific_token(TokenKind::This)
     }

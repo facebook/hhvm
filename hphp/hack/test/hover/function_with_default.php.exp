@@ -1,1 +1,1 @@
-function add_one(int $x = _): int
+function add_one(optional int $x): int

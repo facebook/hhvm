@@ -777,7 +777,12 @@ let fun_param : Env.t -> variance -> Nast.fun_param -> unit =
          env
          variance
          (Some
-            Aast.{ hfparam_kind = param_callconv; hfparam_readonlyness = None }))
+            Aast.
+              {
+                hfparam_kind = param_callconv;
+                hfparam_readonlyness = None;
+                hfparam_optional = None;
+              }))
 
 let fun_where_constraint : Env.t -> Aast.where_constraint_hint -> unit =
  fun env (h1, ck, h2) ->

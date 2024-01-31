@@ -1204,6 +1204,7 @@ and context = hint
 and hf_param_info = {
   hfparam_kind: Ast_defs.param_kind;
   hfparam_readonlyness: Ast_defs.readonly_kind option;
+  hfparam_optional: Ast_defs.optional_kind option;
 }
 [@@transform.opaque]
 

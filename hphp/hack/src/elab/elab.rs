@@ -371,6 +371,9 @@ fn elaborate_for_typechecking<T: Transform>(env: Env, node: &mut T) -> Vec<Namin
         // and `everything_sdt` typechecker options
         Box::<passes::validate_supportdyn::ValidateSupportDynPass>::default(),
 
+        // Validate use of `optional` in function type hints
+        Box::<passes::validate_function_hint_optional_parameters::ValidateFunctionHintOptionalParametersPass>::default(),
+
         // Validate use of module definitions - depends on:
         // - `allow_all_files_for_module_declarations`
         // - `allowed_files_for_module_declarations`

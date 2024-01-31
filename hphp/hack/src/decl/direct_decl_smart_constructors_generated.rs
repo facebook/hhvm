@@ -682,8 +682,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDec
         <Self as FlattenSmartConstructors>::make_closure_type_specifier(self, outer_left_paren, readonly_keyword, function_keyword, inner_left_paren, parameter_list, inner_right_paren, contexts, colon, readonly_return, return_type, outer_right_paren)
     }
 
-    fn make_closure_parameter_type_specifier(&mut self, call_convention: Self::Output, readonly: Self::Output, type_: Self::Output) -> Self::Output {
-        <Self as FlattenSmartConstructors>::make_closure_parameter_type_specifier(self, call_convention, readonly, type_)
+    fn make_closure_parameter_type_specifier(&mut self, optional: Self::Output, call_convention: Self::Output, readonly: Self::Output, type_: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_closure_parameter_type_specifier(self, optional, call_convention, readonly, type_)
     }
 
     fn make_type_refinement(&mut self, type_: Self::Output, keyword: Self::Output, left_brace: Self::Output, members: Self::Output, right_brace: Self::Output) -> Self::Output {

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<55a487601dee782c6c59f502f9a6b6e9>>
+// @generated SignedSource<<a60dafd68a16f5c171d7fefa229c635c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -296,6 +296,14 @@ impl ReadonlyKind {
         ReadonlyKind::Readonly
     }
     pub fn is_readonly(&self) -> bool {
+        true
+    }
+}
+impl OptionalKind {
+    pub fn mk_optional() -> Self {
+        OptionalKind::Optional
+    }
+    pub fn is_optional(&self) -> bool {
         true
     }
 }

@@ -1070,6 +1070,7 @@ struct
         closure_outer_right_paren: t;
       }
     | ClosureParameterTypeSpecifier of {
+        closure_parameter_optional: t;
         closure_parameter_call_convention: t;
         closure_parameter_readonly: t;
         closure_parameter_type: t;

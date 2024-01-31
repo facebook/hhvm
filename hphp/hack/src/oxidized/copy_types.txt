@@ -8,6 +8,7 @@ aast_defs::ImportFlavor
 aast_defs::KvcKind
 aast_defs::NsKind
 aast_defs::OgNullFlavor
+aast_defs::OptionalKind
 aast_defs::ParamMutability
 aast_defs::PropOrMethod
 aast_defs::ReadonlyKind
@@ -31,6 +32,7 @@ aast::ImportFlavor
 aast::KvcKind
 aast::NsKind
 aast::OgNullFlavor
+aast::OptionalKind
 aast::ParamMutability
 aast::PropOrMethod
 aast::ReadonlyKind
@@ -48,6 +50,7 @@ ast_defs::ClassishKind
 ast_defs::ConstraintKind
 ast_defs::FunKind
 ast_defs::OgNullFlavor
+ast_defs::OptionalKind
 ast_defs::PropOrMethod
 ast_defs::ReadonlyKind
 ast_defs::ReifyKind

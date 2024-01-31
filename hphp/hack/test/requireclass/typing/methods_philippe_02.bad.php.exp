@@ -9,9 +9,9 @@ Some members in class `Pajoux` are incompatible with those declared in type `Paj
   File "methods_philippe_02.bad.php", line 26, characters 19-21:
   Method `foo` has type `(function(int $a): void)` in `Pajoux` and comes from ancestor or trait `TPajoux`
   File "methods_philippe_02.bad.php", line 18, characters 19-21:
-  But it has type `(function(int $a, ?int $b = _): void)` in parent `PajouxBase`
+  But it has type `(function(int $a, optional ?int $b): void)` in parent `PajouxBase`
   File "methods_philippe_02.bad.php", line 26, characters 19-21:
-  Type `(function(int $a): void)` is not a subtype of `(function(int $a, ?int $b = _): void)`
+  Type `(function(int $a): void)` is not a subtype of `(function(int $a, optional ?int $b): void)`
   File "methods_philippe_02.bad.php", line 26, characters 19-21:
   Too few arguments (required 2 but got 1)
   File "methods_philippe_02.bad.php", line 18, characters 19-21:
@@ -23,9 +23,9 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   File "methods_philippe_02.bad.php", line 26, characters 19-21:
   Method `foo` has type `(function(int $a): void)` in `TPajoux`
   File "methods_philippe_02.bad.php", line 14, characters 19-21:
-  But it has type `(function(int $a, ?int $b = _): void)` in parent `IPajoux2`
+  But it has type `(function(int $a, optional ?int $b): void)` in parent `IPajoux2`
   File "methods_philippe_02.bad.php", line 26, characters 19-21:
-  Type `(function(int $a): void)` is not a subtype of `(function(int $a, ?int $b = _): void)`
+  Type `(function(int $a): void)` is not a subtype of `(function(int $a, optional ?int $b): void)`
   File "methods_philippe_02.bad.php", line 26, characters 19-21:
   Too few arguments (required 2 but got 1)
   File "methods_philippe_02.bad.php", line 14, characters 19-21:

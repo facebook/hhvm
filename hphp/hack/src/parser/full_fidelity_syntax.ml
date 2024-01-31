@@ -2352,10 +2352,12 @@ module WithToken (Token : TokenType) = struct
         acc
       | ClosureParameterTypeSpecifier
           {
+            closure_parameter_optional;
             closure_parameter_call_convention;
             closure_parameter_readonly;
             closure_parameter_type;
           } ->
+        let acc = f acc closure_parameter_optional in
         let acc = f acc closure_parameter_call_convention in
         let acc = f acc closure_parameter_readonly in
         let acc = f acc closure_parameter_type in
@@ -4138,11 +4140,13 @@ module WithToken (Token : TokenType) = struct
         ]
       | ClosureParameterTypeSpecifier
           {
+            closure_parameter_optional;
             closure_parameter_call_convention;
             closure_parameter_readonly;
             closure_parameter_type;
           } ->
         [
+          closure_parameter_optional;
           closure_parameter_call_convention;
           closure_parameter_readonly;
           closure_parameter_type;
@@ -5933,11 +5937,13 @@ module WithToken (Token : TokenType) = struct
         ]
       | ClosureParameterTypeSpecifier
           {
+            closure_parameter_optional;
             closure_parameter_call_convention;
             closure_parameter_readonly;
             closure_parameter_type;
           } ->
         [
+          "closure_parameter_optional";
           "closure_parameter_call_convention";
           "closure_parameter_readonly";
           "closure_parameter_type";
@@ -7941,12 +7947,14 @@ module WithToken (Token : TokenType) = struct
           }
       | ( SyntaxKind.ClosureParameterTypeSpecifier,
           [
+            closure_parameter_optional;
             closure_parameter_call_convention;
             closure_parameter_readonly;
             closure_parameter_type;
           ] ) ->
         ClosureParameterTypeSpecifier
           {
+            closure_parameter_optional;
             closure_parameter_call_convention;
             closure_parameter_readonly;
             closure_parameter_type;
@@ -10458,12 +10466,14 @@ module WithToken (Token : TokenType) = struct
         make syntax value
 
       let make_closure_parameter_type_specifier
+          closure_parameter_optional
           closure_parameter_call_convention
           closure_parameter_readonly
           closure_parameter_type =
         let syntax =
           ClosureParameterTypeSpecifier
             {
+              closure_parameter_optional;
               closure_parameter_call_convention;
               closure_parameter_readonly;
               closure_parameter_type;

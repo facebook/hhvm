@@ -22,7 +22,7 @@
                  (Throw
                     ((Exception), [5:11-39],
                      (New (((Exception), [5:15-24], (CI ([5:15-24], "\\Exception"))), 
-                        [], [((string), [5:25-38], (String "DoWhileBody"))], None, ((function(string $message = _, int $code = _, ?Exception $previous = _)[]: void)))))))
+                        [], [((string), [5:25-38], (String "DoWhileBody"))], None, ((function(optional string $message, optional int $code, optional ?Exception $previous)[]: void)))))))
                  ],
                ((nothing), [6:12-17], (Lvar ([6:12-17], $cond))))))
             ]

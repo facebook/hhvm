@@ -2196,6 +2196,7 @@ let schema : schema_node list =
       aggregates = [Specifier];
       fields =
         [
+          ("optional", ZeroOrOne Token);
           ("call_convention", ZeroOrOne Token);
           ("readonly", ZeroOrOne Token);
           ("type", Aggregate Specifier);

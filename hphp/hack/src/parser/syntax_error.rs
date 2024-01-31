@@ -1251,3 +1251,6 @@ pub const expected_bar_or_semicolon: Error = Cow::Borrowed(
 
 pub const varray_darray_banned: Error =
     Cow::Borrowed("varray and darray are obsolete. Use vec and dict instead.");
+
+pub const optional_precedes_non_optional: Error =
+    Cow::Borrowed("An optional parameter cannot precede a non-optional parameter.");

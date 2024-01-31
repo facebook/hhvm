@@ -26,12 +26,12 @@ SORT TEXT: none
 Str\capitalize_words
   INSERT Str\capitalize_words(
   INSERT )
-  (function(string $string, ?string $delimiters = _)[]: string)
+  (function(string $string, optional ?string $delimiters)[]: string)
 SORT TEXT: none
 Str\chunk
   INSERT Str\chunk(
   INSERT )
-  (function(string $string, int $chunk_size = _)[]: ~vec<string>)
+  (function(string $string, optional int $chunk_size)[]: ~vec<string>)
 SORT TEXT: none
 Str\compare
   INSERT Str\compare(
@@ -46,12 +46,12 @@ SORT TEXT: none
 Str\contains
   INSERT Str\contains(
   INSERT , ${1:\$needle})
-  (function(string $haystack, string $needle, int $offset = _)[]: bool)
+  (function(string $haystack, string $needle, optional int $offset)[]: bool)
 SORT TEXT: none
 Str\contains_ci
   INSERT Str\contains_ci(
   INSERT , ${1:\$needle})
-  (function(string $haystack, string $needle, int $offset = _)[]: bool)
+  (function(string $haystack, string $needle, optional int $offset)[]: bool)
 SORT TEXT: none
 Str\ends_with
   INSERT Str\ends_with(
@@ -81,12 +81,12 @@ SORT TEXT: none
 Str\pad_left
   INSERT Str\pad_left(
   INSERT , ${1:\$total_length})
-  (function(string $string, int $total_length, string $pad_string = _)[]: string)
+  (function(string $string, int $total_length, optional string $pad_string)[]: string)
 SORT TEXT: none
 Str\pad_right
   INSERT Str\pad_right(
   INSERT , ${1:\$total_length})
-  (function(string $string, int $total_length, string $pad_string = _)[]: string)
+  (function(string $string, int $total_length, optional string $pad_string)[]: string)
 SORT TEXT: none
 Str\repeat
   INSERT Str\repeat(
@@ -131,32 +131,32 @@ SORT TEXT: none
 Str\search
   INSERT Str\search(
   INSERT , ${1:\$needle})
-  (function(string $haystack, string $needle, int $offset = _)[]: ?int)
+  (function(string $haystack, string $needle, optional int $offset)[]: ?int)
 SORT TEXT: none
 Str\search_ci
   INSERT Str\search_ci(
   INSERT , ${1:\$needle})
-  (function(string $haystack, string $needle, int $offset = _)[]: ?int)
+  (function(string $haystack, string $needle, optional int $offset)[]: ?int)
 SORT TEXT: none
 Str\search_last
   INSERT Str\search_last(
   INSERT , ${1:\$needle})
-  (function(string $haystack, string $needle, int $offset = _)[]: ?int)
+  (function(string $haystack, string $needle, optional int $offset)[]: ?int)
 SORT TEXT: none
 Str\slice
   INSERT Str\slice(
   INSERT , ${1:\$offset})
-  (function(string $string, int $offset, ?int $length = _)[]: string)
+  (function(string $string, int $offset, optional ?int $length)[]: string)
 SORT TEXT: none
 Str\splice
   INSERT Str\splice(
   INSERT , ${1:\$replacement}, ${2:\$offset})
-  (function(string $string, string $replacement, int $offset, ?int $length = _)[]: string)
+  (function(string $string, string $replacement, int $offset, optional ?int $length)[]: string)
 SORT TEXT: none
 Str\split
   INSERT Str\split(
   INSERT , ${1:\$delimiter})
-  (function(string $string, string $delimiter, ?int $limit = _)[]: ~vec<string>)
+  (function(string $string, string $delimiter, optional ?int $limit)[]: ~vec<string>)
 SORT TEXT: none
 Str\starts_with
   INSERT Str\starts_with(
@@ -186,17 +186,17 @@ SORT TEXT: none
 Str\trim
   INSERT Str\trim(
   INSERT )
-  (function(string $string, ?string $char_mask = _)[]: string)
+  (function(string $string, optional ?string $char_mask)[]: string)
 SORT TEXT: none
 Str\trim_left
   INSERT Str\trim_left(
   INSERT )
-  (function(string $string, ?string $char_mask = _)[]: string)
+  (function(string $string, optional ?string $char_mask)[]: string)
 SORT TEXT: none
 Str\trim_right
   INSERT Str\trim_right(
   INSERT )
-  (function(string $string, ?string $char_mask = _)[]: string)
+  (function(string $string, optional ?string $char_mask)[]: string)
 SORT TEXT: none
 Str\uppercase
   INSERT Str\uppercase(

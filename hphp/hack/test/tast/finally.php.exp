@@ -32,7 +32,8 @@ Errors:
                 [([10:5-27],
                   (Throw
                      ((Exception), [10:11-26],
-                      (New (((Exception), [10:15-24], (CI ([10:15-24], "\\Exception"))), [], [], None, ((function(string $message = _, int $code = _, ?Exception $previous = _)[]: void)))))))
+                      (New (((Exception), [10:15-24], (CI ([10:15-24], "\\Exception"))), 
+                         [], [], None, ((function(optional string $message, optional int $code, optional ?Exception $previous)[]: void)))))))
                   ],
                 [(([11:12-21], "\\Exception"), ([11:22-24], $_), [])],
                 [([13:5-34],

@@ -547,6 +547,19 @@ where
         }
     }
 
+    fn parse_optional_opt(&mut self) -> S::Output {
+        match self.peek_token_kind() {
+            TokenKind::Optional => {
+                let token = self.next_token();
+                self.sc_mut().make_token(token)
+            }
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
+        }
+    }
+
     // SPEC
     //
     // TODO: Add this to the specification.
@@ -593,6 +606,7 @@ where
                     .make_variadic_parameter(missing1, missing2, token)
             }
             _ => {
+                let optional = self.parse_optional_opt();
                 let callconv = self.parse_call_convention_opt();
                 let readonly = self.parse_readonly_opt();
                 let ts = self.parse_type_specifier(false, true);
@@ -604,7 +618,7 @@ where
                     }
                     _ => self
                         .sc_mut()
-                        .make_closure_parameter_type_specifier(callconv, readonly, ts),
+                        .make_closure_parameter_type_specifier(optional, callconv, readonly, ts),
                 }
             }
         }

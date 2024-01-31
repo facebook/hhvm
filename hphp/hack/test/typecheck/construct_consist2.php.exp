@@ -1,11 +1,11 @@
 File "construct_consist2.php", line 8, characters 19-29:
 The method `__construct` is not compatible with the overridden method (Typing[4341])
   File "construct_consist2.php", line 8, characters 19-29:
-  Method `__construct` has type `(function(?A $a = _): void)` in `C2`
+  Method `__construct` has type `(function(optional ?A $a): void)` in `C2`
   File "construct_consist2.php", line 4, characters 7-8:
   But it has type `(function()[]: void)` in parent `C1`
   File "construct_consist2.php", line 8, characters 19-29:
-  Type `(function(?A $a = _): void)` is not a subtype of `(function()[]: void)`
+  Type `(function(optional ?A $a): void)` is not a subtype of `(function()[]: void)`
   File "construct_consist2.php", line 4, characters 7-8:
   Expected a function that requires the capability set {}
   File "construct_consist2.php", line 8, characters 19-29:

@@ -1,7 +1,7 @@
 C\any
   INSERT C\any(
   INSERT )
-  (function(Traversable<T> $traversable, ?(function(T)[T/[ctx $predicate]]: ~bool) $predicate = _)[T/[ctx $predicate]ctx $predicate]: bool)
+  (function(Traversable<T> $traversable, optional ?(function(T)[T/[ctx $predicate]]: ~bool) $predicate)[T/[ctx $predicate]ctx $predicate]: bool)
 SORT TEXT: none
 C\contains
   INSERT C\contains(
@@ -21,7 +21,7 @@ SORT TEXT: none
 C\every
   INSERT C\every(
   INSERT )
-  (function(Traversable<T> $traversable, ?(function(T)[T/[ctx $predicate]]: ~bool) $predicate = _)[T/[ctx $predicate]ctx $predicate]: bool)
+  (function(Traversable<T> $traversable, optional ?(function(T)[T/[ctx $predicate]]: ~bool) $predicate)[T/[ctx $predicate]ctx $predicate]: bool)
 SORT TEXT: none
 C\find
   INSERT C\find(
@@ -66,12 +66,12 @@ SORT TEXT: none
 C\is_sorted
   INSERT C\is_sorted(
   INSERT )
-  (function(Traversable<Tv> $traversable, ?(function(Tv, Tv)[T/[ctx $comparator]]: ~num) $comparator = _)[T/[ctx $comparator]ctx $comparator]: bool)
+  (function(Traversable<Tv> $traversable, optional ?(function(Tv, Tv)[T/[ctx $comparator]]: ~num) $comparator)[T/[ctx $comparator]ctx $comparator]: bool)
 SORT TEXT: none
 C\is_sorted_by
   INSERT C\is_sorted_by(
   INSERT , ${1:\$scalar_func})
-  (function(Traversable<Tv> $traversable, (function(Tv)[T/[ctx $scalar_func]]: ~Ts) $scalar_func, ?(function(Ts, Ts)[T/[ctx $comparator]]: ~num) $comparator = _)[(T/[ctx $scalar_func] & T/[ctx $comparator])ctx $scalar_funcctx $comparator]: bool)
+  (function(Traversable<Tv> $traversable, (function(Tv)[T/[ctx $scalar_func]]: ~Ts) $scalar_func, optional ?(function(Ts, Ts)[T/[ctx $comparator]]: ~num) $comparator)[(T/[ctx $scalar_func] & T/[ctx $comparator])ctx $scalar_funcctx $comparator]: bool)
 SORT TEXT: none
 C\last
   INSERT C\last(
@@ -96,7 +96,7 @@ SORT TEXT: none
 C\onlyx
   INSERT C\onlyx(
   INSERT )
-  (function(Traversable<T> $traversable, ?HH\Lib\Str\SprintfFormatString $format_string = _, mixed $format_args...)[]: ~T)
+  (function(Traversable<T> $traversable, optional ?HH\Lib\Str\SprintfFormatString $format_string, mixed $format_args...)[]: ~T)
 SORT TEXT: none
 C\pop_back
   INSERT C\pop_back(
@@ -166,7 +166,7 @@ SORT TEXT: none
 Dict\filter
   INSERT Dict\filter(
   INSERT )
-  (function(KeyedTraversable<Tk, Tv> $traversable, ?(function(Tv)[T/[ctx $value_predicate]]: ~bool) $value_predicate = _)[T/[ctx $value_predicate]ctx $value_predicate]: ~dict<Tk, Tv>)
+  (function(KeyedTraversable<Tk, Tv> $traversable, optional ?(function(Tv)[T/[ctx $value_predicate]]: ~bool) $value_predicate)[T/[ctx $value_predicate]ctx $value_predicate]: ~dict<Tk, Tv>)
 SORT TEXT: none
 Dict\filter_async
   INSERT Dict\filter_async(
@@ -176,7 +176,7 @@ SORT TEXT: none
 Dict\filter_keys
   INSERT Dict\filter_keys(
   INSERT )
-  (function(KeyedTraversable<Tk, Tv> $traversable, ?(function(Tk)[T/[ctx $key_predicate]]: ~bool) $key_predicate = _)[T/[ctx $key_predicate]ctx $key_predicate]: ~dict<Tk, Tv>)
+  (function(KeyedTraversable<Tk, Tv> $traversable, optional ?(function(Tk)[T/[ctx $key_predicate]]: ~bool) $key_predicate)[T/[ctx $key_predicate]ctx $key_predicate]: ~dict<Tk, Tv>)
 SORT TEXT: none
 Dict\filter_nulls
   INSERT Dict\filter_nulls(
@@ -286,17 +286,17 @@ SORT TEXT: none
 Dict\sort
   INSERT Dict\sort(
   INSERT )
-  (function(KeyedTraversable<Tk, Tv> $traversable, ?(function(Tv, Tv)[T/[ctx $value_comparator]]: ~num) $value_comparator = _)[T/[ctx $value_comparator]ctx $value_comparator]: ~dict<Tk, Tv>)
+  (function(KeyedTraversable<Tk, Tv> $traversable, optional ?(function(Tv, Tv)[T/[ctx $value_comparator]]: ~num) $value_comparator)[T/[ctx $value_comparator]ctx $value_comparator]: ~dict<Tk, Tv>)
 SORT TEXT: none
 Dict\sort_by
   INSERT Dict\sort_by(
   INSERT , ${1:\$scalar_func})
-  (function(KeyedTraversable<Tk, Tv> $traversable, (function(Tv)[T/[ctx $scalar_func]]: ~Ts) $scalar_func, ?(function(Ts, Ts)[T/[ctx $scalar_comparator]]: ~num) $scalar_comparator = _)[(T/[ctx $scalar_func] & T/[ctx $scalar_comparator])ctx $scalar_funcctx $scalar_comparator]: ~dict<Tk, Tv>)
+  (function(KeyedTraversable<Tk, Tv> $traversable, (function(Tv)[T/[ctx $scalar_func]]: ~Ts) $scalar_func, optional ?(function(Ts, Ts)[T/[ctx $scalar_comparator]]: ~num) $scalar_comparator)[(T/[ctx $scalar_func] & T/[ctx $scalar_comparator])ctx $scalar_funcctx $scalar_comparator]: ~dict<Tk, Tv>)
 SORT TEXT: none
 Dict\sort_by_key
   INSERT Dict\sort_by_key(
   INSERT )
-  (function(KeyedTraversable<Tk, Tv> $traversable, ?(function(Tk, Tk)[T/[ctx $key_comparator]]: ~num) $key_comparator = _)[T/[ctx $key_comparator]ctx $key_comparator]: ~dict<Tk, Tv>)
+  (function(KeyedTraversable<Tk, Tv> $traversable, optional ?(function(Tk, Tk)[T/[ctx $key_comparator]]: ~num) $key_comparator)[T/[ctx $key_comparator]ctx $key_comparator]: ~dict<Tk, Tv>)
 SORT TEXT: none
 Dict\take
   INSERT Dict\take(
@@ -331,7 +331,7 @@ SORT TEXT: none
 Keyset\filter
   INSERT Keyset\filter(
   INSERT )
-  (function(Traversable<Tv> $traversable, ?(function(Tv)[T/[ctx $value_predicate]]: ~bool) $value_predicate = _)[T/[ctx $value_predicate]ctx $value_predicate]: ~keyset<Tv>)
+  (function(Traversable<Tv> $traversable, optional ?(function(Tv)[T/[ctx $value_predicate]]: ~bool) $value_predicate)[T/[ctx $value_predicate]ctx $value_predicate]: ~keyset<Tv>)
 SORT TEXT: none
 Keyset\filter_async
   INSERT Keyset\filter_async(
@@ -386,7 +386,7 @@ SORT TEXT: none
 Keyset\sort
   INSERT Keyset\sort(
   INSERT )
-  (function(Traversable<Tv> $traversable, ?(function(Tv, Tv)[T/[ctx $comparator]]: ~num) $comparator = _)[T/[ctx $comparator]ctx $comparator]: ~keyset<Tv>)
+  (function(Traversable<Tv> $traversable, optional ?(function(Tv, Tv)[T/[ctx $comparator]]: ~num) $comparator)[T/[ctx $comparator]ctx $comparator]: ~keyset<Tv>)
 SORT TEXT: none
 Keyset\take
   INSERT Keyset\take(
@@ -436,7 +436,7 @@ SORT TEXT: none
 Vec\filter
   INSERT Vec\filter(
   INSERT )
-  (function(Traversable<Tv> $traversable, ?(function(Tv)[T/[ctx $value_predicate]]: ~bool) $value_predicate = _)[T/[ctx $value_predicate]ctx $value_predicate]: ~vec<Tv>)
+  (function(Traversable<Tv> $traversable, optional ?(function(Tv)[T/[ctx $value_predicate]]: ~bool) $value_predicate)[T/[ctx $value_predicate]ctx $value_predicate]: ~vec<Tv>)
 SORT TEXT: none
 Vec\filter_async
   INSERT Vec\filter_async(
@@ -511,17 +511,17 @@ SORT TEXT: none
 Vec\slice
   INSERT Vec\slice(
   INSERT , ${1:\$offset})
-  (function(Container<Tv> $container, int $offset, ?int $length = _)[]: ~vec<Tv>)
+  (function(Container<Tv> $container, int $offset, optional ?int $length)[]: ~vec<Tv>)
 SORT TEXT: none
 Vec\sort
   INSERT Vec\sort(
   INSERT )
-  (function(Traversable<Tv> $traversable, ?(function(Tv, Tv)[T/[ctx $comparator]]: ~num) $comparator = _)[T/[ctx $comparator]ctx $comparator]: ~vec<Tv>)
+  (function(Traversable<Tv> $traversable, optional ?(function(Tv, Tv)[T/[ctx $comparator]]: ~num) $comparator)[T/[ctx $comparator]ctx $comparator]: ~vec<Tv>)
 SORT TEXT: none
 Vec\sort_by
   INSERT Vec\sort_by(
   INSERT , ${1:\$scalar_func})
-  (function(Traversable<Tv> $traversable, (function(Tv)[T/[ctx $scalar_func]]: ~Ts) $scalar_func, ?(function(Ts, Ts)[T/[ctx $comparator]]: ~num) $comparator = _)[(T/[ctx $scalar_func] & T/[ctx $comparator])ctx $scalar_funcctx $comparator]: ~vec<Tv>)
+  (function(Traversable<Tv> $traversable, (function(Tv)[T/[ctx $scalar_func]]: ~Ts) $scalar_func, optional ?(function(Ts, Ts)[T/[ctx $comparator]]: ~num) $comparator)[(T/[ctx $scalar_func] & T/[ctx $comparator])ctx $scalar_funcctx $comparator]: ~vec<Tv>)
 SORT TEXT: none
 Vec\take
   INSERT Vec\take(

@@ -75,6 +75,8 @@ and param_kind =
 
 and readonly_kind = Readonly [@@transform.opaque]
 
+and optional_kind = Optional [@@transform.opaque]
+
 and og_null_flavor =
   | OG_nullthrows
   | OG_nullsafe

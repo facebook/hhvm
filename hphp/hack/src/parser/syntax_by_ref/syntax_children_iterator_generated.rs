@@ -1583,10 +1583,11 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ClosureParameterTypeSpecifier(x) => {
-                get_index(3).and_then(|index| { match index {
-                        0 => Some(&x.call_convention),
-                    1 => Some(&x.readonly),
-                    2 => Some(&x.type_),
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.optional),
+                    1 => Some(&x.call_convention),
+                    2 => Some(&x.readonly),
+                    3 => Some(&x.type_),
                         _ => None,
                     }
                 })

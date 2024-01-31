@@ -417,6 +417,10 @@ module Full = struct
             text "<<__AcceptDisposable>>" ^^ Space
           else
             Nothing);
+          (if has_default then
+            text "optional" ^^ Space
+          else
+            Nothing);
           (if inout then
             text "inout" ^^ Space
           else
@@ -426,10 +430,6 @@ module Full = struct
           else
             Nothing);
           d;
-          (if has_default then
-            text " = _"
-          else
-            Nothing);
         ]
     in
     (fuel, d)

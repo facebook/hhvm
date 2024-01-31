@@ -96,8 +96,8 @@
                  (Happly (([14:54-16:9], "\\HH\\supportdyn"),
                     [([14:54-16:9],
                       (Hfun
-                         { hf_is_readonly = None; hf_param_tys = [([15:3-5], (Habstr ("TR", [])))]; 
-                           hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })]; 
+                         { hf_is_readonly = None; hf_param_tys = [([15:3-5], (Habstr ("TR", [])))];
+                           hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None })]; 
                            hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([16:4-8], (Hlike ([16:4-8], (Hprim Tvoid)))); 
                            hf_is_readonly_return = None }))
                       ]
@@ -308,8 +308,8 @@
                  (Happly (([14:54-16:9], "\\HH\\supportdyn"),
                     [([14:54-16:9],
                       (Hfun
-                         { hf_is_readonly = None; hf_param_tys = [([15:3-5], (Habstr ("TR", [])))]; 
-                           hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })]; 
+                         { hf_is_readonly = None; hf_param_tys = [([15:3-5], (Habstr ("TR", [])))];
+                           hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None })]; 
                            hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([16:4-8], (Hlike ([16:4-8], (Hprim Tvoid)))); 
                            hf_is_readonly_return = None }))
                       ]

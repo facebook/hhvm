@@ -14,7 +14,7 @@
             (Some ([4:3-28],
                    (Hfun
                       { hf_is_readonly = None; hf_param_tys = [([4:14-17], (Hprim Tint))]; 
-                        hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })]; 
+                        hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None })]; 
                         hf_variadic_ty = None; hf_ctxs = (Some ([4:18-21], [([4:19-20], (Hfun_context "$f"))])); 
                         hf_return_ty = ([4:23-27], (Hprim Tvoid)); hf_is_readonly_return = None }))));
            param_is_variadic = false; param_pos = [4:29-31]; param_name = "$f"; 
@@ -27,8 +27,8 @@
                     (Hoption
                        ([5:4-32],
                         (Hfun
-                           { hf_is_readonly = None; hf_param_tys = [([5:15-21], (Hprim Tstring))]; 
-                             hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })]; 
+                           { hf_is_readonly = None; hf_param_tys = [([5:15-21], (Hprim Tstring))];
+                             hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None })]; 
                              hf_variadic_ty = None; hf_ctxs = (Some ([5:22-25], [([5:23-24], (Hfun_context "$nf"))])); 
                              hf_return_ty = ([5:27-31], (Hprim Tbool)); 
                              hf_is_readonly_return = None }))))));

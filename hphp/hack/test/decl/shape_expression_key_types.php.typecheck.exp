@@ -2,9 +2,9 @@ File "shape_expression_key_types.php", line 7, characters 5-5:
 Shape field name must be a nonempty single-quoted string or a class constant (Parsing[1002])
 File "shape_expression_key_types.php", line 9, characters 5-12:
 Shape uses class constant as field name (Typing[4049])
-File "shape_expression_key_types.php", line 7, characters 5-5:
-But expected a literal string
+  File "shape_expression_key_types.php", line 7, characters 5-5:
+  But expected a literal string. Shape fields cannot be a mix of literals and constants.
 File "shape_expression_key_types.php", line 10, characters 5-10:
 Shape uses class constant as field name (Typing[4049])
-File "shape_expression_key_types.php", line 7, characters 5-5:
-But expected a literal string
+  File "shape_expression_key_types.php", line 7, characters 5-5:
+  But expected a literal string. Shape fields cannot be a mix of literals and constants.

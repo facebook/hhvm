@@ -1,4 +1,4 @@
 File "shape_typeconst1.php", line 8, characters 5-14:
 Shape uses class constant as field name (Typing[4049])
-File "shape_typeconst1.php", line 6, characters 5-9:
-But expected a literal string
+  File "shape_typeconst1.php", line 6, characters 5-9:
+  But expected a literal string. Shape fields cannot be a mix of literals and constants.

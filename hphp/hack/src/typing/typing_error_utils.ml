@@ -325,7 +325,9 @@ end = struct
       and reason =
         lazy
           [
-            (Pos_or_decl.of_raw_pos witness_pos, "But expected a class constant");
+            ( Pos_or_decl.of_raw_pos witness_pos,
+              "But expected a class constant. Shape fields cannot be a mix of literals and constants."
+            );
           ]
       in
       (Error_code.InvalidShapeFieldLiteral, claim, reason, [])
@@ -335,7 +337,9 @@ end = struct
       and reason =
         lazy
           [
-            (Pos_or_decl.of_raw_pos witness_pos, "But expected a literal string");
+            ( Pos_or_decl.of_raw_pos witness_pos,
+              "But expected a literal string. Shape fields cannot be a mix of literals and constants."
+            );
           ]
       in
       (Error_code.InvalidShapeFieldConst, claim, reason, [])

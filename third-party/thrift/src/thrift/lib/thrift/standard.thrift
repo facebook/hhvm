@@ -79,8 +79,15 @@ typedef string Uri (thrift.uri = "")
 union TypeUri {
   /** The unique Thrift URI for this type. */
   1: Uri uri;
-  /** A prefix of the SHA2-256 hash of the URI. */
+
+  /**
+   * A prefix of the SHA2-256 hash of the universal name. It is ByteString
+   * instead of binary to fit a 16-byte prefix into the inline storage making
+   * use of the small string optimization (SSO). In libstdc++ std::string SSO
+   * is limited to 15 bytes and would require an allocation.
+   */
   2: ByteString typeHashPrefixSha2_256;
+
   /**
    * The (potentially not unique) scoped name of this type.
    * Format is `filename.typename`, e.g. `standard.TypeUri`.

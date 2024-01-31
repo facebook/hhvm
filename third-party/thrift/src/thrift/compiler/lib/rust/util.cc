@@ -75,6 +75,10 @@ rust_crate_map load_crate_map(const std::string& path) {
     if (source.first == "crate") {
       crate_name = "crate";
       ret.multifile_mode = multifile;
+    } else if (
+        source.first == "core" || source.first == "std" ||
+        source.first != mangle(source.first)) {
+      crate_name = "::" + source.first + "_";
     } else {
       crate_name = "::" + mangle(source.first);
     }

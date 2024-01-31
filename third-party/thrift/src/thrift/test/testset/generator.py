@@ -38,7 +38,7 @@ include "thrift/annotation/thrift.thrift"
 cpp_include "thrift/test/AdapterTest.h"
 
 @thrift.Experimental
-package "apache.org/thrift/test/testset"
+package "facebook.com/thrift/test/testset"
 
 namespace cpp2 apache.thrift.test.testset
 namespace py3 thrift.test
@@ -662,13 +662,13 @@ def gen_thrift_def(
       @thrift.A
       @thrift.B
       5: i32 field_5 (cpp.ref);
-    } (thrift.uri="facebook.com/thrift/test/testset/Foo")
+    }
     """
     decl = transform[Target.THRIFT].format(name)
     lines = [f"{decl} {{"]
     for idx, field_type in enumerate(field_types):
         lines.append(gen_thrift_value(field_type, idx))
-    lines.append(f'}} (thrift.uri="facebook.com/thrift/test/testset/{name}")')
+    lines.append("}")
     return "\n".join(lines)
 
 

@@ -71,9 +71,14 @@ pub(crate) use {{program:crate}} as types;
 
 }}{{#program:structs}}{{^struct:has_adapter?}}{{>lib/structimpl}}{{>lib/unionimpl}}{{/struct:has_adapter?}}{{/program:structs}}{{!
 
-}}{{#program:has_adapted_structs?}}{{>lib/mod.unadapted}}{{/program:has_adapted_structs?}}{{!
+}}{{#program:has_adapted_structs?}}{{!
+    }}{{>lib/mod.unadapted}}{{!
+    }}{{>lib/mod.adapted_types}}{{!
+}}{{/program:has_adapted_structs?}}{{!
 
-}}{{#program:has_adapters?}}{{>lib/mod.adapters}}{{/program:has_adapters?}}{{!
+}}{{#program:has_adapters?}}{{!
+    }}{{>lib/mod.adapters}}{{!
+}}{{/program:has_adapters?}}{{!
 
 }}{{#program:nonexhaustiveStructs?}}
 

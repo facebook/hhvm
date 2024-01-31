@@ -16,5 +16,12 @@
 
 }}
 
-pub type {{struct:rust_name}} = {{>lib/adapter/qualified}}::AdaptedType;
+#[allow(dead_code)]
+mod adapted_types {{>lib/block}}{{!
+    }}{{#program:structs}}{{#struct:has_adapter?}}
+    pub type {{struct:rust_name}} = {{>lib/adapter/qualified}}::AdaptedType;{{!
+    }}{{/struct:has_adapter?}}{{/program:structs}}
+}
+
+pub use self::adapted_types::*;
 {{!newline}}

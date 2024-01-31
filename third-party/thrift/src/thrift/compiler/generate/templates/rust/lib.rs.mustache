@@ -50,11 +50,6 @@ pub use {{program:types}} as types;
 #[doc(inline)]
 pub use {{program:types}}::consts as consts;
 {{/program:constants?}}{{!
-}}{{#program:structs}}{{!
-    }}{{#struct:has_adapter?}}{{!
-    }}{{>lib/adapter/struct}}{{!
-    }}{{/struct:has_adapter?}}{{!
-}}{{/program:structs}}{{!
 }}{{#program:services?}}
 
 #[doc(hidden)]

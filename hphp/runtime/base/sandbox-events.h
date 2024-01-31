@@ -28,6 +28,14 @@ void logSboxEvent(uint32_t sampleRate, std::string_view source,
 void rareSboxEvent(std::string_view source, std::string_view event,
                    std::string_view key);
 
+inline void sampleSboxEvent(uint32_t sampleRate, std::string_view source,
+                            std::string_view event, std::string_view key,
+                            uint64_t duration_us) {
+  if (StructuredLog::coinflip(sampleRate)) {
+    logSboxEvent(sampleRate, source, event, key, duration_us);
+  }
+}
+
 template <typename F>
 auto timeSboxEvent(
     uint32_t sampleRate, std::string_view source,

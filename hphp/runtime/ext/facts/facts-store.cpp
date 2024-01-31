@@ -818,7 +818,7 @@ struct FactsStoreImpl final
               std::chrono::microseconds::period>>(
                                  lastWatchmanQueryStart - updateStart)
                                  .count();
-          logSboxEvent(
+          sampleSboxEvent(
               Cfg::Autoload::PerfSampleRate,
               "facts-store",
               "watchman query",

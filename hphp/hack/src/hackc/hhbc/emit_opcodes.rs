@@ -14,9 +14,6 @@ use proc_macro2::Spacing;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::quote;
-use quote::ToTokens;
-use syn::punctuated::Punctuated;
-use syn::token;
 use syn::ItemEnum;
 use syn::Lifetime;
 use syn::Result;
@@ -32,7 +29,7 @@ pub fn emit_opcodes(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenS
         let name = Ident::new(opcode.name, Span::call_site());
 
         let mut body = Vec::new();
-        body.extend(name.to_token_stream());
+        body.push(name.into());
 
         if !opcode.immediates.is_empty() {
             let is_struct = opcode.flags.contains(InstrFlags::AS_STRUCT);
@@ -173,11 +170,11 @@ pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
     let (impl_generics, impl_types, impl_where) = item_enum.generics.split_for_impl();
 
     let mut with_targets_ref: Vec<TokenStream> = Vec::new();
-    let mut without_targets: Punctuated<TokenStream, token::Or> = Punctuated::new();
+    let mut without_targets: Vec<TokenStream> = Vec::new();
 
     for opcode in opcodes {
-        let variant_name = Ident::new(opcode.name, Span::call_site());
-        let variant_name = quote!(#name::#variant_name);
+        let opcode_name = Ident::new(opcode.name, Span::call_site());
+        let variant_name = quote!(#name::#opcode_name);
         let is_struct = opcode.flags.contains(InstrFlags::AS_STRUCT);
 
         fn is_label_type(imm_ty: &ImmType) -> bool {
@@ -250,12 +247,12 @@ pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
             .position(|(_, imm_ty)| is_label_type(imm_ty))
         {
             // Label opcodes.
-            let mut match_parts: Punctuated<TokenStream, token::Comma> = Punctuated::new();
+            let mut match_parts: Vec<TokenStream> = Vec::new();
             let mut result = None;
             for (i, (imm_name, imm_ty)) in opcode.immediates.iter().enumerate() {
                 let imm_name = Ident::new(imm_name, Span::call_site());
                 if i == idx {
-                    match_parts.push(imm_name.to_token_stream());
+                    match_parts.push(quote!(#imm_name));
                     let result_ref = compute_label(opcode.name, &imm_name, imm_ty, true);
                     let old = result.replace(result_ref);
                     if old.is_some() {
@@ -271,9 +268,9 @@ pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
             let result_ref = result.unwrap();
 
             if is_struct {
-                with_targets_ref.push(quote!(#variant_name { #match_parts } => #result_ref, ));
+                with_targets_ref.push(quote!(#variant_name { #(#match_parts),* } => #result_ref, ));
             } else {
-                with_targets_ref.push(quote!(#variant_name ( #match_parts ) => #result_ref, ));
+                with_targets_ref.push(quote!(#variant_name ( #(#match_parts),* ) => #result_ref, ));
             }
         } else {
             // Non-label opcodes.
@@ -292,7 +289,7 @@ pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
             fn targets(&self) -> &[Label] {
                 match self {
                     #(#with_targets_ref)*
-                    #without_targets => &[],
+                    #(#without_targets)|* => &[],
                 }
             }
         }),

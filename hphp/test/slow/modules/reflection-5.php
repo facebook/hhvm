@@ -1,6 +1,5 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('modules')>>
 
 <<__EntryPoint>>
 function main() :mixed{

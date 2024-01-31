@@ -25,7 +25,7 @@ namespace type {
 bool Type::isFull(const TypeUri& typeUri, bool validate_uri) {
   if (typeUri.getType() != TypeUri::Type::uri) {
     return false;
-  };
+  }
   if (validate_uri) {
     try {
       checkName(typeUri.get_uri());

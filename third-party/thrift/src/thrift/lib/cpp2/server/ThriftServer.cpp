@@ -1673,6 +1673,10 @@ folly::coro::CancellableAsyncScope& ThriftServer::getGlobalAsyncScope() {
   globalServer = server;
 }
 
+/* static */ bool ThriftServer::isGlobalServerSet() {
+  return globalServer != nullptr;
+}
+
 void ThriftServer::stopCPUWorkers() {
   // Wait for any tasks currently running on the task queue workers to
   // finish, then stop the task queue workers. Have to do this now, so

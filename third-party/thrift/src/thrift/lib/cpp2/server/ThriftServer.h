@@ -832,6 +832,11 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   static folly::coro::CancellableAsyncScope& getGlobalAsyncScope();
 #endif
 
+  /**
+   * Checks if a global server is set
+   */
+  static bool isGlobalServerSet();
+
   static void setGlobalServer(ThriftServer* server);
 
   void setAcceptorFactory(

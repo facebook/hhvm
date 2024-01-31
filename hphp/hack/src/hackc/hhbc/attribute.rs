@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ffi::Slice;
 use ffi::Str;
-use ffi::Vector;
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
 use serde::Serialize;
@@ -27,7 +27,7 @@ use crate::typed_value::TypedValue;
 #[repr(C)]
 pub struct Attribute<'arena> {
     pub name: Str<'arena>,
-    pub arguments: Vector<TypedValue<'arena>>,
+    pub arguments: Slice<'arena, TypedValue<'arena>>,
 }
 
 impl<'arena> Attribute<'arena> {
@@ -188,7 +188,7 @@ mod tests {
     fn example_is_memoized_vs_eq_memoize() {
         let attr = Attribute {
             name: ua::MEMOIZE_LSB.into(),
-            arguments: vec![].into(),
+            arguments: ffi::Slice::empty(),
         };
         assert!(attr.is(ua::is_memoized));
         assert!(!attr.is(|s| s == ua::MEMOIZE));
@@ -199,7 +199,7 @@ mod tests {
     fn example_has_dynamically_callable() {
         let mk_attr = |name: &'static str| Attribute {
             name: name.into(),
-            arguments: vec![].into(),
+            arguments: ffi::Slice::empty(),
         };
         let attrs = vec![mk_attr(ua::CONST), mk_attr(ua::DYNAMICALLY_CALLABLE)];
         let has_result = attrs

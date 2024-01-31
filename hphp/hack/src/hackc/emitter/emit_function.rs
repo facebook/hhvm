@@ -8,6 +8,7 @@ use ast_scope::Scope;
 use ast_scope::ScopeItem;
 use env::emitter::Emitter;
 use error::Result;
+use ffi::Slice;
 use ffi::Str;
 use hhbc::Attribute;
 use hhbc::ClassName;
@@ -42,7 +43,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
         matches!(f.fun_kind, FunKind::FAsync | FunKind::FAsyncGenerator),
     );
     let mut user_attrs: Vec<Attribute<'arena>> = emit_attribute::from_asts(e, &f.user_attributes)?;
-    user_attrs.extend(emit_attribute::add_reified_attribute(&fd.tparams));
+    user_attrs.extend(emit_attribute::add_reified_attribute(alloc, &fd.tparams));
     let memoized = user_attrs
         .iter()
         .any(|a| ua::is_memoized(a.name.unsafe_as_str()));
@@ -96,18 +97,18 @@ pub fn emit_function<'a, 'arena, 'decl>(
 
     let mut coeffects = Coeffects::from_ast(alloc, f.ctxs.as_ref(), &f.params, &fd.tparams, vec![]);
     if is_meth_caller {
-        coeffects = coeffects.with_caller()
+        coeffects = coeffects.with_caller(alloc)
     }
     if e.systemlib()
         && (fd.name.1 == "\\HH\\Coeffects\\backdoor"
             || fd.name.1 == "\\HH\\Coeffects\\backdoor_async")
     {
-        coeffects = coeffects.with_backdoor()
+        coeffects = coeffects.with_backdoor(alloc)
     }
     if e.systemlib()
         && (fd.name.1 == "\\HH\\Coeffects\\fb\\backdoor_to_globals_leak_safe__DO_NOT_USE")
     {
-        coeffects = coeffects.with_backdoor_globals_leak_safe()
+        coeffects = coeffects.with_backdoor_globals_leak_safe(alloc)
     }
     let ast_body = &f.body.fb_ast;
     let deprecation_info = hhbc::deprecation_info(user_attrs.iter());
@@ -169,7 +170,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
     let attrs =
         emit_memoize_function::get_attrs_for_fun(e, fd, &user_attrs, memoized, has_variadic);
     let normal_function = Function {
-        attributes: user_attrs.into(),
+        attributes: Slice::fill_iter(alloc, user_attrs),
         name: FunctionName::new(Str::new_str(alloc, renamed_id.unsafe_as_str())),
         span: Span::from_pos(&f.span),
         coeffects,

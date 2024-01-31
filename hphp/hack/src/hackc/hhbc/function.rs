@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bitflags::bitflags;
-use ffi::Vector;
+use ffi::Slice;
 use hhvm_types_ffi::ffi::Attr;
 use serde::Serialize;
 
@@ -18,7 +18,7 @@ use crate::Span;
 #[derive(Debug, Serialize)]
 #[repr(C)]
 pub struct Function<'arena> {
-    pub attributes: Vector<Attribute<'arena>>,
+    pub attributes: Slice<'arena, Attribute<'arena>>,
     pub name: FunctionName<'arena>,
     pub body: Body<'arena>,
 

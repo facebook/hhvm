@@ -218,42 +218,46 @@ fn shape_to_typed_value<'arena, 'decl>(
     scope: &Scope<'_, 'arena>,
     fields: &[(ast::ShapeFieldName, ast::Expr)],
 ) -> Result<TypedValue<'arena>, Error> {
-    let a = fields
-        .iter()
-        .map(|(sf, expr)| {
-            let key = match sf {
-                ast_defs::ShapeFieldName::SFlitInt((_, s)) => {
-                    let tv = int_expr_to_typed_value(s)?;
-                    match tv {
-                        TypedValue::Int(_) => tv,
-                        _ => {
-                            return Err(Error::unrecoverable(format!(
-                                "{} is not a valid integer index",
-                                s
-                            )));
+    let a = emitter.alloc.alloc_slice_fill_iter(
+        fields
+            .iter()
+            .map(|(sf, expr)| {
+                let key = match sf {
+                    ast_defs::ShapeFieldName::SFlitInt((_, s)) => {
+                        let tv = int_expr_to_typed_value(s)?;
+                        match tv {
+                            TypedValue::Int(_) => tv,
+                            _ => {
+                                return Err(Error::unrecoverable(format!(
+                                    "{} is not a valid integer index",
+                                    s
+                                )));
+                            }
                         }
                     }
-                }
-                ast_defs::ShapeFieldName::SFlitStr(id) => {
-                    // FIXME: This is not safe--string literals are binary
-                    // strings. There's no guarantee that they're valid UTF-8.
-                    TypedValue::string(
-                        emitter
-                            .alloc
-                            .alloc_str(unsafe { std::str::from_utf8_unchecked(&id.1) }),
-                    )
-                }
-                ast_defs::ShapeFieldName::SFclassConst(class_id, id) => class_const_to_typed_value(
-                    emitter,
-                    scope,
-                    &ast::ClassId((), Pos::NONE, ast::ClassId_::CI(class_id.clone())),
-                    id,
-                )?,
-            };
-            let value = expr_to_typed_value(emitter, scope, expr)?;
-            Ok(DictEntry { key, value })
-        })
-        .collect::<Result<Vec<_>, _>>()?;
+                    ast_defs::ShapeFieldName::SFlitStr(id) => {
+                        // FIXME: This is not safe--string literals are binary
+                        // strings. There's no guarantee that they're valid UTF-8.
+                        TypedValue::string(
+                            emitter
+                                .alloc
+                                .alloc_str(unsafe { std::str::from_utf8_unchecked(&id.1) }),
+                        )
+                    }
+                    ast_defs::ShapeFieldName::SFclassConst(class_id, id) => {
+                        class_const_to_typed_value(
+                            emitter,
+                            scope,
+                            &ast::ClassId((), Pos::NONE, ast::ClassId_::CI(class_id.clone())),
+                            id,
+                        )?
+                    }
+                };
+                let value = expr_to_typed_value(emitter, scope, expr)?;
+                Ok(DictEntry { key, value })
+            })
+            .collect::<Result<Vec<_>, _>>()?,
+    );
     Ok(TypedValue::dict(a))
 }
 
@@ -262,11 +266,14 @@ pub fn vec_to_typed_value<'arena, 'decl>(
     scope: &Scope<'_, 'arena>,
     fields: &[ast::Afield],
 ) -> Result<TypedValue<'arena>, Error> {
-    let tv_fields = fields
+    //TODO: Improve. It's a bit silly having to use a std::vector::Vec
+    // here.
+    let tv_fields: Result<Vec<TypedValue<'arena>>, Error> = fields
         .iter()
         .map(|f| value_afield_to_typed_value(e, scope, f))
-        .collect::<Result<_, Error>>()?;
-    Ok(TypedValue::vec(tv_fields))
+        .collect();
+    let fields = e.alloc.alloc_slice_fill_iter(tv_fields?);
+    Ok(TypedValue::vec(fields))
 }
 
 pub fn expr_to_typed_value<'arena, 'decl>(
@@ -348,66 +355,71 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
 fn valcollection_keyset_expr_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
     scope: &Scope<'_, 'arena>,
-    (_, _, exprs): &((Pos, ast::VcKind), Option<ast::Targ>, Vec<ast::Expr>),
+    x: &((Pos, ast::VcKind), Option<ast::Targ>, Vec<ast::Expr>),
 ) -> Result<TypedValue<'arena>, Error> {
-    let keys = exprs
-        .iter()
-        .map(|e| {
-            expr_to_typed_value(emitter, scope, e).and_then(|tv| match tv {
-                TypedValue::Int(_) | TypedValue::String(_) => Ok(tv),
-                TypedValue::LazyClass(_) if emitter.options().hhbc.fold_lazy_class_keys => Ok(tv),
-                _ => Err(Error::NotLiteral),
+    let keys = emitter.alloc.alloc_slice_fill_iter(
+        x.2.iter()
+            .map(|e| {
+                expr_to_typed_value(emitter, scope, e).and_then(|tv| match tv {
+                    TypedValue::Int(_) | TypedValue::String(_) => Ok(tv),
+                    TypedValue::LazyClass(_) if emitter.options().hhbc.fold_lazy_class_keys => {
+                        Ok(tv)
+                    }
+                    _ => Err(Error::NotLiteral),
+                })
             })
-        })
-        .collect::<Result<Vec<_>, _>>()?
-        .into_iter()
-        .unique()
-        .collect::<Vec<_>>();
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
+            .unique()
+            .collect::<Vec<_>>(),
+    );
     Ok(TypedValue::keyset(keys))
 }
 
 fn keyvalcollection_expr_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
     scope: &Scope<'_, 'arena>,
-    (_, _, fields): &(
+    x: &(
         (Pos, ast::KvcKind),
         Option<(ast::Targ, ast::Targ)>,
         Vec<ast::Field>,
     ),
 ) -> Result<TypedValue<'arena>, Error> {
-    let values = Vec::from_iter(update_duplicates_in_map(
-        fields
-            .iter()
-            .map(|e| kv_to_typed_value_pair(emitter, scope, &e.0, &e.1))
-            .collect::<Result<Vec<_>, _>>()?,
-    ));
+    let values = emitter
+        .alloc
+        .alloc_slice_fill_iter(update_duplicates_in_map(
+            x.2.iter()
+                .map(|e| kv_to_typed_value_pair(emitter, scope, &e.0, &e.1))
+                .collect::<Result<Vec<_>, _>>()?,
+        ));
     Ok(TypedValue::dict(values))
 }
 
 fn valcollection_set_expr_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
     scope: &Scope<'_, 'arena>,
-    (_, _, exprs): &((Pos, ast::VcKind), Option<ast::Targ>, Vec<ast::Expr>),
+    x: &((Pos, ast::VcKind), Option<ast::Targ>, Vec<ast::Expr>),
 ) -> Result<TypedValue<'arena>, Error> {
-    let values = Vec::from_iter(update_duplicates_in_map(
-        exprs
-            .iter()
-            .map(|e| set_afield_value_to_typed_value_pair(emitter, scope, e))
-            .collect::<Result<Vec<_>, _>>()?,
-    ));
+    let values = emitter
+        .alloc
+        .alloc_slice_fill_iter(update_duplicates_in_map(
+            x.2.iter()
+                .map(|e| set_afield_value_to_typed_value_pair(emitter, scope, e))
+                .collect::<Result<Vec<_>, _>>()?,
+        ));
     Ok(TypedValue::dict(values))
 }
 
 fn valcollection_vec_expr_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
     scope: &Scope<'_, 'arena>,
-    (_, _, exprs): &((Pos, ast::VcKind), Option<ast::Targ>, Vec<ast::Expr>),
+    x: &((Pos, ast::VcKind), Option<ast::Targ>, Vec<ast::Expr>),
 ) -> Result<TypedValue<'arena>, Error> {
-    let v = exprs
-        .iter()
-        .map(|e| expr_to_typed_value(emitter, scope, e))
-        .collect::<Result<_, _>>()?;
-    Ok(TypedValue::vec(v))
+    let v: Vec<_> =
+        x.2.iter()
+            .map(|e| expr_to_typed_value(emitter, scope, e))
+            .collect::<Result<_, _>>()?;
+    Ok(TypedValue::vec(emitter.alloc.alloc_slice_fill_iter(v)))
 }
 
 fn tuple_expr_to_typed_value<'arena, 'decl>(
@@ -415,65 +427,68 @@ fn tuple_expr_to_typed_value<'arena, 'decl>(
     scope: &Scope<'_, 'arena>,
     x: &[ast::Expr],
 ) -> Result<TypedValue<'arena>, Error> {
-    let v = x
+    let v: Vec<_> = x
         .iter()
         .map(|e| expr_to_typed_value(emitter, scope, e))
         .collect::<Result<_, _>>()?;
-    Ok(TypedValue::vec(v))
+    Ok(TypedValue::vec(emitter.alloc.alloc_slice_fill_iter(v)))
 }
 
 fn set_expr_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
     scope: &Scope<'_, 'arena>,
-    (_, _, fields): &(
+    x: &(
         ast::ClassName,
         Option<ast::CollectionTarg>,
         Vec<ast::Afield>,
     ),
 ) -> Result<TypedValue<'arena>, Error> {
-    let values = Vec::from_iter(update_duplicates_in_map(
-        fields
-            .iter()
-            .map(|x| set_afield_to_typed_value_pair(emitter, scope, x))
-            .collect::<Result<_, _>>()?,
-    ));
+    let values = emitter
+        .alloc
+        .alloc_slice_fill_iter(update_duplicates_in_map(
+            x.2.iter()
+                .map(|x| set_afield_to_typed_value_pair(emitter, scope, x))
+                .collect::<Result<_, _>>()?,
+        ));
     Ok(TypedValue::dict(values))
 }
 
 fn dict_expr_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
     scope: &Scope<'_, 'arena>,
-    (_, _, fields): &(
+    x: &(
         ast::ClassName,
         Option<ast::CollectionTarg>,
         Vec<ast::Afield>,
     ),
 ) -> Result<TypedValue<'arena>, Error> {
-    let values = Vec::from_iter(update_duplicates_in_map(
-        fields
-            .iter()
-            .map(|x| afield_to_typed_value_pair(emitter, scope, x))
-            .collect::<Result<_, _>>()?,
-    ));
+    let values = emitter
+        .alloc
+        .alloc_slice_fill_iter(update_duplicates_in_map(
+            x.2.iter()
+                .map(|x| afield_to_typed_value_pair(emitter, scope, x))
+                .collect::<Result<_, _>>()?,
+        ));
     Ok(TypedValue::dict(values))
 }
 
 fn keyset_expr_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
     scope: &Scope<'_, 'arena>,
-    (_, _, fields): &(
+    x: &(
         ast::ClassName,
         Option<ast::CollectionTarg>,
         Vec<ast::Afield>,
     ),
 ) -> Result<TypedValue<'arena>, Error> {
-    let keys = fields
-        .iter()
-        .map(|x| keyset_value_afield_to_typed_value(emitter, scope, x))
-        .collect::<Result<Vec<_>, _>>()?
-        .into_iter()
-        .unique()
-        .collect::<Vec<_>>();
+    let keys = emitter.alloc.alloc_slice_fill_iter(
+        x.2.iter()
+            .map(|x| keyset_value_afield_to_typed_value(emitter, scope, x))
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
+            .unique()
+            .collect::<Vec<_>>(),
+    );
     Ok(TypedValue::keyset(keys))
 }
 

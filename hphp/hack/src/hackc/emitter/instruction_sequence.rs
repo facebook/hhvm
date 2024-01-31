@@ -161,6 +161,7 @@ impl<'i, 'a> Iterator for ListIterMut<'i, 'a> {
 }
 
 pub mod instr {
+    use ffi::Slice;
     use ffi::Str;
     use hhbc::AdataId;
     use hhbc::AsTypeStructExceptionKind;
@@ -364,9 +365,9 @@ pub mod instr {
         )))
     }
 
-    pub fn new_struct_dict<'a>(keys: &'a [&'a str]) -> InstrSeq<'a> {
-        let keys = Vec::from_iter(keys.iter().map(|s| Str::from(*s)));
-        instr(Instruct::Opcode(Opcode::NewStructDict(keys.into())))
+    pub fn new_struct_dict<'a>(alloc: &'a bumpalo::Bump, keys: &'a [&'a str]) -> InstrSeq<'a> {
+        let keys = Slice::new(alloc.alloc_slice_fill_iter(keys.iter().map(|s| Str::from(*s))));
+        instr(Instruct::Opcode(Opcode::NewStructDict(keys)))
     }
 
     pub fn set_m_pt<'a>(
@@ -385,27 +386,31 @@ pub mod instr {
         silence(local, SilenceOp::Start)
     }
 
-    pub fn s_switch<'a>(cases: Vec<(&'a str, Label)>) -> InstrSeq<'a> {
-        let targets = Vec::from_iter(cases.iter().map(|(_, target)| *target)).into();
-        let cases = Vec::from_iter(cases.into_iter().map(|(s, _)| Str::from(s))).into();
+    pub fn s_switch<'a>(
+        alloc: &'a bumpalo::Bump,
+        cases: bumpalo::collections::Vec<'a, (&'a str, Label)>,
+    ) -> InstrSeq<'a> {
+        let targets = alloc
+            .alloc_slice_fill_iter(cases.iter().map(|(_, target)| *target))
+            .into();
+        let cases = alloc
+            .alloc_slice_fill_iter(cases.into_iter().map(|(s, _)| Str::from(s)))
+            .into();
         instr(Instruct::Opcode(Opcode::SSwitch { cases, targets }))
     }
 
-    /// Make a String instruction when the litstr is already arena allocated
-    pub fn string_lit<'a>(litstr: Str<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcode::String(litstr)))
+    pub fn string<'a>(alloc: &'a bumpalo::Bump, litstr: impl Into<String>) -> InstrSeq<'a> {
+        instr(Instruct::Opcode(Opcode::String(Str::from(
+            bumpalo::collections::String::from_str_in(litstr.into().as_str(), alloc)
+                .into_bump_str(),
+        ))))
     }
 
-    /// Copy the given litstr to the arena, and make a String instruction
-    pub fn string<'a>(alloc: &'a bumpalo::Bump, litstr: impl AsRef<[u8]>) -> InstrSeq<'a> {
-        string_lit(Str::from(alloc.alloc_slice_copy(litstr.as_ref())))
-    }
-
-    pub fn switch<'a>(targets: Vec<Label>) -> InstrSeq<'a> {
+    pub fn switch<'a>(targets: bumpalo::collections::Vec<'a, Label>) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::Switch(
             SwitchKind::Unbounded,
             0,
-            targets.into(),
+            targets.into_bump_slice().into(),
         )))
     }
 

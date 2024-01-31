@@ -9,6 +9,7 @@ use env::emitter::Emitter;
 use env::Env;
 use error::Result;
 use ffi::Maybe;
+use ffi::Slice;
 use ffi::Str;
 use hhbc::Coeffects;
 use hhbc::Constant;
@@ -74,7 +75,7 @@ fn emit_constant_cinit<'a, 'arena, 'decl>(
         attrs.set(Attr::AttrBuiltin, e.systemlib());
 
         Ok(Function {
-            attributes: Default::default(),
+            attributes: Slice::empty(),
             name: original_name,
             body,
             span: Span::from_pos(&constant.span),

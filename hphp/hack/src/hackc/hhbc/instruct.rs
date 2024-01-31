@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ffi::Slice;
 use ffi::Str;
-use ffi::Vector;
 use serde::Serialize;
 
 use crate::opcodes::Opcode;
@@ -60,7 +60,7 @@ impl Label {
 }
 
 pub type NumParams = u32;
-pub type ByRefs = Vector<bool>;
+pub type ByRefs<'arena> = Slice<'arena, bool>;
 
 // This corresponds to kActRecCells in bytecode.h and must be kept in sync.
 pub const NUM_ACT_REC_CELLS: usize = 2;
@@ -72,8 +72,8 @@ pub struct FCallArgs<'arena> {
     pub async_eager_target: Label,
     pub num_args: NumParams,
     pub num_rets: NumParams,
-    pub inouts: ByRefs,
-    pub readonly: ByRefs,
+    pub inouts: ByRefs<'arena>,
+    pub readonly: ByRefs<'arena>,
     pub context: Str<'arena>,
 }
 
@@ -82,8 +82,8 @@ impl<'arena> FCallArgs<'arena> {
         mut flags: FCallArgsFlags,
         num_rets: NumParams,
         num_args: NumParams,
-        inouts: Vec<bool>,
-        readonly: Vec<bool>,
+        inouts: Slice<'arena, bool>,
+        readonly: Slice<'arena, bool>,
         async_eager_target: Option<Label>,
         context: Option<&'arena str>,
     ) -> Self {
@@ -113,8 +113,8 @@ impl<'arena> FCallArgs<'arena> {
             flags,
             num_args,
             num_rets,
-            inouts: inouts.into(),
-            readonly: readonly.into(),
+            inouts,
+            readonly,
             async_eager_target,
             context: Str::new(context.unwrap_or("").as_bytes()),
         }

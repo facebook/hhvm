@@ -7,8 +7,8 @@ use anyhow::bail;
 use anyhow::Result;
 use assemble_opcode_macro::assemble_imm_for_enum;
 use bumpalo::Bump;
+use ffi::Slice;
 use ffi::Str;
-use ffi::Vector;
 
 use crate::assemble;
 use crate::assemble::DeclMap;
@@ -250,8 +250,8 @@ impl<'arena> AssembleImm<'arena, hhbc::FCallArgs<'arena>> for Lexer<'_> {
         let fcargflags = assemble::assemble_fcallargsflags(self)?;
         let num_args = self.expect_and_get_number()?;
         let num_rets = self.expect_and_get_number()?;
-        let inouts = assemble::assemble_inouts_or_readonly(self)?;
-        let readonly = assemble::assemble_inouts_or_readonly(self)?;
+        let inouts = assemble::assemble_inouts_or_readonly(alloc, self)?;
+        let readonly = assemble::assemble_inouts_or_readonly(alloc, self)?;
         let async_eager_target = assemble::assemble_async_eager_target(self)?;
         let context = assemble::assemble_fcall_context(alloc, self)?;
         let fcargs = hhbc::FCallArgs::new(
@@ -467,35 +467,35 @@ impl<'arena> AssembleImm<'arena, hhbc::PropName<'arena>> for Lexer<'_> {
     }
 }
 
-impl<'arena> AssembleImm<'arena, Vector<hhbc::Label>> for Lexer<'_> {
+impl<'arena> AssembleImm<'arena, Slice<'arena, hhbc::Label>> for Lexer<'_> {
     fn assemble_imm(
         &mut self,
-        _: &'arena Bump,
+        alloc: &'arena Bump,
         _: &DeclMap<'arena>,
-    ) -> Result<Vector<hhbc::Label>> {
+    ) -> Result<Slice<'arena, hhbc::Label>> {
         let mut labels = Vec::new();
         self.expect(Token::is_lt)?;
         while !self.peek_is(Token::is_gt) {
             labels.push(assemble::assemble_label(self)?)
         }
         self.expect(Token::is_gt)?;
-        Ok(labels.into())
+        Ok(Slice::from_vec(alloc, labels))
     }
 }
 
-impl<'arena> AssembleImm<'arena, Vector<Str<'arena>>> for Lexer<'_> {
+impl<'arena> AssembleImm<'arena, Slice<'arena, Str<'arena>>> for Lexer<'_> {
     fn assemble_imm(
         &mut self,
         alloc: &'arena Bump,
         _: &DeclMap<'arena>,
-    ) -> Result<Vector<Str<'arena>>> {
+    ) -> Result<Slice<'arena, Str<'arena>>> {
         self.expect(Token::is_lt)?;
         let mut d = Vec::new();
         while !self.peek_is(Token::is_gt) {
             d.push(assemble::assemble_unescaped_unquoted_str(alloc, self)?);
         }
         self.expect(Token::is_gt)?;
-        Ok(d.into())
+        Ok(Slice::from_vec(alloc, d))
     }
 }
 

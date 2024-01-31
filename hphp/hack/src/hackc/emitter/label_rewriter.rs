@@ -65,6 +65,7 @@ fn create_label_ref_map<'arena>(
 }
 
 fn rewrite_params_and_body<'arena>(
+    alloc: &'arena bumpalo::Bump,
     label_to_offset: &HashMap<Label, u32>,
     used: &HashSet<Label>,
     offset_to_label: &HashMap<u32, Label>,
@@ -92,19 +93,27 @@ fn rewrite_params_and_body<'arena>(
                 false
             }
         } else {
-            rewrite_labels(instr, relabel);
+            rewrite_labels(alloc, instr, relabel);
             true
         }
     });
 }
 
 pub fn relabel_function<'arena>(
+    alloc: &'arena bumpalo::Bump,
     params: &mut [(Param<'arena>, Option<(Label, ast::Expr)>)],
     body: &mut InstrSeq<'arena>,
 ) {
     let label_to_offset = create_label_to_offset_map(body);
     let (used, offset_to_label) = create_label_ref_map(&label_to_offset, params, body);
-    rewrite_params_and_body(&label_to_offset, &used, &offset_to_label, params, body)
+    rewrite_params_and_body(
+        alloc,
+        &label_to_offset,
+        &used,
+        &offset_to_label,
+        params,
+        body,
+    )
 }
 
 pub fn rewrite_with_fresh_regular_labels<'arena, 'decl>(
@@ -121,7 +130,7 @@ pub fn rewrite_with_fresh_regular_labels<'arena, 'decl>(
     if !old_to_new.is_empty() {
         let relabel = |target: Label| old_to_new.get(&target).copied().unwrap_or(target);
         for instr in block.iter_mut() {
-            rewrite_labels(instr, relabel);
+            rewrite_labels(emitter.alloc, instr, relabel);
         }
     }
 }
@@ -130,7 +139,7 @@ pub fn rewrite_with_fresh_regular_labels<'arena, 'decl>(
 ///
 /// If this turns out to be needed elsewhere it should probably be moved into the
 /// Targets trait.
-fn rewrite_labels<'a, F>(instr: &mut Instruct<'a>, f: F)
+fn rewrite_labels<'a, F>(alloc: &'a bumpalo::Bump, instr: &mut Instruct<'a>, f: F)
 where
     F: Fn(Label) -> Label,
 {
@@ -168,14 +177,10 @@ where
             *label2 = f(*label2);
         }
         Instruct::Opcode(Opcode::Switch(_, _, labels)) => {
-            for label in labels.as_mut_slice() {
-                *label = f(*label);
-            }
+            *labels = ffi::Slice::fill_iter(alloc, labels.into_iter().copied().map(f));
         }
         Instruct::Opcode(Opcode::SSwitch { targets, .. }) => {
-            for label in targets.as_mut_slice() {
-                *label = f(*label);
-            }
+            *targets = ffi::Slice::fill_iter(alloc, targets.into_iter().copied().map(f));
         }
         Instruct::Pseudo(
             Pseudo::Break

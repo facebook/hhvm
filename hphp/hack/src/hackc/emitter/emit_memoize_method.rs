@@ -12,6 +12,7 @@ use env::emitter::Emitter;
 use env::Env;
 use error::Error;
 use error::Result;
+use ffi::Slice;
 use ffi::Str;
 use hhbc::Body;
 use hhbc::Coeffects;
@@ -139,7 +140,10 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
     scope.push_item(ScopeItem::Class(ast_scope::Class::new_ref(class)));
     scope.push_item(ScopeItem::Method(ast_scope::Method::new_ref(method)));
     let mut attributes = emit_attribute::from_asts(emitter, &method.user_attributes)?;
-    attributes.extend(emit_attribute::add_reified_attribute(&method.tparams));
+    attributes.extend(emit_attribute::add_reified_attribute(
+        alloc,
+        &method.tparams,
+    ));
     let is_async = method.fun_kind.is_fasync();
     // __Memoize is not allowed on lambdas, so we never need to inherit the rx
     // level from the declaring scope when we're in a Memoize wrapper
@@ -195,7 +199,7 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
     );
 
     Ok(Method {
-        attributes: attributes.into(),
+        attributes: Slice::fill_iter(alloc, attributes),
         visibility: Visibility::from(method.visibility),
         name,
         body,
@@ -322,8 +326,8 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
             fcall_flags,
             1,
             param_count as u32,
-            vec![],
-            vec![],
+            Slice::empty(),
+            Slice::empty(),
             async_eager_target,
             None,
         )
@@ -444,8 +448,8 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
         FCallArgsFlags::default(),
         1,
         0,
-        vec![],
-        vec![],
+        Slice::empty(),
+        Slice::empty(),
         if args.flags.contains(Flags::IS_ASYNC) {
             Some(eager_set)
         } else {

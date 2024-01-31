@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Maybe;
+use ffi::Slice;
 use ffi::Str;
 use ffi::Vector;
 use hhvm_types_ffi::ffi::Attr;
@@ -38,7 +39,7 @@ pub struct Requirement<'arena> {
 #[derive(Debug, Serialize)]
 #[repr(C)]
 pub struct Class<'arena> {
-    pub attributes: Vector<Attribute<'arena>>,
+    pub attributes: Slice<'arena, Attribute<'arena>>,
     pub base: Maybe<ClassName<'arena>>,
     pub implements: Vector<ClassName<'arena>>,
     pub enum_includes: Vector<ClassName<'arena>>,
@@ -52,7 +53,7 @@ pub struct Class<'arena> {
     pub type_constants: Vector<TypeConstant<'arena>>,
     pub ctx_constants: Vector<CtxConstant<'arena>>,
     pub requirements: Vector<Requirement<'arena>>,
-    pub upper_bounds: Vector<UpperBound<'arena>>,
+    pub upper_bounds: Slice<'arena, UpperBound<'arena>>,
     pub doc_comment: Maybe<Str<'arena>>,
     pub flags: Attr,
 }

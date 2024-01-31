@@ -294,6 +294,7 @@ pub(super) fn emit_finally_epilogue<'a, 'b, 'arena, 'decl>(
             _ => fail(),
         }
     }
+    let alloc = env.arena;
     Ok(if jump_instrs.0.is_empty() {
         instr::empty()
     } else if jump_instrs.0.len() == 1 {
@@ -354,7 +355,10 @@ pub(super) fn emit_finally_epilogue<'a, 'b, 'arena, 'decl>(
             instr::isset_l(e.local_gen_mut().get_label().clone()),
             instr::jmp_z(finally_end),
             instr::c_get_l(e.local_gen_mut().get_label().clone()),
-            instr::switch(labels.into_iter().rev().collect()),
+            instr::switch(bumpalo::collections::Vec::from_iter_in(
+                labels.into_iter().rev(),
+                alloc,
+            )),
             InstrSeq::gather(bodies.into_iter().rev().collect()),
         ])
     })

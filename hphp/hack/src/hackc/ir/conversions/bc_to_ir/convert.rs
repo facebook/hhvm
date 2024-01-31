@@ -152,14 +152,14 @@ pub(crate) fn convert_typed_value<'a>(
     tv: &hhbc::TypedValue<'a>,
     strings: &StringInterner,
 ) -> ir::TypedValue {
-    match tv {
+    match *tv {
         hhbc::TypedValue::Uninit => ir::TypedValue::Uninit,
-        hhbc::TypedValue::Int(v) => ir::TypedValue::Int(*v),
-        hhbc::TypedValue::Bool(v) => ir::TypedValue::Bool(*v),
-        hhbc::TypedValue::Float(v) => ir::TypedValue::Float(*v),
+        hhbc::TypedValue::Int(v) => ir::TypedValue::Int(v),
+        hhbc::TypedValue::Bool(v) => ir::TypedValue::Bool(v),
+        hhbc::TypedValue::Float(v) => ir::TypedValue::Float(v),
         hhbc::TypedValue::String(v) => ir::TypedValue::String(strings.intern_bytes(v.as_ref())),
         hhbc::TypedValue::LazyClass(v) => {
-            ir::TypedValue::LazyClass(ir::ClassId::from_hhbc(hhbc::ClassName::new(*v), strings))
+            ir::TypedValue::LazyClass(ir::ClassId::from_hhbc(hhbc::ClassName::new(v), strings))
         }
         hhbc::TypedValue::Null => ir::TypedValue::Null,
         hhbc::TypedValue::Vec(vs) => ir::TypedValue::Vec(

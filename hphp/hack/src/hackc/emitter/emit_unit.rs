@@ -51,6 +51,7 @@ use error::Error;
 use error::ErrorKind;
 use error::Result;
 use ffi::Maybe::*;
+use ffi::Slice;
 use ffi::Str;
 use hhbc::Fatal;
 use hhbc::FatalOp;
@@ -235,7 +236,7 @@ fn emit_unit_<'a, 'arena, 'decl>(
         typedefs: typedefs.into(),
         constants: constants.into(),
         adata: adata.into(),
-        file_attributes: file_attributes.into(),
+        file_attributes: Slice::fill_iter(emitter.alloc, file_attributes),
         module_use,
         symbol_refs,
         fatal,

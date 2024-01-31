@@ -5,6 +5,7 @@
 use env::emitter::Emitter;
 use error::Result;
 use ffi::Maybe;
+use ffi::Slice;
 use ffi::Str;
 use hhbc::ClassName;
 use hhbc::Module;
@@ -43,7 +44,7 @@ pub fn emit_module<'a, 'arena, 'decl>(
     let doc_comment = ast_module.doc_comment.clone();
 
     Ok(Module {
-        attributes: attributes.into(),
+        attributes: Slice::fill_iter(alloc, attributes),
         name,
         span,
         doc_comment: Maybe::from(doc_comment.map(|c| Str::new_str(alloc, &c.1))),

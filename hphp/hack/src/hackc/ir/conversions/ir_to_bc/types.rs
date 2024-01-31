@@ -121,7 +121,7 @@ pub(crate) fn convert_typedef<'a>(td: ir::Typedef, strings: &StringCache<'a>) ->
 
     hhbc::Typedef {
         name,
-        attributes: attributes.into(),
+        attributes,
         type_info_union: type_info_union.into(),
         type_structure,
         span,

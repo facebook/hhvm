@@ -5,8 +5,8 @@
 
 use ffi::Maybe;
 use ffi::Maybe::*;
+use ffi::Slice;
 use ffi::Str;
-use ffi::Vector;
 use serde::Serialize;
 
 use crate::Attribute;
@@ -21,7 +21,7 @@ pub struct Param<'arena> {
     pub is_variadic: bool,
     pub is_inout: bool,
     pub is_readonly: bool,
-    pub user_attributes: Vector<Attribute<'arena>>,
+    pub user_attributes: Slice<'arena, Attribute<'arena>>,
     pub type_info: Maybe<TypeInfo<'arena>>,
     pub default_value: Maybe<DefaultValue<'arena>>,
 }

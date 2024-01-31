@@ -6,6 +6,7 @@
 use env::LabelGen;
 use error::Error;
 use error::Result;
+use ffi::Slice;
 use hhbc::FCallArgs;
 use hhbc::FCallArgsFlags;
 use hhbc::Local;
@@ -67,7 +68,15 @@ pub fn get_implicit_context_memo_key<'arena>(
         instr::null_uninit(),
         instr::null_uninit(),
         instr::f_call_func_d(
-            FCallArgs::new(FCallArgsFlags::default(), 1, 0, vec![], vec![], None, None),
+            FCallArgs::new(
+                FCallArgsFlags::default(),
+                1,
+                0,
+                Slice::empty(),
+                Slice::empty(),
+                None,
+                None,
+            ),
             hhbc::FunctionName::from_raw_string(
                 alloc,
                 "HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key",
@@ -96,7 +105,15 @@ fn ic_set<'arena>(alloc: &'arena bumpalo::Bump, local: Local, soft: bool) -> Ins
             instr::null_uninit(),
             instr::null_uninit(),
             instr::f_call_func_d(
-                FCallArgs::new(FCallArgsFlags::default(), 1, 0, vec![], vec![], None, None),
+                FCallArgs::new(
+                    FCallArgsFlags::default(),
+                    1,
+                    0,
+                    Slice::empty(),
+                    Slice::empty(),
+                    None,
+                    None,
+                ),
                 hhbc::FunctionName::from_raw_string(
                     alloc,
                     "HH\\ImplicitContext\\_Private\\create_ic_inaccessible_context",

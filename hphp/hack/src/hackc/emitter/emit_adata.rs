@@ -22,7 +22,7 @@ pub fn typed_value_into_instr<'arena, 'decl>(
         TypedValue::Bool(true) => Ok(instr::true_()),
         TypedValue::Bool(false) => Ok(instr::false_()),
         TypedValue::Int(i) => Ok(instr::int(i)),
-        TypedValue::String(s) => Ok(instr::string_lit(s)),
+        TypedValue::String(s) => Ok(instr::string(e.alloc, s.unsafe_as_str())),
         TypedValue::LazyClass(s) => {
             let classid = ClassName::from_ast_name_and_mangle(e.alloc, s.unsafe_as_str());
             Ok(instr::lazy_class(classid))

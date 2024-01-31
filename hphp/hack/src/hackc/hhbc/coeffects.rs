@@ -3,8 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use bumpalo::Bump;
+use ffi::Slice;
 use ffi::Str;
-use ffi::Vector;
 use hhbc_string_utils::strip_ns;
 use naming_special_names_rust::coeffects as c;
 use naming_special_names_rust::coeffects::Ctx;
@@ -19,8 +20,8 @@ use serde::Serialize;
 #[repr(C)]
 pub struct CtxConstant<'arena> {
     pub name: Str<'arena>,
-    pub recognized: Vector<Str<'arena>>,
-    pub unrecognized: Vector<Str<'arena>>,
+    pub recognized: Slice<'arena, Str<'arena>>,
+    pub unrecognized: Slice<'arena, Str<'arena>>,
     pub is_abstract: bool,
 }
 
@@ -34,7 +35,7 @@ pub struct CcParam<'arena> {
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 #[repr(C)]
 pub struct CcThis<'arena> {
-    pub types: Vector<Str<'arena>>,
+    pub types: Slice<'arena, Str<'arena>>,
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
@@ -42,18 +43,18 @@ pub struct CcThis<'arena> {
 pub struct CcReified<'arena> {
     pub is_class: bool,
     pub index: u32,
-    pub types: Vector<Str<'arena>>,
+    pub types: Slice<'arena, Str<'arena>>,
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 #[repr(C)]
 pub struct Coeffects<'arena> {
-    pub static_coeffects: Vector<Ctx>,
-    pub unenforced_static_coeffects: Vector<Str<'arena>>,
-    pub fun_param: Vector<u32>,
-    pub cc_param: Vector<CcParam<'arena>>,
-    pub cc_this: Vector<CcThis<'arena>>,
-    pub cc_reified: Vector<CcReified<'arena>>,
+    pub static_coeffects: Slice<'arena, Ctx>,
+    pub unenforced_static_coeffects: Slice<'arena, Str<'arena>>,
+    pub fun_param: Slice<'arena, u32>,
+    pub cc_param: Slice<'arena, CcParam<'arena>>,
+    pub cc_this: Slice<'arena, CcThis<'arena>>,
+    pub cc_reified: Slice<'arena, CcReified<'arena>>,
     pub closure_parent_scope: bool,
     pub generator_this: bool,
     pub caller: bool,
@@ -61,32 +62,33 @@ pub struct Coeffects<'arena> {
 
 impl<'arena> Coeffects<'arena> {
     pub fn new(
-        static_coeffects: Vec<Ctx>,
-        unenforced_static_coeffects: Vec<Str<'arena>>,
-        fun_param: Vec<u32>,
-        cc_param: Vec<CcParam<'arena>>,
-        cc_this: Vec<CcThis<'arena>>,
-        cc_reified: Vec<CcReified<'arena>>,
+        static_coeffects: Slice<'arena, Ctx>,
+        unenforced_static_coeffects: Slice<'arena, Str<'arena>>,
+        fun_param: Slice<'arena, u32>,
+        cc_param: Slice<'arena, CcParam<'arena>>,
+        cc_this: Slice<'arena, CcThis<'arena>>,
+        cc_reified: Slice<'arena, CcReified<'arena>>,
         closure_parent_scope: bool,
         generator_this: bool,
         caller: bool,
     ) -> Self {
         Self {
-            static_coeffects: static_coeffects.into(),
-            unenforced_static_coeffects: unenforced_static_coeffects.into(),
-            fun_param: fun_param.into(),
-            cc_param: cc_param.into(),
-            cc_this: cc_this.into(),
-            cc_reified: cc_reified.into(),
+            static_coeffects,
+            unenforced_static_coeffects,
+            fun_param,
+            cc_param,
+            cc_this,
+            cc_reified,
             closure_parent_scope,
             generator_this,
             caller,
         }
     }
 
-    pub fn from_static_coeffects(scs: Vec<Ctx>) -> Coeffects<'arena> {
+    pub fn from_static_coeffects(alloc: &'arena Bump, scs: Vec<Ctx>) -> Coeffects<'arena> {
         Coeffects {
-            static_coeffects: scs.into(),
+            static_coeffects: Slice::from_vec(alloc, scs),
+
             ..Default::default()
         }
     }
@@ -208,28 +210,34 @@ impl<'arena> Coeffects<'arena> {
                         Hint_::Happly(Id(_, id), _) if !sids.is_empty() => {
                             if strip_ns(id.as_str()) == sn::typehints::THIS {
                                 cc_this.push(CcThis {
-                                    types: Vec::from_iter(
-                                        sids.iter().map(|Id(_, id)| alloc.alloc_str(id).into()),
-                                    )
-                                    .into(),
+                                    types: Slice::from_vec(
+                                        alloc,
+                                        sids.iter()
+                                            .map(|Id(_, id)| alloc.alloc_str(id).into())
+                                            .collect(),
+                                    ),
                                 });
                             } else if let Some(idx) = is_reified_tparam(id.as_str(), false) {
                                 cc_reified.push(CcReified {
                                     is_class: false,
                                     index: idx as u32,
-                                    types: Vec::from_iter(
-                                        sids.iter().map(|Id(_, id)| alloc.alloc_str(id).into()),
-                                    )
-                                    .into(),
+                                    types: Slice::from_vec(
+                                        alloc,
+                                        sids.iter()
+                                            .map(|Id(_, id)| alloc.alloc_str(id).into())
+                                            .collect(),
+                                    ),
                                 });
                             } else if let Some(idx) = is_reified_tparam(id.as_str(), true) {
                                 cc_reified.push(CcReified {
                                     is_class: true,
                                     index: idx as u32,
-                                    types: Vec::from_iter(
-                                        sids.iter().map(|Id(_, id)| alloc.alloc_str(id).into()),
-                                    )
-                                    .into(),
+                                    types: Slice::from_vec(
+                                        alloc,
+                                        sids.iter()
+                                            .map(|Id(_, id)| alloc.alloc_str(id).into())
+                                            .collect(),
+                                    ),
                                 });
                             }
                         }
@@ -258,48 +266,51 @@ impl<'arena> Coeffects<'arena> {
         }
 
         Self {
-            static_coeffects: static_coeffects.into(),
-            unenforced_static_coeffects: unenforced_static_coeffects.into(),
-            fun_param: fun_param.into(),
-            cc_param: cc_param.into(),
-            cc_this: cc_this.into(),
-            cc_reified: cc_reified.into(),
+            static_coeffects: Slice::from_vec(alloc, static_coeffects),
+            unenforced_static_coeffects: Slice::from_vec(alloc, unenforced_static_coeffects),
+            fun_param: Slice::from_vec(alloc, fun_param),
+            cc_param: Slice::from_vec(alloc, cc_param),
+            cc_this: Slice::from_vec(alloc, cc_this),
+            cc_reified: Slice::from_vec(alloc, cc_reified),
             ..Coeffects::default()
         }
     }
 
-    pub fn pure() -> Self {
+    pub fn pure(alloc: &'arena bumpalo::Bump) -> Self {
         Self {
-            static_coeffects: vec![Ctx::Pure].into(),
+            static_coeffects: Slice::from_vec(alloc, vec![Ctx::Pure]),
             ..Coeffects::default()
         }
     }
 
-    pub fn with_backdoor(&self) -> Self {
+    pub fn with_backdoor(&self, alloc: &'arena bumpalo::Bump) -> Self {
         Self {
-            unenforced_static_coeffects: vec![Str::from(c::BACKDOOR)].into(),
+            unenforced_static_coeffects: Slice::from_vec(alloc, vec![Str::from(c::BACKDOOR)]),
             ..self.clone()
         }
     }
 
-    pub fn with_backdoor_globals_leak_safe(&self) -> Self {
+    pub fn with_backdoor_globals_leak_safe(&self, alloc: &'arena bumpalo::Bump) -> Self {
         Self {
-            unenforced_static_coeffects: vec![Str::from(c::BACKDOOR_GLOBALS_LEAK_SAFE)].into(),
+            unenforced_static_coeffects: Slice::from_vec(
+                alloc,
+                vec![Str::from(c::BACKDOOR_GLOBALS_LEAK_SAFE)],
+            ),
             ..self.clone()
         }
     }
 
-    pub fn inherit_to_child_closure(&self) -> Self {
+    pub fn inherit_to_child_closure(&self, alloc: &'arena bumpalo::Bump) -> Self {
         let static_coeffects = Coeffects::local_to_shallow(self.get_static_coeffects());
         if self.has_coeffect_rules() {
             Self {
-                static_coeffects: static_coeffects.into(),
+                static_coeffects: Slice::from_vec(alloc, static_coeffects),
                 closure_parent_scope: true,
                 ..Coeffects::default()
             }
         } else {
             Self {
-                static_coeffects: static_coeffects.into(),
+                static_coeffects: Slice::from_vec(alloc, static_coeffects),
                 ..self.clone()
             }
         }
@@ -312,10 +323,10 @@ impl<'arena> Coeffects<'arena> {
         }
     }
 
-    pub fn with_caller(&self) -> Self {
+    pub fn with_caller(&self, alloc: &'arena bumpalo::Bump) -> Self {
         Self {
-            static_coeffects: vec![Ctx::Pure].into(),
-            unenforced_static_coeffects: vec![].into(),
+            static_coeffects: Slice::from_vec(alloc, vec![Ctx::Pure]),
+            unenforced_static_coeffects: Slice::empty(),
             caller: true,
             ..self.clone()
         }

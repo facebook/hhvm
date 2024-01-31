@@ -283,8 +283,8 @@ class TkoTrackerMap {
 
  private:
   mutable std::mutex mx_;
-  folly::StringKeyedUnorderedMap<std::weak_ptr<TkoTracker>> trackers_;
-  folly::StringKeyedUnorderedMap<std::weak_ptr<PoolTkoTracker>> poolTrackers_;
+  folly::F14NodeMap<std::string, std::weak_ptr<TkoTracker>> trackers_;
+  folly::F14NodeMap<std::string, std::weak_ptr<PoolTkoTracker>> poolTrackers_;
 
   // Total number of boxes marked as TKO.
   TkoCounters globalTkos_;

@@ -83,9 +83,9 @@ RouteHandleMap<RouteHandleIf>::RouteHandleMap(
       defaultRoute_.str());
 
   detail::RouteSelectorVector<RouteHandleIf> allRoutes;
-  folly::StringKeyedUnorderedMap<detail::RouteSelectorVector<RouteHandleIf>>
+  folly::F14NodeMap<std::string, detail::RouteSelectorVector<RouteHandleIf>>
       byRegion;
-  folly::StringKeyedUnorderedMap<detail::RouteSelectorVector<RouteHandleIf>>
+  folly::F14NodeMap<std::string, detail::RouteSelectorVector<RouteHandleIf>>
       byRoute;
   // add defaults first
   for (const auto& it : routeSelectors) {

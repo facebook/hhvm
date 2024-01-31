@@ -70,7 +70,7 @@ ProxyConfigBuilder::ProxyConfigBuilder(
   }
 }
 
-folly::StringKeyedUnorderedMap<folly::dynamic>
+folly::F14NodeMap<std::string, folly::dynamic>
 ProxyConfigBuilder::buildGlobalParams(
     const McrouterOptions& opts,
     const std::string& routerInfoName) {
@@ -78,7 +78,7 @@ ProxyConfigBuilder::buildGlobalParams(
   if (opts.enable_service_router && mcrouter::gSRInitHook) {
     sr_linked = 1;
   }
-  folly::StringKeyedUnorderedMap<folly::dynamic> globalParams{
+  folly::F14NodeMap<std::string, folly::dynamic> globalParams{
       {"default-route", opts.default_route.str()},
       {"default-region", opts.default_route.getRegion().str()},
       {"default-cluster", opts.default_route.getCluster().str()},

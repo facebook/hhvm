@@ -24,7 +24,7 @@ class MockConfigApi : public ConfigApiIf {
  public:
   MockConfigApi() = default;
 
-  explicit MockConfigApi(folly::StringKeyedUnorderedMap<std::string> pools)
+  explicit MockConfigApi(folly::F14NodeMap<std::string, std::string> pools)
       : pools_(std::move(pools)) {}
 
   bool partialReconfigurableSource(const std::string&, std::string&) override {
@@ -56,7 +56,7 @@ class MockConfigApi : public ConfigApiIf {
   }
 
  private:
-  folly::StringKeyedUnorderedMap<std::string> pools_;
+  folly::F14NodeMap<std::string, std::string> pools_;
   size_t getCalls_{0};
 };
 
@@ -90,7 +90,7 @@ TEST(PoolFactory, inherit_loop) {
 }
 
 TEST(PoolFactory, inherit_cache) {
-  MockConfigApi api(folly::StringKeyedUnorderedMap<std::string>{
+  MockConfigApi api(folly::F14NodeMap<std::string, std::string>{
       {"api_pool", "{ \"servers\": [ \"localhost:1234\" ] }"}});
   PoolFactory factory(
       folly::parseJson(R"({

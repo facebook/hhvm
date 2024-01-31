@@ -340,10 +340,10 @@ static int get_proc_stat(pid_t pid, proc_stat_data_t* data) {
 void append_pool_stats(
     CarbonRouterInstanceBase& router,
     std::vector<stat_t>& stats) {
-  folly::StringKeyedUnorderedMap<stat_t> mergedPoolStatsMap;
+  folly::F14NodeMap<std::string, stat_t> mergedPoolStatsMap;
 
   auto mergeMaps = [&mergedPoolStatsMap](
-                       folly::StringKeyedUnorderedMap<stat_t>&& poolStatMap) {
+                       folly::F14NodeMap<std::string, stat_t>&& poolStatMap) {
     for (auto& poolStatMapEntry : poolStatMap) {
       auto it = mergedPoolStatsMap.find(poolStatMapEntry.first);
       if (it != mergedPoolStatsMap.end()) {
@@ -720,7 +720,7 @@ McStatsReply stats_reply(ProxyBase* proxy, folly::StringPiece group_str) {
   }
 
   if (groups & server_stats) {
-    folly::StringKeyedUnorderedMap<ServerStat> serverStats;
+    folly::F14NodeMap<std::string, ServerStat> serverStats;
     auto& router = proxy->router();
     for (size_t i = 0; i < router.opts().num_proxies; ++i) {
       router.getProxyBase(i)->destinationMap()->foreachDestinationSynced(

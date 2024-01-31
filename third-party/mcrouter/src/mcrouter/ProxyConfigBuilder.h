@@ -48,7 +48,7 @@ class ProxyConfigBuilder {
     return json_;
   }
 
-  static folly::StringKeyedUnorderedMap<folly::dynamic> buildGlobalParams(
+  static folly::F14NodeMap<std::string, folly::dynamic> buildGlobalParams(
       const McrouterOptions& opts,
       const std::string& routerInfoName);
 

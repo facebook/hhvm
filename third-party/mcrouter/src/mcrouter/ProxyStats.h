@@ -160,8 +160,8 @@ class ProxyStats {
     return stats_[statId];
   }
 
-  folly::StringKeyedUnorderedMap<stat_t> getAggregatedPoolStatsMap() const {
-    folly::StringKeyedUnorderedMap<stat_t> poolStatsMap;
+  folly::F14NodeMap<std::string, stat_t> getAggregatedPoolStatsMap() const {
+    folly::F14NodeMap<std::string, stat_t> poolStatsMap;
     for (const auto& poolStats : poolStats_) {
       for (const auto& stat : poolStats.getStats()) {
         poolStatsMap.emplace(stat.name, stat);

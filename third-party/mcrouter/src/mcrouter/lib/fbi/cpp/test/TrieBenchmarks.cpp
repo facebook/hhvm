@@ -22,8 +22,8 @@ using facebook::memcache::Trie;
 namespace {
 
 template <class Value>
-class KeyPrefixMap : public folly::StringKeyedUnorderedMap<Value> {
-  using Base = folly::StringKeyedUnorderedMap<Value>;
+class KeyPrefixMap : public folly::F14NodeMap<std::string, Value> {
+  using Base = folly::F14NodeMap<std::string, Value>;
 
  public:
   using iterator = typename Base::iterator;

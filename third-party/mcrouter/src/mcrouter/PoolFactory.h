@@ -64,7 +64,7 @@ class PoolFactory {
 
  private:
   enum class PoolState { NEW, PARSING, PARSED };
-  folly::StringKeyedUnorderedMap<std::pair<folly::dynamic, PoolState>> pools_;
+  folly::F14NodeMap<std::string, std::pair<folly::dynamic, PoolState>> pools_;
   ConfigApiIf& configApi_;
   // Contains metadata of the parsed config
   folly::json::metadata_map configMetadataMap_;

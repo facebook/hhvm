@@ -67,7 +67,7 @@ dynamic moveGet(dynamic& obj, const dynamic& key, StringPiece objName) {
 
 template <class Value>
 const Value& tryGet(
-    const folly::StringKeyedUnorderedMap<Value>& map,
+    const folly::F14NodeMap<std::string, Value>& map,
     StringPiece key,
     StringPiece objName) {
   auto it = map.find(key);
@@ -278,7 +278,7 @@ class ConfigPreprocessor::Context {
  private:
   const ConfigPreprocessor& prep_;
   const Context* outer_{nullptr};
-  folly::StringKeyedUnorderedMap<std::pair<dynamic, VarState>> locals_;
+  folly::F14NodeMap<std::string, std::pair<dynamic, VarState>> locals_;
   bool baseContext_{false};
 
   dynamic& add(StringPiece key, dynamic&& value, VarState state) {
@@ -1650,7 +1650,7 @@ class ConfigPreprocessor::BuiltIns {
 
 ConfigPreprocessor::ConfigPreprocessor(
     ImportResolverIf& importResolver,
-    folly::StringKeyedUnorderedMap<dynamic> globals,
+    folly::F14NodeMap<std::string, dynamic> globals,
     folly::json::metadata_map& configMetadataMap,
     size_t nestedLimit)
     : configMetadataMap_(configMetadataMap), nestedLimit_(nestedLimit) {
@@ -2093,7 +2093,7 @@ void ConfigPreprocessor::parseMacroDefs(dynamic jmacros) {
 dynamic ConfigPreprocessor::getConfigWithoutMacros(
     StringPiece jsonC,
     ImportResolverIf& importResolver,
-    folly::StringKeyedUnorderedMap<dynamic> globalParams,
+    folly::F14NodeMap<std::string, dynamic> globalParams,
     folly::json::metadata_map* configMetadataMap,
     size_t nestedLimit) {
   auto config = parseJsonString(stripComments(jsonC), configMetadataMap);

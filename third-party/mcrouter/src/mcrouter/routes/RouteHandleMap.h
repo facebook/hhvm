@@ -62,9 +62,9 @@ class RouteHandleMap {
   std::shared_ptr<RoutePolicyMap<RouteHandleIf>> defaultRouteMap_;
 
   std::shared_ptr<RoutePolicyMap<RouteHandleIf>> allRoutes_;
-  folly::StringKeyedUnorderedMap<std::shared_ptr<RoutePolicyMap<RouteHandleIf>>>
+  folly::F14NodeMap<std::string, std::shared_ptr<RoutePolicyMap<RouteHandleIf>>>
       byRegion_;
-  folly::StringKeyedUnorderedMap<std::shared_ptr<RoutePolicyMap<RouteHandleIf>>>
+  folly::F14NodeMap<std::string, std::shared_ptr<RoutePolicyMap<RouteHandleIf>>>
       byRoute_;
 
   void foreachRoutePolicy(

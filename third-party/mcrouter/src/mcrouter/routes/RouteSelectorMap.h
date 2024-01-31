@@ -19,7 +19,8 @@ template <class RouteHandleIf>
 class PrefixSelectorRoute;
 
 template <class RouteHandleIf>
-using RouteSelectorMap = folly::StringKeyedUnorderedMap<
+using RouteSelectorMap = folly::F14NodeMap<
+    std::string,
     std::shared_ptr<PrefixSelectorRoute<RouteHandleIf>>>;
 } // namespace mcrouter
 } // namespace memcache

@@ -43,7 +43,7 @@ class ConfigPreprocessor {
   static folly::dynamic getConfigWithoutMacros(
       folly::StringPiece jsonC,
       ImportResolverIf& importResolver,
-      folly::StringKeyedUnorderedMap<folly::dynamic> globalParams,
+      folly::F14NodeMap<std::string, folly::dynamic> globalParams,
       folly::json::metadata_map* configMetadataMap,
       size_t nestedLimit = 250);
 
@@ -68,10 +68,11 @@ class ConfigPreprocessor {
    */
   class BuiltIns;
 
-  folly::StringKeyedUnorderedMap<std::unique_ptr<Macro>> macros_;
-  folly::StringKeyedUnorderedMap<std::unique_ptr<Const>> consts_;
-  folly::StringKeyedUnorderedMap<folly::dynamic> importCache_;
-  folly::StringKeyedUnorderedMap<
+  folly::F14NodeMap<std::string, std::unique_ptr<Macro>> macros_;
+  folly::F14NodeMap<std::string, std::unique_ptr<Const>> consts_;
+  folly::F14NodeMap<std::string, folly::dynamic> importCache_;
+  folly::F14NodeMap<
+      std::string,
       folly::Function<folly::dynamic(folly::dynamic&&, const Context&) const>>
       builtInCalls_;
 
@@ -90,7 +91,7 @@ class ConfigPreprocessor {
    */
   ConfigPreprocessor(
       ImportResolverIf& importResolver,
-      folly::StringKeyedUnorderedMap<folly::dynamic> globals,
+      folly::F14NodeMap<std::string, folly::dynamic> globals,
       folly::json::metadata_map& configMetadataMap,
       size_t nestedLimit);
 

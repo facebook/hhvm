@@ -103,9 +103,9 @@ class RouteHandleFactory {
   RouteHandleProviderIf<RouteHandleIf>& provider_;
 
   /// Registered named routes that are not parsed yet
-  folly::StringKeyedUnorderedMap<const folly::dynamic*> registered_;
+  folly::F14NodeMap<std::string, const folly::dynamic*> registered_;
   /// Named routes we've already parsed
-  folly::StringKeyedUnorderedMap<std::vector<RouteHandlePtr>> seen_;
+  folly::F14NodeMap<std::string, std::vector<RouteHandlePtr>> seen_;
   /// Thread where route handles created by this factory will be used
   size_t threadId_;
 

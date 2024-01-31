@@ -123,27 +123,30 @@ class McRouteHandleProvider
 
   const folly::dynamic& parsePool(const folly::dynamic& json) final;
 
-  folly::StringKeyedUnorderedMap<RouteHandlePtr> releaseAsyncLogRoutes() {
+  folly::F14NodeMap<std::string, RouteHandlePtr> releaseAsyncLogRoutes() {
     return std::move(asyncLogRoutes_);
   }
 
-  folly::StringKeyedUnorderedMap<RouteHandlePtr> releaseTierRoutes() {
+  folly::F14NodeMap<std::string, RouteHandlePtr> releaseTierRoutes() {
     return std::move(tierRoutes_);
   }
 
-  folly::StringKeyedUnorderedMap<std::vector<RouteHandlePtr>> releasePools() {
+  folly::F14NodeMap<std::string, std::vector<RouteHandlePtr>> releasePools() {
     return std::move(pools_);
   }
 
-  folly::StringKeyedUnorderedMap<std::pair<
-      bool,
-      std::vector<std::pair<
-          std::shared_ptr<CommonAccessPointAttributes>,
-          std::vector<std::string>>>>>
+  folly::F14NodeMap<
+      std::string,
+      std::pair<
+          bool,
+          std::vector<std::pair<
+              std::shared_ptr<CommonAccessPointAttributes>,
+              std::vector<std::string>>>>>
   releasePartialConfigs() {
     return std::move(partialConfigs_);
   }
-  folly::StringKeyedUnorderedMap<
+  folly::F14NodeMap<
+      std::string,
       folly::F14FastSet<std::shared_ptr<const AccessPoint>>>
   releaseAccessPoints() {
     return std::move(accessPoints_);
@@ -157,25 +160,28 @@ class McRouteHandleProvider
   std::unique_ptr<ExtraRouteHandleProviderIf<RouterInfo>> extraProvider_;
 
   // poolName -> AsynclogRoute
-  folly::StringKeyedUnorderedMap<RouteHandlePtr> asyncLogRoutes_;
+  folly::F14NodeMap<std::string, RouteHandlePtr> asyncLogRoutes_;
 
   // poolName -> tier level route
-  folly::StringKeyedUnorderedMap<RouteHandlePtr> tierRoutes_;
+  folly::F14NodeMap<std::string, RouteHandlePtr> tierRoutes_;
 
   // pool source name -> (allow_partial_reconfig, [(pool_config,[pool_names])])
-  folly::StringKeyedUnorderedMap<std::pair<
-      bool,
-      std::vector<std::pair<
-          std::shared_ptr<CommonAccessPointAttributes>,
-          std::vector<std::string>>>>>
+  folly::F14NodeMap<
+      std::string,
+      std::pair<
+          bool,
+          std::vector<std::pair<
+              std::shared_ptr<CommonAccessPointAttributes>,
+              std::vector<std::string>>>>>
       partialConfigs_;
 
   // poolName -> (destinations, weights)
-  folly::StringKeyedUnorderedMap<std::vector<RouteHandlePtr>> pools_;
-  folly::StringKeyedUnorderedMap<std::optional<folly::dynamic>> poolWeights_;
+  folly::F14NodeMap<std::string, std::vector<RouteHandlePtr>> pools_;
+  folly::F14NodeMap<std::string, std::optional<folly::dynamic>> poolWeights_;
 
   // poolName -> AccessPoints
-  folly::StringKeyedUnorderedMap<
+  folly::F14NodeMap<
+      std::string,
       folly::F14FastSet<std::shared_ptr<const AccessPoint>>>
       accessPoints_;
 

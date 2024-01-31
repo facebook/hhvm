@@ -59,18 +59,21 @@ class ProxyConfig {
   std::shared_ptr<typename RouterInfo::RouteHandleIf> getRouteHandleForPool(
       folly::StringPiece poolName) const;
 
-  const folly::StringKeyedUnorderedMap<
+  const folly::F14NodeMap<
+      std::string,
       std::vector<std::shared_ptr<typename RouterInfo::RouteHandleIf>>>&
   getPools() const {
     return pools_;
   }
 
   // pool source name -> (allow_partial_reconfig, [(pool_config,[pool_names])])
-  const folly::StringKeyedUnorderedMap<std::pair<
-      bool,
-      std::vector<std::pair<
-          std::shared_ptr<CommonAccessPointAttributes>,
-          std::vector<std::string>>>>>&
+  const folly::F14NodeMap<
+      std::string,
+      std::pair<
+          bool,
+          std::vector<std::pair<
+              std::shared_ptr<CommonAccessPointAttributes>,
+              std::vector<std::string>>>>>&
   getPartialConfigs() const {
     return partialConfigs_;
   }
@@ -101,7 +104,8 @@ class ProxyConfig {
     return false;
   }
 
-  folly::StringKeyedUnorderedMap<
+  folly::F14NodeMap<
+      std::string,
       folly::F14FastSet<std::shared_ptr<const AccessPoint>>>&
   getAccessPoints() {
     return accessPoints_;
@@ -113,28 +117,34 @@ class ProxyConfig {
   // This map (accessPoints_) needs to be destroyed as the last object in the
   // config (after all RouteHandles) because its keys are being referenced
   // by object in the Config.
-  folly::StringKeyedUnorderedMap<
+  folly::F14NodeMap<
+      std::string,
       folly::F14FastSet<std::shared_ptr<const AccessPoint>>>
       accessPoints_;
 
   // pool source name -> (allow_partial_reconfig, [(pool_config,[pool_names])])
-  folly::StringKeyedUnorderedMap<std::pair<
-      bool,
-      std::vector<std::pair<
-          std::shared_ptr<CommonAccessPointAttributes>,
-          std::vector<std::string>>>>>
+  folly::F14NodeMap<
+      std::string,
+      std::pair<
+          bool,
+          std::vector<std::pair<
+              std::shared_ptr<CommonAccessPointAttributes>,
+              std::vector<std::string>>>>>
       partialConfigs_;
 
-  folly::StringKeyedUnorderedMap<
+  folly::F14NodeMap<
+      std::string,
       std::vector<std::shared_ptr<typename RouterInfo::RouteHandleIf>>>
       pools_;
   std::shared_ptr<ProxyRoute<RouterInfo>> proxyRoute_;
   std::shared_ptr<ServiceInfo<RouterInfo>> serviceInfo_;
   std::string configMd5Digest_;
-  folly::StringKeyedUnorderedMap<
+  folly::F14NodeMap<
+      std::string,
       std::shared_ptr<typename RouterInfo::RouteHandleIf>>
       asyncLogRoutes_;
-  folly::StringKeyedUnorderedMap<
+  folly::F14NodeMap<
+      std::string,
       std::shared_ptr<typename RouterInfo::RouteHandleIf>>
       tierRoutes_;
 

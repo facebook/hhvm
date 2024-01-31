@@ -305,13 +305,13 @@ void t_ast_generator::generate_program() {
         ref = static_cast<const t_typedef&>(*ref).type();
       }
 
-      if (auto type = dynamic_cast<const t_list*>(ref.get_type())) {
-        recurse(type->elem_type(), recurse);
-      } else if (auto type = dynamic_cast<const t_set*>(ref.get_type())) {
-        recurse(type->elem_type(), recurse);
-      } else if (auto type = dynamic_cast<const t_map*>(ref.get_type())) {
-        recurse(type->key_type(), recurse);
-        recurse(type->val_type(), recurse);
+      if (auto list_type = dynamic_cast<const t_list*>(ref.get_type())) {
+        recurse(list_type->elem_type(), recurse);
+      } else if (auto set_type = dynamic_cast<const t_set*>(ref.get_type())) {
+        recurse(set_type->elem_type(), recurse);
+      } else if (auto map_type = dynamic_cast<const t_map*>(ref.get_type())) {
+        recurse(map_type->key_type(), recurse);
+        recurse(map_type->val_type(), recurse);
       } else if (ref->is_base_type()) {
       } else {
         try {
@@ -341,12 +341,12 @@ void t_ast_generator::generate_program() {
         try {
           cpp2::IdentifierRef ident;
           ident.range() = src_range(rng, program_);
-          if (auto owner = val->get_enum()) {
-            if (const auto& uri = owner->uri(); !uri.empty()) {
+          if (auto enum_owner = val->get_enum()) {
+            if (const auto& uri = enum_owner->uri(); !uri.empty()) {
               ident.uri()->uri_ref() = uri;
             } else {
               ident.uri()->scopedName_ref() =
-                  owner->program()->scope_name(*owner);
+                  enum_owner->program()->scope_name(*enum_owner);
             }
             ident.enumValue() = val->get_owner()->get_name();
             ast.identifierSourceRanges()->push_back(std::move(ident));
@@ -391,18 +391,19 @@ void t_ast_generator::generate_program() {
     if (node.has_return_type()) {
       span(node.return_type());
     }
-    if (auto type = node.stream()) {
-      span(type->elem_type());
-      for (const auto& exn : get_elems(type->exceptions())) {
+    if (auto stream_type = node.stream()) {
+      span(stream_type->elem_type());
+      for (const auto& exn : get_elems(stream_type->exceptions())) {
         span(exn.type());
       }
-    } else if (auto type = node.sink()) {
-      span(type->elem_type());
-      for (const auto& exn : get_elems(type->sink_exceptions())) {
+    } else if (auto sink_type = node.sink()) {
+      span(sink_type->elem_type());
+      for (const auto& exn : get_elems(sink_type->sink_exceptions())) {
         span(exn.type());
       }
-      span(type->final_response_type());
-      for (const auto& exn : get_elems(type->final_response_exceptions())) {
+      span(sink_type->final_response_type());
+      for (const auto& exn :
+           get_elems(sink_type->final_response_exceptions())) {
         span(exn.type());
       }
     }

@@ -162,8 +162,8 @@ bool McrouterLogger::start() {
   }
 
   if (!ensureDirExistsAndWritable(router_.opts().stats_root)) {
-    LOG(ERROR) << "Can't create or chmod " << router_.opts().stats_root
-               << ", disabling stats logging";
+    LOG(WARNING) << "Can't create or chmod " << router_.opts().stats_root
+                 << ", disabling stats logging";
     return false;
   }
 

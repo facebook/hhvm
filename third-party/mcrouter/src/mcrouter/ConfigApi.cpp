@@ -58,8 +58,8 @@ bool ensureConfigDirectoryExists(boost::filesystem::path directory) {
     if (!result.hasError()) {
       return true;
     }
-    LOG(ERROR) << "Failed to create directory '" << directory
-               << "': " << result.error().what();
+    LOG(WARNING) << "Failed to create directory '" << directory
+                 << "': " << result.error().what();
   } else {
     LOG_FIRST_N(WARNING, 10) << "Parent directory '" << directory.parent_path()
                              << "' does not exist.";

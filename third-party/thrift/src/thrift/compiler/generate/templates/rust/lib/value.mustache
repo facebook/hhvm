@@ -16,7 +16,7 @@
 
 }}{{#value:type}}{{!
 }}{{#value:newtype?}}{{!
-    }}{{type:package}}::types::{{type:rust_name}}({{!
+    }}{{type:package}}::{{type:rust_name}}({{!
         }}{{#value:type}}{{#type:typedef}}{{#typedef:has_adapter?}}{{!
         }}{{>lib/adapter/qualified}}::from_thrift({{!
         }}{{/typedef:has_adapter?}}{{/type:typedef}}{{/value:type}}{{!
@@ -108,10 +108,10 @@
             }}{{#field:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_default::<{{!
                 }}{{#value:type}}{{#type:struct}}{{!
                     }}{{#struct:has_adapter?}}{{!
-                        }}{{type:package}}::types::unadapted::{{struct:rust_name}}{{!
+                        }}{{type:package}}::unadapted::{{struct:rust_name}}{{!
                     }}{{/struct:has_adapter?}}{{!
                     }}{{^struct:has_adapter?}}{{!
-                        }}{{type:package}}::types::{{struct:rust_name}}{{!
+                        }}{{type:package}}::{{struct:rust_name}}{{!
                     }}{{/struct:has_adapter?}}{{!
                 }}{{/type:struct}}{{/value:type}}{{!
             }}>({{/field:has_adapter?}}{{!
@@ -155,7 +155,7 @@
     }}{{/value:unionVariant}}{{!
 }}{{/value:union?}}{{!
 }}{{#value:enum?}}{{!
-    }}{{#value:local_type}}{{type:package}}::types::{{type:rust_name}}{{/value:local_type}}{{!
+    }}{{#value:local_type}}{{type:package}}::{{type:rust_name}}{{/value:local_type}}{{!
     }}{{#value:enumVariant}}::{{value:enumVariant}}{{/value:enumVariant}}{{!
     }}{{^value:enumVariant}}({{value:integer_value}}){{/value:enumVariant}}{{!
 }}{{/value:enum?}}{{!

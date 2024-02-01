@@ -72,7 +72,7 @@ pub struct T4 {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Foo, crate::Bar)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Foo, crate::types::Bar)]
 pub struct TransitiveDerives {
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
@@ -82,7 +82,7 @@ pub struct TransitiveDerives {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Foo, crate::Bar)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Foo, crate::types::Bar)]
 pub struct StructWithTransitiveDerives {
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
@@ -415,8 +415,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for T1 {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<rust::types::Type>() {
-                    let mut tmp = Some(rust::types::Type {
+                if type_id == ::std::any::TypeId::of::<rust__types::Type>() {
+                    let mut tmp = Some(rust__types::Type {
                         name: "OrderedFloat<f64>".to_owned(),
                         ..::std::default::Default::default()
                     });
@@ -611,8 +611,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for T3 {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<rust::types::Type>() {
-                    let mut tmp = Some(rust::types::Type {
+                if type_id == ::std::any::TypeId::of::<rust__types::Type>() {
+                    let mut tmp = Some(rust__types::Type {
                         name: "sorted_vector_map::SortedVectorMap".to_owned(),
                         ..::std::default::Default::default()
                     });
@@ -714,8 +714,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for T4 {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<rust::types::Type>() {
-                    let mut tmp = Some(rust::types::Type {
+                if type_id == ::std::any::TypeId::of::<rust__types::Type>() {
+                    let mut tmp = Some(rust__types::Type {
                         name: "HashMap".to_owned(),
                         ..::std::default::Default::default()
                     });
@@ -797,8 +797,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for TransitiveDerives {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        if type_id == ::std::any::TypeId::of::<rust::types::Derive>() {
-            let mut tmp = Some(rust::types::Derive {
+        if type_id == ::std::any::TypeId::of::<rust__types::Derive>() {
+            let mut tmp = Some(rust__types::Derive {
                 derives: vec![
                     "Foo".to_owned(),
                     "crate::Bar".to_owned(),
@@ -810,8 +810,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for TransitiveDerives {
             return r.take();
         }
 
-        if type_id == ::std::any::TypeId::of::<scope::types::Transitive>() {
-            let mut tmp = Some(scope::types::Transitive {
+        if type_id == ::std::any::TypeId::of::<scope__types::Transitive>() {
+            let mut tmp = Some(scope__types::Transitive {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;

@@ -32,6 +32,8 @@ futures = { version = "0.3.28", features = ["async-await", "compat"] }
 indexmap = { version = "2.1.0", features = ["arbitrary", "rayon", "serde"] }
 ref-cast = "1.0.18"
 smallvec = { version = "1.6.1", features = ["serde", "specialization", "union"] }
+teststructs__clients = { package = "teststructs_clients", path = "clients" }
+teststructs__services = { package = "teststructs_services", path = "services" }
 teststructs__types = { package = "teststructs_types", path = "types" }
 thiserror = "1.0.49"
 tracing = "0.1.40"

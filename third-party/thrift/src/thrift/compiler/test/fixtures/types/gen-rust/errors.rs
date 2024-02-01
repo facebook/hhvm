@@ -9,7 +9,7 @@ pub mod some_service {
     pub type BounceMapError = ::fbthrift::NonthrowingFunctionError;
 
     impl ::std::convert::From<crate::services::some_service::BounceMapExn> for
-        ::std::result::Result<included::types::SomeMap, BounceMapError>
+        ::std::result::Result<included__types::SomeMap, BounceMapError>
     {
         fn from(e: crate::services::some_service::BounceMapExn) -> Self {
             match e {

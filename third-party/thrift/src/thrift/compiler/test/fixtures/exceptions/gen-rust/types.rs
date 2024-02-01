@@ -805,8 +805,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for ExceptionWithStructuredAnnotati
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift::types::ExceptionMessage>() {
-                    let mut tmp = Some(thrift::types::ExceptionMessage {
+                if type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>() {
+                    let mut tmp = Some(thrift__types::ExceptionMessage {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;

@@ -11,7 +11,7 @@ pub mod mock;
 pub(crate) use crate as client;
 pub(crate) use ::::{self as types, errors, services};
 
-pub(crate) mod dependencies {
+pub mod dependencies {
 }
 
 
@@ -1365,7 +1365,7 @@ impl ::fbthrift::ClientFactory for make_MyServicePrioParent {
 
 /// Client definitions for `MyServicePrioChild`.
 pub struct MyServicePrioChildImpl<P, T, S = ::fbthrift::NoopSpawner> {
-    parent: crate::client::MyServicePrioParentImpl<P, T, S>,
+    parent: crate::MyServicePrioParentImpl<P, T, S>,
 }
 
 impl<P, T, S> MyServicePrioChildImpl<P, T, S>
@@ -1380,7 +1380,7 @@ where
     pub fn new(
         transport: T,
     ) -> Self {
-        let parent = crate::client::MyServicePrioParentImpl::<P, T, S>::new(transport);
+        let parent = crate::MyServicePrioParentImpl::<P, T, S>::new(transport);
         Self { parent }
     }
 
@@ -1436,7 +1436,7 @@ where
     }
 }
 
-impl<P, T, S> ::std::convert::AsRef<dyn crate::client::MyServicePrioParent + 'static> for MyServicePrioChildImpl<P, T, S>
+impl<P, T, S> ::std::convert::AsRef<dyn crate::MyServicePrioParent + 'static> for MyServicePrioChildImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -1445,13 +1445,13 @@ where
     P::Deserializer: ::std::marker::Send,
     S: ::fbthrift::help::Spawner,
 {
-    fn as_ref(&self) -> &(dyn crate::client::MyServicePrioParent + 'static)
+    fn as_ref(&self) -> &(dyn crate::MyServicePrioParent + 'static)
     {
         &self.parent
     }
 }
 
-impl<P, T, S> ::std::convert::AsRef<dyn crate::client::MyServicePrioParentExt<T> + 'static> for MyServicePrioChildImpl<P, T, S>
+impl<P, T, S> ::std::convert::AsRef<dyn crate::MyServicePrioParentExt<T> + 'static> for MyServicePrioChildImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -1460,19 +1460,19 @@ where
     P::Deserializer: ::std::marker::Send,
     S: ::fbthrift::help::Spawner,
 {
-    fn as_ref(&self) -> &(dyn crate::client::MyServicePrioParentExt<T> + 'static)
+    fn as_ref(&self) -> &(dyn crate::MyServicePrioParentExt<T> + 'static)
     {
         &self.parent
     }
 }
 
-pub trait MyServicePrioChild: crate::client::MyServicePrioParent + ::std::marker::Send {
+pub trait MyServicePrioChild: crate::MyServicePrioParent + ::std::marker::Send {
     fn pang(
         &self,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service_prio_child::PangError>>;
 }
 
-pub trait MyServicePrioChildExt<T>: MyServicePrioChild + crate::client::MyServicePrioParentExt<T>
+pub trait MyServicePrioChildExt<T>: MyServicePrioChild + crate::MyServicePrioParentExt<T>
 where
     T: ::fbthrift::Transport,
 {
@@ -1543,7 +1543,7 @@ where
 impl<'a, S> MyServicePrioChild for S
 where
     S: ::std::convert::AsRef<dyn MyServicePrioChild + 'a>,
-    S: crate::client::MyServicePrioParent,
+    S: crate::MyServicePrioParent,
     S: ::std::marker::Send,
 {
     fn pang(
@@ -1558,8 +1558,8 @@ impl<S, T> MyServicePrioChildExt<T> for S
 where
     S: ::std::convert::AsRef<dyn MyServicePrioChild + 'static>,
     S: ::std::convert::AsRef<dyn MyServicePrioChildExt<T> + 'static>,
-    S: crate::client::MyServicePrioParent,
-    S: crate::client::MyServicePrioParentExt<T>,
+    S: crate::MyServicePrioParent,
+    S: crate::MyServicePrioParentExt<T>,
     S: ::std::marker::Send,
     T: ::fbthrift::Transport,
 {

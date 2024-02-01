@@ -24,11 +24,11 @@
 }}{{#adapter:layered?}}, {{/adapter:layered?}}{{!
 }}{{#adapter:transitive_type?}}{{!
     }}{{#type:typedef}}{{!
-        }}{{type:package}}::types::adapters::{{type:rust_name}}{{!
+        }}{{type:package}}::adapters::{{type:rust_name}}{{!
     }}{{/type:typedef}}{{!
     }}{{^type:typedef?}}{{!
         }}{{#type:struct?}}{{!
-            }}{{type:package}}::types::adapters::{{type:rust_name}}{{!
+            }}{{type:package}}::adapters::{{type:rust_name}}{{!
         }}{{/type:struct?}}{{!
         }}{{#type:list?}}{{!
             }}::fbthrift::adapter::ListMapAdapter<{{!

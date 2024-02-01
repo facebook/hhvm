@@ -14,8 +14,8 @@ pub(crate) use ::::{self as types, services};
 pub trait SomeService: ::std::marker::Send + ::std::marker::Sync + 'static {
     async fn bounce_map(
         &self,
-        _m: included::types::SomeMap,
-    ) -> ::std::result::Result<included::types::SomeMap, crate::services::some_service::BounceMapExn> {
+        _m: included__types::SomeMap,
+    ) -> ::std::result::Result<included__types::SomeMap, crate::services::some_service::BounceMapExn> {
         ::std::result::Result::Err(crate::services::some_service::BounceMapExn::ApplicationException(
             ::fbthrift::ApplicationException::unimplemented_method(
                 "SomeService",
@@ -43,8 +43,8 @@ where
 {
     async fn bounce_map(
         &self,
-        m: included::types::SomeMap,
-    ) -> ::std::result::Result<included::types::SomeMap, crate::services::some_service::BounceMapExn> {
+        m: included__types::SomeMap,
+    ) -> ::std::result::Result<included__types::SomeMap, crate::services::some_service::BounceMapExn> {
         (**self).bounce_map(
             m,
         ).await
@@ -66,8 +66,8 @@ where
 {
     async fn bounce_map(
         &self,
-        m: included::types::SomeMap,
-    ) -> ::std::result::Result<included::types::SomeMap, crate::services::some_service::BounceMapExn> {
+        m: included__types::SomeMap,
+    ) -> ::std::result::Result<included__types::SomeMap, crate::services::some_service::BounceMapExn> {
         (**self).bounce_map(
             m,
         ).await
@@ -92,7 +92,7 @@ pub struct SomeServiceProcessor<P, H, R, RS> {
 }
 
 struct Args_SomeService_bounce_map {
-    m: included::types::SomeMap,
+    m: included__types::SomeMap,
 }
 impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_SomeService_bounce_map {
     #[inline]

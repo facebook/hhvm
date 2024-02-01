@@ -21,7 +21,7 @@
 /// Client definitions for `{{service:name}}`.
 pub struct {{service:name}}Impl<P, T, S = ::fbthrift::NoopSpawner> {
     {{#service:extends}}
-    parent: {{service:package}}::client::{{service:name}}Impl<P, T, S>,
+    parent: {{service:client_package}}::{{service:name}}Impl<P, T, S>,
     {{/service:extends}}
     {{^service:extends}}
     transport: T,
@@ -43,7 +43,7 @@ where
         transport: T,
     ) -> Self {
         {{#service:extends}}
-        let parent = {{service:package}}::client::{{service:name}}Impl::<P, T, S>::new(transport);
+        let parent = {{service:client_package}}::{{service:name}}Impl::<P, T, S>::new(transport);
         Self { parent }
         {{/service:extends}}
         {{^service:extends}}
@@ -221,10 +221,10 @@ where
     {{/service:rustFunctions}}
 }
 
-{{#service:extendedServices}}
+{{#service:extendedServers}}
 impl<P, T, S> {{!
     }}{{#extendedService:service}}{{!
-    }}::std::convert::AsRef<dyn {{extendedService:packagePrefix}}::client::{{service:name}} + 'static> {{!
+    }}::std::convert::AsRef<dyn {{extendedService:packagePrefix}}::{{service:name}} + 'static> {{!
     }}{{/extendedService:service}}{{!
     }}for {{service:name}}Impl<P, T, S>
 where
@@ -237,7 +237,7 @@ where
     S: ::fbthrift::help::Spawner,
 {
     fn as_ref(&self) -> &(dyn {{#extendedService:service}}{{!
-        }}{{extendedService:packagePrefix}}::client::{{service:name}}{{!
+        }}{{extendedService:packagePrefix}}::{{service:name}}{{!
         }}{{/extendedService:service}}{{!
         }} + 'static)
     {
@@ -247,7 +247,7 @@ where
 
 impl<P, T, S> {{!
     }}{{#extendedService:service}}{{!
-    }}::std::convert::AsRef<dyn {{extendedService:packagePrefix}}::client::{{service:name}}Ext<T> + 'static> {{!
+    }}::std::convert::AsRef<dyn {{extendedService:packagePrefix}}::{{service:name}}Ext<T> + 'static> {{!
     }}{{/extendedService:service}}{{!
     }}for {{service:name}}Impl<P, T, S>
 where
@@ -260,7 +260,7 @@ where
     S: ::fbthrift::help::Spawner,
 {
     fn as_ref(&self) -> &(dyn {{#extendedService:service}}{{!
-        }}{{extendedService:packagePrefix}}::client::{{service:name}}Ext<T>{{!
+        }}{{extendedService:packagePrefix}}::{{service:name}}Ext<T>{{!
         }}{{/extendedService:service}}{{!
         }} + 'static)
     {
@@ -268,12 +268,12 @@ where
     }
 }
 
-{{/service:extendedServices}}
+{{/service:extendedServers}}
 {{#service:docs?}}
 #[doc = {{service:docs}}]
 {{/service:docs?}}
 pub trait {{service:name}}: {{!
-    }}{{#service:extends}}{{service:package}}::client::{{service:name}} + {{/service:extends}}{{!
+    }}{{#service:extends}}{{service:client_package}}::{{service:name}} + {{/service:extends}}{{!
     }}::std::marker::Send {{>lib/block}}{{!
 
     }}{{#service:rustFunctions}}
@@ -297,7 +297,7 @@ pub trait {{service:name}}: {{!
 }
 
 pub trait {{service:name}}Ext<T>: {{service:name}}{{!
-    }}{{#service:extends}} + {{service:package}}::client::{{service:name}}Ext<T>{{/service:extends}}
+    }}{{#service:extends}} + {{service:client_package}}::{{service:name}}Ext<T>{{/service:extends}}
 where
     T: ::fbthrift::Transport,
 {{>lib/block}}
@@ -435,11 +435,11 @@ where
 impl<'a, S> {{service:name}} for S
 where
     S: ::std::convert::AsRef<dyn {{service:name}} + 'a>,
-    {{#service:extendedServices}}
+    {{#service:extendedServers}}
     {{#extendedService:service}}
-    S: {{extendedService:packagePrefix}}::client::{{service:name}},
+    S: {{extendedService:packagePrefix}}::{{service:name}},
     {{/extendedService:service}}
-    {{/service:extendedServices}}
+    {{/service:extendedServers}}
     S: ::std::marker::Send,
 {
     {{#service:rustFunctions}}
@@ -471,12 +471,12 @@ impl<S, T> {{service:name}}Ext<T> for S
 where
     S: ::std::convert::AsRef<dyn {{service:name}} + 'static>,
     S: ::std::convert::AsRef<dyn {{service:name}}Ext<T> + 'static>,
-    {{#service:extendedServices}}
+    {{#service:extendedServers}}
     {{#extendedService:service}}
-    S: {{extendedService:packagePrefix}}::client::{{service:name}},
-    S: {{extendedService:packagePrefix}}::client::{{service:name}}Ext<T>,
+    S: {{extendedService:packagePrefix}}::{{service:name}},
+    S: {{extendedService:packagePrefix}}::{{service:name}}Ext<T>,
     {{/extendedService:service}}
-    {{/service:extendedServices}}
+    {{/service:extendedServers}}
     S: ::std::marker::Send,
     T: ::fbthrift::Transport,
 {

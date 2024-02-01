@@ -16,7 +16,7 @@
 
 }}{{#type:typedef?}}{{!
   }}{{#type:type_annotation?}}{{>lib/rawtype}}{{/type:type_annotation?}}{{!
-  }}{{^type:type_annotation?}}{{type:package}}::types::{{type:rust_name}}{{/type:type_annotation?}}{{!
+  }}{{^type:type_annotation?}}{{type:package}}::{{type:rust_name}}{{/type:type_annotation?}}{{!
 }}{{/type:typedef?}}{{!
 }}{{^type:typedef?}}{{!
 }}{{>lib/rawtype}}{{!

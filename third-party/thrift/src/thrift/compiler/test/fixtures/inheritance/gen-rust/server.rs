@@ -451,7 +451,7 @@ where
     ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
     ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
     SS: ::fbthrift::ThriftService<P::Frame>,
-    SS::Handler: crate::server::MyRoot
+    SS::Handler: crate::MyRoot
 {
     pub fn new(service: H, supa: SS) -> Self {
         Self {
@@ -546,7 +546,7 @@ where
     P::Deserializer: ::std::marker::Send,
     H: MyNode,
     SS: ::fbthrift::ThriftService<P::Frame>,
-    SS::Handler: crate::server::MyRoot,
+    SS::Handler: crate::MyRoot,
     P::Frame: ::std::marker::Send + 'static,
     R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
     <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
@@ -624,7 +624,7 @@ where
     P::Frame: ::std::marker::Send + 'static,
     H: MyNode,
     SS: ::fbthrift::ThriftService<P::Frame, RequestContext = R, ReplyState = RS>,
-    SS::Handler: crate::server::MyRoot,
+    SS::Handler: crate::MyRoot,
     P::Frame: ::std::marker::Send + 'static,
     R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
     <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
@@ -712,7 +712,7 @@ where
     H: MyNode,
     SMAKE: ::std::ops::FnOnce(::fbthrift::ProtocolID) -> ::std::result::Result<SS, ::fbthrift::ApplicationException>,
     SS: ::fbthrift::ThriftService<F, RequestContext = R, ReplyState = RS>,
-    SS::Handler: crate::server::MyRoot,
+    SS::Handler: crate::MyRoot,
     R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
     <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = F> + ::std::marker::Send + ::std::marker::Sync + 'static,
     RS: ::fbthrift::ReplyState<F, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
@@ -819,7 +819,7 @@ where
     ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
     ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
     SS: ::fbthrift::ThriftService<P::Frame>,
-    SS::Handler: crate::server::MyNode
+    SS::Handler: crate::MyNode
 {
     pub fn new(service: H, supa: SS) -> Self {
         Self {
@@ -914,7 +914,7 @@ where
     P::Deserializer: ::std::marker::Send,
     H: MyLeaf,
     SS: ::fbthrift::ThriftService<P::Frame>,
-    SS::Handler: crate::server::MyNode,
+    SS::Handler: crate::MyNode,
     P::Frame: ::std::marker::Send + 'static,
     R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
     <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
@@ -992,7 +992,7 @@ where
     P::Frame: ::std::marker::Send + 'static,
     H: MyLeaf,
     SS: ::fbthrift::ThriftService<P::Frame, RequestContext = R, ReplyState = RS>,
-    SS::Handler: crate::server::MyNode,
+    SS::Handler: crate::MyNode,
     P::Frame: ::std::marker::Send + 'static,
     R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
     <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
@@ -1084,7 +1084,7 @@ where
     H: MyLeaf,
     SMAKE: ::std::ops::FnOnce(::fbthrift::ProtocolID) -> ::std::result::Result<SS, ::fbthrift::ApplicationException>,
     SS: ::fbthrift::ThriftService<F, RequestContext = R, ReplyState = RS>,
-    SS::Handler: crate::server::MyNode,
+    SS::Handler: crate::MyNode,
     R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
     <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = F> + ::std::marker::Send + ::std::marker::Sync + 'static,
     RS: ::fbthrift::ReplyState<F, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,

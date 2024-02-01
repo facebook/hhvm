@@ -90,6 +90,7 @@ class mstch_rust_value;
 namespace {
 
 const std::string_view kRustCratePrefix = "crate::";
+const std::string_view kRustCrateTypesPrefix = "crate::types::";
 
 std::string quoted_rust_doc(const t_named* named_node) {
   const std::string& doc = named_node->doc();
@@ -144,7 +145,7 @@ bool rust_serde_enabled(
   }
 }
 
-std::string get_import_name(
+std::string get_lib_import_name(
     const t_program* program, const rust_codegen_options& options) {
   if (program == options.current_program) {
     return options.current_crate;
@@ -156,6 +157,72 @@ std::string get_import_name(
     return crate->second.import_name();
   }
   return program_name;
+}
+
+std::string get_types_import_name(
+    const t_program* program, const rust_codegen_options& options) {
+  if (program == options.current_program) {
+    return options.current_crate + "::types";
+  }
+
+  auto program_name = program->name();
+  auto crate = options.cratemap.find(program_name);
+  if (crate == options.cratemap.end()) {
+    return program_name + "__types";
+  } else if (crate->second.name == "crate") {
+    return crate->second.import_name() + "::types";
+  }
+
+  std::string absolute_crate_name = "::" + crate->second.name + "_types";
+  if (crate->second.multifile_module) {
+    return absolute_crate_name + "::" + mangle(*crate->second.multifile_module);
+  } else {
+    return absolute_crate_name;
+  }
+}
+
+std::string get_client_import_name(
+    const t_program* program, const rust_codegen_options& options) {
+  if (program == options.current_program) {
+    return options.current_crate;
+  }
+
+  auto program_name = program->name();
+  auto crate = options.cratemap.find(program_name);
+  if (crate == options.cratemap.end()) {
+    return program_name + "__clients";
+  } else if (crate->second.name == "crate") {
+    return crate->second.import_name();
+  }
+
+  std::string absolute_crate_name = "::" + crate->second.name + "_clients";
+  if (crate->second.multifile_module) {
+    return absolute_crate_name + "::" + mangle(*crate->second.multifile_module);
+  } else {
+    return absolute_crate_name;
+  }
+}
+
+std::string get_server_import_name(
+    const t_program* program, const rust_codegen_options& options) {
+  if (program == options.current_program) {
+    return options.current_crate;
+  }
+
+  auto program_name = program->name();
+  auto crate = options.cratemap.find(program_name);
+  if (crate == options.cratemap.end()) {
+    return program_name + "__services";
+  } else if (crate->second.name == "crate") {
+    return crate->second.import_name();
+  }
+
+  std::string absolute_crate_name = "::" + crate->second.name + "_services";
+  if (crate->second.multifile_module) {
+    return absolute_crate_name + "::" + mangle(*crate->second.multifile_module);
+  } else {
+    return absolute_crate_name;
+  }
 }
 
 std::string multifile_module_name(const t_program* program) {
@@ -402,7 +469,7 @@ mstch::node adapter_node(
     // If the annotation originates from the same module, this will just return
     // `crate::` anyways to be a no-op.
     std::string package =
-        get_import_name(adapter_annotation->program(), options);
+        get_types_import_name(adapter_annotation->program(), options);
 
     auto adapter_name =
         get_annotation_property_string(adapter_annotation, "name");
@@ -412,14 +479,19 @@ mstch::node adapter_node(
       adapter_name = adapter_name.substr(0, adapter_name.length() - 2);
     }
 
-    if (!(boost::algorithm::starts_with(adapter_name, "::") ||
-          boost::algorithm::starts_with(adapter_name, kRustCratePrefix))) {
-      adapter_name = "::" + adapter_name;
+    if (!package.empty() &&
+        boost::algorithm::starts_with(adapter_name, kRustCrateTypesPrefix)) {
+      adapter_name =
+          package + "::" + adapter_name.substr(kRustCrateTypesPrefix.length());
     } else if (
         !package.empty() &&
         boost::algorithm::starts_with(adapter_name, kRustCratePrefix)) {
       adapter_name =
           package + "::" + adapter_name.substr(kRustCratePrefix.length());
+    } else if (!(boost::algorithm::starts_with(adapter_name, "::") ||
+                 boost::algorithm::starts_with(
+                     adapter_name, kRustCratePrefix))) {
+      adapter_name = "::" + adapter_name;
     }
 
     name = adapter_name;
@@ -531,9 +603,7 @@ class rust_mstch_program : public mstch_program {
         {
             {"program:types?", &rust_mstch_program::rust_has_types},
             {"program:types", &rust_mstch_program::rust_types},
-            {"program:clients?", &rust_mstch_program::rust_has_clients},
             {"program:clients", &rust_mstch_program::rust_clients},
-            {"program:servers?", &rust_mstch_program::rust_has_servers},
             {"program:servers", &rust_mstch_program::rust_servers},
             {"program:structsOrEnums?",
              &rust_mstch_program::rust_structs_or_enums},
@@ -546,6 +616,8 @@ class rust_mstch_program : public mstch_program {
             {"program:multifile?", &rust_mstch_program::rust_multifile},
             {"program:crate", &rust_mstch_program::rust_crate},
             {"program:package", &rust_mstch_program::rust_package},
+            {"program:client_package",
+             &rust_mstch_program::rust_client_package},
             {"program:includes", &rust_mstch_program::rust_includes},
             {"program:anyServiceWithoutParent?",
              &rust_mstch_program::rust_any_service_without_parent},
@@ -601,8 +673,6 @@ class rust_mstch_program : public mstch_program {
     return types;
   }
 
-  mstch::node rust_has_clients() { return !options_.clients_crate.empty(); }
-
   mstch::node rust_clients() {
     auto clients = "::" + options_.clients_crate;
     if (options_.multifile_mode) {
@@ -610,8 +680,6 @@ class rust_mstch_program : public mstch_program {
     }
     return clients;
   }
-
-  mstch::node rust_has_servers() { return !options_.services_crate.empty(); }
 
   mstch::node rust_servers() {
     auto servers = "::" + options_.services_crate;
@@ -651,7 +719,10 @@ class rust_mstch_program : public mstch_program {
     }
     return std::string("crate");
   }
-  mstch::node rust_package() { return get_import_name(program_, options_); }
+  mstch::node rust_package() { return get_lib_import_name(program_, options_); }
+  mstch::node rust_client_package() {
+    return get_client_import_name(program_, options_);
+  }
   mstch::node rust_includes() {
     mstch::array includes;
     for (auto* program : program_->get_includes_for_codegen()) {
@@ -893,11 +964,14 @@ class rust_mstch_service : public mstch_service {
         this,
         {{"service:rustFunctions", &rust_mstch_service::rust_functions},
          {"service:rust_exceptions", &rust_mstch_service::rust_all_exceptions},
-         {"service:package", &rust_mstch_service::rust_package},
+         {"service:client_package", &rust_mstch_service::rust_client_package},
+         {"service:server_package", &rust_mstch_service::rust_server_package},
          {"service:snake", &rust_mstch_service::rust_snake},
          {"service:requestContext?", &rust_mstch_service::rust_request_context},
-         {"service:extendedServices",
-          &rust_mstch_service::rust_extended_services},
+         {"service:extendedClients",
+          &rust_mstch_service::rust_extended_clients},
+         {"service:extendedServers",
+          &rust_mstch_service::rust_extended_servers},
          {"service:docs?", &rust_mstch_service::rust_has_doc},
          {"service:docs", &rust_mstch_service::rust_doc},
          {"service:parent_service_name",
@@ -906,8 +980,11 @@ class rust_mstch_service : public mstch_service {
           &rust_mstch_service::rust_anyhow_to_application_exn}});
   }
   mstch::node rust_functions();
-  mstch::node rust_package() {
-    return get_import_name(service_->program(), options_);
+  mstch::node rust_client_package() {
+    return get_client_import_name(service_->program(), options_);
+  }
+  mstch::node rust_server_package() {
+    return get_server_import_name(service_->program(), options_);
   }
   mstch::node rust_snake() {
     return service_->get_annotation(
@@ -916,7 +993,14 @@ class rust_mstch_service : public mstch_service {
   mstch::node rust_request_context() {
     return service_->has_annotation("rust.request_context");
   }
-  mstch::node rust_extended_services() {
+  mstch::node rust_extended_clients() {
+    return rust_extended_services(get_client_import_name);
+  }
+  mstch::node rust_extended_servers() {
+    return rust_extended_services(get_server_import_name);
+  }
+  mstch::node rust_extended_services(std::string (*get_import_name)(
+      const t_program*, const rust_codegen_options&)) {
     mstch::array extended_services;
     const t_service* service = service_;
     std::string type_prefix = get_import_name(service_->program(), options_);
@@ -1223,7 +1307,7 @@ class rust_mstch_struct : public mstch_struct {
   }
   mstch::node rust_name() { return struct_rust_name(struct_); }
   mstch::node rust_package() {
-    return get_import_name(struct_->program(), options_);
+    return get_types_import_name(struct_->program(), options_);
   }
   mstch::node rust_is_ord() {
     if (struct_->has_annotation("rust.ord")) {
@@ -1262,7 +1346,8 @@ class rust_mstch_struct : public mstch_struct {
       // originated to support derives applied with `@scope.Transitive`.
       // If the annotation originates from the same module, this will just
       // return `crate::` anyways to be a no-op.
-      std::string package = get_import_name(annotation->program(), options_);
+      std::string package =
+          get_types_import_name(annotation->program(), options_);
 
       std::string ret;
       std::string delimiter = "";
@@ -1374,7 +1459,8 @@ class rust_mstch_enum : public mstch_enum {
       // originated to support derives applied with `@scope.Transitive`.
       // If the annotation originates from the same module, this will just
       // return `crate::` anyways to be a no-op.
-      std::string package = get_import_name(annotation->program(), options_);
+      std::string package =
+          get_types_import_name(annotation->program(), options_);
 
       std::string ret;
       std::string delimiter = "";
@@ -1407,7 +1493,7 @@ class rust_mstch_enum : public mstch_enum {
     return enum_->get_annotation("rust.name");
   }
   mstch::node rust_package() {
-    return get_import_name(enum_->program(), options_);
+    return get_types_import_name(enum_->program(), options_);
   }
   mstch::node variants_by_name() {
     std::vector<t_enum_value*> variants = enum_->get_enum_values();
@@ -1461,7 +1547,7 @@ class rust_mstch_type : public mstch_type {
     return snakecase(mangle_type(type_->get_name()));
   }
   mstch::node rust_package() {
-    return get_import_name(type_->program(), options_);
+    return get_types_import_name(type_->program(), options_);
   }
   mstch::node rust_type() {
     auto rust_type = get_type_annotation(type_);
@@ -1938,15 +2024,11 @@ class rust_mstch_const : public mstch_const {
     register_methods(
         this,
         {
-            {"constant:package", &rust_mstch_const::rust_package},
             {"constant:lazy?", &rust_mstch_const::rust_lazy},
             {"constant:rust", &rust_mstch_const::rust_typed_value},
             {"constant:docs?", &rust_mstch_const::rust_has_docs},
             {"constant:docs", &rust_mstch_const::rust_docs},
         });
-  }
-  mstch::node rust_package() {
-    return get_import_name(const_->program(), options_);
   }
   mstch::node rust_lazy() {
     if (type_has_transitive_adapter(const_->type(), true)) {

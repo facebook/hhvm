@@ -11,7 +11,7 @@ pub mod mock;
 pub(crate) use crate as client;
 pub(crate) use ::::{self as types, errors, services};
 
-pub(crate) mod dependencies {
+pub mod dependencies {
 }
 
 

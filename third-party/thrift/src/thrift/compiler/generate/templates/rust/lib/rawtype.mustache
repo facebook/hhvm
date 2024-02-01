@@ -38,14 +38,14 @@
 }}{{/type:binary?}}{{!
 }}{{#type:struct}}{{!
     }}{{#struct:has_adapter?}}{{!
-        }}{{struct:package}}::types::unadapted::{{struct:rust_name}}{{!
+        }}{{struct:package}}::unadapted::{{struct:rust_name}}{{!
     }}{{/struct:has_adapter?}}{{!
     }}{{^struct:has_adapter?}}{{!
-        }}{{struct:package}}::types::{{struct:rust_name}}{{!
+        }}{{struct:package}}::{{struct:rust_name}}{{!
     }}{{/struct:has_adapter?}}{{!
 }}{{/type:struct}}{{!
 }}{{#type:enum}}{{!
-    }}{{enum:package}}::types::{{enum:rust_name}}{{!
+    }}{{enum:package}}::{{enum:rust_name}}{{!
 }}{{/type:enum}}{{!
 }}{{#type:list?}}{{!
     }}::std::vec::Vec<{{#type:list_elem_type}}{{>lib/type}}{{/type:list_elem_type}}>{{!

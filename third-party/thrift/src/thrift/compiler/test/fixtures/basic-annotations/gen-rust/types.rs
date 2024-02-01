@@ -370,8 +370,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        if type_id == ::std::any::TypeId::of::<cpp::types::Adapter>() {
-            let mut tmp = Some(cpp::types::Adapter {
+        if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
+            let mut tmp = Some(cpp__types::Adapter {
                 name: "::StaticCast".to_owned(),
                 adaptedType: ::std::default::Default::default(),
                 underlyingName: ::std::default::Default::default(),
@@ -384,12 +384,12 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
             return r.take();
         }
 
-        if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+        if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
             return Some(r);
         }
 
-        if type_id == ::std::any::TypeId::of::<cpp::types::Name>() {
-            let mut tmp = Some(cpp::types::Name {
+        if type_id == ::std::any::TypeId::of::<cpp__types::Name>() {
+            let mut tmp = Some(cpp__types::Name {
                 value: "YourUnion".to_owned(),
                 ..::std::default::Default::default()
             });
@@ -398,7 +398,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
             return r.take();
         }
 
-        if let Some(r) = <cpp::types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+        if let Some(r) = <cpp__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
             return Some(r);
         }
 
@@ -483,8 +483,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyException {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        if type_id == ::std::any::TypeId::of::<cpp::types::Name>() {
-            let mut tmp = Some(cpp::types::Name {
+        if type_id == ::std::any::TypeId::of::<cpp__types::Name>() {
+            let mut tmp = Some(cpp__types::Name {
                 value: "YourException".to_owned(),
                 ..::std::default::Default::default()
             });
@@ -493,12 +493,12 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyException {
             return r.take();
         }
 
-        if let Some(r) = <cpp::types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+        if let Some(r) = <cpp__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
             return Some(r);
         }
 
-        if type_id == ::std::any::TypeId::of::<cpp::types::Adapter>() {
-            let mut tmp = Some(cpp::types::Adapter {
+        if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
+            let mut tmp = Some(cpp__types::Adapter {
                 name: "::StaticCast".to_owned(),
                 adaptedType: ::std::default::Default::default(),
                 underlyingName: ::std::default::Default::default(),
@@ -511,7 +511,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyException {
             return r.take();
         }
 
-        if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+        if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
             return Some(r);
         }
 
@@ -684,8 +684,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        if type_id == ::std::any::TypeId::of::<cpp::types::Name>() {
-            let mut tmp = Some(cpp::types::Name {
+        if type_id == ::std::any::TypeId::of::<cpp__types::Name>() {
+            let mut tmp = Some(cpp__types::Name {
                 value: "YourStruct".to_owned(),
                 ..::std::default::Default::default()
             });
@@ -694,12 +694,12 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             return r.take();
         }
 
-        if let Some(r) = <cpp::types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+        if let Some(r) = <cpp__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
             return Some(r);
         }
 
-        if type_id == ::std::any::TypeId::of::<hack::types::Attributes>() {
-            let mut tmp = Some(hack::types::Attributes {
+        if type_id == ::std::any::TypeId::of::<hack__types::Attributes>() {
+            let mut tmp = Some(hack__types::Attributes {
                 attributes: vec![
                     "\\SomeClass(\\AnotherClass::class)".to_owned(),
                 ],
@@ -710,8 +710,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             return r.take();
         }
 
-        if type_id == ::std::any::TypeId::of::<cpp::types::Adapter>() {
-            let mut tmp = Some(cpp::types::Adapter {
+        if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
+            let mut tmp = Some(cpp__types::Adapter {
                 name: "::StaticCast".to_owned(),
                 adaptedType: ::std::default::Default::default(),
                 underlyingName: ::std::default::Default::default(),
@@ -724,7 +724,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             return r.take();
         }
 
-        if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+        if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
             return Some(r);
         }
 
@@ -739,8 +739,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
         match field_id {
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Name>() {
-                    let mut tmp = Some(cpp::types::Name {
+                if type_id == ::std::any::TypeId::of::<cpp__types::Name>() {
+                    let mut tmp = Some(cpp__types::Name {
                         value: "majorVer".to_owned(),
                         ..::std::default::Default::default()
                     });
@@ -749,12 +749,12 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
                     return r.take();
                 }
 
-                if let Some(r) = <cpp::types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                if let Some(r) = <cpp__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
                     return Some(r);
                 }
 
-                if type_id == ::std::any::TypeId::of::<go::types::Name>() {
-                    let mut tmp = Some(go::types::Name {
+                if type_id == ::std::any::TypeId::of::<go__types::Name>() {
+                    let mut tmp = Some(go__types::Name {
                         name: "MajorVer".to_owned(),
                         ..::std::default::Default::default()
                     });
@@ -765,8 +765,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             },
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<go::types::Name>() {
-                    let mut tmp = Some(go::types::Name {
+                if type_id == ::std::any::TypeId::of::<go__types::Name>() {
+                    let mut tmp = Some(go__types::Name {
                         name: "AbstractName".to_owned(),
                         ..::std::default::Default::default()
                     });
@@ -775,8 +775,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<go::types::Tag>() {
-                    let mut tmp = Some(go::types::Tag {
+                if type_id == ::std::any::TypeId::of::<go__types::Tag>() {
+                    let mut tmp = Some(go__types::Tag {
                         tag: "tag:\"some_abstract\"".to_owned(),
                         ..::std::default::Default::default()
                     });
@@ -787,8 +787,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             },
             3 => {
 
-                if type_id == ::std::any::TypeId::of::<go::types::Tag>() {
-                    let mut tmp = Some(go::types::Tag {
+                if type_id == ::std::any::TypeId::of::<go__types::Tag>() {
+                    let mut tmp = Some(go__types::Tag {
                         tag: "tag:\"somevalue\"".to_owned(),
                         ..::std::default::Default::default()
                     });
@@ -913,8 +913,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for SecretStruct {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift::types::DeprecatedUnvalidatedAnnotations>() {
-                    let mut tmp = Some(thrift::types::DeprecatedUnvalidatedAnnotations {
+                if type_id == ::std::any::TypeId::of::<thrift__types::DeprecatedUnvalidatedAnnotations>() {
+                    let mut tmp = Some(thrift__types::DeprecatedUnvalidatedAnnotations {
                         items: {
                             let mut map = ::std::collections::BTreeMap::new();
                             map.insert("java.sensitive".to_owned(), "1".to_owned());
@@ -927,7 +927,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for SecretStruct {
                     return r.take();
                 }
 
-                if let Some(r) = <thrift::types::DeprecatedUnvalidatedAnnotations as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                if let Some(r) = <thrift__types::DeprecatedUnvalidatedAnnotations as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
                     return Some(r);
                 }
             },

@@ -2,6 +2,7 @@
 // This file is probably not the place you want to edit!
 
 #![doc(hidden)]
+#![allow(unused_crate_dependencies)]
 
 #[allow(unused_imports)]
 pub(crate) use :: as types;

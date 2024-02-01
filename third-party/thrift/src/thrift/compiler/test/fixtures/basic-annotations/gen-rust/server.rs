@@ -1733,7 +1733,7 @@ where
     ::fbthrift::ProtocolDecoded<P>: ::std::clone::Clone,
     ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,
     SS: ::fbthrift::ThriftService<P::Frame>,
-    SS::Handler: crate::server::MyServicePrioParent
+    SS::Handler: crate::MyServicePrioParent
 {
     pub fn new(service: H, supa: SS) -> Self {
         Self {
@@ -1828,7 +1828,7 @@ where
     P::Deserializer: ::std::marker::Send,
     H: MyServicePrioChild,
     SS: ::fbthrift::ThriftService<P::Frame>,
-    SS::Handler: crate::server::MyServicePrioParent,
+    SS::Handler: crate::MyServicePrioParent,
     P::Frame: ::std::marker::Send + 'static,
     R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
     <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
@@ -1906,7 +1906,7 @@ where
     P::Frame: ::std::marker::Send + 'static,
     H: MyServicePrioChild,
     SS: ::fbthrift::ThriftService<P::Frame, RequestContext = R, ReplyState = RS>,
-    SS::Handler: crate::server::MyServicePrioParent,
+    SS::Handler: crate::MyServicePrioParent,
     P::Frame: ::std::marker::Send + 'static,
     R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
     <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
@@ -1995,7 +1995,7 @@ where
     H: MyServicePrioChild,
     SMAKE: ::std::ops::FnOnce(::fbthrift::ProtocolID) -> ::std::result::Result<SS, ::fbthrift::ApplicationException>,
     SS: ::fbthrift::ThriftService<F, RequestContext = R, ReplyState = RS>,
-    SS::Handler: crate::server::MyServicePrioParent,
+    SS::Handler: crate::MyServicePrioParent,
     R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
     <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = F> + ::std::marker::Send + ::std::marker::Sync + 'static,
     RS: ::fbthrift::ReplyState<F, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,

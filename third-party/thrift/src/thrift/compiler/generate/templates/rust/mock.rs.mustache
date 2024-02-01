@@ -116,7 +116,7 @@
 {{#program:services}}
 pub struct {{service:name}}<'mock> {{>lib/block}}
     {{#service:extends}}
-    pub parent: {{service:package}}::mock::{{service:name}}<'mock>,
+    pub parent: {{service:client_package}}::mock::{{service:name}}<'mock>,
     {{/service:extends}}
     {{#service:rustFunctions}}
     {{^function:starts_interaction?}}
@@ -130,7 +130,7 @@ impl dyn super::client::{{service:name}} {
     pub fn mock<'mock>() -> {{service:name}}<'mock> {
         {{service:name}} {
             {{#service:extends}}
-            parent: <dyn {{service:package}}::client::{{service:name}}>::mock(),
+            parent: <dyn {{service:client_package}}::{{service:name}}>::mock(),
             {{/service:extends}}
             {{#service:rustFunctions}}
             {{^function:starts_interaction?}}
@@ -185,29 +185,29 @@ impl<'mock> super::client::{{service:name}} for {{service:name}}<'mock> {{>lib/b
     fn {{function:rust_name}}(
         &self,
     ) -> ::std::result::Result<{{!
-    }}{{service:package}}::client::{{function:interaction_name}}Client, {{!
+    }}{{service:client_package}}::{{function:interaction_name}}Client, {{!
     }}::anyhow::Error> {
         unimplemented!("Mocking interactions is not yet implemented");
     }{{!
     }}{{/function:starts_interaction?}}{{/service:rustFunctions}}
 }
 
-{{#service:extendedServices}}
+{{#service:extendedClients}}
 #[::async_trait::async_trait]
 impl<'mock> {{!
     }}{{#extendedService:service}}{{!
-    }}::std::convert::AsRef<dyn {{extendedService:packagePrefix}}::client::{{service:name}} + 'mock> {{!
+    }}::std::convert::AsRef<dyn {{extendedService:packagePrefix}}::{{service:name}} + 'mock> {{!
     }}{{/extendedService:service}}{{!
     }}for {{service:name}}<'mock>
 {
     {{#extendedService:service}}
-    fn as_ref(&self) -> &(dyn {{extendedService:packagePrefix}}::client::{{service:name}} + 'mock) {
+    fn as_ref(&self) -> &(dyn {{extendedService:packagePrefix}}::{{service:name}} + 'mock) {
         &self.parent
     }
     {{/extendedService:service}}
 }
 
-{{/service:extendedServices}}{{!
+{{/service:extendedClients}}{{!
 }}{{/program:services}}
 pub mod r#impl {{>lib/block}}{{!
 }}{{#program:services}}

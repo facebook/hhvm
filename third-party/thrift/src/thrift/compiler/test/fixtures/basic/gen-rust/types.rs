@@ -478,8 +478,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             },
             8 => {
 
-                if type_id == ::std::any::TypeId::of::<hack::types::SkipCodegen>() {
-                    let mut tmp = Some(hack::types::SkipCodegen {
+                if type_id == ::std::any::TypeId::of::<hack__types::SkipCodegen>() {
+                    let mut tmp = Some(hack__types::SkipCodegen {
                         reason: "Invalid key type".to_owned(),
                         ..::std::default::Default::default()
                     });
@@ -490,8 +490,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             },
             9 => {
 
-                if type_id == ::std::any::TypeId::of::<hack::types::SkipCodegen>() {
-                    let mut tmp = Some(hack::types::SkipCodegen {
+                if type_id == ::std::any::TypeId::of::<hack__types::SkipCodegen>() {
+                    let mut tmp = Some(hack__types::SkipCodegen {
                         reason: "skip field codegen for deprecation".to_owned(),
                         ..::std::default::Default::default()
                     });
@@ -730,8 +730,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
             },
             4 => {
 
-                if type_id == ::std::any::TypeId::of::<hack::types::SkipCodegen>() {
-                    let mut tmp = Some(hack::types::SkipCodegen {
+                if type_id == ::std::any::TypeId::of::<hack__types::SkipCodegen>() {
+                    let mut tmp = Some(hack__types::SkipCodegen {
                         reason: "Invalid key type".to_owned(),
                         ..::std::default::Default::default()
                     });
@@ -827,8 +827,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for ReservedKeyword {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        if type_id == ::std::any::TypeId::of::<hack::types::Name>() {
-            let mut tmp = Some(hack::types::Name {
+        if type_id == ::std::any::TypeId::of::<hack__types::Name>() {
+            let mut tmp = Some(hack__types::Name {
                 name: "MyRenamedStruct".to_owned(),
                 reason: ::std::default::Default::default(),
                 ..::std::default::Default::default()
@@ -838,7 +838,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for ReservedKeyword {
             return r.take();
         }
 
-        if let Some(r) = <hack::types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+        if let Some(r) = <hack__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
             return Some(r);
         }
 
@@ -853,8 +853,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for ReservedKeyword {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<hack::types::Name>() {
-                    let mut tmp = Some(hack::types::Name {
+                if type_id == ::std::any::TypeId::of::<hack__types::Name>() {
+                    let mut tmp = Some(hack__types::Name {
                         name: "renamed_field".to_owned(),
                         reason: ::std::default::Default::default(),
                         ..::std::default::Default::default()
@@ -864,7 +864,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for ReservedKeyword {
                     return r.take();
                 }
 
-                if let Some(r) = <hack::types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                if let Some(r) = <hack__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
                     return Some(r);
                 }
             },
@@ -960,8 +960,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for UnionToBeRenamed {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        if type_id == ::std::any::TypeId::of::<hack::types::Name>() {
-            let mut tmp = Some(hack::types::Name {
+        if type_id == ::std::any::TypeId::of::<hack__types::Name>() {
+            let mut tmp = Some(hack__types::Name {
                 name: "MyRenamedUnion".to_owned(),
                 reason: ::std::default::Default::default(),
                 ..::std::default::Default::default()
@@ -971,7 +971,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for UnionToBeRenamed {
             return r.take();
         }
 
-        if let Some(r) = <hack::types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+        if let Some(r) = <hack__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
             return Some(r);
         }
 
@@ -986,8 +986,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for UnionToBeRenamed {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<hack::types::Name>() {
-                    let mut tmp = Some(hack::types::Name {
+                if type_id == ::std::any::TypeId::of::<hack__types::Name>() {
+                    let mut tmp = Some(hack__types::Name {
                         name: "renamed_field".to_owned(),
                         reason: ::std::default::Default::default(),
                         ..::std::default::Default::default()
@@ -997,7 +997,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for UnionToBeRenamed {
                     return r.take();
                 }
 
-                if let Some(r) = <hack::types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                if let Some(r) = <hack__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
                     return Some(r);
                 }
             },

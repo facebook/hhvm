@@ -225,8 +225,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldsInjectedToEmptyStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        if type_id == ::std::any::TypeId::of::<internal::types::InjectMetadataFields>() {
-            let mut tmp = Some(internal::types::InjectMetadataFields {
+        if type_id == ::std::any::TypeId::of::<internal__types::InjectMetadataFields>() {
+            let mut tmp = Some(internal__types::InjectMetadataFields {
                 r#type: "Fields".to_owned(),
                 ..::std::default::Default::default()
             });
@@ -337,8 +337,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldsInjectedToStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        if type_id == ::std::any::TypeId::of::<internal::types::InjectMetadataFields>() {
-            let mut tmp = Some(internal::types::InjectMetadataFields {
+        if type_id == ::std::any::TypeId::of::<internal__types::InjectMetadataFields>() {
+            let mut tmp = Some(internal__types::InjectMetadataFields {
                 r#type: "Fields".to_owned(),
                 ..::std::default::Default::default()
             });
@@ -473,8 +473,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldsInjectedWithIncludedStruc
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        if type_id == ::std::any::TypeId::of::<internal::types::InjectMetadataFields>() {
-            let mut tmp = Some(internal::types::InjectMetadataFields {
+        if type_id == ::std::any::TypeId::of::<internal__types::InjectMetadataFields>() {
+            let mut tmp = Some(internal__types::InjectMetadataFields {
                 r#type: "foo.Fields".to_owned(),
                 ..::std::default::Default::default()
             });
@@ -498,8 +498,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldsInjectedWithIncludedStruc
             },
             -1101 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift::types::Box>() {
-                    let mut tmp = Some(thrift::types::Box {
+                if type_id == ::std::any::TypeId::of::<thrift__types::Box>() {
+                    let mut tmp = Some(thrift__types::Box {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -509,8 +509,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldsInjectedWithIncludedStruc
             },
             -1102 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift::types::Box>() {
-                    let mut tmp = Some(thrift::types::Box {
+                if type_id == ::std::any::TypeId::of::<thrift__types::Box>() {
+                    let mut tmp = Some(thrift__types::Box {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;

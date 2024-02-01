@@ -12,4 +12,8 @@ pub mod dependencies;
 #[doc(inline)]
 pub use ::::services as services;
 #[doc(inline)]
+pub use ::::{self as client, mock};
+#[doc(inline)]
+pub use :: as server;
+#[doc(inline)]
 pub use ::::errors as errors;

@@ -223,7 +223,7 @@ pub struct MyServicePrioChild<'mock> {
 impl dyn super::client::MyServicePrioChild {
     pub fn mock<'mock>() -> MyServicePrioChild<'mock> {
         MyServicePrioChild {
-            parent: <dyn crate::client::MyServicePrioParent>::mock(),
+            parent: <dyn crate::MyServicePrioParent>::mock(),
             pang: r#impl::my_service_prio_child::pang::unimplemented(),
             _marker: ::std::marker::PhantomData,
         }
@@ -241,9 +241,9 @@ impl<'mock> super::client::MyServicePrioChild for MyServicePrioChild<'mock> {
 }
 
 #[::async_trait::async_trait]
-impl<'mock> ::std::convert::AsRef<dyn crate::client::MyServicePrioParent + 'mock> for MyServicePrioChild<'mock>
+impl<'mock> ::std::convert::AsRef<dyn crate::MyServicePrioParent + 'mock> for MyServicePrioChild<'mock>
 {
-    fn as_ref(&self) -> &(dyn crate::client::MyServicePrioParent + 'mock) {
+    fn as_ref(&self) -> &(dyn crate::MyServicePrioParent + 'mock) {
         &self.parent
     }
 }
@@ -266,7 +266,7 @@ impl<'mock> super::client::BadService for BadService<'mock> {
 
     fn createBadInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::BadInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::BadInteractionClient, ::anyhow::Error> {
         unimplemented!("Mocking interactions is not yet implemented");
     }
     fn bar(

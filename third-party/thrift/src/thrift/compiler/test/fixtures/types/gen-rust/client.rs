@@ -11,8 +11,8 @@ pub mod mock;
 pub(crate) use crate as client;
 pub(crate) use ::::{self as types, errors, services};
 
-pub(crate) mod dependencies {
-    pub(crate) use included as included;
+pub mod dependencies {
+    pub use included__clients as included;
 }
 
 
@@ -47,9 +47,9 @@ where
 
     fn _bounce_map_impl(
         &self,
-        arg_m: &included::types::SomeMap,
+        arg_m: &included__types::SomeMap,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included::types::SomeMap, crate::errors::some_service::BounceMapError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included__types::SomeMap, crate::errors::some_service::BounceMapError>> {
         use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
@@ -145,8 +145,8 @@ where
 pub trait SomeService: ::std::marker::Send {
     fn bounce_map(
         &self,
-        arg_m: &included::types::SomeMap,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included::types::SomeMap, crate::errors::some_service::BounceMapError>>;
+        arg_m: &included__types::SomeMap,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included__types::SomeMap, crate::errors::some_service::BounceMapError>>;
 
     fn binary_keyed_map(
         &self,
@@ -160,9 +160,9 @@ where
 {
     fn bounce_map_with_rpc_opts(
         &self,
-        arg_m: &included::types::SomeMap,
+        arg_m: &included__types::SomeMap,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included::types::SomeMap, crate::errors::some_service::BounceMapError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included__types::SomeMap, crate::errors::some_service::BounceMapError>>;
     fn binary_keyed_map_with_rpc_opts(
         &self,
         arg_r: &[::std::primitive::i64],
@@ -173,7 +173,7 @@ where
 }
 
 struct Args_SomeService_bounce_map<'a> {
-    m: &'a included::types::SomeMap,
+    m: &'a included__types::SomeMap,
     _phantom: ::std::marker::PhantomData<&'a ()>,
 }
 
@@ -219,8 +219,8 @@ where
 {
     fn bounce_map(
         &self,
-        arg_m: &included::types::SomeMap,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included::types::SomeMap, crate::errors::some_service::BounceMapError>> {
+        arg_m: &included__types::SomeMap,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included__types::SomeMap, crate::errors::some_service::BounceMapError>> {
         let rpc_options = T::RpcOptions::default();
         self._bounce_map_impl(
             arg_m,
@@ -250,9 +250,9 @@ where
 {
     fn bounce_map_with_rpc_opts(
         &self,
-        arg_m: &included::types::SomeMap,
+        arg_m: &included__types::SomeMap,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included::types::SomeMap, crate::errors::some_service::BounceMapError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included__types::SomeMap, crate::errors::some_service::BounceMapError>> {
         self._bounce_map_impl(
             arg_m,
             rpc_options,
@@ -281,8 +281,8 @@ where
 {
     fn bounce_map(
         &self,
-        arg_m: &included::types::SomeMap,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included::types::SomeMap, crate::errors::some_service::BounceMapError>> {
+        arg_m: &included__types::SomeMap,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included__types::SomeMap, crate::errors::some_service::BounceMapError>> {
         self.as_ref().bounce_map(
             arg_m,
         )
@@ -306,9 +306,9 @@ where
 {
     fn bounce_map_with_rpc_opts(
         &self,
-        arg_m: &included::types::SomeMap,
+        arg_m: &included__types::SomeMap,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included::types::SomeMap, crate::errors::some_service::BounceMapError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included__types::SomeMap, crate::errors::some_service::BounceMapError>> {
         <Self as ::std::convert::AsRef<dyn SomeServiceExt<T>>>::as_ref(self).bounce_map_with_rpc_opts(
             arg_m,
             rpc_options,

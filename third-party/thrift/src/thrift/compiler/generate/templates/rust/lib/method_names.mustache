@@ -15,9 +15,9 @@
   limitations under the License.
 
 }}
-{{#service:extends?}}{{#service:extendedServices}}{{#extendedService:service}}
+{{#service:extends?}}{{#service:extendedServers}}{{#extendedService:service}}
 {{>lib/method_names}}
-{{/extendedService:service}}{{/service:extendedServices}}{{/service:extends?}}
+{{/extendedService:service}}{{/service:extendedServers}}{{/service:extends?}}
 {{^service:interaction?}}
                 // from {{service:name}}
 {{#service:rustFunctions}}{{^function:starts_interaction?}}

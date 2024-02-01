@@ -32,7 +32,7 @@ pub type {{typedef:rust_name}} = {{!
 }}{{^typedef:has_adapter?}}{{!
   }}{{#typedef:type}}{{!
     }}{{#type:enum}}
-pub use {{type:package}}::types::{{type:rust_name}} as {{typedef:rust_name}};
+pub use {{type:package}}::{{type:rust_name}} as {{typedef:rust_name}};
 {{/type:enum}}{{!
     }}{{^type:enum}}
 pub type {{typedef:rust_name}} = {{>lib/type}};

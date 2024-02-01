@@ -44,6 +44,8 @@ fn main() {
         conf.base_path(base_path);
 
         conf.types_crate("test_deprecated_optional_with_default_is_some_if__types");
+        conf.clients_crate("test_deprecated_optional_with_default_is_some_if__clients");
+        conf.services_crate("test_deprecated_optional_with_default_is_some_if__services");
 
         let options = "deprecated_optional_with_default_is_some";
         if !options.is_empty() {

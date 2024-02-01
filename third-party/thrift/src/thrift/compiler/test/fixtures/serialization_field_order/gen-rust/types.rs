@@ -128,8 +128,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        if type_id == ::std::any::TypeId::of::<thrift::types::SerializeInFieldIdOrder>() {
-            let mut tmp = Some(thrift::types::SerializeInFieldIdOrder {
+        if type_id == ::std::any::TypeId::of::<thrift__types::SerializeInFieldIdOrder>() {
+            let mut tmp = Some(thrift__types::SerializeInFieldIdOrder {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;

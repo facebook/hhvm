@@ -235,9 +235,9 @@ impl ::fbthrift::metadata::ThriftAnnotations for ComplexUnion {
             },
             14 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
-                    let mut tmp = Some(cpp::types::Ref {
-                        r#type: cpp::types::RefType::Unique,
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;

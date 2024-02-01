@@ -35,6 +35,9 @@ pub(crate) use {{program:types}}::{self as types, services};
 {{/program:services?}}
 {{^program:services?}}
 #![doc(hidden)]
+{{^program:multifile?}}
+#![allow(unused_crate_dependencies)]
+{{/program:multifile?}}
 
 #[allow(unused_imports)]
 pub(crate) use {{program:types}} as types;

@@ -56,18 +56,10 @@ pub use {{program:types}}::consts as consts;
 pub mod dependencies;
 #[doc(inline)]
 pub use {{program:types}}::services as services;
-{{#program:clients?}}
 #[doc(inline)]
 pub use {{program:clients}}::{self as client, mock};
-{{/program:clients?}}
-{{#program:servers?}}
 #[doc(inline)]
 pub use {{program:servers}} as server;
-{{/program:servers?}}
 {{/program:services?}}
 #[doc(inline)]
 pub use {{program:types}}::errors as errors;
-{{#program:nonstandardTypes?}}
-
-pub(crate) mod r#impl {{>lib/block}}{{>lib/mod.impl}}}{{!
-}}{{/program:nonstandardTypes?}}

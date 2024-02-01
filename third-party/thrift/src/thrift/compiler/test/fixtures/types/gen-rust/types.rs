@@ -18,7 +18,7 @@ pub type IntTypedef = ::std::primitive::i32;
 
 pub type UintTypedef = crate::types::IntTypedef;
 
-pub type SomeListOfTypeMap_2468 = included::types::SomeListOfTypeMap;
+pub type SomeListOfTypeMap_2468 = included__types::SomeListOfTypeMap;
 
 pub type TBinary_8623 = crate::types::TBinary;
 
@@ -66,7 +66,7 @@ pub struct ContainerStruct {
     pub fieldE: ::std::vec::Vec<::std::primitive::i32>,
     pub fieldF: ::sorted_vector_map::SortedVectorSet<::std::primitive::i32>,
     pub fieldG: ::sorted_vector_map::SortedVectorMap<::std::primitive::i32, ::std::string::String>,
-    pub fieldH: included::types::SomeMap,
+    pub fieldH: included__types::SomeMap,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -1161,8 +1161,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for ContainerStruct {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Type>() {
-                    let mut tmp = Some(cpp::types::Type {
+                if type_id == ::std::any::TypeId::of::<cpp__types::Type>() {
+                    let mut tmp = Some(cpp__types::Type {
                         name: ::std::default::Default::default(),
                         template: "std::list".to_owned(),
                         ..::std::default::Default::default()
@@ -1174,8 +1174,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for ContainerStruct {
             },
             3 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Type>() {
-                    let mut tmp = Some(cpp::types::Type {
+                if type_id == ::std::any::TypeId::of::<cpp__types::Type>() {
+                    let mut tmp = Some(cpp__types::Type {
                         name: ::std::default::Default::default(),
                         template: "std::deque".to_owned(),
                         ..::std::default::Default::default()
@@ -1187,8 +1187,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for ContainerStruct {
             },
             4 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Type>() {
-                    let mut tmp = Some(cpp::types::Type {
+                if type_id == ::std::any::TypeId::of::<cpp__types::Type>() {
+                    let mut tmp = Some(cpp__types::Type {
                         name: ::std::default::Default::default(),
                         template: "folly::fbvector".to_owned(),
                         ..::std::default::Default::default()
@@ -1200,8 +1200,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for ContainerStruct {
             },
             5 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Type>() {
-                    let mut tmp = Some(cpp::types::Type {
+                if type_id == ::std::any::TypeId::of::<cpp__types::Type>() {
+                    let mut tmp = Some(cpp__types::Type {
                         name: ::std::default::Default::default(),
                         template: "folly::small_vector".to_owned(),
                         ..::std::default::Default::default()
@@ -1316,8 +1316,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for CppTypeStruct {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Type>() {
-                    let mut tmp = Some(cpp::types::Type {
+                if type_id == ::std::any::TypeId::of::<cpp__types::Type>() {
+                    let mut tmp = Some(cpp__types::Type {
                         name: "std::list<int32_t>".to_owned(),
                         template: ::std::default::Default::default(),
                         ..::std::default::Default::default()
@@ -2124,8 +2124,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MinPadding {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        if type_id == ::std::any::TypeId::of::<cpp::types::MinimizePadding>() {
-            let mut tmp = Some(cpp::types::MinimizePadding {
+        if type_id == ::std::any::TypeId::of::<cpp__types::MinimizePadding>() {
+            let mut tmp = Some(cpp__types::MinimizePadding {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2276,8 +2276,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MinPaddingWithCustomType {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        if type_id == ::std::any::TypeId::of::<thrift::types::Experimental>() {
-            let mut tmp = Some(thrift::types::Experimental {
+        if type_id == ::std::any::TypeId::of::<thrift__types::Experimental>() {
+            let mut tmp = Some(thrift__types::Experimental {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2285,12 +2285,12 @@ impl ::fbthrift::metadata::ThriftAnnotations for MinPaddingWithCustomType {
             return r.take();
         }
 
-        if let Some(r) = <thrift::types::Experimental as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+        if let Some(r) = <thrift__types::Experimental as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
             return Some(r);
         }
 
-        if type_id == ::std::any::TypeId::of::<cpp::types::MinimizePadding>() {
-            let mut tmp = Some(cpp::types::MinimizePadding {
+        if type_id == ::std::any::TypeId::of::<cpp__types::MinimizePadding>() {
+            let mut tmp = Some(cpp__types::MinimizePadding {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2298,8 +2298,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MinPaddingWithCustomType {
             return r.take();
         }
 
-        if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
-            let mut tmp = Some(thrift::types::TerseWrite {
+        if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+            let mut tmp = Some(thrift__types::TerseWrite {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2322,8 +2322,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MinPaddingWithCustomType {
             },
             3 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Adapter>() {
-                    let mut tmp = Some(cpp::types::Adapter {
+                if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
+                    let mut tmp = Some(cpp__types::Adapter {
                         name: "::my::Adapter".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -2336,7 +2336,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MinPaddingWithCustomType {
                     return r.take();
                 }
 
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
                     return Some(r);
                 }
             },
@@ -2887,9 +2887,9 @@ impl ::fbthrift::metadata::ThriftAnnotations for ForwardUsageRoot {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
-                    let mut tmp = Some(cpp::types::Ref {
-                        r#type: cpp::types::RefType::Unique,
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2998,9 +2998,9 @@ impl ::fbthrift::metadata::ThriftAnnotations for ForwardUsageStruct {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
-                    let mut tmp = Some(cpp::types::Ref {
-                        r#type: cpp::types::RefType::Unique,
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -3109,9 +3109,9 @@ impl ::fbthrift::metadata::ThriftAnnotations for ForwardUsageByRef {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
-                    let mut tmp = Some(cpp::types::Ref {
-                        r#type: cpp::types::RefType::Unique,
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -3409,8 +3409,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for CompleteMap {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Type>() {
-                    let mut tmp = Some(cpp::types::Type {
+                if type_id == ::std::any::TypeId::of::<cpp__types::Type>() {
+                    let mut tmp = Some(cpp__types::Type {
                         name: ::std::default::Default::default(),
                         template: "std::unordered_map".to_owned(),
                         ..::std::default::Default::default()
@@ -3609,8 +3609,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for IncompleteList {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Type>() {
-                    let mut tmp = Some(cpp::types::Type {
+                if type_id == ::std::any::TypeId::of::<cpp__types::Type>() {
+                    let mut tmp = Some(cpp__types::Type {
                         name: ::std::default::Default::default(),
                         template: "::std::list".to_owned(),
                         ..::std::default::Default::default()
@@ -3809,8 +3809,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for CompleteList {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Type>() {
-                    let mut tmp = Some(cpp::types::Type {
+                if type_id == ::std::any::TypeId::of::<cpp__types::Type>() {
+                    let mut tmp = Some(cpp__types::Type {
                         name: ::std::default::Default::default(),
                         template: "folly::small_vector".to_owned(),
                         ..::std::default::Default::default()
@@ -4097,8 +4097,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedListDep {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        if type_id == ::std::any::TypeId::of::<cpp::types::Adapter>() {
-            let mut tmp = Some(cpp::types::Adapter {
+        if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
+            let mut tmp = Some(cpp__types::Adapter {
                 name: "IdentityAdapter<detail::AdaptedListDep>".to_owned(),
                 adaptedType: "detail::AdaptedListDep".to_owned(),
                 underlyingName: ::std::default::Default::default(),
@@ -4111,7 +4111,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedListDep {
             return r.take();
         }
 
-        if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+        if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
             return Some(r);
         }
 
@@ -4317,8 +4317,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for DependentAdaptedListDep {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        if type_id == ::std::any::TypeId::of::<cpp::types::Adapter>() {
-            let mut tmp = Some(cpp::types::Adapter {
+        if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
+            let mut tmp = Some(cpp__types::Adapter {
                 name: "IdentityAdapter<detail::DependentAdaptedListDep>".to_owned(),
                 adaptedType: ::std::default::Default::default(),
                 underlyingName: ::std::default::Default::default(),
@@ -4331,7 +4331,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for DependentAdaptedListDep {
             return r.take();
         }
 
-        if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+        if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
             return Some(r);
         }
 
@@ -4346,8 +4346,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for DependentAdaptedListDep {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift::types::Box>() {
-                    let mut tmp = Some(thrift::types::Box {
+                if type_id == ::std::any::TypeId::of::<thrift__types::Box>() {
+                    let mut tmp = Some(thrift__types::Box {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -4518,9 +4518,9 @@ impl ::fbthrift::metadata::ThriftAnnotations for AllocatorAware {
             },
             6 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
-                    let mut tmp = Some(cpp::types::Ref {
-                        r#type: cpp::types::RefType::Unique,
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -4530,9 +4530,9 @@ impl ::fbthrift::metadata::ThriftAnnotations for AllocatorAware {
             },
             7 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
-                    let mut tmp = Some(cpp::types::Ref {
-                        r#type: cpp::types::RefType::SharedMutable,
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::SharedMutable,
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -4652,8 +4652,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for AllocatorAware2 {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift::types::Box>() {
-                    let mut tmp = Some(thrift::types::Box {
+                if type_id == ::std::any::TypeId::of::<thrift__types::Box>() {
+                    let mut tmp = Some(thrift__types::Box {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;

@@ -20,6 +20,8 @@ async-trait = "0.1.71"
 codegen_includer_proc_macro = { path = "../../../../../../common/rust/shed/codegen_includer_proc_macro" }
 const-cstr = "0.3.0"
 fbthrift = { path = "../../.." }
+fbthrift_test_if__clients = { package = "fbthrift_test_if_clients", path = "clients" }
+fbthrift_test_if__services = { package = "fbthrift_test_if_services", path = "services" }
 fbthrift_test_if__types = { package = "fbthrift_test_if_types", path = "types" }
 futures = { version = "0.3.28", features = ["async-await", "compat"] }
 ref-cast = "1.0.18"

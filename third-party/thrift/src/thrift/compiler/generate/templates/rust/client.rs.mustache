@@ -32,9 +32,9 @@ pub mod mock;
 pub(crate) use {{program:crate}} as client;
 pub(crate) use {{program:types}}::{self as types, errors, services};
 
-pub(crate) mod dependencies {
+pub mod dependencies {
     {{#program:includes}}
-    pub(crate) use {{program:package}} as {{program:name}};
+    pub use {{program:client_package}} as {{program:name}};
     {{/program:includes}}
 }
 
@@ -43,6 +43,9 @@ pub(crate) mod dependencies {
 {{/program:services?}}
 {{^program:services?}}
 #![doc(hidden)]
+{{^program:multifile?}}
+#![allow(unused_crate_dependencies)]
+{{/program:multifile?}}
 
 #[allow(unused_imports)]
 pub(crate) use {{program:types}} as types;

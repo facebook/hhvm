@@ -9,7 +9,7 @@ pub mod some_service {
     #[derive(Clone, Debug)]
     pub enum BounceMapExn {
         #[doc(hidden)]
-        Success(included::types::SomeMap),
+        Success(included__types::SomeMap),
         ApplicationException(::fbthrift::ApplicationException),
     }
 

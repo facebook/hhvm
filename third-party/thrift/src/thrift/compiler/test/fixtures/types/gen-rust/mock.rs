@@ -116,10 +116,10 @@ impl dyn super::client::SomeService {
 impl<'mock> super::client::SomeService for SomeService<'mock> {
     fn bounce_map(
         &self,
-        arg_m: &included::types::SomeMap,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included::types::SomeMap, crate::errors::some_service::BounceMapError>> {
+        arg_m: &included__types::SomeMap,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included__types::SomeMap, crate::errors::some_service::BounceMapError>> {
         let mut closure = self.bounce_map.closure.lock().unwrap();
-        let closure: &mut dyn ::std::ops::FnMut(included::types::SomeMap) -> _ = &mut **closure;
+        let closure: &mut dyn ::std::ops::FnMut(included__types::SomeMap) -> _ = &mut **closure;
         ::std::boxed::Box::pin(::futures::future::ready(closure(arg_m.clone())))
     }
     fn binary_keyed_map(
@@ -137,8 +137,8 @@ pub mod r#impl {
 
         pub struct bounce_map<'mock> {
             pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
-                dyn ::std::ops::FnMut(included::types::SomeMap) -> ::std::result::Result<
-                    included::types::SomeMap,
+                dyn ::std::ops::FnMut(included__types::SomeMap) -> ::std::result::Result<
+                    included__types::SomeMap,
                     crate::errors::some_service::BounceMapError,
                 > + ::std::marker::Send + ::std::marker::Sync + 'mock,
             >>,
@@ -148,7 +148,7 @@ pub mod r#impl {
         impl<'mock> bounce_map<'mock> {
             pub(crate) fn unimplemented() -> Self {
                 Self {
-                    closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: included::types::SomeMap| panic!(
+                    closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: included__types::SomeMap| panic!(
                         "{}::{} is not mocked",
                         "SomeService",
                         "bounce_map",
@@ -156,16 +156,16 @@ pub mod r#impl {
                 }
             }
 
-            pub fn ret(&self, value: included::types::SomeMap) {
-                self.mock(move |_: included::types::SomeMap| value.clone());
+            pub fn ret(&self, value: included__types::SomeMap) {
+                self.mock(move |_: included__types::SomeMap| value.clone());
             }
 
-            pub fn mock(&self, mut mock: impl ::std::ops::FnMut(included::types::SomeMap) -> included::types::SomeMap + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+            pub fn mock(&self, mut mock: impl ::std::ops::FnMut(included__types::SomeMap) -> included__types::SomeMap + ::std::marker::Send + ::std::marker::Sync + 'mock) {
                 let mut closure = self.closure.lock().unwrap();
                 *closure = ::std::boxed::Box::new(move |m| ::std::result::Result::Ok(mock(m)));
             }
 
-            pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut(included::types::SomeMap) -> ::std::result::Result<included::types::SomeMap, crate::errors::some_service::BounceMapError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+            pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut(included__types::SomeMap) -> ::std::result::Result<included__types::SomeMap, crate::errors::some_service::BounceMapError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
                 let mut closure = self.closure.lock().unwrap();
                 *closure = ::std::boxed::Box::new(move |m| mock(m));
             }
@@ -176,7 +176,7 @@ pub mod r#impl {
                 E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
             {
                 let mut closure = self.closure.lock().unwrap();
-                *closure = ::std::boxed::Box::new(move |_: included::types::SomeMap| ::std::result::Result::Err(exception.clone().into()));
+                *closure = ::std::boxed::Box::new(move |_: included__types::SomeMap| ::std::result::Result::Err(exception.clone().into()));
             }
         }
 

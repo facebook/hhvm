@@ -121,19 +121,19 @@ impl<'mock> super::client::MyService for MyService<'mock> {
 
     fn createMyInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::MyInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::MyInteractionClient, ::anyhow::Error> {
         unimplemented!("Mocking interactions is not yet implemented");
     }
 
     fn createMyInteractionFast(
         &self,
-    ) -> ::std::result::Result<crate::client::MyInteractionFastClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::MyInteractionFastClient, ::anyhow::Error> {
         unimplemented!("Mocking interactions is not yet implemented");
     }
 
     fn createSerialInteraction(
         &self,
-    ) -> ::std::result::Result<crate::client::SerialInteractionClient, ::anyhow::Error> {
+    ) -> ::std::result::Result<crate::SerialInteractionClient, ::anyhow::Error> {
         unimplemented!("Mocking interactions is not yet implemented");
     }
     fn foo(

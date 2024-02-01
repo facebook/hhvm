@@ -11,7 +11,7 @@ pub mod mock;
 pub(crate) use crate as client;
 pub(crate) use ::::{self as types, errors, services};
 
-pub(crate) mod dependencies {
+pub mod dependencies {
 }
 
 
@@ -300,7 +300,7 @@ impl ::fbthrift::ClientFactory for make_MyRoot {
 
 /// Client definitions for `MyNode`.
 pub struct MyNodeImpl<P, T, S = ::fbthrift::NoopSpawner> {
-    parent: crate::client::MyRootImpl<P, T, S>,
+    parent: crate::MyRootImpl<P, T, S>,
 }
 
 impl<P, T, S> MyNodeImpl<P, T, S>
@@ -315,7 +315,7 @@ where
     pub fn new(
         transport: T,
     ) -> Self {
-        let parent = crate::client::MyRootImpl::<P, T, S>::new(transport);
+        let parent = crate::MyRootImpl::<P, T, S>::new(transport);
         Self { parent }
     }
 
@@ -371,7 +371,7 @@ where
     }
 }
 
-impl<P, T, S> ::std::convert::AsRef<dyn crate::client::MyRoot + 'static> for MyNodeImpl<P, T, S>
+impl<P, T, S> ::std::convert::AsRef<dyn crate::MyRoot + 'static> for MyNodeImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -380,13 +380,13 @@ where
     P::Deserializer: ::std::marker::Send,
     S: ::fbthrift::help::Spawner,
 {
-    fn as_ref(&self) -> &(dyn crate::client::MyRoot + 'static)
+    fn as_ref(&self) -> &(dyn crate::MyRoot + 'static)
     {
         &self.parent
     }
 }
 
-impl<P, T, S> ::std::convert::AsRef<dyn crate::client::MyRootExt<T> + 'static> for MyNodeImpl<P, T, S>
+impl<P, T, S> ::std::convert::AsRef<dyn crate::MyRootExt<T> + 'static> for MyNodeImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -395,19 +395,19 @@ where
     P::Deserializer: ::std::marker::Send,
     S: ::fbthrift::help::Spawner,
 {
-    fn as_ref(&self) -> &(dyn crate::client::MyRootExt<T> + 'static)
+    fn as_ref(&self) -> &(dyn crate::MyRootExt<T> + 'static)
     {
         &self.parent
     }
 }
 
-pub trait MyNode: crate::client::MyRoot + ::std::marker::Send {
+pub trait MyNode: crate::MyRoot + ::std::marker::Send {
     fn do_mid(
         &self,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_node::DoMidError>>;
 }
 
-pub trait MyNodeExt<T>: MyNode + crate::client::MyRootExt<T>
+pub trait MyNodeExt<T>: MyNode + crate::MyRootExt<T>
 where
     T: ::fbthrift::Transport,
 {
@@ -478,7 +478,7 @@ where
 impl<'a, S> MyNode for S
 where
     S: ::std::convert::AsRef<dyn MyNode + 'a>,
-    S: crate::client::MyRoot,
+    S: crate::MyRoot,
     S: ::std::marker::Send,
 {
     fn do_mid(
@@ -493,8 +493,8 @@ impl<S, T> MyNodeExt<T> for S
 where
     S: ::std::convert::AsRef<dyn MyNode + 'static>,
     S: ::std::convert::AsRef<dyn MyNodeExt<T> + 'static>,
-    S: crate::client::MyRoot,
-    S: crate::client::MyRootExt<T>,
+    S: crate::MyRoot,
+    S: crate::MyRootExt<T>,
     S: ::std::marker::Send,
     T: ::fbthrift::Transport,
 {
@@ -613,7 +613,7 @@ impl ::fbthrift::ClientFactory for make_MyNode {
 
 /// Client definitions for `MyLeaf`.
 pub struct MyLeafImpl<P, T, S = ::fbthrift::NoopSpawner> {
-    parent: crate::client::MyNodeImpl<P, T, S>,
+    parent: crate::MyNodeImpl<P, T, S>,
 }
 
 impl<P, T, S> MyLeafImpl<P, T, S>
@@ -628,7 +628,7 @@ where
     pub fn new(
         transport: T,
     ) -> Self {
-        let parent = crate::client::MyNodeImpl::<P, T, S>::new(transport);
+        let parent = crate::MyNodeImpl::<P, T, S>::new(transport);
         Self { parent }
     }
 
@@ -684,7 +684,7 @@ where
     }
 }
 
-impl<P, T, S> ::std::convert::AsRef<dyn crate::client::MyNode + 'static> for MyLeafImpl<P, T, S>
+impl<P, T, S> ::std::convert::AsRef<dyn crate::MyNode + 'static> for MyLeafImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -693,13 +693,13 @@ where
     P::Deserializer: ::std::marker::Send,
     S: ::fbthrift::help::Spawner,
 {
-    fn as_ref(&self) -> &(dyn crate::client::MyNode + 'static)
+    fn as_ref(&self) -> &(dyn crate::MyNode + 'static)
     {
         &self.parent
     }
 }
 
-impl<P, T, S> ::std::convert::AsRef<dyn crate::client::MyNodeExt<T> + 'static> for MyLeafImpl<P, T, S>
+impl<P, T, S> ::std::convert::AsRef<dyn crate::MyNodeExt<T> + 'static> for MyLeafImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -708,13 +708,13 @@ where
     P::Deserializer: ::std::marker::Send,
     S: ::fbthrift::help::Spawner,
 {
-    fn as_ref(&self) -> &(dyn crate::client::MyNodeExt<T> + 'static)
+    fn as_ref(&self) -> &(dyn crate::MyNodeExt<T> + 'static)
     {
         &self.parent
     }
 }
 
-impl<P, T, S> ::std::convert::AsRef<dyn crate::client::MyRoot + 'static> for MyLeafImpl<P, T, S>
+impl<P, T, S> ::std::convert::AsRef<dyn crate::MyRoot + 'static> for MyLeafImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -723,13 +723,13 @@ where
     P::Deserializer: ::std::marker::Send,
     S: ::fbthrift::help::Spawner,
 {
-    fn as_ref(&self) -> &(dyn crate::client::MyRoot + 'static)
+    fn as_ref(&self) -> &(dyn crate::MyRoot + 'static)
     {
         self.parent.as_ref()
     }
 }
 
-impl<P, T, S> ::std::convert::AsRef<dyn crate::client::MyRootExt<T> + 'static> for MyLeafImpl<P, T, S>
+impl<P, T, S> ::std::convert::AsRef<dyn crate::MyRootExt<T> + 'static> for MyLeafImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -738,19 +738,19 @@ where
     P::Deserializer: ::std::marker::Send,
     S: ::fbthrift::help::Spawner,
 {
-    fn as_ref(&self) -> &(dyn crate::client::MyRootExt<T> + 'static)
+    fn as_ref(&self) -> &(dyn crate::MyRootExt<T> + 'static)
     {
         self.parent.as_ref()
     }
 }
 
-pub trait MyLeaf: crate::client::MyNode + ::std::marker::Send {
+pub trait MyLeaf: crate::MyNode + ::std::marker::Send {
     fn do_leaf(
         &self,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_leaf::DoLeafError>>;
 }
 
-pub trait MyLeafExt<T>: MyLeaf + crate::client::MyNodeExt<T>
+pub trait MyLeafExt<T>: MyLeaf + crate::MyNodeExt<T>
 where
     T: ::fbthrift::Transport,
 {
@@ -821,8 +821,8 @@ where
 impl<'a, S> MyLeaf for S
 where
     S: ::std::convert::AsRef<dyn MyLeaf + 'a>,
-    S: crate::client::MyNode,
-    S: crate::client::MyRoot,
+    S: crate::MyNode,
+    S: crate::MyRoot,
     S: ::std::marker::Send,
 {
     fn do_leaf(
@@ -837,10 +837,10 @@ impl<S, T> MyLeafExt<T> for S
 where
     S: ::std::convert::AsRef<dyn MyLeaf + 'static>,
     S: ::std::convert::AsRef<dyn MyLeafExt<T> + 'static>,
-    S: crate::client::MyNode,
-    S: crate::client::MyNodeExt<T>,
-    S: crate::client::MyRoot,
-    S: crate::client::MyRootExt<T>,
+    S: crate::MyNode,
+    S: crate::MyNodeExt<T>,
+    S: crate::MyRoot,
+    S: crate::MyRootExt<T>,
     S: ::std::marker::Send,
     T: ::fbthrift::Transport,
 {

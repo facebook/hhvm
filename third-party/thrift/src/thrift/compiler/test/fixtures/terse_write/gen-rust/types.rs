@@ -974,8 +974,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructLevelTerseStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
-            let mut tmp = Some(thrift::types::TerseWrite {
+        if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+            let mut tmp = Some(thrift__types::TerseWrite {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1382,8 +1382,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
-                    let mut tmp = Some(thrift::types::TerseWrite {
+                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                    let mut tmp = Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1393,8 +1393,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
-                    let mut tmp = Some(thrift::types::TerseWrite {
+                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                    let mut tmp = Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1404,8 +1404,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             3 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
-                    let mut tmp = Some(thrift::types::TerseWrite {
+                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                    let mut tmp = Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1415,8 +1415,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             4 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
-                    let mut tmp = Some(thrift::types::TerseWrite {
+                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                    let mut tmp = Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1426,8 +1426,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             5 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
-                    let mut tmp = Some(thrift::types::TerseWrite {
+                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                    let mut tmp = Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1437,8 +1437,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             6 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
-                    let mut tmp = Some(thrift::types::TerseWrite {
+                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                    let mut tmp = Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1448,8 +1448,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             7 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
-                    let mut tmp = Some(thrift::types::TerseWrite {
+                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                    let mut tmp = Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1459,8 +1459,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             8 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
-                    let mut tmp = Some(thrift::types::TerseWrite {
+                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                    let mut tmp = Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1470,8 +1470,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             9 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
-                    let mut tmp = Some(thrift::types::TerseWrite {
+                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                    let mut tmp = Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1481,8 +1481,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             10 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
-                    let mut tmp = Some(thrift::types::TerseWrite {
+                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                    let mut tmp = Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1492,8 +1492,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             11 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
-                    let mut tmp = Some(thrift::types::TerseWrite {
+                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                    let mut tmp = Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1503,8 +1503,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             12 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
-                    let mut tmp = Some(thrift::types::TerseWrite {
+                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                    let mut tmp = Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1514,8 +1514,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             13 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
-                    let mut tmp = Some(thrift::types::TerseWrite {
+                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                    let mut tmp = Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1525,8 +1525,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             14 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
-                    let mut tmp = Some(thrift::types::TerseWrite {
+                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                    let mut tmp = Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1536,8 +1536,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             29 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
-                    let mut tmp = Some(thrift::types::TerseWrite {
+                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                    let mut tmp = Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1800,8 +1800,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseStructWithCustomDefault {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
-            let mut tmp = Some(thrift::types::TerseWrite {
+        if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+            let mut tmp = Some(thrift__types::TerseWrite {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1952,8 +1952,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedFields {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
-            let mut tmp = Some(thrift::types::TerseWrite {
+        if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+            let mut tmp = Some(thrift__types::TerseWrite {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1974,8 +1974,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedFields {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<hack::types::Adapter>() {
-                    let mut tmp = Some(hack::types::Adapter {
+                if type_id == ::std::any::TypeId::of::<hack__types::Adapter>() {
+                    let mut tmp = Some(hack__types::Adapter {
                         name: "\\Adapter1".to_owned(),
                         ..::std::default::Default::default()
                     });
@@ -1984,8 +1984,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedFields {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Adapter>() {
-                    let mut tmp = Some(cpp::types::Adapter {
+                if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
+                    let mut tmp = Some(cpp__types::Adapter {
                         name: "::my::Adapter".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -1998,14 +1998,14 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedFields {
                     return r.take();
                 }
 
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
                     return Some(r);
                 }
             },
             3 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Adapter>() {
-                    let mut tmp = Some(cpp::types::Adapter {
+                if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
+                    let mut tmp = Some(cpp__types::Adapter {
                         name: "::my::Adapter".to_owned(),
                         adaptedType: ::std::default::Default::default(),
                         underlyingName: ::std::default::Default::default(),
@@ -2018,7 +2018,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedFields {
                     return r.take();
                 }
 
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                if let Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
                     return Some(r);
                 }
             },
@@ -2110,8 +2110,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for WrappedFields {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
-            let mut tmp = Some(thrift::types::TerseWrite {
+        if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+            let mut tmp = Some(thrift__types::TerseWrite {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2130,8 +2130,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for WrappedFields {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<hack::types::FieldWrapper>() {
-                    let mut tmp = Some(hack::types::FieldWrapper {
+                if type_id == ::std::any::TypeId::of::<hack__types::FieldWrapper>() {
+                    let mut tmp = Some(hack__types::FieldWrapper {
                         name: "\\MyFieldWrapper".to_owned(),
                         ..::std::default::Default::default()
                     });
@@ -2228,8 +2228,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseException {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
-            let mut tmp = Some(thrift::types::TerseWrite {
+        if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+            let mut tmp = Some(thrift__types::TerseWrite {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;

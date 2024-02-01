@@ -164,7 +164,7 @@ pub struct MyDataPatch {
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: ::std::boxed::Box<crate::types::MyDataFieldPatch>,
     #[doc = "Removes entries, if present. Applies third."]
-    pub remove: ::std::boxed::Box<patch::types::FieldIdList>,
+    pub remove: ::std::boxed::Box<patch__types::FieldIdList>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -175,8 +175,8 @@ pub struct MyDataPatch {
 
 #[derive(Clone, PartialEq)]
 pub struct MyDataFieldPatch {
-    pub data1: patch::types::StringPatch,
-    pub data2: patch::types::I32Patch,
+    pub data1: patch__types::StringPatch,
+    pub data2: patch__types::I32Patch,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -210,7 +210,7 @@ pub struct MyDataWithCustomDefaultPatch {
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: ::std::boxed::Box<crate::types::MyDataWithCustomDefaultFieldPatch>,
     #[doc = "Removes entries, if present. Applies third."]
-    pub remove: ::std::boxed::Box<patch::types::FieldIdList>,
+    pub remove: ::std::boxed::Box<patch__types::FieldIdList>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -221,8 +221,8 @@ pub struct MyDataWithCustomDefaultPatch {
 
 #[derive(Clone, PartialEq)]
 pub struct MyDataWithCustomDefaultFieldPatch {
-    pub data1: patch::types::StringPatch,
-    pub data2: patch::types::I32Patch,
+    pub data1: patch__types::StringPatch,
+    pub data2: patch__types::I32Patch,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -265,7 +265,7 @@ pub struct InnerUnionPatch {
 
 #[derive(Clone, PartialEq)]
 pub struct InnerUnionFieldPatch {
-    pub innerOption: patch::types::BinaryPatch,
+    pub innerOption: patch__types::BinaryPatch,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -296,8 +296,8 @@ pub struct MyUnionPatch {
 
 #[derive(Clone, PartialEq)]
 pub struct MyUnionFieldPatch {
-    pub option1: patch::types::StringPatch,
-    pub option2: patch::types::I32Patch,
+    pub option1: patch__types::StringPatch,
+    pub option2: patch__types::I32Patch,
     pub option3: crate::types::InnerUnionPatch,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
@@ -320,7 +320,7 @@ pub struct MyStructPatch {
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: ::std::boxed::Box<crate::types::MyStructFieldPatch>,
     #[doc = "Removes entries, if present. Applies third."]
-    pub remove: ::std::boxed::Box<patch::types::FieldIdList>,
+    pub remove: ::std::boxed::Box<patch__types::FieldIdList>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -400,11 +400,11 @@ pub struct MyStructField28Patch {
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
     #[doc = "Patches any previously set values. Applies second."]
-    pub patchPrior: ::fbthrift::builtin_types::HashMap<::std::string::String, patch::types::StringPatch>,
+    pub patchPrior: ::fbthrift::builtin_types::HashMap<::std::string::String, patch__types::StringPatch>,
     #[doc = "Add the given values, if the keys are not already present. Applies forth."]
     pub add: ::std::collections::BTreeMap<::std::string::String, ::std::string::String>,
     #[doc = "Patches any set value, including newly set values. Applies last."]
-    pub patch: ::fbthrift::builtin_types::HashMap<::std::string::String, patch::types::StringPatch>,
+    pub patch: ::fbthrift::builtin_types::HashMap<::std::string::String, patch__types::StringPatch>,
     #[doc = "Removes entries, if present. Applies third."]
     pub remove: ::fbthrift::builtin_types::HashSet<::std::string::String>,
     #[doc = "Adds or replaces the given key/value pairs. Applies fifth."]
@@ -466,11 +466,11 @@ pub struct MyStructField30Patch1 {
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
     #[doc = "Patches any previously set values. Applies second."]
-    pub patchPrior: ::fbthrift::builtin_types::HashMap<::std::string::String, patch::types::I32Patch>,
+    pub patchPrior: ::fbthrift::builtin_types::HashMap<::std::string::String, patch__types::I32Patch>,
     #[doc = "Add the given values, if the keys are not already present. Applies forth."]
     pub add: ::std::collections::BTreeMap<::std::string::String, ::std::primitive::i32>,
     #[doc = "Patches any set value, including newly set values. Applies last."]
-    pub patch: ::fbthrift::builtin_types::HashMap<::std::string::String, patch::types::I32Patch>,
+    pub patch: ::fbthrift::builtin_types::HashMap<::std::string::String, patch__types::I32Patch>,
     #[doc = "Removes entries, if present. Applies third."]
     pub remove: ::fbthrift::builtin_types::HashSet<::std::string::String>,
     #[doc = "Adds or replaces the given key/value pairs. Applies fifth."]
@@ -486,7 +486,7 @@ pub struct MyStructField30Patch1 {
 #[derive(Clone, PartialEq)]
 pub struct MyStructFieldPatch {
     pub structWithCustomDefault: crate::types::MyDataWithCustomDefaultPatch,
-    pub i32WithCustomDefault: patch::types::I32Patch,
+    pub i32WithCustomDefault: patch__types::I32Patch,
     pub mapMap: crate::types::MyStructField30Patch,
     pub listMap: crate::types::MyStructField29Patch,
     pub optMapVal: crate::types::MyStructField28Patch,
@@ -495,28 +495,28 @@ pub struct MyStructFieldPatch {
     pub optLateStructVal: crate::types::LateDefStructPatch,
     pub optStructVal: crate::types::MyDataPatch,
     pub optEnumVal: crate::types::MyStructField23Patch,
-    pub optBinaryVal: patch::types::BinaryPatch,
-    pub optStringVal: patch::types::StringPatch,
-    pub optDoubleVal: patch::types::DoublePatch,
-    pub optFloatVal: patch::types::FloatPatch,
-    pub optI64Val: patch::types::I64Patch,
-    pub optI32Val: patch::types::I32Patch,
-    pub optI16Val: patch::types::I16Patch,
-    pub optByteVal: patch::types::BytePatch,
-    pub optBoolVal: patch::types::BoolPatch,
+    pub optBinaryVal: patch__types::BinaryPatch,
+    pub optStringVal: patch__types::StringPatch,
+    pub optDoubleVal: patch__types::DoublePatch,
+    pub optFloatVal: patch__types::FloatPatch,
+    pub optI64Val: patch__types::I64Patch,
+    pub optI32Val: patch__types::I32Patch,
+    pub optI16Val: patch__types::I16Patch,
+    pub optByteVal: patch__types::BytePatch,
+    pub optBoolVal: patch__types::BoolPatch,
     pub lateStructVal: crate::types::LateDefStructPatch,
     pub unionVal: crate::types::MyUnionPatch,
     pub structVal: crate::types::MyDataPatch,
     pub enumVal: crate::types::MyStructField10Patch,
-    pub binaryVal: patch::types::BinaryPatch,
-    pub stringVal: patch::types::StringPatch,
-    pub doubleVal: patch::types::DoublePatch,
-    pub floatVal: patch::types::FloatPatch,
-    pub i64Val: patch::types::I64Patch,
-    pub i32Val: patch::types::I32Patch,
-    pub i16Val: patch::types::I16Patch,
-    pub byteVal: patch::types::BytePatch,
-    pub boolVal: patch::types::BoolPatch,
+    pub binaryVal: patch__types::BinaryPatch,
+    pub stringVal: patch__types::StringPatch,
+    pub doubleVal: patch__types::DoublePatch,
+    pub floatVal: patch__types::FloatPatch,
+    pub i64Val: patch__types::I64Patch,
+    pub i32Val: patch__types::I32Patch,
+    pub i16Val: patch__types::I16Patch,
+    pub byteVal: patch__types::BytePatch,
+    pub boolVal: patch__types::BoolPatch,
     pub structWithFieldCustomDefault: crate::types::MyDataPatch,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
@@ -582,7 +582,7 @@ pub struct LateDefStructPatch {
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: ::std::boxed::Box<crate::types::LateDefStructFieldPatch>,
     #[doc = "Removes entries, if present. Applies third."]
-    pub remove: ::std::boxed::Box<patch::types::FieldIdList>,
+    pub remove: ::std::boxed::Box<patch__types::FieldIdList>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -624,7 +624,7 @@ pub struct RecursivePatch {
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: ::std::boxed::Box<crate::types::RecursiveFieldPatch>,
     #[doc = "Removes entries, if present. Applies third."]
-    pub remove: ::std::boxed::Box<patch::types::FieldIdList>,
+    pub remove: ::std::boxed::Box<patch__types::FieldIdList>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -682,7 +682,7 @@ pub struct BarPatch {
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: ::std::boxed::Box<crate::types::BarFieldPatch>,
     #[doc = "Removes entries, if present. Applies third."]
-    pub remove: ::std::boxed::Box<patch::types::FieldIdList>,
+    pub remove: ::std::boxed::Box<patch__types::FieldIdList>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -740,7 +740,7 @@ pub struct RefFieldsPatch {
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: ::std::boxed::Box<crate::types::RefFieldsFieldPatch>,
     #[doc = "Removes entries, if present. Applies third."]
-    pub remove: ::std::boxed::Box<patch::types::FieldIdList>,
+    pub remove: ::std::boxed::Box<patch__types::FieldIdList>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -1827,8 +1827,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             },
             -9 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Type>() {
-                    let mut tmp = Some(cpp::types::Type {
+                if type_id == ::std::any::TypeId::of::<cpp__types::Type>() {
+                    let mut tmp = Some(cpp__types::Type {
                         name: "folly::IOBuf".to_owned(),
                         template: ::std::default::Default::default(),
                         ..::std::default::Default::default()
@@ -1864,8 +1864,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             },
             -22 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Type>() {
-                    let mut tmp = Some(cpp::types::Type {
+                if type_id == ::std::any::TypeId::of::<cpp__types::Type>() {
+                    let mut tmp = Some(cpp__types::Type {
                         name: "folly::IOBuf".to_owned(),
                         template: ::std::default::Default::default(),
                         ..::std::default::Default::default()
@@ -2084,8 +2084,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for Recursive {
         match field_id {
             -1 => {
 
-                if type_id == ::std::any::TypeId::of::<patch::types::AssignOnlyPatch>() {
-                    let mut tmp = Some(patch::types::AssignOnlyPatch {
+                if type_id == ::std::any::TypeId::of::<patch__types::AssignOnlyPatch>() {
+                    let mut tmp = Some(patch__types::AssignOnlyPatch {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2093,7 +2093,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Recursive {
                     return r.take();
                 }
 
-                if let Some(r) = <patch::types::AssignOnlyPatch as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                if let Some(r) = <patch__types::AssignOnlyPatch as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
                     return Some(r);
                 }
             },
@@ -2196,9 +2196,9 @@ impl ::fbthrift::metadata::ThriftAnnotations for Bar {
         match field_id {
             -1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
-                    let mut tmp = Some(cpp::types::Ref {
-                        r#type: cpp::types::RefType::Unique,
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2294,8 +2294,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for Loop {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        if type_id == ::std::any::TypeId::of::<patch::types::AssignOnlyPatch>() {
-            let mut tmp = Some(patch::types::AssignOnlyPatch {
+        if type_id == ::std::any::TypeId::of::<patch__types::AssignOnlyPatch>() {
+            let mut tmp = Some(patch__types::AssignOnlyPatch {
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2303,7 +2303,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Loop {
             return r.take();
         }
 
-        if let Some(r) = <patch::types::AssignOnlyPatch as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+        if let Some(r) = <patch__types::AssignOnlyPatch as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
             return Some(r);
         }
 
@@ -2318,8 +2318,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for Loop {
         match field_id {
             -1 => {
 
-                if type_id == ::std::any::TypeId::of::<patch::types::AssignOnlyPatch>() {
-                    let mut tmp = Some(patch::types::AssignOnlyPatch {
+                if type_id == ::std::any::TypeId::of::<patch__types::AssignOnlyPatch>() {
+                    let mut tmp = Some(patch__types::AssignOnlyPatch {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2327,7 +2327,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Loop {
                     return r.take();
                 }
 
-                if let Some(r) = <patch::types::AssignOnlyPatch as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                if let Some(r) = <patch__types::AssignOnlyPatch as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
                     return Some(r);
                 }
             },
@@ -2492,9 +2492,9 @@ impl ::fbthrift::metadata::ThriftAnnotations for RefFields {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
-                    let mut tmp = Some(cpp::types::Ref {
-                        r#type: cpp::types::RefType::Unique,
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2504,9 +2504,9 @@ impl ::fbthrift::metadata::ThriftAnnotations for RefFields {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
-                    let mut tmp = Some(cpp::types::Ref {
-                        r#type: cpp::types::RefType::Shared,
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Shared,
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2516,9 +2516,9 @@ impl ::fbthrift::metadata::ThriftAnnotations for RefFields {
             },
             3 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
-                    let mut tmp = Some(cpp::types::Ref {
-                        r#type: cpp::types::RefType::SharedMutable,
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::SharedMutable,
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2528,9 +2528,9 @@ impl ::fbthrift::metadata::ThriftAnnotations for RefFields {
             },
             4 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
-                    let mut tmp = Some(cpp::types::Ref {
-                        r#type: cpp::types::RefType::Unique,
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2540,9 +2540,9 @@ impl ::fbthrift::metadata::ThriftAnnotations for RefFields {
             },
             5 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
-                    let mut tmp = Some(cpp::types::Ref {
-                        r#type: cpp::types::RefType::Shared,
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Shared,
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2552,9 +2552,9 @@ impl ::fbthrift::metadata::ThriftAnnotations for RefFields {
             },
             6 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
-                    let mut tmp = Some(cpp::types::Ref {
-                        r#type: cpp::types::RefType::SharedMutable,
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::SharedMutable,
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2564,8 +2564,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for RefFields {
             },
             7 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift::types::Box>() {
-                    let mut tmp = Some(thrift::types::Box {
+                if type_id == ::std::any::TypeId::of::<thrift__types::Box>() {
+                    let mut tmp = Some(thrift__types::Box {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;

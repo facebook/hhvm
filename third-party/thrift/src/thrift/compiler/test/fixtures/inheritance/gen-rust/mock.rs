@@ -130,7 +130,7 @@ pub struct MyNode<'mock> {
 impl dyn super::client::MyNode {
     pub fn mock<'mock>() -> MyNode<'mock> {
         MyNode {
-            parent: <dyn crate::client::MyRoot>::mock(),
+            parent: <dyn crate::MyRoot>::mock(),
             do_mid: r#impl::my_node::do_mid::unimplemented(),
             _marker: ::std::marker::PhantomData,
         }
@@ -148,9 +148,9 @@ impl<'mock> super::client::MyNode for MyNode<'mock> {
 }
 
 #[::async_trait::async_trait]
-impl<'mock> ::std::convert::AsRef<dyn crate::client::MyRoot + 'mock> for MyNode<'mock>
+impl<'mock> ::std::convert::AsRef<dyn crate::MyRoot + 'mock> for MyNode<'mock>
 {
-    fn as_ref(&self) -> &(dyn crate::client::MyRoot + 'mock) {
+    fn as_ref(&self) -> &(dyn crate::MyRoot + 'mock) {
         &self.parent
     }
 }
@@ -164,7 +164,7 @@ pub struct MyLeaf<'mock> {
 impl dyn super::client::MyLeaf {
     pub fn mock<'mock>() -> MyLeaf<'mock> {
         MyLeaf {
-            parent: <dyn crate::client::MyNode>::mock(),
+            parent: <dyn crate::MyNode>::mock(),
             do_leaf: r#impl::my_leaf::do_leaf::unimplemented(),
             _marker: ::std::marker::PhantomData,
         }
@@ -182,17 +182,17 @@ impl<'mock> super::client::MyLeaf for MyLeaf<'mock> {
 }
 
 #[::async_trait::async_trait]
-impl<'mock> ::std::convert::AsRef<dyn crate::client::MyNode + 'mock> for MyLeaf<'mock>
+impl<'mock> ::std::convert::AsRef<dyn crate::MyNode + 'mock> for MyLeaf<'mock>
 {
-    fn as_ref(&self) -> &(dyn crate::client::MyNode + 'mock) {
+    fn as_ref(&self) -> &(dyn crate::MyNode + 'mock) {
         &self.parent
     }
 }
 
 #[::async_trait::async_trait]
-impl<'mock> ::std::convert::AsRef<dyn crate::client::MyRoot + 'mock> for MyLeaf<'mock>
+impl<'mock> ::std::convert::AsRef<dyn crate::MyRoot + 'mock> for MyLeaf<'mock>
 {
-    fn as_ref(&self) -> &(dyn crate::client::MyRoot + 'mock) {
+    fn as_ref(&self) -> &(dyn crate::MyRoot + 'mock) {
         &self.parent
     }
 }

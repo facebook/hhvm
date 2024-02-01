@@ -120,6 +120,13 @@ DEFINE_uint32(
     max_ack_receive_timestamps_to_send,
     quic::kMaxReceivedPktsTimestampsStored,
     "Controls how many packet receieve timestamps the peer should send");
+DEFINE_bool(initiate_key_updates,
+            false,
+            "Whether to initiate periodic key updates");
+DEFINE_uint32(key_update_interval,
+              quic::kDefaultKeyUpdatePacketCountInterval,
+              "Number of packets to be sent before initiating a key update (if "
+              "initiate_key_updates is true)");
 
 namespace quic::samples {
 
@@ -270,6 +277,10 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
          .receiveTimestampsExponent = kDefaultReceiveTimestampsExponent});
   }
   hqParams.transportSettings.datagramConfig.enabled = true;
+
+  hqParams.transportSettings.initiateKeyUpdate = FLAGS_initiate_key_updates;
+  hqParams.transportSettings.keyUpdatePacketCountInterval =
+      FLAGS_key_update_interval;
 } // initializeTransportSettings
 
 void initializeHttpServerSettings(HQToolServerParams& hqParams) {

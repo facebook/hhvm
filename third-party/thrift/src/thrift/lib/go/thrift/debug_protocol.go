@@ -271,6 +271,19 @@ func (tdp *DebugProtocol) Flush() (err error) {
 	return
 }
 
+// Deprecated: Transport() is a deprecated method.
 func (tdp *DebugProtocol) Transport() Transport {
 	return tdp.Delegate.Transport()
+}
+
+func (tdp *DebugProtocol) Close() error {
+	return tdp.Delegate.Close()
+}
+
+func (tdp *DebugProtocol) IsOpen() bool {
+	return tdp.Delegate.IsOpen()
+}
+
+func (tdp *DebugProtocol) Open() error {
+	return tdp.Delegate.Open()
 }

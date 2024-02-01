@@ -85,7 +85,7 @@ func (cc *ClientConn) IsOpen() bool {
 func (cc *ClientConn) SendMsg(ctx context.Context, method string, req IRequest, msgType MessageType) error {
 	cc.seqID++
 
-	if err := setHeaders(ctx, cc.oproto.Transport()); err != nil {
+	if err := setHeaders(ctx, cc.oproto); err != nil {
 		return err
 	}
 

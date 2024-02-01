@@ -61,7 +61,6 @@ func (p _ParseContext) String() string {
 // This protocol produces/consumes a simple output format
 // suitable for parsing by scripting languages.  It should not be
 // confused with the full-featured JSONProtocol.
-//
 type SimpleJSONProtocol struct {
 	trans Transport
 
@@ -568,8 +567,21 @@ func (p *SimpleJSONProtocol) Skip(fieldType Type) (err error) {
 	return SkipDefaultDepth(p, fieldType)
 }
 
+// Deprecated: Transport() is a deprecated method.
 func (p *SimpleJSONProtocol) Transport() Transport {
 	return p.trans
+}
+
+func (p *SimpleJSONProtocol) Close() error {
+	return p.trans.Close()
+}
+
+func (p *SimpleJSONProtocol) IsOpen() bool {
+	return p.trans.IsOpen()
+}
+
+func (p *SimpleJSONProtocol) Open() error {
+	return p.trans.Open()
 }
 
 func (p *SimpleJSONProtocol) OutputPreValue() error {

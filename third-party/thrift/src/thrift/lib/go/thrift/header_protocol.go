@@ -120,8 +120,21 @@ func (p *HeaderProtocol) Skip(fieldType Type) (err error) {
 	return SkipDefaultDepth(p, fieldType)
 }
 
+// Deprecated: Transport() is a deprecated method.
 func (p *HeaderProtocol) Transport() Transport {
 	return p.origTransport
+}
+
+func (p *HeaderProtocol) Close() error {
+	return p.origTransport.Close()
+}
+
+func (p *HeaderProtocol) IsOpen() bool {
+	return p.origTransport.IsOpen()
+}
+
+func (p *HeaderProtocol) Open() error {
+	return p.origTransport.Open()
 }
 
 func (p *HeaderProtocol) HeaderTransport() Transport {

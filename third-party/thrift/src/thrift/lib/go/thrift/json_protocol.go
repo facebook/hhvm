@@ -34,16 +34,16 @@ const (
 //
 // Example: With the Message definition
 //
-//   struct Message {
-//     1: bool aBool
-//     2: map<string, bool> aBoolStringMap
-//   },
+//	struct Message {
+//	  1: bool aBool
+//	  2: map<string, bool> aBoolStringMap
+//	},
 //
-//   Message(aBool=True, aBoolStringMap={"key1": True, "key2": False})
+//	Message(aBool=True, aBoolStringMap={"key1": True, "key2": False})
 //
 // will be encoded as:
 //
-//   {"1":{"tf":1},"2":{"map":["str","tf",2,{"key1": 1,"key2":0}]}}'
+//	{"1":{"tf":1},"2":{"map":["str","tf",2,{"key1": 1,"key2":0}]}}'
 type JSONProtocol struct {
 	*SimpleJSONProtocol
 }
@@ -469,8 +469,21 @@ func (p *JSONProtocol) Skip(fieldType Type) (err error) {
 	return SkipDefaultDepth(p, fieldType)
 }
 
+// Deprecated: Transport() is a deprecated method.
 func (p *JSONProtocol) Transport() Transport {
 	return p.trans
+}
+
+func (p *JSONProtocol) Close() error {
+	return p.trans.Close()
+}
+
+func (p *JSONProtocol) IsOpen() bool {
+	return p.trans.IsOpen()
+}
+
+func (p *JSONProtocol) Open() error {
+	return p.trans.Open()
 }
 
 func (p *JSONProtocol) OutputElemListBegin(elemType Type, size int) error {

@@ -42,7 +42,7 @@ func (c *SerialChannel) sendMsg(ctx context.Context, method string, request IReq
 	c.seqID++
 	seqID := c.seqID
 
-	if err := setHeaders(ctx, c.protocol.Transport()); err != nil {
+	if err := setHeaders(ctx, c.protocol); err != nil {
 		return seqID, err
 	}
 
@@ -104,17 +104,17 @@ func (c *SerialChannel) recvMsg(method string, seqID int32, response IResponse) 
 
 // Close closes the client connection
 func (c *SerialChannel) Close() error {
-	return c.protocol.Transport().Close()
+	return c.protocol.Close()
 }
 
 // IsOpen return true if the client connection is open; otherwise, it returns false.
 func (c *SerialChannel) IsOpen() bool {
-	return c.protocol.Transport().IsOpen()
+	return c.protocol.IsOpen()
 }
 
 // Open opens the client connection
 func (c *SerialChannel) Open() error {
-	return c.protocol.Transport().Open()
+	return c.protocol.Open()
 }
 
 // Call will call the given method with the given thrift struct, and read the response

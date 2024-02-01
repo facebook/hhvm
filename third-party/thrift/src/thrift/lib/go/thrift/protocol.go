@@ -105,7 +105,13 @@ type Protocol interface {
 	Skip(fieldType Type) (err error)
 	Flush() (err error)
 
+	// Deprecated: Transport() is deprecated and will no longer be supported in future
 	Transport() Transport
+
+	// replaces Transport() method
+	Close() error
+	IsOpen() bool
+	Open() error
 }
 
 // The maximum recursive depth the skip() function will traverse

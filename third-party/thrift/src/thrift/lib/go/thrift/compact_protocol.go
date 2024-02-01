@@ -646,8 +646,21 @@ func (p *CompactProtocol) Skip(fieldType Type) (err error) {
 	return SkipDefaultDepth(p, fieldType)
 }
 
+// Deprecated: Transport() is a deprecated method.
 func (p *CompactProtocol) Transport() Transport {
 	return p.origTransport
+}
+
+func (p *CompactProtocol) Close() error {
+	return p.origTransport.Close()
+}
+
+func (p *CompactProtocol) IsOpen() bool {
+	return p.origTransport.IsOpen()
+}
+
+func (p *CompactProtocol) Open() error {
+	return p.origTransport.Open()
 }
 
 //

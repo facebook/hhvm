@@ -51,8 +51,8 @@ struct rust_codegen_options {
   std::string services_crate;
 
   // Key: package name according to Thrift.
-  // Value: rust_crate_name to use in generated code.
-  std::map<std::string, std::string> cratemap;
+  // Value: determines the path used by generated code to name the crate.
+  std::map<std::string, rust_crate> cratemap;
 
   // Whether to emit derive(Serialize, Deserialize).
   // Enabled by `--gen rust:serde`.
@@ -151,9 +151,9 @@ std::string get_import_name(
   }
 
   auto program_name = program->name();
-  auto crate_name = options.cratemap.find(program_name);
-  if (crate_name != options.cratemap.end()) {
-    return crate_name->second;
+  auto crate = options.cratemap.find(program_name);
+  if (crate != options.cratemap.end()) {
+    return crate->second.import_name();
   }
   return program_name;
 }

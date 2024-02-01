@@ -66,33 +66,50 @@ rust_crate_map load_crate_map(const std::string& path) {
   }
 
   for (const auto& source : sources) {
-    std::string crate_name;
+    auto crate_name = source.first;
     auto thrift_names = source.second;
     auto multifile = thrift_names.size() > 1;
 
     // Look out for our own crate in the cratemap. It will require paths that
     // begin with `crate::module` rather than `::depenency::module`.
-    if (source.first == "crate") {
-      crate_name = "crate";
+    if (crate_name == "crate") {
       ret.multifile_mode = multifile;
-    } else if (
-        source.first == "core" || source.first == "std" ||
-        source.first != mangle(source.first)) {
-      crate_name = "::" + source.first + "_";
-    } else {
-      crate_name = "::" + mangle(source.first);
     }
 
     if (multifile) {
       for (const auto& thrift_name : thrift_names) {
-        ret.cratemap[thrift_name] = crate_name + "::" + mangle(thrift_name);
+        ret.cratemap[thrift_name].name = crate_name;
+        ret.cratemap[thrift_name].multifile_module = thrift_name;
       }
     } else if (crate_name != "crate") {
-      ret.cratemap[thrift_names[0]] = crate_name;
+      ret.cratemap[thrift_names[0]].name = crate_name;
+      ret.cratemap[thrift_names[0]].multifile_module = boost::none;
     }
   }
 
   return ret;
+}
+
+static bool is_legal_crate_name(const std::string& name) {
+  return name == mangle(name) && name != "core" && name != "std";
+}
+
+std::string rust_crate::import_name() const {
+  std::string absolute_crate_name;
+
+  if (name == "crate") {
+    absolute_crate_name = "crate";
+  } else if (is_legal_crate_name(name)) {
+    absolute_crate_name = "::" + name;
+  } else {
+    absolute_crate_name = "::" + name + "_";
+  }
+
+  if (multifile_module) {
+    return absolute_crate_name + "::" + mangle(*multifile_module);
+  } else {
+    return absolute_crate_name;
+  }
 }
 
 std::string mangle(const std::string& name) {

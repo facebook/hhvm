@@ -18,6 +18,7 @@
 
 #include <map>
 #include <string>
+#include <boost/optional.hpp>
 
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/ast/t_typedef.h>
@@ -27,9 +28,16 @@ namespace thrift {
 namespace compiler {
 namespace rust {
 
+struct rust_crate {
+  std::string name;
+  boost::optional<std::string> multifile_module;
+
+  std::string import_name() const;
+};
+
 struct rust_crate_map {
   bool multifile_mode = false;
-  std::map<std::string, std::string> cratemap;
+  std::map<std::string, rust_crate> cratemap;
 };
 
 rust_crate_map load_crate_map(const std::string& path);

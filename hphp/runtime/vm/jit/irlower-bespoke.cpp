@@ -903,17 +903,9 @@ void cgStructDictSlot(IRLS& env, const IRInstruction* inst) {
       return slot;
     },
     [&] (Vout& v) {
-      auto const [refSF, cc] = [&] {
-        if constexpr (addr_encodes_persistency) {
-          auto const sf = emitIsValRefCountedByPointer(v, rkey);
-          return std::make_pair(sf, CC_NZ);
-        } else {
-          auto const sf = emitCmpRefCount(v, StaticValue, rkey);
-          return std::make_pair(sf, CC_NE);
-        }
-      }();
+      auto const refSF = emitCmpRefCount(v, StaticValue, rkey);
       auto const slot = v.makeReg();
-      return cond(v, vcold(env), cc, refSF, slot,
+      return cond(v, vcold(env), CC_NE, refSF, slot,
         [&] (Vout& v) {
           return nonStaticCase(v);
         },

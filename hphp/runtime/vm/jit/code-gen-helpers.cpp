@@ -332,17 +332,9 @@ void trashTV(Vout& v, Vptr typePtr, Vptr valPtr, char byte) {
 }
 
 void emitAssertRefCount(Vout& v, Vreg data, Reason reason) {
-  auto const [sf, cc] = [&] {
-    if constexpr (addr_encodes_persistency) {
-      auto const sf = emitIsValRefCountedByPointer(v, data);
-      return std::make_pair(sf, CC_NZ);
-    } else {
-      auto const sf = emitCmpRefCount(v, StaticValue, data);
-      return std::make_pair(sf, CC_NLE);
-    }
-  }();
+  auto const sf = emitCmpRefCount(v, StaticValue, data);
 
-  ifThen(v, cc, sf, [&] (Vout& v) {
+  ifThen(v, CC_NLE, sf, [&] (Vout& v) {
     auto const sf = emitCmpRefCount(v, RefCountMaxRealistic, data);
     ifThen(v, CC_NBE, sf, [&] (Vout& v) { v << trap{reason}; });
   });
@@ -369,15 +361,10 @@ void emitIncRefWork(Vout& v, Vreg data, Vreg type, Reason reason) {
   auto const cc = emitIsTVTypeRefCounted(v, sf, type);
   // ifRefCountedType
   ifThen(v, cc, sf, [&] (Vout& v) {
-    auto const [sf2, cc] = [&] {
-      if constexpr (addr_encodes_persistency) {
-        auto const sf = emitIsValRefCountedByPointer(v, data);
-        return std::make_pair(sf, CC_NZ);
-      } else {
-        auto const sf = emitCmpRefCount(v, 0, data);
-        return std::make_pair(sf, CC_GE);
-      }
-    }();
+    // One-bit mode: do the IncRef if m_count == OneReference (0). Normal mode:
+    // do the IncRef if m_count >= 0.
+    auto const sf2 = emitCmpRefCount(v, 0, data);
+    auto const cc = CC_GE;
     ifThen(v, cc, sf2, [&] (Vout& v) { emitIncRef(v, data, reason); });
   });
 }
@@ -402,15 +389,8 @@ void emitIncRefWork(Vout& v, Vloc loc, Type type, Reason reason) {
 
   // We do know the type, but it might be persistent or counted. Check the
   // ref-count.
-  auto const [sf, cc] = [&] {
-    if constexpr (addr_encodes_persistency) {
-      auto const sf = emitIsValRefCountedByPointer(v, loc.reg());
-      return std::make_pair(sf, CC_NZ);
-    } else {
-      auto const sf = emitCmpRefCount(v, 0, loc.reg());
-      return std::make_pair(sf, CC_GE);
-    }
-  }();
+  auto const sf = emitCmpRefCount(v, 0, loc.reg());
+  auto const cc = CC_GE;
   ifThen(v, cc, sf, [&] (Vout& v) { emitIncRef(v, loc.reg(), reason); });
 }
 

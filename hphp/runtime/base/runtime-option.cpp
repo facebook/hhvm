@@ -1946,6 +1946,7 @@ void RuntimeOption::Load(
       EvalJitSerdesFile.clear();
       DumpPreciseProfData = false;
     }
+    EvalJitPGOUseAddrCountedCheck &= addr_encodes_persistency;
     if (EvalSanitizeReqHeap) {
       HeapObjectSanitizer::install_signal_handler();
     }

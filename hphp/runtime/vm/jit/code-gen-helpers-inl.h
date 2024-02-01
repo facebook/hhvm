@@ -99,20 +99,6 @@ inline ConditionCode emitIsTVTypeRefCounted(Vout& v, Vreg sf, TLoc s1) {
   return CC_NZ;
 }
 
-inline Vreg emitIsValRefCountedByPointer(Vout& v, Vreg s) {
-  auto const sf = v.makeReg();
-  v << shrqi{(int)kUncountedMaxShift, s, v.makeReg(), sf};
-  return sf;
-}
-
-inline Vreg emitIsValRefCountedByPointer(Vout& v, Vptr m) {
-  auto const d = v.makeReg();
-  v << lea{m, d};
-  auto const sf = v.makeReg();
-  v << shrqi{(int)kUncountedMaxShift, d, v.makeReg(), sf};
-  return sf;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 inline Vreg emitCmpRefCount(Vout& v, Immed s0, Vreg s1) {

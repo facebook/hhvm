@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/configs/hacklang.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/debugger-hook.h"
@@ -33,7 +34,7 @@ static std::atomic<bool> s_foundHHConfig(false);
 void checkHHConfig(const Unit* unit) {
 
   if (RuntimeOption::RepoAuthoritative ||
-      !RuntimeOption::LookForTypechecker ||
+      !Cfg::HackLang::LookForTypechecker ||
       s_foundHHConfig ||
       isDebuggerAttached()) {
     return;
@@ -98,7 +99,7 @@ void autoTypecheckRequestExit() {
 
 void autoTypecheck(const Unit* unit) {
   if (RuntimeOption::RepoAuthoritative ||
-      !RuntimeOption::AutoTypecheck ||
+      !Cfg::HackLang::AutoTypecheck ||
       *tl_doneAutoTypecheck ||
       isDebuggerAttached()) {
     return;

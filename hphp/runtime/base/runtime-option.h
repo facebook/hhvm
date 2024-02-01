@@ -28,6 +28,7 @@
 #include <folly/dynamic.h>
 
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/configs/hacklang.h"
 #include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/configs/repo-options-flags-generated.h"
 #include "hphp/runtime/base/package.h"
@@ -113,29 +114,6 @@ SECTIONS_FOR_REPOOPTIONSFLAGS()
 // (N=no-prefix, P=PHP7, E=Eval, H=Hack.Lang)
 #define PARSERFLAGS() \
   N(StringMap,      AliasedNamespaces,                {})             \
-  H(bool,           DisableLvalAsAnExpression,        false)          \
-  H(bool,           ConstDefaultFuncArgs,             false)          \
-  H(bool,           ConstStaticProps,                 false)          \
-  H(bool,           AbstractStaticProps,              false)          \
-  H(bool,           DisallowFuncPtrsInConstants,      false)          \
-  H(bool,           AllowUnstableFeatures,            false)          \
-  H(bool,           EnableXHPClassModifier,           true)           \
-  H(bool,           DisableXHPElementMangling,        true)           \
-  H(bool,           StressShallowDeclDeps,            false)          \
-  H(bool,           StressFoldedDeclDeps,             false)          \
-  /* Allow omission of some `readonly` annotations based on           \
-   * nonlocal inference powered by decl directed bytecode             \
-   */                                                                 \
-  H(bool,           ReadonlyNonlocalInference,        false)          \
-  /* Emit specialized bytecodes when we an infer a typehint does not  \
-   * contain a reified generic bytecode, powered by decl directed     \
-   * bytecode                                                         \
-   */                                                                 \
-  H(bool,           OptimizeReifiedParamChecks,       false)          \
-  /* Make it so referencing superglobals directly via their $_[A-Z]+  \
-   * "variable" name hard-fails rather than emitting, e.g., CgetG     \
-   */                                                                 \
-  H(bool,           DisallowDirectSuperglobalsRefs,   false)          \
   /**/
 
   /**/
@@ -689,8 +667,6 @@ struct RuntimeOption {
   static bool TimeoutsUseWallTime;
   static bool EvalAuthoritativeMode;
   static int CheckCLIClientCommands;
-  static bool LookForTypechecker;
-  static bool AutoTypecheck;
   static uint32_t EvalInitialStaticStringTableSize;
   static uint32_t EvalInitialTypeTableSize;
   static uint32_t EvalInitialFuncTableSize;
@@ -708,22 +684,6 @@ struct RuntimeOption {
 
   static std::string WatchmanRootSocket;
   static std::string WatchmanDefaultSocket;
-
-  // Disables PHP's call_user_func function.
-  // Valid values are 0 => enabled (default),
-  // 1 => warning, 2 => error.
-  static uint64_t DisableCallUserFunc;
-  // Disables PHP's call_user_func_array function.
-  // Valid values are 0 => enabled (default),
-  // 1 => warning, 2 => error.
-  static uint64_t DisableCallUserFuncArray;
-  // Disables PHP's constant function
-  // valid values are 0 => enabled (default)
-  // 1 => warning, 2 => error
-  static uint64_t DisableConstant;
-  // Enables the class-level where constraints
-  // true => allow the feature, false => disable the feature
-  static bool EnableClassLevelWhereClauses;
 
   static hphp_string_map<TypedValue> ConstantFunctions;
 

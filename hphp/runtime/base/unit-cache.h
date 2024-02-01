@@ -93,7 +93,6 @@ Unit* lookupSyslibUnit(StringData* path);
  */
 
 #define UNITCACHEFLAGS()                        \
-  R(EnableClassLevelWhereClauses)               \
   R(EvalGenerateDocComments)                    \
   R(EnableXHP)                                  \
   R(EvalEnableCallBuiltin)                      \

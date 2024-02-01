@@ -150,8 +150,6 @@ void ClassCache::loadFail(const StringData* name, const LdClsFallback fallback) 
   switch (fallback) {
     case LdClsFallback::FATAL:
       raise_error(Strings::UNKNOWN_CLASS, name->data());
-    case LdClsFallback::FATAL_RESOLVE_CLASS:
-      raise_error(Strings::FAILED_RESOLVE_CLASS, name->data());
     case LdClsFallback::THROW_CLASSNAME_TO_CLASS_STRING:
     case LdClsFallback::THROW_CLASSNAME_TO_CLASS_LAZYCLASS:
     {

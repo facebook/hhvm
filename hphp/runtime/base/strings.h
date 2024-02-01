@@ -26,7 +26,6 @@ constexpr char CONSTANT_ALREADY_DEFINED[] = "Constant %s already defined";
 constexpr char DIVISION_BY_ZERO[] =
   "Division by zero";
 constexpr char UNKNOWN_CLASS[] = "Class undefined: %s";
-constexpr char FAILED_RESOLVE_CLASS[] = "Failure to resolve undefined class %s";
 constexpr char CANT_ACCESS_SELF[] =
   "Cannot access self:: when no class scope is active";
 constexpr char CANT_ACCESS_PARENT_WHEN_NO_CLASS[] =

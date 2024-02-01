@@ -24,7 +24,7 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 /**
- * The uri of an IDL defined type.
+ * The "uri" of a Thrift type.
  */
 @SuppressWarnings({ "unused", "serial", "unchecked" })
 public class TypeUri extends TUnion<TypeUri> implements Comparable<TypeUri> {
@@ -232,48 +232,62 @@ public class TypeUri extends TUnion<TypeUri> implements Comparable<TypeUri> {
   }
 
   /**
-   * The unique Thrift URI for this type.
+   * The universal name of this type, sometimes referred to as a Thrift URI.
+   * Usually preferred when the name is shorter or has the same length as the
+   * hash prefix.
    */
   public String getUri() {
     return (String) __getValue(URI);
   }
 
   /**
-   * The unique Thrift URI for this type.
+   * The universal name of this type, sometimes referred to as a Thrift URI.
+   * Usually preferred when the name is shorter or has the same length as the
+   * hash prefix.
    */
   public void setUri(String __value) {
     __setValue(URI, __value);
   }
 
   /**
-   * A prefix of the SHA2-256 hash of the URI.
+   * A prefix of the SHA2-256 hash of the universal name. It is ByteString
+   * instead of binary to fit a 16-byte prefix into the inline storage making
+   * use of the small string optimization (SSO). In libstdc++ std::string SSO
+   * is limited to 15 bytes and would require an allocation.
    */
   public byte[] getTypeHashPrefixSha2_256() {
     return (byte[]) __getValue(TYPEHASHPREFIXSHA2_256);
   }
 
   /**
-   * A prefix of the SHA2-256 hash of the URI.
+   * A prefix of the SHA2-256 hash of the universal name. It is ByteString
+   * instead of binary to fit a 16-byte prefix into the inline storage making
+   * use of the small string optimization (SSO). In libstdc++ std::string SSO
+   * is limited to 15 bytes and would require an allocation.
    */
   public void setTypeHashPrefixSha2_256(byte[] __value) {
     __setValue(TYPEHASHPREFIXSHA2_256, __value);
   }
 
   /**
-   * The (potentially not unique) scoped name of this type.
-   * Format is `filename.typename`, e.g. `standard.TypeUri`.
-   * This is a fallback for types that do not have URIs yet.
-   * Must be prepared for the active field to switch to `uri` as package statements are rolled out!
+   * The scoped (qualified) name of this type in the form
+   * `<filename>.<typename>`, e.g. `search.Query`. Unlike the universal name,
+   * it is potentially not unique. This is a fallback for types that do not
+   * have universal names yet. Don't rely on `scopedName` to be always
+   * available. It will be replaced by `uri` as package declarations are
+   * rolled out.
    */
   public String getScopedName() {
     return (String) __getValue(SCOPEDNAME);
   }
 
   /**
-   * The (potentially not unique) scoped name of this type.
-   * Format is `filename.typename`, e.g. `standard.TypeUri`.
-   * This is a fallback for types that do not have URIs yet.
-   * Must be prepared for the active field to switch to `uri` as package statements are rolled out!
+   * The scoped (qualified) name of this type in the form
+   * `<filename>.<typename>`, e.g. `search.Query`. Unlike the universal name,
+   * it is potentially not unique. This is a fallback for types that do not
+   * have universal names yet. Don't rely on `scopedName` to be always
+   * available. It will be replaced by `uri` as package declarations are
+   * rolled out.
    */
   public void setScopedName(String __value) {
     __setValue(SCOPEDNAME, __value);

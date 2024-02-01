@@ -829,4 +829,3 @@ cdef class TypeName(thrift.py3.types.Union):
         return thrift.util.converter.to_py_struct(py_deprecated_types.TypeName, self)
 ByteString = bytes
 ByteBuffer = _fbthrift_iobuf.IOBuf
-Uri = str

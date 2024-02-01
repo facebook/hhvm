@@ -84,7 +84,7 @@ enum apache_thrift_type_standard_TypeUriEnum: int {
 }
 
 /**
- * The uri of an IDL defined type.
+ * The "uri" of a Thrift type.
  *
  * Original thrift struct:-
  * TypeUri
@@ -129,26 +129,33 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
     ?'scopedName' => ?string,
     ...
   );
-  const int STRUCTURAL_ID = 2998943141803441214;
+  const int STRUCTURAL_ID = 4999542119567975443;
   /**
-   * The unique Thrift URI for this type.
+   * The universal name of this type, sometimes referred to as a Thrift URI.
+   * Usually preferred when the name is shorter or has the same length as the
+   * hash prefix.
    * 
    * Original thrift field:-
-   * 1: standard.Uri uri
+   * 1: string uri
    */
   public ?string $uri;
   /**
-   * A prefix of the SHA2-256 hash of the URI.
+   * A prefix of the SHA2-256 hash of the universal name. It is ByteString
+   * instead of binary to fit a 16-byte prefix into the inline storage making
+   * use of the small string optimization (SSO). In libstdc++ std::string SSO
+   * is limited to 15 bytes and would require an allocation.
    * 
    * Original thrift field:-
    * 2: standard.ByteString typeHashPrefixSha2_256
    */
   public ?string $typeHashPrefixSha2_256;
   /**
-   * The (potentially not unique) scoped name of this type.
-   * Format is `filename.typename`, e.g. `standard.TypeUri`.
-   * This is a fallback for types that do not have URIs yet.
-   * Must be prepared for the active field to switch to `uri` as package statements are rolled out!
+   * The scoped (qualified) name of this type in the form
+   * `<filename>.<typename>`, e.g. `search.Query`. Unlike the universal name,
+   * it is potentially not unique. This is a fallback for types that do not
+   * have universal names yet. Don't rely on `scopedName` to be always
+   * available. It will be replaced by `uri` as package declarations are
+   * rolled out.
    * 
    * Original thrift field:-
    * 3: string scopedName
@@ -279,16 +286,7 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
               "id" => 1,
               "type" => tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
-                    shape(
-                      "name" => "standard.Uri",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
-                        )
-                      ),
-                    )
-                  ),
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                 )
               ),
               "name" => "uri",
@@ -335,15 +333,6 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
     return shape(
       'struct' => dict[],
       'fields' => dict[
-        'uri' => shape(
-          'field' => dict[],
-          'type' => dict[
-            '\facebook\thrift\annotation\Experimental' => \facebook\thrift\annotation\Experimental::fromShape(
-              shape(
-              )
-            ),
-          ],
-        ),
         'typeHashPrefixSha2_256' => shape(
           'field' => dict[],
           'type' => dict[

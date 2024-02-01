@@ -46,7 +46,7 @@ union ProtocolUnion {
   /** A standard protocol, known by all Thrift implementations. */
   1: standard.StandardProtocol standard;
   /** A custom protocol. */
-  2: standard.Uri custom;
+  2: string custom;
   /** An externally stored protocol. */
   @python.Py3Hidden
   3: id.ProtocolId id;

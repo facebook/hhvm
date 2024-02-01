@@ -153,7 +153,7 @@ struct DefinitionAttrs {
    * URI can no longer be deserialized.
    */
   // TODO(afuller): Support aliases to help with renaming.
-  2: standard.Uri uri;
+  2: string uri;
 
   /**
    * DEPRECATED! Prefer `annotations`.
@@ -162,9 +162,10 @@ struct DefinitionAttrs {
   3: AnnotationIds structuredAnnotations;
 
   /**
-   * The structured annotations associated with this definition.
+   * The structured annotations associated with this definition indexed by
+   * their universal names.
    */
-  8: map<standard.Uri, Annotation> annotations;
+  8: map<string, Annotation> annotations;
 
   /**
    * The unstructured annotations (deprecated) associated with this definition.

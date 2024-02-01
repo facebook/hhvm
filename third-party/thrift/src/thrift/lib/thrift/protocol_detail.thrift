@@ -42,8 +42,8 @@ namespace py thrift.lib.thrift.protocol_detail
 }
 @cpp.UseOpEncode
 struct Object {
-  // The type of the object, if applicable.
-  1: standard.Uri type;
+  // The universal name (URI) of the object's type, if applicable.
+  1: string type;
 
   // The members of the object.
   // TODO(ytj): use schema.FieldId as key

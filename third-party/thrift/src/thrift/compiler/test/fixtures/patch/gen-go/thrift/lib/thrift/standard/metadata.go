@@ -20,11 +20,6 @@ var (
     premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
             )
-    premadeThriftType_standard_Uri = metadata.NewThriftType().SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("standard.Uri").
-            SetUnderlyingType(premadeThriftType_string),
-            )
     premadeThriftType_binary = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr(),
             )
@@ -53,7 +48,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetId(1).
     SetName("uri").
     SetIsOptional(false).
-    SetType(premadeThriftType_standard_Uri),
+    SetType(premadeThriftType_string),
             metadata.NewThriftField().
     SetId(2).
     SetName("typeHashPrefixSha2_256").

@@ -44,7 +44,7 @@ def __EXPAND_THRIFT_SPEC(spec):
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'Void', 'StandardProtocol', 'TypeUri', 'TypeName', 'ByteString', 'ByteBuffer', 'Uri']
+__all__ = ['UTF8STRINGS', 'Void', 'StandardProtocol', 'TypeUri', 'TypeName', 'ByteString', 'ByteBuffer']
 
 class Void:
   Unused = 0
@@ -85,15 +85,22 @@ class StandardProtocol:
 
 class TypeUri(object):
   r"""
-  The uri of an IDL defined type.
+  The "uri" of a Thrift type.
   
   Attributes:
-   - uri: The unique Thrift URI for this type.
-   - typeHashPrefixSha2_256: A prefix of the SHA2-256 hash of the URI.
-   - scopedName: The (potentially not unique) scoped name of this type.
-  Format is `filename.typename`, e.g. `standard.TypeUri`.
-  This is a fallback for types that do not have URIs yet.
-  Must be prepared for the active field to switch to `uri` as package statements are rolled out!
+   - uri: The universal name of this type, sometimes referred to as a Thrift URI.
+  Usually preferred when the name is shorter or has the same length as the
+  hash prefix.
+   - typeHashPrefixSha2_256: A prefix of the SHA2-256 hash of the universal name. It is ByteString
+  instead of binary to fit a 16-byte prefix into the inline storage making
+  use of the small string optimization (SSO). In libstdc++ std::string SSO
+  is limited to 15 bytes and would require an allocation.
+   - scopedName: The scoped (qualified) name of this type in the form
+  `<filename>.<typename>`, e.g. `search.Query`. Unlike the universal name,
+  it is potentially not unique. This is a fallback for types that do not
+  have universal names yet. Don't rely on `scopedName` to be always
+  available. It will be replaced by `uri` as package declarations are
+  rolled out.
   """
 
   thrift_spec = None
@@ -944,7 +951,6 @@ class TypeName(object):
 
 ByteString = UnimplementedTypedef()
 ByteBuffer = UnimplementedTypedef()
-Uri = UnimplementedTypedef()
 all_structs.append(TypeUri)
 TypeUri.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'uri', True, None, 2, ), # 1

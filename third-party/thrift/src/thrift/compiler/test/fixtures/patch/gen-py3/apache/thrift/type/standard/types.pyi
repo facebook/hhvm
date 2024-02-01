@@ -203,4 +203,3 @@ class TypeName(thrift.py3.types.Union, _typing.Hashable):
 
 ByteString = bytes
 ByteBuffer = _fbthrift_iobuf.IOBuf
-Uri = str

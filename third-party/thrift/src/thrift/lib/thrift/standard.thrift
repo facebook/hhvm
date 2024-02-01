@@ -64,21 +64,14 @@ typedef binary ByteString
 }
 typedef binary ByteBuffer
 
-/**
- * A (scheme-less) URI.
- *
- * Of the form described in RFC 3986, but with every component optional.
- *
- * See rfc3986
- */
-// TODO(afuller): Add definition for 'normal' based on unicode + uri specs.
-@thrift.Experimental // TODO(afuller): Adapt.
-typedef string Uri (thrift.uri = "")
-
-/** The uri of an IDL defined type. */
+/** The "uri" of a Thrift type. */
 union TypeUri {
-  /** The unique Thrift URI for this type. */
-  1: Uri uri;
+  /**
+   * The universal name of this type, sometimes referred to as a Thrift URI.
+   * Usually preferred when the name is shorter or has the same length as the
+   * hash prefix.
+   */
+  1: string uri;
 
   /**
    * A prefix of the SHA2-256 hash of the universal name. It is ByteString
@@ -89,10 +82,12 @@ union TypeUri {
   2: ByteString typeHashPrefixSha2_256;
 
   /**
-   * The (potentially not unique) scoped name of this type.
-   * Format is `filename.typename`, e.g. `standard.TypeUri`.
-   * This is a fallback for types that do not have URIs yet.
-   * Must be prepared for the active field to switch to `uri` as package statements are rolled out!
+   * The scoped (qualified) name of this type in the form
+   * `<filename>.<typename>`, e.g. `search.Query`. Unlike the universal name,
+   * it is potentially not unique. This is a fallback for types that do not
+   * have universal names yet. Don't rely on `scopedName` to be always
+   * available. It will be replaced by `uri` as package declarations are
+   * rolled out.
    */
   3: string scopedName;
 }

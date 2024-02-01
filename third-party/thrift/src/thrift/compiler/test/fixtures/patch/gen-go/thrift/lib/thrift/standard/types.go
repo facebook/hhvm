@@ -68,32 +68,6 @@ if err != nil {
     return decodeResult, decodeErr
 }
 
-type Uri = string
-
-func NewUri() Uri {
-    return ""
-}
-
-func WriteUri(item Uri, p thrift.Protocol) error {
-    if err := p.WriteString(item); err != nil {
-    return err
-}
-    return nil
-}
-
-func ReadUri(p thrift.Protocol) (Uri, error) {
-    var decodeResult Uri
-    decodeErr := func() error {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        decodeResult = result
-        return nil
-    }()
-    return decodeResult, decodeErr
-}
-
 type Void int32
 
 const (
@@ -215,7 +189,7 @@ func StandardProtocolPtr(v StandardProtocol) *StandardProtocol {
 
 
 type TypeUri struct {
-    Uri *Uri `thrift:"uri,1" json:"uri,omitempty" db:"uri"`
+    Uri *string `thrift:"uri,1" json:"uri,omitempty" db:"uri"`
     TypeHashPrefixSha2_256 ByteString `thrift:"typeHashPrefixSha2_256,2" json:"typeHashPrefixSha2_256,omitempty" db:"typeHashPrefixSha2_256"`
     ScopedName *string `thrift:"scopedName,3" json:"scopedName,omitempty" db:"scopedName"`
 }
@@ -226,13 +200,13 @@ func NewTypeUri() *TypeUri {
     return (&TypeUri{})
 }
 
-func (x *TypeUri) GetUriNonCompat() *Uri {
+func (x *TypeUri) GetUriNonCompat() *string {
     return x.Uri
 }
 
-func (x *TypeUri) GetUri() Uri {
+func (x *TypeUri) GetUri() string {
     if !x.IsSetUri() {
-        return NewUri()
+        return ""
     }
 
     return *x.Uri
@@ -262,12 +236,12 @@ func (x *TypeUri) GetScopedName() string {
     return *x.ScopedName
 }
 
-func (x *TypeUri) SetUriNonCompat(value Uri) *TypeUri {
+func (x *TypeUri) SetUriNonCompat(value string) *TypeUri {
     x.Uri = &value
     return x
 }
 
-func (x *TypeUri) SetUri(value *Uri) *TypeUri {
+func (x *TypeUri) SetUri(value *string) *TypeUri {
     x.Uri = value
     return x
 }
@@ -314,8 +288,7 @@ func (x *TypeUri) writeField1(p thrift.Protocol) error {  // Uri
     }
 
     item := *x.GetUriNonCompat()
-    err := WriteUri(item, p)
-if err != nil {
+    if err := p.WriteString(item); err != nil {
     return err
 }
 
@@ -367,7 +340,7 @@ func (x *TypeUri) writeField3(p thrift.Protocol) error {  // ScopedName
 }
 
 func (x *TypeUri) readField1(p thrift.Protocol) error {  // Uri
-    result, err := ReadUri(p)
+    result, err := p.ReadString()
 if err != nil {
     return err
 }
@@ -451,7 +424,7 @@ func NewTypeUriBuilder() *TypeUriBuilder {
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewTypeUri().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *TypeUriBuilder) Uri(value *Uri) *TypeUriBuilder {
+func (x *TypeUriBuilder) Uri(value *string) *TypeUriBuilder {
     x.obj.Uri = value
     return x
 }

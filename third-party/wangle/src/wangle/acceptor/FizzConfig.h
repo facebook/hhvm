@@ -48,6 +48,8 @@ struct FizzConfig {
   std::vector<fizz::CertificateCompressionAlgorithm>
       supportedCompressionAlgorithms;
   fizz::AsyncFizzBase::TransportOptions transportOptions;
+
+  bool dropClientX509Cert{false};
 };
 
 struct FizzClientConfig {

@@ -16,9 +16,82 @@
 #include <functional>
 
 namespace fizz {
+namespace detail {
+class LibAegisCipherBase {
+ public:
+  virtual ~LibAegisCipherBase() = default;
+  virtual void stateInit(
+      const uint8_t* ad,
+      size_t adlen,
+      const uint8_t* npub,
+      const uint8_t* k,
+      size_t inputLength) = 0;
+  virtual int
+  encryptUpdate(uint8_t* c, size_t* written, const uint8_t* m, size_t mlen) = 0;
+  virtual int
+  encryptFinal(uint8_t* c, size_t* written, uint8_t* m, size_t maclen) = 0;
+  virtual int
+  decryptUpdate(uint8_t* m, size_t* written, const uint8_t* c, size_t clen) = 0;
+  virtual int decryptFinal(
+      uint8_t* m,
+      size_t* written,
+      const uint8_t* mac,
+      size_t maclen) = 0;
+};
+
+template <typename Impl>
+class LibAegisCipher : public LibAegisCipherBase {
+ public:
+  ~LibAegisCipher() override = default;
+  LibAegisCipher() : state_({}) {}
+  void stateInit(
+      const uint8_t* ad,
+      size_t adlen,
+      const uint8_t* npub,
+      const uint8_t* k,
+      size_t capacity) override {
+    capacity_ = capacity;
+    return Impl::stateInit(&state_, ad, adlen, npub, k);
+  }
+  int encryptUpdate(uint8_t* c, size_t* written, const uint8_t* m, size_t mlen)
+      override {
+    return Impl::encryptUpdate(&state_, c, capacity_, written, m, mlen);
+  }
+  int encryptFinal(uint8_t* c, size_t* written, uint8_t* m, size_t maclen)
+      override {
+    return Impl::encryptFinal(&state_, c, capacity_, written, m, maclen);
+  }
+  int decryptUpdate(uint8_t* m, size_t* written, const uint8_t* c, size_t clen)
+      override {
+    return Impl::decryptUpdate(&state_, m, capacity_, written, c, clen);
+  }
+  int decryptFinal(
+      uint8_t* m,
+      size_t* written,
+      const uint8_t* mac,
+      size_t maclen) override {
+    return Impl::decryptFinal(&state_, m, capacity_, written, mac, maclen);
+  }
+  typename Impl::stateType state_;
+  size_t capacity_{0};
+};
+} // namespace detail
+#define DEFINE_LIBAEGIS_CIPHER(STRUCT_NAME, CIPHER)                            \
+  struct STRUCT_NAME {                                                         \
+    using stateType = CIPHER##_state;                                          \
+    static constexpr auto stateInit{CIPHER##_state_init};                      \
+    static constexpr auto encryptUpdate{CIPHER##_state_encrypt_update};        \
+    static constexpr auto encryptFinal{CIPHER##_state_encrypt_detached_final}; \
+    static constexpr auto decryptUpdate{                                       \
+        CIPHER##_state_decrypt_detached_update};                               \
+    static constexpr auto decryptFinal{CIPHER##_state_decrypt_detached_final}; \
+  };
+
+DEFINE_LIBAEGIS_CIPHER(AEGIS128L, aegis128l)
+DEFINE_LIBAEGIS_CIPHER(AEGIS256, aegis256)
 
 static_assert(
-    fizz::AEGISCipher::kMaxIVLength == fizz_aegis256_NPUBBYTES,
+    fizz::AEGISCipher::kMaxIVLength == aegis256_NPUBBYTES,
     "Invalid AEGISCipher::kMaxIVLength");
 
 std::unique_ptr<folly::IOBuf> AEGISCipher::doEncrypt(
@@ -27,12 +100,21 @@ std::unique_ptr<folly::IOBuf> AEGISCipher::doEncrypt(
     folly::ByteRange iv,
     folly::ByteRange key,
     Aead::AeadOptions options) const {
-  AegisEVPCtx ctx;
-  if (initstate_(key.data(), iv.data(), &ctx) != 0) {
-    throw std::runtime_error("Initiate encryption state error");
+  const uint8_t* adData;
+  size_t adLen;
+  std::unique_ptr<folly::IOBuf> ad;
+  if (associatedData->isChained()) {
+    ad = associatedData->cloneCoalesced();
+    adData = ad->data();
+    adLen = ad->length();
+  } else {
+    adData = associatedData->data();
+    adLen = associatedData->length();
   }
 
   auto inputLength = plaintext->computeChainDataLength();
+  impl_->stateInit(adData, adLen, iv.data(), key.data(), inputLength);
+
   const auto& bufOption = options.bufferOpt;
   const auto& allocOption = options.allocOpt;
   std::unique_ptr<folly::IOBuf> output;
@@ -74,51 +156,34 @@ std::unique_ptr<folly::IOBuf> AEGISCipher::doEncrypt(
     input = plaintext.get();
   }
 
-  if (associatedData) {
-    for (auto current : *associatedData) {
-      if (current.size() > std::numeric_limits<int>::max()) {
-        throw std::runtime_error("too much associated data");
-      }
-      if (aadUpdate_(current.data(), current.size(), &ctx) != 0) {
-        throw std::runtime_error("Encryption aad update error");
-      }
-    }
-    if (aadFinal_(&ctx) != 0) {
-      throw std::runtime_error("Encryption aad final error");
-    }
-  }
-
   struct Impl {
     const AEGISCipher& self;
-    AegisEVPCtx& ctx;
     unsigned char* tag;
 
-    Impl(const AEGISCipher& s, AegisEVPCtx& c, unsigned char* t)
-        : self(s), ctx(c), tag(t) {}
+    Impl(const AEGISCipher& s, unsigned char* t) : self(s), tag(t) {}
     bool encryptUpdate(
         uint8_t* cipher,
         int* outLen,
         const uint8_t* plain,
         size_t len) {
-      unsigned long long tempOutLen;
-      auto ret = self.encryptUpdate_(cipher, &tempOutLen, plain, len, &ctx);
-      *outLen = static_cast<int>(tempOutLen);
+      size_t tempOutLen;
+      auto ret = self.impl_->encryptUpdate(cipher, &tempOutLen, plain, len);
+      *outLen = tempOutLen;
       return ret == 0;
     }
     bool encryptFinal(unsigned char* outm, int* outLen) {
-      unsigned long long tempOutLen;
-      auto ret = self.encryptFinal_(outm, &tempOutLen, tag, &ctx);
-      *outLen = static_cast<int>(tempOutLen) - kTagLength;
+      size_t tempOutLen;
+      auto ret = self.impl_->encryptFinal(outm, &tempOutLen, tag, kTagLength);
+      *outLen = tempOutLen;
       return ret == 0;
     }
   };
   unsigned char tag[kTagLength];
   if (mms_ == AEGISCipher::kAEGIS128LMMS) {
     encFuncBlocks<AEGISCipher::kAEGIS128LMMS>(
-        Impl(*this, ctx, tag), *input, *output);
+        Impl(*this, tag), *input, *output);
   } else if (mms_ == AEGISCipher::kAEGIS256MMS) {
-    encFuncBlocks<AEGISCipher::kAEGIS256MMS>(
-        Impl(*this, ctx, tag), *input, *output);
+    encFuncBlocks<AEGISCipher::kAEGIS256MMS>(Impl(*this, tag), *input, *output);
   } else {
     throw std::runtime_error("Unsupported AEGIS state size");
   }
@@ -148,12 +213,21 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::doDecrypt(
     folly::ByteRange key,
     folly::MutableByteRange tagOut,
     bool inPlace) const {
-  AegisEVPCtx ctx;
-  if (initstate_(key.data(), iv.data(), &ctx) != 0) {
-    throw std::runtime_error("Initiate encryption state error");
+  const uint8_t* adData;
+  size_t adLen;
+  std::unique_ptr<folly::IOBuf> ad;
+  if (associatedData->isChained()) {
+    ad = associatedData->cloneCoalesced();
+    adData = ad->data();
+    adLen = ad->length();
+  } else {
+    adData = associatedData->data();
+    adLen = associatedData->length();
   }
 
   auto inputLength = ciphertext->computeChainDataLength();
+  impl_->stateInit(adData, adLen, iv.data(), key.data(), inputLength);
+
   folly::IOBuf* input;
   std::unique_ptr<folly::IOBuf> output;
   if (!inPlace) {
@@ -165,32 +239,18 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::doDecrypt(
     input = output.get();
   }
 
-  if (associatedData) {
-    for (auto current : *associatedData) {
-      if (current.size() > std::numeric_limits<int>::max()) {
-        throw std::runtime_error("too much associated data");
-      }
-      if (aadUpdate_(current.data(), current.size(), &ctx) != 0) {
-        throw std::runtime_error("Decryption aad update error");
-      }
-    }
-    if (aadFinal_(&ctx) != 0) {
-      throw std::runtime_error("Decryption aad final error");
-    }
-  }
   struct Impl {
     const AEGISCipher& self;
-    AegisEVPCtx& ctx;
     const unsigned char* expectedTag{nullptr};
 
-    Impl(const AEGISCipher& s, AegisEVPCtx& c) : self(s), ctx(c) {}
+    explicit Impl(const AEGISCipher& s) : self(s) {}
     bool decryptUpdate(
         uint8_t* plain,
         const uint8_t* cipher,
         size_t len,
         int* outLen) {
-      unsigned long long tempOutLen;
-      auto ret = self.decryptUpdate_(plain, &tempOutLen, cipher, len, &ctx);
+      size_t tempOutLen;
+      auto ret = self.impl_->decryptUpdate(plain, &tempOutLen, cipher, len);
       *outLen = static_cast<int>(tempOutLen);
       return ret == 0;
     }
@@ -199,8 +259,9 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::doDecrypt(
       return true;
     }
     bool decryptFinal(unsigned char* outm, int* outLen) {
-      unsigned long long tempOutLen;
-      auto ret = self.decryptFinal_(outm, &tempOutLen, expectedTag, &ctx);
+      size_t tempOutLen;
+      auto ret =
+          self.impl_->decryptFinal(outm, &tempOutLen, expectedTag, kTagLength);
       *outLen = static_cast<int>(tempOutLen);
       return ret == 0;
     }
@@ -209,10 +270,10 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::doDecrypt(
   bool decrypted;
   if (mms_ == AEGISCipher::kAEGIS128LMMS) {
     decrypted = decFuncBlocks<AEGISCipher::kAEGIS128LMMS>(
-        Impl(*this, ctx), *input, *output, tagOut);
+        Impl(*this), *input, *output, tagOut);
   } else if (mms_ == AEGISCipher::kAEGIS256MMS) {
     decrypted = decFuncBlocks<AEGISCipher::kAEGIS256MMS>(
-        Impl(*this, ctx), *input, *output, tagOut);
+        Impl(*this), *input, *output, tagOut);
   } else {
     throw std::runtime_error("Unsupported AEGIS state size");
   }
@@ -223,66 +284,43 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::doDecrypt(
 }
 
 AEGISCipher::AEGISCipher(
-    InitStateFn init,
-    AadUpdateFn aadUpdate,
-    AadFinalFn addFinal,
-    EncryptUpdateFn encryptUpdate,
-    EncryptFinalFn encryptFinal,
-    DecryptUpdateFn decryptUpdate,
-    DecryptFinalFn decryptFinal,
+    std::unique_ptr<detail::LibAegisCipherBase> impl,
     size_t keyLength,
     size_t ivLength,
     size_t mms)
-    : initstate_(init),
-      aadUpdate_(aadUpdate),
-      aadFinal_(addFinal),
-      encryptUpdate_(encryptUpdate),
-      encryptFinal_(encryptFinal),
-      decryptUpdate_(decryptUpdate),
-      decryptFinal_(decryptFinal),
+    : impl_(std::move(impl)),
       keyLength_(keyLength),
       ivLength_(ivLength),
       mms_(mms) {
   static int dummy = []() -> int {
-    // The application should be doing this, sodium_init is safe to call
-    // multiple times, and `fizz_aegis*_pick_best_implementation` relies on
-    // sodium's cpu feature vector being populated (which is done in init)
-    if (sodium_init() == -1) {
-      throw std::runtime_error("failed to initialize libsodium");
+    // aegis_init is safe to call multiple times. It populates libaegis's cpu
+    // feature vector
+    if (aegis_init() == -1) {
+      throw std::runtime_error("failed to initialize libaegis");
     }
-    (void)fizz_aegis128l_pick_best_implementation();
-    (void)fizz_aegis256_pick_best_implementation();
     return 0;
   }();
   (void)dummy;
 }
 
 std::unique_ptr<Aead> AEGISCipher::make128L() {
+  auto impl = std::unique_ptr<detail::LibAegisCipherBase>(
+      new detail::LibAegisCipher<fizz::AEGIS128L>());
   return std::unique_ptr<Aead>(new AEGISCipher(
-      aegis128l_init_state,
-      aegis128l_aad_update,
-      aegis128l_aad_final,
-      aegis128l_encrypt_update,
-      aegis128l_encrypt_final,
-      aegis128l_decrypt_update,
-      aegis128l_decrypt_final,
-      fizz_aegis128l_KEYBYTES,
-      fizz_aegis128l_NPUBBYTES,
-      kAEGIS128LMMS));
+      std::move(impl),
+      aegis128l_KEYBYTES,
+      aegis128l_NPUBBYTES,
+      AEGISCipher::kAEGIS128LMMS));
 }
 
 std::unique_ptr<Aead> AEGISCipher::make256() {
+  auto impl = std::unique_ptr<detail::LibAegisCipherBase>(
+      new detail::LibAegisCipher<fizz::AEGIS256>());
   return std::unique_ptr<Aead>(new AEGISCipher(
-      aegis256_init_state,
-      aegis256_aad_update,
-      aegis256_aad_final,
-      aegis256_encrypt_update,
-      aegis256_encrypt_final,
-      aegis256_decrypt_update,
-      aegis256_decrypt_final,
-      fizz_aegis256_KEYBYTES,
-      fizz_aegis256_NPUBBYTES,
-      kAEGIS256MMS));
+      std::move(impl),
+      aegis256_KEYBYTES,
+      aegis256_NPUBBYTES,
+      AEGISCipher::kAEGIS256MMS));
 }
 
 void AEGISCipher::setKey(TrafficKey trafficKey) {

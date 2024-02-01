@@ -11,9 +11,9 @@
 
 #if FIZZ_BUILD_AEGIS
 
+#include <aegis.h>
 #include <fizz/crypto/aead/Aead.h>
 #include <fizz/crypto/aead/IOBufUtil.h>
-#include <fizz/third-party/libsodium-aegis/aegis.h>
 #include <folly/Conv.h>
 #include <folly/Memory.h>
 #include <folly/Range.h>
@@ -22,41 +22,13 @@
 #include <folly/ssl/OpenSSLPtrTypes.h>
 
 namespace fizz {
+
+namespace detail {
+class LibAegisCipherBase;
+}
+
 class AEGISCipher : public Aead {
  public:
-  using AegisEVPCtx = fizz_aegis_evp_ctx;
-  using InitStateFn = int (*const)(
-      const unsigned char* key,
-      const unsigned char* nonce,
-      AegisEVPCtx* ctx);
-  using AadUpdateFn = int (*const)(
-      const unsigned char* ad,
-      unsigned long long adlen,
-      AegisEVPCtx* ctx);
-  using AadFinalFn = int (*const)(AegisEVPCtx* ctx);
-  using EncryptUpdateFn = int (*const)(
-      unsigned char* c,
-      unsigned long long* clen_p,
-      const unsigned char* m,
-      unsigned long long mlen,
-      AegisEVPCtx* ctx);
-  using EncryptFinalFn = int (*const)(
-      unsigned char* c,
-      unsigned long long* c_writtenlen_p,
-      unsigned char* mac,
-      AegisEVPCtx* ctx);
-  using DecryptUpdateFn = int (*const)(
-      unsigned char* m,
-      unsigned long long* outlen,
-      const unsigned char* c,
-      unsigned long long clen,
-      AegisEVPCtx* ctx);
-  using DecryptFinalFn = int (*const)(
-      unsigned char* m,
-      unsigned long long* outlen,
-      const unsigned char* mac,
-      AegisEVPCtx* ctx);
-
   static constexpr size_t kMaxIVLength = 32;
   static constexpr size_t kTagLength = 16;
   /* The Minimum Message Size (MMS), in bytes, that is required to perform one
@@ -105,7 +77,6 @@ class AEGISCipher : public Aead {
       folly::ByteRange nonce,
       Aead::AeadOptions options) const override;
 
-  // TODO: (T136805571) We will add implementation for inplace encryption later
   std::unique_ptr<folly::IOBuf> inplaceEncrypt(
       std::unique_ptr<folly::IOBuf>&& plaintext,
       const folly::IOBuf* associatedData,
@@ -129,27 +100,14 @@ class AEGISCipher : public Aead {
     headroom_ = headroom;
   }
 
-  InitStateFn initstate_;
-  AadUpdateFn aadUpdate_;
-  AadFinalFn aadFinal_;
-  EncryptUpdateFn encryptUpdate_;
-  EncryptFinalFn encryptFinal_;
-  DecryptUpdateFn decryptUpdate_;
-  DecryptFinalFn decryptFinal_;
-
  private:
   AEGISCipher(
-      InitStateFn init,
-      AadUpdateFn aadUpdate,
-      AadFinalFn aadFinal_,
-      EncryptUpdateFn encryptUpdate,
-      EncryptFinalFn encryptFinal,
-      DecryptUpdateFn decryptUpdate,
-      DecryptFinalFn decryptFinal,
+      std::unique_ptr<detail::LibAegisCipherBase> impl_,
       size_t keyLength,
       size_t ivLength,
       size_t mms);
 
+  std::unique_ptr<detail::LibAegisCipherBase> impl_;
   TrafficKey trafficKey_;
   folly::ByteRange trafficIvKey_;
   folly::ByteRange trafficKeyKey_;
@@ -160,7 +118,7 @@ class AEGISCipher : public Aead {
   // set by the ctor
   size_t keyLength_;
   size_t ivLength_;
-  int mms_;
+  size_t mms_;
 };
 } // namespace fizz
 #endif

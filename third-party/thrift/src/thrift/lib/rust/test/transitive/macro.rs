@@ -31,7 +31,7 @@ pub fn standalone_subcommand_derive(input: TokenStream) -> TokenStream {
     let name_string = name.to_string();
 
     let gen = quote! {
-        impl ::get_struct_name_types::GetStructNameT for #name {
+        impl ::get_struct_name::GetStructNameT for #name {
             fn get_struct_name() -> &'static str {
                 #name_string
             }

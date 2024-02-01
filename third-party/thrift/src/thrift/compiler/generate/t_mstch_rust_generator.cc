@@ -171,13 +171,8 @@ std::string get_types_import_name(
     return program_name + "__types";
   } else if (crate->second.name == "crate") {
     return crate->second.import_name() + "::types";
-  }
-
-  std::string absolute_crate_name = "::" + crate->second.name + "_types";
-  if (crate->second.multifile_module) {
-    return absolute_crate_name + "::" + mangle(*crate->second.multifile_module);
   } else {
-    return absolute_crate_name;
+    return crate->second.import_name();
   }
 }
 

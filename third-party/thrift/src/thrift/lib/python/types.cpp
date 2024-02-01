@@ -575,7 +575,7 @@ DynamicStructInfo::DynamicStructInfo(
     : name_{name} {
   structInfo_ = static_cast<detail::StructInfo*>(folly::operator_new(
       sizeof(detail::StructInfo) + sizeof(detail::FieldInfo) * numFields,
-      folly::align_val_t{alignof(detail::StructInfo)}));
+      std::align_val_t{alignof(detail::StructInfo)}));
   // reserve vector as we are assigning const char* from the string in
   // vector
   fieldNames_.reserve(numFields);
@@ -596,7 +596,7 @@ DynamicStructInfo::~DynamicStructInfo() {
       structInfo_,
       sizeof(detail::StructInfo) +
           sizeof(detail::FieldInfo) * structInfo_->numFields,
-      folly::align_val_t{alignof(detail::StructInfo)});
+      std::align_val_t{alignof(detail::StructInfo)});
 }
 
 void DynamicStructInfo::addFieldInfo(

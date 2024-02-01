@@ -29,7 +29,7 @@ void ThreadSafeSSLSessionCache::setSSLSession(
 
 folly::ssl::SSLSessionUniquePtr ThreadSafeSSLSessionCache::getSSLSession(
     const std::string& identity) const noexcept {
-  SharedMutex::ReadHolder lock(mutex_);
+  std::shared_lock lock(mutex_);
   return delegate_->getSSLSession(identity);
 }
 
@@ -40,12 +40,12 @@ bool ThreadSafeSSLSessionCache::removeSSLSession(
 }
 
 bool ThreadSafeSSLSessionCache::supportsPersistence() const noexcept {
-  SharedMutex::ReadHolder lock(mutex_);
+  std::shared_lock lock(mutex_);
   return delegate_->supportsPersistence();
 }
 
 size_t ThreadSafeSSLSessionCache::size() const {
-  SharedMutex::ReadHolder lock(mutex_);
+  std::shared_lock lock(mutex_);
   return delegate_->size();
 }
 

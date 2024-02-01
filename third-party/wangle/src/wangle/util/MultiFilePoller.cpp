@@ -117,7 +117,7 @@ void MultiFilePoller::onFileUpdated(const std::string& triggeredPath) {
   // A temporary read cache. Not worth it making it permanent because
   // files do not change frequently.
   std::unordered_map<std::string, std::string> filePathsToFileContents;
-  SharedMutex::ReadHolder rh(rwlock_);
+  std::shared_lock rh(rwlock_);
 
   const auto& callbacks = pathsToCallbackIds_.find(triggeredPath);
   if (callbacks == pathsToCallbackIds_.end()) {

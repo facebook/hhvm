@@ -412,7 +412,7 @@ class ServerWorkerPool : public folly::IOThreadPoolExecutorBase::IOObserver {
 
 template <typename F>
 void ServerWorkerPool::forEachWorker(F&& f) const {
-  Mutex::ReadHolder holder(workersMutex_);
+  std::shared_lock holder(workersMutex_);
   for (const auto& kv : *workers_) {
     f(kv.second.get());
   }
@@ -420,7 +420,7 @@ void ServerWorkerPool::forEachWorker(F&& f) const {
 
 template <typename F>
 void ServerWorkerPool::forRandomWorker(F&& f) const {
-  Mutex::ReadHolder holder(workersMutex_);
+  std::shared_lock holder(workersMutex_);
   DCHECK(workers_->size());
   f((*workers_)[folly::Random::rand32(workers_->size())].second.get());
 }

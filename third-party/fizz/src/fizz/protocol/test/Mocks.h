@@ -63,6 +63,15 @@ class MockKeyScheduler : public KeyScheduler {
       (folly::ByteRange trafficSecret, size_t keyLength, size_t ivLength),
       (const));
   MOCK_METHOD(
+      TrafficKey,
+      getTrafficKeyWithLabel,
+      (folly::ByteRange trafficSecret,
+       folly::StringPiece keyLabel,
+       folly::StringPiece ivLabel,
+       size_t keyLength,
+       size_t ivLength),
+      (const));
+  MOCK_METHOD(
       Buf,
       getResumptionSecret,
       (folly::ByteRange, folly::ByteRange),
@@ -73,6 +82,12 @@ class MockKeyScheduler : public KeyScheduler {
         .WillByDefault(InvokeWithoutArgs([]() {
           return TrafficKey{
               folly::IOBuf::copyBuffer("key"), folly::IOBuf::copyBuffer("iv")};
+        }));
+    ON_CALL(*this, getTrafficKeyWithLabel(_, _, _, _, _))
+        .WillByDefault(InvokeWithoutArgs([]() {
+          return TrafficKey{
+              folly::IOBuf::copyBuffer("key_with_label"),
+              folly::IOBuf::copyBuffer("iv_with_label")};
         }));
     ON_CALL(*this, getResumptionSecret(_, _))
         .WillByDefault(InvokeWithoutArgs(
@@ -103,7 +118,13 @@ class MockKeyScheduler : public KeyScheduler {
         }));
     ON_CALL(*this, getSecret(_))
         .WillByDefault(Invoke([](AppTrafficSecrets type) {
-          return DerivedSecret(std::vector<uint8_t>(), type);
+          // The app traffic secret should be 32 bytes
+          return DerivedSecret(
+              std::vector<uint8_t>({'a', 'p', 'p', 't', 'r', 'a', 'f', 'f',
+                                    'i', 'c', 'a', 'p', 'p', 't', 'r', 'a',
+                                    'f', 'f', 'i', 'c', 'a', 'p', 'p', 't',
+                                    'r', 'a', 'f', 'f', 'i', 'c', '3', '2'}),
+              type);
         }));
   }
 };

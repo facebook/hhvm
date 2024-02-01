@@ -47,7 +47,7 @@ class Handler : public apache::thrift::ServiceHandler<DummyStatus>,
       : serviceHealth_(serviceHealth) {}
 
   folly::coro::Task<ServiceHealth> co_getServiceHealth() override {
-    folly::SharedMutex::ReadHolder guard{healthMutex_};
+    std::shared_lock guard{healthMutex_};
     // ensure the baton is not reset() while posting
     polled_.lock()->post();
     co_return **serviceHealthObserver_;

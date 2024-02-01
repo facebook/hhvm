@@ -53,7 +53,7 @@ EventHandlerBase::getEventHandlers() const {
 }
 
 TProcessorBase::TProcessorBase() {
-  folly::SharedMutex::ReadHolder lock{getRWMutex()};
+  std::shared_lock lock{getRWMutex()};
 
   for (const auto& handler : getHandlers()) {
     addNotNullEventHandler(handler);
@@ -103,7 +103,7 @@ TClientBase::TClientBase(Options options) {
 
   // Automatically ask all registered factories to produce an event
   // handler, and attach the handlers
-  folly::SharedMutex::ReadHolder lock{getRWMutex()};
+  std::shared_lock lock{getRWMutex()};
 
   auto& handlers = getHandlers();
   size_t capacity = handlers.size();

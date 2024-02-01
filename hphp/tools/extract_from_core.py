@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env fbpython
 import argparse
 import io
 import os
@@ -11,7 +11,7 @@ lldb_path = (
     .stdout.decode("utf-8")
     .strip()
 )
-sys.path.append(lldb_path)
+sys.path.insert(0, lldb_path)
 import lldb
 
 

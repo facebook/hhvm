@@ -97,8 +97,8 @@ impl Config {
         self.type_.str()
     }
 
-    fn shortname(&self, section_name: &str) -> String {
-        self.name[section_name.len() + 1..]
+    fn shortname(&self) -> String {
+        self.name[self.name.find('.').unwrap() + 1..]
             .to_owned()
             .replace('.', "")
     }
@@ -110,7 +110,6 @@ pub enum ConfigType {
     Int,
     Int64t,
     UInt32t,
-    UInt64t,
     StdString,
     StdVectorStdString,
     BoostFlatSetStdString,
@@ -123,7 +122,6 @@ impl ConfigType {
             ConfigType::Int => "int",
             ConfigType::Int64t => "int64_t",
             ConfigType::UInt32t => "uint32_t",
-            ConfigType::UInt64t => "uint64_t",
             ConfigType::StdString => "std::string",
             ConfigType::StdVectorStdString => "std::vector<std::string>",
             ConfigType::BoostFlatSetStdString => "boost::container::flat_set<std::string>",
@@ -136,12 +134,6 @@ pub struct ConfigSection {
     pub name: String,
     pub description: Option<String>,
     pub configs: Vec<Config>,
-}
-
-impl ConfigSection {
-    fn shortname(&self) -> String {
-        self.name.replace('.', "")
-    }
 }
 
 #[derive(Debug, Parser)]
@@ -159,7 +151,6 @@ fn parse_type(input: &str) -> IResult<&str, ConfigType> {
             value(ConfigType::Int64t, tag("int64_t")),
             value(ConfigType::Int, tag("int")),
             value(ConfigType::UInt32t, tag("uint32_t")),
-            value(ConfigType::UInt64t, tag("uint64_t")),
             value(ConfigType::StdString, tag("std::string")),
             value(
                 ConfigType::StdVectorStdString,
@@ -179,16 +170,6 @@ fn parse_name(input: &str) -> IResult<&str, &str> {
         recognize(tuple((
             alphanumeric1,
             many1(preceded(tag("."), alphanumeric1)),
-        ))),
-    )(input)
-}
-
-fn parse_section_name(input: &str) -> IResult<&str, &str> {
-    preceded(
-        space0,
-        recognize(tuple((
-            alphanumeric1,
-            many0(preceded(tag("."), alphanumeric1)),
         ))),
     )(input)
 }
@@ -275,7 +256,7 @@ fn parse_config(input: &str) -> IResult<&str, Config> {
 fn parse_section(input: &str) -> IResult<&str, ConfigSection> {
     map(
         tuple((
-            preceded(tuple((opt(newline), tag("#"), space1)), parse_section_name),
+            preceded(tuple((opt(newline), tag("#"), space1)), alphanumeric1),
             parse_description,
             many1(parse_config),
         )),
@@ -298,8 +279,7 @@ fn generate_files(sections: Vec<ConfigSection>, output_dir: PathBuf) {
     let mut repo_options_sections = vec![];
 
     for section in sections.iter() {
-        let section_shortname = section.shortname();
-        let lower_section_shortname = section_shortname.to_lowercase();
+        let lower_section_name = section.name.to_lowercase();
 
         let has_repo_option_flags = section
             .configs
@@ -309,7 +289,7 @@ fn generate_files(sections: Vec<ConfigSection>, output_dir: PathBuf) {
             > 0;
 
         if has_repo_option_flags {
-            repo_options_sections.push(format!("  S({})\\", section_shortname));
+            repo_options_sections.push(format!("  S({})\\", section.name));
         }
 
         // [section].h file
@@ -318,17 +298,24 @@ fn generate_files(sections: Vec<ConfigSection>, output_dir: PathBuf) {
         let mut private_defs = vec![];
         let mut private_methods = vec![];
         for config in section.configs.iter() {
-            let shortname = config.shortname(&section.name);
             if config.features.contains(&ConfigFeature::Private) {
-                private_defs.push(format!("  static {} {};", config.type_str(), shortname));
+                private_defs.push(format!(
+                    "  static {} {};",
+                    config.type_str(),
+                    config.shortname()
+                ));
             } else {
-                public_defs.push(format!("  static {} {};", config.type_str(), shortname));
+                public_defs.push(format!(
+                    "  static {} {};",
+                    config.type_str(),
+                    config.shortname()
+                ));
             }
             if config.default_value.is_none() {
                 private_methods.push(format!(
                     "  static {} {}Default();\n",
                     config.type_str(),
-                    shortname
+                    config.shortname()
                 ));
             }
         }
@@ -371,14 +358,14 @@ private:
 
 }} // namespace HPHP
 "#,
-            section_shortname,
+            section.name,
             public_defs.join("\n"),
             public_methods.join("\n"),
             private_defs.join("\n"),
             private_methods.join("\n"),
         );
         let mut h_output_file = output_dir.clone();
-        h_output_file.push(format!("{}.h", lower_section_shortname));
+        h_output_file.push(format!("{}.h", lower_section_name));
         fs::write(h_output_file, h_content).unwrap();
 
         // [section].cpp file
@@ -387,28 +374,23 @@ private:
         let mut repo_options_flags_calls = vec![];
         let mut repo_options_flags_from_config_calls = vec![];
         for config in section.configs.iter() {
-            let shortname = config.shortname(&section.name);
-            defs.push(format!(
-                "{} {}::{};",
-                config.type_str(),
-                section_shortname,
-                shortname
-            ));
+            let name = config.shortname();
+            defs.push(format!("{} {}::{};", config.type_str(), section.name, name));
             bind_calls.push(format!(
                 r#"  Config::Bind({}, ini, config, "{}", {});"#,
-                shortname,
+                name,
                 config.name,
                 config
                     .default_value
                     .clone()
-                    .unwrap_or(format!("{}Default()", shortname)),
+                    .unwrap_or(format!("{}Default()", name)),
             ));
 
             if config.features.contains(&ConfigFeature::RepoOptionsFlag) {
-                repo_options_flags_calls.push(format!("  flags.{} = {};", shortname, shortname));
+                repo_options_flags_calls.push(format!("  flags.{} = {};", name, name));
                 repo_options_flags_from_config_calls.push(format!(
                     r#"  hdfExtract(config, "Parser." "{}", flags.{}, {});"#,
-                    config.name, shortname, shortname
+                    config.name, name, name
                 ));
             }
         }
@@ -425,9 +407,9 @@ void {}::GetRepoOptionsFlagsFromConfig(RepoOptionsFlags& flags, const Hdf& confi
 }}
 
 "#,
-                section_shortname,
+                section.name,
                 repo_options_flags_calls.join("\n"),
-                section_shortname,
+                section.name,
                 repo_options_flags_from_config_calls.join("\n")
             );
         }
@@ -448,42 +430,42 @@ void {}::Load(const IniSetting::Map& ini, const Hdf& config) {{
 
 {}}} // namespace HPHP::Cfg
 "#,
-            lower_section_shortname,
+            lower_section_name,
             defs.join("\n"),
-            section_shortname,
+            section.name,
             bind_calls.join("\n"),
             &repo_options_methods,
         );
 
         let mut cpp_output_file = output_dir.clone();
-        cpp_output_file.push(format!("{}.cpp", lower_section_shortname));
+        cpp_output_file.push(format!("{}.cpp", lower_section_name));
         fs::write(cpp_output_file, cpp_content).unwrap();
 
         // macro files
         for config in section.configs.iter() {
-            let shortname = config.shortname(&section.name);
+            let name = config.shortname();
             if config.features.contains(&ConfigFeature::GlobalData) {
                 repo_global_data.push(format!(
                     "  C(Cfg::{}::{}, {}_{}, {})\\",
-                    section_shortname,
-                    shortname,
-                    section_shortname,
-                    shortname,
+                    section.name,
+                    name,
+                    section.name,
+                    name,
                     &config.type_str(),
                 ));
             }
             if config.features.contains(&ConfigFeature::UnitCacheFlag) {
                 unit_cache_flags.push(format!(
                     "  C(Cfg::{}::{}, {}_{}, {})\\",
-                    section_shortname,
-                    shortname,
-                    section_shortname,
-                    shortname,
+                    section.name,
+                    name,
+                    section.name,
+                    name,
                     &config.type_str(),
                 ));
             }
             if config.features.contains(&ConfigFeature::RepoOptionsFlag) {
-                repo_options_flags.push(format!("  C({}, {})\\", &config.type_str(), shortname));
+                repo_options_flags.push(format!("  C({}, {})\\", &config.type_str(), name,));
             }
         }
     }
@@ -539,13 +521,12 @@ void {}::Load(const IniSetting::Map& ini, const Hdf& config) {{
     let mut repo_options_flags_from_config_calls = vec![];
 
     for section in sections.iter() {
-        let section_shortname = section.shortname();
-        let lower_section_shortname = section_shortname.to_lowercase();
+        let lower_section_name = section.name.to_lowercase();
         config_load_includes.push(format!(
             r#"#include "hphp/runtime/base/configs/{}.h""#,
-            lower_section_shortname
+            lower_section_name
         ));
-        config_load_calls.push(format!("  Cfg::{}::Load(ini, config);", section_shortname));
+        config_load_calls.push(format!("  Cfg::{}::Load(ini, config);", section.name));
 
         if section
             .configs
@@ -556,11 +537,11 @@ void {}::Load(const IniSetting::Map& ini, const Hdf& config) {{
         {
             repo_options_flags_calls.push(format!(
                 "  Cfg::{}::GetRepoOptionsFlags(flags);",
-                section_shortname,
+                section.name,
             ));
             repo_options_flags_from_config_calls.push(format!(
                 "  Cfg::{}::GetRepoOptionsFlagsFromConfig(flags, config);",
-                section_shortname,
+                section.name,
             ));
         }
     }

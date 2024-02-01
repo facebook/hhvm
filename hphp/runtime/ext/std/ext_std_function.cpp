@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/autoload-handler.h"
-#include "hphp/runtime/base/configs/hacklang.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/type-string.h"
@@ -69,7 +68,7 @@ Variant HHVM_FUNCTION(call_user_func, const Variant& function,
                       const Array& params /* = null_array */) {
     auto const warning = "call_user_func() is deprecated and subject"
    " to removal from the Hack language";
-   switch (Cfg::HackLang::PhpismDisableCallUserFunc) {
+   switch (RuntimeOption::DisableCallUserFunc) {
      case 0:  break;
      case 1:  raise_warning(warning); break;
      default: raise_error(warning);
@@ -83,7 +82,7 @@ Variant HHVM_FUNCTION(call_user_func_array, const Variant& function,
                       const Variant& params) {
   auto const warning = "call_user_func_array() is deprecated and subject"
   " to removal from the Hack language";
-  switch (Cfg::HackLang::PhpismDisableCallUserFuncArray) {
+  switch (RuntimeOption::DisableCallUserFuncArray) {
     case 0:  break;
     case 1:  raise_warning(warning); break;
     default: raise_error(warning);

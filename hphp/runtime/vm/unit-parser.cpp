@@ -40,7 +40,6 @@
 #include "hphp/hack/src/parser/ffi_bridge/parser_ffi.rs.h"
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/autoload-handler.h"
-#include "hphp/runtime/base/configs/hacklang.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
@@ -143,7 +142,7 @@ CompilerResult hackc_compile(
       .enable_native_enum_class_labels = RO::EvalEmitNativeEnumClassLabels,
     },
     .parser_flags = hackc::ParserFlags {
-      .enable_class_level_where_clauses = Cfg::HackLang::EnableClassLevelWhereClauses,
+      .enable_class_level_where_clauses = RO::EnableClassLevelWhereClauses,
     },
     .flags = hackc::EnvFlags {
       .is_systemlib = isSystemLib,

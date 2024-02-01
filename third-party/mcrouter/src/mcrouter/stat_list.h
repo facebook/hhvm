@@ -70,8 +70,6 @@ STUI(num_ktls_connections_opened, 0, 1)
 STUI(num_ktls_connections_closed, 0, 1)
 STUI(num_ktls_resumption_attempts, 0, 1)
 STUI(num_ktls_resumption_successes, 0, 1)
-// time between closing an inactive connection and opening it again.
-STAT(inactive_connection_closed_interval_sec, stat_double, 0, .dbl = 0.0)
 // Information about connect retries
 STUI(num_connect_success_after_retrying, 0, 1)
 STUI(num_connect_retries, 0, 1)
@@ -148,10 +146,6 @@ STUI(fibers_stack_high_watermark, 0, 0)
  * Stats about routing
  */
 #define GROUP ods_stats | basic_stats
-// avg time spent for asynclog spooling
-STAT(asynclog_duration_us, stat_double, 0, .dbl = 0.0)
-// avg time spent for appending to axon proxy
-STAT(axon_proxy_duration_us, stat_double, 0, .dbl = 0.0)
 // Number of proxy threads
 STUI(num_proxies, 0, 1)
 // Average CPU across proxies
@@ -164,8 +158,6 @@ STUI(proxy_reqs_waiting, 0, 1)
 STUI(proxy_queue_full, 0, 1)
 // All MPMC queues between clients and proxies are full
 STUI(proxy_queues_all_full, 0, 1)
-// number of request routed using McBucketRoute
-STUI(bucketized_routing, 0, 1)
 // distribution stats
 STUI(distribution_axon_write_success, 0, 1)
 STUI(distribution_axon_write_failed, 0, 1)
@@ -175,7 +167,6 @@ STUI(distribution_replay_xregion_directed, 0, 1)
 STUI(distribution_replay_xregion_directed_no_prefix_error, 0, 1)
 STUI(distribution_replay_xregion_broadcast, 0, 1)
 STUI(distribution_replay_other, 0, 1)
-STAT(client_queue_notify_period, stat_double, 0, .dbl = 0.0)
 #undef GROUP
 #define GROUP ods_stats | detailed_stats
 STUI(proxy_request_num_outstanding, 0, 1)
@@ -230,6 +221,8 @@ STUI(after_request_latency_injected, 0, 1)
 STUI(before_latency_injected, 0, 1)
 STUI(after_latency_injected, 0, 1)
 STUI(total_latency_injected, 0, 1)
+// number of request routed using McBucketRoute
+STUI(bucketized_routing, 0, 1)
 #undef GROUP
 #define GROUP ods_stats | count_stats
 STUI(result_error_count, 0, 1)
@@ -317,11 +310,21 @@ STUI(destination_inflight_reqs, 0, 1)
 STUI(destination_inflight_shadow_reqs, 0, 1)
 STAT(destination_batch_size, stat_double, 0, .dbl = 0.0)
 STAT(destination_reqs_dirty_buffer_ratio, stat_double, 0, .dbl = 0.0)
+#undef GROUP
+#define GROUP ods_stats | basic_stats | avg_stats
 // duration of the rpc call
 STAT(duration_us, stat_double, 0, .dbl = 0.0)
 // Duration microseconds, broken down by request type (get-like and update-like)
 STAT(duration_get_us, stat_double, 0, .dbl = 0.0)
 STAT(duration_update_us, stat_double, 0, .dbl = 0.0)
+// time between closing an inactive connection and opening it again.
+STAT(inactive_connection_closed_interval_sec, stat_double, 0, .dbl = 0.0)
+// Relaxed notification period if set
+STAT(client_queue_notify_period, stat_double, 0, .dbl = 0.0)
+// avg time spent for asynclog spooling
+STAT(asynclog_duration_us, stat_double, 0, .dbl = 0.0)
+// avg time spent appending to axon proxy
+STAT(axon_proxy_duration_us, stat_double, 0, .dbl = 0.0)
 #undef GROUP
 #define GROUP ods_stats | basic_stats | max_stats
 STUI(destination_max_pending_reqs, 0, 1)

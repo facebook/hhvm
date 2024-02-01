@@ -70,6 +70,7 @@ enum stat_group_t {
   count_stats = 0x200,
   max_stats = 0x800,
   max_max_stats = 0x1000,
+  avg_stats = 0x2000,
   all_stats = 0xffff,
   server_stats = 0x10000,
   suspect_server_stats = 0x40000,

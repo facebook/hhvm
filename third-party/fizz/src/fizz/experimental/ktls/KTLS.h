@@ -106,7 +106,7 @@ bool platformSupportsKTLS();
 #else
 constexpr bool platformSupportsKTLS() {
   return false;
-};
+}
 #endif
 
 /**

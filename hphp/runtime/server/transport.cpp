@@ -21,7 +21,6 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/server/stream-transport.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/datetime.h"
@@ -598,7 +597,7 @@ void Transport::prepareHeaders(bool precompressed, bool chunked,
   if (precompressed) {
     // pre-compressed content is currently always gzip compressed.
     addHeaderImpl("Content-Encoding", "gzip");
-    if (Cfg::Server::AddVaryEncoding) {
+    if (RuntimeOption::ServerAddVaryEncoding) {
       addHeaderImpl("Vary", "Accept-Encoding");
     }
   }

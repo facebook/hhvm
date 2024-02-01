@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include "hphp/runtime/base/configs/errorhandling.h"
 #include "hphp/runtime/base/req-hash-map.h"
 #include "hphp/runtime/base/req-vector.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -346,7 +345,7 @@ struct UnlimitSerializationScope {
   TmpAssign<int64_t> v{VariableSerializer::serializationSizeLimit->value,
                        kTmpLimit};
   TmpAssign<int64_t> rs{RuntimeOption::SerializationSizeLimit, kTmpLimit};
-  TmpAssign<int32_t> rm{Cfg::ErrorHandling::MaxSerializedStringSize, kTmpLimit};
+  TmpAssign<int32_t> rm{RuntimeOption::MaxSerializedStringSize, kTmpLimit};
 };
 
 extern const StaticString s_serializedNativeDataKey;

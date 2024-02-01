@@ -522,11 +522,9 @@ bool TestCppBase::TestCollectionHdf() {
                       RuntimeOption::AllowedDirectories);
   VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
   VERIFY(ad.size() == 2);
-
-  boost::container::flat_set<std::string> serverHighPriorityEndPoints;
-  Config::Bind(serverHighPriorityEndPoints, ini,
+  Config::Bind(RuntimeOption::ServerHighPriorityEndPoints, ini,
                hdf, "Server.HighPriorityEndPoints");
-  VERIFY(serverHighPriorityEndPoints.size() == 3);
+  VERIFY(RuntimeOption::ServerHighPriorityEndPoints.size() == 3);
   return Count(true);
 }
 
@@ -544,6 +542,7 @@ bool TestCppBase::TestCollectionIni() {
 
   // Ensure we have no residuals left over from the HDF run.
   RuntimeOption::AllowedDirectories.clear();
+  RuntimeOption::ServerHighPriorityEndPoints.clear();
 
   Config::ParseIniString(inistr, ini);
   Config::Bind(RuntimeOption::AllowedDirectories, ini, empty,
@@ -556,11 +555,9 @@ bool TestCppBase::TestCollectionIni() {
   // values.
   VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
   VERIFY(ad.size() == 2);
-
-  boost::container::flat_set<std::string> serverHighPriorityEndPoints;
-  Config::Bind(serverHighPriorityEndPoints, ini, empty,
+  Config::Bind(RuntimeOption::ServerHighPriorityEndPoints, ini, empty,
                "Server.HighPriorityEndPoints",
-               serverHighPriorityEndPoints, false);
-  VERIFY(serverHighPriorityEndPoints.size() == 4);
+                RuntimeOption::ServerHighPriorityEndPoints, false);
+  VERIFY(RuntimeOption::ServerHighPriorityEndPoints.size() == 4);
   return Count(true);
 }

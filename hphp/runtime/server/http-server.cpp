@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/backtrace.h"
-#include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/init-fini-node.h"
@@ -472,7 +471,7 @@ void HttpServer::runOrExitProcess() {
   waitForServers();
   // Log APC samples after all requests finish.
   apc_sample_by_size();
-  playShutdownRequest(Cfg::Server::CleanupRequest);
+  playShutdownRequest(RuntimeOption::ServerCleanupRequest);
 }
 
 void HttpServer::waitForServers() {
@@ -839,7 +838,7 @@ bool HttpServer::startServer(bool pageServer) {
       }
       return true;
     } catch (FailedToListenException& e) {
-      if (Cfg::Server::ExitOnBindFail) return false;
+      if (RuntimeOption::ServerExitOnBindFail) return false;
 
       StopOldServer();
 

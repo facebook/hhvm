@@ -20,7 +20,6 @@
 #include <sys/stat.h>
 
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/configs/errorhandling.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/debugger/cmd/cmd_info.h"
@@ -345,8 +344,8 @@ void CmdList::onClient(DebuggerClient &client) {
 // The function returns false if the reply to the client fails during the
 // sending process.
 bool CmdList::onServer(DebuggerProxy &proxy) {
-  auto savedWarningFrequency = Cfg::ErrorHandling::WarningFrequency;
-  Cfg::ErrorHandling::WarningFrequency = 0;
+  auto savedWarningFrequency = RuntimeOption::WarningFrequency;
+  RuntimeOption::WarningFrequency = 0;
   m_code = HHVM_FN(file_get_contents)(m_file.c_str());
   if (!proxy.isLocal() && !m_code.toBoolean() && m_file[0] != '/') {
     DSandboxInfo info = proxy.getSandbox();
@@ -358,7 +357,7 @@ bool CmdList::onServer(DebuggerProxy &proxy) {
       m_code = HHVM_FN(file_get_contents)(full_path.c_str());
     }
   }
-  Cfg::ErrorHandling::WarningFrequency = savedWarningFrequency;
+  RuntimeOption::WarningFrequency = savedWarningFrequency;
   if (!m_code.toBoolean() && FileUtil::isSystemName(m_file)) {
     m_code = SystemLib::s_source;
   }

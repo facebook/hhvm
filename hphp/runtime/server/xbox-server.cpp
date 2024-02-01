@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/xbox-request-handler.h"
@@ -173,7 +172,7 @@ void XboxServer::Restart() {
         (RuntimeOption::XboxServerThreadCount,
          RuntimeOption::XboxServerThreadCount,
          RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
-         Cfg::Server::ThreadDropStack,
+         RuntimeOption::ServerThreadDropStack,
          nullptr);
     }
     if (RuntimeOption::XboxServerLogInfo) {

@@ -122,6 +122,9 @@ Unit* lookupSyslibUnit(StringData* path);
   R(EvalDiamondTraitMethods)                    \
   R(EvalClassPassesClassname)                   \
   R(EvalStringPassesClass)                      \
+  R(PHP7_NoHexNumerics)                         \
+  R(PHP7_Builtins)                              \
+  R(PHP7_Substr)                                \
   R(EvalEnableDecl)                             \
   /* This is used by HackC to turn on / off     \
    * magic decl driven bytecode functions like  \

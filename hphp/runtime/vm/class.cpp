@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/base/enum-cache.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/strings.h"
@@ -2823,7 +2822,7 @@ void Class::sortOwnProps(const PropMap::Builder& curPropMap,
                          std::vector<uint16_t>& slotIndex) {
   auto const serverMode = RuntimeOption::ServerExecutionMode();
   FTRACE(3, "Class::sortOwnProps: PreClass: {}\n", m_preClass->name()->data());
-  if (serverMode && Cfg::Server::LogReorderProps) {
+  if (serverMode && RuntimeOption::ServerLogReorderProps) {
     Logger::FInfo("Class::sortOwnProps: PreClass: {}",
                   m_preClass->name()->data());
   }
@@ -2884,7 +2883,7 @@ void Class::sortOwnProps(const PropMap::Builder& curPropMap,
       PropertyProfile::getCount(prop.cls->name(), prop.name),
       jit::irgen::propertyMayBeCountable(prop)
     );
-    if (serverMode && Cfg::Server::LogReorderProps) {
+    if (serverMode && RuntimeOption::ServerLogReorderProps) {
       Logger::FInfo(
         "  index={}: slot={}, prop={}, count={}, countable={}",
         index, slot, prop.name->data(),

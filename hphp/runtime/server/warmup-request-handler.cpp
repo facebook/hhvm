@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/server/warmup-request-handler.h"
 
-#include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/ext/server/ext_server.h"
@@ -168,9 +167,9 @@ runAfterDelay(const std::vector<std::string>& files,
 
 namespace {
 InternalWarmupRequestPlayer* GetReplayer() {
-  if (!Cfg::Server::ExtendedWarmupThreadCount) return nullptr;
+  if (!RO::ServerExtendedWarmupThreadCount) return nullptr;
   static InternalWarmupRequestPlayer* instance =
-    new InternalWarmupRequestPlayer(Cfg::Server::ExtendedWarmupThreadCount);
+    new InternalWarmupRequestPlayer(RO::ServerExtendedWarmupThreadCount);
   return instance;
 }
 
@@ -180,12 +179,12 @@ static InitFiniNode _([] { delete GetReplayer(); },
 
 void replayExtendedWarmupRequests() {
   if (!RO::ServerExecutionMode()) return;
-  auto const threadCount = Cfg::Server::ExtendedWarmupThreadCount;
+  auto const threadCount = RO::ServerExtendedWarmupThreadCount;
   if (threadCount <= 0) return;
-  if (Cfg::Server::ExtendedWarmupRequests.empty()) return;
-  auto const delay = Cfg::Server::ExtendedWarmupDelaySeconds;
-  auto const nTimes = Cfg::Server::ExtendedWarmupRepeat;
-  GetReplayer()->runAfterDelay(Cfg::Server::ExtendedWarmupRequests,
+  if (RO::ServerExtendedWarmupRequests.empty()) return;
+  auto const delay = RO::ServerExtendedWarmupDelaySeconds;
+  auto const nTimes = RO::ServerExtendedWarmupRepeat;
+  GetReplayer()->runAfterDelay(RO::ServerExtendedWarmupRequests,
                             nTimes, delay);
 }
 

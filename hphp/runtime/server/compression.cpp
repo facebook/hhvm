@@ -20,7 +20,6 @@
 
 #include <folly/Random.h>
 
-#include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/ini-setting.h"
 
@@ -576,7 +575,7 @@ void ResponseCompressorManager::setResponseHeaders() {
     assertx(encoding && *encoding);
     m_headers->addHeader("Content-Encoding", encoding);
   }
-  if (Cfg::Server::AddVaryEncoding) {
+  if (RuntimeOption::ServerAddVaryEncoding) {
     /*
      * Our response may vary depending on the Accept-Encoding header if
      *  - we compressed it or

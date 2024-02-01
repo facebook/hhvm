@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/repo-global-data.h"
 
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/util/logger.h"
 
@@ -28,11 +27,10 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 void RepoGlobalData::load(bool loadConstantFuncs) const {
-#define C(Config, Name, ...) Config = Name;
-  CONFIGS_FOR_REPOGLOBALDATA()
-#undef C
-
   RO::EnableIntrinsicsExtension                    = EnableIntrinsicsExtension;
+  RO::PHP7_Builtins                                = PHP7_Builtins;
+  RO::PHP7_NoHexNumerics                           = PHP7_NoHexNumerics;
+  RO::PHP7_Substr                                  = PHP7_Substr;
   RO::EvalCheckPropTypeHints                       = CheckPropTypeHints;
   RO::EnableArgsInBacktraces                       = EnableArgsInBacktraces;
   RO::EvalAbortBuildOnVerifyError                  = AbortBuildOnVerifyError;
@@ -88,6 +86,9 @@ std::string show(const RepoGlobalData& gd) {
   SHOW(InitialFuncTableSize);
   SHOW(InitialStaticStringTableSize);
   SHOW(CheckPropTypeHints);
+  SHOW(PHP7_NoHexNumerics);
+  SHOW(PHP7_Builtins);
+  SHOW(PHP7_Substr);
   SHOW(HackArrCompatSerializeNotices);
   SHOW(EnableIntrinsicsExtension);
   SHOW(ForbidDynamicCallsToFunc);
@@ -120,11 +121,6 @@ std::string show(const RepoGlobalData& gd) {
   SHOW(JitEnableRenameFunction);
   SHOW(StrictUtf8Mode);
 #undef SHOW
-
-#define C(_, Name, ...) folly::format(&out, "  {}: {}\n", #Name, gd.Name);
-  CONFIGS_FOR_REPOGLOBALDATA()
-#undef C
-
   folly::format(
     &out, "  SourceRootForFileBC: {}\n",
     gd.SourceRootForFileBC.value_or("*")

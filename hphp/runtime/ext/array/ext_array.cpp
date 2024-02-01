@@ -24,7 +24,6 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/double-to-int64.h"
@@ -202,7 +201,7 @@ TypedValue HHVM_FUNCTION(array_column,
   int64_t nextKI = 0; // for appends
   for (ArrayIter it(arr_input); it; ++it) {
     Array sub;
-    if (UNLIKELY(Cfg::PHP7::Builtins && it.second().isObject())) {
+    if (UNLIKELY(RuntimeOption::PHP7_Builtins && it.second().isObject())) {
       sub = it.second().toObject().get()->toArray<IntishCast::Cast>();
     } else if (it.second().isArray()) {
       sub = it.second().toArray();

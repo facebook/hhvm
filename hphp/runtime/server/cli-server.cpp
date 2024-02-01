@@ -130,7 +130,6 @@ way to determine how much progress the server made.
 #include "hphp/runtime/server/cli-server-ext.h"
 
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/file-util.h"
@@ -570,7 +569,7 @@ void CLIServer::start() {
     RuntimeOption::EvalUnixServerWorkers,
     RuntimeOption::EvalUnixServerWorkers,
     RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
-    Cfg::Server::ThreadDropStack,
+    RuntimeOption::ServerThreadDropStack,
     nullptr
   );
 
@@ -2019,7 +2018,7 @@ CLIContext CLIContext::initFromClient(int client) {
       "xbox-init",
       RO::XboxServerThreadCount,
       RO::ServerThreadDropCacheTimeoutSeconds,
-      Cfg::Server::ThreadDropStack
+      RO::ServerThreadDropStack
     );
     shared.flags = static_cast<Flags>(shared.flags | Flags::ProxyXbox);
   }

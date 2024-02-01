@@ -18,8 +18,6 @@
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/coeffects-config.h"
-#include "hphp/runtime/base/configs/php7.h"
-#include "hphp/runtime/base/configs/unit-cache-generated.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/file-util.h"
@@ -1535,9 +1533,6 @@ std::string mangleUnitSha1(const folly::StringPiece fileSha1,
 #define R(Opt)  RuntimeOption::Opt, '|',
       UNITCACHEFLAGS()
 #undef R
-#define C(Config, ...) Config, '|',
-      CONFIGS_FOR_UNITCACHEFLAGS()
-#undef C
       CoeffectsConfig::mangle(),
       opts.cacheKeySha1().toString(),
       mangleExtension(fileName)

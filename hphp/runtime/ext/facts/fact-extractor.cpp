@@ -23,7 +23,6 @@
 #include <folly/futures/Future.h>
 #include <folly/logging/xlog.h>
 
-#include "hphp/runtime/base/configs/autoload.h" // @manual=//hphp/runtime/base/configs:autoload-header
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/facts/exception.h"
@@ -107,7 +106,7 @@ void setExtractorFactory(ExtractorFactory* factory) {
 std::unique_ptr<Extractor> makeExtractor(folly::Executor& exec) {
   // If we defined an external Extractor in closed-source code, use that.
   // Otherwise use the SimpleExtractor.
-  if (s_extractorFactory && Cfg::Autoload::EnableExternFactExtractor) {
+  if (s_extractorFactory && RuntimeOption::AutoloadEnableExternFactExtractor) {
     XLOG(INFO) << "Creating a external HPHP::Facts::Extractor.";
     return s_extractorFactory->make(exec);
   }
@@ -201,7 +200,7 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
 
 void prefetchDb(const std::filesystem::path& root, const SQLiteKey& dbKey) {
   XLOG(INFO) << "::prefetchDb " << root << " " << dbKey.toString();
-  if (s_extractorFactory && Cfg::Autoload::EnableExternFactExtractor) {
+  if (s_extractorFactory && RuntimeOption::AutoloadEnableExternFactExtractor) {
     s_extractorFactory->prefetchDb(root, dbKey);
   }
 }

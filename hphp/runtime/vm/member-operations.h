@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/strings.h"
@@ -153,7 +152,7 @@ inline void raiseFalseyPromotion(tv_rval base) {
 
 [[noreturn]]
 inline void raiseEmptyObject() {
-  if (Cfg::PHP7::EngineExceptions) {
+  if (RuntimeOption::PHP7_EngineExceptions) {
     SystemLib::throwErrorObject(Strings::SET_PROP_NON_OBJECT);
   } else {
     SystemLib::throwExceptionObject(Strings::SET_PROP_NON_OBJECT);

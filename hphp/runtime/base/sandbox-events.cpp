@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/sandbox-events.h"
-#include "hphp/runtime/base/configs/autoload.h"
+#include "hphp/runtime/base/runtime-option.h"
 
 namespace HPHP {
 
@@ -35,7 +35,7 @@ void logSboxEvent(uint32_t sample_rate, std::string_view source,
 
 void rareSboxEvent(std::string_view source, std::string_view event,
                    std::string_view key) {
-  if (Cfg::Autoload::PerfSampleRate != 0) {
+  if (RuntimeOption::AutoloadPerfSampleRate != 0) {
     logSboxEvent(1, source, event, key, 0);
   }
 }

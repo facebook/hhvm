@@ -24,7 +24,6 @@
 #include <folly/json.h>
 #include <watchman/cppclient/WatchmanClient.h>
 
-#include "hphp/runtime/base/configs/autoload.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/watchman.h"
@@ -65,8 +64,8 @@ void logSlowQuery(const watchman::QueryResult& res,
 
   // These aren't really watchman specific but it's primarily autoload
   // related queries that we're interested in.
-  ent.setInt("autoload_db_can_create", Cfg::Autoload::DBCanCreate);
-  ent.setStr("autoload_db_path", Cfg::Autoload::DBPath);
+  ent.setInt("autoload_db_can_create", RO::AutoloadDBCanCreate);
+  ent.setStr("autoload_db_path", RO::AutoloadDBPath);
 
   auto const since = queryObj.get_ptr("since");
   auto const suffix = queryObj.get_ptr("suffix");

@@ -151,7 +151,7 @@ void process_throw_wrapped_handler_error(
         std::string(trustedServerEx->errorCode()));
     return;
   }
-  LOG(ERROR) << "uncaught exception in function " << method << ": " << ew;
+
   if (stack) {
     stack->userExceptionWrapped(false, ew);
     stack->handlerErrorWrapped(ew);

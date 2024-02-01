@@ -78,7 +78,7 @@ thrift_library(
 
 So that this can be used later in C++
 
-```
+```cpp
 // MyService.cpp
 #include "path/to/gen-cpp2/foo_patch_types.h"
 
@@ -124,7 +124,7 @@ This workflow is deprecated and it should not be used for new files.
 
 Considering the following thrift struct.
 
-```
+```thrift
 // In thrift file
 struct MyStruct {
   1: optional string field;
@@ -133,7 +133,7 @@ struct MyStruct {
 
 Then you can use `MyStructPatch` to access the underlying [StructPatch](../../../ref/cpp/class/apache/thrift/op/detail/StructPatch). e.g.,
 
-```
+```cpp
 // In C++ file
 namespace op = apache::thrift::op;
 namespace ident = apache::thrift::ident;
@@ -151,7 +151,7 @@ EXPECT_EQ(s.field(), "(hi)");
 
 Here `patch.patch<ident::field>()` is a [StringPatch](../../../ref/cpp/class/apache/thrift/op/detail/StringPatch). It’s worth noting that `patch` method will ensure the existence of the field. If field doesn’t exist, it will be set to intrinsic default first, e.g.,
 
-```
+```cpp
 s.clear();
 patch.apply(s);
 EXPECT_TRUE(s.field().has_value());
@@ -161,7 +161,7 @@ EXPECT_EQ(s.field(), "()");
 If you don’t want to patch when the field doesn’t exist, you **should** use `patchIfSet` method instead.
 Besides patching fields, you can also use `patch` to modify the whole struct. e.g.,
 
-```
+```cpp
 patch.clear();
 patch.apply(s);
 EXPECT_FALSE(s.field().has_value());
@@ -171,46 +171,24 @@ EXPECT_FALSE(s.field().has_value());
 
 All Patches have `merge` method, it’s guaranteed that the following code.
 
-```
+```cpp
 patch1.apply(v);
 patch2.apply(v);
 ```
 
 is equivalent to
 
-```
+```cpp
 patch1.merge(patch2);
 patch1.apply(v);
 ```
-
-### Patch as Thrift Struct
-
-The Patch itself is a thrift struct that can be included in another thrift struct, e.g.
-
-```
-// In Foo.thrift
-@patch.GeneratePatch
-struct MyStruct {
-  1: optional string field;
-};
-
-// In Patches.thrift
-include "Foo.thrift"
-struct Patches {
-  1: Foo.MyStructPatch patch;
-}
-```
-
-`Patches` works as a normal thrift structure which you can serialize/deserialize.
-
-NOTE: Due to implementation limitation, you cannot include MyStructPatch in the same file — you have to include it in another file. In addition, you cannot use `@GeneratePatch` for struct that contains another Patch.
 
 ### Value Patches
 
 Besides StringPatch, there are [other types of Patch](../../../cpp_api_toc). One example would be [MapPatch](../../../ref/cpp/class/apache/thrift/op/detail/MapPatch). Consider the following thrift struct.
 
 
-```
+```thrift
 // In thrift file
 struct MyMapStruct {
   2: map<i64, string> nested;
@@ -219,7 +197,7 @@ struct MyMapStruct {
 
 You can patch elements by key, e.g.,
 
-```
+```cpp
 MyMapStructPatch patch;
 auto &stringPatch = patch.patch<ident::nested>().patchByKey(42);
 stringPatch.prepend("(");
@@ -237,39 +215,50 @@ EXPECT_EQ(s.nested[42], "(hi)");
 
 For example, let's assume you have the following thrift struct:
 
-    struct MyClass {
-      1: string foo;
-      2: bool bar;
-    }
+```thrift
+struct MyClass {
+  1: string foo;
+  2: bool bar;
+}
+```
 
 and then you created the following patch:
 
-    MyClassPatch patch;
-    patch.patch<ident::bar>().invert();
-    patch.patch<ident::bar>().invert();
-    patch.patch<ident::foo>().append("_");
+```cpp
+MyClassPatch patch;
+patch.patch<ident::bar>().invert();
+patch.patch<ident::bar>().invert();
+patch.patch<ident::foo>().append("_");
+```
 
 `patch.customVisit(v)` will invoke the following methods
 
-    v.ensure<ident::foo>();
-    v.ensure<ident::bar>();
-    v.patchIfSet<ident::foo>(StringPatch::createAppend("_"));
-    v.patchIfSet<ident::bar>(BoolPatch{});  // no-op since inverted twice
+```cpp
+v.ensure<ident::foo>();
+v.ensure<ident::bar>();
+v.patchIfSet<ident::foo>(StringPatch::createAppend("_"));
+v.patchIfSet<ident::bar>(BoolPatch{});  // no-op since inverted twice
+```
 
 ### Type alias for Patch type
 
 You can get Patch type from original type, vice versa. e.g.,
 
-```
+```cpp
 static_assert(std::is_same_v<apache::thrift::op::patch_type<MyStruct>, MyStructPatch>);
 static_assert(std::is_same_v<MyStruct, MyStructPatch::value_type>);
 ```
+
+### Debug
+
+You can use [`apache::thrift::op::prettyPrintPatch`](https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Patch.h#L118-L125) to pretty-print Thrift Patch for debugging purpose.
+
 
 ## C++ Dynamic Patch
 
 If you can not include the generated thrift header, you can still serialize any abritrary patch to `protocol::Object` and apply it. Here is an example how to apply the dynamic patch:
 
-```
+```cpp
 MyStruct s;
 s.field() = "hi";
 
@@ -279,7 +268,7 @@ stringPatch.prepend("(");
 stringPatch.append(")");
 
 protocol::Object dynamicStruct = apache::thrift::protocol::toObject(s);
-protocol::Object dynamicPatch = apache::thrift::protocol::toObject(patch);
+protocol::Object dynamicPatch = patch.toObject();
 protocol::applyPatch(dynamicPatch, dynamicStruct);
 
 EXPECT_EQ(dynamicStruct[FieldId{1}].as_string(), "(hi)");

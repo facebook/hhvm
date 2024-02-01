@@ -689,7 +689,6 @@ struct RuntimeOption {
   static bool TimeoutsUseWallTime;
   static bool EvalAuthoritativeMode;
   static int CheckCLIClientCommands;
-  static HackStrictOption StrictArrayFillKeys;
   static bool LookForTypechecker;
   static bool AutoTypecheck;
   static uint32_t EvalInitialStaticStringTableSize;

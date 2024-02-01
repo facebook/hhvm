@@ -939,9 +939,6 @@ std::string RuntimeOption::WatchmanDefaultSocket;
 
 int RuntimeOption::CheckCLIClientCommands = 0;
 
-HackStrictOption
-  RuntimeOption::StrictArrayFillKeys = HackStrictOption::OFF;
-
 // defaults set when the INI option is bound - values below are irrelevant.
 bool RuntimeOption::LookForTypechecker = false;
 bool RuntimeOption::AutoTypecheck = false;
@@ -2065,9 +2062,6 @@ void RuntimeOption::Load(
   }
   {
     // Hack Language
-    Config::Bind(StrictArrayFillKeys, ini, config,
-                 "Hack.Lang.StrictArrayFillKeys", HackStrictOption::ON);
-
     Config::Bind(LookForTypechecker, ini, config,
                  "Hack.Lang.LookForTypechecker", false);
 

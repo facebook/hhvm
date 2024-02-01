@@ -39,18 +39,6 @@ using ConfigIMap = hphp_string_imap<std::string>;
 using ConfigIFastMap = hphp_fast_string_imap<std::string>;
 using ConfigFastSet = hphp_fast_string_set;
 
-/**
- * Parts of the language can individually be made stricter, warning or
- * erroring when there's dangerous/unintuive usage; for example,
- * array_fill_keys() with non-int/string keys: Hack.Lang.StrictArrayFillKeys
- */
-enum class HackStrictOption {
-  OFF, // PHP5 behavior
-  WARN,
-  ON
-};
-
-
 struct Config {
   /*
    * Normalizes hdf string names to their ini counterparts
@@ -135,9 +123,6 @@ struct Config {
                    const Hdf& config, const std::string& name = "",
                    const double defValue = 0,
                    const bool prepend_hhvm = true);
-  static void Bind(HackStrictOption& loc, const IniSettingMap &ini,
-                   const Hdf& config, const std::string& name,
-                   HackStrictOption def);
   static void
   Bind(std::vector<uint32_t>& loc, const IniSettingMap& ini,
        const Hdf& config, const std::string& name = "",
@@ -364,28 +349,6 @@ struct Config {
   static void ReplaceIncludesWithIni(const std::string& original_ini_filename,
                                      const std::string& iniStr,
                                      std::string& with_includes);
-};
-
-}
-
-namespace folly {
-
-template<> class FormatValue<HPHP::HackStrictOption> {
- public:
-  explicit FormatValue(HPHP::HackStrictOption opt) : m_opt(opt) {}
-
-  template<typename Callback> void format(FormatArg& arg, Callback& cb) const {
-    format_value::formatString(
-      (m_opt == HPHP::HackStrictOption::WARN)
-        ? "warn"
-        : (m_opt == HPHP::HackStrictOption::ON) ? "on" : "off",
-      arg,
-      cb
-    );
-  }
-
- private:
-  HPHP::HackStrictOption m_opt;
 };
 
 }

@@ -388,31 +388,6 @@ CONTAINER_CONFIG_BODY(ConfigIMap, IMap)
 CONTAINER_CONFIG_BODY(ConfigIFastMap, IFastMap)
 CONTAINER_CONFIG_BODY(ConfigFastSet, FastSet);
 
-static HackStrictOption GetHackStrictOption(const IniSettingMap& ini,
-                                            const Hdf& config,
-                                            const std::string& name /* = "" */,
-                                            HackStrictOption def
-                                           ) {
-  auto val = Config::GetString(ini, config, name);
-  if (val.empty()) {
-    return def;
-  }
-  if (val == "warn") {
-    return HackStrictOption::WARN;
-  }
-  bool ret;
-  ini_on_update(val, ret);
-  return ret ? HackStrictOption::ON : HackStrictOption::OFF;
-}
-
-void Config::Bind(HackStrictOption& loc, const IniSettingMap& ini,
-                  const Hdf& config, const std::string& name /* = "" */,
-                  HackStrictOption def) {
-  // Currently this doens't bind to ini_get since it is hard to thread through
-  // an enum
-  loc = GetHackStrictOption(ini, config, name, def);
-}
-
 // No `ini` binding yet. Hdf still takes precedence but will be removed
 // once we have made all options ini-aware. All new settings should
 // use the ini path of this method (i.e., pass a bogus Hdf or keep it null)

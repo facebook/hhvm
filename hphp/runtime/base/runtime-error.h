@@ -41,8 +41,6 @@ struct StringData;
 struct TypeConstraint;
 struct TypedValue;
 
-enum class HackStrictOption;
-
 enum class ErrorMode {
   ERROR = 1,
   WARNING = 2,
@@ -119,10 +117,6 @@ void raise_param_type_warning(
     int param_num,
     const char* expected_type,
     TypedValue actual_value);
-void raise_hack_strict(HackStrictOption option, const char *ini_setting,
-                       const std::string& msg);
-void raise_hack_strict(HackStrictOption option, const char *ini_setting,
-                       const char *fmt, ...);
 
 /*
  * raise_typehint_error() is the same as raise_recoverable_error(), except

@@ -139,11 +139,6 @@ struct RepoGlobalData {
   /* Constants from traits behave like constants from interfaces (error on conflict) */
   bool TraitConstantInterfaceBehavior = false;
 
-  /*
-   * The Hack.Lang.StrictArrayFillKeys option the repo was compiled with.
-   */
-  HackStrictOption StrictArrayFillKeys = HackStrictOption::OFF;
-
   std::vector<std::pair<std::string,std::string>> ConstantFunctions;
 
   bool BuildMayNoticeOnMethCallerHelperIsObject = false;
@@ -235,7 +230,6 @@ struct RepoGlobalData {
       (ClassNoticesSampleRate)
       (ClassStringHintNoticesSampleRate)
       (ClassIsStringNotices)
-      (StrictArrayFillKeys)
       (NoticeOnCoerceForStrConcat)
       (TraitConstantInterfaceBehavior)
       (ConstantFunctions)

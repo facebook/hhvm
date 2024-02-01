@@ -173,13 +173,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
                ini, config, "AbortBuildOnVerifyError",
                RuntimeOption::EvalAbortBuildOnVerifyError);
 
-  {
-    // Hack
-    Config::Bind(RuntimeOption::StrictArrayFillKeys, ini, config,
-                 "Hack.Lang.StrictArrayFillKeys",
-                 RuntimeOption::StrictArrayFillKeys);
-  }
-
   Config::Bind(RuntimeOption::EnableXHP, ini, config, "EnableXHP",
                RuntimeOption::EnableXHP);
 

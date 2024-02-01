@@ -36,7 +36,6 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
   RO::EvalCheckPropTypeHints                       = CheckPropTypeHints;
   RO::EnableArgsInBacktraces                       = EnableArgsInBacktraces;
   RO::EvalAbortBuildOnVerifyError                  = AbortBuildOnVerifyError;
-  RO::StrictArrayFillKeys                          = StrictArrayFillKeys;
   RO::EvalEmitClsMethPointers                      = EmitClsMethPointers;
   RO::EvalForbidDynamicCallsWithAttr               = ForbidDynamicCallsWithAttr;
   RO::EvalRaiseClassConversionNoticeSampleRate     = RaiseClassConversionNoticeSampleRate;
@@ -112,7 +111,6 @@ std::string show(const RepoGlobalData& gd) {
   SHOW(ClassNoticesSampleRate);
   SHOW(ClassStringHintNoticesSampleRate);
   SHOW(ClassIsStringNotices);
-  SHOW(StrictArrayFillKeys);
   SHOW(TraitConstantInterfaceBehavior);
   SHOW(BuildMayNoticeOnMethCallerHelperIsObject);
   SHOW(DiamondTraitMethods);

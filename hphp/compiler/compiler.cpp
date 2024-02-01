@@ -503,7 +503,6 @@ CONFIGS_FOR_REPOGLOBALDATA()
   gd.ClassNoticesSampleRate = RuntimeOption::EvalClassNoticesSampleRate;
   gd.ClassStringHintNoticesSampleRate = RO::EvalClassStringHintNoticesSampleRate;
   gd.ClassIsStringNotices = RuntimeOption::EvalClassIsStringNotices;
-  gd.StrictArrayFillKeys = RuntimeOption::StrictArrayFillKeys;
   gd.TraitConstantInterfaceBehavior =
     RuntimeOption::EvalTraitConstantInterfaceBehavior;
   gd.BuildMayNoticeOnMethCallerHelperIsObject =

@@ -334,45 +334,6 @@ void raise_warning(const char *fmt, ...) {
   raise_warning_helper(false, msg);
 }
 
-static void raise_hack_strict_helper(
-  HackStrictOption option, const char *ini_setting, const std::string& msg) {
-  if (option == HackStrictOption::WARN) {
-    raise_warning_helper(
-      false, std::string("(hhvm.hack.") + ini_setting + "=warn) " + msg);
-  } else if (option == HackStrictOption::ON) {
-    raise_error(std::string("(hhvm.hack.") + ini_setting + "=error) " + msg);
-  }
-}
-
-
-/**
- * For use with the HackStrictOption settings. This will warn, error, or do
- * nothing depending on what the user chose for the option. The second param
- * should be the ini setting name after "hhvm.hack."
- */
-void raise_hack_strict(HackStrictOption option, const char *ini_setting,
-                       const std::string& msg) {
-  if (option == HackStrictOption::WARN ?
-      !warning_freq_check() : (option != HackStrictOption::ON)) {
-    return;
-  }
-  raise_hack_strict_helper(option, ini_setting, msg);
-}
-
-void raise_hack_strict(HackStrictOption option, const char *ini_setting,
-                       const char *fmt, ...) {
-  if (option == HackStrictOption::WARN ?
-      !warning_freq_check() : (option != HackStrictOption::ON)) {
-    return;
-  }
-  std::string msg;
-  va_list ap;
-  va_start(ap, fmt);
-  string_vsnprintf(msg, fmt, ap);
-  va_end(ap);
-  raise_hack_strict_helper(option, ini_setting, msg);
-}
-
 /**
  * Warnings are currently sampled. raise_warning_unsampled can help when
  * migrating warnings to errors.

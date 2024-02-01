@@ -309,11 +309,7 @@ Array HHVM_FUNCTION(array_fill_keys,
       if (isIntType(v.m_type) || isStringType(v.m_type)) {
         ai->setUnknownKey<IntishCast::Cast>(v, value);
       } else {
-        raise_hack_strict(RuntimeOption::StrictArrayFillKeys,
-                          "strict_array_fill_keys",
-                          "keys must be ints or strings");
-        ai->setUnknownKey<IntishCast::Cast>(
-          tvCastToString(v).asTypedValue(), value);
+        raise_error("keys must be ints or strings");
       }
     },
     [&](ObjectData* coll) {

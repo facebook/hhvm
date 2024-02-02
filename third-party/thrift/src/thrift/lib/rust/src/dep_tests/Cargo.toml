@@ -13,6 +13,7 @@ build = "thrift_build.rs"
 path = "thrift_lib.rs"
 test = false
 doctest = false
+doc = false
 
 [[test]]
 name = "fbthrift_test"

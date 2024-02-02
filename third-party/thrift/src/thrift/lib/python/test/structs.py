@@ -184,13 +184,15 @@ class StructTests(unittest.TestCase):
         self.assertEqual([x, y], sorted([y, x]))
 
     def test_init_with_invalid_field(self) -> None:
-        with self.assertRaises(TypeError):
+        with self.assertRaisesRegex(
+            TypeError, "got an unexpected keyword argument 'val_lists'"
+        ):
             # pyre-ignore[28]: for test
             easy(val=1, an_int=Integers(small=300), name="foo", val_lists=[1, 2, 3, 4])
 
     def test_init_with_invalid_field_value(self) -> None:
         with self.assertRaisesRegex(
-            TypeError, "Cannot create internal string data representation"
+            TypeError, "field 'name' encountered TypeError: Cannot create"
         ):
             # pyre-ignore[6]: name is string, but under test
             easy(val=1, an_int=Integers(small=300), name=1)

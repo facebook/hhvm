@@ -16,6 +16,7 @@ type override_info = {
 
 type class_id_type =
   | ClassId
+  | ExpressionTreeVisitor
   | Other
 [@@deriving ord, eq, show]
 

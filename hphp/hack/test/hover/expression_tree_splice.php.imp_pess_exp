@@ -1,4 +1,5 @@
 class ExampleDsl
+~ExprTree<ExampleDsl, mixed, TInfer#1>
 where TInfer#1 = ExampleInt
 An example DSL for testing expression trees (ETs).
 

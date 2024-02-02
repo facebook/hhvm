@@ -1346,7 +1346,7 @@ module Full = struct
     in
     let (fuel, body_doc) =
       match (occurrence, get_node x) with
-      | ({ type_ = Class _; name; _ }, _) ->
+      | ({ type_ = Class class_type_id; name; _ }, _) ->
         let keyword =
           match Decl_provider.get_class env.decl_env.Decl_env.ctx name with
           | Decl_entry.Found decl ->
@@ -1360,7 +1360,12 @@ module Full = struct
           | Decl_entry.NotYetAvailable ->
             "class"
         in
-        (fuel, Concat [text keyword; Space; text_strip_ns name])
+        (match class_type_id with
+        | ExpressionTreeVisitor ->
+          let (fuel, ty_doc) = ty ~fuel text_strip_ns Tvid.Set.empty penv x in
+          ( fuel,
+            Concat [text keyword; Space; text_strip_ns name; Newline; ty_doc] )
+        | _ -> (fuel, Concat [text keyword; Space; text_strip_ns name]))
       | ({ type_ = Function; name; _ }, Tfun ft)
       | ({ type_ = Method (_, name); _ }, Tfun ft) ->
         (* Use short names for function types since they display a lot more

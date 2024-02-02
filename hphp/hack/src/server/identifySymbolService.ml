@@ -415,7 +415,9 @@ let visitor =
       (* We only want to consider completion from the hint and the
          virtualized expression, not the visitor expression. The
          visitor expression is unityped, so we can't do much.*)
-      let acc = process_class_id et_class in
+      let acc =
+        process_class_id ~class_id_type:ExpressionTreeVisitor et_class
+      in
       let acc = self#plus acc (self#on_Block env None et_splices) in
 
       (* We're overriding super#on_expression_tree, so we need to

@@ -1,6 +1,6 @@
 class ExampleDsl
-ExprTree<ExampleDsl, mixed, TInfer#1>
-where TInfer#1 = ExampleInt
+~ExprTree<ExampleDsl, mixed, TInfer#1>
+where TInfer#1 = ExampleString
 An example DSL for testing expression trees (ETs).
 
 Any class can be used an an expression tree visitor. It needs to implement

@@ -28,6 +28,7 @@ parser.add_argument(
     help="the type of data we want to extract",
 )
 parser.add_argument("outfile", help="the file to store the extracted data in")
+parser.add_argument("--hhvm_debuginfo", help="the debuginfo file associated with hhvm_binary")
 args = parser.parse_args()
 
 if not os.path.exists(args.hhvm_binary):
@@ -59,29 +60,39 @@ with io.StringIO() as f:
 eprint("Loading core...")
 process = target.LoadCore(args.hhvm_core)
 
+if not process.IsValid():
+    raise RuntimeError("Unable to load core file")
+
+if args.hhvm_debuginfo:
+    ret = lldb.SBCommandReturnObject()
+    debugger.GetCommandInterpreter().HandleCommand(
+        f"target symbols add {args.hhvm_debuginfo}",
+        ret
+    )
+    if not ret.Succeeded():
+        raise RuntimeError(f"Unable to add debuginfo file: {ret.GetError()}")
 
 def read_memory(addr, size):
-    error_ref = lldb.SBError()
-    value = target.ReadMemory(lldb.SBAddress(addr, target), size, error_ref)
-    if not error_ref.Success():
-        raise RuntimeError("Error reading memory: " + str(error_ref))
+    err = lldb.SBError()
+    value = target.ReadMemory(lldb.SBAddress(addr, target), size, err)
+    if err.Fail():
+        raise RuntimeError(f"Error reading memory: {err}")
     return value
 
-
-start_var = "s_%s_start" % (args.type,)
+start_var = f"s_{args.type}_start"
 start = target.FindFirstGlobalVariable(start_var)
-if not start:
-    raise RuntimeError("Unable to find start variable '%s'" % (start_var,))
+if start.GetError().Fail():
+    raise RuntimeError(f"Unable to access start variable '{start_var}': {start.GetError()}")
 start_addr = int(start.GetValue(), 0)
 
-end_var = "s_%s_end" % (args.type,)
+end_var = f"s_{args.type}_end"
 end = target.FindFirstGlobalVariable(end_var)
-if not end:
-    raise RuntimeError("Unable to find end variable '%s'" % (end_var,))
+if end.GetError().Fail():
+    raise RuntimeError(f"Unable to access end variable '{end_var}': {end.GetError()}")
 end_addr = int(end.GetValue(), 0)
 
 table_size = end_addr - start_addr
-eprint("Found table at %s with size %s" % (start_addr, table_size))
+eprint(f"Found table at {start_addr} with size {table_size}")
 
 with open(args.outfile, "wb") as f:
     memory = read_memory(start_addr, table_size)

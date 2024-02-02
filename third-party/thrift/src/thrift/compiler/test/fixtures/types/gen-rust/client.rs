@@ -8,8 +8,12 @@
 
 pub mod mock;
 
+#[doc(inline)]
+pub use :: as types;
+#[doc(inline)]
+pub use ::::errors;
 pub(crate) use crate as client;
-pub(crate) use ::::{self as types, errors, services};
+pub(crate) use ::::services;
 
 pub mod dependencies {
     pub use included__clients as included;

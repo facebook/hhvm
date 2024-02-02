@@ -6,8 +6,12 @@
 #![recursion_limit = "100000000"]
 #![allow(non_camel_case_types, non_snake_case, non_upper_case_globals, unused_crate_dependencies, unused_imports, clippy::all)]
 
+#[doc(inline)]
+pub use :: as types;
+#[doc(inline)]
+pub use ::::services as errors;
 pub(crate) use crate as server;
-pub(crate) use ::::{self as types, services};
+pub(crate) use ::::services;
 
 
 #[::async_trait::async_trait]

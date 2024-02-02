@@ -6,6 +6,8 @@
 #![allow(non_camel_case_types, non_snake_case, non_upper_case_globals, unused_crate_dependencies, clippy::redundant_closure, clippy::type_complexity)]
 
 pub mod consts;
+#[doc(inline)]
+pub use self::consts::*;
 pub mod services;
 
 pub mod errors;

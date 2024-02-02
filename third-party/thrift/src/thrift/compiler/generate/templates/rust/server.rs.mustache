@@ -27,8 +27,12 @@
 }}{{^program:multifile?}}, unused_crate_dependencies{{/program:multifile?}}{{!
 }}, unused_imports, clippy::all)]
 
+#[doc(inline)]
+pub use {{program:types}} as types;
+#[doc(inline)]
+pub use {{program:types}}::services as errors;
 pub(crate) use {{program:crate}} as server;
-pub(crate) use {{program:types}}::{self as types, services};
+pub(crate) use {{program:types}}::services;
 
 {{#program:services}}{{>lib/server}}{{!
 }}{{/program:services}}
@@ -39,7 +43,7 @@ pub(crate) use {{program:types}}::{self as types, services};
 #![allow(unused_crate_dependencies)]
 {{/program:multifile?}}
 
-#[allow(unused_imports)]
-pub(crate) use {{program:types}} as types;
+#[doc(inline)]
+pub use {{program:types}} as types;
 {{/program:services?}}
 {{!newline}}

@@ -29,8 +29,12 @@
 
 pub mod mock;
 
+#[doc(inline)]
+pub use {{program:types}} as types;
+#[doc(inline)]
+pub use {{program:types}}::errors;
 pub(crate) use {{program:crate}} as client;
-pub(crate) use {{program:types}}::{self as types, errors, services};
+pub(crate) use {{program:types}}::services;
 
 pub mod dependencies {
     {{#program:includes}}
@@ -47,7 +51,7 @@ pub mod dependencies {
 #![allow(unused_crate_dependencies)]
 {{/program:multifile?}}
 
-#[allow(unused_imports)]
-pub(crate) use {{program:types}} as types;
+#[doc(inline)]
+pub use {{program:types}} as types;
 {{/program:services?}}
 {{!newline}}

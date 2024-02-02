@@ -41,6 +41,8 @@ include!("{{program:include_src}}");
 }}
 {{#program:constants?}}
 pub mod consts;
+#[doc(inline)]
+pub use self::consts::*;
 {{/program:constants?}}{{!
 
 }}{{#program:services?}}

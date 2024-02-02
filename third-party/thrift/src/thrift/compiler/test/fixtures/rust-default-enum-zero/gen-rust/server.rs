@@ -4,5 +4,5 @@
 #![doc(hidden)]
 #![allow(unused_crate_dependencies)]
 
-#[allow(unused_imports)]
-pub(crate) use :: as types;
+#[doc(inline)]
+pub use :: as types;

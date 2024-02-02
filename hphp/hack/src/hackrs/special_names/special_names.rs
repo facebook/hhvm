@@ -633,7 +633,6 @@ pub mod unstable_features {
         lazy!(sn::unstable_features::COEFFECTS_PROVISIONAL);
     pub static readonly: Lazy<Symbol> = lazy!(sn::unstable_features::READONLY);
     pub static expression_trees: Lazy<Symbol> = lazy!(sn::unstable_features::EXPRESSION_TREES);
-    pub static modules: Lazy<Symbol> = lazy!(sn::unstable_features::MODULES);
 }
 
 pub mod coeffects {

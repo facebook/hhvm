@@ -1118,7 +1118,6 @@ pub mod unstable_features {
     pub const COEFFECTS_PROVISIONAL: &str = "coeffects_provisional";
     pub const READONLY: &str = "readonly";
     pub const EXPRESSION_TREES: &str = "expression_trees";
-    pub const MODULES: &str = "modules";
     pub const MODULE_REFERENCES: &str = "module_references";
     pub const PACKAGE: &str = "package";
 }

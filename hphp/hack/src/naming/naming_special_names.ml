@@ -1238,8 +1238,6 @@ module UnstableFeatures = struct
 
   let expression_trees = "expression_trees"
 
-  let modules = "modules"
-
   let function_references = "function_references"
 end
 

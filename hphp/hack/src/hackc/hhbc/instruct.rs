@@ -8,7 +8,6 @@ use ffi::Vector;
 use serde::Serialize;
 
 use crate::opcodes::Opcode;
-use crate::typed_value::TypedValue;
 use crate::FCallArgsFlags;
 use crate::PropName;
 use crate::ReadonlyOp;
@@ -349,9 +348,6 @@ pub enum Pseudo<'arena> {
     TryCatchBegin,
     TryCatchEnd,
     TryCatchMiddle,
-    /// Pseudo instruction that will get translated into appropraite literal
-    /// bytecode, with possible reference to .adata *)
-    TypedValue(TypedValue<'arena>),
 }
 
 pub trait Targets {
@@ -380,8 +376,7 @@ impl Instruct<'_> {
             // Make sure new variants with branch target Labels are handled above
             // before adding items to this catch-all.
             Self::Pseudo(
-                Pseudo::TypedValue(_)
-                | Pseudo::Continue
+                Pseudo::Continue
                 | Pseudo::Break
                 | Pseudo::Label(_)
                 | Pseudo::TryCatchBegin
@@ -398,8 +393,7 @@ impl Instruct<'_> {
             Self::Opcode(opcode) => opcode.num_inputs(),
 
             Self::Pseudo(
-                Pseudo::TypedValue(_)
-                | Pseudo::Continue
+                Pseudo::Continue
                 | Pseudo::Break
                 | Pseudo::Label(_)
                 | Pseudo::TryCatchBegin
@@ -414,7 +408,6 @@ impl Instruct<'_> {
     pub fn variant_name(&self) -> &'static str {
         match self {
             Self::Opcode(opcode) => opcode.variant_name(),
-            Self::Pseudo(Pseudo::TypedValue(_)) => "TypedValue",
             Self::Pseudo(Pseudo::Continue) => "Continue",
             Self::Pseudo(Pseudo::Break) => "Break",
             Self::Pseudo(Pseudo::Label(_)) => "Label",

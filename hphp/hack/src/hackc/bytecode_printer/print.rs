@@ -951,7 +951,6 @@ pub(crate) fn print_fcall_args(
 
 fn print_pseudo(w: &mut dyn Write, instr: &Pseudo<'_>, dv_labels: &HashSet<Label>) -> Result<()> {
     match instr {
-        Pseudo::TypedValue(_) => Err(Error::fail("print_lit_const: TypedValue").into()),
         Pseudo::Label(l) => {
             print_label(w, l, dv_labels)?;
             w.write_all(b":")

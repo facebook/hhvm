@@ -182,8 +182,7 @@ impl ComputeStackDepth<'_> {
                 | Pseudo::SrcLoc(..)
                 | Pseudo::TryCatchBegin
                 | Pseudo::TryCatchEnd
-                | Pseudo::TryCatchMiddle
-                | Pseudo::TypedValue(_),
+                | Pseudo::TryCatchMiddle,
             ) => false,
             Instruct::Pseudo(Pseudo::Label(_)) => {
                 if let Some(old_depth) = self.handled.insert(addr, self.cur_depth) {

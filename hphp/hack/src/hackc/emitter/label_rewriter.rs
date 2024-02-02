@@ -184,8 +184,7 @@ where
             | Pseudo::SrcLoc(..)
             | Pseudo::TryCatchBegin
             | Pseudo::TryCatchEnd
-            | Pseudo::TryCatchMiddle
-            | Pseudo::TypedValue(..),
+            | Pseudo::TryCatchMiddle,
         )
         | Instruct::Opcode(
             Opcode::AKExists

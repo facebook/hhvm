@@ -454,7 +454,6 @@ impl<'arena, 'a> State<'arena, 'a> {
             Instruct::Pseudo(Pseudo::Comment(..)) => todo!(),
             Instruct::Pseudo(Pseudo::Continue) => todo!(),
             Instruct::Pseudo(Pseudo::Label(..)) => {}
-            Instruct::Pseudo(Pseudo::TypedValue { .. }) => todo!(),
         }
 
         debug_assert!(

@@ -264,15 +264,13 @@ std::shared_ptr<ProxyConfig<RouterInfo>> Proxy<RouterInfo>::getConfigUnsafe()
 }
 
 template <class RouterInfo>
-std::pair<
-    std::unique_ptr<folly::SharedMutex::ReadHolder>,
-    ProxyConfig<RouterInfo>&>
+std::pair<std::shared_lock<folly::SharedMutex>, ProxyConfig<RouterInfo>&>
 Proxy<RouterInfo>::getConfigLocked() const {
-  auto lock = std::make_unique<folly::SharedMutex::ReadHolder>(configLock_);
+  auto lock = std::shared_lock(configLock_);
   /* make_pair strips the reference, so construct directly */
-  return std::pair<
-      std::unique_ptr<folly::SharedMutex::ReadHolder>,
-      ProxyConfig<RouterInfo>&>(std::move(lock), *config_);
+  return std::
+      pair<std::shared_lock<folly::SharedMutex>, ProxyConfig<RouterInfo>&>(
+          std::move(lock), *config_);
 }
 
 template <class RouterInfo>

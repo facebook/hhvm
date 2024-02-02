@@ -122,9 +122,7 @@ class Proxy : public ProxyBase {
    * The caller may only access the config through the reference
    * while the lock is held.
    */
-  std::pair<
-      std::unique_ptr<folly::SharedMutex::ReadHolder>,
-      ProxyConfig<RouterInfo>&>
+  std::pair<std::shared_lock<folly::SharedMutex>, ProxyConfig<RouterInfo>&>
   getConfigLocked() const;
 
   /**

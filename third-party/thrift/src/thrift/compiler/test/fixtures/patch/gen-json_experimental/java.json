@@ -204,6 +204,22 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 71
+      },
+      "FieldUseUnmangledName" : {
+        "name" : "FieldUseUnmangledName",
+        "structured_annotations": {
+          "scope.Field" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 79
       }
       },
   "source_path" : "thrift/annotation/java",

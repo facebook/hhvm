@@ -70,3 +70,11 @@ struct Wrapper {
 
 @scope.Field
 struct Recursive {}
+
+// Note, previous Java codegenerator contains a bug where we use mangled rather than
+// unmangled name for Field ID in unions and exceptions. Fixing it will be a breaking change.
+// To unblock customer, We provide this annotation to guarantee correct behavior. This annotation
+// is only applied in union field or struct field and is ignored if not in a struct field, where
+// behavior is correct to begin with.
+@scope.Field
+struct FieldUseUnmangledName {}

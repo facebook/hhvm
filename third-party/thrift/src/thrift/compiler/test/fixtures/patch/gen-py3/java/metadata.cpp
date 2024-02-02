@@ -20,6 +20,7 @@ namespace java {
   ::apache::thrift::detail::md::StructMetadata<Adapter>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Wrapper>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Recursive>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<FieldUseUnmangledName>::gen(metadata);
   return metadata;
 }
 } // namespace facebook

@@ -904,6 +904,99 @@ func (x *Recursive) String() string {
     return sb.String()
 }
 
+type FieldUseUnmangledName struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &FieldUseUnmangledName{}
+
+func NewFieldUseUnmangledName() *FieldUseUnmangledName {
+    return (&FieldUseUnmangledName{})
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldUseUnmangledName().Set<FieldNameFoo>().Set<FieldNameBar>()
+type FieldUseUnmangledNameBuilder struct {
+    obj *FieldUseUnmangledName
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldUseUnmangledName().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewFieldUseUnmangledNameBuilder() *FieldUseUnmangledNameBuilder {
+    return &FieldUseUnmangledNameBuilder{
+        obj: NewFieldUseUnmangledName(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldUseUnmangledName().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *FieldUseUnmangledNameBuilder) Emit() *FieldUseUnmangledName {
+    var objCopy FieldUseUnmangledName = *x.obj
+    return &objCopy
+}
+
+func (x *FieldUseUnmangledName) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("FieldUseUnmangledName"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *FieldUseUnmangledName) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *FieldUseUnmangledName) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("FieldUseUnmangledName({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)
@@ -914,5 +1007,6 @@ func RegisterTypes(registry interface {
     registry.RegisterType("facebook.com/thrift/annotation/java/Adapter", func() any { return NewAdapter() })
     registry.RegisterType("facebook.com/thrift/annotation/java/Wrapper", func() any { return NewWrapper() })
     registry.RegisterType("facebook.com/thrift/annotation/java/Recursive", func() any { return NewRecursive() })
+    registry.RegisterType("facebook.com/thrift/annotation/java/FieldUseUnmangledName", func() any { return NewFieldUseUnmangledName() })
 
 }

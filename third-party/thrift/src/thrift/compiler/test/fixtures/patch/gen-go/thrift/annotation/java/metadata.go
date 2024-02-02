@@ -78,6 +78,9 @@ var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("java.Recursive").
     SetIsUnion(false),
+    metadata.NewThriftStruct().
+    SetName("java.FieldUseUnmangledName").
+    SetIsUnion(false),
 }
 
 var exceptionMetadatas = []*metadata.ThriftException{

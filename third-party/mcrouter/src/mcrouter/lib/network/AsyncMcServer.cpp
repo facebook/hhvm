@@ -964,7 +964,7 @@ void AsyncMcServer::setTicketKeySeeds(wangle::TLSTicketKeySeeds seeds) {
 }
 
 wangle::TLSTicketKeySeeds AsyncMcServer::getTicketKeySeeds() const {
-  folly::SharedMutex::ReadHolder readGuard(tlsTicketKeySeedsLock_);
+  std::shared_lock readGuard(tlsTicketKeySeedsLock_);
   return tlsTicketKeySeeds_;
 }
 

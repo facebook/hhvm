@@ -115,7 +115,7 @@ bool McSSLUtil::verifySSL(
     X509_STORE_CTX* ctx) noexcept {
   // It should be fine to hold onto the read holder since writes to this
   // will typically happen at app startup.
-  folly::SharedMutex::ReadHolder rh(getMutex());
+  std::shared_lock rh(getMutex());
   auto& func = getAppFuncRef();
   if (!func) {
     return verifySSLWithDefaultBehavior(sock, preverifyOk, ctx);
@@ -191,7 +191,7 @@ folly::AsyncTransportWrapper::UniquePtr McSSLUtil::moveToPlaintext(
 
 folly::AsyncTransportWrapper::UniquePtr McSSLUtil::moveToKtls(
     folly::AsyncTransportWrapper& sock) noexcept {
-  folly::SharedMutex::ReadHolder rh(getMutex());
+  std::shared_lock rh(getMutex());
   auto& func = getKtlsFuncRef();
   if (func) {
     return func(sock);
@@ -201,7 +201,7 @@ folly::AsyncTransportWrapper::UniquePtr McSSLUtil::moveToKtls(
 
 McSSLUtil::CertPair McSSLUtil::dropCertificateX509Payload(
     folly::AsyncSSLSocket& sock) noexcept {
-  folly::SharedMutex::ReadHolder rh(getMutex());
+  std::shared_lock rh(getMutex());
   auto& func = getDropCertificateX509PayloadFuncRef();
   if (func) {
     return func(sock);

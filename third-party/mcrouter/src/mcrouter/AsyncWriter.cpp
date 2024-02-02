@@ -83,7 +83,7 @@ bool AsyncWriter::start(folly::StringPiece threadName) {
 }
 
 bool AsyncWriter::run(std::function<void()> f) {
-  folly::SharedMutex::ReadHolder lock(runLock_);
+  std::shared_lock lock(runLock_);
   if (stopped_) {
     return false;
   }

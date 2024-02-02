@@ -259,7 +259,7 @@ Proxy<RouterInfo>* Proxy<RouterInfo>::createProxy(
 template <class RouterInfo>
 std::shared_ptr<ProxyConfig<RouterInfo>> Proxy<RouterInfo>::getConfigUnsafe()
     const {
-  folly::SharedMutex::ReadHolder lg(configLock_);
+  std::shared_lock lg(configLock_);
   return config_;
 }
 

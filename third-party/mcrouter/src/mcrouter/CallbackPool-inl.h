@@ -52,7 +52,7 @@ CallbackPool<Args...>::CallbackPool() : data_(std::make_shared<Data>()) {}
 
 template <typename... Args>
 void CallbackPool<Args...>::notify(Args... args) {
-  folly::SharedMutex::ReadHolder lck(data_->callbackLock);
+  std::shared_lock lck(data_->callbackLock);
   for (auto& it : data_->callbacks) {
     try {
       it->func_(args...);
@@ -73,7 +73,7 @@ typename CallbackPool<Args...>::CallbackHandle CallbackPool<Args...>::subscribe(
 
 template <typename... Args>
 bool CallbackPool<Args...>::empty() {
-  folly::SharedMutex::ReadHolder lck(data_->callbackLock);
+  std::shared_lock lck(data_->callbackLock);
   return data_->callbacks.empty();
 }
 

@@ -25,7 +25,7 @@ typename Observable<Data>::CallbackHandle Observable<Data>::subscribe(
 template <class Data>
 typename Observable<Data>::CallbackHandle Observable<Data>::subscribeAndCall(
     OnUpdateOldNew callback) {
-  folly::SharedMutex::ReadHolder lck(dataLock_);
+  std::shared_lock lck(dataLock_);
   try {
     callback(Data(), data_);
   } catch (const std::exception& e) {
@@ -45,7 +45,7 @@ typename Observable<Data>::CallbackHandle Observable<Data>::subscribeAndCall(
 
 template <class Data>
 Data Observable<Data>::get() {
-  folly::SharedMutex::ReadHolder lck(dataLock_);
+  std::shared_lock lck(dataLock_);
   return data_;
 }
 

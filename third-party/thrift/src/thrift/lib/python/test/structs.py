@@ -188,6 +188,13 @@ class StructTests(unittest.TestCase):
             # pyre-ignore[28]: for test
             easy(val=1, an_int=Integers(small=300), name="foo", val_lists=[1, 2, 3, 4])
 
+    def test_init_with_invalid_field_value(self) -> None:
+        with self.assertRaisesRegex(
+            TypeError, "Cannot create internal string data representation"
+        ):
+            # pyre-ignore[6]: name is string, but under test
+            easy(val=1, an_int=Integers(small=300), name=1)
+
     def test_iterate(self) -> None:
         x = Reserved(
             from_="hello",

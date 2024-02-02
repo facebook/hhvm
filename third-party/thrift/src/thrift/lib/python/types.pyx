@@ -127,7 +127,13 @@ cdef class StringTypeInfo:
 
     # validate and convert to format serializer may understand
     def to_internal_data(self, object value not None):
-        return PyUnicode_AsUTF8String(value)
+        try:
+            return PyUnicode_AsUTF8String(value)
+        except TypeError as e:
+            raise TypeError(
+                "Cannot create internal string data representation. "
+                f"Expected type <class 'str'>, got: {type(value)}."
+            ) from e
 
     # convert deserialized data to user format
     def to_python_value(self, object value):

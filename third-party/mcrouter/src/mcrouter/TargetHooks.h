@@ -28,6 +28,20 @@ FOLLY_ATTR_WEAK void gAxonInitHook(
     std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreadPool,
     const std::string& threadPrefix);
 
+class StatsApi;
+
+/**
+ * If linked, returns a reference to a StatsApi implementation allowing
+ * custom stats handling.
+ */
+FOLLY_ATTR_WEAK StatsApi& gStatsApiHook();
+
+/**
+ * If linked, will be called once on router initialization with the intent
+ * to initialize the custom StatsApi implementation.
+ */
+FOLLY_ATTR_WEAK void gStatsApiInitHook(const CarbonRouterInstanceBase& router);
+
 } // namespace mcrouter
 } // namespace memcache
 } // namespace facebook

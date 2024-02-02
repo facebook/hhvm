@@ -151,6 +151,13 @@ uint64_t stats_max_value(ProxyBase* proxy, int idx) {
   return stats_aggregate_max_value(proxy->router(), idx);
 }
 
+FOLLY_ALWAYS_INLINE void
+stat_div_internal(stat_t* stats, stat_name_t stat_num, double amount) {
+  auto ref = folly::make_atomic_ref(stats[stat_num].data.dbl);
+  ref.store(
+      ref.load(std::memory_order_relaxed) / amount, std::memory_order_relaxed);
+}
+
 } // anonymous namespace
 
 // This is a subset of what's in proc(5).
@@ -585,16 +592,20 @@ void prepare_stats(CarbonRouterInstanceBase& router, stat_t* stats) {
     if (router.opts().proxy_cpu_monitor_ms > 0) {
       stat_set(stats, proxy_cpu_stat, router.getProxyCpu());
     }
-    stat_div(stats, duration_us_stat, router.opts().num_proxies);
-    stat_div(stats, duration_get_us_stat, router.opts().num_proxies);
-    stat_div(stats, duration_update_us_stat, router.opts().num_proxies);
-    stat_div(
+    stat_div_internal(stats, duration_us_stat, router.opts().num_proxies);
+    stat_div_internal(stats, duration_get_us_stat, router.opts().num_proxies);
+    stat_div_internal(
+        stats, duration_update_us_stat, router.opts().num_proxies);
+    stat_div_internal(
         stats,
         inactive_connection_closed_interval_sec_stat,
         router.opts().num_proxies);
-    stat_div(stats, client_queue_notify_period_stat, router.opts().num_proxies);
-    stat_div(stats, asynclog_duration_us_stat, router.opts().num_proxies);
-    stat_div(stats, axon_proxy_duration_us_stat, router.opts().num_proxies);
+    stat_div_internal(
+        stats, client_queue_notify_period_stat, router.opts().num_proxies);
+    stat_div_internal(
+        stats, asynclog_duration_us_stat, router.opts().num_proxies);
+    stat_div_internal(
+        stats, axon_proxy_duration_us_stat, router.opts().num_proxies);
   }
 
   for (int i = 0; i < num_stats; i++) {
@@ -602,20 +613,20 @@ void prepare_stats(CarbonRouterInstanceBase& router, stat_t* stats) {
       for (size_t j = 0; j < router.opts().num_proxies; ++j) {
         auto pr = router.getProxyBase(j);
         if (stats[i].type == stat_uint64) {
-          stat_incr(
+          detail::stat_incr_internal(
               stats,
               static_cast<stat_name_t>(i),
               static_cast<int64_t>(
                   folly::make_atomic_ref(pr->stats().getStat(i).data.uint64)
                       .load(std::memory_order_relaxed)));
         } else if (stats[i].type == stat_int64) {
-          stat_incr(
+          detail::stat_incr_internal(
               stats,
               static_cast<stat_name_t>(i),
               folly::make_atomic_ref(pr->stats().getStat(i).data.int64)
                   .load(std::memory_order_relaxed));
         } else if (stats[i].type == stat_double) {
-          stat_incr(
+          detail::stat_incr_internal(
               stats,
               static_cast<stat_name_t>(i),
               folly::make_atomic_ref(pr->stats().getStat(i).data.dbl)

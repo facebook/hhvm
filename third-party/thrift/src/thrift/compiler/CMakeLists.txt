@@ -64,6 +64,7 @@ add_library(
   parse/token.cc
   parse/token.h
   sema/const_checker.cc
+  sema/explicit_include_validator.cc
   sema/patch_mutator.cc
   sema/scope_validator.cc
   sema/standard_mutator.cc

@@ -1823,6 +1823,117 @@ TEST(CompilerTest, assign_only_patch) {
   )");
 }
 
+TEST(CompilerTest, warn_on_non_explicit_includes) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["path/to/upstream.thrift"] = R"(
+    struct TransitiveStruct {}
+    enum TransitiveEnum {
+      BLAH = 2,
+    }
+    union TransitiveUnion {
+      1: i64 a;
+      2: double b;
+    }
+    typedef TransitiveStruct TransitiveTypedef
+  )";
+
+  name_contents_map["path/to/direct.thrift"] = R"(
+    include "path/to/upstream.thrift"
+
+    struct IncludedStruct {}
+    enum IncludedEnum {
+      BLAH = 2,
+    }
+    union IncludedUnion {
+      1: i64 a;
+      2: double b;
+    }
+    typedef IncludedStruct IncludedTypedef
+  )";
+
+  name_contents_map["path/to/transitive_struct_field.thrift"] = R"(
+    include "path/to/direct.thrift"
+
+    struct A {
+      1: i64 a;
+      2: string b;
+      3: binary c;
+      4: list<i64> la;
+      5: set<double> sd;
+      6: map<binary, byte> mbb;
+    }
+
+    enum TransitiveEnum {
+      E1 = 1,
+      E2 = 2,
+      E3 = 4,
+    }
+
+    struct B {
+      1: A a;
+      2: TransitiveEnum e;
+    }
+
+    struct TransitiveStruct {
+      1: upstream.TransitiveStruct c;
+        # expected-warning@-1: Type `upstream.TransitiveStruct` relies on a transitive include. Add `include "path/to/upstream.thrift"` near the top of this file.
+      2: direct.IncludedUnion d;
+      3: B b;
+      4: upstream.TransitiveEnum e;
+        # expected-warning@-1: Type `upstream.TransitiveEnum` relies on a transitive include. Add `include "path/to/upstream.thrift"` near the top of this file.
+      5: TransitiveEnum te;
+      6: list<upstream.TransitiveEnum> lte;
+        # expected-warning@-1: Type `upstream.TransitiveEnum` relies on a transitive include. Add `include "path/to/upstream.thrift"` near the top of this file.
+      7: set<TransitiveEnum> ste;
+      8: set<upstream.TransitiveEnum> sute;
+        # expected-warning@-1: Type `upstream.TransitiveEnum` relies on a transitive include. Add `include "path/to/upstream.thrift"` near the top of this file.
+      11: map<i64, direct.IncludedEnum> mdie;
+      12: map<i64, upstream.TransitiveStruct> muts;
+        # expected-warning@-1: Type `upstream.TransitiveStruct` relies on a transitive include. Add `include "path/to/upstream.thrift"` near the top of this file.
+    }
+
+    union TransitiveUnion {
+      1: upstream.TransitiveUnion u;
+        # expected-warning@-1: Type `upstream.TransitiveUnion` relies on a transitive include. Add `include "path/to/upstream.thrift"` near the top of this file.
+      2: direct.IncludedUnion d;
+      3: upstream.TransitiveTypedef utt;
+        # expected-warning@-1: Type `upstream.TransitiveTypedef` relies on a transitive include. Add `include "path/to/upstream.thrift"` near the top of this file.
+      4: direct.IncludedEnum e;
+      5: list<upstream.TransitiveTypedef> lutt;
+        # expected-warning@-1: Type `upstream.TransitiveTypedef` relies on a transitive include. Add `include "path/to/upstream.thrift"` near the top of this file.
+      6: set<direct.IncludedTypedef> sdit;
+    }
+
+    typedef B bprime
+    typedef map<TransitiveEnum, B> map_te_b
+    typedef upstream.TransitiveTypedef utt_prime
+      # expected-warning@-1: Type `upstream.TransitiveTypedef` relies on a transitive include. Add `include "path/to/upstream.thrift"` near the top of this file.
+    typedef direct.IncludedTypedef dtt_prime
+    typedef set<upstream.TransitiveTypedef> sutt_prime
+      # expected-warning@-1: Type `upstream.TransitiveTypedef` relies on a transitive include. Add `include "path/to/upstream.thrift"` near the top of this file.
+  )";
+  check_compile(name_contents_map, "path/to/transitive_struct_field.thrift");
+}
+
+TEST(CompilerTest, include_module_name_collision) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["path/to/dep_module.thrift"] = R"(
+    struct A {}
+  )";
+  name_contents_map["other_path/to/dep_module.thrift"] = R"(
+    struct B {}
+  )";
+  name_contents_map["path/to/my_module.thrift"] = R"(
+    include "path/to/dep_module.thrift"
+    include "other_path/to/dep_module.thrift"
+    struct C {
+      1: dep_module.A a;
+      2: dep_module.B b;
+    }
+  )";
+  check_compile(name_contents_map, "path/to/my_module.thrift");
+}
+
 TEST(CompilerTest, alias_enum) {
   check_compile(R"(
     typedef Enum MyEnum

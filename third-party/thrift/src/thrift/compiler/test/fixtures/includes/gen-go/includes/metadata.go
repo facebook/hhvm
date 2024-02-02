@@ -4,17 +4,24 @@
 package includes // [[[ program thrift source path ]]]
 
 import (
-    "maps"
-
     transitive "transitive"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
+// mapsCopy is a copy of maps.Copy from Go 1.21
+// TODO: remove mapsCopy once we can safely upgrade to Go 1.21 without requiring any rollback.
+func mapsCopy[M1 ~map[K]V, M2 ~map[K]V, K comparable, V any](dst M1, src M2) {
+	for k, v := range src {
+		dst[k] = v
+	}
+}
+
 var _ = transitive.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = thrift.ZERO
-var _ = maps.Copy[map[int]int, map[int]int]
+// TODO: uncomment when can safely upgrade to Go 1.21 without requiring any rollback.
+// var _ = maps.Copy[map[int]int, map[int]int]
 var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
@@ -81,7 +88,7 @@ func GetEnumsMetadata() map[string]*metadata.ThriftEnum {
     }
 
     // ...now add enum metadatas from recursively included programs.
-    maps.Copy(allEnumsMap, transitive.GetEnumsMetadata())
+    mapsCopy(allEnumsMap, transitive.GetEnumsMetadata())
 
     return allEnumsMap
 }
@@ -96,7 +103,7 @@ func GetStructsMetadata() map[string]*metadata.ThriftStruct {
     }
 
     // ...now add struct metadatas from recursively included programs.
-    maps.Copy(allStructsMap, transitive.GetStructsMetadata())
+    mapsCopy(allStructsMap, transitive.GetStructsMetadata())
 
     return allStructsMap
 }
@@ -111,7 +118,7 @@ func GetExceptionsMetadata() map[string]*metadata.ThriftException {
     }
 
     // ...now add exception metadatas from recursively included programs.
-    maps.Copy(allExceptionsMap, transitive.GetExceptionsMetadata())
+    mapsCopy(allExceptionsMap, transitive.GetExceptionsMetadata())
 
     return allExceptionsMap
 }
@@ -126,7 +133,7 @@ func GetServicesMetadata() map[string]*metadata.ThriftService {
     }
 
     // ...now add service metadatas from recursively included programs.
-    maps.Copy(allServicesMap, transitive.GetServicesMetadata())
+    mapsCopy(allServicesMap, transitive.GetServicesMetadata())
 
     return allServicesMap
 }

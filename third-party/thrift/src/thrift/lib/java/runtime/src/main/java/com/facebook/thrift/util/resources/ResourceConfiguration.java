@@ -30,6 +30,10 @@ final class ResourceConfiguration {
   static final boolean forceExecutionOffEventLoop =
       System.getProperty("thrift.force-execution-off-eventloop", "true").equalsIgnoreCase("true");
 
+  static final boolean forceClientExecutionOffEventLoop =
+      System.getProperty("thrift.force-client-execution-off-eventloop", "true")
+          .equalsIgnoreCase("true");
+
   static final int maxPendingTasksForOffLoop =
       Math.max(
           Queues.SMALL_BUFFER_SIZE,

@@ -94,6 +94,10 @@ public final class RpcResources {
     return INSTANCE.doGet().isForceExecutionOffEventLoop();
   }
 
+  public static boolean isForceClientExecutionOffEventLoop() {
+    return INSTANCE.doGet().isForceClientExecutionOffEventLoop();
+  }
+
   public static ThriftMeterRegistry getThriftMeterRegistry() {
     return ThriftMeterRegistry.getInstance();
   }

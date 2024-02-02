@@ -18,6 +18,7 @@ package com.facebook.thrift.util.resources;
 
 import static com.facebook.thrift.util.resources.ResourceConfiguration.enableForkJoinPool;
 import static com.facebook.thrift.util.resources.ResourceConfiguration.eventLoopGroupThreadPrefix;
+import static com.facebook.thrift.util.resources.ResourceConfiguration.forceClientExecutionOffEventLoop;
 import static com.facebook.thrift.util.resources.ResourceConfiguration.forceExecutionOffEventLoop;
 import static com.facebook.thrift.util.resources.ResourceConfiguration.forkJoinPoolClientThreads;
 import static com.facebook.thrift.util.resources.ResourceConfiguration.forkJoinPoolThreads;
@@ -172,6 +173,10 @@ class ResourcesHolder implements Closeable {
 
   public boolean isForceExecutionOffEventLoop() {
     return forceExecutionOffEventLoop;
+  }
+
+  public boolean isForceClientExecutionOffEventLoop() {
+    return forceClientExecutionOffEventLoop;
   }
 
   public Map<String, Long> stats() {

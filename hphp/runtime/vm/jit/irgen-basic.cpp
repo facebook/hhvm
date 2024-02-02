@@ -584,12 +584,8 @@ void emitBreakTraceHint(IRGS&)     {}
 //////////////////////////////////////////////////////////////////////
 
 void emitResolveClass(IRGS& env, const StringData* name) {
-  if (auto const cls = lookupUniqueClass(env, name)) {
-    emitModuleBoundaryCheckKnown(env, cls);
-    push(env, cns(env, cls));
-    return;
-  }
-  interpOne(env);
+  auto const cls = ldCls(env, cns(env, name), LdClsFallback::FATAL_RESOLVE_CLASS);
+  push(env, cls);
 }
 
 }

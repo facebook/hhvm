@@ -16,7 +16,7 @@
                 (Pipe (([4:3-39], $$), ((), [4:3-4], (Int "1")),
                    ((), [4:8-39],
                     (ExpressionTree
-                       { et_hint = ([4:8-18], (Happly (([4:8-18], "\\ExampleDsl"), [])));
+                       { et_class = ([4:8-18], "\\ExampleDsl");
                          et_splices =
                          [([4:22-36],
                            (Expr

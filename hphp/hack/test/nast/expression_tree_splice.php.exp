@@ -14,7 +14,7 @@
             (Expr
                ((), [4:3-33],
                 (ExpressionTree
-                   { et_hint = ([4:3-13], (Happly (([4:3-13], "\\ExampleDsl"), [])));
+                   { et_class = ([4:3-13], "\\ExampleDsl");
                      et_splices =
                      [([4:25-31],
                        (Expr

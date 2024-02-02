@@ -14,8 +14,8 @@
             (Expr
                ((), [4:3-33],
                 (ExpressionTree
-                   { et_hint = ([4:3-13], (Happly (([4:3-13], "\\ExampleDsl"), []))); 
-                     et_splices = []; et_function_pointers = [];
+                   { et_class = ([4:3-13], "\\ExampleDsl"); et_splices = []; 
+                     et_function_pointers = [];
                      et_virtualized_expr =
                      ((), [4:14-32],
                       (Efun

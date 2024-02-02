@@ -460,6 +460,10 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
                     }
                 }
             }
+            Expr_::ExpressionTree(box ExpressionTree { class, .. }) => {
+                env.elaborate_type_name(class);
+                e.recurse(env, self.object())?
+            }
             _ => e.recurse(env, self.object())?,
         }
         Ok(())

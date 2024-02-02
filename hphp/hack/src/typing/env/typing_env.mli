@@ -198,12 +198,12 @@ val with_origin2 :
   env -> Decl_counters.origin -> (env -> env * 'a * 'b) -> env * 'a * 'b
 
 val with_inside_expr_tree :
-  env -> Aast_defs.hint -> (env -> env * 'a * 'b) -> env * 'a * 'b
+  env -> Aast_defs.class_name -> (env -> env * 'a * 'b) -> env * 'a * 'b
 
 val with_outside_expr_tree :
   env -> (env -> Aast.class_name option -> env * 'a * 'b) -> env * 'a * 'b
 
-val inside_expr_tree : env -> Aast_defs.hint -> env
+val inside_expr_tree : env -> Aast_defs.class_name -> env
 
 val outside_expr_tree : env -> env
 

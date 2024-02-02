@@ -84,18 +84,14 @@ struct RewriteResult {
 /// )
 /// ```
 /// Which is the runtime representation of the Expression Tree
-pub fn desugar(hint: &aast::Hint, e: Expr, env: &Env<'_>) -> DesugarResult {
+pub fn desugar(
+    Id(visitor_pos, visitor_name): &aast::ClassName,
+    e: Expr,
+    env: &Env<'_>,
+) -> DesugarResult {
     let mut errors = vec![];
 
-    let visitor_name = match hint_name(hint) {
-        Ok(name) => name,
-        Err((pos, msg)) => {
-            errors.push((pos, msg));
-            "unknown".into()
-        }
-    };
     let et_literal_pos = e.1.clone();
-    let et_hint_pos = hint.0.clone();
 
     let mut temps = Temporaries {
         splices: vec![],
@@ -105,7 +101,7 @@ pub fn desugar(hint: &aast::Hint, e: Expr, env: &Env<'_>) -> DesugarResult {
     let rewritten_expr = rewrite_expr(
         &mut temps,
         e,
-        &visitor_name,
+        visitor_name,
         &mut errors,
         env.parser_options.tco_expression_tree_virtualize_functions,
     );
@@ -117,7 +113,7 @@ pub fn desugar(hint: &aast::Hint, e: Expr, env: &Env<'_>) -> DesugarResult {
     let static_method_count = temps.static_method_pointers.len();
 
     let metadata = maketree_metadata(
-        &et_hint_pos,
+        visitor_pos,
         &temps.splices,
         &temps.global_function_pointers,
         &temps.static_method_pointers,
@@ -130,9 +126,18 @@ pub fn desugar(hint: &aast::Hint, e: Expr, env: &Env<'_>) -> DesugarResult {
     };
     let param = ast::FunParam {
         annotation: (),
-        type_hint: ast::TypeHint((), Some(hint.clone())),
+        type_hint: ast::TypeHint(
+            (),
+            Some(aast::Hint(
+                visitor_pos.clone(),
+                Box::new(Hint_::Happly(
+                    Id(visitor_pos.clone(), visitor_name.clone()),
+                    vec![],
+                )),
+            )),
+        ),
         is_variadic: false,
-        pos: hint.0.clone(),
+        pos: visitor_pos.clone(),
         name: visitor_variable(),
         expr: None,
         callconv: ParamKind::Pnormal,
@@ -174,7 +179,7 @@ pub fn desugar(hint: &aast::Hint, e: Expr, env: &Env<'_>) -> DesugarResult {
             .map(|i| {
                 ast::CaptureLid(
                     (),
-                    ast::Lid(et_hint_pos.clone(), (0, temp_splice_lvar_string(i))),
+                    ast::Lid(visitor_pos.clone(), (0, temp_splice_lvar_string(i))),
                 )
             })
             .collect();
@@ -183,7 +188,7 @@ pub fn desugar(hint: &aast::Hint, e: Expr, env: &Env<'_>) -> DesugarResult {
                 ast::CaptureLid(
                     (),
                     ast::Lid(
-                        et_hint_pos.clone(),
+                        visitor_pos.clone(),
                         (0, temp_function_pointer_lvar_string(i)),
                     ),
                 )
@@ -193,7 +198,7 @@ pub fn desugar(hint: &aast::Hint, e: Expr, env: &Env<'_>) -> DesugarResult {
             .map(|i| {
                 ast::CaptureLid(
                     (),
-                    ast::Lid(et_hint_pos.clone(), (0, temp_static_method_lvar_string(i))),
+                    ast::Lid(visitor_pos.clone(), (0, temp_static_method_lvar_string(i))),
                 )
             })
             .collect();
@@ -225,10 +230,10 @@ pub fn desugar(hint: &aast::Hint, e: Expr, env: &Env<'_>) -> DesugarResult {
     function_pointers.extend(static_method_assignments);
 
     let make_tree = static_meth_call(
-        &visitor_name,
+        visitor_name,
         et::MAKE_TREE,
         vec![exprpos(&et_literal_pos), metadata, visitor_lambda],
-        &et_hint_pos,
+        visitor_pos,
     );
 
     let runtime_expr = if splice_assignments.is_empty() && function_pointers.is_empty() {
@@ -258,7 +263,7 @@ pub fn desugar(hint: &aast::Hint, e: Expr, env: &Env<'_>) -> DesugarResult {
         (),
         et_literal_pos,
         Expr_::mk_expression_tree(ast::ExpressionTree {
-            hint: hint.clone(),
+            class: Id(visitor_pos.clone(), visitor_name.clone()),
             splices: splice_assignments,
             function_pointers,
             virtualized_expr,
@@ -1853,17 +1858,6 @@ fn rewrite_stmt(
             ));
             unchanged_result
         }
-    }
-}
-
-fn hint_name(hint: &aast::Hint) -> Result<String, (Pos, String)> {
-    if let Hint_::Happly(id, _) = &*hint.1 {
-        Ok(id.1.clone())
-    } else {
-        Err((
-            hint.0.clone(),
-            "Could not determine the visitor type for this Expression Tree".into(),
-        ))
     }
 }
 

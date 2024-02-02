@@ -362,6 +362,9 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       | EnumClassLabel (Some sid, name) ->
         let sid = elaborate_type_name env sid in
         EnumClassLabel (Some sid, name)
+      | ExpressionTree et ->
+        let et_class = elaborate_type_name env et.et_class in
+        super#on_expr_ env (ExpressionTree { et with et_class })
       | _ -> super#on_expr_ env expr
 
     method! on_hint_ env h =

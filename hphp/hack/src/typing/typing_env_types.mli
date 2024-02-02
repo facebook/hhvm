@@ -19,7 +19,7 @@ type local_env = {
 (** Contains contextual information useful when type checking an
     expression tree. *)
 type expr_tree_env = {
-  dsl: Aast.hint;
+  dsl: Aast.class_name;
       (** The DSL the expression tree is representing. For instance in:
 
           SomeDSL`1 + 1`

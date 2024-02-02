@@ -569,10 +569,10 @@ let checked_as_value check_status = Atom (Tast.show_check_status check_status)
 
 let in_expr_tree_as_value env = function
   | None -> bool_as_value false
-  | Some { dsl = hint; outer_locals } ->
+  | Some { dsl = cls; outer_locals } ->
     make_map
       [
-        ("dsl", Atom (Aast_defs.show_hint hint));
+        ("dsl", Atom (Aast_defs.show_class_name cls));
         ("outer_locals", local_id_map_as_value (local_as_value env) outer_locals);
       ]
 

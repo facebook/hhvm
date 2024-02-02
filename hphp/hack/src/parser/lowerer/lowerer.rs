@@ -2175,9 +2175,9 @@ fn p_prefixed_code_expr<'a>(
         ast::Expr::new((), pos, expr)
     };
 
-    let hint = p_hint(&c.prefix, env)?;
+    let cls = pos_name(&c.prefix, env)?;
 
-    let desugar_result = desugar(&hint, src_expr, env);
+    let desugar_result = desugar(&cls, src_expr, env);
     for (pos, msg) in desugar_result.errors {
         raise_parsing_error_pos(&pos, env, &msg);
     }

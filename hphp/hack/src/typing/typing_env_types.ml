@@ -21,7 +21,7 @@ type local_env = {
 }
 
 type expr_tree_env = {
-  dsl: Aast.hint;
+  dsl: Aast.class_name;
   outer_locals: Typing_local_types.t;
 }
 

@@ -175,7 +175,7 @@ and check_await_usage expr =
     | Eif (cond, _, _) -> check_await_usage cond
     | ExpressionTree
         {
-          et_hint = _;
+          et_class = _;
           et_splices = splices;
           et_function_pointers = _;
           et_virtualized_expr = _;

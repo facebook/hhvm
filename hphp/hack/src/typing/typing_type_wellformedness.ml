@@ -567,15 +567,6 @@ let hint tenv h =
 let expr tenv ((), _p, e) =
   (* We don't recurse on expressions here because this is called by Typing.expr *)
   match e with
-  | ExpressionTree
-      {
-        et_hint = h;
-        et_splices = _;
-        et_function_pointers = _;
-        et_virtualized_expr = _;
-        et_runtime_expr = _;
-        et_dollardollar_pos = _;
-      }
   | Is (_, h)
   | As { expr = _; hint = h; is_nullable = _; enforce_deep = _ }
   | Upcast (_, h)
@@ -587,6 +578,7 @@ let expr tenv ((), _p, e) =
   | Lfun (f, _)
   | Efun { ef_fun = f; _ } ->
     fun_ tenv f
+  | ExpressionTree _
   | Invalid _
   | Shape _
   | ValCollection _

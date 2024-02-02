@@ -70,16 +70,16 @@ class virtual iter =
         env
         Aast.
           {
-            et_hint;
+            et_class;
             et_splices;
             et_function_pointers;
             et_virtualized_expr;
             et_runtime_expr;
             et_dollardollar_pos = _;
           } =
-      self#on_hint env et_hint;
+      self#on_id env et_class;
       self#on_block env et_splices;
-      let env = Env.inside_expr_tree env et_hint in
+      let env = Env.inside_expr_tree env et_class in
       self#on_block env et_function_pointers;
       self#on_expr env et_virtualized_expr;
       let env = Env.outside_expr_tree env in
@@ -159,16 +159,16 @@ class virtual ['state] iter_with_state =
         (env, state)
         Aast.
           {
-            et_hint;
+            et_class;
             et_splices;
             et_function_pointers;
             et_virtualized_expr;
             et_runtime_expr;
             et_dollardollar_pos = _;
           } =
-      self#on_hint (env, state) et_hint;
+      self#on_id (env, state) et_class;
       self#on_block (env, state) et_splices;
-      let env = Env.inside_expr_tree env et_hint in
+      let env = Env.inside_expr_tree env et_class in
       self#on_block (env, state) et_function_pointers;
       self#on_expr (env, state) et_virtualized_expr;
       let env = Env.outside_expr_tree env in
@@ -241,22 +241,22 @@ class virtual ['a] reduce =
         env
         Aast.
           {
-            et_hint = hint;
+            et_class = cls;
             et_splices;
             et_function_pointers;
             et_virtualized_expr;
             et_runtime_expr;
             et_dollardollar_pos = _;
           } =
-      let et_hint = self#on_hint env hint in
+      let et_class = self#on_id env cls in
       let et_splices = self#on_block env et_splices in
-      let env = Env.inside_expr_tree env hint in
+      let env = Env.inside_expr_tree env cls in
       let et_function_pointers = self#on_block env et_function_pointers in
       let et_virtualized_expr = self#on_expr env et_virtualized_expr in
       let env = Env.outside_expr_tree env in
       let et_runtime_expr = self#on_expr env et_runtime_expr in
       self#plus
-        et_hint
+        et_class
         (self#plus
            et_splices
            (self#plus
@@ -337,27 +337,27 @@ class virtual map =
         env
         Aast.
           {
-            et_hint;
+            et_class;
             et_splices;
             et_function_pointers;
             et_virtualized_expr;
             et_runtime_expr;
             et_dollardollar_pos;
           } =
-      let et_hint = self#on_hint env et_hint in
+      let et_class = self#on_id env et_class in
       let et_splices = self#on_block env et_splices in
       let et_function_pointers =
-        let env = Env.inside_expr_tree env et_hint in
+        let env = Env.inside_expr_tree env et_class in
         self#on_block env et_function_pointers
       in
       let et_virtualized_expr =
-        let env = Env.inside_expr_tree env et_hint in
+        let env = Env.inside_expr_tree env et_class in
         self#on_expr env et_virtualized_expr
       in
       let et_runtime_expr = self#on_expr env et_runtime_expr in
       Aast.
         {
-          et_hint;
+          et_class;
           et_splices;
           et_function_pointers;
           et_virtualized_expr;
@@ -439,27 +439,27 @@ class virtual endo =
         env
         Aast.
           {
-            et_hint;
+            et_class;
             et_splices;
             et_function_pointers;
             et_virtualized_expr;
             et_runtime_expr;
             et_dollardollar_pos;
           } =
-      let et_hint = self#on_hint env et_hint in
+      let et_class = self#on_id env et_class in
       let et_splices = self#on_block env et_splices in
       let et_function_pointers =
-        let env = Env.inside_expr_tree env et_hint in
+        let env = Env.inside_expr_tree env et_class in
         self#on_block env et_function_pointers
       in
       let et_virtualized_expr =
-        let env = Env.inside_expr_tree env et_hint in
+        let env = Env.inside_expr_tree env et_class in
         self#on_expr env et_virtualized_expr
       in
       let et_runtime_expr = self#on_expr env et_runtime_expr in
       Aast.
         {
-          et_hint;
+          et_class;
           et_splices;
           et_function_pointers;
           et_virtualized_expr;

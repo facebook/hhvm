@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7ef7c3c9be8fd8d32aeab64d1a20d6c2>>
+// @generated SignedSource<<8abf8db9b0d36134ff7b5132c90478b9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -822,7 +822,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunctionPtrId<'arena, Ex, En>);
 pub struct ExpressionTree<'a, Ex, En> {
     /// The hint before the backtick, so Foo in this example.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub hint: &'a Hint<'a>,
+    pub class: &'a ClassName<'a>,
     /// The values spliced into expression tree at runtime are assigned
     /// to temporaries.
     ///

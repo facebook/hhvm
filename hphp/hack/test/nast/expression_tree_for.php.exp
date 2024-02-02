@@ -14,8 +14,7 @@
             (Expr
                ((), [4:3-8:5],
                 (ExpressionTree
-                   { et_hint = ([4:3-13], (Happly (([4:3-13], "\\ExampleDsl"), []))); 
-                     et_splices = [];
+                   { et_class = ([4:3-13], "\\ExampleDsl"); et_splices = [];
                      et_function_pointers =
                      [([6:7-10],
                        (Expr ((), [6:7-10], (Binop { bop = (Eq None); lhs = ((), [6:7-10], (Lvar ([6:7-10], $0fp0))); rhs = ((), [6:7-10], (FunctionPointer ((FP_id ([6:7-10], "\\foo")), []))) }))))];

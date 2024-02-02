@@ -10172,7 +10172,7 @@ end = struct
 
   let expression_tree env p et =
     let {
-      et_hint;
+      et_class;
       et_splices;
       et_function_pointers;
       et_virtualized_expr;
@@ -10234,7 +10234,7 @@ end = struct
 
     (* Next, typecheck the function pointer assignments *)
     let (env, _, t_function_pointers) =
-      Env.with_inside_expr_tree env et_hint (fun env ->
+      Env.with_inside_expr_tree env et_class (fun env ->
           let (env, t_function_pointers) =
             Stmt.block env et_function_pointers
           in
@@ -10250,7 +10250,7 @@ end = struct
        }
     *)
     let (env, t_virtualized_expr, ty_virtual) =
-      Env.with_inside_expr_tree env et_hint (fun env ->
+      Env.with_inside_expr_tree env et_class (fun env ->
           Expr.expr
             ~expected:None
             ~ctxt:Expr.Context.default
@@ -10314,7 +10314,7 @@ end = struct
       p
       (Aast.ExpressionTree
          {
-           et_hint;
+           et_class;
            et_splices = t_splices;
            et_function_pointers = t_function_pointers;
            et_virtualized_expr = t_virtualized_expr;

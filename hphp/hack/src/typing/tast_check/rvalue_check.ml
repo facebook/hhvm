@@ -92,14 +92,14 @@ let visitor =
         this#disallow_non_returning (fun () -> super#on_expr env r)
       | ExpressionTree
           {
-            et_hint;
+            et_class;
             et_splices;
             et_function_pointers;
             et_virtualized_expr;
             et_runtime_expr;
             et_dollardollar_pos = _;
           } ->
-        this#on_hint env et_hint;
+        this#on_id env et_class;
         this#on_block env et_splices;
         this#on_block env et_function_pointers;
         (* Allow calls to void functions at the top level:

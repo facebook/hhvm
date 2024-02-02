@@ -973,7 +973,7 @@ let with_outside_expr_tree env f =
   let old_in_expr_tree = env.in_expr_tree in
   let dsl =
     match old_in_expr_tree with
-    | Some { dsl = (_, Happly (cls, _)); outer_locals = _ } -> Some cls
+    | Some { dsl = cls; outer_locals = _ } -> Some cls
     | _ -> None
   in
   let env = outside_expr_tree env in
@@ -1191,13 +1191,13 @@ let local_undefined_error ~env p x ctx =
         Naming_error.Undefined
           { pos = p; var_name = lid; did_you_mean = most_similar }
       | Some dsl ->
-        let dsl =
-          match dsl with
-          | (_, Happly ((_, cls), _)) -> Some cls
-          | _ -> None
-        in
         Naming_error.Undefined_in_expr_tree
-          { pos = p; var_name = lid; dsl; did_you_mean = most_similar }
+          {
+            pos = p;
+            var_name = lid;
+            dsl = Some (snd dsl);
+            did_you_mean = most_similar;
+          }
     in
     Errors.add_error (Naming_error.to_user_error error)
   | None -> ()

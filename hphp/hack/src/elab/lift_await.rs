@@ -238,7 +238,7 @@ fn check_await_usage(expr: &Expr) -> AwaitUsage {
         // Can't have await in the branches (parse error)
         Expr_::Eif(box (cond, _, _)) => check_await_usage(cond),
         Expr_::ExpressionTree(box nast::ExpressionTree {
-            hint: _,
+            class: _,
             splices,
             function_pointers: _,
             virtualized_expr: _,
@@ -640,7 +640,7 @@ impl LiftAwait {
             }
 
             Expr_::ExpressionTree(box nast::ExpressionTree {
-                hint: _,
+                class: _,
                 splices,
                 function_pointers: _,
                 virtualized_expr: _,

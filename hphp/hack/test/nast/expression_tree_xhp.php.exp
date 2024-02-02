@@ -18,8 +18,8 @@
                      rhs =
                      ((), [4:8-59],
                       (ExpressionTree
-                         { et_hint = ([4:8-18], (Happly (([4:8-18], "\\ExampleDsl"), []))); 
-                           et_splices = []; et_function_pointers = [];
+                         { et_class = ([4:8-18], "\\ExampleDsl"); et_splices = []; 
+                           et_function_pointers = [];
                            et_virtualized_expr =
                            ((), [4:19-58],
                             (Efun

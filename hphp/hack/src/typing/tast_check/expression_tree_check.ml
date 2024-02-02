@@ -26,14 +26,14 @@ let handler =
           let allowed_expression_tree_visitors =
             TypecheckerOptions.allowed_expression_tree_visitors tcopt
           in
-          let (_pos, hint) = et.et_hint in
+          let (_pos, id) = et.et_class in
           let err_opt =
-            match hint with
-            | Happly ((_, id), _)
-              when List.exists allowed_expression_tree_visitors ~f:(fun s ->
-                       String.equal s id) ->
+            if
+              List.exists allowed_expression_tree_visitors ~f:(fun s ->
+                  String.equal s id)
+            then
               None
-            | _ ->
+            else
               Some
                 Typing_error.(
                   expr_tree

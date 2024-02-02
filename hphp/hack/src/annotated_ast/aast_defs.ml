@@ -345,7 +345,7 @@ and ('ex, 'en) function_ptr_id =
  *     Foo`1 + ${$x} + ${bar()}` *)
 
 and ('ex, 'en) expression_tree = {
-  et_hint: hint;
+  et_class: class_name;
       (** The hint before the backtick, so Foo in this example. *)
   et_splices: ('ex, 'en) stmt list;
       (** The values spliced into expression tree at runtime are assigned

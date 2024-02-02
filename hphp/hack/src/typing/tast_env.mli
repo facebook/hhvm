@@ -72,7 +72,7 @@ val get_class_or_typedef :
 
 val is_in_expr_tree : env -> bool
 
-val inside_expr_tree : env -> Tast.hint -> env
+val inside_expr_tree : env -> Tast.class_name -> env
 
 val outside_expr_tree : env -> env
 

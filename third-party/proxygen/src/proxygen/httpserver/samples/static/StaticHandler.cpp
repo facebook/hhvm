@@ -13,6 +13,7 @@
 #include <folly/io/async/EventBaseManager.h>
 #include <proxygen/httpserver/RequestHandler.h>
 #include <proxygen/httpserver/ResponseBuilder.h>
+#include <proxygen/lib/utils/SafePathUtils.h>
 
 using namespace proxygen;
 
@@ -33,12 +34,13 @@ void StaticHandler::onRequest(std::unique_ptr<HTTPMessage> headers) noexcept {
         .sendWithEOM();
     return;
   }
-  // a real webserver would validate this path didn't contain malicious
-  // characters like '//' or '..'
+
   try {
     // + 1 to kill leading /
-    file_ = std::make_unique<folly::File>(
-        headers->getPathAsStringPiece().subpiece(1));
+    auto path = std::string(headers->getPathAsStringPiece().subpiece(1));
+    auto safepath = proxygen::SafePath::getPath(path, "./");
+
+    file_ = std::make_unique<folly::File>(safepath);
   } catch (const std::system_error& ex) {
     ResponseBuilder(downstream_)
         .status(404, "Not Found")

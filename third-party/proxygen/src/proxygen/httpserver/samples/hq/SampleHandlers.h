@@ -34,6 +34,7 @@
 #include <proxygen/httpserver/samples/hq/HQServer.h>
 #include <proxygen/httpserver/samples/hq/devious/DeviousBaton.h>
 #include <proxygen/lib/http/session/HTTPTransaction.h>
+#include <proxygen/lib/utils/SafePathUtils.h>
 
 namespace quic::samples {
 
@@ -834,16 +835,18 @@ class StaticFileHandler : public BaseSampleHandler {
       sendError("Path cannot contain ..");
       return;
     }
+
+    auto filepath = folly::to<std::string>(staticRoot_, "/", path);
     try {
-      // Strip /static/ and join with /.
-      file_ = std::make_unique<folly::File>(
-          folly::to<std::string>(staticRoot_, "/", path));
-    } catch (const std::system_error&) {
+      auto safepath = proxygen::SafePath::getPath(filepath, staticRoot_, true);
+      file_ = std::make_unique<folly::File>(safepath);
+    } catch (...) {
       auto errorMsg = folly::to<std::string>(
           "Invalid URL: cannot open requested file. "
-          "path: ",
-          path);
-      LOG(ERROR) << errorMsg;
+          "path: '",
+          path,
+          "'");
+      LOG(ERROR) << errorMsg << " file: '" << filepath << "'";
       sendError(errorMsg);
       return;
     }

@@ -67,3 +67,24 @@ typedef map<i32, FMap> (
 typedef map<i64, string> (
   java.swift.type = "com.foo.FastLongStringMap",
 ) map_i64_string_9739
+
+union Unfortunate_union {
+  @java.FieldUseUnmangledName
+  1: string an_snake_string;
+  @java.FieldUseUnmangledName
+  2: i32 aCamelI32;
+}
+
+exception Unfortunate_exception {
+  @java.FieldUseUnmangledName
+  1: string an_snake_string;
+  @java.FieldUseUnmangledName
+  2: i32 aCamelI32;
+}
+
+struct No_effect {
+  @java.FieldUseUnmangledName
+  1: string an_snake_string;
+  @java.FieldUseUnmangledName
+  2: i32 aCamelI32;
+}

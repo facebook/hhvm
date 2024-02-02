@@ -802,6 +802,8 @@ class mstch_java_field : public mstch_field {
              &mstch_java_field::get_field_adapter_type_class_name},
             {"field:fieldAdapterClassName",
              &mstch_java_field::get_field_adapter_class_name},
+            {"field:FieldNameUnmangled?",
+             &mstch_java_field::is_field_name_unmangled},
         });
   }
 
@@ -1040,6 +1042,11 @@ class mstch_java_field : public mstch_field {
 
     return get_structed_annotation_attribute(
         field_, kJavaAnnotationUri, "java_annotation");
+  }
+
+  mstch::node is_field_name_unmangled() {
+    return field_->find_structured_annotation_or_null(
+        kJavaFieldUseUnmangledNameUri);
   }
 };
 

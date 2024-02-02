@@ -45,7 +45,7 @@ public final class {{struct:javaCapitalName}} implements com.facebook.thrift.pay
 
     {{#struct:fields}}
     public static final int _{{field:javaAllCapsName}} = {{field:key}};
-    private static final TField {{field:javaTFieldName}} = new TField("{{field:javaName}}", TType.{{#field:type}}{{> TType}}{{/field:type}}, (short){{field:key}});
+    private static final TField {{field:javaTFieldName}} = new TField("{{#field:FieldNameUnmangled?}}{{field:name}}{{/field:FieldNameUnmangled?}}{{^field:FieldNameUnmangled?}}{{field:javaName}}{{/field:FieldNameUnmangled?}}", TType.{{#field:type}}{{> TType}}{{/field:type}}, (short){{field:key}});
     {{/struct:fields}}
 
     static {

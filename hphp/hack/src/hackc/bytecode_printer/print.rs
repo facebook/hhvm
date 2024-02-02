@@ -296,7 +296,7 @@ fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &Function<'_>) -
     let body = &fun_def.body;
     newline(w)?;
     w.write_all(b".function ")?;
-    print_upper_bounds_(w, body.upper_bounds)?;
+    print_upper_bounds_(w, &body.upper_bounds)?;
     w.write_all(b" ")?;
     print_special_and_user_attrs(
         ctx,
@@ -495,7 +495,7 @@ fn print_method_def(ctx: &Context<'_>, w: &mut dyn Write, method_def: &Method<'_
     newline(w)?;
     w.write_all(b"  .method ")?;
     print_shadowed_tparams(w, &body.shadowed_tparams)?;
-    print_upper_bounds_(w, body.upper_bounds)?;
+    print_upper_bounds_(w, &body.upper_bounds)?;
     w.write_all(b" ")?;
     print_special_and_user_attrs(
         ctx,
@@ -776,7 +776,7 @@ fn print_attribute(ctx: &Context<'_>, w: &mut dyn Write, a: &Attribute<'_>) -> R
         Adata::VEC_PREFIX,
         a.arguments.len()
     )?;
-    concat(w, a.arguments, |w, arg| print_adata(ctx, w, arg))?;
+    concat(w, &a.arguments, |w, arg| print_adata(ctx, w, arg))?;
     w.write_all(b"}\"\"\")")
 }
 
@@ -1107,7 +1107,7 @@ fn print_upper_bounds<'arena>(
 fn print_upper_bound<'arena>(w: &mut dyn Write, ub: &UpperBound<'arena>) -> Result<()> {
     paren(w, |w| {
         write_bytes!(w, "{} as ", ub.name)?;
-        concat_by(w, ", ", ub.bounds, print_type_info)
+        concat_by(w, ", ", &ub.bounds, print_type_info)
     })
 }
 
@@ -1121,7 +1121,7 @@ fn print_upper_bounds_<'arena>(
 fn print_upper_bound_<'arena>(w: &mut dyn Write, ub: &UpperBound<'arena>) -> Result<()> {
     paren(w, |w| {
         write_bytes!(w, "{} as ", ub.name)?;
-        concat_by(w, ", ", ub.bounds, print_type_info)
+        concat_by(w, ", ", &ub.bounds, print_type_info)
     })
 }
 

@@ -6,7 +6,6 @@ use std::rc::Rc;
 use anyhow::anyhow;
 use anyhow::bail;
 use anyhow::Result;
-use ffi::Slice;
 use ffi::Str;
 use hash::HashMap;
 use hhbc::AdataId;
@@ -823,15 +822,15 @@ impl<'arena, 'a> State<'arena, 'a> {
         ) -> FCallArgs<'arena> {
             // Turn a non-empty, all-false slice into an empty slice.
             let inouts = if !inouts.is_empty() && !inouts.iter().any(|x| *x) {
-                Slice::from(&[][..])
+                Default::default()
             } else {
-                *inouts
+                inouts.clone()
             };
             // Turn a non-empty, all-false slice into an empty slice.
             let readonly = if !readonly.is_empty() && !readonly.iter().any(|x| *x) {
-                Slice::from(&[][..])
+                Default::default()
             } else {
-                *readonly
+                readonly.clone()
             };
             FCallArgs {
                 flags: *flags,
@@ -1061,8 +1060,8 @@ impl<'arena, 'a> State<'arena, 'a> {
     fn step_s_switch(
         &mut self,
         builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
-        cases: &Slice<'arena, Str<'arena>>,
-        targets: &Slice<'arena, Label>,
+        cases: &[Str<'arena>],
+        targets: &[Label],
     ) {
         let value = self.stack_pop();
 
@@ -1070,8 +1069,8 @@ impl<'arena, 'a> State<'arena, 'a> {
 
         let inputs = vec![self.reffy(value)];
         let instr = NodeInstr::Opcode(Opcode::SSwitch {
-            cases: cases.clone(),
-            targets: Slice::empty(),
+            cases: cases.to_vec().into(),
+            targets: vec![].into(),
         });
         self.seq_push(builder, instr, inputs);
         self.ip = InstrPtr::None;
@@ -1082,14 +1081,14 @@ impl<'arena, 'a> State<'arena, 'a> {
         builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
         bounded: SwitchKind,
         base: i64,
-        targets: &Slice<'arena, Label>,
+        targets: &[Label],
     ) {
         let value = self.stack_pop();
 
         self.fork(builder, targets.as_ref());
 
         let inputs = vec![self.reffy(value)];
-        let instr = NodeInstr::Opcode(Opcode::Switch(bounded, base, Slice::empty()));
+        let instr = NodeInstr::Opcode(Opcode::Switch(bounded, base, vec![].into()));
         self.seq_push(builder, instr, inputs);
         self.ip = InstrPtr::None;
     }

@@ -5,8 +5,8 @@
 
 use ffi::Maybe;
 use ffi::Maybe::Just;
-use ffi::Slice;
 use ffi::Str;
+use ffi::Vector;
 use hhvm_types_ffi::ffi::TypeConstraintFlags;
 use serde::Serialize;
 
@@ -29,7 +29,7 @@ pub struct Constraint<'arena> {
 #[repr(C)]
 pub struct UpperBound<'arena> {
     pub name: Str<'arena>,
-    pub bounds: Slice<'arena, TypeInfo<'arena>>,
+    pub bounds: Vector<TypeInfo<'arena>>,
 }
 
 impl<'arena> Constraint<'arena> {

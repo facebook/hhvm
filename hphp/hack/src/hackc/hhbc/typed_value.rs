@@ -5,6 +5,7 @@
 
 use ffi::Slice;
 use ffi::Str;
+use ffi::Vector;
 use serde::Serialize;
 
 /// Raw IEEE floating point bits. We use this rather than f64 so that
@@ -60,13 +61,14 @@ pub enum TypedValue<'arena> {
     Bool(bool),
     /// Hack, C++, PHP, and Caml floats are IEEE754 64-bit
     Float(FloatBits),
-    String(Str<'arena>),
+    /// Hack strings are plain bytes with no utf-8 guarantee
+    String(Slice<'arena, u8>),
     LazyClass(Str<'arena>),
     Null,
     // Hack arrays: vectors, keysets, and dictionaries
-    Vec(Slice<'arena, TypedValue<'arena>>),
-    Keyset(Slice<'arena, TypedValue<'arena>>),
-    Dict(Slice<'arena, Entry<TypedValue<'arena>, TypedValue<'arena>>>),
+    Vec(Vector<TypedValue<'arena>>),
+    Keyset(Vector<TypedValue<'arena>>),
+    Dict(Vector<Entry<TypedValue<'arena>, TypedValue<'arena>>>),
 }
 
 // This is declared as a generic type to work around cbindgen's topo-sort,
@@ -82,24 +84,24 @@ pub struct Entry<K, V> {
 pub type DictEntry<'a> = Entry<TypedValue<'a>, TypedValue<'a>>;
 
 impl<'arena> TypedValue<'arena> {
-    pub fn string(x: impl Into<Str<'arena>>) -> Self {
+    pub fn string(x: impl Into<Slice<'arena, u8>>) -> Self {
         Self::String(x.into())
     }
 
-    pub fn vec(x: impl Into<Slice<'arena, TypedValue<'arena>>>) -> Self {
+    pub fn vec(x: Vec<TypedValue<'arena>>) -> Self {
         Self::Vec(x.into())
     }
 
-    pub fn keyset(x: impl Into<Slice<'arena, TypedValue<'arena>>>) -> Self {
+    pub fn keyset(x: Vec<TypedValue<'arena>>) -> Self {
         Self::Keyset(x.into())
     }
 
-    pub fn dict(x: impl Into<Slice<'arena, DictEntry<'arena>>>) -> Self {
+    pub fn dict(x: Vec<DictEntry<'arena>>) -> Self {
         Self::Dict(x.into())
     }
 
-    pub fn alloc_string(s: impl AsRef<str>, alloc: &'arena bumpalo::Bump) -> Self {
-        Self::String((alloc.alloc_str(s.as_ref()) as &str).into())
+    pub fn alloc_string(s: impl AsRef<[u8]>, alloc: &'arena bumpalo::Bump) -> Self {
+        Self::String((alloc.alloc_slice_copy(s.as_ref())).into())
     }
 
     pub fn float(f: f64) -> Self {

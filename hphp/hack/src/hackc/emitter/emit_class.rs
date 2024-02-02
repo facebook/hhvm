@@ -12,7 +12,6 @@ use error::Error;
 use error::Result;
 use ffi::Maybe;
 use ffi::Maybe::*;
-use ffi::Slice;
 use ffi::Str;
 use hhbc::Class;
 use hhbc::ClassName;
@@ -125,7 +124,7 @@ fn make_86method<'arena, 'decl>(
 
     Ok(Method {
         body,
-        attributes: Slice::fill_iter(alloc, attributes),
+        attributes: attributes.into(),
         name,
         flags,
         span,
@@ -231,7 +230,7 @@ fn from_ctx_constant<'a, 'arena>(
     let name = tc.name.1.to_string();
     let (recognized, unrecognized) = match &tc.kind {
         ClassTypeconst::TCAbstract(ast::ClassAbstractTypeconst { default: None, .. }) => {
-            (Slice::empty(), Slice::empty())
+            (vec![], vec![])
         }
         ClassTypeconst::TCAbstract(ast::ClassAbstractTypeconst {
             default: Some(hint),
@@ -239,14 +238,11 @@ fn from_ctx_constant<'a, 'arena>(
         })
         | ClassTypeconst::TCConcrete(ast::ClassConcreteTypeconst { c_tc_type: hint }) => {
             let x = Coeffects::from_ctx_constant(hint);
-            let r: Slice<'arena, Str<'_>> = Slice::from_vec(
-                alloc,
+            let r: Vec<Str<'_>> =
                 x.0.iter()
                     .map(|ctx| Str::new_str(alloc, &ctx.to_string()))
-                    .collect(),
-            );
-            let u: Slice<'arena, Str<'_>> =
-                Slice::from_vec(alloc, x.1.iter().map(|s| Str::new_str(alloc, s)).collect());
+                    .collect();
+            let u: Vec<Str<'_>> = x.1.iter().map(|s| Str::new_str(alloc, s)).collect();
             (r, u)
         }
     };
@@ -256,8 +252,8 @@ fn from_ctx_constant<'a, 'arena>(
     };
     Ok(CtxConstant {
         name: Str::new_str(alloc, &name),
-        recognized,
-        unrecognized,
+        recognized: recognized.into(),
+        unrecognized: unrecognized.into(),
         is_abstract,
     })
 }
@@ -383,7 +379,7 @@ fn emit_reified_extends_params<'a, 'arena, 'decl>(
         },
         _ => {}
     }
-    let tv = TypedValue::Vec(Slice::empty());
+    let tv = TypedValue::Vec(Default::default());
     emit_adata::typed_value_into_instr(e, tv)
 }
 
@@ -428,15 +424,7 @@ fn emit_reified_init_body<'a, 'arena, 'decl>(
             instr::null_uninit(),
             generic_arr,
             instr::f_call_cls_method_sd(
-                FCallArgs::new(
-                    FCallArgsFlags::default(),
-                    1,
-                    1,
-                    Slice::empty(),
-                    Slice::empty(),
-                    None,
-                    None,
-                ),
+                FCallArgs::new(FCallArgsFlags::default(), 1, 1, vec![], vec![], None, None),
                 SpecialClsRef::ParentCls,
                 hhbc::MethodName::from_raw_string(alloc, INIT_METH_NAME),
             ),
@@ -473,7 +461,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
             is_variadic: false,
             is_inout: false,
             is_readonly: false,
-            user_attributes: Slice::empty(),
+            user_attributes: Default::default(),
             type_info: Just(TypeInfo::make(Just("HH\\varray".into()), tc)),
             default_value: Nothing,
         }];
@@ -490,7 +478,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
             Visibility::Public,
             false, // is_abstract
             Span::from_pos(&ast_class.span),
-            Coeffects::pure(alloc),
+            Coeffects::pure(),
             instrs,
         )?))
     }
@@ -528,7 +516,7 @@ fn make_init_method<'arena, 'decl>(
             Visibility::Private,
             false, // is_abstract
             span,
-            Coeffects::pure(alloc),
+            Coeffects::pure(),
             instrs,
         )?))
     } else {
@@ -547,10 +535,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
 
     let mut attributes = emit_attribute::from_asts(emitter, &ast_class.user_attributes)?;
     if !is_closure {
-        attributes.extend(emit_attribute::add_reified_attribute(
-            alloc,
-            &ast_class.tparams,
-        ));
+        attributes.extend(emit_attribute::add_reified_attribute(&ast_class.tparams));
         attributes.extend(emit_attribute::add_reified_parent_attribute(
             &env,
             &ast_class.extends,
@@ -734,13 +719,12 @@ pub fn emit_class<'a, 'arena, 'decl>(
             is_variadic: false,
             is_inout: false,
             is_readonly: false,
-            user_attributes: Slice::empty(),
+            user_attributes: Default::default(),
             type_info: Nothing, // string?
             default_value: Nothing,
         }];
         let default_label = emitter.label_gen_mut().next_regular();
-        let mut cases =
-            bumpalo::collections::Vec::with_capacity_in(initialized_constants.len() + 1, alloc);
+        let mut cases = Vec::with_capacity(initialized_constants.len() + 1);
         for (name, label, _) in &initialized_constants {
             let n: &str = alloc.alloc_str((*name).unsafe_as_str());
             cases.push((n, *label))
@@ -750,7 +734,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         let instrs = InstrSeq::gather(vec![
             emit_pos::emit_pos(pos),
             instr::c_get_l(param_local),
-            instr::s_switch(alloc, cases),
+            instr::s_switch(cases),
             InstrSeq::gather(
                 initialized_constants
                     .into_iter()
@@ -864,7 +848,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
 
     add_symbol_refs(emitter, base.as_ref(), &implements, &uses, &requirements);
     Ok(Class {
-        attributes: Slice::fill_iter(alloc, attributes),
+        attributes: attributes.into(),
         base: Maybe::from(base),
         implements: implements.into(),
         enum_includes: enum_includes.into(),
@@ -875,7 +859,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         uses: uses.into(),
         methods: methods.into(),
         enum_type: Maybe::from(enum_type),
-        upper_bounds: Slice::fill_iter(alloc, upper_bounds),
+        upper_bounds: upper_bounds.into(),
         properties: Vec::from_iter(properties.into_iter().map(|p| p.prop)).into(),
         requirements: requirements.into(),
         type_constants: type_constants.into(),

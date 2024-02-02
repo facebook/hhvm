@@ -829,7 +829,7 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
     // The embedded macros in this match expression (simple!, todo!) use the
     // hhbc opcode table to figure out how to convert standard opcodes.
     #[bc_to_ir]
-    let action = match *opcode {
+    let action = match opcode.clone() {
         Opcode::BaseC(..)
         | Opcode::BaseGC(..)
         | Opcode::BaseGL(..)

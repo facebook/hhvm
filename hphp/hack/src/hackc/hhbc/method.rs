@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bitflags::bitflags;
-use ffi::Slice;
+use ffi::Vector;
 use hhvm_types_ffi::ffi::Attr;
 use serde::Serialize;
 
@@ -18,7 +18,7 @@ use crate::Visibility;
 #[derive(Debug, Serialize)]
 #[repr(C)]
 pub struct Method<'arena> {
-    pub attributes: Slice<'arena, Attribute<'arena>>,
+    pub attributes: Vector<Attribute<'arena>>,
     pub visibility: Visibility,
     pub name: MethodName<'arena>,
     pub body: Body<'arena>,

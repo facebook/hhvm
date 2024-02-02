@@ -2817,9 +2817,7 @@ dependencies = [
 name = "label_rewriter"
 version = "0.0.0"
 dependencies = [
- "bumpalo",
  "env",
- "ffi",
  "hash",
  "hhbc",
  "instruction_sequence",

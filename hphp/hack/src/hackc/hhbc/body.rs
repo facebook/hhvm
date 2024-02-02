@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Maybe;
-use ffi::Slice;
 use ffi::Str;
 use ffi::Vector;
 use serde::Serialize;
@@ -23,7 +22,7 @@ pub struct Body<'arena> {
     pub num_iters: usize,
     pub is_memoize_wrapper: bool,
     pub is_memoize_wrapper_lsb: bool,
-    pub upper_bounds: Slice<'arena, UpperBound<'arena>>,
+    pub upper_bounds: Vector<UpperBound<'arena>>,
     pub shadowed_tparams: Vector<Str<'arena>>,
     pub params: Vector<Param<'arena>>,
     pub return_type_info: Maybe<TypeInfo<'arena>>,

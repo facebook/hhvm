@@ -10,7 +10,6 @@ use emit_pos::emit_pos_then;
 use env::emitter::Emitter;
 use env::Env;
 use error::Result;
-use ffi::Slice;
 use ffi::Str;
 use hhbc::Attribute;
 use hhbc::Body;
@@ -87,7 +86,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
         .collect::<Vec<_>>();
     let params = emit_param::from_asts(emitter, &mut tparams, true, &scope, &f.params)?;
     let mut attributes = emit_attribute::from_asts(emitter, &f.user_attributes)?;
-    attributes.extend(emit_attribute::add_reified_attribute(alloc, &fd.tparams));
+    attributes.extend(emit_attribute::add_reified_attribute(&fd.tparams));
     let return_type_info = emit_body::emit_return_type_info(
         alloc,
         &tparams,
@@ -138,7 +137,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
     let attrs = get_attrs_for_fun(emitter, fd, &attributes, false, has_variadic);
 
     Ok(Function {
-        attributes: Slice::fill_iter(alloc, attributes),
+        attributes: attributes.into(),
         name: original_id,
         body,
         span: Span::from_pos(&f.span),
@@ -235,8 +234,8 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
             fcall_flags,
             1,
             param_count as u32,
-            Slice::empty(),
-            Slice::empty(),
+            vec![],
+            vec![],
             if is_async { Some(eager_set) } else { None },
             None,
         )
@@ -331,8 +330,8 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
         FCallArgsFlags::default(),
         1,
         0,
-        Slice::empty(),
-        Slice::empty(),
+        vec![],
+        vec![],
         if is_async { Some(eager_set) } else { None },
         None,
     );

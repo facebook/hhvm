@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Maybe;
-use ffi::Slice;
 use ffi::Str;
 use ffi::Vector;
 use serde::Serialize;
@@ -28,7 +27,7 @@ pub struct Unit<'arena> {
     pub classes: Vector<Class<'arena>>,
     pub modules: Vector<Module<'arena>>,
     pub typedefs: Vector<Typedef<'arena>>,
-    pub file_attributes: Slice<'arena, Attribute<'arena>>,
+    pub file_attributes: Vector<Attribute<'arena>>,
     pub module_use: Maybe<Str<'arena>>,
     pub symbol_refs: SymbolRefs<'arena>,
     pub constants: Vector<Constant<'arena>>,

@@ -16,7 +16,6 @@ use anyhow::Context;
 use anyhow::Result;
 use bumpalo::Bump;
 use ffi::Maybe;
-use ffi::Slice;
 use ffi::Str;
 use hash::HashMap;
 use hhvm_types_ffi::Attr;
@@ -77,7 +76,7 @@ fn assemble_from_toks<'arena>(
         unit.assemble_decl(alloc, token_iter)?;
     }
 
-    Ok((unit.into_unit(alloc), fp))
+    Ok((unit.into_unit(), fp))
 }
 
 #[derive(Default)]
@@ -99,13 +98,13 @@ struct UnitBuilder<'a> {
 }
 
 impl<'a> UnitBuilder<'a> {
-    fn into_unit(self, alloc: &'a Bump) -> hhbc::Unit<'a> {
+    fn into_unit(self) -> hhbc::Unit<'a> {
         hhbc::Unit {
             adata: self.adatas.into(),
             functions: self.funcs.into(),
             classes: self.classes.into(),
             typedefs: self.typedefs.into(),
-            file_attributes: Slice::fill_iter(alloc, self.file_attributes),
+            file_attributes: self.file_attributes.into(),
             modules: self.modules.into(),
             module_use: self.module_use.into(),
             symbol_refs: hhbc::SymbolRefs {
@@ -257,7 +256,7 @@ fn assemble_module<'arena>(
     );
 
     Ok(hhbc::Module {
-        attributes,
+        attributes: attributes.into(),
         name,
         span,
         doc_comment,
@@ -313,7 +312,7 @@ fn assemble_typedef<'arena>(
     let (attrs, attributes) = attrs;
     Ok(hhbc::Typedef {
         name,
-        attributes,
+        attributes: attributes.into(),
         type_info_union: type_info_union.into(),
         type_structure,
         span,
@@ -366,7 +365,7 @@ fn assemble_class<'arena>(
     parse!(token_iter, "}");
 
     let hhas_class = hhbc::Class {
-        attributes,
+        attributes: attributes.into(),
         base,
         implements: implements.into(),
         enum_includes: enum_includes.into(),
@@ -380,7 +379,7 @@ fn assemble_class<'arena>(
         type_constants: type_constants.into(),
         ctx_constants: ctx_constants.into(),
         requirements: requirements.into(),
-        upper_bounds,
+        upper_bounds: upper_bounds.into(),
         doc_comment,
         flags,
     };
@@ -388,8 +387,8 @@ fn assemble_class<'arena>(
 }
 
 /// Defined in 'hack/src/naming/naming_special_names.rs`
-fn is_enforced_static_coeffect(d: &Slice<'_, u8>) -> bool {
-    match d.as_ref() {
+fn is_enforced_static_coeffect(d: &[u8]) -> bool {
+    match d {
         b"pure" | b"defaults" | b"rx" | b"zoned" | b"write_props" | b"rx_local" | b"zoned_with"
         | b"zoned_local" | b"zoned_shallow" | b"leak_safe_local" | b"leak_safe_shallow"
         | b"leak_safe" | b"read_globals" | b"globals" | b"write_this_props" | b"rx_shallow" => true,
@@ -411,15 +410,15 @@ fn assemble_ctx_constant<'arena>(
     // .ctx has slice of recognized and unrecognized constants.
     // Making an assumption that recognized ~~ static coeffects and
     // unrecognized ~~ unenforced static coeffects
-    let (r, u) = tokens
+    let (r, u): (Vec<_>, Vec<_>) = tokens
         .into_iter()
         .map(|tok| tok.into_ffi_str(alloc))
-        .partition(is_enforced_static_coeffect);
+        .partition(|s| is_enforced_static_coeffect(s));
 
     Ok(hhbc::CtxConstant {
         name,
-        recognized: Slice::from_vec(alloc, r),
-        unrecognized: Slice::from_vec(alloc, u),
+        recognized: r.into(),
+        unrecognized: u.into(),
         is_abstract,
     })
 }
@@ -517,7 +516,7 @@ fn assemble_method<'arena>(
     let visibility =
         determine_visibility(&attrs).map_err(|e| method_tok.unwrap().error(e.to_string()))?;
     let met = hhbc::Method {
-        attributes,
+        attributes: attributes.into(),
         visibility,
         name,
         body,
@@ -585,7 +584,7 @@ fn assemble_property<'arena>(
     Ok(hhbc::Property {
         name,
         flags,
-        attributes,
+        attributes: attributes.into(),
         visibility,
         initial_value,
         type_info,
@@ -977,11 +976,11 @@ fn assemble_typed_value<'arena>(
 
             pub fn build<'arena>(
                 &self,
-                content: Slice<'arena, hhbc::TypedValue<'arena>>,
+                content: Vec<hhbc::TypedValue<'arena>>,
             ) -> hhbc::TypedValue<'arena> {
                 match self {
-                    VecOrKeyset::Vec => hhbc::TypedValue::Vec(content),
-                    VecOrKeyset::Keyset => hhbc::TypedValue::Keyset(content),
+                    VecOrKeyset::Vec => hhbc::TypedValue::Vec(content.into()),
+                    VecOrKeyset::Keyset => hhbc::TypedValue::Keyset(content.into()),
                 }
             }
         }
@@ -1003,8 +1002,7 @@ fn assemble_typed_value<'arena>(
                 tv_vec.push(tv);
             }
             let src = expect(src, b"}")?;
-            let slice = Slice::from_vec(alloc, tv_vec);
-            Ok((src, v_or_k.build(slice)))
+            Ok((src, v_or_k.build(tv_vec)))
         }
 
         /// D:(D.len):{p1_0; p1_1; ...; pD.len_0; pD.len_1}
@@ -1026,7 +1024,7 @@ fn assemble_typed_value<'arena>(
                 tv_vec.push(hhbc::DictEntry { key, value })
             }
             let src = expect(src, b"}")?;
-            Ok((src, hhbc::TypedValue::Dict(Slice::from_vec(alloc, tv_vec))))
+            Ok((src, hhbc::TypedValue::Dict(tv_vec.into())))
         }
 
         fn deserialize_tv<'arena, 'a>(
@@ -1130,7 +1128,7 @@ fn assemble_function<'arena>(
         upper_bounds,
     )?;
     let hhas_func = hhbc::Function {
-        attributes,
+        attributes: attributes.into(),
         name,
         body,
         span,
@@ -1188,9 +1186,9 @@ fn assemble_span(token_iter: &mut Lexer<'_>) -> Result<hhbc::Span> {
 fn assemble_upper_bounds<'arena>(
     token_iter: &mut Lexer<'_>,
     alloc: &'arena Bump,
-) -> Result<Slice<'arena, hhbc::UpperBound<'arena>>> {
+) -> Result<Vec<hhbc::UpperBound<'arena>>> {
     parse!(token_iter, "{" <ubs:assemble_upper_bound(alloc),*> "}");
-    Ok(Slice::from_vec(alloc, ubs))
+    Ok(ubs)
 }
 
 /// Ex: (T as <"HH\\int" "HH\\int" upper_bound>)
@@ -1201,7 +1199,7 @@ fn assemble_upper_bound<'arena>(
     parse!(token_iter, "(" <id:id> "as" <tis:assemble_type_info(alloc, TypeInfoKind::NotEnumOrTypeDef),*> ")");
     Ok(hhbc::UpperBound {
         name: id.into_ffi_str(alloc),
-        bounds: Slice::from_vec(alloc, tis),
+        bounds: tis.into(),
     })
 }
 
@@ -1210,10 +1208,7 @@ fn assemble_upper_bound<'arena>(
 fn assemble_special_and_user_attrs<'arena>(
     token_iter: &mut Lexer<'_>,
     alloc: &'arena Bump,
-) -> Result<(
-    hhvm_types_ffi::ffi::Attr,
-    Slice<'arena, hhbc::Attribute<'arena>>,
-)> {
+) -> Result<(hhvm_types_ffi::ffi::Attr, Vec<hhbc::Attribute<'arena>>)> {
     let mut user_atts = Vec::new();
     let mut tr = hhvm_types_ffi::ffi::Attr::AttrNone;
     if token_iter.next_is(Token::is_open_bracket) {
@@ -1229,7 +1224,6 @@ fn assemble_special_and_user_attrs<'arena>(
         token_iter.expect(Token::is_close_bracket)?;
     }
     // If no special and user attrs then no [] printed
-    let user_atts = Slice::from_vec(alloc, user_atts);
     Ok((tr, user_atts))
 }
 
@@ -1299,7 +1293,10 @@ fn assemble_user_attr<'arena>(
     token_iter.expect(Token::is_open_paren)?;
     let arguments = assemble_user_attr_args(alloc, token_iter)?;
     token_iter.expect(Token::is_close_paren)?;
-    Ok(hhbc::Attribute { name, arguments })
+    Ok(hhbc::Attribute {
+        name,
+        arguments: arguments.into(),
+    })
 }
 
 /// Printed as follows (print_attributes in bcp)
@@ -1307,10 +1304,10 @@ fn assemble_user_attr<'arena>(
 fn assemble_user_attr_args<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-) -> Result<Slice<'arena, hhbc::TypedValue<'arena>>> {
+) -> Result<Vec<hhbc::TypedValue<'arena>>> {
     let tok = token_iter.peek().copied();
-    if let hhbc::TypedValue::Vec(sl) = assemble_triple_quoted_typed_value(token_iter, alloc)? {
-        Ok(sl)
+    if let hhbc::TypedValue::Vec(vals) = assemble_triple_quoted_typed_value(token_iter, alloc)? {
+        Ok(vals.into())
     } else {
         Err(tok
             .unwrap()
@@ -1437,16 +1434,13 @@ fn assemble_param<'arena>(
     decl_map: &mut DeclMap<'arena>,
 ) -> Result<hhbc::Param<'arena>> {
     let mut ua_vec = Vec::new();
-    let user_attributes = {
-        if token_iter.peek_is(Token::is_open_bracket) {
-            token_iter.expect(Token::is_open_bracket)?;
-            while !token_iter.peek_is(Token::is_close_bracket) {
-                ua_vec.push(assemble_user_attr(token_iter, alloc)?);
-            }
-            token_iter.expect(Token::is_close_bracket)?;
+    if token_iter.peek_is(Token::is_open_bracket) {
+        token_iter.expect(Token::is_open_bracket)?;
+        while !token_iter.peek_is(Token::is_close_bracket) {
+            ua_vec.push(assemble_user_attr(token_iter, alloc)?);
         }
-        Slice::from_vec(alloc, ua_vec)
-    };
+        token_iter.expect(Token::is_close_bracket)?;
+    }
     let is_inout = token_iter.next_is_str(Token::is_identifier, "inout");
     let is_readonly = token_iter.next_is_str(Token::is_identifier, "readonly");
     let is_variadic = token_iter.next_is(Token::is_variadic);
@@ -1460,7 +1454,7 @@ fn assemble_param<'arena>(
         is_variadic,
         is_inout,
         is_readonly,
-        user_attributes,
+        user_attributes: ua_vec.into(),
         type_info,
         default_value,
     })
@@ -1492,7 +1486,7 @@ fn assemble_body<'arena>(
     params: Vec<hhbc::Param<'arena>>,
     return_type_info: Maybe<hhbc::TypeInfo<'arena>>,
     shadowed_tparams: Vec<Str<'arena>>,
-    upper_bounds: Slice<'arena, hhbc::UpperBound<'arena>>,
+    upper_bounds: Vec<hhbc::UpperBound<'arena>>,
 ) -> Result<(hhbc::Body<'arena>, hhbc::Coeffects<'arena>)> {
     let mut doc_comment = Maybe::Nothing;
     let mut instrs = Vec::new();
@@ -1554,7 +1548,7 @@ fn assemble_body<'arena>(
         return_type_info,
         shadowed_tparams: shadowed_tparams.into(),
         stack_depth,
-        upper_bounds,
+        upper_bounds: upper_bounds.into(),
     };
     Ok((tr, coeff))
 }
@@ -1620,12 +1614,12 @@ fn assemble_coeffects<'arena>(
     }
 
     Ok(hhbc::Coeffects::new(
-        Slice::from_vec(alloc, scs),
-        Slice::from_vec(alloc, uscs),
-        Slice::from_vec(alloc, fun_param),
-        Slice::from_vec(alloc, cc_param),
-        Slice::from_vec(alloc, cc_this),
-        Slice::from_vec(alloc, cc_reified),
+        scs,
+        uscs,
+        fun_param,
+        cc_param,
+        cc_this,
+        cc_reified,
         closure_parent_scope,
         generator_this,
         caller,
@@ -1710,7 +1704,7 @@ fn assemble_coeffects_cc_this<'arena>(
     }
     token_iter.expect(Token::is_semicolon)?;
     cc_this.push(hhbc::CcThis {
-        types: Slice::from_vec(alloc, params),
+        types: params.into(),
     });
     Ok(())
 }
@@ -1732,7 +1726,7 @@ fn assemble_coeffects_cc_reified<'arena>(
     cc_reified.push(hhbc::CcReified {
         is_class,
         index,
-        types: Slice::from_vec(alloc, types),
+        types: types.into(),
     });
     Ok(())
 }
@@ -1881,22 +1875,20 @@ pub(crate) fn assemble_fcallargsflags(token_iter: &mut Lexer<'_>) -> Result<hhbc
 }
 
 /// "(0|1)*"
-pub(crate) fn assemble_inouts_or_readonly<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<Slice<'arena, bool>> {
+pub(crate) fn assemble_inouts_or_readonly(token_iter: &mut Lexer<'_>) -> Result<Vec<bool>> {
     let tok = token_iter.expect_token()?;
     let literal = tok.into_str_literal()?;
     debug_assert!(literal[0] == b'"' && literal[literal.len() - 1] == b'"');
-    let tr: Result<Vec<bool>, _> = literal[1..literal.len() - 1] //trims the outer "", which are guaranteed b/c of str token
+    // trim the outer "", which are guaranteed b/c of str token
+    let tr = literal[1..literal.len() - 1]
         .iter()
         .map(|c| match *c {
             b'0' => Ok(false),
             b'1' => Ok(true),
             _ => Err(tok.error("Non 0/1 character in inouts/readonlys")),
         })
-        .collect();
-    Ok(Slice::from_vec(alloc, tr?))
+        .collect::<Result<_>>()?;
+    Ok(tr)
 }
 
 /// - or a label
@@ -1965,8 +1957,8 @@ fn assemble_sswitch<'arena>(
     }
     token_iter.expect(Token::is_gt)?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::SSwitch {
-        cases: Slice::from_vec(alloc, cases),
-        targets: Slice::from_vec(alloc, targets),
+        cases: cases.into(),
+        targets: targets.into(),
     }))
 }
 

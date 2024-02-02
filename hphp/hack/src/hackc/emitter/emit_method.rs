@@ -11,7 +11,6 @@ use ast_scope::ScopeItem;
 use env::emitter::Emitter;
 use error::Error;
 use error::Result;
-use ffi::Slice;
 use hhbc::Attribute;
 use hhbc::Coeffects;
 use hhbc::Method;
@@ -99,10 +98,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
         method.name.1 == members::__INVOKE && (class.name.1).starts_with("Closure$");
     let mut attributes = emit_attribute::from_asts(emitter, &method.user_attributes)?;
     if !is_closure_body {
-        attributes.extend(emit_attribute::add_reified_attribute(
-            emitter.alloc,
-            &method.tparams[..],
-        ));
+        attributes.extend(emit_attribute::add_reified_attribute(&method.tparams[..]));
     };
     let call_context = if is_closure_body {
         match &method.user_attributes[..] {
@@ -198,9 +194,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
         let parent_coeffects = emitter
             .global_state()
             .get_lambda_coeffects_of_scope(&class.name.1, &method.name.1);
-        parent_coeffects.map_or(Coeffects::default(), |pc| {
-            pc.inherit_to_child_closure(emitter.alloc)
-        })
+        parent_coeffects.map_or(Coeffects::default(), |pc| pc.inherit_to_child_closure())
     } else {
         Coeffects::from_ast(
             emitter.alloc,
@@ -212,7 +206,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
     };
 
     if is_closure_body && coeffects.is_86caller() {
-        coeffects = coeffects.with_caller(emitter.alloc)
+        coeffects = coeffects.with_caller()
     }
 
     if is_native_opcode_impl
@@ -230,7 +224,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
         match (class.name.1.as_str(), method.name.1.as_str()) {
             ("\\__SystemLib\\MethCallerHelper", members::__INVOKE)
             | ("\\__SystemLib\\DynMethCallerHelper", members::__INVOKE) => {
-                coeffects = coeffects.with_caller(emitter.alloc)
+                coeffects = coeffects.with_caller()
             }
             _ => {}
         }
@@ -323,7 +317,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
         has_variadic,
     );
     Ok(Method {
-        attributes: Slice::fill_iter(emitter.alloc, attributes),
+        attributes: attributes.into(),
         visibility: Visibility::from(visibility),
         name,
         body,

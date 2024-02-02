@@ -189,7 +189,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
 
     let prop = Property {
         name: pid,
-        attributes: alloc.alloc_slice_fill_iter(attributes).into(),
+        attributes: attributes.into(),
         type_info,
         initial_value: initial_value.into(),
         flags: hhas_property_flags,

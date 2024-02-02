@@ -8,7 +8,6 @@ use env::emitter::Emitter;
 use env::Env;
 use error::Error;
 use error::Result;
-use ffi::Slice;
 use hack_macros::hack_expr;
 use hhbc::FCallArgs;
 use hhbc::FCallArgsFlags;
@@ -585,8 +584,8 @@ fn emit_using<'a, 'arena, 'decl>(
                             FCallArgsFlags::default(),
                             1,
                             0,
-                            Slice::empty(),
-                            Slice::empty(),
+                            vec![],
+                            vec![],
                             async_eager_label,
                             env.call_context
                                 .as_ref()
@@ -1078,8 +1077,8 @@ fn emit_foreach_await<'a, 'arena, 'decl>(
                     FCallArgsFlags::default(),
                     1,
                     0,
-                    Slice::empty(),
-                    Slice::empty(),
+                    vec![],
+                    vec![],
                     Some(async_eager_label),
                     None,
                 ),

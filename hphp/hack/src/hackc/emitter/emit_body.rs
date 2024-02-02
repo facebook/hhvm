@@ -15,7 +15,6 @@ use error::Error;
 use error::Result;
 use ffi::Maybe;
 use ffi::Maybe::*;
-use ffi::Slice;
 use ffi::Str;
 use hash::HashSet;
 use hhbc::Body;
@@ -373,7 +372,7 @@ pub fn make_body<'a, 'arena, 'decl>(
     opt_env: Option<&Env<'a, 'arena>>,
 ) -> Result<Body<'arena>> {
     if emitter.options().compiler_flags.relabel {
-        label_rewriter::relabel_function(alloc, &mut params, &mut body_instrs);
+        label_rewriter::relabel_function(&mut params, &mut body_instrs);
     }
     let num_iters = if is_memoize_wrapper {
         0
@@ -424,7 +423,7 @@ pub fn make_body<'a, 'arena, 'decl>(
         num_iters,
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
-        upper_bounds: Slice::fill_iter(alloc, upper_bounds),
+        upper_bounds: upper_bounds.into(),
         shadowed_tparams: Vec::from_iter(
             shadowed_tparams
                 .into_iter()
@@ -598,15 +597,7 @@ pub fn emit_deprecation_info<'a, 'arena>(
                     instr::int(sampling_rate),
                     instr::int(error_code),
                     instr::f_call_func_d(
-                        FCallArgs::new(
-                            FCallArgsFlags::default(),
-                            1,
-                            3,
-                            Slice::empty(),
-                            Slice::empty(),
-                            None,
-                            None,
-                        ),
+                        FCallArgs::new(FCallArgsFlags::default(), 1, 3, vec![], vec![], None, None),
                         hhbc::FunctionName::from_raw_string(alloc, "trigger_sampled_error"),
                     ),
                     instr::pop_c(),
@@ -725,7 +716,7 @@ pub fn emit_generics_upper_bounds<'arena>(
             [] => None,
             _ => Some(UpperBound {
                 name: Str::new_str(alloc, get_tp_name(tparam)),
-                bounds: Slice::fill_iter(alloc, ubs),
+                bounds: ubs.into(),
             }),
         }
     };

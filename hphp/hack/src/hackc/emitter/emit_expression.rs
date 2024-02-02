@@ -16,7 +16,6 @@ use env::Env;
 use env::Flags as EnvFlags;
 use error::Error;
 use error::Result;
-use ffi::Slice;
 use ffi::Str;
 use hash::HashSet;
 use hhbc::AsTypeStructExceptionKind;
@@ -434,10 +433,8 @@ pub fn emit_nameof<'a, 'arena, 'decl>(
     let cexpr = ClassExpr::class_id_to_class_expr(emitter, &env.scope, false, true, class_id);
     match cexpr {
         ClassExpr::Id(ast_defs::Id(_, cname)) => {
-            let classid =
-                hhbc::ClassName::from_ast_name_and_mangle(emitter.alloc, cname).as_ffi_str();
-
-            emit_adata::typed_value_into_instr(emitter, TypedValue::string(classid))
+            let classid = hhbc::ClassName::from_ast_name_and_mangle(emitter.alloc, cname);
+            Ok(instr::string_lit(classid.as_ffi_str()))
         }
         ClassExpr::Special(_) => Ok(InstrSeq::gather(vec![
             emit_load_class_ref(emitter, env, &class_id.1, cexpr)?,
@@ -927,8 +924,8 @@ fn inline_gena_call<'a, 'arena, 'decl>(
                     FCallArgsFlags::default(),
                     1,
                     1,
-                    Slice::empty(),
-                    Slice::empty(),
+                    vec![],
+                    vec![],
                     Some(async_eager_label),
                     None,
                 ),
@@ -1396,11 +1393,7 @@ fn emit_struct_array<
     'a,
     'arena,
     'decl,
-    C: FnOnce(
-        &'arena bumpalo::Bump,
-        &mut Emitter<'arena, 'decl>,
-        &'arena [&'arena str],
-    ) -> Result<InstrSeq<'arena>>,
+    C: FnOnce(&'arena [&'arena str]) -> Result<InstrSeq<'arena>>,
 >(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
@@ -1450,7 +1443,7 @@ fn emit_struct_array<
     Ok(InstrSeq::gather(vec![
         InstrSeq::gather(value_instrs),
         emit_pos(pos),
-        ctor(alloc, e, keys_)?,
+        ctor(keys_)?,
     ]))
 }
 
@@ -1464,9 +1457,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
     let count = fields.len() as u32;
     let emit_dict = |e: &mut Emitter<'arena, 'decl>| {
         if is_struct_init(e, env, fields, true)? {
-            emit_struct_array(e, env, pos, fields, |alloc, _, x| {
-                Ok(instr::new_struct_dict(alloc, x))
-            })
+            emit_struct_array(e, env, pos, fields, |x| Ok(instr::new_struct_dict(x)))
         } else {
             let ctor = Instruct::Opcode(Opcode::NewDictArray(count));
             emit_array(e, env, pos, fields, ctor)
@@ -1475,9 +1466,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
     let emit_collection_helper = |e: &mut Emitter<'arena, 'decl>, ctype| {
         if is_struct_init(e, env, fields, true)? {
             Ok(InstrSeq::gather(vec![
-                emit_struct_array(e, env, pos, fields, |alloc, _, x| {
-                    Ok(instr::new_struct_dict(alloc, x))
-                })?,
+                emit_struct_array(e, env, pos, fields, |x| Ok(instr::new_struct_dict(x)))?,
                 emit_pos(pos),
                 instr::col_from_array(ctype),
             ]))
@@ -2052,8 +2041,8 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                                         FCallArgsFlags::default(),
                                         1,
                                         1,
-                                        Slice::empty(),
-                                        Slice::empty(),
+                                        vec![],
+                                        vec![],
                                         None,
                                         None,
                                     );
@@ -2458,15 +2447,15 @@ fn get_fcall_args_common<'arena, T>(
     flags.set(FCallArgsFlags::EnforceMutableReturn, !readonly_return);
     flags.set(FCallArgsFlags::EnforceReadonlyThis, readonly_this);
     let readonly_args = if args.iter().any(readonly_predicate) {
-        Slice::fill_iter(alloc, args.iter().map(readonly_predicate))
+        args.iter().map(readonly_predicate).collect()
     } else {
-        Slice::empty()
+        vec![]
     };
     FCallArgs::new(
         flags,
         1 + args.iter().filter(|e| is_inout_arg(e)).count() as u32,
         args.len() as u32,
-        Slice::fill_iter(alloc, args.iter().map(is_inout_arg)),
+        args.iter().map(is_inout_arg).collect(),
         readonly_args,
         async_eager_label,
         context
@@ -3492,7 +3481,7 @@ fn emit_known_class_id<'arena, 'decl>(
     id: &ast_defs::Id,
 ) -> InstrSeq<'arena> {
     let cid = hhbc::ClassName::from_ast_name_and_mangle(alloc, &id.1);
-    let cid_string = instr::string(alloc, cid.unsafe_as_str());
+    let cid_string = instr::string_lit(cid.as_ffi_str());
     e.add_class_ref(cid);
     InstrSeq::gather(vec![cid_string, instr::class_get_c(ClassGetCMode::Normal)])
 }
@@ -3665,15 +3654,7 @@ fn emit_new_obj_reified_instrs<'a, 'b, 'arena, 'decl>(
             instr::null_uninit(),
             ts,
             instr::f_call_obj_method_d(
-                FCallArgs::new(
-                    FCallArgsFlags::default(),
-                    1,
-                    1,
-                    Slice::empty(),
-                    Slice::empty(),
-                    None,
-                    None,
-                ),
+                FCallArgs::new(FCallArgsFlags::default(), 1, 1, vec![], vec![], None, None),
                 hhbc::MethodName::from_raw_string(env.arena, INIT_METH_NAME),
             ),
             instr::pop_c(),
@@ -3709,15 +3690,7 @@ fn emit_new_obj_reified_instrs<'a, 'b, 'arena, 'decl>(
             instr::null_uninit(),
             instr::c_get_l(ts_local),
             instr::f_call_func_d(
-                FCallArgs::new(
-                    FCallArgsFlags::default(),
-                    1,
-                    1,
-                    Slice::empty(),
-                    Slice::empty(),
-                    None,
-                    None,
-                ),
+                FCallArgs::new(FCallArgsFlags::default(), 1, 1, vec![], vec![], None, None),
                 hhbc::FunctionName::from_raw_string(env.arena, "count"),
             ),
             instr::int(0),

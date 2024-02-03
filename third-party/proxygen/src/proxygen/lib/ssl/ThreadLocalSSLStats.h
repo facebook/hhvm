@@ -35,6 +35,8 @@ class ProxygenSSLStats : public wangle::SSLStats {
 
   virtual void recordFizzHandshake(bool success) = 0;
 
+  virtual void recordSSLConnectionReuse() = 0;
+
   // Protocol level errors only
   virtual void recordFizzHandshakeProtocolError() = 0;
 
@@ -89,6 +91,8 @@ class TLSSLStats : public ProxygenSSLStats {
 
   void recordFizzHandshake(bool success) override;
 
+  void recordSSLConnectionReuse() override;
+
   void recordFizzHandshakeProtocolError() override;
 
   void recordTFOSuccess() override;
@@ -139,6 +143,7 @@ class TLSSLStats : public ProxygenSSLStats {
   BaseStats::TLTimeseries newSSLHandshakeShed_;
   BaseStats::TLTimeseries sslHandshakeErrors_;
   BaseStats::TLTimeseries sslHandshakeSuccesses_;
+  BaseStats::TLTimeseries sslResumptions_;
   BaseStats::TLTimeseries fizzHandshakeErrors_;
   BaseStats::TLTimeseries fizzHandshakeProtocolErrors_;
   BaseStats::TLTimeseries fizzHandshakeSuccesses_;

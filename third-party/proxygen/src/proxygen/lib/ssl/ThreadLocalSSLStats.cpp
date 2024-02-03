@@ -59,6 +59,7 @@ TLSSLStats::TLSSLStats(const std::string& prefix)
       newSSLHandshakeShed_(prefix + "_ssl_handshake_shed_new", SUM, RATE),
       sslHandshakeErrors_(prefix + "_ssl_handshake_errors", SUM, PERCENT),
       sslHandshakeSuccesses_(prefix + "_ssl_handshake_successes", SUM),
+      sslResumptions_(prefix + "_ssl_resumptions", SUM),
       fizzHandshakeErrors_(prefix + "_fizz_handshake_errors", SUM, PERCENT),
       fizzHandshakeProtocolErrors_(prefix + "_fizz_handshake_protocol_errors",
                                    SUM),
@@ -189,6 +190,10 @@ void TLSSLStats::recordFizzHandshake(bool success) {
   } else {
     fizzHandshakeErrors_.add(1);
   }
+}
+
+void TLSSLStats::recordSSLConnectionReuse() {
+  sslResumptions_.add(1);
 }
 
 void TLSSLStats::recordFizzHandshakeProtocolError() {

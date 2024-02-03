@@ -222,6 +222,7 @@ where
 }
 
 {{#service:extendedServers}}
+#[allow(deprecated)]{{! `dependencies` modules are deprecated other than for packagePrefix to use }}
 impl<P, T, S> {{!
     }}{{#extendedService:service}}{{!
     }}::std::convert::AsRef<dyn {{extendedService:packagePrefix}}::{{service:name}} + 'static> {{!
@@ -245,6 +246,7 @@ where
     }
 }
 
+#[allow(deprecated)]{{! `dependencies` modules are deprecated other than for packagePrefix to use }}
 impl<P, T, S> {{!
     }}{{#extendedService:service}}{{!
     }}::std::convert::AsRef<dyn {{extendedService:packagePrefix}}::{{service:name}}Ext<T> + 'static> {{!
@@ -432,6 +434,7 @@ where
     }
 }
 
+#[allow(deprecated)]{{! `dependencies` modules are deprecated other than for packagePrefix to use }}
 impl<'a, S> {{service:name}} for S
 where
     S: ::std::convert::AsRef<dyn {{service:name}} + 'a>,
@@ -467,6 +470,7 @@ where
     {{/function:starts_interaction?}}{{/service:rustFunctions}}
 }
 
+#[allow(deprecated)]{{! `dependencies` modules are deprecated other than for packagePrefix to use }}
 impl<S, T> {{service:name}}Ext<T> for S
 where
     S: ::std::convert::AsRef<dyn {{service:name}} + 'static>,

@@ -241,6 +241,7 @@ impl<'mock> super::client::MyServicePrioChild for MyServicePrioChild<'mock> {
 }
 
 #[::async_trait::async_trait]
+#[allow(deprecated)]
 impl<'mock> ::std::convert::AsRef<dyn crate::MyServicePrioParent + 'mock> for MyServicePrioChild<'mock>
 {
     fn as_ref(&self) -> &(dyn crate::MyServicePrioParent + 'mock) {

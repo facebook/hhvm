@@ -194,6 +194,7 @@ impl<'mock> super::client::{{service:name}} for {{service:name}}<'mock> {{>lib/b
 
 {{#service:extendedClients}}
 #[::async_trait::async_trait]
+#[allow(deprecated)]{{! `dependencies` modules are deprecated other than for packagePrefix to use }}
 impl<'mock> {{!
     }}{{#extendedService:service}}{{!
     }}::std::convert::AsRef<dyn {{extendedService:packagePrefix}}::{{service:name}} + 'mock> {{!

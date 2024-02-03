@@ -148,6 +148,7 @@ impl<'mock> super::client::MyNode for MyNode<'mock> {
 }
 
 #[::async_trait::async_trait]
+#[allow(deprecated)]
 impl<'mock> ::std::convert::AsRef<dyn crate::MyRoot + 'mock> for MyNode<'mock>
 {
     fn as_ref(&self) -> &(dyn crate::MyRoot + 'mock) {
@@ -182,6 +183,7 @@ impl<'mock> super::client::MyLeaf for MyLeaf<'mock> {
 }
 
 #[::async_trait::async_trait]
+#[allow(deprecated)]
 impl<'mock> ::std::convert::AsRef<dyn crate::MyNode + 'mock> for MyLeaf<'mock>
 {
     fn as_ref(&self) -> &(dyn crate::MyNode + 'mock) {
@@ -190,6 +192,7 @@ impl<'mock> ::std::convert::AsRef<dyn crate::MyNode + 'mock> for MyLeaf<'mock>
 }
 
 #[::async_trait::async_trait]
+#[allow(deprecated)]
 impl<'mock> ::std::convert::AsRef<dyn crate::MyRoot + 'mock> for MyLeaf<'mock>
 {
     fn as_ref(&self) -> &(dyn crate::MyRoot + 'mock) {

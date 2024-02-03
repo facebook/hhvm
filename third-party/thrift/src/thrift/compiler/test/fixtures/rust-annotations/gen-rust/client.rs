@@ -17,6 +17,7 @@ pub(crate) use ::::services;
 
 // Used by Thrift-generated code to implement service inheritance.
 #[doc(hidden)]
+#[deprecated]
 pub mod dependencies {
 }
 
@@ -255,6 +256,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<'a, S> AllMethods for S
 where
     S: ::std::convert::AsRef<dyn AllMethods + 'a>,
@@ -274,6 +276,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<S, T> AllMethodsExt<T> for S
 where
     S: ::std::convert::AsRef<dyn AllMethods + 'static>,
@@ -636,6 +639,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<'a, S> OneMethod for S
 where
     S: ::std::convert::AsRef<dyn OneMethod + 'a>,
@@ -655,6 +659,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<S, T> OneMethodExt<T> for S
 where
     S: ::std::convert::AsRef<dyn OneMethod + 'static>,
@@ -1017,6 +1022,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<'a, S> OneMethodOptOut for S
 where
     S: ::std::convert::AsRef<dyn OneMethodOptOut + 'a>,
@@ -1036,6 +1042,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<S, T> OneMethodOptOutExt<T> for S
 where
     S: ::std::convert::AsRef<dyn OneMethodOptOut + 'static>,

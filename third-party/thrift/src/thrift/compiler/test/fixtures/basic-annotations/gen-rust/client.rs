@@ -17,6 +17,7 @@ pub(crate) use ::::services;
 
 // Used by Thrift-generated code to implement service inheritance.
 #[doc(hidden)]
+#[deprecated]
 pub mod dependencies {
 }
 
@@ -747,6 +748,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<'a, S> MyService for S
 where
     S: ::std::convert::AsRef<dyn MyService + 'a>,
@@ -808,6 +810,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<S, T> MyServiceExt<T> for S
 where
     S: ::std::convert::AsRef<dyn MyService + 'static>,
@@ -1222,6 +1225,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<'a, S> MyServicePrioParent for S
 where
     S: ::std::convert::AsRef<dyn MyServicePrioParent + 'a>,
@@ -1241,6 +1245,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<S, T> MyServicePrioParentExt<T> for S
 where
     S: ::std::convert::AsRef<dyn MyServicePrioParent + 'static>,
@@ -1442,6 +1447,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<P, T, S> ::std::convert::AsRef<dyn crate::MyServicePrioParent + 'static> for MyServicePrioChildImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -1457,6 +1463,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<P, T, S> ::std::convert::AsRef<dyn crate::MyServicePrioParentExt<T> + 'static> for MyServicePrioChildImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -1546,6 +1553,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<'a, S> MyServicePrioChild for S
 where
     S: ::std::convert::AsRef<dyn MyServicePrioChild + 'a>,
@@ -1560,6 +1568,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<S, T> MyServicePrioChildExt<T> for S
 where
     S: ::std::convert::AsRef<dyn MyServicePrioChild + 'static>,
@@ -1832,6 +1841,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<'a, S> BadInteraction for S
 where
     S: ::std::convert::AsRef<dyn BadInteraction + 'a>,
@@ -1845,6 +1855,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<S, T> BadInteractionExt<T> for S
 where
     S: ::std::convert::AsRef<dyn BadInteraction + 'static>,
@@ -2135,6 +2146,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<'a, S> BadService for S
 where
     S: ::std::convert::AsRef<dyn BadService + 'a>,
@@ -2153,6 +2165,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<S, T> BadServiceExt<T> for S
 where
     S: ::std::convert::AsRef<dyn BadService + 'static>,
@@ -2591,6 +2604,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<'a, S> FooBarBazService for S
 where
     S: ::std::convert::AsRef<dyn FooBarBazService + 'a>,
@@ -2616,6 +2630,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<S, T> FooBarBazServiceExt<T> for S
 where
     S: ::std::convert::AsRef<dyn FooBarBazService + 'static>,

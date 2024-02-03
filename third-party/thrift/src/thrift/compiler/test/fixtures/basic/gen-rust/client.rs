@@ -17,6 +17,7 @@ pub(crate) use ::::services;
 
 // Used by Thrift-generated code to implement service inheritance.
 #[doc(hidden)]
+#[deprecated]
 pub mod dependencies {
 }
 
@@ -171,6 +172,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<'a, S> FooService for S
 where
     S: ::std::convert::AsRef<dyn FooService + 'a>,
@@ -184,6 +186,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<S, T> FooServiceExt<T> for S
 where
     S: ::std::convert::AsRef<dyn FooService + 'static>,
@@ -466,6 +469,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<'a, S> FB303Service for S
 where
     S: ::std::convert::AsRef<dyn FB303Service + 'a>,
@@ -481,6 +485,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<S, T> FB303ServiceExt<T> for S
 where
     S: ::std::convert::AsRef<dyn FB303Service + 'static>,
@@ -1605,6 +1610,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<'a, S> MyService for S
 where
     S: ::std::convert::AsRef<dyn MyService + 'a>,
@@ -1688,6 +1694,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<S, T> MyServiceExt<T> for S
 where
     S: ::std::convert::AsRef<dyn MyService + 'static>,
@@ -2154,6 +2161,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<'a, S> DbMixedStackArguments for S
 where
     S: ::std::convert::AsRef<dyn DbMixedStackArguments + 'a>,
@@ -2177,6 +2185,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<S, T> DbMixedStackArgumentsExt<T> for S
 where
     S: ::std::convert::AsRef<dyn DbMixedStackArguments + 'static>,

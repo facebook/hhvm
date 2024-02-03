@@ -17,6 +17,7 @@ pub(crate) use ::::services;
 
 // Used by Thrift-generated code to implement service inheritance.
 #[doc(hidden)]
+#[deprecated]
 pub mod dependencies {
 }
 
@@ -171,6 +172,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<'a, S> MyRoot for S
 where
     S: ::std::convert::AsRef<dyn MyRoot + 'a>,
@@ -184,6 +186,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<S, T> MyRootExt<T> for S
 where
     S: ::std::convert::AsRef<dyn MyRoot + 'static>,
@@ -377,6 +380,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<P, T, S> ::std::convert::AsRef<dyn crate::MyRoot + 'static> for MyNodeImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -392,6 +396,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<P, T, S> ::std::convert::AsRef<dyn crate::MyRootExt<T> + 'static> for MyNodeImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -481,6 +486,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<'a, S> MyNode for S
 where
     S: ::std::convert::AsRef<dyn MyNode + 'a>,
@@ -495,6 +501,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<S, T> MyNodeExt<T> for S
 where
     S: ::std::convert::AsRef<dyn MyNode + 'static>,
@@ -690,6 +697,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<P, T, S> ::std::convert::AsRef<dyn crate::MyNode + 'static> for MyLeafImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -705,6 +713,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<P, T, S> ::std::convert::AsRef<dyn crate::MyNodeExt<T> + 'static> for MyLeafImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -720,6 +729,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<P, T, S> ::std::convert::AsRef<dyn crate::MyRoot + 'static> for MyLeafImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -735,6 +745,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<P, T, S> ::std::convert::AsRef<dyn crate::MyRootExt<T> + 'static> for MyLeafImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -824,6 +835,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<'a, S> MyLeaf for S
 where
     S: ::std::convert::AsRef<dyn MyLeaf + 'a>,
@@ -839,6 +851,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<S, T> MyLeafExt<T> for S
 where
     S: ::std::convert::AsRef<dyn MyLeaf + 'static>,

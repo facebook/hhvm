@@ -17,6 +17,7 @@ pub(crate) use ::::services;
 
 // Used by Thrift-generated code to implement service inheritance.
 #[doc(hidden)]
+#[deprecated]
 pub mod dependencies {
 }
 
@@ -279,6 +280,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<'a, S> Foo for S
 where
     S: ::std::convert::AsRef<dyn Foo + 'a>,
@@ -302,6 +304,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<S, T> FooExt<T> for S
 where
     S: ::std::convert::AsRef<dyn Foo + 'static>,

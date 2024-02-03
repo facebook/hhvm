@@ -1027,6 +1027,15 @@ INSTANTIATE_TEST_SUITE_P(
             "dc5180954df0c3391a60b44cbf70aee72b7dbb2addc90a0bf2ceac6113287eb501fe1ea9f4c51822664b82fe0279b039f4",
             "c8a7d9131cebfa5388003cc30deac523aa9b09d148affff06ba40400e09ca900db770e07cedf5cd0647f6723c810ffcb596cac51edd6f49cd7be0010a3ac29e704",
             false,
+            CipherSuite::TLS_AEGIS_128L_SHA256},
+        CipherParams{
+            "711a437629429db2e14058e2a826dcbf",
+            "eb036d6e483a212ff6ee25d970fe1ac3",
+            0,
+            "",
+            "29937c0efb36ed27fe7709d7179b4f38a2fc191b5e8d9616b58f6dc9ba2ab74e13bbdcd233e8726d90f7ded06c3861582f27158732f997df9091446befe75855ab05b348d68f96e45445f44c31e9ba3e4d7be96d9c8e806535e79079139c71fcc599fea8701e0c2edf606986eff1535afdfa51d1be2dfdee",
+            "4a61f5d6b8e746bf6fb49ca2b16c22f4e9ffcdc89a3137b39bf5445fb6b989d5200f0c8d5538891a5e8979b5cd8c734128b4e4ad98b0cd598c40ec9be74725dbca84c65a52f17ac983330b0b74e4193540f6357c3bcde4e8d8fc6942314ba68115bf2a682756e3c42008803a81532708a0e7b5e3b843614555a819d187faaedcc36ee67d6711ee46",
+            true,
             CipherSuite::TLS_AEGIS_128L_SHA256}));
 INSTANTIATE_TEST_SUITE_P(
     AEGIS256TestVectors,
@@ -1076,6 +1085,15 @@ INSTANTIATE_TEST_SUITE_P(
             "dc5180954df0c3391a60b44cbf70aee72b7dbb2addc90a0bf2ceac6113287eb501fe1ea9f4c51822664b82fe0279b039f4",
             "c8a7d9131cebfa5388003cc30deac523aa9b09d148affff06ba40400e09ca900db770e07cedf5cd0647f6723c810ffcb596cac51edd6f49cd7be0010a3ac29e704",
             false,
+            CipherSuite::TLS_AEGIS_256_SHA512},
+        CipherParams{
+            "8011b1043674d753172302aa123478a121640daf4317957545749d0be6a91698",
+            "57bd1ac0f3db407989f88a762f60b3eabd03d3bc3bae577f3818b15c0974ae9c",
+            0,
+            "",
+            "be1833fd169fd745acaa7d8584c457657433e6a3237225a086d47806804120613d78344e097ecc6a5f869d07",
+            "e34dff511e16bf12570a6828843c414b8fdced120db36ea0223e8700f57bea4c9dfbec5d3195caa633d52ee8e1077216251e24f81ed8cb16e829ba6c",
+            true,
             CipherSuite::TLS_AEGIS_256_SHA512}));
 #endif
 } // namespace test

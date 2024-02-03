@@ -100,19 +100,23 @@ std::unique_ptr<folly::IOBuf> AEGISCipher::doEncrypt(
     folly::ByteRange iv,
     folly::ByteRange key,
     Aead::AeadOptions options) const {
-  const uint8_t* adData;
-  size_t adLen;
+  const uint8_t* adData = nullptr;
+  size_t adLen = 0;
   std::unique_ptr<folly::IOBuf> ad;
-  if (associatedData->isChained()) {
-    ad = associatedData->cloneCoalesced();
-    adData = ad->data();
-    adLen = ad->length();
-  } else {
-    adData = associatedData->data();
-    adLen = associatedData->length();
+  if (associatedData) {
+    if (associatedData->isChained()) {
+      ad = associatedData->cloneCoalesced();
+      adData = ad->data();
+      adLen = ad->length();
+    } else {
+      adData = associatedData->data();
+      adLen = associatedData->length();
+    }
   }
 
   auto inputLength = plaintext->computeChainDataLength();
+  // the stateInit function will skip adding aad to the state when adData is
+  // null and adLen is 0
   impl_->stateInit(adData, adLen, iv.data(), key.data(), inputLength);
 
   const auto& bufOption = options.bufferOpt;
@@ -213,19 +217,23 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::doDecrypt(
     folly::ByteRange key,
     folly::MutableByteRange tagOut,
     bool inPlace) const {
-  const uint8_t* adData;
-  size_t adLen;
+  const uint8_t* adData = nullptr;
+  size_t adLen = 0;
   std::unique_ptr<folly::IOBuf> ad;
-  if (associatedData->isChained()) {
-    ad = associatedData->cloneCoalesced();
-    adData = ad->data();
-    adLen = ad->length();
-  } else {
-    adData = associatedData->data();
-    adLen = associatedData->length();
+  if (associatedData) {
+    if (associatedData->isChained()) {
+      ad = associatedData->cloneCoalesced();
+      adData = ad->data();
+      adLen = ad->length();
+    } else {
+      adData = associatedData->data();
+      adLen = associatedData->length();
+    }
   }
 
   auto inputLength = ciphertext->computeChainDataLength();
+  // the stateInit function will skip adding aad to the state when adData is
+  // null and adLen is 0
   impl_->stateInit(adData, adLen, iv.data(), key.data(), inputLength);
 
   folly::IOBuf* input;

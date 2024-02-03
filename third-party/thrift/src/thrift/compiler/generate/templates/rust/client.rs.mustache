@@ -54,7 +54,7 @@ pub mod dependencies {{>lib/block}}{{!
 {{^program:services?}}
 #![doc(hidden)]
 {{^program:multifile?}}
-#![allow(unused_crate_dependencies)]
+#![allow(non_snake_case, unused_crate_dependencies)]
 {{/program:multifile?}}
 
 #[doc(inline)]

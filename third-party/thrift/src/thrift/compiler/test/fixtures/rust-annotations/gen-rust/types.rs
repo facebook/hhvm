@@ -22,6 +22,12 @@ pub type map_t = ::std::collections::BTreeMap<::std::string::String, ::std::prim
 #[derive(Default, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct binary_t(pub ::smallvec::SmallVec<[u8; 16]>);
 
+#[derive(Default, Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Generation(pub ::std::primitive::i64);
+
+#[derive(Default, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct binary_t2(pub ::smallvec::SmallVec<[u8; 16]>);
+
 #[derive(Clone, PartialEq)]
 pub struct T0 {
     pub data: ::fbthrift::builtin_types::OrderedFloat<f64>,
@@ -259,6 +265,49 @@ where
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         crate::r#impl::read(p).map(binary_t)
+    }
+}
+
+impl ::fbthrift::GetTType for Generation {
+    const TTYPE: ::fbthrift::TType = <::std::primitive::i64 as ::fbthrift::GetTType>::TTYPE;
+}
+
+impl<P> ::fbthrift::Serialize<P> for Generation
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        self.0.write(p)
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for Generation
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        ::fbthrift::Deserialize::read(p).map(Generation)
+    }
+}
+
+impl ::fbthrift::GetTType for binary_t2 {
+    const TTYPE: ::fbthrift::TType = <::std::vec::Vec<::std::primitive::u8> as ::fbthrift::GetTType>::TTYPE;
+}
+impl<P> ::fbthrift::Serialize<P> for binary_t2
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        crate::r#impl::write(&self.0, p)
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for binary_t2
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        crate::r#impl::read(p).map(binary_t2)
     }
 }
 

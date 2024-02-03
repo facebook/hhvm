@@ -297,6 +297,19 @@ bool has_nonstandard_type_annotation(const t_named* node) {
   return get_type_annotation(node).find("::") != std::string::npos;
 }
 
+bool has_newtype_annotation(const t_named* node) {
+  if (const t_typedef* type = dynamic_cast<const t_typedef*>(node)) {
+    if (const t_const* annot = node->find_structured_annotation_or_null(
+            "facebook.com/thrift/annotation/rust/NewType")) {
+      return true;
+    }
+
+    return type->has_annotation("rust.newtype");
+  }
+
+  return false;
+}
+
 void parse_include_srcs(
     mstch::array& elements, boost::optional<std::string> const& include_srcs) {
   if (!include_srcs) {
@@ -342,8 +355,7 @@ bool type_has_transitive_adapter(
         return true;
       }
 
-      if (!step_through_newtypes &&
-          (*typedef_type).has_annotation("rust.newtype")) {
+      if (!step_through_newtypes && has_newtype_annotation(typedef_type)) {
         return false;
       }
 
@@ -387,7 +399,7 @@ const t_type* step_through_typedefs(const t_type* t, bool break_on_adapter) {
       return t;
     }
 
-    if ((*typedef_type).has_annotation("rust.newtype")) {
+    if (has_newtype_annotation(typedef_type)) {
       return t;
     }
 
@@ -1569,13 +1581,11 @@ class rust_mstch_type : public mstch_type {
     return rust_type;
   }
   mstch::node rust_type_annotation() {
-    return has_type_annotation(type_) &&
-        !(type_->is_typedef() && type_->has_annotation("rust.newtype"));
+    return has_type_annotation(type_) && !has_newtype_annotation(type_);
   }
   mstch::node rust_nonstandard() {
-    return (
-        has_nonstandard_type_annotation(type_) &&
-        !(type_->is_typedef() && type_->has_annotation("rust.newtype")));
+    return has_nonstandard_type_annotation(type_) &&
+        !has_newtype_annotation(type_);
   }
   mstch::node adapter() {
     return adapter_node(nullptr, type_, false, context_, pos_, options_);
@@ -1644,9 +1654,7 @@ class mstch_rust_value : public mstch_base {
     return context_.type_factory->make_mstch_object(
         local_type_, context_, pos_);
   }
-  mstch::node is_newtype() {
-    return type_->is_typedef() && type_->has_annotation("rust.newtype");
-  }
+  mstch::node is_newtype() { return has_newtype_annotation(type_); }
   mstch::node inner() {
     auto typedef_type = dynamic_cast<const t_typedef*>(type_);
     if (typedef_type) {
@@ -2176,9 +2184,7 @@ class rust_mstch_typedef : public mstch_typedef {
         });
   }
   mstch::node rust_name() { return typedef_rust_name(typedef_); }
-  mstch::node rust_newtype() {
-    return typedef_->has_annotation("rust.newtype");
-  }
+  mstch::node rust_newtype() { return has_newtype_annotation(typedef_); }
   mstch::node rust_type() {
     // See 'typedef.mustache'. The context is writing a newtype: e.g. `pub
     // struct T(pub X)`. If `X` has a type annotation `A` we should write `pub

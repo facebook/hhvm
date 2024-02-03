@@ -16,6 +16,99 @@ var _ = strings.Split
 var _ = thrift.ZERO
 
 
+type NewType_ struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &NewType_{}
+
+func NewNewType_() *NewType_ {
+    return (&NewType_{})
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewNewType_().Set<FieldNameFoo>().Set<FieldNameBar>()
+type NewType_Builder struct {
+    obj *NewType_
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewNewType_().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewNewType_Builder() *NewType_Builder {
+    return &NewType_Builder{
+        obj: NewNewType_(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewNewType_().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *NewType_Builder) Emit() *NewType_ {
+    var objCopy NewType_ = *x.obj
+    return &objCopy
+}
+
+func (x *NewType_) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("NewType"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *NewType_) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *NewType_) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("NewType_({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 type Type struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
@@ -693,6 +786,7 @@ func (x *ServiceExn) String() string {
 func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)
 }) {
+    registry.RegisterType("facebook.com/thrift/annotation/rust/NewType", func() any { return NewNewType_() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/Type", func() any { return NewType() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/Adapter", func() any { return NewAdapter() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/Derive", func() any { return NewDerive() })

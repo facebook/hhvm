@@ -41,8 +41,17 @@ struct T4 {
   1: map_t data;
 }
 
+// --
+
 @rust.Type{name = "smallvec::SmallVec<[u8; 16]>"}
 typedef binary binary_t (rust.newtype)
+
+@rust.NewType
+typedef i64 Generation
+
+@rust.NewType
+@rust.Type{name = "smallvec::SmallVec<[u8; 16]>"}
+typedef binary binary_t2
 
 // --
 

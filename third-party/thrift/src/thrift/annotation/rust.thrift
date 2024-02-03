@@ -24,6 +24,27 @@ namespace py.asyncio facebook_thrift_asyncio.annotation.rust
 namespace go thrift.annotation.rust
 namespace py thrift.annotation.rust
 
+@scope.Typedef
+struct NewType {
+// # `rust.NewType`
+//
+// Make a newtype from a typedef. For example,
+// ```
+// @rust.NewType
+// typedef binary Sha1
+// ```
+// will result in `pub struct Sha1(pub std::vec::Vec<u8>)`.
+//
+// Another common idiom is to use `rust.Type` and `rust.NewType` together like
+// this:
+// ```
+// @rust.NewType
+// @rust.Type { name =  "smallvec::SmallVec<[u8; 20]>" }
+// typedef binary Sha1
+// ```
+// in this case we'll get `pub struct Sha1(smallvec::SmallVec[u8; 20])`.
+}
+
 @scope.Field
 @scope.Typedef
 struct Type {

@@ -38,6 +38,9 @@ var (
 
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
+    SetName("rust.NewType").
+    SetIsUnion(false),
+    metadata.NewThriftStruct().
     SetName("rust.Type").
     SetIsUnion(false).
     SetFields(

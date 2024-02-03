@@ -614,6 +614,8 @@ class rust_mstch_program : public mstch_program {
             {"program:client_package",
              &rust_mstch_program::rust_client_package},
             {"program:includes", &rust_mstch_program::rust_includes},
+            {"program:label", &rust_mstch_program::rust_label},
+            {"program:namespace", &rust_mstch_program::rust_namespace},
             {"program:anyServiceWithoutParent?",
              &rust_mstch_program::rust_any_service_without_parent},
             {"program:nonstandardTypes?",
@@ -725,6 +727,21 @@ class rust_mstch_program : public mstch_program {
           context_.program_factory->make_mstch_object(program, context_, pos_));
     }
     return includes;
+  }
+  mstch::node rust_label() {
+    auto crate = options_.cratemap.find(program_->name());
+    if (crate != options_.cratemap.end()) {
+      return crate->second.label;
+    }
+    return false;
+  }
+  mstch::node rust_namespace() {
+    auto program_name = program_->name();
+    auto crate = options_.cratemap.find(program_name);
+    if (crate != options_.cratemap.end()) {
+      return crate->second.name;
+    }
+    return program_name;
   }
   mstch::node rust_any_service_without_parent() {
     for (const t_service* service : program_->services()) {

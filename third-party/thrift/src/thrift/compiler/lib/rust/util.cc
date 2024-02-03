@@ -27,6 +27,13 @@ namespace thrift {
 namespace compiler {
 namespace rust {
 
+namespace {
+struct CrateInfo {
+  std::vector<std::string> thrift_names;
+  std::string label;
+};
+} // namespace
+
 rust_crate_map load_crate_map(const std::string& path) {
   // Each line of the file is:
   // thrift_name crate_name
@@ -55,19 +62,21 @@ rust_crate_map load_crate_map(const std::string& path) {
 
   // Map from crate_name to list of thrift_names. Most Thrift crates consist of
   // a single *.thrift file but some may have multiple.
-  std::map<std::string, std::vector<std::string>> sources;
+  std::map<std::string, CrateInfo> sources;
 
   std::string line;
   while (std::getline(in, line)) {
     std::istringstream iss(line);
-    std::string thrift_name, crate_name;
-    iss >> thrift_name >> crate_name;
-    sources[crate_name].push_back(thrift_name);
+    std::string thrift_name, crate_name, label;
+    iss >> thrift_name >> crate_name >> label;
+    sources[crate_name].label = label;
+    sources[crate_name].thrift_names.push_back(thrift_name);
   }
 
   for (const auto& source : sources) {
     auto crate_name = source.first;
-    auto thrift_names = source.second;
+    auto label = source.second.label;
+    auto thrift_names = source.second.thrift_names;
     auto multifile = thrift_names.size() > 1;
 
     // Look out for our own crate in the cratemap. It will require paths that
@@ -80,10 +89,12 @@ rust_crate_map load_crate_map(const std::string& path) {
       for (const auto& thrift_name : thrift_names) {
         ret.cratemap[thrift_name].name = crate_name;
         ret.cratemap[thrift_name].multifile_module = thrift_name;
+        ret.cratemap[thrift_name].label = label;
       }
     } else if (crate_name != "crate") {
       ret.cratemap[thrift_names[0]].name = crate_name;
       ret.cratemap[thrift_names[0]].multifile_module = boost::none;
+      ret.cratemap[thrift_names[0]].label = label;
     }
   }
 

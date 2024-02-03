@@ -36,10 +36,14 @@ pub use {{program:types}}::errors;
 pub(crate) use {{program:crate}} as client;
 pub(crate) use {{program:types}}::services;
 
-pub mod dependencies {
-    {{#program:includes}}
-    pub use {{program:client_package}} as {{program:name}};
-    {{/program:includes}}
+// Used by Thrift-generated code to implement service inheritance.
+#[doc(hidden)]
+pub mod dependencies {{>lib/block}}{{!
+    }}{{#program:includes}}{{!
+    }}{{#program:label}}
+    /// Deprecated: use `{{.}}` ({{program:namespace}}){{/program:label}}
+    pub use {{program:client_package}} as {{program:name}};{{!
+    }}{{/program:includes}}
 }
 
 {{#program:services}}{{>lib/client}}{{!

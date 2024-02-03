@@ -31,6 +31,7 @@ namespace rust {
 struct rust_crate {
   std::string name;
   boost::optional<std::string> multifile_module;
+  std::string label;
 
   std::string import_name() const;
 };

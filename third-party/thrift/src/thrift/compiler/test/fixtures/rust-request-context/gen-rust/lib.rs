@@ -13,8 +13,10 @@ pub use self::types::*;
 #[doc(inline)]
 pub use :: as types;
 
+// Used by Thrift-generated code to implement service inheritance.
 #[doc(hidden)]
 pub mod dependencies;
+
 #[doc(inline)]
 pub use ::::services as services;
 #[doc(inline)]

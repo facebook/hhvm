@@ -15,6 +15,8 @@ pub use ::::errors;
 pub(crate) use crate as client;
 pub(crate) use ::::services;
 
+// Used by Thrift-generated code to implement service inheritance.
+#[doc(hidden)]
 pub mod dependencies {
 }
 

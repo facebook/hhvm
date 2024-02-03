@@ -19,6 +19,9 @@ pub type double_t = ::std::primitive::f64;
 
 pub type map_t = ::std::collections::BTreeMap<::std::string::String, ::std::primitive::i64>;
 
+#[derive(Default, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct binary_t(pub ::smallvec::SmallVec<[u8; 16]>);
+
 #[derive(Clone, PartialEq)]
 pub struct T0 {
     pub data: ::fbthrift::builtin_types::OrderedFloat<f64>,
@@ -238,6 +241,27 @@ where
         ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
+impl ::fbthrift::GetTType for binary_t {
+    const TTYPE: ::fbthrift::TType = <::std::vec::Vec<::std::primitive::u8> as ::fbthrift::GetTType>::TTYPE;
+}
+impl<P> ::fbthrift::Serialize<P> for binary_t
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        crate::r#impl::write(&self.0, p)
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for binary_t
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        crate::r#impl::read(p).map(binary_t)
+    }
+}
+
 
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::T0 {
@@ -1158,6 +1182,36 @@ pub(crate) mod r#impl {
     {
         let value: LocalImpl<T> = ::fbthrift::Deserialize::read(p)?;
         ::std::result::Result::Ok(value.0)
+    }
+
+    impl<P> ::fbthrift::Serialize<P> for LocalImpl<::smallvec::SmallVec<[u8; 16]>>
+    where
+        P: ::fbthrift::ProtocolWriter,
+    {
+        fn write(&self, p: &mut P) {
+            self.0.as_slice().write(p)
+        }
+    }
+
+    impl<P> ::fbthrift::Deserialize<P> for LocalImpl<::smallvec::SmallVec<[u8; 16]>>
+    where
+        P: ::fbthrift::ProtocolReader,
+    {
+        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+            p.read_binary()
+        }
+    }
+
+    impl ::fbthrift::binary_type::BinaryType for LocalImpl<::smallvec::SmallVec<[u8; 16]>> {
+        fn with_capacity(capacity: usize) -> Self {
+            LocalImpl(<::smallvec::SmallVec<[u8; 16]>>::with_capacity(capacity))
+        }
+        fn extend_from_slice(&mut self, other: &[u8]) {
+            self.0.extend_from_slice(other)
+        }
+        fn from_vec(vec: ::std::vec::Vec<u8>) -> Self {
+            LocalImpl(::std::convert::Into::into(vec))
+        }
     }
 
     impl<P> ::fbthrift::Serialize<P> for LocalImpl<::sorted_vector_map::SortedVectorMap<::std::string::String, ::std::primitive::i64>>

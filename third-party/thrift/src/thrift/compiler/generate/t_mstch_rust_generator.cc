@@ -2163,7 +2163,16 @@ class rust_mstch_typedef : public mstch_typedef {
     return typedef_->has_annotation("rust.newtype");
   }
   mstch::node rust_type() {
-    const std::string& rust_type = typedef_->get_annotation("rust.type");
+    // See 'typedef.mustache'. The context is writing a newtype: e.g. `pub
+    // struct T(pub X)`. If `X` has a type annotation `A` we should write `pub
+    // T(A)`. If it does not, we should write `X`.
+    std::string rust_type;
+    if (const t_const* annot = typedef_->find_structured_annotation_or_null(
+            "facebook.com/thrift/annotation/rust/Type")) {
+      rust_type = get_annotation_property_string(annot, "name");
+    } else {
+      rust_type = typedef_->get_annotation("rust.type");
+    }
     if (!rust_type.empty() && rust_type.find("::") == std::string::npos) {
       return "fbthrift::builtin_types::" + rust_type;
     }
@@ -2189,8 +2198,20 @@ class rust_mstch_typedef : public mstch_typedef {
     return false;
   }
   mstch::node rust_nonstandard() {
-    return typedef_->get_annotation("rust.type").find("::") !=
-        std::string::npos;
+    // See 'typedef.mustache'. The context is writing serialization functions
+    // for a newtype `pub struct T(pub X)`.
+    // If `X` has a type annotation `A` that is non-standard we should emit the
+    // phrase `crate::r#impl::write(&self.0, p)`. If `X` does not have an
+    // annotation or does but it is not non-standard we should write
+    // `self.0.write(p)`.
+    std::string rust_type;
+    if (const t_const* annot = typedef_->find_structured_annotation_or_null(
+            "facebook.com/thrift/annotation/rust/Type")) {
+      rust_type = get_annotation_property_string(annot, "name");
+    } else {
+      rust_type = typedef_->get_annotation("rust.type");
+    }
+    return rust_type.find("::") != std::string::npos;
   }
   mstch::node rust_has_docs() { return typedef_->has_doc(); }
   mstch::node rust_docs() { return quoted_rust_doc(typedef_); }

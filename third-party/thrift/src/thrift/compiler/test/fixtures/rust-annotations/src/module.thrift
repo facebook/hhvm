@@ -41,6 +41,9 @@ struct T4 {
   1: map_t data;
 }
 
+@rust.Type{name = "smallvec::SmallVec<[u8; 16]>"}
+typedef binary binary_t (rust.newtype)
+
 // --
 
 @rust.Derive{derives = ["Foo", "crate::Bar"]}

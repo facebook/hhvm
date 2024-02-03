@@ -7,10 +7,6 @@
 #[allow(unused_imports)]
 #[doc(no_inline)]
 pub use self::errors::*;
-// Used by Thrift-generated code to implement service inheritance.
-#[doc(hidden)]
-pub mod dependencies;
-
 #[doc(inline)]
 pub use ::::services as services;
 #[doc(inline)]

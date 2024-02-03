@@ -17,10 +17,6 @@ pub use :: as types;
 #[doc(inline)]
 pub use ::::consts as consts;
 
-// Used by Thrift-generated code to implement service inheritance.
-#[doc(hidden)]
-pub mod dependencies;
-
 #[doc(inline)]
 pub use ::::services as services;
 #[doc(inline)]

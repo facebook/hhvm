@@ -52,10 +52,6 @@ pub use {{program:types}}::consts as consts;
 {{/program:constants?}}{{!
 }}{{#program:services?}}
 
-// Used by Thrift-generated code to implement service inheritance.
-#[doc(hidden)]
-pub mod dependencies;
-
 #[doc(inline)]
 pub use {{program:types}}::services as services;
 #[doc(inline)]

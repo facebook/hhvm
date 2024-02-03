@@ -2425,7 +2425,6 @@ void t_mstch_rust_generator::generate_program() {
   render_to_file(prog, "services.rs", "services.rs");
   render_to_file(prog, "errors.rs", "errors.rs");
   render_to_file(prog, "consts.rs", "consts.rs");
-  render_to_file(prog, "dependencies.rs", "dependencies.rs");
   render_to_file(prog, "client.rs", "client.rs");
   render_to_file(prog, "server.rs", "server.rs");
   render_to_file(prog, "mock.rs", "mock.rs");

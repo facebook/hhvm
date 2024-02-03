@@ -899,7 +899,7 @@ void RocketServerConnection::onEgressBuffered() {
     if (exceeds && rawSocket_->good()) {
       DestructorGuard dg(this);
       FB_LOG_EVERY_MS(ERROR, 1000) << fmt::format(
-          "Dropping connection for ({}): exceeded egress memory limit ({}), required min increment size ({})",
+          "Dropping connection for ({}): exceeded egress memory limit ({}). The config value of min increment size: ({})",
           getPeerAddress().describe(),
           egressMemoryTracker_.getMemLimit(),
           egressMemoryTracker_.getMinIncrementSize());
@@ -1160,7 +1160,7 @@ bool RocketServerConnection::incMemoryUsage(uint32_t memSize) {
     socket_->setReadCB(nullptr);
     startDrain(DrainCompleteCode::EXCEEDED_INGRESS_MEM_LIMIT);
     FB_LOG_EVERY_MS(ERROR, 1000) << fmt::format(
-        "Dropping connection for ({}): exceeded ingress memory limit ({}), required min increment size ({})",
+        "Dropping connection for ({}): exceeded ingress memory limit ({}). The config value of min increment size: ({})",
         getPeerAddress().describe(),
         ingressMemoryTracker_.getMemLimit(),
         ingressMemoryTracker_.getMinIncrementSize());

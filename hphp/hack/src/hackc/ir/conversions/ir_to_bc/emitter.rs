@@ -1088,7 +1088,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 )
                 .into();
 
-                self.push_opcode(Opcode::SSwitch { cases, targets });
+                self.push_opcode(Opcode::SSwitch(cases, targets));
             }
             Terminator::Throw(_src, _) => {
                 self.push_opcode(Opcode::Throw);

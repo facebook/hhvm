@@ -7,7 +7,6 @@ use std::collections::HashMap;
 
 use hhbc_gen::ImmType;
 use hhbc_gen::Inputs;
-use hhbc_gen::InstrFlags;
 use hhbc_gen::OpcodeData;
 use hhbc_gen::Outputs;
 use proc_macro2::Ident;
@@ -333,11 +332,7 @@ fn parse_convert_simple(
         params.push(quote!(ctx.loc));
     }
 
-    let pat = if data.flags.contains(InstrFlags::AS_STRUCT) {
-        todo!("AS_STRUCT");
-    } else {
-        build_match_pat(opcode_path, match_pats)?
-    };
+    let pat = build_match_pat(opcode_path, match_pats)?;
 
     let cons = {
         match &data.outputs {

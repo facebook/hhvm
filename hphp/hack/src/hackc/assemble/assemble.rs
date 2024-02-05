@@ -1956,10 +1956,10 @@ fn assemble_sswitch<'arena>(
         targets.push(assemble_label(token_iter)?);
     }
     token_iter.expect(Token::is_gt)?;
-    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::SSwitch {
-        cases: cases.into(),
-        targets: targets.into(),
-    }))
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::SSwitch(
+        cases.into(),
+        targets.into(),
+    )))
 }
 
 /// Ex:

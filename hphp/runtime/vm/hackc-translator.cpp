@@ -873,8 +873,8 @@ void handleOA(TranslationState& ts, T subop) {
 
 #define handleOA(imm) handleOA<imm>
 #define handleSLA(ts, imm) do {                           \
-  auto const targets = body.targets;                      \
-  auto const cases = body.cases;                          \
+  auto const targets = body._1;                           \
+  auto const cases = body._0;                             \
   ts.fe->emitIVA(cases.len);                              \
   for (int i = 0; i < cases.len-1; i++) {                 \
     auto const caseName = toStaticString(cases.data[i]);  \

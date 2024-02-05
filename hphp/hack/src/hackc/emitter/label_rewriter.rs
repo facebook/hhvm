@@ -172,7 +172,7 @@ where
                 *label = f(*label);
             }
         }
-        Instruct::Opcode(Opcode::SSwitch { targets, .. }) => {
+        Instruct::Opcode(Opcode::SSwitch(_, targets)) => {
             for label in targets.as_mut_slice() {
                 *label = f(*label);
             }

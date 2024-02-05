@@ -157,16 +157,7 @@ fn compare_instrs<'arena>(
             sem_diff_eq(path, &(a0, b0, c0), &(a1, b1, c1))
         }
 
-        (
-            I::Opcode(O::SSwitch {
-                cases: a0,
-                targets: _,
-            }),
-            I::Opcode(O::SSwitch {
-                cases: a1,
-                targets: _,
-            }),
-        ) => sem_diff_eq(path, a0, a1),
+        (I::Opcode(O::SSwitch(a0, _)), I::Opcode(O::SSwitch(a1, _))) => sem_diff_eq(path, a0, a1),
 
         (a, b) => {
             match a {

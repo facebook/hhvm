@@ -5,7 +5,6 @@
 
 use hash::HashSet;
 use hhbc_gen::ImmType;
-use hhbc_gen::InstrFlags;
 use hhbc_gen::OpcodeData;
 use proc_macro2::Ident;
 use proc_macro2::Span;
@@ -46,7 +45,6 @@ pub fn build_print_opcode(input: TokenStream, opcodes: &[OpcodeData]) -> Result<
             LitByteStr::new(name.as_bytes(), Span::call_site())
         };
 
-        let is_struct = opcode.flags.contains(InstrFlags::AS_STRUCT);
         let is_override = attributes.overrides.contains(opcode.name);
 
         let parameters: Vec<Ident> = opcode
@@ -57,8 +55,6 @@ pub fn build_print_opcode(input: TokenStream, opcodes: &[OpcodeData]) -> Result<
 
         let input_parameters = if parameters.is_empty() {
             TokenStream::new()
-        } else if is_struct {
-            quote!( {#(#parameters),*} )
         } else {
             quote!( (#(#parameters),*) )
         };
@@ -330,14 +326,6 @@ mod tests {
                                 w.write_all(b" ")?;
                                 print_quoted_str(w, str3)?;
                             }
-                            // -------------------------------------------
-                            Opcode::TestAsStruct { str1, str2 } => {
-                                w.write_all(b"TestAsStruct ")?;
-                                print_quoted_str(w, str1)?;
-                                w.write_all(b" ")?;
-                                print_quoted_str(w, str2)?;
-                            }
-                            // -------------------------------------------
                             Opcode::TestAA(arr1) => {
                                 w.write_all(b"TestAA ")?;
                                 print_adata_id(w, arr1)?;

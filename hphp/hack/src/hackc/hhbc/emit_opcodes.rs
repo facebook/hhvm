@@ -5,7 +5,6 @@
 
 use hhbc_gen::ImmType;
 use hhbc_gen::Inputs;
-use hhbc_gen::InstrFlags;
 use hhbc_gen::OpcodeData;
 use hhbc_gen::Outputs;
 use proc_macro2::Ident;
@@ -32,27 +31,16 @@ pub fn emit_opcodes(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenS
         body.push(name.into());
 
         if !opcode.immediates.is_empty() {
-            let is_struct = opcode.flags.contains(InstrFlags::AS_STRUCT);
-
             let mut imms = Vec::new();
-            for (idx, (name, ty)) in opcode.immediates.iter().enumerate() {
+            for (idx, (_name, ty)) in opcode.immediates.iter().enumerate() {
                 if idx != 0 {
                     imms.push(Punct::new(',', Spacing::Alone).into());
                 }
                 let ty = convert_imm_type(ty, lifetime);
-                if is_struct {
-                    let name = Ident::new(name, Span::call_site());
-                    imms.extend(quote!( #name: #ty ));
-                } else {
-                    imms.extend(ty);
-                }
+                imms.extend(ty);
             }
 
-            if is_struct {
-                body.extend(quote!( { #(#imms)* } ));
-            } else {
-                body.extend(quote!( ( #(#imms)* ) ));
-            }
+            body.extend(quote!( ( #(#imms)* ) ));
         }
 
         let variant = syn::parse2::<Variant>(quote!(#(#body)*))?;
@@ -75,11 +63,8 @@ pub fn emit_opcodes(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenS
         for (idx, opcode) in opcodes.iter().enumerate() {
             let name = Ident::new(opcode.name, Span::call_site());
             let name_str = &opcode.name;
-            let is_struct = opcode.flags.contains(InstrFlags::AS_STRUCT);
             let ignore_args = if opcode.immediates.is_empty() {
                 Default::default()
-            } else if is_struct {
-                quote!({ .. })
             } else {
                 quote!((..))
             };
@@ -175,7 +160,6 @@ pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
     for opcode in opcodes {
         let opcode_name = Ident::new(opcode.name, Span::call_site());
         let variant_name = quote!(#name::#opcode_name);
-        let is_struct = opcode.flags.contains(InstrFlags::AS_STRUCT);
 
         fn is_label_type(imm_ty: &ImmType) -> bool {
             match imm_ty {
@@ -258,8 +242,6 @@ pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
                     if old.is_some() {
                         panic!("Unable to build targets for opcode with multiple labels");
                     }
-                } else if is_struct {
-                    match_parts.push(quote!(#imm_name: _));
                 } else {
                     match_parts.push(quote!(_));
                 }
@@ -267,17 +249,11 @@ pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
 
             let result_ref = result.unwrap();
 
-            if is_struct {
-                with_targets_ref.push(quote!(#variant_name { #(#match_parts),* } => #result_ref, ));
-            } else {
-                with_targets_ref.push(quote!(#variant_name ( #(#match_parts),* ) => #result_ref, ));
-            }
+            with_targets_ref.push(quote!(#variant_name ( #(#match_parts),* ) => #result_ref, ));
         } else {
             // Non-label opcodes.
             if opcode.immediates.is_empty() {
                 without_targets.push(quote!(#variant_name));
-            } else if is_struct {
-                without_targets.push(quote!(#variant_name { .. }));
             } else {
                 without_targets.push(quote!(#variant_name ( .. )));
             }
@@ -590,9 +566,6 @@ mod tests {
                     TestOneImm(Str<'a>),
                     TestTwoImm(Str<'a>, Str<'a>),
                     TestThreeImm(Str<'a>, Str<'a>, Str<'a>),
-                    // --------------------
-                    TestAsStruct { str1: Str<'a>, str2: Str<'a> },
-                    // --------------------
                     TestAA(AdataId<'a>),
                     TestARR(Vector<Str<'a>>),
                     TestBA(Label),
@@ -623,7 +596,6 @@ mod tests {
                             MyOps::TestOneImm(..) => "TestOneImm",
                             MyOps::TestTwoImm(..) => "TestTwoImm",
                             MyOps::TestThreeImm(..) => "TestThreeImm",
-                            MyOps::TestAsStruct { .. } => "TestAsStruct",
                             MyOps::TestAA(..) => "TestAA",
                             MyOps::TestARR(..) => "TestARR",
                             MyOps::TestBA(..) => "TestBA",
@@ -654,29 +626,28 @@ mod tests {
                             MyOps::TestOneImm(..) => 1usize,
                             MyOps::TestTwoImm(..) => 2usize,
                             MyOps::TestThreeImm(..) => 3usize,
-                            MyOps::TestAsStruct { .. } => 4usize,
-                            MyOps::TestAA(..) => 5usize,
-                            MyOps::TestARR(..) => 6usize,
-                            MyOps::TestBA(..) => 7usize,
-                            MyOps::TestBA2(..) => 8usize,
-                            MyOps::TestBLA(..) => 9usize,
-                            MyOps::TestDA(..) => 10usize,
-                            MyOps::TestFCA(..) => 11usize,
-                            MyOps::TestI64A(..) => 12usize,
-                            MyOps::TestIA(..) => 13usize,
-                            MyOps::TestILA(..) => 14usize,
-                            MyOps::TestITA(..) => 15usize,
-                            MyOps::TestIVA(..) => 16usize,
-                            MyOps::TestKA(..) => 17usize,
-                            MyOps::TestLA(..) => 18usize,
-                            MyOps::TestLAR(..) => 19usize,
-                            MyOps::TestNLA(..) => 20usize,
-                            MyOps::TestOA(..) => 21usize,
-                            MyOps::TestOAL(..) => 22usize,
-                            MyOps::TestRATA(..) => 23usize,
-                            MyOps::TestSA(..) => 24usize,
-                            MyOps::TestSLA(..) => 25usize,
-                            MyOps::TestVSA(..) => 26usize,
+                            MyOps::TestAA(..) => 4usize,
+                            MyOps::TestARR(..) => 5usize,
+                            MyOps::TestBA(..) => 6usize,
+                            MyOps::TestBA2(..) => 7usize,
+                            MyOps::TestBLA(..) => 8usize,
+                            MyOps::TestDA(..) => 9usize,
+                            MyOps::TestFCA(..) => 10usize,
+                            MyOps::TestI64A(..) => 11usize,
+                            MyOps::TestIA(..) => 12usize,
+                            MyOps::TestILA(..) => 13usize,
+                            MyOps::TestITA(..) => 14usize,
+                            MyOps::TestIVA(..) => 15usize,
+                            MyOps::TestKA(..) => 16usize,
+                            MyOps::TestLA(..) => 17usize,
+                            MyOps::TestLAR(..) => 18usize,
+                            MyOps::TestNLA(..) => 19usize,
+                            MyOps::TestOA(..) => 20usize,
+                            MyOps::TestOAL(..) => 21usize,
+                            MyOps::TestRATA(..) => 22usize,
+                            MyOps::TestSA(..) => 23usize,
+                            MyOps::TestSLA(..) => 24usize,
+                            MyOps::TestVSA(..) => 25usize,
                         }
                     }
                     pub fn num_inputs(&self) -> usize {
@@ -685,7 +656,6 @@ mod tests {
                             MyOps::TestOneImm(..) => 0,
                             MyOps::TestTwoImm(..) => 0,
                             MyOps::TestThreeImm(..) => 0,
-                            MyOps::TestAsStruct { .. } => 0,
                             MyOps::TestAA(..) => 0,
                             MyOps::TestARR(..) => 0,
                             MyOps::TestBA(..) => 0,
@@ -716,7 +686,6 @@ mod tests {
                             MyOps::TestOneImm(..) => 0,
                             MyOps::TestTwoImm(..) => 0,
                             MyOps::TestThreeImm(..) => 0,
-                            MyOps::TestAsStruct { .. } => 0,
                             MyOps::TestAA(..) => 0,
                             MyOps::TestARR(..) => 0,
                             MyOps::TestBA(..) => 0,
@@ -763,9 +732,6 @@ mod tests {
             quote!(
                 pub fn test_aa<'a>(arr1: AdataId<'a>) -> InstrSeq<'a> {
                     instr(Instruct::Opcode(Opcode::TestAA(arr1)))
-                }
-                pub fn test_as_struct<'a>(str1: Str<'a>, str2: Str<'a>) -> InstrSeq<'a> {
-                    instr(Instruct::Opcode(Opcode::TestAsStruct(str1, str2)))
                 }
                 pub fn test_lar<'a>(locrange: LocalRange) -> InstrSeq<'a> {
                     instr(Instruct::Opcode(Opcode::TestLAR(locrange)))

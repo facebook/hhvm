@@ -782,10 +782,7 @@ fn convert_control_flow<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) 
             };
             ctx.emit(Instr::Terminator(instr));
         }
-        Opcode::SSwitch {
-            ref cases,
-            ref targets,
-        } => {
+        Opcode::SSwitch(ref cases, ref targets) => {
             let s1 = ctx.pop();
             let stack_size = ctx.spill_stack();
             let cases = cases.iter().map(|case| ctx.intern_ffi_str(*case)).collect();

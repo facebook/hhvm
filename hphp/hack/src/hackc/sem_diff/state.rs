@@ -416,10 +416,9 @@ impl<'arena, 'a> State<'arena, 'a> {
             Instruct::Opcode(Opcode::Switch(bounded, base, ref targets)) => {
                 self.step_switch(builder, bounded, base, targets)
             }
-            Instruct::Opcode(Opcode::SSwitch {
-                ref cases,
-                ref targets,
-            }) => self.step_s_switch(builder, cases, targets),
+            Instruct::Opcode(Opcode::SSwitch(ref cases, ref targets)) => {
+                self.step_s_switch(builder, cases, targets)
+            }
 
             Instruct::Opcode(Opcode::Enter(label) | Opcode::Jmp(label)) => {
                 // Jmp and JmpNS need to update the next IP.
@@ -1067,10 +1066,7 @@ impl<'arena, 'a> State<'arena, 'a> {
         self.fork(builder, targets.as_ref());
 
         let inputs = vec![self.reffy(value)];
-        let instr = NodeInstr::Opcode(Opcode::SSwitch {
-            cases: cases.to_vec().into(),
-            targets: vec![].into(),
-        });
+        let instr = NodeInstr::Opcode(Opcode::SSwitch(cases.to_vec().into(), vec![].into()));
         self.seq_push(builder, instr, inputs);
         self.ip = InstrPtr::None;
     }

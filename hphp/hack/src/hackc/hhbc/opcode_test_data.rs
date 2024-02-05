@@ -45,14 +45,6 @@ pub fn test_opcodes() -> Vec<OpcodeData> {
         },
         // --------------------------------------------------
         OpcodeData {
-            name: "TestAsStruct",
-            immediates: vec![("str1", ImmType::SA), ("str2", ImmType::SA)],
-            inputs: Inputs::NOV,
-            outputs: Outputs::NOV,
-            flags: InstrFlags::AS_STRUCT,
-        },
-        // --------------------------------------------------
-        OpcodeData {
             name: "TestAA",
             immediates: vec![("arr1", ImmType::AA)],
             inputs: Inputs::NOV,

@@ -83,9 +83,6 @@ bitflags! {
         const NF = 0b00000001;
         const TF = 0b00000010;
         const CF = 0b00000100;
-        /// This flag indicates that the opcode should be generated as a
-        /// structured variant instead of a tuple.
-        const AS_STRUCT = 0b00001000;
     }
 }
 
@@ -343,7 +340,6 @@ mod fixups {
             "SSwitch" => vec![
                 // Instead of using a single [(String, Label)] field in HHAS we
                 // split the cases and targets.
-                add_flag(InstrFlags::AS_STRUCT),
                 insert_imm(0, "cases", ImmType::ARR(Box::new(ImmType::SA))),
                 replace_imm("targets", ImmType::SLA, ImmType::BLA),
             ],
@@ -472,7 +468,7 @@ mod test {
 
         let fixups = hashmap! {
             "TestOp" => vec! {
-                add_flag(InstrFlags::AS_STRUCT),
+                add_flag(InstrFlags::TF),
             },
         };
 
@@ -484,7 +480,7 @@ mod test {
                 immediates: vec![],
                 inputs: Inputs::NOV,
                 outputs: Outputs::NOV,
-                flags: InstrFlags::NF | InstrFlags::AS_STRUCT,
+                flags: InstrFlags::NF | InstrFlags::TF,
             }
         );
     }

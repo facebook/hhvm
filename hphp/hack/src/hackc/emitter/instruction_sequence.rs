@@ -388,7 +388,7 @@ pub mod instr {
     pub fn s_switch<'a>(cases: Vec<(&'a str, Label)>) -> InstrSeq<'a> {
         let targets = Vec::from_iter(cases.iter().map(|(_, target)| *target)).into();
         let cases = Vec::from_iter(cases.into_iter().map(|(s, _)| Str::from(s))).into();
-        instr(Instruct::Opcode(Opcode::SSwitch { cases, targets }))
+        instr(Instruct::Opcode(Opcode::SSwitch(cases, targets)))
     }
 
     /// Make a String instruction when the litstr is already arena allocated

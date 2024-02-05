@@ -128,6 +128,7 @@ type t =
   | Internal_member_inside_public_trait of {
       member_pos: Pos.t;
       trait_pos: Pos.t;
+      is_method: bool;
     }
   | Attribute_conflicting_memoize of {
       pos: Pos.t;

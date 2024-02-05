@@ -8,7 +8,7 @@
 #pragma once
 
 #define PY_SSIZE_T_CLEAN
-#include <Python.h> // @manual=third-party//python:python
+#include <Python.h> // @manual=fbsource//third-party/python:python
 
 #ifdef __cplusplus
 extern "C" {

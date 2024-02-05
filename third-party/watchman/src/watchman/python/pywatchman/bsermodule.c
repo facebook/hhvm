@@ -6,8 +6,8 @@
  */
 
 #define PY_SSIZE_T_CLEAN
-#include <Python.h>
-#include <bytesobject.h>
+#include <Python.h> // @manual=fbsource//third-party/python:python
+#include <bytesobject.h> // @manual=fbsource//third-party/python:python
 #ifdef _MSC_VER
 #define inline __inline
 #if _MSC_VER >= 1800

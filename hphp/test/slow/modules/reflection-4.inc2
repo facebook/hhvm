@@ -1,7 +1,5 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('modules')>>
-
 module A.B;
 
 class C {

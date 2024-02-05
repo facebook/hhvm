@@ -868,7 +868,7 @@ void RocketClient::sendRequestStreamChannel(
               nullptr /* writeCallback */),
           serverCallback_(serverCallback) {}
 
-    ~Context() {
+    ~Context() override {
       if (!complete_) {
         client_.freeStream(streamId_);
       }

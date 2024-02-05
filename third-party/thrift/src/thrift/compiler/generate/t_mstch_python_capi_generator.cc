@@ -36,6 +36,7 @@
 #include <thrift/compiler/lib/cpp2/util.h>
 #include <thrift/compiler/lib/py3/util.h>
 #include <thrift/compiler/lib/uri.h>
+#include <thrift/compiler/sema/explicit_include_validator.h>
 
 namespace apache {
 namespace thrift {
@@ -602,6 +603,13 @@ class t_mstch_python_capi_generator : public t_mstch_generator {
     }
     set_mstch_factories();
     generate_types();
+  }
+
+  void fill_validator_visitors(ast_validator& validator) const override {
+    validator.add_field_visitor(
+        &validate_explicit_include<t_field, diagnostic_level::error>);
+    validator.add_typedef_visitor(
+        &validate_explicit_include<t_typedef, diagnostic_level::error>);
   }
 
  protected:

@@ -22,7 +22,6 @@
 #include <type_traits>
 #include <vector>
 
-#include <thrift/compiler/ast/detail/ast_visitor.h>
 #include <thrift/compiler/ast/t_const.h>
 #include <thrift/compiler/ast/t_enum.h>
 #include <thrift/compiler/ast/t_enum_value.h>
@@ -47,6 +46,70 @@
 namespace apache {
 namespace thrift {
 namespace compiler {
+namespace ast_detail {
+
+// Visitation and registration functions for concrete AST nodes.
+#define FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(name)       \
+ private:                                                   \
+  using name##_type = node_type<t_##name>;                  \
+  visitor_list<Args..., name##_type&> name##_visitors_;     \
+                                                            \
+ public:                                                    \
+  void add_##name##_visitor(                                \
+      std::function<void(Args..., name##_type&)> visitor) { \
+    name##_visitors_.emplace_back(std::move(visitor));      \
+  }                                                         \
+  void operator()(Args... args, name##_type& node) const
+
+// The type to use when traversing the given node type N.
+template <bool is_const, typename N>
+using node_type = std::conditional_t<is_const, const N, N>;
+
+// Helper that to propagate constness through a dynamic_cast.
+template <typename N>
+N* as(t_node* node) {
+  return dynamic_cast<N*>(node);
+}
+template <typename N>
+const N* as(const t_node* node) {
+  return dynamic_cast<const N*>(node);
+}
+
+template <typename... Args>
+using void_t = void;
+
+// TODO(afuller): Use a c++ 'concept' when available or switch
+// to a stricter form of checking if an argument is an 'observer'
+template <typename O, typename = void>
+struct is_observer : std::false_type {};
+template <typename O>
+struct is_observer<
+    O,
+    void_t<
+        decltype(std::declval<O>().begin_visit(std::declval<t_node&>())),
+        decltype(std::declval<O>().end_visit(std::declval<t_node&>()))>>
+    : std::true_type {};
+
+template <typename O>
+using if_observer = std::enable_if_t<is_observer<O>::value>;
+template <typename O>
+using if_not_observer = std::enable_if_t<!is_observer<O>::value>;
+
+// Helper to call begin/end_visit if supported on the given argument.
+template <typename T, typename N = const t_node>
+if_observer<T> begin_visit(N& node, T& observer) {
+  observer.begin_visit(node);
+}
+template <typename T, typename N = const t_node>
+if_observer<T> end_visit(N& node, T& observer) {
+  observer.end_visit(node);
+}
+template <typename T>
+if_not_observer<T> begin_visit(const t_node&, T&) {}
+template <typename T>
+if_not_observer<T> end_visit(const t_node&, T&) {}
+
+} // namespace ast_detail
 
 // A list of visitor that accept the given arguments.
 template <typename... Args>

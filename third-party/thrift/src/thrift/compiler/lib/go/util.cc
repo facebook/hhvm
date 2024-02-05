@@ -16,6 +16,7 @@
 
 #include <cctype>
 #include <boost/algorithm/string.hpp>
+#include <fmt/core.h>
 #include <thrift/compiler/lib/go/util.h>
 
 namespace apache {
@@ -254,7 +255,8 @@ std::string codegen_data::get_go_package_alias(const t_program* program) {
   if (iter != go_package_map_.end()) {
     return iter->second;
   }
-  throw std::runtime_error("unable to determine Go package alias");
+  throw std::runtime_error(
+      fmt::format("unable to determine Go package alias '{}'", package));
 }
 
 std::string codegen_data::go_package_alias_prefix(const t_program* program) {

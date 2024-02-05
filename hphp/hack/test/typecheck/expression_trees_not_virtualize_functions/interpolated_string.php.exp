@@ -1,6 +1,0 @@
-File "interpolated_string.php", line 10, characters 7-19:
-Unsupported expression tree syntax. (Parsing[1002])
-File "interpolated_string.php", line 10, characters 8-9:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-File "interpolated_string.php", line 10, characters 8-9:
-Expected an object convertible to string but got an object of type ExampleString (Typing[4318])

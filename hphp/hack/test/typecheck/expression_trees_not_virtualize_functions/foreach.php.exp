@@ -1,8 +1,0 @@
-File "foreach.php", line 8, characters 5-50:
-Expression trees do not support `foreach` loops. Consider using a `for` loop or a `while` loop instead. (Parsing[1002])
-File "foreach.php", line 9, characters 12-13:
-Typing error (Typing[4429])
-  File "foreach.php", line 9, characters 12-18:
-  Expected `num` because this is used in an arithmetic operation
-  File "expr_tree.hhi", line 31, characters 37-46:
-  But got `ExampleInt`

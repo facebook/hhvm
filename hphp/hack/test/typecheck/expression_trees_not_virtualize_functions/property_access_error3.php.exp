@@ -1,6 +1,0 @@
-File "property_access_error3.php", line 7, characters 13-19:
-No property `my_prop` in `ExampleInt` (Typing[4053])
-  File "property_access_error3.php", line 11, characters 112-121:
-  This is why I think it is an object of type ExampleInt
-  File "expr_tree.hhi", line 236, characters 11-20:
-  Declaration of `ExampleInt` is here

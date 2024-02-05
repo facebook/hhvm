@@ -1,4 +1,0 @@
-File "invalid_call2.php", line 15, characters 5-15:
-Only classnames and variables are allowed before `::`. (Parsing[1002])
-File "invalid_call2.php", line 15, characters 5-22:
-Expression trees only support function calls and static method calls on named classes. (Parsing[1002])

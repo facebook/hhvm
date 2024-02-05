@@ -1,2 +1,0 @@
-File "class_const.php", line 9, characters 16-35:
-Expression trees do not support directly referencing class consts. Consider splicing values defined outside the scope of an Expression Tree using ${...}. (Parsing[1002])

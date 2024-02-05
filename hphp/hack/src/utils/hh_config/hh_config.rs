@@ -357,9 +357,6 @@ impl HhConfig {
                 "allowed_files_for_module_declarations" => {
                     go.tco_allowed_files_for_module_declarations = parse_svec(&value);
                 }
-                "expression_tree_virtualize_functions" => {
-                    go.tco_expression_tree_virtualize_functions = parse_json(&value)?;
-                }
                 "tco_global_access_check_enabled" => {
                     go.tco_global_access_check_enabled = parse_json(&value)?;
                 }

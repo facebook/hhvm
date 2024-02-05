@@ -1,2 +1,0 @@
-File "php_lambda.php", line 6, characters 14-44:
-Expression trees do not support PHP lambdas. Consider using Hack lambdas `() ==> {}` instead. (Parsing[1002])

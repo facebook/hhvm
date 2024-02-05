@@ -1,2 +1,0 @@
-File "reified_generic.php", line 14, characters 14-19:
-Static method calls on reified generics are not permitted in Expression Trees. (Typing[4440])

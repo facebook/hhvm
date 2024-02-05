@@ -1,4 +1,0 @@
-File "pipe_lambda3.php", line 9, characters 70-124:
-Wrong number of type arguments (expected 0, got 3) (Typing[4101])
-  File "expr_tree.hhi", line 13, characters 7-16:
-  Definition is here

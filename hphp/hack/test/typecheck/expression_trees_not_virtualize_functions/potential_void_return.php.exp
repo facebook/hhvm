@@ -1,6 +1,0 @@
-File "potential_void_return.php", line 15, characters 5-469:
-This function can exit with and without returning a value (Typing[4421])
-  File "potential_void_return.php", line 19, characters 9-41:
-  Returning a value here.
-  File "potential_void_return.php", line 15, characters 5-469:
-  This function does not always return a value

@@ -1,9 +1,0 @@
-File "splice_state4.php", line 26, characters 5-9:
-Typing error (Typing[4429])
-  File "splice_state4.php", line 26, characters 5-13:
-  Expected `num` because this is used in an arithmetic operation
-  File "splice_state4.php", line 6, characters 10-13:
-  But got `?int`
-  File "splice_state4.php", line 21, characters 14-24:
-  All the local information about `$x->x` has been invalidated during this call.
-This is a limitation of the type-checker; use a local if that's the problem.

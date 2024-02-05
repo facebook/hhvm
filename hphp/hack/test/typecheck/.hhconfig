@@ -20,6 +20,5 @@ const_default_func_args = true
 const_default_lambda_args = true
 disallow_direct_superglobals_refs = true
 allowed_files_for_module_declarations = *
-expression_tree_virtualize_functions = true
 enable_sound_dynamic_type = true
 everything_sdt = true

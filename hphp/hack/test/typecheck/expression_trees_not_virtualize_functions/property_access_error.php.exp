@@ -1,6 +1,0 @@
-File "property_access_error.php", line 7, characters 5-25:
-Invalid assignment (Typing[4110])
-  File "property_access_error.php", line 12, characters 10-19:
-  Expected `ExampleInt`
-  File "expr_tree.hhi", line 40, characters 40-52:
-  But got `ExampleString`

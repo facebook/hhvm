@@ -1,2 +1,0 @@
-File "invalid_call3.php", line 6, characters 14-23:
-This call is invalid, this is not a function, it is an object of type ExampleInt (Typing[4009])

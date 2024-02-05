@@ -1,2 +1,0 @@
-File "nested_expression_tree_in_splice_in_lambda.php", line 7, characters 13-25:
-Expression trees may not be nested. Consider assigning to a local variable and splicing the local variable in. (Parsing[1002])

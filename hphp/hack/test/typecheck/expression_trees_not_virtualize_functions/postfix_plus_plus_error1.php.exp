@@ -1,4 +1,0 @@
-File "postfix_plus_plus_error1.php", line 7, characters 14-14:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-File "postfix_plus_plus_error1.php", line 7, characters 14-14:
-You cannot use this syntax with an increment or decrement statement. (Parsing[1002])

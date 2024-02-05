@@ -1,4 +1,0 @@
-File "dollar_this.php", line 7, characters 16-20:
-Variable `$this` is undefined, or not always defined. (Naming[2050])
-File "dollar_this.php", line 7, characters 16-20:
-`$this` is not bound inside expression trees (Typing[4095])

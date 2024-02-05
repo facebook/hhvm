@@ -1,8 +1,0 @@
-File "parse_constants.php", line 8, characters 23-30:
-Unsupported expression tree syntax. (Parsing[1002])
-File "parse_constants.php", line 8, characters 23-30:
-Invalid argument (Typing[4110])
-  File "expr_tree.hhi", line 237, characters 26-35:
-  Expected `ExampleInt`
-  File "parse_constants.php", line 5, characters 7-9:
-  But got `int`

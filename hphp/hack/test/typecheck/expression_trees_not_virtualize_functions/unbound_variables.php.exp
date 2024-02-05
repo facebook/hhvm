@@ -1,6 +1,0 @@
-File "unbound_variables.php", line 9, characters 19-20:
-Variable `$x` is undefined in this `ExampleDsl` expression tree. (Naming[2050])
-  File "unbound_variables.php", line 6, characters 3-8:
-  Did you forget to splice in `$x`?
-File "unbound_variables.php", line 15, characters 16-17:
-Variable `$x` is undefined, or not always defined. (Naming[2050])

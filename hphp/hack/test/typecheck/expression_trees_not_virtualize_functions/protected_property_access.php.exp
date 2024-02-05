@@ -1,6 +1,0 @@
-File "protected_property_access.php", line 12, characters 7-8:
-Typing error (Typing[4448])
-  File "protected_property_access.php", line 12, characters 11-14:
-  Cannot access non-public members within expression trees.
-  File "protected_property_access.php", line 6, characters 13-22:
-  Member defined here

@@ -386,8 +386,6 @@ let load_config config options =
       (string_list_opt "allowed_files_for_module_declarations" config)
     ?tco_allow_all_files_for_module_declarations:
       (bool_opt "allow_all_files_for_module_declarations" config)
-    ?tco_expression_tree_virtualize_functions:
-      (bool_opt "expression_tree_virtualize_functions" config)
     ?tco_use_type_alias_heap:(bool_opt "use_type_alias_heap" config)
     ?tco_populate_dead_unsafe_cast_heap:
       (bool_opt "populate_dead_unsafe_cast_heap" config)

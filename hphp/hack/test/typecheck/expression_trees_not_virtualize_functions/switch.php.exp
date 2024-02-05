@@ -1,2 +1,0 @@
-File "switch.php", line 7, characters 5-74:
-Expression trees do not support `switch` statements. Consider using `if`/`else if`/`else` instead. (Parsing[1002])

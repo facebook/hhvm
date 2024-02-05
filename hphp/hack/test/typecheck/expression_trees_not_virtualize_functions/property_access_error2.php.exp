@@ -1,2 +1,0 @@
-File "property_access_error2.php", line 7, characters 12-32:
-`ExampleInt` does not support this operator (it has no instance method named `__dot`) (Typing[4053])

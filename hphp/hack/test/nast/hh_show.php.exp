@@ -37,49 +37,64 @@
                                [([6:14-9:4],
                                  (Return
                                     (Some ((), [6:14-9:4],
-                                           (Lfun (
-                                              { f_span = [6:14-9:4]; 
-                                                f_readonly_this = None; 
-                                                f_annotation = (); f_readonly_ret = None; 
-                                                f_ret = ((), None); f_params = []; 
-                                                f_ctxs = None; f_unsafe_ctxs = None;
-                                                f_body =
-                                                { fb_ast =
-                                                  [([7:5-12],
-                                                    (Expr
-                                                       ((), [7:5-11],
-                                                        (Binop
-                                                           { bop = (Eq None); 
-                                                             lhs = ((), [7:5-7], (Lvar ([7:5-7], $x)));
-                                                             rhs =
-                                                             ((), [7:10-11],
-                                                              (Call
-                                                                 { func = ((), [7:10-11], (Class_const (((), [7:10-11], (CI ([7:10-11], "\\ExampleDsl"))), ([7:10-11], "intType")))); 
-                                                                   targs = []; 
-                                                                   args = []; 
-                                                                   unpacked_arg = None }))
-                                                             }))));
-                                                    ([8:5-17],
-                                                     (Expr
-                                                        ((), [8:5-16],
-                                                         (Call
-                                                            { func = ((), [8:5-12], (Id ([8:5-12], "\\hh_show"))); 
-                                                              targs = []; 
-                                                              args = [(Pnormal, ((), [8:13-15], (Lvar ([8:13-15], $x))))]; 
-                                                              unpacked_arg = None }))));
-                                                    ([6:14-9:4],
-                                                     (Return
-                                                        (Some ((), [6:14-9:4],
-                                                               (Call
-                                                                  { func = ((), [6:14-9:4], (Class_const (((), [6:14-9:4], (CI ([6:14-9:4], "\\ExampleDsl"))), ([6:14-9:4], "voidType")))); 
+                                           (Call
+                                              { func = ((), [6:14-9:4], (Class_const (((), [6:14-9:4], (CI ([6:14-9:4], "\\ExampleDsl"))), ([6:14-9:4], "lambdaType")))); 
+                                                targs = [];
+                                                args =
+                                                [(Pnormal,
+                                                  ((), [6:14-9:4],
+                                                   (Lfun (
+                                                      { f_span = [6:14-9:4]; 
+                                                        f_readonly_this = None; 
+                                                        f_annotation = (); 
+                                                        f_readonly_ret = None; 
+                                                        f_ret = ((), None); 
+                                                        f_params = []; 
+                                                        f_ctxs = None; 
+                                                        f_unsafe_ctxs = None;
+                                                        f_body =
+                                                        { fb_ast =
+                                                          [([7:5-12],
+                                                            (Expr
+                                                               ((), [7:5-11],
+                                                                (Binop
+                                                                   { bop = (Eq None); 
+                                                                    lhs = ((), [7:5-7], (Lvar ([7:5-7], $x)));
+                                                                    rhs =
+                                                                    (
+                                                                    (), [7:10-11],
+                                                                    (
+                                                                    Call
+                                                                    { func = ((), [7:10-11], (Class_const (((), [7:10-11], (CI ([7:10-11], "\\ExampleDsl"))), ([7:10-11], "intType")))); 
+                                                                    targs = []; 
+                                                                    args = []; 
+                                                                    unpacked_arg = None })) }))));
+                                                            ([8:5-17],
+                                                             (Expr
+                                                                ((), [8:5-16],
+                                                                 (Call
+                                                                    { func = ((), [8:5-12], (Id ([8:5-12], "\\hh_show"))); 
+                                                                    targs = []; 
+                                                                    args = [(Pnormal, ((), [8:13-15], (Lvar ([8:13-15], $x))))]; 
+                                                                    unpacked_arg = None }))));
+                                                            ([6:14-9:4],
+                                                             (Return
+                                                                (Some (
+                                                                (), [6:14-9:4],
+                                                                (Call
+                                                                   { func = ((), [6:14-9:4], (Class_const (((), [6:14-9:4], (CI ([6:14-9:4], "\\ExampleDsl"))), ([6:14-9:4], "voidType"))));
                                                                     targs = []; 
                                                                     args = []; 
                                                                     unpacked_arg = None })))))
-                                                    ]
-                                                  };
-                                                f_fun_kind = FSync; f_user_attributes = []; 
-                                                f_external = false; f_doc_comment = None },
-                                              []))))))
+                                                            ]
+                                                          };
+                                                        f_fun_kind = FSync; 
+                                                        f_user_attributes = []; 
+                                                        f_external = false; 
+                                                        f_doc_comment = None },
+                                                      []))))
+                                                  ];
+                                                unpacked_arg = None })))))
                                  ]
                                };
                              f_fun_kind = FSync; f_user_attributes = []; 

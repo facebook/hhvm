@@ -1,4 +1,0 @@
-File "splice_variable4.php", line 15, characters 5-6:
-Variable `$x` is undefined in this `ExampleDsl` expression tree. (Naming[2050])
-  File "splice_variable4.php", line 10, characters 3-8:
-  Did you forget to splice in `$x`?

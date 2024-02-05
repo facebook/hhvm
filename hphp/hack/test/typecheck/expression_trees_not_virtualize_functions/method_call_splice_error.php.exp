@@ -1,8 +1,0 @@
-File "method_call_splice_error.php", line 11, characters 21-23:
-No instance method `bar` in `Foo` (Typing[4053])
-  File "method_call_splice_error.php", line 6, characters 19-21:
-  Did you mean `boo` instead?
-  File "method_call_splice_error.php", line 10, characters 12-14:
-  This is why I think it is an object of type Foo
-  File "method_call_splice_error.php", line 5, characters 7-9:
-  Declaration of `Foo` is here

@@ -1,2 +1,0 @@
-File "mismatched_types.php", line 8, characters 5-10:
-`ExampleString` does not support this operator (it has no instance method named `__plus`) (Typing[4053])

@@ -279,8 +279,6 @@ type t = {
          for example between individual methods. *)
   tco_loop_iteration_upper_bound: int option;
       (** When set, uses the given number of iterations while typechecking loops *)
-  tco_expression_tree_virtualize_functions: bool;
-      (** When enabled, wrap function types in Expression Trees in user defined virtual function types *)
   tco_use_type_alias_heap: bool;
   tco_populate_dead_unsafe_cast_heap: bool;
       (** Dead UNSAFE_CAST codemod stashes patches through a TAST visitor in shared
@@ -423,7 +421,6 @@ val set :
   ?tco_allowed_files_for_module_declarations:string list ->
   ?tco_record_fine_grained_dependencies:bool ->
   ?tco_loop_iteration_upper_bound:int option ->
-  ?tco_expression_tree_virtualize_functions:bool ->
   ?tco_use_type_alias_heap:bool ->
   ?tco_populate_dead_unsafe_cast_heap:bool ->
   ?po_disallow_static_constants_in_default_func_args:bool ->

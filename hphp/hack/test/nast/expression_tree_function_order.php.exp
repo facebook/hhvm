@@ -45,8 +45,17 @@
                                               { func =
                                                 ((), [5:5-11:4],
                                                  (Call
-                                                    { func = ((), [5:5-11:4], (Class_const (((), [5:5-11:4], (CI ([5:5-11:4], "\\ExampleDsl"))), ([5:5-11:4], "symbolType")))); 
-                                                      targs = []; args = [(Pnormal, ((), [5:5-8], (Lvar ([5:5-8], $0fp4))))]; 
+                                                    { func =
+                                                      ((), [5:5-11:4],
+                                                       (Obj_get (
+                                                          ((), [5:5-11:4],
+                                                           (Call
+                                                              { func = ((), [5:5-11:4], (Class_const (((), [5:5-11:4], (CI ([5:5-11:4], "\\ExampleDsl"))), ([5:5-11:4], "symbolType")))); 
+                                                                targs = []; 
+                                                                args = [(Pnormal, ((), [5:5-8], (Lvar ([5:5-8], $0fp4))))]; 
+                                                                unpacked_arg = None })),
+                                                          ((), [5:5-11:4], (Id ([5:5-11:4], "__unwrap"))), OG_nullthrows, Is_method)));
+                                                      targs = []; args = []; 
                                                       unpacked_arg = None }));
                                                 targs = [];
                                                 args =
@@ -56,9 +65,18 @@
                                                       { func =
                                                         ((), [6:7-9:8],
                                                          (Call
-                                                            { func = ((), [6:7-9:8], (Class_const (((), [6:7-9:8], (CI ([6:7-9:8], "\\ExampleDsl"))), ([6:7-9:8], "symbolType")))); 
+                                                            { func =
+                                                              ((), [6:7-9:8],
+                                                               (Obj_get (
+                                                                  ((), [6:7-9:8],
+                                                                   (Call
+                                                                    { func = ((), [6:7-9:8], (Class_const (((), [6:7-9:8], (CI ([6:7-9:8], "\\ExampleDsl"))), ([6:7-9:8], "symbolType")))); 
+                                                                    targs = []; 
+                                                                    args = [(Pnormal, ((), [6:7-10], (Lvar ([6:7-10], $0fp2))))]; 
+                                                                    unpacked_arg = None })),
+                                                                  ((), [6:7-9:8], (Id ([6:7-9:8], "__unwrap"))), OG_nullthrows, Is_method)));
                                                               targs = []; 
-                                                              args = [(Pnormal, ((), [6:7-10], (Lvar ([6:7-10], $0fp2))))]; 
+                                                              args = []; 
                                                               unpacked_arg = None }));
                                                         targs = [];
                                                         args =
@@ -68,9 +86,18 @@
                                                               { func =
                                                                 ((), [7:9-14],
                                                                  (Call
+                                                                    { func =
+                                                                    ((), [7:9-14],
+                                                                    (Obj_get (
+                                                                    ((), [7:9-14],
+                                                                    (Call
                                                                     { func = ((), [7:9-14], (Class_const (((), [7:9-14], (CI ([7:9-14], "\\ExampleDsl"))), ([7:9-14], "symbolType")))); 
                                                                     targs = []; 
                                                                     args = [(Pnormal, ((), [7:9-12], (Lvar ([7:9-12], $0fp0))))]; 
+                                                                    unpacked_arg = None })), (
+                                                                    (), [7:9-14], (Id ([7:9-14], "__unwrap"))), OG_nullthrows, Is_method))); 
+                                                                    targs = []; 
+                                                                    args = []; 
                                                                     unpacked_arg = None }));
                                                                 targs = []; 
                                                                 args = []; 
@@ -81,9 +108,18 @@
                                                                { func =
                                                                  ((), [8:9-14],
                                                                   (Call
+                                                                    { func =
+                                                                    ((), [8:9-14],
+                                                                    (Obj_get (
+                                                                    ((), [8:9-14],
+                                                                    (Call
                                                                     { func = ((), [8:9-14], (Class_const (((), [8:9-14], (CI ([8:9-14], "\\ExampleDsl"))), ([8:9-14], "symbolType")))); 
                                                                     targs = []; 
                                                                     args = [(Pnormal, ((), [8:9-12], (Lvar ([8:9-12], $0fp1))))]; 
+                                                                    unpacked_arg = None })), (
+                                                                    (), [8:9-14], (Id ([8:9-14], "__unwrap"))), OG_nullthrows, Is_method))); 
+                                                                    targs = []; 
+                                                                    args = []; 
                                                                     unpacked_arg = None }));
                                                                  targs = []; 
                                                                  args = []; 
@@ -96,9 +132,19 @@
                                                        { func =
                                                          ((), [10:7-13],
                                                           (Call
-                                                             { func = ((), [10:7-13], (Class_const (((), [10:7-13], (CI ([10:7-13], "\\ExampleDsl"))), ([10:7-13], "symbolType")))); 
+                                                             { func =
+                                                               ((), [10:7-13],
+                                                                (Obj_get (
+                                                                   ((), [10:7-13],
+                                                                    (
+                                                                    Call
+                                                                    { func = ((), [10:7-13], (Class_const (((), [10:7-13], (CI ([10:7-13], "\\ExampleDsl"))), ([10:7-13], "symbolType")))); 
+                                                                    targs = []; 
+                                                                    args = [(Pnormal, ((), [10:7-11], (Lvar ([10:7-11], $0fp3))))]; 
+                                                                    unpacked_arg = None })),
+                                                                   ((), [10:7-13], (Id ([10:7-13], "__unwrap"))), OG_nullthrows, Is_method)));
                                                                targs = []; 
-                                                               args = [(Pnormal, ((), [10:7-11], (Lvar ([10:7-11], $0fp3))))]; 
+                                                               args = []; 
                                                                unpacked_arg = None }));
                                                          targs = []; 
                                                          args = []; unpacked_arg = None })))

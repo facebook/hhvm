@@ -1,8 +1,0 @@
-File "self_static_method_call.php", line 13, characters 28-43:
-Static method calls in expression trees require explicit class names. (Parsing[1002])
-File "self_static_method_call.php", line 13, characters 38-42:
-Invalid argument (Typing[4110])
-  File "self_static_method_call.php", line 7, characters 5-18:
-  Expected `ExampleContext`
-  File "self_static_method_call.php", line 13, characters 38-42:
-  But got `string`

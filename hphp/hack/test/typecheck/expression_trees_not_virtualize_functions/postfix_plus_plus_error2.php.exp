@@ -1,2 +1,0 @@
-File "postfix_plus_plus_error2.php", line 10, characters 5-8:
-`ExampleFloat` does not support this operator (it has no instance method named `__postfixPlusPlus`) (Typing[4053])

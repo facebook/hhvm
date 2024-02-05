@@ -23,10 +23,12 @@ class RequestCommon : public MessageCommon {
 
   RequestCommon(const RequestCommon& other) {
     traceContext_ = other.traceContext_;
+    cryptoAuthToken_ = other.cryptoAuthToken_;
   }
   RequestCommon& operator=(const RequestCommon& other) {
     if (this != &other) {
       traceContext_ = other.traceContext_;
+      cryptoAuthToken_ = other.cryptoAuthToken_;
     }
     return *this;
   }

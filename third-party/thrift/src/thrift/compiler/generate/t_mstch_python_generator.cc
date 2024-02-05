@@ -873,7 +873,8 @@ bool validate_enum(diagnostic_context& ctx, const t_enum& enm) {
   return true;
 }
 
-bool validate_structured(diagnostic_context& ctx, const t_structured& s) {
+// TODO(T176314881): this never does anything?
+bool validate_structured(diagnostic_context& ctx, const t_struct& s) {
   if (!s.is_union()) {
     return false;
   }
@@ -909,7 +910,7 @@ class t_mstch_python_generator : public t_mstch_generator {
     validator.add_program_visitor(validate_no_reserved_key_in_namespace);
     validator.add_enum_visitor(
         enum_member_union_field_names_validator::validate_enum);
-    validator.add_structured_visitor(
+    validator.add_struct_visitor(
         enum_member_union_field_names_validator::validate_structured);
   }
 

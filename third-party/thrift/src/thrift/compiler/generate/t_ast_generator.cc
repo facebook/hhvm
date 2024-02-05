@@ -279,7 +279,7 @@ void t_ast_generator::generate_program() {
 
   // t_structured is special, because the corresponding field in the AST thrift
   // is called "structDef", not "structuredDef" (for historical reasons).
-  visitor.add_structured_visitor([&](const t_structured& node) {
+  visitor.add_struct_visitor([&](const t_struct& node) {
     if (node.generated() && !include_generated_) {
       return;
     }

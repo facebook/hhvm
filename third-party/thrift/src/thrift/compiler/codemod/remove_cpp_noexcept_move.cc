@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
   codemod::file_manager fm(source_mgr, *program);
 
   const_ast_visitor visitor;
-  visitor.add_structured_visitor(
+  visitor.add_struct_visitor(
       folly::partial(remove_cpp_noexcept_move, std::ref(fm)));
   visitor.add_union_visitor(
       folly::partial(remove_cpp_noexcept_move, std::ref(fm)));

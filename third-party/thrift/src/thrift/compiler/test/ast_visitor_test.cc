@@ -91,8 +91,8 @@ class MockAstVisitor {
     visitor.add_stream_visitor(
         [this](const t_stream& node) { visit_stream(&node); });
 
-    visitor.add_structured_visitor(
-        [this](const t_structured& node) { visit_structured(&node); });
+    visitor.add_struct_visitor(
+        [this](const t_struct& node) { visit_structured(&node); });
     visitor.add_union_visitor(
         [this](const t_union& node) { visit_union(&node); });
     visitor.add_exception_visitor(

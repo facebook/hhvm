@@ -494,10 +494,10 @@ ast_mutators standard_mutators(bool use_legacy_type_ref_resolution) {
 
   {
     auto& main = mutators[standard_mutator_stage::main];
-    main.add_structured_visitor(&mutate_terse_write_annotation_structured);
+    main.add_struct_visitor(&mutate_terse_write_annotation_structured);
     main.add_exception_visitor(&mutate_terse_write_annotation_structured);
-    main.add_structured_visitor(&mutate_inject_metadata_fields);
-    main.add_structured_visitor(&generate_struct_schema);
+    main.add_struct_visitor(&mutate_inject_metadata_fields);
+    main.add_struct_visitor(&generate_struct_schema);
     main.add_union_visitor(&generate_union_schema);
     main.add_exception_visitor(&generate_exception_schema);
     main.add_service_visitor(&generate_service_schema);

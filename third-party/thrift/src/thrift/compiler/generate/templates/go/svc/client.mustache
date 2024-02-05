@@ -105,16 +105,6 @@ func New{{service:go_name}}ThreadsafeClient(t thrift.Transport, iprot thrift.Pro
 }
 
 // Deprecated: Use New{{service:go_name}}ChannelClient() instead.
-func New{{service:go_name}}ClientProtocol(prot thrift.Protocol) *{{service:go_name}}Client {
-  return New{{service:go_name}}Client(prot.Transport(), prot, prot)
-}
-
-// Deprecated: Use New{{service:go_name}}ChannelClient() instead.
-func New{{service:go_name}}ThreadsafeClientProtocol(prot thrift.Protocol) *{{service:go_name}}Client {
-  return New{{service:go_name}}Client(prot.Transport(), prot, prot)
-}
-
-// Deprecated: Use New{{service:go_name}}ChannelClient() instead.
 func New{{service:go_name}}ClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *{{service:go_name}}Client {
   iprot := pf.GetProtocol(t)
   oprot := pf.GetProtocol(t)

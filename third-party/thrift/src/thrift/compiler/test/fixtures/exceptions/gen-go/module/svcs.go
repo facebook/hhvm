@@ -107,16 +107,6 @@ func NewRaiserThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot 
 }
 
 // Deprecated: Use NewRaiserChannelClient() instead.
-func NewRaiserClientProtocol(prot thrift.Protocol) *RaiserClient {
-  return NewRaiserClient(prot.Transport(), prot, prot)
-}
-
-// Deprecated: Use NewRaiserChannelClient() instead.
-func NewRaiserThreadsafeClientProtocol(prot thrift.Protocol) *RaiserClient {
-  return NewRaiserClient(prot.Transport(), prot, prot)
-}
-
-// Deprecated: Use NewRaiserChannelClient() instead.
 func NewRaiserClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *RaiserClient {
   iprot := pf.GetProtocol(t)
   oprot := pf.GetProtocol(t)

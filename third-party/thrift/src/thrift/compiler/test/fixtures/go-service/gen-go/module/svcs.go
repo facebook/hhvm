@@ -129,16 +129,6 @@ func NewGetEntityThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, opr
 }
 
 // Deprecated: Use NewGetEntityChannelClient() instead.
-func NewGetEntityClientProtocol(prot thrift.Protocol) *GetEntityClient {
-  return NewGetEntityClient(prot.Transport(), prot, prot)
-}
-
-// Deprecated: Use NewGetEntityChannelClient() instead.
-func NewGetEntityThreadsafeClientProtocol(prot thrift.Protocol) *GetEntityClient {
-  return NewGetEntityClient(prot.Transport(), prot, prot)
-}
-
-// Deprecated: Use NewGetEntityChannelClient() instead.
 func NewGetEntityClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *GetEntityClient {
   iprot := pf.GetProtocol(t)
   oprot := pf.GetProtocol(t)

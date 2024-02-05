@@ -105,16 +105,6 @@ func NewSomeServiceThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, o
 }
 
 // Deprecated: Use NewSomeServiceChannelClient() instead.
-func NewSomeServiceClientProtocol(prot thrift.Protocol) *SomeServiceClient {
-  return NewSomeServiceClient(prot.Transport(), prot, prot)
-}
-
-// Deprecated: Use NewSomeServiceChannelClient() instead.
-func NewSomeServiceThreadsafeClientProtocol(prot thrift.Protocol) *SomeServiceClient {
-  return NewSomeServiceClient(prot.Transport(), prot, prot)
-}
-
-// Deprecated: Use NewSomeServiceChannelClient() instead.
 func NewSomeServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *SomeServiceClient {
   iprot := pf.GetProtocol(t)
   oprot := pf.GetProtocol(t)

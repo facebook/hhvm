@@ -109,16 +109,6 @@ func NewNestedContainersThreadsafeClient(t thrift.Transport, iprot thrift.Protoc
 }
 
 // Deprecated: Use NewNestedContainersChannelClient() instead.
-func NewNestedContainersClientProtocol(prot thrift.Protocol) *NestedContainersClient {
-  return NewNestedContainersClient(prot.Transport(), prot, prot)
-}
-
-// Deprecated: Use NewNestedContainersChannelClient() instead.
-func NewNestedContainersThreadsafeClientProtocol(prot thrift.Protocol) *NestedContainersClient {
-  return NewNestedContainersClient(prot.Transport(), prot, prot)
-}
-
-// Deprecated: Use NewNestedContainersChannelClient() instead.
 func NewNestedContainersClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *NestedContainersClient {
   iprot := pf.GetProtocol(t)
   oprot := pf.GetProtocol(t)

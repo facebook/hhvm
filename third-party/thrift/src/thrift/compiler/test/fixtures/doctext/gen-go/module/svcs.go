@@ -103,16 +103,6 @@ func NewCThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrif
 }
 
 // Deprecated: Use NewCChannelClient() instead.
-func NewCClientProtocol(prot thrift.Protocol) *CClient {
-  return NewCClient(prot.Transport(), prot, prot)
-}
-
-// Deprecated: Use NewCChannelClient() instead.
-func NewCThreadsafeClientProtocol(prot thrift.Protocol) *CClient {
-  return NewCClient(prot.Transport(), prot, prot)
-}
-
-// Deprecated: Use NewCChannelClient() instead.
 func NewCClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *CClient {
   iprot := pf.GetProtocol(t)
   oprot := pf.GetProtocol(t)

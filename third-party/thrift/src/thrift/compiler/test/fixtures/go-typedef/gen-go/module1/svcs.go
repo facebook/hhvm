@@ -107,16 +107,6 @@ func NewFinderThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot 
 }
 
 // Deprecated: Use NewFinderChannelClient() instead.
-func NewFinderClientProtocol(prot thrift.Protocol) *FinderClient {
-  return NewFinderClient(prot.Transport(), prot, prot)
-}
-
-// Deprecated: Use NewFinderChannelClient() instead.
-func NewFinderThreadsafeClientProtocol(prot thrift.Protocol) *FinderClient {
-  return NewFinderClient(prot.Transport(), prot, prot)
-}
-
-// Deprecated: Use NewFinderChannelClient() instead.
 func NewFinderClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *FinderClient {
   iprot := pf.GetProtocol(t)
   oprot := pf.GetProtocol(t)

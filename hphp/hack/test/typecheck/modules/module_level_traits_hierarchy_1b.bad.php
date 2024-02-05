@@ -9,10 +9,9 @@ module A;
 
 <<file: __EnableUnstableFeatures('module_level_traits')>>
 
+// module level trait cannot use internal traits
 
-// a module level trait cannot use a non-module level trait
-
-trait T1 {}
+internal trait T1 {}
 
 <<__ModuleLevelTrait>>
 trait T2 {

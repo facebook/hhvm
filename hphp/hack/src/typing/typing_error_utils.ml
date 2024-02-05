@@ -2416,22 +2416,12 @@ end = struct
     let parent_name = Render.strip_ns parent_name in
     let child_name = Render.strip_ns name in
     let reason =
-      lazy
-        [
-          ( parent_pos,
-            "Trait "
-            ^ parent_name
-            ^ " is not annotated with <<__ModuleLevelTrait>>." );
-        ]
+      lazy [(parent_pos, "Trait " ^ parent_name ^ " is internal.")]
     in
     let claim =
       lazy
         ( pos,
-          "Module level trait "
-          ^ child_name
-          ^ " cannot use the non-module level trait "
-          ^ parent_name
-          ^ "." )
+          "Module level trait " ^ child_name ^ " cannot use internal traits." )
     in
     (Error_code.WrongUseKind, claim, reason, [])
 

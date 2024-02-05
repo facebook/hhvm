@@ -1,4 +1,0 @@
-File "module_level_traits_hierarchy_1.bad.php--A.php", line 13, characters 7-8:
-Module level trait T2 cannot use the non-module level trait T1. (Typing[4477])
-  File "module_level_traits_hierarchy_1.bad.php--A.php", line 14, characters 7-8:
-  Trait T1 is not annotated with <<__ModuleLevelTrait>>.

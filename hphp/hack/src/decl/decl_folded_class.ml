@@ -73,14 +73,14 @@ let check_use_kind
     (parent_pos : Pos_or_decl.t)
     (parent_kind : Ast_defs.classish_kind)
     (parent_name : string)
-    (parent_is_module_level_trait : bool)
+    (parent_is_internal : bool)
     (child_pos : Pos_or_decl.t)
     (child_kind : Ast_defs.classish_kind)
     (child_name : string)
     (child_is_module_level_trait : bool) : decl_error option =
   match (parent_kind, child_kind) with
   | (Ast_defs.Ctrait, Ast_defs.Ctrait)
-    when child_is_module_level_trait && not parent_is_module_level_trait ->
+    when child_is_module_level_trait && parent_is_internal ->
     Some
       (Wrong_use_kind
          {
@@ -147,7 +147,7 @@ let add_grand_parents_or_traits
            parent_pos
            parent_type.dc_kind
            parent_type.dc_name
-           parent_type.dc_is_module_level_trait
+           parent_type.dc_internal
            class_pos
            classish_kind
            class_name

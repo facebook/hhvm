@@ -523,7 +523,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         parent_pos: &R::Pos,
         parent_kind: ClassishKind,
         parent_name: TypeName,
-        parent_is_module_level_trait: bool,
+        parent_is_internal: bool,
     ) {
         let child_is_module_level_trait = self
             .child
@@ -532,7 +532,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             .any(|ua| ua.name.id() == *sn::user_attributes::uaModuleLevelTrait);
         match (parent_kind, self.child.kind) {
             (ClassishKind::Ctrait, ClassishKind::Ctrait)
-                if child_is_module_level_trait && !parent_is_module_level_trait =>
+                if child_is_module_level_trait && parent_is_internal =>
             {
                 self.errors.push(DeclError::WrongUseKind {
                     parent_pos: parent_pos.clone(),
@@ -559,12 +559,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                     self.check_extend_kind(pos_id.pos(), cls.kind, cls.name);
                 }
                 Pass::Traits => {
-                    self.check_use_kind(
-                        pos_id.pos(),
-                        cls.kind,
-                        cls.name,
-                        cls.is_module_level_trait,
-                    );
+                    self.check_use_kind(pos_id.pos(), cls.kind, cls.name, cls.is_internal);
                 }
                 Pass::Xhp => {
                     // If we are crawling the xhp attribute deps, need to merge their xhp deps as well

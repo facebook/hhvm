@@ -107,7 +107,7 @@ impl MapName for hhbc::UpperBound<'_> {
 }
 
 /// Currently, some includes aren't printed out. So this is like the cmp_slice without a length check.
-/// T126391106: BCP drops information
+/// T126391106: bytecode_printer drops information
 /// T126543346: Difficult to verify IncludeRootRelative
 fn cmp_includes(a: &[hhbc::IncludePath<'_>], b: &[hhbc::IncludePath<'_>]) -> Result {
     for bv in b.iter() {
@@ -118,6 +118,8 @@ fn cmp_includes(a: &[hhbc::IncludePath<'_>], b: &[hhbc::IncludePath<'_>]) -> Res
     Ok(())
 }
 
+/// Attribute order should not matter, and the assembler does not preserve order
+/// of special attributes that format as flags, like __Reified and __HasReifiedParents
 fn cmp_attributes(a: &[Attribute<'_>], b: &[Attribute<'_>]) -> Result {
     cmp_set_t(a, b)
 }
@@ -161,7 +163,7 @@ fn cmp_body(a: &Body<'_>, b: &Body<'_>) -> Result {
     cmp_eq(a_upper_bounds, b_upper_bounds).qualified("upper_bounds")?;
     cmp_eq(a_shadowed_tparams, b_shadowed_tparams).qualified("shadowed_tparams")?;
 
-    cmp_set_t(a_decl_vars, b_decl_vars).qualified("decl_vars")?;
+    cmp_slice(a_decl_vars, b_decl_vars, cmp_eq).qualified("decl_vars")?;
 
     if a_body_instrs.len() != b_body_instrs.len() {
         bail!(
@@ -182,7 +184,7 @@ fn cmp_body(a: &Body<'_>, b: &Body<'_>) -> Result {
 
 /// This is unique because only a few FCAFlags are printed -- those specified in
 /// as-base-hhas.h.
-/// T126391106 -- BCP drops information
+/// T126391106 -- bytecode_printer drops information
 fn cmp_fcallargflags(a: &hhbc::FCallArgsFlags, b: &hhbc::FCallArgsFlags) -> Result {
     use hhbc::FCallArgsFlags;
     let mut not_printed = FCallArgsFlags::SkipRepack;
@@ -356,7 +358,7 @@ fn cmp_param(a: &Param<'_>, b: &Param<'_>) -> Result {
     cmp_eq(a_is_variadic, b_is_variadic).qualified("is_variadic")?;
     cmp_eq(a_is_inout, b_is_inout).qualified("is_inout")?;
     cmp_eq(a_is_readonly, b_is_readonly).qualified("is_readonly")?;
-    // T126391106 -- BCP sorts attributes of parameters before printing.
+    // T126391106 -- bytecode_printer sorts attributes of parameters before printing.
     cmp_attributes(a_user_attributes, b_user_attributes).qualified("user_attributes")?;
     cmp_eq(a_type_info, b_type_info).qualified("type_info")?;
     cmp_option(
@@ -471,8 +473,9 @@ fn cmp_properties(a: &Property<'_>, b: &Property<'_>) -> Result {
     Ok(())
 }
 
-// T126391106: BCP/HCU is not consistent -- if there is no initial value the underlying
-// HCU may have Just(Null) or Nothing in that slot.
+// T126391106: bytecode_printer/hhbc::Unit is not consistent --
+// if there is no initial value the underlying
+// hhbc::Unit may have Just(Null) or Nothing in that slot.
 fn cmp_initial_value(a: &Maybe<TypedValue<'_>>, b: &Maybe<TypedValue<'_>>) -> Result {
     match (a, b) {
         (Maybe::Nothing, Maybe::Just(TypedValue::Null))
@@ -729,7 +732,8 @@ fn cmp_symbol_refs(a: &SymbolRefs<'_>, b: &SymbolRefs<'_>) -> Result {
     Ok(())
 }
 
-/// T126391106: BCP drops information -- &s TCF with nullable before printing.
+/// T126391106: bytecode_printer drops information by intersecting flags with Nullable
+/// before printing.
 fn cmp_type_constraint_flags(
     a: &hhvm_types_ffi::ffi::TypeConstraintFlags,
     b: &hhvm_types_ffi::ffi::TypeConstraintFlags,
@@ -741,7 +745,7 @@ fn cmp_type_constraint_flags(
     Ok(())
 }
 
-// T126391106: BCP doesn't disambiguate a constraint name of Just("") and Nothing
+// T126391106: bytecode_printer doesn't disambiguate a constraint name of Just("") and Nothing
 fn cmp_type_constraint_name(a: &Maybe<Str<'_>>, b: &Maybe<Str<'_>>) -> Result {
     match (a, b) {
         (Maybe::Nothing, Maybe::Just(s)) | (Maybe::Just(s), Maybe::Nothing) => {

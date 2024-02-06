@@ -1,0 +1,14 @@
+<?hh
+
+module MLT_A;
+
+interface I {
+  internal function foo(): void;
+}
+
+<<__ModuleLevelTrait>>
+trait T {
+  internal function foo(): void {
+    echo "I am foo\n";
+  }
+}

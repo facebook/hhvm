@@ -133,19 +133,55 @@ void H3DatagramAsyncSocket::deliverDatagram(
   ReadCallback::OnDataAvailableParams params;
   CHECK(readCallback_);
   CHECK(datagram);
-  readCallback_->getReadBuffer(&buf, &len);
-  if (buf == nullptr || len == 0 || len < datagram->computeChainDataLength()) {
-    LOG(ERROR) << "Buffer too small to deliver "
-               << datagram->computeChainDataLength() << " bytes datagram";
-    return;
+  if (!readCallback_->shouldOnlyNotify()) {
+
+    readCallback_->getReadBuffer(&buf, &len);
+    if (buf == nullptr || len == 0 ||
+        len < datagram->computeChainDataLength()) {
+      LOG(ERROR) << "Buffer too small to deliver "
+                 << datagram->computeChainDataLength() << " bytes datagram";
+      return;
+    }
+    datagram->coalesce();
+    memcpy(buf, datagram->data(), datagram->length());
+    readCallback_->onDataAvailable((upstreamSession_
+                                        ? upstreamSession_->getPeerAddress()
+                                        : connectAddress_),
+                                   size_t(datagram->length()),
+                                   /*truncated*/ false,
+                                   params);
+  } else {
+    datagram->coalesce();
+    pendingDelivery_ = std::move(datagram);
+    readCallback_->onNotifyDataAvailable(*this);
   }
-  datagram->coalesce();
-  memcpy(buf, datagram->data(), datagram->length());
-  readCallback_->onDataAvailable(
-      (upstreamSession_ ? upstreamSession_->getPeerAddress() : connectAddress_),
-      size_t(datagram->length()),
-      /*truncated*/ false,
-      params);
+}
+
+ssize_t H3DatagramAsyncSocket::recvmsg(struct msghdr* msg, int /*flags*/) {
+  if (!pendingDelivery_) {
+    return 0;
+  }
+  // This isn't ideal because we are doing double copies, but it is a
+  // limitation of the interface for now.
+  memcpy(msg->msg_iov[0].iov_base,
+         pendingDelivery_->data(),
+         pendingDelivery_->length());
+  ssize_t ret = pendingDelivery_->length();
+  pendingDelivery_ = nullptr;
+  return ret;
+}
+
+int H3DatagramAsyncSocket::recvmmsg(struct mmsghdr* msgvec,
+                                    unsigned int vlen,
+                                    unsigned int flags,
+                                    struct timespec* /*timeout*/) {
+  CHECK_GT(vlen, 0);
+  auto bytesReceived = recvmsg(&msgvec->msg_hdr, flags);
+  if (bytesReceived < 0) {
+    return -1;
+  }
+  msgvec->msg_len = bytesReceived;
+  return 1;
 }
 
 void H3DatagramAsyncSocket::onBody(

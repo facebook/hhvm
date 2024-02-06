@@ -127,16 +127,12 @@ class H3DatagramAsyncSocket
     return -1;
   }
 
-  ssize_t recvmsg(struct msghdr* /*msg*/, int /*flags*/) override {
-    return -1;
-  }
+  ssize_t recvmsg(struct msghdr* /*msg*/, int /*flags*/) override;
 
-  int recvmmsg(struct mmsghdr* /*msgvec*/,
-               unsigned int /*vlen*/,
-               unsigned int /*flags*/,
-               struct timespec* /*timeout*/) override {
-    return -1;
-  }
+  int recvmmsg(struct mmsghdr* msgvec,
+               unsigned int vlen,
+               unsigned int flags,
+               struct timespec* /*timeout*/) override;
 
   void resumeRead(ReadCallback* cob) override;
 
@@ -304,6 +300,7 @@ class H3DatagramAsyncSocket
   std::deque<std::unique_ptr<folly::IOBuf>> readBuf_;
   // Buffers Outgoing Datagrams before the transport is ready
   std::deque<std::unique_ptr<folly::IOBuf>> writeBuf_;
+  std::unique_ptr<folly::IOBuf> pendingDelivery_;
 
   bool transportConnected_ : 1;
   bool pendingEOM_ : 1;

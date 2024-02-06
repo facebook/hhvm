@@ -142,7 +142,7 @@ TEST(SlidingBloomReplayCacheTest, TestTimeBucketing) {
           }
           baton.post();
         },
-        std::chrono::seconds(1));
+        std::chrono::milliseconds(1500));
   });
   baton.wait();
 }

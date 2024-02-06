@@ -5,7 +5,7 @@
   full_fidelity
   lsp
   pos
-  server_code_actions_services
+  code_actions_services
   utils_core)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))

@@ -498,7 +498,7 @@
   direct_decl_parser
   direct_decl_utils
   server_codemod_type_printer
-  server_code_actions_services
+  code_actions_services
   server_docblock_at
   server_env
   server_incremental

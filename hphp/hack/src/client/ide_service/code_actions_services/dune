@@ -1,5 +1,5 @@
 (library
- (name server_code_actions_services)
+ (name code_actions_services)
  (wrapped true)
  (libraries
   annotated_ast

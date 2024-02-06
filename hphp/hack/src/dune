@@ -37,7 +37,7 @@
   remove_dead_unsafe_casts
   server_env
   server_env_build
-  server_code_actions_services
+  code_actions_services
   server_file_outline
   server_find_refs
   server_go_to

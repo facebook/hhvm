@@ -30,8 +30,8 @@
 
 #include <folly/Conv.h>
 #include <folly/Range.h>
+#include <folly/container/F14Map.h>
 #include <folly/dynamic.h>
-#include <folly/experimental/StringKeyedUnorderedMap.h>
 #include <folly/hash/Hash.h>
 
 namespace facebook {

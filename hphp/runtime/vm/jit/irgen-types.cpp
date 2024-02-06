@@ -1208,6 +1208,7 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_resource:
     case TypeStructure::Kind::T_reifiedtype:
+    case TypeStructure::Kind::T_recursiveUnion:
       // TODO(T28423611): Implement these
       return false;
   }

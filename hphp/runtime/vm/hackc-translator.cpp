@@ -411,7 +411,7 @@ void translateTypedef(TranslationState& ts, const hhbc::Typedef& t) {
     t.span.line_end,
     attrs,
     value,
-    t.case_type,
+    t.case_type ? AliasKind::CaseType : AliasKind::TypeAlias,
     ArrNR{tys.m_data.parr},
     Array{}
   );

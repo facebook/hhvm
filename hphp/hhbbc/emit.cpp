@@ -1219,7 +1219,7 @@ void emit_typealias(UnitEmitter& ue, const php::TypeAlias& alias) {
       std::get<1>(alias.srcInfo.loc),
       alias.attrs,
       alias.value,
-      alias.caseType,
+      alias.kind,
       alias.typeStructure,
       alias.resolvedTypeStructure
   );

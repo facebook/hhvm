@@ -634,7 +634,7 @@ ArrayData* loadClsTypeCnsHelper(
   auto const getFake = [] {
     auto array = make_dict_array(
       s_kind,
-      Variant(static_cast<uint8_t>(TypeStructure::Kind::T_class)),
+      typeStructureKindToVariant(TypeStructure::Kind::T_class),
       s_classname,
       Variant(s_type_structure_non_existant_class)
     );

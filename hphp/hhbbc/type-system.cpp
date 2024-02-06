@@ -4221,6 +4221,11 @@ Optional<Type> type_of_type_structure(const IIndex& index,
         }
         return ret;
       }
+      case TypeStructure::Kind::T_recursiveUnion: {
+        // Since our type can't cleanly represent a recursive type be
+        // conservative here and bail.
+        return std::nullopt;
+      }
       case TypeStructure::Kind::T_vec_or_dict: return union_of(TVec, TDict);
       case TypeStructure::Kind::T_any_array:   return TArrLike;
       case TypeStructure::Kind::T_nothing:

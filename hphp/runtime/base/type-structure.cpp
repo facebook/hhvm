@@ -61,8 +61,8 @@ struct TSEnv {
   bool invalidType{};
   // Vector of typestructures that need to be put in for reified generics
   const req::vector<Array>* tsList;
-  // Set of type aliases or case types currently being resolved
-  req::StringFastSet resolving;
+  // Set of type aliases currently being resolved
+  req::fast_map<String, AliasKind, hphp_string_hash, hphp_string_same> resolving;
 };
 
 struct TSCtx {
@@ -337,10 +337,7 @@ std::string fullName(const Array& arr, TypeStructure::TSDisplayType type) {
     }
   }
 
-  assertx(arr.exists(s_kind));
-
-  TypeStructure::Kind kind =
-    TypeStructure::Kind(arr[s_kind].toInt64Val());
+  TypeStructure::Kind kind = TypeStructure::kind(arr);
   switch (kind) {
     case TypeStructure::Kind::T_null:
       name += forDisplay(type) ? s_null : s_hh + s_null;
@@ -444,6 +441,9 @@ std::string fullName(const Array& arr, TypeStructure::TSDisplayType type) {
     case TypeStructure::Kind::T_union:
       assertx(arr.exists(s_union_types));
       unionTypeName(arr, name, type);
+      break;
+    case TypeStructure::Kind::T_recursiveUnion:
+      name += arr[s_case_type].asCStrRef().toCppString();
       break;
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
@@ -610,9 +610,7 @@ const Class* getClass(TSEnv& env, const TSCtx& ctx, const String& clsName) {
  * portion of the array with all the field names resolved to string
  * literals. */
 Array resolveShape(TSEnv& env, const TSCtx& ctx, const Array& arr) {
-  assertx(arr.exists(s_kind));
-  assertx(static_cast<TypeStructure::Kind>(arr[s_kind].toInt64Val())
-         == TypeStructure::Kind::T_shape);
+  assertx(TypeStructure::kind(arr) == TypeStructure::Kind::T_shape);
   assertx(arr.exists(s_fields));
 
   auto newfields = Array::CreateDict();
@@ -679,7 +677,7 @@ bool resolveClass(TSEnv& env, const TSCtx& ctx, Array& ret,
     not_reached();
   }
 
-  ret.set(s_kind, Variant(static_cast<uint8_t>(resolvedKind)));
+  TypeStructure::setKind(ret, resolvedKind);
   ret.set(s_classname, Variant(makeStaticString(cls->name())));
   if (clsName.same(s_this)) ret.set(s_exact, make_tv<KindOfBoolean>(true));
 
@@ -703,13 +701,11 @@ void copyTypeModifiers(const Array& from, Array& to) {
 }
 
 Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
-  assertx(arr.exists(s_kind));
-  auto const kind = static_cast<TypeStructure::Kind>(
-    arr[s_kind].toInt64Val());
+  auto const kind = TypeStructure::kind(arr);
 
   auto newarr = Array::CreateDict();
   copyTypeModifiers(arr, newarr);
-  newarr.set(s_kind, Variant(static_cast<uint8_t>(kind)));
+  TypeStructure::setKind(newarr, kind);
 
   if (arr.exists(s_allows_unknown_fields)) {
     newarr.set(s_allows_unknown_fields, make_tv<KindOfBoolean>(true));
@@ -765,18 +761,44 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
     case TypeStructure::Kind::T_unresolved: {
       assertx(arr.exists(s_classname));
       auto const clsName = arr[s_classname].asCStrRef();
-      auto tsAndPreresolved = getAlias(env, clsName, true);
-      auto ts = tsAndPreresolved.first;
-      auto const preresolved = tsAndPreresolved.second;
 
+      auto ty = env.resolving.find(clsName);
+      if (ty != env.resolving.end()) {
+        // The alias is currently being resolved and we are hitting a
+        // recursion.
+        switch (ty->second) {
+          case AliasKind::TypeAlias: {
+            // This is what getAlias() would do anyway.
+            throw Exception(
+              "Alias %s is being used recursively",
+              clsName.data());
+          }
+          case AliasKind::CaseType: {
+            // This is a recursive case type. It's allowed - but we just need to
+            // set a few fields.
+            DictInit res(2);
+            TypeStructure::setKind(res, TypeStructure::Kind::T_recursiveUnion);
+            res.set(s_case_type, clsName);
+            return res.toArray();
+          }
+        }
+      }
+
+      auto [ts, preresolved] = getAlias(env, clsName, true);
       if (!ts.empty()) {
-        auto resolveAlias = [&] (ArrayData* generics) {
+        auto resolveAlias = [&, &ts=ts, preresolved=preresolved] (ArrayData* generics) {
           // If it's already resolved, don't do so again.
           if (preresolved) return ts;
           TSCtx newCtx;
           newCtx.name = clsName.get();
           newCtx.generics = generics;
-          auto const [_, inserted] = env.resolving.insert(clsName);
+
+          AliasKind ak = AliasKind::TypeAlias;
+          if (ts.exists(s_case_type)) {
+            ak = AliasKind::CaseType;
+          }
+          auto const [_, inserted] = env.resolving.insert_or_assign(clsName, ak);
+
           always_assert(inserted);
           auto resolved = resolveTS(env, newCtx, ts, generics);
           assertx(!resolved.isNull());
@@ -820,16 +842,13 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
        * compatible with php. We simply return as a OF_CLASS with class name
        * set to 'callable'. */
       if (clsName.same(s_callable)) {
-        newarr.set(s_kind,
-                   Variant(static_cast<uint8_t>(TypeStructure::Kind::T_class)));
+        TypeStructure::setKind(newarr, TypeStructure::Kind::T_class);
         newarr.set(s_classname, Variant(clsName));
         break;
       }
       if (!resolveClass(env, ctx, newarr, clsName) && env.allow_partial) {
         env.partial = true;
-        newarr.set(s_kind,
-                   Variant(static_cast<uint8_t>(
-                           TypeStructure::Kind::T_unresolved)));
+        TypeStructure::setKind(newarr, TypeStructure::Kind::T_unresolved);
         newarr.set(s_classname, Variant(clsName));
         break;
       }
@@ -876,11 +895,9 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
         if (i == sz - 1) break;
 
         // if there are more accesses, keep resolving
-        assertx(typeCnsVal.exists(s_kind));
-        auto kind = static_cast<TypeStructure::Kind>
-          (typeCnsVal[s_kind].toInt64Val());
-        if (kind != TypeStructure::Kind::T_class
-            && kind != TypeStructure::Kind::T_interface) {
+        auto const typeCnsKind = TypeStructure::kind(typeCnsVal);
+        if (typeCnsKind != TypeStructure::Kind::T_class
+            && typeCnsKind != TypeStructure::Kind::T_interface) {
           throw Exception(
             "%s, %s::%s does not resolve to a class or "
             "an interface and cannot contain type constant %s",
@@ -940,6 +957,7 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
     case TypeStructure::Kind::T_null:
     case TypeStructure::Kind::T_nothing:
     case TypeStructure::Kind::T_dynamic:
+    case TypeStructure::Kind::T_recursiveUnion:
       // Return the original type structure, no resolution needed
       return arr.toDict();
   }
@@ -1002,8 +1020,14 @@ Array TypeStructure::resolve(const String& aliasName,
                              const Array& arr,
                              bool& persistent,
                              const Array& generics) {
+  AliasKind ak =
+    (TypeStructure::kind(arr) == TypeStructureKind::T_union)
+    ? AliasKind::CaseType
+    : AliasKind::TypeAlias;
+
   TSEnv env;
-  env.resolving.insert(aliasName);
+  env.resolving.insert_or_assign(aliasName, ak);
+
   TSCtx ctx;
   ctx.name = aliasName.get();
   ctx.generics = generics.get();
@@ -1140,13 +1164,9 @@ bool coerceToTypeStructure(Array& arr) {
   assertx(arr->empty() || !arr->cowCheck());
   if (!arr->isDictType()) return false;
 
-  auto const kindfield = arr.lookup(s_kind);
-  if (!isIntType(kindfield.type()) ||
-      kindfield.val().num > TypeStructure::kMaxResolvedKind) {
-    return false;
-  }
-  auto const kind = static_cast<TypeStructure::Kind>(kindfield.val().num);
-  switch (kind) {
+  auto const kindfield = TypeStructure::optKind(arr.get());
+  if (!kindfield.has_value()) return false;
+  switch (*kindfield) {
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:
@@ -1168,7 +1188,8 @@ bool coerceToTypeStructure(Array& arr) {
     case TypeStructure::Kind::T_noreturn:
     case TypeStructure::Kind::T_mixed:
     case TypeStructure::Kind::T_dynamic:
-    case TypeStructure::Kind::T_nonnull: {
+    case TypeStructure::Kind::T_nonnull:
+    case TypeStructure::Kind::T_recursiveUnion: {
       return true;
     }
     case TypeStructure::Kind::T_fun: {
@@ -1211,6 +1232,32 @@ bool coerceToTypeStructure(Array& arr) {
 bool TypeStructure::coerceToTypeStructureList_SERDE_ONLY(tv_lval lval) {
   return coerceToVecOrVArray(lval) &&
          coerceToTypeStructureList(ArrNR(val(lval).parr).asArray());
+}
+
+Variant typeStructureKindToVariant(TypeStructureKind kind) {
+  return Variant(static_cast<uint8_t>(kind));
+}
+
+TypeStructureKind TypeStructure::kind(const ArrayData* arr) {
+  assertx(arr->exists(s_kind));
+  return TypeStructure::Kind(tvCastToInt64(arr->get(s_kind)));
+}
+
+Optional<TypeStructureKind> TypeStructure::optKind(const ArrayData* arr) {
+  auto const kindfield = arr->get(s_kind);
+  if (!isIntType(kindfield.type()) ||
+      kindfield.val().num > TypeStructure::kMaxResolvedKind) {
+    return std::nullopt;
+  }
+  return TypeStructure::Kind(kindfield.val().num);
+}
+
+void TypeStructure::setKind(Array& arr, TypeStructureKind kind) {
+  arr.set(s_kind, Variant(static_cast<uint8_t>(kind)));
+}
+
+void TypeStructure::setKind(DictInit& arr, TypeStructureKind kind) {
+  arr.set(s_kind, Variant(static_cast<uint8_t>(kind)));
 }
 
 } // namespace HPHP

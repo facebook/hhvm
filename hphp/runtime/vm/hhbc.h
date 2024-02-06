@@ -457,6 +457,7 @@ ArgUnion getImm(PC opcode, int idx, const Unit* u = nullptr);
 ArgUnion* getImmPtr(PC opcode, int idx);
 
 void staticStreamer(const TypedValue* tv, std::string& out);
+std::string staticStreamer(const TypedValue* tv);
 
 std::string instrToString(PC it, Either<const Func*, const FuncEmitter*> f);
 void staticArrayStreamer(const ArrayData*, std::string&);

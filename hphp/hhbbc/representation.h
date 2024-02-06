@@ -699,7 +699,7 @@ struct TypeAlias {
   LSString name;
   Attr attrs;
   TypeConstraint value;
-  bool caseType : 1;
+  AliasKind kind;
   UserAttributeMap userAttrs;
   Array typeStructure{ArrayData::CreateDict()};
   Array resolvedTypeStructure;

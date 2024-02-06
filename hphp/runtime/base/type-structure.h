@@ -25,9 +25,16 @@ namespace HPHP {
 
 struct String;
 struct Array;
+struct DictInit;
 
 /* Utility for representing full type information in the runtime. */
 namespace TypeStructure {
+
+TypeStructureKind kind(const ArrayData* arr);
+inline TypeStructureKind kind(const Array& arr) { return kind(arr.get()); }
+Optional<TypeStructureKind> optKind(const ArrayData* arr);
+void setKind(Array& arr, TypeStructureKind kind);
+void setKind(DictInit& arr, TypeStructureKind kind);
 
 enum class TSDisplayType : uint8_t {
   TSDisplayTypeReflection = 0,

@@ -21,6 +21,7 @@
 #include "hphp/hhbbc/type-system.h"
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/type-structure.h"
@@ -66,6 +67,7 @@ bool kind_is_resolved(TS::Kind kind) {
     case TS::Kind::T_xhp:
     case TS::Kind::T_enum:
     case TS::Kind::T_trait:
+    case TS::Kind::T_recursiveUnion:
       return true;
     case TS::Kind::T_typevar:
     case TS::Kind::T_darray:
@@ -86,6 +88,13 @@ bool kind_is_resolved(TS::Kind kind) {
       return false;
   }
   always_assert(false);
+}
+
+const StaticString& keyForAliasKind(AliasKind kind) {
+  switch (kind) {
+    case AliasKind::TypeAlias: return s_alias;
+    case AliasKind::CaseType: return s_case_type;
+  }
 }
 
 using Resolution = TypeStructureResolution;
@@ -255,9 +264,13 @@ using GenericsMap = hphp_fast_map<std::string, Type>;
 
 struct Cache;
 
+// A map used to indicate aliases currently being resolved (used to find
+// recursive definitions). Maps from alias name to the type of alias.
+using ResolvingMap = SStringToOneT<AliasKind>;
+
 struct ResolveCtx {
-  ResolveCtx(Context ctx, const IIndex* index, Cache* cache)
-    : ctx{ctx}, index{index}, cache{cache} {}
+  ResolveCtx(Context ctx, const IIndex* index, Cache* cache, ResolvingMap* resolving)
+    : ctx{ctx}, index{index}, cache{cache}, resolving{resolving} {}
   Context ctx;
   const IIndex* index;
   Cache* cache;
@@ -265,6 +278,34 @@ struct ResolveCtx {
   const php::Class* selfCls = nullptr;
   const php::Class* thisCls = nullptr;
   const GenericsMap* generics = nullptr;
+  ResolvingMap* resolving = nullptr;
+};
+
+// RAII structure used to add an alias to the ResolvingMap for the current
+// context. Removes the alias on delete.
+struct WithResolving {
+  ~WithResolving() {
+    if (m_clsName) {
+      m_resolving->erase(m_clsName);
+    }
+  }
+  WithResolving(SString clsName,
+                AliasKind ak,
+                ResolvingMap* resolving) : m_clsName{clsName},
+                                           m_resolving{resolving} {
+    auto it = resolving->insert_or_assign(clsName, ak);
+    if (!it.second) {
+      // The name was already in the map - we're not the one to remove it.
+      m_clsName = nullptr;
+    }
+  }
+  WithResolving(const WithResolving&) = delete;
+  WithResolving& operator=(const WithResolving&) = delete;
+private:
+  // m_clsName can be null if there was a collision and this isn't the outer
+  // WithResolving that originally set the value.
+  SString m_clsName;
+  ResolvingMap* m_resolving = nullptr;
 };
 
 struct Cache {
@@ -600,7 +641,7 @@ Resolution resolve_type_access_list(ResolveCtx& ctx,
         if (cns.resolvedTypeStructure) {
           return Resolution { dict_val(cns.resolvedTypeStructure), false };
         }
-        ResolveCtx newCtx{ctx.ctx, ctx.index, ctx.cache};
+        ResolveCtx newCtx{ctx.ctx, ctx.index, ctx.cache, ctx.resolving};
         newCtx.selfCls = ctx.index->lookup_const_class(cns);
         if (!newCtx.selfCls) return Resolution{ TDictN, true };
         newCtx.thisCls = &thiz;
@@ -741,7 +782,7 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
     }
   }
 
-  auto const lookup = ctx.index->lookup_class_or_type_alias(clsName);
+  const auto lookup = ctx.index->lookup_class_or_type_alias(clsName);
   if (lookup.cls) {
     return resolvedCls(lookup.cls->name, lookup.cls->attrs, false);
   }
@@ -751,6 +792,30 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
   auto const typeAlias = lookup.typeAlias;
   assertx(!typeAlias->typeStructure.empty());
   assertx(typeAlias->typeStructure.isDict());
+
+  auto ty = ctx.resolving->find(clsName);
+  if (ty != ctx.resolving->end()) {
+    // The alias is currently being resolved and we are hitting a
+    // recursion.
+    switch (ty->second) {
+      case AliasKind::TypeAlias: {
+        // Alias recursion isn't allowed - we could just short-circuit here but
+        // instead allow the "normal" code to deal with it (which will end up
+        // returning the unresolved type).
+        break;
+      }
+      case AliasKind::CaseType: {
+        // This is a recursive case type. It's allowed - but we just need to
+        // set a few fields.
+        Builder res = Builder::dict();
+        res.set(s_kind, *typeStructureKindToVariant(TypeStructure::Kind::T_recursiveUnion).asTypedValue());
+        res.set(s_case_type, *Variant{const_cast<StringData*>(clsName)}.asTypedValue());
+        return res.finish();
+      }
+    }
+  }
+
+  WithResolving withResolving(clsName, lookup.typeAlias->kind, ctx.resolving);
 
   using TypevarTypes = std::vector<std::pair<std::string, Type>>;
 
@@ -766,7 +831,7 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
         );
       }
 
-      ResolveCtx newCtx{ctx.ctx, ctx.index, ctx.cache};
+      ResolveCtx newCtx{ctx.ctx, ctx.index, ctx.cache, ctx.resolving};
       newCtx.generics = &g;
 
       auto const toResolve = [&] {
@@ -777,9 +842,9 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
         return removed.get();
       }();
 
+      const StaticString& key = keyForAliasKind(typeAlias->kind);
       return Builder::attach(resolve(newCtx, toResolve))
-        .set(typeAlias->caseType ? s_case_type : s_alias,
-             make_tv<KindOfPersistentString>(clsName));
+        .set(key, make_tv<KindOfPersistentString>(clsName));
     }();
 
     if (typevarTypes) {
@@ -883,6 +948,7 @@ Resolution resolve_impl(ResolveCtx& ctx, TS::Kind kind, SArray ts) {
     case TS::Kind::T_xhp:
     case TS::Kind::T_enum:
     case TS::Kind::T_trait:
+    case TS::Kind::T_recursiveUnion:
       // These should be already caught by resolve().
       break;
   }
@@ -917,7 +983,8 @@ Resolution resolve_type_structure(const ISS& env, SArray ts) {
   assertx(ts->isDictType());
 
   Cache cache;
-  ResolveCtx ctx{env.ctx, &env.index, &cache};
+  ResolvingMap resolving;
+  ResolveCtx ctx{env.ctx, &env.index, &cache, &resolving};
   ctx.selfCls = env.ctx.cls;
   ctx.collect = &env.collect;
   return resolveBespoke(ctx, ts);
@@ -937,7 +1004,8 @@ Resolution resolve_type_structure(const IIndex& index,
   }
 
   Cache cache;
-  ResolveCtx ctx{Context{}, &index, &cache};
+  ResolvingMap resolving;
+  ResolveCtx ctx{Context{}, &index, &cache, &resolving};
   ctx.selfCls = index.lookup_const_class(cns);
   ctx.thisCls = &thiz;
 
@@ -957,11 +1025,13 @@ Resolution resolve_type_structure(const IIndex& index,
   }
 
   Cache cache;
-  ResolveCtx ctx{Context{}, &index, &cache};
+  ResolvingMap resolving;
+  WithResolving withResolving(typeAlias.name, typeAlias.kind, &resolving);
+  ResolveCtx ctx{Context{}, &index, &cache, &resolving};
   ctx.collect = collect;
+  const StaticString& key = keyForAliasKind(typeAlias.kind);
   return Builder::attach(resolve(ctx, typeAlias.typeStructure.get()))
-    .set(typeAlias.caseType ? s_case_type : s_alias,
-         make_tv<KindOfPersistentString>(typeAlias.name))
+    .set(key, make_tv<KindOfPersistentString>(typeAlias.name))
     .finishTS();
 }
 

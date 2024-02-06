@@ -3006,7 +3006,7 @@ void parse_adata(AsmState& as) {
  * Following the type-constraint we encode the serialized type structure
  * corresponding to this alias.
  */
-void parse_alias(AsmState& as, bool caseType) {
+void parse_alias(AsmState& as, AliasKind kind) {
   as.in.skipWhitespace();
 
   UserAttributeMap userAttrs;
@@ -3048,7 +3048,7 @@ void parse_alias(AsmState& as, bool caseType) {
     line1,
     attrs,
     value,
-    caseType,
+    kind,
     ArrNR{ArrayData::GetScalarArray(std::move(ts))},
     Array{}
   );
@@ -3221,8 +3221,8 @@ void parse(AsmState& as) {
     if (directive == ".function")      { parse_function(as)      ; continue; }
     if (directive == ".adata")         { parse_adata(as)         ; continue; }
     if (directive == ".class")         { parse_class(as)         ; continue; }
-    if (directive == ".alias")         { parse_alias(as, false)  ; continue; }
-    if (directive == ".case_type")     { parse_alias(as, true)   ; continue; }
+    if (directive == ".alias")         { parse_alias(as, AliasKind::TypeAlias); continue; }
+    if (directive == ".case_type")     { parse_alias(as, AliasKind::CaseType); continue; }
     if (directive == ".includes")      { parse_includes(as)      ; continue; }
     if (directive == ".const")         { parse_constant(as)      ; continue; }
     if (directive == ".constant_refs") { parse_constant_refs(as) ; continue; }

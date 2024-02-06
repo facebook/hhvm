@@ -605,6 +605,12 @@ std::string staticArrayStreamer(const ArrayData* ad) {
   return out;
 }
 
+std::string staticStreamer(const TypedValue* tv) {
+  std::string out;
+  staticStreamer(tv, out);
+  return out;
+}
+
 void staticStreamer(const TypedValue* tv, std::string& out) {
   switch (tv->m_type) {
     case KindOfUninit:

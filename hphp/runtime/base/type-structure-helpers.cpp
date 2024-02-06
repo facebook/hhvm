@@ -399,6 +399,7 @@ bool typeStructureIsType(
     case TypeStructure::Kind::T_unresolved:
       raise_error("Invalid generics for type structure");
     case TypeStructure::Kind::T_union:
+    case TypeStructure::Kind::T_recursiveUnion:
       always_assert(false && "should be caught by above earlier check");
   }
   not_reached();
@@ -617,12 +618,8 @@ bool checkTypeStructureMatchesTVImpl(
   if (isNullType(type) && tv.is_init() && tv.val().num) {
     return true;
   }
-  assertx(ts.exists(s_kind));
 
-  auto const ts_kind = static_cast<TypeStructure::Kind>(
-    ts[s_kind].toInt64Val()
-  );
-
+  auto const ts_kind = TypeStructure::kind(ts);
   auto const result = [&] {
     switch (ts_kind) {
     case TypeStructure::Kind::T_void:
@@ -850,6 +847,32 @@ bool checkTypeStructureMatchesTVImpl(
       return match;
     }
 
+    case TypeStructure::Kind::T_recursiveUnion: {
+      // get the case_type, look it up and re-check
+      auto case_type = get_ts_case_type(ts.get());
+      // We could keep a map of the aliases we've already seen and look up in
+      // that - but that seems like it would be more expensive in the common
+      // case (no recursion).
+      auto alias = TypeAlias::lookup(case_type);
+      auto ts = alias->typeStructure();
+      String name{const_cast<StringData*>(case_type)};
+      bool persistent = true;
+      auto resolved = TypeStructure::resolve(
+        name,
+        /*arr*/ts,
+        persistent,
+        /*generics*/Array());
+
+      return checkTypeStructureMatchesTVImpl<gen_error>(
+        resolved,
+        c1,
+        givenType,
+        expectedType,
+        errorKey,
+        warn,
+        isOrAsOp);
+    }
+
     case TypeStructure::Kind::T_nothing:
     case TypeStructure::Kind::T_noreturn:
     case TypeStructure::Kind::T_unresolved:
@@ -946,8 +969,7 @@ bool errorOnIsAsExpressionInvalidTypes(const Array& ts, bool dryrun,
     if (dryrun) return true;
     raise_error("\"is\" and \"as\" operators cannot be used with %s", errMsg);
   };
-  assertx(ts.exists(s_kind));
-  auto ts_kind = static_cast<TypeStructure::Kind>(ts[s_kind].toInt64Val());
+  auto ts_kind = TypeStructure::kind(ts);
   switch (ts_kind) {
     case TypeStructure::Kind::T_int:
     case TypeStructure::Kind::T_bool:
@@ -974,6 +996,7 @@ bool errorOnIsAsExpressionInvalidTypes(const Array& ts, bool dryrun,
     case TypeStructure::Kind::T_typeaccess:
     case TypeStructure::Kind::T_nonnull:
     case TypeStructure::Kind::T_xhp:
+    case TypeStructure::Kind::T_recursiveUnion:
       return false;
     case TypeStructure::Kind::T_enum:
     case TypeStructure::Kind::T_class:
@@ -1076,6 +1099,12 @@ bool typeStructureCouldBeNonStatic(const ArrayData* ts) {
       );
       return match;
     }
+    case TypeStructure::Kind::T_recursiveUnion: {
+      // We don't need to dig through the recursive union - if it contains
+      // 'this' (which it probably won't since 'this' isn't allowed in a case
+      // type) then it will be found on a different path.
+      return false;
+    }
     case TypeStructure::Kind::T_null:
     case TypeStructure::Kind::T_void:
     case TypeStructure::Kind::T_int:
@@ -1112,10 +1141,7 @@ Array resolveAndVerifyTypeStructure(
     if (!suppress || !IsOrAsOp) raise_error(errMsg);
     if (RuntimeOption::EvalIsExprEnableUnresolvedWarning) raise_warning(errMsg);
     auto unresolved = Array::CreateDict();
-    unresolved.set(
-      s_kind,
-      Variant(static_cast<uint8_t>(TypeStructure::Kind::T_unresolved))
-    );
+    TypeStructure::setKind(unresolved, TypeStructure::Kind::T_unresolved);
     unresolved.set(s_classname, Variant(s_unresolved));
     return unresolved;
   };

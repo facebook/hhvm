@@ -3004,6 +3004,7 @@ void isTypeStructImpl(ISS& env, SArray inputTS) {
     case TypeStructure::Kind::T_vec_or_dict:
     case TypeStructure::Kind::T_any_array:
     case TypeStructure::Kind::T_union:
+    case TypeStructure::Kind::T_recursiveUnion:
       // TODO(T29232862): implement
       return result(TBool);
     case TypeStructure::Kind::T_typeaccess:

@@ -203,6 +203,7 @@ Array getReifiedClasses(const ActRec* ar) {
       break;
 
     case K::T_union:
+    case K::T_recursiveUnion:
     case K::T_void:
     case K::T_int:
     case K::T_bool:

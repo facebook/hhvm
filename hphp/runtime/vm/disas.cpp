@@ -827,8 +827,15 @@ void print_alias(Output& out, const PreTypeAlias& alias) {
       ">"));
   }
 
+  auto const kind = [&]() {
+    switch (alias.kind) {
+      case AliasKind::TypeAlias: return "alias";
+      case AliasKind::CaseType: return "case_type";
+    }
+  }();
+
   out.fmtln(".{}{} {} = {} ({}, {}) {};",
-            alias.caseType ? "case_type" : "alias",
+            kind,
             opt_attrs(AttrContext::Alias, alias.attrs, &alias.userAttrs),
             (const StringData*)alias.name,
             type_constraints,

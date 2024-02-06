@@ -255,9 +255,8 @@ template <typename SerDe> void TypeAlias::serde(SerDe& sd) {
     (value)
     (typeStructure)
     (resolvedTypeStructure)
+    (kind)
     ;
-
-    SERDE_BITFIELD(caseType, sd);
 }
 
 template <typename SerDe> void FatalInfo::serde(SerDe& sd) {

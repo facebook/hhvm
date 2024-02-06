@@ -1,0 +1,95 @@
+C1: dict [
+  'kind' => 31,
+  'union_types' => 
+  vec [
+    dict [
+      'kind' => 1,
+    ],
+    dict [
+      'kind' => 14,
+      'fields' => 
+      dict [
+        'foo' => 
+        dict [
+          'kind' => 32,
+          'case_type' => 'C1',
+        ],
+      ],
+    ],
+  ],
+  'case_type' => 'C1',
+]
+5 is C1: 1
+'foo' is C1: 0
+shape('foo' => 5) is C1: 1
+shape('foo' => 'abc') is C1: 0
+shape('foo' => shape('foo' => 5)) is C1: 1
+shape('foo' => shape('foo' => 'abc')) is C1: 0
+-----
+C2: dict [
+  'kind' => 31,
+  'union_types' => 
+  vec [
+    dict [
+      'kind' => 4,
+    ],
+    dict [
+      'kind' => 14,
+      'fields' => 
+      dict [
+        'foo' => 
+        dict [
+          'kind' => 31,
+          'union_types' => 
+          vec [
+            dict [
+              'kind' => 1,
+            ],
+            dict [
+              'kind' => 14,
+              'fields' => 
+              dict [
+                'foo' => 
+                dict [
+                  'kind' => 32,
+                  'case_type' => 'C2',
+                ],
+              ],
+            ],
+          ],
+          'case_type' => 'C3',
+        ],
+      ],
+    ],
+  ],
+  'case_type' => 'C2',
+]
+5 is C2: 0
+'foo' is C2: 1
+shape('foo' => 5) is C2: 1
+shape('foo' => 'abc') is C2: 0
+shape('foo' => shape('foo' => 5)) is C2: 0
+shape('foo' => shape('foo' => 'abc')) is C2: 1
+-----
+C7: dict [
+  'kind' => 31,
+  'union_types' => 
+  vec [
+    dict [
+      'kind' => 4,
+    ],
+    dict [
+      'kind' => 14,
+      'fields' => 
+      dict [
+        'foo' => 
+        dict [
+          'kind' => 32,
+          'case_type' => 'C7',
+          'alias' => 'T3',
+        ],
+      ],
+    ],
+  ],
+  'case_type' => 'C7',
+]

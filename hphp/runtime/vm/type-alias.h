@@ -42,14 +42,13 @@ struct Unit;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+enum class AliasKind {
+  TypeAlias,
+  CaseType
+};
+
 /*
  * This is the runtime representation of a type alias.
- *
- * `types` and `values` fields are vectors because case types are comprised of
- * union of multiple types.
- *
- * When `caseType` field is not set, these vectors are guarenteed to be of
- * size 1;
  *
  * At runtime we still might resolve this name to another type alias,
  * becoming a type alias for some other type or something in that request.
@@ -63,7 +62,7 @@ struct PreTypeAlias {
   TypeConstraint value;
   int line0;
   int line1;
-  bool caseType;
+  AliasKind kind;
   UserAttributeMap userAttrs;
   Array typeStructure;
   // If !isNull(), contains m_typeStructure in post-resolved form from

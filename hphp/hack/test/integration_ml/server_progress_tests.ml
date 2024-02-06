@@ -384,7 +384,7 @@ let test_errors_complete () : bool Lwt.t =
         let { ServerProgress.ErrorsRead.pid; _ } =
           ServerProgress.ErrorsRead.openfile fd |> Result.ok |> Option.value_exn
         in
-        let q = ServerProgressLwt.watch_errors_file ~pid fd in
+        let q = Server_progress_lwt.watch_errors_file ~pid fd in
         let%lwt () = expect_qitem q "Telemetry [to_recheck_count]" in
         let%lwt () = expect_qitem q "Telemetry [will_use_distc]" in
         let%lwt () = expect_qitem q "Telemetry [process_in_parallel]" in
@@ -397,7 +397,7 @@ let test_errors_complete () : bool Lwt.t =
         let { ServerProgress.ErrorsRead.pid; _ } =
           ServerProgress.ErrorsRead.openfile fd |> Result.ok |> Option.value_exn
         in
-        let q = ServerProgressLwt.watch_errors_file ~pid fd in
+        let q = Server_progress_lwt.watch_errors_file ~pid fd in
         let%lwt () = expect_qitem q "Telemetry [to_recheck_count]" in
         let%lwt () = expect_qitem q "Telemetry [will_use_distc]" in
         let%lwt () = expect_qitem q "Telemetry [process_in_parallel]" in
@@ -450,7 +450,7 @@ let test_errors_during () : bool Lwt.t =
           |> Result.ok
           |> Option.value_exn
         in
-        let q1 = ServerProgressLwt.watch_errors_file ~pid fd1 in
+        let q1 = Server_progress_lwt.watch_errors_file ~pid fd1 in
         let%lwt () = expect_qitem q1 "Telemetry [to_recheck_count]" in
         let%lwt () = expect_qitem q1 "Telemetry [will_use_distc]" in
         let%lwt () = expect_qitem q1 "Telemetry [process_in_parallel]" in
@@ -463,7 +463,7 @@ let test_errors_during () : bool Lwt.t =
           |> Result.ok
           |> Option.value_exn
         in
-        let q2 = ServerProgressLwt.watch_errors_file ~pid fd2 in
+        let q2 = Server_progress_lwt.watch_errors_file ~pid fd2 in
         let%lwt () = expect_qitem q2 "Telemetry [to_recheck_count]" in
         let%lwt () = expect_qitem q2 "Telemetry [will_use_distc]" in
         let%lwt () = expect_qitem q2 "Telemetry [process_in_parallel]" in

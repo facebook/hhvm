@@ -338,7 +338,7 @@ let test_async_read_completed () : bool Lwt.t =
         ServerProgress.ErrorsWrite.complete telemetry;
         let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         let _open = ServerProgress.ErrorsRead.openfile fd in
-        let q = ServerProgressLwt.watch_errors_file ~pid fd in
+        let q = Server_progress_lwt.watch_errors_file ~pid fd in
         let%lwt () = expect_qitem q "Errors [a=2,b=1]" in
         let%lwt () = expect_qitem q "Errors [c=1]" in
         let%lwt () = expect_qitem q "Complete [complete]" in
@@ -357,7 +357,7 @@ let test_async_read_partial () : bool Lwt.t =
           ~cancel_reason;
         let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         let _open = ServerProgress.ErrorsRead.openfile fd in
-        let q = ServerProgressLwt.watch_errors_file ~pid fd in
+        let q = Server_progress_lwt.watch_errors_file ~pid fd in
         (* initially there are no items available *)
         let%lwt () = expect_qitem q "nothing" in
         (* we'll put in one report, and after this there should be exactly one item available *)
@@ -388,7 +388,7 @@ let test_async_read_unlinked () : bool Lwt.t =
         in
         assert (Option.equal String.equal (Some "clock123") clock);
         assert (pid = Unix.getpid ());
-        let q = ServerProgressLwt.watch_errors_file ~pid fd in
+        let q = Server_progress_lwt.watch_errors_file ~pid fd in
         (* we'll unlink the file, and after this the stream should be closed *)
         ServerProgress.ErrorsWrite.unlink_at_server_stop ();
         let%lwt () = expect_qitem q "Stopped [unlink]" in
@@ -435,7 +435,7 @@ let test_async_read_killed () : bool Lwt.t =
         let { ServerProgress.ErrorsRead.pid; _ } =
           ServerProgress.ErrorsRead.openfile fd |> Result.ok |> Option.value_exn
         in
-        let q = ServerProgressLwt.watch_errors_file ~pid fd in
+        let q = Server_progress_lwt.watch_errors_file ~pid fd in
         (* because the file is incomplete, the queue should assume that the
            creating process was killed *)
         let%lwt () = expect_qitem q "Killed [no payload]" in
@@ -476,7 +476,7 @@ let test_async_pid_killed () : bool Lwt.t =
           | _ -> pid
         in
         let dead_pid = pick_dead_pid (Unix.getpid ()) in
-        let q = ServerProgressLwt.watch_errors_file ~pid:dead_pid fd in
+        let q = Server_progress_lwt.watch_errors_file ~pid:dead_pid fd in
         (* because the pid is dead, within 5s, the queue should report
            that the creating process was killed *)
         let%lwt () = expect_qitem ~delay:60.0 q "Killed [pid]" in
@@ -498,7 +498,7 @@ let test_async_read_start () : bool Lwt.t =
         (* oops! we didn't call ServerProgress.ErrorsRead.openfile *)
         let exn =
           try
-            let _q = ServerProgressLwt.watch_errors_file ~pid fd in
+            let _q = Server_progress_lwt.watch_errors_file ~pid fd in
             "successfully opened queue"
           with
           | exn -> Exn.to_string exn

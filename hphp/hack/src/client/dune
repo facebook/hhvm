@@ -6,7 +6,8 @@
    \
    clientLogCommand
    clientGetDefinition
-   clientHighlightRefs))
+   clientHighlightRefs
+   server_progress_lwt))
  (libraries
   connection_tracker
   client_get_definition
@@ -52,5 +53,14 @@
  (wrapped false)
  (modules clientHighlightRefs)
  (libraries pos nuclide_rpc_message_printer server sys_utils)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name server_progress_lwt)
+ (wrapped false)
+ (modules server_progress_lwt)
+ (libraries
+   server_progress)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))

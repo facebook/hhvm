@@ -87,7 +87,7 @@ let go_streaming_on_fd
     ~(progress_callback : string option -> unit) :
     (Exit_status.t * Telemetry.t) Lwt.t =
   let ClientEnv.{ max_errors; error_format; _ } = args in
-  let errors_stream = ServerProgressLwt.watch_errors_file ~pid fd in
+  let errors_stream = Server_progress_lwt.watch_errors_file ~pid fd in
   let start_time = Unix.gettimeofday () in
   let first_error_time = ref None in
   let latest_progress = ref None in
@@ -136,7 +136,7 @@ let go_streaming_on_fd
     let%lwt errors = Lwt_stream.get errors_stream in
     match errors with
     | None ->
-      (* The contract of [errors_stream] (from [ServerProgressLwt.watch_errors_file]) is
+      (* The contract of [errors_stream] (from [Server_progress_lwt.watch_errors_file]) is
          that it will always have a single [Some error] item as its last item, before the
          stream is closed and hence subsequent [Lwt_stream.get] return [None].
          If we're here, it means that contract has been violated. *)

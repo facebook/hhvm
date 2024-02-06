@@ -3707,7 +3707,7 @@ let try_open_errors_file ~(state : state ref) : unit Lwt.t =
           log
             "Errors-file: opened and tailing the check from %s"
             (Utils.timestring timestamp);
-          let q = ServerProgressLwt.watch_errors_file ~pid fd in
+          let q = Server_progress_lwt.watch_errors_file ~pid fd in
           Lwt.return (TailingErrors { fd; start_time = timestamp; q })
       end
     in

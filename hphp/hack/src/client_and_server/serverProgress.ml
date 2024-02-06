@@ -608,7 +608,7 @@ module ErrorsRead = struct
     | ErrorsFile.VersionHeader _
     | ErrorsFile.Header _ ->
       failwith
-        "do ServerProgress.ErrorsRead.openfile before read_next_error or ServerProgressLwt.watch_errors_file"
+        "do ServerProgress.ErrorsRead.openfile before read_next_error or Server_progress_lwt.watch_errors_file"
     | ErrorsFile.Item item -> Ok item
     | ErrorsFile.End { error; log_message; _ } -> Error (error, log_message)
 end

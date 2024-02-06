@@ -28,16 +28,6 @@
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
-(library
- (name server_progress_lwt)
- (wrapped false)
- (modules serverProgressLwt)
- (libraries
-   server_progress
- )
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
 (rule
  (target serverInvalidateUnits.fb.ml)
  (action

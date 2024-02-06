@@ -17,6 +17,7 @@
   server_env_build
   server_go_to
   server_highlight_refs
+  server_rewrite
   server_search
   state_loader
   naming_table_builder_ffi_externs

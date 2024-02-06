@@ -10,7 +10,7 @@
   client
   hh_server_monitor
   server
-  server_client_provider
+  client_provider
   server_command_types
   server_env
   test_injector_config)

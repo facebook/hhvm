@@ -62,7 +62,7 @@ let go_quarantined
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(line : int)
-    ~(column : int) : ServerHighlightRefsTypes.result =
+    ~(column : int) : Ide_api_types.range list =
   let symbol_to_highlight =
     IdentifySymbolService.go_quarantined ~ctx ~entry ~line ~column
   in

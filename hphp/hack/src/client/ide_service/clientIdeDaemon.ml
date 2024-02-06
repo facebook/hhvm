@@ -1125,7 +1125,7 @@ let handle_request
     let (istate, ctx, entry, _) = update_file_ctx istate document in
     let results =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          ServerHighlightRefs.go_quarantined ~ctx ~entry ~line ~column)
+          Ide_highlight_refs.go_quarantined ~ctx ~entry ~line ~column)
     in
     (Initialized istate, Ok results)
   (* Signature help *)

@@ -2010,9 +2010,7 @@ let handle_mode
   | Highlight_refs (line, column) ->
     let path = expect_single_file () in
     let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
-    let results =
-      ServerHighlightRefs.go_quarantined ~ctx ~entry ~line ~column
-    in
+    let results = Ide_highlight_refs.go_quarantined ~ctx ~entry ~line ~column in
     ClientHighlightRefs.go results ~output_json:false
   | Errors when batch_mode ->
     (* For each file in our batch, run typechecking serially.

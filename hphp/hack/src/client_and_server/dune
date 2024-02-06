@@ -59,7 +59,6 @@
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
-
 (library
   (name server_symbol_definition)
   (wrapped false)
@@ -251,7 +250,6 @@
   serverCommandTypesUtils
   serverFormatTypes
   serverGlobalInferenceTypes
-  serverHighlightRefsTypes
   serverLintTypes
   serverRageTypes
   serverRenameTypes

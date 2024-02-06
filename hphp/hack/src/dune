@@ -41,7 +41,7 @@
   server_file_outline
   server_find_refs
   server_go_to
-  server_highlight_refs
+  ide_highlight_refs
   server_symbol_info_service_utils
   sys_utils
   temp_file

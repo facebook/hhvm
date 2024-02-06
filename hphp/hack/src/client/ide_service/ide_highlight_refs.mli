@@ -13,4 +13,4 @@ val go_quarantined :
   entry:Provider_context.entry ->
   line:int ->
   column:int ->
-  ServerHighlightRefsTypes.result
+  Ide_api_types.range list

@@ -29,14 +29,6 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
- (name server_highlight_refs)
- (wrapped false)
- (modules serverHighlightRefs)
- (libraries provider_context server_services)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
-(library
  (name server_progress_lwt)
  (wrapped false)
  (modules serverProgressLwt)
@@ -179,6 +171,7 @@
     direct_decl_service
     folly_stubs
     hh_server_provider_backend_stubs
+    ide_highlight_refs
     load_script
     lwt
     memory_stats
@@ -191,7 +184,6 @@
     server_incremental
     server_call_hierarchy
     server_go_to
-    server_highlight_refs
     server_rewrite
     server_search
     startup_initializer_stubs

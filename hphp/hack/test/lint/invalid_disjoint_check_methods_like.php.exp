@@ -1,4 +1,6 @@
-File "invalid_disjoint_check_methods_like.php", line 22, characters 8-38:
+File "invalid_disjoint_check_methods_like.php", line 32, characters 8-38:
 Non-dynamic calls to 'isEqual' will always return the same value, because type int is disjoint from type string. (Lint[5638])
-File "invalid_disjoint_check_methods_like.php", line 24, characters 8-38:
+File "invalid_disjoint_check_methods_like.php", line 34, characters 8-38:
 Non-dynamic calls to 'isEqual' will always return the same value, because type string is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check_methods_like.php", line 39, characters 8-24:
+Non-dynamic calls to 'contains' will always return the same value, because type int is disjoint from type string. (Lint[5638])

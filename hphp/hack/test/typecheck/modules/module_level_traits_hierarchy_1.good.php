@@ -7,9 +7,7 @@ new module A {}
 
 module A;
 
-<<file: __EnableUnstableFeatures('module_level_traits')>>
-
-// module level trait can use public non-module level trait
+// a module level trait can use public non-module level trait
 
 trait T1 {}
 

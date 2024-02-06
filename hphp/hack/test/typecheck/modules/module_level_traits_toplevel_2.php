@@ -8,8 +8,6 @@ new module B {}
 //// A.php
 <?hh
 
-<<file: __EnableUnstableFeatures('module_level_traits')>>
-
 // basic module level traits behaviour:
 // - T belongs to module A even if used by class C in B
 // - getFoo cannot invoke foo which belongs to B

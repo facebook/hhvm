@@ -1,4 +1,4 @@
-File "module_level_traits_method_2.php--A.php", line 14, characters 9-11:
+File "module_level_traits_method_2.php--A.php", line 12, characters 9-11:
 You cannot access internal members from module `B` in module `A` (Typing[4112])
   File "module_level_traits_method_2.php--B.php", line 6, characters 21-23:
   This member is internal

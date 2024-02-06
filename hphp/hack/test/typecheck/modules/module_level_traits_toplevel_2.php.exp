@@ -1,4 +1,4 @@
-File "module_level_traits_toplevel_2.php--A.php", line 14, characters 5-7:
+File "module_level_traits_toplevel_2.php--A.php", line 12, characters 5-7:
 Cannot access an internal element from module `B` in module `A` (Typing[4444])
   File "module_level_traits_toplevel_2.php--B.php", line 5, characters 19-21:
   This is from module `B`

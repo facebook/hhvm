@@ -1,2 +1,2 @@
-File "module_level_traits_internal_1.bad.php--A.php", line 7, characters 1-42:
+File "module_level_traits_internal_1.bad.php--A.php", line 5, characters 1-42:
 Internal modules cannot have the <<__ModuleLevelTrait>> attribute (Naming[2127])

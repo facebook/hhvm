@@ -5666,9 +5666,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     fn old_attr_spec(&mut self, node: S<'a>, attributes: S<'a>) {
         let attributes = self.text(attributes).split(',');
         attributes.for_each(|attr| match attr.trim() {
-            sn::user_attributes::MODULE_LEVEL_TRAIT => {
-                self.check_can_use_feature(node, &UnstableFeatures::ModuleLevelTraits)
-            }
             sn::user_attributes::STRICT_SWITCH => {
                 self.check_can_use_feature(node, &UnstableFeatures::StrictSwitch)
             }

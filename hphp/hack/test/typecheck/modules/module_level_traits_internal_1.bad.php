@@ -7,7 +7,5 @@ new module A {}
 
 module A;
 
-<<file: __EnableUnstableFeatures('module_level_traits')>>
-
 <<__ModuleLevelTrait>>
 internal trait T {}

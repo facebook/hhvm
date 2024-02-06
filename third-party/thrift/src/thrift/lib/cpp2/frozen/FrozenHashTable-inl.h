@@ -16,6 +16,7 @@
 
 // IWYU pragma: private, include "thrift/lib/cpp2/frozen/Frozen.h"
 
+#include <folly/Traits.h>
 #include <thrift/lib/cpp2/FieldRef.h>
 
 namespace apache {
@@ -79,6 +80,46 @@ struct Layout<apache::thrift::frozen::detail::Block>
     : apache::thrift::frozen::detail::BlockLayout {};
 
 namespace detail {
+
+class Fast64BitRemainderCalculator {
+#if FOLLY_HAVE_INT128_T
+ public:
+  Fast64BitRemainderCalculator() = default;
+  explicit Fast64BitRemainderCalculator(uint64_t divisor)
+      : fastRemainderConstant_(
+            divisor ? (~folly::uint128_t(0) / divisor + 1) : 0) {
+#ifndef NDEBUG
+    divisor_ = divisor;
+#endif
+  }
+
+  size_t remainder(size_t lhs, size_t rhs) const {
+    const folly::uint128_t lowBits = fastRemainderConstant_ * lhs;
+    auto result = mul128_u64(lowBits, rhs);
+    assert(rhs == divisor_);
+    assert(result == lhs % rhs);
+    return result;
+  }
+
+ private:
+  static uint64_t mul128_u64(folly::uint128_t lowbits, uint64_t d) {
+    folly::uint128_t bottom = ((lowbits & 0xFFFFFFFFFFFFFFFFUL) * d) >> 64;
+    folly::uint128_t top = (lowbits >> 64) * d;
+    return static_cast<uint64_t>((bottom + top) >> 64);
+  }
+  folly::uint128_t fastRemainderConstant_ = 0;
+#ifndef NDEBUG
+  size_t divisor_ = 0;
+#endif
+#else
+ public:
+  Fast64BitRemainderCalculator() = default;
+  explicit Fast64BitRemainderCalculator(size_t) {}
+
+  auto remainder(size_t lhs, size_t rhs) const { return lhs % rhs; }
+#endif
+};
+
 /**
  * Layout specialization for range types which support unique hash lookup.
  */
@@ -256,13 +297,15 @@ struct HashTableLayout : public ArrayLayout<T, Item> {
     typedef typename Layout<std::vector<Block>>::View TableView;
 
     TableView table_;
+    Fast64BitRemainderCalculator remainderCalculator_;
 
    public:
     View() {}
     View(const LayoutSelf* layout, ViewPosition self)
         : Base::View(layout, self),
           table_(layout->sparseTableField.layout.view(
-              self(layout->sparseTableField.pos))) {}
+              self(layout->sparseTableField.pos))),
+          remainderCalculator_(table_.size() * Block::bits) {}
 
     typedef typename Base::View::iterator iterator;
 
@@ -282,7 +325,7 @@ struct HashTableLayout : public ArrayLayout<T, Item> {
       const auto buckets = table_.size() * Block::bits;
       auto bucket = KeyLayout::hash(key) * 5; // spread out clumped values
       for (size_t p = 0; p < buckets; bucket += ++p) { // quadratic probing
-        bucket %= buckets;
+        bucket = remainderCalculator_.remainder(bucket, buckets);
         const auto& block = table_[bucket / Block::bits]; // major block
         auto mask = block.mask();
         auto offset = block.offset();

@@ -57,3 +57,24 @@
  (wrapped false)
  (modules)
  (foreign_archives rust_batch_index_ffi))
+
+(library
+ (name ide_hover)
+ (wrapped false)
+ (modules ide_hover)
+ (libraries
+  decl_provider
+  naming_special_names
+  pos
+  provider_context
+  server_command_types
+  server_docblock_at
+  server_infer_type
+  server_services
+  symbol
+  tast_provider
+  typing
+  utils_core
+ )
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))

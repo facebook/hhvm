@@ -2174,7 +2174,7 @@ let handle_mode
         let src = Provider_context.read_file_contents_exn entry in
         caret_pos_exn src "^ hover-at-caret"
     in
-    let results = ServerHover.go_quarantined ~ctx ~entry ~line ~column in
+    let results = Ide_hover.go_quarantined ~ctx ~entry ~line ~column in
     let formatted_results =
       List.map
         ~f:(fun r ->

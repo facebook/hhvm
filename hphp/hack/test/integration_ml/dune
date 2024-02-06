@@ -61,7 +61,7 @@
   test_property_initializer
   test_property_initializer2
   test_remove_method
-  test_server_hover
+  test_ide_hover
   test_serverConfig_overrides
   test_unbound_name
   test_unbound_name_2
@@ -201,10 +201,10 @@
   (run ./test_all.exe identify)))
 
 (rule
- (alias server_hover)
+ (alias ide_hover)
  (deps test_all.exe)
  (action
-  (run ./test_all.exe server_hover)))
+  (run ./test_all.exe ide_hover)))
 
 (rule
  (alias failed_naming)
@@ -341,7 +341,7 @@
   (alias infer_type)
   (alias getfundeps)
   (alias identify)
-  (alias server_hover)
+  (alias ide_hover)
   (alias failed_naming)
   (alias gconst_file)
   (alias unbound_name)

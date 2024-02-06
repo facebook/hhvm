@@ -793,7 +793,7 @@ let handle_request
     let (istate, ctx, entry, _) = update_file_ctx istate document in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          ServerHover.go_quarantined ~ctx ~entry ~line ~column)
+          Ide_hover.go_quarantined ~ctx ~entry ~line ~column)
     in
     (Initialized istate, Ok result)
   | ( Initialized istate,

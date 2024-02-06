@@ -41,11 +41,11 @@ let go_hover expected ~ctx ~entry ~line ~column =
   let hovers_to_string h =
     List.map h ~f:HoverService.string_of_result |> String.concat ~sep:"; "
   in
-  let actual = ServerHover.go_quarantined ~ctx ~entry ~line ~column in
+  let actual = Ide_hover.go_quarantined ~ctx ~entry ~line ~column in
   Asserter.String_asserter.assert_equals
     (expected |> hovers_to_string)
     (actual |> hovers_to_string)
-    (Printf.sprintf "ServerHover at line %d, column %d" line column);
+    (Printf.sprintf "Ide_hover at line %d, column %d" line column);
   ()
 
 let pos_at (line1, column1) (line2, column2) =
@@ -107,5 +107,5 @@ let test () =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           go ~ctx ~entry ~line ~column);
       ());
-  (* ServerHover.go_quarantined ~ctx ~entry ~line ~column *)
+  (* Ide_hover.go_quarantined ~ctx ~entry ~line ~column *)
   ()

@@ -60,27 +60,6 @@
   hh_json
   pos))
 
-(library
- (name server_hover)
- (wrapped false)
- (modules serverHover)
- (libraries
-  decl_provider
-  naming_special_names
-  pos
-  provider_context
-  server_command_types
-  server_docblock_at
-  server_infer_type
-  server_services
-  symbol
-  tast_provider
-  typing
-  utils_core
- )
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
 (rule
  (target serverInvalidateUnits.fb.ml)
  (action
@@ -149,7 +128,7 @@
   server_env
   server_incremental
   server_find_refs
-  server_hover
+  ide_hover
   server_infer_type
   server_prechecked_files
   server_revision_tracker

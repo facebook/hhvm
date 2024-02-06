@@ -21,7 +21,7 @@ type mode =
   | Autocomplete of { is_manually_invoked: bool }
   | Autocomplete_glean of { dry_run: bool }
   | Search of {
-      glean_only: bool;  (** if true, uses glean; if false, uses ServerSearch *)
+      glean_only: bool;  (** if true, uses glean; if false, uses Ide_search *)
       dry_run: bool;
           (** only applies to [glean_only]; skips actually running the glean query *)
     }
@@ -659,8 +659,8 @@ and accepts both <?hh files that define symbols, and newline-separated
 lists of search queries.
 For each query, it either shows the angle query (--search-show-glean)
 or shows the query and runs it and shows the results (--search-glean)
-or runs the query through ServerSearch (--search) which will also pick up
-any symbols defined in <?hh files. Note that in the final case, ServerSearch
+or runs the query through Ide_search (--search) which will also pick up
+any symbols defined in <?hh files. Note that in the final case, Ide_search
 uses the naming-table and root in [ctx] to validate the results it got from
 glean -- to find their filename and load the file and get its AST -- and
 if glean gives results without [ctx] being set up right then the glean
@@ -685,7 +685,7 @@ let handle_search ctx sienv ~glean_only ~dry_run filename =
     List.iter queries ~f:(fun query ->
         Printf.printf "query: %s\n%!" query;
         let sienv_ref = ref sienv in
-        let results = ServerSearch.go ctx query ~kind_filter:"" sienv_ref in
+        let results = Ide_search.go ctx query ~kind_filter:"" sienv_ref in
         List.iter results ~f:(fun { SearchUtils.name; pos; result_type } ->
             let filename = Pos.filename pos |> Filename.basename in
             let (line, start_, end_) = Pos.info_pos pos in

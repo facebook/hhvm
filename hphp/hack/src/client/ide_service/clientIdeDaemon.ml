@@ -1225,7 +1225,7 @@ let handle_request
     (* Note: we intentionally don't give results from unsaved files *)
     let ctx = make_empty_ctx istate.icommon in
     let sienv_ref = ref istate.sienv in
-    let result = ServerSearch.go ctx query ~kind_filter:"" sienv_ref in
+    let result = Ide_search.go ctx query ~kind_filter:"" sienv_ref in
     let istate = { istate with sienv = !sienv_ref } in
     (Initialized istate, Ok result)
 

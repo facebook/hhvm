@@ -81,7 +81,7 @@
   hhi
   search
   server_autocomplete_services
-  server_search
+  ide_search
   server_services
   string
   sys_utils

@@ -38,20 +38,6 @@
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
-(library
- (name server_search)
- (wrapped false)
- (modules serverSearch)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std))
- (libraries
-  server_autocomplete_services
-  search
-  search_utils
-  utils_core
-  hh_json
-  pos))
-
 (rule
  (target serverInvalidateUnits.fb.ml)
  (action
@@ -185,7 +171,7 @@
     server_call_hierarchy
     server_go_to
     server_rewrite
-    server_search
+    ide_search
     startup_initializer_stubs
     state_loader
     watchman_client

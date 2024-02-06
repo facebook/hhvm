@@ -18,7 +18,7 @@
   server_env_build
   server_go_to
   server_rewrite
-  server_search
+  ide_search
   state_loader
   naming_table_builder_ffi_externs
   sys_utils)
@@ -86,3 +86,16 @@
  (libraries provider_context server_services)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name ide_search)
+ (wrapped false)
+ (modules ide_search)
+ (libraries
+  hh_json
+  logging
+  pos
+  search_core
+  search_utils
+  server_autocomplete_services
+  utils_core))

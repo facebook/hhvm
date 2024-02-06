@@ -83,5 +83,5 @@ let go
     ~max_results
     ~kind_filter
     ~results:(List.length results)
-    ~caller:"ServerSearch.go";
+    ~caller:"Ide_search.go";
   results

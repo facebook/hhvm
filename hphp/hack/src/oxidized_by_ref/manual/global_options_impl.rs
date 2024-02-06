@@ -115,7 +115,6 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_enable_modules: false,
     tco_enable_function_references: false,
     tco_allowed_expression_tree_visitors: &[],
-    tco_math_new_code: false,
     tco_typeconst_concrete_concrete_error: false,
     tco_enable_strict_const_semantics: 0,
     tco_strict_wellformedness: 0,

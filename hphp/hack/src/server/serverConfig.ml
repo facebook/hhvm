@@ -353,7 +353,6 @@ let load_config config options =
       (Option.map
          (string_list_opt "allowed_expression_tree_visitors" config)
          ~f:(fun l -> List.map l ~f:Utils.add_ns))
-    ?tco_math_new_code:(bool_opt "math_new_code" config)
     ?tco_typeconst_concrete_concrete_error:
       (bool_opt "typeconst_concrete_concrete_error" config)
     ?tco_enable_strict_const_semantics:

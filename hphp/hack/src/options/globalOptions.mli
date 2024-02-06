@@ -232,9 +232,6 @@ type t = {
       (** Enable unstable feature: function references *)
   tco_allowed_expression_tree_visitors: string list;
       (** Allowed expression tree visitors when not enabled via unstable features flag *)
-  tco_math_new_code: bool;
-      (** Use a new error code for math operations: addition, subtraction,
-        division, multiplication, exponentiation *)
   tco_typeconst_concrete_concrete_error: bool;
       (** Raise an error when a concrete type constant is overridden by a concrete type constant
          in a child class. *)
@@ -402,7 +399,6 @@ val set :
   ?tco_enable_expression_trees:bool ->
   ?tco_enable_function_references:bool ->
   ?tco_allowed_expression_tree_visitors:string list ->
-  ?tco_math_new_code:bool ->
   ?tco_typeconst_concrete_concrete_error:bool ->
   ?tco_enable_strict_const_semantics:int ->
   ?tco_strict_wellformedness:int ->

@@ -164,7 +164,6 @@ type t = {
   tco_enable_expression_trees: bool;
   tco_enable_function_references: bool;
   tco_allowed_expression_tree_visitors: string list;
-  tco_math_new_code: bool;
   tco_typeconst_concrete_concrete_error: bool;
   tco_enable_strict_const_semantics: int;
   tco_strict_wellformedness: int;
@@ -296,7 +295,6 @@ let default =
     tco_enable_expression_trees = false;
     tco_enable_function_references = false;
     tco_allowed_expression_tree_visitors = [];
-    tco_math_new_code = false;
     tco_typeconst_concrete_concrete_error = false;
     tco_enable_strict_const_semantics = 0;
     tco_strict_wellformedness = 0;
@@ -426,7 +424,6 @@ let set
     ?tco_enable_expression_trees
     ?tco_enable_function_references
     ?tco_allowed_expression_tree_visitors
-    ?tco_math_new_code
     ?tco_typeconst_concrete_concrete_error
     ?tco_enable_strict_const_semantics
     ?tco_strict_wellformedness
@@ -705,7 +702,6 @@ let set
       setting
         tco_allowed_expression_tree_visitors
         options.tco_allowed_expression_tree_visitors;
-    tco_math_new_code = setting tco_math_new_code options.tco_math_new_code;
     tco_typeconst_concrete_concrete_error =
       setting
         tco_typeconst_concrete_concrete_error

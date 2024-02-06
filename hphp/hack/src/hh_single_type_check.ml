@@ -920,7 +920,6 @@ let parse_options () =
       ~tco_enable_strict_string_concat_interp:
         !enable_strict_string_concat_interp
       ~tco_ignore_unsafe_cast:!ignore_unsafe_cast
-      ~tco_math_new_code:true
       ~tco_typeconst_concrete_concrete_error:!typeconst_concrete_concrete_error
       ~tco_enable_strict_const_semantics:!enable_strict_const_semantics
       ~tco_strict_wellformedness:!strict_wellformedness

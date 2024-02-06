@@ -19,6 +19,7 @@ gen-cpp2
 /proxygen/lib/utils/TraceEventType.h
 /proxygen/lib/utils/TraceFieldType.cpp
 /proxygen/lib/utils/TraceFieldType.h
+/proxygen/lib/stats/StatsWrapper.h
 _build/
 
 # common editor artifacts

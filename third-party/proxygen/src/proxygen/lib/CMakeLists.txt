@@ -28,6 +28,16 @@ add_custom_command(
 )
 
 add_custom_command(
+    OUTPUT ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/stats/StatsWrapper.h
+    COMMAND
+        ${CMAKE_CURRENT_SOURCE_DIR}/stats/gen_StatsWrapper.sh
+        ${PROXYGEN_FBCODE_ROOT}
+    DEPENDS
+        ${CMAKE_CURRENT_SOURCE_DIR}/stats/BaseStats.h
+    COMMENT "Generating StatsWrapper.h"
+)
+
+add_custom_command(
     OUTPUT
         ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceEventType.h
         ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceEventType.cpp
@@ -56,6 +66,7 @@ add_custom_target(
         ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceEventType.cpp
         ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceFieldType.h
         ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceFieldType.cpp
+        ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/stats/StatsWrapper.h
 )
 
 set(

@@ -137,8 +137,14 @@ func (p *HeaderProtocol) Open() error {
 	return p.origTransport.Open()
 }
 
-func (p *HeaderProtocol) HeaderTransport() Transport {
-	return p.trans
+// Deprecated: SetSeqID() is a deprecated method.
+func (p *HeaderProtocol) SetSeqID(seq uint32) {
+	p.trans.SetSeqID(seq)
+}
+
+// Deprecated: GetSeqID() is a deprecated method.
+func (p *HeaderProtocol) GetSeqID() uint32 {
+	return p.trans.SeqID()
 }
 
 // Control underlying header transport
@@ -197,6 +203,11 @@ func (p *HeaderProtocol) ReadHeaders() map[string]string {
 
 func (p *HeaderProtocol) ProtocolID() ProtocolID {
 	return p.protoID
+}
+
+// Deprecated: GetFlags() is a deprecated method.
+func (t *HeaderProtocol) GetFlags() HeaderFlags {
+	return t.trans.GetFlags()
 }
 
 func (p *HeaderProtocol) AddTransform(trans TransformID) error {

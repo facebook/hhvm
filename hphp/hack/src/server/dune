@@ -20,14 +20,6 @@
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
-(library
- (name server_call_hierarchy)
- (wrapped false)
- (modules serverPrepareCallHierarchy serverCallHierarchyIncomingCalls serverCallHierarchyOutgoingCalls serverCallHierarchyUtils)
- (libraries provider_context server_find_refs server_services lsp server_command_types)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
 (rule
  (target serverInvalidateUnits.fb.ml)
  (action
@@ -158,7 +150,6 @@
     server
     server_env_build
     server_incremental
-    server_call_hierarchy
     server_go_to
     server_rewrite
     ide_search

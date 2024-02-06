@@ -601,7 +601,7 @@ let merge
   let completed_check_count = completed_check_count - deferred_check_count in
 
   files_checked_count := !files_checked_count + completed_check_count;
-  ServerProgress.write_percentage
+  Server_progress.write_percentage
     ~operation:"typechecking"
     ~done_count:!files_checked_count
     ~total_count:workitems_initial_count
@@ -610,7 +610,7 @@ let merge
 
   (* Handle errors paradigm (3) - push updates to errors-file as soon as their batch is finished *)
   if check_info.log_errors then
-    ServerProgress.ErrorsWrite.report produced_by_job.errors;
+    Server_progress.ErrorsWrite.report produced_by_job.errors;
   (* Handle errors paradigm (2) - push updates to lsp as well *)
   if not (Errors.is_empty produced_by_job.errors) then
     time_first_error :=
@@ -693,7 +693,7 @@ let on_cancelled
 let rec drain_events (done_count, total_count, handle, check_info) =
   match Hh_distc_ffi.recv handle with
   | Ok (Some (Hh_distc_types.Errors errors)) ->
-    if check_info.log_errors then ServerProgress.ErrorsWrite.report errors;
+    if check_info.log_errors then Server_progress.ErrorsWrite.report errors;
     drain_events (done_count, total_count, handle, check_info)
   | Ok (Some (Hh_distc_types.TypingStart total_count)) ->
     drain_events (done_count, total_count, handle, check_info)
@@ -737,7 +737,7 @@ let rec event_loop
   if List.mem ~equal:Poly.( = ) ready_fds fd_distc then
     match Sys_utils.read_non_intr fd_distc 1 with
     | None ->
-      ServerProgress.write "hh_distc done";
+      Server_progress.write "hh_distc done";
       (match Hh_distc_ffi.join handle with
       | Ok (errors, map_reduce_data) ->
         (* TODO: Clear in memory deps. Doesn't effect correctness but can cause larger fanouts *)
@@ -751,7 +751,7 @@ let rec event_loop
     | Some _ ->
       (match drain_events (done_count, total_count, handle, check_info) with
       | Ok (done_count, total_count) ->
-        ServerProgress.write_percentage
+        Server_progress.write_percentage
           ~operation:"hh_distc checking"
           ~done_count
           ~total_count
@@ -845,7 +845,7 @@ let process_with_hh_distc
   let fd_distc = Hh_distc_ffi.get_fd hh_distc_handle in
   let re_session_id = Hh_distc_ffi.get_re_session_id hh_distc_handle in
   Hh_logger.log "hh_distc RE session id: %s" re_session_id;
-  ServerProgress.write "hh_distc running";
+  Server_progress.write "hh_distc running";
   let handlers =
     interrupt.MultiThreadedCall.handlers interrupt.MultiThreadedCall.env
   in
@@ -1052,7 +1052,7 @@ let go_with_interrupt
   let sample_rate = TypecheckerOptions.typecheck_sample_rate tcopt in
   let original_fnl = fnl in
   let fnl = BigList.create fnl in
-  ServerProgress.write "typechecking %d files" (BigList.length fnl);
+  Server_progress.write "typechecking %d files" (BigList.length fnl);
   let fnl =
     if Float.(sample_rate >= 1.0) then
       fnl
@@ -1089,7 +1089,7 @@ let go_with_interrupt
       && BigList.length fnl > Option.value_exn hh_distc_fanout_threshold
     in
     if check_info.log_errors then
-      ServerProgress.ErrorsWrite.telemetry
+      Server_progress.ErrorsWrite.telemetry
         (Telemetry.create ()
         |> Telemetry.bool_ ~key:"will_use_distc" ~value:will_use_distc);
     if will_use_distc then (
@@ -1123,7 +1123,7 @@ let go_with_interrupt
         failwith (Printf.sprintf "Distc failed with: %s" msg)
     ) else (
       if check_info.log_errors then
-        ServerProgress.ErrorsWrite.telemetry
+        Server_progress.ErrorsWrite.telemetry
           (Telemetry.create ()
           |> Telemetry.bool_ ~key:"process_in_parallel" ~value:true);
       process_in_parallel
@@ -1141,7 +1141,7 @@ let go_with_interrupt
   let { errors; map_reduce_data; dep_edges; profiling_info } = typing_result in
   Typing_deps.register_discovered_dep_edges dep_edges;
   Map_reduce.finalize
-    ~progress:(fun s -> ServerProgress.write "%s" s)
+    ~progress:(fun s -> Server_progress.write "%s" s)
     ~init_id:check_info.init_id
     ~recheck_id:check_info.recheck_id
     map_reduce_data;

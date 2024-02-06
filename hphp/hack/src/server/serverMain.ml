@@ -600,7 +600,7 @@ let serve_one_iteration genv env client_provider =
         client_kind
   in
 
-  (* ServerProgress: By updating status now at the start of the serve_one_iteration,
+  (* Server_progress: By updating status now at the start of the serve_one_iteration,
    * it means there's no obligation on the "doing work" part of the previous
    * iteration to clean up its own status-reporting once done.
    *
@@ -628,15 +628,15 @@ let serve_one_iteration genv env client_provider =
          until either a file-save comes in or 5.0s has elapsed. *)
       let (disposition, msg) =
         match env.full_check_status with
-        | Full_check_needed -> (ServerProgress.DWorking, "will resume")
-        | Full_check_started -> (ServerProgress.DWorking, "typechecking")
-        | Full_check_done -> (ServerProgress.DReady, "ready")
+        | Full_check_needed -> (Server_progress.DWorking, "will resume")
+        | Full_check_started -> (Server_progress.DWorking, "typechecking")
+        | Full_check_done -> (Server_progress.DReady, "ready")
       in
-      ServerProgress.write ~include_in_logs:false ~disposition "%s" msg
+      Server_progress.write ~include_in_logs:false ~disposition "%s" msg
     | ClientProvider.Not_selecting_hg_updating ->
-      ServerProgress.write ~include_in_logs:false "hg-transaction"
+      Server_progress.write ~include_in_logs:false "hg-transaction"
     | ClientProvider.Select_new _ ->
-      ServerProgress.write ~include_in_logs:false "working"
+      Server_progress.write ~include_in_logs:false "working"
   end;
   let env = idle_if_no_client env selected_client in
   let stage =
@@ -990,11 +990,11 @@ let resolve_init_approach genv : ServerInit.init_approach * string =
 
 let program_init genv env =
   Hh_logger.log "Init id: %s" env.init_env.init_id;
-  ServerProgress.with_message "initializing..." @@ fun () ->
-  ServerProgress.enable_error_production
+  Server_progress.with_message "initializing..." @@ fun () ->
+  Server_progress.enable_error_production
     genv.local_config.ServerLocalConfig.produce_streaming_errors;
   Exit.add_hook_upon_clean_exit (fun _finale_data ->
-      ServerProgress.ErrorsWrite.unlink_at_server_stop ());
+      Server_progress.ErrorsWrite.unlink_at_server_stop ());
   let env =
     {
       env with
@@ -1043,7 +1043,7 @@ let program_init genv env =
     }
   in
   Hh_logger.log "Waiting for daemon(s) to be ready...";
-  ServerProgress.write "wrapping up init...";
+  Server_progress.write "wrapping up init...";
   ServerNotifier.wait_until_ready genv.notifier;
   ServerStamp.touch_stamp ();
   EventLogger.set_init_type init_type;
@@ -1122,7 +1122,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
         and upon clean exit we'll write "shutting down" to it.
      In both case of clean exit and abrupt exit there'll be leftover files.
      We'll rely upon tmpclean to eventually clean them up. *)
-  ServerProgress.set_root (ServerArgs.root options);
+  Server_progress.set_root (ServerArgs.root options);
   let server_finale_file = ServerFiles.server_finale_file pid in
   let server_receipt_to_monitor_file =
     ServerFiles.server_receipt_to_monitor_file pid
@@ -1131,7 +1131,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   | _ -> ());
   (try Unix.unlink server_receipt_to_monitor_file with
   | _ -> ());
-  ServerProgress.write "starting up";
+  Server_progress.write "starting up";
   Exit.add_hook_upon_clean_exit (fun finale_data ->
       begin
         try Unix.unlink server_receipt_to_monitor_file with
@@ -1147,7 +1147,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
         | _ -> ()
       end;
       begin
-        try ServerProgress.write "shutting down" with
+        try Server_progress.write "shutting down" with
         | _ -> ()
       end;
       ());

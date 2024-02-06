@@ -587,7 +587,7 @@ let go
         !num_files_searched - !last_printed_num_files_searched >= 10000
         || is_bucket_empty
       then (
-        ServerProgress.write
+        Server_progress.write
           "CST search: searched %d files..."
           !num_files_searched;
         last_printed_num_files_searched := !num_files_searched

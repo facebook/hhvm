@@ -654,7 +654,7 @@ let update_status_ (env : env msg_update) monitor_config :
         in
         let (exit_type, exit_code) = Exit_status.unpack proc_stat in
         let time_taken = Unix.time () -. process.start_t in
-        ServerProgress.write "writing crash logs";
+        Server_progress.write "writing crash logs";
         let telemetry =
           Telemetry.create ()
           |> Telemetry.string_ ~key:"unix_exit_type" ~value:exit_type
@@ -695,9 +695,9 @@ let update_status_ (env : env msg_update) monitor_config :
           ~exit_code
           ~exit_status
           ~is_oom;
-        ServerProgress.write
+        Server_progress.write
           "%s"
-          ~disposition:ServerProgress.DStopped
+          ~disposition:Server_progress.DStopped
           (Option.value_map
              exit_status
              ~f:Exit_status.show

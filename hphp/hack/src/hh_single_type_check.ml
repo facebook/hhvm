@@ -2468,7 +2468,7 @@ let main_hack opts (root : Path.t) (sharedmem_config : SharedMem.config) : unit
   (* TODO: We should have a per file config *)
   Sys_utils.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos);
   EventLogger.init_fake ();
-  ServerProgress.disable ();
+  Server_progress.disable ();
   Measure.push_global ();
 
   let (_handle : SharedMem.handle) =

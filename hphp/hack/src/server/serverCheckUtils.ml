@@ -197,7 +197,7 @@ let user_filter_type_check_files ~to_recheck ~reparsed =
     Hh_logger.log "Reading in config file at %s" config_file_path;
     try read_config_file_once () with
     | e ->
-      ServerProgress.write
+      Server_progress.write
         ~include_in_logs:false
         "error while applying user file filter, see logs to continue";
       let e = Exception.wrap e in

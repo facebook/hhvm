@@ -23,10 +23,10 @@ let show_errors (errors : Errors.finalized_error list Relative_path.Map.t) :
   in
   Printf.sprintf "Errors [%s]" counts
 
-let show_read (read : ServerProgress.ErrorsRead.read_result) : string =
+let show_read (read : Server_progress.ErrorsRead.read_result) : string =
   match read with
-  | Ok (ServerProgress.Errors { errors; timestamp = _ }) -> show_errors errors
-  | Ok (ServerProgress.Telemetry telemetry) ->
+  | Ok (Server_progress.Errors { errors; timestamp = _ }) -> show_errors errors
+  | Ok (Server_progress.Telemetry telemetry) ->
     let key =
       match Telemetry.to_json telemetry with
       | Hh_json.JSON_Object elems ->
@@ -38,7 +38,7 @@ let show_read (read : ServerProgress.ErrorsRead.read_result) : string =
   | Error (e, log_message) ->
     Printf.sprintf
       "%s [%s]"
-      (ServerProgress.show_errors_file_error e)
+      (Server_progress.show_errors_file_error e)
       log_message
 
 (** Reading from ShowProgressLwt.watch_errors_file is inherently racey:
@@ -53,7 +53,7 @@ For convenience, this function flattens all results into a string:
 *)
 let expect_qitem
     ?(delay : float = 10.0)
-    (q : ServerProgress.ErrorsRead.read_result Lwt_stream.t)
+    (q : Server_progress.ErrorsRead.read_result Lwt_stream.t)
     (expected : string) : unit Lwt.t =
   let%lwt r =
     Lwt.pick

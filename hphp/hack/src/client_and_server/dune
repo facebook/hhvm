@@ -302,7 +302,7 @@
 (library
  (name server_progress)
  (wrapped false)
- (modules serverProgress)
+ (modules server_progress)
  (libraries
    errors
    server_command_types

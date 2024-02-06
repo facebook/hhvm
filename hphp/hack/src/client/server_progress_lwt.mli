@@ -21,4 +21,4 @@ It returns a Lwt_stream.t as follows.
 val watch_errors_file :
   pid:int ->
   Unix.file_descr ->
-  ServerProgress.ErrorsRead.read_result Lwt_stream.t
+  Server_progress.ErrorsRead.read_result Lwt_stream.t

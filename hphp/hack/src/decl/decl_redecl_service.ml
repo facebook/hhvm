@@ -185,7 +185,7 @@ let load_defs_compare_and_get_fanout ctx _acc (filel : Relative_path.t list) :
 
 let merge_on_the_fly files_initial_count files_declared_count (count, ()) () =
   files_declared_count := !files_declared_count + count;
-  ServerProgress.write_percentage
+  Server_progress.write_percentage
     ~operation:"declaring"
     ~done_count:!files_declared_count
     ~total_count:files_initial_count
@@ -200,7 +200,7 @@ let merge_compute_deps
     (fanout2, old_decl_missing_count2) =
   files_computed_count := !files_computed_count + computed_count;
   let fanout = Fanout.union fanout1 fanout2 in
-  ServerProgress.write_percentage
+  Server_progress.write_percentage
     ~operation:"computing dependencies of"
     ~done_count:!files_computed_count
     ~total_count:files_initial_count
@@ -221,14 +221,14 @@ let parallel_redecl_compare_and_get_fanout
     (bucket_size : int)
     (defs_per_file : Decl_compare.VersionedNames.t Relative_path.Map.t)
     (fnl : Relative_path.t list) : Fanout.t * int =
-  ServerProgress.with_frame @@ fun () ->
+  Server_progress.with_frame @@ fun () ->
   try
     OnTheFlyStore.store defs_per_file;
     let files_initial_count = List.length fnl in
     let files_declared_count = ref 0 in
     let t = Unix.gettimeofday () in
     Hh_logger.log ~lvl "Declaring on-the-fly %d files" files_initial_count;
-    ServerProgress.write_percentage
+    Server_progress.write_percentage
       ~operation:"declaring"
       ~done_count:!files_declared_count
       ~total_count:files_initial_count
@@ -243,7 +243,7 @@ let parallel_redecl_compare_and_get_fanout
     let t = Hh_logger.log_duration ~lvl "Finished declaring on-the-fly" t in
     Hh_logger.log ~lvl "Computing dependencies of %d files" files_initial_count;
     let files_computed_count = ref 0 in
-    ServerProgress.write_percentage
+    Server_progress.write_percentage
       ~operation:"computing dependencies of"
       ~done_count:!files_computed_count
       ~total_count:files_initial_count
@@ -405,7 +405,7 @@ let merge_descendant_classes
     (descendant_classes, filtered)
     acc =
   classes_filtered_count := !classes_filtered_count + filtered;
-  ServerProgress.write_percentage
+  Server_progress.write_percentage
     ~operation:"filtering"
     ~done_count:!classes_filtered_count
     ~total_count:classes_initial_count
@@ -422,12 +422,12 @@ let filter_descendant_classes_parallel
   if classes_initial_count < 10 then
     filter_descendant_classes classes ~maybe_descendant_classes
   else
-    ServerProgress.with_frame @@ fun () ->
+    Server_progress.with_frame @@ fun () ->
     ClassSetStore.store classes;
     let classes_filtered_count = ref 0 in
     let t = Unix.gettimeofday () in
     Hh_logger.log ~lvl "Filtering %d descendant classes" classes_initial_count;
-    ServerProgress.write_percentage
+    Server_progress.write_percentage
       ~operation:"filtering"
       ~done_count:!classes_filtered_count
       ~total_count:classes_initial_count
@@ -471,7 +471,7 @@ let merge_elements
   classes_processed_count := !classes_processed_count + count;
 
   let acc = SMap.union elements acc in
-  ServerProgress.write_percentage
+  Server_progress.write_percentage
     ~operation:"getting members of"
     ~done_count:!classes_processed_count
     ~total_count:classes_initial_count
@@ -500,9 +500,9 @@ let get_elems
     if classes_initial_count < 10 then
       Decl_class_elements.get_for_classes ~old classes
     else
-      ServerProgress.with_frame @@ fun () ->
+      Server_progress.with_frame @@ fun () ->
       let classes_processed_count = ref 0 in
-      ServerProgress.write_percentage
+      Server_progress.write_percentage
         ~operation:"getting members of"
         ~done_count:!classes_processed_count
         ~total_count:classes_initial_count

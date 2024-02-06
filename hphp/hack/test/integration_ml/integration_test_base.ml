@@ -67,7 +67,7 @@ let test_init_common ?(hhi_files = []) () =
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);
   Relative_path.set_path_prefix Relative_path.Hhi (Path.make hhi);
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make tmp);
-  ServerProgress.disable ();
+  Server_progress.disable ();
 
   let handle = SharedMem.init ~num_workers:0 SharedMem.default_config in
   ignore (handle : SharedMem.handle);
@@ -110,7 +110,7 @@ let setup_server ?custom_config ?(hhi_files = []) ?edges_dir () : ServerEnv.env
   in
   let hhi_set = Relative_path.Set.of_list hhi_file_list in
 
-  ServerProgress.disable ();
+  Server_progress.disable ();
   (* Return environment *)
   { env with ServerEnv.disk_needs_parsing = hhi_set }
 

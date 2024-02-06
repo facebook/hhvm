@@ -88,7 +88,7 @@ let add_files_with_stale_errors ctx ~reparsed errors files_acc =
         acc)
 
 let resolve_files ctx env fanout =
-  ServerProgress.with_message "resolving files" @@ fun () ->
+  Server_progress.with_message "resolving files" @@ fun () ->
   let { Fanout.changed = _; to_recheck; to_recheck_if_errors } = fanout in
   let files_to_recheck = Naming_provider.get_files ctx to_recheck in
   let files_with_errors_to_recheck =

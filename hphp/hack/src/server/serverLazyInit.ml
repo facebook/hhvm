@@ -209,7 +209,7 @@ let report
       Printf.sprintf "waiting on %s..." msg1
     | (Some _, Some (msg2, _)) -> Printf.sprintf "waiting on %s..." msg2
   in
-  ServerProgress.write "%s" msg;
+  Server_progress.write "%s" msg;
   ()
 
 let download_and_load_state_exn
@@ -810,7 +810,7 @@ let initialize_naming_table
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
-  ServerProgress.with_message progress_message @@ fun () ->
+  Server_progress.with_message progress_message @@ fun () ->
   let (get_next, count, t) =
     match fnl with
     | Some fnl ->
@@ -1017,7 +1017,7 @@ let update_naming_table
   } =
     loaded_info
   in
-  ServerProgress.with_message "updating file-to-symbol table" @@ fun () ->
+  Server_progress.with_message "updating file-to-symbol table" @@ fun () ->
   let t = Unix.gettimeofday () in
   let naming_files =
     List.fold
@@ -1116,7 +1116,7 @@ let compute_fanout
     ~new_naming_table
     ~dirty_master_files
     ~dirty_local_files =
-  ServerProgress.with_message "figuring out files to recheck" @@ fun () ->
+  Server_progress.with_message "figuring out files to recheck" @@ fun () ->
   let partition_unchanged_hash dirty_files =
     Relative_path.Set.partition
       (fun f ->
@@ -1312,7 +1312,7 @@ let saved_state_init
         t
   in
 
-  ServerProgress.write "loading saved state";
+  Server_progress.write "loading saved state";
 
   let ctx = Provider_utils.ctx_from_server_env env in
   let do_ () : (loaded_info, load_state_error) result =
@@ -1350,7 +1350,7 @@ let saved_state_init
   match state_result with
   | Error err -> Error err
   | Ok (loaded_info, changed_while_parsing, clock) ->
-    ServerProgress.write "loading saved state succeeded";
+    Server_progress.write "loading saved state succeeded";
     Hh_logger.log "Watchclock: %s" (ServerEnv.show_clock clock);
     let (env, t) =
       post_saved_state_initialization

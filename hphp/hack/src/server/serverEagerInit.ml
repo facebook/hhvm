@@ -37,7 +37,7 @@ let type_decl
     (env : ServerEnv.env)
     (defs_per_file : Naming_table.defs_per_file)
     (t : float) : ServerEnv.env * float =
-  ServerProgress.with_message "evaluating type declarations" @@ fun () ->
+  Server_progress.with_message "evaluating type declarations" @@ fun () ->
   let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
   let ctx = Provider_utils.ctx_from_server_env env in
   Decl_service.go ~bucket_size ctx genv.workers defs_per_file;

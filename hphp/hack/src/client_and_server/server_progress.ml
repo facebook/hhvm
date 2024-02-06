@@ -44,7 +44,7 @@ let disable () : unit = root := Some Path.dummy_path
 
 let server_progress_file () =
   match !root with
-  | None -> failwith "ServerProgress.set_root must be called first"
+  | None -> failwith "Server_progress.set_root must be called first"
   | Some root when Path.equal root Path.dummy_path -> None
   | Some root -> Some (ServerFiles.server_progress_file root)
 
@@ -102,7 +102,7 @@ let read () : t =
     }
   in
   match server_progress_file () with
-  | None -> failwith "ServerProgress.disable: can't read it"
+  | None -> failwith "Server_progress.disable: can't read it"
   | Some server_progress_file ->
     let content = ref "[not yet read content]" in
     (try
@@ -249,7 +249,7 @@ let enable_error_production (b : bool) : unit = is_production_enabled := b
 
 let errors_file_path () =
   match !root with
-  | None -> failwith "ServerProgress.set_root must be called first"
+  | None -> failwith "Server_progress.set_root must be called first"
   | Some _ when not !is_production_enabled -> None
   | Some root when Path.equal root Path.dummy_path -> None
   | Some root -> Some (ServerFiles.errors_file_path root)
@@ -608,7 +608,7 @@ module ErrorsRead = struct
     | ErrorsFile.VersionHeader _
     | ErrorsFile.Header _ ->
       failwith
-        "do ServerProgress.ErrorsRead.openfile before read_next_error or Server_progress_lwt.watch_errors_file"
+        "do Server_progress.ErrorsRead.openfile before read_next_error or Server_progress_lwt.watch_errors_file"
     | ErrorsFile.Item item -> Ok item
     | ErrorsFile.End { error; log_message; _ } -> Error (error, log_message)
 end

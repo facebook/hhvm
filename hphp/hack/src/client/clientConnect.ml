@@ -58,7 +58,7 @@ type conn = {
 }
 
 let read_and_show_progress (progress_callback : string option -> unit) : unit =
-  let { ServerProgress.message; _ } = ServerProgress.read () in
+  let { Server_progress.message; _ } = Server_progress.read () in
   progress_callback (Some message);
   ()
 

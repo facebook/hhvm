@@ -149,7 +149,7 @@ let try_with_server
             Sys_utils.write_file
               ~file:(Path.concat root name |> Path.to_string)
               content);
-        ServerProgress.set_root root;
+        Server_progress.set_root root;
         ServerFiles.set_tmp_FOR_TESTING_ONLY tmp;
         let%lwt () = f ~root ~hhi ~tmp in
         Lwt.return_unit
@@ -185,16 +185,16 @@ let try_with_server
       Sys_utils.rm_dir_tree ~skip_mocking:true (Path.to_string tmp);
       Lwt.return_unit)
 
-(** Looks for substring 'expected' in the ServerProgress message;
-will keep polling the ServerProgress every 0.1s up to 'deadline' until it finds it,
+(** Looks for substring 'expected' in the Server_progress message;
+will keep polling the Server_progress every 0.1s up to 'deadline' until it finds it,
 and will raise an exception if it doesn't. *)
 let rec wait_for_progress ~(deadline : float) ~(expected : string) : unit Lwt.t
     =
-  let { ServerProgress.message; disposition; _ } = ServerProgress.read () in
+  let { Server_progress.message; disposition; _ } = Server_progress.read () in
   let actual =
     Printf.sprintf
       "[%s] %s"
-      (ServerProgress.show_disposition disposition)
+      (Server_progress.show_disposition disposition)
       message
   in
   if String.is_substring actual ~substring:expected then
@@ -381,8 +381,10 @@ let test_errors_complete () : bool Lwt.t =
         (* at this point we should have all errors available *)
         let errors_file_path = ServerFiles.errors_file_path root in
         let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
-        let { ServerProgress.ErrorsRead.pid; _ } =
-          ServerProgress.ErrorsRead.openfile fd |> Result.ok |> Option.value_exn
+        let { Server_progress.ErrorsRead.pid; _ } =
+          Server_progress.ErrorsRead.openfile fd
+          |> Result.ok
+          |> Option.value_exn
         in
         let q = Server_progress_lwt.watch_errors_file ~pid fd in
         let%lwt () = expect_qitem q "Telemetry [to_recheck_count]" in
@@ -394,8 +396,10 @@ let test_errors_complete () : bool Lwt.t =
         Unix.close fd;
         (* a second client will also observe the files *)
         let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
-        let { ServerProgress.ErrorsRead.pid; _ } =
-          ServerProgress.ErrorsRead.openfile fd |> Result.ok |> Option.value_exn
+        let { Server_progress.ErrorsRead.pid; _ } =
+          Server_progress.ErrorsRead.openfile fd
+          |> Result.ok
+          |> Option.value_exn
         in
         let q = Server_progress_lwt.watch_errors_file ~pid fd in
         let%lwt () = expect_qitem q "Telemetry [to_recheck_count]" in
@@ -445,8 +449,8 @@ let test_errors_during () : bool Lwt.t =
             ~deadline:(Unix.gettimeofday () +. 60.0)
         in
         (* at this point we should have one error available *)
-        let { ServerProgress.ErrorsRead.pid; _ } =
-          ServerProgress.ErrorsRead.openfile fd1
+        let { Server_progress.ErrorsRead.pid; _ } =
+          Server_progress.ErrorsRead.openfile fd1
           |> Result.ok
           |> Option.value_exn
         in
@@ -458,8 +462,8 @@ let test_errors_during () : bool Lwt.t =
         let%lwt () = expect_qitem q1 "nothing" in
         (* and a second client should be able to observe it too *)
         let fd2 = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
-        let { ServerProgress.ErrorsRead.pid; _ } =
-          ServerProgress.ErrorsRead.openfile fd2
+        let { Server_progress.ErrorsRead.pid; _ } =
+          Server_progress.ErrorsRead.openfile fd2
           |> Result.ok
           |> Option.value_exn
         in

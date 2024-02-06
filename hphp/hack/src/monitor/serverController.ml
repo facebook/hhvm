@@ -82,7 +82,7 @@ let start_server_daemon
      started up quickly enough to write its initial message first. It's benign because
      either message will communicate the right intent to the user, and in any case the server
      will always have further progress updates to write. *)
-  ServerProgress.write "starting hh_server";
+  Server_progress.write "starting hh_server";
 
   let server =
     ServerProcess.

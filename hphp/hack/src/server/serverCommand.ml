@@ -113,7 +113,7 @@ let handle
      CMD is the "--type-at-pos" or similar command-line argument that gave rise to serverRpc, or something sensible for LSP.
      PHASE is empty at the start, "done" once we've finished handling, "check" if Needs_full_recheck. *)
   let send_progress phase =
-    ServerProgress.write
+    Server_progress.write
       ~include_in_logs:false
       "%s%s"
       (ServerCommandTypesUtils.status_describe_cmd msg)

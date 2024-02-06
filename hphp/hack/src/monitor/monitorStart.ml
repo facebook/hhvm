@@ -32,7 +32,7 @@ let monitor_daemon_main
   Folly.ensure_folly_init ();
 
   let www_root = ServerArgs.root options in
-  ServerProgress.set_root www_root;
+  Server_progress.set_root www_root;
 
   (* Check mode: --check means we'll start up the server and it will do a typecheck
      and then terminate; in the absence of that flag, (1) if a monitor was already running
@@ -99,9 +99,9 @@ let monitor_daemon_main
     ));
 
   (* Now that we've got an exclusive lock and all globals have been initialized: *)
-  ServerProgress.write "monitor initializing...";
+  Server_progress.write "monitor initializing...";
   Exit.add_hook_upon_clean_exit (fun _finale_data ->
-      ServerProgress.try_delete ());
+      Server_progress.try_delete ());
 
   if ServerArgs.check_mode options then (
     Hh_logger.log "%s" "Will run once in check mode then exit.";
@@ -145,7 +145,7 @@ let monitor_daemon_main
               server_log_file = ServerFiles.log_link www_root;
               monitor_log_file = ServerFiles.monitor_log_link www_root;
             })
-      ~finally:ServerProgress.try_delete
+      ~finally:Server_progress.try_delete
 
 let daemon_entry =
   Daemon.register_entry_point

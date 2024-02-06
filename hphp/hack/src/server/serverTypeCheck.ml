@@ -106,7 +106,7 @@ let push_errors_outside_files_to_errors_file
              (path, error) :: acc)
     |> Errors.from_file_error_list
   in
-  ServerProgress.ErrorsWrite.report typing_errors_not_in_files_to_check;
+  Server_progress.ErrorsWrite.report typing_errors_not_in_files_to_check;
   ()
 
 let indexing genv env to_check cgroup_steps :
@@ -501,7 +501,7 @@ let type_check_core genv env start_time ~check_reason cgroup_steps =
   in
 
   (* PARSING ***************************************************************)
-  ServerProgress.write ~include_in_logs:false "parsing %d files" reparse_count;
+  Server_progress.write ~include_in_logs:false "parsing %d files" reparse_count;
   let logstring = Printf.sprintf "Parsing %d files" reparse_count in
   Hh_logger.log "Begin %s" logstring;
 
@@ -524,7 +524,7 @@ let type_check_core genv env start_time ~check_reason cgroup_steps =
   let t = Hh_logger.log_duration logstring t in
 
   (* UPDATE NAMING TABLES **************************************************)
-  ServerProgress.write ~include_in_logs:false "updating naming tables";
+  Server_progress.write ~include_in_logs:false "updating naming tables";
   let logstring = "updating naming tables" in
   Hh_logger.log "Begin %s" logstring;
   let telemetry =
@@ -548,7 +548,7 @@ let type_check_core genv env start_time ~check_reason cgroup_steps =
   (* The things we redecl `defs_per_file` come from the current content of
      files changed `defs_per_files_parsed`, plus the previous content `add_old_decls`,
      plus those that had duplicate names `failed_naming` *)
-  ServerProgress.write "determining changes";
+  Server_progress.write "determining changes";
   let deptable_unlocked =
     Typing_deps.allow_dependency_table_reads env.deps_mode true
   in
@@ -650,7 +650,7 @@ let type_check_core genv env start_time ~check_reason cgroup_steps =
     }
   in
   (* HANDLE PRECHECKED FILES AFTER LOCAL CHANGES ***************************)
-  ServerProgress.write "determining trunk changes";
+  Server_progress.write "determining trunk changes";
   Hh_logger.log "Begin evaluating prechecked changes";
   let telemetry =
     Telemetry.duration telemetry ~key:"prechecked1_start" ~start_time
@@ -691,7 +691,7 @@ let type_check_core genv env start_time ~check_reason cgroup_steps =
   (* The things we recheck are those from the fanout `do_redecl().fanout` plus every file
      whose error reasons were in changed files. *)
   let type_check_start_t = Unix.gettimeofday () in
-  ServerProgress.write "typechecking";
+  Server_progress.write "typechecking";
 
   (* For a full check, typecheck everything which may be affected by the
      changes. For a lazy check, typecheck only the affected files which are
@@ -716,7 +716,7 @@ let type_check_core genv env start_time ~check_reason cgroup_steps =
       to_recheck
   in
 
-  ServerProgress.write
+  Server_progress.write
     "typechecking %d files"
     (Relative_path.Set.cardinal to_recheck);
 
@@ -753,7 +753,7 @@ let type_check_core genv env start_time ~check_reason cgroup_steps =
       of the state-on-disk being the same as what the parser saw *)
   Hh_logger.log "Begin typechecking %d files." to_recheck_count;
   if do_errors_file then
-    ServerProgress.ErrorsWrite.telemetry
+    Server_progress.ErrorsWrite.telemetry
       (Telemetry.create ()
       |> Telemetry.int_ ~key:"to_recheck_count" ~value:to_recheck_count);
 
@@ -791,7 +791,7 @@ let type_check_core genv env start_time ~check_reason cgroup_steps =
 
   let heap_size = SharedMem.SMTelemetry.heap_size () in
 
-  ServerProgress.write "typecheck ending";
+  Server_progress.write "typecheck ending";
   let logstring =
     Printf.sprintf
       "Typechecked %d files [%d errors]"
@@ -1084,7 +1084,7 @@ let type_check :
   *)
   let ignore_hh_version = ServerArgs.ignore_hh_version genv.ServerEnv.options in
   (* Restart the errors-file at the start of type_check. *)
-  ServerProgress.ErrorsWrite.new_empty_file
+  Server_progress.ErrorsWrite.new_empty_file
     ~ignore_hh_version
     ~clock:env.clock
     ~cancel_reason:env.why_needs_server_type_check;
@@ -1105,7 +1105,7 @@ let type_check :
 
      For incomplete typechecks, we don't do anything here. Necessarily ServerMain
      will do another round of [ServerTypeCheck.type_check] (i.e. us) shortly,
-     and then next round will call [ServerProgress.ErrorsWrite.new_empty_file]
+     and then next round will call [Server_progress.ErrorsWrite.new_empty_file]
      which will put a "restarted" sentinel at the end of the current file as
      well as starting a new file. Indeed it's *better* to place the "restarted"
      sentinel at that future time rather than now, because it'll have a more
@@ -1114,7 +1114,7 @@ let type_check :
     Relative_path.Set.is_empty env.needs_recheck
     && Relative_path.Set.is_empty env.disk_needs_parsing
   in
-  if is_complete then ServerProgress.ErrorsWrite.complete telemetry;
+  if is_complete then Server_progress.ErrorsWrite.complete telemetry;
 
   (* If this was a full check, store in [env] whether+why it got interrupted+cancelled. *)
   let env =

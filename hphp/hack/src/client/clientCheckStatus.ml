@@ -119,7 +119,7 @@ let go_streaming_on_fd
      it never terminates *)
   let rec show_progress () : 'a Lwt.t =
     let message =
-      try (ServerProgress.read ()).ServerProgress.message with
+      try (Server_progress.read ()).Server_progress.message with
       | _ -> "unknown"
     in
     latest_progress := Some message;
@@ -132,7 +132,7 @@ let go_streaming_on_fd
      every 0.2s, and displays them. It terminates once the errors.bin file has an "end"
      sentinel written to it, or the process that was writing errors.bin terminates. *)
   let rec consume (displayed_count : int) :
-      (int * ServerProgress.errors_file_error * string) Lwt.t =
+      (int * Server_progress.errors_file_error * string) Lwt.t =
     let%lwt errors = Lwt_stream.get errors_stream in
     match errors with
     | None ->
@@ -143,12 +143,12 @@ let go_streaming_on_fd
       failwith "Expected end_sentinel before end of stream"
     | Some (Error (end_sentinel, log_message)) ->
       Lwt.return (displayed_count, end_sentinel, log_message)
-    | Some (Ok (ServerProgress.Telemetry telemetry_item)) ->
+    | Some (Ok (Server_progress.Telemetry telemetry_item)) ->
       errors_file_telemetry :=
         Telemetry.merge !errors_file_telemetry telemetry_item;
       update_partial_telemetry displayed_count;
       consume displayed_count
-    | Some (Ok (ServerProgress.Errors { errors; timestamp = _ })) ->
+    | Some (Ok (Server_progress.Errors { errors; timestamp = _ })) ->
       first_error_time :=
         Option.first_some !first_error_time (Some (Unix.gettimeofday ()));
       (* We'll clear the spinner, print errs to stdout, flush stdout, and restore the spinner *)
@@ -177,7 +177,7 @@ let go_streaming_on_fd
       if displayed_count >= Option.value max_errors ~default:Int.max_value then
         Lwt.return
           ( displayed_count,
-            ServerProgress.Complete (Telemetry.create ()),
+            Server_progress.Complete (Telemetry.create ()),
             "max-errors" )
       else
         consume displayed_count
@@ -193,7 +193,7 @@ let go_streaming_on_fd
 
   let (exit_status, telemetry) =
     match end_sentinel with
-    | ServerProgress.Complete telemetry ->
+    | Server_progress.Complete telemetry ->
       (* complete either because the server completed, or we truncated early *)
       Option.iter
         (Errors.format_summary
@@ -209,7 +209,7 @@ let go_streaming_on_fd
         (Exit_status.No_error, telemetry)
       else
         (Exit_status.Type_error, telemetry)
-    | ServerProgress.Restarted { user_message; log_message } ->
+    | Server_progress.Restarted { user_message; log_message } ->
       Hh_logger.log
         "Errors-file: on %s, read Restarted(%s,%s)"
         (Sys_utils.show_inode fd)
@@ -227,10 +227,10 @@ let go_streaming_on_fd
       Hh_logger.log
         "Errors-file: on %s, read %s"
         (Sys_utils.show_inode fd)
-        (ServerProgress.show_errors_file_error end_sentinel);
+        (Server_progress.show_errors_file_error end_sentinel);
       Printf.printf
         "Hh_server has terminated. [%s]\n%!"
-        (ServerProgress.show_errors_file_error end_sentinel);
+        (Server_progress.show_errors_file_error end_sentinel);
       raise Exit_status.(Exit_with Exit_status.Typecheck_abandoned)
   in
 
@@ -427,13 +427,13 @@ let rec keep_trying_to_open
       ~deadline
       ~root
   | Some fd -> begin
-    match ServerProgress.ErrorsRead.openfile fd with
+    match Server_progress.ErrorsRead.openfile fd with
     | Error (end_sentinel, log_message) when not has_already_attempted_connect
       ->
       Hh_logger.log
         "Errors-file: on %s, read sentinel %s [%s], so connecting then trying again"
         (Sys_utils.show_inode fd)
-        (ServerProgress.show_errors_file_error end_sentinel)
+        (Server_progress.show_errors_file_error end_sentinel)
         log_message;
       (* If there was an existing file but it was bad -- e.g. came from a dead server,
          or binary mismatch, then we will connect as before. In the case of binary mismatch,
@@ -456,13 +456,13 @@ let rec keep_trying_to_open
       Hh_logger.log
         "Errors-file: on %s, read sentinel %s [%s], and already connected once, so giving up."
         (Sys_utils.show_inode fd)
-        (ServerProgress.show_errors_file_error end_sentinel)
+        (Server_progress.show_errors_file_error end_sentinel)
         log_message;
       progress_callback None;
       match end_sentinel with
-      | ServerProgress.Build_id_mismatch ->
+      | Server_progress.Build_id_mismatch ->
         raise (Exit_status.Exit_with Exit_status.Build_id_mismatch)
-      | ServerProgress.Killed finale_data ->
+      | Server_progress.Killed finale_data ->
         raise
           (Exit_status.Exit_with
              (Exit_status.Server_hung_up_should_abort finale_data))
@@ -470,10 +470,10 @@ let rec keep_trying_to_open
         failwith
           (Printf.sprintf
              "Unexpected error from openfile: %s [%s]"
-             (ServerProgress.show_errors_file_error end_sentinel)
+             (Server_progress.show_errors_file_error end_sentinel)
              log_message)
     end
-    | Ok { ServerProgress.ErrorsRead.pid; clock = None; _ } ->
+    | Ok { Server_progress.ErrorsRead.pid; clock = None; _ } ->
       (* If there's an existing file, but it's not using watchman, then we cannot offer
          consistency guarantees. We'll just go with it. This happens for instance
          if the server was started using dfind instead of watchman. *)
@@ -481,7 +481,7 @@ let rec keep_trying_to_open
         "Errors-file: %s is present, without watchman, so just going with it."
         (Sys_utils.show_inode fd);
       Lwt.return (pid, fd)
-    | Ok { ServerProgress.ErrorsRead.clock = Some clock; _ }
+    | Ok { Server_progress.ErrorsRead.clock = Some clock; _ }
       when Option.equal String.equal (Some clock) already_checked_clock ->
       (* we've already checked this clock! so just wait a short time, then re-open the file
          so we soon discover when it has a new clock. *)
@@ -493,7 +493,7 @@ let rec keep_trying_to_open
         ~progress_callback
         ~deadline
         ~root
-    | Ok { ServerProgress.ErrorsRead.pid; clock = Some clock; _ } -> begin
+    | Ok { Server_progress.ErrorsRead.pid; clock = Some clock; _ } -> begin
       Hh_logger.log
         "Errors-file: %s is present, was started at clock %s, so querying watchman..."
         (Sys_utils.show_inode fd)

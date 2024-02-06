@@ -10,24 +10,24 @@
 report it finds into the queue. If it gets an error then it sticks that
 in the queue and terminates.
 Exception: if it gets a NothingYet error, then it either continues polling
-the file, or ends the queue with ServerProgress.Killed, depending on whether
+the file, or ends the queue with Server_progress.Killed, depending on whether
 the producing PID is still alive. *)
 let rec watch
     ~(pid : int)
     ~(pid_future : unit Lwt.t)
     (fd : Unix.file_descr)
-    (add : ServerProgress.ErrorsRead.read_result option -> unit) : unit Lwt.t =
-  match ServerProgress.ErrorsRead.read_next_errors fd with
+    (add : Server_progress.ErrorsRead.read_result option -> unit) : unit Lwt.t =
+  match Server_progress.ErrorsRead.read_next_errors fd with
   | Ok errors ->
     add (Some (Ok errors));
     watch ~pid ~pid_future fd add
-  | Error (ServerProgress.NothingYet, _) when Lwt.is_sleeping pid_future ->
+  | Error (Server_progress.NothingYet, _) when Lwt.is_sleeping pid_future ->
     let%lwt () = Lwt_unix.sleep 0.2 in
     watch ~pid ~pid_future fd add
-  | Error (ServerProgress.NothingYet, _) ->
+  | Error (Server_progress.NothingYet, _) ->
     let server_finale_file = ServerFiles.server_finale_file pid in
     let finale_data = Exit_status.get_finale_data server_finale_file in
-    add (Some (Error (ServerProgress.Killed finale_data, "pid")));
+    add (Some (Error (Server_progress.Killed finale_data, "pid")));
     add None;
     Lwt.return_unit
   | Error e ->
@@ -52,7 +52,7 @@ let rec watch_pid (pid : int) : unit Lwt.t =
     Lwt.return_unit
 
 let watch_errors_file ~(pid : int) (fd : Unix.file_descr) :
-    ServerProgress.ErrorsRead.read_result Lwt_stream.t =
+    Server_progress.ErrorsRead.read_result Lwt_stream.t =
   let (q, add) = Lwt_stream.create () in
   let pid_future = watch_pid pid in
   let _watcher_future =

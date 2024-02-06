@@ -103,24 +103,25 @@ type errors_conn =
           we'll only attempt another seek (hence, update [seek_reason] or switch to [TailingErrors])
           once we find a new, different errors.bin file. *)
       seek_reason:
-        ServerProgress.errors_file_error * ServerProgress.ErrorsRead.log_message;
+        Server_progress.errors_file_error
+        * Server_progress.ErrorsRead.log_message;
           (** This contains the latest explanation of why we entered or remain in [SeekingErrors] state.
           "Latest" in the sense that every time [handle_tick] is unable to open or find a new errors-file,
           or when [handle_errors_file_item] enters [SeekingErrors] mode, then it will will update [seek_reason].
-          * [ServerProgress.NothingYet] is used at initialization, before anything's yet been tried.
-          * [ServerProgress.NothingYet] is also used when [handle_tick] couldn't open an errors-file.
-          * [ServerProgress.Completed] is used when we were in [TailingErrors], and then [handle_errors_file_item]
+          * [Server_progress.NothingYet] is used at initialization, before anything's yet been tried.
+          * [Server_progress.NothingYet] is also used when [handle_tick] couldn't open an errors-file.
+          * [Server_progress.Completed] is used when we were in [TailingErrors], and then [handle_errors_file_item]
             discovered that the errors-file was complete, and so switched over to [SeekingErrors]
-          * Other cases are used when [handle_tick] calls [ServerProgress.ErrorsRead.openfile]
-            and gets an error. The only possibilities are [ServerProgress.{Killed,Build_id_mismatch}].
+          * Other cases are used when [handle_tick] calls [Server_progress.ErrorsRead.openfile]
+            and gets an error. The only possibilities are [Server_progress.{Killed,Build_id_mismatch}].
 
           It's a bit naughty of us to report our own "seek reasons" (completed/nothing-yet) through
-          the error codes that properly belong to [ServerProgress.ErrorsRead]. But they fit so well... *)
+          the error codes that properly belong to [Server_progress.ErrorsRead]. But they fit so well... *)
     }  (** Haven't yet found a suitable errors.bin, but looking! *)
   | TailingErrors of {
       start_time: float;
       fd: Unix.file_descr;
-      q: ServerProgress.ErrorsRead.read_result Lwt_stream.t;
+      q: Server_progress.ErrorsRead.read_result Lwt_stream.t;
     }  (** We are tailing this errors.bin file *)
 
 (** What triggered the errors that we're sending right now? *)
@@ -288,15 +289,18 @@ one we already found. It's updated
 let latest_hh_server_errors : errors_conn ref =
   ref
     (SeekingErrors
-       { prev_st_ino = None; seek_reason = (ServerProgress.NothingYet, "init") })
+       {
+         prev_st_ino = None;
+         seek_reason = (Server_progress.NothingYet, "init");
+       })
 
 (** This is the latest state of the progress.json file, updated once a second
 in a background Lwt process [background_status_refresher]. This file is where the
 monitor reports its status like "starting up", and hh_server reports its status
 like "typechecking". *)
-let latest_hh_server_progress : ServerProgress.t ref =
+let latest_hh_server_progress : Server_progress.t ref =
   ref
-    ServerProgress.
+    Server_progress.
       {
         pid = 0;
         disposition = DWorking;
@@ -350,7 +354,7 @@ type event =
       (** This event represents whenever clientIdeDaemon
       pushes a notification to us, e.g. a progress or status update.
       Handled by [handle_client_ide_notification]. *)
-  | Errors_file of ServerProgress.ErrorsRead.read_result option
+  | Errors_file of Server_progress.ErrorsRead.read_result option
       (** Under [--config ide_standalone=true], we once a second seek out a new errors.bin
       file that the server has produced to accumulate errors in the current typecheck.
       Once we have one, we "tail -f" it until it's finished. This event signals
@@ -399,10 +403,10 @@ let event_to_string (event : event) : string =
   | Refs_file (Some refs) ->
     Printf.sprintf "Refs_file(%d refs)" (List.length refs)
   | Errors_file None -> "Errors_file(anomalous end-of-stream)"
-  | Errors_file (Some (Ok (ServerProgress.Telemetry _))) ->
+  | Errors_file (Some (Ok (Server_progress.Telemetry _))) ->
     "Errors_file: telemetry"
-  | Errors_file (Some (Ok (ServerProgress.Errors { errors; timestamp = _ }))) ->
-  begin
+  | Errors_file (Some (Ok (Server_progress.Errors { errors; timestamp = _ })))
+    -> begin
     match Relative_path.Map.choose_opt errors with
     | None -> "Errors_file(anomalous empty report)"
     | Some (file, errors_in_file) ->
@@ -414,7 +418,7 @@ let event_to_string (event : event) : string =
   | Errors_file (Some (Error (e, log_message))) ->
     Printf.sprintf
       "Errors_file: %s [%s]"
-      (ServerProgress.show_errors_file_error e)
+      (Server_progress.show_errors_file_error e)
       log_message
   | Shell_out_complete _ -> "Shell_out_complete"
   | Deferred_check (uri, _trigger) ->
@@ -691,13 +695,13 @@ clientIdeDaemon, or whether neither is ready within 1s. *)
 let get_client_message_source
     (client : Jsonrpc.t option)
     (ide_service : ClientIdeService.t ref)
-    (q_opt : ServerProgress.ErrorsRead.read_result Lwt_stream.t option)
+    (q_opt : Server_progress.ErrorsRead.read_result Lwt_stream.t option)
     (refs_q_opt :
       FindRefsWireFormat.half_open_one_based list Lwt_stream.t option)
     (uri_needs_check : (DocumentUri.t * errors_trigger) option) :
     [ `From_client
     | `From_ide_service of event
-    | `From_q of ServerProgress.ErrorsRead.read_result option
+    | `From_q of Server_progress.ErrorsRead.read_result option
     | `From_refs_q of FindRefsWireFormat.half_open_one_based list option
     | `From_uris_that_need_check of DocumentUri.t * errors_trigger
     | `No_source
@@ -1427,7 +1431,7 @@ let stop_ide_service
 (3) status of clientIdeDaemon. It synthesizes a status message suitable for display
 in the VSCode status bar. *)
 let merge_statuses_standalone
-    (server : ServerProgress.t)
+    (server : Server_progress.t)
     (errors : errors_conn)
     (ide : ClientIdeService.t) : Lsp.ShowStatusFB.params =
   let ( (client_ide_disposition, client_ide_is_initializing),
@@ -1435,22 +1439,22 @@ let merge_statuses_standalone
         client_ide_tooltip ) =
     match ClientIdeService.get_status ide with
     | ClientIdeService.Status.Initializing ->
-      ( (ServerProgress.DWorking, true),
+      ( (Server_progress.DWorking, true),
         "Hack: initializing",
         "Hack IDE support is initializing (loading saved state)" )
     | ClientIdeService.Status.Rpc _ ->
-      ( (ServerProgress.DWorking, false),
+      ( (Server_progress.DWorking, false),
         "Hack",
         "Hack is working on IDE requests" )
     | ClientIdeService.Status.Ready ->
-      ((ServerProgress.DReady, false), "Hack", "Hack IDE support is ready")
+      ((Server_progress.DReady, false), "Hack", "Hack IDE support is ready")
     | ClientIdeService.Status.Stopped s ->
-      ( (ServerProgress.DStopped, false),
+      ( (Server_progress.DStopped, false),
         "Hack: " ^ s.ClientIdeMessage.short_user_message,
         s.ClientIdeMessage.medium_user_message ^ see_output_hack )
   in
   let (hh_server_disposition, hh_server_message, hh_server_tooltip) =
-    let open ServerProgress in
+    let open Server_progress in
     match (server, errors) with
     | ({ disposition = DStopped; message; _ }, _) ->
       ( DStopped,
@@ -1458,7 +1462,7 @@ let merge_statuses_standalone
         Printf.sprintf "hh_server is %s. %s" message fix_by_running_hh )
     | ( _,
         SeekingErrors
-          { seek_reason = (ServerProgress.Build_id_mismatch, log_message); _ }
+          { seek_reason = (Server_progress.Build_id_mismatch, log_message); _ }
       ) ->
       ( DStopped,
         "Hack: hh_server wrong version",
@@ -1478,7 +1482,7 @@ let merge_statuses_standalone
     | ( { disposition = DReady; _ },
         SeekingErrors
           {
-            seek_reason = (ServerProgress.(NothingYet | Killed _), log_message);
+            seek_reason = (Server_progress.(NothingYet | Killed _), log_message);
             _;
           } ) ->
       ( DStopped,
@@ -1489,8 +1493,8 @@ let merge_statuses_standalone
           fix_by_running_hh )
     | ( { disposition = DReady; _ },
         SeekingErrors { seek_reason = (e, log_message); _ } )
-      when not (ServerProgress.is_complete e) ->
-      let e = ServerProgress.show_errors_file_error e in
+      when not (Server_progress.is_complete e) ->
+      let e = Server_progress.show_errors_file_error e in
       ( DStopped,
         "Hack: hh_server " ^ e,
         Printf.sprintf
@@ -1506,20 +1510,20 @@ let merge_statuses_standalone
     match
       (client_ide_disposition, client_ide_is_initializing, hh_server_disposition)
     with
-    | (ServerProgress.DWorking, true, _) ->
-      (ServerProgress.DWorking, client_ide_message)
-    | (_, _, ServerProgress.DWorking) ->
-      (ServerProgress.DWorking, hh_server_message)
-    | (ServerProgress.DWorking, false, ServerProgress.DStopped) ->
-      (ServerProgress.DWorking, hh_server_message)
-    | (ServerProgress.DWorking, false, _) ->
-      (ServerProgress.DWorking, client_ide_message)
-    | (ServerProgress.DStopped, _, _) ->
-      (ServerProgress.DStopped, client_ide_message)
-    | (_, _, ServerProgress.DStopped) ->
-      (ServerProgress.DStopped, hh_server_message)
-    | (ServerProgress.DReady, _, ServerProgress.DReady) ->
-      (ServerProgress.DReady, "Hack")
+    | (Server_progress.DWorking, true, _) ->
+      (Server_progress.DWorking, client_ide_message)
+    | (_, _, Server_progress.DWorking) ->
+      (Server_progress.DWorking, hh_server_message)
+    | (Server_progress.DWorking, false, Server_progress.DStopped) ->
+      (Server_progress.DWorking, hh_server_message)
+    | (Server_progress.DWorking, false, _) ->
+      (Server_progress.DWorking, client_ide_message)
+    | (Server_progress.DStopped, _, _) ->
+      (Server_progress.DStopped, client_ide_message)
+    | (_, _, Server_progress.DStopped) ->
+      (Server_progress.DStopped, hh_server_message)
+    | (Server_progress.DReady, _, Server_progress.DReady) ->
+      (Server_progress.DReady, "Hack")
   in
   let root_tooltip =
     if Sys_utils.deterministic_behavior_for_tests () then
@@ -1536,9 +1540,9 @@ let merge_statuses_standalone
   in
   let type_ =
     match disposition with
-    | ServerProgress.DStopped -> MessageType.ErrorMessage
-    | ServerProgress.DWorking -> MessageType.WarningMessage
-    | ServerProgress.DReady -> MessageType.InfoMessage
+    | Server_progress.DStopped -> MessageType.ErrorMessage
+    | Server_progress.DWorking -> MessageType.WarningMessage
+    | Server_progress.DReady -> MessageType.InfoMessage
   in
   {
     ShowStatusFB.shortMessage = Some message;
@@ -1568,7 +1572,7 @@ and calls [refresh_status]. Because it's an Lwt process, it's able to update
 status even when we're stuck waiting for RPC. *)
 let background_status_refresher (ide_service : ClientIdeService.t ref) : unit =
   let rec loop () =
-    latest_hh_server_progress := ServerProgress.read ();
+    latest_hh_server_progress := Server_progress.read ();
     refresh_status ~ide_service;
     let%lwt () = Lwt_unix.sleep 1.0 in
     loop ()
@@ -3501,7 +3505,7 @@ since these will have come recently from clientIdeDaemon, to which we grant prim
 let handle_errors_file_item
     ~(state : state ref)
     ~(ide_service : ClientIdeService.t ref)
-    (item : ServerProgress.ErrorsRead.read_result option) :
+    (item : Server_progress.ErrorsRead.read_result option) :
     result_telemetry option Lwt.t =
   (* a small helper, to send the actual lsp message *)
   let publish params =
@@ -3531,7 +3535,7 @@ let handle_errors_file_item
       SeekingErrors
         {
           prev_st_ino = None;
-          seek_reason = (ServerProgress.NothingYet, "eof-error");
+          seek_reason = (Server_progress.NothingYet, "eof-error");
         };
     Lwt.return_none
   | Some (Error (end_sentinel, log_message)) ->
@@ -3546,26 +3550,26 @@ let handle_errors_file_item
         };
     begin
       match end_sentinel with
-      | ServerProgress.NothingYet
-      | ServerProgress.Build_id_mismatch ->
+      | Server_progress.NothingYet
+      | Server_progress.Build_id_mismatch ->
         failwith
           ("not possible out of q: "
-          ^ ServerProgress.show_errors_file_error end_sentinel
+          ^ Server_progress.show_errors_file_error end_sentinel
           ^ " "
           ^ log_message)
-      | ServerProgress.Stopped
-      | ServerProgress.Killed _ ->
+      | Server_progress.Stopped
+      | Server_progress.Killed _ ->
         (* At this point we'd like to erase all the squiggles that came from hh_server.
            All we'll do is leave the errors for now, and then a subsequent [try_open_errors_file]
            will determine that we've transitioned from an ok state (like we leave it in right now)
            to an error state, and it takes that opportunity to erase all squiggles. *)
         ()
-      | ServerProgress.Restarted _ ->
+      | Server_progress.Restarted _ ->
         (* If the typecheck restarted, we'll just leave all existing errors as they are.
            We have no evidence upon which to add or erase anything.
            It will all be fixed in the next typecheck to complete. *)
         ()
-      | ServerProgress.Complete _telemetry ->
+      | Server_progress.Complete _telemetry ->
         let lenv = validate_error_complete_TEMPORARY lenv ~start_time in
         (* If the typecheck completed, then we can erase all diagnostics (from closed-files)
            that were reported prior to the start of the typecheck - regardless of whether that
@@ -3589,8 +3593,8 @@ let handle_errors_file_item
         ()
     end;
     Lwt.return_none
-  | Some (Ok (ServerProgress.Telemetry _)) -> Lwt.return_none
-  | Some (Ok (ServerProgress.Errors { errors; timestamp })) ->
+  | Some (Ok (Server_progress.Telemetry _)) -> Lwt.return_none
+  | Some (Ok (Server_progress.Errors { errors; timestamp })) ->
     let lenv =
       validate_error_item_TEMPORARY lenv ide_service errors ~start_time
     in
@@ -3609,7 +3613,7 @@ let handle_errors_file_item
        (4) Existing diagnostics might have come from a file that was open in the editor but
        got closed after the current errors-file started; hence the latest we received from
        clientIdeDaemon is more up to date. (5) Existing diagnostics might have come from
-       the current errors-file, per the comment in ServerProgress.mli: 'Currently we make
+       the current errors-file, per the comment in Server_progress.mli: 'Currently we make
        one report for all "duplicate name" errors across the project if any, followed by
        one report per batch that had errors. This means that a file might be mentioned
        twice, once in a "duplicate name" report, once later. This will change in future
@@ -3669,14 +3673,14 @@ let try_open_errors_file ~(state : state ref) : unit Lwt.t =
           (SeekingErrors
              {
                prev_st_ino;
-               seek_reason = (ServerProgress.NothingYet, "absent");
+               seek_reason = (Server_progress.NothingYet, "absent");
              })
       | exn ->
         Error
           (SeekingErrors
              {
                prev_st_ino;
-               seek_reason = (ServerProgress.NothingYet, Exn.to_string exn);
+               seek_reason = (Server_progress.NothingYet, Exn.to_string exn);
              })
     in
     (* 2. is it different from the previous time we looked? *)
@@ -3687,23 +3691,23 @@ let try_open_errors_file ~(state : state ref) : unit Lwt.t =
         Error (SeekingErrors { prev_st_ino; seek_reason })
       | _ -> result
     in
-    (* 3. can we [ServerProgress.ErrorsRead.openfile] on it? *)
+    (* 3. can we [Server_progress.ErrorsRead.openfile] on it? *)
     let%lwt errors_conn =
       match result with
       | Error errors_conn -> Lwt.return errors_conn
       | Ok fd -> begin
-        match ServerProgress.ErrorsRead.openfile fd with
+        match Server_progress.ErrorsRead.openfile fd with
         | Error (e, log_message) ->
           let prev_st_ino = Some (Unix.fstat fd).Unix.st_ino in
           Unix.close fd;
           log
             "Errors-file: failed to open. %s [%s]"
-            (ServerProgress.show_errors_file_error e)
+            (Server_progress.show_errors_file_error e)
             log_message;
           let%lwt () = terminate_if_version_changed_since_start_of_lsp () in
           Lwt.return
             (SeekingErrors { prev_st_ino; seek_reason = (e, log_message) })
-        | Ok { ServerProgress.ErrorsRead.timestamp; pid; _ } ->
+        | Ok { Server_progress.ErrorsRead.timestamp; pid; _ } ->
           log
             "Errors-file: opened and tailing the check from %s"
             (Utils.timestring timestamp);
@@ -3720,12 +3724,13 @@ let try_open_errors_file ~(state : state ref) : unit Lwt.t =
       match conn with
       | TailingErrors _ -> true
       | SeekingErrors
-          { seek_reason = (ServerProgress.(Restarted _ | Complete _), _); _ } ->
+          { seek_reason = (Server_progress.(Restarted _ | Complete _), _); _ }
+        ->
         true
       | SeekingErrors
           {
             seek_reason =
-              ( ServerProgress.(
+              ( Server_progress.(
                   NothingYet | Stopped | Killed _ | Build_id_mismatch),
                 _ );
             _;
@@ -4927,7 +4932,7 @@ let main
   log "cmd: %s" (String.concat ~sep:" " (Array.to_list Sys.argv));
   log "LSP Init id: %s" init_id;
 
-  ServerProgress.set_root root;
+  Server_progress.set_root root;
   Relative_path.set_path_prefix Relative_path.Root root;
 
   let%lwt version = read_hhconfig_version root in

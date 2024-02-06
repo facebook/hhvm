@@ -14,7 +14,7 @@ open ServerEnv
 let directory_walk
     ?hhi_filter ~(telemetry_label : string) (genv : ServerEnv.genv) :
     Relative_path.t list Bucket.next * float =
-  ServerProgress.write "indexing";
+  Server_progress.write "indexing";
   let t = Unix.gettimeofday () in
   let get_next =
     ServerUtils.make_next
@@ -41,8 +41,8 @@ let parse_files_and_update_forward_naming_table
   @@ fun _cgroup_step ->
   begin
     match count with
-    | None -> ServerProgress.write "parsing"
-    | Some c -> ServerProgress.write "parsing %d files" c
+    | None -> Server_progress.write "parsing"
+    | Some c -> Server_progress.write "parsing %d files" c
   end;
   let ctx = Provider_utils.ctx_from_server_env env in
   let defs_per_file =
@@ -77,7 +77,7 @@ let update_reverse_naming_table_from_env_and_get_duplicate_name_errors
     ~(cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
   CgroupProfiler.step_start_end cgroup_steps telemetry_label
   @@ fun _cgroup_step ->
-  ServerProgress.with_message "resolving symbol references" @@ fun () ->
+  Server_progress.with_message "resolving symbol references" @@ fun () ->
   let ctx = Provider_utils.ctx_from_server_env env in
   let count = ref 0 in
   let env =
@@ -177,8 +177,8 @@ let defer_or_do_type_check
        Our current code calls into typing_check_service.ml without having done that set up,
        and so we will override whatever was set before and disable it now. *)
     Hh_logger.log "Streaming errors disabled for eager init";
-    ServerProgress.enable_error_production false;
-    ServerProgress.write "typechecking";
+    Server_progress.enable_error_production false;
+    Server_progress.write "typechecking";
 
     let count = List.length files_to_check in
     let logstring =

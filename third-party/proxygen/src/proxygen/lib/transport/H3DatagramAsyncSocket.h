@@ -150,16 +150,17 @@ class H3DatagramAsyncSocket
   }
 
   folly::NetworkSocket getNetworkSocket() const override {
-    LOG(FATAL) << __func__ << " not supported";
-    folly::assume_unreachable();
+    // Not great but better than crashing.
+    VLOG(4) << "getNetworkSocket returning fake socket";
+    return folly::NetworkSocket();
   }
 
   void setReusePort(bool /*reusePort*/) override {
-    LOG(FATAL) << __func__ << " not supported";
+    // Meaningless
   }
 
   void setReuseAddr(bool /*reuseAddr*/) override {
-    LOG(FATAL) << __func__ << " not supported";
+    // Meaningless
   }
 
   void setRcvBuf(int rcvBuf) override {
@@ -179,24 +180,20 @@ class H3DatagramAsyncSocket
   }
 
   void setBusyPoll(int /*busyPollUs*/) override {
-    LOG(FATAL) << __func__ << " unsupported";
-    folly::assume_unreachable();
+    VLOG(4) << "busy poll not supported";
   }
 
   void dontFragment(bool /*df*/) override {
-    LOG(FATAL) << __func__ << " unsupported";
-    folly::assume_unreachable();
+    // Meaningless.
   }
 
   void setDFAndTurnOffPMTU() override {
-    LOG(FATAL) << __func__ << " unsupported";
-    folly::assume_unreachable();
+    // Meaningless.
   }
 
-  void setErrMessageCallback(
-      ErrMessageCallback* /*errMessageCallback*/) override {
-    LOG(FATAL) << __func__ << " unsupported";
-    folly::assume_unreachable();
+  void setErrMessageCallback(ErrMessageCallback*) override {
+    // TODO do we want to support this and convey errors this way?
+    VLOG(4) << "err message callback not supported";
   }
 
   bool isBound() const override {

@@ -14,19 +14,26 @@
  * limitations under the License.
  */
 
-package "test.dev/fixtures/python_capi"
+#include <thrift/lib/python/capi/types.h>
 
-struct SerializedStruct {
-  1: string s;
-  2: i32 i;
-  3: optional string os;
+namespace apache::thrift::python::capi {
+
+StrongRef& StrongRef::operator=(StrongRef&& other) {
+  if (this != &other) {
+    obj_ = nullptr;
+    std::swap(obj_, other.obj_);
+  }
+  return *this;
 }
 
-union SerializedUnion {
-  1: string s;
-  2: i32 i;
+PyObject* StrongRef::release() && {
+  PyObject* ptr = obj_;
+  obj_ = nullptr;
+  return ptr;
 }
 
-safe exception SerializedError {
-  1: string msg;
+bool StrongRef::isNone() const {
+  return obj_ == Py_None;
 }
+
+} // namespace apache::thrift::python::capi

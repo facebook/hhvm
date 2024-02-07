@@ -200,6 +200,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__field2(
     Constructor<Bytes>{}
     .constructFrom(val.field2_ref()));
+  if (_fbthrift__field2.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__Mixin2__tuple_pos[1],
+      Py_None);
+  } else
   if (!_fbthrift__field2 ||
       setStructField(
           *fbthrift_data,

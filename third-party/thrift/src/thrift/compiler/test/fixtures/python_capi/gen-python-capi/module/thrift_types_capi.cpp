@@ -802,6 +802,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__floaty(
     Constructor<float>{}
     .constructFrom(val.floaty_ref()));
+  if (_fbthrift__floaty.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__PrimitiveStruct__tuple_pos[5],
+      Py_None);
+  } else
   if (!_fbthrift__floaty ||
       setStructField(
           *fbthrift_data,
@@ -812,6 +818,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__dubby(
     Constructor<double>{}
     .constructFrom(val.dubby_ref()));
+  if (_fbthrift__dubby.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__PrimitiveStruct__tuple_pos[6],
+      Py_None);
+  } else
   if (!_fbthrift__dubby ||
       setStructField(
           *fbthrift_data,
@@ -822,6 +834,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__stringy(
     Constructor<Bytes>{}
     .constructFrom(val.stringy_ref()));
+  if (_fbthrift__stringy.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__PrimitiveStruct__tuple_pos[7],
+      Py_None);
+  } else
   if (!_fbthrift__stringy ||
       setStructField(
           *fbthrift_data,
@@ -832,6 +850,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__bytey(
     Constructor<Bytes>{}
     .constructFrom(val.bytey_ref()));
+  if (_fbthrift__bytey.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__PrimitiveStruct__tuple_pos[8],
+      Py_None);
+  } else
   if (!_fbthrift__bytey ||
       setStructField(
           *fbthrift_data,
@@ -1144,6 +1168,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__intz(
     Constructor<list<int64_t>>{}
     .constructFrom(val.intz_ref()));
+  if (_fbthrift__intz.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__ListStruct__tuple_pos[1],
+      Py_None);
+  } else
   if (!_fbthrift__intz ||
       setStructField(
           *fbthrift_data,
@@ -1154,6 +1184,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__stringz(
     Constructor<list<Bytes>>{}
     .constructFrom(val.stringz_ref()));
+  if (_fbthrift__stringz.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__ListStruct__tuple_pos[2],
+      Py_None);
+  } else
   if (!_fbthrift__stringz ||
       setStructField(
           *fbthrift_data,
@@ -1327,6 +1363,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__intz(
     Constructor<set<int32_t>>{}
     .constructFrom(val.intz_ref()));
+  if (_fbthrift__intz.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__SetStruct__tuple_pos[1],
+      Py_None);
+  } else
   if (!_fbthrift__intz ||
       setStructField(
           *fbthrift_data,
@@ -1337,6 +1379,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__binnaz(
     Constructor<set<Bytes>>{}
     .constructFrom(val.binnaz_ref()));
+  if (_fbthrift__binnaz.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__SetStruct__tuple_pos[2],
+      Py_None);
+  } else
   if (!_fbthrift__binnaz ||
       setStructField(
           *fbthrift_data,
@@ -1502,6 +1550,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__intz(
     Constructor<map<int32_t, Bytes>>{}
     .constructFrom(val.intz_ref()));
+  if (_fbthrift__intz.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__MapStruct__tuple_pos[1],
+      Py_None);
+  } else
   if (!_fbthrift__intz ||
       setStructField(
           *fbthrift_data,
@@ -1512,6 +1566,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__binnaz(
     Constructor<map<Bytes, ::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::PrimitiveStruct>>>{}
     .constructFrom(val.binnaz_ref()));
+  if (_fbthrift__binnaz.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__MapStruct__tuple_pos[2],
+      Py_None);
+  } else
   if (!_fbthrift__binnaz ||
       setStructField(
           *fbthrift_data,

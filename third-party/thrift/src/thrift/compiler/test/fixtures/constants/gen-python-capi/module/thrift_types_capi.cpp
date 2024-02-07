@@ -149,6 +149,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__employer(
     Constructor<::apache::thrift::python::capi::ComposedEnum<::cpp2::Company>>{}
     .constructFrom(val.employer_ref()));
+  if (_fbthrift__employer.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__Internship__tuple_pos[2],
+      Py_None);
+  } else
   if (!_fbthrift__employer ||
       setStructField(
           *fbthrift_data,
@@ -159,6 +165,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__compensation(
     Constructor<double>{}
     .constructFrom(val.compensation_ref()));
+  if (_fbthrift__compensation.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__Internship__tuple_pos[3],
+      Py_None);
+  } else
   if (!_fbthrift__compensation ||
       setStructField(
           *fbthrift_data,
@@ -169,6 +181,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__school(
     Constructor<Bytes>{}
     .constructFrom(val.school_ref()));
+  if (_fbthrift__school.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__Internship__tuple_pos[4],
+      Py_None);
+  } else
   if (!_fbthrift__school ||
       setStructField(
           *fbthrift_data,
@@ -680,6 +698,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__b(
     Constructor<double>{}
     .constructFrom(val.b_ref()));
+  if (_fbthrift__b.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__struct4__tuple_pos[1],
+      Py_None);
+  } else
   if (!_fbthrift__b ||
       setStructField(
           *fbthrift_data,
@@ -690,6 +714,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__c(
     Constructor<int8_t>{}
     .constructFrom(val.c_ref()));
+  if (_fbthrift__c.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__struct4__tuple_pos[2],
+      Py_None);
+  } else
   if (!_fbthrift__c ||
       setStructField(
           *fbthrift_data,

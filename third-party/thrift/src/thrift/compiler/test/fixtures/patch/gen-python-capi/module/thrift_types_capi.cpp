@@ -928,6 +928,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__opt_unique(
     Constructor<list<int32_t>>{}
     .constructFrom(val.opt_unique_ref()));
+  if (_fbthrift__opt_unique.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__RefFields__tuple_pos[3],
+      Py_None);
+  } else
   if (!_fbthrift__opt_unique ||
       setStructField(
           *fbthrift_data,
@@ -938,6 +944,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__opt_shared_const(
     Constructor<list<int32_t>>{}
     .constructFrom(val.opt_shared_const_ref()));
+  if (_fbthrift__opt_shared_const.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__RefFields__tuple_pos[4],
+      Py_None);
+  } else
   if (!_fbthrift__opt_shared_const ||
       setStructField(
           *fbthrift_data,
@@ -948,6 +960,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__opt_shared_mustable(
     Constructor<list<int32_t>>{}
     .constructFrom(val.opt_shared_mustable_ref()));
+  if (_fbthrift__opt_shared_mustable.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__RefFields__tuple_pos[5],
+      Py_None);
+  } else
   if (!_fbthrift__opt_shared_mustable ||
       setStructField(
           *fbthrift_data,
@@ -958,6 +976,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__opt_box(
     Constructor<list<int32_t>>{}
     .constructFrom(val.opt_box_ref()));
+  if (_fbthrift__opt_box.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__RefFields__tuple_pos[6],
+      Py_None);
+  } else
   if (!_fbthrift__opt_box ||
       setStructField(
           *fbthrift_data,

@@ -1553,6 +1553,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__ForwardUsageStruct(
     Constructor<::apache::thrift::python::capi::ComposedStruct<::apache::thrift::fixtures::types::ForwardUsageStruct>>{}
     .constructFrom(val.ForwardUsageStruct_ref()));
+  if (_fbthrift__ForwardUsageStruct.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__ForwardUsageRoot__tuple_pos[0],
+      Py_None);
+  } else
   if (!_fbthrift__ForwardUsageStruct ||
       setStructField(
           *fbthrift_data,
@@ -1563,6 +1569,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__ForwardUsageByRef(
     Constructor<::apache::thrift::python::capi::ComposedStruct<::apache::thrift::fixtures::types::ForwardUsageByRef>>{}
     .constructFrom(val.ForwardUsageByRef_ref()));
+  if (_fbthrift__ForwardUsageByRef.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__ForwardUsageRoot__tuple_pos[1],
+      Py_None);
+  } else
   if (!_fbthrift__ForwardUsageByRef ||
       setStructField(
           *fbthrift_data,
@@ -1642,6 +1654,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__foo(
     Constructor<::apache::thrift::python::capi::ComposedStruct<::apache::thrift::fixtures::types::ForwardUsageRoot>>{}
     .constructFrom(val.foo_ref()));
+  if (_fbthrift__foo.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__ForwardUsageStruct__tuple_pos[0],
+      Py_None);
+  } else
   if (!_fbthrift__foo ||
       setStructField(
           *fbthrift_data,
@@ -1721,6 +1739,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__foo(
     Constructor<::apache::thrift::python::capi::ComposedStruct<::apache::thrift::fixtures::types::ForwardUsageRoot>>{}
     .constructFrom(val.foo_ref()));
+  if (_fbthrift__foo.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__ForwardUsageByRef__tuple_pos[0],
+      Py_None);
+  } else
   if (!_fbthrift__foo ||
       setStructField(
           *fbthrift_data,
@@ -1800,6 +1824,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__field(
     Constructor<map<int32_t, ::apache::thrift::python::capi::ComposedStruct<::apache::thrift::fixtures::types::IncompleteMapDep>>>{}
     .constructFrom(val.field_ref()));
+  if (_fbthrift__field.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__IncompleteMap__tuple_pos[0],
+      Py_None);
+  } else
   if (!_fbthrift__field ||
       setStructField(
           *fbthrift_data,
@@ -2568,6 +2598,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__field(
     Constructor<int16_t>{}
     .constructFrom(val.field_ref()));
+  if (_fbthrift__field.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__DependentAdaptedListDep__tuple_pos[0],
+      Py_None);
+  } else
   if (!_fbthrift__field ||
       setStructField(
           *fbthrift_data,
@@ -2824,6 +2860,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__box_field(
     Constructor<int32_t>{}
     .constructFrom(val.box_field_ref()));
+  if (_fbthrift__box_field.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__AllocatorAware2__tuple_pos[1],
+      Py_None);
+  } else
   if (!_fbthrift__box_field ||
       setStructField(
           *fbthrift_data,

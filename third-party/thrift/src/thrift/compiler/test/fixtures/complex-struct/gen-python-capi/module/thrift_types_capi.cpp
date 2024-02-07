@@ -2367,6 +2367,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__message(
     Constructor<Bytes>{}
     .constructFrom(val.message_ref()));
+  if (_fbthrift__message.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__optXcep__tuple_pos[0],
+      Py_None);
+  } else
   if (!_fbthrift__message ||
       setStructField(
           *fbthrift_data,
@@ -2377,6 +2383,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__errorCode(
     Constructor<int32_t>{}
     .constructFrom(val.errorCode_ref()));
+  if (_fbthrift__errorCode.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__optXcep__tuple_pos[1],
+      Py_None);
+  } else
   if (!_fbthrift__errorCode ||
       setStructField(
           *fbthrift_data,
@@ -2506,6 +2518,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__unionError(
     Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyUnion>>{}
     .constructFrom(val.unionError_ref()));
+  if (_fbthrift__unionError.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__complexException__tuple_pos[3],
+      Py_None);
+  } else
   if (!_fbthrift__unionError ||
       setStructField(
           *fbthrift_data,

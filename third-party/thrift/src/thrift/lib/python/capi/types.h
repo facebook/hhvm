@@ -56,13 +56,7 @@ struct is_union_field_ref<::apache::thrift::union_field_ref<FieldT>>
 struct StrongRef {
   StrongRef() : obj_(nullptr) {}
   StrongRef(StrongRef&& other) : obj_(nullptr) { std::swap(obj_, other.obj_); }
-  StrongRef& operator=(StrongRef&& other) {
-    if (this != &other) {
-      obj_ = nullptr;
-      std::swap(obj_, other.obj_);
-    }
-    return *this;
-  }
+  StrongRef& operator=(StrongRef&& other);
 
   PyObject* obj_;
   // Constructor "steals" a reference so that object, so it should onl be
@@ -76,11 +70,8 @@ struct StrongRef {
   PyObject* operator->() const { return obj_; }
   operator bool() const { return obj_ != nullptr; }
   // Release ownership to function that "steals" reference
-  PyObject* release() && {
-    PyObject* ptr = obj_;
-    obj_ = nullptr;
-    return ptr;
-  }
+  PyObject* release() &&;
+  bool isNone() const;
 };
 
 template <typename T>

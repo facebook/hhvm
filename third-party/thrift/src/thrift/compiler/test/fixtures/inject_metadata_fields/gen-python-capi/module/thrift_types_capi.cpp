@@ -391,6 +391,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__injected_structured_annotation_field(
     Constructor<Bytes>{}
     .constructFrom(val.injected_structured_annotation_field_ref()));
+  if (_fbthrift__injected_structured_annotation_field.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__FieldsInjectedWithIncludedStruct__tuple_pos[2],
+      Py_None);
+  } else
   if (!_fbthrift__injected_structured_annotation_field ||
       setStructField(
           *fbthrift_data,
@@ -401,6 +407,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__injected_unstructured_annotation_field(
     Constructor<Bytes>{}
     .constructFrom(val.injected_unstructured_annotation_field_ref()));
+  if (_fbthrift__injected_unstructured_annotation_field.isNone()) {
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__FieldsInjectedWithIncludedStruct__tuple_pos[3],
+      Py_None);
+  } else
   if (!_fbthrift__injected_unstructured_annotation_field ||
       setStructField(
           *fbthrift_data,

@@ -27,6 +27,10 @@ from libcpp.pair cimport pair
 from thrift.py3.std_libcpp cimport string_view, sv_to_str
 from thrift.py3.common cimport Protocol, cThriftMetadata
 
+# This was changed in cython to have except+ which breaks thrift-py3
+cdef extern from "<memory>" namespace "std" nogil:
+    unique_ptr[T] make_unique[T](...)
+
 cdef extern from *:
     """
     // Py_SET_TYPE is new in Python 3.9 and this is a suggested replacement for

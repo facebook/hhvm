@@ -14,7 +14,7 @@ from libc.stdint cimport (
     int32_t as cint32_t,
     int64_t as cint64_t,
 )
-from libcpp.memory cimport shared_ptr, make_shared, unique_ptr, make_unique
+from libcpp.memory cimport shared_ptr, make_shared, unique_ptr
 from libcpp.string cimport string
 from libcpp cimport bool as cbool
 from cpython cimport bool as pbool
@@ -43,6 +43,7 @@ from thrift.py3.common cimport (
 )
 
 from thrift.py3.server cimport THRIFT_REQUEST_CONTEXT as __THRIFT_REQUEST_CONTEXT
+from thrift.py3.types cimport make_unique
 
 cimport folly.futures
 from folly.executor cimport get_executor

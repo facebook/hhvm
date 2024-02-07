@@ -29,7 +29,7 @@ from libc.stdint cimport (
     int32_t as cint32_t,
     int64_t as cint64_t,
 )
-from libcpp.memory cimport shared_ptr, make_shared, unique_ptr, make_unique
+from libcpp.memory cimport shared_ptr, make_shared, unique_ptr
 from libcpp.string cimport string
 from libcpp cimport bool as cbool
 from cpython cimport bool as pbool
@@ -46,6 +46,7 @@ from folly.cast cimport down_cast_ptr
 from libcpp.typeinfo cimport type_info
 import thrift.py3.types
 cimport thrift.py3.types
+from thrift.py3.types cimport make_unique
 import thrift.py3.client
 cimport thrift.py3.client
 from thrift.py3.common cimport (

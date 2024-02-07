@@ -6,7 +6,7 @@
 #
 cimport cython as __cython
 from cpython.object cimport PyTypeObject, Py_LT, Py_LE, Py_EQ, Py_NE, Py_GT, Py_GE
-from libcpp.memory cimport shared_ptr, make_shared, unique_ptr, make_unique
+from libcpp.memory cimport shared_ptr, make_shared, unique_ptr
 from libcpp.optional cimport optional as __optional
 from libcpp.string cimport string
 from libcpp cimport bool as cbool
@@ -15,6 +15,7 @@ from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
 from thrift.py3.types import _IsSet as _fbthrift_IsSet
+from thrift.py3.types cimport make_unique
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
 from thrift.py3.std_libcpp cimport sv_to_str as __sv_to_str, string_view as __cstring_view

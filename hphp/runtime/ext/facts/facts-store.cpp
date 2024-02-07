@@ -1132,8 +1132,9 @@ struct FactsStoreImpl final
       addBaseTypes(DeriveKind::RequireImplements);
     }
 
-    return makeVecOfString(
-        filterByKind(std::move(baseTypes), filters.m_kindFilters));
+    return makeVecOfString(filterByFlags(
+        filterByKind(std::move(baseTypes), filters.m_kindFilters),
+        filters.m_typeFlagFilters));
   }
 
   Array filterDerivedTypes(
@@ -1160,8 +1161,9 @@ struct FactsStoreImpl final
       addDerivedTypes(DeriveKind::RequireImplements);
     }
 
-    return makeVecOfString(
-        filterByKind(std::move(derivedTypes), filters.m_kindFilters));
+    return makeVecOfString(filterByFlags(
+        filterByKind(std::move(derivedTypes), filters.m_kindFilters),
+        filters.m_typeFlagFilters));
   }
 
   std::atomic<std::chrono::steady_clock::time_point> m_lastWatchmanQueryStart{
@@ -1253,6 +1255,40 @@ struct FactsStoreImpl final
                 default:
                   return false;
               }
+            }),
+        types.end());
+    return types;
+  }
+  /**
+   * Filter down to the just the type flags that we want, such as final,
+   * abstract, or empty. This is probably less performant than
+   * if we rolled this logic into filterByKind, but it is easier to follow
+   * this way, as two consecutive filters, rather than one complex one.
+   */
+  std::vector<Symbol<SymKind::Type>> filterByFlags(
+      std::vector<Symbol<SymKind::Type>> types,
+      const TypeFlagFilterData& flags) {
+    // If returning everything, no need to iterate
+    if (flags == TypeFlagFilterData::includeEverything()) {
+      return types;
+    }
+    types.erase(
+        std::remove_if(
+            types.begin(),
+            types.end(),
+            [&](const Symbol<SymKind::Type>& type) {
+              bool isFinal = m_symbolMap.isTypeFinal(type);
+              bool isAbstract = m_symbolMap.isTypeAbstract(type);
+              if (flags.m_removeEmpty && (!isFinal && !isAbstract)) {
+                return true;
+              }
+              if (isFinal && flags.m_removeFinal) {
+                return true;
+              }
+              if (isAbstract && flags.m_removeAbstract) {
+                return true;
+              }
+              return false;
             }),
         types.end());
     return types;

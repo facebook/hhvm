@@ -832,6 +832,7 @@ name = "compiler_ffi"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "arena_deserializer",
  "bincode",
  "bumpalo",
  "compile",

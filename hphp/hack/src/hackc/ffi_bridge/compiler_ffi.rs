@@ -29,6 +29,7 @@ use options::ParserOptions;
 use parser_core_types::source_text::SourceText;
 use relative_path::Prefix;
 use relative_path::RelativePath;
+use serde::Deserialize;
 use sha1::Digest;
 use sha1::Sha1;
 
@@ -256,6 +257,8 @@ mod ffi {
         is_abstract: bool,
         value: String,
     }
+
+    #[derive(Debug, PartialEq)]
     pub struct ExtDeclClassConstVec {
         pub vec: Vec<ExtDeclClassConst>,
     }
@@ -471,6 +474,12 @@ mod ffi {
 
         /// Decode a binary facts blob back to hackc::FileFacts
         fn binary_to_facts(json: &CxxString) -> Result<FileFacts>;
+
+        /// Convert an DeclsHolder struct to binary
+        fn decls_holder_to_binary(decls: &DeclsHolder) -> Result<Vec<u8>>;
+
+        /// Decode a binary DeclsHolder blob back to DeclsHolder
+        fn binary_to_decls_holder(json: &CxxString) -> Result<Box<DeclsHolder>>;
 
         /// Format facts into a human readable string for debugging.
         fn facts_debug(facts: &FileFacts) -> String;
@@ -804,6 +813,29 @@ fn decls_to_facts_binary(decls: &DeclsHolder, sha1sum: &CxxString) -> Result<Vec
 fn binary_to_facts(blob: &CxxString) -> bincode::Result<ffi::FileFacts> {
     use bincode::Options;
     bincode::options().deserialize_from(blob.as_bytes())
+}
+
+fn decls_holder_to_binary(decls: &DeclsHolder) -> bincode::Result<Vec<u8>> {
+    use bincode::Options;
+    let mut buf = Vec::new();
+    bincode::options().serialize_into(&mut buf, &decls.parsed_file)?;
+    Ok(buf)
+}
+
+fn binary_to_decls_holder(blob: &CxxString) -> bincode::Result<Box<DeclsHolder>> {
+    use bincode::Options;
+    let data = blob.as_bytes();
+    let arena = bumpalo::Bump::new();
+    let alloc: &'static bumpalo::Bump =
+        unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&arena) };
+    let op = bincode::options().with_native_endian();
+    let mut de = bincode::de::Deserializer::from_slice(data, op);
+    let de = arena_deserializer::ArenaDeserializer::new(alloc, &mut de);
+    let parsed_file = ParsedFile::deserialize(de)?;
+    Ok(Box::new(DeclsHolder {
+        parsed_file,
+        _arena: arena,
+    }))
 }
 
 fn facts_debug(facts: &ffi::FileFacts) -> String {

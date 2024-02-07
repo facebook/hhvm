@@ -45,6 +45,8 @@ pub struct ParsedFile<'a> {
     pub has_first_pass_parse_errors: bool,
 }
 
+arena_deserializer::impl_deserialize_in_arena!(ParsedFile<'arena>);
+
 impl<'a> IntoIterator for ParsedFile<'a> {
     type Item = (&'a str, shallow_decl_defs::Decl<'a>);
     type IntoIter = std::iter::Rev<std::vec::IntoIter<Self::Item>>;

@@ -412,30 +412,27 @@ void DeviousBatonHandler::onBody(std::unique_ptr<folly::IOBuf> body) noexcept {
   VLOG(4) << "DeviousBatonHandler::" << __func__;
   VLOG(3) << IOBufPrinter::printHexFolly(body.get(), true);
   folly::io::Cursor cursor(body.get());
-
-  // parse capsules
   auto leftToParse = body->computeChainDataLength();
   while (leftToParse > 0) {
     auto typeRes = quic::decodeQuicInteger(cursor, leftToParse);
     if (!typeRes) {
-      VLOG(2) << "Failed to decode capsule type l=" << leftToParse;
+      LOG(ERROR) << "Failed to decode capsule type.";
       return;
     }
-    leftToParse -= typeRes->first;
-    auto capLength = quic::decodeQuicInteger(cursor, leftToParse);
-    if (!capLength) {
-      VLOG(2) << "Failed to decode capsule length";
+    auto [type, typeLen] = typeRes.value();
+    leftToParse -= typeLen;
+    auto capLengthRes = quic::decodeQuicInteger(cursor, leftToParse);
+    if (!capLengthRes) {
+      LOG(ERROR) << "Failed to decode capsule length: type=" << type;
       return;
     }
-    leftToParse -= capLength->first;
-    if (capLength->second > leftToParse) {
-      VLOG(2) << "Derp";
+    auto [capLength, capLengthLen] = capLengthRes.value();
+    leftToParse -= capLengthLen;
+    if (capLength > leftToParse) {
+      LOG(ERROR) << "Not enough data for capsule: type=" << type
+                 << " length=" << capLength;
       return;
     }
-    VLOG(2) << "Parsed Capsule t=" << typeRes->second
-            << " l=" << capLength->second;
-    cursor.skipAtMost(capLength->second);
-    leftToParse -= capLength->second;
   }
 }
 

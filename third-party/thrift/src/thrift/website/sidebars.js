@@ -430,7 +430,6 @@ module.exports = {
               'fb/best-practices/you-dont-need-facebookbase2/facebookbase2-deprecation-migration',
             ],
           },
-          'fb/best-practices/migrating-javadeprecated-to-java-swift',
         ],
       },
       {

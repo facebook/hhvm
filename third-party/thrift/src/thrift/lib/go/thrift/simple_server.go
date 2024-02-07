@@ -50,38 +50,6 @@ func NewSimpleServerContext(processor ProcessorContext, serverTransport ServerTr
 	return NewSimpleServerFactoryContext(NewProcessorFactoryContext(processor), serverTransport, options...)
 }
 
-// NewSimpleServer2 is deprecated, used NewSimpleServer instead
-func NewSimpleServer2(processor Processor, serverTransport ServerTransport) *SimpleServer {
-	return NewSimpleServerFactory(NewProcessorFactory(processor), serverTransport)
-}
-
-// NewSimpleServer4 is deprecated, used NewSimpleServer instead
-func NewSimpleServer4(processor Processor, serverTransport ServerTransport, transportFactory TransportFactory, protocolFactory ProtocolFactory) *SimpleServer {
-	return NewSimpleServerFactory(
-		NewProcessorFactory(processor),
-		serverTransport,
-		TransportFactories(transportFactory),
-		ProtocolFactories(protocolFactory),
-	)
-}
-
-// NewSimpleServer6 is deprecated, used NewSimpleServer instead
-func NewSimpleServer6(processor Processor, serverTransport ServerTransport, inputTransportFactory TransportFactory, outputTransportFactory TransportFactory, inputProtocolFactory ProtocolFactory, outputProtocolFactory ProtocolFactory) *SimpleServer {
-	return NewSimpleServerFactory(
-		NewProcessorFactory(processor),
-		serverTransport,
-		InputTransportFactory(inputTransportFactory),
-		OutputTransportFactory(outputTransportFactory),
-		InputProtocolFactory(inputProtocolFactory),
-		OutputProtocolFactory(outputProtocolFactory),
-	)
-}
-
-// NewSimpleServerFactory create a new server factory
-func NewSimpleServerFactory(processorFactory ProcessorFactory, serverTransport ServerTransport, options ...func(*ServerOptions)) *SimpleServer {
-	return NewSimpleServerFactoryContext(NewProcessorFactoryContextAdapter(processorFactory), serverTransport, options...)
-}
-
 // NewSimpleServerFactoryContext creates a new server factory that supports contexts.
 func NewSimpleServerFactoryContext(processorFactoryContext ProcessorFactoryContext, serverTransport ServerTransport, options ...func(*ServerOptions)) *SimpleServer {
 	return &SimpleServer{
@@ -96,33 +64,6 @@ func simpleServerOptions(t ServerTransport, options ...func(*ServerOptions)) *Se
 		option(opts)
 	}
 	return opts
-}
-
-// NewSimpleServerFactory2 is deprecated, used NewSimpleServerFactory instead
-func NewSimpleServerFactory2(processorFactory ProcessorFactory, serverTransport ServerTransport) *SimpleServer {
-	return NewSimpleServerFactory(processorFactory, serverTransport)
-}
-
-// NewSimpleServerFactory4 is deprecated, used NewSimpleServerFactory instead
-func NewSimpleServerFactory4(processorFactory ProcessorFactory, serverTransport ServerTransport, transportFactory TransportFactory, protocolFactory ProtocolFactory) *SimpleServer {
-	return NewSimpleServerFactory(
-		processorFactory,
-		serverTransport,
-		TransportFactories(transportFactory),
-		ProtocolFactories(protocolFactory),
-	)
-}
-
-// NewSimpleServerFactory6 is deprecated, used NewSimpleServerFactory instead
-func NewSimpleServerFactory6(processorFactory ProcessorFactory, serverTransport ServerTransport, inputTransportFactory TransportFactory, outputTransportFactory TransportFactory, inputProtocolFactory ProtocolFactory, outputProtocolFactory ProtocolFactory) *SimpleServer {
-	return NewSimpleServerFactory(
-		processorFactory,
-		serverTransport,
-		InputTransportFactory(inputTransportFactory),
-		OutputTransportFactory(outputTransportFactory),
-		InputProtocolFactory(inputProtocolFactory),
-		OutputProtocolFactory(outputProtocolFactory),
-	)
 }
 
 // ProcessorFactoryContext returns the processor factory that supports contexts

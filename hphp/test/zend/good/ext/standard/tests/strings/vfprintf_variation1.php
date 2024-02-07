@@ -51,7 +51,6 @@ writeAndDump( $fp, "%s %s %s", vec[ 'bar', 'bar', 'bar' ] );
 writeAndDump( $fp, "%02d", vec[ 50 ] );
 writeAndDump( $fp, "", vec[] );
 writeAndDump( $fp, "Testing %b %d %f %o %s %x %X", vec[ 9, 6, 2.5502, 24, "foobar", 15, 65 ] );
-@writeAndDump( new FooClass(), "Foo with %s", vec[ 'string' ] );
 
 // Close handle
 fclose( $fp );

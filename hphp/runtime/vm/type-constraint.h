@@ -257,7 +257,7 @@ struct TypeConstraint {
     return m_u.single.class_.m_namedType;
   }
   const NamedType* anyNamedType() const {
-    assertx(!isUnion());
+    if (isUnion()) return nullptr;
     return m_u.single.class_.m_namedType;
   }
   TypeConstraintFlags flags() const { return m_flags; }

@@ -1658,11 +1658,13 @@ public:
 
   // Experimental thread tuning options, allows threads to be adjusted by
   // thread controller (host stats monitor). `ThreadTuneDebug` is meant to allow
-  // additional debugging metrics/logs to be exported. Maximum adjustment is
+  // additional debugging metrics/logs to be exported. `ThreadTuneSkipWarmup`
+  // will skip the warmup period (jit maturity = 100). Maximum adjustment is
   // defined by the `ThreadTuneAdjustmentPct` of the configured thread count,
   // and the step size is defined by `ThreadTuneStepPct`. Thread tuning is
   // turned off when `ThreadTuneAdjustmentPct` is set to 0 (default).
   static bool ThreadTuneDebug;
+  static bool ThreadTuneSkipWarmup;
   static double ThreadTuneAdjustmentPct;
   static double ThreadTuneStepPct;
 #endif

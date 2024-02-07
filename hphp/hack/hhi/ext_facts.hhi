@@ -15,6 +15,9 @@ namespace HH\Facts {
     K_MODULE = 4;
   }
 
+  /**
+   * Different kinds of types that you can query into facts API for.
+   */
   enum TypeKind: string {
     K_CLASS = 'class';
     K_ENUM = 'enum';
@@ -23,9 +26,6 @@ namespace HH\Facts {
     K_TYPE_ALIAS = 'typeAlias';
   }
 
-  /**
-   * The two forms of inheritance supported by Hack.
-   */
   enum DeriveKind: string {
     // Includes `implements` and `use`
     K_EXTENDS = 'extends';
@@ -33,15 +33,32 @@ namespace HH\Facts {
     K_REQUIRE_EXTENDS = 'require extends';
   }
 
+  /**
+   * Type flags include abstract and final. Empty means no flags i.e.
+   * `class MyClass {}`
+   */
+  enum TypeFlag : string {
+    K_EMPTY = 'empty';
+    K_ABSTRACT = 'abstract';
+    K_FINAL = 'final';
+  }
+
   type TypeAttributeFilter = shape(
     'name' => classname<\HH\ClassLikeAttribute>,
     'parameters' => dict<int, dynamic>,
   );
 
+  /**
+   * Different filters for for type queries, not just for derived types but
+   * also for base types. These filters default to 'include everything' if they
+   * are omitted, not 'include nothing'. See the enums for what type of thing
+   * goes in each field.
+   */
   type DeriveFilters = shape(
     ?'kind' => keyset<TypeKind>,
     ?'derive_kind' => keyset<DeriveKind>,
     ?'attributes' => vec<TypeAttributeFilter>,
+    ?'flags' => vec<TypeFlag>,
   );
 
   /**

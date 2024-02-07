@@ -28,6 +28,16 @@ enum TypeKind : string {
 }
 
 /**
+ * Type flags include abstract and final. Empty means no flags i.e.
+ * `class MyClass {}`
+ */
+enum TypeFlag : string {
+  K_EMPTY = 'empty';
+  K_ABSTRACT = 'abstract';
+  K_FINAL = 'final';
+}
+
+/**
  * The two forms of inheritance supported by Hack.
  */
 enum DeriveKind : string {
@@ -42,10 +52,17 @@ type TypeAttributeFilter = shape(
   'parameters' => dict<int, dynamic>,
 );
 
+/**
+ * Different filters for for type queries, not just for derived types but
+ * also for base types. These filters default to 'include everything' if they
+ * are omitted, not 'include nothing'. See the enums for what type of thing
+ * goes in each field.
+ */
 type DeriveFilters = shape(
   ?'kind' => keyset<TypeKind>,
   ?'derive_kind' => keyset<DeriveKind>,
   ?'attributes' => vec<TypeAttributeFilter>,
+  ?'flags' => vec<TypeFlag>,
 );
 
 /**

@@ -11,7 +11,7 @@ license = "MIT"
 path = "lib.rs"
 
 [dependencies]
-dashmap = { version = "5.4", features = ["rayon", "serde"] }
+dashmap = { version = "5.5.3", features = ["rayon", "serde"] }
 fnv = "1.0"
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 once_cell = "1.12"

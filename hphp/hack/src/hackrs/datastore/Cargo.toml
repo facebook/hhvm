@@ -12,6 +12,6 @@ path = "datastore.rs"
 
 [dependencies]
 anyhow = "1.0.75"
-dashmap = { version = "5.4", features = ["rayon", "serde"] }
+dashmap = { version = "5.5.3", features = ["rayon", "serde"] }
 hash = { version = "0.0.0", path = "../../utils/hash" }
 parking_lot = { version = "0.12.1", features = ["send_guard"] }

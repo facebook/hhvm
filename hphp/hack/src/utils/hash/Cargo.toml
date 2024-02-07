@@ -11,6 +11,6 @@ license = "MIT"
 path = "lib.rs"
 
 [dependencies]
-dashmap = { version = "5.4", features = ["rayon", "serde"] }
+dashmap = { version = "5.5.3", features = ["rayon", "serde"] }
 indexmap = { version = "2.1.0", features = ["arbitrary", "rayon", "serde"] }
 rustc-hash = "1.1.0"

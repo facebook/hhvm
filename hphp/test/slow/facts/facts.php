@@ -43,6 +43,12 @@ function jsonify_filters(HH\Facts\DeriveFilters $filters): string {
     \sort(inout $attributes);
     $filters_for_json['attributes'] = $attributes;
   }
+  $flags = Shapes::idx($filters, 'flags');
+  if ($flags is Container<_>) {
+    $flags = vec($flags);
+    \sort(inout $flags);
+    $filters_for_json['flags'] = $flags;
+  }
 
   return json_encode($filters_for_json);
 }
@@ -297,6 +303,48 @@ function facts(): void {
   print_subtypes(
     BaseClass::class,
     shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
+  );
+  print_subtypes(
+    BaseClass::class,
+    shape(
+      'derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS],
+      'flags' => keyset[HH\Facts\TypeFlag::K_FINAL],
+    ),
+  );
+  print_subtypes(
+    BaseClass::class,
+    shape(
+      'derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS],
+      'flags' => keyset[
+          HH\Facts\TypeFlag::K_ABSTRACT,
+          HH\Facts\TypeFlag::K_FINAL
+      ],
+    ),
+  );
+  print_subtypes(
+    BaseClass::class,
+    shape(
+      'derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS],
+      'flags' => keyset[HH\Facts\TypeFlag::K_EMPTY],
+    ),
+  );
+  print_subtypes(
+    BaseClass::class,
+    shape(
+      'derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS],
+      'flags' => keyset[
+        HH\Facts\TypeFlag::K_ABSTRACT,
+        HH\Facts\TypeFlag::K_EMPTY,
+        HH\Facts\TypeFlag::K_FINAL
+      ],
+    ),
+  );
+  print_subtypes(
+    BaseClass::class,
+    shape(
+      'derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS],
+      'flags' => keyset[],
+    ),
   );
   print_supertypes(
     TRequireExtendsBaseClassAndRequireImplementsIBase::class,

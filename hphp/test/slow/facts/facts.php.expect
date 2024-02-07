@@ -10,7 +10,7 @@ E1 is enum
 I1 is interface
 T1 is trait
 Nonexistent has no kind
-Subtypes of BaseClass: ["DerivedClass","IRequireExtendsBaseClass","TRequireExtendsBaseClass","TRequireExtendsBaseClassAndRequireImplementsIBase"]
+Subtypes of BaseClass: ["AbstractDerived","DerivedClass","IRequireExtendsBaseClass","NoFlagsDerived","TRequireExtendsBaseClass","TRequireExtendsBaseClassAndRequireImplementsIBase"]
 Supertypes of BaseClass: []
 Subtypes of IBase with filters {"kind":["class"]}: ["DerivedClass","UsesTRequireImplementsIBase"]
 Subtypes of IBase with filters {"kind":["trait"]}: ["TImplementsIBase","TRequireExtendsBaseClassAndRequireImplementsIBase","TRequireImplementsAndImplementsIBase","TRequireImplementsAndImplementsIBase","TRequireImplementsIBase"]
@@ -24,7 +24,12 @@ Supertypes of DerivedClass with filters {"kind":["interface","trait"]}: ["IBase"
 
 Excluding `require extends` relations
 Subtypes of IBase with filters {"derive_kind":["extends"]}: ["DerivedClass","TImplementsIBase","TRequireImplementsAndImplementsIBase","UsesTRequireImplementsIBase"]
-Subtypes of BaseClass with filters {"derive_kind":["extends"]}: ["DerivedClass"]
+Subtypes of BaseClass with filters {"derive_kind":["extends"]}: ["AbstractDerived","DerivedClass","NoFlagsDerived"]
+Subtypes of BaseClass with filters {"derive_kind":["extends"],"flags":["final"]}: ["DerivedClass"]
+Subtypes of BaseClass with filters {"derive_kind":["extends"],"flags":["abstract","final"]}: ["AbstractDerived","DerivedClass"]
+Subtypes of BaseClass with filters {"derive_kind":["extends"],"flags":["empty"]}: ["NoFlagsDerived"]
+Subtypes of BaseClass with filters {"derive_kind":["extends"],"flags":["abstract","empty","final"]}: ["AbstractDerived","DerivedClass","NoFlagsDerived"]
+Subtypes of BaseClass with filters {"derive_kind":["extends"],"flags":[]}: []
 Supertypes of TRequireExtendsBaseClassAndRequireImplementsIBase with filters {"derive_kind":["extends"]}: []
 Supertypes of TRequireImplementsAndImplementsIBase with filters {"derive_kind":["extends"]}: ["IBase"]
 Subtypes of IBase with filters {"kind":["interface"],"derive_kind":["extends"]}: []
@@ -103,7 +108,7 @@ E1 is enum
 I1 is interface
 T1 is trait
 Nonexistent has no kind
-Subtypes of BaseClass: ["DerivedClass","IRequireExtendsBaseClass","TRequireExtendsBaseClass","TRequireExtendsBaseClassAndRequireImplementsIBase"]
+Subtypes of BaseClass: ["AbstractDerived","DerivedClass","IRequireExtendsBaseClass","NoFlagsDerived","TRequireExtendsBaseClass","TRequireExtendsBaseClassAndRequireImplementsIBase"]
 Supertypes of BaseClass: []
 Subtypes of IBase with filters {"kind":["class"]}: ["DerivedClass","UsesTRequireImplementsIBase"]
 Subtypes of IBase with filters {"kind":["trait"]}: ["TImplementsIBase","TRequireExtendsBaseClassAndRequireImplementsIBase","TRequireImplementsAndImplementsIBase","TRequireImplementsAndImplementsIBase","TRequireImplementsIBase"]
@@ -117,7 +122,12 @@ Supertypes of DerivedClass with filters {"kind":["interface","trait"]}: ["IBase"
 
 Excluding `require extends` relations
 Subtypes of IBase with filters {"derive_kind":["extends"]}: ["DerivedClass","TImplementsIBase","TRequireImplementsAndImplementsIBase","UsesTRequireImplementsIBase"]
-Subtypes of BaseClass with filters {"derive_kind":["extends"]}: ["DerivedClass"]
+Subtypes of BaseClass with filters {"derive_kind":["extends"]}: ["AbstractDerived","DerivedClass","NoFlagsDerived"]
+Subtypes of BaseClass with filters {"derive_kind":["extends"],"flags":["final"]}: ["DerivedClass"]
+Subtypes of BaseClass with filters {"derive_kind":["extends"],"flags":["abstract","final"]}: ["AbstractDerived","DerivedClass"]
+Subtypes of BaseClass with filters {"derive_kind":["extends"],"flags":["empty"]}: ["NoFlagsDerived"]
+Subtypes of BaseClass with filters {"derive_kind":["extends"],"flags":["abstract","empty","final"]}: ["AbstractDerived","DerivedClass","NoFlagsDerived"]
+Subtypes of BaseClass with filters {"derive_kind":["extends"],"flags":[]}: []
 Supertypes of TRequireExtendsBaseClassAndRequireImplementsIBase with filters {"derive_kind":["extends"]}: []
 Supertypes of TRequireImplementsAndImplementsIBase with filters {"derive_kind":["extends"]}: ["IBase"]
 Subtypes of IBase with filters {"kind":["interface"],"derive_kind":["extends"]}: []

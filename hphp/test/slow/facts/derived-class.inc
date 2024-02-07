@@ -6,6 +6,10 @@ final class DerivedClass extends BaseClass implements IBase {
   use TImplementsIBase;
 }
 
+abstract class AbstractDerived extends BaseClass {}
+
+class NoFlagsDerived extends BaseClass {}
+
 interface IRequireExtendsBaseClass {
   require extends BaseClass;
 }

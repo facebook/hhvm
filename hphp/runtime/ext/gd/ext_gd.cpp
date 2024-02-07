@@ -1487,6 +1487,7 @@ static struct gfxinfo *php_handle_webp(const req::ptr<File>& stream) {
   }
 
   result = (struct gfxinfo *)IM_CALLOC(1, sizeof(struct gfxinfo));
+  CHECK_ALLOC_R(result, (sizeof(struct gfxinfo)), nullptr);
 
   switch (format) {
     case ' ':

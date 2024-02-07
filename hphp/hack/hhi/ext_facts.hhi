@@ -57,7 +57,6 @@ namespace HH\Facts {
   type DeriveFilters = shape(
     ?'kind' => keyset<TypeKind>,
     ?'derive_kind' => keyset<DeriveKind>,
-    ?'attributes' => vec<TypeAttributeFilter>,
     ?'flags' => vec<TypeFlag>,
   );
 

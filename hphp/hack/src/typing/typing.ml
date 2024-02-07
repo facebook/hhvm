@@ -224,57 +224,57 @@ module Env_help : sig
 end = struct
   let unbox ~strip_supportdyn ~pessimisable_builtin env ty =
     let rec aux ~under_supportdyn env ty =
-      let (env, ty) = Env.expand_type env ty in
-      match TUtils.try_strip_dynamic env ty with
-      | Some stripped_ty ->
-        (* We've got a type ty = ~stripped_ty so under Sound Dynamic we need to
-         * account for like-pushing: the rule (shown here for vec)
-         *     t <:D dynamic
-         *     ----------------------
-         *     vec<~t> <: ~vec<t>
-         * So if expected type is ~vec<t> then we can actually ask for vec<~t>
-         * which is more generous.
-         *)
-        if TCO.enable_sound_dynamic env.genv.tcopt then begin
-          let (env, opt_ty) =
-            if
-              (not strip_supportdyn)
-              && TCO.enable_sound_dynamic (Env.get_tcopt env)
-              && pessimisable_builtin
-            then
-              (env, None)
-            else
-              Typing_dynamic.try_push_like env stripped_ty
-          in
-          match opt_ty with
-          | None -> aux ~under_supportdyn env stripped_ty
-          | Some rty ->
-            (* We can only apply like-pushing if the type actually supports dynamic.
-             * We know this if we've gone under a supportdyn, *OR* if the type is
-             * known to be a dynamic-aware subtype of dynamic. The latter might fail
-             * if it's yet to be resolved i.e. a type variable, in which case we just
-             * remove the expected type.
-             *)
-            if under_supportdyn || TUtils.is_supportdyn env rty then
-              aux ~under_supportdyn:true env rty
-            else
-              (env, None)
-        end else
-          aux ~under_supportdyn env stripped_ty
-      | None -> begin
-        match get_node ty with
-        | Tunion [ty] -> aux ~under_supportdyn env ty
-        | Toption ty -> aux ~under_supportdyn env ty
-        | Tnewtype (name, [ty], _) when String.equal name SN.Classes.cSupportDyn
-          ->
-          let (env, result) = aux ~under_supportdyn:true env ty in
-          begin
-            match result with
-            | None -> (env, None)
-            | Some (ty, _) -> (env, Some (ty, true))
-          end
-        | _ -> (env, Some (ty, false))
-      end
+      let (sd, env, ty) = TUtils.strip_supportdyn env ty in
+      if sd then
+        let (env, result) = aux ~under_supportdyn:true env ty in
+        begin
+          match result with
+          | None -> (env, None)
+          | Some (ty, _) -> (env, Some (ty, true))
+        end
+      else
+        match TUtils.try_strip_dynamic env ty with
+        | Some stripped_ty ->
+          (* We've got a type ty = ~stripped_ty so under Sound Dynamic we need to
+           * account for like-pushing: the rule (shown here for vec)
+           *     t <:D dynamic
+           *     ----------------------
+           *     vec<~t> <: ~vec<t>
+           * So if expected type is ~vec<t> then we can actually ask for vec<~t>
+           * which is more generous.
+           *)
+          if TCO.enable_sound_dynamic env.genv.tcopt then begin
+            let (env, opt_ty) =
+              if
+                (not strip_supportdyn)
+                && TCO.enable_sound_dynamic (Env.get_tcopt env)
+                && pessimisable_builtin
+              then
+                (env, None)
+              else
+                Typing_dynamic.try_push_like env stripped_ty
+            in
+            match opt_ty with
+            | None -> aux ~under_supportdyn env stripped_ty
+            | Some rty ->
+              (* We can only apply like-pushing if the type actually supports dynamic.
+               * We know this if we've gone under a supportdyn, *OR* if the type is
+               * known to be a dynamic-aware subtype of dynamic. The latter might fail
+               * if it's yet to be resolved i.e. a type variable, in which case we just
+               * remove the expected type.
+               *)
+              if under_supportdyn || TUtils.is_supportdyn env rty then
+                aux ~under_supportdyn:true env rty
+              else
+                (env, None)
+          end else
+            aux ~under_supportdyn env stripped_ty
+        | None -> begin
+          match get_node ty with
+          | Tunion [ty] -> aux ~under_supportdyn env ty
+          | Toption ty -> aux ~under_supportdyn env ty
+          | _ -> (env, Some (ty, false))
+        end
     in
     aux ~under_supportdyn:false env ty
 

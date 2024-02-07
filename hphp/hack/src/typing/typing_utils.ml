@@ -812,9 +812,20 @@ let rec try_strip_dynamic_from_union _env tyl =
   | Some (ty :: _, tyl) -> Some (ty, tyl)
   | _ -> None
 
+(* Strip dynamic off a union, and push supportdyn through. So
+ *   try_strip_dynamic(~t) = t
+ *   try_strip_dynamic(supportdyn<~t>) = supportdyn<t>
+ * Otherwise return None.
+ *)
 and try_strip_dynamic env ty =
   let (env, ty) = Env.expand_type env ty in
   match get_node ty with
+  | Tnewtype (name, [tyarg], _) when String.equal name SN.Classes.cSupportDyn ->
+  begin
+    match try_strip_dynamic env tyarg with
+    | None -> None
+    | Some stripped_ty -> Some (MakeType.supportdyn (get_reason ty) stripped_ty)
+  end
   | Tunion tyl ->
     (match try_strip_dynamic_from_union env tyl with
     | None -> None

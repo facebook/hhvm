@@ -245,7 +245,7 @@ fn print_symbol_ref_regions<'arena>(
 }
 
 fn print_adata_region(ctx: &Context<'_>, w: &mut dyn Write, adata: &Adata<'_>) -> Result<()> {
-    write_bytes!(w, ".adata {} = ", adata.id)?;
+    write_bytes!(w, ".adata A_{} = ", adata.id.id())?;
     triple_quotes(w, |w| print_adata(ctx, w, &adata.value))?;
     w.write_all(b";")?;
     ctx.newline(w)

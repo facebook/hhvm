@@ -28,7 +28,7 @@ pub(crate) fn convert_function<'a>(
     unit: &mut ir::Unit<'a>,
     filename: ir::Filename,
     src: &Function<'a>,
-    unit_state: &UnitState<'a>,
+    unit_state: &UnitState,
 ) {
     trace!("--- convert_function {}", src.name.unsafe_as_str());
 
@@ -60,7 +60,7 @@ pub(crate) fn convert_method<'a>(
     filename: ir::Filename,
     clsidx: usize,
     src: &Method<'a>,
-    unit_state: &UnitState<'a>,
+    unit_state: &UnitState,
 ) {
     trace!("--- convert_method {}", src.name.unsafe_as_str());
 
@@ -96,7 +96,7 @@ fn convert_body<'a>(
     attrs: ir::Attr,
     coeffects: &hhbc::Coeffects<'a>,
     src_loc: ir::SrcLoc,
-    unit_state: &UnitState<'a>,
+    unit_state: &UnitState,
 ) -> ir::Func<'a> {
     let Body {
         ref body_instrs,

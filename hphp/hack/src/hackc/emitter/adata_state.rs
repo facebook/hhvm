@@ -9,20 +9,20 @@ use hhbc::TypedValue;
 
 #[derive(Debug, Default)]
 pub struct AdataState<'a> {
-    shared: HashMap<TypedValue<'a>, AdataId<'a>>,
+    shared: HashMap<TypedValue<'a>, AdataId>,
     adata: Vec<Adata<'a>>,
 }
 
 impl<'a> AdataState<'a> {
-    pub fn push(&mut self, alloc: &'a bumpalo::Bump, value: TypedValue<'a>) -> AdataId<'a> {
-        push(alloc, &mut self.adata, value)
+    pub fn push(&mut self, value: TypedValue<'a>) -> AdataId {
+        push(&mut self.adata, value)
     }
 
-    pub fn intern(&mut self, alloc: &'a bumpalo::Bump, tv: TypedValue<'a>) -> AdataId<'a> {
+    pub fn intern(&mut self, tv: TypedValue<'a>) -> AdataId {
         *self
             .shared
             .entry(tv)
-            .or_insert_with_key(|tv| push(alloc, &mut self.adata, tv.clone()))
+            .or_insert_with_key(|tv| push(&mut self.adata, tv.clone()))
     }
 
     pub fn take_adata(&mut self) -> Vec<Adata<'a>> {
@@ -31,12 +31,8 @@ impl<'a> AdataState<'a> {
     }
 }
 
-fn push<'a>(
-    alloc: &'a bumpalo::Bump,
-    adata: &mut Vec<Adata<'a>>,
-    value: TypedValue<'a>,
-) -> AdataId<'a> {
-    let id = AdataId::from_raw_string(alloc, &format!("A_{}", adata.len()));
+fn push<'a>(adata: &mut Vec<Adata<'a>>, value: TypedValue<'a>) -> AdataId {
+    let id = AdataId::new(adata.len());
     adata.push(Adata { id, value });
     id
 }

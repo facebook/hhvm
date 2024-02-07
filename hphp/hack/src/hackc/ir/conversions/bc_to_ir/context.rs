@@ -48,7 +48,7 @@ impl Addr {
 /// Context used during conversion of an HhasBody to an ir::Func.
 pub(crate) struct Context<'a, 'b> {
     /// Conversion from hhbc::AdataId to the hhbc:TypedValue it represents.
-    pub(crate) adata_lookup: &'b HashMap<hhbc::AdataId<'a>, Arc<ir::TypedValue>>,
+    pub(crate) adata_lookup: &'b HashMap<hhbc::AdataId, Arc<ir::TypedValue>>,
     /// Source instructions from the bytecode
     pub(crate) instrs: &'b [Instruct<'a>],
     pub(crate) addr_to_seq: AddrMap<Sequence>,
@@ -71,7 +71,7 @@ impl<'a, 'b> Context<'a, 'b> {
         filename: ir::Filename,
         func: ir::Func<'a>,
         instrs: &'b [Instruct<'a>],
-        unit_state: &'b UnitState<'a>,
+        unit_state: &'b UnitState,
     ) -> Self {
         let mut builder = FuncBuilder::with_func(func, Arc::clone(&unit.strings));
         let (label_to_addr, bid_to_addr, addr_to_seq) =

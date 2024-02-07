@@ -95,7 +95,7 @@ struct TranslationState {
   FuncEmitter* fe{nullptr};
   PreClassEmitter* pce{nullptr};
   // Map of adata identifiers to their associated static arrays.
-  std::map<std::string, ArrayData*> adataMap;
+  hphp_fast_map<uint32_t, ArrayData*> adataMap;
 
   // Used for Execption Handler entry.
   jit::stack<Offset> handler;
@@ -668,7 +668,7 @@ HPHP::MemberKey TranslationState::translateMemberKey(const hhbc::MemberKey& mkey
 }
 
 ArrayData* TranslationState::getArrayfromAdataId(const AdataId& id) {
-  auto const it = adataMap.find(toString(id._0));
+  auto const it = adataMap.find(id.id);
   assertx(it != adataMap.end());
   assertx(it->second->isStatic());
   return it->second;
@@ -1364,12 +1364,11 @@ void translateClass(TranslationState& ts, const hhbc::Class& c) {
   translateClassBody(ts, c, classUbs);
 }
 
-void translateAdata(TranslationState& ts, const hhbc::Adata& ad) {
-  auto const name = toString(ad.id._0);
-  auto tv = toTypedValue(ad.value);
+void translateAdata(TranslationState& ts, const hhbc::Adata& adata) {
+  auto tv = toTypedValue(adata.value);
   auto arr = tv.m_data.parr;
   ArrayData::GetScalarArray(&arr);
-  ts.adataMap[name] = arr;
+  ts.adataMap[adata.id.id] = arr;
   ts.ue->mergeArray(arr);
 }
 

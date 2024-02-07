@@ -12,10 +12,10 @@ use hhbc::TypedValue;
 use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
 
-pub fn typed_value_into_instr<'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
-    tv: TypedValue<'arena>,
-) -> Result<InstrSeq<'arena>> {
+pub fn typed_value_into_instr<'a>(
+    e: &mut Emitter<'a, '_>,
+    tv: TypedValue<'a>,
+) -> Result<InstrSeq<'a>> {
     match tv {
         TypedValue::Uninit => Err(Error::unrecoverable("rewrite_typed_value: uninit")),
         TypedValue::Null => Ok(instr::null()),
@@ -43,14 +43,10 @@ pub fn typed_value_into_instr<'arena, 'decl>(
     }
 }
 
-fn get_array_identifier<'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
-    tv: TypedValue<'arena>,
-) -> AdataId<'arena> {
-    let alloc = e.alloc;
+fn get_array_identifier<'a>(e: &mut Emitter<'a, '_>, tv: TypedValue<'a>) -> AdataId {
     if e.options().hhbc.array_provenance {
-        e.adata_state_mut().push(alloc, tv)
+        e.adata_state_mut().push(tv)
     } else {
-        e.adata_state_mut().intern(alloc, tv)
+        e.adata_state_mut().intern(tv)
     }
 }

@@ -84,7 +84,7 @@ pub(crate) fn emit_func<'a>(
 
 /// Use to look up a ConstantId and get the AdataId and AdataKind for that
 /// ConstantId.
-type AdataIdMap<'a> = ConstantIdMap<(hhbc::AdataId<'a>, AdataKind)>;
+type AdataIdMap = ConstantIdMap<(hhbc::AdataId, AdataKind)>;
 
 /// Used for adata_id_map - the kind of the underlying array. Storing this in
 /// AdataIdMap means we don't have to pass around a &Unit just to look up what
@@ -188,7 +188,7 @@ pub(crate) struct InstrEmitter<'a, 'b> {
     loc_id: ir::LocId,
     strings: &'b StringCache<'a>,
     locals: HashMap<LocalId, hhbc::Local>,
-    adata_id_map: &'b AdataIdMap<'a>,
+    adata_id_map: &'b AdataIdMap,
 }
 
 fn convert_indexes_to_bools(total_len: usize, indexes: Option<&[u32]>) -> Vec<bool> {
@@ -209,7 +209,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
         func: &'b ir::Func<'a>,
         labeler: &'b mut Labeler,
         strings: &'b StringCache<'a>,
-        adata_id_map: &'b AdataIdMap<'a>,
+        adata_id_map: &'b AdataIdMap,
     ) -> Self {
         let locals = Self::prealloc_locals(func);
 

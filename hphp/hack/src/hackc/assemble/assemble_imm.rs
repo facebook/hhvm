@@ -204,15 +204,11 @@ impl AssembleImm<'_, i64> for Lexer<'_> {
     }
 }
 
-impl<'arena> AssembleImm<'arena, hhbc::AdataId<'arena>> for Lexer<'_> {
-    fn assemble_imm(
-        &mut self,
-        alloc: &'arena Bump,
-        _: &DeclMap<'arena>,
-    ) -> Result<hhbc::AdataId<'arena>> {
+impl<'arena> AssembleImm<'arena, hhbc::AdataId> for Lexer<'_> {
+    fn assemble_imm(&mut self, _: &'arena Bump, _: &DeclMap<'arena>) -> Result<hhbc::AdataId> {
         let adata_id = self.expect_with(Token::into_global)?;
         debug_assert!(adata_id[0] == b'@');
-        Ok(hhbc::AdataId::new(Str::new_slice(alloc, &adata_id[1..])))
+        Ok(hhbc::AdataId::parse(std::str::from_utf8(&adata_id[1..])?)?)
     }
 }
 

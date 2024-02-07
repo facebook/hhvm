@@ -36,7 +36,7 @@ use crate::Result;
 
 impl MapName for hhbc::Adata<'_> {
     fn get_name(&self) -> String {
-        self.id.unsafe_as_str().to_string()
+        self.id.to_string()
     }
 }
 

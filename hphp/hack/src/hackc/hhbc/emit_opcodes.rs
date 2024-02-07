@@ -274,7 +274,7 @@ pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
 
 fn convert_imm_type(imm: &ImmType, lifetime: &Lifetime) -> TokenStream {
     match imm {
-        ImmType::AA => quote!(AdataId<#lifetime>),
+        ImmType::AA => quote!(AdataId),
         ImmType::ARR(sub) => {
             let sub_ty = convert_imm_type(sub, lifetime);
             quote!(Vector<#sub_ty>)
@@ -566,7 +566,7 @@ mod tests {
                     TestOneImm(Str<'a>),
                     TestTwoImm(Str<'a>, Str<'a>),
                     TestThreeImm(Str<'a>, Str<'a>, Str<'a>),
-                    TestAA(AdataId<'a>),
+                    TestAA(AdataId),
                     TestARR(Vector<Str<'a>>),
                     TestBA(Label),
                     TestBA2([Label; 2]),
@@ -730,7 +730,7 @@ mod tests {
                 &opcode_test_data::test_opcodes(),
             ),
             quote!(
-                pub fn test_aa<'a>(arr1: AdataId<'a>) -> InstrSeq<'a> {
+                pub fn test_aa<'a>(arr1: AdataId) -> InstrSeq<'a> {
                     instr(Instruct::Opcode(Opcode::TestAA(arr1)))
                 }
                 pub fn test_lar<'a>(locrange: LocalRange) -> InstrSeq<'a> {

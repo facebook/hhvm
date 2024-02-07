@@ -11,12 +11,6 @@ pub(crate) trait MapName {
     fn get_name(&self) -> &str;
 }
 
-impl MapName for hhbc::Adata<'_> {
-    fn get_name(&self) -> &str {
-        self.id.unsafe_as_str()
-    }
-}
-
 impl MapName for hhbc::Class<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()

@@ -48,9 +48,9 @@ use crate::work_queue::WorkQueue;
 pub(crate) fn compare_bodies<'arena, 'a>(
     path: &CodePath<'_>,
     body_a: &'arena hhbc::Body<'arena>,
-    a_adata: &'a HashMap<AdataId<'arena>, &'a TypedValue<'arena>>,
+    a_adata: &'a HashMap<AdataId, &'a TypedValue<'arena>>,
     body_b: &'arena hhbc::Body<'arena>,
-    b_adata: &'a HashMap<AdataId<'arena>, &'a TypedValue<'arena>>,
+    b_adata: &'a HashMap<AdataId, &'a TypedValue<'arena>>,
 ) -> Result<()> {
     let mut work_queue = WorkQueue::default();
 

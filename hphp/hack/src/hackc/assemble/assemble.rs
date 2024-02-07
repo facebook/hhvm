@@ -806,7 +806,7 @@ fn assemble_adata<'arena>(
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::Adata<'arena>> {
     parse!(token_iter, ".adata" <id:id> "=" <value:assemble_triple_quoted_typed_value(alloc)> ";");
-    let id = hhbc::AdataId::new(id.into_ffi_str(alloc));
+    let id = hhbc::AdataId::parse(std::str::from_utf8(id.as_bytes())?)?;
     Ok(hhbc::Adata { id, value })
 }
 

@@ -19,7 +19,7 @@ use crate::strings::StringCache;
 pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Unit<'a> {
     let strings = StringCache::new(alloc, Arc::clone(&ir_unit.strings));
 
-    let mut unit = UnitBuilder::new_in(alloc);
+    let mut unit = UnitBuilder::new();
 
     for cls in ir_unit.classes.into_iter() {
         crate::class::convert_class(&mut unit, cls, &strings);
@@ -84,9 +84,9 @@ pub(crate) struct UnitBuilder<'a> {
 }
 
 impl<'a> UnitBuilder<'a> {
-    fn new_in(alloc: &'a bumpalo::Bump) -> Self {
+    fn new() -> Self {
         Self {
-            adata_cache: AdataCache::new(alloc),
+            adata_cache: AdataCache::new(),
             classes: Default::default(),
             functions: Default::default(),
         }

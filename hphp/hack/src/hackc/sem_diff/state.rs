@@ -55,14 +55,14 @@ pub(crate) struct State<'arena, 'a> {
     pub(crate) iterators: IterIdMap<IterState>,
     pub(crate) locals: HashMap<Local, Value>,
     pub(crate) stack: Vec<Value>,
-    adata: &'a HashMap<AdataId<'arena>, &'a TypedValue<'arena>>,
+    adata: &'a HashMap<AdataId, &'a TypedValue<'arena>>,
 }
 
 impl<'arena, 'a> State<'arena, 'a> {
     pub(crate) fn new(
         body: &'a Body<'arena>,
         debug_name: &'static str,
-        adata: &'a HashMap<AdataId<'arena>, &'a TypedValue<'arena>>,
+        adata: &'a HashMap<AdataId, &'a TypedValue<'arena>>,
     ) -> Self {
         Self {
             body,
@@ -1737,9 +1737,9 @@ fn clean_opcode<'arena>(opcode: &Opcode<'arena>) -> Opcode<'arena> {
         | Opcode::VerifyParamType(_)
         | Opcode::VerifyParamTypeTS(_) => opcode.clone(),
 
-        Opcode::Dict(_) => Opcode::Dict(AdataId::empty()),
-        Opcode::Keyset(_) => Opcode::Keyset(AdataId::empty()),
-        Opcode::Vec(_) => Opcode::Vec(AdataId::empty()),
+        Opcode::Dict(_) => Opcode::Dict(AdataId::INVALID),
+        Opcode::Keyset(_) => Opcode::Keyset(AdataId::INVALID),
+        Opcode::Vec(_) => Opcode::Vec(AdataId::INVALID),
 
         Opcode::MemoGetEager(_, dummy, _) => {
             Opcode::MemoGetEager([Label::INVALID, Label::INVALID], dummy, LocalRange::EMPTY)

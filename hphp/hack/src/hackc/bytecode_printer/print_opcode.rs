@@ -200,9 +200,8 @@ print_with_debug!(
     AsTypeStructExceptionKind
 );
 
-fn print_adata_id(w: &mut dyn Write, id: &AdataId<'_>) -> Result<()> {
-    w.write_all(b"@")?;
-    print_str(w, &id.as_ffi_str())
+fn print_adata_id(w: &mut dyn Write, id: &AdataId) -> Result<()> {
+    write!(w, "@{}", id)
 }
 
 fn print_class_name(w: &mut dyn Write, id: &ClassName<'_>) -> Result<()> {

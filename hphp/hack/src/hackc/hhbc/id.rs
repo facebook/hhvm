@@ -95,11 +95,38 @@ macro_rules! impl_add_suffix {
 }
 
 /// Conventionally this is "A_" followed by an integer
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, Serialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, Serialize)]
 #[repr(C)]
-pub struct AdataId<'arena>(Str<'arena>);
+pub struct AdataId {
+    id: u32,
+}
 
-impl_id!(AdataId);
+impl AdataId {
+    pub const INVALID: Self = Self { id: u32::MAX };
+
+    pub fn new(id: usize) -> Self {
+        Self {
+            id: id.try_into().unwrap(),
+        }
+    }
+
+    pub fn parse(s: &str) -> Result<Self, std::num::ParseIntError> {
+        use std::str::FromStr;
+        Ok(Self {
+            id: u32::from_str(s.strip_prefix("A_").unwrap_or(""))?,
+        })
+    }
+
+    pub fn id(&self) -> u32 {
+        self.id
+    }
+}
+
+impl std::fmt::Display for AdataId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "A_{}", self.id)
+    }
+}
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, Serialize)]
 #[repr(C)]

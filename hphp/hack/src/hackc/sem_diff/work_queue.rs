@@ -27,9 +27,9 @@ impl<'arena, 'a> WorkQueue<'arena, 'a> {
         &mut self,
         value_builder: &mut ValueBuilder<'arena>,
         a: &'a Body<'arena>,
-        a_adata: &'a HashMap<AdataId<'arena>, &'a TypedValue<'arena>>,
+        a_adata: &'a HashMap<AdataId, &'a TypedValue<'arena>>,
         b: &'a Body<'arena>,
-        b_adata: &'a HashMap<AdataId<'arena>, &'a TypedValue<'arena>>,
+        b_adata: &'a HashMap<AdataId, &'a TypedValue<'arena>>,
     ) {
         let mut a_state = State::new(a, "A", a_adata);
         let mut b_state = State::new(b, "B", b_adata);

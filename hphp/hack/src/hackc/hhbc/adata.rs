@@ -11,7 +11,7 @@ use crate::AdataId;
 #[derive(Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
 pub struct Adata<'arena> {
-    pub id: AdataId<'arena>,
+    pub id: AdataId,
     pub value: TypedValue<'arena>,
 }
 

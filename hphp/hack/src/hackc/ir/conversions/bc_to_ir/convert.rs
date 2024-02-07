@@ -111,9 +111,9 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit<'a> {
     ir_unit
 }
 
-pub(crate) struct UnitState<'a> {
+pub(crate) struct UnitState {
     /// Conversion from hhbc::AdataId to hhbc::TypedValue
-    pub(crate) adata_lookup: HashMap<hhbc::AdataId<'a>, Arc<ir::TypedValue>>,
+    pub(crate) adata_lookup: HashMap<hhbc::AdataId, Arc<ir::TypedValue>>,
 }
 
 pub(crate) fn convert_attribute<'a>(

@@ -301,23 +301,23 @@ cdef void combinedHandler(object func, string funcName, Cpp2RequestContext* ctx,
 
     THRIFT_REQUEST_CONTEXT.reset(__context_token)
 
-cdef public api void handleLifecycleCallback(object func, string funcName, cFollyPromise[cFollyUnit] cPromise):
+cdef api void handleLifecycleCallback(object func, string funcName, cFollyPromise[cFollyUnit] cPromise):
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit.create(cmove(cPromise))
     asyncio.get_event_loop().create_task(lifecycle_coro(func, funcName.decode('UTF-8'), __promise))
 
-cdef public api void handleServerCallback(object func, string funcName, Cpp2RequestContext* ctx, cFollyPromise[unique_ptr[cIOBuf]] cPromise, SerializedRequest serializedRequest, Protocol prot, RpcKind kind):
+cdef api void handleServerCallback(object func, string funcName, Cpp2RequestContext* ctx, cFollyPromise[unique_ptr[cIOBuf]] cPromise, SerializedRequest serializedRequest, Protocol prot, RpcKind kind):
     cdef Promise_IOBuf __promise = Promise_IOBuf.create(cmove(cPromise))
     combinedHandler(func, funcName, ctx, __promise, cmove(serializedRequest), prot, kind)
 
-cdef public api void handleServerStreamCallback(object func, string funcName, Cpp2RequestContext* ctx, cFollyPromise[cResponseAndServerStream[unique_ptr[cIOBuf], unique_ptr[cIOBuf]]] cPromise, SerializedRequest serializedRequest, Protocol prot, RpcKind kind):
+cdef api void handleServerStreamCallback(object func, string funcName, Cpp2RequestContext* ctx, cFollyPromise[cResponseAndServerStream[unique_ptr[cIOBuf], unique_ptr[cIOBuf]]] cPromise, SerializedRequest serializedRequest, Protocol prot, RpcKind kind):
     cdef Promise_Stream __promise = Promise_Stream.create(cmove(cPromise))
     combinedHandler(func, funcName, ctx, __promise, cmove(serializedRequest), prot, kind)
 
-cdef public api void handleServerCallbackOneway(object func, string funcName, Cpp2RequestContext* ctx, cFollyPromise[cFollyUnit] cPromise, SerializedRequest serializedRequest, Protocol prot, RpcKind kind):
+cdef api void handleServerCallbackOneway(object func, string funcName, Cpp2RequestContext* ctx, cFollyPromise[cFollyUnit] cPromise, SerializedRequest serializedRequest, Protocol prot, RpcKind kind):
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit.create(cmove(cPromise))
     combinedHandler(func, funcName, ctx, __promise, cmove(serializedRequest), prot, kind)
 
-cdef public api unique_ptr[cIOBuf] getSerializedPythonMetadata(object server):
+cdef api unique_ptr[cIOBuf] getSerializedPythonMetadata(object server):
     metadata = server.__get_metadata_service_response__()
     iobuf = serialize_iobuf(metadata, protocol=Protocol.BINARY)
     return cmove((<IOBuf>iobuf)._ours)

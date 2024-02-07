@@ -9,7 +9,7 @@
 #pragma once
 
 #include <proxygen/lib/http/session/HTTPSessionStats.h>
-#include <proxygen/lib/stats/BaseStats.h>
+#include <proxygen/lib/stats/StatsWrapper.h>
 #include <string>
 
 namespace proxygen {
@@ -49,36 +49,36 @@ class TLHTTPSessionStats : public HTTPSessionStats {
   void recordResetsInInterval(int64_t quantity) noexcept override;
   void recordResetsRateLimited() noexcept override;
 
-  BaseStats::TLCounter txnsOpen;
-  BaseStats::TLCounter pendingBufferedReadBytes;
-  BaseStats::TLCounter pendingBufferedWriteBytes;
-  BaseStats::TLTimeseries txnsOpened;
-  BaseStats::TLTimeseries txnsFromSessionReuse;
-  BaseStats::TLTimeseries txnsTransactionStalled;
-  BaseStats::TLTimeseries txnsSessionStalled;
-  BaseStats::TLTimeseries egressContentLengthMismatches;
-  BaseStats::TLTimeseries sessionPeriodicPingProbeTimeout;
+  StatsWrapper::TLCounter txnsOpen;
+  StatsWrapper::TLCounter pendingBufferedReadBytes;
+  StatsWrapper::TLCounter pendingBufferedWriteBytes;
+  StatsWrapper::TLTimeseries txnsOpened;
+  StatsWrapper::TLTimeseries txnsFromSessionReuse;
+  StatsWrapper::TLTimeseries txnsTransactionStalled;
+  StatsWrapper::TLTimeseries txnsSessionStalled;
+  StatsWrapper::TLTimeseries egressContentLengthMismatches;
+  StatsWrapper::TLTimeseries sessionPeriodicPingProbeTimeout;
   // Time to Last Byte Ack (TTLBA)
-  BaseStats::TLTimeseries presendIoSplit;
-  BaseStats::TLTimeseries presendExceedLimit;
-  BaseStats::TLTimeseries ttlbaTracked;
-  BaseStats::TLTimeseries ttlbaReceived;
-  BaseStats::TLTimeseries ttlbaTimeout;
-  BaseStats::TLTimeseries ttlbaNotFound;
-  BaseStats::TLTimeseries ttlbaExceedLimit;
-  BaseStats::TLTimeseries ttbtxTracked;
-  BaseStats::TLTimeseries ttbtxReceived;
-  BaseStats::TLTimeseries ttbtxTimeout;
-  BaseStats::TLTimeseries ttbtxNotFound;
-  BaseStats::TLTimeseries ttbtxExceedLimit;
-  BaseStats::TLTimeseries ctrlMsgsRateLimited;
-  BaseStats::TLTimeseries headersRateLimited;
-  BaseStats::TLTimeseries resetsRateLimited;
-  BaseStats::TLHistogram txnsPerSession;
-  BaseStats::TLHistogram sessionIdleTime;
-  BaseStats::TLHistogram ctrlMsgsInInterval;
-  BaseStats::TLHistogram headersInInterval;
-  BaseStats::TLHistogram resetsInInterval;
+  StatsWrapper::TLTimeseries presendIoSplit;
+  StatsWrapper::TLTimeseries presendExceedLimit;
+  StatsWrapper::TLTimeseries ttlbaTracked;
+  StatsWrapper::TLTimeseries ttlbaReceived;
+  StatsWrapper::TLTimeseries ttlbaTimeout;
+  StatsWrapper::TLTimeseries ttlbaNotFound;
+  StatsWrapper::TLTimeseries ttlbaExceedLimit;
+  StatsWrapper::TLTimeseries ttbtxTracked;
+  StatsWrapper::TLTimeseries ttbtxReceived;
+  StatsWrapper::TLTimeseries ttbtxTimeout;
+  StatsWrapper::TLTimeseries ttbtxNotFound;
+  StatsWrapper::TLTimeseries ttbtxExceedLimit;
+  StatsWrapper::TLTimeseries ctrlMsgsRateLimited;
+  StatsWrapper::TLTimeseries headersRateLimited;
+  StatsWrapper::TLTimeseries resetsRateLimited;
+  StatsWrapper::TLHistogram txnsPerSession;
+  StatsWrapper::TLHistogram sessionIdleTime;
+  StatsWrapper::TLHistogram ctrlMsgsInInterval;
+  StatsWrapper::TLHistogram headersInInterval;
+  StatsWrapper::TLHistogram resetsInInterval;
 };
 
 } // namespace proxygen

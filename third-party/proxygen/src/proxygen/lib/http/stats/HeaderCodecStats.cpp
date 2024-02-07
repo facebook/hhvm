@@ -30,7 +30,7 @@ TLHeaderCodecStats::TLHeaderCodecStats(const string& prefix) {
   decodeErrors_.reserve(kCompressionTypes.size());
   decodeTooLarge_.reserve(kCompressionTypes.size());
   for (auto comprType : kCompressionTypes) {
-    encodeCompr_.emplace_back(std::make_unique<BaseStats::TLHistogram>(
+    encodeCompr_.emplace_back(std::make_unique<StatsWrapper::TLHistogram>(
         prefix + "_" + comprType + "_encode_compr",
         100,
         0,
@@ -40,7 +40,7 @@ TLHeaderCodecStats::TLHeaderCodecStats(const string& prefix) {
         10,
         50,
         90));
-    encodeUncompr_.emplace_back(std::make_unique<BaseStats::TLHistogram>(
+    encodeUncompr_.emplace_back(std::make_unique<StatsWrapper::TLHistogram>(
         prefix + "_" + comprType + "_encode_uncompr",
         100,
         0,
@@ -50,7 +50,7 @@ TLHeaderCodecStats::TLHeaderCodecStats(const string& prefix) {
         10,
         50,
         90));
-    decodeCompr_.emplace_back(std::make_unique<BaseStats::TLHistogram>(
+    decodeCompr_.emplace_back(std::make_unique<StatsWrapper::TLHistogram>(
         prefix + "_" + comprType + "_decode_compr",
         100,
         0,
@@ -60,7 +60,7 @@ TLHeaderCodecStats::TLHeaderCodecStats(const string& prefix) {
         10,
         50,
         90));
-    decodeUncompr_.emplace_back(std::make_unique<BaseStats::TLHistogram>(
+    decodeUncompr_.emplace_back(std::make_unique<StatsWrapper::TLHistogram>(
         prefix + "_" + comprType + "_decode_uncompr",
         100,
         0,

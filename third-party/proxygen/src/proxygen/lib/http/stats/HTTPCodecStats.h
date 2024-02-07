@@ -9,7 +9,7 @@
 #pragma once
 
 #include <proxygen/lib/http/codec/ErrorCode.h>
-#include <proxygen/lib/stats/BaseStats.h>
+#include <proxygen/lib/stats/StatsWrapper.h>
 #include <string>
 
 namespace proxygen {
@@ -94,38 +94,38 @@ class TLHTTPCodecStats : public HTTPCodecStats {
   void recordEgressPriority() override;
 
  private:
-  BaseStats::TLCounter openConn_;
-  BaseStats::TLTimeseries ingressSynStream_;
-  BaseStats::TLTimeseries ingressSynReply_;
-  BaseStats::TLTimeseries ingressPushPromise_;
-  BaseStats::TLTimeseries ingressExStream_;
-  BaseStats::TLTimeseries ingressData_;
-  BaseStats::TLTimeseries ingressRst_;
-  std::vector<BaseStats::TLTimeseries> ingressRstStatus_;
-  BaseStats::TLTimeseries ingressSettings_;
-  BaseStats::TLTimeseries ingressPingRequest_;
-  BaseStats::TLTimeseries ingressPingReply_;
-  BaseStats::TLTimeseries ingressGoaway_;
-  BaseStats::TLTimeseries ingressGoawayDrain_;
-  std::vector<BaseStats::TLTimeseries> ingressGoawayStatus_;
-  BaseStats::TLTimeseries ingressWindowUpdate_;
-  BaseStats::TLTimeseries ingressPriority_;
+  StatsWrapper::TLCounter openConn_;
+  StatsWrapper::TLTimeseries ingressSynStream_;
+  StatsWrapper::TLTimeseries ingressSynReply_;
+  StatsWrapper::TLTimeseries ingressPushPromise_;
+  StatsWrapper::TLTimeseries ingressExStream_;
+  StatsWrapper::TLTimeseries ingressData_;
+  StatsWrapper::TLTimeseries ingressRst_;
+  std::vector<StatsWrapper::TLTimeseries> ingressRstStatus_;
+  StatsWrapper::TLTimeseries ingressSettings_;
+  StatsWrapper::TLTimeseries ingressPingRequest_;
+  StatsWrapper::TLTimeseries ingressPingReply_;
+  StatsWrapper::TLTimeseries ingressGoaway_;
+  StatsWrapper::TLTimeseries ingressGoawayDrain_;
+  std::vector<StatsWrapper::TLTimeseries> ingressGoawayStatus_;
+  StatsWrapper::TLTimeseries ingressWindowUpdate_;
+  StatsWrapper::TLTimeseries ingressPriority_;
 
-  BaseStats::TLTimeseries egressSynStream_;
-  BaseStats::TLTimeseries egressSynReply_;
-  BaseStats::TLTimeseries egressPushPromise_;
-  BaseStats::TLTimeseries egressExStream_;
-  BaseStats::TLTimeseries egressData_;
-  BaseStats::TLTimeseries egressRst_;
-  std::vector<BaseStats::TLTimeseries> egressRstStatus_;
-  BaseStats::TLTimeseries egressSettings_;
-  BaseStats::TLTimeseries egressPingRequest_;
-  BaseStats::TLTimeseries egressPingReply_;
-  BaseStats::TLTimeseries egressGoaway_;
-  BaseStats::TLTimeseries egressGoawayDrain_;
-  std::vector<BaseStats::TLTimeseries> egressGoawayStatus_;
-  BaseStats::TLTimeseries egressWindowUpdate_;
-  BaseStats::TLTimeseries egressPriority_;
+  StatsWrapper::TLTimeseries egressSynStream_;
+  StatsWrapper::TLTimeseries egressSynReply_;
+  StatsWrapper::TLTimeseries egressPushPromise_;
+  StatsWrapper::TLTimeseries egressExStream_;
+  StatsWrapper::TLTimeseries egressData_;
+  StatsWrapper::TLTimeseries egressRst_;
+  std::vector<StatsWrapper::TLTimeseries> egressRstStatus_;
+  StatsWrapper::TLTimeseries egressSettings_;
+  StatsWrapper::TLTimeseries egressPingRequest_;
+  StatsWrapper::TLTimeseries egressPingReply_;
+  StatsWrapper::TLTimeseries egressGoaway_;
+  StatsWrapper::TLTimeseries egressGoawayDrain_;
+  std::vector<StatsWrapper::TLTimeseries> egressGoawayStatus_;
+  StatsWrapper::TLTimeseries egressWindowUpdate_;
+  StatsWrapper::TLTimeseries egressPriority_;
 };
 
 } // namespace proxygen

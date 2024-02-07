@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <proxygen/lib/stats/BaseStats.h>
+#include <proxygen/lib/stats/StatsWrapper.h>
 
 namespace proxygen {
 
@@ -17,12 +17,12 @@ struct ResponseCodeStatsMinute {
 
   void addStatus(int status);
 
-  BaseStats::TLTimeseriesMinute statusOther;
-  BaseStats::TLTimeseriesMinute status1xx;
-  BaseStats::TLTimeseriesMinute status2xx;
-  BaseStats::TLTimeseriesMinute status3xx;
-  BaseStats::TLTimeseriesMinute status4xx;
-  BaseStats::TLTimeseriesMinute status5xx;
+  StatsWrapper::TLTimeseriesMinute statusOther;
+  StatsWrapper::TLTimeseriesMinute status1xx;
+  StatsWrapper::TLTimeseriesMinute status2xx;
+  StatsWrapper::TLTimeseriesMinute status3xx;
+  StatsWrapper::TLTimeseriesMinute status4xx;
+  StatsWrapper::TLTimeseriesMinute status5xx;
 };
 
 } // namespace proxygen

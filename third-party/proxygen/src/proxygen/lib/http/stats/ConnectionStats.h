@@ -11,7 +11,8 @@
 #include <folly/Optional.h>
 
 #include <proxygen/lib/http/stats/TLResponseCodeStats.h>
-#include <proxygen/lib/stats/BaseStats.h>
+
+#include <proxygen/lib/stats/StatsWrapper.h>
 
 namespace proxygen {
 
@@ -74,20 +75,20 @@ class TLConnectionStats : public ConnectionStats {
   void addIngressBodyBytes(size_t bytes) override;
 
  private:
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> req_;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> resp_;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> egressBytes_;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> ingressBytes_;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> egressBodyBytes_;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> ingressBodyBytes_;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> req_;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> resp_;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> egressBytes_;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> ingressBytes_;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> egressBodyBytes_;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> ingressBodyBytes_;
   std::optional<TLResponseCodeStats> responseCodes_;
-  std::optional<BaseStats::TLHistogram> totalDuration_;
+  std::optional<StatsWrapper::TLHistogram> totalDuration_;
 
-  std::optional<BaseStats::TLCounter> currConns_;
-  std::optional<BaseStats::TLTimeseries> newConns_;
+  std::optional<StatsWrapper::TLCounter> currConns_;
+  std::optional<StatsWrapper::TLTimeseries> newConns_;
 
-  std::optional<BaseStats::TLCounter> currTcpConns_;
-  std::optional<BaseStats::TLTimeseries> newTcpConns_;
+  std::optional<StatsWrapper::TLCounter> currTcpConns_;
+  std::optional<StatsWrapper::TLTimeseries> newTcpConns_;
 };
 
 } // namespace proxygen

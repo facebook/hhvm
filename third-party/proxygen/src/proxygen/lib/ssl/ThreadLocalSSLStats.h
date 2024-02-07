@@ -10,7 +10,7 @@
 
 #include <fizz/protocol/Types.h>
 #include <folly/ThreadLocal.h>
-#include <proxygen/lib/stats/BaseStats.h>
+#include <proxygen/lib/stats/StatsWrapper.h>
 #include <string>
 #include <wangle/ssl/SSLStats.h>
 #include <wangle/ssl/SSLUtil.h>
@@ -111,61 +111,61 @@ class TLSSLStats : public ProxygenSSLStats {
   TLSSLStats& operator=(TLSSLStats const&) = delete;
 
   // downstream
-  BaseStats::TLHistogram sslAcceptLatency_;
-  BaseStats::TLTimeseries sslAcceptLatencyTS_;
-  BaseStats::TLTimeseries tlsTicketNew_;
-  BaseStats::TLTimeseries tlsTicketHit_;
-  BaseStats::TLTimeseries tlsTicketMiss_;
-  BaseStats::TLTimeseries sslSessionNew_;
-  BaseStats::TLTimeseries sslSessionHit_;
-  BaseStats::TLTimeseries sslSessionForeignHit_;
-  BaseStats::TLTimeseries sslSessionTotalMiss_;
-  BaseStats::TLTimeseries sslSessionRemove_;
-  BaseStats::TLTimeseries sslSessionFree_;
-  BaseStats::TLTimeseries sslSessionSetError_;
-  BaseStats::TLTimeseries sslSessionGetError_;
-  BaseStats::TLTimeseries sslClientRenegotiations_;
-  BaseStats::TLTimeseries clientCertMismatch_;
-  BaseStats::TLTimeseries tlsTicketInvalidRotation_;
+  StatsWrapper::TLHistogram sslAcceptLatency_;
+  StatsWrapper::TLTimeseries sslAcceptLatencyTS_;
+  StatsWrapper::TLTimeseries tlsTicketNew_;
+  StatsWrapper::TLTimeseries tlsTicketHit_;
+  StatsWrapper::TLTimeseries tlsTicketMiss_;
+  StatsWrapper::TLTimeseries sslSessionNew_;
+  StatsWrapper::TLTimeseries sslSessionHit_;
+  StatsWrapper::TLTimeseries sslSessionForeignHit_;
+  StatsWrapper::TLTimeseries sslSessionTotalMiss_;
+  StatsWrapper::TLTimeseries sslSessionRemove_;
+  StatsWrapper::TLTimeseries sslSessionFree_;
+  StatsWrapper::TLTimeseries sslSessionSetError_;
+  StatsWrapper::TLTimeseries sslSessionGetError_;
+  StatsWrapper::TLTimeseries sslClientRenegotiations_;
+  StatsWrapper::TLTimeseries clientCertMismatch_;
+  StatsWrapper::TLTimeseries tlsTicketInvalidRotation_;
 
   // upstream
-  BaseStats::TLTimeseries sslUpstreamHandshakes_;
-  BaseStats::TLTimeseries sslUpstreamResumes_;
-  BaseStats::TLTimeseries sslUpstreamErrors_;
-  BaseStats::TLTimeseries sslUpstreamVerifyErrors_;
+  StatsWrapper::TLTimeseries sslUpstreamHandshakes_;
+  StatsWrapper::TLTimeseries sslUpstreamResumes_;
+  StatsWrapper::TLTimeseries sslUpstreamErrors_;
+  StatsWrapper::TLTimeseries sslUpstreamVerifyErrors_;
   // replay_cache service
-  BaseStats::TLTimeseries replayCacheNumRequests_;
-  BaseStats::TLTimeseries replayCacheNumHits_;
-  BaseStats::TLTimeseries replayCacheNumErrors_;
-  BaseStats::TLHistogram replayCacheDuration_;
+  StatsWrapper::TLTimeseries replayCacheNumRequests_;
+  StatsWrapper::TLTimeseries replayCacheNumHits_;
+  StatsWrapper::TLTimeseries replayCacheNumErrors_;
+  StatsWrapper::TLHistogram replayCacheDuration_;
 
   // ssl handshake metrics
-  BaseStats::TLTimeseries newSSLHandshakeShed_;
-  BaseStats::TLTimeseries sslHandshakeErrors_;
-  BaseStats::TLTimeseries sslHandshakeSuccesses_;
-  BaseStats::TLTimeseries sslResumptions_;
-  BaseStats::TLTimeseries fizzHandshakeErrors_;
-  BaseStats::TLTimeseries fizzHandshakeProtocolErrors_;
-  BaseStats::TLTimeseries fizzHandshakeSuccesses_;
-  BaseStats::TLTimeseries tfoSuccess_;
-  BaseStats::TLTimeseries sslServerCertExpiring_;
-  BaseStats::TLTimeseries sslServerCertExpiringCritical_;
+  StatsWrapper::TLTimeseries newSSLHandshakeShed_;
+  StatsWrapper::TLTimeseries sslHandshakeErrors_;
+  StatsWrapper::TLTimeseries sslHandshakeSuccesses_;
+  StatsWrapper::TLTimeseries sslResumptions_;
+  StatsWrapper::TLTimeseries fizzHandshakeErrors_;
+  StatsWrapper::TLTimeseries fizzHandshakeProtocolErrors_;
+  StatsWrapper::TLTimeseries fizzHandshakeSuccesses_;
+  StatsWrapper::TLTimeseries tfoSuccess_;
+  StatsWrapper::TLTimeseries sslServerCertExpiring_;
+  StatsWrapper::TLTimeseries sslServerCertExpiringCritical_;
   // tlsUnknown_ is to track and make sure that we do not
   // support a TLS versions that is unintented. This is
   // also used for audits.
-  BaseStats::TLTimeseries tlsUnknown_;
-  BaseStats::TLTimeseries tlsVersion_1_0_;
-  BaseStats::TLTimeseries tlsVersion_1_1_;
-  BaseStats::TLTimeseries tlsVersion_1_2_;
-  BaseStats::TLTimeseries tlsVersion_1_3_;
-  BaseStats::TLTimeseries tlsInsecureConnection;
+  StatsWrapper::TLTimeseries tlsUnknown_;
+  StatsWrapper::TLTimeseries tlsVersion_1_0_;
+  StatsWrapper::TLTimeseries tlsVersion_1_1_;
+  StatsWrapper::TLTimeseries tlsVersion_1_2_;
+  StatsWrapper::TLTimeseries tlsVersion_1_3_;
+  StatsWrapper::TLTimeseries tlsInsecureConnection;
 
   // PskTypes counters
-  BaseStats::TLTimeseries fizzPskTypeNotSupported_;
-  BaseStats::TLTimeseries fizzPskTypeNotAttempted_;
-  BaseStats::TLTimeseries fizzPskTypeRejected_;
-  BaseStats::TLTimeseries fizzPskTypeExternal_;
-  BaseStats::TLTimeseries fizzPskTypeResumption_;
+  StatsWrapper::TLTimeseries fizzPskTypeNotSupported_;
+  StatsWrapper::TLTimeseries fizzPskTypeNotAttempted_;
+  StatsWrapper::TLTimeseries fizzPskTypeRejected_;
+  StatsWrapper::TLTimeseries fizzPskTypeExternal_;
+  StatsWrapper::TLTimeseries fizzPskTypeResumption_;
 };
 
 } // namespace proxygen

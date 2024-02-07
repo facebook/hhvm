@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <proxygen/lib/stats/BaseStats.h>
+#include <proxygen/lib/stats/StatsWrapper.h>
 
 namespace proxygen {
 
@@ -17,41 +17,41 @@ struct TLResponseCodeStats {
 
   void addStatus(int status);
 
-  BaseStats::TLTimeseries statusNone;
-  BaseStats::TLTimeseries statusOther;
-  BaseStats::TLTimeseries status1xx;
-  BaseStats::TLTimeseries status2xx;
-  BaseStats::TLTimeseries status3xx;
-  BaseStats::TLTimeseries status4xx;
-  BaseStats::TLTimeseries status5xx;
+  StatsWrapper::TLTimeseries statusNone;
+  StatsWrapper::TLTimeseries statusOther;
+  StatsWrapper::TLTimeseries status1xx;
+  StatsWrapper::TLTimeseries status2xx;
+  StatsWrapper::TLTimeseries status3xx;
+  StatsWrapper::TLTimeseries status4xx;
+  StatsWrapper::TLTimeseries status5xx;
 
   // TODO: all the counters below are marked for deprecation.
 
-  std::optional<BaseStats::TLTimeseries> status39x;
+  std::optional<StatsWrapper::TLTimeseries> status39x;
 
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status200;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status206;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status301;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status302;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status303;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status304;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status307;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status395;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status396;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status397;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status398;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status399;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status400;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status401;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status403;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status404;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status408;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status429;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status500;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status501;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status502;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status503;
-  std::optional<BaseStats::TLTimeseriesMinuteAndAllTime> status504;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> status200;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> status206;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> status301;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> status302;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> status303;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> status304;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> status307;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> status395;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> status396;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> status397;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> status398;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> status399;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> status400;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> status401;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> status403;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> status404;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> status408;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> status429;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> status500;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> status501;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> status502;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> status503;
+  std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> status504;
 };
 
 } // namespace proxygen

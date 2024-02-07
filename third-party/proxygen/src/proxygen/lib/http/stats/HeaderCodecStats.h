@@ -9,7 +9,7 @@
 #pragma once
 
 #include <proxygen/lib/http/codec/compress/HeaderCodec.h>
-#include <proxygen/lib/stats/BaseStats.h>
+#include <proxygen/lib/stats/StatsWrapper.h>
 #include <string>
 #include <vector>
 
@@ -29,14 +29,14 @@ class TLHeaderCodecStats : public HeaderCodec::Stats {
   void recordDecodeTooLarge(HeaderCodec::Type type) override;
 
  private:
-  std::vector<std::unique_ptr<BaseStats::TLHistogram>> encodeCompr_;
-  std::vector<std::unique_ptr<BaseStats::TLHistogram>> encodeUncompr_;
-  std::vector<std::unique_ptr<BaseStats::TLHistogram>> decodeCompr_;
-  std::vector<std::unique_ptr<BaseStats::TLHistogram>> decodeUncompr_;
-  std::vector<BaseStats::TLTimeseries> encodes_;
-  std::vector<BaseStats::TLTimeseries> decodes_;
-  std::vector<BaseStats::TLTimeseries> decodeErrors_;
-  std::vector<BaseStats::TLTimeseries> decodeTooLarge_;
+  std::vector<std::unique_ptr<StatsWrapper::TLHistogram>> encodeCompr_;
+  std::vector<std::unique_ptr<StatsWrapper::TLHistogram>> encodeUncompr_;
+  std::vector<std::unique_ptr<StatsWrapper::TLHistogram>> decodeCompr_;
+  std::vector<std::unique_ptr<StatsWrapper::TLHistogram>> decodeUncompr_;
+  std::vector<StatsWrapper::TLTimeseries> encodes_;
+  std::vector<StatsWrapper::TLTimeseries> decodes_;
+  std::vector<StatsWrapper::TLTimeseries> decodeErrors_;
+  std::vector<StatsWrapper::TLTimeseries> decodeTooLarge_;
 };
 
 } // namespace proxygen

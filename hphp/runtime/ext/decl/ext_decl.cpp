@@ -736,16 +736,18 @@ Object HHVM_STATIC_METHOD(FileDecls, parsePath, const String& path) {
   // Check if we have already parsed this file
   // and if the cache contains the result
   // validated by the SHA1 hash of the file contents
-  FileDeclsCache::ConstAccessor acc;
   auto const [sha1, textOpt] = computeSHA1(filePath, root);
-  if (fileDeclsCache.find(acc, filePath.native())) {
-    FileDeclsCacheEntry entry = *acc;
-    auto& [expectedSha1, decls] = entry;
-    if (expectedSha1 == sha1) {
-      Object obj{FileDecls::classof()};
-      auto data = Native::data<FileDecls>(obj);
-      data->declsHolder = std::move(decls);
-      return obj;
+  {
+    FileDeclsCache::ConstAccessor acc;
+    if (fileDeclsCache.find(acc, filePath.native())) {
+      FileDeclsCacheEntry entry = *acc;
+      auto& [expectedSha1, decls] = entry;
+      if (expectedSha1 == sha1) {
+        Object obj{FileDecls::classof()};
+        auto data = Native::data<FileDecls>(obj);
+        data->declsHolder = std::move(decls);
+        return obj;
+      }
     }
   }
 

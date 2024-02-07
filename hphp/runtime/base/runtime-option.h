@@ -1513,6 +1513,9 @@ struct RuntimeOption {
   F(hphp_fast_string_set, StartOptionLogOptions, {})                    \
   F(hphp_fast_string_set, StartOptionLogExcludeOptions, {})             \
   F(bool, RecordReplay, false)                                          \
+  /* Format: _SUPERGLOBAL.Key=Value[&_SUPERGLOBAL.Key=Value...] */      \
+  /* Example: _SERVER.SCRIPT_URL=/foo&_POST.key=value */                \
+  F(string, RecordSampleFilter, std::string(""))                        \
   F(uint64_t, RecordSampleRate, 0)                                      \
   F(string, RecordDir, std::string(""))                                 \
   F(bool, Replay, false)                                                \

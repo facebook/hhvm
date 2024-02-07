@@ -23,8 +23,10 @@
 #include <limits>
 #include <sstream>
 #include <stdexcept>
+#include <string_view>
 
 #include <folly/dynamic.h>
+#include <folly/String.h>
 #include <folly/Random.h>
 #include <sys/stat.h>
 
@@ -105,7 +107,6 @@ void Recorder::onCompileSystemlibString(const std::string& filename) {
 
 void Recorder::onGetFactsForRequest(HPHP::FactsStore*& map) {
   if (const auto recorder{get()}; UNLIKELY(recorder && recorder->m_enabled)) {
-    unitCacheClearSync();
     recorder->m_parentFactsStore = map;
     map = getFactsStore();
   }
@@ -242,7 +243,36 @@ struct Recorder::DebuggerHook final : public HPHP::DebuggerHook {
   }
 
   void onRequestInit() override {
+    static const auto filters{[] {
+      std::unordered_map<std::string_view,
+        std::unordered_map<std::string_view, std::string_view>> filters_;
+      if (!RO::EvalRecordSampleFilter.empty()) {
+        std::vector<std::string_view> parts;
+        folly::split('&', RO::EvalRecordSampleFilter, parts, true);
+        for (const auto& part : parts) {
+          std::string_view k1, k2, v;
+          folly::split<false>('=', part, k1, v);
+          folly::split<false>('.', k1, k1, k2);
+          filters_[k1][k2] = v;
+        }
+      }
+      return filters_;
+    }()};
+    HPHP::DebuggerHook::detach();
     auto& recorder{*Recorder::get()};
+    for (const auto& [k1, filter] : filters) {
+      for (const auto& [k2, value] : filter) {
+        if (const auto global{php_global(StaticString{k1})}; global.isDict()) {
+          if (const auto g{global.asCArrRef()[String{k2}]}; !g.isNull()) {
+            if (g.toString().toCppString() == value) {
+              continue;
+            }
+          }
+        }
+        recorder.m_enabled = false;
+        return;
+      }
+    }
     for (auto s : {"_ENV", "_FILES", "_GET", "_POST", "_REQUEST", "_SERVER"}) {
       auto globals{Array::CreateDict()};
       for (auto i{php_global(StaticString{s}).asCArrRef().begin()}; i; ++i) {
@@ -250,7 +280,6 @@ struct Recorder::DebuggerHook final : public HPHP::DebuggerHook {
       }
       recorder.m_globals.set(String{s}, globals);
     }
-    HPHP::DebuggerHook::detach();
   }
 };
 

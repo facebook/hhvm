@@ -15,7 +15,7 @@
  */
 
 #include <thrift/compiler/gen/cpp/reference_type.h>
-#include <thrift/compiler/gen/testing.h>
+#include <thrift/compiler/test/gen_testing.h>
 
 #include <folly/portability/GTest.h>
 #include <thrift/compiler/ast/t_base_type.h>

@@ -22,7 +22,7 @@
 
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_type.h>
-#include <thrift/compiler/gen/cpp/detail/gen.h>
+#include <thrift/compiler/gen/cpp/gen.h>
 
 namespace apache {
 namespace thrift {

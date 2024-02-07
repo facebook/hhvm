@@ -37,8 +37,8 @@
 #include <thrift/compiler/ast/t_type.h>
 #include <thrift/compiler/ast/t_typedef.h>
 #include <thrift/compiler/ast/t_union.h>
-#include <thrift/compiler/gen/testing.h>
 #include <thrift/compiler/source_location.h>
+#include <thrift/compiler/test/gen_testing.h>
 #include <thrift/compiler/test/parser_test_helpers.h>
 
 namespace apache::thrift::compiler {

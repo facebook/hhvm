@@ -15,7 +15,7 @@
  */
 
 #include <thrift/compiler/gen/cpp/type_resolver.h>
-#include <thrift/compiler/gen/testing.h>
+#include <thrift/compiler/test/gen_testing.h>
 
 #include <memory>
 #include <stdexcept>

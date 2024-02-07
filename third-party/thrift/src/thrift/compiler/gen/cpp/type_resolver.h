@@ -33,7 +33,7 @@
 #include <thrift/compiler/ast/t_sink.h>
 #include <thrift/compiler/ast/t_stream.h>
 #include <thrift/compiler/ast/t_type.h>
-#include <thrift/compiler/gen/cpp/detail/gen.h>
+#include <thrift/compiler/gen/cpp/gen.h>
 #include <thrift/compiler/gen/cpp/namespace_resolver.h>
 #include <thrift/compiler/gen/cpp/reference_type.h>
 #include <thrift/compiler/lib/uri.h>

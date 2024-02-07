@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <thrift/compiler/gen/cpp/detail/gen.h>
+#include <thrift/compiler/gen/cpp/gen.h>
 
 namespace apache {
 namespace thrift {

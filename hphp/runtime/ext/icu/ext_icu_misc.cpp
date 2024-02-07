@@ -100,7 +100,7 @@ static Variant doIdnTranslateUTS46(const String& domain, int64_t options,
   SCOPE_EXIT{ uidna_close(idna); };
   String result(255, ReserveString); // 255 == max length possible
   int32_t len;
-  auto capacity = result.capacity() + 1;
+  auto capacity = result.capacity();
   if (toUtf8) {
     len = uidna_nameToUnicodeUTF8(idna, domain.c_str(), domain.size(),
                                   result.mutableData(), capacity,

@@ -42,10 +42,13 @@ enum MyEnum {
   MyValue2 = 1,
 }
 
+@cpp.Name{value = "NormalDecentEnum"}
 enum AnnoyingEnum {
-  FOO = 1 (cpp.name = "l0O1"),
-  BAR = 2 (cpp.name = "FuBaR"),
-} (cpp.name = "NormalDecentEnum")
+  @cpp.Name{value = "l0O1"}
+  FOO = 1,
+  @cpp.Name{value = "FuBaR"}
+  BAR = 2,
+}
 
 @patch.GeneratePatch
 struct MyStruct {
@@ -80,7 +83,8 @@ struct StringPair {
   2: string doubled;
 }
 
-struct EmptyStruct {} (cpp.name = "VapidStruct")
+@cpp.Name{value = "VapidStruct"}
+struct EmptyStruct {}
 
 typedef byte signed_byte
 @cpp.Type{name = "folly::IOBuf"}
@@ -187,6 +191,7 @@ struct ComposeStruct {
   10: serialized_dep.SerializedError serial_error;
 } (cpp.noncopyable)
 
+@cpp.Name{value = "Shallot"}
 union Onion {
   1: MyEnum myEnum;
   2: PrimitiveStruct myStruct;
@@ -195,4 +200,4 @@ union Onion {
   8: list<double> doubleList;
   9: map<binary, string> strMap;
   10: id.ProtocolId adaptedInt;
-} (cpp.name = "Shallot")
+}

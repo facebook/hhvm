@@ -48,6 +48,7 @@ void EnumMetadata<::test::fixtures::python_capi::NormalDecentEnum>::gen(ThriftMe
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
     enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
+  enum_metadata.structured_annotations()->push_back(*cvStruct("cpp.Name", {{"value", cvString("NormalDecentEnum")}}).cv_struct_ref());
 }
 
 const ::apache::thrift::metadata::ThriftStruct&
@@ -180,6 +181,7 @@ StructMetadata<::test::fixtures::python_capi::VapidStruct>::gen(ThriftMetadata& 
   ::apache::thrift::metadata::ThriftStruct& module_EmptyStruct = res.first->second;
   module_EmptyStruct.name() = "module.EmptyStruct";
   module_EmptyStruct.is_union() = false;
+  module_EmptyStruct.structured_annotations()->push_back(*cvStruct("cpp.Name", {{"value", cvString("VapidStruct")}}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -404,6 +406,7 @@ StructMetadata<::test::fixtures::python_capi::Shallot>::gen(ThriftMetadata& meta
     field.structured_annotations() = f.structured_annotations;
     module_Onion.fields()->push_back(std::move(field));
   }
+  module_Onion.structured_annotations()->push_back(*cvStruct("cpp.Name", {{"value", cvString("Shallot")}}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&

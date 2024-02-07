@@ -184,6 +184,7 @@ def _fbthrift_gen_metadata_struct_EmptyStruct(metadata_struct: _fbthrift_metadat
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
         is_union=False,
         structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Name"), fields= { "value": _fbthrift_metadata.ThriftConstValue(cv_string="VapidStruct"),  }),
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
@@ -545,6 +546,7 @@ def _fbthrift_gen_metadata_struct_Onion(metadata_struct: _fbthrift_metadata.Thri
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
         is_union=True,
         structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Name"), fields= { "value": _fbthrift_metadata.ThriftConstValue(cv_string="Shallot"),  }),
         ])
     new_struct = metadata_struct(structs=struct_dict)
 

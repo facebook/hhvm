@@ -29,7 +29,7 @@ template <typename T>
 PyObject* __shim__roundtrip(PyObject* obj) {
   auto cpp = python::capi::Extractor<T>{}(obj);
   if (cpp.hasValue()) {
-    return python::capi::Constructor<T>{}(std::move(*cpp));
+    return python::capi::Constructor<T>{}(*cpp);
   }
   return nullptr;
 }

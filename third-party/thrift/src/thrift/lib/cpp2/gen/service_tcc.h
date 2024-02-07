@@ -152,6 +152,13 @@ void process_throw_wrapped_handler_error(
     return;
   }
 
+  FB_LOG_EVERY_MS(ERROR, 1000)
+      << "Service handler threw an uncaught exception in method" << method
+      << ": " << ew
+      << ". This indicates an error in user code that implements this method. "
+      << "Note: only exceptions declared in service definition in thrift IDL are allowed to "
+      << "be thrown from method handler.";
+
   if (stack) {
     stack->userExceptionWrapped(false, ew);
     stack->handlerErrorWrapped(ew);

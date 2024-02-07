@@ -17,6 +17,7 @@
 package gotest
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"reflect"
@@ -67,33 +68,30 @@ func createTestHeaderServer(handler thrifttest.ThriftTest) (*thrift.SimpleServer
 	return server, taddr, nil
 }
 
+type transportFactory = func(socket *thrift.Socket) thrift.Transport
+
 // connectTestHeaderServer Create a client and connect to a test server
 func connectTestHeaderServer(
 	addr net.Addr,
-	transportFactory thrift.TransportFactory,
+	transportFactory func(socket *thrift.Socket) thrift.Transport,
 	protocolFactory thrift.ProtocolFactory,
-) (*thrifttest.ThriftTestClient, error) {
-	var trans thrift.Transport
-	trans, err := thrift.NewSocket(thrift.SocketAddr(addr.String()), thrift.SocketTimeout(localConnTimeout))
+) (*thrifttest.ThriftTestChannelClient, error) {
+	socket, err := thrift.NewSocket(thrift.SocketAddr(addr.String()), thrift.SocketTimeout(localConnTimeout))
 	if err != nil {
 		return nil, err
 	}
 
-	err = trans.Open()
-
+	err = socket.Open()
 	if err != nil {
 		return nil, err
 	}
 
-	if transportFactory != nil {
-		trans = transportFactory.GetTransport(trans)
-	}
-
+	trans := transportFactory(socket)
 	prot := protocolFactory.GetProtocol(trans)
-	return thrifttest.NewThriftTestClient(trans, prot, prot), nil
+	return thrifttest.NewThriftTestChannelClient(thrift.NewSerialChannel(prot)), nil
 }
 
-func doClientTest(t *testing.T, transportFactory thrift.TransportFactory, protocolFactory thrift.ProtocolFactory) {
+func doClientTest(ctx context.Context, t *testing.T, transportFactory transportFactory, protocolFactory thrift.ProtocolFactory) {
 	handler := &testHandler{}
 	serv, addr, err := createTestHeaderServer(handler)
 	if err != nil {
@@ -107,7 +105,7 @@ func doClientTest(t *testing.T, transportFactory thrift.TransportFactory, protoc
 	}
 	defer client.Close()
 
-	res, err := client.DoTestString(testCallString)
+	res, err := client.DoTestString(ctx, testCallString)
 	if err != nil {
 		t.Fatalf("failed to query test server: %s", err.Error())
 	}
@@ -118,7 +116,7 @@ func doClientTest(t *testing.T, transportFactory thrift.TransportFactory, protoc
 
 	// Try sending a lot of requests
 	for i := 0; i < 1000; i++ {
-		res, err = client.DoTestString(testCallString)
+		res, err = client.DoTestString(ctx, testCallString)
 		if err != nil {
 			t.Fatalf("failed to query test server: %s", err.Error())
 		}
@@ -133,7 +131,7 @@ func doClientTest(t *testing.T, transportFactory thrift.TransportFactory, protoc
 	exp1.Message = testCallString
 	handler.ReturnError = exp1
 
-	err = client.DoTestException(testCallString)
+	err = client.DoTestException(ctx, testCallString)
 	if texp, ok := err.(*thrifttest.Xception); ok && texp != nil {
 		if texp.ErrorCode != 5 || texp.Message != testCallString {
 			t.Fatalf("application exception values incorrect: got=%s", texp.String())
@@ -157,7 +155,7 @@ func doClientTest(t *testing.T, transportFactory thrift.TransportFactory, protoc
 
 	// Try sending a lot of large things
 	for i := 0; i < 10; i++ {
-		resp, terr := client.DoTestInsanity(insanity)
+		resp, terr := client.DoTestInsanity(ctx, insanity)
 		if terr != nil {
 			t.Fatalf("failed to query test server: %s", err.Error())
 		}
@@ -178,29 +176,44 @@ func doClientTest(t *testing.T, transportFactory thrift.TransportFactory, protoc
 	}
 
 	// Ensure poorly named method exists
-	_ = client.XDoTestPoorName()
+	_ = client.XDoTestPoorName(ctx)
 }
 
 func TestHeaderHeader(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	doClientTest(
+		ctx,
 		t,
-		thrift.NewHeaderTransportFactory(thrift.NewTransportFactory()),
+		func(socket *thrift.Socket) thrift.Transport {
+			return thrift.NewHeaderTransport(socket)
+		},
 		thrift.NewHeaderProtocolFactory(),
 	)
 }
 
 func TestHeaderFramedBinary(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	doClientTest(
+		ctx,
 		t,
-		thrift.NewFramedTransportFactory(thrift.NewTransportFactory()),
+		func(socket *thrift.Socket) thrift.Transport {
+			return thrift.NewFramedTransport(socket)
+		},
 		thrift.NewBinaryProtocolFactory(false, true),
 	)
 }
 
 func TestHeaderFramedCompact(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	doClientTest(
+		ctx,
 		t,
-		thrift.NewFramedTransportFactory(thrift.NewTransportFactory()),
+		func(socket *thrift.Socket) thrift.Transport {
+			return thrift.NewFramedTransport(socket)
+		},
 		thrift.NewCompactProtocolFactory(),
 	)
 }

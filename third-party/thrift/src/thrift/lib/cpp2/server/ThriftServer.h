@@ -73,6 +73,7 @@
 
 FOLLY_GFLAGS_DECLARE_bool(thrift_abort_if_exceeds_shutdown_deadline);
 FOLLY_GFLAGS_DECLARE_string(service_identity);
+FOLLY_GFLAGS_DECLARE_bool(disable_legacy_header_routing_handler);
 
 THRIFT_FLAG_DECLARE_bool(dump_snapshot_on_long_shutdown);
 THRIFT_FLAG_DECLARE_bool(server_check_unimplemented_extra_interfaces);

@@ -55,6 +55,7 @@
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
 #include <thrift/lib/cpp2/server/ExecutorToThreadManagerAdaptor.h>
 #include <thrift/lib/cpp2/server/InternalPriorityRequestPile.h>
+#include <thrift/lib/cpp2/server/LegacyHeaderRoutingHandler.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/server/ServerFlags.h>
 #include <thrift/lib/cpp2/server/ServerInstrumentation.h>
@@ -81,6 +82,10 @@ FOLLY_GFLAGS_DEFINE_string(
     service_identity,
     "",
     "The name of the service. Associates the service with ACLs and keys");
+FOLLY_GFLAGS_DEFINE_bool(
+    disable_legacy_header_routing_handler,
+    false,
+    "Do not register a TransportRoutingHandler that can handle the legacy transports: header, framed, and unframed (default: false)");
 
 THRIFT_FLAG_DEFINE_bool(server_alpn_prefer_rocket, true);
 THRIFT_FLAG_DEFINE_bool(server_enable_stoptls, false);
@@ -525,6 +530,10 @@ void ThriftServer::setup() {
 
   addRoutingHandler(
       std::make_unique<apache::thrift::RocketRoutingHandler>(*this));
+  if (!FLAGS_disable_legacy_header_routing_handler) {
+    addRoutingHandler(
+        std::make_unique<apache::thrift::LegacyHeaderRoutingHandler>(*this));
+  }
 
   // Initialize event base for this thread
   auto serveEventBase = eventBaseManager_->getEventBase();

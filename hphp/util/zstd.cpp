@@ -47,8 +47,8 @@ void ZstdCompressor::zstd_cctx_deleter(ZSTD_CCtx* ctx) {
   throwIfZstdError(error, "Error freeing ZSTD_CCtx! ");
 }
 
-ZstdCompressor::ZstdCompressor(int compression_level, bool should_checksum, int window_log)
-    : compression_level_(compression_level), should_checksum_(should_checksum), window_log_(window_log) {
+ZstdCompressor::ZstdCompressor(int compression_level, bool should_checksum, int window_log, int target_block_size)
+    : compression_level_(compression_level), should_checksum_(should_checksum), window_log_(window_log), target_block_size_(target_block_size) {
 }
 
 void ZstdCompressor::setChecksum(bool should_checksum) {
@@ -66,7 +66,10 @@ ZstdCompressor::ContextPool::Ref ZstdCompressor::make_zstd_cctx(bool last) {
 StringHolder ZstdCompressor::compress(const void* data,
                                       size_t& len,
                                       bool last) {
-  auto const outSize = ZSTD_compressBound(len);
+  // quick and dirty extra space because ZSTD_compressBound() is calculated for
+  // full-size blocks, rather than small blocks.
+  auto const extraOutSize = target_block_size_ != 0 ? len / target_block_size_ * 10 : 0;
+  auto const outSize = ZSTD_compressBound(len) + extraOutSize;
   char* out;
   StringHolder holder;
   if (s_useLocalArena) {
@@ -95,6 +98,13 @@ StringHolder ZstdCompressor::compress(const void* data,
           ctx_.get(), ZSTD_c_windowLog, window_log_),
           "ZSTD_CCtx_setParameter() Setting window log failed! ");
     }
+#ifdef ZSTD_c_targetCBlockSize
+    if (target_block_size_ != 0) {
+      throwIfZstdError(ZSTD_CCtx_setParameter(
+          ctx_.get(), ZSTD_c_targetCBlockSize, target_block_size_),
+          "ZSTD_CCtx_setParameter() Setting target block size failed! ");
+    }
+#endif
   }
 
   ZSTD_inBuffer inBuf = {data, len, 0};

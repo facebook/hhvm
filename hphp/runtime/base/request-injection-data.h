@@ -435,6 +435,7 @@ private:
   int64_t m_zstdLevel;
   int64_t m_zstdChecksumRate;
   int64_t m_zstdWindowLog;
+  int64_t m_zstdTargetBlockSize;
 
   /*
    * Instead of using several surprise flags, we can track the timeout info

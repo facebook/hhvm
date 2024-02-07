@@ -40,6 +40,7 @@ const StaticString s_brotliCC("brotli.chunked_compression");
 const StaticString s_zstdCL("zstd.compression_level");
 const StaticString s_zstdCR("zstd.checksum_rate");
 const StaticString s_zstdWL("zstd.window_log");
+const StaticString s_zstdBS("zstd.block_size");
 const StaticString s_zstdC("zstd.compression");
 
 const StaticString s_zlibOCL("zlib.output_compression_level");
@@ -376,8 +377,12 @@ ZstdCompressor* ZstdResponseCompressor::getCompressor() {
     IniSetting::Get(s_zstdWL, windowLog);
     auto window_log = windowLog.asInt64Val();
 
+    Variant targetBlockSize;
+    IniSetting::Get(s_zstdBS, targetBlockSize);
+    auto target_block_size = targetBlockSize.asInt64Val();
+
     m_compressor = std::make_unique<ZstdCompressor>(
-        compression_level, folly::Random::oneIn(checksum_rate), window_log);
+        compression_level, folly::Random::oneIn(checksum_rate), window_log, target_block_size);
   }
 
   return m_compressor.get();

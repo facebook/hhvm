@@ -385,6 +385,12 @@ void RequestInjectionData::threadInit() {
       "zstd.window_log",
       std::to_string(RuntimeOption::ZstdWindowLog).c_str(),
       &m_zstdWindowLog);
+  IniSetting::Bind(
+      IniSetting::CORE,
+      IniSetting::Mode::Request,
+      "zstd.target_block_size",
+      std::to_string(RuntimeOption::ZstdTargetBlockSize).c_str(),
+      &m_zstdTargetBlockSize);
 
   // TODO(20427335): Get rid of this illogical onSessionInit() call.
   onSessionInit();

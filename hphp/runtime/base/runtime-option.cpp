@@ -809,6 +809,7 @@ int RuntimeOption::BrotliCompressionLgWindowSize = 20;
 int RuntimeOption::ZstdCompressionEnabled = -1;
 int RuntimeOption::ZstdCompressionLevel = 3;
 int RuntimeOption::ZstdWindowLog = 0;
+int RuntimeOption::ZstdTargetBlockSize = 0;
 int RuntimeOption::ZstdChecksumRate = 0;
 int RuntimeOption::GzipCompressionLevel = 3;
 int RuntimeOption::GzipMaxCompressionLevel = 9;

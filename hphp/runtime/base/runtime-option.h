@@ -471,6 +471,7 @@ struct RuntimeOption {
   static int ZstdCompressionEnabled;
   static int ZstdCompressionLevel;
   static int ZstdWindowLog;
+  static int ZstdTargetBlockSize;
   static int ZstdChecksumRate;
   static int GzipCompressionLevel;
   static int GzipMaxCompressionLevel;

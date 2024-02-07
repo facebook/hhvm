@@ -114,7 +114,9 @@ bool can_derive_ord(const t_type* type) {
       type->is_enum() || type->is_void()) {
     return true;
   }
-  if (type->has_annotation("rust.ord")) {
+  if (type->has_annotation("rust.ord") ||
+      type->find_structured_annotation_or_null(
+          "facebook.com/thrift/annotation/rust/Ord")) {
     return true;
   }
   if (type->is_list()) {
@@ -1334,7 +1336,9 @@ class rust_mstch_struct : public mstch_struct {
     return get_types_import_name(struct_->program(), options_);
   }
   mstch::node rust_is_ord() {
-    if (struct_->has_annotation("rust.ord")) {
+    if (struct_->has_annotation("rust.ord") ||
+        struct_->find_structured_annotation_or_null(
+            "facebook.com/thrift/annotation/rust/Ord")) {
       return true;
     }
 
@@ -2203,6 +2207,8 @@ class rust_mstch_typedef : public mstch_typedef {
   }
   mstch::node rust_ord() {
     return typedef_->has_annotation("rust.ord") ||
+        typedef_->find_structured_annotation_or_null(
+            "facebook.com/thrift/annotation/rust/Ord") ||
         (can_derive_ord(typedef_->get_type()) &&
          !type_has_transitive_adapter(typedef_->get_type(), true));
   }

@@ -55,6 +55,13 @@ typedef binary binary_t2
 
 // --
 
+@rust.Ord // This struct would not derive `Ord` but for this.
+struct T5 {
+  1: map<i32, string> data;
+}
+
+// --
+
 @rust.Derive{derives = ["Foo", "crate::Bar"]}
 @scope.Transitive
 struct TransitiveDerives {}

@@ -24,6 +24,14 @@ namespace py.asyncio facebook_thrift_asyncio.annotation.rust
 namespace go thrift.annotation.rust
 namespace py thrift.annotation.rust
 
+@scope.Struct
+@scope.Typedef
+struct Ord {
+// # `rust.Ord`
+//
+// Require that the type being defined derive `Ord`.
+}
+
 @scope.Typedef
 struct NewType {
 // # `rust.NewType`

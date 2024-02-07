@@ -83,6 +83,17 @@ pub struct T4 {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct T5 {
+    pub data: ::std::collections::BTreeMap<::std::primitive::i32, ::std::string::String>,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Foo, crate::types::Bar)]
 pub struct TransitiveDerives {
     // This field forces `..Default::default()` when instantiating this
@@ -798,6 +809,108 @@ impl ::fbthrift::metadata::ThriftAnnotations for T4 {
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+            },
+            _ => {}
+        }
+
+        None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::T5 {
+    fn default() -> Self {
+        Self {
+            data: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::T5 {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("T5")
+            .field("data", &self.data)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::T5 {}
+unsafe impl ::std::marker::Sync for self::T5 {}
+impl ::std::marker::Unpin for self::T5 {}
+
+impl ::fbthrift::GetTType for self::T5 {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::T5
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("T5");
+        p.write_field_begin("data", ::fbthrift::TType::Map, 1);
+        ::fbthrift::Serialize::write(&self.data, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::T5
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::Map, 1),
+        ];
+        let mut field_data = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::Map, 1) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            data: field_data.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for T5 {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        if type_id == ::std::any::TypeId::of::<rust__types::Ord>() {
+            let mut tmp = Some(rust__types::Ord {
+                ..::std::default::Default::default()
+            });
+            let r: &mut dyn ::std::any::Any = &mut tmp;
+            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            return r.take();
+        }
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
             },
             _ => {}
         }

@@ -185,7 +185,38 @@ int H3DatagramAsyncSocket::recvmmsg(struct mmsghdr* msgvec,
 }
 
 void H3DatagramAsyncSocket::onBody(
-    std::unique_ptr<folly::IOBuf> /*chain*/) noexcept {
+    std::unique_ptr<folly::IOBuf> body) noexcept {
+  if (!options_.capsuleCallback_) {
+    return;
+  }
+  // TODO this only supports parsing capsules that come in one
+  // onBody call and isn't a proper streaming parser.
+  folly::io::Cursor cursor(body.get());
+  auto leftToParse = body->computeChainDataLength();
+  while (leftToParse > 0) {
+    auto typeRes = quic::decodeQuicInteger(cursor, leftToParse);
+    if (!typeRes) {
+      LOG(ERROR) << "Failed to decode capsule type.";
+      return;
+    }
+    auto [type, typeLen] = typeRes.value();
+    leftToParse -= typeLen;
+    auto capLengthRes = quic::decodeQuicInteger(cursor, leftToParse);
+    if (!capLengthRes) {
+      LOG(ERROR) << "Failed to decode capsule length: type=" << type;
+      return;
+    }
+    auto [capLength, capLengthLen] = capLengthRes.value();
+    leftToParse -= capLengthLen;
+    if (capLength > leftToParse) {
+      LOG(ERROR) << "Not enough data for capsule: type=" << type
+                 << " length=" << capLength;
+      return;
+    }
+    H3Capsule ret{type, capLength, nullptr};
+    cursor.cloneAtMost(ret.data, capLength);
+    options_.capsuleCallback_(std::move(ret));
+  }
 }
 
 void H3DatagramAsyncSocket::onTrailers(

@@ -34,6 +34,12 @@ class H3DatagramAsyncSocket
     SERVER = 1,
   };
 
+  struct H3Capsule {
+    uint64_t type{0};
+    uint64_t length{0};
+    std::unique_ptr<folly::IOBuf> data;
+  };
+
   struct Options {
     Mode mode_;
     std::chrono::milliseconds txnTimeout_{10000};
@@ -42,6 +48,7 @@ class H3DatagramAsyncSocket
     folly::Optional<std::pair<std::string, std::string>> certAndKey_;
     std::shared_ptr<const fizz::CertificateVerifier> certVerifier_;
     uint16_t maxDatagramSize_{1400};
+    std::function<void(H3Capsule&&)> capsuleCallback_;
   };
 
  public:

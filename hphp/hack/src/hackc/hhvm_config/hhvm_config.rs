@@ -48,10 +48,6 @@ pub fn hhbc_flags(config: &HhvmConfig) -> Result<HhbcFlags> {
         .get_bool("Eval.EmitMethCallerFuncPointers")?
         .unwrap_or(true);
 
-    flags.readonly_nonlocal_infer = config
-        .get_bool("Hack.Lang.ReadonlyNonlocalInference")?
-        .unwrap_or(false);
-
     flags.optimize_reified_param_checks = config
         .get_bool("Hack.Lang.OptimizeReifiedParamChecks")?
         .unwrap_or(false);

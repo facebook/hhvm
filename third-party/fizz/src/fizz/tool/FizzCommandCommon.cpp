@@ -110,7 +110,7 @@ void TerminalInputHandler::handlerReady(uint16_t events) noexcept {
 }
 
 void TerminalInputHandler::hitEOF() {
-  evb_->runInLoop([cb_ = cb_]() { cb_->close(); });
+  evb_->runInLoop([cb = cb_]() { cb->close(); });
 }
 
 std::vector<Extension> getExtensions(folly::StringPiece hex) {

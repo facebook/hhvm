@@ -59,7 +59,10 @@ TEST(ReqPtr, Refcounts) {
 TEST(ReqPtr, Assignment) {
   auto ptr = req::make<DummyResource>();
   auto* tmp = ptr.get();
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wself-assign-overloaded"
   ptr = ptr;
+#pragma clang diagnostic pop
   EXPECT_TRUE(ptr->hasExactlyOneRef());
   EXPECT_TRUE(ptr.get() == tmp);
 }

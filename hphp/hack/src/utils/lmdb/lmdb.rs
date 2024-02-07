@@ -287,29 +287,28 @@ impl<'e> Txn for RoTxn<'e> {
 }
 
 impl<'e> RoTxn<'e> {
-    pub fn ro_cursor(&self, db: Db) -> Result<RoCursor<'_>> {
+    // Let 't be the common lifetime of `self` (the owning transaction) & `key`.
+    pub fn ro_cursor<'t>(&'t self, db: Db, key: &'t [u8]) -> Result<RoCursor<'t>> {
         let mut cursor = ptr::null_mut();
         unsafe {
             check(mdb_cursor_open(self.txn, db.0, &mut cursor))?;
         }
-        let _txn = PhantomData;
-        Ok(RoCursor { cursor, _txn })
+        Ok(RoCursor { key, cursor })
     }
 }
 
 pub struct RoCursor<'t> {
-    #[allow(dead_code)]
-    cursor: *mut MDB_cursor,
-    _txn: PhantomData<fn() -> &'t ()>,
+    pub key: &'t [u8],
+    pub cursor: *mut MDB_cursor,
 }
 
 impl<'t> RoCursor<'t> {
     pub fn iter(&self) -> Iter<'t> {
         Iter::Ok {
+            key: self.key,
             cursor: self.cursor,
             op: MDB_cursor_op_MDB_NEXT,
             next_op: MDB_cursor_op_MDB_NEXT,
-            _mark: PhantomData,
         }
     }
 }
@@ -317,10 +316,10 @@ impl<'t> RoCursor<'t> {
 pub enum Iter<'t> {
     Err(i32),
     Ok {
+        key: &'t [u8],
         cursor: *mut MDB_cursor,
         op: MDB_cursor_op,
         next_op: MDB_cursor_op,
-        _mark: PhantomData<fn(_: &'t ())>,
     },
 }
 
@@ -331,12 +330,15 @@ impl<'t> Iterator for Iter<'t> {
         match self {
             Self::Err(e) => Some(Err(*e)),
             Self::Ok {
+                key,
                 cursor,
                 op,
                 next_op,
                 ..
             } => {
                 let mut k = zeroed_val();
+                k.mv_size = key.len();
+                k.mv_data = key.as_ptr() as _;
                 let mut v = zeroed_val();
                 let op = std::mem::replace(op, *next_op);
                 unsafe {

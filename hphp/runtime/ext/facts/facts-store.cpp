@@ -280,26 +280,25 @@ struct TypeFlagFilterData {
   }
 };
 
-struct InheritanceFilterData {
+struct TypeFilterData {
   KindFilterData m_kindFilters;
   DeriveKindFilterData m_deriveKindFilters;
   TypeFlagFilterData m_typeFlagFilters;
 
-  static InheritanceFilterData includeEverything() noexcept {
+  static TypeFilterData includeEverything() noexcept {
     return {
         .m_kindFilters = KindFilterData::includeEverything(),
         .m_deriveKindFilters = DeriveKindFilterData::includeEverything(),
         .m_typeFlagFilters = TypeFlagFilterData::includeEverything()};
   }
 
-  static InheritanceFilterData createFromShape(const ArrayData* filters) {
+  static TypeFilterData createFromShape(const ArrayData* filters) {
     if (filters == nullptr) {
-      return InheritanceFilterData::includeEverything();
+      return TypeFilterData::includeEverything();
     }
     // Default to including everything. If a keyset is provided, include only
     // the members of that keyset.
-    InheritanceFilterData inheritanceFilters =
-        InheritanceFilterData::includeEverything();
+    TypeFilterData typeFilters = TypeFilterData::includeEverything();
     IterateKV(filters, [&](TypedValue k, TypedValue v) {
       if (!tvIsString(k)) {
         return;
@@ -308,22 +307,22 @@ struct InheritanceFilterData {
 
       if (key == kKindFilterKey) {
         if (tvIsArrayLike(v)) {
-          inheritanceFilters.m_kindFilters =
+          typeFilters.m_kindFilters =
               KindFilterData::createFromKeyset(v.m_data.parr);
         }
       } else if (key == kDeriveKindFilterKey) {
         if (tvIsArrayLike(v)) {
-          inheritanceFilters.m_deriveKindFilters =
+          typeFilters.m_deriveKindFilters =
               DeriveKindFilterData::createFromKeyset(v.m_data.parr);
         }
       } else if (key == kTypeFlagFilterKey) {
         if (tvIsArrayLike(v)) {
-          inheritanceFilters.m_typeFlagFilters =
+          typeFilters.m_typeFlagFilters =
               TypeFlagFilterData::createFromKeyset(v.m_data.parr);
         }
       }
     });
-    return inheritanceFilters;
+    return typeFilters;
   }
 };
 
@@ -683,7 +682,7 @@ struct FactsStoreImpl final
       override {
     return filterBaseTypes(
         derivedType,
-        InheritanceFilterData::createFromShape(
+        TypeFilterData::createFromShape(
             filters.isArray() ? filters.getArrayData() : nullptr));
   }
 
@@ -691,7 +690,7 @@ struct FactsStoreImpl final
       override {
     return filterDerivedTypes(
         baseType,
-        InheritanceFilterData::createFromShape(
+        TypeFilterData::createFromShape(
             filters.isArray() ? filters.getArrayData() : nullptr));
   }
 
@@ -1110,7 +1109,7 @@ struct FactsStoreImpl final
 
   Array filterBaseTypes(
       const String& derivedType,
-      const InheritanceFilterData& filters) {
+      const TypeFilterData& filters) {
     std::vector<Symbol<SymKind::Type>> baseTypes;
 
     auto addBaseTypes = [&](DeriveKind kind) {
@@ -1139,7 +1138,7 @@ struct FactsStoreImpl final
 
   Array filterDerivedTypes(
       const String& baseType,
-      const InheritanceFilterData& filters) {
+      const TypeFilterData& filters) {
     std::vector<Symbol<SymKind::Type>> derivedTypes;
 
     auto addDerivedTypes = [&](DeriveKind kind) {

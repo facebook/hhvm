@@ -46,6 +46,8 @@ enum class TypeFlag {
   Abstract = 1 << 0,
   Final = 1 << 1,
 };
+constexpr TypeFlagMask kTypeFlagAll = static_cast<int>(TypeFlag::Empty) |
+    static_cast<int>(TypeFlag::Abstract) | static_cast<int>(TypeFlag::Final);
 
 // Two different forms of inheritance.
 //

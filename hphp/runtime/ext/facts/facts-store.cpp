@@ -100,6 +100,10 @@ constexpr std::string_view kKindFilterKey{"kind"};
 constexpr std::string_view kDeriveKindFilterKey{"derive_kind"};
 constexpr std::string_view kExtendsFilterKey{"extends"};
 constexpr std::string_view kRequiresFilterKey{"require extends"};
+constexpr std::string_view kTypeFlagFilterKey{"flags"};
+constexpr std::string_view kTypeFlagFilterValEmpty{"empty"};
+constexpr std::string_view kTypeFlagFilterValAbstract{"abstract"};
+constexpr std::string_view kTypeFlagFilterValFinal{"final"};
 
 // Filter on TypeKind: Class, Enum, Interface, or Trait
 struct KindFilterData {
@@ -217,14 +221,75 @@ struct DeriveKindFilterData {
   bool m_removeRequires = false;
 };
 
+/**
+ * Passed into FactsAPI queries to filter down to only classes that are
+ * abstract, final, or neither (empty flag).
+ */
+struct TypeFlagFilterData {
+  bool m_removeEmpty;
+  bool m_removeAbstract;
+  bool m_removeFinal;
+
+  static constexpr TypeFlagFilterData includeEverything() noexcept {
+    return {
+        .m_removeEmpty = false,
+        .m_removeAbstract = false,
+        .m_removeFinal = false};
+  }
+
+  static constexpr TypeFlagFilterData removeEverything() noexcept {
+    return {
+        .m_removeEmpty = true, .m_removeAbstract = true, .m_removeFinal = true};
+  }
+
+  /**
+   * We'll use this to check on equality to includeEverything() and
+   * removeEverything()
+   */
+  bool operator==(const TypeFlagFilterData& other) const {
+    return m_removeEmpty == other.m_removeEmpty &&
+        m_removeAbstract == other.m_removeAbstract &&
+        m_removeFinal == other.m_removeFinal;
+  }
+
+  /**
+   * The ArrayData* is how the data comes in from hack.  It corresponds
+   * to the contents of the 'flags' field on the DeriveFilters shape. If that
+   * key isn't provided, this will never be called and so we will include
+   * everything.
+   */
+  static TypeFlagFilterData createFromKeyset(const ArrayData* typeFlagFilter) {
+    TypeFlagFilterData out = TypeFlagFilterData::removeEverything();
+    IterateKV(typeFlagFilter, [&](TypedValue k, UNUSED TypedValue v) {
+      if (!tvIsString(k)) {
+        return;
+      }
+      StringPtr key{k.m_data.pstr};
+      if (key == kTypeFlagFilterValEmpty) {
+        out.m_removeEmpty = false;
+      } else if (key == kTypeFlagFilterValAbstract) {
+        out.m_removeAbstract = false;
+      } else if (key == kTypeFlagFilterValFinal) {
+        out.m_removeFinal = false;
+      } else {
+        HPHP::SystemLib::throwRuntimeExceptionObject(
+            fmt::format("Passed invalid key {}", key->toCppString()));
+      }
+    });
+    return out;
+  }
+};
+
 struct InheritanceFilterData {
   KindFilterData m_kindFilters;
   DeriveKindFilterData m_deriveKindFilters;
+  TypeFlagFilterData m_typeFlagFilters;
 
   static InheritanceFilterData includeEverything() noexcept {
     return {
         .m_kindFilters = KindFilterData::includeEverything(),
-        .m_deriveKindFilters = DeriveKindFilterData::includeEverything()};
+        .m_deriveKindFilters = DeriveKindFilterData::includeEverything(),
+        .m_typeFlagFilters = TypeFlagFilterData::includeEverything()};
   }
 
   static InheritanceFilterData createFromShape(const ArrayData* filters) {
@@ -250,6 +315,11 @@ struct InheritanceFilterData {
         if (tvIsArrayLike(v)) {
           inheritanceFilters.m_deriveKindFilters =
               DeriveKindFilterData::createFromKeyset(v.m_data.parr);
+        }
+      } else if (key == kTypeFlagFilterKey) {
+        if (tvIsArrayLike(v)) {
+          inheritanceFilters.m_typeFlagFilters =
+              TypeFlagFilterData::createFromKeyset(v.m_data.parr);
         }
       }
     });

@@ -18,6 +18,8 @@ namespace {
   <<__PHPStdLib>>
   function enum_exists(string $enum_name, bool $autoload = true)[]: bool;
   <<__PHPStdLib>>
+  function type_alias_exists(string $name, bool $autoload = true)[]: bool;
+  <<__PHPStdLib>>
   function class_exists(string $class_name, bool $autoload = true)[]: bool;
   <<__PHPStdLib>>
   function interface_exists(

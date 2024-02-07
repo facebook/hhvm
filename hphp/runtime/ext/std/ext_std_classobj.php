@@ -223,6 +223,19 @@ function enum_exists(string $enumname,
                       bool $autoload = true)[]: bool;
 
 /**
+ * Checks if the type alias exists
+ *
+ * @param string $name -
+ * @param bool $autoload -
+ *
+ * @return bool - Returns TRUE if type alias exists, FALSE if not
+ */
+<<__Native>>
+function type_alias_exists(string $name,
+                           bool $autoload = true)[]: bool;
+
+
+/**
  * Checks if the module exists
  *
  * @param string $modulename -

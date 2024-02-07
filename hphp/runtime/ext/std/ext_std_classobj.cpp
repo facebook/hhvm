@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/type-alias.h"
 
 namespace HPHP {
 
@@ -97,6 +98,14 @@ bool HHVM_FUNCTION(enum_exists, const String& enum_name,
                    bool autoload /* = true */) {
   Class* cls = Class::get(enum_name.get(), autoload);
   return cls && isAnyEnum(cls);
+}
+
+bool HHVM_FUNCTION(type_alias_exists, const String& name,
+                   bool autoload /* = true */) {
+  auto const typeAlias = autoload
+    ? TypeAlias::load(name.get())
+    : TypeAlias::lookup(name.get());
+  return typeAlias != nullptr;
 }
 
 bool HHVM_FUNCTION(module_exists, const String& module_name,
@@ -524,6 +533,7 @@ void StandardExtension::initClassobj() {
   HHVM_FE(interface_exists);
   HHVM_FE(trait_exists);
   HHVM_FE(enum_exists);
+  HHVM_FE(type_alias_exists);
   HHVM_FE(module_exists);
   HHVM_FE(get_class_methods);
   HHVM_FE(get_class_constants);

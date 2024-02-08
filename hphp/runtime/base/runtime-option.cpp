@@ -1470,6 +1470,7 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
     matched &= Config::matchHdfPattern(task, ini, hdf, "task");
     matched &= Config::matchHdfPattern(tiers, ini, hdf, "tiers", "m");
     matched &= Config::matchHdfPattern(tags, ini, hdf, "tags", "m");
+    matched &= Config::matchHdfPatternSet(tags, ini, hdf, "tagset");
     matched &= Config::matchHdfPattern(cpu, ini, hdf, "cpu");
     return matched;
   };

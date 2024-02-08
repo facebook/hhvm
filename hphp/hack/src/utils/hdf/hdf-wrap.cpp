@@ -34,4 +34,14 @@ rust::Vec<rust::String> hdf_child_names(const Hdf& hdf) {
   return keys;
 }
 
+rust::Vec<rust::String> hdf_get_string_vec(const Hdf& hdf) {
+  auto values = std::vector<std::string>{};
+  hdf.configGet(values);
+  auto ret = rust::Vec<rust::String>{};
+  for (auto value : values) {
+    ret.push_back(rust::String(value));
+  }
+  return ret;
 }
+
+} // namespace HPHP

@@ -414,19 +414,47 @@ void Config::Iterate(std::function<void (const IniSettingMap&,
   }
 }
 
+bool valueMatchesPattern(const std::string &value,
+                         std::string &pattern,
+                         const std::string &suffix) {
+  if (!suffix.empty()) pattern += suffix;
+  Variant ret = preg_match(String(pattern.c_str(), pattern.size(),
+                                  CopyString),
+                           String(value.c_str(), value.size(),
+                                  CopyString));
+  return ret.toInt64() > 0;
+}
+
 bool Config::matchHdfPattern(const std::string &value,
                              const IniSettingMap& ini, Hdf hdfPattern,
                              const std::string& name,
                              const std::string& suffix) {
   std::string pattern = Config::GetString(ini, hdfPattern, name, "", false);
   if (!pattern.empty()) {
-    if (!suffix.empty()) pattern += suffix;
-    Variant ret = preg_match(String(pattern.c_str(), pattern.size(),
-                                    CopyString),
-                             String(value.c_str(), value.size(),
-                                    CopyString));
-    if (ret.toInt64() <= 0) {
+    if (!valueMatchesPattern(value, pattern, suffix)) {
       return false;
+    }
+  }
+  return true;
+}
+
+bool Config::matchHdfPatternSet(const std::string &value,
+                                const IniSettingMap& ini, Hdf hdfPattern,
+                                const std::string& name) {
+  std::vector<std::string> patterns = Config::GetStrVector(ini,
+                                                           hdfPattern,
+                                                           name,
+                                                           std::vector<std::string>{},
+                                                           false);
+  if (!patterns.empty()) {
+    String valueString = String(value.c_str(), value.size(), CopyString);
+    for (std::string pattern: patterns) {
+      if (!pattern.empty()) {
+        // PatternSets are applied only to multiline values
+        if (!valueMatchesPattern(value, pattern, "m")) {
+          return false;
+        }
+      }
     }
   }
   return true;

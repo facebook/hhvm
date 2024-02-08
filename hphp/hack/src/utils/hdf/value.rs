@@ -188,6 +188,16 @@ impl Value {
         }
     }
 
+    /// Lookup the node with the given name.
+    /// If it exists, return it's vector of string value, otherwise return None.
+    /// Fails on internal Hdf parsing errors or Utf8 validation checks.
+    pub fn get_str_vec_or(&self, name: &str, or_default: Vec<String>) -> Result<Vec<String>> {
+        match self.get(name)? {
+            Some(v) => Ok(ffi::hdf_get_string_vec(&v.inner)?),
+            None => Ok(or_default),
+        }
+    }
+
     /// Return this node's name.
     /// Fails on internal Hdf parsing errors or Utf8 validation checks.
     pub fn name(&self) -> Result<String> {
@@ -497,15 +507,15 @@ a.b.c="d;e"
         hdf.set_hdf(
             r#"
             foo {
-                * => zero
-                * => one
-                # This is a dangerous config because if next after this if * => three
+                * = zero
+                * = one
+                # This is a dangerous config because if next after this if * = three
                 # occurs foo.2 will be replaced with three
-                2 => two
+                2 = two
             }
-            bar.* => two
-            bar.* => three
-            bar.4 => four
+            bar.* = two
+            bar.* = three
+            bar.4 = four
         }
         "#,
         )?;
@@ -538,6 +548,13 @@ a.b.c="d;e"
         assert_eq!(node.name()?, "4");
         assert_eq!(node.name_as_read()?, "4");
 
+        let empty_vec: Vec<String> = Vec::new();
+        assert_eq!(
+            hdf.get_str_vec_or("foo", vec![])?,
+            vec!["zero", "one", "two"]
+        );
+        assert_eq!(hdf.get_str_vec_or("none", vec![])?, empty_vec);
+        assert_eq!(hdf.get_str_vec_or("foo.1", vec![])?, empty_vec);
         Ok(())
     }
 }

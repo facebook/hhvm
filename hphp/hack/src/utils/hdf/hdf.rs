@@ -13,6 +13,7 @@ pub(crate) mod ffi {
         fn hdf_next(hdf: &Hdf) -> Result<UniquePtr<Hdf>>;
         fn hdf_name(hdf: &Hdf) -> Result<String>;
         fn hdf_child_names(hdf: &Hdf) -> Result<Vec<String>>;
+        fn hdf_get_string_vec(hdf: &Hdf) -> Result<Vec<String>>;
 
         fn append(self: Pin<&mut Hdf>, filename: &CxxString) -> Result<()>;
         fn fromString(self: Pin<&mut Hdf>, input: &CxxString) -> Result<()>;

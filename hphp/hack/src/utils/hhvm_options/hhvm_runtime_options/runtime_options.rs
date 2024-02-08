@@ -73,6 +73,7 @@ pub fn apply_tier_overrides_with_params(
             && match_hdf_pattern(task, hdf, "task", false)?
             && match_hdf_pattern(tiers, hdf, "tiers", true)?
             && match_hdf_pattern(tags, hdf, "tags", true)?
+            && match_hdf_pattern_set(tags, hdf, "tagset")?
             && match_hdf_pattern(cpu, hdf, "cpu", false)?)
     };
 
@@ -177,6 +178,22 @@ fn create_seed(input: &str) -> Result<i64> {
     Ok((NetworkEndian::read_u32(&Md5::digest(input.as_bytes()).as_slice()[..4]) >> 4) as i64)
 }
 
+fn is_pattern_match(pattern: &String, value: &str, multiline: bool) -> Result<bool> {
+    // In hhvm we would error withut a / prefix or suffix on the pattern
+    // This is maintained here to ensure compatability with HHVM.
+    let pattern = pattern
+        .strip_prefix('/')
+        .ok_or_else(|| anyhow::anyhow!("{pattern}: should have a / prefix"))?
+        .strip_suffix('/')
+        .ok_or_else(|| anyhow::anyhow!("{pattern}: should have a / suffix"))?;
+    let re = if multiline {
+        Regex::new(format!("(?m:{pattern})").as_str())?
+    } else {
+        Regex::new(pattern)?
+    };
+    Ok(re.is_match(value))
+}
+
 // Config::matchHdfPattern()
 fn match_hdf_pattern(
     value: &str,
@@ -186,22 +203,23 @@ fn match_hdf_pattern(
 ) -> Result<bool> {
     let pattern = config.get_str(name)?.unwrap_or_default();
     if !pattern.is_empty() {
-        // In hhvm we would error withut a / prefix or suffix on the pattern
-        // This is maintained here to ensure compatability with HHVM.
-        let pattern = pattern
-            .strip_prefix('/')
-            .ok_or_else(|| anyhow::anyhow!("{pattern}: should have a / prefix"))?
-            .strip_suffix('/')
-            .ok_or_else(|| anyhow::anyhow!("{pattern}: should have a / suffix"))?;
-        let re = if multiline {
-            Regex::new(format!("(?m:{pattern})").as_str())?
-        } else {
-            Regex::new(pattern)?
-        };
-        if !re.is_match(value) {
+        if !is_pattern_match(&pattern, value, multiline)? {
             return Ok(false);
         }
         log::info!("Matched {name} pattern: {pattern}");
+    }
+    Ok(true)
+}
+
+fn match_hdf_pattern_set(value: &str, config: &hdf::Value, name: &str) -> Result<bool> {
+    let patterns = config.get_str_vec_or(name, vec![])?;
+    for pattern in patterns {
+        if !pattern.is_empty() {
+            if !is_pattern_match(&pattern, value, true)? {
+                return Ok(false);
+            }
+            log::info!("Matched {name} pattern: {pattern}");
+        }
     }
     Ok(true)
 }
@@ -376,6 +394,22 @@ mod test {
                         Eval.strA = shard
                     }
                 }
+
+                foo_baz_tier {
+                    tagset {
+                        * = /^foo$/
+                        * = /^baz$/
+                    }
+                    clear {
+                        * = Eval.intA
+                        * = Eval.intB
+                    }
+                    overwrite {
+                        Eval.strA = foo
+                        Eval.strB = baz
+                    }
+                }
+
             }
         "#;
 
@@ -516,6 +550,17 @@ mod test {
             vec!["disable_shards".into(), "baz_tier".into()],
         )?;
 
+        // Match on foo and baz in shard range, and foo_baz
+        check_tier_overrides(
+            None,
+            Some("foo\nbaz".into()),
+            Some("foo".into()),
+            Some("baz".into()),
+            None,
+            None,
+            Some(5),
+            vec!["foo_tier".into(), "baz_tier".into(), "foo_baz_tier".into()],
+        )?;
         Ok(())
     }
 }

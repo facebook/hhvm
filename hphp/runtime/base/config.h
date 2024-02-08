@@ -304,6 +304,10 @@ struct Config {
                               const std::string& name,
                               const std::string& suffix = "");
 
+  static bool matchHdfPatternSet(const std::string &value,
+                                 const IniSettingMap& ini, Hdf hdfPattern,
+                                 const std::string& name);
+
   private:
 
   static void SetParsedIni(IniSettingMap &ini, const std::string confStr,

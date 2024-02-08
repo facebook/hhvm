@@ -16,6 +16,7 @@ include "mcrouter/lib/carbon/carbon.thrift"
 include "mcrouter/lib/carbon/carbon_result.thrift"
 include "mcrouter/lib/network/gen/Common.thrift"
 include "mcrouter/lib/carbon/test/gen/B.thrift"
+include "graphene/ticket/if/ticket_rep.thrift"
 
 cpp_include "<mcrouter/lib/carbon/CarbonProtocolReader.h>"
 cpp_include "mcrouter/lib/carbon/test/gen/BMessages.h"

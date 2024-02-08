@@ -407,7 +407,7 @@ impl Display for FmtVid<'_> {
     }
 }
 
-pub(crate) struct FmtDocComment<'a>(pub Option<&'a Str<'a>>);
+pub(crate) struct FmtDocComment<'a>(pub Option<&'a Vec<u8>>);
 
 impl Display for FmtDocComment<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {

@@ -33,7 +33,7 @@ pub struct Module<'arena> {
     pub attributes: Vector<Attribute<'arena>>,
     pub name: ClassName<'arena>,
     pub span: Span,
-    pub doc_comment: Maybe<Str<'arena>>,
+    pub doc_comment: Maybe<Vector<u8>>,
     pub exports: Maybe<Vector<Rule<'arena>>>,
     pub imports: Maybe<Vector<Rule<'arena>>>,
 }

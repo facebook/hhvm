@@ -49,7 +49,7 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit<'a> {
         .map(|a| convert_attribute(a, &strings))
         .collect();
 
-    let modules: Vec<ir::Module<'a>> = unit
+    let modules: Vec<ir::Module> = unit
         .modules
         .iter()
         .map(|module| ir::Module {
@@ -60,7 +60,7 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit<'a> {
                 .collect(),
             name: ir::ClassId::from_hhbc(module.name, &strings),
             src_loc: ir::SrcLoc::from_span(filename, &module.span),
-            doc_comment: module.doc_comment.into(),
+            doc_comment: module.doc_comment.clone().map(|c| c.into()).into(),
         })
         .collect();
 

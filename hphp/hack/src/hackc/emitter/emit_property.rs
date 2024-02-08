@@ -196,7 +196,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
         visibility: Visibility::from(args.visibility),
         doc_comment: args
             .doc_comment
-            .map(|pstr| ffi::Str::from(alloc.alloc_str(&pstr.1)))
+            .map(|(_, comment)| comment.into_bytes().into())
             .into(),
     };
     Ok(PropAndInit {

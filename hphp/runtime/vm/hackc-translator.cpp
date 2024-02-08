@@ -220,12 +220,16 @@ StringData* toStaticString(const Str& str, uint32_t start = 0) {
   return makeStaticString((char*)str.data + start, str.len - start);
 }
 
+StringData* toStaticString(const Vector<uint8_t>& str) {
+  return makeStaticString((char*)str.data, str.len);
+}
+
 // TODO(@voork): NamedLocals are still prefixed with '$'.
 StringData* toNamedLocalStaticString(const Str& str) {
   return toStaticString(str, 1);
 }
 
-StringData* makeDocComment(const Str& str) {
+StringData* makeDocComment(const Vector<uint8_t>& str) {
   if (RuntimeOption::EvalGenerateDocComments) return toStaticString(str);
   return staticEmptyString();
 }
@@ -484,7 +488,7 @@ void translateProperty(TranslationState& ts, const hhbc::Property& p, const Uppe
   translateUserAttributes(p.attributes, userAttributes);
 
   auto const heredoc = maybeOrElse(p.doc_comment,
-    [&](Str& s) {return makeDocComment(s);},
+    [&](const Vector<uint8_t>& s) {return makeDocComment(s);},
     [&]() {return staticEmptyString();});
 
   auto [userTy, typeConstraint] = translateTypeInfo(p.type_info);
@@ -1449,7 +1453,7 @@ void translateModule(TranslationState& ts, const hhbc::Module& m) {
   ts.ue->addModule(HPHP::Module{
     toStaticString(m.name._0),
     maybeOrElse(m.doc_comment,
-      [&](Str& s) {return makeDocComment(s);},
+      [&](const Vector<uint8_t>& s) {return makeDocComment(s);},
       [&]() {return staticEmptyString();}),
     static_cast<int>(m.span.line_begin),
     static_cast<int>(m.span.line_end),

@@ -17,6 +17,7 @@ use anyhow::Result;
 use bumpalo::Bump;
 use ffi::Maybe;
 use ffi::Str;
+use ffi::Vector;
 use hash::HashMap;
 use hhvm_types_ffi::Attr;
 use log::trace;
@@ -246,7 +247,7 @@ fn assemble_module<'arena>(
            <name:assemble_class_name(alloc)>
            <span:assemble_span>
            "{"
-           <doc_comment:assemble_doc_comment(alloc)>
+           <doc_comment:assemble_doc_comment>
            "}");
     let (attr, attributes) = attr;
 
@@ -334,7 +335,7 @@ fn assemble_class<'arena>(
        <implements:assemble_imp_or_enum_includes(alloc, "implements")>
        <enum_includes:assemble_imp_or_enum_includes(alloc, "enum_includes")>
        "{"
-       <doc_comment:assemble_doc_comment(alloc)>
+       <doc_comment:assemble_doc_comment>
        <uses:assemble_uses(alloc)>
        <enum_type:assemble_enum_ty(alloc)>
     );
@@ -569,7 +570,7 @@ fn assemble_property<'arena>(
     parse!(token_iter,
            ".property"
            <attrs:assemble_special_and_user_attrs(alloc)>
-           [triple_string: <dc:assemble_unescaped_unquoted_triple_str(alloc)> { doc_comment = Maybe::Just(dc); } ;
+           [triple_string: <dc:assemble_unescaped_unquoted_triple_vec> { doc_comment = Maybe::Just(dc); } ;
             else: { } ;
            ]
            <type_info:assemble_type_info(alloc, TypeInfoKind::NotEnumOrTypeDef)>
@@ -736,12 +737,9 @@ fn assemble_imp_or_enum_includes<'arena>(
 }
 
 /// Ex: .doc """doc""";
-fn assemble_doc_comment<'arena>(
-    token_iter: &mut Lexer<'_>,
-    alloc: &'arena Bump,
-) -> Result<Maybe<Str<'arena>>> {
+fn assemble_doc_comment(token_iter: &mut Lexer<'_>) -> Result<Maybe<Vector<u8>>> {
     Ok(parse!(token_iter, [
-        ".doc": ".doc" <com:assemble_unescaped_unquoted_triple_str(alloc)> ";" { Maybe::Just(com) } ;
+        ".doc": ".doc" <com:assemble_unescaped_unquoted_triple_vec> ";" { Maybe::Just(com) } ;
         else: { Maybe::Nothing } ;
     ]))
 }
@@ -1501,7 +1499,7 @@ fn assemble_body<'arena>(
     // only .declvars can be declared more than once
     while token_iter.peek_is(Token::is_decl) {
         if token_iter.peek_is_str(Token::is_decl, ".doc") {
-            doc_comment = assemble_doc_comment(token_iter, alloc)?;
+            doc_comment = assemble_doc_comment(token_iter)?;
         } else if token_iter.peek_is_str(Token::is_decl, ".ismemoizewrapperlsb") {
             token_iter.expect_str(Token::is_decl, ".ismemoizewrapperlsb")?;
             token_iter.expect(Token::is_semicolon)?;
@@ -1926,11 +1924,15 @@ fn assemble_unescaped_unquoted_triple_str<'arena>(
     token_iter: &mut Lexer<'_>,
     alloc: &'arena Bump,
 ) -> Result<Str<'arena>> {
+    let st = assemble_unescaped_unquoted_triple_vec(token_iter)?;
+    Ok(Str::new_slice(alloc, &st))
+}
+
+fn assemble_unescaped_unquoted_triple_vec(token_iter: &mut Lexer<'_>) -> Result<Vector<u8>> {
     let st = escaper::unquote_slice(escaper::unquote_slice(escaper::unquote_slice(
         token_iter.expect_with(Token::into_triple_str_literal)?,
     )));
-    let st = escaper::unescape_literal_bytes_into_vec_bytes(st)?;
-    Ok(Str::new_slice(alloc, &st))
+    Ok(escaper::unescape_literal_bytes_into_vec_bytes(st)?.into())
 }
 
 /// Ex:

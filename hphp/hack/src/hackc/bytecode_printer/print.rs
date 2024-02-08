@@ -9,6 +9,7 @@ use std::io::Result;
 use std::io::Write;
 use std::write;
 
+use bstr::ByteSlice;
 use ffi::Maybe;
 use ffi::Maybe::*;
 use ffi::Str;
@@ -450,7 +451,7 @@ fn print_enum_ty(ctx: &Context<'_>, w: &mut dyn Write, c: &Class<'_>) -> Result<
 fn print_doc_comment<'arena>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    doc_comment: Maybe<&Str<'arena>>,
+    doc_comment: Maybe<&Vector<u8>>,
 ) -> Result<()> {
     if let Just(cmt) = doc_comment {
         ctx.newline(w)?;

@@ -35,7 +35,7 @@ pub struct Class<'a> {
     pub ctx_constants: Vec<CtxConstant<'a>>,
 
     /// Doc comment for the class.
-    pub doc_comment: Option<Str<'a>>,
+    pub doc_comment: Option<Vec<u8>>,
 
     /// In an enum this is the enum_type:
     /// ```
@@ -54,7 +54,7 @@ pub struct Class<'a> {
     pub methods: Vec<Method<'a>>,
 
     pub name: ClassId,
-    pub properties: Vec<Property<'a>>,
+    pub properties: Vec<Property>,
     pub requirements: Vec<Requirement>,
     pub src_loc: SrcLoc,
     pub type_constants: Vec<TypeConstant<'a>>,
@@ -66,7 +66,7 @@ pub struct Class<'a> {
 }
 
 impl<'a> Class<'a> {
-    pub fn get_prop_by_pid(&self, pid: PropId) -> Option<&Property<'a>> {
+    pub fn get_prop_by_pid(&self, pid: PropId) -> Option<&Property> {
         self.properties.iter().find(|prop| prop.name == pid)
     }
 
@@ -76,14 +76,14 @@ impl<'a> Class<'a> {
 }
 
 #[derive(Clone, Debug)]
-pub struct Property<'a> {
+pub struct Property {
     pub name: PropId,
     pub flags: Attr,
     pub attributes: Vec<Attribute>,
     pub visibility: Visibility,
     pub initial_value: Option<TypedValue>,
     pub type_info: TypeInfo,
-    pub doc_comment: ffi::Maybe<Str<'a>>,
+    pub doc_comment: ffi::Maybe<Vec<u8>>,
 }
 
 #[derive(Debug)]

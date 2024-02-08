@@ -211,7 +211,7 @@ pub struct Func<'a> {
     pub attrs: Attr,
     pub blocks: IdVec<BlockId, Block>,
     pub coeffects: Coeffects<'a>,
-    pub doc_comment: Option<Str<'a>>,
+    pub doc_comment: Option<Vec<u8>>,
     pub ex_frames: ExFrameIdMap<ExFrame>,
     pub instrs: IdVec<InstrId, Instr>,
     pub is_memoize_wrapper: bool,

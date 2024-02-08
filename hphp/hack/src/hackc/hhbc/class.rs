@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Maybe;
-use ffi::Str;
 use ffi::Vector;
 use hhvm_types_ffi::ffi::Attr;
 use serde::Serialize;
@@ -53,7 +52,7 @@ pub struct Class<'arena> {
     pub ctx_constants: Vector<CtxConstant<'arena>>,
     pub requirements: Vector<Requirement<'arena>>,
     pub upper_bounds: Vector<UpperBound<'arena>>,
-    pub doc_comment: Maybe<Str<'arena>>,
+    pub doc_comment: Maybe<Vector<u8>>,
     pub flags: Attr,
 }
 

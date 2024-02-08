@@ -432,7 +432,9 @@ pub fn make_body<'a, 'arena, 'decl>(
         .into(),
         params: params.into(),
         return_type_info: return_type_info.into(),
-        doc_comment: doc_comment.map(|c| Str::new_str(alloc, &c.1)).into(),
+        doc_comment: doc_comment
+            .map(|(_, comment)| comment.into_bytes().into())
+            .into(),
         stack_depth,
     })
 }

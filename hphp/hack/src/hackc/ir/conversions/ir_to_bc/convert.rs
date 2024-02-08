@@ -51,7 +51,7 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Un
             attributes: convert_attributes(module.attributes, &strings).into(),
             name: strings.lookup_class_name(module.name),
             span: module.src_loc.to_span(),
-            doc_comment: module.doc_comment.into(),
+            doc_comment: module.doc_comment.map(|c| c.into()).into(),
             exports: Maybe::Nothing, // TODO
             imports: Maybe::Nothing, // TODO
         })

@@ -80,7 +80,7 @@ pub struct Unit<'a> {
     // being two separate variants.
     pub fatal: Option<Fatal>,
 
-    pub modules: Vec<Module<'a>>,
+    pub modules: Vec<Module>,
     pub module_use: Option<Str<'a>>,
 
     /// The unit string interning table.

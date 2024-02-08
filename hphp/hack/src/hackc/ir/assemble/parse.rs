@@ -7,7 +7,6 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use bumpalo::Bump;
-use ffi::Str;
 use ir_core::func::DefaultValue;
 use ir_core::ArrayKey;
 use ir_core::AsTypeStructExceptionKind;
@@ -388,14 +387,11 @@ pub(crate) fn parse_constant<'a>(
     })
 }
 
-pub(crate) fn parse_doc_comment<'a>(
-    tokenizer: &mut Tokenizer<'_>,
-    alloc: &'a Bump,
-) -> Result<Option<Str<'a>>> {
+pub(crate) fn parse_doc_comment(tokenizer: &mut Tokenizer<'_>) -> Result<Option<Vec<u8>>> {
     Ok(if tokenizer.next_is_identifier("N")? {
         None
     } else {
-        Some(tokenizer.expect_any_string()?.unescaped_bump_str(alloc)?)
+        Some(tokenizer.expect_any_string()?.unescaped_string()?)
     })
 }
 

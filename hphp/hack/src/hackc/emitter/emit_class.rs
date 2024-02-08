@@ -855,7 +855,9 @@ pub fn emit_class<'a, 'arena, 'decl>(
         name,
         span,
         flags,
-        doc_comment: Maybe::from(doc_comment.map(|c| Str::new_str(alloc, &c.1))),
+        doc_comment: doc_comment
+            .map(|(_, comment)| comment.into_bytes().into())
+            .into(),
         uses: uses.into(),
         methods: methods.into(),
         enum_type: Maybe::from(enum_type),

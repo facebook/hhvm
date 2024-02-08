@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Maybe;
-use ffi::Str;
 use ffi::Vector;
 use hhvm_types_ffi::ffi::Attr;
 use serde::Serialize;
@@ -24,7 +23,7 @@ pub struct Property<'arena> {
     pub visibility: Visibility,
     pub initial_value: Maybe<TypedValue<'arena>>,
     pub type_info: TypeInfo<'arena>,
-    pub doc_comment: Maybe<Str<'arena>>,
+    pub doc_comment: Maybe<Vector<u8>>,
 }
 
 impl<'arena> Property<'arena> {

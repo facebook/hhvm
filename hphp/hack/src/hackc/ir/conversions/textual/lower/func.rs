@@ -235,7 +235,7 @@ fn load_closure_vars(func: &mut Func<'_>, method_info: &MethodInfo<'_>, strings:
     // Some magic: We sort the properties such that we always put 'this' at the
     // end. That way when we overwrite the '$this' local we're doing so as the
     // last access to the closure class '$this'.
-    let sort_cmp = |a: &ir::Property<'_>, b: &ir::Property<'_>| -> std::cmp::Ordering {
+    let sort_cmp = |a: &ir::Property, b: &ir::Property| -> std::cmp::Ordering {
         if strings.eq_str(a.name.id, THIS_AS_PROPERTY) {
             std::cmp::Ordering::Greater
         } else if strings.eq_str(b.name.id, THIS_AS_PROPERTY) {

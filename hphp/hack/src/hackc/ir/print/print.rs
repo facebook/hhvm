@@ -316,7 +316,11 @@ fn print_class(w: &mut dyn Write, class: &Class<'_>, strings: &StringInterner) -
     )?;
 
     if let Some(doc_comment) = class.doc_comment.as_ref() {
-        writeln!(w, "  doc_comment {}", FmtQuotedStr(doc_comment))?;
+        writeln!(
+            w,
+            "  doc_comment {}",
+            FmtQuotedStr(&ffi::Str::new(doc_comment.as_ref()))
+        )?;
     }
 
     if let Some(base) = class.base {
@@ -426,7 +430,11 @@ pub(crate) fn print_coeffects(w: &mut dyn Write, coeffects: &Coeffects<'_>) -> R
     }
 
     for CcParam { index, ctx_name } in &coeffects.cc_param {
-        writeln!(w, ".coeffects_cc_param {index} {}", FmtQuotedStr(ctx_name))?;
+        writeln!(
+            w,
+            ".coeffects_cc_param {index} {}",
+            FmtQuotedStr(&ffi::Str::new(ctx_name.as_ref()))
+        )?;
     }
 
     for CcThis { types } in &coeffects.cc_this {
@@ -511,7 +519,11 @@ pub(crate) fn print_func_body(
     f_pre_instr: Option<&dyn Fn(&mut dyn Write, InstrId) -> Result>,
 ) -> Result {
     if let Some(doc_comment) = func.doc_comment.as_ref() {
-        writeln!(w, "  .doc {}", FmtQuotedStr(doc_comment))?;
+        writeln!(
+            w,
+            "  .doc {}",
+            FmtQuotedStr(&ffi::Str::new(doc_comment.as_ref()))
+        )?;
     }
     if func.num_iters != 0 {
         writeln!(w, "  .num_iters {}", func.num_iters)?;
@@ -1928,7 +1940,7 @@ pub(crate) fn print_param(
     Ok(())
 }
 
-fn print_property(w: &mut dyn Write, property: &Property<'_>, strings: &StringInterner) -> Result {
+fn print_property(w: &mut dyn Write, property: &Property, strings: &StringInterner) -> Result {
     write!(
         w,
         "  property {name} {flags}{attributes} {vis} : {ty} {doc}",

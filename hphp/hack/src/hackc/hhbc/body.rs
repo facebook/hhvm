@@ -26,7 +26,7 @@ pub struct Body<'arena> {
     pub shadowed_tparams: Vector<Str<'arena>>,
     pub params: Vector<Param<'arena>>,
     pub return_type_info: Maybe<TypeInfo<'arena>>,
-    pub doc_comment: Maybe<Str<'arena>>,
+    pub doc_comment: Maybe<Vector<u8>>,
     /// The statically computed stack depth for this Body. This can be computed
     /// using the hhbc::compute_stack_depth() function.
     pub stack_depth: usize,

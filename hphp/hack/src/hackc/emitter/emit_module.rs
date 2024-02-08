@@ -46,7 +46,9 @@ pub fn emit_module<'a, 'arena, 'decl>(
         attributes: attributes.into(),
         name,
         span,
-        doc_comment: Maybe::from(doc_comment.map(|c| Str::new_str(alloc, &c.1))),
+        doc_comment: doc_comment
+            .map(|(_, comment)| comment.into_bytes().into())
+            .into(),
         exports: Maybe::from(
             ast_module
                 .exports

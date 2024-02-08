@@ -94,7 +94,7 @@ pub(crate) fn convert_class<'a>(
         )
         .into(),
         ctx_constants: ctx_constants.into(),
-        doc_comment: doc_comment.into(),
+        doc_comment: doc_comment.map(|c| c.into()).into(),
         enum_includes: enum_includes.into(),
         enum_type,
         flags,
@@ -116,7 +116,7 @@ pub(crate) fn convert_class<'a>(
     unit.classes.push(class);
 }
 
-fn convert_property<'a>(src: ir::Property<'a>, strings: &StringCache<'a>) -> hhbc::Property<'a> {
+fn convert_property<'a>(src: ir::Property, strings: &StringCache<'a>) -> hhbc::Property<'a> {
     hhbc::Property {
         name: strings.lookup_prop_name(src.name),
         flags: src.flags,
@@ -127,7 +127,7 @@ fn convert_property<'a>(src: ir::Property<'a>, strings: &StringCache<'a>) -> hhb
             .map(|tv| convert::convert_typed_value(&tv, strings))
             .into(),
         type_info: types::convert(&src.type_info, strings).unwrap(),
-        doc_comment: src.doc_comment,
+        doc_comment: src.doc_comment.map(|c| c.into()),
     }
 }
 

@@ -1210,9 +1210,7 @@ impl FunctionParser<'_, '_> {
     }
 
     fn parse_doc(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
-        let doc = tokenizer
-            .expect_any_string()?
-            .unescaped_bump_str(self.alloc)?;
+        let doc = tokenizer.expect_any_string()?.unescaped_string()?;
         self.builder.func.doc_comment = Some(doc);
         Ok(())
     }

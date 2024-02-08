@@ -1431,8 +1431,8 @@ fn cmp_method(
 }
 
 fn cmp_module(
-    (a, a_strings): (&Module<'_>, &StringInterner),
-    (b, b_strings): (&Module<'_>, &StringInterner),
+    (a, a_strings): (&Module, &StringInterner),
+    (b, b_strings): (&Module, &StringInterner),
 ) -> Result {
     let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
 
@@ -1516,8 +1516,8 @@ fn cmp_default_value(a: &DefaultValue<'_>, b: &DefaultValue<'_>) -> Result {
 }
 
 fn cmp_property(
-    (a, a_strings): (&Property<'_>, &StringInterner),
-    (b, b_strings): (&Property<'_>, &StringInterner),
+    (a, a_strings): (&Property, &StringInterner),
+    (b, b_strings): (&Property, &StringInterner),
 ) -> Result {
     let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
 
@@ -2006,13 +2006,13 @@ mod mapping {
         }
     }
 
-    impl MapName for (&Module<'_>, &StringInterner) {
+    impl MapName for (&Module, &StringInterner) {
         fn get_name(&self) -> String {
             self.0.name.as_bstr(self.1).to_string()
         }
     }
 
-    impl MapName for (&Property<'_>, &StringInterner) {
+    impl MapName for (&Property, &StringInterner) {
         fn get_name(&self) -> String {
             self.0.name.as_bstr(self.1).to_string()
         }

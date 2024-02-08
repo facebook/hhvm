@@ -176,7 +176,7 @@ impl ClassState<'_, '_, '_> {
     fn write_property(
         &mut self,
         fields: &mut Vec<textual::Field<'_>>,
-        prop: &ir::Property<'_>,
+        prop: &ir::Property,
     ) -> Result {
         let ir::Property {
             name,

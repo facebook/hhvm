@@ -149,7 +149,7 @@ fn convert_body<'a>(
         attrs,
         blocks: Default::default(),
         coeffects,
-        doc_comment: doc_comment.clone().into_option(),
+        doc_comment: doc_comment.clone().map(|c| c.clone().into()).into(),
         ex_frames: Default::default(),
         instrs: Default::default(),
         is_memoize_wrapper,

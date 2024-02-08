@@ -141,9 +141,7 @@ impl<'a> ClassParser<'a> {
     }
 
     fn parse_doc_comment(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
-        let doc_comment = tokenizer
-            .expect_any_string()?
-            .unescaped_bump_str(self.alloc)?;
+        let doc_comment = tokenizer.expect_any_string()?.unescaped_string()?;
         self.class.doc_comment = Some(doc_comment);
         Ok(())
     }
@@ -178,12 +176,11 @@ impl<'a> ClassParser<'a> {
     }
 
     fn parse_property(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
-        let alloc = self.alloc;
         parse!(tokenizer,
                <name:parse_user_id> <flags:parse_attr>
                <attributes:parse_attributes("<")> <visibility:parse_visibility>
                ":" <type_info:parse_type_info>
-               <doc_comment:parse_doc_comment(alloc)>);
+               <doc_comment:parse_doc_comment>);
         let name = PropId::from_bytes(&name.0, &self.strings);
 
         let initial_value = if tokenizer.next_is_identifier("=")? {

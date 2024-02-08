@@ -86,7 +86,7 @@ pub(crate) fn convert_func<'a>(
         }
     }));
 
-    let doc_comment = func.doc_comment.into();
+    let doc_comment = func.doc_comment.map(|c| c.into()).into();
 
     let upper_bounds = Vec::from_iter(func.tparams.iter().map(|(name, tparam)| {
         let name = strings.lookup_class_name(*name);

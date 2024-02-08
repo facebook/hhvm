@@ -259,7 +259,7 @@ impl<'a> UnitParser<'a> {
     fn parse_module(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
         parse!(tokenizer, <name:parse_class_id> "[" <attributes:parse_attribute,*> "]");
 
-        let doc_comment = parse_doc_comment(tokenizer, self.alloc)?;
+        let doc_comment = parse_doc_comment(tokenizer)?;
 
         let src_loc = self.get_cur_src_loc();
 

@@ -92,7 +92,7 @@ pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, filename: ir::Filename,
         base,
         constants,
         ctx_constants,
-        doc_comment: cls.doc_comment.into(),
+        doc_comment: cls.doc_comment.clone().map(|c| c.into()).into(),
         enum_includes,
         enum_type,
         flags: cls.flags,
@@ -112,10 +112,7 @@ pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, filename: ir::Filename,
     });
 }
 
-fn convert_property<'a>(
-    prop: &hhbc::Property<'a>,
-    strings: &ir::StringInterner,
-) -> ir::Property<'a> {
+fn convert_property(prop: &hhbc::Property<'_>, strings: &ir::StringInterner) -> ir::Property {
     let attributes = prop
         .attributes
         .iter()
@@ -132,7 +129,7 @@ fn convert_property<'a>(
             .map(|tv| convert::convert_typed_value(tv, strings))
             .into(),
         type_info: types::convert_type(&prop.type_info, strings),
-        doc_comment: prop.doc_comment,
+        doc_comment: prop.doc_comment.clone().map(|c| c.into()),
     }
 }
 

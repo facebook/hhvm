@@ -439,7 +439,8 @@ void parseValueInplace(
         if (ftype == protocol::T_STOP) {
           break;
         }
-        objectValue[FieldId{fid}] = parseValue(prot, ftype, string_to_binary);
+        parseValueInplace(
+            prot, ftype, objectValue[FieldId{fid}], string_to_binary);
         prot.readFieldEnd();
       }
       prot.readStructEnd();
@@ -539,7 +540,7 @@ MaskedDecodeResultValue parseValueWithMask(
     bool string_to_binary = true) {
   MaskedDecodeResultValue result;
   if (readMask.isAllMask()) { // serialize all
-    result.included = parseValue(prot, arg_type, string_to_binary);
+    parseValueInplace(prot, arg_type, result.included, string_to_binary);
     return result;
   }
   if (readMask.isNoneMask()) { // do not deserialize
@@ -629,7 +630,7 @@ MaskedDecodeResultValue parseValueWithMask(
       return result;
     }
     default: {
-      result.included = parseValue(prot, arg_type, string_to_binary);
+      parseValueInplace(prot, arg_type, result.included, string_to_binary);
       return result;
     }
   }

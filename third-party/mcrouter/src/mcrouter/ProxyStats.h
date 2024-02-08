@@ -9,7 +9,7 @@
 
 #include <mutex>
 
-#include <folly/experimental/StringKeyedUnorderedMap.h>
+#include <folly/container/F14Map.h>
 
 #include "mcrouter/ExponentialSmoothData.h"
 #include "mcrouter/PoolStats.h"

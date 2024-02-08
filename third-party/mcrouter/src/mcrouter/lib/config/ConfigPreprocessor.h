@@ -12,8 +12,8 @@
 #include <vector>
 
 #include <folly/Function.h>
+#include <folly/container/F14Map.h>
 #include <folly/dynamic.h>
-#include <folly/experimental/StringKeyedUnorderedMap.h>
 #include <folly/json.h>
 
 namespace facebook {

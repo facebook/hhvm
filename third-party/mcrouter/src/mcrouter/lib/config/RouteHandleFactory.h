@@ -12,8 +12,8 @@
 #include <vector>
 
 #include <folly/Range.h>
+#include <folly/container/F14Map.h>
 #include <folly/dynamic.h>
-#include <folly/experimental/StringKeyedUnorderedMap.h>
 
 namespace facebook {
 namespace memcache {

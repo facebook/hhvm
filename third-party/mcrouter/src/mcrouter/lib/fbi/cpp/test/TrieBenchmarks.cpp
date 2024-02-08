@@ -12,7 +12,7 @@
 #include <gtest/gtest.h>
 
 #include <folly/Benchmark.h>
-#include <folly/experimental/StringKeyedUnorderedMap.h>
+#include <folly/container/F14Map.h>
 #include <folly/init/Init.h>
 
 #include "mcrouter/lib/fbi/cpp/Trie.h"

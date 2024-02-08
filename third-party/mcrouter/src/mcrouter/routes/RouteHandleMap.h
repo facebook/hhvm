@@ -14,7 +14,7 @@
 
 #include <folly/Portability.h>
 #include <folly/Range.h>
-#include <folly/experimental/StringKeyedUnorderedMap.h>
+#include <folly/container/F14Map.h>
 
 #include "mcrouter/config.h"
 #include "mcrouter/routes/RoutePolicyMap.h"

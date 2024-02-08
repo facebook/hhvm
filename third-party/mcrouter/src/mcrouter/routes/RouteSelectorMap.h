@@ -9,7 +9,7 @@
 
 #include <memory>
 
-#include <folly/experimental/StringKeyedUnorderedMap.h>
+#include <folly/container/F14Map.h>
 
 namespace facebook {
 namespace memcache {

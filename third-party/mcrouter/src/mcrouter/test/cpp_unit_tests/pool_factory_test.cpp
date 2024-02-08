@@ -10,7 +10,7 @@
 #include <gtest/gtest.h>
 
 #include <folly/Range.h>
-#include <folly/experimental/StringKeyedUnorderedMap.h>
+#include <folly/container/F14Map.h>
 #include <folly/json.h>
 
 #include "mcrouter/ConfigApiIf.h"

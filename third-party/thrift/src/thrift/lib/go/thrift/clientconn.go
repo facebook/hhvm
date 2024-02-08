@@ -23,11 +23,10 @@ import (
 
 // ClientConn holds all the connection information for a thrift client
 type ClientConn struct {
-	transport       Transport
-	protocolFactory ProtocolFactory
-	iproto          Protocol
-	oproto          Protocol
-	seqID           int32
+	transport Transport
+	iproto    Protocol
+	oproto    Protocol
+	seqID     int32
 }
 
 // Transport returns the underlying Transport object inside the ClientConn
@@ -39,20 +38,18 @@ func (cc *ClientConn) Transport() Transport {
 // NewClientConn creates a new ClientConn object using the provided ProtocolFactory
 func NewClientConn(t Transport, pf ProtocolFactory) ClientConn {
 	return ClientConn{
-		transport:       t,
-		protocolFactory: pf,
-		iproto:          pf.GetProtocol(t),
-		oproto:          pf.GetProtocol(t),
+		transport: t,
+		iproto:    pf.GetProtocol(t),
+		oproto:    pf.GetProtocol(t),
 	}
 }
 
 // NewClientConnWithProtocols creates a new ClientConn object using the input and output protocols provided
 func NewClientConnWithProtocols(t Transport, iproto, oproto Protocol) ClientConn {
 	return ClientConn{
-		transport:       t,
-		protocolFactory: nil,
-		iproto:          iproto,
-		oproto:          oproto,
+		transport: t,
+		iproto:    iproto,
+		oproto:    oproto,
 	}
 }
 
@@ -68,17 +65,17 @@ type IResponse interface {
 
 // Open opens the client connection
 func (cc *ClientConn) Open() error {
-	return cc.transport.Open()
+	return cc.oproto.Open()
 }
 
 // Close closes the client connection
 func (cc *ClientConn) Close() error {
-	return cc.transport.Close()
+	return cc.oproto.Close()
 }
 
 // IsOpen return true if the client connection is open; otherwise, it returns false.
 func (cc *ClientConn) IsOpen() bool {
-	return cc.transport.IsOpen()
+	return cc.oproto.IsOpen()
 }
 
 // SendMsg sends a request to a given thrift endpoint

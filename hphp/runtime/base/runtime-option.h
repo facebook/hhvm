@@ -1068,7 +1068,10 @@ struct RuntimeOption {
                                        ServerExecutionMode() ? 0.5 : 0) \
   F(double,   JitPGODecRefNopDecPercent, ServerExecutionMode() ? 5 : 0) \
   F(bool,     JitPGOArrayGetStress,    false)                           \
+  /* Mininum weight of a tracelet to include it in HotCFG as a percentage
+     of the weight of the first tracelet in the region. [0,100] */      \
   F(double,   JitPGOMinBlockCountPercent, 0.25)                         \
+  /* Minimum probability of an arc to include it in HotCFG. [0,1] */    \
   F(double,   JitPGOMinArcProbability, 0.0)                             \
   F(uint32_t, JitPGORelaxPercent,      100)                             \
   F(double,   JitPGOCalledFuncCheckThreshold, 25)                       \

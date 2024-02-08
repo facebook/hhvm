@@ -2661,7 +2661,7 @@ and simplify_subtype_i
                ~sub_supportdyn:(Some r)
                tyarg_sub
                tyarg_super
-        | (_, (Tgeneric _ | Tvar _)) -> default_subtype env
+        | (_, Tvar _) -> default_subtype env
         | _ ->
           let ty_dyn = MakeType.dynamic r_supportdyn in
           env

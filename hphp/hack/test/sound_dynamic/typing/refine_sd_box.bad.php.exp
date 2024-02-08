@@ -1,4 +1,4 @@
 File "refine_sd_box.bad.php", line 14, characters 7-11:
 You are trying to access the method `bogus` but this is a mixed value. Use a **specific** class or interface name. (Typing[4064])
-  File "refine_sd_box.bad.php", line 4, characters 31-35:
+  File "refine_sd_box.bad.php", line 4, characters 20-36:
   Definition is here

@@ -42,38 +42,10 @@ func TransportFactories(factory TransportFactory) func(*ServerOptions) {
 	}
 }
 
-// InputTransportFactory sets the input transport factory
-func InputTransportFactory(factory TransportFactory) func(*ServerOptions) {
-	return func(server *ServerOptions) {
-		server.inputTransportFactory = factory
-	}
-}
-
-// OutputTransportFactory sets the output transport factory
-func OutputTransportFactory(factory TransportFactory) func(*ServerOptions) {
-	return func(server *ServerOptions) {
-		server.outputTransportFactory = factory
-	}
-}
-
 // ProtocolFactories sets both input and output protocol factories
 func ProtocolFactories(factory ProtocolFactory) func(*ServerOptions) {
 	return func(server *ServerOptions) {
 		server.inputProtocolFactory = factory
-		server.outputProtocolFactory = factory
-	}
-}
-
-// InputProtocolFactory sets the input protocol factory
-func InputProtocolFactory(factory ProtocolFactory) func(*ServerOptions) {
-	return func(server *ServerOptions) {
-		server.inputProtocolFactory = factory
-	}
-}
-
-// OutputProtocolFactory sets the output protocol factory
-func OutputProtocolFactory(factory ProtocolFactory) func(*ServerOptions) {
-	return func(server *ServerOptions) {
 		server.outputProtocolFactory = factory
 	}
 }

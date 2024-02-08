@@ -52,7 +52,6 @@
   serverLint
   serverMethodJumps
   serverMethodJumpsBatch
-  serverPopulateRemoteDecls
   serverRage
   serverStamp
   serverStatusSingle

@@ -173,8 +173,6 @@ let parse_check_args cmd ~from_default =
     | [] -> ()
     | single_files ->
       (match !mode with
-      | Some (MODE_POPULATE_REMOTE_DECLS None) ->
-        mode := Some (MODE_POPULATE_REMOTE_DECLS (Some single_files))
       | _ ->
         set_mode (MODE_STATUS_SINGLE { filenames = single_files; show_tast }))
   in
@@ -352,14 +350,6 @@ let parse_check_args cmd ~from_default =
                 | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " (mode) for each entry in input list get list of function dependencies [file:line:character list]"
-      );
-      ( "--gen-prefetch-dir",
-        Arg.String (fun _x -> set_mode (MODE_POPULATE_REMOTE_DECLS None)),
-        " Compute all decls for the repo and upload them to the remote decl service."
-        ^ " Usage: --gen-prefetch-dir unused" );
-      ( "--populate-remote-decls",
-        Arg.Unit (fun () -> set_mode (MODE_POPULATE_REMOTE_DECLS None)),
-        " Compute all decls for the repo and upload them to the remote decl service."
       );
       ( "--gen-saved-ignore-type-errors",
         Arg.Set gen_saved_ignore_type_errors,

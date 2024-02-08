@@ -396,7 +396,6 @@ type _ t =
   | RAGE : ServerRageTypes.result t
   | CST_SEARCH : cst_search_input -> (Hh_json.json, string) result t
   | NO_PRECHECKED_FILES : unit t
-  | POPULATE_REMOTE_DECLS : Relative_path.t list option -> unit t
   | FUN_DEPS_BATCH : (string * int * int) list -> string list t
   | LIST_FILES_WITH_ERRORS : string list t
   | FILE_DEPENDENTS : string list -> string list t
@@ -471,7 +470,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   (* Same case as Ai commands *)
   | IN_MEMORY_DEP_TABLE_SIZE -> true
   | NO_PRECHECKED_FILES -> true
-  | POPULATE_REMOTE_DECLS _ -> false
   | STATS -> false
   | STATUS_SINGLE _ -> false
   | INFER_TYPE _ -> false

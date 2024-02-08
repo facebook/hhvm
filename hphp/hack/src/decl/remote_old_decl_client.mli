@@ -12,13 +12,6 @@ val fetch_old_decls :
   Shallow_decl_defs.shallow_class option SMap.t
 
 module Utils : sig
-  val get_dev_build_version : unit -> string
-
-  val make_manifold_path : version:string -> string
-
-  val name_to_decl_hash_opt :
-    name:string -> db_path:Naming_sqlite.db_path -> string option
-
   val name_to_file_hash_opt :
     name:string -> db_path:Naming_sqlite.db_path -> string option
 

@@ -12,54 +12,6 @@
 open Hh_prelude
 
 module Utils = struct
-  let get_hh_version () =
-    (* TODO: the following is a bug! *)
-    let repo = Wwwroot.interpret_command_line_root_parameter [] in
-    let hhconfig_path =
-      Path.to_string
-        (Path.concat repo Config_file.file_path_relative_to_repo_root)
-    in
-    let version =
-      if Disk.file_exists hhconfig_path then
-        let (_, config) = Config_file.parse_hhconfig hhconfig_path in
-        Config_file.Getters.string_opt "version" config
-      else
-        None
-    in
-    match version with
-    | None -> Hh_version.version
-    | Some version ->
-      let version = "v" ^ String_utils.lstrip version "^" in
-      version
-
-  let get_dev_build_version () =
-    if String.is_empty Build_id.build_revision then
-      Sys_username.get_logged_in_username ()
-      |> Option.value ~default:"anonymous"
-    else
-      Build_id.build_revision
-
-  let make_manifold_path ~version =
-    Printf.sprintf
-      "hack_decl_prefetching/tree/prefetch/%s/shallow_decls"
-      version
-
-  let manifold_path_exists ~path =
-    let cmd = Printf.sprintf "manifold exists %s" path in
-    let code = Sys.command cmd in
-    Int.equal code 0
-
-  let get_version () =
-    if Build_id.is_dev_build then
-      let version = get_dev_build_version () in
-      let path = make_manifold_path ~version in
-      if manifold_path_exists ~path then
-        version
-      else
-        get_hh_version ()
-    else
-      get_hh_version ()
-
   let db_path_of_ctx ~(ctx : Provider_context.t) : Naming_sqlite.db_path option
       =
     ctx |> Provider_context.get_backend |> Db_path_provider.get_naming_db_path
@@ -76,53 +28,6 @@ module Utils = struct
     let file_hash = Naming_sqlite.get_file_hash_by_64bit_dep db_path dep in
     file_hash
 end
-
-module FetchAsync = struct
-  (** The input record that gets passed from the main process to the daemon process *)
-  type input = {
-    hhconfig_version: string;
-    destination_path: string;
-    no_limit: bool;
-    decl_hashes: string list;
-  }
-
-  (** The main entry point of the daemon process that fetches the remote old decl blobs
-      and writes them to a file. *)
-  let fetch { hhconfig_version; destination_path; no_limit; decl_hashes } : unit
-      =
-    begin
-      match
-        Remote_old_decls_ffi.get_decls hhconfig_version no_limit decl_hashes
-      with
-      | Ok decl_hashes_and_blobs ->
-        let chan = Stdlib.open_out_bin destination_path in
-        Marshal.to_channel chan decl_hashes_and_blobs [];
-        Stdlib.close_out chan
-      | Error msg -> Hh_logger.log "Error fetching remote decls: %s" msg
-    end;
-
-    (* The intention here is to force the daemon process to exit with
-       an failed exit code so that the main process can detect
-       the condition and log the outcome. *)
-    assert (Disk.file_exists destination_path)
-
-  (** The daemon entry registration - used by the main process *)
-  let fetch_entry =
-    Process.register_entry_point "remote_old_decls_fetch_async_entry" fetch
-end
-
-let fetch_async ~hhconfig_version ~destination_path ~no_limit decl_hashes =
-  Hh_logger.log
-    "Fetching %d remote old decls to %s"
-    (List.length decl_hashes)
-    destination_path;
-  let open FetchAsync in
-  FutureProcess.make
-    (Process.run_entry
-       Process_types.Default
-       fetch_entry
-       { hhconfig_version; destination_path; no_limit; decl_hashes })
-    (fun _output -> Hh_logger.log "Finished fetching remote old decls")
 
 let fetch_old_decls_via_file_hashes
     ~(ctx : Provider_context.t)
@@ -171,61 +76,7 @@ let fetch_old_decls ~(ctx : Provider_context.t) (names : string list) :
           (Provider_context.get_tcopt ctx)
       in
       Hh_logger.log "Using old decls from CAS? %b" use_old_decls_from_cas;
-      match use_old_decls_from_cas with
-      | true -> fetch_old_decls_via_file_hashes ~ctx ~db_path names
-      | false ->
-        (match decl_hashes with
-        | [] -> SMap.empty
-        | _ ->
-          let hhconfig_version = Utils.get_version () in
-          let no_limit =
-            TypecheckerOptions.remote_old_decls_no_limit
-              (Provider_context.get_tcopt ctx)
-          in
-          let tmp_dir = Tempfile.mkdtemp ~skip_mocking:false in
-          let destination_path =
-            Path.(to_string @@ concat tmp_dir "decl_blobs")
-          in
-          let decl_fetch_future =
-            fetch_async
-              ~hhconfig_version
-              ~destination_path
-              ~no_limit
-              decl_hashes
-          in
-          (match Future.get ~timeout:120 decl_fetch_future with
-          | Error e ->
-            Hh_logger.log
-              "Failed to fetch decls from remote decl store: %s"
-              (Future.error_to_string e);
-            SMap.empty
-          | Ok () ->
-            let chan = Stdlib.open_in_bin destination_path in
-            let decl_hashes_and_blobs : (string * string) list =
-              Marshal.from_channel chan
-            in
-            let decl_blobs =
-              List.map ~f:(fun (_decl_hash, blob) -> blob) decl_hashes_and_blobs
-            in
-            Stdlib.close_in chan;
-            let decls =
-              List.fold
-                ~init:SMap.empty
-                ~f:(fun acc blob ->
-                  let contents : Shallow_decl_defs.decl SMap.t =
-                    Marshal.from_string blob 0
-                  in
-                  SMap.fold
-                    (fun name decl acc ->
-                      match decl with
-                      | Shallow_decl_defs.Class cls ->
-                        SMap.add name (Some cls) acc
-                      | _ -> acc)
-                    contents
-                    acc)
-                decl_blobs
-            in
-            decls))
+      fetch_old_decls_via_file_hashes ~ctx ~db_path names
     in
     let to_fetch = List.length decl_hashes in
     let telemetry =

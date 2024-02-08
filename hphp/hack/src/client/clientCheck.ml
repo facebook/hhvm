@@ -298,18 +298,6 @@ let main_internal
     in
     print_refs results ~json:args.output_json;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
-  | MODE_POPULATE_REMOTE_DECLS files ->
-    let files =
-      Option.map
-        files
-        ~f:
-          (List.map ~f:(fun path ->
-               Relative_path.create_detect_prefix (expand_path path)))
-    in
-    let%lwt (_, telemetry) =
-      rpc args (ServerCommandTypes.POPULATE_REMOTE_DECLS files)
-    in
-    Lwt.return (Exit_status.No_error, telemetry)
   | MODE_GO_TO_IMPL_CLASS class_name ->
     let%lwt results =
       rpc_with_retry args

@@ -47,13 +47,8 @@ func NewSimpleServer(processor Processor, serverTransport ServerTransport, optio
 
 // NewSimpleServerContext creates a new server that supports contexts
 func NewSimpleServerContext(processor ProcessorContext, serverTransport ServerTransport, options ...func(*ServerOptions)) *SimpleServer {
-	return NewSimpleServerFactoryContext(NewProcessorFactoryContext(processor), serverTransport, options...)
-}
-
-// NewSimpleServerFactoryContext creates a new server factory that supports contexts.
-func NewSimpleServerFactoryContext(processorFactoryContext ProcessorFactoryContext, serverTransport ServerTransport, options ...func(*ServerOptions)) *SimpleServer {
 	return &SimpleServer{
-		processorFactoryContext: processorFactoryContext,
+		processorFactoryContext: NewProcessorFactoryContext(processor),
 		ServerOptions:           simpleServerOptions(serverTransport, options...),
 	}
 }

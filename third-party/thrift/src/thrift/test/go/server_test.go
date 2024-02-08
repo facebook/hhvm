@@ -47,9 +47,7 @@ func createTestHeaderServer(handler thrifttest.ThriftTest) (*thrift.SimpleServer
 	}
 	taddr := transport.Addr()
 
-	server := thrift.NewSimpleServerContext(processor, transport,
-		thrift.TransportFactories(transportFactory),
-		thrift.ProtocolFactories(protocolFactory))
+	server := thrift.NewSimpleServerContext(processor, transport, transportFactory, protocolFactory)
 	go func(server *thrift.SimpleServer) {
 		err = server.Serve()
 		if err != nil && err != thrift.ErrServerClosed {

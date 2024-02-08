@@ -170,9 +170,9 @@ func newServer(processor thrift.ProcessorContext, addr string) (thrift.Server, e
 	if err != nil {
 		return nil, err
 	}
-	protocols := thrift.ProtocolFactories(thrift.NewHeaderProtocolFactory())
-	transports := thrift.TransportFactories(thrift.NewHeaderTransportFactory(thrift.NewTransportFactory()))
-	return thrift.NewSimpleServerContext(processor, socket, protocols, transports), nil
+	protocol := thrift.NewHeaderProtocolFactory()
+	transport := thrift.NewHeaderTransportFactory(thrift.NewTransportFactory())
+	return thrift.NewSimpleServerContext(processor, socket, transport, protocol), nil
 }
 
 type dataConformanceServiceHandler struct {

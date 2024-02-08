@@ -22,11 +22,6 @@ import "context"
 type Server interface {
 	ProcessorFactoryContext() ProcessorFactoryContext
 	ServerTransport() ServerTransport
-	InputTransportFactory() TransportFactory
-	OutputTransportFactory() TransportFactory
-	InputProtocolFactory() ProtocolFactory
-	OutputProtocolFactory() ProtocolFactory
-
 	// Serve starts the server
 	Serve() error
 	// ServeContext starts the server, and stops it when the context is cancelled

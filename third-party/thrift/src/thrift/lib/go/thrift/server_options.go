@@ -26,28 +26,6 @@ type ServerOptions struct {
 	quit        chan struct{}
 	log         *log.Logger
 	interceptor Interceptor
-
-	serverTransport        ServerTransport
-	inputTransportFactory  TransportFactory
-	outputTransportFactory TransportFactory
-	inputProtocolFactory   ProtocolFactory
-	outputProtocolFactory  ProtocolFactory
-}
-
-// TransportFactories sets both input and output transport factories
-func TransportFactories(factory TransportFactory) func(*ServerOptions) {
-	return func(server *ServerOptions) {
-		server.inputTransportFactory = factory
-		server.outputTransportFactory = factory
-	}
-}
-
-// ProtocolFactories sets both input and output protocol factories
-func ProtocolFactories(factory ProtocolFactory) func(*ServerOptions) {
-	return func(server *ServerOptions) {
-		server.inputProtocolFactory = factory
-		server.outputProtocolFactory = factory
-	}
 }
 
 // Logger sets the logger used for the server
@@ -64,14 +42,9 @@ func WithInterceptor(interceptor Interceptor) func(*ServerOptions) {
 	}
 }
 
-func defaultServerOptions(serverTransport ServerTransport) *ServerOptions {
+func defaultServerOptions() *ServerOptions {
 	return &ServerOptions{
-		serverTransport:        serverTransport,
-		inputTransportFactory:  NewTransportFactory(),
-		outputTransportFactory: NewTransportFactory(),
-		inputProtocolFactory:   NewBinaryProtocolFactoryDefault(),
-		outputProtocolFactory:  NewBinaryProtocolFactoryDefault(),
-		quit:                   make(chan struct{}, 1),
-		log:                    log.New(os.Stderr, "", log.LstdFlags),
+		quit: make(chan struct{}, 1),
+		log:  log.New(os.Stderr, "", log.LstdFlags),
 	}
 }

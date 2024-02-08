@@ -56,8 +56,7 @@ func newServer(processor thrift.ProcessorContext, addr string) (thrift.Server, e
 	tFactory := thrift.NewHeaderTransportFactory(thrift.NewTransportFactory())
 	pFactory := thrift.NewHeaderProtocolFactory()
 
-	return thrift.NewSimpleServerContext(
-		processor, socket, thrift.TransportFactories(tFactory), thrift.ProtocolFactories(pFactory)), nil
+	return thrift.NewSimpleServerContext(processor, socket, tFactory, pFactory), nil
 }
 
 // Echo - does echo

@@ -40,7 +40,7 @@ const StaticString s_brotliCC("brotli.chunked_compression");
 const StaticString s_zstdCL("zstd.compression_level");
 const StaticString s_zstdCR("zstd.checksum_rate");
 const StaticString s_zstdWL("zstd.window_log");
-const StaticString s_zstdBS("zstd.block_size");
+const StaticString s_zstdBS("zstd.target_block_size");
 const StaticString s_zstdC("zstd.compression");
 
 const StaticString s_zlibOCL("zlib.output_compression_level");

@@ -113,7 +113,7 @@ pub(crate) fn convert_sequence<'a, 'b>(ctx: &mut Context<'a, 'b>, addr: Addr) {
                 // sequence gathering code.
                 unreachable!();
             }
-            Instruct::Pseudo(Pseudo::Break | Pseudo::Comment(..) | Pseudo::Continue) => {
+            Instruct::Pseudo(Pseudo::Break | Pseudo::Continue) => {
                 // We should never see these in an HHBC sequence outside of the
                 // HackC emitter.
                 unreachable!();

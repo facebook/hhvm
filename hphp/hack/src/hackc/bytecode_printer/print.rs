@@ -874,11 +874,6 @@ fn print_instructions<'a, 'b>(
             Instruct::Pseudo(Pseudo::Continue | Pseudo::Break) => {
                 return Err(Error::fail("Cannot break/continue").into());
             }
-            Instruct::Pseudo(Pseudo::Comment(_)) => {
-                // indentation = 0
-                newline(w)?;
-                print_instr(w, instr, dv_labels, local_names)?;
-            }
             Instruct::Pseudo(Pseudo::Label(_)) => ctx.unblock(w, |c, w| {
                 c.newline(w)?;
                 print_instr(w, instr, dv_labels, local_names)
@@ -949,7 +944,7 @@ pub(crate) fn print_fcall_args(
     quotes(w, |w| w.write_all(context))
 }
 
-fn print_pseudo(w: &mut dyn Write, instr: &Pseudo<'_>, dv_labels: &HashSet<Label>) -> Result<()> {
+fn print_pseudo(w: &mut dyn Write, instr: &Pseudo, dv_labels: &HashSet<Label>) -> Result<()> {
     match instr {
         Pseudo::Label(l) => {
             print_label(w, l, dv_labels)?;
@@ -958,7 +953,6 @@ fn print_pseudo(w: &mut dyn Write, instr: &Pseudo<'_>, dv_labels: &HashSet<Label
         Pseudo::TryCatchBegin => w.write_all(b".try {"),
         Pseudo::TryCatchMiddle => w.write_all(b"} .catch {"),
         Pseudo::TryCatchEnd => w.write_all(b"}"),
-        Pseudo::Comment(s) => write_bytes!(w, "# {}", s),
         Pseudo::SrcLoc(p) => write!(
             w,
             ".srcloc {}:{},{}:{};",

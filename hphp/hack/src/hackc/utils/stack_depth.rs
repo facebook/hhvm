@@ -177,7 +177,6 @@ impl ComputeStackDepth<'_> {
         let end_block = match instr {
             Instruct::Pseudo(
                 Pseudo::Break
-                | Pseudo::Comment(_)
                 | Pseudo::Continue
                 | Pseudo::SrcLoc(..)
                 | Pseudo::TryCatchBegin

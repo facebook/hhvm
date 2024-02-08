@@ -450,7 +450,6 @@ impl<'arena, 'a> State<'arena, 'a> {
 
             Instruct::Pseudo(Pseudo::SrcLoc(_)) => {}
             Instruct::Pseudo(Pseudo::Break) => todo!(),
-            Instruct::Pseudo(Pseudo::Comment(..)) => todo!(),
             Instruct::Pseudo(Pseudo::Continue) => todo!(),
             Instruct::Pseudo(Pseudo::Label(..)) => {}
         }

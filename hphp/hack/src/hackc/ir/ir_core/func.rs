@@ -184,10 +184,10 @@ impl TryCatchId {
 /// non-terminal instructions ending with a terminal instruction.
 ///
 /// A Block can take parameters which are used to pass data when control is
-/// transferred to the Block.
+/// transferred to the Block. Block parameters correspond to SSA phi nodes.
 ///
 ///   - A Block can end with the ControlFlow::JmpArgs instruction to pass data
-///     to a successor block (these correspond to phi-nodes in the SSA graph).
+///     to a successor block. These arguments correspond to SSA phi node inputs.
 ///
 ///   - A Block which is the target of exception handling will be passed the
 ///     exception object as a Block parameter.

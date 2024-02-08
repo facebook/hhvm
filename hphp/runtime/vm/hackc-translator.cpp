@@ -967,7 +967,6 @@ void translatePseudoInstruction(TranslationState& ts, const Pseudo& p) {
   switch (p.tag) {
     case Pseudo::Tag::Break:
     case Pseudo::Tag::Continue:
-    case Pseudo::Tag::Comment:
       return;
     case Pseudo::Tag::Label:
       ts.labelMap[p.Label._0].target = ts.fe->bcPos();

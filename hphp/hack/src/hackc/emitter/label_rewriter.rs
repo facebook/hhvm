@@ -179,7 +179,6 @@ where
         }
         Instruct::Pseudo(
             Pseudo::Break
-            | Pseudo::Comment(..)
             | Pseudo::Continue
             | Pseudo::SrcLoc(..)
             | Pseudo::TryCatchBegin

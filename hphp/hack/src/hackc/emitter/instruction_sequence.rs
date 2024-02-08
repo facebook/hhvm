@@ -560,7 +560,6 @@ impl<'a> InstrSeq<'a> {
 
 #[cfg(test)]
 mod tests {
-    use ffi::Str;
     use instr::instr;
     use instr::instrs;
     use pretty_assertions::assert_eq;
@@ -569,7 +568,7 @@ mod tests {
 
     #[test]
     fn iter() {
-        let mk_i = || Instruct::Pseudo(Pseudo::Comment(Str::from("")));
+        let mk_i = || Instruct::Opcode(hhbc::Opcode::Nop);
         let empty = InstrSeq::new_empty;
 
         let one = || instr(mk_i());

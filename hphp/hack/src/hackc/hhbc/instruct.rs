@@ -335,11 +335,10 @@ impl LocalRange {
 /// do not have HHBC opcodes equivalents.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, Serialize)]
 #[repr(C)]
-pub enum Pseudo<'arena> {
+pub enum Pseudo {
     /// An internal representation of a break statement that is removed by the
     /// try/finally rewriter.
     Break,
-    Comment(Str<'arena>),
     /// An internal representation of a continue statement that is removed by
     /// the try/finally rewriter.
     Continue,
@@ -363,7 +362,7 @@ pub enum Instruct<'arena> {
     // HHVM opcodes.
     Opcode(Opcode<'arena>),
     // HHAS pseudo-instructions.
-    Pseudo(Pseudo<'arena>),
+    Pseudo(Pseudo),
 }
 
 impl Instruct<'_> {
@@ -382,7 +381,6 @@ impl Instruct<'_> {
                 | Pseudo::TryCatchBegin
                 | Pseudo::TryCatchMiddle
                 | Pseudo::TryCatchEnd
-                | Pseudo::Comment(_)
                 | Pseudo::SrcLoc(_),
             ) => &[],
         }
@@ -399,7 +397,6 @@ impl Instruct<'_> {
                 | Pseudo::TryCatchBegin
                 | Pseudo::TryCatchMiddle
                 | Pseudo::TryCatchEnd
-                | Pseudo::Comment(_)
                 | Pseudo::SrcLoc(_),
             ) => 0,
         }
@@ -414,7 +411,6 @@ impl Instruct<'_> {
             Self::Pseudo(Pseudo::TryCatchBegin) => "TryCatchBegin",
             Self::Pseudo(Pseudo::TryCatchMiddle) => "TryCatchMiddle",
             Self::Pseudo(Pseudo::TryCatchEnd) => "TryCatchEnd",
-            Self::Pseudo(Pseudo::Comment(_)) => "Comment",
             Self::Pseudo(Pseudo::SrcLoc(_)) => "SrcLoc",
         }
     }

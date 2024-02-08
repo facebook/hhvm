@@ -3,5 +3,5 @@ Until the initialization of `$this` is over, you can only call private methods
 The initialization is not over because `$this->x` can still potentially be null (NastCheck[3004])
 File "call_before_init2.php", line 16, characters 17-47:
 Too many arguments (expected 1 but got 2) (Typing[4105])
-  File "stdlib/builtins_class.hhi", line 33, characters 12-20:
+  File "stdlib/builtins_class.hhi", line 35, characters 12-20:
   Definition is here

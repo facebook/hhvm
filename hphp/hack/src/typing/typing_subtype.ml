@@ -112,6 +112,9 @@ type subtype_env = {
           tell apart coeffects from regular types *)
   log_level: int;
       (** Which level the recursive calls to simplify_subtype should be logged at *)
+  in_transitive_closure: bool;
+      (** This is a subtype check from within transitive closure
+          e.g. string <: #1 <: int doing string <: int *)
 }
 
 let coercing_from_dynamic se =
@@ -130,6 +133,7 @@ let make_subtype_env
     ?(no_top_bottom = false)
     ?(coerce = None)
     ?(is_coeffect = false)
+    ?(in_transitive_closure = false)
     ~(log_level : int)
     on_error =
   {
@@ -142,6 +146,7 @@ let make_subtype_env
     on_error;
     tparam_constraints = [];
     log_level;
+    in_transitive_closure;
   }
 
 let possibly_add_violated_constraint subtype_env ~r_sub ~r_super =
@@ -967,7 +972,8 @@ and simplify_subtype_i
       ^ flag " super_supportdyn" super_supportdyn
       ^ flag " super_like" super_like
       ^ flag " require_soundness" subtype_env.require_soundness
-      ^ flag " require_completeness" subtype_env.require_completeness)
+      ^ flag " require_completeness" subtype_env.require_completeness
+      ^ flag " in_transitive_closure" subtype_env.in_transitive_closure)
     env
     ty_sub
     ty_super;
@@ -4661,7 +4667,12 @@ and add_tyvar_upper_bound_and_close
           (fun lower_bound (env, prop1) ->
             let (env, prop2) =
               simplify_subtype_i
-                ~subtype_env:(make_subtype_env ~coerce ~log_level:2 on_error)
+                ~subtype_env:
+                  (make_subtype_env
+                     ~coerce
+                     ~log_level:2
+                     ~in_transitive_closure:true
+                     on_error)
                 ~sub_supportdyn:None
                 lower_bound
                 upper_bound
@@ -4717,7 +4728,12 @@ and add_tyvar_lower_bound_and_close
           (fun upper_bound (env, prop1) ->
             let (env, prop2) =
               simplify_subtype_i
-                ~subtype_env:(make_subtype_env ~coerce ~log_level:2 on_error)
+                ~subtype_env:
+                  (make_subtype_env
+                     ~coerce
+                     ~log_level:2
+                     ~in_transitive_closure:true
+                     on_error)
                 ~sub_supportdyn:None
                 lower_bound
                 upper_bound

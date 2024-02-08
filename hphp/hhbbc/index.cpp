@@ -10112,10 +10112,19 @@ private:
     // method to true. This flag causes the originalModuleName field to be
     // copied in the HHVM extendedSharedData section of the method, so that
     // HHVM is able to resolve correctly the original module of the method.
+    // Preserving the original module of a method is also needed when a
+    // method is defined in an internal trait that is used by a module level
+    // trait.
     const bool requiresFromOriginalModule = [&] () {
-      if (RO::EvalModuleLevelTraits && orig.fromModuleLevelTrait &&
-         !orig.requiresFromOriginalModule &&
-         orig.originalModuleName != dstCls.moduleName) {
+      bool copyFromModuleLevelTrait =
+        orig.fromModuleLevelTrait && !orig.requiresFromOriginalModule &&
+        orig.originalModuleName != dstCls.moduleName;
+      bool copyFromInternal =
+        (orig.cls->attrs & AttrInternal)
+        && dstCls.userAttributes.count(s___ModuleLevelTrait.get());;
+
+      if (RO::EvalModuleLevelTraits &&
+          (copyFromModuleLevelTrait || copyFromInternal)) {
         return true;
       } else {
         return orig.requiresFromOriginalModule;

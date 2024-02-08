@@ -1,0 +1,16 @@
+<?hh
+
+<<file:__EnableUnstableFeatures('module_level_traits')>>
+
+module MLT_A;
+
+internal trait T1 {
+  internal function foo(): void {
+    echo "I am foo in T";
+  }
+}
+
+<<__ModuleLevelTrait>>
+public trait T2 {
+  use T1;
+}

@@ -21,3 +21,16 @@
     be captured.
 *)
 val can_be_captured : ('a, 'b) Aast_defs.expr_ -> bool
+
+(** If the expression is an ExpressionTree with a "type" field in the shape that is the
+    second argumentto MakeTree, that's the virtualized expression. Return it. Otherwise,
+    return the input expression
+*)
+val get_virtual_expr : ('a, 'b) Aast_defs.expr -> ('a, 'b) Aast_defs.expr
+
+(** If expression_tree has a"type" field in the shape that is the second
+argumentto MakeTree, that's the virtualized expression. Return it. Otherwise,
+return None
+*)
+val get_virtual_expr_from_et :
+  ('a, 'b) Aast_defs.expression_tree -> ('a, 'b) Aast_defs.expr option

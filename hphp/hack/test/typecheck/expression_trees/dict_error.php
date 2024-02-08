@@ -5,13 +5,13 @@
 class DictError {
   const type TAst = mixed;
 
-  public static function makeTree<<<__Explicit>> TInfer>(
+  public static function makeTree<TInfer>(
     ?ExprPos $pos,
     shape(
       // Based on a user report of an error that didn't make much sense
       'splices' => dict<string, Spliceable<DictError, DictError::TAst, TInfer>>,
       'functions' => vec<mixed>,
-      'static_methods' => vec<mixed>,
+      'static_methods' => vec<mixed>, ?'type' => TInfer,
     ) $metadata,
     (function(DictError): DictError::TAst) $ast,
   ): ExprTree<DictError, DictError::TAst, TInfer> {

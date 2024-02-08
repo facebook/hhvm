@@ -16,45 +16,6 @@
                 (ExpressionTree
                    { et_class = ([5:3-13], "\\ExampleDsl"); et_splices = []; 
                      et_function_pointers = [];
-                     et_virtualized_expr =
-                     ((), [5:14-20],
-                      (Efun
-                         { ef_fun =
-                           { f_span = [5:14-20]; f_readonly_this = None; 
-                             f_annotation = (); f_readonly_ret = None; 
-                             f_ret = ((), None); f_params = []; f_ctxs = (Some ([5:14-20], [([5:14-20], (Happly (([5:14-20], "\\HH\\Contexts\\defaults"), [])))])); 
-                             f_unsafe_ctxs = None;
-                             f_body =
-                             { fb_ast =
-                               [([5:14-20],
-                                 (Return
-                                    (Some ((), [5:14-20],
-                                           (Call
-                                              { func =
-                                                ((), [5:14-20],
-                                                 (Obj_get (
-                                                    ((), [5:14-15],
-                                                     (Call
-                                                        { func = ((), [5:14-15], (Class_const (((), [5:14-15], (CI ([5:14-15], "\\ExampleDsl"))), ([5:14-15], "intType")))); 
-                                                          targs = []; 
-                                                          args = []; 
-                                                          unpacked_arg = None })),
-                                                    ((), [5:14-20], (Id ([5:14-20], "__unsupported"))), OG_nullthrows, Is_method)));
-                                                targs = [];
-                                                args =
-                                                [(Pnormal,
-                                                  ((), [5:19-20],
-                                                   (Call
-                                                      { func = ((), [5:19-20], (Class_const (((), [5:19-20], (CI ([5:19-20], "\\ExampleDsl"))), ([5:19-20], "intType")))); 
-                                                        targs = []; args = []; 
-                                                        unpacked_arg = None })))
-                                                  ];
-                                                unpacked_arg = None })))))
-                                 ]
-                               };
-                             f_fun_kind = FSync; f_user_attributes = []; 
-                             f_external = false; f_doc_comment = None };
-                           ef_use = []; ef_closure_class_name = None }));
                      et_runtime_expr =
                      ((), [5:3-13],
                       (Call
@@ -74,7 +35,51 @@
                                (Shape
                                   [((SFlit_str ([5:3-13], "splices")), ((), [5:3-13], (KeyValCollection (([5:3-13], Dict), None, []))));
                                     ((SFlit_str ([5:3-13], "functions")), ((), [5:3-13], (ValCollection (([5:3-13], Vec), None, []))));
-                                    ((SFlit_str ([5:3-13], "static_methods")), ((), [5:3-13], (ValCollection (([5:3-13], Vec), None, []))))])));
+                                    ((SFlit_str ([5:3-13], "static_methods")), ((), [5:3-13], (ValCollection (([5:3-13], Vec), None, []))));
+                                    ((SFlit_str ([5:3-13], "type")),
+                                     ((), [5:14-20],
+                                      (Efun
+                                         { ef_fun =
+                                           { f_span = [5:14-20]; f_readonly_this = None; 
+                                             f_annotation = (); f_readonly_ret = None; 
+                                             f_ret = ((), None); f_params = []; 
+                                             f_ctxs = (Some ([5:14-20], [([5:14-20], (Happly (([5:14-20], "\\HH\\Contexts\\defaults"), [])))])); 
+                                             f_unsafe_ctxs = None;
+                                             f_body =
+                                             { fb_ast =
+                                               [([5:14-20],
+                                                 (Return
+                                                    (Some ((), [5:14-20],
+                                                           (Call
+                                                              { func =
+                                                                ((), [5:14-20],
+                                                                 (Obj_get (
+                                                                    (
+                                                                    (), [5:14-15],
+                                                                    (
+                                                                    Call
+                                                                    { func = ((), [5:14-15], (Class_const (((), [5:14-15], (CI ([5:14-15], "\\ExampleDsl"))), ([5:14-15], "intType")))); 
+                                                                    targs = []; 
+                                                                    args = []; 
+                                                                    unpacked_arg = None })), (
+                                                                    (), [5:14-20], (Id ([5:14-20], "__unsupported"))), OG_nullthrows, Is_method)));
+                                                                targs = [];
+                                                                args =
+                                                                [(Pnormal,
+                                                                  ((), [5:19-20],
+                                                                   (Call
+                                                                    { func = ((), [5:19-20], (Class_const (((), [5:19-20], (CI ([5:19-20], "\\ExampleDsl"))), ([5:19-20], "intType")))); 
+                                                                    targs = []; 
+                                                                    args = []; 
+                                                                    unpacked_arg = None })))
+                                                                  ];
+                                                                unpacked_arg = None })))))
+                                                 ]
+                                               };
+                                             f_fun_kind = FSync; f_user_attributes = []; 
+                                             f_external = false; f_doc_comment = None };
+                                           ef_use = []; ef_closure_class_name = None })))
+                                    ])));
                              (Pnormal,
                               ((), [5:14-20],
                                (Lfun (

@@ -6,9 +6,10 @@
  *
  *)
 
-let rec can_be_captured =
-  let open Aast_defs in
-  function
+open Ast_defs
+open Aast_defs
+
+let rec can_be_captured = function
   | Shape _
   | ValCollection _
   | KeyValCollection _
@@ -65,3 +66,46 @@ let rec can_be_captured =
   | Invalid (Some (_, _, exp))
   | Hole ((_, _, exp), _, _, _) ->
     can_be_captured exp
+
+let find_shape_field name fields =
+  List.find_opt
+    (fun (field_name, _e) ->
+      match field_name with
+      | SFlit_str (_, n) -> String.equal name n
+      | _ -> false)
+    fields
+
+let get_return_from_fun e =
+  match e with
+  | (_, _, Lfun ({ f_body = { fb_ast = [(_, Return (Some e))]; _ }; _ }, _))
+  | ( _,
+      _,
+      Efun
+        { ef_fun = { f_body = { fb_ast = [(_, Return (Some e))]; _ }; _ }; _ }
+    ) ->
+    Some e
+  | _ -> None
+
+let get_virtual_expr_from_et et =
+  let get_body_helper e =
+    match e with
+    | (_, _, Call { args = _ :: (Pnormal, (_, _, Shape fields)) :: _; _ }) ->
+      (match find_shape_field "type" fields with
+      | Some (_, e) -> get_return_from_fun e
+      | None -> None)
+    | _ -> None
+  in
+  match et.et_runtime_expr with
+  | (_, _, Call { func = e; _ }) ->
+    (match get_return_from_fun e with
+    | Some e -> get_body_helper e
+    | None -> get_body_helper et.et_runtime_expr)
+  | _ -> get_body_helper et.et_runtime_expr
+
+let get_virtual_expr expr =
+  match expr with
+  | (_, _, ExpressionTree et) ->
+    (match get_virtual_expr_from_et et with
+    | Some expr -> expr
+    | None -> expr)
+  | _ -> expr

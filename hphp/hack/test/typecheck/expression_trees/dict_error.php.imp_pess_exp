@@ -1,7 +1,7 @@
 File "dict_error.php", line 59, characters 3-11:
 The values of this `dict` are incompatible (Typing[4110])
   File "dict_error.php", line 12, characters 33-78:
-  Expected `Spliceable<DictError, mixed, TInfer#1>`
+  Expected `Spliceable<DictError, mixed, _>`
   File "dict_error.php", line 58, characters 15-24:
   But got `ExampleInt`
 File "dict_error.php", line 61, characters 10-14:

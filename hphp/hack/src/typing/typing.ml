@@ -9167,8 +9167,7 @@ end = struct
      * Exception: we're checking an expression tree. Even in the dynamic pass,
      * maketree_with_type_param needs the lambda to be typed precisely.
      *)
-      when Tast.is_under_dynamic_assumptions env.checked
-           && not (Env.is_in_expr_tree env) ->
+      when Tast.is_under_dynamic_assumptions env.checked ->
       make_result env p Aast.Omitted (MakeType.dynamic (Reason.Rwitness p))
     | Some (_pos, _ur, supportdyn, ty, Tfun expected_ft) ->
       (* First check that arities match up *)
@@ -10082,100 +10081,11 @@ and Expression_tree : sig
   val expression_tree :
     env -> pos -> (unit, unit) expression_tree -> env * Tast.expr * locl_ty
 end = struct
-  (** Add a fresh type parameter to [env] with a name starting [prefix]
-    and a constraint on [ty]. *)
-  let synthesize_type_param env p prefix ty =
-    let (env, name) =
-      match get_node ty with
-      (* Don't generate another fresh generic off an existing fresh generic *)
-      | Tgeneric (n, _) when Env.is_fresh_generic_parameter n -> (env, n)
-      | _ ->
-        let (env, name) = Env.fresh_param_name env prefix in
-        let env = Env.add_upper_bound_global env name ty in
-        let env = Env.add_lower_bound_global env name ty in
-        (env, name)
-    in
-    let hint = (p, Aast.Habstr (name, [])) in
-    (hint, env)
-
-  (** Transform calls to MyVisitor::makeTree with [f]. *)
-  let rec rewrite_expr_tree_maketree env expr f =
-    let (pos, p, expr_) = expr in
-    let (env, expr_) =
-      match expr_ with
-      | Call
-          ({
-             func =
-               ( fun_pos,
-                 p,
-                 (Lfun (fun_, idl) | Efun { ef_fun = fun_; ef_use = idl; _ }) );
-             _;
-           } as call_expr) ->
-        (* Express tree literals containing splices use an anonymous
-           function that returns the makeTree call.
-
-            (function() {
-               $0splice1 = "whatever";
-               return MyVisitor::makeTree(...);
-            })()
-        *)
-        let map_stmt env s =
-          match s with
-          | (pos, Return (Some expr)) ->
-            let (env, expr) = rewrite_expr_tree_maketree env expr f in
-            (env, (pos, Return (Some expr)))
-          | _ -> (env, s)
-        in
-
-        let (env, body_ast) = List.map_env env fun_.f_body.fb_ast ~f:map_stmt in
-        let fun_ = { fun_ with f_body = { fb_ast = body_ast } } in
-
-        (env, Call { call_expr with func = (fun_pos, p, Lfun (fun_, idl)) })
-      | Call _ ->
-        (* The desugarer might give us a simple call to makeTree, so we
-           can process it immediately. *)
-        f env expr_
-      | _ -> (env, expr_)
-    in
-    (env, (pos, p, expr_))
-
-  (** Given [expr], a runtime expression for an expression tree, add a
-    type parameter to the makeTree call.
-
-    This enables expression tree visitors to use phantom type
-    parameters. The visitor can be defined with __Explicit.
-
-        public static function makeTree<<<__Explicit>> TInfer>(...) { ... }
-
-     Userland calls to this method must provide an explicit type.
-
-        MyVisitor::makeTree<MyVisitorInt>(...);
-
-    For expression tree literals, we run type inference and provide a
-    synthesized type parameter to the desugared runtime expression.
-
-        MyVisitor`1`; // we infer MyVisitorInt
-        // we add this constrained type parameter:
-        MyVisitor::makeTree<TInfer#1>(...) where TInfer#1 = MyVisitorInt
-
- *)
-  let maketree_with_type_param env p expr expected_ty =
-    let (hint_virtual, env) =
-      synthesize_type_param env p "TInfer" expected_ty
-    in
-    let rewrite_expr env expr =
-      match expr with
-      | Call e -> (env, Call { e with targs = [((), hint_virtual)] })
-      | e -> (env, e)
-    in
-    rewrite_expr_tree_maketree env expr rewrite_expr
-
   let expression_tree env p et =
     let {
       et_class;
       et_splices;
       et_function_pointers;
-      et_virtualized_expr;
       et_runtime_expr;
       et_dollardollar_pos;
     } =
@@ -10241,58 +10151,6 @@ end = struct
           (env, (), t_function_pointers))
     in
 
-    (* Type check the virtualized expression, which will look
-       roughly like this:
-
-       function() {
-         $0splice0 = foo();
-         return MyVisitor::intType()->__plus($0splice0);
-       }
-    *)
-    let (env, t_virtualized_expr, ty_virtual) =
-      Env.with_inside_expr_tree env et_class (fun env ->
-          Expr.expr
-            ~expected:None
-            ~ctxt:Expr.Context.default
-            env
-            et_virtualized_expr)
-    in
-
-    (* If the virtualized expression type is pessimised, we should strip off likes.
-     * Do this through supportdyn and unions.
-     *)
-    let rec strip_all_likes env ty =
-      let (env, ty) = Env.expand_type env ty in
-      match get_node ty with
-      | Tnewtype (name, [ty'], _) when String.equal name SN.Classes.cSupportDyn
-        ->
-        let (env, ty'') = strip_all_likes env ty' in
-        (env, MakeType.supportdyn (get_reason ty) ty'')
-      | Tunion tyl ->
-        let tyl =
-          List.filter tyl ~f:(fun ty -> not (Typing_defs.is_dynamic ty))
-        in
-        let (env, tyl) = List.map_env env tyl ~f:strip_all_likes in
-        Union.union_list env (get_reason ty) tyl
-      | _ -> (env, ty)
-    in
-
-    let rec get_ret env ty =
-      let (env, ty) = Env.expand_type env ty in
-      match deref ty with
-      | (_, Tfun ft) -> (env, ft.ft_ret)
-      | (_, Tnewtype (name, [ty'], _))
-        when String.equal name SN.Classes.cSupportDyn ->
-        get_ret env ty'
-      | _ -> (env, ty_virtual)
-    in
-    let (env, ty_virtual) = get_ret env ty_virtual in
-    let (env, ty_virtual) = strip_all_likes env ty_virtual in
-    let t_virtualized_expr =
-      match t_virtualized_expr with
-      | (_, pos, ast) -> (ty_virtual, pos, ast)
-    in
-
     (* Given the runtime expression:
 
         MyVisitor::makeTree(...)
@@ -10302,11 +10160,13 @@ end = struct
         MyVisitor::makeTree<MyVisitorInt>(...)
 
        and then typecheck. *)
-    let (env, runtime_expr) =
-      maketree_with_type_param env p et_runtime_expr ty_virtual
-    in
     let (env, t_runtime_expr, ty_runtime_expr) =
-      Expr.expr ~expected:None ~ctxt:Expr.Context.default env runtime_expr
+      Env.with_inside_expr_tree env et_class (fun env ->
+          Expr.expr
+            ~expected:None
+            ~ctxt:Expr.Context.default
+            env
+            et_runtime_expr)
     in
 
     make_result
@@ -10317,7 +10177,6 @@ end = struct
            et_class;
            et_splices = t_splices;
            et_function_pointers = t_function_pointers;
-           et_virtualized_expr = t_virtualized_expr;
            et_runtime_expr = t_runtime_expr;
            et_dollardollar_pos;
          })

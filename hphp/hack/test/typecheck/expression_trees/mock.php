@@ -5,7 +5,7 @@
 class Mock {
   const type TAst = mixed;
 
-  public static function makeTree<<<__Explicit>> TInfer>(
+  public static function makeTree<TInfer>(
     ?ExprPos $pos,
     mixed $metadata,
     (function(Mock): Mock::TAst) $ast,

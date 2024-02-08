@@ -357,10 +357,6 @@ and ('ex, 'en) expression_tree = {
        * temporaries.
        *
        *     $0fp1 = foo<>; *)
-  et_virtualized_expr: ('ex, 'en) expr;
-      (** The expression that gets type checked.
-       *
-       *     1 + $0tmp1 + $0tmp2 *)
   et_runtime_expr: ('ex, 'en) expr;
       (** The expression that's executed at runtime.
        *

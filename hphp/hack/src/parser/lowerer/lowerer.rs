@@ -241,7 +241,7 @@ impl<'a> Env<'a> {
         !self.quick_mode || self.show_all_errors
     }
 
-    fn is_typechecker(&self) -> bool {
+    pub fn is_typechecker(&self) -> bool {
         !self.codegen
     }
 

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<dedad2f4d9b7e56983e43a0eae9e7d56>>
+// @generated SignedSource<<520d9ad5a226394dac765a1cef300f42>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1081,7 +1081,6 @@ impl<P: Params> NodeMut<P> for ExpressionTree<P::Ex, P::En> {
         self.class.accept(c, v)?;
         self.splices.accept(c, v)?;
         self.function_pointers.accept(c, v)?;
-        self.virtualized_expr.accept(c, v)?;
         self.runtime_expr.accept(c, v)?;
         self.dollardollar_pos.accept(c, v)
     }

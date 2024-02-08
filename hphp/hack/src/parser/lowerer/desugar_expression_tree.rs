@@ -106,46 +106,6 @@ pub fn desugar(
     let function_count = temps.global_function_pointers.len();
     let static_method_count = temps.static_method_pointers.len();
 
-    let metadata = maketree_metadata(
-        visitor_pos,
-        &temps.splices,
-        &temps.global_function_pointers,
-        &temps.static_method_pointers,
-    );
-
-    // Make anonymous function of smart constructor calls
-    let visitor_expr = wrap_return(rewritten_expr.desugar_expr, &et_literal_pos);
-    let visitor_body = ast::FuncBody {
-        fb_ast: ast::Block(vec![visitor_expr]),
-    };
-    let param = ast::FunParam {
-        annotation: (),
-        type_hint: ast::TypeHint(
-            (),
-            Some(aast::Hint(
-                visitor_pos.clone(),
-                Box::new(Hint_::Happly(
-                    Id(visitor_pos.clone(), visitor_name.clone()),
-                    vec![],
-                )),
-            )),
-        ),
-        is_variadic: false,
-        pos: visitor_pos.clone(),
-        name: visitor_variable(),
-        expr: None,
-        callconv: ParamKind::Pnormal,
-        readonly: None,
-        user_attributes: Default::default(),
-        visibility: None,
-    };
-    let visitor_fun_ = wrap_fun_(visitor_body, vec![param], et_literal_pos.clone());
-    let visitor_lambda = Expr::new(
-        (),
-        et_literal_pos.clone(),
-        Expr_::mk_lfun(visitor_fun_, vec![]),
-    );
-
     // Wrap this in an Efun with appropriate variables for typing.
     // This enables us to report unbound variables correctly.
     let virtualized_expr = {
@@ -209,6 +169,48 @@ pub fn desugar(
         )
     };
 
+    let metadata = maketree_metadata(
+        &visitor_pos,
+        &temps.splices,
+        &temps.global_function_pointers,
+        &temps.static_method_pointers,
+        env.is_typechecker(),
+        virtualized_expr,
+    );
+
+    // Make anonymous function of smart constructor calls
+    let visitor_expr = wrap_return(rewritten_expr.desugar_expr, &et_literal_pos);
+    let visitor_body = ast::FuncBody {
+        fb_ast: ast::Block(vec![visitor_expr]),
+    };
+    let param = ast::FunParam {
+        annotation: (),
+        type_hint: ast::TypeHint(
+            (),
+            Some(aast::Hint(
+                visitor_pos.clone(),
+                Box::new(Hint_::Happly(
+                    Id(visitor_pos.clone(), visitor_name.clone()),
+                    vec![],
+                )),
+            )),
+        ),
+        is_variadic: false,
+        pos: visitor_pos.clone(),
+        name: visitor_variable(),
+        expr: None,
+        callconv: ParamKind::Pnormal,
+        readonly: None,
+        user_attributes: Default::default(),
+        visibility: None,
+    };
+    let visitor_fun_ = wrap_fun_(visitor_body, vec![param], et_literal_pos.clone());
+    let visitor_lambda = Expr::new(
+        (),
+        et_literal_pos.clone(),
+        Expr_::mk_lfun(visitor_fun_, vec![]),
+    );
+
     // Create assignment of the extracted expressions to temporary variables
     // `$0splice0 = spliced_expr0;`
     let splice_assignments: Vec<Stmt> = create_temp_statements(temps.splices, temp_splice_lvar);
@@ -260,7 +262,6 @@ pub fn desugar(
             class: Id(visitor_pos.clone(), visitor_name.clone()),
             splices: splice_assignments,
             function_pointers,
-            virtualized_expr,
             runtime_expr,
             dollardollar_pos,
         }),
@@ -1829,6 +1830,8 @@ fn maketree_metadata(
     splices: &[Expr],
     functions: &[Expr],
     static_methods: &[Expr],
+    is_typecheck: bool,
+    virtual_expr: Expr,
 ) -> Expr {
     let key_value_pairs = splices
         .iter()
@@ -1858,15 +1861,15 @@ fn maketree_metadata(
         .map(|(i, expr)| temp_static_method_lvar(&expr.1, i))
         .collect();
     let static_method_vec = vec_literal_with_pos(pos, static_method_vars);
-
-    shape_literal(
-        pos,
-        vec![
-            ("splices", splices_dict),
-            ("functions", functions_vec),
-            ("static_methods", static_method_vec),
-        ],
-    )
+    let mut fields = vec![
+        ("splices", splices_dict),
+        ("functions", functions_vec),
+        ("static_methods", static_method_vec),
+    ];
+    if is_typecheck {
+        fields.push(("type", virtual_expr))
+    }
+    shape_literal(pos, fields)
 }
 
 fn global_func_ptr(sid: &Sid) -> Expr {

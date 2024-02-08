@@ -178,7 +178,6 @@ and check_await_usage expr =
           et_class = _;
           et_splices = splices;
           et_function_pointers = _;
-          et_virtualized_expr = _;
           et_runtime_expr = runtime_expr;
           et_dollardollar_pos = _;
         } ->

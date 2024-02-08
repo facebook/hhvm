@@ -14,12 +14,12 @@ class ExampleDsl {
   const type TAst = mixed;
 
   // The desugared expression tree literal will call this method.
-  public static function makeTree<<<__Explicit>> TInfer>(
+  public static function makeTree<TInfer>(
     ?ExprPos $pos,
     shape(
       'splices' => dict<string, mixed>,
       'functions' => vec<mixed>,
-      'static_methods' => vec<mixed>,
+      'static_methods' => vec<mixed>, ?'type' => (function (): TInfer),
     ) $metadata,
     (function(ExampleDsl): ExampleDsl::TAst) $ast,
   )[]: ExprTree<ExampleDsl, ExampleDsl::TAst, TInfer> {

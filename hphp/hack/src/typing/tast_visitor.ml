@@ -73,7 +73,6 @@ class virtual iter =
             et_class;
             et_splices;
             et_function_pointers;
-            et_virtualized_expr;
             et_runtime_expr;
             et_dollardollar_pos = _;
           } =
@@ -81,8 +80,6 @@ class virtual iter =
       self#on_block env et_splices;
       let env = Env.inside_expr_tree env et_class in
       self#on_block env et_function_pointers;
-      self#on_expr env et_virtualized_expr;
-      let env = Env.outside_expr_tree env in
       self#on_expr env et_runtime_expr
 
     method! on_ET_Splice env e =
@@ -162,7 +159,6 @@ class virtual ['state] iter_with_state =
             et_class;
             et_splices;
             et_function_pointers;
-            et_virtualized_expr;
             et_runtime_expr;
             et_dollardollar_pos = _;
           } =
@@ -170,8 +166,6 @@ class virtual ['state] iter_with_state =
       self#on_block (env, state) et_splices;
       let env = Env.inside_expr_tree env et_class in
       self#on_block (env, state) et_function_pointers;
-      self#on_expr (env, state) et_virtualized_expr;
-      let env = Env.outside_expr_tree env in
       self#on_expr (env, state) et_runtime_expr
 
     method! on_ET_Splice (env, state) e =
@@ -244,7 +238,6 @@ class virtual ['a] reduce =
             et_class = cls;
             et_splices;
             et_function_pointers;
-            et_virtualized_expr;
             et_runtime_expr;
             et_dollardollar_pos = _;
           } =
@@ -252,16 +245,10 @@ class virtual ['a] reduce =
       let et_splices = self#on_block env et_splices in
       let env = Env.inside_expr_tree env cls in
       let et_function_pointers = self#on_block env et_function_pointers in
-      let et_virtualized_expr = self#on_expr env et_virtualized_expr in
-      let env = Env.outside_expr_tree env in
       let et_runtime_expr = self#on_expr env et_runtime_expr in
       self#plus
         et_class
-        (self#plus
-           et_splices
-           (self#plus
-              et_function_pointers
-              (self#plus et_virtualized_expr et_runtime_expr)))
+        (self#plus et_splices (self#plus et_function_pointers et_runtime_expr))
 
     method! on_ET_Splice env e =
       let env = Env.outside_expr_tree env in
@@ -340,7 +327,6 @@ class virtual map =
             et_class;
             et_splices;
             et_function_pointers;
-            et_virtualized_expr;
             et_runtime_expr;
             et_dollardollar_pos;
           } =
@@ -350,17 +336,15 @@ class virtual map =
         let env = Env.inside_expr_tree env et_class in
         self#on_block env et_function_pointers
       in
-      let et_virtualized_expr =
+      let et_runtime_expr =
         let env = Env.inside_expr_tree env et_class in
-        self#on_expr env et_virtualized_expr
+        self#on_expr env et_runtime_expr
       in
-      let et_runtime_expr = self#on_expr env et_runtime_expr in
       Aast.
         {
           et_class;
           et_splices;
           et_function_pointers;
-          et_virtualized_expr;
           et_runtime_expr;
           et_dollardollar_pos;
         }
@@ -442,7 +426,6 @@ class virtual endo =
             et_class;
             et_splices;
             et_function_pointers;
-            et_virtualized_expr;
             et_runtime_expr;
             et_dollardollar_pos;
           } =
@@ -452,17 +435,15 @@ class virtual endo =
         let env = Env.inside_expr_tree env et_class in
         self#on_block env et_function_pointers
       in
-      let et_virtualized_expr =
+      let et_runtime_expr =
         let env = Env.inside_expr_tree env et_class in
-        self#on_expr env et_virtualized_expr
+        self#on_expr env et_runtime_expr
       in
-      let et_runtime_expr = self#on_expr env et_runtime_expr in
       Aast.
         {
           et_class;
           et_splices;
           et_function_pointers;
-          et_virtualized_expr;
           et_runtime_expr;
           et_dollardollar_pos;
         }

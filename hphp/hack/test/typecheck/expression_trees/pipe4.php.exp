@@ -8,7 +8,7 @@ File "pipe4.php", line 14, characters 10-12:
 Invalid return type (Typing[4110])
   File "pipe4.php", line 9, characters 57-68:
   Expected `ExampleFloat`
-  File "pipe4.php", line 12, characters 8-52:
-  But got `TInfer#1 = ExampleInt`
-  File "expr_tree.hhi", line 25, characters 47-52:
+  File "pipe4.php", line 5, characters 62-71:
+  But got `ExampleInt`
+  File "expr_tree.hhi", line 211, characters 44-49:
     via this generic `TInfer`

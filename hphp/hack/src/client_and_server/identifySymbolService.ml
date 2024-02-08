@@ -403,15 +403,14 @@ let visitor =
 
     method! on_expression_tree
         env
-        Aast.
-          {
-            et_class;
-            et_virtualized_expr;
-            et_splices;
-            et_function_pointers;
-            et_runtime_expr = _;
-            et_dollardollar_pos = _;
-          } =
+        (Aast.
+           {
+             et_class;
+             et_splices;
+             et_function_pointers;
+             et_runtime_expr;
+             et_dollardollar_pos = _;
+           } as expr) =
       (* We only want to consider completion from the hint and the
          virtualized expression, not the visitor expression. The
          visitor expression is unityped, so we can't do much.*)
@@ -425,21 +424,10 @@ let visitor =
       let env = Tast_env.inside_expr_tree env et_class in
       let acc = self#plus acc (self#on_Block env None et_function_pointers) in
 
-      let (_, _, virtualized_expr_) = et_virtualized_expr in
       let e =
-        match virtualized_expr_ with
-        | Aast.(
-            Efun
-              {
-                ef_fun = { f_body = { fb_ast = [(_, Return (Some e))]; _ }; _ };
-                _;
-              }) ->
-          (* The virtualized expression is wrapped in a
-             lambda to help check unbound variables, which leads to
-             unwanted closure info in hovers. Use the inner
-             expression directly. *)
-          e
-        | _ -> et_virtualized_expr
+        match Aast_utils.get_virtual_expr_from_et expr with
+        | Some e -> e
+        | _ -> et_runtime_expr
       in
       self#plus acc (self#on_expr env e)
 

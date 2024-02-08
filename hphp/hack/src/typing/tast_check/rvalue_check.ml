@@ -95,13 +95,13 @@ let visitor =
             et_class;
             et_splices;
             et_function_pointers;
-            et_virtualized_expr;
             et_runtime_expr;
             et_dollardollar_pos = _;
           } ->
         this#on_id env et_class;
         this#on_block env et_splices;
         this#on_block env et_function_pointers;
+
         (* Allow calls to void functions at the top level:
 
              Code`void_func()`
@@ -110,8 +110,6 @@ let visitor =
 
              Code`() ==> { $x = void_func(); }`
         *)
-        super#on_expr env et_virtualized_expr;
-
         this#on_expr env et_runtime_expr
       | _ ->
         if not !non_returning_allowed then check_valid_rvalue p env ty;

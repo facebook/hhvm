@@ -241,7 +241,6 @@ fn check_await_usage(expr: &Expr) -> AwaitUsage {
             class: _,
             splices,
             function_pointers: _,
-            virtualized_expr: _,
             runtime_expr,
             dollardollar_pos: _,
         }) => splices
@@ -643,7 +642,6 @@ impl LiftAwait {
                 class: _,
                 splices,
                 function_pointers: _,
-                virtualized_expr: _,
                 runtime_expr,
                 dollardollar_pos: _,
             }) => {

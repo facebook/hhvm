@@ -7,12 +7,12 @@ namespace Bar {
 class MyExampleDsl {
   const type TAst = mixed;
 
-  public static function makeTree<<<__Explicit>> TInfer>(
+  public static function makeTree<TInfer>(
     ?\ExprPos $pos,
     shape(
       'splices' => dict<string, mixed>,
       'functions' => vec<mixed>,
-      'static_methods' => vec<mixed>,
+      'static_methods' => vec<mixed>, ?'type' => TInfer,
     ) $metadata,
     (function(MyExampleDsl): MyExampleDsl::TAst) $ast,
   ): \ExprTree<MyExampleDsl, MyExampleDsl::TAst, TInfer> {

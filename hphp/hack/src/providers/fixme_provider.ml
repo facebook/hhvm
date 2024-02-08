@@ -270,7 +270,13 @@ let () =
          else
            Some err_pos
        else
-         IMap.find_opt err_code imap);
+         match IMap.find_opt err_code imap with
+         | None ->
+           if err_code = 4110 then
+             IMap.find_opt 4323 imap
+           else
+             None
+         | x -> x);
   (Errors.is_hh_fixme :=
      fun err_pos err_code ->
        Option.is_some (!Errors.get_hh_fixme_pos err_pos err_code));

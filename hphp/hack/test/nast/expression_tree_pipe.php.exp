@@ -31,18 +31,6 @@
                                     }))))
                            ];
                          et_function_pointers = [];
-                         et_virtualized_expr =
-                         ((), [4:19-38],
-                          (Efun
-                             { ef_fun =
-                               { f_span = [4:19-38]; f_readonly_this = None; 
-                                 f_annotation = (); f_readonly_ret = None; 
-                                 f_ret = ((), None); f_params = []; f_ctxs = (Some ([4:19-38], [([4:19-38], (Happly (([4:19-38], "\\HH\\Contexts\\defaults"), [])))])); 
-                                 f_unsafe_ctxs = None; f_body = { fb_ast = [([4:19-38], (Return (Some ((), [4:19-38], (ET_Splice ((), [4:22-36], (Lvar ([4:22-36], $0splice0))))))))] };
-                                 f_fun_kind = FSync; f_user_attributes = []; 
-                                 f_external = false; f_doc_comment = None };
-                               ef_use = [((), ([4:8-18], $0splice0))]; 
-                               ef_closure_class_name = None }));
                          et_runtime_expr =
                          ((), [4:19-38],
                           (Call
@@ -87,7 +75,27 @@
                                                                     [4:8-18], Dict), None, 
                                                                     [(((), [4:22-36], (String "$0splice0")), ((), [4:22-36], (Lvar ([4:22-36], $0splice0))))]))));
                                                                  ((SFlit_str ([4:8-18], "functions")), ((), [4:8-18], (ValCollection (([4:8-18], Vec), None, []))));
-                                                                 ((SFlit_str ([4:8-18], "static_methods")), ((), [4:8-18], (ValCollection (([4:8-18], Vec), None, []))))])));
+                                                                 ((SFlit_str ([4:8-18], "static_methods")), ((), [4:8-18], (ValCollection (([4:8-18], Vec), None, []))));
+                                                                 ((SFlit_str ([4:8-18], "type")),
+                                                                  ((), [4:19-38],
+                                                                   (Efun
+                                                                    { ef_fun =
+                                                                    { f_span = [4:19-38]; 
+                                                                    f_readonly_this = None; 
+                                                                    f_annotation = (); 
+                                                                    f_readonly_ret = None; 
+                                                                    f_ret = ((), None); 
+                                                                    f_params = []; 
+                                                                    f_ctxs = (Some ([4:19-38], [([4:19-38], (Happly (([4:19-38], "\\HH\\Contexts\\defaults"), [])))])); 
+                                                                    f_unsafe_ctxs = None;
+                                                                    f_body = { fb_ast = [([4:19-38], (Return (Some ((), [4:19-38], (ET_Splice ((), [4:22-36], (Lvar ([4:22-36], $0splice0))))))))] };
+                                                                    f_fun_kind = FSync; 
+                                                                    f_user_attributes = []; 
+                                                                    f_external = false; 
+                                                                    f_doc_comment = None }; 
+                                                                    ef_use = [((), ([4:8-18], $0splice0))]; 
+                                                                    ef_closure_class_name = None })))
+                                                                 ])));
                                                           (Pnormal,
                                                            ((), [4:19-38],
                                                             (Lfun (

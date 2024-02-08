@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<08f119ff1a70b14cdd930757e6c348c7>>
+// @generated SignedSource<<6e13f5a2e5bb96e2d86f8b2ff4b7f1e9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -651,10 +651,6 @@ pub struct ExpressionTree<Ex, En> {
     ///
     ///     $0fp1 = foo<>;
     pub function_pointers: Vec<Stmt<Ex, En>>,
-    /// The expression that gets type checked.
-    ///
-    ///     1 + $0tmp1 + $0tmp2
-    pub virtualized_expr: Expr<Ex, En>,
     /// The expression that's executed at runtime.
     ///
     ///     Foo::makeTree($v ==> $v->visitBinOp(...))

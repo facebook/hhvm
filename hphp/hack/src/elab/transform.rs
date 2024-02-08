@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<33c65aee36a5ae0d60e516f87bf57744>>
+// @generated SignedSource<<1172b4b0df687444b74ace3b712c0e6f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -578,8 +578,7 @@ impl Transform for ExpressionTree {
                 class: ref mut __binding_0,
                 splices: ref mut __binding_1,
                 function_pointers: ref mut __binding_2,
-                virtualized_expr: ref mut __binding_3,
-                runtime_expr: ref mut __binding_4,
+                runtime_expr: ref mut __binding_3,
                 ..
             } => {
                 {
@@ -591,10 +590,7 @@ impl Transform for ExpressionTree {
                 {
                     __binding_2.transform(env, &mut pass.clone())
                 }
-                {
-                    __binding_3.transform(env, &mut pass.clone())
-                }
-                { __binding_4.transform(env, &mut pass.clone()) }
+                { __binding_3.transform(env, &mut pass.clone()) }
             }
         }
     }

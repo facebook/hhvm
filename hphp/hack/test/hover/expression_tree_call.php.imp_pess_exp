@@ -1,7 +1,7 @@
-async function bar(ExampleContext $_): Awaitable<
+async ~(readonly function(ExampleContext $_): Awaitable<
   ~ExprTree<
     ExampleDsl,
     mixed,
     (function(ExampleString): ~ExampleInt)
   >
->
+>)

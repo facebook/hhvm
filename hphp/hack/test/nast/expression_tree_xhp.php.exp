@@ -20,47 +20,6 @@
                       (ExpressionTree
                          { et_class = ([4:8-18], "\\ExampleDsl"); et_splices = []; 
                            et_function_pointers = [];
-                           et_virtualized_expr =
-                           ((), [4:19-58],
-                            (Efun
-                               { ef_fun =
-                                 { f_span = [4:19-58]; f_readonly_this = None; 
-                                   f_annotation = (); f_readonly_ret = None; 
-                                   f_ret = ((), None); f_params = []; 
-                                   f_ctxs = (Some ([4:19-58], [([4:19-58], (Happly (([4:19-58], "\\HH\\Contexts\\defaults"), [])))])); 
-                                   f_unsafe_ctxs = None;
-                                   f_body =
-                                   { fb_ast =
-                                     [([4:19-58],
-                                       (Return
-                                          (Some ((), [4:19-58],
-                                                 (Xml (([4:20-27], "\\:foo:bar"),
-                                                    [(Xhp_simple
-                                                        { xs_name = ([4:28-29], "x"); 
-                                                          xs_type = ();
-                                                          xs_expr =
-                                                          ((), [4:30-33],
-                                                           (Call
-                                                              { func = ((), [4:30-33], (Class_const (((), [4:30-33], (CI ([4:30-33], "\\ExampleDsl"))), ([4:30-33], "stringType")))); 
-                                                                targs = []; 
-                                                                args = []; 
-                                                                unpacked_arg = None }))
-                                                          })
-                                                      ],
-                                                    [((), [4:34-41], (Xml (([4:35-38], "\\:baz"), [], [])));
-                                                      ((), [4:42-47],
-                                                       (Call
-                                                          { func = ((), [4:42-47], (Class_const (((), [4:42-47], (CI ([4:42-47], "\\ExampleDsl"))), ([4:42-47], "stringType")))); 
-                                                            targs = []; 
-                                                            args = []; 
-                                                            unpacked_arg = None }))
-                                                      ]
-                                                    ))))))
-                                       ]
-                                     };
-                                   f_fun_kind = FSync; f_user_attributes = []; 
-                                   f_external = false; f_doc_comment = None };
-                                 ef_use = []; ef_closure_class_name = None }));
                            et_runtime_expr =
                            ((), [4:8-18],
                             (Call
@@ -80,7 +39,52 @@
                                      (Shape
                                         [((SFlit_str ([4:8-18], "splices")), ((), [4:8-18], (KeyValCollection (([4:8-18], Dict), None, []))));
                                           ((SFlit_str ([4:8-18], "functions")), ((), [4:8-18], (ValCollection (([4:8-18], Vec), None, []))));
-                                          ((SFlit_str ([4:8-18], "static_methods")), ((), [4:8-18], (ValCollection (([4:8-18], Vec), None, []))))])));
+                                          ((SFlit_str ([4:8-18], "static_methods")), ((), [4:8-18], (ValCollection (([4:8-18], Vec), None, []))));
+                                          ((SFlit_str ([4:8-18], "type")),
+                                           ((), [4:19-58],
+                                            (Efun
+                                               { ef_fun =
+                                                 { f_span = [4:19-58]; 
+                                                   f_readonly_this = None; 
+                                                   f_annotation = (); 
+                                                   f_readonly_ret = None; 
+                                                   f_ret = ((), None); 
+                                                   f_params = []; f_ctxs = (Some ([4:19-58], [([4:19-58], (Happly (([4:19-58], "\\HH\\Contexts\\defaults"), [])))])); 
+                                                   f_unsafe_ctxs = None;
+                                                   f_body =
+                                                   { fb_ast =
+                                                     [([4:19-58],
+                                                       (Return
+                                                          (Some ((), [4:19-58],
+                                                                 (Xml ((
+                                                                    [4:20-27], "\\:foo:bar"),
+                                                                    [(Xhp_simple
+                                                                    { xs_name = ([4:28-29], "x"); 
+                                                                    xs_type = ();
+                                                                    xs_expr =
+                                                                    (
+                                                                    (), [4:30-33],
+                                                                    (
+                                                                    Call
+                                                                    { func = ((), [4:30-33], (Class_const (((), [4:30-33], (CI ([4:30-33], "\\ExampleDsl"))), ([4:30-33], "stringType")))); 
+                                                                    targs = []; 
+                                                                    args = []; 
+                                                                    unpacked_arg = None })) })],
+                                                                    [((), [4:34-41], (Xml (([4:35-38], "\\:baz"), [], [])));
+                                                                    ((), [4:42-47],
+                                                                    (Call
+                                                                    { func = ((), [4:42-47], (Class_const (((), [4:42-47], (CI ([4:42-47], "\\ExampleDsl"))), ([4:42-47], "stringType")))); 
+                                                                    targs = []; 
+                                                                    args = []; 
+                                                                    unpacked_arg = None }))]))))))
+                                                       ]
+                                                     };
+                                                   f_fun_kind = FSync; 
+                                                   f_user_attributes = []; 
+                                                   f_external = false; 
+                                                   f_doc_comment = None };
+                                                 ef_use = []; ef_closure_class_name = None })))
+                                          ])));
                                    (Pnormal,
                                     ((), [4:19-58],
                                      (Lfun (

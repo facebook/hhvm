@@ -299,19 +299,6 @@ void Operation::snapshotMysqlErrors() {
   }
 }
 
-// TODO: @Aditj Remove this version of setAsyncClientError
-// always require explicitly err code
-void Operation::setAsyncClientError(
-    folly::StringPiece msg,
-    folly::StringPiece normalizeMsg) {
-  if (normalizeMsg.empty()) {
-    normalizeMsg = msg;
-  }
-  mysql_errno_ = CR_UNKNOWN_ERROR;
-  mysql_error_ = msg.toString();
-  mysql_normalize_error_ = normalizeMsg.toString();
-}
-
 void Operation::setAsyncClientError(
     unsigned int mysql_errno,
     folly::StringPiece msg,

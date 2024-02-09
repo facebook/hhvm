@@ -618,13 +618,6 @@ class Operation : public std::enable_shared_from_this<Operation> {
 
   MysqlClientBase* client() const;
 
-  // Flag internal async client errors; this always becomes a MySQL
-  // error 2000 (CR_UNKNOWN_ERROR) with a suitable descriptive message.
-  void setAsyncClientError(
-      folly::StringPiece msg,
-      folly::StringPiece normalizeMsg = "");
-
-  // Same as above, but specify the error code.
   void setAsyncClientError(
       unsigned int mysql_errno,
       folly::StringPiece msg,

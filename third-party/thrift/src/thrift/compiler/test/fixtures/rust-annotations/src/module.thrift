@@ -67,6 +67,13 @@ struct T6 {}
 
 // --
 
+struct T7 {
+  @rust.Box
+  1: i64 data; // `::std::boxed::Box<::std::primitive::i64>`
+}
+
+// --
+
 @rust.Derive{derives = ["Foo", "crate::Bar"]}
 @scope.Transitive
 struct TransitiveDerives {}

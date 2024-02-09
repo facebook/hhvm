@@ -24,6 +24,13 @@ namespace py.asyncio facebook_thrift_asyncio.annotation.rust
 namespace go thrift.annotation.rust
 namespace py thrift.annotation.rust
 
+@scope.Field
+struct Box {
+// # `rust.Box`
+//
+// Indicates that a field's value should not be stored on the stack.
+}
+
 @scope.Struct
 struct Exhaustive {
 // # `rust.Exhaustive`

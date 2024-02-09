@@ -16,6 +16,99 @@ var _ = strings.Split
 var _ = thrift.ZERO
 
 
+type Box struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &Box{}
+
+func NewBox() *Box {
+    return (&Box{})
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBox().Set<FieldNameFoo>().Set<FieldNameBar>()
+type BoxBuilder struct {
+    obj *Box
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBox().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewBoxBuilder() *BoxBuilder {
+    return &BoxBuilder{
+        obj: NewBox(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBox().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *BoxBuilder) Emit() *Box {
+    var objCopy Box = *x.obj
+    return &objCopy
+}
+
+func (x *Box) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("Box"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Box) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *Box) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Box({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 type Exhaustive struct {
 }
 // Compile time interface enforcer
@@ -972,6 +1065,7 @@ func (x *ServiceExn) String() string {
 func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)
 }) {
+    registry.RegisterType("facebook.com/thrift/annotation/rust/Box", func() any { return NewBox() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/Exhaustive", func() any { return NewExhaustive() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/Ord", func() any { return NewOrd() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/NewType", func() any { return NewNewType_() })

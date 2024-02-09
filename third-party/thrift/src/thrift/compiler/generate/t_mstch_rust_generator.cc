@@ -237,7 +237,9 @@ std::string multifile_module_name(const t_program* program) {
 
 bool node_is_boxed(const t_named& node) {
   return node.has_annotation("rust.box") || node.has_annotation("thrift.box") ||
-      node.find_structured_annotation_or_null(kBoxUri);
+      node.find_structured_annotation_or_null(kBoxUri) ||
+      node.find_structured_annotation_or_null(
+          "facebook.com/thrift/annotation/rust/Box");
 }
 
 bool node_is_arced(const t_named& node) {

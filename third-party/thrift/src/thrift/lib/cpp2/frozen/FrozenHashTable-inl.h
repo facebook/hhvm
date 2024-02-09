@@ -16,8 +16,8 @@
 
 // IWYU pragma: private, include "thrift/lib/cpp2/frozen/Frozen.h"
 
-#include <folly/Traits.h>
 #include <thrift/lib/cpp2/FieldRef.h>
+#include <thrift/lib/cpp2/frozen/Fast64BitRemainderCalculator.h>
 
 namespace apache {
 namespace thrift {
@@ -80,45 +80,6 @@ struct Layout<apache::thrift::frozen::detail::Block>
     : apache::thrift::frozen::detail::BlockLayout {};
 
 namespace detail {
-
-class Fast64BitRemainderCalculator {
-#if FOLLY_HAVE_INT128_T
- public:
-  Fast64BitRemainderCalculator() = default;
-  explicit Fast64BitRemainderCalculator(uint64_t divisor)
-      : fastRemainderConstant_(
-            divisor ? (~folly::uint128_t(0) / divisor + 1) : 0) {
-#ifndef NDEBUG
-    divisor_ = divisor;
-#endif
-  }
-
-  size_t remainder(size_t lhs, size_t rhs) const {
-    const folly::uint128_t lowBits = fastRemainderConstant_ * lhs;
-    auto result = mul128_u64(lowBits, rhs);
-    assert(rhs == divisor_);
-    assert(result == lhs % rhs);
-    return result;
-  }
-
- private:
-  static uint64_t mul128_u64(folly::uint128_t lowbits, uint64_t d) {
-    folly::uint128_t bottom = ((lowbits & 0xFFFFFFFFFFFFFFFFUL) * d) >> 64;
-    folly::uint128_t top = (lowbits >> 64) * d;
-    return static_cast<uint64_t>((bottom + top) >> 64);
-  }
-  folly::uint128_t fastRemainderConstant_ = 0;
-#ifndef NDEBUG
-  size_t divisor_ = 0;
-#endif
-#else
- public:
-  Fast64BitRemainderCalculator() = default;
-  explicit Fast64BitRemainderCalculator(size_t) {}
-
-  auto remainder(size_t lhs, size_t rhs) const { return lhs % rhs; }
-#endif
-};
 
 /**
  * Layout specialization for range types which support unique hash lookup.

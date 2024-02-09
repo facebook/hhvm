@@ -16,9 +16,6 @@
 
 #pragma once
 
-#include <memory>
-#include <vector>
-
 #include <thrift/compiler/ast/t_const.h>
 #include <thrift/compiler/ast/t_enum.h>
 #include <thrift/compiler/ast/t_field.h>
@@ -81,37 +78,6 @@ class visitor {
   void recurse(t_structured* tstruct);
   void recurse(t_field* tfield);
   void recurse(t_const* tconst);
-};
-
-/***
- *  Useful for splitting up a single large visitor into multiple smaller ones,
- *  each doing its own portion of the work.
- *
- *  Runs the visitors across the AST nodes in lockstep with each other, taking
- *  care to recurse with only those visitors which return true from visit().
- *
- *  Performs a single concurrent traversal will all visitors, rather than a
- *  sequence of traversals with one visitor each. The concurrent traversal will
- *  interleave all the visitor traversals in lockstep.
- */
-class interleaved_visitor : public visitor {
- public:
-  explicit interleaved_visitor(std::vector<visitor*> visitors);
-
- protected:
-  void visit_and_recurse(t_program* program) override;
-  void visit_and_recurse(t_service* service) override;
-  void visit_and_recurse(t_enum* tenum) override;
-  void visit_and_recurse(t_structured* tstruct) override;
-  void visit_and_recurse(t_field* tfield) override;
-  void visit_and_recurse(t_const* tconst) override;
-
- private:
-  template <typename Visitee>
-  void visit_and_recurse_gen(Visitee* visitee);
-
-  std::vector<visitor*> visitors_;
-  std::vector<bool> rec_mask_{std::vector<bool>(visitors_.size(), true)};
 };
 
 } // namespace compiler

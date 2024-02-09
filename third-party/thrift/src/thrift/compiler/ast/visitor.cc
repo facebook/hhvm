@@ -124,51 +124,6 @@ void visitor::recurse(t_const* const /* tconst */) {
   // partial implementation - that's the end of the line for now
 }
 
-interleaved_visitor::interleaved_visitor(std::vector<visitor*> visitors)
-    : visitor(), visitors_(std::move(visitors)) {}
-
-void interleaved_visitor::visit_and_recurse(t_program* const program) {
-  visit_and_recurse_gen(program);
-}
-
-void interleaved_visitor::visit_and_recurse(t_service* const service) {
-  visit_and_recurse_gen(service);
-}
-
-void interleaved_visitor::visit_and_recurse(t_enum* const tenum) {
-  visit_and_recurse_gen(tenum);
-}
-
-void interleaved_visitor::visit_and_recurse(t_structured* const tstruct) {
-  visit_and_recurse_gen(tstruct);
-}
-
-void interleaved_visitor::visit_and_recurse(t_field* const tfield) {
-  visit_and_recurse_gen(tfield);
-}
-
-void interleaved_visitor::visit_and_recurse(t_const* const tconst) {
-  visit_and_recurse_gen(tconst);
-}
-
-template <typename Visitee>
-void interleaved_visitor::visit_and_recurse_gen(Visitee* const visitee) {
-  // track the set of visitors which return true from visit()
-  auto rec_mask = std::vector<bool>(visitors_.size());
-  auto any = false;
-  for (size_t i = 0; i < visitors_.size(); ++i) {
-    const auto rec = rec_mask_[i] && visitors_[i]->visit(visitee);
-    rec_mask[i] = rec;
-    any = any || rec;
-  }
-  // only recurse with the set of visitors which return true from visit()
-  if (any) {
-    std::swap(rec_mask_, rec_mask);
-    recurse(visitee);
-    std::swap(rec_mask_, rec_mask);
-  }
-}
-
 } // namespace compiler
 } // namespace thrift
 } // namespace apache

@@ -1043,6 +1043,7 @@ void FetchOperation::specializedRunImpl() {
     socketActionable();
   } catch (std::invalid_argument& e) {
     setAsyncClientError(
+        static_cast<uint16_t>(SquangleErrno::SQ_INVALID_API_USAGE),
         std::string("Unable to parse Query: ") + e.what(),
         "Unable to parse Query");
     completeOperation(OperationResult::Failed);

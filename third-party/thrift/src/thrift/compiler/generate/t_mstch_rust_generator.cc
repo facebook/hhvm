@@ -41,6 +41,17 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 
+constexpr auto kRustOrdUri = "facebook.com/thrift/annotation/rust/Ord";
+constexpr auto kRustBoxUri = "facebook.com/thrift/annotation/rust/Box";
+constexpr auto kRustTypeUri = "facebook.com/thrift/annotation/rust/Type";
+constexpr auto kRustNewTypeUri = "facebook.com/thrift/annotation/rust/NewType";
+constexpr auto kRustAdapterUri = "facebook.com/thrift/annotation/rust/Adapter";
+constexpr auto kRustDeriveUri = "facebook.com/thrift/annotation/rust/Derive";
+constexpr auto kRustServiceExnUri =
+    "facebook.com/thrift/annotation/rust/ServiceExn";
+constexpr auto kRustExhaustiveUri =
+    "facebook.com/thrift/annotation/rust/Exhaustive";
+
 namespace rust {
 
 struct rust_codegen_options {
@@ -115,8 +126,7 @@ bool can_derive_ord(const t_type* type) {
     return true;
   }
   if (type->has_annotation("rust.ord") ||
-      type->find_structured_annotation_or_null(
-          "facebook.com/thrift/annotation/rust/Ord")) {
+      type->find_structured_annotation_or_null(kRustOrdUri)) {
     return true;
   }
   if (type->is_list()) {
@@ -238,8 +248,7 @@ std::string multifile_module_name(const t_program* program) {
 bool node_is_boxed(const t_named& node) {
   return node.has_annotation("rust.box") || node.has_annotation("thrift.box") ||
       node.find_structured_annotation_or_null(kBoxUri) ||
-      node.find_structured_annotation_or_null(
-          "facebook.com/thrift/annotation/rust/Box");
+      node.find_structured_annotation_or_null(kRustBoxUri);
 }
 
 bool node_is_arced(const t_named& node) {
@@ -281,8 +290,8 @@ bool get_annotation_property_bool(
 }
 
 std::string get_type_annotation(const t_named* node) {
-  if (const t_const* annot = node->find_structured_annotation_or_null(
-          "facebook.com/thrift/annotation/rust/Type")) {
+  if (const t_const* annot =
+          node->find_structured_annotation_or_null(kRustTypeUri)) {
     return get_annotation_property_string(annot, "name");
   }
 
@@ -303,8 +312,8 @@ bool has_nonstandard_type_annotation(const t_named* node) {
 
 bool has_newtype_annotation(const t_named* node) {
   if (const t_typedef* type = dynamic_cast<const t_typedef*>(node)) {
-    if (const t_const* annot = node->find_structured_annotation_or_null(
-            "facebook.com/thrift/annotation/rust/NewType")) {
+    if (const t_const* annot =
+            node->find_structured_annotation_or_null(kRustNewTypeUri)) {
       return true;
     }
 
@@ -331,18 +340,15 @@ void parse_include_srcs(
 }
 
 const t_const* find_structured_adapter_annotation(const t_named& node) {
-  return node.find_structured_annotation_or_null(
-      "facebook.com/thrift/annotation/rust/Adapter");
+  return node.find_structured_annotation_or_null(kRustAdapterUri);
 }
 
 const t_const* find_structured_derive_annotation(const t_named& node) {
-  return node.find_structured_annotation_or_null(
-      "facebook.com/thrift/annotation/rust/Derive");
+  return node.find_structured_annotation_or_null(kRustDeriveUri);
 }
 
 const t_const* find_structured_service_exn_annotation(const t_named& node) {
-  return node.find_structured_annotation_or_null(
-      "facebook.com/thrift/annotation/rust/ServiceExn");
+  return node.find_structured_annotation_or_null(kRustServiceExnUri);
 }
 
 bool node_has_adapter(const t_named& node) {
@@ -418,8 +424,7 @@ const t_type* step_through_typedefs(const t_type* t, bool break_on_adapter) {
 }
 
 bool node_has_custom_rust_type(const t_named& node) {
-  return node.find_structured_annotation_or_null(
-             "facebook.com/thrift/annotation/rust/Type") ||
+  return node.find_structured_annotation_or_null(kRustTypeUri) ||
       node.has_annotation("rust.type") || node.has_annotation("rust.newtype");
 }
 
@@ -710,15 +715,13 @@ class rust_mstch_program : public mstch_program {
     for (t_structured* strct : program_->structs_and_unions()) {
       // The is_union is because `union` are also in this collection.
       if (!strct->is_union() && !strct->has_annotation("rust.exhaustive") &&
-          !strct->find_structured_annotation_or_null(
-              "facebook.com/thrift/annotation/rust/Exhaustive")) {
+          !strct->find_structured_annotation_or_null(kRustExhaustiveUri)) {
         return true;
       }
     }
     for (t_exception* strct : program_->xceptions()) {
       if (!strct->has_annotation("rust.exhaustive") &&
-          !strct->find_structured_annotation_or_null(
-              "facebook.com/thrift/annotation/rust/Exhaustive")) {
+          !strct->find_structured_annotation_or_null(kRustExhaustiveUri)) {
         return true;
       }
     }
@@ -1343,8 +1346,7 @@ class rust_mstch_struct : public mstch_struct {
   }
   mstch::node rust_is_ord() {
     if (struct_->has_annotation("rust.ord") ||
-        struct_->find_structured_annotation_or_null(
-            "facebook.com/thrift/annotation/rust/Ord")) {
+        struct_->find_structured_annotation_or_null(kRustOrdUri)) {
       return true;
     }
 
@@ -1364,8 +1366,7 @@ class rust_mstch_struct : public mstch_struct {
   mstch::node rust_is_copy() { return struct_->has_annotation("rust.copy"); }
   mstch::node rust_is_exhaustive() {
     return struct_->has_annotation("rust.exhaustive") ||
-        struct_->find_structured_annotation_or_null(
-            "facebook.com/thrift/annotation/rust/Exhaustive");
+        struct_->find_structured_annotation_or_null(kRustExhaustiveUri);
   }
   mstch::node rust_fields_by_name() {
     auto fields = struct_->fields().copy();
@@ -2040,8 +2041,7 @@ mstch::node mstch_rust_value::is_exhaustive() {
   auto struct_type = dynamic_cast<const t_struct*>(type_);
   return struct_type &&
       (struct_type->has_annotation("rust.exhaustive") ||
-       struct_type->find_structured_annotation_or_null(
-           "facebook.com/thrift/annotation/rust/Exhaustive"));
+       struct_type->find_structured_annotation_or_null(kRustExhaustiveUri));
 }
 
 class rust_mstch_const : public mstch_const {
@@ -2205,8 +2205,8 @@ class rust_mstch_typedef : public mstch_typedef {
     // struct T(pub X)`. If `X` has a type annotation `A` we should write `pub
     // T(A)`. If it does not, we should write `X`.
     std::string rust_type;
-    if (const t_const* annot = typedef_->find_structured_annotation_or_null(
-            "facebook.com/thrift/annotation/rust/Type")) {
+    if (const t_const* annot =
+            typedef_->find_structured_annotation_or_null(kRustTypeUri)) {
       rust_type = get_annotation_property_string(annot, "name");
     } else {
       rust_type = typedef_->get_annotation("rust.type");
@@ -2218,8 +2218,7 @@ class rust_mstch_typedef : public mstch_typedef {
   }
   mstch::node rust_ord() {
     return typedef_->has_annotation("rust.ord") ||
-        typedef_->find_structured_annotation_or_null(
-            "facebook.com/thrift/annotation/rust/Ord") ||
+        typedef_->find_structured_annotation_or_null(kRustOrdUri) ||
         (can_derive_ord(typedef_->get_type()) &&
          !type_has_transitive_adapter(typedef_->get_type(), true));
   }
@@ -2245,8 +2244,8 @@ class rust_mstch_typedef : public mstch_typedef {
     // annotation or does but it is not non-standard we should write
     // `self.0.write(p)`.
     std::string rust_type;
-    if (const t_const* annot = typedef_->find_structured_annotation_or_null(
-            "facebook.com/thrift/annotation/rust/Type")) {
+    if (const t_const* annot =
+            typedef_->find_structured_annotation_or_null(kRustTypeUri)) {
       rust_type = get_annotation_property_string(annot, "name");
     } else {
       rust_type = typedef_->get_annotation("rust.type");

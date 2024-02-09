@@ -1025,8 +1025,9 @@ void FetchOperation::specializedRunImpl() {
 
     mysql_options(mysql, MYSQL_OPT_QUERY_ATTR_RESET, 0);
     for (const auto& [key, value] : attributes_) {
-      if (!setQueryAttribute(key, value)) {
+      if (int retErrCode = setQueryAttribute(key, value)) {
         setAsyncClientError(
+            retErrCode,
             fmt::format("Failed to set query attribute: {} = {}", key, value));
         completeOperation(OperationResult::Failed);
         return;
@@ -1034,8 +1035,8 @@ void FetchOperation::specializedRunImpl() {
     }
 
     if (use_checksum_ || conn()->getConnectionOptions().getUseChecksum()) {
-      if (!setQueryAttribute(kQueryChecksumKey, "ON")) {
-        setAsyncClientError("Failed to set checksum = ON");
+      if (int retErrCode = setQueryAttribute(kQueryChecksumKey, "ON")) {
+        setAsyncClientError(retErrCode, "Failed to set checksum = ON");
         completeOperation(OperationResult::Failed);
         return;
       }
@@ -1050,14 +1051,11 @@ void FetchOperation::specializedRunImpl() {
   }
 }
 
-bool FetchOperation::setQueryAttribute(
+int FetchOperation::setQueryAttribute(
     const std::string& key,
     const std::string& value) {
   return mysql_options4(
-             conn()->mysql(),
-             MYSQL_OPT_QUERY_ATTR_ADD,
-             key.c_str(),
-             value.c_str()) == 0;
+      conn()->mysql(), MYSQL_OPT_QUERY_ATTR_ADD, key.c_str(), value.c_str());
 }
 
 FetchOperation::RowStream::RowStream(

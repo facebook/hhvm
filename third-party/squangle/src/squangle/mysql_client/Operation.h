@@ -1254,7 +1254,7 @@ class FetchOperation : public Operation {
   friend class MultiQueryStreamHandler;
   void specializedRunImpl();
 
-  bool setQueryAttribute(const std::string& key, const std::string& value);
+  int setQueryAttribute(const std::string& key, const std::string& value);
 
   void resumeImpl();
   // Checks if the current thread has access to stream, or result data.

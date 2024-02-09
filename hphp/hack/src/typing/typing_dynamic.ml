@@ -287,7 +287,7 @@ let rec try_push_like env ty =
  *   e.g. tuple and shape components, covariant type arguments to generic classes.
  *)
 let rec strip_covariant_like env ty =
-  match Typing_utils.try_strip_dynamic env ty with
+  match Typing_utils.try_strip_dynamic ~accept_intersections:true env ty with
   | Some ty -> (env, ty)
   | None ->
     (match deref ty with

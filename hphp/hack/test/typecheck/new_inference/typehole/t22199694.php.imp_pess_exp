@@ -1,10 +1,8 @@
 File "t22199694.php", line 12, characters 15-38:
-Invalid argument (Typing[4323])
-  File "t22199694.php", line 5, characters 30-30:
-  `T` is a constrained type parameter
-  File "t22199694.php", line 5, characters 35-37:
-  This type constraint is violated
-  File "t22199694.php", line 5, characters 35-37:
-  Expected `num`
+Invalid argument (Typing[4110])
+  File "t22199694.php", line 12, characters 11-13:
+  Expected `~_` because type parameter `T` of `max` could not be determined. Please add explicit type parameters to the invocation of `max`
+  File "t22199694.php", line 5, characters 40-40:
+    via this generic `T`
   File "t22199694.php", line 12, characters 15-38:
   But got `vec<(int | (nonnull & dynamic))>`

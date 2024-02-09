@@ -807,8 +807,22 @@ and strip_union tyl ~f =
   | ([], _) -> None
   | (_, _) -> Some (dyns, nondyns)
 
-let rec try_strip_dynamic_from_union _env tyl =
-  match strip_union ~f:Typing_defs.is_dynamic tyl with
+let rec is_dynamic_or_intersection_with_dynamic ~accept_intersections env ty =
+  let (_, ty) = Env.expand_type env ty in
+  match get_node ty with
+  | Tintersection tyl when accept_intersections ->
+    List.exists
+      tyl
+      ~f:(is_dynamic_or_intersection_with_dynamic ~accept_intersections env)
+  | Tdynamic -> true
+  | _ -> false
+
+let rec try_strip_dynamic_from_union ?(accept_intersections = false) env tyl =
+  match
+    strip_union
+      ~f:(is_dynamic_or_intersection_with_dynamic ~accept_intersections env)
+      tyl
+  with
   | Some (ty :: _, tyl) -> Some (ty, tyl)
   | _ -> None
 
@@ -817,17 +831,17 @@ let rec try_strip_dynamic_from_union _env tyl =
  *   try_strip_dynamic(supportdyn<~t>) = supportdyn<t>
  * Otherwise return None.
  *)
-and try_strip_dynamic env ty =
+and try_strip_dynamic ?(accept_intersections = false) env ty =
   let (env, ty) = Env.expand_type env ty in
   match get_node ty with
   | Tnewtype (name, [tyarg], _) when String.equal name SN.Classes.cSupportDyn ->
   begin
-    match try_strip_dynamic env tyarg with
+    match try_strip_dynamic ~accept_intersections env tyarg with
     | None -> None
     | Some stripped_ty -> Some (MakeType.supportdyn (get_reason ty) stripped_ty)
   end
   | Tunion tyl ->
-    (match try_strip_dynamic_from_union env tyl with
+    (match try_strip_dynamic_from_union ~accept_intersections env tyl with
     | None -> None
     | Some (_, tyl) -> Some (MakeType.union (get_reason ty) tyl))
   | _ -> None

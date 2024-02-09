@@ -28,6 +28,8 @@ pub struct Generation(pub ::std::primitive::i64);
 #[derive(Default, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct binary_t2(pub ::smallvec::SmallVec<[u8; 16]>);
 
+pub type t_y1 = ::std::primitive::i64;
+
 #[derive(Clone, PartialEq)]
 pub struct T0 {
     pub data: ::fbthrift::builtin_types::OrderedFloat<f64>,
@@ -131,6 +133,24 @@ pub struct T9 {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct U10 {
+    pub string: ::std::string::String,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+pub enum U11 {
+    string(::std::string::String),
+    integer(::std::primitive::i32),
+    UnknownField(::std::primitive::i32),
+}
+
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Foo, crate::types::Bar)]
 pub struct TransitiveDerives {
     // This field forces `..Default::default()` when instantiating this
@@ -183,6 +203,216 @@ pub enum Bar {
     Annotated(::std::primitive::i32),
     WithoutAnnotation(::std::primitive::i32),
     UnknownField(::std::primitive::i32),
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub struct E1(pub ::std::primitive::i32);
+
+impl E1 {
+    pub const B0: Self = E1(0i32);
+    pub const B1: Self = E1(1i32);
+}
+
+impl ::fbthrift::ThriftEnum for E1 {
+    fn enumerate() -> &'static [(Self, &'static str)] {
+        &[
+            (Self::B0, "A0"),
+            (Self::B1, "A1"),
+        ]
+    }
+
+    fn variants() -> &'static [&'static str] {
+        &[
+            "A0",
+            "A1",
+        ]
+    }
+
+    fn variant_values() -> &'static [Self] {
+        &[
+            Self::B0,
+            Self::B1,
+        ]
+    }
+}
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for E1 {
+    fn default() -> Self {
+        Self(0)
+    }
+}
+
+impl<'a> ::std::convert::From<&'a E1> for ::std::primitive::i32 {
+    #[inline]
+    fn from(x: &'a E1) -> Self {
+        x.0
+    }
+}
+
+impl ::std::convert::From<E1> for ::std::primitive::i32 {
+    #[inline]
+    fn from(x: E1) -> Self {
+        x.0
+    }
+}
+
+impl ::std::convert::From<::std::primitive::i32> for E1 {
+    #[inline]
+    fn from(x: ::std::primitive::i32) -> Self {
+        Self(x)
+    }
+}
+
+impl ::std::fmt::Display for E1 {
+    fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        static VARIANTS_BY_NUMBER: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
+            ("A0", 0),
+            ("A1", 1),
+        ];
+        ::fbthrift::help::enum_display(VARIANTS_BY_NUMBER, fmt, self.0)
+    }
+}
+
+impl ::std::fmt::Debug for E1 {
+    fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        write!(fmt, "E1::{}", self)
+    }
+}
+
+impl ::std::str::FromStr for E1 {
+    type Err = ::anyhow::Error;
+
+    fn from_str(string: &::std::primitive::str) -> ::std::result::Result<Self, Self::Err> {
+        static VARIANTS_BY_NAME: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
+            ("A0", 0),
+            ("A1", 1),
+        ];
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "E1").map(Self)
+    }
+}
+
+impl ::fbthrift::GetTType for E1 {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
+}
+
+impl<P> ::fbthrift::Serialize<P> for E1
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn write(&self, p: &mut P) {
+        p.write_i32(self.into())
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for E1
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
+    }
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub struct F2(pub ::std::primitive::i32);
+
+impl F2 {
+}
+
+impl ::fbthrift::ThriftEnum for F2 {
+    fn enumerate() -> &'static [(Self, &'static str)] {
+        &[
+        ]
+    }
+
+    fn variants() -> &'static [&'static str] {
+        &[
+        ]
+    }
+
+    fn variant_values() -> &'static [Self] {
+        &[
+        ]
+    }
+}
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for F2 {
+    fn default() -> Self {
+        Self(0)
+    }
+}
+
+impl<'a> ::std::convert::From<&'a F2> for ::std::primitive::i32 {
+    #[inline]
+    fn from(x: &'a F2) -> Self {
+        x.0
+    }
+}
+
+impl ::std::convert::From<F2> for ::std::primitive::i32 {
+    #[inline]
+    fn from(x: F2) -> Self {
+        x.0
+    }
+}
+
+impl ::std::convert::From<::std::primitive::i32> for F2 {
+    #[inline]
+    fn from(x: ::std::primitive::i32) -> Self {
+        Self(x)
+    }
+}
+
+impl ::std::fmt::Display for F2 {
+    fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        static VARIANTS_BY_NUMBER: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
+        ];
+        ::fbthrift::help::enum_display(VARIANTS_BY_NUMBER, fmt, self.0)
+    }
+}
+
+impl ::std::fmt::Debug for F2 {
+    fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        write!(fmt, "E2::{}", self)
+    }
+}
+
+impl ::std::str::FromStr for F2 {
+    type Err = ::anyhow::Error;
+
+    fn from_str(string: &::std::primitive::str) -> ::std::result::Result<Self, Self::Err> {
+        static VARIANTS_BY_NAME: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
+        ];
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "E2").map(Self)
+    }
+}
+
+impl ::fbthrift::GetTType for F2 {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
+}
+
+impl<P> ::fbthrift::Serialize<P> for F2
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn write(&self, p: &mut P) {
+        p.write_i32(self.into())
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for F2
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
+    }
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Foo)]
@@ -1353,6 +1583,248 @@ impl ::fbthrift::metadata::ThriftAnnotations for T9 {
     }
 }
 
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::U10 {
+    fn default() -> Self {
+        Self {
+            string: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::U10 {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("U10")
+            .field("string", &self.string)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::U10 {}
+unsafe impl ::std::marker::Sync for self::U10 {}
+impl ::std::marker::Unpin for self::U10 {}
+
+impl ::fbthrift::GetTType for self::U10 {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::U10
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("T10");
+        p.write_field_begin("data", ::fbthrift::TType::String, 1);
+        ::fbthrift::Serialize::write(&self.string, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::U10
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::String, 1),
+        ];
+        let mut field_data = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::String, 1) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            string: field_data.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for U10 {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        if type_id == ::std::any::TypeId::of::<rust__types::Name>() {
+            let mut tmp = Some(rust__types::Name {
+                name: "U10".to_owned(),
+                ..::std::default::Default::default()
+            });
+            let r: &mut dyn ::std::any::Any = &mut tmp;
+            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            return r.take();
+        }
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<rust__types::Name>() {
+                    let mut tmp = Some(rust__types::Name {
+                        name: "string".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            _ => {}
+        }
+
+        None
+    }
+}
+
+
+
+impl ::std::default::Default for U11 {
+    fn default() -> Self {
+        Self::UnknownField(-1)
+    }
+}
+
+impl ::fbthrift::GetTType for U11 {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl<P> ::fbthrift::Serialize<P> for U11
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("T11");
+        match self {
+            Self::string(inner) => {
+                p.write_field_begin("str", ::fbthrift::TType::String, 1);
+                ::fbthrift::Serialize::write(inner, p);
+                p.write_field_end();
+            }
+            Self::integer(inner) => {
+                p.write_field_begin("integer", ::fbthrift::TType::I32, 2);
+                ::fbthrift::Serialize::write(inner, p);
+                p.write_field_end();
+            }
+            Self::UnknownField(_) => {}
+        }
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for U11
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("integer", ::fbthrift::TType::I32, 2),
+            ::fbthrift::Field::new("str", ::fbthrift::TType::String, 1),
+        ];
+        let _ = p.read_struct_begin(|_| ())?;
+        let mut once = false;
+        let mut alt = ::std::option::Option::None;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32, once) {
+                (::fbthrift::TType::Stop, _, _) => break,
+                (::fbthrift::TType::String, 1, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::string(::fbthrift::Deserialize::read(p)?));
+                }
+                (::fbthrift::TType::I32, 2, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::integer(::fbthrift::Deserialize::read(p)?));
+                }
+                (fty, _, false) => p.skip(fty)?,
+                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
+                    "T11".to_string(),
+                    badty,
+                    badid,
+                ))),
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(alt.unwrap_or_default())
+    }
+}
+
+impl U11 {
+    /// Return current union variant name as a tuple of (Rust name, original name).
+    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+        match self {
+            Self::string(_) => Some(("string", "str")),
+            Self::integer(_) => Some(("integer", "integer")),
+            Self::UnknownField(_) => None,
+        }
+    }
+}
+
+impl ::fbthrift::metadata::ThriftAnnotations for U11 {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        if type_id == ::std::any::TypeId::of::<rust__types::Name>() {
+            let mut tmp = Some(rust__types::Name {
+                name: "U11".to_owned(),
+                ..::std::default::Default::default()
+            });
+            let r: &mut dyn ::std::any::Any = &mut tmp;
+            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            return r.take();
+        }
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<rust__types::Name>() {
+                    let mut tmp = Some(rust__types::Name {
+                        name: "string".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            2 => {
+            },
+            _ => {}
+        }
+
+        None
+    }
+}
 
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::TransitiveDerives {

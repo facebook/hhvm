@@ -24,6 +24,27 @@ pub mod s1 {
 
 }
 
+/// Error definitions for `S2`.
+pub mod s2 {
+
+    pub type RError = ::fbthrift::NonthrowingFunctionError;
+
+    impl ::std::convert::From<crate::services::s2::RExn> for
+        ::std::result::Result<crate::types::T6, RError>
+    {
+        fn from(e: crate::services::s2::RExn) -> Self {
+            match e {
+                crate::services::s2::RExn::Success(res) => {
+                    ::std::result::Result::Ok(res)
+                }
+                crate::services::s2::RExn::ApplicationException(aexn) =>
+                    ::std::result::Result::Err(RError::ApplicationException(aexn)),
+            }
+        }
+    }
+
+}
+
 /// Error definitions for `AllMethods`.
 pub mod all_methods {
 

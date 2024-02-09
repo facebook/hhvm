@@ -38,6 +38,18 @@ var (
 
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
+    SetName("rust.Name").
+    SetIsUnion(false).
+    SetFields(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("name").
+    SetIsOptional(false).
+    SetType(premadeThriftType_string),
+        },
+    ),
+    metadata.NewThriftStruct().
     SetName("rust.Copy").
     SetIsUnion(false),
     metadata.NewThriftStruct().

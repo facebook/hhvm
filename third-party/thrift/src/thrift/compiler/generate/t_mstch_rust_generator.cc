@@ -41,21 +41,6 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 
-constexpr auto kRustOrdUri = "facebook.com/thrift/annotation/rust/Ord";
-constexpr auto kRustBoxUri = "facebook.com/thrift/annotation/rust/Box";
-constexpr auto kRustTypeUri = "facebook.com/thrift/annotation/rust/Type";
-constexpr auto kRustNewTypeUri = "facebook.com/thrift/annotation/rust/NewType";
-constexpr auto kRustAdapterUri = "facebook.com/thrift/annotation/rust/Adapter";
-constexpr auto kRustDeriveUri = "facebook.com/thrift/annotation/rust/Derive";
-constexpr auto kRustServiceExnUri =
-    "facebook.com/thrift/annotation/rust/ServiceExn";
-constexpr auto kRustExhaustiveUri =
-    "facebook.com/thrift/annotation/rust/Exhaustive";
-constexpr auto kRustArcUri = "facebook.com/thrift/annotation/rust/Arc";
-constexpr auto kRustRequestContextUri =
-    "facebook.com/thrift/annotation/rust/RequestContext";
-constexpr auto kRustCopyUri = "facebook.com/thrift/annotation/rust/Copy";
-
 namespace rust {
 
 struct rust_codegen_options {
@@ -268,30 +253,6 @@ FieldKind field_kind(const t_named& node) {
     return FieldKind::Box;
   }
   return FieldKind::Inline;
-}
-
-std::string get_annotation_property_string(
-    const t_const* annotation, const std::string& key) {
-  if (annotation) {
-    for (const auto& item : annotation->value()->get_map()) {
-      if (item.first->get_string() == key) {
-        return item.second->get_string();
-      }
-    }
-  }
-  return "";
-}
-
-bool get_annotation_property_bool(
-    const t_const* annotation, const std::string& key) {
-  if (annotation) {
-    for (const auto& item : annotation->value()->get_map()) {
-      if (item.first->get_string() == key) {
-        return item.second->get_bool();
-      }
-    }
-  }
-  return false;
 }
 
 std::string get_type_annotation(const t_named* node) {
@@ -1141,12 +1102,7 @@ class rust_mstch_function : public mstch_function {
           &rust_mstch_function::
               rust_check_service_for_anyhow_to_application_exn}});
   }
-  mstch::node rust_name() {
-    if (!function_->has_annotation("rust.name")) {
-      return mangle(function_->get_name());
-    }
-    return function_->get_annotation("rust.name");
-  }
+  mstch::node rust_name() { return named_rust_name(function_); }
   mstch::node rust_upcamel() {
     auto upcamel_name = camelcase(function_->get_name());
     if (function_upcamel_names_.count(upcamel_name) > 1) {
@@ -1347,7 +1303,7 @@ class rust_mstch_struct : public mstch_struct {
             {"struct:generated?", &rust_mstch_struct::rust_generated_struct},
         });
   }
-  mstch::node rust_name() { return struct_rust_name(struct_); }
+  mstch::node rust_name() { return type_rust_name(struct_); }
   mstch::node rust_package() {
     return get_types_import_name(struct_->program(), options_);
   }
@@ -1469,12 +1425,7 @@ class rust_mstch_enum_value : public mstch_enum_value {
             {"enum_value:docs", &rust_mstch_enum_value::rust_doc},
         });
   }
-  mstch::node rust_name() {
-    if (!enum_value_->has_annotation("rust.name")) {
-      return mangle(enum_value_->get_name());
-    }
-    return enum_value_->get_annotation("rust.name");
-  }
+  mstch::node rust_name() { return named_rust_name(enum_value_); }
   mstch::node rust_has_doc() { return enum_value_->has_doc(); }
   mstch::node rust_doc() { return quoted_rust_doc(enum_value_); }
 };
@@ -1533,12 +1484,7 @@ class rust_mstch_enum : public mstch_enum {
     }
     return mstch::node();
   }
-  mstch::node rust_name() {
-    if (!enum_->has_annotation("rust.name")) {
-      return mangle_type(enum_->get_name());
-    }
-    return enum_->get_annotation("rust.name");
-  }
+  mstch::node rust_name() { return type_rust_name(enum_); }
   mstch::node rust_package() {
     return get_types_import_name(enum_->program(), options_);
   }
@@ -1584,12 +1530,7 @@ class rust_mstch_type : public mstch_type {
             {"type:has_adapter?", &rust_mstch_type::adapter},
         });
   }
-  mstch::node rust_name() {
-    if (!type_->has_annotation("rust.name")) {
-      return mangle_type(type_->get_name());
-    }
-    return type_->get_annotation("rust.name");
-  }
+  mstch::node rust_name() { return type_rust_name(type_); }
   mstch::node rust_name_snake() {
     return snakecase(mangle_type(type_->get_name()));
   }
@@ -1798,7 +1739,8 @@ class mstch_rust_value : public mstch_base {
 
     for (auto&& field : struct_type->fields()) {
       if (field.name() == variant) {
-        if (!field.has_annotation("rust.name")) {
+        if (!field.has_annotation("rust.name") &&
+            !field.find_structured_annotation_or_null(kRustNameUri)) {
           return variant;
         }
         return field.get_annotation("rust.name");
@@ -1951,12 +1893,7 @@ class mstch_rust_struct_field : public mstch_base {
         });
   }
   mstch::node key() { return std::to_string(field_->get_key()); }
-  mstch::node rust_name() {
-    if (!field_->has_annotation("rust.name")) {
-      return mangle(field_->get_name());
-    }
-    return field_->get_annotation("rust.name");
-  }
+  mstch::node rust_name() { return named_rust_name(field_); }
   mstch::node is_optional() {
     return field_->get_req() == t_field::e_req::optional;
   }
@@ -2138,12 +2075,7 @@ class rust_mstch_field : public mstch_field {
     }
     return rust_type;
   }
-  mstch::node rust_name() {
-    if (!field_->has_annotation("rust.name")) {
-      return mangle(field_->get_name());
-    }
-    return field_->get_annotation("rust.name");
-  }
+  mstch::node rust_name() { return named_rust_name(field_); }
   mstch::node rust_primitive() {
     auto type = field_->get_type();
     return type->is_bool() || type->is_any_int() || type->is_floating_point();
@@ -2208,12 +2140,12 @@ class rust_mstch_typedef : public mstch_typedef {
             {"typedef:has_adapter?", &rust_mstch_typedef::has_adapter},
         });
   }
-  mstch::node rust_name() { return typedef_rust_name(typedef_); }
+  mstch::node rust_name() { return type_rust_name(typedef_); }
   mstch::node rust_newtype() { return has_newtype_annotation(typedef_); }
   mstch::node rust_type() {
     // See 'typedef.mustache'. The context is writing a newtype: e.g. `pub
-    // struct T(pub X)`. If `X` has a type annotation `A` we should write `pub
-    // T(A)`. If it does not, we should write `X`.
+    // struct T(pub X)`. If `X` has a `rust.Type` annotation `A` we should write
+    // `struct T(pub A)` If it does not, we should write `pub struct T (pub X)`.
     std::string rust_type;
     if (const t_const* annot =
             typedef_->find_structured_annotation_or_null(kRustTypeUri)) {

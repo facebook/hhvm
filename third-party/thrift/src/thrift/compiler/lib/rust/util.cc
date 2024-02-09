@@ -266,19 +266,58 @@ std::string quote(const std::string& data, bool do_backslash) {
   return quoted.str();
 }
 
-const std::string typedef_rust_name(const t_typedef* t) {
-  if (!t->has_annotation("rust.name")) {
-    return mangle_type(t->name());
+std::string get_annotation_property_string(
+    const t_const* annotation, const std::string& key) {
+  if (annotation) {
+    for (const auto& item : annotation->value()->get_map()) {
+      if (item.first->get_string() == key) {
+        return item.second->get_string();
+      }
+    }
   }
-  return t->get_annotation("rust.name");
+  return "";
 }
 
-const std::string struct_rust_name(const t_structured* strct) {
-  if (!strct->has_annotation("rust.name")) {
-    return mangle_type(strct->get_name());
+bool get_annotation_property_bool(
+    const t_const* annotation, const std::string& key) {
+  if (annotation) {
+    for (const auto& item : annotation->value()->get_map()) {
+      if (item.first->get_string() == key) {
+        return item.second->get_bool();
+      }
+    }
   }
-  return strct->get_annotation("rust.name");
+  return false;
 }
+
+namespace {
+
+std::string unmangled_rust_name(const t_named* node) {
+  if (const t_const* annot =
+          node->find_structured_annotation_or_null(kRustNameUri)) {
+    return get_annotation_property_string(annot, "name");
+  }
+  return node->get_annotation("rust.name");
+}
+
+} // namespace
+
+std::string type_rust_name(const t_type* t) {
+  if (!t->has_annotation("rust.name") &&
+      !t->find_structured_annotation_or_null(kRustNameUri)) {
+    return mangle_type(t->name());
+  }
+  return unmangled_rust_name(t);
+}
+
+std::string named_rust_name(const t_named* node) {
+  if (!node->has_annotation("rust.name") &&
+      !node->find_structured_annotation_or_null(kRustNameUri)) {
+    return mangle(node->name());
+  }
+  return unmangled_rust_name(node);
+}
+
 } // namespace rust
 } // namespace compiler
 } // namespace thrift

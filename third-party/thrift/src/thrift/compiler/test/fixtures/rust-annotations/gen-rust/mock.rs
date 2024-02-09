@@ -121,6 +121,30 @@ impl<'mock> super::client::S1 for S1<'mock> {
     }
 }
 
+pub struct S2<'mock> {
+    pub s: r#impl::s2::s<'mock>,
+    _marker: ::std::marker::PhantomData<&'mock ()>,
+}
+
+impl dyn super::client::S2 {
+    pub fn mock<'mock>() -> S2<'mock> {
+        S2 {
+            s: r#impl::s2::s::unimplemented(),
+            _marker: ::std::marker::PhantomData,
+        }
+    }
+}
+
+impl<'mock> super::client::S2 for S2<'mock> {
+    fn s(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s2::RError>> {
+        let mut closure = self.s.closure.lock().unwrap();
+        let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
+        ::std::boxed::Box::pin(::futures::future::ready(closure()))
+    }
+}
+
 pub struct AllMethods<'mock> {
     pub foo: r#impl::all_methods::foo<'mock>,
     pub bar: r#impl::all_methods::bar<'mock>,
@@ -261,6 +285,53 @@ pub mod r#impl {
             pub fn throw<E>(&self, exception: E)
             where
                 E: ::std::convert::Into<crate::errors::s1::RError>,
+                E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
+            {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || ::std::result::Result::Err(exception.clone().into()));
+            }
+        }
+    }
+    pub mod s2 {
+
+        pub struct s<'mock> {
+            pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
+                dyn ::std::ops::FnMut() -> ::std::result::Result<
+                    crate::types::T6,
+                    crate::errors::s2::RError,
+                > + ::std::marker::Send + ::std::marker::Sync + 'mock,
+            >>,
+        }
+
+        #[allow(clippy::redundant_closure)]
+        impl<'mock> s<'mock> {
+            pub(crate) fn unimplemented() -> Self {
+                Self {
+                    closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
+                        "{}::{} is not mocked",
+                        "S2",
+                        "r",
+                    ))),
+                }
+            }
+
+            pub fn ret(&self, value: crate::types::T6) {
+                self.mock(move || value.clone());
+            }
+
+            pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> crate::types::T6 + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || ::std::result::Result::Ok(mock()));
+            }
+
+            pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut() -> ::std::result::Result<crate::types::T6, crate::errors::s2::RError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move || mock());
+            }
+
+            pub fn throw<E>(&self, exception: E)
+            where
+                E: ::std::convert::Into<crate::errors::s2::RError>,
                 E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
             {
                 let mut closure = self.closure.lock().unwrap();

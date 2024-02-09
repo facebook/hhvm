@@ -24,6 +24,20 @@ namespace py.asyncio facebook_thrift_asyncio.annotation.rust
 namespace go thrift.annotation.rust
 namespace py thrift.annotation.rust
 
+@scope.Function
+@scope.EnumValue
+@scope.Enum
+@scope.Struct
+@scope.Field
+@scope.Typedef
+@scope.Union
+struct Name {
+  // # `rust.Name`
+  //
+  // Override the Thrift identifier of the entity with the given name.
+  1: string name;
+}
+
 @scope.Struct
 struct Copy {
 // # `rust.Copy`

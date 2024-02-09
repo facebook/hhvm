@@ -95,6 +95,40 @@ struct T9 {
 
 // --
 
+service S2 {
+  @rust.Name{name = "s"}
+  T6 r();
+}
+
+enum E1 {
+  @rust.Name{name = "B0"}
+  A0 = 0,
+  @rust.Name{name = "B1"}
+  A1 = 1,
+}
+
+@rust.Name{name = "F2"}
+enum E2 {
+}
+
+@rust.Name{name = "U10"}
+struct T10 {
+  @rust.Name{name = "string"}
+  1: string data;
+}
+
+@rust.Name{name = "t_y1"}
+typedef i64 t_t1
+
+@rust.Name{name = "U11"}
+union T11 {
+  @rust.Name{name = "string"}
+  1: string str;
+  2: i32 integer;
+}
+
+// --
+
 @rust.Derive{derives = ["Foo", "crate::Bar"]}
 @scope.Transitive
 struct TransitiveDerives {}

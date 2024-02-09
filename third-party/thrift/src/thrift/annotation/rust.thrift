@@ -24,6 +24,13 @@ namespace py.asyncio facebook_thrift_asyncio.annotation.rust
 namespace go thrift.annotation.rust
 namespace py thrift.annotation.rust
 
+@scope.Struct
+struct Copy {
+// # `rust.Copy`
+//
+// Mark the generated struct `#[derive(Copy)]`.
+}
+
 @scope.Service
 struct RequestContext {
 // # `rust.RequestContext`

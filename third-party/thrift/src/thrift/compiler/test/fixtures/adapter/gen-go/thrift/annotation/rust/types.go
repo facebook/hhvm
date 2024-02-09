@@ -16,6 +16,99 @@ var _ = strings.Split
 var _ = thrift.ZERO
 
 
+type Copy struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &Copy{}
+
+func NewCopy() *Copy {
+    return (&Copy{})
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewCopy().Set<FieldNameFoo>().Set<FieldNameBar>()
+type CopyBuilder struct {
+    obj *Copy
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewCopy().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewCopyBuilder() *CopyBuilder {
+    return &CopyBuilder{
+        obj: NewCopy(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewCopy().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *CopyBuilder) Emit() *Copy {
+    var objCopy Copy = *x.obj
+    return &objCopy
+}
+
+func (x *Copy) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("Copy"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Copy) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *Copy) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Copy({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 type RequestContext struct {
 }
 // Compile time interface enforcer
@@ -1251,6 +1344,7 @@ func (x *ServiceExn) String() string {
 func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)
 }) {
+    registry.RegisterType("facebook.com/thrift/annotation/rust/Copy", func() any { return NewCopy() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/RequestContext", func() any { return NewRequestContext() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/Arc", func() any { return NewArc() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/Box", func() any { return NewBox() })

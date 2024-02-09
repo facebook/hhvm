@@ -54,6 +54,7 @@ constexpr auto kRustExhaustiveUri =
 constexpr auto kRustArcUri = "facebook.com/thrift/annotation/rust/Arc";
 constexpr auto kRustRequestContextUri =
     "facebook.com/thrift/annotation/rust/RequestContext";
+constexpr auto kRustCopyUri = "facebook.com/thrift/annotation/rust/Copy";
 
 namespace rust {
 
@@ -1369,7 +1370,10 @@ class rust_mstch_struct : public mstch_struct {
     }
     return true;
   }
-  mstch::node rust_is_copy() { return struct_->has_annotation("rust.copy"); }
+  mstch::node rust_is_copy() {
+    return struct_->has_annotation("rust.copy") ||
+        struct_->find_structured_annotation_or_null(kRustCopyUri);
+  }
   mstch::node rust_is_exhaustive() {
     return struct_->has_annotation("rust.exhaustive") ||
         struct_->find_structured_annotation_or_null(kRustExhaustiveUri);

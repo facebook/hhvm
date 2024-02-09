@@ -88,6 +88,13 @@ service S1 {
 
 // --
 
+@rust.Copy
+struct T9 {
+  1: i64 data;
+}
+
+// --
+
 @rust.Derive{derives = ["Foo", "crate::Bar"]}
 @scope.Transitive
 struct TransitiveDerives {}

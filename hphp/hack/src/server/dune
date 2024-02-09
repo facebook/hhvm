@@ -130,7 +130,6 @@
   (libraries
     ast
     ast_and_decl_service
-    build
     ci_util
     cgroupprofiler
     custom_error_config

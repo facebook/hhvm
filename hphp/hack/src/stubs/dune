@@ -15,20 +15,6 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
- (name build)
- (wrapped false)
- (modules buildMain)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
-(library
- (name rust_ffi_stubs)
- (wrapped false)
- (modules)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
-(library
  (name rust_provider_backend_stubs)
  (wrapped false)
  (modules rust_provider_backend)

@@ -1203,7 +1203,17 @@ void t_mstch_python_generator::generate_services() {
 THRIFT_REGISTER_GENERATOR(
     mstch_python,
     "Python",
-    "    include_prefix:  Use full include paths in generated files.\n");
+    "    include_prefix:  Use full include paths in generated files.\n"
+    "    experimental_generate_mutable_types:\n"
+    "      DO NOT USE. Enables the experimental generation of mutable\n"
+    "      thrift-python types (i.e., structs and unions). This is for local\n"
+    "      experimentation, development and testing ONLY. When this option is\n"
+    "      enabled, NO GUARANTEE is provided on any output (including any\n"
+    "      seemingly unrelated logic, such as previously existing generated\n"
+    "      code). Any \"new\" behavior (including the existence of this\n"
+    "      option) should be considered UNSTABLE and is subject to arbitrary\n"
+    "      (backwards incompatible) changes and undefined behavior.\n"
+    "      NEVER ENABLE THIS OPTION in production environments.\n");
 
 } // namespace compiler
 } // namespace thrift

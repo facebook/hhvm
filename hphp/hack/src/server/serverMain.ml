@@ -429,8 +429,6 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
   else
     let check_kind_str = "Full_check" in
     let needed_full_init = env.init_env.why_needed_full_check in
-    let old_errorl = Errors.get_error_list env.errorl in
-
     (* HERE'S WHERE WE DO THE HEAVY WORK! **)
     let telemetry =
       telemetry
@@ -456,7 +454,6 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
         finalize_init env.init_env telemetry needed_full_init
       | _ -> ()
     end;
-    ServerStamp.touch_stamp_errors old_errorl (Errors.get_error_list env.errorl);
     let telemetry =
       Telemetry.duration telemetry ~key:"finalized_and_touched" ~start_time
     in
@@ -1045,7 +1042,6 @@ let program_init genv env =
   Hh_logger.log "Waiting for daemon(s) to be ready...";
   Server_progress.write "wrapping up init...";
   ServerNotifier.wait_until_ready genv.notifier;
-  ServerStamp.touch_stamp ();
   EventLogger.set_init_type init_type;
   let telemetry =
     ServerUtils.log_and_get_sharedmem_load_telemetry ()

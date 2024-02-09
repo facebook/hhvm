@@ -41,6 +41,7 @@ inline folly::IOBuf makeKey<folly::IOBuf>(folly::StringPiece sp) {
  * keyWithoutRoute:                       ^^^^^^^^^^^^^
  * routingPrefix:         ^^^^^^^^^^^^^^^^
  * routingKey:                            ^^^^^^^
+ * afterRoutingKey:                              ^^^^^^
  */
 template <class Storage>
 class Keys {
@@ -109,6 +110,11 @@ class Keys {
   folly::StringPiece routingKey() const {
     return routingKey_;
   }
+
+  folly::StringPiece afterRoutingKey() const {
+    return afterRoutingKey_;
+  }
+
   uint32_t routingKeyHash() const {
     if (!routingKeyHash_) {
       const auto keyPiece = routingKey();
@@ -181,6 +187,7 @@ class Keys {
     keyWithoutRoute_ = other.keyWithoutRoute_;
     routingPrefix_ = other.routingPrefix_;
     routingKey_ = other.routingKey_;
+    afterRoutingKey_ = other.afterRoutingKey_;
     routingKeyHash_ = other.routingKeyHash_;
     lastHash_.size_ = other.lastHash_.size_;
     lastHash_.hash_ = other.lastHash_.hash_;
@@ -212,6 +219,7 @@ class Keys {
   folly::StringPiece keyWithoutRoute_;
   folly::StringPiece routingPrefix_;
   folly::StringPiece routingKey_;
+  folly::StringPiece afterRoutingKey_;
   mutable uint32_t routingKeyHash_{0};
 
   struct HashData {

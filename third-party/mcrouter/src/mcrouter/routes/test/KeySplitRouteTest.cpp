@@ -86,11 +86,6 @@ class KeySplitRouteTest : public RouteHandleTestBase<MemcacheRouterInfo> {
     firstHit_ = firstHit;
   }
 
-  std::string expectedKey(folly::StringPiece key, size_t hostid) {
-    return folly::to<std::string>(
-        key, kMemcacheReplicaSeparator, hostid % replicas_);
-  }
-
   template <class Request>
   void testLeases(const Request& req, size_t numReplicas = 10) {
     // lease operations with allsync enabled should never broadcast.
@@ -106,10 +101,15 @@ class KeySplitRouteTest : public RouteHandleTestBase<MemcacheRouterInfo> {
         auto reply = rh_->route(req);
 
         // verify
-        auto expectedKeyReplica = folly::to<std::string>(
-            req.key_ref()->fullKey(),
-            kMemcacheReplicaSeparator,
-            i % numReplicas);
+        std::string expectedKeyReplica;
+        if (req.key_ref()->hasHashStop()) {
+          expectedKeyReplica = genSplitKeyWitHashStop(req, i);
+        } else {
+          expectedKeyReplica = folly::to<std::string>(
+              req.key_ref()->fullKey(),
+              kMemcacheReplicaSeparator,
+              i % numReplicas);
+        }
         EXPECT_FALSE(th_->saw_keys.empty());
 
         // first replica is the original key
@@ -132,10 +132,18 @@ class KeySplitRouteTest : public RouteHandleTestBase<MemcacheRouterInfo> {
 
     // create expected keys, the first key is not modified.
     std::vector<std::string> expectedKeys;
-    expectedKeys.push_back(key);
-    for (size_t i = 1; i < numReplicas; ++i) {
-      expectedKeys.push_back(
-          folly::to<std::string>(key, kMemcacheReplicaSeparator, i));
+    if (req.key_ref()->hasHashStop()) {
+      for (size_t i = 1; i < numReplicas; ++i) {
+        expectedKeys.push_back(genSplitKeyWitHashStop(req, i));
+      }
+      // Changing the order for hashstops to enable the seen keys to be sorted
+      expectedKeys.push_back(key);
+    } else {
+      expectedKeys.push_back(key);
+      for (size_t i = 1; i < numReplicas; ++i) {
+        expectedKeys.push_back(
+            folly::to<std::string>(key, kMemcacheReplicaSeparator, i));
+      }
     }
 
     // all sync req will be done through fibers
@@ -149,6 +157,15 @@ class KeySplitRouteTest : public RouteHandleTestBase<MemcacheRouterInfo> {
 
     // reset
     th_->saw_keys.clear();
+  }
+
+  template <class Request>
+  std::string genSplitKeyWitHashStop(const Request& req, size_t replica) {
+    return folly::to<std::string>(
+        req.key_ref()->routingKey(),
+        kMemcacheReplicaSeparator,
+        replica,
+        req.key_ref()->afterRoutingKey());
   }
 
   static constexpr folly::StringPiece kMemcacheReplicaSeparator = "::";
@@ -192,10 +209,55 @@ TEST_F(KeySplitRouteTest, NoAllSyncSet) {
   }
 }
 
+TEST_F(KeySplitRouteTest, NoAllSyncSetHashStop) {
+  size_t numReplicas = 10;
+  testCreate(numReplicas, false);
+  std::string routingKey = "abc";
+  std::string keySuffix = "|#|ignore_me";
+  std::string key = routingKey + keySuffix;
+
+  for (size_t i = 0; i < numReplicas; ++i) {
+    globals::HostidMock hostidMock(i);
+
+    // single set should not use the fiber manager
+    McSetRequest reqSet(key);
+    reqSet.value_ref() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, "value");
+
+    auto reply = rh_->route(reqSet);
+
+    // verify
+    auto expectedKeyReplica = folly::to<std::string>(
+        routingKey, kMemcacheReplicaSeparator, i % numReplicas, keySuffix);
+    EXPECT_FALSE(th_->saw_keys.empty());
+    // first replica is the original key
+    if (i == 0) {
+      EXPECT_EQ(key, th_->saw_keys[0]);
+    } else {
+      EXPECT_EQ(expectedKeyReplica, th_->saw_keys[0]);
+    }
+
+    th_->saw_keys.clear();
+  }
+}
+
 TEST_F(KeySplitRouteTest, AllSyncSet) {
   testCreate(10, true);
 
   std::string key = "abc";
+  McSetRequest reqSet(key);
+  reqSet.value_ref() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, "value");
+
+  for (size_t i = 0; i < 10; ++i) {
+    testAllSync(reqSet, i);
+  }
+}
+
+TEST_F(KeySplitRouteTest, AllSyncSetHashStop) {
+  testCreate(10, true);
+
+  std::string routingKey = "abc";
+  std::string keySuffix = "|#|ignore_me";
+  std::string key = routingKey + keySuffix;
   McSetRequest reqSet(key);
   reqSet.value_ref() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, "value");
 
@@ -233,12 +295,59 @@ TEST_F(KeySplitRouteTest, Get) {
   }
 }
 
+TEST_F(KeySplitRouteTest, GetWithHashStop) {
+  for (size_t j = 0; j < 2; ++j) {
+    size_t numReplicas = 10;
+    std::string routingKey = "abc";
+    std::string keySuffix = "|#|ignore_me";
+    std::string key = routingKey + keySuffix;
+    testCreate(numReplicas, j == 0);
+
+    for (size_t i = 0; i < numReplicas; ++i) {
+      globals::HostidMock hostidMock(i);
+
+      // submit get based on our replica
+      auto reply = rh_->route(McGetRequest(key));
+
+      // verify
+      auto expectedKeyReplica = folly::to<std::string>(
+          routingKey, kMemcacheReplicaSeparator, i % numReplicas, keySuffix);
+      EXPECT_FALSE(th_->saw_keys.empty());
+
+      // first replica is the original key
+      if (i == 0) {
+        EXPECT_EQ(key, th_->saw_keys[0]);
+      } else {
+        EXPECT_EQ(expectedKeyReplica, th_->saw_keys[0]);
+      }
+
+      th_->saw_keys.clear();
+    }
+  }
+}
+
 TEST_F(KeySplitRouteTest, DeleteAllSync) {
   // test both allsync and non-allsync
   for (size_t mode = 0; mode < 2; ++mode) {
     testCreate(10, mode == 0);
 
     std::string key = "abc";
+    McDeleteRequest req(key);
+
+    for (size_t i = 0; i < 10; ++i) {
+      testAllSync(req, i);
+    }
+  }
+}
+
+TEST_F(KeySplitRouteTest, DeleteAllSyncHashStop) {
+  // test both allsync and non-allsync
+  for (size_t mode = 0; mode < 2; ++mode) {
+    testCreate(10, mode == 0);
+
+    std::string routingKey = "abc";
+    std::string keySuffix = "|#|ignore_me";
+    std::string key = routingKey + keySuffix;
     McDeleteRequest req(key);
 
     for (size_t i = 0; i < 10; ++i) {
@@ -255,8 +364,27 @@ TEST_F(KeySplitRouteTest, LeasesSetTest) {
   testLeases(reqSet);
 }
 
+TEST_F(KeySplitRouteTest, LeasesSetTestHashStop) {
+  std::string routingKey = "abc";
+  std::string keySuffix = "|#|ignore_me";
+  std::string key = routingKey + keySuffix;
+  McLeaseSetRequest reqSet(key);
+  reqSet.value_ref() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, "value");
+
+  testLeases(reqSet);
+}
+
 TEST_F(KeySplitRouteTest, LeasesGetTest) {
   constexpr folly::StringPiece key = "abc";
+  McLeaseGetRequest req(key);
+
+  testLeases(req);
+}
+
+TEST_F(KeySplitRouteTest, LeasesGetTestHashStop) {
+  std::string routingKey = "abc";
+  std::string keySuffix = "|#|ignore_me";
+  std::string key = routingKey + keySuffix;
   McLeaseGetRequest req(key);
 
   testLeases(req);
@@ -302,6 +430,48 @@ TEST_F(KeySplitRouteTest, FirstHitTest) {
   EXPECT_EQ(vector<std::string>{expectedKeys}, th->saw_keys);
 }
 
+TEST_F(KeySplitRouteTest, FirstHitTestHashStop) {
+  std::string routingKey = "abc";
+  std::string keySuffix = "|#|ignore_me";
+  std::string key = routingKey + keySuffix;
+  McLeaseGetRequest req(key);
+
+  auto th = std::make_shared<TestHandle>(GetRouteTestData());
+  th->setResultGenerator([key](std::string reqKey) {
+    return reqKey == key ? carbon::Result::FOUND : carbon::Result::NOTFOUND;
+  });
+  auto rh = std::make_shared<RouteHandle>(RouteHandle(th->rh, 3, true, true));
+
+  // create expected keys, the first key is not modified.
+  std::vector<std::string> expectedKeys;
+  expectedKeys.push_back(key);
+  for (size_t i = 1; i < 3; ++i) {
+    expectedKeys.push_back(folly::to<std::string>(
+        routingKey, kMemcacheReplicaSeparator, i, keySuffix));
+  }
+
+  TestFiberManager<MemcacheRouterInfo> fm;
+  fm.runAll({[&]() {
+    auto reply = rh->route(req);
+    EXPECT_EQ(*reply.result_ref(), carbon::Result::FOUND);
+  }});
+  EXPECT_FALSE(th->saw_keys.empty());
+
+  EXPECT_EQ(vector<std::string>{expectedKeys}, th->saw_keys);
+
+  th->setResultGenerator([key](std::string reqKey) {
+    return reqKey != key ? carbon::Result::FOUND : carbon::Result::NOTFOUND;
+  });
+  th->saw_keys = {};
+
+  fm.runAll({[&]() {
+    auto reply = rh->route(req);
+    EXPECT_EQ(*reply.result_ref(), carbon::Result::FOUND);
+  }});
+
+  EXPECT_EQ(vector<std::string>{expectedKeys}, th->saw_keys);
+}
+
 TEST_F(KeySplitRouteTest, FirstHitWorstCaseTest) {
   constexpr folly::StringPiece key = "abc";
   McLeaseGetRequest req(key);
@@ -317,6 +487,35 @@ TEST_F(KeySplitRouteTest, FirstHitWorstCaseTest) {
     expectedKeys.push_back(
         folly::to<std::string>(key, kMemcacheReplicaSeparator, i));
   }
+
+  TestFiberManager<MemcacheRouterInfo> fm;
+  fm.runAll({[&]() {
+    auto reply = rh->route(req);
+    EXPECT_EQ(*reply.result_ref(), carbon::Result::NOTFOUND);
+  }});
+
+  EXPECT_FALSE(th->saw_keys.empty());
+  std::sort(th->saw_keys.begin(), th->saw_keys.end());
+  EXPECT_EQ(vector<std::string>{expectedKeys}, th->saw_keys);
+}
+
+TEST_F(KeySplitRouteTest, FirstHitWorstCaseTestHashStop) {
+  std::string routingKey = "abc";
+  std::string keySuffix = "|#|ignore_me";
+  std::string key = routingKey + keySuffix;
+  McLeaseGetRequest req(key);
+
+  auto th = std::make_shared<TestHandle>(
+      GetRouteTestData(carbon::Result::NOTFOUND, "a"));
+  auto rh = std::make_shared<RouteHandle>(RouteHandle(th->rh, 3, true, true));
+
+  // create expected keys, the first key is not modified.
+  std::vector<std::string> expectedKeys;
+  for (size_t i = 1; i < 3; ++i) {
+    expectedKeys.push_back(folly::to<std::string>(
+        routingKey, kMemcacheReplicaSeparator, i, keySuffix));
+  }
+  expectedKeys.push_back(key);
 
   TestFiberManager<MemcacheRouterInfo> fm;
   fm.runAll({[&]() {

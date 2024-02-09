@@ -71,7 +71,8 @@ void Keys<Storage>::update() {
   if (pos != std::string::npos) {
     pos = keyWithoutRoute_.find("|#|", pos);
     if (pos != std::string::npos) {
-      routingKey_.reset(keyWithoutRoute_.begin(), pos);
+      routingKey_ = keyWithoutRoute_.subpiece(0, pos);
+      afterRoutingKey_ = keyWithoutRoute_.subpiece(pos);
     }
   }
   routingKeyHash_ = 0;

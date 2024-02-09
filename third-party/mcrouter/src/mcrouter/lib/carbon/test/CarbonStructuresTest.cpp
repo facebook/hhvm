@@ -55,9 +55,11 @@ void checkKeyFilledProperly(const Key& key) {
   EXPECT_EQ(std::strlen(kKeyLiteral), key.size());
   EXPECT_EQ(kKeyLiteral, key.fullKey());
   EXPECT_EQ(
-      "abcdefghijklmnopqrstuvwxyz|#|afterhashstop", key.keyWithoutRoute());
-  EXPECT_EQ("/region/cluster/", key.routingPrefix());
-  EXPECT_EQ("abcdefghijklmnopqrstuvwxyz", key.routingKey());
+      "abcdefghijklmnopqrstuvwxyz|#|afterhashstop",
+      key.keyWithoutRoute().str());
+  EXPECT_EQ("/region/cluster/", key.routingPrefix().str());
+  EXPECT_EQ("abcdefghijklmnopqrstuvwxyz", key.routingKey().str());
+  EXPECT_EQ("|#|afterhashstop", key.afterRoutingKey().str());
   EXPECT_NE(0, key.routingKeyHash());
   EXPECT_TRUE(key.hasHashStop());
 }
@@ -261,6 +263,7 @@ TEST(CarbonBasic, setAndGet) {
   EXPECT_EQ(
       "abcdefghijklmnopqrstuvwxyz|#|afterhashstop",
       req.key_ref()->keyWithoutRoute().str());
+  EXPECT_EQ("|#|afterhashstop", req.key_ref()->afterRoutingKey().str());
 
   const auto reqKeyPiece2 = req2.key_ref()->fullKey();
   EXPECT_EQ(kKeyLiteral, reqKeyPiece2);
@@ -270,6 +273,7 @@ TEST(CarbonBasic, setAndGet) {
   EXPECT_EQ(
       "abcdefghijklmnopqrstuvwxyz|#|afterhashstop",
       req2.key_ref()->keyWithoutRoute().str());
+  EXPECT_EQ("|#|afterhashstop", req2.key_ref()->afterRoutingKey().str());
 
   // bool
   req.testBool_ref() = true;
@@ -634,6 +638,7 @@ TEST(CarbonBasic, setAndGetFieldRefAPI) {
   EXPECT_EQ(
       "abcdefghijklmnopqrstuvwxyz|#|afterhashstop",
       req.key_ref()->keyWithoutRoute().str());
+  EXPECT_EQ("|#|afterhashstop", req.key_ref()->afterRoutingKey().str());
 
   const auto reqKeyPiece2 = req2.key_ref()->fullKey();
   EXPECT_EQ(kKeyLiteral, reqKeyPiece2);
@@ -643,6 +648,7 @@ TEST(CarbonBasic, setAndGetFieldRefAPI) {
   EXPECT_EQ(
       "abcdefghijklmnopqrstuvwxyz|#|afterhashstop",
       req2.key_ref()->keyWithoutRoute().str());
+  EXPECT_EQ("|#|afterhashstop", req2.key_ref()->afterRoutingKey().str());
 
   // bool
   req.testBool_ref() = true;
@@ -760,6 +766,7 @@ TEST(CarbonBasic, setAndGetFieldRefAPIThrift) {
   EXPECT_EQ(
       "abcdefghijklmnopqrstuvwxyz|#|afterhashstop",
       req.key_ref()->keyWithoutRoute().str());
+  EXPECT_EQ("|#|afterhashstop", req.key_ref()->afterRoutingKey().str());
 
   // bool
   req.testBool_ref() = true;

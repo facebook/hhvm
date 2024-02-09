@@ -185,8 +185,16 @@ class KeySplitRoute {
   template <class Request>
   Request copyAndAugment(Request& originalReq, uint64_t replicaId) const {
     auto req = originalReq;
-    req.key_ref() = folly::to<std::string>(
-        req.key_ref()->fullKey(), kMemcacheReplicaSeparator, replicaId);
+    if (req.key_ref()->hasHashStop()) {
+      req.key_ref() = folly::to<std::string>(
+          req.key_ref()->routingKey(),
+          kMemcacheReplicaSeparator,
+          replicaId,
+          req.key_ref()->afterRoutingKey());
+    } else {
+      req.key_ref() = folly::to<std::string>(
+          req.key_ref()->fullKey(), kMemcacheReplicaSeparator, replicaId);
+    }
     return req;
   }
 

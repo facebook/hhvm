@@ -35,15 +35,6 @@ func (cc *ClientConn) Transport() Transport {
 	return cc.transport
 }
 
-// NewClientConn creates a new ClientConn object using the provided ProtocolFactory
-func NewClientConn(t Transport, pf ProtocolFactory) ClientConn {
-	return ClientConn{
-		transport: t,
-		iproto:    pf.GetProtocol(t),
-		oproto:    pf.GetProtocol(t),
-	}
-}
-
 // NewClientConnWithProtocols creates a new ClientConn object using the input and output protocols provided
 func NewClientConnWithProtocols(t Transport, iproto, oproto Protocol) ClientConn {
 	return ClientConn{

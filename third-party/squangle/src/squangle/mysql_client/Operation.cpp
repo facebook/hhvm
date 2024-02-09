@@ -635,7 +635,9 @@ void ConnectOperation::specializedRunImpl() {
   removeClientReference();
   MYSQL* mysql = conn()->mysql();
   if (!mysql) {
-    setAsyncClientError("connection initialization failed");
+    setAsyncClientError(
+        static_cast<uint16_t>(SquangleErrno::SQ_INITIALIZATION_FAILED),
+        "Connection initialization failed. Ran out of Memory?");
     attemptFailed(OperationResult::Failed);
     return;
   }
@@ -751,6 +753,7 @@ void ConnectOperation::socketActionable() {
                  << (status == MysqlHandler::DONE ? "errorless" : "pending")
                  << " connect.  fd=" << fd;
       setAsyncClientError(
+          static_cast<uint16_t>(SquangleErrno::SQ_INITIALIZATION_FAILED),
           "mysql_get_socket_descriptor returned an invalid "
           "descriptor");
       logThreadBlockTimeGuard.reset();

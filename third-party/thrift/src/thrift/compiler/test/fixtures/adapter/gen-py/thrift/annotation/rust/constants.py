@@ -17,5 +17,5 @@ if sys.version_info[0] >= 3:
   long = int
 
 
-from .ttypes import UTF8STRINGS, Arc, Box, Exhaustive, Ord, NewType, Type, Adapter, Derive, ServiceExn
+from .ttypes import UTF8STRINGS, RequestContext, Arc, Box, Exhaustive, Ord, NewType, Type, Adapter, Derive, ServiceExn
 

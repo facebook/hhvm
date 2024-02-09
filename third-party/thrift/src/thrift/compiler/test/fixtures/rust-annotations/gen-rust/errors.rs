@@ -3,6 +3,27 @@
 
 //! Thrift error definitions for `module`.
 
+/// Error definitions for `S1`.
+pub mod s1 {
+
+    pub type RError = ::fbthrift::NonthrowingFunctionError;
+
+    impl ::std::convert::From<crate::services::s1::RExn> for
+        ::std::result::Result<crate::types::T6, RError>
+    {
+        fn from(e: crate::services::s1::RExn) -> Self {
+            match e {
+                crate::services::s1::RExn::Success(res) => {
+                    ::std::result::Result::Ok(res)
+                }
+                crate::services::s1::RExn::ApplicationException(aexn) =>
+                    ::std::result::Result::Err(RError::ApplicationException(aexn)),
+            }
+        }
+    }
+
+}
+
 /// Error definitions for `AllMethods`.
 pub mod all_methods {
 

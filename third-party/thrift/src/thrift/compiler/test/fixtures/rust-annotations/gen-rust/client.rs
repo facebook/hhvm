@@ -22,6 +22,291 @@ pub mod dependencies {
 }
 
 
+/// Client definitions for `S1`.
+pub struct S1Impl<P, T, S = ::fbthrift::NoopSpawner> {
+    transport: T,
+    _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
+}
+
+impl<P, T, S> S1Impl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    pub fn new(
+        transport: T,
+    ) -> Self {
+        Self {
+            transport,
+            _phantom: ::std::marker::PhantomData,
+        }
+    }
+
+    pub fn transport(&self) -> &T {
+        &self.transport
+    }
+
+
+    fn _r_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s1::RError>> {
+        use ::const_cstr::const_cstr;
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+
+        const_cstr! {
+            SERVICE_NAME = "S1";
+            SERVICE_METHOD_NAME = "S1.r";
+        }
+        let args = self::Args_S1_r {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("r", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call = transport
+            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call", method = "S1.r"));
+
+        async move {
+            let reply_env = call.await?;
+
+            let de = P::deserializer(reply_env);
+            let (res, _de): (::std::result::Result<crate::services::s1::RExn, _>, _) =
+                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+
+            let res = match res {
+                ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
+                ::std::result::Result::Err(aexn) =>
+                    ::std::result::Result::Err(crate::errors::s1::RError::ApplicationException(aexn))
+            };
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "S1.r"))
+        .boxed()
+    }
+}
+
+pub trait S1: ::std::marker::Send {
+    fn r(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s1::RError>>;
+}
+
+pub trait S1Ext<T>: S1
+where
+    T: ::fbthrift::Transport,
+{
+    fn r_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s1::RError>>;
+
+    fn transport(&self) -> &T;
+}
+
+struct Args_S1_r<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_S1_r<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "S1.r"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P, T, S> S1 for S1Impl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    fn r(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s1::RError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._r_impl(
+            rpc_options,
+        )
+    }
+}
+
+impl<P, T, S> S1Ext<T> for S1Impl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    fn r_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s1::RError>> {
+        self._r_impl(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+      self.transport()
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S> S1 for S
+where
+    S: ::std::convert::AsRef<dyn S1 + 'a>,
+    S: ::std::marker::Send,
+{
+    fn r(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s1::RError>> {
+        self.as_ref().r(
+        )
+    }
+}
+
+#[allow(deprecated)]
+impl<S, T> S1Ext<T> for S
+where
+    S: ::std::convert::AsRef<dyn S1 + 'static>,
+    S: ::std::convert::AsRef<dyn S1Ext<T> + 'static>,
+    S: ::std::marker::Send,
+    T: ::fbthrift::Transport,
+{
+    fn r_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s1::RError>> {
+        <Self as ::std::convert::AsRef<dyn S1Ext<T>>>::as_ref(self).r_with_rpc_opts(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        <dyn S1Ext<T> as S1Ext<T>>::transport(<Self as ::std::convert::AsRef<dyn S1Ext<T>>>::as_ref(self))
+    }
+}
+
+#[derive(Clone)]
+pub struct make_S1;
+
+/// To be called by user directly setting up a client. Avoids
+/// needing ClientFactory trait in scope, avoids unidiomatic
+/// make_Trait name.
+///
+/// ```
+/// # const _: &str = stringify! {
+/// use bgs::client::BuckGraphService;
+///
+/// let protocol = BinaryProtocol::new();
+/// let transport = HttpClient::new();
+/// let client = <dyn BuckGraphService>::new(protocol, transport);
+/// # };
+/// ```
+impl dyn S1 {
+    pub fn new<P, T>(
+        protocol: P,
+        transport: T,
+    ) -> ::std::sync::Arc<impl S1 + ::std::marker::Send + ::std::marker::Sync + 'static>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        T: ::fbthrift::Transport,
+        P::Deserializer: ::std::marker::Send,
+    {
+        let spawner = ::fbthrift::help::NoopSpawner;
+        Self::with_spawner(protocol, transport, spawner)
+    }
+
+    pub fn with_spawner<P, T, S>(
+        protocol: P,
+        transport: T,
+        spawner: S,
+    ) -> ::std::sync::Arc<impl S1 + ::std::marker::Send + ::std::marker::Sync + 'static>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        T: ::fbthrift::Transport,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        let _ = protocol;
+        let _ = spawner;
+        ::std::sync::Arc::new(S1Impl::<P, T, S>::new(transport))
+    }
+}
+
+impl<T> dyn S1Ext<T>
+where
+    T: ::fbthrift::Transport,
+{
+    pub fn new<P>(
+        protocol: P,
+        transport: T,
+    ) -> ::std::sync::Arc<impl S1Ext<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        P::Deserializer: ::std::marker::Send,
+    {
+        let spawner = ::fbthrift::help::NoopSpawner;
+        Self::with_spawner(protocol, transport, spawner)
+    }
+
+    pub fn with_spawner<P, S>(
+        protocol: P,
+        transport: T,
+        spawner: S,
+    ) -> ::std::sync::Arc<impl S1Ext<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        let _ = protocol;
+        let _ = spawner;
+        ::std::sync::Arc::new(S1Impl::<P, T, S>::new(transport))
+    }
+}
+
+pub type S1DynClient = <make_S1 as ::fbthrift::ClientFactory>::Api;
+pub type S1Client = ::std::sync::Arc<S1DynClient>;
+
+/// The same thing, but to be called from generic contexts where we are
+/// working with a type parameter `C: ClientFactory` to produce clients.
+impl ::fbthrift::ClientFactory for make_S1 {
+    type Api = dyn S1 + ::std::marker::Send + ::std::marker::Sync + 'static;
+
+    fn with_spawner<P, T, S>(protocol: P, transport: T, spawner: S) -> ::std::sync::Arc<Self::Api>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        T: ::fbthrift::Transport,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        <dyn S1>::with_spawner(protocol, transport, spawner)
+    }
+}
+
+
 /// Client definitions for `AllMethods`.
 pub struct AllMethodsImpl<P, T, S = ::fbthrift::NoopSpawner> {
     transport: T,

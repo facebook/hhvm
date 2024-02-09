@@ -14,6 +14,7 @@ namespace rust {
 ::apache::thrift::metadata::ThriftMetadata rust_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::detail::md::StructMetadata<RequestContext>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Arc>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Box>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Exhaustive>::gen(metadata);

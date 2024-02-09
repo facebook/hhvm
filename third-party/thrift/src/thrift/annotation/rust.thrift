@@ -24,6 +24,15 @@ namespace py.asyncio facebook_thrift_asyncio.annotation.rust
 namespace go thrift.annotation.rust
 namespace py thrift.annotation.rust
 
+@scope.Service
+struct RequestContext {
+// # `rust.RequestContext`
+//
+// Opt-in to request contexts for your service (which can be used to ensure that
+// only authorized clients can access your service by identity checks against
+// Hipster ACLs).
+}
+
 @scope.Field
 struct Arc {
 // # `rust.Box`

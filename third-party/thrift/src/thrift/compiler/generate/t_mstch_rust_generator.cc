@@ -52,6 +52,8 @@ constexpr auto kRustServiceExnUri =
 constexpr auto kRustExhaustiveUri =
     "facebook.com/thrift/annotation/rust/Exhaustive";
 constexpr auto kRustArcUri = "facebook.com/thrift/annotation/rust/Arc";
+constexpr auto kRustRequestContextUri =
+    "facebook.com/thrift/annotation/rust/RequestContext";
 
 namespace rust {
 
@@ -1029,7 +1031,8 @@ class rust_mstch_service : public mstch_service {
         "rust.mod", mangle_type(snakecase(service_->get_name())));
   }
   mstch::node rust_request_context() {
-    return service_->has_annotation("rust.request_context");
+    return service_->has_annotation("rust.request_context") ||
+        service_->find_structured_annotation_or_null(kRustRequestContextUri);
   }
   mstch::node rust_extended_clients() {
     return rust_extended_services(get_client_import_name);

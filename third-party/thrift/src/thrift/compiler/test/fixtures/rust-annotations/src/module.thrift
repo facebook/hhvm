@@ -81,6 +81,13 @@ struct T8 {
 
 // --
 
+@rust.RequestContext
+service S1 {
+  T6 r();
+}
+
+// --
+
 @rust.Derive{derives = ["Foo", "crate::Bar"]}
 @scope.Transitive
 struct TransitiveDerives {}

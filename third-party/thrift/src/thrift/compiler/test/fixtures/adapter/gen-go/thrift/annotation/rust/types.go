@@ -16,6 +16,99 @@ var _ = strings.Split
 var _ = thrift.ZERO
 
 
+type RequestContext struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &RequestContext{}
+
+func NewRequestContext() *RequestContext {
+    return (&RequestContext{})
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewRequestContext().Set<FieldNameFoo>().Set<FieldNameBar>()
+type RequestContextBuilder struct {
+    obj *RequestContext
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewRequestContext().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewRequestContextBuilder() *RequestContextBuilder {
+    return &RequestContextBuilder{
+        obj: NewRequestContext(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewRequestContext().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *RequestContextBuilder) Emit() *RequestContext {
+    var objCopy RequestContext = *x.obj
+    return &objCopy
+}
+
+func (x *RequestContext) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("RequestContext"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *RequestContext) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *RequestContext) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("RequestContext({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 type Arc struct {
 }
 // Compile time interface enforcer
@@ -1158,6 +1251,7 @@ func (x *ServiceExn) String() string {
 func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)
 }) {
+    registry.RegisterType("facebook.com/thrift/annotation/rust/RequestContext", func() any { return NewRequestContext() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/Arc", func() any { return NewArc() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/Box", func() any { return NewBox() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/Exhaustive", func() any { return NewExhaustive() })

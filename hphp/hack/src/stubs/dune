@@ -69,6 +69,12 @@
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
+ ; this stub file is used by both buck2 and dune
+(rule
+ (target remote_old_decls_ffi.ml)
+ (action
+  (copy# ../facebook/remote_old_decls/stubs/remote_old_decls_ffi.ml remote_old_decls_ffi.ml)))
+
 (library
   (name remote_old_decls_ffi)
   (wrapped false)
@@ -76,6 +82,12 @@
     remote_old_decls_ffi)
   (preprocess
     (pps lwt_ppx ppx_deriving.std)))
+
+; this stub file is used by both buck2 and dune
+(rule
+ (target hh_distc_ffi.ml)
+ (action
+  (copy# ../facebook/hh_distc/check_ffi/stubs/hh_distc_ffi.ml hh_distc_ffi.ml)))
 
 (library
   (name hh_distc_ffi)

@@ -94,6 +94,10 @@ pub struct T5 {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct T6 {
+}
+
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Foo, crate::types::Bar)]
 pub struct TransitiveDerives {
     // This field forces `..Default::default()` when instantiating this
@@ -912,6 +916,97 @@ impl ::fbthrift::metadata::ThriftAnnotations for T5 {
         match field_id {
             1 => {
             },
+            _ => {}
+        }
+
+        None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::T6 {
+    fn default() -> Self {
+        Self {
+            
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::T6 {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("T6")
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::T6 {}
+unsafe impl ::std::marker::Sync for self::T6 {}
+impl ::std::marker::Unpin for self::T6 {}
+
+impl ::fbthrift::GetTType for self::T6 {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::T6
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("T6");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::T6
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            
+        })
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for T6 {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        if type_id == ::std::any::TypeId::of::<rust__types::Exhaustive>() {
+            let mut tmp = Some(rust__types::Exhaustive {
+                ..::std::default::Default::default()
+            });
+            let r: &mut dyn ::std::any::Any = &mut tmp;
+            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            return r.take();
+        }
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
             _ => {}
         }
 

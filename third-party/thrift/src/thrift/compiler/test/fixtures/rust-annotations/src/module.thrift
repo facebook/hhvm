@@ -62,6 +62,11 @@ struct T5 {
 
 // --
 
+@rust.Exhaustive // no `pub _dot_dot_Default_default: self::dot_dot::OtherFields`
+struct T6 {}
+
+// --
+
 @rust.Derive{derives = ["Foo", "crate::Bar"]}
 @scope.Transitive
 struct TransitiveDerives {}

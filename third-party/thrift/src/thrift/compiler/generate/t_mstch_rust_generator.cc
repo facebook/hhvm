@@ -707,12 +707,16 @@ class rust_mstch_program : public mstch_program {
   mstch::node rust_nonexhaustive_structs() {
     for (t_structured* strct : program_->structs_and_unions()) {
       // The is_union is because `union` are also in this collection.
-      if (!strct->is_union() && !strct->has_annotation("rust.exhaustive")) {
+      if (!strct->is_union() && !strct->has_annotation("rust.exhaustive") &&
+          !strct->find_structured_annotation_or_null(
+              "facebook.com/thrift/annotation/rust/Exhaustive")) {
         return true;
       }
     }
     for (t_exception* strct : program_->xceptions()) {
-      if (!strct->has_annotation("rust.exhaustive")) {
+      if (!strct->has_annotation("rust.exhaustive") &&
+          !strct->find_structured_annotation_or_null(
+              "facebook.com/thrift/annotation/rust/Exhaustive")) {
         return true;
       }
     }
@@ -1357,7 +1361,9 @@ class rust_mstch_struct : public mstch_struct {
   }
   mstch::node rust_is_copy() { return struct_->has_annotation("rust.copy"); }
   mstch::node rust_is_exhaustive() {
-    return struct_->has_annotation("rust.exhaustive");
+    return struct_->has_annotation("rust.exhaustive") ||
+        struct_->find_structured_annotation_or_null(
+            "facebook.com/thrift/annotation/rust/Exhaustive");
   }
   mstch::node rust_fields_by_name() {
     auto fields = struct_->fields().copy();
@@ -2030,7 +2036,10 @@ mstch::node mstch_rust_value::struct_fields() {
 
 mstch::node mstch_rust_value::is_exhaustive() {
   auto struct_type = dynamic_cast<const t_struct*>(type_);
-  return struct_type && struct_type->has_annotation("rust.exhaustive");
+  return struct_type &&
+      (struct_type->has_annotation("rust.exhaustive") ||
+       struct_type->find_structured_annotation_or_null(
+           "facebook.com/thrift/annotation/rust/Exhaustive"));
 }
 
 class rust_mstch_const : public mstch_const {

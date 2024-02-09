@@ -25,6 +25,15 @@ namespace go thrift.annotation.rust
 namespace py thrift.annotation.rust
 
 @scope.Struct
+struct Exhaustive {
+// # `rust.Exhaustive`
+//
+// Generated struct definitions generally include an additional member to
+// force use of `..Default::default()` when initalizing instances. Use this
+// annotation to prevent this.
+}
+
+@scope.Struct
 @scope.Typedef
 struct Ord {
 // # `rust.Ord`

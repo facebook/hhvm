@@ -65,7 +65,8 @@ func SocketConn(conn net.Conn) SocketOption {
 
 // NewSocket creates a net.Conn-backed Transport, given a host and port,
 // or an existing connection.
-// 	trans, err := thrift.NewSocket(thrift.SocketAddr("localhost:9090"))
+//
+//	trans, err := thrift.NewSocket(thrift.SocketAddr("localhost:9090"))
 func NewSocket(options ...SocketOption) (*Socket, error) {
 	socket := &Socket{}
 
@@ -76,7 +77,7 @@ func NewSocket(options ...SocketOption) (*Socket, error) {
 		}
 	}
 
-	if socket.addr.String() == "" && socket.conn.RemoteAddr().String() == "" {
+	if socket.addr.String() == "" && socket.conn.RemoteAddr().String() == "" && socket.addr.Network() != "unix" {
 		return nil, errors.New("must supply either an address or a connection")
 	}
 
@@ -150,7 +151,7 @@ func (p *Socket) Close() error {
 	return nil
 }
 
-//Returns the remote address of the socket.
+// Addr returns the remote address of the socket.
 func (p *Socket) Addr() net.Addr {
 	return p.addr
 }

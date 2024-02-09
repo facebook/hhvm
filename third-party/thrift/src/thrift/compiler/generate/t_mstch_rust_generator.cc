@@ -425,6 +425,7 @@ const t_type* step_through_typedefs(const t_type* t, bool break_on_adapter) {
 
 bool node_has_custom_rust_type(const t_named& node) {
   return node.find_structured_annotation_or_null(kRustTypeUri) ||
+      node.find_structured_annotation_or_null(kRustNewTypeUri) ||
       node.has_annotation("rust.type") || node.has_annotation("rust.newtype");
 }
 

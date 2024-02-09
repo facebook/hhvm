@@ -299,6 +299,8 @@ void Operation::snapshotMysqlErrors() {
   }
 }
 
+// TODO: @Aditj Remove this version of setAsyncClientError
+// always require explicitly err code
 void Operation::setAsyncClientError(
     folly::StringPiece msg,
     folly::StringPiece normalizeMsg) {

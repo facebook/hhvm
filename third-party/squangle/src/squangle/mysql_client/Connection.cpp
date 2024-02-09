@@ -125,7 +125,9 @@ std::shared_ptr<MultiQueryOperation> Connection::beginMultiQuery(
       Operation::ConnectionProxy(Operation::OwnedConnection(std::move(conn))),
       std::move(queries));
   if (is_queries_empty) {
-    operation->setAsyncClientError("Given vector of queries is empty");
+    operation->setAsyncClientError(
+        static_cast<uint16_t>(SquangleErrno::SQ_INVALID_API_USAGE),
+        "Given vector of queries is empty");
     operation->cancel();
   }
   return operation;
@@ -140,7 +142,9 @@ std::shared_ptr<MultiQueryStreamOperation> Connection::beginMultiQueryStreaming(
       Operation::ConnectionProxy(Operation::OwnedConnection(std::move(conn))),
       std::move(queries));
   if (is_queries_empty) {
-    operation->setAsyncClientError("Given vector of queries is empty");
+    operation->setAsyncClientError(
+        static_cast<uint16_t>(SquangleErrno::SQ_INVALID_API_USAGE),
+        "Given vector of queries is empty");
     operation->cancel();
   }
   return operation;

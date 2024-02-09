@@ -63,7 +63,7 @@ XboxRequestHandler::~XboxRequestHandler() {
 void XboxRequestHandler::initState(RequestId requestId) {
   hphp_session_init(Treadmill::SessionKind::RpcRequest, nullptr, requestId);
   m_context = g_context.getNoCheck();
-  if (!is_any_cli_mode()) {
+  if (!is_any_cli_mode() && !m_cli) {
     m_context->obStart(uninit_null(),
                        0,
                        OBFlags::Default | OBFlags::OutputDisabled);

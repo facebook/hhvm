@@ -2208,10 +2208,13 @@ void cli_invoke(
     );
   } catch (const Exception& ex) {
     Logger::Warning("CLI Xbox Job failed: %s", ex.what());
+    throw;
   } catch (const std::exception& ex) {
     Logger::FError("CLI Xbox Job failed with C++ exception: {}", ex.what());
+    throw;
   } catch (...) {
     Logger::Error("CLI Xbox Job failed with unknown exception");
+    throw;
   }
 
   FTRACE(1, "{}({}): done.\n", __func__, client);

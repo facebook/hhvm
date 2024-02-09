@@ -116,13 +116,9 @@ const StaticString
   s_worker("worker");
 
 String HHVM_FUNCTION(execution_context) {
+  if (auto t = g_context->getTransport()) return t->describe();
   if (is_cli_server_mode()) return s_clisrv;
-
-  if (auto t = g_context->getTransport()) {
-    return t->describe();
-  }
-
-  return RuntimeOption::ServerExecutionMode() ? s_worker : s_cli;
+  return RO::ServerExecutionMode() ? s_worker : s_cli;
 }
 
 }

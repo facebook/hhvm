@@ -2213,22 +2213,13 @@ checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
 
 [[package]]
 name = "hashbrown"
-version = "0.13.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "43a3c133739dddd0d2990f9a4bdf8eb4b21ef50e4851ca85ab661199821d510e"
-dependencies = [
- "ahash",
- "serde",
-]
-
-[[package]]
-name = "hashbrown"
 version = "0.14.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "290f1a1d9242c78d09ce40a5e87e7554ee637af1351968159f4952f028f75604"
 dependencies = [
  "ahash",
  "allocator-api2",
+ "serde",
 ]
 
 [[package]]
@@ -2660,7 +2651,7 @@ version = "0.1.0"
 dependencies = [
  "bincode",
  "fnv",
- "hashbrown 0.13.2",
+ "hashbrown 0.14.3",
  "indexmap 2.1.0",
  "once_cell",
  "parking_lot",
@@ -4617,7 +4608,7 @@ name = "shmrs"
 version = "0.0.0"
 dependencies = [
  "ahash",
- "hashbrown 0.13.2",
+ "hashbrown 0.14.3",
  "libc",
  "nix",
  "nohash-hasher",

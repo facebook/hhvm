@@ -347,7 +347,7 @@ impl<'shm, K: Hash + Eq, V: CMapValue, S: BuildHasher> CMapRef<'shm, K, V, S> {
         shard: &mut Shard<'shm, 'a, K, V, S>,
         mut f: P,
     ) {
-        let entries_to_invalidate = shard.map.drain_filter(|_, value| !f(value));
+        let entries_to_invalidate = shard.map.extract_if(|_, value| !f(value));
         entries_to_invalidate.for_each(|(_, value)| {
             let data = value.ptr();
             shard.alloc_evictable.mark_as_unreachable(data)

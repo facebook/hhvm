@@ -771,91 +771,7 @@ class MyUnion final  {
     apache::thrift::clear(rhs);
   }
 
-  MyUnion(const MyUnion& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::bool_field:
-      {
-        set_bool_field(rhs.value_.bool_field);
-        break;
-      }
-      case Type::byte_field:
-      {
-        set_byte_field(rhs.value_.byte_field);
-        break;
-      }
-      case Type::short_field:
-      {
-        set_short_field(rhs.value_.short_field);
-        break;
-      }
-      case Type::int_field:
-      {
-        set_int_field(rhs.value_.int_field);
-        break;
-      }
-      case Type::long_field:
-      {
-        set_long_field(rhs.value_.long_field);
-        break;
-      }
-      case Type::float_field:
-      {
-        set_float_field(rhs.value_.float_field);
-        break;
-      }
-      case Type::double_field:
-      {
-        set_double_field(rhs.value_.double_field);
-        break;
-      }
-      case Type::string_field:
-      {
-        set_string_field(rhs.value_.string_field);
-        break;
-      }
-      case Type::binary_field:
-      {
-        set_binary_field(rhs.value_.binary_field);
-        break;
-      }
-      case Type::enum_field:
-      {
-        set_enum_field(rhs.value_.enum_field);
-        break;
-      }
-      case Type::list_field:
-      {
-        set_list_field(rhs.value_.list_field);
-        break;
-      }
-      case Type::set_field:
-      {
-        set_set_field(rhs.value_.set_field);
-        break;
-      }
-      case Type::map_field:
-      {
-        set_map_field(rhs.value_.map_field);
-        break;
-      }
-      case Type::struct_field:
-      {
-        set_struct_field(rhs.value_.struct_field);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  MyUnion(const MyUnion& rhs);
 
   MyUnion& operator=(MyUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -945,92 +861,7 @@ class MyUnion final  {
     return *this;
   }
 
-  MyUnion& operator=(const MyUnion& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::bool_field:
-      {
-        set_bool_field(rhs.value_.bool_field);
-        break;
-      }
-      case Type::byte_field:
-      {
-        set_byte_field(rhs.value_.byte_field);
-        break;
-      }
-      case Type::short_field:
-      {
-        set_short_field(rhs.value_.short_field);
-        break;
-      }
-      case Type::int_field:
-      {
-        set_int_field(rhs.value_.int_field);
-        break;
-      }
-      case Type::long_field:
-      {
-        set_long_field(rhs.value_.long_field);
-        break;
-      }
-      case Type::float_field:
-      {
-        set_float_field(rhs.value_.float_field);
-        break;
-      }
-      case Type::double_field:
-      {
-        set_double_field(rhs.value_.double_field);
-        break;
-      }
-      case Type::string_field:
-      {
-        set_string_field(rhs.value_.string_field);
-        break;
-      }
-      case Type::binary_field:
-      {
-        set_binary_field(rhs.value_.binary_field);
-        break;
-      }
-      case Type::enum_field:
-      {
-        set_enum_field(rhs.value_.enum_field);
-        break;
-      }
-      case Type::list_field:
-      {
-        set_list_field(rhs.value_.list_field);
-        break;
-      }
-      case Type::set_field:
-      {
-        set_set_field(rhs.value_.set_field);
-        break;
-      }
-      case Type::map_field:
-      {
-        set_map_field(rhs.value_.map_field);
-        break;
-      }
-      case Type::struct_field:
-      {
-        set_struct_field(rhs.value_.struct_field);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  MyUnion& operator=(const MyUnion& rhs);
 
   ~MyUnion();
 
@@ -1067,6 +898,7 @@ class MyUnion final  {
     return value_.bool_field;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int8_t& set_byte_field(::std::int8_t t = ::std::int8_t()) {
     using T0 = ::std::int8_t;
@@ -1076,6 +908,7 @@ class MyUnion final  {
     ::new (std::addressof(value_.byte_field)) T(t);
     return value_.byte_field;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int16_t& set_short_field(::std::int16_t t = ::std::int16_t()) {
@@ -1087,6 +920,7 @@ class MyUnion final  {
     return value_.short_field;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_int_field(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -1096,6 +930,7 @@ class MyUnion final  {
     ::new (std::addressof(value_.int_field)) T(t);
     return value_.int_field;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int64_t& set_long_field(::std::int64_t t = ::std::int64_t()) {
@@ -1107,6 +942,7 @@ class MyUnion final  {
     return value_.long_field;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   float& set_float_field(float t = float()) {
     using T0 = float;
@@ -1117,6 +953,7 @@ class MyUnion final  {
     return value_.float_field;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   double& set_double_field(double t = double()) {
     using T0 = double;
@@ -1126,6 +963,7 @@ class MyUnion final  {
     ::new (std::addressof(value_.double_field)) T(t);
     return value_.double_field;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_string_field(::std::string const &t) {
@@ -1154,6 +992,7 @@ class MyUnion final  {
     return value_.string_field;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_binary_field(::std::string const &t) {
     using T0 = ::std::string;
@@ -1181,6 +1020,7 @@ class MyUnion final  {
     return value_.binary_field;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::facebook::thrift::test::terse_write::MyEnum& set_enum_field(::facebook::thrift::test::terse_write::MyEnum t = ::facebook::thrift::test::terse_write::MyEnum()) {
     using T0 = ::facebook::thrift::test::terse_write::MyEnum;
@@ -1190,6 +1030,7 @@ class MyUnion final  {
     ::new (std::addressof(value_.enum_field)) T(t);
     return value_.enum_field;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::std::int16_t>& set_list_field(::std::vector<::std::int16_t> const &t) {

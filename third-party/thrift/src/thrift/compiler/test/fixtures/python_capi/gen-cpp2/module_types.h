@@ -5717,56 +5717,7 @@ class Shallot final  {
     apache::thrift::clear(rhs);
   }
 
-  Shallot(const Shallot& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::myEnum:
-      {
-        set_myEnum(rhs.value_.myEnum);
-        break;
-      }
-      case Type::myStruct:
-      {
-        set_myStruct(rhs.value_.myStruct);
-        break;
-      }
-      case Type::intSet:
-      {
-        set_intSet(rhs.value_.intSet);
-        break;
-      }
-      case Type::myString:
-      {
-        set_myString(rhs.value_.myString);
-        break;
-      }
-      case Type::doubleList:
-      {
-        set_doubleList(rhs.value_.doubleList);
-        break;
-      }
-      case Type::strMap:
-      {
-        set_strMap(rhs.value_.strMap);
-        break;
-      }
-      case Type::adaptedInt:
-      {
-        set_adaptedInt(rhs.value_.adaptedInt);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  Shallot(const Shallot& rhs);
 
   Shallot& operator=(Shallot&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -5821,57 +5772,7 @@ class Shallot final  {
     return *this;
   }
 
-  Shallot& operator=(const Shallot& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::myEnum:
-      {
-        set_myEnum(rhs.value_.myEnum);
-        break;
-      }
-      case Type::myStruct:
-      {
-        set_myStruct(rhs.value_.myStruct);
-        break;
-      }
-      case Type::intSet:
-      {
-        set_intSet(rhs.value_.intSet);
-        break;
-      }
-      case Type::myString:
-      {
-        set_myString(rhs.value_.myString);
-        break;
-      }
-      case Type::doubleList:
-      {
-        set_doubleList(rhs.value_.doubleList);
-        break;
-      }
-      case Type::strMap:
-      {
-        set_strMap(rhs.value_.strMap);
-        break;
-      }
-      case Type::adaptedInt:
-      {
-        set_adaptedInt(rhs.value_.adaptedInt);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  Shallot& operator=(const Shallot& rhs);
 
   ~Shallot();
 
@@ -5900,6 +5801,7 @@ class Shallot final  {
     ::new (std::addressof(value_.myEnum)) T(t);
     return value_.myEnum;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::python_capi::PrimitiveStruct& set_myStruct(::test::fixtures::python_capi::PrimitiveStruct const &t) {
@@ -5982,6 +5884,7 @@ class Shallot final  {
     return value_.myString;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<double>& set_doubleList(::std::vector<double> const &t) {
     using T0 = ::std::vector<double>;
@@ -6045,6 +5948,7 @@ class Shallot final  {
     ::new (std::addressof(value_.adaptedInt)) T(t);
     return value_.adaptedInt;
   }
+
 
   ::test::fixtures::python_capi::MyEnum const& get_myEnum() const {
     if (getType() != Type::myEnum) {

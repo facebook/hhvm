@@ -263,51 +263,7 @@ class ComplexUnion final  {
     apache::thrift::clear(rhs);
   }
 
-  ComplexUnion(const ComplexUnion& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::intValue:
-      {
-        set_intValue(rhs.value_.intValue);
-        break;
-      }
-      case Type::stringValue:
-      {
-        set_stringValue(rhs.value_.stringValue);
-        break;
-      }
-      case Type::intListValue:
-      {
-        set_intListValue(rhs.value_.intListValue);
-        break;
-      }
-      case Type::stringListValue:
-      {
-        set_stringListValue(rhs.value_.stringListValue);
-        break;
-      }
-      case Type::typedefValue:
-      {
-        set_typedefValue(rhs.value_.typedefValue);
-        break;
-      }
-      case Type::stringRef:
-      {
-        set_stringRef(*rhs.value_.stringRef);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  ComplexUnion(const ComplexUnion& rhs);
 
   ComplexUnion& operator=(ComplexUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -357,52 +313,7 @@ class ComplexUnion final  {
     return *this;
   }
 
-  ComplexUnion& operator=(const ComplexUnion& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::intValue:
-      {
-        set_intValue(rhs.value_.intValue);
-        break;
-      }
-      case Type::stringValue:
-      {
-        set_stringValue(rhs.value_.stringValue);
-        break;
-      }
-      case Type::intListValue:
-      {
-        set_intListValue(rhs.value_.intListValue);
-        break;
-      }
-      case Type::stringListValue:
-      {
-        set_stringListValue(rhs.value_.stringListValue);
-        break;
-      }
-      case Type::typedefValue:
-      {
-        set_typedefValue(rhs.value_.typedefValue);
-        break;
-      }
-      case Type::stringRef:
-      {
-        set_stringRef(*rhs.value_.stringRef);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  ComplexUnion& operator=(const ComplexUnion& rhs);
 
   ~ComplexUnion();
 
@@ -431,6 +342,7 @@ class ComplexUnion final  {
     return value_.intValue;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_stringValue(::std::string const &t) {
     using T0 = ::std::string;
@@ -457,6 +369,7 @@ class ComplexUnion final  {
     ::new (std::addressof(value_.stringValue)) ::std::string(std::forward<T>(t)...);
     return value_.stringValue;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::std::int64_t>& set_intListValue(::std::vector<::std::int64_t> const &t) {
@@ -563,6 +476,13 @@ class ComplexUnion final  {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::stringRef);
     ::new (std::addressof(value_.stringRef)) ::std::unique_ptr<::std::string>(new ::std::unique_ptr<::std::string>::element_type(std::forward<T>(t)...));
+    return value_.stringRef;
+  }
+
+  ::std::unique_ptr<::std::string>& set_stringRef(::std::unique_ptr<::std::string> t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::stringRef);
+    ::new (std::addressof(value_.stringRef)) ::std::unique_ptr<::std::string>(std::move(t));
     return value_.stringRef;
   }
 
@@ -898,31 +818,7 @@ class ListUnion final  {
     apache::thrift::clear(rhs);
   }
 
-  ListUnion(const ListUnion& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::intListValue:
-      {
-        set_intListValue(rhs.value_.intListValue);
-        break;
-      }
-      case Type::stringListValue:
-      {
-        set_stringListValue(rhs.value_.stringListValue);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  ListUnion(const ListUnion& rhs);
 
   ListUnion& operator=(ListUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -952,32 +848,7 @@ class ListUnion final  {
     return *this;
   }
 
-  ListUnion& operator=(const ListUnion& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::intListValue:
-      {
-        set_intListValue(rhs.value_.intListValue);
-        break;
-      }
-      case Type::stringListValue:
-      {
-        set_stringListValue(rhs.value_.stringListValue);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  ListUnion& operator=(const ListUnion& rhs);
 
   ~ListUnion();
 
@@ -1234,31 +1105,7 @@ class DataUnion final  {
     apache::thrift::clear(rhs);
   }
 
-  DataUnion(const DataUnion& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::binaryData:
-      {
-        set_binaryData(rhs.value_.binaryData);
-        break;
-      }
-      case Type::stringData:
-      {
-        set_stringData(rhs.value_.stringData);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  DataUnion(const DataUnion& rhs);
 
   DataUnion& operator=(DataUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -1288,32 +1135,7 @@ class DataUnion final  {
     return *this;
   }
 
-  DataUnion& operator=(const DataUnion& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::binaryData:
-      {
-        set_binaryData(rhs.value_.binaryData);
-        break;
-      }
-      case Type::stringData:
-      {
-        set_stringData(rhs.value_.stringData);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  DataUnion& operator=(const DataUnion& rhs);
 
   ~DataUnion();
 
@@ -1355,6 +1177,7 @@ class DataUnion final  {
     return value_.binaryData;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_stringData(::std::string const &t) {
     using T0 = ::std::string;
@@ -1381,6 +1204,7 @@ class DataUnion final  {
     ::new (std::addressof(value_.stringData)) ::std::string(std::forward<T>(t)...);
     return value_.stringData;
   }
+
 
   ::std::string const& get_binaryData() const {
     if (getType() != Type::binaryData) {
@@ -1832,31 +1656,7 @@ class ValUnion final  {
     apache::thrift::clear(rhs);
   }
 
-  ValUnion(const ValUnion& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::v1:
-      {
-        set_v1(rhs.value_.v1);
-        break;
-      }
-      case Type::v2:
-      {
-        set_v2(rhs.value_.v2);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  ValUnion(const ValUnion& rhs);
 
   ValUnion& operator=(ValUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -1886,32 +1686,7 @@ class ValUnion final  {
     return *this;
   }
 
-  ValUnion& operator=(const ValUnion& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::v1:
-      {
-        set_v1(rhs.value_.v1);
-        break;
-      }
-      case Type::v2:
-      {
-        set_v2(rhs.value_.v2);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  ValUnion& operator=(const ValUnion& rhs);
 
   ~ValUnion();
 
@@ -2168,31 +1943,7 @@ class VirtualComplexUnion  {
     apache::thrift::clear(rhs);
   }
 
-  VirtualComplexUnion(const VirtualComplexUnion& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::thingOne:
-      {
-        set_thingOne(rhs.value_.thingOne);
-        break;
-      }
-      case Type::thingTwo:
-      {
-        set_thingTwo(rhs.value_.thingTwo);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  VirtualComplexUnion(const VirtualComplexUnion& rhs);
 
   VirtualComplexUnion& operator=(VirtualComplexUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -2222,32 +1973,7 @@ class VirtualComplexUnion  {
     return *this;
   }
 
-  VirtualComplexUnion& operator=(const VirtualComplexUnion& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::thingOne:
-      {
-        set_thingOne(rhs.value_.thingOne);
-        break;
-      }
-      case Type::thingTwo:
-      {
-        set_thingTwo(rhs.value_.thingTwo);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  VirtualComplexUnion& operator=(const VirtualComplexUnion& rhs);
 
   virtual ~VirtualComplexUnion();
 
@@ -2289,6 +2015,7 @@ class VirtualComplexUnion  {
     return value_.thingOne;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_thingTwo(::std::string const &t) {
     using T0 = ::std::string;
@@ -2315,6 +2042,7 @@ class VirtualComplexUnion  {
     ::new (std::addressof(value_.thingTwo)) ::std::string(std::forward<T>(t)...);
     return value_.thingTwo;
   }
+
 
   ::std::string const& get_thingOne() const {
     if (getType() != Type::thingOne) {

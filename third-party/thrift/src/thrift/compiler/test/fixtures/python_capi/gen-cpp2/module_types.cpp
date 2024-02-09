@@ -2098,6 +2098,70 @@ void Shallot::__fbthrift_clear() {
 bool Shallot::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  Shallot::Shallot(const Shallot& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::myEnum:
+        set_myEnum(rhs.value_.myEnum);
+        break;
+      case Type::myStruct:
+        set_myStruct(rhs.value_.myStruct);
+        break;
+      case Type::intSet:
+        set_intSet(rhs.value_.intSet);
+        break;
+      case Type::myString:
+        set_myString(rhs.value_.myString);
+        break;
+      case Type::doubleList:
+        set_doubleList(rhs.value_.doubleList);
+        break;
+      case Type::strMap:
+        set_strMap(rhs.value_.strMap);
+        break;
+      case Type::adaptedInt:
+        set_adaptedInt(rhs.value_.adaptedInt);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    Shallot&Shallot::operator=(const Shallot& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::myEnum:
+        set_myEnum(rhs.value_.myEnum);
+        break;
+      case Type::myStruct:
+        set_myStruct(rhs.value_.myStruct);
+        break;
+      case Type::intSet:
+        set_intSet(rhs.value_.intSet);
+        break;
+      case Type::myString:
+        set_myString(rhs.value_.myString);
+        break;
+      case Type::doubleList:
+        set_doubleList(rhs.value_.doubleList);
+        break;
+      case Type::strMap:
+        set_strMap(rhs.value_.strMap);
+        break;
+      case Type::adaptedInt:
+        set_adaptedInt(rhs.value_.adaptedInt);
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool Shallot::operator==(const Shallot& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);

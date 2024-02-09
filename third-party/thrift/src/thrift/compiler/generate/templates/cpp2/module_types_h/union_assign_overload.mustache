@@ -45,32 +45,5 @@
   }
 <%^struct:cpp_noncopyable%>
 
-  <%struct:cpp_underlying_name%>& operator=(const <%struct:cpp_underlying_name%>& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-<%#struct:fields%>
-      case Type::<%field:cpp_name%>:
-      {
-<%#field:cpp_ref?%>
-        set_<%field:cpp_name%>(*rhs.value_.<%field:cpp_name%>);
-<%/field:cpp_ref?%>
-<%^field:cpp_ref?%>
-        set_<%field:cpp_name%>(rhs.value_.<%field:cpp_name%>);
-<%/field:cpp_ref?%>
-        break;
-      }
-<%/struct:fields%>
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  <%struct:cpp_underlying_name%>& operator=(const <%struct:cpp_underlying_name%>& rhs);
 <%/struct:cpp_noncopyable%>

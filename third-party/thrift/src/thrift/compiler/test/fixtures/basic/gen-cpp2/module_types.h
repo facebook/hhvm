@@ -994,41 +994,7 @@ class MyUnion final  {
     apache::thrift::clear(rhs);
   }
 
-  MyUnion(const MyUnion& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::myEnum:
-      {
-        set_myEnum(rhs.value_.myEnum);
-        break;
-      }
-      case Type::myStruct:
-      {
-        set_myStruct(rhs.value_.myStruct);
-        break;
-      }
-      case Type::myDataItem:
-      {
-        set_myDataItem(rhs.value_.myDataItem);
-        break;
-      }
-      case Type::floatSet:
-      {
-        set_floatSet(rhs.value_.floatSet);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  MyUnion(const MyUnion& rhs);
 
   MyUnion& operator=(MyUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -1068,42 +1034,7 @@ class MyUnion final  {
     return *this;
   }
 
-  MyUnion& operator=(const MyUnion& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::myEnum:
-      {
-        set_myEnum(rhs.value_.myEnum);
-        break;
-      }
-      case Type::myStruct:
-      {
-        set_myStruct(rhs.value_.myStruct);
-        break;
-      }
-      case Type::myDataItem:
-      {
-        set_myDataItem(rhs.value_.myDataItem);
-        break;
-      }
-      case Type::floatSet:
-      {
-        set_floatSet(rhs.value_.floatSet);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  MyUnion& operator=(const MyUnion& rhs);
 
   ~MyUnion();
 
@@ -1129,6 +1060,7 @@ class MyUnion final  {
     ::new (std::addressof(value_.myEnum)) T(t);
     return value_.myEnum;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::basic::MyStruct& set_myStruct(::test::fixtures::basic::MyStruct const &t) {
@@ -1614,26 +1546,7 @@ class UnionToBeRenamed final  {
     apache::thrift::clear(rhs);
   }
 
-  UnionToBeRenamed(const UnionToBeRenamed& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::reserved_field:
-      {
-        set_reserved_field(rhs.value_.reserved_field);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  UnionToBeRenamed(const UnionToBeRenamed& rhs);
 
   UnionToBeRenamed& operator=(UnionToBeRenamed&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -1658,27 +1571,7 @@ class UnionToBeRenamed final  {
     return *this;
   }
 
-  UnionToBeRenamed& operator=(const UnionToBeRenamed& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::reserved_field:
-      {
-        set_reserved_field(rhs.value_.reserved_field);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  UnionToBeRenamed& operator=(const UnionToBeRenamed& rhs);
 
 
   union storage_type {
@@ -1698,6 +1591,7 @@ class UnionToBeRenamed final  {
     ::new (std::addressof(value_.reserved_field)) T(t);
     return value_.reserved_field;
   }
+
 
   ::std::int32_t const& get_reserved_field() const {
     if (getType() != Type::reserved_field) {

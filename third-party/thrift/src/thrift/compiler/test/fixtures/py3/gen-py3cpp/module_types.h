@@ -927,26 +927,7 @@ class AdaptedUnion final  {
     apache::thrift::clear(rhs);
   }
 
-  AdaptedUnion(const AdaptedUnion& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::best:
-      {
-        set_best(rhs.value_.best);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  AdaptedUnion(const AdaptedUnion& rhs);
 
   AdaptedUnion& operator=(AdaptedUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -971,27 +952,7 @@ class AdaptedUnion final  {
     return *this;
   }
 
-  AdaptedUnion& operator=(const AdaptedUnion& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::best:
-      {
-        set_best(rhs.value_.best);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  AdaptedUnion& operator=(const AdaptedUnion& rhs);
 
 
   union storage_type {
@@ -1011,6 +972,7 @@ class AdaptedUnion final  {
     ::new (std::addressof(value_.best)) T(t);
     return value_.best;
   }
+
 
   ::std::int16_t const& get_best() const {
     if (getType() != Type::best) {
@@ -2486,26 +2448,7 @@ class BinaryUnion final  {
     apache::thrift::clear(rhs);
   }
 
-  BinaryUnion(const BinaryUnion& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::iobuf_val:
-      {
-        set_iobuf_val(rhs.value_.iobuf_val);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  BinaryUnion(const BinaryUnion& rhs);
 
   BinaryUnion& operator=(BinaryUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -2530,27 +2473,7 @@ class BinaryUnion final  {
     return *this;
   }
 
-  BinaryUnion& operator=(const BinaryUnion& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::iobuf_val:
-      {
-        set_iobuf_val(rhs.value_.iobuf_val);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  BinaryUnion& operator=(const BinaryUnion& rhs);
 
   ~BinaryUnion();
 
@@ -2587,6 +2510,7 @@ class BinaryUnion final  {
     ::new (std::addressof(value_.iobuf_val)) ::py3::simple::IOBuf(std::forward<T>(t)...);
     return value_.iobuf_val;
   }
+
 
   ::py3::simple::IOBuf const& get_iobuf_val() const {
     if (getType() != Type::iobuf_val) {

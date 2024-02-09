@@ -4245,51 +4245,7 @@ class MyUnion final  {
     apache::thrift::clear(rhs);
   }
 
-  MyUnion(const MyUnion& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::myEnum:
-      {
-        set_myEnum(rhs.value_.myEnum);
-        break;
-      }
-      case Type::myStruct:
-      {
-        set_myStruct(rhs.value_.myStruct);
-        break;
-      }
-      case Type::myDataItem:
-      {
-        set_myDataItem(rhs.value_.myDataItem);
-        break;
-      }
-      case Type::complexNestedStruct:
-      {
-        set_complexNestedStruct(rhs.value_.complexNestedStruct);
-        break;
-      }
-      case Type::longValue:
-      {
-        set_longValue(rhs.value_.longValue);
-        break;
-      }
-      case Type::intValue:
-      {
-        set_intValue(rhs.value_.intValue);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  MyUnion(const MyUnion& rhs);
 
   MyUnion& operator=(MyUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -4339,52 +4295,7 @@ class MyUnion final  {
     return *this;
   }
 
-  MyUnion& operator=(const MyUnion& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::myEnum:
-      {
-        set_myEnum(rhs.value_.myEnum);
-        break;
-      }
-      case Type::myStruct:
-      {
-        set_myStruct(rhs.value_.myStruct);
-        break;
-      }
-      case Type::myDataItem:
-      {
-        set_myDataItem(rhs.value_.myDataItem);
-        break;
-      }
-      case Type::complexNestedStruct:
-      {
-        set_complexNestedStruct(rhs.value_.complexNestedStruct);
-        break;
-      }
-      case Type::longValue:
-      {
-        set_longValue(rhs.value_.longValue);
-        break;
-      }
-      case Type::intValue:
-      {
-        set_intValue(rhs.value_.intValue);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  MyUnion& operator=(const MyUnion& rhs);
 
   ~MyUnion();
 
@@ -4412,6 +4323,7 @@ class MyUnion final  {
     ::new (std::addressof(value_.myEnum)) T(t);
     return value_.myEnum;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::MyStruct& set_myStruct(::cpp2::MyStruct const &t) {
@@ -4504,6 +4416,7 @@ class MyUnion final  {
     return value_.longValue;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_intValue(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -4513,6 +4426,7 @@ class MyUnion final  {
     ::new (std::addressof(value_.intValue)) T(t);
     return value_.intValue;
   }
+
 
   ::cpp2::MyEnum const& get_myEnum() const {
     if (getType() != Type::myEnum) {
@@ -6732,41 +6646,7 @@ class MyUnionFloatFieldThrowExp final  {
     apache::thrift::clear(rhs);
   }
 
-  MyUnionFloatFieldThrowExp(const MyUnionFloatFieldThrowExp& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::myEnum:
-      {
-        set_myEnum(rhs.value_.myEnum);
-        break;
-      }
-      case Type::setFloat:
-      {
-        set_setFloat(rhs.value_.setFloat);
-        break;
-      }
-      case Type::myDataItem:
-      {
-        set_myDataItem(rhs.value_.myDataItem);
-        break;
-      }
-      case Type::complexNestedStruct:
-      {
-        set_complexNestedStruct(rhs.value_.complexNestedStruct);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  MyUnionFloatFieldThrowExp(const MyUnionFloatFieldThrowExp& rhs);
 
   MyUnionFloatFieldThrowExp& operator=(MyUnionFloatFieldThrowExp&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -6806,42 +6686,7 @@ class MyUnionFloatFieldThrowExp final  {
     return *this;
   }
 
-  MyUnionFloatFieldThrowExp& operator=(const MyUnionFloatFieldThrowExp& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::myEnum:
-      {
-        set_myEnum(rhs.value_.myEnum);
-        break;
-      }
-      case Type::setFloat:
-      {
-        set_setFloat(rhs.value_.setFloat);
-        break;
-      }
-      case Type::myDataItem:
-      {
-        set_myDataItem(rhs.value_.myDataItem);
-        break;
-      }
-      case Type::complexNestedStruct:
-      {
-        set_complexNestedStruct(rhs.value_.complexNestedStruct);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  MyUnionFloatFieldThrowExp& operator=(const MyUnionFloatFieldThrowExp& rhs);
 
   ~MyUnionFloatFieldThrowExp();
 
@@ -6867,6 +6712,7 @@ class MyUnionFloatFieldThrowExp final  {
     ::new (std::addressof(value_.myEnum)) T(t);
     return value_.myEnum;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::std::vector<float>>& set_setFloat(::std::vector<::std::vector<float>> const &t) {

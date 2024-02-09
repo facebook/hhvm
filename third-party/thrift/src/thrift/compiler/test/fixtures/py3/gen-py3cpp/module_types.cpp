@@ -607,6 +607,34 @@ void AdaptedUnion::__fbthrift_clear() {
 bool AdaptedUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  AdaptedUnion::AdaptedUnion(const AdaptedUnion& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::best:
+        set_best(rhs.value_.best);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    AdaptedUnion&AdaptedUnion::operator=(const AdaptedUnion& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::best:
+        set_best(rhs.value_.best);
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool AdaptedUnion::operator==(const AdaptedUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
@@ -977,6 +1005,34 @@ void BinaryUnion::__fbthrift_clear() {
 bool BinaryUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  BinaryUnion::BinaryUnion(const BinaryUnion& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::iobuf_val:
+        set_iobuf_val(rhs.value_.iobuf_val);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    BinaryUnion&BinaryUnion::operator=(const BinaryUnion& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::iobuf_val:
+        set_iobuf_val(rhs.value_.iobuf_val);
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 
 void swap(BinaryUnion& a, BinaryUnion& b) {

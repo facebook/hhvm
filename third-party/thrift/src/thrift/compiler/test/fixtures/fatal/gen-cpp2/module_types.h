@@ -1171,41 +1171,7 @@ class union1 final  {
     apache::thrift::clear(rhs);
   }
 
-  union1(const union1& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::ui:
-      {
-        set_ui(rhs.value_.ui);
-        break;
-      }
-      case Type::ud:
-      {
-        set_ud(rhs.value_.ud);
-        break;
-      }
-      case Type::us:
-      {
-        set_us(rhs.value_.us);
-        break;
-      }
-      case Type::ue:
-      {
-        set_ue(rhs.value_.ue);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  union1(const union1& rhs);
 
   union1& operator=(union1&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -1245,42 +1211,7 @@ class union1 final  {
     return *this;
   }
 
-  union1& operator=(const union1& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::ui:
-      {
-        set_ui(rhs.value_.ui);
-        break;
-      }
-      case Type::ud:
-      {
-        set_ud(rhs.value_.ud);
-        break;
-      }
-      case Type::us:
-      {
-        set_us(rhs.value_.us);
-        break;
-      }
-      case Type::ue:
-      {
-        set_ue(rhs.value_.ue);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  union1& operator=(const union1& rhs);
 
   ~union1();
 
@@ -1307,6 +1238,7 @@ class union1 final  {
     return value_.ui;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   double& set_ud(double t = double()) {
     using T0 = double;
@@ -1316,6 +1248,7 @@ class union1 final  {
     ::new (std::addressof(value_.ud)) T(t);
     return value_.ud;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_us(::std::string const &t) {
@@ -1344,6 +1277,7 @@ class union1 final  {
     return value_.us;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test_cpp2::cpp_reflection::enum1& set_ue(::test_cpp2::cpp_reflection::enum1 t = ::test_cpp2::cpp_reflection::enum1()) {
     using T0 = ::test_cpp2::cpp_reflection::enum1;
@@ -1353,6 +1287,7 @@ class union1 final  {
     ::new (std::addressof(value_.ue)) T(t);
     return value_.ue;
   }
+
 
   ::std::int32_t const& get_ui() const {
     if (getType() != Type::ui) {
@@ -1630,41 +1565,7 @@ class union2 final  {
     apache::thrift::clear(rhs);
   }
 
-  union2(const union2& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::ui_2:
-      {
-        set_ui_2(rhs.value_.ui_2);
-        break;
-      }
-      case Type::ud_2:
-      {
-        set_ud_2(rhs.value_.ud_2);
-        break;
-      }
-      case Type::us_2:
-      {
-        set_us_2(rhs.value_.us_2);
-        break;
-      }
-      case Type::ue_2:
-      {
-        set_ue_2(rhs.value_.ue_2);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  union2(const union2& rhs);
 
   union2& operator=(union2&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -1704,42 +1605,7 @@ class union2 final  {
     return *this;
   }
 
-  union2& operator=(const union2& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::ui_2:
-      {
-        set_ui_2(rhs.value_.ui_2);
-        break;
-      }
-      case Type::ud_2:
-      {
-        set_ud_2(rhs.value_.ud_2);
-        break;
-      }
-      case Type::us_2:
-      {
-        set_us_2(rhs.value_.us_2);
-        break;
-      }
-      case Type::ue_2:
-      {
-        set_ue_2(rhs.value_.ue_2);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  union2& operator=(const union2& rhs);
 
   ~union2();
 
@@ -1766,6 +1632,7 @@ class union2 final  {
     return value_.ui_2;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   double& set_ud_2(double t = double()) {
     using T0 = double;
@@ -1775,6 +1642,7 @@ class union2 final  {
     ::new (std::addressof(value_.ud_2)) T(t);
     return value_.ud_2;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_us_2(::std::string const &t) {
@@ -1803,6 +1671,7 @@ class union2 final  {
     return value_.us_2;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test_cpp2::cpp_reflection::enum1& set_ue_2(::test_cpp2::cpp_reflection::enum1 t = ::test_cpp2::cpp_reflection::enum1()) {
     using T0 = ::test_cpp2::cpp_reflection::enum1;
@@ -1812,6 +1681,7 @@ class union2 final  {
     ::new (std::addressof(value_.ue_2)) T(t);
     return value_.ue_2;
   }
+
 
   ::std::int32_t const& get_ui_2() const {
     if (getType() != Type::ui_2) {
@@ -2089,41 +1959,7 @@ class union3 final  {
     apache::thrift::clear(rhs);
   }
 
-  union3(const union3& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::ui_3:
-      {
-        set_ui_3(rhs.value_.ui_3);
-        break;
-      }
-      case Type::ud_3:
-      {
-        set_ud_3(rhs.value_.ud_3);
-        break;
-      }
-      case Type::us_3:
-      {
-        set_us_3(rhs.value_.us_3);
-        break;
-      }
-      case Type::ue_3:
-      {
-        set_ue_3(rhs.value_.ue_3);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  union3(const union3& rhs);
 
   union3& operator=(union3&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -2163,42 +1999,7 @@ class union3 final  {
     return *this;
   }
 
-  union3& operator=(const union3& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::ui_3:
-      {
-        set_ui_3(rhs.value_.ui_3);
-        break;
-      }
-      case Type::ud_3:
-      {
-        set_ud_3(rhs.value_.ud_3);
-        break;
-      }
-      case Type::us_3:
-      {
-        set_us_3(rhs.value_.us_3);
-        break;
-      }
-      case Type::ue_3:
-      {
-        set_ue_3(rhs.value_.ue_3);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  union3& operator=(const union3& rhs);
 
   ~union3();
 
@@ -2225,6 +2026,7 @@ class union3 final  {
     return value_.ui_3;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   double& set_ud_3(double t = double()) {
     using T0 = double;
@@ -2234,6 +2036,7 @@ class union3 final  {
     ::new (std::addressof(value_.ud_3)) T(t);
     return value_.ud_3;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_us_3(::std::string const &t) {
@@ -2262,6 +2065,7 @@ class union3 final  {
     return value_.us_3;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test_cpp2::cpp_reflection::enum1& set_ue_3(::test_cpp2::cpp_reflection::enum1 t = ::test_cpp2::cpp_reflection::enum1()) {
     using T0 = ::test_cpp2::cpp_reflection::enum1;
@@ -2271,6 +2075,7 @@ class union3 final  {
     ::new (std::addressof(value_.ue_3)) T(t);
     return value_.ue_3;
   }
+
 
   ::std::int32_t const& get_ui_3() const {
     if (getType() != Type::ui_3) {
@@ -2765,46 +2570,7 @@ class unionA final  {
     apache::thrift::clear(rhs);
   }
 
-  unionA(const unionA& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::i:
-      {
-        set_i(rhs.value_.i);
-        break;
-      }
-      case Type::d:
-      {
-        set_d(rhs.value_.d);
-        break;
-      }
-      case Type::s:
-      {
-        set_s(rhs.value_.s);
-        break;
-      }
-      case Type::e:
-      {
-        set_e(rhs.value_.e);
-        break;
-      }
-      case Type::a:
-      {
-        set_a(rhs.value_.a);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  unionA(const unionA& rhs);
 
   unionA& operator=(unionA&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -2849,47 +2615,7 @@ class unionA final  {
     return *this;
   }
 
-  unionA& operator=(const unionA& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::i:
-      {
-        set_i(rhs.value_.i);
-        break;
-      }
-      case Type::d:
-      {
-        set_d(rhs.value_.d);
-        break;
-      }
-      case Type::s:
-      {
-        set_s(rhs.value_.s);
-        break;
-      }
-      case Type::e:
-      {
-        set_e(rhs.value_.e);
-        break;
-      }
-      case Type::a:
-      {
-        set_a(rhs.value_.a);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  unionA& operator=(const unionA& rhs);
 
   ~unionA();
 
@@ -2917,6 +2643,7 @@ class unionA final  {
     return value_.i;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   double& set_d(double t = double()) {
     using T0 = double;
@@ -2926,6 +2653,7 @@ class unionA final  {
     ::new (std::addressof(value_.d)) T(t);
     return value_.d;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_s(::std::string const &t) {
@@ -2954,6 +2682,7 @@ class unionA final  {
     return value_.s;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test_cpp2::cpp_reflection::enum1& set_e(::test_cpp2::cpp_reflection::enum1 t = ::test_cpp2::cpp_reflection::enum1()) {
     using T0 = ::test_cpp2::cpp_reflection::enum1;
@@ -2963,6 +2692,7 @@ class unionA final  {
     ::new (std::addressof(value_.e)) T(t);
     return value_.e;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test_cpp2::cpp_reflection::structA& set_a(::test_cpp2::cpp_reflection::structA const &t) {
@@ -8847,161 +8577,7 @@ class union_with_special_names final  {
     apache::thrift::clear(rhs);
   }
 
-  union_with_special_names(const union_with_special_names& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::get:
-      {
-        set_get(rhs.value_.get);
-        break;
-      }
-      case Type::getter:
-      {
-        set_getter(rhs.value_.getter);
-        break;
-      }
-      case Type::lists:
-      {
-        set_lists(rhs.value_.lists);
-        break;
-      }
-      case Type::maps:
-      {
-        set_maps(rhs.value_.maps);
-        break;
-      }
-      case Type::name:
-      {
-        set_name(rhs.value_.name);
-        break;
-      }
-      case Type::name_to_value:
-      {
-        set_name_to_value(rhs.value_.name_to_value);
-        break;
-      }
-      case Type::names:
-      {
-        set_names(rhs.value_.names);
-        break;
-      }
-      case Type::prefix_tree:
-      {
-        set_prefix_tree(rhs.value_.prefix_tree);
-        break;
-      }
-      case Type::sets:
-      {
-        set_sets(rhs.value_.sets);
-        break;
-      }
-      case Type::setter:
-      {
-        set_setter(rhs.value_.setter);
-        break;
-      }
-      case Type::str:
-      {
-        set_str(rhs.value_.str);
-        break;
-      }
-      case Type::strings:
-      {
-        set_strings(rhs.value_.strings);
-        break;
-      }
-      case Type::type:
-      {
-        set_type(rhs.value_.type);
-        break;
-      }
-      case Type::value:
-      {
-        set_value(rhs.value_.value);
-        break;
-      }
-      case Type::value_to_name:
-      {
-        set_value_to_name(rhs.value_.value_to_name);
-        break;
-      }
-      case Type::values:
-      {
-        set_values(rhs.value_.values);
-        break;
-      }
-      case Type::id:
-      {
-        set_id(rhs.value_.id);
-        break;
-      }
-      case Type::ids:
-      {
-        set_ids(rhs.value_.ids);
-        break;
-      }
-      case Type::descriptor:
-      {
-        set_descriptor(rhs.value_.descriptor);
-        break;
-      }
-      case Type::descriptors:
-      {
-        set_descriptors(rhs.value_.descriptors);
-        break;
-      }
-      case Type::key:
-      {
-        set_key(rhs.value_.key);
-        break;
-      }
-      case Type::keys:
-      {
-        set_keys(rhs.value_.keys);
-        break;
-      }
-      case Type::annotation:
-      {
-        set_annotation(rhs.value_.annotation);
-        break;
-      }
-      case Type::annotations:
-      {
-        set_annotations(rhs.value_.annotations);
-        break;
-      }
-      case Type::member:
-      {
-        set_member(rhs.value_.member);
-        break;
-      }
-      case Type::members:
-      {
-        set_members(rhs.value_.members);
-        break;
-      }
-      case Type::field:
-      {
-        set_field(rhs.value_.field);
-        break;
-      }
-      case Type::fields:
-      {
-        set_fields(rhs.value_.fields);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  union_with_special_names(const union_with_special_names& rhs);
 
   union_with_special_names& operator=(union_with_special_names&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -9161,162 +8737,7 @@ class union_with_special_names final  {
     return *this;
   }
 
-  union_with_special_names& operator=(const union_with_special_names& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::get:
-      {
-        set_get(rhs.value_.get);
-        break;
-      }
-      case Type::getter:
-      {
-        set_getter(rhs.value_.getter);
-        break;
-      }
-      case Type::lists:
-      {
-        set_lists(rhs.value_.lists);
-        break;
-      }
-      case Type::maps:
-      {
-        set_maps(rhs.value_.maps);
-        break;
-      }
-      case Type::name:
-      {
-        set_name(rhs.value_.name);
-        break;
-      }
-      case Type::name_to_value:
-      {
-        set_name_to_value(rhs.value_.name_to_value);
-        break;
-      }
-      case Type::names:
-      {
-        set_names(rhs.value_.names);
-        break;
-      }
-      case Type::prefix_tree:
-      {
-        set_prefix_tree(rhs.value_.prefix_tree);
-        break;
-      }
-      case Type::sets:
-      {
-        set_sets(rhs.value_.sets);
-        break;
-      }
-      case Type::setter:
-      {
-        set_setter(rhs.value_.setter);
-        break;
-      }
-      case Type::str:
-      {
-        set_str(rhs.value_.str);
-        break;
-      }
-      case Type::strings:
-      {
-        set_strings(rhs.value_.strings);
-        break;
-      }
-      case Type::type:
-      {
-        set_type(rhs.value_.type);
-        break;
-      }
-      case Type::value:
-      {
-        set_value(rhs.value_.value);
-        break;
-      }
-      case Type::value_to_name:
-      {
-        set_value_to_name(rhs.value_.value_to_name);
-        break;
-      }
-      case Type::values:
-      {
-        set_values(rhs.value_.values);
-        break;
-      }
-      case Type::id:
-      {
-        set_id(rhs.value_.id);
-        break;
-      }
-      case Type::ids:
-      {
-        set_ids(rhs.value_.ids);
-        break;
-      }
-      case Type::descriptor:
-      {
-        set_descriptor(rhs.value_.descriptor);
-        break;
-      }
-      case Type::descriptors:
-      {
-        set_descriptors(rhs.value_.descriptors);
-        break;
-      }
-      case Type::key:
-      {
-        set_key(rhs.value_.key);
-        break;
-      }
-      case Type::keys:
-      {
-        set_keys(rhs.value_.keys);
-        break;
-      }
-      case Type::annotation:
-      {
-        set_annotation(rhs.value_.annotation);
-        break;
-      }
-      case Type::annotations:
-      {
-        set_annotations(rhs.value_.annotations);
-        break;
-      }
-      case Type::member:
-      {
-        set_member(rhs.value_.member);
-        break;
-      }
-      case Type::members:
-      {
-        set_members(rhs.value_.members);
-        break;
-      }
-      case Type::field:
-      {
-        set_field(rhs.value_.field);
-        break;
-      }
-      case Type::fields:
-      {
-        set_fields(rhs.value_.fields);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  union_with_special_names& operator=(const union_with_special_names& rhs);
 
 
   union storage_type {
@@ -9364,6 +8785,7 @@ class union_with_special_names final  {
     return value_.get;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_getter(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9373,6 +8795,7 @@ class union_with_special_names final  {
     ::new (std::addressof(value_.getter)) T(t);
     return value_.getter;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_lists(::std::int32_t t = ::std::int32_t()) {
@@ -9384,6 +8807,7 @@ class union_with_special_names final  {
     return value_.lists;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_maps(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9393,6 +8817,7 @@ class union_with_special_names final  {
     ::new (std::addressof(value_.maps)) T(t);
     return value_.maps;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_name(::std::int32_t t = ::std::int32_t()) {
@@ -9404,6 +8829,7 @@ class union_with_special_names final  {
     return value_.name;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_name_to_value(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9413,6 +8839,7 @@ class union_with_special_names final  {
     ::new (std::addressof(value_.name_to_value)) T(t);
     return value_.name_to_value;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_names(::std::int32_t t = ::std::int32_t()) {
@@ -9424,6 +8851,7 @@ class union_with_special_names final  {
     return value_.names;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_prefix_tree(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9433,6 +8861,7 @@ class union_with_special_names final  {
     ::new (std::addressof(value_.prefix_tree)) T(t);
     return value_.prefix_tree;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_sets(::std::int32_t t = ::std::int32_t()) {
@@ -9444,6 +8873,7 @@ class union_with_special_names final  {
     return value_.sets;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_setter(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9453,6 +8883,7 @@ class union_with_special_names final  {
     ::new (std::addressof(value_.setter)) T(t);
     return value_.setter;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_str(::std::int32_t t = ::std::int32_t()) {
@@ -9464,6 +8895,7 @@ class union_with_special_names final  {
     return value_.str;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_strings(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9473,6 +8905,7 @@ class union_with_special_names final  {
     ::new (std::addressof(value_.strings)) T(t);
     return value_.strings;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_type(::std::int32_t t = ::std::int32_t()) {
@@ -9484,6 +8917,7 @@ class union_with_special_names final  {
     return value_.type;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_value(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9493,6 +8927,7 @@ class union_with_special_names final  {
     ::new (std::addressof(value_.value)) T(t);
     return value_.value;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_value_to_name(::std::int32_t t = ::std::int32_t()) {
@@ -9504,6 +8939,7 @@ class union_with_special_names final  {
     return value_.value_to_name;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_values(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9513,6 +8949,7 @@ class union_with_special_names final  {
     ::new (std::addressof(value_.values)) T(t);
     return value_.values;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_id(::std::int32_t t = ::std::int32_t()) {
@@ -9524,6 +8961,7 @@ class union_with_special_names final  {
     return value_.id;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_ids(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9533,6 +8971,7 @@ class union_with_special_names final  {
     ::new (std::addressof(value_.ids)) T(t);
     return value_.ids;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_descriptor(::std::int32_t t = ::std::int32_t()) {
@@ -9544,6 +8983,7 @@ class union_with_special_names final  {
     return value_.descriptor;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_descriptors(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9553,6 +8993,7 @@ class union_with_special_names final  {
     ::new (std::addressof(value_.descriptors)) T(t);
     return value_.descriptors;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_key(::std::int32_t t = ::std::int32_t()) {
@@ -9564,6 +9005,7 @@ class union_with_special_names final  {
     return value_.key;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_keys(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9573,6 +9015,7 @@ class union_with_special_names final  {
     ::new (std::addressof(value_.keys)) T(t);
     return value_.keys;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_annotation(::std::int32_t t = ::std::int32_t()) {
@@ -9584,6 +9027,7 @@ class union_with_special_names final  {
     return value_.annotation;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_annotations(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9593,6 +9037,7 @@ class union_with_special_names final  {
     ::new (std::addressof(value_.annotations)) T(t);
     return value_.annotations;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_member(::std::int32_t t = ::std::int32_t()) {
@@ -9604,6 +9049,7 @@ class union_with_special_names final  {
     return value_.member;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_members(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9613,6 +9059,7 @@ class union_with_special_names final  {
     ::new (std::addressof(value_.members)) T(t);
     return value_.members;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_field(::std::int32_t t = ::std::int32_t()) {
@@ -9624,6 +9071,7 @@ class union_with_special_names final  {
     return value_.field;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_fields(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -9633,6 +9081,7 @@ class union_with_special_names final  {
     ::new (std::addressof(value_.fields)) T(t);
     return value_.fields;
   }
+
 
   ::std::int32_t const& get_get() const {
     if (getType() != Type::get) {
@@ -12894,26 +12343,7 @@ class UnionWithTypedefFieldAdapter final  {
     apache::thrift::clear(rhs);
   }
 
-  UnionWithTypedefFieldAdapter(const UnionWithTypedefFieldAdapter& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::field:
-      {
-        set_field(rhs.value_.field);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  UnionWithTypedefFieldAdapter(const UnionWithTypedefFieldAdapter& rhs);
 
   UnionWithTypedefFieldAdapter& operator=(UnionWithTypedefFieldAdapter&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -12938,27 +12368,7 @@ class UnionWithTypedefFieldAdapter final  {
     return *this;
   }
 
-  UnionWithTypedefFieldAdapter& operator=(const UnionWithTypedefFieldAdapter& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::field:
-      {
-        set_field(rhs.value_.field);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  UnionWithTypedefFieldAdapter& operator=(const UnionWithTypedefFieldAdapter& rhs);
 
   ~UnionWithTypedefFieldAdapter();
 
@@ -12981,6 +12391,7 @@ class UnionWithTypedefFieldAdapter final  {
     ::new (std::addressof(value_.field)) T(t);
     return value_.field;
   }
+
 
   ::test_cpp2::cpp_reflection::I32 const& get_field() const {
     if (getType() != Type::field) {

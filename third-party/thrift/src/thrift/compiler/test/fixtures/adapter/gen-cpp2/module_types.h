@@ -1341,46 +1341,7 @@ class Baz final  {
     apache::thrift::clear(rhs);
   }
 
-  Baz(const Baz& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::intField:
-      {
-        set_intField(rhs.value_.intField);
-        break;
-      }
-      case Type::setField:
-      {
-        set_setField(rhs.value_.setField);
-        break;
-      }
-      case Type::mapField:
-      {
-        set_mapField(rhs.value_.mapField);
-        break;
-      }
-      case Type::binaryField:
-      {
-        set_binaryField(rhs.value_.binaryField);
-        break;
-      }
-      case Type::longField:
-      {
-        set_longField(rhs.value_.longField);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  Baz(const Baz& rhs);
 
   Baz& operator=(Baz&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -1425,47 +1386,7 @@ class Baz final  {
     return *this;
   }
 
-  Baz& operator=(const Baz& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::intField:
-      {
-        set_intField(rhs.value_.intField);
-        break;
-      }
-      case Type::setField:
-      {
-        set_setField(rhs.value_.setField);
-        break;
-      }
-      case Type::mapField:
-      {
-        set_mapField(rhs.value_.mapField);
-        break;
-      }
-      case Type::binaryField:
-      {
-        set_binaryField(rhs.value_.binaryField);
-        break;
-      }
-      case Type::longField:
-      {
-        set_longField(rhs.value_.longField);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  Baz& operator=(const Baz& rhs);
 
   ~Baz();
 
@@ -1492,6 +1413,7 @@ class Baz final  {
     ::new (std::addressof(value_.intField)) T(t);
     return value_.intField;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::facebook::thrift::test::SetWithAdapter& set_setField(::facebook::thrift::test::SetWithAdapter const &t) {
@@ -1574,6 +1496,7 @@ class Baz final  {
     return value_.binaryField;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::facebook::thrift::test::MyI64& set_longField(::facebook::thrift::test::MyI64 t = ::facebook::thrift::test::MyI64()) {
     using T0 = ::facebook::thrift::test::MyI64;
@@ -1583,6 +1506,7 @@ class Baz final  {
     ::new (std::addressof(value_.longField)) T(t);
     return value_.longField;
   }
+
 
   ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::facebook::thrift::test::i32_5137, Baz> const& get_intField() const {
     if (getType() != Type::intField) {
@@ -5989,31 +5913,7 @@ class ThriftAdaptTestUnion final  {
     apache::thrift::clear(rhs);
   }
 
-  ThriftAdaptTestUnion(const ThriftAdaptTestUnion& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::delay:
-      {
-        set_delay(rhs.value_.delay);
-        break;
-      }
-      case Type::custom:
-      {
-        set_custom(rhs.value_.custom);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  ThriftAdaptTestUnion(const ThriftAdaptTestUnion& rhs);
 
   ThriftAdaptTestUnion& operator=(ThriftAdaptTestUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -6043,32 +5943,7 @@ class ThriftAdaptTestUnion final  {
     return *this;
   }
 
-  ThriftAdaptTestUnion& operator=(const ThriftAdaptTestUnion& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::delay:
-      {
-        set_delay(rhs.value_.delay);
-        break;
-      }
-      case Type::custom:
-      {
-        set_custom(rhs.value_.custom);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  ThriftAdaptTestUnion& operator=(const ThriftAdaptTestUnion& rhs);
 
   ~ThriftAdaptTestUnion();
 
@@ -6092,6 +5967,7 @@ class ThriftAdaptTestUnion final  {
     ::new (std::addressof(value_.delay)) T(t);
     return value_.delay;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::facebook::thrift::test::CustomProtocolType& set_custom(::facebook::thrift::test::CustomProtocolType const &t) {
@@ -6119,6 +5995,7 @@ class ThriftAdaptTestUnion final  {
     ::new (std::addressof(value_.custom)) ::facebook::thrift::test::CustomProtocolType(std::forward<T>(t)...);
     return value_.custom;
   }
+
 
   ::facebook::thrift::test::DurationMs const& get_delay() const {
     if (getType() != Type::delay) {

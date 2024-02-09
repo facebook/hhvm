@@ -592,6 +592,40 @@ void SimpleUnion::__fbthrift_clear() {
 bool SimpleUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  SimpleUnion::SimpleUnion(const SimpleUnion& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::intValue:
+        set_intValue(rhs.value_.intValue);
+        break;
+      case Type::stringValue:
+        set_stringValue(rhs.value_.stringValue);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    SimpleUnion&SimpleUnion::operator=(const SimpleUnion& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::intValue:
+        set_intValue(rhs.value_.intValue);
+        break;
+      case Type::stringValue:
+        set_stringValue(rhs.value_.stringValue);
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool SimpleUnion::operator==(const SimpleUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
@@ -773,6 +807,198 @@ void ComplexUnion::__fbthrift_clear() {
 bool ComplexUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  ComplexUnion::ComplexUnion(const ComplexUnion& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::intValue:
+        set_intValue(rhs.value_.intValue);
+        break;
+      case Type::opt_intValue:
+        set_opt_intValue(rhs.value_.opt_intValue);
+        break;
+      case Type::stringValue:
+        set_stringValue(rhs.value_.stringValue);
+        break;
+      case Type::opt_stringValue:
+        set_opt_stringValue(rhs.value_.opt_stringValue);
+        break;
+      case Type::intValue2:
+        set_intValue2(rhs.value_.intValue2);
+        break;
+      case Type::intValue3:
+        set_intValue3(rhs.value_.intValue3);
+        break;
+      case Type::doubelValue:
+        set_doubelValue(rhs.value_.doubelValue);
+        break;
+      case Type::boolValue:
+        set_boolValue(rhs.value_.boolValue);
+        break;
+      case Type::union_list:
+        set_union_list(rhs.value_.union_list);
+        break;
+      case Type::union_set:
+        set_union_set(rhs.value_.union_set);
+        break;
+      case Type::union_map:
+        set_union_map(rhs.value_.union_map);
+        break;
+      case Type::opt_union_map:
+        set_opt_union_map(rhs.value_.opt_union_map);
+        break;
+      case Type::enum_field:
+        set_enum_field(rhs.value_.enum_field);
+        break;
+      case Type::enum_container:
+        set_enum_container(rhs.value_.enum_container);
+        break;
+      case Type::a_struct:
+        set_a_struct(rhs.value_.a_struct);
+        break;
+      case Type::a_set_struct:
+        set_a_set_struct(rhs.value_.a_set_struct);
+        break;
+      case Type::a_union:
+        set_a_union(rhs.value_.a_union);
+        break;
+      case Type::opt_a_union:
+        set_opt_a_union(rhs.value_.opt_a_union);
+        break;
+      case Type::a_union_list:
+        set_a_union_list(rhs.value_.a_union_list);
+        break;
+      case Type::a_union_typedef:
+        set_a_union_typedef(rhs.value_.a_union_typedef);
+        break;
+      case Type::a_union_typedef_list:
+        set_a_union_typedef_list(rhs.value_.a_union_typedef_list);
+        break;
+      case Type::MyBinaryField:
+        set_MyBinaryField(rhs.value_.MyBinaryField);
+        break;
+      case Type::MyBinaryField2:
+        set_MyBinaryField2(rhs.value_.MyBinaryField2);
+        break;
+      case Type::MyBinaryListField4:
+        set_MyBinaryListField4(rhs.value_.MyBinaryListField4);
+        break;
+      case Type::ref_field:
+        set_ref_field(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(rhs.value_.ref_field));
+        break;
+      case Type::ref_field2:
+        set_ref_field2(*rhs.value_.ref_field2);
+        break;
+      case Type::excp_field:
+        set_excp_field(rhs.value_.excp_field);
+        break;
+      case Type::MyCustomField:
+        set_MyCustomField(rhs.value_.MyCustomField);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    ComplexUnion&ComplexUnion::operator=(const ComplexUnion& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::intValue:
+        set_intValue(rhs.value_.intValue);
+        break;
+      case Type::opt_intValue:
+        set_opt_intValue(rhs.value_.opt_intValue);
+        break;
+      case Type::stringValue:
+        set_stringValue(rhs.value_.stringValue);
+        break;
+      case Type::opt_stringValue:
+        set_opt_stringValue(rhs.value_.opt_stringValue);
+        break;
+      case Type::intValue2:
+        set_intValue2(rhs.value_.intValue2);
+        break;
+      case Type::intValue3:
+        set_intValue3(rhs.value_.intValue3);
+        break;
+      case Type::doubelValue:
+        set_doubelValue(rhs.value_.doubelValue);
+        break;
+      case Type::boolValue:
+        set_boolValue(rhs.value_.boolValue);
+        break;
+      case Type::union_list:
+        set_union_list(rhs.value_.union_list);
+        break;
+      case Type::union_set:
+        set_union_set(rhs.value_.union_set);
+        break;
+      case Type::union_map:
+        set_union_map(rhs.value_.union_map);
+        break;
+      case Type::opt_union_map:
+        set_opt_union_map(rhs.value_.opt_union_map);
+        break;
+      case Type::enum_field:
+        set_enum_field(rhs.value_.enum_field);
+        break;
+      case Type::enum_container:
+        set_enum_container(rhs.value_.enum_container);
+        break;
+      case Type::a_struct:
+        set_a_struct(rhs.value_.a_struct);
+        break;
+      case Type::a_set_struct:
+        set_a_set_struct(rhs.value_.a_set_struct);
+        break;
+      case Type::a_union:
+        set_a_union(rhs.value_.a_union);
+        break;
+      case Type::opt_a_union:
+        set_opt_a_union(rhs.value_.opt_a_union);
+        break;
+      case Type::a_union_list:
+        set_a_union_list(rhs.value_.a_union_list);
+        break;
+      case Type::a_union_typedef:
+        set_a_union_typedef(rhs.value_.a_union_typedef);
+        break;
+      case Type::a_union_typedef_list:
+        set_a_union_typedef_list(rhs.value_.a_union_typedef_list);
+        break;
+      case Type::MyBinaryField:
+        set_MyBinaryField(rhs.value_.MyBinaryField);
+        break;
+      case Type::MyBinaryField2:
+        set_MyBinaryField2(rhs.value_.MyBinaryField2);
+        break;
+      case Type::MyBinaryListField4:
+        set_MyBinaryListField4(rhs.value_.MyBinaryListField4);
+        break;
+      case Type::ref_field:
+        set_ref_field(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(rhs.value_.ref_field));
+        break;
+      case Type::ref_field2:
+        set_ref_field2(*rhs.value_.ref_field2);
+        break;
+      case Type::excp_field:
+        set_excp_field(rhs.value_.excp_field);
+        break;
+      case Type::MyCustomField:
+        set_MyCustomField(rhs.value_.MyCustomField);
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool ComplexUnion::operator==(const ComplexUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
@@ -782,32 +1008,34 @@ bool ComplexUnion::operator<(FOLLY_MAYBE_UNUSED const ComplexUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
-::std::unique_ptr<::some::valid::ns::MyStruct>& ComplexUnion::set_ref_field(::some::valid::ns::MyStruct const &t) {
+::std::unique_ptr<::some::valid::ns::MyStruct>& ComplexUnion::set_ref_field(::std::unique_ptr<::some::valid::ns::MyStruct> t) {
   __fbthrift_destruct();
   type_ = folly::to_underlying(Type::ref_field);
-  ::new (std::addressof(value_.ref_field)) ::std::unique_ptr<::some::valid::ns::MyStruct>(new ::std::unique_ptr<::some::valid::ns::MyStruct>::element_type(t));
+  ::new (std::addressof(value_.ref_field)) ::std::unique_ptr<::some::valid::ns::MyStruct>(std::move(t));
   return value_.ref_field;
+}
+
+::std::unique_ptr<::some::valid::ns::MyStruct>& ComplexUnion::set_ref_field(::some::valid::ns::MyStruct const &t) {
+  return set_ref_field(::std::unique_ptr<::some::valid::ns::MyStruct>(new ::std::unique_ptr<::some::valid::ns::MyStruct>::element_type(t)));
 }
 
 ::std::unique_ptr<::some::valid::ns::MyStruct>& ComplexUnion::set_ref_field(::some::valid::ns::MyStruct&& t) {
+  return set_ref_field(::std::unique_ptr<::some::valid::ns::MyStruct>(new ::std::unique_ptr<::some::valid::ns::MyStruct>::element_type(std::move(t))));
+}
+
+::std::shared_ptr<const ::some::valid::ns::MyStruct>& ComplexUnion::set_ref_field2(::std::shared_ptr<const ::some::valid::ns::MyStruct> t) {
   __fbthrift_destruct();
-  type_ = folly::to_underlying(Type::ref_field);
-  ::new (std::addressof(value_.ref_field)) ::std::unique_ptr<::some::valid::ns::MyStruct>(new ::std::unique_ptr<::some::valid::ns::MyStruct>::element_type(std::move(t)));
-  return value_.ref_field;
+  type_ = folly::to_underlying(Type::ref_field2);
+  ::new (std::addressof(value_.ref_field2)) ::std::shared_ptr<const ::some::valid::ns::MyStruct>(std::move(t));
+  return value_.ref_field2;
 }
 
 ::std::shared_ptr<const ::some::valid::ns::MyStruct>& ComplexUnion::set_ref_field2(::some::valid::ns::MyStruct const &t) {
-  __fbthrift_destruct();
-  type_ = folly::to_underlying(Type::ref_field2);
-  ::new (std::addressof(value_.ref_field2)) ::std::shared_ptr<const ::some::valid::ns::MyStruct>(new ::std::shared_ptr<const ::some::valid::ns::MyStruct>::element_type(t));
-  return value_.ref_field2;
+  return set_ref_field2(::std::shared_ptr<const ::some::valid::ns::MyStruct>(new ::std::shared_ptr<const ::some::valid::ns::MyStruct>::element_type(t)));
 }
 
 ::std::shared_ptr<const ::some::valid::ns::MyStruct>& ComplexUnion::set_ref_field2(::some::valid::ns::MyStruct&& t) {
-  __fbthrift_destruct();
-  type_ = folly::to_underlying(Type::ref_field2);
-  ::new (std::addressof(value_.ref_field2)) ::std::shared_ptr<const ::some::valid::ns::MyStruct>(new ::std::shared_ptr<const ::some::valid::ns::MyStruct>::element_type(std::move(t)));
-  return value_.ref_field2;
+  return set_ref_field2(::std::shared_ptr<const ::some::valid::ns::MyStruct>(new ::std::shared_ptr<const ::some::valid::ns::MyStruct>::element_type(std::move(t))));
 }
 
 void swap(ComplexUnion& a, ComplexUnion& b) {
@@ -2850,6 +3078,40 @@ void FloatUnion::__fbthrift_clear() {
 bool FloatUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  FloatUnion::FloatUnion(const FloatUnion& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::floatSide:
+        set_floatSide(rhs.value_.floatSide);
+        break;
+      case Type::doubleSide:
+        set_doubleSide(rhs.value_.doubleSide);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    FloatUnion&FloatUnion::operator=(const FloatUnion& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::floatSide:
+        set_floatSide(rhs.value_.floatSide);
+        break;
+      case Type::doubleSide:
+        set_doubleSide(rhs.value_.doubleSide);
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool FloatUnion::operator==(const FloatUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);

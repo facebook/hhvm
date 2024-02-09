@@ -207,6 +207,40 @@ void SerializedUnion::__fbthrift_clear() {
 bool SerializedUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  SerializedUnion::SerializedUnion(const SerializedUnion& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::s:
+        set_s(rhs.value_.s);
+        break;
+      case Type::i:
+        set_i(rhs.value_.i);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    SerializedUnion&SerializedUnion::operator=(const SerializedUnion& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::s:
+        set_s(rhs.value_.s);
+        break;
+      case Type::i:
+        set_i(rhs.value_.i);
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool SerializedUnion::operator==(const SerializedUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
@@ -541,6 +575,40 @@ void MarshalUnion::__fbthrift_clear() {
 bool MarshalUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  MarshalUnion::MarshalUnion(const MarshalUnion& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::s:
+        set_s(rhs.value_.s);
+        break;
+      case Type::i:
+        set_i(rhs.value_.i);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    MarshalUnion&MarshalUnion::operator=(const MarshalUnion& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::s:
+        set_s(rhs.value_.s);
+        break;
+      case Type::i:
+        set_i(rhs.value_.i);
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool MarshalUnion::operator==(const MarshalUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);

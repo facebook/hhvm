@@ -215,6 +215,112 @@ void MyUnion::__fbthrift_clear() {
 bool MyUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  MyUnion::MyUnion(const MyUnion& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::bool_field:
+        set_bool_field(rhs.value_.bool_field);
+        break;
+      case Type::byte_field:
+        set_byte_field(rhs.value_.byte_field);
+        break;
+      case Type::short_field:
+        set_short_field(rhs.value_.short_field);
+        break;
+      case Type::int_field:
+        set_int_field(rhs.value_.int_field);
+        break;
+      case Type::long_field:
+        set_long_field(rhs.value_.long_field);
+        break;
+      case Type::float_field:
+        set_float_field(rhs.value_.float_field);
+        break;
+      case Type::double_field:
+        set_double_field(rhs.value_.double_field);
+        break;
+      case Type::string_field:
+        set_string_field(rhs.value_.string_field);
+        break;
+      case Type::binary_field:
+        set_binary_field(rhs.value_.binary_field);
+        break;
+      case Type::enum_field:
+        set_enum_field(rhs.value_.enum_field);
+        break;
+      case Type::list_field:
+        set_list_field(rhs.value_.list_field);
+        break;
+      case Type::set_field:
+        set_set_field(rhs.value_.set_field);
+        break;
+      case Type::map_field:
+        set_map_field(rhs.value_.map_field);
+        break;
+      case Type::struct_field:
+        set_struct_field(rhs.value_.struct_field);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    MyUnion&MyUnion::operator=(const MyUnion& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::bool_field:
+        set_bool_field(rhs.value_.bool_field);
+        break;
+      case Type::byte_field:
+        set_byte_field(rhs.value_.byte_field);
+        break;
+      case Type::short_field:
+        set_short_field(rhs.value_.short_field);
+        break;
+      case Type::int_field:
+        set_int_field(rhs.value_.int_field);
+        break;
+      case Type::long_field:
+        set_long_field(rhs.value_.long_field);
+        break;
+      case Type::float_field:
+        set_float_field(rhs.value_.float_field);
+        break;
+      case Type::double_field:
+        set_double_field(rhs.value_.double_field);
+        break;
+      case Type::string_field:
+        set_string_field(rhs.value_.string_field);
+        break;
+      case Type::binary_field:
+        set_binary_field(rhs.value_.binary_field);
+        break;
+      case Type::enum_field:
+        set_enum_field(rhs.value_.enum_field);
+        break;
+      case Type::list_field:
+        set_list_field(rhs.value_.list_field);
+        break;
+      case Type::set_field:
+        set_set_field(rhs.value_.set_field);
+        break;
+      case Type::map_field:
+        set_map_field(rhs.value_.map_field);
+        break;
+      case Type::struct_field:
+        set_struct_field(rhs.value_.struct_field);
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool MyUnion::operator==(const MyUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);

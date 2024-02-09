@@ -312,6 +312,34 @@ void InnerUnion::__fbthrift_clear() {
 bool InnerUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  InnerUnion::InnerUnion(const InnerUnion& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::innerOption:
+        set_innerOption(rhs.value_.innerOption);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    InnerUnion&InnerUnion::operator=(const InnerUnion& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::innerOption:
+        set_innerOption(rhs.value_.innerOption);
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool InnerUnion::operator==(const InnerUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
@@ -418,6 +446,46 @@ void MyUnion::__fbthrift_clear() {
 bool MyUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  MyUnion::MyUnion(const MyUnion& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::option1:
+        set_option1(rhs.value_.option1);
+        break;
+      case Type::option2:
+        set_option2(rhs.value_.option2);
+        break;
+      case Type::option3:
+        set_option3(rhs.value_.option3);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    MyUnion&MyUnion::operator=(const MyUnion& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::option1:
+        set_option1(rhs.value_.option1);
+        break;
+      case Type::option2:
+        set_option2(rhs.value_.option2);
+        break;
+      case Type::option3:
+        set_option3(rhs.value_.option3);
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool MyUnion::operator==(const MyUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);

@@ -349,31 +349,7 @@ class U final  {
     apache::thrift::clear(rhs);
   }
 
-  U(const U& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::i:
-      {
-        set_i(rhs.value_.i);
-        break;
-      }
-      case Type::s:
-      {
-        set_s(rhs.value_.s);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  U(const U& rhs);
 
   U& operator=(U&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -403,32 +379,7 @@ class U final  {
     return *this;
   }
 
-  U& operator=(const U& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::i:
-      {
-        set_i(rhs.value_.i);
-        break;
-      }
-      case Type::s:
-      {
-        set_s(rhs.value_.s);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  U& operator=(const U& rhs);
 
   ~U();
 
@@ -452,6 +403,7 @@ class U final  {
     ::new (std::addressof(value_.i)) T(t);
     return value_.i;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_s(::std::string const &t) {
@@ -479,6 +431,7 @@ class U final  {
     ::new (std::addressof(value_.s)) ::std::string(std::forward<T>(t)...);
     return value_.s;
   }
+
 
   ::std::int32_t const& get_i() const {
     if (getType() != Type::i) {

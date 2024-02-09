@@ -467,6 +467,58 @@ void Baz::__fbthrift_clear() {
 bool Baz::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  Baz::Baz(const Baz& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::intField:
+        set_intField(rhs.value_.intField);
+        break;
+      case Type::setField:
+        set_setField(rhs.value_.setField);
+        break;
+      case Type::mapField:
+        set_mapField(rhs.value_.mapField);
+        break;
+      case Type::binaryField:
+        set_binaryField(rhs.value_.binaryField);
+        break;
+      case Type::longField:
+        set_longField(rhs.value_.longField);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    Baz&Baz::operator=(const Baz& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::intField:
+        set_intField(rhs.value_.intField);
+        break;
+      case Type::setField:
+        set_setField(rhs.value_.setField);
+        break;
+      case Type::mapField:
+        set_mapField(rhs.value_.mapField);
+        break;
+      case Type::binaryField:
+        set_binaryField(rhs.value_.binaryField);
+        break;
+      case Type::longField:
+        set_longField(rhs.value_.longField);
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool Baz::operator==(const Baz& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
@@ -2330,6 +2382,40 @@ void ThriftAdaptTestUnion::__fbthrift_clear() {
 bool ThriftAdaptTestUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  ThriftAdaptTestUnion::ThriftAdaptTestUnion(const ThriftAdaptTestUnion& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::delay:
+        set_delay(rhs.value_.delay);
+        break;
+      case Type::custom:
+        set_custom(rhs.value_.custom);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    ThriftAdaptTestUnion&ThriftAdaptTestUnion::operator=(const ThriftAdaptTestUnion& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::delay:
+        set_delay(rhs.value_.delay);
+        break;
+      case Type::custom:
+        set_custom(rhs.value_.custom);
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool ThriftAdaptTestUnion::operator==(const ThriftAdaptTestUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);

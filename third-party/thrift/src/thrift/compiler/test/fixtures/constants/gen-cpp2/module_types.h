@@ -2030,31 +2030,7 @@ class union1 final  {
     apache::thrift::clear(rhs);
   }
 
-  union1(const union1& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::i:
-      {
-        set_i(rhs.value_.i);
-        break;
-      }
-      case Type::d:
-      {
-        set_d(rhs.value_.d);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  union1(const union1& rhs);
 
   union1& operator=(union1&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -2084,32 +2060,7 @@ class union1 final  {
     return *this;
   }
 
-  union1& operator=(const union1& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::i:
-      {
-        set_i(rhs.value_.i);
-        break;
-      }
-      case Type::d:
-      {
-        set_d(rhs.value_.d);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  union1& operator=(const union1& rhs);
 
 
   union storage_type {
@@ -2131,6 +2082,7 @@ class union1 final  {
     return value_.i;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   double& set_d(double t = double()) {
     using T0 = double;
@@ -2140,6 +2092,7 @@ class union1 final  {
     ::new (std::addressof(value_.d)) T(t);
     return value_.d;
   }
+
 
   ::std::int32_t const& get_i() const {
     if (getType() != Type::i) {
@@ -2345,41 +2298,7 @@ class union2 final  {
     apache::thrift::clear(rhs);
   }
 
-  union2(const union2& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::i:
-      {
-        set_i(rhs.value_.i);
-        break;
-      }
-      case Type::d:
-      {
-        set_d(rhs.value_.d);
-        break;
-      }
-      case Type::s:
-      {
-        set_s(rhs.value_.s);
-        break;
-      }
-      case Type::u:
-      {
-        set_u(rhs.value_.u);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  union2(const union2& rhs);
 
   union2& operator=(union2&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -2419,42 +2338,7 @@ class union2 final  {
     return *this;
   }
 
-  union2& operator=(const union2& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::i:
-      {
-        set_i(rhs.value_.i);
-        break;
-      }
-      case Type::d:
-      {
-        set_d(rhs.value_.d);
-        break;
-      }
-      case Type::s:
-      {
-        set_s(rhs.value_.s);
-        break;
-      }
-      case Type::u:
-      {
-        set_u(rhs.value_.u);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  union2& operator=(const union2& rhs);
 
   ~union2();
 
@@ -2481,6 +2365,7 @@ class union2 final  {
     return value_.i;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   double& set_d(double t = double()) {
     using T0 = double;
@@ -2490,6 +2375,7 @@ class union2 final  {
     ::new (std::addressof(value_.d)) T(t);
     return value_.d;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::struct1& set_s(::cpp2::struct1 const &t) {

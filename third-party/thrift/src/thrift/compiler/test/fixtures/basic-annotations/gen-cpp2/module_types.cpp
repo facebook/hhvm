@@ -189,6 +189,28 @@ void YourUnion::__fbthrift_clear() {
 bool YourUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  YourUnion::YourUnion(const YourUnion& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      default:
+        assert(false);
+    }
+  }
+
+    YourUnion&YourUnion::operator=(const YourUnion& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool YourUnion::operator==(const YourUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);

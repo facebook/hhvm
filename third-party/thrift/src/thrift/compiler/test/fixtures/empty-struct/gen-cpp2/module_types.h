@@ -205,21 +205,7 @@ class Nada final  {
     apache::thrift::clear(rhs);
   }
 
-  Nada(const Nada& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  Nada(const Nada& rhs);
 
   Nada& operator=(Nada&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -239,22 +225,7 @@ class Nada final  {
     return *this;
   }
 
-  Nada& operator=(const Nada& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  Nada& operator=(const Nada& rhs);
 
 
   union storage_type {

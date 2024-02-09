@@ -553,31 +553,7 @@ class SerializedUnion final  {
     apache::thrift::clear(rhs);
   }
 
-  SerializedUnion(const SerializedUnion& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::s:
-      {
-        set_s(rhs.value_.s);
-        break;
-      }
-      case Type::i:
-      {
-        set_i(rhs.value_.i);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  SerializedUnion(const SerializedUnion& rhs);
 
   SerializedUnion& operator=(SerializedUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -607,32 +583,7 @@ class SerializedUnion final  {
     return *this;
   }
 
-  SerializedUnion& operator=(const SerializedUnion& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::s:
-      {
-        set_s(rhs.value_.s);
-        break;
-      }
-      case Type::i:
-      {
-        set_i(rhs.value_.i);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  SerializedUnion& operator=(const SerializedUnion& rhs);
 
   ~SerializedUnion();
 
@@ -674,6 +625,7 @@ class SerializedUnion final  {
     return value_.s;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_i(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -683,6 +635,7 @@ class SerializedUnion final  {
     ::new (std::addressof(value_.i)) T(t);
     return value_.i;
   }
+
 
   ::std::string const& get_s() const {
     if (getType() != Type::s) {
@@ -1487,31 +1440,7 @@ class MarshalUnion final  {
     apache::thrift::clear(rhs);
   }
 
-  MarshalUnion(const MarshalUnion& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::s:
-      {
-        set_s(rhs.value_.s);
-        break;
-      }
-      case Type::i:
-      {
-        set_i(rhs.value_.i);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  MarshalUnion(const MarshalUnion& rhs);
 
   MarshalUnion& operator=(MarshalUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -1541,32 +1470,7 @@ class MarshalUnion final  {
     return *this;
   }
 
-  MarshalUnion& operator=(const MarshalUnion& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::s:
-      {
-        set_s(rhs.value_.s);
-        break;
-      }
-      case Type::i:
-      {
-        set_i(rhs.value_.i);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  MarshalUnion& operator=(const MarshalUnion& rhs);
 
   ~MarshalUnion();
 
@@ -1608,6 +1512,7 @@ class MarshalUnion final  {
     return value_.s;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_i(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -1617,6 +1522,7 @@ class MarshalUnion final  {
     ::new (std::addressof(value_.i)) T(t);
     return value_.i;
   }
+
 
   ::std::string const& get_s() const {
     if (getType() != Type::s) {

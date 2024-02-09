@@ -2304,31 +2304,7 @@ class SimpleUnion  {
     apache::thrift::clear(rhs);
   }
 
-  SimpleUnion(const SimpleUnion& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::intValue:
-      {
-        set_intValue(rhs.value_.intValue);
-        break;
-      }
-      case Type::stringValue:
-      {
-        set_stringValue(rhs.value_.stringValue);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  SimpleUnion(const SimpleUnion& rhs);
 
   SimpleUnion& operator=(SimpleUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -2358,32 +2334,7 @@ class SimpleUnion  {
     return *this;
   }
 
-  SimpleUnion& operator=(const SimpleUnion& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::intValue:
-      {
-        set_intValue(rhs.value_.intValue);
-        break;
-      }
-      case Type::stringValue:
-      {
-        set_stringValue(rhs.value_.stringValue);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  SimpleUnion& operator=(const SimpleUnion& rhs);
 
   virtual ~SimpleUnion();
 
@@ -2407,6 +2358,7 @@ class SimpleUnion  {
     ::new (std::addressof(value_.intValue)) T(t);
     return value_.intValue;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_stringValue(::std::string const &t) {
@@ -2434,6 +2386,7 @@ class SimpleUnion  {
     ::new (std::addressof(value_.stringValue)) ::std::string(std::forward<T>(t)...);
     return value_.stringValue;
   }
+
 
   ::std::int64_t const& get_intValue() const {
     if (getType() != Type::intValue) {
@@ -3835,161 +3788,7 @@ class ComplexUnion final  {
     apache::thrift::clear(rhs);
   }
 
-  ComplexUnion(const ComplexUnion& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::intValue:
-      {
-        set_intValue(rhs.value_.intValue);
-        break;
-      }
-      case Type::opt_intValue:
-      {
-        set_opt_intValue(rhs.value_.opt_intValue);
-        break;
-      }
-      case Type::stringValue:
-      {
-        set_stringValue(rhs.value_.stringValue);
-        break;
-      }
-      case Type::opt_stringValue:
-      {
-        set_opt_stringValue(rhs.value_.opt_stringValue);
-        break;
-      }
-      case Type::intValue2:
-      {
-        set_intValue2(rhs.value_.intValue2);
-        break;
-      }
-      case Type::intValue3:
-      {
-        set_intValue3(rhs.value_.intValue3);
-        break;
-      }
-      case Type::doubelValue:
-      {
-        set_doubelValue(rhs.value_.doubelValue);
-        break;
-      }
-      case Type::boolValue:
-      {
-        set_boolValue(rhs.value_.boolValue);
-        break;
-      }
-      case Type::union_list:
-      {
-        set_union_list(rhs.value_.union_list);
-        break;
-      }
-      case Type::union_set:
-      {
-        set_union_set(rhs.value_.union_set);
-        break;
-      }
-      case Type::union_map:
-      {
-        set_union_map(rhs.value_.union_map);
-        break;
-      }
-      case Type::opt_union_map:
-      {
-        set_opt_union_map(rhs.value_.opt_union_map);
-        break;
-      }
-      case Type::enum_field:
-      {
-        set_enum_field(rhs.value_.enum_field);
-        break;
-      }
-      case Type::enum_container:
-      {
-        set_enum_container(rhs.value_.enum_container);
-        break;
-      }
-      case Type::a_struct:
-      {
-        set_a_struct(rhs.value_.a_struct);
-        break;
-      }
-      case Type::a_set_struct:
-      {
-        set_a_set_struct(rhs.value_.a_set_struct);
-        break;
-      }
-      case Type::a_union:
-      {
-        set_a_union(rhs.value_.a_union);
-        break;
-      }
-      case Type::opt_a_union:
-      {
-        set_opt_a_union(rhs.value_.opt_a_union);
-        break;
-      }
-      case Type::a_union_list:
-      {
-        set_a_union_list(rhs.value_.a_union_list);
-        break;
-      }
-      case Type::a_union_typedef:
-      {
-        set_a_union_typedef(rhs.value_.a_union_typedef);
-        break;
-      }
-      case Type::a_union_typedef_list:
-      {
-        set_a_union_typedef_list(rhs.value_.a_union_typedef_list);
-        break;
-      }
-      case Type::MyBinaryField:
-      {
-        set_MyBinaryField(rhs.value_.MyBinaryField);
-        break;
-      }
-      case Type::MyBinaryField2:
-      {
-        set_MyBinaryField2(rhs.value_.MyBinaryField2);
-        break;
-      }
-      case Type::MyBinaryListField4:
-      {
-        set_MyBinaryListField4(rhs.value_.MyBinaryListField4);
-        break;
-      }
-      case Type::ref_field:
-      {
-        set_ref_field(*rhs.value_.ref_field);
-        break;
-      }
-      case Type::ref_field2:
-      {
-        set_ref_field2(*rhs.value_.ref_field2);
-        break;
-      }
-      case Type::excp_field:
-      {
-        set_excp_field(rhs.value_.excp_field);
-        break;
-      }
-      case Type::MyCustomField:
-      {
-        set_MyCustomField(rhs.value_.MyCustomField);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  ComplexUnion(const ComplexUnion& rhs);
 
   ComplexUnion& operator=(ComplexUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -4149,162 +3948,7 @@ class ComplexUnion final  {
     return *this;
   }
 
-  ComplexUnion& operator=(const ComplexUnion& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::intValue:
-      {
-        set_intValue(rhs.value_.intValue);
-        break;
-      }
-      case Type::opt_intValue:
-      {
-        set_opt_intValue(rhs.value_.opt_intValue);
-        break;
-      }
-      case Type::stringValue:
-      {
-        set_stringValue(rhs.value_.stringValue);
-        break;
-      }
-      case Type::opt_stringValue:
-      {
-        set_opt_stringValue(rhs.value_.opt_stringValue);
-        break;
-      }
-      case Type::intValue2:
-      {
-        set_intValue2(rhs.value_.intValue2);
-        break;
-      }
-      case Type::intValue3:
-      {
-        set_intValue3(rhs.value_.intValue3);
-        break;
-      }
-      case Type::doubelValue:
-      {
-        set_doubelValue(rhs.value_.doubelValue);
-        break;
-      }
-      case Type::boolValue:
-      {
-        set_boolValue(rhs.value_.boolValue);
-        break;
-      }
-      case Type::union_list:
-      {
-        set_union_list(rhs.value_.union_list);
-        break;
-      }
-      case Type::union_set:
-      {
-        set_union_set(rhs.value_.union_set);
-        break;
-      }
-      case Type::union_map:
-      {
-        set_union_map(rhs.value_.union_map);
-        break;
-      }
-      case Type::opt_union_map:
-      {
-        set_opt_union_map(rhs.value_.opt_union_map);
-        break;
-      }
-      case Type::enum_field:
-      {
-        set_enum_field(rhs.value_.enum_field);
-        break;
-      }
-      case Type::enum_container:
-      {
-        set_enum_container(rhs.value_.enum_container);
-        break;
-      }
-      case Type::a_struct:
-      {
-        set_a_struct(rhs.value_.a_struct);
-        break;
-      }
-      case Type::a_set_struct:
-      {
-        set_a_set_struct(rhs.value_.a_set_struct);
-        break;
-      }
-      case Type::a_union:
-      {
-        set_a_union(rhs.value_.a_union);
-        break;
-      }
-      case Type::opt_a_union:
-      {
-        set_opt_a_union(rhs.value_.opt_a_union);
-        break;
-      }
-      case Type::a_union_list:
-      {
-        set_a_union_list(rhs.value_.a_union_list);
-        break;
-      }
-      case Type::a_union_typedef:
-      {
-        set_a_union_typedef(rhs.value_.a_union_typedef);
-        break;
-      }
-      case Type::a_union_typedef_list:
-      {
-        set_a_union_typedef_list(rhs.value_.a_union_typedef_list);
-        break;
-      }
-      case Type::MyBinaryField:
-      {
-        set_MyBinaryField(rhs.value_.MyBinaryField);
-        break;
-      }
-      case Type::MyBinaryField2:
-      {
-        set_MyBinaryField2(rhs.value_.MyBinaryField2);
-        break;
-      }
-      case Type::MyBinaryListField4:
-      {
-        set_MyBinaryListField4(rhs.value_.MyBinaryListField4);
-        break;
-      }
-      case Type::ref_field:
-      {
-        set_ref_field(*rhs.value_.ref_field);
-        break;
-      }
-      case Type::ref_field2:
-      {
-        set_ref_field2(*rhs.value_.ref_field2);
-        break;
-      }
-      case Type::excp_field:
-      {
-        set_excp_field(rhs.value_.excp_field);
-        break;
-      }
-      case Type::MyCustomField:
-      {
-        set_MyCustomField(rhs.value_.MyCustomField);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  ComplexUnion& operator=(const ComplexUnion& rhs);
 
   ~ComplexUnion();
 
@@ -4355,6 +3999,7 @@ class ComplexUnion final  {
     return value_.intValue;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int64_t& set_opt_intValue(::std::int64_t t = ::std::int64_t()) {
     using T0 = ::std::int64_t;
@@ -4364,6 +4009,7 @@ class ComplexUnion final  {
     ::new (std::addressof(value_.opt_intValue)) T(t);
     return value_.opt_intValue;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_stringValue(::std::string const &t) {
@@ -4392,6 +4038,7 @@ class ComplexUnion final  {
     return value_.stringValue;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_opt_stringValue(::std::string const &t) {
     using T0 = ::std::string;
@@ -4419,6 +4066,7 @@ class ComplexUnion final  {
     return value_.opt_stringValue;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int16_t& set_intValue2(::std::int16_t t = ::std::int16_t()) {
     using T0 = ::std::int16_t;
@@ -4428,6 +4076,7 @@ class ComplexUnion final  {
     ::new (std::addressof(value_.intValue2)) T(t);
     return value_.intValue2;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_intValue3(::std::int32_t t = ::std::int32_t()) {
@@ -4439,6 +4088,7 @@ class ComplexUnion final  {
     return value_.intValue3;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   double& set_doubelValue(double t = double()) {
     using T0 = double;
@@ -4449,6 +4099,7 @@ class ComplexUnion final  {
     return value_.doubelValue;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   bool& set_boolValue(bool t = bool()) {
     using T0 = bool;
@@ -4458,6 +4109,7 @@ class ComplexUnion final  {
     ::new (std::addressof(value_.boolValue)) T(t);
     return value_.boolValue;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::std::int32_t>& set_union_list(::std::vector<::std::int32_t> const &t) {
@@ -4576,6 +4228,7 @@ class ComplexUnion final  {
     ::new (std::addressof(value_.enum_field)) T(t);
     return value_.enum_field;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::some::valid::ns::MyEnumA>& set_enum_container(::std::vector<::some::valid::ns::MyEnumA> const &t) {
@@ -4820,6 +4473,7 @@ class ComplexUnion final  {
     return value_.MyBinaryField;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_MyBinaryField2(::std::string const &t) {
     using T0 = ::std::string;
@@ -4847,6 +4501,7 @@ class ComplexUnion final  {
     return value_.MyBinaryField2;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::std::string>& set_MyBinaryListField4(::std::vector<::std::string> const &t) {
     using T0 = ::std::vector<::std::string>;
@@ -4873,6 +4528,7 @@ class ComplexUnion final  {
     ::new (std::addressof(value_.MyBinaryListField4)) ::std::vector<::std::string>(std::forward<T>(t)...);
     return value_.MyBinaryListField4;
   }
+  ::std::unique_ptr<::some::valid::ns::MyStruct>& set_ref_field(::std::unique_ptr<::some::valid::ns::MyStruct> t);
   ::std::unique_ptr<::some::valid::ns::MyStruct>& set_ref_field(::some::valid::ns::MyStruct const &t);
   ::std::unique_ptr<::some::valid::ns::MyStruct>& set_ref_field(::some::valid::ns::MyStruct&& t);
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::some::valid::ns::MyStruct, T...>> ::std::unique_ptr<::some::valid::ns::MyStruct>& set_ref_field(T&&... t) {
@@ -4883,6 +4539,7 @@ class ComplexUnion final  {
     ::new (std::addressof(value_.ref_field)) ref_(new typename ref_::element_type(std::forward<T>(t)...));
     return value_.ref_field;
   }
+  ::std::shared_ptr<const ::some::valid::ns::MyStruct>& set_ref_field2(::std::shared_ptr<const ::some::valid::ns::MyStruct> t);
   ::std::shared_ptr<const ::some::valid::ns::MyStruct>& set_ref_field2(::some::valid::ns::MyStruct const &t);
   ::std::shared_ptr<const ::some::valid::ns::MyStruct>& set_ref_field2(::some::valid::ns::MyStruct&& t);
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::some::valid::ns::MyStruct, T...>> ::std::shared_ptr<const ::some::valid::ns::MyStruct>& set_ref_field2(T&&... t) {
@@ -4947,6 +4604,7 @@ class ComplexUnion final  {
     ::new (std::addressof(value_.MyCustomField)) ::some::valid::ns::CustomProtocolType(std::forward<T>(t)...);
     return value_.MyCustomField;
   }
+
 
   ::std::int64_t const& get_intValue() const {
     if (getType() != Type::intValue) {
@@ -9981,31 +9639,7 @@ class FloatUnion final  {
     apache::thrift::clear(rhs);
   }
 
-  FloatUnion(const FloatUnion& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::floatSide:
-      {
-        set_floatSide(rhs.value_.floatSide);
-        break;
-      }
-      case Type::doubleSide:
-      {
-        set_doubleSide(rhs.value_.doubleSide);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  FloatUnion(const FloatUnion& rhs);
 
   FloatUnion& operator=(FloatUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -10035,32 +9669,7 @@ class FloatUnion final  {
     return *this;
   }
 
-  FloatUnion& operator=(const FloatUnion& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::floatSide:
-      {
-        set_floatSide(rhs.value_.floatSide);
-        break;
-      }
-      case Type::doubleSide:
-      {
-        set_doubleSide(rhs.value_.doubleSide);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  FloatUnion& operator=(const FloatUnion& rhs);
 
 
   union storage_type {
@@ -10082,6 +9691,7 @@ class FloatUnion final  {
     return value_.floatSide;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   double& set_doubleSide(double t = double()) {
     using T0 = double;
@@ -10091,6 +9701,7 @@ class FloatUnion final  {
     ::new (std::addressof(value_.doubleSide)) T(t);
     return value_.doubleSide;
   }
+
 
   float const& get_floatSide() const {
     if (getType() != Type::floatSide) {

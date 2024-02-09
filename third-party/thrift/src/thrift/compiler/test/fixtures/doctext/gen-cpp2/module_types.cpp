@@ -178,6 +178,40 @@ void U::__fbthrift_clear() {
 bool U::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  U::U(const U& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::i:
+        set_i(rhs.value_.i);
+        break;
+      case Type::s:
+        set_s(rhs.value_.s);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    U&U::operator=(const U& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::i:
+        set_i(rhs.value_.i);
+        break;
+      case Type::s:
+        set_s(rhs.value_.s);
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool U::operator==(const U& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);

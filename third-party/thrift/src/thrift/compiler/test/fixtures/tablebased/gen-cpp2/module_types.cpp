@@ -571,6 +571,40 @@ void ExampleUnion::__fbthrift_clear() {
 bool ExampleUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  ExampleUnion::ExampleUnion(const ExampleUnion& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::fieldA:
+        set_fieldA(rhs.value_.fieldA);
+        break;
+      case Type::fieldB:
+        set_fieldB(rhs.value_.fieldB);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    ExampleUnion&ExampleUnion::operator=(const ExampleUnion& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::fieldA:
+        set_fieldA(rhs.value_.fieldA);
+        break;
+      case Type::fieldB:
+        set_fieldB(rhs.value_.fieldB);
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool ExampleUnion::operator==(const ExampleUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);

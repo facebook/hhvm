@@ -1167,31 +1167,7 @@ class ExampleUnion final  {
     apache::thrift::clear(rhs);
   }
 
-  ExampleUnion(const ExampleUnion& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::fieldA:
-      {
-        set_fieldA(rhs.value_.fieldA);
-        break;
-      }
-      case Type::fieldB:
-      {
-        set_fieldB(rhs.value_.fieldB);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  ExampleUnion(const ExampleUnion& rhs);
 
   ExampleUnion& operator=(ExampleUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -1221,32 +1197,7 @@ class ExampleUnion final  {
     return *this;
   }
 
-  ExampleUnion& operator=(const ExampleUnion& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::fieldA:
-      {
-        set_fieldA(rhs.value_.fieldA);
-        break;
-      }
-      case Type::fieldB:
-      {
-        set_fieldB(rhs.value_.fieldB);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  ExampleUnion& operator=(const ExampleUnion& rhs);
 
   ~ExampleUnion();
 

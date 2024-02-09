@@ -233,21 +233,7 @@ class YourUnion final  {
     apache::thrift::clear(rhs);
   }
 
-  YourUnion(const YourUnion& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  YourUnion(const YourUnion& rhs);
 
   YourUnion& operator=(YourUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -267,22 +253,7 @@ class YourUnion final  {
     return *this;
   }
 
-  YourUnion& operator=(const YourUnion& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  YourUnion& operator=(const YourUnion& rhs);
 
 
   union storage_type {

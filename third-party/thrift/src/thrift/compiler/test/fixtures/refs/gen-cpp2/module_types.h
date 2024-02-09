@@ -542,31 +542,7 @@ class MyUnion final  {
     apache::thrift::clear(rhs);
   }
 
-  MyUnion(const MyUnion& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::anInteger:
-      {
-        set_anInteger(*rhs.value_.anInteger);
-        break;
-      }
-      case Type::aString:
-      {
-        set_aString(*rhs.value_.aString);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  MyUnion(const MyUnion& rhs);
 
   MyUnion& operator=(MyUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -596,32 +572,7 @@ class MyUnion final  {
     return *this;
   }
 
-  MyUnion& operator=(const MyUnion& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::anInteger:
-      {
-        set_anInteger(*rhs.value_.anInteger);
-        break;
-      }
-      case Type::aString:
-      {
-        set_aString(*rhs.value_.aString);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  MyUnion& operator=(const MyUnion& rhs);
 
   ~MyUnion();
 
@@ -643,6 +594,13 @@ class MyUnion final  {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::anInteger);
     ::new (std::addressof(value_.anInteger)) T(new typename T::element_type(t));
+    return value_.anInteger;
+  }
+
+  ::std::unique_ptr<::std::int32_t>& set_anInteger(::std::unique_ptr<::std::int32_t> t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::anInteger);
+    ::new (std::addressof(value_.anInteger)) ::std::unique_ptr<::std::int32_t>(std::move(t));
     return value_.anInteger;
   }
 
@@ -670,6 +628,13 @@ class MyUnion final  {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::aString);
     ::new (std::addressof(value_.aString)) ::std::unique_ptr<::std::string>(new ::std::unique_ptr<::std::string>::element_type(std::forward<T>(t)...));
+    return value_.aString;
+  }
+
+  ::std::unique_ptr<::std::string>& set_aString(::std::unique_ptr<::std::string> t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::aString);
+    ::new (std::addressof(value_.aString)) ::std::unique_ptr<::std::string>(std::move(t));
     return value_.aString;
   }
 
@@ -853,26 +818,7 @@ class NonTriviallyDestructibleUnion final  {
     apache::thrift::clear(rhs);
   }
 
-  NonTriviallyDestructibleUnion(const NonTriviallyDestructibleUnion& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::int_field:
-      {
-        set_int_field(*rhs.value_.int_field);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  NonTriviallyDestructibleUnion(const NonTriviallyDestructibleUnion& rhs);
 
   NonTriviallyDestructibleUnion& operator=(NonTriviallyDestructibleUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -897,27 +843,7 @@ class NonTriviallyDestructibleUnion final  {
     return *this;
   }
 
-  NonTriviallyDestructibleUnion& operator=(const NonTriviallyDestructibleUnion& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::int_field:
-      {
-        set_int_field(*rhs.value_.int_field);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  NonTriviallyDestructibleUnion& operator=(const NonTriviallyDestructibleUnion& rhs);
 
   ~NonTriviallyDestructibleUnion();
 
@@ -938,6 +864,13 @@ class NonTriviallyDestructibleUnion final  {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::int_field);
     ::new (std::addressof(value_.int_field)) T(new typename T::element_type(t));
+    return value_.int_field;
+  }
+
+  ::std::shared_ptr<::std::int32_t>& set_int_field(::std::shared_ptr<::std::int32_t> t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::int_field);
+    ::new (std::addressof(value_.int_field)) ::std::shared_ptr<::std::int32_t>(std::move(t));
     return value_.int_field;
   }
 

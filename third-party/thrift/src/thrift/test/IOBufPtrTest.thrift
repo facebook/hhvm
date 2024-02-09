@@ -27,7 +27,7 @@ struct Request {
 
 union Union {
   1: IOBufPtr foo;
-} (cpp.noncopyable)
+}
 
 service IOBufPtrTestService {
   IOBufPtr combine(1: Request req);

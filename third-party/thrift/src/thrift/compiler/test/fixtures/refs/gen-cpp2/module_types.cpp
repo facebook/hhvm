@@ -116,6 +116,44 @@ void MyUnion::__fbthrift_clear() {
 bool MyUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  MyUnion::MyUnion(const MyUnion& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::anInteger:
+        set_anInteger(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::integral>(rhs.value_.anInteger));
+        break;
+      case Type::aString:
+        set_aString(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::string>(rhs.value_.aString));
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    MyUnion&MyUnion::operator=(const MyUnion& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::anInteger:
+        set_anInteger(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::integral>(rhs.value_.anInteger));
+        break;
+      case Type::aString:
+        set_aString(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::string>(rhs.value_.aString));
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool MyUnion::operator==(const MyUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
@@ -212,6 +250,34 @@ void NonTriviallyDestructibleUnion::__fbthrift_clear() {
 bool NonTriviallyDestructibleUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  NonTriviallyDestructibleUnion::NonTriviallyDestructibleUnion(const NonTriviallyDestructibleUnion& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::int_field:
+        set_int_field(*rhs.value_.int_field);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    NonTriviallyDestructibleUnion&NonTriviallyDestructibleUnion::operator=(const NonTriviallyDestructibleUnion& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::int_field:
+        set_int_field(*rhs.value_.int_field);
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool NonTriviallyDestructibleUnion::operator==(const NonTriviallyDestructibleUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);

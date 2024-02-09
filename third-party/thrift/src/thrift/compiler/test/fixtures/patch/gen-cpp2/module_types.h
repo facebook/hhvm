@@ -1921,26 +1921,7 @@ class InnerUnion final  {
     apache::thrift::clear(rhs);
   }
 
-  InnerUnion(const InnerUnion& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::innerOption:
-      {
-        set_innerOption(rhs.value_.innerOption);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  InnerUnion(const InnerUnion& rhs);
 
   InnerUnion& operator=(InnerUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -1965,27 +1946,7 @@ class InnerUnion final  {
     return *this;
   }
 
-  InnerUnion& operator=(const InnerUnion& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::innerOption:
-      {
-        set_innerOption(rhs.value_.innerOption);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  InnerUnion& operator=(const InnerUnion& rhs);
 
   ~InnerUnion();
 
@@ -2025,6 +1986,7 @@ class InnerUnion final  {
     ::new (std::addressof(value_.innerOption)) ::std::string(std::forward<T>(t)...);
     return value_.innerOption;
   }
+
 
   ::std::string const& get_innerOption() const {
     if (getType() != Type::innerOption) {
@@ -2188,36 +2150,7 @@ class MyUnion final  {
     apache::thrift::clear(rhs);
   }
 
-  MyUnion(const MyUnion& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::option1:
-      {
-        set_option1(rhs.value_.option1);
-        break;
-      }
-      case Type::option2:
-      {
-        set_option2(rhs.value_.option2);
-        break;
-      }
-      case Type::option3:
-      {
-        set_option3(rhs.value_.option3);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  MyUnion(const MyUnion& rhs);
 
   MyUnion& operator=(MyUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -2252,37 +2185,7 @@ class MyUnion final  {
     return *this;
   }
 
-  MyUnion& operator=(const MyUnion& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::option1:
-      {
-        set_option1(rhs.value_.option1);
-        break;
-      }
-      case Type::option2:
-      {
-        set_option2(rhs.value_.option2);
-        break;
-      }
-      case Type::option3:
-      {
-        set_option3(rhs.value_.option3);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  MyUnion& operator=(const MyUnion& rhs);
 
   ~MyUnion();
 
@@ -2325,6 +2228,7 @@ class MyUnion final  {
     return value_.option1;
   }
 
+
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_option2(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
@@ -2334,6 +2238,7 @@ class MyUnion final  {
     ::new (std::addressof(value_.option2)) T(t);
     return value_.option2;
   }
+
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::patch::InnerUnion& set_option3(::test::fixtures::patch::InnerUnion const &t) {

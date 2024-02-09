@@ -1,0 +1,72 @@
+<%!
+
+  Copyright (c) Meta Platforms, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%>
+<%^struct:cpp_noncopyable%>
+  <%struct:cpp_underlying_name%>::<%struct:cpp_underlying_name%>(const <%struct:cpp_underlying_name%>& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+<%#struct:fields%>
+      case Type::<%field:cpp_name%>:
+<%^field:transitively_refers_to_unique?%>
+  <%#field:cpp_ref?%>
+        set_<%field:cpp_name%>(*rhs.value_.<%field:cpp_name%>);
+  <%/field:cpp_ref?%>
+  <%^field:cpp_ref?%>
+        set_<%field:cpp_name%>(rhs.value_.<%field:cpp_name%>);
+  <%/field:cpp_ref?%>
+<%/field:transitively_refers_to_unique?%>
+<%#field:transitively_refers_to_unique?%>
+        set_<%field:cpp_name%>(::apache::thrift::detail::st::copy_field<
+          <%#field:type%><%type:type_class%><%/field:type%>>(rhs.value_.<%field:cpp_name%>));
+<%/field:transitively_refers_to_unique?%>
+        break;
+<%/struct:fields%>
+      default:
+        assert(false);
+    }
+  }
+
+    <%struct:cpp_underlying_name%>&<%struct:cpp_underlying_name%>::operator=(const <%struct:cpp_underlying_name%>& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+<%#struct:fields%>
+      case Type::<%field:cpp_name%>:
+<%^field:transitively_refers_to_unique?%>
+  <%#field:cpp_ref?%>
+        set_<%field:cpp_name%>(*rhs.value_.<%field:cpp_name%>);
+  <%/field:cpp_ref?%>
+  <%^field:cpp_ref?%>
+        set_<%field:cpp_name%>(rhs.value_.<%field:cpp_name%>);
+  <%/field:cpp_ref?%>
+<%/field:transitively_refers_to_unique?%>
+<%#field:transitively_refers_to_unique?%>
+        set_<%field:cpp_name%>(::apache::thrift::detail::st::copy_field<
+          <%#field:type%><%type:type_class%><%/field:type%>>(rhs.value_.<%field:cpp_name%>));
+<%/field:transitively_refers_to_unique?%>
+        break;
+<%/struct:fields%>
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+<%/struct:cpp_noncopyable%>

@@ -146,6 +146,28 @@ void Nada::__fbthrift_clear() {
 bool Nada::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  Nada::Nada(const Nada& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      default:
+        assert(false);
+    }
+  }
+
+    Nada&Nada::operator=(const Nada& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool Nada::operator==(const Nada& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);

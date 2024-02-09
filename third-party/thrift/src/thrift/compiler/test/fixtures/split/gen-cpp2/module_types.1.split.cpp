@@ -87,6 +87,46 @@ void MyUnion::__fbthrift_clear() {
 bool MyUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  MyUnion::MyUnion(const MyUnion& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::myEnum:
+        set_myEnum(rhs.value_.myEnum);
+        break;
+      case Type::myStruct:
+        set_myStruct(rhs.value_.myStruct);
+        break;
+      case Type::myDataItem:
+        set_myDataItem(rhs.value_.myDataItem);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    MyUnion&MyUnion::operator=(const MyUnion& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::myEnum:
+        set_myEnum(rhs.value_.myEnum);
+        break;
+      case Type::myStruct:
+        set_myStruct(rhs.value_.myStruct);
+        break;
+      case Type::myDataItem:
+        set_myDataItem(rhs.value_.myDataItem);
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool MyUnion::operator==(const MyUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);

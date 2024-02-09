@@ -154,6 +154,52 @@ void union1::__fbthrift_clear() {
 bool union1::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  union1::union1(const union1& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::ui:
+        set_ui(rhs.value_.ui);
+        break;
+      case Type::ud:
+        set_ud(rhs.value_.ud);
+        break;
+      case Type::us:
+        set_us(rhs.value_.us);
+        break;
+      case Type::ue:
+        set_ue(rhs.value_.ue);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    union1&union1::operator=(const union1& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::ui:
+        set_ui(rhs.value_.ui);
+        break;
+      case Type::ud:
+        set_ud(rhs.value_.ud);
+        break;
+      case Type::us:
+        set_us(rhs.value_.us);
+        break;
+      case Type::ue:
+        set_ue(rhs.value_.ue);
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool union1::operator==(const union1& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
@@ -259,6 +305,52 @@ void union2::__fbthrift_clear() {
 bool union2::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  union2::union2(const union2& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::ui_2:
+        set_ui_2(rhs.value_.ui_2);
+        break;
+      case Type::ud_2:
+        set_ud_2(rhs.value_.ud_2);
+        break;
+      case Type::us_2:
+        set_us_2(rhs.value_.us_2);
+        break;
+      case Type::ue_2:
+        set_ue_2(rhs.value_.ue_2);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    union2&union2::operator=(const union2& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::ui_2:
+        set_ui_2(rhs.value_.ui_2);
+        break;
+      case Type::ud_2:
+        set_ud_2(rhs.value_.ud_2);
+        break;
+      case Type::us_2:
+        set_us_2(rhs.value_.us_2);
+        break;
+      case Type::ue_2:
+        set_ue_2(rhs.value_.ue_2);
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool union2::operator==(const union2& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
@@ -364,6 +456,52 @@ void union3::__fbthrift_clear() {
 bool union3::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  union3::union3(const union3& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::ui_3:
+        set_ui_3(rhs.value_.ui_3);
+        break;
+      case Type::ud_3:
+        set_ud_3(rhs.value_.ud_3);
+        break;
+      case Type::us_3:
+        set_us_3(rhs.value_.us_3);
+        break;
+      case Type::ue_3:
+        set_ue_3(rhs.value_.ue_3);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    union3&union3::operator=(const union3& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::ui_3:
+        set_ui_3(rhs.value_.ui_3);
+        break;
+      case Type::ud_3:
+        set_ud_3(rhs.value_.ud_3);
+        break;
+      case Type::us_3:
+        set_us_3(rhs.value_.us_3);
+        break;
+      case Type::ue_3:
+        set_ue_3(rhs.value_.ue_3);
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool union3::operator==(const union3& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
@@ -576,6 +714,58 @@ void unionA::__fbthrift_clear() {
 bool unionA::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  unionA::unionA(const unionA& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::i:
+        set_i(rhs.value_.i);
+        break;
+      case Type::d:
+        set_d(rhs.value_.d);
+        break;
+      case Type::s:
+        set_s(rhs.value_.s);
+        break;
+      case Type::e:
+        set_e(rhs.value_.e);
+        break;
+      case Type::a:
+        set_a(rhs.value_.a);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    unionA&unionA::operator=(const unionA& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::i:
+        set_i(rhs.value_.i);
+        break;
+      case Type::d:
+        set_d(rhs.value_.d);
+        break;
+      case Type::s:
+        set_s(rhs.value_.s);
+        break;
+      case Type::e:
+        set_e(rhs.value_.e);
+        break;
+      case Type::a:
+        set_a(rhs.value_.a);
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool unionA::operator==(const unionA& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
@@ -2756,6 +2946,196 @@ void union_with_special_names::__fbthrift_clear() {
 bool union_with_special_names::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  union_with_special_names::union_with_special_names(const union_with_special_names& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::get:
+        set_get(rhs.value_.get);
+        break;
+      case Type::getter:
+        set_getter(rhs.value_.getter);
+        break;
+      case Type::lists:
+        set_lists(rhs.value_.lists);
+        break;
+      case Type::maps:
+        set_maps(rhs.value_.maps);
+        break;
+      case Type::name:
+        set_name(rhs.value_.name);
+        break;
+      case Type::name_to_value:
+        set_name_to_value(rhs.value_.name_to_value);
+        break;
+      case Type::names:
+        set_names(rhs.value_.names);
+        break;
+      case Type::prefix_tree:
+        set_prefix_tree(rhs.value_.prefix_tree);
+        break;
+      case Type::sets:
+        set_sets(rhs.value_.sets);
+        break;
+      case Type::setter:
+        set_setter(rhs.value_.setter);
+        break;
+      case Type::str:
+        set_str(rhs.value_.str);
+        break;
+      case Type::strings:
+        set_strings(rhs.value_.strings);
+        break;
+      case Type::type:
+        set_type(rhs.value_.type);
+        break;
+      case Type::value:
+        set_value(rhs.value_.value);
+        break;
+      case Type::value_to_name:
+        set_value_to_name(rhs.value_.value_to_name);
+        break;
+      case Type::values:
+        set_values(rhs.value_.values);
+        break;
+      case Type::id:
+        set_id(rhs.value_.id);
+        break;
+      case Type::ids:
+        set_ids(rhs.value_.ids);
+        break;
+      case Type::descriptor:
+        set_descriptor(rhs.value_.descriptor);
+        break;
+      case Type::descriptors:
+        set_descriptors(rhs.value_.descriptors);
+        break;
+      case Type::key:
+        set_key(rhs.value_.key);
+        break;
+      case Type::keys:
+        set_keys(rhs.value_.keys);
+        break;
+      case Type::annotation:
+        set_annotation(rhs.value_.annotation);
+        break;
+      case Type::annotations:
+        set_annotations(rhs.value_.annotations);
+        break;
+      case Type::member:
+        set_member(rhs.value_.member);
+        break;
+      case Type::members:
+        set_members(rhs.value_.members);
+        break;
+      case Type::field:
+        set_field(rhs.value_.field);
+        break;
+      case Type::fields:
+        set_fields(rhs.value_.fields);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    union_with_special_names&union_with_special_names::operator=(const union_with_special_names& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::get:
+        set_get(rhs.value_.get);
+        break;
+      case Type::getter:
+        set_getter(rhs.value_.getter);
+        break;
+      case Type::lists:
+        set_lists(rhs.value_.lists);
+        break;
+      case Type::maps:
+        set_maps(rhs.value_.maps);
+        break;
+      case Type::name:
+        set_name(rhs.value_.name);
+        break;
+      case Type::name_to_value:
+        set_name_to_value(rhs.value_.name_to_value);
+        break;
+      case Type::names:
+        set_names(rhs.value_.names);
+        break;
+      case Type::prefix_tree:
+        set_prefix_tree(rhs.value_.prefix_tree);
+        break;
+      case Type::sets:
+        set_sets(rhs.value_.sets);
+        break;
+      case Type::setter:
+        set_setter(rhs.value_.setter);
+        break;
+      case Type::str:
+        set_str(rhs.value_.str);
+        break;
+      case Type::strings:
+        set_strings(rhs.value_.strings);
+        break;
+      case Type::type:
+        set_type(rhs.value_.type);
+        break;
+      case Type::value:
+        set_value(rhs.value_.value);
+        break;
+      case Type::value_to_name:
+        set_value_to_name(rhs.value_.value_to_name);
+        break;
+      case Type::values:
+        set_values(rhs.value_.values);
+        break;
+      case Type::id:
+        set_id(rhs.value_.id);
+        break;
+      case Type::ids:
+        set_ids(rhs.value_.ids);
+        break;
+      case Type::descriptor:
+        set_descriptor(rhs.value_.descriptor);
+        break;
+      case Type::descriptors:
+        set_descriptors(rhs.value_.descriptors);
+        break;
+      case Type::key:
+        set_key(rhs.value_.key);
+        break;
+      case Type::keys:
+        set_keys(rhs.value_.keys);
+        break;
+      case Type::annotation:
+        set_annotation(rhs.value_.annotation);
+        break;
+      case Type::annotations:
+        set_annotations(rhs.value_.annotations);
+        break;
+      case Type::member:
+        set_member(rhs.value_.member);
+        break;
+      case Type::members:
+        set_members(rhs.value_.members);
+        break;
+      case Type::field:
+        set_field(rhs.value_.field);
+        break;
+      case Type::fields:
+        set_fields(rhs.value_.fields);
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool union_with_special_names::operator==(const union_with_special_names& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
@@ -3258,6 +3638,34 @@ void UnionWithTypedefFieldAdapter::__fbthrift_clear() {
 bool UnionWithTypedefFieldAdapter::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
+  UnionWithTypedefFieldAdapter::UnionWithTypedefFieldAdapter(const UnionWithTypedefFieldAdapter& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::field:
+        set_field(rhs.value_.field);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    UnionWithTypedefFieldAdapter&UnionWithTypedefFieldAdapter::operator=(const UnionWithTypedefFieldAdapter& rhs) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::field:
+        set_field(rhs.value_.field);
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
 
 bool UnionWithTypedefFieldAdapter::operator==(const UnionWithTypedefFieldAdapter& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);

@@ -126,26 +126,7 @@ class RefUnion final  {
     apache::thrift::clear(rhs);
   }
 
-  RefUnion(const RefUnion& rhs)
-      : type_(folly::to_underlying(Type::__EMPTY__)) {
-    if (this == &rhs) { return; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        return;
-      }
-      case Type::field1:
-      {
-        set_field1(*rhs.value_.field1);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
+  RefUnion(const RefUnion& rhs);
 
   RefUnion& operator=(RefUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
@@ -170,27 +151,7 @@ class RefUnion final  {
     return *this;
   }
 
-  RefUnion& operator=(const RefUnion& rhs) {
-    if (this == &rhs) { return *this; }
-    switch (rhs.getType()) {
-      case Type::__EMPTY__:
-      {
-        __fbthrift_clear();
-        break;
-      }
-      case Type::field1:
-      {
-        set_field1(*rhs.value_.field1);
-        break;
-      }
-      default:
-      {
-        assert(false);
-        __fbthrift_clear();
-      }
-    }
-    return *this;
-  }
+  RefUnion& operator=(const RefUnion& rhs);
 
   ~RefUnion();
 
@@ -228,6 +189,13 @@ class RefUnion final  {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::field1);
     ::new (std::addressof(value_.field1)) ::std::shared_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::string, RefUnion>>(new ::std::shared_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::string, RefUnion>>::element_type(std::forward<T>(t)...));
+    return value_.field1;
+  }
+
+  ::std::shared_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::string, RefUnion>>& set_field1(::std::shared_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::string, RefUnion>> t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::field1);
+    ::new (std::addressof(value_.field1)) ::std::shared_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::string, RefUnion>>(std::move(t));
     return value_.field1;
   }
 

@@ -16,17 +16,18 @@
 
 %><%#struct:fields%><%#field:type%><%#type:resolves_to_container_or_struct?%><%#field:cpp_ref?%>
 
-<%!deprecated%><%field:cpp_storage_type%>& <%struct:cpp_underlying_name%>::set_<%field:cpp_name%>(<%field:cpp_type%> const &t) {
+<%!deprecated%><%field:cpp_storage_type%>& <%struct:cpp_underlying_name%>::set_<%field:cpp_name%>(<%field:cpp_storage_type%> t) {
   __fbthrift_destruct();
   type_ = folly::to_underlying(Type::<%field:cpp_name%>);
-  ::new (std::addressof(value_.<%field:cpp_name%>)) <%field:cpp_storage_type%>(<%^field:boxed_ref?%>new <%/field:boxed_ref?%><%field:cpp_storage_type%>::element_type(t));
+  ::new (std::addressof(value_.<%field:cpp_name%>)) <%field:cpp_storage_type%>(std::move(t));
   return value_.<%field:cpp_name%>;
 }
 
+<%!deprecated%><%field:cpp_storage_type%>& <%struct:cpp_underlying_name%>::set_<%field:cpp_name%>(<%field:cpp_type%> const &t) {
+  return set_<%field:cpp_name%>(<%field:cpp_storage_type%>(<%^field:boxed_ref?%>new <%/field:boxed_ref?%><%field:cpp_storage_type%>::element_type(t)));
+}
+
 <%!deprecated%><%field:cpp_storage_type%>& <%struct:cpp_underlying_name%>::set_<%field:cpp_name%>(<%field:cpp_type%>&& t) {
-  __fbthrift_destruct();
-  type_ = folly::to_underlying(Type::<%field:cpp_name%>);
-  ::new (std::addressof(value_.<%field:cpp_name%>)) <%field:cpp_storage_type%>(<%^field:boxed_ref?%>new <%/field:boxed_ref?%><%field:cpp_storage_type%>::element_type(std::move(t)));
-  return value_.<%field:cpp_name%>;
+  return set_<%field:cpp_name%>(<%field:cpp_storage_type%>(<%^field:boxed_ref?%>new <%/field:boxed_ref?%><%field:cpp_storage_type%>::element_type(std::move(t))));
 }
 <%/field:cpp_ref?%><%/type:resolves_to_container_or_struct?%><%/field:type%><%/struct:fields%>

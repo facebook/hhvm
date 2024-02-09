@@ -11,6 +11,7 @@ license = "MIT"
 path = "shmrs.rs"
 
 [dependencies]
+ahash = "0.8"
 hashbrown = { version = "0.12.3", features = ["nightly", "raw", "serde"] }
 libc = "0.2.139"
 nohash-hasher = "0.2"

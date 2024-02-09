@@ -12,9 +12,8 @@ use std::hash::Hasher;
 use std::mem::MaybeUninit;
 use std::ptr::NonNull;
 
-use hashbrown::hash_map::DefaultHashBuilder;
-
 use crate::filealloc::FileAlloc;
+use crate::hash_builder::ShmrsHashBuilder;
 use crate::hashmap::Map;
 use crate::shardalloc::ShardAlloc;
 use crate::shardalloc::ShardAllocControlData;
@@ -126,7 +125,7 @@ where
 ///   2. Each sharded hashmap can only contain pointers to values in
 ///      its own sharded allocators. Pointing to a value in a different
 ///      shard allocator is an invariant violation.
-pub struct CMap<'shm, K, V, S = DefaultHashBuilder> {
+pub struct CMap<'shm, K, V, S = ShmrsHashBuilder> {
     hash_builder: S,
     max_evictable_bytes_per_shard: usize,
     file_alloc: &'shm FileAlloc,
@@ -141,7 +140,7 @@ pub struct CMap<'shm, K, V, S = DefaultHashBuilder> {
 /// it is process-local.
 ///
 /// Obtained by calling `initialize` or `attach` on `CMap`.
-pub struct CMapRef<'shm, K, V, S = DefaultHashBuilder> {
+pub struct CMapRef<'shm, K, V, S = ShmrsHashBuilder> {
     hash_builder: S,
     pub max_evictable_bytes_per_shard: usize,
     file_alloc: &'shm FileAlloc,
@@ -150,7 +149,7 @@ pub struct CMapRef<'shm, K, V, S = DefaultHashBuilder> {
     maps: Vec<RwLockRef<'shm, Map<'shm, K, V, S>>>,
 }
 
-impl<'shm, K, V> CMap<'shm, K, V, DefaultHashBuilder> {
+impl<'shm, K, V> CMap<'shm, K, V, ShmrsHashBuilder> {
     /// Initialize a new concurrent hash map at the given location.
     ///
     /// See `initialize_with_hasher`
@@ -158,10 +157,10 @@ impl<'shm, K, V> CMap<'shm, K, V, DefaultHashBuilder> {
         cmap: &'shm mut MaybeUninit<Self>,
         file_alloc: &'shm FileAlloc,
         max_evictable_bytes_per_shard: usize,
-    ) -> CMapRef<'shm, K, V, DefaultHashBuilder> {
+    ) -> CMapRef<'shm, K, V, ShmrsHashBuilder> {
         Self::initialize_with_hasher(
             cmap,
-            DefaultHashBuilder::new(),
+            ShmrsHashBuilder::new(),
             file_alloc,
             max_evictable_bytes_per_shard,
         )

@@ -6,16 +6,16 @@
 use std::ops::Deref;
 use std::ops::DerefMut;
 
-use hashbrown::hash_map::DefaultHashBuilder;
 use hashbrown::HashMap;
 
 use crate::filealloc::FileAlloc;
+use crate::hash_builder::ShmrsHashBuilder;
 
 /// A hash map that lives in shared memory.
 ///
 /// This is a wrapper around hashbrown's `HashMap`. The hash map lives
 /// and allocates in shared memory.
-pub struct Map<'shm, K, V, S = DefaultHashBuilder>(Option<HashMap<K, V, S, &'shm FileAlloc>>);
+pub struct Map<'shm, K, V, S = ShmrsHashBuilder>(Option<HashMap<K, V, S, &'shm FileAlloc>>);
 
 impl<'shm, K, V, S> Deref for Map<'shm, K, V, S> {
     type Target = HashMap<K, V, S, &'shm FileAlloc>;
@@ -31,12 +31,12 @@ impl<'shm, K, V, S> DerefMut for Map<'shm, K, V, S> {
     }
 }
 
-impl<'shm, K, V> Map<'shm, K, V, DefaultHashBuilder> {
+impl<'shm, K, V> Map<'shm, K, V, ShmrsHashBuilder> {
     /// Re-allocate the hash map.
     ///
     /// See `reset_with_hasher`
     pub fn reset(&mut self, alloc: &'shm FileAlloc) {
-        self.0 = Some(HashMap::new_in(alloc));
+        self.0 = Some(HashMap::with_hasher_in(ShmrsHashBuilder::new(), alloc));
     }
 }
 

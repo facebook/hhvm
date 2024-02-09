@@ -1246,8 +1246,6 @@ ast_validator standard_validator() {
   validator.add_field_visitor(&validate_cpp_field_interceptor_annotation);
   validator.add_field_visitor(&validate_required_field);
   validator.add_field_visitor(&validate_cpp_type_annotation<t_field>);
-  validator.add_field_visitor(
-      &validate_explicit_include<t_field, diagnostic_level::warning>);
 
   validator.add_enum_visitor(&validate_enum_value_name_uniqueness);
   validator.add_enum_visitor(&validate_enum_value_uniqueness);
@@ -1270,13 +1268,15 @@ ast_validator standard_validator() {
   validator.add_definition_visitor(&deprecate_annotations);
 
   validator.add_typedef_visitor(&validate_cpp_type_annotation<t_typedef>);
-  validator.add_typedef_visitor(
-      &validate_explicit_include<t_typedef, diagnostic_level::warning>);
+
   validator.add_container_visitor(ValidateAnnotationPositions());
   validator.add_enum_visitor(&validate_cpp_enum_type);
   validator.add_const_visitor(&validate_const_type_and_value);
   validator.add_const_visitor(ValidateAnnotationPositions());
   validator.add_program_visitor(&validate_uri_uniqueness);
+
+  add_explicit_include_validators(validator);
+
   return validator;
 }
 

@@ -92,4 +92,90 @@ void validate_explicit_include(
   visit_type(ctx, src, type, level);
 }
 
+void add_explicit_include_validators(ast_validator& validator) {
+  /*
+   * This function adds visitors that collectively apply the validation logic to
+   * each type reference in the IDL file.
+   * A type reference is a use of a type's identifier other than
+   * to define that type, and is usually but not always represented as
+   * t_type_ref in the AST.
+   */
+
+  // Structured types: field types
+  validator.add_field_visitor([](diagnostic_context& ctx, const t_field& f) {
+    visit_type(ctx, f, *f.get_type(), diagnostic_level::warning);
+  });
+
+  // Typedefs: underlying type
+  validator.add_typedef_visitor(
+      [](diagnostic_context& ctx, const t_typedef& td) {
+        visit_type(ctx, td, *td.get_type(), diagnostic_level::warning);
+      });
+
+  // Functions: return types, exceptions, stream/sink types
+  validator.add_function_visitor(
+      [](diagnostic_context& ctx, const t_function& f) {
+        visit_type(ctx, f, *f.return_type(), diagnostic_level::warning);
+        if (const t_type_ref& interaction = f.interaction()) {
+          visit_type(ctx, f, *interaction, diagnostic_level::warning);
+        }
+        for (const t_field& param : f.params().fields()) {
+          visit_type(ctx, param, *param.get_type(), diagnostic_level::warning);
+        }
+      });
+  validator.add_throws_visitor(
+      [](diagnostic_context& ctx, const t_throws& exns) {
+        for (const t_field& ex : exns.fields()) {
+          visit_type(ctx, ex, *ex.get_type(), diagnostic_level::warning);
+        }
+      });
+  validator.add_stream_visitor([](diagnostic_context& ctx, const t_stream& s) {
+    visit_type(
+        ctx,
+        static_cast<const t_named&>(*ctx.parent()),
+        *s.elem_type(),
+        diagnostic_level::warning);
+  });
+  validator.add_sink_visitor([](diagnostic_context& ctx, const t_sink& s) {
+    visit_type(
+        ctx,
+        static_cast<const t_named&>(*ctx.parent()),
+        *s.final_response_type(),
+        diagnostic_level::warning);
+    visit_type(
+        ctx,
+        static_cast<const t_named&>(*ctx.parent()),
+        *s.elem_type(),
+        diagnostic_level::warning);
+  });
+
+  // Services: base service
+  validator.add_service_visitor(
+      [](diagnostic_context& ctx, const t_service& svc) {
+        if (const t_service* extends = svc.extends()) {
+          visit_type(ctx, svc, *extends, diagnostic_level::warning);
+        }
+      });
+
+  // Constants: value type
+  validator.add_const_visitor([](diagnostic_context& ctx, const t_const& c) {
+    visit_type(ctx, c, *c.type(), diagnostic_level::warning);
+  });
+
+  // All definitions: annotations
+  validator.add_definition_visitor(
+      [](diagnostic_context& ctx, const t_named& n) {
+        // Temporary workaround for patch generator
+        if (n.generated() ||
+            (ctx.parent() &&
+             static_cast<const t_named&>(*ctx.parent()).generated())) {
+          return;
+        }
+
+        for (const t_const& anno : n.structured_annotations()) {
+          visit_type(ctx, n, *anno.type(), diagnostic_level::warning);
+        }
+      });
+}
+
 } // namespace apache::thrift::compiler

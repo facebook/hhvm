@@ -23,6 +23,7 @@
 #include <thrift/compiler/ast/diagnostic_context.h>
 #include <thrift/compiler/ast/t_named.h>
 #include <thrift/compiler/ast/t_type.h>
+#include <thrift/compiler/sema/ast_validator.h>
 
 namespace apache::thrift::compiler {
 
@@ -53,5 +54,7 @@ template <typename T, diagnostic_level ErrLevel>
 void validate_explicit_include(diagnostic_context& ctx, const T& named_type) {
   validate_explicit_include(ctx, named_type, *named_type.get_type(), ErrLevel);
 }
+
+void add_explicit_include_validators(ast_validator& validator);
 
 } // namespace apache::thrift::compiler

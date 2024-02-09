@@ -1533,6 +1533,7 @@ TEST(CompilerTest, undefined_type_include) {
 TEST(CompilerTest, adapting_variable) {
   check_compile(R"(
     include "thrift/annotation/cpp.thrift"
+    include "thrift/annotation/scope.thrift"
     include "thrift/annotation/thrift.thrift"
 
     package "facebook.com/thrift/test"
@@ -1570,6 +1571,7 @@ TEST(CompilerTest, adapting_variable) {
 
   check_compile(R"(
     include "thrift/annotation/cpp.thrift"
+    include "thrift/annotation/scope.thrift"
     include "thrift/annotation/thrift.thrift"
 
     @thrift.Experimental
@@ -1835,6 +1837,10 @@ TEST(CompilerTest, warn_on_non_explicit_includes) {
       2: double b;
     }
     typedef TransitiveStruct TransitiveTypedef
+
+    service TransitiveService {}
+    exception TransitiveException {}
+    interaction TransitiveInteraction {}
   )";
 
   name_contents_map["path/to/direct.thrift"] = R"(
@@ -1890,6 +1896,9 @@ TEST(CompilerTest, warn_on_non_explicit_includes) {
       11: map<i64, direct.IncludedEnum> mdie;
       12: map<i64, upstream.TransitiveStruct> muts;
         # expected-warning@-1: Type `upstream.TransitiveStruct` relies on a transitive include. Add `include "path/to/upstream.thrift"` near the top of this file.
+      @upstream.TransitiveStruct
+      42: i32 annotated;
+        # expected-warning@-2: Type `upstream.TransitiveStruct` relies on a transitive include. Add `include "path/to/upstream.thrift"` near the top of this file.
     }
 
     union TransitiveUnion {
@@ -1911,6 +1920,20 @@ TEST(CompilerTest, warn_on_non_explicit_includes) {
     typedef direct.IncludedTypedef dtt_prime
     typedef set<upstream.TransitiveTypedef> sutt_prime
       # expected-warning@-1: Type `upstream.TransitiveTypedef` relies on a transitive include. Add `include "path/to/upstream.thrift"` near the top of this file.
+
+    const upstream.TransitiveStruct c = upstream.TransitiveStruct{};
+      # expected-warning@-1: Type `upstream.TransitiveStruct` relies on a transitive include. Add `include "path/to/upstream.thrift"` near the top of this file.
+
+    service TransitiveService extends upstream.TransitiveService {
+        # expected-warning@-1: Type `upstream.TransitiveService` relies on a transitive include. Add `include "path/to/upstream.thrift"` near the top of this file.
+      upstream.TransitiveStruct foo(1: upstream.TransitiveStruct x) throws (1: upstream.TransitiveException ex);
+        # expected-warning@-1: Type `upstream.TransitiveStruct` relies on a transitive include. Add `include "path/to/upstream.thrift"` near the top of this file.
+        # expected-warning@-2: Type `upstream.TransitiveStruct` relies on a transitive include. Add `include "path/to/upstream.thrift"` near the top of this file.
+        # expected-warning@-3: Type `upstream.TransitiveException` relies on a transitive include. Add `include "path/to/upstream.thrift"` near the top of this file.
+      upstream.TransitiveInteraction, stream<upstream.TransitiveStruct> bar();
+        # expected-warning@-1: Type `upstream.TransitiveStruct` relies on a transitive include. Add `include "path/to/upstream.thrift"` near the top of this file.
+        # expected-warning@-2: Type `upstream.TransitiveInteraction` relies on a transitive include. Add `include "path/to/upstream.thrift"` near the top of this file.
+    }
   )";
   check_compile(name_contents_map, "path/to/transitive_struct_field.thrift");
 }

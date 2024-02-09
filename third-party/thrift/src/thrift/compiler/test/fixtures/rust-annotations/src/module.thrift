@@ -74,6 +74,13 @@ struct T7 {
 
 // --
 
+struct T8 {
+  @rust.Arc
+  1: i64 data; // `::std::sync::Arc<::std::primitive::i64>`
+}
+
+// --
+
 @rust.Derive{derives = ["Foo", "crate::Bar"]}
 @scope.Transitive
 struct TransitiveDerives {}

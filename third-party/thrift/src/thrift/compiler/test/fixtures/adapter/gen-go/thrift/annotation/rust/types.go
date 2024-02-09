@@ -16,6 +16,99 @@ var _ = strings.Split
 var _ = thrift.ZERO
 
 
+type Arc struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &Arc{}
+
+func NewArc() *Arc {
+    return (&Arc{})
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewArc().Set<FieldNameFoo>().Set<FieldNameBar>()
+type ArcBuilder struct {
+    obj *Arc
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewArc().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewArcBuilder() *ArcBuilder {
+    return &ArcBuilder{
+        obj: NewArc(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewArc().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *ArcBuilder) Emit() *Arc {
+    var objCopy Arc = *x.obj
+    return &objCopy
+}
+
+func (x *Arc) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("Arc"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Arc) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *Arc) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Arc({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 type Box struct {
 }
 // Compile time interface enforcer
@@ -1065,6 +1158,7 @@ func (x *ServiceExn) String() string {
 func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)
 }) {
+    registry.RegisterType("facebook.com/thrift/annotation/rust/Arc", func() any { return NewArc() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/Box", func() any { return NewBox() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/Exhaustive", func() any { return NewExhaustive() })
     registry.RegisterType("facebook.com/thrift/annotation/rust/Ord", func() any { return NewOrd() })

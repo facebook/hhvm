@@ -25,6 +25,13 @@ namespace go thrift.annotation.rust
 namespace py thrift.annotation.rust
 
 @scope.Field
+struct Arc {
+// # `rust.Box`
+//
+// Indicates that a field's value should be shared.
+}
+
+@scope.Field
 struct Box {
 // # `rust.Box`
 //

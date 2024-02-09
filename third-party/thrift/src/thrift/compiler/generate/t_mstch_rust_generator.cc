@@ -51,6 +51,7 @@ constexpr auto kRustServiceExnUri =
     "facebook.com/thrift/annotation/rust/ServiceExn";
 constexpr auto kRustExhaustiveUri =
     "facebook.com/thrift/annotation/rust/Exhaustive";
+constexpr auto kRustArcUri = "facebook.com/thrift/annotation/rust/Arc";
 
 namespace rust {
 
@@ -252,7 +253,8 @@ bool node_is_boxed(const t_named& node) {
 }
 
 bool node_is_arced(const t_named& node) {
-  return node.has_annotation("rust.arc");
+  return node.has_annotation("rust.arc") ||
+      node.find_structured_annotation_or_null(kRustArcUri);
 }
 
 FieldKind field_kind(const t_named& node) {

@@ -43,6 +43,8 @@
   }
 
     <%struct:cpp_underlying_name%>&<%struct:cpp_underlying_name%>::operator=(const <%struct:cpp_underlying_name%>& rhs) {
+    <%! a bunch of code relies on the self-assignment check even though it should not be needed %>
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();

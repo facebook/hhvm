@@ -95,6 +95,7 @@ bool RefUnion::__fbthrift_is_empty() const {
   }
 
     RefUnion&RefUnion::operator=(const RefUnion& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();

@@ -224,6 +224,7 @@ bool SerializedUnion::__fbthrift_is_empty() const {
   }
 
     SerializedUnion&SerializedUnion::operator=(const SerializedUnion& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();
@@ -592,6 +593,7 @@ bool MarshalUnion::__fbthrift_is_empty() const {
   }
 
     MarshalUnion&MarshalUnion::operator=(const MarshalUnion& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();

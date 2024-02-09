@@ -609,6 +609,7 @@ bool SimpleUnion::__fbthrift_is_empty() const {
   }
 
     SimpleUnion&SimpleUnion::operator=(const SimpleUnion& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();
@@ -903,6 +904,7 @@ bool ComplexUnion::__fbthrift_is_empty() const {
   }
 
     ComplexUnion&ComplexUnion::operator=(const ComplexUnion& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();
@@ -3095,6 +3097,7 @@ bool FloatUnion::__fbthrift_is_empty() const {
   }
 
     FloatUnion&FloatUnion::operator=(const FloatUnion& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();

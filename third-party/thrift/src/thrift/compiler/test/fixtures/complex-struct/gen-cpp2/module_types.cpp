@@ -1557,6 +1557,7 @@ bool MyUnion::__fbthrift_is_empty() const {
   }
 
     MyUnion&MyUnion::operator=(const MyUnion& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();
@@ -1732,6 +1733,7 @@ bool MyUnionFloatFieldThrowExp::__fbthrift_is_empty() const {
   }
 
     MyUnionFloatFieldThrowExp&MyUnionFloatFieldThrowExp::operator=(const MyUnionFloatFieldThrowExp& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();

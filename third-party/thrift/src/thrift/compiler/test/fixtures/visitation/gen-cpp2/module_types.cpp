@@ -177,6 +177,7 @@ bool union1::__fbthrift_is_empty() const {
   }
 
     union1&union1::operator=(const union1& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();
@@ -328,6 +329,7 @@ bool union2::__fbthrift_is_empty() const {
   }
 
     union2&union2::operator=(const union2& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();
@@ -479,6 +481,7 @@ bool union3::__fbthrift_is_empty() const {
   }
 
     union3&union3::operator=(const union3& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();
@@ -740,6 +743,7 @@ bool unionA::__fbthrift_is_empty() const {
   }
 
     unionA&unionA::operator=(const unionA& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();
@@ -3041,6 +3045,7 @@ bool union_with_special_names::__fbthrift_is_empty() const {
   }
 
     union_with_special_names&union_with_special_names::operator=(const union_with_special_names& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();

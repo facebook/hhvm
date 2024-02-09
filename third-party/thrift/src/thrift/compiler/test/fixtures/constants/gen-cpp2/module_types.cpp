@@ -817,6 +817,7 @@ bool union1::__fbthrift_is_empty() const {
   }
 
     union1&union1::operator=(const union1& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();
@@ -962,6 +963,7 @@ bool union2::__fbthrift_is_empty() const {
   }
 
     union2&union2::operator=(const union2& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();

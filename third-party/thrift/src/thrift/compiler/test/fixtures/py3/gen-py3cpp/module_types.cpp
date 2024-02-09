@@ -621,6 +621,7 @@ bool AdaptedUnion::__fbthrift_is_empty() const {
   }
 
     AdaptedUnion&AdaptedUnion::operator=(const AdaptedUnion& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();
@@ -1019,6 +1020,7 @@ bool BinaryUnion::__fbthrift_is_empty() const {
   }
 
     BinaryUnion&BinaryUnion::operator=(const BinaryUnion& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();

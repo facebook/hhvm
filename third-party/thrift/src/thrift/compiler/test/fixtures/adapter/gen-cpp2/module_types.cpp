@@ -493,6 +493,7 @@ bool Baz::__fbthrift_is_empty() const {
   }
 
     Baz&Baz::operator=(const Baz& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();
@@ -2399,6 +2400,7 @@ bool ThriftAdaptTestUnion::__fbthrift_is_empty() const {
   }
 
     ThriftAdaptTestUnion&ThriftAdaptTestUnion::operator=(const ThriftAdaptTestUnion& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();

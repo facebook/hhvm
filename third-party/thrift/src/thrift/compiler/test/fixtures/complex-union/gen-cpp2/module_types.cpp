@@ -126,6 +126,7 @@ bool ComplexUnion::__fbthrift_is_empty() const {
   }
 
     ComplexUnion&ComplexUnion::operator=(const ComplexUnion& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();
@@ -272,6 +273,7 @@ bool ListUnion::__fbthrift_is_empty() const {
   }
 
     ListUnion&ListUnion::operator=(const ListUnion& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();
@@ -405,6 +407,7 @@ bool DataUnion::__fbthrift_is_empty() const {
   }
 
     DataUnion&DataUnion::operator=(const DataUnion& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();
@@ -656,6 +659,7 @@ bool ValUnion::__fbthrift_is_empty() const {
   }
 
     ValUnion&ValUnion::operator=(const ValUnion& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();
@@ -801,6 +805,7 @@ bool VirtualComplexUnion::__fbthrift_is_empty() const {
   }
 
     VirtualComplexUnion&VirtualComplexUnion::operator=(const VirtualComplexUnion& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();

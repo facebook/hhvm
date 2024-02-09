@@ -2130,6 +2130,7 @@ bool Shallot::__fbthrift_is_empty() const {
   }
 
     Shallot&Shallot::operator=(const Shallot& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();

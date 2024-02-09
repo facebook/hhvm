@@ -200,6 +200,7 @@ bool YourUnion::__fbthrift_is_empty() const {
   }
 
     YourUnion&YourUnion::operator=(const YourUnion& rhs) {
+    if (this == &rhs) { return *this; }
     switch (rhs.getType()) {
       case Type::__EMPTY__:
         __fbthrift_clear();

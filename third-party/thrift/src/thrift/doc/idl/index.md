@@ -243,6 +243,8 @@ struct PeopleSearchResponse {
 
 If there is a circular dependency between files, a compile-time error is reported. So `a.thrift` cannot include itself, and cannot include `b.thrift` if `b.thrift` includes `a.thrift`. Including multiple files with a common ancestor is okay - so `a.thrift` can include `b.thrift` and `c.thrift` when both `b.thrift` and `c.thrift` include `d.thrift`.
 
+Including a file only provides access to symbols defined directly in that file; if `a.thrift` only includes `b.thrift` and `b.thrift` includes `d.thrift` then `a.thrift` can use symbols starting with `b.` but not `d.`. Referencing the latter without the corresponding include directive is an error in some target languages and is deprecated behavior in Thrift.
+
 ### Package Declaration
 
 A package declaration determines the default namespaces for target languages, e.g. the namespace for the generated C++ code and the package for Java. It is also used for applying file-level annotations and as the default [universal name](../features/universal-name.md) prefix.

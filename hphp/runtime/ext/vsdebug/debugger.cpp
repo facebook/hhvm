@@ -1656,24 +1656,22 @@ void Debugger::tryInstallBreakpoints(DebuggerRequestInfo* ri) {
     return;
   }
 
+  BreakpointManager* bpMgr = m_session->getBreakpointManager();
+  phpSetExceptionBreakpoint(bpMgr->getExceptionBreakMode());
   auto bpInfo = ri->m_breakpointInfo;
+  auto& pendingBps = bpInfo->m_pendingBreakpoints;
+  if (pendingBps.empty()) return;
 
   // Create a map of the normalized file paths of all compilation units that
   // have already been loaded by this request before the debugger attached to
   // it to allow for quick lookup when resolving breakpoints. Any units loaded
   // after this will be added to the map by onCompilationUnitLoaded().
-  if (!ri->m_flags.compilationUnitsMapped) {
-    ri->m_flags.compilationUnitsMapped = true;
-    for (auto p : g_context->m_loadedUnits) {
-      bpInfo->m_loadedUnits.emplace(p.first->data(), p.second);
-    }
+  for (auto p : g_context->m_loadedUnits) {
+    bpInfo->m_loadedUnits.emplace(p.first->data(), p.second);
   }
 
   // For any breakpoints that are pending for this request, try to resolve
   // and install them, or mark them as unresolved.
-  BreakpointManager* bpMgr = m_session->getBreakpointManager();
-  phpSetExceptionBreakpoint(bpMgr->getExceptionBreakMode());
-  auto& pendingBps = bpInfo->m_pendingBreakpoints;
 
   for (auto it = pendingBps.begin(); it != pendingBps.end();) {
     const int breakpointId = *it;

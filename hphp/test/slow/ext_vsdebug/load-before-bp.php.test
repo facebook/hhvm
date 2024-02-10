@@ -1,0 +1,8 @@
+<?hh
+
+<<__EntryPoint>>
+function main() {
+  require(__DIR__. '/MyClass.inc');
+  $a = MyClass::foo();
+  echo $a;
+}

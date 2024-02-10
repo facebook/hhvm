@@ -29,14 +29,13 @@ struct DebuggerRequestInfo {
   union {
     struct {
       uint32_t memoryLimitRemoved : 1;
-      uint32_t compilationUnitsMapped : 1;
       uint32_t doNotBreak : 1;
       uint32_t outputHooked : 1;
       uint32_t requestUrlInitialized : 1;
       uint32_t terminateRequest : 1;
       uint32_t unresolvedBps : 1;
       uint32_t alive : 1;
-      uint32_t unused : 24;
+      uint32_t unused : 25;
     } m_flags;
     uint32_t m_allFlags;
   };

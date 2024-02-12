@@ -21,8 +21,8 @@
 
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger.h"
+#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/util/network.h"
 #include "hphp/util/logger.h"
@@ -37,8 +37,8 @@ DebuggerServer DebuggerServer::s_debugger_server;
 
 bool DebuggerServer::Start() {
   TRACE(2, "DebuggerServer::Start\n");
-  if (RuntimeOption::EnableDebuggerServer) {
-    if (RuntimeOption::EnableDebuggerColor) {
+  if (Cfg::Debugger::EnableServer) {
+    if (Cfg::Debugger::EnableColor) {
       Debugger::SetTextColors();
 
       // Some server commands pre-formatted texts with color for clients.
@@ -55,7 +55,7 @@ bool DebuggerServer::Start() {
 
 void DebuggerServer::Stop() {
   TRACE(2, "DebuggerServer::Stop\n");
-  if (RuntimeOption::EnableDebuggerServer) {
+  if (Cfg::Debugger::EnableServer) {
     s_debugger_server.stop();
   }
 }
@@ -75,7 +75,7 @@ DebuggerServer::~DebuggerServer() {
 
 bool DebuggerServer::start() {
   TRACE(2, "DebuggerServer::start\n");
-  int port = RuntimeOption::DebuggerServerPort;
+  int port = Cfg::Debugger::ServerPort;
   int backlog = 128;
 
   struct addrinfo hint;
@@ -84,13 +84,13 @@ bool DebuggerServer::start() {
   hint.ai_family = AF_UNSPEC;
   hint.ai_socktype = SOCK_STREAM;
   hint.ai_flags = AI_PASSIVE;
-  if (RuntimeOption::DebuggerDisableIPv6) {
+  if (Cfg::Debugger::DisableIPv6) {
     hint.ai_family = AF_INET;
   }
 
-  const auto nodename = RuntimeOption::DebuggerServerIP.empty()
+  const auto nodename = Cfg::Debugger::ServerIP.empty()
     ? "localhost"
-    : RuntimeOption::DebuggerServerIP.c_str();
+    : Cfg::Debugger::ServerIP.c_str();
   if (getaddrinfo(nodename, std::to_string(port).c_str(), &hint, &ai)) {
     Logger::Error("unable to get address information");
     return false;

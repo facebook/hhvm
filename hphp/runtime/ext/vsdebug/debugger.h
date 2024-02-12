@@ -21,6 +21,7 @@
 #include <condition_variable>
 #include <mutex>
 
+#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/ext/vsdebug/logging.h"
 #include "hphp/runtime/ext/vsdebug/transport.h"
@@ -411,8 +412,8 @@ struct Debugger final {
 
   static bool hasSameTty() {
     return !RuntimeOption::ServerExecutionMode() &&
-      RuntimeOption::VSDebuggerListenPort <= 0 &&
-      RuntimeOption::VSDebuggerDomainSocketPath.empty();
+      Cfg::Debugger::VSDebuggerListenPort <= 0 &&
+      Cfg::Debugger::VSDebuggerDomainSocketPath.empty();
   }
 
   // Returns the current stdout hook if one is installed, or nullptr otherwise.

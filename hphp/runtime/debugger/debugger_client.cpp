@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/string-util.h"
@@ -628,7 +629,7 @@ req::ptr<Socket> DebuggerClient::connectLocal() {
 bool DebuggerClient::connectRemote(const std::string &host, int port) {
   TRACE(2, "DebuggerClient::connectRemote\n");
   if (port <= 0) {
-    port = RuntimeOption::DebuggerServerPort;
+    port = Cfg::Debugger::ServerPort;
   }
   info("Connecting to %s:%d...", host.c_str(), port);
 
@@ -666,7 +667,7 @@ bool DebuggerClient::tryConnect(const std::string &host, int port,
   memset(&hint, 0, sizeof(hint));
   hint.ai_family = AF_UNSPEC;
   hint.ai_socktype = SOCK_STREAM;
-  if (RuntimeOption::DebuggerDisableIPv6) {
+  if (Cfg::Debugger::DisableIPv6) {
     hint.ai_family = AF_INET;
   }
 
@@ -711,7 +712,7 @@ bool DebuggerClient::tryConnect(const std::string &host, int port,
 
 std::string DebuggerClient::getPrompt() {
   TRACE(2, "DebuggerClient::getPrompt\n");
-  if (NoPrompt || !RuntimeOption::EnableDebuggerPrompt) {
+  if (NoPrompt || !Cfg::Debugger::EnablePrompt) {
     return "";
   }
   auto name = &m_machine->m_name;
@@ -747,14 +748,14 @@ void DebuggerClient::init(const DebuggerClientOptions &options) {
   }
 
   if (!options.cmds.empty()) {
-    RuntimeOption::EnableDebuggerColor = false;
-    RuntimeOption::EnableDebuggerPrompt = false;
+    Cfg::Debugger::EnableColor = false;
+    Cfg::Debugger::EnablePrompt = false;
     s_use_utf8 = false;
   }
 
-  if (UseColor && RuntimeOption::EnableDebuggerColor) Debugger::SetTextColors();
+  if (UseColor && Cfg::Debugger::EnableColor) Debugger::SetTextColors();
 
-  if (!NoPrompt && RuntimeOption::EnableDebuggerPrompt) {
+  if (!NoPrompt && Cfg::Debugger::EnablePrompt) {
     info("Welcome to HipHop Debugger!");
     info("Type \"help\" or \"?\" for a complete list of commands.\n");
    }
@@ -1228,7 +1229,7 @@ void DebuggerClient::console() {
         print("%s", line); // Stay consistent with the readline library
 #endif
       }
-    } else if (!NoPrompt && RuntimeOption::EnableDebuggerPrompt) {
+    } else if (!NoPrompt && Cfg::Debugger::EnablePrompt) {
       print("%s%s", getPrompt().c_str(), line);
     }
     if (*line && !m_macroPlaying &&
@@ -1377,7 +1378,7 @@ bool DebuggerClient::code(const String& source, int line1 /*= 0*/,
   }
   if (!sb.empty()) {
     print("%s%s", sb.data(),
-      UseColor && RuntimeOption::EnableDebuggerColor ? ANSI_COLOR_END : "\0");
+      UseColor && Cfg::Debugger::EnableColor ? ANSI_COLOR_END : "\0");
     return true;
   }
   return false;
@@ -1389,7 +1390,7 @@ char DebuggerClient::ask(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   string_vsnprintf(msg, fmt, ap); va_end(ap);
-  if (UseColor && InfoColor && RuntimeOption::EnableDebuggerColor) {
+  if (UseColor && InfoColor && Cfg::Debugger::EnableColor) {
     msg = InfoColor + msg + ANSI_COLOR_END;
   }
   fwrite(msg.data(), 1, msg.length(), stdout);
@@ -1447,11 +1448,11 @@ void DebuggerClient::print(folly::StringPiece msg) {
 
 #define IMPLEMENT_COLOR_OUTPUT(name, where, color)                      \
   void DebuggerClient::name(folly::StringPiece msg) {                   \
-    if (UseColor && color && RuntimeOption::EnableDebuggerColor) {      \
+    if (UseColor && color && Cfg::Debugger::EnableColor) {              \
       DWRITE(color, 1, strlen(color), where);                           \
     }                                                                   \
     DWRITE(msg.data(), 1, msg.size(), where);                           \
-    if (UseColor && color && RuntimeOption::EnableDebuggerColor) {      \
+    if (UseColor && color && Cfg::Debugger::EnableColor) {              \
       DWRITE(ANSI_COLOR_END, 1, strlen(ANSI_COLOR_END), where);         \
     }                                                                   \
     DWRITE("\n", 1, 1, where);                                          \
@@ -2372,7 +2373,7 @@ void DebuggerClient::loadConfig() {
 
   Config::Bind(UseColor, ini, config, "Color", true);
   BIND(color, &UseColor);
-  if (UseColor && RuntimeOption::EnableDebuggerColor) {
+  if (UseColor && Cfg::Debugger::EnableColor) {
     LoadColors(ini, config);
   }
 

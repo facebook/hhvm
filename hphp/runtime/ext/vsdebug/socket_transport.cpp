@@ -14,9 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/ext/vsdebug/socket_transport.h"
+
+#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
-#include "hphp/runtime/ext/vsdebug/socket_transport.h"
 #include "hphp/util/user-info.h"
 
 #include <pwd.h>
@@ -186,13 +188,13 @@ void SocketTransport::listenForClientConnection() {
     hint.ai_socktype = SOCK_STREAM;
     hint.ai_flags = AI_PASSIVE;
 
-    if (RuntimeOption::DebuggerDisableIPv6) {
+    if (Cfg::Debugger::DisableIPv6) {
       hint.ai_family = AF_INET;
     }
 
-    const auto name = RuntimeOption::DebuggerServerIP.empty()
+    const auto name = Cfg::Debugger::ServerIP.empty()
       ? "localhost"
-      : RuntimeOption::DebuggerServerIP.c_str();
+      : Cfg::Debugger::ServerIP.c_str();
     if (getaddrinfo(name, std::to_string(m_listenPort).c_str(), &hint, &ai)) {
       VSDebugLogger::Log(
         VSDebugLogger::LogLevelError,

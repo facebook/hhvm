@@ -14,6 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/ext/vsdebug/debugger.h"
+
+#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/intercept.h"
@@ -22,7 +25,6 @@
 #include "hphp/runtime/base/watchman-connection.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
-#include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/debugger-request-info.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/util/process.h"
@@ -2113,7 +2115,7 @@ void Debugger::onBreakpointHit(
         assertx(bp);
         auto firstBpHit = ri->m_firstBpHit;
         ri->m_firstBpHit = true;
-        if (RuntimeOption::LogBreakpointHitTime && StructuredLog::enabled() &&
+        if (Cfg::Debugger::LogBreakpointHitTime && StructuredLog::enabled() &&
             !firstBpHit && bp->m_type == BreakpointType::Source &&
             !isDummyRequest() && g_context->getTransport()) {
           StructuredLogEntry ent;

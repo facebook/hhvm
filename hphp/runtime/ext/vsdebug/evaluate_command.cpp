@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/variable-serializer.h"
@@ -202,7 +203,7 @@ bool EvaluateCommand::executeImpl(
   auto result = executor.m_result;
 
   if (isDummy &&
-      RuntimeOption::LogEvaluationCommands &&
+      Cfg::Debugger::LogEvaluationCommands &&
       StructuredLog::enabled()) {
     logToScuba(rawExpression, !result.failed, result.error,
                session->getClientId(), session->getSessionId(),

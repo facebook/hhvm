@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/coeffects-config.h"
+#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/configs/unit-cache-generated.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -1714,7 +1715,7 @@ Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
            FileLoadFlags::kDup};
       }
     }
-    if (RuntimeOption::EnableVSDebugger || RuntimeOption::EnableHphpdDebugger) {
+    if (Cfg::Debugger::EnableVSDebugger || Cfg::Debugger::EnableHphpd) {
       eContext->m_loadedUnits.emplace(cunit.unit->filepath(), cunit.unit);
       DEBUGGER_ATTACHED_ONLY(phpDebuggerFileLoadHook(cunit.unit));
     }

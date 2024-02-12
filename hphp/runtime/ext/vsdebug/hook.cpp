@@ -362,9 +362,9 @@ void VSDebugHook::tryEnterDebugger(
     // the wrapper has the actual stdout and stderr pipes to use directly,
     // except for the case where we attached to an already-running script,
     // which behaves like server mode.
-    bool scriptAttachMode = RuntimeOption::VSDebuggerListenPort > 0 ||
+    bool scriptAttachMode = Cfg::Debugger::VSDebuggerListenPort > 0 ||
       (!RuntimeOption::ServerExecutionMode() &&
-       !RuntimeOption::VSDebuggerDomainSocketPath.empty());
+       !Cfg::Debugger::VSDebuggerDomainSocketPath.empty());
     if (!Debugger::hasSameTty()) {
       if (debugger->getDebuggerOptions().disableStdoutRedirection == false) {
         if (!g_context.isNull()) {

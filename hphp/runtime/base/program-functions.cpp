@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/configs/errorhandling.h"
 #include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/base/exceptions.h"
@@ -1650,10 +1651,10 @@ static int execute_program_impl(int argc, char** argv) {
   // forget the source for systemlib.php unless we are debugging
   if (po.mode != "debug" && po.mode != "vsdebug") SystemLib::s_source = "";
   if (po.mode == "vsdebug") {
-    RuntimeOption::EnableVSDebugger = true;
-    RuntimeOption::VSDebuggerListenPort = po.vsDebugPort;
-    RuntimeOption::VSDebuggerDomainSocketPath = po.vsDebugDomainSocket;
-    RuntimeOption::VSDebuggerNoWait = po.vsDebugNoWait;
+    Cfg::Debugger::EnableVSDebugger = true;
+    Cfg::Debugger::VSDebuggerListenPort = po.vsDebugPort;
+    Cfg::Debugger::VSDebuggerDomainSocketPath = po.vsDebugDomainSocket;
+    Cfg::Debugger::VSDebuggerNoWait = po.vsDebugNoWait;
   }
 
   // we need to to initialize these very early
@@ -2099,7 +2100,7 @@ static int execute_program_impl(int argc, char** argv) {
 
     if (po.mode == "debug") {
       StackTraceNoHeap::AddExtraLogging("IsDebugger", "True");
-      RuntimeOption::EnableHphpdDebugger = true;
+      Cfg::Debugger::EnableHphpd = true;
       po.debugger_options.fileName = file;
       po.debugger_options.user = po.user;
       Eval::DebuggerProxyPtr localProxy =
@@ -2470,7 +2471,7 @@ void hphp_process_init(bool skipExtensions) {
   ImplicitContext::activeCtx
     .bind(rds::Mode::Normal, rds::LinkID{"ImplicitContext::activeCtx"});
 
-  if (RO::EnableVSDebugger && RO::EvalEmitDebuggerIntrCheck) {
+  if (Cfg::Debugger::EnableVSDebugger && RO::EvalEmitDebuggerIntrCheck) {
     DebuggerHook::s_exceptionBreakpointIntr
       .bind(rds::Mode::Normal, rds::LinkID{"ExceptionBreakpointIntr"});
   }

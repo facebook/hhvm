@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/crash-reporter.h"
 
+#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -185,7 +186,7 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
       s_crash_report_stage = CrashReportStage::ReportAssertDetail;
       {
         auto const debuggerCount = [&] {
-          if (RuntimeOption::EnableHphpdDebugger) {
+          if (Cfg::Debugger::EnableHphpd) {
             return Eval::Debugger::CountConnectedProxy();
           }
 

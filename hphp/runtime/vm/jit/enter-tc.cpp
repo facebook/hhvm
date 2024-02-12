@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
+#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/util/rds-local.h"
@@ -50,7 +51,7 @@ ALWAYS_INLINE void preEnter(JitResumeAddr start) {
 
   // If stepping in the debugger, the next debugger interrpt check in JIT
   // must bring the execution back to interpreter.
-  if (UNLIKELY(RuntimeOption::EnableVSDebugger &&
+  if (UNLIKELY(Cfg::Debugger::EnableVSDebugger &&
                !RID().getVSDebugDisablesJit() &&
                !g_context->m_dbgNoBreak &&
                RID().getDebuggerStepIntr())) {

@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/attr.h"
+#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/location.h"
 #include "hphp/runtime/base/repo-auth-type.h"
@@ -599,9 +600,9 @@ bool UnitEmitter::check(bool verbose) const {
 bool needs_extended_line_table() {
   return RuntimeOption::RepoDebugInfo &&
     (RuntimeOption::EvalDumpHhas ||
-     RuntimeOption::EnableHphpdDebugger ||
-     RuntimeOption::EnableVSDebugger ||
-     RuntimeOption::EnableDebuggerServer);
+     Cfg::Debugger::EnableHphpd ||
+     Cfg::Debugger::EnableVSDebugger ||
+     Cfg::Debugger::EnableServer);
 }
 
 std::unique_ptr<Unit> UnitEmitter::create() const {

@@ -16,6 +16,8 @@
 */
 
 #include "hphp/runtime/ext/debugger/ext_debugger.h"
+
+#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
@@ -57,7 +59,7 @@ String HHVM_FUNCTION(hphp_debug_session_auth) {
 bool HHVM_FUNCTION(hphp_debug_break, bool condition /* = true */) {
   TRACE(5, "in hphp_debug_break()\n");
   if (!condition || g_context->m_dbgNoBreak) {
-    TRACE(5, "bail !%d || !%d || %d\n", RuntimeOption::EnableHphpdDebugger,
+    TRACE(5, "bail !%d || !%d || %d\n", Cfg::Debugger::EnableHphpd,
           condition, g_context->m_dbgNoBreak);
     return false;
   }
@@ -71,7 +73,7 @@ bool HHVM_FUNCTION(hphp_debug_break, bool condition /* = true */) {
   }
 
   // Try breaking into hphpd, if attached.
-  if (RuntimeOption::EnableHphpdDebugger) {
+  if (Cfg::Debugger::EnableHphpd) {
     VMRegAnchor _;
     Debugger::InterruptVMHook(HardBreakPoint);
     return true;
@@ -90,7 +92,7 @@ void HHVM_FUNCTION(hphpd_break, bool condition /* = true */) {
 // Quickly determine if a debugger is attached to the current thread.
 bool HHVM_FUNCTION(hphp_debugger_attached) {
   if (RO::RepoAuthoritative) return false;
-  if (RO::EnableHphpdDebugger && (Debugger::GetProxy() != nullptr)) return true;
+  if (Cfg::Debugger::EnableHphpd && (Debugger::GetProxy() != nullptr)) return true;
 
   auto debugger = HPHP::VSDEBUG::VSDebugExtension::getDebugger();
   return (debugger != nullptr && debugger->clientConnected());
@@ -125,7 +127,7 @@ const StaticString
 
 Array HHVM_FUNCTION(debugger_get_info) {
   Array ret(Array::CreateDict());
-  if (!RuntimeOption::EnableHphpdDebugger) return ret;
+  if (!Cfg::Debugger::EnableHphpd) return ret;
   DebuggerProxyPtr proxy = Debugger::GetProxy();
   if (!proxy) return ret;
   Variant address;

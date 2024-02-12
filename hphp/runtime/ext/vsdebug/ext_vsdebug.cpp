@@ -14,8 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <string>
 #include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
+
+#include <string>
+
+#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/ext/vsdebug/logging.h"
 
 namespace HPHP {
@@ -58,7 +61,7 @@ void VSDebugExtension::moduleLoad(const IniSetting::Map& ini, const Hdf hdf) {
     "Eval.Debugger.VSDebugDomainSocketGroup",
     "");
 
-  if (!RuntimeOption::EnableVSDebugger) {
+  if (!Cfg::Debugger::EnableVSDebugger) {
    m_enabled = false;
    return;
   }
@@ -117,18 +120,18 @@ void VSDebugExtension::moduleInit() {
     // If a listen port or domain socket was specified on the command line,
     // use socket transport even in script mode. Otherwise, fall back to
     // using a pipe with our parent process.
-    if (RuntimeOption::VSDebuggerListenPort > 0 ||
-        !RuntimeOption::VSDebuggerDomainSocketPath.empty()) {
+    if (Cfg::Debugger::VSDebuggerListenPort > 0 ||
+        !Cfg::Debugger::VSDebuggerDomainSocketPath.empty()) {
       VSDebugLogger::Log(
         VSDebugLogger::LogLevelInfo,
         "Blocking script startup. Waiting for debugger to attach: %s",
-        RuntimeOption::VSDebuggerDomainSocketPath.empty()
-          ? std::to_string(RuntimeOption::VSDebuggerListenPort).c_str()
-          : RuntimeOption::VSDebuggerDomainSocketPath.c_str()
+        Cfg::Debugger::VSDebuggerDomainSocketPath.empty()
+          ? std::to_string(Cfg::Debugger::VSDebuggerListenPort).c_str()
+          : Cfg::Debugger::VSDebuggerDomainSocketPath.c_str()
       );
 
-      opts.tcpListenPort = RuntimeOption::VSDebuggerListenPort;
-      opts.domainSocketPath = RuntimeOption::VSDebuggerDomainSocketPath;
+      opts.tcpListenPort = Cfg::Debugger::VSDebuggerListenPort;
+      opts.domainSocketPath = Cfg::Debugger::VSDebuggerDomainSocketPath;
       transport = new SocketTransport(s_debugger, opts);
     } else {
       try {
@@ -182,10 +185,10 @@ void VSDebugExtension::requestInit() {
   // line, we need to block starting the script until the debugger client
   // connects.
   if (!RuntimeOption::ServerExecutionMode() &&
-      (RuntimeOption::VSDebuggerListenPort > 0 ||
-        !RuntimeOption::VSDebuggerDomainSocketPath.empty())) {
+      (Cfg::Debugger::VSDebuggerListenPort > 0 ||
+        !Cfg::Debugger::VSDebuggerDomainSocketPath.empty())) {
 
-    if (!RuntimeOption::VSDebuggerNoWait) {
+    if (!Cfg::Debugger::VSDebuggerNoWait) {
       VSDebugLogger::Log(
         VSDebugLogger::LogLevelInfo,
         "Blocking script startup until debugger client connects..."

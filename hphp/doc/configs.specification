@@ -34,6 +34,32 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 
   Sample rate for Autoload & Facts API latency logging
 
+# Debugger (Eval.Debugger.)
+
+- bool Debugger.EnableHphpd = false (Eval.Debugger.EnableDebugger), UNKNOWN
+- bool Debugger.EnableVSDebugger = EnableVSDebugger (Eval.Debugger.VSDebugEnable), UNKNOWN
+
+  Yes the default value is itself. That is because between the static initiation and the
+  Config::Bind call https://fburl.com/code/f7wryx1z sets it to a different value sometimes.
+
+- int Debugger.VSDebuggerListenPort = -1, UNKNOWN, nobind
+- std::string Debugger.VSDebuggerDomainSocketPath = "", UNKNOWN, nobind
+- bool Debugger.VSDebuggerNoWait = false, UNKNOWN, nobind
+- bool Debugger.EnableColor = true (Eval.Debugger.EnableDebuggerColor), UNKNOWN
+- bool Debugger.EnablePrompt = true (Eval.Debugger.EnableDebuggerPrompt), UNKNOWN
+- bool Debugger.EnableServer = false (Eval.Debugger.EnableDebuggerServer), UNKNOWN
+- bool Debugger.EnableUsageLog = false (Eval.Debugger.EnableDebuggerUsageLog), UNKNOWN
+- std::string Debugger.ServerIP = "" (Eval.Debugger.IP), UNKNOWN
+- int Debugger.ServerPort = 8089 (Eval.Debugger.Port), UNKNOWN
+- bool Debugger.DisableIPv6 = false, UNKNOWN
+- std::string Debugger.DefaultSandboxPath = "", UNKNOWN
+- std::string Debugger.StartupDocument = "", UNKNOWN
+- int Debugger.SignalTimeout = 1, UNKNOWN
+- std::string Debugger.Auth.TokenScriptBin = "", UNKNOWN
+- std::string Debugger.Auth.SessionAuthScriptBin = "", UNKNOWN
+- bool Debugger.LogBreakpointHitTime = false, UNKNOWN
+- bool Debugger.LogEvaluationCommands = false, UNKNOWN
+
 # ErrorHandling
 
 - int ErrorHandling.UpgradeLevel = 0, UNKNOWN

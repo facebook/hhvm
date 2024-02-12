@@ -30,7 +30,7 @@
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/debugger/dummy_sandbox.h"
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/vm/debugger-hook.h"
@@ -237,8 +237,8 @@ void DebuggerProxy::startDummySandbox() {
 
   TRACE(2, "DebuggerProxy::startDummySandbox\n");
   m_dummySandbox =
-    new DummySandbox(this, RuntimeOption::DebuggerDefaultSandboxPath,
-                     RuntimeOption::DebuggerStartupDocument);
+    new DummySandbox(this, Cfg::Debugger::DefaultSandboxPath,
+                     Cfg::Debugger::StartupDocument);
   m_dummySandbox->start();
 }
 
@@ -407,7 +407,7 @@ void DebuggerProxy::startSignalThread() {
 // it will be passed to the dummy sandbox instead.
 void DebuggerProxy::pollSignal() {
   TRACE_RB(2, "DebuggerProxy::pollSignal: starting\n");
-  int signalTimeout = RuntimeOption::DebuggerSignalTimeout;
+  int signalTimeout = Cfg::Debugger::SignalTimeout;
   while (!m_stopped) {
     sleep(1);
 
@@ -471,7 +471,7 @@ void DebuggerProxy::pollSignal() {
       TRACE_RB(2, "DebuggerProxy::pollSignal: "
                "got interrupt signal from client\n");
       m_signum = newSignum;
-      signalTimeout = RuntimeOption::DebuggerSignalTimeout;
+      signalTimeout = Cfg::Debugger::SignalTimeout;
       Debugger::RequestInterrupt(shared_from_this());
     }
   }
@@ -839,7 +839,7 @@ std::string DebuggerProxy::requestAuthToken() {
   // DebuggerDefaultSandboxPath if the current sandbox path is empty.
   auto sandboxPath = getSandbox().m_path;
   if (sandboxPath.empty()) {
-    sandboxPath = RuntimeOption::DebuggerDefaultSandboxPath;
+    sandboxPath = Cfg::Debugger::DefaultSandboxPath;
   }
 
   CmdAuth cmd;
@@ -879,7 +879,7 @@ std::string DebuggerProxy::requestSessionAuth() {
   // DebuggerDefaultSandboxPath if the current sandbox path is empty.
   auto sandboxPath = getSandbox().m_path;
   if (sandboxPath.empty()) {
-    sandboxPath = RuntimeOption::DebuggerDefaultSandboxPath;
+    sandboxPath = Cfg::Debugger::DefaultSandboxPath;
   }
 
   CmdAuth cmd;

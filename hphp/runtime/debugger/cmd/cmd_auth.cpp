@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_auth.h"
 
+#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/util/process-exec.h"
@@ -41,8 +42,8 @@ void CmdAuth::recvImpl(DebuggerThriftBuffer& thrift) {
 }
 
 void CmdAuth::onClient(DebuggerClient& client) {
-  auto const token_path = RuntimeOption::DebuggerAuthTokenScriptBin;
-  auto const session_path = RuntimeOption::DebuggerSessionAuthScriptBin;
+  auto const token_path = Cfg::Debugger::AuthTokenScriptBin;
+  auto const session_path = Cfg::Debugger::AuthSessionAuthScriptBin;
   const char *argv[] = { nullptr };
   if (token_path.empty() ||
       !proc::exec(token_path.data(), argv, nullptr, m_token, nullptr)) {

@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/jit/service-request-handlers.h"
 
+#include "hphp/runtime/base/configs/debugger.h"
+
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 
 #include "hphp/runtime/vm/jit/code-cache.h"
@@ -134,7 +136,7 @@ TranslationResult getTranslation(SrcKey sk) {
     return TranslationResult::failTransiently();
   }
 
-  if (UNLIKELY(RO::EnableVSDebugger && RO::EvalEmitDebuggerIntrCheck)) {
+  if (UNLIKELY(Cfg::Debugger::EnableVSDebugger && RO::EvalEmitDebuggerIntrCheck)) {
     assertx(!RO::RepoAuthoritative);
     sk.func()->ensureDebuggerIntrSetLinkBound();
   }

@@ -15,6 +15,8 @@
 */
 #include "hphp/runtime/vm/jit/irgen-control.h"
 
+#include "hphp/runtime/base/configs/debugger.h"
+
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/unwind.h"
 
@@ -355,7 +357,7 @@ void emitThrow(IRGS& env) {
   if (!stackEmpty || !maybeThrowable || !(srcTy <= TObj)) return interpOne(env);
 
   auto slowExit = makeExitSlow(env);
-  if (RO::EnableVSDebugger && RO::EvalEmitDebuggerIntrCheck) {
+  if (Cfg::Debugger::EnableVSDebugger && RO::EvalEmitDebuggerIntrCheck) {
     irgen::checkDebuggerExceptionIntr(env, slowExit);
   }
 

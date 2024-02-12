@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/http-client.h"
@@ -252,7 +253,7 @@ void HttpServer::onServerShutdown() {
   InitFiniNode::ServerFini();
 
   Eval::Debugger::Stop();
-  if (RuntimeOption::EnableDebuggerServer) {
+  if (Cfg::Debugger::EnableServer) {
     Logger::Info("debugger server stopped");
   }
 
@@ -386,7 +387,7 @@ void HttpServer::runOrExitProcess() {
   if (!Eval::Debugger::StartServer()) {
     startupFailure("Unable to start debugger server");
     not_reached();
-  } else if (RuntimeOption::EnableDebuggerServer) {
+  } else if (Cfg::Debugger::EnableServer) {
     Logger::Info("debugger server started");
   }
 

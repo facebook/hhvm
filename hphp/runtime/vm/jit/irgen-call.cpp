@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/vm/jit/irgen-call.h"
 
+#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/method-lookup.h"
@@ -324,7 +325,7 @@ void handleCallReturn(IRGS& env, const Func* callee, SSATmp* retVal,
     // If the call is the last bytecode of the region, there is no need to
     // insert the debugger interrupt check as it will be checked at the
     // beginning of next translation.
-    if (RO::EnableVSDebugger && RO::EvalEmitDebuggerIntrCheck &&
+    if (Cfg::Debugger::EnableVSDebugger && RO::EvalEmitDebuggerIntrCheck &&
         curSrcKey(env) != env.region->lastSrcKey()) {
       irgen::checkDebuggerIntr(env, nextSk);
     }

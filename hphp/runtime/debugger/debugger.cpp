@@ -20,6 +20,7 @@
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
+#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -226,7 +227,7 @@ void Debugger::InterruptRequestEnded(const char *url) {
 }
 
 void Debugger::InterruptPSPEnded(const char *url) {
-  if (!RuntimeOption::EnableHphpdDebugger) return;
+  if (!Cfg::Debugger::EnableHphpd) return;
   try {
     TRACE(2, "Debugger::InterruptPSPEnded\n");
     if (isDebuggerAttached()) {
@@ -244,7 +245,7 @@ void Debugger::InterruptPSPEnded(const char *url) {
 void Debugger::Interrupt(int type, const char *program,
                          InterruptSite *site /* = NULL */,
                          const char *error /* = NULL */) {
-  assertx(RuntimeOption::EnableHphpdDebugger);
+  assertx(Cfg::Debugger::EnableHphpd);
   TRACE_RB(2, "Debugger::Interrupt type %d\n", type);
 
   DebuggerProxyPtr proxy = GetProxy();

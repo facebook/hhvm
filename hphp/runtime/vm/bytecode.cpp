@@ -43,6 +43,7 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/configs/errorhandling.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -2247,7 +2248,7 @@ OPTBLD_INLINE void iopThrow(PC&) {
   auto obj = Object::attach(c1->m_data.pobj);
   vmStack().discard();
   DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionThrownHook(obj.get()));
-  if (UNLIKELY(RuntimeOption::EnableVSDebugger &&
+  if (UNLIKELY(Cfg::Debugger::EnableVSDebugger &&
                !RID().getVSDebugDisablesJit() &&
                !g_context->m_dbgNoBreak &&
                RID().getDebuggerStepIntr())) {
@@ -5891,7 +5892,7 @@ JitResumeAddr dispatchBB() {
   auto const retAddr = dispatchImpl<true>();
   // When dispatchBB returns with debugger interrupt set, the next check in JIT
   // for debugger interrupt must bring the execution back to interpreter.
-  if (UNLIKELY(RuntimeOption::EnableVSDebugger &&
+  if (UNLIKELY(Cfg::Debugger::EnableVSDebugger &&
                !RID().getVSDebugDisablesJit() &&
                !g_context->m_dbgNoBreak &&
                RID().getDebuggerStepIntr() &&

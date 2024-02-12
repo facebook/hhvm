@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 
+#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/hhprof.h"
@@ -446,7 +447,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     ServerStatsHelper ssh("input");
     HttpProtocol::PrepareSystemVariables(transport, reqURI);
 
-    if (RuntimeOption::EnableHphpdDebugger) {
+    if (Cfg::Debugger::EnableHphpd) {
       Eval::DSandboxInfo sInfo = SourceRootInfo::GetSandboxInfo();
       Eval::Debugger::RegisterSandbox(sInfo);
       context->setSandboxId(sInfo.id());
@@ -460,7 +461,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
   // Let the debugger initialize.
   // FIXME: hphpd can be initialized this way as well
   DEBUGGER_ATTACHED_ONLY(phpDebuggerRequestInitHook());
-  if (RuntimeOption::EnableHphpdDebugger) {
+  if (Cfg::Debugger::EnableHphpd) {
     Eval::Debugger::InterruptRequestStarted(transport->getUrl());
   }
 
@@ -523,7 +524,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     transport->sendString("RequestInitDocument Not Found", 404);
   }
 
-  if (RuntimeOption::EnableHphpdDebugger) {
+  if (Cfg::Debugger::EnableHphpd) {
     Eval::Debugger::InterruptRequestEnded(transport->getUrl());
   }
 

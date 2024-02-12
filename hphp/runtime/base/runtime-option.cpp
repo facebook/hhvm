@@ -1184,26 +1184,6 @@ std::string RuntimeOption::SandboxLogsRoot;
 std::string RuntimeOption::SandboxDefaultUserFile;
 std::string RuntimeOption::SandboxHostAlias;
 
-bool RuntimeOption::EnableHphpdDebugger = false;
-bool RuntimeOption::EnableVSDebugger = false;
-int RuntimeOption::VSDebuggerListenPort = -1;
-std::string RuntimeOption::VSDebuggerDomainSocketPath;
-bool RuntimeOption::VSDebuggerNoWait = false;
-bool RuntimeOption::EnableDebuggerColor = true;
-bool RuntimeOption::EnableDebuggerPrompt = true;
-bool RuntimeOption::EnableDebuggerServer = false;
-bool RuntimeOption::EnableDebuggerUsageLog = false;
-bool RuntimeOption::DebuggerDisableIPv6 = false;
-std::string RuntimeOption::DebuggerServerIP;
-int RuntimeOption::DebuggerServerPort = 8089;
-std::string RuntimeOption::DebuggerDefaultSandboxPath;
-std::string RuntimeOption::DebuggerStartupDocument;
-int RuntimeOption::DebuggerSignalTimeout = 1;
-std::string RuntimeOption::DebuggerAuthTokenScriptBin;
-std::string RuntimeOption::DebuggerSessionAuthScriptBin;
-bool RuntimeOption::LogBreakpointHitTime = false;
-bool RuntimeOption::LogEvaluationCommands = false;
-
 std::string RuntimeOption::SendmailPath = "sendmail -t -i";
 std::string RuntimeOption::MailForceExtraParameters;
 
@@ -1988,39 +1968,6 @@ void RuntimeOption::Load(
     Config::Bind(CheckCLIClientCommands, ini, config, "Eval.CheckCLIClientCommands", 1);
     if (RepoAuthoritative) {
       EvalAuthoritativeMode = true;
-    }
-    {
-      // Debugger (part of Eval)
-      Config::Bind(EnableHphpdDebugger, ini, config,
-                   "Eval.Debugger.EnableDebugger");
-      Config::Bind(EnableVSDebugger, ini, config,
-                   "Eval.Debugger.VSDebugEnable", EnableVSDebugger);
-      Config::Bind(EnableDebuggerColor, ini, config,
-                   "Eval.Debugger.EnableDebuggerColor", true);
-      Config::Bind(EnableDebuggerPrompt, ini, config,
-                   "Eval.Debugger.EnableDebuggerPrompt", true);
-      Config::Bind(EnableDebuggerServer, ini, config,
-                   "Eval.Debugger.EnableDebuggerServer");
-      Config::Bind(EnableDebuggerUsageLog, ini, config,
-                   "Eval.Debugger.EnableDebuggerUsageLog");
-      Config::Bind(DebuggerServerIP, ini, config, "Eval.Debugger.IP");
-      Config::Bind(DebuggerServerPort, ini, config, "Eval.Debugger.Port", 8089);
-      Config::Bind(DebuggerDisableIPv6, ini, config,
-                   "Eval.Debugger.DisableIPv6", false);
-      Config::Bind(DebuggerDefaultSandboxPath, ini, config,
-                   "Eval.Debugger.DefaultSandboxPath");
-      Config::Bind(DebuggerStartupDocument, ini, config,
-                   "Eval.Debugger.StartupDocument");
-      Config::Bind(DebuggerSignalTimeout, ini, config,
-                   "Eval.Debugger.SignalTimeout", 1);
-      Config::Bind(DebuggerAuthTokenScriptBin, ini, config,
-                   "Eval.Debugger.Auth.TokenScriptBin");
-      Config::Bind(DebuggerSessionAuthScriptBin, ini, config,
-                   "Eval.Debugger.Auth.SessionAuthScriptBin");
-      Config::Bind(LogBreakpointHitTime, ini, config,
-                   "Eval.Debugger.LogBreakpointHitTime", false);
-      Config::Bind(LogEvaluationCommands, ini, config,
-                   "Eval.Debugger.LogEvaluationCommands", false);
     }
   }
   {

@@ -22,6 +22,7 @@
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/base/coeffects-config.h"
+#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/tracing.h"
 
@@ -267,7 +268,7 @@ void emitGuards(irgen::IRGS& irgs,
       irgen::checkCoverage(irgs);
     }
 
-    if (RO::EnableVSDebugger && RO::EvalEmitDebuggerIntrCheck &&
+    if (Cfg::Debugger::EnableVSDebugger && RO::EvalEmitDebuggerIntrCheck &&
         !sk.trivialDVFuncEntry()) {
       irgen::checkDebuggerIntr(irgs, curSrcKey(irgs));
     }

@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/vm/jit/irgen.h"
 
+#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/configs/hhir.h"
 
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -223,7 +224,7 @@ void checkCoverage(IRGS& env) {
 
 void checkDebuggerIntr(IRGS& env, SrcKey sk) {
   assertx(!RuntimeOption::RepoAuthoritative);
-  assertx(RuntimeOption::EnableVSDebugger);
+  assertx(Cfg::Debugger::EnableVSDebugger);
   assertx(RuntimeOption::EvalEmitDebuggerIntrCheck);
   assertx(curFunc(env) == sk.func());
   if (sk.func()->isBuiltin()) return;
@@ -247,7 +248,7 @@ void checkDebuggerIntr(IRGS& env, SrcKey sk) {
 
 void checkDebuggerExceptionIntr(IRGS& env, Block* slowExit) {
   assertx(!RuntimeOption::RepoAuthoritative);
-  assertx(RuntimeOption::EnableVSDebugger);
+  assertx(Cfg::Debugger::EnableVSDebugger);
   assertx(RuntimeOption::EvalEmitDebuggerIntrCheck);
 
   auto const& link = DebuggerHook::s_exceptionBreakpointIntr;

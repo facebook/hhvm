@@ -1496,27 +1496,6 @@ public:
   static std::string SandboxDefaultUserFile;
   static std::string SandboxHostAlias;
 
-  // Debugger options
-  static bool EnableHphpdDebugger;
-  static bool EnableVSDebugger;
-  static int VSDebuggerListenPort;
-  static std::string VSDebuggerDomainSocketPath;
-  static bool VSDebuggerNoWait;
-  static bool EnableDebuggerColor;
-  static bool EnableDebuggerPrompt;
-  static bool EnableDebuggerServer;
-  static bool EnableDebuggerUsageLog;
-  static bool DebuggerDisableIPv6;
-  static std::string DebuggerServerIP;
-  static int DebuggerServerPort;
-  static std::string DebuggerDefaultSandboxPath;
-  static std::string DebuggerStartupDocument;
-  static int DebuggerSignalTimeout;
-  static std::string DebuggerAuthTokenScriptBin;
-  static std::string DebuggerSessionAuthScriptBin;
-  static bool LogBreakpointHitTime;
-  static bool LogEvaluationCommands;
-
   // Mail options
   static std::string SendmailPath;
   static std::string MailForceExtraParameters;

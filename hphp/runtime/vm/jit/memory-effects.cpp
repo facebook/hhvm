@@ -19,6 +19,7 @@
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/assertions.h"
 
+#include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/implicit-context.h"
 
 #include "hphp/runtime/vm/bytecode.h"
@@ -140,7 +141,7 @@ jit::vector<AliasClass> backtrace_locals(const IRInstruction& inst) {
     // when EnableArgsInBacktraces is true. However, if debugging is enabled,
     // all named locals need to be sync'ed.
     auto const numLocals =
-      RuntimeOption::EnableVSDebugger &&
+      Cfg::Debugger::EnableVSDebugger &&
       RuntimeOption::EvalEmitDebuggerIntrCheck ?
       func->numNamedLocals() : func->numParams();
 

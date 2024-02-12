@@ -2432,7 +2432,7 @@ func (p *procFuncMyServicePing) RunContext(ctx context.Context, reqStruct thrift
             result.MyExcept = v
             return result, nil
         default:
-            x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing doRaise: " + err.Error(), err)
+            x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Ping: " + err.Error(), err)
             return x, x
         }
     }

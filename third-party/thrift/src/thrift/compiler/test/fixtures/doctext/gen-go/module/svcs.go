@@ -1097,7 +1097,7 @@ func (p *procFuncCThing) RunContext(ctx context.Context, reqStruct thrift.Struct
             result.Bang = v
             return result, nil
         default:
-            x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing doRaise: " + err.Error(), err)
+            x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Thing: " + err.Error(), err)
             return x, x
         }
     }

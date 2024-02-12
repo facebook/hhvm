@@ -1834,7 +1834,7 @@ func (p *procFuncRaiserDoRaise) RunContext(ctx context.Context, reqStruct thrift
             result.S = v
             return result, nil
         default:
-            x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing doRaise: " + err.Error(), err)
+            x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing DoRaise: " + err.Error(), err)
             return x, x
         }
     }
@@ -1959,7 +1959,7 @@ func (p *procFuncRaiserGet500) RunContext(ctx context.Context, reqStruct thrift.
             result.S = v
             return result, nil
         default:
-            x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing doRaise: " + err.Error(), err)
+            x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Get500: " + err.Error(), err)
             return x, x
         }
     }

@@ -17,8 +17,8 @@
 #include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/perf-warning.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tracing.h"
 
 #include "hphp/runtime/vm/jit/types.h"
@@ -218,7 +218,7 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit,
 
 Vcost computeIRUnitCost(const IRUnit& unit) {
   auto vunit = lowerUnit(unit, CodeKind::Trace, false /* regAlloc */);
-  if (RuntimeOption::EvalHHIRInliningUseLayoutBlocks) {
+  if (Cfg::HHIR::InliningUseLayoutBlocks) {
     layoutBlocks(*vunit);
   }
   return computeVunitCost(*vunit);

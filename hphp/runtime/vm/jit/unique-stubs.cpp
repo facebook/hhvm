@@ -16,10 +16,10 @@
 
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/rds-header.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
@@ -1548,7 +1548,7 @@ void emitInterpReqImpl(Vout& v, SrcKey sk, SBInvOffset spOff, TCA helper) {
   if (sk.funcEntry()) {
     auto const withCtx =
       sk.func()->isClosureBody() || sk.func()->cls() ||
-      RuntimeOption::EvalHHIRGenerateAsserts;
+      Cfg::HHIR::GenerateAsserts;
     emitUninitDefaultArgs(v, sk, withCtx);
     sk.advance();
     regSet = func_entry_regs(withCtx);

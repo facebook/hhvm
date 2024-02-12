@@ -19,6 +19,7 @@
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 
 #include "hphp/runtime/vm/hhbc-codec.h"
@@ -121,12 +122,12 @@ bool isTailAwait(const IRGS& env, std::vector<Type>& locals) {
 
 void doTailAwaitDecRefs(IRGS& env, const std::vector<Type>& locals) {
   auto const shouldFreeInline = [&]{
-    if (locals.size() > RO::EvalHHIRInliningMaxReturnLocals) return false;
+    if (locals.size() > Cfg::HHIR::InliningMaxReturnLocals) return false;
     auto numRefCounted = 0;
     for (auto i = 0; i < locals.size(); i++) {
       if (locals[i].maybe(TCounted)) numRefCounted++;
     }
-    return numRefCounted <= RO::EvalHHIRInliningMaxReturnDecRefs;
+    return numRefCounted <= Cfg::HHIR::InliningMaxReturnDecRefs;
   }();
 
   if (shouldFreeInline) {

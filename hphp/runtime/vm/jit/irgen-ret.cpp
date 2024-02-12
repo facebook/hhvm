@@ -16,6 +16,8 @@
 #include "hphp/runtime/vm/jit/irgen-ret.h"
 
 
+#include "hphp/runtime/base/configs/hhir.h"
+
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -59,7 +61,7 @@ void freeLocalsAndThis(IRGS& env) {
     // We don't want to specialize on arg types for builtins
     if (curFunc(env)->arFuncPtr()) return false;
 
-    if (localCount > RuntimeOption::EvalHHIRInliningMaxReturnLocals) {
+    if (localCount > Cfg::HHIR::InliningMaxReturnLocals) {
       return false;
     }
     auto numRefCounted = int{0};
@@ -68,7 +70,7 @@ void freeLocalsAndThis(IRGS& env) {
         ++numRefCounted;
       }
     }
-    return numRefCounted <= RuntimeOption::EvalHHIRInliningMaxReturnDecRefs;
+    return numRefCounted <= Cfg::HHIR::InliningMaxReturnDecRefs;
   }();
 
   if (shouldFreeInline) {

@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/tc.h"
 
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -166,7 +167,7 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
   }
 
   auto const func = sk.func();
-  if (!RO::EvalHHIRAlwaysInterpIgnoreHint &&
+  if (!Cfg::HHIR::AlwaysInterpIgnoreHint &&
       func->userAttributes().count(s_AlwaysInterp.get())) {
     SKTRACE(2, sk,
             "punting because function is annotated with __ALWAYS_INTERP\n");

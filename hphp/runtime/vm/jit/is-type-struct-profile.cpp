@@ -18,13 +18,14 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-data-defs.h"
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 
 namespace HPHP::jit {
 
 bool IsTypeStructProfile::shouldOptimize() const {
-  auto const threshold = RO::EvalHHIRIsTypeStructProfileThreshold;
+  auto const threshold = Cfg::HHIR::IsTypeStructProfileThreshold;
   return m_class >= threshold * m_total;
 }
 

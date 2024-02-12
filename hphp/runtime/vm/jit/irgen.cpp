@@ -15,6 +15,8 @@
 */
 #include "hphp/runtime/vm/jit/irgen.h"
 
+#include "hphp/runtime/base/configs/hhir.h"
+
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/dce.h"
 #include "hphp/runtime/vm/jit/irgen-call.h"
@@ -283,7 +285,7 @@ void prepareEntry(IRGS& env) {
    * If assertions are on, before we do anything, each region makes a call to a
    * C++ function that checks the state of everything.
    */
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+  if (Cfg::HHIR::GenerateAsserts) {
     auto const data = IRSPRelOffsetData { spOffBCFromIRSP(env) };
     gen(env, DbgTraceCall, data, fp(env), sp(env));
   }

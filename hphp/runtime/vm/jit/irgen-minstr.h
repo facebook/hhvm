@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/static-string-table.h"
 
 #include "hphp/runtime/vm/jit/extra-data.h"
@@ -346,7 +347,7 @@ SSATmp* profiledType(IRGS& env, SSATmp* tmp, Finish finish) {
 
   auto const data = prof.data();
 
-  if (data.count < RO::EvalHHIRTypeProfileMinSamples) {
+  if (data.count < Cfg::HHIR::TypeProfileMinSamples) {
     // Not enough samples.
     return tmp;
   }

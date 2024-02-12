@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/memory-manager.h"
 
@@ -602,7 +603,7 @@ void cgLdTVAux(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   v << shrqi{32, type, dst, v.makeReg()};
 
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+  if (Cfg::HHIR::GenerateAsserts) {
     auto const extra = inst->extra<LdTVAux>();
     auto const mask = -extra->valid - 1;
 

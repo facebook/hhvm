@@ -27,6 +27,8 @@
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 
+#include "hphp/runtime/base/configs/hhir.h"
+
 #include "hphp/runtime/vm/jit/alias-analysis.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -410,7 +412,7 @@ bool removeDead(Local& env, IRInstruction& inst, bool trash) {
   FTRACE(4, "      dead (removed)\n");
 
   IRInstruction* dbgInst = nullptr;
-  if (trash && RuntimeOption::EvalHHIRGenerateAsserts) {
+  if (trash && Cfg::HHIR::GenerateAsserts) {
     switch (inst.op()) {
     case StStk:
     case StStkMeta:
@@ -1447,7 +1449,7 @@ void optimizeStores(IRUnit& unit) {
 
   compute_anticipated(genv, blockAnalysis);
 
-  if (!RuntimeOption::EvalHHIRStorePRE) {
+  if (!Cfg::HHIR::StorePRE) {
     /*
      * We've reached a fixed point.
      * Delete redundant stores

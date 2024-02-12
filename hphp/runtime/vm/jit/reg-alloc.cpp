@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
 
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/util/arch.h"
@@ -132,7 +133,7 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
 void assignRegs(const IRUnit& unit, Vunit& vunit, irlower::IRLS& state,
                 const BlockList& blocks) {
   // visit instructions to find tmps eligible to use SIMD registers
-  auto const try_wide = RuntimeOption::EvalHHIRAllocSIMDRegs;
+  auto const try_wide = Cfg::HHIR::AllocSIMDRegs;
   boost::dynamic_bitset<> not_wide(unit.numTmps());
   StateVector<SSATmp,SSATmp*> tmps(unit, nullptr);
   for (auto block : blocks) {

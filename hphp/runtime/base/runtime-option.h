@@ -925,61 +925,8 @@ struct RuntimeOption {
    * of profiled loops. If the value is > 1.0, we won't specialize. */  \
   F(double, ArrayIterSpecializationRate, 0.99)                          \
   F(double, CoeffectFunParamProfileThreshold, 0.10)                     \
-  F(bool, HHIRSimplification,          true)                            \
-  F(bool, HHIRGenOpts,                 true)                            \
-  F(bool, HHIRRefcountOpts,            true)                            \
-  F(bool, HHIREnableGenTimeInlining,   true)                            \
-  F(uint32_t, HHIRInliningCostFactorMain, 100)                          \
-  F(uint32_t, HHIRInliningCostFactorCold, 32)                           \
-  F(uint32_t, HHIRInliningCostFactorFrozen, 10)                         \
-  F(uint32_t, HHIRInliningVasmCostLimit, 80000)                         \
-  F(uint32_t, HHIRInliningMinVasmCostLimit, 6500)                       \
-  F(uint32_t, HHIRInliningMaxVasmCostLimit, 30000)                      \
-  F(uint32_t, HHIRAlwaysInlineVasmCostLimit, 4800)                      \
-  F(uint32_t, HHIRInliningMaxDepth,    5)                               \
-  F(double,   HHIRInliningVasmCallerExp, .5)                            \
-  F(double,   HHIRInliningVasmCalleeExp, .5)                            \
-  F(double,   HHIRInliningDepthExp, 0)                                  \
-  F(uint32_t, HHIRInliningMaxReturnDecRefs, 24)                         \
-  F(uint32_t, HHIRInliningMaxReturnLocals, 40)                          \
-  F(uint32_t, HHIRInliningMaxInitObjProps, 12)                          \
-  F(bool,     HHIRInliningIgnoreHints, !debug)                          \
-  F(bool,     HHIRInliningUseStackedCost, false)                        \
-  F(bool,     HHIRInliningUseLayoutBlocks, false)                       \
-  F(bool,     HHIRInliningAssertMemoryEffects, true)                    \
-  F(bool, HHIRAlwaysInterpIgnoreHint,  !debug)                          \
-  F(bool, HHIRGenerateAsserts,         false)                           \
-  F(bool, HHIRDeadCodeElim,            true)                            \
-  F(bool, HHIRGlobalValueNumbering,    true)                            \
-  F(bool, HHIRPredictionOpts,          true)                            \
-  F(bool, HHIROptimizeCheckTypes,      true)                            \
-  F(bool, HHIRMemoryOpts,              true)                            \
   F(bool, AssemblerFoldDefaultValues,  true)                            \
   F(uint64_t, AssemblerMaxScalarSize,  2147483648) /* 2GB */            \
-  F(uint32_t, HHIRLoadElimMaxIters,    10)                              \
-  F(bool, HHIRLoadEnableTeardownOpts, true)                            \
-  F(uint32_t, HHIRLoadStackTeardownMaxDecrefs, 0)                       \
-  F(uint32_t, HHIRLoadThrowMaxDecrefs, 0)                              \
-  F(bool, HHIRStorePRE,                true)                            \
-  F(bool, HHIRSinkDefs,                true)                            \
-  F(bool, HHIRLowerBespokesPostIRGen,  true)                            \
-  F(bool, HHIROutlineGenericIncDecRef, true)                            \
-  /* How many elements to inline for packed- or mixed-array inits. */   \
-  F(uint32_t, HHIRMaxInlineInitPackedElements, 8)                       \
-  F(uint32_t, HHIRMaxInlineInitMixedElements,  4)                       \
-  F(uint32_t, HHIRMaxInlineInitStructElements, 8)                       \
-  F(double, HHIROffsetArrayProfileThreshold, 0.85)                      \
-  F(double, HHIRCOWArrayProfileThreshold, 0.85)                         \
-  F(double, HHIRSmallArrayProfileThreshold, 0.8)                        \
-  F(double, HHIRMissingArrayProfileThreshold, 0.8)                      \
-  F(double, HHIRExitArrayProfileThreshold, 0.98)                        \
-  F(double, HHIROffsetExitArrayProfileThreshold, 0.98)                  \
-  F(double, HHIRIsTypeStructProfileThreshold, 0.95)                     \
-  F(uint32_t, HHIRTypeProfileMinSamples, 10)                            \
-  /* Register allocation flags */                                       \
-  F(bool, HHIREnablePreColoring,       true)                            \
-  F(bool, HHIREnableCoalescing,        true)                            \
-  F(bool, HHIRAllocSIMDRegs,           true)                            \
   /* Region compiler flags */                                           \
   F(string,   JitRegionSelector,       regionSelectorDefault())         \
   F(bool,     JitPGO,                  pgoDefault())                    \
@@ -1443,7 +1390,6 @@ struct RuntimeOption {
   /* The maximum number of resolved variants allowed in a single case
      type. This value is determined after flattening. */                \
   F(uint32_t, MaxCaseTypeVariants, 48)                                  \
-  F(uint32_t, HHIRSpecializedDestructorThreshold, 80)                   \
   F(uint32_t, LogSlowWatchmanQueriesMsec, 500)                          \
   F(uint32_t, LogSlowWatchmanQueriesRate, 1)                            \
   F(uint32_t, StartOptionLogRate, 0)                                    \

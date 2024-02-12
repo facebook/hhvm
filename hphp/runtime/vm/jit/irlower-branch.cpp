@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
@@ -55,7 +55,7 @@ namespace {
 
 void maybe_syncsp(Vout& v, const BCMarker& marker, Vreg sp, IRSPRelOffset off) {
   if (marker.resumeMode() == ResumeMode::None) {
-    if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    if (Cfg::HHIR::GenerateAsserts) {
       v << syncvmsp{v.cns(0x42)};
     }
     return;
@@ -70,7 +70,7 @@ RegSet cross_trace_args(const BCMarker& marker, SrcKey target) {
     auto const func = target.func();
     auto const withCtx =
       func->isClosureBody() || func->cls() ||
-      RuntimeOption::EvalHHIRGenerateAsserts;
+      Cfg::HHIR::GenerateAsserts;
     return func_entry_regs(withCtx);
   }
 
@@ -82,7 +82,7 @@ void popFrameToFuncEntryRegs(Vout& v, const Func* func) {
   v << unrecordbasenativesp{};
   if (func->isClosureBody() || func->cls()) {
     v << load{Vreg(rvmfp()) + AROFF(m_thisUnsafe), r_func_entry_ctx()};
-  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
+  } else if (Cfg::HHIR::GenerateAsserts) {
     v << copy{v.cns(ActRec::kTrashedThisSlot), r_func_entry_ctx()};
   }
   v << loadl{Vreg(rvmfp()) + AROFF(m_callOffAndFlags), r_func_entry_ar_flags()};
@@ -260,7 +260,7 @@ void cgAssertNonNull(IRLS& env, const IRInstruction* inst) {
   auto src = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+  if (Cfg::HHIR::GenerateAsserts) {
     auto const sf = v.makeReg();
     v << testq{src, src, sf};
     ifThen(v, CC_Z, sf, [&](Vout& v) { v << trap{TRAP_REASON}; });
@@ -424,7 +424,7 @@ void cgReqBindJmp(IRLS& env, const IRInstruction* inst) {
       v << copy{calleeId, r_func_entry_callee_id()};
       if (target.func()->isClosureBody() || target.func()->cls()) {
         v << copy{ctx, r_func_entry_ctx()};
-      } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
+      } else if (Cfg::HHIR::GenerateAsserts) {
         v << copy{v.cns(ActRec::kTrashedThisSlot), r_func_entry_ctx()};
       }
     }

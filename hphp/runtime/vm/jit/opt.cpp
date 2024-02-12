@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/opt.h"
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/tracing.h"
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/irgen-bespoke.h"
@@ -259,7 +260,7 @@ void optimize(IRUnit& unit, TransKind kind) {
   assertx(checkEverything(unit));
 
   auto const doCheckTypes = [&] {
-    if (!isProfiling(kind) && RO::EvalHHIROptimizeCheckTypes) {
+    if (!isProfiling(kind) && Cfg::HHIR::OptimizeCheckTypes) {
       rqtrace::EventGuard trace{"OPT_OPTIMIZE_CHECK_TYPES"};
       while (true) {
         if (!doPass(unit, optimizeCheckTypes, DCE::None)) {
@@ -274,12 +275,12 @@ void optimize(IRUnit& unit, TransKind kind) {
     }
   };
 
-  if (RuntimeOption::EvalHHIRPredictionOpts) {
+  if (Cfg::HHIR::PredictionOpts) {
     rqtrace::EventGuard trace{"OPT_PRED"};
     doPass(unit, optimizePredictions, DCE::None);
   }
 
-  if (RuntimeOption::EvalHHIRSimplification) {
+  if (Cfg::HHIR::Simplification) {
     rqtrace::EventGuard trace{"OPT_SIMPLIFY"};
     doPass(unit, simplifyPass, DCE::Full);
     doPass(unit, cleanCfg, DCE::None);
@@ -287,7 +288,7 @@ void optimize(IRUnit& unit, TransKind kind) {
 
   doCheckTypes();
 
-  if (RuntimeOption::EvalHHIRGlobalValueNumbering) {
+  if (Cfg::HHIR::GlobalValueNumbering) {
     rqtrace::EventGuard trace{"OPT_GVN"};
     doPass(unit, gvn, DCE::Full);
   }
@@ -295,7 +296,7 @@ void optimize(IRUnit& unit, TransKind kind) {
   while (true) {
     auto again = false;
 
-    if (!isProfiling(kind) && RuntimeOption::EvalHHIRMemoryOpts) {
+    if (!isProfiling(kind) && Cfg::HHIR::MemoryOpts) {
       rqtrace::EventGuard trace{"OPT_LOAD"};
       doPass(unit, optimizeLoads, DCE::Full);
       printUnit(6, unit, " after optimizeLoads ");
@@ -304,7 +305,7 @@ void optimize(IRUnit& unit, TransKind kind) {
 
       // Load-elim may have propagated array layout information where
       // it wasn't before.
-      if (RO::EvalHHIRLowerBespokesPostIRGen) {
+      if (Cfg::HHIR::LowerBespokesPostIRGen) {
         if (doPass(unit, lowerBespokes, DCE::None)) {
           doPass(unit, simplifyPass, DCE::Full);
           doPass(unit, cleanCfg, DCE::None);
@@ -314,7 +315,7 @@ void optimize(IRUnit& unit, TransKind kind) {
       }
     }
 
-    if (!isProfiling(kind) && RuntimeOption::EvalHHIRMemoryOpts) {
+    if (!isProfiling(kind) && Cfg::HHIR::MemoryOpts) {
       rqtrace::EventGuard trace{"OPT_STORE"};
       doPass(unit, optimizeStores, DCE::Full);
       printUnit(6, unit, " after optimizeStores ");
@@ -330,7 +331,7 @@ void optimize(IRUnit& unit, TransKind kind) {
     printUnit(6, unit, " after optimizePhis ");
   }
 
-  if (!isProfiling(kind) && RuntimeOption::EvalHHIRRefcountOpts) {
+  if (!isProfiling(kind) && Cfg::HHIR::RefcountOpts) {
     rqtrace::EventGuard trace{"OPT_REFS"};
     doPass(unit, optimizeRefcounts, DCE::Full);
     printUnit(6, unit, " after optimizeRefCounts ");
@@ -340,15 +341,15 @@ void optimize(IRUnit& unit, TransKind kind) {
 
   doPass(unit, simplifyOrdStrIdx, DCE::Minimal);
 
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+  if (Cfg::HHIR::GenerateAsserts) {
     doPass(unit, insertAsserts, DCE::None);
   }
 
-  if (!isProfiling(kind) && RuntimeOption::EvalHHIRSinkDefs) {
+  if (!isProfiling(kind) && Cfg::HHIR::SinkDefs) {
     doPass(unit, sinkDefs, DCE::Full);
   }
 
-  if (!isProfiling(kind) && RO::EvalHHIRLowerBespokesPostIRGen) {
+  if (!isProfiling(kind) && Cfg::HHIR::LowerBespokesPostIRGen) {
     if (doPass(unit, lowerBespokes, DCE::None)) {
       doPass(unit, simplifyPass, DCE::Full);
     }
@@ -358,7 +359,7 @@ void optimize(IRUnit& unit, TransKind kind) {
   // split, and simplify our instructions before shipping off to codegen.
   doPass(unit, cleanCfg, DCE::None);
 
-  if (!isProfiling(kind) && RuntimeOption::EvalHHIRGlobalValueNumbering) {
+  if (!isProfiling(kind) && Cfg::HHIR::GlobalValueNumbering) {
     rqtrace::EventGuard trace{"OPT_GVN"};
     doPass(unit, gvn, DCE::Full);
   }
@@ -370,7 +371,7 @@ void optimize(IRUnit& unit, TransKind kind) {
 
   doCheckTypes();
 
-  if (!isProfiling(kind) && RuntimeOption::EvalHHIRSimplification) {
+  if (!isProfiling(kind) && Cfg::HHIR::Simplification) {
     rqtrace::EventGuard trace{"OPT_SIMPLIFY"};
     doPass(unit, simplifyPass, DCE::Full);
   } else {

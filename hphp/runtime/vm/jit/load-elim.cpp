@@ -29,6 +29,7 @@
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/perf-warning.h"
 
 #include "hphp/runtime/vm/hhbc-codec.h"
@@ -720,7 +721,7 @@ void check_decref_eligible(
 
 Flags handle_end_catch(Local& env, const IRInstruction& inst) {
   if (env.global.unit.context().kind != TransKind::Optimize
-      || !RuntimeOption::EvalHHIRLoadEnableTeardownOpts
+      || !Cfg::HHIR::LoadEnableTeardownOpts
       || inst.marker().sk().prologue()
   ) {
     return FNone{};
@@ -781,7 +782,7 @@ Flags handle_end_catch(Local& env, const IRInstruction& inst) {
     }
   }
 
-  if (elems.size() > RuntimeOption::EvalHHIRLoadStackTeardownMaxDecrefs) {
+  if (elems.size() > Cfg::HHIR::LoadStackTeardownMaxDecrefs) {
     FTRACE(2, "      handle_end_catch: refusing -- too many decrefs {}\n",
            elems.size());
     return FNone{};
@@ -792,7 +793,7 @@ Flags handle_end_catch(Local& env, const IRInstruction& inst) {
 
 Flags handle_enter_tc_unwind(Local& env, const IRInstruction& inst) {
   if (env.global.unit.context().kind != TransKind::Optimize
-      || !RuntimeOption::EvalHHIRLoadEnableTeardownOpts) {
+      || !Cfg::HHIR::LoadEnableTeardownOpts) {
     return FNone{};
   }
   assertx(inst.op() == EnterTCUnwind);
@@ -814,7 +815,7 @@ Flags handle_enter_tc_unwind(Local& env, const IRInstruction& inst) {
       AliasClass { ALocal { inst.marker().fp(), i }});
   }
 
-  if (locals.size() > RuntimeOption::EvalHHIRLoadThrowMaxDecrefs) {
+  if (locals.size() > Cfg::HHIR::LoadThrowMaxDecrefs) {
     FTRACE(2, "      handle_enter_tc_unwind: refusing -- too many decrefs {}\n",
            locals.size());
     return FNone{};
@@ -1001,7 +1002,7 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
     break;
   }
   case EndInlining:
-    if (RO::EvalHHIRInliningAssertMemoryEffects) {
+    if (Cfg::HHIR::InliningAssertMemoryEffects) {
       assertx(inst.src(0)->inst()->is(BeginInlining));
       auto const fp = inst.src(0);
       auto const callee = fp->inst()->extra<BeginInlining>()->func;
@@ -1262,7 +1263,7 @@ void optimize_end_catch(Global& env, IRInstruction& inst,
   };
 
   auto const original = inst.extra<EndCatchData>();
-  if (RuntimeOption::EvalHHIRGenerateAsserts &&
+  if (Cfg::HHIR::GenerateAsserts &&
       original->mode != EndCatchData::CatchMode::LocalsDecRefd) {
     block->insert(block->iteratorTo(&inst),
       env.unit.gen(DbgCheckLocalsDecRefd, inst.bcctx(), inst.src(0)));
@@ -1857,7 +1858,7 @@ void optimizeLoads(IRUnit& unit) {
     // Restore reachability invariants
     mandatoryDCE(unit);
 
-    if (iters >= RuntimeOption::EvalHHIRLoadElimMaxIters) {
+    if (iters >= Cfg::HHIR::LoadElimMaxIters) {
       // We've iterated way more than usual without reaching a fixed
       // point. Either there's some bug in load-elim, or this unit is especially
       // pathological. Emit a perf warning so we're aware and stop iterating.

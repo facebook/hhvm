@@ -1,5 +1,8 @@
 These are the options that exists for HHVM
 
+If you add a new section you need to update generate_configs in
+hphp/runtime/base/configs/TARGETS
+
 The format can be found in hphp/runtime/base/configs/generate-script.rs
 
 # Autoload
@@ -93,6 +96,70 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 
   Disables PHP's constant function
   Valid values are 0 => enabled (default), 1 => warning, 2 => error
+
+# HHIR (Eval.HHIR)
+
+- bool HHIR.Simplification = true, UNKNOWN
+- bool HHIR.GenOpts = true, UNKNOWN
+- bool HHIR.RefcountOpts = true, UNKNOWN
+- bool HHIR.EnableGenTimeInlining = true, UNKNOWN
+- uint32_t HHIR.InliningCostFactorMain = 100, UNKNOWN
+- uint32_t HHIR.InliningCostFactorCold = 32, UNKNOWN
+- uint32_t HHIR.InliningCostFactorFrozen = 10, UNKNOWN
+- uint32_t HHIR.InliningVasmCostLimit = 80000, UNKNOWN
+- uint32_t HHIR.InliningMinVasmCostLimit = 6500, UNKNOWN
+- uint32_t HHIR.InliningMaxVasmCostLimit = 30000, UNKNOWN
+- uint32_t HHIR.AlwaysInlineVasmCostLimit = 4800, UNKNOWN
+- uint32_t HHIR.InliningMaxDepth = 5, UNKNOWN
+- double HHIR.InliningVasmCallerExp = .5, UNKNOWN
+- double HHIR.InliningVasmCalleeExp = .5, UNKNOWN
+- double HHIR.InliningDepthExp = 0, UNKNOWN
+- uint32_t HHIR.InliningMaxReturnDecRefs = 24, UNKNOWN
+- uint32_t HHIR.InliningMaxReturnLocals = 40, UNKNOWN
+- uint32_t HHIR.InliningMaxInitObjProps = 12, UNKNOWN
+- bool HHIR.InliningIgnoreHints, UNKNOWN
+- bool HHIR.InliningUseStackedCost = false, UNKNOWN
+- bool HHIR.InliningUseLayoutBlocks = false, UNKNOWN
+- bool HHIR.InliningAssertMemoryEffects = true, UNKNOWN
+- bool HHIR.AlwaysInterpIgnoreHint, UNKNOWN
+- bool HHIR.GenerateAsserts = false, UNKNOWN
+- bool HHIR.DeadCodeElim = true, UNKNOWN
+- bool HHIR.GlobalValueNumbering = true, UNKNOWN
+- bool HHIR.PredictionOpts = true, UNKNOWN
+- bool HHIR.OptimizeCheckTypes = true, UNKNOWN
+- bool HHIR.MemoryOpts = true, UNKNOWN
+- uint32_t HHIR.LoadElimMaxIters = 10, UNKNOWN
+- bool HHIR.LoadEnableTeardownOpts = true, UNKNOWN
+- uint32_t HHIR.LoadStackTeardownMaxDecrefs = 0, UNKNOWN
+- uint32_t HHIR.LoadThrowMaxDecrefs = 0, UNKNOWN
+- bool HHIR.StorePRE = true, UNKNOWN
+- bool HHIR.SinkDefs = true, UNKNOWN
+- bool HHIR.LowerBespokesPostIRGen = true, UNKNOWN
+- bool HHIR.OutlineGenericIncDecRef = true, UNKNOWN
+- uint32_t HHIR.MaxInlineInitPackedElements = 8, UNKNOWN
+
+  How many elements to inline for packed array inits
+
+- uint32_t HHIR.MaxInlineInitMixedElements = 4, UNKNOWN
+
+  How many elements to inline for mixed array inits
+
+- uint32_t HHIR.MaxInlineInitStructElements = 8, UNKNOWN
+
+  How many elements to inline for struct array inits
+
+- double HHIR.OffsetArrayProfileThreshold = 0.85, UNKNOWN
+- double HHIR.COWArrayProfileThreshold = 0.85, UNKNOWN
+- double HHIR.SmallArrayProfileThreshold = 0.8, UNKNOWN
+- double HHIR.MissingArrayProfileThreshold = 0.8, UNKNOWN
+- double HHIR.ExitArrayProfileThreshold = 0.98, UNKNOWN
+- double HHIR.OffsetExitArrayProfileThreshold = 0.98, UNKNOWN
+- double HHIR.IsTypeStructProfileThreshold = 0.95, UNKNOWN
+- uint32_t HHIR.TypeProfileMinSamples = 10, UNKNOWN
+- bool HHIR.EnablePreColoring = true, UNKNOWN
+- bool HHIR.EnableCoalescing = true, UNKNOWN
+- bool HHIR.AllocSIMDRegs = true, UNKNOWN
+- uint32_t HHIR.SpecializedDestructorThreshold = 80, UNKNOWN
 
 # PHP7
 

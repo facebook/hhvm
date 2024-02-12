@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/func.h"
 
@@ -93,7 +93,7 @@ void cgEndInlining(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const fp = srcLoc(env, inst, 0).reg();
 
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+  if (Cfg::HHIR::GenerateAsserts) {
     if (env.unit.context().initSrcKey.resumeMode() == ResumeMode::None) {
       for (auto i = 0; i < kNumActRecCells; ++i) {
         trashFullTV(v, fp[i], kTVTrashJITFrame);

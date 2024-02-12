@@ -22,7 +22,7 @@
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/base/coeffects-config.h"
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/tracing.h"
 
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
@@ -776,7 +776,7 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
                 calleeProfFactor);
   }
 
-  auto const ignoreBCSize = calleeCost <= RO::EvalHHIRAlwaysInlineVasmCostLimit;
+  auto const ignoreBCSize = calleeCost <= Cfg::HHIR::AlwaysInlineVasmCostLimit;
   auto result = irGenRegionImpl(irgs, *calleeRegion, calleeProfFactor,
                                 ignoreBCSize);
   assertx(irgs.budgetBCInstrs >= 0);

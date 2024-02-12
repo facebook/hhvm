@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/enum-cache.h"
 #include "hphp/runtime/base/isame-log.h"
 #include "hphp/runtime/base/repo-auth-type.h"

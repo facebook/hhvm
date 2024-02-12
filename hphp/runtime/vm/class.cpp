@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/base/enum-cache.h"
 #include "hphp/runtime/base/rds.h"

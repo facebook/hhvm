@@ -17,7 +17,7 @@
 #include "hphp/runtime/vm/jit/cow-profile.h"
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/configs/hhir.h"
 
 #include <algorithm>
 #include <cstring>
@@ -46,8 +46,8 @@ folly::dynamic COWProfile::toDynamic() const {
 COWProfile::Result COWProfile::choose() const {
   if (!m_total) return Result::None;
 
-  auto const cold = m_total * RO::EvalHHIRCOWArrayProfileThreshold;
-  auto const frozen = m_total * RO::EvalHHIRExitArrayProfileThreshold;
+  auto const cold = m_total * Cfg::HHIR::COWArrayProfileThreshold;
+  auto const frozen = m_total * Cfg::HHIR::ExitArrayProfileThreshold;
   if (m_nocow >= frozen) return Result::NeverCOW;
   if (m_nocow >= cold) return Result::RarelyCOW;
 

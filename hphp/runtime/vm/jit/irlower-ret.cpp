@@ -16,9 +16,9 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -149,7 +149,7 @@ void cgRetCtrl(IRLS& env, const IRInstruction* inst) {
   auto const sync_sp = adjustSPForReturn<RetCtrlData>(env, inst);
   auto& v = vmain(env);
 
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+  if (Cfg::HHIR::GenerateAsserts) {
     auto rip = v.makeReg();
     auto prev_fp = v.makeReg();
     v << load{fp[AROFF(m_savedRip)], rip};

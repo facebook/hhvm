@@ -23,6 +23,8 @@
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 
+#include "hphp/runtime/base/configs/hhir.h"
+
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -1320,7 +1322,7 @@ void mandatoryDCE(IRUnit& unit) {
 }
 
 void fullDCE(IRUnit& unit) {
-  if (!RuntimeOption::EvalHHIRDeadCodeElim) {
+  if (!Cfg::HHIR::DeadCodeElim) {
     // This portion of DCE cannot be turned off, because it restores IR
     // invariants, and callers of fullDCE are allowed to rely on it for that.
     return mandatoryDCE(unit);

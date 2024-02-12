@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/irlower.h"
 
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/configs/hhir.h"
 
 namespace HPHP::jit {
 namespace {
@@ -60,11 +60,11 @@ Vcost computeVunitCost(const Vunit& unit) {
     auto const factor = [&] {
       switch (block.area_idx) {
         case AreaIndex::Main:
-          return RuntimeOption::EvalHHIRInliningCostFactorMain;
+          return Cfg::HHIR::InliningCostFactorMain;
         case AreaIndex::Cold:
-          return RuntimeOption::EvalHHIRInliningCostFactorCold;
+          return Cfg::HHIR::InliningCostFactorCold;
         case AreaIndex::Frozen:
-          return RuntimeOption::EvalHHIRInliningCostFactorFrozen;
+          return Cfg::HHIR::InliningCostFactorFrozen;
       }
       not_reached();
     }();

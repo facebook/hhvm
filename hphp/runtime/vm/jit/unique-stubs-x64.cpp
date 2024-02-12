@@ -17,7 +17,7 @@
 #include "hphp/runtime/vm/jit/unique-stubs-x64.h"
 
 #include "hphp/runtime/base/header-kind.h"
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/bytecode.h"
 
@@ -213,7 +213,7 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& /*data*/, const UniqueStubs& us) {
   a.emitNop(1);
 
   auto const start = a.frontier();
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+  if (Cfg::HHIR::GenerateAsserts) {
     always_assert(rarg(0) != rret(0) &&
                   rarg(0) != rret(1));
     a.movq(rsp(), rarg(0));

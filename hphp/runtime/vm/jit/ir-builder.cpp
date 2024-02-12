@@ -24,6 +24,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/trace.h"
 
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
@@ -75,8 +76,8 @@ IRBuilder::IRBuilder(IRUnit& unit, const Func* func)
   , m_state(func)
   , m_curBlock(m_unit.entry())
 {
-  if (RuntimeOption::EvalHHIRGenOpts) {
-    m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
+  if (Cfg::HHIR::GenOpts) {
+    m_enableSimplification = Cfg::HHIR::Simplification;
   }
   m_state.startBlock(m_curBlock, false);
 }

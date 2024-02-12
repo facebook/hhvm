@@ -454,7 +454,7 @@ for (auto const& thing : thingVec) {
   example, here are some long expressions, formatted appropriately:
 ```cpp
 if (RuntimeOption::EvalJitRegionSelector != "" &&
-    (RuntimeOption::EvalHHIRRefcountOpts ||
+    (Cfg::HHIR::RefcountOpts ||
      RuntimeOption::EvalHHITExtraOptPass) &&
     Func::numLoadedFuncs() < 600) {
   // ...

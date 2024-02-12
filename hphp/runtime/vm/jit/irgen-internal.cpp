@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 
 #include "hphp/util/text-util.h"
@@ -134,7 +135,7 @@ void defineFrameAndStack(IRGS& env, SBInvOffset bcSPOff) {
 
   gen(env, EnterTranslation);
 
-  if (RuntimeOption::EvalHHIRGenerateAsserts &&
+  if (Cfg::HHIR::GenerateAsserts &&
       !curSrcKey(env).trivialDVFuncEntry()) {
     // Assert that we're in the correct function, but we can't do so
     // for trivial DV FuncEntries because the frame isn't setup yet

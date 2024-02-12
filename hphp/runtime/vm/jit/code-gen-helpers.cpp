@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/code-gen-tls.h"
 
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/header-kind.h"
@@ -56,7 +57,7 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 void assertSFNonNegative(Vout& v, Vreg sf, Reason reason) {
-  if (!RuntimeOption::EvalHHIRGenerateAsserts) return;
+  if (!Cfg::HHIR::GenerateAsserts) return;
   ifThen(v, CC_NGE, sf, [&] (Vout& v) { v << trap{reason}; });
 }
 
@@ -184,7 +185,7 @@ void storeTV(Vout& v, Type type, Vloc srcLoc,
              Vptr typePtr, Vptr valPtr, bool aux) {
   if (srcLoc.isFullSIMD()) {
     // The whole TV is stored in a single SIMD reg.
-    assertx(RuntimeOption::EvalHHIRAllocSIMDRegs);
+    assertx(Cfg::HHIR::AllocSIMDRegs);
     always_assert(typePtr == valPtr + (TVOFF(m_type) - TVOFF(m_data)));
     v << storeups{srcLoc.reg(), valPtr};
     return;
@@ -236,7 +237,7 @@ void loadTV(Vout& v, Type type, Vloc dstLoc, Vptr typePtr, Vptr valPtr,
             bool aux) {
   if (dstLoc.isFullSIMD()) {
     // The whole TV is loaded into a single SIMD reg.
-    assertx(RuntimeOption::EvalHHIRAllocSIMDRegs);
+    assertx(Cfg::HHIR::AllocSIMDRegs);
     always_assert(typePtr == valPtr + (TVOFF(m_type) - TVOFF(m_data)));
     v << loadups{valPtr, dstLoc.reg()};
     return;
@@ -341,7 +342,7 @@ void emitAssertRefCount(Vout& v, Vreg data, Reason reason) {
 }
 
 void emitIncRef(Vout& v, Vreg base, Reason reason) {
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+  if (Cfg::HHIR::GenerateAsserts) {
     emitAssertRefCount(v, base, reason);
   }
 

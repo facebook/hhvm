@@ -517,6 +517,8 @@ them when we shouldn't.
 
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
 
+#include "hphp/runtime/base/configs/hhir.h"
+
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -543,7 +545,7 @@ TRACE_SET_MOD(hhir_refcount);
 // mode is enabled, it will replace it with a debugging instruction if
 // appropriate instead of removing it.
 void remove_helper(IRUnit& unit, IRInstruction* inst) {
-  if (!RuntimeOption::EvalHHIRGenerateAsserts) {
+  if (!Cfg::HHIR::GenerateAsserts) {
     inst->convertToNop();
     return;
   }
@@ -2316,7 +2318,7 @@ void rc_analyze_step(Env& env,
   mrinfo_step(env, inst, state.avail);
   assertx(check_state(state));
 
-  if (RO::EvalHHIRInliningAssertMemoryEffects && inst.is(EndInlining)) {
+  if (Cfg::HHIR::InliningAssertMemoryEffects && inst.is(EndInlining)) {
     assertx(inst.src(0)->inst()->is(BeginInlining));
     auto const fp = inst.src(0);
     auto const callee = fp->inst()->extra<BeginInlining>()->func;
@@ -3438,7 +3440,7 @@ bool shouldReleaseShallow(const DecRefProfile& data, SSATmp* tmp) {
   }
   return isArrayLikeType(tmp->type().toDataType())
     && data.percent(data.arrayOfUncountedReleasedCount())
-    > RuntimeOption::EvalHHIRSpecializedDestructorThreshold;
+    > Cfg::HHIR::SpecializedDestructorThreshold;
 }
 
 IRInstruction* makeReleaseShallow(

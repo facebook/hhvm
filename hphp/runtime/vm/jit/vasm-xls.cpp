@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/vasm.h"
 
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/stats.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
@@ -1364,8 +1365,8 @@ tryPhiHint(const jit::vector<Variable*>& variables,
 PhysReg chooseHint(const jit::vector<Variable*>& variables,
                    const Interval* ivl, const HintInfo& hint_info,
                    const PosVec& free_until, RegSet allow) {
-  if (!RuntimeOption::EvalHHIREnablePreColoring &&
-      !RuntimeOption::EvalHHIREnableCoalescing) return InvalidReg;
+  if (!Cfg::HHIR::EnablePreColoring &&
+      !Cfg::HHIR::EnableCoalescing) return InvalidReg;
 
   auto const choose = [&] (PhysReg h1, PhysReg h2) {
     return choose_closest_after(ivl->end(), free_until, h1, h2);

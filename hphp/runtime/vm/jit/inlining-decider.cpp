@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
@@ -158,7 +159,7 @@ bool canInlineAt(SrcKey callSK, SrcKey entry, AnnotationData* annotations) {
   assertx(entry.funcEntry());
   auto const callee = entry.func();
 
-  if (!RuntimeOption::EvalHHIREnableGenTimeInlining) {
+  if (!Cfg::HHIR::EnableGenTimeInlining) {
     return traceRefusal(callSK, callee, "disabled via runtime option",
                         annotations);
   }
@@ -340,7 +341,7 @@ int computeTranslationCost(SrcKey at,
   bool cacheResult = true;
 
   if (info.incomplete) {
-    if (info.cost <= RuntimeOption::EvalHHIRInliningMaxVasmCostLimit) {
+    if (info.cost <= Cfg::HHIR::InliningMaxVasmCostLimit) {
       auto const fid = region.entry()->func()->getFuncId();
       auto const profData = jit::profData();
       auto const profiling = profData && profData->profiling(fid);
@@ -361,27 +362,27 @@ int computeTranslationCost(SrcKey at,
 uint64_t adjustedMaxVasmCost(const irgen::IRGS& env,
                              const RegionDesc& calleeRegion,
                              uint32_t depth) {
-  auto const maxDepth = RuntimeOption::EvalHHIRInliningMaxDepth;
+  auto const maxDepth = Cfg::HHIR::InliningMaxDepth;
   if (depth >= maxDepth) return 0;
-  const auto baseVasmCost = RuntimeOption::EvalHHIRInliningVasmCostLimit;
+  const auto baseVasmCost = Cfg::HHIR::InliningVasmCostLimit;
   const auto baseProfCount = s_baseProfCount.load();
   if (baseProfCount == 0) return baseVasmCost;
   auto const callerProfCount = irgen::curProfCount(env);
   auto adjustedCost = baseVasmCost *
     std::pow((double)callerProfCount / baseProfCount,
-             RuntimeOption::EvalHHIRInliningVasmCallerExp);
+             Cfg::HHIR::InliningVasmCallerExp);
   auto const calleeProfCount = irgen::calleeProfCount(env, calleeRegion);
   if (calleeProfCount) {
     adjustedCost *= std::pow((double)callerProfCount / calleeProfCount,
-                             RuntimeOption::EvalHHIRInliningVasmCalleeExp);
+                             Cfg::HHIR::InliningVasmCalleeExp);
   }
   adjustedCost *= std::pow(1.0 / (1 + depth),
-                           RuntimeOption::EvalHHIRInliningDepthExp);
-  if (adjustedCost < RuntimeOption::EvalHHIRInliningMinVasmCostLimit) {
-    adjustedCost = RuntimeOption::EvalHHIRInliningMinVasmCostLimit;
+                           Cfg::HHIR::InliningDepthExp);
+  if (adjustedCost < Cfg::HHIR::InliningMinVasmCostLimit) {
+    adjustedCost = Cfg::HHIR::InliningMinVasmCostLimit;
   }
-  if (adjustedCost > RuntimeOption::EvalHHIRInliningMaxVasmCostLimit) {
-    adjustedCost = RuntimeOption::EvalHHIRInliningMaxVasmCostLimit;
+  if (adjustedCost > Cfg::HHIR::InliningMaxVasmCostLimit) {
+    adjustedCost = Cfg::HHIR::InliningMaxVasmCostLimit;
   }
   if (calleeProfCount) {
     FTRACE(3, "adjustedMaxVasmCost: adjustedCost ({}) = baseVasmCost ({}) * "
@@ -390,18 +391,18 @@ uint64_t adjustedMaxVasmCost(const irgen::IRGS& env,
            "(1.0 / (1 + depth ({}))) ^ {}\n",
            adjustedCost, baseVasmCost,
            callerProfCount, baseProfCount,
-           RuntimeOption::EvalHHIRInliningVasmCallerExp,
+           Cfg::HHIR::InliningVasmCallerExp,
            callerProfCount, calleeProfCount,
-           RuntimeOption::EvalHHIRInliningVasmCalleeExp,
-           depth, RuntimeOption::EvalHHIRInliningDepthExp);
+           Cfg::HHIR::InliningVasmCalleeExp,
+           depth, Cfg::HHIR::InliningDepthExp);
   } else {
     FTRACE(3, "adjustedMaxVasmCost: adjustedCost ({}) = baseVasmCost ({}) * "
            "(callerProfCount ({}) / baseProfCount ({})) ^ {} * "
            "(1.0 / (1 + depth ({}))) ^ {}\n",
            adjustedCost, baseVasmCost,
            callerProfCount, baseProfCount,
-           RuntimeOption::EvalHHIRInliningVasmCallerExp,
-           depth, RuntimeOption::EvalHHIRInliningDepthExp);
+           Cfg::HHIR::InliningVasmCallerExp,
+           depth, Cfg::HHIR::InliningDepthExp);
   }
   return adjustedCost;
 }
@@ -417,7 +418,7 @@ int costOfInlining(SrcKey callerSk,
                    const RegionDesc& region,
                    AnnotationData* annotationData) {
   auto const alwaysInl =
-    (!RuntimeOption::EvalHHIRInliningIgnoreHints &&
+    (!Cfg::HHIR::InliningIgnoreHints &&
     callee->userAttributes().count(s_AlwaysInline.get())) ||
     (callee->isMemoizeWrapper() && callee->numParams() == 0);
 
@@ -568,7 +569,7 @@ bool shouldInline(const irgen::IRGS& irgs,
   }
 
   // Ignore cost computation for functions marked __ALWAYS_INLINE
-  if (!RuntimeOption::EvalHHIRInliningIgnoreHints &&
+  if (!Cfg::HHIR::InliningIgnoreHints &&
       callee->userAttributes().count(s_AlwaysInline.get())) {
     // In debug builds compute the cost anyway to catch bugs in the inlining
     // machinery. Many inlining tests utilize the __ALWAYS_INLINE attribute.
@@ -583,7 +584,7 @@ bool shouldInline(const irgen::IRGS& irgs,
   // certain threshold.  (Note that we do not measure the total cost of all the
   // inlined calls for a given caller---just the cost of each nested stack.)
   const int cost = costOfInlining(callerSk, callee, region, annotationsPtr);
-  if (cost <= RuntimeOption::EvalHHIRAlwaysInlineVasmCostLimit) {
+  if (cost <= Cfg::HHIR::AlwaysInlineVasmCostLimit) {
     return accept(folly::sformat("cost={} within always-inline limit", cost));
   }
 
@@ -594,7 +595,7 @@ bool shouldInline(const irgen::IRGS& irgs,
   }
 
   int maxCost = maxTotalCost;
-  if (RuntimeOption::EvalHHIRInliningUseStackedCost) {
+  if (Cfg::HHIR::InliningUseStackedCost) {
     maxCost -= irgs.inlineState.cost;
   }
   const auto baseProfCount = s_baseProfCount.load();

@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/vm/jit/irgen-create.h"
 
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/vm/class.h"
@@ -239,7 +240,7 @@ void checkPropInitialValues(IRGS& env, const Class* cls) {
 void initObjProps(IRGS& env, const Class* cls, SSATmp* obj) {
   auto const nprops = cls->numDeclProperties();
 
-  if (nprops <= RuntimeOption::EvalHHIRInliningMaxInitObjProps &&
+  if (nprops <= Cfg::HHIR::InliningMaxInitObjProps &&
       cls->pinitVec().size() == 0) {
     if (cls->hasMemoSlots()) {
       gen(env, InitObjMemoSlots, ClassData(cls), obj);
@@ -438,7 +439,7 @@ void emitNewVec(IRGS& env, uint32_t numArgs) {
     gen(env, AssertType, Type::Vec(rat), array);
   };
 
-  if (numArgs > RuntimeOption::EvalHHIRMaxInlineInitPackedElements) {
+  if (numArgs > Cfg::HHIR::MaxInlineInitPackedElements) {
     gen(
       env,
       InitVecElemLoop,
@@ -481,7 +482,7 @@ void emitNewStructDict(IRGS& env, const ImmVector& immVec) {
     extra.keys[i] = curUnit(env)->lookupLitstrId(ids[i]);
   }
 
-  if (numArgs > RuntimeOption::EvalHHIRMaxInlineInitMixedElements) {
+  if (numArgs > Cfg::HHIR::MaxInlineInitMixedElements) {
     auto const arr = gen(env, NewStructDict, extra, sp(env));
     discard(env, numArgs);
     push(env, arr);

@@ -17,9 +17,9 @@
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
 #include "hphp/runtime/base/attr.h"
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
@@ -78,7 +78,7 @@ bool setCtxReg(Vout& v, const Func* callee, SSATmp* ctx, Vreg src, Vreg dst) {
 
   assertx(ctx->isA(TNullptr));
   assertx(!callee || (!callee->isClosureBody() && !callee->cls()));
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+  if (Cfg::HHIR::GenerateAsserts) {
     v << copy{v.cns(ActRec::kTrashedThisSlot), dst};
     return true;
   }

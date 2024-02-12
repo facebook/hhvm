@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/bespoke-array.h"
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -151,7 +152,7 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
 
   // We profile generic IncRefs to see which ones are unlikely to see
   // refcounted values.
-  if (RuntimeOption::EvalHHIROutlineGenericIncDecRef && profile.optimizing()) {
+  if (Cfg::HHIR::OutlineGenericIncDecRef && profile.optimizing()) {
     auto const data = profile.data();
     if (data.total > 0) {
       if (data.percent(data.refcounted) <
@@ -533,7 +534,7 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
         profile.data());
   }
 
-  if (RuntimeOption::EvalHHIROutlineGenericIncDecRef &&
+  if (Cfg::HHIR::OutlineGenericIncDecRef &&
       profile.optimizing() && !ty.isKnownDataType()) {
     auto const data = profile.data();
     auto const unlikelyCountedPct =
@@ -690,7 +691,7 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
 
   auto unlikelyCounted = false;
   auto unlikelyDecrement = false;
-  if (RuntimeOption::EvalHHIROutlineGenericIncDecRef && profile.optimizing()) {
+  if (Cfg::HHIR::OutlineGenericIncDecRef && profile.optimizing()) {
     auto const data = profile.data();
     if (data.total > 0) {
       if (data.percent(data.refcounted) <

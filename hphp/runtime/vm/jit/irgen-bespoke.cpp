@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/bespoke/logging-array.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 
 #include "hphp/runtime/vm/jit/analysis.h"
@@ -1586,7 +1587,7 @@ bool canProfilePropsInline(const Class* cls) {
   if (cls->hasReifiedGenerics() || cls->hasReifiedParent()) return false;
 
   auto num_array_props = 0;
-  auto const limit = RO::EvalHHIRInliningMaxInitObjProps;
+  auto const limit = Cfg::HHIR::InliningMaxInitObjProps;
   for (auto slot = 0; slot < cls->numDeclProperties(); slot++) {
     if (cls->declProperties()[slot].attrs & AttrIsConst) return false;
     auto const index = cls->propSlotToIndex(slot);
@@ -1716,7 +1717,7 @@ bool specializeStructSource(IRGS& env, SrcKey sk, ArrayLayout layout) {
     auto const exit = makeExitSlow(env);
     for (auto const& guard : guards) {
       auto const soff = BCSPRelOffset{guard.first};
-      if (size > RuntimeOption::EvalHHIRMaxInlineInitStructElements) {
+      if (size > Cfg::HHIR::MaxInlineInitStructElements) {
         auto const data = IRSPRelOffsetData{offsetFromIRSP(env, soff)};
         gen(env, AssertStk, TInitCell, data, sp(env));
         gen(env, CheckStk, guard.second, data, exit, sp(env));
@@ -1735,7 +1736,7 @@ bool specializeStructSource(IRGS& env, SrcKey sk, ArrayLayout layout) {
     assertx(slots[i] != kInvalidSlot);
   }
 
-  if (size > RuntimeOption::EvalHHIRMaxInlineInitStructElements) {
+  if (size > Cfg::HHIR::MaxInlineInitStructElements) {
     auto const data = NewBespokeStructData {
         layout, spOffBCFromIRSP(env), safe_cast<uint32_t>(size), slots};
     auto const arr = gen(env, NewBespokeStructDict, data, sp(env));

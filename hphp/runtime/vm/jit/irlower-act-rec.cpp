@@ -17,11 +17,11 @@
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/configs/hhir.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/header-kind.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -78,7 +78,7 @@ void cgEnterFrame(IRLS& env, const IRInstruction* inst) {
 
   v << storel{calleeId, dst + AROFF(m_funcId)};
   v << storel{arFlags, dst + AROFF(m_callOffAndFlags)};
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+  if (Cfg::HHIR::GenerateAsserts) {
     emitImmStoreq(v, ActRec::kTrashedThisSlot, dst + AROFF(m_thisUnsafe));
   }
 }

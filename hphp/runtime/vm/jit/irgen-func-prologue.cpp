@@ -369,7 +369,7 @@ void emitPrologueEntry(IRGS& env, const Func* callee, uint32_t argc,
   // Update marker with the stublogue bit.
   updateMarker(env);
 
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+  if (Cfg::HHIR::GenerateAsserts) {
     // Make sure we are at the right function.
     auto const calleeSSA = gen(env, DefFuncPrologueCallee);
     auto const calleeOK = gen(env, EqFunc, calleeSSA, cns(env, callee));

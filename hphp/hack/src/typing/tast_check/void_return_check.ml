@@ -65,9 +65,6 @@ let validate_state fun_span fun_kind env s =
         |> Tast_env.localize_no_subst env ~ignore_errors:true
         |> snd)
   in
-  let annotated_with_ret_any =
-    Option.value_map ret_type_hint_locl_opt ~default:false ~f:Typing_defs.is_any
-  in
   let is_bad_supertype sub sup =
     let sup =
       if TypecheckerOptions.enable_sound_dynamic (Tast_env.get_tcopt env) then
@@ -145,13 +142,8 @@ let validate_state fun_span fun_kind env s =
        An async lambda without a return type annotation can combine returning with and
        without a value if we can otherwise type the lambda with an sufficiently general type like
        Awaitable<mixed> *)
-    match
-      ( s.prev_no_value_return,
-        s.prev_value_return,
-        is_async,
-        annotated_with_ret_any )
-    with
-    | (Some without_value_pos_opt, Some with_value_pos, false, false) ->
+    match (s.prev_no_value_return, s.prev_value_return, is_async) with
+    | (Some without_value_pos_opt, Some with_value_pos, false) ->
       let fun_pos = s.fun_def_pos in
       ( false,
         lazy

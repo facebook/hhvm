@@ -49,22 +49,6 @@ std::string snakecase(const std::string& name);
 std::string camelcase(const std::string& name);
 std::string quote(const std::string& data, bool do_backslash);
 
-constexpr auto kRustOrdUri = "facebook.com/thrift/annotation/rust/Ord";
-constexpr auto kRustBoxUri = "facebook.com/thrift/annotation/rust/Box";
-constexpr auto kRustTypeUri = "facebook.com/thrift/annotation/rust/Type";
-constexpr auto kRustNewTypeUri = "facebook.com/thrift/annotation/rust/NewType";
-constexpr auto kRustAdapterUri = "facebook.com/thrift/annotation/rust/Adapter";
-constexpr auto kRustDeriveUri = "facebook.com/thrift/annotation/rust/Derive";
-constexpr auto kRustServiceExnUri =
-    "facebook.com/thrift/annotation/rust/ServiceExn";
-constexpr auto kRustExhaustiveUri =
-    "facebook.com/thrift/annotation/rust/Exhaustive";
-constexpr auto kRustArcUri = "facebook.com/thrift/annotation/rust/Arc";
-constexpr auto kRustRequestContextUri =
-    "facebook.com/thrift/annotation/rust/RequestContext";
-constexpr auto kRustCopyUri = "facebook.com/thrift/annotation/rust/Copy";
-constexpr auto kRustNameUri = "facebook.com/thrift/annotation/rust/Name";
-
 bool get_annotation_property_bool(
     const t_const* annotation, const std::string& key);
 std::string get_annotation_property_string(

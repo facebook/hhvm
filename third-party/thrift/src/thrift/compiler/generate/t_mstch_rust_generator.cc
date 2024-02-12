@@ -33,6 +33,7 @@
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
+#include <thrift/compiler/lib/rust/uri.h>
 #include <thrift/compiler/lib/rust/util.h>
 #include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/ast_validator.h>

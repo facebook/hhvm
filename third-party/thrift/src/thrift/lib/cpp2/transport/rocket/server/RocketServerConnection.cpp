@@ -774,6 +774,8 @@ void RocketServerConnection::startDrain(
 }
 
 void RocketServerConnection::dropConnection(const std::string& errorMsg) {
+  DestructorGuard dg(this);
+
   // Subtle: skip the socket draining process and stop new reads
   socketDrainer_.drainComplete();
   // Subtle: flush pending writes to ensure isBusy() returns false

@@ -14,19 +14,17 @@ class A {
 // CHECK:   n2 = A._86pinit(n1)
 // CHECK:   store &$2 <- n1: *HackMixed
 // CHECK:   n3: *HackMixed = load &$0
-// CHECK:   jmp b1
-// CHECK: #b1:
 // CHECK:   n4: *HackMixed = load &$0
 // CHECK:   n5: *HackMixed = load &$2
-// CHECK:   jmp b3
-// CHECK:   .handlers b2
-// CHECK: #b2(n6: *HackMixed):
+// CHECK:   jmp b2
+// CHECK:   .handlers b1
+// CHECK: #b1(n6: *HackMixed):
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK:   store &$1 <- null: *HackMixed
 // CHECK:   store &$2 <- null: *HackMixed
 // CHECK:   n7 = $builtins.hhbc_throw(n6)
 // CHECK:   unreachable
-// CHECK: #b3:
+// CHECK: #b2:
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK:   store &$1 <- null: *HackMixed
 // CHECK:   store &$2 <- null: *HackMixed

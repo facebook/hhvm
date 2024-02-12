@@ -110,7 +110,7 @@ fn insert_constants(builder: &mut FuncBuilder<'_>, start_bid: BlockId) {
     let mut remap = ValueIdMap::default();
     let mut fixups = Vec::default();
 
-    let new_bid = builder.alloc_bid();
+    let new_bid = builder.alloc_bid_based_on(start_bid);
     builder.start_block(new_bid);
 
     for cid in constants.into_iter() {

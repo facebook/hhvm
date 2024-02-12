@@ -89,20 +89,18 @@ class C {
   // CHECK:   n4 = n3.?.__factory()
   // CHECK:   store &$2 <- n4: *HackMixed
   // CHECK:   n5: *HackMixed = load &$0
-  // CHECK:   jmp b1
-  // CHECK: #b1:
   // CHECK:   n6: *HackMixed = load &$0
   // CHECK:   n7: *HackMixed = load &$0
   // CHECK:   n8: *HackMixed = load &$2
-  // CHECK:   jmp b3
-  // CHECK:   .handlers b2
-  // CHECK: #b2(n9: *HackMixed):
+  // CHECK:   jmp b2
+  // CHECK:   .handlers b1
+  // CHECK: #b1(n9: *HackMixed):
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
   // CHECK:   n10 = $builtins.hhbc_throw(n9)
   // CHECK:   unreachable
-  // CHECK: #b3:
+  // CHECK: #b2:
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
@@ -126,19 +124,17 @@ class C {
   // CHECK:   n3 = C._86pinit(n2)
   // CHECK:   store &$2 <- n2: *HackMixed
   // CHECK:   n4: *HackMixed = load &$0
-  // CHECK:   jmp b1
-  // CHECK: #b1:
   // CHECK:   n5: *HackMixed = load &$0
   // CHECK:   n6: *HackMixed = load &$2
-  // CHECK:   jmp b3
-  // CHECK:   .handlers b2
-  // CHECK: #b2(n7: *HackMixed):
+  // CHECK:   jmp b2
+  // CHECK:   .handlers b1
+  // CHECK: #b1(n7: *HackMixed):
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
   // CHECK:   n8 = $builtins.hhbc_throw(n7)
   // CHECK:   unreachable
-  // CHECK: #b3:
+  // CHECK: #b2:
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
@@ -162,19 +158,17 @@ class C {
   // CHECK:   n3 = C._86pinit(n2)
   // CHECK:   store &$2 <- n2: *HackMixed
   // CHECK:   n4: *HackMixed = load &$0
-  // CHECK:   jmp b1
-  // CHECK: #b1:
   // CHECK:   n5: *HackMixed = load &$0
   // CHECK:   n6: *HackMixed = load &$2
-  // CHECK:   jmp b3
-  // CHECK:   .handlers b2
-  // CHECK: #b2(n7: *HackMixed):
+  // CHECK:   jmp b2
+  // CHECK:   .handlers b1
+  // CHECK: #b1(n7: *HackMixed):
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
   // CHECK:   n8 = $builtins.hhbc_throw(n7)
   // CHECK:   unreachable
-  // CHECK: #b3:
+  // CHECK: #b2:
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed

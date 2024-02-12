@@ -141,6 +141,21 @@ impl<'a> FuncBuilder<'a> {
         bid
     }
 
+    pub fn alloc_bid_based_on(&mut self, basis: BlockId) -> BlockId {
+        let basis = &self.func.blocks[basis];
+        let bid = BlockId::from_usize(self.func.blocks.len());
+        self.func.blocks.push(Block {
+            pname_hint: basis.pname_hint.clone(),
+            tcid: basis.tcid,
+            ..Block::default()
+        });
+        bid
+    }
+
+    pub fn alloc_bid_based_on_cur(&mut self) -> BlockId {
+        self.alloc_bid_based_on(self.cur_bid)
+    }
+
     pub fn cur_bid(&self) -> BlockId {
         self.cur_bid
     }

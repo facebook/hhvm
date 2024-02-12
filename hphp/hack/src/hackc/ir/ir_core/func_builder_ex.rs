@@ -58,8 +58,8 @@ pub trait FuncBuilderEx {
 
 impl<'a> FuncBuilderEx for FuncBuilder<'a> {
     fn emit_if_then(&mut self, pred: ValueId, loc: LocId, f: impl FnOnce(&mut Self)) {
-        let join_bid = self.alloc_bid();
-        let true_bid = self.alloc_bid();
+        let join_bid = self.alloc_bid_based_on_cur();
+        let true_bid = self.alloc_bid_based_on_cur();
         self.emit(Instr::jmp_op(
             pred,
             Predicate::NonZero,
@@ -91,8 +91,8 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
         // b_join(arg):
 
         let mut join_bid = None;
-        let true_bid = self.alloc_bid();
-        let false_bid = self.alloc_bid();
+        let true_bid = self.alloc_bid_based_on_cur();
+        let false_bid = self.alloc_bid_based_on_cur();
         self.emit(Instr::jmp_op(
             pred,
             Predicate::NonZero,
@@ -107,7 +107,7 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
             let terminated = matches!(instr, Instr::Terminator(_));
             let arg = self.emit(instr);
             if !terminated {
-                let target = self.alloc_bid();
+                let target = self.alloc_bid_based_on_cur();
                 join_bid = Some(target);
                 self.emit(Instr::jmp_args(target, &[arg], loc));
             }
@@ -119,7 +119,7 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
             let terminated = matches!(instr, Instr::Terminator(_));
             let arg = self.emit(instr);
             if !terminated {
-                let target = join_bid.get_or_insert_with(|| self.alloc_bid());
+                let target = join_bid.get_or_insert_with(|| self.alloc_bid_based_on_cur());
                 self.emit(Instr::jmp_args(*target, &[arg], loc));
             }
         }

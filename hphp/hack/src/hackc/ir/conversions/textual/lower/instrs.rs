@@ -854,7 +854,7 @@ impl TransformInstr for LowerInstrs<'_> {
                 for (case, target) in iter {
                     let string = builder.emit_constant(Constant::String(*case));
                     let pred = builder.emit_hhbc_builtin(hack::Hhbc::CmpSame, &[string, cond], loc);
-                    let false_bid = builder.alloc_bid();
+                    let false_bid = builder.alloc_bid_based_on_cur();
                     builder.emit(Instr::jmp_op(
                         pred,
                         Predicate::NonZero,
@@ -909,9 +909,9 @@ fn rewrite_nullsafe_call(
     let pred = builder.emit_hack_builtin(hack::Builtin::Hhbc(hack::Hhbc::IsTypeNull), &[obj], loc);
 
     // Need to customize the if/then/else because of multi-return.
-    let join_bid = builder.alloc_bid();
-    let null_bid = builder.alloc_bid();
-    let nonnull_bid = builder.alloc_bid();
+    let join_bid = builder.alloc_bid_based_on_cur();
+    let null_bid = builder.alloc_bid_based_on_cur();
+    let nonnull_bid = builder.alloc_bid_based_on_cur();
     builder.emit(Instr::jmp_op(
         pred,
         Predicate::NonZero,

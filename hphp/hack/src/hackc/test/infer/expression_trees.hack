@@ -13,6 +13,13 @@
 // CHECK:   store &$0 <- n2: *HackMixed
 // CHECK:   n4: *HackMixed = load &$0
 // CHECK:   n5 = n4.?.__invoke()
+// CHECK:   jmp b2
+// CHECK:   .handlers b1
+// CHECK: #b1(n6: *HackMixed):
+// CHECK:   store &$0 <- null: *HackMixed
+// CHECK:   n7 = $builtins.hhbc_throw(n6)
+// CHECK:   unreachable
+// CHECK: #b2:
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK:   ret n5
 // CHECK: }

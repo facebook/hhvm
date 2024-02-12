@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/configs/autoload.h"
 #include "hphp/runtime/base/recorder.h"
 #include "hphp/runtime/base/replayer.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -260,14 +261,14 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
       : folly::format("{} in {} on line {}",
                       ee.getMessage(), fileAndLine.first,
                       fileAndLine.second).str();
-    if (RuntimeOption::AutoloadRethrowExceptions) {
+    if (Cfg::Autoload::RethrowExceptions) {
       throw;
     }
     log_err(msg.c_str());
     err = msg;
   } catch (Exception& e) {
     auto msg = e.getMessage();
-    if (RuntimeOption::AutoloadRethrowExceptions) {
+    if (Cfg::Autoload::RethrowExceptions) {
       throw;
     }
     log_err(msg.c_str());

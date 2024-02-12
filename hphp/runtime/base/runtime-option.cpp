@@ -22,6 +22,9 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/configs/autoload.h"
+#include "hphp/runtime/base/configs/configs-load.h"
+#include "hphp/runtime/base/configs/errorhandling.h"
 #include "hphp/runtime/base/crash-reporter.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/extended-logger.h"
@@ -60,6 +63,7 @@
 #include "hphp/util/gzip.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/hdf.h"
+#include "hphp/util/hdf-extract.h"
 #include "hphp/util/light-process.h"
 #include "hphp/util/log-file-flusher.h"
 #include "hphp/util/logger.h"
@@ -107,18 +111,6 @@ RepoOptions RepoOptions::s_defaults;
 
 namespace {
 
-#ifdef HHVM_FACEBOOK
-const static bool s_PHP7_default = false;
-#else
-const static bool s_PHP7_default = true;
-#endif
-// PHP7 is off by default (false). s_PHP7_master is not a static member of
-// RuntimeOption so that it's private to this file and not exposed -- it's a
-// master switch only, and not to be used for any actual gating, use the more
-// granular options instead. (It can't be a local since Config::Bind will take
-// and store a pointer to it.)
-static bool s_PHP7_master = s_PHP7_default;
-
 std::vector<std::string> s_RelativeConfigs;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -143,40 +135,7 @@ void mangleForKey(const RepoOptionsFlags::StringVector& vec, std::string& s) {
   }
 }
 void mangleForKey(const std::string& s1, std::string& s2) { s2 += s1; }
-void hdfExtract(const Hdf& hdf, const char* name, bool& val, bool dv) {
-  val = hdf[name].configGetBool(dv);
-}
-void hdfExtract(const Hdf& hdf, const char* name, uint16_t& val, uint16_t dv) {
-  val = hdf[name].configGetUInt16(dv);
-}
-void hdfExtract(
-  const Hdf& hdf,
-  const char* name,
-  RepoOptionsFlags::StringMap& map,
-  const RepoOptionsFlags::StringMap& dv
-) {
-  Hdf config = hdf[name];
-  if (config.exists() && !config.isEmpty()) config.configGet(map);
-  else map = dv;
-}
-void hdfExtract(
-  const Hdf& hdf,
-  const char* name,
-  RepoOptionsFlags::StringVector& vec,
-  const RepoOptionsFlags::StringVector& dv
-) {
-  Hdf config = hdf[name];
-  if (config.exists() && !config.isEmpty()) config.configGet(vec);
-  else vec = dv;
-}
-void hdfExtract(
-  const Hdf& hdf,
-  const char* name,
-  std::string& val,
-  std::string dv
-) {
-  val = hdf[name].configGetString(dv);
-}
+
 folly::dynamic toIniValue(bool b) {
   return b ? "1" : "0";
 }
@@ -503,6 +462,11 @@ AUTOLOADFLAGS()
 #undef P
 #undef H
 #undef E
+
+#define C(_, n) mangleForKey(m_flags.n, raw);
+CONFIGS_FOR_REPOOPTIONSFLAGS()
+#undef C
+
   mangleForKey(packageInfo().mangleForCacheKey(), raw);
   m_flags.m_sha1 = SHA1{string_sha1(raw)};
 }
@@ -542,8 +506,8 @@ constexpr std::string_view kSchemaPlaceholder = "%{schema}";
 void RepoOptions::calcAutoloadDB() {
   namespace fs = std::filesystem;
 
-  if (RO::AutoloadDBPath.empty()) return;
-  std::string pathTemplate{RuntimeOption::AutoloadDBPath};
+  if (Cfg::Autoload::DBPath.empty()) return;
+  std::string pathTemplate{Cfg::Autoload::DBPath};
 
   auto const euidIdx = pathTemplate.find(kEUIDPlaceholder);
   if (euidIdx != std::string::npos) {
@@ -615,6 +579,8 @@ AUTOLOADFLAGS();
 #undef H
 #undef E
 
+  Cfg::GetRepoOptionsFlagsFromConfig(m_flags, config, s_defaults.m_flags);
+
   hdfExtract(autoloadConfig, "CacheBreaker", m_flags.m_factsCacheBreaker,
              "d6ede7d391");
 
@@ -644,6 +610,8 @@ AUTOLOADFLAGS()
 #undef P
 #undef H
 #undef E
+
+  Cfg::GetRepoOptionsFlags(m_flags, ini, hdf);
 
   filterNamespaces();
   m_path.clear();
@@ -697,10 +665,6 @@ int RuntimeOption::LogHeaderMangle = 0;
 bool RuntimeOption::AlwaysLogUnhandledExceptions = true;
 bool RuntimeOption::AlwaysEscapeLog = true;
 bool RuntimeOption::NoSilencer = false;
-int RuntimeOption::ErrorUpgradeLevel = 0;
-bool RuntimeOption::CallUserHandlerOnFatals = false;
-bool RuntimeOption::ThrowExceptionOnBadMethodCall = true;
-bool RuntimeOption::LogNativeStackOnOOM = true;
 int RuntimeOption::RuntimeErrorReportingLevel =
   static_cast<int>(ErrorMode::HPHP_ALL);
 int RuntimeOption::ForceErrorReportingLevel = 0;
@@ -708,9 +672,6 @@ int RuntimeOption::ForceErrorReportingLevel = 0;
 std::string RuntimeOption::ServerUser;
 std::vector<std::string> RuntimeOption::TzdataSearchPaths;
 
-int RuntimeOption::MaxSerializedStringSize = 64 * 1024 * 1024; // 64MB
-int64_t RuntimeOption::NoticeFrequency = 1;
-int64_t RuntimeOption::WarningFrequency = 1;
 int RuntimeOption::RaiseDebuggingFrequency = 1;
 int64_t RuntimeOption::SerializationSizeLimit = StringData::MaxSize;
 
@@ -746,30 +707,10 @@ int RuntimeOption::ServerWarmupThrottleRequestCount = 0;
 int RuntimeOption::ServerWarmupThrottleThreadCount = 0;
 int RuntimeOption::ServerThreadDropCacheTimeoutSeconds = 0;
 int RuntimeOption::ServerThreadJobLIFOSwitchThreshold = INT_MAX;
-int RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds = -1;
 bool RuntimeOption::AlwaysDecodePostDataDefault = true;
 bool RuntimeOption::SetChunkedTransferEncoding = true;
-bool RuntimeOption::ServerThreadDropStack = false;
-bool RuntimeOption::ServerHttpSafeMode = false;
-bool RuntimeOption::ServerFixPathInfo = false;
-bool RuntimeOption::ServerAddVaryEncoding = true;
-bool RuntimeOption::ServerLogSettingsOnStartup = false;
-bool RuntimeOption::ServerLogReorderProps = false;
 bool RuntimeOption::ServerForkEnabled = true;
 bool RuntimeOption::ServerForkLogging = false;
-bool RuntimeOption::ServerWarmupConcurrently = false;
-bool RuntimeOption::ServerDedupeWarmupRequests = false;
-int RuntimeOption::ServerWarmupThreadCount = 1;
-int RuntimeOption::ServerExtendedWarmupThreadCount = 1;
-unsigned RuntimeOption::ServerExtendedWarmupRepeat = 1;
-unsigned RuntimeOption::ServerExtendedWarmupDelaySeconds = 60;
-std::vector<std::string> RuntimeOption::ServerWarmupRequests;
-std::vector<std::string> RuntimeOption::ServerExtendedWarmupRequests;
-std::string RuntimeOption::ServerCleanupRequest;
-int RuntimeOption::ServerInternalWarmupThreads = 0;
-boost::container::flat_set<std::string>
-RuntimeOption::ServerHighPriorityEndPoints;
-bool RuntimeOption::ServerExitOnBindFail;
 int RuntimeOption::PageletServerThreadCount = 0;
 int RuntimeOption::PageletServerHugeThreadCount = 0;
 int RuntimeOption::PageletServerThreadDropCacheTimeoutSeconds = 0;
@@ -883,17 +824,7 @@ std::string RuntimeOption::XboxProcessMessageFunc = "xbox_process_message";
 std::string RuntimeOption::SourceRoot = Process::GetCurrentDirectory() + '/';
 std::vector<std::string> RuntimeOption::IncludeSearchPaths;
 std::map<std::string, std::string> RuntimeOption::IncludeRoots;
-bool RuntimeOption::AutoloadEnableExternFactExtractor;
-std::string RuntimeOption::AutoloadDBPath;
-bool RuntimeOption::AutoloadDBCanCreate;
-std::string RuntimeOption::AutoloadUpdateSuppressionPath;
-std::string RuntimeOption::AutoloadDBPerms{"0644"};
-std::string RuntimeOption::AutoloadDBGroup;
-std::string RuntimeOption::AutoloadLogging;
-bool RuntimeOption::AutoloadLoggingAllowPropagation;
-bool RuntimeOption::AutoloadRethrowExceptions = true;
 int RuntimeOption::DeclExtensionCacheSize = 500000;
-uint32_t RuntimeOption::AutoloadPerfSampleRate = 0;
 std::string RuntimeOption::FileCache;
 std::string RuntimeOption::DefaultDocument;
 std::string RuntimeOption::GlobalDocument;
@@ -1016,12 +947,6 @@ int RuntimeOption::CheckCLIClientCommands = 0;
 // defaults set when the INI option is bound - values below are irrelevant.
 bool RuntimeOption::LookForTypechecker = false;
 bool RuntimeOption::AutoTypecheck = false;
-
-bool RuntimeOption::PHP7_EngineExceptions = false;
-bool RuntimeOption::PHP7_NoHexNumerics = false;
-bool RuntimeOption::PHP7_Builtins = false;
-bool RuntimeOption::PHP7_Substr = false;
-bool RuntimeOption::PHP7_DisallowUnsafeCurlUploads = false;
 
 const std::string& RuntimeOption::GetServerPrimaryIPv4() {
    static std::string serverPrimaryIPv4 = GetPrimaryIPv4();
@@ -1769,25 +1694,6 @@ void RuntimeOption::Load(
     Config::Bind(AdminLogFile, ini, config, "Log.AdminLog.File");
     Config::Bind(AdminLogSymLink, ini, config, "Log.AdminLog.SymLink");
   }
-  {
-    // Error Handling
-
-    Config::Bind(ErrorUpgradeLevel, ini, config, "ErrorHandling.UpgradeLevel",
-                 0);
-    Config::Bind(MaxSerializedStringSize, ini,
-                 config, "ErrorHandling.MaxSerializedStringSize",
-                 64 * 1024 * 1024);
-    Config::Bind(CallUserHandlerOnFatals, ini,
-                 config, "ErrorHandling.CallUserHandlerOnFatals", false);
-    Config::Bind(ThrowExceptionOnBadMethodCall, ini,
-                 config, "ErrorHandling.ThrowExceptionOnBadMethodCall", true);
-    Config::Bind(LogNativeStackOnOOM, ini,
-                 config, "ErrorHandling.LogNativeStackOnOOM", false);
-    Config::Bind(NoticeFrequency, ini, config, "ErrorHandling.NoticeFrequency",
-                 1);
-    Config::Bind(WarningFrequency, ini, config,
-                 "ErrorHandling.WarningFrequency", 1);
-  }
 
   // If we generated errors while loading RelativeConfigs report those now that
   // error reporting is initialized
@@ -2178,31 +2084,6 @@ void RuntimeOption::Load(
                  false);
   }
   {
-    // Options for PHP7 features which break BC. (Features which do not break
-    // BC don't need options here and can just always be turned on.)
-    //
-    // NB that the "PHP7.all" option is intended to be only a master switch;
-    // all runtime behavior gating should be based on sub-options (that's why
-    // it's a file static not a static member of RuntimeOption). Also don't
-    // forget to update mangleUnitPHP7Options if needed.
-    //
-    // TODO: we may eventually want to make an option which specifies
-    // directories or filenames to exclude from PHP7 behavior, and so checking
-    // these may want to be per-file. We originally planned to do this from the
-    // get-go, but threading that through turns out to be kind of annoying and
-    // of questionable value, so just doing this for now.
-    Config::Bind(s_PHP7_master, ini, config, "PHP7.all", s_PHP7_default);
-    Config::Bind(PHP7_EngineExceptions, ini, config, "PHP7.EngineExceptions",
-                 s_PHP7_master);
-    Config::Bind(PHP7_NoHexNumerics, ini, config, "PHP7.NoHexNumerics",
-                 s_PHP7_master);
-    Config::Bind(PHP7_Builtins, ini, config, "PHP7.Builtins", s_PHP7_master);
-    Config::Bind(PHP7_Substr, ini, config, "PHP7.Substr",
-                 s_PHP7_master);
-    Config::Bind(PHP7_DisallowUnsafeCurlUploads, ini, config,
-                 "PHP7.DisallowUnsafeCurlUploads", s_PHP7_master);
-  }
-  {
     // Server
     Config::Bind(Host, ini, config, "Server.Host");
     Config::Bind(DefaultServerNameSuffix, ini, config,
@@ -2260,41 +2141,6 @@ void RuntimeOption::Load(
     Config::Bind(ServerThreadJobLIFOSwitchThreshold, ini, config,
                  "Server.ThreadJobLIFOSwitchThreshold",
                  ServerThreadJobLIFOSwitchThreshold);
-    Config::Bind(ServerThreadJobMaxQueuingMilliSeconds, ini, config,
-                 "Server.ThreadJobMaxQueuingMilliSeconds", -1);
-    Config::Bind(ServerThreadDropStack, ini, config, "Server.ThreadDropStack");
-    Config::Bind(ServerHttpSafeMode, ini, config, "Server.HttpSafeMode");
-    Config::Bind(ServerFixPathInfo, ini, config, "Server.FixPathInfo", false);
-    Config::Bind(ServerAddVaryEncoding, ini, config, "Server.AddVaryEncoding",
-                 ServerAddVaryEncoding);
-    Config::Bind(ServerLogSettingsOnStartup, ini, config,
-                 "Server.LogSettingsOnStartup", false);
-    Config::Bind(ServerLogReorderProps, ini, config,
-                 "Server.LogReorderProps", false);
-    Config::Bind(ServerWarmupConcurrently, ini, config,
-                 "Server.WarmupConcurrently", false);
-    Config::Bind(ServerDedupeWarmupRequests, ini, config,
-                 "Server.DedupeWarmupRequests", false);
-    Config::Bind(ServerWarmupThreadCount, ini, config,
-                 "Server.WarmupThreadCount", ServerWarmupThreadCount);
-    Config::Bind(ServerExtendedWarmupThreadCount, ini, config,
-                 "Server.ExtendedWarmup.ThreadCount",
-                 ServerExtendedWarmupThreadCount);
-    Config::Bind(ServerExtendedWarmupDelaySeconds, ini, config,
-                 "Server.ExtendedWarmup.DelaySeconds",
-                 ServerExtendedWarmupDelaySeconds);
-    Config::Bind(ServerExtendedWarmupRepeat, ini, config,
-                 "Server.ExtendedWarmup.Repeat", ServerExtendedWarmupRepeat);
-    Config::Bind(ServerWarmupRequests, ini, config, "Server.WarmupRequests");
-    Config::Bind(ServerExtendedWarmupRequests, ini, config,
-                 "Server.ExtendedWarmup.Requests");
-    Config::Bind(ServerCleanupRequest, ini, config, "Server.CleanupRequest");
-    Config::Bind(ServerInternalWarmupThreads, ini, config,
-                 "Server.InternalWarmupThreads", 0);  // 0 = skip
-    Config::Bind(ServerHighPriorityEndPoints, ini, config,
-                 "Server.HighPriorityEndPoints");
-    Config::Bind(ServerExitOnBindFail, ini, config, "Server.ExitOnBindFail",
-                 false);
 
     Config::Bind(RequestTimeoutSeconds, ini, config,
                  "Server.RequestTimeoutSeconds", 0);
@@ -2477,44 +2323,7 @@ void RuntimeOption::Load(
     }
     IncludeSearchPaths.insert(IncludeSearchPaths.begin(), ".");
 
-    Config::Bind(AutoloadDBPath, ini, config, "Autoload.DB.Path");
-    Config::Bind(AutoloadEnableExternFactExtractor, ini, config,
-                 "Autoload.EnableExternFactExtractor", true);
-
-    /**
-     * If this option is nonempty, Facts will check if a file exists at the
-     * given path. If such a file does exist, Facts will not update.
-     */
-    Config::Bind(AutoloadUpdateSuppressionPath, ini, config,
-      "Autoload.UpdateSuppressionPath", "");
-
-    /**
-     * If true, and if a Facts DB doesn't already exist, native Facts will
-     * attempt to load the repo from scratch and create the DB. If the repo is
-     * very large, this may not be practical. Setting up the DB could grind the
-     * system to a halt, and you may have some other system to download a DB
-     * from saved state. You may rather prefer that requests fail until the
-     * saved state DB has been set up. Setting `AutoloadDBCanCreate=false`
-     * will prevent us from creating the DB if none exists, causing requests
-     * to fail in the meantime.
-     */
-    Config::Bind(AutoloadDBCanCreate, ini, config,
-      "Autoload.DB.CanCreate", true);
-
-    Config::Bind(AutoloadDBPerms, ini, config, "Autoload.DB.Perms", "0644");
-    Config::Bind(AutoloadDBGroup, ini, config, "Autoload.DB.Group");
-    Config::Bind(AutoloadLogging, ini, config, "Autoload.Logging",
-      "hphp.runtime.ext.facts:=CRITICAL:slog;slog=hhvm");
-    Config::Bind(AutoloadLoggingAllowPropagation, ini, config,
-                 "Autoload.AllowLoggingPropagation", false);
-    Config::Bind(AutoloadRethrowExceptions, ini, config,
-                 "Autoload.RethrowExceptions", true);
-
     Config::Bind(DeclExtensionCacheSize, ini, config, "Ext.Decl.CacheSize", 500000);
-
-    // Sample rate for Autoload & Facts API latency logging
-    Config::Bind(AutoloadPerfSampleRate, ini, config,
-                 "Autoload.PerfSampleRate", 0);
 
     Config::Bind(FileCache, ini, config, "Server.FileCache");
     Config::Bind(DefaultDocument, ini, config, "Server.DefaultDocument",
@@ -2872,6 +2681,8 @@ void RuntimeOption::Load(
 
   Config::Bind(CustomSettings, ini, config, "CustomSettings");
 
+  Cfg::Load(ini, config);
+
   // Run initializers dependent on options, e.g., resizing atomic maps/vectors.
   refineStaticStringTableSize();
   InitFiniNode::ProcessPostRuntimeOptions();
@@ -2969,10 +2780,10 @@ void RuntimeOption::Load(
   );
   IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Config,
                    "notice_frequency",
-                   &RuntimeOption::NoticeFrequency);
+                   &Cfg::ErrorHandling::NoticeFrequency);
   IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Config,
                    "warning_frequency",
-                   &RuntimeOption::WarningFrequency);
+                   &Cfg::ErrorHandling::WarningFrequency);
   IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Constant,
                    "hhvm.build_type",
                    IniSetting::SetAndGet<std::string>(

@@ -23,6 +23,7 @@
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/proxygen/proxygen-transport.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/base/configs/server.h" // @manual=//hphp/runtime/base/configs:server-header
 #include "hphp/runtime/base/crash-reporter.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -219,9 +220,9 @@ ProxygenServer::ProxygenServer(
       m_dispatcher(options.m_maxThreads,
                    options.m_maxQueue,
                    RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
-                   RuntimeOption::ServerThreadDropStack,
+                   Cfg::Server::ThreadDropStack,
                    this, RuntimeOption::ServerThreadJobLIFOSwitchThreshold,
-                   RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds,
+                   Cfg::Server::ThreadJobMaxQueuingMilliSeconds,
                    kNumPriorities,
                    options.m_hugeThreads,
                    options.m_initThreads,
@@ -998,8 +999,8 @@ void ProxygenServer::decrementEnqueuedCount() {
 ProxygenServer::RequestPriority ProxygenServer::getRequestPriority(
   const char *uri) {
   auto const command = URL::getCommand(URL::getServerObject(uri));
-  if (RuntimeOption::ServerHighPriorityEndPoints.find(command) ==
-      RuntimeOption::ServerHighPriorityEndPoints.end()) {
+  if (Cfg::Server::HighPriorityEndPoints.find(command) ==
+      Cfg::Server::HighPriorityEndPoints.end()) {
     return PRIORITY_NORMAL;
   }
   return PRIORITY_HIGH;

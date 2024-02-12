@@ -1559,7 +1559,7 @@ Array VariableUnserializer::unserializeBespokeTypeStructure() {
 folly::StringPiece
 VariableUnserializer::unserializeStringPiece(char delimiter0, char delimiter1) {
   int64_t size = readInt();
-  if (size >= RuntimeOption::MaxSerializedStringSize) {
+  if (size >= Cfg::ErrorHandling::MaxSerializedStringSize) {
     throwLargeStringSize(size);
   }
   if (size < 0) {
@@ -1640,7 +1640,7 @@ bool VariableUnserializer::tryUnserializeStrIntMap(BaseMap* map, int64_t sz) {
     return false;
   }
   auto const end = this->end();
-  auto const maxKeyLen = RuntimeOption::MaxSerializedStringSize;
+  auto const maxKeyLen = Cfg::ErrorHandling::MaxSerializedStringSize;
   /*
    * First, parse the entire input and allocate the keys (accessing lots of
    * data, but mostly sequentially).

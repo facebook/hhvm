@@ -790,7 +790,7 @@ void ExecutionContext::handleError(const std::string& msg,
   }
 
   // Potentially upgrade the error to E_USER_ERROR
-  if (errnum & RuntimeOption::ErrorUpgradeLevel &
+  if (errnum & Cfg::ErrorHandling::UpgradeLevel &
       static_cast<int>(ErrorMode::UPGRADEABLE_ERROR)) {
     errnum = static_cast<int>(ErrorMode::USER_ERROR);
     mode = ErrorThrowMode::IfUnhandled;
@@ -960,7 +960,7 @@ bool ExecutionContext::onFatalError(const Exception& e) {
                 fileAndLine.second);
   }
   bool handled = false;
-  if (RuntimeOption::CallUserHandlerOnFatals) {
+  if (Cfg::ErrorHandling::CallUserHandlerOnFatals) {
     handled = callUserErrorHandler(e, errnum, true);
   }
   if (!handled && !silenced && !RuntimeOption::AlwaysLogUnhandledExceptions) {

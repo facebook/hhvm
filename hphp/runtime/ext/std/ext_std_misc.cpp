@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/strings.h"
@@ -163,7 +164,7 @@ void StandardExtension::threadInitMisc() {
 StaticString get_PHP_VERSION() {
   static StaticString v5(PHP_VERSION_5);
   static StaticString v7(PHP_VERSION_7);
-  return RuntimeOption::PHP7_Builtins ? v7 : v5;
+  return Cfg::PHP7::Builtins ? v7 : v5;
 }
 
 
@@ -497,7 +498,7 @@ void StandardExtension::initMisc() {
     HHVM_RC_INT(PHP_INT_MIN, k_PHP_INT_MIN);
     HHVM_RC_INT(PHP_INT_MAX, k_PHP_INT_MAX);
 
-    if (RuntimeOption::PHP7_Builtins) {
+    if (Cfg::PHP7::Builtins) {
       HHVM_RC_INT(PHP_MAJOR_VERSION, PHP_MAJOR_VERSION_7);
       HHVM_RC_INT(PHP_MINOR_VERSION, PHP_MINOR_VERSION_7);
       HHVM_RC_STR(PHP_VERSION, PHP_VERSION_7);

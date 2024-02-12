@@ -40,6 +40,7 @@
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/configs/autoload.h" // @manual=//hphp/runtime/base/configs:autoload-header
 #include "hphp/runtime/base/sandbox-events.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
@@ -95,17 +96,17 @@ fs::path getRepoRoot(const RepoOptions& options) {
 
 ::gid_t getGroup() {
   // Resolve the group to a unix gid
-  if (RuntimeOption::AutoloadDBGroup.empty()) {
+  if (Cfg::Autoload::DBGroup.empty()) {
     return -1;
   }
   try {
-    GroupInfo grp{RuntimeOption::AutoloadDBGroup.c_str()};
+    GroupInfo grp{Cfg::Autoload::DBGroup.c_str()};
     return grp.gr->gr_gid;
   } catch (const Exception& e) {
     XLOGF(
         WARN,
         "Can't resolve {} to a gid: {}",
-        RuntimeOption::AutoloadDBGroup,
+        Cfg::Autoload::DBGroup,
         e.what());
     return -1;
   }
@@ -113,8 +114,8 @@ fs::path getRepoRoot(const RepoOptions& options) {
 
 ::mode_t getDBPerms() {
   try {
-    ::mode_t res = std::stoi(RuntimeOption::AutoloadDBPerms, 0, 8);
-    XLOGF(DBG0, "Converted {} to {:04o}", RuntimeOption::AutoloadDBPerms, res);
+    ::mode_t res = std::stoi(Cfg::Autoload::DBPerms, 0, 8);
+    XLOGF(DBG0, "Converted {} to {:04o}", Cfg::Autoload::DBPerms, res);
     return res;
   } catch (const std::exception& e) {
     XLOG(WARN) << "Error running std::stoi on \"Autoload.DB.Perms\": "
@@ -158,7 +159,7 @@ SQLiteKey getDBKey(const fs::path& root, const RepoOptions& repoOptions) {
   auto const dbPath = repoOptions.autoloadDB();
   always_assert(!dbPath.empty());
   // Create a DB with the given permissions if none exists
-  if (RuntimeOption::AutoloadDBCanCreate) {
+  if (Cfg::Autoload::DBCanCreate) {
     ::gid_t gid = getGroup();
     return SQLiteKey::readWriteCreate(dbPath, gid, getDBPerms());
   }
@@ -440,9 +441,9 @@ FactsStore* SqliteAutoloadMapFactory::getForOptions(
   }
 
   Optional<std::filesystem::path> updateSuppressionPath;
-  if (!RuntimeOption::AutoloadUpdateSuppressionPath.empty()) {
+  if (!Cfg::Autoload::UpdateSuppressionPath.empty()) {
     updateSuppressionPath = {
-        std::filesystem::path{RuntimeOption::AutoloadUpdateSuppressionPath}};
+        std::filesystem::path{Cfg::Autoload::UpdateSuppressionPath}};
   }
 
   // Prefetch a FactsDB if we don't have one, while guarded by m_mutex
@@ -799,13 +800,13 @@ void FactsExtension::moduleInit() {
   try {
     enableFactsLogging(
         RuntimeOption::ServerUser,
-        RuntimeOption::AutoloadLogging,
-        RuntimeOption::AutoloadLoggingAllowPropagation);
+        Cfg::Autoload::Logging,
+        Cfg::Autoload::AllowLoggingPropagation);
   } catch (std::exception& e) {
     Logger::FError(
         "Caught exception ({}) while setting up logging with settings: {}",
         e.what(),
-        RuntimeOption::AutoloadLogging);
+        Cfg::Autoload::Logging);
   }
 
   HHVM_NAMED_FE(HH\\Facts\\enabled, HHVM_FN(facts_enabled));
@@ -864,7 +865,7 @@ void FactsExtension::moduleInit() {
       HH\\Facts\\file_attribute_parameters,
       HHVM_FN(facts_file_attribute_parameters));
 
-  if (RuntimeOption::AutoloadDBPath.empty()) {
+  if (Cfg::Autoload::DBPath.empty()) {
     XLOG(ERR) << "Autoload.DB.Path was empty, not enabling native autoloader.";
     return;
   }

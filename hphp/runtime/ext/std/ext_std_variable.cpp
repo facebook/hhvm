@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/base/configs/errorhandling.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
@@ -461,7 +462,7 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
           classToStringHelper(value.toClassVal(), op) :
           lazyClassToStringHelper(value.toLazyClassVal(), op);
       auto const size = str->size();
-      if (size >= RuntimeOption::MaxSerializedStringSize) {
+      if (size >= Cfg::ErrorHandling::MaxSerializedStringSize) {
         throw Exception("Size of serialized string (%ld) exceeds max", size);
       }
       StringBuffer sb;

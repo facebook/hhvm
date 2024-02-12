@@ -6,6 +6,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/curl-tls-workarounds.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-util.h"
@@ -912,7 +913,7 @@ bool CurlResource::setPostFieldsOption(const Variant& value) {
       String val = var_val.toString();
       auto postval = val.data();
 
-      if (!RuntimeOption::PHP7_DisallowUnsafeCurlUploads &&
+      if (!Cfg::PHP7::DisallowUnsafeCurlUploads &&
           !m_safeUpload &&
           *postval == '@' &&
           strlen(postval) == val.size()) {
@@ -1143,7 +1144,7 @@ bool CurlResource::setNonCurlOption(long option, const Variant& value) {
       }
       return false;
     case CURLOPT_SAFE_UPLOAD:
-      if (RuntimeOption::PHP7_DisallowUnsafeCurlUploads &&
+      if (Cfg::PHP7::DisallowUnsafeCurlUploads &&
           value.toInt64() == 0) {
         raise_warning(
           "curl_setopt(): Disabling safe uploads is no longer supported"

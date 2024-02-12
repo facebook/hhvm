@@ -16,6 +16,7 @@
 #pragma once
 
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/configs/repo-global-data-generated.h"
 
 #include "hphp/util/optional.h"
 
@@ -32,6 +33,10 @@ namespace HPHP {
  * Only used in RepoAuthoritative mode.  See loadGlobalData().
  */
 struct RepoGlobalData {
+#define C(_, Name, Type) Type Name;
+  CONFIGS_FOR_REPOGLOBALDATA()
+#undef C
+
   /*
    * Copy of InitialNamedEntityTableSize for hhbbc to use.
    */
@@ -47,24 +52,6 @@ struct RepoGlobalData {
    * Indicates whether the repo was compiled with CheckPropTypeHints.
    */
   int32_t CheckPropTypeHints = 0;
-
-  /*
-   * Indicates whether hex strings (e.g. "0x20") can be used for numeric
-   * operations, e.g. ("0x20" + 1)
-   */
-  bool PHP7_NoHexNumerics = false;
-
-  /*
-   * Indicates whether the repo was compiled with PHP7 builtins enabled.
-   */
-  bool PHP7_Builtins = false;
-
-  /*
-   * Indicates whether the repo was compiled with PHP7 substr behavior which
-   * returns an empty string if the stringi length is equal to start characters
-   * long, instead of PHP5's false.
-   */
-  bool PHP7_Substr = false;
 
   bool HackArrCompatSerializeNotices = false;
 

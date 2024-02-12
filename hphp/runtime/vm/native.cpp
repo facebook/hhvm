@@ -19,6 +19,7 @@
 #include <folly/Random.h>
 
 #include "hphp/runtime/base/annot-type.h"
+#include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -349,7 +350,7 @@ void coerceFCallArgsImpl(int32_t numArgs, const Func* func, F args) {
       }();
       auto const msg = param_type_error_message(
         func->name()->data(), i+1, expected_type, *tv);
-      if (RuntimeOption::PHP7_EngineExceptions) {
+      if (Cfg::PHP7::EngineExceptions) {
         SystemLib::throwTypeErrorObject(msg);
       }
       SystemLib::throwRuntimeExceptionObject(msg);

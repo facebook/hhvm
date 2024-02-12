@@ -26,6 +26,8 @@
 #include "hphp/hhbbc/options.h"
 
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/configs/php7.h"
+#include "hphp/runtime/base/configs/repo-global-data-generated.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/preg.h"
@@ -458,10 +460,12 @@ RepoGlobalData getGlobalData() {
 
   auto gd                        = RepoGlobalData{};
   gd.Signature                   = nanos.count();
+
+#define C(Config, Name, ...) gd.Name = Config;
+CONFIGS_FOR_REPOGLOBALDATA()
+#undef C
+
   gd.CheckPropTypeHints          = RuntimeOption::EvalCheckPropTypeHints;
-  gd.PHP7_NoHexNumerics          = RuntimeOption::PHP7_NoHexNumerics;
-  gd.PHP7_Substr                 = RuntimeOption::PHP7_Substr;
-  gd.PHP7_Builtins               = RuntimeOption::PHP7_Builtins;
   gd.EnableIntrinsicsExtension   = RuntimeOption::EnableIntrinsicsExtension;
   gd.ForbidDynamicCallsToFunc    = RuntimeOption::EvalForbidDynamicCallsToFunc;
   gd.ForbidDynamicCallsWithAttr  =

@@ -28,6 +28,8 @@
 #include <folly/dynamic.h>
 
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/configs/php7.h"
+#include "hphp/runtime/base/configs/repo-options-flags-generated.h"
 #include "hphp/runtime/base/package.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/types.h"
@@ -99,14 +101,18 @@ constexpr size_t kSchemaVersion = 1916337637;
  * The bare RepoOptions information that the parser cares about.
  */
 struct RepoOptionsFlags {
+
+#define S(name) friend Cfg::name;
+SECTIONS_FOR_REPOOPTIONSFLAGS()
+#undef S
+
   using StringMap = std::map<std::string, std::string>;
   using StringVector = std::vector<std::string>;
+
 // (Type, HDFName, DV)
 // (N=no-prefix, P=PHP7, E=Eval, H=Hack.Lang)
 #define PARSERFLAGS() \
   N(StringMap,      AliasedNamespaces,                {})             \
-  P(bool,           UVS,                              s_PHP7_master)  \
-  P(bool,           LTRAssign,                        s_PHP7_master)  \
   H(bool,           DisableLvalAsAnExpression,        false)          \
   H(bool,           ConstDefaultFuncArgs,             false)          \
   H(bool,           ConstStaticProps,                 false)          \
@@ -174,6 +180,11 @@ struct RepoOptionsFlags {
     #undef P
     #undef H
     #undef E
+
+    #define C(t, n) sd(n);
+    CONFIGS_FOR_REPOOPTIONSFLAGS()
+    #undef C
+
     sd(m_packageInfo);
     sd(m_sha1);
     sd(m_factsCacheBreaker);
@@ -204,6 +215,10 @@ private:
   #undef P
   #undef H
   #undef E
+
+  #define C(t, n) t n;
+  CONFIGS_FOR_REPOOPTIONSFLAGS()
+  #undef C
 
   PackageInfo m_packageInfo;
 
@@ -345,19 +360,12 @@ struct RuntimeOption {
   static bool AlwaysEscapeLog;
   static bool AlwaysLogUnhandledExceptions;
   static bool NoSilencer;
-  static int ErrorUpgradeLevel; // Bitmask of errors to upgrade to E_USER_ERROR
-  static bool CallUserHandlerOnFatals;
-  static bool ThrowExceptionOnBadMethodCall;
-  static bool LogNativeStackOnOOM;
   static int RuntimeErrorReportingLevel;
   static int ForceErrorReportingLevel; // Bitmask ORed with the reporting level
 
   static std::string ServerUser; // run server under this user account
   static bool AllowRunAsRoot; // Allow running hhvm as root.
 
-  static int  MaxSerializedStringSize;
-  static int64_t NoticeFrequency; // output 1 out of NoticeFrequency notices
-  static int64_t WarningFrequency;
   static int RaiseDebuggingFrequency;
   static int64_t SerializationSizeLimit;
 
@@ -396,29 +404,10 @@ struct RuntimeOption {
   static int ServerWarmupThrottleThreadCount;
   static int ServerThreadDropCacheTimeoutSeconds;
   static int ServerThreadJobLIFOSwitchThreshold;
-  static int ServerThreadJobMaxQueuingMilliSeconds;
   static bool AlwaysDecodePostDataDefault;
   static bool SetChunkedTransferEncoding;
-  static bool ServerThreadDropStack;
-  static bool ServerHttpSafeMode;
-  static bool ServerFixPathInfo;
-  static bool ServerAddVaryEncoding;
-  static bool ServerLogSettingsOnStartup;
-  static bool ServerLogReorderProps;
   static bool ServerForkEnabled;
   static bool ServerForkLogging;
-  static bool ServerWarmupConcurrently;
-  static bool ServerDedupeWarmupRequests;
-  static int ServerWarmupThreadCount;
-  static int ServerExtendedWarmupThreadCount;
-  static unsigned ServerExtendedWarmupRepeat;
-  static unsigned ServerExtendedWarmupDelaySeconds;
-  static std::vector<std::string> ServerWarmupRequests;
-  static std::vector<std::string> ServerExtendedWarmupRequests;
-  static std::string ServerCleanupRequest;
-  static int ServerInternalWarmupThreads;
-  static boost::container::flat_set<std::string> ServerHighPriorityEndPoints;
-  static bool ServerExitOnBindFail;
   static int PageletServerThreadCount;
   static int PageletServerHugeThreadCount;
   static int PageletServerThreadDropCacheTimeoutSeconds;
@@ -577,17 +566,6 @@ struct RuntimeOption {
    */
   static std::map<std::string, std::string> IncludeRoots;
 
-  static bool AutoloadEnableExternFactExtractor;
-  static std::string AutoloadDBPath;
-  static bool AutoloadDBCanCreate;
-  static std::string AutoloadUpdateSuppressionPath;
-  static std::string AutoloadDBPerms;
-  static std::string AutoloadDBGroup;
-  static std::string AutoloadLogging;
-  static bool AutoloadLoggingAllowPropagation;
-  static bool AutoloadRethrowExceptions;
-  static uint32_t AutoloadPerfSampleRate;
-
   static int DeclExtensionCacheSize;
 
   static std::string FileCache;
@@ -718,13 +696,6 @@ struct RuntimeOption {
   static std::string EvalJitSerdesFile;
   static std::string ProfDataTag;
   static bool DumpPreciseProfData;
-
-  // ENABLED (1) selects PHP7 behavior.
-  static bool PHP7_NoHexNumerics;
-  static bool PHP7_Builtins;
-  static bool PHP7_EngineExceptions;
-  static bool PHP7_Substr;
-  static bool PHP7_DisallowUnsafeCurlUploads;
 
   static int64_t HeapSizeMB;
   static int64_t HeapResetCountBase;

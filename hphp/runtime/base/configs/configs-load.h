@@ -13,31 +13,36 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/sandbox-events.h"
-#include "hphp/runtime/base/configs/autoload.h"
+
+#pragma once
+
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
+
+#include <boost/container/flat_set.hpp>
 
 namespace HPHP {
 
-void logSboxEvent(uint32_t sample_rate, std::string_view source,
-    std::string_view event, std::string_view key, uint64_t duration_us) {
-  if (!getenv("INSIDE_RE_WORKER")) {
-    StructuredLogEntry ent;
-    ent.force_init = true;
-    ent.setProcessUuid("hhvm_uuid");
-    ent.setInt("sample_rate", sample_rate);
-    ent.setStr("source", source);
-    ent.setStr("event", event);
-    ent.setStr("key", key);
-    ent.setInt("duration_us", duration_us);
-    StructuredLog::log("hhvm_sandbox_events", ent);
-  }
-}
+struct IniSettingMap;
+struct Hdf;
+struct RepoOptionsFlags;
 
-void rareSboxEvent(std::string_view source, std::string_view event,
-                   std::string_view key) {
-  if (Cfg::Autoload::PerfSampleRate != 0) {
-    logSboxEvent(1, source, event, key, 0);
-  }
+namespace Cfg {
+
+void Load(const IniSettingMap& ini, const Hdf& config);
+void LoadForCompiler(const IniSettingMap& ini, const Hdf& config);
+
+void GetRepoOptionsFlags(RepoOptionsFlags& flags, const IniSettingMap& ini, const Hdf& config);
+void GetRepoOptionsFlagsFromConfig(RepoOptionsFlags& flags, const Hdf& config,
+                                   const RepoOptionsFlags& default_flags);
+
+using StringStringMap = std::map<std::string, std::string>;
+using StringVector = std::vector<std::string>;
+using StringSet = std::set<std::string>;
+using StringBoostFlatSet = boost::container::flat_set<std::string>;
+
 }
 
 }

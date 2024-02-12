@@ -32,6 +32,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/configs/autoload.h" // @manual=//hphp/runtime/base/configs:autoload-header
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/sandbox-events.h"
 #include "hphp/runtime/base/type-array.h"
@@ -787,7 +788,7 @@ struct FactsStoreImpl final
             return;
           }
           timeSboxEvent(
-              RO::AutoloadPerfSampleRate,
+              Cfg::Autoload::PerfSampleRate,
               "facts-store",
               "subscribe update",
               "",
@@ -887,7 +888,7 @@ struct FactsStoreImpl final
                                  lastWatchmanQueryStart - updateStart)
                                  .count();
           sampleSboxEvent(
-              RO::AutoloadPerfSampleRate,
+              Cfg::Autoload::PerfSampleRate,
               "facts-store",
               "watchman query",
               m_root.native(),
@@ -1318,9 +1319,7 @@ std::shared_ptr<FactsStore> make_watcher_facts(
     inner->subscribe();
   }
   return FactsLogger::wrap(
-      std::move(inner),
-      "ext_facts watcher",
-      RuntimeOption::AutoloadPerfSampleRate);
+      std::move(inner), "ext_facts watcher", Cfg::Autoload::PerfSampleRate);
 }
 
 std::shared_ptr<FactsStore> make_trusted_facts(
@@ -1335,9 +1334,7 @@ std::shared_ptr<FactsStore> make_trusted_facts(
   auto inner = std::make_unique<FactsStoreImpl>(
       std::move(root), std::move(dbOpener), std::move(indexedMethodAttrs));
   return FactsLogger::wrap(
-      std::move(inner),
-      "ext_facts trusted",
-      RuntimeOption::AutoloadPerfSampleRate);
+      std::move(inner), "ext_facts trusted", Cfg::Autoload::PerfSampleRate);
 }
 
 } // namespace Facts

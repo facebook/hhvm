@@ -17,6 +17,8 @@
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/configs/php7.h"
+#include "hphp/runtime/base/configs/errorhandling.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/request-info.h"
@@ -89,7 +91,7 @@ void raise_recoverable_error_without_first_frame(const std::string &msg) {
 }
 
 void raise_typehint_error(const std::string& msg) {
-  if (RuntimeOption::PHP7_EngineExceptions) {
+  if (Cfg::PHP7::EngineExceptions) {
     VMRegAnchor _;
     SystemLib::throwTypeErrorObject(msg);
   }
@@ -98,7 +100,7 @@ void raise_typehint_error(const std::string& msg) {
 }
 
 void raise_typehint_error_without_first_frame(const std::string& msg) {
-  if (RuntimeOption::PHP7_EngineExceptions) {
+  if (Cfg::PHP7::EngineExceptions) {
     VMRegAnchor _;
     SystemLib::throwTypeErrorObject(msg);
   }
@@ -112,7 +114,7 @@ void raise_reified_typehint_error(const std::string& msg, bool warn) {
 }
 
 void raise_return_typehint_error(const std::string& msg) {
-  if (RuntimeOption::PHP7_EngineExceptions) {
+  if (Cfg::PHP7::EngineExceptions) {
     VMRegAnchor _;
     SystemLib::throwTypeErrorObject(msg);
   }
@@ -238,8 +240,8 @@ static int64_t g_notice_counter = 0;
 
 static bool notice_freq_check(ErrorMode mode) {
   if (!g_context->getThrowAllErrors() &&
-      (RuntimeOption::NoticeFrequency <= 0 ||
-       g_notice_counter++ % RuntimeOption::NoticeFrequency != 0)) {
+      (Cfg::ErrorHandling::NoticeFrequency <= 0 ||
+       g_notice_counter++ % Cfg::ErrorHandling::NoticeFrequency != 0)) {
     return false;
   }
   return g_context->errorNeedsHandling(
@@ -296,8 +298,8 @@ static int64_t g_warning_counter = 0;
 
 bool warning_freq_check() {
   if (!g_context->getThrowAllErrors() &&
-      (RuntimeOption::WarningFrequency <= 0 ||
-       g_warning_counter++ % RuntimeOption::WarningFrequency != 0)) {
+      (Cfg::ErrorHandling::WarningFrequency <= 0 ||
+       g_warning_counter++ % Cfg::ErrorHandling::WarningFrequency != 0)) {
     return false;
   }
   return g_context->errorNeedsHandling(
@@ -492,16 +494,16 @@ void raise_message(ErrorMode mode,
   }
 
   if (mode == ErrorMode::WARNING) {
-    if (RuntimeOption::WarningFrequency <= 0 ||
-        (g_warning_counter++) % RuntimeOption::WarningFrequency != 0) {
+    if (Cfg::ErrorHandling::WarningFrequency <= 0 ||
+        (g_warning_counter++) % Cfg::ErrorHandling::WarningFrequency != 0) {
       return;
     }
     HANDLE_ERROR(true, Never, "\nWarning: ", skipTop);
     return;
   }
 
-  if (RuntimeOption::NoticeFrequency <= 0 ||
-      (g_notice_counter++) % RuntimeOption::NoticeFrequency != 0) {
+  if (Cfg::ErrorHandling::NoticeFrequency <= 0 ||
+      (g_notice_counter++) % Cfg::ErrorHandling::NoticeFrequency != 0) {
     return;
   }
 

@@ -13,31 +13,17 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/sandbox-events.h"
-#include "hphp/runtime/base/configs/autoload.h"
 
-namespace HPHP {
+#include "hphp/runtime/base/configs/php7.h"
 
-void logSboxEvent(uint32_t sample_rate, std::string_view source,
-    std::string_view event, std::string_view key, uint64_t duration_us) {
-  if (!getenv("INSIDE_RE_WORKER")) {
-    StructuredLogEntry ent;
-    ent.force_init = true;
-    ent.setProcessUuid("hhvm_uuid");
-    ent.setInt("sample_rate", sample_rate);
-    ent.setStr("source", source);
-    ent.setStr("event", event);
-    ent.setStr("key", key);
-    ent.setInt("duration_us", duration_us);
-    StructuredLog::log("hhvm_sandbox_events", ent);
-  }
-}
+namespace HPHP::Cfg {
 
-void rareSboxEvent(std::string_view source, std::string_view event,
-                   std::string_view key) {
-  if (Cfg::Autoload::PerfSampleRate != 0) {
-    logSboxEvent(1, source, event, key, 0);
-  }
+bool PHP7::allDefault() {
+#ifdef HHVM_FACEBOOK
+  return false;
+#else
+  return true;
+#endif
 }
 
 }

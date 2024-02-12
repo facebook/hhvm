@@ -770,12 +770,12 @@ struct protocol_methods<type_class::map<KeyClass, MappedClass>, Type> {
         iters.push_back(it);
       }
       std::sort(iters.begin(), iters.end(), [](auto a, auto b) {
-        return a->first < b->first;
+        return (*a).first < (*b).first;
       });
       for (auto it : iters) {
         xfer += writeMapValueBegin(protocol);
-        xfer += key_methods::write(protocol, it->first);
-        xfer += mapped_methods::write(protocol, it->second);
+        xfer += key_methods::write(protocol, (*it).first);
+        xfer += mapped_methods::write(protocol, (*it).second);
         xfer += writeMapValueEnd(protocol);
       }
     } else {

@@ -225,6 +225,10 @@ class Query {
   folly::fbstring renderInsecure(
       const std::vector<QueryArgument>& params) const;
 
+  // Render with basic query escaping. Not suitable for generating a query to
+  // be sent to MySQL, but it should be good enough for logging.
+  folly::fbstring renderPartiallyEscaped() const;
+
   folly::StringPiece getQueryFormat() const {
     return query_text_.getQuery();
   }
@@ -340,13 +344,21 @@ class Query {
     unsafe_query_ = true;
   }
 
+  using EscapeFunc =
+      std::function<void(folly::fbstring*, const folly::fbstring&)>;
+
+  folly::fbstring renderInternal(const EscapeFunc& escapeFunc) const;
+  folly::fbstring renderInternal(
+      const EscapeFunc& escapeFunc,
+      const std::vector<QueryArgument>& params) const;
+
   // append an int, float, or string to the specified buffer
   void appendValue(
       folly::fbstring* s,
       size_t offset,
       char type,
       const QueryArgument& d,
-      MYSQL* conn) const;
+      const EscapeFunc& escapeFunc) const;
 
   // append a dynamic::object param as key=value joined with sep;
   // values are passed to appendValue
@@ -355,7 +367,7 @@ class Query {
       size_t* idx,
       const char* sep,
       const QueryArgument& param,
-      MYSQL* connection) const;
+      const EscapeFunc& escapeFunc) const;
 
   template <typename Arg, typename... Args>
   void unpack(Arg&& arg, Args&&... args);

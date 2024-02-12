@@ -312,19 +312,45 @@ advance(const folly::StringPiece s, size_t* offset, size_t num) {
       s.data() + *offset - num + 1, s.data() + *offset + 1);
 }
 
-// Escape a string (or copy it through unmodified if no connection is
-// available).
-void appendEscapedString(
+// No escaping (useful for logging/testing only)
+void noEscapeString(folly::fbstring* dest, const folly::fbstring& value) {
+  VLOG(3) << "connectionless escape performed; this should only occur in "
+          << "testing.";
+  *dest += value;
+}
+
+// Simple escaping of default characters
+void simpleEscapeString(folly::fbstring* dest, const folly::fbstring& value) {
+  dest->reserve(dest->size() + value.size());
+  for (char ch : value) {
+    static const std::unordered_map<char, folly::fbstring> replacements = {
+        {'\\', "\\\\"},
+        {'\'', "\\'"},
+        {'\"', "\\\""},
+        {'\0', "\\0"},
+        {'\b', "\\b"},
+        {'\n', "\\n"},
+        {'\r', "\\r"},
+        {'\t', "\\t"},
+    };
+    if (auto it = replacements.find(ch); it != replacements.end()) {
+      dest->append(it->second);
+    } else {
+      dest->push_back(ch);
+    }
+  }
+}
+
+// Escape a string using the connection.  The connection allows for special
+// handling of byte sequences that look like multi-byte characters but are not
+// based on the connection's character set
+void fullEscapeString(
     folly::fbstring* dest,
     const folly::fbstring& value,
     MYSQL* connection) {
   if (!connection) {
-    VLOG(3) << "connectionless escape performed; this should only occur in "
-            << "testing.";
-    *dest += value;
-    return;
+    return noEscapeString(dest, value);
   }
-
   size_t old_size = dest->size();
   dest->resize(old_size + 2 * value.size() + 1);
   size_t actual_value_size = mysql_real_escape_string(
@@ -356,7 +382,7 @@ void Query::appendValue(
     size_t offset,
     char type,
     const QueryArgument& d,
-    MYSQL* connection) const {
+    const EscapeFunc& escapeFunc) const {
   auto querySp = query_text_.getQuery();
 
   if (d.isString()) {
@@ -366,7 +392,7 @@ void Query::appendValue(
     auto value = d.asString();
     s->reserve(s->size() + value.size() + 4);
     s->push_back('"');
-    appendEscapedString(s, value, connection);
+    escapeFunc(s, value);
     s->push_back('"');
   } else if (d.isBool()) {
     if (type != 'v' && type != 'm') {
@@ -388,7 +414,7 @@ void Query::appendValue(
     }
     s->append(d.asString());
   } else if (d.isQuery()) {
-    s->append(d.getQuery().render(connection));
+    s->append(d.getQuery().renderInternal(escapeFunc));
   } else if (d.isNull()) {
     s->append("NULL");
   } else {
@@ -401,7 +427,7 @@ void Query::appendValueClauses(
     size_t* idx,
     const char* sep,
     const QueryArgument& param,
-    MYSQL* connection) const {
+    const EscapeFunc& escapeFunc) const {
   auto querySp = query_text_.getQuery();
 
   if (!param.isPairList()) {
@@ -424,7 +450,7 @@ void Query::appendValueClauses(
       ret->append(" IS NULL");
     } else {
       ret->append(" = ");
-      appendValue(ret, *idx, 'v', key_value.second, connection);
+      appendValue(ret, *idx, 'v', key_value.second, escapeFunc);
     }
   }
 }
@@ -451,21 +477,39 @@ folly::fbstring Query::renderMultiQuery(
   return ret;
 }
 
-folly::fbstring Query::renderInsecure() const {
-  return render(nullptr, params_);
-}
-
-folly::fbstring Query::renderInsecure(
-    const std::vector<QueryArgument>& params) const {
-  return render(nullptr, params);
-}
-
 folly::fbstring Query::render(MYSQL* conn) const {
   return render(conn, params_);
 }
 
 folly::fbstring Query::render(
     MYSQL* conn,
+    const std::vector<QueryArgument>& params) const {
+  return renderInternal(
+      [&](auto* dest, const auto& value) {
+        return fullEscapeString(dest, value, conn);
+      },
+      params);
+}
+
+folly::fbstring Query::renderInsecure() const {
+  return renderInternal(noEscapeString);
+}
+
+folly::fbstring Query::renderInsecure(
+    const std::vector<QueryArgument>& params) const {
+  return renderInternal(noEscapeString, params);
+}
+
+folly::fbstring Query::renderPartiallyEscaped() const {
+  return renderInternal(simpleEscapeString);
+}
+
+folly::fbstring Query::renderInternal(const EscapeFunc& escapeFunc) const {
+  return renderInternal(escapeFunc, params_);
+}
+
+folly::fbstring Query::renderInternal(
+    const EscapeFunc& escapeFunc,
     const std::vector<QueryArgument>& params) const {
   auto querySp = query_text_.getQuery();
 
@@ -508,13 +552,13 @@ folly::fbstring Query::render(
 
     const auto& param = *current_param++;
     if (c == 'd' || c == 's' || c == 'f' || c == 'u') {
-      appendValue(&ret, idx, c, param, conn);
+      appendValue(&ret, idx, c, param, escapeFunc);
     } else if (c == 'm') {
       if (!(param.isString() || param.isInt() || param.isDouble() ||
             param.isBool() || param.isNull())) {
         parseError(querySp, idx, "%m expects int/float/string/bool");
       }
-      appendValue(&ret, idx, c, param, conn);
+      appendValue(&ret, idx, c, param, escapeFunc);
     } else if (c == 'K') {
       ret.append("/*");
       appendComment(&ret, param);
@@ -532,7 +576,7 @@ folly::fbstring Query::render(
         ret.append(" IS NULL");
       } else {
         ret.append(" = ");
-        appendValue(&ret, idx, type[0], param, conn);
+        appendValue(&ret, idx, type[0], param, escapeFunc);
       }
     } else if (c == 'V') {
       if (param.isQuery()) {
@@ -541,9 +585,8 @@ folly::fbstring Query::render(
       size_t col_idx;
       size_t row_len = 0;
       bool first_row = true;
-      bool first_in_row = true;
       for (const auto& row : param.getList()) {
-        first_in_row = true;
+        bool first_in_row = true;
         col_idx = 0;
         if (!first_row) {
           ret.append(", ");
@@ -553,7 +596,7 @@ folly::fbstring Query::render(
           if (!first_in_row) {
             ret.append(", ");
           }
-          appendValue(&ret, idx, 'v', col, conn);
+          appendValue(&ret, idx, 'v', col, escapeFunc);
           col_idx++;
           first_in_row = false;
           if (first_row) {
@@ -575,7 +618,7 @@ folly::fbstring Query::render(
       if (type == "O" || type == "A") {
         ret.append("(");
         const char* sep = (type == "O") ? " OR " : " AND ";
-        appendValueClauses(&ret, &idx, sep, param, conn);
+        appendValueClauses(&ret, &idx, sep, param, escapeFunc);
         ret.append(")");
       } else {
         if (!param.isList()) {
@@ -591,19 +634,19 @@ folly::fbstring Query::render(
           if (type == "C") {
             appendColumnTableName(&ret, val);
           } else {
-            appendValue(&ret, idx, type[0], val, conn);
+            appendValue(&ret, idx, type[0], val, escapeFunc);
           }
         }
       }
     } else if (c == 'U' || c == 'W') {
       if (c == 'W') {
-        appendValueClauses(&ret, &idx, " AND ", param, conn);
+        appendValueClauses(&ret, &idx, " AND ", param, escapeFunc);
       } else {
-        appendValueClauses(&ret, &idx, ", ", param, conn);
+        appendValueClauses(&ret, &idx, ", ", param, escapeFunc);
       }
     } else if (c == 'Q') {
       if (param.isQuery()) {
-        ret.append(param.getQuery().render(conn));
+        ret.append(param.getQuery().renderInternal(escapeFunc));
       } else {
         ret.append((param).asString());
       }

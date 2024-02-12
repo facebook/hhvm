@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/configs/hacklang.h"
 #include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -191,7 +192,7 @@ static Class* getClassByName(const char* name, int len) {
 Variant HHVM_FUNCTION(constant, const String& name) {
   auto const warning = "constant() is deprecated and subject"
   " to removal from the Hack language";
-  switch (RuntimeOption::DisableConstant) {
+  switch (Cfg::HackLang::PhpismDisableConstant) {
     case 0:  break;
     case 1:  raise_warning(warning); break;
     default: raise_error(warning);

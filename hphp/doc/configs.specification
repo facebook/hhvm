@@ -44,6 +44,56 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 - int64_t ErrorHandling.NoticeFrequency = 1, UNKNOWN
 - int64_t ErrorHandling.WarningFrequency = 1, UNKNOWN
 
+# Hack.Lang
+
+- bool Hack.Lang.DisableLvalAsAnExpression = false, UNKNOWN, repooptionsflag(Parser)
+- bool Hack.Lang.ConstDefaultFuncArgs = false, UNKNOWN, repooptionsflag(Parser)
+- bool Hack.Lang.ConstStaticProps = false, UNKNOWN, repooptionsflag(Parser)
+- bool Hack.Lang.AbstractStaticProps = false, UNKNOWN, repooptionsflag(Parser)
+- bool Hack.Lang.DisallowFuncPtrsInConstants = false, UNKNOWN, repooptionsflag(Parser)
+- bool Hack.Lang.AllowUnstableFeatures = false, UNKNOWN, repooptionsflag(Parser)
+- bool Hack.Lang.EnableXHPClassModifier = true, UNKNOWN, repooptionsflag(Parser)
+- bool Hack.Lang.DisableXHPElementMangling = true, UNKNOWN, repooptionsflag(Parser)
+- bool Hack.Lang.StressShallowDeclDeps = false, UNKNOWN, repooptionsflag(Parser)
+- bool Hack.Lang.StressFoldedDeclDeps = false, UNKNOWN, repooptionsflag(Parser)
+- bool Hack.Lang.OptimizeReifiedParamChecks = false, UNKNOWN, repooptionsflag(Parser)
+
+  Emit specialized bytecodes when we an infer a typehint does not contain a
+  reified generic bytecode, powered by decl directed bytecode
+
+- bool Hack.Lang.DisallowDirectSuperglobalsRefs = false, UNKNOWN, repooptionsflag(Parser)
+
+  Make it so referencing superglobals directly via their $_[A-Z]+ "variable"
+  name hard-fails rather than emitting, e.g., CgetG
+
+- bool Hack.Lang.LookForTypechecker = false, UNKNOWN
+- bool Hack.Lang.AutoTypecheck = LookForTypechecker, UNKNOWN
+
+  If you turn off LookForTypechecker, you probably want to turn this off
+  too -- basically, make the two look like the same option to external
+  users, unless you really explicitly want to set them differently for
+  some reason.
+
+- bool Hack.Lang.EnableClassLevelWhereClauses = false, UNKNOWN, unitcacheflag
+
+  Enables the class-level where constraints
+  true => allow the feature, false => disable the feature
+
+- uint64_t Hack.Lang.Phpism.DisableCallUserFunc = 0, UNKNOWN
+
+  Disables PHP's call_user_func function.
+  Valid values are 0 => enabled (default), 1 => warning, 2 => error.
+
+- uint64_t Hack.Lang.Phpism.DisableCallUserFuncArray = 0, UNKNOWN
+
+  Disables PHP's call_user_func_array function.
+  Valid values are 0 => enabled (default), 1 => warning, 2 => error.
+
+- uint64_t Hack.Lang.Phpism.DisableConstant = 0, UNKNOWN
+
+  Disables PHP's constant function
+  Valid values are 0 => enabled (default), 1 => warning, 2 => error
+
 # PHP7
 
 - bool PHP7.all, UNKNOWN, private

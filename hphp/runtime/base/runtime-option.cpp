@@ -933,20 +933,12 @@ int64_t RuntimeOption::HeapResetCountBase = 1;
 int64_t RuntimeOption::HeapResetCountMultiple = 2;
 int64_t RuntimeOption::HeapLowWaterMark = 16;
 int64_t RuntimeOption::HeapHighWaterMark = 1024;
-uint64_t RuntimeOption::DisableCallUserFunc = 0;
-uint64_t RuntimeOption::DisableCallUserFuncArray = 0;
-uint64_t RuntimeOption::DisableConstant = 0;
-bool RuntimeOption::EnableClassLevelWhereClauses = false;
 
 
 std::string RuntimeOption::WatchmanRootSocket;
 std::string RuntimeOption::WatchmanDefaultSocket;
 
 int RuntimeOption::CheckCLIClientCommands = 0;
-
-// defaults set when the INI option is bound - values below are irrelevant.
-bool RuntimeOption::LookForTypechecker = false;
-bool RuntimeOption::AutoTypecheck = false;
 
 const std::string& RuntimeOption::GetServerPrimaryIPv4() {
    static std::string serverPrimaryIPv4 = GetPrimaryIPv4();
@@ -1745,18 +1737,6 @@ void RuntimeOption::Load(
                  "watchman.socket.default", "");
   }
   {
-    // PHPisms
-    Config::Bind(DisableCallUserFunc, ini, config,
-                 "Hack.Lang.Phpism.DisableCallUserFunc",
-                 DisableCallUserFunc);
-    Config::Bind(DisableCallUserFuncArray, ini, config,
-                 "Hack.Lang.Phpism.DisableCallUserFuncArray",
-                 DisableCallUserFuncArray);
-    Config::Bind(DisableConstant, ini, config,
-                 "Hack.Lang.Phpism.DisableConstant",
-                 DisableConstant);
-  }
-  {
     // Repo
     auto repoModeToStr = [](RepoMode mode) {
       switch (mode) {
@@ -2067,21 +2047,6 @@ void RuntimeOption::Load(
                  "Eval.TCNumHugeColdMB", 4);
 
     Config::Bind(CodeCache::AutoTCShift, ini, config, "Eval.JitAutoTCShift", 1);
-  }
-  {
-    // Hack Language
-    Config::Bind(LookForTypechecker, ini, config,
-                 "Hack.Lang.LookForTypechecker", false);
-
-    // If you turn off LookForTypechecker, you probably want to turn this off
-    // too -- basically, make the two look like the same option to external
-    // users, unless you really explicitly want to set them differently for
-    // some reason.
-    Config::Bind(AutoTypecheck, ini, config, "Hack.Lang.AutoTypecheck",
-                 LookForTypechecker);
-    Config::Bind(EnableClassLevelWhereClauses, ini, config,
-                 "Hack.Lang.EnableClassLevelWhereClauses",
-                 false);
   }
   {
     // Server

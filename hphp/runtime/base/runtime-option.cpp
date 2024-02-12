@@ -116,7 +116,7 @@ std::vector<std::string> s_RelativeConfigs;
 ////////////////////////////////////////////////////////////////////////////////
 
 void mangleForKey(bool b, std::string& s) { s += (b ? '1' : '0'); }
-void mangleForKey(const RepoOptionsFlags::StringMap& map, std::string& s) {
+void mangleForKey(const Cfg::StringStringMap& map, std::string& s) {
   s += folly::to<std::string>(map.size());
   s += '\0';
   for (auto const& par : map) {
@@ -126,7 +126,7 @@ void mangleForKey(const RepoOptionsFlags::StringMap& map, std::string& s) {
     s += '\0';
   }
 }
-void mangleForKey(const RepoOptionsFlags::StringVector& vec, std::string& s) {
+void mangleForKey(const Cfg::StringVector& vec, std::string& s) {
   s += folly::to<std::string>(vec.size());
   s += '\0';
   for (auto const& val : vec) {
@@ -140,7 +140,7 @@ folly::dynamic toIniValue(bool b) {
   return b ? "1" : "0";
 }
 
-folly::dynamic toIniValue(const RepoOptionsFlags::StringMap& map) {
+folly::dynamic toIniValue(const Cfg::StringStringMap& map) {
   folly::dynamic obj = folly::dynamic::object();
   for (auto& kv : map) {
     obj[kv.first] = kv.second;
@@ -148,7 +148,7 @@ folly::dynamic toIniValue(const RepoOptionsFlags::StringMap& map) {
   return obj;
 }
 
-folly::dynamic toIniValue(const RepoOptionsFlags::StringVector& vec) {
+folly::dynamic toIniValue(const Cfg::StringVector& vec) {
   folly::dynamic obj = folly::dynamic::array();
   for (auto& val : vec) {
     obj.push_back(val);
@@ -452,17 +452,6 @@ const RepoOptions& RepoOptions::forFile(const std::string& path) {
 
 void RepoOptions::calcCacheKey() {
   std::string raw;
-#define N(_, n, ...) mangleForKey(m_flags.n, raw);
-#define P(_, n, ...) mangleForKey(m_flags.n, raw);
-#define H(_, n, ...) mangleForKey(m_flags.n, raw);
-#define E(_, n, ...) mangleForKey(m_flags.n, raw);
-PARSERFLAGS()
-AUTOLOADFLAGS()
-#undef N
-#undef P
-#undef H
-#undef E
-
 #define C(_, n) mangleForKey(m_flags.n, raw);
 CONFIGS_FOR_REPOOPTIONSFLAGS()
 #undef C
@@ -555,33 +544,10 @@ RepoOptions::RepoOptions(const char* str, const char* file) : m_path(file) {
   always_assert(s_init);
   Hdf config{};
   config.fromString(str);
-  Hdf parserConfig = config["Parser"];
-
-#define N(_, n, ...) hdfExtract(parserConfig, #n, m_flags.n, s_defaults.m_flags.n);
-#define P(_, n, ...) hdfExtract(parserConfig, "PHP7." #n, m_flags.n, s_defaults.m_flags.n);
-#define H(_, n, ...) hdfExtract(parserConfig, "Hack.Lang." #n, m_flags.n, s_defaults.m_flags.n);
-#define E(_, n, ...) hdfExtract(parserConfig, "Eval." #n, m_flags.n, s_defaults.m_flags.n);
-PARSERFLAGS();
-#undef N
-#undef P
-#undef H
-#undef E
-
-  Hdf autoloadConfig = config["Autoload"];
-#define N(_, n, ...) hdfExtract(autoloadConfig, #n, m_flags.n, s_defaults.m_flags.n);
-#define P(_, n, ...) hdfExtract(autoloadConfig, "PHP7." #n, m_flags.n, s_defaults.m_flags.n);
-#define H(_, n, ...) hdfExtract(autoloadConfig, "Hack.Lang." #n, m_flags.n, \
-                                s_defaults.m_flags.n);
-#define E(_, n, ...) hdfExtract(autoloadConfig, "Eval." #n, m_flags.n, s_defaults.m_flags.n);
-AUTOLOADFLAGS();
-#undef N
-#undef P
-#undef H
-#undef E
 
   Cfg::GetRepoOptionsFlagsFromConfig(m_flags, config, s_defaults.m_flags);
 
-  hdfExtract(autoloadConfig, "CacheBreaker", m_flags.m_factsCacheBreaker,
+  hdfExtract(config, "Autoload.CacheBreaker", m_flags.m_factsCacheBreaker,
              "d6ede7d391");
 
   filterNamespaces();
@@ -600,17 +566,6 @@ AUTOLOADFLAGS();
 }
 
 void RepoOptions::initDefaults(const Hdf& hdf, const IniSettingMap& ini) {
-#define N(_, n, dv) Config::Bind(m_flags.n, ini, hdf, #n, dv);
-#define P(_, n, dv) Config::Bind(m_flags.n, ini, hdf, "PHP7." #n, dv);
-#define H(_, n, dv) Config::Bind(m_flags.n, ini, hdf, "Hack.Lang." #n, dv);
-#define E(_, n, dv) Config::Bind(m_flags.n, ini, hdf, "Eval." #n, dv);
-PARSERFLAGS()
-AUTOLOADFLAGS()
-#undef N
-#undef P
-#undef H
-#undef E
-
   Cfg::GetRepoOptionsFlags(m_flags, ini, hdf);
 
   filterNamespaces();

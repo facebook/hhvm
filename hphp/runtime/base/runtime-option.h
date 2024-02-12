@@ -28,6 +28,7 @@
 #include <folly/dynamic.h>
 
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/configs/autoload.h"
 #include "hphp/runtime/base/configs/hacklang.h"
 #include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/configs/php7.h"
@@ -109,24 +110,6 @@ struct RepoOptionsFlags {
 SECTIONS_FOR_REPOOPTIONSFLAGS()
 #undef S
 
-  using StringMap = std::map<std::string, std::string>;
-  using StringVector = std::vector<std::string>;
-
-// (Type, HDFName, DV)
-// (N=no-prefix, P=PHP7, E=Eval, H=Hack.Lang)
-#define PARSERFLAGS() \
-  N(StringMap,      AliasedNamespaces,                {})             \
-  /**/
-
-  /**/
-
-#define AUTOLOADFLAGS() \
-  N(std::string,    Query,                                        "") \
-  N(std::string,    TrustedDBPath,                                "") \
-  N(StringVector,   IndexedMethodAttributes,                      {}) \
-  N(StringVector,   RepoBuildSearchDirs,                          {}) \
-  /**/
-
   const PackageInfo& packageInfo() const { return m_packageInfo; }
   const SHA1& cacheKeySha1() const { return m_sha1; }
 
@@ -147,24 +130,13 @@ SECTIONS_FOR_REPOOPTIONSFLAGS()
    * Allowlist consisting of the attributes, marking methods, which Facts
    * should index
    */
-  const StringVector& indexedMethodAttributes() const {
+  const Cfg::StringVector& indexedMethodAttributes() const {
     return IndexedMethodAttributes;
   }
 
   // NB: Everything serialized here affects the cache for RE. Do not
   // put anything unnecessary or that changes spuriously.
   template <typename SerDe> void serde(SerDe& sd) {
-    #define N(t, n, ...) sd(n);
-    #define P(t, n, ...) sd(n);
-    #define H(t, n, ...) sd(n);
-    #define E(t, n, ...) sd(n);
-    PARSERFLAGS()
-    AUTOLOADFLAGS()
-    #undef N
-    #undef P
-    #undef H
-    #undef E
-
     #define C(t, n) sd(n);
     CONFIGS_FOR_REPOOPTIONSFLAGS()
     #undef C
@@ -188,17 +160,6 @@ SECTIONS_FOR_REPOOPTIONSFLAGS()
 
 private:
   RepoOptionsFlags() = default;
-
-  #define N(t, n, ...) t n;
-  #define P(t, n, ...) t n;
-  #define H(t, n, ...) t n;
-  #define E(t, n, ...) t n;
-  PARSERFLAGS()
-  AUTOLOADFLAGS()
-  #undef N
-  #undef P
-  #undef H
-  #undef E
 
   #define C(t, n) t n;
   CONFIGS_FOR_REPOOPTIONSFLAGS()

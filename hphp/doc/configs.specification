@@ -34,6 +34,11 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 
   Sample rate for Autoload & Facts API latency logging
 
+- std::string Autoload.Query = "" (Query), UNKNOWN, repooptionsflag(Autoload)
+- std::string Autoload.TrustedDBPath = "" (TrustedDBPath), UNKNOWN, repooptionsflag(Autoload)
+- std::vector<std::string> Autoload.IndexedMethodAttributes = {} (IndexedMethodAttributes), UNKNOWN, repooptionsflag(Autoload)
+- std::vector<std::string> Autoload.RepoBuildSearchDirs = {} (RepoBuildSearchDirs), UNKNOWN, repooptionsflag(Autoload)
+
 # Debugger (Eval.Debugger.)
 
 - bool Debugger.EnableHphpd = false (Eval.Debugger.EnableDebugger), UNKNOWN
@@ -95,6 +100,7 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
   Make it so referencing superglobals directly via their $_[A-Z]+ "variable"
   name hard-fails rather than emitting, e.g., CgetG
 
+- std::map<std::string,std::string> Hack.Lang.AliasedNamespaces = {} (AliasedNamespaces), UNKNOWN, repooptionsflag(Parser)
 - bool Hack.Lang.LookForTypechecker = false, UNKNOWN
 - bool Hack.Lang.AutoTypecheck = LookForTypechecker, UNKNOWN
 

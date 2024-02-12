@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/tc-region.h"
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
@@ -178,7 +179,7 @@ void PrologueTranslator::publishMetaImpl() {
               std::move(annotations)};
   transdb::addTranslation(tr);
   FuncOrder::recordTranslation(tr);
-  if (RuntimeOption::EvalJitUseVtuneAPI) {
+  if (Cfg::Jit::UseVtuneAPI) {
     reportTraceletToVtune(func->unit(), func, tr);
   }
   recordTranslationSizes(tr);

@@ -34,6 +34,7 @@
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
@@ -1029,7 +1030,7 @@ void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni) {
 
   if (isAlwaysNop(ni)) return;
 
-  if (ni.interp || RuntimeOption::EvalJitAlwaysInterpOne) {
+  if (ni.interp || Cfg::Jit::AlwaysInterpOne) {
     irgen::interpOne(irgs);
     return;
   }

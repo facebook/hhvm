@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/surprise-flags.h"
@@ -61,13 +62,13 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 void alignJmpTarget(CodeBlock& cb) {
-  if (RuntimeOption::EvalJitAlignUniqueStubs) {
+  if (Cfg::Jit::AlignUniqueStubs) {
     align(cb, nullptr, Alignment::JmpTarget, AlignContext::Dead);
   }
 }
 
 void alignCacheLine(CodeBlock& cb) {
-  if (RuntimeOption::EvalJitAlignUniqueStubs) {
+  if (Cfg::Jit::AlignUniqueStubs) {
     align(cb, nullptr, Alignment::CacheLine, AlignContext::Dead);
   }
 }

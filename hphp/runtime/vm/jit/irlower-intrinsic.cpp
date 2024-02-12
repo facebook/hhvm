@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/stats.h"
@@ -981,7 +982,7 @@ void cgIncProfCounter(IRLS& env, const IRInstruction* inst) {
   auto const counterAddr = profData()->transCounterAddr(transID);
   auto& v = vmain(env);
 
-  if (RuntimeOption::EvalJitPGORacyProfiling) {
+  if (Cfg::Jit::PGORacyProfiling) {
     v << decqm{v.cns(counterAddr)[0], v.makeReg()};
   } else {
     v << decqmlock{v.cns(counterAddr)[0], v.makeReg()};
@@ -995,7 +996,7 @@ void cgCheckCold(IRLS& env, const IRInstruction* inst) {
 
   auto const sf = v.makeReg();
   v << decqmlock{v.cns(counterAddr)[0], sf};
-  if (RuntimeOption::EvalJitFilterLease) {
+  if (Cfg::Jit::FilterLease) {
     auto filter = v.makeBlock();
     v << jcc{CC_LE, sf, {label(env, inst->next()), filter}};
     v = filter;

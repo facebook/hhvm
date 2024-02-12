@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/bespoke-runtime.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -389,7 +390,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       if (!frm) return bt;
     }
 
-    if (btArgs.m_skipInlined && RuntimeOption::EvalJit) {
+    if (btArgs.m_skipInlined && Cfg::Jit::Enabled) {
       while (frm && frm.isInlined()) {
         frm = getPrevActRec(frm, visitedWHs);
       }

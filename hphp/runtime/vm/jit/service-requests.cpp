@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/service-requests.h"
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/align.h"
@@ -164,7 +165,7 @@ TCA emitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
                 coldStart, view.cold().frontier() - coldStart, frozenStart, 0);
     transdb::addTranslation(tr);
     FuncOrder::recordTranslation(tr);
-    if (RuntimeOption::EvalJitUseVtuneAPI) {
+    if (Cfg::Jit::UseVtuneAPI) {
       reportTraceletToVtune(sk.unit(), sk.func(), tr);
     }
     tc::recordTranslationSizes(tr);

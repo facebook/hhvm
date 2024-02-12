@@ -19,6 +19,7 @@
 #include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/debugger-request-info.h"
+#include "hphp/runtime/base/configs/jit.h"
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -49,7 +50,7 @@ void VSDebugHook::onRequestInit() {
   BreakContext breakContext(false);
   auto const disableJit = breakContext.m_debugger ?
     breakContext.m_debugger->getDebuggerOptions().disableJit :
-    RuntimeOption::EvalJitDisabledByVSDebug;
+    Cfg::Jit::DisabledByVSDebug;
   RID().setVSDebugDisablesJit(disableJit);
 }
 

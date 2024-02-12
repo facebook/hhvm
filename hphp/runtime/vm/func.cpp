@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/intercept.h"
@@ -109,7 +110,7 @@ Func::Func(Unit& unit, const StringData* name, Attr attrs)
   : m_name(name)
   , m_isPreFunc(false)
   , m_hasPrivateAncestor(false)
-  , m_shouldSampleJit(StructuredLog::coinflip(RuntimeOption::EvalJitSampleRate))
+  , m_shouldSampleJit(StructuredLog::coinflip(Cfg::Jit::SampleRate))
   , m_hasForeignThis(false)
   , m_registeredInDataMap(false)
   , m_unit(&unit)
@@ -126,7 +127,7 @@ Func::Func(
   , m_u(methCallerCls)
   , m_isPreFunc(false)
   , m_hasPrivateAncestor(false)
-  , m_shouldSampleJit(StructuredLog::coinflip(RuntimeOption::EvalJitSampleRate))
+  , m_shouldSampleJit(StructuredLog::coinflip(Cfg::Jit::SampleRate))
   , m_hasForeignThis(false)
   , m_registeredInDataMap(false)
   , m_unit(&unit)

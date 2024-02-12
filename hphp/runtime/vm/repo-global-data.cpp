@@ -56,7 +56,6 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
   RO::EvalActiveDeployment                         = ActiveDeployment;
   RO::EvalModuleLevelTraits                        = ModuleLevelTraits;
   RO::EvalTreatCaseTypesAsMixed                    = TreatCaseTypesAsMixed;
-  RO::EvalJitEnableRenameFunction                  = JitEnableRenameFunction;
   RO::RenamableFunctions                           = RenamableFunctions;
   RO::NonInterceptableFunctions                    = NonInterceptableFunctions;
   RO::EvalStrictUtf8Mode                           = StrictUtf8Mode;
@@ -117,7 +116,6 @@ std::string show(const RepoGlobalData& gd) {
   SHOW(EmitBespokeTypeStructures);
   SHOW(ModuleLevelTraits);
   SHOW(TreatCaseTypesAsMixed);
-  SHOW(JitEnableRenameFunction);
   SHOW(StrictUtf8Mode);
 #undef SHOW
 

@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/jit/mcgen-prologue.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
@@ -55,7 +56,7 @@ void processInit() {
   tc::processInit();
 
   if (Trace::moduleEnabledRelease(Trace::printir) &&
-      !RuntimeOption::EvalJit) {
+      !Cfg::Jit::Enabled) {
     Trace::traceRelease("TRACE=printir is set but the jit isn't on. "
                         "Did you mean to run with -vEval.Jit=1?\n");
   }

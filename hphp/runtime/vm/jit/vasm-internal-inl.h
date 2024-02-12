@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
@@ -305,7 +306,7 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
   // We don't want to put nops in Vunits representing stubs, and those Vunits
   // don't have a context set.
   auto const nop_interval =
-    unit.context ? RuntimeOption::EvalJitNopInterval : uint32_t{0};
+    unit.context ? Cfg::Jit::NopInterval : uint32_t{0};
   auto nop_counter = uint32_t{0};
 
   for (int i = 0, n = labels.size(); i < n; ++i) {

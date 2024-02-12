@@ -97,7 +97,6 @@ Unit* lookupSyslibUnit(StringData* path);
   R(EnableXHP)                                  \
   R(EvalEnableCallBuiltin)                      \
   R(EvalHackArrCompatSerializeNotices)          \
-  R(EvalJitEnableRenameFunction)                \
   R(EvalLoadFilepathFromUnitCache)              \
   R(EvalForbidDynamicCallsToFunc)               \
   R(EvalForbidDynamicCallsToClsMeth)            \

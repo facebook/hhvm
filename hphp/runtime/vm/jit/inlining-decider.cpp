@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 
 #include "hphp/runtime/base/configs/hhir.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
@@ -816,7 +817,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
   const auto depth = inlineDepth(irgs);
   if (profData()) {
     auto region = selectCalleeCFG(callerSk, entry, ctxType, inputTypes,
-                                  RO::EvalJitMaxRegionInstrs, annotationsPtr);
+                                  Cfg::Jit::MaxRegionInstrs, annotationsPtr);
     if (region) {
       if (shouldInline(irgs, callerSk, callee, *region,
                        adjustedMaxVasmCost(irgs, *region, depth))) {
@@ -838,7 +839,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
   }
 
   auto region = selectCalleeTracelet(entry, ctxType, inputTypes,
-                                     RO::EvalJitMaxRegionInstrs);
+                                     Cfg::Jit::MaxRegionInstrs);
 
   if (region &&
       shouldInline(irgs, callerSk, callee, *region,

@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tracing.h"
 
@@ -142,8 +143,8 @@ void emitVunit(Vunit& vunit, const IRUnit* unit,
 
   assertx(IMPLIES(RuntimeOption::EvalEnableReusableTC, code.isLocal()));
   auto const do_relocate =
-    RuntimeOption::EvalJitRelocationSize &&
-    cold_in.canEmit(RuntimeOption::EvalJitRelocationSize * 3) &&
+    Cfg::Jit::RelocationSize &&
+    cold_in.canEmit(Cfg::Jit::RelocationSize * 3) &&
     !code.isLocal();
 
   // If code relocation is supported and enabled, set up temporary code blocks.
@@ -163,11 +164,11 @@ void emitVunit(Vunit& vunit, const IRUnit* unit,
     auto off = rand_r(&seed) & (cache_line_size() - code_alignment);
 
     cold.init(cold_in.frontier() +
-              RuntimeOption::EvalJitRelocationSize + off,
-              RuntimeOption::EvalJitRelocationSize - off, "cgRelocCold");
+              Cfg::Jit::RelocationSize + off,
+              Cfg::Jit::RelocationSize - off, "cgRelocCold");
     main.init(cold.frontier() +
-              RuntimeOption::EvalJitRelocationSize + off,
-              RuntimeOption::EvalJitRelocationSize - off, "cgRelocMain");
+              Cfg::Jit::RelocationSize + off,
+              Cfg::Jit::RelocationSize - off, "cgRelocMain");
   } else if (!code.isLocal()) {
     // Use separate code blocks, so that attempts to use code's blocks
     // directly will fail (e.g., by overwriting the same memory being written
@@ -187,7 +188,7 @@ void emitVunit(Vunit& vunit, const IRUnit* unit,
   auto frozen_start = frozen->frontier();
 
   Optional<AsmInfo> optAI;
-  if (unit && (RuntimeOption::EvalJitBuildOutliningHashes ||
+  if (unit && (Cfg::Jit::BuildOutliningHashes ||
                dumpIREnabled(unit->context().kind))) {
     optAI.emplace(*unit);
   }
@@ -227,7 +228,7 @@ void emitVunit(Vunit& vunit, const IRUnit* unit,
     }
     printUnit(kCodeGenLevel, *unit, " after code gen ",
              ai, nullptr, annotations);
-    if (RuntimeOption::EvalJitBuildOutliningHashes) {
+    if (Cfg::Jit::BuildOutliningHashes) {
       recordIR(*unit, ai);
     }
   }

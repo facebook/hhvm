@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/implicit-context.h"
@@ -656,7 +657,7 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
   // Inlined calls normally skip the function enter and exit events. If we
   // side exit in an inlined callee, we short-circuit here in order to skip
   // exit events that could unbalance the call stack.
-  if (RuntimeOption::EvalJit && ar->isInlined()) {
+  if (Cfg::Jit::Enabled && ar->isInlined()) {
     return;
   }
 

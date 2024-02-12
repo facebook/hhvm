@@ -48,6 +48,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/configs/debugger.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/rds.h"
@@ -406,7 +407,7 @@ void Unit::merge() {
   if (mergeState == MergeState::NeedsNonPersistentMerged) {
     if (isSystemLib()) {
       mergeImpl<true /* mergeOnlyNonPersistentFuncs */>();
-      assertx(!RO::RepoAuthoritative && RuntimeOption::EvalJitEnableRenameFunction);
+      assertx(!RO::RepoAuthoritative && Cfg::Jit::EnableRenameFunction);
     } else {
       mergeImpl<false>();
       assertx(!RO::RepoAuthoritative);
@@ -432,7 +433,7 @@ void Unit::merge() {
   }
 
   if (RuntimeOption::RepoAuthoritative ||
-    (isSystemLib() && !RuntimeOption::EvalJitEnableRenameFunction)) {
+    (isSystemLib() && !Cfg::Jit::EnableRenameFunction)) {
     m_mergeState.store(MergeState::Merged, std::memory_order_relaxed);
   } else {
     m_mergeState.store(MergeState::NeedsNonPersistentMerged, std::memory_order_relaxed);

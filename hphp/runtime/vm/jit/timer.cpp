@@ -23,6 +23,7 @@
 
 #include <folly/Format.h>
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/struct-log.h"
@@ -49,12 +50,12 @@ const TimerName s_names[] = {
 };
 
 int64_t getCPUTimeNanos() {
-  return RuntimeOption::EvalJitTimer ? HPHP::Timer::GetThreadCPUTimeNanos() :
+  return Cfg::Jit::Timer ? HPHP::Timer::GetThreadCPUTimeNanos() :
          -1;
 }
 
 int64_t getWallClockMicros() {
-  return RuntimeOption::EvalJitTimer ? HPHP::Timer::GetCurrentTimeMicros() :
+  return Cfg::Jit::Timer ? HPHP::Timer::GetCurrentTimeMicros() :
          -1;
 }
 
@@ -76,7 +77,7 @@ Timer::~Timer() {
 }
 
 int64_t Timer::stop() {
-  if (!RuntimeOption::EvalJitTimer) return 0;
+  if (!Cfg::Jit::Timer) return 0;
 
   assertx(!m_finished);
   auto const elapsed = getCPUTimeNanos() - m_start;

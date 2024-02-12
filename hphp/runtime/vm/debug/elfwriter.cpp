@@ -26,7 +26,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/asm-x64.h"
 
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
@@ -631,7 +631,7 @@ ElfWriter::~ElfWriter() {
     elf_end(m_elf);
   if (m_fd != -1)
     close(m_fd);
-  if (!RuntimeOption::EvalJitKeepDbgFiles) {
+  if (!Cfg::Jit::KeepDbgFiles) {
     unlink(m_filename.c_str());
   }
   if (m_dwarfProducer != nullptr)

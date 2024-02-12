@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/vasm-emit.h"
@@ -178,8 +179,8 @@ Vauto::~Vauto() {
 
 uint64_t areaWeightFactor(AreaIndex area) {
   switch (area) {
-    case AreaIndex::Main:   return RuntimeOption::EvalJitLayoutMainFactor;
-    case AreaIndex::Cold:   return RuntimeOption::EvalJitLayoutColdFactor;
+    case AreaIndex::Main:   return Cfg::Jit::LayoutMainFactor;
+    case AreaIndex::Cold:   return Cfg::Jit::LayoutColdFactor;
     case AreaIndex::Frozen: return 1;
   };
   always_assert(false);

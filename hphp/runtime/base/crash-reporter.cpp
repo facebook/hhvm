@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/crash-reporter.h"
 
 #include "hphp/runtime/base/configs/debugger.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -293,7 +294,7 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
     case CrashReportStage::DumpTransDB:
       s_crash_report_stage = CrashReportStage::DumpProfileData;
 
-      if (jit::transdb::enabled() && RuntimeOption::EvalJit) {
+      if (jit::transdb::enabled() && Cfg::Jit::Enabled) {
         jit::tc::dump(true);
       }
       [[fallthrough]];

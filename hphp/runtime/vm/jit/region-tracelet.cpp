@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/region-selection.h"
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/irgen-bespoke.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
@@ -477,7 +478,7 @@ RegionDescPtr form_region(Env& env) {
   };
 
   auto const eager =
-    env.ctx.liveTypes.size() <= RuntimeOption::EvalJitTraceletEagerGuardsLimit;
+    env.ctx.liveTypes.size() <= Cfg::Jit::TraceletEagerGuardsLimit;
 
   Block* guardFailBlock = nullptr;
   for (auto const& lt : env.ctx.liveTypes) {
@@ -569,7 +570,7 @@ RegionDescPtr form_region(Env& env) {
     }
 
     const auto numGuards = env.irgs.irb->numGuards();
-    if (numGuards >= RuntimeOption::EvalJitTraceletGuardsLimit) {
+    if (numGuards >= Cfg::Jit::TraceletGuardsLimit) {
       FTRACE(1, "selectTracelet: tracelet broken due to too many guards ({})\n",
              numGuards);
       break;
@@ -641,7 +642,7 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, TransKind kind,
     }
   };
 
-  if (ctx.liveTypes.size() > RuntimeOption::EvalJitTraceletLiveLocsLimit) {
+  if (ctx.liveTypes.size() > Cfg::Jit::TraceletLiveLocsLimit) {
     return nullptr;
   }
 

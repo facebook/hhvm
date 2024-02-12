@@ -137,7 +137,7 @@ TransLoc TransRange::loc() const {
 
 bool canTranslate() {
   return s_numTrans.load(std::memory_order_relaxed) <
-    RuntimeOption::EvalJitGlobalTranslationLimit;
+    Cfg::Jit::GlobalTranslationLimit;
 }
 
 static RDS_LOCAL_NO_CHECK(bool, s_jittingTimeLimitExceeded);
@@ -148,7 +148,7 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
 
   if (*s_jittingTimeLimitExceeded) return TranslationResult::Scope::Request;
 
-  auto const maxTransTime = RuntimeOption::EvalJitMaxRequestTranslationTime;
+  auto const maxTransTime = Cfg::Jit::MaxRequestTranslationTime;
   if (maxTransTime >= 0 && RuntimeOption::ServerExecutionMode()) {
     auto const transCounter = Timer::CounterValue(Timer::mcg_translate);
     if (transCounter.wall_time_elapsed >= maxTransTime) {
@@ -181,7 +181,7 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
   }
 
   // Never translate functions in user-supplied blocklist.
-  if (!RO::EvalJitFuncBlockList.empty()) {
+  if (!Cfg::Jit::FuncBlockList.empty()) {
     // Calling func->fullName() could create a static string. So do our own
     // concatenation here to avoid wasting low memory.
     std::string fullName;
@@ -189,13 +189,13 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
       fullName = cls->name()->toCppString() + "::";
     }
     fullName.append(func->name()->data());
-    if (RO::EvalJitFuncBlockList.count(fullName)) {
+    if (Cfg::Jit::FuncBlockList.count(fullName)) {
       return TranslationResult::Scope::Process;
     }
   }
 
   // Refuse to JIT Live translations if Eval.JitPGOOnly is enabled.
-  if (RuntimeOption::EvalJitPGOOnly &&
+  if (Cfg::Jit::PGOOnly &&
       (kind == TransKind::Live || kind == TransKind::LivePrologue)) {
     return TranslationResult::Scope::Transient;
   }
@@ -207,8 +207,8 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
   auto const isProf = kind == TransKind::Profile ||
                       kind == TransKind::ProfPrologue;
   if (isLive || isProf) {
-    auto const funcThreshold = isLive ? RO::EvalJitLiveThreshold
-                                      : RO::EvalJitProfileThreshold;
+    auto const funcThreshold = isLive ? Cfg::Jit::LiveThreshold
+                                      : Cfg::Jit::ProfileThreshold;
     if (func->incJitReqCount() < funcThreshold) {
       return TranslationResult::Scope::Transient;
     }
@@ -230,7 +230,7 @@ TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind) {
   }
 
   const bool reachedMaxLiveMainLimit =
-    getLiveMainUsage() >= RuntimeOption::EvalJitMaxLiveMainUsage;
+    getLiveMainUsage() >= Cfg::Jit::MaxLiveMainUsage;
 
   auto const main_under = code().main().used() < CodeCache::AMaxUsage;
   auto const cold_under = code().cold().used() < CodeCache::AColdMaxUsage;
@@ -263,7 +263,7 @@ TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind) {
 
 bool newTranslation() {
   if (s_numTrans.fetch_add(1, std::memory_order_relaxed) >=
-      RuntimeOption::EvalJitGlobalTranslationLimit) {
+      Cfg::Jit::GlobalTranslationLimit) {
     return false;
   }
   return true;
@@ -315,7 +315,7 @@ void requestInit() {
 void requestExit() {
   Stats::dump();
   Stats::clear();
-  if (RuntimeOption::EvalJitProfileGuardTypes) {
+  if (Cfg::Jit::ProfileGuardTypes) {
     logGuardProfileData();
   }
   Timer::RequestExit();
@@ -383,7 +383,7 @@ void checkFreeProfData() {
   if (profData() &&
       !RuntimeOption::EvalEnableReusableTC &&
       (code().main().used() >= CodeCache::AMaxUsage ||
-       getLiveMainUsage() >= RuntimeOption::EvalJitMaxLiveMainUsage) &&
+       getLiveMainUsage() >= Cfg::Jit::MaxLiveMainUsage) &&
       !transdb::enabled() &&
       !mcgen::retranslateAllEnabled()) {
     discardProfData();
@@ -398,8 +398,8 @@ bool shouldProfileNewFuncs() {
   // functions until either of these limits is exceeded. In practice, we expect
   // to hit the bytecode size limit first, but we keep the request limit around
   // as a safety net.
-  return profData()->profilingBCSize() < RuntimeOption::EvalJitProfileBCSize &&
-    requestCount() < RuntimeOption::EvalJitProfileRequests;
+  return profData()->profilingBCSize() < Cfg::Jit::ProfileBCSize &&
+    requestCount() < Cfg::Jit::ProfileRequests;
 }
 
 bool profileFunc(const Func* func) {
@@ -411,7 +411,7 @@ bool profileFunc(const Func* func) {
 
   if (code().main().used() >= CodeCache::AMaxUsage) return false;
 
-  if (getLiveMainUsage() >= RuntimeOption::EvalJitMaxLiveMainUsage) {
+  if (getLiveMainUsage() >= Cfg::Jit::MaxLiveMainUsage) {
     return false;
   }
 
@@ -630,7 +630,7 @@ Translator::translate(Optional<CodeCache::View> view) {
     logTranslation(this, transMeta->range);
   }
 
-  if (!RuntimeOption::EvalJitLogAllInlineRegions.empty()) {
+  if (!Cfg::Jit::LogAllInlineRegions.empty()) {
     logFrames(*vunit);
   }
 

@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/req-optional.h"
 #include "hphp/runtime/base/unit-cache.h"
@@ -175,7 +176,7 @@ bool register_intercept(const String& name, const Variant& callback) {
   }
 
   if (RO::EvalDumpJitEnableRenameFunctionStats &&
-      StructuredLog::coinflip(RO::EvalJitInterceptFunctionLogRate)) {
+      StructuredLog::coinflip(Cfg::Jit::InterceptFunctionLogRate)) {
     StructuredLogEntry entry;
     entry.setStr("intercepted_func", interceptedFunc->fullName()->data());
     addBacktraceToStructLog(
@@ -234,7 +235,7 @@ void rename_function(const String& old_name, const String& new_name) {
   }
 
   if (!RuntimeOption::funcIsRenamable(old)) {
-    if (RuntimeOption::EvalJitEnableRenameFunction == 2) {
+    if (Cfg::Jit::EnableRenameFunction == 2) {
       raise_error("fb_rename_function must be explicitly enabled for %s "
                   "(when Eval.JitEnableRenameFunction=2 by adding it to "
                   "option Eval.RenamableFunctions)", old->data());
@@ -266,7 +267,7 @@ void rename_function(const String& old_name, const String& new_name) {
   newNe->m_cachedFunc.bind(rds::Mode::Normal, rds::LinkName{"NEFunc", newName});
   newNe->setCachedFunc(func);
 
-  if (RuntimeOption::EvalJit) {
+  if (Cfg::Jit::Enabled) {
     jit::invalidateForRenameFunction(old);
   }
 }

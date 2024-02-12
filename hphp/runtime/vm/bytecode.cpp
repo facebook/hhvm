@@ -45,6 +45,7 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/configs/errorhandling.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-util.h"
@@ -4579,7 +4580,7 @@ OPTBLD_INLINE void iopEval() {
     string_md5(code.slice()).c_str()
   );
   auto unit = compileEvalString(prefixedCode.get(), evalFilename.c_str());
-  if (!RuntimeOption::EvalJitEvaledCode) {
+  if (!Cfg::Jit::EvaledCode) {
     unit->setInterpretOnly();
   }
 

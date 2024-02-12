@@ -21,6 +21,7 @@
 #include <folly/ScopeGuard.h>
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/configs/jit.h" // @manual=//hphp/runtime/base/configs:jit-header
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -43,7 +44,7 @@ namespace HPHP::HHBBC {
 template<class Pred>
 Optional<Type> eval_cell(Pred p) {
   try {
-    assertx(!RuntimeOption::EvalJit);
+    assertx(!Cfg::Jit::Enabled);
     ThrowAllErrorsSetter taes;
 
     TypedValue c = p();

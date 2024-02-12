@@ -513,7 +513,6 @@ CONFIGS_FOR_REPOGLOBALDATA()
   gd.ActiveDeployment = RO::EvalActiveDeployment;
   gd.ModuleLevelTraits = RO::EvalModuleLevelTraits;
   gd.TreatCaseTypesAsMixed = RO::EvalTreatCaseTypesAsMixed;
-  gd.JitEnableRenameFunction = RO::EvalJitEnableRenameFunction;
   gd.RenamableFunctions = RO::RenamableFunctions;
   gd.NonInterceptableFunctions = RO::NonInterceptableFunctions;
   gd.StrictUtf8Mode = RuntimeOption::EvalStrictUtf8Mode;
@@ -773,7 +772,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   Option::Load(ini, config);
   RuntimeOption::RepoAuthoritative = false;
   RuntimeOption::RepoPath = "";
-  RuntimeOption::EvalJit = false;
+  Cfg::Jit::Enabled = false;
   RuntimeOption::EvalLowStaticArrays = false;
 
   std::vector<std::string> badnodes;

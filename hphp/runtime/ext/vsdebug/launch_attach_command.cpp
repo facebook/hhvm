@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
 
@@ -68,7 +69,7 @@ bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
     tryGetBool(args, "disableStdoutRedirection", false);
 
   bool disableJit =
-    tryGetBool(args, "disableJit", RuntimeOption::EvalJitDisabledByVSDebug);
+    tryGetBool(args, "disableJit", Cfg::Jit::DisabledByVSDebug);
 
   bool warnOnFileChange = tryGetBool(args, "warnOnFileChange", true);
 

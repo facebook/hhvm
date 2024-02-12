@@ -29,8 +29,10 @@
 
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/configs/hacklang.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/configs/repo-options-flags-generated.h"
+#include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/base/package.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/types.h"
@@ -293,7 +295,7 @@ struct RuntimeOption {
     std::string cmd = "");
 
   static bool ServerExecutionMode() {
-    return ServerMode;
+    return Cfg::Server::Mode;
   }
 
   static bool GcSamplingEnabled() {
@@ -301,7 +303,7 @@ struct RuntimeOption {
   }
 
   static bool JitSamplingEnabled() {
-    return EvalJit && EvalJitSampleRate > 0;
+    return Cfg::Jit::Enabled && Cfg::Jit::SampleRate > 0;
   }
 
   static void ReadSatelliteInfo(
@@ -326,7 +328,6 @@ struct RuntimeOption {
 
   static std::string getTraceOutputFile();
 
-  static bool ServerMode;
   static std::string BuildId;
   static std::string InstanceId;
   static std::string DeploymentId; // ID for set of instances deployed at once
@@ -705,23 +706,6 @@ struct RuntimeOption {
    */                                                                   \
   F(uint32_t, VMInitialGlobalTableSize,                                 \
     kEvalVMInitialGlobalTableSizeDefault)                               \
-  F(bool, Jit,                         evalJitDefault())                \
-  F(bool, JitEvaledCode,               true)                            \
-  F(bool, JitRequireWriteLease,        false)                           \
-  F(uint64_t, JitRelocationSize,       kJitRelocationSizeDefault)       \
-  F(uint64_t, JitMatureSize,           125 << 20)                       \
-  F(bool, JitMatureAfterWarmup,        false)                           \
-  F(double, JitMaturityExponent,       1.)                              \
-  F(double, JitMaturityProfWeight,     1.)                              \
-  F(bool, JitTimer,                    kJitTimerDefault)                \
-  F(int, JitConcurrently,              1)                               \
-  F(int, JitThreads,                   4)                               \
-  F(int, JitWorkerThreads,             std::max(1, Process::GetCPUCount() / 2)) \
-  F(int, JitWorkerThreadsForSerdes,    0)                               \
-  F(int, JitWorkerArenas,              std::max(1, Process::GetCPUCount() / 4)) \
-  F(bool, JitParallelDeserialize,      true)                            \
-  F(int, JitLdimmqSpan,                8)                               \
-  F(int, JitPrintOptimizedIR,          0)                               \
   F(bool, RecordSubprocessTimes,       false)                           \
   F(bool, AllowHhas,                   false)                           \
   F(bool, GenerateDocComments,         true)                            \
@@ -826,7 +810,6 @@ struct RuntimeOption {
   F(bool, EnableLogBridge,             true)                            \
   F(bool, MoreAccurateMemStats,        true)                            \
   F(bool, MemInfoCheckCgroup2,         true)                            \
-  F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \
   F(bool, PerfPidMap,                  true)                            \
@@ -854,70 +837,9 @@ struct RuntimeOption {
   F(double, RDSReorderThreshold,       0.0005)                          \
   F(uint32_t, ProfileGlobalsLimit,     200)                             \
   F(double, ProfileGlobalsSlowExitThreshold, 0.98)                      \
-  F(bool, JitAlwaysInterpOne,          false)                           \
-  F(uint32_t, JitNopInterval,          0)                               \
-  F(uint32_t, JitMaxTranslations,      10)                              \
-  F(uint32_t, JitMaxProfileTranslations, 30)                            \
-  F(uint32_t, JitTraceletLiveLocsLimit, 2000)                           \
-  F(uint32_t, JitTraceletEagerGuardsLimit, 0)                           \
-  F(uint32_t, JitTraceletGuardsLimit,  5)                               \
-  F(uint64_t, JitGlobalTranslationLimit, -1)                            \
-  F(int64_t, JitMaxRequestTranslationTime, -1)                          \
-  F(uint32_t, JitMaxRegionInstrs,      3000)                            \
-  F(uint32_t, JitMaxLiveRegionInstrs,  50)                              \
-  F(uint32_t, JitMaxAwaitAllUnroll,    8)                               \
-  F(bool, JitProfileWarmupRequests,    false)                           \
-  F(uint32_t, JitProfileRequests,      profileRequestsDefault())        \
-  F(uint32_t, JitProfileBCSize,        profileBCSizeDefault())          \
-  F(uint32_t, JitResetProfCountersRequest, resetProfCountersDefault())  \
-  F(uint32_t, JitRetranslateAllRequest, retranslateAllRequestDefault()) \
-  F(uint32_t, JitRetranslateAllSeconds, retranslateAllSecondsDefault()) \
-  F(bool,     JitRerunRetranslateAll,  false)                           \
-  F(bool,     JitBuildOutliningHashes, false)                           \
-  F(bool,     JitPGOLayoutSplitHotCold, pgoLayoutSplitHotColdDefault()) \
-  F(bool,     JitPGOVasmBlockCounters, true)                            \
-  F(bool,     JitPGOVasmBlockCountersOptPrologue, true)                 \
-  F(uint32_t, JitPGOVasmBlockCountersMaxOpMismatches, 12)               \
-  F(uint32_t, JitPGOVasmBlockCountersMinEntryValue,                     \
-                                       ServerExecutionMode() ? 200 : 0) \
-  F(double,   JitPGOVasmBlockCountersHotWeightMultiplier, 0)            \
-  F(bool, JitLayoutSeparateZeroWeightBlocks, false)                     \
-  F(bool, JitLayoutPrologueSplitHotCold, layoutPrologueSplitHotColdDefault()) \
-  F(bool, JitLayoutProfileSplitHotCold, true)                           \
-  F(uint64_t, JitLayoutMinHotThreshold,  0)                             \
-  F(uint64_t, JitLayoutMinColdThreshold, 0)                             \
-  F(double,   JitLayoutHotThreshold,   0.01)                            \
-  F(double,   JitLayoutColdThreshold,  0.0005)                          \
-  F(int32_t,  JitLayoutMainFactor,     1000)                            \
-  F(int32_t,  JitLayoutColdFactor,     5)                               \
-  F(bool,     JitLayoutExtTSP,         true)                            \
-  F(bool,     JitLayoutExtTSPForPrologues, false)                       \
-  F(double,   JitLayoutExtTSPMaxMergeDensityRatio, 25)                  \
-  F(double,   JitLayoutMaxMergeRatio,  1000000)                         \
-  F(bool,     JitLayoutPruneCatchArcs, true)                            \
   F(uint32_t, GdbSyncChunks,           128)                             \
-  F(bool, JitKeepDbgFiles,             false)                           \
-  /* This controls function renaming.
-   * 0 - Renaming not allowed
-   * 1 - All functions can be renamed
-   * 2 - Functions in RenamableFunctions config list can be renamed
-   */                                                                   \
-  F(uint32_t, JitEnableRenameFunction, 0)                               \
-  F(uint32_t, JitInterceptFunctionLogRate, 1000)                        \
-  F(bool, JitUseVtuneAPI,              false)                           \
   F(bool, TraceCommandLineRequest,     true)                            \
-                                                                        \
-  F(bool, JitDisabledByHphpd,          false)                           \
-  F(bool, JitDisabledByVSDebug,        true)                            \
   F(bool, EmitDebuggerIntrCheck,       true)                            \
-  F(uint32_t, JitWarmupStatusBytes,    ((25 << 10) + 1))                \
-  F(uint32_t, JitWarmupMaxCodeGenRate, 20000)                           \
-  F(uint32_t, JitWarmupRateSeconds,    64)                              \
-  F(uint32_t, JitWarmupMinFillFactor,  10)                              \
-  F(uint32_t, JitWriteLeaseExpiration, 1500) /* in microseconds */      \
-  F(int, JitRetargetJumps,             1)                               \
-  /* Sync VM reg state for all native calls. */                         \
-  F(bool, JitForceVMRegSync,           false)                           \
   /* Log the profile used to optimize array-like gets and sets. */      \
   F(bool, LogArrayAccessProfile,      false)                            \
   /* We use PGO to target specialization for "foreach" iterator loops.  \
@@ -927,44 +849,6 @@ struct RuntimeOption {
   F(double, CoeffectFunParamProfileThreshold, 0.10)                     \
   F(bool, AssemblerFoldDefaultValues,  true)                            \
   F(uint64_t, AssemblerMaxScalarSize,  2147483648) /* 2GB */            \
-  /* Region compiler flags */                                           \
-  F(string,   JitRegionSelector,       regionSelectorDefault())         \
-  F(bool,     JitPGO,                  pgoDefault())                    \
-  F(string,   JitPGORegionSelector,    "hotcfg")                        \
-  F(uint64_t, JitPGOThreshold,         pgoThresholdDefault())           \
-  F(bool,     JitPGOOnly,              false)                           \
-  F(bool,     JitPGOUsePostConditions, true)                            \
-  F(bool,     JitPGOUseAddrCountedCheck, false)                         \
-  F(uint32_t, JitPGOUnlikelyIncRefCountedPercent, 2)                    \
-  F(uint32_t, JitPGOUnlikelyIncRefIncrementPercent, 5)                  \
-  F(uint32_t, JitPGOUnlikelyDecRefReleasePercent, 5)                    \
-  F(uint32_t, JitPGOUnlikelyDecRefCountedPercent, 2)                    \
-  F(uint32_t, JitPGOUnlikelyDecRefPersistPercent, 5)                    \
-  F(uint32_t, JitPGOUnlikelyDecRefSurvivePercent, 5)                    \
-  F(uint32_t, JitPGOUnlikelyDecRefDecrementPercent, 5)                  \
-  F(double,   JitPGODecRefNZReleasePercentCOW,                          \
-                                       ServerExecutionMode() ? 0.5 : 0) \
-  F(double,   JitPGODecRefNZReleasePercent,                             \
-                                         ServerExecutionMode() ? 5 : 0) \
-  F(double,   JitPGODecRefNopDecPercentCOW,                             \
-                                       ServerExecutionMode() ? 0.5 : 0) \
-  F(double,   JitPGODecRefNopDecPercent, ServerExecutionMode() ? 5 : 0) \
-  F(bool,     JitPGOArrayGetStress,    false)                           \
-  /* Mininum weight of a tracelet to include it in HotCFG as a percentage
-     of the weight of the first tracelet in the region. [0,100] */      \
-  F(double,   JitPGOMinBlockCountPercent, 0.25)                         \
-  /* Minimum probability of an arc to include it in HotCFG. [0,1] */    \
-  F(double,   JitPGOMinArcProbability, 0.0)                             \
-  F(uint32_t, JitPGORelaxPercent,      100)                             \
-  F(double,   JitPGOCalledFuncCheckThreshold, 25)                       \
-  F(double,   JitPGOCalledFuncExitThreshold,  99.9)                     \
-  F(bool,     JitPGODumpCallGraph,     false)                           \
-  F(bool,     JitPGOOptCodeCallGraph,  true)                            \
-  F(bool,     JitPGORacyProfiling,     false)                           \
-  F(bool,     JitPGOHFSortPlus,        false)                           \
-  F(uint8_t,  JitLiveThreshold,        ServerExecutionMode() ? 200 : 0) \
-  F(uint8_t,  JitProfileThreshold,     ServerExecutionMode() ? 200 : 0) \
-  F(uint32_t, JitMaxLiveMainUsage,     96 * 1024 * 1024)                \
   F(uint64_t, FuncCountHint,           10000)                           \
   F(uint64_t, PGOFuncCountHint,        1000)                            \
   F(bool, RegionRelaxGuards,           true)                            \
@@ -1040,18 +924,8 @@ struct RuntimeOption {
   F(uint32_t, StaticContentsLogRate,   100)                             \
   F(uint32_t, LogUnitLoadRate,         0)                               \
   F(uint32_t, MaxDeferredErrors,       50)                              \
-  F(bool, JitAlignMacroFusionPairs, alignMacroFusionPairs())            \
-  F(bool, JitAlignUniqueStubs,         true)                            \
   F(uint32_t, SerDesSampleRate,            0)                           \
-  F(bool, JitSerdesModeForceOff,       false)                           \
-  F(bool, JitDesUnitPreload,           false)                           \
-  F(std::set<std::string>, JitSerdesDebugFunctions, {})                 \
-  F(std::set<std::string>, JitFuncBlockList, {})                        \
-  F(uint32_t, JitSerializeOptProfSeconds, ServerExecutionMode() ? 300 : 0)\
-  F(uint32_t, JitSerializeOptProfRequests, 0)                           \
-  F(bool, JitSerializeOptProfRestart,  true)                            \
   F(int, SimpleJsonMaxLength,        2 << 20)                           \
-  F(uint32_t, JitSampleRate,               0)                           \
   F(uint32_t, TraceServerRequestRate,      0)                           \
   /* Tracing Options */                                                 \
   /* Base tracing sample rate for all requests */                       \
@@ -1066,15 +940,6 @@ struct RuntimeOption {
   F(std::string, ArtilleryTracePolicy, "")                              \
   /* Opaque tag to add to each trace. Useful for aggregation */         \
   F(std::string, TracingTagId, "")                                      \
-  /* Log the sizes and metadata for all translations in the TC broken
-   * down by function and inclusive/exclusive size for inlined regions.
-   * When set to "" TC size data will be sampled on a per function basis
-   * as determined by JitSampleRate. When set to a non-empty string all
-   * translations will be logged, and run_key column will be logged with
-   * the value of this option. */                                       \
-  F(string,   JitLogAllInlineRegions,  "")                              \
-  F(bool, JitProfileGuardTypes,        false)                           \
-  F(uint32_t, JitFilterLease,          1)                               \
   F(uint32_t, PCRETableSize, kPCREInitialTableSize)                     \
   F(uint64_t, PCREExpireInterval, 2 * 60 * 60)                          \
   F(string, PCRECacheType, std::string("static"))                       \
@@ -1315,10 +1180,6 @@ struct RuntimeOption {
   F(bool, UnixServerAssumeRepoRealpath, true)                           \
   /* Options for testing */                                             \
   F(bool, TrashFillOnRequestExit, false)                                \
-  /******************                                                   \
-   | ARM   Options. |                                                   \
-   *****************/                                                   \
-  F(bool, JitArmLse, armLseDefault())                                   \
   /********************                                                 \
    | Profiling flags. |                                                 \
    ********************/                                                \

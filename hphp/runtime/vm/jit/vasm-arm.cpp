@@ -67,6 +67,7 @@
 
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -951,7 +952,7 @@ void Vgen::emit(const decqmlock& i) {
   auto adr = M(i.m);
   /* Use VIXL's macroassembler scratch regs. */
   a->SetScratchRegisters(vixl::NoReg, vixl::NoReg);
-  if (RuntimeOption::EvalJitArmLse) {
+  if (Cfg::Jit::ArmLse) {
     a->Mov(rVixlScratch0, -1);
     a->ldaddal(rVixlScratch0, rVixlScratch0, adr);
     a->Sub(rAsm, rVixlScratch0, 1, SetFlags);

@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/base/configs/hhir.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 
 #include "hphp/runtime/vm/hhbc-codec.h"
@@ -615,7 +616,7 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
   auto const exitSlow = makeExitSlow(env);
 
   auto const cnt = [&] {
-    if (locals.count > RuntimeOption::EvalJitMaxAwaitAllUnroll) {
+    if (locals.count > Cfg::Jit::MaxAwaitAllUnroll) {
       return gen(
         env,
         CountWHNotDone,

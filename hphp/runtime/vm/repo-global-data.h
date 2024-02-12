@@ -181,12 +181,6 @@ struct RepoGlobalData {
    */
   bool ModuleLevelTraits = false;
 
-  /* This controls function renaming.
-   * 0 - Renaming not allowed
-   * 1 - All functions can be renamed
-   * 2 - Functions in RenamableFunctions config list can be renamed
-   */
-  uint32_t JitEnableRenameFunction = 0;
   std::set<std::string> RenamableFunctions;
   std::set<std::string> NonInterceptableFunctions;
 
@@ -201,9 +195,6 @@ struct RepoGlobalData {
       (InitialFuncTableSize)
       (InitialStaticStringTableSize)
       (CheckPropTypeHints)
-      (PHP7_NoHexNumerics)
-      (PHP7_Substr)
-      (PHP7_Builtins)
       (HackArrCompatSerializeNotices)
       (EnableIntrinsicsExtension)
       (ForbidDynamicCallsToFunc)
@@ -211,7 +202,6 @@ struct RepoGlobalData {
       (ForbidDynamicCallsToInstMeth)
       (ForbidDynamicConstructs)
       (ForbidDynamicCallsWithAttr)
-      (JitEnableRenameFunction)
       (RenamableFunctions)
       (NonInterceptableFunctions)
       (LogKnownMethodsAsDynamicCalls)
@@ -243,6 +233,10 @@ struct RepoGlobalData {
       (TreatCaseTypesAsMixed)
       (StrictUtf8Mode)
       ;
+
+#define C(_, Name, ...) sd(Name);
+  CONFIGS_FOR_REPOGLOBALDATA()
+#undef C
   }
 };
 

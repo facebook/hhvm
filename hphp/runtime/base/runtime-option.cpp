@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/configs/autoload.h"
 #include "hphp/runtime/base/configs/configs-load.h"
 #include "hphp/runtime/base/configs/errorhandling.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/crash-reporter.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/extended-logger.h"
@@ -58,7 +59,6 @@
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/bump-mapper.h"
-#include "hphp/util/cpuid.h"
 #include "hphp/util/current-executable.h" // @donotremove
 #include "hphp/util/gzip.h"
 #include "hphp/util/hardware-counter.h"
@@ -633,8 +633,6 @@ std::string RuntimeOption::DeploymentId;
 int64_t RuntimeOption::ConfigId = 0;
 std::string RuntimeOption::PidFile = "www.pid";
 
-bool RuntimeOption::ServerMode = false;
-
 bool RuntimeOption::EnableXHP = true;
 bool RuntimeOption::EnableIntrinsicsExtension = false;
 bool RuntimeOption::CheckSymLink = true;
@@ -978,33 +976,6 @@ static inline uint64_t pgoThresholdDefault() {
   return debug ? 2 : 2000;
 }
 
-static inline bool alignMacroFusionPairs() {
-  switch (getProcessorFamily()) {
-    case ProcessorFamily::Intel_SandyBridge:
-    case ProcessorFamily::Intel_IvyBridge:
-    case ProcessorFamily::Intel_Haswell:
-    case ProcessorFamily::Intel_Broadwell:
-    case ProcessorFamily::Intel_Skylake:
-    case ProcessorFamily::Intel_Cooperlake:
-      return true;
-    case ProcessorFamily::Unknown:
-      return false;
-  }
-  return false;
-}
-
-static inline bool armLseDefault() {
-#if defined (__aarch64__) && defined (HWCAP_ATOMICS)
-  return (getauxval(AT_HWCAP) & HWCAP_ATOMICS) != 0;
-#else
-  return false;
-#endif
-}
-
-static inline bool evalJitDefault() {
-  return true;
-}
-
 static inline bool reuseTCDefault() {
   return hhvm_reuse_tc && !RuntimeOption::RepoAuthoritative;
 }
@@ -1030,38 +1001,6 @@ static inline std::string reorderPropsDefault() {
   return debug ? "alphabetical" : "countedness";
 }
 
-static inline uint32_t profileRequestsDefault() {
-  return debug ? std::numeric_limits<uint32_t>::max() : 2500;
-}
-
-static inline uint32_t profileBCSizeDefault() {
-  return debug ? std::numeric_limits<uint32_t>::max()
-    : RuntimeOption::EvalJitConcurrently ? 3750000
-    : 4300000;
-}
-
-static inline uint32_t resetProfCountersDefault() {
-  return RuntimeOption::EvalJitPGORacyProfiling
-    ? std::numeric_limits<uint32_t>::max()
-    : RuntimeOption::EvalJitConcurrently ? 250 : 1000;
-}
-
-static inline int retranslateAllRequestDefault() {
-  return RuntimeOption::ServerExecutionMode() ? 1000000 : 0;
-}
-
-static inline int retranslateAllSecondsDefault() {
-  return RuntimeOption::ServerExecutionMode() ? 180 : 0;
-}
-
-static inline bool pgoLayoutSplitHotColdDefault() {
-  return arch() != Arch::ARM;
-}
-
-static inline bool layoutPrologueSplitHotColdDefault() {
-  return arch() != Arch::ARM;
-}
-
 Optional<std::filesystem::path> RuntimeOption::GetHomePath(
     const folly::StringPiece user) {
   namespace fs = std::filesystem;
@@ -1083,8 +1022,8 @@ Optional<std::filesystem::path> RuntimeOption::GetHomePath(
 
 bool RuntimeOption::funcIsRenamable(const StringData* name) {
   if (HPHP::is_generated(name)) return false;
-  if (RO::EvalJitEnableRenameFunction == 0) return false;
-  if (RO::EvalJitEnableRenameFunction == 2) {
+  if (Cfg::Jit::EnableRenameFunction == 0) return false;
+  if (Cfg::Jit::EnableRenameFunction == 2) {
     return RO::RenamableFunctions.find(name->data()) !=
       RO::RenamableFunctions.end();
   } else {
@@ -1130,15 +1069,6 @@ const uint64_t kEvalVMStackElmsDefault =
  ;
 
 constexpr uint32_t kEvalVMInitialGlobalTableSizeDefault = 512;
-constexpr uint64_t kJitRelocationSizeDefault = 1 << 20;
-
-static const bool kJitTimerDefault =
-#ifdef ENABLE_JIT_TIMER_DEFAULT
-  true
-#else
-  false
-#endif
-;
 
 using std::string;
 #define F(type, name, def) \
@@ -1822,6 +1752,9 @@ void RuntimeOption::Load(
     Config::Bind(HHProfAccum, ini, config, "HHProf.Accum", false);
     Config::Bind(HHProfRequest, ini, config, "HHProf.Request", false);
   }
+
+  Cfg::Load(ini, config);
+
   {
     // Eval
     Config::Bind(EnableXHP, ini, config, "Eval.EnableXHP", EnableXHP);
@@ -1890,7 +1823,7 @@ void RuntimeOption::Load(
       return Replayer::onRuntimeOptionLoad(ini, config, cmd);
     }
 
-    if (EvalJitSerdesModeForceOff) EvalJitSerdesMode = JitSerdesMode::Off;
+    if (Cfg::Jit::SerdesModeForceOff) EvalJitSerdesMode = JitSerdesMode::Off;
     if (!EvalEnableReusableTC) EvalReusableTCPadding = 0;
     if (numa_num_nodes <= 1) {
       EvalEnableNuma = false;
@@ -1917,9 +1850,9 @@ void RuntimeOption::Load(
     replacePlaceholders(EvalEmbeddedDataFallbackPath);
 
     if (!jit::mcgen::retranslateAllEnabled()) {
-      EvalJitWorkerThreads = 0;
+      Cfg::Jit::WorkerThreads = 0;
       if (EvalJitSerdesMode != JitSerdesMode::Off) {
-        if (ServerMode) {
+        if (Cfg::Server::Mode) {
           Logger::Warning("Eval.JitSerdesMode reset from " + jitSerdesMode +
                           " to off, becasue JitRetranslateAll isn't enabled.");
         }
@@ -1928,7 +1861,7 @@ void RuntimeOption::Load(
       EvalJitSerdesFile.clear();
       DumpPreciseProfData = false;
     }
-    EvalJitPGOUseAddrCountedCheck &= addr_encodes_persistency;
+    Cfg::Jit::PGOUseAddrCountedCheck &= addr_encodes_persistency;
     if (EvalSanitizeReqHeap) {
       HeapObjectSanitizer::install_signal_handler();
     }
@@ -1945,7 +1878,7 @@ void RuntimeOption::Load(
                  config, "Eval.EnableIntrinsicsExtension",
                  EnableIntrinsicsExtension);
     Config::Bind(RecordCodeCoverage, ini, config, "Eval.RecordCodeCoverage");
-    if (EvalJit && RecordCodeCoverage) {
+    if (Cfg::Jit::Enabled && RecordCodeCoverage) {
       throw std::runtime_error("Code coverage is not supported with "
         "Eval.Jit=true");
     }
@@ -2593,8 +2526,6 @@ void RuntimeOption::Load(
 
   Config::Bind(CustomSettings, ini, config, "CustomSettings");
 
-  Cfg::Load(ini, config);
-
   // Run initializers dependent on options, e.g., resizing atomic maps/vectors.
   refineStaticStringTableSize();
   InitFiniNode::ProcessPostRuntimeOptions();
@@ -2712,7 +2643,7 @@ void RuntimeOption::Load(
 
   if (TraceFunctions.size()) Trace::ensureInit(getTraceOutputFile());
 
-  if (RO::EvalJitEnableRenameFunction && RO::RepoAuthoritative) {
+  if (Cfg::Jit::EnableRenameFunction && RO::RepoAuthoritative) {
       throw std::runtime_error("Can't use Eval.JitEnableRenameFunction if "
                                " RepoAuthoritative is turned on");
   }

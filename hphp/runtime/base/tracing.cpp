@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/tracing.h"
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/init-fini-node.h"
 
 #include "hphp/runtime/server/cli-server.h"
@@ -119,7 +120,7 @@ void setCommonFields(StructuredLogEntry& entry) {
     v["repo_auth"] = RuntimeOption::RepoAuthoritative ? "true" : "false";
     v["is_server"] = RuntimeOption::ServerExecutionMode() ? "true" : "false";
     v["is_cli_server"] = is_cli_server_mode() ? "true" : "false";
-    v["use_jit"] = RuntimeOption::EvalJit ? "true" : "false";
+    v["use_jit"] = Cfg::Jit::Enabled ? "true" : "false";
     v["tag_id"] = RuntimeOption::EvalTracingTagId;
     return v;
   }();

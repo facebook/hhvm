@@ -20,7 +20,7 @@
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/configs/jit.h"
 
 #include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
@@ -92,7 +92,7 @@ inline Vreg emitMaskTVType(Vout& v, Immed s0, TLoc s1) {
 
 template<typename TLoc>
 inline ConditionCode emitIsTVTypeRefCounted(Vout& v, Vreg sf, TLoc s1) {
-  if (RuntimeOption::EvalJitProfileGuardTypes) {
+  if (Cfg::Jit::ProfileGuardTypes) {
     emitProfileGuardType(v, TUncounted);
   }
   emitTestTVType(v, sf, kRefCountedBit, s1);

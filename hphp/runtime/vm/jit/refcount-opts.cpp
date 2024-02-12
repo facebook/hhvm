@@ -518,6 +518,7 @@ them when we shouldn't.
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
 
 #include "hphp/runtime/base/configs/hhir.h"
+#include "hphp/runtime/base/configs/jit.h"
 
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"
@@ -3559,15 +3560,15 @@ void selectiveWeakenDecRefs(IRUnit& unit) {
           const auto decrefdPct = data.percent(data.destroyed()) +
                                   data.percent(data.survived());
           double decrefdPctLimit = inst.src(0)->type() <= cowFree
-            ? RuntimeOption::EvalJitPGODecRefNopDecPercent
-            : RuntimeOption::EvalJitPGODecRefNopDecPercentCOW;
+            ? Cfg::Jit::PGODecRefNopDecPercent
+            : Cfg::Jit::PGODecRefNopDecPercentCOW;
           if (decrefdPct < decrefdPctLimit && !(type <= TCounted)) {
             inst.convertToNop();
           } else if (inst.is(DecRef)) {
             const auto destroyPct = data.percent(data.destroyed());
             double destroyPctLimit = inst.src(0)->type() <= cowFree
-              ? RuntimeOption::EvalJitPGODecRefNZReleasePercent
-              : RuntimeOption::EvalJitPGODecRefNZReleasePercentCOW;
+              ? Cfg::Jit::PGODecRefNZReleasePercent
+              : Cfg::Jit::PGODecRefNZReleasePercentCOW;
             if (destroyPct < destroyPctLimit && !(type <= TAwaitable)) {
               inst.setOpcode(DecRefNZ);
             } else if (isRealType(data.datatype)) {

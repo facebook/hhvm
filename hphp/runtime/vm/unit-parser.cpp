@@ -41,6 +41,7 @@
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/configs/hacklang.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
@@ -122,9 +123,9 @@ CompilerResult hackc_compile(
   hackc::DeclProvider* provider
 ) {
   auto const getRenameFunctionValue = []() {
-    if (RO::EvalJitEnableRenameFunction == 1) {
+    if (Cfg::Jit::EnableRenameFunction == 1) {
       return hackc::JitEnableRenameFunction::Enable;
-    } else if (RO::EvalJitEnableRenameFunction == 2) {
+    } else if (Cfg::Jit::EnableRenameFunction == 2) {
       return hackc::JitEnableRenameFunction::RestrictedEnable;
     } else {
       return hackc::JitEnableRenameFunction::Disable;
@@ -160,7 +161,7 @@ CompilerResult hackc_compile(
       native_env.include_roots.emplace_back(hackc::StringMapEntry{k, v});
     }
   }
-  if (RO::EvalJitEnableRenameFunction == 2) {
+  if (Cfg::Jit::EnableRenameFunction == 2) {
     for (auto& f : RO::RenamableFunctions) {
       native_env.renamable_functions.emplace_back(rust::String{f});
     }

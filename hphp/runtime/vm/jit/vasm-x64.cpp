@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tracing.h"
 
@@ -481,7 +482,7 @@ namespace {
 
 template<class X64Asm>
 void Vgen<X64Asm>::retargetBinds(Venv& env) {
-  if (RuntimeOption::EvalJitRetargetJumps < 1) return;
+  if (Cfg::Jit::RetargetJumps < 1) return;
 
   // The target is unique per the SrcKey and the fallback flag.
   jit::hash_map<
@@ -530,7 +531,7 @@ void Vgen<X64Asm>::patch(Venv& env) {
       env.text.toDestAddress(p.instr), p.instr, env.addrs[p.target]);
   }
 
-  auto const optLevel = RuntimeOption::EvalJitRetargetJumps;
+  auto const optLevel = Cfg::Jit::RetargetJumps;
   jit::hash_map<TCA, jit::vector<TCA>> jccs;
   for (auto const& p : env.jccs) {
     assertx(env.addrs[p.target]);

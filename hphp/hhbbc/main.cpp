@@ -33,6 +33,7 @@
 #include <folly/String.h>
 #include <folly/portability/Unistd.h>
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -291,7 +292,6 @@ CONFIGS_FOR_REPOGLOBALDATA()
   gd.ModuleLevelTraits = RuntimeOption::EvalModuleLevelTraits;
   gd.TreatCaseTypesAsMixed = RO::EvalTreatCaseTypesAsMixed;
   gd.RenamableFunctions = RO::RenamableFunctions;
-  gd.JitEnableRenameFunction = RO::EvalJitEnableRenameFunction;
   gd.NonInterceptableFunctions = RO::NonInterceptableFunctions;
   gd.StrictUtf8Mode   = RuntimeOption::EvalStrictUtf8Mode;
 
@@ -649,7 +649,7 @@ void process_init(const Options& o,
 
   RO::Load(ini, config);
   RO::RepoAuthoritative                     = false;
-  RO::EvalJit                               = false;
+  Cfg::Jit::Enabled                         = false;
   RO::EvalLowStaticArrays                   = false;
   RO::RepoDebugInfo                         = false;
   Logger::LogLevel                          = Logger::LogError;

@@ -37,6 +37,7 @@
 #include "hphp/util/smalllocks.h"
 #include "hphp/util/type-scan.h"
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/rds-symbol.h"
 #include "hphp/runtime/vm/debug/debug.h"
@@ -592,7 +593,7 @@ void processInit() {
       jit::deserializeProfData(RO::EvalJitSerdesFile, 1, true);
     } else if (isJitSerializing() &&
                jit::serializeOptProfEnabled() &&
-               RO::EvalJitSerializeOptProfRestart) {
+               Cfg::Jit::SerializeOptProfRestart) {
       jit::tryDeserializePartialProfData(RO::EvalJitSerdesFile, 1, true);
     }
   }

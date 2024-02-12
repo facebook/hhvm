@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "hphp/util/assertions.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -372,7 +373,7 @@ RegionVec regionizeFunc(const Func* func, std::string& transCFGAnnot) {
       // If the weight of node is too low, we mark it and its incoming arcs as
       // covered but skip generating a region starting at it to reduce code
       // size.  This node will probably trigger a live translation instead.
-      auto const minBlkPerc = RuntimeOption::EvalJitPGOMinBlockCountPercent;
+      auto const minBlkPerc = Cfg::Jit::PGOMinBlockCountPercent;
       if (cfg.weight(node) < cfg.weight(nodes[0]) * minBlkPerc / 100) {
         FTRACE(3, "regionizeFunc: skipping forming a region to cover node {}\n",
                newHead);
@@ -389,7 +390,7 @@ RegionVec regionizeFunc(const Func* func, std::string& transCFGAnnot) {
       ctx.cfg = &cfg;
       ctx.profData = profData;
       ctx.entries = {newHead};
-      ctx.maxBCInstrs = RuntimeOption::EvalJitMaxRegionInstrs;
+      ctx.maxBCInstrs = Cfg::Jit::MaxRegionInstrs;
       switch (regionMode) {
         case PGORegionMode::Hottrace:
           region = selectHotTrace(ctx);
@@ -401,7 +402,7 @@ RegionVec regionizeFunc(const Func* func, std::string& transCFGAnnot) {
           break;
 
         case PGORegionMode::Hotblock:
-          always_assert(0 && "Invalid value for EvalJitPGORegionSelector");
+          always_assert(0 && "Invalid value for Cfg::Jit::PGORegionSelector");
       }
       FTRACE(6, "regionizeFunc: selected region to cover node {}\n{}\n",
              newHead, show(*region));

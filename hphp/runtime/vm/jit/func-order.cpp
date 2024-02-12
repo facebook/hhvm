@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/act-rec.h"
@@ -234,7 +235,7 @@ std::pair<std::vector<FuncId>, uint64_t> hfsortFuncs() {
   jit::hash_map<hfsort::TargetId, FuncId> target2FuncId;
   auto cg = createCallGraph(target2FuncId);
 
-  if (RuntimeOption::EvalJitPGODumpCallGraph) {
+  if (Cfg::Jit::PGODumpCallGraph) {
     Treadmill::Session ts(Treadmill::SessionKind::Retranslate);
     cg.printDot("/tmp/cg-pgo.dot",
                 [&](hfsort::TargetId targetId) -> const char* {
@@ -249,7 +250,7 @@ std::pair<std::vector<FuncId>, uint64_t> hfsortFuncs() {
   }
 
   std::vector<hfsort::Cluster> clusters;
-  if (RuntimeOption::EvalJitPGOHFSortPlus) {
+  if (Cfg::Jit::PGOHFSortPlus) {
     clusters = hfsort::hfsortPlus(cg);
   } else {
     clusters = hfsort::clusterize(cg);
@@ -259,7 +260,7 @@ std::pair<std::vector<FuncId>, uint64_t> hfsortFuncs() {
     Logger::Info("retranslateAll: finished clusterizing the functions");
   }
 
-  if (RuntimeOption::EvalJitPGODumpCallGraph) {
+  if (Cfg::Jit::PGODumpCallGraph) {
     Treadmill::Session ts(Treadmill::SessionKind::Retranslate);
 
     print("/tmp/hotfuncs-pgo.txt", clusters, target2FuncId);

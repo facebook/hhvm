@@ -32,8 +32,9 @@
 #include "hphp/util/service-data.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/configs/jit.h"
+#include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/backtrace.h"
@@ -1280,7 +1281,7 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit,
 }
 
 void ExecutionContext::syncGdbState() {
-  if (RuntimeOption::EvalJit && !RuntimeOption::EvalJitNoGdb) {
+  if (Cfg::Jit::Enabled && !Cfg::Jit::NoGdb) {
     Debug::DebugInfo::Get()->debugSync();
   }
 }
@@ -1404,7 +1405,7 @@ void ExecutionContext::requestInit() {
 
   *rl_num_coeffect_violations = 0;
 
-  if (RuntimeOption::EvalJitEnableRenameFunction == 1) {
+  if (Cfg::Jit::EnableRenameFunction == 1) {
     assertx(SystemLib::s_anyNonPersistentBuiltins);
   }
 

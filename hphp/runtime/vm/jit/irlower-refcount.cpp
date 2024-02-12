@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/configs/hhir.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -120,7 +121,7 @@ void incrementProfile(Vout& v, const TargetProfile<IncRefProfile>& profile,
 
 inline bool useAddrForCountedCheck() {
   return addr_encodes_persistency &&
-    RuntimeOption::EvalJitPGOUseAddrCountedCheck;
+    Cfg::Jit::PGOUseAddrCountedCheck;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -156,14 +157,14 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
     auto const data = profile.data();
     if (data.total > 0) {
       if (data.percent(data.refcounted) <
-          RuntimeOption::EvalJitPGOUnlikelyIncRefCountedPercent
+          Cfg::Jit::PGOUnlikelyIncRefCountedPercent
           && !(ty <= TCell && ty.isKnownDataType())) {
         unlikelyCounted = true;
         FTRACE(3, "irlower-inc-dec: Emitting cold counted check for {}, {}\n",
                data, *inst);
       }
       if (data.percent(data.incremented) <
-          RuntimeOption::EvalJitPGOUnlikelyIncRefIncrementPercent) {
+          Cfg::Jit::PGOUnlikelyIncRefIncrementPercent) {
         unlikelyIncrement = true;
         FTRACE(3, "irlower-inc-dec: Emitting cold IncRef for {}, {}\n",
                data, *inst);
@@ -377,13 +378,13 @@ void emitDecRefOpt(Vout& v, Vout& vcold, Vreg base,
   const auto survivePct = data.percent(data.survived());
 
   const bool persistUnlikely = persistPct <
-    RuntimeOption::EvalJitPGOUnlikelyDecRefPersistPercent;
+    Cfg::Jit::PGOUnlikelyDecRefPersistPercent;
 
   const bool destroyUnlikely = destroyPct <
-    RuntimeOption::EvalJitPGOUnlikelyDecRefReleasePercent;
+    Cfg::Jit::PGOUnlikelyDecRefReleasePercent;
 
   const bool surviveUnlikely = survivePct <
-    RuntimeOption::EvalJitPGOUnlikelyDecRefSurvivePercent;
+    Cfg::Jit::PGOUnlikelyDecRefSurvivePercent;
 
   // Case 1: optimize for destruction
   if (destroyPct >= persistPct && destroyPct >= survivePct) {
@@ -418,7 +419,7 @@ void implDecRef(Vout& v, IRLS& env,
   if (!ty.maybe(TPersistent)) {
     auto const destroyedPct = decRefDestroyedPercent(v, env, inst, profile);
     auto const unlikelyReleasePct =
-      RuntimeOption::EvalJitPGOUnlikelyDecRefReleasePercent;
+      Cfg::Jit::PGOUnlikelyDecRefReleasePercent;
     auto const unlikelyDestroy = destroyedPct < unlikelyReleasePct;
 
     auto const sf = emitDecRef(v, base, TRAP_REASON);
@@ -538,7 +539,7 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
       profile.optimizing() && !ty.isKnownDataType()) {
     auto const data = profile.data();
     auto const unlikelyCountedPct =
-      RuntimeOption::EvalJitPGOUnlikelyDecRefCountedPercent;
+      Cfg::Jit::PGOUnlikelyDecRefCountedPercent;
     if (data.percent(data.refcounted) < unlikelyCountedPct) {
       // This DecRef rarely saw a refcounted type during profiling, so call the
       // stub in cold, keeping only the type check in main.
@@ -573,7 +574,7 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
     auto const data = profile.data();
     auto const unlikelyDecrement = data.total > 0 &&
       data.percent(data.survived() + data.destroyed()) <
-      RuntimeOption::EvalJitPGOUnlikelyDecRefDecrementPercent;
+      Cfg::Jit::PGOUnlikelyDecRefDecrementPercent;
     // If it's actually counted, we need to touch the cache line anyway.
     if (unlikelyDecrement) {
       auto sf = v.makeReg();
@@ -664,7 +665,7 @@ void cgDecReleaseCheck(IRLS& env, const IRInstruction* inst) {
  };
 
  ifThenElseRefCountedType(
-     vmain(env), vcold(env), ty, srcLoc(env, inst, 0), 
+     vmain(env), vcold(env), ty, srcLoc(env, inst, 0),
      refcountedTypeImpl, notRefcountedTypeImpl);
 }
 
@@ -695,14 +696,14 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
     auto const data = profile.data();
     if (data.total > 0) {
       if (data.percent(data.refcounted) <
-          RuntimeOption::EvalJitPGOUnlikelyDecRefCountedPercent
+          Cfg::Jit::PGOUnlikelyDecRefCountedPercent
           && !(ty <= TCell && ty.isKnownDataType())) {
         unlikelyCounted = true;
         FTRACE(3, "irlower-inc-dec: Emitting cold counted check for {}, {}\n",
                data, *inst);
       }
       if (data.percent(data.decremented) <
-          RuntimeOption::EvalJitPGOUnlikelyDecRefDecrementPercent) {
+          Cfg::Jit::PGOUnlikelyDecRefDecrementPercent) {
         unlikelyDecrement = true;
         FTRACE(3, "irlower-inc-dec: Emitting cold DecRef for {}, {}\n",
                data, *inst);

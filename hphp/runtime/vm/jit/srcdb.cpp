@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/jit/srcdb.h"
 
+#include "hphp/runtime/base/configs/jit.h"
+
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/treadmill.h"
 
@@ -164,8 +166,8 @@ void SrcRec::newTranslation(TransLoc loc,
   // When translation punts due to hitting limit, will generate one
   // more translation that will call the interpreter.
   assertx(m_translations.size() <=
-          std::max(RuntimeOption::EvalJitMaxProfileTranslations,
-                   RuntimeOption::EvalJitMaxTranslations));
+          std::max(Cfg::Jit::MaxProfileTranslations,
+                   Cfg::Jit::MaxTranslations));
 
   TRACE(1, "SrcRec(%p)::newTranslation @%p, ", this, loc.entry());
 
@@ -256,7 +258,7 @@ void SrcRec::replaceOldTranslations(TCA transStub) {
   auto translations = std::move(m_translations);
   m_tailFallbackJumps.clear();
   m_topTranslation = nullptr;
-  assertx(!RuntimeOption::RepoAuthoritative || RuntimeOption::EvalJitPGO);
+  assertx(!RuntimeOption::RepoAuthoritative || Cfg::Jit::PGO);
   patchIncomingBranches(transStub);
 
   // Now that we've smashed all the IBs for these translations they should be

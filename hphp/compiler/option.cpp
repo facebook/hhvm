@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/configs/configs-load.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/variable-unserializer.h"
@@ -132,6 +133,8 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     Logger::FError("Invalid ConstantFunction: '{}'\n", str);
   }
 
+  Cfg::LoadForCompiler(ini, config);
+
   {
     // Repo
     Config::Bind(RuntimeOption::RepoDebugInfo,
@@ -142,9 +145,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(RuntimeOption::EvalCheckPropTypeHints, ini, config,
                "CheckPropTypeHints", RuntimeOption::EvalCheckPropTypeHints);
 
-  Config::Bind(RuntimeOption::EvalJitEnableRenameFunction,
-               ini, config, "JitEnableRenameFunction",
-               RuntimeOption::EvalJitEnableRenameFunction);
   Config::Bind(RuntimeOption::EvalHackArrCompatSerializeNotices,
                ini, config, "HackArrCompatSerializeNotices",
                RuntimeOption::EvalHackArrCompatSerializeNotices);

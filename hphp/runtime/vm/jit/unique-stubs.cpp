@@ -91,13 +91,13 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 void alignJmpTarget(CodeBlock& cb) {
-  if (RuntimeOption::EvalJitAlignUniqueStubs) {
+  if (Cfg::Jit::AlignUniqueStubs) {
     align(cb, nullptr, Alignment::JmpTarget, AlignContext::Dead);
   }
 }
 
 void alignCacheLine(CodeBlock& cb) {
-  if (RuntimeOption::EvalJitAlignUniqueStubs) {
+  if (Cfg::Jit::AlignUniqueStubs) {
     align(cb, nullptr, Alignment::CacheLine, AlignContext::Dead);
   }
 }
@@ -1465,11 +1465,11 @@ void UniqueStubs::add(const char* name,
             }()
            );
 
-    if (!RuntimeOption::EvalJitNoGdb) {
+    if (!Cfg::Jit::NoGdb) {
       dbg.recordStub(Debug::TCRange(start, end, &cb == &code.cold()),
                      folly::sformat("HHVM::{}", name));
     }
-    if (RuntimeOption::EvalJitUseVtuneAPI) {
+    if (Cfg::Jit::UseVtuneAPI) {
       reportHelperToVtune(folly::sformat("HHVM::{}", name).c_str(),
                           start,
                           end);

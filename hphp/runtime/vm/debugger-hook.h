@@ -18,6 +18,7 @@
 
 #include <functional>
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/surprise-flags.h"
@@ -50,12 +51,12 @@ inline bool isDebuggerAttached(RequestInfo* ti = nullptr) {
 }
 
 inline bool disableJitAtAttach(RequestInjectionData& rid) {
-  return RuntimeOption::EvalJitDisabledByVSDebug &&
+  return Cfg::Jit::DisabledByVSDebug &&
     !rid.m_breakPointFilter.isNull();
 }
 
 inline bool disableJitForDebuggerCli() {
-  return RuntimeOption::EvalJitDisabledByVSDebug && is_any_cli_mode();
+  return Cfg::Jit::DisabledByVSDebug && is_any_cli_mode();
 }
 
 // Executes the passed code only if there is a debugger attached to the current
@@ -308,4 +309,3 @@ PCFilter* getFlowFilter();
 String getCurrentFilePath(int* pLine);
 
 }
-

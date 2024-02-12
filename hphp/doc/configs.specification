@@ -187,6 +187,152 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 - bool HHIR.AllocSIMDRegs = true, UNKNOWN
 - uint32_t HHIR.SpecializedDestructorThreshold = 80, UNKNOWN
 
+# Jit (Eval.Jit)
+
+- bool Jit.Enabled = true (Eval.Jit), UNKNOWN
+- bool Jit.EvaledCode = true, UNKNOWN
+- bool Jit.RequireWriteLease = false, UNKNOWN
+- uint64_t Jit.RelocationSize = 1 << 20, UNKNOWN
+- uint64_t Jit.MatureSize = 125 << 20, UNKNOWN
+- bool Jit.MatureAfterWarmup = false, UNKNOWN
+- double Jit.MaturityExponent = 1.0, UNKNOWN
+- double Jit.MaturityProfWeight = 1.0, UNKNOWN
+- bool Jit.Timer, UNKNOWN
+- int Jit.Threads = 4, UNKNOWN
+- int Jit.WorkerThreads, UNKNOWN
+- int Jit.WorkerThreadsForSerdes = 0, UNKNOWN
+- int Jit.WorkerArenas, UNKNOWN
+- bool Jit.ParallelDeserialize = true, UNKNOWN
+- int Jit.LdimmqSpan = 8, UNKNOWN
+- int Jit.PrintOptimizedIR = 0, UNKNOWN
+- int Jit.Concurrently = 1, UNKNOWN
+- bool Jit.PGORacyProfiling = false, UNKNOWN
+- bool Jit.AlwaysInterpOne = false, UNKNOWN
+- uint32_t Jit.NopInterval = 0, UNKNOWN
+- uint32_t Jit.MaxTranslations = 10, UNKNOWN
+- uint32_t Jit.MaxProfileTranslations = 30, UNKNOWN
+- uint32_t Jit.TraceletLiveLocsLimit = 2000, UNKNOWN
+- uint32_t Jit.TraceletEagerGuardsLimit = 0, UNKNOWN
+- uint32_t Jit.TraceletGuardsLimit = 5, UNKNOWN
+- uint64_t Jit.GlobalTranslationLimit = -1, UNKNOWN
+- int64_t Jit.MaxRequestTranslationTime = -1, UNKNOWN
+- uint32_t Jit.MaxRegionInstrs = 3000, UNKNOWN
+- uint32_t Jit.MaxLiveRegionInstrs = 50, UNKNOWN
+- uint32_t Jit.MaxAwaitAllUnroll = 8, UNKNOWN
+- bool Jit.ProfileWarmupRequests = false, UNKNOWN
+- uint32_t Jit.ProfileRequests, UNKNOWN
+- uint32_t Jit.ProfileBCSize, UNKNOWN
+- uint32_t Jit.ResetProfCountersRequest, UNKNOWN
+- uint32_t Jit.RetranslateAllRequest, UNKNOWN
+- uint32_t Jit.RetranslateAllSeconds, UNKNOWN
+- bool Jit.RerunRetranslateAll = false, UNKNOWN
+- bool Jit.BuildOutliningHashes = false, UNKNOWN
+- bool Jit.PGOLayoutSplitHotCold, UNKNOWN
+- bool Jit.PGOVasmBlockCounters = true, UNKNOWN
+- bool Jit.PGOVasmBlockCountersOptPrologue = true, UNKNOWN
+- uint32_t Jit.PGOVasmBlockCountersMaxOpMismatches = 12, UNKNOWN
+- uint32_t Jit.PGOVasmBlockCountersMinEntryValue, UNKNOWN
+- double Jit.PGOVasmBlockCountersHotWeightMultiplier = 0, UNKNOWN
+- bool Jit.LayoutSeparateZeroWeightBlocks = false, UNKNOWN
+- bool Jit.LayoutPrologueSplitHotCold, UNKNOWN
+- bool Jit.LayoutProfileSplitHotCold = true, UNKNOWN
+- uint64_t Jit.LayoutMinHotThreshold = 0, UNKNOWN
+- uint64_t Jit.LayoutMinColdThreshold = 0, UNKNOWN
+- double Jit.LayoutHotThreshold = 0.01, UNKNOWN
+- double Jit.LayoutColdThreshold = 0.0005, UNKNOWN
+- int32_t Jit.LayoutMainFactor = 1000, UNKNOWN
+- int32_t Jit.LayoutColdFactor = 5, UNKNOWN
+- bool Jit.LayoutExtTSP = true, UNKNOWN
+- bool Jit.LayoutExtTSPForPrologues = false, UNKNOWN
+- double Jit.LayoutExtTSPMaxMergeDensityRatio = 25, UNKNOWN
+- double Jit.LayoutMaxMergeRatio = 1000000, UNKNOWN
+- bool Jit.LayoutPruneCatchArcs = true, UNKNOWN
+- bool Jit.KeepDbgFiles = false, UNKNOWN
+- uint32_t Jit.EnableRenameFunction = 0, UNKNOWN, globaldata|compileroption(JitEnableRenameFunction)|unitcacheflag
+
+  This controls function renaming.
+  0 - Renaming not allowed
+  1 - All functions can be renamed
+  2 - Functions in RenamableFunctions config list can be renamed
+
+- uint32_t Jit.InterceptFunctionLogRate = 1000, UNKNOWN
+- bool Jit.UseVtuneAPI = false, UNKNOWN
+- bool Jit.DisabledByHphpd = false, UNKNOWN
+- bool Jit.DisabledByVSDebug = true, UNKNOWN
+- uint32_t Jit.WarmupStatusBytes = ((25 << 10) + 1), UNKNOWN
+- uint32_t Jit.WarmupMaxCodeGenRate = 20000, UNKNOWN
+- uint32_t Jit.WarmupRateSeconds = 64, UNKNOWN
+- uint32_t Jit.WarmupMinFillFactor = 10, UNKNOWN
+- uint32_t Jit.WriteLeaseExpiration = 1500, UNKNOWN
+
+  In seconds
+
+- int Jit.RetargetJumps = 1, UNKNOWN
+- bool Jit.ForceVMRegSync = false, UNKNOWN
+
+  Sync VM reg state for all native calls.
+
+- std::string Jit.RegionSelector = "tracelet", UNKNOWN
+- bool Jit.NoGdb = true, UNKNOWN
+- bool Jit.PGO, UNKNOWN
+- std::string Jit.PGORegionSelector = "hotcfg", UNKNOWN
+- uint64_t Jit.PGOThreshold, UNKNOWN
+- bool Jit.PGOOnly = false, UNKNOWN
+- bool Jit.PGOUsePostConditions = true, UNKNOWN
+- bool Jit.PGOUseAddrCountedCheck = false, UNKNOWN
+- uint32_t Jit.PGOUnlikelyIncRefCountedPercent = 2, UNKNOWN
+- uint32_t Jit.PGOUnlikelyIncRefIncrementPercent = 5, UNKNOWN
+- uint32_t Jit.PGOUnlikelyDecRefReleasePercent = 5, UNKNOWN
+- uint32_t Jit.PGOUnlikelyDecRefCountedPercent = 2, UNKNOWN
+- uint32_t Jit.PGOUnlikelyDecRefPersistPercent = 5, UNKNOWN
+- uint32_t Jit.PGOUnlikelyDecRefSurvivePercent = 5, UNKNOWN
+- uint32_t Jit.PGOUnlikelyDecRefDecrementPercent = 5, UNKNOWN
+- double Jit.PGODecRefNZReleasePercentCOW, UNKNOWN
+- double Jit.PGODecRefNZReleasePercent, UNKNOWN
+- double Jit.PGODecRefNopDecPercentCOW, UNKNOWN
+- double Jit.PGODecRefNopDecPercent, UNKNOWN
+- bool Jit.PGOArrayGetStress = false, UNKNOWN
+- double Jit.PGOMinBlockCountPercent = 0.25, UNKNOWN
+
+  Mininum weight of a tracelet to include it in HotCFG as a percentage
+  of the weight of the first tracelet in the region. [0,100]
+
+- double Jit.PGOMinArcProbability = 0.0, UNKNOWN
+
+  Minimum probability of an arc to include it in HotCFG. [0,1]
+
+- uint32_t Jit.PGORelaxPercent = 100, UNKNOWN
+- double Jit.PGOCalledFuncCheckThreshold = 25, UNKNOWN
+- double Jit.PGOCalledFuncExitThreshold = 99.9, UNKNOWN
+- bool Jit.PGODumpCallGraph = false, UNKNOWN
+- bool Jit.PGOOptCodeCallGraph = true, UNKNOWN
+- bool Jit.PGOHFSortPlus = false, UNKNOWN
+- uint8_t Jit.LiveThreshold, UNKNOWN
+- uint8_t Jit.ProfileThreshold, UNKNOWN
+- uint32_t Jit.MaxLiveMainUsage = 96 * 1024 * 1024, UNKNOWN
+- uint32_t Jit.SampleRate = 0, UNKNOWN
+- bool Jit.AlignMacroFusionPairs, UNKNOWN
+- bool Jit.AlignUniqueStubs = true, UNKNOWN
+- bool Jit.SerdesModeForceOff = false, UNKNOWN
+- bool Jit.DesUnitPreload = false, UNKNOWN
+- std::set<std::string> Jit.SerdesDebugFunctions = {}, UNKNOWN
+- std::set<std::string> Jit.FuncBlockList = {}, UNKNOWN
+- uint32_t Jit.SerializeOptProfSeconds, UNKNOWN
+- uint32_t Jit.SerializeOptProfRequests = 0, UNKNOWN
+- bool Jit.SerializeOptProfRestart = true, UNKNOWN
+- bool Jit.ArmLse, UNKNOWN
+- std::string Jit.LogAllInlineRegions = "", UNKNOWN
+
+  Log the sizes and metadata for all translations in the TC broken
+  down by function and inclusive/exclusive size for inlined regions.
+  When set to "" TC size data will be sampled on a per function basis
+  as determined by JitSampleRate. When set to a non-empty string all
+  translations will be logged, and run_key column will be logged with
+  the value of this option.
+
+- bool Jit.ProfileGuardTypes = false, UNKNOWN
+- uint32_t Jit.FilterLease = 1, UNKNOWN
+
 # PHP7
 
 - bool PHP7.all, UNKNOWN, private
@@ -213,6 +359,7 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 
 # Server
 
+- bool Server.Mode = false, UNKNOWN, nobind
 - int Server.ThreadJobMaxQueuingMilliSeconds = -1, UNKNOWN
 - bool Server.ThreadDropStack = false, UNKNOWN
 - bool Server.HttpSafeMode = false, UNKNOWN

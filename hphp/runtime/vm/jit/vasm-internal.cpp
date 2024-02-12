@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/vasm-internal.h"
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/vm/jit/asm-info.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/containers.h"
@@ -48,7 +49,7 @@ IRMetadataUpdater::IRMetadataUpdater(const Venv& env, AsmInfo* asm_info)
     m_area_to_blockinfos.resize(m_env.text.areas().size());
     for (auto& r : m_area_to_blockinfos) r.resize(m_env.unit.blocks.size());
   }
-  if (transdb::enabled() || RuntimeOption::EvalJitUseVtuneAPI) {
+  if (transdb::enabled() || Cfg::Jit::UseVtuneAPI) {
     m_bcmap = &env.meta.bcMap;
   }
 }

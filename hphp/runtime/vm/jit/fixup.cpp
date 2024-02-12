@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/fixup.h"
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -177,7 +178,7 @@ bool processFixupForVMFrame(VMFrame frame) {
 }
 
 bool fixupWork(ActRec* nextRbp, bool soft) {
-  assertx(RuntimeOption::EvalJit);
+  assertx(Cfg::Jit::Enabled);
 
   TRACE(1, "fixup(begin):\n");
 

@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/tc-region.h"
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/vm/resumable.h"
@@ -53,7 +54,7 @@ void recordGdbTranslation(SrcKey sk, const CodeBlock& cb,
   assertx(cb.contains(start, end));
   if (start != end) {
     assertOwnsCodeLock();
-    if (!RuntimeOption::EvalJitNoGdb) {
+    if (!Cfg::Jit::NoGdb) {
       Debug::DebugInfo::Get()->recordTracelet(
         Debug::TCRange(start, end, &cb == &code().cold()),
         sk
@@ -85,7 +86,7 @@ buildCodeSizeCounters() {
       auto counterName = folly::sformat("jit.code.{}.used", name);
       counters[name] = ServiceData::createTimeSeries(
           counterName, stats,
-          {std::chrono::seconds(RuntimeOption::EvalJitWarmupRateSeconds),
+          {std::chrono::seconds(Cfg::Jit::WarmupRateSeconds),
            std::chrono::seconds(0)}
       );
     };
@@ -281,13 +282,13 @@ void reportJitMaturity() {
   );
   auto const codeSize =
     std::max(hotSize + liveSize,
-             static_cast<size_t>(profSize * RO::EvalJitMaturityProfWeight));
-  auto const fullSize = RO::EvalJitMatureSize;
+             static_cast<size_t>(profSize * Cfg::Jit::MaturityProfWeight));
+  auto const fullSize = Cfg::Jit::MatureSize;
 
   int64_t maturity = before;
   if (beforeRetranslateAll) {
     maturity = std::min(kMaxMaturityBeforeRTA, codeSize * 100 / fullSize);
-  } else if (liveSize >= RO::EvalJitMaxLiveMainUsage ||
+  } else if (liveSize >= Cfg::Jit::MaxLiveMainUsage ||
              code().main().used() >= CodeCache::AMaxUsage ||
              code().cold().used() >= CodeCache::AColdMaxUsage ||
              code().frozen().used() >= CodeCache::AFrozenMaxUsage) {
@@ -296,13 +297,13 @@ void reportJitMaturity() {
     maturity = 99;
   } else {
     maturity = std::pow(codeSize / static_cast<double>(fullSize),
-                        RuntimeOption::EvalJitMaturityExponent) * 99;
+                        Cfg::Jit::MaturityExponent) * 99;
   }
 
-  // If EvalJitMatureAfterWarmup is set, we consider the JIT to be mature once
+  // If Cfg::Jit::MatureAfterWarmup is set, we consider the JIT to be mature once
   // warmupStatusString() is empty, which indicates that the JIT is warmed up
   // based on the rate in which JITed code is being produced.
-  if (RuntimeOption::EvalJitMatureAfterWarmup && warmupStatusString().empty()) {
+  if (Cfg::Jit::MatureAfterWarmup && warmupStatusString().empty()) {
     maturity = 100;
   }
 
@@ -412,8 +413,8 @@ static void logFrame(const Vunit& unit, const size_t frame) {
 
   logFunc(func, ent);
 
-  if (!RuntimeOption::EvalJitLogAllInlineRegions.empty()) {
-    ent.setStr("run_key", RuntimeOption::EvalJitLogAllInlineRegions);
+  if (!Cfg::Jit::LogAllInlineRegions.empty()) {
+    ent.setStr("run_key", Cfg::Jit::LogAllInlineRegions);
   }
 
   StructuredLog::log("hhvm_tc_func_sizes", ent);
@@ -453,7 +454,7 @@ void logTranslation(const Translator* trans, const TransRange& range) {
     assertx(regionTrans);
     cols.setInt("opt_index", regionTrans->optIndex);
   }
-  cols.setInt("jit_sample_rate", RuntimeOption::EvalJitSampleRate);
+  cols.setInt("jit_sample_rate", Cfg::Jit::SampleRate);
   // timing info
   cols.setInt("jit_micros", nanos / 1000);
   // hhir stats
@@ -489,7 +490,7 @@ void logTranslation(const Translator* trans, const TransRange& range) {
     cols.setInt("num_vblocks_cold", num_vblocks[(int)AreaIndex::Cold]);
     cols.setInt("num_vblocks_frozen", num_vblocks[(int)AreaIndex::Frozen]);
 
-    if (RuntimeOption::EvalJitLogAllInlineRegions.empty()) {
+    if (Cfg::Jit::LogAllInlineRegions.empty()) {
       logFrames(*trans->vunit);
     }
   }
@@ -520,7 +521,7 @@ std::string warmupStatusString() {
           return;
         }
         auto const codeSize = series->getSum();
-        if (codeSize < maxSize / RuntimeOption::EvalJitWarmupMinFillFactor) {
+        if (codeSize < maxSize / Cfg::Jit::WarmupMinFillFactor) {
           folly::format(&status_str,
                         "Code.{} is still to small to be considered warm. "
                         "({} of max {})\n",
@@ -528,8 +529,8 @@ std::string warmupStatusString() {
           return;
         }
         auto const codeSizeRate = series->getRateByDuration(
-          std::chrono::seconds(RuntimeOption::EvalJitWarmupRateSeconds));
-        if (codeSizeRate > RuntimeOption::EvalJitWarmupMaxCodeGenRate) {
+          std::chrono::seconds(Cfg::Jit::WarmupRateSeconds));
+        if (codeSizeRate > Cfg::Jit::WarmupMaxCodeGenRate) {
           folly::format(&status_str,
                         "Code.{} is still increasing at a rate of {}\n",
                         name, codeSizeRate);

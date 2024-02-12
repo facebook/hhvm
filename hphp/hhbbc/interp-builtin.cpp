@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 
@@ -698,7 +699,7 @@ Optional<Type> const_fold(ISS& env,
 
   FTRACE(1, "invoking: {}\n", func->fullName()->data());
 
-  assertx(!RuntimeOption::EvalJit);
+  assertx(!Cfg::Jit::Enabled);
   // NB: Coeffects are already checked prior to here by `shouldAttemptToFold`
   return eval_cell(
     [&] {

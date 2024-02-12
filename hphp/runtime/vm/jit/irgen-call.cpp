@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/configs/hhir.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/reified-generics.h"
@@ -424,7 +425,7 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
   // Don't emit the check if the probability of it succeeding is below the
   // threshold.
   if (profiledFunc == nullptr ||
-      probability * 100 < RO::EvalJitPGOCalledFuncCheckThreshold) {
+      probability * 100 < Cfg::Jit::PGOCalledFuncCheckThreshold) {
     return callUnknown(false);
   }
 
@@ -440,7 +441,7 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
     [&] {
       auto indirectCall = [&] {
         auto const unlikely = probability * 100 >=
-          RuntimeOption::EvalJitPGOCalledFuncExitThreshold;
+          Cfg::Jit::PGOCalledFuncExitThreshold;
         if (unlikely) {
           hint(env, Block::Hint::Unlikely);
           IRUnit::Hinter h(env.irb->unit(), Block::Hint::Unlikely);
@@ -456,7 +457,7 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
         auto const remainingProb = 1 - choices[0].probability;
         always_assert(remainingProb > 0);
         probability = choices[1].probability / remainingProb;
-        if (probability * 100 >= RO::EvalJitPGOCalledFuncCheckThreshold) {
+        if (probability * 100 >= Cfg::Jit::PGOCalledFuncCheckThreshold) {
           ifThenElse(
             env,
             [&] (Block* taken2) {

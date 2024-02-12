@@ -30,6 +30,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/rds-header.h"
@@ -577,8 +578,8 @@ void RequestInjectionData::reset() {
 }
 
 void RequestInjectionData::updateJit() {
-  m_jit = RuntimeOption::EvalJit &&
-    !(RuntimeOption::EvalJitDisabledByHphpd && m_debuggerAttached) &&
+  m_jit = Cfg::Jit::Enabled &&
+    !(Cfg::Jit::DisabledByHphpd && m_debuggerAttached) &&
     !m_coverage &&
     (rl_typeProfileLocals.isNull() || !isForcedToInterpret()) &&
     !m_vsdebugDisablesJit;

@@ -42,6 +42,7 @@
 #include "hphp/runtime/vm/type-profile.h"
 
 #include "hphp/runtime/base/bespoke-array.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/tracing.h"
 #include "hphp/runtime/base/vm-worker.h"
@@ -89,9 +90,9 @@ CompactVector<Trace::BumpRelease> bumpTraceFunctions(const Func* func) {
 
   auto opt = [&] {
     CompactVector<Trace::BumpRelease> result;
-    if (RuntimeOption::EvalJitPrintOptimizedIR) {
+    if (Cfg::Jit::PrintOptimizedIR) {
       result.emplace_back(Trace::printir,
-                          -RuntimeOption::EvalJitPrintOptimizedIR);
+                          -Cfg::Jit::PrintOptimizedIR);
     }
 
     return result;
@@ -234,8 +235,8 @@ WorkerDispatcher& dispatcher() {
   if (auto ptr = s_dispatcher.load(std::memory_order_acquire)) return *ptr;
 
   auto dispatcher = new WorkerDispatcher(
-    RuntimeOption::EvalJitWorkerThreads,
-    RuntimeOption::EvalJitWorkerThreads, 0, false, nullptr
+    Cfg::Jit::WorkerThreads,
+    Cfg::Jit::WorkerThreads, 0, false, nullptr
   );
   dispatcher->start();
   s_dispatcher.store(dispatcher, std::memory_order_release);
@@ -295,7 +296,7 @@ bool serializeProfDataAndLog() {
     }
 
     if (mode == JitSerdesMode::Serialize) {
-      if (serializeOptProfEnabled() && RO::EvalJitSerializeOptProfRestart) {
+      if (serializeOptProfEnabled() && Cfg::Jit::SerializeOptProfRestart) {
         Logger::Info("retranslateAll: deferring retranslate-all until restart");
         return true;
       }
@@ -303,7 +304,7 @@ bool serializeProfDataAndLog() {
     }
 
     assertx(mode == JitSerdesMode::SerializeAndExit);
-    if (!serializeOptProfEnabled() || RO::EvalJitSerializeOptProfRestart) {
+    if (!serializeOptProfEnabled() || Cfg::Jit::SerializeOptProfRestart) {
       Logger::Info("retranslateAll: deferring retranslate-all until restart");
       killProcess();
       return true;
@@ -311,7 +312,7 @@ bool serializeProfDataAndLog() {
     return false;
   }
 
-  return serializeOptProfEnabled() && RO::EvalJitSerializeOptProfRestart;
+  return serializeOptProfEnabled() && Cfg::Jit::SerializeOptProfRestart;
 }
 
 /*
@@ -326,8 +327,8 @@ void scheduleSerializeOptProf() {
   }
 
   auto const serverMode    = RuntimeOption::ServerExecutionMode();
-  auto const delayRequests = RuntimeOption::EvalJitSerializeOptProfRequests;
-  auto const delaySeconds  = RuntimeOption::EvalJitSerializeOptProfSeconds;
+  auto const delayRequests = Cfg::Jit::SerializeOptProfRequests;
+  auto const delaySeconds  = Cfg::Jit::SerializeOptProfSeconds;
 
   if (delayRequests > 0) {
     s_serializeOptProfRequest = requestCount() + delayRequests;
@@ -426,9 +427,9 @@ void retranslateAll(bool skipSerialize) {
         for (auto i = 0u; i < nFuncs; ++i, bufp += initialSize) {
           auto const fid = sortedFuncs[i];
           auto const func = const_cast<Func*>(Func::fromFuncId(fid));
-          if (!RuntimeOption::EvalJitSerdesDebugFunctions.empty()) {
+          if (!Cfg::Jit::SerdesDebugFunctions.empty()) {
             // Only run specified functions
-            if (!RuntimeOption::EvalJitSerdesDebugFunctions.
+            if (!Cfg::Jit::SerdesDebugFunctions.
                 count(func->fullName()->toCppString())) {
               continue;
             }
@@ -442,7 +443,7 @@ void retranslateAll(bool skipSerialize) {
           enqueueRetranslateOptRequest(&jobs.back());
         }
       }
-      if (RuntimeOption::EvalJitBuildOutliningHashes) {
+      if (Cfg::Jit::BuildOutliningHashes) {
         auto const dispatcher = s_dispatcher.load(std::memory_order_acquire);
         if (dispatcher) {
           dispatcher->waitEmpty(false);
@@ -452,7 +453,7 @@ void retranslateAll(bool skipSerialize) {
     };
     runParallelRetranslate();
 
-    if (RuntimeOption::EvalJitRerunRetranslateAll) {
+    if (Cfg::Jit::RerunRetranslateAll) {
       if (auto const dispatcher = s_dispatcher.load(std::memory_order_acquire)) {
         dispatcher->waitEmpty(false);
       }
@@ -590,7 +591,7 @@ TranslationResult retranslate(TransArgs args, const RegionContext& ctx) {
 bool retranslateOpt(FuncId funcId) {
   VMProtect _;
 
-  if (RuntimeOption::EvalJitDisabledByVSDebug && isDebuggerAttachedProcess()) {
+  if (Cfg::Jit::DisabledByVSDebug && isDebuggerAttachedProcess()) {
     return false;
   }
 
@@ -617,9 +618,9 @@ bool retranslateOpt(FuncId funcId) {
 
 bool retranslateAllEnabled() {
   return
-    RuntimeOption::EvalJitPGO &&
-    RuntimeOption::EvalJitRetranslateAllRequest != 0 &&
-    RuntimeOption::EvalJitRetranslateAllSeconds != 0;
+    Cfg::Jit::PGO &&
+    Cfg::Jit::RetranslateAllRequest != 0 &&
+    Cfg::Jit::RetranslateAllSeconds != 0;
 }
 
 void checkRetranslateAll(bool force, bool skipSerialize) {
@@ -634,10 +635,10 @@ void checkRetranslateAll(bool force, bool skipSerialize) {
   auto const serverMode = RuntimeOption::ServerExecutionMode();
   if (!force) {
     auto const uptime = static_cast<int>(HHVM_FN(server_uptime)()); // may be -1
-    if (uptime >= (int)RuntimeOption::EvalJitRetranslateAllSeconds) {
+    if (uptime >= (int)Cfg::Jit::RetranslateAllSeconds) {
       assertx(serverMode);
       Logger::FInfo("retranslateAll: scheduled after {} seconds", uptime);
-    } else if (requestCount() >= RuntimeOption::EvalJitRetranslateAllRequest) {
+    } else if (requestCount() >= Cfg::Jit::RetranslateAllRequest) {
       if (serverMode) {
         Logger::FInfo("retranslateAll: scheduled after {} requests",
                       requestCount());

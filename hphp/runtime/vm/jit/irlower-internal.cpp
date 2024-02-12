@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/runtime/vm/jit/arg-group.h"
@@ -130,7 +131,7 @@ Fixup makeFixup(const BCMarker& marker, SyncOptions sync) {
   // normal sync settings and sync anyway.
   always_assert(
     sync == SyncOptions::Sync ||
-    RuntimeOption::EvalJitForceVMRegSync ||
+    Cfg::Jit::ForceVMRegSync ||
     RuntimeOption::HHProfEnabled
   );
 
@@ -175,7 +176,7 @@ void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
 
   auto const syncFixup = [&] {
     if (RuntimeOption::HHProfEnabled ||
-        RuntimeOption::EvalJitForceVMRegSync ||
+        Cfg::Jit::ForceVMRegSync ||
         sync != SyncOptions::None) {
       // If we are profiling the heap, we always need to sync because regs need
       // to be correct during allocations no matter what.

@@ -19,6 +19,7 @@
 
 #include "hphp/util/trace.h"
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -100,13 +101,13 @@ struct Former {
 
   RegionDescPtr go(TransID head) {
     m_region = std::make_shared<RegionDesc>();
-    if (RuntimeOption::EvalJitPGORegionSelector == "wholecfg") {
+    if (Cfg::Jit::PGORegionSelector == "wholecfg") {
       m_minBlockWeight = 0;
       m_minArcProb = 0;
     } else {
-      auto const minBlkPerc = RuntimeOption::EvalJitPGOMinBlockCountPercent;
+      auto const minBlkPerc = Cfg::Jit::PGOMinBlockCountPercent;
       m_minBlockWeight = minBlkPerc * m_cfg.weight(head) / 100.0;
-      m_minArcProb = RuntimeOption::EvalJitPGOMinArcProbability;
+      m_minArcProb = Cfg::Jit::PGOMinArcProbability;
     }
 
     countPreds(head);

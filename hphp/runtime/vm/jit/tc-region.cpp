@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/tc-prologue.h"
 #include "hphp/runtime/vm/jit/tc-record.h"
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -66,8 +67,8 @@ using SrcKeyTransMap = jit::hash_map<SrcKey,jit::vector<TCA>,
 
 bool checkLimit(TransKind kind, const size_t numTrans) {
   auto const limit = kind == TransKind::Profile
-    ? RuntimeOption::EvalJitMaxProfileTranslations
-    : RuntimeOption::EvalJitMaxTranslations;
+    ? Cfg::Jit::MaxProfileTranslations
+    : Cfg::Jit::MaxTranslations;
 
   // Once numTrans has reached limit + 1 we know that an interp translation
   // has already been emitted. Prior to that if numTrans == limit only allow
@@ -79,7 +80,7 @@ bool checkLimit(TransKind kind, const size_t numTrans) {
 }
 
 void invalidateSrcKey(SrcKey sk, SBInvOffset spOff) {
-  assertx(!RuntimeOption::RepoAuthoritative || RuntimeOption::EvalJitPGO);
+  assertx(!RuntimeOption::RepoAuthoritative || Cfg::Jit::PGO);
   /*
    * Reroute existing translations for SrcKey to an as-yet indeterminate
    * new one.
@@ -618,13 +619,13 @@ Optional<TranslationResult> RegionTranslator::getCached() {
   if (!m_lease || !(*m_lease)) return std::nullopt;
   // Check for potential interp anchor translation
   if (kind == TransKind::Profile) {
-    if (numTrans > RuntimeOption::EvalJitMaxProfileTranslations) {
+    if (numTrans > Cfg::Jit::MaxProfileTranslations) {
       always_assert(numTrans ==
-                    RuntimeOption::EvalJitMaxProfileTranslations + 1);
+                    Cfg::Jit::MaxProfileTranslations + 1);
       return TranslationResult{srcRec->getTopTranslation()};
     }
-  } else if (numTrans > RuntimeOption::EvalJitMaxTranslations) {
-    always_assert(numTrans == RuntimeOption::EvalJitMaxTranslations + 1);
+  } else if (numTrans > Cfg::Jit::MaxTranslations) {
+    always_assert(numTrans == Cfg::Jit::MaxTranslations + 1);
     return TranslationResult{srcRec->getTopTranslation()};
   }
   return std::nullopt;
@@ -753,7 +754,7 @@ void RegionTranslator::publishMetaImpl() {
               std::move(annotations), region, fixups.bcMap, hasLoop};
   transdb::addTranslation(tr);
   FuncOrder::recordTranslation(tr);
-  if (RuntimeOption::EvalJitUseVtuneAPI) {
+  if (Cfg::Jit::UseVtuneAPI) {
     reportTraceletToVtune(sk.unit(), sk.func(), tr);
   }
   recordTranslationSizes(tr);

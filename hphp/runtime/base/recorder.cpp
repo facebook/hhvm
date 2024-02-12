@@ -32,6 +32,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file.h"
@@ -227,7 +228,7 @@ void Recorder::requestInit() {
     m_streamWrapper = getStreamWrapper();
     m_streamWrapperCalls = Array::CreateDict();
     Stream::setThreadLocalFileHandler(m_streamWrapper.get());
-    TmpAssign _{RO::EvalJitDisabledByVSDebug, false};
+    TmpAssign _{Cfg::Jit::DisabledByVSDebug, false};
     HPHP::DebuggerHook::attach<DebuggerHook>();
   }
 }

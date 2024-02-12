@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/configs/hacklang.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/configs/php7.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -66,7 +67,7 @@ String HHVM_FUNCTION(server_warmup_status) {
   size_t begin, end;
   jit::tc::codeEmittedThisRequest(begin, end);
   auto const diff = end - begin;
-  if (diff >= RuntimeOption::EvalJitWarmupStatusBytes) {
+  if (diff >= Cfg::Jit::WarmupStatusBytes) {
     // TODO(13274666) Mismatch between 'to' and 'begin' below.
     return folly::format("Translation cache grew by {} bytes to {} bytes.",
                          diff, begin).str();

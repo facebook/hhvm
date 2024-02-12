@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/ir-unit.h"
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/frame-state.h"
@@ -48,7 +49,7 @@ const PackageInfo& IRUnit::packageInfo() {
 
 void IRUnit::initLogEntry(const Func* func) {
   if (func ? func->shouldSampleJit() :
-      StructuredLog::coinflip(RuntimeOption::EvalJitSampleRate)) {
+      StructuredLog::coinflip(Cfg::Jit::SampleRate)) {
     m_logEntry.emplace();
   }
 }

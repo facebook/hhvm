@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/jit/vasm-layout.h"
 
+#include "hphp/runtime/base/configs/jit.h"
+
 #include "hphp/util/trace.h"
 
 #include <algorithm>
@@ -698,7 +700,7 @@ struct ExtTSPImpl {
           assert(minDensity > 0.0 && maxDensity > 0.0 &&
                  "incorrectly computed chain densities");
           const double ratio = maxDensity / minDensity;
-          if (ratio > RO::EvalJitLayoutExtTSPMaxMergeDensityRatio) continue;
+          if (ratio > Cfg::Jit::LayoutExtTSPMaxMergeDensityRatio) continue;
 
           // Compute the gain of merging the two chains
           MergeGainTy curGain = getBestMergeGain(chainPred, chainSucc, chainEdge);

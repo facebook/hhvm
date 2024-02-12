@@ -67,7 +67,7 @@ struct LeaseHolder {
   }
 
   /*
-   * Check if the combination of RuntimeOption::EvalJitConcurrently and kind
+   * Check if the combination of Cfg::Jit::Concurrently and kind
    * require acquiring more locks than this LeaseHolder currently has. If so
    * and they can't be acquired, return false. Otherwise, return true.
    */
@@ -91,4 +91,3 @@ struct LeaseHolder {
 };
 
 }} // HPHP::jit
-

@@ -23,6 +23,7 @@
 
 #include "hphp/util/logger.h"
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -78,7 +79,7 @@ typename Map::Config makeAHMConfig() {
 ProfData::ProfData()
   : m_counters(RuntimeOption::ServerExecutionMode()
                  ? std::numeric_limits<int64_t>::max()
-                 : RuntimeOption::EvalJitPGOThreshold)
+                 : Cfg::Jit::PGOThreshold)
   , m_profilingFuncs(RuntimeOption::EvalPGOFuncCountHint,
                      makeAHMConfig<decltype(m_profilingFuncs)>())
   , m_optimizedSKs(RuntimeOption::EvalPGOFuncCountHint,
@@ -247,7 +248,7 @@ ServiceData::ExportedCounter* ProfData::s_deserialize_succ =
 RDS_LOCAL_NO_CHECK(ProfData*, rl_profData)(nullptr);
 
 void processInitProfData() {
-  if (!RuntimeOption::EvalJitPGO) return;
+  if (!Cfg::Jit::PGO) return;
 
   s_profData.store(new ProfData(), std::memory_order_relaxed);
 }
@@ -283,11 +284,11 @@ void discardProfData() {
 
 void ProfData::maybeResetCounters() {
   if (m_countersReset.load(std::memory_order_acquire)) return;
-  if (requestCount() < RuntimeOption::EvalJitResetProfCountersRequest) return;
+  if (requestCount() < Cfg::Jit::ResetProfCountersRequest) return;
 
   std::unique_lock lock{m_transLock};
   if (m_countersReset.load(std::memory_order_relaxed)) return;
-  m_counters.resetAllCounters(RuntimeOption::EvalJitPGOThreshold);
+  m_counters.resetAllCounters(Cfg::Jit::PGOThreshold);
   m_countersReset.store(true, std::memory_order_release);
 }
 

@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/configs/autoload.h"
+#include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/base/recorder.h"
 #include "hphp/runtime/base/replayer.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -232,7 +233,7 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
   bool ok = false;
   // Utility for logging errors in server mode.
   auto log_err = [](char const* const msg) {
-    if (RuntimeOption::ServerMode) {
+    if (Cfg::Server::Mode) {
       Logger::Error("Exception: AutoloadMap::loadFromMapImpl: %s", msg);
     }
   };

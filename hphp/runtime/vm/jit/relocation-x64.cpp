@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/jit/relocation.h"
 
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/configs/jit.h"
 
 #include "hphp/runtime/vm/jit/align-x64.h"
 #include "hphp/runtime/vm/jit/asm-info.h"
@@ -91,7 +91,7 @@ size_t relocateImpl(RelocationInfo& rel,
       // that starts at byte 0 of the next cache line."
       auto nextSrc = src + di.size();
       auto const nextDest = destBlock.frontier() + di.size();
-      if (RuntimeOption::EvalJitAlignMacroFusionPairs &&
+      if (Cfg::Jit::AlignMacroFusionPairs &&
           codeArea == AreaIndex::Main) {
         while (nextSrc != end) {
           DecodedInstruction next(srcBlock.toDestAddress(nextSrc), nextSrc);

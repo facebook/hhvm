@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/bespoke-array.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/object-data.h"
@@ -236,7 +237,7 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
 
   // Profile the type being guarded. We skip TUncounted here because that's
   // handled in emitIsTVTypeRefCounted, which has a number of other callers.
-  if (RuntimeOption::EvalJitProfileGuardTypes && type != TUncounted) {
+  if (Cfg::Jit::ProfileGuardTypes && type != TUncounted) {
     emitProfileGuardType(v, type);
   }
 

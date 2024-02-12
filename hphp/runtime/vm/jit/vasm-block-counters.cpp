@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/vasm-block-counters.h"
 
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
@@ -165,7 +166,7 @@ std::string checkProfile(const Vunit& unit,
 
   // Consider the profile to match even if we have some opcode mismatches.
   if (opcodeMismatches <=
-      RuntimeOption::EvalJitPGOVasmBlockCountersMaxOpMismatches) {
+      Cfg::Jit::PGOVasmBlockCountersMaxOpMismatches) {
     return "";
   }
   return errorMsg;
@@ -195,7 +196,7 @@ void setWeights(Vunit& unit, const T& key) {
 
   if (errorMsg == "") {
     // Check that enough profile was collected.
-    if (counters[0] >= RuntimeOption::EvalJitPGOVasmBlockCountersMinEntryValue) {
+    if (counters[0] >= Cfg::Jit::PGOVasmBlockCountersMinEntryValue) {
       enoughProfile = true;
       // Update the block weights.
       for (size_t index = 0; index < sortedBlocks.size(); index++) {
@@ -230,7 +231,7 @@ void setWeights(Vunit& unit, const T& key) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Optional<uint64_t> getRegionWeight(const RegionDesc& region) {
-  if (!RO::EvalJitPGOVasmBlockCounters || !isJitDeserializing()) {
+  if (!Cfg::Jit::PGOVasmBlockCounters || !isJitDeserializing()) {
     return std::nullopt;
   }
   auto const key = RegionEntryKey(region);
@@ -251,7 +252,7 @@ void update(Vunit& unit, const T& key){
 }
 
 void profileGuidedUpdate(Vunit& unit) {
-  if (!RuntimeOption::EvalJitPGOVasmBlockCounters) return;
+  if (!Cfg::Jit::PGOVasmBlockCounters) return;
 
   if (unit.name){
     // unique stub
@@ -262,7 +263,7 @@ void profileGuidedUpdate(Vunit& unit) {
 
   if (!unit.context) return;
   auto const optimizePrologue = unit.context->kind == TransKind::OptPrologue &&
-    RuntimeOption::EvalJitPGOVasmBlockCountersOptPrologue;
+    Cfg::Jit::PGOVasmBlockCountersOptPrologue;
 
   if (unit.context->kind == TransKind::Optimize) {
     auto const regionPtr = unit.context->region;

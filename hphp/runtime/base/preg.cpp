@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/ini-setting.h"
@@ -930,8 +931,8 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
           throw;
         }
       }
-      if ((!RuntimeOption::EvalJitNoGdb ||
-           RuntimeOption::EvalJitUseVtuneAPI ||
+      if ((!Cfg::Jit::NoGdb ||
+           Cfg::Jit::UseVtuneAPI ||
            RuntimeOption::EvalPerfPidMap) &&
           extra &&
           extra->executable_jit != nullptr) {
@@ -942,11 +943,11 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
         TCA end = start + size;
         std::string name = folly::sformat("HHVM::pcre_jit::{}", pattern);
 
-        if (!RuntimeOption::EvalJitNoGdb && jit::mcgen::initialized()) {
+        if (!Cfg::Jit::NoGdb && jit::mcgen::initialized()) {
           Debug::DebugInfo::Get()->recordStub(Debug::TCRange(start, end, false),
                                               name);
         }
-        if (RuntimeOption::EvalJitUseVtuneAPI) {
+        if (Cfg::Jit::UseVtuneAPI) {
           HPHP::jit::reportHelperToVtune(name.c_str(), start, end);
         }
         if (RuntimeOption::EvalPerfPidMap && jit::mcgen::initialized()) {

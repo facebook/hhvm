@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/timestamp.h"
@@ -226,9 +227,9 @@ UnitPreloadDispatcher* s_preload_dispatcher;
 
 void read_unit_preload(ProfDataDeserializer& ser) {
   auto const path =
-    read_raw_string(ser, /* skip = */ !RuntimeOption::EvalJitDesUnitPreload);
+    read_raw_string(ser, /* skip = */ !Cfg::Jit::DesUnitPreload);
   // path may be nullptr when JitDesUnitPreload isn't set.
-  if (RuntimeOption::EvalJitDesUnitPreload) {
+  if (Cfg::Jit::DesUnitPreload) {
     assertx(path);
     s_preload_dispatcher->enqueue(path);
   }
@@ -265,9 +266,9 @@ void write_units_preload(ProfDataSerializer& ser) {
 void read_units_preload(ProfDataDeserializer& ser) {
   BootStats::Block timer("DES_read_units_preload",
                          RuntimeOption::ServerExecutionMode());
-  if (RuntimeOption::EvalJitDesUnitPreload) {
+  if (Cfg::Jit::DesUnitPreload) {
     auto const threads =
-      std::max(RuntimeOption::EvalJitWorkerThreadsForSerdes, 1);
+      std::max(Cfg::Jit::WorkerThreadsForSerdes, 1);
     s_preload_dispatcher = new UnitPreloadDispatcher(
         threads, threads, 0, false, nullptr
     );
@@ -1846,7 +1847,7 @@ std::string serializeOptProfData(const std::string& filename) {
 
     // If enabled, recompute the function order using the call graph obtained
     // via instrumentation of the optimized code, then serialize it.
-    if (RuntimeOption::EvalJitPGOOptCodeCallGraph) {
+    if (Cfg::Jit::PGOOptCodeCallGraph) {
       FuncOrder::compute();
     }
     FuncOrder::serialize(ser);
@@ -2024,8 +2025,8 @@ bool tryDeserializePartialProfData(const std::string& filename,
 }
 
 bool serializeOptProfEnabled() {
-  return RuntimeOption::EvalJitSerializeOptProfSeconds  > 0 ||
-         RuntimeOption::EvalJitSerializeOptProfRequests > 0;
+  return Cfg::Jit::SerializeOptProfSeconds  > 0 ||
+         Cfg::Jit::SerializeOptProfRequests > 0;
 }
 
 Optional<std::string> getFilenameDeserialized() {

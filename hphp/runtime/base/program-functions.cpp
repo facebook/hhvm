@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/configs/debugger.h"
 #include "hphp/runtime/base/configs/errorhandling.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/configs/server.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -700,7 +701,7 @@ init_command_line_globals(
     process_env_variables(envArr, envp, envVariables);
     envArr.set(s_HPHP, 1);
     envArr.set(s_HHVM, 1);
-    if (RuntimeOption::EvalJit) {
+    if (Cfg::Jit::Enabled) {
       envArr.set(s_HHVM_JIT, 1);
     }
     switch (arch()) {
@@ -1012,14 +1013,14 @@ static void pagein_self(void) {
  */
 static bool set_execution_mode(folly::StringPiece mode) {
   if (mode == "daemon" || mode == "server" || mode == "replay") {
-    RuntimeOption::ServerMode = true;
+    Cfg::Server::Mode = true;
     Logger::Escape = true;
     return true;
   } else if (mode == "run" || mode == "debug" || mode == "translate" ||
              mode == "dumphhas" || mode == "verify" || mode == "vsdebug" ||
              mode == "getoption" || mode == "eval" || mode == "dumpcoverage") {
     // We don't run PHP in "translate" mode, so just treat it like cli mode.
-    RuntimeOption::ServerMode = false;
+    Cfg::Server::Mode = false;
     Logger::Escape = false;
     return true;
   }
@@ -1129,7 +1130,7 @@ static int start_server(const std::string &username) {
   // real connections
   {
     Logger::Info("Warming up");
-    if (!RuntimeOption::EvalJitProfileWarmupRequests) profileWarmupStart();
+    if (!Cfg::Jit::ProfileWarmupRequests) profileWarmupStart();
     SCOPE_EXIT { profileWarmupEnd(); };
     InternalWarmupRequestPlayer(Cfg::Server::WarmupThreadCount,
                                 Cfg::Server::DedupeWarmupRequests)
@@ -2518,19 +2519,19 @@ void hphp_process_init(bool skipExtensions) {
       !RuntimeOption::EvalJitSerdesFile.empty() &&
       jit::mcgen::retranslateAllEnabled()) {
     auto const mode = RuntimeOption::EvalJitSerdesMode;
-    auto const numWorkers = RuntimeOption::EvalJitWorkerThreadsForSerdes ?
-        RuntimeOption::EvalJitWorkerThreadsForSerdes : Process::GetCPUCount();
+    auto const numWorkers = Cfg::Jit::WorkerThreadsForSerdes ?
+        Cfg::Jit::WorkerThreadsForSerdes : Process::GetCPUCount();
 
     auto const deserialize = [&] (auto const& f) {
 #if USE_JEMALLOC_EXTENT_HOOKS
       auto const numArenas =
-        std::min(RO::EvalJitWorkerArenas,
-                 std::max(RO::EvalJitWorkerThreads, numWorkers));
+        std::min(Cfg::Jit::WorkerArenas,
+                 std::max(Cfg::Jit::WorkerThreads, numWorkers));
       setup_extra_arenas(numArenas);
 #endif
       return f(
         RO::EvalJitSerdesFile,
-        RO::EvalJitParallelDeserialize ? numWorkers : 1,
+        Cfg::Jit::ParallelDeserialize ? numWorkers : 1,
         false
       );
     };
@@ -2540,8 +2541,8 @@ void hphp_process_init(bool skipExtensions) {
       BootStats::set("prof_data_source_host",
                      jit::ProfData::buildHost()->toCppString());
       BootStats::set("prof_data_timestamp", jit::ProfData::buildTime());
-      RO::EvalJitProfileRequests = 0;
-      RO::EvalJitWorkerThreads = numWorkers;
+      Cfg::Jit::ProfileRequests = 0;
+      Cfg::Jit::WorkerThreads = numWorkers;
       // Run retranslateAll asynchronously, without waiting for it to finish
       // here.
       jit::mcgen::checkRetranslateAll(true, skipSerialize);
@@ -2550,7 +2551,7 @@ void hphp_process_init(bool skipExtensions) {
     auto const tryPartialDeserialize = [&] {
       if (!isJitSerializing()) return;
       if (!jit::serializeOptProfEnabled()) return;
-      if (!RO::EvalJitSerializeOptProfRestart) return;
+      if (!Cfg::Jit::SerializeOptProfRestart) return;
 
       if (RO::ServerExecutionMode()) {
         Logger::FInfo("Attempting to deserialize partial profile-data file: {}",

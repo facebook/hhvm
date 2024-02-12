@@ -454,7 +454,7 @@ struct RegionEntryKey {
 /*
  * Select a compilation region corresponding to the given context.
  * The shape of the region selected is controlled by
- * RuntimeOption::EvalJitRegionSelector.
+ * Cfg::Jit::RegionSelector.
  *
  * This function may return nullptr.
  *
@@ -537,7 +537,7 @@ void optimizeProfiledGuards(RegionDesc& region, const ProfData& profData);
 
 /*
  * Returns the PGO region selector to be used for the given `func'.
- * This depends on the value of RuntimeOption::EvalJitPGORegionSelector
+ * This depends on the value of Cfg::Jit::PGORegionSelector
  * and the given `func'.
  */
 PGORegionMode pgoRegionMode(const Func& func);

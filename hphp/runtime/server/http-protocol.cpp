@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/configs/jit.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -154,7 +155,7 @@ static void PrepareEnv(Array& env, Transport *transport) {
   process_env_variables(env);
   env.set(s_HPHP, 1);
   env.set(s_HHVM, 1);
-  if (RuntimeOption::EvalJit) {
+  if (Cfg::Jit::Enabled) {
     env.set(s_HHVM_JIT, 1);
   }
   switch (arch()) {

@@ -531,7 +531,7 @@ struct ProfData {
   /*
    * Check if the profile counters should be reset and, if so, do it.  This is
    * used in server mode, and it triggers once the server executes
-   * RuntimeOption::EvalJitResetProfCountersRequest requests.  In the requests
+   * Cfg::Jit::ResetProfCountersRequest requests.  In the requests
    * executed before reaching this limit, the profile counters are set very high
    * so that no retranslation in optimized mode is triggered.  This allows more
    * profile translations to be produced before the counters effectively start,

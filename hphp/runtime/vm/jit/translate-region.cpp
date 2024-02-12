@@ -286,7 +286,7 @@ void emitGuards(irgen::IRGS& irgs,
     // Increment the count for the latest call for optimized translations if we're
     // going to serialize the profile data.
     if (irgs.context.kind == TransKind::Optimize && isJitSerializing() &&
-        sk.nonTrivialFuncEntry() && RuntimeOption::EvalJitPGOOptCodeCallGraph) {
+        sk.nonTrivialFuncEntry() && Cfg::Jit::PGOOptCodeCallGraph) {
       irgen::gen(irgs, IncCallCounter, FuncData { curFunc(irgs) }, irgen::fp(irgs));
     }
 
@@ -644,8 +644,8 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
 
   while (true) {
     int32_t budgetBCInstrs = context.kind == TransKind::Live
-      ? RuntimeOption::EvalJitMaxLiveRegionInstrs
-      : RuntimeOption::EvalJitMaxRegionInstrs;
+      ? Cfg::Jit::MaxLiveRegionInstrs
+      : Cfg::Jit::MaxRegionInstrs;
     unit = std::make_unique<IRUnit>(context,
                                     std::make_unique<AnnotationData>());
     unit->initLogEntry(context.initSrcKey.func());
@@ -684,7 +684,7 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
     // region selection whenever we decide to retranslate.
     assertx(pConds.changed.empty() && pConds.refined.empty());
     if (context.kind == TransKind::Profile &&
-        RuntimeOption::EvalJitPGOUsePostConditions) {
+        Cfg::Jit::PGOUsePostConditions) {
       auto const lastSrcKey = region.lastSrcKey();
       auto const mainExits = findMainExitBlocks(irgs.unit, lastSrcKey);
       if (mainExits.size() > 0) {
@@ -810,8 +810,8 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
 
   while (true) {
     const int32_t budgetBCInstrs = ctx.kind == TransKind::Live
-      ? RuntimeOption::EvalJitMaxLiveRegionInstrs
-      : RuntimeOption::EvalJitMaxRegionInstrs;
+      ? Cfg::Jit::MaxLiveRegionInstrs
+      : Cfg::Jit::MaxRegionInstrs;
     // TODO: ctx contains caller info, make inlining cost calc caller agnostic
     unit = std::make_unique<IRUnit>(ctx, std::make_unique<AnnotationData>());
     irgen::IRGS irgs{*unit, &region, budgetBCInstrs, &retryContext};

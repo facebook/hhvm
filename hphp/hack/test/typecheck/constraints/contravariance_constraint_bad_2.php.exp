@@ -1,11 +1,9 @@
 File "contravariance_constraint_bad_2.php", line 43, characters 12-13:
-Invalid return type (Typing[4323])
-  File "contravariance_constraint_bad_2.php", line 14, characters 12-12:
-  `T` is a constrained type parameter
-  File "contravariance_constraint_bad_2.php", line 14, characters 17-19:
-  This type constraint is violated
+Invalid return type (Typing[4110])
   File "contravariance_constraint_bad_2.php", line 14, characters 17-19:
   Expected `NAC\AAA`
+  File "contravariance_constraint_bad_2.php", line 14, characters 40-40:
+    via this generic `T`
   File "contravariance_constraint_bad_2.php", line 37, characters 33-33:
   But got `T as NAC\BBB`
   File "contravariance_constraint_bad_2.php", line 37, characters 33-33:

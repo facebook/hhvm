@@ -6394,12 +6394,72 @@ end = struct
           (* Force subtype with expected result *)
           let env = check_expected_ty "Call result" env ft.ft_ret expected in
           let env = Env.set_tyvar_variance env ft.ft_ret in
-          let is_lambda (_, _, e) =
+          let set_tyvar_variance_from_lambda_param env opt_param =
+            match opt_param with
+            | Some param ->
+              let rec set_params_variance env ty =
+                let ty = TUtils.strip_dynamic env ty in
+                let (env, ty) = Env.expand_type env ty in
+                match get_node ty with
+                | Tunion [ty] -> set_params_variance env ty
+                | Toption ty -> set_params_variance env ty
+                | Tfun { ft_params; ft_ret; _ } ->
+                  let env =
+                    List.fold
+                      ~init:env
+                      ~f:(fun env param ->
+                        Env.set_tyvar_variance env param.fp_type)
+                      ft_params
+                  in
+                  Env.set_tyvar_variance env ft_ret ~flip:true
+                | Tnewtype (name, [ty], _)
+                  when String.equal name SN.Classes.cSupportDyn ->
+                  set_params_variance env ty
+                | _ -> env
+              in
+              set_params_variance env param.fp_type
+            | None -> env
+          in
+          let non_variadic_ft_params =
+            if get_ft_variadic ft then
+              List.drop_last_exn ft.ft_params
+            else
+              ft.ft_params
+          in
+          (* Simply checking argument expressions from left-to-right produces poor
+           * results from inference, with too many programs rejected because unknown
+           * types can not be determined or are not solved with enough precision.
+           * So instead we traverse the arguments in three passes.
+           *
+           * Pass 0. We first check lambda expression arguments for which all lambda parameters
+           * have an explicit type hint. If we don't do this then Hack sometimes infers
+           * a like-type for a generic parameter where a non-like-type would be better.
+           *
+           * Pass 1. Next, we check all non-lambda arguments, in order to get as much information
+           * about generic type parameters that might appear in the types of
+           * lambda arguments.
+           *
+           * Pass 2. Finally, we check the remaining lambda arguments.
+           *)
+          let check_pass_and_set_tyvar_variance pass env (_, _, e) opt_param =
             match e with
+            (* We first check lambdas that have fully explicit parameters *)
+            | Efun { ef_fun = { f_params; _ }; _ }
+            | Lfun ({ f_params; _ }, _)
+              when List.for_all f_params ~f:(fun param ->
+                       Option.is_some (hint_of_type_hint param.param_type_hint))
+              ->
+              (env, pass = 0)
+            (* Lastly we check lambdas that have some parameters whose types must be inferred *)
             | Efun _
             | Lfun _ ->
-              true
-            | _ -> false
+              (* On the first pass we need to set the type variable variance *)
+              if pass = 0 then
+                (set_tyvar_variance_from_lambda_param env opt_param, false)
+              else
+                (env, pass = 2)
+            (* Second we check non-lambdas *)
+            | _ -> (env, pass = 1)
           in
           let is_single_argument = List.length el = 1 in
           let get_next_param_info paraml =
@@ -6555,68 +6615,57 @@ end = struct
               in
               (env, Some (te, ty), false)
           in
-          let set_tyvar_variance_from_lambda_param env opt_param =
-            match opt_param with
-            | Some param ->
-              let rec set_params_variance env ty =
-                let ty = TUtils.strip_dynamic env ty in
-                let (env, ty) = Env.expand_type env ty in
-                match get_node ty with
-                | Tunion [ty] -> set_params_variance env ty
-                | Toption ty -> set_params_variance env ty
-                | Tfun { ft_params; ft_ret; _ } ->
-                  let env =
-                    List.fold
-                      ~init:env
-                      ~f:(fun env param ->
-                        Env.set_tyvar_variance env param.fp_type)
-                      ft_params
-                  in
-                  Env.set_tyvar_variance env ft_ret ~flip:true
-                | Tnewtype (name, [ty], _)
-                  when String.equal name SN.Classes.cSupportDyn ->
-                  set_params_variance env ty
-                | _ -> env
-              in
-              set_params_variance env param.fp_type
-            | None -> env
-          in
-          (* Given an expected function type ft, check types for the non-unpacked
-           * arguments. Don't check lambda expressions if check_lambdas=false *)
-          let rec check_args_aux check_lambdas env el paraml used_dynamic rl =
-            match el with
+          (* For a given pass number, check arguments from left-to-right that correspond
+           * to this pass. If any arguments remain unprocessed, bump the pass number
+           * and repeat. *)
+          let rec check_args pass env args_with_result paraml used_dynamic acc =
+            match args_with_result with
             (* We've got an argument *)
-            | ((pk, e), opt_result) :: el ->
+            | ((param_kind, e), opt_result) :: args_with_result ->
               (* Pick up next parameter type info *)
               let (is_variadic, opt_param, paraml) =
                 get_next_param_info paraml
               in
               let (env, one_result, used_dynamic') =
-                match (check_lambdas, is_lambda e) with
-                | (false, false)
-                | (true, true) ->
-                  check_arg env pk e opt_param ~is_variadic
-                | (false, true) ->
-                  let env =
-                    set_tyvar_variance_from_lambda_param env opt_param
-                  in
+                (* If we're on the pass appropriate for this argument
+                 * expression, then check it
+                 *)
+                let (env, check_on_this_pass) =
+                  check_pass_and_set_tyvar_variance pass env e opt_param
+                in
+                if check_on_this_pass then
+                  check_arg env param_kind e opt_param ~is_variadic
+                else
                   (env, opt_result, false)
-                | (true, false) -> (env, opt_result, false)
               in
-              check_args_aux
-                check_lambdas
+              check_args
+                pass
                 env
-                el
+                args_with_result
                 paraml
                 (used_dynamic || used_dynamic')
-                (((pk, e), one_result) :: rl)
-            | [] -> (env, rl, paraml, used_dynamic)
-          in
-          let check_args check_lambdas env el paraml =
-            let (env, rl, paraml, used_dynamic) =
-              check_args_aux check_lambdas env el paraml false []
-            in
-            (env, List.rev rl, paraml, used_dynamic)
+                (((param_kind, e), one_result) :: acc)
+            | [] ->
+              let rec collect_results reversed_res tel argtys =
+                match reversed_res with
+                | [] -> (env, tel, argtys, used_dynamic, paraml)
+                (* We've still not finished, so bump pass and iterate *)
+                | (_, None) :: _ ->
+                  check_args
+                    (pass + 1)
+                    env
+                    (List.rev acc)
+                    non_variadic_ft_params
+                    used_dynamic
+                    []
+                | ((param_kind, _), Some (((_, pos, _) as te), ty))
+                  :: reversed_res ->
+                  collect_results
+                    reversed_res
+                    ((param_kind, te) :: tel)
+                    ((pos, ty) :: argtys)
+              in
+              collect_results acc [] []
           in
           (* Same as above, but checks the types of the implicit arguments, which are
            * read from the context *)
@@ -6664,35 +6713,16 @@ end = struct
               (MakeType.capability Reason.Rnone SN.Capabilities.writeProperty)
           in
 
-          (* First check the non-lambda arguments. For generic functions, this
-           * is likely to resolve type variables to concrete types *)
-          let rl = List.map el ~f:(fun e -> (e, None)) in
-          let non_variadic_ft_params =
-            if get_ft_variadic ft then
-              List.drop_last_exn ft.ft_params
-            else
-              ft.ft_params
-          in
-          let (env, rl, _, used_dynamic1) =
-            check_args false env rl non_variadic_ft_params
-          in
-          (* Now check the lambda arguments, hopefully with type variables resolved *)
-          let (env, rl, paraml, used_dynamic2) =
-            check_args true env rl non_variadic_ft_params
-          in
-          (* We expect to see results for all arguments after this second pass *)
-          let get_param ((pk, _), opt) =
-            match opt with
-            | Some (((_, pos, _) as e), ty) -> ((pk, e), (pos, ty))
-            | None -> failwith "missing parameter in check_args"
-          in
-          let (tel, argtys) =
-            let l = List.map rl ~f:get_param in
-            List.unzip l
+          (* Pair argument expressions with the result of checking the expression,
+           * initially set to None
+           *)
+          let args_with_result = List.map el ~f:(fun e -> (e, None)) in
+          let (env, tel, argtys, used_dynamic1, paraml) =
+            check_args 0 env args_with_result non_variadic_ft_params false []
           in
           let (env, ty_err_opt) = check_implicit_args env in
           Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-          let (env, typed_unpack_element, arity, did_unpack, used_dynamic3) =
+          let (env, typed_unpack_element, arity, did_unpack, used_dynamic2) =
             match unpacked_element with
             | None -> (env, None, List.length el, false, false)
             | Some e ->
@@ -6824,7 +6854,7 @@ end = struct
                 Option.is_some d_variadic,
                 used_dynamic )
           in
-          let used_dynamic = used_dynamic1 || used_dynamic2 || used_dynamic3 in
+          let used_dynamic = used_dynamic1 || used_dynamic2 in
           (* If dynamic_func is set, then the function type is supportdyn<t1 ... tn -> t>
              or ~(t1 ... tn -> t)
              and we are trying to call it as though it were dynamic. Hence all of the

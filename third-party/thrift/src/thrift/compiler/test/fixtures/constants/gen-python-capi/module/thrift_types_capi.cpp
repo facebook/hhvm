@@ -150,6 +150,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<::apache::thrift::python::capi::ComposedEnum<::cpp2::Company>>{}
     .constructFrom(val.employer_ref()));
   if (_fbthrift__employer.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__Internship__tuple_pos[2],
@@ -166,6 +167,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<double>{}
     .constructFrom(val.compensation_ref()));
   if (_fbthrift__compensation.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__Internship__tuple_pos[3],
@@ -182,6 +184,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<Bytes>{}
     .constructFrom(val.school_ref()));
   if (_fbthrift__school.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__Internship__tuple_pos[4],
@@ -699,6 +702,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<double>{}
     .constructFrom(val.b_ref()));
   if (_fbthrift__b.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__struct4__tuple_pos[1],
@@ -715,6 +719,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<int8_t>{}
     .constructFrom(val.c_ref()));
   if (_fbthrift__c.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__struct4__tuple_pos[2],

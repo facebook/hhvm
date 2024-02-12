@@ -213,6 +213,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     .constructFrom(val.{{field:cpp_name}}_ref()));
   {{#field:optional?}}
   if (_fbthrift__{{field:name}}.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__{{struct:name}}__tuple_pos[{{field:index}}],

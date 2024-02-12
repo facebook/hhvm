@@ -193,6 +193,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<Bytes>{}
     .constructFrom(val.sonnet_ref()));
   if (_fbthrift__sonnet.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__Serious__tuple_pos[0],

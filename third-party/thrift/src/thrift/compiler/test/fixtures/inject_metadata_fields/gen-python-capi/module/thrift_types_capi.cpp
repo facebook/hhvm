@@ -392,6 +392,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<Bytes>{}
     .constructFrom(val.injected_structured_annotation_field_ref()));
   if (_fbthrift__injected_structured_annotation_field.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__FieldsInjectedWithIncludedStruct__tuple_pos[2],
@@ -408,6 +409,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<Bytes>{}
     .constructFrom(val.injected_unstructured_annotation_field_ref()));
   if (_fbthrift__injected_unstructured_annotation_field.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__FieldsInjectedWithIncludedStruct__tuple_pos[3],

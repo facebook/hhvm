@@ -201,6 +201,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<Bytes>{}
     .constructFrom(val.field2_ref()));
   if (_fbthrift__field2.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__Mixin2__tuple_pos[1],

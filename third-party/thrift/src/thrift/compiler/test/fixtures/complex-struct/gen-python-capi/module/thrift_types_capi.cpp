@@ -2368,6 +2368,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<Bytes>{}
     .constructFrom(val.message_ref()));
   if (_fbthrift__message.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__optXcep__tuple_pos[0],
@@ -2384,6 +2385,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<int32_t>{}
     .constructFrom(val.errorCode_ref()));
   if (_fbthrift__errorCode.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__optXcep__tuple_pos[1],
@@ -2519,6 +2521,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyUnion>>{}
     .constructFrom(val.unionError_ref()));
   if (_fbthrift__unionError.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__complexException__tuple_pos[3],

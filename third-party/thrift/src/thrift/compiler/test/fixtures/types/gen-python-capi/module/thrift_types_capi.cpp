@@ -1554,6 +1554,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<::apache::thrift::python::capi::ComposedStruct<::apache::thrift::fixtures::types::ForwardUsageStruct>>{}
     .constructFrom(val.ForwardUsageStruct_ref()));
   if (_fbthrift__ForwardUsageStruct.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__ForwardUsageRoot__tuple_pos[0],
@@ -1570,6 +1571,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<::apache::thrift::python::capi::ComposedStruct<::apache::thrift::fixtures::types::ForwardUsageByRef>>{}
     .constructFrom(val.ForwardUsageByRef_ref()));
   if (_fbthrift__ForwardUsageByRef.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__ForwardUsageRoot__tuple_pos[1],
@@ -1655,6 +1657,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<::apache::thrift::python::capi::ComposedStruct<::apache::thrift::fixtures::types::ForwardUsageRoot>>{}
     .constructFrom(val.foo_ref()));
   if (_fbthrift__foo.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__ForwardUsageStruct__tuple_pos[0],
@@ -1740,6 +1743,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<::apache::thrift::python::capi::ComposedStruct<::apache::thrift::fixtures::types::ForwardUsageRoot>>{}
     .constructFrom(val.foo_ref()));
   if (_fbthrift__foo.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__ForwardUsageByRef__tuple_pos[0],
@@ -1825,6 +1829,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<map<int32_t, ::apache::thrift::python::capi::ComposedStruct<::apache::thrift::fixtures::types::IncompleteMapDep>>>{}
     .constructFrom(val.field_ref()));
   if (_fbthrift__field.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__IncompleteMap__tuple_pos[0],
@@ -2599,6 +2604,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<int16_t>{}
     .constructFrom(val.field_ref()));
   if (_fbthrift__field.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__DependentAdaptedListDep__tuple_pos[0],
@@ -2861,6 +2867,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<int32_t>{}
     .constructFrom(val.box_field_ref()));
   if (_fbthrift__box_field.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__AllocatorAware2__tuple_pos[1],

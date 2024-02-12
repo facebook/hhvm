@@ -803,6 +803,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<float>{}
     .constructFrom(val.floaty_ref()));
   if (_fbthrift__floaty.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__PrimitiveStruct__tuple_pos[5],
@@ -819,6 +820,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<double>{}
     .constructFrom(val.dubby_ref()));
   if (_fbthrift__dubby.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__PrimitiveStruct__tuple_pos[6],
@@ -835,6 +837,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<Bytes>{}
     .constructFrom(val.stringy_ref()));
   if (_fbthrift__stringy.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__PrimitiveStruct__tuple_pos[7],
@@ -851,6 +854,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<Bytes>{}
     .constructFrom(val.bytey_ref()));
   if (_fbthrift__bytey.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__PrimitiveStruct__tuple_pos[8],
@@ -1169,6 +1173,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<list<int64_t>>{}
     .constructFrom(val.intz_ref()));
   if (_fbthrift__intz.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__ListStruct__tuple_pos[1],
@@ -1185,6 +1190,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<list<Bytes>>{}
     .constructFrom(val.stringz_ref()));
   if (_fbthrift__stringz.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__ListStruct__tuple_pos[2],
@@ -1364,6 +1370,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<set<int32_t>>{}
     .constructFrom(val.intz_ref()));
   if (_fbthrift__intz.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__SetStruct__tuple_pos[1],
@@ -1380,6 +1387,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<set<Bytes>>{}
     .constructFrom(val.binnaz_ref()));
   if (_fbthrift__binnaz.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__SetStruct__tuple_pos[2],
@@ -1551,6 +1559,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<map<int32_t, Bytes>>{}
     .constructFrom(val.intz_ref()));
   if (_fbthrift__intz.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__MapStruct__tuple_pos[1],
@@ -1567,6 +1576,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<map<Bytes, ::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::PrimitiveStruct>>>{}
     .constructFrom(val.binnaz_ref()));
   if (_fbthrift__binnaz.isNone()) {
+    Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
       _fbthrift__MapStruct__tuple_pos[2],

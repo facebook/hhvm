@@ -732,7 +732,7 @@ static int xbuf_format_converter(char **outbuf, const char *fmt, va_list ap)
           if (*fmt == 'h') {
             fmt++;
           }
-          /* these are promoted to int, so no break */
+          [[fallthrough]]; // these are promoted to int, so no break
         default:
           modifier = LM_STD;
           break;
@@ -783,6 +783,7 @@ static int xbuf_format_converter(char **outbuf, const char *fmt, va_list ap)
            * The rest also applies to other integer formats, so fall
            * into that case.
            */
+          [[fallthrough]];
         case 'd':
         case 'i':
           /*

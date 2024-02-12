@@ -1018,7 +1018,7 @@ void Disassembler::VisitFPCompare(Instruction* instr) {
 
   switch (instr->Mask(FPCompareMask)) {
     case FCMP_s_zero:
-    case FCMP_d_zero: form = form_zero;  // Fall through.
+    case FCMP_d_zero: form = form_zero; [[fallthrough]];
     case FCMP_s:
     case FCMP_d: mnemonic = "fcmp"; break;
     default: form = "(FPCompare)";

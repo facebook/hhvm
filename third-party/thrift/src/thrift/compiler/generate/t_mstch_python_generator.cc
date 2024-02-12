@@ -843,7 +843,7 @@ class python_mstch_enum_value : public mstch_enum_value {
 };
 
 // Generator-specific validator that enforces "name" and "value" are not used
-// as enum member or union field names (thrift-py3).
+// as enum member or union field names (thrift-python).
 namespace enum_member_union_field_names_validator {
 void validate(
     const t_named* node, const std::string& name, diagnostic_context& ctx) {
@@ -860,9 +860,9 @@ void validate(
         *node,
         "enum-member-union-field-names-rule",
         diagnostic_level::error,
-        "'{}' should not be used as an enum/union field name in thrift-py3. "
+        "'{}' should not be used as an enum/union field name in thrift-python. "
         "Use a different name or annotate the field with "
-        "`(py3.name=\"<new_py_name>\")`",
+        "`@python.Name`",
         pyname);
   }
 }
@@ -873,11 +873,7 @@ bool validate_enum(diagnostic_context& ctx, const t_enum& enm) {
   return true;
 }
 
-// TODO(T176314881): this never does anything?
-bool validate_structured(diagnostic_context& ctx, const t_struct& s) {
-  if (!s.is_union()) {
-    return false;
-  }
+bool validate_union(diagnostic_context& ctx, const t_union& s) {
   for (const t_field& f : s.fields()) {
     validate(&f, f.name(), ctx);
   }
@@ -910,8 +906,8 @@ class t_mstch_python_generator : public t_mstch_generator {
     validator.add_program_visitor(validate_no_reserved_key_in_namespace);
     validator.add_enum_visitor(
         enum_member_union_field_names_validator::validate_enum);
-    validator.add_struct_visitor(
-        enum_member_union_field_names_validator::validate_structured);
+    validator.add_union_visitor(
+        enum_member_union_field_names_validator::validate_union);
   }
 
   enum TypesFile { IsTypesFile, NotTypesFile };

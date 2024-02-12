@@ -190,11 +190,19 @@ struct OwnedKey<folly::ByteRange> {
   using type = FixedSizeString<8>;
 };
 
+template <>
+struct OwnedKey<
+    typename detail::FixedSizeStringLayout<FixedSizeString<8>>::View> {
+  using type = FixedSizeString<8>;
+};
+
 template <
     typename M,
     typename T,
     std::enable_if_t<
-        !std::is_same<typename M::key_type, folly::ByteRange>::value,
+        !std::is_same<
+            typename M::key_type,
+            detail::FixedSizeStringLayout<FixedSizeString<8>>::View>::value,
         bool> = true>
 typename M::const_iterator mapFind(const M& map, const T& key) {
   return map.find(key);
@@ -206,7 +214,9 @@ template <
     typename M,
     typename T,
     std::enable_if_t<
-        std::is_same<typename M::key_type, folly::ByteRange>::value,
+        std::is_same<
+            typename M::key_type,
+            detail::FixedSizeStringLayout<FixedSizeString<8>>::View>::value,
         bool> = true>
 typename M::const_iterator mapFind(const M& map, const T& key) {
   static_assert(std::is_same<T, FixedSizeString<8>>::value);

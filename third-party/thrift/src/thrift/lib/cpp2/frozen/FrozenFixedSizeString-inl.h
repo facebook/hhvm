@@ -65,10 +65,20 @@ struct FixedSizeStringLayout : public LayoutBase {
     os << folly::demangle(type.name());
   }
 
-  using View = folly::ByteRange;
-  View view(ViewPosition self) const {
-    return folly::ByteRange{self.start, T::kFixedSize};
-  }
+  struct View : public folly::ByteRange {
+   public:
+    using folly::ByteRange::ByteRange;
+
+    View(folly::ByteRange bytes) : folly::ByteRange(bytes) {}
+
+    bool operator==(View rhs) {
+      return memcmp(this->data(), rhs.data(), T::kFixedSize) == 0;
+    }
+
+    using folly::ByteRange::toString;
+  };
+
+  View view(ViewPosition self) const { return View(self.start, T::kFixedSize); }
 
   static size_t hash(const T& value) {
     return FixedSizeStringHash<T::kFixedSize, T>::hash(value);

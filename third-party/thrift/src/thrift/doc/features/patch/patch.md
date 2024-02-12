@@ -6,7 +6,7 @@ state: experimental
 
 :::note
 
-Thrift Patch is an experimental feature that is under alpha testing. It's only implemented in C++. To use Patch, please reach out thrift team with your use case first. You will also need to add your codebase to `PATCH_VISIBILITY` in `thrift/lib/thrift/TARGETS`.
+Thrift Patch is an experimental feature that is under alpha testing. It's only implemented in C++. To use Patch, please reach out to the Thrift team with your use-case. You will also need to add your codebase to `PATCH_VISIBILITY` in `thrift/lib/thrift/TARGETS`.
 
 :::
 
@@ -17,17 +17,17 @@ How mutations for Thrift values are represented, manipulated, and applied. It ca
 ## Motivation
 
 1. Reduce network bandwidth.
-    1. Considering that we have a service which stores thrift objects in database. When a client wants to modify the object, they can just send the Patch instead of the whole object to reduce network bandwidth.
+    1. Assume that you have a service that stores Thrift objects in a database. When a client wants to modify an object, it can just send the Patch instead of the entire object to reduce network bandwidth.
     2. This is how Patch is used in Rodos and CPEntity.
 2. Reduce storage overhead.
-    1. When storing multiple similar thrift objects in database, we can store one root object, and patches to generate other objects from the root object.
-    2. In addition, you might want to know how stored thrift objects are changed over time. You can store the changesets as patches.
+    1. When storing multiple similar Thrift objects in database, we can store one root object, and patches to generate other objects from the root object.
+    2. In addition, you might want to know how stored Thrift objects are changed over time. You can store the changesets as patches.
     3. This is how Patch is used in Control Plane.
 
 ## Enable Patch
 
 Use `thrift_patch_library` buck build rule to enable Patch. Internally, it will
-create a `thrift_library` buile rule that contains the patch structs in thrift
+create a `thrift_library` build rule that contains the patch structs in Thrift
 file `[thrift_file_name]_patch.thrift`. It takes the following arguments
 
 | Argument            | Description                                             | Example                            |
@@ -93,36 +93,36 @@ Dependencies can be included automatically via autodeps.
 
 ### Dynamic Patch
 
-There are 2 representations of a Patch — Static Patch and Dynamic Patch. Both
-have identical wire format, though they have different requirements and provide
+There are 2 representations of a Patch: Static Patch and Dynamic Patch. Both
+have identical wire formats, though they have different requirements and provide
 different APIs. In general, Static Patch is preferred unless you can not include
-the generated thrift header.
+the generated Thrift header.
 
 - Static Patch, or Schema-full Patch, is generated from Thrift codegen and has
   1:1 mapping to Thrift type.
-  - Pros: More user-friendly APIs (e.g., be able to modify patch based on field
+  - Pros: More user-friendly APIs (e.g., ability to modify patch based on field
     name, user can’t generate invalid patch).
-  - Cons: Requires thrift file to be available (e.g.,
+  - Cons: Requires Thrift file to be available (e.g.,
     `<thrift_file>_patch_types.h` must be included in C++).
-    You need to recursively enable to all Thrift file dependencies.
+    You need to recursively enable for all Thrift file dependencies.
 - Dynamic Patch, or Schema-less Patch, is a schema-less representation of static
   patch that is consumed with dynamic type `protocol::Object`.
-  - Pros: Can be used without thrift file.
+  - Pros: Can be used without Thrift file.
   - Cons: Less user-friendly APIs.
 
-### Deprecated workflow
+### Deprecated Workflow
 
-There is also a deprecated workflow which you can enable Patch via
+There is also a deprecated workflow that can be used to enable Patch via the
 `@patch.GeneratePatch` annotation.
 
-When this annotation is used, the corresponding Patch struct will be generated directly in the original thrift file.
+When this annotation is used, the corresponding Patch struct will be generated directly in the original Thrift file.
 This workflow is deprecated and it should not be used for new files.
 
 ## C++ Static Patch
 
 ### Struct Patch
 
-Considering the following thrift struct.
+Consider the following Thrift struct
 
 ```thrift
 // In thrift file
@@ -149,7 +149,7 @@ patch.apply(s);
 EXPECT_EQ(s.field(), "(hi)");
 ```
 
-Here `patch.patch<ident::field>()` is a [StringPatch](../../../ref/cpp/class/apache/thrift/op/detail/StringPatch). It’s worth noting that `patch` method will ensure the existence of the field. If field doesn’t exist, it will be set to intrinsic default first, e.g.,
+Here `patch.patch<ident::field>()` is a [StringPatch](../../../ref/cpp/class/apache/thrift/op/detail/StringPatch). It’s worth noting that `patch` method will ensure the existence of the field. If field doesn’t exist, it will be set to the intrinsic default first, e.g.,
 
 ```cpp
 s.clear();
@@ -158,8 +158,8 @@ EXPECT_TRUE(s.field().has_value());
 EXPECT_EQ(s.field(), "()");
 ```
 
-If you don’t want to patch when the field doesn’t exist, you **should** use `patchIfSet` method instead.
-Besides patching fields, you can also use `patch` to modify the whole struct. e.g.,
+If you don’t want to patch when the field doesn’t exist, you **should** use the `patchIfSet` method instead.
+Besides patching fields you can also use `patch` to modify the whole struct. e.g.,
 
 ```cpp
 patch.clear();
@@ -169,7 +169,7 @@ EXPECT_FALSE(s.field().has_value());
 
 ### Merge
 
-All Patches have `merge` method, it’s guaranteed that the following code.
+All Patches have `merge` method, it’s guaranteed that the following code
 
 ```cpp
 patch1.apply(v);
@@ -185,7 +185,7 @@ patch1.apply(v);
 
 ### Value Patches
 
-Besides StringPatch, there are [other types of Patch](../../../cpp_api_toc). One example would be [MapPatch](../../../ref/cpp/class/apache/thrift/op/detail/MapPatch). Consider the following thrift struct.
+Besides StringPatch there are [other types of Patch](../../../cpp_api_toc). One example would be [MapPatch](../../../ref/cpp/class/apache/thrift/op/detail/MapPatch). Consider the following Thrift struct
 
 
 ```thrift
@@ -209,11 +209,11 @@ patch.apply(s);
 EXPECT_EQ(s.nested[42], "(hi)");
 ```
 
-### Read patch's content
+### Reading the Contents of a Patch
 
-`Patch::customVisitor(Visitor)` can be used to inspect Patch. This API uses the Visitor pattern to describe how Patch is applied. For each operation that will be performed by the patch, the corresponding method (that matches the write API) will be invoked.
+`Patch::customVisitor(Visitor)` can be used to inspect Patches. This API uses the Visitor pattern to describe how a Patch is applied. For each operation that will be performed by a patch, the corresponding method (that matches the write API) will be invoked.
 
-For example, let's assume you have the following thrift struct:
+For example, let's assume you have the following Thrift struct
 
 ```thrift
 struct MyClass {
@@ -222,7 +222,7 @@ struct MyClass {
 }
 ```
 
-and then you created the following patch:
+and then you created the following patch
 
 ```cpp
 MyClassPatch patch;
@@ -240,23 +240,23 @@ v.patchIfSet<ident::foo>(StringPatch::createAppend("_"));
 v.patchIfSet<ident::bar>(BoolPatch{});  // no-op since inverted twice
 ```
 
-### Type alias for Patch type
+### Type Alias for Patch Type
 
-You can get Patch type from original type, vice versa. e.g.,
+You can get the Patch type from the original type and vice versa. e.g.,
 
 ```cpp
 static_assert(std::is_same_v<apache::thrift::op::patch_type<MyStruct>, MyStructPatch>);
 static_assert(std::is_same_v<MyStruct, MyStructPatch::value_type>);
 ```
 
-### Debug
+### Debugging
 
-You can use [`apache::thrift::op::prettyPrintPatch`](https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Patch.h#L118-L125) to pretty-print Thrift Patch for debugging purpose.
+You can use [`apache::thrift::op::prettyPrintPatch`](https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Patch.h#L118-L125) to pretty-print Thrift Patch for debugging purposes.
 
 
 ## C++ Dynamic Patch
 
-If you can not include the generated thrift header, you can still serialize any abritrary patch to `protocol::Object` and apply it. Here is an example how to apply the dynamic patch:
+If you can not include the generated Thrift header, you can still serialize an abritrary patch to `protocol::Object` and apply it. Here is an example for how to apply a dynamic patch
 
 ```cpp
 MyStruct s;

@@ -113,6 +113,7 @@ namespace proxygen {
 
 const std::string kH3FBCurrentDraft("h3-fb-05");
 const std::string kH3AliasV1("h3-alias-01");
+const std::string kH3AliasV2("h3-alias-02");
 const std::string kH3("h3");
 const std::string kHQ("hq-interop");
 
@@ -403,7 +404,8 @@ bool HQSession::getAndCheckApplicationProtocol() {
   CHECK(sock_);
   auto alpn = sock_->getAppProtocol();
   if (alpn) {
-    if (alpn == kH3FBCurrentDraft || alpn == kH3AliasV1 || alpn == kH3) {
+    if (alpn == kH3FBCurrentDraft || alpn == kH3AliasV1 || alpn == kH3AliasV2 ||
+        alpn == kH3) {
       version_ = HQVersion::HQ;
     }
   }

@@ -52,6 +52,7 @@ struct HQBaseParams {
                                           proxygen::kHQ,
                                           proxygen::kH3FBCurrentDraft,
                                           proxygen::kH3AliasV1,
+                                          proxygen::kH3AliasV2,
                                           proxygen::kH3CurrentDraft,
                                           proxygen::kHQCurrentDraft};
   quic::TransportSettings transportSettings;

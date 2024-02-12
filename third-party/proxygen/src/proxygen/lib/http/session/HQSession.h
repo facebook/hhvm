@@ -54,6 +54,7 @@ enum class HQVersion : uint8_t {
 
 extern const std::string kH3;
 extern const std::string kH3AliasV1;
+extern const std::string kH3AliasV2;
 extern const std::string kHQ;
 extern const std::string kH3FBCurrentDraft;
 // TODO: Remove these constants, the session no longer negotiates these

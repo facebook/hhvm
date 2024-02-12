@@ -424,8 +424,7 @@ struct ActiveSubscription {
         invoke_prelude_script(
             m_path.c_str(),
             doc,
-            RuntimeOption::EvalPreludePath,
-            m_path.c_str());
+            RuntimeOption::EvalPreludePath);
       }
       auto unit_result = Variant::attach(context->invokeUnit(unit));
       auto func = Func::load(String(m_callbackFunc.c_str()).get());

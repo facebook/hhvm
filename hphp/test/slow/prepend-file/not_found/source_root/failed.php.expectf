@@ -1,0 +1,2 @@
+Failed to read prelude file at %s/prepend-file/not/a/real/path.php. Ensure that ${SOURCE_ROOT}/ is relative to the folder containing .hhvmconfig.hdf
+In file

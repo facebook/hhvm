@@ -99,8 +99,7 @@ void hphp_session_init(Treadmill::SessionKind session_kind,
 void invoke_prelude_script(
      const char* currentDir,
      const std::string& document,
-     const std::string& prelude,
-     const char* root = nullptr);
+     const std::string& prelude);
 bool hphp_invoke_simple(const std::string& filename, bool warmupOnly);
 bool hphp_invoke(ExecutionContext *context,
                  const std::string &cmd,

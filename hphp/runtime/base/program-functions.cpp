@@ -2666,35 +2666,42 @@ static void handle_invoke_exception(bool &ret, ExecutionContext *context,
                    richErrorMsg);
 }
 
+const std::string s_phpRootVar("${SOURCE_ROOT}/");
+
 void invoke_prelude_script(
   const char* currentDir,
   const std::string& document,
-  const std::string& prelude,
-  const char* root
+  const std::string& prelude
 ) {
-  // If $SOURCE_ROOT is found in prelude path
-  // Execute the script from PHP root folder
-  // or from current folder
-  static const std::string s_phpRootVar("${SOURCE_ROOT}");
-  std::string preludeScript(prelude);
-  auto posPhpRoot = preludeScript.find(s_phpRootVar);
-  if (std::string::npos != posPhpRoot){
-    preludeScript.replace(posPhpRoot, s_phpRootVar.length(),
-      root ? root : SourceRootInfo::GetCurrentSourceRoot().c_str());
-  }
-  FileUtil::runRelative(
-    preludeScript,
-    String(document, CopyString),
-    currentDir,
-    [currentDir] (const String& f) {
-      auto const w = Stream::getWrapperFromURI(f, nullptr, false);
-      if (w->access(f, R_OK) == 0) {
-        include_impl_invoke(f, true, currentDir, true);
-        return true;
-      }
-      return false;
+  const auto run_file = [currentDir] (const String& f) {
+    auto const w = Stream::getWrapperFromURI(f, nullptr, false);
+    if (w->access(f, R_OK) == 0) {
+      include_impl_invoke(f, true, currentDir, true);
+      return true;
     }
-  );
+    return false;
+  };
+
+  if (UNLIKELY(!prelude.starts_with(s_phpRootVar))) {
+    if(!FileUtil::runRelative(
+      prelude,
+      String(document, CopyString),
+      currentDir,
+      run_file
+    )) {
+      Logger::Error("Failed to read prelude file at %s.", prelude.data());
+    };
+    return;
+  }
+
+  const auto repo_path = RepoOptions::forFile(document.c_str()).dir();
+  const auto path = repo_path / prelude.substr(s_phpRootVar.length());
+  if (!run_file(String(path.native()))) {
+    Logger::Error(
+      "Failed to read prelude file at %s. "
+      "Ensure that %s is relative to the folder containing .hhvmconfig.hdf",
+      path.c_str(), s_phpRootVar.data());
+  }
 }
 
 static bool hphp_warmup(ExecutionContext *context,

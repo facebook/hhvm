@@ -38,8 +38,6 @@ class EchoHandler : public proxygen::RequestHandler {
 
  private:
   EchoStats* const stats_{nullptr};
-
-  std::unique_ptr<folly::IOBuf> body_;
 };
 
 } // namespace EchoService

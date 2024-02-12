@@ -1,0 +1,1 @@
+--output unused --from-targets-pattern //hphp/hack/test/scripts/cut_ocaml_dependencies/fixtures/b:b --to-targets-pattern //hphp/hack/test/scripts/cut_ocaml_dependencies/fixtures/... --project-targets-pattern //hphp/hack/test/scripts/cut_ocaml_dependencies/fixtures/... --buck-mode @//mode/dev-nosan-lg --buck-isolation-dir isolation_dir

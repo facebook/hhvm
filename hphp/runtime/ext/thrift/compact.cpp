@@ -48,6 +48,7 @@
 #include <folly/Format.h>
 #include <folly/Likely.h>
 
+#include <folly/io/IOBuf.h>
 #include <limits>
 #include <stack>
 #include <type_traits>
@@ -703,9 +704,10 @@ struct CompactWriter {
     }
 };
 
+template<typename Transport>
 struct CompactReader {
-    explicit CompactReader(const Object& _transportobj, int options) :
-      transport(_transportobj),
+    explicit CompactReader(Transport&& transport, int options) :
+      transport(std::move(transport)),
       options(options),
       version(VERSION),
       state(STATE_CLEAR),
@@ -848,7 +850,7 @@ struct CompactReader {
     }
 
   private:
-    PHPInputTransport transport;
+    Transport transport;
     int options;
     uint8_t version;
     CState state;
@@ -1525,7 +1527,9 @@ Variant HHVM_FUNCTION(thrift_protocol_read_compact,
   SuppressClassConversionNotice suppressor;
 
   VMRegAnchor _2;
-  CompactReader reader(transportobj, options);
+  CompactReader<PHPInputTransport> reader(
+    PHPInputTransport(transportobj),
+    options);
   return reader.read(obj_typename);
 }
 
@@ -1538,7 +1542,27 @@ Object HHVM_FUNCTION(thrift_protocol_read_compact_struct,
   SuppressClassConversionNotice suppressor;
 
   VMRegAnchor _;
-  CompactReader reader(transportobj, options);
+  CompactReader<PHPInputTransport> reader(
+    PHPInputTransport(transportobj),
+    options);
+  return reader.readStruct(obj_typename);
+}
+
+Object HHVM_FUNCTION(thrift_protocol_read_compact_struct_from_string,
+                     const String& serialized,
+                     const String& obj_typename,
+                     int64_t options) {
+  // Suppress class-to-string conversion warnings that occur during
+  // serialization and deserialization.
+  SuppressClassConversionNotice suppressor;
+
+  VMRegAnchor _;
+  auto iobuf = folly::IOBuf::wrapBufferAsValue(
+    serialized.data(),
+    serialized.size());
+  CompactReader<folly::io::Cursor> reader(
+    folly::io::Cursor(&iobuf),
+    options);
   return reader.readStruct(obj_typename);
 }
 

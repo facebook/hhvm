@@ -34,27 +34,73 @@ class TProtocolException extends Exception {
 }
 
 class DummyProtocol {
-  public $t;
-  function __construct()[] {
-    $this->t = new DummyTransport();
+  function __construct(
+    public DummyTransport $t = new DummyTransport(),
+  ): void {
   }
+
   function getTransport() {
     return $this->t;
+  }
+
+  function readCompactUsingAllMethods(
+    string $classname,
+    string $method_name = '',
+  ): mixed {
+    $actual = thrift_protocol_read_compact($this, $classname);
+
+    // The calculation of header length is fragile. We are assuming the method
+    // names used in the test are small and their lengths will fit witin a
+    // a single varint byte. Also other integers like message sequence number
+    // has to be small.
+    $header_length = 4 + strlen($method_name);
+    $unenveloped = \substr($this->t->buff, $header_length);
+
+    $actual_struct = thrift_protocol_read_compact_struct(
+      new DummyProtocol(new DummyTransport($unenveloped)),
+      $classname
+    );
+    if ($actual != $actual_struct) {
+      echo
+        "Value returned by thrift_protocol_read_compact_struct not identical ".
+        "to that returned by thrift_protocol_read_compact\n";
+      var_dump($actual_struct);
+    }
+
+    $actual_struct_from_string =
+      thrift_protocol_read_compact_struct_from_string($unenveloped, $classname);
+    if ($actual != $actual_struct_from_string) {
+      echo
+        "Value returned by thrift_protocol_read_compact_struct_from_string not".
+        " identical to that returned by thrift_protocol_read_compact\n";
+      var_dump($actual_struct_from_string);
+    }
+
+    return $actual;
   }
 }
 
 class DummyTransport {
-  public $buff = '';
-  public $pos = 0;
+  public $pos;
+
+  public function __construct(
+    public $buff = '',
+  ): void {
+    $this->pos = 0;
+  }
+
   function flush() { }
+
   function onewayFlush() {}
+
   function write($buff) {
     $this->buff .= $buff;
   }
+
   function read($n) {
     $rem = strlen($this->buff) - $this->pos;
     if ($rem === 0) {
-        throw new Exception("Out of input");
+      throw new Exception("Out of input");
     } else if ($rem < $n) {
         $n = $rem;
     }
@@ -62,6 +108,7 @@ class DummyTransport {
     $this->pos += $n;
     return $r;
   }
+
   function putBack($data) {
     $this->buff = ($data . $this->buff);
   }

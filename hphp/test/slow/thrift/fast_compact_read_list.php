@@ -64,8 +64,8 @@ function test($name, $classname, $data) :mixed{
 
   echo "---- $name ----\n";
   $p = new DummyProtocol();
-  thrift_protocol_write_compact2($p, 'foo', 2, $obj, 20);
-  var_dump(thrift_protocol_read_compact($p, $classname));
+  thrift_protocol_write_compact2($p, '', 2, $obj, 20);
+  var_dump($p->readCompactUsingAllMethods($classname));
 }
 
 function main(): mixed {

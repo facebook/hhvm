@@ -97,6 +97,12 @@ Object HHVM_FUNCTION(
     const String& obj_typename,
     int64_t options);
 
+Object HHVM_FUNCTION(
+    thrift_protocol_read_compact_struct_from_string,
+    const String& serialized,
+    const String& obj_typename,
+    int64_t options);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct InteractionId : SystemLib::ClassLoader<"InteractionId"> {

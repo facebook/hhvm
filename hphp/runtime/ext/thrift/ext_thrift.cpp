@@ -328,6 +328,7 @@ static struct ThriftExtension final : Extension {
     HHVM_FE(thrift_protocol_write_compact2);
     HHVM_FE(thrift_protocol_read_compact);
     HHVM_FE(thrift_protocol_read_compact_struct);
+    HHVM_FE(thrift_protocol_read_compact_struct_from_string);
 
     Native::registerNativeDataInfo<RpcOptions>();
     HHVM_ME(RpcOptions, setChunkBufferSize);

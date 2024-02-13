@@ -142,7 +142,7 @@ function test() :mixed{
   echo "---- terse: compact ----\n";
   $p = new DummyProtocol();
   thrift_protocol_write_compact($p, 'foo', 2, $v1, 20);
-  var_dump(thrift_protocol_read_compact($p, 'TestStruct'));
+  var_dump($p->readCompactUsingAllMethods('TestStruct', 'foo'));
 
   echo "---- terse: binary ----\n";
   $p = new DummyProtocol();

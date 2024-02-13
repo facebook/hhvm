@@ -65,13 +65,13 @@ function testCompact() :mixed{
   $v1 = new OldStruct();
   $v1->features = dict[1 => 314, 2 => 271.8];
   thrift_protocol_write_compact2($p1, 'foomethod', 2, $v1, 20);
-  var_dump(thrift_protocol_read_compact($p1, 'NewStruct'));
+  var_dump($p1->readCompactUsingAllMethods('NewStruct','foomethod'));
 
   $p2 = new DummyProtocol();
   $v2 = new NewStruct();
   $v2->features = dict[1 => 314, 2 => 271.8];
   thrift_protocol_write_compact2($p2, 'foomethod', 2, $v2, 20);
-  var_dump(thrift_protocol_read_compact($p2, 'OldStruct'));
+  var_dump($p2->readCompactUsingAllMethods('OldStruct','foomethod'));
 }
 
 function main() :mixed{

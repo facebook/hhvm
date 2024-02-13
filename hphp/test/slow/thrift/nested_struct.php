@@ -73,7 +73,7 @@ function testCompact() :mixed{
   var_dump($v);
   thrift_protocol_write_compact2($p, 'foomethod', 2, $v, 20);
   var_dump(md5($p->getTransport()->buff));
-  var_dump(thrift_protocol_read_compact($p, 'OuterStruct'));
+  var_dump($p->readCompactUsingAllMethods('OuterStruct','foomethod'));
 }
 
 <<__EntryPoint>>

@@ -35,7 +35,7 @@ function test_compact($var) :mixed{
   $p = new DummyProtocol();
   $v1 = new TestStruct($var);
   thrift_protocol_write_compact2($p, 'foo', 2, $v1, 20);
-  var_dump(thrift_protocol_read_compact($p, 'TestStruct'));
+  var_dump($p->readCompactUsingAllMethods('TestStruct', 'foo'));
 }
 
 <<__EntryPoint>>

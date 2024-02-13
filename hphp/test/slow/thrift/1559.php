@@ -102,7 +102,7 @@ function test() :mixed{
   $v1->aFloat = 1.25;
   $v1->bFloat = 3.14159265358979323846264;
   thrift_protocol_write_compact2($p, 'foomethod', 2, $v1, 20);
-  var_dump(thrift_protocol_read_compact($p, 'TestStruct'));
+  var_dump($p->readCompactUsingAllMethods('TestStruct', 'foomethod'));
 }
 
 <<__EntryPoint>>

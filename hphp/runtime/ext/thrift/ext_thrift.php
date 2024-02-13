@@ -50,6 +50,11 @@ function thrift_protocol_read_compact_struct(\HH\object $transportobj,
                                              string $obj_typename,
                                              int $options = 0): \HH\object;
 
+<<__Native>>
+function thrift_protocol_read_compact_struct_from_string(string $serialized,
+                                                         string $obj_typename,
+                                                         int $options = 0): object;
+
 <<__NativeData>>
 class InteractionId {
   private function __construct()[]: void {}

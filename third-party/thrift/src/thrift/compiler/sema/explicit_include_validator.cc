@@ -103,6 +103,9 @@ void add_explicit_include_validators(ast_validator& validator) {
 
   // Structured types: field types
   validator.add_field_visitor([](diagnostic_context& ctx, const t_field& f) {
+    if (f.is_injected()) {
+      return;
+    }
     visit_type(ctx, f, *f.get_type(), diagnostic_level::warning);
   });
 

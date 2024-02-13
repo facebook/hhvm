@@ -46,15 +46,6 @@ void validate_explicit_include(
     const t_type& type,
     diagnostic_level level);
 
-/*
- * T can be any t_named that supports get_type()
- * Reports diagnostic error.
- */
-template <typename T, diagnostic_level ErrLevel>
-void validate_explicit_include(diagnostic_context& ctx, const T& named_type) {
-  validate_explicit_include(ctx, named_type, *named_type.get_type(), ErrLevel);
-}
-
 void add_explicit_include_validators(ast_validator& validator);
 
 } // namespace apache::thrift::compiler

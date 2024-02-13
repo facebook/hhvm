@@ -469,6 +469,12 @@ impl<T> Vector<T> {
         // Safety: data and len haven't been modified since constructing self
         unsafe { std::slice::from_raw_parts_mut(self.data.as_ptr(), self.len) }
     }
+
+    pub fn push(&mut self, x: T) {
+        let mut v = Vec::from(std::mem::take(self));
+        v.push(x);
+        *self = Self::from(v);
+    }
 }
 
 impl<T> std::ops::Drop for Vector<T> {

@@ -12,23 +12,12 @@ use crate::func::SrcLoc;
 use crate::string_intern::StringInterner;
 use crate::Attribute;
 use crate::Class;
-use crate::ClassName;
-use crate::ConstName;
 use crate::FatalOp;
 use crate::Function;
-use crate::FunctionName;
 use crate::HackConstant;
-use crate::IncludePath;
 use crate::Module;
+use crate::SymbolRefs;
 use crate::Typedef;
-
-#[derive(Debug, Default)]
-pub struct SymbolRefs<'a> {
-    pub classes: Vec<ClassName<'a>>,
-    pub constants: Vec<ConstName<'a>>,
-    pub functions: Vec<FunctionName<'a>>,
-    pub includes: Vec<IncludePath<'a>>,
-}
 
 /// Fields used when a unit had compile-time errors that should be reported
 /// when the unit is loaded.

@@ -79,6 +79,7 @@ pub use hhbc::SilenceOp;
 pub use hhbc::Span;
 pub use hhbc::SpecialClsRef;
 pub use hhbc::SwitchKind;
+pub use hhbc::SymbolRefs;
 pub use hhbc::TraitReqKind;
 pub use hhbc::TypeStructEnforceKind;
 pub use hhbc::TypeStructResolveOp;

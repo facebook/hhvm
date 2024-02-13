@@ -112,7 +112,7 @@ impl<'a> UnitBuilder<'a> {
     }
 }
 
-fn convert_symbol_refs<'a>(symbol_refs: &ir::unit::SymbolRefs<'a>) -> hhbc::SymbolRefs<'a> {
+fn convert_symbol_refs<'a>(symbol_refs: &ir::SymbolRefs<'a>) -> hhbc::SymbolRefs<'a> {
     hhbc::SymbolRefs {
         classes: symbol_refs.classes.clone().into(),
         constants: symbol_refs.constants.clone().into(),

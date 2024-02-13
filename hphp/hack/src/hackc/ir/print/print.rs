@@ -27,7 +27,7 @@ use ir_core::instr::MemberKey;
 use ir_core::instr::Special;
 use ir_core::instr::Terminator;
 use ir_core::instr::Tmp;
-use ir_core::unit::SymbolRefs;
+use ir_core::SymbolRefs;
 use ir_core::*;
 
 use crate::formatters::*;

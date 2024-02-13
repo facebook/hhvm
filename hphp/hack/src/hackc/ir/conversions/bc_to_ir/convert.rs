@@ -64,8 +64,6 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit<'a> {
         })
         .collect();
 
-    let symbol_refs = convert_symbol_refs(&unit.symbol_refs);
-
     let typedefs: Vec<_> = unit
         .typedefs
         .iter()
@@ -81,7 +79,7 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit<'a> {
         module_use: unit.module_use.into(),
         modules,
         strings,
-        symbol_refs,
+        symbol_refs: unit.symbol_refs.clone(),
         typedefs,
     };
 
@@ -128,23 +126,6 @@ pub(crate) fn convert_attribute<'a>(
     ir::Attribute {
         name: ir::ClassId::from_hhbc(hhbc::ClassName::new(attr.name), strings),
         arguments,
-    }
-}
-
-fn convert_symbol_refs<'a>(symbol_refs: &hhbc::SymbolRefs<'a>) -> ir::unit::SymbolRefs<'a> {
-    // TODO: It would be nice if we could determine this stuff from the IR
-    // instead of having to carry it along with the Unit.
-
-    let classes = symbol_refs.classes.iter().cloned().collect();
-    let constants = symbol_refs.constants.iter().cloned().collect();
-    let functions = symbol_refs.functions.iter().cloned().collect();
-    let includes = symbol_refs.includes.iter().cloned().collect();
-
-    ir::unit::SymbolRefs {
-        classes,
-        constants,
-        functions,
-        includes,
     }
 }
 

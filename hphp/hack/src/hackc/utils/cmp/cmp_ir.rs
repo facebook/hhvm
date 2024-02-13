@@ -16,7 +16,7 @@ use ir::instr::MemberKey;
 use ir::instr::MemberOp;
 use ir::instr::Special;
 use ir::instr::Terminator;
-use ir::unit::SymbolRefs;
+use ir::SymbolRefs;
 // This is reasonable because if we compare everything then we'll end up pulling
 // in everything...
 use ir::*;

@@ -427,6 +427,7 @@ enum InterfaceKind {
 // The key is 32-bit, using a 64-bit constant here to make it work with signed
 // types.
 const i64 kRocketProtocolKey = 0xf09f9a80;
+const i64 kRocketProtocolKeyWithSBE = 0xf09f9a81;
 
 struct ClientMetadata {
   1: optional string agent;

@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+ SBE Representation of RpcMetadata.thrift
+
+ To generate the flyweights:
+ In you home directory
+ git clone https://github.com/real-logic/simple-binary-encoding.git
+ cd simple-binary-encoding
+ ./gradlew
+ cd ~/simple-binary-encoding/sbe-all/build/libs
+ cp ./sbe-all-1.31.0-SNAPSHOT.jar ~
+ cd ~/fbsource/fbcode/thrift/lib/thrift/
+ /usr/local/java-runtime/11/bin/java -Dsbe.target.language=Cpp \
+ -Dsbe.generate.precedence.checks=true \
+  -jar ~/sbe-all-1.31.0-SNAPSHOT.jar ~/fbsource/fbcode/thrift/lib/thrift/RpcMetadata.xml
+
+This will generate code into ~/simple-binary-encoding/sbe-all/build/libs/apache_thrift_sbe
+-->
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   xmlns:xi="http://www.w3.org/2001/XInclude"
+                   package="apache.thrift.sbe"
+                   id="1"
+                   version="0"
+                   semanticVersion="5.2"
+                   description="RpcMetadata expressed in SBE - ported from RpcMetadata.thrft"
+                   byteOrder="littleEndian"
+                   semanticType="cpp2">
+    <types>
+        <!-- Common Types -->
+        <composite name="messageHeader" description="Message identifiers and length of message root.">
+          <type name="blockLength" primitiveType="uint16"/>
+          <type name="templateId" primitiveType="uint16"/>
+          <type name="schemaId" primitiveType="uint16"/>
+          <type name="version" primitiveType="uint16"/>
+        </composite>
+        <composite name="groupSizeEncoding" description="Repeating group dimensions.">
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="numInGroup" primitiveType="uint16"/>
+        </composite>
+        <composite name="varStringEncoding" description="Variable length UTF-8 String.">
+            <type name="length" primitiveType="uint32" maxValue="1073741824"/>
+            <type name="varData" primitiveType="uint8" length="0" characterEncoding="UTF-8"/>
+        </composite>
+        <composite name="varDataEncoding" description="Variable length binary blob.">
+            <type name="length" primitiveType="uint32" maxValue="1073741824"/>
+            <type name="varData" primitiveType="uint8" length="0"/>
+        </composite>
+        <enum name="BooleanType" encodingType="uint8" semanticType="Boolean">
+            <validValue name="FALSE">0</validValue>
+            <validValue name="TRUE">1</validValue>
+        </enum>
+
+        <!-- RpcMetadata Types -->
+        <!--const i64 kRocketProtocolKey = 0xf09f9a80;-->
+        <type name="kRocketProtocolKey" primitiveType="uint32" presence="constant">4036991616</type>
+        <!--const i64 kRocketProtocolKey = 0xf09f9a81;-->
+        <type name="kRocketProtocolKeyWithSBE" primitiveType="uint32" presence="constant">4036991617</type>
+        <type name="InteractionId" primitiveType="int64" />
+        <enum name="ProtocolId" encodingType="uint8">
+            <validValue name="BINARY">0</validValue>
+            <validValue name="COMPACT">2</validValue>
+        </enum>
+        <enum name="RpcKind" encodingType="uint8">
+            <validValue name="SINGLE_REQUEST_SINGLE_RESPONSE">0</validValue>
+            <validValue name="SINGLE_REQUEST_NO_RESPONSE">1</validValue>
+            <validValue name="STREAMING_REQUEST_SINGLE_RESPONSE">2</validValue>
+            <validValue name="STREAMING_REQUEST_NO_RESPONSE">3</validValue>
+            <validValue name="SINGLE_REQUEST_STREAMING_RESPONSE">4</validValue>
+            <validValue name="STREAMING_REQUEST_STREAMING_RESPONSE">5</validValue>
+            <validValue name="SINK">6</validValue>
+        </enum>
+        <enum name="RpcPriority" encodingType="uint8">
+            <validValue name="HIGH_IMPORTANT">0</validValue>
+            <validValue name="HIGH">1</validValue>
+            <validValue name="IMPORTANT">2</validValue>
+            <validValue name="NORMAL">3</validValue>
+            <validValue name="BEST_EFFORT">4</validValue>
+            <validValue name="N_PRIORITIES">5</validValue>
+        </enum>
+        <enum name="CompressionAlgorithm" encodingType="uint8">
+            <validValue name="NONE">0</validValue>
+            <validValue name="ZLIB">1</validValue>
+            <validValue name="ZSTD">2</validValue>
+        </enum>
+        <enum name="ErrorKind" encodingType="uint8">
+            <validValue name="UNSPECIFIED">0</validValue>
+            <validValue name="TRANSIENT">1</validValue>
+            <validValue name="STATEFUL">2</validValue>
+            <validValue name="PERMANENT">3</validValue>
+        </enum>
+        <enum name="ErrorBlame" encodingType="uint8">
+            <validValue name="UNSPECIFIED">0</validValue>
+            <validValue name="SERVER">1</validValue>
+            <validValue name="CLIENT">2</validValue>
+        </enum>
+        <enum name="ErrorSafety" encodingType="uint8">
+            <validValue name="UNSPECIFIED">0</validValue>
+            <validValue name="SAFE">1</validValue>
+        </enum>
+        <enum name="ResponseRpcErrorCategory" encodingType="uint8">
+            <validValue name="INTERNAL_ERROR">0</validValue>
+            <validValue name="INVALID_REQUEST">1</validValue>
+            <validValue name="LOADSHEDDING">2</validValue>
+            <validValue name="SHUTDOWN">3</validValue>
+        </enum>
+        <enum name="ResponseRpcErrorCode" encodingType="uint8">
+            <validValue name="UNKNOWN">0</validValue>
+            <validValue name="OVERLOAD">1</validValue>
+            <validValue name="TASK_EXPIRED">2</validValue>
+            <validValue name="QUEUE_OVERLOADED">3</validValue>
+            <validValue name="SHUTDOWN">4</validValue>
+            <validValue name="INJECTED_FAILURE">5</validValue>
+            <validValue name="REQUEST_PARSING_FAILURE">6</validValue>
+            <validValue name="QUEUE_TIMEOUT">7</validValue>
+            <validValue name="RESPONSE_TOO_BIG">8</validValue>
+            <validValue name="WRONG_RPC_KIND">9</validValue>
+            <validValue name="UNKNOWN_METHOD">10</validValue>
+            <validValue name="CHECKSUM_MISMATCH">11</validValue>
+            <validValue name="INTERRUPTION">12</validValue>
+            <validValue name="APP_OVERLOAD">13</validValue>
+            <validValue name="UNKNOWN_INTERACTION_ID">14</validValue>
+            <validValue name="INTERACTION_CONSTRUCTOR_ERROR">15</validValue>
+            <validValue name="UNIMPLEMENTED_METHOD">16</validValue>
+            <validValue name="TENANT_QUOTA_EXCEEDED">17</validValue>
+        </enum>
+        <enum name="StreamRpcErrorCode" encodingType="uint8">
+            <validValue name="UNKNOWN">0</validValue>
+            <validValue name="CREDIT_TIMEOUT">1</validValue>
+            <validValue name="CHUNK_TIMEOUT">2</validValue>
+        </enum>
+        <enum name="InterfaceKind" encodingType="uint8">
+            <validValue name="USER">0</validValue>
+            <validValue name="DEBUGGING">1</validValue>
+            <validValue name="MONITORING">2</validValue>
+            <validValue name="PROFILING">3</validValue>
+        </enum>
+        <enum name="DrainCompleteCode" encodingType="uint8">
+            <validValue name="EXCEEDED_INGRESS_MEM_LIMIT">1</validValue>
+        </enum>
+        <composite name="CompressionConfig">
+            <set name="CodecConfig" encodingType="uint8">
+                <choice name="ZlibCompressionCodecConfig">0</choice>
+                <choice name="ZstdCompressionCodecConfig">1</choice>
+            </set>
+            <type name="compressionSizeLimit" primitiveType="int64" />
+        </composite>
+        <composite name="NegotiationParameters">
+            <type name="compressionAlgos" primitiveType="uint64" presence="optional" />
+            <ref name="useStopTLS" type="BooleanType" presence="optional" />
+        </composite>
+        <composite name="FdMetadata">
+            <type name="fdSeqNum" primitiveType="int64" presence="optional" />
+            <type name="numFds" primitiveType="int32" presence="optional" />
+        </composite>
+        <composite name="ErrorClassification">
+            <ref name="errorKind" type="ErrorKind"/>
+            <ref name="errorBlame" type="ErrorBlame"/>
+            <ref name="errorSafety" type="ErrorSafety"/>
+        </composite>
+        <composite name="PayloadExceptionMetadata">
+            <ref name="errorClassification" type="ErrorClassification" />
+            <set name="metadataType" encodingType="uint8">
+                <choice name="declaredException">0</choice>
+                <choice name="DEPRECATED_proxyException">1</choice>
+                <choice name="appUnknownException">2</choice>
+                <choice name="anyException">3</choice>
+            </set>
+        </composite>
+        <composite name="QueueMetadata">
+            <type name="queueingTimeMs" primitiveType="int32" />
+            <type name="queueTimeoutMs" primitiveType="int32" presence="optional" />
+        </composite>
+    </types>
+
+    <sbe:message name="RequestRpcMetadata" id="1" description="request metadta for an rpc">
+        <field name="protocol" id="1" type="ProtocolId"  />
+        <field name="kind"  id="2" type="RpcKind" />
+        <group name="otherMetadata" id="3" dimensionType="groupSizeEncoding" >
+            <data name="otherMetadataKey" id="1" type="varStringEncoding" />
+            <data name="otherMetadataValue" id="2" type="varDataEncoding" />
+        </group>
+        <data name="name" type="varStringEncoding" id="4" />
+        <data name="interactionMetadata" id="5" type="varDataEncoding"  />
+        <data name="optionalMetdata" id="6" type="varDataEncoding" />
+    </sbe:message>
+
+    <sbe:message  name="InteractionCreate" id="2" description="message to create an interaction">
+        <field name="interactionId" id="1" type="InteractionId" />
+        <data name="interactionName" id="2" type="varStringEncoding" />
+    </sbe:message>
+
+    <sbe:message name="InteractionRequest" id="3" description="message containing interaction id">
+        <field name="interactionId" id="1" type="InteractionId" />
+    </sbe:message>
+
+    <sbe:message name="InterationTerminate" id="4" description="message to delete an interaction">
+        <field name="interactionId" id="1" type="InteractionId" />
+    </sbe:message>
+
+    <sbe:message name="RequestRpcMetadataOptional" id="5" description="optional metadata fields for RpcMetadata">
+        <field name="clientTimeoutMs" id="1" type="int32"/>
+        <field name="queueTimeoutMs" id="2" type="int32"  />
+        <field name="priority" id="3" type="RpcPriority" />
+        <field name="compression" id="4" type="CompressionAlgorithm"  presence="optional" />
+        <field name="compressionConfig" id="5" type="CompressionConfig" presence="optional" />
+        <field name="fdMetadata" type="FdMetadata" presence="optional" id="6" />
+        <data name="loadMetric"  id="7" type="varDataEncoding" />
+        <data name="tenantId" id="8" type="varStringEncoding" />
+        <data name="serviceTraceMeta" id="9" type="varStringEncoding"  />
+        <data name="loggingContext" id="10" type="varDataEncoding"  />
+    </sbe:message>
+
+    <sbe:message name="LoggingContext" id="6" description="optional logging context">
+        <field name="logSampleRatio" id="1" type="int32" />
+        <field name="logErrorSampleRatio" id="2" type="int32" />
+        <data name="requestId" id="3" type="varStringEncoding" />
+        <data name="routingTarget" id="4" type="varStringEncoding" />
+    </sbe:message>
+
+    <sbe:message name="ResponseRpcMetadata" id="7" description="response rpc metadata">
+        <field name="streamId" id="1" type="int32" presence="optional" />
+        <group name="otherMetadata" id="2" dimensionType="groupSizeEncoding" >
+            <data name="otherMetadataKey" id="1" type="varStringEncoding" />
+            <data name="otherMetadataValue" id="2" type="varDataEncoding" />
+        </group>
+        <data name="exceptionMetadata" id="3" type="varDataEncoding" />
+        <data name="optionalMetadata" id="4" type="varDataEncoding" />
+    </sbe:message>
+
+    <sbe:message name="ResponseRpcMetadataOptional" id="8">
+        <field name="proxiedPayloadMetadata" id="1" type="BooleanType" />
+        <field name="queueMetadata" id="2" type="QueueMetadata" presence="optional" />
+        <field name="fdMetadata" id="3" type="FdMetadata" presence="optional" />
+        <data name="frameworkMetadata" id="4" type="varDataEncoding" />
+    </sbe:message>
+    <sbe:message name="ExceptionMetadata" id="9">
+        <field name="payloadExceptionMetadata" id="1" type="PayloadExceptionMetadata" />
+        <data name="name_utf8" id="2" type="varStringEncoding" />
+        <data name="what_utf8" id="3" type="varStringEncoding" />
+    </sbe:message>
+</sbe:messageSchema>

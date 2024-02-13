@@ -7,7 +7,7 @@
 
 #include <folly/Try.h>
 #include <folly/futures/Future.h>
-
+#include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
 #include "hphp/runtime/ext/facts/path-and-hash.h"
 
 namespace HPHP {
@@ -23,8 +23,7 @@ struct Extractor {
   virtual ~Extractor() = default;
 
   /**
-   * Convert a path/hash tuple representing a file into the JSON-encoded Facts
-   * for that file.
+   * Convert a path/hash tuple representing a file to a DeclsHolder
    */
   virtual folly::SemiFuture<std::string> get(
       const Facts::PathAndOptionalHash& pathAndOptionalHash) = 0;
@@ -57,6 +56,15 @@ DeclBinaryString decls_binary_from_path(const Facts::PathAndOptionalHash& path);
 
 // Returns the content of a file on disk or throws if unreadable.
 std::string readFile(const std::string& filePath);
+
+/*
+ * Given a path to a file, returns the content of the file as a DeclsHolder.
+ * Can use a lookaside cache to avoid re-parsing the file.
+ * Throws DeclExtractionExc on error.
+ */
+rust::Box<hackc::DeclsHolder> decl_from_path(
+    const std::filesystem::path& root,
+    const Facts::PathAndOptionalHash& pathAndHash);
 
 } // namespace Decl
 } // namespace HPHP

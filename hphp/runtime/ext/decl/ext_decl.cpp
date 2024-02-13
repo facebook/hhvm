@@ -712,7 +712,6 @@ Object HHVM_STATIC_METHOD(FileDecls, parsePath, const String& path) {
         String("File not found ") + path.data());
   };
   auto root = getRepoRootForFile(path);
-
   // Check if we have already parsed this file
   // and if the cache contains the result
   // validated by the SHA1 hash of the file contents
@@ -731,19 +730,14 @@ Object HHVM_STATIC_METHOD(FileDecls, parsePath, const String& path) {
     }
   }
 
-  std::string text;
-  if (textOpt.has_value()) {
-    text = textOpt.value();
-  } else {
-    text = Decl::readFile(path.toCppString());
-  }
+  Facts::PathAndOptionalHash pathAndHash{
+      filePath, Optional<std::string>(sha1.toString())};
   Object obj{FileDecls::classof()};
   auto data = Native::data<FileDecls>(obj);
   auto config = initDeclConfig(root);
   try {
-    data->declsHolder =
-        std::make_shared<rust::Box<hackc::DeclsHolder>>(hackc::parse_decls(
-            config, "", {(const uint8_t*)text.data(), (size_t)text.size()}));
+    data->declsHolder = std::make_shared<rust::Box<hackc::DeclsHolder>>(
+        Decl::decl_from_path(filePath, pathAndHash));
   } catch (const std::exception& ex) {
     data->error = ex.what();
   }

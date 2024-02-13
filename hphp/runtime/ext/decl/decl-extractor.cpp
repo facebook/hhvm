@@ -22,14 +22,6 @@ namespace HPHP {
 namespace Decl {
 
 namespace {
-rust::Box<hackc::DeclsHolder> decode_decls(const std::string& blob) {
-  try {
-    return hackc::binary_to_decls_holder(blob);
-  } catch (const std::exception& e) {
-    throw DeclExtractionExc{e.what()};
-  }
-}
-
 ExtractorFactory* s_extractorFactory = nullptr;
 
 struct SimpleExtractor final : Extractor {
@@ -47,6 +39,14 @@ struct SimpleExtractor final : Extractor {
 };
 
 } // namespace
+
+rust::Box<hackc::DeclsHolder> decode_decls(const std::string& blob) {
+  try {
+    return hackc::binary_to_decls_holder(blob);
+  } catch (const std::exception& e) {
+    throw DeclExtractionExc{e.what()};
+  }
+}
 
 // Returns the content of a file on disk or throws if unreadable.
 // Reading the file off disk makes us susceptible to tearing.
@@ -96,10 +96,11 @@ std::unique_ptr<Extractor> makeExtractor(folly::Executor& exec) {
   // If we defined an external Extractor in closed-source code, use that.
   // Otherwise use the SimpleExtractor.
   if (s_extractorFactory && RuntimeOption::DeclExtensionEnableExternExtractor) {
-    XLOG(INFO) << "Creating a external HPHP::Decl::Extractor.";
+    // TODO(nzthomas) restore logging without breaking tests
+    // XLOG(INFO) << "Creating a external HPHP::Decl::Extractor.";
     return s_extractorFactory->make(exec);
   }
-  XLOG(INFO) << "Creating an internal HPHP::Decl::SimpleExtractor.";
+  // XLOG(INFO) << "Creating an internal HPHP::Decl::SimpleExtractor.";
   return std::make_unique<SimpleExtractor>(exec);
 }
 
@@ -113,9 +114,9 @@ rust::Box<hackc::DeclsHolder> decl_from_path(
   // Otherwise use the SimpleExtractor.
   auto extractor = makeExtractor(exec);
 
-  assertx(pathAndHash.m_path.is_relative());
-  Facts::PathAndOptionalHash absPathAndHash{
-      root / pathAndHash.m_path, pathAndHash.m_hash};
+  auto path = pathAndHash.m_path.is_relative() ? root / pathAndHash.m_path
+                                               : pathAndHash.m_path;
+  Facts::PathAndOptionalHash absPathAndHash{path, pathAndHash.m_hash};
   return folly::via(
              &exec,
              [&extractor, absPathAndHash]() {

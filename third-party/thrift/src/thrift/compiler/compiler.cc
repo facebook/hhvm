@@ -736,18 +736,19 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
 
 std::unique_ptr<t_program_bundle> parse_and_mutate_program(
     source_manager& sm,
-    diagnostic_context& ctx,
+    diagnostics_engine& diags,
     const std::string& filename,
     parsing_params params,
     bool return_nullptr_on_failure,
     t_program_bundle* already_parsed) {
   bool use_legacy_type_ref_resolution = params.use_legacy_type_ref_resolution;
   auto programs =
-      parse_ast(sm, ctx, filename, std::move(params), already_parsed);
-  if (!programs || ctx.has_errors()) {
+      parse_ast(sm, diags, filename, std::move(params), already_parsed);
+  if (!programs || diags.has_errors()) {
     // Mutations should be only performed on a valid AST.
     return !return_nullptr_on_failure ? std::move(programs) : nullptr;
   }
+  auto ctx = diagnostic_context(diags);
   auto result =
       standard_mutators(use_legacy_type_ref_resolution)(ctx, *programs);
   if (result.unresolvable_typeref && return_nullptr_on_failure) {

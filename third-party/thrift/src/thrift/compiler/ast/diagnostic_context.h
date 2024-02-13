@@ -96,10 +96,11 @@ class diagnostic_context : public diagnostics_engine,
  public:
   using diagnostics_engine::diagnostics_engine;
 
-  static diagnostic_context ignore_all(source_manager& sm) {
-    return diagnostic_context(
-        sm, [](const diagnostic&) {}, diagnostic_params::only_errors());
-  }
+  explicit diagnostic_context(diagnostics_engine& diags)
+      : diagnostics_engine(
+            diags.source_mgr(),
+            [&diags](diagnostic diag) { diags.report(std::move(diag)); },
+            diags.params()) {}
 
   // A cache for traversal-specific metadata.
   node_metadata_cache& cache() { return cache_; }

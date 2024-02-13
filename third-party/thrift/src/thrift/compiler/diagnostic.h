@@ -173,6 +173,11 @@ class diagnostics_engine {
             [&results](diagnostic diag) { results.add(std::move(diag)); },
             std::move(params)) {}
 
+  static diagnostics_engine ignore_all(source_manager& sm) {
+    return diagnostics_engine(
+        sm, [](const diagnostic&) {}, diagnostic_params::only_errors());
+  }
+
   diagnostic_params& params() { return params_; }
   const diagnostic_params& params() const { return params_; }
 
@@ -182,6 +187,9 @@ class diagnostics_engine {
   bool has_errors() const { return has_errors_; }
 
   void report(diagnostic diag) {
+    if (diag.level() == diagnostic_level::error) {
+      has_errors_ = true;
+    }
     if (params_.should_report(diag.level())) {
       report_cb_(std::move(diag));
     }

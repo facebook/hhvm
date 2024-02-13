@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 
-#include <thrift/compiler/ast/diagnostic_context.h>
+#include <thrift/compiler/diagnostic.h>
 #include <thrift/compiler/parse/parse_ast.h> // parsing_params
 
 namespace apache {
@@ -64,7 +64,7 @@ parse_and_mutate_program(
     diagnostic_params dparams = {});
 std::unique_ptr<t_program_bundle> parse_and_mutate_program(
     source_manager& sm,
-    diagnostic_context& ctx,
+    diagnostics_engine& diags,
     const std::string& filename,
     parsing_params params,
     bool return_nullptr_on_failure = false,

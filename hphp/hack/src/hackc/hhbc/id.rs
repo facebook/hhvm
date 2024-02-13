@@ -155,7 +155,6 @@ impl<'arena> ClassName<'arena> {
 pub struct PropName<'arena>(Str<'arena>);
 
 impl_id!(PropName);
-impl_add_suffix!(PropName);
 
 impl<'arena> PropName<'arena> {
     pub fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> PropName<'arena> {
@@ -248,9 +247,9 @@ mod tests {
     #[test]
     fn test_add_suffix() {
         let alloc = bumpalo::Bump::new();
-        let id = PropName::new(ffi::Str::new_str(&alloc, "Some"));
-        let id = PropName::add_suffix(&alloc, &id, "Property");
-        assert_eq!("SomeProperty", id.unsafe_as_str());
+        let id = FunctionName::new(ffi::Str::new_str(&alloc, "Some"));
+        let id = FunctionName::add_suffix(&alloc, &id, "Func");
+        assert_eq!("SomeFunc", id.unsafe_as_str());
     }
 
     #[test]

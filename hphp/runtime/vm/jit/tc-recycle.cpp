@@ -279,7 +279,12 @@ void clearRange(TCA start, size_t len, const char* info) {
   cb.init(start, len, info);
 
   CGMeta fixups;
-  SCOPE_EXIT { assertx(fixups.empty()); };
+  SCOPE_EXIT {
+    // In general, fixups should be empty at this point. However, a fallthru
+    // instruction is appended to any empty block and, on ARM, fallthru
+    // instructions add address immediates in the fixups.addressImmediates.
+    assertx(arch() == Arch::ARM || fixups.empty());
+  };
 
   DataBlock db;
   Vauto vasm { cb, cb, db, fixups };

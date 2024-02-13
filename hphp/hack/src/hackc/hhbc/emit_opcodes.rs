@@ -5,6 +5,7 @@
 
 use hhbc_gen::ImmType;
 use hhbc_gen::Inputs;
+use hhbc_gen::InstrFlags;
 use hhbc_gen::OpcodeData;
 use hhbc_gen::Outputs;
 use proc_macro2::Ident;
@@ -12,6 +13,7 @@ use proc_macro2::Punct;
 use proc_macro2::Spacing;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
+use quote::format_ident;
 use quote::quote;
 use syn::ItemEnum;
 use syn::Lifetime;
@@ -163,7 +165,7 @@ pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
 
         fn is_label_type(imm_ty: &ImmType) -> bool {
             match imm_ty {
-                ImmType::BA | ImmType::BA2 | ImmType::FCA | ImmType::BLA => true,
+                ImmType::BA | ImmType::BA2 | ImmType::FCA | ImmType::BLA | ImmType::SLA => true,
                 ImmType::ARR(subty) => is_label_type(subty),
                 ImmType::AA
                 | ImmType::DA
@@ -181,7 +183,6 @@ pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
                 | ImmType::OA(_)
                 | ImmType::RATA
                 | ImmType::SA
-                | ImmType::SLA
                 | ImmType::VSA
                 | ImmType::OAL(_) => false,
             }
@@ -220,6 +221,9 @@ pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
                 ImmType::FCA => {
                     let call = ident_with_mut("targets", is_ref);
                     quote!(#imm_name.#call())
+                }
+                ImmType::SLA => {
+                    quote!(#imm_name.targets)
                 }
                 _ => todo!("unhandled {:?} for {:?}", imm_ty, opcode_name),
             }
@@ -266,6 +270,183 @@ pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
                 match self {
                     #(#with_targets_ref)*
                     #(#without_targets)|* => &[],
+                }
+            }
+        }),
+    )
+}
+
+pub fn emit_impl_flow(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenStream> {
+    // impl Flow for Instruct<'_> {
+    //   pub fn is_terminal(&self) -> bool {
+    //     match self {
+    //       ..
+    //     }
+    //   }
+    //
+    //   pub fn is_flow(&self) -> bool {
+    //     match self {
+    //       ..
+    //     }
+    //   }
+    // }
+    //
+
+    let item_enum = syn::parse2::<ItemEnum>(input)?;
+    let name = &item_enum.ident;
+    let (impl_generics, impl_types, impl_where) = item_enum.generics.split_for_impl();
+
+    let mut with_flow = Vec::new();
+    let mut without_flow = Vec::new();
+    let mut with_terminal = Vec::new();
+    let mut without_terminal = Vec::new();
+
+    for opcode in opcodes {
+        let variant_name = Ident::new(opcode.name, Span::call_site());
+        let variant_name = quote!(#name::#variant_name);
+
+        let insert = |list: &mut Vec<TokenStream>| {
+            if opcode.immediates.is_empty() {
+                list.push(quote!(#variant_name));
+            } else {
+                list.push(quote!(#variant_name ( .. )));
+            }
+        };
+
+        if opcode.flags.contains(InstrFlags::TF) {
+            insert(&mut with_terminal);
+        } else {
+            insert(&mut without_terminal);
+        }
+        if opcode.flags.contains(InstrFlags::CF) {
+            insert(&mut with_flow);
+        } else {
+            insert(&mut without_flow);
+        }
+    }
+
+    Ok(
+        quote!(impl #impl_generics Flow for #name #impl_types #impl_where {
+            fn is_terminal(&self) -> bool {
+                match self {
+                    #(#with_terminal)|* => true,
+                    #(#without_terminal)|* => false,
+                }
+            }
+
+            fn is_flow(&self) -> bool {
+                match self {
+                    #(#with_flow)|* => true,
+                    #(#without_flow)|* => false,
+                }
+            }
+        }),
+    )
+}
+
+pub fn emit_impl_locals(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenStream> {
+    // impl Locals for Instruct<'_> {
+    //   pub fn locals(&self) -> Vec<Local> {
+    //     match self {
+    //       ..
+    //     }
+    //   }
+    //
+
+    let item_enum = syn::parse2::<ItemEnum>(input)?;
+    let name = &item_enum.ident;
+    let (impl_generics, impl_types, impl_where) = item_enum.generics.split_for_impl();
+
+    let mut with_locals = Vec::new();
+    let mut without_locals = Vec::new();
+
+    for opcode in opcodes {
+        let variant_name = Ident::new(opcode.name, Span::call_site());
+        let variant_name = quote!(#name::#variant_name);
+
+        let mut locals: Vec<TokenStream> = Vec::new();
+        let mut ranges = Vec::new();
+        let mut match_parts = Vec::new();
+
+        for (imm_name, imm_ty) in opcode.immediates.iter() {
+            let imm_name = Ident::new(imm_name, Span::call_site());
+            match imm_ty {
+                ImmType::LA | ImmType::NLA | ImmType::ILA => {
+                    locals.push(quote!(#imm_name));
+                    match_parts.push(quote!(#imm_name));
+                }
+                ImmType::LAR => {
+                    ranges.push(quote!(#imm_name.iter().collect()));
+                    match_parts.push(quote!(#imm_name));
+                }
+                ImmType::ITA => {
+                    let key = format_ident!("{}_key", imm_name);
+                    let val = format_ident!("{}_val", imm_name);
+                    locals.push(quote!(#key));
+                    locals.push(quote!(#val));
+                    let mstr = quote!(IterArgs {
+                        iter_id: _,
+                        key_id: #key,
+                        val_id: #val,
+                    });
+                    match_parts.push(quote!(#mstr));
+                }
+                ImmType::KA => {
+                    ranges.push(quote!((match &#imm_name {
+                        MemberKey::EL(loc, _) => vec![*loc],
+                        MemberKey::PL(loc, _) => vec![*loc],
+                        _ => vec![]
+                    })));
+                    match_parts.push(quote!(#imm_name));
+                }
+
+                ImmType::AA
+                | ImmType::ARR(_)
+                | ImmType::BA
+                | ImmType::BA2
+                | ImmType::FCA
+                | ImmType::BLA
+                | ImmType::DA
+                | ImmType::DUMMY
+                | ImmType::I64A
+                | ImmType::IA
+                | ImmType::IVA
+                | ImmType::NA
+                | ImmType::OA(_)
+                | ImmType::RATA
+                | ImmType::SA
+                | ImmType::SLA
+                | ImmType::VSA
+                | ImmType::OAL(_) => {
+                    match_parts.push(quote!(_));
+                }
+            }
+        }
+
+        if !locals.is_empty() {
+            ranges.push(quote!(vec![#(*#locals, )*]));
+        }
+
+        let ematch = quote!(#variant_name ( #(#match_parts, )* ));
+        match (ranges.len(), opcode.immediates.is_empty()) {
+            (0, true) => without_locals.push(quote!(#variant_name)),
+            (0, _) => without_locals.push(quote!(#variant_name ( .. ))),
+            (1, _) => {
+                let item = &ranges[0];
+                with_locals.push(quote!(#ematch => #item));
+            }
+            (_, _) => {
+                with_locals.push(quote!(#ematch => [#(#ranges,)*].concat()));
+            }
+        }
+    }
+
+    Ok(
+        quote!(impl #impl_generics Locals for #name #impl_types #impl_where {
+            fn locals(&self) -> Vec<Local> {
+                match self {
+                    #(#with_locals, )*
+                    #(#without_locals)|* => vec![],
                 }
             }
         }),

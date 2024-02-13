@@ -38,9 +38,11 @@ fn main() -> Result<()> {
     );
 
     let opcodes = emit_opcodes::emit_opcodes(input.clone(), &opcode_data)?;
-    let targets = emit_opcodes::emit_impl_targets(input, &opcode_data)?;
+    let targets = emit_opcodes::emit_impl_targets(input.clone(), &opcode_data)?;
+    let flow = emit_opcodes::emit_impl_flow(input.clone(), &opcode_data)?;
+    let locals = emit_opcodes::emit_impl_locals(input, &opcode_data)?;
 
-    let output = format!("{}\n\n{}", opcodes, targets);
+    let output = format!("{}\n\n{}\n\n{}\n\n{}", opcodes, targets, flow, locals);
 
     if opts.no_format {
         if let Some(out) = opts.output.as_ref() {

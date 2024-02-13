@@ -356,6 +356,24 @@ pub trait Targets {
     fn targets(&self) -> &[Label];
 }
 
+pub trait Flow {
+    /// Returns true if the bytecode does not ever pass control to the next
+    /// bytecode in the sequence. Bytecodes for which is_terminal() is true
+    /// may still be is_flow() if they can still branch.
+    fn is_terminal(&self) -> bool;
+
+    /// Returns true if the bytecode performs control flow. The flow need not
+    /// be within the current frame (e.g. a Call bytecode is a flow bytecode),
+    /// however, bytecodes which produce faults but do not otherwise branch are
+    /// not considered is_flow() bytecodes.
+    fn is_flow(&self) -> bool;
+}
+
+pub trait Locals {
+    /// Return a Vec of locals referenced in the immediates for this bytecode
+    fn locals(&self) -> Vec<Local>;
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, Hash, Serialize)]
 #[repr(C)]
 pub enum Instruct<'arena> {

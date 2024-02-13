@@ -31,6 +31,7 @@ namespace py thrift.annotation.rust
 @scope.Field
 @scope.Typedef
 @scope.Union
+@scope.Service
 struct Name {
   // # `rust.Name`
   //

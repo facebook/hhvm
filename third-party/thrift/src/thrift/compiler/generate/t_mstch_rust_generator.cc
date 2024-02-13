@@ -965,7 +965,8 @@ class rust_mstch_service : public mstch_service {
     }
     register_methods(
         this,
-        {{"service:rustFunctions", &rust_mstch_service::rust_functions},
+        {{"service:rust_name", &rust_mstch_service::rust_name},
+         {"service:rustFunctions", &rust_mstch_service::rust_functions},
          {"service:rust_exceptions", &rust_mstch_service::rust_all_exceptions},
          {"service:client_package", &rust_mstch_service::rust_client_package},
          {"service:server_package", &rust_mstch_service::rust_server_package},
@@ -982,6 +983,7 @@ class rust_mstch_service : public mstch_service {
          {"service:enable_anyhow_to_application_exn",
           &rust_mstch_service::rust_anyhow_to_application_exn}});
   }
+  mstch::node rust_name() { return named_rust_name(service_); }
   mstch::node rust_functions();
   mstch::node rust_client_package() {
     return get_client_import_name(service_->program(), options_);
@@ -990,8 +992,17 @@ class rust_mstch_service : public mstch_service {
     return get_server_import_name(service_->program(), options_);
   }
   mstch::node rust_snake() {
-    return service_->get_annotation(
-        "rust.mod", mangle_type(snakecase(service_->get_name())));
+    if (service_->has_annotation("rust.mod")) {
+      return service_->get_annotation("rust.mod");
+    } else if (
+        const t_const* annot =
+            service_->find_structured_annotation_or_null(kRustNameUri)) {
+      return snakecase(get_annotation_property_string(annot, "name"));
+    } else if (service_->has_annotation("rust.name")) {
+      return snakecase(service_->get_annotation("rust.name"));
+    } else {
+      return mangle_type(snakecase(service_->get_name()));
+    }
   }
   mstch::node rust_request_context() {
     return service_->has_annotation("rust.request_context") ||
@@ -2378,7 +2389,7 @@ void t_mstch_rust_generator::generate_program() {
 
   std::string service_names;
   for (const t_service* service : program_->services()) {
-    service_names += service->name();
+    service_names += named_rust_name(service);
     service_names += '\n';
   }
 

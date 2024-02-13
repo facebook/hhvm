@@ -81,6 +81,7 @@ struct T8 {
 
 // --
 
+@rust.Name{name = "Service1"}
 @rust.RequestContext
 service S1 {
   T6 r();

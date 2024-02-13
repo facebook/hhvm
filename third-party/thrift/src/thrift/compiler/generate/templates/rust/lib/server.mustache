@@ -22,7 +22,7 @@
 #[doc = {{service:docs}}]
 {{/service:docs?}}
 #[::async_trait::async_trait]
-pub trait {{service:name}}: ::std::marker::Send + ::std::marker::Sync + 'static {{>lib/block}}{{!
+pub trait {{service:rust_name}}: ::std::marker::Send + ::std::marker::Sync + 'static {{>lib/block}}{{!
 }}{{#service:requestContext?}}
     type RequestContext: ::std::marker::Sync;{{!
 }}{{/service:requestContext?}}
@@ -62,9 +62,9 @@ pub trait {{service:name}}: ::std::marker::Send + ::std::marker::Sync + 'static 
 }
 
 #[::async_trait::async_trait]
-impl<T> {{service:name}} for ::std::boxed::Box<T>
+impl<T> {{service:rust_name}} for ::std::boxed::Box<T>
 where
-    T: {{service:name}} + Send + Sync + ?Sized,
+    T: {{service:rust_name}} + Send + Sync + ?Sized,
 {{>lib/block}}
 {{#service:requestContext?}}
     type RequestContext = T::RequestContext;{{!
@@ -103,9 +103,9 @@ where
 }
 
 #[::async_trait::async_trait]
-impl<T> {{service:name}} for ::std::sync::Arc<T>
+impl<T> {{service:rust_name}} for ::std::sync::Arc<T>
 where
-    T: {{service:name}} + Send + Sync + ?Sized,
+    T: {{service:rust_name}} + Send + Sync + ?Sized,
 {{>lib/block}}
 {{#service:requestContext?}}
     type RequestContext = T::RequestContext;{{!
@@ -144,9 +144,9 @@ where
 }
 
 
-/// Processor for {{service:name}}'s methods.
+/// Processor for {{service:rust_name}}'s methods.
 #[derive(Clone, Debug)]
-pub struct {{service:name}}Processor<P, H, R, RS{{!
+pub struct {{service:rust_name}}Processor<P, H, R, RS{{!
     }}{{#service:extends?}}, SS{{/service:extends?}}{{!
     }}{{!
 }}> {
@@ -161,12 +161,12 @@ pub struct {{service:name}}Processor<P, H, R, RS{{!
 }
 
 {{#service:rustFunctions}}{{^function:starts_interaction?}}
-struct Args_{{service:name}}_{{function:name}} {
+struct Args_{{service:rust_name}}_{{function:name}} {
     {{#function:args}}
     {{field:rust_name}}: {{>lib/fieldtype}},
     {{/function:args}}
 }
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_{{service:name}}_{{function:name}} {
+impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_{{service:rust_name}}_{{function:name}} {
     #[inline]{{! No cost because there's only one caller; with luck will mitigate move cost of args. }}
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "{{service:name}}.{{function:name}}"))]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
@@ -205,14 +205,14 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_{{
 
 impl<P, H, R, RS{{!
     }}{{#service:extends?}}, SS{{/service:extends?}}{{!
-}}> {{service:name}}Processor<P, H, R, RS{{!
+}}> {{service:rust_name}}Processor<P, H, R, RS{{!
     }}{{#service:extends?}}, SS{{/service:extends?}}{{!
 }}>
 where
     P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
     P::Frame: ::std::marker::Send + 'static,
     P::Deserializer: ::std::marker::Send,
-    H: {{service:name}}{{!
+    H: {{service:rust_name}}{{!
     }}{{#service:requestContext?}}<RequestContext = R>{{/service:requestContext?}},
     R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
     RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
@@ -265,7 +265,7 @@ where
             SERVICE_METHOD_NAME.as_cstr(),
         )?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_{{service:name}}_{{function:name}} = ::fbthrift::Deserialize::read(p)?;
+        let _args: self::Args_{{service:rust_name}}_{{function:name}} = ::fbthrift::Deserialize::read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
@@ -432,13 +432,13 @@ where
 #[::async_trait::async_trait]
 impl<P, H, R, RS{{!
     }}{{#service:extends?}}, SS{{/service:extends?}}{{!
-}}> ::fbthrift::ServiceProcessor<P> for {{service:name}}Processor<P, H, R, RS{{!
+}}> ::fbthrift::ServiceProcessor<P> for {{service:rust_name}}Processor<P, H, R, RS{{!
     }}{{#service:extends?}}, SS{{/service:extends?}}{{!
 }}>
 where
     P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
     P::Deserializer: ::std::marker::Send,
-    H: {{service:name}}{{!
+    H: {{service:rust_name}}{{!
     }}{{#service:requestContext?}}<RequestContext = R>{{/service:requestContext?}},{{!
     }}{{#service:extends?}}
     SS: ::fbthrift::ThriftService<P::Frame>,
@@ -483,7 +483,7 @@ where
             }}{{/function:starts_interaction?}}{{/service:rustFunctions}}
             bad => panic!(
                 "{}: unexpected method idx {}",
-                "{{service:name}}Processor",
+                "{{service:rust_name}}Processor",
                 bad
             ),
         }
@@ -517,7 +517,7 @@ where
             }}{{/function:starts_interaction?}}{{/service:rustFunctions}}
             bad => panic!(
                 "{}: unexpected method idx {}",
-                "{{service:name}}Processor",
+                "{{service:rust_name}}Processor",
                 bad
             ),
         }
@@ -533,14 +533,14 @@ where
 #[::async_trait::async_trait]
 impl<P, H, R, RS{{!
     }}{{#service:extends?}}, SS{{/service:extends?}}{{!
-}}> ::fbthrift::ThriftService<P::Frame> for {{service:name}}Processor<P, H, R, RS{{!
+}}> ::fbthrift::ThriftService<P::Frame> for {{service:rust_name}}Processor<P, H, R, RS{{!
     }}{{#service:extends?}}, SS{{/service:extends?}}{{!
 }}>
 where
     P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
     P::Deserializer: ::std::marker::Send,
     P::Frame: ::std::marker::Send + 'static,
-    H: {{service:name}}{{!
+    H: {{service:rust_name}}{{!
     }}{{#service:requestContext?}}<RequestContext = R>{{/service:requestContext?}},{{!
     }}{{#service:extends?}}
     SS: ::fbthrift::ThriftService<P::Frame, RequestContext = R, ReplyState = RS>,
@@ -622,12 +622,12 @@ where
 }
 
 {{^service:interaction?}}
-/// Construct a new instance of a {{service:name}} service.
+/// Construct a new instance of a {{service:rust_name}} service.
 ///
 /// This is called when a new instance of a Thrift service Processor
 /// is needed for a particular Thrift protocol.
 #[::tracing::instrument(level="debug", skip_all, fields(proto = ?proto))]
-pub fn make_{{service:name}}_server<F, H, R, RS{{!
+pub fn make_{{service:rust_name}}_server<F, H, R, RS{{!
     }}{{#service:extends?}}, SMAKE, SS{{/service:extends?}}{{!
 }}>(
     proto: ::fbthrift::ProtocolID,
@@ -638,7 +638,7 @@ pub fn make_{{service:name}}_server<F, H, R, RS{{!
 ) -> ::std::result::Result<::std::boxed::Box<dyn ::fbthrift::ThriftService<F, Handler = H, RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>, ::fbthrift::ApplicationException>
 where
     F: ::fbthrift::Framing + ::std::marker::Send + ::std::marker::Sync + 'static,
-    H: {{service:name}}{{!
+    H: {{service:rust_name}}{{!
     }}{{#service:requestContext?}}<RequestContext = R>{{/service:requestContext?}},{{!
     }}{{#service:extends?}}
     SMAKE: ::std::ops::FnOnce(::fbthrift::ProtocolID) -> ::std::result::Result<SS, ::fbthrift::ApplicationException>,
@@ -653,14 +653,14 @@ where
 {
     match proto {
         ::fbthrift::ProtocolID::BinaryProtocol => {
-            ::std::result::Result::Ok(::std::boxed::Box::new({{service:name}}Processor::<::fbthrift::BinaryProtocol<F>, H, R, RS{{!
+            ::std::result::Result::Ok(::std::boxed::Box::new({{service:rust_name}}Processor::<::fbthrift::BinaryProtocol<F>, H, R, RS{{!
                 }}{{#service:extends?}}, SS{{/service:extends?}}{{!
             }}>::new(handler{{!
                 }}{{#service:extends?}}, supa(proto)?{{/service:extends?}}{{!
             }})))
         }
         ::fbthrift::ProtocolID::CompactProtocol => {
-            ::std::result::Result::Ok(::std::boxed::Box::new({{service:name}}Processor::<::fbthrift::CompactProtocol<F>, H, R, RS{{!
+            ::std::result::Result::Ok(::std::boxed::Box::new({{service:rust_name}}Processor::<::fbthrift::CompactProtocol<F>, H, R, RS{{!
                 }}{{#service:extends?}}, SS{{/service:extends?}}{{!
             }}>::new(handler{{!
                 }}{{#service:extends?}}, supa(proto)?{{/service:extends?}}{{!

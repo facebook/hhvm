@@ -114,9 +114,9 @@
 //! ```
 
 {{#program:services}}
-pub struct {{service:name}}<'mock> {{>lib/block}}
+pub struct {{service:rust_name}}<'mock> {{>lib/block}}
     {{#service:extends}}
-    pub parent: {{service:client_package}}::mock::{{service:name}}<'mock>,
+    pub parent: {{service:client_package}}::mock::{{service:rust_name}}<'mock>,
     {{/service:extends}}
     {{#service:rustFunctions}}
     {{^function:starts_interaction?}}
@@ -126,11 +126,11 @@ pub struct {{service:name}}<'mock> {{>lib/block}}
     _marker: ::std::marker::PhantomData<&'mock ()>,
 }
 
-impl dyn super::client::{{service:name}} {
-    pub fn mock<'mock>() -> {{service:name}}<'mock> {
-        {{service:name}} {
+impl dyn super::client::{{service:rust_name}} {
+    pub fn mock<'mock>() -> {{service:rust_name}}<'mock> {
+        {{service:rust_name}} {
             {{#service:extends}}
-            parent: <dyn {{service:client_package}}::{{service:name}}>::mock(),
+            parent: <dyn {{service:client_package}}::{{service:rust_name}}>::mock(),
             {{/service:extends}}
             {{#service:rustFunctions}}
             {{^function:starts_interaction?}}
@@ -143,7 +143,7 @@ impl dyn super::client::{{service:name}} {
     }
 }
 
-impl<'mock> super::client::{{service:name}} for {{service:name}}<'mock> {{>lib/block}}{{!
+impl<'mock> super::client::{{service:rust_name}} for {{service:rust_name}}<'mock> {{>lib/block}}{{!
     }}{{#service:rustFunctions}}
     {{^function:starts_interaction?}}{{^function:creates_interaction?}}
     fn {{function:rust_name}}(
@@ -197,12 +197,12 @@ impl<'mock> super::client::{{service:name}} for {{service:name}}<'mock> {{>lib/b
 #[allow(deprecated)]{{! `dependencies` modules are deprecated other than for packagePrefix to use }}
 impl<'mock> {{!
     }}{{#extendedService:service}}{{!
-    }}::std::convert::AsRef<dyn {{extendedService:packagePrefix}}::{{service:name}} + 'mock> {{!
+    }}::std::convert::AsRef<dyn {{extendedService:packagePrefix}}::{{service:rust_name}} + 'mock> {{!
     }}{{/extendedService:service}}{{!
-    }}for {{service:name}}<'mock>
+    }}for {{service:rust_name}}<'mock>
 {
     {{#extendedService:service}}
-    fn as_ref(&self) -> &(dyn {{extendedService:packagePrefix}}::{{service:name}} + 'mock) {
+    fn as_ref(&self) -> &(dyn {{extendedService:packagePrefix}}::{{service:rust_name}} + 'mock) {
         &self.parent
     }
     {{/extendedService:service}}
@@ -242,7 +242,7 @@ pub mod r#impl {{>lib/block}}{{!
                         }}{{/function:args}}{{!
                     }}| panic!(
                         "{}::{} is not mocked",
-                        "{{service:name}}",
+                        "{{service:rust_name}}",
                         "{{function:name}}",
                     ))),
                 }

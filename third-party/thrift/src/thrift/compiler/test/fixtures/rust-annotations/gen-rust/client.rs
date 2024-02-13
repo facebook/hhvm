@@ -22,13 +22,13 @@ pub mod dependencies {
 }
 
 
-/// Client definitions for `S1`.
-pub struct S1Impl<P, T, S = ::fbthrift::NoopSpawner> {
+/// Client definitions for `Service1`.
+pub struct Service1Impl<P, T, S = ::fbthrift::NoopSpawner> {
     transport: T,
     _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
 }
 
-impl<P, T, S> S1Impl<P, T, S>
+impl<P, T, S> Service1Impl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -54,7 +54,7 @@ where
     fn _r_impl(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s1::RError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::service1::RError>> {
         use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
@@ -63,7 +63,7 @@ where
             SERVICE_NAME = "S1";
             SERVICE_METHOD_NAME = "S1.r";
         }
-        let args = self::Args_S1_r {
+        let args = self::Args_Service1_r {
             _phantom: ::std::marker::PhantomData,
         };
 
@@ -83,13 +83,13 @@ where
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let (res, _de): (::std::result::Result<crate::services::s1::RExn, _>, _) =
+            let (res, _de): (::std::result::Result<crate::services::service1::RExn, _>, _) =
                 ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
             let res = match res {
                 ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
                 ::std::result::Result::Err(aexn) =>
-                    ::std::result::Result::Err(crate::errors::s1::RError::ApplicationException(aexn))
+                    ::std::result::Result::Err(crate::errors::service1::RError::ApplicationException(aexn))
             };
             res
         }
@@ -98,29 +98,29 @@ where
     }
 }
 
-pub trait S1: ::std::marker::Send {
+pub trait Service1: ::std::marker::Send {
     fn r(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s1::RError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::service1::RError>>;
 }
 
-pub trait S1Ext<T>: S1
+pub trait Service1Ext<T>: Service1
 where
     T: ::fbthrift::Transport,
 {
     fn r_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s1::RError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::service1::RError>>;
 
     fn transport(&self) -> &T;
 }
 
-struct Args_S1_r<'a> {
+struct Args_Service1_r<'a> {
     _phantom: ::std::marker::PhantomData<&'a ()>,
 }
 
-impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_S1_r<'a> {
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_Service1_r<'a> {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "S1.r"))]
     fn write(&self, p: &mut P) {
@@ -130,7 +130,7 @@ impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_
     }
 }
 
-impl<P, T, S> S1 for S1Impl<P, T, S>
+impl<P, T, S> Service1 for Service1Impl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -141,7 +141,7 @@ where
 {
     fn r(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s1::RError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::service1::RError>> {
         let rpc_options = T::RpcOptions::default();
         self._r_impl(
             rpc_options,
@@ -149,7 +149,7 @@ where
     }
 }
 
-impl<P, T, S> S1Ext<T> for S1Impl<P, T, S>
+impl<P, T, S> Service1Ext<T> for Service1Impl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -161,7 +161,7 @@ where
     fn r_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s1::RError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::service1::RError>> {
         self._r_impl(
             rpc_options,
         )
@@ -173,43 +173,43 @@ where
 }
 
 #[allow(deprecated)]
-impl<'a, S> S1 for S
+impl<'a, S> Service1 for S
 where
-    S: ::std::convert::AsRef<dyn S1 + 'a>,
+    S: ::std::convert::AsRef<dyn Service1 + 'a>,
     S: ::std::marker::Send,
 {
     fn r(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s1::RError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::service1::RError>> {
         self.as_ref().r(
         )
     }
 }
 
 #[allow(deprecated)]
-impl<S, T> S1Ext<T> for S
+impl<S, T> Service1Ext<T> for S
 where
-    S: ::std::convert::AsRef<dyn S1 + 'static>,
-    S: ::std::convert::AsRef<dyn S1Ext<T> + 'static>,
+    S: ::std::convert::AsRef<dyn Service1 + 'static>,
+    S: ::std::convert::AsRef<dyn Service1Ext<T> + 'static>,
     S: ::std::marker::Send,
     T: ::fbthrift::Transport,
 {
     fn r_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s1::RError>> {
-        <Self as ::std::convert::AsRef<dyn S1Ext<T>>>::as_ref(self).r_with_rpc_opts(
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::service1::RError>> {
+        <Self as ::std::convert::AsRef<dyn Service1Ext<T>>>::as_ref(self).r_with_rpc_opts(
             rpc_options,
         )
     }
 
     fn transport(&self) -> &T {
-        <dyn S1Ext<T> as S1Ext<T>>::transport(<Self as ::std::convert::AsRef<dyn S1Ext<T>>>::as_ref(self))
+        <dyn Service1Ext<T> as Service1Ext<T>>::transport(<Self as ::std::convert::AsRef<dyn Service1Ext<T>>>::as_ref(self))
     }
 }
 
 #[derive(Clone)]
-pub struct make_S1;
+pub struct make_Service1;
 
 /// To be called by user directly setting up a client. Avoids
 /// needing ClientFactory trait in scope, avoids unidiomatic
@@ -224,11 +224,11 @@ pub struct make_S1;
 /// let client = <dyn BuckGraphService>::new(protocol, transport);
 /// # };
 /// ```
-impl dyn S1 {
+impl dyn Service1 {
     pub fn new<P, T>(
         protocol: P,
         transport: T,
-    ) -> ::std::sync::Arc<impl S1 + ::std::marker::Send + ::std::marker::Sync + 'static>
+    ) -> ::std::sync::Arc<impl Service1 + ::std::marker::Send + ::std::marker::Sync + 'static>
     where
         P: ::fbthrift::Protocol<Frame = T>,
         T: ::fbthrift::Transport,
@@ -242,7 +242,7 @@ impl dyn S1 {
         protocol: P,
         transport: T,
         spawner: S,
-    ) -> ::std::sync::Arc<impl S1 + ::std::marker::Send + ::std::marker::Sync + 'static>
+    ) -> ::std::sync::Arc<impl Service1 + ::std::marker::Send + ::std::marker::Sync + 'static>
     where
         P: ::fbthrift::Protocol<Frame = T>,
         T: ::fbthrift::Transport,
@@ -251,18 +251,18 @@ impl dyn S1 {
     {
         let _ = protocol;
         let _ = spawner;
-        ::std::sync::Arc::new(S1Impl::<P, T, S>::new(transport))
+        ::std::sync::Arc::new(Service1Impl::<P, T, S>::new(transport))
     }
 }
 
-impl<T> dyn S1Ext<T>
+impl<T> dyn Service1Ext<T>
 where
     T: ::fbthrift::Transport,
 {
     pub fn new<P>(
         protocol: P,
         transport: T,
-    ) -> ::std::sync::Arc<impl S1Ext<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
+    ) -> ::std::sync::Arc<impl Service1Ext<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
     where
         P: ::fbthrift::Protocol<Frame = T>,
         P::Deserializer: ::std::marker::Send,
@@ -275,7 +275,7 @@ where
         protocol: P,
         transport: T,
         spawner: S,
-    ) -> ::std::sync::Arc<impl S1Ext<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
+    ) -> ::std::sync::Arc<impl Service1Ext<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
     where
         P: ::fbthrift::Protocol<Frame = T>,
         P::Deserializer: ::std::marker::Send,
@@ -283,17 +283,17 @@ where
     {
         let _ = protocol;
         let _ = spawner;
-        ::std::sync::Arc::new(S1Impl::<P, T, S>::new(transport))
+        ::std::sync::Arc::new(Service1Impl::<P, T, S>::new(transport))
     }
 }
 
-pub type S1DynClient = <make_S1 as ::fbthrift::ClientFactory>::Api;
-pub type S1Client = ::std::sync::Arc<S1DynClient>;
+pub type Service1DynClient = <make_Service1 as ::fbthrift::ClientFactory>::Api;
+pub type Service1Client = ::std::sync::Arc<Service1DynClient>;
 
 /// The same thing, but to be called from generic contexts where we are
 /// working with a type parameter `C: ClientFactory` to produce clients.
-impl ::fbthrift::ClientFactory for make_S1 {
-    type Api = dyn S1 + ::std::marker::Send + ::std::marker::Sync + 'static;
+impl ::fbthrift::ClientFactory for make_Service1 {
+    type Api = dyn Service1 + ::std::marker::Send + ::std::marker::Sync + 'static;
 
     fn with_spawner<P, T, S>(protocol: P, transport: T, spawner: S) -> ::std::sync::Arc<Self::Api>
     where
@@ -302,7 +302,7 @@ impl ::fbthrift::ClientFactory for make_S1 {
         P::Deserializer: ::std::marker::Send,
         S: ::fbthrift::help::Spawner,
     {
-        <dyn S1>::with_spawner(protocol, transport, spawner)
+        <dyn Service1>::with_spawner(protocol, transport, spawner)
     }
 }
 

@@ -111,6 +111,10 @@ class Name implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
           shape(
           )
         ),
+        '\facebook\thrift\annotation\Service' => \facebook\thrift\annotation\Service::fromShape(
+          shape(
+          )
+        ),
       ],
       'fields' => dict[
       ],

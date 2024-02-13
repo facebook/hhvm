@@ -15,13 +15,13 @@ pub(crate) use ::::services;
 
 
 #[::async_trait::async_trait]
-pub trait S1: ::std::marker::Send + ::std::marker::Sync + 'static {
+pub trait Service1: ::std::marker::Send + ::std::marker::Sync + 'static {
     type RequestContext: ::std::marker::Sync;
     async fn r(
         &self,
         _request_context: &Self::RequestContext,
-    ) -> ::std::result::Result<crate::types::T6, crate::services::s1::RExn> {
-        ::std::result::Result::Err(crate::services::s1::RExn::ApplicationException(
+    ) -> ::std::result::Result<crate::types::T6, crate::services::service1::RExn> {
+        ::std::result::Result::Err(crate::services::service1::RExn::ApplicationException(
             ::fbthrift::ApplicationException::unimplemented_method(
                 "S1",
                 "r",
@@ -31,14 +31,14 @@ pub trait S1: ::std::marker::Send + ::std::marker::Sync + 'static {
 }
 
 #[::async_trait::async_trait]
-impl<T> S1 for ::std::boxed::Box<T>
+impl<T> Service1 for ::std::boxed::Box<T>
 where
-    T: S1 + Send + Sync + ?Sized,
+    T: Service1 + Send + Sync + ?Sized,
 {    type RequestContext = T::RequestContext;
     async fn r(
         &self,
         request_context: &Self::RequestContext,
-    ) -> ::std::result::Result<crate::types::T6, crate::services::s1::RExn> {
+    ) -> ::std::result::Result<crate::types::T6, crate::services::service1::RExn> {
         (**self).r(
             request_context,
         ).await
@@ -46,14 +46,14 @@ where
 }
 
 #[::async_trait::async_trait]
-impl<T> S1 for ::std::sync::Arc<T>
+impl<T> Service1 for ::std::sync::Arc<T>
 where
-    T: S1 + Send + Sync + ?Sized,
+    T: Service1 + Send + Sync + ?Sized,
 {    type RequestContext = T::RequestContext;
     async fn r(
         &self,
         request_context: &Self::RequestContext,
-    ) -> ::std::result::Result<crate::types::T6, crate::services::s1::RExn> {
+    ) -> ::std::result::Result<crate::types::T6, crate::services::service1::RExn> {
         (**self).r(
             request_context,
         ).await
@@ -61,17 +61,17 @@ where
 }
 
 
-/// Processor for S1's methods.
+/// Processor for Service1's methods.
 #[derive(Clone, Debug)]
-pub struct S1Processor<P, H, R, RS> {
+pub struct Service1Processor<P, H, R, RS> {
     service: H,
     supa: ::fbthrift::NullServiceProcessor<P, R, RS>,
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
 
-struct Args_S1_r {
+struct Args_Service1_r {
 }
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_S1_r {
+impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Service1_r {
     #[inline]
     #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "S1.r"))]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
@@ -93,12 +93,12 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_S1
 }
 
 
-impl<P, H, R, RS> S1Processor<P, H, R, RS>
+impl<P, H, R, RS> Service1Processor<P, H, R, RS>
 where
     P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
     P::Frame: ::std::marker::Send + 'static,
     P::Deserializer: ::std::marker::Send,
-    H: S1<RequestContext = R>,
+    H: Service1<RequestContext = R>,
     R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
     RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
     <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
@@ -140,7 +140,7 @@ where
             SERVICE_METHOD_NAME.as_cstr(),
         )?;
         ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
-        let _args: self::Args_S1_r = ::fbthrift::Deserialize::read(p)?;
+        let _args: self::Args_Service1_r = ::fbthrift::Deserialize::read(p)?;
         let bytes_read = ::fbthrift::help::buf_len(&req)?;
         ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, ::fbthrift::SerializedMessage {
             protocol: P::PROTOCOL_ID,
@@ -161,9 +161,9 @@ where
         let res = match res {
             ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
                 ::tracing::trace!(method = "S1.r", "success");
-                crate::services::s1::RExn::Success(res)
+                crate::services::service1::RExn::Success(res)
             }
-            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::s1::RExn::Success(_))) => {
+            ::std::result::Result::Ok(::std::result::Result::Err(crate::services::service1::RExn::Success(_))) => {
                 panic!(
                     "{} attempted to return success via error",
                     "r",
@@ -176,7 +176,7 @@ where
             ::std::result::Result::Err(exn) => {
                 let aexn = ::fbthrift::ApplicationException::handler_panic("S1.r", exn);
                 ::tracing::error!(method = "S1.r", panic = ?aexn);
-                crate::services::s1::RExn::ApplicationException(aexn)
+                crate::services::service1::RExn::ApplicationException(aexn)
             }
         };
 
@@ -194,11 +194,11 @@ where
 }
 
 #[::async_trait::async_trait]
-impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for S1Processor<P, H, R, RS>
+impl<P, H, R, RS> ::fbthrift::ServiceProcessor<P> for Service1Processor<P, H, R, RS>
 where
     P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
     P::Deserializer: ::std::marker::Send,
-    H: S1<RequestContext = R>,
+    H: Service1<RequestContext = R>,
     P::Frame: ::std::marker::Send + 'static,
     R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
     <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
@@ -234,7 +234,7 @@ where
             }
             bad => panic!(
                 "{}: unexpected method idx {}",
-                "S1Processor",
+                "Service1Processor",
                 bad
             ),
         }
@@ -258,7 +258,7 @@ where
         match idx {
             bad => panic!(
                 "{}: unexpected method idx {}",
-                "S1Processor",
+                "Service1Processor",
                 bad
             ),
         }
@@ -269,12 +269,12 @@ where
 }
 
 #[::async_trait::async_trait]
-impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for S1Processor<P, H, R, RS>
+impl<P, H, R, RS> ::fbthrift::ThriftService<P::Frame> for Service1Processor<P, H, R, RS>
 where
     P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
     P::Deserializer: ::std::marker::Send,
     P::Frame: ::std::marker::Send + 'static,
-    H: S1<RequestContext = R>,
+    H: Service1<RequestContext = R>,
     R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
     <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = <P as ::fbthrift::Protocol>::Frame>
         + ::std::marker::Send + ::std::marker::Sync + 'static,
@@ -344,18 +344,18 @@ where
     }
 }
 
-/// Construct a new instance of a S1 service.
+/// Construct a new instance of a Service1 service.
 ///
 /// This is called when a new instance of a Thrift service Processor
 /// is needed for a particular Thrift protocol.
 #[::tracing::instrument(level="debug", skip_all, fields(proto = ?proto))]
-pub fn make_S1_server<F, H, R, RS>(
+pub fn make_Service1_server<F, H, R, RS>(
     proto: ::fbthrift::ProtocolID,
     handler: H,
 ) -> ::std::result::Result<::std::boxed::Box<dyn ::fbthrift::ThriftService<F, Handler = H, RequestContext = R, ReplyState = RS> + ::std::marker::Send + 'static>, ::fbthrift::ApplicationException>
 where
     F: ::fbthrift::Framing + ::std::marker::Send + ::std::marker::Sync + 'static,
-    H: S1<RequestContext = R>,
+    H: Service1<RequestContext = R>,
     R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
     <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = F> + ::std::marker::Send + ::std::marker::Sync + 'static,
     RS: ::fbthrift::ReplyState<F, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
@@ -364,10 +364,10 @@ where
 {
     match proto {
         ::fbthrift::ProtocolID::BinaryProtocol => {
-            ::std::result::Result::Ok(::std::boxed::Box::new(S1Processor::<::fbthrift::BinaryProtocol<F>, H, R, RS>::new(handler)))
+            ::std::result::Result::Ok(::std::boxed::Box::new(Service1Processor::<::fbthrift::BinaryProtocol<F>, H, R, RS>::new(handler)))
         }
         ::fbthrift::ProtocolID::CompactProtocol => {
-            ::std::result::Result::Ok(::std::boxed::Box::new(S1Processor::<::fbthrift::CompactProtocol<F>, H, R, RS>::new(handler)))
+            ::std::result::Result::Ok(::std::boxed::Box::new(Service1Processor::<::fbthrift::CompactProtocol<F>, H, R, RS>::new(handler)))
         }
         bad => {
             ::tracing::error!(method = "S1.", invalid_protocol = ?bad);

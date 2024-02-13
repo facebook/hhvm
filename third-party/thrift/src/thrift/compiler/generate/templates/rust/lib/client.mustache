@@ -18,10 +18,10 @@
 {{#service:interactions}}{{>lib/client}}
 {{/service:interactions}}
 
-/// Client definitions for `{{service:name}}`.
-pub struct {{service:name}}Impl<P, T, S = ::fbthrift::NoopSpawner> {
+/// Client definitions for `{{service:rust_name}}`.
+pub struct {{service:rust_name}}Impl<P, T, S = ::fbthrift::NoopSpawner> {
     {{#service:extends}}
-    parent: {{service:client_package}}::{{service:name}}Impl<P, T, S>,
+    parent: {{service:client_package}}::{{service:rust_name}}Impl<P, T, S>,
     {{/service:extends}}
     {{^service:extends}}
     transport: T,
@@ -29,7 +29,7 @@ pub struct {{service:name}}Impl<P, T, S = ::fbthrift::NoopSpawner> {
     {{/service:extends}}
 }
 
-impl<P, T, S> {{service:name}}Impl<P, T, S>
+impl<P, T, S> {{service:rust_name}}Impl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -43,7 +43,7 @@ where
         transport: T,
     ) -> Self {
         {{#service:extends}}
-        let parent = {{service:client_package}}::{{service:name}}Impl::<P, T, S>::new(transport);
+        let parent = {{service:client_package}}::{{service:rust_name}}Impl::<P, T, S>::new(transport);
         Self { parent }
         {{/service:extends}}
         {{^service:extends}}
@@ -88,7 +88,7 @@ where
             INTERACTION_NAME = "{{function:interaction_name}}";
             {{/function:creates_interaction?}}
         }
-        let args = self::Args_{{service:name}}_{{function:name}} {
+        let args = self::Args_{{service:rust_name}}_{{function:name}} {
             {{#function:args}}
             {{field:rust_name}}: arg_{{field:name}},
             {{/function:args}}
@@ -225,9 +225,9 @@ where
 #[allow(deprecated)]{{! `dependencies` modules are deprecated other than for packagePrefix to use }}
 impl<P, T, S> {{!
     }}{{#extendedService:service}}{{!
-    }}::std::convert::AsRef<dyn {{extendedService:packagePrefix}}::{{service:name}} + 'static> {{!
+    }}::std::convert::AsRef<dyn {{extendedService:packagePrefix}}::{{service:rust_name}} + 'static> {{!
     }}{{/extendedService:service}}{{!
-    }}for {{service:name}}Impl<P, T, S>
+    }}for {{service:rust_name}}Impl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -238,7 +238,7 @@ where
     S: ::fbthrift::help::Spawner,
 {
     fn as_ref(&self) -> &(dyn {{#extendedService:service}}{{!
-        }}{{extendedService:packagePrefix}}::{{service:name}}{{!
+        }}{{extendedService:packagePrefix}}::{{service:rust_name}}{{!
         }}{{/extendedService:service}}{{!
         }} + 'static)
     {
@@ -249,9 +249,9 @@ where
 #[allow(deprecated)]{{! `dependencies` modules are deprecated other than for packagePrefix to use }}
 impl<P, T, S> {{!
     }}{{#extendedService:service}}{{!
-    }}::std::convert::AsRef<dyn {{extendedService:packagePrefix}}::{{service:name}}Ext<T> + 'static> {{!
+    }}::std::convert::AsRef<dyn {{extendedService:packagePrefix}}::{{service:rust_name}}Ext<T> + 'static> {{!
     }}{{/extendedService:service}}{{!
-    }}for {{service:name}}Impl<P, T, S>
+    }}for {{service:rust_name}}Impl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -262,7 +262,7 @@ where
     S: ::fbthrift::help::Spawner,
 {
     fn as_ref(&self) -> &(dyn {{#extendedService:service}}{{!
-        }}{{extendedService:packagePrefix}}::{{service:name}}Ext<T>{{!
+        }}{{extendedService:packagePrefix}}::{{service:rust_name}}Ext<T>{{!
         }}{{/extendedService:service}}{{!
         }} + 'static)
     {
@@ -274,8 +274,8 @@ where
 {{#service:docs?}}
 #[doc = {{service:docs}}]
 {{/service:docs?}}
-pub trait {{service:name}}: {{!
-    }}{{#service:extends}}{{service:client_package}}::{{service:name}} + {{/service:extends}}{{!
+pub trait {{service:rust_name}}: {{!
+    }}{{#service:extends}}{{service:client_package}}::{{service:rust_name}} + {{/service:extends}}{{!
     }}::std::marker::Send {{>lib/block}}{{!
 
     }}{{#service:rustFunctions}}
@@ -298,8 +298,8 @@ pub trait {{service:name}}: {{!
     {{/function:starts_interaction?}}{{/service:rustFunctions}}
 }
 
-pub trait {{service:name}}Ext<T>: {{service:name}}{{!
-    }}{{#service:extends}} + {{service:client_package}}::{{service:name}}Ext<T>{{/service:extends}}
+pub trait {{service:rust_name}}Ext<T>: {{service:rust_name}}{{!
+    }}{{#service:extends}} + {{service:client_package}}::{{service:rust_name}}Ext<T>{{/service:extends}}
 where
     T: ::fbthrift::Transport,
 {{>lib/block}}
@@ -323,14 +323,14 @@ where
 }
 {{#service:rustFunctions}}{{^function:starts_interaction?}}
 
-struct Args_{{service:name}}_{{function:name}}<'a> {
+struct Args_{{service:rust_name}}_{{function:name}}<'a> {
     {{#function:args}}
     {{field:rust_name}}: {{>lib/arg_life}},
     {{/function:args}}
     _phantom: ::std::marker::PhantomData<&'a ()>,
 }
 
-impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_{{service:name}}_{{function:name}}<'a> {
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_{{service:rust_name}}_{{function:name}}<'a> {
     #[inline]{{! No cost because there's only one caller; with luck will mitigate move cost of args. }}
     #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "{{service:name}}.{{function:name}}"))]
     fn write(&self, p: &mut P) {
@@ -350,7 +350,7 @@ impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_
 }
 {{/function:starts_interaction?}}{{/service:rustFunctions}}
 
-impl<P, T, S> {{service:name}} for {{service:name}}Impl<P, T, S>
+impl<P, T, S> {{service:rust_name}} for {{service:rust_name}}Impl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -399,7 +399,7 @@ where
     {{/function:starts_interaction?}}{{/service:rustFunctions}}
 }
 
-impl<P, T, S> {{service:name}}Ext<T> for {{service:name}}Impl<P, T, S>
+impl<P, T, S> {{service:rust_name}}Ext<T> for {{service:rust_name}}Impl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -435,12 +435,12 @@ where
 }
 
 #[allow(deprecated)]{{! `dependencies` modules are deprecated other than for packagePrefix to use }}
-impl<'a, S> {{service:name}} for S
+impl<'a, S> {{service:rust_name}} for S
 where
-    S: ::std::convert::AsRef<dyn {{service:name}} + 'a>,
+    S: ::std::convert::AsRef<dyn {{service:rust_name}} + 'a>,
     {{#service:extendedServers}}
     {{#extendedService:service}}
-    S: {{extendedService:packagePrefix}}::{{service:name}},
+    S: {{extendedService:packagePrefix}}::{{service:rust_name}},
     {{/extendedService:service}}
     {{/service:extendedServers}}
     S: ::std::marker::Send,
@@ -471,14 +471,14 @@ where
 }
 
 #[allow(deprecated)]{{! `dependencies` modules are deprecated other than for packagePrefix to use }}
-impl<S, T> {{service:name}}Ext<T> for S
+impl<S, T> {{service:rust_name}}Ext<T> for S
 where
-    S: ::std::convert::AsRef<dyn {{service:name}} + 'static>,
-    S: ::std::convert::AsRef<dyn {{service:name}}Ext<T> + 'static>,
+    S: ::std::convert::AsRef<dyn {{service:rust_name}} + 'static>,
+    S: ::std::convert::AsRef<dyn {{service:rust_name}}Ext<T> + 'static>,
     {{#service:extendedServers}}
     {{#extendedService:service}}
-    S: {{extendedService:packagePrefix}}::{{service:name}},
-    S: {{extendedService:packagePrefix}}::{{service:name}}Ext<T>,
+    S: {{extendedService:packagePrefix}}::{{service:rust_name}},
+    S: {{extendedService:packagePrefix}}::{{service:rust_name}}Ext<T>,
     {{/extendedService:service}}
     {{/service:extendedServers}}
     S: ::std::marker::Send,
@@ -493,7 +493,7 @@ where
         }}{{/function:args}}
         rpc_options: T::RpcOptions,
     ) -> {{>lib/client_return_type}} {
-        <Self as ::std::convert::AsRef<dyn {{service:name}}Ext<T>>>::as_ref(self).{{function:rust_name}}_with_rpc_opts(
+        <Self as ::std::convert::AsRef<dyn {{service:rust_name}}Ext<T>>>::as_ref(self).{{function:rust_name}}_with_rpc_opts(
             {{#function:args}}
             arg_{{field:name}},
             {{/function:args}}
@@ -504,12 +504,12 @@ where
     {{/service:rustFunctions}}
 
     fn transport(&self) -> &T {
-        <dyn {{service:name}}Ext<T> as {{service:name}}Ext<T>>::transport(<Self as ::std::convert::AsRef<dyn {{service:name}}Ext<T>>>::as_ref(self))
+        <dyn {{service:rust_name}}Ext<T> as {{service:rust_name}}Ext<T>>::transport(<Self as ::std::convert::AsRef<dyn {{service:rust_name}}Ext<T>>>::as_ref(self))
     }
 }
 
 #[derive(Clone)]
-pub struct make_{{service:name}};
+pub struct make_{{service:rust_name}};
 
 /// To be called by user directly setting up a client. Avoids
 /// needing ClientFactory trait in scope, avoids unidiomatic
@@ -524,7 +524,7 @@ pub struct make_{{service:name}};
 /// let client = <dyn BuckGraphService>::new(protocol, transport);
 /// # };
 /// ```
-impl dyn {{service:name}} {
+impl dyn {{service:rust_name}} {
     {{#service:annotations}}
     {{#annotation:value?}}
     pub const {{annotation:rust_name}}: &'static ::std::primitive::str = {{annotation:rust_value}};
@@ -533,7 +533,7 @@ impl dyn {{service:name}} {
     pub fn new<P, T>(
         protocol: P,
         transport: T,
-    ) -> ::std::sync::Arc<impl {{service:name}} + ::std::marker::Send + ::std::marker::Sync + 'static>
+    ) -> ::std::sync::Arc<impl {{service:rust_name}} + ::std::marker::Send + ::std::marker::Sync + 'static>
     where
         P: ::fbthrift::Protocol<Frame = T>,
         T: ::fbthrift::Transport,
@@ -547,7 +547,7 @@ impl dyn {{service:name}} {
         protocol: P,
         transport: T,
         spawner: S,
-    ) -> ::std::sync::Arc<impl {{service:name}} + ::std::marker::Send + ::std::marker::Sync + 'static>
+    ) -> ::std::sync::Arc<impl {{service:rust_name}} + ::std::marker::Send + ::std::marker::Sync + 'static>
     where
         P: ::fbthrift::Protocol<Frame = T>,
         T: ::fbthrift::Transport,
@@ -556,18 +556,18 @@ impl dyn {{service:name}} {
     {
         let _ = protocol;
         let _ = spawner;
-        ::std::sync::Arc::new({{service:name}}Impl::<P, T, S>::new(transport))
+        ::std::sync::Arc::new({{service:rust_name}}Impl::<P, T, S>::new(transport))
     }
 }
 
-impl<T> dyn {{service:name}}Ext<T>
+impl<T> dyn {{service:rust_name}}Ext<T>
 where
     T: ::fbthrift::Transport,
 {
     pub fn new<P>(
         protocol: P,
         transport: T,
-    ) -> ::std::sync::Arc<impl {{service:name}}Ext<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
+    ) -> ::std::sync::Arc<impl {{service:rust_name}}Ext<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
     where
         P: ::fbthrift::Protocol<Frame = T>,
         P::Deserializer: ::std::marker::Send,
@@ -580,7 +580,7 @@ where
         protocol: P,
         transport: T,
         spawner: S,
-    ) -> ::std::sync::Arc<impl {{service:name}}Ext<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
+    ) -> ::std::sync::Arc<impl {{service:rust_name}}Ext<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
     where
         P: ::fbthrift::Protocol<Frame = T>,
         P::Deserializer: ::std::marker::Send,
@@ -588,17 +588,17 @@ where
     {
         let _ = protocol;
         let _ = spawner;
-        ::std::sync::Arc::new({{service:name}}Impl::<P, T, S>::new(transport))
+        ::std::sync::Arc::new({{service:rust_name}}Impl::<P, T, S>::new(transport))
     }
 }
 
-pub type {{service:name}}DynClient = <make_{{service:name}} as ::fbthrift::ClientFactory>::Api;
-pub type {{service:name}}Client = ::std::sync::Arc<{{service:name}}DynClient>;
+pub type {{service:rust_name}}DynClient = <make_{{service:rust_name}} as ::fbthrift::ClientFactory>::Api;
+pub type {{service:rust_name}}Client = ::std::sync::Arc<{{service:rust_name}}DynClient>;
 
 /// The same thing, but to be called from generic contexts where we are
 /// working with a type parameter `C: ClientFactory` to produce clients.
-impl ::fbthrift::ClientFactory for make_{{service:name}} {
-    type Api = dyn {{service:name}} + ::std::marker::Send + ::std::marker::Sync + 'static;
+impl ::fbthrift::ClientFactory for make_{{service:rust_name}} {
+    type Api = dyn {{service:rust_name}} + ::std::marker::Send + ::std::marker::Sync + 'static;
 
     fn with_spawner<P, T, S>(protocol: P, transport: T, spawner: S) -> ::std::sync::Arc<Self::Api>
     where
@@ -607,7 +607,7 @@ impl ::fbthrift::ClientFactory for make_{{service:name}} {
         P::Deserializer: ::std::marker::Send,
         S: ::fbthrift::help::Spawner,
     {
-        <dyn {{service:name}}>::with_spawner(protocol, transport, spawner)
+        <dyn {{service:rust_name}}>::with_spawner(protocol, transport, spawner)
     }
 }
 

@@ -97,24 +97,24 @@
 //! # };
 //! ```
 
-pub struct S1<'mock> {
-    pub r: r#impl::s1::r<'mock>,
+pub struct Service1<'mock> {
+    pub r: r#impl::service1::r<'mock>,
     _marker: ::std::marker::PhantomData<&'mock ()>,
 }
 
-impl dyn super::client::S1 {
-    pub fn mock<'mock>() -> S1<'mock> {
-        S1 {
-            r: r#impl::s1::r::unimplemented(),
+impl dyn super::client::Service1 {
+    pub fn mock<'mock>() -> Service1<'mock> {
+        Service1 {
+            r: r#impl::service1::r::unimplemented(),
             _marker: ::std::marker::PhantomData,
         }
     }
 }
 
-impl<'mock> super::client::S1 for S1<'mock> {
+impl<'mock> super::client::Service1 for Service1<'mock> {
     fn r(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::s1::RError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::T6, crate::errors::service1::RError>> {
         let mut closure = self.r.closure.lock().unwrap();
         let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
         ::std::boxed::Box::pin(::futures::future::ready(closure()))
@@ -245,13 +245,13 @@ impl<'mock> super::client::OneMethodOptOut for OneMethodOptOut<'mock> {
 }
 
 pub mod r#impl {
-    pub mod s1 {
+    pub mod service1 {
 
         pub struct r<'mock> {
             pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
                 dyn ::std::ops::FnMut() -> ::std::result::Result<
                     crate::types::T6,
-                    crate::errors::s1::RError,
+                    crate::errors::service1::RError,
                 > + ::std::marker::Send + ::std::marker::Sync + 'mock,
             >>,
         }
@@ -262,7 +262,7 @@ pub mod r#impl {
                 Self {
                     closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
                         "{}::{} is not mocked",
-                        "S1",
+                        "Service1",
                         "r",
                     ))),
                 }
@@ -277,14 +277,14 @@ pub mod r#impl {
                 *closure = ::std::boxed::Box::new(move || ::std::result::Result::Ok(mock()));
             }
 
-            pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut() -> ::std::result::Result<crate::types::T6, crate::errors::s1::RError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+            pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut() -> ::std::result::Result<crate::types::T6, crate::errors::service1::RError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
                 let mut closure = self.closure.lock().unwrap();
                 *closure = ::std::boxed::Box::new(move || mock());
             }
 
             pub fn throw<E>(&self, exception: E)
             where
-                E: ::std::convert::Into<crate::errors::s1::RError>,
+                E: ::std::convert::Into<crate::errors::service1::RError>,
                 E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
             {
                 let mut closure = self.closure.lock().unwrap();

@@ -17,7 +17,7 @@
 }}
 {{#service:interactions}}{{>lib/errors}}
 {{/service:interactions}}
-/// Error definitions for `{{service:name}}`.
+/// Error definitions for `{{service:rust_name}}`.
 pub mod {{service:snake}} {
 
     {{#service:rust_exceptions}}
@@ -65,21 +65,21 @@ pub mod {{service:snake}} {
                 {{#function:exceptions}}
                 Self::{{field:rust_name}}(inner) => {
                     if f.alternate() {
-                        write!(f, "{{service:name}}::{{function:rust_name}} failed with variant `{{field:rust_name}}`: {:#}", inner)?;
+                        write!(f, "{{service:rust_name}}::{{function:rust_name}} failed with variant `{{field:rust_name}}`: {:#}", inner)?;
                     } else {
-                        write!(f, "{{service:name}}::{{function:rust_name}} failed with {{field:rust_name}}({{#field:type}}{{type:rust_name}}{{/field:type}})")?;
+                        write!(f, "{{service:rust_name}}::{{function:rust_name}} failed with {{field:rust_name}}({{#field:type}}{{type:rust_name}}{{/field:type}})")?;
                     }
                 }
                 {{/function:exceptions}}
                 Self::ApplicationException(inner) => {
-                    write!(f, "{{service:name}}::{{function:rust_name}} failed with ApplicationException")?;
+                    write!(f, "{{service:rust_name}}::{{function:rust_name}} failed with ApplicationException")?;
 
                     if f.alternate() {
                       write!(f, ": {:#}", inner)?;
                     }
                 }
                 Self::ThriftError(inner) => {
-                    write!(f, "{{service:name}}::{{function:rust_name}} failed with ThriftError")?;
+                    write!(f, "{{service:rust_name}}::{{function:rust_name}} failed with ThriftError")?;
 
                     if f.alternate() {
                       write!(f, ": {:#}", inner)?;
@@ -221,21 +221,21 @@ pub mod {{service:snake}} {
                 {{#function:stream_exceptions}}
                 Self::{{field:rust_name}}(inner) => {
                     if f.alternate() {
-                        write!(f, "{{service:name}}::{{function:rust_name}} failed with variant `{{field:rust_name}}`: {:#}", inner)?;
+                        write!(f, "{{service:rust_name}}::{{function:rust_name}} failed with variant `{{field:rust_name}}`: {:#}", inner)?;
                     } else {
-                        write!(f, "{{service:name}}::{{function:rust_name}} failed with {{field:rust_name}}({{#field:type}}{{type:rust_name}}{{/field:type}})")?;
+                        write!(f, "{{service:rust_name}}::{{function:rust_name}} failed with {{field:rust_name}}({{#field:type}}{{type:rust_name}}{{/field:type}})")?;
                     }
                 }
                 {{/function:stream_exceptions}}
                 Self::ApplicationException(inner) => {
-                    write!(f, "{{service:name}}::{{function:rust_name}} failed with ApplicationException")?;
+                    write!(f, "{{service:rust_name}}::{{function:rust_name}} failed with ApplicationException")?;
 
                     if f.alternate() {
                       write!(f, ": {:#}", inner)?;
                     }
                 }
                 Self::ThriftError(inner) => {
-                    write!(f, "{{service:name}}::{{function:rust_name}} failed with ThriftError")?;
+                    write!(f, "{{service:rust_name}}::{{function:rust_name}} failed with ThriftError")?;
 
                     if f.alternate() {
                       write!(f, ": {:#}", inner)?;

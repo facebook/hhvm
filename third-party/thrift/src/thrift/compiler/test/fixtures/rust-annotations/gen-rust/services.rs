@@ -4,8 +4,8 @@
 //! Thrift service definitions for `module`.
 
 
-/// Service definitions for `S1`.
-pub mod s1 {
+/// Service definitions for `Service1`.
+pub mod service1 {
     #[derive(Clone, Debug)]
     pub enum RExn {
         #[doc(hidden)]
@@ -13,11 +13,11 @@ pub mod s1 {
         ApplicationException(::fbthrift::ApplicationException),
     }
 
-    impl ::std::convert::From<crate::errors::s1::RError> for RExn {
-        fn from(err: crate::errors::s1::RError) -> Self {
+    impl ::std::convert::From<crate::errors::service1::RError> for RExn {
+        fn from(err: crate::errors::service1::RError) -> Self {
             match err {
-                crate::errors::s1::RError::ApplicationException(aexn) => RExn::ApplicationException(aexn),
-                crate::errors::s1::RError::ThriftError(err) => RExn::ApplicationException(::fbthrift::ApplicationException {
+                crate::errors::service1::RError::ApplicationException(aexn) => RExn::ApplicationException(aexn),
+                crate::errors::service1::RError::ThriftError(err) => RExn::ApplicationException(::fbthrift::ApplicationException {
                     message: err.to_string(),
                     type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
                 }),

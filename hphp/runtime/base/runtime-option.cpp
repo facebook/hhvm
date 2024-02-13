@@ -778,6 +778,7 @@ std::string RuntimeOption::SourceRoot = Process::GetCurrentDirectory() + '/';
 std::vector<std::string> RuntimeOption::IncludeSearchPaths;
 std::map<std::string, std::string> RuntimeOption::IncludeRoots;
 int RuntimeOption::DeclExtensionCacheSize = 500000;
+bool RuntimeOption::DeclExtensionEnableExternExtractor;
 std::string RuntimeOption::FileCache;
 std::string RuntimeOption::DefaultDocument;
 std::string RuntimeOption::GlobalDocument;
@@ -2124,6 +2125,8 @@ void RuntimeOption::Load(
     IncludeSearchPaths.insert(IncludeSearchPaths.begin(), ".");
 
     Config::Bind(DeclExtensionCacheSize, ini, config, "Ext.Decl.CacheSize", 500000);
+    Config::Bind(DeclExtensionEnableExternExtractor, ini, config,
+                 "Ext.Decl.EnableExternExtractor", false);
 
     Config::Bind(FileCache, ini, config, "Server.FileCache");
     Config::Bind(DefaultDocument, ini, config, "Server.DefaultDocument",

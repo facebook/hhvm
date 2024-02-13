@@ -511,6 +511,7 @@ struct RuntimeOption {
   static std::map<std::string, std::string> IncludeRoots;
 
   static int DeclExtensionCacheSize;
+  static bool DeclExtensionEnableExternExtractor;
 
   static std::string FileCache;
   static std::string DefaultDocument;

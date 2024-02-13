@@ -22,6 +22,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/htonll.h"
 
+#include <folly/lang/Bits.h>
 #include <sys/types.h>
 #include <stdexcept>
 
@@ -213,24 +214,21 @@ struct PHPInputTransport {
     }
   }
 
-  size_t skipNoAdvance(size_t len) {
-    if (len > buffer_used) {
-      len = buffer_used;
-    }
+  void skipNoAdvance(size_t len) {
+    DCHECK_LE(len, length());
     buffer_ptr += len;
     buffer_used -= len;
-    return len;
   }
 
-  size_t getBufferSize() noexcept {
+  size_t length() noexcept {
     return buffer_used;
   }
 
-  const char* getBuffer() noexcept {
-    return buffer_ptr;
+  const uint8_t* data() noexcept {
+    return reinterpret_cast<const uint8_t*>(buffer_ptr);
   }
 
-  void readBytes(void* buf, size_t len) {
+  void pull(void* buf, size_t len) {
     if (LIKELY(len < buffer_used)) {
       // Fast path if we have enough data
       memcpy(buf, buffer_ptr, len);
@@ -253,31 +251,24 @@ struct PHPInputTransport {
     }
   }
 
-  int8_t readI8() {
-    int8_t c;
-    readBytes(&c, 1);
-    return c;
+  template<typename T>
+  T readBE() {
+    return folly::Endian::big(read<T>());
   }
 
-  int16_t readI16() {
-    int16_t c;
-    readBytes(&c, 2);
-    return (int16_t)ntohs(c);
-  }
-
-  uint32_t readU32() {
-    uint32_t c;
-    readBytes(&c, 4);
-    return (uint32_t)ntohl(c);
-  }
-
-  int32_t readI32() {
-    int32_t c;
-    readBytes(&c, 4);
-    return (int32_t)ntohl(c);
+  template<typename T>
+  T readLE() {
+    return folly::Endian::little(read<T>());
   }
 
 private:
+  template<typename T>
+  T read() {
+    T ret;
+    pull(&ret, sizeof(T));
+    return ret;
+  }
+
   void refill(size_t len) {
     assertx(buffer_used == 0);
     len = std::max<size_t>(len, SIZE);

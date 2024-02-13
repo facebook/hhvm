@@ -60,7 +60,7 @@ namespace {
 const StaticString SKIP_CHECKS_ATTR("ThriftDeprecatedSkipSerializerChecks");
 
 // Assumes that at least 10 bytes available in the input buffer
-static int64_t readVarintFast(const char **ptr) {
+static int64_t readVarintFast(const uint8_t **ptr) {
   uint8_t byte;
   uint64_t result;
 
@@ -937,7 +937,7 @@ struct CompactReader {
           }
 
         case T_BYTE:
-          return transport.readI8();
+          return transport.template readBE<int8_t>();
 
         case T_I16:
         case T_I32:
@@ -947,7 +947,7 @@ struct CompactReader {
 
         case T_DOUBLE: {
             uint64_t i;
-            transport.readBytes(&i, 8);
+            transport.pull(&i, 8);
             if (version >= VERSION_DOUBLE_BE) {
               i = ntohll(i);
             } else {
@@ -958,7 +958,7 @@ struct CompactReader {
 
         case T_FLOAT: {
             uint32_t i;
-            transport.readBytes(&i, 4);
+            transport.pull(&i, 4);
             i = ntohl(i);
             return folly::bit_cast<float>(i);
           }
@@ -1084,9 +1084,9 @@ struct CompactReader {
     using IntMapInserter = folly::Function<void(int64_t, int64_t)>;
 
     void readIntMap(IntMapInserter inserter, uint32_t size) {
-      const char *startPtr = transport.getBuffer();
-      const char *ptr = startPtr;
-      const char *endPtr = startPtr + transport.getBufferSize() - 20;
+      const uint8_t *startPtr = transport.data();
+      const uint8_t *ptr = startPtr;
+      const uint8_t *endPtr = startPtr + transport.length() - 20;
       while ((ptr <= endPtr) && (size > 0)) {
         // Because of 20B offset from the end of the buffer
         // we have enough data to read 2 Varints fast
@@ -1096,9 +1096,10 @@ struct CompactReader {
         size--;
       }
       intptr_t skipLen = ptr - startPtr;
-      if (transport.skipNoAdvance(skipLen) != skipLen) {
+      if (skipLen > transport.length()) {
         thrift_error("Invalid skip value", ERR_INVALID_DATA);
       }
+      transport.skipNoAdvance(skipLen);
       // Finish tail using slow byte-by-byte reading
       while (size > 0) {
         int64_t key = readI();
@@ -1204,9 +1205,9 @@ struct CompactReader {
     using IntListInserter = folly::Function<void(int64_t)>;
 
     void readIntList(IntListInserter inserter, size_t size) {
-      const char *startPtr = transport.getBuffer();
-      const char *ptr = startPtr;
-      const char *endPtr = startPtr + transport.getBufferSize() - 10;
+      const uint8_t *startPtr = transport.data();
+      const uint8_t *ptr = startPtr;
+      const uint8_t *endPtr = startPtr + transport.length() - 10;
       while ((ptr <= endPtr) && (size > 0)) {
         // Because of 10B offset from the end of the buffer
         // we have enough data to read 1 Varint fast
@@ -1214,9 +1215,10 @@ struct CompactReader {
         size--;
       }
       intptr_t skipLen = ptr - startPtr;
-      if (transport.skipNoAdvance(skipLen) != skipLen) {
+      if (skipLen > transport.length()) {
         thrift_error("Invalid skip value", ERR_INVALID_DATA);
       }
+      transport.skipNoAdvance(skipLen);
       // Finish tail using slow byte-by-byte reading
       while (size > 0) {
         inserter(readI());
@@ -1233,7 +1235,7 @@ struct CompactReader {
       VecInit arr(size);
       if (spec.val().adapter == nullptr && valueType == T_BYTE) {
         for (uint32_t i = 0; i < size; i++) {
-          arr.append(transport.readI8());
+          arr.append(transport.template readBE<int8_t>());
         }
       } else if (spec.val().adapter == nullptr && typeIs16to64Int(valueType)) {
         readIntList([&](int64_t val) { arr.append(val); }, size);
@@ -1365,7 +1367,7 @@ struct CompactReader {
     }
 
     uint8_t readUByte(void) {
-      return transport.readI8();
+      return transport.template readBE<int8_t>();
     }
 
     int64_t readI(void) {
@@ -1426,7 +1428,7 @@ struct CompactReader {
         String s = String(size, ReserveString);
         char* buf = s.mutableData();
 
-        transport.readBytes(buf, size);
+        transport.pull(buf, size);
         s.setSize(size);
         return s;
       } else {

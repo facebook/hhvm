@@ -6,8 +6,14 @@ function main(): void {
   HH\autoload_is_native();
 
   // === FileDecls should succeed parsing this text
+  /* Parsing in a loop to trigger extractor logic
+   * Override config.opts to include -vExt.Decl.EnableExternExtractor=true
+   * to test Memcache extractor
+  */
   $filepath = __DIR__.'/FileDecls_testcontent.txt';
-  $instance = HH\FileDecls::parsePath($filepath);
+  for ($i = 0; $i < 5; $i++) {
+    $instance = HH\FileDecls::parsePath($filepath);
+  }
 
   echo "=== Methods\n";
   var_dump($instance->getMethods('MyClass'));

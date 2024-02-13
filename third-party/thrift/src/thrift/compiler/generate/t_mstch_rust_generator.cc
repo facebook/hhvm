@@ -2376,6 +2376,12 @@ void t_mstch_rust_generator::generate_program() {
     namespace_rust = program_->name();
   }
 
+  std::string service_names;
+  for (const t_service* service : program_->services()) {
+    service_names += service->name();
+    service_names += '\n';
+  }
+
   set_mstch_factories();
 
   const auto& prog = cached_program(program_);
@@ -2388,6 +2394,7 @@ void t_mstch_rust_generator::generate_program() {
   render_to_file(prog, "server.rs", "server.rs");
   render_to_file(prog, "mock.rs", "mock.rs");
   write_output("namespace", namespace_rust);
+  write_output("service-names", service_names);
 }
 
 void t_mstch_rust_generator::set_mstch_factories() {

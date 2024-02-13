@@ -5853,8 +5853,8 @@ void t_hack_generator::generate_process_function(
   indent_down();
   int exc_num = 0;
   for (const t_field& x : get_elems(tfunction->exceptions())) {
-    f_service_ << indent() << "} catch (" << hack_name(x.get_type()) << " $exc"
-               << exc_num << ") {\n";
+    f_service_ << indent() << "} catch (" << type_to_typehint(x.get_type())
+               << " $exc" << exc_num << ") {\n";
     if (tfunction->qualifier() != t_function_qualifier::oneway) {
       indent_up();
       f_service_ << indent()

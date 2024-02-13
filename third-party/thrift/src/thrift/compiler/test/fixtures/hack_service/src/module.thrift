@@ -26,3 +26,7 @@ struct TestStruct {
 
 service FooHackService {
 }
+
+exception FooException {}
+
+typedef FooException ExTypedef

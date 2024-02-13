@@ -27,5 +27,5 @@ struct FBStruct {
 }
 
 service TestService extends module.FooHackService {
-  i32 ping(1: string str_arg);
+  i32 ping(1: string str_arg) throws (1: module.ExTypedef ex);
 }

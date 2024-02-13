@@ -16,7 +16,8 @@ interface TestServiceAsyncIf extends \foo\hack_ns\FooHackServiceAsyncIf {
   /**
    * Original thrift definition:-
    * i32
-   *   ping(1: string str_arg);
+   *   ping(1: string str_arg)
+   *   throws (1: module.ExTypedef ex);
    */
   public function ping(string $str_arg): Awaitable<int>;
 }
@@ -29,7 +30,8 @@ interface TestServiceIf extends \foo\hack_ns\FooHackServiceIf {
   /**
    * Original thrift definition:-
    * i32
-   *   ping(1: string str_arg);
+   *   ping(1: string str_arg)
+   *   throws (1: module.ExTypedef ex);
    */
   public function ping(string $str_arg): int;
 }
@@ -49,7 +51,8 @@ interface TestServiceClientIf extends \foo\hack_ns\FooHackServiceClientIf {
   /**
    * Original thrift definition:-
    * i32
-   *   ping(1: string str_arg);
+   *   ping(1: string str_arg)
+   *   throws (1: module.ExTypedef ex);
    */
   public function ping(string $str_arg): Awaitable<int>;
 }
@@ -69,7 +72,8 @@ class TestServiceAsyncClient extends \foo\hack_ns\FooHackServiceAsyncClient impl
   /**
    * Original thrift definition:-
    * i32
-   *   ping(1: string str_arg);
+   *   ping(1: string str_arg)
+   *   throws (1: module.ExTypedef ex);
    */
   public async function ping(string $str_arg): Awaitable<int> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
@@ -93,7 +97,8 @@ class TestServiceClient extends \foo\hack_ns\FooHackServiceClient implements Tes
   /**
    * Original thrift definition:-
    * i32
-   *   ping(1: string str_arg);
+   *   ping(1: string str_arg)
+   *   throws (1: module.ExTypedef ex);
    */
   public async function ping(string $str_arg): Awaitable<int> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
@@ -120,6 +125,192 @@ class TestServiceClient extends \foo\hack_ns\FooHackServiceClient implements Tes
     return $this->recvImplHelper(\hack_ns2\TestService_ping_result::class, "ping", false, $expectedsequenceid);
   }
 }
+
+abstract class TestServiceAsyncProcessorBase extends \foo\hack_ns\FooHackServiceAsyncProcessorBase {
+  abstract const type TThriftIf as TestServiceAsyncIf;
+  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = TestServiceStaticMetadata::class;
+  const string THRIFT_SVC_NAME = 'TestService';
+
+  protected async function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
+    $reply_type = \TMessageType::REPLY;
+
+    $this->eventHandler_->preRead($handler_ctx, 'ping', dict[]);
+
+    if ($input is \TBinaryProtocolAccelerated) {
+      $args = \thrift_protocol_read_binary_struct($input, '\hack_ns2\TestService_ping_args');
+    } else if ($input is \TCompactProtocolAccelerated) {
+      $args = \thrift_protocol_read_compact_struct($input, '\hack_ns2\TestService_ping_args');
+    } else {
+      $args = \hack_ns2\TestService_ping_args::withDefaultValues();
+      $args->read($input);
+    }
+    $input->readMessageEnd();
+    $this->eventHandler_->postRead($handler_ctx, 'ping', $args);
+    $result = \hack_ns2\TestService_ping_result::withDefaultValues();
+    try {
+      $this->eventHandler_->preExec($handler_ctx, '\hack_ns2\TestService', 'ping', $args);
+      $result->success = await $this->handler->ping($args->str_arg);
+      $this->eventHandler_->postExec($handler_ctx, 'ping', $result);
+    } catch (\foo\hack_ns\FooException $exc0) {
+      $this->eventHandler_->handlerException($handler_ctx, 'ping', $exc0);
+      $result->ex = $exc0;
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $this->eventHandler_->handlerError($handler_ctx, 'ping', $ex);
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    $this->eventHandler_->preWrite($handler_ctx, 'ping', $result);
+    if ($output is \TBinaryProtocolAccelerated)
+    {
+      \thrift_protocol_write_binary($output, 'ping', $reply_type, $result, $seqid, $output->isStrictWrite());
+    }
+    else if ($output is \TCompactProtocolAccelerated)
+    {
+      \thrift_protocol_write_compact2($output, 'ping', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
+    }
+    else
+    {
+      $output->writeMessageBegin("ping", $reply_type, $seqid);
+      $result->write($output);
+      $output->writeMessageEnd();
+      $output->getTransport()->flush();
+    }
+    $this->eventHandler_->postWrite($handler_ctx, 'ping', $result);
+  }
+  protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $reply_type = \TMessageType::REPLY;
+
+    if ($input is \TBinaryProtocolAccelerated) {
+      $args = \thrift_protocol_read_binary_struct($input, '\tmeta_ThriftMetadataService_getThriftServiceMetadata_args');
+    } else if ($input is \TCompactProtocolAccelerated) {
+      $args = \thrift_protocol_read_compact_struct($input, '\tmeta_ThriftMetadataService_getThriftServiceMetadata_args');
+    } else {
+      $args = \tmeta_ThriftMetadataService_getThriftServiceMetadata_args::withDefaultValues();
+      $args->read($input);
+    }
+    $input->readMessageEnd();
+    $result = \tmeta_ThriftMetadataService_getThriftServiceMetadata_result::withDefaultValues();
+    try {
+      $result->success = TestServiceStaticMetadata::getServiceMetadataResponse();
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    if ($output is \TBinaryProtocolAccelerated)
+    {
+      \thrift_protocol_write_binary($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, $output->isStrictWrite());
+    }
+    else if ($output is \TCompactProtocolAccelerated)
+    {
+      \thrift_protocol_write_compact2($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
+    }
+    else
+    {
+      $output->writeMessageBegin("getThriftServiceMetadata", $reply_type, $seqid);
+      $result->write($output);
+      $output->writeMessageEnd();
+      $output->getTransport()->flush();
+    }
+  }
+}
+class TestServiceAsyncProcessor extends TestServiceAsyncProcessorBase {
+  const type TThriftIf = TestServiceAsyncIf;
+}
+
+abstract class TestServiceSyncProcessorBase extends \foo\hack_ns\FooHackServiceSyncProcessorBase {
+  abstract const type TThriftIf as TestServiceIf;
+  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = TestServiceStaticMetadata::class;
+  const string THRIFT_SVC_NAME = 'TestService';
+
+  protected function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): void {
+    $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
+    $reply_type = \TMessageType::REPLY;
+
+    $this->eventHandler_->preRead($handler_ctx, 'ping', dict[]);
+
+    if ($input is \TBinaryProtocolAccelerated) {
+      $args = \thrift_protocol_read_binary_struct($input, '\hack_ns2\TestService_ping_args');
+    } else if ($input is \TCompactProtocolAccelerated) {
+      $args = \thrift_protocol_read_compact_struct($input, '\hack_ns2\TestService_ping_args');
+    } else {
+      $args = \hack_ns2\TestService_ping_args::withDefaultValues();
+      $args->read($input);
+    }
+    $input->readMessageEnd();
+    $this->eventHandler_->postRead($handler_ctx, 'ping', $args);
+    $result = \hack_ns2\TestService_ping_result::withDefaultValues();
+    try {
+      $this->eventHandler_->preExec($handler_ctx, '\hack_ns2\TestService', 'ping', $args);
+      $result->success = $this->handler->ping($args->str_arg);
+      $this->eventHandler_->postExec($handler_ctx, 'ping', $result);
+    } catch (\foo\hack_ns\FooException $exc0) {
+      $this->eventHandler_->handlerException($handler_ctx, 'ping', $exc0);
+      $result->ex = $exc0;
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $this->eventHandler_->handlerError($handler_ctx, 'ping', $ex);
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    $this->eventHandler_->preWrite($handler_ctx, 'ping', $result);
+    if ($output is \TBinaryProtocolAccelerated)
+    {
+      \thrift_protocol_write_binary($output, 'ping', $reply_type, $result, $seqid, $output->isStrictWrite());
+    }
+    else if ($output is \TCompactProtocolAccelerated)
+    {
+      \thrift_protocol_write_compact2($output, 'ping', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
+    }
+    else
+    {
+      $output->writeMessageBegin("ping", $reply_type, $seqid);
+      $result->write($output);
+      $output->writeMessageEnd();
+      $output->getTransport()->flush();
+    }
+    $this->eventHandler_->postWrite($handler_ctx, 'ping', $result);
+  }
+  protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
+    $reply_type = \TMessageType::REPLY;
+
+    if ($input is \TBinaryProtocolAccelerated) {
+      $args = \thrift_protocol_read_binary_struct($input, '\tmeta_ThriftMetadataService_getThriftServiceMetadata_args');
+    } else if ($input is \TCompactProtocolAccelerated) {
+      $args = \thrift_protocol_read_compact_struct($input, '\tmeta_ThriftMetadataService_getThriftServiceMetadata_args');
+    } else {
+      $args = \tmeta_ThriftMetadataService_getThriftServiceMetadata_args::withDefaultValues();
+      $args->read($input);
+    }
+    $input->readMessageEnd();
+    $result = \tmeta_ThriftMetadataService_getThriftServiceMetadata_result::withDefaultValues();
+    try {
+      $result->success = TestServiceStaticMetadata::getServiceMetadataResponse();
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    if ($output is \TBinaryProtocolAccelerated)
+    {
+      \thrift_protocol_write_binary($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, $output->isStrictWrite());
+    }
+    else if ($output is \TCompactProtocolAccelerated)
+    {
+      \thrift_protocol_write_compact2($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
+    }
+    else
+    {
+      $output->writeMessageBegin("getThriftServiceMetadata", $reply_type, $seqid);
+      $result->write($output);
+      $output->writeMessageEnd();
+      $output->getTransport()->flush();
+    }
+  }
+}
+class TestServiceSyncProcessor extends TestServiceSyncProcessorBase {
+  const type TThriftIf = TestServiceIf;
+}
+// For backwards compatibility
+class TestServiceProcessor extends TestServiceSyncProcessor {}
 
 // HELPER FUNCTIONS AND STRUCTURES
 
@@ -207,20 +398,29 @@ class TestService_ping_result extends \ThriftSyncStructWithResult implements \IT
       'var' => 'success',
       'type' => \TType::I32,
     ),
+    1 => shape(
+      'var' => 'ex',
+      'type' => \TType::STRUCT,
+      'class' => \foo\hack_ns\FooException::class,
+    ),
   ];
   const dict<string, int> FIELDMAP = dict[
     'success' => 0,
+    'ex' => 1,
   ];
 
   const type TConstructorShape = shape(
     ?'success' => ?this::TResult,
+    ?'ex' => ?\foo\hack_ns\FooException,
   );
 
-  const int STRUCTURAL_ID = 3865318819874171525;
+  const int STRUCTURAL_ID = 8023834040554497270;
   public ?this::TResult $success;
+  public ?\foo\hack_ns\FooException $ex;
 
-  public function __construct(?this::TResult $success = null)[] {
+  public function __construct(?this::TResult $success = null, ?\foo\hack_ns\FooException $ex = null)[] {
     $this->success = $success;
+    $this->ex = $ex;
   }
 
   public static function withDefaultValues()[]: this {
@@ -230,6 +430,7 @@ class TestService_ping_result extends \ThriftSyncStructWithResult implements \IT
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'success'),
+      Shapes::idx($shape, 'ex'),
     );
   }
 
@@ -253,6 +454,30 @@ class TestService_ping_result extends \ThriftSyncStructWithResult implements \IT
               "name" => "success",
             )
           ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.ExTypedef",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
+                            shape(
+                              "name" => "module.FooException",
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "ex",
+            )
+          ),
         ],
         "is_union" => false,
       )
@@ -271,6 +496,12 @@ class TestService_ping_result extends \ThriftSyncStructWithResult implements \IT
     return \TCompactSerializer::serialize($this);
   }
 
+  public function checkForException(): ?\TException {
+    if ($this->ex !== null) {
+      return $this->ex;
+    }
+    return null;
+  }
 }
 
 class TestServiceStaticMetadata implements \IThriftServiceStaticMetadata {
@@ -297,6 +528,32 @@ class TestServiceStaticMetadata implements \IThriftServiceStaticMetadata {
                       )
                     ),
                     "name" => "str_arg",
+                  )
+                ),
+              ],
+              "exceptions" => vec[
+                \tmeta_ThriftField::fromShape(
+                  shape(
+                    "id" => 1,
+                    "type" => \tmeta_ThriftType::fromShape(
+                      shape(
+                        "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                          shape(
+                            "name" => "module.ExTypedef",
+                            "underlyingType" => \tmeta_ThriftType::fromShape(
+                              shape(
+                                "t_struct" => \tmeta_ThriftStructType::fromShape(
+                                  shape(
+                                    "name" => "module.FooException",
+                                  )
+                                ),
+                              )
+                            ),
+                          )
+                        ),
+                      )
+                    ),
+                    "name" => "ex",
                   )
                 ),
               ],
@@ -328,6 +585,7 @@ class TestServiceStaticMetadata implements \IThriftServiceStaticMetadata {
             'structs' => dict[
             ],
             'exceptions' => dict[
+              'module.FooException' => \foo\hack_ns\FooException::getExceptionMetadata(),
             ],
             'services' => dict[
               'module.FooHackService' => \foo\hack_ns\FooHackServiceStaticMetadata::getServiceMetadata(),

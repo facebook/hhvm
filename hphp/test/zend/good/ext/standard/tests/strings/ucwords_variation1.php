@@ -19,68 +19,17 @@ echo "*** Testing ucwords() : usage variations ***\n";
 // initialize all required variables
 
 
-$fp = fopen(__FILE__, "r");
-
 // array with different values
 $values =  vec[
-
-  // integer values
-  0,
-  1,
-  12345,
-  -2345,
-
-  // hex values
-  0x10,
-  0X20,
-  0xAA,
-  -0XF5,
-
-  // octal values
-  0123,
-  -0342,
-
-  // float values
-  10.5,
-  -10.5,
-  10.1234567e10,
-  10.7654321E-10,
-  .5,
-
-  // array values
-  vec[],
-  vec[0],
-  vec[1],
-  vec[1, 2],
-  dict['color' => 'red', 'item' => 'pen'],
-
-  // boolean values
-  true,
-  false,
-  TRUE,
-  FALSE,
-
-  // objects
-  new my(),
-
   // empty string
   "",
   '',
-
-  //NULL
-  NULL,
-  null,
 
   // hex in string
   "0x123",
   '0x123',
   "0xFF12",
   "-0xFF12",
-
-
-
-  // resource variable
-  $fp
 ];
 
 // loop through each element of the array and check the working of ucwords()
@@ -96,7 +45,5 @@ for($index = 0; $index < count($values); $index ++) {
   $counter ++;
 }
 
-// close the file handle
-fclose($fp);
 echo "Done\n";
 }

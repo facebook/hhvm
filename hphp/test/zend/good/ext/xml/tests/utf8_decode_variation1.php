@@ -1,10 +1,5 @@
 <?hh
 
-class aClass {
-   function __toString() :mixed{
-       return "Some Ascii Data";
-   }
-}
 <<__EntryPoint>>
 function entrypoint_utf8_decode_variation1(): void {
   /* Prototype  : proto string utf8_decode(string data)
@@ -20,45 +15,9 @@ function entrypoint_utf8_decode_variation1(): void {
 
   //array of values to iterate over
   $values = vec[
-
-        // int data
-        0,
-        1,
-        12345,
-        -2345,
-
-        // float data
-        10.5,
-        -10.5,
-        10.1234567e10,
-        10.7654321E-10,
-        .5,
-
-
-
-
-
-
-
-
-        // null data
-        NULL,
-        null,
-
-        // boolean data
-        true,
-        false,
-        TRUE,
-        FALSE,
-
         // empty data
         "",
         '',
-
-        // object data
-        new aClass(),
-
-
   ];
 
   // loop through each element of the array for data

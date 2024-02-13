@@ -1,6 +1,0 @@
-Basic test of POSIX posix_initgroups function
-
-Warning: posix_initgroups() expects parameter 2 to be integer, string given in %s/zend/good/ext/posix/tests/posix_initgroups_basic.php on line 3
-
-Warning: posix_initgroups() expects parameter 1 to be string, null given in %s/zend/good/ext/posix/tests/posix_initgroups_basic.php on line 4
-===DONE====

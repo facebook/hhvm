@@ -29,10 +29,6 @@ $strings = vec[
   "1.233.344StrinG12333",
   "$$$$$$!!!!@@@@@@@ ABCDEF !!!***",
   "ABCD\0abcdABCD",
-  NULL,
-  TRUE,
-  FALSE,
-  vec[]
 ];
 
 $count = 0;

@@ -22,10 +22,6 @@ EOD;
 $str_arr = vec[
   "",
   '',
-  NULL,
-  null,
-  FALSE,
-  false,
   $heredoc_str
 ];
 

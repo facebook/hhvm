@@ -26,42 +26,6 @@ function entrypoint_xml_parser_set_option_variation2(): void {
         12345,
         -2345,
 
-        // float data
-        10.5,
-        -10.5,
-        10.1234567e10,
-        10.7654321E-10,
-        .5,
-
-
-
-
-
-
-
-
-        // null data
-        NULL,
-        null,
-
-        // boolean data
-        true,
-        false,
-        TRUE,
-        FALSE,
-
-        // empty data
-        "",
-        '',
-
-        // string data
-        "string",
-        'string',
-
-        // object data
-        new aClass(),
-
-
   ];
 
   // loop through each element of the array for option

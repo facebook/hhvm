@@ -1,0 +1,14 @@
+*** Testing parse_url() : usage variations ***
+
+Arg value 
+dict(1) {
+  ["path"]=>
+  string(0) ""
+}
+
+Arg value 
+dict(1) {
+  ["path"]=>
+  string(0) ""
+}
+Done

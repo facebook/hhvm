@@ -3,176 +3,22 @@
 --- Testing wordwrap() by supplying different values for 'break' argument ---
 -- Iteration 1 --
 
-Warning: wordwrap() expects parameter 3 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 75
+Warning: Break string cannot be empty in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 36
+bool(false)
 
-Warning: wordwrap() expects parameter 3 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 79
+Warning: Break string cannot be empty in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 40
+bool(false)
 
-Warning: wordwrap() expects parameter 3 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 83
+Warning: Break string cannot be empty in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 44
+bool(false)
 -- Iteration 2 --
 
-Warning: wordwrap() expects parameter 3 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 75
-
-Warning: wordwrap() expects parameter 3 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 79
-
-Warning: wordwrap() expects parameter 3 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 83
--- Iteration 3 --
-
-Warning: wordwrap() expects parameter 3 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 75
-
-Warning: wordwrap() expects parameter 3 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 79
-
-Warning: wordwrap() expects parameter 3 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 83
--- Iteration 4 --
-
-Warning: wordwrap() expects parameter 3 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 75
-
-Warning: wordwrap() expects parameter 3 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 79
-
-Warning: wordwrap() expects parameter 3 to be string, integer given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 83
--- Iteration 5 --
-
-Warning: wordwrap() expects parameter 3 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 75
-
-Warning: wordwrap() expects parameter 3 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 79
-
-Warning: wordwrap() expects parameter 3 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 83
--- Iteration 6 --
-
-Warning: wordwrap() expects parameter 3 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 75
-
-Warning: wordwrap() expects parameter 3 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 79
-
-Warning: wordwrap() expects parameter 3 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 83
--- Iteration 7 --
-
-Warning: wordwrap() expects parameter 3 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 75
-
-Warning: wordwrap() expects parameter 3 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 79
-
-Warning: wordwrap() expects parameter 3 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 83
--- Iteration 8 --
-
-Warning: wordwrap() expects parameter 3 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 75
-
-Warning: wordwrap() expects parameter 3 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 79
-
-Warning: wordwrap() expects parameter 3 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 83
--- Iteration 9 --
-
-Warning: wordwrap() expects parameter 3 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 75
-
-Warning: wordwrap() expects parameter 3 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 79
-
-Warning: wordwrap() expects parameter 3 to be string, double given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 83
--- Iteration 10 --
-
-Warning: wordwrap() expects parameter 3 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 75
-
-Warning: wordwrap() expects parameter 3 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 79
-
-Warning: wordwrap() expects parameter 3 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 83
--- Iteration 11 --
-
-Warning: wordwrap() expects parameter 3 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 75
-
-Warning: wordwrap() expects parameter 3 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 79
-
-Warning: wordwrap() expects parameter 3 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 83
--- Iteration 12 --
-
-Warning: wordwrap() expects parameter 3 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 75
-
-Warning: wordwrap() expects parameter 3 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 79
-
-Warning: wordwrap() expects parameter 3 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 83
--- Iteration 13 --
-
-Warning: wordwrap() expects parameter 3 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 75
-
-Warning: wordwrap() expects parameter 3 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 79
-
-Warning: wordwrap() expects parameter 3 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 83
--- Iteration 14 --
-
-Warning: wordwrap() expects parameter 3 to be string, dict given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 75
-
-Warning: wordwrap() expects parameter 3 to be string, dict given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 79
-
-Warning: wordwrap() expects parameter 3 to be string, dict given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 83
--- Iteration 15 --
-
-Warning: wordwrap() expects parameter 3 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 75
-
-Warning: wordwrap() expects parameter 3 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 79
-
-Warning: wordwrap() expects parameter 3 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 83
--- Iteration 16 --
-
-Warning: wordwrap() expects parameter 3 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 75
-
-Warning: wordwrap() expects parameter 3 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 79
-
-Warning: wordwrap() expects parameter 3 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 83
--- Iteration 17 --
-
-Warning: wordwrap() expects parameter 3 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 75
-
-Warning: wordwrap() expects parameter 3 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 79
-
-Warning: wordwrap() expects parameter 3 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 83
--- Iteration 18 --
-
-Warning: wordwrap() expects parameter 3 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 75
-
-Warning: wordwrap() expects parameter 3 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 79
-
-Warning: wordwrap() expects parameter 3 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 83
--- Iteration 19 --
-
-Warning: wordwrap() expects parameter 3 to be string, object given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 75
-
-Warning: wordwrap() expects parameter 3 to be string, object given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 79
-
-Warning: wordwrap() expects parameter 3 to be string, object given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 83
--- Iteration 20 --
-
-Warning: Break string cannot be empty in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 75
+Warning: Break string cannot be empty in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 36
 bool(false)
 
-Warning: Break string cannot be empty in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 79
+Warning: Break string cannot be empty in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 40
 bool(false)
 
-Warning: Break string cannot be empty in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 83
+Warning: Break string cannot be empty in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 44
 bool(false)
--- Iteration 21 --
-
-Warning: Break string cannot be empty in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 75
-bool(false)
-
-Warning: Break string cannot be empty in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 79
-bool(false)
-
-Warning: Break string cannot be empty in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 83
-bool(false)
--- Iteration 22 --
-
-Warning: wordwrap() expects parameter 3 to be string, null given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 75
-
-Warning: wordwrap() expects parameter 3 to be string, null given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 79
-
-Warning: wordwrap() expects parameter 3 to be string, null given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 83
--- Iteration 23 --
-
-Warning: wordwrap() expects parameter 3 to be string, null given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 75
-
-Warning: wordwrap() expects parameter 3 to be string, null given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 79
-
-Warning: wordwrap() expects parameter 3 to be string, null given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 83
--- Iteration 24 --
-
-Warning: wordwrap() expects parameter 3 to be string, resource given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 75
-
-Warning: wordwrap() expects parameter 3 to be string, resource given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 79
-
-Warning: wordwrap() expects parameter 3 to be string, resource given in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 83
 Done

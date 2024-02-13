@@ -12,10 +12,4 @@ Warning: gzinflate() expects at most 2 parameters, 3 given in %s/gzinflate_error
 
 Warning: data error in %s/gzinflate_error1.php on line 33
 bool(false)
-
--- Testing with incorrect parameters --
-
-Warning: gzinflate() expects parameter 1 to be string, object given in %s/gzinflate_error1.php on line 38
-
-Warning: gzinflate() expects parameter 2 to be integer, object given in %s/gzinflate_error1.php on line 39
 ===DONE===

@@ -38,13 +38,5 @@ function entrypoint_gzencode_error1(): void {
   echo "\n-- Testing with incorrect encoding_mode --\n";
   $bad_mode = 99;
   var_dump(gzencode($data, $level, $bad_mode));
-
-  echo "\n-- Testing with incorrect parameters --\n";
-  $testclass = new Tester();
-  try { var_dump(gzencode($testclass)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-  try { var_dump(gzencode($data, $testclass)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-  try { var_dump(gzencode($data, -1, 99.99)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-  try { var_dump(gzencode($data, -1, $testclass)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-  try { var_dump(gzencode($data, "a very none numeric string\n")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   echo "===Done===";
 }

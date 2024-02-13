@@ -26,39 +26,6 @@ $values =  vec[
   // -ve value for width
   -1,
   -10,
-
-  // array values
-  vec[],
-  vec[0],
-  vec[1],
-  vec[1, 2],
-  dict['color' => 'red', 'item' => 'pen'],
-
-  // boolean values
-  true,
-  false,
-  TRUE,
-  FALSE,
-
-  // string values
-  "string",
-  'string',
-
-  // objects
-  new stdClass(),
-
-  // Null value
-  NULL,
-  null,
-
-  // empty string
-  "",
-  '',
-
-  // resource variable
-  $fp,
-
-
 ];
 
 

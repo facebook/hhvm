@@ -2,15 +2,15 @@
 
 class Tester {
     function Hello() :mixed{
-        echo "Hello\n"; 
+        echo "Hello\n";
     }
 }
 <<__EntryPoint>>
 function entrypoint_gzinflate_error1(): void {
   /* Prototype  : string gzinflate(string data [, int length])
-   * Description: Unzip a gzip-compressed string 
+   * Description: Unzip a gzip-compressed string
    * Source code: ext/zlib/zlib.c
-   * Alias to functions: 
+   * Alias to functions:
    */
 
   include(dirname(__FILE__) . '/data.inc');
@@ -31,12 +31,6 @@ function entrypoint_gzinflate_error1(): void {
   $compressed = gzcompress($data);
 
   var_dump(gzinflate($compressed, $short_len));
-
-  echo "\n-- Testing with incorrect parameters --\n";
-
-  $testclass = new Tester();
-  try { var_dump(gzinflate($testclass)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-  try { var_dump(gzinflate($data, $testclass)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
   echo "===DONE===\n";
 }

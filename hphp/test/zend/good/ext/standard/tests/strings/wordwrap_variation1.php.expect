@@ -1,0 +1,16 @@
+*** Testing wordwrap() : usage variations ***
+
+--- Testing wordwrap() by supplying different values for 'str' argument ---
+-- Iteration 1 --
+string(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
+-- Iteration 2 --
+string(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
+Done

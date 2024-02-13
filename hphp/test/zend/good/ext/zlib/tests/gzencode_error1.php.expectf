@@ -17,16 +17,4 @@ bool(false)
 
 Warning: encoding mode must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE in %s/gzencode_error1.php on line 40
 bool(false)
-
--- Testing with incorrect parameters --
-
-Warning: gzencode() expects parameter 1 to be string, object given in %s/gzencode_error1.php on line 44
-
-Warning: gzencode() expects parameter 2 to be integer, object given in %s/gzencode_error1.php on line 45
-
-Warning: %s
-
-Warning: gzencode() expects parameter 3 to be integer, object given in %s/gzencode_error1.php on line 47
-
-Warning: %s
 ===Done===

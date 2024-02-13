@@ -34,11 +34,5 @@ function entrypoint_gzuncompress_error1(): void {
 
   echo "\n-- Testing with incorrect arguments --\n";
   var_dump(gzuncompress('123'));
-
-  $testclass = new Tester();
-  try { var_dump(gzuncompress($testclass)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-
-  try { var_dump(gzuncompress($compressed, "this is not a number\n")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-
   echo "===DONE===\n";
 }

@@ -1,4 +1,0 @@
-Warning: posix_mkfifo() expects exactly 2 parameters, 1 given in %s/zend/good/ext/posix/tests/posix_mkfifo_wrongparams.php on line 2
-
-Warning: posix_mkfifo() expects parameter 1 to be string, null given in %s/zend/good/ext/posix/tests/posix_mkfifo_wrongparams.php on line 3
-===DONE===

@@ -1,0 +1,14 @@
+*** Testing base64_decode() : usage variations ***
+
+-- Arg value true --
+bool(false)
+
+-- Arg value false --
+string(12) "hello world!"
+
+-- Arg value TRUE --
+bool(false)
+
+-- Arg value FALSE --
+string(12) "hello world!"
+===Done===

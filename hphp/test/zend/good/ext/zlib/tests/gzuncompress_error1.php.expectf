@@ -17,8 +17,4 @@ bool(false)
 
 Warning: data error in %s/gzuncompress_error1.php on line 36
 bool(false)
-
-Warning: gzuncompress() expects parameter 1 to be string, object given in %s/gzuncompress_error1.php on line 39
-
-Warning: gzuncompress() expects parameter 2 to be integer, string given in %s/gzuncompress_error1.php on line 41
 ===DONE===

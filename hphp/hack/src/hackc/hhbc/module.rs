@@ -9,7 +9,7 @@ use ffi::Vector;
 use serde::Serialize;
 
 use crate::Attribute;
-use crate::ClassName;
+use crate::ModuleName;
 use crate::Span;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
@@ -31,7 +31,7 @@ pub struct Rule<'arena> {
 #[repr(C)]
 pub struct Module<'arena> {
     pub attributes: Vector<Attribute<'arena>>,
-    pub name: ClassName<'arena>,
+    pub name: ModuleName<'arena>,
     pub span: Span,
     pub doc_comment: Maybe<Vector<u8>>,
     pub exports: Maybe<Vector<Rule<'arena>>>,

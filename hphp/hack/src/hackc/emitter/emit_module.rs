@@ -6,8 +6,8 @@ use env::emitter::Emitter;
 use error::Result;
 use ffi::Maybe;
 use ffi::Str;
-use hhbc::ClassName;
 use hhbc::Module;
+use hhbc::ModuleName;
 use hhbc::Rule;
 use hhbc::RuleKind;
 use hhbc::Span;
@@ -38,7 +38,7 @@ pub fn emit_module<'a, 'arena, 'decl>(
     ast_module: &'a ast::ModuleDef,
 ) -> Result<Module<'arena>> {
     let attributes = emit_attribute::from_asts(emitter, &ast_module.user_attributes)?;
-    let name = ClassName::from_ast_name_and_mangle(alloc, &ast_module.name.1);
+    let name = ModuleName::from_raw_string(alloc, &ast_module.name.1);
     let span = Span::from_pos(&ast_module.span);
     let doc_comment = ast_module.doc_comment.clone();
 

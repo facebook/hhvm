@@ -152,6 +152,12 @@ impl<'arena> ClassName<'arena> {
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, Serialize)]
 #[repr(C)]
+pub struct ModuleName<'arena>(Str<'arena>);
+
+impl_id!(ModuleName);
+
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, Serialize)]
+#[repr(C)]
 pub struct PropName<'arena>(Str<'arena>);
 
 impl_id!(PropName);

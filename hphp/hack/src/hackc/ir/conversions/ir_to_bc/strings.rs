@@ -38,6 +38,11 @@ impl<'a> StringCache<'a> {
         hhbc::ClassName::new(s)
     }
 
+    pub fn lookup_module_name(&self, id: ir::ModuleId) -> hhbc::ModuleName<'a> {
+        let s = self.lookup_ffi_str(id.id);
+        hhbc::ModuleName::new(s)
+    }
+
     pub fn lookup_const_name(&self, id: ir::ConstId) -> hhbc::ConstName<'a> {
         let s = self.lookup_ffi_str(id.id);
         hhbc::ConstName::new(s)

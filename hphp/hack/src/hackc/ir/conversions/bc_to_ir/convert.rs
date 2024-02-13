@@ -58,7 +58,7 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit<'a> {
                 .iter()
                 .map(|a| convert_attribute(a, &strings))
                 .collect(),
-            name: ir::ClassId::from_hhbc(module.name, &strings),
+            name: ir::ModuleId::from_hhbc(module.name, &strings),
             src_loc: ir::SrcLoc::from_span(filename, &module.span),
             doc_comment: module.doc_comment.clone().map(|c| c.into()).into(),
         })

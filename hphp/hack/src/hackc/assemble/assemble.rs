@@ -244,7 +244,7 @@ fn assemble_module<'arena>(
     parse!(token_iter,
            ".module"
            <attr:assemble_special_and_user_attrs(alloc)>
-           <name:assemble_class_name(alloc)>
+           <name:assemble_module_name(alloc)>
            <span:assemble_span>
            "{"
            <doc_comment:assemble_doc_comment>
@@ -629,6 +629,14 @@ fn assemble_class_name<'arena>(
 ) -> Result<hhbc::ClassName<'arena>> {
     parse!(token_iter, <id:id>);
     Ok(hhbc::ClassName::new(id.into_ffi_str(alloc)))
+}
+
+fn assemble_module_name<'arena>(
+    token_iter: &mut Lexer<'_>,
+    alloc: &'arena Bump,
+) -> Result<hhbc::ModuleName<'arena>> {
+    parse!(token_iter, <id:id>);
+    Ok(hhbc::ModuleName::new(id.into_ffi_str(alloc)))
 }
 
 pub(crate) fn assemble_prop_name_from_str<'arena>(

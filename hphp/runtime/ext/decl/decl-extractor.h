@@ -55,5 +55,8 @@ void setExtractorFactory(ExtractorFactory* factory);
  */
 DeclBinaryString decls_binary_from_path(const Facts::PathAndOptionalHash& path);
 
+// Returns the content of a file on disk or throws if unreadable.
+std::string readFile(const std::string& filePath);
+
 } // namespace Decl
 } // namespace HPHP

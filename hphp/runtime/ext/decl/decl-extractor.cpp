@@ -8,7 +8,6 @@
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/futures/Future.h>
 #include <folly/logging/xlog.h>
-
 #include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -31,27 +30,6 @@ rust::Box<hackc::DeclsHolder> decode_decls(const std::string& blob) {
   }
 }
 
-// Returns the content of a file on disk or throws if unreadable.
-// Reading the file off disk makes us susceptible to tearing.
-// Ideally, we can precompute file + hash and obtain file content via CAS
-// but that is, as of now, unimplemented.
-std::string readFile(const String& filePath) {
-  auto w = Stream::getWrapperFromURI(filePath);
-  if (!(w && w->isNormalFileStream())) {
-    SystemLib::throwRuntimeExceptionObject(
-        String("Could not open FileStreamWrapper for ") + filePath);
-  }
-  const auto f = w->open(filePath, "r", 0, nullptr);
-  if (!f) {
-    SystemLib::throwRuntimeExceptionObject(
-        String("Could not read file: ") + filePath);
-  }
-  auto const contents = f->read();
-  auto const text = contents.toCppString();
-  f->close();
-  return text;
-}
-
 ExtractorFactory* s_extractorFactory = nullptr;
 
 struct SimpleExtractor final : Extractor {
@@ -69,6 +47,27 @@ struct SimpleExtractor final : Extractor {
 };
 
 } // namespace
+
+// Returns the content of a file on disk or throws if unreadable.
+// Reading the file off disk makes us susceptible to tearing.
+// Ideally, we can precompute file + hash and obtain file content via CAS
+// but that is, as of now, unimplemented.
+std::string readFile(const std::string& filePath) {
+  auto w = Stream::getWrapperFromURI(filePath);
+  if (!(w && w->isNormalFileStream())) {
+    SystemLib::throwRuntimeExceptionObject(
+        String("Could not open FileStreamWrapper for ") + filePath);
+  }
+  const auto f = w->open(filePath, "r", 0, nullptr);
+  if (!f) {
+    SystemLib::throwRuntimeExceptionObject(
+        String("Could not read file: ") + filePath);
+  }
+  auto const contents = f->read();
+  auto const text = contents.toCppString();
+  f->close();
+  return text;
+}
 
 DeclBinaryString decls_binary_from_path(
     const Facts::PathAndOptionalHash& path) {

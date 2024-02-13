@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/ext/decl/decl-extractor.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/decl-provider.h"
 #include "hphp/runtime/vm/native-data.h"
@@ -162,27 +163,6 @@ hackc::DeclParserConfig initDeclConfig() {
   return config;
 }
 
-// Returns the content of a file on disk or throws if unreadable.
-// Reading the file off disk makes us susceptible to tearing.
-// Ideally, we can precompute file + hash and obtain file content via CAS
-// but that is, as of now, unimplemented.
-std::string readFile(const String& filePath) {
-  auto w = Stream::getWrapperFromURI(filePath);
-  if (!(w && w->isNormalFileStream())) {
-    SystemLib::throwRuntimeExceptionObject(
-        String("Could not open FileStreamWrapper for ") + filePath);
-  }
-  const auto f = w->open(filePath, "r", 0, nullptr);
-  if (!f) {
-    SystemLib::throwRuntimeExceptionObject(
-        String("Could not read file: ") + filePath);
-  }
-  auto const contents = f->read();
-  auto const text = contents.toCppString();
-  f->close();
-  return text;
-}
-
 // Returns the pair of <sha1 Hash, and optional file contents>
 // We return file contents only if the file is not found in Eden
 // since we need it for computing the decls later.
@@ -195,7 +175,7 @@ std::pair<SHA1, std::optional<std::string>> computeSHA1(
   if (edenHash.has_value()) {
     return std::make_pair(edenHash.value(), std::nullopt);
   }
-  auto const text = readFile(filePath);
+  auto const text = Decl::readFile(filePath);
   auto sha1 = HPHP::string_sha1(text);
   return std::make_pair(SHA1{sha1}, std::move(text));
 }
@@ -755,7 +735,7 @@ Object HHVM_STATIC_METHOD(FileDecls, parsePath, const String& path) {
   if (textOpt.has_value()) {
     text = textOpt.value();
   } else {
-    text = readFile(path);
+    text = Decl::readFile(path.toCppString());
   }
   Object obj{FileDecls::classof()};
   auto data = Native::data<FileDecls>(obj);

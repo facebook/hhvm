@@ -131,7 +131,6 @@ add_executable(
   thrift1
   main.cc
   compiler.cc
-  validator/validator.cc
 )
 target_link_libraries(
   thrift1

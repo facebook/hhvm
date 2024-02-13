@@ -16,21 +16,9 @@
 
 package com.facebook.thrift.util;
 
-import com.facebook.thrift.payload.ClientResponsePayload;
-import java.util.Map;
-import org.apache.thrift.TBaseException;
 import org.apache.thrift.TException;
-import org.apache.thrift.protocol.TProtocolException;
-import org.apache.thrift.transport.TTransportException;
-import reactor.core.Exceptions;
 
 public final class ExceptionUtil {
-
-  // These need to match the keys/values emitted by Cpp2Server
-  private static final String EXCEPTION_HEADER_KEY = "ex";
-  private static final String TRANSPORT_EXCEPTION = "3";
-  private static final String PROTOCOL_EXCEPTION = "4";
-
   private static final Class REACTIVE_EXCEPTION;
 
   static {
@@ -55,42 +43,5 @@ public final class ExceptionUtil {
       return new TException(t.getCause());
     }
     return new TException(t);
-  }
-
-  /**
-   * Prepare an unchecked {@link RuntimeException}.<br>
-   * If the errorResponse header contains transport or protocol exception, transform the exception
-   * into {@link TTransportException} or {@link TProtocolException}.
-   *
-   * @param errorResponse
-   * @return RuntimeException
-   */
-  public static RuntimeException propagate(ClientResponsePayload errorResponse) {
-    Map<String, String> headers = errorResponse.getHeaders();
-    Exception exception = errorResponse.getException();
-
-    if (headers != null) {
-      if (exception instanceof TBaseException) {
-        ((TBaseException) exception).setHeaders(headers);
-      }
-
-      String value = headers.get(EXCEPTION_HEADER_KEY);
-      if (TRANSPORT_EXCEPTION.equals(value)) {
-        TTransportException ex =
-            new TTransportException(
-                exception.getMessage() != null
-                    ? exception.getMessage()
-                    : "Proxy hit a transport exception");
-        ex.setHeaders(headers);
-        return ex;
-      }
-      if (PROTOCOL_EXCEPTION.equals(value)) {
-        TProtocolException ex = new TProtocolException("Proxy hit a protocol exception");
-        ex.setHeaders(headers);
-        return ex;
-      }
-    }
-
-    return Exceptions.propagate(exception);
   }
 }

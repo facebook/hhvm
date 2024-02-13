@@ -76,6 +76,7 @@ import org.apache.thrift.transport.TTransportException;
 import reactor.core.Exceptions;
 
 public final class RpcClientUtils {
+
   private RpcClientUtils() {}
 
   /**
@@ -310,7 +311,6 @@ public final class RpcClientUtils {
     ClientResponsePayload<K> response;
     protocol.readStructBegin();
     TField field = protocol.readFieldBegin();
-
     if (field.id == 0) {
       K read = reader.read(protocol);
       response = ClientResponsePayload.createResult(read, responseRpcMetadata, null, false);

@@ -1137,7 +1137,7 @@ impl FunctionParser<'_, '_> {
         self.builder.func.coeffects.cc_reified.push(CcReified {
             is_class,
             index,
-            types,
+            types: types.into(),
         });
         Ok(())
     }
@@ -1147,14 +1147,15 @@ impl FunctionParser<'_, '_> {
         let types = types
             .into_iter()
             .map(|t| Ok(Str::new_slice(self.alloc, &t.unescaped_string()?)))
-            .collect::<Result<_>>()?;
+            .collect::<Result<Vec<_>>>()?
+            .into();
         self.builder.func.coeffects.cc_this.push(CcThis { types });
         Ok(())
     }
 
     fn parse_coeffects_fun_param(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
         parse!(tokenizer, <fun_param:parse_u32,+>);
-        self.builder.func.coeffects.fun_param = fun_param;
+        self.builder.func.coeffects.fun_param = fun_param.into();
         Ok(())
     }
 
@@ -1188,8 +1189,8 @@ impl FunctionParser<'_, '_> {
         };
 
         self.builder.func.coeffects = Coeffects {
-            static_coeffects,
-            unenforced_static_coeffects,
+            static_coeffects: static_coeffects.into(),
+            unenforced_static_coeffects: unenforced_static_coeffects.into(),
             ..Coeffects::default()
         };
         Ok(())

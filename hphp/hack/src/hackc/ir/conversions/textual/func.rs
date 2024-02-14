@@ -519,7 +519,7 @@ fn write_instance_stub(
     txf: &mut TextualFile<'_>,
     unit_state: &mut UnitState,
     method_info: &MethodInfo<'_>,
-    coeffects: &Vec<ir::Ctx>,
+    coeffects: &[ir::Ctx],
     tx_params: &[textual::Param<'_>],
     ret_ty: &textual::Return<'_>,
     span: &ir::SrcLoc,

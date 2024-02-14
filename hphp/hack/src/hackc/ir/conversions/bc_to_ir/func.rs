@@ -258,26 +258,20 @@ fn convert_param<'a, 'b>(ctx: &mut Context<'a, 'b>, param: &Param<'a>) -> ir::Pa
 
 fn convert_coeffects<'a>(coeffects: &hhbc::Coeffects<'a>) -> ir::Coeffects<'a> {
     ir::Coeffects {
-        static_coeffects: coeffects.get_static_coeffects().to_vec(),
-        unenforced_static_coeffects: coeffects.get_unenforced_static_coeffects().to_vec(),
-        fun_param: coeffects.get_fun_param().to_vec(),
-        cc_param: coeffects.get_cc_param().to_vec(),
-        cc_this: coeffects
-            .get_cc_this()
-            .iter()
-            .map(|inner| CcThis {
-                types: inner.types.iter().copied().collect(),
-            })
-            .collect(),
-        cc_reified: coeffects
-            .get_cc_reified()
-            .iter()
-            .map(|inner| CcReified {
-                is_class: inner.is_class,
-                index: inner.index,
-                types: inner.types.iter().copied().collect(),
-            })
-            .collect(),
+        static_coeffects: coeffects.static_coeffects.clone(),
+        unenforced_static_coeffects: coeffects.unenforced_static_coeffects.clone(),
+        fun_param: coeffects.fun_param.clone(),
+        cc_param: coeffects.cc_param.clone(),
+        cc_this: Vec::from_iter(coeffects.get_cc_this().iter().map(|inner| CcThis {
+            types: Vec::from_iter(inner.types.iter().copied()).into(),
+        }))
+        .into(),
+        cc_reified: Vec::from_iter(coeffects.get_cc_reified().iter().map(|inner| CcReified {
+            is_class: inner.is_class,
+            index: inner.index,
+            types: Vec::from_iter(inner.types.iter().copied()).into(),
+        }))
+        .into(),
         closure_parent_scope: coeffects.is_closure_parent_scope(),
         generator_this: coeffects.generator_this(),
         caller: coeffects.caller(),

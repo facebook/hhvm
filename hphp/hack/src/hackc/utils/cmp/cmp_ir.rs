@@ -1976,12 +1976,6 @@ mod mapping {
         }
     }
 
-    impl MapName for CtxConstant<'_> {
-        fn get_name(&self) -> String {
-            self.name.as_bstr().to_string()
-        }
-    }
-
     impl MapName for (&ExFrameId, &ExFrame) {
         fn get_name(&self) -> String {
             self.0.to_string()

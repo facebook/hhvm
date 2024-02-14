@@ -195,10 +195,10 @@ fn convert_coeffects<'a>(coeffects: &ir::Coeffects<'a>) -> hhbc::Coeffects<'a> {
     let caller = coeffects.caller;
 
     hhbc::Coeffects::new(
-        static_coeffects,
-        unenforced_static_coeffects,
-        fun_param,
-        cc_param,
+        static_coeffects.into(),
+        unenforced_static_coeffects.into(),
+        fun_param.into(),
+        cc_param.into(),
         cc_this,
         cc_reified,
         closure_parent_scope,

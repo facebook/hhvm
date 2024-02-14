@@ -18,7 +18,6 @@ use ir_core::Property;
 use ir_core::StringInterner;
 use ir_core::TraitReqKind;
 use ir_core::TypeConstant;
-use itertools::Itertools;
 use parse_macro_ir::parse;
 
 use crate::parse::parse_attr;
@@ -124,11 +123,11 @@ impl<'a> ClassParser<'a> {
         let recognized = recognized
             .into_iter()
             .map(|(name, _)| Str::new_slice(self.alloc, &name))
-            .collect_vec();
+            .collect();
         let unrecognized = unrecognized
             .into_iter()
             .map(|(name, _)| Str::new_slice(self.alloc, &name))
-            .collect_vec();
+            .collect();
         let is_abstract = is_abstract.is_some();
         let ctx = CtxConstant {
             name,

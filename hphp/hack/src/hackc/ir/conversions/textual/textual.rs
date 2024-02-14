@@ -144,7 +144,7 @@ impl TextualFile<'_> {
         name: &FunctionName,
         loc: Option<&SrcLoc>,
         attributes: &FuncAttributes,
-        coeffects: &Vec<ir::Ctx>,
+        coeffects: &[ir::Ctx],
         params: &[Param<'_>],
         ret_ty: &Return<'_>,
         locals: &[(LocalId, &Ty)],

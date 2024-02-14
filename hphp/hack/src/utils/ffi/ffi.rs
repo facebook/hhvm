@@ -544,6 +544,15 @@ impl<'a, T> IntoIterator for &'a Vector<T> {
     }
 }
 
+impl<T> std::iter::FromIterator<T> for Vector<T> {
+    fn from_iter<I>(iter: I) -> Self
+    where
+        I: IntoIterator<Item = T>,
+    {
+        Self::from(Vec::from_iter(iter))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

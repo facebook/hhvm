@@ -2,8 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::collections::BTreeMap;
-use std::collections::BTreeSet;
 use std::marker::PhantomData;
 
 use ast_scope::Scope;
@@ -16,6 +14,8 @@ use error::Result;
 use ffi::Maybe;
 use ffi::Nothing;
 use ffi::Str;
+use hash::HashMap;
+use hash::HashSet;
 use hhbc::Label;
 use hhbc::Local;
 use hhbc::Param;
@@ -64,37 +64,30 @@ fn rename_params<'arena>(
     alloc: &'arena bumpalo::Bump,
     mut params: Vec<(Param<'arena>, Option<(Label, a::Expr)>)>,
 ) -> Vec<(Param<'arena>, Option<(Label, a::Expr)>)> {
-    fn rename<'arena>(
-        alloc: &'arena bumpalo::Bump,
-        names: &BTreeSet<Str<'arena>>,
-        param_counts: &mut BTreeMap<Str<'arena>, usize>,
-        param: &mut Param<'arena>,
-    ) {
-        match param_counts.get_mut(&param.name) {
-            None => {
-                param_counts.insert(param.name, 0);
-            }
-            Some(count) => {
-                let newname =
-                    Str::new_str(alloc, &format!("{}{}", param.name.unsafe_as_str(), count));
-                *count += 1;
-                if names.contains(&newname) {
-                    rename(alloc, names, param_counts, param);
-                } else {
-                    param.name = newname;
+    let mut param_counts = HashMap::default();
+    let names: HashSet<&[u8]> = params.iter().map(|(p, _)| p.name.as_arena_ref()).collect();
+    for (param, _) in params.iter_mut() {
+        use std::collections::hash_map::Entry;
+        'inner: loop {
+            match param_counts.entry(param.name.as_arena_ref()) {
+                Entry::Vacant(e) => {
+                    e.insert(0);
+                }
+                Entry::Occupied(mut e) => {
+                    let newname = format!("{}{}", param.name.unsafe_as_str(), e.get());
+                    let newname = Str::new_str(alloc, &newname);
+                    *e.get_mut() += 1;
+                    if names.contains(newname.as_ref()) {
+                        // collision - try again
+                        continue 'inner;
+                    } else {
+                        param.name = newname;
+                    }
                 }
             }
+            break 'inner;
         }
     }
-    let mut param_counts = BTreeMap::new();
-    let names = params
-        .iter()
-        .map(|(p, _)| p.name.clone())
-        .collect::<BTreeSet<_>>();
-    params
-        .iter_mut()
-        .rev()
-        .for_each(|(p, _)| rename(alloc, &names, &mut param_counts, p));
     params.into_iter().collect()
 }
 

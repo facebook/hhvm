@@ -23,12 +23,37 @@
 #include <folly/portability/GTest.h>
 #include <thrift/compiler/ast/t_base_type.h>
 #include <thrift/compiler/ast/t_type.h>
-#include <thrift/compiler/test/ast_testing.h>
 
 namespace apache::thrift::compiler {
-namespace {
 
-class VisitorContextTest : public test::BaseVisitorTest {};
+class base_program_test : public testing::Test {
+ protected:
+  t_program program_{"path/to/program.thrift"};
+
+  template <typename T>
+  T& create_def(const std::string& name, fmt::string_view uri = {}) {
+    return program_.add_def(std::make_unique<T>(&program_, name), uri);
+  }
+
+  t_struct& create_annotation(const std::string& name, fmt::string_view uri) {
+    return create_def<t_struct>(name, uri);
+  }
+
+  t_struct& create_annotation(const std::string& name) {
+    return create_annotation(name, "facebook.com/thrift/annotation/" + name);
+  }
+
+  std::unique_ptr<t_const> create_const(const t_struct& type) {
+    auto value = std::make_unique<t_const_value>();
+    value->set_map();
+    value->set_ttype(type);
+    return std::make_unique<t_const>(&program_, type, "", std::move(value));
+  }
+
+  void add_annot(const t_struct& type, t_named& node) {
+    node.add_structured_annotation(create_const(type));
+  }
+};
 
 // A helper class for keeping track of visitation expectations.
 class MockAstVisitor {
@@ -148,7 +173,7 @@ class OverloadedVisitor {
 };
 
 template <typename V>
-class AstVisitorTest : public test::BaseProgramTest {
+class AstVisitorTest : public base_program_test {
  public:
   AstVisitorTest() noexcept : overload_visitor_(&overload_mock_) {}
 
@@ -461,7 +486,7 @@ class MockObserver {
   MOCK_METHOD(void, end_visit, (t_node&));
 };
 
-class ObserverTest : public test::BaseProgramTest {};
+class ObserverTest : public base_program_test {};
 
 TEST_F(ObserverTest, OrderOfCalls) {
   static_assert(ast_detail::is_observer<MockObserver&>::value, "");
@@ -523,5 +548,4 @@ TEST_F(ObserverTest, VisitContext) {
   EXPECT_EQ(calls, 3);
 }
 
-} // namespace
 } // namespace apache::thrift::compiler

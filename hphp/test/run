@@ -55,7 +55,7 @@ function get_cli_config {
 }
 
 if hhvm_cfg="$(get_cli_config)"; then
-  exec "$hhvm_bin" -c "$hhvm_cfg" -vBCCache.Enabled=false -vEval.EnableLogBridge=false "$script_dir/run.php" "$@"
+  exec "$hhvm_bin" -c "$hhvm_cfg" -vBCCache.Enabled=false -vEval.EnableLogBridge=false -vEval.PreludePath= "$script_dir/run.php" "$@"
 else
   exec "$hhvm_bin" -vBCCache.Enabled=false -vEval.EnableLogBridge=false "$script_dir/run.php" "$@"
 fi

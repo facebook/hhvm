@@ -1,0 +1,46 @@
+Code actions available:
+------------------------------------------
+Extract into variable (CodeActionKind: quickfix) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"{\n      $${0:placeholder0} = await gen_int();\n      return 1 < 2 ? $${0:placeholder0} : 0;\n    }",
+          "range":{"end":{"character":55,"line":10},"start":{"character":28,"line":10}}
+        }
+      ]
+    }
+  },
+  "kind":"quickfix",
+  "title":"Extract into variable"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+function take_mixed(mixed $_): void {}
+
+async function gen_int(): Awaitable<int> {
+  return 1;
+}
+
+function main(): void {
+  if (1 < 2) {
+    // Should be a quickfix, as configured in quickfixes_to_refactors_config.ml
+    take_mixed(async () ==> {
+      $${0:placeholder0} = await gen_int();
+      return 1 < 2 ? $${0:placeholder0} : 0;
+    });
+                                    // ^ at-caret
+    // important: a refactoring here would require
+    // selecting the entire expression to extract,
+    // but a quickfix only requires the cursor
+    // to be in a sub-span of the error span
+  }
+}
+

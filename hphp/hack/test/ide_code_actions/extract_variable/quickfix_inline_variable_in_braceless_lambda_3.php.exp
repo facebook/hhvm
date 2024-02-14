@@ -1,6 +1,6 @@
 Code actions available:
 ------------------------------------------
-Extract into variable (CodeActionKind: refactor) SELECTED
+Extract into variable (CodeActionKind: quickfix) SELECTED
 
 JSON for selected code action:
 ------------------------------------------
@@ -11,12 +11,12 @@ JSON for selected code action:
       "FILE.php":[
         {
           "newText":"{\n      $${0:placeholder0} = await gen_int();\n      return 1 < 2 ? /*range-start*/$${0:placeholder0}/*range-end*/ : 0;\n    }",
-          "range":{"end":{"character":83,"line":10},"start":{"character":28,"line":10}}
+          "range":{"end":{"character":83,"line":11},"start":{"character":28,"line":11}}
         }
       ]
     }
   },
-  "kind":"refactor",
+  "kind":"quickfix",
   "title":"Extract into variable"
 }
 
@@ -32,6 +32,7 @@ async function gen_int(): Awaitable<int> {
 
 function main(): void {
   if (1 < 2) {
+    // Should be a quickfix, as configured in quickfixes_to_refactors_config.ml
     take_mixed(async () ==> {
       $${0:placeholder0} = await gen_int();
       return 1 < 2 ? /*range-start*/$${0:placeholder0}/*range-end*/ : 0;

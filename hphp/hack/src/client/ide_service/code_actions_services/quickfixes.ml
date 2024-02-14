@@ -23,6 +23,8 @@ let convert_quickfix
   Code_action_types.Quickfix.{ title = Quickfix.get_title quickfix; edits }
 
 let errors_to_quickfixes
+    (ctx : Provider_context.t)
+    (entry : Provider_context.entry)
     (errors : Errors.t)
     (path : Relative_path.t)
     (classish_starts : Pos.t SMap.t)
@@ -34,7 +36,29 @@ let errors_to_quickfixes
         Pos.contains selection e_pos || Pos.contains e_pos selection)
   in
   let quickfixes = List.bind ~f:User_error.quickfixes errors_here in
-  List.map quickfixes ~f:(convert_quickfix path classish_starts)
+  let standard_quickfixes =
+    List.map quickfixes ~f:(convert_quickfix path classish_starts)
+  in
+  let quickfixes_from_refactors =
+    errors_here
+    |> List.bind ~f:(fun (e : Errors.error) ->
+           let e_pos = User_error.get_pos e in
+           let msg = e.User_error.claim in
+           let msg_str = Message.get_message_str msg in
+           match
+             SMap.find_opt
+               msg_str
+               Quickfixes_to_refactors_config
+               .mapping_from_error_message_to_refactors
+           with
+           | Some fn -> fn ~entry e_pos ctx
+           | None -> [])
+    |> List.map
+         ~f:
+           Code_action_types.(
+             (fun Refactor.{ title; edits } -> Quickfix.{ title; edits }))
+  in
+  standard_quickfixes @ quickfixes_from_refactors
 
 let find ~ctx ~entry pos : Code_action_types.Quickfix.t list =
   let cst = Ast_provider.compute_cst ~ctx ~entry in
@@ -51,4 +75,4 @@ let find ~ctx ~entry pos : Code_action_types.Quickfix.t list =
     Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry
   in
   let path = entry.Provider_context.path in
-  errors_to_quickfixes errors path classish_starts pos
+  errors_to_quickfixes ctx entry errors path classish_starts pos

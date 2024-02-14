@@ -117,7 +117,7 @@ class MessageWrapper {
    * methods.
    */
   template <typename SubMessageHeader>
-  std::optional<std::pair<std::string_view, std::uint16_t>>
+  std::optional<std::pair<std::uint16_t, std::string_view>>
   getSubMessageTemplateIdAndBuffer(std::string_view (*bufferFunc)(Message&)) {
     auto buf = bufferFunc(message_);
     auto size = buf.size();
@@ -126,7 +126,7 @@ class MessageWrapper {
       char* bufPtr = const_cast<char*>(buf.data());
       SubMessageHeader header(bufPtr, 0, size, 0);
       std::uint16_t templateId = header.templateId();
-      return std::make_pair(buf, templateId);
+      return std::make_pair(templateId, buf);
     } else {
       return std::nullopt;
     }
@@ -143,7 +143,7 @@ class MessageWrapper {
   Message message_;
   MessageHeader header_;
 
-  void encodeLength(const std::uint32_t length) {
+  void encodeLength(std::uint32_t length) {
     const std::uint32_t val = folly::Endian::little(length);
     auto buffer = message_.buffer();
     auto position = message_.sbePosition();

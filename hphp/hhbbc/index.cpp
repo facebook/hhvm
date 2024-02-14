@@ -16035,7 +16035,7 @@ void make_class_infos_local(
               aux.emplace_back(name, FuncFamilyOrSingle{});
             }
           },
-          [&, &entry=entry] (const FuncFamilyEntry::None&) {
+          [&, entry=entry] (const FuncFamilyEntry::None&) {
             assertx(entry.m_allIncomplete);
           }
         );

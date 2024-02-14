@@ -364,7 +364,7 @@ pub mod instr {
         )))
     }
 
-    pub fn new_struct_dict<'a>(keys: &'a [&'a str]) -> InstrSeq<'a> {
+    pub fn new_struct_dict<'a>(keys: &[&'a [u8]]) -> InstrSeq<'a> {
         let keys = Vec::from_iter(keys.iter().map(|s| Str::from(*s)));
         instr(Instruct::Opcode(Opcode::NewStructDict(keys.into())))
     }

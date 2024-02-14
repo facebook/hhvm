@@ -1278,9 +1278,12 @@ fn emit_array<'a, 'arena, 'decl>(
     )
 }
 
-fn non_numeric(s: &str) -> bool {
+fn non_numeric(s: &[u8]) -> bool {
     // Note(hrust): OCaml Int64.of_string and float_of_string ignore underscores
-    let s = s.replace('_', "");
+    let s = match std::str::from_utf8(s) {
+        Ok(s) => s.replace('_', ""),
+        Err(_) => return true, // numeric strings would be valid utf8
+    };
     lazy_static! {
         static ref HEX: Regex = Regex::new(r"(?P<sign>^-?)0[xX](?P<digits>.*)").unwrap();
         static ref OCTAL: Regex = Regex::new(r"(?P<sign>^-?)0[oO](?P<digits>.*)").unwrap();
@@ -1367,12 +1370,8 @@ fn is_struct_init<'arena, 'decl>(
             constant_folder::fold_expr(&mut key, &env.scope, e)
                 .map_err(|e| Error::unrecoverable(format!("{}", e)))?;
             if let ast::Expr(_, _, ast::Expr_::String(s)) = key {
-                are_all_keys_non_numeric_strings = are_all_keys_non_numeric_strings
-                    && non_numeric(
-                        // FIXME: This is not safe--string literals are binary strings.
-                        // There's no guarantee that they're valid UTF-8.
-                        unsafe { std::str::from_utf8_unchecked(s.as_slice()) },
-                    );
+                are_all_keys_non_numeric_strings =
+                    are_all_keys_non_numeric_strings && non_numeric(s.as_slice());
                 uniq_keys.insert(s);
             } else {
                 are_all_keys_non_numeric_strings = false;
@@ -1389,61 +1388,43 @@ fn is_struct_init<'arena, 'decl>(
         && num_keys != 0)
 }
 
-fn emit_struct_array<
-    'a,
-    'arena,
-    'decl,
-    C: FnOnce(&'arena [&'arena str]) -> Result<InstrSeq<'arena>>,
->(
+fn emit_struct_array<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
     fields: &[ast::Afield],
-    ctor: C,
 ) -> Result<InstrSeq<'arena>> {
     use ast::Expr;
     use ast::Expr_;
     let alloc = env.arena;
-    let (keys, value_instrs): (Vec<String>, _) = fields
+    let (keys, value_instrs): (Vec<&'arena [u8]>, _) = fields
         .iter()
         .map(|f| match f {
             ast::Afield::AFkvalue(k, v) => match k {
-                Expr(_, _, Expr_::String(s)) => Ok((
-                    // FIXME: This is not safe--string literals are binary strings.
-                    // There's no guarantee that they're valid UTF-8.
-                    unsafe { String::from_utf8_unchecked(s.clone().into()) },
-                    emit_expr(e, env, v)?,
-                )),
+                Expr(_, _, Expr_::String(s)) => {
+                    Ok((alloc.alloc_slice_copy(s) as &[u8], emit_expr(e, env, v)?))
+                }
                 _ => {
                     let mut k = k.clone();
                     constant_folder::fold_expr(&mut k, &env.scope, e)
                         .map_err(|e| Error::unrecoverable(format!("{}", e)))?;
                     match k {
-                        Expr(_, _, Expr_::String(s)) => Ok((
-                            // FIXME: This is not safe--string literals are binary strings.
-                            // There's no guarantee that they're valid UTF-8.
-                            unsafe { String::from_utf8_unchecked(s.into()) },
-                            emit_expr(e, env, v)?,
-                        )),
+                        Expr(_, _, Expr_::String(s)) => {
+                            Ok((alloc.alloc_slice_copy(&s) as &[u8], emit_expr(e, env, v)?))
+                        }
                         _ => Err(Error::unrecoverable("Key must be a string")),
                     }
                 }
             },
             _ => Err(Error::unrecoverable("impossible")),
         })
-        .collect::<Result<Vec<(String, InstrSeq<'arena>)>>>()?
+        .collect::<Result<Vec<_>>>()?
         .into_iter()
         .unzip();
-    let keys_ = bumpalo::collections::Vec::from_iter_in(
-        keys.into_iter()
-            .map(|x| bumpalo::collections::String::from_str_in(x.as_str(), alloc).into_bump_str()),
-        alloc,
-    )
-    .into_bump_slice();
     Ok(InstrSeq::gather(vec![
         InstrSeq::gather(value_instrs),
         emit_pos(pos),
-        ctor(keys_)?,
+        instr::new_struct_dict(&keys),
     ]))
 }
 
@@ -1457,7 +1438,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
     let count = fields.len() as u32;
     let emit_dict = |e: &mut Emitter<'arena, 'decl>| {
         if is_struct_init(e, env, fields, true)? {
-            emit_struct_array(e, env, pos, fields, |x| Ok(instr::new_struct_dict(x)))
+            emit_struct_array(e, env, pos, fields)
         } else {
             let ctor = Instruct::Opcode(Opcode::NewDictArray(count));
             emit_array(e, env, pos, fields, ctor)
@@ -1466,7 +1447,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
     let emit_collection_helper = |e: &mut Emitter<'arena, 'decl>, ctype| {
         if is_struct_init(e, env, fields, true)? {
             Ok(InstrSeq::gather(vec![
-                emit_struct_array(e, env, pos, fields, |x| Ok(instr::new_struct_dict(x)))?,
+                emit_struct_array(e, env, pos, fields)?,
                 emit_pos(pos),
                 instr::col_from_array(ctype),
             ]))

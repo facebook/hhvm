@@ -950,12 +950,8 @@ fn write_terminator(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
         }
 
         Terminator::Throw(vid, _) => {
-            textual_todo! {
-                let expr = state.lookup_vid(vid);
-                let target = FunctionName::Unmangled("TODO_throw".to_string());
-                state.fb.call(&target, [expr])?;
-                state.fb.unreachable()?;
-            }
+            let expr = state.lookup_vid(vid);
+            state.fb.throw(expr)?;
         }
     }
 

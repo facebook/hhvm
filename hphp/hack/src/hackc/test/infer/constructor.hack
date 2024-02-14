@@ -22,15 +22,14 @@ class A {
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK:   store &$1 <- null: *HackMixed
 // CHECK:   store &$2 <- null: *HackMixed
-// CHECK:   n7 = $builtins.hhbc_throw(n6)
-// CHECK:   unreachable
+// CHECK:   throw n6
 // CHECK: #b2:
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK:   store &$1 <- null: *HackMixed
 // CHECK:   store &$2 <- null: *HackMixed
-// CHECK:   n8 = n5.?.__construct()
-// CHECK:   n9 = $builtins.hhbc_lock_obj(n5)
-// CHECK:   n10 = n5.?.a()
+// CHECK:   n7 = n5.?.__construct()
+// CHECK:   n8 = $builtins.hhbc_lock_obj(n5)
+// CHECK:   n9 = n5.?.a()
 // CHECK:   ret null
 // CHECK: }
 function f1() : void {

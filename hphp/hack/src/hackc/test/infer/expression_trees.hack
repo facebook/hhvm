@@ -17,8 +17,7 @@
 // CHECK:   .handlers b1
 // CHECK: #b1(n6: *HackMixed):
 // CHECK:   store &$0 <- null: *HackMixed
-// CHECK:   n7 = $builtins.hhbc_throw(n6)
-// CHECK:   unreachable
+// CHECK:   throw n6
 // CHECK: #b2:
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK:   ret n5

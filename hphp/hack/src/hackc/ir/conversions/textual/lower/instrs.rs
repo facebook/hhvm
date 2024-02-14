@@ -174,7 +174,6 @@ impl LowerInstrs<'_> {
     fn handle_terminator_with_builtin(&self, term: &Terminator) -> Option<hack::Hhbc> {
         let builtin = match term {
             Terminator::Exit(..) => hack::Hhbc::Exit,
-            Terminator::Throw(..) => hack::Hhbc::Throw,
             Terminator::ThrowAsTypeStructException(..) => hack::Hhbc::ThrowAsTypeStructException,
             _ => return None,
         };

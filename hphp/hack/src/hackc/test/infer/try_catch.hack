@@ -16,15 +16,14 @@
 // CHECK:   jmp b3, b4
 // CHECK: #b3:
 // CHECK:   prune ! $builtins.hack_is_true(n3)
-// CHECK:   n4 = $builtins.hhbc_throw(n2)
-// CHECK:   unreachable
+// CHECK:   throw n2
 // CHECK: #b4:
 // CHECK:   prune $builtins.hack_is_true(n3)
 // CHECK:   store &$e <- n2: *HackMixed
-// CHECK:   n5 = $root.a(null, $builtins.hack_int(2))
+// CHECK:   n4 = $root.a(null, $builtins.hack_int(2))
 // CHECK:   jmp b5
 // CHECK: #b5:
-// CHECK:   n6 = $root.a(null, $builtins.hack_int(3))
+// CHECK:   n5 = $root.a(null, $builtins.hack_int(3))
 // CHECK:   ret null
 // CHECK: }
 function main(): void {
@@ -50,12 +49,11 @@ function main(): void {
 // CHECK:   jmp b2, b3
 // CHECK: #b2:
 // CHECK:   prune ! $builtins.hack_is_true(n2)
-// CHECK:   n3 = $builtins.hhbc_throw(n1)
-// CHECK:   unreachable
+// CHECK:   throw n1
 // CHECK: #b3:
 // CHECK:   prune $builtins.hack_is_true(n2)
 // CHECK:   store &$e <- n1: *HackMixed
-// CHECK:   n4 = $root.a(null, $builtins.hack_int(2))
+// CHECK:   n3 = $root.a(null, $builtins.hack_int(2))
 // CHECK:   jmp b4
 // CHECK: #b4:
 // CHECK:   ret null

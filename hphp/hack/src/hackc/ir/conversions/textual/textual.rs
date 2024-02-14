@@ -1174,6 +1174,14 @@ impl FuncBuilder<'_, '_> {
         Ok(())
     }
 
+    pub(crate) fn throw(&mut self, exn_expr: impl Into<Expr>) -> Result {
+        let exn_expr = exn_expr.into();
+        write!(self.txf.w, "{INDENT}throw ",)?;
+        self.write_expr(&exn_expr)?;
+        writeln!(self.txf.w)?;
+        Ok(())
+    }
+
     /// A curry boxes up some parameters and returns an invokable.  This has to
     /// be an intrinsic so we don't end up a ton of little duplicate classes.
     ///

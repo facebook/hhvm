@@ -23,8 +23,7 @@
 // CHECK: #b3(n9: *HackMixed):
 // CHECK:   n10: *HackMixed = load &iter0
 // CHECK:   n11 = $builtins.hhbc_iter_free(n10)
-// CHECK:   n12 = $builtins.hhbc_throw(n9)
-// CHECK:   unreachable
+// CHECK:   throw n9
 // CHECK: #b4:
 // CHECK:   prune $builtins.hack_is_true(n8)
 // CHECK:   jmp b7

@@ -142,8 +142,7 @@ function fcall_nullsafe(?C $c): void {
 // CHECK:   .handlers b2
 // CHECK: #b2(n5: *HackMixed):
 // CHECK:   store &$0 <- null: *HackMixed
-// CHECK:   n6 = $builtins.hhbc_throw(n5)
-// CHECK:   unreachable
+// CHECK:   throw n5
 // CHECK: #b3:
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK:   ret null
@@ -169,8 +168,7 @@ function fcall_class_meth(): void {
 // CHECK:   .handlers b2
 // CHECK: #b2(n4: *HackMixed):
 // CHECK:   store &$0 <- null: *HackMixed
-// CHECK:   n5 = $builtins.hhbc_throw(n4)
-// CHECK:   unreachable
+// CHECK:   throw n4
 // CHECK: #b3:
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK:   ret null
@@ -214,8 +212,7 @@ function fcall_splat(): void {
 // CHECK:   .handlers b2
 // CHECK: #b2(n5: *HackMixed):
 // CHECK:   store &$0 <- null: *HackMixed
-// CHECK:   n6 = $builtins.hhbc_throw(n5)
-// CHECK:   unreachable
+// CHECK:   throw n5
 // CHECK: #b3:
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK:   ret null

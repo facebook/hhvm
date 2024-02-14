@@ -22,16 +22,15 @@ class InternalGeneric<T> {}
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK:   store &$1 <- null: *HackMixed
 // CHECK:   store &$2 <- null: *HackMixed
-// CHECK:   n7 = $builtins.hhbc_throw(n6)
-// CHECK:   unreachable
+// CHECK:   throw n6
 // CHECK: #b2:
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK:   store &$1 <- null: *HackMixed
 // CHECK:   store &$2 <- null: *HackMixed
-// CHECK:   n8 = n5.?.__construct()
-// CHECK:   n9 = $builtins.hhbc_lock_obj(n5)
-// CHECK:   n10 = $builtins.hack_bool(__sil_instanceof(n5, <Internal>))
-// CHECK:   n11 = $builtins.hhbc_verify_type_pred(n5, n10)
+// CHECK:   n7 = n5.?.__construct()
+// CHECK:   n8 = $builtins.hhbc_lock_obj(n5)
+// CHECK:   n9 = $builtins.hack_bool(__sil_instanceof(n5, <Internal>))
+// CHECK:   n10 = $builtins.hhbc_verify_type_pred(n5, n9)
 // CHECK:   ret n5
 // CHECK: }
 function internalClassParam(int $a, Internal $b) : Internal {
@@ -56,16 +55,15 @@ function internalClassParam(int $a, Internal $b) : Internal {
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK:   store &$1 <- null: *HackMixed
 // CHECK:   store &$2 <- null: *HackMixed
-// CHECK:   n7 = $builtins.hhbc_throw(n6)
-// CHECK:   unreachable
+// CHECK:   throw n6
 // CHECK: #b2:
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK:   store &$1 <- null: *HackMixed
 // CHECK:   store &$2 <- null: *HackMixed
-// CHECK:   n8 = n5.?.__construct()
-// CHECK:   n9 = $builtins.hhbc_lock_obj(n5)
-// CHECK:   n10 = $builtins.hack_bool(__sil_instanceof(n5, <External>))
-// CHECK:   n11 = $builtins.hhbc_verify_type_pred(n5, n10)
+// CHECK:   n7 = n5.?.__construct()
+// CHECK:   n8 = $builtins.hhbc_lock_obj(n5)
+// CHECK:   n9 = $builtins.hack_bool(__sil_instanceof(n5, <External>))
+// CHECK:   n10 = $builtins.hhbc_verify_type_pred(n5, n9)
 // CHECK:   ret n5
 // CHECK: }
 function externalClassParam(bool $a, External $b): External {

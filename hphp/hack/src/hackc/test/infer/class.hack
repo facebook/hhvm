@@ -98,14 +98,13 @@ class C {
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n10 = $builtins.hhbc_throw(n9)
-  // CHECK:   unreachable
+  // CHECK:   throw n9
   // CHECK: #b2:
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n11 = n8.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
-  // CHECK:   n12 = $builtins.hhbc_lock_obj(n8)
+  // CHECK:   n10 = n8.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
+  // CHECK:   n11 = $builtins.hhbc_lock_obj(n8)
   // CHECK:   store &$a <- n8: *HackMixed
   // CHECK:   ret null
   // CHECK: }
@@ -132,14 +131,13 @@ class C {
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n8 = $builtins.hhbc_throw(n7)
-  // CHECK:   unreachable
+  // CHECK:   throw n7
   // CHECK: #b2:
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n9 = n6.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
-  // CHECK:   n10 = $builtins.hhbc_lock_obj(n6)
+  // CHECK:   n8 = n6.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
+  // CHECK:   n9 = $builtins.hhbc_lock_obj(n6)
   // CHECK:   store &$a <- n6: *HackMixed
   // CHECK:   ret null
   // CHECK: }
@@ -166,14 +164,13 @@ class C {
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n8 = $builtins.hhbc_throw(n7)
-  // CHECK:   unreachable
+  // CHECK:   throw n7
   // CHECK: #b2:
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n9 = n6.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
-  // CHECK:   n10 = $builtins.hhbc_lock_obj(n6)
+  // CHECK:   n8 = n6.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
+  // CHECK:   n9 = $builtins.hhbc_lock_obj(n6)
   // CHECK:   store &$a <- n6: *HackMixed
   // CHECK:   ret null
   // CHECK: }

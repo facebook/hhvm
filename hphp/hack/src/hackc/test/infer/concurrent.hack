@@ -87,21 +87,20 @@ namespace Concurrent {
   // CHECK:   .handlers b2
   // CHECK: #b2(n8: *HackMixed):
   // CHECK:   store &$0 <- null: *HackMixed
-  // CHECK:   n9 = $builtins.hhbc_throw(n8)
-  // CHECK:   unreachable
+  // CHECK:   throw n8
   // CHECK: #b3:
   // CHECK:   store &$0 <- null: *HackMixed
-  // CHECK:   n10 = $root.Concurrent::genGetInt(null)
-  // CHECK:   n11 = $builtins.hhbc_await(n10)
-  // CHECK:   store &$z <- n11: *HackMixed
-  // CHECK:   n12: *HackMixed = load &$y
-  // CHECK:   n13: *HackMixed = load &$x
-  // CHECK:   n14 = $builtins.hhbc_add(n13, n12)
-  // CHECK:   n15: *HackMixed = load &$z
-  // CHECK:   n16 = $builtins.hhbc_add(n14, n15)
-  // CHECK:   n17 = $builtins.hhbc_is_type_int(n16)
-  // CHECK:   n18 = $builtins.hhbc_verify_type_pred(n16, n17)
-  // CHECK:   ret n16
+  // CHECK:   n9 = $root.Concurrent::genGetInt(null)
+  // CHECK:   n10 = $builtins.hhbc_await(n9)
+  // CHECK:   store &$z <- n10: *HackMixed
+  // CHECK:   n11: *HackMixed = load &$y
+  // CHECK:   n12: *HackMixed = load &$x
+  // CHECK:   n13 = $builtins.hhbc_add(n12, n11)
+  // CHECK:   n14: *HackMixed = load &$z
+  // CHECK:   n15 = $builtins.hhbc_add(n13, n14)
+  // CHECK:   n16 = $builtins.hhbc_is_type_int(n15)
+  // CHECK:   n17 = $builtins.hhbc_verify_type_pred(n15, n16)
+  // CHECK:   ret n15
   // CHECK: }
   async function genTest3(): Awaitable<int> {
     concurrent {
@@ -132,19 +131,18 @@ namespace Concurrent {
   // CHECK:   .handlers b2
   // CHECK: #b2(n4: *HackMixed):
   // CHECK:   store &$0 <- null: *HackMixed
-  // CHECK:   n5 = $builtins.hhbc_throw(n4)
-  // CHECK:   unreachable
+  // CHECK:   throw n4
   // CHECK: #b3:
   // CHECK:   store &$0 <- null: *HackMixed
-  // CHECK:   n6 = $root.Concurrent::genGetString(null)
-  // CHECK:   n7 = $builtins.hhbc_await(n6)
-  // CHECK:   store &$y <- n7: *HackMixed
-  // CHECK:   n8: *HackMixed = load &$y
-  // CHECK:   n9: *HackMixed = load &$x
-  // CHECK:   n10 = $builtins.hhbc_concat(n9, n8)
-  // CHECK:   n11 = $builtins.hhbc_is_type_str(n10)
-  // CHECK:   n12 = $builtins.hhbc_verify_type_pred(n10, n11)
-  // CHECK:   ret n10
+  // CHECK:   n5 = $root.Concurrent::genGetString(null)
+  // CHECK:   n6 = $builtins.hhbc_await(n5)
+  // CHECK:   store &$y <- n6: *HackMixed
+  // CHECK:   n7: *HackMixed = load &$y
+  // CHECK:   n8: *HackMixed = load &$x
+  // CHECK:   n9 = $builtins.hhbc_concat(n8, n7)
+  // CHECK:   n10 = $builtins.hhbc_is_type_str(n9)
+  // CHECK:   n11 = $builtins.hhbc_verify_type_pred(n9, n10)
+  // CHECK:   ret n9
   // CHECK: }
   async function genTest4(): Awaitable<string> {
     concurrent {

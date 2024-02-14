@@ -55,8 +55,7 @@ function params_and_locals(int $a) : void {
 // CHECK: #b3(n7: *HackMixed):
 // CHECK:   n8: *HackMixed = load &iter0
 // CHECK:   n9 = $builtins.hhbc_iter_free(n8)
-// CHECK:   n10 = $builtins.hhbc_throw(n7)
-// CHECK:   unreachable
+// CHECK:   throw n7
 // CHECK: #b4:
 // CHECK:   prune $builtins.hack_is_true(n6)
 // CHECK:   jmp b7

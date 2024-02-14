@@ -623,6 +623,8 @@ If not provided, will use the default path for the repository.
     $ state_path)
 
 let clean_subcommand =
+  let () = HackEventLogger.fanout_init ~init_id:"hh_fanout" in
+  let () = HackEventLogger.call_hh_fanout "clean_subcommand" in
   let open Cmdliner in
   let doc = "Delete any state files which hh_fanout uses from disk." in
 
@@ -636,6 +638,7 @@ let clean_subcommand =
   Cmd.v info term
 
 let calculate_subcommand =
+  let () = HackEventLogger.call_hh_fanout "calculate_subcommand" in
   let open Cmdliner in
   let open Cmdliner.Arg in
   let doc = "Determines which files must be rechecked after a change." in
@@ -664,6 +667,7 @@ let calculate_subcommand =
   Cmd.v info term
 
 let calculate_errors_subcommand =
+  let () = HackEventLogger.call_hh_fanout "calculate_errors_subcommand" in
   let open Cmdliner in
   let open Cmdliner.Arg in
   let doc = "Produce typechecking errors for the codebase." in
@@ -750,6 +754,7 @@ let mode_debug ~(env : env) ~(path : Path.t) ~(cursor_id : string option) :
   Lwt.return_unit
 
 let debug_subcommand =
+  let () = HackEventLogger.call_hh_fanout "debug_subcommand" in
   let open Cmdliner in
   let open Cmdliner.Arg in
   let doc =
@@ -783,6 +788,7 @@ let mode_status ~(env : env) ~(cursor_id : string) : unit Lwt.t =
   Lwt.return_unit
 
 let status_subcommand =
+  let () = HackEventLogger.call_hh_fanout "status_subcommand" in
   let open Cmdliner in
   let open Cmdliner.Arg in
   let doc =
@@ -817,6 +823,7 @@ let mode_query
   Lwt.return_unit
 
 let query_subcommand =
+  let () = HackEventLogger.call_hh_fanout "query_subcommand" in
   let open Cmdliner in
   let open Cmdliner.Arg in
   let doc = "Get the edges for which the given input node is a dependency." in
@@ -850,6 +857,7 @@ let mode_query_path
   Lwt.return_unit
 
 let query_path_subcommand =
+  let () = HackEventLogger.call_hh_fanout "query_path_subcommand" in
   let open Cmdliner in
   let open Cmdliner.Arg in
   let doc =
@@ -886,6 +894,7 @@ a typing-dependency edge.
 let mode_build = Build.go
 
 let build_subcommand =
+  let () = HackEventLogger.call_hh_fanout "build_subcommand" in
   let open Cmdliner in
   let open Cmdliner.Arg in
   let doc = "Build the 64-bit graph from a collection of edges" in
@@ -951,6 +960,7 @@ to be produced by hh_server
 let mode_dep_graph_stats = Dep_graph_stats.go
 
 let dep_graph_stats_subcommand =
+  let () = HackEventLogger.call_hh_fanout "dep_graph_status_subcommand" in
   let open Cmdliner in
   let open Cmdliner.Arg in
   let doc = "Calculate some statistics for the 64-bit dependency graph" in
@@ -983,6 +993,7 @@ Calculate a bunch of statistics for a given 64-bit dependency graph.
 let mode_dep_graph_is_subgraph = Dep_graph_is_subgraph.go
 
 let dep_graph_is_subgraph_subcommand =
+  let () = HackEventLogger.call_hh_fanout "dep_graph_is_subgraph_subcommand" in
   let open Cmdliner in
   let open Cmdliner.Arg in
   let doc = "Check whether SUB is a subgraph of SUPER" in
@@ -1015,12 +1026,13 @@ Check whether a 64-bit dependency graph is a subgraph of an other graph.
   Cmd.v info term
 
 let default_subcommand =
+  let () = HackEventLogger.call_hh_fanout "default_subcommand" in
   let open Cmdliner in
   let sdocs = Manpage.s_common_options in
   Term.(ret (const (`Help (`Pager, None))), Cmd.info "hh_fanout" ~sdocs)
 
 let () =
-  EventLogger.init EventLogger.Event_logger_fake 0.0;
+  HackEventLogger.fanout_init ~init_id:"hh_fanout";
   Daemon.check_entry_point ();
   Folly.ensure_folly_init ();
   let cmds =

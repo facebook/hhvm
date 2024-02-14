@@ -156,6 +156,8 @@ let tried_to_be_hg_aware_with_precomputed_saved_state_warning _ = ()
 
 let tried_to_load_non_existant_compressed_dep_graph _ = ()
 
+let call_hh_fanout _ = ()
+
 let init_start ~experiments_config_meta:_ _ = ()
 
 let nfs_root _ = ()
@@ -173,6 +175,8 @@ let lock_stolen _ = ()
 let client_init ~init_id:_ ~from:_ ~custom_columns:_ _ = ()
 
 let serverless_ide_init ~init_id:_ = ()
+
+let fanout_init ~init_id:_ = ()
 
 let serverless_ide_done _ = ()
 

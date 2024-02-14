@@ -23,7 +23,9 @@ HTTP3::ErrorCode toHTTP3ErrorCode(proxygen::ErrorCode err) {
       return HTTP3::ErrorCode::HTTP_INTERNAL_ERROR;
     case ErrorCode::FLOW_CONTROL_ERROR:
       DCHECK(false) << "ErrorCode::FLOW_CONTROL_ERROR for QUIC";
-      // fallthrough
+#ifdef NDEBUG
+      [[fallthrough]];
+#endif
     case ErrorCode::SETTINGS_TIMEOUT: // maybe we should keep this?
     case ErrorCode::STREAM_CLOSED:
       return HTTP3::ErrorCode::HTTP_GENERAL_PROTOCOL_ERROR;

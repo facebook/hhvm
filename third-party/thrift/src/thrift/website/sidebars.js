@@ -261,6 +261,7 @@ module.exports = {
               'fb/languages/java/netty4_background',
               'fb/languages/java/netty4',
               'fb/languages/java/serde',
+              'fb/languages/java/legacy_api',
             ],
           },
           {

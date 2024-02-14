@@ -21,24 +21,37 @@ class DummyHTTPSessionStats : public HTTPSessionStats {
   void recordSessionReused() noexcept override{};
   // virtual void recordSessionIdleTime(std::chrono::seconds) noexcept {};
   void recordTransactionStalled() noexcept override{};
-  void recordSessionStalled() noexcept override{};
+  void recordSessionStalled() noexcept override {
+  }
   void recordEgressContentLengthMismatches() noexcept override {
   }
   void recordSessionPeriodicPingProbeTimeout() noexcept override {
   }
 
-  void recordPresendIOSplit() noexcept override{};
-  void recordPresendExceedLimit() noexcept override{};
-  void recordTTLBAExceedLimit() noexcept override{};
-  void recordTTLBANotFound() noexcept override{};
-  void recordTTLBAReceived() noexcept override{};
-  void recordTTLBATimeout() noexcept override{};
-  void recordTTLBATracked() noexcept override{};
-  void recordTTBTXExceedLimit() noexcept override{};
-  void recordTTBTXReceived() noexcept override{};
-  void recordTTBTXTimeout() noexcept override{};
-  void recordTTBTXNotFound() noexcept override{};
-  void recordTTBTXTracked() noexcept override{};
+  void recordPresendIOSplit() noexcept override {
+  }
+  void recordPresendExceedLimit() noexcept override {
+  }
+  void recordTTLBAExceedLimit() noexcept override {
+  }
+  void recordTTLBANotFound() noexcept override {
+  }
+  void recordTTLBAReceived() noexcept override {
+  }
+  void recordTTLBATimeout() noexcept override {
+  }
+  void recordTTLBATracked() noexcept override {
+  }
+  void recordTTBTXExceedLimit() noexcept override {
+  }
+  void recordTTBTXReceived() noexcept override {
+  }
+  void recordTTBTXTimeout() noexcept override {
+  }
+  void recordTTBTXNotFound() noexcept override {
+  }
+  void recordTTBTXTracked() noexcept override {
+  }
 };
 
 class MockHTTPSessionStats : public DummyHTTPSessionStats {

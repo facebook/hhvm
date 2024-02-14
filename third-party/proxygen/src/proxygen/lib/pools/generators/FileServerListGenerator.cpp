@@ -27,7 +27,8 @@ void FileServerListGenerator::FileGenerator::readFile(std::string& filePath,
     folly::throw_exception<Exception>("Error reading file %s", filePath);
   }
 }
-void FileServerListGenerator::FileGenerator::cancelServerListRequest(){};
+void FileServerListGenerator::FileGenerator::cancelServerListRequest() {
+}
 
 void FileServerListGenerator::FileGenerator::run(milliseconds /*timeout*/) {
   // Read the file

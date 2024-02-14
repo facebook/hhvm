@@ -34,7 +34,7 @@ StatusType ProxyStatus::getStatusType() const {
 void ProxyStatus::setStatusType(StatusType statusType) {
   statusType_ = statusType;
   pIdent_.identifier = getStatusTypeString(statusType_);
-};
+}
 
 ProxyStatus& ProxyStatus::setProxyStatusParameter(folly::StringPiece name,
                                                   const std::string& text) {

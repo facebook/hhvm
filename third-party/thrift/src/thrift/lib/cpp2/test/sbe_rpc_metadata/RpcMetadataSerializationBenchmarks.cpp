@@ -15,6 +15,7 @@
  */
 
 // build in @mode/dbg to enable SBE Checks
+#include <iterator>
 #if __SBE_DEBUG_MODE == 1
 #define SBE_ENABLE_PRECEDENCE_CHECKS
 #else
@@ -31,6 +32,7 @@
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/sbe/MessageWrapper.h>
+#include <thrift/lib/cpp2/test/sbe_rpc_metadata/gen-cpp2/wrapper_types.h>
 #include <thrift/lib/thrift/apache_thrift_sbe/RequestRpcMetadata.h>
 #include <thrift/lib/thrift/apache_thrift_sbe/ResponseRpcMetadata.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -74,6 +76,8 @@ std::unique_ptr<folly::IOBuf> responseMetadataHeaders;
 std::unique_ptr<folly::IOBuf> messageBuffer;
 std::unique_ptr<folly::IOBuf> tcompact_baseRequestMetadata;
 std::unique_ptr<folly::IOBuf> tcompact_baseResponseMetadata;
+std::unique_ptr<folly::IOBuf> tcompact_requestMetadataHeaders;
+std::unique_ptr<folly::IOBuf> tcompact_responseMetadataHeaders;
 
 void setup() {
   auto requestMetadata =
@@ -89,9 +93,7 @@ void setup() {
     requestMetadata->putName(name);
     requestMetadata->putInteractionMetadata(kEmptyString);
     requestMetadata->putOptionalMetdata(kEmptyString);
-#if __SBE_DEBUG_MODE == 1
-    requestMetadata.completeEncoding();
-#endif
+    requestMetadata.completeEncoding(*baseRequestMetadata);
   }
   {
     baseResponseMetadata = folly::IOBuf::create(64);
@@ -100,9 +102,7 @@ void setup() {
     responseMetadata->otherMetadataCount(0);
     responseMetadata->putExceptionMetadata(kEmptyString);
     responseMetadata->putOptionalMetadata(kEmptyString);
-#if __SBE_DEBUG_MODE == 1
-    responseMetadata.completeEncoding();
-#endif
+    responseMetadata.completeEncoding(*baseResponseMetadata);
   }
   {
     requestMetadataHeaders = folly::IOBuf::create(256);
@@ -136,9 +136,7 @@ void setup() {
     requestMetadata->putName(name);
     requestMetadata->putInteractionMetadata(kEmptyString);
     requestMetadata->putOptionalMetdata(kEmptyString);
-#if __SBE_DEBUG_MODE == 1
-    requestMetadata.completeEncoding();
-#endif
+    requestMetadata.completeEncoding(*requestMetadataHeaders);
   }
   {
     responseMetadataHeaders = folly::IOBuf::create(256);
@@ -170,9 +168,7 @@ void setup() {
 
     responseMetadata->putExceptionMetadata(kEmptyString);
     responseMetadata->putOptionalMetadata(kEmptyString);
-#if __SBE_DEBUG_MODE == 1
-    responseMetadata.completeEncoding();
-#endif
+    responseMetadata.completeEncoding(*responseMetadataHeaders);
   }
   messageBuffer = folly::IOBuf::create(256);
 
@@ -192,17 +188,46 @@ void setup() {
     serialize_with_protocol_writer<CompactProtocolWriter>(response);
     tcompact_baseResponseMetadata = thriftIOBufQueue.move();
   }
+
+  {
+    ManagedStringView managedName = ManagedStringView::from_static(nameView);
+    apache::thrift::RequestRpcMetadata request;
+    request.protocol() = apache::thrift::ProtocolId::COMPACT;
+    request.name() = ManagedStringViewWithConversions(std::move(managedName));
+    request.kind() = apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE;
+    request.otherMetadata().ensure();
+    auto& otherMetadata = can_throw(*request.otherMetadata());
+    otherMetadata[kSerfAppHeader] = "test_app";
+    otherMetadata[kSerfAppPathHeader] = "test_app_path_header";
+    otherMetadata[kSerfAppArgsHeader] = "test_app";
+    otherMetadata[kSerfAppAPIHeader] = "test_api";
+    otherMetadata[kSerfOnBehalfOf] = "12345";
+    serialize_with_protocol_writer<CompactProtocolWriter>(request);
+    tcompact_requestMetadataHeaders = thriftIOBufQueue.move();
+  }
+
+  {
+    apache::thrift::ResponseRpcMetadata response;
+    response.streamId() = 100;
+    response.otherMetadata().ensure();
+    auto& otherMetadata = can_throw(*response.otherMetadata());
+    otherMetadata[kSerfAppHeader] = "test_app";
+    otherMetadata[kSerfAppPathHeader] = "test_app_path_header";
+    otherMetadata[kSerfAppArgsHeader] = "test_app";
+    otherMetadata[kSerfAppAPIHeader] = "test_api";
+    otherMetadata[kSerfOnBehalfOf] = "12345";
+    serialize_with_protocol_writer<CompactProtocolWriter>(response);
+  }
 }
 
 void do_TCompactRpcMetadataRequestSerializationBaseline() {
-  folly::BenchmarkSuspender susp;
   ManagedStringView managedName = ManagedStringView::from_static(nameView);
-  susp.dismiss();
   apache::thrift::RequestRpcMetadata request;
   request.protocol() = apache::thrift::ProtocolId::COMPACT;
   request.name() = ManagedStringViewWithConversions(std::move(managedName));
   request.kind() = apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE;
   serialize_with_protocol_writer<CompactProtocolWriter>(request);
+  thriftIOBufQueue.move();
 }
 
 BENCHMARK(TCompactRpcMetadataRequestSerializationBaseline) {
@@ -210,9 +235,7 @@ BENCHMARK(TCompactRpcMetadataRequestSerializationBaseline) {
 }
 
 void do_SBERpcMetadataRequestSerializationBaseline() {
-  folly::BenchmarkSuspender susp;
   messageBuffer->clear();
-  susp.dismiss();
   auto metadata =
       sbe::MessageWrapper<sbe::RequestRpcMetadata, sbe::MessageHeader>();
   metadata.wrapForEncode(*messageBuffer);
@@ -222,9 +245,7 @@ void do_SBERpcMetadataRequestSerializationBaseline() {
   metadata->putName(name);
   metadata->putInteractionMetadata(kEmptyString);
   metadata->putOptionalMetdata(kEmptyString);
-#if __SBE_DEBUG_MODE == 1
-  metadata.completeEncoding();
-#endif
+  metadata.completeEncoding(*messageBuffer);
 }
 
 BENCHMARK_RELATIVE(SBERpcMetadataRequestSerializationBaseline) {
@@ -232,17 +253,9 @@ BENCHMARK_RELATIVE(SBERpcMetadataRequestSerializationBaseline) {
 }
 
 void do_TCompactRpcMetadataRequestDeserBaseline() {
-  folly::BenchmarkSuspender susp;
-  ManagedStringView managedName = ManagedStringView::from_static(nameView);
-  apache::thrift::RequestRpcMetadata request;
-  request.protocol() = apache::thrift::ProtocolId::COMPACT;
-  request.name() = ManagedStringViewWithConversions(std::move(managedName));
-  request.kind() = apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE;
-  serialize_with_protocol_writer<CompactProtocolWriter>(request);
-  susp.dismiss();
   deserialize_with_protocol_reader<
       apache::thrift::RequestRpcMetadata,
-      CompactProtocolReader>(thriftIOBufQueue.move());
+      CompactProtocolReader>(tcompact_baseRequestMetadata);
 }
 
 BENCHMARK(TCompactRpcMetadataRequestDeserBaseline) {
@@ -283,9 +296,7 @@ BENCHMARK(TCompactRpcMetadataResponseSerializationBaseline) {
 }
 
 void do_SBERpcMetadataResponseSerializationBaseline() {
-  folly::BenchmarkSuspender susp;
   messageBuffer->clear();
-  susp.dismiss();
   auto metadata =
       sbe::MessageWrapper<sbe::ResponseRpcMetadata, sbe::MessageHeader>();
   metadata.wrapForEncode(*messageBuffer);
@@ -354,9 +365,7 @@ BENCHMARK_RELATIVE(SBEServerRoundTripBaseline) {
 }
 
 void do_TCompactRpcMetadataRequestSerializationWithHeaders() {
-  folly::BenchmarkSuspender susp;
   ManagedStringView managedName = ManagedStringView::from_static(nameView);
-  susp.dismiss();
   apache::thrift::RequestRpcMetadata request;
   request.protocol() = apache::thrift::ProtocolId::COMPACT;
   request.name() = ManagedStringViewWithConversions(std::move(managedName));
@@ -376,9 +385,7 @@ BENCHMARK(TCompactRpcMetadataRequestSerializationHeaders) {
 }
 
 void do_SBERpcMetadataRequestSerializationWithHeaders() {
-  folly::BenchmarkSuspender susp;
   messageBuffer->clear();
-  susp.dismiss();
   auto metadata =
       sbe::MessageWrapper<sbe::RequestRpcMetadata, sbe::MessageHeader>();
   metadata.wrapForEncode(*messageBuffer);
@@ -419,24 +426,9 @@ BENCHMARK_RELATIVE(SBERpcMetadataRequestSerializationWithHeaders) {
 }
 
 void do_TCompactRpcMetadataRequestDeserializationWithHeaders() {
-  folly::BenchmarkSuspender susp;
-  ManagedStringView managedName = ManagedStringView::from_static(nameView);
-  apache::thrift::RequestRpcMetadata request;
-  request.protocol() = apache::thrift::ProtocolId::COMPACT;
-  request.name() = ManagedStringViewWithConversions(std::move(managedName));
-  request.kind() = apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE;
-  request.otherMetadata().ensure();
-  auto& otherMetadata = can_throw(*request.otherMetadata());
-  otherMetadata[kSerfAppHeader] = "test_app";
-  otherMetadata[kSerfAppPathHeader] = "test_app_path_header";
-  otherMetadata[kSerfAppArgsHeader] = "test_app";
-  otherMetadata[kSerfAppAPIHeader] = "test_api";
-  otherMetadata[kSerfOnBehalfOf] = "12345";
-  serialize_with_protocol_writer<CompactProtocolWriter>(request);
-  susp.dismiss();
   deserialize_with_protocol_reader<
       apache::thrift::RequestRpcMetadata,
-      CompactProtocolReader>(thriftIOBufQueue.move());
+      CompactProtocolReader>(tcompact_requestMetadataHeaders);
 }
 
 BENCHMARK(TCompactRpcMetadataRequestDeserializationHeaders) {
@@ -525,21 +517,9 @@ BENCHMARK_RELATIVE(SBERpcMetadataResponseSerializationHeaders) {
 }
 
 void do_TCompactRpcMetadataResponseDeserializationHeaders() {
-  folly::BenchmarkSuspender susp;
-  apache::thrift::ResponseRpcMetadata response;
-  response.streamId() = 100;
-  response.otherMetadata().ensure();
-  auto& otherMetadata = can_throw(*response.otherMetadata());
-  otherMetadata[kSerfAppHeader] = "test_app";
-  otherMetadata[kSerfAppPathHeader] = "test_app_path_header";
-  otherMetadata[kSerfAppArgsHeader] = "test_app";
-  otherMetadata[kSerfAppAPIHeader] = "test_api";
-  otherMetadata[kSerfOnBehalfOf] = "12345";
-  serialize_with_protocol_writer<CompactProtocolWriter>(response);
-  susp.dismiss();
   deserialize_with_protocol_reader<
       apache::thrift::ResponseRpcMetadata,
-      CompactProtocolReader>(thriftIOBufQueue.move());
+      CompactProtocolReader>(tcompact_responseMetadataHeaders);
 }
 
 BENCHMARK(TCompactRpcMetadataResponseDeserializationHeaders) {
@@ -586,6 +566,55 @@ BENCHMARK(TCompactServerRoundTripHeader) {
 BENCHMARK_RELATIVE(SBEServerRoundTripHeader) {
   do_SBERpcMetadataRequestDeserializationWithHeaders();
   do_SBERpcMetadataResponseSerializationHeaders();
+}
+
+BENCHMARK_DRAW_LINE();
+
+BENCHMARK(TestWrapping_SbeBaseline) {
+  do_SBERpcMetadataRequestSerializationBaseline();
+}
+
+BENCHMARK(TestWrapping_TCompactBaseline) {
+  do_TCompactRpcMetadataRequestSerializationBaseline();
+}
+
+BENCHMARK_RELATIVE(TestWrapping_CloneOne) {
+  do_SBERpcMetadataRequestSerializationBaseline();
+  messageBuffer->cloneOne();
+}
+
+BENCHMARK_RELATIVE(TestWrapping_WrapNoSerialize) {
+  do_SBERpcMetadataRequestSerializationBaseline();
+  benchmarks::Wrapper wrapper{};
+  wrapper.data() = messageBuffer->cloneOne();
+}
+
+BENCHMARK_RELATIVE(TestWrapping_CompactWriter) {
+  CompactProtocolWriter writer;
+  writer.setOutput(&thriftIOBufQueue);
+  writer.writeBinary(baseRequestMetadata->cloneOne());
+}
+
+BENCHMARK_RELATIVE(TestWrapping_BinaryWriter) {
+  BinaryProtocolWriter writer;
+  writer.setOutput(&thriftIOBufQueue);
+  writer.writeBinary(baseRequestMetadata->cloneOne());
+}
+
+template <typename ProtocolWriter>
+void do_ThriftWrapperSerialize() {
+  do_SBERpcMetadataRequestSerializationBaseline();
+  benchmarks::Wrapper wrapper{};
+  wrapper.data() = messageBuffer->cloneOne();
+  serialize_with_protocol_writer<ProtocolWriter>(wrapper);
+}
+
+BENCHMARK_RELATIVE(TestWrapping_TCompact) {
+  do_ThriftWrapperSerialize<CompactProtocolWriter>();
+}
+
+BENCHMARK_RELATIVE(TestWrapping_TBinary) {
+  do_ThriftWrapperSerialize<BinaryProtocolWriter>();
 }
 
 } // namespace apache::thrift::benchmark

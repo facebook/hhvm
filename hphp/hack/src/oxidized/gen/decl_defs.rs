@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<44c3af257d7c75061ec9dc12a5d46f24>>
+// @generated SignedSource<<930b7d2014c54e0dc26d39b37459137b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -241,4 +241,7 @@ pub struct DeclClassType {
     pub docs_url: Option<String>,
     /// Wether this interface has attribute __UNSAFE_AllowMultipleInstantiations.
     pub allow_multiple_instantiations: bool,
+    /// The string provided by the __AutocompleteSortText attribute used for sorting
+    /// autocomplete results.
+    pub sort_text: Option<String>,
 }

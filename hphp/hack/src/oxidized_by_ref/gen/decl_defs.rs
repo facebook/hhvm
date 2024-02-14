@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<118edea3ff04700c6961cfc38b7e9fee>>
+// @generated SignedSource<<f342ee47277c5a5ec8273adf66ad0a87>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -260,6 +260,10 @@ pub struct DeclClassType<'a> {
     pub docs_url: Option<&'a str>,
     /// Wether this interface has attribute __UNSAFE_AllowMultipleInstantiations.
     pub allow_multiple_instantiations: bool,
+    /// The string provided by the __AutocompleteSortText attribute used for sorting
+    /// autocomplete results.
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub sort_text: Option<&'a str>,
 }
 impl<'a> TrivialDrop for DeclClassType<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(DeclClassType<'arena>);

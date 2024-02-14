@@ -481,6 +481,7 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::FoldedClass<R> {
             decl_errors,
             docs_url,
             allow_multiple_instantiations,
+            sort_text,
         } = self;
         arena.alloc(obr::decl_defs::DeclClassType {
             name: name.to_oxidized(arena),
@@ -523,6 +524,7 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::FoldedClass<R> {
             decl_errors: decl_errors.to_oxidized(arena),
             docs_url: docs_url.as_deref().to_oxidized(arena),
             allow_multiple_instantiations: *allow_multiple_instantiations,
+            sort_text: sort_text.as_deref().to_oxidized(arena),
         })
     }
 }

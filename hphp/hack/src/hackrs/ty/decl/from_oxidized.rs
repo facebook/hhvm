@@ -704,6 +704,7 @@ impl<R: Reason> From<&obr::decl_defs::DeclClassType<'_>> for folded::FoldedClass
             decl_errors,
             docs_url,
             allow_multiple_instantiations,
+            sort_text,
         } = cls;
         Self {
             name: (*name).into(),
@@ -753,6 +754,7 @@ impl<R: Reason> From<&obr::decl_defs::DeclClassType<'_>> for folded::FoldedClass
             decl_errors: slice(decl_errors),
             docs_url: docs_url.map(Into::into),
             allow_multiple_instantiations: *allow_multiple_instantiations,
+            sort_text: sort_text.map(Into::into),
         }
     }
 }

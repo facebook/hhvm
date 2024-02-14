@@ -1103,6 +1103,19 @@ and class_decl
       c.sc_tparams
   in
   let sealed_whitelist = get_sealed_whitelist c in
+  let ua_sort_text =
+    match
+      Attributes.find
+        SN.UserAttributes.uaAutocompleteSortText
+        c.sc_user_attributes
+    with
+    | None -> None
+    | Some { ua_params; _ } ->
+      List.find_map ua_params ~f:(function
+          | String s -> Some s
+          | _ -> None)
+  in
+
   let tc =
     {
       dc_final = c.sc_final;
@@ -1153,6 +1166,7 @@ and class_decl
         Attributes.mem
           SN.UserAttributes.uaUnsafeAllowMultipleInstantiations
           c.sc_user_attributes;
+      dc_sort_text = ua_sort_text;
     }
   in
   let filter_snd map = SMap.filter_map (fun _k v -> snd v) map in

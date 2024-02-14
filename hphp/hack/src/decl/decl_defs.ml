@@ -158,6 +158,9 @@ type decl_class_type = {
   dc_docs_url: string option;
   dc_allow_multiple_instantiations: bool;
       (** Wether this interface has attribute __UNSAFE_AllowMultipleInstantiations. *)
+  dc_sort_text: string option;
+      (** The string provided by the __AutocompleteSortText attribute used for sorting
+          autocomplete results. *)
 }
 [@@deriving show]
 

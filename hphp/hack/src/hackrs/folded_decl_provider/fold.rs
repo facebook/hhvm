@@ -921,6 +921,18 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         );
 
         let is_const = self.has_user_attribute(*sn::user_attributes::uaConst);
+        use ty::decl::ty::UserAttributeParam;
+        let sort_text = self
+            .child
+            .user_attributes
+            .iter()
+            .find(|ua| ua.name.id() == *sn::user_attributes::uaAutocompleteSortText)
+            .and_then(|ua| ua.params.first().cloned())
+            .and_then(|param| match param {
+                UserAttributeParam::String(s) => Some(s),
+                _ => None,
+            })
+            .map(|s| s.to_string());
         let is_module_level_trait =
             self.has_user_attribute(*sn::user_attributes::uaModuleLevelTrait);
         let allow_multiple_instantiations =
@@ -966,6 +978,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             decl_errors: self.errors.into_boxed_slice(),
             docs_url: self.child.docs_url.clone(),
             allow_multiple_instantiations,
+            sort_text,
         });
 
         Ok(fc)

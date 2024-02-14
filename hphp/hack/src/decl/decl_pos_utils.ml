@@ -309,6 +309,7 @@ struct
       dc_decl_errors = [];
       dc_docs_url = dc.dc_docs_url;
       dc_allow_multiple_instantiations = dc.dc_allow_multiple_instantiations;
+      dc_sort_text = dc.dc_sort_text;
     }
 
   and requirement (p, t) = (pos_or_decl p, ty t)

@@ -189,6 +189,7 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
             decl_errors,
             docs_url,
             allow_multiple_instantiations,
+            sort_text,
         } = self;
 
         let mut s = f.debug_struct("FoldedClass");
@@ -300,6 +301,9 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
                 "allow_multiple_instantiations",
                 allow_multiple_instantiations,
             );
+        }
+        if let Some(sort_text) = sort_text {
+            s.field("sort_text", sort_text);
         }
 
         s.finish()

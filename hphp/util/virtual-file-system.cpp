@@ -207,7 +207,7 @@ ServiceData::ExportedCounter* s_contentSize =
 ServiceData::ExportedCounter* s_fileCount =
   ServiceData::createCounter("misc.vfs-file-count");
 
-};
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Reader state

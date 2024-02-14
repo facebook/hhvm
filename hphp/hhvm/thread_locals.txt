@@ -119,6 +119,8 @@ HPHP::Facts::(anonymous namespace)::t_savedStates
 # "guard variable for" is a clang-ism, leaving it out is a GCC-ism
 facebook::datatype::MemcacheFetcher<HPHP::Facts::(anonymous namespace)::FactsMemcacheDataType, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::timeToLive() const::gen
 guard variable for facebook::datatype::MemcacheFetcher<HPHP::Facts::(anonymous namespace)::FactsMemcacheDataType, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::timeToLive() const::gen
+facebook::datatype::MemcacheFetcher<HPHP::Decl::(anonymous namespace)::DeclsMemcacheDataType, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::timeToLive() const::gen
+guard variable for facebook::datatype::MemcacheFetcher<HPHP::Decl::(anonymous namespace)::DeclsMemcacheDataType, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::timeToLive() const::gen
 
 # TODO: (T9683397) Un-whitelist these Call Threaded Interpreter TLS vars.
 HPHP::(anonymous namespace)::cc_lookups

@@ -10,12 +10,8 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"$${0:placeholder0} = $a->toggle_mut_and_ret_false();\n  ",
-          "range":{"end":{"character":2,"line":13},"start":{"character":2,"line":13}}
-        },
-        {
-          "newText":"$${0:placeholder0}",
-          "range":{"end":{"character":61,"line":13},"start":{"character":31,"line":13}}
+          "newText":"$${0:placeholder0} = $a->toggle_mut_and_ret_false();\n  $x = $a->b || /*range-start*/$${0:placeholder0}/*range-end*/;",
+          "range":{"end":{"character":75,"line":13},"start":{"character":2,"line":13}}
         }
       ]
     }

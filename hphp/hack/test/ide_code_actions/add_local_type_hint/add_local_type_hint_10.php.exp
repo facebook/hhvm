@@ -1,5 +1,6 @@
 Code actions available:
 ------------------------------------------
+Extract into variable (CodeActionKind: refactor)
 Add local type hint for $y (CodeActionKind: refactor) SELECTED
 
 JSON for selected code action:

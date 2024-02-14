@@ -10,12 +10,8 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"$${0:placeholder0} = 300\n      //\n      +\n      2;\n    ",
-          "range":{"end":{"character":4,"line":8},"start":{"character":4,"line":8}}
-        },
-        {
-          "newText":"$${0:placeholder0}",
-          "range":{"end":{"character":7,"line":11},"start":{"character":26,"line":8}}
+          "newText":"$${0:placeholder0} = 300\n      //\n      +\n      2;\n    return /*range-start*/$${0:placeholder0}/*range-end*/;",
+          "range":{"end":{"character":21,"line":11},"start":{"character":4,"line":8}}
         }
       ]
     }

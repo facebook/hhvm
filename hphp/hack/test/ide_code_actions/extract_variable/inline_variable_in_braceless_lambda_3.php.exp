@@ -1,1 +1,41 @@
-No commands or actions found
+Code actions available:
+------------------------------------------
+Extract into variable (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"{\n      $${0:placeholder0} = await gen_int();\n      return 1 < 2 ? /*range-start*/$${0:placeholder0}/*range-end*/ : 0;\n    }",
+          "range":{"end":{"character":83,"line":10},"start":{"character":28,"line":10}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Extract into variable"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+function take_mixed(mixed $_): void {}
+
+async function gen_int(): Awaitable<int> {
+  return 1;
+}
+
+function main(): void {
+  if (1 < 2) {
+    take_mixed(async () ==> {
+      $${0:placeholder0} = await gen_int();
+      return 1 < 2 ? /*range-start*/$${0:placeholder0}/*range-end*/ : 0;
+    });
+  }
+}
+

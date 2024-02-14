@@ -1,1 +1,36 @@
-No commands or actions found
+Code actions available:
+------------------------------------------
+Extract into variable (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"{\n    $${0:placeholder0} = 300 + 2;\n    return $${0:placeholder0};\n  }",
+          "range":{"end":{"character":32,"line":6},"start":{"character":25,"line":6}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Extract into variable"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+<<__EntryPoint>>
+function main(): void {
+  // No variable extraction expected
+  $z = 100 +
+    () ==>/*range-start*/{
+    $${0:placeholder0} = 300 + 2;
+    return $${0:placeholder0};
+  }/*range-end*/
+}
+

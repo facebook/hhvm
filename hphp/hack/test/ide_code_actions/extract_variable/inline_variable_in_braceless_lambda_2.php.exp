@@ -1,1 +1,35 @@
-No commands or actions found
+Code actions available:
+------------------------------------------
+Extract into variable (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"{\n    $${0:placeholder0} = 1 + 2;\n    return 1 < 2 ? /*range-start*/$${0:placeholder0}/*range-end*/ : 0;\n  }",
+          "range":{"end":{"character":65,"line":5},"start":{"character":20,"line":5}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Extract into variable"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+function take_mixed(mixed $_): void {}
+
+function main(): void {
+  take_mixed(() ==> {
+    $${0:placeholder0} = 1 + 2;
+    return 1 < 2 ? /*range-start*/$${0:placeholder0}/*range-end*/ : 0;
+  });
+}
+

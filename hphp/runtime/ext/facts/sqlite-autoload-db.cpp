@@ -330,12 +330,12 @@ struct PathStmts {
       : m_insert{db.prepare(
             "INSERT OR IGNORE INTO all_paths (path) VALUES (@path)")},
         m_erase{db.prepare("DELETE FROM all_paths WHERE path = @path")},
-        m_getAll{db.prepare("SELECT path, sha1sum FROM path_sha1sum"
-                            " JOIN all_paths USING (pathid)")} {}
+        m_getAllPaths{db.prepare("SELECT path, sha1sum FROM path_sha1sum"
+                                 " JOIN all_paths USING (pathid)")} {}
 
   SQLiteStmt m_insert;
   SQLiteStmt m_erase;
-  SQLiteStmt m_getAll;
+  SQLiteStmt m_getAllPaths;
 };
 
 struct Sha1HexStmts {
@@ -488,9 +488,7 @@ struct TypeStmts {
                        " FROM type_details"
                        "  JOIN method_attributes USING (typeid)"
                        "  JOIN all_paths USING (pathid)"
-                       " WHERE attribute_name = @attribute_name")},
-        m_getAll{db.prepare("SELECT name, path from type_details JOIN "
-                            "all_paths USING (pathid)")} {}
+                       " WHERE attribute_name = @attribute_name")} {}
 
   SQLiteStmt m_insertDetails;
   SQLiteStmt m_getTypePath;
@@ -510,7 +508,6 @@ struct TypeStmts {
   SQLiteStmt m_getTypeAliasesWithAttribute;
   SQLiteStmt m_getMethodsInPath;
   SQLiteStmt m_getMethodsWithAttribute;
-  SQLiteStmt m_getAll;
 };
 
 struct FileStmts {
@@ -566,14 +563,11 @@ struct FunctionStmts {
                                      " WHERE function=@function")},
         m_getPathFunctions{db.prepare("SELECT function FROM function_paths"
                                       " JOIN all_paths USING (pathid)"
-                                      " WHERE path=@path")},
-        m_getAll{db.prepare("SELECT function, path FROM function_paths JOIN "
-                            "all_paths USING (pathid)")} {}
+                                      " WHERE path=@path")} {}
 
   SQLiteStmt m_insert;
   SQLiteStmt m_getFunctionPath;
   SQLiteStmt m_getPathFunctions;
-  SQLiteStmt m_getAll;
 };
 
 struct ConstantStmts {
@@ -589,14 +583,11 @@ struct ConstantStmts {
                                      " WHERE constant=@constant")},
         m_getPathConstants{db.prepare("SELECT constant FROM constant_paths"
                                       " JOIN all_paths USING (pathid)"
-                                      " WHERE path=@path")},
-        m_getAll{db.prepare("SELECT constant, path FROM constant_paths JOIN "
-                            "all_paths USING (pathid)")} {}
+                                      " WHERE path=@path")} {}
 
   SQLiteStmt m_insert;
   SQLiteStmt m_getConstantPath;
   SQLiteStmt m_getPathConstants;
-  SQLiteStmt m_getAll;
 };
 
 struct ModuleStmts {
@@ -611,14 +602,11 @@ struct ModuleStmts {
                                    " WHERE module_name=@module_name")},
         m_getPathModules{db.prepare("SELECT module_name FROM file_modules"
                                     " JOIN all_paths USING (pathid)"
-                                    " WHERE path=@path")},
-        m_getAll{db.prepare("SELECT module_name,path FROM file_modules "
-                            " JOIN all_paths USING (pathid)")} {}
+                                    " WHERE path=@path")} {}
 
   SQLiteStmt m_insert;
   SQLiteStmt m_getModulePath;
   SQLiteStmt m_getPathModules;
-  SQLiteStmt m_getAll;
 };
 
 struct ClockStmts {
@@ -1275,7 +1263,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
   }
 
   MultiResult<PathAndHash> getAllPathsAndHashes() override {
-    auto query = m_txn.query(m_pathStmts.m_getAll);
+    auto query = m_txn.query(m_pathStmts.m_getAllPaths);
     XLOGF(DBG9, "Running {}", query.sql());
     return MultiResult<PathAndHash>{
         [q = std::move(query)]() mutable -> Optional<PathAndHash> {

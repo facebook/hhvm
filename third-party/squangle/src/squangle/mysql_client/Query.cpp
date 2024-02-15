@@ -276,7 +276,7 @@ void appendColumnTableName(folly::fbstring* s, const QueryArgument& d) {
 }
 
 // Raise an exception with, hopefully, a helpful error message.
-void parseError(
+[[noreturn]] void parseError(
     const folly::StringPiece s,
     size_t offset,
     const folly::StringPiece message) {

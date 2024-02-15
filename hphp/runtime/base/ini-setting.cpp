@@ -992,6 +992,9 @@ struct IniSettingExtension final : Extension {
   void requestInit() override {
     assertx(!s_saved_defaults->settings.has_value());
   }
+  std::vector<std::string> hackFiles() const override {
+    return {};
+  }
 } s_ini_extension;
 
 }

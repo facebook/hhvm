@@ -49,6 +49,9 @@ struct HostHealthMonitorExtension final : Extension {
     Config::Bind(ProcStatusUpdateSeconds, ini, globalConfig,
                  "HealthMonitor.ProcStatusUpdateSeconds", 1);
   }
+  std::vector<std::string> hackFiles() const override {
+    return {};
+  }
 } s_host_health_monitor_extension;
 
 folly::Singleton<HostHealthMonitor> s_health_monitor;

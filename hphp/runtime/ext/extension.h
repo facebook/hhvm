@@ -52,6 +52,7 @@ namespace HPHP {
   static class name ## Extension final : public Extension {               \
   public:                                                                 \
     name ## Extension() : Extension(#name, #v, NO_ONCALL_YET) {}          \
+    std::vector<std::string> hackFiles() const override { return {}; }    \
   } s_ ## name ## _extension
 
 ///////////////////////////////////////////////////////////////////////////////

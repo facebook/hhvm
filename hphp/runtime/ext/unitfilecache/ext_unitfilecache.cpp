@@ -184,6 +184,10 @@ static struct UnitFileCacheExtension final : Extension {
       }
     }
   }
+
+  std::vector<std::string> hackFiles() const override {
+    return {};
+  }
 } s_unitfilecache_extension;
 
 ///////////////////////////////////////////////////////////////////////////////

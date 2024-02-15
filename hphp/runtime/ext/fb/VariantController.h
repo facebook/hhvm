@@ -207,7 +207,14 @@ struct VariantControllerImpl {
   static String mapKeyAsString(const Variant& k) {
     return k.toString();
   }
-
+  static bool mapExistsStringKey(const MapType& map, const StringType& key) {
+    return map.exists(key);
+  }
+  static VariantType mapAtStringKey(
+      const MapType& map,
+      const StringType& key) {
+    return map[key];
+  }
   static void mapSet(MapType& map, StringType&& k, VariantType&& v) {
     auto constexpr IC = [&]{
       switch (HackArraysMode) {

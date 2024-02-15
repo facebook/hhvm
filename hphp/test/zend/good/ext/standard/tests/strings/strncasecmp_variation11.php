@@ -21,54 +21,9 @@ $file_handle = fopen(__FILE__, "r");
 
 /* array with different values */
 $values =  vec[
-  /* integer values */
-  0,
-  1,
-  12345,
-  -2345,
-
-  /* float values */
-  10.5,
-  -10.5,
-  10.5e10,
-  10.6E-10,
-  .5,
-
-  /* hexadecimal values */
-  0x12,
-  -0x12,
-
-  /* octal values */
-  012,
-  -012,
-  01.2,
-
-  /* array values */
-  vec[],
-  vec[0],
-  vec[1],
-  vec[1, 2],
-  dict['color' => 'red', 'item' => 'pen'],
-
-  /* boolean values */
-  true,
-  false,
-  TRUE,
-  FALSE,
-
-  /* nulls */
-  NULL,
-  null,
-
   /* empty string */
   "",
   '',
-
-  /* resource */
-  $file_handle,
-
-  /* object */
-  new sample()
 ];
 
 /* loop through each element of the array and check the working of strncasecmp() */

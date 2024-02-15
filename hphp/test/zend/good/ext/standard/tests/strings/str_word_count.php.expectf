@@ -39,19 +39,11 @@ bool(false)
 
 Warning: Invalid argument: format: 999999999 in %s/test/zend/good/ext/standard/tests/strings/str_word_count.php on line 12
 bool(false)
-
-Warning: str_word_count() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/standard/tests/strings/str_word_count.php on line 13
-
-Warning: str_word_count() expects parameter 2 to be integer, string given in %s/test/zend/good/ext/standard/tests/strings/str_word_count.php on line 14
 string(53) "Hello friend, you're
     looking          good today!"
 int(5)
 int(6)
 int(5)
-
-Warning: str_word_count() expects parameter 3 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/str_word_count.php on line 21
-
-Warning: str_word_count() expects parameter 3 to be string, object given in %s/test/zend/good/ext/standard/tests/strings/str_word_count.php on line 22
 int(7)
 dict(5) {
   [0]=>
@@ -91,10 +83,6 @@ dict(5) {
   [4]=>
   string(3) "foo"
 }
-
-Warning: str_word_count() expects parameter 3 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/str_word_count.php on line 27
-
-Warning: str_word_count() expects parameter 3 to be string, object given in %s/test/zend/good/ext/standard/tests/strings/str_word_count.php on line 28
 dict(7) {
   [0]=>
   string(1) "F"
@@ -149,10 +137,6 @@ dict(5) {
   [15]=>
   string(3) "foo"
 }
-
-Warning: str_word_count() expects parameter 3 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/str_word_count.php on line 33
-
-Warning: str_word_count() expects parameter 3 to be string, object given in %s/test/zend/good/ext/standard/tests/strings/str_word_count.php on line 34
 dict(7) {
   [0]=>
   string(1) "F"

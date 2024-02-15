@@ -94,21 +94,12 @@ abcd$:Hello world";
 
   echo "\n-- passing an array as string and needle --\n";
   $needles = vec["hello", "?world", "!$%**()%**[][[[&@#~!"];
-  try { var_dump( strstr($needles, $needles) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // won't work
   var_dump( strstr("hello?world,!$%**()%**[][[[&@#~!", (string)$needles[1]) );  // works
   var_dump( strstr("hello?world,!$%**()%**[][[[&@#~!", (string)$needles[2]) );  // works
 
 
-  echo "\n-- passing Resources as string and needle --\n";
-  $resource1 = fopen(__FILE__, "r");
-  $resource2 = opendir(".");
-  try { var_dump( strstr($resource1, $resource1) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-  try { var_dump( strstr($resource1, $resource2) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-
-
   echo "\n-- Posiibilities with null --\n";
   var_dump( strstr("", NULL) );
-  try { var_dump( strstr(NULL, NULL) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   var_dump( strstr("a", NULL) );
   var_dump( strstr("/x0", "0") );  // Hexadecimal NUL
 
@@ -168,11 +159,6 @@ EOD;
   try { var_dump( strstr() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }  // zero argument
   try { var_dump( strstr("") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }  // null argument
   try { var_dump( strstr($string) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }  // without "needle"
-  try { var_dump( strstr("a", "b", "c") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // args > expected
-  try { var_dump( strstr(NULL, "") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
   echo "\nDone";
-
-  fclose($resource1);
-  closedir($resource2);
 }

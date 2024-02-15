@@ -1,0 +1,6 @@
+*** Testing sha1() : unexpected values for 'str' ***
+-- Iteration 1 --
+string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+-- Iteration 2 --
+string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+===DONE===

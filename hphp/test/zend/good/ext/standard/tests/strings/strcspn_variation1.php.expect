@@ -1,0 +1,12 @@
+*** Testing strcspn() : with unexpected values for str argument ***
+
+-- Iteration with str value as ""
+int(0)
+bool(false)
+bool(false)
+
+-- Iteration with str value as ""
+int(0)
+bool(false)
+bool(false)
+Done

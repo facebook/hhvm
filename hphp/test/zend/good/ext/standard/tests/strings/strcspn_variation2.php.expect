@@ -1,0 +1,12 @@
+*** Testing strcspn() : with different unexpected values of mask argument ***
+
+-- Iteration with mask value as "" --
+int(10)
+int(9)
+int(9)
+
+-- Iteration with mask value as "" --
+int(10)
+int(9)
+int(9)
+Done

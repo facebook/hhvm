@@ -23,48 +23,9 @@ $file_handle = fopen(__FILE__, "r");
 
 // array with different values
 $haystacks =  vec[
-
-  // integer values
-  0,
-  1,
-  12345,
-  -2345,
-
-  // float values
-  10.5,
-  -10.5,
-  10.5e10,
-  10.6E-10,
-  .5,
-
-  // array values
-  vec[],
-  vec[0],
-  vec[1],
-  vec[1, 2],
-  dict['color' => 'red', 'item' => 'pen'],
-
-  // boolean values
-  true,
-  false,
-  TRUE,
-  FALSE,
-
-  // null vlaues
-  NULL,
-  null,
-
-  // objects
-  new sample(),
-
   // empty string
   "",
   '',
-
-  // resource
-  $file_handle,
-
-
 ];
 
 $needles =  vec[

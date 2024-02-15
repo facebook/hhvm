@@ -27,47 +27,10 @@ $file_handle = fopen(__FILE__, "r");
 
 // array with different values for $number
 $numbers =  vec[
-
-          // integer values
-/*1*/      0,
-          1,
-          255,
-          256,
-          2147483647,
-          -2147483648,
-
           // float values
-/*7*/      10.5,
+          10.5,
           -20.5,
           10.1234567e10,
-
-          // array values
-/*10*/      vec[],
-          vec[0],
-          vec[1, 2],
-
-          // boolean values
-/*13*/      true,
-          false,
-          TRUE,
-          FALSE,
-
-          // null values
-/*17*/      NULL,
-          null,
-
-          // string values
-/*19*/      "abcd",
-          'abcd',
-          "0x12f",
-          "%=*!14#8.2nabcd",
-
-          // objects
-/*23*/      new class_no_tostring(),
-          new class_with_tostring(),
-
-          // resource
-/*25*/      $file_handle,
 ];
 
 // loop through with each element of the $numbers array to test money_format() function

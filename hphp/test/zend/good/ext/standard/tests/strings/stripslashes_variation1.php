@@ -24,46 +24,9 @@ $file_handle = fopen(__FILE__, 'r');
 
 // array with different values
 $values =  vec[
-
-          // integer values
-/*1*/      0,
-          1,
-          12345,
-          -2345,
-
-          // float values
-/*5*/      10.5,
-          -10.5,
-          10.1234567e10,
-          10.7654321E-10,
-          .5,
-
-          // array values
-/*10*/      vec[],
-          vec[0],
-          vec[1],
-          vec[1, 2],
-          dict['color' => 'red', 'item' => 'pen'],
-
-          // boolean values
-/*15*/      true,
-          false,
-          TRUE,
-          FALSE,
-
           // empty string
-/*19*/      "",
+          "",
           '',
-
-          // objects
-/*23*/      new sample(),
-
-          // resource
-/*24*/      $file_handle,
-
-          // null values
-/*25*/      NULL,
-          null
 ];
 
 

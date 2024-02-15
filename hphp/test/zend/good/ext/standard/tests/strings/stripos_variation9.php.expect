@@ -1,0 +1,8 @@
+*** Testing stripos() function with unexpected values for haystack ***
+
+-- Iteration 1 --
+bool(false)
+
+-- Iteration 2 --
+bool(false)
+*** Done ***

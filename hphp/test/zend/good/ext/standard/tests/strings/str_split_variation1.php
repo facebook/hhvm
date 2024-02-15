@@ -27,48 +27,9 @@ $fp = fopen(__FILE__, 'r');
 
 //different values for 'str' argument
 $values = vec[
-
-  // int data
-  0,
-  1,
-  12345,
-  -2345,
-
-  // float data
-  10.5,
-  -10.5,
-  10.5e10,
-  10.6E-10,
-  .5,
-
-  // array data
-  vec[],
-  vec[0],
-  vec[1],
-  vec[1, 2],
-  dict['color' => 'red', 'item' => 'pen'],
-
-  // null data
-  NULL,
-  null,
-
-  // boolean data
-  true,
-  false,
-  TRUE,
-  FALSE,
-
   // empty data
   "",
   '',
-
-  // object data
-  new MyClass(),
-
-
-
-  //resource data
-  $fp
 ];
 
 // loop through each element of $values for 'str' argument

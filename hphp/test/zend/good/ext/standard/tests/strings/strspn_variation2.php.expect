@@ -1,0 +1,12 @@
+*** Testing strspn() : with different unexpected values of mask argument ***
+
+-- Iteration with mask value as "" --
+int(0)
+int(0)
+int(0)
+
+-- Iteration with mask value as "" --
+int(0)
+int(0)
+int(0)
+Done

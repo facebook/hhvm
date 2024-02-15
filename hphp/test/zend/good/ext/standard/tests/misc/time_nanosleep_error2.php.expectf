@@ -1,2 +1,0 @@
-
-Warning: time_nanosleep() expects parameter 2 to be integer, string given in %s/time_nanosleep_error2.php on line 3

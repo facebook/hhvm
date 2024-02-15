@@ -1,0 +1,8 @@
+*** Testing strrev() : unexpected inputs for 'str' ***
+
+-- Iterator 1 --
+string(0) ""
+
+-- Iterator 2 --
+string(0) ""
+*** Done ***

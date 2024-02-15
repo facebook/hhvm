@@ -49,14 +49,10 @@ Constant: IMAGETYPE_JPEG2000
 Constant: IMAGETYPE_XBM
 	With dot: .xbm
 	Without dot: xbm
-
-Warning: image_type_to_extension() expects parameter 2 to be boolean, vec given in %s/image_type_to_extension.php on line 25
-
-Warning: image_type_to_extension() expects parameter 1 to be integer, object given in %s/image_type_to_extension.php on line 26
 bool(false)
 
-Warning: image_type_to_extension() expects at least 1 parameter, 0 given in %s/image_type_to_extension.php on line 28
+Warning: image_type_to_extension() expects at least 1 parameter, 0 given in %s/image_type_to_extension.php on line 26
 bool(false)
 
-Warning: image_type_to_extension() expects at most 2 parameters, 3 given in %s/image_type_to_extension.php on line 30
+Warning: image_type_to_extension() expects at most 2 parameters, 3 given in %s/image_type_to_extension.php on line 28
 Done

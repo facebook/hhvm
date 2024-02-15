@@ -6,10 +6,22 @@
  */
 
 #include "mcrouter/routes/McBucketRoute.h"
+#include <cstdint>
 
 namespace facebook {
 namespace memcache {
 namespace mcrouter {
+namespace detail {
+std::vector<std::pair<std::string, Ch3HashFunc>> buildPrefixMap(
+    const std::unordered_map<std::string, uint64_t>& map) {
+  std::vector<std::pair<std::string, Ch3HashFunc>> result;
+  for (const auto& [prefix, bucket] : map) {
+    result.emplace_back(prefix, Ch3HashFunc(bucket));
+  }
+  return result;
+}
+} // namespace detail
+
 McBucketRouteSettings parseMcBucketRouteSettings(const folly::dynamic& json) {
   McBucketRouteSettings settings;
   checkLogic(
@@ -19,6 +31,31 @@ McBucketRouteSettings parseMcBucketRouteSettings(const folly::dynamic& json) {
       "total_buckets",
       1,
       std::numeric_limits<int64_t>::max());
+
+  auto jBucketsByPrefix = json.get_ptr("total_buckets_by_prefix");
+  if (jBucketsByPrefix && jBucketsByPrefix->isObject()) {
+    std::unordered_map<std::string, uint64_t> prefixToBuckets;
+    for (const auto& it : jBucketsByPrefix->items()) {
+      checkLogic(
+          it.first.isString(),
+          "{} expected string, found {}",
+          it.first,
+          it.first.typeName());
+      checkLogic(
+          it.second.isInt(),
+          "{} expected int, found {}",
+          it.second,
+          it.second.typeName());
+      auto buckets = it.second.asInt();
+      checkLogic(
+          0 < buckets && buckets <= totalBuckets,
+          "Bucket count should be in range (0, {}], got {}",
+          totalBuckets,
+          buckets);
+      prefixToBuckets[it.first.asString()] = it.second.asInt();
+    }
+    settings.prefixToBuckets = std::move(prefixToBuckets);
+  }
 
   auto* bucketizationKeyspacePtr = json.get_ptr("bucketization_keyspace");
   checkLogic(

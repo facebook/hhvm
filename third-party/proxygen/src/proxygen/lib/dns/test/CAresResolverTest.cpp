@@ -66,7 +66,7 @@ class MockQueryWithCob : public MockQuery {
       : MockQuery(
             resolver, type, name, recordStats, dnsEvent, timeUtil, teContext) {
     callback_ = cb;
-  };
+  }
 };
 
 class MockResolutionCallback : public CAresResolver::ResolutionCallback {

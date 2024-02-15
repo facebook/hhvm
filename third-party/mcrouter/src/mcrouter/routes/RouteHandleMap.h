@@ -34,8 +34,7 @@ class RouteHandleMap {
   RouteHandleMap(
       const RouteSelectorMap<RouteHandleIf>& routeSelectors,
       const RoutingPrefix& defaultRoute,
-      bool sendInvalidRouteToDefault,
-      bool enableRoutePolicyV2);
+      bool sendInvalidRouteToDefault);
 
   /**
    * @return pointer to a precalculated vector of route handles that a request
@@ -58,7 +57,6 @@ class RouteHandleMap {
   const std::vector<std::shared_ptr<RouteHandleIf>> emptyV_;
   const RoutingPrefix& defaultRoute_;
   bool sendInvalidRouteToDefault_;
-  bool enableRoutePolicyV2_;
   std::shared_ptr<RoutePolicyMap<RouteHandleIf>> defaultRouteMap_;
 
   std::shared_ptr<RoutePolicyMap<RouteHandleIf>> allRoutes_;

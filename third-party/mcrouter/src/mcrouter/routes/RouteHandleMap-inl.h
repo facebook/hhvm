@@ -56,14 +56,12 @@ using UniqueVectorMap = std::unordered_map<
 template <class RouteHandleIf>
 std::shared_ptr<RoutePolicyMap<RouteHandleIf>> makePolicyMap(
     UniqueVectorMap<RouteHandleIf>& uniqueVectors,
-    const RouteSelectorVector<RouteHandleIf>& v,
-    bool enableRoutePolicyV2) {
+    const RouteSelectorVector<RouteHandleIf>& v) {
   auto it = uniqueVectors.find(v);
   if (it != uniqueVectors.end()) {
     return it->second;
   }
-  return uniqueVectors[v] = std::make_shared<RoutePolicyMap<RouteHandleIf>>(
-             v, enableRoutePolicyV2);
+  return uniqueVectors[v] = std::make_shared<RoutePolicyMap<RouteHandleIf>>(v);
 }
 
 } // namespace detail
@@ -72,11 +70,9 @@ template <class RouteHandleIf>
 RouteHandleMap<RouteHandleIf>::RouteHandleMap(
     const RouteSelectorMap<RouteHandleIf>& routeSelectors,
     const RoutingPrefix& defaultRoute,
-    bool sendInvalidRouteToDefault,
-    bool enableRoutePolicyV2)
+    bool sendInvalidRouteToDefault)
     : defaultRoute_(defaultRoute),
-      sendInvalidRouteToDefault_(sendInvalidRouteToDefault),
-      enableRoutePolicyV2_(enableRoutePolicyV2) {
+      sendInvalidRouteToDefault_(sendInvalidRouteToDefault) {
   checkLogic(
       routeSelectors.find(defaultRoute_) != routeSelectors.end(),
       "invalid default route: {}",
@@ -115,16 +111,12 @@ RouteHandleMap<RouteHandleIf>::RouteHandleMap(
 
   // create corresponding RoutePolicyMaps
   detail::UniqueVectorMap<RouteHandleIf> uniqueVectors;
-  allRoutes_ = makePolicyMap(uniqueVectors, allRoutes, enableRoutePolicyV2_);
+  allRoutes_ = makePolicyMap(uniqueVectors, allRoutes);
   for (const auto& it : byRegion) {
-    byRegion_.emplace(
-        it.first,
-        makePolicyMap(uniqueVectors, it.second, enableRoutePolicyV2_));
+    byRegion_.emplace(it.first, makePolicyMap(uniqueVectors, it.second));
   }
   for (const auto& it : byRoute) {
-    byRoute_.emplace(
-        it.first,
-        makePolicyMap(uniqueVectors, it.second, enableRoutePolicyV2_));
+    byRoute_.emplace(it.first, makePolicyMap(uniqueVectors, it.second));
   }
 
   assert(byRoute_.find(defaultRoute_) != byRoute_.end());

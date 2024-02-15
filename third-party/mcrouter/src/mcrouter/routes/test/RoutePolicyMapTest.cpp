@@ -48,38 +48,22 @@ struct MockPrefixSelectorRoute {
   }
 };
 
-struct MapsToTest {
-  explicit MapsToTest(const std::vector<SharedSelector>& clusters)
-      : m0(clusters, false), m1(clusters, true), m2(clusters) {}
-
-  RoutePolicyMap<RouteHandle> m0;
-  RoutePolicyMap<RouteHandle> m1;
-  RoutePolicyMapV2<RouteHandle> m2;
-};
-
-MapsToTest makeMap(const std::vector<MockPrefixSelectorRoute>& routes) {
+auto makeMap(const std::vector<MockPrefixSelectorRoute>& routes) {
   std::vector<SharedSelector> clusters(routes.begin(), routes.end());
-  return MapsToTest(clusters);
+  return RoutePolicyMap<RouteHandle>(clusters);
 }
 
-std::vector<int> routesFor(MapsToTest& maps, folly::StringPiece key) {
-  auto resForMap = [&](const auto& m) {
-    std::vector<int> res;
-    auto actual = m.getTargetsForKey(key);
-    res.reserve(actual.size());
-    for (const auto& x : actual) {
-      EXPECT_NE(x, nullptr);
-      res.push_back(x != nullptr ? *x : -1);
-    }
-    return res;
-  };
-
-  auto r0 = resForMap(maps.m0);
-  auto r1 = resForMap(maps.m1);
-  auto r2 = resForMap(maps.m2);
-  EXPECT_EQ(r0, r1) << key;
-  EXPECT_EQ(r0, r2) << key;
-  return r0;
+std::vector<int> routesFor(
+    const RoutePolicyMap<RouteHandle>& m,
+    folly::StringPiece key) {
+  std::vector<int> res;
+  auto actual = m.getTargetsForKey(key);
+  res.reserve(actual.size());
+  for (const auto& x : actual) {
+    EXPECT_NE(x, nullptr);
+    res.push_back(x != nullptr ? *x : -1);
+  }
+  return res;
 }
 
 TEST(RoutePolicyMapTest, NoPolicies) {

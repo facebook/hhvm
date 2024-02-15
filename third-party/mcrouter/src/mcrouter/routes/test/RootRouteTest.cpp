@@ -265,7 +265,6 @@ TEST_F(RootRouteTest, NoRoutingPrefixDeleteWithDistributionOnRoutesToDefault) {
       *proxy,
       getRouteSelectors(),
       RootRouteRolloutOpts{
-          .enablePolicyMapV2 = true,
           .enableDeleteDistribution = true,
           .enableCrossRegionDeleteRpc = true,
       }};
@@ -290,7 +289,6 @@ TEST_F(RootRouteTest, BroadcastPrefixDeleteWithDistributionOnRoutesToAll) {
       *proxy,
       getRouteSelectors(),
       RootRouteRolloutOpts{
-          .enablePolicyMapV2 = true,
           .enableDeleteDistribution = true,
           .enableCrossRegionDeleteRpc = true,
       }};
@@ -323,7 +321,6 @@ TEST_F(
       *proxy,
       getRouteSelectors(),
       RootRouteRolloutOpts{
-          .enablePolicyMapV2 = true,
           .enableDeleteDistribution = true,
           .enableCrossRegionDeleteRpc = true,
       }};
@@ -353,7 +350,6 @@ TEST_F(
       *proxy,
       getRouteSelectors(),
       RootRouteRolloutOpts{
-          .enablePolicyMapV2 = true,
           .enableDeleteDistribution = true,
           .enableCrossRegionDeleteRpc = false,
       }};
@@ -381,7 +377,6 @@ TEST_F(
       *proxy,
       getRouteSelectors(),
       RootRouteRolloutOpts{
-          .enablePolicyMapV2 = true,
           .enableDeleteDistribution = true,
           .enableCrossRegionDeleteRpc = false,
       }};

@@ -49,63 +49,6 @@ std::vector<std::shared_ptr<RouteHandleIf>> overrideItems(
 
 template <class RouteHandleIf>
 RoutePolicyMap<RouteHandleIf>::RoutePolicyMap(
-    const std::vector<std::shared_ptr<PrefixSelectorRoute<RouteHandleIf>>>&
-        clusters,
-    bool useV2) {
-  if (useV2) {
-    v2_ = RoutePolicyMapV2<RouteHandleIf>(clusters);
-    return;
-  }
-
-  // wildcards of all clusters
-  std::vector<std::shared_ptr<RouteHandleIf>> wildcards;
-  wildcards.reserve(clusters.size());
-  // Trie with aggregated policies from all clusters
-  Trie<std::vector<std::pair<size_t, std::shared_ptr<RouteHandleIf>>>> t;
-
-  size_t clusterId = 0;
-  for (auto& policy : clusters) {
-    wildcards.push_back(policy->wildcard);
-
-    for (auto& it : policy->policies) {
-      auto clusterHandlePair = std::make_pair(clusterId, it.second);
-      auto existing = t.find(it.first);
-      if (existing != t.end()) {
-        existing->second.push_back(std::move(clusterHandlePair));
-      } else {
-        t.emplace(it.first, {clusterHandlePair});
-      }
-    }
-    ++clusterId;
-  }
-
-  ut_.emplace("", std::move(wildcards));
-  // we iterate over keys in lexicographic order, so all prefixes of key will go
-  // before key itself
-  for (auto& it : t) {
-    auto existing = ut_.findPrefix(it.first);
-    // at least empty string should be there
-    assert(existing != ut_.end());
-    ut_.emplace(it.first, detail::overrideItems(existing->second, it.second));
-  }
-  for (auto& it : ut_) {
-    it.second = detail::orderedUnique(it.second);
-  }
-}
-
-template <class RouteHandleIf>
-const std::vector<std::shared_ptr<RouteHandleIf>>&
-RoutePolicyMap<RouteHandleIf>::getTargetsForKey(folly::StringPiece key) const {
-  // empty means not initialized - i.e. the flag was not enabled.
-  if (!v2_.empty()) {
-    return v2_.getTargetsForKey(key);
-  }
-  auto result = ut_.findPrefix(key);
-  return result == ut_.end() ? emptyV_ : result->second;
-}
-
-template <class RouteHandleIf>
-RoutePolicyMapV2<RouteHandleIf>::RoutePolicyMapV2(
     const std::vector<SharedClusterPtr>& clusters) {
   typename LBRouteMap::Builder builder;
 
@@ -129,9 +72,8 @@ RoutePolicyMapV2<RouteHandleIf>::RoutePolicyMapV2(
 
 template <class RouteHandleIf>
 // static
-auto RoutePolicyMapV2<RouteHandleIf>::populateWildCards(
-    const std::vector<SharedClusterPtr>& clusters)
-    -> std::vector<SharedRoutePtr> {
+auto RoutePolicyMap<RouteHandleIf>::populateWildCards(
+    std::span<const SharedClusterPtr> clusters) -> std::vector<SharedRoutePtr> {
   std::vector<SharedRoutePtr> res;
   res.reserve(clusters.size());
 
@@ -150,10 +92,9 @@ auto RoutePolicyMapV2<RouteHandleIf>::populateWildCards(
 
 template <class RouteHandleIf>
 // static
-auto RoutePolicyMapV2<RouteHandleIf>::populateRoutesForKey(
+auto RoutePolicyMap<RouteHandleIf>::populateRoutesForKey(
     std::string_view key,
-    const std::vector<SharedClusterPtr>& clusters)
-    -> std::vector<SharedRoutePtr> {
+    std::span<const SharedClusterPtr> clusters) -> std::vector<SharedRoutePtr> {
   std::vector<std::shared_ptr<RouteHandleIf>> res;
   res.reserve(clusters.size());
 

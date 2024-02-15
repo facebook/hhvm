@@ -27,7 +27,6 @@ namespace memcache {
 namespace mcrouter {
 
 struct RootRouteRolloutOpts {
-  bool enablePolicyMapV2 = false;
   bool enableDeleteDistribution = false;
   bool enableCrossRegionDeleteRpc = true;
   bool enableAsyncDlBroadcast = false;
@@ -49,8 +48,7 @@ class RootRoute {
         rhMap_(
             routeSelectors,
             opts_.default_route,
-            opts_.send_invalid_route_to_default,
-            rolloutOpts.enablePolicyMapV2),
+            opts_.send_invalid_route_to_default),
         defaultRoute_(opts_.default_route),
         enableDeleteDistribution_(rolloutOpts.enableDeleteDistribution),
         enableCrossRegionDeleteRpc_(rolloutOpts.enableCrossRegionDeleteRpc),

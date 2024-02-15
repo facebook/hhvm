@@ -126,15 +126,12 @@ ProxyConfig<RouterInfo>::ProxyConfig(
       enableDeleteDistribution || enableCrossRegionDeleteRpc,
       "ProxyConfig: cannot disable cross-region delete rpc if distribution is disabled");
 
-  bool enablePolicyMapV2 = readBool("enable_policy_map_v2", false);
-
   bool enableAsyncDlBroadcast = readBool("enable_async_dl_broadcast", false);
 
   proxyRoute_ = std::make_shared<ProxyRoute<RouterInfo>>(
       proxy,
       routeSelectors,
       RootRouteRolloutOpts{
-          .enablePolicyMapV2 = enablePolicyMapV2,
           .enableDeleteDistribution = enableDeleteDistribution,
           .enableCrossRegionDeleteRpc = enableCrossRegionDeleteRpc,
           .enableAsyncDlBroadcast = enableAsyncDlBroadcast});

@@ -8,6 +8,7 @@
 #pragma once
 
 #include <memory>
+#include <span>
 #include <string_view>
 #include <vector>
 
@@ -48,22 +49,26 @@ class PrefixSelectorRoute;
  *    Complexity is O(min(longest key prefix in config, key length))
  */
 template <class RouteHandleIf>
-class RoutePolicyMapV2 {
+class RoutePolicyMap {
  public:
   using SharedRoutePtr = std::shared_ptr<RouteHandleIf>;
   using SharedClusterPtr = std::shared_ptr<PrefixSelectorRoute<RouteHandleIf>>;
 
-  RoutePolicyMapV2() = default;
-  explicit RoutePolicyMapV2(const std::vector<SharedClusterPtr>& clusters);
+  RoutePolicyMap() = default;
+  explicit RoutePolicyMap(const std::vector<SharedClusterPtr>& clusters);
 
-  // NOTE: change to span when the migration is over
+  /**
+   * @return vector of route handles that a request with given key should be
+   *         forwarded to.
+   */
   const std::vector<SharedRoutePtr>& getTargetsForKey(
       std::string_view key) const {
     // has to be there by construction
     auto found = ut_.findPrefix(key);
     // RoutePolicyMap always has wildcard which matches everything.
     CHECK(found != ut_.end());
-    return found->value();
+    return found->value(); // NOTE: returning a span would make sense here but
+                           // it requires noticeable changes downstream.
   }
 
   bool empty() const {
@@ -72,42 +77,21 @@ class RoutePolicyMapV2 {
 
  private:
   static std::vector<SharedRoutePtr> populateWildCards(
-      const std::vector<SharedClusterPtr>& clusters);
+      std::span<const SharedClusterPtr> clusters);
 
   static std::vector<SharedRoutePtr> populateRoutesForKey(
       std::string_view key,
-      const std::vector<SharedClusterPtr>& clusters);
+      std::span<const SharedClusterPtr> clusters);
 
   using LBRouteMap = LowerBoundPrefixMap<std::vector<SharedRoutePtr>>;
 
-  LBRouteMap ut_;
-};
-
-template <class RouteHandleIf>
-class RoutePolicyMap {
- public:
-  explicit RoutePolicyMap(
-      const std::vector<std::shared_ptr<PrefixSelectorRoute<RouteHandleIf>>>&
-          clusters,
-      bool useV2);
-
   /**
-   * @return vector of route handles that a request with given key should be
-   *         forwarded to.
-   */
-  const std::vector<std::shared_ptr<RouteHandleIf>>& getTargetsForKey(
-      folly::StringPiece key) const;
-
- private:
-  RoutePolicyMapV2<RouteHandleIf> v2_;
-  const std::vector<std::shared_ptr<RouteHandleIf>> emptyV_;
-  /**
-   * This Trie contains targets for each key prefix. It is built like this:
+   * This map contains targets for each key prefix. It is built like this:
    * 1) targets for empty string are wildcards.
    * 2) targets for string of length n+1 S[0..n] are targets for S[0..n-1] with
    *    OperationSelectorRoutes for key prefix == S[0..n] overridden.
    */
-  Trie<std::vector<std::shared_ptr<RouteHandleIf>>> ut_;
+  LBRouteMap ut_;
 };
 
 } // namespace mcrouter

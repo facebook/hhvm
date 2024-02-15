@@ -30,6 +30,11 @@ HTTPTransactionSink::getPeerCertificate() const {
   auto transport = httpTransaction_->getTransport().getUnderlyingTransport();
   if (transport) {
     return transport->getPeerCertificate();
+  } else {
+    auto quicSocket = getQUICTransport();
+    if (quicSocket) {
+      return quicSocket->getPeerCertificate().get();
+    }
   }
   return nullptr;
 }

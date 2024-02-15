@@ -61,8 +61,8 @@ static int64_t HHVM_METHOD(GlobIterator, count) {
   return getDir<ArrayDirectory>(ObjNR(this_).asObject())->size();
 }
 
-void CoreExtension::moduleInit() {
-  initClosure();
+void CoreExtension::moduleRegisterNative() {
+  registerNativeClosure();
 
   HHVM_ME(DirectoryIterator, hh_readdir);
   HHVM_ME(GlobIterator, count);

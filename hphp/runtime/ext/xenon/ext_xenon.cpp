@@ -331,7 +331,7 @@ bool HHVM_FUNCTION(xenon_get_is_profiled_request, void) {
 struct xenonExtension final : Extension {
   xenonExtension() : Extension("xenon", "2.0", NO_ONCALL_YET) { }
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_FALIAS(HH\\xenon_get_data, xenon_get_data);
     HHVM_FALIAS(HH\\xenon_get_and_clear_samples, xenon_get_and_clear_samples);
     HHVM_FALIAS(HH\\xenon_get_and_clear_missed_sample_count,

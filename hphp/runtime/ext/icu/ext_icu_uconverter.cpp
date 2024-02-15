@@ -483,7 +483,7 @@ static Variant HHVM_STATIC_METHOD(UConverter, getStandardName,
   return String(standard_name, CopyString);
 }
 
-void IntlExtension::initUConverter() {
+void IntlExtension::registerNativeUConverter() {
   HHVM_ME(UConverter, __construct);
   HHVM_ME(UConverter, __dispose);
   HHVM_ME(UConverter, convert);

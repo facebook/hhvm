@@ -376,7 +376,7 @@ static Object HHVM_STATIC_METHOD(IntlTimeZone, getUnknown) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void IntlExtension::initTimeZone() {
+void IntlExtension::registerNativeTimeZone() {
   HHVM_RCC_INT(IntlTimeZone, DISPLAY_SHORT, icu::TimeZone::SHORT);
   HHVM_RCC_INT(IntlTimeZone, DISPLAY_LONG, icu::TimeZone::LONG);
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44

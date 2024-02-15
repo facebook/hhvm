@@ -379,7 +379,7 @@ static void HHVM_METHOD(MapIterator, rewind) {
 
 /////////////////////////////////////////////////////////////////////////////
 
-void CollectionsExtension::initMap() {
+void CollectionsExtension::registerNativeMap() {
   HHVM_ME(MapIterator, current);
   HHVM_ME(MapIterator, key);
   HHVM_ME(MapIterator, valid);

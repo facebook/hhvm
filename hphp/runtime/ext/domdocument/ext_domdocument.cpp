@@ -5826,7 +5826,7 @@ Variant HHVM_FUNCTION(dom_import_simplexml,
 
 struct DOMDocumentExtension final : Extension {
   DOMDocumentExtension() : Extension("domdocument", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_ME(DOMNode, appendChild);
     HHVM_ME(DOMNode, cloneNode);
     HHVM_ME(DOMNode, getLineNo);

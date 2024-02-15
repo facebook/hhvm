@@ -447,7 +447,9 @@ struct HSLStrExtension final : Extension {
   void moduleInit() override {
     s_byte_ops = new HSLLocaleByteOps();
     s_bytes_locale = Locale::getCLocale().get();
+  }
 
+  void moduleRegisterNative() override {
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\strlen_l, strlen_l);
     // - clang doesn't like the HHVM_FALIAS macro with \\u
     // - \\\\ gets different results in gcc, leading to 'undefined native function'

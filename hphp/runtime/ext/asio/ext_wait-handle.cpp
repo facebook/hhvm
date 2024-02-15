@@ -104,9 +104,12 @@ size_t asio_object_size(const ObjectData* od) {
   always_assert(false);
 }
 
-void AsioExtension::initWaitHandle() {
+void AsioExtension::initNativeWaitHandle() {
   // ensure AsioBlockable* fields are pointer-followable
   (void)type_scan::getIndexForMalloc<AsioBlockable>();
+}
+
+void AsioExtension::registerNativeWaitHandle() {
 #define WH_SME(meth) \
   HHVM_STATIC_MALIAS(HH\\Awaitable, meth, Awaitable, meth)
   WH_SME(setOnIOWaitEnterCallback);

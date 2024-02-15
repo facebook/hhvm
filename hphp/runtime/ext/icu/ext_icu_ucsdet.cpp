@@ -174,7 +174,7 @@ static String HHVM_METHOD(EncodingMatch, getUTF8) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void IntlExtension::initUcsDet() {
+void IntlExtension::registerNativeUcsDet() {
 
   HHVM_ME(EncodingDetector, setText);
   HHVM_ME(EncodingDetector, setDeclaredEncoding);

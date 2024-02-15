@@ -237,7 +237,7 @@ static bool HHVM_METHOD(ResourceBundle, valid) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void IntlExtension::initResourceBundle() {
+void IntlExtension::registerNativeResourceBundle() {
   HHVM_ME(ResourceBundle, __construct);
   HHVM_ME(ResourceBundle, count);
   HHVM_ME(ResourceBundle, getErrorCode);

@@ -194,7 +194,7 @@ static struct IntervalTimerExtension final : Extension {
     Config::Bind(Enabled, ini, hdf, "IntervalTimer.Enable", true);
   }
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_ME(IntervalTimer, __construct);
     HHVM_ME(IntervalTimer, start);
     HHVM_ME(IntervalTimer, stop);

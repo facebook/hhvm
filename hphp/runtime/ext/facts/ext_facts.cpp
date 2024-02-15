@@ -329,6 +329,7 @@ struct FactsExtension final : Extension {
   }
 
   void moduleInit() override;
+  void moduleRegisterNative() override;
 
   void moduleShutdown() override {
     // Destroy all resources at a deterministic time to avoid SDOF
@@ -809,6 +810,24 @@ void FactsExtension::moduleInit() {
         Cfg::Autoload::Logging);
   }
 
+  if (Cfg::Autoload::DBPath.empty()) {
+    XLOG(ERR) << "Autoload.DB.Path was empty, not enabling native autoloader.";
+    return;
+  }
+
+  if (RO::WatchmanDefaultSocket.empty()) {
+    XLOG(INFO) << "watchman.socket.default was not provided.";
+  }
+
+  if (RO::WatchmanRootSocket.empty()) {
+    XLOG(INFO) << "watchman.socket.root was not provided.";
+  }
+
+  m_data->m_factory = std::make_unique<SqliteAutoloadMapFactory>();
+  FactsFactory::setInstance(m_data->m_factory.get());
+}
+
+void FactsExtension::moduleRegisterNative() {
   HHVM_NAMED_FE(HH\\Facts\\enabled, HHVM_FN(facts_enabled));
   HHVM_NAMED_FE(HH\\Facts\\db_path, HHVM_FN(facts_db_path));
   HHVM_NAMED_FE(HH\\Facts\\schema_version, HHVM_FN(facts_schema_version));
@@ -864,22 +883,6 @@ void FactsExtension::moduleInit() {
   HHVM_NAMED_FE(
       HH\\Facts\\file_attribute_parameters,
       HHVM_FN(facts_file_attribute_parameters));
-
-  if (Cfg::Autoload::DBPath.empty()) {
-    XLOG(ERR) << "Autoload.DB.Path was empty, not enabling native autoloader.";
-    return;
-  }
-
-  if (RO::WatchmanDefaultSocket.empty()) {
-    XLOG(INFO) << "watchman.socket.default was not provided.";
-  }
-
-  if (RO::WatchmanRootSocket.empty()) {
-    XLOG(INFO) << "watchman.socket.root was not provided.";
-  }
-
-  m_data->m_factory = std::make_unique<SqliteAutoloadMapFactory>();
-  FactsFactory::setInstance(m_data->m_factory.get());
 }
 
 } // namespace Facts

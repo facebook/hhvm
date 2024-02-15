@@ -243,7 +243,7 @@ static String HHVM_FUNCTION(mime_content_type, const Variant& filename) {
 
 struct fileinfoExtension final : Extension {
   fileinfoExtension() : Extension("fileinfo", "1.0.5-dev", NO_ONCALL_YET) {}
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_RC_INT(FILEINFO_NONE, MAGIC_NONE);
     HHVM_RC_INT(FILEINFO_SYMLINK, MAGIC_SYMLINK);
     HHVM_RC_INT(FILEINFO_MIME, MAGIC_MIME);

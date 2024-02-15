@@ -34,7 +34,7 @@ namespace HPHP {
 
 static struct ServerExtension final : Extension {
   ServerExtension() : Extension("server", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
-  void moduleInit() override;
+  void moduleRegisterNative() override;
 } s_server_extension;
 
 int64_t HHVM_FUNCTION(hphp_thread_type) {
@@ -218,7 +218,7 @@ int64_t HHVM_FUNCTION(server_process_start_time) {
   return BootStats::startTimestamp();
 }
 
-void ServerExtension::moduleInit() {
+void ServerExtension::moduleRegisterNative() {
   HHVM_RC_INT_SAME(PAGELET_NOT_READY);
   HHVM_RC_INT_SAME(PAGELET_READY);
   HHVM_RC_INT_SAME(PAGELET_DONE);

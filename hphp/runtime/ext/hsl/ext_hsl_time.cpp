@@ -31,7 +31,7 @@ namespace {
 
     TimeExtension() : Extension("hsl_time", "1.0", NO_ONCALL_YET) {}
 
-    void moduleInit() override {
+    void moduleRegisterNative() override {
       // Clang 15 doesn't like the HHVM_FALIAS macro with \\N
       HHVM_FALIAS_FE_STR(
         "HH\\Lib\\_Private\\Native\\request_time_ns",

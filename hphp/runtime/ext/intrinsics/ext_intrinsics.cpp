@@ -478,7 +478,7 @@ static struct IntrinsicsExtension final : Extension {
     return RuntimeOption::EnableIntrinsicsExtension;
   }
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_FALIAS(__hhvm_intrinsics\\builtin_io, builtin_io);
     HHVM_FALIAS(__hhvm_intrinsics\\builtin_io_no_fca, builtin_io);
     HHVM_FALIAS(__hhvm_intrinsics\\builtin_io_foldable, builtin_io_foldable);

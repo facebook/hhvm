@@ -704,7 +704,7 @@ static Variant HHVM_FUNCTION(mysql_field_flags, const OptResource& result,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void mysqlExtension::moduleInit() {
+void mysqlExtension::moduleRegisterNative() {
   HHVM_FE(mysql_connect);
   HHVM_FE(mysql_connect_with_db);
   HHVM_FE(mysql_connect_with_ssl);

@@ -43,17 +43,17 @@ namespace HPHP {
 
 static struct SysvmsgExtension final : Extension {
   SysvmsgExtension() : Extension("sysvmsg", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
-  void moduleInit() override;
+  void moduleRegisterNative() override;
 } s_sysvmsg_extension;
 
 static struct SysvsemExtension final : Extension {
   SysvsemExtension() : Extension("sysvsem", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
-  void moduleInit() override;
+  void moduleRegisterNative() override;
 } s_sysvsem_extension;
 
 static struct SysvshmExtension final : Extension {
   SysvshmExtension() : Extension("sysvshm", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
-  void moduleInit() override;
+  void moduleRegisterNative() override;
 } s_sysvshm_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -828,7 +828,7 @@ bool HHVM_FUNCTION(shm_remove_var,
   return true;
 }
 
-void SysvmsgExtension::moduleInit() {
+void SysvmsgExtension::moduleRegisterNative() {
   HHVM_RC_INT(MSG_IPC_NOWAIT, k_MSG_IPC_NOWAIT);
   HHVM_RC_INT(MSG_EAGAIN,     EAGAIN);
   HHVM_RC_INT(MSG_ENOMSG,     ENOMSG);
@@ -845,14 +845,14 @@ void SysvmsgExtension::moduleInit() {
   HHVM_FE(msg_stat_queue);
 }
 
-void SysvsemExtension::moduleInit() {
+void SysvsemExtension::moduleRegisterNative() {
   HHVM_FE(sem_acquire);
   HHVM_FE(sem_get);
   HHVM_FE(sem_release);
   HHVM_FE(sem_remove);
 }
 
-void SysvshmExtension::moduleInit() {
+void SysvshmExtension::moduleRegisterNative() {
   HHVM_FE(shm_attach);
   HHVM_FE(shm_detach);
   HHVM_FE(shm_remove);

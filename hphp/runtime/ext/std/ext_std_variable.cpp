@@ -637,7 +637,7 @@ bool HHVM_FUNCTION(HH_global_key_exists, StringArg key) {
 
 /////////////////////////////////////////////////////////////////////////////
 
-void StandardExtension::initVariable() {
+void StandardExtension::registerNativeVariable() {
   HHVM_FE(is_null);
   HHVM_FE(is_bool);
   HHVM_FE(is_int);

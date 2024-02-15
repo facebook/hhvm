@@ -372,7 +372,7 @@ static Object HHVM_METHOD(IntlPartsIterator, getBreakIterator) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void IntlExtension::initBreakIterator() {
+void IntlExtension::registerNativeBreakIterator() {
   HHVM_STATIC_ME(IntlBreakIterator, createCharacterInstance);
   HHVM_STATIC_ME(IntlBreakIterator, createCodePointInstance);
   HHVM_STATIC_ME(IntlBreakIterator, createLineInstance);

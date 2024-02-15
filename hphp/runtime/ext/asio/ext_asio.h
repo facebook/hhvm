@@ -25,24 +25,28 @@ namespace HPHP {
 struct AsioExtension final : Extension {
   AsioExtension() : Extension("asio", "0.1", NO_ONCALL_YET) {}
   void moduleInit() override;
+  void moduleRegisterNative() override;
   void requestInit() override;
   std::vector<std::string> hackFiles() const override;
 
 private:
-  void initFunctions();
+  void registerNativeFunctions();
 
-  void initWaitHandle();
-  void initResumableWaitHandle();
-  void initAsyncGenerator();
-  void initAwaitAllWaitHandle();
-  void initConcurrentWaitHandle();
-  void initConditionWaitHandle();
-  void initSleepWaitHandle();
-  void initRescheduleWaitHandle();
-  void initExternalThreadEventWaitHandle();
-  void initStaticWaitHandle();
-  void initAsyncFunctionWaitHandle();
-  void initAsyncGeneratorWaitHandle();
+  void registerNativeWaitHandle();
+  void registerNativeResumableWaitHandle();
+  void registerNativeAsyncGenerator();
+  void registerNativeAwaitAllWaitHandle();
+  void registerNativeConcurrentWaitHandle();
+  void registerNativeConditionWaitHandle();
+  void registerNativeSleepWaitHandle();
+  void registerNativeRescheduleWaitHandle();
+  void registerNativeExternalThreadEventWaitHandle();
+  void registerNativeStaticWaitHandle();
+  void registerNativeAsyncFunctionWaitHandle();
+  void registerNativeAsyncGeneratorWaitHandle();
+
+  void initNativeWaitHandle();
+
   void requestInitSingletons();
 
 };

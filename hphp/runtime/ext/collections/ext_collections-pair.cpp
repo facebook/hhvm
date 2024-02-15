@@ -107,7 +107,7 @@ Object c_Pair::getIterator() {
 namespace collections {
 /////////////////////////////////////////////////////////////////////////////
 
-void CollectionsExtension::initPair() {
+void CollectionsExtension::registerNativePair() {
   HHVM_ME(PairIterator, current);
   HHVM_ME(PairIterator, key);
   HHVM_ME(PairIterator, valid);

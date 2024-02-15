@@ -113,7 +113,7 @@ void c_RescheduleWaitHandle::exitContext(context_idx_t ctx_idx) {
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString s_HH_RescheduleWaitHandle("HH\\RescheduleWaitHandle");
-void AsioExtension::initRescheduleWaitHandle() {
+void AsioExtension::registerNativeRescheduleWaitHandle() {
   HHVM_STATIC_MALIAS(HH\\RescheduleWaitHandle, create,
                      RescheduleWaitHandle, create);
 

@@ -112,7 +112,7 @@ bool HHVM_METHOD(WeakRef, valid) {
 // Extension
 struct WeakRefExtension final : Extension {
   WeakRefExtension() : Extension("weakref", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_ME(WeakRef, __construct);
     HHVM_ME(WeakRef, acquire);
     HHVM_ME(WeakRef, get);

@@ -167,7 +167,7 @@ Variant HHVM_FUNCTION(unwrap_opaque_value, int64_t id,
 
 struct enumExtension final : Extension {
   enumExtension() : Extension("enum", "1.0.0-dev", NO_ONCALL_YET) {}
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, getValues, BuiltinEnum, getValues);
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, getNames, BuiltinEnum, getNames);
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, isValid, BuiltinEnum, isValid);

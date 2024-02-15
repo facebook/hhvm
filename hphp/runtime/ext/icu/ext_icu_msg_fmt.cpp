@@ -498,7 +498,7 @@ static bool HHVM_METHOD(MessageFormatter, setPattern, const String& value) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void IntlExtension::initMessageFormatter() {
+void IntlExtension::registerNativeMessageFormatter() {
   HHVM_ME(MessageFormatter, __construct);
   HHVM_ME(MessageFormatter, format);
   HHVM_ME(MessageFormatter, getErrorCode);

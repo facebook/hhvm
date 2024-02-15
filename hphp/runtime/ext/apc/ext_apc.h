@@ -49,6 +49,7 @@ struct apcExtension final : Extension {
 
   void moduleLoad(const IniSetting::Map& ini, Hdf config) override;
   void moduleInit() override;
+  void moduleRegisterNative() override;
   void moduleShutdown() override;
   bool moduleEnabled() const override { return Enable; }
 

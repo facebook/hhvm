@@ -45,7 +45,7 @@ static void HHVM_FUNCTION(gc_check_heap) {
   tl_heap->checkHeap("gc_check_heap");
 }
 
-void StandardExtension::initGc() {
+void StandardExtension::registerNativeGc() {
   HHVM_FE(gc_enabled);
   HHVM_FE(gc_enable);
   HHVM_FE(gc_disable);

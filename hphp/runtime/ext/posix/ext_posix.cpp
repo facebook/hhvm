@@ -46,7 +46,7 @@ namespace HPHP {
 
 static struct POSIXExtension final : Extension {
   POSIXExtension() : Extension("posix", "1.0", NO_ONCALL_YET) {}
-  void moduleInit() override;
+  void moduleRegisterNative() override;
 } s_posix_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -499,7 +499,7 @@ Variant HHVM_FUNCTION(posix_uname) {
   );
 }
 
-void POSIXExtension::moduleInit() {
+void POSIXExtension::moduleRegisterNative() {
   HHVM_RC_INT(POSIX_S_IFMT, S_IFMT);
   HHVM_RC_INT(POSIX_S_IFSOCK, S_IFSOCK);
   HHVM_RC_INT(POSIX_S_IFLNK, S_IFLNK);

@@ -35,6 +35,7 @@ void moduleLoad(const IniSetting::Map& ini, Hdf hdf);
 // called by hphp_process_init/exit
 void cliClientInit();
 void moduleInit();
+void moduleRegisterNative();
 void moduleShutdown();
 void threadInit();
 void threadShutdown();

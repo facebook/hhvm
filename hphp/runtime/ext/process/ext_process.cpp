@@ -87,7 +87,7 @@ static struct ProcessExtension final : Extension {
   std::vector<std::string> hackFiles() const override {
     return {"process"};
   }
-  void moduleInit() override;
+  void moduleRegisterNative() override;
 } s_process_extension;
 
 int64_t HHVM_FUNCTION(pcntl_alarm,
@@ -522,7 +522,7 @@ int64_t HHVM_FUNCTION(pcntl_wtermsig,
   return WTERMSIG(status);
 }
 
-void ProcessExtension::moduleInit() {
+void ProcessExtension::moduleRegisterNative() {
   HHVM_FE(pcntl_alarm);
   HHVM_FE(pcntl_exec);
   HHVM_FE(pcntl_fork);

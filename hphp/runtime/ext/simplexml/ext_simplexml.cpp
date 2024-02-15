@@ -1811,7 +1811,7 @@ static bool HHVM_METHOD(SimpleXMLIterator, hasChildren) {
 static struct SimpleXMLExtension : Extension {
   SimpleXMLExtension(): Extension("simplexml", "1.0", NO_ONCALL_YET) {}
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_FE(simplexml_import_dom);
     HHVM_FE(simplexml_load_string);
     HHVM_FE(simplexml_load_file);

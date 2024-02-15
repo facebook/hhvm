@@ -1986,7 +1986,7 @@ const char* iconv_version() { return "2.5"; }
 struct iconvExtension final : Extension {
   iconvExtension() : Extension("iconv", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_RC_STR(ICONV_IMPL, iconv_impl());
     HHVM_RC_STR(ICONV_VERSION, iconv_version());
 

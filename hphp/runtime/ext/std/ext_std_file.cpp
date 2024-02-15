@@ -2122,7 +2122,7 @@ Variant HHVM_FUNCTION(try_stderr) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void StandardExtension::initFile() {
+void StandardExtension::registerNativeFile() {
   HHVM_RC_STR(DIRECTORY_SEPARATOR, s_DIRECTORY_SEPARATOR);
   HHVM_RC_STR(PATH_SEPARATOR, s_PATH_SEPARATOR);
 

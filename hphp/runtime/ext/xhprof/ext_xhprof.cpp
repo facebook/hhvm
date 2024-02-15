@@ -35,7 +35,7 @@ void HHVM_FUNCTION(fb_setprofile,
 struct XHProfExtension : Extension {
   XHProfExtension(): Extension("xhprof", "0.9.4", NO_ONCALL_YET) {}
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_RC_INT(SETPROFILE_FLAGS_ENTERS, EventHook::ProfileEnters);
     HHVM_RC_INT(SETPROFILE_FLAGS_EXITS, EventHook::ProfileExits);
     HHVM_RC_INT(SETPROFILE_FLAGS_DEFAULT, EventHook::ProfileDefault);

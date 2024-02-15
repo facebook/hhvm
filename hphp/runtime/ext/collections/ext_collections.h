@@ -69,11 +69,11 @@ inline size_t getSize(const ObjectData* od) {
 struct CollectionsExtension : Extension {
   CollectionsExtension(): Extension("collections", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
-  void moduleInit() override {
-    initPair();
-    initVector();
-    initMap();
-    initSet();
+  void moduleRegisterNative() override {
+    registerNativePair();
+    registerNativeVector();
+    registerNativeMap();
+    registerNativeSet();
   }
 
   std::vector<std::string> hackFiles() const override {
@@ -86,10 +86,10 @@ struct CollectionsExtension : Extension {
   }
 
  private:
-  void initPair();
-  void initVector();
-  void initMap();
-  void initSet();
+  void registerNativePair();
+  void registerNativeVector();
+  void registerNativeMap();
+  void registerNativeSet();
 };
 
 const StaticString s_isset{"isset"};

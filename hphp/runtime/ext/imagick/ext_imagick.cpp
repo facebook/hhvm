@@ -311,12 +311,15 @@ ImagickExtension::ImagickExtension() :
   Extension("imagick", "3.2.0b2", NO_ONCALL_YET) {
 }
 
+void ImagickExtension::moduleRegisterNative() {
+  registerNativeImagickConstants();
+  registerNativeImagickClass();
+  registerNativeImagickDrawClass();
+  registerNativeImagickPixelClass();
+  registerNativeImagickPixelIteratorClass();
+}
+
 void ImagickExtension::moduleInit() {
-  loadImagickConstants();
-  loadImagickClass();
-  loadImagickDrawClass();
-  loadImagickPixelClass();
-  loadImagickPixelIteratorClass();
   MagickWandGenesis();
 }
 

@@ -1437,7 +1437,7 @@ static Variant HHVM_FUNCTION(zip_read, const OptResource& zip) {
 
 struct zipExtension final : Extension {
   zipExtension() : Extension("zip", "1.12.4-dev", NO_ONCALL_YET) {}
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_ME(ZipArchive, addEmptyDir);
     HHVM_ME(ZipArchive, addFile);
     HHVM_ME(ZipArchive, addFromString);
@@ -1552,7 +1552,9 @@ struct zipExtension final : Extension {
     HHVM_FE(zip_entry_read);
     HHVM_FE(zip_open);
     HHVM_FE(zip_read);
+  }
 
+  void moduleInit() override {
     auto wrapper = new ZipStreamWrapper();
     if (wrapper == nullptr || !Stream::registerWrapper("zip", wrapper)) {
       delete wrapper;

@@ -265,7 +265,7 @@ void HHVM_FUNCTION(hphp_clear_hardware_events) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void StandardExtension::initOutput() {
+void StandardExtension::registerNativeOutput() {
   HHVM_FE(ob_start);
   HHVM_FE(ob_clean);
   HHVM_FE(ob_flush);

@@ -156,7 +156,7 @@ static Variant HHVM_METHOD(Transliterator, transliterate,
 
 //////////////////////////////////////////////////////////////////////////////
 
-void IntlExtension::initTransliterator() {
+void IntlExtension::registerNativeTransliterator() {
   HHVM_ME(Transliterator, __init);
   HHVM_ME(Transliterator, __createInverse);
   HHVM_ME(Transliterator, getErrorCode);

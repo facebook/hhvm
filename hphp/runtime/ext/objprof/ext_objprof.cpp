@@ -919,7 +919,7 @@ void HHVM_FUNCTION(set_mem_threshold_callback,
 struct objprofExtension final : Extension {
   objprofExtension() : Extension("objprof", "1.0", NO_ONCALL_YET) { }
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_FALIAS(HH\\objprof_get_data, objprof_get_data);
     HHVM_FALIAS(HH\\objprof_get_paths, objprof_get_paths);
     HHVM_FALIAS(HH\\thread_memory_stats, thread_memory_stats);

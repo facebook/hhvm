@@ -469,7 +469,7 @@ static bool HHVM_METHOD(NumberFormatter, setTextAttribute,
 
 //////////////////////////////////////////////////////////////////////////////
 
-void IntlExtension::initNumberFormatter() {
+void IntlExtension::registerNativeNumberFormatter() {
   HHVM_ME(NumberFormatter, __construct);
   HHVM_ME(NumberFormatter, formatCurrency);
   HHVM_ME(NumberFormatter, format);

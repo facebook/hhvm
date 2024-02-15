@@ -159,7 +159,7 @@ Variant HHVM_FUNCTION(bind_textdomain_codeset, const String& domain,
 #endif
 
 static GettextExtension s_gettext_extension;
-void GettextExtension::moduleInit() {
+void GettextExtension::moduleRegisterNative() {
   HHVM_FE(textdomain);
   HHVM_FE(gettext);
   HHVM_FALIAS(_, gettext);

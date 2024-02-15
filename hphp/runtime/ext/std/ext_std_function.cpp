@@ -160,7 +160,7 @@ String HHVM_FUNCTION(HH_fun_get_function, TypedValue v) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void StandardExtension::initFunction() {
+void StandardExtension::registerNativeFunction() {
   HHVM_FE(get_defined_functions);
   HHVM_FE(function_exists);
   HHVM_FE(is_callable);

@@ -376,7 +376,7 @@ void StandardExtension::requestInitMath() {
   }
 }
 
-void StandardExtension::initMath() {
+void StandardExtension::registerNativeMath() {
   HHVM_RC_INT_SAME(PHP_ROUND_HALF_UP);
   HHVM_RC_INT_SAME(PHP_ROUND_HALF_DOWN);
   HHVM_RC_INT_SAME(PHP_ROUND_HALF_EVEN);

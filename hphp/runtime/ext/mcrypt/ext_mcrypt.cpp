@@ -729,7 +729,7 @@ bool HHVM_FUNCTION(mcrypt_generic_end, const OptResource& td) {
 
 struct McryptExtension final : Extension {
   McryptExtension() : Extension("mcrypt", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_RC_INT(MCRYPT_DEV_RANDOM, RANDOM);
     HHVM_RC_INT(MCRYPT_DEV_URANDOM, URANDOM);
     HHVM_RC_INT(MCRYPT_RAND, RAND);

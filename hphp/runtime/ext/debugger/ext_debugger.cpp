@@ -143,7 +143,7 @@ Array HHVM_FUNCTION(debugger_get_info) {
 
 struct DebuggerExtension final : Extension {
   DebuggerExtension() : Extension("debugger", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_NAMED_FE(__SystemLib\\debugger_get_info, HHVM_FN(debugger_get_info));
     HHVM_FE(hphpd_auth_token);
     HHVM_FE(hphp_debug_session_auth);

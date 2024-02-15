@@ -72,7 +72,7 @@ c_StaticWaitHandle* c_StaticWaitHandle::CreateFailed(ObjectData* exception) {
   return waitHandle.detach();
 }
 
-void AsioExtension::initStaticWaitHandle() {
+void AsioExtension::registerNativeStaticWaitHandle() {
   c_StaticWaitHandle::NullHandle.bind(
     rds::Mode::Normal, rds::LinkID{"StaticNullWH"});
   c_StaticWaitHandle::TrueHandle.bind(

@@ -427,7 +427,7 @@ Array HHVM_FUNCTION(HH_deferred_errors) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void StandardExtension::initErrorFunc() {
+void StandardExtension::registerNativeErrorFunc() {
   HHVM_FE(debug_backtrace);
   HHVM_FE(hphp_debug_caller_info);
   HHVM_FE(hphp_debug_caller_identifier);

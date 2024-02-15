@@ -365,7 +365,7 @@ Offset c_AsyncFunctionWaitHandle::getNextExecutionOffset() {
   return resumable()->resumeFromAwaitOffset();
 }
 
-void AsioExtension::initAsyncFunctionWaitHandle() {
+void AsioExtension::registerNativeAsyncFunctionWaitHandle() {
   Native::registerClassExtraDataHandler(
     c_AsyncFunctionWaitHandle::className(),
     finish_class<c_AsyncFunctionWaitHandle>);

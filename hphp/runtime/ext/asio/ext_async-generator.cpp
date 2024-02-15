@@ -128,7 +128,7 @@ void AsyncGenerator::failCpp() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 
-void AsioExtension::initAsyncGenerator() {
+void AsioExtension::registerNativeAsyncGenerator() {
   Native::registerNativeDataInfo<AsyncGenerator>(
     Native::NDIFlags::NO_SWEEP | Native::NDIFlags::NO_COPY |
       Native::NDIFlags::CTOR_THROWS

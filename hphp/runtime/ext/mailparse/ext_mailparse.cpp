@@ -381,7 +381,7 @@ Variant HHVM_FUNCTION(mailparse_determine_best_xfer_encoding,
 
 struct MailparseExtension final : Extension {
   MailparseExtension() : Extension("mailparse", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) { }
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_FE(mailparse_msg_create);
     HHVM_FE(mailparse_msg_free);
     HHVM_FE(mailparse_msg_parse_file);

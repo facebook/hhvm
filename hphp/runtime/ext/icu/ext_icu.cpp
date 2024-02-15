@@ -351,7 +351,7 @@ static Array HHVM_FUNCTION(icu_tokenize, const String& text) {
 
 /////////////////////////////////////////////////////////////////////////////
 
-void IntlExtension::initICU() {
+void IntlExtension::registerNativeICU() {
   HHVM_FE(icu_match);
   HHVM_FE(icu_match_with_matches);
   HHVM_FE(icu_transliterate);

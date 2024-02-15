@@ -801,7 +801,9 @@ void apcExtension::moduleInit() {
     UseUncounted = true;
   }
   apc_store().init();
+}
 
+void apcExtension::moduleRegisterNative() {
   HHVM_FE(apc_add);
   HHVM_FE(apc_add_with_pure_sleep);
   HHVM_FE(apc_store);

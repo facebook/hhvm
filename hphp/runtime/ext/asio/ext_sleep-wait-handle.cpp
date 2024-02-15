@@ -164,7 +164,7 @@ void c_SleepWaitHandle::unregisterFromContext() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void AsioExtension::initSleepWaitHandle() {
+void AsioExtension::registerNativeSleepWaitHandle() {
 #define SWH_SME(meth) \
   HHVM_STATIC_MALIAS(HH\\SleepWaitHandle, meth, SleepWaitHandle, meth)
   SWH_SME(create);

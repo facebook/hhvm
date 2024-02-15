@@ -114,7 +114,7 @@ static Variant HHVM_STATIC_METHOD(Normalizer, normalize,
 
 //////////////////////////////////////////////////////////////////////////////
 
-void IntlExtension::initNormalizer() {
+void IntlExtension::registerNativeNormalizer() {
   HHVM_STATIC_ME(Normalizer, isNormalized);
   HHVM_STATIC_ME(Normalizer, normalize);
 

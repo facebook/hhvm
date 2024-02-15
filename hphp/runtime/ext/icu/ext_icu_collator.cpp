@@ -313,7 +313,7 @@ static bool HHVM_METHOD(Collator, sort, Variant& arr,
 
 //////////////////////////////////////////////////////////////////////////////
 
-void IntlExtension::initCollator() {
+void IntlExtension::registerNativeCollator() {
   HHVM_ME(Collator, __construct);
   HHVM_ME(Collator, asort);
   HHVM_ME(Collator, compare);

@@ -212,7 +212,7 @@ c_WaitableWaitHandle* c_AwaitAllWaitHandle::getChild() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void AsioExtension::initAwaitAllWaitHandle() {
+void AsioExtension::registerNativeAwaitAllWaitHandle() {
 #define AAWH_SME(meth) \
   HHVM_STATIC_MALIAS(HH\\AwaitAllWaitHandle, meth, AwaitAllWaitHandle, meth)
   AAWH_SME(fromVec);

@@ -175,7 +175,7 @@ struct LocaleExtension final : Extension {
 
   LocaleExtension() : Extension("hsl_locale", "0.1", NO_ONCALL_YET) {}
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     // Remember to update the HHI :)
 
     Native::registerNativeDataInfo<HSLLocale>();

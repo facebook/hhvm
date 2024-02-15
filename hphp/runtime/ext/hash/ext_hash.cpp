@@ -54,7 +54,7 @@ namespace HPHP {
 
 static struct HashExtension final : Extension {
   HashExtension() : Extension("hash", "1.0", NO_ONCALL_YET) { }
-  void moduleInit() override;
+  void moduleRegisterNative() override;
 } s_hash_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -441,7 +441,7 @@ int64_t HHVM_FUNCTION(hphp_murmurhash, const String& key,
   return murmur_hash_64A(key.data(), len, seed);
 }
 
-void HashExtension::moduleInit() {
+void HashExtension::moduleRegisterNative() {
   HHVM_FE(hash);
   HHVM_FE(hash_algos);
   HHVM_FE(hash_file);

@@ -552,7 +552,7 @@ static void HHVM_METHOD(SetIterator, rewind) {
 
 /////////////////////////////////////////////////////////////////////////////
 
-void CollectionsExtension::initSet() {
+void CollectionsExtension::registerNativeSet() {
   HHVM_ME(SetIterator, current);
   HHVM_ME(SetIterator, key);
   HHVM_ME(SetIterator, valid);

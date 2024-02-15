@@ -596,7 +596,7 @@ Array HHVM_FUNCTION(heapgraph_stats, const OptResource& resource) {
 struct heapgraphExtension final : Extension {
   heapgraphExtension() : Extension("heapgraph", "1.0", NO_ONCALL_YET) { }
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_FALIAS(HH\\heapgraph_create, heapgraph_create);
     HHVM_FALIAS(HH\\heapgraph_stats, heapgraph_stats);
     HHVM_FALIAS(HH\\heapgraph_foreach_node, heapgraph_foreach_node);

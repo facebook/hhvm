@@ -3289,7 +3289,7 @@ static struct PDOExtension final : Extension {
   }
 #endif
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_FE(pdo_drivers);
     HHVM_ME(PDO, __construct);
     HHVM_ME(PDO, prepare);

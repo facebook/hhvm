@@ -164,20 +164,24 @@ Array HHVM_FUNCTION(backtrace,
 static AsioExtension s_asio_extension;
 
 void AsioExtension::moduleInit() {
-  initFunctions();
+  initNativeWaitHandle();
+}
 
-  initWaitHandle();
-  initResumableWaitHandle();
-  initAsyncGenerator();
-  initAwaitAllWaitHandle();
-  initConcurrentWaitHandle();
-  initConditionWaitHandle();
-  initSleepWaitHandle();
-  initRescheduleWaitHandle();
-  initExternalThreadEventWaitHandle();
-  initStaticWaitHandle();
-  initAsyncFunctionWaitHandle();
-  initAsyncGeneratorWaitHandle();
+void AsioExtension::moduleRegisterNative() {
+  registerNativeFunctions();
+
+  registerNativeWaitHandle();
+  registerNativeResumableWaitHandle();
+  registerNativeAsyncGenerator();
+  registerNativeAwaitAllWaitHandle();
+  registerNativeConcurrentWaitHandle();
+  registerNativeConditionWaitHandle();
+  registerNativeSleepWaitHandle();
+  registerNativeRescheduleWaitHandle();
+  registerNativeExternalThreadEventWaitHandle();
+  registerNativeStaticWaitHandle();
+  registerNativeAsyncFunctionWaitHandle();
+  registerNativeAsyncGeneratorWaitHandle();
 }
 
 std::vector<std::string> AsioExtension::hackFiles() const {
@@ -186,7 +190,7 @@ std::vector<std::string> AsioExtension::hackFiles() const {
 
 void AsioExtension::requestInit() { requestInitSingletons(); }
 
-void AsioExtension::initFunctions() {
+void AsioExtension::registerNativeFunctions() {
   HHVM_FALIAS(
     HH\\asio_get_current_context_idx,
     asio_get_current_context_idx);

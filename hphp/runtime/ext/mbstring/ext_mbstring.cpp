@@ -4540,7 +4540,9 @@ static struct mbstringExtension final : Extension {
     IniSetting::Bind(this, IniSetting::Mode::Request,
                      "mbstring.substitute_character",
                      &MBSTRG(current_filter_illegal_mode));
+  }
 
+  void moduleRegisterNative() override {
     HHVM_RC_INT(MB_CASE_UPPER, PHP_UNICODE_CASE_UPPER);
     HHVM_RC_INT(MB_CASE_LOWER, PHP_UNICODE_CASE_LOWER);
     HHVM_RC_INT(MB_CASE_TITLE, PHP_UNICODE_CASE_TITLE);

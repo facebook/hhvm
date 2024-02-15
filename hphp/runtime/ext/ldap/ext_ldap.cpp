@@ -57,6 +57,7 @@ static struct LdapExtension final : Extension {
   void requestInit() override;
   void requestShutdown() override;
   void moduleInit() override;
+  void moduleRegisterNative() override;
 } s_ldap_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2063,7 +2064,7 @@ String HHVM_FUNCTION(ldap_escape,
   return result;
 }
 
-void LdapExtension::moduleInit() {
+void LdapExtension::moduleRegisterNative() {
   HHVM_RC_INT(LDAP_ESCAPE_FILTER, k_LDAP_ESCAPE_FILTER);
   HHVM_RC_INT(LDAP_ESCAPE_DN, k_LDAP_ESCAPE_DN);
 
@@ -2155,7 +2156,9 @@ void LdapExtension::moduleInit() {
 #ifdef LDAP_OPT_DEBUG_LEVEL
   HHVM_RC_INT_SAME(LDAP_OPT_DEBUG_LEVEL);
 #endif
+}
 
+void LdapExtension::moduleInit() {
   LDAP* link = nullptr;
   if (ldap_create(&link) == LDAP_SUCCESS) {
     ldap_unbind(link);

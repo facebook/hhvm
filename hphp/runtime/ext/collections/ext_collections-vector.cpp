@@ -454,7 +454,7 @@ c_ImmVector* c_ImmVector::Clone(ObjectData* obj) {
 
 namespace collections {
 
-void CollectionsExtension::initVector() {
+void CollectionsExtension::registerNativeVector() {
   HHVM_ME(VectorIterator, current);
   HHVM_ME(VectorIterator, key);
   HHVM_ME(VectorIterator, valid);

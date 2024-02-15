@@ -254,8 +254,7 @@ Variant HHVM_FUNCTION(shmop_write,
 struct ShmopExtension final : Extension {
   ShmopExtension() : Extension("shmop", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) { }
 
-  void moduleInit() override {
-
+  void moduleRegisterNative() override {
     HHVM_FE(shmop_close);
     HHVM_FE(shmop_delete);
     HHVM_FE(shmop_open);

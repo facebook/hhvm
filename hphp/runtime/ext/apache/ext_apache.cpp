@@ -144,7 +144,7 @@ ApacheExtension::ApacheExtension() : Extension("apache", NO_EXTENSION_VERSION_YE
 
 ApacheExtension::~ApacheExtension() {}
 
-void ApacheExtension::moduleInit() {
+void ApacheExtension::moduleRegisterNative() {
   HHVM_FE(apache_note);
   HHVM_FE(apache_notes);
   HHVM_FE(apache_request_headers);

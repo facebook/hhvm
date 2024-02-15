@@ -1078,7 +1078,7 @@ struct DeclExtension final : Extension {
     return DependencySet({"facts"});
   }
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_STATIC_MALIAS(HH\\FileDecls, parseText, FileDecls, parseText);
     HHVM_STATIC_MALIAS(HH\\FileDecls, parsePath, FileDecls, parsePath);
     HHVM_STATIC_MALIAS(

@@ -79,7 +79,7 @@ const int64_t k_FILTER_FLAG_NO_PRIV_RANGE = 8388608;
 static struct FilterExtension final : Extension {
   FilterExtension() : Extension("filter", "0.12.1", NO_ONCALL_YET) {}
 
-  void moduleInit() override;
+  void moduleRegisterNative() override;
 
 } s_filter_extension;
 
@@ -312,7 +312,7 @@ Variant HHVM_FUNCTION(filter_var,
 
 #undef FAIL_IF
 
-void FilterExtension::moduleInit() {
+void FilterExtension::moduleRegisterNative() {
   HHVM_RC_INT(FILTER_FLAG_NONE, k_FILTER_FLAG_NONE);
   HHVM_RC_INT(FILTER_REQUIRE_SCALAR, k_FILTER_REQUIRE_SCALAR);
   HHVM_RC_INT(FILTER_REQUIRE_ARRAY, k_FILTER_REQUIRE_ARRAY);

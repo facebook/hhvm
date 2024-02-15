@@ -109,6 +109,9 @@ void Extension::moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*hdf*/)
 void Extension::moduleInit()
 {}
 
+void Extension::moduleRegisterNative()
+{}
+
 void Extension::moduleInfo(Array &info) {
   info.set(String(m_name), true);
 }

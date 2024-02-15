@@ -2585,7 +2585,9 @@ struct StringExtension final : Extension {
   StringExtension() : Extension("string", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
   void moduleInit() override {
     setlocale(LC_CTYPE, "");
+  }
 
+  void moduleRegisterNative() override {
     HHVM_FE(addcslashes);
     HHVM_FE(stripcslashes);
     HHVM_FE(addslashes);

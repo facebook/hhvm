@@ -743,7 +743,7 @@ struct LibXMLExtension final : Extension {
       }
     }
 
-    void moduleInit() override {
+    void moduleRegisterNative() override {
       HHVM_RC_INT_SAME(LIBXML_VERSION);
       HHVM_RC_STR_SAME(LIBXML_DOTTED_VERSION);
       HHVM_RC_STR(LIBXML_LOADED_VERSION, xmlParserVersion);
@@ -793,7 +793,9 @@ struct LibXMLExtension final : Extension {
       HHVM_FE(libxml_suppress_errors);
       HHVM_FE(libxml_disable_entity_loader);
       HHVM_FE(libxml_set_streams_context);
+    }
 
+    void moduleInit() override {
       // Set up callbacks to support stream wrappers for reading and writing
       // xml files and loading external entities.
       xmlParserInputBufferCreateFilenameDefault(libxml_create_input_buffer);

@@ -1006,7 +1006,7 @@ String HHVM_FUNCTION(escapeshellcmd,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void StandardExtension::initProcess() {
+void StandardExtension::registerNativeProcess() {
   HHVM_FE(shell_exec);
   HHVM_FE(exec);
   HHVM_FE(passthru);

@@ -315,7 +315,7 @@ StringRet HHVM_FUNCTION(urlencode, const String& str) {
 
 struct StandardURLExtension final : Extension {
   StandardURLExtension() : Extension("url", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_RC_INT(PHP_URL_SCHEME, k_PHP_URL_SCHEME);
     HHVM_RC_INT(PHP_URL_HOST, k_PHP_URL_HOST);
     HHVM_RC_INT(PHP_URL_PORT, k_PHP_URL_PORT);

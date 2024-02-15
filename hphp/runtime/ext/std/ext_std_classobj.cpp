@@ -525,7 +525,7 @@ String HHVM_FUNCTION(HH_meth_caller_get_method, TypedValue v) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void StandardExtension::initClassobj() {
+void StandardExtension::registerNativeClassobj() {
   HHVM_FE(get_declared_classes);
   HHVM_FE(get_declared_interfaces);
   HHVM_FE(get_declared_traits);

@@ -3042,7 +3042,7 @@ Array HHVM_FUNCTION(merge_xhp_attr_declarations,
 
 struct ArrayExtension final : Extension {
   ArrayExtension() : Extension("array", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_RC_INT_SAME(UCOL_DEFAULT);
 
     HHVM_RC_INT_SAME(UCOL_PRIMARY);

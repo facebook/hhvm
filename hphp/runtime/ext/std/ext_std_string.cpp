@@ -177,7 +177,7 @@ Variant HHVM_FUNCTION(vprintf, const Variant& vformat, const Variant& args) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void StandardExtension::initString() {
+void StandardExtension::registerNativeString() {
   HHVM_FE(wordwrap);
 
   HHVM_FE(sprintf);

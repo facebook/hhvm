@@ -164,7 +164,7 @@ c_WaitableWaitHandle* c_ConcurrentWaitHandle::getChild() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void AsioExtension::initConcurrentWaitHandle() {
+void AsioExtension::registerNativeConcurrentWaitHandle() {
 #define CCWH_SME(meth) \
   HHVM_STATIC_MALIAS(HH\\ConcurrentWaitHandle, meth, ConcurrentWaitHandle, meth)
   CCWH_SME(setOnCreateCallback);

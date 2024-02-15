@@ -3818,7 +3818,7 @@ struct ImagickPropHandler : Native::MapPropHandler<ImagickPropHandler> {
 
 #undef IMAGICK_THROW
 
-void ImagickExtension::loadImagickClass() {
+void ImagickExtension::registerNativeImagickClass() {
   HHVM_ME(Imagick, adaptiveBlurImage);
   HHVM_ME(Imagick, adaptiveResizeImage);
   HHVM_ME(Imagick, adaptiveSharpenImage);

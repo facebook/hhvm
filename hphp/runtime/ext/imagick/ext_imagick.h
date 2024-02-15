@@ -38,6 +38,7 @@ namespace HPHP {
 struct ImagickExtension final : Extension {
   ImagickExtension();
   void moduleInit() override;
+  void moduleRegisterNative() override;
   void moduleShutdown() override;
   void threadInit() override;
 
@@ -45,10 +46,10 @@ struct ImagickExtension final : Extension {
   static bool hasProgressMonitor();
 
  private:
-  void loadImagickClass();
-  void loadImagickDrawClass();
-  void loadImagickPixelClass();
-  void loadImagickPixelIteratorClass();
+  void registerNativeImagickClass();
+  void registerNativeImagickDrawClass();
+  void registerNativeImagickPixelClass();
+  void registerNativeImagickPixelIteratorClass();
 
   struct ImagickIniSetting {
     bool m_locale_fix;
@@ -375,4 +376,3 @@ void loadImagickPixelIteratorClass();
 
 //////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
-

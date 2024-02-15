@@ -365,7 +365,7 @@ struct bz2Extension final : Extension {
     s_bzip2_stream_wrapper.registerAs("compress.bzip2");
   }
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_FE(bzclose);
     HHVM_FE(bzread);
     HHVM_FE(bzwrite);

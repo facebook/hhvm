@@ -621,7 +621,7 @@ struct ZlibExtension final : Extension {
   void moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*hdf*/) override {
     s_zlib_stream_wrapper.registerAs("compress.zlib");
   }
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_RC_INT(ZLIB_ENCODING_RAW, k_ZLIB_ENCODING_RAW);
     HHVM_RC_INT(ZLIB_ENCODING_GZIP, k_ZLIB_ENCODING_GZIP);
     HHVM_RC_INT(ZLIB_ENCODING_DEFLATE, k_ZLIB_ENCODING_DEFLATE);

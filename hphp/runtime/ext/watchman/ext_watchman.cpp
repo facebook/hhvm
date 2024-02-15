@@ -957,7 +957,7 @@ struct WatchmanExtension final : Extension {
   WatchmanExtension() : Extension("watchman", "1", "scm_client_infra") {}
 
   // (INIT entry-point) no need for a lock
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_FALIAS(HH\\watchman_run, HH_watchman_run);
     HHVM_FALIAS(HH\\watchman_query, HH_watchman_query);
     HHVM_FALIAS(HH\\watchman_subscribe, HH_watchman_subscribe);

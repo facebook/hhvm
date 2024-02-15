@@ -706,6 +706,9 @@ struct XSLExtension final : Extension {
     void moduleInit() override {
       xsltSetGenericErrorFunc(nullptr, xslt_ext_error_handler);
       exsltRegisterAll();
+    }
+
+    void moduleRegisterNative() override {
       HHVM_RC_INT(XSL_SECPREF_NONE, k_XSL_SECPREF_NONE);
       HHVM_RC_INT(XSL_SECPREF_READ_FILE, k_XSL_SECPREF_READ_FILE);
       HHVM_RC_INT(XSL_SECPREF_WRITE_FILE, k_XSL_SECPREF_WRITE_FILE);

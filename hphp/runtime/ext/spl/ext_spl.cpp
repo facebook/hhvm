@@ -201,7 +201,7 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(ExtensionList, s_extension_list);
 
 struct SPLExtension final : Extension {
   SPLExtension() : Extension("spl", "0.2", NO_ONCALL_YET) { }
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_FE(spl_object_hash);
     HHVM_FE(hphp_object_pointer);
     HHVM_FE(hphp_get_this);

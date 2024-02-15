@@ -116,8 +116,7 @@ extern const StaticString
   s_ImagickPixel,
   s_ImagickPixelIterator;
 
-void loadImagickConstants();
+void registerNativeImagickConstants();
 
 //////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
-

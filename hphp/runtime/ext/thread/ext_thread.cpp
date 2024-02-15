@@ -34,7 +34,7 @@ int64_t HHVM_FUNCTION(hphp_gettid) {
 
 static struct ThreadExtension final : Extension {
   ThreadExtension() : Extension("thread", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_FE(hphp_get_thread_id);
     HHVM_FE(hphp_gettid);
   }

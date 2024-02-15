@@ -250,7 +250,7 @@ ObjectData* c_Closure::clone() {
   return ret;
 }
 
-void CoreExtension::initClosure() {
+void CoreExtension::registerNativeClosure() {
   Native::registerNativePropHandler<ClosurePropHandler>(s_Closure);
 }
 

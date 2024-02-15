@@ -60,7 +60,7 @@ static bool HHVM_METHOD(IntlIterator, valid) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void IntlExtension::initIterator() {
+void IntlExtension::registerNativeIterator() {
   HHVM_ME(IntlIterator, current);
   HHVM_ME(IntlIterator, key);
   HHVM_ME(IntlIterator, next);

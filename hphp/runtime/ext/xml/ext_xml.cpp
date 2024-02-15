@@ -44,7 +44,7 @@ enum php_xml_option {
 
 static struct XMLExtension final : Extension {
   XMLExtension() : Extension("xml", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
-  void moduleInit() override;
+  void moduleRegisterNative() override;
 } s_xml_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -978,7 +978,7 @@ String HHVM_FUNCTION(utf8_encode,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void XMLExtension::moduleInit() {
+void XMLExtension::moduleRegisterNative() {
   HHVM_FE(xml_parser_create);
   HHVM_FE(xml_parser_free);
   HHVM_FE(xml_parse);

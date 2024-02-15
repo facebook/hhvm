@@ -916,7 +916,7 @@ TypedValue date_sunrise_sunset(int64_t timestamp, int64_t format,
 static struct DateTimeExtension final : Extension {
   DateTimeExtension() : Extension("date", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) { }
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_ME(DateTime, __construct);
     HHVM_ME(DateTime, add);
     HHVM_ME(DateTime, diff);

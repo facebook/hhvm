@@ -175,7 +175,7 @@ String HHVM_METHOD(Generator, getCalledClass) {
 struct GeneratorExtension final : Extension {
   GeneratorExtension() : Extension("generator", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_ME(Generator, getOrigFuncName);
     HHVM_ME(Generator, getCalledClass);
     Native::registerNativeDataInfo<Generator>(

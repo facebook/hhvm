@@ -276,7 +276,7 @@ void c_ExternalThreadEventWaitHandle::unregisterFromContext() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void AsioExtension::initExternalThreadEventWaitHandle() {
+void AsioExtension::registerNativeExternalThreadEventWaitHandle() {
 #define ETEWH_SME(meth) \
   HHVM_STATIC_MALIAS(HH\\ExternalThreadEventWaitHandle, meth, \
                      ExternalThreadEventWaitHandle, meth)

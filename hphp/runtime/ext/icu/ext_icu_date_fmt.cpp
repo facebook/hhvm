@@ -456,7 +456,7 @@ static bool HHVM_METHOD(IntlDateFormatter, setTimezone, const Variant& zone) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void IntlExtension::initDateFormatter() {
+void IntlExtension::registerNativeDateFormatter() {
   HHVM_RCC_INT(IntlDateFormatter, FULL, UDAT_FULL);
   HHVM_RCC_INT(IntlDateFormatter, LONG, UDAT_LONG);
   HHVM_RCC_INT(IntlDateFormatter, MEDIUM, UDAT_MEDIUM);

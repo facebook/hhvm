@@ -9,21 +9,21 @@ namespace HPHP {
 struct StandardExtension final : Extension {
   StandardExtension() : Extension("standard", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
-  void moduleInit() override {
-    initStandard();
-    initErrorFunc();
-    initClassobj();
-    initNetwork();
-    initOptions();
-    initGc();
-    initOutput();
-    initString();
-    initVariable();
-    initFunction();
-    initMisc();
-    initFile();
-    initMath();
-    initProcess();
+  void moduleRegisterNative() override {
+    registerNativeStandard();
+    registerNativeErrorFunc();
+    registerNativeClassobj();
+    registerNativeNetwork();
+    registerNativeOptions();
+    registerNativeGc();
+    registerNativeOutput();
+    registerNativeString();
+    registerNativeVariable();
+    registerNativeFunction();
+    registerNativeMisc();
+    registerNativeFile();
+    registerNativeMath();
+    registerNativeProcess();
   }
 
   std::vector<std::string> hackFiles() const override {
@@ -53,20 +53,20 @@ struct StandardExtension final : Extension {
   }
 
  private:
-  void initStandard();
-  void initErrorFunc();
-  void initClassobj();
-  void initNetwork();
-  void initOptions();
-  void initGc();
-  void initOutput();
-  void initString();
-  void initVariable();
-  void initFunction();
-  void initMisc();
-  void initFile();
-  void initMath();
-  void initProcess();
+  void registerNativeStandard();
+  void registerNativeErrorFunc();
+  void registerNativeClassobj();
+  void registerNativeNetwork();
+  void registerNativeOptions();
+  void registerNativeGc();
+  void registerNativeOutput();
+  void registerNativeString();
+  void registerNativeVariable();
+  void registerNativeFunction();
+  void registerNativeMisc();
+  void registerNativeFile();
+  void registerNativeMath();
+  void registerNativeProcess();
 
   void threadInitMisc();
 

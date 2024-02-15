@@ -325,7 +325,7 @@ HHVM_RCC_INT(IntlDatePatternGenerator, nm##_PATTERN_FIELD, UDATPG_##nm##_FIELD);
 #define UDATPG_CONST(nm) \
   HHVM_RCC_INT(IntlDatePatternGenerator, PATTERN_##nm, UDATPG_##nm);
 
-void IntlExtension::initDatePatternGenerator() {
+void IntlExtension::registerNativeDatePatternGenerator() {
   // UDateTimePatternField
   UDATPG_CONST_FIELD(ERA);
   UDATPG_CONST_FIELD(YEAR);

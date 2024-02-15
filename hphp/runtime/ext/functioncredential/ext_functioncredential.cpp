@@ -65,7 +65,7 @@ namespace {
 struct FunctionCredentialExtension final : Extension {
   FunctionCredentialExtension() : Extension("functioncredential", "1.0", NO_ONCALL_YET) {}
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_ME(FunctionCredential, getClassName);
     HHVM_ME(FunctionCredential, getFunctionName);
     HHVM_ME(FunctionCredential, getFilename);

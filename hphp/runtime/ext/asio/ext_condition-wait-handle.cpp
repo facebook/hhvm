@@ -154,7 +154,7 @@ c_WaitableWaitHandle* c_ConditionWaitHandle::getChild() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void AsioExtension::initConditionWaitHandle() {
+void AsioExtension::registerNativeConditionWaitHandle() {
   HHVM_STATIC_MALIAS(HH\\ConditionWaitHandle, create,
                      ConditionWaitHandle, create);
   HHVM_STATIC_MALIAS(HH\\ConditionWaitHandle, setOnCreateCallback,

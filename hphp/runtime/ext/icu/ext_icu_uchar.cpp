@@ -346,7 +346,7 @@ Variant uchar_method(const Class* /*self_*/, const Variant& arg) {
 
 const StaticString s_IntlChar("IntlChar");
 
-void IntlExtension::initUChar() {
+void IntlExtension::registerNativeUChar() {
   HHVM_RCC_STR(IntlChar, UNICODE_VERSION, U_UNICODE_VERSION);
 
   HHVM_RCC_INT(IntlChar, CODEPOINT_MIN, UCHAR_MIN_VALUE);

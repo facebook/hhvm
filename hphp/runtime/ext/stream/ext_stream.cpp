@@ -59,7 +59,7 @@ req::ptr<StreamContext> get_stream_context(const Variant& stream_or_context);
 
 static struct StreamExtension final : Extension {
   StreamExtension() : Extension("stream", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
-  void moduleInit() override;
+  void moduleRegisterNative() override;
 } s_stream_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -827,7 +827,7 @@ Array StreamContext::getParams() const {
 
 #define REGISTER_SAME_CONSTANT(name) HHVM_RC_INT(name, k_ ## name)
 
-void StreamExtension::moduleInit() {
+void StreamExtension::moduleRegisterNative() {
   REGISTER_SAME_CONSTANT(PSFS_ERR_FATAL);
   REGISTER_SAME_CONSTANT(PSFS_FEED_ME);
   REGISTER_SAME_CONSTANT(PSFS_FLAG_FLUSH_CLOSE);

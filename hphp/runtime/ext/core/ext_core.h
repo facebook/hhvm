@@ -24,10 +24,10 @@ namespace HPHP {
 
 struct CoreExtension final : Extension {
   CoreExtension() : Extension("core", "1.0", "hhvm") { }
-  void moduleInit() override;
+  void moduleRegisterNative() override;
 
 private:
-  void initClosure();
+  void registerNativeClosure();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

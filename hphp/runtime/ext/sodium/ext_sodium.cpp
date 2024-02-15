@@ -2305,7 +2305,9 @@ struct SodiumExtension final : Extension {
     if (sodium_init() == -1) {
       raise_error("sodium_init()");
     }
+  }
 
+  void moduleRegisterNative() override {
     HHVM_RC_STR(SODIUM_LIBRARY_VERSION, sodium_version_string());
     HHVM_RC_INT(SODIUM_LIBRARY_MAJOR_VERSION, sodium_library_version_major());
     HHVM_RC_INT(SODIUM_LIBRARY_MINOR_VERSION, sodium_library_version_minor());

@@ -503,7 +503,7 @@ bool validate_dns_arguments(const String& host, const String& type,
   return true;
 }
 
-void StandardExtension::initNetwork() {
+void StandardExtension::registerNativeNetwork() {
   HHVM_FE(gethostname);
   HHVM_FE(gethostbyaddr);
   HHVM_FE(gethostbyname);

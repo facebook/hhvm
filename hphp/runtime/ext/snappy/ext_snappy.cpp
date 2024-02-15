@@ -43,7 +43,7 @@ Variant HHVM_FUNCTION(snappy_uncompress, const String& data) {
 
 static struct SnappyExtension final : Extension {
   SnappyExtension() : Extension("snappy", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_FE(snappy_compress);
     HHVM_FE(snappy_uncompress);
     HHVM_FALIAS(sncompress, snappy_compress);

@@ -47,7 +47,7 @@ struct mysqlExtension final : Extension {
   static bool TypedResults;
 
   virtual void moduleLoad(const IniSetting::Map& ini, Hdf config) override;
-  void moduleInit() override;
+  void moduleRegisterNative() override;
 };
 
 extern mysqlExtension s_mysql_extension;

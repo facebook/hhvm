@@ -674,7 +674,7 @@ bool HHVM_FUNCTION(curl_share_setopt, const OptResource& sh,
 
 struct CurlExtension final : Extension {
   CurlExtension() : Extension("curl", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
-  void moduleInit() override {
+  void moduleRegisterNative() override {
 
     /* See https://curl.haxx.se/libcurl/c/symbols-in-versions.html
        or curl src/docs/libcurl/symbols-in-versions for a (almost) complete list

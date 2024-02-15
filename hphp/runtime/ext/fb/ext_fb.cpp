@@ -1467,7 +1467,7 @@ Variant HHVM_FUNCTION(fb_gen_user_func_array, const String& initialDoc,
 struct FBExtension : Extension {
   FBExtension(): Extension("fb", "1.0.0", NO_ONCALL_YET) {}
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_RC_BOOL(HHVM_FACEBOOK, HHVM_FACEBOOK_FLAG);
     HHVM_RC_INT_SAME(FB_UNSERIALIZE_NONSTRING_VALUE);
     HHVM_RC_INT_SAME(FB_UNSERIALIZE_UNEXPECTED_END);

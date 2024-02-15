@@ -753,7 +753,7 @@ static bool HHVM_METHOD(IntlGregorianCalendar, setGregorianChange,
 /////////////////////////////////////////////////////////////////////////////
 // Extension
 
-void IntlExtension::initCalendar() {
+void IntlExtension::registerNativeCalendar() {
   HHVM_RCC_INT(IntlCalendar, FIELD_ERA, UCAL_ERA);
   HHVM_RCC_INT(IntlCalendar, FIELD_YEAR, UCAL_YEAR);
   HHVM_RCC_INT(IntlCalendar, FIELD_MONTH, UCAL_MONTH);

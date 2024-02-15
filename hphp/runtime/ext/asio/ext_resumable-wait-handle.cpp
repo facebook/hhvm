@@ -70,7 +70,7 @@ c_ResumableWaitHandle* c_ResumableWaitHandle::getRunning(ActRec* fp) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void AsioExtension::initResumableWaitHandle() {
+void AsioExtension::registerNativeResumableWaitHandle() {
 #define RWH_SME(meth) \
   HHVM_STATIC_MALIAS(HH\\ResumableWaitHandle, meth, ResumableWaitHandle, meth)
   RWH_SME(setOnCreateCallback);

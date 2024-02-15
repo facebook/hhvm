@@ -872,7 +872,7 @@ XMLWRITER_METHOD_AND_FUNCTION(String, xmlwriter_output_memory, outputMemory,
 struct XMLWriterExtension final : Extension {
     XMLWriterExtension() : Extension("xmlwriter", "0.1", NO_ONCALL_YET) {};
 
-    void moduleInit() override {
+    void moduleRegisterNative() override {
       HHVM_ME(XMLWriter, openMemory);
       HHVM_ME(XMLWriter, openURI);
       HHVM_ME(XMLWriter, setIndentString);

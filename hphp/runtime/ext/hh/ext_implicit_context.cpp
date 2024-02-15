@@ -341,7 +341,7 @@ Variant HHVM_FUNCTION(enter_zoned_with, const Variant& function) {
 
 static struct HHImplicitContext final : Extension {
   HHImplicitContext(): Extension("implicit_context", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) { }
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     Native::registerNativeDataInfo<ImplicitContext>(
       ImplicitContextLoader::className().get());
 

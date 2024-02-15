@@ -2154,7 +2154,7 @@ static struct AsyncMysqlExtension final : Extension {
   //   $ext = new ReflectionExtension("async_mysql");
   //   $version = (float) $ext->getVersion();
   AsyncMysqlExtension() : Extension("async_mysql", "7.0", NO_ONCALL_YET) {}
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     // expose the mysql flags
     HHVM_RC_INT_SAME(NOT_NULL_FLAG);
     HHVM_RC_INT_SAME(PRI_KEY_FLAG);

@@ -1234,7 +1234,7 @@ struct MemcachedExtension final : Extension {
     *s_memcached_globals = nullptr;
   }
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_ME(Memcached, __construct);
     HHVM_ME(Memcached, quit);
     HHVM_ME(Memcached, getAllKeys);

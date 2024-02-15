@@ -115,28 +115,28 @@ inline String u8(const icu::UnicodeString& u16, UErrorCode& error) {
 struct IntlExtension final : Extension {
   IntlExtension() : Extension("intl", "1.1.0", NO_ONCALL_YET) {}
 
-  void moduleInit() override {
-    bindConstants();
-    initICU(); // HHVM-specific ICU functions
-    initLocale();
-    initNumberFormatter();
-    initTimeZone();
-    initIterator();
-    initDateFormatter();
-    initDatePatternGenerator();
-    initCalendar();
-    initGrapheme();
-    initBreakIterator(); // Must come after initIterator()
-    initUChar();
-    initUConverter();
-    initUcsDet();
-    initUSpoof();
-    initMisc();
-    initCollator();
-    initMessageFormatter();
-    initNormalizer();
-    initResourceBundle();
-    initTransliterator();
+  void moduleRegisterNative() override {
+    registerNativeConstants();
+    registerNativeICU(); // HHVM-specific ICU functions
+    registerNativeLocale();
+    registerNativeNumberFormatter();
+    registerNativeTimeZone();
+    registerNativeIterator();
+    registerNativeDateFormatter();
+    registerNativeDatePatternGenerator();
+    registerNativeCalendar();
+    registerNativeGrapheme();
+    registerNativeBreakIterator(); // Must come after registerNativeIterator()
+    registerNativeUChar();
+    registerNativeUConverter();
+    registerNativeUcsDet();
+    registerNativeUSpoof();
+    registerNativeMisc();
+    registerNativeCollator();
+    registerNativeMessageFormatter();
+    registerNativeNormalizer();
+    registerNativeResourceBundle();
+    registerNativeTransliterator();
   }
 
   std::vector<std::string> hackFiles() const override {
@@ -169,27 +169,28 @@ struct IntlExtension final : Extension {
   }
  private:
   void bindIniSettings();
-  void bindConstants();
-  void initICU();
-  void initLocale();
-  void initNumberFormatter();
-  void initTimeZone();
-  void initIterator();
-  void initDateFormatter();
-  void initDatePatternGenerator();
-  void initCalendar();
-  void initGrapheme();
-  void initBreakIterator();
-  void initUChar();
-  void initUConverter();
-  void initUcsDet();
-  void initUSpoof();
-  void initMisc();
-  void initCollator();
-  void initMessageFormatter();
-  void initNormalizer();
-  void initResourceBundle();
-  void initTransliterator();
+
+  void registerNativeConstants();
+  void registerNativeICU();
+  void registerNativeLocale();
+  void registerNativeNumberFormatter();
+  void registerNativeTimeZone();
+  void registerNativeIterator();
+  void registerNativeDateFormatter();
+  void registerNativeDatePatternGenerator();
+  void registerNativeCalendar();
+  void registerNativeGrapheme();
+  void registerNativeBreakIterator();
+  void registerNativeUChar();
+  void registerNativeUConverter();
+  void registerNativeUcsDet();
+  void registerNativeUSpoof();
+  void registerNativeMisc();
+  void registerNativeCollator();
+  void registerNativeMessageFormatter();
+  void registerNativeNormalizer();
+  void registerNativeResourceBundle();
+  void registerNativeTransliterator();
 };
 
 } // namespace Intl

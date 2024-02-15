@@ -241,7 +241,7 @@ void c_AsyncGeneratorWaitHandle::exitContext(context_idx_t ctx_idx) {
   }
 }
 
-void AsioExtension::initAsyncGeneratorWaitHandle() {
+void AsioExtension::registerNativeAsyncGeneratorWaitHandle() {
   Native::registerClassExtraDataHandler(
     c_AsyncGeneratorWaitHandle::className(),
     finish_class<c_AsyncGeneratorWaitHandle>);

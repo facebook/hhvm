@@ -1547,7 +1547,7 @@ bool HHVM_FUNCTION(package_exists, StringArg name) {
 
 static struct HHExtension final : Extension {
   HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) { }
-  void moduleInit() override {
+  void moduleRegisterNative() override {
 #define X(nm) HHVM_NAMED_FE(HH\\nm, HHVM_FN(nm))
     X(autoload_is_native);
     X(autoload_type_to_path);

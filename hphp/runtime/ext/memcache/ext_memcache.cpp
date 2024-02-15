@@ -783,7 +783,7 @@ struct MemcacheExtension final : Extension {
       *s_memcache_globals = nullptr;
     }
 
-    void moduleInit() override {
+    void moduleRegisterNative() override {
       HHVM_RC_INT(MEMCACHE_COMPRESSED, k_MEMCACHE_COMPRESSED);
       HHVM_ME(Memcache, connect);
       HHVM_ME(Memcache, add);

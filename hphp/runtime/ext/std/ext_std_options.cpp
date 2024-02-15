@@ -1124,7 +1124,7 @@ Variant HHVM_FUNCTION(version_compare,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void StandardExtension::initOptions() {
+void StandardExtension::registerNativeOptions() {
   HHVM_FE(extension_loaded);
   HHVM_FE(get_loaded_extensions);
   HHVM_FE(get_extension_funcs);

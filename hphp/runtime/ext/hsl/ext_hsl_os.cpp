@@ -1067,7 +1067,7 @@ struct OSExtension final : Extension {
     CLI_REGISTER_HANDLER(HSL_os_fcntl_intarg);
   }
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     // Remember to update the HHI :)
 
     Native::registerNativeDataInfo<HSLFileDescriptor>();

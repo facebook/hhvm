@@ -96,7 +96,7 @@ bool SetDefaultLocale(const String& locale) {
 /////////////////////////////////////////////////////////////////////////////
 // Common extension init
 
-void IntlExtension::bindConstants() {
+void IntlExtension::registerNativeConstants() {
 #ifdef U_ICU_DATA_VERSION
   HHVM_RC_STR(INTL_ICU_DATA_VERSION, U_ICU_DATA_VERSION);
 #endif

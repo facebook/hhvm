@@ -376,7 +376,7 @@ extern RDS_LOCAL(PCREglobals, tl_pcre_globals);
 struct PcreExtension final : Extension {
   PcreExtension() : Extension("pcre", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_RC_STR(PCRE_VERSION, pcre_version());
 
     HHVM_RC_INT(PREG_NO_ERROR, PHP_PCRE_NO_ERROR);
@@ -444,7 +444,9 @@ struct PcreExtension final : Extension {
     HHVM_FE(split);
     HHVM_FE(spliti);
     HHVM_FE(sql_regcase);
+  }
 
+  void moduleInit() override {
     pcre_config(PCRE_CONFIG_JIT, &s_pcre_has_jit);
     IniSetting::Bind(this, IniSetting::Mode::Constant,
                      "hhvm.pcre.jit",

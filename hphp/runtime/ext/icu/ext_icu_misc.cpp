@@ -156,7 +156,7 @@ static Variant HHVM_FUNCTION(idn_to_utf8, const String& domain,
 
 /////////////////////////////////////////////////////////////////////////////
 
-void IntlExtension::initMisc() {
+void IntlExtension::registerNativeMisc() {
   HHVM_FE(intl_get_error_code);
   HHVM_FE(intl_get_error_message);
   HHVM_FE(intl_error_name);

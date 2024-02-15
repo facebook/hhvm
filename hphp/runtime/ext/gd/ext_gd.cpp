@@ -8031,7 +8031,7 @@ Variant HHVM_FUNCTION(exif_imagetype, const String& filename) {
 struct ExifExtension final : Extension {
   ExifExtension() : Extension("exif", "1.0", "images_infra_backend") {}
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_FE(exif_imagetype);
     HHVM_FE(exif_read_data);
     HHVM_FE(exif_tagname);
@@ -8042,7 +8042,7 @@ struct ExifExtension final : Extension {
 struct GdExtension final : Extension {
   GdExtension() : Extension("gd", "1.0", "images_infra_backend") {}
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_FE(gd_info);
     HHVM_FE(getimagesize);
     HHVM_FE(getimagesizefromstring);

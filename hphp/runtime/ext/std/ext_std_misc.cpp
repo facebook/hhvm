@@ -449,7 +449,7 @@ String HHVM_FUNCTION(hhvm_binary) {
   return String(current_executable_path());
 }
 
-void StandardExtension::initMisc() {
+void StandardExtension::registerNativeMisc() {
     HHVM_FALIAS(HH\\server_warmup_status, server_warmup_status);
     HHVM_FALIAS(HH\\server_warmup_status_monotonic,
                 server_warmup_status_monotonic);

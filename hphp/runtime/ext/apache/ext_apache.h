@@ -28,7 +28,7 @@ namespace HPHP {
 struct ApacheExtension final : Extension {
   ApacheExtension();
   ~ApacheExtension() override;
-  void moduleInit() override;
+  void moduleRegisterNative() override;
 
   static void UpdateHealthLevel(HealthLevel newStatus) {
     m_healthLevel = newStatus;

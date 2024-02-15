@@ -97,6 +97,8 @@ class HQClient : private quic::QuicSocket::ConnectionSetupCallback {
 
   std::deque<folly::StringPiece> httpPaths_;
 
+  std::deque<std::chrono::milliseconds> requestGaps_;
+
   bool failed_{false};
 
   bool replaySafe_{false};

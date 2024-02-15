@@ -173,7 +173,9 @@ void HQClient::sendRequests(bool closeSession, uint64_t numOpenableStreams) {
   // will keep scheduling itself until there are no more requests.
   if (params_.sendRequestsSequentially && !httpPaths_.empty()) {
     auto callSendRequestsAfterADelay = [&]() {
-      if (params_.gapBetweenRequests.count() > 0) {
+      std::chrono::milliseconds gap = requestGaps_.front();
+      requestGaps_.pop_front();
+      if (gap.count() > 0) {
         evb_.runAfterDelay(
             [&]() {
               uint64_t numOpenable =
@@ -182,7 +184,7 @@ void HQClient::sendRequests(bool closeSession, uint64_t numOpenableStreams) {
                 sendRequests(true, numOpenable);
               };
             },
-            params_.gapBetweenRequests.count());
+            gap.count());
       } else {
         uint64_t numOpenable =
             quicClient_->getNumOpenableBidirectionalStreams();
@@ -206,10 +208,24 @@ void HQClient::connectSuccess() {
   CHECK_GT(numOpenableStreams, 0);
   httpPaths_.insert(
       httpPaths_.end(), params_.httpPaths.begin(), params_.httpPaths.end());
+  for (auto const& s : params_.requestGaps) {
+    requestGaps_.emplace_back(folly::to<uint32_t>(s));
+  }
+  if (requestGaps_.size() == 1) {
+    for (uint32_t i = 0; i < httpPaths_.size() - 2; ++i) {
+      requestGaps_.emplace_back(requestGaps_.front());
+    }
+  }
+  if (httpPaths_.size() != requestGaps_.size() + 1) {
+    throw std::runtime_error(
+        "Number of gaps must be one (same gap between all paths) or one less "
+        "than number of paths.");
+  }
+
   sendRequests(!params_.migrateClient, numOpenableStreams);
   // If there are still pending requests to be send in parallel, schedule a
-  // callback on the first EOM to try to make some more. That callback will keep
-  // scheduling itself until there are no more requests.
+  // callback on the first EOM to try to make some more. That callback will
+  // keep scheduling itself until there are no more requests.
   if (!params_.sendRequestsSequentially && !httpPaths_.empty()) {
     selfSchedulingRequestRunner = [&]() {
       uint64_t numOpenable = quicClient_->getNumOpenableBidirectionalStreams();

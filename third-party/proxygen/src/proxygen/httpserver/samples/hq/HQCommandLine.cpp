@@ -58,7 +58,9 @@ DEFINE_bool(sequential,
             false,
             "Whether to make requests sequentially or in parallel when "
             "multiple paths are provided");
-DEFINE_uint32(gap_ms, 0, "Time between consecutive requests in milliseconds");
+DEFINE_string(gap_ms,
+              "0",
+              "Comma separated list of gaps in ms between requests");
 DEFINE_string(congestion, "cubic", "newreno/cubic/bbr/none");
 DEFINE_int32(conn_flow_control, 1024 * 1024 * 10, "Connection flow control");
 DEFINE_int32(stream_flow_control, 256 * 1024, "Stream flow control");
@@ -318,7 +320,7 @@ void initializeHttpClientSettings(HQToolClientParams& hqParams) {
   hqParams.logResponse = FLAGS_log_response;
   hqParams.logResponseHeaders = FLAGS_log_response_headers;
   hqParams.sendRequestsSequentially = FLAGS_sequential;
-  hqParams.gapBetweenRequests = std::chrono::milliseconds(FLAGS_gap_ms);
+  folly::split(',', FLAGS_gap_ms, hqParams.requestGaps);
 
   hqParams.earlyData = FLAGS_early_data;
   hqParams.migrateClient = FLAGS_migrate_client;

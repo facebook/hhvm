@@ -481,7 +481,7 @@ struct MemoryRef {
  * MemoryRef::segment set to something different than the default (DS) value.
  */
 struct SegReg {
-  explicit constexpr SegReg(Segment seg) : seg(seg) {};
+  explicit constexpr SegReg(Segment seg) : seg(seg) {}
   MemoryRef operator[](const IndexedDispReg& idr) {
     return MemoryRef(idr, seg);
   }

@@ -78,7 +78,7 @@ struct IterArgs {
   bool hasKey() const {
     assertx(keyId == kNoKey || keyId >= 0);
     return keyId != kNoKey;
-  };
+  }
 
   bool operator==(const IterArgs& other) const {
     return iterId == other.iterId && keyId == other.keyId &&

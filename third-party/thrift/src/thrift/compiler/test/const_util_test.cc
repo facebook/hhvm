@@ -17,7 +17,7 @@
 #include <thrift/compiler/lib/const_util.h>
 
 #include <folly/portability/GTest.h>
-#include <thrift/compiler/lib/test/gen-cpp2/const_util_test_types.h>
+#include <thrift/compiler/test/gen-cpp2/const_util_test_types.h>
 
 using apache::thrift::compiler::t_const_value;
 

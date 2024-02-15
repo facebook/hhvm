@@ -62,6 +62,8 @@ impl ::std::fmt::Debug for self::Foo {
 unsafe impl ::std::marker::Send for self::Foo {}
 unsafe impl ::std::marker::Sync for self::Foo {}
 impl ::std::marker::Unpin for self::Foo {}
+impl ::std::panic::RefUnwindSafe for self::Foo {}
+impl ::std::panic::UnwindSafe for self::Foo {}
 
 impl ::fbthrift::GetTType for self::Foo {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -186,6 +188,8 @@ impl ::std::fmt::Debug for self::Foo2 {
 unsafe impl ::std::marker::Send for self::Foo2 {}
 unsafe impl ::std::marker::Sync for self::Foo2 {}
 impl ::std::marker::Unpin for self::Foo2 {}
+impl ::std::panic::RefUnwindSafe for self::Foo2 {}
+impl ::std::panic::UnwindSafe for self::Foo2 {}
 
 impl ::fbthrift::GetTType for self::Foo2 {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;

@@ -496,6 +496,8 @@ impl ::std::fmt::Debug for self::Val {
 unsafe impl ::std::marker::Send for self::Val {}
 unsafe impl ::std::marker::Sync for self::Val {}
 impl ::std::marker::Unpin for self::Val {}
+impl ::std::panic::RefUnwindSafe for self::Val {}
+impl ::std::panic::UnwindSafe for self::Val {}
 
 impl ::fbthrift::GetTType for self::Val {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -825,6 +827,8 @@ impl ::std::fmt::Debug for self::NonCopyableStruct {
 unsafe impl ::std::marker::Send for self::NonCopyableStruct {}
 unsafe impl ::std::marker::Sync for self::NonCopyableStruct {}
 impl ::std::marker::Unpin for self::NonCopyableStruct {}
+impl ::std::panic::RefUnwindSafe for self::NonCopyableStruct {}
+impl ::std::panic::UnwindSafe for self::NonCopyableStruct {}
 
 impl ::fbthrift::GetTType for self::NonCopyableStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;

@@ -76,6 +76,8 @@ impl ::std::fmt::Debug for self::{{struct:rust_name}} {
 unsafe impl ::std::marker::Send for self::{{struct:rust_name}} {}
 unsafe impl ::std::marker::Sync for self::{{struct:rust_name}} {}
 impl ::std::marker::Unpin for self::{{struct:rust_name}} {}
+impl ::std::panic::RefUnwindSafe for self::{{struct:rust_name}} {}
+impl ::std::panic::UnwindSafe for self::{{struct:rust_name}} {}
 
 impl ::fbthrift::GetTType for self::{{struct:rust_name}} {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;

@@ -48,6 +48,8 @@ impl ::std::fmt::Debug for self::ThereAreNoPascalCaseKeywords {
 unsafe impl ::std::marker::Send for self::ThereAreNoPascalCaseKeywords {}
 unsafe impl ::std::marker::Sync for self::ThereAreNoPascalCaseKeywords {}
 impl ::std::marker::Unpin for self::ThereAreNoPascalCaseKeywords {}
+impl ::std::panic::RefUnwindSafe for self::ThereAreNoPascalCaseKeywords {}
+impl ::std::panic::UnwindSafe for self::ThereAreNoPascalCaseKeywords {}
 
 impl ::fbthrift::GetTType for self::ThereAreNoPascalCaseKeywords {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;

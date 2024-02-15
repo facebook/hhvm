@@ -62,6 +62,8 @@ impl ::std::fmt::Debug for self::CustomException {
 unsafe impl ::std::marker::Send for self::CustomException {}
 unsafe impl ::std::marker::Sync for self::CustomException {}
 impl ::std::marker::Unpin for self::CustomException {}
+impl ::std::panic::RefUnwindSafe for self::CustomException {}
+impl ::std::panic::UnwindSafe for self::CustomException {}
 
 impl ::fbthrift::GetTType for self::CustomException {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;

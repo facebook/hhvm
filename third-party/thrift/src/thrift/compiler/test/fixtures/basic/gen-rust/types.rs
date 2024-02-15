@@ -339,6 +339,8 @@ impl ::std::fmt::Debug for self::MyStruct {
 unsafe impl ::std::marker::Send for self::MyStruct {}
 unsafe impl ::std::marker::Sync for self::MyStruct {}
 impl ::std::marker::Unpin for self::MyStruct {}
+impl ::std::panic::RefUnwindSafe for self::MyStruct {}
+impl ::std::panic::UnwindSafe for self::MyStruct {}
 
 impl ::fbthrift::GetTType for self::MyStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -528,6 +530,8 @@ impl ::std::fmt::Debug for self::MyDataItem {
 unsafe impl ::std::marker::Send for self::MyDataItem {}
 unsafe impl ::std::marker::Sync for self::MyDataItem {}
 impl ::std::marker::Unpin for self::MyDataItem {}
+impl ::std::panic::RefUnwindSafe for self::MyDataItem {}
+impl ::std::panic::UnwindSafe for self::MyDataItem {}
 
 impl ::fbthrift::GetTType for self::MyDataItem {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -769,6 +773,8 @@ impl ::std::fmt::Debug for self::ReservedKeyword {
 unsafe impl ::std::marker::Send for self::ReservedKeyword {}
 unsafe impl ::std::marker::Sync for self::ReservedKeyword {}
 impl ::std::marker::Unpin for self::ReservedKeyword {}
+impl ::std::panic::RefUnwindSafe for self::ReservedKeyword {}
+impl ::std::panic::UnwindSafe for self::ReservedKeyword {}
 
 impl ::fbthrift::GetTType for self::ReservedKeyword {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;

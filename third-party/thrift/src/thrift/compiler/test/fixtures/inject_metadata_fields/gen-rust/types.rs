@@ -80,6 +80,8 @@ impl ::std::fmt::Debug for self::Fields {
 unsafe impl ::std::marker::Send for self::Fields {}
 unsafe impl ::std::marker::Sync for self::Fields {}
 impl ::std::marker::Unpin for self::Fields {}
+impl ::std::panic::RefUnwindSafe for self::Fields {}
+impl ::std::panic::UnwindSafe for self::Fields {}
 
 impl ::fbthrift::GetTType for self::Fields {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -173,6 +175,8 @@ impl ::std::fmt::Debug for self::FieldsInjectedToEmptyStruct {
 unsafe impl ::std::marker::Send for self::FieldsInjectedToEmptyStruct {}
 unsafe impl ::std::marker::Sync for self::FieldsInjectedToEmptyStruct {}
 impl ::std::marker::Unpin for self::FieldsInjectedToEmptyStruct {}
+impl ::std::panic::RefUnwindSafe for self::FieldsInjectedToEmptyStruct {}
+impl ::std::panic::UnwindSafe for self::FieldsInjectedToEmptyStruct {}
 
 impl ::fbthrift::GetTType for self::FieldsInjectedToEmptyStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -278,6 +282,8 @@ impl ::std::fmt::Debug for self::FieldsInjectedToStruct {
 unsafe impl ::std::marker::Send for self::FieldsInjectedToStruct {}
 unsafe impl ::std::marker::Sync for self::FieldsInjectedToStruct {}
 impl ::std::marker::Unpin for self::FieldsInjectedToStruct {}
+impl ::std::panic::RefUnwindSafe for self::FieldsInjectedToStruct {}
+impl ::std::panic::UnwindSafe for self::FieldsInjectedToStruct {}
 
 impl ::fbthrift::GetTType for self::FieldsInjectedToStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -396,6 +402,8 @@ impl ::std::fmt::Debug for self::FieldsInjectedWithIncludedStruct {
 unsafe impl ::std::marker::Send for self::FieldsInjectedWithIncludedStruct {}
 unsafe impl ::std::marker::Sync for self::FieldsInjectedWithIncludedStruct {}
 impl ::std::marker::Unpin for self::FieldsInjectedWithIncludedStruct {}
+impl ::std::panic::RefUnwindSafe for self::FieldsInjectedWithIncludedStruct {}
+impl ::std::panic::UnwindSafe for self::FieldsInjectedWithIncludedStruct {}
 
 impl ::fbthrift::GetTType for self::FieldsInjectedWithIncludedStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;

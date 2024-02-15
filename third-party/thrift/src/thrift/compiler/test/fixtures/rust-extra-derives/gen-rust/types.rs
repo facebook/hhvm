@@ -43,6 +43,8 @@ impl ::std::fmt::Debug for self::WithCustomDerives {
 unsafe impl ::std::marker::Send for self::WithCustomDerives {}
 unsafe impl ::std::marker::Sync for self::WithCustomDerives {}
 impl ::std::marker::Unpin for self::WithCustomDerives {}
+impl ::std::panic::RefUnwindSafe for self::WithCustomDerives {}
+impl ::std::panic::UnwindSafe for self::WithCustomDerives {}
 
 impl ::fbthrift::GetTType for self::WithCustomDerives {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;

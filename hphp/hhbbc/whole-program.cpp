@@ -25,6 +25,12 @@
 #include <folly/Memory.h>
 #include <folly/ScopeGuard.h>
 
+#ifdef HHVM_FACEBOOK
+#include <strobelight/strobemeta/strobemeta_frames.h>
+#else
+#define SET_FRAME_METADATA(...)
+#endif
+
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
@@ -301,6 +307,7 @@ void analyze_iteratively(Index& index) {
         // We have a Optional just to keep the result type
         // DefaultConstructible.
         [&] (const WorkItem& wi) -> Optional<WorkResult> {
+          SET_FRAME_METADATA(wi.ctx.unit->toCppString());
           switch (wi.type) {
           case WorkType::Func: {
             ++total_funcs;
@@ -437,6 +444,7 @@ void final_pass(Index& index,
   parallel::for_each(
     index.program().units,
     [&] (const std::unique_ptr<php::Unit>& unit) {
+      SET_FRAME_METADATA(unit->filename->toCppString());
       // optimize_func can remove 86*init methods from classes, so we
       // have to save the contexts for now.
       for (auto const& context : all_unit_contexts(index, *unit)) {

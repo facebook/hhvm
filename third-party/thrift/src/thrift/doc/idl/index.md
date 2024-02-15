@@ -811,7 +811,6 @@ map<string, list<i32>> AMap = {
 }
 ```
 
-NOTE: We cannot write constants of struct, union, or exception types.
 
 ## Types
 
@@ -879,7 +878,7 @@ The element, key, and value types can be any Thrift type, including nested conta
 default_value ::=  "=" initializer
 ```
 
-All fields of struct types and exception types have a default value. This is either explicitly provided via the syntax shown above, or (if not explicitly provided) is the natural default value for that type. The natural default values for listed below:
+All fields of struct types and exception types have a default value. This is either explicitly provided via the syntax shown above, or (if not explicitly provided) is the natural default value for that type. The natural default values for Thrift types are listed below:
 
 * bool: `false`
 * Integer types: 0
@@ -887,14 +886,16 @@ All fields of struct types and exception types have a default value. This is eit
 * float and double: 0.0
 * string and binary: empty string
 * containers: empty container
-* structs: language dependent. Empty struct for C++, null/None for Hack/python/Java
+* structs: language-dependent: empty struct for C++, null/None for Hack/Python/Java
 
 Default values are used as follows:
 
 * To initialize required fields (fields with the qualifier `required`).
 * As the value used to serialize an unqualified field (a field with no qualifier) when this field is *not present*.
 
-NOTE: The concepts "required", "unqualified", and "not present" are described in more detail below.
+:::note
+The concepts "required", "unqualified", and "not present" are described in more detail below.
+:::
 
 In addition, default values can be used in generated code to provide default behaviors when fields have not been initialized. For example, the method `getValueOrDefault()` can be provided for a field that returns the value of the field when present, and the default value when not present.
 
@@ -936,7 +937,9 @@ There are four kinds of fields that may be part of a struct type (or exception t
 * *terse*: Filed is annotated with the structured annotation `@thrift.TerseWrite`.
 * *unqualified*: Field is not qualified with either of these reserved words or `@thrift.TerseWrite`.
 
-NOTE: Union types may only have optional fields.
+:::note
+Union types may only have optional fields.
+:::
 
 ```
 include "thrift/annotation/thrift.thrift"

@@ -38,8 +38,9 @@ For non-primitive types: In languages where fields may be set to null (`thrift-p
 
 For primitive types: Fields must be set to `optional` to be nullable in PHP.
 
-NOTE: In thrift-py-deprecated, [**all** fields are nullable](https://www.internalfb.com/intern/wiki/Thrift_in_Python/Migrate_from_thrift-py/Types/#unqualified-fields-in-th).
-
+:::note
+In thrift-py-deprecated, [**all** fields are nullable](https://www.internalfb.com/intern/wiki/Thrift_in_Python/Migrate_from_thrift-py/Types/#unqualified-fields-in-th).
+:::
 
 #### Terse Writes (Compiler Option)
 

@@ -107,7 +107,9 @@ struct S {
 }
 ```
 
-**Warning**: unrecognized unstructured annotations are *silently ignored*. So, for example, passing `cpp2.adapter` does absolutely nothing (the correct syntax is `cpp.adapter`). This is not a problem for structured annotation.
+:::caution
+Unrecognized unstructured annotations are *silently ignored*. So, for example, passing `cpp2.adapter` does absolutely nothing (the correct syntax is `cpp.adapter`). This is not a problem for structured annotation.
+:::
 
 ## Standard Annotations
 

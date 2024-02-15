@@ -7,12 +7,11 @@ slug: /
 Thrift is a serialization and [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call)
 (Remote Procedure Call) framework for service communication. Thrift enables
 these features in all major languages with strong support for C++, Python, Hack,
-and Java. Most services at Facebook are written using Thrift for RPC, and some
+and Java. Most services at Meta are written using Thrift for RPC, and some
 storage systems use Thrift for serializing records on disk.
 Our version, [FBThrift](https://github.com/facebook/fbthrift), is based on
-[Apache Thrift](https://thrift.apache.org/), and is open sourced.
-
-At a high level, Thrift is three major things:
+[Apache Thrift](https://thrift.apache.org/), and is open sourced. At a high level, Thrift
+has three major components:
 
 ## A Code Generator
 

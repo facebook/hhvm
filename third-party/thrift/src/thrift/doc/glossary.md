@@ -4,18 +4,18 @@ Terms that have a special meaning or interpretation in Thrift.
 
 ## Specification Requirement Levels
 
-Key terms used consistency throughout this specifications, to indicate the level
+Key terms used consistently throughout this specification to indicate the level
 of requirement:
 
 - **must** / **must not** - required
 - **should** / **should not** - strongly encouraged
 - **may** - optional
 
-For more detailed meaning, see [rfc2119](https://www.ietf.org/rfc/rfc2119.txt).
+For more details regarding the meaning of these terms, see [rfc2119](https://www.ietf.org/rfc/rfc2119.txt).
 
 ## Kinds of Types
 
-Terms used classify types.
+Terms used to classify types.
 
 - *Thrift type* - The type specified in the Thrift IDL, for example `i32`.
 - *native type* - A language specific type. For example `int` and `java.lang.Integer` are native types in Java.
@@ -23,7 +23,7 @@ Terms used classify types.
 - *non-standard type* - A native type that does not have built-in support in the Thrift runtime. For example `folly::dynamic` in C++.
 - *default type* - The standard type used by Thrift when no override is specified.
 - *adapted type* - A native type that is convertible to/from an underlying type when used with a Thrift library.
-- *underlying type* - The underlying type of an adapted type, is usually the standard type begin adapted, except when multiple adapters are applied. In which case, underlying type is the adapted type of the previous adapter.
+- *underlying type* - The underlying type of an adapted type, is usually the standard type being adapted, except when multiple adapters are applied. In which case, underlying type is the adapted type of the previous adapter.
 
 ## Release States
 

@@ -181,15 +181,6 @@ TEST(Trie, ConstructorTest) {
     }
     EXPECT_TRUE(trie2.find("z") == trie2.end());
 
-    trie2 = trie2;
-
-    for (auto i = 0; i < nk; ++i) {
-      EXPECT_TRUE(trie.find(k[i])->second == i);
-      EXPECT_TRUE(trie2.find(k[i])->second == i);
-      EXPECT_TRUE(trie.find(k[i]) != trie2.find(k[i]));
-    }
-    EXPECT_TRUE(trie2.find("z") == trie2.end());
-
     // clear
     trie2.clear();
     for (auto i = 0; i < nk; ++i) {

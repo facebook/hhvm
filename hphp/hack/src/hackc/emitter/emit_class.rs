@@ -726,10 +726,10 @@ pub fn emit_class<'a, 'arena, 'decl>(
         let default_label = emitter.label_gen_mut().next_regular();
         let mut cases = Vec::with_capacity(initialized_constants.len() + 1);
         for (name, label, _) in &initialized_constants {
-            let n: &str = alloc.alloc_str((*name).unsafe_as_str());
-            cases.push((n, *label))
+            let pattern = alloc.alloc_slice_copy(name.as_bytes()) as &[u8];
+            cases.push((pattern, *label))
         }
-        cases.push((alloc.alloc_str("default"), default_label));
+        cases.push((alloc.alloc_slice_copy(b"default"), default_label));
         let pos = &ast_class.span;
         let instrs = InstrSeq::gather(vec![
             emit_pos::emit_pos(pos),

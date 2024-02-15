@@ -385,9 +385,9 @@ pub mod instr {
         silence(local, SilenceOp::Start)
     }
 
-    pub fn s_switch<'a>(cases: Vec<(&'a str, Label)>) -> InstrSeq<'a> {
+    pub fn s_switch<'a>(cases: Vec<(&'a [u8], Label)>) -> InstrSeq<'a> {
         let targets = Vec::from_iter(cases.iter().map(|(_, target)| *target)).into();
-        let cases = Vec::from_iter(cases.into_iter().map(|(s, _)| Str::from(s))).into();
+        let cases = Vec::from_iter(cases.into_iter().map(|(s, _)| Str::new(s))).into();
         instr(Instruct::Opcode(Opcode::SSwitch(cases, targets)))
     }
 

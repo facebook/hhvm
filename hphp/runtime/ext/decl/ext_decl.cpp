@@ -175,7 +175,7 @@ std::pair<SHA1, std::optional<std::string>> computeSHA1(
   if (edenHash.has_value()) {
     return std::make_pair(edenHash.value(), std::nullopt);
   }
-  auto const text = Decl::readFile(filePath);
+  auto text = Decl::readFile(filePath);
   auto sha1 = HPHP::string_sha1(text);
   return std::make_pair(SHA1{sha1}, std::move(text));
 }

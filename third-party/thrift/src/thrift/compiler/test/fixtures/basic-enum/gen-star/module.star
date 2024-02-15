@@ -1,3 +1,4 @@
+__StarlarkEnum__ = record(name=str.type, value=int.type)
 __EmptyEnum_enum__ = record(
 )
 
@@ -5,59 +6,59 @@ EmptyEnum = __EmptyEnum_enum__(
 )
 
 __MyEnum_enum__ = record(
-    ONE = int.type,
-    TWO = int.type,
+    ONE = __StarlarkEnum__.type,
+    TWO = __StarlarkEnum__.type,
 )
 
 MyEnum = __MyEnum_enum__(
-    ONE = 1,
-    TWO = 2,
+    ONE = __StarlarkEnum__(name="ONE", value=1),
+    TWO = __StarlarkEnum__(name="TWO", value=2),
 )
 
 __MyBigEnum_enum__ = record(
-    UNKNOWN = int.type,
-    ONE = int.type,
-    TWO = int.type,
-    THREE = int.type,
-    FOUR = int.type,
-    FIVE = int.type,
-    SIX = int.type,
-    SEVEN = int.type,
-    EIGHT = int.type,
-    NINE = int.type,
-    TEN = int.type,
-    ELEVEN = int.type,
-    TWELVE = int.type,
-    THIRTEEN = int.type,
-    FOURTEEN = int.type,
-    FIFTEEN = int.type,
-    SIXTEEN = int.type,
-    SEVENTEEN = int.type,
-    EIGHTEEN = int.type,
-    NINETEEN = int.type,
+    UNKNOWN = __StarlarkEnum__.type,
+    ONE = __StarlarkEnum__.type,
+    TWO = __StarlarkEnum__.type,
+    THREE = __StarlarkEnum__.type,
+    FOUR = __StarlarkEnum__.type,
+    FIVE = __StarlarkEnum__.type,
+    SIX = __StarlarkEnum__.type,
+    SEVEN = __StarlarkEnum__.type,
+    EIGHT = __StarlarkEnum__.type,
+    NINE = __StarlarkEnum__.type,
+    TEN = __StarlarkEnum__.type,
+    ELEVEN = __StarlarkEnum__.type,
+    TWELVE = __StarlarkEnum__.type,
+    THIRTEEN = __StarlarkEnum__.type,
+    FOURTEEN = __StarlarkEnum__.type,
+    FIFTEEN = __StarlarkEnum__.type,
+    SIXTEEN = __StarlarkEnum__.type,
+    SEVENTEEN = __StarlarkEnum__.type,
+    EIGHTEEN = __StarlarkEnum__.type,
+    NINETEEN = __StarlarkEnum__.type,
 )
 
 MyBigEnum = __MyBigEnum_enum__(
-    UNKNOWN = 0,
-    ONE = 1,
-    TWO = 2,
-    THREE = 3,
-    FOUR = 4,
-    FIVE = 5,
-    SIX = 6,
-    SEVEN = 7,
-    EIGHT = 8,
-    NINE = 9,
-    TEN = 10,
-    ELEVEN = 11,
-    TWELVE = 12,
-    THIRTEEN = 13,
-    FOURTEEN = 14,
-    FIFTEEN = 15,
-    SIXTEEN = 16,
-    SEVENTEEN = 17,
-    EIGHTEEN = 18,
-    NINETEEN = 19,
+    UNKNOWN = __StarlarkEnum__(name="UNKNOWN", value=0),
+    ONE = __StarlarkEnum__(name="ONE", value=1),
+    TWO = __StarlarkEnum__(name="TWO", value=2),
+    THREE = __StarlarkEnum__(name="THREE", value=3),
+    FOUR = __StarlarkEnum__(name="FOUR", value=4),
+    FIVE = __StarlarkEnum__(name="FIVE", value=5),
+    SIX = __StarlarkEnum__(name="SIX", value=6),
+    SEVEN = __StarlarkEnum__(name="SEVEN", value=7),
+    EIGHT = __StarlarkEnum__(name="EIGHT", value=8),
+    NINE = __StarlarkEnum__(name="NINE", value=9),
+    TEN = __StarlarkEnum__(name="TEN", value=10),
+    ELEVEN = __StarlarkEnum__(name="ELEVEN", value=11),
+    TWELVE = __StarlarkEnum__(name="TWELVE", value=12),
+    THIRTEEN = __StarlarkEnum__(name="THIRTEEN", value=13),
+    FOURTEEN = __StarlarkEnum__(name="FOURTEEN", value=14),
+    FIFTEEN = __StarlarkEnum__(name="FIFTEEN", value=15),
+    SIXTEEN = __StarlarkEnum__(name="SIXTEEN", value=16),
+    SEVENTEEN = __StarlarkEnum__(name="SEVENTEEN", value=17),
+    EIGHTEEN = __StarlarkEnum__(name="EIGHTEEN", value=18),
+    NINETEEN = __StarlarkEnum__(name="NINETEEN", value=19),
 )
 
 kOne = MyEnum.ONE

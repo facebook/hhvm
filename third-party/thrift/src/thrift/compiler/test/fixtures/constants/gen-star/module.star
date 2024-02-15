@@ -1,3 +1,4 @@
+__StarlarkEnum__ = record(name=str.type, value=int.type)
 __EmptyEnum_enum__ = record(
 )
 
@@ -5,31 +6,31 @@ EmptyEnum = __EmptyEnum_enum__(
 )
 
 __City_enum__ = record(
-    NYC = int.type,
-    MPK = int.type,
-    SEA = int.type,
-    LON = int.type,
+    NYC = __StarlarkEnum__.type,
+    MPK = __StarlarkEnum__.type,
+    SEA = __StarlarkEnum__.type,
+    LON = __StarlarkEnum__.type,
 )
 
 City = __City_enum__(
-    NYC = 0,
-    MPK = 1,
-    SEA = 2,
-    LON = 3,
+    NYC = __StarlarkEnum__(name="NYC", value=0),
+    MPK = __StarlarkEnum__(name="MPK", value=1),
+    SEA = __StarlarkEnum__(name="SEA", value=2),
+    LON = __StarlarkEnum__(name="LON", value=3),
 )
 
 __Company_enum__ = record(
-    FACEBOOK = int.type,
-    WHATSAPP = int.type,
-    OCULUS = int.type,
-    INSTAGRAM = int.type,
+    FACEBOOK = __StarlarkEnum__.type,
+    WHATSAPP = __StarlarkEnum__.type,
+    OCULUS = __StarlarkEnum__.type,
+    INSTAGRAM = __StarlarkEnum__.type,
 )
 
 Company = __Company_enum__(
-    FACEBOOK = 0,
-    WHATSAPP = 1,
-    OCULUS = 2,
-    INSTAGRAM = 3,
+    FACEBOOK = __StarlarkEnum__(name="FACEBOOK", value=0),
+    WHATSAPP = __StarlarkEnum__(name="WHATSAPP", value=1),
+    OCULUS = __StarlarkEnum__(name="OCULUS", value=2),
+    INSTAGRAM = __StarlarkEnum__(name="INSTAGRAM", value=3),
 )
 
 myInt = 1337

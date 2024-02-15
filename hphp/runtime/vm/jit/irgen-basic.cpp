@@ -585,6 +585,7 @@ void emitBreakTraceHint(IRGS&)     {}
 
 void emitResolveClass(IRGS& env, const StringData* name) {
   auto const cls = ldCls(env, cns(env, name), LdClsFallback::FATAL_RESOLVE_CLASS);
+  emitModuleBoundaryCheck(env, cls, false);
   push(env, cls);
 }
 

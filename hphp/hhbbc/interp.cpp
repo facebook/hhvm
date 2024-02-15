@@ -4318,7 +4318,9 @@ void in(ISS& env, const bc::ResolveClass& op) {
     unreachable(env);
     return;
   }
-  effect_free(env);
+  if (module_check_always_passes(env, *cls)) {
+    effect_free(env);
+  }
   push(env, clsExact(*cls));
 }
 

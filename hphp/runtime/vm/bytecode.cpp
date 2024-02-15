@@ -2276,7 +2276,7 @@ OPTBLD_INLINE void iopRaiseClassStringConversionNotice() {
 
 OPTBLD_INLINE void iopResolveClass(Id id) {
   auto const cname = vmfp()->unit()->lookupLitstrId(id);
-  auto const class_ = Class::load(cname);
+  auto const class_ = Class::resolve(cname, vmfp()->func());
   if (class_) vmStack().pushClass(class_);
   else raise_resolve_class_undefined(cname);
 }
@@ -4345,7 +4345,7 @@ OPTBLD_INLINE void iopNewObj() {
 OPTBLD_INLINE void iopNewObjD(Id id) {
   const NamedTypePair &nep =
     vmfp()->func()->unit()->lookupNamedTypePairId(id);
-  auto cls = Class::resolve(nep.second, nep.first, vmfp()->func());
+  auto cls = Class::load(nep.second, nep.first);
   if (cls == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS,
                 vmfp()->func()->unit()->lookupLitstrId(id)->data());

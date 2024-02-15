@@ -1544,12 +1544,10 @@ void emitNewObjD(IRGS& env, const StringData* className) {
   bool const persistentCls = classIsPersistentOrCtxParent(env, cls);
   bool const canInstantiate = cls && isNormalClass(cls) && !isAbstract(cls);
   if (persistentCls && canInstantiate && !cls->hasNativePropHandler()){
-    emitModuleBoundaryCheckKnown(env, cls);
     push(env, allocObjFast(env, cls));
     return;
   }
   if (cls || persistentCls) {
-    emitModuleBoundaryCheckKnown(env, cls);
     push(env, gen(env, AllocObj, cns(env, cls)));
     return;
   }
@@ -1557,7 +1555,6 @@ void emitNewObjD(IRGS& env, const StringData* className) {
                              LdClsCached,
                              LdClsFallbackData::Fatal(),
                              cns(env, className));
-  emitModuleBoundaryCheck(env, cachedCls, false);
   push(env, gen(env, AllocObj, cachedCls));
 }
 

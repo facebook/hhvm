@@ -217,7 +217,10 @@ void setup() {
     otherMetadata[kSerfAppAPIHeader] = "test_api";
     otherMetadata[kSerfOnBehalfOf] = "12345";
     serialize_with_protocol_writer<CompactProtocolWriter>(response);
+    tcompact_responseMetadataHeaders = thriftIOBufQueue.move();
   }
+
+  thriftIOBufQueue.preallocate(1024, 1024);
 }
 
 void do_TCompactRpcMetadataRequestSerializationBaseline() {
@@ -227,7 +230,7 @@ void do_TCompactRpcMetadataRequestSerializationBaseline() {
   request.name() = ManagedStringViewWithConversions(std::move(managedName));
   request.kind() = apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE;
   serialize_with_protocol_writer<CompactProtocolWriter>(request);
-  thriftIOBufQueue.move();
+  thriftIOBufQueue.clearAndTryReuseLargestBuffer();
 }
 
 BENCHMARK(TCompactRpcMetadataRequestSerializationBaseline) {
@@ -289,6 +292,7 @@ void do_TCompactRpcMetadataResponseSerializationBaseline() {
   apache::thrift::ResponseRpcMetadata response;
   response.streamId() = 100;
   serialize_with_protocol_writer<CompactProtocolWriter>(response);
+  thriftIOBufQueue.clearAndTryReuseLargestBuffer();
 }
 
 BENCHMARK(TCompactRpcMetadataResponseSerializationBaseline) {
@@ -378,6 +382,7 @@ void do_TCompactRpcMetadataRequestSerializationWithHeaders() {
   otherMetadata[kSerfAppAPIHeader] = "test_api";
   otherMetadata[kSerfOnBehalfOf] = "12345";
   serialize_with_protocol_writer<CompactProtocolWriter>(request);
+  thriftIOBufQueue.clearAndTryReuseLargestBuffer();
 }
 
 BENCHMARK(TCompactRpcMetadataRequestSerializationHeaders) {
@@ -469,6 +474,7 @@ void do_TCompactRpcMetadataResponseSerializationHeaders() {
   otherMetadata[kSerfAppAPIHeader] = "test_api";
   otherMetadata[kSerfOnBehalfOf] = "12345";
   serialize_with_protocol_writer<CompactProtocolWriter>(response);
+  thriftIOBufQueue.clearAndTryReuseLargestBuffer();
 }
 
 BENCHMARK(TCompactRpcMetadataResponseSerializationHeaders) {
@@ -574,7 +580,21 @@ BENCHMARK(TestWrapping_SbeBaseline) {
   do_SBERpcMetadataRequestSerializationBaseline();
 }
 
-BENCHMARK(TestWrapping_TCompactBaseline) {
+BENCHMARK(TestWrapping_SbeWithAllocation) {
+  auto buffer = folly::IOBuf::create(64);
+  auto metadata =
+      sbe::MessageWrapper<sbe::RequestRpcMetadata, sbe::MessageHeader>();
+  metadata.wrapForEncode(*messageBuffer);
+  metadata->protocol(sbe::ProtocolId::COMPACT);
+  metadata->kind(sbe::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  metadata->otherMetadataCount(0);
+  metadata->putName(name);
+  metadata->putInteractionMetadata(kEmptyString);
+  metadata->putOptionalMetdata(kEmptyString);
+  metadata.completeEncoding(*buffer);
+}
+
+BENCHMARK_RELATIVE(TestWrapping_TCompactBaseline) {
   do_TCompactRpcMetadataRequestSerializationBaseline();
 }
 
@@ -593,12 +613,14 @@ BENCHMARK_RELATIVE(TestWrapping_CompactWriter) {
   CompactProtocolWriter writer;
   writer.setOutput(&thriftIOBufQueue);
   writer.writeBinary(baseRequestMetadata->cloneOne());
+  thriftIOBufQueue.clearAndTryReuseLargestBuffer();
 }
 
 BENCHMARK_RELATIVE(TestWrapping_BinaryWriter) {
   BinaryProtocolWriter writer;
   writer.setOutput(&thriftIOBufQueue);
   writer.writeBinary(baseRequestMetadata->cloneOne());
+  thriftIOBufQueue.clearAndTryReuseLargestBuffer();
 }
 
 template <typename ProtocolWriter>
@@ -606,7 +628,7 @@ void do_ThriftWrapperSerialize() {
   do_SBERpcMetadataRequestSerializationBaseline();
   benchmarks::Wrapper wrapper{};
   wrapper.data() = messageBuffer->cloneOne();
-  serialize_with_protocol_writer<ProtocolWriter>(wrapper);
+  thriftIOBufQueue.clearAndTryReuseLargestBuffer();
 }
 
 BENCHMARK_RELATIVE(TestWrapping_TCompact) {

@@ -79,11 +79,15 @@ void usage() {
   fprintf(
       stderr,
       "  -o dir      Set the output directory for gen-* packages\n"
-      "              (default: current directory)\n");
+      "              (default: current directory).\n"
+      "              At most one of this option (-o) or -out (see below) can\n"
+      "              be specified.\n");
   fprintf(
       stderr,
       "  -out dir    Set the output location for generated files\n"
-      "              (no gen-* folder will be created)\n");
+      "              (no gen-* folder will be created).\n"
+      "              At most one of this option (-out) or -o (see above) can\n"
+      "              be specified.\n");
   fprintf(
       stderr,
       "  -I dir      Add a directory to the list of directories\n"
@@ -111,15 +115,16 @@ void usage() {
       "              STR has the form language[:key1=val1[,key2,[key3=val3]]].\n"
       "              Keys and values are options passed to the generator.\n"
       "              Many options will not require values.\n"
-      "              This option (--gen) can be specified multiple times (eg.\n"
-      "              to generate multiple languages), but must not be\n"
-      "              specified if --skip-gen is also specified (see below).\n");
+      "              If --skip-gen (see below) is specified, then --gen\n"
+      "              cannot be used. Otherwise (i.e., --skip-gen is NOT\n"
+      "              specified), then --gen must be specified at least once,\n"
+      "              and may be specified multiple times (eg. to generate\n"
+      "              multiple languages).");
   fprintf(
       stderr,
       "  --skip-gen  Skip code generation. This is useful, for example, to\n"
       "              parse and validate Thrift IDL without generating code\n"
-      "              for any particular language. If this is specified, --gen\n"
-      "              must be omitted.\n"
+      "              for any particular language.\n"
       "              If --skip-gen is specified, no --gen argument may be\n"
       "              given (see above).\n");
   fprintf(
@@ -352,7 +357,6 @@ std::string parse_args(
       }
 
       std::string out_path = *arg;
-      bool add_gen_dir = (flag == "o");
 
       // Strip out trailing \ on a Windows path
       if (detail::platform_is_windows()) {
@@ -363,7 +367,7 @@ std::string parse_args(
       }
 
       gparams.out_path = std::move(out_path);
-      gparams.add_gen_dir = add_gen_dir;
+      gparams.add_gen_dir = (flag == "o");
     } else {
       fprintf(
           stderr, "!!! Unrecognized option: %s\n\n", arguments[arg_i].c_str());

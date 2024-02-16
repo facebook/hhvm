@@ -56,7 +56,7 @@ use futures::future::FutureExt;
 use futures::stream::StreamExt;
 use serde_bser::de::Bunser;
 use serde_bser::de::SliceRead;
-use serde_bser::value::Value;
+pub use serde_bser::value::Value;
 use thiserror::Error;
 use tokio::io::AsyncRead;
 use tokio::io::AsyncWrite;

@@ -77,7 +77,7 @@
 #include <folly/Optional.h>
 #include <folly/Range.h>
 #include <folly/String.h>
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 
 #include <boost/variant.hpp>
 #include <glog/logging.h>

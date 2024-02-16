@@ -31,8 +31,8 @@
 #include <folly/Conv.h>
 #include <folly/Range.h>
 #include <folly/container/F14Map.h>
-#include <folly/dynamic.h>
 #include <folly/hash/Hash.h>
+#include <folly/json/dynamic.h>
 
 namespace facebook {
 namespace common {

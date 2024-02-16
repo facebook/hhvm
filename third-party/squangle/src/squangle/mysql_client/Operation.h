@@ -49,12 +49,12 @@
 #include <folly/Memory.h>
 #include <folly/String.h>
 #include <folly/Unit.h>
-#include <folly/dynamic.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/AsyncTimeout.h>
 #include <folly/io/async/EventHandler.h>
 #include <folly/io/async/Request.h>
 #include <folly/io/async/SSLContext.h>
+#include <folly/json/dynamic.h>
 #include <folly/ssl/OpenSSLPtrTypes.h>
 #include <folly/stop_watch.h>
 #include "squangle/logger/DBEventLogger.h"

@@ -138,6 +138,7 @@ pub mod {{service:snake}} {
         }
     }
     {{/function:exceptions?}}
+    {{^function:sink?}}
     {{^function:exceptions?}}
     pub type {{function:upcamel}}Error = ::fbthrift::NonthrowingFunctionError;
 
@@ -179,6 +180,7 @@ pub mod {{service:snake}} {
         }
     }
 
+    {{/function:sink?}}
     {{#function:stream?}}
     impl ::std::convert::From<{{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn> for
         ::std::result::Result<{{!

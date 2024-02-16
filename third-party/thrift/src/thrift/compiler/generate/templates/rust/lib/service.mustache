@@ -464,6 +464,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
     }
     {{/function:stream?}}
 
+    {{^function:sink?}}
     {{^function:stream?}}
     #[derive(Clone, Debug)]
     {{/function:stream?}}
@@ -694,7 +695,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
             }}{{/function:void_excluding_interaction?}}
         }
     }
-    {{/function:stream?}}{{!
+    {{/function:stream?}}{{/function:sink?}}{{!
     }}{{/function:starts_interaction?}}{{/service:rustFunctions}}
 }
 {{!newline}}

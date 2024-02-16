@@ -216,52 +216,6 @@ where
         .instrument(::tracing::info_span!("stream", method = "MyInteraction.truthify"))
         .boxed()
     }
-
-    fn _encode_impl(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::EncodeError>> {
-        use ::const_cstr::const_cstr;
-        use ::tracing::Instrument as _;
-        use ::futures::FutureExt as _;
-
-        const_cstr! {
-            SERVICE_NAME = "MyService";
-            SERVICE_METHOD_NAME = "MyService.MyInteraction.encode";
-        }
-        let args = self::Args_MyInteraction_encode {
-            _phantom: ::std::marker::PhantomData,
-        };
-
-        let transport = self.transport();
-
-        // need to do call setup outside of async block because T: Transport isn't Send
-        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteraction.encode", &args) {
-            ::std::result::Result::Ok(res) => res,
-            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-        };
-
-        let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
-            .instrument(::tracing::trace_span!("call", method = "MyInteraction.encode"));
-
-        async move {
-            let reply_env = call.await?;
-
-            let de = P::deserializer(reply_env);
-            let (res, _de): (::std::result::Result<crate::services::my_interaction::EncodeExn, _>, _) =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
-
-            let res = match res {
-                ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
-                ::std::result::Result::Err(aexn) =>
-                    ::std::result::Result::Err(crate::errors::my_interaction::EncodeError::ApplicationException(aexn))
-            };
-            res
-        }
-        .instrument(::tracing::info_span!("stream", method = "MyInteraction.encode"))
-        .boxed()
-    }
 }
 
 pub trait MyInteraction: ::std::marker::Send {
@@ -277,9 +231,6 @@ pub trait MyInteraction: ::std::marker::Send {
         &self,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>>;
 
-    fn encode(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::EncodeError>>;
 }
 
 pub trait MyInteractionExt<T>: MyInteraction
@@ -298,10 +249,6 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>>;
-    fn encode_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::EncodeError>>;
 
     fn transport(&self) -> &T;
 }
@@ -348,20 +295,6 @@ impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_
     }
 }
 
-struct Args_MyInteraction_encode<'a> {
-    _phantom: ::std::marker::PhantomData<&'a ()>,
-}
-
-impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteraction_encode<'a> {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteraction.encode"))]
-    fn write(&self, p: &mut P) {
-        p.write_struct_begin("args");
-        p.write_field_stop();
-        p.write_struct_end();
-    }
-}
-
 impl<P, T, S> MyInteraction for MyInteractionImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -392,14 +325,6 @@ where
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
         let rpc_options = T::RpcOptions::default();
         self._truthify_impl(
-            rpc_options,
-        )
-    }
-    fn encode(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::EncodeError>> {
-        let rpc_options = T::RpcOptions::default();
-        self._encode_impl(
             rpc_options,
         )
     }
@@ -438,14 +363,6 @@ where
             rpc_options,
         )
     }
-    fn encode_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::EncodeError>> {
-        self._encode_impl(
-            rpc_options,
-        )
-    }
 
     fn transport(&self) -> &T {
       self.transport()
@@ -474,12 +391,6 @@ where
         &self,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
         self.as_ref().truthify(
-        )
-    }
-    fn encode(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::EncodeError>> {
-        self.as_ref().encode(
         )
     }
 }
@@ -513,14 +424,6 @@ where
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction::TruthifyStreamError>>, crate::errors::my_interaction::TruthifyError>> {
         <Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self).truthify_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn encode_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::EncodeError>> {
-        <Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self).encode_with_rpc_opts(
             rpc_options,
         )
     }
@@ -823,52 +726,6 @@ where
         .instrument(::tracing::info_span!("stream", method = "MyInteractionFast.truthify"))
         .boxed()
     }
-
-    fn _encode_impl(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::EncodeError>> {
-        use ::const_cstr::const_cstr;
-        use ::tracing::Instrument as _;
-        use ::futures::FutureExt as _;
-
-        const_cstr! {
-            SERVICE_NAME = "MyService";
-            SERVICE_METHOD_NAME = "MyService.MyInteractionFast.encode";
-        }
-        let args = self::Args_MyInteractionFast_encode {
-            _phantom: ::std::marker::PhantomData,
-        };
-
-        let transport = self.transport();
-
-        // need to do call setup outside of async block because T: Transport isn't Send
-        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("MyInteractionFast.encode", &args) {
-            ::std::result::Result::Ok(res) => res,
-            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
-        };
-
-        let call = transport
-            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
-            .instrument(::tracing::trace_span!("call", method = "MyInteractionFast.encode"));
-
-        async move {
-            let reply_env = call.await?;
-
-            let de = P::deserializer(reply_env);
-            let (res, _de): (::std::result::Result<crate::services::my_interaction_fast::EncodeExn, _>, _) =
-                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
-
-            let res = match res {
-                ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
-                ::std::result::Result::Err(aexn) =>
-                    ::std::result::Result::Err(crate::errors::my_interaction_fast::EncodeError::ApplicationException(aexn))
-            };
-            res
-        }
-        .instrument(::tracing::info_span!("stream", method = "MyInteractionFast.encode"))
-        .boxed()
-    }
 }
 
 pub trait MyInteractionFast: ::std::marker::Send {
@@ -884,9 +741,6 @@ pub trait MyInteractionFast: ::std::marker::Send {
         &self,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>>;
 
-    fn encode(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::EncodeError>>;
 }
 
 pub trait MyInteractionFastExt<T>: MyInteractionFast
@@ -905,10 +759,6 @@ where
         &self,
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>>;
-    fn encode_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::EncodeError>>;
 
     fn transport(&self) -> &T;
 }
@@ -955,20 +805,6 @@ impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_
     }
 }
 
-struct Args_MyInteractionFast_encode<'a> {
-    _phantom: ::std::marker::PhantomData<&'a ()>,
-}
-
-impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyInteractionFast_encode<'a> {
-    #[inline]
-    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyInteractionFast.encode"))]
-    fn write(&self, p: &mut P) {
-        p.write_struct_begin("args");
-        p.write_field_stop();
-        p.write_struct_end();
-    }
-}
-
 impl<P, T, S> MyInteractionFast for MyInteractionFastImpl<P, T, S>
 where
     P: ::fbthrift::Protocol,
@@ -999,14 +835,6 @@ where
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
         let rpc_options = T::RpcOptions::default();
         self._truthify_impl(
-            rpc_options,
-        )
-    }
-    fn encode(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::EncodeError>> {
-        let rpc_options = T::RpcOptions::default();
-        self._encode_impl(
             rpc_options,
         )
     }
@@ -1045,14 +873,6 @@ where
             rpc_options,
         )
     }
-    fn encode_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::EncodeError>> {
-        self._encode_impl(
-            rpc_options,
-        )
-    }
 
     fn transport(&self) -> &T {
       self.transport()
@@ -1081,12 +901,6 @@ where
         &self,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
         self.as_ref().truthify(
-        )
-    }
-    fn encode(
-        &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::EncodeError>> {
-        self.as_ref().encode(
         )
     }
 }
@@ -1120,14 +934,6 @@ where
         rpc_options: T::RpcOptions,
     ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::errors::my_interaction_fast::TruthifyStreamError>>, crate::errors::my_interaction_fast::TruthifyError>> {
         <Self as ::std::convert::AsRef<dyn MyInteractionFastExt<T>>>::as_ref(self).truthify_with_rpc_opts(
-            rpc_options,
-        )
-    }
-    fn encode_with_rpc_opts(
-        &self,
-        rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::EncodeError>> {
-        <Self as ::std::convert::AsRef<dyn MyInteractionFastExt<T>>>::as_ref(self).encode_with_rpc_opts(
             rpc_options,
         )
     }

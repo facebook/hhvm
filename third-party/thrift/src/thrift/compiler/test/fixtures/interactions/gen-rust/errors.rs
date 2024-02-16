@@ -187,22 +187,6 @@ pub mod my_interaction {
         }
     }
 
-    pub type EncodeError = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::std::convert::From<crate::services::my_interaction::EncodeExn> for
-        ::std::result::Result<(), EncodeError>
-    {
-        fn from(e: crate::services::my_interaction::EncodeExn) -> Self {
-            match e {
-                crate::services::my_interaction::EncodeExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
-                crate::services::my_interaction::EncodeExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(EncodeError::ApplicationException(aexn)),
-            }
-        }
-    }
-
 }
 
 /// Error definitions for `MyInteractionFast`.
@@ -285,22 +269,6 @@ pub mod my_interaction_fast {
                     ::std::result::Result::Ok(res),
                 crate::services::my_interaction_fast::TruthifyStreamExn::ApplicationException(aexn) =>
                     ::std::result::Result::Err(TruthifyStreamError::ApplicationException(aexn)),
-            }
-        }
-    }
-
-    pub type EncodeError = ::fbthrift::NonthrowingFunctionError;
-
-    impl ::std::convert::From<crate::services::my_interaction_fast::EncodeExn> for
-        ::std::result::Result<(), EncodeError>
-    {
-        fn from(e: crate::services::my_interaction_fast::EncodeExn) -> Self {
-            match e {
-                crate::services::my_interaction_fast::EncodeExn::Success(res) => {
-                    ::std::result::Result::Ok(res)
-                }
-                crate::services::my_interaction_fast::EncodeExn::ApplicationException(aexn) =>
-                    ::std::result::Result::Err(EncodeError::ApplicationException(aexn)),
             }
         }
     }

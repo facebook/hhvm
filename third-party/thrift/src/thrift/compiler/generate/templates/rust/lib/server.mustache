@@ -26,7 +26,7 @@ pub trait {{service:rust_name}}: ::std::marker::Send + ::std::marker::Sync + 'st
 }}{{#service:requestContext?}}
     type RequestContext: ::std::marker::Sync;{{!
 }}{{/service:requestContext?}}
-{{#service:rustFunctions}}{{^function:starts_interaction?}}
+{{#service:rustFunctions}}{{^function:starts_interaction?}}{{^function:sink?}}
     {{#function:docs?}}
     #[doc = {{function:docs}}]
     {{/function:docs?}}
@@ -46,7 +46,7 @@ pub trait {{service:rust_name}}: ::std::marker::Send + ::std::marker::Sync + 'st
             ),
         ))
     }
-{{/function:starts_interaction?}}{{#function:starts_interaction?}}
+{{/function:sink?}}{{/function:starts_interaction?}}{{#function:starts_interaction?}}
     {{#function:docs?}}
     #[doc = {{function:docs}}]
     {{/function:docs?}}
@@ -69,7 +69,7 @@ where
 {{#service:requestContext?}}
     type RequestContext = T::RequestContext;{{!
 }}{{/service:requestContext?}}
-{{#service:rustFunctions}}{{^function:starts_interaction?}}
+{{#service:rustFunctions}}{{^function:starts_interaction?}}{{^function:sink?}}
     async fn {{function:rust_name}}(
         &self,{{!
         }}{{#service:requestContext?}}
@@ -88,7 +88,7 @@ where
             }}{{/function:args}}
         ).await
     }
-{{/function:starts_interaction?}}{{#function:starts_interaction?}}
+{{/function:sink?}}{{/function:starts_interaction?}}{{#function:starts_interaction?}}
     fn {{function:rust_name}}(
         &self,
     ) -> ::anyhow::Result<::std::boxed::Box<dyn {{function:interaction_name}}>> {
@@ -110,7 +110,7 @@ where
 {{#service:requestContext?}}
     type RequestContext = T::RequestContext;{{!
 }}{{/service:requestContext?}}
-{{#service:rustFunctions}}{{^function:starts_interaction?}}
+{{#service:rustFunctions}}{{^function:starts_interaction?}}{{^function:sink?}}
     async fn {{function:rust_name}}(
         &self,{{!
         }}{{#service:requestContext?}}
@@ -129,7 +129,7 @@ where
             }}{{/function:args}}
         ).await
     }
-{{/function:starts_interaction?}}{{#function:starts_interaction?}}
+{{/function:sink?}}{{/function:starts_interaction?}}{{#function:starts_interaction?}}
     fn {{function:rust_name}}(
         &self,
     ) -> ::anyhow::Result<::std::boxed::Box<dyn {{function:interaction_name}}>> {
@@ -160,7 +160,7 @@ pub struct {{service:rust_name}}Processor<P, H, R, RS{{!
     _phantom: ::std::marker::PhantomData<(P, H, R, RS)>,
 }
 
-{{#service:rustFunctions}}{{^function:starts_interaction?}}
+{{#service:rustFunctions}}{{^function:starts_interaction?}}{{^function:sink?}}
 struct Args_{{service:rust_name}}_{{function:name}} {
     {{#function:args}}
     {{field:rust_name}}: {{>lib/fieldtype}},
@@ -201,7 +201,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_{{
     }
 }
 
-{{/function:starts_interaction?}}{{/service:rustFunctions}}
+{{/function:sink?}}{{/function:starts_interaction?}}{{/service:rustFunctions}}
 
 impl<P, H, R, RS{{!
     }}{{#service:extends?}}, SS{{/service:extends?}}{{!
@@ -241,7 +241,7 @@ where
     pub fn into_inner(self) -> H {
         self.service
     }{{!
-    }}{{#service:rustFunctions}}{{^function:starts_interaction?}}
+    }}{{#service:rustFunctions}}{{^function:starts_interaction?}}{{^function:sink?}}
 
     #[::tracing::instrument(skip_all, name = "handler", fields(method = "{{service:name}}.{{function:name}}"))]
     async fn handle_{{function:name}}<'a>(
@@ -418,7 +418,7 @@ where
         Ok(())
         {{/function:stream?}}
     }{{!
-    }}{{/function:starts_interaction?}}{{#function:starts_interaction?}}
+    }}{{/function:sink?}}{{/function:starts_interaction?}}{{#function:starts_interaction?}}
 
     fn handle_{{function:name}}(
         &self,
@@ -458,9 +458,9 @@ where
     #[inline]
     fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
         match name {{>lib/block}}{{!
-            }}{{#service:rustFunctions}}{{^function:starts_interaction?}}
+            }}{{#service:rustFunctions}}{{^function:starts_interaction?}}{{^function:sink?}}
             b"{{#service:interaction?}}{{service:name}}.{{/service:interaction?}}{{function:name}}" => ::std::result::Result::Ok({{function:index}}usize),{{!
-            }}{{/function:starts_interaction?}}{{/service:rustFunctions}}
+            }}{{/function:sink?}}{{/function:starts_interaction?}}{{/service:rustFunctions}}
             _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
         }
     }
@@ -476,11 +476,11 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         match idx {{>lib/block}}{{!
-            }}{{#service:rustFunctions}}{{^function:starts_interaction?}}
+            }}{{#service:rustFunctions}}{{^function:starts_interaction?}}{{^function:sink?}}
             {{function:index}}usize => {
                 self.handle_{{function:name}}(_p, _req, _req_ctxt, _reply_state, _seqid).await
             }{{!
-            }}{{/function:starts_interaction?}}{{/service:rustFunctions}}
+            }}{{/function:sink?}}{{/function:starts_interaction?}}{{/service:rustFunctions}}
             bad => panic!(
                 "{}: unexpected method idx {}",
                 "{{service:rust_name}}Processor",

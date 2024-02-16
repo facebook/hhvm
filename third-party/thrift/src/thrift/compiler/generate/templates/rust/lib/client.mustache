@@ -64,7 +64,7 @@ where
     }
 
     {{#service:rustFunctions}}
-    {{^function:starts_interaction?}}
+    {{^function:starts_interaction?}}{{^function:sink?}}
 
     fn _{{function:name}}_impl(
         &self,{{!
@@ -217,7 +217,7 @@ where
         .instrument(::tracing::info_span!("stream", method = "{{service:name}}.{{function:name}}"))
         .boxed()
     }
-    {{/function:starts_interaction?}}
+    {{/function:sink?}}{{/function:starts_interaction?}}
     {{/service:rustFunctions}}
 }
 
@@ -282,14 +282,14 @@ pub trait {{service:rust_name}}: {{!
     {{#function:docs?}}
     #[doc = {{function:docs}}]
     {{/function:docs?}}
-    {{^function:starts_interaction?}}
+    {{^function:starts_interaction?}}{{^function:sink?}}
     fn {{function:rust_name}}(
         &self,
         {{#function:args}}
         arg_{{field:name}}: {{>lib/arg}},
         {{/function:args}}
     ) -> {{>lib/client_return_type}};
-    {{/function:starts_interaction?}}{{#function:starts_interaction?}}
+    {{/function:sink?}}{{/function:starts_interaction?}}{{#function:starts_interaction?}}
     fn {{function:rust_name}}(
         &self,
     ) -> ::std::result::Result<{{!
@@ -308,7 +308,7 @@ where
     {{#function:docs?}}
     #[doc = {{function:docs}}]
     {{/function:docs?}}
-    {{^function:starts_interaction?}}
+    {{^function:starts_interaction?}}{{^function:sink?}}
     fn {{function:rust_name}}_with_rpc_opts(
         &self,
         {{#function:args}}
@@ -316,12 +316,12 @@ where
         {{/function:args}}
         rpc_options: T::RpcOptions,
     ) -> {{>lib/client_return_type}};
-    {{/function:starts_interaction?}}
+    {{/function:sink?}}{{/function:starts_interaction?}}
     {{/service:rustFunctions}}
 
     fn transport(&self) -> &T;
 }
-{{#service:rustFunctions}}{{^function:starts_interaction?}}
+{{#service:rustFunctions}}{{^function:starts_interaction?}}{{^function:sink?}}
 
 struct Args_{{service:rust_name}}_{{function:name}}<'a> {
     {{#function:args}}
@@ -348,7 +348,7 @@ impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_
         p.write_struct_end();
     }
 }
-{{/function:starts_interaction?}}{{/service:rustFunctions}}
+{{/function:sink?}}{{/function:starts_interaction?}}{{/service:rustFunctions}}
 
 impl<P, T, S> {{service:rust_name}} for {{service:rust_name}}Impl<P, T, S>
 where
@@ -362,7 +362,7 @@ where
 {{>lib/block}}
 
     {{#service:rustFunctions}}
-    {{^function:starts_interaction?}}
+    {{^function:starts_interaction?}}{{^function:sink?}}
     fn {{function:rust_name}}(
         &self,{{!
         }}{{#function:args}}
@@ -377,7 +377,7 @@ where
             rpc_options,
         )
     }
-    {{/function:starts_interaction?}}{{#function:starts_interaction?}}
+    {{/function:sink?}}{{/function:starts_interaction?}}{{#function:starts_interaction?}}
 
     fn {{function:name}}(
         &self,
@@ -411,7 +411,7 @@ where
 {{>lib/block}}
 
     {{#service:rustFunctions}}
-    {{^function:starts_interaction?}}
+    {{^function:starts_interaction?}}{{^function:sink?}}
     fn {{function:rust_name}}_with_rpc_opts(
         &self,{{!
         }}{{#function:args}}
@@ -426,7 +426,7 @@ where
             rpc_options,
         )
     }
-    {{/function:starts_interaction?}}
+    {{/function:sink?}}{{/function:starts_interaction?}}
     {{/service:rustFunctions}}
 
     fn transport(&self) -> &T {
@@ -446,7 +446,7 @@ where
     S: ::std::marker::Send,
 {
     {{#service:rustFunctions}}
-    {{^function:starts_interaction?}}
+    {{^function:starts_interaction?}}{{^function:sink?}}
     fn {{function:rust_name}}(
         &self,{{!
         }}{{#function:args}}
@@ -459,7 +459,7 @@ where
             {{/function:args}}
         )
     }
-    {{/function:starts_interaction?}}{{#function:starts_interaction?}}
+    {{/function:sink?}}{{/function:starts_interaction?}}{{#function:starts_interaction?}}
     fn {{function:rust_name}}(
         &self,
     ) -> ::std::result::Result<{{!
@@ -485,7 +485,7 @@ where
     T: ::fbthrift::Transport,
 {
     {{#service:rustFunctions}}
-    {{^function:starts_interaction?}}
+    {{^function:starts_interaction?}}{{^function:sink?}}
     fn {{function:rust_name}}_with_rpc_opts(
         &self,{{!
         }}{{#function:args}}
@@ -500,7 +500,7 @@ where
             rpc_options,
         )
     }
-    {{/function:starts_interaction?}}
+    {{/function:sink?}}{{/function:starts_interaction?}}
     {{/service:rustFunctions}}
 
     fn transport(&self) -> &T {

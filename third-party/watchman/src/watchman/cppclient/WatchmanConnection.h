@@ -13,11 +13,11 @@
 #include <optional>
 
 #include <folly/ExceptionWrapper.h>
-#include <folly/dynamic.h>
 #include <folly/futures/Future.h>
 #include <folly/io/IOBufQueue.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBase.h>
+#include <folly/json/dynamic.h>
 
 namespace watchman {
 

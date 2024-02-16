@@ -17,7 +17,7 @@
 #include <folly/experimental/io/FsUtil.h>
 #include <folly/init/Init.h>
 #include <folly/io/async/EventBaseThread.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 #include <glog/logging.h>
 
 using namespace folly;

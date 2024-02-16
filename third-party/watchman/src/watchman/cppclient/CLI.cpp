@@ -25,7 +25,7 @@
 
 #include <folly/init/Init.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 
 using namespace folly;
 using namespace watchman;

@@ -18,14 +18,14 @@ doc = false
 [dependencies]
 anyhow = "1.0.75"
 async-trait = "0.1.71"
-codegen_includer_proc_macro = { path = "../../../../../../common/rust/shed/codegen_includer_proc_macro" }
-compat__types = { package = "compat_types", path = "../types" }
+codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }
+compat__types = { package = "compat_types", version = "0.0.1+unstable", path = "../types" }
 const-cstr = "0.3.0"
-fbthrift = { path = "../../.." }
+fbthrift = { version = "0.0.1+unstable", path = "../../.." }
 futures = { version = "0.3.28", features = ["async-await", "compat"] }
-scope_clients = { path = "../../scope/clients" }
-scope_types = { path = "../../scope/types" }
+scope_clients = { version = "0.0.1+unstable", path = "../../scope/clients" }
+scope_types = { version = "0.0.1+unstable", path = "../../scope/types" }
 tracing = "0.1.40"
 
 [build-dependencies]
-thrift_compiler = { path = "../../../../../../common/rust/shed/thrift_compiler" }
+thrift_compiler = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }

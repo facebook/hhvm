@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <limits>
+
 #include <glog/logging.h>
 
 #include <proxygen/lib/http/codec/compress/HPACKHeader.h>
@@ -22,7 +24,7 @@ namespace proxygen {
 
 class QPACKHeaderTable : public HeaderTable {
  public:
-  enum { UNACKED = std::numeric_limits<uint32_t>::max() };
+  static constexpr uint32_t UNACKED = std::numeric_limits<uint32_t>::max();
 
   QPACKHeaderTable(uint32_t capacityVal, bool trackReferences);
 

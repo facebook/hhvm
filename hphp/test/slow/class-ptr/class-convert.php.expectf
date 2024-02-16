@@ -22,8 +22,6 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-
-Notice: Implicit string to Class conversion for classname Props in %s/class-convert.php on line 56
 string(3) "foo"
 class(foo)
 string(3) "foo"
@@ -62,8 +60,6 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-
-Notice: Implicit string to Class conversion for classname Props in %s/class-convert.php on line 56
 string(3) "foo"
 class(foo)
 string(3) "foo"
@@ -102,8 +98,6 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-
-Notice: Implicit string to Class conversion for classname Props in %s/class-convert.php on line 56
 string(3) "foo"
 class(foo)
 string(3) "foo"
@@ -142,8 +136,6 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-
-Notice: Implicit string to Class conversion for classname Props in %s/class-convert.php on line 56
 string(3) "foo"
 class(foo)
 string(3) "foo"
@@ -182,8 +174,6 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-
-Notice: Implicit string to Class conversion for classname Props in %s/class-convert.php on line 56
 string(3) "foo"
 class(foo)
 string(3) "foo"
@@ -222,8 +212,6 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-
-Notice: Implicit string to Class conversion for classname Props in %s/class-convert.php on line 56
 string(3) "foo"
 class(foo)
 string(3) "foo"
@@ -262,8 +250,6 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-
-Notice: Implicit string to Class conversion for classname Props in %s/class-convert.php on line 56
 string(3) "foo"
 class(foo)
 string(3) "foo"
@@ -302,8 +288,6 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-
-Notice: Implicit string to Class conversion for classname Props in %s/class-convert.php on line 56
 string(3) "foo"
 class(foo)
 string(3) "foo"
@@ -342,8 +326,6 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-
-Notice: Implicit string to Class conversion for classname Props in %s/class-convert.php on line 56
 string(3) "foo"
 class(foo)
 string(3) "foo"
@@ -382,8 +364,6 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-
-Notice: Implicit string to Class conversion for classname Props in %s/class-convert.php on line 56
 string(3) "foo"
 class(foo)
 string(3) "foo"

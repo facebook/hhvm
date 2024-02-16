@@ -3462,9 +3462,8 @@ fn emit_known_class_id<'arena, 'decl>(
     id: &ast_defs::Id,
 ) -> InstrSeq<'arena> {
     let cid = hhbc::ClassName::from_ast_name_and_mangle(alloc, &id.1);
-    let cid_string = instr::string_lit(cid.as_ffi_str());
     e.add_class_ref(cid);
-    InstrSeq::gather(vec![cid_string, instr::class_get_c(ClassGetCMode::Normal)])
+    instr::resolve_class(cid)
 }
 
 fn emit_load_class_ref<'a, 'arena, 'decl>(

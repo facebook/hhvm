@@ -23,12 +23,13 @@ class D {
   // TEST-CHECK-BAL: define D.mop_basesc_querym_pt
   // CHECK: define D.mop_basesc_querym_pt($this: *D) : *HackInt {
   // CHECK: #b0:
-  // CHECK:   n0 = $builtins.hhbc_class_get_c($builtins.hack_string("D"))
-  // CHECK:   n1: *HackMixed = load n0.?.bar
-  // CHECK:   n2: *HackMixed = load n1.?.foo
-  // CHECK:   n3 = $builtins.hhbc_is_type_int(n2)
-  // CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
-  // CHECK:   ret n2
+  // CHECK:   n0: *D = load &$this
+  // CHECK:   n1 = $builtins.hack_get_static_class(n0)
+  // CHECK:   n2: *HackMixed = load n1.?.bar
+  // CHECK:   n3: *HackMixed = load n2.?.foo
+  // CHECK:   n4 = $builtins.hhbc_is_type_int(n3)
+  // CHECK:   n5 = $builtins.hhbc_verify_type_pred(n3, n4)
+  // CHECK:   ret n3
   // CHECK: }
   public function mop_basesc_querym_pt(): int {
     return D::$bar->foo;

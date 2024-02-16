@@ -12,12 +12,8 @@ class(Foo)
 Warning: Value returned from function foo() must be of type @N, lazy class given in %s/test/slow/class-ptr/classptr-eager.php on line 26
 class(Bar)
 
-Notice: Implicit string to Class conversion for classname Baz in %s/test/slow/class-ptr/classptr-eager.php on line 39
-
 Warning: Static property 'Baz::f' declared as type @HH\classname, lazy class assigned in %s/test/slow/class-ptr/classptr-eager.php on line 39
 
 Warning: Static property 'Baz::f' declared as type @HH\classname, lazy class assigned in %s/test/slow/class-ptr/classptr-eager.php on line 39
-
-Notice: Implicit string to Class conversion for classname Baz in %s/test/slow/class-ptr/classptr-eager.php on line 40
 class(Bar)
 class(T)

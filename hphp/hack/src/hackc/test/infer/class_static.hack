@@ -8,8 +8,8 @@
 // TEST-CHECK-BAL: define C$static.foo
 // CHECK: define C$static.foo($this: *C$static) : *void {
 // CHECK: #b0:
-// CHECK:   n0 = $builtins.hhbc_class_get_c($builtins.hack_string("C"))
-// CHECK:   n1 = $builtins.hack_set_static_prop($builtins.hack_string("C"), $builtins.hack_string("a"), $builtins.hack_int(6))
+// CHECK:   n0: *C$static = load &$this
+// CHECK:   store n0.?.a <- $builtins.hack_int(6): *HackMixed
 // CHECK:   ret null
 // CHECK: }
 

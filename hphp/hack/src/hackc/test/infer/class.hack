@@ -346,7 +346,7 @@ function dynamic_const(C $c): void {
 // TEST-CHECK-BAL: define $root.cgets
 // CHECK: define $root.cgets($this: *void) : *void {
 // CHECK: #b0:
-// CHECK:   n0 = $builtins.hhbc_class_get_c($builtins.hack_string("C"))
+// CHECK:   n0 = __sil_lazy_class_initialize(<C>)
 // CHECK:   n1 = $builtins.hack_field_get(n0, "prop3")
 // CHECK:   n2 = $root.sink(null, n1)
 // CHECK:   ret null
@@ -360,7 +360,7 @@ function cgets(): void {
 // CHECK: local $0: *void, $1: *void
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(3))
-// CHECK:   n1 = $builtins.hhbc_class_get_c($builtins.hack_string("C"))
+// CHECK:   n1 = __sil_lazy_class_initialize(<C>)
 // CHECK:   n2 = $root.source(null)
 // CHECK:   store &$0 <- n2: *HackMixed
 // CHECK:   store &$1 <- n0: *HackMixed
@@ -370,13 +370,13 @@ function cgets(): void {
 // CHECK:   prune $builtins.hack_is_true(n3)
 // CHECK:   n4: *HackMixed = load &$0
 // CHECK:   store &$1 <- null: *HackMixed
-// CHECK:   n5 = $builtins.hack_set_static_prop($builtins.hack_string("C"), $builtins.hack_string("prop3"), n4)
+// CHECK:   store n1.?.prop3 <- n4: *HackMixed
 // CHECK:   ret null
 // CHECK: #b2:
 // CHECK:   prune ! $builtins.hack_is_true(n3)
-// CHECK:   n6: *HackMixed = load &$0
-// CHECK:   n7: *HackMixed = load &$1
-// CHECK:   n8 = $builtins.hhbc_throw_as_type_struct_exception(n6, n7)
+// CHECK:   n5: *HackMixed = load &$0
+// CHECK:   n6: *HackMixed = load &$1
+// CHECK:   n7 = $builtins.hhbc_throw_as_type_struct_exception(n5, n6)
 // CHECK:   unreachable
 // CHECK: }
 function sets(): void {

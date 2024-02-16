@@ -21,8 +21,8 @@ async-trait = "0.1.71"
 codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }
 const-cstr = "0.3.0"
 fbthrift = { version = "0.0.1+unstable", path = "../../../.." }
-fbthrift_test_if__types = { package = "fbthrift_test_if_types", version = "0.0.1+unstable", path = "../types" }
 futures = { version = "0.3.28", features = ["async-await", "compat"] }
+test_if__types = { package = "test_if_types", version = "0.0.1+unstable", path = "../types" }
 tracing = "0.1.40"
 
 [build-dependencies]

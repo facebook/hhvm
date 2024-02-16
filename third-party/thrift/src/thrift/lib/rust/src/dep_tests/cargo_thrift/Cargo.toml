@@ -21,11 +21,11 @@ async-trait = "0.1.71"
 codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }
 const-cstr = "0.3.0"
 fbthrift = { version = "0.0.1+unstable", path = "../../.." }
-fbthrift_test_if__clients = { package = "fbthrift_test_if_clients", version = "0.0.1+unstable", path = "clients" }
-fbthrift_test_if__services = { package = "fbthrift_test_if_services", version = "0.0.1+unstable", path = "services" }
-fbthrift_test_if__types = { package = "fbthrift_test_if_types", version = "0.0.1+unstable", path = "types" }
 futures = { version = "0.3.28", features = ["async-await", "compat"] }
 ref-cast = "1.0.18"
+test_if__clients = { package = "fbthrift_test_if_clients", version = "0.0.1+unstable", path = "clients" }
+test_if__services = { package = "fbthrift_test_if_services", version = "0.0.1+unstable", path = "services" }
+test_if__types = { package = "test_if_types", version = "0.0.1+unstable", path = "types" }
 thiserror = "1.0.49"
 tracing = "0.1.40"
 tracing-futures = { version = "0.2.5", features = ["futures-03"] }

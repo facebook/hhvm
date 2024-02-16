@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+namespace rust best_crate
+
 struct Foo {
   1: i32 this;
   2: binary that;

@@ -20,6 +20,7 @@ include "thrift/lib/thrift/protocol.thrift"
 include "thrift/lib/thrift/id.thrift"
 
 namespace py3 apache.thrift
+namespace rust thrift_ast
 
 /**
  * Information about a thrift source file.

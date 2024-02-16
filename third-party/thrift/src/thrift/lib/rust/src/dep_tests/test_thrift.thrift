@@ -15,6 +15,7 @@
  */
 
 namespace cpp2 facebook
+namespace rust fbthrift_test_if
 
 struct Small {
   1: i32 num;

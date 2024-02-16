@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+namespace rust interface
+
 struct WrapBinary {
   1: binary data;
 } (rust.exhaustive)

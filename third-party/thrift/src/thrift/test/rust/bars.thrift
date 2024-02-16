@@ -16,6 +16,8 @@
 
 include "thrift/test/rust/foos.thrift"
 
+namespace rust best_crate
+
 enum Bar {
   WAT = 1,
   WOT = 2,

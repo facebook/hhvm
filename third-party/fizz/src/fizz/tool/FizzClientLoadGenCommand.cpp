@@ -16,7 +16,7 @@
 #include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/SSLContext.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 #include <folly/stats/Histogram.h>
 #include <chrono>
 #include <iostream>

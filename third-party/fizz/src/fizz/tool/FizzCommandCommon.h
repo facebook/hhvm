@@ -16,7 +16,7 @@
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/EventHandler.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 
 #include <algorithm>
 #include <cstdint>

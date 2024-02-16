@@ -17,7 +17,7 @@
 #include <chrono>
 #include <vector>
 
-#include <folly/DynamicConverter.h>
+#include <folly/json/DynamicConverter.h>
 #include <folly/portability/GTest.h>
 #include <folly/ssl/OpenSSLPtrTypes.h>
 #include <wangle/client/ssl/SSLSessionCacheData.h>

@@ -20,7 +20,7 @@
 
 #include <folly/Optional.h>
 #include <folly/container/EvictingCacheMap.h>
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 #include <wangle/client/persistence/PersistentCacheCommon.h>
 
 namespace wangle {

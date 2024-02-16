@@ -18,8 +18,8 @@
 
 #include <folly/FileUtil.h>
 #include <folly/Memory.h>
-#include <folly/dynamic.h>
-#include <folly/json.h>
+#include <folly/json/dynamic.h>
+#include <folly/json/json.h>
 #include <wangle/ssl/SSLUtil.h>
 
 using namespace folly;

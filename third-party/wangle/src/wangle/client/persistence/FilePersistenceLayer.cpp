@@ -19,7 +19,7 @@
 #include <exception>
 
 #include <folly/FileUtil.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 #include <folly/portability/Unistd.h>
 
 namespace wangle {

@@ -16,10 +16,10 @@
 
 #pragma once
 
-#include <folly/DynamicConverter.h>
 #include <folly/FileUtil.h>
 #include <folly/ScopeGuard.h>
-#include <folly/json.h>
+#include <folly/json/DynamicConverter.h>
+#include <folly/json/json.h>
 #include <folly/portability/SysTime.h>
 #include <folly/synchronization/Lock.h>
 #include <folly/system/ThreadName.h>

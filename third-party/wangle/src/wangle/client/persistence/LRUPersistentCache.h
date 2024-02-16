@@ -24,7 +24,7 @@
 #include <thread>
 
 #include <folly/Executor.h>
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 #include <folly/synchronization/SaturatingSemaphore.h>
 #include <wangle/client/persistence/LRUInMemoryCache.h>
 #include <wangle/client/persistence/PersistentCache.h>

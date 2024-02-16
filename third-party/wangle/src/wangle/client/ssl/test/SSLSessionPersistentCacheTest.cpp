@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include <folly/DynamicConverter.h>
 #include <folly/Format.h>
 #include <folly/Memory.h>
+#include <folly/json/DynamicConverter.h>
 
 #include <folly/portability/GMock.h>
 

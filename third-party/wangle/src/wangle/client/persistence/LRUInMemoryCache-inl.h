@@ -18,8 +18,8 @@
 
 #include <glog/logging.h>
 
-#include <folly/DynamicConverter.h>
 #include <folly/Likely.h>
+#include <folly/json/DynamicConverter.h>
 #include <folly/synchronization/Lock.h>
 
 namespace wangle {

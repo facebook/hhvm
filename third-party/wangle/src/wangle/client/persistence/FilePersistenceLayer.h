@@ -17,7 +17,7 @@
 #pragma once
 
 #include <folly/FileUtil.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 #include <folly/portability/Unistd.h>
 #include <wangle/client/persistence/LRUPersistentCache.h>
 

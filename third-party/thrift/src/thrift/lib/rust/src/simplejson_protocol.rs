@@ -418,8 +418,11 @@ impl<B: Buf> SimpleJsonProtocolDeserializer<B> {
         for to_check in val {
             let b = self.peek_can_panic();
             if b != *to_check {
-                // TODO(azw): better error messages
-                bail!("Expected {} got {}", to_check, b)
+                bail!(
+                    "Expected '{}' got '{}'",
+                    char::from(*to_check),
+                    char::from(b)
+                )
             }
             self.advance(1);
         }
@@ -490,7 +493,7 @@ impl<B: Buf> SimpleJsonProtocolDeserializer<B> {
         let v: std::result::Result<serde_json::Value, _> = serde_json::from_slice(&ret);
         match v {
             Ok(serde_json::Value::Number(n)) => Ok(n),
-            _ => bail!("invalid number"),
+            _ => bail!("Invalid number"),
         }
     }
 
@@ -532,8 +535,9 @@ impl<B: Buf> SimpleJsonProtocolDeserializer<B> {
                 let mut map = serde_json::Map::new();
                 self.read_struct_begin(|_| ())?;
                 while let Some(b'"') = self.peek() {
-                    let key = self.read_string()?;
-                    self.eat(b":")?;
+                    let key = self.read_string().context("Expected a object key")?;
+                    self.eat(b":")
+                        .context("Expected a colon between object key and value")?;
                     let value = self.read_json_value(max_depth - 1)?;
                     map.insert(key, value);
                     self.read_field_end()?;
@@ -651,7 +655,7 @@ impl<B: Buf> SimpleJsonProtocolDeserializer<B> {
     }
 
     fn read_null(&mut self) -> Result<()> {
-        self.eat(b"null")
+        self.eat(b"null").context("Expected null")
     }
 
     fn check_null(&mut self) -> bool {
@@ -679,12 +683,12 @@ impl<B: Buf> ProtocolReader for SimpleJsonProtocolDeserializer<B> {
     where
         F: FnOnce(&[u8]) -> T,
     {
-        self.eat(b"{")?;
+        self.eat(b"{").context("Expected a start of a struct")?;
         Ok(namefn(&[]))
     }
 
     fn read_struct_end(&mut self) -> Result<()> {
-        self.eat(b"}")?;
+        self.eat(b"}").context("Expected an end of a struct")?;
         Ok(())
     }
 
@@ -700,8 +704,9 @@ impl<B: Buf> ProtocolReader for SimpleJsonProtocolDeserializer<B> {
         }
 
         // Something went wrong if we dont find a string
-        let field_name = self.read_string()?;
-        self.eat(b":")?;
+        let field_name = self.read_string().context("Expected a field name")?;
+        self.eat(b":")
+            .context("Expected a colon between struct key and value")?;
 
         // Did we find a field we know about?
         if let Ok(idx) = fields.binary_search_by_key(&field_name.as_str(), |f| f.name) {
@@ -727,7 +732,7 @@ impl<B: Buf> ProtocolReader for SimpleJsonProtocolDeserializer<B> {
     }
 
     fn read_map_begin(&mut self) -> Result<(TType, TType, Option<usize>)> {
-        self.eat(b"{")?;
+        self.eat(b"{").context("Expected a start of a list")?;
         // Meaningless type, self.skip_inner and deserialize do not depend on it
         Ok((TType::Stop, TType::Stop, None))
     }
@@ -745,7 +750,8 @@ impl<B: Buf> ProtocolReader for SimpleJsonProtocolDeserializer<B> {
     }
 
     fn read_map_value_begin(&mut self) -> Result<()> {
-        self.eat(b":")?;
+        self.eat(b":")
+            .context("Expected a colon between map key and value")?;
         Ok(())
     }
 
@@ -760,12 +766,12 @@ impl<B: Buf> ProtocolReader for SimpleJsonProtocolDeserializer<B> {
     }
 
     fn read_map_end(&mut self) -> Result<()> {
-        self.eat(b"}")?;
+        self.eat(b"}").context("Expected an end of a map")?;
         Ok(())
     }
 
     fn read_list_begin(&mut self) -> Result<(TType, Option<usize>)> {
-        self.eat(b"[")?;
+        self.eat(b"[").context("Expected a start of a list")?;
         Ok((TType::Stop, None))
     }
 
@@ -788,7 +794,7 @@ impl<B: Buf> ProtocolReader for SimpleJsonProtocolDeserializer<B> {
     }
 
     fn read_list_end(&mut self) -> Result<()> {
-        self.eat(b"]")?;
+        self.eat(b"]").context("Expected an end of a list")?;
         Ok(())
     }
 
@@ -849,7 +855,8 @@ impl<B: Buf> ProtocolReader for SimpleJsonProtocolDeserializer<B> {
 
     fn read_string(&mut self) -> Result<String> {
         self.strip_whitespace();
-        self.eat_only(b"\"")?;
+        self.eat_only(b"\"")
+            .context("Expected a start of a string")?;
         let mut ret = Vec::new();
         ret.push(b'"');
         loop {
@@ -877,7 +884,7 @@ impl<B: Buf> ProtocolReader for SimpleJsonProtocolDeserializer<B> {
                     self.advance(1);
                     ret.push(b);
                 }
-                None => bail!("Expected some char"),
+                None => bail!("Expected the string to continue"),
             }
         }
         ret.push(b'"');
@@ -885,12 +892,12 @@ impl<B: Buf> ProtocolReader for SimpleJsonProtocolDeserializer<B> {
         let v: std::result::Result<serde_json::Value, _> = serde_json::from_slice(&ret);
         match v {
             Ok(serde_json::Value::String(s)) => Ok(s),
-            _ => bail!("invalid string  "),
+            _ => bail!("Invalid string"),
         }
     }
 
     fn read_binary<V: CopyFromBuf>(&mut self) -> Result<V> {
-        self.eat(b"\"")?;
+        self.eat(b"\"").context("Expected a start of a string")?;
         let mut ret = Vec::new();
         loop {
             match self.peek() {
@@ -902,11 +909,11 @@ impl<B: Buf> ProtocolReader for SimpleJsonProtocolDeserializer<B> {
                     self.advance(1);
                     ret.push(b);
                 }
-                None => bail!("Expected some char"),
+                None => bail!("Expected the string to continue"),
             }
         }
         let bin = base64::decode_config(&ret, base64::STANDARD_NO_PAD)
-            .context("the `binary` data in JSON string does not contain valid base64")?;
+            .context("The `binary` data in JSON string does not contain valid base64")?;
         Ok(V::from_vec(bin))
     }
 

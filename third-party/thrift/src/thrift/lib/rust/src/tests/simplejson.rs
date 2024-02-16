@@ -16,6 +16,8 @@
 
 // NOTE: See dep_test/cpp_compat_test.cpp for a comparison
 
+use std::collections::BTreeMap;
+
 use serde_json::json;
 
 use super::BOOL_VALUES;
@@ -224,7 +226,7 @@ fn test_trailing() {
         }
         Err(err) => assert_eq!(
             "Unexpected trailing data after the end of a value",
-            err.to_string(),
+            format!("{:#}", err),
         ),
     }
 }
@@ -235,7 +237,22 @@ fn fail_to_read_object() {
     let mut de = SimpleJsonProtocolDeserializer::new(json);
     let err = serde_json::Value::read(&mut de).unwrap_err();
     assert_eq!(
-        "Expected the following chars: \"}\", not enough bytes remaining",
-        err.to_string()
+        "Expected an end of a struct: Expected the following chars: \"}\", not enough bytes remaining",
+        format!("{:#}", err),
     );
+}
+
+#[test]
+fn test_bad_type() {
+    let json: &[u8] = br#"{"test": 456}"#;
+    match simplejson_protocol::deserialize(json) {
+        Ok(ok) => {
+            let _: BTreeMap<String, String> = ok;
+            panic!("type mismatch is supposed to cause deserialization failure");
+        }
+        Err(err) => assert_eq!(
+            r#"Expected a start of a string: Expected '"' got '4'"#,
+            format!("{:#}", err)
+        ),
+    }
 }

@@ -120,8 +120,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
-        ::std::result::Result::Ok(Self::from(p.read_i32().context("Expected a number indicating enum variant")?))
+        ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
 
@@ -232,8 +231,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
-        ::std::result::Result::Ok(Self::from(p.read_i32().context("Expected a number indicating enum variant")?))
+        ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
 
@@ -452,8 +450,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
-        ::std::result::Result::Ok(Self::from(p.read_i32().context("Expected a number indicating enum variant")?))
+        ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
 
@@ -510,14 +507,13 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("myBigEnum", ::fbthrift::TType::I32, 2),
             ::fbthrift::Field::new("myEnum", ::fbthrift::TType::I32, 1),
         ];
         let mut field_myEnum = ::std::option::Option::None;
         let mut field_myBigEnum = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ()).context("Expected a MyStruct")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {

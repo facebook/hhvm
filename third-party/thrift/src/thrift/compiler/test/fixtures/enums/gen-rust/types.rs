@@ -163,8 +163,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
-        ::std::result::Result::Ok(Self::from(p.read_i32().context("Expected a number indicating enum variant")?))
+        ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
 
@@ -305,8 +304,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
-        ::std::result::Result::Ok(Self::from(p.read_i32().context("Expected a number indicating enum variant")?))
+        ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
 
@@ -429,8 +427,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
-        ::std::result::Result::Ok(Self::from(p.read_i32().context("Expected a number indicating enum variant")?))
+        ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
 
@@ -571,8 +568,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
-        ::std::result::Result::Ok(Self::from(p.read_i32().context("Expected a number indicating enum variant")?))
+        ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
 
@@ -701,8 +697,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
-        ::std::result::Result::Ok(Self::from(p.read_i32().context("Expected a number indicating enum variant")?))
+        ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
 
@@ -825,8 +820,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
-        ::std::result::Result::Ok(Self::from(p.read_i32().context("Expected a number indicating enum variant")?))
+        ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
 
@@ -949,8 +943,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
-        ::std::result::Result::Ok(Self::from(p.read_i32().context("Expected a number indicating enum variant")?))
+        ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
 
@@ -1023,7 +1016,6 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("fine", ::fbthrift::TType::I32, 2),
             ::fbthrift::Field::new("questionable", ::fbthrift::TType::I32, 3),
@@ -1034,7 +1026,7 @@ where
         let mut field_fine = ::std::option::Option::None;
         let mut field_questionable = ::std::option::Option::None;
         let mut field_tags = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ()).context("Expected a SomeStruct")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a SomeStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -1158,7 +1150,6 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("me1_t1", ::fbthrift::TType::I32, 4),
             ::fbthrift::Field::new("me1_t2", ::fbthrift::TType::I32, 6),
@@ -1169,7 +1160,7 @@ where
         let mut field_me3_n3 = ::std::option::Option::None;
         let mut field_me1_t1 = ::std::option::Option::None;
         let mut field_me1_t2 = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ()).context("Expected a MyStruct")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {

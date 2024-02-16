@@ -259,12 +259,11 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("message", ::fbthrift::TType::String, 1),
         ];
         let mut field_message = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ()).context("Expected a Fiery")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Fiery")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -357,12 +356,11 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("sonnet", ::fbthrift::TType::String, 1),
         ];
         let mut field_sonnet = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ()).context("Expected a Serious")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Serious")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -458,14 +456,13 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("error_message", ::fbthrift::TType::String, 1),
             ::fbthrift::Field::new("internal_error_message", ::fbthrift::TType::String, 2),
         ];
         let mut field_error_message = ::std::option::Option::None;
         let mut field_internal_error_message = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ()).context("Expected a ComplexFieldNames")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a ComplexFieldNames")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -565,14 +562,13 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("error_message", ::fbthrift::TType::String, 1),
             ::fbthrift::Field::new("internal_error_message", ::fbthrift::TType::String, 2),
         ];
         let mut field_error_message = ::std::option::Option::None;
         let mut field_internal_error_message = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ()).context("Expected a CustomFieldNames")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a CustomFieldNames")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -672,14 +668,13 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("error_code", ::fbthrift::TType::I32, 2),
             ::fbthrift::Field::new("message", ::fbthrift::TType::String, 1),
         ];
         let mut field_message = ::std::option::Option::None;
         let mut field_error_code = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ()).context("Expected a ExceptionWithPrimitiveField")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a ExceptionWithPrimitiveField")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -779,14 +774,13 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("error_code", ::fbthrift::TType::I32, 2),
             ::fbthrift::Field::new("message_field", ::fbthrift::TType::String, 1),
         ];
         let mut field_message_field = ::std::option::Option::None;
         let mut field_error_code = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ()).context("Expected a ExceptionWithStructuredAnnotation")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a ExceptionWithStructuredAnnotation")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -885,10 +879,9 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
         ];
-        let _ = p.read_struct_begin(|_| ()).context("Expected a Banal")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Banal")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {

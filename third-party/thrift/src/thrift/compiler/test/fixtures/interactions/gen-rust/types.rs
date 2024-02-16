@@ -88,12 +88,11 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("message", ::fbthrift::TType::String, 1),
         ];
         let mut field_message = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ()).context("Expected a CustomException")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a CustomException")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {

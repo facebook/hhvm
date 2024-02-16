@@ -123,8 +123,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
-        ::std::result::Result::Ok(Self::from(p.read_i32().context("Expected a number indicating enum variant")?))
+        ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
 

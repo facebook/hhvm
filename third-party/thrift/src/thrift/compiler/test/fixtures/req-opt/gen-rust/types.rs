@@ -89,7 +89,6 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("myBools", ::fbthrift::TType::List, 3),
             ::fbthrift::Field::new("myInteger", ::fbthrift::TType::I32, 1),
@@ -100,7 +99,7 @@ where
         let mut field_myString = ::std::option::Option::None;
         let mut field_myBools = ::std::option::Option::None;
         let mut field_myNumbers = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ()).context("Expected a Foo")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Foo")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {

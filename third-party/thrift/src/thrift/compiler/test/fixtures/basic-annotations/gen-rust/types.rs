@@ -208,8 +208,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
-        ::std::result::Result::Ok(Self::from(p.read_i32().context("Expected a number indicating enum variant")?))
+        ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
 
@@ -261,12 +260,11 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("name", ::fbthrift::TType::String, 1),
         ];
         let mut field_name = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ()).context("Expected a MyStructNestedAnnotation")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStructNestedAnnotation")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -339,10 +337,9 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
         ];
-        let _ = p.read_struct_begin(|_| ()).context("Expected a MyUnion")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyUnion")?;
         let once = false;
         let alt = ::std::option::Option::None;
         loop {
@@ -468,10 +465,9 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
         ];
-        let _ = p.read_struct_begin(|_| ()).context("Expected a MyException")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyException")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -636,7 +632,6 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("abstract", ::fbthrift::TType::String, 1),
             ::fbthrift::Field::new("annotation_with_quote", ::fbthrift::TType::String, 3),
@@ -657,7 +652,7 @@ where
         let mut field_my_enum = ::std::option::Option::None;
         let mut field_cpp_type_annotation = ::std::option::Option::None;
         let mut field_my_union = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ()).context("Expected a MyStruct")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -883,14 +878,13 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("id", ::fbthrift::TType::I64, 1),
             ::fbthrift::Field::new("password", ::fbthrift::TType::String, 2),
         ];
         let mut field_id = ::std::option::Option::None;
         let mut field_password = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ()).context("Expected a SecretStruct")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a SecretStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {

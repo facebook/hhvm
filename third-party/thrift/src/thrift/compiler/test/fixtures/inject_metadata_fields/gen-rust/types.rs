@@ -106,12 +106,11 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("injected_field", ::fbthrift::TType::String, 100),
         ];
         let mut field_injected_field = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ()).context("Expected a Fields")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Fields")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -202,12 +201,11 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("injected_field", ::fbthrift::TType::String, -1100),
         ];
         let mut field_injected_field = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ()).context("Expected a FieldsInjectedToEmptyStruct")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a FieldsInjectedToEmptyStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -313,14 +311,13 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("injected_field", ::fbthrift::TType::String, -1100),
             ::fbthrift::Field::new("string_field", ::fbthrift::TType::String, 1),
         ];
         let mut field_string_field = ::std::option::Option::None;
         let mut field_injected_field = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ()).context("Expected a FieldsInjectedToStruct")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a FieldsInjectedToStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -444,7 +441,6 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("injected_field", ::fbthrift::TType::String, -1100),
             ::fbthrift::Field::new("injected_structured_annotation_field", ::fbthrift::TType::String, -1101),
@@ -455,7 +451,7 @@ where
         let mut field_injected_field = ::std::option::Option::None;
         let mut field_injected_structured_annotation_field = ::std::option::Option::None;
         let mut field_injected_unstructured_annotation_field = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ()).context("Expected a FieldsInjectedWithIncludedStruct")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a FieldsInjectedWithIncludedStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {

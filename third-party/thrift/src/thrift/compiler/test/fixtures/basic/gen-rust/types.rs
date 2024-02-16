@@ -180,8 +180,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
-        ::std::result::Result::Ok(Self::from(p.read_i32().context("Expected a number indicating enum variant")?))
+        ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
 
@@ -298,8 +297,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
-        ::std::result::Result::Ok(Self::from(p.read_i32().context("Expected a number indicating enum variant")?))
+        ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
 
@@ -397,7 +395,6 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("MyDataField", ::fbthrift::TType::Struct, 3),
             ::fbthrift::Field::new("MyIntField", ::fbthrift::TType::I64, 1),
@@ -418,7 +415,7 @@ where
         let mut field_idempotent = ::std::option::Option::None;
         let mut field_floatSet = ::std::option::Option::None;
         let mut field_no_hack_codegen_field = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ()).context("Expected a MyStruct")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -562,10 +559,9 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
         ];
-        let _ = p.read_struct_begin(|_| ()).context("Expected a MyDataItem")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyDataItem")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -660,14 +656,13 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("floatSet", ::fbthrift::TType::Set, 4),
             ::fbthrift::Field::new("myDataItem", ::fbthrift::TType::Struct, 3),
             ::fbthrift::Field::new("myEnum", ::fbthrift::TType::I32, 1),
             ::fbthrift::Field::new("myStruct", ::fbthrift::TType::Struct, 2),
         ];
-        let _ = p.read_struct_begin(|_| ()).context("Expected a MyUnion")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyUnion")?;
         let mut once = false;
         let mut alt = ::std::option::Option::None;
         loop {
@@ -810,12 +805,11 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("reserved_field", ::fbthrift::TType::I32, 1),
         ];
         let mut field_reserved_field = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ()).context("Expected a ReservedKeyword")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a ReservedKeyword")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -929,11 +923,10 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("reserved_field", ::fbthrift::TType::I32, 1),
         ];
-        let _ = p.read_struct_begin(|_| ()).context("Expected a UnionToBeRenamed")?;
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a UnionToBeRenamed")?;
         let mut once = false;
         let mut alt = ::std::option::Option::None;
         loop {

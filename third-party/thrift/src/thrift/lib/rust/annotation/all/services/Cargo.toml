@@ -16,32 +16,32 @@ doctest = false
 doc = false
 
 [dependencies]
-all__types = { package = "all_types", path = "../types" }
+all__types = { package = "all_types", version = "0.0.1+unstable", path = "../types" }
 anyhow = "1.0.75"
 async-trait = "0.1.71"
-codegen_includer_proc_macro = { path = "../../../../../../common/rust/shed/codegen_includer_proc_macro" }
-compat_services = { path = "../../compat/services" }
-compat_types = { path = "../../compat/types" }
+codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }
+compat_services = { version = "0.0.1+unstable", path = "../../compat/services" }
+compat_types = { version = "0.0.1+unstable", path = "../../compat/types" }
 const-cstr = "0.3.0"
-cpp_services = { path = "../../cpp/services" }
-cpp_types = { path = "../../cpp/types" }
-fbthrift = { path = "../../.." }
+cpp_services = { version = "0.0.1+unstable", path = "../../cpp/services" }
+cpp_types = { version = "0.0.1+unstable", path = "../../cpp/types" }
+fbthrift = { version = "0.0.1+unstable", path = "../../.." }
 futures = { version = "0.3.28", features = ["async-await", "compat"] }
-go_services = { path = "../../go/services" }
-go_types = { path = "../../go/types" }
-hack_services = { path = "../../hack/services" }
-hack_types = { path = "../../hack/types" }
-java_services = { path = "../../java/services" }
-java_types = { path = "../../java/types" }
-python_services = { path = "../../python/services" }
-python_types = { path = "../../python/types" }
-rust_services = { path = "../../rust/services" }
-rust_types = { path = "../../rust/types" }
-scope_services = { path = "../../scope/services" }
-scope_types = { path = "../../scope/types" }
-thrift_services = { path = "../../thrift/services" }
-thrift_types = { path = "../../thrift/types" }
+go_services = { version = "0.0.1+unstable", path = "../../go/services" }
+go_types = { version = "0.0.1+unstable", path = "../../go/types" }
+hack_services = { version = "0.0.1+unstable", path = "../../hack/services" }
+hack_types = { version = "0.0.1+unstable", path = "../../hack/types" }
+java_services = { version = "0.0.1+unstable", path = "../../java/services" }
+java_types = { version = "0.0.1+unstable", path = "../../java/types" }
+python_services = { version = "0.0.1+unstable", path = "../../python/services" }
+python_types = { version = "0.0.1+unstable", path = "../../python/types" }
+rust_services = { version = "0.0.1+unstable", path = "../../rust/services" }
+rust_types = { version = "0.0.1+unstable", path = "../../rust/types" }
+scope_services = { version = "0.0.1+unstable", path = "../../scope/services" }
+scope_types = { version = "0.0.1+unstable", path = "../../scope/types" }
+thrift_services = { version = "0.0.1+unstable", path = "../../thrift/services" }
+thrift_types = { version = "0.0.1+unstable", path = "../../thrift/types" }
 tracing = "0.1.40"
 
 [build-dependencies]
-thrift_compiler = { path = "../../../../../../common/rust/shed/thrift_compiler" }
+thrift_compiler = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }

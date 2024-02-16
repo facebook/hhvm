@@ -18,21 +18,21 @@ doc = false
 [dependencies]
 anyhow = "1.0.75"
 async-trait = "0.1.71"
-codegen_includer_proc_macro = { path = "../../../../../common/rust/shed/codegen_includer_proc_macro" }
+codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }
 const-cstr = "0.3.0"
-fbthrift = { path = "../.." }
+fbthrift = { version = "0.0.1+unstable", path = "../.." }
 futures = { version = "0.3.28", features = ["async-await", "compat"] }
-go__clients = { package = "go_clients", path = "clients" }
-go__services = { package = "go_services", path = "services" }
-go__types = { package = "go_types", path = "types" }
+go__clients = { package = "go_clients", version = "0.0.1+unstable", path = "clients" }
+go__services = { package = "go_services", version = "0.0.1+unstable", path = "services" }
+go__types = { package = "go_types", version = "0.0.1+unstable", path = "types" }
 ref-cast = "1.0.18"
-scope = { path = "../scope" }
+scope = { version = "0.0.1+unstable", path = "../scope" }
 thiserror = "1.0.49"
 tracing = "0.1.40"
 tracing-futures = { version = "0.2.5", features = ["futures-03"] }
 
 [build-dependencies]
-thrift_compiler = { path = "../../../../../common/rust/shed/thrift_compiler" }
+thrift_compiler = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }
 
 [features]
 default = ["thrift_library_unittests_disabled"]

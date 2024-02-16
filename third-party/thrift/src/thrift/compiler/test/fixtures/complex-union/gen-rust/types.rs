@@ -141,6 +141,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("intListValue", ::fbthrift::TType::List, 2),
             ::fbthrift::Field::new("intValue", ::fbthrift::TType::I64, 1),
@@ -149,7 +150,7 @@ where
             ::fbthrift::Field::new("stringValue", ::fbthrift::TType::String, 5),
             ::fbthrift::Field::new("typedefValue", ::fbthrift::TType::Map, 9),
         ];
-        let _ = p.read_struct_begin(|_| ())?;
+        let _ = p.read_struct_begin(|_| ()).context("Expected a ComplexUnion")?;
         let mut once = false;
         let mut alt = ::std::option::Option::None;
         loop {
@@ -292,11 +293,12 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("intListValue", ::fbthrift::TType::List, 2),
             ::fbthrift::Field::new("stringListValue", ::fbthrift::TType::List, 3),
         ];
-        let _ = p.read_struct_begin(|_| ())?;
+        let _ = p.read_struct_begin(|_| ()).context("Expected a ListUnion")?;
         let mut once = false;
         let mut alt = ::std::option::Option::None;
         loop {
@@ -401,11 +403,12 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("binaryData", ::fbthrift::TType::String, 1),
             ::fbthrift::Field::new("stringData", ::fbthrift::TType::String, 2),
         ];
-        let _ = p.read_struct_begin(|_| ())?;
+        let _ = p.read_struct_begin(|_| ()).context("Expected a DataUnion")?;
         let mut once = false;
         let mut alt = ::std::option::Option::None;
         loop {
@@ -528,6 +531,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("intVal", ::fbthrift::TType::I32, 2),
             ::fbthrift::Field::new("strVal", ::fbthrift::TType::String, 1),
@@ -536,7 +540,7 @@ where
         let mut field_strVal = ::std::option::Option::None;
         let mut field_intVal = ::std::option::Option::None;
         let mut field_typedefValue = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ())?;
+        let _ = p.read_struct_begin(|_| ()).context("Expected a Val")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -627,11 +631,12 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("v1", ::fbthrift::TType::Struct, 1),
             ::fbthrift::Field::new("v2", ::fbthrift::TType::Struct, 2),
         ];
-        let _ = p.read_struct_begin(|_| ())?;
+        let _ = p.read_struct_begin(|_| ()).context("Expected a ValUnion")?;
         let mut once = false;
         let mut alt = ::std::option::Option::None;
         loop {
@@ -736,11 +741,12 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("thingOne", ::fbthrift::TType::String, 1),
             ::fbthrift::Field::new("thingTwo", ::fbthrift::TType::String, 2),
         ];
-        let _ = p.read_struct_begin(|_| ())?;
+        let _ = p.read_struct_begin(|_| ()).context("Expected a VirtualComplexUnion")?;
         let mut once = false;
         let mut alt = ::std::option::Option::None;
         loop {
@@ -853,11 +859,12 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("num", ::fbthrift::TType::I64, 1),
         ];
         let mut field_num = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ())?;
+        let _ = p.read_struct_begin(|_| ()).context("Expected a NonCopyableStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -935,10 +942,11 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("s", ::fbthrift::TType::Struct, 1),
         ];
-        let _ = p.read_struct_begin(|_| ())?;
+        let _ = p.read_struct_begin(|_| ()).context("Expected a NonCopyableUnion")?;
         let mut once = false;
         let mut alt = ::std::option::Option::None;
         loop {

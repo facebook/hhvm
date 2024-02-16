@@ -151,7 +151,8 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::std::result::Result::Ok(Self::from(p.read_i32()?))
+        use ::anyhow::Context;
+        ::std::result::Result::Ok(Self::from(p.read_i32().context("Expected a number indicating enum variant")?))
     }
 }
 
@@ -218,6 +219,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("MyDataField", ::fbthrift::TType::Struct, 3),
             ::fbthrift::Field::new("MyIntField", ::fbthrift::TType::I64, 1),
@@ -228,7 +230,7 @@ where
         let mut field_MyStringField = ::std::option::Option::None;
         let mut field_MyDataField = ::std::option::Option::None;
         let mut field_myEnum = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ())?;
+        let _ = p.read_struct_begin(|_| ()).context("Expected a MyStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -326,9 +328,10 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
         ];
-        let _ = p.read_struct_begin(|_| ())?;
+        let _ = p.read_struct_begin(|_| ()).context("Expected a MyDataItem")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -412,12 +415,13 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("myDataItem", ::fbthrift::TType::Struct, 3),
             ::fbthrift::Field::new("myEnum", ::fbthrift::TType::I32, 1),
             ::fbthrift::Field::new("myStruct", ::fbthrift::TType::Struct, 2),
         ];
-        let _ = p.read_struct_begin(|_| ())?;
+        let _ = p.read_struct_begin(|_| ()).context("Expected a MyUnion")?;
         let mut once = false;
         let mut alt = ::std::option::Option::None;
         loop {

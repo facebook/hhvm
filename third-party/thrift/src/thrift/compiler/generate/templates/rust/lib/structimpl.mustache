@@ -138,6 +138,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             {{#struct:fields_by_name}}
             ::fbthrift::Field::new("{{field:name}}", {{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}),
@@ -146,7 +147,7 @@ where
         {{#struct:fields}}
         let mut field_{{field:name}} = ::std::option::Option::None;
         {{/struct:fields}}
-        let _ = p.read_struct_begin(|_| ())?;
+        let _ = p.read_struct_begin(|_| ()).context("Expected a {{struct:name}}")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {

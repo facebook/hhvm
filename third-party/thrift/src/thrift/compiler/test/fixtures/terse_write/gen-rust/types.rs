@@ -306,7 +306,8 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::std::result::Result::Ok(Self::from(p.read_i32()?))
+        use ::anyhow::Context;
+        ::std::result::Result::Ok(Self::from(p.read_i32().context("Expected a number indicating enum variant")?))
     }
 }
 
@@ -359,9 +360,10 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
         ];
-        let _ = p.read_struct_begin(|_| ())?;
+        let _ = p.read_struct_begin(|_| ()).context("Expected a MyStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -506,6 +508,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("binary_field", ::fbthrift::TType::String, 9),
             ::fbthrift::Field::new("bool_field", ::fbthrift::TType::Bool, 1),
@@ -522,7 +525,7 @@ where
             ::fbthrift::Field::new("string_field", ::fbthrift::TType::String, 8),
             ::fbthrift::Field::new("struct_field", ::fbthrift::TType::Struct, 14),
         ];
-        let _ = p.read_struct_begin(|_| ())?;
+        let _ = p.read_struct_begin(|_| ()).context("Expected a MyUnion")?;
         let mut once = false;
         let mut alt = ::std::option::Option::None;
         loop {
@@ -725,11 +728,12 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field1", ::fbthrift::TType::I64, 1),
         ];
         let mut field_field1 = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ())?;
+        let _ = p.read_struct_begin(|_| ()).context("Expected a MyStructWithCustomDefault")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -896,6 +900,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("binary_field", ::fbthrift::TType::String, 9),
             ::fbthrift::Field::new("bool_field", ::fbthrift::TType::Bool, 1),
@@ -928,7 +933,7 @@ where
         let mut field_map_field = ::std::option::Option::None;
         let mut field_struct_field = ::std::option::Option::None;
         let mut field_union_field = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ())?;
+        let _ = p.read_struct_begin(|_| ()).context("Expected a StructLevelTerseStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -1235,6 +1240,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("binary_field", ::fbthrift::TType::String, 23),
             ::fbthrift::Field::new("bool_field", ::fbthrift::TType::Bool, 15),
@@ -1297,7 +1303,7 @@ where
         let mut field_map_field = ::std::option::Option::None;
         let mut field_struct_field = ::std::option::Option::None;
         let mut field_union_field = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ())?;
+        let _ = p.read_struct_begin(|_| ()).context("Expected a FieldLevelTerseStruct")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -1720,6 +1726,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("binary_field", ::fbthrift::TType::String, 9),
             ::fbthrift::Field::new("bool_field", ::fbthrift::TType::Bool, 1),
@@ -1750,7 +1757,7 @@ where
         let mut field_set_field = ::std::option::Option::None;
         let mut field_map_field = ::std::option::Option::None;
         let mut field_struct_field = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ())?;
+        let _ = p.read_struct_begin(|_| ()).context("Expected a TerseStructWithCustomDefault")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -1928,6 +1935,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field1", ::fbthrift::TType::I32, 1),
             ::fbthrift::Field::new("field2", ::fbthrift::TType::I32, 2),
@@ -1936,7 +1944,7 @@ where
         let mut field_field1 = ::std::option::Option::None;
         let mut field_field2 = ::std::option::Option::None;
         let mut field_field3 = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ())?;
+        let _ = p.read_struct_begin(|_| ()).context("Expected a AdaptedFields")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -2096,11 +2104,12 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field1", ::fbthrift::TType::I32, 1),
         ];
         let mut field_field1 = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ())?;
+        let _ = p.read_struct_begin(|_| ()).context("Expected a WrappedFields")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
@@ -2216,11 +2225,12 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("msg", ::fbthrift::TType::String, 1),
         ];
         let mut field_msg = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ())?;
+        let _ = p.read_struct_begin(|_| ()).context("Expected a TerseException")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {

@@ -77,13 +77,14 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        use ::anyhow::Context;
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("return", ::fbthrift::TType::Bool, 1),
             ::fbthrift::Field::new("super", ::fbthrift::TType::Bool, 2),
         ];
         let mut field_return = ::std::option::Option::None;
         let mut field_super = ::std::option::Option::None;
-        let _ = p.read_struct_begin(|_| ())?;
+        let _ = p.read_struct_begin(|_| ()).context("Expected a ThereAreNoPascalCaseKeywords")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {

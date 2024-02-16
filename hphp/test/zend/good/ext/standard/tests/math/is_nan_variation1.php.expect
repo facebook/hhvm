@@ -1,17 +1,17 @@
-*** Testing rand() : usage variations ***
+*** Testing is_nan() : usage variations ***
 
 -- Iteration 1 --
-int(%i)
+bool(false)
 
 -- Iteration 2 --
-int(%i)
+bool(false)
 
 -- Iteration 3 --
-int(%i)
+bool(false)
 
 -- Iteration 4 --
-int(%i)
+bool(false)
 
 -- Iteration 5 --
-int(%i)
+bool(false)
 ===Done===

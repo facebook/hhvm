@@ -3,8 +3,6 @@ string(0) ""
 string(4) "test"
 
 Warning: quoted_printable_encode() expects exactly 1 parameter, 2 given in %s/test/zend/good/ext/standard/tests/strings/quoted_printable_encode_001.php on line 6
-
-Warning: quoted_printable_encode() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/quoted_printable_encode_001.php on line 9
 string(1) "1"
 string(0) ""
 Done

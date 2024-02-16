@@ -1,17 +1,17 @@
-*** Testing rand() : usage variations ***
+*** Testing is_finite() : usage variations ***
 
 -- Iteration 1 --
-int(%i)
+bool(true)
 
 -- Iteration 2 --
-int(%i)
+bool(true)
 
 -- Iteration 3 --
-int(%i)
+bool(true)
 
 -- Iteration 4 --
-int(%i)
+bool(true)
 
 -- Iteration 5 --
-int(%i)
+bool(true)
 ===Done===

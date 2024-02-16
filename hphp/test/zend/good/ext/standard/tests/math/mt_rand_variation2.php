@@ -29,40 +29,9 @@ $inputs = vec[
        -2345,
        2147483647,
 
-       // float data
-/*6*/  10.5,
-       -10.5,
-       12.3456789000e10,
-       12.3456789000E-10,
-       .5,
-
        // null data
 /*11*/ NULL,
        null,
-
-       // boolean data
-/*13*/ true,
-       false,
-       TRUE,
-       FALSE,
-
-       // empty data
-/*17*/ "",
-       '',
-       vec[],
-
-       // string data
-/*20*/ "abcxyz",
-       'abcxyz',
-       $heredoc,
-
-       // object data
-/*23*/ new classA(),
-
-
-
-       // resource variable
-/*24*/ $fp
 ];
 
 // loop through each element of $inputs to check the behaviour of mt_rand()

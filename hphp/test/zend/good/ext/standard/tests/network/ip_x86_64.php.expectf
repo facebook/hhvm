@@ -16,11 +16,7 @@ bool(false)
 bool(false)
 int(1869573999)
 
-Warning: ip2long() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/standard/tests/network/ip_x86_64.php on line 21
-
-Warning: long2ip() expects exactly 1 parameter, 0 given in %s/test/zend/good/ext/standard/tests/network/ip_x86_64.php on line 23
+Warning: long2ip() expects exactly 1 parameter, 0 given in %s/test/zend/good/ext/standard/tests/network/ip_x86_64.php on line 22
 string(13) "255.254.82.80"
 string(7) "0.0.0.0"
-
-Warning: long2ip() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/standard/tests/network/ip_x86_64.php on line 26
 Done

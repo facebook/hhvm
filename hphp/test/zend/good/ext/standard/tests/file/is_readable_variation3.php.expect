@@ -1,0 +1,5 @@
+*** Testing is_readable(): usage variations ***
+
+*** Testing is_readable() on miscelleneous filenames ***
+bool(false)
+Done

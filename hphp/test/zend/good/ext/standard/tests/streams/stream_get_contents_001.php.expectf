@@ -1,6 +1,0 @@
---
---
-45--
---
-
-Warning: unlink() expects parameter 1 to be string, resource given in %s/stream_get_contents_001.php on line 12

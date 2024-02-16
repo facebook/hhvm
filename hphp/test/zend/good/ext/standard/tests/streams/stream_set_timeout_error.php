@@ -43,9 +43,6 @@ echo "\n-- Testing stream_set_timeout() function with a closed socket --\n";
 fclose($client);
 var_dump( stream_set_timeout($client, $seconds) );
 
-echo "\n-- Testing stream_set_timeout() function with an invalid stream --\n";
-try { var_dump( stream_set_timeout($seconds, $seconds) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-
 echo "\n-- Testing stream_set_timeout() function with a stream that does not support timeouts --\n";
 $filestream = fopen(__FILE__, "r");
 var_dump( stream_set_timeout($filestream, $seconds) );

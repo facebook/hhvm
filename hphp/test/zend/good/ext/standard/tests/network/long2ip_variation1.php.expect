@@ -1,0 +1,20 @@
+*** Testing long2ip() : usage variation ***
+
+--empty string DQ--
+string(7) "0.0.0.0"
+
+--empty string SQ--
+string(7) "0.0.0.0"
+
+--string DQ--
+string(7) "0.0.0.0"
+
+--string SQ--
+string(7) "0.0.0.0"
+
+--mixed case string--
+string(7) "0.0.0.0"
+
+--heredoc--
+string(7) "0.0.0.0"
+===DONE===

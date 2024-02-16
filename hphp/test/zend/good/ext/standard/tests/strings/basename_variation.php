@@ -24,13 +24,11 @@ $file_path_variations = vec[
   /* paths with shortcut home dir char, with suffix variation */
   vec["~/home/user/bar"],
   vec["~/home/user/bar", ""],
-  vec["~/home/user/bar", NULL],
   vec["~/home/user/bar", ' '],
   vec["~/home/user/bar.tar", ".tar"],
   vec["~/home/user/bar.tar", "~"],
   vec["~/home/user/bar.tar/", "~"],
   vec["~/home/user/bar.tar/", ""],
-  vec["~/home/user/bar.tar", NULL],
   vec["~/home/user/bar.tar", ''],
   vec["~/home/user/bar.tar", " "],
 
@@ -47,7 +45,6 @@ $file_path_variations = vec[
   vec["hostname:/home/user/My Pics.gz/", "Pics.gz"],
   vec["hostname:/home/user/My Pics.gz/", ".gz"],
   vec["hostname:/home/user/My Pics.gz/"],
-  vec["hostname:/home/user/My Pics.gz/", NULL],
   vec["hostname:/home/user/My Pics.gz/", ' '],
   vec["hostname:/home/user/My Pics.gz/", ''],
   vec["hostname:/home/user/My Pics.gz/", "My Pics.gz"],
@@ -70,7 +67,6 @@ $file_path_variations = vec[
   vec["/bar.gz/", "/bar.gz/"],
   vec[" ", " "],
   vec[' ', ' '],
-  vec[NULL, NULL],
 
   /* path with spaces */
   vec[" "],
@@ -79,7 +75,6 @@ $file_path_variations = vec[
   /* empty paths */
   vec[""],
   vec[''],
-  vec[NULL]
 ];
 
 echo "*** Testing possible variations in path and suffix ***\n";

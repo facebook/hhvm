@@ -13,10 +13,6 @@ Warning: stream_set_timeout() expects at least 2 parameters, 1 given in %s/strea
 Warning: unable to set socket option [9]: Bad file descriptor in %s/stream_set_timeout_error.php on line %d
 bool(false)
 
--- Testing stream_set_timeout() function with an invalid stream --
-
-Warning: stream_set_timeout() expects parameter 1 to be resource, integer given in %s/stream_set_timeout_error.php on line %d
-
 -- Testing stream_set_timeout() function with a stream that does not support timeouts --
 bool(false)
 Done

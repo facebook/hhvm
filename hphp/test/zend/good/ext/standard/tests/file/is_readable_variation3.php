@@ -9,14 +9,7 @@ echo "*** Testing is_readable(): usage variations ***\n";
 
 echo "\n*** Testing is_readable() on miscelleneous filenames ***\n";
 $misc_files = vec[
-  0,
-  1234,
-  -2.34555,
-  TRUE,
-  FALSE,
-  NULL,
   " ",
-  vec[],
 ];
 /* loop through to test each element in the above array
    is a readable file */

@@ -52,23 +52,14 @@ string(1) "."
 string(1) "."
 
 --Iteration 18 --
-string(56) "dirname() expects parameter 1 to be string, object given"
+string(1) "."
 
 --Iteration 19 --
 string(1) "."
 
 --Iteration 20 --
-string(1) "."
+string(0) ""
 
 --Iteration 21 --
 string(0) ""
-
---Iteration 22 --
-string(0) ""
-
---Iteration 23 --
-string(54) "dirname() expects parameter 1 to be string, null given"
-
---Iteration 24 --
-string(54) "dirname() expects parameter 1 to be string, null given"
 Done

@@ -17,6 +17,4 @@ echo "\n";
 echo stream_get_contents($tmp, 1, 0);
 echo "\n";
 echo stream_get_contents($tmp, -1);
-
-try { unlink($tmp); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }

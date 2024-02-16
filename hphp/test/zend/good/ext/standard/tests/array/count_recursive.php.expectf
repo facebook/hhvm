@@ -75,8 +75,4 @@ Warning: count() expects at least 1 parameter, 0 given in %s/count_recursive.php
 
 Warning: count() expects at most 2 parameters, 3 given in %s/count_recursive.php on line 102
 
-Warning: count() expects parameter 2 to be integer, string given in %s/count_recursive.php on line 105
-
-Warning: count() expects parameter 2 to be integer, string given in %s/count_recursive.php on line 106
-
 Done

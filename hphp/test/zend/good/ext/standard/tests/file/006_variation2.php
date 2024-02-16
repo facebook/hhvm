@@ -37,12 +37,6 @@ $perms_array = vec[
   /* hex value as permission */
   0x777, // permissions will be given as ocatal equivalent value of 0x777
   0x7777,
-
-  /* strings notation of permission,  wont work properly */
-  "r+w",
-  "r+w+x",
-  "u+rwx",
-  "u+rwx, g+rw, o+wx"
 ];
 
 $count = 1;

@@ -1,0 +1,5 @@
+*** Testing is_executable(): usage variations ***
+
+*** Testing is_executable() on invalid files ***
+bool(false)
+Done

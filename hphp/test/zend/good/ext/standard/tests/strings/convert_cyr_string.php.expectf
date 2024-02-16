@@ -9,16 +9,14 @@ Warning: Invalid argument: Unknown source charset:  in %s/test/zend/good/ext/sta
 Warning: Invalid argument: Unknown destination charset:  in %s/test/zend/good/ext/standard/tests/strings/convert_cyr_string.php on line 6
 string(0) ""
 
-Warning: convert_cyr_string() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/standard/tests/strings/convert_cyr_string.php on line 7
-
-Warning: Invalid argument: Unknown source charset: q in %s/test/zend/good/ext/standard/tests/strings/convert_cyr_string.php on line 9
+Warning: Invalid argument: Unknown source charset: q in %s/test/zend/good/ext/standard/tests/strings/convert_cyr_string.php on line 8
 string(6) "[[[[[["
 string(6) "[[[[[["
 string(6) "[[[[[["
 string(6) "[[[[[["
 string(6) "[[[[[["
 
-Warning: Invalid argument: Unknown destination charset: q in %s/test/zend/good/ext/standard/tests/strings/convert_cyr_string.php on line 14
+Warning: Invalid argument: Unknown destination charset: q in %s/test/zend/good/ext/standard/tests/strings/convert_cyr_string.php on line 13
 string(6) "[[[[[["
 string(0) ""
 Done

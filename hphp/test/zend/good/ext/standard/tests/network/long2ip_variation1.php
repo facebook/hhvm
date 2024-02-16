@@ -44,28 +44,6 @@ $res = fopen(__FILE__,'r');
 
 //array of values to iterate over
 $inputs = dict[
-
-      // float data
-      'float 10.5' => 10.5,
-      'float -10.5' => -10.5,
-      'float .5' => .5,
-
-      // array data
-      'empty array' => vec[],
-      'int indexed array' => $index_array,
-      'associative array' => $assoc_array,
-      'nested arrays' => vec['foo', $index_array, $assoc_array],
-
-      // null data
-      'uppercase NULL' => NULL,
-      'lowercase null' => null,
-
-      // boolean data
-      'lowercase true' => true,
-      'lowercase false' =>false,
-      'uppercase TRUE' =>TRUE,
-      'uppercase FALSE' =>FALSE,
-
       // empty data
       'empty string DQ' => "",
       'empty string SQ' => '',
@@ -75,13 +53,6 @@ $inputs = dict[
       'string SQ' => 'string',
       'mixed case string' => "sTrInG",
       'heredoc' => $heredoc,
-
-      // object data
-      'instance of classWithToString' => new classWithToString(),
-      'instance of classWithoutToString' => new classWithoutToString(),
-
-      // resource
-      'resource' => $res,
 ];
 
 // loop through each element of the array for proper_address

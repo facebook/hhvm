@@ -1,0 +1,6 @@
+*** Testing htmlspecialchars_decode() : usage variations ***
+-- Iterator 1 --
+string(0) ""
+-- Iterator 2 --
+string(0) ""
+===DONE===

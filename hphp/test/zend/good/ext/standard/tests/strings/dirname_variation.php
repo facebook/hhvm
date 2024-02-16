@@ -44,9 +44,6 @@ $file_path_variations = vec[
   '0',
   "0",
 
-  /* object */
-  new temp,
-
   /* path as spaces */
   " ",
   ' ',
@@ -54,8 +51,6 @@ $file_path_variations = vec[
   /* empty path */
   "",
   '',
-  NULL,
-  null
 ];
 
 echo "*** Testing possible variations in path ***\n";

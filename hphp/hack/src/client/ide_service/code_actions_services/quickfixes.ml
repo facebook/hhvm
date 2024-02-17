@@ -40,23 +40,7 @@ let errors_to_quickfixes
     List.map quickfixes ~f:(convert_quickfix path classish_starts)
   in
   let quickfixes_from_refactors =
-    errors_here
-    |> List.bind ~f:(fun (e : Errors.error) ->
-           let e_pos = User_error.get_pos e in
-           let msg = e.User_error.claim in
-           let msg_str = Message.get_message_str msg in
-           match
-             SMap.find_opt
-               msg_str
-               Quickfixes_to_refactors_config
-               .mapping_from_error_message_to_refactors
-           with
-           | Some fn -> fn ~entry e_pos ctx
-           | None -> [])
-    |> List.map
-         ~f:
-           Code_action_types.(
-             (fun Refactor.{ title; edits } -> Quickfix.{ title; edits }))
+    errors_here |> List.bind ~f:(Quickfixes_from_refactors.find ctx entry)
   in
   standard_quickfixes @ quickfixes_from_refactors
 

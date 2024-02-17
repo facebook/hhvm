@@ -7,13 +7,17 @@
  *)
 
 (**
- * Error messages for which the best quickfix is to repurpose
- * a refactor.
+ * Find quickfixes for errors where the quickfix comes from
+ * repurposing a refactor.
  *
  * Note that quickfixes can come from several different places:
+ * - Here. Best for when a quickfix is also useful as a refactor
+ * or edits are expensive to compute
  * - From the full_fidelity parser implementation in Rust
  * - From errors generated from OCaml code
- * - And here.
 *)
-val mapping_from_error_message_to_refactors :
-  Code_action_types.Refactor.find SMap.t
+val find :
+  Provider_context.t ->
+  Provider_context.entry ->
+  Errors.error ->
+  Code_action_types.Quickfix.t list

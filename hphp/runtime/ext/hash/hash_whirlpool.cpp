@@ -32,7 +32,7 @@ struct PhpWhirlpoolCtx {
 
 hash_whirlpool::hash_whirlpool() :
   HashEngine(64, 64, sizeof(PhpWhirlpoolCtx)) {
-};
+}
 
 #define DIGESTBYTES 64
 #define DIGESTBITS  (8*DIGESTBYTES) /* 512 */

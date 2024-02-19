@@ -10,6 +10,7 @@
    regenerate: buck2 run fbcode//glean/schema/gen:gen-schema  -- --ocaml fbcode/hphp/hack/src/typing/write_symbol_info/schema --dir DEST_DIR *)
 
 open Hh_json
+open Core [@@warning "-33"]
 
 
 

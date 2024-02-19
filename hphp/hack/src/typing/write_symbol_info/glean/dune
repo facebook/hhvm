@@ -12,6 +12,7 @@
  src)
 (libraries
  utils_core
+ core
  base64)
 (preprocess
  (pps ppx_deriving.std)))

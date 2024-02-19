@@ -10,6 +10,7 @@
    regenerate: buck2 run fbcode//glean/schema/gen:gen-schema  -- --ocaml fbcode/hphp/hack/src/typing/write_symbol_info/schema --dir DEST_DIR *)
 
 open Hh_json
+open Core [@@warning "-33"]
 
 
 module rec MethodDefinition: sig
@@ -63,19 +64,26 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {declaration; signature; visibility; is_abstract; is_async; is_final; is_static; attributes; type_params; is_readonly_this; readonly_ret} = 
-    JSON_Object ([
-      ("declaration", Some (MethodDeclaration.to_json declaration));
-      ("signature", Some (Signature.to_json signature));
-      ("visibility", Some (Visibility.to_json visibility));
-      ("isAbstract", Some (JSON_Bool is_abstract));
-      ("isAsync", Some (JSON_Bool is_async));
-      ("isFinal", Some (JSON_Bool is_final));
-      ("isStatic", Some (JSON_Bool is_static));
-      ("attributes", Some (JSON_Array (List.map (fun x -> UserAttribute.to_json x) attributes)));
-      ("typeParams", Some (JSON_Array (List.map (fun x -> TypeParameter.to_json x) type_params)));
-      ("isReadonlyThis", Option.map (fun x -> JSON_Bool x) is_readonly_this);
-      ("readonlyRet", Option.map (fun x -> ReadonlyKind.to_json x) readonly_ret);
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("declaration", MethodDeclaration.to_json declaration);
+      ("signature", Signature.to_json signature);
+      ("visibility", Visibility.to_json visibility);
+      ("isAbstract", JSON_Bool is_abstract);
+      ("isAsync", JSON_Bool is_async);
+      ("isFinal", JSON_Bool is_final);
+      ("isStatic", JSON_Bool is_static);
+      ("attributes", JSON_Array (List.map ~f:(fun x -> UserAttribute.to_json x) attributes));
+      ("typeParams", JSON_Array (List.map ~f:(fun x -> TypeParameter.to_json x) type_params));
+    ] in
+    let fields =
+      match is_readonly_this with
+      | None -> fields
+      | Some is_readonly_this -> ("isReadonlyThis", JSON_Bool is_readonly_this) :: fields in
+    let fields =
+      match readonly_ret with
+      | None -> fields
+      | Some readonly_ret -> ("readonlyRet", ReadonlyKind.to_json readonly_ret) :: fields in
+    JSON_Object fields
 
 end
 
@@ -110,9 +118,10 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {name} = 
-    JSON_Object ([
-      ("name", Some (QName.to_json name));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("name", QName.to_json name);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -147,9 +156,10 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {name} = 
-    JSON_Object ([
-      ("name", Some (QName.to_json name));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("name", QName.to_json name);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -192,13 +202,17 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {declaration; is_transparent; attributes; type_params; module_} = 
-    JSON_Object ([
-      ("declaration", Some (TypedefDeclaration.to_json declaration));
-      ("isTransparent", Some (JSON_Bool is_transparent));
-      ("attributes", Some (JSON_Array (List.map (fun x -> UserAttribute.to_json x) attributes)));
-      ("typeParams", Some (JSON_Array (List.map (fun x -> TypeParameter.to_json x) type_params)));
-      ("module_", Option.map (fun x -> ModuleMembership.to_json x) module_);
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("declaration", TypedefDeclaration.to_json declaration);
+      ("isTransparent", JSON_Bool is_transparent);
+      ("attributes", JSON_Array (List.map ~f:(fun x -> UserAttribute.to_json x) attributes));
+      ("typeParams", JSON_Array (List.map ~f:(fun x -> TypeParameter.to_json x) type_params));
+    ] in
+    let fields =
+      match module_ with
+      | None -> fields
+      | Some module_ -> ("module_", ModuleMembership.to_json module_) :: fields in
+    JSON_Object fields
 
 end
 
@@ -235,10 +249,11 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {attribute; definition} = 
-    JSON_Object ([
-      ("attribute", Some (UserAttribute.to_json attribute));
-      ("definition", Some (Definition.to_json definition));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("attribute", UserAttribute.to_json attribute);
+      ("definition", Definition.to_json definition);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -275,10 +290,11 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {namespace_; decl} = 
-    JSON_Object ([
-      ("namespace_", Some (NamespaceQName.to_json namespace_));
-      ("decl", Some (Declaration.to_json decl));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("namespace_", NamespaceQName.to_json namespace_);
+      ("decl", Declaration.to_json decl);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -317,11 +333,15 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {declaration; type_; value} = 
-    JSON_Object ([
-      ("declaration", Some (GlobalConstDeclaration.to_json declaration));
-      ("type", Option.map (fun x -> Type.to_json x) type_);
-      ("value", Some (JSON_String value));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("declaration", GlobalConstDeclaration.to_json declaration);
+      ("value", JSON_String value);
+    ] in
+    let fields =
+      match type_ with
+      | None -> fields
+      | Some type_ -> ("type", Type.to_json type_) :: fields in
+    JSON_Object fields
 
 end
 
@@ -358,10 +378,11 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {decl; namespace_} = 
-    JSON_Object ([
-      ("decl", Some (Declaration.to_json decl));
-      ("namespace_", Some (NamespaceQName.to_json namespace_));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("decl", Declaration.to_json decl);
+      ("namespace_", NamespaceQName.to_json namespace_);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -398,10 +419,11 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {container; parent} = 
-    JSON_Object ([
-      ("container", Some (ContainerDeclaration.to_json container));
-      ("parent", Some (ContainerDeclaration.to_json parent));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("container", ContainerDeclaration.to_json container);
+      ("parent", ContainerDeclaration.to_json parent);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -448,15 +470,19 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {declaration; members; extends_; attributes; type_params; require_extends; module_} = 
-    JSON_Object ([
-      ("declaration", Some (InterfaceDeclaration.to_json declaration));
-      ("members", Some (JSON_Array (List.map (fun x -> Declaration.to_json x) members)));
-      ("extends_", Some (JSON_Array (List.map (fun x -> InterfaceDeclaration.to_json x) extends_)));
-      ("attributes", Some (JSON_Array (List.map (fun x -> UserAttribute.to_json x) attributes)));
-      ("typeParams", Some (JSON_Array (List.map (fun x -> TypeParameter.to_json x) type_params)));
-      ("requireExtends", Some (JSON_Array (List.map (fun x -> ClassDeclaration.to_json x) require_extends)));
-      ("module_", Option.map (fun x -> ModuleMembership.to_json x) module_);
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("declaration", InterfaceDeclaration.to_json declaration);
+      ("members", JSON_Array (List.map ~f:(fun x -> Declaration.to_json x) members));
+      ("extends_", JSON_Array (List.map ~f:(fun x -> InterfaceDeclaration.to_json x) extends_));
+      ("attributes", JSON_Array (List.map ~f:(fun x -> UserAttribute.to_json x) attributes));
+      ("typeParams", JSON_Array (List.map ~f:(fun x -> TypeParameter.to_json x) type_params));
+      ("requireExtends", JSON_Array (List.map ~f:(fun x -> ClassDeclaration.to_json x) require_extends));
+    ] in
+    let fields =
+      match module_ with
+      | None -> fields
+      | Some module_ -> ("module_", ModuleMembership.to_json module_) :: fields in
+    JSON_Object fields
 
 end
 
@@ -493,10 +519,11 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {module_; decl} = 
-    JSON_Object ([
-      ("module", Some (ModuleDeclaration.to_json module_));
-      ("decl", Some (Declaration.to_json decl));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("module", ModuleDeclaration.to_json module_);
+      ("decl", Declaration.to_json decl);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -599,11 +626,12 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {target; file; uses} = 
-    JSON_Object ([
-      ("target", Some (XRefTarget.to_json target));
-      ("file", Some (Src.File.to_json file));
-      ("uses", Some (JSON_Array (List.map (fun x -> Src.RelByteSpan.to_json x) uses)));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("target", XRefTarget.to_json target);
+      ("file", Src.File.to_json file);
+      ("uses", JSON_Array (List.map ~f:(fun x -> Src.RelByteSpan.to_json x) uses));
+    ] in
+    JSON_Object fields
 
 end
 
@@ -642,11 +670,12 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {target; file; uses} = 
-    JSON_Object ([
-      ("target", Some (XRefTarget.to_json target));
-      ("file", Some (Src.File.to_json file));
-      ("uses", Some (JSON_Array (List.map (fun x -> Src.ByteSpan.to_json x) uses)));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("target", XRefTarget.to_json target);
+      ("file", Src.File.to_json file);
+      ("uses", JSON_Array (List.map ~f:(fun x -> Src.ByteSpan.to_json x) uses));
+    ] in
+    JSON_Object fields
 
 end
 
@@ -683,10 +712,11 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {base; derived} = 
-    JSON_Object ([
-      ("base", Some (MethodDeclaration.to_json base));
-      ("derived", Some (MethodDeclaration.to_json derived));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("base", MethodDeclaration.to_json base);
+      ("derived", MethodDeclaration.to_json derived);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -721,9 +751,10 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {name} = 
-    JSON_Object ([
-      ("name", Some (QName.to_json name));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("name", QName.to_json name);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -759,7 +790,7 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key str = JSON_String str
-  and to_json_value v = JSON_String (List.map Base64.encode_string v |> String.concat "")
+  and to_json_value v = JSON_String (List.map ~f:Base64.encode_string v |> String.concat ~sep:"")
 end
 
 and QName: sig
@@ -795,10 +826,14 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {name; namespace_} = 
-    JSON_Object ([
-      ("name", Some (Name.to_json name));
-      ("namespace_", Option.map (fun x -> NamespaceQName.to_json x) namespace_);
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("name", Name.to_json name);
+    ] in
+    let fields =
+      match namespace_ with
+      | None -> fields
+      | Some namespace_ -> ("namespace_", NamespaceQName.to_json namespace_) :: fields in
+    JSON_Object fields
 
 end
 
@@ -833,9 +868,10 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {name} = 
-    JSON_Object ([
-      ("name", Some (QName.to_json name));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("name", QName.to_json name);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -872,10 +908,11 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {declaration; attributes} = 
-    JSON_Object ([
-      ("declaration", Some (ModuleDeclaration.to_json declaration));
-      ("attributes", Some (JSON_Array (List.map (fun x -> UserAttribute.to_json x) attributes)));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("declaration", ModuleDeclaration.to_json declaration);
+      ("attributes", JSON_Array (List.map ~f:(fun x -> UserAttribute.to_json x) attributes));
+    ] in
+    JSON_Object fields
 
 end
 
@@ -914,11 +951,12 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {name; parameter; attribute} = 
-    JSON_Object ([
-      ("name", Some (Name.to_json name));
-      ("parameter", Some (JSON_String parameter));
-      ("attribute", Some (UserAttribute.to_json attribute));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("name", Name.to_json name);
+      ("parameter", JSON_String parameter);
+      ("attribute", UserAttribute.to_json attribute);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -984,10 +1022,11 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {name; container} = 
-    JSON_Object ([
-      ("name", Some (Name.to_json name));
-      ("container", Some (ContainerDeclaration.to_json container));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("name", Name.to_json name);
+      ("container", ContainerDeclaration.to_json container);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -1026,11 +1065,12 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {attribute; declaration; file} = 
-    JSON_Object ([
-      ("attribute", Some (UserAttribute.to_json attribute));
-      ("declaration", Some (Declaration.to_json declaration));
-      ("file", Some (Src.File.to_json file));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("attribute", UserAttribute.to_json attribute);
+      ("declaration", Declaration.to_json declaration);
+      ("file", Src.File.to_json file);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -1067,10 +1107,11 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {file; xrefs} = 
-    JSON_Object ([
-      ("file", Some (Src.File.to_json file));
-      ("xrefs", Some (JSON_Array (List.map (fun x -> XRef.to_json x) xrefs)));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("file", Src.File.to_json file);
+      ("xrefs", JSON_Array (List.map ~f:(fun x -> XRef.to_json x) xrefs));
+    ] in
+    JSON_Object fields
 
 end
 
@@ -1107,10 +1148,11 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {name; enumeration} = 
-    JSON_Object ([
-      ("name", Some (Name.to_json name));
-      ("enumeration", Some (EnumDeclaration.to_json enumeration));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("name", Name.to_json name);
+      ("enumeration", EnumDeclaration.to_json enumeration);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -1149,11 +1191,12 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {declaration; file; span} = 
-    JSON_Object ([
-      ("declaration", Some (Declaration.to_json declaration));
-      ("file", Some (Src.File.to_json file));
-      ("span", Some (Src.ByteSpan.to_json span));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("declaration", Declaration.to_json declaration);
+      ("file", Src.File.to_json file);
+      ("span", Src.ByteSpan.to_json span);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -1194,12 +1237,22 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {returns; parameters; contexts; returns_type_info} = 
-    JSON_Object ([
-      ("returns", Option.map (fun x -> Type.to_json x) returns);
-      ("parameters", Some (JSON_Array (List.map (fun x -> Parameter.to_json x) parameters)));
-      ("contexts", Option.map (fun x -> JSON_Array (List.map (fun x -> Context_.to_json x) x)) contexts);
-      ("returnsTypeInfo", Option.map (fun x -> TypeInfo.to_json x) returns_type_info);
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("parameters", JSON_Array (List.map ~f:(fun x -> Parameter.to_json x) parameters));
+    ] in
+    let fields =
+      match returns with
+      | None -> fields
+      | Some returns -> ("returns", Type.to_json returns) :: fields in
+    let fields =
+      match contexts with
+      | None -> fields
+      | Some contexts -> ("contexts", JSON_Array (List.map ~f:(fun x -> Context_.to_json x) contexts)) :: fields in
+    let fields =
+      match returns_type_info with
+      | None -> fields
+      | Some returns_type_info -> ("returnsTypeInfo", TypeInfo.to_json returns_type_info) :: fields in
+    JSON_Object fields
 
 end
 
@@ -1236,10 +1289,11 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {container; child} = 
-    JSON_Object ([
-      ("container", Some (ContainerDeclaration.to_json container));
-      ("child", Some (ContainerDeclaration.to_json child));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("container", ContainerDeclaration.to_json container);
+      ("child", ContainerDeclaration.to_json child);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -1276,10 +1330,14 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {name; parent} = 
-    JSON_Object ([
-      ("name", Some (Name.to_json name));
-      ("parent", Option.map (fun x -> NamespaceQName.to_json x) parent);
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("name", Name.to_json name);
+    ] in
+    let fields =
+      match parent with
+      | None -> fields
+      | Some parent -> ("parent", NamespaceQName.to_json parent) :: fields in
+    JSON_Object fields
 
 end
 
@@ -1314,9 +1372,10 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {name} = 
-    JSON_Object ([
-      ("name", Some (QName.to_json name));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("name", QName.to_json name);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -1353,10 +1412,11 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {target; source} = 
-    JSON_Object ([
-      ("target", Some (Declaration.to_json target));
-      ("source", Some (Declaration.to_json source));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("target", Declaration.to_json target);
+      ("source", Declaration.to_json source);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -1395,11 +1455,15 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {name; parameters; qname} = 
-    JSON_Object ([
-      ("name", Some (Name.to_json name));
-      ("parameters", Some (JSON_Array (List.map (fun x -> JSON_String x) parameters)));
-      ("qname", Option.map (fun x -> QName.to_json x) qname);
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("name", Name.to_json name);
+      ("parameters", JSON_Array (List.map ~f:(fun x -> JSON_String x) parameters));
+    ] in
+    let fields =
+      match qname with
+      | None -> fields
+      | Some qname -> ("qname", QName.to_json qname) :: fields in
+    JSON_Object fields
 
 end
 
@@ -1434,9 +1498,10 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {name} = 
-    JSON_Object ([
-      ("name", Some (Name.to_json name));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("name", Name.to_json name);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -1483,15 +1548,19 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {declaration; type_; visibility; is_final; is_abstract; is_static; attributes} = 
-    JSON_Object ([
-      ("declaration", Some (PropertyDeclaration.to_json declaration));
-      ("type", Option.map (fun x -> Type.to_json x) type_);
-      ("visibility", Some (Visibility.to_json visibility));
-      ("isFinal", Some (JSON_Bool is_final));
-      ("isAbstract", Some (JSON_Bool is_abstract));
-      ("isStatic", Some (JSON_Bool is_static));
-      ("attributes", Some (JSON_Array (List.map (fun x -> UserAttribute.to_json x) attributes)));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("declaration", PropertyDeclaration.to_json declaration);
+      ("visibility", Visibility.to_json visibility);
+      ("isFinal", JSON_Bool is_final);
+      ("isAbstract", JSON_Bool is_abstract);
+      ("isStatic", JSON_Bool is_static);
+      ("attributes", JSON_Array (List.map ~f:(fun x -> UserAttribute.to_json x) attributes));
+    ] in
+    let fields =
+      match type_ with
+      | None -> fields
+      | Some type_ -> ("type", Type.to_json type_) :: fields in
+    JSON_Object fields
 
 end
 
@@ -1526,9 +1595,10 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {members} = 
-    JSON_Object ([
-      ("members", Some (JSON_Array (List.map (fun x -> Declaration.to_json x) members)));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("members", JSON_Array (List.map ~f:(fun x -> Declaration.to_json x) members));
+    ] in
+    JSON_Object fields
 
 end
 
@@ -1565,10 +1635,11 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {name; container} = 
-    JSON_Object ([
-      ("name", Some (Name.to_json name));
-      ("container", Some (ContainerDeclaration.to_json container));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("name", Name.to_json name);
+      ("container", ContainerDeclaration.to_json container);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -1603,9 +1674,10 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {name} = 
-    JSON_Object ([
-      ("name", Some (QName.to_json name));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("name", QName.to_json name);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -1644,11 +1716,12 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {declaration; file; span} = 
-    JSON_Object ([
-      ("declaration", Some (Declaration.to_json declaration));
-      ("file", Some (Src.File.to_json file));
-      ("span", Some (Src.ByteSpan.to_json span));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("declaration", Declaration.to_json declaration);
+      ("file", Src.File.to_json file);
+      ("span", Src.ByteSpan.to_json span);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -1683,9 +1756,10 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {name} = 
-    JSON_Object ([
-      ("name", Some (NamespaceQName.to_json name));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("name", NamespaceQName.to_json name);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -1738,18 +1812,25 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {declaration; is_abstract; is_final; members; extends_; implements_; uses; attributes; type_params; module_} = 
-    JSON_Object ([
-      ("declaration", Some (ClassDeclaration.to_json declaration));
-      ("isAbstract", Some (JSON_Bool is_abstract));
-      ("isFinal", Some (JSON_Bool is_final));
-      ("members", Some (JSON_Array (List.map (fun x -> Declaration.to_json x) members)));
-      ("extends_", Option.map (fun x -> ClassDeclaration.to_json x) extends_);
-      ("implements_", Some (JSON_Array (List.map (fun x -> InterfaceDeclaration.to_json x) implements_)));
-      ("uses", Some (JSON_Array (List.map (fun x -> TraitDeclaration.to_json x) uses)));
-      ("attributes", Some (JSON_Array (List.map (fun x -> UserAttribute.to_json x) attributes)));
-      ("typeParams", Some (JSON_Array (List.map (fun x -> TypeParameter.to_json x) type_params)));
-      ("module_", Option.map (fun x -> ModuleMembership.to_json x) module_);
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("declaration", ClassDeclaration.to_json declaration);
+      ("isAbstract", JSON_Bool is_abstract);
+      ("isFinal", JSON_Bool is_final);
+      ("members", JSON_Array (List.map ~f:(fun x -> Declaration.to_json x) members));
+      ("implements_", JSON_Array (List.map ~f:(fun x -> InterfaceDeclaration.to_json x) implements_));
+      ("uses", JSON_Array (List.map ~f:(fun x -> TraitDeclaration.to_json x) uses));
+      ("attributes", JSON_Array (List.map ~f:(fun x -> UserAttribute.to_json x) attributes));
+      ("typeParams", JSON_Array (List.map ~f:(fun x -> TypeParameter.to_json x) type_params));
+    ] in
+    let fields =
+      match extends_ with
+      | None -> fields
+      | Some extends_ -> ("extends_", ClassDeclaration.to_json extends_) :: fields in
+    let fields =
+      match module_ with
+      | None -> fields
+      | Some module_ -> ("module_", ModuleMembership.to_json module_) :: fields in
+    JSON_Object fields
 
 end
 
@@ -1786,10 +1867,14 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {name; class_name} = 
-    JSON_Object ([
-      ("name", Some (Name.to_json name));
-      ("className", Option.map (fun x -> Name.to_json x) class_name);
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("name", Name.to_json name);
+    ] in
+    let fields =
+      match class_name with
+      | None -> fields
+      | Some class_name -> ("className", Name.to_json class_name) :: fields in
+    JSON_Object fields
 
 end
 
@@ -1826,10 +1911,11 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {derived; base} = 
-    JSON_Object ([
-      ("derived", Some (MethodDeclaration.to_json derived));
-      ("base", Some (MethodDeclaration.to_json base));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("derived", MethodDeclaration.to_json derived);
+      ("base", MethodDeclaration.to_json base);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -1895,10 +1981,11 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {name_lowercase; name} = 
-    JSON_Object ([
-      ("nameLowercase", Some (JSON_String name_lowercase));
-      ("name", Some (Name.to_json name));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("nameLowercase", JSON_String name_lowercase);
+      ("name", Name.to_json name);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -1939,12 +2026,16 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {declaration; type_; kind; attributes} = 
-    JSON_Object ([
-      ("declaration", Some (TypeConstDeclaration.to_json declaration));
-      ("type", Option.map (fun x -> Type.to_json x) type_);
-      ("kind", Some (TypeConstKind.to_json kind));
-      ("attributes", Some (JSON_Array (List.map (fun x -> UserAttribute.to_json x) attributes)));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("declaration", TypeConstDeclaration.to_json declaration);
+      ("kind", TypeConstKind.to_json kind);
+      ("attributes", JSON_Array (List.map ~f:(fun x -> UserAttribute.to_json x) attributes));
+    ] in
+    let fields =
+      match type_ with
+      | None -> fields
+      | Some type_ -> ("type", Type.to_json type_) :: fields in
+    JSON_Object fields
 
 end
 
@@ -1981,10 +2072,11 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {source; target} = 
-    JSON_Object ([
-      ("source", Some (Declaration.to_json source));
-      ("target", Some (Declaration.to_json target));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("source", Declaration.to_json source);
+      ("target", Declaration.to_json target);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -2021,10 +2113,11 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {from; to_} = 
-    JSON_Object ([
-      ("from", Some (Name.to_json from));
-      ("to", Some (NamespaceQName.to_json to_));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("from", Name.to_json from);
+      ("to", NamespaceQName.to_json to_);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -2061,10 +2154,11 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {display_type; xrefs} = 
-    JSON_Object ([
-      ("displayType", Some (Type.to_json display_type));
-      ("xrefs", Some (JSON_Array (List.map (fun x -> XRef.to_json x) xrefs)));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("displayType", Type.to_json display_type);
+      ("xrefs", JSON_Array (List.map ~f:(fun x -> XRef.to_json x) xrefs));
+    ] in
+    JSON_Object fields
 
 end
 
@@ -2113,16 +2207,23 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {declaration; enum_base; enum_constraint; enumerators; attributes; includes; is_enum_class; module_} = 
-    JSON_Object ([
-      ("declaration", Some (EnumDeclaration.to_json declaration));
-      ("enumBase", Some (Type.to_json enum_base));
-      ("enumConstraint", Option.map (fun x -> Type.to_json x) enum_constraint);
-      ("enumerators", Some (JSON_Array (List.map (fun x -> Enumerator.to_json x) enumerators)));
-      ("attributes", Some (JSON_Array (List.map (fun x -> UserAttribute.to_json x) attributes)));
-      ("includes", Some (JSON_Array (List.map (fun x -> EnumDeclaration.to_json x) includes)));
-      ("isEnumClass", Some (JSON_Bool is_enum_class));
-      ("module_", Option.map (fun x -> ModuleMembership.to_json x) module_);
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("declaration", EnumDeclaration.to_json declaration);
+      ("enumBase", Type.to_json enum_base);
+      ("enumerators", JSON_Array (List.map ~f:(fun x -> Enumerator.to_json x) enumerators));
+      ("attributes", JSON_Array (List.map ~f:(fun x -> UserAttribute.to_json x) attributes));
+      ("includes", JSON_Array (List.map ~f:(fun x -> EnumDeclaration.to_json x) includes));
+      ("isEnumClass", JSON_Bool is_enum_class);
+    ] in
+    let fields =
+      match enum_constraint with
+      | None -> fields
+      | Some enum_constraint -> ("enumConstraint", Type.to_json enum_constraint) :: fields in
+    let fields =
+      match module_ with
+      | None -> fields
+      | Some module_ -> ("module_", ModuleMembership.to_json module_) :: fields in
+    JSON_Object fields
 
 end
 
@@ -2159,10 +2260,11 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {decl; module_} = 
-    JSON_Object ([
-      ("decl", Some (Declaration.to_json decl));
-      ("module", Some (ModuleDeclaration.to_json module_));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("decl", Declaration.to_json decl);
+      ("module", ModuleDeclaration.to_json module_);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -2201,11 +2303,18 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {declaration; type_; value} = 
-    JSON_Object ([
-      ("declaration", Some (ClassConstDeclaration.to_json declaration));
-      ("type", Option.map (fun x -> Type.to_json x) type_);
-      ("value", Option.map (fun x -> JSON_String x) value);
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("declaration", ClassConstDeclaration.to_json declaration);
+    ] in
+    let fields =
+      match type_ with
+      | None -> fields
+      | Some type_ -> ("type", Type.to_json type_) :: fields in
+    let fields =
+      match value with
+      | None -> fields
+      | Some value -> ("value", JSON_String value) :: fields in
+    JSON_Object fields
 
 end
 
@@ -2269,9 +2378,10 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {name} = 
-    JSON_Object ([
-      ("name", Some (QName.to_json name));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("name", QName.to_json name);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -2318,15 +2428,22 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {declaration; signature; is_async; attributes; type_params; module_; readonly_ret} = 
-    JSON_Object ([
-      ("declaration", Some (FunctionDeclaration.to_json declaration));
-      ("signature", Some (Signature.to_json signature));
-      ("isAsync", Some (JSON_Bool is_async));
-      ("attributes", Some (JSON_Array (List.map (fun x -> UserAttribute.to_json x) attributes)));
-      ("typeParams", Some (JSON_Array (List.map (fun x -> TypeParameter.to_json x) type_params)));
-      ("module_", Option.map (fun x -> ModuleMembership.to_json x) module_);
-      ("readonlyRet", Option.map (fun x -> ReadonlyKind.to_json x) readonly_ret);
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("declaration", FunctionDeclaration.to_json declaration);
+      ("signature", Signature.to_json signature);
+      ("isAsync", JSON_Bool is_async);
+      ("attributes", JSON_Array (List.map ~f:(fun x -> UserAttribute.to_json x) attributes));
+      ("typeParams", JSON_Array (List.map ~f:(fun x -> TypeParameter.to_json x) type_params));
+    ] in
+    let fields =
+      match module_ with
+      | None -> fields
+      | Some module_ -> ("module_", ModuleMembership.to_json module_) :: fields in
+    let fields =
+      match readonly_ret with
+      | None -> fields
+      | Some readonly_ret -> ("readonlyRet", ReadonlyKind.to_json readonly_ret) :: fields in
+    JSON_Object fields
 
 end
 
@@ -2379,18 +2496,25 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {declaration; members; implements_; uses; attributes; type_params; require_extends; require_implements; module_; require_class} = 
-    JSON_Object ([
-      ("declaration", Some (TraitDeclaration.to_json declaration));
-      ("members", Some (JSON_Array (List.map (fun x -> Declaration.to_json x) members)));
-      ("implements_", Some (JSON_Array (List.map (fun x -> InterfaceDeclaration.to_json x) implements_)));
-      ("uses", Some (JSON_Array (List.map (fun x -> TraitDeclaration.to_json x) uses)));
-      ("attributes", Some (JSON_Array (List.map (fun x -> UserAttribute.to_json x) attributes)));
-      ("typeParams", Some (JSON_Array (List.map (fun x -> TypeParameter.to_json x) type_params)));
-      ("requireExtends", Some (JSON_Array (List.map (fun x -> ClassDeclaration.to_json x) require_extends)));
-      ("requireImplements", Some (JSON_Array (List.map (fun x -> InterfaceDeclaration.to_json x) require_implements)));
-      ("module_", Option.map (fun x -> ModuleMembership.to_json x) module_);
-      ("requireClass", Option.map (fun x -> JSON_Array (List.map (fun x -> ClassDeclaration.to_json x) x)) require_class);
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("declaration", TraitDeclaration.to_json declaration);
+      ("members", JSON_Array (List.map ~f:(fun x -> Declaration.to_json x) members));
+      ("implements_", JSON_Array (List.map ~f:(fun x -> InterfaceDeclaration.to_json x) implements_));
+      ("uses", JSON_Array (List.map ~f:(fun x -> TraitDeclaration.to_json x) uses));
+      ("attributes", JSON_Array (List.map ~f:(fun x -> UserAttribute.to_json x) attributes));
+      ("typeParams", JSON_Array (List.map ~f:(fun x -> TypeParameter.to_json x) type_params));
+      ("requireExtends", JSON_Array (List.map ~f:(fun x -> ClassDeclaration.to_json x) require_extends));
+      ("requireImplements", JSON_Array (List.map ~f:(fun x -> InterfaceDeclaration.to_json x) require_implements));
+    ] in
+    let fields =
+      match module_ with
+      | None -> fields
+      | Some module_ -> ("module_", ModuleMembership.to_json module_) :: fields in
+    let fields =
+      match require_class with
+      | None -> fields
+      | Some require_class -> ("requireClass", JSON_Array (List.map ~f:(fun x -> ClassDeclaration.to_json x) require_class)) :: fields in
+    JSON_Object fields
 
 end
 
@@ -2462,10 +2586,11 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {container; inherited_members} = 
-    JSON_Object ([
-      ("container", Some (ContainerDeclaration.to_json container));
-      ("inheritedMembers", Some (JSON_Array (List.map (fun x -> MemberCluster.to_json x) inherited_members)));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("container", ContainerDeclaration.to_json container);
+      ("inheritedMembers", JSON_Array (List.map ~f:(fun x -> MemberCluster.to_json x) inherited_members));
+    ] in
+    JSON_Object fields
 
 end
 
@@ -2502,10 +2627,11 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {name; container} = 
-    JSON_Object ([
-      ("name", Some (Name.to_json name));
-      ("container", Some (ContainerDeclaration.to_json container));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("name", Name.to_json name);
+      ("container", ContainerDeclaration.to_json container);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -2552,15 +2678,25 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {file; callee_span; call_args; callee_xref; dispatch_arg; receiver_type; callee_xrefs} = 
-    JSON_Object ([
-      ("file", Some (Src.File.to_json file));
-      ("callee_span", Some (Src.ByteSpan.to_json callee_span));
-      ("call_args", Some (JSON_Array (List.map (fun x -> CallArgument.to_json x) call_args)));
-      ("callee_xref", Option.map (fun x -> XRefTarget.to_json x) callee_xref);
-      ("dispatch_arg", Option.map (fun x -> CallArgument.to_json x) dispatch_arg);
-      ("receiver_type", Option.map (fun x -> Declaration.to_json x) receiver_type);
-      ("callee_xrefs", Some (JSON_Array (List.map (fun x -> XRefTarget.to_json x) callee_xrefs)));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("file", Src.File.to_json file);
+      ("callee_span", Src.ByteSpan.to_json callee_span);
+      ("call_args", JSON_Array (List.map ~f:(fun x -> CallArgument.to_json x) call_args));
+      ("callee_xrefs", JSON_Array (List.map ~f:(fun x -> XRefTarget.to_json x) callee_xrefs));
+    ] in
+    let fields =
+      match callee_xref with
+      | None -> fields
+      | Some callee_xref -> ("callee_xref", XRefTarget.to_json callee_xref) :: fields in
+    let fields =
+      match dispatch_arg with
+      | None -> fields
+      | Some dispatch_arg -> ("dispatch_arg", CallArgument.to_json dispatch_arg) :: fields in
+    let fields =
+      match receiver_type with
+      | None -> fields
+      | Some receiver_type -> ("receiver_type", Declaration.to_json receiver_type) :: fields in
+    JSON_Object fields
 
 end
 
@@ -2597,10 +2733,11 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {file; declarations} = 
-    JSON_Object ([
-      ("file", Some (Src.File.to_json file));
-      ("declarations", Some (JSON_Array (List.map (fun x -> Declaration.to_json x) declarations)));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("file", Src.File.to_json file);
+      ("declarations", JSON_Array (List.map ~f:(fun x -> Declaration.to_json x) declarations));
+    ] in
+    JSON_Object fields
 
 end
 
@@ -2637,10 +2774,11 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {name; container} = 
-    JSON_Object ([
-      ("name", Some (Name.to_json name));
-      ("container", Some (ContainerDeclaration.to_json container));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("name", Name.to_json name);
+      ("container", ContainerDeclaration.to_json container);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -2679,11 +2817,12 @@ end = struct
     | Key t -> Util.key (to_json_key t)
 
   and to_json_key {declaration; file; span} = 
-    JSON_Object ([
-      ("declaration", Some (Declaration.to_json declaration));
-      ("file", Some (Src.File.to_json file));
-      ("span", Some (Src.ByteSpan.to_json span));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("declaration", Declaration.to_json declaration);
+      ("file", Src.File.to_json file);
+      ("span", Src.ByteSpan.to_json span);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -2729,13 +2868,14 @@ end = struct
   [@@deriving ord]
 
   let to_json {name; variance; reify_kind; constraints; attributes} = 
-    JSON_Object ([
-      ("name", Some (Name.to_json name));
-      ("variance", Some (Variance.to_json variance));
-      ("reifyKind", Some (ReifyKind.to_json reify_kind));
-      ("constraints", Some (JSON_Array (List.map (fun x -> Constraint.to_json x) constraints)));
-      ("attributes", Some (JSON_Array (List.map (fun x -> UserAttribute.to_json x) attributes)));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("name", Name.to_json name);
+      ("variance", Variance.to_json variance);
+      ("reifyKind", ReifyKind.to_json reify_kind);
+      ("constraints", JSON_Array (List.map ~f:(fun x -> Constraint.to_json x) constraints));
+      ("attributes", JSON_Array (List.map ~f:(fun x -> UserAttribute.to_json x) attributes));
+    ] in
+    JSON_Object fields
 
 end
 
@@ -2887,10 +3027,11 @@ end = struct
   [@@deriving ord]
 
   let to_json {declaration; internal} = 
-    JSON_Object ([
-      ("declaration", Some (ModuleDeclaration.to_json declaration));
-      ("internal", Some (JSON_Bool internal));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("declaration", ModuleDeclaration.to_json declaration);
+      ("internal", JSON_Bool internal);
+    ] in
+    JSON_Object fields
 
 end
 
@@ -2934,10 +3075,11 @@ end = struct
   [@@deriving ord]
 
   let to_json {target; ranges} = 
-    JSON_Object ([
-      ("target", Some (XRefTarget.to_json target));
-      ("ranges", Some (JSON_Array (List.map (fun x -> Src.RelByteSpan.to_json x) ranges)));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("target", XRefTarget.to_json target);
+      ("ranges", JSON_Array (List.map ~f:(fun x -> Src.RelByteSpan.to_json x) ranges));
+    ] in
+    JSON_Object fields
 
 end
 
@@ -2969,16 +3111,29 @@ end = struct
   [@@deriving ord]
 
   let to_json {name; type_; is_inout; is_variadic; default_value; attributes; type_info; readonly} = 
-    JSON_Object ([
-      ("name", Some (Name.to_json name));
-      ("type", Option.map (fun x -> Type.to_json x) type_);
-      ("isInout", Some (JSON_Bool is_inout));
-      ("isVariadic", Some (JSON_Bool is_variadic));
-      ("defaultValue", Option.map (fun x -> JSON_String x) default_value);
-      ("attributes", Some (JSON_Array (List.map (fun x -> UserAttribute.to_json x) attributes)));
-      ("typeInfo", Option.map (fun x -> TypeInfo.to_json x) type_info);
-      ("readonly", Option.map (fun x -> ReadonlyKind.to_json x) readonly);
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("name", Name.to_json name);
+      ("isInout", JSON_Bool is_inout);
+      ("isVariadic", JSON_Bool is_variadic);
+      ("attributes", JSON_Array (List.map ~f:(fun x -> UserAttribute.to_json x) attributes));
+    ] in
+    let fields =
+      match type_ with
+      | None -> fields
+      | Some type_ -> ("type", Type.to_json type_) :: fields in
+    let fields =
+      match default_value with
+      | None -> fields
+      | Some default_value -> ("defaultValue", JSON_String default_value) :: fields in
+    let fields =
+      match type_info with
+      | None -> fields
+      | Some type_info -> ("typeInfo", TypeInfo.to_json type_info) :: fields in
+    let fields =
+      match readonly with
+      | None -> fields
+      | Some readonly -> ("readonly", ReadonlyKind.to_json readonly) :: fields in
+    JSON_Object fields
 
 end
 
@@ -2998,10 +3153,14 @@ end = struct
   [@@deriving ord]
 
   let to_json {span; argument} = 
-    JSON_Object ([
-      ("span", Some (Src.RelByteSpan.to_json span));
-      ("argument", Option.map (fun x -> Argument.to_json x) argument);
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("span", Src.RelByteSpan.to_json span);
+    ] in
+    let fields =
+      match argument with
+      | None -> fields
+      | Some argument -> ("argument", Argument.to_json argument) :: fields in
+    JSON_Object fields
 
 end
 
@@ -3113,10 +3272,11 @@ end = struct
   [@@deriving ord]
 
   let to_json {constraint_kind; type_} = 
-    JSON_Object ([
-      ("constraintKind", Some (ConstraintKind.to_json constraint_kind));
-      ("type", Some (Type.to_json type_));
-    ] |> List.filter_map Util.rem_opt)
+    let fields = [
+      ("constraintKind", ConstraintKind.to_json constraint_kind);
+      ("type", Type.to_json type_);
+    ] in
+    JSON_Object fields
 
 end
 

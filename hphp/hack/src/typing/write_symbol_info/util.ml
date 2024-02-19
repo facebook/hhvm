@@ -7,6 +7,8 @@
  *)
 
 open Hh_prelude
+open Hack
+open Src
 
 let is_enum_or_enum_class = function
   | Ast_defs.Cenum
@@ -25,6 +27,7 @@ let get_type_from_hint ctx h =
   let decl_env = Decl_env.{ mode; droot = None; droot_member = None; ctx } in
   let tcopt = Provider_context.get_tcopt ctx in
   Typing_print.full_decl ~msg:false tcopt (Decl_hint.hint decl_env h)
+  |> Utils.strip_ns
 
 let get_type_from_hint_strip_ns ctx h =
   let mode = FileInfo.Mhhi in
@@ -221,3 +224,58 @@ let hint_to_string_and_symbols ctx h =
 let remove_generated_tparams tparams =
   let param_name Aast_defs.{ tp_name = (_, name); _ } = name in
   Typing_print.split_desugared_ctx_tparams_gen ~tparams ~param_name |> snd
+
+(* Remove leading slash, if present, so names such as
+   Exception and \Exception are captured by the same fact *)
+let make_name name = Name.Key (Utils.strip_ns name)
+
+let rec make_namespaceqname ns =
+  let open NamespaceQName in
+  Key
+    (match split_name ns with
+    | None -> { name = make_name ns; parent = None }
+    | Some (parent_ns, namespace) ->
+      {
+        name = make_name namespace;
+        parent = Some (make_namespaceqname parent_ns);
+      })
+
+let make_qname qname =
+  let open QName in
+  Key
+    (match split_name qname with
+    | None -> { name = make_name qname; namespace_ = None }
+    | Some (ns, name) ->
+      { name = make_name name; namespace_ = Some (make_namespaceqname ns) })
+
+let make_constraint_kind = function
+  | Ast_defs.Constraint_as -> ConstraintKind.As
+  | Ast_defs.Constraint_eq -> ConstraintKind.Equal
+  | Ast_defs.Constraint_super -> ConstraintKind.Super
+
+let make_visibility = function
+  | Aast.Private -> Visibility.Private
+  | Aast.Protected -> Visibility.Protected
+  | Aast.Public -> Visibility.Public
+  | Aast.Internal -> Visibility.Internal
+
+let make_type_const_kind = function
+  | Aast.TCAbstract _ -> TypeConstKind.Abstract
+  | Aast.TCConcrete _ -> TypeConstKind.Concrete
+
+let make_byte_span pos =
+  ByteSpan.{ start = fst (Pos.info_raw pos); length = Pos.length pos }
+
+let make_variance =
+  let open Variance in
+  function
+  | Ast_defs.Contravariant -> Contravariant
+  | Ast_defs.Covariant -> Covariant
+  | Ast_defs.Invariant -> Invariant
+
+let make_reify_kind =
+  let open ReifyKind in
+  function
+  | Ast_defs.Erased -> Erased
+  | Ast_defs.Reified -> Reified
+  | Ast_defs.SoftReified -> SoftReified

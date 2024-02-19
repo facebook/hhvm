@@ -8,7 +8,7 @@
 
 open Aast
 open Hh_prelude
-open Glean_schema.Hack
+open Hack
 module Fact_acc = Predicate.Fact_acc
 
 let process_doc_comment
@@ -300,7 +300,7 @@ let process_module_decl ctx path source_text elem (xrefs, all_decls, fa) =
     process_decl_loc
       Add_fact.module_decl
       (Add_fact.module_defn ctx source_text)
-      (fun x -> Declaration.ModuleDeclaration (ModuleDeclaration.Id x))
+      (fun x -> Declaration.Module (ModuleDeclaration.Id x))
       ~path
       pos
       elem.md_span
@@ -309,9 +309,7 @@ let process_module_decl ctx path source_text elem (xrefs, all_decls, fa) =
       None
       fa
   in
-  ( xrefs,
-    all_decls @ [Declaration.ModuleDeclaration (ModuleDeclaration.Id decl_id)],
-    fa )
+  (xrefs, all_decls @ [Declaration.Module (ModuleDeclaration.Id decl_id)], fa)
 
 let process_namespace_decl ~path (pos, id) (all_decls, fa) =
   let (decl_id, fa) =
@@ -362,8 +360,7 @@ let process_cst_decls st path root (decls, fa) =
 let process_mod_xref fa xrefs (pos, id) =
   let (target_id, fa) = Add_fact.module_decl id fa in
   let target =
-    XRefTarget.Declaration
-      (Declaration.ModuleDeclaration (ModuleDeclaration.Id target_id))
+    XRefTarget.Declaration (Declaration.Module (ModuleDeclaration.Id target_id))
   in
   (Xrefs.add xrefs target_id pos Xrefs.{ target; receiver_type = None }, fa)
 

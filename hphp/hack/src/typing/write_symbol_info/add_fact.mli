@@ -12,7 +12,7 @@
  *)
 
 open Hh_prelude
-open Glean_schema.Hack
+open Hack
 module Fact_acc = Predicate.Fact_acc
 
 val namespace_decl : string -> Fact_acc.t -> Fact_id.t * Fact_acc.t

@@ -6,7 +6,7 @@
  *
  *)
 
-open Glean_schema.Hack
+open Hack
 
 module PosMap = WrappedMap.Make (struct
   let compare = Pos.compare

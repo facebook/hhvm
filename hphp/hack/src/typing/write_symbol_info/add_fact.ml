@@ -8,9 +8,9 @@
 
 open Aast
 open Hh_prelude
-open Glean_schema.Src
-open Glean_schema.Hack
-open Glean_schema.GenCode
+open Src
+open Hack
+open Gencode
 module Fact_acc = Predicate.Fact_acc
 
 let is_async = function
@@ -21,7 +21,7 @@ let is_async = function
 let namespace_decl name fa =
   let json =
     NamespaceDeclaration.(
-      { name = NamespaceQName.(Key (of_string name)) } |> to_json_key)
+      { name = Util.make_namespaceqname name } |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack NamespaceDeclaration) json fa
 
@@ -34,7 +34,7 @@ let namespace_decl_opt name fa =
   | Some name -> namespace_decl name fa |> snd
 
 let container_decl decl_pred name fa =
-  let qname = QName.(Key (of_string name)) in
+  let qname = Util.make_qname name in
   let json =
     match decl_pred with
     | Predicate.(Hack ClassDeclaration) ->
@@ -80,7 +80,9 @@ let parent_decls_interface ctx decls fa =
   (List.map ~f:(fun x -> InterfaceDeclaration.Id x) fact_ids, fa)
 
 let module_decl name fa =
-  let json = ModuleDeclaration.({ name = Name.Key name } |> to_json_key) in
+  let json =
+    ModuleDeclaration.({ name = Util.make_name name } |> to_json_key)
+  in
   Fact_acc.add_fact Predicate.(Hack ModuleDeclaration) json fa
 
 let module_field module_ internal fa =
@@ -99,7 +101,7 @@ let inherited_members ~container_type ~container_id ~member_clusters fa =
     InheritedMembers.(
       {
         container = Predicate.container_decl container_type container_id;
-        inheritedMembers =
+        inherited_members =
           List.map ~f:(fun x -> MemberCluster.Id x) member_clusters;
       }
       |> to_json_key)
@@ -108,7 +110,7 @@ let inherited_members ~container_type ~container_id ~member_clusters fa =
 
 let container_defn ctx source_text clss decl_id members fa =
   let fa = namespace_decl_opt clss.c_namespace fa in
-  let typeParams =
+  let type_params =
     List.map clss.c_tparams ~f:(Build_fact.type_param ctx source_text)
   in
   let (module_, fa) = module_field clss.c_module clss.c_internal fa in
@@ -116,13 +118,13 @@ let container_defn ctx source_text clss decl_id members fa =
   let (req_extends_hints, req_implements_hints, req_class_hints) =
     Aast.partition_map_require_kind ~f:(fun x -> x) clss.c_reqs
   in
-  let (requireExtends, fa) =
+  let (require_extends, fa) =
     parent_decls_class ctx (List.map req_extends_hints ~f:fst) fa
   in
-  let (requireImplements, fa) =
+  let (require_implements, fa) =
     parent_decls_interface ctx (List.map req_implements_hints ~f:fst) fa
   in
-  let (requireClass, fa) =
+  let (require_class, fa) =
     parent_decls_class ctx (List.map req_class_hints ~f:fst) fa
   in
   match Predicate.get_parent_kind clss.c_kind with
@@ -132,11 +134,11 @@ let container_defn ctx source_text clss decl_id members fa =
       InterfaceDefinition.(
         {
           declaration = InterfaceDeclaration.Id decl_id;
-          typeParams;
+          type_params;
           members;
           attributes;
           extends_;
-          requireExtends;
+          require_extends;
           module_;
         }
         |> to_json_key)
@@ -153,10 +155,10 @@ let container_defn ctx source_text clss decl_id members fa =
           implements_;
           uses;
           attributes;
-          typeParams;
-          requireExtends;
-          requireImplements;
-          requireClass = Some requireClass;
+          type_params;
+          require_extends;
+          require_implements;
+          require_class = Some require_class;
           module_;
         }
         |> to_json_key)
@@ -173,7 +175,7 @@ let container_defn ctx source_text clss decl_id members fa =
           let parent_clss =
             Util.strip_tparams (Util.get_type_from_hint ctx parent)
           in
-          let qname = QName.(Key (of_string parent_clss)) in
+          let qname = Util.make_qname parent_clss in
           let json = ClassDeclaration.(to_json_key { name = qname }) in
           Fact_acc.add_fact Predicate.(Hack ClassDeclaration) json fa
         in
@@ -188,14 +190,14 @@ let container_defn ctx source_text clss decl_id members fa =
       ClassDefinition.(
         {
           declaration = ClassDeclaration.Id decl_id;
-          isAbstract = Ast_defs.is_classish_abstract clss.c_kind;
-          isFinal = clss.c_final;
+          is_abstract = Ast_defs.is_classish_abstract clss.c_kind;
+          is_final = clss.c_final;
           members;
           extends_;
           implements_;
           uses;
           attributes;
-          typeParams;
+          type_params;
           module_;
         }
         |> to_json_key)
@@ -206,7 +208,7 @@ let property_decl con_type decl_id name fa =
   let json =
     PropertyDeclaration.(
       {
-        name = Name.Key name;
+        name = Util.make_name name;
         container = Predicate.container_decl con_type decl_id;
       }
       |> to_json_key)
@@ -217,7 +219,7 @@ let class_const_decl con_type decl_id name fa =
   let json =
     ClassConstDeclaration.(
       {
-        name = Name.Key name;
+        name = Util.make_name name;
         container = Predicate.container_decl con_type decl_id;
       }
       |> to_json_key)
@@ -228,7 +230,7 @@ let type_const_decl con_type decl_id name fa =
   let json =
     TypeConstDeclaration.(
       {
-        name = Name.Key name;
+        name = Util.make_name name;
         container = Predicate.container_decl con_type decl_id;
       }
       |> to_json_key)
@@ -239,7 +241,7 @@ let method_decl con_type decl_id name fa =
   let json =
     MethodDeclaration.(
       {
-        name = Name.Key name;
+        name = Util.make_name name;
         container = Predicate.container_decl con_type decl_id;
       }
       |> to_json_key)
@@ -249,7 +251,10 @@ let method_decl con_type decl_id name fa =
 let type_info ~ty sym_pos fa =
   let json =
     TypeInfo.(
-      Key.{ displayType = Type.Key ty; xrefs = Build_fact.hint_xrefs sym_pos }
+      {
+        display_type = Type.Key (ty |> Utils.strip_ns);
+        xrefs = Build_fact.hint_xrefs sym_pos;
+      }
       |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack TypeInfo) json fa
@@ -302,7 +307,7 @@ let build_signature ctx pos_map_opt source_text params ctxs ret fa =
 
 let method_defn ctx source_text meth decl_id fa =
   let m_tparams = Util.remove_generated_tparams meth.m_tparams in
-  let typeParams =
+  let type_params =
     List.map m_tparams ~f:(Build_fact.type_param ctx source_text)
   in
   let (signature, fa) =
@@ -315,10 +320,10 @@ let method_defn ctx source_text meth decl_id fa =
       meth.m_ret
       fa
   in
-  let readonlyRet =
-    Option.map meth.m_readonly_ret ~f:(fun _ -> ReadonlyKind.ReadOnly)
+  let readonly_ret =
+    Option.map meth.m_readonly_ret ~f:(fun _ -> ReadonlyKind.Readonly)
   in
-  let isReadonlyThis =
+  let is_readonly_this =
     if meth.m_readonly_this then
       Some meth.m_readonly_this
     else
@@ -329,15 +334,15 @@ let method_defn ctx source_text meth decl_id fa =
       {
         declaration = MethodDeclaration.Id decl_id;
         signature;
-        visibility = Visibility.(of_visibility meth.m_visibility);
-        isAbstract = meth.m_abstract;
-        isAsync = is_async meth.m_fun_kind;
-        isFinal = meth.m_final;
-        isStatic = meth.m_static;
+        visibility = Util.(make_visibility meth.m_visibility);
+        is_abstract = meth.m_abstract;
+        is_async = is_async meth.m_fun_kind;
+        is_final = meth.m_final;
+        is_static = meth.m_static;
         attributes = Build_fact.attributes source_text meth.m_user_attributes;
-        typeParams;
-        readonlyRet;
-        isReadonlyThis;
+        type_params;
+        readonly_ret;
+        is_readonly_this;
       }
       |> to_json_key)
   in
@@ -347,11 +352,10 @@ let method_overrides
     meth_name base_cont_name base_cont_type der_cont_name der_cont_type fa =
   let json =
     MethodOverrides.(
-      Key.
-        {
-          derived = Build_fact.method_decl meth_name der_cont_name der_cont_type;
-          base = Build_fact.method_decl meth_name base_cont_name base_cont_type;
-        }
+      {
+        derived = Build_fact.method_decl meth_name der_cont_name der_cont_type;
+        base = Build_fact.method_decl meth_name base_cont_name base_cont_type;
+      }
       |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack MethodOverrides) json fa
@@ -367,10 +371,10 @@ let property_defn ctx source_text prop decl_id fa =
       {
         declaration = PropertyDeclaration.Id decl_id;
         type_ : Type.t option;
-        visibility = Visibility.(of_visibility prop.cv_visibility);
-        isFinal = prop.cv_final;
-        isAbstract = prop.cv_abstract;
-        isStatic = prop.cv_is_static;
+        visibility = Util.(make_visibility prop.cv_visibility);
+        is_final = prop.cv_final;
+        is_abstract = prop.cv_abstract;
+        is_static = prop.cv_is_static;
         attributes = Build_fact.attributes source_text prop.cv_user_attributes;
       }
       |> to_json_key)
@@ -411,7 +415,7 @@ let type_const_defn ctx source_text tc decl_id fa =
     TypeConstDefinition.(
       {
         declaration = TypeConstDeclaration.Id decl_id;
-        kind = TypeConstKind.(of_ast_const_kind tc.c_tconst_kind);
+        kind = Util.(make_type_const_kind tc.c_tconst_kind);
         type_;
         attributes =
           Build_fact.attributes source_text tc.c_tconst_user_attributes;
@@ -421,9 +425,7 @@ let type_const_defn ctx source_text tc decl_id fa =
   Fact_acc.add_fact Predicate.(Hack TypeConstDefinition) json fa
 
 let enum_decl name fa =
-  let json =
-    EnumDeclaration.({ name = QName.(Key (of_string name)) } |> to_json_key)
-  in
+  let json = EnumDeclaration.({ name = Util.make_qname name } |> to_json_key) in
   Fact_acc.add_fact Predicate.(Hack EnumDeclaration) json fa
 
 let enum_defn ctx source_text enm enum_id enum_data enumerators fa =
@@ -431,7 +433,7 @@ let enum_defn ctx source_text enm enum_id enum_data enumerators fa =
   let fa = namespace_decl_opt enm.c_namespace fa in
   let (includes, fa) = parent_decls_enum ctx enum_data.e_includes fa in
   let (module_, fa) = module_field enm.c_module enm.c_internal fa in
-  let enumConstraint =
+  let enum_constraint =
     Option.map enum_data.e_constraint ~f:(fun x ->
         Type.Key (Util.get_type_from_hint ctx x))
   in
@@ -439,13 +441,13 @@ let enum_defn ctx source_text enm enum_id enum_data enumerators fa =
     EnumDefinition.(
       {
         declaration = EnumDeclaration.Id enum_id;
-        enumBase = Type.Key (Util.get_type_from_hint ctx enum_data.e_base);
+        enum_base = Type.Key (Util.get_type_from_hint ctx enum_data.e_base);
         enumerators;
         attributes = Build_fact.attributes source_text enm.c_user_attributes;
         includes;
-        isEnumClass = Aast.is_enum_class enm;
+        is_enum_class = Aast.is_enum_class enm;
         module_;
-        enumConstraint;
+        enum_constraint;
       }
       |> to_json_key)
   in
@@ -454,14 +456,17 @@ let enum_defn ctx source_text enm enum_id enum_data enumerators fa =
 let enumerator decl_id const_name fa =
   let json =
     Enumerator.(
-      { name = Name.Key const_name; enumeration = EnumDeclaration.Id decl_id }
+      {
+        name = Util.make_name const_name;
+        enumeration = EnumDeclaration.Id decl_id;
+      }
       |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack Enumerator) json fa
 
 let func_decl name fa =
   let json =
-    FunctionDeclaration.({ name = QName.(Key (of_string name)) } |> to_json_key)
+    FunctionDeclaration.({ name = Util.make_qname name } |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack FunctionDeclaration) json fa
 
@@ -469,7 +474,7 @@ let func_defn ctx source_text fd decl_id fa =
   let elem = fd.fd_fun in
   let fa = namespace_decl_opt fd.fd_namespace fa in
   let fd_tparams = Util.remove_generated_tparams fd.fd_tparams in
-  let typeParams =
+  let type_params =
     List.map fd_tparams ~f:(Build_fact.type_param ctx source_text)
   in
   let (module_, fa) = module_field fd.fd_module fd.fd_internal fa in
@@ -483,18 +488,18 @@ let func_defn ctx source_text fd decl_id fa =
       elem.f_ret
       fa
   in
-  let readonlyRet =
-    Option.map elem.f_readonly_ret ~f:(fun _ -> ReadonlyKind.ReadOnly)
+  let readonly_ret =
+    Option.map elem.f_readonly_ret ~f:(fun _ -> ReadonlyKind.Readonly)
   in
   let json =
     FunctionDefinition.(
       {
         declaration = FunctionDeclaration.Id decl_id;
         signature;
-        isAsync = is_async elem.f_fun_kind;
+        is_async = is_async elem.f_fun_kind;
         attributes = Build_fact.attributes source_text elem.f_user_attributes;
-        typeParams;
-        readonlyRet;
+        type_params;
+        readonly_ret;
         module_;
       }
       |> to_json_key)
@@ -514,13 +519,13 @@ let module_defn _ctx source_text elem decl_id fa =
 
 let typedef_decl name fa =
   let json =
-    TypedefDeclaration.({ name = QName.(Key (of_string name)) } |> to_json_key)
+    TypedefDeclaration.({ name = Util.make_qname name } |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack TypedefDeclaration) json fa
 
 let typedef_defn ctx source_text elem decl_id fa =
   let fa = namespace_decl_opt elem.t_namespace fa in
-  let isTransparent =
+  let is_transparent =
     match elem.t_vis with
     | Transparent -> true
     | CaseType
@@ -528,7 +533,7 @@ let typedef_defn ctx source_text elem decl_id fa =
     | OpaqueModule ->
       false
   in
-  let typeParams =
+  let type_params =
     List.map elem.t_tparams ~f:(Build_fact.type_param ctx source_text)
   in
   let (module_, fa) = module_field elem.t_module elem.t_internal fa in
@@ -536,9 +541,9 @@ let typedef_defn ctx source_text elem decl_id fa =
     TypedefDefinition.(
       {
         declaration = TypedefDeclaration.Id decl_id;
-        isTransparent;
+        is_transparent;
         attributes = Build_fact.attributes source_text elem.t_user_attributes;
-        typeParams;
+        type_params;
         module_;
       }
       |> to_json_key)
@@ -547,8 +552,7 @@ let typedef_defn ctx source_text elem decl_id fa =
 
 let gconst_decl name fa =
   let json =
-    GlobalConstDeclaration.(
-      { name = QName.(Key (of_string name)) } |> to_json_key)
+    GlobalConstDeclaration.({ name = Util.make_qname name } |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack GlobalConstDeclaration) json fa
 
@@ -569,7 +573,7 @@ let gconst_defn ctx source_text elem decl_id fa =
 let decl_loc ~path pos declaration fa =
   let json =
     DeclarationLocation.(
-      { declaration; file = File.(Key path); span = ByteSpan.(of_pos pos) }
+      { declaration; file = File.(Key path); span = Util.(make_byte_span pos) }
       |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack DeclarationLocation) json fa
@@ -577,7 +581,7 @@ let decl_loc ~path pos declaration fa =
 let decl_comment ~path pos declaration fa =
   let json =
     DeclarationComment.(
-      { declaration; file = File.Key path; span = ByteSpan.of_pos pos }
+      { declaration; file = File.Key path; span = Util.make_byte_span pos }
       |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack DeclarationComment) json fa
@@ -585,7 +589,7 @@ let decl_comment ~path pos declaration fa =
 let decl_span ~path pos declaration fa =
   let json =
     DeclarationSpan.(
-      { declaration; file = File.Key path; span = ByteSpan.of_pos pos }
+      { declaration; file = File.Key path; span = Util.make_byte_span pos }
       |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack DeclarationSpan) json fa
@@ -595,26 +599,25 @@ let file_lines ~path sourceText fa =
     Line_break_map.offsets_to_line_lengths
       sourceText.Full_fidelity_source_text.offset_map
   in
-  let endsInNewline = Util.ends_in_newline sourceText in
-  let hasUnicodeOrTabs = Util.has_tabs_or_multibyte_codepoints sourceText in
+  let ends_in_newline = Util.ends_in_newline sourceText in
+  let has_unicode_or_tabs = Util.has_tabs_or_multibyte_codepoints sourceText in
   let json =
     FileLines.(
       to_json_key
-        { file = File.Key path; lengths; endsInNewline; hasUnicodeOrTabs })
+        { file = File.Key path; lengths; ends_in_newline; has_unicode_or_tabs })
   in
   Fact_acc.add_fact Predicate.(Src FileLines) json fa
 
 let file_xrefs ~path fact_map fa =
   let json =
     FileXRefs.(
-      Key.{ file = File.Key path; xrefs = Build_fact.xrefs fact_map }
-      |> to_json_key)
+      { file = File.Key path; xrefs = Build_fact.xrefs fact_map } |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack FileXRefs) json fa
 
 let file_decls ~path declarations fa =
   let json =
-    FileDeclarations.(Key.{ file = File.Key path; declarations } |> to_json_key)
+    FileDeclarations.({ file = File.Key path; declarations } |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack FileDeclarations) json fa
 
@@ -622,11 +625,12 @@ let method_occ receiver_class name fa =
   let json =
     MethodOccurrence.(
       {
-        name = Name.Key name;
-        className =
+        name = Util.make_name name;
+        class_name =
           (match receiver_class with
           | SymbolOccurrence.UnknownClass -> None
-          | SymbolOccurrence.ClassName className -> Some (Name.Key className));
+          | SymbolOccurrence.ClassName class_name ->
+            Some (Util.make_name class_name));
       }
       |> to_json_key)
   in
@@ -646,7 +650,7 @@ let file_call ~path pos ~callee_infos ~call_args ~dispatch_arg fa =
     FileCall.(
       {
         file = File.Key path;
-        callee_span = ByteSpan.(of_pos pos);
+        callee_span = Util.(make_byte_span pos);
         callee_xref;
         dispatch_arg;
         receiver_type;
@@ -660,15 +664,15 @@ let file_call ~path pos ~callee_infos ~call_args ~dispatch_arg fa =
 let global_namespace_alias ~from ~to_ fa =
   let json =
     GlobalNamespaceAlias.(
-      { from = Name.(Key from); to_ = NamespaceQName.(Key (of_string to_)) }
+      { from = Name.(Key from); to_ = Util.make_namespaceqname to_ }
       |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack GlobalNamespaceAlias) json fa
 
 let indexerInputsHash key hashes fa =
-  let key = IndexerInputHash.(key |> to_json_key) in
+  let key = IndexerInputsHash.(key |> to_json_key) in
   let value =
-    IndexerInputHash.(List.map hashes ~f:Md5.to_binary |> to_json_value)
+    IndexerInputsHash.(List.map hashes ~f:Md5.to_binary |> to_json_value)
   in
   Fact_acc.add_fact Predicate.(Hack IndexerInputsHash) key ~value fa
 

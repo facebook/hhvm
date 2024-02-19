@@ -35,7 +35,8 @@
   pos
   relative_path
   utils_core
-  write_symbol_info))
+  write_symbol_info
+  glean_schema))
 
 (test
  (name posSpanTinyTest)

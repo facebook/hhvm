@@ -2,14 +2,12 @@
  (name write_symbol_info)
  (wrapped true)
  (modules
-  glean_schema
   sym_def
-  gencode
+  gencode_utils
   indexable
   file_info
   add_fact
   build_fact
-  fact_id
   xrefs
   util
   sym_hash
@@ -20,6 +18,7 @@
   entrypoint
   predicate)
  (libraries
+  glean_schema
   ast_provider
   naming_table
   tast_provider

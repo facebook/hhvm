@@ -7,7 +7,7 @@
  *)
 
 open Hh_prelude
-open Glean_schema.Hack
+open Hack
 module Fact_acc = Predicate.Fact_acc
 
 let call_handler ~path fa_ref (pos_map : Xrefs.pos_map) =
@@ -29,7 +29,7 @@ let call_handler ~path fa_ref (pos_map : Xrefs.pos_map) =
             | Some (Xrefs.{ target; _ } :: _) ->
               (* there shouldn't be more than one target for a symbol in that
                  position *)
-              Some (Argument.XRef target)
+              Some (Argument.Xref target)
             | _ -> None)
           | _ -> None
         in
@@ -252,7 +252,7 @@ let receiver_type occ =
       (Declaration.Container
          (ContainerDeclaration.Class_
             (ClassDeclaration.Key
-               { ClassDeclaration.name = QName.Key (QName.of_string receiver) })))
+               { ClassDeclaration.name = Util.make_qname receiver })))
   | _ -> None
 
 (* given symbols occurring in a file, compute the maps of xrefs *)
@@ -280,7 +280,7 @@ let process_xrefs ctx symbols fa : Xrefs.t * Fact_acc.t =
               let receiver_type = receiver_type occ in
               let target =
                 XRefTarget.Occurrence
-                  Occurrence.{ method_ = MethodOccurrence.Id target_id }
+                  (Occurrence.Method (MethodOccurrence.Id target_id))
               in
               let xrefs =
                 Xrefs.add xrefs target_id pos Xrefs.{ target; receiver_type }

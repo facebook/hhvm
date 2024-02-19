@@ -12,7 +12,7 @@ open Hh_json.Access
 open Hh_json_helpers
 open OUnit2
 open Write_symbol_info
-open Glean_schema.Hack
+open Hack
 module Fact_acc = Predicate.Fact_acc
 
 let extract_facts_from_obj pred_name = function
@@ -121,8 +121,7 @@ let test_build_xrefs _test_ctxt =
   let decl_name = "TestDecl" in
   let target =
     XRefTarget.Declaration
-      (Declaration.ModuleDeclaration
-         ModuleDeclaration.(Key { name = Name.Key decl_name }))
+      (Declaration.Module ModuleDeclaration.(Key { name = Name.Key decl_name }))
   in
   let target_id = Fact_id.next () in
   let ref_pos =

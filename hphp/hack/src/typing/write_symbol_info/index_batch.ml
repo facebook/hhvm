@@ -16,8 +16,8 @@ module Fact_acc = Predicate.Fact_acc
 
 let process_source_text _ctx fa File_info.{ path; source_text; _ } =
   let text = Full_fidelity_source_text.text source_text in
-  match Gencode.get_gencode_status text with
-  | Gencode.
+  match Gencode_utils.get_gencode_status text with
+  | Gencode_utils.
       {
         is_generated = true;
         fully_generated;

@@ -9,22 +9,24 @@
 open Aast
 open Ast_defs
 open Hh_prelude
-open Glean_schema.Hack
-open Glean_schema.Src
+open Hack
+open Src
 
 let method_decl meth_name con_name con_type =
-  let qname = QName.(Key (of_string con_name)) in
+  let qname = Util.make_qname con_name in
+  let name = Util.make_name meth_name in
   let container = Predicate.container_decl_qname con_type qname in
-  MethodDeclaration.(Key { name = Name.Key meth_name; container })
+  MethodDeclaration.(Key { name; container })
 
 let attributes source_text attrs =
   List.map attrs ~f:(fun attr ->
       let (_, name) = attr.ua_name in
+      let name = Util.make_name name in
       let parameters =
         List.fold_right attr.ua_params ~init:[] ~f:(fun expr acc ->
             Util.ast_expr_to_string_stripped source_text expr :: acc)
       in
-      UserAttribute.(Key { name = Name.Key name; parameters; qname = None }))
+      UserAttribute.(Key { name; parameters; qname = None }))
 
 let call_arguments arguments =
   let argument span arg_opt = CallArgument.{ span; argument = arg_opt } in
@@ -40,7 +42,7 @@ let constraint_ ctx (kind, hint) =
   let type_string = Util.get_type_from_hint ctx hint in
   Constraint.
     {
-      constraintKind = ConstraintKind.of_ast_constraint_kind kind;
+      constraint_kind = Util.make_constraint_kind kind;
       type_ = Type.Key type_string;
     }
 
@@ -51,26 +53,27 @@ let signature
     (ctxs_hints : Aast.contexts option)
     ~ret_ty
     ~return_info =
-  let hint_to_ctx hint = Context.Key (Util.get_context_from_hint ctx hint) in
+  let hint_to_ctx hint = Context_.Key (Util.get_context_from_hint ctx hint) in
   let f (_pos, hint) = List.map ~f:hint_to_ctx hint in
   let ctxs_hints = Option.map ctxs_hints ~f in
   let param (p, type_xref, ty) =
     Parameter.
       {
-        name = Name.Key p.param_name;
+        name = Util.make_name p.param_name;
         type_ = Option.map ~f:(fun x -> Type.Key x) ty;
-        defaultValue =
+        default_value =
           Option.map p.param_expr ~f:(fun expr ->
-              Util.ast_expr_to_string source_text expr);
-        isInout =
+              Util.strip_nested_quotes
+                (Util.ast_expr_to_string source_text expr));
+        is_inout =
           (match p.param_callconv with
           | Pinout _ -> true
           | Pnormal -> false);
-        isVariadic = p.param_is_variadic;
+        is_variadic = p.param_is_variadic;
         attributes = attributes source_text p.param_user_attributes;
-        typeInfo = Option.map ~f:(fun x -> TypeInfo.Id x) type_xref;
+        type_info = Option.map ~f:(fun x -> TypeInfo.Id x) type_xref;
         readonly =
-          Option.map ~f:(fun _ -> ReadonlyKind.ReadOnly) p.param_readonly;
+          Option.map ~f:(fun _ -> ReadonlyKind.Readonly) p.param_readonly;
       }
   in
   let parameters = List.map params ~f:param in
@@ -80,17 +83,18 @@ let signature
         returns = Option.map ~f:(fun x -> Type.Key x) ret_ty;
         parameters;
         contexts = ctxs_hints;
-        returnsTypeInfo = Option.map ~f:(fun x -> TypeInfo.Id x) return_info;
+        returns_type_info = Option.map ~f:(fun x -> TypeInfo.Id x) return_info;
       })
 
 let type_param ctx source_text tp =
   let (_, name) = tp.tp_name in
+  let name = Util.make_name name in
   let constraints = List.map tp.tp_constraints ~f:(constraint_ ctx) in
   TypeParameter.
     {
-      name = Name.Key name;
-      variance = Variance.of_ast_variance tp.tp_variance;
-      reifyKind = ReifyKind.of_ast_reifyKind tp.tp_reified;
+      name;
+      variance = Util.make_variance tp.tp_variance;
+      reify_kind = Util.make_reify_kind tp.tp_reified;
       constraints;
       attributes = attributes source_text tp.tp_user_attributes;
     }

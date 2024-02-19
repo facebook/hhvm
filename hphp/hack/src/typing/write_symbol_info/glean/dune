@@ -1,0 +1,18 @@
+; @generated
+; regenerate: buck2 run fbcode//glean/schema/gen:gen-schema  -- --ocaml fbcode/hphp/hack/src/typing/write_symbol_info/schema --dir DEST_DIR
+(library
+ (name glean_schema)
+ (wrapped false)
+(modules
+ util
+ fact_id
+ builtin
+ gencode
+ hack
+ src)
+(libraries
+ utils_core
+ base64)
+(preprocess
+ (pps ppx_deriving.std)))
+

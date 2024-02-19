@@ -8,7 +8,7 @@
 
 open Hh_prelude
 open Hh_json
-open Glean_schema.Hack
+open Hack
 
 (* Predicate types for the JSON facts emitted *)
 type hack =

@@ -10,7 +10,7 @@
  * Helper fact builder functions
  *)
 
-open Glean_schema.Hack
+open Hack
 
 val call_arguments : (Argument.t option * Pos.t) list -> CallArgument.t list
 

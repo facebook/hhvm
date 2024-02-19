@@ -69,3 +69,21 @@ val namespace_ast_to_pos_id :
 (* remove generated parameters of the form T/[ctx $f]*)
 val remove_generated_tparams :
   ('a, 'b) Aast_defs.tparam list -> ('a, 'b) Aast_defs.tparam list
+
+val make_namespaceqname : string -> Hack.NamespaceQName.t
+
+val make_name : string -> Hack.Name.t
+
+val make_qname : string -> Hack.QName.t
+
+val make_constraint_kind : Ast_defs.constraint_kind -> Hack.ConstraintKind.t
+
+val make_visibility : Aast.visibility -> Hack.Visibility.t
+
+val make_type_const_kind : Aast.class_typeconst -> Hack.TypeConstKind.t
+
+val make_byte_span : 'a Pos.pos -> Src.ByteSpan.t
+
+val make_variance : Ast_defs.variance -> Hack.Variance.t
+
+val make_reify_kind : Ast_defs.reify_kind -> Hack.ReifyKind.t

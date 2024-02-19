@@ -37,9 +37,9 @@ class PrefixSelectorRoute {
 
   PrefixSelectorRoute() = default;
 
-  PrefixSelectorRoute(
-      RouteHandleFactory<RouteHandleIf>& factory,
-      const folly::dynamic& json) {
+  // This should be RouteHandleFactory<RouteHandleIf> but we mock it in tests.
+  template <typename Factory>
+  PrefixSelectorRoute(Factory& factory, const folly::dynamic& json) {
     // if json is not PrefixSelectorRoute, just treat it as a wildcard.
     if (!json.isObject() || !json.count("type") || !json["type"].isString() ||
         json["type"].stringPiece() != "PrefixSelectorRoute") {

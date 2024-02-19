@@ -378,8 +378,7 @@ let autocomplete_shape_key autocomplete_context env fields id =
 
     List.iter (TShapeMap.keys fields) ~f:add
 
-let autocomplete_member
-    ~is_static autocomplete_context env ety_env class_ cid id =
+let autocomplete_member ~is_static autocomplete_context env class_ cid id =
   (* This is used for instance "$x->|" and static "Class1::|" members. *)
   if is_auto_complete (snd id) then (
     (* Detect usage of "parent::|" which can use both static and instance *)
@@ -424,20 +423,6 @@ let autocomplete_member
      fun list ->
       List.sort ~compare:(fun (a, _) (b, _) -> String.compare a b) list
     in
-
-    let check_where_constraints wc : bool =
-      let (_, eo) =
-        Typing_phase.check_where_constraints
-          ~in_class:true
-          ~use_pos:Pos.none
-          ~ety_env
-          ~definition_pos:Pos_or_decl.none
-          (Tast_env.tast_env_as_typing_env env)
-          wc
-      in
-      is_none eo
-    in
-
     (* There's no reason for us to sort -- we can expect our client to do its
        own sorting of our results -- but having a sorted list here makes our tests
        more stable. *)
@@ -471,15 +456,7 @@ let autocomplete_member
            class_
            cid
            (Cls.methods class_ |> sort))
-        ~f:(fun (s, ty, i) ->
-          let satisfies_where_constraints =
-            match get_node (strip_supportdyn_decl ty) with
-            | Tfun { ft_where_constraints; _ } ->
-              check_where_constraints ft_where_constraints
-            | _ -> true
-          in
-          if satisfies_where_constraints then
-            add FileInfo.SI_ClassMethod (s, ty, i));
+        ~f:(add FileInfo.SI_ClassMethod);
       List.iter
         (get_class_elt_types
            ~is_method:false
@@ -809,16 +786,6 @@ let fun_accepts_first_arg (env : Tast_env.env) (f : fun_elt) (arg_ty : locl_ty)
     | _ -> false)
   | _ -> false
 
-(** Attempt to reconstruct the tparam substitution applied to class_ty *)
-let reconstruct_tparam_subst env class_ty class_ : Typing_defs.expand_env =
-  let actual_types =
-    match get_node (expand_and_strip_supportdyn env class_ty) with
-    | Tclass (_, _, tl) -> tl
-    | _ -> []
-  in
-  let substs = Decl_subst.make_locl (Cls.tparams class_) actual_types in
-  { Typing_defs.empty_expand_env with substs }
-
 (** Fetch decls for all the [fun_names] and filter to those where the first argument
     is compatible with [arg_ty]. *)
 let compatible_fun_decls
@@ -935,13 +902,11 @@ let autocomplete_typed_member
          Decl_provider.get_class (Tast_env.get_ctx env) cname
          |> Decl_entry.to_option
          |> Option.iter ~f:(fun class_ ->
-                let ety_env = reconstruct_tparam_subst env class_ty class_ in
                 let cid = Option.map cid ~f:to_nast_class_id_ in
                 autocomplete_member
                   ~is_static
                   autocomplete_context
                   env
-                  ety_env
                   class_
                   cid
                   mid))
@@ -1901,8 +1866,6 @@ let visitor
       super#on_Class_const env cid mid
 
     method! on_Obj_get env obj mid ognf =
-      let ty = get_type obj in
-      let ty = expand_and_strip_dynamic env ty in
       (match mid with
       | (_, _, Aast.Id mid) ->
         autocomplete_hack_fake_arrow env obj mid naming_table;
@@ -1910,7 +1873,7 @@ let visitor
           ~is_static:false
           autocomplete_context
           env
-          ty
+          (get_type obj)
           None
           mid
       | _ -> ());
@@ -2015,7 +1978,6 @@ let visitor
                        ~is_static:false
                        autocomplete_context
                        env
-                       empty_expand_env
                        c
                        (Some cid)
                        id

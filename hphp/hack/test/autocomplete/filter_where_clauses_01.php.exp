@@ -1,4 +1,0 @@
-toEqual
-  INSERT toEqual(${1:\$expected})
-  function(T $expected): void
-SORT TEXT: none

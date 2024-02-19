@@ -14,9 +14,9 @@
 
 #include <folly/Range.h>
 #include <folly/container/F14Set.h>
+#include <glog/logging.h>
 
 #include "mcrouter/lib/fbi/cpp/LowerBoundPrefixMap.h"
-#include "mcrouter/lib/fbi/cpp/Trie.h"
 
 namespace facebook {
 namespace memcache {

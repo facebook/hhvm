@@ -7475,10 +7475,8 @@ end = struct
       loop env 1
     in
     let env = Env.open_tyvars env pos in
-    (fun (env, tb) ->
-      let ((env, ty_err_opt), res) =
-        (Typing_solver.close_tyvars_and_solve env, tb)
-      in
+    (fun (env, res) ->
+      let (env, ty_err_opt) = Typing_solver.close_tyvars_and_solve env in
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
       (env, res))
     @@

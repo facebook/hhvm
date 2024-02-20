@@ -695,6 +695,27 @@ Array HHVM_FUNCTION(objprof_get_data,
   return objs.toArray();
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+/* Function that inits the scan of the memory and count of class pointers
+*  It also includes one entry per memoized function, including the number of
+*  times it was called, and the total size of its cache. We will overload the
+*  ObjprofObjectStats struct to include this information
+    type ObjprofObjectStats = shape(
+      'instances'        => int,   // total number of cache entries for this function
+      'bytes'            => int,   // total sum of all caches for the function
+      ...
+    );
+*/
+Array HHVM_FUNCTION(objprof_get_data_extended,
+  UNUSED int64_t flags = ObjprofFlags::DEFAULT,
+  UNUSED const Array& exclude_list = Array()
+) {
+  // Create response
+  DictInit objs(0);
+  return objs.toArray();
+}
+
 Array HHVM_FUNCTION(objprof_get_paths,
   int64_t flags = ObjprofFlags::DEFAULT,
   const Array& exclude_list = Array()
@@ -921,6 +942,7 @@ struct objprofExtension final : Extension {
 
   void moduleRegisterNative() override {
     HHVM_FALIAS(HH\\objprof_get_data, objprof_get_data);
+    HHVM_FALIAS(HH\\objprof_get_data_extended, objprof_get_data_extended);
     HHVM_FALIAS(HH\\objprof_get_paths, objprof_get_paths);
     HHVM_FALIAS(HH\\thread_memory_stats, thread_memory_stats);
     HHVM_FALIAS(HH\\thread_mark_stack, thread_mark_stack);

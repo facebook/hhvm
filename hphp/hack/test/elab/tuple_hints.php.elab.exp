@@ -93,6 +93,7 @@ Program(
                         "keyset": "HH\\keyset",
                         "meth_caller": "HH\\meth_caller",
                         "objprof_get_data": "HH\\objprof_get_data",
+                        "objprof_get_data_extended": "HH\\objprof_get_data_extended",
                         "objprof_get_paths": "HH\\objprof_get_paths",
                         "package_exists": "HH\\package_exists",
                         "server_warmup_status": "HH\\server_warmup_status",

@@ -49,6 +49,11 @@ namespace HH {
     varray<string> $exclude_list = vec[],
   ): darray<string, ObjprofObjectStats>; // auto-imported from HH namespace
 
+  function objprof_get_data_extended(
+    int $flags = \OBJPROF_FLAGS_DEFAULT,
+    varray<string> $exclude_list = vec[],
+  ): darray<string, ObjprofObjectStats>; // auto-imported from HH namespace
+
   function objprof_get_paths(
     int $flags = \OBJPROF_FLAGS_DEFAULT,
     varray<string> $exclude_list = vec[],

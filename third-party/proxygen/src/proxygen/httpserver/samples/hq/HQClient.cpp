@@ -212,11 +212,15 @@ void HQClient::connectSuccess() {
     requestGaps_.emplace_back(folly::to<uint32_t>(s));
   }
   if (requestGaps_.size() == 1) {
-    for (uint32_t i = 0; i < httpPaths_.size() - 2; ++i) {
+    // #gaps must be one less than #paths, since gaps occur between downloads.
+    // Already one gap in dequeue, so copy in #paths-2 more.
+    for (int32_t i = 0; i < static_cast<int32_t>(httpPaths_.size()) - 2; ++i) {
       requestGaps_.emplace_back(requestGaps_.front());
     }
   }
-  if (httpPaths_.size() != requestGaps_.size() + 1) {
+  // Check that there is exactly one gap between each path download.
+  // Ignore gaps_ms flag with only one httpPath.
+  if (httpPaths_.size() > 1 && httpPaths_.size() != requestGaps_.size() + 1) {
     throw std::runtime_error(
         "Number of gaps must be one (same gap between all paths) or one less "
         "than number of paths.");

@@ -112,6 +112,9 @@ template <int N> struct EmptyHeader {
   size_t startHash() const { always_assert(false); }
   void moved() {}
   bool needsMixing() const { return false; }
+  FuncId getFuncId() const {
+    return FuncId::Invalid;
+  }
 };
 // Shared, fixed size case. The head just stores a FuncId (to distinguish
 // different functions), but the number of keys is a constant.
@@ -128,6 +131,9 @@ template <int N> struct FuncIdHeader {
   size_t startHash() const { always_assert(false); }
   void moved() {}
   bool needsMixing() const { return true; }
+  FuncId getFuncId() const {
+    return funcId;
+  }
   FuncId funcId;
 };
 // Generic case. Both the function and key count are stored (and are
@@ -144,6 +150,9 @@ struct GenericHeader {
   size_t startHash() const { return id.asParam(); }
   void moved() { id.setKeyCount(0); }
   bool needsMixing() const { return true; }
+  FuncId getFuncId() const {
+    return id.getFuncId();
+  }
   GenericMemoId id;
 };
 
@@ -207,6 +216,10 @@ template <int N, typename H> struct FixedStorage : private H {
     stringTags = castStringTags(o);
   }
 
+  FuncId getFuncId() const {
+    return header().getFuncId();
+  }
+
   // The key elements are a fixed size, and we use a bitset to know which ones
   // are strings.
   std::array<KeyElem, N> elems;
@@ -261,6 +274,10 @@ struct UnboundStorage {
   Header& header() { return header_; }
   const Header& header() const { return header_; }
 
+  FuncId getFuncId() const {
+    return header().getFuncId();
+
+  }
   // We don't store the int/string markers for keys in a compacted bitset, so we
   // can't take advantage of some optimizations.
   static constexpr bool HasStringTags = false;
@@ -359,6 +376,11 @@ template <typename S> struct Key {
       hash = hash_int64(hash);
     }
     return std::uint32_t(hash) | (std::size_t(hash) << 32);
+  }
+
+  FuncId getFuncId() const {
+    // storage contains header, which contains funcId in all shared caches
+    return storage.getFuncId();
   }
 
   TYPE_SCAN_CUSTOM() {

@@ -74,23 +74,72 @@ let find_candidate ctx tast selection : candidate option =
   in
   visitor#go ctx tast
 
-let edits_of_candidate { expr_pos } : Code_action_types.edit list =
-  [Code_action_types.{ pos = Pos.shrink_to_start expr_pos; text = "await " }]
+let pos_of_offset path source_text offset : Pos.t =
+  let (line, col) =
+    Full_fidelity_source_text.offset_to_position source_text offset
+  in
+  let bol = offset - col + 1 in
+  let triple = (line, bol, offset) in
+  Pos.make_from_lnum_bol_offset ~pos_file:path ~pos_start:triple ~pos_end:triple
 
-let refactor_of_candidate path candidate =
+let find_modifier_edits path source_text positioned_tree pos :
+    Code_action_types.edit list option =
+  let module Syn = Full_fidelity_positioned_syntax in
+  let parents =
+    let root = Provider_context.PositionedSyntaxTree.root positioned_tree in
+    let offset =
+      let (line, start, _) = Pos.info_pos pos in
+      Full_fidelity_source_text.position_to_offset source_text (line, start)
+    in
+    Syn.parentage root offset
+  in
+  parents
+  |> List.map ~f:Syn.syntax
+  |> List.find_map ~f:(function
+         | Syn.LambdaExpression
+             { lambda_async = Syn.{ syntax = Missing; _ } as node; _ } -> begin
+           Syn.offset node
+           |> Option.map ~f:(fun offset ->
+                  [
+                    Code_action_types.
+                      {
+                        pos = pos_of_offset path source_text offset;
+                        text = "async ";
+                      };
+                  ])
+         end
+         | Syn.LambdaExpression _ -> Some []
+         | _ -> None)
+
+let edits_of_candidate ctx entry { expr_pos } : Code_action_types.edit list =
+  let path = entry.Provider_context.path in
+  let source_text = Ast_provider.compute_source_text ~entry in
+  let positioned_tree = Ast_provider.compute_cst ~ctx ~entry in
+
+  find_modifier_edits path source_text positioned_tree expr_pos
+  |> Option.value ~default:[]
+  |> ( @ )
+       [
+         Code_action_types.
+           { pos = Pos.shrink_to_start expr_pos; text = "await " };
+       ]
+
+let refactor_of_candidate ctx entry candidate =
   let edits =
-    lazy (Relative_path.Map.singleton path (edits_of_candidate candidate))
+    lazy
+      (Relative_path.Map.singleton
+         entry.Provider_context.path
+         (edits_of_candidate ctx entry candidate))
   in
   Code_action_types.Refactor.{ title = "await expression"; edits }
 
 let find ~entry selection ctx =
   if Pos.length selection <> 0 then
-    let path = entry.Provider_context.path in
     let { Tast_provider.Compute_tast.tast; _ } =
       Tast_provider.compute_tast_quarantined ~ctx ~entry
     in
     find_candidate ctx tast.Tast_with_dynamic.under_normal_assumptions selection
-    |> Option.map ~f:(refactor_of_candidate path)
+    |> Option.map ~f:(refactor_of_candidate ctx entry)
     |> Option.to_list
   else
     []

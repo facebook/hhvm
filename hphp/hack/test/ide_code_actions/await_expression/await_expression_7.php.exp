@@ -12,11 +12,11 @@ JSON for selected code action:
       "FILE.php":[
         {
           "newText":"await ",
-          "range":{"end":{"character":37,"line":9},"start":{"character":37,"line":9}}
+          "range":{"end":{"character":26,"line":10},"start":{"character":26,"line":10}}
         },
         {
           "newText":"async ",
-          "range":{"end":{"character":15,"line":9},"start":{"character":15,"line":9}}
+          "range":{"end":{"character":11,"line":9},"start":{"character":11,"line":9}}
         }
       ]
     }
@@ -33,8 +33,12 @@ async function gen_int(): Awaitable<int> {
   return 1;
 }
 
-
-async function repro(): Awaitable<mixed> {
-  // We should offer the refactoring.
-  return await async () ==> /*range-start*/await gen_int()/*range-end*/ + 3;
+function example(): Awaitable<mixed> {
+  return () ==> {
+    // `asnyc` should be added to this lambda, not the one above
+    return async () ==> {
+      $_ = /*range-start*/await gen_int()/*range-end*/ + 3;
+    }
+  }
 }
+

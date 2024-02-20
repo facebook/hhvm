@@ -6,6 +6,6 @@ async function gen_int(): Awaitable<int> {
 
 
 async function repro(): Awaitable<mixed> {
-  // We should offer the refactoring. TODO: add `async`
+  // We should offer the refactoring.
   return await () ==> /*range-start*/gen_int()/*range-end*/ + 3;
 }

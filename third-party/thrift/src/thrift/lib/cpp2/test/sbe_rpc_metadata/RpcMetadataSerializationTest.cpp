@@ -43,6 +43,38 @@ using namespace apache::thrift::sbe;
 
 const auto kEmptyString = std::string("");
 
+TEST(RpcMetadataSerializationTest, TestDecodeMessageHeader) {
+  std::unique_ptr<folly::IOBuf> buf = folly::IOBuf::create(64);
+  auto metadata = MessageWrapper<RequestRpcMetadata, MessageHeader>();
+  metadata.wrapForEncode(*buf);
+  metadata->protocol(sbe::ProtocolId::COMPACT);
+  metadata->kind(sbe::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  metadata->otherMetadataCount(0);
+  metadata->putName(std::string("test_name"));
+  metadata->putInteractionMetadata(kEmptyString);
+  metadata->putOptionalMetdata(kEmptyString);
+  metadata.completeEncoding(*buf);
+
+  auto header = decodeMessageHeader<MessageHeader>(*buf);
+  EXPECT_EQ(header.templateId(), RequestRpcMetadata::sbeTemplateId());
+}
+
+TEST(RpcMetadataSerializationTest, TestDecodeTemplateId) {
+  std::unique_ptr<folly::IOBuf> buf = folly::IOBuf::create(64);
+  auto metadata = MessageWrapper<RequestRpcMetadata, MessageHeader>();
+  metadata.wrapForEncode(*buf);
+  metadata->protocol(sbe::ProtocolId::COMPACT);
+  metadata->kind(sbe::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  metadata->otherMetadataCount(0);
+  metadata->putName(std::string("test_name"));
+  metadata->putInteractionMetadata(kEmptyString);
+  metadata->putOptionalMetdata(kEmptyString);
+  metadata.completeEncoding(*buf);
+
+  auto templateId = decodeTemplateId<MessageHeader>(*buf);
+  EXPECT_EQ(templateId, RequestRpcMetadata::sbeTemplateId());
+}
+
 TEST(RpcMetadataSerializationTest, BasicRoundTripRequestRpcMetadata) {
   std::unique_ptr<folly::IOBuf> buf = folly::IOBuf::create(64);
   auto metadata = MessageWrapper<RequestRpcMetadata, MessageHeader>();

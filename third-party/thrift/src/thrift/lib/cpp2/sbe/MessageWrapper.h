@@ -23,6 +23,41 @@
 
 namespace apache::thrift::sbe {
 
+template <typename MessageHeader>
+MessageHeader decodeMessageHeader(void* buf, size_t length, size_t offset = 0) {
+  return MessageHeader(static_cast<char*>(buf), offset, length, 0);
+}
+
+template <typename MessageHeader>
+MessageHeader decodeMessageHeader(
+    const void* buf, size_t length, size_t offset = 0) {
+  return decodeMessageHeader<MessageHeader>(
+      const_cast<void*>(buf), length, offset);
+}
+
+template <typename MessageHeader>
+MessageHeader decodeMessageHeader(folly::IOBuf& buf) {
+  return decodeMessageHeader<MessageHeader>(buf.writableData(), buf.capacity());
+}
+
+template <typename MessageHeader>
+std::uint16_t decodeTemplateId(void* buf, size_t length, size_t offset = 0) {
+  auto header = decodeMessageHeader<MessageHeader>(buf, length, offset);
+  return header.templateId();
+}
+
+template <typename MessageHeader>
+std::uint16_t decodeTemplateId(
+    const void* buf, size_t length, size_t offset = 0) {
+  return decodeTemplateId<MessageHeader>(
+      const_cast<void*>(buf), length, offset);
+}
+
+template <typename MessageHeader>
+std::uint16_t decodeTemplateId(folly::IOBuf& buf) {
+  return decodeTemplateId<MessageHeader>(buf.writableData(), buf.capacity());
+}
+
 /**
  * A wrapper around a SBE flyweight that makes it easier to encode and decode.
  * Has helper methods to make it easier to deal with sub messages, i.e. a

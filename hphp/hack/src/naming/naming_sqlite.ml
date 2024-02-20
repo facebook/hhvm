@@ -762,6 +762,7 @@ let save_file_infos db_name file_info_map ~base_content_version =
           let per_file =
             save_file_info db stmt_cache path acc.checksum file_info
           in
+          let () = HackEventLogger.calling_ocaml_naming_table () in
 
           {
             files_added = acc.files_added + per_file.files_added;
@@ -865,6 +866,8 @@ let copy_and_update
           let per_file =
             save_file_info new_db stmt_cache path acc.checksum file_info
           in
+          let () = HackEventLogger.calling_ocaml_naming_table () in
+
           {
             files_added = acc.files_added + per_file.files_added;
             symbols_added = acc.symbols_added + per_file.symbols_added;

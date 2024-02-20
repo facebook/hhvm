@@ -1045,6 +1045,13 @@ Optional<Symbol> reverseLink(Handle handle) {
   return it->second.sym;
 }
 
+Optional<Symbol> reverseLinkExact(Handle handle) {
+  Guard g(s_allocMutex);
+  auto const it = s_handleTable.find(handle);
+  if (it == s_handleTable.end()) return std::nullopt;
+  return it->second.sym;
+}
+
 namespace {
 local::RegisterConfig s_rdsLocalConfigRegistration({
   .rdsInitFunc =

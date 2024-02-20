@@ -432,6 +432,13 @@ bool testAndSetBit(size_t bit);
  */
 Optional<Symbol> reverseLink(Handle handle);
 
+/*
+ * Table mapping handles to their symbols.
+ * Only returns a symbol if the handle is exact, unlike reverseLink(),
+ * which returns true if the handle is within range of a symbol.
+ */
+Optional<Symbol> reverseLinkExact(Handle handle);
+
 //////////////////////////////////////////////////////////////////////
 
 /*

@@ -1,3 +1,3 @@
 <?hh
-
-=/*range-start*/$x/*range-end*/;
+   =$x;
+//  ^ at-caret

@@ -11,11 +11,11 @@ JSON for selected code action:
       "FILE.php":[
         {
           "newText":"debugger_dump(",
-          "range":{"end":{"character":20,"line":5},"start":{"character":4,"line":5}}
+          "range":{"end":{"character":5,"line":5},"start":{"character":4,"line":5}}
         },
         {
           "newText":")",
-          "range":{"end":{"character":35,"line":5},"start":{"character":35,"line":5}}
+          "range":{"end":{"character":20,"line":5},"start":{"character":20,"line":5}}
         }
       ]
     }
@@ -32,5 +32,6 @@ Applied edit for code action:
 // The tests in //hphp/hack/test/quickfixes exercise quickfixes more.
 function f(int $x): void {
     debugger_dump($x/*range-end*/);
+  // ^ at-caret
 }
 

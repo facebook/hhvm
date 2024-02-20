@@ -33,7 +33,7 @@ let errors_to_quickfixes
   let errors_here =
     List.filter errors ~f:(fun e ->
         let e_pos = User_error.get_pos e in
-        Pos.contains selection e_pos || Pos.contains e_pos selection)
+        Pos.contains e_pos selection)
   in
   let quickfixes = List.bind ~f:User_error.quickfixes errors_here in
   let standard_quickfixes =

@@ -1,6 +1,5 @@
 Code actions available:
 ------------------------------------------
-Change to ::foo (CodeActionKind: quickfix)
 Extract into variable (CodeActionKind: refactor)
 slog variable (CodeActionKind: refactor)
 Extract into method (CodeActionKind: refactor)

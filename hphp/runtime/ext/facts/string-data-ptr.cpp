@@ -81,6 +81,14 @@ bool StringPtr::fsame(const StringPtr& s) const noexcept {
   return m_impl->fsame(s.m_impl);
 }
 
+bool StringPtr::tsame_slice(std::string_view a, std::string_view b) noexcept {
+  return tstrcmp_slice(a, b) == 0;
+}
+
+bool StringPtr::fsame_slice(std::string_view a, std::string_view b) noexcept {
+  return fstrcmp_slice(a, b) == 0;
+}
+
 StringPtr makeStringPtr(const StringData& s) {
   return StringPtr{makeStaticString(&s)};
 }

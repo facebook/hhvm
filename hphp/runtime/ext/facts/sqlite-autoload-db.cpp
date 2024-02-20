@@ -558,7 +558,7 @@ struct FunctionStmts {
             " @function,"
             " (SELECT pathid FROM all_paths WHERE path=@path)"
             ")")},
-        m_getFunctionPath{db.prepare("SELECT path FROM function_paths"
+        m_getFunctionPath{db.prepare("SELECT path, function FROM function_paths"
                                      " JOIN all_paths USING (pathid)"
                                      " WHERE function=@function")},
         m_getPathFunctions{db.prepare("SELECT function FROM function_paths"
@@ -1174,13 +1174,16 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     query.step();
   }
 
-  std::vector<fs::path> getFunctionPath(std::string_view function) override {
+  std::vector<std::pair<fs::path, std::string>> getFunctionPath(
+      std::string_view function) override {
     auto query = m_txn.query(m_functionStmts.m_getFunctionPath);
     query.bindString("@function", function);
     XLOGF(DBG9, "Running {}", query.sql());
-    std::vector<fs::path> results;
+    std::vector<std::pair<fs::path, std::string>> results;
     for (query.step(); query.row(); query.step()) {
-      results.emplace_back(std::string{query.getString(0)});
+      auto path = std::string{query.getString(0)};
+      auto actual_func = std::string{query.getString(1)};
+      results.emplace_back(path, actual_func);
     }
     return results;
   }

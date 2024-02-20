@@ -182,6 +182,24 @@ bool StringPtr::StringPtr::fsame(const StringPtr& s) const noexcept {
       m_impl->impl()->size());
 }
 
+bool StringPtr::tsame_slice(std::string_view a, std::string_view b) noexcept {
+  auto lower = [](std::string_view t) {
+    std::string s{t};
+    std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+    return s;
+  };
+  return lower(a) == lower(b);
+}
+
+bool StringPtr::fsame_slice(std::string_view a, std::string_view b) noexcept {
+  auto lower = [](std::string_view t) {
+    std::string s{t};
+    std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+    return s;
+  };
+  return lower(a) == lower(b);
+}
+
 StringPtr makeStringPtr(const StringData& s) {
   auto it = s_stringTable.find(StringPtr{&s});
   if (it != s_stringTable.end()) {
@@ -448,7 +466,7 @@ struct MockAutoloadDB : public AutoloadDB {
       (std::string_view function, const std::filesystem::path& path),
       (override));
   MOCK_METHOD(
-      std::vector<std::filesystem::path>,
+      (std::vector<std::pair<std::filesystem::path, std::string>>),
       getFunctionPath,
       (std::string_view function),
       (override));

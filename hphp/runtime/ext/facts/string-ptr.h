@@ -103,6 +103,8 @@ struct StringPtr {
    */
   bool tsame(const StringPtr& s) const noexcept;
   bool fsame(const StringPtr& s) const noexcept;
+  static bool tsame_slice(std::string_view, std::string_view) noexcept;
+  static bool fsame_slice(std::string_view, std::string_view) noexcept;
 
   const StringData* get() const noexcept {
     return m_impl;

@@ -215,8 +215,8 @@ struct AutoloadDB {
   virtual void insertFunction(
       std::string_view function,
       const std::filesystem::path& path) = 0;
-  virtual std::vector<std::filesystem::path> getFunctionPath(
-      std::string_view function) = 0;
+  virtual std::vector<std::pair<std::filesystem::path, std::string>>
+  getFunctionPath(std::string_view function) = 0;
   virtual std::vector<std::string> getPathFunctions(
       const std::filesystem::path& path) = 0;
 

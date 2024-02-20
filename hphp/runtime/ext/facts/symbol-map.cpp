@@ -1383,8 +1383,19 @@ Path SymbolMap::getSymbolPath(Symbol<k> symbol) {
           switch (k) {
             case SymKind::Type:
               return db->getTypePath(symbol.slice());
-            case SymKind::Function:
-              return db->getFunctionPath(symbol.slice());
+            case SymKind::Function: {
+              auto pairs = db->getFunctionPath(symbol.slice());
+              std::vector<fs::path> out;
+              out.reserve(pairs.size());
+              for (auto& [path, actual] : pairs) {
+                // Function names in the function_paths table are NOCASE.
+                // Filter out DB results using a logging/enforcing comparator.
+                if (StringPtr::fsame_slice(actual, symbol.slice())) {
+                  out.emplace_back(std::move(path));
+                }
+              }
+              return out;
+            }
             case SymKind::Constant:
               return db->getConstantPath(symbol.slice());
             case SymKind::Module:

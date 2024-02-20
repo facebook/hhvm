@@ -14,6 +14,10 @@ JSON for selected code action:
           "range":{"end":{"character":16,"line":8},"start":{"character":16,"line":8}}
         },
         {
+          "newText":"Awaitable<mixed>",
+          "range":{"end":{"character":32,"line":7},"start":{"character":27,"line":7}}
+        },
+        {
           "newText":"async ",
           "range":{"end":{"character":9,"line":7},"start":{"character":9,"line":7}}
         }
@@ -33,7 +37,7 @@ async function gen_int(): Awaitable<int> {
 }
 
 class A {
-  public async function repro(): mixed {
+  public async function repro(): Awaitable<mixed> {
     return (int)await gen_int() + 3;
             //  ^ at-caret should be a quickfix (not a refactoring)
   }

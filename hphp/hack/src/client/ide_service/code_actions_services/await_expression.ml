@@ -74,16 +74,20 @@ let find_candidate ctx tast selection : candidate option =
   in
   visitor#go ctx tast
 
-let pos_of_offset path source_text offset : Pos.t =
-  let (line, col) =
-    Full_fidelity_source_text.offset_to_position source_text offset
-  in
-  let bol = offset - col + 1 in
-  let triple = (line, bol, offset) in
-  Pos.make_from_lnum_bol_offset ~pos_file:path ~pos_start:triple ~pos_end:triple
-
-let find_modifier_edits path source_text positioned_tree pos :
+let find_modifier_and_signature_edits path source_text positioned_tree pos :
     Code_action_types.edit list option =
+  let pos_of_offset offset : Pos.t =
+    let (line, col) =
+      Full_fidelity_source_text.offset_to_position source_text offset
+    in
+    let bol = offset - col + 1 in
+    let triple = (line, bol, offset) in
+    Pos.make_from_lnum_bol_offset
+      ~pos_file:path
+      ~pos_start:triple
+      ~pos_end:triple
+  in
+
   let module Syn = Full_fidelity_positioned_syntax in
   let parents =
     let root = Provider_context.PositionedSyntaxTree.root positioned_tree in
@@ -102,10 +106,7 @@ let find_modifier_edits path source_text positioned_tree pos :
            |> Option.map ~f:(fun offset ->
                   [
                     Code_action_types.
-                      {
-                        pos = pos_of_offset path source_text offset;
-                        text = "async ";
-                      };
+                      { pos = pos_of_offset offset; text = "async " };
                   ])
          end
          | Syn.LambdaExpression _ -> Some []
@@ -116,7 +117,12 @@ let find_modifier_edits path source_text positioned_tree pos :
                    {
                      syntax =
                        FunctionDeclarationHeader
-                         { function_modifiers; function_keyword; _ };
+                         {
+                           function_modifiers;
+                           function_keyword;
+                           function_type;
+                           _;
+                         };
                      _;
                    };
                _;
@@ -128,37 +134,63 @@ let find_modifier_edits path source_text positioned_tree pos :
                    {
                      syntax =
                        FunctionDeclarationHeader
-                         { function_modifiers; function_keyword; _ };
+                         {
+                           function_modifiers;
+                           function_keyword;
+                           function_type;
+                           _;
+                         };
                      _;
                    };
                _;
              } ->
-           let has_async =
-             match Syn.syntax function_modifiers with
-             | Syn.SyntaxList elements ->
-               elements
-               |> List.map ~f:Syn.syntax
-               |> List.exists ~f:(function
-                      | Syn.Token
-                          Full_fidelity_positioned_token.
-                            { kind = TokenKind.Async; _ } ->
-                        true
-                      | _ -> false)
-             | Syn.Missing -> false
-             | _ -> false
+           let open Option.Let_syntax in
+           let signature_edit_opt =
+             let return_type_string = Syn.text function_type in
+             if
+               (not @@ String.is_prefix return_type_string ~prefix:"Awaitable")
+               && not
+                  @@ String.is_prefix return_type_string ~prefix:"~Awaitable"
+             then
+               let+ return_type_offset = Syn.offset function_type in
+               let pos =
+                 let start_pos = pos_of_offset return_type_offset in
+                 let end_pos =
+                   pos_of_offset (Syn.end_offset function_type + 1)
+                 in
+                 Pos.merge start_pos end_pos
+               in
+               let text = Printf.sprintf "Awaitable<%s>" return_type_string in
+               Code_action_types.{ pos; text }
+             else
+               None
            in
-           if has_async then
-             Some []
-           else
-             Syn.offset function_keyword
-             |> Option.map ~f:(fun offset ->
-                    [
-                      Code_action_types.
-                        {
-                          pos = pos_of_offset path source_text offset;
-                          text = "async ";
-                        };
-                    ])
+           let modifier_edit_opt =
+             let has_async =
+               match Syn.syntax function_modifiers with
+               | Syn.SyntaxList elements ->
+                 elements
+                 |> List.map ~f:Syn.syntax
+                 |> List.exists ~f:(function
+                        | Syn.Token
+                            Full_fidelity_positioned_token.
+                              { kind = TokenKind.Async; _ } ->
+                          true
+                        | _ -> false)
+               | Syn.Missing -> false
+               | _ -> false
+             in
+             if has_async then
+               None
+             else
+               let+ function_keyword_offset = Syn.offset function_keyword in
+               Code_action_types.
+                 {
+                   pos = pos_of_offset function_keyword_offset;
+                   text = "async ";
+                 }
+           in
+           Some (List.filter_opt [signature_edit_opt; modifier_edit_opt])
          | _ -> None)
 
 let edits_of_candidate ctx entry { expr_pos } : Code_action_types.edit list =
@@ -166,7 +198,7 @@ let edits_of_candidate ctx entry { expr_pos } : Code_action_types.edit list =
   let source_text = Ast_provider.compute_source_text ~entry in
   let positioned_tree = Ast_provider.compute_cst ~ctx ~entry in
 
-  find_modifier_edits path source_text positioned_tree expr_pos
+  find_modifier_and_signature_edits path source_text positioned_tree expr_pos
   |> Option.value ~default:[]
   |> ( @ )
        [

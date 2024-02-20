@@ -14,10 +14,6 @@ JSON for selected code action:
           "range":{"end":{"character":14,"line":8},"start":{"character":14,"line":8}}
         },
         {
-          "newText":"Awaitable<mixed>",
-          "range":{"end":{"character":23,"line":7},"start":{"character":18,"line":7}}
-        },
-        {
           "newText":"async ",
           "range":{"end":{"character":0,"line":7},"start":{"character":0,"line":7}}
         }
@@ -36,7 +32,7 @@ async function gen_int(): Awaitable<int> {
   return 1;
 }
 
-
+// The refactor should not change the return type in this case
 async function repro(): Awaitable<mixed> {
   return (int)await gen_int() + 3;
            //  ^ at-caret should be a quickfix (not a refactoring)

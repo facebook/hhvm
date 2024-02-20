@@ -197,7 +197,12 @@ val as_telemetry_summary : t -> Telemetry.t
 Does not include fixme'd errors.
 
 [limit] parameter to avoid blowing up our systems. *)
-val as_telemetry : limit:int -> t -> Telemetry.t
+val as_telemetry :
+  limit:int ->
+  with_context_limit:int ->
+  error_to_context:(finalized_error -> string) ->
+  t ->
+  Telemetry.t
 
 val choose_code_opt : t -> int option
 

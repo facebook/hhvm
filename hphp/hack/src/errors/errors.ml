@@ -866,17 +866,31 @@ let as_telemetry_summary : t -> Telemetry.t =
             ~n:5
             (drop_fixmed_errors_in_files errors))
 
-let as_telemetry ~limit (errors : t) : Telemetry.t =
+let as_telemetry
+    ~limit
+    ~with_context_limit
+    ~(error_to_context : finalized_error -> string)
+    (errors : t) : Telemetry.t =
+  let module L = struct
+    type error_to_process = {
+      error: error;
+      include_context: bool;
+    }
+  end in
   let errors = drop_fixmed_errors_in_files errors in
   let total_count = error_count errors in
-  let (errors, _, is_truncated) =
+  let ( (errors : L.error_to_process list Relative_path.Map.t),
+        _,
+        _,
+        is_truncated ) =
     Relative_path.Map.fold
       errors
-      ~init:(Relative_path.Map.empty, 0, false)
+      ~init:(Relative_path.Map.empty, 0, 0, false)
       ~f:(fun
            path
            file_errors
-           ((errors_acc, errors_acc_count, is_truncated) as acc)
+           ((errors_acc, errors_acc_count, with_context_count, is_truncated) as
+           acc)
          ->
         if is_truncated then
           acc
@@ -890,18 +904,38 @@ let as_telemetry ~limit (errors : t) : Telemetry.t =
             else
               (file_errors, file_errors_count)
           in
+          let file_errors =
+            let remaining_with_context =
+              with_context_limit - with_context_count
+            in
+            List.mapi file_errors ~f:(fun i error ->
+                L.{ error; include_context = remaining_with_context > i })
+          in
           ( Relative_path.Map.add errors_acc ~key:path ~data:file_errors,
             errors_acc_count + file_errors_count,
+            with_context_count + file_errors_count,
             is_truncated ))
   in
   (* Convert to Scuba loggable data *)
-  let error_to_telemetry (e : error) : Telemetry.t =
-    let e = User_error.to_relative e in
-    Telemetry.create ()
-    |> Telemetry.int_ ~key:"error_code" ~value:(User_error.get_code e)
-    |> Telemetry.json_
-         ~key:"error_json"
-         ~value:(User_error.to_json ~filename_to_string:Relative_path.suffix e)
+  let error_to_telemetry (err : L.error_to_process) : Telemetry.t =
+    let rel_err = User_error.to_relative err.L.error in
+    let telemetry =
+      Telemetry.create ()
+      |> Telemetry.int_ ~key:"error_code" ~value:(User_error.get_code rel_err)
+      |> Telemetry.json_
+           ~key:"error_json"
+           ~value:
+             (User_error.to_json
+                ~filename_to_string:Relative_path.suffix
+                rel_err)
+    in
+    if err.L.include_context then
+      telemetry
+      |> Telemetry.string_
+           ~key:"error_context"
+           ~value:(error_to_context @@ User_error.to_absolute err.L.error)
+    else
+      telemetry
   in
   let by_file =
     List.fold

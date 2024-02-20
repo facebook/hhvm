@@ -973,7 +973,12 @@ let type_check_core genv env start_time ~check_reason cgroup_steps =
     ~start_t:type_check_start_t;
   HackEventLogger.TypingErrors.log_errors
     ~type_check_end_id
-    ~data:(Errors.as_telemetry ~limit:1000 env.errorl);
+    ~data:
+      (Errors.as_telemetry
+         ~limit:1000
+         ~with_context_limit:10
+         ~error_to_context:Contextual_error_formatter.to_string
+         env.errorl);
   ( env,
     {
       CheckStats.reparse_count;

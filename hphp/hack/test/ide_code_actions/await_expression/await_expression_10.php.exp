@@ -11,11 +11,11 @@ JSON for selected code action:
       "FILE.php":[
         {
           "newText":"await ",
-          "range":{"end":{"character":14,"line":8},"start":{"character":14,"line":8}}
+          "range":{"end":{"character":16,"line":8},"start":{"character":16,"line":8}}
         },
         {
           "newText":"async ",
-          "range":{"end":{"character":0,"line":7},"start":{"character":0,"line":7}}
+          "range":{"end":{"character":9,"line":7},"start":{"character":9,"line":7}}
         }
       ]
     }
@@ -32,8 +32,10 @@ async function gen_int(): Awaitable<int> {
   return 1;
 }
 
-
-async function repro(): mixed {
-  return (int)await gen_int() + 3;
-           //  ^ at-caret should be a quickfix (not a refactoring)
+class A {
+  public async function repro(): mixed {
+    return (int)await gen_int() + 3;
+            //  ^ at-caret should be a quickfix (not a refactoring)
+  }
 }
+

@@ -109,6 +109,56 @@ let find_modifier_edits path source_text positioned_tree pos :
                   ])
          end
          | Syn.LambdaExpression _ -> Some []
+         | Syn.FunctionDeclaration
+             {
+               function_declaration_header =
+                 Syn.
+                   {
+                     syntax =
+                       FunctionDeclarationHeader
+                         { function_modifiers; function_keyword; _ };
+                     _;
+                   };
+               _;
+             }
+         | Syn.MethodishDeclaration
+             {
+               methodish_function_decl_header =
+                 Syn.
+                   {
+                     syntax =
+                       FunctionDeclarationHeader
+                         { function_modifiers; function_keyword; _ };
+                     _;
+                   };
+               _;
+             } ->
+           let has_async =
+             match Syn.syntax function_modifiers with
+             | Syn.SyntaxList elements ->
+               elements
+               |> List.map ~f:Syn.syntax
+               |> List.exists ~f:(function
+                      | Syn.Token
+                          Full_fidelity_positioned_token.
+                            { kind = TokenKind.Async; _ } ->
+                        true
+                      | _ -> false)
+             | Syn.Missing -> false
+             | _ -> false
+           in
+           if has_async then
+             Some []
+           else
+             Syn.offset function_keyword
+             |> Option.map ~f:(fun offset ->
+                    [
+                      Code_action_types.
+                        {
+                          pos = pos_of_offset path source_text offset;
+                          text = "async ";
+                        };
+                    ])
          | _ -> None)
 
 let edits_of_candidate ctx entry { expr_pos } : Code_action_types.edit list =

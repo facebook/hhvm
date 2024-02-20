@@ -696,152 +696,186 @@ Array HHVM_FUNCTION(objprof_get_data,
 }
 
 namespace {
-  /* Given an object, this function goes through the class,
-  *  finds all memoized methods and attributes their footprint
-  */
-  void attributeMemoizedFootprint(const ObjectData* obj, hphp_fast_map<ClassProp, ObjprofMetrics>* histogram,
-                                  bool objprof_props_mode,
-                                  hphp_fast_set<const HPHP::MemoCacheBase*>& seen_caches) {
-    auto cls = obj->getVMClass();
-    auto clsName = cls->name()->toCppString();
-    auto method_count = cls->numMethods();
+/* Given an object, this function goes through the class,
+*  finds all memoized methods and attributes their footprint
+*/
+void attributeMemoizedFootprint(const ObjectData* obj, hphp_fast_map<ClassProp, ObjprofMetrics>* histogram,
+                                bool objprof_props_mode,
+                                hphp_fast_set<const HPHP::MemoCacheBase*>& seen_caches) {
+  auto cls = obj->getVMClass();
+  auto clsName = cls->name()->toCppString();
+  auto method_count = cls->numMethods();
 
-    for (Slot i = 0; i < method_count; ++i) {
-        auto const m = cls->getMethod(i);
-        if(m->isMemoizeWrapper() && !m->isStatic() && m->cls() == cls) {
+  for (Slot i = 0; i < method_count; ++i) {
+      auto const m = cls->getMethod(i);
+      if(m->isMemoizeWrapper() && !m->isStatic() && m->cls() == cls) {
 
-          auto memo_pair = cls->memoSlotForFunc(m->getFuncId());
-          auto memoslot = obj->memoSlot(memo_pair.first);
-          UNUSED auto isShared = memo_pair.second;
+        auto memo_pair = cls->memoSlotForFunc(m->getFuncId());
+        auto memoslot = obj->memoSlot(memo_pair.first);
+        UNUSED auto isShared = memo_pair.second;
 
-          if(memoslot->isCache()) {
-            auto cache = memoslot->getCache();
-            // if we have already seen this cache, skip to avoid double counting
-            if(!cache || (seen_caches.find(cache) != seen_caches.end())) {
-              continue;
-            }
-            std::vector<std::pair<FuncId, size_t>> cache_mem_footprints;
-            cache->heapSizesPerCacheEntry(cache_mem_footprints);
-            std::string func_name;
-            for (auto e : cache_mem_footprints) {
-              if(e.first == FuncId::Invalid) {
-                // this should only happen if cache is non-shared
-                assertx(!isShared);
-                func_name = m->name()->toCppString();
-              }
-              else {
-                func_name = Func::fromFuncId(e.first)->name()->toCppString();
-              }
-              auto histogram_key = objprof_props_mode ?
-                                   std::make_pair(clsName, func_name) :
-                                   std::make_pair(clsName, "");
-              auto& metrics = (*histogram)[histogram_key];
-              // we certainly have visited getObjSize before on this object due to call order
-              // which means this object has instance count of at least 1
-              // if objprof_props_mode is true, then we'd have the key as "Cls::Func" so increment instances
-              // otherwise the key is "Cls", don't increment instances
-              if(objprof_props_mode) {
-                metrics.instances += 1;
-              }
-              metrics.bytes += e.second;
-              metrics.bytes_rel = metrics.bytes / metrics.instances;
-            }
-            seen_caches.insert(cache);
+        if(memoslot->isCache()) {
+          auto cache = memoslot->getCache();
+          // if we have already seen this cache, skip to avoid double counting
+          if(!cache || (seen_caches.find(cache) != seen_caches.end())) {
+            continue;
           }
-          else {
-            // value type
-            size_t size = tvHeapSize(*(memoslot->getValue()));
+          std::vector<std::pair<FuncId, size_t>> cache_mem_footprints;
+          cache->heapSizesPerCacheEntry(cache_mem_footprints);
+          std::string func_name;
+          for (auto e : cache_mem_footprints) {
+            if(e.first == FuncId::Invalid) {
+              // this should only happen if cache is non-shared
+              assertx(!isShared);
+              func_name = m->name()->toCppString();
+            }
+            else {
+              func_name = Func::fromFuncId(e.first)->name()->toCppString();
+            }
             auto histogram_key = objprof_props_mode ?
-                                std::make_pair(clsName, m->name()->toCppString()) :
-                                std::make_pair(clsName, "");
+                                  std::make_pair(clsName, func_name) :
+                                  std::make_pair(clsName, "");
             auto& metrics = (*histogram)[histogram_key];
+            // we certainly have visited getObjSize before on this object due to call order
+            // which means this object has instance count of at least 1
+            // if objprof_props_mode is true, then we'd have the key as "Cls::Func" so increment instances
+            // otherwise the key is "Cls", don't increment instances
             if(objprof_props_mode) {
-                metrics.instances += 1;
-              }
-            metrics.bytes += size;
+              metrics.instances += 1;
+            }
+            metrics.bytes += e.second;
             metrics.bytes_rel = metrics.bytes / metrics.instances;
           }
+          seen_caches.insert(cache);
         }
+        else {
+          // value type
+          size_t size = tvHeapSize(*(memoslot->getValue()));
+          auto histogram_key = objprof_props_mode ?
+                              std::make_pair(clsName, m->name()->toCppString()) :
+                              std::make_pair(clsName, "");
+          auto& metrics = (*histogram)[histogram_key];
+          if(objprof_props_mode) {
+              metrics.instances += 1;
+            }
+          metrics.bytes += size;
+          metrics.bytes_rel = metrics.bytes / metrics.instances;
+        }
+      }
+  }
+}
+template<class Fn> void iterateRDSRoots(const Fn& fn) {
+  auto rds = rds::header();
+  if (rds) {
+    rds::forEachNormalAlloc(fn);
+    rds::forEachLocalAlloc(fn);
+  }
+  rds::local::iterateRoots(fn);
+}
+
+struct RDSVisitorParams {
+  hphp_fast_map<ClassProp, ObjprofMetrics>* histogram;
+  bool objprof_props_mode;
+  const void* h;
+};
+
+
+// Helper to selectively process RDS types we are interested in
+// (e.g. static memo caches) and ignore other RDS types
+struct StaticAndMemoProps : public boost::static_visitor<> {
+  explicit StaticAndMemoProps(RDSVisitorParams p) : params_(p) {}
+  template<typename T>
+  void operator()(UNUSED const T& actualType) const {
+    // Do nothing for the types we're not explicitly interested in
+  }
+  void operator()(const rds::StaticMemoValue& actualType) const {
+    // Process the StaticMemoValue type, simply a pointer to TV
+    auto histogram = params_.histogram;
+    bool objprof_props_mode = params_.objprof_props_mode;
+    const void* h = params_.h;
+    auto tv = reinterpret_cast<const TypedValue*>(h);
+    assertx(tv);
+    auto func = Func::fromFuncId(actualType.funcId);
+    assertx(func);
+
+    auto clsName = func->cls() ? func->cls()->name()->toCppString() : "NoClass";
+    auto histogram_key = objprof_props_mode ?
+                          std::make_pair(clsName, func->name()->toCppString()) :
+                          std::make_pair(clsName, "Static");
+    auto& metrics = (*histogram)[histogram_key];
+
+    /*
+    * Here, we either want per prop data or account for everything at the class level
+    * In either case, the instance count will always be 1 (due to static)
+    * If we want per prop data, we simply assign it into bytes/bytes_rel
+    * If we want class level data, we increment it as there can be many static methods per class
+    */
+    metrics.instances = 1;
+    if(objprof_props_mode) {
+      metrics.bytes = tvHeapSize(*tv);
+      metrics.bytes_rel = tvHeapSize(*tv);
+
+    }
+    else {
+      metrics.bytes += tvHeapSize(*tv);
+      metrics.bytes_rel += tvHeapSize(*tv);
     }
   }
-  template<class Fn> void iterateRDSRoots(const Fn& fn) {
-    auto rds = rds::header();
-    if (rds) {
-      rds::forEachNormalAlloc(fn);
-      rds::forEachLocalAlloc(fn);
-    }
-    rds::local::iterateRoots(fn);
-  }
-
-  struct RDSVisitorParams {
-    hphp_fast_map<ClassProp, ObjprofMetrics>* histogram;
-    bool objprof_props_mode;
-    const void* h;
-  };
-
-
-  // Helper to selectively process RDS types we are interested in
-  // (e.g. static memo caches) and ignore other RDS types
-  struct StaticAndMemoProps : public boost::static_visitor<> {
-    explicit StaticAndMemoProps(RDSVisitorParams p) : params_(p) {}
-    template<typename T>
-    void operator()(UNUSED const T& actualType) const {
-      // Do nothing for the types we're not explicitly interested in
-    }
-    void operator()(const rds::StaticMemoValue& actualType) const {
-      // Process the StaticMemoValue type, simply a pointer to TV
-      auto histogram = params_.histogram;
-      bool objprof_props_mode = params_.objprof_props_mode;
-      const void* h = params_.h;
-      auto tv = reinterpret_cast<const TypedValue*>(h);
-      assertx(tv);
+  void operator()(const rds::StaticMemoCache& actualType) const {
+    // Process the StaticMemoCache type, which is a pointer to a MemoCacheBase
+    auto histogram = params_.histogram;
+    bool objprof_props_mode = params_.objprof_props_mode;
+    const void* h = params_.h;
+    assertx(h);
+    auto cacheAddress = reinterpret_cast<const uint64_t*>(h);
+    // the pointer stored in the cache address should point to the MemoCacheBase
+    auto cache = reinterpret_cast<const MemoCacheBase*>(*cacheAddress);
+    std::vector<std::pair<FuncId, size_t>> cacheMemFootprints;
+    cache->heapSizesPerCacheEntry(cacheMemFootprints);
+    for (auto e : cacheMemFootprints) {
+      assertx(actualType.funcId != FuncId::Invalid);
+      auto cls = Func::fromFuncId(actualType.funcId)->cls();
+      auto clsName = cls ? cls->name()->toCppString() : "NoClass";
       auto func = Func::fromFuncId(actualType.funcId);
       assertx(func);
 
-      auto clsName = func->cls() ? func->cls()->name()->toCppString() : "NoClass";
       auto histogram_key = objprof_props_mode ?
-                           std::make_pair(clsName, func->name()->toCppString()) :
-                           std::make_pair(clsName, "Static");
+                            std::make_pair(clsName, func->name()->toCppString()) :
+                            std::make_pair(clsName, "Static");
       auto& metrics = (*histogram)[histogram_key];
-
-      /*
-      * Here, we either want per prop data or account for everything at the class level
-      * In either case, the instance count will always be 1 (due to static)
-      * If we want per prop data, we simply assign it into bytes/bytes_rel
-      * If we want class level data, we increment it as there can be many static methods per class
-      */
       metrics.instances = 1;
       if(objprof_props_mode) {
-        metrics.bytes = tvHeapSize(*tv);
-        metrics.bytes_rel = tvHeapSize(*tv);
-
+        metrics.bytes = e.second;
+        metrics.bytes_rel = e.second;
       }
       else {
-        metrics.bytes += tvHeapSize(*tv);
-        metrics.bytes_rel += tvHeapSize(*tv);
+        // Class level aggregation, increment
+        metrics.bytes += e.second;
+        metrics.bytes_rel += e.second;
       }
     }
-  private:
-    RDSVisitorParams params_;
-  };
-
-  void attributeStaticMemoizedFootprint(hphp_fast_map<ClassProp, ObjprofMetrics>* histogram,
-                                        bool objprof_props_mode) {
-    /*
-    *  To get the static memoized methods cache sizes, we need to iterate RDS roots
-    *  and find the static memo caches and values.
-    */
-    iterateRDSRoots([&](const void* h, UNUSED size_t size, UNUSED type_scan::Index tyindex) {
-      // get the offset from rds::tl_base so we can lookup the reverse link
-      uint64_t rdsOffset = reinterpret_cast<uint64_t>(h) - reinterpret_cast<uint64_t>(rds::tl_base);
-      auto sym = rds::reverseLinkExact(rdsOffset);
-      if (sym.has_value()) {
-        RDSVisitorParams params{histogram, objprof_props_mode, h};
-        // pass everything to the visitor, it'll do the rest
-        boost::apply_visitor(StaticAndMemoProps(params), sym.value());
-      }
-    });
   }
+private:
+  RDSVisitorParams params_;
+};
+
+void attributeStaticMemoizedFootprint(hphp_fast_map<ClassProp, ObjprofMetrics>* histogram,
+                                      bool objprof_props_mode) {
+  /*
+  *  To get the static memoized methods cache sizes, we need to iterate RDS roots
+  *  and find the static memo caches and values.
+  */
+  iterateRDSRoots([&](const void* h, UNUSED size_t size, UNUSED type_scan::Index tyindex) {
+    // get the offset from rds::tl_base so we can lookup the reverse link
+    uint64_t rdsOffset = reinterpret_cast<uint64_t>(h) - reinterpret_cast<uint64_t>(rds::tl_base);
+    auto sym = rds::reverseLinkExact(rdsOffset);
+    if (sym.has_value()) {
+      RDSVisitorParams params{histogram, objprof_props_mode, h};
+      // pass everything to the visitor, it'll do the rest
+      boost::apply_visitor(StaticAndMemoProps(params), sym.value());
+    }
+  });
+}
 } // anonymous namespace
 
 ///////////////////////////////////////////////////////////////////////////////

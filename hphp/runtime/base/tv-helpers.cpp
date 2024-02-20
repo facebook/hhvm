@@ -134,6 +134,40 @@ bool tvIsPlausible(const TypedValue cell) {
   return true;
 }
 
+
+size_t tvHeapSize(TypedValue input) {
+  switch (type(input)) {
+    case KindOfString:
+      return input.m_data.pstr->heapSize();
+    case KindOfVec:
+    case KindOfDict:
+    case KindOfKeyset:
+      return input.m_data.parr->heapSize();
+    case KindOfObject:
+      return input.m_data.pobj->heapSize();
+    case KindOfResource:
+      return input.m_data.pres->heapSize();
+    case KindOfPersistentDict:
+    case KindOfPersistentVec:
+    case KindOfPersistentKeyset:
+    case KindOfPersistentString:
+    case KindOfRFunc:
+    case KindOfFunc:
+    case KindOfClass:
+    case KindOfLazyClass:
+    case KindOfClsMeth:
+    case KindOfRClsMeth:
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfEnumClassLabel:
+    // returning 0 size here, pointer size accounting should happen at the callsite
+      return 0;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

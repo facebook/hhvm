@@ -2715,7 +2715,7 @@ end = struct
                * they are equal type. *)
               valid env
             else
-              simplify_subtype_shape
+              Subtype_shape.simplify_subtype_shape
                 ~subtype_env
                 ~env
                 ~this_ty
@@ -3170,224 +3170,6 @@ end = struct
               valid env
             | (_, _) -> default_subtype_help env)
           | _ -> default_subtype_help env)))
-
-  and simplify_subtype_shape
-      ~(subtype_env : subtype_env)
-      ~(env : env)
-      ~(this_ty : locl_ty option)
-      ?(super_like = false)
-      (supportdyn_sub, r_sub, shape_kind_sub, fdm_sub)
-      (supportdyn_super, r_super, shape_kind_super, fdm_super) =
-    (*
-    Shape projection for shape type `s` and field `f` (`s |_ f`) is defined as:
-      - if `f` appears in `s` as `f => ty` then `s |_ f` = `Required ty`
-      - if `f` appears in `s` as `?f => ty` then `s |_ f` = `Optional ty`
-      - if `f` does not appear in `s` and `s` is closed, then `s |_ f` = `Absent`
-      - if `f` does not appear in `s` and `s` is open, then `s |_ f` = `Optional mixed`
-
-    EXCEPT
-      - `?f => nothing` should be ignored, and treated as `Absent`.
-        Such a field cannot be given a value, and so is effectively not present.
-  *)
-    let shape_projection ~supportdyn field_name shape_kind shape_map r =
-      let make_supportdyn ty =
-        if
-          supportdyn
-          && not
-               (is_sub_type_for_union_i
-                  env
-                  (LoclType ty)
-                  (LoclType (MakeType.supportdyn_mixed ~mixed_reason:r r)))
-        then
-          MakeType.supportdyn r ty
-        else
-          ty
-      in
-
-      match TShapeMap.find_opt field_name shape_map with
-      | Some { sft_ty; sft_optional } ->
-        (match (deref sft_ty, sft_optional) with
-        | ((_, Tunion []), true) -> `Absent
-        | (_, true) -> `Optional (make_supportdyn sft_ty)
-        | (_, false) -> `Required (make_supportdyn sft_ty))
-      | None ->
-        if TUtils.is_nothing env shape_kind then
-          `Absent
-        else
-          let printable_name =
-            TUtils.get_printable_shape_field_name field_name
-          in
-          let ty =
-            with_reason
-              shape_kind
-              (Reason.Rmissing_optional_field (Reason.to_pos r, printable_name))
-          in
-          `Optional (make_supportdyn ty)
-    in
-    (*
-    For two particular projections `p1` and `p2`, `p1` <: `p2` iff:
-      - `p1` = `Required ty1`, `p2` = `Required ty2`, and `ty1` <: `ty2`
-      - `p1` = `Required ty1`, `p2` = `Optional ty2`, and `ty1` <: `ty2`
-      - `p1` = `Optional ty1`, `p2` = `Optional ty2`, and `ty1` <: `ty2`
-      - `p1` = `Absent`, `p2` = `Optional ty2`
-      - `p1` = `Absent`, `p2` = `Absent`
-    We therefore need to handle all other cases appropriately.
-  *)
-    let simplify_subtype_shape_projection
-        (r_sub, proj_sub) (r_super, proj_super) field_name res =
-      let field_pos = TShapeField.pos field_name in
-      let printable_name = TUtils.get_printable_shape_field_name field_name in
-      match (proj_sub, proj_super) with
-      (***** "Successful" cases - 5 / 9 total cases *****)
-      | (`Required sub_ty, `Required super_ty)
-      | (`Required sub_ty, `Optional super_ty)
-      | (`Optional sub_ty, `Optional super_ty) ->
-        let super_ty = liken ~super_like env super_ty in
-
-        res
-        &&& simplify_subtype
-              ~subtype_env
-              ~sub_supportdyn:
-                (if supportdyn_sub then
-                  Some r_sub
-                else
-                  None)
-              ~this_ty
-              sub_ty
-              super_ty
-      | (`Absent, `Optional _)
-      | (`Absent, `Absent) ->
-        res
-      (***** Error cases - 4 / 9 total cases *****)
-      | (`Required _, `Absent)
-      | (`Optional _, `Absent) ->
-        let ty_err_opt =
-          Option.map
-            subtype_env.on_error
-            ~f:
-              Typing_error.(
-                fun on_error ->
-                  apply_reasons ~on_error
-                  @@ Secondary.Missing_field
-                       {
-                         pos = Reason.to_pos r_super;
-                         decl_pos = field_pos;
-                         name = printable_name;
-                       })
-        in
-        with_error ty_err_opt res
-      | (`Optional _, `Required super_ty) ->
-        let ty_err_opt =
-          Option.map
-            subtype_env.on_error
-            ~f:
-              Typing_error.(
-                fun on_error ->
-                  apply_reasons ~on_error
-                  @@ Secondary.Required_field_is_optional
-                       {
-                         pos = Reason.to_pos r_sub;
-                         decl_pos = Reason.to_pos r_super;
-                         name = printable_name;
-                         def_pos = get_pos super_ty;
-                       })
-        in
-        with_error ty_err_opt res
-      | (`Absent, `Required _) ->
-        let quickfixes_opt =
-          match r_sub with
-          | Reason.Rshape_literal p ->
-            let fix_pos =
-              Pos.shrink_to_end (Pos.shrink_by_one_char_both_sides p)
-            in
-            Some
-              [
-                Quickfix.make
-                  ~title:("Add field " ^ Markdown_lite.md_codify printable_name)
-                  ~new_text:(Printf.sprintf ", '%s' => TODO" printable_name)
-                  fix_pos;
-              ]
-          | _ -> None
-        in
-
-        let ty_err_opt =
-          Option.map
-            subtype_env.on_error
-            ~f:
-              Typing_error.(
-                fun on_error ->
-                  let on_error =
-                    Option.value_map
-                      ~default:on_error
-                      ~f:(Reasons_callback.add_quickfixes on_error)
-                      quickfixes_opt
-                  in
-                  apply_reasons ~on_error
-                  @@ Secondary.Missing_field
-                       {
-                         decl_pos = field_pos;
-                         pos = Reason.to_pos r_sub;
-                         name = printable_name;
-                       })
-        in
-        with_error ty_err_opt res
-    in
-    (* Helper function to project out a field and then simplify subtype *)
-    let shape_project_and_simplify_subtype
-        (supportdyn_sub, r_sub, shape_kind_sub, shape_map_sub)
-        (supportdyn_super, r_super, shape_kind_super, shape_map_super)
-        field_name
-        res =
-      let proj_sub =
-        shape_projection
-          ~supportdyn:supportdyn_sub
-          field_name
-          shape_kind_sub
-          shape_map_sub
-          r_sub
-      in
-      let proj_super =
-        shape_projection
-          ~supportdyn:supportdyn_super
-          field_name
-          shape_kind_super
-          shape_map_super
-          r_super
-      in
-      simplify_subtype_shape_projection
-        (r_sub, proj_sub)
-        (r_super, proj_super)
-        field_name
-        res
-    in
-    match
-      ( TUtils.is_nothing env shape_kind_sub,
-        TUtils.is_nothing env shape_kind_super )
-    with
-    (* An open shape cannot subtype a closed shape *)
-    | (false, true) ->
-      let fail =
-        Option.map
-          subtype_env.on_error
-          ~f:
-            Typing_error.(
-              fun on_error ->
-                apply_reasons ~on_error
-                @@ Secondary.Shape_fields_unknown
-                     {
-                       pos = Reason.to_pos r_sub;
-                       decl_pos = Reason.to_pos r_super;
-                     })
-      in
-      invalid ~fail env
-    (* Otherwise, all projections must subtype *)
-    | _ ->
-      TShapeSet.fold
-        (shape_project_and_simplify_subtype
-           (supportdyn_sub, r_sub, shape_kind_sub, fdm_sub)
-           (supportdyn_super, r_super, shape_kind_super, fdm_super))
-        (TShapeSet.of_list (TShapeMap.keys fdm_sub @ TShapeMap.keys fdm_super))
-        (env, TL.valid)
 
   (* Given a type constructor N that may not be injective (e.g., a newtype)
    * t1 <:v1> u1 /\ ... /\ tn <:vn> un
@@ -5461,6 +5243,243 @@ end = struct
       ~sub_supportdyn
       ~super_like
       cid
+end
+
+and Subtype_shape : sig
+  val simplify_subtype_shape :
+    subtype_env:subtype_env ->
+    env:Typing_env_types.env ->
+    this_ty:Typing_defs.locl_ty option ->
+    ?super_like:bool ->
+    bool
+    * Typing_defs.locl_phase Typing_defs.Reason.t_
+    * Typing_defs.locl_phase Typing_defs.ty
+    * Typing_defs.locl_phase Typing_defs.shape_field_type
+      Typing_defs.TShapeMap.t ->
+    bool
+    * Typing_defs.locl_phase Typing_defs.Reason.t_
+    * Typing_defs.locl_phase Typing_defs.ty
+    * Typing_defs.locl_phase Typing_defs.shape_field_type
+      Typing_defs.TShapeMap.t ->
+    Typing_env_types.env * TL.subtype_prop
+end = struct
+  let simplify_subtype_shape
+      ~(subtype_env : subtype_env)
+      ~(env : env)
+      ~(this_ty : locl_ty option)
+      ?(super_like = false)
+      (supportdyn_sub, r_sub, shape_kind_sub, fdm_sub)
+      (supportdyn_super, r_super, shape_kind_super, fdm_super) =
+    (*
+    Shape projection for shape type `s` and field `f` (`s |_ f`) is defined as:
+      - if `f` appears in `s` as `f => ty` then `s |_ f` = `Required ty`
+      - if `f` appears in `s` as `?f => ty` then `s |_ f` = `Optional ty`
+      - if `f` does not appear in `s` and `s` is closed, then `s |_ f` = `Absent`
+      - if `f` does not appear in `s` and `s` is open, then `s |_ f` = `Optional mixed`
+
+    EXCEPT
+      - `?f => nothing` should be ignored, and treated as `Absent`.
+        Such a field cannot be given a value, and so is effectively not present.
+  *)
+    let shape_projection ~supportdyn field_name shape_kind shape_map r =
+      let make_supportdyn ty =
+        if
+          supportdyn
+          && not
+               (Subtype.is_sub_type_for_union_i
+                  env
+                  (LoclType ty)
+                  (LoclType (MakeType.supportdyn_mixed ~mixed_reason:r r)))
+        then
+          MakeType.supportdyn r ty
+        else
+          ty
+      in
+
+      match TShapeMap.find_opt field_name shape_map with
+      | Some { sft_ty; sft_optional } ->
+        (match (deref sft_ty, sft_optional) with
+        | ((_, Tunion []), true) -> `Absent
+        | (_, true) -> `Optional (make_supportdyn sft_ty)
+        | (_, false) -> `Required (make_supportdyn sft_ty))
+      | None ->
+        if TUtils.is_nothing env shape_kind then
+          `Absent
+        else
+          let printable_name =
+            TUtils.get_printable_shape_field_name field_name
+          in
+          let ty =
+            with_reason
+              shape_kind
+              (Reason.Rmissing_optional_field (Reason.to_pos r, printable_name))
+          in
+          `Optional (make_supportdyn ty)
+    in
+    (*
+    For two particular projections `p1` and `p2`, `p1` <: `p2` iff:
+      - `p1` = `Required ty1`, `p2` = `Required ty2`, and `ty1` <: `ty2`
+      - `p1` = `Required ty1`, `p2` = `Optional ty2`, and `ty1` <: `ty2`
+      - `p1` = `Optional ty1`, `p2` = `Optional ty2`, and `ty1` <: `ty2`
+      - `p1` = `Absent`, `p2` = `Optional ty2`
+      - `p1` = `Absent`, `p2` = `Absent`
+    We therefore need to handle all other cases appropriately.
+  *)
+    let simplify_subtype_shape_projection
+        (r_sub, proj_sub) (r_super, proj_super) field_name res =
+      let field_pos = TShapeField.pos field_name in
+      let printable_name = TUtils.get_printable_shape_field_name field_name in
+      match (proj_sub, proj_super) with
+      (***** "Successful" cases - 5 / 9 total cases *****)
+      | (`Required sub_ty, `Required super_ty)
+      | (`Required sub_ty, `Optional super_ty)
+      | (`Optional sub_ty, `Optional super_ty) ->
+        let super_ty = liken ~super_like env super_ty in
+
+        res
+        &&& Subtype.simplify_subtype
+              ~subtype_env
+              ~sub_supportdyn:
+                (if supportdyn_sub then
+                  Some r_sub
+                else
+                  None)
+              ~this_ty
+              sub_ty
+              super_ty
+      | (`Absent, `Optional _)
+      | (`Absent, `Absent) ->
+        res
+      (***** Error cases - 4 / 9 total cases *****)
+      | (`Required _, `Absent)
+      | (`Optional _, `Absent) ->
+        let ty_err_opt =
+          Option.map
+            subtype_env.on_error
+            ~f:
+              Typing_error.(
+                fun on_error ->
+                  apply_reasons ~on_error
+                  @@ Secondary.Missing_field
+                       {
+                         pos = Reason.to_pos r_super;
+                         decl_pos = field_pos;
+                         name = printable_name;
+                       })
+        in
+        with_error ty_err_opt res
+      | (`Optional _, `Required super_ty) ->
+        let ty_err_opt =
+          Option.map
+            subtype_env.on_error
+            ~f:
+              Typing_error.(
+                fun on_error ->
+                  apply_reasons ~on_error
+                  @@ Secondary.Required_field_is_optional
+                       {
+                         pos = Reason.to_pos r_sub;
+                         decl_pos = Reason.to_pos r_super;
+                         name = printable_name;
+                         def_pos = get_pos super_ty;
+                       })
+        in
+        with_error ty_err_opt res
+      | (`Absent, `Required _) ->
+        let quickfixes_opt =
+          match r_sub with
+          | Reason.Rshape_literal p ->
+            let fix_pos =
+              Pos.shrink_to_end (Pos.shrink_by_one_char_both_sides p)
+            in
+            Some
+              [
+                Quickfix.make
+                  ~title:("Add field " ^ Markdown_lite.md_codify printable_name)
+                  ~new_text:(Printf.sprintf ", '%s' => TODO" printable_name)
+                  fix_pos;
+              ]
+          | _ -> None
+        in
+
+        let ty_err_opt =
+          Option.map
+            subtype_env.on_error
+            ~f:
+              Typing_error.(
+                fun on_error ->
+                  let on_error =
+                    Option.value_map
+                      ~default:on_error
+                      ~f:(Reasons_callback.add_quickfixes on_error)
+                      quickfixes_opt
+                  in
+                  apply_reasons ~on_error
+                  @@ Secondary.Missing_field
+                       {
+                         decl_pos = field_pos;
+                         pos = Reason.to_pos r_sub;
+                         name = printable_name;
+                       })
+        in
+        with_error ty_err_opt res
+    in
+    (* Helper function to project out a field and then simplify subtype *)
+    let shape_project_and_simplify_subtype
+        (supportdyn_sub, r_sub, shape_kind_sub, shape_map_sub)
+        (supportdyn_super, r_super, shape_kind_super, shape_map_super)
+        field_name
+        res =
+      let proj_sub =
+        shape_projection
+          ~supportdyn:supportdyn_sub
+          field_name
+          shape_kind_sub
+          shape_map_sub
+          r_sub
+      in
+      let proj_super =
+        shape_projection
+          ~supportdyn:supportdyn_super
+          field_name
+          shape_kind_super
+          shape_map_super
+          r_super
+      in
+      simplify_subtype_shape_projection
+        (r_sub, proj_sub)
+        (r_super, proj_super)
+        field_name
+        res
+    in
+    match
+      ( TUtils.is_nothing env shape_kind_sub,
+        TUtils.is_nothing env shape_kind_super )
+    with
+    (* An open shape cannot subtype a closed shape *)
+    | (false, true) ->
+      let fail =
+        Option.map
+          subtype_env.on_error
+          ~f:
+            Typing_error.(
+              fun on_error ->
+                apply_reasons ~on_error
+                @@ Secondary.Shape_fields_unknown
+                     {
+                       pos = Reason.to_pos r_sub;
+                       decl_pos = Reason.to_pos r_super;
+                     })
+      in
+      invalid ~fail env
+    (* Otherwise, all projections must subtype *)
+    | _ ->
+      TShapeSet.fold
+        (shape_project_and_simplify_subtype
+           (supportdyn_sub, r_sub, shape_kind_sub, fdm_sub)
+           (supportdyn_super, r_super, shape_kind_super, fdm_super))
+        (TShapeSet.of_list (TShapeMap.keys fdm_sub @ TShapeMap.keys fdm_super))
+        (env, TL.valid)
 end
 
 (* Determines whether the types are definitely disjoint, or whether they might

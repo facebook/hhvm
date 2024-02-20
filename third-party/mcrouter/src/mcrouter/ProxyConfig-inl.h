@@ -128,6 +128,11 @@ ProxyConfig<RouterInfo>::ProxyConfig(
 
   bool enableAsyncDlBroadcast = readBool("enable_async_dl_broadcast", false);
 
+  proxy.router().runtimeFeatures_.enableOdslScuba =
+      readBool("enable_odsl_scuba", false);
+  proxy.router().runtimeFeatures_.enableOdslODS =
+      readBool("enable_odsl_ods", false);
+
   proxyRoute_ = std::make_shared<ProxyRoute<RouterInfo>>(
       proxy,
       routeSelectors,

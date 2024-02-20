@@ -243,6 +243,16 @@ class CarbonRouterInstanceBase {
     axonProxyClientFactory_ = std::move(clientFactory);
   }
 
+  /**
+   * Runtime features that can be enabled from runtime_features block
+   * in routing config
+   */
+  struct RuntimeFeatures {
+    std::atomic<bool> enableOdslScuba = false;
+    std::atomic<bool> enableOdslODS = false;
+  };
+  RuntimeFeatures runtimeFeatures_;
+
  protected:
   void resetMetadata() {
     metadata_.reset();

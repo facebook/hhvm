@@ -1,0 +1,8 @@
+Pass: The normalized size of A should be greater than 3000
+Pass: The normalized size of A should be greater than 3000
+Pass: The normalized size of A::zeroParam1 should be greater than 1000
+Pass: The normalized size of A::zeroParam2 should be greater than 1000
+Pass: The normalized size of A::zeroParam3 should be greater than 1000
+Pass: The normalized size of B::zeroParam1 should be greater than 1000
+Pass: The normalized size of B::zeroParam2 should be greater than 1000
+Pass: The normalized size of B::zeroParam3 should be greater than 1000

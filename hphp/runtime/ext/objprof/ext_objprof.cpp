@@ -764,6 +764,84 @@ namespace {
         }
     }
   }
+  template<class Fn> void iterateRDSRoots(const Fn& fn) {
+    auto rds = rds::header();
+    if (rds) {
+      rds::forEachNormalAlloc(fn);
+      rds::forEachLocalAlloc(fn);
+    }
+    rds::local::iterateRoots(fn);
+  }
+
+  struct RDSVisitorParams {
+    hphp_fast_map<ClassProp, ObjprofMetrics>* histogram;
+    bool objprof_props_mode;
+    const void* h;
+  };
+
+
+  // Helper to selectively process RDS types we are interested in
+  // (e.g. static memo caches) and ignore other RDS types
+  struct StaticAndMemoProps : public boost::static_visitor<> {
+    explicit StaticAndMemoProps(RDSVisitorParams p) : params_(p) {}
+    template<typename T>
+    void operator()(UNUSED const T& actualType) const {
+      // Do nothing for the types we're not explicitly interested in
+    }
+    void operator()(const rds::StaticMemoValue& actualType) const {
+      // Process the StaticMemoValue type, simply a pointer to TV
+      auto histogram = params_.histogram;
+      bool objprof_props_mode = params_.objprof_props_mode;
+      const void* h = params_.h;
+      auto tv = reinterpret_cast<const TypedValue*>(h);
+      assertx(tv);
+      auto func = Func::fromFuncId(actualType.funcId);
+      assertx(func);
+
+      auto clsName = func->cls() ? func->cls()->name()->toCppString() : "NoClass";
+      auto histogram_key = objprof_props_mode ?
+                           std::make_pair(clsName, func->name()->toCppString()) :
+                           std::make_pair(clsName, "Static");
+      auto& metrics = (*histogram)[histogram_key];
+
+      /*
+      * Here, we either want per prop data or account for everything at the class level
+      * In either case, the instance count will always be 1 (due to static)
+      * If we want per prop data, we simply assign it into bytes/bytes_rel
+      * If we want class level data, we increment it as there can be many static methods per class
+      */
+      metrics.instances = 1;
+      if(objprof_props_mode) {
+        metrics.bytes = tvHeapSize(*tv);
+        metrics.bytes_rel = tvHeapSize(*tv);
+
+      }
+      else {
+        metrics.bytes += tvHeapSize(*tv);
+        metrics.bytes_rel += tvHeapSize(*tv);
+      }
+    }
+  private:
+    RDSVisitorParams params_;
+  };
+
+  void attributeStaticMemoizedFootprint(hphp_fast_map<ClassProp, ObjprofMetrics>* histogram,
+                                        bool objprof_props_mode) {
+    /*
+    *  To get the static memoized methods cache sizes, we need to iterate RDS roots
+    *  and find the static memo caches and values.
+    */
+    iterateRDSRoots([&](const void* h, UNUSED size_t size, UNUSED type_scan::Index tyindex) {
+      // get the offset from rds::tl_base so we can lookup the reverse link
+      uint64_t rdsOffset = reinterpret_cast<uint64_t>(h) - reinterpret_cast<uint64_t>(rds::tl_base);
+      auto sym = rds::reverseLinkExact(rdsOffset);
+      if (sym.has_value()) {
+        RDSVisitorParams params{histogram, objprof_props_mode, h};
+        // pass everything to the visitor, it'll do the rest
+        boost::apply_visitor(StaticAndMemoProps(params), sym.value());
+      }
+    });
+  }
 } // anonymous namespace
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -829,6 +907,9 @@ Array HHVM_FUNCTION(objprof_get_data_extended,
     attributeMemoizedFootprint(obj, &histogram, objprof_props_mode, seen_caches);
   });
   issueWarnings(deferred_warnings);
+
+  // Finished iterating over objects, now gather static memoized functions
+  attributeStaticMemoizedFootprint(&histogram, objprof_props_mode);
 
   // Create response
   DictInit objs(histogram.size());

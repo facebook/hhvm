@@ -39,12 +39,11 @@ public class RSocketRpcClientFactory implements RpcClientFactory {
               "thrift.rsocket-max-frame-size", String.valueOf(FrameLengthCodec.FRAME_LENGTH_MASK)));
 
   private static final int KEEP_ALIVE =
-      Integer.parseInt(
-          System.getProperty("thrift.rsocket-keep-alive-ms", String.valueOf(1 << 31 - 1)));
+      Integer.parseInt(System.getProperty("thrift.rsocket-keep-alive-ms", String.valueOf(-1)));
 
   private static final int KEEP_ALIVE_MAX_LIFETIME =
       Integer.parseInt(
-          System.getProperty("thrift.rsocket-keep-max-lifetime-ms", String.valueOf(1 << 31 - 1)));
+          System.getProperty("thrift.rsocket-keep-max-lifetime-ms", String.valueOf(-1)));
 
   static {
     ReactorHooks.init();

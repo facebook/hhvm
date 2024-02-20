@@ -31,8 +31,6 @@
 
 #include <algorithm>
 #include <sstream>
-#include <unordered_set>
-#include <unordered_map>
 #include <vector>
 
 #include "hphp/runtime/base/array-init.h"
@@ -40,6 +38,7 @@
 #include "hphp/runtime/base/object-iterator.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/core/ext_core_closure.h"
@@ -47,6 +46,7 @@
 #include "hphp/runtime/ext/simplexml/ext_simplexml.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/low-ptr.h"
@@ -74,11 +74,11 @@ const StaticString
 
 struct ObjprofObjectReferral {
   uint64_t refs{0};
-  std::unordered_set<const ObjectData*> sources;
+  hphp_fast_set<const ObjectData*> sources;
 };
 struct ObjprofClassReferral {
   uint64_t refs{0};
-  std::unordered_set<Class*> sources;
+  hphp_fast_set<Class*> sources;
 };
 
 struct ObjprofMetrics {
@@ -109,7 +109,7 @@ struct ObjprofState {
   Optional<ObjprofStack> stack;
   Optional<PathsToObject> paths;
   ObjprofValuePtrStack val_stack;
-  const std::unordered_set<std::string>& exclude_classes;
+  const hphp_fast_set<std::string>& exclude_classes;
   ObjprofFlags flags;
   // While iterating the heap objprof is retaining pointers to heap objects,
   // any logic that may reenter (or trigger frees) must be deferred.
@@ -149,7 +149,7 @@ void issueWarnings(std::vector<std::string>& deferred_warnings) {
 bool isObjprofRoot(
   const ObjectData* obj,
   ObjprofFlags flags,
-  const std::unordered_set<std::string>& exclude_classes
+  const hphp_fast_set<std::string>& exclude_classes
 ) {
   using SSWH = c_StaticWaitHandle;
 
@@ -630,7 +630,7 @@ Array HHVM_FUNCTION(objprof_get_data,
   // Create a set of std::strings from the exclude_list provided. This de-dups
   // the exclude_list, and also provides for fast lookup when determining
   // whether a given class is in the exclude_list
-  std::unordered_set<std::string> exclude_classes;
+  hphp_fast_set<std::string> exclude_classes;
   for (ArrayIter iter(exclude_list); iter; ++iter) {
     exclude_classes.insert(iter.second().toString().data());
   }
@@ -695,25 +695,161 @@ Array HHVM_FUNCTION(objprof_get_data,
   return objs.toArray();
 }
 
+namespace {
+  /* Given an object, this function goes through the class,
+  *  finds all memoized methods and attributes their footprint
+  */
+  void attributeMemoizedFootprint(const ObjectData* obj, hphp_fast_map<ClassProp, ObjprofMetrics>* histogram,
+                                  bool objprof_props_mode,
+                                  hphp_fast_set<const HPHP::MemoCacheBase*>& seen_caches) {
+    auto cls = obj->getVMClass();
+    auto method_count = cls->numMethods();
+
+    for (Slot i = 0; i < method_count; ++i) {
+        auto const m = cls->getMethod(i);
+        if(m->isMemoizeWrapper() && !m->isStatic() && m->cls() == cls) {
+
+          auto memo_pair = cls->memoSlotForFunc(m->getFuncId());
+          auto memoslot = obj->memoSlot(memo_pair.first);
+          UNUSED auto isShared = memo_pair.second;
+
+          if(memoslot->isCache()) {
+            auto cache = memoslot->getCache();
+            // if we have already seen this cache, skip to avoid double counting
+            if(!cache || (seen_caches.find(cache) != seen_caches.end())) {
+              continue;
+            }
+            std::vector<std::pair<FuncId, size_t>> cache_mem_footprints;
+            cache->heapSizesPerCacheEntry(cache_mem_footprints);
+            std::string func_name;
+            for (auto e : cache_mem_footprints) {
+              if(e.first == FuncId::Invalid) {
+                // this should only happen if cache is non-shared
+                assertx(!isShared);
+                func_name = m->name()->toCppString();
+              }
+              else {
+                func_name = Func::fromFuncId(e.first)->name()->toCppString();
+              }
+              auto histogram_key = objprof_props_mode ? std::make_pair(cls, func_name) : std::make_pair(cls, "");
+              auto& metrics = (*histogram)[histogram_key];
+              // we certainly have visited getObjSize before on this object due to call order
+              // which means this object has instance count of at least 1
+              // if objprof_props_mode is true, then we'd have the key as "Cls::Func" so increment instances
+              // otherwise the key is "Cls", don't increment instances
+              if(objprof_props_mode) {
+                metrics.instances += 1;
+              }
+              metrics.bytes += e.second;
+              metrics.bytes_rel = metrics.bytes / metrics.instances;
+            }
+            seen_caches.insert(cache);
+          }
+          else {
+            // value type
+            size_t size = tvHeapSize(*(memoslot->getValue()));
+            auto histogram_key = objprof_props_mode ?
+                                std::make_pair(cls, m->name()->toCppString()) :
+                                std::make_pair(cls, "");
+            auto& metrics = (*histogram)[histogram_key];
+            if(objprof_props_mode) {
+                metrics.instances += 1;
+              }
+            metrics.bytes += size;
+            metrics.bytes_rel = metrics.bytes / metrics.instances;
+          }
+        }
+    }
+  }
+} // anonymous namespace
 
 ///////////////////////////////////////////////////////////////////////////////
 /* Function that inits the scan of the memory and count of class pointers
-*  It also includes one entry per memoized function, including the number of
-*  times it was called, and the total size of its cache. We will overload the
-*  ObjprofObjectStats struct to include this information
-    type ObjprofObjectStats = shape(
-      'instances'        => int,   // total number of cache entries for this function
-      'bytes'            => int,   // total sum of all caches for the function
-      ...
-    );
+*  If ObjprofFlags::PER_PROPERTY is set, it includes one entry per memoized function,
+*  including the number of times it was called, and the total size of its cache.
+*  We will overload the ObjProfObjectStats struct to include this information
+*  type ObjprofObjectStats = shape(
+*      'instances'        => int,   // total number of cache entries for this function
+*      'bytes'            => int,   // total sum of all caches for the function
+*      ...
+*    );
+*  If the ObjprofFlags::PER_PROPERTY was not supplied, the outout will summarize
+*  all non static memo cache footprints in the object itself, and all static
+*  memo cache footprints under ::Static title
 */
 Array HHVM_FUNCTION(objprof_get_data_extended,
-  UNUSED int64_t flags = ObjprofFlags::DEFAULT,
-  UNUSED const Array& exclude_list = Array()
+  int64_t flags = ObjprofFlags::DEFAULT,
+  const Array& exclude_list = Array()
 ) {
+  hphp_fast_map<ClassProp, ObjprofMetrics> histogram;
+  hphp_fast_set<const HPHP::MemoCacheBase*> seen_caches;
+  auto objprof_props_mode = (flags & ObjprofFlags::PER_PROPERTY) != 0;
+
+  // Create a set of std::strings from the exclude_list provided. This de-dups
+  // the exclude_list, and also provides for fast lookup when determining
+  // whether a given class is in the exclude_list
+  hphp_fast_set<std::string> exclude_classes;
+  for (ArrayIter iter(exclude_list); iter; ++iter) {
+    if(!iter.second().isString()) {
+      SystemLib::throwInvalidArgumentExceptionObject(
+        std::string("Exclude list must be array of strings"));
+    }
+    exclude_classes.insert(iter.second().toString().data());
+  }
+
+  std::vector<std::string> deferred_warnings;
+  tl_heap->forEachObject([&](const ObjectData* obj) {
+    if (!isObjprofRoot(obj, (ObjprofFlags)flags, exclude_classes)) return;
+    if (obj->hasZeroRefs()) return;
+    ObjprofState env{
+      .source = nullptr,
+      .stack = std::nullopt,
+      .paths = std::nullopt,
+      .val_stack = ObjprofValuePtrStack{},
+      .exclude_classes = exclude_classes,
+      .flags = (ObjprofFlags)flags,
+      .deferred_warnings = deferred_warnings
+    };
+    auto objsizePair = getObjSize(
+      obj, env,
+      objprof_props_mode ? &histogram : nullptr
+    );
+
+    if (!objprof_props_mode) {
+      auto cls = obj->getVMClass();
+      auto& metrics = histogram[std::make_pair(cls, "")];
+      metrics.instances += 1;
+      metrics.bytes += objsizePair.first;
+      metrics.bytes_rel += objsizePair.second;
+    }
+    // Gather Memoized methods data
+    attributeMemoizedFootprint(obj, &histogram, objprof_props_mode, seen_caches);
+  });
+  issueWarnings(deferred_warnings);
+
   // Create response
-  DictInit objs(0);
+  DictInit objs(histogram.size());
+  for (auto const& it : histogram) {
+    auto c = it.first;
+    auto cls = c.first;
+    auto prop = c.second;
+    auto key = cls->name()->toCppString();
+    if (prop != "") {
+      key += "::" + c.second;
+    }
+
+    auto metrics_val = make_dict_array(
+      s_instances, Variant(it.second.instances),
+      s_bytes, Variant(it.second.bytes),
+      s_bytes_rel, it.second.bytes_rel,
+      s_paths, init_null()
+    );
+
+    objs.set(StrNR(key), Variant(metrics_val));
+  }
+
   return objs.toArray();
+
 }
 
 Array HHVM_FUNCTION(objprof_get_paths,
@@ -726,7 +862,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
   // Create a set of std::strings from the exclude_list provided. This de-dups
   // the exclude_list, and also provides for fast lookup when determining
   // whether a given class is in the exclude_list
-  std::unordered_set<std::string> exclude_classes;
+  hphp_fast_set<std::string> exclude_classes;
   for (ArrayIter iter(exclude_list); iter; ++iter) {
     exclude_classes.insert(iter.second().toString().data());
   }

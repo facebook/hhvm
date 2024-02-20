@@ -1,0 +1,23 @@
+Pass: The normalized size of A should be greater than 5000
+
+Pass: Total number of instances of A should be 1
+
+Pass: The normalized size of zeroParam should be greater than 1000
+
+Pass: The normalized size of oneParam should be greater than 1000
+
+Pass: The normalized size of twoParams should be greater than 1000
+
+Pass: The normalized size of myString should be greater than 1000
+
+Pass: The normalized size of myDict should be greater than 1000
+
+Pass: Total number of instances of zeroParam should be 1
+
+Pass: Total number of instances of oneParam should be 2
+
+Pass: Total number of instances of twoParams should be 1
+
+Pass: Total number of instances of myString should be 1
+
+Pass: Total number of instances of myDict should be 1

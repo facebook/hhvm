@@ -1521,7 +1521,7 @@ end = struct
             (r, ci)
             env
         | (r, Tcan_traverse ct) ->
-          simplify_subtype_can_traverse
+          Can_traverse.simplify_subtype_can_traverse
             ~subtype_env
             ~sub_supportdyn
             ~this_ty
@@ -3552,90 +3552,6 @@ end = struct
               invalid_env env))
     | (_, _) -> invalid_env env
 
-  and simplify_subtype_can_traverse
-      ~subtype_env
-      ~sub_supportdyn
-      ~this_ty
-      ~fail
-      ty_sub
-      ty_super
-      ((_r : Reason.t), ct)
-      env =
-    log_subtype_i
-      ~level:2
-      ~this_ty
-      ~function_name:"simplify_subtype_can_traverse"
-      env
-      ty_sub
-      ty_super;
-    match ty_sub with
-    | ConstraintType _ ->
-      default_subtype
-        ~subtype_env
-        ~sub_supportdyn
-        ~this_ty
-        ~fail
-        env
-        ty_sub
-        ty_super
-    | LoclType lty_sub ->
-      if TUtils.is_tyvar_error env lty_sub then
-        let trav_ty = can_traverse_to_iface ct in
-        simplify_subtype
-          ~subtype_env
-          ~sub_supportdyn
-          ~this_ty
-          lty_sub
-          trav_ty
-          env
-      else
-        let subtype_with_dynamic () =
-          simplify_subtype
-            ~subtype_env
-            ~sub_supportdyn
-            ~this_ty
-            lty_sub
-            ct.ct_val
-            env
-          &&&
-          match ct.ct_key with
-          | None -> valid
-          | Some ct_key ->
-            simplify_subtype
-              ~subtype_env
-              ~sub_supportdyn
-              ~this_ty
-              lty_sub
-              ct_key
-        in
-        (match get_node lty_sub with
-        | Tdynamic -> subtype_with_dynamic ()
-        | _
-          when Option.is_some sub_supportdyn
-               && TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
-               && Tast.is_under_dynamic_assumptions env.checked ->
-          subtype_with_dynamic ()
-        | Tclass _
-        | Tvec_or_dict _
-        | Tany _ ->
-          let trav_ty = can_traverse_to_iface ct in
-          simplify_subtype
-            ~subtype_env
-            ~sub_supportdyn
-            ~this_ty
-            lty_sub
-            trav_ty
-            env
-        | _ ->
-          default_subtype
-            ~subtype_env
-            ~sub_supportdyn
-            ~this_ty
-            ~fail
-            env
-            ty_sub
-            ty_super)
-
   and simplify_subtype_has_type_member
       ~subtype_env ~sub_supportdyn ~this_ty ~fail ty_sub (r, htm) env =
     let { htm_id = memid; htm_lower = memloty; htm_upper = memupty } = htm in
@@ -5384,6 +5300,103 @@ end = struct
       env
       ty_sub
       ty_super
+end
+
+and Can_traverse : sig
+  val simplify_subtype_can_traverse :
+    subtype_env:subtype_env ->
+    sub_supportdyn:Reason.t option ->
+    this_ty:Typing_defs.locl_ty option ->
+    fail:Typing_error.t option ->
+    Typing_defs.internal_type ->
+    Typing_defs.internal_type ->
+    Typing_defs.Reason.t * Typing_defs.can_traverse ->
+    Typing_env_types.env ->
+    Typing_env_types.env * TL.subtype_prop
+end = struct
+  let simplify_subtype_can_traverse
+      ~subtype_env
+      ~sub_supportdyn
+      ~this_ty
+      ~fail
+      ty_sub
+      ty_super
+      ((_r : Reason.t), ct)
+      env =
+    log_subtype_i
+      ~level:2
+      ~this_ty
+      ~function_name:"simplify_subtype_can_traverse"
+      env
+      ty_sub
+      ty_super;
+    match ty_sub with
+    | ConstraintType _ ->
+      Subtype.default_subtype
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~fail
+        env
+        ty_sub
+        ty_super
+    | LoclType lty_sub ->
+      if TUtils.is_tyvar_error env lty_sub then
+        let trav_ty = can_traverse_to_iface ct in
+        Subtype.simplify_subtype
+          ~subtype_env
+          ~sub_supportdyn
+          ~this_ty
+          lty_sub
+          trav_ty
+          env
+      else
+        let subtype_with_dynamic () =
+          Subtype.simplify_subtype
+            ~subtype_env
+            ~sub_supportdyn
+            ~this_ty
+            lty_sub
+            ct.ct_val
+            env
+          &&&
+          match ct.ct_key with
+          | None -> valid
+          | Some ct_key ->
+            Subtype.simplify_subtype
+              ~subtype_env
+              ~sub_supportdyn
+              ~this_ty
+              lty_sub
+              ct_key
+        in
+        (match get_node lty_sub with
+        | Tdynamic -> subtype_with_dynamic ()
+        | _
+          when Option.is_some sub_supportdyn
+               && TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
+               && Tast.is_under_dynamic_assumptions env.checked ->
+          subtype_with_dynamic ()
+        | Tclass _
+        | Tvec_or_dict _
+        | Tany _ ->
+          let trav_ty = can_traverse_to_iface ct in
+          Subtype.simplify_subtype
+            ~subtype_env
+            ~sub_supportdyn
+            ~this_ty
+            lty_sub
+            trav_ty
+            env
+        | _ ->
+          Subtype.default_subtype
+            ~subtype_env
+            ~sub_supportdyn
+            ~this_ty
+            ~fail
+            env
+            ty_sub
+            ty_super)
 end
 
 (* Determines whether the types are definitely disjoint, or whether they might

@@ -37,6 +37,14 @@ class ServerStreamConsumer {
   virtual void canceled() = 0;
 };
 
+template <typename Baton>
+class ServerStreamConsumerBaton final : public ServerStreamConsumer {
+ public:
+  void consume() override { baton.post(); }
+  void canceled() override { std::terminate(); }
+  Baton baton;
+};
+
 struct StreamControl {
   enum Code : int32_t { CANCEL = -1, PAUSE = -2, RESUME = -3 };
 };
@@ -62,6 +70,16 @@ class ServerGeneratorStream : public TwoWayBridge<
   ~ServerGeneratorStream() override;
 
 #if FOLLY_HAS_COROUTINES
+ private:
+  template <bool WithHeader, typename T>
+  static folly::coro::Task<> fromAsyncGeneratorImpl(
+      std::unique_ptr<ServerGeneratorStream, Deleter> stream,
+      StreamElementEncoder<T>* encode,
+      folly::coro::AsyncGenerator<
+          std::conditional_t<WithHeader, MessageVariant<T>, T>&&> gen,
+      TileStreamGuard);
+
+ public:
   template <bool WithHeader, typename T>
   static ServerStreamFn<T> fromAsyncGenerator(
       folly::coro::AsyncGenerator<

@@ -86,13 +86,13 @@ struct ObjprofMetrics {
   uint64_t bytes{0};
   double bytes_rel{0};
 };
-using PathsToObject = std::unordered_map<
-  ObjectData*, std::unordered_map<std::string, ObjprofObjectReferral>>;
-using PathsToClass = std::unordered_map<
-  Class*, std::unordered_map<std::string, ObjprofClassReferral>>;
+using PathsToObject = hphp_fast_map<
+  ObjectData*, hphp_fast_map<std::string, ObjprofObjectReferral>>;
+using PathsToClass = hphp_fast_map<
+  std::string, hphp_fast_map<std::string, ObjprofClassReferral>>;
 
 using ObjprofStack = std::vector<std::string>;
-using ClassProp = std::pair<Class*, std::string>;
+using ClassProp = std::pair<std::string, std::string>;
 
 // Stack of pointers used for avoiding back-links when performing a DFS scan
 // starting at a root node.
@@ -203,7 +203,7 @@ std::pair<int, double> sizeOfArray(
     IterateV(ad, [&] (TypedValue v) {
       auto val_size_pair = tvGetSize(v, env);
       if (histogram) {
-        auto histogram_key = std::make_pair(cls, "<index>");
+        auto histogram_key = std::make_pair(cls->name()->toCppString(), "<index>");
         auto& metrics = (*histogram)[histogram_key];
         metrics.instances += 1;
         metrics.bytes += val_size_pair.first;
@@ -272,7 +272,7 @@ std::pair<int, double> sizeOfArray(
       FTRACE(2, "  Value size for that key was {}:{}\n",
         val_size_pair.first, val_size_pair.second);
       if (histogram) {
-        auto const histogram_key = std::make_pair(cls, k_str);
+        auto const histogram_key = std::make_pair(cls->name()->toCppString(), k_str);
         auto& metrics = (*histogram)[histogram_key];
         metrics.instances += 1;
         metrics.bytes += val_size_pair.first + key_size_pair.first;
@@ -558,7 +558,7 @@ std::pair<int, double> getObjSize(
       );
 
       if (histogram) {
-        auto histogram_key = std::make_pair(cls, prop.name->toCppString());
+        auto histogram_key = std::make_pair(cls->name()->toCppString(), prop.name->toCppString());
         auto& metrics = (*histogram)[histogram_key];
         metrics.instances += 1;
         metrics.bytes += val_size_pair.first;
@@ -596,7 +596,7 @@ std::pair<int, double> getObjSize(
       );
 
       if (histogram) {
-        auto histogram_key = std::make_pair(cls, k_str);
+        auto histogram_key = std::make_pair(cls->name()->toCppString(), k_str);
         auto& metrics = (*histogram)[histogram_key];
         metrics.instances += 1;
         metrics.bytes += key_size_pair.first + val_size_pair.first;
@@ -656,7 +656,7 @@ Array HHVM_FUNCTION(objprof_get_data,
     if (!objprof_props_mode) {
       auto cls = obj->getVMClass();
       auto cls_name = cls->name()->toCppString();
-      auto& metrics = histogram[std::make_pair(cls, "")];
+      auto& metrics = histogram[std::make_pair(cls_name, "")];
       metrics.instances += 1;
       metrics.bytes += objsizePair.first;
       metrics.bytes_rel += objsizePair.second;
@@ -677,7 +677,7 @@ Array HHVM_FUNCTION(objprof_get_data,
     auto c = it.first;
     auto cls = c.first;
     auto prop = c.second;
-    auto key = cls->name()->toCppString();
+    auto key = cls;
     if (prop != "") {
       key += "::" + c.second;
     }
@@ -703,6 +703,7 @@ namespace {
                                   bool objprof_props_mode,
                                   hphp_fast_set<const HPHP::MemoCacheBase*>& seen_caches) {
     auto cls = obj->getVMClass();
+    auto clsName = cls->name()->toCppString();
     auto method_count = cls->numMethods();
 
     for (Slot i = 0; i < method_count; ++i) {
@@ -731,7 +732,9 @@ namespace {
               else {
                 func_name = Func::fromFuncId(e.first)->name()->toCppString();
               }
-              auto histogram_key = objprof_props_mode ? std::make_pair(cls, func_name) : std::make_pair(cls, "");
+              auto histogram_key = objprof_props_mode ?
+                                   std::make_pair(clsName, func_name) :
+                                   std::make_pair(clsName, "");
               auto& metrics = (*histogram)[histogram_key];
               // we certainly have visited getObjSize before on this object due to call order
               // which means this object has instance count of at least 1
@@ -749,8 +752,8 @@ namespace {
             // value type
             size_t size = tvHeapSize(*(memoslot->getValue()));
             auto histogram_key = objprof_props_mode ?
-                                std::make_pair(cls, m->name()->toCppString()) :
-                                std::make_pair(cls, "");
+                                std::make_pair(clsName, m->name()->toCppString()) :
+                                std::make_pair(clsName, "");
             auto& metrics = (*histogram)[histogram_key];
             if(objprof_props_mode) {
                 metrics.instances += 1;
@@ -817,7 +820,7 @@ Array HHVM_FUNCTION(objprof_get_data_extended,
 
     if (!objprof_props_mode) {
       auto cls = obj->getVMClass();
-      auto& metrics = histogram[std::make_pair(cls, "")];
+      auto& metrics = histogram[std::make_pair(cls->name()->toCppString(), "")];
       metrics.instances += 1;
       metrics.bytes += objsizePair.first;
       metrics.bytes_rel += objsizePair.second;
@@ -833,7 +836,7 @@ Array HHVM_FUNCTION(objprof_get_data_extended,
     auto c = it.first;
     auto cls = c.first;
     auto prop = c.second;
-    auto key = cls->name()->toCppString();
+    auto key = cls;
     if (prop != "") {
       key += "::" + c.second;
     }
@@ -872,7 +875,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
       if (!isObjprofRoot(obj, (ObjprofFlags)flags, exclude_classes)) return;
       if (obj->hasZeroRefs()) return;
       auto cls = obj->getVMClass();
-      auto& metrics = histogram[std::make_pair(cls, "")];
+      auto& metrics = histogram[std::make_pair(cls->name()->toCppString(), "")];
       ObjprofState env{
         .source = obj,
         .stack = ObjprofStack{},
@@ -893,7 +896,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
       for (auto const& pathsIt : *env.paths) {
         auto cls = pathsIt.first->getVMClass();
         auto& paths = pathsIt.second;
-        auto& aggPaths = pathsToClass[cls];
+        auto& aggPaths = pathsToClass[cls->name()->toCppString()];
         for (auto const& pathKV : paths) {
           auto& path = pathKV.first;
           auto& referral = pathKV.second;
@@ -958,7 +961,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
       for (auto const& pathsIt : *env.paths) {
         auto cls = pathsIt.first->getVMClass();
         auto& paths = pathsIt.second;
-        auto& aggPaths = pathsToClass[cls];
+        auto& aggPaths = pathsToClass[cls->name()->toCppString()];
         for (auto const& pathKV : paths) {
           auto& path = pathKV.first;
           auto& referral = pathKV.second;
@@ -994,7 +997,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
       s_paths, Variant(pathsArr.toArray())
     );
 
-    objs.set(c.first->nameStr(), Variant(metrics_val));
+    objs.set(StringData::Make(c.first.c_str()), Variant(metrics_val));
   }
 
   return objs.toArray();

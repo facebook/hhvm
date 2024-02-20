@@ -1,4 +1,4 @@
-/*
+ /*
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
@@ -720,6 +720,11 @@ template <typename K> struct MemoCache : MemoCacheBase {
   MemoCache& operator=(const MemoCache&) = delete;
   MemoCache& operator=(MemoCache&&) = delete;
 
+  void heapSizesPerCacheEntry(std::vector<std::pair<FuncId, size_t>>& entries) const override {
+    for (auto const& p : cache) {
+      entries.push_back({p.first.getFuncId(), tvHeapSize(p.second.value) + sizeof(p)});
+    }
+  }
   TYPE_SCAN_CUSTOM() {
     using value_type = typename Cache::value_type; // pair
     cache.visitContiguousRanges(
@@ -746,6 +751,11 @@ struct SharedOnlyMemoCache : MemoCacheBase {
   SharedOnlyMemoCache& operator=(const SharedOnlyMemoCache&) = delete;
   SharedOnlyMemoCache& operator=(SharedOnlyMemoCache&&) = delete;
 
+  void heapSizesPerCacheEntry(std::vector<std::pair<FuncId, size_t>>& entries) const override {
+    for (auto const& p : cache) {
+      entries.push_back({unmakeSharedOnlyKey(p.first), tvHeapSize(p.second.value) + sizeof(p)});
+    }
+  }
   TYPE_SCAN_CUSTOM() {
     using value_type = typename Cache::value_type; // pair
     cache.visitContiguousRanges(

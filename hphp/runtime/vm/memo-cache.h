@@ -69,6 +69,12 @@ namespace HPHP {
  */
 struct MemoCacheBase {
   virtual ~MemoCacheBase() = default;
+  /* Returns a vector of key value pair where first value is FuncId and second
+  *  value is the memory footprint for that entry. Puts one entry in the vector
+  *  per cache entry. The vector reference is supplied by the caller, so the
+  *  caller has the option to group together multiple caches.
+  */
+  virtual void heapSizesPerCacheEntry(std::vector<std::pair<FuncId, size_t>>&) const = 0;
 };
 
 ////////////////////////////////////////////////////////////
@@ -191,6 +197,16 @@ inline SharedOnlyKey makeSharedOnlyKey(FuncId funcId) {
   );
 }
 
+/*
+* Reverses what makeSharedOnlyKey does
+* Needs to update if makeSharedOnlyKey updates
+*/
+inline FuncId unmakeSharedOnlyKey(uint64_t key) {
+  auto unmixed_hash = folly::hash::twang_unmix64(key);
+  unmixed_hash &= 0xffffffff;
+  return FuncId::fromInt(unmixed_hash);
+}
+
 const TypedValue* memoCacheGetSharedOnly(const MemoCacheBase* base,
                                    SharedOnlyKey key);
 void memoCacheSetSharedOnly(MemoCacheBase*& base,
@@ -205,4 +221,3 @@ void memoCacheSetSharedOnly(MemoCacheBase*& base,
 static constexpr size_t kMemoCacheMaxSpecializedKeys = 6;
 
 }
-

@@ -640,23 +640,6 @@ module rec Subtype : sig
     Typing_env_types.env ->
     Typing_env_types.env * TL.subtype_prop
 
-  (** This implements basic subtyping on non-generic function types:
-      (1) return type behaves covariantly
-      (2) parameter types behave contravariantly
-      (3) special casing for variadics
-   *)
-  val simplify_subtype_funs :
-    subtype_env:subtype_env ->
-    check_return:bool ->
-    for_override:bool ->
-    ?super_like:bool ->
-    Typing_defs.locl_phase Typing_defs.Reason.t_ ->
-    Typing_defs.locl_phase Typing_defs.ty Typing_defs.fun_type ->
-    Typing_defs.locl_phase Typing_defs.Reason.t_ ->
-    Typing_defs.locl_phase Typing_defs.ty Typing_defs.fun_type ->
-    Typing_env_types.env ->
-    Typing_env_types.env * TL.subtype_prop
-
   (** Given a subtype proposition, resolve conjunctions of subtype assertions
     of the form #v <: t or t <: #v by adding bounds to #v in env. Close env
     wrt transitivity i.e. if t <: #v and #v <: u then resolve t <: u which
@@ -2406,7 +2389,7 @@ end = struct
                 let ty_dyn_enf = ty_super in
                 env
                 (* Contravariant subtyping on parameters *)
-                |> simplify_supertype_params_with_variadic
+                |> Subtype_fun.simplify_supertype_params_with_variadic
                      ~subtype_env
                      ft_sub.ft_params
                      ty_dyn_enf
@@ -2656,7 +2639,7 @@ end = struct
         | LoclType lty ->
           (match deref lty with
           | (r_sub, Tfun ft_sub) ->
-            simplify_subtype_funs
+            Subtype_fun.simplify_subtype_funs
               ~subtype_env
               ~check_return:true
               ~for_override:false
@@ -3218,524 +3201,6 @@ end = struct
         (env, TL.valid)
     else
       res
-
-  and simplify_subtype_params
-      ~(subtype_env : subtype_env)
-      ~for_override
-      (subl : locl_fun_param list)
-      (superl : locl_fun_param list)
-      (variadic_sub_ty : bool)
-      (variadic_super_ty : bool)
-      env =
-    let simplify_subtype_params_help =
-      simplify_subtype_params ~subtype_env ~for_override
-    in
-    let simplify_subtype_params_with_variadic_help =
-      simplify_subtype_params_with_variadic ~subtype_env
-    in
-    let simplify_supertype_params_with_variadic_help =
-      simplify_supertype_params_with_variadic ~subtype_env
-    in
-    match (subl, superl) with
-    (* When either list runs out, we still have to typecheck that
-       the remaining portion sub/super types with the other's variadic.
-       For example, if
-       ChildClass {
-         public function a(int $x = 0, string ... $args) // superl = [int], super_var = string
-       }
-       overrides
-       ParentClass {
-         public function a(string ... $args) // subl = [], sub_var = string
-       }
-       , there should be an error because the first argument will be checked against
-       int, not string that is, ChildClass::a("hello") would crash,
-       but ParentClass::a("hello") wouldn't.
-
-       Similarly, if the other list is longer, aka
-       ChildClass  extends ParentClass {
-         public function a(mixed ... $args) // superl = [], super_var = mixed
-       }
-       overrides
-       ParentClass {
-         //subl = [string], sub_var = string
-         public function a(string $x = 0, string ... $args)
-       }
-       It should also check that string is a subtype of mixed.
-    *)
-    | ([fp], _) when variadic_sub_ty ->
-      simplify_supertype_params_with_variadic_help superl fp.fp_type env
-    | (_, [fp]) when variadic_super_ty ->
-      simplify_subtype_params_with_variadic_help subl fp.fp_type env
-    | ([], _) -> valid env
-    | (_, []) -> valid env
-    | (sub :: subl, super :: superl) ->
-      let { fp_type = ty_sub; _ } = sub in
-      let { fp_type = ty_super; _ } = super in
-      let subtype_env_for_param =
-        (* When overriding in Sound Dynamic, we treat any dynamic-aware subtype of dynamic as a
-         * subtype of the dynamic type itself
-         *)
-        match get_node ty_super with
-        | Tdynamic
-          when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
-               && for_override ->
-          { subtype_env with coerce = Some TL.CoerceToDynamic }
-        | _ -> subtype_env
-      in
-      let simplify_subtype_for_param =
-        simplify_subtype ~subtype_env:subtype_env_for_param ~sub_supportdyn:None
-      in
-      (* Check that the calling conventions of the params are compatible. *)
-      env
-      |> simplify_param_modes ~subtype_env sub super
-      &&& simplify_param_readonly ~subtype_env sub super
-      &&& simplify_param_accept_disposable ~subtype_env sub super
-      &&& begin
-            fun env ->
-              match (get_fp_mode sub, get_fp_mode super) with
-              | (FPinout, FPinout) ->
-                (* Inout parameters are invariant wrt subtyping for function types. *)
-                env
-                |> simplify_subtype_for_param ty_super ty_sub
-                &&& simplify_subtype_for_param ty_sub ty_super
-              | _ -> env |> simplify_subtype_for_param ty_sub ty_super
-          end
-      &&& simplify_subtype_params_help
-            subl
-            superl
-            variadic_sub_ty
-            variadic_super_ty
-
-  and simplify_subtype_params_with_variadic
-      ~(subtype_env : subtype_env)
-      (subl : locl_fun_param list)
-      (variadic_ty : locl_ty)
-      env =
-    let simplify_subtype_params_with_variadic_help =
-      simplify_subtype_params_with_variadic ~subtype_env
-    in
-    match subl with
-    | [] -> valid env
-    | { fp_type = sub; _ } :: subl ->
-      env
-      |> simplify_subtype ~subtype_env ~sub_supportdyn:None sub variadic_ty
-      &&& simplify_subtype_params_with_variadic_help subl variadic_ty
-
-  and simplify_subtype_implicit_params
-      ~subtype_env { capability = sub_cap } { capability = super_cap } env =
-    if TypecheckerOptions.any_coeffects (Env.get_tcopt env) then
-      let expected = Typing_coeffects.get_type sub_cap in
-      let got = Typing_coeffects.get_type super_cap in
-      let reasons =
-        Typing_error.Secondary.Coeffect_subtyping
-          {
-            pos = get_pos got;
-            cap = Typing_coeffects.pretty env got;
-            pos_expected = get_pos expected;
-            cap_expected = Typing_coeffects.pretty env expected;
-          }
-      in
-      let on_error =
-        Option.map subtype_env.on_error ~f:(fun on_error ->
-            let err = Typing_error.apply_reasons ~on_error reasons in
-            Typing_error.(Reasons_callback.always err))
-      in
-      let subtype_env = { subtype_env with on_error } in
-      match (sub_cap, super_cap) with
-      | (CapTy sub, CapTy super) ->
-        simplify_subtype ~subtype_env ~sub_supportdyn:None sub super env
-      | (CapTy sub, CapDefaults _p) ->
-        simplify_subtype ~subtype_env ~sub_supportdyn:None sub got env
-      | (CapDefaults _p, CapTy super) ->
-        simplify_subtype ~subtype_env ~sub_supportdyn:None expected super env
-      | (CapDefaults _p1, CapDefaults _p2) -> valid env
-    else
-      valid env
-
-  and simplify_supertype_params_with_variadic
-      ~(subtype_env : subtype_env)
-      (superl : locl_fun_param list)
-      (variadic_ty : locl_ty)
-      env =
-    let simplify_supertype_params_with_variadic_help =
-      simplify_supertype_params_with_variadic ~subtype_env
-    in
-    match superl with
-    | [] -> valid env
-    | { fp_type = super; _ } :: superl ->
-      env
-      |> simplify_subtype ~subtype_env ~sub_supportdyn:None variadic_ty super
-      &&& simplify_supertype_params_with_variadic_help superl variadic_ty
-
-  and simplify_param_modes ~subtype_env param1 param2 env =
-    let { fp_pos = pos1; _ } = param1 in
-    let { fp_pos = pos2; _ } = param2 in
-    match (get_fp_mode param1, get_fp_mode param2) with
-    | (FPnormal, FPnormal)
-    | (FPinout, FPinout) ->
-      valid env
-    | (FPnormal, FPinout) ->
-      invalid
-        ~fail:
-          (Option.map
-             subtype_env.on_error
-             ~f:
-               Typing_error.(
-                 fun on_error ->
-                   apply_reasons ~on_error
-                   @@ Secondary.Inoutness_mismatch
-                        { pos = pos2; decl_pos = pos1 }))
-        env
-    | (FPinout, FPnormal) ->
-      invalid
-        ~fail:
-          (Option.map
-             subtype_env.on_error
-             ~f:
-               Typing_error.(
-                 fun on_error ->
-                   apply_reasons ~on_error
-                   @@ Secondary.Inoutness_mismatch
-                        { pos = pos1; decl_pos = pos2 }))
-        env
-
-  and simplify_param_accept_disposable ~subtype_env param1 param2 env =
-    let { fp_pos = pos1; _ } = param1 in
-    let { fp_pos = pos2; _ } = param2 in
-    match
-      (get_fp_accept_disposable param1, get_fp_accept_disposable param2)
-    with
-    | (true, false) ->
-      invalid
-        ~fail:
-          (Option.map
-             subtype_env.on_error
-             ~f:
-               Typing_error.(
-                 fun on_error ->
-                   apply_reasons ~on_error
-                   @@ Secondary.Accept_disposable_invariant
-                        { pos = pos1; decl_pos = pos2 }))
-        env
-    | (false, true) ->
-      invalid
-        ~fail:
-          (Option.map
-             subtype_env.on_error
-             ~f:
-               Typing_error.(
-                 fun on_error ->
-                   apply_reasons ~on_error
-                   @@ Secondary.Accept_disposable_invariant
-                        { pos = pos2; decl_pos = pos1 }))
-        env
-    | (_, _) -> valid env
-
-  and simplify_param_readonly ~subtype_env sub super env =
-    (* The sub param here (as with all simplify_param_* functions)
-       is actually the parameter on ft_super, since params are contravariant *)
-    (* Thus we check readonly subtyping covariantly *)
-    let { fp_pos = pos1; _ } = sub in
-    let { fp_pos = pos2; _ } = super in
-    if not (readonly_subtype (get_fp_readonly sub) (get_fp_readonly super)) then
-      invalid
-        ~fail:
-          (Option.map
-             subtype_env.on_error
-             ~f:
-               Typing_error.(
-                 fun on_error ->
-                   apply_reasons ~on_error
-                   @@ Secondary.Readonly_mismatch
-                        {
-                          pos = pos1;
-                          kind = `param;
-                          reason_sub =
-                            lazy [(pos2, "This parameter is mutable")];
-                          reason_super =
-                            lazy [(pos1, "But this parameter is readonly")];
-                        }))
-        env
-    else
-      valid env
-
-  and readonly_subtype (r_sub : bool) (r_super : bool) =
-    match (r_sub, r_super) with
-    | (true, false) ->
-      false (* A readonly value is a supertype of a mutable one *)
-    | _ -> true
-
-  and cross_package_subtype (c_sub : string option) (c_super : string option) =
-    match (c_sub, c_super) with
-    | (Some s, Some t) -> String.equal s t
-    | (Some _, None) -> false
-    | (None, Some _) -> true
-    | (None, None) -> true
-
-  (* Helper function for subtyping on function types: performs all checks that
-   * don't involve actual types:
-   *   <<__ReturnDisposable>> attribute
-   *   variadic arity
-   *  <<__Policied>> attribute
-   *  Readonlyness
-   * <<__CrossPackage>> attribute
-   *)
-  and simplify_subtype_funs_attributes
-      ~subtype_env
-      (r_sub : Reason.t)
-      (ft_sub : locl_fun_type)
-      (r_super : Reason.t)
-      (ft_super : locl_fun_type)
-      env =
-    let p_sub = Reason.to_pos r_sub in
-    let p_super = Reason.to_pos r_super in
-    let print_cross_pkg_reason (c : string option) (is_sub : bool) =
-      match c with
-      | Some s when is_sub ->
-        Printf.sprintf
-          "This function is marked `<<__CrossPackage(%s)>>`, so it's only compatible with other functions marked `<<__CrossPackage(%s)>>`"
-          s
-          s
-      | Some s ->
-        Printf.sprintf "This function is marked <<__CrossPackage(%s)>>" s
-      | None -> "This function is not cross package"
-    in
-    (env, TL.valid)
-    |> check_with
-         (readonly_subtype
-            (* Readonly this is contravariant, so check ft_super_ro <: ft_sub_ro *)
-            (get_ft_readonly_this ft_super)
-            (get_ft_readonly_this ft_sub))
-         (Option.map
-            subtype_env.on_error
-            ~f:
-              Typing_error.(
-                fun on_error ->
-                  apply_reasons ~on_error
-                  @@ Secondary.Readonly_mismatch
-                       {
-                         pos = p_sub;
-                         kind = `fn;
-                         reason_sub =
-                           lazy
-                             [(p_sub, "This function is not marked readonly")];
-                         reason_super =
-                           lazy [(p_super, "This function is marked readonly")];
-                       }))
-    |> check_with
-         (readonly_subtype
-            (* Readonly return is covariant, so check ft_sub <: ft_super *)
-            (get_ft_returns_readonly ft_sub)
-            (get_ft_returns_readonly ft_super))
-         (Option.map
-            subtype_env.on_error
-            ~f:
-              Typing_error.(
-                fun on_error ->
-                  apply_reasons ~on_error
-                  @@ Secondary.Readonly_mismatch
-                       {
-                         pos = p_sub;
-                         kind = `fn_return;
-                         reason_sub =
-                           lazy
-                             [(p_sub, "This function returns a readonly value")];
-                         reason_super =
-                           lazy
-                             [
-                               ( p_super,
-                                 "This function does not return a readonly value"
-                               );
-                             ];
-                       }))
-    |> check_with
-         (cross_package_subtype
-            ft_sub.ft_cross_package
-            ft_super.ft_cross_package)
-         (Option.map
-            subtype_env.on_error
-            ~f:
-              Typing_error.(
-                fun on_error ->
-                  apply_reasons ~on_error
-                  @@ Secondary.Cross_package_mismatch
-                       {
-                         pos = p_sub;
-                         reason_sub =
-                           lazy
-                             [
-                               ( p_sub,
-                                 print_cross_pkg_reason
-                                   ft_sub.ft_cross_package
-                                   true );
-                             ];
-                         reason_super =
-                           lazy
-                             [
-                               ( p_super,
-                                 print_cross_pkg_reason
-                                   ft_super.ft_cross_package
-                                   false );
-                             ];
-                       }))
-    |> check_with
-         (Bool.equal
-            (get_ft_return_disposable ft_sub)
-            (get_ft_return_disposable ft_super))
-         (Option.map
-            subtype_env.on_error
-            ~f:
-              Typing_error.(
-                fun on_error ->
-                  apply_reasons ~on_error
-                  @@ Secondary.Return_disposable_mismatch
-                       {
-                         pos_super = p_super;
-                         pos_sub = p_sub;
-                         is_marked_return_disposable =
-                           get_ft_return_disposable ft_super;
-                       }))
-    |> check_with
-         (arity_min ft_sub <= arity_min ft_super)
-         (Option.map
-            subtype_env.on_error
-            ~f:
-              Typing_error.(
-                fun on_error ->
-                  apply_reasons ~on_error
-                  @@ Secondary.Fun_too_many_args
-                       {
-                         expected = arity_min ft_super;
-                         actual = arity_min ft_sub;
-                         pos = p_sub;
-                         decl_pos = p_super;
-                       }))
-    |> fun res ->
-    let ft_sub_variadic =
-      if get_ft_variadic ft_sub then
-        List.last ft_sub.ft_params
-      else
-        None
-    in
-    let ft_super_variadic =
-      if get_ft_variadic ft_super then
-        List.last ft_super.ft_params
-      else
-        None
-    in
-
-    match (ft_sub_variadic, ft_super_variadic) with
-    | (Some { fp_name = None; _ }, Some { fp_name = Some _; _ }) ->
-      (* The HHVM runtime ignores "..." entirely, but knows about
-       * "...$args"; for contexts for which the runtime enforces method
-       * compatibility (currently, inheritance from abstract/interface
-       * methods), letting "..." override "...$args" would result in method
-       * compatibility errors at runtime. *)
-      with_error
-        (Option.map
-           subtype_env.on_error
-           ~f:
-             Typing_error.(
-               fun on_error ->
-                 apply_reasons ~on_error
-                 @@ Secondary.Fun_variadicity_hh_vs_php56
-                      { pos = p_sub; decl_pos = p_super }))
-        res
-    | (None, None) ->
-      let sub_max = List.length ft_sub.ft_params in
-      let super_max = List.length ft_super.ft_params in
-      if sub_max < super_max then
-        with_error
-          (Option.map
-             subtype_env.on_error
-             ~f:
-               Typing_error.(
-                 fun on_error ->
-                   apply_reasons ~on_error
-                   @@ Secondary.Fun_too_few_args
-                        {
-                          pos = p_sub;
-                          decl_pos = p_super;
-                          expected = super_max;
-                          actual = sub_max;
-                        }))
-          res
-      else
-        res
-    | (None, Some _) ->
-      with_error
-        (Option.map
-           subtype_env.on_error
-           ~f:
-             Typing_error.(
-               fun on_error ->
-                 apply_reasons ~on_error
-                 @@ Secondary.Fun_unexpected_nonvariadic
-                      { pos = p_sub; decl_pos = p_super }))
-        res
-    | (_, _) -> res
-
-  and simplify_subtype_funs
-      ~(subtype_env : subtype_env)
-      ~(check_return : bool)
-      ~(for_override : bool)
-      ?(super_like = false)
-      (r_sub : Reason.t)
-      (ft_sub : locl_fun_type)
-      (r_super : Reason.t)
-      (ft_super : locl_fun_type)
-      env : env * TL.subtype_prop =
-    (* First apply checks on attributes and variadic arity *)
-    let simplify_subtype_implicit_params_help =
-      simplify_subtype_implicit_params ~subtype_env
-    in
-    env
-    |> simplify_subtype_funs_attributes
-         ~subtype_env
-         r_sub
-         ft_sub
-         r_super
-         ft_super
-    &&& (* Now do contravariant subtyping on parameters *)
-    begin
-      simplify_subtype_params
-        ~subtype_env
-        ~for_override
-        ft_super.ft_params
-        ft_sub.ft_params
-        (get_ft_variadic ft_super)
-        (get_ft_variadic ft_sub)
-    end
-    &&& simplify_subtype_implicit_params_help
-          ft_super.ft_implicit_params
-          ft_sub.ft_implicit_params
-    &&&
-    (* Finally do covariant subtyping on return type *)
-    if check_return then
-      let super_ty = liken ~super_like env ft_super.ft_ret in
-      let subtype_env =
-        if
-          TypecheckerOptions.enable_sound_dynamic env.genv.tcopt && for_override
-        then
-          (* When overriding in Sound Dynamic, we allow t to override dynamic if
-           * t is a dynamic-aware subtype of dynamic. We also allow Awaitable<t>
-           * to override Awaitable<dynamic> and and Awaitable<t> to
-           * override ~Awaitable<dynamic>.
-           *)
-          let super_ty = TUtils.strip_dynamic env super_ty in
-          match get_node super_ty with
-          | Tdynamic -> { subtype_env with coerce = Some TL.CoerceToDynamic }
-          | Tclass ((_, class_name), _, [ty])
-            when String.equal class_name SN.Classes.cAwaitable && is_dynamic ty
-            ->
-            { subtype_env with coerce = Some TL.CoerceToDynamic }
-          | _ -> subtype_env
-        else
-          subtype_env
-      in
-      simplify_subtype ~subtype_env ~sub_supportdyn:None ft_sub.ft_ret super_ty
-    else
-      valid
 
   (* Add a new upper bound ty on var.  Apply transitivity of sutyping,
    * so if we already have tyl <: var, then check that for each ty_sub
@@ -5482,6 +4947,569 @@ end = struct
         (env, TL.valid)
 end
 
+and Subtype_fun : sig
+  (** This implements basic subtyping on non-generic function types:
+      (1) return type behaves covariantly
+      (2) parameter types behave contravariantly
+      (3) special casing for variadics
+   *)
+  val simplify_subtype_funs :
+    subtype_env:subtype_env ->
+    check_return:bool ->
+    for_override:bool ->
+    ?super_like:bool ->
+    Typing_defs.locl_phase Typing_defs.Reason.t_ ->
+    Typing_defs.locl_phase Typing_defs.ty Typing_defs.fun_type ->
+    Typing_defs.locl_phase Typing_defs.Reason.t_ ->
+    Typing_defs.locl_phase Typing_defs.ty Typing_defs.fun_type ->
+    Typing_env_types.env ->
+    Typing_env_types.env * TL.subtype_prop
+
+  val simplify_supertype_params_with_variadic :
+    subtype_env:subtype_env ->
+    Typing_defs.locl_fun_param list ->
+    Typing_defs.locl_ty ->
+    Typing_env_types.env ->
+    Typing_env_types.env * Typing_logic.subtype_prop
+end = struct
+  let rec simplify_subtype_params_with_variadic
+      ~(subtype_env : subtype_env)
+      (subl : locl_fun_param list)
+      (variadic_ty : locl_ty)
+      env =
+    let simplify_subtype_params_with_variadic_help =
+      simplify_subtype_params_with_variadic ~subtype_env
+    in
+    match subl with
+    | [] -> valid env
+    | { fp_type = sub; _ } :: subl ->
+      env
+      |> Subtype.simplify_subtype
+           ~subtype_env
+           ~sub_supportdyn:None
+           sub
+           variadic_ty
+      &&& simplify_subtype_params_with_variadic_help subl variadic_ty
+
+  let simplify_subtype_implicit_params
+      ~subtype_env { capability = sub_cap } { capability = super_cap } env =
+    if TypecheckerOptions.any_coeffects (Env.get_tcopt env) then
+      let expected = Typing_coeffects.get_type sub_cap in
+      let got = Typing_coeffects.get_type super_cap in
+      let reasons =
+        Typing_error.Secondary.Coeffect_subtyping
+          {
+            pos = get_pos got;
+            cap = Typing_coeffects.pretty env got;
+            pos_expected = get_pos expected;
+            cap_expected = Typing_coeffects.pretty env expected;
+          }
+      in
+      let on_error =
+        Option.map subtype_env.on_error ~f:(fun on_error ->
+            let err = Typing_error.apply_reasons ~on_error reasons in
+            Typing_error.(Reasons_callback.always err))
+      in
+      let subtype_env = { subtype_env with on_error } in
+      match (sub_cap, super_cap) with
+      | (CapTy sub, CapTy super) ->
+        Subtype.simplify_subtype ~subtype_env ~sub_supportdyn:None sub super env
+      | (CapTy sub, CapDefaults _p) ->
+        Subtype.simplify_subtype ~subtype_env ~sub_supportdyn:None sub got env
+      | (CapDefaults _p, CapTy super) ->
+        Subtype.simplify_subtype
+          ~subtype_env
+          ~sub_supportdyn:None
+          expected
+          super
+          env
+      | (CapDefaults _p1, CapDefaults _p2) -> valid env
+    else
+      valid env
+
+  let rec simplify_supertype_params_with_variadic
+      ~(subtype_env : subtype_env)
+      (superl : locl_fun_param list)
+      (variadic_ty : locl_ty)
+      env =
+    let simplify_supertype_params_with_variadic_help =
+      simplify_supertype_params_with_variadic ~subtype_env
+    in
+    match superl with
+    | [] -> valid env
+    | { fp_type = super; _ } :: superl ->
+      env
+      |> Subtype.simplify_subtype
+           ~subtype_env
+           ~sub_supportdyn:None
+           variadic_ty
+           super
+      &&& simplify_supertype_params_with_variadic_help superl variadic_ty
+
+  let simplify_param_modes ~subtype_env param1 param2 env =
+    let { fp_pos = pos1; _ } = param1 in
+    let { fp_pos = pos2; _ } = param2 in
+    match (get_fp_mode param1, get_fp_mode param2) with
+    | (FPnormal, FPnormal)
+    | (FPinout, FPinout) ->
+      valid env
+    | (FPnormal, FPinout) ->
+      invalid
+        ~fail:
+          (Option.map
+             subtype_env.on_error
+             ~f:
+               Typing_error.(
+                 fun on_error ->
+                   apply_reasons ~on_error
+                   @@ Secondary.Inoutness_mismatch
+                        { pos = pos2; decl_pos = pos1 }))
+        env
+    | (FPinout, FPnormal) ->
+      invalid
+        ~fail:
+          (Option.map
+             subtype_env.on_error
+             ~f:
+               Typing_error.(
+                 fun on_error ->
+                   apply_reasons ~on_error
+                   @@ Secondary.Inoutness_mismatch
+                        { pos = pos1; decl_pos = pos2 }))
+        env
+
+  let simplify_param_accept_disposable ~subtype_env param1 param2 env =
+    let { fp_pos = pos1; _ } = param1 in
+    let { fp_pos = pos2; _ } = param2 in
+    match
+      (get_fp_accept_disposable param1, get_fp_accept_disposable param2)
+    with
+    | (true, false) ->
+      invalid
+        ~fail:
+          (Option.map
+             subtype_env.on_error
+             ~f:
+               Typing_error.(
+                 fun on_error ->
+                   apply_reasons ~on_error
+                   @@ Secondary.Accept_disposable_invariant
+                        { pos = pos1; decl_pos = pos2 }))
+        env
+    | (false, true) ->
+      invalid
+        ~fail:
+          (Option.map
+             subtype_env.on_error
+             ~f:
+               Typing_error.(
+                 fun on_error ->
+                   apply_reasons ~on_error
+                   @@ Secondary.Accept_disposable_invariant
+                        { pos = pos2; decl_pos = pos1 }))
+        env
+    | (_, _) -> valid env
+
+  let readonly_subtype (r_sub : bool) (r_super : bool) =
+    match (r_sub, r_super) with
+    | (true, false) ->
+      false (* A readonly value is a supertype of a mutable one *)
+    | _ -> true
+
+  let simplify_param_readonly ~subtype_env sub super env =
+    (* The sub param here (as with all simplify_param_* functions)
+       is actually the parameter on ft_super, since params are contravariant *)
+    (* Thus we check readonly subtyping covariantly *)
+    let { fp_pos = pos1; _ } = sub in
+    let { fp_pos = pos2; _ } = super in
+    if not (readonly_subtype (get_fp_readonly sub) (get_fp_readonly super)) then
+      invalid
+        ~fail:
+          (Option.map
+             subtype_env.on_error
+             ~f:
+               Typing_error.(
+                 fun on_error ->
+                   apply_reasons ~on_error
+                   @@ Secondary.Readonly_mismatch
+                        {
+                          pos = pos1;
+                          kind = `param;
+                          reason_sub =
+                            lazy [(pos2, "This parameter is mutable")];
+                          reason_super =
+                            lazy [(pos1, "But this parameter is readonly")];
+                        }))
+        env
+    else
+      valid env
+
+  let cross_package_subtype (c_sub : string option) (c_super : string option) =
+    match (c_sub, c_super) with
+    | (Some s, Some t) -> String.equal s t
+    | (Some _, None) -> false
+    | (None, Some _) -> true
+    | (None, None) -> true
+
+  (* Helper function for subtyping on function types: performs all checks that
+   * don't involve actual types:
+   *   <<__ReturnDisposable>> attribute
+   *   variadic arity
+   *  <<__Policied>> attribute
+   *  Readonlyness
+   * <<__CrossPackage>> attribute
+   *)
+  let simplify_subtype_funs_attributes
+      ~subtype_env
+      (r_sub : Reason.t)
+      (ft_sub : locl_fun_type)
+      (r_super : Reason.t)
+      (ft_super : locl_fun_type)
+      env =
+    let p_sub = Reason.to_pos r_sub in
+    let p_super = Reason.to_pos r_super in
+    let print_cross_pkg_reason (c : string option) (is_sub : bool) =
+      match c with
+      | Some s when is_sub ->
+        Printf.sprintf
+          "This function is marked `<<__CrossPackage(%s)>>`, so it's only compatible with other functions marked `<<__CrossPackage(%s)>>`"
+          s
+          s
+      | Some s ->
+        Printf.sprintf "This function is marked <<__CrossPackage(%s)>>" s
+      | None -> "This function is not cross package"
+    in
+    (env, TL.valid)
+    |> check_with
+         (readonly_subtype
+            (* Readonly this is contravariant, so check ft_super_ro <: ft_sub_ro *)
+            (get_ft_readonly_this ft_super)
+            (get_ft_readonly_this ft_sub))
+         (Option.map
+            subtype_env.on_error
+            ~f:
+              Typing_error.(
+                fun on_error ->
+                  apply_reasons ~on_error
+                  @@ Secondary.Readonly_mismatch
+                       {
+                         pos = p_sub;
+                         kind = `fn;
+                         reason_sub =
+                           lazy
+                             [(p_sub, "This function is not marked readonly")];
+                         reason_super =
+                           lazy [(p_super, "This function is marked readonly")];
+                       }))
+    |> check_with
+         (readonly_subtype
+            (* Readonly return is covariant, so check ft_sub <: ft_super *)
+            (get_ft_returns_readonly ft_sub)
+            (get_ft_returns_readonly ft_super))
+         (Option.map
+            subtype_env.on_error
+            ~f:
+              Typing_error.(
+                fun on_error ->
+                  apply_reasons ~on_error
+                  @@ Secondary.Readonly_mismatch
+                       {
+                         pos = p_sub;
+                         kind = `fn_return;
+                         reason_sub =
+                           lazy
+                             [(p_sub, "This function returns a readonly value")];
+                         reason_super =
+                           lazy
+                             [
+                               ( p_super,
+                                 "This function does not return a readonly value"
+                               );
+                             ];
+                       }))
+    |> check_with
+         (cross_package_subtype
+            ft_sub.ft_cross_package
+            ft_super.ft_cross_package)
+         (Option.map
+            subtype_env.on_error
+            ~f:
+              Typing_error.(
+                fun on_error ->
+                  apply_reasons ~on_error
+                  @@ Secondary.Cross_package_mismatch
+                       {
+                         pos = p_sub;
+                         reason_sub =
+                           lazy
+                             [
+                               ( p_sub,
+                                 print_cross_pkg_reason
+                                   ft_sub.ft_cross_package
+                                   true );
+                             ];
+                         reason_super =
+                           lazy
+                             [
+                               ( p_super,
+                                 print_cross_pkg_reason
+                                   ft_super.ft_cross_package
+                                   false );
+                             ];
+                       }))
+    |> check_with
+         (Bool.equal
+            (get_ft_return_disposable ft_sub)
+            (get_ft_return_disposable ft_super))
+         (Option.map
+            subtype_env.on_error
+            ~f:
+              Typing_error.(
+                fun on_error ->
+                  apply_reasons ~on_error
+                  @@ Secondary.Return_disposable_mismatch
+                       {
+                         pos_super = p_super;
+                         pos_sub = p_sub;
+                         is_marked_return_disposable =
+                           get_ft_return_disposable ft_super;
+                       }))
+    |> check_with
+         (arity_min ft_sub <= arity_min ft_super)
+         (Option.map
+            subtype_env.on_error
+            ~f:
+              Typing_error.(
+                fun on_error ->
+                  apply_reasons ~on_error
+                  @@ Secondary.Fun_too_many_args
+                       {
+                         expected = arity_min ft_super;
+                         actual = arity_min ft_sub;
+                         pos = p_sub;
+                         decl_pos = p_super;
+                       }))
+    |> fun res ->
+    let ft_sub_variadic =
+      if get_ft_variadic ft_sub then
+        List.last ft_sub.ft_params
+      else
+        None
+    in
+    let ft_super_variadic =
+      if get_ft_variadic ft_super then
+        List.last ft_super.ft_params
+      else
+        None
+    in
+
+    match (ft_sub_variadic, ft_super_variadic) with
+    | (Some { fp_name = None; _ }, Some { fp_name = Some _; _ }) ->
+      (* The HHVM runtime ignores "..." entirely, but knows about
+       * "...$args"; for contexts for which the runtime enforces method
+       * compatibility (currently, inheritance from abstract/interface
+       * methods), letting "..." override "...$args" would result in method
+       * compatibility errors at runtime. *)
+      with_error
+        (Option.map
+           subtype_env.on_error
+           ~f:
+             Typing_error.(
+               fun on_error ->
+                 apply_reasons ~on_error
+                 @@ Secondary.Fun_variadicity_hh_vs_php56
+                      { pos = p_sub; decl_pos = p_super }))
+        res
+    | (None, None) ->
+      let sub_max = List.length ft_sub.ft_params in
+      let super_max = List.length ft_super.ft_params in
+      if sub_max < super_max then
+        with_error
+          (Option.map
+             subtype_env.on_error
+             ~f:
+               Typing_error.(
+                 fun on_error ->
+                   apply_reasons ~on_error
+                   @@ Secondary.Fun_too_few_args
+                        {
+                          pos = p_sub;
+                          decl_pos = p_super;
+                          expected = super_max;
+                          actual = sub_max;
+                        }))
+          res
+      else
+        res
+    | (None, Some _) ->
+      with_error
+        (Option.map
+           subtype_env.on_error
+           ~f:
+             Typing_error.(
+               fun on_error ->
+                 apply_reasons ~on_error
+                 @@ Secondary.Fun_unexpected_nonvariadic
+                      { pos = p_sub; decl_pos = p_super }))
+        res
+    | (_, _) -> res
+
+  let rec simplify_subtype_params
+      ~(subtype_env : subtype_env)
+      ~for_override
+      (subl : locl_fun_param list)
+      (superl : locl_fun_param list)
+      (variadic_sub_ty : bool)
+      (variadic_super_ty : bool)
+      env =
+    let simplify_subtype_params_help =
+      simplify_subtype_params ~subtype_env ~for_override
+    in
+    let simplify_subtype_params_with_variadic_help =
+      simplify_subtype_params_with_variadic ~subtype_env
+    in
+    let simplify_supertype_params_with_variadic_help =
+      simplify_supertype_params_with_variadic ~subtype_env
+    in
+    match (subl, superl) with
+    (* When either list runs out, we still have to typecheck that
+       the remaining portion sub/super types with the other's variadic.
+       For example, if
+       ChildClass {
+         public function a(int $x = 0, string ... $args) // superl = [int], super_var = string
+       }
+       overrides
+       ParentClass {
+         public function a(string ... $args) // subl = [], sub_var = string
+       }
+       , there should be an error because the first argument will be checked against
+       int, not string that is, ChildClass::a("hello") would crash,
+       but ParentClass::a("hello") wouldn't.
+
+       Similarly, if the other list is longer, aka
+       ChildClass  extends ParentClass {
+         public function a(mixed ... $args) // superl = [], super_var = mixed
+       }
+       overrides
+       ParentClass {
+         //subl = [string], sub_var = string
+         public function a(string $x = 0, string ... $args)
+       }
+       It should also check that string is a subtype of mixed.
+    *)
+    | ([fp], _) when variadic_sub_ty ->
+      simplify_supertype_params_with_variadic_help superl fp.fp_type env
+    | (_, [fp]) when variadic_super_ty ->
+      simplify_subtype_params_with_variadic_help subl fp.fp_type env
+    | ([], _) -> valid env
+    | (_, []) -> valid env
+    | (sub :: subl, super :: superl) ->
+      let { fp_type = ty_sub; _ } = sub in
+      let { fp_type = ty_super; _ } = super in
+      let subtype_env_for_param =
+        (* When overriding in Sound Dynamic, we treat any dynamic-aware subtype of dynamic as a
+         * subtype of the dynamic type itself
+         *)
+        match get_node ty_super with
+        | Tdynamic
+          when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
+               && for_override ->
+          { subtype_env with coerce = Some TL.CoerceToDynamic }
+        | _ -> subtype_env
+      in
+      let simplify_subtype_for_param =
+        Subtype.simplify_subtype
+          ~subtype_env:subtype_env_for_param
+          ~sub_supportdyn:None
+      in
+      (* Check that the calling conventions of the params are compatible. *)
+      env
+      |> simplify_param_modes ~subtype_env sub super
+      &&& simplify_param_readonly ~subtype_env sub super
+      &&& simplify_param_accept_disposable ~subtype_env sub super
+      &&& begin
+            fun env ->
+              match (get_fp_mode sub, get_fp_mode super) with
+              | (FPinout, FPinout) ->
+                (* Inout parameters are invariant wrt subtyping for function types. *)
+                env
+                |> simplify_subtype_for_param ty_super ty_sub
+                &&& simplify_subtype_for_param ty_sub ty_super
+              | _ -> env |> simplify_subtype_for_param ty_sub ty_super
+          end
+      &&& simplify_subtype_params_help
+            subl
+            superl
+            variadic_sub_ty
+            variadic_super_ty
+
+  let simplify_subtype_funs
+      ~(subtype_env : subtype_env)
+      ~(check_return : bool)
+      ~(for_override : bool)
+      ?(super_like = false)
+      (r_sub : Reason.t)
+      (ft_sub : locl_fun_type)
+      (r_super : Reason.t)
+      (ft_super : locl_fun_type)
+      env : env * TL.subtype_prop =
+    (* First apply checks on attributes and variadic arity *)
+    let simplify_subtype_implicit_params_help =
+      simplify_subtype_implicit_params ~subtype_env
+    in
+    env
+    |> simplify_subtype_funs_attributes
+         ~subtype_env
+         r_sub
+         ft_sub
+         r_super
+         ft_super
+    &&& (* Now do contravariant subtyping on parameters *)
+    begin
+      simplify_subtype_params
+        ~subtype_env
+        ~for_override
+        ft_super.ft_params
+        ft_sub.ft_params
+        (get_ft_variadic ft_super)
+        (get_ft_variadic ft_sub)
+    end
+    &&& simplify_subtype_implicit_params_help
+          ft_super.ft_implicit_params
+          ft_sub.ft_implicit_params
+    &&&
+    (* Finally do covariant subtyping on return type *)
+    if check_return then
+      let super_ty = liken ~super_like env ft_super.ft_ret in
+      let subtype_env =
+        if
+          TypecheckerOptions.enable_sound_dynamic env.genv.tcopt && for_override
+        then
+          (* When overriding in Sound Dynamic, we allow t to override dynamic if
+           * t is a dynamic-aware subtype of dynamic. We also allow Awaitable<t>
+           * to override Awaitable<dynamic> and and Awaitable<t> to
+           * override ~Awaitable<dynamic>.
+           *)
+          let super_ty = TUtils.strip_dynamic env super_ty in
+          match get_node super_ty with
+          | Tdynamic -> { subtype_env with coerce = Some TL.CoerceToDynamic }
+          | Tclass ((_, class_name), _, [ty])
+            when String.equal class_name SN.Classes.cAwaitable && is_dynamic ty
+            ->
+            { subtype_env with coerce = Some TL.CoerceToDynamic }
+          | _ -> subtype_env
+        else
+          subtype_env
+      in
+      Subtype.simplify_subtype
+        ~subtype_env
+        ~sub_supportdyn:None
+        ft_sub.ft_ret
+        super_ty
+    else
+      valid
+end
+
 (* Determines whether the types are definitely disjoint, or whether they might
     overlap (i.e., both contain some particular value). *)
 (* One of the main entry points to this module *)
@@ -6016,7 +6044,7 @@ let subtype_funs
    *)
   let old_env = env in
   let (env, prop) =
-    Subtype.simplify_subtype_funs
+    Subtype_fun.simplify_subtype_funs
       ~subtype_env:(make_subtype_env ~log_level:2 ~coerce:None on_error)
       ~check_return
       ~for_override

@@ -588,7 +588,7 @@ let add_obj_get_quickfixes
       on_error
   | _ -> on_error
 
-module Subtype : sig
+module rec Subtype : sig
   (** Given types ty_sub and ty_super, attempt to
    reduce the subtyping proposition ty_sub <: ty_super to
    a logical proposition whose primitive assertions are of the form v <: t or t <: v
@@ -710,6 +710,17 @@ module Subtype : sig
     Typing_defs.locl_ty ->
     Typing_defs.locl_ty list ->
     Typing_defs.locl_ty list
+
+  val default_subtype :
+    subtype_env:subtype_env ->
+    this_ty:Typing_defs.locl_ty option ->
+    ?super_like:bool ->
+    sub_supportdyn:Reason.t option ->
+    fail:Typing_error.t option ->
+    Typing_env_types.env ->
+    Typing_defs.internal_type ->
+    Typing_defs.internal_type ->
+    Typing_env_types.env * TL.subtype_prop
 end = struct
   let rec simplify_subtype
       ~(subtype_env : subtype_env)
@@ -1500,7 +1511,7 @@ end = struct
               end)
           end
         | (r, Tcan_index ci) ->
-          simplify_subtype_can_index
+          Can_index.simplify_subtype_can_index
             ~subtype_env
             ~sub_supportdyn
             ~this_ty
@@ -3541,19 +3552,6 @@ end = struct
               invalid_env env))
     | (_, _) -> invalid_env env
 
-  and simplify_subtype_can_index
-      ~subtype_env ~sub_supportdyn ~this_ty ~fail ty_sub ty_super (_r, _ci) env
-      =
-    (* TODO: implement *)
-    default_subtype
-      ~subtype_env
-      ~sub_supportdyn
-      ~this_ty
-      ~fail
-      env
-      ty_sub
-      ty_super
-
   and simplify_subtype_can_traverse
       ~subtype_env
       ~sub_supportdyn
@@ -5360,6 +5358,32 @@ end = struct
         | LoclType ty -> ty
         | _ ->
           failwith "The union of two locl type should always be a locl type.")
+end
+
+and Can_index : sig
+  val simplify_subtype_can_index :
+    subtype_env:subtype_env ->
+    sub_supportdyn:Reason.t option ->
+    this_ty:Typing_defs.locl_ty option ->
+    fail:Typing_error.t option ->
+    Typing_defs.internal_type ->
+    Typing_defs.internal_type ->
+    Typing_defs.Reason.t * Typing_defs.can_index ->
+    Typing_env_types.env ->
+    Typing_env_types.env * TL.subtype_prop
+end = struct
+  let simplify_subtype_can_index
+      ~subtype_env ~sub_supportdyn ~this_ty ~fail ty_sub ty_super (_r, _ci) env
+      =
+    (* TODO: implement *)
+    Subtype.default_subtype
+      ~subtype_env
+      ~sub_supportdyn
+      ~this_ty
+      ~fail
+      env
+      ty_sub
+      ty_super
 end
 
 (* Determines whether the types are definitely disjoint, or whether they might

@@ -3115,7 +3115,7 @@ end = struct
             valid env
           (* Match what's done in unify for non-strict code *)
           | (_, Tclass _) ->
-            simplify_subtype_classes
+            Subtype_class.simplify_subtype_classes
               ~fail
               ~subtype_env
               ~sub_supportdyn
@@ -3389,294 +3389,6 @@ end = struct
         (TShapeSet.of_list (TShapeMap.keys fdm_sub @ TShapeMap.keys fdm_super))
         (env, TL.valid)
 
-  (* Suptyping when the two types are classish *)
-  and simplify_subtype_classes
-      ~fail
-      ~(subtype_env : subtype_env)
-      ~(sub_supportdyn : Reason.t option)
-      ~(this_ty : locl_ty option)
-      ~(super_like : bool)
-      ty_sub
-      ty_super
-      env : env * TL.subtype_prop =
-    let invalid_env = invalid ~fail in
-    let ( ||| ) = ( ||| ) ~fail in
-    match (deref ty_sub, deref ty_super) with
-    | ( (r_sub, Tclass (x_sub, exact_sub, tyl_sub)),
-        (_r_super, Tclass (x_super, exact_super, tyl_super)) ) ->
-      let (cid_super, cid_sub) = (snd x_super, snd x_sub) in
-      let (exact_match, both_exact) =
-        match (exact_sub, exact_super) with
-        | (Nonexact _, Exact) -> (false, false)
-        | (Exact, Exact) -> (true, true)
-        | (_, _) -> (true, false)
-      in
-      if String.equal cid_super cid_sub then
-        if List.is_empty tyl_sub && List.is_empty tyl_super && exact_match then
-          valid env
-        else
-          (* This is side-effecting as it registers a dependency *)
-          let class_def_sub = Env.get_class env cid_sub in
-          (* If class is final then exactness is superfluous *)
-          let (has_generics, is_final) =
-            match class_def_sub with
-            | Decl_entry.Found tc ->
-              (not (List.is_empty (Cls.tparams tc)), Cls.final tc)
-            | Decl_entry.DoesNotExist
-            | Decl_entry.NotYetAvailable ->
-              (false, false)
-          in
-          if not (exact_match || is_final) then
-            invalid_env env
-          else if has_generics && List.is_empty tyl_super then
-            (* C<t> <: C where C represents all possible instantiations of C's generics *)
-            valid env
-          else if has_generics && List.is_empty tyl_sub then
-            (* C </: C<t>, since C's generic can be instantiated to other things than t *)
-            invalid_env env
-          else
-            let variance_reifiedl =
-              if List.is_empty tyl_sub then
-                []
-              else if both_exact then
-                (* Subtyping exact class types following variance
-                 * annotations is unsound in general (see T142810099).
-                 * When the class is exact, we must treat all generic
-                 * parameters as invariant.
-                 *)
-                List.map tyl_sub ~f:(fun _ -> (Ast_defs.Invariant, Aast.Erased))
-              else
-                match class_def_sub with
-                | Decl_entry.DoesNotExist
-                | Decl_entry.NotYetAvailable ->
-                  List.map tyl_sub ~f:(fun _ ->
-                      (Ast_defs.Invariant, Aast.Erased))
-                | Decl_entry.Found class_sub ->
-                  List.map (Cls.tparams class_sub) ~f:(fun t ->
-                      (t.tp_variance, t.tp_reified))
-            in
-            simplify_subtype_variance_for_injective
-              ~subtype_env
-              ~sub_supportdyn
-              ~super_like
-              cid_sub
-              (Decl_entry.to_option class_def_sub)
-              variance_reifiedl
-              tyl_sub
-              tyl_super
-              env
-      else if not exact_match then
-        invalid_env env
-      else
-        let class_def_sub = Env.get_class env cid_sub in
-        (match class_def_sub with
-        | Decl_entry.DoesNotExist
-        | Decl_entry.NotYetAvailable ->
-          (* This should have been caught already in the naming phase *)
-          valid env
-        | Decl_entry.Found class_sub ->
-          (* We handle the case where a generic A<T> is used as A for the sub-class.
-             This works because there will be no locls to substitute for type parameters
-             T in the type build by get_ancestor. If T does show up in that type, then
-             the call to simplify subtype will fail. This is what we expect since we
-             would need it to be a sub-type of the super-type for all T. If T is not there,
-             then simplify_subtype should succeed. *)
-          let ety_env =
-            {
-              empty_expand_env with
-              substs =
-                TUtils.make_locl_subst_for_class_tparams class_sub tyl_sub;
-              (* FIXME(T59448452): Unsound in general *)
-              this_ty = Option.value this_ty ~default:ty_sub;
-            }
-          in
-          let up_obj = Cls.get_ancestor class_sub cid_super in
-          (match up_obj with
-          | Some up_obj ->
-            (* Since we have provided no `Typing_error.Reasons_callback.t`
-             * in the `expand_env`, this will not generate any errors *)
-            let ((env, _ty_err_opt), up_obj) =
-              Phase.localize ~ety_env env up_obj
-            in
-            simplify_subtype_classes
-              ~fail
-              ~subtype_env
-              ~sub_supportdyn
-              ~this_ty
-              ~super_like
-              up_obj
-              ty_super
-              env
-          | None ->
-            if
-              Ast_defs.is_c_trait (Cls.kind class_sub)
-              || Ast_defs.is_c_interface (Cls.kind class_sub)
-            then
-              let reqs_class =
-                List.map
-                  (Cls.all_ancestor_req_class_requirements class_sub)
-                  ~f:snd
-              in
-              let rec try_upper_bounds_on_this up_objs env =
-                match up_objs with
-                | [] ->
-                  (* It's crucial that we don't lose updates to tpenv in
-                   * env that were introduced by Phase.localize.
-                   * TODO: avoid this requirement *)
-                  invalid_env env
-                | ub_obj_typ :: up_objs
-                  when List.mem reqs_class ub_obj_typ ~equal:equal_decl_ty ->
-                  (* `require class` constraints do not induce subtyping,
-                   * so skipping them *)
-                  try_upper_bounds_on_this up_objs env
-                | ub_obj_typ :: up_objs ->
-                  (* A trait is never the runtime type, but it can be used
-                   * as a constraint if it has requirements or where
-                   * constraints for its using classes *)
-                  (* Since we have provided no `Typing_error.Reasons_callback.t`
-                   * in the `expand_env`, this will not generate any errors *)
-                  let ((env, _ty_err_opt), ub_obj_typ) =
-                    Phase.localize ~ety_env env ub_obj_typ
-                  in
-                  env
-                  |> simplify_subtype
-                       ~subtype_env
-                       ~sub_supportdyn
-                       ~this_ty
-                       (mk (r_sub, get_node ub_obj_typ))
-                       ty_super
-                  ||| try_upper_bounds_on_this up_objs
-              in
-              try_upper_bounds_on_this (Cls.upper_bounds_on_this class_sub) env
-            else
-              invalid_env env))
-    | (_, _) -> invalid_env env
-
-  (* Given an injective type constructor C (e.g., a class)
-   * C<t1, .., tn> <: C<u1, .., un> iff
-   * t1 <:v1> u1 /\ ... /\ tn <:vn> un
-   * where vi is the variance of the i'th generic parameter of C,
-   * and <:v denotes the appropriate direction of subtyping for variance v *)
-  and simplify_subtype_variance_for_injective
-      ~(subtype_env : subtype_env)
-      ~(sub_supportdyn : Reason.t option)
-      ?(super_like = false)
-      (cid : string)
-      (class_sub : Cls.t option) =
-    (* Before looping through the generic arguments, check to see if we should push
-       supportdyn onto them. This depends on the generic class itself. *)
-    let sub_supportdyn =
-      match (sub_supportdyn, class_sub) with
-      | (None, _)
-      | (_, None) ->
-        None
-      | (Some _, Some class_sub) ->
-        if
-          String.equal cid SN.Collections.cTraversable
-          || String.equal cid SN.Collections.cKeyedTraversable
-          || String.equal cid SN.Collections.cContainer
-          || Cls.has_ancestor class_sub SN.Collections.cContainer
-        then
-          sub_supportdyn
-        else
-          None
-    in
-    simplify_subtype_variance_for_injective_loop
-      ~subtype_env
-      ~sub_supportdyn
-      ~super_like
-      cid
-
-  and simplify_subtype_variance_for_injective_loop
-      ~(subtype_env : subtype_env)
-      ~(sub_supportdyn : Reason.t option)
-      ?(super_like = false)
-      (cid : string)
-      (variance_reifiedl : (Ast_defs.variance * Aast.reify_kind) list)
-      (children_tyl : locl_ty list)
-      (super_tyl : locl_ty list) : env -> env * TL.subtype_prop =
-   fun env ->
-    let simplify_subtype_help reify_kind =
-      (* When doing coercions from dynamic we treat dynamic as a bottom type. This is generally
-         correct, except for the case when the generic isn't erased. When a generic is
-         reified it is enforced as if it is it's own separate class in the runtime. i.e.
-         In the code:
-
-           class Box<reify T> {}
-           function box_int(): Box<int> { return new Box<~int>(); }
-
-         If is enforced like:
-           class Box<reify T> {}
-           class Box_int extends Box<int> {}
-           class Box_like_int extends Box<~int> {}
-
-           function box_int(): Box_int { return new Box_like_int(); }
-
-         Thus we cannot push the like type to the outside of generic like we can
-         we erased generics.
-      *)
-      let subtype_env =
-        if
-          (not Aast.(equal_reify_kind reify_kind Erased))
-          && coercing_from_dynamic subtype_env
-        then
-          { subtype_env with coerce = None }
-        else
-          subtype_env
-      in
-      simplify_subtype ~subtype_env ~this_ty:None
-    in
-    let simplify_subtype_variance_for_injective_loop_help =
-      simplify_subtype_variance_for_injective_loop
-        ~subtype_env
-        ~sub_supportdyn
-        ~super_like
-    in
-    match (variance_reifiedl, children_tyl, super_tyl) with
-    | ([], _, _)
-    | (_, [], _)
-    | (_, _, []) ->
-      valid env
-    | ( (variance, reify_kind) :: variance_reifiedl,
-        child :: childrenl,
-        super :: superl ) ->
-      let simplify_subtype_help = simplify_subtype_help reify_kind in
-      begin
-        match variance with
-        | Ast_defs.Covariant ->
-          let super = liken ~super_like env super in
-          simplify_subtype_help ~sub_supportdyn child super env
-        | Ast_defs.Contravariant ->
-          let super =
-            mk
-              ( Reason.Rcontravariant_generic (get_reason super, cid),
-                get_node super )
-          in
-          simplify_subtype_help ~sub_supportdyn super child env
-        | Ast_defs.Invariant ->
-          let super' =
-            mk
-              (Reason.Rinvariant_generic (get_reason super, cid), get_node super)
-          in
-          env
-          |> simplify_subtype_help
-               ~sub_supportdyn
-               child
-               (liken ~super_like env super')
-          &&& simplify_subtype_help
-                ~sub_supportdyn
-                super'
-                (if is_tyvar super' then
-                  child
-                else
-                  liken ~super_like env child)
-      end
-      &&& simplify_subtype_variance_for_injective_loop_help
-            cid
-            variance_reifiedl
-            childrenl
-            superl
-
   (* Given a type constructor N that may not be injective (e.g., a newtype)
    * t1 <:v1> u1 /\ ... /\ tn <:vn> un
    * implies
@@ -3697,7 +3409,7 @@ end = struct
       ty_super
       env =
     let ((env, p) as res) =
-      simplify_subtype_variance_for_injective
+      Subtype_injective_ctor.simplify_subtype_variance_for_injective
         ~subtype_env
         ~sub_supportdyn
         ~super_like
@@ -5434,6 +5146,321 @@ end = struct
               ~this_ty
               obj_get_ty
               member_ty)
+end
+
+and Subtype_class : sig
+  (** Suptyping when the two types are classish *)
+  val simplify_subtype_classes :
+    fail:Typing_error.t option ->
+    subtype_env:subtype_env ->
+    sub_supportdyn:Reason.t option ->
+    this_ty:Typing_defs.locl_ty option ->
+    super_like:bool ->
+    Typing_defs.locl_ty ->
+    Typing_defs.locl_ty ->
+    Typing_env_types.env ->
+    Typing_env_types.env * TL.subtype_prop
+end = struct
+  let rec simplify_subtype_classes
+      ~fail
+      ~(subtype_env : subtype_env)
+      ~(sub_supportdyn : Reason.t option)
+      ~(this_ty : locl_ty option)
+      ~(super_like : bool)
+      ty_sub
+      ty_super
+      env : env * TL.subtype_prop =
+    let invalid_env = invalid ~fail in
+    let ( ||| ) = ( ||| ) ~fail in
+    match (deref ty_sub, deref ty_super) with
+    | ( (r_sub, Tclass (x_sub, exact_sub, tyl_sub)),
+        (_r_super, Tclass (x_super, exact_super, tyl_super)) ) ->
+      let (cid_super, cid_sub) = (snd x_super, snd x_sub) in
+      let (exact_match, both_exact) =
+        match (exact_sub, exact_super) with
+        | (Nonexact _, Exact) -> (false, false)
+        | (Exact, Exact) -> (true, true)
+        | (_, _) -> (true, false)
+      in
+      if String.equal cid_super cid_sub then
+        if List.is_empty tyl_sub && List.is_empty tyl_super && exact_match then
+          valid env
+        else
+          (* This is side-effecting as it registers a dependency *)
+          let class_def_sub = Env.get_class env cid_sub in
+          (* If class is final then exactness is superfluous *)
+          let (has_generics, is_final) =
+            match class_def_sub with
+            | Decl_entry.Found tc ->
+              (not (List.is_empty (Cls.tparams tc)), Cls.final tc)
+            | Decl_entry.DoesNotExist
+            | Decl_entry.NotYetAvailable ->
+              (false, false)
+          in
+          if not (exact_match || is_final) then
+            invalid_env env
+          else if has_generics && List.is_empty tyl_super then
+            (* C<t> <: C where C represents all possible instantiations of C's generics *)
+            valid env
+          else if has_generics && List.is_empty tyl_sub then
+            (* C </: C<t>, since C's generic can be instantiated to other things than t *)
+            invalid_env env
+          else
+            let variance_reifiedl =
+              if List.is_empty tyl_sub then
+                []
+              else if both_exact then
+                (* Subtyping exact class types following variance
+                 * annotations is unsound in general (see T142810099).
+                 * When the class is exact, we must treat all generic
+                 * parameters as invariant.
+                 *)
+                List.map tyl_sub ~f:(fun _ -> (Ast_defs.Invariant, Aast.Erased))
+              else
+                match class_def_sub with
+                | Decl_entry.DoesNotExist
+                | Decl_entry.NotYetAvailable ->
+                  List.map tyl_sub ~f:(fun _ ->
+                      (Ast_defs.Invariant, Aast.Erased))
+                | Decl_entry.Found class_sub ->
+                  List.map (Cls.tparams class_sub) ~f:(fun t ->
+                      (t.tp_variance, t.tp_reified))
+            in
+            Subtype_injective_ctor.simplify_subtype_variance_for_injective
+              ~subtype_env
+              ~sub_supportdyn
+              ~super_like
+              cid_sub
+              (Decl_entry.to_option class_def_sub)
+              variance_reifiedl
+              tyl_sub
+              tyl_super
+              env
+      else if not exact_match then
+        invalid_env env
+      else
+        let class_def_sub = Env.get_class env cid_sub in
+        (match class_def_sub with
+        | Decl_entry.DoesNotExist
+        | Decl_entry.NotYetAvailable ->
+          (* This should have been caught already in the naming phase *)
+          valid env
+        | Decl_entry.Found class_sub ->
+          (* We handle the case where a generic A<T> is used as A for the sub-class.
+             This works because there will be no locls to substitute for type parameters
+             T in the type build by get_ancestor. If T does show up in that type, then
+             the call to simplify subtype will fail. This is what we expect since we
+             would need it to be a sub-type of the super-type for all T. If T is not there,
+             then simplify_subtype should succeed. *)
+          let ety_env =
+            {
+              empty_expand_env with
+              substs =
+                TUtils.make_locl_subst_for_class_tparams class_sub tyl_sub;
+              (* FIXME(T59448452): Unsound in general *)
+              this_ty = Option.value this_ty ~default:ty_sub;
+            }
+          in
+          let up_obj = Cls.get_ancestor class_sub cid_super in
+          (match up_obj with
+          | Some up_obj ->
+            (* Since we have provided no `Typing_error.Reasons_callback.t`
+             * in the `expand_env`, this will not generate any errors *)
+            let ((env, _ty_err_opt), up_obj) =
+              Phase.localize ~ety_env env up_obj
+            in
+            simplify_subtype_classes
+              ~fail
+              ~subtype_env
+              ~sub_supportdyn
+              ~this_ty
+              ~super_like
+              up_obj
+              ty_super
+              env
+          | None ->
+            if
+              Ast_defs.is_c_trait (Cls.kind class_sub)
+              || Ast_defs.is_c_interface (Cls.kind class_sub)
+            then
+              let reqs_class =
+                List.map
+                  (Cls.all_ancestor_req_class_requirements class_sub)
+                  ~f:snd
+              in
+              let rec try_upper_bounds_on_this up_objs env =
+                match up_objs with
+                | [] ->
+                  (* It's crucial that we don't lose updates to tpenv in
+                   * env that were introduced by Phase.localize.
+                   * TODO: avoid this requirement *)
+                  invalid_env env
+                | ub_obj_typ :: up_objs
+                  when List.mem reqs_class ub_obj_typ ~equal:equal_decl_ty ->
+                  (* `require class` constraints do not induce subtyping,
+                   * so skipping them *)
+                  try_upper_bounds_on_this up_objs env
+                | ub_obj_typ :: up_objs ->
+                  (* A trait is never the runtime type, but it can be used
+                   * as a constraint if it has requirements or where
+                   * constraints for its using classes *)
+                  (* Since we have provided no `Typing_error.Reasons_callback.t`
+                   * in the `expand_env`, this will not generate any errors *)
+                  let ((env, _ty_err_opt), ub_obj_typ) =
+                    Phase.localize ~ety_env env ub_obj_typ
+                  in
+                  env
+                  |> Subtype.simplify_subtype
+                       ~subtype_env
+                       ~sub_supportdyn
+                       ~this_ty
+                       (mk (r_sub, get_node ub_obj_typ))
+                       ty_super
+                  ||| try_upper_bounds_on_this up_objs
+              in
+              try_upper_bounds_on_this (Cls.upper_bounds_on_this class_sub) env
+            else
+              invalid_env env))
+    | (_, _) -> invalid_env env
+end
+
+and Subtype_injective_ctor : sig
+  (** Given an injective type constructor C (e.g., a class)
+    C<t1, .., tn> <: C<u1, .., un> iff
+    t1 <:v1> u1 /\ ... /\ tn <:vn> un
+    where vi is the variance of the i'th generic parameter of C,
+    and <:v denotes the appropriate direction of subtyping for variance v *)
+  val simplify_subtype_variance_for_injective :
+    subtype_env:subtype_env ->
+    sub_supportdyn:Typing_defs.locl_phase Typing_defs.Reason.t_ option ->
+    ?super_like:bool ->
+    string ->
+    Cls.t option ->
+    (Ast_defs.variance * Aast.reify_kind) list ->
+    Typing_defs.locl_ty list ->
+    Typing_defs.locl_ty list ->
+    Typing_env_types.env ->
+    Typing_env_types.env * TL.subtype_prop
+end = struct
+  let rec simplify_subtype_variance_for_injective_loop
+      ~(subtype_env : subtype_env)
+      ~(sub_supportdyn : Reason.t option)
+      ?(super_like = false)
+      (cid : string)
+      (variance_reifiedl : (Ast_defs.variance * Aast.reify_kind) list)
+      (children_tyl : locl_ty list)
+      (super_tyl : locl_ty list) : env -> env * TL.subtype_prop =
+   fun env ->
+    let simplify_subtype_help reify_kind =
+      (* When doing coercions from dynamic we treat dynamic as a bottom type. This is generally
+         correct, except for the case when the generic isn't erased. When a generic is
+         reified it is enforced as if it is it's own separate class in the runtime. i.e.
+         In the code:
+
+           class Box<reify T> {}
+           function box_int(): Box<int> { return new Box<~int>(); }
+
+         If is enforced like:
+           class Box<reify T> {}
+           class Box_int extends Box<int> {}
+           class Box_like_int extends Box<~int> {}
+
+           function box_int(): Box_int { return new Box_like_int(); }
+
+         Thus we cannot push the like type to the outside of generic like we can
+         we erased generics.
+      *)
+      let subtype_env =
+        if
+          (not Aast.(equal_reify_kind reify_kind Erased))
+          && coercing_from_dynamic subtype_env
+        then
+          { subtype_env with coerce = None }
+        else
+          subtype_env
+      in
+      Subtype.simplify_subtype ~subtype_env ~this_ty:None
+    in
+    let simplify_subtype_variance_for_injective_loop_help =
+      simplify_subtype_variance_for_injective_loop
+        ~subtype_env
+        ~sub_supportdyn
+        ~super_like
+    in
+    match (variance_reifiedl, children_tyl, super_tyl) with
+    | ([], _, _)
+    | (_, [], _)
+    | (_, _, []) ->
+      valid env
+    | ( (variance, reify_kind) :: variance_reifiedl,
+        child :: childrenl,
+        super :: superl ) ->
+      let simplify_subtype_help = simplify_subtype_help reify_kind in
+      begin
+        match variance with
+        | Ast_defs.Covariant ->
+          let super = liken ~super_like env super in
+          simplify_subtype_help ~sub_supportdyn child super env
+        | Ast_defs.Contravariant ->
+          let super =
+            mk
+              ( Reason.Rcontravariant_generic (get_reason super, cid),
+                get_node super )
+          in
+          simplify_subtype_help ~sub_supportdyn super child env
+        | Ast_defs.Invariant ->
+          let super' =
+            mk
+              (Reason.Rinvariant_generic (get_reason super, cid), get_node super)
+          in
+          env
+          |> simplify_subtype_help
+               ~sub_supportdyn
+               child
+               (liken ~super_like env super')
+          &&& simplify_subtype_help
+                ~sub_supportdyn
+                super'
+                (if is_tyvar super' then
+                  child
+                else
+                  liken ~super_like env child)
+      end
+      &&& simplify_subtype_variance_for_injective_loop_help
+            cid
+            variance_reifiedl
+            childrenl
+            superl
+
+  let simplify_subtype_variance_for_injective
+      ~(subtype_env : subtype_env)
+      ~(sub_supportdyn : Reason.t option)
+      ?(super_like = false)
+      (cid : string)
+      (class_sub : Cls.t option) =
+    (* Before looping through the generic arguments, check to see if we should push
+       supportdyn onto them. This depends on the generic class itself. *)
+    let sub_supportdyn =
+      match (sub_supportdyn, class_sub) with
+      | (None, _)
+      | (_, None) ->
+        None
+      | (Some _, Some class_sub) ->
+        if
+          String.equal cid SN.Collections.cTraversable
+          || String.equal cid SN.Collections.cKeyedTraversable
+          || String.equal cid SN.Collections.cContainer
+          || Cls.has_ancestor class_sub SN.Collections.cContainer
+        then
+          sub_supportdyn
+        else
+          None
+    in
+    simplify_subtype_variance_for_injective_loop
+      ~subtype_env
+      ~sub_supportdyn
+      ~super_like
+      cid
 end
 
 (* Determines whether the types are definitely disjoint, or whether they might

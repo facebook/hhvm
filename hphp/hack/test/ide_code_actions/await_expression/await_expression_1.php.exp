@@ -1,0 +1,36 @@
+Code actions available:
+------------------------------------------
+await expression (CodeActionKind: quickfix) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"await ",
+          "range":{"end":{"character":14,"line":8},"start":{"character":14,"line":8}}
+        }
+      ]
+    }
+  },
+  "kind":"quickfix",
+  "title":"await expression"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+async function gen_int(): Awaitable<int> {
+  return 1;
+}
+
+
+async function repro(): Awaitable<mixed> {
+  return (int)await gen_int() + 3;
+          //     ^ at-caret should be a quickfix (not a refactoring)
+}
+

@@ -1,0 +1,36 @@
+Code actions available:
+------------------------------------------
+await expression (CodeActionKind: refactor) SELECTED
+Extract into variable (CodeActionKind: refactor)
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"await ",
+          "range":{"end":{"character":24,"line":8},"start":{"character":24,"line":8}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"await expression"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+async function gen_int(): Awaitable<int> {
+  return 1;
+}
+
+
+async function repro(): Awaitable<mixed> {
+  return /*range-start*/await gen_int()/*range-end*/ + 3;
+}
+

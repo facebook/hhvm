@@ -4204,7 +4204,7 @@ end = struct
           ^ "either being discarded or used in a dangerous way before "
           ^ "being awaited" ),
       lazy [(pos2, "This is why I think it is `Awaitable`")],
-      [] )
+      [ (* We add a quickfix for this error in Quickfixes_from_refactors *) ] )
 
   let elt_type_to_string = function
     | `meth -> "method"

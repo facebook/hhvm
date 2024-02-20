@@ -11,7 +11,8 @@ let find ~entry pos ctx =
     | [] -> Extract_variable.find ~entry pos ctx
     | actions -> actions
   in
-  Override_method.find ~entry pos ctx
+  Await_expression.find ~entry pos ctx
+  @ Override_method.find ~entry pos ctx
   @ variable_actions
   @ Inline_method.find ~entry pos ctx
   @ Extract_method.find ~entry pos ctx

@@ -1,0 +1,22 @@
+(rule
+ (alias ide_code_actions_await_expression)
+ (deps
+  %{exe:../../../src/hh_single_type_check.exe}
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/ide_code_actions/await_expression/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/ide_code_actions/await_expression/*.php)
+  (glob_files %{project_root}/hack/test/ide_code_actions/await_expression/*.exp))
+ (action
+  (run
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/ide_code_actions/await_expression
+   --program
+   %{exe:../../../src/hh_single_type_check.exe}
+   --flags
+   --ide-code-actions "await")))
+
+(alias
+ (name runtest)
+ (deps
+  (alias ide_code_actions_await_expression)))

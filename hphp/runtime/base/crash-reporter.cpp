@@ -231,7 +231,10 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
         fd,
         "\n-------------------------------"
         "Treadmill Information"
-        "----------------------------\n%s\n",
+        "----------------------------\n%s\n"
+        "---------------------------------"
+        "---------------------------------"
+        "------------\n",
         Treadmill::dumpTreadmillInfo(true).data()
       );
       [[fallthrough]];
@@ -240,6 +243,7 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
 
       // flush so if C++ stack walking crashes, we still have this output so far
       ::fsync(fd);
+      dprintf(fd, "\nCPP Stacktrace:\n\n");
       if (st.has_value()) {
         st->printStackTrace(fd);
       } else {

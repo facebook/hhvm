@@ -217,6 +217,13 @@ function debug_get_bytecode(): string;
 function debug_file_deps(): vec<string>;
 
 /*
+ * Check if the treadmill is stuck with a long running request
+ * (killing the process if there is).
+ */
+<<__Native>>
+function check_for_stuck_treadmill(): void;
+
+/*
  * We need to be able to unit test functionality of __NativeData classes
  * without tripping over the funky behavior or (intentional) limitations
  * of the __NativeData classes that actually do something.

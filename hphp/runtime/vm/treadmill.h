@@ -93,6 +93,14 @@ Clock::time_point getRequestStartTime();
 void deferredFree(void*);
 
 /*
+ * Check if the treadmill is "stuck" by a request running far longer
+ * than it should. If stuck, the process will send a SIGABRT to itself
+ * to die. This check is normally done by startRequest(), but can be
+ * triggered manually with this.
+ */
+void checkForStuckTreadmill();
+
+/*
  * Used to get debug information about the treadmill. If forCrash is true then
  * an attempt will be made to acquire the treadmill mutex but a result will be
  * returned regardless of whether the lock was acquired.

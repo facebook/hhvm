@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/unit-cache.h"
 
 #include "hphp/runtime/vm/native-data.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
@@ -447,6 +448,12 @@ bool HHVM_FUNCTION(is_module_in_deployment, StringArg module,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void HHVM_FUNCTION(check_for_stuck_treadmill) {
+  Treadmill::checkForStuckTreadmill();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }
 
 struct DummyNativeData {
@@ -537,6 +544,8 @@ static struct IntrinsicsExtension final : Extension {
     HHVM_FALIAS(__hhvm_intrinsics\\debug_file_deps, debug_file_deps);
 
     HHVM_FALIAS(__hhvm_intrinsics\\is_module_in_deployment, is_module_in_deployment);
+
+    HHVM_FALIAS(__hhvm_intrinsics\\check_for_stuck_treadmill, check_for_stuck_treadmill);
 
     HHVM_NAMED_ME(__hhvm_intrinsics\\ExtensibleNewableClassWithNativeData,
                   setDummyValue,

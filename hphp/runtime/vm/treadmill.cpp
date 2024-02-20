@@ -72,6 +72,8 @@ std::vector<TreadmillRequestInfo> s_inflightRequests;
 // as all writes happen under the s_stateLock.
 std::atomic<Clock::time_point> s_oldestRequestInFlight{kNoStartTime};
 
+std::string s_killMessage;
+
 //////////////////////////////////////////////////////////////////////
 
 struct StateGuard {
@@ -150,50 +152,66 @@ Clock::duration getOldestRequestAge() {
  * bulk of the JITing.  In such cases, we want to abort the oldest JIT worker,
  * to capture its backtrace, instead of the main retranslate-all thread.
  */
-TreadmillRequestInfo getRequestToAbort() {
-  auto const oldestStart = getOldestRequestStartTime();
+const TreadmillRequestInfo* getRequestToAbort() {
   const TreadmillRequestInfo* oldest = nullptr;
   const TreadmillRequestInfo* oldestWorker = nullptr;
+
   for (auto const& req : s_inflightRequests) {
-    if (req.startTime == oldestStart) oldest = &req;
+    if (req.startTime == kNoStartTime) continue;
+    auto const timeout = req.requestInfo
+      ? req.requestInfo->m_reqInjectionData.getTimeout()
+      : 0;
+    auto const limit = std::chrono::seconds(std::max(
+      RO::MaxRequestAgeFactor * RO::RequestTimeoutSeconds,
+      RO::MaxRequestAgeFactor * timeout
+    ));
+    if (!limit.count()) continue;
+    auto const age = Clock::now() - req.startTime;
+    if (age <= limit) continue;
+    oldest = &req;
     if (req.sessionKind == SessionKind::TranslateWorker &&
         (oldestWorker == nullptr || req.startTime < oldestWorker->startTime)) {
       oldestWorker = &req;
     }
   }
-  always_assert(oldest != nullptr);
-  if (oldest->sessionKind != SessionKind::RetranslateAll) {
-    return *oldest;
-  }
-  if (oldestWorker != nullptr) {
-    return *oldestWorker;
-  }
-  return *oldest;
+
+  if (!oldest) return nullptr;
+  if (oldest->sessionKind != SessionKind::RetranslateAll) return oldest;
+  if (oldestWorker) return oldestWorker;
+  return oldest;
 }
 
-void checkOldest(Optional<StateGuard>& guard) {
+void checkOldest(Optional<StateGuard>& guard, bool force) {
+  if (debug && !force) return;
+
   auto const limit =
     RuntimeOption::MaxRequestAgeFactor *
       std::chrono::seconds(RuntimeOption::RequestTimeoutSeconds);
-  if (debug || limit.count() == 0) return;
+  if (limit.count() == 0) return;
 
   auto const oldestAge = getOldestRequestAge();
   if (oldestAge <= limit) return;
 
   auto const request = getRequestToAbort();
+  if (!request) return;
+
   auto const msg = folly::sformat(
     "Oldest request ({}, {}, {}) has been running for {} "
     "seconds. Aborting the server.",
-    request.requestInfo ? request.requestInfo->m_id.toString() : "none",
-    request.startTime.time_since_epoch().count(),
-    getSessionKindName(request.sessionKind),
-    std::chrono::duration_cast<std::chrono::seconds>(oldestAge).count()
+    request->requestInfo ? request->requestInfo->m_id.toString() : "none",
+    request->startTime.time_since_epoch().count(),
+    getSessionKindName(request->sessionKind),
+    std::chrono::duration_cast<std::chrono::seconds>(
+      Clock::now() - request->startTime
+    ).count()
   );
   Logger::Error(msg);
+  s_killMessage = msg;
+  auto const threadId = request->pthreadId;
   // Drop the lock since the SIGABRT we're about to send will try to
   // acquire it.
   guard.reset();
-  pthread_kill(request.pthreadId, SIGABRT);
+  pthread_kill(threadId, SIGABRT);
   // We're going to die, wait for it and don't bother proceeding.
   ::pause();
   always_assert(false);
@@ -242,7 +260,7 @@ void startRequest(SessionKind session_kind) {
   g.emplace();
 
   refreshStats();
-  checkOldest(g);
+  checkOldest(g, false);
   auto const startTime = Clock::now();
   if (requestIdx >= s_inflightRequests.size()) {
     s_inflightRequests.resize(
@@ -369,6 +387,13 @@ void deferredFree(void* p) {
   enqueue([p] { free(p); });
 }
 
+void checkForStuckTreadmill() {
+  Optional<StateGuard> g;
+  g.emplace();
+  refreshStats();
+  checkOldest(g, true);
+}
+
 std::string dumpTreadmillInfo(bool forCrash) {
   std::string out;
   Optional<StateGuard> g;
@@ -389,36 +414,50 @@ std::string dumpTreadmillInfo(bool forCrash) {
     }
   }
 
+  if (!s_killMessage.empty()) {
+    folly::format(&out, "{}\n\n", s_killMessage);
+  }
+
   auto const oldestStart = getOldestRequestStartTime();
 
   folly::format(
-      &out,
-      "Now: {}\n",
-      Clock::now().time_since_epoch().count()
+    &out,
+    "Now: {}\n",
+    Clock::now().time_since_epoch().count()
   );
 
   folly::format(
-      &out,
-      "OldestStartTime: {}\n",
-      oldestStart.time_since_epoch().count()
+    &out,
+    "OldestStartTime: {}\n",
+    oldestStart.time_since_epoch().count()
   );
 
   folly::format(
-      &out,
-      "InflightRequestsSize: {}\n",
-      s_inflightRequests.size()
+    &out,
+    "InflightRequestsSize: {}\n",
+    s_inflightRequests.size()
   );
 
+  out += "\nActive Requests:\n";
   for (auto& req : s_inflightRequests) {
     if (req.startTime != kNoStartTime) {
       folly::format(
-          &out,
-          "{} {} {} {}{}\n",
-          req.pthreadId,
-          req.requestInfo ? req.requestInfo->m_id.toString() : "none",
-          req.startTime.time_since_epoch().count(),
-          getSessionKindName(req.sessionKind),
-          req.startTime == oldestStart ? " OLDEST" : ""
+        &out,
+        "  {} {} {} (age {}ms){} {}{}\n",
+        req.pthreadId,
+        req.requestInfo ? req.requestInfo->m_id.toString() : "none",
+        req.startTime.time_since_epoch().count(),
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+          Clock::now() - req.startTime
+        ).count(),
+        req.requestInfo
+          ? folly::sformat(
+            " (timeout {}s)",
+            req.requestInfo->m_reqInjectionData.getTimeout()
+          )
+          : "",
+        getSessionKindName(req.sessionKind),
+        req.startTime == oldestStart ? " OLDEST" : ""
       );
     }
   }

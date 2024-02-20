@@ -664,23 +664,6 @@ module rec Subtype : sig
     Typing_defs.internal_type ->
     Typing_env_types.env * Typing_error.t option
 
-  val is_sub_type_alt_i :
-    require_completeness:bool ->
-    no_top_bottom:bool ->
-    coerce:TL.coercion_direction option ->
-    sub_supportdyn:Reason.t option ->
-    Typing_env_types.env ->
-    Typing_defs.internal_type ->
-    Typing_defs.internal_type ->
-    Hh_prelude.Bool.t option
-
-  val is_sub_type_for_union_i :
-    Typing_env_types.env ->
-    ?coerce:TL.coercion_direction option ->
-    Typing_defs.internal_type ->
-    Typing_defs.internal_type ->
-    bool
-
   val try_intersect :
     ?ignore_tyvars:bool ->
     Typing_env_types.env ->
@@ -1697,7 +1680,7 @@ end = struct
             let ty = MakeType.union r tyl in
             let (env, ty) = Env.expand_type env ty in
             let delay_push =
-              is_sub_type_for_union_i
+              Subtype_ask.is_sub_type_for_union_i
                 env
                 (LoclType ty)
                 (LoclType (MakeType.supportdyn_mixed ~mixed_reason:r r))
@@ -3390,16 +3373,21 @@ end = struct
         else
           MakeType.nonnull Reason.none
       in
-      is_sub_type_for_union_i ~coerce env (LoclType nonnull) super_ty
+      Subtype_ask.is_sub_type_for_union_i
+        ~coerce
+        env
+        (LoclType nonnull)
+        super_ty
     in
     let rec add_new_bound ~is_lower ~coerce ~constr ty bounds =
       match bounds with
       | [] -> [(is_lower, ty, constr)]
       | ((is_lower', bound_ty, _) as b) :: bounds ->
         if is_lower && is_lower' then
-          if is_sub_type_for_union_i ~coerce env bound_ty ty then
+          if Subtype_ask.is_sub_type_for_union_i ~coerce env bound_ty ty then
             b :: bounds
-          else if is_sub_type_for_union_i ~coerce env ty bound_ty then
+          else if Subtype_ask.is_sub_type_for_union_i ~coerce env ty bound_ty
+          then
             add_new_bound ~is_lower ~coerce ~constr ty bounds
           else if additional_heuristic ~coerce env bound_ty ty then
             b :: bounds
@@ -3410,13 +3398,13 @@ end = struct
         else if
           (not is_lower)
           && (not is_lower')
-          && is_sub_type_for_union_i ~coerce env ty bound_ty
+          && Subtype_ask.is_sub_type_for_union_i ~coerce env ty bound_ty
         then
           b :: bounds
         else if
           (not is_lower)
           && (not is_lower')
-          && is_sub_type_for_union_i ~coerce env bound_ty ty
+          && Subtype_ask.is_sub_type_for_union_i ~coerce env bound_ty ty
         then
           add_new_bound ~is_lower ~coerce ~constr ty bounds
         else
@@ -3620,62 +3608,6 @@ end = struct
         prop;
     prop_to_env ty_sub ty_super env prop subtype_env.on_error
 
-  and is_sub_type_alt_i
-      ~require_completeness ~no_top_bottom ~coerce ~sub_supportdyn env ty1 ty2 =
-    let this_ty =
-      match ty1 with
-      | LoclType ty1 -> Some ty1
-      | ConstraintType _ -> None
-    in
-    let (_env, prop) =
-      simplify_subtype_i
-        ~subtype_env:
-          (make_subtype_env
-             ~require_completeness
-             ~no_top_bottom
-             ~coerce
-             ~log_level:3
-             None)
-        ~sub_supportdyn
-        ~this_ty
-        (* It is weird that this can cause errors, but I am wary to discard them.
-         * Using the generic unify_error to maintain current behavior. *)
-        ty1
-        ty2
-        env
-    in
-    if TL.is_valid prop then
-      Some true
-    else if TL.is_unsat prop then
-      Some false
-    else
-      None
-
-  and is_sub_type_for_union_i env ?(coerce = None) ty1 ty2 =
-    let ( = ) = Option.equal Bool.equal in
-    is_sub_type_alt_i
-      ~require_completeness:false
-      ~no_top_bottom:true
-      ~coerce
-      ~sub_supportdyn:None
-      env
-      ty1
-      ty2
-    = Some true
-
-  and is_sub_type_ignore_generic_params_i env ty1 ty2 =
-    let ( = ) = Option.equal Bool.equal in
-    is_sub_type_alt_i
-    (* TODO(T121047839): Should this set a dedicated ignore_generic_param flag instead? *)
-      ~require_completeness:true
-      ~no_top_bottom:true
-      ~coerce:None
-      ~sub_supportdyn:None
-      env
-      ty1
-      ty2
-    = Some true
-
   (* Attempt to compute the intersection of a type with an existing list intersection.
    * If try_intersect env t [t1;...;tn] = [u1; ...; um]
    * then u1&...&um must be the greatest lower bound of t and t1&...&tn wrt subtyping.
@@ -3699,22 +3631,26 @@ end = struct
        *)
       if ignore_tyvars && (is_tyvar_i ty || is_tyvar_i ty') then
         default env
-      else if is_sub_type_ignore_generic_params_i env ty ty' then
+      else if Subtype_ask.is_sub_type_ignore_generic_params_i env ty ty' then
         try_intersect_i ~ignore_tyvars env ty tyl'
-      else if is_sub_type_ignore_generic_params_i env ty' ty then
+      else if Subtype_ask.is_sub_type_ignore_generic_params_i env ty' ty then
         tyl
       else
         let nonnull_ty = LoclType (MakeType.nonnull (reason ty)) in
         (match (ty, ty') with
         | (LoclType lty, _)
-          when is_sub_type_ignore_generic_params_i env ty' nonnull_ty -> begin
+          when Subtype_ask.is_sub_type_ignore_generic_params_i
+                 env
+                 ty'
+                 nonnull_ty -> begin
           match get_node lty with
           | Toption t ->
             try_intersect_i ~ignore_tyvars env (LoclType t) (ty' :: tyl')
           | _ -> default env
         end
         | (_, LoclType lty)
-          when is_sub_type_ignore_generic_params_i env ty nonnull_ty -> begin
+          when Subtype_ask.is_sub_type_ignore_generic_params_i env ty nonnull_ty
+          -> begin
           match get_node lty with
           | Toption t ->
             try_intersect_i ~ignore_tyvars env (LoclType t) (ty :: tyl')
@@ -3753,9 +3689,9 @@ end = struct
     match tyl with
     | [] -> [ty]
     | ty' :: tyl' ->
-      if is_sub_type_for_union_i env ty ty' then
+      if Subtype_ask.is_sub_type_for_union_i env ty ty' then
         tyl
-      else if is_sub_type_for_union_i env ty' ty then
+      else if Subtype_ask.is_sub_type_for_union_i env ty' ty then
         try_union_i env ty tyl'
       else
         let (env, ty) = Env.expand_internal_type env ty in
@@ -4751,7 +4687,7 @@ end = struct
         if
           supportdyn
           && not
-               (Subtype.is_sub_type_for_union_i
+               (Subtype_ask.is_sub_type_for_union_i
                   env
                   (LoclType ty)
                   (LoclType (MakeType.supportdyn_mixed ~mixed_reason:r r)))
@@ -5510,6 +5446,87 @@ end = struct
       valid
 end
 
+and Subtype_ask : sig
+  val is_sub_type_alt_i :
+    require_completeness:bool ->
+    no_top_bottom:bool ->
+    coerce:TL.coercion_direction option ->
+    sub_supportdyn:Reason.t option ->
+    Typing_env_types.env ->
+    Typing_defs.internal_type ->
+    Typing_defs.internal_type ->
+    bool option
+
+  val is_sub_type_for_union_i :
+    Typing_env_types.env ->
+    ?coerce:TL.coercion_direction option ->
+    Typing_defs.internal_type ->
+    Typing_defs.internal_type ->
+    bool
+
+  val is_sub_type_ignore_generic_params_i :
+    Typing_env_types.env ->
+    Typing_defs.internal_type ->
+    Typing_defs.internal_type ->
+    bool
+end = struct
+  let is_sub_type_alt_i
+      ~require_completeness ~no_top_bottom ~coerce ~sub_supportdyn env ty1 ty2 =
+    let this_ty =
+      match ty1 with
+      | LoclType ty1 -> Some ty1
+      | ConstraintType _ -> None
+    in
+    let (_env, prop) =
+      Subtype.simplify_subtype_i
+        ~subtype_env:
+          (make_subtype_env
+             ~require_completeness
+             ~no_top_bottom
+             ~coerce
+             ~log_level:3
+             None)
+        ~sub_supportdyn
+        ~this_ty
+        (* It is weird that this can cause errors, but I am wary to discard them.
+         * Using the generic unify_error to maintain current behavior. *)
+        ty1
+        ty2
+        env
+    in
+    if TL.is_valid prop then
+      Some true
+    else if TL.is_unsat prop then
+      Some false
+    else
+      None
+
+  let is_sub_type_for_union_i env ?(coerce = None) ty1 ty2 =
+    let ( = ) = Option.equal Bool.equal in
+    is_sub_type_alt_i
+      ~require_completeness:false
+      ~no_top_bottom:true
+      ~coerce
+      ~sub_supportdyn:None
+      env
+      ty1
+      ty2
+    = Some true
+
+  let is_sub_type_ignore_generic_params_i env ty1 ty2 =
+    let ( = ) = Option.equal Bool.equal in
+    is_sub_type_alt_i
+    (* TODO(T121047839): Should this set a dedicated ignore_generic_param flag instead? *)
+      ~require_completeness:true
+      ~no_top_bottom:true
+      ~coerce:None
+      ~sub_supportdyn:None
+      env
+      ty1
+      ty2
+    = Some true
+end
+
 (* Determines whether the types are definitely disjoint, or whether they might
     overlap (i.e., both contain some particular value). *)
 (* One of the main entry points to this module *)
@@ -5542,7 +5559,7 @@ let sub_type
     (LoclType ty_super)
 
 let is_sub_type_alt ~require_completeness ~no_top_bottom env ty1 ty2 =
-  Subtype.is_sub_type_alt_i
+  Subtype_ask.is_sub_type_alt_i
     ~require_completeness
     ~no_top_bottom
     env
@@ -6074,7 +6091,7 @@ let sub_type_or_fail env ty1 ty2 err_opt =
 
 let is_sub_type_for_union = is_sub_type_for_union ~coerce:None
 
-let is_sub_type_for_union_i = Subtype.is_sub_type_for_union_i ~coerce:None
+let is_sub_type_for_union_i = Subtype_ask.is_sub_type_for_union_i ~coerce:None
 
 let set_fun_refs () =
   TUtils.sub_type_ref := sub_type;

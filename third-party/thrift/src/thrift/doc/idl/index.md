@@ -878,7 +878,7 @@ The element, key, and value types can be any Thrift type, including nested conta
 default_value ::=  "=" initializer
 ```
 
-All fields of struct types and exception types have a default value. This is either explicitly provided via the syntax shown above, or (if not explicitly provided) is the natural default value for that type. The natural default values for Thrift types are listed below:
+All fields of struct types and exception types have a default value. This is either explicitly provided via the syntax shown above, or (if not explicitly provided) is the intrinsic default for that type. The intrinsic default values for Thrift types are listed below:
 
 * bool: `false`
 * Integer types: 0

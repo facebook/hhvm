@@ -664,19 +664,6 @@ module rec Subtype : sig
     Typing_defs.internal_type ->
     Typing_env_types.env * Typing_error.t option
 
-  val try_intersect :
-    ?ignore_tyvars:bool ->
-    Typing_env_types.env ->
-    Typing_defs.locl_ty ->
-    Typing_defs.locl_ty list ->
-    Typing_defs.locl_ty list
-
-  val try_union :
-    Typing_env_types.env ->
-    Typing_defs.locl_ty ->
-    Typing_defs.locl_ty list ->
-    Typing_defs.locl_ty list
-
   val default_subtype :
     subtype_env:subtype_env ->
     this_ty:Typing_defs.locl_ty option ->
@@ -3203,7 +3190,7 @@ end = struct
     let upper_bounds_before = Env.get_tyvar_upper_bounds env var in
     let env =
       Env.add_tyvar_upper_bound_and_update_variances
-        ~intersect:(try_intersect_i ~ignore_tyvars:true env)
+        ~intersect:(Subtype_simplify.try_intersect_i ~ignore_tyvars:true env)
         env
         var
         ty
@@ -3266,7 +3253,7 @@ end = struct
     let lower_bounds_before = Env.get_tyvar_lower_bounds env var in
     let env =
       Env.add_tyvar_lower_bound_and_update_variances
-        ~union:(try_union_i env)
+        ~union:(Subtype_simplify.try_union_i env)
         env
         var
         ty
@@ -3607,110 +3594,6 @@ end = struct
         env
         prop;
     prop_to_env ty_sub ty_super env prop subtype_env.on_error
-
-  (* Attempt to compute the intersection of a type with an existing list intersection.
-   * If try_intersect env t [t1;...;tn] = [u1; ...; um]
-   * then u1&...&um must be the greatest lower bound of t and t1&...&tn wrt subtyping.
-   * For example:
-   *   try_intersect nonnull [?C] = [C]
-   *   try_intersect t1 [t2] = [t1]  if t1 <: t2
-   * Note: it's acceptable to return [t;t1;...;tn] but the intention is that
-   * we simplify (as above) wherever practical.
-   * It can be assumed that the original list contains no redundancy.
-   *)
-  and try_intersect_i ?(ignore_tyvars = false) env ty tyl =
-    match tyl with
-    | [] -> [ty]
-    | ty' :: tyl' ->
-      let (env, ty) = Env.expand_internal_type env ty in
-      let (env, ty') = Env.expand_internal_type env ty' in
-      let default env = ty' :: try_intersect_i env ~ignore_tyvars ty tyl' in
-      (* Do not attempt to simplify intersection of type variables, as we use
-       * intersection simplification when transitively closing through type variable
-       * upper bounds and this would result in a type failing to be added.
-       *)
-      if ignore_tyvars && (is_tyvar_i ty || is_tyvar_i ty') then
-        default env
-      else if Subtype_ask.is_sub_type_ignore_generic_params_i env ty ty' then
-        try_intersect_i ~ignore_tyvars env ty tyl'
-      else if Subtype_ask.is_sub_type_ignore_generic_params_i env ty' ty then
-        tyl
-      else
-        let nonnull_ty = LoclType (MakeType.nonnull (reason ty)) in
-        (match (ty, ty') with
-        | (LoclType lty, _)
-          when Subtype_ask.is_sub_type_ignore_generic_params_i
-                 env
-                 ty'
-                 nonnull_ty -> begin
-          match get_node lty with
-          | Toption t ->
-            try_intersect_i ~ignore_tyvars env (LoclType t) (ty' :: tyl')
-          | _ -> default env
-        end
-        | (_, LoclType lty)
-          when Subtype_ask.is_sub_type_ignore_generic_params_i env ty nonnull_ty
-          -> begin
-          match get_node lty with
-          | Toption t ->
-            try_intersect_i ~ignore_tyvars env (LoclType t) (ty :: tyl')
-          | _ -> default env
-        end
-        | (_, _) -> default env)
-
-  and try_intersect ?(ignore_tyvars = false) env ty tyl =
-    List.map
-      (try_intersect_i
-         ~ignore_tyvars
-         env
-         (LoclType ty)
-         (List.map tyl ~f:(fun ty -> LoclType ty)))
-      ~f:(function
-        | LoclType ty -> ty
-        | _ ->
-          failwith
-            "The intersection of two locl type should always be a locl type.")
-
-  (* Attempt to compute the union of a type with an existing list union.
-   * If try_union env t [t1;...;tn] = [u1;...;um]
-   * then u1|...|um must be the least upper bound of t and t1|...|tn wrt subtyping.
-   * For example:
-   *   try_union int [float] = [num]
-   *   try_union t1 [t2] = [t1] if t2 <: t1
-   *
-   * Notes:
-   * 1. It's acceptable to return [t;t1;...;tn] but the intention is that
-   *    we simplify (as above) wherever practical.
-   * 2. Do not use Tunion for a syntactic union - the caller can do that.
-   * 3. It can be assumed that the original list contains no redundancy.
-   * TODO: there are many more unions to implement yet.
-   *)
-  and try_union_i env ty tyl =
-    match tyl with
-    | [] -> [ty]
-    | ty' :: tyl' ->
-      if Subtype_ask.is_sub_type_for_union_i env ty ty' then
-        tyl
-      else if Subtype_ask.is_sub_type_for_union_i env ty' ty then
-        try_union_i env ty tyl'
-      else
-        let (env, ty) = Env.expand_internal_type env ty in
-        let (env, ty') = Env.expand_internal_type env ty' in
-        (match (ty, ty') with
-        | (LoclType t1, LoclType t2)
-          when (is_prim Nast.Tfloat t1 && is_prim Nast.Tint t2)
-               || (is_prim Nast.Tint t1 && is_prim Nast.Tfloat t2) ->
-          let num = LoclType (MakeType.num (reason ty)) in
-          try_union_i env num tyl'
-        | (_, _) -> ty' :: try_union_i env ty tyl')
-
-  and try_union env ty tyl =
-    List.map
-      (try_union_i env (LoclType ty) (List.map tyl ~f:(fun ty -> LoclType ty)))
-      ~f:(function
-        | LoclType ty -> ty
-        | _ ->
-          failwith "The union of two locl type should always be a locl type.")
 end
 
 and Can_index : sig
@@ -5527,6 +5410,138 @@ end = struct
     = Some true
 end
 
+and Subtype_simplify : sig
+  (** Attempt to compute the intersection of a type with an existing list intersection.
+    If try_intersect env t [t1;...;tn] = [u1; ...; um]
+    then u1&...&um must be the greatest lower bound of t and t1&...&tn wrt subtyping.
+    For example:
+      try_intersect nonnull [?C] = [C]
+      try_intersect t1 [t2] = [t1]  if t1 <: t2
+    Note: it's acceptable to return [t;t1;...;tn] but the intention is that
+    we simplify (as above) wherever practical.
+    It can be assumed that the original list contains no redundancy.
+   *)
+  val try_intersect_i :
+    ?ignore_tyvars:bool ->
+    Typing_env_types.env ->
+    Typing_defs.internal_type ->
+    Typing_defs.internal_type list ->
+    Typing_defs.internal_type list
+
+  val try_intersect :
+    ?ignore_tyvars:bool ->
+    Typing_env_types.env ->
+    Typing_defs.locl_ty ->
+    Typing_defs.locl_ty list ->
+    Typing_defs.locl_ty list
+
+  (** Attempt to compute the union of a type with an existing list union.
+    If try_union env t [t1;...;tn] = [u1;...;um]
+    then u1|...|um must be the least upper bound of t and t1|...|tn wrt subtyping.
+    For example:
+      try_union int [float] = [num]
+      try_union t1 [t2] = [t1] if t2 <: t1
+
+    Notes:
+    1. It's acceptable to return [t;t1;...;tn] but the intention is that
+       we simplify (as above) wherever practical.
+    2. Do not use Tunion for a syntactic union - the caller can do that.
+    3. It can be assumed that the original list contains no redundancy.
+    TODO: there are many more unions to implement yet.
+   *)
+  val try_union_i :
+    Typing_env_types.env ->
+    Typing_defs.internal_type ->
+    Typing_defs.internal_type list ->
+    Typing_defs.internal_type list
+
+  val try_union :
+    Typing_env_types.env ->
+    Typing_defs.locl_ty ->
+    Typing_defs.locl_ty list ->
+    Typing_defs.locl_ty list
+end = struct
+  let rec try_intersect_i ?(ignore_tyvars = false) env ty tyl =
+    match tyl with
+    | [] -> [ty]
+    | ty' :: tyl' ->
+      let (env, ty) = Env.expand_internal_type env ty in
+      let (env, ty') = Env.expand_internal_type env ty' in
+      let default env = ty' :: try_intersect_i env ~ignore_tyvars ty tyl' in
+      (* Do not attempt to simplify intersection of type variables, as we use
+       * intersection simplification when transitively closing through type variable
+       * upper bounds and this would result in a type failing to be added.
+       *)
+      if ignore_tyvars && (is_tyvar_i ty || is_tyvar_i ty') then
+        default env
+      else if Subtype_ask.is_sub_type_ignore_generic_params_i env ty ty' then
+        try_intersect_i ~ignore_tyvars env ty tyl'
+      else if Subtype_ask.is_sub_type_ignore_generic_params_i env ty' ty then
+        tyl
+      else
+        let nonnull_ty = LoclType (MakeType.nonnull (reason ty)) in
+        (match (ty, ty') with
+        | (LoclType lty, _)
+          when Subtype_ask.is_sub_type_ignore_generic_params_i
+                 env
+                 ty'
+                 nonnull_ty -> begin
+          match get_node lty with
+          | Toption t ->
+            try_intersect_i ~ignore_tyvars env (LoclType t) (ty' :: tyl')
+          | _ -> default env
+        end
+        | (_, LoclType lty)
+          when Subtype_ask.is_sub_type_ignore_generic_params_i env ty nonnull_ty
+          -> begin
+          match get_node lty with
+          | Toption t ->
+            try_intersect_i ~ignore_tyvars env (LoclType t) (ty :: tyl')
+          | _ -> default env
+        end
+        | (_, _) -> default env)
+
+  let try_intersect ?(ignore_tyvars = false) env ty tyl =
+    List.map
+      (try_intersect_i
+         ~ignore_tyvars
+         env
+         (LoclType ty)
+         (List.map tyl ~f:(fun ty -> LoclType ty)))
+      ~f:(function
+        | LoclType ty -> ty
+        | _ ->
+          failwith
+            "The intersection of two locl type should always be a locl type.")
+
+  let rec try_union_i env ty tyl =
+    match tyl with
+    | [] -> [ty]
+    | ty' :: tyl' ->
+      if Subtype_ask.is_sub_type_for_union_i env ty ty' then
+        tyl
+      else if Subtype_ask.is_sub_type_for_union_i env ty' ty then
+        try_union_i env ty tyl'
+      else
+        let (env, ty) = Env.expand_internal_type env ty in
+        let (env, ty') = Env.expand_internal_type env ty' in
+        (match (ty, ty') with
+        | (LoclType t1, LoclType t2)
+          when (is_prim Nast.Tfloat t1 && is_prim Nast.Tint t2)
+               || (is_prim Nast.Tint t1 && is_prim Nast.Tfloat t2) ->
+          let num = LoclType (MakeType.num (reason ty)) in
+          try_union_i env num tyl'
+        | (_, _) -> ty' :: try_union_i env ty tyl')
+
+  let try_union env ty tyl =
+    List.map
+      (try_union_i env (LoclType ty) (List.map tyl ~f:(fun ty -> LoclType ty)))
+      ~f:(function
+        | LoclType ty -> ty
+        | _ ->
+          failwith "The union of two locl type should always be a locl type.")
+end
+
 (* Determines whether the types are definitely disjoint, or whether they might
     overlap (i.e., both contain some particular value). *)
 (* One of the main entry points to this module *)
@@ -5807,7 +5822,7 @@ let decompose_subtype_add_bound
       env
     else
       Env.add_upper_bound
-        ~intersect:(Subtype.try_intersect env)
+        ~intersect:(Subtype_simplify.try_intersect env)
         env
         name_sub
         ty_super
@@ -5827,7 +5842,11 @@ let decompose_subtype_add_bound
     if Typing_set.mem ty_sub tys then
       env
     else
-      Env.add_lower_bound ~union:(Subtype.try_union env) env name_super ty_sub
+      Env.add_lower_bound
+        ~union:(Subtype_simplify.try_union env)
+        env
+        name_super
+        ty_sub
   | (_, _) -> env
 
 (* Given two types that we know are in a subtype relationship

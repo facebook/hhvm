@@ -6,7 +6,7 @@ require (
 	github.com/klauspost/compress v1.17.4
 	github.com/rsocket/rsocket-go v0.8.12
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/sync v0.0.0-20190423024810-112230192c58
+	golang.org/x/sync v0.6.0
 )
 
 require (

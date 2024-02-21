@@ -14,8 +14,8 @@
 #include <folly/FileUtil.h>
 #include <folly/Random.h>
 #include <folly/String.h>
-#include <folly/dynamic.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
+#include <folly/json/dynamic.h>
 
 #include "mcrouter/CarbonRouterInstance.h"
 #include "mcrouter/FileDataProvider.h"

@@ -7,7 +7,7 @@
 
 #include "PoolFactory.h"
 
-#include <folly/json.h>
+#include <folly/json/json.h>
 
 #include "mcrouter/ConfigApiIf.h"
 #include "mcrouter/lib/fbi/cpp/util.h"

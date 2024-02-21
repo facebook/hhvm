@@ -9,7 +9,7 @@
 
 #include <gtest/gtest.h>
 
-#include <folly/json.h>
+#include <folly/json/json.h>
 
 #include "mcrouter/lib/WeightedChHashFuncBase.h"
 

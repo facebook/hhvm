@@ -22,7 +22,7 @@
 #include <folly/Random.h>
 #include <folly/ScopeGuard.h>
 #include <folly/hash/SpookyHashV2.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 
 namespace facebook {
 namespace memcache {

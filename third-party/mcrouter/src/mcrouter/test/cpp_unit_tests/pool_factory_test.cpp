@@ -11,7 +11,7 @@
 
 #include <folly/Range.h>
 #include <folly/container/F14Map.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 
 #include "mcrouter/ConfigApiIf.h"
 #include "mcrouter/PoolFactory.h"

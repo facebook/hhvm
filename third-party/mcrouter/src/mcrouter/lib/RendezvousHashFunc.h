@@ -13,7 +13,7 @@
 #include <glog/logging.h>
 
 #include <folly/Range.h>
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 
 #include "mcrouter/lib/HashFunctionType.h"
 #include "mcrouter/lib/RendezvousHashHelper.h"

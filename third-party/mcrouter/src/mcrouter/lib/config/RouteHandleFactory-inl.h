@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 
 #include "mcrouter/lib/config/RouteHandleProviderIf.h"
 #include "mcrouter/lib/fbi/cpp/util.h"

@@ -16,8 +16,8 @@
 
 #include <folly/Range.h>
 #include <folly/container/F14Set.h>
-#include <folly/dynamic.h>
 #include <folly/io/async/AsyncTimeout.h>
+#include <folly/json/dynamic.h>
 
 namespace facebook {
 namespace memcache {

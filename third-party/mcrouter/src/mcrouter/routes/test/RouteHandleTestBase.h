@@ -9,7 +9,7 @@
 
 #include <folly/Range.h>
 #include <folly/Singleton.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 
 #include <mcrouter/CarbonRouterInstance.h>
 #include <mcrouter/PoolFactory.h>

@@ -12,7 +12,7 @@
 #include <vector>
 
 #include <folly/Range.h>
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 
 namespace folly {
 struct dynamic;

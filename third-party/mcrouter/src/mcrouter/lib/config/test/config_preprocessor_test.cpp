@@ -13,7 +13,7 @@
 
 #include <folly/FileUtil.h>
 #include <folly/Range.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 
 #include "mcrouter/lib/config/ConfigPreprocessor.h"
 #include "mcrouter/lib/config/ImportResolverIf.h"

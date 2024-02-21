@@ -16,7 +16,7 @@
 
 #include <folly/FileUtil.h>
 #include <folly/Range.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 
 #include "mcrouter/lib/fbi/cpp/util.h"
 

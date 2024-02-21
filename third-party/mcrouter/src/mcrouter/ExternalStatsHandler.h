@@ -10,7 +10,7 @@
 #include <folly/Conv.h>
 #include <folly/Function.h>
 #include <folly/Synchronized.h>
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 
 namespace facebook {
 namespace memcache {

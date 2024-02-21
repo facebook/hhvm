@@ -9,7 +9,7 @@
 
 #include <gtest/gtest.h>
 
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 
 #include "mcrouter/lib/fbi/cpp/globals.h"
 #include "mcrouter/routes/ShardSplitter.h"

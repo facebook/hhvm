@@ -7,9 +7,9 @@
 
 #pragma once
 
-#include <folly/dynamic.h>
 #include <folly/fibers/FiberManager.h>
 #include <folly/io/async/EventBase.h>
+#include <folly/json/dynamic.h>
 
 #include "mcrouter/lib/network/AsyncMcClient.h"
 

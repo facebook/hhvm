@@ -15,7 +15,7 @@
 
 #include <folly/Range.h>
 #include <folly/container/F14Set.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 
 #include "mcrouter/PoolFactory.h"
 #include "mcrouter/ProxyBase.h"

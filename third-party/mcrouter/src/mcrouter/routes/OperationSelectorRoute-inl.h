@@ -10,7 +10,7 @@
 #include <map>
 #include <sstream>
 
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 
 #include "mcrouter/lib/carbon/RequestReplyUtil.h"
 #include "mcrouter/lib/config/RouteHandleFactory.h"

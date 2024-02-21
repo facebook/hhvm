@@ -9,7 +9,7 @@
 
 #include <glog/logging.h>
 
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 #include "mcrouter/lib/fbi/cpp/util.h"
 
 namespace facebook {

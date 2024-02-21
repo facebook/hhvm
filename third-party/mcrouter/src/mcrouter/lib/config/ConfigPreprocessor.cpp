@@ -16,7 +16,7 @@
 #include <folly/Random.h>
 #include <folly/String.h>
 #include <folly/hash/Hash.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 
 #include "mcrouter/lib/config/ImportResolverIf.h"
 #include "mcrouter/lib/config/RendezvousHash.h"

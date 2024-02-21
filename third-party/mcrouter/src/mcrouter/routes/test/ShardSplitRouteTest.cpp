@@ -11,7 +11,7 @@
 
 #include <gtest/gtest.h>
 
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 
 #include "mcrouter/lib/network/gen/MemcacheMessages.h"
 #include "mcrouter/routes/ShardSplitRoute.h"

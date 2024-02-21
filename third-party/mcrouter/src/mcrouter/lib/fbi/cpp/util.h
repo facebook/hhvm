@@ -17,7 +17,7 @@
 #include <folly/Likely.h>
 #include <folly/Range.h>
 #include <folly/Unit.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 
 using timeval_t = struct timeval;
 

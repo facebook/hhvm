@@ -7,7 +7,7 @@
 
 #include "ProxyConfigBuilder.h"
 
-#include <folly/json.h>
+#include <folly/json/json.h>
 
 #include "mcrouter/ConfigApi.h"
 #include "mcrouter/PoolFactory.h"

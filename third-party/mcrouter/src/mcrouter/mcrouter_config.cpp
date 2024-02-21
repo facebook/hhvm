@@ -9,7 +9,7 @@
 
 #include <folly/FileUtil.h>
 #include <folly/Range.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 
 #include "mcrouter/CarbonRouterInstanceBase.h"
 #include "mcrouter/McrouterLogger.h"

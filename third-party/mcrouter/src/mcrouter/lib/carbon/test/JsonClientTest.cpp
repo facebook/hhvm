@@ -7,8 +7,8 @@
 
 #include <gtest/gtest.h>
 
-#include <folly/dynamic.h>
-#include <folly/json.h>
+#include <folly/json/dynamic.h>
+#include <folly/json/json.h>
 
 #include "mcrouter/lib/carbon/CmdLineClient.h"
 #include "mcrouter/lib/carbon/JsonClient.h"

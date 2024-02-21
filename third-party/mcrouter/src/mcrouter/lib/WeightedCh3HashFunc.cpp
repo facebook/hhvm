@@ -7,8 +7,8 @@
 
 #include "WeightedCh3HashFunc.h"
 
-#include <folly/dynamic.h>
 #include <folly/hash/SpookyHashV2.h>
+#include <folly/json/dynamic.h>
 
 #include "mcrouter/lib/fbi/cpp/util.h"
 #include "mcrouter/lib/fbi/hash.h"

@@ -12,7 +12,7 @@
 
 #include <folly/Conv.h>
 #include <folly/String.h>
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 
 #include "mcrouter/lib/fbi/cpp/util.h"
 

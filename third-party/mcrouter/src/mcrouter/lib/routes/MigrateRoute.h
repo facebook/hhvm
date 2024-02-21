@@ -12,9 +12,9 @@
 #include <vector>
 
 #include <folly/Optional.h>
-#include <folly/dynamic.h>
 #include <folly/fibers/FiberManager.h>
 #include <folly/fibers/WhenN.h>
+#include <folly/json/dynamic.h>
 
 #include "mcrouter/lib/McResUtil.h"
 #include "mcrouter/lib/Reply.h"

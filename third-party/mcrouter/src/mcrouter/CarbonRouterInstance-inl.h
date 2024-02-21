@@ -9,7 +9,6 @@
 
 #include <boost/filesystem/operations.hpp>
 
-#include <folly/DynamicConverter.h>
 #include <folly/MapUtil.h>
 #include <folly/Singleton.h>
 #include <folly/Synchronized.h>
@@ -17,6 +16,7 @@
 #include <folly/executors/ThreadPoolExecutor.h>
 #include <folly/fibers/FiberManager.h>
 #include <folly/io/async/EventBase.h>
+#include <folly/json/DynamicConverter.h>
 
 #include "mcrouter/AsyncWriter.h"
 #include "mcrouter/CarbonRouterInstanceBase.h"

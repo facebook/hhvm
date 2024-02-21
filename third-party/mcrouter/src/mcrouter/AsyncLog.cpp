@@ -22,7 +22,7 @@
 #include <folly/File.h>
 #include <folly/FileUtil.h>
 #include <folly/fibers/EventBaseLoopController.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 #include <folly/system/ThreadName.h>
 
 #include "mcrouter/CarbonRouterInstance.h"

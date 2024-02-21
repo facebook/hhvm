@@ -6,7 +6,7 @@
  */
 
 #pragma once
-#include "folly/dynamic.h"
+#include "folly/json/dynamic.h"
 
 /* Class which implements a function-style cast to 'folly::dynamic'
  * for testing in CarbonMessageConversionUtilsTest.cpp.

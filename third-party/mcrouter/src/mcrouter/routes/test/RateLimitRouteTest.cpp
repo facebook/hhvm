@@ -11,7 +11,7 @@
 
 #include <gtest/gtest.h>
 
-#include <folly/json.h>
+#include <folly/json/json.h>
 
 #include "mcrouter/lib/config/RouteHandleFactory.h"
 #include "mcrouter/lib/network/gen/MemcacheMessages.h"

@@ -7,7 +7,7 @@
 
 #include <folly/Benchmark.h>
 #include <folly/init/Init.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 
 #include "mcrouter/lib/carbon/example/gen/HelloGoodbyeRouteHandleIf.h"
 #include "mcrouter/lib/carbon/example/gen/HelloGoodbyeRouterInfo.h"

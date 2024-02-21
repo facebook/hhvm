@@ -9,7 +9,7 @@
 
 #include <vector>
 
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 
 #include "mcrouter/lib/FailoverErrorsSettings.h"
 #include "mcrouter/lib/WeightedCh3HashFunc.h"

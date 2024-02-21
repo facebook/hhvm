@@ -7,10 +7,10 @@
 
 #include <gtest/gtest.h>
 
-#include "folly/dynamic.h"
 #include "folly/fibers/FiberManagerMap.h"
 #include "folly/io/async/EventBase.h"
-#include "folly/json.h"
+#include "folly/json/dynamic.h"
+#include "folly/json/json.h"
 #include "mcrouter/McrouterFiberContext.h"
 
 using namespace ::testing;

@@ -12,9 +12,9 @@
 #include <random>
 
 #include <folly/Portability.h>
-#include <folly/dynamic.h>
 #include <folly/fibers/FiberManager.h>
 #include <folly/io/async/VirtualEventBase.h>
+#include <folly/json/dynamic.h>
 
 #include "mcrouter/AsyncLog.h"
 #include "mcrouter/ProxyStats.h"

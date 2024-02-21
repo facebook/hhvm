@@ -15,7 +15,7 @@
 
 #include <folly/container/F14Map.h>
 #include <folly/container/F14Set.h>
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 
 #include "mcrouter/lib/Ch3HashFunc.h"
 #include "mcrouter/lib/HashSelector.h"

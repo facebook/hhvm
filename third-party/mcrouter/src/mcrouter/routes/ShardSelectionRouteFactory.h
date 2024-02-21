@@ -13,7 +13,7 @@
 #include <vector>
 
 #include <folly/Range.h>
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 
 #include <mcrouter/config.h>
 #include <mcrouter/lib/config/RouteHandleFactory.h>

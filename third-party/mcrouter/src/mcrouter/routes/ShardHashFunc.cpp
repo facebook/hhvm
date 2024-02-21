@@ -7,7 +7,7 @@
 
 #include "ShardHashFunc.h"
 
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 
 namespace facebook {
 namespace memcache {

@@ -8,7 +8,7 @@
 #include "CarbonRouterInstance.h"
 
 #include <folly/io/async/EventBase.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 
 #include "mcrouter/lib/AuxiliaryCPUThreadPool.h"
 #include "mcrouter/lib/fbi/cpp/LogFailure.h"

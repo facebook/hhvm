@@ -7,7 +7,7 @@
 
 #include <string>
 
-#include <folly/json.h>
+#include <folly/json/json.h>
 #include <thrift/lib/cpp2/FieldRef.h>
 
 #include "mcrouter/lib/carbon/CommonSerializationTraits.h"

@@ -50,6 +50,11 @@
    behaviour of fgetc(). */
 typedef int (*get_func)(void* data);
 
+/* When an get_func returns EOF, it can be end of file or an error. This
+   returns non-zero (1) when an error occured. This corresponds to the
+   behaviour of ferror(). */
+typedef int (*error_func)(void* data);
+
 namespace {
 
 // We could write the JSON parser to use O(1) stack depth, but in the short term
@@ -58,6 +63,7 @@ constexpr size_t kMaximumDepth = 1000;
 
 typedef struct {
   get_func get;
+  error_func error;
   void* data;
   char buffer[5];
   size_t buffer_pos;
@@ -161,8 +167,9 @@ error_set(json_error_t* error, const lex_t* lex, const char* msg, ...) {
 
 /*** lexical analyzer ***/
 
-static void stream_init(stream_t* stream, get_func get, void* data) {
+static void stream_init(stream_t* stream, get_func get, error_func error, void* data) {
   stream->get = get;
+  stream->error = error;
   stream->data = data;
   stream->buffer[0] = '\0';
   stream->buffer_pos = 0;
@@ -182,6 +189,12 @@ static int stream_get(stream_t* stream, json_error_t* error) {
   if (!stream->buffer[stream->buffer_pos]) {
     c = stream->get(stream->data);
     if (c == EOF) {
+      if (stream->error(stream->data)) {
+        auto err = errno;
+        throw std::system_error(
+            err, std::generic_category(), "error occurred when reading from stream");
+      }
+
       stream->state = STREAM_STATE_EOF;
       return STREAM_STATE_EOF;
     }
@@ -630,8 +643,8 @@ static std::string lex_steal_string(lex_t* lex) {
   return result;
 }
 
-static int lex_init(lex_t* lex, get_func get, void* data) {
-  stream_init(&lex->stream, get, data);
+static int lex_init(lex_t* lex, get_func get, error_func error, void* data) {
+  stream_init(&lex->stream, get, error, data);
 
   lex->token = TOKEN_INVALID;
   return 0;
@@ -828,6 +841,10 @@ static int string_get(void* data) {
   }
 }
 
+static int string_error(void*) {
+  return 0;
+}
+
 std::optional<json_ref>
 json_loads(const char* string, size_t flags, json_error_t* error) {
   lex_t lex;
@@ -843,7 +860,7 @@ json_loads(const char* string, size_t flags, json_error_t* error) {
   stream_data.data = string;
   stream_data.pos = 0;
 
-  if (lex_init(&lex, string_get, (void*)&stream_data))
+  if (lex_init(&lex, string_get, string_error, (void*)&stream_data))
     return std::nullopt;
 
   return parse_json(&lex, flags, error);
@@ -866,6 +883,10 @@ static int buffer_get(void* data) {
   return (unsigned char)c;
 }
 
+static int buffer_error(void*) {
+  return 0;
+}
+
 std::optional<json_ref> json_loadb(
     const char* buffer,
     size_t buflen,
@@ -885,7 +906,7 @@ std::optional<json_ref> json_loadb(
   stream_data.pos = 0;
   stream_data.len = buflen;
 
-  if (lex_init(&lex, buffer_get, (void*)&stream_data))
+  if (lex_init(&lex, buffer_get, buffer_error, (void*)&stream_data))
     return std::nullopt;
 
   return parse_json(&lex, flags, error);
@@ -908,7 +929,7 @@ json_loadf(FILE* input, size_t flags, json_error_t* error) {
     return std::nullopt;
   }
 
-  if (lex_init(&lex, (get_func)fgetc, input))
+  if (lex_init(&lex, (get_func)fgetc, (error_func)ferror, input))
     return std::nullopt;
 
   return parse_json(&lex, flags, error);

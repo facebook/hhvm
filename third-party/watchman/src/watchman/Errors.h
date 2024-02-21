@@ -165,6 +165,15 @@ class RootResolveError : public WatchmanError<RootResolveError> {
   using WatchmanError::WatchmanError;
 };
 
+/**
+ * Represents an error when root is not conntected.
+ */
+class RootNotConnectedError : public WatchmanError<RootResolveError> {
+ public:
+  static constexpr const char* prefix = "root not connected";
+  using WatchmanError::WatchmanError;
+};
+
 } // namespace watchman
 
 // Allow watchman::error_code to implicitly convert to std::error_condition

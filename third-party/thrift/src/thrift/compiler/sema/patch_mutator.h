@@ -18,10 +18,10 @@
 
 #include <string>
 
-#include <thrift/compiler/ast/diagnostic_context.h>
 #include <thrift/compiler/ast/t_const.h>
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/sema/ast_mutator.h>
+#include <thrift/compiler/sema/diagnostic_context.h>
 
 namespace apache {
 namespace thrift {

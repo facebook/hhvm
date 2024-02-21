@@ -18,9 +18,9 @@
 #include <thrift/compiler/sema/standard_mutator.h>
 
 #include <folly/portability/GTest.h>
-#include <thrift/compiler/ast/diagnostic_context.h>
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/diagnostic.h>
+#include <thrift/compiler/sema/diagnostic_context.h>
 #include <thrift/compiler/test/gen_testing.h>
 
 namespace apache::thrift::compiler {

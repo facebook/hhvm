@@ -27,7 +27,6 @@
 #include <boost/algorithm/string/split.hpp>
 #include <fmt/core.h>
 
-#include <thrift/compiler/ast/diagnostic_context.h>
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/gen/cpp/type_resolver.h>
 #include <thrift/compiler/generate/common.h>
@@ -36,6 +35,7 @@
 #include <thrift/compiler/lib/cpp2/util.h>
 #include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/ast_validator.h>
+#include <thrift/compiler/sema/diagnostic_context.h>
 
 namespace apache {
 namespace thrift {

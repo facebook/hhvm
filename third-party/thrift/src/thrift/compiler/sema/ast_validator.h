@@ -17,7 +17,7 @@
 #pragma once
 
 #include <thrift/compiler/ast/ast_visitor.h>
-#include <thrift/compiler/ast/diagnostic_context.h>
+#include <thrift/compiler/sema/diagnostic_context.h>
 
 namespace apache {
 namespace thrift {

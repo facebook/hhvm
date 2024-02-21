@@ -18,8 +18,8 @@
 #include <thrift/compiler/sema/patch_mutator.h>
 
 #include <folly/portability/GTest.h>
-#include <thrift/compiler/ast/diagnostic_context.h>
 #include <thrift/compiler/diagnostic.h>
+#include <thrift/compiler/sema/diagnostic_context.h>
 
 namespace apache::thrift::compiler {
 

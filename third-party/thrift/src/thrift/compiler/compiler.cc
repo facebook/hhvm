@@ -39,13 +39,13 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/filesystem.hpp>
 
-#include <thrift/compiler/ast/diagnostic_context.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/detail/system.h>
 #include <thrift/compiler/diagnostic.h>
 #include <thrift/compiler/generate/t_generator.h>
 #include <thrift/compiler/parse/parse_ast.h>
 #include <thrift/compiler/sema/ast_validator.h>
+#include <thrift/compiler/sema/diagnostic_context.h>
 #include <thrift/compiler/sema/standard_mutator.h>
 #include <thrift/compiler/sema/standard_validator.h>
 
@@ -488,7 +488,7 @@ std::unique_ptr<t_generator> create_generator(
  */
 bool validate_program(t_generator& generator, diagnostics_engine& diags) {
   bool success = true;
-  diagnostic_context validator_diags(
+  diagnostic_context validator_ctx(
       diags.source_mgr(),
       [&](diagnostic d) {
         if (d.level() == diagnostic_level::error) {
@@ -499,7 +499,7 @@ bool validate_program(t_generator& generator, diagnostics_engine& diags) {
       diags.params());
   ast_validator validator;
   generator.fill_validator_visitors(validator);
-  validator(validator_diags, *(generator.get_program()));
+  validator(validator_ctx, *(generator.get_program()));
   return success;
 }
 

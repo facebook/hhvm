@@ -20,11 +20,11 @@
 
 #include <fmt/core.h>
 
-#include <thrift/compiler/ast/diagnostic_context.h>
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/gen/cpp/namespace_resolver.h>
 #include <thrift/compiler/lib/cpp2/util.h>
 #include <thrift/compiler/lib/uri.h>
+#include <thrift/compiler/sema/diagnostic_context.h>
 #include <thrift/compiler/sema/standard_mutator_stage.h>
 
 namespace apache {

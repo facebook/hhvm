@@ -654,9 +654,12 @@ let update_status_ (env : env msg_update) monitor_config :
         in
         let (exit_type, exit_code) = Exit_status.unpack proc_stat in
         let time_taken = Unix.time () -. process.start_t in
-        Server_progress.write "writing crash logs";
+        Server_progress.write
+          "writing crash log (pid: %d, hint: `hh --logname` OR `bunnylol coredumper`)"
+          pid;
         let telemetry =
           Telemetry.create ()
+          |> Telemetry.int_ ~key:"pid" ~value:pid
           |> Telemetry.string_ ~key:"unix_exit_type" ~value:exit_type
           |> Telemetry.int_ ~key:"unix_exit_code" ~value:exit_code
           |> Telemetry.bool_ ~key:"is_oom" ~value:is_oom

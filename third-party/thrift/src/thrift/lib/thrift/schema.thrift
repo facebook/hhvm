@@ -701,9 +701,6 @@ struct Schema {
   /** The programs included in the schema, accessible by `ProgramId`. */
   1: ProgramList programs;
 
-  /** The instantiated types, accessible by `TypeId`. */
-  2: type.TypeList types;
-
   /** The values, accessible by `ValueId`. */
   3: list<protocol.Value> values;
 

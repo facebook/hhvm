@@ -1,0 +1,50 @@
+Code actions available:
+------------------------------------------
+await expression (CodeActionKind: refactor) SELECTED
+Extract into variable (CodeActionKind: refactor)
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"await ",
+          "range":{"end":{"character":17,"line":14},"start":{"character":17,"line":14}}
+        },
+        {
+          "newText":"Awaitable<void>",
+          "range":{"end":{"character":20,"line":12},"start":{"character":16,"line":12}}
+        },
+        {
+          "newText":"async ",
+          "range":{"end":{"character":0,"line":12},"start":{"character":0,"line":12}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"await expression"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+class Foo() {
+  public function meth(): int {
+    return 1;
+  }
+}
+
+async function gen_foo(): Awaitable<Foo> {
+  return new Foo();
+}
+
+async function foo(): Awaitable<void> {
+  // The refactoring should generate `(await gen_foo())->meth()`
+  /*range-start*/await gen_foo()/*range-end*/->meth();
+}
+

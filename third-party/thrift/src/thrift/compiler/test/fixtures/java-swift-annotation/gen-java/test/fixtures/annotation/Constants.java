@@ -15,6 +15,9 @@ import java.util.*;
 public final class Constants {
     private Constants() {}
 
-    public static final test.fixtures.annotation.MyStruct MY_CONSTANT = new test.fixtures.annotation.MyStruct.Builder().setIntField(0L).setStringField("yarn").setDetailField("the devil").setDetailMap(ImmutableMap.<Integer, Long>builder()
+    public static final test.fixtures.annotation.MyStruct MY_CONSTANT = construct_MY_CONSTANT();
+    private static test.fixtures.annotation.MyStruct construct_MY_CONSTANT() {
+      return new test.fixtures.annotation.MyStruct.Builder().setIntField(0L).setStringField("yarn").setDetailField("the devil").setDetailMap(ImmutableMap.<Integer, Long>builder()
         .build()).build();
+    }
 }

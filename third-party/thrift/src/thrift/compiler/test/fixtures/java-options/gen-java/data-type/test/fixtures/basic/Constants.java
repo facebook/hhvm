@@ -15,5 +15,8 @@ import java.util.*;
 public final class Constants {
     private Constants() {}
 
-    public static final long K_CONSTANT_VALUE = 48879L;
+    public static final long K_CONSTANT_VALUE = construct_K_CONSTANT_VALUE();
+    private static long construct_K_CONSTANT_VALUE() {
+      return 48879L;
+    }
 }

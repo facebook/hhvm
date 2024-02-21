@@ -15,9 +15,18 @@ import java.util.*;
 public final class Constants {
     private Constants() {}
 
-    public static final test.fixtures.module2.Struct C2 = new test.fixtures.module2.Struct.Builder().setFirst(test.fixtures.module0.Constants.C0).setSecond(test.fixtures.module1.Constants.C1).build();
+    public static final test.fixtures.module2.Struct C2 = construct_C2();
+    private static test.fixtures.module2.Struct construct_C2() {
+      return new test.fixtures.module2.Struct.Builder().setFirst(test.fixtures.module0.Constants.C0).setSecond(test.fixtures.module1.Constants.C1).build();
+    }
 
-    public static final test.fixtures.module2.Struct C3 = test.fixtures.module2.Constants.C2;
+    public static final test.fixtures.module2.Struct C3 = construct_C3();
+    private static test.fixtures.module2.Struct construct_C3() {
+      return test.fixtures.module2.Constants.C2;
+    }
 
-    public static final test.fixtures.module2.Struct C4 = test.fixtures.module2.Constants.C2;
+    public static final test.fixtures.module2.Struct C4 = construct_C4();
+    private static test.fixtures.module2.Struct construct_C4() {
+      return test.fixtures.module2.Constants.C2;
+    }
 }

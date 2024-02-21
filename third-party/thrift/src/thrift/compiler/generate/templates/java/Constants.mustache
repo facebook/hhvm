@@ -29,7 +29,10 @@ public final class {{program:constantClassName}} {
     {{#program:constants}}
 
     {{^constant:javaIgnoreConstant?}}
-    public static final {{#constant:type}}{{> Type}}{{/constant:type}} {{constant:javaCapitalName}} = {{#constant:type}}{{#constant:value}}{{> DefaultValue}}{{/constant:value}}{{/constant:type}};
+    public static final {{#constant:type}}{{> Type}}{{/constant:type}} {{constant:javaCapitalName}} = construct_{{constant:javaCapitalName}}();
+    private static {{#constant:type}}{{> Type}}{{/constant:type}} construct_{{constant:javaCapitalName}}() {
+      return {{#constant:type}}{{#constant:value}}{{> DefaultValue}}{{/constant:value}}{{/constant:type}};
+    }
     {{/constant:javaIgnoreConstant?}}
     {{/program:constants}}
 }

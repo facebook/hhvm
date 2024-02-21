@@ -15,7 +15,9 @@ import java.util.*;
 public final class Constants {
     private Constants() {}
 
-    public static final com.facebook.thrift.type.Schema SCHEMA_PRIMITIVES_SERVICE = new com.facebook.thrift.type.Schema.Builder().setDefinitions(ImmutableList.<com.facebook.thrift.type.Definition>builder()
+    public static final com.facebook.thrift.type.Schema SCHEMA_PRIMITIVES_SERVICE = construct_SCHEMA_PRIMITIVES_SERVICE();
+    private static com.facebook.thrift.type.Schema construct_SCHEMA_PRIMITIVES_SERVICE() {
+      return new com.facebook.thrift.type.Schema.Builder().setDefinitions(ImmutableList.<com.facebook.thrift.type.Definition>builder()
         .add(com.facebook.thrift.type.Definition.fromServiceDef(new com.facebook.thrift.type.Service.Builder().setAttrs(new com.facebook.thrift.type.DefinitionAttrs.Builder().setName("PrimitivesService").setStructuredAnnotations(ImmutableSet.<Long>builder()
         .add(1L)
         .build()).setAnnotations(ImmutableMap.<String, com.facebook.thrift.type.Annotation>builder()
@@ -48,4 +50,5 @@ public final class Constants {
         .add(new com.facebook.thrift.type.Field.Builder().setAttrs(new com.facebook.thrift.type.DefinitionAttrs.Builder().setName("name").build()).setId((short)1).setQualifier(com.facebook.thrift.type.FieldQualifier.DEFAULT).setType(new com.facebook.thrift.type_swift.TypeStruct.Builder().setName(com.facebook.thrift.standard_type.TypeName.fromStringType(com.facebook.thrift.standard_type.Void.UNUSED)).build()).build())
         .build()).setSafety(com.facebook.thrift.type.ErrorSafety.UNSPECIFIED).setKind(com.facebook.thrift.type.ErrorKind.UNSPECIFIED).setBlame(com.facebook.thrift.type.ErrorBlame.UNSPECIFIED).build()))
         .build()).build();
+    }
 }

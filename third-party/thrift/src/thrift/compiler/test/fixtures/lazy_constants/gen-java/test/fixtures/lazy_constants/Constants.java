@@ -15,11 +15,19 @@ import java.util.*;
 public final class Constants {
     private Constants() {}
 
-    public static final int MY_INT = 1337;
+    public static final int MY_INT = construct_MY_INT();
+    private static int construct_MY_INT() {
+      return 1337;
+    }
 
-    public static final String NAME = "Mark Zuckerberg";
+    public static final String NAME = construct_NAME();
+    private static String construct_NAME() {
+      return "Mark Zuckerberg";
+    }
 
-    public static final List<Map<String, Integer>> STATES = ImmutableList.<Map<String, Integer>>builder()
+    public static final List<Map<String, Integer>> STATES = construct_STATES();
+    private static List<Map<String, Integer>> construct_STATES() {
+      return ImmutableList.<Map<String, Integer>>builder()
         .add(ImmutableMap.<String, Integer>builder()
         .put("San Diego", 3211000)
         .put("Sacramento", 479600)
@@ -30,49 +38,92 @@ public final class Constants {
         .put("Albany", 98400)
         .build())
         .build();
+    }
 
-    public static final Set<String> CITIES = ImmutableSet.<String>builder()
+    public static final Set<String> CITIES = construct_CITIES();
+    private static Set<String> construct_CITIES() {
+      return ImmutableSet.<String>builder()
         .add("New York")
         .add("Sacramento")
         .build();
+    }
 
-    public static final double X = (double)1;
+    public static final double X = construct_X();
+    private static double construct_X() {
+      return (double)1;
+    }
 
-    public static final double Y = 1000000.0;
+    public static final double Y = construct_Y();
+    private static double construct_Y() {
+      return 1000000.0;
+    }
 
-    public static final double Z = (double)1000000000;
+    public static final double Z = construct_Z();
+    private static double construct_Z() {
+      return (double)1000000000;
+    }
 
-    public static final Map<test.fixtures.lazy_constants.Company, Integer> CONST_ENUM_MAP = ImmutableMap.<test.fixtures.lazy_constants.Company, Integer>builder()
+    public static final Map<test.fixtures.lazy_constants.Company, Integer> CONST_ENUM_MAP = construct_CONST_ENUM_MAP();
+    private static Map<test.fixtures.lazy_constants.Company, Integer> construct_CONST_ENUM_MAP() {
+      return ImmutableMap.<test.fixtures.lazy_constants.Company, Integer>builder()
         .put(test.fixtures.lazy_constants.Company.FACEBOOK, 123)
         .put(test.fixtures.lazy_constants.Company.WHATSAPP, 2)
         .build();
+    }
 
-    public static final test.fixtures.lazy_constants.Internship INSTAGRAM = new test.fixtures.lazy_constants.Internship.Builder().setWeeks(12).setTitle("Software Engineer").setEmployer(test.fixtures.lazy_constants.Company.INSTAGRAM).build();
+    public static final test.fixtures.lazy_constants.Internship INSTAGRAM = construct_INSTAGRAM();
+    private static test.fixtures.lazy_constants.Internship construct_INSTAGRAM() {
+      return new test.fixtures.lazy_constants.Internship.Builder().setWeeks(12).setTitle("Software Engineer").setEmployer(test.fixtures.lazy_constants.Company.INSTAGRAM).build();
+    }
 
-    public static final List<test.fixtures.lazy_constants.Range> K_RANGES = ImmutableList.<test.fixtures.lazy_constants.Range>builder()
+    public static final List<test.fixtures.lazy_constants.Range> K_RANGES = construct_K_RANGES();
+    private static List<test.fixtures.lazy_constants.Range> construct_K_RANGES() {
+      return ImmutableList.<test.fixtures.lazy_constants.Range>builder()
         .add(new test.fixtures.lazy_constants.Range.Builder().setMin(1).setMax(2).build())
         .add(new test.fixtures.lazy_constants.Range.Builder().setMin(5).setMax(6).build())
         .build();
+    }
 
-    public static final List<test.fixtures.lazy_constants.Internship> INTERN_LIST = ImmutableList.<test.fixtures.lazy_constants.Internship>builder()
+    public static final List<test.fixtures.lazy_constants.Internship> INTERN_LIST = construct_INTERN_LIST();
+    private static List<test.fixtures.lazy_constants.Internship> construct_INTERN_LIST() {
+      return ImmutableList.<test.fixtures.lazy_constants.Internship>builder()
         .add(test.fixtures.lazy_constants.Constants.INSTAGRAM)
         .add(new test.fixtures.lazy_constants.Internship.Builder().setWeeks(10).setTitle("Sales Intern").setEmployer(test.fixtures.lazy_constants.Company.FACEBOOK).build())
         .build();
+    }
 
-    public static final String APOSTROPHE = "'";
+    public static final String APOSTROPHE = construct_APOSTROPHE();
+    private static String construct_APOSTROPHE() {
+      return "'";
+    }
 
-    public static final String TRIPLE_APOSTROPHE = "'''";
+    public static final String TRIPLE_APOSTROPHE = construct_TRIPLE_APOSTROPHE();
+    private static String construct_TRIPLE_APOSTROPHE() {
+      return "'''";
+    }
 
-    public static final String QUOTATION_MARK = "\"";
+    public static final String QUOTATION_MARK = construct_QUOTATION_MARK();
+    private static String construct_QUOTATION_MARK() {
+      return "\"";
+    }
 
-    public static final String BACKSLASH = "\\";
+    public static final String BACKSLASH = construct_BACKSLASH();
+    private static String construct_BACKSLASH() {
+      return "\\";
+    }
 
-    public static final String ESCAPED_A = "a";
+    public static final String ESCAPED_A = construct_ESCAPED_A();
+    private static String construct_ESCAPED_A() {
+      return "a";
+    }
 
-    public static final Map<String, Integer> CHAR2ASCII = ImmutableMap.<String, Integer>builder()
+    public static final Map<String, Integer> CHAR2ASCII = construct_CHAR2ASCII();
+    private static Map<String, Integer> construct_CHAR2ASCII() {
+      return ImmutableMap.<String, Integer>builder()
         .put("'", 39)
         .put("\"", 34)
         .put("\\", 92)
         .put("a", 97)
         .build();
+    }
 }

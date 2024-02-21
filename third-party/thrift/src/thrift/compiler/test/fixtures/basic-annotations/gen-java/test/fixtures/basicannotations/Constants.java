@@ -15,5 +15,8 @@ import java.util.*;
 public final class Constants {
     private Constants() {}
 
-    public static final test.fixtures.basicannotations.MyStruct MY_STRUCT = new test.fixtures.basicannotations.MyStruct.Builder().setMajor(42L).setAbstract("abstract").setMyEnum(test.fixtures.basicannotations.MyEnum.DOMAIN).build();
+    public static final test.fixtures.basicannotations.MyStruct MY_STRUCT = construct_MY_STRUCT();
+    private static test.fixtures.basicannotations.MyStruct construct_MY_STRUCT() {
+      return new test.fixtures.basicannotations.MyStruct.Builder().setMajor(42L).setAbstract("abstract").setMyEnum(test.fixtures.basicannotations.MyEnum.DOMAIN).build();
+    }
 }

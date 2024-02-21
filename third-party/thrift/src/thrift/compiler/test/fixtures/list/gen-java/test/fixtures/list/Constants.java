@@ -15,7 +15,9 @@ import java.util.*;
 public final class Constants {
     private Constants() {}
 
-    public static final Map<Long, List<String>> TEST_MAP = ImmutableMap.<Long, List<String>>builder()
+    public static final Map<Long, List<String>> TEST_MAP = construct_TEST_MAP();
+    private static Map<Long, List<String>> construct_TEST_MAP() {
+      return ImmutableMap.<Long, List<String>>builder()
         .put(0L, ImmutableList.<String>builder()
         .add("foo")
         .add("bar")
@@ -24,4 +26,5 @@ public final class Constants {
         .add("baz")
         .build())
         .build();
+    }
 }

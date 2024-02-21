@@ -15,10 +15,16 @@ import java.util.*;
 public final class Constants {
     private Constants() {}
 
-    public static final test.fixtures.module1.Struct C1 = new test.fixtures.module1.Struct.Builder().setFirst(201).setSecond("module1_str").build();
+    public static final test.fixtures.module1.Struct C1 = construct_C1();
+    private static test.fixtures.module1.Struct construct_C1() {
+      return new test.fixtures.module1.Struct.Builder().setFirst(201).setSecond("module1_str").build();
+    }
 
-    public static final List<test.fixtures.module1.Enum> E1S = ImmutableList.<test.fixtures.module1.Enum>builder()
+    public static final List<test.fixtures.module1.Enum> E1S = construct_E1S();
+    private static List<test.fixtures.module1.Enum> construct_E1S() {
+      return ImmutableList.<test.fixtures.module1.Enum>builder()
         .add(test.fixtures.module1.Enum.ONE)
         .add(test.fixtures.module1.Enum.THREE)
         .build();
+    }
 }

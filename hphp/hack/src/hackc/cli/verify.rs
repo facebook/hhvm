@@ -210,7 +210,7 @@ impl CompileOpts {
 
         if let ffi::Maybe::Just(hhbc::Fatal { op, loc, message }) = unit.fatal {
             use hhbc::FatalOp;
-            let msg = message.as_bstr().to_string();
+            let msg = String::from_utf8_lossy(&message).into_owned();
             let err = match op {
                 FatalOp::Parse => VerifyError::ParseError(msg, loc),
                 FatalOp::Runtime | FatalOp::RuntimeOmitFrame => VerifyError::RuntimeError(msg, loc),

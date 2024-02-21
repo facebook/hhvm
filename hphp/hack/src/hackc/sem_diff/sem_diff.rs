@@ -505,7 +505,7 @@ fn sem_diff_typed_value(path: &CodePath<'_>, a: &TypedValue<'_>, b: &TypedValue<
     }
 }
 
-fn sem_diff_fatal(path: &CodePath<'_>, a: &Fatal<'_>, b: &Fatal<'_>) -> Result<()> {
+fn sem_diff_fatal(path: &CodePath<'_>, a: &Fatal, b: &Fatal) -> Result<()> {
     sem_diff_eq(&path.index(0), &a.op, &b.op)?;
     sem_diff_eq(&path.index(1), &a.loc, &b.loc)?;
     sem_diff_eq(&path.index(2), &a.message, &b.message)?;

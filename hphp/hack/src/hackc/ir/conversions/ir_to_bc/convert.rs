@@ -73,7 +73,7 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Un
         unit.fatal = Maybe::Just(Fatal {
             op,
             loc: loc.to_hhbc(),
-            message: ffi::Str::new_slice(alloc, message),
+            message: message.to_vec().into(),
         });
     }
 

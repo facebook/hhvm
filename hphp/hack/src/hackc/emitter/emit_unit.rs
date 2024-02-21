@@ -65,16 +65,15 @@ use oxidized_by_ref::typing_defs_core::Exact;
 
 /// This is the entry point from hh_single_compile & fuzzer
 pub fn emit_fatal_unit<'arena>(
-    alloc: &'arena bumpalo::Bump,
     op: FatalOp,
     pos: Pos,
-    msg: impl AsRef<str> + 'arena,
+    msg: impl Into<String>,
 ) -> Result<Unit<'arena>> {
     Ok(Unit {
         fatal: Just(Fatal {
             op,
             loc: pos.into(),
-            message: Str::new_str(alloc, msg.as_ref()),
+            message: msg.into().into_bytes().into(),
         }),
         adata: Default::default(),
         functions: Default::default(),
@@ -102,9 +101,7 @@ pub fn emit_unit<'a, 'arena, 'decl>(
     let result = emit_unit_(emitter, namespace, tast, invalid_utf8_offset);
     match result {
         Err(e) => match e.into_kind() {
-            ErrorKind::IncludeTimeFatalException(op, pos, msg) => {
-                emit_fatal_unit(emitter.alloc, op, pos, msg)
-            }
+            ErrorKind::IncludeTimeFatalException(op, pos, msg) => emit_fatal_unit(op, pos, msg),
             ErrorKind::Unrecoverable(x) => Err(Error::unrecoverable(x)),
         },
         _ => result,

@@ -506,7 +506,7 @@ fn cmp_constant(a: &Constant<'_>, b: &Constant<'_>) -> Result {
     Ok(())
 }
 
-fn cmp_fatal(a: &Fatal<'_>, b: &Fatal<'_>) -> Result {
+fn cmp_fatal(a: &Fatal, b: &Fatal) -> Result {
     cmp_eq(&a.op, &b.op).qualified("op")?;
     cmp_eq(&a.loc, &b.loc).qualified("loc")?;
     cmp_eq(&a.message, &b.message).qualified("message")?;

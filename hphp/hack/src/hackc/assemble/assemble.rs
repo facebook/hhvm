@@ -88,7 +88,7 @@ struct UnitBuilder<'a> {
     classes: Vec<hhbc::Class<'a>>,
     constant_refs: Option<Vec<hhbc::ConstName<'a>>>,
     constants: Vec<hhbc::Constant<'a>>,
-    fatal: Option<hhbc::Fatal<'a>>,
+    fatal: Option<hhbc::Fatal>,
     file_attributes: Vec<hhbc::Attribute<'a>>,
     func_refs: Option<Vec<hhbc::FunctionName<'a>>>,
     funcs: Vec<hhbc::Function<'a>>,
@@ -133,7 +133,7 @@ impl<'a> UnitBuilder<'a> {
 
         match tok.as_bytes() {
             b".fatal" => {
-                self.fatal = Some(assemble_fatal(alloc, token_iter)?);
+                self.fatal = Some(assemble_fatal(token_iter)?);
             }
             b".adata" => {
                 self.adatas.push(assemble_adata(alloc, token_iter)?);
@@ -780,10 +780,7 @@ fn assemble_enum_ty<'arena>(
 }
 
 /// Ex: .fatal 2:63,2:63 Parse "A right parenthesis `)` is expected here.";
-fn assemble_fatal<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::Fatal<'arena>> {
+fn assemble_fatal(token_iter: &mut Lexer<'_>) -> Result<hhbc::Fatal> {
     parse!(token_iter, ".fatal"
            <line_begin:numeric> ":" <col_begin:numeric> ","
            <line_end:numeric> ":" <col_end:numeric>
@@ -804,8 +801,11 @@ fn assemble_fatal<'arena>(
         _ => return Err(op.error("Unknown fatal op")),
     };
     let msg = escaper::unescape_literal_bytes_into_vec_bytes(msg.into_unquoted_str_literal()?)?;
-    let message = Str::new_slice(alloc, &msg);
-    Ok(hhbc::Fatal { op, loc, message })
+    Ok(hhbc::Fatal {
+        op,
+        loc,
+        message: msg.into(),
+    })
 }
 
 /// A line of adata looks like:

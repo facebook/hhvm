@@ -32,7 +32,7 @@ pub struct Unit<'arena> {
     pub module_use: Maybe<ModuleName<'arena>>,
     pub symbol_refs: SymbolRefs<'arena>,
     pub constants: Vector<Constant<'arena>>,
-    pub fatal: Maybe<Fatal<'arena>>,
+    pub fatal: Maybe<Fatal>,
     pub missing_symbols: Vector<Str<'arena>>,
     pub error_symbols: Vector<Str<'arena>>,
     // TODO(T120858428): Remove this field once non-utf8 is banned from the
@@ -45,8 +45,8 @@ pub struct Unit<'arena> {
 /// when the unit is loaded.
 #[derive(Debug, Serialize)]
 #[repr(C)]
-pub struct Fatal<'arena> {
+pub struct Fatal {
     pub op: FatalOp,
     pub loc: SrcLoc,
-    pub message: Str<'arena>,
+    pub message: Vector<u8>,
 }

@@ -210,6 +210,11 @@ std::string toString(const Str& str) {
   return std::string{(const char*)str.data, str.len};
 }
 
+std::string toString(const Vector<uint8_t>& str) {
+  assertx(str.data != nullptr);
+  return std::string{(const char*)str.data, str.len};
+}
+
 folly::StringPiece toStringPiece(const Str& str) {
   assertx(str.data != nullptr);
   return folly::StringPiece{(const char*)str.data, str.len};

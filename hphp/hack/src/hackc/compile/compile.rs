@@ -239,7 +239,7 @@ fn rewrite_and_emit<'p, 'arena, 'decl>(
         }
         Err(e) => match e.into_kind() {
             ErrorKind::IncludeTimeFatalException(fatal_op, pos, msg) => {
-                emit_unit::emit_fatal_unit(emitter.alloc, fatal_op, pos, msg)
+                emit_unit::emit_fatal_unit(fatal_op, pos, msg)
             }
             ErrorKind::Unrecoverable(x) => Err(Error::unrecoverable(x)),
         },
@@ -382,16 +382,13 @@ fn emit_unit_from_text<'arena, 'decl>(
                         profile,
                     )
                 }),
-                Err(errs) => profile_rust::time(move || {
-                    (
-                        emit_fatal_naming_phase_error(emitter.alloc, &errs[0]),
-                        profile,
-                    )
-                }),
+                Err(errs) => {
+                    profile_rust::time(move || (emit_fatal_naming_phase_error(&errs[0]), profile))
+                }
             }
         }
         Err(ParseError(pos, msg, fatal_op)) => {
-            profile_rust::time(move || (emit_fatal(emitter.alloc, fatal_op, pos, msg), profile))
+            profile_rust::time(move || (emit_fatal(fatal_op, pos, msg), profile))
         }
     };
     profile.codegen_t = codegen_t;
@@ -401,26 +398,18 @@ fn emit_unit_from_text<'arena, 'decl>(
     }
 }
 
-fn emit_fatal_naming_phase_error<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    err: &NamingPhaseError,
-) -> Result<Unit<'arena>, Error> {
+fn emit_fatal_naming_phase_error<'arena>(err: &NamingPhaseError) -> Result<Unit<'arena>, Error> {
     match err {
-        NamingPhaseError::Naming(err) => emit_fatal_naming_error(alloc, err),
-        NamingPhaseError::NastCheck(err) => emit_fatal_nast_check_error(alloc, err),
+        NamingPhaseError::Naming(err) => emit_fatal_naming_error(err),
+        NamingPhaseError::NastCheck(err) => emit_fatal_nast_check_error(err),
         NamingPhaseError::UnexpectedHint(_) => todo!(),
         NamingPhaseError::MalformedAccess(_) => todo!(),
-        NamingPhaseError::ExperimentalFeature(err) => {
-            emit_fatal_experimental_feature_error(alloc, err)
-        }
-        NamingPhaseError::Parsing(err) => emit_fatal_parsing_error(alloc, err),
+        NamingPhaseError::ExperimentalFeature(err) => emit_fatal_experimental_feature_error(err),
+        NamingPhaseError::Parsing(err) => emit_fatal_parsing_error(err),
     }
 }
 
-fn emit_fatal_naming_error<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    err: &NamingError,
-) -> Result<Unit<'arena>, Error> {
+fn emit_fatal_naming_error<'arena>(err: &NamingError) -> Result<Unit<'arena>, Error> {
     match err {
         NamingError::UnsupportedTraitUseAs(_) => todo!(),
         NamingError::UnsupportedInsteadOf(_) => todo!(),
@@ -529,7 +518,6 @@ fn emit_fatal_naming_error<'arena>(
                 "It is already defined. Typed locals must have their type declared before they can be assigned."
             };
             emit_unit::emit_fatal_unit(
-                alloc,
                 FatalOp::Parse,
                 id_pos.clone(),
                 format!("Illegal definition of typed local variable {id_name}. {msg}"),
@@ -539,10 +527,7 @@ fn emit_fatal_naming_error<'arena>(
     }
 }
 
-fn emit_fatal_nast_check_error<'arena>(
-    _alloc: &'arena bumpalo::Bump,
-    err: &NastCheckError,
-) -> Result<Unit<'arena>, Error> {
+fn emit_fatal_nast_check_error<'arena>(err: &NastCheckError) -> Result<Unit<'arena>, Error> {
     match err {
         NastCheckError::RepeatedRecordFieldName { .. } => todo!(),
         NastCheckError::DynamicallyCallableReified(_) => todo!(),
@@ -616,7 +601,6 @@ fn emit_fatal_nast_check_error<'arena>(
 }
 
 fn emit_fatal_experimental_feature_error<'arena>(
-    _alloc: &'arena bumpalo::Bump,
     err: &ExperimentalFeature,
 ) -> Result<Unit<'arena>, Error> {
     match err {
@@ -627,10 +611,7 @@ fn emit_fatal_experimental_feature_error<'arena>(
     }
 }
 
-fn emit_fatal_parsing_error<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    err: &ParsingError,
-) -> Result<Unit<'arena>, Error> {
+fn emit_fatal_parsing_error<'arena>(err: &ParsingError) -> Result<Unit<'arena>, Error> {
     match err {
         ParsingError::FixmeFormat(_) => todo!(),
         ParsingError::HhIgnoreComment(_) => todo!(),
@@ -638,19 +619,18 @@ fn emit_fatal_parsing_error<'arena>(
             pos,
             msg,
             quickfixes: _,
-        } => emit_unit::emit_fatal_unit(alloc, FatalOp::Parse, pos.clone(), msg.clone()),
+        } => emit_unit::emit_fatal_unit(FatalOp::Parse, pos.clone(), msg.clone()),
         ParsingError::XhpParsingError { .. } => todo!(),
         ParsingError::PackageConfigError { .. } => todo!(),
     }
 }
 
 fn emit_fatal<'arena>(
-    alloc: &'arena bumpalo::Bump,
     fatal_op: FatalOp,
     pos: Pos,
-    msg: impl AsRef<str> + 'arena,
+    msg: impl Into<String>,
 ) -> Result<Unit<'arena>, Error> {
-    emit_unit::emit_fatal_unit(alloc, fatal_op, pos, msg)
+    emit_unit::emit_fatal_unit(fatal_op, pos, msg)
 }
 
 fn create_emitter<'arena, 'decl>(

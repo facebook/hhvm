@@ -103,10 +103,14 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit<'a> {
         }
     }
 
-    if let Maybe::Just(Fatal { op, loc, message }) = unit.fatal {
+    if let Maybe::Just(Fatal { op, loc, message }) = &unit.fatal {
         let loc = ir::func::SrcLoc::from_hhbc(filename, &loc);
         let message = bstr::BString::from(message.as_ref());
-        ir_unit.fatal = Some(ir::Fatal { op, loc, message });
+        ir_unit.fatal = Some(ir::Fatal {
+            op: *op,
+            loc,
+            message,
+        });
     }
 
     ir_unit

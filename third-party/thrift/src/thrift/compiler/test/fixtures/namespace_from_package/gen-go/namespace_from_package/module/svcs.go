@@ -63,7 +63,6 @@ func (c *TestServiceChannelClient) Open() error {
     return c.ch.Open()
 }
 
-// Deprecated: Use TestServiceChannelClient instead.
 type TestServiceClient struct {
     chClient *TestServiceChannelClient
     Mu       sync.Mutex
@@ -71,11 +70,15 @@ type TestServiceClient struct {
 // Compile time interface enforcer
 var _ TestServiceClientInterface = &TestServiceClient{}
 
-// Deprecated: Use NewTestServiceChannelClient() instead.
+// Deprecated: Use NewTestServiceClientFromProtocol() instead.
 func NewTestServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *TestServiceClient {
+    return NewTestServiceClientFromProtocol(iprot)
+}
+
+func NewTestServiceClientFromProtocol(prot thrift.Protocol) *TestServiceClient {
     return &TestServiceClient{
         chClient: NewTestServiceChannelClient(
-            thrift.NewSerialChannel(iprot),
+            thrift.NewSerialChannel(prot),
         ),
     }
 }
@@ -92,24 +95,22 @@ func (c *TestServiceClient) Open() error {
     return c.chClient.Open()
 }
 
-// Deprecated: Use TestServiceChannelClient instead.
+// Deprecated: Use TestServiceClient instead.
 type TestServiceThreadsafeClient = TestServiceClient
 
-// Deprecated: Use NewTestServiceChannelClient() instead.
+// Deprecated: Use NewTestServiceClientFromProtocol() instead.
 func NewTestServiceThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *TestServiceThreadsafeClient {
-    return NewTestServiceClient(t, iprot, oprot)
+    return NewTestServiceClientFromProtocol(iprot)
 }
 
-// Deprecated: Use NewTestServiceChannelClient() instead.
+// Deprecated: Use NewTestServiceClientFromProtocol() instead.
 func NewTestServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *TestServiceClient {
-  iprot := pf.GetProtocol(t)
-  oprot := pf.GetProtocol(t)
-  return NewTestServiceClient(t, iprot, oprot)
+  return NewTestServiceClientFromProtocol(pf.GetProtocol(t))
 }
 
-// Deprecated: Use NewTestServiceChannelClient() instead.
+// Deprecated: Use NewTestServiceClientFromProtocol() instead.
 func NewTestServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *TestServiceThreadsafeClient {
-  return NewTestServiceClientFactory(t, pf)
+  return NewTestServiceClientFromProtocol(pf.GetProtocol(t))
 }
 
 

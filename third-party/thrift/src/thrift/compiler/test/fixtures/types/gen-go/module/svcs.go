@@ -67,7 +67,6 @@ func (c *SomeServiceChannelClient) Open() error {
     return c.ch.Open()
 }
 
-// Deprecated: Use SomeServiceChannelClient instead.
 type SomeServiceClient struct {
     chClient *SomeServiceChannelClient
     Mu       sync.Mutex
@@ -75,11 +74,15 @@ type SomeServiceClient struct {
 // Compile time interface enforcer
 var _ SomeServiceClientInterface = &SomeServiceClient{}
 
-// Deprecated: Use NewSomeServiceChannelClient() instead.
+// Deprecated: Use NewSomeServiceClientFromProtocol() instead.
 func NewSomeServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *SomeServiceClient {
+    return NewSomeServiceClientFromProtocol(iprot)
+}
+
+func NewSomeServiceClientFromProtocol(prot thrift.Protocol) *SomeServiceClient {
     return &SomeServiceClient{
         chClient: NewSomeServiceChannelClient(
-            thrift.NewSerialChannel(iprot),
+            thrift.NewSerialChannel(prot),
         ),
     }
 }
@@ -96,24 +99,22 @@ func (c *SomeServiceClient) Open() error {
     return c.chClient.Open()
 }
 
-// Deprecated: Use SomeServiceChannelClient instead.
+// Deprecated: Use SomeServiceClient instead.
 type SomeServiceThreadsafeClient = SomeServiceClient
 
-// Deprecated: Use NewSomeServiceChannelClient() instead.
+// Deprecated: Use NewSomeServiceClientFromProtocol() instead.
 func NewSomeServiceThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *SomeServiceThreadsafeClient {
-    return NewSomeServiceClient(t, iprot, oprot)
+    return NewSomeServiceClientFromProtocol(iprot)
 }
 
-// Deprecated: Use NewSomeServiceChannelClient() instead.
+// Deprecated: Use NewSomeServiceClientFromProtocol() instead.
 func NewSomeServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *SomeServiceClient {
-  iprot := pf.GetProtocol(t)
-  oprot := pf.GetProtocol(t)
-  return NewSomeServiceClient(t, iprot, oprot)
+  return NewSomeServiceClientFromProtocol(pf.GetProtocol(t))
 }
 
-// Deprecated: Use NewSomeServiceChannelClient() instead.
+// Deprecated: Use NewSomeServiceClientFromProtocol() instead.
 func NewSomeServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *SomeServiceThreadsafeClient {
-  return NewSomeServiceClientFactory(t, pf)
+  return NewSomeServiceClientFromProtocol(pf.GetProtocol(t))
 }
 
 

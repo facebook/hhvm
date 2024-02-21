@@ -63,7 +63,6 @@ func (c *MyServiceChannelClient) Open() error {
     return c.ch.Open()
 }
 
-// Deprecated: Use MyServiceChannelClient instead.
 type MyServiceClient struct {
     chClient *MyServiceChannelClient
     Mu       sync.Mutex
@@ -71,11 +70,15 @@ type MyServiceClient struct {
 // Compile time interface enforcer
 var _ MyServiceClientInterface = &MyServiceClient{}
 
-// Deprecated: Use NewMyServiceChannelClient() instead.
+// Deprecated: Use NewMyServiceClientFromProtocol() instead.
 func NewMyServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyServiceClient {
+    return NewMyServiceClientFromProtocol(iprot)
+}
+
+func NewMyServiceClientFromProtocol(prot thrift.Protocol) *MyServiceClient {
     return &MyServiceClient{
         chClient: NewMyServiceChannelClient(
-            thrift.NewSerialChannel(iprot),
+            thrift.NewSerialChannel(prot),
         ),
     }
 }
@@ -92,24 +95,22 @@ func (c *MyServiceClient) Open() error {
     return c.chClient.Open()
 }
 
-// Deprecated: Use MyServiceChannelClient instead.
+// Deprecated: Use MyServiceClient instead.
 type MyServiceThreadsafeClient = MyServiceClient
 
-// Deprecated: Use NewMyServiceChannelClient() instead.
+// Deprecated: Use NewMyServiceClientFromProtocol() instead.
 func NewMyServiceThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyServiceThreadsafeClient {
-    return NewMyServiceClient(t, iprot, oprot)
+    return NewMyServiceClientFromProtocol(iprot)
 }
 
-// Deprecated: Use NewMyServiceChannelClient() instead.
+// Deprecated: Use NewMyServiceClientFromProtocol() instead.
 func NewMyServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServiceClient {
-  iprot := pf.GetProtocol(t)
-  oprot := pf.GetProtocol(t)
-  return NewMyServiceClient(t, iprot, oprot)
+  return NewMyServiceClientFromProtocol(pf.GetProtocol(t))
 }
 
-// Deprecated: Use NewMyServiceChannelClient() instead.
+// Deprecated: Use NewMyServiceClientFromProtocol() instead.
 func NewMyServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServiceThreadsafeClient {
-  return NewMyServiceClientFactory(t, pf)
+  return NewMyServiceClientFromProtocol(pf.GetProtocol(t))
 }
 
 

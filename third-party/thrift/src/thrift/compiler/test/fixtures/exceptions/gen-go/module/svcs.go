@@ -69,7 +69,6 @@ func (c *RaiserChannelClient) Open() error {
     return c.ch.Open()
 }
 
-// Deprecated: Use RaiserChannelClient instead.
 type RaiserClient struct {
     chClient *RaiserChannelClient
     Mu       sync.Mutex
@@ -77,11 +76,15 @@ type RaiserClient struct {
 // Compile time interface enforcer
 var _ RaiserClientInterface = &RaiserClient{}
 
-// Deprecated: Use NewRaiserChannelClient() instead.
+// Deprecated: Use NewRaiserClientFromProtocol() instead.
 func NewRaiserClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *RaiserClient {
+    return NewRaiserClientFromProtocol(iprot)
+}
+
+func NewRaiserClientFromProtocol(prot thrift.Protocol) *RaiserClient {
     return &RaiserClient{
         chClient: NewRaiserChannelClient(
-            thrift.NewSerialChannel(iprot),
+            thrift.NewSerialChannel(prot),
         ),
     }
 }
@@ -98,24 +101,22 @@ func (c *RaiserClient) Open() error {
     return c.chClient.Open()
 }
 
-// Deprecated: Use RaiserChannelClient instead.
+// Deprecated: Use RaiserClient instead.
 type RaiserThreadsafeClient = RaiserClient
 
-// Deprecated: Use NewRaiserChannelClient() instead.
+// Deprecated: Use NewRaiserClientFromProtocol() instead.
 func NewRaiserThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *RaiserThreadsafeClient {
-    return NewRaiserClient(t, iprot, oprot)
+    return NewRaiserClientFromProtocol(iprot)
 }
 
-// Deprecated: Use NewRaiserChannelClient() instead.
+// Deprecated: Use NewRaiserClientFromProtocol() instead.
 func NewRaiserClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *RaiserClient {
-  iprot := pf.GetProtocol(t)
-  oprot := pf.GetProtocol(t)
-  return NewRaiserClient(t, iprot, oprot)
+  return NewRaiserClientFromProtocol(pf.GetProtocol(t))
 }
 
-// Deprecated: Use NewRaiserChannelClient() instead.
+// Deprecated: Use NewRaiserClientFromProtocol() instead.
 func NewRaiserThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *RaiserThreadsafeClient {
-  return NewRaiserClientFactory(t, pf)
+  return NewRaiserClientFromProtocol(pf.GetProtocol(t))
 }
 
 

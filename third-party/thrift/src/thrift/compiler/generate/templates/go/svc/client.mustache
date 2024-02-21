@@ -16,7 +16,7 @@
 
 }}{{!
 
-  This tempalte defined the client type/functions for a thrift service.
+  This template defined the client type/functions for a thrift service.
 
 }}
 type {{service:go_name}}ChannelClient struct {
@@ -54,8 +54,6 @@ func (c *{{service:go_name}}ChannelClient) Open() error {
     return c.ch.Open()
 }
 
-{{! COMPAT: backwards compatibility - remove once all code is migrated to ChannelClient. }}
-// Deprecated: Use {{service:go_name}}ChannelClient instead.
 type {{service:go_name}}Client struct {
     {{#service:extends?}}
     {{#service:extends}}
@@ -69,17 +67,21 @@ type {{service:go_name}}Client struct {
 // Compile time interface enforcer
 var _ {{service:go_name}}ClientInterface = &{{service:go_name}}Client{}
 
-{{! COMPAT: backwards compatibility - remove once all code is migrated to ChannelClient. }}
-// Deprecated: Use New{{service:go_name}}ChannelClient() instead.
+{{! COMPAT: backwards compatibility - remove once all code is migrated to a Client with Context. }}
+// Deprecated: Use New{{service:go_name}}ClientFromProtocol() instead.
 func New{{service:go_name}}Client(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *{{service:go_name}}Client {
+    return New{{service:go_name}}ClientFromProtocol(iprot)
+}
+
+func New{{service:go_name}}ClientFromProtocol(prot thrift.Protocol) *{{service:go_name}}Client {
     return &{{service:go_name}}Client{
         {{#service:extends?}}
         {{#service:extends}}
-        {{service:go_name}}Client: {{service:go_package_alias_prefix}}New{{service:go_name}}Client(t, iprot, oprot),
+        {{service:go_name}}Client: {{service:go_package_alias_prefix}}New{{service:go_name}}ClientFromProtocol(prot),
         {{/service:extends}}
         {{/service:extends?}}
         chClient: New{{service:go_name}}ChannelClient(
-            thrift.NewSerialChannel(iprot),
+            thrift.NewSerialChannel(prot),
         ),
     }
 }
@@ -96,24 +98,22 @@ func (c *{{service:go_name}}Client) Open() error {
     return c.chClient.Open()
 }
 
-// Deprecated: Use {{service:go_name}}ChannelClient instead.
+// Deprecated: Use {{service:go_name}}Client instead.
 type {{service:go_name}}ThreadsafeClient = {{service:go_name}}Client
 
-// Deprecated: Use New{{service:go_name}}ChannelClient() instead.
+// Deprecated: Use New{{service:go_name}}ClientFromProtocol() instead.
 func New{{service:go_name}}ThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *{{service:go_name}}ThreadsafeClient {
-    return New{{service:go_name}}Client(t, iprot, oprot)
+    return New{{service:go_name}}ClientFromProtocol(iprot)
 }
 
-// Deprecated: Use New{{service:go_name}}ChannelClient() instead.
+// Deprecated: Use New{{service:go_name}}ClientFromProtocol() instead.
 func New{{service:go_name}}ClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *{{service:go_name}}Client {
-  iprot := pf.GetProtocol(t)
-  oprot := pf.GetProtocol(t)
-  return New{{service:go_name}}Client(t, iprot, oprot)
+  return New{{service:go_name}}ClientFromProtocol(pf.GetProtocol(t))
 }
 
-// Deprecated: Use New{{service:go_name}}ChannelClient() instead.
+// Deprecated: Use New{{service:go_name}}ClientFromProtocol() instead.
 func New{{service:go_name}}ThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *{{service:go_name}}ThreadsafeClient {
-  return New{{service:go_name}}ClientFactory(t, pf)
+  return New{{service:go_name}}ClientFromProtocol(pf.GetProtocol(t))
 }
 
 {{#service:functions}}

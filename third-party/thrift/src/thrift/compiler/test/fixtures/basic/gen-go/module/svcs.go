@@ -63,7 +63,6 @@ func (c *FooServiceChannelClient) Open() error {
     return c.ch.Open()
 }
 
-// Deprecated: Use FooServiceChannelClient instead.
 type FooServiceClient struct {
     chClient *FooServiceChannelClient
     Mu       sync.Mutex
@@ -71,11 +70,15 @@ type FooServiceClient struct {
 // Compile time interface enforcer
 var _ FooServiceClientInterface = &FooServiceClient{}
 
-// Deprecated: Use NewFooServiceChannelClient() instead.
+// Deprecated: Use NewFooServiceClientFromProtocol() instead.
 func NewFooServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *FooServiceClient {
+    return NewFooServiceClientFromProtocol(iprot)
+}
+
+func NewFooServiceClientFromProtocol(prot thrift.Protocol) *FooServiceClient {
     return &FooServiceClient{
         chClient: NewFooServiceChannelClient(
-            thrift.NewSerialChannel(iprot),
+            thrift.NewSerialChannel(prot),
         ),
     }
 }
@@ -92,24 +95,22 @@ func (c *FooServiceClient) Open() error {
     return c.chClient.Open()
 }
 
-// Deprecated: Use FooServiceChannelClient instead.
+// Deprecated: Use FooServiceClient instead.
 type FooServiceThreadsafeClient = FooServiceClient
 
-// Deprecated: Use NewFooServiceChannelClient() instead.
+// Deprecated: Use NewFooServiceClientFromProtocol() instead.
 func NewFooServiceThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *FooServiceThreadsafeClient {
-    return NewFooServiceClient(t, iprot, oprot)
+    return NewFooServiceClientFromProtocol(iprot)
 }
 
-// Deprecated: Use NewFooServiceChannelClient() instead.
+// Deprecated: Use NewFooServiceClientFromProtocol() instead.
 func NewFooServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *FooServiceClient {
-  iprot := pf.GetProtocol(t)
-  oprot := pf.GetProtocol(t)
-  return NewFooServiceClient(t, iprot, oprot)
+  return NewFooServiceClientFromProtocol(pf.GetProtocol(t))
 }
 
-// Deprecated: Use NewFooServiceChannelClient() instead.
+// Deprecated: Use NewFooServiceClientFromProtocol() instead.
 func NewFooServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *FooServiceThreadsafeClient {
-  return NewFooServiceClientFactory(t, pf)
+  return NewFooServiceClientFromProtocol(pf.GetProtocol(t))
 }
 
 
@@ -463,7 +464,6 @@ func (c *FB303ServiceChannelClient) Open() error {
     return c.ch.Open()
 }
 
-// Deprecated: Use FB303ServiceChannelClient instead.
 type FB303ServiceClient struct {
     chClient *FB303ServiceChannelClient
     Mu       sync.Mutex
@@ -471,11 +471,15 @@ type FB303ServiceClient struct {
 // Compile time interface enforcer
 var _ FB303ServiceClientInterface = &FB303ServiceClient{}
 
-// Deprecated: Use NewFB303ServiceChannelClient() instead.
+// Deprecated: Use NewFB303ServiceClientFromProtocol() instead.
 func NewFB303ServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *FB303ServiceClient {
+    return NewFB303ServiceClientFromProtocol(iprot)
+}
+
+func NewFB303ServiceClientFromProtocol(prot thrift.Protocol) *FB303ServiceClient {
     return &FB303ServiceClient{
         chClient: NewFB303ServiceChannelClient(
-            thrift.NewSerialChannel(iprot),
+            thrift.NewSerialChannel(prot),
         ),
     }
 }
@@ -492,24 +496,22 @@ func (c *FB303ServiceClient) Open() error {
     return c.chClient.Open()
 }
 
-// Deprecated: Use FB303ServiceChannelClient instead.
+// Deprecated: Use FB303ServiceClient instead.
 type FB303ServiceThreadsafeClient = FB303ServiceClient
 
-// Deprecated: Use NewFB303ServiceChannelClient() instead.
+// Deprecated: Use NewFB303ServiceClientFromProtocol() instead.
 func NewFB303ServiceThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *FB303ServiceThreadsafeClient {
-    return NewFB303ServiceClient(t, iprot, oprot)
+    return NewFB303ServiceClientFromProtocol(iprot)
 }
 
-// Deprecated: Use NewFB303ServiceChannelClient() instead.
+// Deprecated: Use NewFB303ServiceClientFromProtocol() instead.
 func NewFB303ServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *FB303ServiceClient {
-  iprot := pf.GetProtocol(t)
-  oprot := pf.GetProtocol(t)
-  return NewFB303ServiceClient(t, iprot, oprot)
+  return NewFB303ServiceClientFromProtocol(pf.GetProtocol(t))
 }
 
-// Deprecated: Use NewFB303ServiceChannelClient() instead.
+// Deprecated: Use NewFB303ServiceClientFromProtocol() instead.
 func NewFB303ServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *FB303ServiceThreadsafeClient {
-  return NewFB303ServiceClientFactory(t, pf)
+  return NewFB303ServiceClientFromProtocol(pf.GetProtocol(t))
 }
 
 
@@ -1036,7 +1038,6 @@ func (c *MyServiceChannelClient) Open() error {
     return c.ch.Open()
 }
 
-// Deprecated: Use MyServiceChannelClient instead.
 type MyServiceClient struct {
     chClient *MyServiceChannelClient
     Mu       sync.Mutex
@@ -1044,11 +1045,15 @@ type MyServiceClient struct {
 // Compile time interface enforcer
 var _ MyServiceClientInterface = &MyServiceClient{}
 
-// Deprecated: Use NewMyServiceChannelClient() instead.
+// Deprecated: Use NewMyServiceClientFromProtocol() instead.
 func NewMyServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyServiceClient {
+    return NewMyServiceClientFromProtocol(iprot)
+}
+
+func NewMyServiceClientFromProtocol(prot thrift.Protocol) *MyServiceClient {
     return &MyServiceClient{
         chClient: NewMyServiceChannelClient(
-            thrift.NewSerialChannel(iprot),
+            thrift.NewSerialChannel(prot),
         ),
     }
 }
@@ -1065,24 +1070,22 @@ func (c *MyServiceClient) Open() error {
     return c.chClient.Open()
 }
 
-// Deprecated: Use MyServiceChannelClient instead.
+// Deprecated: Use MyServiceClient instead.
 type MyServiceThreadsafeClient = MyServiceClient
 
-// Deprecated: Use NewMyServiceChannelClient() instead.
+// Deprecated: Use NewMyServiceClientFromProtocol() instead.
 func NewMyServiceThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyServiceThreadsafeClient {
-    return NewMyServiceClient(t, iprot, oprot)
+    return NewMyServiceClientFromProtocol(iprot)
 }
 
-// Deprecated: Use NewMyServiceChannelClient() instead.
+// Deprecated: Use NewMyServiceClientFromProtocol() instead.
 func NewMyServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServiceClient {
-  iprot := pf.GetProtocol(t)
-  oprot := pf.GetProtocol(t)
-  return NewMyServiceClient(t, iprot, oprot)
+  return NewMyServiceClientFromProtocol(pf.GetProtocol(t))
 }
 
-// Deprecated: Use NewMyServiceChannelClient() instead.
+// Deprecated: Use NewMyServiceClientFromProtocol() instead.
 func NewMyServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServiceThreadsafeClient {
-  return NewMyServiceClientFactory(t, pf)
+  return NewMyServiceClientFromProtocol(pf.GetProtocol(t))
 }
 
 
@@ -4676,7 +4679,6 @@ func (c *DbMixedStackArgumentsChannelClient) Open() error {
     return c.ch.Open()
 }
 
-// Deprecated: Use DbMixedStackArgumentsChannelClient instead.
 type DbMixedStackArgumentsClient struct {
     chClient *DbMixedStackArgumentsChannelClient
     Mu       sync.Mutex
@@ -4684,11 +4686,15 @@ type DbMixedStackArgumentsClient struct {
 // Compile time interface enforcer
 var _ DbMixedStackArgumentsClientInterface = &DbMixedStackArgumentsClient{}
 
-// Deprecated: Use NewDbMixedStackArgumentsChannelClient() instead.
+// Deprecated: Use NewDbMixedStackArgumentsClientFromProtocol() instead.
 func NewDbMixedStackArgumentsClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *DbMixedStackArgumentsClient {
+    return NewDbMixedStackArgumentsClientFromProtocol(iprot)
+}
+
+func NewDbMixedStackArgumentsClientFromProtocol(prot thrift.Protocol) *DbMixedStackArgumentsClient {
     return &DbMixedStackArgumentsClient{
         chClient: NewDbMixedStackArgumentsChannelClient(
-            thrift.NewSerialChannel(iprot),
+            thrift.NewSerialChannel(prot),
         ),
     }
 }
@@ -4705,24 +4711,22 @@ func (c *DbMixedStackArgumentsClient) Open() error {
     return c.chClient.Open()
 }
 
-// Deprecated: Use DbMixedStackArgumentsChannelClient instead.
+// Deprecated: Use DbMixedStackArgumentsClient instead.
 type DbMixedStackArgumentsThreadsafeClient = DbMixedStackArgumentsClient
 
-// Deprecated: Use NewDbMixedStackArgumentsChannelClient() instead.
+// Deprecated: Use NewDbMixedStackArgumentsClientFromProtocol() instead.
 func NewDbMixedStackArgumentsThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *DbMixedStackArgumentsThreadsafeClient {
-    return NewDbMixedStackArgumentsClient(t, iprot, oprot)
+    return NewDbMixedStackArgumentsClientFromProtocol(iprot)
 }
 
-// Deprecated: Use NewDbMixedStackArgumentsChannelClient() instead.
+// Deprecated: Use NewDbMixedStackArgumentsClientFromProtocol() instead.
 func NewDbMixedStackArgumentsClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *DbMixedStackArgumentsClient {
-  iprot := pf.GetProtocol(t)
-  oprot := pf.GetProtocol(t)
-  return NewDbMixedStackArgumentsClient(t, iprot, oprot)
+  return NewDbMixedStackArgumentsClientFromProtocol(pf.GetProtocol(t))
 }
 
-// Deprecated: Use NewDbMixedStackArgumentsChannelClient() instead.
+// Deprecated: Use NewDbMixedStackArgumentsClientFromProtocol() instead.
 func NewDbMixedStackArgumentsThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *DbMixedStackArgumentsThreadsafeClient {
-  return NewDbMixedStackArgumentsClientFactory(t, pf)
+  return NewDbMixedStackArgumentsClientFromProtocol(pf.GetProtocol(t))
 }
 
 

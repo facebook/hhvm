@@ -65,7 +65,6 @@ func (c *CChannelClient) Open() error {
     return c.ch.Open()
 }
 
-// Deprecated: Use CChannelClient instead.
 type CClient struct {
     chClient *CChannelClient
     Mu       sync.Mutex
@@ -73,11 +72,15 @@ type CClient struct {
 // Compile time interface enforcer
 var _ CClientInterface = &CClient{}
 
-// Deprecated: Use NewCChannelClient() instead.
+// Deprecated: Use NewCClientFromProtocol() instead.
 func NewCClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *CClient {
+    return NewCClientFromProtocol(iprot)
+}
+
+func NewCClientFromProtocol(prot thrift.Protocol) *CClient {
     return &CClient{
         chClient: NewCChannelClient(
-            thrift.NewSerialChannel(iprot),
+            thrift.NewSerialChannel(prot),
         ),
     }
 }
@@ -94,24 +97,22 @@ func (c *CClient) Open() error {
     return c.chClient.Open()
 }
 
-// Deprecated: Use CChannelClient instead.
+// Deprecated: Use CClient instead.
 type CThreadsafeClient = CClient
 
-// Deprecated: Use NewCChannelClient() instead.
+// Deprecated: Use NewCClientFromProtocol() instead.
 func NewCThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *CThreadsafeClient {
-    return NewCClient(t, iprot, oprot)
+    return NewCClientFromProtocol(iprot)
 }
 
-// Deprecated: Use NewCChannelClient() instead.
+// Deprecated: Use NewCClientFromProtocol() instead.
 func NewCClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *CClient {
-  iprot := pf.GetProtocol(t)
-  oprot := pf.GetProtocol(t)
-  return NewCClient(t, iprot, oprot)
+  return NewCClientFromProtocol(pf.GetProtocol(t))
 }
 
-// Deprecated: Use NewCChannelClient() instead.
+// Deprecated: Use NewCClientFromProtocol() instead.
 func NewCThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *CThreadsafeClient {
-  return NewCClientFactory(t, pf)
+  return NewCClientFromProtocol(pf.GetProtocol(t))
 }
 
 

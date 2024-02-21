@@ -91,7 +91,6 @@ func (c *GetEntityChannelClient) Open() error {
     return c.ch.Open()
 }
 
-// Deprecated: Use GetEntityChannelClient instead.
 type GetEntityClient struct {
     chClient *GetEntityChannelClient
     Mu       sync.Mutex
@@ -99,11 +98,15 @@ type GetEntityClient struct {
 // Compile time interface enforcer
 var _ GetEntityClientInterface = &GetEntityClient{}
 
-// Deprecated: Use NewGetEntityChannelClient() instead.
+// Deprecated: Use NewGetEntityClientFromProtocol() instead.
 func NewGetEntityClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *GetEntityClient {
+    return NewGetEntityClientFromProtocol(iprot)
+}
+
+func NewGetEntityClientFromProtocol(prot thrift.Protocol) *GetEntityClient {
     return &GetEntityClient{
         chClient: NewGetEntityChannelClient(
-            thrift.NewSerialChannel(iprot),
+            thrift.NewSerialChannel(prot),
         ),
     }
 }
@@ -120,24 +123,22 @@ func (c *GetEntityClient) Open() error {
     return c.chClient.Open()
 }
 
-// Deprecated: Use GetEntityChannelClient instead.
+// Deprecated: Use GetEntityClient instead.
 type GetEntityThreadsafeClient = GetEntityClient
 
-// Deprecated: Use NewGetEntityChannelClient() instead.
+// Deprecated: Use NewGetEntityClientFromProtocol() instead.
 func NewGetEntityThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *GetEntityThreadsafeClient {
-    return NewGetEntityClient(t, iprot, oprot)
+    return NewGetEntityClientFromProtocol(iprot)
 }
 
-// Deprecated: Use NewGetEntityChannelClient() instead.
+// Deprecated: Use NewGetEntityClientFromProtocol() instead.
 func NewGetEntityClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *GetEntityClient {
-  iprot := pf.GetProtocol(t)
-  oprot := pf.GetProtocol(t)
-  return NewGetEntityClient(t, iprot, oprot)
+  return NewGetEntityClientFromProtocol(pf.GetProtocol(t))
 }
 
-// Deprecated: Use NewGetEntityChannelClient() instead.
+// Deprecated: Use NewGetEntityClientFromProtocol() instead.
 func NewGetEntityThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *GetEntityThreadsafeClient {
-  return NewGetEntityClientFactory(t, pf)
+  return NewGetEntityClientFromProtocol(pf.GetProtocol(t))
 }
 
 

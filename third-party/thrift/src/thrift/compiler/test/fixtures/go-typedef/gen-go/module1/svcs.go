@@ -69,7 +69,6 @@ func (c *FinderChannelClient) Open() error {
     return c.ch.Open()
 }
 
-// Deprecated: Use FinderChannelClient instead.
 type FinderClient struct {
     chClient *FinderChannelClient
     Mu       sync.Mutex
@@ -77,11 +76,15 @@ type FinderClient struct {
 // Compile time interface enforcer
 var _ FinderClientInterface = &FinderClient{}
 
-// Deprecated: Use NewFinderChannelClient() instead.
+// Deprecated: Use NewFinderClientFromProtocol() instead.
 func NewFinderClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *FinderClient {
+    return NewFinderClientFromProtocol(iprot)
+}
+
+func NewFinderClientFromProtocol(prot thrift.Protocol) *FinderClient {
     return &FinderClient{
         chClient: NewFinderChannelClient(
-            thrift.NewSerialChannel(iprot),
+            thrift.NewSerialChannel(prot),
         ),
     }
 }
@@ -98,24 +101,22 @@ func (c *FinderClient) Open() error {
     return c.chClient.Open()
 }
 
-// Deprecated: Use FinderChannelClient instead.
+// Deprecated: Use FinderClient instead.
 type FinderThreadsafeClient = FinderClient
 
-// Deprecated: Use NewFinderChannelClient() instead.
+// Deprecated: Use NewFinderClientFromProtocol() instead.
 func NewFinderThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *FinderThreadsafeClient {
-    return NewFinderClient(t, iprot, oprot)
+    return NewFinderClientFromProtocol(iprot)
 }
 
-// Deprecated: Use NewFinderChannelClient() instead.
+// Deprecated: Use NewFinderClientFromProtocol() instead.
 func NewFinderClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *FinderClient {
-  iprot := pf.GetProtocol(t)
-  oprot := pf.GetProtocol(t)
-  return NewFinderClient(t, iprot, oprot)
+  return NewFinderClientFromProtocol(pf.GetProtocol(t))
 }
 
-// Deprecated: Use NewFinderChannelClient() instead.
+// Deprecated: Use NewFinderClientFromProtocol() instead.
 func NewFinderThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *FinderThreadsafeClient {
-  return NewFinderClientFactory(t, pf)
+  return NewFinderClientFromProtocol(pf.GetProtocol(t))
 }
 
 

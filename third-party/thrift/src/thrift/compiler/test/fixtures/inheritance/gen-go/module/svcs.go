@@ -63,7 +63,6 @@ func (c *MyRootChannelClient) Open() error {
     return c.ch.Open()
 }
 
-// Deprecated: Use MyRootChannelClient instead.
 type MyRootClient struct {
     chClient *MyRootChannelClient
     Mu       sync.Mutex
@@ -71,11 +70,15 @@ type MyRootClient struct {
 // Compile time interface enforcer
 var _ MyRootClientInterface = &MyRootClient{}
 
-// Deprecated: Use NewMyRootChannelClient() instead.
+// Deprecated: Use NewMyRootClientFromProtocol() instead.
 func NewMyRootClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyRootClient {
+    return NewMyRootClientFromProtocol(iprot)
+}
+
+func NewMyRootClientFromProtocol(prot thrift.Protocol) *MyRootClient {
     return &MyRootClient{
         chClient: NewMyRootChannelClient(
-            thrift.NewSerialChannel(iprot),
+            thrift.NewSerialChannel(prot),
         ),
     }
 }
@@ -92,24 +95,22 @@ func (c *MyRootClient) Open() error {
     return c.chClient.Open()
 }
 
-// Deprecated: Use MyRootChannelClient instead.
+// Deprecated: Use MyRootClient instead.
 type MyRootThreadsafeClient = MyRootClient
 
-// Deprecated: Use NewMyRootChannelClient() instead.
+// Deprecated: Use NewMyRootClientFromProtocol() instead.
 func NewMyRootThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyRootThreadsafeClient {
-    return NewMyRootClient(t, iprot, oprot)
+    return NewMyRootClientFromProtocol(iprot)
 }
 
-// Deprecated: Use NewMyRootChannelClient() instead.
+// Deprecated: Use NewMyRootClientFromProtocol() instead.
 func NewMyRootClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyRootClient {
-  iprot := pf.GetProtocol(t)
-  oprot := pf.GetProtocol(t)
-  return NewMyRootClient(t, iprot, oprot)
+  return NewMyRootClientFromProtocol(pf.GetProtocol(t))
 }
 
-// Deprecated: Use NewMyRootChannelClient() instead.
+// Deprecated: Use NewMyRootClientFromProtocol() instead.
 func NewMyRootThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyRootThreadsafeClient {
-  return NewMyRootClientFactory(t, pf)
+  return NewMyRootClientFromProtocol(pf.GetProtocol(t))
 }
 
 
@@ -469,7 +470,6 @@ func (c *MyNodeChannelClient) Open() error {
     return c.ch.Open()
 }
 
-// Deprecated: Use MyNodeChannelClient instead.
 type MyNodeClient struct {
     // Inherited/extended service
     *MyRootClient
@@ -479,12 +479,16 @@ type MyNodeClient struct {
 // Compile time interface enforcer
 var _ MyNodeClientInterface = &MyNodeClient{}
 
-// Deprecated: Use NewMyNodeChannelClient() instead.
+// Deprecated: Use NewMyNodeClientFromProtocol() instead.
 func NewMyNodeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyNodeClient {
+    return NewMyNodeClientFromProtocol(iprot)
+}
+
+func NewMyNodeClientFromProtocol(prot thrift.Protocol) *MyNodeClient {
     return &MyNodeClient{
-        MyRootClient: NewMyRootClient(t, iprot, oprot),
+        MyRootClient: NewMyRootClientFromProtocol(prot),
         chClient: NewMyNodeChannelClient(
-            thrift.NewSerialChannel(iprot),
+            thrift.NewSerialChannel(prot),
         ),
     }
 }
@@ -501,24 +505,22 @@ func (c *MyNodeClient) Open() error {
     return c.chClient.Open()
 }
 
-// Deprecated: Use MyNodeChannelClient instead.
+// Deprecated: Use MyNodeClient instead.
 type MyNodeThreadsafeClient = MyNodeClient
 
-// Deprecated: Use NewMyNodeChannelClient() instead.
+// Deprecated: Use NewMyNodeClientFromProtocol() instead.
 func NewMyNodeThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyNodeThreadsafeClient {
-    return NewMyNodeClient(t, iprot, oprot)
+    return NewMyNodeClientFromProtocol(iprot)
 }
 
-// Deprecated: Use NewMyNodeChannelClient() instead.
+// Deprecated: Use NewMyNodeClientFromProtocol() instead.
 func NewMyNodeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyNodeClient {
-  iprot := pf.GetProtocol(t)
-  oprot := pf.GetProtocol(t)
-  return NewMyNodeClient(t, iprot, oprot)
+  return NewMyNodeClientFromProtocol(pf.GetProtocol(t))
 }
 
-// Deprecated: Use NewMyNodeChannelClient() instead.
+// Deprecated: Use NewMyNodeClientFromProtocol() instead.
 func NewMyNodeThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyNodeThreadsafeClient {
-  return NewMyNodeClientFactory(t, pf)
+  return NewMyNodeClientFromProtocol(pf.GetProtocol(t))
 }
 
 
@@ -852,7 +854,6 @@ func (c *MyLeafChannelClient) Open() error {
     return c.ch.Open()
 }
 
-// Deprecated: Use MyLeafChannelClient instead.
 type MyLeafClient struct {
     // Inherited/extended service
     *MyNodeClient
@@ -862,12 +863,16 @@ type MyLeafClient struct {
 // Compile time interface enforcer
 var _ MyLeafClientInterface = &MyLeafClient{}
 
-// Deprecated: Use NewMyLeafChannelClient() instead.
+// Deprecated: Use NewMyLeafClientFromProtocol() instead.
 func NewMyLeafClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyLeafClient {
+    return NewMyLeafClientFromProtocol(iprot)
+}
+
+func NewMyLeafClientFromProtocol(prot thrift.Protocol) *MyLeafClient {
     return &MyLeafClient{
-        MyNodeClient: NewMyNodeClient(t, iprot, oprot),
+        MyNodeClient: NewMyNodeClientFromProtocol(prot),
         chClient: NewMyLeafChannelClient(
-            thrift.NewSerialChannel(iprot),
+            thrift.NewSerialChannel(prot),
         ),
     }
 }
@@ -884,24 +889,22 @@ func (c *MyLeafClient) Open() error {
     return c.chClient.Open()
 }
 
-// Deprecated: Use MyLeafChannelClient instead.
+// Deprecated: Use MyLeafClient instead.
 type MyLeafThreadsafeClient = MyLeafClient
 
-// Deprecated: Use NewMyLeafChannelClient() instead.
+// Deprecated: Use NewMyLeafClientFromProtocol() instead.
 func NewMyLeafThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyLeafThreadsafeClient {
-    return NewMyLeafClient(t, iprot, oprot)
+    return NewMyLeafClientFromProtocol(iprot)
 }
 
-// Deprecated: Use NewMyLeafChannelClient() instead.
+// Deprecated: Use NewMyLeafClientFromProtocol() instead.
 func NewMyLeafClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyLeafClient {
-  iprot := pf.GetProtocol(t)
-  oprot := pf.GetProtocol(t)
-  return NewMyLeafClient(t, iprot, oprot)
+  return NewMyLeafClientFromProtocol(pf.GetProtocol(t))
 }
 
-// Deprecated: Use NewMyLeafChannelClient() instead.
+// Deprecated: Use NewMyLeafClientFromProtocol() instead.
 func NewMyLeafThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyLeafThreadsafeClient {
-  return NewMyLeafClientFactory(t, pf)
+  return NewMyLeafClientFromProtocol(pf.GetProtocol(t))
 }
 
 

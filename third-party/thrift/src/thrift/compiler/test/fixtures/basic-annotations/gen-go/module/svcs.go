@@ -75,7 +75,6 @@ func (c *MyServiceChannelClient) Open() error {
     return c.ch.Open()
 }
 
-// Deprecated: Use MyServiceChannelClient instead.
 type MyServiceClient struct {
     chClient *MyServiceChannelClient
     Mu       sync.Mutex
@@ -83,11 +82,15 @@ type MyServiceClient struct {
 // Compile time interface enforcer
 var _ MyServiceClientInterface = &MyServiceClient{}
 
-// Deprecated: Use NewMyServiceChannelClient() instead.
+// Deprecated: Use NewMyServiceClientFromProtocol() instead.
 func NewMyServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyServiceClient {
+    return NewMyServiceClientFromProtocol(iprot)
+}
+
+func NewMyServiceClientFromProtocol(prot thrift.Protocol) *MyServiceClient {
     return &MyServiceClient{
         chClient: NewMyServiceChannelClient(
-            thrift.NewSerialChannel(iprot),
+            thrift.NewSerialChannel(prot),
         ),
     }
 }
@@ -104,24 +107,22 @@ func (c *MyServiceClient) Open() error {
     return c.chClient.Open()
 }
 
-// Deprecated: Use MyServiceChannelClient instead.
+// Deprecated: Use MyServiceClient instead.
 type MyServiceThreadsafeClient = MyServiceClient
 
-// Deprecated: Use NewMyServiceChannelClient() instead.
+// Deprecated: Use NewMyServiceClientFromProtocol() instead.
 func NewMyServiceThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyServiceThreadsafeClient {
-    return NewMyServiceClient(t, iprot, oprot)
+    return NewMyServiceClientFromProtocol(iprot)
 }
 
-// Deprecated: Use NewMyServiceChannelClient() instead.
+// Deprecated: Use NewMyServiceClientFromProtocol() instead.
 func NewMyServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServiceClient {
-  iprot := pf.GetProtocol(t)
-  oprot := pf.GetProtocol(t)
-  return NewMyServiceClient(t, iprot, oprot)
+  return NewMyServiceClientFromProtocol(pf.GetProtocol(t))
 }
 
-// Deprecated: Use NewMyServiceChannelClient() instead.
+// Deprecated: Use NewMyServiceClientFromProtocol() instead.
 func NewMyServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServiceThreadsafeClient {
-  return NewMyServiceClientFactory(t, pf)
+  return NewMyServiceClientFromProtocol(pf.GetProtocol(t))
 }
 
 
@@ -2790,7 +2791,6 @@ func (c *MyServicePrioParentChannelClient) Open() error {
     return c.ch.Open()
 }
 
-// Deprecated: Use MyServicePrioParentChannelClient instead.
 type MyServicePrioParentClient struct {
     chClient *MyServicePrioParentChannelClient
     Mu       sync.Mutex
@@ -2798,11 +2798,15 @@ type MyServicePrioParentClient struct {
 // Compile time interface enforcer
 var _ MyServicePrioParentClientInterface = &MyServicePrioParentClient{}
 
-// Deprecated: Use NewMyServicePrioParentChannelClient() instead.
+// Deprecated: Use NewMyServicePrioParentClientFromProtocol() instead.
 func NewMyServicePrioParentClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyServicePrioParentClient {
+    return NewMyServicePrioParentClientFromProtocol(iprot)
+}
+
+func NewMyServicePrioParentClientFromProtocol(prot thrift.Protocol) *MyServicePrioParentClient {
     return &MyServicePrioParentClient{
         chClient: NewMyServicePrioParentChannelClient(
-            thrift.NewSerialChannel(iprot),
+            thrift.NewSerialChannel(prot),
         ),
     }
 }
@@ -2819,24 +2823,22 @@ func (c *MyServicePrioParentClient) Open() error {
     return c.chClient.Open()
 }
 
-// Deprecated: Use MyServicePrioParentChannelClient instead.
+// Deprecated: Use MyServicePrioParentClient instead.
 type MyServicePrioParentThreadsafeClient = MyServicePrioParentClient
 
-// Deprecated: Use NewMyServicePrioParentChannelClient() instead.
+// Deprecated: Use NewMyServicePrioParentClientFromProtocol() instead.
 func NewMyServicePrioParentThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyServicePrioParentThreadsafeClient {
-    return NewMyServicePrioParentClient(t, iprot, oprot)
+    return NewMyServicePrioParentClientFromProtocol(iprot)
 }
 
-// Deprecated: Use NewMyServicePrioParentChannelClient() instead.
+// Deprecated: Use NewMyServicePrioParentClientFromProtocol() instead.
 func NewMyServicePrioParentClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServicePrioParentClient {
-  iprot := pf.GetProtocol(t)
-  oprot := pf.GetProtocol(t)
-  return NewMyServicePrioParentClient(t, iprot, oprot)
+  return NewMyServicePrioParentClientFromProtocol(pf.GetProtocol(t))
 }
 
-// Deprecated: Use NewMyServicePrioParentChannelClient() instead.
+// Deprecated: Use NewMyServicePrioParentClientFromProtocol() instead.
 func NewMyServicePrioParentThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServicePrioParentThreadsafeClient {
-  return NewMyServicePrioParentClientFactory(t, pf)
+  return NewMyServicePrioParentClientFromProtocol(pf.GetProtocol(t))
 }
 
 
@@ -3457,7 +3459,6 @@ func (c *MyServicePrioChildChannelClient) Open() error {
     return c.ch.Open()
 }
 
-// Deprecated: Use MyServicePrioChildChannelClient instead.
 type MyServicePrioChildClient struct {
     // Inherited/extended service
     *MyServicePrioParentClient
@@ -3467,12 +3468,16 @@ type MyServicePrioChildClient struct {
 // Compile time interface enforcer
 var _ MyServicePrioChildClientInterface = &MyServicePrioChildClient{}
 
-// Deprecated: Use NewMyServicePrioChildChannelClient() instead.
+// Deprecated: Use NewMyServicePrioChildClientFromProtocol() instead.
 func NewMyServicePrioChildClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyServicePrioChildClient {
+    return NewMyServicePrioChildClientFromProtocol(iprot)
+}
+
+func NewMyServicePrioChildClientFromProtocol(prot thrift.Protocol) *MyServicePrioChildClient {
     return &MyServicePrioChildClient{
-        MyServicePrioParentClient: NewMyServicePrioParentClient(t, iprot, oprot),
+        MyServicePrioParentClient: NewMyServicePrioParentClientFromProtocol(prot),
         chClient: NewMyServicePrioChildChannelClient(
-            thrift.NewSerialChannel(iprot),
+            thrift.NewSerialChannel(prot),
         ),
     }
 }
@@ -3489,24 +3494,22 @@ func (c *MyServicePrioChildClient) Open() error {
     return c.chClient.Open()
 }
 
-// Deprecated: Use MyServicePrioChildChannelClient instead.
+// Deprecated: Use MyServicePrioChildClient instead.
 type MyServicePrioChildThreadsafeClient = MyServicePrioChildClient
 
-// Deprecated: Use NewMyServicePrioChildChannelClient() instead.
+// Deprecated: Use NewMyServicePrioChildClientFromProtocol() instead.
 func NewMyServicePrioChildThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyServicePrioChildThreadsafeClient {
-    return NewMyServicePrioChildClient(t, iprot, oprot)
+    return NewMyServicePrioChildClientFromProtocol(iprot)
 }
 
-// Deprecated: Use NewMyServicePrioChildChannelClient() instead.
+// Deprecated: Use NewMyServicePrioChildClientFromProtocol() instead.
 func NewMyServicePrioChildClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServicePrioChildClient {
-  iprot := pf.GetProtocol(t)
-  oprot := pf.GetProtocol(t)
-  return NewMyServicePrioChildClient(t, iprot, oprot)
+  return NewMyServicePrioChildClientFromProtocol(pf.GetProtocol(t))
 }
 
-// Deprecated: Use NewMyServicePrioChildChannelClient() instead.
+// Deprecated: Use NewMyServicePrioChildClientFromProtocol() instead.
 func NewMyServicePrioChildThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServicePrioChildThreadsafeClient {
-  return NewMyServicePrioChildClientFactory(t, pf)
+  return NewMyServicePrioChildClientFromProtocol(pf.GetProtocol(t))
 }
 
 
@@ -3834,7 +3837,6 @@ func (c *BadServiceChannelClient) Open() error {
     return c.ch.Open()
 }
 
-// Deprecated: Use BadServiceChannelClient instead.
 type BadServiceClient struct {
     chClient *BadServiceChannelClient
     Mu       sync.Mutex
@@ -3842,11 +3844,15 @@ type BadServiceClient struct {
 // Compile time interface enforcer
 var _ BadServiceClientInterface = &BadServiceClient{}
 
-// Deprecated: Use NewBadServiceChannelClient() instead.
+// Deprecated: Use NewBadServiceClientFromProtocol() instead.
 func NewBadServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *BadServiceClient {
+    return NewBadServiceClientFromProtocol(iprot)
+}
+
+func NewBadServiceClientFromProtocol(prot thrift.Protocol) *BadServiceClient {
     return &BadServiceClient{
         chClient: NewBadServiceChannelClient(
-            thrift.NewSerialChannel(iprot),
+            thrift.NewSerialChannel(prot),
         ),
     }
 }
@@ -3863,24 +3869,22 @@ func (c *BadServiceClient) Open() error {
     return c.chClient.Open()
 }
 
-// Deprecated: Use BadServiceChannelClient instead.
+// Deprecated: Use BadServiceClient instead.
 type BadServiceThreadsafeClient = BadServiceClient
 
-// Deprecated: Use NewBadServiceChannelClient() instead.
+// Deprecated: Use NewBadServiceClientFromProtocol() instead.
 func NewBadServiceThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *BadServiceThreadsafeClient {
-    return NewBadServiceClient(t, iprot, oprot)
+    return NewBadServiceClientFromProtocol(iprot)
 }
 
-// Deprecated: Use NewBadServiceChannelClient() instead.
+// Deprecated: Use NewBadServiceClientFromProtocol() instead.
 func NewBadServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *BadServiceClient {
-  iprot := pf.GetProtocol(t)
-  oprot := pf.GetProtocol(t)
-  return NewBadServiceClient(t, iprot, oprot)
+  return NewBadServiceClientFromProtocol(pf.GetProtocol(t))
 }
 
-// Deprecated: Use NewBadServiceChannelClient() instead.
+// Deprecated: Use NewBadServiceClientFromProtocol() instead.
 func NewBadServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *BadServiceThreadsafeClient {
-  return NewBadServiceClientFactory(t, pf)
+  return NewBadServiceClientFromProtocol(pf.GetProtocol(t))
 }
 
 
@@ -4320,7 +4324,6 @@ func (c *FooBarBazServiceChannelClient) Open() error {
     return c.ch.Open()
 }
 
-// Deprecated: Use FooBarBazServiceChannelClient instead.
 type FooBarBazServiceClient struct {
     chClient *FooBarBazServiceChannelClient
     Mu       sync.Mutex
@@ -4328,11 +4331,15 @@ type FooBarBazServiceClient struct {
 // Compile time interface enforcer
 var _ FooBarBazServiceClientInterface = &FooBarBazServiceClient{}
 
-// Deprecated: Use NewFooBarBazServiceChannelClient() instead.
+// Deprecated: Use NewFooBarBazServiceClientFromProtocol() instead.
 func NewFooBarBazServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *FooBarBazServiceClient {
+    return NewFooBarBazServiceClientFromProtocol(iprot)
+}
+
+func NewFooBarBazServiceClientFromProtocol(prot thrift.Protocol) *FooBarBazServiceClient {
     return &FooBarBazServiceClient{
         chClient: NewFooBarBazServiceChannelClient(
-            thrift.NewSerialChannel(iprot),
+            thrift.NewSerialChannel(prot),
         ),
     }
 }
@@ -4349,24 +4356,22 @@ func (c *FooBarBazServiceClient) Open() error {
     return c.chClient.Open()
 }
 
-// Deprecated: Use FooBarBazServiceChannelClient instead.
+// Deprecated: Use FooBarBazServiceClient instead.
 type FooBarBazServiceThreadsafeClient = FooBarBazServiceClient
 
-// Deprecated: Use NewFooBarBazServiceChannelClient() instead.
+// Deprecated: Use NewFooBarBazServiceClientFromProtocol() instead.
 func NewFooBarBazServiceThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *FooBarBazServiceThreadsafeClient {
-    return NewFooBarBazServiceClient(t, iprot, oprot)
+    return NewFooBarBazServiceClientFromProtocol(iprot)
 }
 
-// Deprecated: Use NewFooBarBazServiceChannelClient() instead.
+// Deprecated: Use NewFooBarBazServiceClientFromProtocol() instead.
 func NewFooBarBazServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *FooBarBazServiceClient {
-  iprot := pf.GetProtocol(t)
-  oprot := pf.GetProtocol(t)
-  return NewFooBarBazServiceClient(t, iprot, oprot)
+  return NewFooBarBazServiceClientFromProtocol(pf.GetProtocol(t))
 }
 
-// Deprecated: Use NewFooBarBazServiceChannelClient() instead.
+// Deprecated: Use NewFooBarBazServiceClientFromProtocol() instead.
 func NewFooBarBazServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *FooBarBazServiceThreadsafeClient {
-  return NewFooBarBazServiceClientFactory(t, pf)
+  return NewFooBarBazServiceClientFromProtocol(pf.GetProtocol(t))
 }
 
 

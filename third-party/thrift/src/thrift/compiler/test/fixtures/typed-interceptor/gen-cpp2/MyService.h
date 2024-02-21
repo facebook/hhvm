@@ -66,7 +66,6 @@ class MyInteractionIf : public apache::thrift::Tile, public apache::thrift::Serv
   std::string_view getGeneratedName() const override { return "MyInteraction"; }
 
   typedef ::cpp2::MyServiceAsyncProcessor ProcessorType;
-  virtual ~MyInteractionIf() = default;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override {
     std::terminate();
   }

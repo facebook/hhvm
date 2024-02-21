@@ -68,7 +68,6 @@ class IIf : public apache::thrift::Tile, public apache::thrift::ServerInterface 
   std::string_view getGeneratedName() const override { return "I"; }
 
   typedef ::cpp2::AAsyncProcessor ProcessorType;
-  virtual ~IIf() = default;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override {
     std::terminate();
   }
@@ -316,7 +315,6 @@ class IIf : public apache::thrift::Tile, public apache::thrift::ServerInterface 
   std::string_view getGeneratedName() const override { return "I"; }
 
   typedef ::cpp2::CAsyncProcessor ProcessorType;
-  virtual ~IIf() = default;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override {
     std::terminate();
   }

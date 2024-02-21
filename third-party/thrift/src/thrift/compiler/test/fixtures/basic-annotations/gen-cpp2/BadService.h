@@ -58,7 +58,6 @@ class BadInteractionIf : public apache::thrift::Tile, public apache::thrift::Ser
   std::string_view getGeneratedName() const override { return "BadInteraction"; }
 
   typedef ::cpp2::GoodServiceAsyncProcessor ProcessorType;
-  virtual ~BadInteractionIf() = default;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override {
     std::terminate();
   }

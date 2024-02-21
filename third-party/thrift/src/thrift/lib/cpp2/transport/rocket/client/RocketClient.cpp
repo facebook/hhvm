@@ -49,6 +49,21 @@
 #include <thrift/lib/cpp2/transport/rocket/framing/Util.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
+THRIFT_FLAG_DEFINE_int64(rocket_server_version_timeout_ms, 500);
+
+THRIFT_FLAG_DEFINE_bool(rocket_client_enable_keep_alive, true);
+
+DEFINE_bool(
+    rocket_client_enable_keep_alive, false, "True to enable keep alive.");
+DEFINE_int64(
+    rocket_client_keep_alive_interval_ms,
+    1000 * 20,
+    "KeepAlive Sending Frequency.");
+DEFINE_int64(
+    rocket_client_keep_alive_timeout_ms,
+    1000 * 90,
+    "Timeout Connection if no keep alive frames received.");
+
 namespace apache {
 namespace thrift {
 
@@ -62,9 +77,6 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
 } // namespace detail
 
 namespace rocket {
-
-THRIFT_FLAG_DEFINE_int64(rocket_server_version_timeout_ms, 500);
-
 namespace {
 folly::exception_wrapper err(folly::Try<void> t) {
   return t.hasException() ? std::move(t.exception())
@@ -108,6 +120,22 @@ RocketClient::RocketClient(
   if (auto socket_2 = dynamic_cast<folly::AsyncSocket*>(socket_.get())) {
     socket_2->setCloseOnFailedWrite(false);
   }
+
+  if (FLAGS_rocket_client_enable_keep_alive &&
+      THRIFT_FLAG(rocket_client_enable_keep_alive)) {
+    keepAliveWatcher_ = std::unique_ptr<
+        KeepAliveWatcher,
+        folly::DelayedDestruction::Destructor>(new KeepAliveWatcher(
+        evb_,
+        socket_.get(),
+        std::chrono::milliseconds(FLAGS_rocket_client_keep_alive_interval_ms),
+        std::chrono::milliseconds(FLAGS_rocket_client_keep_alive_timeout_ms)));
+    // If enabled, KeepAliveFrame will be send first, so it will need to attach
+    // setupFrame.
+    auto setupFrameMoveOut = moveOutSetupFrame();
+    keepAliveWatcher_->start(setupFrameMoveOut.get());
+  }
+
   evb_->runOnDestruction(eventBaseDestructionCallback_);
   // Get or create flush manager from EventBaseLocal
   flushManager_ = &FlushManager::getInstance(*evb_);
@@ -115,6 +143,9 @@ RocketClient::RocketClient(
 
 RocketClient::~RocketClient() {
   closeNow(transport::TTransportException("Destroying RocketClient"));
+  if (keepAliveWatcher_) {
+    keepAliveWatcher_->stop();
+  }
   eventBaseDestructionCallback_.cancel();
   detachableLoopCallback_.cancelLoopCallback();
 
@@ -146,6 +177,12 @@ void RocketClient::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
         errorFrame.errorCode(), std::move(errorFrame.payload()).data()));
     return;
   }
+  if (frameType == FrameType::KEEPALIVE && streamId == StreamId{0} &&
+      keepAliveWatcher_) {
+    keepAliveWatcher_->handleKeepaliveFrame(std::move(frame));
+    return;
+  }
+
   if (frameType == FrameType::METADATA_PUSH && streamId == StreamId{0}) {
     MetadataPushFrame mdPushFrame(std::move(frame));
     if (!mdPushFrame.metadata()) {
@@ -1265,7 +1302,9 @@ void RocketClient::close(folly::exception_wrapper ew) noexcept {
 void RocketClient::closeNowImpl() noexcept {
   DestructorGuard dg(this);
   DCHECK(clientState_.connState == ConnectionState::ERROR);
-
+  if (keepAliveWatcher_) {
+    keepAliveWatcher_->stop();
+  }
   // Notice that AsyncSocket::closeNow() is a no-op if the socket is already in
   // the ERROR state -- such as if we are currently handling a writeErr() event.
   DCHECK(socket_);
@@ -1397,6 +1436,9 @@ void RocketClient::attachEventBase(folly::EventBase& evb) {
 
   evb_ = &evb;
   socket_->attachEventBase(evb_);
+  if (keepAliveWatcher_) {
+    keepAliveWatcher_->attachEventBase(evb_);
+  }
   evb_->runOnDestruction(eventBaseDestructionCallback_);
   flushManager_ = &FlushManager::getInstance(*evb_);
 }
@@ -1416,6 +1458,9 @@ void RocketClient::detachEventBase() {
 
   eventBaseDestructionCallback_.cancel();
   detachableLoopCallback_.cancelLoopCallback();
+  if (keepAliveWatcher_) {
+    keepAliveWatcher_->detachEventBase();
+  }
   socket_->detachEventBase();
   flushManager_ = nullptr;
   evb_ = nullptr;

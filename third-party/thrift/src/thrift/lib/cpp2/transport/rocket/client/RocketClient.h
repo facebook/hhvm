@@ -33,6 +33,7 @@
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/async/RpcOptions.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
+#include <thrift/lib/cpp2/transport/rocket/client/KeepAliveWatcher.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RequestContext.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RequestContextQueue.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketStreamServerCallback.h>
@@ -40,6 +41,10 @@
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Parser.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
+
+DECLARE_bool(rocket_client_enable_keep_alive);
+DECLARE_int64(rocket_client_keep_alive_interval_ms);
+DECLARE_int64(rocket_client_keep_alive_timeout_ms);
 
 namespace folly {
 class IOBuf;
@@ -371,7 +376,8 @@ class RocketClient : public virtual folly::DelayedDestruction,
   folly::AsyncTransport::UniquePtr socket_;
   folly::Function<void()> onDetachable_;
   folly::exception_wrapper error_;
-
+  std::unique_ptr<KeepAliveWatcher, folly::DelayedDestruction::Destructor>
+      keepAliveWatcher_;
   class FirstResponseTimeout : public folly::HHWheelTimer::Callback {
    public:
     FirstResponseTimeout(RocketClient& client, StreamId streamId)

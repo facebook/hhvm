@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<27c49643c412fa577066fb1cf7ecfe03>>
+// @generated SignedSource<<39df0a4cf72c5f0ce8d1bc18850083d0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -229,7 +229,6 @@ pub enum NastCheckError {
     InternalMemberInsidePublicTrait {
         member_pos: pos::Pos,
         trait_pos: pos::Pos,
-        is_method: bool,
     },
     #[rust_to_ocaml(name = "Attribute_conflicting_memoize")]
     AttributeConflictingMemoize {

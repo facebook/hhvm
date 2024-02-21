@@ -11,8 +11,8 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"(await gen_int())",
-          "range":{"end":{"character":33,"line":8},"start":{"character":24,"line":8}}
+          "newText":"return /*range-start*/await gen_int()/*range-end*/ + 3;",
+          "range":{"end":{"character":51,"line":8},"start":{"character":2,"line":8}}
         }
       ]
     }
@@ -31,6 +31,6 @@ async function gen_int(): Awaitable<int> {
 
 
 async function repro(): Awaitable<mixed> {
-  return /*range-start*/(await gen_int())/*range-end*/ + 3;
+  return /*range-start*/await gen_int()/*range-end*/ + 3;
 }
 

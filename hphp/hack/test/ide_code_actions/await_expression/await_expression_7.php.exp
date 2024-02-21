@@ -15,8 +15,8 @@ JSON for selected code action:
           "range":{"end":{"character":11,"line":9},"start":{"character":11,"line":9}}
         },
         {
-          "newText":"(await gen_int())",
-          "range":{"end":{"character":35,"line":10},"start":{"character":26,"line":10}}
+          "newText":"$_ = /*range-start*/await gen_int()/*range-end*/ + 3;",
+          "range":{"end":{"character":53,"line":10},"start":{"character":6,"line":10}}
         }
       ]
     }
@@ -37,7 +37,7 @@ function example(): Awaitable<mixed> {
   return () ==> {
     // `asnyc` should be added to this lambda, not the one above
     return async () ==> {
-      $_ = /*range-start*/(await gen_int())/*range-end*/ + 3;
+      $_ = /*range-start*/await gen_int()/*range-end*/ + 3;
     }
   }
 }

@@ -11,8 +11,8 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"(await gen_int())",
-          "range":{"end":{"character":35,"line":10},"start":{"character":26,"line":10}}
+          "newText":"$_ = /*range-start*/await gen_int()/*range-end*/ + 3;",
+          "range":{"end":{"character":53,"line":10},"start":{"character":6,"line":10}}
         }
       ]
     }
@@ -33,7 +33,7 @@ function example(): Awaitable<mixed> {
   // no `asnyc` should be added to this lambda
   return () ==> {
     return async () ==> {
-      $_ = /*range-start*/(await gen_int())/*range-end*/ + 3;
+      $_ = /*range-start*/await gen_int()/*range-end*/ + 3;
     }
   }
 }

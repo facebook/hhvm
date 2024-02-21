@@ -7,7 +7,14 @@
  *)
 open Hh_prelude
 
-type candidate = { expr_pos: Pos.t }
+type candidate = {
+  expr_pos: Pos.t;
+  containing_stmt_pos: Pos.t;
+}
+
+let offset_of_pos source_text pos =
+  let (line, start, _) = Pos.info_pos pos in
+  Full_fidelity_source_text.position_to_offset source_text (line, start)
 
 let find_candidate ctx tast selection : candidate option =
   let visitor =
@@ -25,6 +32,7 @@ let find_candidate ctx tast selection : candidate option =
             ~f:(Pos.contains candidate.expr_pos))
     in
     let in_await = ref false in
+    let stmt_pos : Pos.t option ref = ref None in
     object
       inherit [candidate option] Tast_visitor.reduce as super
 
@@ -54,6 +62,10 @@ let find_candidate ctx tast selection : candidate option =
         in_await := true;
         super#on_Await env await
 
+      method! on_stmt env stmt =
+        stmt_pos := Some (fst stmt);
+        super#on_stmt env stmt
+
       method! on_expr env expr =
         let (ty, expr_pos, _) = expr in
         if Pos.contains selection expr_pos then
@@ -68,7 +80,11 @@ let find_candidate ctx tast selection : candidate option =
               && String.equal c_name Naming_special_names.Classes.cAwaitable
             | _ -> false
           in
-          Option.some_if needs_await { expr_pos }
+          if needs_await then
+            Option.map !stmt_pos ~f:(fun containing_stmt_pos ->
+                { expr_pos; containing_stmt_pos })
+          else
+            None
         | candidate_opt -> candidate_opt
     end
   in
@@ -112,11 +128,7 @@ let calc_modifier_and_signature_edits path source_text positioned_tree pos :
 
   let parents =
     let root = Provider_context.PositionedSyntaxTree.root positioned_tree in
-    let offset =
-      let (line, start, _) = Pos.info_pos pos in
-      Full_fidelity_source_text.position_to_offset source_text (line, start)
-    in
-    Syn.parentage root offset
+    Syn.parentage root (offset_of_pos source_text pos)
   in
   parents
   |> List.map ~f:Syn.syntax
@@ -210,21 +222,150 @@ let calc_modifier_and_signature_edits path source_text positioned_tree pos :
            Some (List.filter_opt [signature_edit_opt; modifier_edit_opt])
          | _ -> None)
 
-let edits_of_candidate ctx entry { expr_pos } : Code_action_types.edit list =
+let text_before_and_after_expr_in_stmt
+    source_text { containing_stmt_pos; expr_pos } : string * string =
+  let stmt_offset = offset_of_pos source_text containing_stmt_pos in
+  let expr_offset = offset_of_pos source_text expr_pos in
+  let expr_end_offset =
+    offset_of_pos source_text (Pos.shrink_to_end expr_pos)
+  in
+  let stmt_end_offset =
+    offset_of_pos source_text (Pos.shrink_to_end containing_stmt_pos)
+  in
+  let before_text =
+    Full_fidelity_source_text.sub
+      source_text
+      stmt_offset
+      (expr_offset - stmt_offset)
+  in
+  let after_text =
+    Full_fidelity_source_text.sub
+      source_text
+      expr_end_offset
+      (stmt_end_offset - expr_end_offset)
+  in
+  (before_text, after_text)
+
+(** Enables us to distinguish whether a change to source code affects the structure of expressions in the AST.
+ *
+ * Examples
+ * `equiv popt ~stmt1 ~stmt2` is `false` given:
+ * stmt1:
+ *   await gen_int() -> meth();
+ * stmt2:
+ *   (await gen_int()) -> meth();
+ *
+ * `equiv popt ~stm1 ~stmt2` is `true` given:
+ * stmt1:
+ *   await gen_int() + 3;
+ * stmt1:
+ *   (await gen_int()) + 3;
+ *
+ * We only pay attention to the shape of the tree, not what's in a node. `equiv popt ~stm1 ~stmt2` is `true` given:
+ * stmt1:
+ *   await $z || 3000;
+ * stmt1:
+ *   await gen_int() + 3;
+ *)
+module Expr_structure : sig
+  val equiv : ParserOptions.t -> stmt1:string -> stmt2:string -> bool
+end = struct
+  type t =
+    | Zero
+    | Plus of t * t
+    | On_expr of t
+  [@@deriving eq]
+
+  let of_nast (nast : Nast.program) =
+    let visitor =
+      object
+        inherit [_] Aast.reduce as super
+
+        method zero = Zero
+
+        method plus a b = Plus (a, b)
+
+        method! on_expr env expr = On_expr (super#on_expr env expr)
+      end
+    in
+    nast
+    |> List.map ~f:(visitor#on_def ())
+    |> List.fold ~init:visitor#zero ~f:visitor#plus
+
+  let nast_of_program_source_code popt s =
+    let source_text = Full_fidelity_source_text.make Relative_path.default s in
+    let parser_env =
+      Full_fidelity_ast.make_env
+        ~quick_mode:false
+        ~parser_options:popt
+        Relative_path.default
+    in
+    let Parser_return.{ ast; _ } =
+      Full_fidelity_ast.from_source_text_with_legacy parser_env source_text
+    in
+    ast
+
+  let wrap_as_program : string -> string =
+    (* Convert a statement into a program, so we can parse it.
+        We include an extra semicolon because not all statements end in semicolons.
+        For example, in braceless lambdas: `() ==> expr_statement`.
+        Double-semicolon parses OK, so we're all right.
+    *)
+    Printf.sprintf "<?hh\nfunction foo(): void { %s; }"
+
+  let of_stmt_source_code popt statement_source_code =
+    statement_source_code
+    |> wrap_as_program
+    |> nast_of_program_source_code popt
+    |> of_nast
+
+  let equiv popt ~stmt1 ~stmt2 =
+    let structure1 = of_stmt_source_code popt stmt1 in
+    let structure2 = of_stmt_source_code popt stmt2 in
+    equal structure1 structure2
+end
+
+let calc_await_edit
+    ctx source_text ({ expr_pos; containing_stmt_pos } as candidate) :
+    Code_action_types.edit =
+  let (before_text, after_text) =
+    text_before_and_after_expr_in_stmt source_text candidate
+  in
+  let orig_expr_text =
+    Full_fidelity_source_text.sub_of_pos source_text expr_pos
+  in
+  let with_parentheses =
+    Printf.sprintf "%s(await %s)%s" before_text orig_expr_text after_text
+  in
+  let without_parentheses =
+    Printf.sprintf "%sawait %s%s" before_text orig_expr_text after_text
+  in
+  let text =
+    let popt = Provider_context.get_popt ctx in
+    if
+      Expr_structure.equiv
+        popt
+        ~stmt1:with_parentheses
+        ~stmt2:without_parentheses
+    then
+      without_parentheses
+    else
+      with_parentheses
+  in
+  Code_action_types.{ pos = containing_stmt_pos; text }
+
+let edits_of_candidate ctx entry ({ expr_pos; _ } as candidate) :
+    Code_action_types.edit list =
   let path = entry.Provider_context.path in
   let source_text = Ast_provider.compute_source_text ~entry in
   let positioned_tree = Ast_provider.compute_cst ~ctx ~entry in
-
-  let text =
-    let expr_text = Full_fidelity_source_text.sub_of_pos source_text expr_pos in
-    Printf.sprintf "(await %s)" expr_text
-  in
 
   let modifier_and_signature_edits =
     calc_modifier_and_signature_edits path source_text positioned_tree expr_pos
     |> Option.value ~default:[]
   in
-  modifier_and_signature_edits @ [Code_action_types.{ pos = expr_pos; text }]
+  let await_edit = calc_await_edit ctx source_text candidate in
+  modifier_and_signature_edits @ [await_edit]
 
 let refactor_of_candidate ctx entry candidate =
   let edits =

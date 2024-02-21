@@ -19,8 +19,8 @@ JSON for selected code action:
           "range":{"end":{"character":0,"line":12},"start":{"character":0,"line":12}}
         },
         {
-          "newText":"(await gen_foo())",
-          "range":{"end":{"character":26,"line":14},"start":{"character":17,"line":14}}
+          "newText":"(await gen_foo())/*range-end*/->meth();",
+          "range":{"end":{"character":48,"line":14},"start":{"character":17,"line":14}}
         }
       ]
     }

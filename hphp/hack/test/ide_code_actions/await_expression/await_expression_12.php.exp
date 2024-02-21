@@ -16,8 +16,8 @@ JSON for selected code action:
           "range":{"end":{"character":0,"line":7},"start":{"character":0,"line":7}}
         },
         {
-          "newText":"(await gen_int())",
-          "range":{"end":{"character":34,"line":9},"start":{"character":25,"line":9}}
+          "newText":"$_ = /*range-start*/ await gen_int()/*range-end*/ + 3;",
+          "range":{"end":{"character":52,"line":9},"start":{"character":4,"line":9}}
         }
       ]
     }
@@ -37,7 +37,7 @@ async function gen_int(): Awaitable<int> {
 function example(): void {
 async   // The refactor should not chang ethe return type of this lambda:
   (): Awaitable<mixed> ==> {
-    $_ = /*range-start*/ (await gen_int())/*range-end*/ + 3;
+    $_ = /*range-start*/ await gen_int()/*range-end*/ + 3;
   };
 }
 

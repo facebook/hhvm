@@ -39,7 +39,7 @@ let call_arguments arguments =
   List.fold arguments ~init:([], 0) ~f |> fst |> List.rev
 
 let constraint_ ctx (kind, hint) =
-  let type_string = Util.get_type_from_hint ctx hint in
+  let type_string = Pretty.get_type_from_hint ctx hint in
   Constraint.
     {
       constraint_kind = Util.make_constraint_kind kind;
@@ -53,7 +53,7 @@ let signature
     (ctxs_hints : Aast.contexts option)
     ~ret_ty
     ~return_info =
-  let hint_to_ctx hint = Context_.Key (Util.get_context_from_hint ctx hint) in
+  let hint_to_ctx hint = Context_.Key (Pretty.get_context_from_hint ctx hint) in
   let f (_pos, hint) = List.map ~f:hint_to_ctx hint in
   let ctxs_hints = Option.map ctxs_hints ~f in
   let param (p, type_xref, ty) =
@@ -99,16 +99,16 @@ let type_param ctx source_text tp =
       attributes = attributes source_text tp.tp_user_attributes;
     }
 
-let generic_xrefs (sym_pos : (XRefTarget.t * Util.pos list) Seq.t) =
+let generic_xrefs (sym_pos : (XRefTarget.t * Pretty.pos list) Seq.t) =
   let xrefs =
     Stdlib.Seq.fold_left
       (fun acc (target, pos_list) ->
-        let sorted_pos = Stdlib.List.sort_uniq Util.compare_pos pos_list in
+        let sorted_pos = Stdlib.List.sort_uniq Pretty.compare_pos pos_list in
         let (rev_byte_spans, _) =
           List.fold
             sorted_pos
             ~init:([], 0)
-            ~f:(fun (spans, last_start) Util.{ start; length } ->
+            ~f:(fun (spans, last_start) Pretty.{ start; length } ->
               let span = RelByteSpan.{ offset = start - last_start; length } in
               (span :: spans, start))
         in
@@ -128,7 +128,7 @@ let xrefs (fact_map : Xrefs.fact_map) =
       List.map pos_list ~f:(fun pos ->
           let start = fst (Pos.info_raw pos) in
           let length = Pos.length pos in
-          Util.{ start; length })
+          Pretty.{ start; length })
     in
     (target, util_pos_list)
   in

@@ -13,25 +13,6 @@ val ends_in_newline : Full_fidelity_source_text.t -> bool
 
 val has_tabs_or_multibyte_codepoints : Full_fidelity_source_text.t -> bool
 
-val get_type_from_hint : Provider_context.t -> Aast.hint -> string
-
-type pos = {
-  start: int;
-  length: int;
-}
-[@@deriving ord]
-
-(* A pretty printer which returns a user friendly
-   type representation, and the list of class names with
-   their position within the string.
-
-   Symbols are identified by their position `Pos.t` within the file *)
-
-val hint_to_string_and_symbols :
-  Provider_context.t -> Aast.hint -> string * (Pos.t * pos) list
-
-val get_context_from_hint : Provider_context.t -> Aast.hint -> string
-
 (* Values pulled from source code may have quotation marks;
    strip these when present, eg: "\"FOO\"" => "FOO" *)
 val strip_nested_quotes : string -> string

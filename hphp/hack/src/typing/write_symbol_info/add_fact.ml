@@ -51,7 +51,7 @@ let container_decl decl_pred name fa =
 
 let parent_decls ctx decls pred fa =
   List.fold decls ~init:([], fa) ~f:(fun (decl_refs, fa) decl ->
-      let name = Util.strip_tparams (Util.get_type_from_hint ctx decl) in
+      let name = Util.strip_tparams (Pretty.get_type_from_hint ctx decl) in
       let (decl_id, fa) = container_decl pred name fa in
       (decl_id :: decl_refs, fa))
 
@@ -173,7 +173,7 @@ let container_defn ctx source_text clss decl_id members fa =
       | [parent] ->
         let (decl_id, fa) =
           let parent_clss =
-            Util.strip_tparams (Util.get_type_from_hint ctx parent)
+            Util.strip_tparams (Pretty.get_type_from_hint ctx parent)
           in
           let qname = Util.make_qname parent_clss in
           let json = ClassDeclaration.(to_json_key { name = qname }) in
@@ -259,8 +259,8 @@ let type_info ~ty sym_pos fa =
   in
   Fact_acc.add_fact Predicate.(Hack TypeInfo) json fa
 
-let aggregate_pos (json_pos_list : (XRefTarget.t * Util.pos) list) :
-    (XRefTarget.t * Util.pos list) list =
+let aggregate_pos (json_pos_list : (XRefTarget.t * Pretty.pos) list) :
+    (XRefTarget.t * Pretty.pos list) list =
   let jmap =
     List.fold json_pos_list ~init:Map.Poly.empty ~f:(fun acc (json, pos) ->
         let f = function
@@ -281,8 +281,8 @@ let build_signature ctx pos_map_opt source_text params ctxs ret fa =
     match hint_of_type_hint h with
     | None -> (None, None, fa)
     | Some hint ->
-      let legacy_ty = Util.get_type_from_hint ctx hint in
-      let (ty, sym_pos) = Util.hint_to_string_and_symbols ctx hint in
+      let legacy_ty = Pretty.get_type_from_hint ctx hint in
+      let (ty, sym_pos) = Pretty.hint_to_string_and_symbols ctx hint in
       let decl_json_pos =
         List.filter_map sym_pos ~f:(fun (source_pos, pos) ->
             match Xrefs.PosMap.find_opt source_pos pos_map with
@@ -363,7 +363,7 @@ let method_overrides
 let property_defn ctx source_text prop decl_id fa =
   let type_ =
     Option.map
-      ~f:(fun x -> Type.Key (Util.get_type_from_hint ctx x))
+      ~f:(fun x -> Type.Key (Pretty.get_type_from_hint ctx x))
       (hint_of_type_hint prop.cv_type)
   in
   let json =
@@ -391,7 +391,7 @@ let class_const_defn ctx source_text const decl_id fa =
   in
   let type_ =
     Option.map
-      ~f:(fun x -> Type.Key (Util.get_type_from_hint ctx x))
+      ~f:(fun x -> Type.Key (Pretty.get_type_from_hint ctx x))
       const.cc_type
   in
   let json =
@@ -408,7 +408,7 @@ let type_const_defn ctx source_text tc decl_id fa =
     match tc.c_tconst_kind with
     | TCConcrete { c_tc_type = h }
     | TCAbstract { c_atc_default = Some h; _ } ->
-      Some (Type.Key (Util.get_type_from_hint ctx h))
+      Some (Type.Key (Pretty.get_type_from_hint ctx h))
     | TCAbstract { c_atc_default = None; _ } -> None
   in
   let json =
@@ -435,13 +435,13 @@ let enum_defn ctx source_text enm enum_id enum_data enumerators fa =
   let (module_, fa) = module_field enm.c_module enm.c_internal fa in
   let enum_constraint =
     Option.map enum_data.e_constraint ~f:(fun x ->
-        Type.Key (Util.get_type_from_hint ctx x))
+        Type.Key (Pretty.get_type_from_hint ctx x))
   in
   let json =
     EnumDefinition.(
       {
         declaration = EnumDeclaration.Id enum_id;
-        enum_base = Type.Key (Util.get_type_from_hint ctx enum_data.e_base);
+        enum_base = Type.Key (Pretty.get_type_from_hint ctx enum_data.e_base);
         enumerators;
         attributes = Build_fact.attributes source_text enm.c_user_attributes;
         includes;
@@ -561,7 +561,7 @@ let gconst_defn ctx source_text elem decl_id fa =
   let value = Util.ast_expr_to_string_stripped source_text elem.cst_value in
   let type_ =
     Option.map elem.cst_type ~f:(fun x ->
-        Type.Key (Util.get_type_from_hint ctx x))
+        Type.Key (Pretty.get_type_from_hint ctx x))
   in
   let json =
     GlobalConstDefinition.(

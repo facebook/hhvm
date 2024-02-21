@@ -10,6 +10,7 @@
   build_fact
   xrefs
   util
+  pretty
   sym_hash
   index_batch
   index_decls

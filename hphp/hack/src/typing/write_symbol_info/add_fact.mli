@@ -216,6 +216,6 @@ val indexerInputsHash :
 
 val type_info :
   ty:string ->
-  (XRefTarget.t * Util.pos list) list ->
+  (XRefTarget.t * Pretty.pos list) list ->
   Fact_acc.t ->
   Fact_id.t * Fact_acc.t

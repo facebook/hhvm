@@ -41,6 +41,6 @@ val type_param :
 
 val xrefs : (XRefTarget.t * Pos.t list) Fact_id.Map.t -> XRef.t list
 
-val hint_xrefs : (XRefTarget.t * Util.pos list) list -> XRef.t list
+val hint_xrefs : (XRefTarget.t * Pretty.pos list) list -> XRef.t list
 
 val module_membership : Fact_id.t -> internal:bool -> ModuleMembership.t

@@ -88,3 +88,10 @@ struct No_effect {
   @java.FieldUseUnmangledName
   2: i32 aCamelI32;
 }
+
+const MyStruct MY_CONSTANT = {
+  "intField": 0,
+  "stringField": "yarn",
+  "detailField": "the devil",
+  "detailMap": {},
+};

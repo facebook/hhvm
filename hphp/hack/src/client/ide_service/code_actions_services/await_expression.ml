@@ -215,13 +215,14 @@ let edits_of_candidate ctx entry { expr_pos } : Code_action_types.edit list =
   let source_text = Ast_provider.compute_source_text ~entry in
   let positioned_tree = Ast_provider.compute_cst ~ctx ~entry in
 
+  let text =
+    let expr_text = Full_fidelity_source_text.sub_of_pos source_text expr_pos in
+    Printf.sprintf "(await %s)" expr_text
+  in
+
   find_modifier_and_signature_edits path source_text positioned_tree expr_pos
   |> Option.value ~default:[]
-  |> ( @ )
-       [
-         Code_action_types.
-           { pos = Pos.shrink_to_start expr_pos; text = "await " };
-       ]
+  |> ( @ ) [Code_action_types.{ pos = expr_pos; text }]
 
 let refactor_of_candidate ctx entry candidate =
   let edits =

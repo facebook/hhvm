@@ -12,8 +12,8 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"await ",
-          "range":{"end":{"character":25,"line":9},"start":{"character":25,"line":9}}
+          "newText":"(await gen_int())",
+          "range":{"end":{"character":34,"line":9},"start":{"character":25,"line":9}}
         },
         {
           "newText":"async ",
@@ -37,7 +37,7 @@ async function gen_int(): Awaitable<int> {
 function example(): void {
 async   // The refactor should not chang ethe return type of this lambda:
   (): Awaitable<mixed> ==> {
-    $_ = /*range-start*/ await gen_int()/*range-end*/ + 3;
+    $_ = /*range-start*/ (await gen_int())/*range-end*/ + 3;
   };
 }
 

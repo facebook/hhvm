@@ -10,8 +10,8 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"await ",
-          "range":{"end":{"character":16,"line":8},"start":{"character":16,"line":8}}
+          "newText":"(await gen_int())",
+          "range":{"end":{"character":25,"line":8},"start":{"character":16,"line":8}}
         },
         {
           "newText":"Awaitable<mixed>",
@@ -38,7 +38,7 @@ async function gen_int(): Awaitable<int> {
 
 class A {
   public async function repro(): Awaitable<mixed> {
-    return (int)await gen_int() + 3;
+    return (int)(await gen_int()) + 3;
             //  ^ at-caret should be a quickfix (not a refactoring)
   }
 }

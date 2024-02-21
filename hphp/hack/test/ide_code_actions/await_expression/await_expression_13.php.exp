@@ -11,8 +11,8 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"await ",
-          "range":{"end":{"character":17,"line":14},"start":{"character":17,"line":14}}
+          "newText":"(await gen_foo())",
+          "range":{"end":{"character":26,"line":14},"start":{"character":17,"line":14}}
         },
         {
           "newText":"Awaitable<void>",
@@ -45,6 +45,6 @@ async function gen_foo(): Awaitable<Foo> {
 
 async function foo(): Awaitable<void> {
   // The refactoring should generate `(await gen_foo())->meth()`
-  /*range-start*/await gen_foo()/*range-end*/->meth();
+  /*range-start*/(await gen_foo())/*range-end*/->meth();
 }
 

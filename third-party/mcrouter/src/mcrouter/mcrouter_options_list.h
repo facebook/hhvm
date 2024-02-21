@@ -926,11 +926,11 @@ MCROUTER_OPTION_INTEGER(
 
 MCROUTER_OPTION_INTEGER(
     uint32_t,
-    proxy_cpu_monitor_ms,
+    proxy_cpu_interval_ms,
     0,
-    "proxy-cpu-monitor-ms",
+    "proxy-cpu-interval-ms",
     no_short,
-    "Measure proxy CPU utilization every proxy_cpu_monitor_ms milliseconds. "
+    "Measure proxy CPU utilization every proxy_cpu_interval_ms milliseconds. "
     "0 means disabled.")
 
 #ifdef ADDITIONAL_OPTIONS_FILE

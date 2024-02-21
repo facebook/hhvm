@@ -355,8 +355,11 @@ ServerStatusReport ServerStats::ReportStatus() {
 
   time_t now = time(nullptr);
   status.process.now = (int64_t)now;
-  status.process.start = HttpServer::StartTime;
-  status.process.up = now - HttpServer::StartTime;
+
+  // Match behavior of HHVM_FN(server_uptime) and return -1 if the server has
+  // not started yet.
+  status.process.start = HttpServer::StartTime == 0 ? -1  : HttpServer::StartTime;
+  status.process.up = HttpServer::StartTime == 0 ? -1 : (now - HttpServer::StartTime);
 
   Lock lock(s_lock, false);
   timeval current;
@@ -458,9 +461,19 @@ std::string ServerStats::ReportStatus(Writer::Format format) {
   up.tv_usec = 0;
   w->writeEntry("now", req::make<DateTime>(status.process.now)->
                        toString(DateTime::DateFormatCookie).data());
-  w->writeEntry("start", req::make<DateTime>(status.process.start)->
-                         toString(DateTime::DateFormatCookie).data());
+  if (status.process.up == -1) {
+    w->writeEntry("start", "server not started");
+  } else {
+    w->writeEntry("start", req::make<DateTime>(status.process.start)->
+                          toString(DateTime::DateFormatCookie).data());
+  }
+
+  // TODO(jtwarren): Deprecate this field (up) once we confirm there are no
+  // usages and replace with "uptime" which is more deterministic and more
+  // easily parsed.
   w->writeEntry("up", format_duration(up));
+  w->writeEntry("uptime", status.process.up);
+
   w->endObject("process");
 
   w->beginList("threads");

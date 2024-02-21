@@ -74,7 +74,7 @@ let find_candidate ctx tast selection : candidate option =
   in
   visitor#go ctx tast
 
-let find_modifier_and_signature_edits path source_text positioned_tree pos :
+let calc_modifier_and_signature_edits path source_text positioned_tree pos :
     Code_action_types.edit list option =
   let module Syn = Full_fidelity_positioned_syntax in
   let open Option.Let_syntax in
@@ -220,9 +220,11 @@ let edits_of_candidate ctx entry { expr_pos } : Code_action_types.edit list =
     Printf.sprintf "(await %s)" expr_text
   in
 
-  find_modifier_and_signature_edits path source_text positioned_tree expr_pos
-  |> Option.value ~default:[]
-  |> ( @ ) [Code_action_types.{ pos = expr_pos; text }]
+  let modifier_and_signature_edits =
+    calc_modifier_and_signature_edits path source_text positioned_tree expr_pos
+    |> Option.value ~default:[]
+  in
+  modifier_and_signature_edits @ [Code_action_types.{ pos = expr_pos; text }]
 
 let refactor_of_candidate ctx entry candidate =
   let edits =

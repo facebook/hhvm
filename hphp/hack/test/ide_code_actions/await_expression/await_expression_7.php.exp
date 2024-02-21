@@ -11,12 +11,12 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"(await gen_int())",
-          "range":{"end":{"character":35,"line":10},"start":{"character":26,"line":10}}
-        },
-        {
           "newText":"async ",
           "range":{"end":{"character":11,"line":9},"start":{"character":11,"line":9}}
+        },
+        {
+          "newText":"(await gen_int())",
+          "range":{"end":{"character":35,"line":10},"start":{"character":26,"line":10}}
         }
       ]
     }

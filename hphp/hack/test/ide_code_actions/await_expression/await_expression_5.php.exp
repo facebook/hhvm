@@ -10,16 +10,16 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"(await gen_int())",
-          "range":{"end":{"character":23,"line":8},"start":{"character":14,"line":8}}
-        },
-        {
           "newText":"Awaitable<mixed>",
           "range":{"end":{"character":23,"line":7},"start":{"character":18,"line":7}}
         },
         {
           "newText":"async ",
           "range":{"end":{"character":0,"line":7},"start":{"character":0,"line":7}}
+        },
+        {
+          "newText":"(await gen_int())",
+          "range":{"end":{"character":23,"line":8},"start":{"character":14,"line":8}}
         }
       ]
     }

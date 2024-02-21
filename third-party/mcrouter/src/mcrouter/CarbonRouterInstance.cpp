@@ -46,30 +46,41 @@ CpuStatsWorker::CpuStatsWorker(
     std::chrono::milliseconds timeIntervalMs,
     std::shared_ptr<folly::FunctionScheduler> scheduler,
     const folly::IOThreadPoolExecutorBase& proxyThreads)
-    : scheduler_(scheduler),
+    : timeIntervalMs_(timeIntervalMs),
+      scheduler_(scheduler),
       startMs_(std::chrono::steady_clock::time_point::min()),
-      proxyThreads_(proxyThreads) {
-  if (timeIntervalMs.count() > 0 && scheduler) {
-    scheduler->addFunction(
-        [this]() { this->calculateCpuStats(); },
-        timeIntervalMs, /* monitoring interval in ms */
-        kCpuStatsWorkerName_,
-        std::chrono::milliseconds{
-            kWorkerStartDelayMs_} /* start delay in ms */);
+      proxyThreads_(proxyThreads) {}
+
+void CpuStatsWorker::schedule(bool enable) {
+  std::lock_guard<std::mutex> lock(mx_);
+  if (auto scheduler = scheduler_.lock()) {
+    if (enable) {
+      if (timeIntervalMs_.count() > 0 && !scheduled_.exchange(true)) {
+        scheduler->addFunction(
+            [this]() { this->calculateCpuStats(); },
+            timeIntervalMs_, /* monitoring interval in ms */
+            kCpuStatsWorkerName_,
+            std::chrono::milliseconds{
+                kWorkerStartDelayMs_} /* start delay in ms */);
+      }
+    } else {
+      if (scheduled_.exchange(false)) {
+        scheduler->cancelFunctionAndWait(kCpuStatsWorkerName_);
+        avgCpu_ = 0;
+        firstRun_ = true;
+      }
+    }
   }
 }
 
 CpuStatsWorker::~CpuStatsWorker() {
-  if (auto scheduler = scheduler_.lock()) {
-    scheduler->cancelFunctionAndWait(kCpuStatsWorkerName_);
-  }
+  schedule(false);
 }
 
 void CpuStatsWorker::calculateCpuStats() {
   auto end = std::chrono::steady_clock::now();
   auto currUsedCpuTime = proxyThreads_.getUsedCpuTime();
-  if (usedCpuTime_.count() > 0 &&
-      startMs_ > std::chrono::steady_clock::time_point::min()) {
+  if (!firstRun_.exchange(false)) {
     auto timeDeltaNs =
         std::chrono::duration_cast<std::chrono::nanoseconds>(end - startMs_)
             .count();

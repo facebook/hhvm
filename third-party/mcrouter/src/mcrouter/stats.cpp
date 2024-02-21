@@ -592,6 +592,10 @@ void prepare_stats(CarbonRouterInstanceBase& router, stat_t* stats) {
     if (router.opts().proxy_cpu_monitor_ms > 0) {
       stat_set(stats, proxy_cpu_stat, router.getProxyCpu());
     }
+    stat_set(
+        stats,
+        proxy_cpu_enabled_stat,
+        static_cast<uint64_t>(router.proxyCpuEnabled() ? 1 : 0));
     stat_div_internal(stats, duration_us_stat, router.opts().num_proxies);
     stat_div_internal(stats, duration_get_us_stat, router.opts().num_proxies);
     stat_div_internal(

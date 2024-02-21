@@ -150,6 +150,8 @@ STUI(fibers_stack_high_watermark, 0, 0)
 STUI(num_proxies, 0, 1)
 // Average CPU across proxies
 STUI(proxy_cpu, 0, 1)
+// Proxy cpu monitor enabled
+STUI(proxy_cpu_enabled, 0, 1)
 // Proxy requests that are currently being routed.
 STUI(proxy_reqs_processing, 0, 1)
 // Proxy requests queued up and not routed yet

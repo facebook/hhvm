@@ -132,6 +132,10 @@ ProxyConfig<RouterInfo>::ProxyConfig(
       readBool("enable_odsl_scuba", false);
   proxy.router().runtimeFeatures_.enableOdslODS =
       readBool("enable_odsl_ods", false);
+  proxy.router().runtimeFeatures_.enableCpuMonitor =
+      readBool("enable_cpu_monitor", false);
+  proxy.router().scheduleStatsCpuWorker(
+      proxy.router().runtimeFeatures_.enableCpuMonitor);
 
   proxyRoute_ = std::make_shared<ProxyRoute<RouterInfo>>(
       proxy,

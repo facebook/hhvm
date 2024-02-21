@@ -56,8 +56,27 @@ class CpuStatsWorker {
     return avgCpu_;
   }
 
+  /**
+   * Schedules/deschedules the CpuStatsWorker
+   *
+   * @param enable If true, the worker is scheduled if not already running.
+   *               If false, the worker is descheduled if it is running.
+   **/
+  void schedule(bool enable);
+
+  /**
+   * Returns true if the CpuStatsWorker is scheduled, otherwise false.
+   */
+  bool isScheduled() {
+    return scheduled_;
+  }
+
  private:
-  size_t avgCpu_{0};
+  mutable std::mutex mx_;
+  std::atomic<size_t> avgCpu_{0};
+  std::chrono::milliseconds timeIntervalMs_{0};
+  std::atomic<bool> scheduled_{false};
+  std::atomic<bool> firstRun_{true};
   std::weak_ptr<folly::FunctionScheduler> scheduler_;
   std::chrono::steady_clock::time_point startMs_;
   std::chrono::nanoseconds usedCpuTime_{0};
@@ -179,6 +198,20 @@ class CarbonRouterInstance
 
   size_t getProxyCpu() const override final {
     return cpuStatsWorker_ ? cpuStatsWorker_->getAvgCpu() : 0;
+  }
+
+  bool proxyCpuEnabled() const override final {
+    return cpuStatsWorker_ ? cpuStatsWorker_->isScheduled() : false;
+  }
+
+  /**
+   * Schedules CPU stats worker thread to measure CPU utilization of the proxy
+   * threads
+   */
+  void scheduleStatsCpuWorker(bool enable) override {
+    if (cpuStatsWorker_) {
+      cpuStatsWorker_->schedule(enable);
+    }
   }
 
   /**

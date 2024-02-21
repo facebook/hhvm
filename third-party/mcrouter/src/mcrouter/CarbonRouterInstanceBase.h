@@ -210,6 +210,17 @@ class CarbonRouterInstanceBase {
   virtual size_t getProxyCpu() const = 0;
 
   /**
+   * Returns true if proxy cpu monitoring is enabled, otherwise false
+   */
+  virtual bool proxyCpuEnabled() const = 0;
+
+  /**
+   * Schedules CPU stats worker thread to measure CPU utilization of the proxy
+   * threads
+   */
+  virtual void scheduleStatsCpuWorker(bool enable) = 0;
+
+  /**
    * Bump and return the index of the next proxy to be used by clients.
    */
   size_t nextProxyIndex();
@@ -250,6 +261,7 @@ class CarbonRouterInstanceBase {
   struct RuntimeFeatures {
     std::atomic<bool> enableOdslScuba = false;
     std::atomic<bool> enableOdslODS = false;
+    std::atomic<bool> enableCpuMonitor = false;
   };
   RuntimeFeatures runtimeFeatures_;
 

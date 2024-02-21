@@ -64,6 +64,7 @@ struct HostHealthMonitor {
   HealthLevel m_status{HealthLevel::Bold};
   std::chrono::steady_clock::time_point m_statusTime;
   ServiceData::ExportedTimeSeries* m_healthLevelCounter{nullptr};
+  ServiceData::ExportedTimeSeries* m_illnessLevelCounter{nullptr};
   std::mutex m_condvar_lock;
   std::condition_variable m_condition;
   std::atomic_bool m_stopped{true};

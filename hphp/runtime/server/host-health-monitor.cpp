@@ -110,6 +110,12 @@ void HostHealthMonitor::monitor() {
                                   {ServiceData::StatsType::AVG},
                                   {std::chrono::seconds(5),
                                    std::chrono::seconds(60)});
+  // This is invert of health.level, going from 0 to 100
+  m_illnessLevelCounter =
+    ServiceData::createTimeSeries("illness.level",
+                                  {ServiceData::StatsType::AVG},
+                                  {std::chrono::seconds(5),
+                                   std::chrono::seconds(60)});
   m_stopped.store(false, std::memory_order_relaxed);
   std::unique_lock<std::mutex> guard(m_condvar_lock);
   std::chrono::milliseconds dura(MaxUpdatePeriod);
@@ -132,7 +138,9 @@ void HostHealthMonitor::monitor() {
       }
     }
     if (notify) notifyObservers(newStatus);
-    m_healthLevelCounter->addValue(healthLevelToInt(m_status));
+    const auto healthLevel = healthLevelToInt(m_status);
+    m_healthLevelCounter->addValue(healthLevel);
+    m_illnessLevelCounter->addValue(100 /* max health */ - healthLevel);
     ProcStatus::checkUpdate(ProcStatusUpdateSeconds);
     next += dura;
     auto const now = std::chrono::steady_clock::now();

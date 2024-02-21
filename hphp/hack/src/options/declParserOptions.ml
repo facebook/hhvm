@@ -16,6 +16,7 @@ type t = {
   hhvm_compat_mode: bool;
   keep_user_attributes: bool;
   include_assignment_values: bool;
+  stack_size: int;
 }
 [@@deriving show]
 
@@ -32,6 +33,7 @@ let from_parser_options popt =
     hhvm_compat_mode = false;
     keep_user_attributes = popt.po_keep_user_attributes;
     include_assignment_values = false;
+    stack_size = popt.po_stack_size;
   }
 
 let default = from_parser_options ParserOptions.default

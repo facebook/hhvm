@@ -134,6 +134,8 @@ let disallow_direct_superglobals_refs po =
 let with_disallow_direct_superglobals_refs po b =
   { po with GlobalOptions.po_disallow_direct_superglobals_refs = b }
 
+let with_stack_size po i = { po with GlobalOptions.po_stack_size = i }
+
 let make
     ~auto_namespace_map
     ~codegen
@@ -154,7 +156,8 @@ let make
     ~disable_hh_ignore_error
     ~interpret_soft_types_as_like_types
     ~is_systemlib
-    ~disallow_direct_superglobals_refs =
+    ~disallow_direct_superglobals_refs
+    ~stack_size =
   GlobalOptions.
     {
       default with
@@ -178,6 +181,7 @@ let make
       po_interpret_soft_types_as_like_types = interpret_soft_types_as_like_types;
       tco_is_systemlib = is_systemlib;
       po_disallow_direct_superglobals_refs = disallow_direct_superglobals_refs;
+      po_stack_size = stack_size;
     }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)

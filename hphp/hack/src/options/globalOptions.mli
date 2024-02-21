@@ -303,6 +303,8 @@ type t = {
   tco_autocomplete_sort_text: bool;
   po_nameof_precedence: bool;  (** Make nameof bind tighter *)
   po_strict_utf8: bool;  (** Require utf8 in source files *)
+  po_stack_size: int;
+      (** Stack size to use for parallel workers inside the parser. *)
 }
 [@@deriving eq, show]
 
@@ -433,6 +435,7 @@ val set :
   ?tco_autocomplete_sort_text:bool ->
   ?po_nameof_precedence:bool ->
   ?po_strict_utf8:bool ->
+  ?po_stack_size:int ->
   t ->
   t
 

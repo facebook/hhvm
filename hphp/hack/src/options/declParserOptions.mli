@@ -16,6 +16,7 @@ type t = {
   hhvm_compat_mode: bool;
   keep_user_attributes: bool;
   include_assignment_values: bool;
+  stack_size: int;  (** Stack size to for the parallel workers *)
 }
 [@@deriving show]
 

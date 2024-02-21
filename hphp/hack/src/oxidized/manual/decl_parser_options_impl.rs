@@ -26,6 +26,7 @@ impl DeclParserOptions {
             hhvm_compat_mode: false,
             keep_user_attributes: false,
             include_assignment_values: false,
+            stack_size: opts.po_stack_size,
         }
     }
 }

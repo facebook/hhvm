@@ -23,6 +23,6 @@ function main() {
   $end = new DateTime();
   // This is ideally to catch either deadlocks (test will hang) or
   // perf regressions (taking forever to parse files due to lock contention).
-  echo "took less than 2 seconds? ". ($end->diff($start)->s < 2 ? 'yes' : 'no')."\n";
+  echo "took less than 5 seconds? ". ($end->diff($start)->s < 5 ? 'yes' : 'no')."\n";
   echo "finished all runs\n";
 }

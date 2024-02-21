@@ -83,10 +83,10 @@ pub fn emit_modules_from_program<'a, 'arena, 'decl>(
 pub fn emit_module_use_from_program<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     prog: &[ast::Def],
-) -> Maybe<Str<'arena>> {
+) -> Maybe<ModuleName<'arena>> {
     for node in prog.iter() {
         if let ast::Def::SetModule(s) = node {
-            return Maybe::Just(Str::new_str(e.alloc, &s.1));
+            return Maybe::Just(ModuleName::new(Str::new_str(e.alloc, &s.1)));
         }
     }
     Maybe::Nothing

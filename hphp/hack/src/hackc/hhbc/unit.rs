@@ -15,6 +15,7 @@ use crate::Constant;
 use crate::FatalOp;
 use crate::Function;
 use crate::Module;
+use crate::ModuleName;
 use crate::SrcLoc;
 use crate::SymbolRefs;
 use crate::Typedef;
@@ -28,7 +29,7 @@ pub struct Unit<'arena> {
     pub modules: Vector<Module<'arena>>,
     pub typedefs: Vector<Typedef<'arena>>,
     pub file_attributes: Vector<Attribute<'arena>>,
-    pub module_use: Maybe<Str<'arena>>,
+    pub module_use: Maybe<ModuleName<'arena>>,
     pub symbol_refs: SymbolRefs<'arena>,
     pub constants: Vector<Constant<'arena>>,
     pub fatal: Maybe<Fatal<'arena>>,

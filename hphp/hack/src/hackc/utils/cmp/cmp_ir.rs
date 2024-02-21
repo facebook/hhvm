@@ -1933,7 +1933,10 @@ fn cmp_unit(a_unit: &Unit<'_>, b_unit: &Unit<'_>) -> Result {
     )
     .qualified("modules")?;
 
-    cmp_option(a_module_use.as_ref(), b_module_use.as_ref(), cmp_eq).qualified("module_use")?;
+    cmp_option(a_module_use.as_ref(), b_module_use.as_ref(), |a, b| {
+        cmp_id((a.id, a_strings), (b.id, b_strings))
+    })
+    .qualified("module_use")?;
 
     cmp_symbol_refs(a_symbol_refs, b_symbol_refs).qualified("symbol_refs")?;
 

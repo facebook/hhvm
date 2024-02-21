@@ -1388,9 +1388,9 @@ void translateConstant(TranslationState& ts, const hhbc::Constant& c) {
   ts.ue->addConstant(constant);
 }
 
-void translateModuleUse(TranslationState& ts, const Optional<Str>& name) {
+void translateModuleUse(TranslationState& ts, const Optional<ModuleName>& name) {
   if (!name) return;
-  ts.ue->m_moduleName = toStaticString(name.value());
+  ts.ue->m_moduleName = toStaticString(name.value()._0);
 }
 
 void translateRuleName(VMCompactVector<LowStringPtr>& names, Str name) {

@@ -57,7 +57,10 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Un
         })
         .collect::<Vec<_>>()
         .into();
-    unit.module_use = ir_unit.module_use.into();
+    unit.module_use = ir_unit
+        .module_use
+        .map(|id| strings.lookup_module_name(id))
+        .into();
     unit.symbol_refs = convert_symbol_refs(&ir_unit.symbol_refs);
 
     if let Some(ir::Fatal { op, loc, message }) = ir_unit.fatal.as_ref() {

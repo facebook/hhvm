@@ -37,6 +37,7 @@ use hhbc::Label;
 use hhbc::Method;
 use hhbc::MethodFlags;
 use hhbc::Module;
+use hhbc::ModuleName;
 use hhbc::Param;
 use hhbc::Property;
 use hhbc::Pseudo;
@@ -804,10 +805,10 @@ fn print_file_attributes(ctx: &Context<'_>, w: &mut dyn Write, al: &[Attribute<'
     newline(w)
 }
 
-fn print_module_use(w: &mut dyn Write, m_opt: &Maybe<Str<'_>>) -> Result<()> {
+fn print_module_use(w: &mut dyn Write, m_opt: &Maybe<ModuleName<'_>>) -> Result<()> {
     if let Just(m) = m_opt {
         newline(w)?;
-        write_bytes!(w, ".module_use \"{}\";", m)?;
+        write_bytes!(w, ".module_use \"{}\";", m.as_bstr())?;
         newline(w)?;
     }
     Ok(())

@@ -2259,7 +2259,11 @@ pub fn print_unit(w: &mut dyn Write, unit: &Unit<'_>, verbose: bool) -> Result {
     }
 
     if let Some(module_use) = unit.module_use.as_ref() {
-        writeln!(w, "module_use {}\n", FmtEscapedString(module_use))?;
+        writeln!(
+            w,
+            "module_use {}\n",
+            FmtEscapedString(&module_use.as_bytes(strings))
+        )?;
     }
 
     for c in &unit.constants {

@@ -6,7 +6,6 @@
 use std::sync::Arc;
 
 use bstr::BString;
-use ffi::Str;
 
 use crate::func::SrcLoc;
 use crate::string_intern::StringInterner;
@@ -16,6 +15,7 @@ use crate::FatalOp;
 use crate::Function;
 use crate::HackConstant;
 use crate::Module;
+use crate::ModuleId;
 use crate::SymbolRefs;
 use crate::Typedef;
 
@@ -69,8 +69,11 @@ pub struct Unit<'a> {
     // being two separate variants.
     pub fatal: Option<Fatal>,
 
+    /// What modules are defined in this unit
     pub modules: Vec<Module>,
-    pub module_use: Option<Str<'a>>,
+
+    /// What module is this unit declared to be part of
+    pub module_use: Option<ModuleId>,
 
     /// The unit string interning table.
     pub strings: Arc<StringInterner>,

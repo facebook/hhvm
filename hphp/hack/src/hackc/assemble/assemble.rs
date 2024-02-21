@@ -19,6 +19,7 @@ use ffi::Maybe;
 use ffi::Str;
 use ffi::Vector;
 use hash::HashMap;
+use hhbc::ModuleName;
 use hhvm_types_ffi::Attr;
 use log::trace;
 use naming_special_names_rust::coeffects::Ctx;
@@ -92,7 +93,7 @@ struct UnitBuilder<'a> {
     func_refs: Option<Vec<hhbc::FunctionName<'a>>>,
     funcs: Vec<hhbc::Function<'a>>,
     include_refs: Option<Vec<hhbc::IncludePath<'a>>>,
-    module_use: Option<Str<'a>>,
+    module_use: Option<ModuleName<'a>>,
     modules: Vec<hhbc::Module<'a>>,
     type_constants: Vec<hhbc::TypeConstant<'a>>,
     typedefs: Vec<hhbc::Typedef<'a>>,
@@ -271,9 +272,12 @@ fn assemble_module<'arena>(
 fn assemble_module_use<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-) -> Result<Str<'arena>> {
+) -> Result<ModuleName<'arena>> {
     parse!(token_iter, ".module_use" <name:string> ";");
-    let name = Str::new_slice(alloc, escaper::unquote_slice(name.as_bytes()));
+    let name = ModuleName::new(Str::new_slice(
+        alloc,
+        escaper::unquote_slice(name.as_bytes()),
+    ));
     Ok(name)
 }
 

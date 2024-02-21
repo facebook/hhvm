@@ -76,7 +76,10 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit<'a> {
         fatal: Default::default(),
         file_attributes,
         functions: Default::default(),
-        module_use: unit.module_use.into(),
+        module_use: unit
+            .module_use
+            .map(|name| ir::ModuleId::from_hhbc(name, &strings))
+            .into(),
         modules,
         strings,
         symbol_refs: unit.symbol_refs.clone(),

@@ -20,6 +20,7 @@ use ir_core::IncludePath;
 use ir_core::Method;
 use ir_core::MethodId;
 use ir_core::Module;
+use ir_core::ModuleId;
 use ir_core::SrcLoc;
 use ir_core::StringInterner;
 use ir_core::Typedef;
@@ -274,9 +275,10 @@ impl<'a> UnitParser<'a> {
     }
 
     fn parse_module_use(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
-        let module_use = tokenizer
-            .expect_any_string()?
-            .unescaped_bump_str(self.alloc)?;
+        let module_use = ModuleId::from_bytes(
+            &tokenizer.expect_any_string()?.unescaped_string()?,
+            &self.unit.strings,
+        );
         self.unit.module_use = Some(module_use);
         Ok(())
     }

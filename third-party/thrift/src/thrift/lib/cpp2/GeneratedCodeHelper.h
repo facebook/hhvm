@@ -192,7 +192,7 @@ struct FieldData {
     if constexpr (std::is_void_v<Tag>) {
       return Ops::thriftType();
     } else {
-      return op::detail::typeTagToTType<Tag>;
+      return op::typeTagToTType<Tag>;
     }
   }
 };

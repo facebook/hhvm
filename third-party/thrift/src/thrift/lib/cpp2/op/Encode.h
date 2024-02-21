@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/op/detail/Encode.h>
 
 namespace apache {
@@ -38,6 +39,11 @@ inline constexpr detail::Encode<Tag> encode{};
 /// For example: decode<type::int16_t>(prot, i); // decode to variable i
 template <typename Tag>
 inline constexpr detail::Decode<Tag> decode{};
+
+// Converts from a type tag to a wire type used on the protocol level.
+template <typename Tag>
+inline constexpr apache::thrift::protocol::TType typeTagToTType =
+    detail::typeTagToTType<Tag>;
 
 } // namespace op
 } // namespace thrift

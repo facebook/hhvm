@@ -19,8 +19,8 @@
 
 #include <string>
 
-#include <folly/dynamic.h>
-#include <folly/DynamicConverter.h>
+#include <folly/json/dynamic.h>
+#include <folly/json/DynamicConverter.h>
 
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"

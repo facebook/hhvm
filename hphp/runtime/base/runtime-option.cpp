@@ -89,7 +89,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <folly/CPortability.h>
 #include <folly/Conv.h>
-#include <folly/DynamicConverter.h>
+#include <folly/json/DynamicConverter.h>
 #include <folly/FileUtil.h>
 #include <folly/String.h>
 #include <folly/portability/SysResource.h>

@@ -30,7 +30,7 @@
 #include "hphp/util/process.h"
 #include "hphp/util/timer.h"
 
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 
 namespace HPHP {
 namespace VSDEBUG {

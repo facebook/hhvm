@@ -22,7 +22,7 @@
 
 #include <fmt/format.h>
 #include <folly/Format.h>
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 #include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
 
 namespace HPHP {

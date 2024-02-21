@@ -43,7 +43,7 @@
 #include "hphp/util/trace.h"
 
 #include <folly/gen/Base.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 
 TRACE_SET_MOD(mcg);
 

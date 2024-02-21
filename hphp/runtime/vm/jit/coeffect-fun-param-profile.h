@@ -21,7 +21,7 @@
 
 #include "hphp/runtime/base/typed-value.h"
 
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 
 namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////

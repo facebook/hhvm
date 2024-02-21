@@ -35,8 +35,8 @@
 #include <folly/Format.h>
 #include <folly/ScopeGuard.h>
 #include <folly/container/F14Map.h>
-#include <folly/dynamic.h>
-#include <folly/json.h>
+#include <folly/json/dynamic.h>
+#include <folly/json/json.h>
 #include <folly/logging/LogStreamProcessor.h>
 #include <folly/logging/xlog.h>
 

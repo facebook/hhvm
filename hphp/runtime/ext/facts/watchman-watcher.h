@@ -18,7 +18,7 @@
 
 #include <memory>
 
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 
 #include "hphp/runtime/base/watchman.h"
 #include "hphp/runtime/ext/facts/watcher.h"

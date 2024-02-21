@@ -6,8 +6,8 @@
 #include <utility>
 #include <vector>
 
-#include <folly/dynamic.h>
 #include <folly/hash/Hash.h>
+#include <folly/json/dynamic.h>
 
 #include "hphp/runtime/ext/facts/symbol-types.h"
 #include "hphp/util/hash-map.h"

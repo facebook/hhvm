@@ -21,8 +21,8 @@
 #include <fstream>
 #include <optional>
 
-#include <folly/dynamic.h>
-#include <folly/json.h>
+#include <folly/json/dynamic.h>
+#include <folly/json/json.h>
 #include <sys/stat.h>
 
 #include "hphp/runtime/base/array-data.h"

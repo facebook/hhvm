@@ -19,7 +19,7 @@
 #include <iostream>
 #include <stack>
 
-#include <folly/json.h>
+#include <folly/json/json.h>
 #include <folly/Range.h>
 #include <folly/String.h>
 

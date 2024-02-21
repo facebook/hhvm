@@ -19,7 +19,7 @@
 #include <filesystem>
 #include <memory>
 
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/ext/facts/autoload-db.h"

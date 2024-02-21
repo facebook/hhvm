@@ -75,7 +75,7 @@
 #include <folly/Conv.h>
 #include <folly/File.h>
 #include <folly/FileUtil.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 #include <folly/Random.h>
 #include <folly/portability/Unistd.h>
 

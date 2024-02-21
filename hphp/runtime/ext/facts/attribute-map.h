@@ -21,8 +21,8 @@
 #include <utility>
 #include <vector>
 
-#include <folly/dynamic.h>
 #include <folly/hash/Hash.h>
+#include <folly/json/dynamic.h>
 
 #include "hphp/runtime/ext/facts/attribute-argument-map.h"
 #include "hphp/runtime/ext/facts/file-facts.h"

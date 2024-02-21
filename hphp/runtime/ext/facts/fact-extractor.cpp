@@ -18,9 +18,9 @@
 #include <memory>
 #include <string>
 
-#include <folly/dynamic.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/futures/Future.h>
+#include <folly/json/dynamic.h>
 #include <folly/logging/xlog.h>
 
 #include "hphp/runtime/base/configs/autoload.h" // @manual=//hphp/runtime/base/configs:autoload-header

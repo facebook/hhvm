@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 
 namespace HPHP::jit {
 

@@ -25,7 +25,7 @@
 #include <vector>
 
 #include <folly/Function.h>
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 
 #include "hphp/runtime/ext/facts/file-facts.h"
 #include "hphp/util/optional.h"

@@ -29,7 +29,7 @@
 #include <folly/Hash.h>
 #include <folly/concurrency/ConcurrentHashMap.h>
 #include <folly/io/async/EventBaseThread.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 #include <folly/logging/xlog.h>
 
 #include <watchman/cppclient/WatchmanClient.h>

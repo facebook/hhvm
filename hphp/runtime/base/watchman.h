@@ -23,7 +23,7 @@
 
 #include "hphp/util/optional.h"
 
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 #include <folly/futures/Future.h>
 #include <watchman/cppclient/WatchmanClient.h>
 

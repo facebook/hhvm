@@ -25,8 +25,8 @@
 
 #include "hphp/hack/src/package/ffi_bridge/package_ffi.rs.h"
 
-#include <folly/dynamic.h>
-#include <folly/json.h>
+#include <folly/json/dynamic.h>
+#include <folly/json/json.h>
 #include <fstream>
 
 namespace HPHP {

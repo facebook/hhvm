@@ -27,7 +27,7 @@
 #include <folly/executors/GlobalExecutor.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/futures/FutureSplitter.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/hash-map.h"

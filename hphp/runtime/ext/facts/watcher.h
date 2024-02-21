@@ -23,8 +23,8 @@
 
 #include <folly/Executor.h>
 #include <folly/Unit.h>
-#include <folly/dynamic.h>
 #include <folly/futures/Future.h>
+#include <folly/json/dynamic.h>
 
 #include "hphp/runtime/ext/facts/file-facts.h"
 #include "hphp/util/optional.h"

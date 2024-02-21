@@ -20,7 +20,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <folly/json.h>
+#include <folly/json/json.h>
 #include <folly/Random.h>
 #include <folly/synchronization/AtomicNotification.h>
 

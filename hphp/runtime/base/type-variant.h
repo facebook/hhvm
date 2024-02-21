@@ -33,7 +33,7 @@
 #include <algorithm>
 #include <type_traits>
 
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

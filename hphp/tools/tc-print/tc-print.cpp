@@ -29,9 +29,9 @@
 #include <boost/uuid/uuid_generators.hpp>
 
 #include <folly/Format.h>
-#include <folly/dynamic.h>
-#include <folly/DynamicConverter.h>
-#include <folly/json.h>
+#include <folly/json/dynamic.h>
+#include <folly/json/DynamicConverter.h>
+#include <folly/json/json.h>
 #include <folly/Singleton.h>
 
 #include "hphp/util/build-info.h"

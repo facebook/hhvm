@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 #include <folly/futures/Future.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 #include <folly/Range.h>
 
 namespace HPHP {

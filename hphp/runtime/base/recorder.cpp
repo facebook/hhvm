@@ -25,7 +25,7 @@
 #include <stdexcept>
 #include <string_view>
 
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 #include <folly/String.h>
 #include <folly/Random.h>
 #include <sys/stat.h>

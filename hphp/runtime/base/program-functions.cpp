@@ -126,7 +126,7 @@
 #include "hphp/zend/zend-strtod.h"
 
 #include <folly/CPortability.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 #include <folly/Portability.h>
 #include <folly/Random.h>
 #include <folly/Range.h>

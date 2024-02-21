@@ -25,7 +25,7 @@
 #include <boost/container/flat_set.hpp>
 #include <memory>
 #include <sys/stat.h>
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/configs/autoload.h"

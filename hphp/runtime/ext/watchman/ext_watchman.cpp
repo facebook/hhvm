@@ -30,14 +30,14 @@
 #include <utility>
 #include <vector>
 
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 #include <folly/ExceptionWrapper.h>
 #include <folly/Executor.h>
 #include <folly/Format.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 
 #include <watchman/cppclient/WatchmanClient.h>
 

@@ -21,7 +21,7 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <folly/Random.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/stack-trace.h"

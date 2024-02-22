@@ -49,6 +49,10 @@ class HQMultiCodec : public HQControlCodec {
     return true;
   }
 
+  void setStrictValidation(bool strict) {
+    strictValidation_ = strict;
+  }
+
   bool isStreamIngressEgressAllowed(StreamID streamId) const {
     CHECK(transportDirection_ == TransportDirection::DOWNSTREAM);
     return streamId < egressGoawayAck_;
@@ -73,6 +77,7 @@ class HQMultiCodec : public HQControlCodec {
                                                         settings_));
     auto& codec = res.first->second;
     codec->setCallback(callback_);
+    codec->setStrictValidation(strictValidation_);
     return *codec;
   }
 
@@ -267,6 +272,7 @@ class HQMultiCodec : public HQControlCodec {
       folly::IOBufQueue::cacheChainLength()};
   std::function<uint64_t()> qpackEncoderMaxDataFn_;
   uint64_t nextPushID_{0};
+  bool strictValidation_{true};
 };
 
 }} // namespace proxygen::hq

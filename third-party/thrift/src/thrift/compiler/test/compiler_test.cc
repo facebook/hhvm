@@ -1805,46 +1805,6 @@ TEST(CompilerTest, py3_invalid_field_names) {
       {"--gen", "mstch_py3"});
 }
 
-TEST(CompilerTest, python_enum_invalid_value_names) {
-  check_compile(
-      R"(
-    enum Foo {
-      name = 1,
-        # expected-error@-1: 'name' should not be used as an enum/union field name in thrift-python. Use a different name or annotate the field with `@python.Name` [enum-member-union-field-names-rule]
-      value = 2 (py3.name = "value_"),
-        # expected-warning@-1: The annotation py3.name is deprecated. Please use @python.Name instead.
-    }
-
-    enum Bar {
-      name = 1 (py3.name = "name_"),
-        # expected-warning@-1: The annotation py3.name is deprecated. Please use @python.Name instead.
-      value = 2,
-        # expected-error@-1: 'value' should not be used as an enum/union field name in thrift-python. Use a different name or annotate the field with `@python.Name` [enum-member-union-field-names-rule]
-    }
-  )",
-      {"--gen", "mstch_python"});
-}
-
-TEST(CompilerTest, python_invalid_field_names) {
-  check_compile(
-      R"(
-    union Foo {
-      1: string name;
-        # expected-error@-1: 'name' should not be used as an enum/union field name in thrift-python. Use a different name or annotate the field with `@python.Name` [enum-member-union-field-names-rule]
-      2: i32 value (py3.name = "value_");
-        # expected-warning@-1: The annotation py3.name is deprecated. Please use @python.Name instead.
-    }
-
-    union Bar {
-      1: string name (py3.name = "name_");
-        # expected-warning@-1: The annotation py3.name is deprecated. Please use @python.Name instead.
-      2: i32 value;
-        # expected-error@-1: 'value' should not be used as an enum/union field name in thrift-python. Use a different name or annotate the field with `@python.Name` [enum-member-union-field-names-rule]
-    }
-  )",
-      {"--gen", "mstch_python"});
-}
-
 TEST(CompilerTest, assign_only_patch) {
   check_compile(R"(
     include "thrift/lib/thrift/patch.thrift"

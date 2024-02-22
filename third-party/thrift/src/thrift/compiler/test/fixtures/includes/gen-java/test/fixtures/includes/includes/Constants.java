@@ -16,12 +16,10 @@ public final class Constants {
     private Constants() {}
 
     public static final test.fixtures.includes.includes.Included EXAMPLE_INCLUDED = construct_EXAMPLE_INCLUDED();
+
     private static test.fixtures.includes.includes.Included construct_EXAMPLE_INCLUDED() {
       return new test.fixtures.includes.includes.Included.Builder().setMyIntField(2L).setMyTransitiveField(test.fixtures.includes.transitive.Constants.EXAMPLE_FOO).build();
     }
 
-    public static final long INCLUDED_CONSTANT = construct_INCLUDED_CONSTANT();
-    private static long construct_INCLUDED_CONSTANT() {
-      return 42L;
-    }
+    public static final long INCLUDED_CONSTANT = 42L;
 }

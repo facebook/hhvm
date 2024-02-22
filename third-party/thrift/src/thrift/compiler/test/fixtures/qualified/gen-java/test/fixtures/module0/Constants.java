@@ -16,11 +16,13 @@ public final class Constants {
     private Constants() {}
 
     public static final test.fixtures.module0.Struct C0 = construct_C0();
+
     private static test.fixtures.module0.Struct construct_C0() {
       return new test.fixtures.module0.Struct.Builder().setFirst(101).setSecond("module0_str").build();
     }
 
     public static final List<test.fixtures.module0.Enum> E0S = construct_E0S();
+
     private static List<test.fixtures.module0.Enum> construct_E0S() {
       return ImmutableList.<test.fixtures.module0.Enum>builder()
         .add(test.fixtures.module0.Enum.ONE)

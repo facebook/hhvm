@@ -15,12 +15,10 @@ import java.util.*;
 public final class Constants {
     private Constants() {}
 
-    public static final int DEFAULT_PORT_NUM = construct_DEFAULT_PORT_NUM();
-    private static int construct_DEFAULT_PORT_NUM() {
-      return 3456;
-    }
+    public static final int DEFAULT_PORT_NUM = 3456;
 
     public static final test.fixtures.complex_struct.MyUnion CONST_ENUM_UNION = construct_CONST_ENUM_UNION();
+
     private static test.fixtures.complex_struct.MyUnion construct_CONST_ENUM_UNION() {
       return test.fixtures.complex_struct.MyUnion.fromMyEnum(test.fixtures.complex_struct.MyEnum.MY_VALUE2);
     }

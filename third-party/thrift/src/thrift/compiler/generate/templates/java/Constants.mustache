@@ -28,11 +28,19 @@ public final class {{program:constantClassName}} {
     private {{program:constantClassName}}() {}
     {{#program:constants}}
 
-    {{^constant:javaIgnoreConstant?}}
-    public static final {{#constant:type}}{{> Type}}{{/constant:type}} {{constant:javaCapitalName}} = construct_{{constant:javaCapitalName}}();
+    {{^constant:javaIgnoreConstant?}}{{!
+    }}{{#constant:type}}{{!
+    }}{{#type:base?}}
+    public static final {{> Type}} {{constant:javaCapitalName}} = {{#constant:value}}{{> DefaultValue}}{{/constant:value}};
+    {{/type:base?}}{{!
+    }}{{^type:base?}}
+    public static final {{> Type}} {{constant:javaCapitalName}} = construct_{{constant:javaCapitalName}}();
+
     private static {{#constant:type}}{{> Type}}{{/constant:type}} construct_{{constant:javaCapitalName}}() {
-      return {{#constant:type}}{{#constant:value}}{{> DefaultValue}}{{/constant:value}}{{/constant:type}};
+      return {{#constant:value}}{{> DefaultValue}}{{/constant:value}};
     }
-    {{/constant:javaIgnoreConstant?}}
+    {{/type:base?}}{{!
+    }}{{/constant:type}}{{!
+    }}{{/constant:javaIgnoreConstant?}}
     {{/program:constants}}
 }

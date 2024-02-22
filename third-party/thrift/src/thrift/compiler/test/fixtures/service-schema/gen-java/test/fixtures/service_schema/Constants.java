@@ -16,6 +16,7 @@ public final class Constants {
     private Constants() {}
 
     public static final com.facebook.thrift.type.Schema SCHEMA_PRIMITIVES_SERVICE = construct_SCHEMA_PRIMITIVES_SERVICE();
+
     private static com.facebook.thrift.type.Schema construct_SCHEMA_PRIMITIVES_SERVICE() {
       return new com.facebook.thrift.type.Schema.Builder().setDefinitions(ImmutableList.<com.facebook.thrift.type.Definition>builder()
         .add(com.facebook.thrift.type.Definition.fromServiceDef(new com.facebook.thrift.type.Service.Builder().setAttrs(new com.facebook.thrift.type.DefinitionAttrs.Builder().setName("PrimitivesService").setStructuredAnnotations(ImmutableSet.<Long>builder()

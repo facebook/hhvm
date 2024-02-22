@@ -16,6 +16,7 @@ public final class Constants {
     private Constants() {}
 
     public static final Map<Long, List<String>> TEST_MAP = construct_TEST_MAP();
+
     private static Map<Long, List<String>> construct_TEST_MAP() {
       return ImmutableMap.<Long, List<String>>builder()
         .put(0L, ImmutableList.<String>builder()

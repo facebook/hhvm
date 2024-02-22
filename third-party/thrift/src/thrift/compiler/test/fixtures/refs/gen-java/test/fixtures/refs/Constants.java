@@ -16,21 +16,25 @@ public final class Constants {
     private Constants() {}
 
     public static final test.fixtures.refs.StructWithRef K_STRUCT_WITH_REF = construct_K_STRUCT_WITH_REF();
+
     private static test.fixtures.refs.StructWithRef construct_K_STRUCT_WITH_REF() {
       return new test.fixtures.refs.StructWithRef.Builder().setDefField(new test.fixtures.refs.Empty.Builder().build()).setOptField(new test.fixtures.refs.Empty.Builder().build()).setReqField(new test.fixtures.refs.Empty.Builder().build()).build();
     }
 
     public static final test.fixtures.refs.StructWithRefTypeUnique K_STRUCT_WITH_REF_TYPE_UNIQUE = construct_K_STRUCT_WITH_REF_TYPE_UNIQUE();
+
     private static test.fixtures.refs.StructWithRefTypeUnique construct_K_STRUCT_WITH_REF_TYPE_UNIQUE() {
       return new test.fixtures.refs.StructWithRefTypeUnique.Builder().setDefField(new test.fixtures.refs.Empty.Builder().build()).setOptField(new test.fixtures.refs.Empty.Builder().build()).setReqField(new test.fixtures.refs.Empty.Builder().build()).build();
     }
 
     public static final test.fixtures.refs.StructWithRefTypeShared K_STRUCT_WITH_REF_TYPE_SHARED = construct_K_STRUCT_WITH_REF_TYPE_SHARED();
+
     private static test.fixtures.refs.StructWithRefTypeShared construct_K_STRUCT_WITH_REF_TYPE_SHARED() {
       return new test.fixtures.refs.StructWithRefTypeShared.Builder().setDefField(new test.fixtures.refs.Empty.Builder().build()).setOptField(new test.fixtures.refs.Empty.Builder().build()).setReqField(new test.fixtures.refs.Empty.Builder().build()).build();
     }
 
     public static final test.fixtures.refs.StructWithRefTypeSharedConst K_STRUCT_WITH_REF_TYPE_SHARED_CONST = construct_K_STRUCT_WITH_REF_TYPE_SHARED_CONST();
+
     private static test.fixtures.refs.StructWithRefTypeSharedConst construct_K_STRUCT_WITH_REF_TYPE_SHARED_CONST() {
       return new test.fixtures.refs.StructWithRefTypeSharedConst.Builder().setDefField(new test.fixtures.refs.Empty.Builder().build()).setOptField(new test.fixtures.refs.Empty.Builder().build()).setReqField(new test.fixtures.refs.Empty.Builder().build()).build();
     }

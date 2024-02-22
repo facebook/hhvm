@@ -16,11 +16,13 @@ public final class Constants {
     private Constants() {}
 
     public static final test.fixtures.swift.enumstrict.MyEnum K_ONE = construct_K_ONE();
+
     private static test.fixtures.swift.enumstrict.MyEnum construct_K_ONE() {
       return test.fixtures.swift.enumstrict.MyEnum.ONE;
     }
 
     public static final Map<test.fixtures.swift.enumstrict.MyEnum, String> ENUM_NAMES = construct_ENUM_NAMES();
+
     private static Map<test.fixtures.swift.enumstrict.MyEnum, String> construct_ENUM_NAMES() {
       return ImmutableMap.<test.fixtures.swift.enumstrict.MyEnum, String>builder()
         .put(test.fixtures.swift.enumstrict.MyEnum.ONE, "one")

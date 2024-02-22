@@ -15,22 +15,14 @@ import java.util.*;
 public final class ModuleConstants {
     private ModuleConstants() {}
 
-    public static final int MY_INT = construct_MY_INT();
-    private static int construct_MY_INT() {
-      return 1337;
-    }
+    public static final int MY_INT = 1337;
 
-    public static final String NAME = construct_NAME();
-    private static String construct_NAME() {
-      return "Mark Zuckerberg";
-    }
+    public static final String NAME = "Mark Zuckerberg";
 
-    public static final String MULTI_LINE_STRING = construct_MULTI_LINE_STRING();
-    private static String construct_MULTI_LINE_STRING() {
-      return "This\nis a\nmulti line string.\n";
-    }
+    public static final String MULTI_LINE_STRING = "This\nis a\nmulti line string.\n";
 
     public static final List<Map<String, Integer>> STATES = construct_STATES();
+
     private static List<Map<String, Integer>> construct_STATES() {
       return ImmutableList.<Map<String, Integer>>builder()
         .add(ImmutableMap.<String, Integer>builder()
@@ -45,47 +37,28 @@ public final class ModuleConstants {
         .build();
     }
 
-    public static final double X = construct_X();
-    private static double construct_X() {
-      return (double)1;
-    }
+    public static final double X = (double)1;
 
-    public static final double Y = construct_Y();
-    private static double construct_Y() {
-      return 1000000.0;
-    }
+    public static final double Y = 1000000.0;
 
-    public static final double Z = construct_Z();
-    private static double construct_Z() {
-      return (double)1000000000;
-    }
+    public static final double Z = (double)1000000000;
 
-    public static final double ZERO_DOUBLE_VALUE = construct_ZERO_DOUBLE_VALUE();
-    private static double construct_ZERO_DOUBLE_VALUE() {
-      return (double)0;
-    }
+    public static final double ZERO_DOUBLE_VALUE = (double)0;
 
-    public static final double LONG_DOUBLE_VALUE = construct_LONG_DOUBLE_VALUE();
-    private static double construct_LONG_DOUBLE_VALUE() {
-      return (double)2.59961000990301e-05;
-    }
+    public static final double LONG_DOUBLE_VALUE = (double)2.59961000990301e-05;
 
     public static final test.fixtures.constants.Company MY_COMPANY = construct_MY_COMPANY();
+
     private static test.fixtures.constants.Company construct_MY_COMPANY() {
       return test.fixtures.constants.Company.FACEBOOK;
     }
 
-    public static final String FOO = construct_FOO();
-    private static String construct_FOO() {
-      return "foo";
-    }
+    public static final String FOO = "foo";
 
-    public static final int BAR = construct_BAR();
-    private static int construct_BAR() {
-      return 42;
-    }
+    public static final int BAR = 42;
 
     public static final Map<String, String> MYMAP = construct_MYMAP();
+
     private static Map<String, String> construct_MYMAP() {
       return ImmutableMap.<String, String>builder()
         .put("keys", "values")
@@ -93,16 +66,19 @@ public final class ModuleConstants {
     }
 
     public static final test.fixtures.constants.Internship INSTAGRAM = construct_INSTAGRAM();
+
     private static test.fixtures.constants.Internship construct_INSTAGRAM() {
       return new test.fixtures.constants.Internship.Builder().setWeeks(12).setTitle("Software Engineer").setEmployer(test.fixtures.constants.Company.INSTAGRAM).setCompensation((double)1200).setSchool("Monters University").build();
     }
 
     public static final test.fixtures.constants.Internship PARTIAL_CONST = construct_PARTIAL_CONST();
+
     private static test.fixtures.constants.Internship construct_PARTIAL_CONST() {
       return new test.fixtures.constants.Internship.Builder().setWeeks(8).setTitle("Some Job").build();
     }
 
     public static final List<test.fixtures.constants.Range> K_RANGES = construct_K_RANGES();
+
     private static List<test.fixtures.constants.Range> construct_K_RANGES() {
       return ImmutableList.<test.fixtures.constants.Range>builder()
         .add(new test.fixtures.constants.Range.Builder().setMin(1).setMax(2).build())
@@ -111,6 +87,7 @@ public final class ModuleConstants {
     }
 
     public static final List<test.fixtures.constants.Internship> INTERN_LIST = construct_INTERN_LIST();
+
     private static List<test.fixtures.constants.Internship> construct_INTERN_LIST() {
       return ImmutableList.<test.fixtures.constants.Internship>builder()
         .add(test.fixtures.constants.Constants.INSTAGRAM)
@@ -119,26 +96,31 @@ public final class ModuleConstants {
     }
 
     public static final test.fixtures.constants.Struct1 POD_0 = construct_POD_0();
+
     private static test.fixtures.constants.Struct1 construct_POD_0() {
       return new test.fixtures.constants.Struct1.Builder().build();
     }
 
     public static final test.fixtures.constants.Struct1 POD_S_0 = construct_POD_S_0();
+
     private static test.fixtures.constants.Struct1 construct_POD_S_0() {
       return new test.fixtures.constants.Struct1.Builder().build();
     }
 
     public static final test.fixtures.constants.Struct1 POD_1 = construct_POD_1();
+
     private static test.fixtures.constants.Struct1 construct_POD_1() {
       return new test.fixtures.constants.Struct1.Builder().setA(10).setB("foo").build();
     }
 
     public static final test.fixtures.constants.Struct1 POD_S_1 = construct_POD_S_1();
+
     private static test.fixtures.constants.Struct1 construct_POD_S_1() {
       return new test.fixtures.constants.Struct1.Builder().setA(10).setB("foo").build();
     }
 
     public static final test.fixtures.constants.Struct2 POD_2 = construct_POD_2();
+
     private static test.fixtures.constants.Struct2 construct_POD_2() {
       return new test.fixtures.constants.Struct2.Builder().setA(98).setB("gaz").setC(new test.fixtures.constants.Struct1.Builder().setA(12).setB("bar").build()).setD(ImmutableList.<Integer>builder()
         .add(11)
@@ -148,6 +130,7 @@ public final class ModuleConstants {
     }
 
     public static final test.fixtures.constants.Struct2 POD_TRAILING_COMMAS = construct_POD_TRAILING_COMMAS();
+
     private static test.fixtures.constants.Struct2 construct_POD_TRAILING_COMMAS() {
       return new test.fixtures.constants.Struct2.Builder().setA(98).setB("gaz").setC(new test.fixtures.constants.Struct1.Builder().setA(12).setB("bar").build()).setD(ImmutableList.<Integer>builder()
         .add(11)
@@ -157,6 +140,7 @@ public final class ModuleConstants {
     }
 
     public static final test.fixtures.constants.Struct2 POD_S_2 = construct_POD_S_2();
+
     private static test.fixtures.constants.Struct2 construct_POD_S_2() {
       return new test.fixtures.constants.Struct2.Builder().setA(98).setB("gaz").setC(new test.fixtures.constants.Struct1.Builder().setA(12).setB("bar").build()).setD(ImmutableList.<Integer>builder()
         .add(11)
@@ -166,6 +150,7 @@ public final class ModuleConstants {
     }
 
     public static final test.fixtures.constants.Struct3 POD_3 = construct_POD_3();
+
     private static test.fixtures.constants.Struct3 construct_POD_3() {
       return new test.fixtures.constants.Struct3.Builder().setA("abc").setB(456).setC(new test.fixtures.constants.Struct2.Builder().setA(888).setC(new test.fixtures.constants.Struct1.Builder().setB("gaz").build()).setD(ImmutableList.<Integer>builder()
         .add(1)
@@ -175,6 +160,7 @@ public final class ModuleConstants {
     }
 
     public static final test.fixtures.constants.Struct3 POD_S_3 = construct_POD_S_3();
+
     private static test.fixtures.constants.Struct3 construct_POD_S_3() {
       return new test.fixtures.constants.Struct3.Builder().setA("abc").setB(456).setC(new test.fixtures.constants.Struct2.Builder().setA(888).setC(new test.fixtures.constants.Struct1.Builder().setB("gaz").build()).setD(ImmutableList.<Integer>builder()
         .add(1)
@@ -184,81 +170,77 @@ public final class ModuleConstants {
     }
 
     public static final test.fixtures.constants.Struct4 POD_4 = construct_POD_4();
+
     private static test.fixtures.constants.Struct4 construct_POD_4() {
       return new test.fixtures.constants.Struct4.Builder().setA(1234).setB((double)0.333).setC((byte)25).build();
     }
 
     public static final test.fixtures.constants.Union1 U_1_1 = construct_U_1_1();
+
     private static test.fixtures.constants.Union1 construct_U_1_1() {
       return test.fixtures.constants.Union1.fromI(97);
     }
 
     public static final test.fixtures.constants.Union1 U_1_2 = construct_U_1_2();
+
     private static test.fixtures.constants.Union1 construct_U_1_2() {
       return test.fixtures.constants.Union1.fromD((double)5.6);
     }
 
     public static final test.fixtures.constants.Union1 U_1_3 = construct_U_1_3();
+
     private static test.fixtures.constants.Union1 construct_U_1_3() {
       return new test.fixtures.constants.Union1();
     }
 
     public static final test.fixtures.constants.Union2 U_2_1 = construct_U_2_1();
+
     private static test.fixtures.constants.Union2 construct_U_2_1() {
       return test.fixtures.constants.Union2.fromI(51);
     }
 
     public static final test.fixtures.constants.Union2 U_2_2 = construct_U_2_2();
+
     private static test.fixtures.constants.Union2 construct_U_2_2() {
       return test.fixtures.constants.Union2.fromD((double)6.7);
     }
 
     public static final test.fixtures.constants.Union2 U_2_3 = construct_U_2_3();
+
     private static test.fixtures.constants.Union2 construct_U_2_3() {
       return test.fixtures.constants.Union2.fromS(new test.fixtures.constants.Struct1.Builder().setA(8).setB("abacabb").build());
     }
 
     public static final test.fixtures.constants.Union2 U_2_4 = construct_U_2_4();
+
     private static test.fixtures.constants.Union2 construct_U_2_4() {
       return test.fixtures.constants.Union2.fromU(test.fixtures.constants.Union1.fromI(43));
     }
 
     public static final test.fixtures.constants.Union2 U_2_5 = construct_U_2_5();
+
     private static test.fixtures.constants.Union2 construct_U_2_5() {
       return test.fixtures.constants.Union2.fromU(test.fixtures.constants.Union1.fromD((double)9.8));
     }
 
     public static final test.fixtures.constants.Union2 U_2_6 = construct_U_2_6();
+
     private static test.fixtures.constants.Union2 construct_U_2_6() {
       return test.fixtures.constants.Union2.fromU(new test.fixtures.constants.Union1());
     }
 
-    public static final String APOSTROPHE = construct_APOSTROPHE();
-    private static String construct_APOSTROPHE() {
-      return "'";
-    }
+    public static final String APOSTROPHE = "'";
 
-    public static final String TRIPLE_APOSTROPHE = construct_TRIPLE_APOSTROPHE();
-    private static String construct_TRIPLE_APOSTROPHE() {
-      return "'''";
-    }
+    public static final String TRIPLE_APOSTROPHE = "'''";
 
-    public static final String QUOTATION_MARK = construct_QUOTATION_MARK();
-    private static String construct_QUOTATION_MARK() {
-      return "\"";
-    }
+    public static final String QUOTATION_MARK = "\"";
 
-    public static final String BACKSLASH = construct_BACKSLASH();
-    private static String construct_BACKSLASH() {
-      return "\\";
-    }
+    public static final String BACKSLASH = "\\";
 
-    public static final String ESCAPED_A = construct_ESCAPED_A();
-    private static String construct_ESCAPED_A() {
-      return "a";
-    }
+    public static final String ESCAPED_A = "a";
 
     public static final Map<String, Integer> CHAR2ASCII = construct_CHAR2ASCII();
+
     private static Map<String, Integer> construct_CHAR2ASCII() {
       return ImmutableMap.<String, Integer>builder()
         .put("'", 39)
@@ -269,6 +251,7 @@ public final class ModuleConstants {
     }
 
     public static final List<String> ESCAPED_STRINGS = construct_ESCAPED_STRINGS();
+
     private static List<String> construct_ESCAPED_STRINGS() {
       return ImmutableList.<String>builder()
         .add("\001")
@@ -298,200 +281,122 @@ public final class ModuleConstants {
         .build();
     }
 
-    public static final boolean FALSE_C = construct_FALSE_C();
-    private static boolean construct_FALSE_C() {
-      return false;
-    }
+    public static final boolean FALSE_C = false;
 
-    public static final boolean TRUE_C = construct_TRUE_C();
-    private static boolean construct_TRUE_C() {
-      return true;
-    }
+    public static final boolean TRUE_C = true;
 
-    public static final byte ZERO_BYTE = construct_ZERO_BYTE();
-    private static byte construct_ZERO_BYTE() {
-      return (byte)0;
-    }
+    public static final byte ZERO_BYTE = (byte)0;
 
-    public static final short ZERO16 = construct_ZERO16();
-    private static short construct_ZERO16() {
-      return (short)0;
-    }
+    public static final short ZERO16 = (short)0;
 
-    public static final int ZERO32 = construct_ZERO32();
-    private static int construct_ZERO32() {
-      return 0;
-    }
+    public static final int ZERO32 = 0;
 
-    public static final long ZERO64 = construct_ZERO64();
-    private static long construct_ZERO64() {
-      return 0L;
-    }
+    public static final long ZERO64 = 0L;
 
-    public static final double ZERO_DOT_ZERO = construct_ZERO_DOT_ZERO();
-    private static double construct_ZERO_DOT_ZERO() {
-      return (double)0;
-    }
+    public static final double ZERO_DOT_ZERO = (double)0;
 
-    public static final String EMPTY_STRING = construct_EMPTY_STRING();
-    private static String construct_EMPTY_STRING() {
-      return "";
-    }
+    public static final String EMPTY_STRING = "";
 
     public static final List<Integer> EMPTY_INT_LIST = construct_EMPTY_INT_LIST();
+
     private static List<Integer> construct_EMPTY_INT_LIST() {
       return ImmutableList.<Integer>builder()
         .build();
     }
 
     public static final List<String> EMPTY_STRING_LIST = construct_EMPTY_STRING_LIST();
+
     private static List<String> construct_EMPTY_STRING_LIST() {
       return ImmutableList.<String>builder()
         .build();
     }
 
     public static final Set<Integer> EMPTY_INT_SET = construct_EMPTY_INT_SET();
+
     private static Set<Integer> construct_EMPTY_INT_SET() {
       return ImmutableSet.<Integer>builder()
         .build();
     }
 
     public static final Set<String> EMPTY_STRING_SET = construct_EMPTY_STRING_SET();
+
     private static Set<String> construct_EMPTY_STRING_SET() {
       return ImmutableSet.<String>builder()
         .build();
     }
 
     public static final Map<Integer, Integer> EMPTY_INT_INT_MAP = construct_EMPTY_INT_INT_MAP();
+
     private static Map<Integer, Integer> construct_EMPTY_INT_INT_MAP() {
       return ImmutableMap.<Integer, Integer>builder()
         .build();
     }
 
     public static final Map<Integer, String> EMPTY_INT_STRING_MAP = construct_EMPTY_INT_STRING_MAP();
+
     private static Map<Integer, String> construct_EMPTY_INT_STRING_MAP() {
       return ImmutableMap.<Integer, String>builder()
         .build();
     }
 
     public static final Map<String, Integer> EMPTY_STRING_INT_MAP = construct_EMPTY_STRING_INT_MAP();
+
     private static Map<String, Integer> construct_EMPTY_STRING_INT_MAP() {
       return ImmutableMap.<String, Integer>builder()
         .build();
     }
 
     public static final Map<String, String> EMPTY_STRING_STRING_MAP = construct_EMPTY_STRING_STRING_MAP();
+
     private static Map<String, String> construct_EMPTY_STRING_STRING_MAP() {
       return ImmutableMap.<String, String>builder()
         .build();
     }
 
-    public static final long MAX_INT_DEC = construct_MAX_INT_DEC();
-    private static long construct_MAX_INT_DEC() {
-      return 9223372036854775807L;
-    }
+    public static final long MAX_INT_DEC = 9223372036854775807L;
 
-    public static final long MAX_INT_OCT = construct_MAX_INT_OCT();
-    private static long construct_MAX_INT_OCT() {
-      return 9223372036854775807L;
-    }
+    public static final long MAX_INT_OCT = 9223372036854775807L;
 
-    public static final long MAX_INT_HEX = construct_MAX_INT_HEX();
-    private static long construct_MAX_INT_HEX() {
-      return 9223372036854775807L;
-    }
+    public static final long MAX_INT_HEX = 9223372036854775807L;
 
-    public static final long MAX_INT_BIN = construct_MAX_INT_BIN();
-    private static long construct_MAX_INT_BIN() {
-      return 9223372036854775807L;
-    }
+    public static final long MAX_INT_BIN = 9223372036854775807L;
 
-    public static final double MAX_DUB = construct_MAX_DUB();
-    private static double construct_MAX_DUB() {
-      return (double)1.7976931348623157e+308;
-    }
+    public static final double MAX_DUB = (double)1.7976931348623157e+308;
 
-    public static final double MIN_DUB = construct_MIN_DUB();
-    private static double construct_MIN_DUB() {
-      return (double)2.2250738585072014e-308;
-    }
+    public static final double MIN_DUB = (double)2.2250738585072014e-308;
 
-    public static final double MIN_SDUB = construct_MIN_SDUB();
-    private static double construct_MIN_SDUB() {
-      return (double)5e-324;
-    }
+    public static final double MIN_SDUB = (double)5e-324;
 
-    public static final long MAX_PINT_DEC = construct_MAX_PINT_DEC();
-    private static long construct_MAX_PINT_DEC() {
-      return 9223372036854775807L;
-    }
+    public static final long MAX_PINT_DEC = 9223372036854775807L;
 
-    public static final long MAX_PINT_OCT = construct_MAX_PINT_OCT();
-    private static long construct_MAX_PINT_OCT() {
-      return 9223372036854775807L;
-    }
+    public static final long MAX_PINT_OCT = 9223372036854775807L;
 
-    public static final long MAX_PINT_HEX = construct_MAX_PINT_HEX();
-    private static long construct_MAX_PINT_HEX() {
-      return 9223372036854775807L;
-    }
+    public static final long MAX_PINT_HEX = 9223372036854775807L;
 
-    public static final long MAX_PINT_BIN = construct_MAX_PINT_BIN();
-    private static long construct_MAX_PINT_BIN() {
-      return 9223372036854775807L;
-    }
+    public static final long MAX_PINT_BIN = 9223372036854775807L;
 
-    public static final double MAX_PDUB = construct_MAX_PDUB();
-    private static double construct_MAX_PDUB() {
-      return (double)1.7976931348623157e+308;
-    }
+    public static final double MAX_PDUB = (double)1.7976931348623157e+308;
 
-    public static final double MIN_PDUB = construct_MIN_PDUB();
-    private static double construct_MIN_PDUB() {
-      return (double)2.2250738585072014e-308;
-    }
+    public static final double MIN_PDUB = (double)2.2250738585072014e-308;
 
-    public static final double MIN_PSDUB = construct_MIN_PSDUB();
-    private static double construct_MIN_PSDUB() {
-      return (double)5e-324;
-    }
+    public static final double MIN_PSDUB = (double)5e-324;
 
-    public static final long MIN_INT_DEC = construct_MIN_INT_DEC();
-    private static long construct_MIN_INT_DEC() {
-      return -9223372036854775808L;
-    }
+    public static final long MIN_INT_DEC = -9223372036854775808L;
 
-    public static final long MIN_INT_OCT = construct_MIN_INT_OCT();
-    private static long construct_MIN_INT_OCT() {
-      return -9223372036854775808L;
-    }
+    public static final long MIN_INT_OCT = -9223372036854775808L;
 
-    public static final long MIN_INT_HEX = construct_MIN_INT_HEX();
-    private static long construct_MIN_INT_HEX() {
-      return -9223372036854775808L;
-    }
+    public static final long MIN_INT_HEX = -9223372036854775808L;
 
-    public static final long MIN_INT_BIN = construct_MIN_INT_BIN();
-    private static long construct_MIN_INT_BIN() {
-      return -9223372036854775808L;
-    }
+    public static final long MIN_INT_BIN = -9223372036854775808L;
 
-    public static final double MAX_NDUB = construct_MAX_NDUB();
-    private static double construct_MAX_NDUB() {
-      return (double)-1.7976931348623157e+308;
-    }
+    public static final double MAX_NDUB = (double)-1.7976931348623157e+308;
 
-    public static final double MIN_NDUB = construct_MIN_NDUB();
-    private static double construct_MIN_NDUB() {
-      return (double)-2.2250738585072014e-308;
-    }
+    public static final double MIN_NDUB = (double)-2.2250738585072014e-308;
 
-    public static final double MIN_NSDUB = construct_MIN_NSDUB();
-    private static double construct_MIN_NSDUB() {
-      return (double)-5e-324;
-    }
+    public static final double MIN_NSDUB = (double)-5e-324;
 
     public static final Map<Integer, Boolean> I2B = construct_I2B();
+
     private static Map<Integer, Boolean> construct_I2B() {
       return ImmutableMap.<Integer, Boolean>builder()
         .put(0, false)
@@ -502,6 +407,7 @@ public final class ModuleConstants {
     }
 
     public static final Map<Integer, Boolean> I2B_REF = construct_I2B_REF();
+
     private static Map<Integer, Boolean> construct_I2B_REF() {
       return ImmutableMap.<Integer, Boolean>builder()
         .put(0, false)

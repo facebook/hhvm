@@ -41,7 +41,7 @@ void constructionTest(
   };
   std::vector<std::pair<std::string, RouteHandle>> policies;
   for (const auto& p : route.policies) {
-    policies.emplace_back(std::string(p.first), toInt(p.second));
+    policies.emplace_back(std::string(p.key()), toInt(p.value()));
   }
 
   EXPECT_EQ(expected.wildcard, toInt(route.wildcard));

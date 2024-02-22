@@ -60,9 +60,10 @@ RoutePolicyMap<RouteHandleIf>::RoutePolicyMap(
   // Combining routes for each key
   folly::F14FastSet<std::string_view> seen;
   for (const auto& cluster : clusters) {
-    for (const auto& [key, _] : cluster->policies) {
+    for (const auto& policy : cluster->policies) {
+      std::string_view key = policy.key();
       if (seen.insert(key).second) {
-        builder.insert({key, populateRoutesForKey(key, clusters)});
+        builder.insert({std::string(key), populateRoutesForKey(key, clusters)});
       }
     }
   }
@@ -104,7 +105,7 @@ auto RoutePolicyMap<RouteHandleIf>::populateRoutesForKey(
   for (const auto& cluster : clusters) {
     auto found = cluster->policies.findPrefix(key);
     const SharedRoutePtr& ptr =
-        found == cluster->policies.end() ? cluster->wildcard : found->second;
+        found == cluster->policies.end() ? cluster->wildcard : found->value();
     if (ptr && seen.insert(ptr.get()).second) {
       res.push_back(ptr);
     }

@@ -16,7 +16,7 @@
 #include <folly/json/dynamic.h>
 
 #include "mcrouter/lib/config/RouteHandleFactory.h"
-#include "mcrouter/lib/fbi/cpp/Trie.h"
+#include "mcrouter/lib/fbi/cpp/LowerBoundPrefixMap.h"
 #include "mcrouter/lib/fbi/cpp/util.h"
 
 namespace facebook {
@@ -31,7 +31,7 @@ template <class RouteHandleIf>
 class PrefixSelectorRoute {
  public:
   /// Trie that acts like map from key prefix to corresponding RouteHandle.
-  Trie<std::shared_ptr<RouteHandleIf>> policies;
+  LowerBoundPrefixMap<std::shared_ptr<RouteHandleIf>> policies;
   /// Used when no RouteHandle found in policies
   std::shared_ptr<RouteHandleIf> wildcard;
 
@@ -64,9 +64,14 @@ class PrefixSelectorRoute {
       }
       // order is important
       std::sort(items.begin(), items.end());
+
+      typename LowerBoundPrefixMap<std::shared_ptr<RouteHandleIf>>::Builder
+          builder;
+      builder.reserve(items.size());
       for (const auto& it : items) {
-        policies.emplace(it.first, factory.create(*it.second));
+        builder.insert({std::string(it.first), factory.create(*it.second)});
       }
+      policies = std::move(builder).build();
     }
 
     if (jWildcard) {

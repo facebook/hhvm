@@ -40,9 +40,11 @@ struct MockPrefixSelectorRoute {
       res->wildcard = kRouteHandles[*wildcard];
     }
 
+    LowerBoundPrefixMap<std::shared_ptr<RouteHandle>>::Builder builder;
     for (const auto& [k, v] : policies) {
-      res->policies.emplace(k, kRouteHandles[v]);
+      builder.insert({k, kRouteHandles[v]});
     }
+    res->policies = std::move(builder).build();
 
     return res;
   }

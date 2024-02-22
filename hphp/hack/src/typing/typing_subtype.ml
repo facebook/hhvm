@@ -226,14 +226,6 @@ let log_subtype ~this_ty ~function_name env ty_sub ty_super =
     (LoclType ty_sub)
     (LoclType ty_super)
 
-let is_final_and_invariant env id =
-  let class_def = Env.get_class env id in
-  match class_def with
-  | Decl_entry.Found class_ty -> TUtils.class_is_final_and_invariant class_ty
-  | Decl_entry.DoesNotExist
-  | Decl_entry.NotYetAvailable ->
-    false
-
 let is_tprim_disjoint tp1 tp2 =
   let one_side tp1 tp2 =
     Aast_defs.(
@@ -437,39 +429,6 @@ let rec describe_ty_super ~is_coeffect env ty =
         (describe_ty_super env (LoclType lty))
         (describe_ty_super env (ConstraintType cty)))
 
-let simplify_subtype_by_physical_equality env ty_sub ty_super simplify_subtype =
-  match (ty_sub, ty_super) with
-  | (LoclType ty1, LoclType ty2) when phys_equal ty1 ty2 -> (env, TL.valid)
-  | _ -> simplify_subtype ()
-
-(* If it's clear from the syntax of the type that null isn't in ty, return true.
- *)
-let rec null_not_subtype ty =
-  match get_node ty with
-  | Tprim (Aast_defs.Tnull | Aast_defs.Tvoid)
-  | Tgeneric _
-  | Tdynamic
-  | Tany _
-  | Toption _
-  | Tvar _
-  | Taccess _
-  | Tunapplied_alias _
-  | Tneg _
-  | Tintersection _ ->
-    false
-  | Tunion tys -> List.for_all tys ~f:null_not_subtype
-  | Tclass _
-  | Tprim _
-  | Tnonnull
-  | Tfun _
-  | Ttuple _
-  | Tshape _
-  | Tvec_or_dict _ ->
-    true
-  | Tdependent (_, bound)
-  | Tnewtype (_, _, bound) ->
-    null_not_subtype bound
-
 let get_tyvar_opt t =
   match t with
   | LoclType lt -> begin
@@ -548,46 +507,6 @@ let mk_issubtype_prop ~sub_supportdyn ~coerce env ty1 ty2 =
       TL.IsSubtype (coerce, ty1, LoclType ty2)
     | _ -> TL.IsSubtype (coerce, ty1, ty2) )
 
-(* This is a duplicate of logic in Typing_error_utils, due to conversion of primary errors to secondary errors
-   on some code paths for Typing_object_get, which throws out quickfix information (unsafe for secondary errors). *)
-let add_obj_get_quickfixes
-    ty_err (on_error : Typing_error.Reasons_callback.t option) :
-    Typing_error.Reasons_callback.t option =
-  match ty_err with
-  | Typing_error.(Error.Primary (Primary.Null_member { pos; obj_pos_opt; _ }))
-    ->
-    let quickfixes =
-      match obj_pos_opt with
-      | Some obj_pos ->
-        let (obj_pos_start_line, _) = Pos.line_column obj_pos in
-        let (rhs_pos_start_line, rhs_pos_start_column) = Pos.line_column pos in
-        (*
-        heuristic: if the lhs and rhs of the Objget are on the same line, then we assume they are
-        separated by two characters (`->`). So we do not generate a quickfix for chained Objgets:
-        ```
-        obj
-        ->rhs
-        ```
-      *)
-        if obj_pos_start_line = rhs_pos_start_line then
-          let width = 2 (* length of "->" *) in
-          let quickfix_pos =
-            pos
-            |> Pos.set_col_start (rhs_pos_start_column - width)
-            |> Pos.set_col_end rhs_pos_start_column
-          in
-          [
-            Quickfix.make ~title:"Add null-safe get" ~new_text:"?->" quickfix_pos;
-          ]
-        else
-          []
-      | None -> []
-    in
-    Option.map
-      ~f:(fun cb -> Typing_error.Reasons_callback.add_quickfixes cb quickfixes)
-      on_error
-  | _ -> on_error
-
 module rec Subtype : sig
   (** Given types ty_sub and ty_super, attempt to
    reduce the subtyping proposition ty_sub <: ty_super to
@@ -651,6 +570,48 @@ module rec Subtype : sig
     Typing_defs.internal_type ->
     Typing_env_types.env * TL.subtype_prop
 end = struct
+  (* If it's clear from the syntax of the type that null isn't in ty, return true.
+ *)
+  let rec null_not_subtype ty =
+    match get_node ty with
+    | Tprim (Aast_defs.Tnull | Aast_defs.Tvoid)
+    | Tgeneric _
+    | Tdynamic
+    | Tany _
+    | Toption _
+    | Tvar _
+    | Taccess _
+    | Tunapplied_alias _
+    | Tneg _
+    | Tintersection _ ->
+      false
+    | Tunion tys -> List.for_all tys ~f:null_not_subtype
+    | Tclass _
+    | Tprim _
+    | Tnonnull
+    | Tfun _
+    | Ttuple _
+    | Tshape _
+    | Tvec_or_dict _ ->
+      true
+    | Tdependent (_, bound)
+    | Tnewtype (_, _, bound) ->
+      null_not_subtype bound
+
+  let is_final_and_invariant env id =
+    let class_def = Env.get_class env id in
+    match class_def with
+    | Decl_entry.Found class_ty -> TUtils.class_is_final_and_invariant class_ty
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      false
+
+  let simplify_subtype_by_physical_equality env ty_sub ty_super simplify_subtype
+      =
+    match (ty_sub, ty_super) with
+    | (LoclType ty1, LoclType ty2) when phys_equal ty1 ty2 -> (env, TL.valid)
+    | _ -> simplify_subtype ()
+
   let rec simplify_subtype
       ~(subtype_env : subtype_env)
       ~(sub_supportdyn : Reason.t option)
@@ -3482,6 +3443,52 @@ and Has_member : sig
     Typing_env_types.env ->
     Typing_env_types.env * TL.subtype_prop
 end = struct
+  (* This is a duplicate of logic in Typing_error_utils, due to conversion of primary errors to secondary errors
+     on some code paths for Typing_object_get, which throws out quickfix information (unsafe for secondary errors). *)
+  let add_obj_get_quickfixes
+      ty_err (on_error : Typing_error.Reasons_callback.t option) :
+      Typing_error.Reasons_callback.t option =
+    match ty_err with
+    | Typing_error.(Error.Primary (Primary.Null_member { pos; obj_pos_opt; _ }))
+      ->
+      let quickfixes =
+        match obj_pos_opt with
+        | Some obj_pos ->
+          let (obj_pos_start_line, _) = Pos.line_column obj_pos in
+          let (rhs_pos_start_line, rhs_pos_start_column) =
+            Pos.line_column pos
+          in
+          (*
+        heuristic: if the lhs and rhs of the Objget are on the same line, then we assume they are
+        separated by two characters (`->`). So we do not generate a quickfix for chained Objgets:
+        ```
+        obj
+        ->rhs
+        ```
+      *)
+          if obj_pos_start_line = rhs_pos_start_line then
+            let width = 2 (* length of "->" *) in
+            let quickfix_pos =
+              pos
+              |> Pos.set_col_start (rhs_pos_start_column - width)
+              |> Pos.set_col_end rhs_pos_start_column
+            in
+            [
+              Quickfix.make
+                ~title:"Add null-safe get"
+                ~new_text:"?->"
+                quickfix_pos;
+            ]
+          else
+            []
+        | None -> []
+      in
+      Option.map
+        ~f:(fun cb ->
+          Typing_error.Reasons_callback.add_quickfixes cb quickfixes)
+        on_error
+    | _ -> on_error
+
   let rec simplify_subtype_has_member
       ~subtype_env
       ~sub_supportdyn

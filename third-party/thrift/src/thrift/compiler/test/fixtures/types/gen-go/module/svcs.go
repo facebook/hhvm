@@ -36,11 +36,16 @@ type SomeServiceChannelClientInterface interface {
     SomeService
 }
 
-// Deprecated: Migrate to ChannelClient and use SomeServiceChannelClientInterface instead.
 type SomeServiceClientInterface interface {
     thrift.ClientInterface
     BounceMap(m included.SomeMap) (included.SomeMap, error)
     BinaryKeyedMap(r []int64) (map[*TBinary]int64, error)
+}
+
+type SomeServiceContextClientInterface interface {
+    SomeServiceClientInterface
+    BounceMapContext(ctx context.Context, m included.SomeMap) (included.SomeMap, error)
+    BinaryKeyedMapContext(ctx context.Context, r []int64) (map[*TBinary]int64, error)
 }
 
 type SomeServiceChannelClient struct {
@@ -65,6 +70,7 @@ type SomeServiceClient struct {
 }
 // Compile time interface enforcer
 var _ SomeServiceClientInterface = &SomeServiceClient{}
+var _ SomeServiceContextClientInterface = &SomeServiceClient{}
 
 // Deprecated: Use NewSomeServiceClientFromProtocol() instead.
 func NewSomeServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *SomeServiceClient {
@@ -118,6 +124,9 @@ func (c *SomeServiceClient) BounceMap(m included.SomeMap) (included.SomeMap, err
     return c.chClient.BounceMap(nil, m)
 }
 
+func (c *SomeServiceClient) BounceMapContext(ctx context.Context, m included.SomeMap) (included.SomeMap, error) {
+    return c.chClient.BounceMap(ctx, m)
+}
 
 func (c *SomeServiceChannelClient) BinaryKeyedMap(ctx context.Context, r []int64) (map[*TBinary]int64, error) {
     in := &reqSomeServiceBinaryKeyedMap{
@@ -135,6 +144,9 @@ func (c *SomeServiceClient) BinaryKeyedMap(r []int64) (map[*TBinary]int64, error
     return c.chClient.BinaryKeyedMap(nil, r)
 }
 
+func (c *SomeServiceClient) BinaryKeyedMapContext(ctx context.Context, r []int64) (map[*TBinary]int64, error) {
+    return c.chClient.BinaryKeyedMap(ctx, r)
+}
 
 type reqSomeServiceBounceMap struct {
     M included.SomeMap `thrift:"m,1" json:"m" db:"m"`

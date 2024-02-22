@@ -33,10 +33,14 @@ type FooServiceChannelClientInterface interface {
     FooService
 }
 
-// Deprecated: Migrate to ChannelClient and use FooServiceChannelClientInterface instead.
 type FooServiceClientInterface interface {
     thrift.ClientInterface
     SimpleRPC() (error)
+}
+
+type FooServiceContextClientInterface interface {
+    FooServiceClientInterface
+    SimpleRPCContext(ctx context.Context) (error)
 }
 
 type FooServiceChannelClient struct {
@@ -61,6 +65,7 @@ type FooServiceClient struct {
 }
 // Compile time interface enforcer
 var _ FooServiceClientInterface = &FooServiceClient{}
+var _ FooServiceContextClientInterface = &FooServiceClient{}
 
 // Deprecated: Use NewFooServiceClientFromProtocol() instead.
 func NewFooServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *FooServiceClient {
@@ -113,6 +118,9 @@ func (c *FooServiceClient) SimpleRPC() (error) {
     return c.chClient.SimpleRPC(nil)
 }
 
+func (c *FooServiceClient) SimpleRPCContext(ctx context.Context) (error) {
+    return c.chClient.SimpleRPC(ctx)
+}
 
 type reqFooServiceSimpleRPC struct {
 }
@@ -418,10 +426,14 @@ type FB303ServiceChannelClientInterface interface {
     FB303Service
 }
 
-// Deprecated: Migrate to ChannelClient and use FB303ServiceChannelClientInterface instead.
 type FB303ServiceClientInterface interface {
     thrift.ClientInterface
     SimpleRPC(intParameter int32) (*ReservedKeyword, error)
+}
+
+type FB303ServiceContextClientInterface interface {
+    FB303ServiceClientInterface
+    SimpleRPCContext(ctx context.Context, intParameter int32) (*ReservedKeyword, error)
 }
 
 type FB303ServiceChannelClient struct {
@@ -446,6 +458,7 @@ type FB303ServiceClient struct {
 }
 // Compile time interface enforcer
 var _ FB303ServiceClientInterface = &FB303ServiceClient{}
+var _ FB303ServiceContextClientInterface = &FB303ServiceClient{}
 
 // Deprecated: Use NewFB303ServiceClientFromProtocol() instead.
 func NewFB303ServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *FB303ServiceClient {
@@ -499,6 +512,9 @@ func (c *FB303ServiceClient) SimpleRPC(intParameter int32) (*ReservedKeyword, er
     return c.chClient.SimpleRPC(nil, intParameter)
 }
 
+func (c *FB303ServiceClient) SimpleRPCContext(ctx context.Context, intParameter int32) (*ReservedKeyword, error) {
+    return c.chClient.SimpleRPC(ctx, intParameter)
+}
 
 type reqFB303ServiceSimpleRPC struct {
     IntParameter int32 `thrift:"int_parameter,1" json:"int_parameter" db:"int_parameter"`
@@ -967,7 +983,6 @@ type MyServiceChannelClientInterface interface {
     MyService
 }
 
-// Deprecated: Migrate to ChannelClient and use MyServiceChannelClientInterface instead.
 type MyServiceClientInterface interface {
     thrift.ClientInterface
     Ping() (error)
@@ -980,6 +995,20 @@ type MyServiceClientInterface interface {
     LobDataById(id int64, data string) (error)
     InvalidReturnForHack() ([]float32, error)
     RpcSkippedCodegen() (error)
+}
+
+type MyServiceContextClientInterface interface {
+    MyServiceClientInterface
+    PingContext(ctx context.Context) (error)
+    GetRandomDataContext(ctx context.Context) (string, error)
+    SinkContext(ctx context.Context, sink int64) (error)
+    PutDataByIdContext(ctx context.Context, id int64, data string) (error)
+    HasDataByIdContext(ctx context.Context, id int64) (bool, error)
+    GetDataByIdContext(ctx context.Context, id int64) (string, error)
+    DeleteDataByIdContext(ctx context.Context, id int64) (error)
+    LobDataByIdContext(ctx context.Context, id int64, data string) (error)
+    InvalidReturnForHackContext(ctx context.Context) ([]float32, error)
+    RpcSkippedCodegenContext(ctx context.Context) (error)
 }
 
 type MyServiceChannelClient struct {
@@ -1004,6 +1033,7 @@ type MyServiceClient struct {
 }
 // Compile time interface enforcer
 var _ MyServiceClientInterface = &MyServiceClient{}
+var _ MyServiceContextClientInterface = &MyServiceClient{}
 
 // Deprecated: Use NewMyServiceClientFromProtocol() instead.
 func NewMyServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyServiceClient {
@@ -1056,6 +1086,9 @@ func (c *MyServiceClient) Ping() (error) {
     return c.chClient.Ping(nil)
 }
 
+func (c *MyServiceClient) PingContext(ctx context.Context) (error) {
+    return c.chClient.Ping(ctx)
+}
 
 func (c *MyServiceChannelClient) GetRandomData(ctx context.Context) (string, error) {
     in := &reqMyServiceGetRandomData{
@@ -1072,6 +1105,9 @@ func (c *MyServiceClient) GetRandomData() (string, error) {
     return c.chClient.GetRandomData(nil)
 }
 
+func (c *MyServiceClient) GetRandomDataContext(ctx context.Context) (string, error) {
+    return c.chClient.GetRandomData(ctx)
+}
 
 func (c *MyServiceChannelClient) Sink(ctx context.Context, sink int64) (error) {
     in := &reqMyServiceSink{
@@ -1089,6 +1125,9 @@ func (c *MyServiceClient) Sink(sink int64) (error) {
     return c.chClient.Sink(nil, sink)
 }
 
+func (c *MyServiceClient) SinkContext(ctx context.Context, sink int64) (error) {
+    return c.chClient.Sink(ctx, sink)
+}
 
 func (c *MyServiceChannelClient) PutDataById(ctx context.Context, id int64, data string) (error) {
     in := &reqMyServicePutDataById{
@@ -1107,6 +1146,9 @@ func (c *MyServiceClient) PutDataById(id int64, data string) (error) {
     return c.chClient.PutDataById(nil, id, data)
 }
 
+func (c *MyServiceClient) PutDataByIdContext(ctx context.Context, id int64, data string) (error) {
+    return c.chClient.PutDataById(ctx, id, data)
+}
 
 func (c *MyServiceChannelClient) HasDataById(ctx context.Context, id int64) (bool, error) {
     in := &reqMyServiceHasDataById{
@@ -1124,6 +1166,9 @@ func (c *MyServiceClient) HasDataById(id int64) (bool, error) {
     return c.chClient.HasDataById(nil, id)
 }
 
+func (c *MyServiceClient) HasDataByIdContext(ctx context.Context, id int64) (bool, error) {
+    return c.chClient.HasDataById(ctx, id)
+}
 
 func (c *MyServiceChannelClient) GetDataById(ctx context.Context, id int64) (string, error) {
     in := &reqMyServiceGetDataById{
@@ -1141,6 +1186,9 @@ func (c *MyServiceClient) GetDataById(id int64) (string, error) {
     return c.chClient.GetDataById(nil, id)
 }
 
+func (c *MyServiceClient) GetDataByIdContext(ctx context.Context, id int64) (string, error) {
+    return c.chClient.GetDataById(ctx, id)
+}
 
 func (c *MyServiceChannelClient) DeleteDataById(ctx context.Context, id int64) (error) {
     in := &reqMyServiceDeleteDataById{
@@ -1158,6 +1206,9 @@ func (c *MyServiceClient) DeleteDataById(id int64) (error) {
     return c.chClient.DeleteDataById(nil, id)
 }
 
+func (c *MyServiceClient) DeleteDataByIdContext(ctx context.Context, id int64) (error) {
+    return c.chClient.DeleteDataById(ctx, id)
+}
 
 func (c *MyServiceChannelClient) LobDataById(ctx context.Context, id int64, data string) (error) {
     in := &reqMyServiceLobDataById{
@@ -1171,6 +1222,9 @@ func (c *MyServiceClient) LobDataById(id int64, data string) (error) {
     return c.chClient.LobDataById(nil, id, data)
 }
 
+func (c *MyServiceClient) LobDataByIdContext(ctx context.Context, id int64, data string) (error) {
+    return c.chClient.LobDataById(ctx, id, data)
+}
 
 func (c *MyServiceChannelClient) InvalidReturnForHack(ctx context.Context) ([]float32, error) {
     in := &reqMyServiceInvalidReturnForHack{
@@ -1187,6 +1241,9 @@ func (c *MyServiceClient) InvalidReturnForHack() ([]float32, error) {
     return c.chClient.InvalidReturnForHack(nil)
 }
 
+func (c *MyServiceClient) InvalidReturnForHackContext(ctx context.Context) ([]float32, error) {
+    return c.chClient.InvalidReturnForHack(ctx)
+}
 
 func (c *MyServiceChannelClient) RpcSkippedCodegen(ctx context.Context) (error) {
     in := &reqMyServiceRpcSkippedCodegen{
@@ -1203,6 +1260,9 @@ func (c *MyServiceClient) RpcSkippedCodegen() (error) {
     return c.chClient.RpcSkippedCodegen(nil)
 }
 
+func (c *MyServiceClient) RpcSkippedCodegenContext(ctx context.Context) (error) {
+    return c.chClient.RpcSkippedCodegen(ctx)
+}
 
 type reqMyServicePing struct {
 }
@@ -4600,11 +4660,16 @@ type DbMixedStackArgumentsChannelClientInterface interface {
     DbMixedStackArguments
 }
 
-// Deprecated: Migrate to ChannelClient and use DbMixedStackArgumentsChannelClientInterface instead.
 type DbMixedStackArgumentsClientInterface interface {
     thrift.ClientInterface
     GetDataByKey0(key string) ([]byte, error)
     GetDataByKey1(key string) ([]byte, error)
+}
+
+type DbMixedStackArgumentsContextClientInterface interface {
+    DbMixedStackArgumentsClientInterface
+    GetDataByKey0Context(ctx context.Context, key string) ([]byte, error)
+    GetDataByKey1Context(ctx context.Context, key string) ([]byte, error)
 }
 
 type DbMixedStackArgumentsChannelClient struct {
@@ -4629,6 +4694,7 @@ type DbMixedStackArgumentsClient struct {
 }
 // Compile time interface enforcer
 var _ DbMixedStackArgumentsClientInterface = &DbMixedStackArgumentsClient{}
+var _ DbMixedStackArgumentsContextClientInterface = &DbMixedStackArgumentsClient{}
 
 // Deprecated: Use NewDbMixedStackArgumentsClientFromProtocol() instead.
 func NewDbMixedStackArgumentsClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *DbMixedStackArgumentsClient {
@@ -4682,6 +4748,9 @@ func (c *DbMixedStackArgumentsClient) GetDataByKey0(key string) ([]byte, error) 
     return c.chClient.GetDataByKey0(nil, key)
 }
 
+func (c *DbMixedStackArgumentsClient) GetDataByKey0Context(ctx context.Context, key string) ([]byte, error) {
+    return c.chClient.GetDataByKey0(ctx, key)
+}
 
 func (c *DbMixedStackArgumentsChannelClient) GetDataByKey1(ctx context.Context, key string) ([]byte, error) {
     in := &reqDbMixedStackArgumentsGetDataByKey1{
@@ -4699,6 +4768,9 @@ func (c *DbMixedStackArgumentsClient) GetDataByKey1(key string) ([]byte, error) 
     return c.chClient.GetDataByKey1(nil, key)
 }
 
+func (c *DbMixedStackArgumentsClient) GetDataByKey1Context(ctx context.Context, key string) ([]byte, error) {
+    return c.chClient.GetDataByKey1(ctx, key)
+}
 
 type reqDbMixedStackArgumentsGetDataByKey0 struct {
     Key string `thrift:"key,1" json:"key" db:"key"`

@@ -37,12 +37,18 @@ type FinderChannelClientInterface interface {
     Finder
 }
 
-// Deprecated: Migrate to ChannelClient and use FinderChannelClientInterface instead.
 type FinderClientInterface interface {
     thrift.ClientInterface
     ByPlate(plate Plate) (*Automobile, error)
     AliasByPlate(plate Plate) (*Car, error)
     PreviousPlate(plate Plate) (Plate, error)
+}
+
+type FinderContextClientInterface interface {
+    FinderClientInterface
+    ByPlateContext(ctx context.Context, plate Plate) (*Automobile, error)
+    AliasByPlateContext(ctx context.Context, plate Plate) (*Car, error)
+    PreviousPlateContext(ctx context.Context, plate Plate) (Plate, error)
 }
 
 type FinderChannelClient struct {
@@ -67,6 +73,7 @@ type FinderClient struct {
 }
 // Compile time interface enforcer
 var _ FinderClientInterface = &FinderClient{}
+var _ FinderContextClientInterface = &FinderClient{}
 
 // Deprecated: Use NewFinderClientFromProtocol() instead.
 func NewFinderClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *FinderClient {
@@ -120,6 +127,9 @@ func (c *FinderClient) ByPlate(plate Plate) (*Automobile, error) {
     return c.chClient.ByPlate(nil, plate)
 }
 
+func (c *FinderClient) ByPlateContext(ctx context.Context, plate Plate) (*Automobile, error) {
+    return c.chClient.ByPlate(ctx, plate)
+}
 
 func (c *FinderChannelClient) AliasByPlate(ctx context.Context, plate Plate) (*Car, error) {
     in := &reqFinderAliasByPlate{
@@ -137,6 +147,9 @@ func (c *FinderClient) AliasByPlate(plate Plate) (*Car, error) {
     return c.chClient.AliasByPlate(nil, plate)
 }
 
+func (c *FinderClient) AliasByPlateContext(ctx context.Context, plate Plate) (*Car, error) {
+    return c.chClient.AliasByPlate(ctx, plate)
+}
 
 func (c *FinderChannelClient) PreviousPlate(ctx context.Context, plate Plate) (Plate, error) {
     in := &reqFinderPreviousPlate{
@@ -154,6 +167,9 @@ func (c *FinderClient) PreviousPlate(plate Plate) (Plate, error) {
     return c.chClient.PreviousPlate(nil, plate)
 }
 
+func (c *FinderClient) PreviousPlateContext(ctx context.Context, plate Plate) (Plate, error) {
+    return c.chClient.PreviousPlate(ctx, plate)
+}
 
 type reqFinderByPlate struct {
     Plate Plate `thrift:"plate,1" json:"plate" db:"plate"`

@@ -35,8 +35,6 @@ type {{service:go_name}}ChannelClientInterface interface {
     {{service:go_name}}
 }
 
-{{! COMPAT: backwards compatibility - remove once all code is migrated to ChannelClient. }}
-// Deprecated: Migrate to ChannelClient and use {{service:go_name}}ChannelClientInterface instead.
 type {{service:go_name}}ClientInterface interface {
     thrift.ClientInterface
     {{^program:compat?}}
@@ -51,6 +49,30 @@ type {{service:go_name}}ClientInterface interface {
     {{#service:functions}}
     {{#function:go_supported?}}
     {{> svc/func_signature_no_ctx}}
+
+    {{/function:go_supported?}}
+    {{/service:functions}}
+}
+
+{{!COMPAT: backwards compatibility
+Currently there are a bunch of use cases that implement ClientInterface without Context functions.
+1. We need to manually move them over to ContextClientInterface
+2. Add func_signature_with_ctx to ClientInterface
+3. Move them back to ClientInterface
+4. Delete ContextClientInterface
+}}{{!
+}}type {{service:go_name}}ContextClientInterface interface {
+    {{service:go_name}}ClientInterface
+    {{#service:extends?}}
+    {{#service:extends}}
+    // Inherited/extended service
+    {{service:go_qualified_name}}ContextClientInterface
+
+    {{/service:extends}}
+    {{/service:extends?}}
+    {{#service:functions}}
+    {{#function:go_supported?}}
+    {{> svc/func_signature_with_ctx}}
 
     {{/function:go_supported?}}
     {{/service:functions}}

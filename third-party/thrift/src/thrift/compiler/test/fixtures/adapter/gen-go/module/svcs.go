@@ -33,10 +33,14 @@ type ServiceChannelClientInterface interface {
     Service
 }
 
-// Deprecated: Migrate to ChannelClient and use ServiceChannelClientInterface instead.
 type ServiceClientInterface interface {
     thrift.ClientInterface
     Func(arg1 StringWithAdapter_7208, arg2 string, arg3 *Foo) (MyI32_4873, error)
+}
+
+type ServiceContextClientInterface interface {
+    ServiceClientInterface
+    FuncContext(ctx context.Context, arg1 StringWithAdapter_7208, arg2 string, arg3 *Foo) (MyI32_4873, error)
 }
 
 type ServiceChannelClient struct {
@@ -61,6 +65,7 @@ type ServiceClient struct {
 }
 // Compile time interface enforcer
 var _ ServiceClientInterface = &ServiceClient{}
+var _ ServiceContextClientInterface = &ServiceClient{}
 
 // Deprecated: Use NewServiceClientFromProtocol() instead.
 func NewServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *ServiceClient {
@@ -116,6 +121,9 @@ func (c *ServiceClient) Func(arg1 StringWithAdapter_7208, arg2 string, arg3 *Foo
     return c.chClient.Func(nil, arg1, arg2, arg3)
 }
 
+func (c *ServiceClient) FuncContext(ctx context.Context, arg1 StringWithAdapter_7208, arg2 string, arg3 *Foo) (MyI32_4873, error) {
+    return c.chClient.Func(ctx, arg1, arg2, arg3)
+}
 
 type reqServiceFunc struct {
     Arg1 StringWithAdapter_7208 `thrift:"arg1,1" json:"arg1" db:"arg1"`
@@ -726,11 +734,16 @@ type AdapterServiceChannelClientInterface interface {
     AdapterService
 }
 
-// Deprecated: Migrate to ChannelClient and use AdapterServiceChannelClientInterface instead.
 type AdapterServiceClientInterface interface {
     thrift.ClientInterface
     Count() (*CountingStruct, error)
     AdaptedTypes(arg *HeapAllocated) (*HeapAllocated, error)
+}
+
+type AdapterServiceContextClientInterface interface {
+    AdapterServiceClientInterface
+    CountContext(ctx context.Context) (*CountingStruct, error)
+    AdaptedTypesContext(ctx context.Context, arg *HeapAllocated) (*HeapAllocated, error)
 }
 
 type AdapterServiceChannelClient struct {
@@ -755,6 +768,7 @@ type AdapterServiceClient struct {
 }
 // Compile time interface enforcer
 var _ AdapterServiceClientInterface = &AdapterServiceClient{}
+var _ AdapterServiceContextClientInterface = &AdapterServiceClient{}
 
 // Deprecated: Use NewAdapterServiceClientFromProtocol() instead.
 func NewAdapterServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *AdapterServiceClient {
@@ -807,6 +821,9 @@ func (c *AdapterServiceClient) Count() (*CountingStruct, error) {
     return c.chClient.Count(nil)
 }
 
+func (c *AdapterServiceClient) CountContext(ctx context.Context) (*CountingStruct, error) {
+    return c.chClient.Count(ctx)
+}
 
 func (c *AdapterServiceChannelClient) AdaptedTypes(ctx context.Context, arg *HeapAllocated) (*HeapAllocated, error) {
     in := &reqAdapterServiceAdaptedTypes{
@@ -824,6 +841,9 @@ func (c *AdapterServiceClient) AdaptedTypes(arg *HeapAllocated) (*HeapAllocated,
     return c.chClient.AdaptedTypes(nil, arg)
 }
 
+func (c *AdapterServiceClient) AdaptedTypesContext(ctx context.Context, arg *HeapAllocated) (*HeapAllocated, error) {
+    return c.chClient.AdaptedTypes(ctx, arg)
+}
 
 type reqAdapterServiceCount struct {
 }

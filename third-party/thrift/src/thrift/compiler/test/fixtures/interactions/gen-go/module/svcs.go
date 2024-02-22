@@ -33,10 +33,14 @@ type MyServiceChannelClientInterface interface {
     MyService
 }
 
-// Deprecated: Migrate to ChannelClient and use MyServiceChannelClientInterface instead.
 type MyServiceClientInterface interface {
     thrift.ClientInterface
     Foo() (error)
+}
+
+type MyServiceContextClientInterface interface {
+    MyServiceClientInterface
+    FooContext(ctx context.Context) (error)
 }
 
 type MyServiceChannelClient struct {
@@ -61,6 +65,7 @@ type MyServiceClient struct {
 }
 // Compile time interface enforcer
 var _ MyServiceClientInterface = &MyServiceClient{}
+var _ MyServiceContextClientInterface = &MyServiceClient{}
 
 // Deprecated: Use NewMyServiceClientFromProtocol() instead.
 func NewMyServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyServiceClient {
@@ -113,6 +118,9 @@ func (c *MyServiceClient) Foo() (error) {
     return c.chClient.Foo(nil)
 }
 
+func (c *MyServiceClient) FooContext(ctx context.Context) (error) {
+    return c.chClient.Foo(ctx)
+}
 
 type reqMyServiceFoo struct {
 }

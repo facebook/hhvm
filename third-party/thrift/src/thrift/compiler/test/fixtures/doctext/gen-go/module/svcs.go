@@ -34,11 +34,16 @@ type CChannelClientInterface interface {
     C
 }
 
-// Deprecated: Migrate to ChannelClient and use CChannelClientInterface instead.
 type CClientInterface interface {
     thrift.ClientInterface
     F() (error)
     Thing(a int32, b string, c []int32) (string, error)
+}
+
+type CContextClientInterface interface {
+    CClientInterface
+    FContext(ctx context.Context) (error)
+    ThingContext(ctx context.Context, a int32, b string, c []int32) (string, error)
 }
 
 type CChannelClient struct {
@@ -63,6 +68,7 @@ type CClient struct {
 }
 // Compile time interface enforcer
 var _ CClientInterface = &CClient{}
+var _ CContextClientInterface = &CClient{}
 
 // Deprecated: Use NewCClientFromProtocol() instead.
 func NewCClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *CClient {
@@ -115,6 +121,9 @@ func (c *CClient) F() (error) {
     return c.chClient.F(nil)
 }
 
+func (c *CClient) FContext(ctx context.Context) (error) {
+    return c.chClient.F(ctx)
+}
 
 func (c *CChannelClient) Thing(ctx context.Context, a int32, b string, c []int32) (string, error) {
     in := &reqCThing{
@@ -136,6 +145,9 @@ func (c *CClient) Thing(a int32, b string, c []int32) (string, error) {
     return c.chClient.Thing(nil, a, b, c)
 }
 
+func (c *CClient) ThingContext(ctx context.Context, a int32, b string, c []int32) (string, error) {
+    return c.chClient.Thing(ctx, a, b, c)
+}
 
 type reqCF struct {
 }

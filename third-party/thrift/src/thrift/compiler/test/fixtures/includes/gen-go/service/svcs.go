@@ -38,11 +38,16 @@ type MyServiceChannelClientInterface interface {
     MyService
 }
 
-// Deprecated: Migrate to ChannelClient and use MyServiceChannelClientInterface instead.
 type MyServiceClientInterface interface {
     thrift.ClientInterface
     Query(s *module.MyStruct, i *includes.Included) (error)
     HasArgDocs(s *module.MyStruct, i *includes.Included) (error)
+}
+
+type MyServiceContextClientInterface interface {
+    MyServiceClientInterface
+    QueryContext(ctx context.Context, s *module.MyStruct, i *includes.Included) (error)
+    HasArgDocsContext(ctx context.Context, s *module.MyStruct, i *includes.Included) (error)
 }
 
 type MyServiceChannelClient struct {
@@ -67,6 +72,7 @@ type MyServiceClient struct {
 }
 // Compile time interface enforcer
 var _ MyServiceClientInterface = &MyServiceClient{}
+var _ MyServiceContextClientInterface = &MyServiceClient{}
 
 // Deprecated: Use NewMyServiceClientFromProtocol() instead.
 func NewMyServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyServiceClient {
@@ -121,6 +127,9 @@ func (c *MyServiceClient) Query(s *module.MyStruct, i *includes.Included) (error
     return c.chClient.Query(nil, s, i)
 }
 
+func (c *MyServiceClient) QueryContext(ctx context.Context, s *module.MyStruct, i *includes.Included) (error) {
+    return c.chClient.Query(ctx, s, i)
+}
 
 func (c *MyServiceChannelClient) HasArgDocs(ctx context.Context, s *module.MyStruct, i *includes.Included) (error) {
     in := &reqMyServiceHasArgDocs{
@@ -139,6 +148,9 @@ func (c *MyServiceClient) HasArgDocs(s *module.MyStruct, i *includes.Included) (
     return c.chClient.HasArgDocs(nil, s, i)
 }
 
+func (c *MyServiceClient) HasArgDocsContext(ctx context.Context, s *module.MyStruct, i *includes.Included) (error) {
+    return c.chClient.HasArgDocs(ctx, s, i)
+}
 
 type reqMyServiceQuery struct {
     S *module.MyStruct `thrift:"s,1" json:"s" db:"s"`

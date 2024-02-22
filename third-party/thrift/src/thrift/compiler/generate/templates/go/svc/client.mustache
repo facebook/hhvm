@@ -58,6 +58,7 @@ type {{service:go_name}}Client struct {
 }
 // Compile time interface enforcer
 var _ {{service:go_name}}ClientInterface = &{{service:go_name}}Client{}
+var _ {{service:go_name}}ContextClientInterface = &{{service:go_name}}Client{}
 
 {{! COMPAT: backwards compatibility - remove once all code is migrated to a Client with Context. }}
 // Deprecated: Use New{{service:go_name}}ClientFromProtocol() instead.
@@ -135,6 +136,10 @@ func (c *{{service:go_name}}Client) {{> svc/func_signature_no_ctx}} {
       }}{{#function:args}}{{field:go_arg_name}}{{^last?}}, {{/last?}}{{/function:args}})
 }
 
+func (c *{{service:go_name}}Client) {{> svc/func_signature_with_ctx}} {
+    return c.chClient.{{function:go_name}}({{function:ctx_arg_name}}{{function:comma}}{{!
+      }}{{#function:args}}{{field:go_arg_name}}{{^last?}}, {{/last?}}{{/function:args}})
+}
 {{/function:go_supported?}}
 {{/service:functions}}
 

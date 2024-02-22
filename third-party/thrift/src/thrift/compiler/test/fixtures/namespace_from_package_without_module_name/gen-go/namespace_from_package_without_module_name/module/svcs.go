@@ -33,10 +33,14 @@ type TestServiceChannelClientInterface interface {
     TestService
 }
 
-// Deprecated: Migrate to ChannelClient and use TestServiceChannelClientInterface instead.
 type TestServiceClientInterface interface {
     thrift.ClientInterface
     Init(int1 int64) (int64, error)
+}
+
+type TestServiceContextClientInterface interface {
+    TestServiceClientInterface
+    InitContext(ctx context.Context, int1 int64) (int64, error)
 }
 
 type TestServiceChannelClient struct {
@@ -61,6 +65,7 @@ type TestServiceClient struct {
 }
 // Compile time interface enforcer
 var _ TestServiceClientInterface = &TestServiceClient{}
+var _ TestServiceContextClientInterface = &TestServiceClient{}
 
 // Deprecated: Use NewTestServiceClientFromProtocol() instead.
 func NewTestServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *TestServiceClient {
@@ -114,6 +119,9 @@ func (c *TestServiceClient) Init(int1 int64) (int64, error) {
     return c.chClient.Init(nil, int1)
 }
 
+func (c *TestServiceClient) InitContext(ctx context.Context, int1 int64) (int64, error) {
+    return c.chClient.Init(ctx, int1)
+}
 
 type reqTestServiceInit struct {
     Int1 int64 `thrift:"int1,1" json:"int1" db:"int1"`

@@ -33,10 +33,14 @@ type MyRootChannelClientInterface interface {
     MyRoot
 }
 
-// Deprecated: Migrate to ChannelClient and use MyRootChannelClientInterface instead.
 type MyRootClientInterface interface {
     thrift.ClientInterface
     DoRoot() (error)
+}
+
+type MyRootContextClientInterface interface {
+    MyRootClientInterface
+    DoRootContext(ctx context.Context) (error)
 }
 
 type MyRootChannelClient struct {
@@ -61,6 +65,7 @@ type MyRootClient struct {
 }
 // Compile time interface enforcer
 var _ MyRootClientInterface = &MyRootClient{}
+var _ MyRootContextClientInterface = &MyRootClient{}
 
 // Deprecated: Use NewMyRootClientFromProtocol() instead.
 func NewMyRootClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyRootClient {
@@ -113,6 +118,9 @@ func (c *MyRootClient) DoRoot() (error) {
     return c.chClient.DoRoot(nil)
 }
 
+func (c *MyRootClient) DoRootContext(ctx context.Context) (error) {
+    return c.chClient.DoRoot(ctx)
+}
 
 type reqMyRootDoRoot struct {
 }
@@ -421,10 +429,17 @@ type MyNodeChannelClientInterface interface {
     MyNode
 }
 
-// Deprecated: Migrate to ChannelClient and use MyNodeChannelClientInterface instead.
 type MyNodeClientInterface interface {
     thrift.ClientInterface
     DoMid() (error)
+}
+
+type MyNodeContextClientInterface interface {
+    MyNodeClientInterface
+    // Inherited/extended service
+    MyRootContextClientInterface
+
+    DoMidContext(ctx context.Context) (error)
 }
 
 type MyNodeChannelClient struct {
@@ -454,6 +469,7 @@ type MyNodeClient struct {
 }
 // Compile time interface enforcer
 var _ MyNodeClientInterface = &MyNodeClient{}
+var _ MyNodeContextClientInterface = &MyNodeClient{}
 
 // Deprecated: Use NewMyNodeClientFromProtocol() instead.
 func NewMyNodeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyNodeClient {
@@ -507,6 +523,9 @@ func (c *MyNodeClient) DoMid() (error) {
     return c.chClient.DoMid(nil)
 }
 
+func (c *MyNodeClient) DoMidContext(ctx context.Context) (error) {
+    return c.chClient.DoMid(ctx)
+}
 
 type reqMyNodeDoMid struct {
 }
@@ -789,10 +808,17 @@ type MyLeafChannelClientInterface interface {
     MyLeaf
 }
 
-// Deprecated: Migrate to ChannelClient and use MyLeafChannelClientInterface instead.
 type MyLeafClientInterface interface {
     thrift.ClientInterface
     DoLeaf() (error)
+}
+
+type MyLeafContextClientInterface interface {
+    MyLeafClientInterface
+    // Inherited/extended service
+    MyNodeContextClientInterface
+
+    DoLeafContext(ctx context.Context) (error)
 }
 
 type MyLeafChannelClient struct {
@@ -822,6 +848,7 @@ type MyLeafClient struct {
 }
 // Compile time interface enforcer
 var _ MyLeafClientInterface = &MyLeafClient{}
+var _ MyLeafContextClientInterface = &MyLeafClient{}
 
 // Deprecated: Use NewMyLeafClientFromProtocol() instead.
 func NewMyLeafClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyLeafClient {
@@ -875,6 +902,9 @@ func (c *MyLeafClient) DoLeaf() (error) {
     return c.chClient.DoLeaf(nil)
 }
 
+func (c *MyLeafClient) DoLeafContext(ctx context.Context) (error) {
+    return c.chClient.DoLeaf(ctx)
+}
 
 type reqMyLeafDoLeaf struct {
 }

@@ -39,7 +39,6 @@ type MyServiceChannelClientInterface interface {
     MyService
 }
 
-// Deprecated: Migrate to ChannelClient and use MyServiceChannelClientInterface instead.
 type MyServiceClientInterface interface {
     thrift.ClientInterface
     Ping() (error)
@@ -49,6 +48,17 @@ type MyServiceClientInterface interface {
     PutDataById(id int64, data string) (error)
     LobDataById(id int64, data string) (error)
     GoDoNothing() (error)
+}
+
+type MyServiceContextClientInterface interface {
+    MyServiceClientInterface
+    PingContext(ctx context.Context) (error)
+    GetRandomDataContext(ctx context.Context) (string, error)
+    HasDataByIdContext(ctx context.Context, id int64) (bool, error)
+    GoGetDataByIdContext(ctx context.Context, id int64) (string, error)
+    PutDataByIdContext(ctx context.Context, id int64, data string) (error)
+    LobDataByIdContext(ctx context.Context, id int64, data string) (error)
+    GoDoNothingContext(ctx context.Context) (error)
 }
 
 type MyServiceChannelClient struct {
@@ -73,6 +83,7 @@ type MyServiceClient struct {
 }
 // Compile time interface enforcer
 var _ MyServiceClientInterface = &MyServiceClient{}
+var _ MyServiceContextClientInterface = &MyServiceClient{}
 
 // Deprecated: Use NewMyServiceClientFromProtocol() instead.
 func NewMyServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyServiceClient {
@@ -127,6 +138,9 @@ func (c *MyServiceClient) Ping() (error) {
     return c.chClient.Ping(nil)
 }
 
+func (c *MyServiceClient) PingContext(ctx context.Context) (error) {
+    return c.chClient.Ping(ctx)
+}
 
 func (c *MyServiceChannelClient) GetRandomData(ctx context.Context) (string, error) {
     in := &reqMyServiceGetRandomData{
@@ -143,6 +157,9 @@ func (c *MyServiceClient) GetRandomData() (string, error) {
     return c.chClient.GetRandomData(nil)
 }
 
+func (c *MyServiceClient) GetRandomDataContext(ctx context.Context) (string, error) {
+    return c.chClient.GetRandomData(ctx)
+}
 
 func (c *MyServiceChannelClient) HasDataById(ctx context.Context, id int64) (bool, error) {
     in := &reqMyServiceHasDataById{
@@ -160,6 +177,9 @@ func (c *MyServiceClient) HasDataById(id int64) (bool, error) {
     return c.chClient.HasDataById(nil, id)
 }
 
+func (c *MyServiceClient) HasDataByIdContext(ctx context.Context, id int64) (bool, error) {
+    return c.chClient.HasDataById(ctx, id)
+}
 
 func (c *MyServiceChannelClient) GoGetDataById(ctx context.Context, id int64) (string, error) {
     in := &reqMyServiceGoGetDataById{
@@ -177,6 +197,9 @@ func (c *MyServiceClient) GoGetDataById(id int64) (string, error) {
     return c.chClient.GoGetDataById(nil, id)
 }
 
+func (c *MyServiceClient) GoGetDataByIdContext(ctx context.Context, id int64) (string, error) {
+    return c.chClient.GoGetDataById(ctx, id)
+}
 
 func (c *MyServiceChannelClient) PutDataById(ctx context.Context, id int64, data string) (error) {
     in := &reqMyServicePutDataById{
@@ -195,6 +218,9 @@ func (c *MyServiceClient) PutDataById(id int64, data string) (error) {
     return c.chClient.PutDataById(nil, id, data)
 }
 
+func (c *MyServiceClient) PutDataByIdContext(ctx context.Context, id int64, data string) (error) {
+    return c.chClient.PutDataById(ctx, id, data)
+}
 
 func (c *MyServiceChannelClient) LobDataById(ctx context.Context, id int64, data string) (error) {
     in := &reqMyServiceLobDataById{
@@ -208,6 +234,9 @@ func (c *MyServiceClient) LobDataById(id int64, data string) (error) {
     return c.chClient.LobDataById(nil, id, data)
 }
 
+func (c *MyServiceClient) LobDataByIdContext(ctx context.Context, id int64, data string) (error) {
+    return c.chClient.LobDataById(ctx, id, data)
+}
 
 func (c *MyServiceChannelClient) GoDoNothing(ctx context.Context) (error) {
     in := &reqMyServiceGoDoNothing{
@@ -224,6 +253,9 @@ func (c *MyServiceClient) GoDoNothing() (error) {
     return c.chClient.GoDoNothing(nil)
 }
 
+func (c *MyServiceClient) GoDoNothingContext(ctx context.Context) (error) {
+    return c.chClient.GoDoNothing(ctx)
+}
 
 type reqMyServicePing struct {
 }
@@ -2744,11 +2776,16 @@ type MyServicePrioParentChannelClientInterface interface {
     MyServicePrioParent
 }
 
-// Deprecated: Migrate to ChannelClient and use MyServicePrioParentChannelClientInterface instead.
 type MyServicePrioParentClientInterface interface {
     thrift.ClientInterface
     Ping() (error)
     Pong() (error)
+}
+
+type MyServicePrioParentContextClientInterface interface {
+    MyServicePrioParentClientInterface
+    PingContext(ctx context.Context) (error)
+    PongContext(ctx context.Context) (error)
 }
 
 type MyServicePrioParentChannelClient struct {
@@ -2773,6 +2810,7 @@ type MyServicePrioParentClient struct {
 }
 // Compile time interface enforcer
 var _ MyServicePrioParentClientInterface = &MyServicePrioParentClient{}
+var _ MyServicePrioParentContextClientInterface = &MyServicePrioParentClient{}
 
 // Deprecated: Use NewMyServicePrioParentClientFromProtocol() instead.
 func NewMyServicePrioParentClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyServicePrioParentClient {
@@ -2825,6 +2863,9 @@ func (c *MyServicePrioParentClient) Ping() (error) {
     return c.chClient.Ping(nil)
 }
 
+func (c *MyServicePrioParentClient) PingContext(ctx context.Context) (error) {
+    return c.chClient.Ping(ctx)
+}
 
 func (c *MyServicePrioParentChannelClient) Pong(ctx context.Context) (error) {
     in := &reqMyServicePrioParentPong{
@@ -2841,6 +2882,9 @@ func (c *MyServicePrioParentClient) Pong() (error) {
     return c.chClient.Pong(nil)
 }
 
+func (c *MyServicePrioParentClient) PongContext(ctx context.Context) (error) {
+    return c.chClient.Pong(ctx)
+}
 
 type reqMyServicePrioParentPing struct {
 }
@@ -3394,10 +3438,17 @@ type MyServicePrioChildChannelClientInterface interface {
     MyServicePrioChild
 }
 
-// Deprecated: Migrate to ChannelClient and use MyServicePrioChildChannelClientInterface instead.
 type MyServicePrioChildClientInterface interface {
     thrift.ClientInterface
     Pang() (error)
+}
+
+type MyServicePrioChildContextClientInterface interface {
+    MyServicePrioChildClientInterface
+    // Inherited/extended service
+    MyServicePrioParentContextClientInterface
+
+    PangContext(ctx context.Context) (error)
 }
 
 type MyServicePrioChildChannelClient struct {
@@ -3427,6 +3478,7 @@ type MyServicePrioChildClient struct {
 }
 // Compile time interface enforcer
 var _ MyServicePrioChildClientInterface = &MyServicePrioChildClient{}
+var _ MyServicePrioChildContextClientInterface = &MyServicePrioChildClient{}
 
 // Deprecated: Use NewMyServicePrioChildClientFromProtocol() instead.
 func NewMyServicePrioChildClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyServicePrioChildClient {
@@ -3480,6 +3532,9 @@ func (c *MyServicePrioChildClient) Pang() (error) {
     return c.chClient.Pang(nil)
 }
 
+func (c *MyServicePrioChildClient) PangContext(ctx context.Context) (error) {
+    return c.chClient.Pang(ctx)
+}
 
 type reqMyServicePrioChildPang struct {
 }
@@ -3759,10 +3814,14 @@ type BadServiceChannelClientInterface interface {
     BadService
 }
 
-// Deprecated: Migrate to ChannelClient and use BadServiceChannelClientInterface instead.
 type BadServiceClientInterface interface {
     thrift.ClientInterface
     Bar() (int32, error)
+}
+
+type BadServiceContextClientInterface interface {
+    BadServiceClientInterface
+    BarContext(ctx context.Context) (int32, error)
 }
 
 type BadServiceChannelClient struct {
@@ -3787,6 +3846,7 @@ type BadServiceClient struct {
 }
 // Compile time interface enforcer
 var _ BadServiceClientInterface = &BadServiceClient{}
+var _ BadServiceContextClientInterface = &BadServiceClient{}
 
 // Deprecated: Use NewBadServiceClientFromProtocol() instead.
 func NewBadServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *BadServiceClient {
@@ -3839,6 +3899,9 @@ func (c *BadServiceClient) Bar() (int32, error) {
     return c.chClient.Bar(nil)
 }
 
+func (c *BadServiceClient) BarContext(ctx context.Context) (int32, error) {
+    return c.chClient.Bar(ctx)
+}
 
 type reqBadServiceBar struct {
 }
@@ -4228,12 +4291,18 @@ type FooBarBazServiceChannelClientInterface interface {
     FooBarBazService
 }
 
-// Deprecated: Migrate to ChannelClient and use FooBarBazServiceChannelClientInterface instead.
 type FooBarBazServiceClientInterface interface {
     thrift.ClientInterface
     FooStructured() (error)
     BarNonStructured() (error)
     Baz() (error)
+}
+
+type FooBarBazServiceContextClientInterface interface {
+    FooBarBazServiceClientInterface
+    FooStructuredContext(ctx context.Context) (error)
+    BarNonStructuredContext(ctx context.Context) (error)
+    BazContext(ctx context.Context) (error)
 }
 
 type FooBarBazServiceChannelClient struct {
@@ -4258,6 +4327,7 @@ type FooBarBazServiceClient struct {
 }
 // Compile time interface enforcer
 var _ FooBarBazServiceClientInterface = &FooBarBazServiceClient{}
+var _ FooBarBazServiceContextClientInterface = &FooBarBazServiceClient{}
 
 // Deprecated: Use NewFooBarBazServiceClientFromProtocol() instead.
 func NewFooBarBazServiceClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *FooBarBazServiceClient {
@@ -4310,6 +4380,9 @@ func (c *FooBarBazServiceClient) FooStructured() (error) {
     return c.chClient.FooStructured(nil)
 }
 
+func (c *FooBarBazServiceClient) FooStructuredContext(ctx context.Context) (error) {
+    return c.chClient.FooStructured(ctx)
+}
 
 func (c *FooBarBazServiceChannelClient) BarNonStructured(ctx context.Context) (error) {
     in := &reqFooBarBazServiceBarNonStructured{
@@ -4326,6 +4399,9 @@ func (c *FooBarBazServiceClient) BarNonStructured() (error) {
     return c.chClient.BarNonStructured(nil)
 }
 
+func (c *FooBarBazServiceClient) BarNonStructuredContext(ctx context.Context) (error) {
+    return c.chClient.BarNonStructured(ctx)
+}
 
 func (c *FooBarBazServiceChannelClient) Baz(ctx context.Context) (error) {
     in := &reqFooBarBazServiceBaz{
@@ -4342,6 +4418,9 @@ func (c *FooBarBazServiceClient) Baz() (error) {
     return c.chClient.Baz(nil)
 }
 
+func (c *FooBarBazServiceClient) BazContext(ctx context.Context) (error) {
+    return c.chClient.Baz(ctx)
+}
 
 type reqFooBarBazServiceFooStructured struct {
 }

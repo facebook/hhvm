@@ -47,7 +47,6 @@ type GetEntityChannelClientInterface interface {
     GetEntity
 }
 
-// Deprecated: Migrate to ChannelClient and use GetEntityChannelClientInterface instead.
 type GetEntityClientInterface interface {
     thrift.ClientInterface
     GetEntity(r *GetEntityRequest) (*GetEntityResponse, error)
@@ -65,6 +64,25 @@ type GetEntityClientInterface interface {
     GetLegacyStuff(numPos int64, numNeg1 int64, numNeg2 int64) (int32, error)
     GetCtxCollision(ctx int64) (int32, error)
     GetCtx1Collision(ctx int64, ctx1 int64) (int32, error)
+}
+
+type GetEntityContextClientInterface interface {
+    GetEntityClientInterface
+    GetEntityContext(ctx context.Context, r *GetEntityRequest) (*GetEntityResponse, error)
+    GetBoolContext(ctx context.Context) (bool, error)
+    GetByteContext(ctx context.Context) (int8, error)
+    GetI16Context(ctx context.Context) (int16, error)
+    GetI32Context(ctx context.Context) (int32, error)
+    GetI64Context(ctx context.Context) (int64, error)
+    GetDoubleContext(ctx context.Context) (float64, error)
+    GetStringContext(ctx context.Context) (string, error)
+    GetBinaryContext(ctx context.Context) ([]byte, error)
+    GetMapContext(ctx context.Context) (map[string]string, error)
+    GetSetContext(ctx context.Context) ([]string, error)
+    GetListContext(ctx context.Context) ([]string, error)
+    GetLegacyStuffContext(ctx context.Context, numPos int64, numNeg1 int64, numNeg2 int64) (int32, error)
+    GetCtxCollisionContext(ctx1 context.Context, ctx int64) (int32, error)
+    GetCtx1CollisionContext(ctx2 context.Context, ctx int64, ctx1 int64) (int32, error)
 }
 
 type GetEntityChannelClient struct {
@@ -89,6 +107,7 @@ type GetEntityClient struct {
 }
 // Compile time interface enforcer
 var _ GetEntityClientInterface = &GetEntityClient{}
+var _ GetEntityContextClientInterface = &GetEntityClient{}
 
 // Deprecated: Use NewGetEntityClientFromProtocol() instead.
 func NewGetEntityClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *GetEntityClient {
@@ -142,6 +161,9 @@ func (c *GetEntityClient) GetEntity(r *GetEntityRequest) (*GetEntityResponse, er
     return c.chClient.GetEntity(nil, r)
 }
 
+func (c *GetEntityClient) GetEntityContext(ctx context.Context, r *GetEntityRequest) (*GetEntityResponse, error) {
+    return c.chClient.GetEntity(ctx, r)
+}
 
 func (c *GetEntityChannelClient) GetBool(ctx context.Context) (bool, error) {
     in := &reqGetEntityGetBool{
@@ -158,6 +180,9 @@ func (c *GetEntityClient) GetBool() (bool, error) {
     return c.chClient.GetBool(nil)
 }
 
+func (c *GetEntityClient) GetBoolContext(ctx context.Context) (bool, error) {
+    return c.chClient.GetBool(ctx)
+}
 
 func (c *GetEntityChannelClient) GetByte(ctx context.Context) (int8, error) {
     in := &reqGetEntityGetByte{
@@ -174,6 +199,9 @@ func (c *GetEntityClient) GetByte() (int8, error) {
     return c.chClient.GetByte(nil)
 }
 
+func (c *GetEntityClient) GetByteContext(ctx context.Context) (int8, error) {
+    return c.chClient.GetByte(ctx)
+}
 
 func (c *GetEntityChannelClient) GetI16(ctx context.Context) (int16, error) {
     in := &reqGetEntityGetI16{
@@ -190,6 +218,9 @@ func (c *GetEntityClient) GetI16() (int16, error) {
     return c.chClient.GetI16(nil)
 }
 
+func (c *GetEntityClient) GetI16Context(ctx context.Context) (int16, error) {
+    return c.chClient.GetI16(ctx)
+}
 
 func (c *GetEntityChannelClient) GetI32(ctx context.Context) (int32, error) {
     in := &reqGetEntityGetI32{
@@ -206,6 +237,9 @@ func (c *GetEntityClient) GetI32() (int32, error) {
     return c.chClient.GetI32(nil)
 }
 
+func (c *GetEntityClient) GetI32Context(ctx context.Context) (int32, error) {
+    return c.chClient.GetI32(ctx)
+}
 
 func (c *GetEntityChannelClient) GetI64(ctx context.Context) (int64, error) {
     in := &reqGetEntityGetI64{
@@ -222,6 +256,9 @@ func (c *GetEntityClient) GetI64() (int64, error) {
     return c.chClient.GetI64(nil)
 }
 
+func (c *GetEntityClient) GetI64Context(ctx context.Context) (int64, error) {
+    return c.chClient.GetI64(ctx)
+}
 
 func (c *GetEntityChannelClient) GetDouble(ctx context.Context) (float64, error) {
     in := &reqGetEntityGetDouble{
@@ -238,6 +275,9 @@ func (c *GetEntityClient) GetDouble() (float64, error) {
     return c.chClient.GetDouble(nil)
 }
 
+func (c *GetEntityClient) GetDoubleContext(ctx context.Context) (float64, error) {
+    return c.chClient.GetDouble(ctx)
+}
 
 func (c *GetEntityChannelClient) GetString(ctx context.Context) (string, error) {
     in := &reqGetEntityGetString{
@@ -254,6 +294,9 @@ func (c *GetEntityClient) GetString() (string, error) {
     return c.chClient.GetString(nil)
 }
 
+func (c *GetEntityClient) GetStringContext(ctx context.Context) (string, error) {
+    return c.chClient.GetString(ctx)
+}
 
 func (c *GetEntityChannelClient) GetBinary(ctx context.Context) ([]byte, error) {
     in := &reqGetEntityGetBinary{
@@ -270,6 +313,9 @@ func (c *GetEntityClient) GetBinary() ([]byte, error) {
     return c.chClient.GetBinary(nil)
 }
 
+func (c *GetEntityClient) GetBinaryContext(ctx context.Context) ([]byte, error) {
+    return c.chClient.GetBinary(ctx)
+}
 
 func (c *GetEntityChannelClient) GetMap(ctx context.Context) (map[string]string, error) {
     in := &reqGetEntityGetMap{
@@ -286,6 +332,9 @@ func (c *GetEntityClient) GetMap() (map[string]string, error) {
     return c.chClient.GetMap(nil)
 }
 
+func (c *GetEntityClient) GetMapContext(ctx context.Context) (map[string]string, error) {
+    return c.chClient.GetMap(ctx)
+}
 
 func (c *GetEntityChannelClient) GetSet(ctx context.Context) ([]string, error) {
     in := &reqGetEntityGetSet{
@@ -302,6 +351,9 @@ func (c *GetEntityClient) GetSet() ([]string, error) {
     return c.chClient.GetSet(nil)
 }
 
+func (c *GetEntityClient) GetSetContext(ctx context.Context) ([]string, error) {
+    return c.chClient.GetSet(ctx)
+}
 
 func (c *GetEntityChannelClient) GetList(ctx context.Context) ([]string, error) {
     in := &reqGetEntityGetList{
@@ -318,6 +370,9 @@ func (c *GetEntityClient) GetList() ([]string, error) {
     return c.chClient.GetList(nil)
 }
 
+func (c *GetEntityClient) GetListContext(ctx context.Context) ([]string, error) {
+    return c.chClient.GetList(ctx)
+}
 
 func (c *GetEntityChannelClient) GetLegacyStuff(ctx context.Context, numPos int64, numNeg1 int64, numNeg2 int64) (int32, error) {
     in := &reqGetEntityGetLegacyStuff{
@@ -337,6 +392,9 @@ func (c *GetEntityClient) GetLegacyStuff(numPos int64, numNeg1 int64, numNeg2 in
     return c.chClient.GetLegacyStuff(nil, numPos, numNeg1, numNeg2)
 }
 
+func (c *GetEntityClient) GetLegacyStuffContext(ctx context.Context, numPos int64, numNeg1 int64, numNeg2 int64) (int32, error) {
+    return c.chClient.GetLegacyStuff(ctx, numPos, numNeg1, numNeg2)
+}
 
 func (c *GetEntityChannelClient) GetCtxCollision(ctx1 context.Context, ctx int64) (int32, error) {
     in := &reqGetEntityGetCtxCollision{
@@ -354,6 +412,9 @@ func (c *GetEntityClient) GetCtxCollision(ctx int64) (int32, error) {
     return c.chClient.GetCtxCollision(nil, ctx)
 }
 
+func (c *GetEntityClient) GetCtxCollisionContext(ctx1 context.Context, ctx int64) (int32, error) {
+    return c.chClient.GetCtxCollision(ctx1, ctx)
+}
 
 func (c *GetEntityChannelClient) GetCtx1Collision(ctx2 context.Context, ctx int64, ctx1 int64) (int32, error) {
     in := &reqGetEntityGetCtx1Collision{
@@ -372,6 +433,9 @@ func (c *GetEntityClient) GetCtx1Collision(ctx int64, ctx1 int64) (int32, error)
     return c.chClient.GetCtx1Collision(nil, ctx, ctx1)
 }
 
+func (c *GetEntityClient) GetCtx1CollisionContext(ctx2 context.Context, ctx int64, ctx1 int64) (int32, error) {
+    return c.chClient.GetCtx1Collision(ctx2, ctx, ctx1)
+}
 
 type reqGetEntityGetEntity struct {
     R *GetEntityRequest `thrift:"r,1" json:"r" db:"r"`

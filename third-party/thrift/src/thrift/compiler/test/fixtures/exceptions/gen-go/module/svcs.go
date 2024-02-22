@@ -36,13 +36,20 @@ type RaiserChannelClientInterface interface {
     Raiser
 }
 
-// Deprecated: Migrate to ChannelClient and use RaiserChannelClientInterface instead.
 type RaiserClientInterface interface {
     thrift.ClientInterface
     DoBland() (error)
     DoRaise() (error)
     Get200() (string, error)
     Get500() (string, error)
+}
+
+type RaiserContextClientInterface interface {
+    RaiserClientInterface
+    DoBlandContext(ctx context.Context) (error)
+    DoRaiseContext(ctx context.Context) (error)
+    Get200Context(ctx context.Context) (string, error)
+    Get500Context(ctx context.Context) (string, error)
 }
 
 type RaiserChannelClient struct {
@@ -67,6 +74,7 @@ type RaiserClient struct {
 }
 // Compile time interface enforcer
 var _ RaiserClientInterface = &RaiserClient{}
+var _ RaiserContextClientInterface = &RaiserClient{}
 
 // Deprecated: Use NewRaiserClientFromProtocol() instead.
 func NewRaiserClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *RaiserClient {
@@ -119,6 +127,9 @@ func (c *RaiserClient) DoBland() (error) {
     return c.chClient.DoBland(nil)
 }
 
+func (c *RaiserClient) DoBlandContext(ctx context.Context) (error) {
+    return c.chClient.DoBland(ctx)
+}
 
 func (c *RaiserChannelClient) DoRaise(ctx context.Context) (error) {
     in := &reqRaiserDoRaise{
@@ -141,6 +152,9 @@ func (c *RaiserClient) DoRaise() (error) {
     return c.chClient.DoRaise(nil)
 }
 
+func (c *RaiserClient) DoRaiseContext(ctx context.Context) (error) {
+    return c.chClient.DoRaise(ctx)
+}
 
 func (c *RaiserChannelClient) Get200(ctx context.Context) (string, error) {
     in := &reqRaiserGet200{
@@ -157,6 +171,9 @@ func (c *RaiserClient) Get200() (string, error) {
     return c.chClient.Get200(nil)
 }
 
+func (c *RaiserClient) Get200Context(ctx context.Context) (string, error) {
+    return c.chClient.Get200(ctx)
+}
 
 func (c *RaiserChannelClient) Get500(ctx context.Context) (string, error) {
     in := &reqRaiserGet500{
@@ -179,6 +196,9 @@ func (c *RaiserClient) Get500() (string, error) {
     return c.chClient.Get500(nil)
 }
 
+func (c *RaiserClient) Get500Context(ctx context.Context) (string, error) {
+    return c.chClient.Get500(ctx)
+}
 
 type reqRaiserDoBland struct {
 }

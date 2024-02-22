@@ -11,4 +11,5 @@ mod write;
 
 pub use context::Context;
 pub use print::external_print_unit as print_unit;
+pub use print_opcode::PrintOpcode;
 pub use write::Error;

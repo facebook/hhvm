@@ -57,14 +57,14 @@ use crate::print;
 
 #[derive(PrintOpcode)]
 #[print_opcode(override = "SSwitch")]
-pub(crate) struct PrintOpcode<'a, 'b> {
+pub struct PrintOpcode<'a, 'b> {
     pub(crate) opcode: &'b Opcode<'a>,
     pub(crate) dv_labels: &'b HashSet<Label>,
     pub(crate) local_names: &'b [Str<'a>],
 }
 
 impl<'a, 'b> PrintOpcode<'a, 'b> {
-    pub(crate) fn new(
+    pub fn new(
         opcode: &'b Opcode<'a>,
         dv_labels: &'b HashSet<Label>,
         local_names: &'b [Str<'a>],

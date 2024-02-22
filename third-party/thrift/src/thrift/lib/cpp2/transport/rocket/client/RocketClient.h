@@ -33,6 +33,7 @@
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/async/RpcOptions.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
+#include <thrift/lib/cpp2/transport/rocket/client/KeepAliveWatcher.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RequestContext.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RequestContextQueue.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketStreamServerCallback.h>
@@ -371,7 +372,8 @@ class RocketClient : public virtual folly::DelayedDestruction,
   folly::AsyncTransport::UniquePtr socket_;
   folly::Function<void()> onDetachable_;
   folly::exception_wrapper error_;
-
+  std::unique_ptr<KeepAliveWatcher, folly::DelayedDestruction::Destructor>
+      keepAliveWatcher_;
   class FirstResponseTimeout : public folly::HHWheelTimer::Callback {
    public:
     FirstResponseTimeout(RocketClient& client, StreamId streamId)

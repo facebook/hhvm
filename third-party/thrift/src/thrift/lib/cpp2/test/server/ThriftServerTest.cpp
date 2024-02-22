@@ -100,6 +100,7 @@ using std::string;
 THRIFT_FLAG_DECLARE_bool(server_rocket_upgrade_enabled);
 THRIFT_FLAG_DECLARE_bool(rocket_allocating_strategy_parser);
 DECLARE_int32(thrift_cpp2_protocol_reader_string_limit);
+
 namespace {
 constexpr auto kForcedQueueTimeout = 10ms /*ms*/;
 } // namespace

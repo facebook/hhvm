@@ -70,7 +70,7 @@ class RocketClientTest : public testing::Test {
     return RocketClientChannel::newChannel(std::move(socket));
   }
 
-  std::string getRandomString(size_t len) {
+  static std::string getRandomString(size_t len) {
     auto randomChar = []() -> char {
       return 32 + (folly::Random::rand32() % 95);
     };
@@ -87,9 +87,13 @@ class RocketClientTest : public testing::Test {
     }
 
     void sync_echoRequest(
-        ::std::string& _return, std::unique_ptr<::std::string>) override {
+        ::std::string& _return, std::unique_ptr<::std::string> input) override {
       hit++;
-      _return = "__";
+      if (*input == "big") {
+        _return = getRandomString(1024 * 1024 * 80);
+      } else {
+        _return = "__";
+      }
     }
 
     int getHit() { return hit; }
@@ -115,7 +119,7 @@ class RocketClientTest : public testing::Test {
 // of payload is 80MB for now to ensure even in test environment, it will take
 // a long time to transfer. This test can be flaky if the local transfer speed
 // increased drastically.
-TEST_F(RocketClientTest, KeepAliveWatcherTest) {
+TEST_F(RocketClientTest, KeepAliveWatcherLargeRequestTest) {
   FLAGS_rocket_client_enable_keep_alive = true;
   // Smaller numbers to make keep_alive sensitive.
   FLAGS_rocket_client_keep_alive_interval_ms = 10;
@@ -144,10 +148,15 @@ TEST_F(RocketClientTest, KeepAliveWatcherTest) {
   EXPECT_THROW(
       client->sync_echoRequest(response, getRandomString(payloadSize)),
       TTransportException);
-
-  // The big payload should not hit server.
+  // Connection was closed, so next call should fail with NOT_OPEN.
+  try {
+    client->sync_echoRequest(response, "");
+    FAIL() << "Expected exception.";
+  } catch (const TTransportException& ex) {
+    EXPECT_EQ(ex.getType(), TTransportException::NOT_OPEN);
+  }
+  // Only the first call should hit server.
   EXPECT_EQ(testInterface->getHit(), 1);
-
   /*
    * Turn-off Keep Alive and Do the same thing. The large payload should not
    * have problem finishing transfer.
@@ -162,6 +171,69 @@ TEST_F(RocketClientTest, KeepAliveWatcherTest) {
   EXPECT_EQ(response, "__");
 
   EXPECT_EQ(testInterface->getHit(), 3);
+}
+
+// Send a small request, expecting a big response. Such that the server will
+// process the request, however KeepAlive will be blocked during the response,
+// and close the connection.
+TEST_F(RocketClientTest, KeepAliveWatcherLargeResponseTest) {
+  FLAGS_rocket_client_enable_keep_alive = true;
+  // Smaller numbers to make keep_alive sensitive.
+  FLAGS_rocket_client_keep_alive_interval_ms = 10;
+  FLAGS_rocket_client_keep_alive_timeout_ms = 100;
+
+  auto testInterface = std::make_shared<TestInterface>();
+  ScopedServerInterfaceThread runner(testInterface);
+
+  auto client = runner.newStickyClient<apache::thrift::Client<TestService>>(
+      nullptr, [&](auto socket) {
+        // Set send buffer size to minimum to similate slow network.
+        socket->setSendBufSize(0);
+        return makeChannel(std::move(socket));
+      });
+
+  // Call to shrink server socket buffer
+  client->semifuture_echoInt(0).get();
+  std::string response;
+  // Test normal client reads (timeout should not fire).
+  client->sync_echoRequest(response, "");
+
+  // The big response will throw EOF.
+  try {
+    client->sync_echoRequest(response, "big");
+    FAIL() << "Expected exception.";
+  } catch (const TTransportException& ex) {
+    EXPECT_EQ(ex.getType(), TTransportException::END_OF_FILE);
+  }
+  // Connection was closed, so next call should fail with NOT_OPEN.
+  try {
+    client->sync_echoRequest(response, "");
+    FAIL() << "Expected exception.";
+  } catch (const TTransportException& ex) {
+    EXPECT_EQ(ex.getType(), TTransportException::NOT_OPEN);
+  }
+
+  // First two calls hit the server.
+  EXPECT_EQ(testInterface->getHit(), 2);
+
+  /*
+   * Turn-off Keep Alive and Do the same thing. The large payload should not
+   * have problem finishing transfer.
+   */
+  FLAGS_rocket_client_enable_keep_alive = false;
+
+  auto client1 = runner.newStickyClient<apache::thrift::Client<TestService>>(
+      nullptr, [&](auto socket) { return makeChannel(std::move(socket)); });
+
+  // Call to shrink server socket buffer
+  client1->semifuture_echoInt(0).get();
+  // Test normal client1 reads (timeout should not fire).
+  client1->sync_echoRequest(response, "");
+
+  // Both payload should hit server. The big response should have no problem.
+  client1->sync_echoRequest(response, "big");
+  EXPECT_EQ(response.size(), 1024 * 1024 * 80);
+  EXPECT_EQ(testInterface->getHit(), 4);
 }
 
 // This test ensure KeepAlive works as normal when connection was bouncing

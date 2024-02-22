@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package thrift
+package rocket
 
 import (
 	rsocket "github.com/rsocket/rsocket-go"

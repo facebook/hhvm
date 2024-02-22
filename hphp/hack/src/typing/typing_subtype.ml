@@ -3455,13 +3455,13 @@ end = struct
       remain
       props
       (on_error : Typing_error.Reasons_callback.t option) =
-    let props_to_env = props_to_env ty_sub ty_super in
+    let props_to_env_help = props_to_env ty_sub ty_super in
     match props with
     | [] -> (env, List.rev ty_errs, List.rev remain)
     | prop :: props ->
       (match prop with
       | TL.Conj props' ->
-        props_to_env env ty_errs remain (props' @ props) on_error
+        props_to_env_help env ty_errs remain (props' @ props) on_error
       | TL.Disj (ty_err_opt, disj_props) ->
         (* For now, just find the first prop in the disjunction that works *)
         let rec try_disj disj_props =
@@ -3469,14 +3469,14 @@ end = struct
           | [] ->
             (* For now let it fail later when calling
                process_simplify_subtype_result on the remaining constraints. *)
-            props_to_env env (ty_err_opt :: ty_errs) remain props on_error
+            props_to_env_help env (ty_err_opt :: ty_errs) remain props on_error
           | prop :: disj_props' ->
             let (env', ty_errs', other) =
-              props_to_env env [] remain [prop] on_error
+              props_to_env_help env [] remain [prop] on_error
             in
             if List.is_empty ty_errs' || List.for_all ty_errs' ~f:Option.is_none
             then
-              props_to_env env' ty_errs (remain @ other) props on_error
+              props_to_env_help env' ty_errs (remain @ other) props on_error
             else
               try_disj disj_props'
         in
@@ -3524,7 +3524,12 @@ end = struct
               ty_sub
               on_error
           in
-          props_to_env env ty_errs remain (prop1 :: prop2 :: props) on_error
+          props_to_env_help
+            env
+            ty_errs
+            remain
+            (prop1 :: prop2 :: props)
+            on_error
         | (Some var, _) ->
           let (env, prop) =
             add_tyvar_upper_bound_and_close
@@ -3534,7 +3539,7 @@ end = struct
               ty_super
               on_error
           in
-          props_to_env env ty_errs remain (prop :: props) on_error
+          props_to_env_help env ty_errs remain (prop :: props) on_error
         | (_, Some var) ->
           let (env, prop) =
             add_tyvar_lower_bound_and_close
@@ -3544,8 +3549,8 @@ end = struct
               ty_sub
               on_error
           in
-          props_to_env env ty_errs remain (prop :: props) on_error
-        | _ -> props_to_env env ty_errs (prop :: remain) props on_error))
+          props_to_env_help env ty_errs remain (prop :: props) on_error
+        | _ -> props_to_env_help env ty_errs (prop :: remain) props on_error))
 
   and prop_to_env ty_sub ty_super env prop on_error =
     let (env, ty_errs, props') =

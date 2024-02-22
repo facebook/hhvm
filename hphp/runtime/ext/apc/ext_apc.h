@@ -21,6 +21,7 @@
 #include <set>
 #include <vector>
 #include "hphp/runtime/server/upload.h"
+#include "hphp/runtime/base/concurrent-shared-store.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -105,6 +106,15 @@ Variant apc_unserialize(const char* data, int len, bool pure);
 
 ///////////////////////////////////////////////////////////////////////////////
 // debugging support
+typedef hphp_fast_string_set APCKeySet;
+typedef hphp_fast_string_map<HPHP::Optional<std::string>> APCEntryMap;
+APCKeySet apc_debug_get_keys();
+APCEntryMap apc_debug_get_all_entries();
+APCEntryMap apc_debug_get_entries_with_prefix(const std::string& prefix,
+                                  HPHP::Optional<uint32_t> count);
+std::vector<EntryInfo> apc_debug_get_all_entry_info();
+std::vector<EntryInfo> apc_debug_get_random_entry_info(uint32_t count);
+
 bool apc_dump(const char *filename, bool keyOnly, bool metaDump);
 bool apc_dump_prefix(const char *filename,
                      const std::string &prefix,

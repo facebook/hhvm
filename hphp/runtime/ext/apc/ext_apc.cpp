@@ -36,7 +36,6 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/concurrent-shared-store.h"
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/ini-setting.h"
@@ -731,6 +730,27 @@ Variant apc_unserialize(const char* data, int len, bool pure) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // debugging support
+
+APCKeySet apc_debug_get_keys() {
+  return apc_store().debugGetKeys();
+}
+
+APCEntryMap apc_debug_get_all_entries() {
+  return apc_store().debugGetEntries(std::nullopt, std::nullopt);
+}
+
+APCEntryMap apc_debug_get_entries_with_prefix(const std::string& prefix,
+                                              HPHP::Optional<uint32_t> count) {
+  return apc_store().debugGetEntries(prefix, count);
+}
+
+std::vector<EntryInfo> apc_debug_get_all_entry_info() {
+  return apc_store().getEntriesInfo();
+}
+
+std::vector<EntryInfo> apc_debug_get_random_entry_info(uint32_t count) {
+  return apc_store().sampleEntriesInfo(count);
+}
 
 bool apc_dump(const char *filename, bool keyOnly, bool metaDump) {
   DumpMode mode;

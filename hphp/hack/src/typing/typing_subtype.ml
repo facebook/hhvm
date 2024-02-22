@@ -580,9 +580,9 @@ module rec Subtype : sig
   val simplify_subtype_i :
     subtype_env:Subtype_env.t ->
     sub_supportdyn:Reason.t option ->
-    ?this_ty:Typing_defs.locl_ty option ->
-    ?super_like:bool ->
-    ?super_supportdyn:bool ->
+    this_ty:Typing_defs.locl_ty option ->
+    super_like:bool ->
+    super_supportdyn:bool ->
     Typing_defs.internal_type ->
     Typing_defs.internal_type ->
     Typing_env_types.env ->
@@ -797,11 +797,17 @@ end = struct
         |> simplify_subtype_i
              ~subtype_env
              ~sub_supportdyn
+             ~this_ty:None
+             ~super_like:false
+             ~super_supportdyn:false
              (LoclType lty_sub)
              ty_super
         &&& simplify_subtype_i
               ~subtype_env
               ~sub_supportdyn
+              ~this_ty:None
+              ~super_like:false
+              ~super_supportdyn:false
               (ConstraintType cty_sub)
               ty_super
       | (_, TCintersection (lty_sub, cty_sub)) ->
@@ -809,11 +815,17 @@ end = struct
         |> simplify_subtype_i
              ~subtype_env
              ~sub_supportdyn
+             ~this_ty:None
+             ~super_like:false
+             ~super_supportdyn:false
              (LoclType lty_sub)
              ty_super
         ||| simplify_subtype_i
               ~subtype_env
               ~sub_supportdyn
+              ~this_ty:None
+              ~super_like:false
+              ~super_supportdyn:false
               (ConstraintType cty_sub)
               ty_super
       | _ -> invalid ~fail env
@@ -845,7 +857,9 @@ end = struct
               &&& simplify_subtype_i
                     ~subtype_env
                     ~sub_supportdyn
+                    ~this_ty:None
                     ~super_like
+                    ~super_supportdyn:false
                     (LoclType ty_sub)
                     ty_super)
         in
@@ -898,6 +912,9 @@ end = struct
           simplify_subtype_i
             ~subtype_env
             ~sub_supportdyn
+            ~this_ty:None
+            ~super_like:false
+            ~super_supportdyn:false
             (LoclType ty_sub)
             ty_super
             env
@@ -917,6 +934,7 @@ end = struct
                     ~sub_supportdyn
                     ~this_ty
                     ~super_like
+                    ~super_supportdyn:false
                     ty_sub
                     ty_super))
       | (_, Tgeneric (name_sub, tyargs)) ->
@@ -976,6 +994,8 @@ end = struct
                      ~subtype_env
                      ~sub_supportdyn
                      ~this_ty
+                     ~super_like:false
+                     ~super_supportdyn:false
                      tmixed
                      ty_super
               | [ty] ->
@@ -984,6 +1004,7 @@ end = struct
                   ~sub_supportdyn
                   ~this_ty
                   ~super_like
+                  ~super_supportdyn:false
                   (LoclType ty)
                   ty_super
                   env
@@ -995,6 +1016,7 @@ end = struct
                       ~sub_supportdyn
                       ~this_ty
                       ~super_like
+                      ~super_supportdyn:false
                       (LoclType ty)
                       ty_super
             in
@@ -1022,6 +1044,7 @@ end = struct
           ~sub_supportdyn
           ~this_ty
           ~super_like
+          ~super_supportdyn:false
           (LoclType ty)
           ty_super
           env
@@ -1032,6 +1055,7 @@ end = struct
           ~sub_supportdyn
           ~this_ty
           ~super_like
+          ~super_supportdyn:false
           (LoclType ty)
           ty_super
           env
@@ -1041,9 +1065,9 @@ end = struct
   and simplify_subtype_i
       ~(subtype_env : Subtype_env.t)
       ~(sub_supportdyn : Reason.t option)
-      ?(this_ty : locl_ty option = None)
-      ?(super_like : bool = false)
-      ?(super_supportdyn : bool = false)
+      ~(this_ty : locl_ty option)
+      ~(super_like : bool)
+      ~(super_supportdyn : bool)
       (ty_sub : internal_type)
       (ty_super : internal_type)
       env : env * TL.subtype_prop =
@@ -1165,11 +1189,17 @@ end = struct
             |> simplify_subtype_i
                  ~subtype_env
                  ~sub_supportdyn
+                 ~this_ty:None
+                 ~super_like:false
+                 ~super_supportdyn:false
                  ty_sub
                  (LoclType lty)
             &&& simplify_subtype_i
                   ~subtype_env
                   ~sub_supportdyn
+                  ~this_ty:None
+                  ~super_like:false
+                  ~super_supportdyn:false
                   ty_sub
                   (ConstraintType cty))
         | (_, TCunion (maybe_null, maybe_has_member))
@@ -1203,11 +1233,17 @@ end = struct
             |> simplify_subtype_i
                  ~subtype_env
                  ~sub_supportdyn
+                 ~this_ty:None
+                 ~super_like:false
+                 ~super_supportdyn:false
                  ty_sub
                  (ConstraintType cty_super)
             ||| simplify_subtype_i
                   ~subtype_env
                   ~sub_supportdyn
+                  ~this_ty:None
+                  ~super_like:false
+                  ~super_supportdyn:false
                   ty_sub
                   (LoclType lty_super)
             ||| default_subtype_help
@@ -1221,6 +1257,8 @@ end = struct
                    ~subtype_env
                    ~sub_supportdyn
                    ~this_ty
+                   ~super_like:false
+                   ~super_supportdyn:false
                    (LoclType ty_null)
                    ty_super
                    env)
@@ -1228,6 +1266,8 @@ end = struct
                     ~subtype_env
                     ~sub_supportdyn
                     ~this_ty
+                    ~super_like:false
+                    ~super_supportdyn:false
                     (LoclType ty)
                     ty_super
             | (_, (Tintersection _ | Tunion _ | Tvar _)) ->
@@ -1237,11 +1277,17 @@ end = struct
               |> simplify_subtype_i
                    ~subtype_env
                    ~sub_supportdyn
+                   ~this_ty:None
+                   ~super_like:false
+                   ~super_supportdyn:false
                    ty_sub
                    (ConstraintType cty_super)
               ||| simplify_subtype_i
                     ~subtype_env
                     ~sub_supportdyn
+                    ~this_ty:None
+                    ~super_like:false
+                    ~super_supportdyn:false
                     ty_sub
                     (LoclType lty_super)
               ||| default_subtype_help))
@@ -1611,6 +1657,7 @@ end = struct
                      ~sub_supportdyn
                      ~this_ty
                      ~super_like:false
+                     ~super_supportdyn:false
                      (LoclType ty_sub)
                      (LoclType ty_super)
               else
@@ -1633,6 +1680,8 @@ end = struct
                     ~subtype_env
                     ~sub_supportdyn
                     ~this_ty
+                    ~super_like:false
+                    ~super_supportdyn:false
                     ty_sub
                     ty_super))
       (* Empty union encodes the bottom type nothing *)
@@ -1644,6 +1693,7 @@ end = struct
           ~sub_supportdyn
           ~this_ty
           ~super_like
+          ~super_supportdyn:false
           ty_sub
           (LoclType ty_super')
           env
@@ -1680,6 +1730,8 @@ end = struct
               ~subtype_env
               ~sub_supportdyn
               ~this_ty
+              ~super_like:false
+              ~super_supportdyn:false
               ty_sub
               (LoclType (MakeType.dynamic r))
               env
@@ -1803,6 +1855,7 @@ end = struct
                          ~sub_supportdyn
                          ~this_ty
                          ~super_like:true
+                         ~super_supportdyn:false
                          ty_sub
                          (LoclType ty)
                     ||| dyn_finish ty
@@ -1821,6 +1874,8 @@ end = struct
                           ~subtype_env
                           ~sub_supportdyn
                           ~this_ty
+                          ~super_like:false
+                          ~super_supportdyn:false
                           ty_sub
                           (LoclType ty)
                   in
@@ -1831,6 +1886,7 @@ end = struct
               ~sub_supportdyn
               ~this_ty
               ~super_like:delay_push
+              ~super_supportdyn:false
               ty_sub
               (LoclType ty)
               env
@@ -1854,6 +1910,7 @@ end = struct
                      ~sub_supportdyn
                      ~this_ty
                      ~super_like
+                     ~super_supportdyn:false
                      ty_sub
                      ty
                 ||| try_disjuncts tys
@@ -1910,6 +1967,8 @@ end = struct
                    ~subtype_env
                    ~sub_supportdyn
                    ~this_ty
+                   ~super_like:false
+                   ~super_supportdyn:false
                    (LoclType ty_null)
                    ety_super
                    env)
@@ -1917,6 +1976,8 @@ end = struct
                     ~subtype_env
                     ~sub_supportdyn
                     ~this_ty
+                    ~super_like:false
+                    ~super_supportdyn:false
                     (LoclType ty)
                     ety_super
             | (_, Tintersection tyl)
@@ -1941,6 +2002,8 @@ end = struct
                           ~subtype_env
                           ~sub_supportdyn
                           ~this_ty
+                          ~super_like:false
+                          ~super_supportdyn:false
                           ty_sub
                           ty_super)
               in
@@ -2023,7 +2086,9 @@ end = struct
               simplify_subtype_i
                 ~subtype_env
                 ~sub_supportdyn
+                ~this_ty:None
                 ~super_like
+                ~super_supportdyn:false
                 ty_sub'
                 (LoclType arg_ty_super)
                 env
@@ -3059,6 +3124,7 @@ end = struct
               ~sub_supportdyn
               ~this_ty
               ~super_like
+              ~super_supportdyn:false
               ety_sub
               (ConstraintType htm_ty))
         &&&
@@ -3070,6 +3136,7 @@ end = struct
           ~sub_supportdyn
           ~this_ty
           ~super_like
+          ~super_supportdyn:false
           ety_sub
           (LoclType ty_super)
       | (_, Tclass ((_, class_name), exact_super, tyl_super)) ->
@@ -3251,6 +3318,8 @@ end = struct
             ~this_ty
             ~sub_supportdyn
             ~subtype_env
+            ~super_like:false
+            ~super_supportdyn:false
             (LoclType inter_ty)
             (LoclType (mk tvar_ty))
             env
@@ -3458,6 +3527,8 @@ end = struct
           ~subtype_env
           ~sub_supportdyn:None
           ~this_ty
+          ~super_like:false
+          ~super_supportdyn:false
           (LoclType bndty)
           htmty
           env
@@ -5085,6 +5156,8 @@ end = struct
              None)
         ~sub_supportdyn
         ~this_ty
+        ~super_like:false
+        ~super_supportdyn:false
         (* It is weird that this can cause errors, but I am wary to discard them.
          * Using the generic unify_error to maintain current behavior. *)
         ty1
@@ -5329,6 +5402,9 @@ end = struct
                        ~in_transitive_closure:true
                        on_error)
                   ~sub_supportdyn:None
+                  ~this_ty:None
+                  ~super_like:false
+                  ~super_supportdyn:false
                   lower_bound
                   upper_bound
                   env
@@ -5392,6 +5468,9 @@ end = struct
                        ~in_transitive_closure:true
                        on_error)
                   ~sub_supportdyn:None
+                  ~this_ty:None
+                  ~super_like:false
+                  ~super_supportdyn:false
                   lower_bound
                   upper_bound
                   env
@@ -5658,6 +5737,8 @@ end = struct
         ~subtype_env
         ~sub_supportdyn
         ~this_ty
+        ~super_like:false
+        ~super_supportdyn:false
         ty_sub
         ty_super
         env
@@ -6195,6 +6276,9 @@ let simplify_subtype_i ?(is_coeffect = false) env ty_sub ty_super ~on_error =
          ~log_level:2
          on_error)
     ~sub_supportdyn:None
+    ~this_ty:None
+    ~super_like:false
+    ~super_supportdyn:false
     ty_sub
     ty_super
     env

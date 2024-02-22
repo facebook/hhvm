@@ -5920,6 +5920,32 @@ let decompose_subtype_add_bound
         ty_sub
   | (_, _) -> env
 
+let rec decompose_subtype_add_prop env prop =
+  match prop with
+  | TL.Conj props ->
+    List.fold_left ~f:decompose_subtype_add_prop ~init:env props
+  | TL.Disj (_, []) -> Env.mark_inconsistent env
+  | TL.Disj (_, [prop']) -> decompose_subtype_add_prop env prop'
+  | TL.Disj _ ->
+    let callable_pos = env.genv.callable_pos in
+    Typing_log.log_prop
+      2
+      (Pos_or_decl.of_raw_pos callable_pos)
+      "decompose_subtype_add_prop"
+      env
+      prop;
+    env
+  | TL.IsSubtype (coerce, LoclType ty1, LoclType ty2) ->
+    decompose_subtype_add_bound ~coerce env ty1 ty2
+  | TL.IsSubtype _ ->
+    (* Subtyping queries between locl types are not creating
+       constraint types only if require_soundness is unset.
+       Otherwise type refinement subtyping queries may create
+       Thas_type_member() constraint types. *)
+    failwith
+      ("Subtyping locl types in completeness mode should yield "
+      ^ "propositions involving locl types only.")
+
 (* Given two types that we know are in a subtype relationship
  *   ty_sub <: ty_super
  * add to env.tpenv any bounds on generic type parameters that must
@@ -5938,7 +5964,7 @@ let decompose_subtype_add_bound
  * hold, and makes updates to bounds on generic parameters that *necessarily*
  * hold in order for t <: u.
  *)
-let rec decompose_subtype
+let decompose_subtype
     (env : env)
     (ty_sub : locl_ty)
     (ty_super : locl_ty)
@@ -5966,34 +5992,8 @@ let rec decompose_subtype
   in
   decompose_subtype_add_prop env prop
 
-and decompose_subtype_add_prop env prop =
-  match prop with
-  | TL.Conj props ->
-    List.fold_left ~f:decompose_subtype_add_prop ~init:env props
-  | TL.Disj (_, []) -> Env.mark_inconsistent env
-  | TL.Disj (_, [prop']) -> decompose_subtype_add_prop env prop'
-  | TL.Disj _ ->
-    let callable_pos = env.genv.callable_pos in
-    Typing_log.log_prop
-      2
-      (Pos_or_decl.of_raw_pos callable_pos)
-      "decompose_subtype_add_prop"
-      env
-      prop;
-    env
-  | TL.IsSubtype (coerce, LoclType ty1, LoclType ty2) ->
-    decompose_subtype_add_bound ~coerce env ty1 ty2
-  | TL.IsSubtype _ ->
-    (* Subtyping queries between locl types are not creating
-       constraint types only if require_soundness is unset.
-       Otherwise type refinement subtyping queries may create
-       Thas_type_member() constraint types. *)
-    failwith
-      ("Subtyping locl types in completeness mode should yield "
-      ^ "propositions involving locl types only.")
-
 (* Decompose a general constraint *)
-and decompose_constraint
+let decompose_constraint
     (env : env)
     (ck : Ast_defs.constraint_kind)
     (ty_sub : locl_ty)

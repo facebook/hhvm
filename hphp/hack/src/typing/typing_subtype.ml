@@ -334,111 +334,123 @@ let find_type_with_exact_negation env tyl =
   in
   find env tyl []
 
-let describe_ty_default env ty =
-  Typing_print.with_blank_tyvars (fun () -> Typing_print.full_strip_ns_i env ty)
+module Pretty : sig
+  val describe_ty_default :
+    Typing_env_types.env -> Typing_defs.internal_type -> string
 
-let describe_ty ~is_coeffect : env -> internal_type -> string =
-  (* Optimization: specialize on partial application, i.e.
-     *    let describe_ty_sub = describe_ty ~is_coeffect in
-     *  will check the flag only once, not every time the function is called *)
-  if not is_coeffect then
-    describe_ty_default
-  else
-    fun env -> function
-     | LoclType ty -> Lazy.force @@ Typing_coeffects.pretty env ty
-     | ty -> describe_ty_default env ty
+  val describe_ty_super :
+    is_coeffect:bool ->
+    Typing_env_types.env ->
+    Typing_defs.internal_type ->
+    string
+end = struct
+  let describe_ty_default env ty =
+    Typing_print.with_blank_tyvars (fun () ->
+        Typing_print.full_strip_ns_i env ty)
 
-let rec describe_ty_super ~is_coeffect env ty =
-  let describe_ty_super = describe_ty_super ~is_coeffect in
-  let print = (describe_ty ~is_coeffect) env in
-  let default () = print ty in
-  match ty with
-  | LoclType ty ->
-    let (env, ty) = Env.expand_type env ty in
-    (match get_node ty with
-    | Tvar v ->
-      let upper_bounds = ITySet.elements (Env.get_tyvar_upper_bounds env v) in
-      (* The constraint graph is transitively closed so we can filter tyvars. *)
-      let upper_bounds =
-        List.filter upper_bounds ~f:(fun t -> not (is_tyvar_i t))
-      in
-      (match upper_bounds with
-      | [] -> "some type not known yet"
-      | tyl ->
-        let (locl_tyl, cstr_tyl) = List.partition_tf tyl ~f:is_locl_type in
-        let sep =
-          match (locl_tyl, cstr_tyl) with
-          | (_ :: _, _ :: _) -> " and "
-          | _ -> ""
+  let describe_ty ~is_coeffect : env -> internal_type -> string =
+    (* Optimization: specialize on partial application, i.e.
+       *    let describe_ty_sub = describe_ty ~is_coeffect in
+       *  will check the flag only once, not every time the function is called *)
+    if not is_coeffect then
+      describe_ty_default
+    else
+      fun env -> function
+       | LoclType ty -> Lazy.force @@ Typing_coeffects.pretty env ty
+       | ty -> describe_ty_default env ty
+
+  let rec describe_ty_super ~is_coeffect env ty =
+    let describe_ty_super = describe_ty_super ~is_coeffect in
+    let print = (describe_ty ~is_coeffect) env in
+    let default () = print ty in
+    match ty with
+    | LoclType ty ->
+      let (env, ty) = Env.expand_type env ty in
+      (match get_node ty with
+      | Tvar v ->
+        let upper_bounds = ITySet.elements (Env.get_tyvar_upper_bounds env v) in
+        (* The constraint graph is transitively closed so we can filter tyvars. *)
+        let upper_bounds =
+          List.filter upper_bounds ~f:(fun t -> not (is_tyvar_i t))
         in
-        let locl_descr =
-          match locl_tyl with
-          | [] -> ""
-          | tyl ->
-            "of type "
-            ^ (String.concat ~sep:" & " (List.map tyl ~f:print)
-              |> Markdown_lite.md_codify)
+        (match upper_bounds with
+        | [] -> "some type not known yet"
+        | tyl ->
+          let (locl_tyl, cstr_tyl) = List.partition_tf tyl ~f:is_locl_type in
+          let sep =
+            match (locl_tyl, cstr_tyl) with
+            | (_ :: _, _ :: _) -> " and "
+            | _ -> ""
+          in
+          let locl_descr =
+            match locl_tyl with
+            | [] -> ""
+            | tyl ->
+              "of type "
+              ^ (String.concat ~sep:" & " (List.map tyl ~f:print)
+                |> Markdown_lite.md_codify)
+          in
+          let cstr_descr =
+            String.concat
+              ~sep:" and "
+              (List.map cstr_tyl ~f:(describe_ty_super env))
+          in
+          "something " ^ locl_descr ^ sep ^ cstr_descr)
+      | Toption ty when is_tyvar ty ->
+        "`null` or " ^ describe_ty_super env (LoclType ty)
+      | _ -> Markdown_lite.md_codify (default ()))
+    | ConstraintType ty ->
+      (match deref_constraint_type ty with
+      | (_, Thas_member hm) ->
+        let {
+          hm_name = (_, name);
+          hm_type = _;
+          hm_class_id = _;
+          hm_explicit_targs = targs;
+        } =
+          hm
         in
-        let cstr_descr =
-          String.concat
-            ~sep:" and "
-            (List.map cstr_tyl ~f:(describe_ty_super env))
-        in
-        "something " ^ locl_descr ^ sep ^ cstr_descr)
-    | Toption ty when is_tyvar ty ->
-      "`null` or " ^ describe_ty_super env (LoclType ty)
-    | _ -> Markdown_lite.md_codify (default ()))
-  | ConstraintType ty ->
-    (match deref_constraint_type ty with
-    | (_, Thas_member hm) ->
-      let {
-        hm_name = (_, name);
-        hm_type = _;
-        hm_class_id = _;
-        hm_explicit_targs = targs;
-      } =
-        hm
-      in
-      (match targs with
-      | None -> Printf.sprintf "an object with property `%s`" name
-      | Some _ -> Printf.sprintf "an object with method `%s`" name)
-    | (_, Thas_type_member htm) ->
-      let { htm_id = id; htm_lower = lo; htm_upper = up } = htm in
-      if phys_equal lo up then
-        (* We use physical equality as a heuristic to generate
-           slightly more readable descriptions. *)
+        (match targs with
+        | None -> Printf.sprintf "an object with property `%s`" name
+        | Some _ -> Printf.sprintf "an object with method `%s`" name)
+      | (_, Thas_type_member htm) ->
+        let { htm_id = id; htm_lower = lo; htm_upper = up } = htm in
+        if phys_equal lo up then
+          (* We use physical equality as a heuristic to generate
+             slightly more readable descriptions. *)
+          Printf.sprintf
+            "a class with `{type %s = %s}`"
+            id
+            (describe_ty ~is_coeffect:false env (LoclType lo))
+        else
+          let bound_desc ~prefix ~is_trivial bnd =
+            if is_trivial env bnd then
+              ""
+            else
+              prefix ^ describe_ty ~is_coeffect:false env (LoclType bnd)
+          in
+          Printf.sprintf
+            "a class with `{type %s%s%s}`"
+            id
+            (bound_desc ~prefix:" super " ~is_trivial:TUtils.is_nothing lo)
+            (bound_desc ~prefix:" as " ~is_trivial:TUtils.is_mixed up)
+      | (_, Tcan_traverse _) -> "an array that can be traversed with foreach"
+      | (_, Tcan_index _) -> "an array that can be indexed"
+      | (_, Tdestructure _) ->
+        Markdown_lite.md_codify
+          (Typing_print.with_blank_tyvars (fun () ->
+               Typing_print.full_strip_ns_i env (ConstraintType ty)))
+      | (_, TCunion (lty, cty)) ->
         Printf.sprintf
-          "a class with `{type %s = %s}`"
-          id
-          (describe_ty ~is_coeffect:false env (LoclType lo))
-      else
-        let bound_desc ~prefix ~is_trivial bnd =
-          if is_trivial env bnd then
-            ""
-          else
-            prefix ^ describe_ty ~is_coeffect:false env (LoclType bnd)
-        in
+          "%s or %s"
+          (describe_ty_super env (LoclType lty))
+          (describe_ty_super env (ConstraintType cty))
+      | (_, TCintersection (lty, cty)) ->
         Printf.sprintf
-          "a class with `{type %s%s%s}`"
-          id
-          (bound_desc ~prefix:" super " ~is_trivial:TUtils.is_nothing lo)
-          (bound_desc ~prefix:" as " ~is_trivial:TUtils.is_mixed up)
-    | (_, Tcan_traverse _) -> "an array that can be traversed with foreach"
-    | (_, Tcan_index _) -> "an array that can be indexed"
-    | (_, Tdestructure _) ->
-      Markdown_lite.md_codify
-        (Typing_print.with_blank_tyvars (fun () ->
-             Typing_print.full_strip_ns_i env (ConstraintType ty)))
-    | (_, TCunion (lty, cty)) ->
-      Printf.sprintf
-        "%s or %s"
-        (describe_ty_super env (LoclType lty))
-        (describe_ty_super env (ConstraintType cty))
-    | (_, TCintersection (lty, cty)) ->
-      Printf.sprintf
-        "%s and %s"
-        (describe_ty_super env (LoclType lty))
-        (describe_ty_super env (ConstraintType cty)))
+          "%s and %s"
+          (describe_ty_super env (LoclType lty))
+          (describe_ty_super env (ConstraintType cty)))
+end
 
 let get_tyvar_opt t =
   match t with
@@ -2251,11 +2263,13 @@ end = struct
           (* TODO *)
           default_subtype_help env
         | LoclType lty_sub ->
-          let dyn = lazy (describe_ty_super ~is_coeffect:false env ety_super) in
+          let dyn =
+            lazy (Pretty.describe_ty_super ~is_coeffect:false env ety_super)
+          in
           let dynamic_part =
             Lazy.map dyn ~f:(fun dyn ->
                 Reason.to_string ("Expected " ^ dyn) r_dynamic)
-          and ty_name = lazy (describe_ty_default env ety_sub)
+          and ty_name = lazy (Pretty.describe_ty_default env ety_sub)
           and pos = Reason.to_pos (get_reason lty_sub) in
           let postprocess =
             if_unsat

@@ -946,8 +946,6 @@ void ThriftServer::setupThreadManager() {
       if (observer) {
         if (getEnableCodel()) {
           observer->queueTimeout();
-        } else {
-          observer->shadowQueueTimeout();
         }
       }
     });

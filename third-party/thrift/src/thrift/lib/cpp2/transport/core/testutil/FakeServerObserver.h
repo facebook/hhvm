@@ -37,7 +37,6 @@ class FakeServerObserver : public apache::thrift::server::TServerObserver {
   std::atomic<size_t> serverOverloaded_{0};
   std::atomic<size_t> receivedRequest_{0};
   std::atomic<size_t> queuedRequests_{0};
-  std::atomic<size_t> shadowQueueTimeout_{0};
   std::atomic<size_t> sentReply_{0};
   std::atomic<size_t> activeRequests_{0};
   std::atomic<size_t> callCompleted_{0};
@@ -95,8 +94,6 @@ class FakeServerObserver : public apache::thrift::server::TServerObserver {
   }
 
   void queueTimeout() override { ++queueTimeout_; }
-
-  void shadowQueueTimeout() override { ++shadowQueueTimeout_; }
 
   void sentReply() override { ++sentReply_; }
 

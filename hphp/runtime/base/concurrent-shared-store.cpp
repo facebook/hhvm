@@ -966,18 +966,12 @@ std::vector<EntryInfo> ConcurrentTableSharedStore::getEntriesInfo() {
  * sval won't be invalidated while this is called.
  */
 static void dumpOneKeyAndValue(std::ostream &out,
-                               const char *key, const StoreValue *sval) {
+                               const std::string& key,
+                               const HPHP::Optional<std::string>& value) {
     out << key;
     out << " #### ";
-    if (!sval->expired()) {
-      out << "INMEMORY ";
-      auto const value = sval->data()->toLocal(false);
-      try {
-        auto valS = internal_serialize(value);
-        out << valS.toCppString();
-      } catch (const Exception& e) {
-        out << "Exception: " << e.what();
-      }
+    if (value) {
+      out << "INMEMORY " << *value;
     }
     out << std::endl;
 }
@@ -997,11 +991,51 @@ static void dumpEntriesInfo(std::vector<EntryInfo> entries, std::ostream& out) {
 }
 
 void ConcurrentTableSharedStore::dumpKeyAndValue(std::ostream & out) {
-  std::unique_lock l(m_lock);
-  out << "Total " << m_vars.size() << std::endl;
-  for (Map::iterator iter = m_vars.begin(); iter != m_vars.end(); ++iter) {
-    dumpOneKeyAndValue(out, iter->first, &iter->second);
+  auto const entries = debugGetEntries(std::nullopt, std::nullopt);
+  out << "Total " << entries.size() << std::endl;
+  for (auto const& e : entries) {
+    dumpOneKeyAndValue(out, e.first, e.second);
   }
+}
+
+hphp_fast_string_set ConcurrentTableSharedStore::debugGetKeys() {
+  hphp_fast_string_set keys;
+  for (auto const& e: getEntriesInfo()) {
+    keys.emplace(e.key);
+  }
+
+  return keys;
+}
+
+hphp_fast_string_map<HPHP::Optional<std::string>>
+ConcurrentTableSharedStore::debugGetEntries(const HPHP::Optional<std::string>& prefix,
+                                                  HPHP::Optional<uint32_t> count) {
+  hphp_fast_string_map<HPHP::Optional<std::string>> entries;
+  std::unique_lock l(m_lock);
+  for (auto const& iter : m_vars) {
+    if (prefix && strncmp(iter.first, prefix->c_str(), prefix->size()) != 0) {
+      // if we asked for a prefix filter, and it does not match, continue
+      continue;
+    }
+
+    if (iter.second.expired()) {
+      entries.emplace(iter.first, std::nullopt);
+    } else {
+      auto const value = iter.second.data()->toLocal(false);
+      try {
+        auto valS = internal_serialize(value);
+        entries.emplace(iter.first, valS.toCppString());
+      } catch (const Exception& e) {
+        entries.emplace(iter.first, std::string{"Exception: ", e.what()});
+      }
+    }
+
+    if (count && entries.size() >= *count) {
+      break;
+    }
+  }
+
+  return entries;
 }
 
 void ConcurrentTableSharedStore::dump(std::ostream& out, DumpMode dumpMode) {
@@ -1013,8 +1047,8 @@ void ConcurrentTableSharedStore::dump(std::ostream& out, DumpMode dumpMode) {
     break;
 
   case DumpMode::KeyOnly:
-    for (auto& e : getEntriesInfo()) {
-      out << e.key << '\n';
+    for (auto& key : debugGetKeys()) {
+      out << key << '\n';
     }
     break;
 
@@ -1030,15 +1064,11 @@ void ConcurrentTableSharedStore::dumpPrefix(std::ostream& out,
                                             const std::string &prefix,
                                             uint32_t count) {
   Logger::Info("dumping apc prefix %s", prefix.c_str());
-  std::unique_lock l(m_lock);
 
-  uint32_t dumped = 0;
-  for (auto const &iter : m_vars) {
-    // dump key only if it matches the prefix
-    if (strncmp(iter.first, prefix.c_str(), prefix.size()) == 0) {
-      dumpOneKeyAndValue(out, iter.first, &iter.second);
-      if (++dumped >= count) break;
-    }
+  auto const entries = debugGetEntries(prefix, count);
+
+  for (auto const &iter : entries) {
+    dumpOneKeyAndValue(out, iter.first, iter.second);
   }
 
   Logger::Info("dumping apc prefix done");

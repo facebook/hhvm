@@ -277,6 +277,20 @@ struct ConcurrentTableSharedStore {
   void init();
 
   /*
+   * Debugging. Return information about the table.
+   *
+   * This is extremely expensive and not recommended for use outside of
+   * development or debugging scenarios.
+   */
+  hphp_fast_string_set debugGetKeys();
+
+  hphp_fast_string_map<HPHP::Optional<std::string>>
+  debugGetEntries(const HPHP::Optional<std::string>& prefix,
+                        HPHP::Optional<uint32_t> count);
+
+  hphp_fast_string_map<EntryInfo> debugGetMetadata();
+
+  /*
    * Debugging.  Dump information about the table to an output stream.
    *
    * This is extremely expensive and not recommended for use outside of

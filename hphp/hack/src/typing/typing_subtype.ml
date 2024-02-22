@@ -459,28 +459,30 @@ let can_traverse_to_iface ct =
   | (Some ct_key, true) ->
     MakeType.async_keyed_iterator ct.ct_reason ct_key ct.ct_val
 
-let liken ~super_like env ty =
-  if super_like then
-    TUtils.make_like env ty
-  else
-    ty
+module Sd = struct
+  let liken ~super_like env ty =
+    if super_like then
+      TUtils.make_like env ty
+    else
+      ty
 
-(* At present, we don't distinguish between coercions (<:D) and subtyping (<:) in the
- * type variable and type parameter environments. When closing the environment we use subtyping (<:).
- * To mitigate against this, when adding a dynamic upper bound wrt coercion,
- * transform it first into supportdyn<mixed>,
- * as t <:D dynamic iff t <: supportdyn<mixed>.
- *)
-let transform_dynamic_upper_bound ~coerce env ty =
-  if Tast.is_under_dynamic_assumptions env.checked then
-    ty
-  else
-    match (coerce, get_node ty) with
-    | (Some TL.CoerceToDynamic, Tdynamic) ->
-      let r = get_reason ty in
-      MakeType.supportdyn_mixed ~mixed_reason:r r
-    | (Some TL.CoerceToDynamic, _) -> ty
-    | _ -> ty
+  (* At present, we don't distinguish between coercions (<:D) and subtyping (<:) in the
+   * type variable and type parameter environments. When closing the environment we use subtyping (<:).
+   * To mitigate against this, when adding a dynamic upper bound wrt coercion,
+   * transform it first into supportdyn<mixed>,
+   * as t <:D dynamic iff t <: supportdyn<mixed>.
+   *)
+  let transform_dynamic_upper_bound ~coerce env ty =
+    if Tast.is_under_dynamic_assumptions env.checked then
+      ty
+    else
+      match (coerce, get_node ty) with
+      | (Some TL.CoerceToDynamic, Tdynamic) ->
+        let r = get_reason ty in
+        MakeType.supportdyn_mixed ~mixed_reason:r r
+      | (Some TL.CoerceToDynamic, _) -> ty
+      | _ -> ty
+end
 
 let mk_issubtype_prop ~sub_supportdyn ~coerce env ty1 ty2 =
   let (env, ty1) =
@@ -2589,7 +2591,7 @@ end = struct
             when Int.equal (List.length tyl_super) (List.length tyl_sub) ->
             wfold_left2
               (fun res ty_sub ty_super ->
-                let ty_super = liken ~super_like env ty_super in
+                let ty_super = Sd.liken ~super_like env ty_super in
                 res
                 &&& simplify_subtype
                       ~subtype_env
@@ -2642,8 +2644,8 @@ end = struct
           (match (get_node lty, get_node ty_super) with
           | (Tvec_or_dict (tk_sub, tv_sub), Tvec_or_dict (tk_super, tv_super))
             ->
-            let tv_super = liken ~super_like env tv_super in
-            let tk_super = liken ~super_like env tk_super in
+            let tv_super = Sd.liken ~super_like env tv_super in
+            let tk_super = Sd.liken ~super_like env tk_super in
             env
             |> simplify_subtype
                  ~subtype_env
@@ -2660,8 +2662,8 @@ end = struct
           | ( Tclass ((_, n), _, [tk_sub; tv_sub]),
               Tvec_or_dict (tk_super, tv_super) )
             when String.equal n SN.Collections.cDict ->
-            let tv_super = liken ~super_like env tv_super in
-            let tk_super = liken ~super_like env tk_super in
+            let tv_super = Sd.liken ~super_like env tv_super in
+            let tk_super = Sd.liken ~super_like env tk_super in
             env
             |> simplify_subtype
                  ~subtype_env
@@ -2679,8 +2681,8 @@ end = struct
             when String.equal n SN.Collections.cVec ->
             let pos = get_pos lty in
             let tk_sub = MakeType.int (Reason.Ridx_vector_from_decl pos) in
-            let tv_super = liken ~super_like env tv_super in
-            let tk_super = liken ~super_like env tk_super in
+            let tv_super = Sd.liken ~super_like env tv_super in
+            let tk_super = Sd.liken ~super_like env tk_super in
             env
             |> simplify_subtype
                  ~subtype_env
@@ -4091,7 +4093,7 @@ end = struct
       begin
         match variance with
         | Ast_defs.Covariant ->
-          let super = liken ~super_like env super in
+          let super = Sd.liken ~super_like env super in
           simplify_subtype_help ~sub_supportdyn child super env
         | Ast_defs.Contravariant ->
           let super =
@@ -4109,14 +4111,14 @@ end = struct
           |> simplify_subtype_help
                ~sub_supportdyn
                child
-               (liken ~super_like env super')
+               (Sd.liken ~super_like env super')
           &&& simplify_subtype_help
                 ~sub_supportdyn
                 super'
                 (if is_tyvar super' then
                   child
                 else
-                  liken ~super_like env child)
+                  Sd.liken ~super_like env child)
       end
       &&& simplify_subtype_variance_for_injective_loop_help
             cid
@@ -4244,7 +4246,7 @@ end = struct
       | (`Required sub_ty, `Required super_ty)
       | (`Required sub_ty, `Optional super_ty)
       | (`Optional sub_ty, `Optional super_ty) ->
-        let super_ty = liken ~super_like env super_ty in
+        let super_ty = Sd.liken ~super_like env super_ty in
 
         res
         &&& Subtype.simplify_subtype
@@ -4925,7 +4927,7 @@ end = struct
     &&&
     (* Finally do covariant subtyping on return type *)
     if check_return then
-      let super_ty = liken ~super_like env ft_super.ft_ret in
+      let super_ty = Sd.liken ~super_like env ft_super.ft_ret in
       let subtype_env =
         if
           TypecheckerOptions.enable_sound_dynamic env.genv.tcopt && for_override
@@ -5196,7 +5198,8 @@ end = struct
       (on_error : Typing_error.Reasons_callback.t option) =
     let ty =
       match ty with
-      | LoclType ty -> LoclType (transform_dynamic_upper_bound ~coerce env ty)
+      | LoclType ty ->
+        LoclType (Sd.transform_dynamic_upper_bound ~coerce env ty)
       | cty -> cty
     in
     let upper_bounds_before = Env.get_tyvar_upper_bounds env var in
@@ -5375,7 +5378,7 @@ end = struct
       let ty =
         match ty with
         | LoclType ty when not is_lower ->
-          LoclType (transform_dynamic_upper_bound ~coerce env ty)
+          LoclType (Sd.transform_dynamic_upper_bound ~coerce env ty)
         | _ -> ty
       in
       match Tvid.Map.find_opt var !bound_map with
@@ -5854,7 +5857,7 @@ let decompose_subtype_add_bound
   | (_, Tany _) -> env
   (* name_sub <: ty_super so add an upper bound on name_sub *)
   | (Tgeneric (name_sub, targs), _) when not (phys_equal ty_sub ty_super) ->
-    let ty_super = transform_dynamic_upper_bound ~coerce env ty_super in
+    let ty_super = Sd.transform_dynamic_upper_bound ~coerce env ty_super in
     (* TODO(T69551141) handle type arguments. Passing targs to get_lower_bounds,
        but the add_upper_bound call must be adapted *)
     Logging.log_subtype

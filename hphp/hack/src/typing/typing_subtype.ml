@@ -237,102 +237,106 @@ module Logging = struct
       (LoclType ty_super)
 end
 
-let is_tprim_disjoint tp1 tp2 =
-  let one_side tp1 tp2 =
-    Aast_defs.(
-      match (tp1, tp2) with
-      | (Tnum, Tint)
-      | (Tnum, Tfloat)
-      | (Tarraykey, Tint)
-      | (Tarraykey, Tstring)
-      | (Tarraykey, Tnum) ->
-        false
-      | ( _,
-          ( Tnum | Tint | Tvoid | Tbool | Tarraykey | Tfloat | Tstring | Tnull
-          | Tresource | Tnoreturn ) ) ->
-        true)
-  in
-  (not (Aast_defs.equal_tprim tp1 tp2)) && one_side tp1 tp2 && one_side tp2 tp1
+module Subtype_negation = struct
+  let is_tprim_disjoint tp1 tp2 =
+    let one_side tp1 tp2 =
+      Aast_defs.(
+        match (tp1, tp2) with
+        | (Tnum, Tint)
+        | (Tnum, Tfloat)
+        | (Tarraykey, Tint)
+        | (Tarraykey, Tstring)
+        | (Tarraykey, Tnum) ->
+          false
+        | ( _,
+            ( Tnum | Tint | Tvoid | Tbool | Tarraykey | Tfloat | Tstring | Tnull
+            | Tresource | Tnoreturn ) ) ->
+          true)
+    in
+    (not (Aast_defs.equal_tprim tp1 tp2))
+    && one_side tp1 tp2
+    && one_side tp2 tp1
 
-(* Two classes c1 and c2 are disjoint iff there exists no c3 such that
-   c3 <: c1 and c3 <: c2. *)
-let is_class_disjoint env c1 c2 =
-  let is_interface_or_trait c_def =
-    Ast_defs.(
-      match Cls.kind c_def with
-      | Cinterface
-      | Ctrait ->
-        true
-      | Cclass _
-      | Cenum_class _
-      | Cenum ->
-        false)
-  in
-  if String.equal c1 c2 then
-    false
-  else
-    match (Env.get_class env c1, Env.get_class env c2) with
-    | (Decl_entry.Found c1_def, Decl_entry.Found c2_def) ->
-      let is_disjoint =
-        if Cls.final c1_def then
-          (* if c1 is final, then c3 would have to be equal to c1 *)
-          not (Cls.has_ancestor c1_def c2)
-        else if Cls.final c2_def then
-          (* if c2 is final, then c3 would have to be equal to c2 *)
-          not (Cls.has_ancestor c2_def c1)
-        else
-          (* Given two non-final classes, if either is an interface or trait, then
-             there could be a c3, and so we consider the classes to not be disjoint.
-             However, if they are both classes, then c3 must be either c1 or c2 since
-             we don't have multiple inheritance. *)
-          (not (is_interface_or_trait c1_def))
-          && (not (is_interface_or_trait c2_def))
-          && (not (Cls.has_ancestor c2_def c1))
-          && not (Cls.has_ancestor c1_def c2)
-      in
-      if is_disjoint then (
-        (* We've used the facts that 'c1 is not a subtype of c2'
-         * and 'c2 is not a subtype of c1' to conclude that a type is nothing
-         * and therefore a bunch of things typecheck.
-         * If these facts get invalidated by a decl change,
-         * e.g. adding c2 as a parent of c1, we'd therefore need
-         * to recheck the current def. *)
-        Typing_env.add_not_subtype_dep env c1;
-        Typing_env.add_not_subtype_dep env c2;
-        ()
-      );
-      is_disjoint
-    | _ ->
-      (* This is a decl error that should have already been caught *)
+  (* Two classes c1 and c2 are disjoint iff there exists no c3 such that
+     c3 <: c1 and c3 <: c2. *)
+  let is_class_disjoint env c1 c2 =
+    let is_interface_or_trait c_def =
+      Ast_defs.(
+        match Cls.kind c_def with
+        | Cinterface
+        | Ctrait ->
+          true
+        | Cclass _
+        | Cenum_class _
+        | Cenum ->
+          false)
+    in
+    if String.equal c1 c2 then
       false
+    else
+      match (Env.get_class env c1, Env.get_class env c2) with
+      | (Decl_entry.Found c1_def, Decl_entry.Found c2_def) ->
+        let is_disjoint =
+          if Cls.final c1_def then
+            (* if c1 is final, then c3 would have to be equal to c1 *)
+            not (Cls.has_ancestor c1_def c2)
+          else if Cls.final c2_def then
+            (* if c2 is final, then c3 would have to be equal to c2 *)
+            not (Cls.has_ancestor c2_def c1)
+          else
+            (* Given two non-final classes, if either is an interface or trait, then
+               there could be a c3, and so we consider the classes to not be disjoint.
+               However, if they are both classes, then c3 must be either c1 or c2 since
+               we don't have multiple inheritance. *)
+            (not (is_interface_or_trait c1_def))
+            && (not (is_interface_or_trait c2_def))
+            && (not (Cls.has_ancestor c2_def c1))
+            && not (Cls.has_ancestor c1_def c2)
+        in
+        if is_disjoint then (
+          (* We've used the facts that 'c1 is not a subtype of c2'
+           * and 'c2 is not a subtype of c1' to conclude that a type is nothing
+           * and therefore a bunch of things typecheck.
+           * If these facts get invalidated by a decl change,
+           * e.g. adding c2 as a parent of c1, we'd therefore need
+           * to recheck the current def. *)
+          Typing_env.add_not_subtype_dep env c1;
+          Typing_env.add_not_subtype_dep env c2;
+          ()
+        );
+        is_disjoint
+      | _ ->
+        (* This is a decl error that should have already been caught *)
+        false
 
-(** [negate_ak_null_type env r ty] performs type negation similar to
+  (** [negate_ak_null_type env r ty] performs type negation similar to
   TUtils.negate_type, but restricted to arraykey and null (and their
   negations). *)
-let negate_ak_null_type env r ty =
-  let (env, ty) = Env.expand_type env ty in
-  let neg_ty =
-    match get_node ty with
-    | Tprim Aast.Tnull -> Some (MakeType.nonnull r)
-    | Tprim Aast.Tarraykey -> Some (MakeType.neg r (Neg_prim Aast.Tarraykey))
-    | Tneg (Neg_prim Aast.Tarraykey) ->
-      Some (MakeType.prim_type r Aast.Tarraykey)
-    | Tnonnull -> Some (MakeType.null r)
-    | _ -> None
-  in
-  (env, neg_ty)
+  let negate_ak_null_type env r ty =
+    let (env, ty) = Env.expand_type env ty in
+    let neg_ty =
+      match get_node ty with
+      | Tprim Aast.Tnull -> Some (MakeType.nonnull r)
+      | Tprim Aast.Tarraykey -> Some (MakeType.neg r (Neg_prim Aast.Tarraykey))
+      | Tneg (Neg_prim Aast.Tarraykey) ->
+        Some (MakeType.prim_type r Aast.Tarraykey)
+      | Tnonnull -> Some (MakeType.null r)
+      | _ -> None
+    in
+    (env, neg_ty)
 
-let find_type_with_exact_negation env tyl =
-  let rec find env tyl acc_tyl =
-    match tyl with
-    | [] -> (env, None, acc_tyl)
-    | ty :: tyl' ->
-      let (env, neg_ty) = negate_ak_null_type env (get_reason ty) ty in
-      (match neg_ty with
-      | None -> find env tyl' (ty :: acc_tyl)
-      | Some neg_ty -> (env, Some neg_ty, tyl' @ acc_tyl))
-  in
-  find env tyl []
+  let find_type_with_exact_negation env tyl =
+    let rec find env tyl acc_tyl =
+      match tyl with
+      | [] -> (env, None, acc_tyl)
+      | ty :: tyl' ->
+        let (env, neg_ty) = negate_ak_null_type env (get_reason ty) ty in
+        (match neg_ty with
+        | None -> find env tyl' (ty :: acc_tyl)
+        | Some neg_ty -> (env, Some neg_ty, tyl' @ acc_tyl))
+    in
+    find env tyl []
+end
 
 module Pretty : sig
   val describe_ty_default :
@@ -777,7 +781,7 @@ end = struct
             | _ -> default ~sub_supportdyn env)
         | (r_sub, Tintersection tyl) ->
           (* A & B <: C iif A <: C | !B *)
-          (match find_type_with_exact_negation env tyl with
+          (match Subtype_negation.find_type_with_exact_negation env tyl with
           | (env, Some non_ty, tyl) ->
             let (env, ty_super) =
               TUtils.union_i env (get_reason non_ty) ty_super non_ty
@@ -1851,7 +1855,7 @@ end = struct
                     ety_super
             | (_, Tintersection tyl)
               when let (_, non_ty_opt, _) =
-                     find_type_with_exact_negation env tyl
+                     Subtype_negation.find_type_with_exact_negation env tyl
                    in
                    Option.is_some non_ty_opt ->
               default_subtype_help env
@@ -1944,7 +1948,7 @@ end = struct
                forever between this case and the previous one. *)
             | ((_, Tintersection tyl), (Tintersection _ | Tvar _))
               when let (_, non_ty_opt, _) =
-                     find_type_with_exact_negation env tyl
+                     Subtype_negation.find_type_with_exact_negation env tyl
                    in
                    Option.is_none non_ty_opt ->
               let (env, ty_sub') =
@@ -2916,7 +2920,7 @@ end = struct
                not p, which doesn't contain primitive type p *)
             invalid_env env
           | (_, Tprim tprim_sub) ->
-            if is_tprim_disjoint tprim_sub tprim_super then
+            if Subtype_negation.is_tprim_disjoint tprim_sub tprim_super then
               valid env
             else
               invalid_env env
@@ -2945,7 +2949,7 @@ end = struct
                can't be a subtype of not c, which doesn't contain class types c *)
             invalid_env env
           | (_, Tclass ((_, c_sub), _, _)) ->
-            if is_class_disjoint env c_sub c_super then
+            if Subtype_negation.is_class_disjoint env c_sub c_super then
               valid env
             else
               invalid_env env
@@ -3698,7 +3702,9 @@ end = struct
                             ctxt = `read;
                           })))
       | (_, Tintersection tyl)
-        when let (_, non_ty_opt, _) = find_type_with_exact_negation env tyl in
+        when let (_, non_ty_opt, _) =
+               Subtype_negation.find_type_with_exact_negation env tyl
+             in
              Option.is_some non_ty_opt ->
         (* use default_subtype to perform: A & B <: C <=> A <: C | !B *)
         default_subtype_help env
@@ -5811,7 +5817,7 @@ let is_type_disjoint env ty1 ty2 =
     | (Tneg _, _)
     | (_, Tneg _) ->
       false
-    | (Tprim tp1, Tprim tp2) -> is_tprim_disjoint tp1 tp2
+    | (Tprim tp1, Tprim tp2) -> Subtype_negation.is_tprim_disjoint tp1 tp2
     | (Tclass ((_, cname), ex, _), Tprim (Aast.Tarraykey | Aast.Tstring))
     | (Tprim (Aast.Tarraykey | Aast.Tstring), Tclass ((_, cname), ex, _))
       when String.equal cname SN.Classes.cStringish && is_nonexact ex ->
@@ -5824,7 +5830,7 @@ let is_type_disjoint env ty1 ty2 =
     | (Tclass _, Tfun _) ->
       true
     | (Tclass ((_, c1), _, _), Tclass ((_, c2), _, _)) ->
-      is_class_disjoint env c1 c2
+      Subtype_negation.is_class_disjoint env c1 c2
   (* incomplete, e.g., is_intersection_type_disjoint (?int & ?float) num *)
   and is_intersection_type_disjoint visited_tvyars env inter_tyl ty =
     List.exists ~f:(is_type_disjoint visited_tvyars env ty) inter_tyl

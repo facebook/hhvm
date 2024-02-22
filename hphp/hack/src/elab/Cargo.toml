@@ -11,7 +11,7 @@ license = "MIT"
 path = "elab.rs"
 
 [dependencies]
-bitflags = "2.4"
+bitflags = { version = "2.4", features = ["serde"] }
 bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
 core_utils_rust = { version = "0.0.0", path = "../utils/core" }
 elaborate_namespaces_visitor = { version = "0.0.0", path = "../naming/cargo/elaborate_namespaces" }

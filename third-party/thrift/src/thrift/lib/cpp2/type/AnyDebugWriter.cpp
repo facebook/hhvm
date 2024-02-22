@@ -286,6 +286,7 @@ uint32_t AnyDebugWriter::writeUnregisteredAnyImpl(
       if (try_unregistered_structs_as_any_ && tryAsAny(reader)) {
         return 0;
       }
+      [[fallthrough]];
     case type::BaseType::Union:
     case type::BaseType::Exception: {
       uint32_t s = 0;

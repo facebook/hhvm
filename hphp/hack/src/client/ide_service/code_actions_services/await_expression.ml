@@ -258,13 +258,13 @@ let text_before_and_after_expr_in_stmt
  * `equiv popt ~stm1 ~stmt2` is `true` given:
  * stmt1:
  *   await gen_int() + 3;
- * stmt1:
+ * stmt2:
  *   (await gen_int()) + 3;
  *
  * We only pay attention to the shape of the tree, not what's in a node. `equiv popt ~stm1 ~stmt2` is `true` given:
  * stmt1:
  *   await $z || 3000;
- * stmt1:
+ * stmt2:
  *   await gen_int() + 3;
  *)
 module Expr_structure : sig

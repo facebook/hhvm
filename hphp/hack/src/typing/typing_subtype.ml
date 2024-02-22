@@ -175,64 +175,67 @@ module Subtype_env = struct
     }
 end
 
-(* Given a pair of types `ty_sub` and `ty_super` attempt to apply simplifications
- * and add to the accumulated constraints in `constraints` any necessary and
- * sufficient [(t1,ck1,u1);...;(tn,ckn,un)] such that
- *   ty_sub <: ty_super iff t1 ck1 u1, ..., tn ckn un
- * where ck is `as` or `=`. Essentially we are making solution-preserving
- * simplifications to the subtype assertion, for now, also generating equalities
- * as well as subtype assertions, for backwards compatibility with use of
- * unification.
- *
- * If `constraints = []` is returned then the subtype assertion is valid.
- *
- * If the subtype assertion is unsatisfiable then return `failed = Some f`
- * where `f` is a `unit-> unit` function that records an error message.
- * (Sometimes we don't want to call this function e.g. when just checking if
- *  a subtype holds)
- *
- * Elide singleton unions, treat invariant generics as both-ways
- * subtypes, and actually chase hierarchy for extends and implements.
- *
- * Annoyingly, we need to pass env back too, because Typing_phase.localize
- * expands type constants. (TODO: work out a better way of handling this)
- *
- * Special cases:
- *   If assertion is valid (e.g. string <: arraykey) then
- *     result can be the empty list (i.e. nothing is added to the result)
- *   If assertion is unsatisfiable (e.g. arraykey <: string) then
- *     we record this in the failed field of the result.
- *)
+module Logging = struct
+  (* Given a pair of types `ty_sub` and `ty_super` attempt to apply simplifications
+   * and add to the accumulated constraints in `constraints` any necessary and
+   * sufficient [(t1,ck1,u1);...;(tn,ckn,un)] such that
+   *   ty_sub <: ty_super iff t1 ck1 u1, ..., tn ckn un
+   * where ck is `as` or `=`. Essentially we are making solution-preserving
+   * simplifications to the subtype assertion, for now, also generating equalities
+   * as well as subtype assertions, for backwards compatibility with use of
+   * unification.
+   *
+   * If `constraints = []` is returned then the subtype assertion is valid.
+   *
+   * If the subtype assertion is unsatisfiable then return `failed = Some f`
+   * where `f` is a `unit-> unit` function that records an error message.
+   * (Sometimes we don't want to call this function e.g. when just checking if
+   *  a subtype holds)
+   *
+   * Elide singleton unions, treat invariant generics as both-ways
+   * subtypes, and actually chase hierarchy for extends and implements.
+   *
+   * Annoyingly, we need to pass env back too, because Typing_phase.localize
+   * expands type constants. (TODO: work out a better way of handling this)
+   *
+   * Special cases:
+   *   If assertion is valid (e.g. string <: arraykey) then
+   *     result can be the empty list (i.e. nothing is added to the result)
+   *   If assertion is unsatisfiable (e.g. arraykey <: string) then
+   *     we record this in the failed field of the result.
+   *)
 
-let log_subtype_i ~level ~this_ty ~function_name env ty_sub ty_super =
-  Typing_log.(
-    log_with_level env "sub" ~level (fun () ->
-        let types =
-          [Log_type_i ("ty_sub", ty_sub); Log_type_i ("ty_super", ty_super)]
-        in
-        let types =
-          Option.value_map this_ty ~default:types ~f:(fun ty ->
-              Log_type ("this_ty", ty) :: types)
-        in
-        if
-          level >= 3
-          || not
-               (TUtils.is_capability_i ty_sub || TUtils.is_capability_i ty_super)
-        then
-          log_types
-            (Reason.to_pos (reason ty_sub))
-            env
-            [Log_head (function_name, types)]
-        else
-          ()))
+  let log_subtype_i ~level ~this_ty ~function_name env ty_sub ty_super =
+    Typing_log.(
+      log_with_level env "sub" ~level (fun () ->
+          let types =
+            [Log_type_i ("ty_sub", ty_sub); Log_type_i ("ty_super", ty_super)]
+          in
+          let types =
+            Option.value_map this_ty ~default:types ~f:(fun ty ->
+                Log_type ("this_ty", ty) :: types)
+          in
+          if
+            level >= 3
+            || not
+                 (TUtils.is_capability_i ty_sub
+                 || TUtils.is_capability_i ty_super)
+          then
+            log_types
+              (Reason.to_pos (reason ty_sub))
+              env
+              [Log_head (function_name, types)]
+          else
+            ()))
 
-let log_subtype ~this_ty ~function_name env ty_sub ty_super =
-  log_subtype_i
-    ~this_ty
-    ~function_name
-    env
-    (LoclType ty_sub)
-    (LoclType ty_super)
+  let log_subtype ~this_ty ~function_name env ty_sub ty_super =
+    log_subtype_i
+      ~this_ty
+      ~function_name
+      env
+      (LoclType ty_sub)
+      (LoclType ty_super)
+end
 
 let is_tprim_disjoint tp1 tp2 =
   let one_side tp1 tp2 =
@@ -960,7 +963,7 @@ end = struct
       (ty_sub : internal_type)
       (ty_super : internal_type)
       env : env * TL.subtype_prop =
-    log_subtype_i
+    Logging.log_subtype_i
       ~level:subtype_env.Subtype_env.log_level
       ~this_ty
       ~function_name:
@@ -3218,7 +3221,7 @@ end = struct
       ty_super
       ((_r : Reason.t), ct)
       env =
-    log_subtype_i
+    Logging.log_subtype_i
       ~level:2
       ~this_ty
       ~function_name:"simplify_subtype_can_traverse"
@@ -3309,7 +3312,7 @@ end = struct
       ~subtype_env ~sub_supportdyn ~this_ty ~fail ty_sub (r, htm) env =
     let { htm_id = memid; htm_lower = memloty; htm_upper = memupty } = htm in
     let htmty = ConstraintType (mk_constraint_type (r, Thas_type_member htm)) in
-    log_subtype_i
+    Logging.log_subtype_i
       ~level:2
       ~this_ty
       ~function_name:"simplify_subtype_has_type_member"
@@ -3542,7 +3545,7 @@ end = struct
       mk_maybe_nullable env (ConstraintType ty_super)
     in
 
-    log_subtype_i
+    Logging.log_subtype_i
       ~level:2
       ~this_ty
       ~function_name:"simplify_subtype_has_member"
@@ -5548,7 +5551,7 @@ end = struct
       ~(this_ty : locl_ty option)
       (ty_sub : internal_type)
       (ty_super : internal_type) : env * Typing_error.t option =
-    log_subtype_i
+    Logging.log_subtype_i
       ~level:1
       ~this_ty
       ~function_name:
@@ -5854,7 +5857,7 @@ let decompose_subtype_add_bound
     let ty_super = transform_dynamic_upper_bound ~coerce env ty_super in
     (* TODO(T69551141) handle type arguments. Passing targs to get_lower_bounds,
        but the add_upper_bound call must be adapted *)
-    log_subtype
+    Logging.log_subtype
       ~level:2
       ~this_ty:None
       ~function_name:"decompose_subtype_add_bound"
@@ -5875,7 +5878,7 @@ let decompose_subtype_add_bound
   | (_, Tgeneric (name_super, targs)) when not (phys_equal ty_sub ty_super) ->
     (* TODO(T69551141) handle type arguments. Passing targs to get_lower_bounds,
        but the add_lower_bound call must be adapted *)
-    log_subtype
+    Logging.log_subtype
       ~level:2
       ~this_ty:None
       ~function_name:"decompose_subtype_add_bound"
@@ -5917,7 +5920,7 @@ let rec decompose_subtype
     (ty_sub : locl_ty)
     (ty_super : locl_ty)
     (on_error : Typing_error.Reasons_callback.t option) : env =
-  log_subtype
+  Logging.log_subtype
     ~level:2
     ~this_ty:None
     ~function_name:"decompose_subtype"
@@ -6009,7 +6012,7 @@ let add_constraint
     (ty_sub : locl_ty)
     (ty_super : locl_ty)
     on_error : env =
-  log_subtype
+  Logging.log_subtype
     ~level:1
     ~this_ty:None
     ~function_name:"add_constraint"
@@ -6059,7 +6062,7 @@ let add_constraints p env constraints =
   List.fold_left constraints ~f:add_constraint ~init:env
 
 let sub_type_with_dynamic_as_bottom env ty_sub ty_super on_error =
-  log_subtype
+  Logging.log_subtype
     ~level:1
     ~this_ty:None
     ~function_name:"coercion"

@@ -84,88 +84,96 @@ module VisitedGoals = struct
         Some (SMap.add name (ITySet.add ty lower, upper) v)
 end
 
-type subtype_env = {
-  require_soundness: bool;
-      (** If set, requires the simplification of subtype constraints to be sound,
+module Subtype_env = struct
+  type t = {
+    require_soundness: bool;
+        (** If set, requires the simplification of subtype constraints to be sound,
           meaning that the simplified constraint must imply the original one. *)
-  require_completeness: bool;
-      (** If set, requires the simplification of subtype constraints to be complete,
+    require_completeness: bool;
+        (** If set, requires the simplification of subtype constraints to be complete,
           meaning that the original constraint must imply the simplified one.
           If set, we also finish as soon as we see a goal of the form T <: t or
           t <: T for generic parameter T *)
-  visited: VisitedGoals.t;
-      (** If above is not set, maintain a visited goal set *)
-  no_top_bottom: bool;
-  coerce: TL.coercion_direction option;
-      (** Coerce indicates whether subtyping should allow
+    visited: VisitedGoals.t;
+        (** If above is not set, maintain a visited goal set *)
+    no_top_bottom: bool;
+    coerce: TL.coercion_direction option;
+        (** Coerce indicates whether subtyping should allow
           coercion to or from dynamic. For coercion to dynamic, types that implement
           dynamic are considered sub-types of dynamic. For coercion from dynamic,
           dynamic is treated as a sub-type of all types. *)
-  on_error: Typing_error.Reasons_callback.t option;
-  tparam_constraints: (Pos_or_decl.t * Typing_defs.pos_id) list;
-      (** This is used for better error reporting to flag violated
+    on_error: Typing_error.Reasons_callback.t option;
+    tparam_constraints: (Pos_or_decl.t * Typing_defs.pos_id) list;
+        (** This is used for better error reporting to flag violated
           constraints on type parameters, if any. *)
-  is_coeffect: bool;
-      (** A flag which, if set, indicates that coeffects are being subtyped.
+    is_coeffect: bool;
+        (** A flag which, if set, indicates that coeffects are being subtyped.
           Note: this is a short-term solution to provide coeffects.pretty-printing of
           `locl_ty`s that represent coeffects, since there is no good way to
           tell apart coeffects from regular types *)
-  log_level: int;
-      (** Which level the recursive calls to simplify_subtype should be logged at *)
-  in_transitive_closure: bool;
-      (** This is a subtype check from within transitive closure
+    log_level: int;
+        (** Which level the recursive calls to simplify_subtype should be logged at *)
+    in_transitive_closure: bool;
+        (** This is a subtype check from within transitive closure
           e.g. string <: #1 <: int doing string <: int *)
-}
-
-let coercing_from_dynamic se =
-  match se.coerce with
-  | Some TL.CoerceFromDynamic -> true
-  | _ -> false
-
-let coercing_to_dynamic se =
-  match se.coerce with
-  | Some TL.CoerceToDynamic -> true
-  | _ -> false
-
-let make_subtype_env
-    ?(require_soundness = true)
-    ?(require_completeness = false)
-    ?(no_top_bottom = false)
-    ?(coerce = None)
-    ?(is_coeffect = false)
-    ?(in_transitive_closure = false)
-    ~(log_level : int)
-    on_error =
-  {
-    require_soundness;
-    require_completeness;
-    visited = VisitedGoals.empty;
-    no_top_bottom;
-    coerce;
-    is_coeffect;
-    on_error;
-    tparam_constraints = [];
-    log_level;
-    in_transitive_closure;
   }
 
-let possibly_add_violated_constraint subtype_env ~r_sub ~r_super =
-  {
-    subtype_env with
-    tparam_constraints =
-      (match (r_super, r_sub) with
-      | (Reason.Rcstr_on_generics (p, tparam), _)
-      | (_, Reason.Rcstr_on_generics (p, tparam)) ->
-        (match subtype_env.tparam_constraints with
-        | (p_prev, tparam_prev) :: _
-          when Pos_or_decl.equal p p_prev
-               && Typing_defs.equal_pos_id tparam tparam_prev ->
-          (* since tparam_constraints is used for error reporting, it's
-           * unnecessary to add duplicates. *)
-          subtype_env.tparam_constraints
-        | _ -> (p, tparam) :: subtype_env.tparam_constraints)
-      | _ -> subtype_env.tparam_constraints);
-  }
+  let set_on_error t on_error = { t with on_error }
+
+  let set_visited t visited = { t with visited }
+
+  let coercing_from_dynamic se =
+    match se.coerce with
+    | Some TL.CoerceFromDynamic -> true
+    | _ -> false
+
+  let coercing_to_dynamic se =
+    match se.coerce with
+    | Some TL.CoerceToDynamic -> true
+    | _ -> false
+
+  let set_coercing_to_dynamic se = { se with coerce = Some TL.CoerceToDynamic }
+
+  let create
+      ?(require_soundness = true)
+      ?(require_completeness = false)
+      ?(no_top_bottom = false)
+      ?(coerce = None)
+      ?(is_coeffect = false)
+      ?(in_transitive_closure = false)
+      ~(log_level : int)
+      on_error =
+    {
+      require_soundness;
+      require_completeness;
+      visited = VisitedGoals.empty;
+      no_top_bottom;
+      coerce;
+      is_coeffect;
+      on_error;
+      tparam_constraints = [];
+      log_level;
+      in_transitive_closure;
+    }
+
+  let possibly_add_violated_constraint subtype_env ~r_sub ~r_super =
+    {
+      subtype_env with
+      tparam_constraints =
+        (match (r_super, r_sub) with
+        | (Reason.Rcstr_on_generics (p, tparam), _)
+        | (_, Reason.Rcstr_on_generics (p, tparam)) ->
+          (match subtype_env.tparam_constraints with
+          | (p_prev, tparam_prev) :: _
+            when Pos_or_decl.equal p p_prev
+                 && Typing_defs.equal_pos_id tparam tparam_prev ->
+            (* since tparam_constraints is used for error reporting, it's
+             * unnecessary to add duplicates. *)
+            subtype_env.tparam_constraints
+          | _ -> (p, tparam) :: subtype_env.tparam_constraints)
+        | _ -> subtype_env.tparam_constraints);
+    }
+end
 
 (* Given a pair of types `ty_sub` and `ty_super` attempt to apply simplifications
  * and add to the accumulated constraints in `constraints` any necessary and
@@ -522,7 +530,7 @@ module rec Subtype : sig
    propagate it.
  *)
   val simplify_subtype :
-    subtype_env:subtype_env ->
+    subtype_env:Subtype_env.t ->
     sub_supportdyn:Reason.t option ->
     ?this_ty:Typing_defs.locl_ty option ->
     ?super_like:bool ->
@@ -549,7 +557,7 @@ module rec Subtype : sig
     This last one would be left as T <: I if subtype_env.require_completeness=true
    *)
   val simplify_subtype_i :
-    subtype_env:subtype_env ->
+    subtype_env:Subtype_env.t ->
     sub_supportdyn:Reason.t option ->
     ?this_ty:Typing_defs.locl_ty option ->
     ?super_like:bool ->
@@ -560,7 +568,7 @@ module rec Subtype : sig
     Typing_env_types.env * TL.subtype_prop
 
   val default_subtype :
-    subtype_env:subtype_env ->
+    subtype_env:Subtype_env.t ->
     this_ty:Typing_defs.locl_ty option ->
     ?super_like:bool ->
     sub_supportdyn:Reason.t option ->
@@ -613,7 +621,7 @@ end = struct
     | _ -> simplify_subtype ()
 
   let rec simplify_subtype
-      ~(subtype_env : subtype_env)
+      ~(subtype_env : Subtype_env.t)
       ~(sub_supportdyn : Reason.t option)
       ?(this_ty : locl_ty option = None)
       ?(super_like = false)
@@ -630,8 +638,8 @@ end = struct
       (LoclType ty_super)
 
   and simplify_dynamic_aware_subtype ~subtype_env =
-    simplify_subtype
-      ~subtype_env:{ subtype_env with coerce = Some TL.CoerceToDynamic }
+    let subtype_env = Subtype_env.set_coercing_to_dynamic subtype_env in
+    simplify_subtype ~subtype_env
 
   and default_subtype
       ~subtype_env
@@ -645,7 +653,7 @@ end = struct
     let default ~sub_supportdyn env =
       mk_issubtype_prop
         ~sub_supportdyn
-        ~coerce:subtype_env.coerce
+        ~coerce:subtype_env.Subtype_env.coerce
         env
         ty_sub
         ty_super
@@ -785,7 +793,7 @@ end = struct
         | (_, Tgeneric (name_sub, tyargs)) ->
           (* TODO(T69551141) handle type arguments. right now, just passing
            * tyargs to Env.get_upper_bounds *)
-          (if subtype_env.require_completeness then
+          (if subtype_env.Subtype_env.require_completeness then
             default ~sub_supportdyn env
           else
             (* If we've seen this type parameter before then we must have gone
@@ -793,13 +801,15 @@ end = struct
              *)
             match
               VisitedGoals.try_add_visited_generic_sub
-                subtype_env.visited
+                subtype_env.Subtype_env.visited
                 name_sub
                 ty_super
             with
             | None -> invalid ~fail env
             | Some new_visited ->
-              let subtype_env = { subtype_env with visited = new_visited } in
+              let subtype_env =
+                Subtype_env.set_visited subtype_env new_visited
+              in
               (* If the generic is actually an expression dependent type,
                  we need to update this_ty
               *)
@@ -862,7 +872,8 @@ end = struct
               env |> try_bounds bounds)
           |> (* Turn error into a generic error about the type parameter *)
           if_unsat (invalid ~fail)
-        | (_, Tdynamic) when coercing_from_dynamic subtype_env -> valid env
+        | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
+          valid env
         | (_, Taccess _) -> invalid ~fail env
         | (r, Tnewtype (n, _, ty)) ->
           let sub_supportdyn =
@@ -905,7 +916,7 @@ end = struct
       | LoclType lty_sub -> begin
         match deref lty_sub with
         | (_, Tvar _) -> begin
-          match (subtype_env.coerce, get_node lty_super) with
+          match (subtype_env.Subtype_env.coerce, get_node lty_super) with
           | (Some TL.CoerceToDynamic, Tdynamic) ->
             let r = get_reason lty_super in
             let ty_super = MakeType.supportdyn_mixed ~mixed_reason:r r in
@@ -932,7 +943,7 @@ end = struct
             env
           |> if_unsat (invalid ~fail)
         | (_, Tany _) ->
-          if subtype_env.no_top_bottom then
+          if subtype_env.Subtype_env.no_top_bottom then
             default ~sub_supportdyn env
           else
             valid env
@@ -941,7 +952,7 @@ end = struct
     | ConstraintType _ -> default_subtype_inner env ty_sub ty_super
 
   and simplify_subtype_i
-      ~(subtype_env : subtype_env)
+      ~(subtype_env : Subtype_env.t)
       ~(sub_supportdyn : Reason.t option)
       ?(this_ty : locl_ty option = None)
       ?(super_like : bool = false)
@@ -950,11 +961,11 @@ end = struct
       (ty_super : internal_type)
       env : env * TL.subtype_prop =
     log_subtype_i
-      ~level:subtype_env.log_level
+      ~level:subtype_env.Subtype_env.log_level
       ~this_ty
       ~function_name:
         ("simplify_subtype"
-        ^ (match subtype_env.coerce with
+        ^ (match subtype_env.Subtype_env.coerce with
           | None -> ""
           | Some TL.CoerceToDynamic -> " <:D"
           | Some TL.CoerceFromDynamic -> " D<:")
@@ -966,9 +977,13 @@ end = struct
         flag " sub_supportdyn" (Option.is_some sub_supportdyn)
         ^ flag " super_supportdyn" super_supportdyn
         ^ flag " super_like" super_like
-        ^ flag " require_soundness" subtype_env.require_soundness
-        ^ flag " require_completeness" subtype_env.require_completeness
-        ^ flag " in_transitive_closure" subtype_env.in_transitive_closure)
+        ^ flag " require_soundness" subtype_env.Subtype_env.require_soundness
+        ^ flag
+            " require_completeness"
+            subtype_env.Subtype_env.require_completeness
+        ^ flag
+            " in_transitive_closure"
+            subtype_env.Subtype_env.in_transitive_closure)
       env
       ty_sub
       ty_super;
@@ -977,19 +992,19 @@ end = struct
     let (env, ety_sub) = Env.expand_internal_type env ty_sub in
     simplify_subtype_by_physical_equality env ety_sub ety_super @@ fun () ->
     let subtype_env =
-      possibly_add_violated_constraint
+      Subtype_env.possibly_add_violated_constraint
         subtype_env
         ~r_sub:(reason ety_sub)
         ~r_super:(reason ety_super)
     in
     let fail_snd_err =
-      match subtype_env.tparam_constraints with
+      match subtype_env.Subtype_env.tparam_constraints with
       | [] ->
         Typing_error.Secondary.Subtyping_error
           {
             ty_sub = ety_sub;
             ty_sup = ety_super;
-            is_coeffect = subtype_env.is_coeffect;
+            is_coeffect = subtype_env.Subtype_env.is_coeffect;
           }
       | cstrs ->
         Typing_error.Secondary.Violated_constraint
@@ -997,26 +1012,26 @@ end = struct
             cstrs;
             ty_sub = ety_sub;
             ty_sup = ety_super;
-            is_coeffect = subtype_env.is_coeffect;
+            is_coeffect = subtype_env.Subtype_env.is_coeffect;
           }
     in
     let fail_with_suffix snd_err_opt =
       let open Typing_error in
       let maybe_retain_code =
-        match subtype_env.tparam_constraints with
+        match subtype_env.Subtype_env.tparam_constraints with
         | [] -> Reasons_callback.retain_code
         | _ -> Fn.id
       in
       match snd_err_opt with
       | Some snd_err ->
-        Option.map subtype_env.on_error ~f:(fun on_error ->
+        Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
             apply_reasons
               ~on_error:
                 Reasons_callback.(
                   prepend_on_apply (maybe_retain_code on_error) fail_snd_err)
               snd_err)
       | _ ->
-        Option.map subtype_env.on_error ~f:(fun on_error ->
+        Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
             apply_reasons ~on_error:(maybe_retain_code on_error) fail_snd_err)
     in
 
@@ -1029,7 +1044,7 @@ end = struct
     let default env =
       mk_issubtype_prop
         ~sub_supportdyn
-        ~coerce:subtype_env.coerce
+        ~coerce:subtype_env.Subtype_env.coerce
         env
         ety_sub
         ety_super
@@ -1166,7 +1181,7 @@ end = struct
                  have been created for the Traversable type created below. *)
               invalid_env_with
                 env
-                (Option.map subtype_env.on_error ~f:(fun on_error ->
+                (Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
                      Typing_error.(
                        apply_reasons ~on_error
                        @@ Secondary.Unpack_array_required_argument
@@ -1174,7 +1189,7 @@ end = struct
             | (SplatUnpack, [], None) ->
               invalid_env_with
                 env
-                (Option.map subtype_env.on_error ~f:(fun on_error ->
+                (Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
                      Typing_error.(
                        apply_reasons ~on_error
                        @@ Secondary.Unpack_array_variadic_argument
@@ -1239,7 +1254,7 @@ end = struct
                    (prefix + len_ts)
                    epos
                    fpos
-                   subtype_env.on_error)
+                   subtype_env.Subtype_env.on_error)
             in
             if len_ts < len_required then
               arity_error (fun expected actual pos decl_pos on_error_opt ->
@@ -1387,7 +1402,7 @@ end = struct
                      invalid_env_with
                        env
                        (Option.map
-                          subtype_env.on_error
+                          subtype_env.Subtype_env.on_error
                           ~f:
                             Typing_error.(
                               fun on_error ->
@@ -1433,11 +1448,11 @@ end = struct
           (* Contextualize errors that may be generated when
            * checking refinement bounds. *)
           let on_error =
-            Option.map subtype_env.on_error ~f:(fun on_error ->
+            Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
                 let open Typing_error.Reasons_callback in
                 prepend_on_apply on_error fail_snd_err)
           in
-          let subtype_env = { subtype_env with on_error } in
+          let subtype_env = Subtype_env.set_on_error subtype_env on_error in
           Has_type_member.simplify_subtype_has_type_member
             ~subtype_env
             ~sub_supportdyn
@@ -1458,7 +1473,7 @@ end = struct
         | LoclType ty_sub ->
           (match deref ty_sub with
           | (_, Tunion _) -> default_subtype_help env
-          | (_, Tdynamic) when coercing_from_dynamic subtype_env ->
+          | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
             default_subtype_help env
           (* We want to treat nullable as a union with the same rule as above.
            * This is only needed for Tvar on right; other cases are dealt with specially as
@@ -1490,7 +1505,7 @@ end = struct
                     ty_super)
           | (_, Tvar var_sub) when Tvid.equal var_sub var_super -> valid env
           | _ -> begin
-            match subtype_env.coerce with
+            match subtype_env.Subtype_env.coerce with
             | Some cd ->
               mk_issubtype_prop
                 ~sub_supportdyn
@@ -1777,7 +1792,8 @@ end = struct
           | (env, None) ->
             (match deref lty_sub with
             | (_, (Tunion _ | Tvar _)) -> default_subtype_help env
-            | (_, Tgeneric _) when subtype_env.require_completeness ->
+            | (_, Tgeneric _) when subtype_env.Subtype_env.require_completeness
+              ->
               default_subtype_help env
             (* Num is not atomic: it is equivalent to int|float. The rule below relies
              * on ty_sub not being a union e.g. consider num <: arraykey | float, so
@@ -1959,7 +1975,8 @@ end = struct
               (* We do not want to decompose Toption for these cases *)
             | ((_, (Tvar _ | Tunion _ | Tintersection _)), _) ->
               default_subtype_help env
-            | ((_, Tgeneric _), _) when subtype_env.require_completeness ->
+            | ((_, Tgeneric _), _)
+              when subtype_env.Subtype_env.require_completeness ->
               (* TODO(T69551141) handle type arguments ? *)
               default_subtype_help env
             (* If t1 <: ?t2 and t1 is an abstract type constrained as t1',
@@ -2151,7 +2168,7 @@ end = struct
           | Tunion _ ->
             default_subtype_help env
           | _ ->
-            if subtype_env.require_completeness then
+            if subtype_env.Subtype_env.require_completeness then
               default env
             else (
               (* If we've seen this type parameter before then we must have gone
@@ -2159,13 +2176,15 @@ end = struct
                *)
               match
                 VisitedGoals.try_add_visited_generic_super
-                  subtype_env.visited
+                  subtype_env.Subtype_env.visited
                   ety_sub
                   name_super
               with
               | None -> invalid_env env
               | Some new_visited ->
-                let subtype_env = { subtype_env with visited = new_visited } in
+                let subtype_env =
+                  Subtype_env.set_visited subtype_env new_visited
+                in
                 (* Collect all the lower bounds ("super" constraints) on the
                  * generic parameter, and check ty_sub against each of them in turn
                  * until one of them succeeds *)
@@ -2219,7 +2238,7 @@ end = struct
           | _ -> default_subtype_help env))
       | (r_dynamic, Tdynamic)
         when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
-             && (coercing_to_dynamic subtype_env
+             && (Subtype_env.coercing_to_dynamic subtype_env
                 || Tast.is_under_dynamic_assumptions env.checked) ->
         let open Ast_defs in
         (match ety_sub with
@@ -2238,7 +2257,7 @@ end = struct
               (invalid
                  ~fail:
                    (Option.map
-                      subtype_env.on_error
+                      subtype_env.Subtype_env.on_error
                       ~f:
                         Typing_error.(
                           fun on_error ->
@@ -2538,7 +2557,7 @@ end = struct
           | (_, Tany _) -> valid env
           | (_, (Tunion _ | Tintersection _ | Tvar _)) ->
             default_subtype_help env
-          | _ when subtype_env.no_top_bottom -> default env
+          | _ when subtype_env.Subtype_env.no_top_bottom -> default env
           | _ -> valid env))
       | (r_super, Tfun ft_super) ->
         (match ety_sub with
@@ -2790,7 +2809,7 @@ end = struct
                       ty_int
                       ty_super
               end
-          | (_, Tgeneric _) when subtype_env.require_completeness ->
+          | (_, Tgeneric _) when subtype_env.Subtype_env.require_completeness ->
             default_subtype_help env
           | _ ->
             (match Env.get_typedef env name_super with
@@ -2916,7 +2935,7 @@ end = struct
           | _ -> default_subtype_help env))
       | (r_super, Tclass (x_super, Nonexact cr_super, tyl_super))
         when (not (Class_refinement.is_empty cr_super))
-             && (subtype_env.require_soundness
+             && (subtype_env.Subtype_env.require_soundness
                 || (* To deal with refinements, the code below generates a
                     * constraint type. That is currently not supported when
                     * require_soundness is not set (see below in the function
@@ -3069,7 +3088,7 @@ end = struct
    * and <:v denotes the appropriate direction of subtyping for variance v.
    * However, the reverse direction does not hold. *)
   and simplify_subtype_variance_for_non_injective
-      ~(subtype_env : subtype_env)
+      ~(subtype_env : Subtype_env.t)
       ~sub_supportdyn
       ~super_like
       (cid : string)
@@ -3092,15 +3111,15 @@ end = struct
         super_tyl
         env
     in
-    if subtype_env.require_completeness && not (TL.is_valid p) then
+    if subtype_env.Subtype_env.require_completeness && not (TL.is_valid p) then
       (* If we require completeness, then we can still use the incomplete
        * N<t1, .., tn> <: N<u1, .., un> to t1 <:v1> u1 /\ ... /\ tn <:vn> un
        * simplification if all of the latter constraints already hold.
        * If they don't already hold, there is nothing we can (soundly) simplify. *)
-      if subtype_env.require_soundness then
+      if subtype_env.Subtype_env.require_soundness then
         mk_issubtype_prop
           ~sub_supportdyn
-          ~coerce:subtype_env.coerce
+          ~coerce:subtype_env.Subtype_env.coerce
           env
           ty_sub
           ty_super
@@ -3154,7 +3173,7 @@ end
 
 and Can_index : sig
   val simplify_subtype_can_index :
-    subtype_env:subtype_env ->
+    subtype_env:Subtype_env.t ->
     sub_supportdyn:Reason.t option ->
     this_ty:Typing_defs.locl_ty option ->
     fail:Typing_error.t option ->
@@ -3180,7 +3199,7 @@ end
 
 and Can_traverse : sig
   val simplify_subtype_can_traverse :
-    subtype_env:subtype_env ->
+    subtype_env:Subtype_env.t ->
     sub_supportdyn:Reason.t option ->
     this_ty:Typing_defs.locl_ty option ->
     fail:Typing_error.t option ->
@@ -3277,7 +3296,7 @@ end
 
 and Has_type_member : sig
   val simplify_subtype_has_type_member :
-    subtype_env:subtype_env ->
+    subtype_env:Subtype_env.t ->
     sub_supportdyn:Reason.t option ->
     this_ty:Typing_defs.locl_ty option ->
     fail:Typing_error.t option ->
@@ -3310,14 +3329,14 @@ end = struct
     in
     let simplify_subtype_bound kind ~bound ty env =
       let on_error =
-        Option.map subtype_env.on_error ~f:(fun on_error ->
+        Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
             let open Typing_error in
             let pos = Reason.to_pos (get_reason bound) in
             Reasons_callback.prepend_on_apply
               on_error
               (Secondary.Violated_refinement_constraint { cstr = (kind, pos) }))
       in
-      let subtype_env = { subtype_env with on_error } in
+      let subtype_env = Subtype_env.set_on_error subtype_env on_error in
       let this_ty = None in
       match kind with
       | `As ->
@@ -3360,7 +3379,7 @@ end = struct
           Typing_type_member.make_type_member
             env
             ~this_ty:(Option.value this_ty ~default:ty_sub)
-            ~on_error:subtype_env.on_error
+            ~on_error:subtype_env.Subtype_env.on_error
             ucckind
             bndtys
             (Reason.to_pos r, memid)
@@ -3379,7 +3398,7 @@ end = struct
           Typing_type_member.lookup_class_type_member
             env
             ~this_ty:(Option.value this_ty ~default:ty_sub)
-            ~on_error:subtype_env.on_error
+            ~on_error:subtype_env.Subtype_env.on_error
             (x_sub, exact_sub)
             (Reason.to_pos r, memid)
         in
@@ -3402,11 +3421,11 @@ end = struct
           (if is_exact then
             let drop_sub_reasons =
               Option.map
-                subtype_env.on_error
+                subtype_env.Subtype_env.on_error
                 ~f:Typing_error.Reasons_callback.drop_reasons_on_apply
             in
             let subtype_env =
-              { subtype_env with on_error = drop_sub_reasons }
+              Subtype_env.set_on_error subtype_env drop_sub_reasons
             in
             Subtype.simplify_subtype
               ~subtype_env
@@ -3433,7 +3452,7 @@ end
 
 and Has_member : sig
   val simplify_subtype_has_member :
-    subtype_env:subtype_env ->
+    subtype_env:Subtype_env.t ->
     sub_supportdyn:Reason.t option ->
     this_ty:Typing_defs.locl_ty option ->
     fail:Typing_error.t option ->
@@ -3793,7 +3812,9 @@ end = struct
           match res with
           | (env, None) -> valid env
           | (env, Some ty_err) ->
-            let on_error = add_obj_get_quickfixes ty_err subtype_env.on_error in
+            let on_error =
+              add_obj_get_quickfixes ty_err subtype_env.Subtype_env.on_error
+            in
             (* TODO - this needs to somehow(?) account for the fact that the old
                code considered FIXMEs in this position *)
             let fail =
@@ -3820,7 +3841,7 @@ and Subtype_class : sig
   (** Suptyping when the two types are classish *)
   val simplify_subtype_classes :
     fail:Typing_error.t option ->
-    subtype_env:subtype_env ->
+    subtype_env:Subtype_env.t ->
     sub_supportdyn:Reason.t option ->
     this_ty:Typing_defs.locl_ty option ->
     super_like:bool ->
@@ -3831,7 +3852,7 @@ and Subtype_class : sig
 end = struct
   let rec simplify_subtype_classes
       ~fail
-      ~(subtype_env : subtype_env)
+      ~(subtype_env : Subtype_env.t)
       ~(sub_supportdyn : Reason.t option)
       ~(this_ty : locl_ty option)
       ~(super_like : bool)
@@ -3999,7 +4020,7 @@ and Subtype_injective_ctor : sig
     where vi is the variance of the i'th generic parameter of C,
     and <:v denotes the appropriate direction of subtyping for variance v *)
   val simplify_subtype_variance_for_injective :
-    subtype_env:subtype_env ->
+    subtype_env:Subtype_env.t ->
     sub_supportdyn:Typing_defs.locl_phase Typing_defs.Reason.t_ option ->
     ?super_like:bool ->
     string ->
@@ -4011,7 +4032,7 @@ and Subtype_injective_ctor : sig
     Typing_env_types.env * TL.subtype_prop
 end = struct
   let rec simplify_subtype_variance_for_injective_loop
-      ~(subtype_env : subtype_env)
+      ~(subtype_env : Subtype_env.t)
       ~(sub_supportdyn : Reason.t option)
       ?(super_like = false)
       (cid : string)
@@ -4041,9 +4062,9 @@ end = struct
       let subtype_env =
         if
           (not Aast.(equal_reify_kind reify_kind Erased))
-          && coercing_from_dynamic subtype_env
+          && Subtype_env.coercing_from_dynamic subtype_env
         then
-          { subtype_env with coerce = None }
+          Subtype_env.{ subtype_env with coerce = None }
         else
           subtype_env
       in
@@ -4101,7 +4122,7 @@ end = struct
             superl
 
   let simplify_subtype_variance_for_injective
-      ~(subtype_env : subtype_env)
+      ~(subtype_env : Subtype_env.t)
       ~(sub_supportdyn : Reason.t option)
       ?(super_like = false)
       (cid : string)
@@ -4133,7 +4154,7 @@ end
 
 and Subtype_shape : sig
   val simplify_subtype_shape :
-    subtype_env:subtype_env ->
+    subtype_env:Subtype_env.t ->
     env:Typing_env_types.env ->
     this_ty:Typing_defs.locl_ty option ->
     ?super_like:bool ->
@@ -4150,7 +4171,7 @@ and Subtype_shape : sig
     Typing_env_types.env * TL.subtype_prop
 end = struct
   let simplify_subtype_shape
-      ~(subtype_env : subtype_env)
+      ~(subtype_env : Subtype_env.t)
       ~(env : env)
       ~(this_ty : locl_ty option)
       ?(super_like = false)
@@ -4241,7 +4262,7 @@ end = struct
       | (`Optional _, `Absent) ->
         let ty_err_opt =
           Option.map
-            subtype_env.on_error
+            subtype_env.Subtype_env.on_error
             ~f:
               Typing_error.(
                 fun on_error ->
@@ -4257,7 +4278,7 @@ end = struct
       | (`Optional _, `Required super_ty) ->
         let ty_err_opt =
           Option.map
-            subtype_env.on_error
+            subtype_env.Subtype_env.on_error
             ~f:
               Typing_error.(
                 fun on_error ->
@@ -4290,7 +4311,7 @@ end = struct
 
         let ty_err_opt =
           Option.map
-            subtype_env.on_error
+            subtype_env.Subtype_env.on_error
             ~f:
               Typing_error.(
                 fun on_error ->
@@ -4346,7 +4367,7 @@ end = struct
     | (false, true) ->
       let fail =
         Option.map
-          subtype_env.on_error
+          subtype_env.Subtype_env.on_error
           ~f:
             Typing_error.(
               fun on_error ->
@@ -4375,7 +4396,7 @@ and Subtype_fun : sig
       (3) special casing for variadics
    *)
   val simplify_subtype_funs :
-    subtype_env:subtype_env ->
+    subtype_env:Subtype_env.t ->
     check_return:bool ->
     for_override:bool ->
     ?super_like:bool ->
@@ -4387,14 +4408,14 @@ and Subtype_fun : sig
     Typing_env_types.env * TL.subtype_prop
 
   val simplify_supertype_params_with_variadic :
-    subtype_env:subtype_env ->
+    subtype_env:Subtype_env.t ->
     Typing_defs.locl_fun_param list ->
     Typing_defs.locl_ty ->
     Typing_env_types.env ->
     Typing_env_types.env * Typing_logic.subtype_prop
 end = struct
   let rec simplify_subtype_params_with_variadic
-      ~(subtype_env : subtype_env)
+      ~(subtype_env : Subtype_env.t)
       (subl : locl_fun_param list)
       (variadic_ty : locl_ty)
       env =
@@ -4427,11 +4448,11 @@ end = struct
           }
       in
       let on_error =
-        Option.map subtype_env.on_error ~f:(fun on_error ->
+        Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
             let err = Typing_error.apply_reasons ~on_error reasons in
             Typing_error.(Reasons_callback.always err))
       in
-      let subtype_env = { subtype_env with on_error } in
+      let subtype_env = Subtype_env.set_on_error subtype_env on_error in
       match (sub_cap, super_cap) with
       | (CapTy sub, CapTy super) ->
         Subtype.simplify_subtype ~subtype_env ~sub_supportdyn:None sub super env
@@ -4449,7 +4470,7 @@ end = struct
       valid env
 
   let rec simplify_supertype_params_with_variadic
-      ~(subtype_env : subtype_env)
+      ~(subtype_env : Subtype_env.t)
       (superl : locl_fun_param list)
       (variadic_ty : locl_ty)
       env =
@@ -4478,7 +4499,7 @@ end = struct
       invalid
         ~fail:
           (Option.map
-             subtype_env.on_error
+             subtype_env.Subtype_env.on_error
              ~f:
                Typing_error.(
                  fun on_error ->
@@ -4490,7 +4511,7 @@ end = struct
       invalid
         ~fail:
           (Option.map
-             subtype_env.on_error
+             subtype_env.Subtype_env.on_error
              ~f:
                Typing_error.(
                  fun on_error ->
@@ -4509,7 +4530,7 @@ end = struct
       invalid
         ~fail:
           (Option.map
-             subtype_env.on_error
+             subtype_env.Subtype_env.on_error
              ~f:
                Typing_error.(
                  fun on_error ->
@@ -4521,7 +4542,7 @@ end = struct
       invalid
         ~fail:
           (Option.map
-             subtype_env.on_error
+             subtype_env.Subtype_env.on_error
              ~f:
                Typing_error.(
                  fun on_error ->
@@ -4547,7 +4568,7 @@ end = struct
       invalid
         ~fail:
           (Option.map
-             subtype_env.on_error
+             subtype_env.Subtype_env.on_error
              ~f:
                Typing_error.(
                  fun on_error ->
@@ -4607,7 +4628,7 @@ end = struct
             (get_ft_readonly_this ft_super)
             (get_ft_readonly_this ft_sub))
          (Option.map
-            subtype_env.on_error
+            subtype_env.Subtype_env.on_error
             ~f:
               Typing_error.(
                 fun on_error ->
@@ -4628,7 +4649,7 @@ end = struct
             (get_ft_returns_readonly ft_sub)
             (get_ft_returns_readonly ft_super))
          (Option.map
-            subtype_env.on_error
+            subtype_env.Subtype_env.on_error
             ~f:
               Typing_error.(
                 fun on_error ->
@@ -4653,7 +4674,7 @@ end = struct
             ft_sub.ft_cross_package
             ft_super.ft_cross_package)
          (Option.map
-            subtype_env.on_error
+            subtype_env.Subtype_env.on_error
             ~f:
               Typing_error.(
                 fun on_error ->
@@ -4683,7 +4704,7 @@ end = struct
             (get_ft_return_disposable ft_sub)
             (get_ft_return_disposable ft_super))
          (Option.map
-            subtype_env.on_error
+            subtype_env.Subtype_env.on_error
             ~f:
               Typing_error.(
                 fun on_error ->
@@ -4698,7 +4719,7 @@ end = struct
     |> check_with
          (arity_min ft_sub <= arity_min ft_super)
          (Option.map
-            subtype_env.on_error
+            subtype_env.Subtype_env.on_error
             ~f:
               Typing_error.(
                 fun on_error ->
@@ -4733,7 +4754,7 @@ end = struct
        * compatibility errors at runtime. *)
       with_error
         (Option.map
-           subtype_env.on_error
+           subtype_env.Subtype_env.on_error
            ~f:
              Typing_error.(
                fun on_error ->
@@ -4747,7 +4768,7 @@ end = struct
       if sub_max < super_max then
         with_error
           (Option.map
-             subtype_env.on_error
+             subtype_env.Subtype_env.on_error
              ~f:
                Typing_error.(
                  fun on_error ->
@@ -4765,7 +4786,7 @@ end = struct
     | (None, Some _) ->
       with_error
         (Option.map
-           subtype_env.on_error
+           subtype_env.Subtype_env.on_error
            ~f:
              Typing_error.(
                fun on_error ->
@@ -4776,7 +4797,7 @@ end = struct
     | (_, _) -> res
 
   let rec simplify_subtype_params
-      ~(subtype_env : subtype_env)
+      ~(subtype_env : Subtype_env.t)
       ~for_override
       (subl : locl_fun_param list)
       (superl : locl_fun_param list)
@@ -4835,7 +4856,7 @@ end = struct
         | Tdynamic
           when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
                && for_override ->
-          { subtype_env with coerce = Some TL.CoerceToDynamic }
+          Subtype_env.set_coercing_to_dynamic subtype_env
         | _ -> subtype_env
       in
       let simplify_subtype_for_param =
@@ -4865,7 +4886,7 @@ end = struct
             variadic_super_ty
 
   let simplify_subtype_funs
-      ~(subtype_env : subtype_env)
+      ~(subtype_env : Subtype_env.t)
       ~(check_return : bool)
       ~(for_override : bool)
       ?(super_like = false)
@@ -4913,11 +4934,11 @@ end = struct
            *)
           let super_ty = TUtils.strip_dynamic env super_ty in
           match get_node super_ty with
-          | Tdynamic -> { subtype_env with coerce = Some TL.CoerceToDynamic }
+          | Tdynamic -> Subtype_env.set_coercing_to_dynamic subtype_env
           | Tclass ((_, class_name), _, [ty])
             when String.equal class_name SN.Classes.cAwaitable && is_dynamic ty
             ->
-            { subtype_env with coerce = Some TL.CoerceToDynamic }
+            Subtype_env.set_coercing_to_dynamic subtype_env
           | _ -> subtype_env
         else
           subtype_env
@@ -4965,7 +4986,7 @@ end = struct
     let (_env, prop) =
       Subtype.simplify_subtype_i
         ~subtype_env:
-          (make_subtype_env
+          (Subtype_env.create
              ~require_completeness
              ~no_top_bottom
              ~coerce
@@ -5210,7 +5231,7 @@ end = struct
               let (env, prop2) =
                 Subtype.simplify_subtype_i
                   ~subtype_env:
-                    (make_subtype_env
+                    (Subtype_env.create
                        ~coerce
                        ~log_level:2
                        ~in_transitive_closure:true
@@ -5273,7 +5294,7 @@ end = struct
               let (env, prop2) =
                 Subtype.simplify_subtype_i
                   ~subtype_env:
-                    (make_subtype_env
+                    (Subtype_env.create
                        ~coerce
                        ~log_level:2
                        ~in_transitive_closure:true
@@ -5513,7 +5534,7 @@ and Subtype_tell : sig
   (** Entry point asserting top-level subtype constraints and all implied constraints *)
   val sub_type_inner :
     Typing_env_types.env ->
-    subtype_env:subtype_env ->
+    subtype_env:Subtype_env.t ->
     sub_supportdyn:Reason.t option ->
     this_ty:Typing_defs.locl_ty option ->
     Typing_defs.internal_type ->
@@ -5522,7 +5543,7 @@ and Subtype_tell : sig
 end = struct
   let sub_type_inner
       (env : env)
-      ~(subtype_env : subtype_env)
+      ~(subtype_env : Subtype_env.t)
       ~(sub_supportdyn : Reason.t option)
       ~(this_ty : locl_ty option)
       (ty_sub : internal_type)
@@ -5533,7 +5554,7 @@ end = struct
       ~function_name:
         ("sub_type_inner"
         ^
-        match subtype_env.coerce with
+        match subtype_env.Subtype_env.coerce with
         | Some TL.CoerceToDynamic -> " (dynamic aware)"
         | Some TL.CoerceFromDynamic -> " (treat dynamic as bottom)"
         | None -> "")
@@ -5556,7 +5577,12 @@ end = struct
         "sub_type_inner"
         env
         prop;
-    Subtype_trans.prop_to_env ty_sub ty_super env prop subtype_env.on_error
+    Subtype_trans.prop_to_env
+      ty_sub
+      ty_super
+      env
+      prop
+      subtype_env.Subtype_env.on_error
 end
 
 (* == API =================================================================== *)
@@ -5587,7 +5613,7 @@ let sub_type
     (ty_super : locl_ty)
     on_error =
   sub_type_i
-    ~subtype_env:(make_subtype_env ~is_coeffect ~coerce ~log_level:2 on_error)
+    ~subtype_env:(Subtype_env.create ~is_coeffect ~coerce ~log_level:2 on_error)
     env
     (LoclType ty_sub)
     (LoclType ty_super)
@@ -5901,7 +5927,7 @@ let rec decompose_subtype
   let (env, prop) =
     Subtype.simplify_subtype
       ~subtype_env:
-        (make_subtype_env
+        (Subtype_env.create
            ~require_soundness:false
            ~require_completeness:true
            ~log_level:2
@@ -6044,7 +6070,7 @@ let sub_type_with_dynamic_as_bottom env ty_sub ty_super on_error =
   let (env, prop) =
     Subtype.simplify_subtype
       ~subtype_env:
-        (make_subtype_env
+        (Subtype_env.create
            ~coerce:(Some TL.CoerceFromDynamic)
            ~log_level:2
            on_error)
@@ -6071,7 +6097,11 @@ let sub_type_with_dynamic_as_bottom env ty_sub ty_super on_error =
 let simplify_subtype_i ?(is_coeffect = false) env ty_sub ty_super ~on_error =
   Subtype.simplify_subtype_i
     ~subtype_env:
-      (make_subtype_env ~is_coeffect ~no_top_bottom:true ~log_level:2 on_error)
+      (Subtype_env.create
+         ~is_coeffect
+         ~no_top_bottom:true
+         ~log_level:2
+         on_error)
     ~sub_supportdyn:None
     ty_sub
     ty_super
@@ -6084,7 +6114,7 @@ let simplify_subtype_i ?(is_coeffect = false) env ty_sub ty_super ~on_error =
 let sub_type_i env ?(is_coeffect = false) ty1 ty2 on_error =
   sub_type_i
     ~subtype_env:
-      (make_subtype_env ~log_level:2 ~is_coeffect ~coerce:None on_error)
+      (Subtype_env.create ~log_level:2 ~is_coeffect ~coerce:None on_error)
     env
     ty1
     ty2
@@ -6105,7 +6135,7 @@ let subtype_funs
   let old_env = env in
   let (env, prop) =
     Subtype_fun.simplify_subtype_funs
-      ~subtype_env:(make_subtype_env ~log_level:2 ~coerce:None on_error)
+      ~subtype_env:(Subtype_env.create ~log_level:2 ~coerce:None on_error)
       ~check_return
       ~for_override
       r_sub

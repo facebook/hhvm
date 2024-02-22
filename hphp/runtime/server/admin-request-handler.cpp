@@ -66,6 +66,7 @@
 #include "hphp/util/numa.h"
 #include "hphp/util/process.h"
 #include "hphp/util/service-data.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 
 #ifdef ENABLE_EXTENSION_MYSQL
@@ -237,6 +238,21 @@ void AdminRequestHandler::setupRequest(Transport* transport) {
     g_context.getCheck();
   }
   GetAccessLog().onNewRequest();
+
+  if (StructuredLog::enabled()) {
+    auto entry = StructuredLogEntry{};
+    entry.setStr("protocol", "http");
+
+    entry.setStr("local_ip", transport->getServerAddr());
+    entry.setInt("local_port", transport->getServerPort());
+    entry.setStr("remote_ip", transport->getRemoteHost());
+    entry.setInt("remote_port", transport->getRemotePort());
+
+    entry.setStr("command", transport->getCommand());
+    entry.setStr("client_id", transport->getHeader("User-Agent"));
+
+    StructuredLog::log("hhvm_admin_log", entry);
+  }
 }
 
 void AdminRequestHandler::teardownRequest(Transport* transport) noexcept {

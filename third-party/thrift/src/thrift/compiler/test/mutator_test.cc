@@ -15,8 +15,10 @@
  */
 
 #include <memory>
+#include <thrift/compiler/sema/patch_mutator.h>
 #include <thrift/compiler/sema/standard_mutator.h>
 
+#include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/diagnostic.h>
@@ -24,7 +26,36 @@
 #include <thrift/compiler/test/gen_testing.h>
 
 namespace apache::thrift::compiler {
-namespace {
+
+using ::testing::UnorderedElementsAre;
+
+TEST(AstMutatorTest, Output) {
+  ast_mutator mutator;
+  mutator.add_program_visitor([](diagnostic_context& ctx,
+                                 mutator_context& mctx,
+                                 t_program& program) {
+    ctx.report(program, diagnostic_level::info, "test");
+    EXPECT_EQ(mctx.current(), &program);
+    EXPECT_EQ(mctx.parent(), nullptr);
+    EXPECT_EQ(mctx.root(), &program);
+    program.add_service(std::make_unique<t_service>(&program, "MagicService"));
+  });
+
+  t_program program("path/to/program.thrift");
+  source_manager source_mgr;
+  diagnostic_results results;
+  diagnostic_context ctx(source_mgr, results, diagnostic_params::keep_all());
+  auto loc = source_mgr.add_virtual_file(program.path(), "").start;
+  program.set_src_range({loc, loc});
+  mutator_context mctx;
+  mutator(ctx, mctx, program);
+  EXPECT_THAT(
+      results.diagnostics(),
+      UnorderedElementsAre(
+          diagnostic(diagnostic_level::info, "test", program.path(), 1)));
+  ASSERT_EQ(program.services().size(), 1);
+  EXPECT_EQ(program.services().front()->name(), "MagicService");
+}
 
 class StandardMutatorTest : public ::testing::Test {
  protected:
@@ -147,5 +178,41 @@ TEST_F(StandardMutatorTest, Transitive) {
   EXPECT_EQ(terse_field_ptr->qualifier(), t_field_qualifier::terse);
 }
 
-} // namespace
+class PatchGeneratorTest : public ::testing::Test {
+ public:
+  PatchGeneratorTest() : ctx_(source_mgr_, results_) {}
+
+  void SetUp() override {
+    ctx_.begin_visit(program_);
+    gen_ = std::make_unique<patch_generator>(ctx_, program_);
+  }
+
+  // Give tests access to this funciton.
+  template <typename... Args>
+  std::string prefix_uri_name(Args&&... args) {
+    return patch_generator::prefix_uri_name(std::forward<Args>(args)...);
+  }
+
+ protected:
+  t_program program_{"path/to/file.thrift"};
+  source_manager source_mgr_;
+  diagnostic_results results_;
+  diagnostic_context ctx_;
+  std::unique_ptr<patch_generator> gen_;
+};
+
+TEST_F(PatchGeneratorTest, Empty) {
+  // We do not error when the patch types cannot be found.
+  EXPECT_FALSE(results_.has_error());
+  // Failures/warnings are produced lazily.
+  EXPECT_EQ(results_.count(diagnostic_level::warning), 0);
+}
+
+TEST_F(PatchGeneratorTest, PrefixUriName) {
+  EXPECT_EQ(prefix_uri_name("", "Foo"), "");
+  EXPECT_EQ(prefix_uri_name("Bar", "Foo"), "");
+  EXPECT_EQ(prefix_uri_name("Baz/Bar", "Foo"), "Baz/FooBar");
+  EXPECT_EQ(prefix_uri_name("Buk/Baz/Bar", "Foo"), "Buk/Baz/FooBar");
+}
+
 } // namespace apache::thrift::compiler

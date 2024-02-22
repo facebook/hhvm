@@ -61,14 +61,6 @@ func (c *RaiserChannelClient) Close() error {
     return c.ch.Close()
 }
 
-func (c *RaiserChannelClient) IsOpen() bool {
-    return c.ch.IsOpen()
-}
-
-func (c *RaiserChannelClient) Open() error {
-    return c.ch.Open()
-}
-
 type RaiserClient struct {
     chClient *RaiserChannelClient
     Mu       sync.Mutex
@@ -91,14 +83,6 @@ func NewRaiserClientFromProtocol(prot thrift.Protocol) *RaiserClient {
 
 func (c *RaiserClient) Close() error {
     return c.chClient.Close()
-}
-
-func (c *RaiserClient) IsOpen() bool {
-    return c.chClient.IsOpen()
-}
-
-func (c *RaiserClient) Open() error {
-    return c.chClient.Open()
 }
 
 // Deprecated: Use RaiserClient instead.

@@ -46,14 +46,6 @@ func (c *{{service:go_name}}ChannelClient) Close() error {
     return c.ch.Close()
 }
 
-func (c *{{service:go_name}}ChannelClient) IsOpen() bool {
-    return c.ch.IsOpen()
-}
-
-func (c *{{service:go_name}}ChannelClient) Open() error {
-    return c.ch.Open()
-}
-
 type {{service:go_name}}Client struct {
     {{#service:extends?}}
     {{#service:extends}}
@@ -88,14 +80,6 @@ func New{{service:go_name}}ClientFromProtocol(prot thrift.Protocol) *{{service:g
 
 func (c *{{service:go_name}}Client) Close() error {
     return c.chClient.Close()
-}
-
-func (c *{{service:go_name}}Client) IsOpen() bool {
-    return c.chClient.IsOpen()
-}
-
-func (c *{{service:go_name}}Client) Open() error {
-    return c.chClient.Open()
 }
 
 // Deprecated: Use {{service:go_name}}Client instead.

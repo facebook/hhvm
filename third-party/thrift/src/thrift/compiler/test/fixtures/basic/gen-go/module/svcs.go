@@ -55,14 +55,6 @@ func (c *FooServiceChannelClient) Close() error {
     return c.ch.Close()
 }
 
-func (c *FooServiceChannelClient) IsOpen() bool {
-    return c.ch.IsOpen()
-}
-
-func (c *FooServiceChannelClient) Open() error {
-    return c.ch.Open()
-}
-
 type FooServiceClient struct {
     chClient *FooServiceChannelClient
     Mu       sync.Mutex
@@ -85,14 +77,6 @@ func NewFooServiceClientFromProtocol(prot thrift.Protocol) *FooServiceClient {
 
 func (c *FooServiceClient) Close() error {
     return c.chClient.Close()
-}
-
-func (c *FooServiceClient) IsOpen() bool {
-    return c.chClient.IsOpen()
-}
-
-func (c *FooServiceClient) Open() error {
-    return c.chClient.Open()
 }
 
 // Deprecated: Use FooServiceClient instead.
@@ -456,14 +440,6 @@ func (c *FB303ServiceChannelClient) Close() error {
     return c.ch.Close()
 }
 
-func (c *FB303ServiceChannelClient) IsOpen() bool {
-    return c.ch.IsOpen()
-}
-
-func (c *FB303ServiceChannelClient) Open() error {
-    return c.ch.Open()
-}
-
 type FB303ServiceClient struct {
     chClient *FB303ServiceChannelClient
     Mu       sync.Mutex
@@ -486,14 +462,6 @@ func NewFB303ServiceClientFromProtocol(prot thrift.Protocol) *FB303ServiceClient
 
 func (c *FB303ServiceClient) Close() error {
     return c.chClient.Close()
-}
-
-func (c *FB303ServiceClient) IsOpen() bool {
-    return c.chClient.IsOpen()
-}
-
-func (c *FB303ServiceClient) Open() error {
-    return c.chClient.Open()
 }
 
 // Deprecated: Use FB303ServiceClient instead.
@@ -1030,14 +998,6 @@ func (c *MyServiceChannelClient) Close() error {
     return c.ch.Close()
 }
 
-func (c *MyServiceChannelClient) IsOpen() bool {
-    return c.ch.IsOpen()
-}
-
-func (c *MyServiceChannelClient) Open() error {
-    return c.ch.Open()
-}
-
 type MyServiceClient struct {
     chClient *MyServiceChannelClient
     Mu       sync.Mutex
@@ -1060,14 +1020,6 @@ func NewMyServiceClientFromProtocol(prot thrift.Protocol) *MyServiceClient {
 
 func (c *MyServiceClient) Close() error {
     return c.chClient.Close()
-}
-
-func (c *MyServiceClient) IsOpen() bool {
-    return c.chClient.IsOpen()
-}
-
-func (c *MyServiceClient) Open() error {
-    return c.chClient.Open()
 }
 
 // Deprecated: Use MyServiceClient instead.
@@ -4671,14 +4623,6 @@ func (c *DbMixedStackArgumentsChannelClient) Close() error {
     return c.ch.Close()
 }
 
-func (c *DbMixedStackArgumentsChannelClient) IsOpen() bool {
-    return c.ch.IsOpen()
-}
-
-func (c *DbMixedStackArgumentsChannelClient) Open() error {
-    return c.ch.Open()
-}
-
 type DbMixedStackArgumentsClient struct {
     chClient *DbMixedStackArgumentsChannelClient
     Mu       sync.Mutex
@@ -4701,14 +4645,6 @@ func NewDbMixedStackArgumentsClientFromProtocol(prot thrift.Protocol) *DbMixedSt
 
 func (c *DbMixedStackArgumentsClient) Close() error {
     return c.chClient.Close()
-}
-
-func (c *DbMixedStackArgumentsClient) IsOpen() bool {
-    return c.chClient.IsOpen()
-}
-
-func (c *DbMixedStackArgumentsClient) Open() error {
-    return c.chClient.Open()
 }
 
 // Deprecated: Use DbMixedStackArgumentsClient instead.

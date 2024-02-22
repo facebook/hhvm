@@ -576,14 +576,6 @@ func (p *SimpleJSONProtocol) Close() error {
 	return p.trans.Close()
 }
 
-func (p *SimpleJSONProtocol) IsOpen() bool {
-	return p.trans.IsOpen()
-}
-
-func (p *SimpleJSONProtocol) Open() error {
-	return p.trans.Open()
-}
-
 func (p *SimpleJSONProtocol) OutputPreValue() error {
 	cxt := _ParseContext(p.dumpContext[len(p.dumpContext)-1])
 	switch cxt {

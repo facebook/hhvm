@@ -61,14 +61,6 @@ func (c *FinderChannelClient) Close() error {
     return c.ch.Close()
 }
 
-func (c *FinderChannelClient) IsOpen() bool {
-    return c.ch.IsOpen()
-}
-
-func (c *FinderChannelClient) Open() error {
-    return c.ch.Open()
-}
-
 type FinderClient struct {
     chClient *FinderChannelClient
     Mu       sync.Mutex
@@ -91,14 +83,6 @@ func NewFinderClientFromProtocol(prot thrift.Protocol) *FinderClient {
 
 func (c *FinderClient) Close() error {
     return c.chClient.Close()
-}
-
-func (c *FinderClient) IsOpen() bool {
-    return c.chClient.IsOpen()
-}
-
-func (c *FinderClient) Open() error {
-    return c.chClient.Open()
 }
 
 // Deprecated: Use FinderClient instead.

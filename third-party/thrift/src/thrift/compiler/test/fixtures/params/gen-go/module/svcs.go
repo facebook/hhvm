@@ -63,14 +63,6 @@ func (c *NestedContainersChannelClient) Close() error {
     return c.ch.Close()
 }
 
-func (c *NestedContainersChannelClient) IsOpen() bool {
-    return c.ch.IsOpen()
-}
-
-func (c *NestedContainersChannelClient) Open() error {
-    return c.ch.Open()
-}
-
 type NestedContainersClient struct {
     chClient *NestedContainersChannelClient
     Mu       sync.Mutex
@@ -93,14 +85,6 @@ func NewNestedContainersClientFromProtocol(prot thrift.Protocol) *NestedContaine
 
 func (c *NestedContainersClient) Close() error {
     return c.chClient.Close()
-}
-
-func (c *NestedContainersClient) IsOpen() bool {
-    return c.chClient.IsOpen()
-}
-
-func (c *NestedContainersClient) Open() error {
-    return c.chClient.Open()
 }
 
 // Deprecated: Use NestedContainersClient instead.

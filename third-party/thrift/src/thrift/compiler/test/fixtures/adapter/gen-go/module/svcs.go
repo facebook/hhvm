@@ -55,14 +55,6 @@ func (c *ServiceChannelClient) Close() error {
     return c.ch.Close()
 }
 
-func (c *ServiceChannelClient) IsOpen() bool {
-    return c.ch.IsOpen()
-}
-
-func (c *ServiceChannelClient) Open() error {
-    return c.ch.Open()
-}
-
 type ServiceClient struct {
     chClient *ServiceChannelClient
     Mu       sync.Mutex
@@ -85,14 +77,6 @@ func NewServiceClientFromProtocol(prot thrift.Protocol) *ServiceClient {
 
 func (c *ServiceClient) Close() error {
     return c.chClient.Close()
-}
-
-func (c *ServiceClient) IsOpen() bool {
-    return c.chClient.IsOpen()
-}
-
-func (c *ServiceClient) Open() error {
-    return c.chClient.Open()
 }
 
 // Deprecated: Use ServiceClient instead.
@@ -765,14 +749,6 @@ func (c *AdapterServiceChannelClient) Close() error {
     return c.ch.Close()
 }
 
-func (c *AdapterServiceChannelClient) IsOpen() bool {
-    return c.ch.IsOpen()
-}
-
-func (c *AdapterServiceChannelClient) Open() error {
-    return c.ch.Open()
-}
-
 type AdapterServiceClient struct {
     chClient *AdapterServiceChannelClient
     Mu       sync.Mutex
@@ -795,14 +771,6 @@ func NewAdapterServiceClientFromProtocol(prot thrift.Protocol) *AdapterServiceCl
 
 func (c *AdapterServiceClient) Close() error {
     return c.chClient.Close()
-}
-
-func (c *AdapterServiceClient) IsOpen() bool {
-    return c.chClient.IsOpen()
-}
-
-func (c *AdapterServiceClient) Open() error {
-    return c.chClient.Open()
 }
 
 // Deprecated: Use AdapterServiceClient instead.

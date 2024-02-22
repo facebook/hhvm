@@ -83,14 +83,6 @@ func (c *GetEntityChannelClient) Close() error {
     return c.ch.Close()
 }
 
-func (c *GetEntityChannelClient) IsOpen() bool {
-    return c.ch.IsOpen()
-}
-
-func (c *GetEntityChannelClient) Open() error {
-    return c.ch.Open()
-}
-
 type GetEntityClient struct {
     chClient *GetEntityChannelClient
     Mu       sync.Mutex
@@ -113,14 +105,6 @@ func NewGetEntityClientFromProtocol(prot thrift.Protocol) *GetEntityClient {
 
 func (c *GetEntityClient) Close() error {
     return c.chClient.Close()
-}
-
-func (c *GetEntityClient) IsOpen() bool {
-    return c.chClient.IsOpen()
-}
-
-func (c *GetEntityClient) Open() error {
-    return c.chClient.Open()
 }
 
 // Deprecated: Use GetEntityClient instead.

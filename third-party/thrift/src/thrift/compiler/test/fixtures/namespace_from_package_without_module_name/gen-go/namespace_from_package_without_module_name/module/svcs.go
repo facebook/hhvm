@@ -55,14 +55,6 @@ func (c *TestServiceChannelClient) Close() error {
     return c.ch.Close()
 }
 
-func (c *TestServiceChannelClient) IsOpen() bool {
-    return c.ch.IsOpen()
-}
-
-func (c *TestServiceChannelClient) Open() error {
-    return c.ch.Open()
-}
-
 type TestServiceClient struct {
     chClient *TestServiceChannelClient
     Mu       sync.Mutex
@@ -85,14 +77,6 @@ func NewTestServiceClientFromProtocol(prot thrift.Protocol) *TestServiceClient {
 
 func (c *TestServiceClient) Close() error {
     return c.chClient.Close()
-}
-
-func (c *TestServiceClient) IsOpen() bool {
-    return c.chClient.IsOpen()
-}
-
-func (c *TestServiceClient) Open() error {
-    return c.chClient.Open()
 }
 
 // Deprecated: Use TestServiceClient instead.

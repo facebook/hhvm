@@ -67,14 +67,6 @@ func (c *MyServiceChannelClient) Close() error {
     return c.ch.Close()
 }
 
-func (c *MyServiceChannelClient) IsOpen() bool {
-    return c.ch.IsOpen()
-}
-
-func (c *MyServiceChannelClient) Open() error {
-    return c.ch.Open()
-}
-
 type MyServiceClient struct {
     chClient *MyServiceChannelClient
     Mu       sync.Mutex
@@ -97,14 +89,6 @@ func NewMyServiceClientFromProtocol(prot thrift.Protocol) *MyServiceClient {
 
 func (c *MyServiceClient) Close() error {
     return c.chClient.Close()
-}
-
-func (c *MyServiceClient) IsOpen() bool {
-    return c.chClient.IsOpen()
-}
-
-func (c *MyServiceClient) Open() error {
-    return c.chClient.Open()
 }
 
 // Deprecated: Use MyServiceClient instead.
@@ -2783,14 +2767,6 @@ func (c *MyServicePrioParentChannelClient) Close() error {
     return c.ch.Close()
 }
 
-func (c *MyServicePrioParentChannelClient) IsOpen() bool {
-    return c.ch.IsOpen()
-}
-
-func (c *MyServicePrioParentChannelClient) Open() error {
-    return c.ch.Open()
-}
-
 type MyServicePrioParentClient struct {
     chClient *MyServicePrioParentChannelClient
     Mu       sync.Mutex
@@ -2813,14 +2789,6 @@ func NewMyServicePrioParentClientFromProtocol(prot thrift.Protocol) *MyServicePr
 
 func (c *MyServicePrioParentClient) Close() error {
     return c.chClient.Close()
-}
-
-func (c *MyServicePrioParentClient) IsOpen() bool {
-    return c.chClient.IsOpen()
-}
-
-func (c *MyServicePrioParentClient) Open() error {
-    return c.chClient.Open()
 }
 
 // Deprecated: Use MyServicePrioParentClient instead.
@@ -3451,14 +3419,6 @@ func (c *MyServicePrioChildChannelClient) Close() error {
     return c.ch.Close()
 }
 
-func (c *MyServicePrioChildChannelClient) IsOpen() bool {
-    return c.ch.IsOpen()
-}
-
-func (c *MyServicePrioChildChannelClient) Open() error {
-    return c.ch.Open()
-}
-
 type MyServicePrioChildClient struct {
     // Inherited/extended service
     *MyServicePrioParentClient
@@ -3484,14 +3444,6 @@ func NewMyServicePrioChildClientFromProtocol(prot thrift.Protocol) *MyServicePri
 
 func (c *MyServicePrioChildClient) Close() error {
     return c.chClient.Close()
-}
-
-func (c *MyServicePrioChildClient) IsOpen() bool {
-    return c.chClient.IsOpen()
-}
-
-func (c *MyServicePrioChildClient) Open() error {
-    return c.chClient.Open()
 }
 
 // Deprecated: Use MyServicePrioChildClient instead.
@@ -3829,14 +3781,6 @@ func (c *BadServiceChannelClient) Close() error {
     return c.ch.Close()
 }
 
-func (c *BadServiceChannelClient) IsOpen() bool {
-    return c.ch.IsOpen()
-}
-
-func (c *BadServiceChannelClient) Open() error {
-    return c.ch.Open()
-}
-
 type BadServiceClient struct {
     chClient *BadServiceChannelClient
     Mu       sync.Mutex
@@ -3859,14 +3803,6 @@ func NewBadServiceClientFromProtocol(prot thrift.Protocol) *BadServiceClient {
 
 func (c *BadServiceClient) Close() error {
     return c.chClient.Close()
-}
-
-func (c *BadServiceClient) IsOpen() bool {
-    return c.chClient.IsOpen()
-}
-
-func (c *BadServiceClient) Open() error {
-    return c.chClient.Open()
 }
 
 // Deprecated: Use BadServiceClient instead.
@@ -4316,14 +4252,6 @@ func (c *FooBarBazServiceChannelClient) Close() error {
     return c.ch.Close()
 }
 
-func (c *FooBarBazServiceChannelClient) IsOpen() bool {
-    return c.ch.IsOpen()
-}
-
-func (c *FooBarBazServiceChannelClient) Open() error {
-    return c.ch.Open()
-}
-
 type FooBarBazServiceClient struct {
     chClient *FooBarBazServiceChannelClient
     Mu       sync.Mutex
@@ -4346,14 +4274,6 @@ func NewFooBarBazServiceClientFromProtocol(prot thrift.Protocol) *FooBarBazServi
 
 func (c *FooBarBazServiceClient) Close() error {
     return c.chClient.Close()
-}
-
-func (c *FooBarBazServiceClient) IsOpen() bool {
-    return c.chClient.IsOpen()
-}
-
-func (c *FooBarBazServiceClient) Open() error {
-    return c.chClient.Open()
 }
 
 // Deprecated: Use FooBarBazServiceClient instead.

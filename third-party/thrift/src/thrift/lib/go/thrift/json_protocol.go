@@ -478,14 +478,6 @@ func (p *JSONProtocol) Close() error {
 	return p.trans.Close()
 }
 
-func (p *JSONProtocol) IsOpen() bool {
-	return p.trans.IsOpen()
-}
-
-func (p *JSONProtocol) Open() error {
-	return p.trans.Open()
-}
-
 func (p *JSONProtocol) OutputElemListBegin(elemType Type, size int) error {
 	if e := p.OutputListBegin(); e != nil {
 		return e

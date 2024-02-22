@@ -497,14 +497,6 @@ func (p *BinaryProtocol) Close() error {
 	return p.origTransport.Close()
 }
 
-func (p *BinaryProtocol) IsOpen() bool {
-	return p.origTransport.IsOpen()
-}
-
-func (p *BinaryProtocol) Open() error {
-	return p.origTransport.Open()
-}
-
 func (p *BinaryProtocol) readAll(buf []byte) error {
 	_, err := io.ReadFull(p.reader, buf)
 	return NewProtocolException(err)

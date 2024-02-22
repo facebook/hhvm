@@ -59,14 +59,6 @@ func (c *SomeServiceChannelClient) Close() error {
     return c.ch.Close()
 }
 
-func (c *SomeServiceChannelClient) IsOpen() bool {
-    return c.ch.IsOpen()
-}
-
-func (c *SomeServiceChannelClient) Open() error {
-    return c.ch.Open()
-}
-
 type SomeServiceClient struct {
     chClient *SomeServiceChannelClient
     Mu       sync.Mutex
@@ -89,14 +81,6 @@ func NewSomeServiceClientFromProtocol(prot thrift.Protocol) *SomeServiceClient {
 
 func (c *SomeServiceClient) Close() error {
     return c.chClient.Close()
-}
-
-func (c *SomeServiceClient) IsOpen() bool {
-    return c.chClient.IsOpen()
-}
-
-func (c *SomeServiceClient) Open() error {
-    return c.chClient.Open()
 }
 
 // Deprecated: Use SomeServiceClient instead.

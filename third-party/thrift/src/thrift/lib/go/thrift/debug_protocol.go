@@ -279,11 +279,3 @@ func (tdp *DebugProtocol) Transport() Transport {
 func (tdp *DebugProtocol) Close() error {
 	return tdp.Delegate.Close()
 }
-
-func (tdp *DebugProtocol) IsOpen() bool {
-	return tdp.Delegate.IsOpen()
-}
-
-func (tdp *DebugProtocol) Open() error {
-	return tdp.Delegate.Open()
-}

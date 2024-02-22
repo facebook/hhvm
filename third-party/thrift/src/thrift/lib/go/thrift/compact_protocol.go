@@ -655,14 +655,6 @@ func (p *CompactProtocol) Close() error {
 	return p.origTransport.Close()
 }
 
-func (p *CompactProtocol) IsOpen() bool {
-	return p.origTransport.IsOpen()
-}
-
-func (p *CompactProtocol) Open() error {
-	return p.origTransport.Open()
-}
-
 //
 // Internal writing methods
 //

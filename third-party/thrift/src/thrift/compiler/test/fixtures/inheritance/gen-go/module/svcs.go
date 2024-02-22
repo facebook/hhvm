@@ -55,14 +55,6 @@ func (c *MyRootChannelClient) Close() error {
     return c.ch.Close()
 }
 
-func (c *MyRootChannelClient) IsOpen() bool {
-    return c.ch.IsOpen()
-}
-
-func (c *MyRootChannelClient) Open() error {
-    return c.ch.Open()
-}
-
 type MyRootClient struct {
     chClient *MyRootChannelClient
     Mu       sync.Mutex
@@ -85,14 +77,6 @@ func NewMyRootClientFromProtocol(prot thrift.Protocol) *MyRootClient {
 
 func (c *MyRootClient) Close() error {
     return c.chClient.Close()
-}
-
-func (c *MyRootClient) IsOpen() bool {
-    return c.chClient.IsOpen()
-}
-
-func (c *MyRootClient) Open() error {
-    return c.chClient.Open()
 }
 
 // Deprecated: Use MyRootClient instead.
@@ -462,14 +446,6 @@ func (c *MyNodeChannelClient) Close() error {
     return c.ch.Close()
 }
 
-func (c *MyNodeChannelClient) IsOpen() bool {
-    return c.ch.IsOpen()
-}
-
-func (c *MyNodeChannelClient) Open() error {
-    return c.ch.Open()
-}
-
 type MyNodeClient struct {
     // Inherited/extended service
     *MyRootClient
@@ -495,14 +471,6 @@ func NewMyNodeClientFromProtocol(prot thrift.Protocol) *MyNodeClient {
 
 func (c *MyNodeClient) Close() error {
     return c.chClient.Close()
-}
-
-func (c *MyNodeClient) IsOpen() bool {
-    return c.chClient.IsOpen()
-}
-
-func (c *MyNodeClient) Open() error {
-    return c.chClient.Open()
 }
 
 // Deprecated: Use MyNodeClient instead.
@@ -846,14 +814,6 @@ func (c *MyLeafChannelClient) Close() error {
     return c.ch.Close()
 }
 
-func (c *MyLeafChannelClient) IsOpen() bool {
-    return c.ch.IsOpen()
-}
-
-func (c *MyLeafChannelClient) Open() error {
-    return c.ch.Open()
-}
-
 type MyLeafClient struct {
     // Inherited/extended service
     *MyNodeClient
@@ -879,14 +839,6 @@ func NewMyLeafClientFromProtocol(prot thrift.Protocol) *MyLeafClient {
 
 func (c *MyLeafClient) Close() error {
     return c.chClient.Close()
-}
-
-func (c *MyLeafClient) IsOpen() bool {
-    return c.chClient.IsOpen()
-}
-
-func (c *MyLeafClient) Open() error {
-    return c.chClient.Open()
 }
 
 // Deprecated: Use MyLeafClient instead.

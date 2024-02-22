@@ -54,19 +54,9 @@ type IResponse interface {
 	Read(p Protocol) error
 }
 
-// Open opens the client connection
-func (cc *ClientConn) Open() error {
-	return cc.oproto.Open()
-}
-
 // Close closes the client connection
 func (cc *ClientConn) Close() error {
 	return cc.oproto.Close()
-}
-
-// IsOpen return true if the client connection is open; otherwise, it returns false.
-func (cc *ClientConn) IsOpen() bool {
-	return cc.oproto.IsOpen()
 }
 
 // SendMsg sends a request to a given thrift endpoint

@@ -57,14 +57,6 @@ func (c *CChannelClient) Close() error {
     return c.ch.Close()
 }
 
-func (c *CChannelClient) IsOpen() bool {
-    return c.ch.IsOpen()
-}
-
-func (c *CChannelClient) Open() error {
-    return c.ch.Open()
-}
-
 type CClient struct {
     chClient *CChannelClient
     Mu       sync.Mutex
@@ -87,14 +79,6 @@ func NewCClientFromProtocol(prot thrift.Protocol) *CClient {
 
 func (c *CClient) Close() error {
     return c.chClient.Close()
-}
-
-func (c *CClient) IsOpen() bool {
-    return c.chClient.IsOpen()
-}
-
-func (c *CClient) Open() error {
-    return c.chClient.Open()
 }
 
 // Deprecated: Use CClient instead.

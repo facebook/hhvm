@@ -129,14 +129,6 @@ func (p *HeaderProtocol) Close() error {
 	return p.origTransport.Close()
 }
 
-func (p *HeaderProtocol) IsOpen() bool {
-	return p.origTransport.IsOpen()
-}
-
-func (p *HeaderProtocol) Open() error {
-	return p.origTransport.Open()
-}
-
 // Deprecated: SetSeqID() is a deprecated method.
 func (p *HeaderProtocol) SetSeqID(seq uint32) {
 	p.trans.SetSeqID(seq)

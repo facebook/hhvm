@@ -19,7 +19,5 @@ package thrift
 // ClientInterface specifies the common methods every thrift client
 // should implement
 type ClientInterface interface {
-	Open() error
 	Close() error
-	IsOpen() bool
 }

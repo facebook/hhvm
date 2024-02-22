@@ -133,7 +133,7 @@ class TestWebRoot implements IDisposable {
     }
 
     $this->curVersion = $vers;
-    if ($vers) usleep(100000); // Let the filesystem / watchman catch up
+    if ($vers) usleep(1000000); // Let the filesystem / watchman catch up
   }
 
   public function cur(): int { return $this->curVersion; }

@@ -26,6 +26,7 @@ namespace go thrift.conformance.any
 cpp_include "<folly/io/IOBuf.h>"
 cpp_include "<folly/FBString.h>"
 
+include "thrift/annotation/java.thrift"
 include "thrift/conformance/if/protocol.thrift"
 include "thrift/lib/thrift/standard.thrift"
 

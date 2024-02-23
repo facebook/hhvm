@@ -27,6 +27,10 @@ namespace HPHP::jit {
 TRACE_SET_MOD(pgo);
 
 TransIDSet findPredTrans(const RegionDesc& rd, const ProfData* profData) {
+  // In the case of profile serialization, the profile translations we
+  // need to build the TransCFG are not in the SrcDB since they were collected
+  // before we restarted. So instead, we call this function at serialization time,
+  // and serialize the results to store them in the RegionDesc on deserialization.
   auto const incoming = rd.incoming();
   TransIDSet predSet;
   if (incoming) {
@@ -35,6 +39,8 @@ TransIDSet findPredTrans(const RegionDesc& rd, const ProfData* profData) {
     }
     return predSet;
   }
+
+  // Otherwise, we compute with the SrcDB.
   auto const dstSK = rd.start();
   const SrcRec* dstSR = tc::findSrcRec(dstSK);
   assertx(dstSR);

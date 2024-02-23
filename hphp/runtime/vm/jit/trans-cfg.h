@@ -102,6 +102,7 @@ struct TransCFG {
                                               // in m_nodeInfo
 };
 
+// Returns the set of all predecessor profiling translations.
 TransIDSet findPredTrans(const RegionDesc& rd, const ProfData* profData);
 
 } }

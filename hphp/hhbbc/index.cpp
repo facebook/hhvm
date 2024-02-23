@@ -7195,6 +7195,15 @@ Index::ReturnType context_sensitive_return_type(AnalysisIndex::IndexData& data,
 
   auto const& caller = *context_for_deps(data).func;
 
+  if (callCtx.callee->cls && callCtx.callee->cls->closureContextCls) {
+    ITRACE_MOD(
+      Trace::hhbbc, 4,
+      "Skipping inline interp of {} because closures aren't handled yet\n",
+      func_fullname(func)
+    );
+    return returnType;
+  }
+
   auto const adjustedCtx = adjust_closure_context(
     AnalysisIndexAdaptor { data.index },
     callCtx
@@ -20986,6 +20995,16 @@ AnalysisIndex::lookup_foldable_return_type(const CallContext& calleeCtx) const {
   using R = Index::ReturnType;
 
   auto const& func = *calleeCtx.callee;
+
+  if (calleeCtx.callee->cls && calleeCtx.callee->cls->closureContextCls) {
+    ITRACE_MOD(
+      Trace::hhbbc, 4,
+      "Skipping inline interp of {} because closures aren't handled yet\n",
+      func_fullname(func)
+    );
+    return R{ TInitCell, false };
+  }
+
   auto const ctxType =
     adjust_closure_context(AnalysisIndexAdaptor { *this }, calleeCtx);
 

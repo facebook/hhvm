@@ -4489,7 +4489,7 @@ and Subtype_shape : sig
     subtype_env:Subtype_env.t ->
     env:Typing_env_types.env ->
     this_ty:Typing_defs.locl_ty option ->
-    ?super_like:bool ->
+    super_like:bool ->
     bool
     * Typing_defs.locl_phase Typing_defs.Reason.t_
     * Typing_defs.locl_phase Typing_defs.ty
@@ -4506,7 +4506,7 @@ end = struct
       ~(subtype_env : Subtype_env.t)
       ~(env : env)
       ~(this_ty : locl_ty option)
-      ?(super_like = false)
+      ~super_like
       (supportdyn_sub, r_sub, shape_kind_sub, fdm_sub)
       (supportdyn_super, r_super, shape_kind_super, fdm_super) =
     (*

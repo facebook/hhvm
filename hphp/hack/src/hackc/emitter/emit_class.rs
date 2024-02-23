@@ -352,8 +352,7 @@ fn from_enum_type<'arena>(
             alloc,
             &emit_type_hint::fmt_hint(alloc, &[], true, &e.base)?,
         ));
-        let type_info_type_constraint =
-            Constraint::make(Nothing, TypeConstraintFlags::ExtendedHint);
+        let type_info_type_constraint = Constraint::new(Nothing, TypeConstraintFlags::ExtendedHint);
         Ok(TypeInfo::make(
             type_info_user_type,
             type_info_type_constraint,
@@ -454,7 +453,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
     if num_reified == 0 && !maybe_has_reified_parents {
         Ok(None)
     } else {
-        let tc = Constraint::make(Just("HH\\varray".into()), TypeConstraintFlags::NoFlags);
+        let tc = Constraint::intern("HH\\varray", TypeConstraintFlags::NoFlags);
         let param_local = Local::new(0);
         let params = vec![Param {
             name: Str::new_str(alloc, string_utils::reified::INIT_METH_PARAM_NAME),

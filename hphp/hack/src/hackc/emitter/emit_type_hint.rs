@@ -10,6 +10,7 @@ use ffi::Maybe;
 use ffi::Maybe::*;
 use ffi::Str;
 use hhbc::Constraint;
+use hhbc::StringId;
 use hhbc::TypeInfo;
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::TypeConstraintFlags;
@@ -196,24 +197,24 @@ fn can_be_nullable(hint: &Hint_) -> bool {
     }
 }
 
-fn hint_to_type_constraint<'arena>(
-    alloc: &'arena bumpalo::Bump,
+fn hint_to_type_constraint(
+    alloc: &bumpalo::Bump,
     kind: &Kind,
     tparams: &[&str],
     skipawaitable: bool,
     h: &Hint,
-) -> Result<Constraint<'arena>> {
+) -> Result<Constraint> {
     let Hint(_, hint) = h;
     Ok(match &**hint {
         Hdynamic | Hfun(_) | Hunion(_) | Hintersection(_) | Hmixed | Hwildcard => {
             Constraint::default()
         }
-        Haccess(_, _) => Constraint::make(
-            Just("".into()),
+        Haccess(_, _) => Constraint::intern(
+            "",
             TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::TypeConstant,
         ),
-        Hshape(_) => Constraint::make(Just("HH\\darray".into()), TypeConstraintFlags::ExtendedHint),
-        Htuple(_) => Constraint::make(Just("HH\\varray".into()), TypeConstraintFlags::ExtendedHint),
+        Hshape(_) => Constraint::intern("HH\\darray", TypeConstraintFlags::ExtendedHint),
+        Htuple(_) => Constraint::intern("HH\\varray", TypeConstraintFlags::ExtendedHint),
         Hsoft(t) => make_tc_with_flags_if_non_empty_flags(
             alloc,
             kind,
@@ -282,15 +283,15 @@ fn hint_to_type_constraint<'arena>(
                 }
                 _ => {}
             };
-            type_application_helper(alloc, tparams, kind, s)?
+            type_application_helper(tparams, kind, s)?
         }
-        Habstr(s, _hs) => type_application_helper(alloc, tparams, kind, s)?,
+        Habstr(s, _hs) => type_application_helper(tparams, kind, s)?,
         Hrefinement(hint, _) => {
             // NOTE: refinements are already banned in type structures
             // and in other cases they should be invisible to the HHVM, so unpack hint
             hint_to_type_constraint(alloc, kind, tparams, skipawaitable, hint)?
         }
-        h => type_application_helper(alloc, tparams, kind, hint_to_string(h))?,
+        h => type_application_helper(tparams, kind, hint_to_string(h))?,
     })
 }
 
@@ -302,44 +303,41 @@ fn is_typedef(kind: &Kind) -> bool {
     Kind::TypeDef == *kind
 }
 
-fn make_tc_with_flags_if_non_empty_flags<'arena>(
-    alloc: &'arena bumpalo::Bump,
+fn make_tc_with_flags_if_non_empty_flags(
+    alloc: &bumpalo::Bump,
     kind: &Kind,
     tparams: &[&str],
     skipawaitable: bool,
     hint: &Hint,
     flags: TypeConstraintFlags,
-) -> Result<Constraint<'arena>> {
+) -> Result<Constraint> {
     let tc = hint_to_type_constraint(alloc, kind, tparams, skipawaitable, hint)?;
     Ok(match (&tc.name, u16::from(&tc.flags)) {
         (Nothing, 0) => tc,
-        _ => Constraint::make(tc.name, flags | tc.flags),
+        _ => Constraint {
+            name: tc.name,
+            flags: flags | tc.flags,
+        },
     })
 }
 
 // Used for nodes that do type application (i.e., Happly and Habstr)
-fn type_application_helper<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    tparams: &[&str],
-    kind: &Kind,
-    name: &str,
-) -> Result<Constraint<'arena>> {
+fn type_application_helper(tparams: &[&str], kind: &Kind, name: &str) -> Result<Constraint> {
     if tparams.contains(&name) {
         let tc_name = match kind {
-            Kind::Param | Kind::Return | Kind::Property => Just(Str::new_str(alloc, name)),
-            _ => Just("".into()),
+            Kind::Param | Kind::Return | Kind::Property => Just(hhbc::intern(name)),
+            _ => Just(hhbc::StringId::EMPTY),
         };
-        Ok(Constraint::make(
-            tc_name,
-            TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::TypeVar,
-        ))
+        Ok(Constraint {
+            name: tc_name,
+            flags: TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::TypeVar,
+        })
     } else {
-        let name: String =
-            hhbc::ClassName::from_ast_name_and_mangle(alloc, name).unsafe_into_string();
-        Ok(Constraint::make(
-            Just(Str::new_str(alloc, &name)),
-            TypeConstraintFlags::NoFlags,
-        ))
+        let name = hhbc::ClassName::mangle(name);
+        Ok(Constraint {
+            name: Just(name),
+            flags: TypeConstraintFlags::NoFlags,
+        })
     }
 }
 
@@ -364,11 +362,11 @@ fn make_type_info<'arena>(
     alloc: &'arena bumpalo::Bump,
     tparams: &[&str],
     h: &Hint,
-    tc_name: Maybe<Str<'arena>>,
+    tc_name: Maybe<StringId>,
     tc_flags: TypeConstraintFlags,
 ) -> Result<TypeInfo<'arena>> {
     let type_info_user_type = fmt_hint(alloc, tparams, false, h)?;
-    let type_info_type_constraint = Constraint::make(tc_name, tc_flags);
+    let type_info_type_constraint = Constraint::new(tc_name, tc_flags);
     Ok(TypeInfo::make(
         Just(Str::new_str(alloc, &type_info_user_type)),
         type_info_type_constraint,
@@ -492,29 +490,25 @@ pub fn hint_to_class<'arena>(alloc: &'arena bumpalo::Bump, hint: &Hint) -> hhbc:
 }
 
 pub fn emit_type_constraint_for_native_function<'arena>(
-    alloc: &'arena bumpalo::Bump,
     tparams: &[&str],
     ret_opt: Option<&Hint>,
     ti: TypeInfo<'arena>,
 ) -> TypeInfo<'arena> {
     let (name, flags) = match (&ti.user_type, ret_opt) {
-        (_, None) | (Nothing, _) => (
-            Just(String::from("HH\\void")),
-            TypeConstraintFlags::ExtendedHint,
-        ),
+        (_, None) | (Nothing, _) => (Just("HH\\void"), TypeConstraintFlags::ExtendedHint),
         (Just(t), _) => match t.unsafe_as_str() {
             "HH\\mixed" | "callable" => (Nothing, TypeConstraintFlags::default()),
             "HH\\void" => {
                 let Hint(_, h) = ret_opt.as_ref().unwrap();
                 (
-                    Just("HH\\void".to_string()),
+                    Just("HH\\void"),
                     get_flags(tparams, TypeConstraintFlags::ExtendedHint, h),
                 )
             }
             _ => return ti,
         },
     };
-    let tc = Constraint::make(name.map(|n| Str::new_str(alloc, &n)), flags);
+    let tc = Constraint::new(name.map(hhbc::intern), flags);
     TypeInfo::make(ti.user_type, tc)
 }
 

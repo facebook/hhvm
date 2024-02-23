@@ -9,6 +9,7 @@ use std::io::Result;
 use std::io::Write;
 use std::write;
 
+use bstr::BStr;
 use bstr::ByteSlice;
 use ffi::Maybe;
 use ffi::Maybe::*;
@@ -46,6 +47,7 @@ use hhbc::Rule;
 use hhbc::RuleKind;
 use hhbc::Span;
 use hhbc::SrcLoc;
+use hhbc::StringId;
 use hhbc::SymbolRefs;
 use hhbc::TraitReqKind;
 use hhbc::TypeConstant;
@@ -1129,19 +1131,27 @@ fn print_type_flags(w: &mut dyn Write, flag: TypeConstraintFlags) -> Result<()> 
 }
 
 fn print_type_info_(w: &mut dyn Write, is_enum: bool, ti: &TypeInfo<'_>) -> Result<()> {
+    let print_quote_bstr = |w: &mut dyn Write, opt: Option<&BStr>| {
+        option_or(
+            w,
+            opt,
+            |w, s: &BStr| quotes(w, |w| w.write_all(escaper::escape_bstr(s).as_ref())),
+            "N",
+        )
+    };
     let print_quote_str = |w: &mut dyn Write, opt: Option<&str>| {
         option_or(
             w,
             opt,
-            |w, s: &str| quotes(w, |w| w.write_all(escaper::escape(s).as_bytes())),
+            |w, s: &str| quotes(w, |w| w.write_all(escaper::escape(s).as_ref().as_bytes())),
             "N",
         )
     };
     angle(w, |w| {
-        print_quote_str(w, ti.user_type.map(|n| n.unsafe_as_str()).into())?;
+        print_quote_bstr(w, ti.user_type.map(|s| s.as_bstr()).into())?;
         w.write_all(b" ")?;
         if !is_enum {
-            print_quote_str(w, ti.type_constraint.name.map(|n| n.unsafe_as_str()).into())?;
+            print_quote_str(w, ti.type_constraint.name.map(|n| n.as_str()).into())?;
             w.write_all(b" ")?;
         }
         print_type_flags(w, ti.type_constraint.flags)
@@ -1155,12 +1165,12 @@ fn print_typedef_info(w: &mut dyn Write, ti: &TypeInfo<'_>) -> Result<()> {
         write_bytes!(
             w,
             r#""{}""#,
-            escaper::escape_bstr(
+            escaper::escape(
                 ti.type_constraint
                     .name
                     .as_ref()
-                    .unwrap_or(&Default::default())
-                    .as_bstr()
+                    .unwrap_or(&StringId::EMPTY)
+                    .as_str()
             )
         )?;
         let flags = ti.type_constraint.flags & TypeConstraintFlags::Nullable;

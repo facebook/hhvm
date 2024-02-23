@@ -18,6 +18,7 @@ use hhbc::Opcode;
 use hhbc::Param;
 use hhbc::Property;
 use hhbc::Rule;
+use hhbc::StringId;
 use hhbc::SymbolRefs;
 use hhbc::TypeInfo;
 use hhbc::TypedValue;
@@ -746,10 +747,10 @@ fn cmp_type_constraint_flags(
 }
 
 // T126391106: bytecode_printer doesn't disambiguate a constraint name of Just("") and Nothing
-fn cmp_type_constraint_name(a: &Maybe<Str<'_>>, b: &Maybe<Str<'_>>) -> Result {
+fn cmp_type_constraint_name(a: &Maybe<StringId>, b: &Maybe<StringId>) -> Result {
     match (a, b) {
         (Maybe::Nothing, Maybe::Just(s)) | (Maybe::Just(s), Maybe::Nothing) => {
-            if s.as_bstr() == "" {
+            if s.is_empty() {
                 Ok(())
             } else {
                 bail!("Constraint name mismatch: {:?} vs {:?}", a, b)
@@ -759,7 +760,7 @@ fn cmp_type_constraint_name(a: &Maybe<Str<'_>>, b: &Maybe<Str<'_>>) -> Result {
     }
 }
 
-fn cmp_type_constraint(a: &hhbc::Constraint<'_>, b: &hhbc::Constraint<'_>) -> Result {
+fn cmp_type_constraint(a: &hhbc::Constraint, b: &hhbc::Constraint) -> Result {
     let hhbc::Constraint {
         name: a_name,
         flags: a_flags,

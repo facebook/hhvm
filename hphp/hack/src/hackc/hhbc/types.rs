@@ -8,6 +8,7 @@ use ffi::Maybe::Just;
 use ffi::Str;
 use ffi::Vector;
 use hhvm_types_ffi::ffi::TypeConstraintFlags;
+use intern::string::StringId;
 use serde::Serialize;
 
 /// Type info has additional optional user type
@@ -15,13 +16,13 @@ use serde::Serialize;
 #[repr(C)]
 pub struct TypeInfo<'arena> {
     pub user_type: Maybe<Str<'arena>>,
-    pub type_constraint: Constraint<'arena>,
+    pub type_constraint: Constraint,
 }
 
 #[derive(Clone, Default, Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
-pub struct Constraint<'arena> {
-    pub name: Maybe<Str<'arena>>,
+pub struct Constraint {
+    pub name: Maybe<StringId>,
     pub flags: TypeConstraintFlags,
 }
 
@@ -32,22 +33,21 @@ pub struct UpperBound<'arena> {
     pub bounds: Vector<TypeInfo<'arena>>,
 }
 
-impl<'arena> Constraint<'arena> {
-    pub fn make(name: Maybe<Str<'arena>>, flags: TypeConstraintFlags) -> Self {
+impl Constraint {
+    pub fn new(name: Maybe<StringId>, flags: TypeConstraintFlags) -> Self {
         Self { name, flags }
     }
 
-    pub fn make_with_raw_str(
-        alloc: &'arena bumpalo::Bump,
-        name: &str,
-        flags: TypeConstraintFlags,
-    ) -> Self {
-        Constraint::make(Just(Str::new_str(alloc, name)), flags)
+    pub fn intern(name: impl AsRef<str>, flags: TypeConstraintFlags) -> Self {
+        Self {
+            name: Just(intern::string::intern(name.as_ref())),
+            flags,
+        }
     }
 }
 
 impl<'arena> TypeInfo<'arena> {
-    pub fn make(user_type: Maybe<Str<'arena>>, type_constraint: Constraint<'arena>) -> Self {
+    pub fn make(user_type: Maybe<Str<'arena>>, type_constraint: Constraint) -> Self {
         Self {
             user_type,
             type_constraint,

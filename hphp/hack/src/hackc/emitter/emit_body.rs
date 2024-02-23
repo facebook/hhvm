@@ -328,7 +328,7 @@ fn make_return_type_info<'arena>(
     let return_type_info = emit_return_type_info(alloc, tp_names, skip_awaitable, ret);
     if is_native {
         return return_type_info.map(|rti| {
-            emit_type_hint::emit_type_constraint_for_native_function(alloc, tp_names, ret, rti)
+            emit_type_hint::emit_type_constraint_for_native_function(tp_names, ret, rti)
         });
     };
     return_type_info

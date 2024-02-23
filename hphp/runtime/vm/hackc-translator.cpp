@@ -368,7 +368,7 @@ std::pair<const StringData*, TypeConstraint> translateTypeInfo(const hhbc::TypeI
   auto const type_name = isEnum
     ? user_type
     : maybeOrElse(t.type_constraint.name,
-        [&](Str& s) {return toStaticString(s);},
+        [&](BytesId s) {return toStaticString(s);},
         [&]() {return nullptr;});
 
   auto flags = t.type_constraint.flags;

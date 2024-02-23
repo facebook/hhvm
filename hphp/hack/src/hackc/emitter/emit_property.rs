@@ -201,13 +201,13 @@ pub fn from_ast<'ast, 'arena, 'decl>(
     })
 }
 
-fn valid_for_prop(tc: &Constraint<'_>) -> bool {
+fn valid_for_prop(tc: &Constraint) -> bool {
     match &tc.name {
         Nothing => true,
         Just(s) => {
-            !(s.unsafe_as_str().eq_ignore_ascii_case("HH\\nothing")
-                || s.unsafe_as_str().eq_ignore_ascii_case("HH\\noreturn")
-                || s.unsafe_as_str().eq_ignore_ascii_case("callable"))
+            !(s.as_bytes().eq_ignore_ascii_case(b"HH\\nothing")
+                || s.as_bytes().eq_ignore_ascii_case(b"HH\\noreturn")
+                || s.as_bytes().eq_ignore_ascii_case(b"callable"))
         }
     }
 }

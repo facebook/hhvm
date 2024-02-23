@@ -1351,17 +1351,16 @@ fn assemble_type_info_opt<'arena>(
             if first.is_empty() {
                 Maybe::Nothing
             } else {
-                Maybe::Just(Str::new_slice(alloc, &first))
+                Maybe::Just(hhbc::intern(std::str::from_utf8(&first[..])?))
             }
         } else if tik == TypeInfoKind::Enum || token_iter.next_is_str(Token::is_identifier, "N") {
             Maybe::Nothing
         } else {
-            Maybe::Just(Str::new_slice(
-                alloc,
+            Maybe::Just(hhbc::intern(std::str::from_utf8(
                 &escaper::unescape_literal_bytes_into_vec_bytes(
                     token_iter.expect_with(Token::into_unquoted_str_literal)?,
                 )?,
-            ))
+            )?))
         };
         let user_type = if tik != TypeInfoKind::TypeDef {
             Maybe::Just(Str::new_slice(alloc, &first))
@@ -1373,7 +1372,7 @@ fn assemble_type_info_opt<'arena>(
             tcflags = tcflags | assemble_type_constraint(token_iter)?;
         }
         token_iter.expect(Token::is_gt)?;
-        let cons = hhbc::Constraint::make(type_cons_name, tcflags);
+        let cons = hhbc::Constraint::new(type_cons_name, tcflags);
         Ok(Maybe::Just(hhbc::TypeInfo::make(user_type, cons)))
     } else {
         Ok(Maybe::Nothing)

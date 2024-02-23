@@ -7,6 +7,7 @@ use std::sync::OnceLock;
 
 use ffi::Maybe;
 use ffi::Str;
+use hhbc::StringId;
 use ir::BaseType;
 use ir::ClassId;
 use ir::StringInterner;
@@ -61,7 +62,7 @@ pub(crate) fn convert_maybe_type<'a>(
     }
 }
 
-fn cvt_constraint_type<'a>(name: Str<'a>, strings: &StringInterner) -> BaseType {
+fn cvt_constraint_type(name: StringId, strings: &StringInterner) -> BaseType {
     use std::collections::HashMap;
     static CONSTRAINT_BY_NAME: OnceLock<HashMap<Str<'static>, BaseType>> = OnceLock::new();
     let constraint_by_name = CONSTRAINT_BY_NAME.get_or_init(|| {
@@ -91,10 +92,13 @@ fn cvt_constraint_type<'a>(name: Str<'a>, strings: &StringInterner) -> BaseType 
         }
     });
 
-    constraint_by_name.get(&name).cloned().unwrap_or_else(|| {
-        let name = ClassId::new(strings.intern_bytes(name.as_ref()));
-        BaseType::Class(name)
-    })
+    constraint_by_name
+        .get(name.as_str().as_bytes())
+        .cloned()
+        .unwrap_or_else(|| {
+            let name = ClassId::new(strings.intern_str(name.as_str()));
+            BaseType::Class(name)
+        })
 }
 
 pub(crate) fn convert_typedef<'a>(

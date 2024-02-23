@@ -40,11 +40,13 @@ fn convert_type<'a>(ty: &ir::TypeInfo, strings: &StringCache<'a>) -> TypeInfo<'a
                 ffi::Slice::new(p)
             });
         }
-        Some(name)
+        Some(hhbc::intern(
+            std::str::from_utf8(&name).expect("non-utf8 constraint"),
+        ))
     } else {
         match ty.enforced.ty {
             BaseType::Mixed | BaseType::Void => None,
-            BaseType::Class(name) => Some(strings.lookup_ffi_str(name.id)),
+            BaseType::Class(name) => Some(strings.intern(name.id).expect("non-utf8 constraint")),
             _ => unreachable!(),
         }
     };
@@ -52,7 +54,7 @@ fn convert_type<'a>(ty: &ir::TypeInfo, strings: &StringCache<'a>) -> TypeInfo<'a
     TypeInfo {
         user_type: user_type.into(),
         type_constraint: Constraint {
-            name: name.map(|name| Str::new_slice(strings.alloc, &name)).into(),
+            name: name.into(),
             flags: ty.enforced.modifiers,
         },
     }

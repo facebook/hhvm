@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<631fd7740b372d065b9418a668c241d9>>
+// @generated SignedSource<<c67d3b4c9b71ad90ef4f6d1bc8436ffd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2714,6 +2714,8 @@ pub struct Gconst<'a, Ex, En> {
     pub span: &'a Pos<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub emit_id: Option<&'a oxidized::aast_defs::EmitId>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub module: Option<Sid<'a>>,
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Gconst<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(Gconst<'arena, Ex, En>);

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0d0bea970c39df84a6114039c0aba0e9>>
+// @generated SignedSource<<74535810a87b24ecf49b1fb1f3749182>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1291,7 +1291,8 @@ impl<P: Params> Node<P> for Gconst<P::Ex, P::En> {
         self.value.accept(c, v)?;
         self.namespace.accept(c, v)?;
         self.span.accept(c, v)?;
-        self.emit_id.accept(c, v)
+        self.emit_id.accept(c, v)?;
+        self.module.accept(c, v)
     }
 }
 impl<P: Params> Node<P> for HfParamInfo {

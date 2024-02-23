@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1172b4b0df687444b74ace3b712c0e6f>>
+// @generated SignedSource<<b9e19f005f8d1226f1180e8d97b661ab>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1960,6 +1960,7 @@ impl Transform for Gconst {
                 value: ref mut __binding_4,
                 namespace: ref mut __binding_5,
                 emit_id: ref mut __binding_7,
+                module: ref mut __binding_8,
                 ..
             } => {
                 {
@@ -1985,7 +1986,10 @@ impl Transform for Gconst {
                 {
                     __binding_5.transform(env, &mut pass.clone())
                 }
-                { __binding_7.transform(env, &mut pass.clone()) }
+                {
+                    __binding_7.transform(env, &mut pass.clone())
+                }
+                { __binding_8.transform(env, &mut pass.clone()) }
             }
         }
     }

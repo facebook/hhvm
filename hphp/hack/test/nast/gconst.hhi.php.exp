@@ -5,7 +5,7 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      cst_span = [3:1-18]; cst_emit_id = None });
+      cst_span = [3:1-18]; cst_emit_id = None; cst_module = None });
   (Constant
      { cst_annotation = (); cst_mode = Mhhi; cst_name = ([4:11-13], "\\X2"); 
        cst_type = (Some ([4:7-10], (Hprim Tint))); cst_value = ((), [4:11-13], Omitted);
@@ -13,7 +13,7 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       cst_span = [4:1-14]; cst_emit_id = None });
+       cst_span = [4:1-14]; cst_emit_id = None; cst_module = None });
   (Constant
      { cst_annotation = (); cst_mode = Mhhi; cst_name = ([5:14-15], "\\Y"); 
        cst_type = (Some ([5:7-13], (Hprim Tstring))); cst_value = ((), [5:14-15], Omitted);
@@ -21,7 +21,7 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       cst_span = [5:1-16]; cst_emit_id = None });
+       cst_span = [5:1-16]; cst_emit_id = None; cst_module = None });
   (Constant
      { cst_annotation = (); cst_mode = Mhhi; cst_name = ([6:26-27], "\\Z"); 
        cst_type = (Some ([6:7-25], (Happly (([6:7-25], "\\FunctionCredential"), [])))); 
@@ -30,7 +30,7 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       cst_span = [6:1-28]; cst_emit_id = None });
+       cst_span = [6:1-28]; cst_emit_id = None; cst_module = None });
   (Constant
      { cst_annotation = (); cst_mode = Mhhi; cst_name = ([7:11-14], "\\BAD"); 
        cst_type = (Some ([7:7-10], (Hprim Tint))); cst_value = ((), [7:17-24], (String "hello"));
@@ -38,5 +38,5 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       cst_span = [7:1-25]; cst_emit_id = None })
+       cst_span = [7:1-25]; cst_emit_id = None; cst_module = None })
   ]

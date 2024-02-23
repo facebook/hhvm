@@ -107,6 +107,7 @@ let gconst_env ?origin ctx cst =
   let file = Pos.filename (fst cst.cst_name) in
   let droot = Some (Typing_deps.Dep.GConst (snd cst.cst_name)) in
   let env = Typing_env_types.empty ?origin ctx file ~mode:cst.cst_mode ~droot in
+  let env = Env.set_current_module env cst.cst_module in
   env
 
 let module_env ?origin ctx md =

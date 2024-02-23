@@ -5627,6 +5627,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                             namespace: mk_empty_ns_env(env),
                             span: p_pos(node, env),
                             emit_id: None,
+                            module: None,
                         };
                         ast::Def::mk_constant(gconst)
                     }

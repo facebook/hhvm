@@ -386,6 +386,7 @@ let gconst_def ctx cst =
     Aast.cst_namespace = cst.cst_namespace;
     Aast.cst_span = cst.cst_span;
     Aast.cst_emit_id = cst.cst_emit_id;
+    Aast.cst_module = cst.cst_module;
   }
 
 let module_def ctx md =

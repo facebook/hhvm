@@ -1113,6 +1113,7 @@ and ('ex, 'en) gconst = {
   cst_namespace: nsenv;
   cst_span: pos; [@transform.opaque]
   cst_emit_id: emit_id option;
+  cst_module: sid option;
 }
 
 and ('ex, 'en) fun_def = {

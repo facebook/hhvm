@@ -407,8 +407,10 @@ pub mod toplevel_elaborator {
             Def::Module(m) => {
                 m.file_attributes = file_attrs.clone();
             }
+            Def::Constant(c) => {
+                c.module = module_name.clone();
+            }
             Def::Stmt(_)
-            | Def::Constant(_)
             | Def::Namespace(_)
             | Def::NamespaceUse(_)
             | Def::SetNamespaceEnv(_)

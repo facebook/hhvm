@@ -83,6 +83,7 @@ mod tests {
             }),
             span: Pos::NONE,
             emit_id: None,
+            module: None,
         }
     }
 

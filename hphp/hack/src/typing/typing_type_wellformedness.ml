@@ -554,6 +554,7 @@ let global_constant tenv gconst =
     cst_namespace = _;
     cst_span = _;
     cst_emit_id = _;
+    cst_module = _;
   } =
     gconst
   in

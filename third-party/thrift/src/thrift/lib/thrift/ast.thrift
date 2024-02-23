@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
 include "thrift/lib/thrift/schema.thrift"
 include "thrift/lib/thrift/standard.thrift"
 include "thrift/lib/thrift/protocol.thrift"

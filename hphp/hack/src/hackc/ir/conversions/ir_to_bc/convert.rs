@@ -153,7 +153,7 @@ pub(crate) fn convert_typed_value<'a>(
         ir::TypedValue::Int(v) => hhbc::TypedValue::Int(*v),
         ir::TypedValue::Bool(v) => hhbc::TypedValue::Bool(*v),
         ir::TypedValue::Float(v) => hhbc::TypedValue::Float(*v),
-        ir::TypedValue::String(v) => hhbc::TypedValue::String(strings.lookup_ffi_str(*v)),
+        ir::TypedValue::String(v) => hhbc::TypedValue::intern_string(strings.lookup_ffi_str(*v)),
         ir::TypedValue::LazyClass(v) => {
             hhbc::TypedValue::LazyClass(strings.lookup_class_name(*v).as_ffi_str())
         }
@@ -184,6 +184,6 @@ pub(crate) fn convert_array_key<'a>(
         ir::ArrayKey::LazyClass(v) => {
             hhbc::TypedValue::LazyClass(strings.lookup_class_name(v).as_ffi_str())
         }
-        ir::ArrayKey::String(v) => hhbc::TypedValue::String(strings.lookup_ffi_str(v)),
+        ir::ArrayKey::String(v) => hhbc::TypedValue::intern_string(strings.lookup_ffi_str(v)),
     }
 }

@@ -564,7 +564,7 @@ pub fn emit_deprecation_info<'a, 'arena>(
                 + (if args.is_empty() {
                     "deprecated function"
                 } else if let TypedValue::String(s) = &args[0] {
-                    s.unsafe_as_str()
+                    std::str::from_utf8(s.as_bytes()).expect("non-utf8 deprecation info")
                 } else {
                     return Err(Error::unrecoverable(
                         "deprecated attribute first argument is not a string",

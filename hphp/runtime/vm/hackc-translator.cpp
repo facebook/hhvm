@@ -229,6 +229,11 @@ StringData* toStaticString(const Vector<uint8_t>& str) {
   return makeStaticString((char*)str.data, str.len);
 }
 
+StringData* toStaticString(BytesId id) {
+  auto const b = deref_bytes(id);
+  return makeStaticString((char*)b.data(), b.size());
+}
+
 // TODO(@voork): NamedLocals are still prefixed with '$'.
 StringData* toNamedLocalStaticString(const Str& str) {
   return toStaticString(str, 1);

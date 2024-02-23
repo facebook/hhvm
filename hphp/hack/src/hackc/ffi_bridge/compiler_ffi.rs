@@ -536,6 +536,11 @@ mod ffi {
 
         fn get_file_typedefs(decls: &DeclsHolder) -> Vec<ExtDeclTypeDef>;
         fn get_file_typedef(decls: &DeclsHolder, name: &str) -> Vec<ExtDeclTypeDef>;
+
+        /// Dereference a BytesId whose newtype has been laundered away by the bridge.
+        /// SAFETY: i must have been a valid BytesId from a previous intern_bytes()
+        /// call in this process.
+        unsafe fn deref_bytes(i: u32) -> &'static [u8];
     }
 }
 
@@ -641,9 +646,12 @@ impl ffi::NativeEnv {
 }
 
 fn hash_unit(UnitWrapper(unit, _): &UnitWrapper) -> [u8; 20] {
+    use bincode::Options;
     let mut hasher = Sha1::new();
     let w = std::io::BufWriter::new(&mut hasher);
-    bincode::serialize_into(w, unit).unwrap();
+    bincode::options()
+        .serialize_into(w, &intern::WithIntern(unit))
+        .unwrap();
     hasher.finalize().into()
 }
 
@@ -966,4 +974,11 @@ fn get_file(holder: &DeclsHolder) -> ffi::ExtDeclFile {
 
 fn get_type_structure(holder: &DeclsHolder, name: &str) -> Vec<ffi::ExtDeclTypeStructure> {
     ext_decl::get_type_structure(&holder.parsed_file, name)
+}
+
+// SAFETY: i must be a raw bitcast from a valid BytesId
+unsafe fn deref_bytes(i: u32) -> &'static [u8] {
+    use intern::InternId;
+    let biased = i.try_into().expect("raw id should be nonzero");
+    intern::string::BytesId::from_raw(biased).as_bytes()
 }

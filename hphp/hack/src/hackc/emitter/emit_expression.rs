@@ -2767,10 +2767,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                             serde_json::to_string(&s).unwrap()
                         }
                     };
-                    Ok(Some(emit_adata::typed_value_into_instr(
-                        e,
-                        TypedValue::string(e.alloc.alloc_str(str.as_ref())),
-                    )?))
+                    Ok(Some(instr::string(e.alloc, str)))
                 }
                 // If we don't have a classish type hint, compile this as
                 // normal and let the call fail down the line (for now)

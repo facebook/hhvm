@@ -835,6 +835,7 @@ dependencies = [
  "hex",
  "hhbc",
  "hhbc_string_utils",
+ "intern",
  "libc",
  "options",
  "oxidized",
@@ -895,9 +896,7 @@ name = "constant_folder"
 version = "0.0.0"
 dependencies = [
  "ast_scope",
- "bumpalo",
  "env",
- "ffi",
  "hhbc",
  "hhbc_string_utils",
  "indexmap 2.1.0",
@@ -2436,6 +2435,7 @@ dependencies = [
  "hhbc_string_utils",
  "hhvm_hhbc_defs_ffi",
  "hhvm_types_ffi",
+ "intern",
  "naming_special_names_rust",
  "oxidized",
  "relative_path",

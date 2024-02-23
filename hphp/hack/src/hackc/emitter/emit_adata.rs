@@ -22,7 +22,7 @@ pub fn typed_value_into_instr<'a>(
         TypedValue::Bool(true) => Ok(instr::true_()),
         TypedValue::Bool(false) => Ok(instr::false_()),
         TypedValue::Int(i) => Ok(instr::int(i)),
-        TypedValue::String(s) => Ok(instr::string_lit(s)),
+        TypedValue::String(s) => Ok(instr::string(e.alloc, s.as_bytes())),
         TypedValue::LazyClass(s) => {
             let classid = ClassName::from_ast_name_and_mangle(e.alloc, s.unsafe_as_str());
             Ok(instr::lazy_class(classid))

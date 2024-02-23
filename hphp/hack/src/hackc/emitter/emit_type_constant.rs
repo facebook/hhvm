@@ -177,13 +177,10 @@ fn shape_allows_unknown_fields<'arena>(si: &NastShapeInfo) -> Option<DictEntry<'
     }
 }
 
-fn type_constant_access_list<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    ids: &[aast::Sid],
-) -> TypedValue<'arena> {
+fn type_constant_access_list<'arena>(ids: &[aast::Sid]) -> TypedValue<'arena> {
     let ids: Vec<_> = ids
         .iter()
-        .map(|ast_defs::Id(_, s)| TypedValue::alloc_string(s, alloc))
+        .map(|ast_defs::Id(_, s)| TypedValue::intern_string(s))
         .collect();
     TypedValue::vec(ids)
 }
@@ -203,10 +200,7 @@ fn resolve_classname<'arena>(
     let entry = if is_prim_or_resolved_classname(ts_kind(tparams, &s)) {
         None
     } else {
-        Some(encode_entry(
-            name_key,
-            TypedValue::alloc_string(s.as_str(), alloc),
-        ))
+        Some(encode_entry(name_key, TypedValue::intern_string(&s)))
     };
     (entry, s)
 }
@@ -259,7 +253,7 @@ fn get_union_types<'arena>(
 
 fn encode_entry<'a>(key: &'a str, value: TypedValue<'a>) -> DictEntry<'a> {
     DictEntry {
-        key: TypedValue::string(key),
+        key: TypedValue::intern_string(key),
         value,
     }
 }
@@ -274,16 +268,16 @@ fn encode_root_name<'a>(alloc: &'a bumpalo::Bump, s: &str) -> DictEntry<'a> {
     } else {
         hhbc::ClassName::from_ast_name_and_mangle(alloc, s).unsafe_into_string()
     };
-    encode_entry("root_name", TypedValue::alloc_string(&s, alloc))
+    encode_entry("root_name", TypedValue::intern_string(&s))
 }
 
-fn get_typevars<'arena>(alloc: &'arena bumpalo::Bump, tparams: &[&str]) -> Vec<DictEntry<'arena>> {
+fn get_typevars<'arena>(tparams: &[&str]) -> Vec<DictEntry<'arena>> {
     if tparams.is_empty() {
         vec![]
     } else {
         vec![encode_entry(
             "typevars",
-            TypedValue::alloc_string(tparams.join(","), alloc),
+            TypedValue::intern_string(tparams.join(",")),
         )]
     }
 }
@@ -377,7 +371,7 @@ fn hint_to_type_constant_list<'arena>(
                 vec![
                     encode_kind(TypeStructureKind::T_typeaccess),
                     encode_root_name(alloc, &root_id.1),
-                    encode_entry("access_list", type_constant_access_list(alloc, ids)),
+                    encode_entry("access_list", type_constant_access_list(ids)),
                 ]
             }
             _ => {
@@ -541,14 +535,14 @@ pub(crate) fn typedef_to_type_structure<'a, 'arena>(
         TypeRefinementInHint::Disallowed, // Note: only called by `emit_typedef
         kind,
     )?;
-    tconsts.append(&mut get_typevars(alloc, tparams));
+    tconsts.append(&mut get_typevars(tparams));
     if typedef.vis.is_opaque() || typedef.vis.is_opaque_module() {
         tconsts.push(encode_entry("opaque", TypedValue::Bool(true)));
     };
     let mangled_name = hhbc_string_utils::mangle(typedef.name.1.clone());
-    let name = ffi::Str::new_str(alloc, hhbc_string_utils::strip_global_ns(&mangled_name));
+    let name = hhbc_string_utils::strip_global_ns(&mangled_name);
     let key = if is_case_type { "case_type" } else { "alias" };
-    tconsts.push(encode_entry(key, TypedValue::string(name)));
+    tconsts.push(encode_entry(key, TypedValue::intern_string(name)));
     Ok(TypedValue::dict(tconsts))
 }
 

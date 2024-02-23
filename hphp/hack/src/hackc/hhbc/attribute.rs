@@ -59,7 +59,7 @@ fn is_native_arg<'arena>(s: &str, attrs: impl AsRef<[Attribute<'arena>]>) -> boo
     attrs.as_ref().iter().any(|attr| {
         attr.is(ua::is_native)
             && attr.arguments.as_ref().iter().any(|tv| match *tv {
-                TypedValue::String(s0) => s0.unsafe_as_str() == s,
+                TypedValue::String(s0) => s0.as_bytes() == s.as_bytes(),
                 _ => false,
             })
     })
@@ -69,7 +69,7 @@ fn is_memoize_with<'arena>(attrs: impl AsRef<[Attribute<'arena>]>, arg: &str) ->
     attrs.as_ref().iter().any(|attr| {
         ua::is_memoized(attr.name.unsafe_as_str())
             && attr.arguments.as_ref().iter().any(|tv| match *tv {
-                TypedValue::String(s0) => s0.unsafe_as_str() == arg,
+                TypedValue::String(s0) => s0.as_bytes() == arg.as_bytes(),
                 _ => false,
             })
     })

@@ -10,6 +10,7 @@
 use bstr::BStr;
 use bstr::ByteSlice;
 use ffi::Str;
+use intern::string::StringId;
 use serde::Serialize;
 
 macro_rules! impl_id {
@@ -142,6 +143,12 @@ impl<'arena> ClassName<'arena> {
         ClassName(Str::new_str(
             alloc,
             hhbc_string_utils::strip_global_ns(&hhbc_string_utils::mangle(s.into())),
+        ))
+    }
+
+    pub fn mangle(s: impl std::convert::Into<std::string::String>) -> StringId {
+        intern::string::intern(hhbc_string_utils::strip_global_ns(
+            &hhbc_string_utils::mangle(s.into()),
         ))
     }
 

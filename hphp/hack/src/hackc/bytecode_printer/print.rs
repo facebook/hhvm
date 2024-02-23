@@ -734,7 +734,7 @@ fn print_adata(ctx: &Context<'_>, w: &mut dyn Write, tv: &TypedValue<'_>) -> Res
                 w,
                 r#"s:{}:\"{}\";"#,
                 s.len(),
-                escaper::escape_bstr(s.as_bstr())
+                escaper::escape_bstr(s.as_bytes().as_bstr())
             )
         }
         TypedValue::LazyClass(s) => {

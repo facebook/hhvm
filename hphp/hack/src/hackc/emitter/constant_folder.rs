@@ -9,7 +9,6 @@ use ast_scope::Scope;
 use ast_scope::ScopeItem;
 use env::emitter::Emitter;
 use env::ClassExpr;
-use ffi::Str;
 use hhbc::DictEntry;
 use hhbc::TypedValue;
 use hhbc_string_utils as string_utils;
@@ -102,8 +101,8 @@ fn nameof_to_typed_value<'arena, 'decl>(
 ) -> Result<TypedValue<'arena>, Error> {
     let cexpr = ClassExpr::class_id_to_class_expr(emitter, scope, false, true, cid);
     if let ClassExpr::Id(ast_defs::Id(_, cname)) = cexpr {
-        let classid = hhbc::ClassName::from_ast_name_and_mangle(emitter.alloc, cname).as_ffi_str();
-        return Ok(TypedValue::String(classid));
+        let classid = hhbc::ClassName::mangle(cname);
+        return Ok(TypedValue::String(classid.as_bytes()));
     }
     Err(Error::UserDefinedConstant)
 }
@@ -234,15 +233,7 @@ fn shape_to_typed_value<'arena, 'decl>(
                         }
                     }
                 }
-                ast_defs::ShapeFieldName::SFlitStr(id) => {
-                    // FIXME: This is not safe--string literals are binary
-                    // strings. There's no guarantee that they're valid UTF-8.
-                    TypedValue::string(
-                        emitter
-                            .alloc
-                            .alloc_str(unsafe { std::str::from_utf8_unchecked(&id.1) }),
-                    )
-                }
+                ast_defs::ShapeFieldName::SFlitStr(id) => TypedValue::intern_string(&id.1),
                 ast_defs::ShapeFieldName::SFclassConst(class_id, id) => class_const_to_typed_value(
                     emitter,
                     scope,
@@ -291,7 +282,7 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
             Expr_::True => Ok(TypedValue::Bool(true)),
             Expr_::False => Ok(TypedValue::Bool(false)),
             Expr_::Null => Ok(TypedValue::Null),
-            Expr_::String(s) => string_expr_to_typed_value(emitter, s),
+            Expr_::String(s) => string_expr_to_typed_value(s),
             Expr_::Float(s) => float_expr_to_typed_value(emitter, s),
 
             Expr_::Id(id) if id.1 == math::NAN => Ok(TypedValue::float(std::f64::NAN)),
@@ -494,17 +485,8 @@ fn float_expr_to_typed_value<'arena, 'decl>(
     }
 }
 
-fn string_expr_to_typed_value<'arena, 'decl>(
-    emitter: &Emitter<'arena, 'decl>,
-    s: &[u8],
-) -> Result<TypedValue<'arena>, Error> {
-    // FIXME: This is not safe--string literals are binary strings.
-    // There's no guarantee that they're valid UTF-8.
-    Ok(TypedValue::string(
-        emitter
-            .alloc
-            .alloc_str(unsafe { std::str::from_utf8_unchecked(s) }),
-    ))
+fn string_expr_to_typed_value<'arena>(s: &[u8]) -> Result<TypedValue<'arena>, Error> {
+    Ok(TypedValue::intern_string(s))
 }
 
 fn int_expr_to_typed_value<'arena>(s: &str) -> Result<TypedValue<'arena>, Error> {
@@ -526,7 +508,6 @@ fn update_duplicates_in_map<'arena>(
 }
 
 fn cast_value<'arena>(
-    alloc: &'arena bumpalo::Bump,
     hint: &ast::Hint_,
     v: TypedValue<'arena>,
 ) -> Result<TypedValue<'arena>, Error> {
@@ -536,7 +517,7 @@ fn cast_value<'arena>(
             if id == typehints::BOOL {
                 Some(TypedValue::Bool(cast_to_bool(v)))
             } else if id == typehints::STRING {
-                cast_to_arena_str(v, alloc).map(TypedValue::string)
+                cast_to_string(v).map(TypedValue::intern_string)
             } else if id == typehints::FLOAT {
                 cast_to_float(v).map(TypedValue::float)
             } else {
@@ -568,14 +549,13 @@ fn unop_on_value<'arena>(
 }
 
 fn binop_on_values<'arena>(
-    alloc: &'arena bumpalo::Bump,
     binop: &ast_defs::Bop,
     v1: TypedValue<'arena>,
     v2: TypedValue<'arena>,
 ) -> Result<TypedValue<'arena>, Error> {
     use ast_defs::Bop;
     match binop {
-        Bop::Dot => fold_concat(v1, v2, alloc),
+        Bop::Dot => fold_concat(v1, v2),
         Bop::Plus => fold_add(v1, v2),
         Bop::Minus => fold_sub(v1, v2),
         Bop::Star => fold_mul(v1, v2),
@@ -596,7 +576,7 @@ fn value_to_expr_<'arena>(v: TypedValue<'arena>) -> Result<ast::Expr_, Error> {
         ))),
         TypedValue::Bool(false) => Ok(Expr_::False),
         TypedValue::Bool(true) => Ok(Expr_::True),
-        TypedValue::String(s) => Ok(Expr_::String(s.unsafe_as_str().into())),
+        TypedValue::String(s) => Ok(Expr_::String(s.as_bytes().into())),
         TypedValue::LazyClass(_) => Err(Error::unrecoverable("value_to_expr: lazyclass NYI")),
         TypedValue::Null => Ok(Expr_::Null),
         TypedValue::Uninit => Err(Error::unrecoverable("value_to_expr: uninit value")),
@@ -639,7 +619,7 @@ impl<'ast, 'decl> VisitorMut<'ast> for FolderVisitor<'_, '_, 'decl> {
         p.recurse(c, self.object())?;
         let new_p = match p {
             ast::Expr_::Cast(e) => expr_to_typed_value(self.emitter, self.scope, &e.1)
-                .and_then(|v| cast_value(self.emitter.alloc, &(e.0).1, v))
+                .and_then(|v| cast_value(&(e.0).1, v))
                 .map(value_to_expr_)
                 .ok(),
             ast::Expr_::Unop(e) => expr_to_typed_value(self.emitter, self.scope, &e.1)
@@ -648,9 +628,8 @@ impl<'ast, 'decl> VisitorMut<'ast> for FolderVisitor<'_, '_, 'decl> {
                 .ok(),
             ast::Expr_::Binop(binop) => expr_to_typed_value(self.emitter, self.scope, &binop.lhs)
                 .and_then(|v1| {
-                    expr_to_typed_value(self.emitter, self.scope, &binop.rhs).and_then(|v2| {
-                        binop_on_values(self.emitter.alloc, &binop.bop, v1, v2).map(value_to_expr_)
-                    })
+                    expr_to_typed_value(self.emitter, self.scope, &binop.rhs)
+                        .and_then(|v2| binop_on_values(&binop.bop, v1, v2).map(value_to_expr_))
                 })
                 .ok(),
             _ => None,
@@ -734,19 +713,6 @@ pub fn literals_from_exprs<'arena, 'decl>(
         Err(Error::unrecoverable("literals_from_exprs: not literal"))
     } else {
         ret
-    }
-}
-
-fn cast_to_arena_str<'a>(x: TypedValue<'a>, alloc: &'a bumpalo::Bump) -> Option<Str<'a>> {
-    match x {
-        TypedValue::Uninit => None, // Should not happen
-        TypedValue::Bool(false) => Some("".into()),
-        TypedValue::Bool(true) => Some("1".into()),
-        TypedValue::Null => Some("".into()),
-        TypedValue::Int(i) => Some(alloc.alloc_str(i.to_string().as_str()).into()),
-        TypedValue::String(s) => Some(s),
-        TypedValue::LazyClass(s) => Some(s),
-        _ => None,
     }
 }
 
@@ -846,11 +812,7 @@ fn fold_bitwise_or<'a>(x: TypedValue<'a>, y: TypedValue<'a>) -> Option<TypedValu
 }
 
 // String concatenation
-fn fold_concat<'a>(
-    x: TypedValue<'a>,
-    y: TypedValue<'a>,
-    alloc: &'a bumpalo::Bump,
-) -> Option<TypedValue<'a>> {
+fn fold_concat<'a>(x: TypedValue<'a>, y: TypedValue<'a>) -> Option<TypedValue<'a>> {
     fn safe_to_cast(t: &TypedValue<'_>) -> bool {
         matches!(
             t,
@@ -861,9 +823,9 @@ fn fold_concat<'a>(
         return None;
     }
 
-    let l = cast_to_string(x)?;
-    let r = cast_to_string(y)?;
-    Some(TypedValue::alloc_string(l + &r, alloc))
+    let mut s = cast_to_string(x)?;
+    s.extend(cast_to_string(y)?);
+    Some(TypedValue::intern_string(s))
 }
 
 // Bitwise operations.
@@ -884,7 +846,7 @@ pub fn cast_to_bool(x: TypedValue<'_>) -> bool {
         TypedValue::Uninit => false, // Should not happen
         TypedValue::Bool(b) => b,
         TypedValue::Null => false,
-        TypedValue::String(s) => !s.is_empty() && s.unsafe_as_str() != "0",
+        TypedValue::String(s) => !s.is_empty() && s.as_bytes() != b"0",
         TypedValue::LazyClass(_) => true,
         TypedValue::Int(i) => i != 0,
         TypedValue::Float(f) => f.to_f64() != 0.0,
@@ -935,15 +897,15 @@ pub fn cast_to_float(v: TypedValue<'_>) -> Option<f64> {
 
 /// Cast to a string: the (string) operator in PHP. Return Err if we can't
 /// or won't produce the correct value *)
-pub fn cast_to_string(x: TypedValue<'_>) -> Option<String> {
+pub fn cast_to_string(x: TypedValue<'_>) -> Option<Vec<u8>> {
     match x {
         TypedValue::Uninit => None, // Should not happen
-        TypedValue::Bool(false) => Some("".into()),
-        TypedValue::Bool(true) => Some("1".into()),
-        TypedValue::Null => Some("".into()),
-        TypedValue::Int(i) => Some(i.to_string()),
-        TypedValue::String(s) => Some(s.unsafe_as_str().into()),
-        TypedValue::LazyClass(s) => Some(s.unsafe_as_str().into()),
+        TypedValue::Bool(false) => Some(b"".into()),
+        TypedValue::Bool(true) => Some(b"1".into()),
+        TypedValue::Null => Some(b"".into()),
+        TypedValue::Int(i) => Some(i.to_string().into_bytes()),
+        TypedValue::String(s) => Some(s.as_bytes().to_vec()),
+        TypedValue::LazyClass(s) => Some(s.to_vec()),
         _ => None,
     }
 }
@@ -954,7 +916,7 @@ mod cast_tests {
 
     #[test]
     fn non_numeric_string_to_int() {
-        let res = cast_to_int(TypedValue::string("foo"));
+        let res = cast_to_int(TypedValue::intern_string("foo"));
         assert!(res.is_none());
     }
 

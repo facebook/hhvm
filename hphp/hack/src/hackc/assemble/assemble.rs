@@ -964,7 +964,7 @@ fn assemble_typed_value<'arena>(
 
             pub fn build<'arena>(&self, content: Str<'arena>) -> hhbc::TypedValue<'arena> {
                 match self {
-                    StringOrLazyClass::String => hhbc::TypedValue::String(content),
+                    StringOrLazyClass::String => hhbc::TypedValue::intern_string(content),
                     StringOrLazyClass::LazyClass => hhbc::TypedValue::LazyClass(content),
                 }
             }

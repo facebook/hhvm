@@ -120,7 +120,7 @@ fn cmp_includes(a: &[hhbc::IncludePath<'_>], b: &[hhbc::IncludePath<'_>]) -> Res
 
 /// Attribute order should not matter, and the assembler does not preserve order
 /// of special attributes that format as flags, like __Reified and __HasReifiedParents
-fn cmp_attributes(a: &[Attribute<'_>], b: &[Attribute<'_>]) -> Result {
+fn cmp_attributes(a: &[Attribute], b: &[Attribute]) -> Result {
     cmp_set_t(a, b)
 }
 

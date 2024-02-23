@@ -21,7 +21,7 @@ pub struct Param<'arena> {
     pub is_variadic: bool,
     pub is_inout: bool,
     pub is_readonly: bool,
-    pub user_attributes: Vector<Attribute<'arena>>,
+    pub user_attributes: Vector<Attribute>,
     pub type_info: Maybe<TypeInfo<'arena>>,
     pub default_value: Maybe<DefaultValue<'arena>>,
 }

@@ -18,7 +18,7 @@ use crate::Visibility;
 #[derive(Debug, Serialize)]
 #[repr(C)]
 pub struct Method<'arena> {
-    pub attributes: Vector<Attribute<'arena>>,
+    pub attributes: Vector<Attribute>,
     pub visibility: Visibility,
     pub name: MethodName<'arena>,
     pub body: Body<'arena>,

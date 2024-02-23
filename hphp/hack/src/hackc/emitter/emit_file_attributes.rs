@@ -10,17 +10,17 @@ use oxidized::ast;
 
 use crate::emit_attribute::from_asts;
 
-fn emit_file_attributes<'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
+fn emit_file_attributes(
+    e: &mut Emitter<'_, '_>,
     fa: &ast::FileAttribute,
-) -> Result<Vec<Attribute<'arena>>> {
+) -> Result<Vec<Attribute>> {
     from_asts(e, &fa.user_attributes[..])
 }
 
-pub fn emit_file_attributes_from_program<'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
+pub fn emit_file_attributes_from_program(
+    e: &mut Emitter<'_, '_>,
     prog: &[ast::Def],
-) -> Result<Vec<Attribute<'arena>>> {
+) -> Result<Vec<Attribute>> {
     prog.iter()
         .filter_map(|node| {
             if let ast::Def::FileAttributes(fa) = node {

@@ -121,17 +121,14 @@ pub(crate) struct UnitState {
     pub(crate) adata_lookup: HashMap<hhbc::AdataId, Arc<ir::TypedValue>>,
 }
 
-pub(crate) fn convert_attribute<'a>(
-    attr: &hhbc::Attribute<'a>,
-    strings: &StringInterner,
-) -> ir::Attribute {
+pub(crate) fn convert_attribute(attr: &hhbc::Attribute, strings: &StringInterner) -> ir::Attribute {
     let arguments = attr
         .arguments
         .iter()
         .map(|tv| convert_typed_value(tv, strings))
         .collect();
     ir::Attribute {
-        name: ir::ClassId::from_hhbc(hhbc::ClassName::new(attr.name), strings),
+        name: ir::ClassId::from_str(attr.name.as_str(), strings),
         arguments,
     }
 }

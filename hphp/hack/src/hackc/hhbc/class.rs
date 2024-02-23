@@ -37,7 +37,7 @@ pub struct Requirement<'arena> {
 #[derive(Debug, Serialize)]
 #[repr(C)]
 pub struct Class<'arena> {
-    pub attributes: Vector<Attribute<'arena>>,
+    pub attributes: Vector<Attribute>,
     pub base: Maybe<ClassName<'arena>>,
     pub implements: Vector<ClassName<'arena>>,
     pub enum_includes: Vector<ClassName<'arena>>,

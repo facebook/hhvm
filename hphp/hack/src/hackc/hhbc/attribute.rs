@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::Str;
 use ffi::Vector;
+use intern::string::StringId;
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
 use serde::Serialize;
@@ -25,37 +25,44 @@ use crate::typed_value::TypedValue;
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash, Serialize)]
 #[repr(C)]
-pub struct Attribute<'arena> {
-    pub name: Str<'arena>,
+pub struct Attribute {
+    pub name: StringId,
     pub arguments: Vector<TypedValue>,
 }
 
-impl<'arena> Attribute<'arena> {
+impl Attribute {
+    pub fn new(name: impl AsRef<str>, arguments: Vec<TypedValue>) -> Self {
+        Self {
+            name: intern::string::intern(name.as_ref()),
+            arguments: arguments.into(),
+        }
+    }
+
     pub fn is<F: Fn(&str) -> bool>(&self, f: F) -> bool {
-        f(self.name.unsafe_as_str())
+        f(self.name.as_str())
     }
 }
 
-fn is<'arena>(s: &str, attr: &Attribute<'arena>) -> bool {
+fn is(s: &str, attr: &Attribute) -> bool {
     attr.is(|x| x == s)
 }
 
-fn has<'arena, F>(attrs: &[Attribute<'arena>], f: F) -> bool
+fn has<F>(attrs: &[Attribute], f: F) -> bool
 where
-    F: Fn(&Attribute<'arena>) -> bool,
+    F: Fn(&Attribute) -> bool,
 {
     attrs.iter().any(f)
 }
 
-pub fn is_no_injection<'arena>(attrs: impl AsRef<[Attribute<'arena>]>) -> bool {
+pub fn is_no_injection(attrs: impl AsRef<[Attribute]>) -> bool {
     is_native_arg(native_arg::NO_INJECTION, attrs)
 }
 
-pub fn is_native_opcode_impl<'arena>(attrs: impl AsRef<[Attribute<'arena>]>) -> bool {
+pub fn is_native_opcode_impl(attrs: impl AsRef<[Attribute]>) -> bool {
     is_native_arg(native_arg::OP_CODE_IMPL, attrs)
 }
 
-fn is_native_arg<'arena>(s: &str, attrs: impl AsRef<[Attribute<'arena>]>) -> bool {
+fn is_native_arg(s: &str, attrs: impl AsRef<[Attribute]>) -> bool {
     attrs.as_ref().iter().any(|attr| {
         attr.is(ua::is_native)
             && attr.arguments.as_ref().iter().any(|tv| match *tv {
@@ -65,9 +72,9 @@ fn is_native_arg<'arena>(s: &str, attrs: impl AsRef<[Attribute<'arena>]>) -> boo
     })
 }
 
-fn is_memoize_with<'arena>(attrs: impl AsRef<[Attribute<'arena>]>, arg: &str) -> bool {
+fn is_memoize_with(attrs: impl AsRef<[Attribute]>, arg: &str) -> bool {
     attrs.as_ref().iter().any(|attr| {
-        ua::is_memoized(attr.name.unsafe_as_str())
+        ua::is_memoized(attr.name.as_str())
             && attr.arguments.as_ref().iter().any(|tv| match *tv {
                 TypedValue::String(s0) => s0.as_bytes() == arg.as_bytes(),
                 _ => false,
@@ -75,97 +82,95 @@ fn is_memoize_with<'arena>(attrs: impl AsRef<[Attribute<'arena>]>, arg: &str) ->
     })
 }
 
-pub fn is_keyed_by_ic_memoize<'arena>(attrs: impl AsRef<[Attribute<'arena>]>) -> bool {
+pub fn is_keyed_by_ic_memoize(attrs: impl AsRef<[Attribute]>) -> bool {
     is_memoize_with(attrs, "KeyedByIC")
 }
 
-pub fn is_make_ic_inaccessible_memoize<'arena>(attrs: impl AsRef<[Attribute<'arena>]>) -> bool {
+pub fn is_make_ic_inaccessible_memoize(attrs: impl AsRef<[Attribute]>) -> bool {
     is_memoize_with(attrs, "MakeICInaccessible")
 }
 
-pub fn is_soft_make_ic_inaccessible_memoize<'arena>(
-    attrs: impl AsRef<[Attribute<'arena>]>,
-) -> bool {
+pub fn is_soft_make_ic_inaccessible_memoize(attrs: impl AsRef<[Attribute]>) -> bool {
     is_memoize_with(attrs, "SoftMakeICInaccessible")
 }
 
-fn is_foldable<'arena>(attr: &Attribute<'arena>) -> bool {
+fn is_foldable(attr: &Attribute) -> bool {
     is(ua::IS_FOLDABLE, attr)
 }
 
-fn is_dynamically_constructible<'arena>(attr: &Attribute<'arena>) -> bool {
+fn is_dynamically_constructible(attr: &Attribute) -> bool {
     is(ua::DYNAMICALLY_CONSTRUCTIBLE, attr)
 }
 
-fn is_dynamically_referenced<'arena>(attr: &Attribute<'arena>) -> bool {
+fn is_dynamically_referenced(attr: &Attribute) -> bool {
     is(ua::DYNAMICALLY_REFERENCED, attr)
 }
 
-fn is_sealed<'arena>(attr: &Attribute<'arena>) -> bool {
+fn is_sealed(attr: &Attribute) -> bool {
     is(ua::SEALED, attr)
 }
 
-fn is_const<'arena>(attr: &Attribute<'arena>) -> bool {
+fn is_const(attr: &Attribute) -> bool {
     is(ua::CONST, attr)
 }
 
-fn is_meth_caller<'arena>(attr: &Attribute<'arena>) -> bool {
+fn is_meth_caller(attr: &Attribute) -> bool {
     is("__MethCaller", attr)
 }
 
-fn is_provenance_skip_frame<'arena>(attr: &Attribute<'arena>) -> bool {
+fn is_provenance_skip_frame(attr: &Attribute) -> bool {
     is(ua::PROVENANCE_SKIP_FRAME, attr)
 }
 
-fn is_dynamically_callable<'arena>(attr: &Attribute<'arena>) -> bool {
+fn is_dynamically_callable(attr: &Attribute) -> bool {
     is(ua::DYNAMICALLY_CALLABLE, attr)
 }
 
-fn is_enum_class<'arena>(attr: &Attribute<'arena>) -> bool {
+fn is_enum_class(attr: &Attribute) -> bool {
     is(ua::ENUM_CLASS, attr)
 }
 
-pub fn has_enum_class<'arena>(attrs: &[Attribute<'arena>]) -> bool {
+pub fn has_enum_class(attrs: &[Attribute]) -> bool {
     has(attrs, is_enum_class)
 }
 
-pub fn has_dynamically_constructible<'arena>(attrs: &[Attribute<'arena>]) -> bool {
+pub fn has_dynamically_constructible(attrs: &[Attribute]) -> bool {
     has(attrs, is_dynamically_constructible)
 }
 
-pub fn has_dynamically_referenced<'arena>(attrs: &[Attribute<'arena>]) -> bool {
+pub fn has_dynamically_referenced(attrs: &[Attribute]) -> bool {
     has(attrs, is_dynamically_referenced)
 }
 
-pub fn has_foldable<'arena>(attrs: &[Attribute<'arena>]) -> bool {
+pub fn has_foldable(attrs: &[Attribute]) -> bool {
     has(attrs, is_foldable)
 }
 
-pub fn has_sealed<'arena>(attrs: &[Attribute<'arena>]) -> bool {
+pub fn has_sealed(attrs: &[Attribute]) -> bool {
     has(attrs, is_sealed)
 }
 
-pub fn has_const<'arena>(attrs: &[Attribute<'arena>]) -> bool {
+pub fn has_const(attrs: &[Attribute]) -> bool {
     has(attrs, is_const)
 }
 
-pub fn has_meth_caller<'arena>(attrs: &[Attribute<'arena>]) -> bool {
+pub fn has_meth_caller(attrs: &[Attribute]) -> bool {
     has(attrs, is_meth_caller)
 }
 
-pub fn has_provenance_skip_frame<'arena>(attrs: &[Attribute<'arena>]) -> bool {
+pub fn has_provenance_skip_frame(attrs: &[Attribute]) -> bool {
     has(attrs, is_provenance_skip_frame)
 }
 
-pub fn has_dynamically_callable<'arena>(attrs: &[Attribute<'arena>]) -> bool {
+pub fn has_dynamically_callable(attrs: &[Attribute]) -> bool {
     has(attrs, is_dynamically_callable)
 }
 
-pub fn deprecation_info<'arena>(
-    mut iter: impl Iterator<Item = &'arena Attribute<'arena>>,
-) -> Option<&'arena [TypedValue]> {
+pub fn deprecation_info<'a>(
+    mut iter: impl Iterator<Item = &'a Attribute>,
+) -> Option<&'a [TypedValue]> {
     iter.find_map(|attr| {
-        if attr.name.unsafe_as_str() == ua::DEPRECATED {
+        if attr.name.as_str() == ua::DEPRECATED {
             Some(attr.arguments.as_ref())
         } else {
             None
@@ -187,7 +192,7 @@ mod tests {
     #[test]
     fn example_is_memoized_vs_eq_memoize() {
         let attr = Attribute {
-            name: ua::MEMOIZE_LSB.into(),
+            name: intern::string::intern(ua::MEMOIZE_LSB),
             arguments: vec![].into(),
         };
         assert!(attr.is(ua::is_memoized));
@@ -198,13 +203,13 @@ mod tests {
     #[test]
     fn example_has_dynamically_callable() {
         let mk_attr = |name: &'static str| Attribute {
-            name: name.into(),
+            name: intern::string::intern(name),
             arguments: vec![].into(),
         };
         let attrs = vec![mk_attr(ua::CONST), mk_attr(ua::DYNAMICALLY_CALLABLE)];
         let has_result = attrs
             .iter()
-            .any(|a| a.name.unsafe_as_str() == ua::DYNAMICALLY_CALLABLE);
+            .any(|a| a.name.as_str() == ua::DYNAMICALLY_CALLABLE);
         assert!(has_result);
     }
 }

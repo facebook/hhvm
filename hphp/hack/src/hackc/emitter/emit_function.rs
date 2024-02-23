@@ -9,7 +9,6 @@ use ast_scope::ScopeItem;
 use env::emitter::Emitter;
 use error::Result;
 use ffi::Str;
-use hhbc::Attribute;
 use hhbc::ClassName;
 use hhbc::Coeffects;
 use hhbc::Function;
@@ -41,11 +40,9 @@ pub fn emit_function<'a, 'arena, 'decl>(
         FunctionFlags::ASYNC,
         matches!(f.fun_kind, FunKind::FAsync | FunKind::FAsyncGenerator),
     );
-    let mut user_attrs: Vec<Attribute<'arena>> = emit_attribute::from_asts(e, &f.user_attributes)?;
+    let mut user_attrs = emit_attribute::from_asts(e, &f.user_attributes)?;
     user_attrs.extend(emit_attribute::add_reified_attribute(&fd.tparams));
-    let memoized = user_attrs
-        .iter()
-        .any(|a| ua::is_memoized(a.name.unsafe_as_str()));
+    let memoized = user_attrs.iter().any(|a| ua::is_memoized(a.name.as_str()));
     flags.set(FunctionFlags::MEMOIZE_IMPL, memoized);
 
     let renamed_id = {
@@ -113,9 +110,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
     let deprecation_info = hhbc::deprecation_info(user_attrs.iter());
     let (body, is_gen, is_pair_gen) = {
         let deprecation_info = if memoized { None } else { deprecation_info };
-        let native = user_attrs
-            .iter()
-            .any(|a| ua::is_native(a.name.unsafe_as_str()));
+        let native = user_attrs.iter().any(|a| ua::is_native(a.name.as_str()));
         use emit_body::Args as EmitBodyArgs;
         use emit_body::Flags as EmitBodyFlags;
         let mut body_flags = EmitBodyFlags::empty();

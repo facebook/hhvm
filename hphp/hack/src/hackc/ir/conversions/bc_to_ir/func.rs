@@ -92,7 +92,7 @@ fn convert_body<'a>(
     unit: &mut ir::Unit<'a>,
     filename: ir::Filename,
     body: &Body<'a>,
-    attributes: &[hhbc::Attribute<'_>],
+    attributes: &[hhbc::Attribute],
     attrs: ir::Attr,
     coeffects: &hhbc::Coeffects<'a>,
     src_loc: ir::SrcLoc,

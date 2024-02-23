@@ -764,9 +764,9 @@ fn print_adata(ctx: &Context<'_>, w: &mut dyn Write, tv: &TypedValue) -> Result<
     }
 }
 
-fn print_attribute(ctx: &Context<'_>, w: &mut dyn Write, a: &Attribute<'_>) -> Result<()> {
-    let unescaped = a.name.as_bstr();
-    let escaped = if a.name.starts_with(b"__") {
+fn print_attribute(ctx: &Context<'_>, w: &mut dyn Write, a: &Attribute) -> Result<()> {
+    let unescaped = a.name.as_str().as_bytes().as_bstr();
+    let escaped = if a.name.as_str().starts_with("__") {
         Cow::Borrowed(unescaped)
     } else {
         escaper::escape_bstr(unescaped)
@@ -782,11 +782,11 @@ fn print_attribute(ctx: &Context<'_>, w: &mut dyn Write, a: &Attribute<'_>) -> R
     w.write_all(b"}\"\"\")")
 }
 
-fn print_attributes<'a>(ctx: &Context<'_>, w: &mut dyn Write, al: &[Attribute<'a>]) -> Result<()> {
+fn print_attributes(ctx: &Context<'_>, w: &mut dyn Write, al: &[Attribute]) -> Result<()> {
     // Adjust for underscore coming before alphabet
     let al = al
         .iter()
-        .sorted_by_key(|a| (!a.name.starts_with(b"__"), a.name));
+        .sorted_by_key(|a| (!a.name.as_str().starts_with("__"), a.name));
     write_bytes!(
         w,
         "{}",
@@ -794,7 +794,7 @@ fn print_attributes<'a>(ctx: &Context<'_>, w: &mut dyn Write, al: &[Attribute<'a
     )
 }
 
-fn print_file_attributes(ctx: &Context<'_>, w: &mut dyn Write, al: &[Attribute<'_>]) -> Result<()> {
+fn print_file_attributes(ctx: &Context<'_>, w: &mut dyn Write, al: &[Attribute]) -> Result<()> {
     if al.is_empty() {
         return Ok(());
     }
@@ -1075,7 +1075,7 @@ fn print_span(
 fn print_special_and_user_attrs(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    users: &[Attribute<'_>],
+    users: &[Attribute],
     attr_ctx: &AttrContext,
     attrs: &Attr,
 ) -> Result<()> {

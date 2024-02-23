@@ -18,7 +18,7 @@ use crate::Span;
 #[derive(Debug, Serialize)]
 #[repr(C)]
 pub struct Function<'arena> {
-    pub attributes: Vector<Attribute<'arena>>,
+    pub attributes: Vector<Attribute>,
     pub name: FunctionName<'arena>,
     pub body: Body<'arena>,
 

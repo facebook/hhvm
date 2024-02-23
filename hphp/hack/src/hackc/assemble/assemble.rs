@@ -89,7 +89,7 @@ struct UnitBuilder<'a> {
     constant_refs: Option<Vec<hhbc::ConstName<'a>>>,
     constants: Vec<hhbc::Constant<'a>>,
     fatal: Option<hhbc::Fatal>,
-    file_attributes: Vec<hhbc::Attribute<'a>>,
+    file_attributes: Vec<hhbc::Attribute>,
     func_refs: Option<Vec<hhbc::FunctionName<'a>>>,
     funcs: Vec<hhbc::Function<'a>>,
     include_refs: Option<Vec<hhbc::IncludePath<'a>>>,
@@ -283,10 +283,10 @@ fn assemble_module_use<'arena>(
 
 /// Ex:
 /// .file_attributes ["__EnableUnstableFeatures"("""v:1:{s:8:\"readonly\";}""")] ;
-fn assemble_file_attributes<'arena>(
-    alloc: &'arena Bump,
+fn assemble_file_attributes(
+    alloc: &Bump,
     token_iter: &mut Lexer<'_>,
-    file_attributes: &mut Vec<hhbc::Attribute<'arena>>,
+    file_attributes: &mut Vec<hhbc::Attribute>,
 ) -> Result<()> {
     parse!(token_iter, ".file_attributes" "[" <attrs:assemble_user_attr(alloc),*> "]" ";");
     file_attributes.extend(attrs);
@@ -1202,10 +1202,10 @@ fn assemble_upper_bound<'arena>(
 
 /// Ex: [ "__EntryPoint"("""v:0:{}""")]. This example lacks Attrs
 /// Ex: [abstract final] This example lacks Attributes
-fn assemble_special_and_user_attrs<'arena>(
+fn assemble_special_and_user_attrs(
     token_iter: &mut Lexer<'_>,
-    alloc: &'arena Bump,
-) -> Result<(hhvm_types_ffi::ffi::Attr, Vec<hhbc::Attribute<'arena>>)> {
+    alloc: &Bump,
+) -> Result<(hhvm_types_ffi::ffi::Attr, Vec<hhbc::Attribute>)> {
     let mut user_atts = Vec::new();
     let mut tr = hhvm_types_ffi::ffi::Attr::AttrNone;
     if token_iter.next_is(Token::is_open_bracket) {
@@ -1279,21 +1279,14 @@ fn assemble_hhvm_attr(token_iter: &mut Lexer<'_>) -> Result<hhvm_types_ffi::ffi:
 
 /// Attributes are printed as follows:
 /// "name"("""v:args.len:{args}""") where args are typed values.
-fn assemble_user_attr<'arena>(
-    token_iter: &mut Lexer<'_>,
-    alloc: &'arena Bump,
-) -> Result<hhbc::Attribute<'arena>> {
+fn assemble_user_attr(token_iter: &mut Lexer<'_>, alloc: &Bump) -> Result<hhbc::Attribute> {
     let nm = escaper::unescape_literal_bytes_into_vec_bytes(
         token_iter.expect_with(Token::into_unquoted_str_literal)?,
     )?;
-    let name = Str::new_slice(alloc, &nm);
     token_iter.expect(Token::is_open_paren)?;
     let arguments = assemble_user_attr_args(alloc, token_iter)?;
     token_iter.expect(Token::is_close_paren)?;
-    Ok(hhbc::Attribute {
-        name,
-        arguments: arguments.into(),
-    })
+    Ok(hhbc::Attribute::new(std::str::from_utf8(&nm)?, arguments))
 }
 
 /// Printed as follows (print_attributes in bcp)

@@ -16,17 +16,11 @@ use oxidized::ast as a;
 
 use crate::emit_expression;
 
-pub fn from_asts<'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
-    attrs: &[a::UserAttribute],
-) -> Result<Vec<Attribute<'arena>>> {
+pub fn from_asts(e: &mut Emitter<'_, '_>, attrs: &[a::UserAttribute]) -> Result<Vec<Attribute>> {
     attrs.iter().map(|attr| from_ast(e, attr)).collect()
 }
 
-pub fn from_ast<'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
-    attr: &a::UserAttribute,
-) -> Result<Attribute<'arena>> {
+pub fn from_ast(e: &mut Emitter<'_, '_>, attr: &a::UserAttribute) -> Result<Attribute> {
     let mut arguments: Vec<Expr<_, _>> = attr
         .params
         .iter()
@@ -65,17 +59,14 @@ pub fn from_ast<'arena, 'decl>(
     } else {
         hhbc::ClassName::from_ast_name_and_mangle(e.alloc, &attr.name.1).unsafe_as_str()
     };
-    Ok(Attribute {
-        name: e.alloc.alloc_str(fully_qualified_id).into(),
-        arguments: arguments.into(),
-    })
+    Ok(Attribute::new(fully_qualified_id, arguments))
 }
 
 /// Adds an __Reified attribute for functions and classes with reified type
 /// parameters. The arguments to __Reified are number of type parameters
 /// followed by the indicies of these reified type parameters and whether they
 /// are soft reified or not
-pub fn add_reified_attribute<'arena>(tparams: &[a::Tparam]) -> Option<Attribute<'arena>> {
+pub fn add_reified_attribute(tparams: &[a::Tparam]) -> Option<Attribute> {
     let reified_data: Vec<(usize, bool, bool)> = tparams
         .iter()
         .enumerate()
@@ -93,7 +84,7 @@ pub fn add_reified_attribute<'arena>(tparams: &[a::Tparam]) -> Option<Attribute<
         return None;
     }
 
-    let name = "__Reified".into();
+    let name = "__Reified";
     let bool2i64 = |b| b as i64;
     let mut arguments = Vec::with_capacity(reified_data.len() * 3 + 1);
     arguments.push(TypedValue::Int(tparams.len() as i64));
@@ -102,22 +93,13 @@ pub fn add_reified_attribute<'arena>(tparams: &[a::Tparam]) -> Option<Attribute<
         arguments.push(TypedValue::Int(bool2i64(soft)));
         arguments.push(TypedValue::Int(bool2i64(warn)));
     }
-    Some(Attribute {
-        name,
-        arguments: arguments.into(),
-    })
+    Some(Attribute::new(name, arguments))
 }
 
-pub fn add_reified_parent_attribute<'a, 'arena>(
-    env: &Env<'a, 'arena>,
-    extends: &[a::Hint],
-) -> Option<Attribute<'arena>> {
+pub fn add_reified_parent_attribute(env: &Env<'_, '_>, extends: &[a::Hint]) -> Option<Attribute> {
     if let Some((_, hl)) = extends.first().and_then(|h| h.1.as_happly()) {
         if emit_expression::has_non_tparam_generics(env, hl) {
-            return Some(Attribute {
-                name: "__HasReifiedParent".into(),
-                arguments: vec![].into(),
-            });
+            return Some(Attribute::new("__HasReifiedParent", vec![]));
         }
     }
     None

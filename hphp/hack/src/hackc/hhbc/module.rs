@@ -30,7 +30,7 @@ pub struct Rule<'arena> {
 #[derive(Debug, Serialize)]
 #[repr(C)]
 pub struct Module<'arena> {
-    pub attributes: Vector<Attribute<'arena>>,
+    pub attributes: Vector<Attribute>,
     pub name: ModuleName<'arena>,
     pub span: Span,
     pub doc_comment: Maybe<Vector<u8>>,

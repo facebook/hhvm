@@ -19,7 +19,7 @@ use crate::Visibility;
 pub struct Property<'arena> {
     pub name: PropName<'arena>,
     pub flags: Attr,
-    pub attributes: Vector<Attribute<'arena>>,
+    pub attributes: Vector<Attribute>,
     pub visibility: Visibility,
     pub initial_value: Maybe<TypedValue>,
     pub type_info: TypeInfo<'arena>,

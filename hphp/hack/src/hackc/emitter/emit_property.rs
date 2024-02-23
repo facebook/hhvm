@@ -59,13 +59,9 @@ pub fn from_ast<'ast, 'arena, 'decl>(
     let attributes = emit_attribute::from_asts(emitter, args.user_attributes)?;
 
     let is_const = (!args.is_static && class_is_const)
-        || attributes
-            .iter()
-            .any(|a| a.name.unsafe_as_str() == ua::CONST);
-    let is_lsb = attributes.iter().any(|a| a.name.unsafe_as_str() == ua::LSB);
-    let is_late_init = attributes
-        .iter()
-        .any(|a| a.name.unsafe_as_str() == ua::LATE_INIT);
+        || attributes.iter().any(|a| a.name.as_str() == ua::CONST);
+    let is_lsb = attributes.iter().any(|a| a.name.as_str() == ua::LSB);
+    let is_late_init = attributes.iter().any(|a| a.name.as_str() == ua::LATE_INIT);
 
     let is_cabstract = match class.kind {
         ast_defs::ClassishKind::Cclass(k) => k.is_abstract(),

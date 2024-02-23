@@ -44,12 +44,12 @@ pub fn from_asts<'a, 'arena, 'decl>(
         .collect()
 }
 
-pub fn get_attrs_for_method<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
-    method: &'a ast::Method_,
-    user_attrs: &'a [Attribute<'arena>],
-    visibility: &'a ast::Visibility,
-    class: &'a ast::Class_,
+pub fn get_attrs_for_method(
+    emitter: &mut Emitter<'_, '_>,
+    method: &ast::Method_,
+    user_attrs: &[Attribute],
+    visibility: &ast::Visibility,
+    class: &ast::Class_,
     is_memoize_impl: bool,
     has_variadic: bool,
 ) -> Attr {

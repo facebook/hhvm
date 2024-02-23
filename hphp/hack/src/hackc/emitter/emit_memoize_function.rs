@@ -37,10 +37,10 @@ use crate::emit_body;
 use crate::emit_memoize_helpers;
 use crate::emit_param;
 
-pub(crate) fn get_attrs_for_fun<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
-    fd: &'a ast::FunDef,
-    user_attrs: &'a [Attribute<'arena>],
+pub(crate) fn get_attrs_for_fun(
+    emitter: &mut Emitter<'_, '_>,
+    fd: &ast::FunDef,
+    user_attrs: &[Attribute],
     is_memoize_impl: bool,
     has_variadic: bool,
 ) -> Attr {

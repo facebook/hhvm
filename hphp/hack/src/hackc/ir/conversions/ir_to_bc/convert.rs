@@ -124,10 +124,10 @@ fn convert_symbol_refs<'a>(symbol_refs: &ir::SymbolRefs<'a>) -> hhbc::SymbolRefs
     }
 }
 
-pub(crate) fn convert_attributes<'a>(
+pub(crate) fn convert_attributes(
     attrs: Vec<ir::Attribute>,
-    strings: &StringCache<'a>,
-) -> Vec<hhbc::Attribute<'a>> {
+    strings: &StringCache<'_>,
+) -> Vec<hhbc::Attribute> {
     attrs
         .into_iter()
         .map(|attr| {
@@ -136,10 +136,11 @@ pub(crate) fn convert_attributes<'a>(
                     .into_iter()
                     .map(|arg| convert_typed_value(&arg, strings)),
             );
-            hhbc::Attribute {
-                name: strings.lookup_class_name(attr.name).as_ffi_str(),
-                arguments: arguments.into(),
-            }
+            hhbc::Attribute::new(
+                std::str::from_utf8(&strings.interner.lookup_bytes(attr.name.id))
+                    .expect("non-utf8 attribute name"),
+                arguments,
+            )
         })
         .collect()
 }

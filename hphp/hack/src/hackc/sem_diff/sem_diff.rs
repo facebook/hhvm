@@ -150,7 +150,7 @@ pub fn sem_diff_unit(a_unit: &Unit<'_>, b_unit: &Unit<'_>) -> Result<()> {
     Ok(())
 }
 
-fn sem_diff_attribute(path: &CodePath<'_>, a: &Attribute<'_>, b: &Attribute<'_>) -> Result<()> {
+fn sem_diff_attribute(path: &CodePath<'_>, a: &Attribute, b: &Attribute) -> Result<()> {
     let Attribute {
         name: a_name,
         arguments: a_arguments,
@@ -169,11 +169,7 @@ fn sem_diff_attribute(path: &CodePath<'_>, a: &Attribute<'_>, b: &Attribute<'_>)
     Ok(())
 }
 
-fn sem_diff_attributes(
-    path: &CodePath<'_>,
-    a: &[Attribute<'_>],
-    b: &[Attribute<'_>],
-) -> Result<()> {
+fn sem_diff_attributes(path: &CodePath<'_>, a: &[Attribute], b: &[Attribute]) -> Result<()> {
     sem_diff_slice(path, a, b, sem_diff_attribute)
 }
 

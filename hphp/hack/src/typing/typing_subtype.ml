@@ -4350,7 +4350,7 @@ and Subtype_injective_ctor : sig
   val simplify_subtype_variance_for_injective :
     subtype_env:Subtype_env.t ->
     sub_supportdyn:Typing_defs.locl_phase Typing_defs.Reason.t_ option ->
-    ?super_like:bool ->
+    super_like:bool ->
     string ->
     Cls.t option ->
     (Ast_defs.variance * Aast.reify_kind) list ->
@@ -4362,7 +4362,7 @@ end = struct
   let rec simplify_subtype_variance_for_injective_loop
       ~(subtype_env : Subtype_env.t)
       ~(sub_supportdyn : Reason.t option)
-      ?(super_like = false)
+      ~super_like
       (cid : string)
       (variance_reifiedl : (Ast_defs.variance * Aast.reify_kind) list)
       (children_tyl : locl_ty list)
@@ -4456,7 +4456,7 @@ end = struct
   let simplify_subtype_variance_for_injective
       ~(subtype_env : Subtype_env.t)
       ~(sub_supportdyn : Reason.t option)
-      ?(super_like = false)
+      ~super_like
       (cid : string)
       (class_sub : Cls.t option) =
     (* Before looping through the generic arguments, check to see if we should push

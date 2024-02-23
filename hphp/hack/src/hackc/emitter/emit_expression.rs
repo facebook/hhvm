@@ -867,17 +867,13 @@ pub fn emit_await<'a, 'arena, 'decl>(
     expr: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
     let ast::Expr(_, _, e) = expr;
-    let can_inline_gen_functions = !emitter
-        .options()
-        .function_is_renamable(emitter_special_functions::GENA);
     match e.as_call() {
         Some(ast::CallExpr {
             func: ast::Expr(_, _, ast::Expr_::Id(id)),
             args,
             unpacked_arg: None,
             ..
-        }) if (can_inline_gen_functions
-            && args.len() == 1
+        }) if (args.len() == 1
             && string_utils::strip_global_ns(&id.1) == emitter_special_functions::GENA) =>
         {
             inline_gena_call(emitter, env, error::expect_normal_paramkind(&args[0])?)
@@ -3298,7 +3294,6 @@ fn emit_call_expr<'a, 'arena, 'decl>(
         }
         (Expr_::Id(id), args, None)
             if (id.1 == fb::IDX || id.1 == fb::IDXREADONLY)
-                && !e.options().function_is_renamable(&id.1)
                 && (args.len() == 2 || args.len() == 3) =>
         {
             emit_idx(e, env, pos, args)

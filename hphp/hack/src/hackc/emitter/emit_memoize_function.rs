@@ -50,12 +50,8 @@ pub(crate) fn get_attrs_for_fun(
         is_systemlib || (hhbc::has_dynamically_callable(user_attrs) && !is_memoize_impl);
     let is_prov_skip_frame = hhbc::has_provenance_skip_frame(user_attrs);
     let is_meth_caller = hhbc::has_meth_caller(user_attrs);
-    let is_persistent = is_systemlib && !emitter.options().function_is_renamable(&fd.name.1);
-    let is_interceptable = emitter.options().function_is_interceptable(&fd.name.1);
 
     let mut attrs = Attr::AttrNone;
-    attrs.set(Attr::AttrInterceptable, is_interceptable);
-    attrs.set(Attr::AttrPersistent, is_persistent);
     attrs.set(Attr::AttrBuiltin, is_meth_caller | is_systemlib);
     attrs.set(Attr::AttrDynamicallyCallable, is_dyn_call);
     attrs.set(Attr::AttrIsFoldable, hhbc::has_foldable(user_attrs));

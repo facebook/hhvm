@@ -60,9 +60,6 @@ pub fn get_attrs_for_method(
     let is_no_injection = hhbc::is_no_injection(user_attrs);
     let is_prov_skip_frame = hhbc::has_provenance_skip_frame(user_attrs);
     let is_readonly_return = method.readonly_ret.is_some();
-    let is_interceptable = emitter
-        .options()
-        .method_is_interceptable(&class.name.1, &method.name.1);
 
     let mut attrs = Attr::AttrNone;
     attrs.add(Attr::from(visibility));
@@ -70,10 +67,8 @@ pub fn get_attrs_for_method(
     attrs.set(Attr::AttrBuiltin, is_systemlib);
     attrs.set(Attr::AttrDynamicallyCallable, is_dyn_callable);
     attrs.set(Attr::AttrFinal, method.final_);
-    attrs.set(Attr::AttrInterceptable, is_interceptable);
     attrs.set(Attr::AttrIsFoldable, hhbc::has_foldable(user_attrs));
     attrs.set(Attr::AttrNoInjection, is_no_injection);
-    attrs.set(Attr::AttrPersistent, is_systemlib);
     attrs.set(Attr::AttrReadonlyReturn, is_readonly_return);
     attrs.set(Attr::AttrReadonlyThis, method.readonly_this);
     attrs.set(Attr::AttrStatic, method.static_);

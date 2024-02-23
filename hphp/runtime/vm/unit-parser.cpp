@@ -122,19 +122,9 @@ CompilerResult hackc_compile(
   CompileAbortMode mode,
   hackc::DeclProvider* provider
 ) {
-  auto const getRenameFunctionValue = []() {
-    if (Cfg::Jit::EnableRenameFunction == 1) {
-      return hackc::JitEnableRenameFunction::Enable;
-    } else if (Cfg::Jit::EnableRenameFunction == 2) {
-      return hackc::JitEnableRenameFunction::RestrictedEnable;
-    } else {
-      return hackc::JitEnableRenameFunction::Disable;
-    }
-  };
   hackc::NativeEnv native_env{
     .decl_provider = reinterpret_cast<uint64_t>(provider),
     .filepath = filename,
-    .jit_enable_rename_function = getRenameFunctionValue(),
     .hhbc_flags = hackc::HhbcFlags {
       .log_extern_compiler_perf = RO::EvalLogExternCompilerPerf,
       .enable_intrinsics_extension = RO::EnableIntrinsicsExtension,
@@ -160,15 +150,6 @@ CompilerResult hackc_compile(
     for (auto& [k, v] : RO::IncludeRoots) {
       native_env.include_roots.emplace_back(hackc::StringMapEntry{k, v});
     }
-  }
-  if (Cfg::Jit::EnableRenameFunction == 2) {
-    for (auto& f : RO::RenamableFunctions) {
-      native_env.renamable_functions.emplace_back(rust::String{f});
-    }
-  }
-
-  for (auto& f : RO::NonInterceptableFunctions) {
-    native_env.non_interceptable_functions.emplace_back(rust::String{f});
   }
 
   switch (RO::EvalStrictUtf8Mode) {

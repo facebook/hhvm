@@ -12,6 +12,5 @@ path = "../../options.rs"
 
 [dependencies]
 bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
-hhbc_string_utils = { version = "0.0.0", path = "../../../utils/cargo/hhbc_string_utils" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 serde = { version = "1.0.185", features = ["derive", "rc"] }

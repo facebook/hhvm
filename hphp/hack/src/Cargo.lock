@@ -3484,7 +3484,6 @@ name = "options"
 version = "0.0.0"
 dependencies = [
  "bstr",
- "hhbc_string_utils",
  "oxidized",
  "serde",
 ]

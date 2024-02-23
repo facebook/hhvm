@@ -6,7 +6,6 @@
 use anyhow::Result;
 use hhvm_options::HhvmConfig;
 use options::HhbcFlags;
-use options::JitEnableRenameFunction;
 use options::ParserOptions;
 
 /*
@@ -65,21 +64,6 @@ pub fn hhbc_flags(config: &HhvmConfig) -> Result<HhbcFlags> {
     // Only hdf version
     flags.fold_lazy_class_keys = config.get_bool("Eval.FoldLazyClassKeys")?.unwrap_or(true);
     Ok(flags)
-}
-
-pub fn jit_enable_rename_function(config: &HhvmConfig) -> Result<JitEnableRenameFunction> {
-    match config.get_uint32("Eval.JitEnableRenameFunction")? {
-        Some(b) => {
-            if b == 1 {
-                Ok(JitEnableRenameFunction::Enable)
-            } else if b == 2 {
-                Ok(JitEnableRenameFunction::RestrictedEnable)
-            } else {
-                Ok(JitEnableRenameFunction::Disable)
-            }
-        }
-        None => Ok(JitEnableRenameFunction::Disable),
-    }
 }
 
 pub fn parser_options(config: &HhvmConfig) -> Result<ParserOptions> {

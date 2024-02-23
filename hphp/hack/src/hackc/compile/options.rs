@@ -4,10 +4,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use std::collections::BTreeMap;
-use std::collections::BTreeSet;
 
 use bstr::BString;
-use hhbc_string_utils as string_utils;
 pub use oxidized::parser_options::ParserOptions;
 use serde::Deserialize;
 use serde::Serialize;
@@ -32,24 +30,13 @@ impl Default for CompilerFlags {
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct Hhvm {
     pub include_roots: BTreeMap<BString, BString>,
-    pub renamable_functions: BTreeSet<BString>,
-    pub non_interceptable_functions: BTreeSet<BString>,
     pub parser_options: ParserOptions,
-    pub jit_enable_rename_function: JitEnableRenameFunction,
 }
 
 impl Hhvm {
     pub fn aliased_namespaces_cloned(&self) -> impl Iterator<Item = (String, String)> + '_ {
         self.parser_options.po_auto_namespace_map.iter().cloned()
     }
-}
-
-#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
-pub enum JitEnableRenameFunction {
-    #[default]
-    Disable,
-    Enable,
-    RestrictedEnable,
 }
 
 #[derive(Clone, PartialEq, Debug)]
@@ -63,35 +50,6 @@ pub struct Options {
 impl Options {
     pub fn log_extern_compiler_perf(&self) -> bool {
         self.hhbc.log_extern_compiler_perf
-    }
-    pub fn function_is_renamable(&self, func: &str) -> bool {
-        let stripped_func = string_utils::strip_global_ns(func);
-        match self.hhvm.jit_enable_rename_function {
-            JitEnableRenameFunction::Enable => true,
-            JitEnableRenameFunction::RestrictedEnable => self
-                .hhvm
-                .renamable_functions
-                .contains(stripped_func.as_bytes()),
-            JitEnableRenameFunction::Disable => false,
-        }
-    }
-    pub fn function_is_interceptable(&self, func: &str) -> bool {
-        let stripped_func = string_utils::strip_global_ns(func);
-        !self
-            .hhvm
-            .non_interceptable_functions
-            .contains(stripped_func.as_bytes())
-    }
-
-    pub fn method_is_interceptable(&self, class_name: &str, meth: &str) -> bool {
-        let stripped_meth = string_utils::strip_global_ns(meth);
-        let stripped_class_name =
-            string_utils::mangle(string_utils::strip_global_ns(class_name).into());
-        let formatted_name = format!("{}::{}", stripped_class_name, stripped_meth);
-        !self
-            .hhvm
-            .non_interceptable_functions
-            .contains(formatted_name.as_bytes())
     }
 }
 

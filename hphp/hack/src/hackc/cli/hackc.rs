@@ -228,10 +228,7 @@ impl Opts {
             filepath: relative_path::RelativePath::make(relative_path::Prefix::Dummy, path),
             hhvm: Hhvm {
                 include_roots: Default::default(),
-                renamable_functions: Default::default(),
-                non_interceptable_functions: Default::default(),
                 parser_options,
-                jit_enable_rename_function: hhvm_config::jit_enable_rename_function(&hhvm_config)?,
             },
             flags: self.env_flags.clone(),
             hhbc_flags,

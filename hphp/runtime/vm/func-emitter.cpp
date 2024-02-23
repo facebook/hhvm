@@ -212,16 +212,30 @@ const StaticString
   s_Uncategorized("Uncategorized"),
   s_SoftInternal("__SoftInternal");
 
+namespace {
+  bool is_interceptable(const PreClass* preClass, const StringData* name) {
+    if (RO::RepoAuthoritative) return false;
+    if (RO::NonInterceptableFunctions.empty()) return true;
+    auto fullname = [&]() {
+      auto n = name->toCppString();
+      if (!preClass) {
+        return n;
+      }
+      return preClass->name()->toCppString() +"::"+ n;
+    }();
+    return RO::NonInterceptableFunctions.count(fullname) == 0;
+  }
+}
+
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   auto attrs = this->attrs;
-  assertx(IMPLIES(attrs & AttrIsMethCaller && RO::RepoAuthoritative,
-    attrs & AttrPersistent));
 
-  DEBUG_ONLY auto persistent = ue().isASystemLib() &&
-    (!RO::funcIsRenamable(name) || preClass);
+  auto persistent = RO::RepoAuthoritative || (ue().isASystemLib() && (!RO::funcIsRenamable(name) || preClass));
+  assertx(IMPLIES(attrs & AttrPersistent, persistent));
+  attrSetter(attrs, persistent, AttrPersistent);
 
-  assertx(IMPLIES(!RO::RepoAuthoritative && attrs & AttrPersistent, persistent));
-  assertx(IMPLIES(!RO::RepoAuthoritative && !(attrs & AttrPersistent), !persistent));
+  auto interceptable = is_interceptable(preClass, name);
+  attrSetter(attrs, interceptable, AttrInterceptable);
 
   if (!(attrs & AttrPersistent) && attrs & AttrBuiltin) {
     assertx(!preClass);

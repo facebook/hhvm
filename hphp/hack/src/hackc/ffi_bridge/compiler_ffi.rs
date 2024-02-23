@@ -36,12 +36,6 @@ use sha1::Sha1;
 #[allow(clippy::derivable_impls)]
 #[cxx::bridge(namespace = "HPHP::hackc")]
 mod ffi {
-    enum JitEnableRenameFunction {
-        Disable,
-        Enable,
-        RestrictedEnable,
-    }
-
     struct NativeEnv {
         /// Pointer to decl_provider opaque object, cast to usize. 0 means null.
         decl_provider: usize,
@@ -49,9 +43,6 @@ mod ffi {
         filepath: String,
         aliased_namespaces: Vec<StringMapEntry>,
         include_roots: Vec<StringMapEntry>,
-        renamable_functions: Vec<String>,
-        non_interceptable_functions: Vec<String>,
-        jit_enable_rename_function: JitEnableRenameFunction,
 
         hhbc_flags: HhbcFlags,
         parser_flags: ParserFlags,
@@ -557,17 +548,6 @@ pub struct DeclsHolder {
 pub struct UnitWrapper(Unit<'static>, bumpalo::Bump);
 
 ///////////////////////////////////////////////////////////////////////////////////
-impl From<ffi::JitEnableRenameFunction> for options::JitEnableRenameFunction {
-    fn from(other: ffi::JitEnableRenameFunction) -> Self {
-        match other {
-            ffi::JitEnableRenameFunction::Enable => Self::Enable,
-            ffi::JitEnableRenameFunction::Disable => Self::Disable,
-            ffi::JitEnableRenameFunction::RestrictedEnable => Self::RestrictedEnable,
-            _ => panic!("Enum value does not match one of listed variants"),
-        }
-    }
-}
-///////////////////////////////////////////////////////////////////////////////////
 impl ffi::NativeEnv {
     fn to_compile_env(&self) -> Option<compile::NativeEnv> {
         Some(compile::NativeEnv {
@@ -578,17 +558,6 @@ impl ffi::NativeEnv {
             hhvm: Hhvm {
                 include_roots: (self.include_roots.iter())
                     .map(|e| (e.key.clone().into(), e.value.clone().into()))
-                    .collect(),
-                renamable_functions: self
-                    .renamable_functions
-                    .iter()
-                    .map(|e| e.clone().into())
-                    .collect(),
-                jit_enable_rename_function: self.jit_enable_rename_function.into(),
-                non_interceptable_functions: self
-                    .non_interceptable_functions
-                    .iter()
-                    .map(|e| e.clone().into())
                     .collect(),
                 parser_options: ParserOptions {
                     po_auto_namespace_map: (self.aliased_namespaces.iter())

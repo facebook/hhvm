@@ -167,6 +167,16 @@ class MessageWrapper {
     }
   }
 
+  folly::IOBuf getIOBufForEncoding(
+      std::string_view (*bufferFunc)(Message&), std::uint32_t length) {
+    encodeLength(length);
+    auto s = bufferFunc(message_);
+    auto buffer = const_cast<char*>(s.data());
+    auto iobuf = folly::IOBuf::wrapBufferAsValue(buffer, length);
+    iobuf.clear();
+    return iobuf;
+  }
+
   void completeEncoding() { message_.checkEncodingIsComplete(); }
   void completeEncoding(folly::IOBuf& buf) {
     completeEncoding();

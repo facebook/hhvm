@@ -21,6 +21,7 @@
 #define SBE_ENABLE_PRECEDENCE_CHECKS
 
 #include <gtest/gtest.h>
+#include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/sbe/MessageWrapper.h>
 #include <thrift/lib/thrift/apache_thrift_sbe/CompressionAlgorithm.h>
@@ -401,4 +402,37 @@ TEST(RpcMetadataSerializationTest, RequestRpcMetadataWithInteractionMetadata) {
   EXPECT_EQ(otherInteraction->getInteractionNameAsString(), interactionName);
 
   EXPECT_EQ(0, other->skipOptionalMetdata());
+}
+
+TEST(RpcMetadataSerializationTest, Test_getIOBufForEncoding) {
+  std::unique_ptr<folly::IOBuf> buf = folly::IOBuf::create(64);
+  auto metadata = MessageWrapper<RequestRpcMetadata, MessageHeader>();
+  metadata.wrapForEncode(*buf);
+  metadata->protocol(sbe::ProtocolId::COMPACT);
+  metadata->kind(sbe::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  metadata->otherMetadataCount(0);
+
+  auto name = std::string("test_name");
+  auto namebuf = metadata.getIOBufForEncoding(
+      [](auto m) { return m.getNameAsStringView(); }, name.length());
+  std::memcpy(namebuf.writableTail(), name.data(), name.length());
+
+  metadata->putInteractionMetadata(kEmptyString);
+  metadata->putOptionalMetdata(kEmptyString);
+  metadata.completeEncoding(*buf);
+
+  auto other = MessageWrapper<RequestRpcMetadata, MessageHeader>();
+  other.wrapForDecode(*buf);
+
+  EXPECT_EQ(other->protocol(), sbe::ProtocolId::COMPACT);
+  EXPECT_EQ(other->kind(), sbe::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  auto om1 = other->otherMetadata();
+  EXPECT_EQ(om1.count(), 0);
+  EXPECT_EQ(om1.hasNext(), false);
+
+  auto name2 = other->getNameAsStringView();
+  EXPECT_EQ(name2, name);
+
+  other->skipInteractionMetadata();
+  other->skipOptionalMetdata();
 }

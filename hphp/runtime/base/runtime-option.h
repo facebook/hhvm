@@ -1286,19 +1286,6 @@ public:
   static bool RepoDebugInfo;
   static bool RepoAuthoritative;
 
-  // These are (functionally) unused
-  static RepoMode RepoLocalMode;
-  static std::string RepoLocalPath;
-  static RepoMode RepoCentralMode;
-  static std::string RepoCentralPath;
-  static int32_t RepoCentralFileMode;
-  static std::string RepoCentralFileUser;
-  static std::string RepoCentralFileGroup;
-  static bool RepoAllowFallbackPath;
-  static std::string RepoJournal;
-  static bool RepoCommit;
-  static uint32_t RepoBusyTimeoutMS;
-
   // pprof/hhprof options
   static bool HHProfEnabled;
   static bool HHProfActive;

@@ -2727,10 +2727,10 @@ struct EnterTCUnwindData : IRExtraData {
  * Func/Class/Prop attributes
  */
 struct AttrData : IRExtraData {
-  explicit AttrData(Attr attr) : attr(static_cast<int32_t>(attr)) {}
+  explicit AttrData(Attr attr) : attr(attr) {}
 
   std::string show() const {
-    return folly::format("{}", attr).str();
+    return ::HPHP::show(attr);
   }
 
   size_t stableHash() const {
@@ -2745,7 +2745,7 @@ struct AttrData : IRExtraData {
     return attr == o.attr;
   }
 
-  int32_t attr;
+  Attr attr;
 };
 
 struct MethCallerData : IRExtraData {

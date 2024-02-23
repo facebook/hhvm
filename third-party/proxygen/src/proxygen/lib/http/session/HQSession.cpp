@@ -3831,10 +3831,13 @@ HQSession::HQStreamTransport::sendWebTransportStreamData(
 folly::Expected<folly::Unit, WebTransport::ErrorCode>
 HQSession::HQStreamTransport::resetWebTransportEgress(HTTPCodec::StreamID id,
                                                       uint32_t errorCode) {
-  auto res = session_.sock_->resetStream(
-      id, quic::ApplicationErrorCode(WebTransport::toHTTPErrorCode(errorCode)));
-  if (res.hasError()) {
-    return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
+  if (session_.sock_) {
+    auto res = session_.sock_->resetStream(
+        id,
+        quic::ApplicationErrorCode(WebTransport::toHTTPErrorCode(errorCode)));
+    if (res.hasError()) {
+      return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
+    }
   }
   return folly::unit;
 }
@@ -3861,12 +3864,14 @@ HQSession::HQStreamTransport::resumeWebTransportIngress(
 folly::Expected<folly::Unit, WebTransport::ErrorCode>
 HQSession::HQStreamTransport::stopReadingWebTransportIngress(
     HTTPCodec::StreamID id, uint32_t errorCode) {
-  auto res = session_.sock_->setReadCallback(
-      id,
-      nullptr,
-      quic::ApplicationErrorCode(WebTransport::toHTTPErrorCode(errorCode)));
-  if (res.hasError()) {
-    return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
+  if (session_.sock_) {
+    auto res = session_.sock_->setReadCallback(
+        id,
+        nullptr,
+        quic::ApplicationErrorCode(WebTransport::toHTTPErrorCode(errorCode)));
+    if (res.hasError()) {
+      return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
+    }
   }
   return folly::unit;
 }

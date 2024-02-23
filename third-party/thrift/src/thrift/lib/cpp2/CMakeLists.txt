@@ -287,6 +287,7 @@ add_library(
   transport/rocket/client/RequestContext.cpp
   transport/rocket/client/RequestContextQueue.cpp
   transport/rocket/client/RocketClient.cpp
+  transport/rocket/client/KeepAliveWatcher.cpp
   transport/rocket/client/RocketStreamServerCallback.cpp
   transport/rocket/flush/FlushManager.cpp
   transport/rocket/framing/parser/AllocatingParserStrategy.cpp

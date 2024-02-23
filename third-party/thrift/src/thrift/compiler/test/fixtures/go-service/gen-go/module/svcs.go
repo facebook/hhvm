@@ -40,6 +40,12 @@ type GetEntity interface {
     GetLegacyStuff(ctx context.Context, numPos int64, numNeg1 int64, numNeg2 int64) (int32, error)
     GetCtxCollision(ctx1 context.Context, ctx int64) (int32, error)
     GetCtx1Collision(ctx2 context.Context, ctx int64, ctx1 int64) (int32, error)
+    GetOutCollision(ctx context.Context, out int64) (int32, error)
+    GetOut1Collision(ctx context.Context, out int64, out1 int64) (int32, error)
+    GetInCollision(ctx context.Context, in int64) (int32, error)
+    GetIn1Collision(ctx context.Context, in int64, in1 int64) (int32, error)
+    GetErrCollision(ctx context.Context, err int64) (int32, error)
+    GetErr1Collision(ctx context.Context, err int64, err1 int64) (int32, error)
 }
 
 type GetEntityChannelClientInterface interface {
@@ -64,6 +70,12 @@ type GetEntityClientInterface interface {
     GetLegacyStuff(numPos int64, numNeg1 int64, numNeg2 int64) (int32, error)
     GetCtxCollision(ctx int64) (int32, error)
     GetCtx1Collision(ctx int64, ctx1 int64) (int32, error)
+    GetOutCollision(out int64) (int32, error)
+    GetOut1Collision(out int64, out1 int64) (int32, error)
+    GetInCollision(in int64) (int32, error)
+    GetIn1Collision(in int64, in1 int64) (int32, error)
+    GetErrCollision(err int64) (int32, error)
+    GetErr1Collision(err int64, err1 int64) (int32, error)
 }
 
 type GetEntityContextClientInterface interface {
@@ -83,6 +95,12 @@ type GetEntityContextClientInterface interface {
     GetLegacyStuffContext(ctx context.Context, numPos int64, numNeg1 int64, numNeg2 int64) (int32, error)
     GetCtxCollisionContext(ctx1 context.Context, ctx int64) (int32, error)
     GetCtx1CollisionContext(ctx2 context.Context, ctx int64, ctx1 int64) (int32, error)
+    GetOutCollisionContext(ctx context.Context, out int64) (int32, error)
+    GetOut1CollisionContext(ctx context.Context, out int64, out1 int64) (int32, error)
+    GetInCollisionContext(ctx context.Context, in int64) (int32, error)
+    GetIn1CollisionContext(ctx context.Context, in int64, in1 int64) (int32, error)
+    GetErrCollisionContext(ctx context.Context, err int64) (int32, error)
+    GetErr1CollisionContext(ctx context.Context, err int64, err1 int64) (int32, error)
 }
 
 type GetEntityChannelClient struct {
@@ -435,6 +453,129 @@ func (c *GetEntityClient) GetCtx1Collision(ctx int64, ctx1 int64) (int32, error)
 
 func (c *GetEntityClient) GetCtx1CollisionContext(ctx2 context.Context, ctx int64, ctx1 int64) (int32, error) {
     return c.chClient.GetCtx1Collision(ctx2, ctx, ctx1)
+}
+
+func (c *GetEntityChannelClient) GetOutCollision(ctx context.Context, out int64) (int32, error) {
+    in := &reqGetEntityGetOutCollision{
+        Out: out,
+    }
+    out1 := newRespGetEntityGetOutCollision()
+    err := c.ch.Call(ctx, "getOutCollision", in, out1)
+    if err != nil {
+        return 0, err
+    }
+    return out1.GetSuccess(), nil
+}
+
+func (c *GetEntityClient) GetOutCollision(out int64) (int32, error) {
+    return c.chClient.GetOutCollision(nil, out)
+}
+
+func (c *GetEntityClient) GetOutCollisionContext(ctx context.Context, out int64) (int32, error) {
+    return c.chClient.GetOutCollision(ctx, out)
+}
+
+func (c *GetEntityChannelClient) GetOut1Collision(ctx context.Context, out int64, out1 int64) (int32, error) {
+    in := &reqGetEntityGetOut1Collision{
+        Out: out,
+        Out1: out1,
+    }
+    out2 := newRespGetEntityGetOut1Collision()
+    err := c.ch.Call(ctx, "getOut1Collision", in, out2)
+    if err != nil {
+        return 0, err
+    }
+    return out2.GetSuccess(), nil
+}
+
+func (c *GetEntityClient) GetOut1Collision(out int64, out1 int64) (int32, error) {
+    return c.chClient.GetOut1Collision(nil, out, out1)
+}
+
+func (c *GetEntityClient) GetOut1CollisionContext(ctx context.Context, out int64, out1 int64) (int32, error) {
+    return c.chClient.GetOut1Collision(ctx, out, out1)
+}
+
+func (c *GetEntityChannelClient) GetInCollision(ctx context.Context, in int64) (int32, error) {
+    in1 := &reqGetEntityGetInCollision{
+        In: in,
+    }
+    out := newRespGetEntityGetInCollision()
+    err := c.ch.Call(ctx, "getInCollision", in1, out)
+    if err != nil {
+        return 0, err
+    }
+    return out.GetSuccess(), nil
+}
+
+func (c *GetEntityClient) GetInCollision(in int64) (int32, error) {
+    return c.chClient.GetInCollision(nil, in)
+}
+
+func (c *GetEntityClient) GetInCollisionContext(ctx context.Context, in int64) (int32, error) {
+    return c.chClient.GetInCollision(ctx, in)
+}
+
+func (c *GetEntityChannelClient) GetIn1Collision(ctx context.Context, in int64, in1 int64) (int32, error) {
+    in2 := &reqGetEntityGetIn1Collision{
+        In: in,
+        In1: in1,
+    }
+    out := newRespGetEntityGetIn1Collision()
+    err := c.ch.Call(ctx, "getIn1Collision", in2, out)
+    if err != nil {
+        return 0, err
+    }
+    return out.GetSuccess(), nil
+}
+
+func (c *GetEntityClient) GetIn1Collision(in int64, in1 int64) (int32, error) {
+    return c.chClient.GetIn1Collision(nil, in, in1)
+}
+
+func (c *GetEntityClient) GetIn1CollisionContext(ctx context.Context, in int64, in1 int64) (int32, error) {
+    return c.chClient.GetIn1Collision(ctx, in, in1)
+}
+
+func (c *GetEntityChannelClient) GetErrCollision(ctx context.Context, err int64) (int32, error) {
+    in := &reqGetEntityGetErrCollision{
+        Err: err,
+    }
+    out := newRespGetEntityGetErrCollision()
+    err1 := c.ch.Call(ctx, "getErrCollision", in, out)
+    if err1 != nil {
+        return 0, err1
+    }
+    return out.GetSuccess(), nil
+}
+
+func (c *GetEntityClient) GetErrCollision(err int64) (int32, error) {
+    return c.chClient.GetErrCollision(nil, err)
+}
+
+func (c *GetEntityClient) GetErrCollisionContext(ctx context.Context, err int64) (int32, error) {
+    return c.chClient.GetErrCollision(ctx, err)
+}
+
+func (c *GetEntityChannelClient) GetErr1Collision(ctx context.Context, err int64, err1 int64) (int32, error) {
+    in := &reqGetEntityGetErr1Collision{
+        Err: err,
+        Err1: err1,
+    }
+    out := newRespGetEntityGetErr1Collision()
+    err2 := c.ch.Call(ctx, "getErr1Collision", in, out)
+    if err2 != nil {
+        return 0, err2
+    }
+    return out.GetSuccess(), nil
+}
+
+func (c *GetEntityClient) GetErr1Collision(err int64, err1 int64) (int32, error) {
+    return c.chClient.GetErr1Collision(nil, err, err1)
+}
+
+func (c *GetEntityClient) GetErr1CollisionContext(ctx context.Context, err int64, err1 int64) (int32, error) {
+    return c.chClient.GetErr1Collision(ctx, err, err1)
 }
 
 type reqGetEntityGetEntity struct {
@@ -5124,6 +5265,2244 @@ func (x *respGetEntityGetCtx1Collision) String() string {
 
     return sb.String()
 }
+type reqGetEntityGetOutCollision struct {
+    Out int64 `thrift:"out,1" json:"out" db:"out"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &reqGetEntityGetOutCollision{}
+
+type GetEntityGetOutCollisionArgs = reqGetEntityGetOutCollision
+
+func newReqGetEntityGetOutCollision() *reqGetEntityGetOutCollision {
+    return (&reqGetEntityGetOutCollision{}).
+        SetOutNonCompat(0)
+}
+
+func (x *reqGetEntityGetOutCollision) GetOutNonCompat() int64 {
+    return x.Out
+}
+
+func (x *reqGetEntityGetOutCollision) GetOut() int64 {
+    return x.Out
+}
+
+func (x *reqGetEntityGetOutCollision) SetOutNonCompat(value int64) *reqGetEntityGetOutCollision {
+    x.Out = value
+    return x
+}
+
+func (x *reqGetEntityGetOutCollision) SetOut(value int64) *reqGetEntityGetOutCollision {
+    x.Out = value
+    return x
+}
+
+func (x *reqGetEntityGetOutCollision) writeField1(p thrift.Protocol) error {  // Out
+    if err := p.WriteFieldBegin("out", thrift.I64, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetOutNonCompat()
+    if err := p.WriteI64(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityGetOutCollision) readField1(p thrift.Protocol) error {  // Out
+    result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+
+    x.SetOutNonCompat(result)
+    return nil
+}
+
+func (x *reqGetEntityGetOutCollision) toString1() string {  // Out
+    return fmt.Sprintf("%v", x.GetOutNonCompat())
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetOutCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+type reqGetEntityGetOutCollisionBuilder struct {
+    obj *reqGetEntityGetOutCollision
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetOutCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func newReqGetEntityGetOutCollisionBuilder() *reqGetEntityGetOutCollisionBuilder {
+    return &reqGetEntityGetOutCollisionBuilder{
+        obj: newReqGetEntityGetOutCollision(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetOutCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *reqGetEntityGetOutCollisionBuilder) Out(value int64) *reqGetEntityGetOutCollisionBuilder {
+    x.obj.Out = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetOutCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *reqGetEntityGetOutCollisionBuilder) Emit() *reqGetEntityGetOutCollision {
+    var objCopy reqGetEntityGetOutCollision = *x.obj
+    return &objCopy
+}
+
+func (x *reqGetEntityGetOutCollision) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("reqGetEntityGetOutCollision"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityGetOutCollision) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I64)):  // out
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqGetEntityGetOutCollision) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqGetEntityGetOutCollision({")
+    sb.WriteString(fmt.Sprintf("Out:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+type respGetEntityGetOutCollision struct {
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &respGetEntityGetOutCollision{}
+var _ thrift.WritableResult = &respGetEntityGetOutCollision{}
+
+type GetEntityGetOutCollisionResult = respGetEntityGetOutCollision
+
+func newRespGetEntityGetOutCollision() *respGetEntityGetOutCollision {
+    return (&respGetEntityGetOutCollision{})
+}
+
+func (x *respGetEntityGetOutCollision) GetSuccessNonCompat() *int32 {
+    return x.Success
+}
+
+func (x *respGetEntityGetOutCollision) GetSuccess() int32 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+
+    return *x.Success
+}
+
+func (x *respGetEntityGetOutCollision) SetSuccessNonCompat(value int32) *respGetEntityGetOutCollision {
+    x.Success = &value
+    return x
+}
+
+func (x *respGetEntityGetOutCollision) SetSuccess(value *int32) *respGetEntityGetOutCollision {
+    x.Success = value
+    return x
+}
+
+func (x *respGetEntityGetOutCollision) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respGetEntityGetOutCollision) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := *x.GetSuccessNonCompat()
+    if err := p.WriteI32(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respGetEntityGetOutCollision) readField0(p thrift.Protocol) error {  // Success
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.SetSuccessNonCompat(result)
+    return nil
+}
+
+func (x *respGetEntityGetOutCollision) toString0() string {  // Success
+    if x.IsSetSuccess() {
+        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+}
+
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetOutCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+type respGetEntityGetOutCollisionBuilder struct {
+    obj *respGetEntityGetOutCollision
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetOutCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func newRespGetEntityGetOutCollisionBuilder() *respGetEntityGetOutCollisionBuilder {
+    return &respGetEntityGetOutCollisionBuilder{
+        obj: newRespGetEntityGetOutCollision(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetOutCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *respGetEntityGetOutCollisionBuilder) Success(value *int32) *respGetEntityGetOutCollisionBuilder {
+    x.obj.Success = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetOutCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *respGetEntityGetOutCollisionBuilder) Emit() *respGetEntityGetOutCollision {
+    var objCopy respGetEntityGetOutCollision = *x.obj
+    return &objCopy
+}
+
+func (x *respGetEntityGetOutCollision) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respGetEntityGetOutCollision) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("respGetEntityGetOutCollision"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respGetEntityGetOutCollision) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 0 && wireType == thrift.Type(thrift.I32)):  // success
+            if err := x.readField0(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respGetEntityGetOutCollision) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respGetEntityGetOutCollision({")
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+type reqGetEntityGetOut1Collision struct {
+    Out int64 `thrift:"out,1" json:"out" db:"out"`
+    Out1 int64 `thrift:"out1,2" json:"out1" db:"out1"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &reqGetEntityGetOut1Collision{}
+
+type GetEntityGetOut1CollisionArgs = reqGetEntityGetOut1Collision
+
+func newReqGetEntityGetOut1Collision() *reqGetEntityGetOut1Collision {
+    return (&reqGetEntityGetOut1Collision{}).
+        SetOutNonCompat(0).
+        SetOut1NonCompat(0)
+}
+
+func (x *reqGetEntityGetOut1Collision) GetOutNonCompat() int64 {
+    return x.Out
+}
+
+func (x *reqGetEntityGetOut1Collision) GetOut() int64 {
+    return x.Out
+}
+
+func (x *reqGetEntityGetOut1Collision) GetOut1NonCompat() int64 {
+    return x.Out1
+}
+
+func (x *reqGetEntityGetOut1Collision) GetOut1() int64 {
+    return x.Out1
+}
+
+func (x *reqGetEntityGetOut1Collision) SetOutNonCompat(value int64) *reqGetEntityGetOut1Collision {
+    x.Out = value
+    return x
+}
+
+func (x *reqGetEntityGetOut1Collision) SetOut(value int64) *reqGetEntityGetOut1Collision {
+    x.Out = value
+    return x
+}
+
+func (x *reqGetEntityGetOut1Collision) SetOut1NonCompat(value int64) *reqGetEntityGetOut1Collision {
+    x.Out1 = value
+    return x
+}
+
+func (x *reqGetEntityGetOut1Collision) SetOut1(value int64) *reqGetEntityGetOut1Collision {
+    x.Out1 = value
+    return x
+}
+
+func (x *reqGetEntityGetOut1Collision) writeField1(p thrift.Protocol) error {  // Out
+    if err := p.WriteFieldBegin("out", thrift.I64, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetOutNonCompat()
+    if err := p.WriteI64(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityGetOut1Collision) writeField2(p thrift.Protocol) error {  // Out1
+    if err := p.WriteFieldBegin("out1", thrift.I64, 2); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetOut1NonCompat()
+    if err := p.WriteI64(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityGetOut1Collision) readField1(p thrift.Protocol) error {  // Out
+    result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+
+    x.SetOutNonCompat(result)
+    return nil
+}
+
+func (x *reqGetEntityGetOut1Collision) readField2(p thrift.Protocol) error {  // Out1
+    result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+
+    x.SetOut1NonCompat(result)
+    return nil
+}
+
+func (x *reqGetEntityGetOut1Collision) toString1() string {  // Out
+    return fmt.Sprintf("%v", x.GetOutNonCompat())
+}
+
+func (x *reqGetEntityGetOut1Collision) toString2() string {  // Out1
+    return fmt.Sprintf("%v", x.GetOut1NonCompat())
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetOut1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+type reqGetEntityGetOut1CollisionBuilder struct {
+    obj *reqGetEntityGetOut1Collision
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetOut1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func newReqGetEntityGetOut1CollisionBuilder() *reqGetEntityGetOut1CollisionBuilder {
+    return &reqGetEntityGetOut1CollisionBuilder{
+        obj: newReqGetEntityGetOut1Collision(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetOut1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *reqGetEntityGetOut1CollisionBuilder) Out(value int64) *reqGetEntityGetOut1CollisionBuilder {
+    x.obj.Out = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetOut1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *reqGetEntityGetOut1CollisionBuilder) Out1(value int64) *reqGetEntityGetOut1CollisionBuilder {
+    x.obj.Out1 = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetOut1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *reqGetEntityGetOut1CollisionBuilder) Emit() *reqGetEntityGetOut1Collision {
+    var objCopy reqGetEntityGetOut1Collision = *x.obj
+    return &objCopy
+}
+
+func (x *reqGetEntityGetOut1Collision) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("reqGetEntityGetOut1Collision"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityGetOut1Collision) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I64)):  // out
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        case (id == 2 && wireType == thrift.Type(thrift.I64)):  // out1
+            if err := x.readField2(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqGetEntityGetOut1Collision) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqGetEntityGetOut1Collision({")
+    sb.WriteString(fmt.Sprintf("Out:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Out1:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+type respGetEntityGetOut1Collision struct {
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &respGetEntityGetOut1Collision{}
+var _ thrift.WritableResult = &respGetEntityGetOut1Collision{}
+
+type GetEntityGetOut1CollisionResult = respGetEntityGetOut1Collision
+
+func newRespGetEntityGetOut1Collision() *respGetEntityGetOut1Collision {
+    return (&respGetEntityGetOut1Collision{})
+}
+
+func (x *respGetEntityGetOut1Collision) GetSuccessNonCompat() *int32 {
+    return x.Success
+}
+
+func (x *respGetEntityGetOut1Collision) GetSuccess() int32 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+
+    return *x.Success
+}
+
+func (x *respGetEntityGetOut1Collision) SetSuccessNonCompat(value int32) *respGetEntityGetOut1Collision {
+    x.Success = &value
+    return x
+}
+
+func (x *respGetEntityGetOut1Collision) SetSuccess(value *int32) *respGetEntityGetOut1Collision {
+    x.Success = value
+    return x
+}
+
+func (x *respGetEntityGetOut1Collision) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respGetEntityGetOut1Collision) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := *x.GetSuccessNonCompat()
+    if err := p.WriteI32(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respGetEntityGetOut1Collision) readField0(p thrift.Protocol) error {  // Success
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.SetSuccessNonCompat(result)
+    return nil
+}
+
+func (x *respGetEntityGetOut1Collision) toString0() string {  // Success
+    if x.IsSetSuccess() {
+        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+}
+
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetOut1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+type respGetEntityGetOut1CollisionBuilder struct {
+    obj *respGetEntityGetOut1Collision
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetOut1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func newRespGetEntityGetOut1CollisionBuilder() *respGetEntityGetOut1CollisionBuilder {
+    return &respGetEntityGetOut1CollisionBuilder{
+        obj: newRespGetEntityGetOut1Collision(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetOut1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *respGetEntityGetOut1CollisionBuilder) Success(value *int32) *respGetEntityGetOut1CollisionBuilder {
+    x.obj.Success = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetOut1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *respGetEntityGetOut1CollisionBuilder) Emit() *respGetEntityGetOut1Collision {
+    var objCopy respGetEntityGetOut1Collision = *x.obj
+    return &objCopy
+}
+
+func (x *respGetEntityGetOut1Collision) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respGetEntityGetOut1Collision) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("respGetEntityGetOut1Collision"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respGetEntityGetOut1Collision) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 0 && wireType == thrift.Type(thrift.I32)):  // success
+            if err := x.readField0(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respGetEntityGetOut1Collision) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respGetEntityGetOut1Collision({")
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+type reqGetEntityGetInCollision struct {
+    In int64 `thrift:"in,1" json:"in" db:"in"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &reqGetEntityGetInCollision{}
+
+type GetEntityGetInCollisionArgs = reqGetEntityGetInCollision
+
+func newReqGetEntityGetInCollision() *reqGetEntityGetInCollision {
+    return (&reqGetEntityGetInCollision{}).
+        SetInNonCompat(0)
+}
+
+func (x *reqGetEntityGetInCollision) GetInNonCompat() int64 {
+    return x.In
+}
+
+func (x *reqGetEntityGetInCollision) GetIn() int64 {
+    return x.In
+}
+
+func (x *reqGetEntityGetInCollision) SetInNonCompat(value int64) *reqGetEntityGetInCollision {
+    x.In = value
+    return x
+}
+
+func (x *reqGetEntityGetInCollision) SetIn(value int64) *reqGetEntityGetInCollision {
+    x.In = value
+    return x
+}
+
+func (x *reqGetEntityGetInCollision) writeField1(p thrift.Protocol) error {  // In
+    if err := p.WriteFieldBegin("in", thrift.I64, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetInNonCompat()
+    if err := p.WriteI64(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityGetInCollision) readField1(p thrift.Protocol) error {  // In
+    result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+
+    x.SetInNonCompat(result)
+    return nil
+}
+
+func (x *reqGetEntityGetInCollision) toString1() string {  // In
+    return fmt.Sprintf("%v", x.GetInNonCompat())
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetInCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+type reqGetEntityGetInCollisionBuilder struct {
+    obj *reqGetEntityGetInCollision
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetInCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func newReqGetEntityGetInCollisionBuilder() *reqGetEntityGetInCollisionBuilder {
+    return &reqGetEntityGetInCollisionBuilder{
+        obj: newReqGetEntityGetInCollision(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetInCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *reqGetEntityGetInCollisionBuilder) In(value int64) *reqGetEntityGetInCollisionBuilder {
+    x.obj.In = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetInCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *reqGetEntityGetInCollisionBuilder) Emit() *reqGetEntityGetInCollision {
+    var objCopy reqGetEntityGetInCollision = *x.obj
+    return &objCopy
+}
+
+func (x *reqGetEntityGetInCollision) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("reqGetEntityGetInCollision"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityGetInCollision) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I64)):  // in
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqGetEntityGetInCollision) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqGetEntityGetInCollision({")
+    sb.WriteString(fmt.Sprintf("In:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+type respGetEntityGetInCollision struct {
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &respGetEntityGetInCollision{}
+var _ thrift.WritableResult = &respGetEntityGetInCollision{}
+
+type GetEntityGetInCollisionResult = respGetEntityGetInCollision
+
+func newRespGetEntityGetInCollision() *respGetEntityGetInCollision {
+    return (&respGetEntityGetInCollision{})
+}
+
+func (x *respGetEntityGetInCollision) GetSuccessNonCompat() *int32 {
+    return x.Success
+}
+
+func (x *respGetEntityGetInCollision) GetSuccess() int32 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+
+    return *x.Success
+}
+
+func (x *respGetEntityGetInCollision) SetSuccessNonCompat(value int32) *respGetEntityGetInCollision {
+    x.Success = &value
+    return x
+}
+
+func (x *respGetEntityGetInCollision) SetSuccess(value *int32) *respGetEntityGetInCollision {
+    x.Success = value
+    return x
+}
+
+func (x *respGetEntityGetInCollision) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respGetEntityGetInCollision) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := *x.GetSuccessNonCompat()
+    if err := p.WriteI32(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respGetEntityGetInCollision) readField0(p thrift.Protocol) error {  // Success
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.SetSuccessNonCompat(result)
+    return nil
+}
+
+func (x *respGetEntityGetInCollision) toString0() string {  // Success
+    if x.IsSetSuccess() {
+        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+}
+
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetInCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+type respGetEntityGetInCollisionBuilder struct {
+    obj *respGetEntityGetInCollision
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetInCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func newRespGetEntityGetInCollisionBuilder() *respGetEntityGetInCollisionBuilder {
+    return &respGetEntityGetInCollisionBuilder{
+        obj: newRespGetEntityGetInCollision(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetInCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *respGetEntityGetInCollisionBuilder) Success(value *int32) *respGetEntityGetInCollisionBuilder {
+    x.obj.Success = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetInCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *respGetEntityGetInCollisionBuilder) Emit() *respGetEntityGetInCollision {
+    var objCopy respGetEntityGetInCollision = *x.obj
+    return &objCopy
+}
+
+func (x *respGetEntityGetInCollision) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respGetEntityGetInCollision) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("respGetEntityGetInCollision"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respGetEntityGetInCollision) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 0 && wireType == thrift.Type(thrift.I32)):  // success
+            if err := x.readField0(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respGetEntityGetInCollision) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respGetEntityGetInCollision({")
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+type reqGetEntityGetIn1Collision struct {
+    In int64 `thrift:"in,1" json:"in" db:"in"`
+    In1 int64 `thrift:"in1,2" json:"in1" db:"in1"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &reqGetEntityGetIn1Collision{}
+
+type GetEntityGetIn1CollisionArgs = reqGetEntityGetIn1Collision
+
+func newReqGetEntityGetIn1Collision() *reqGetEntityGetIn1Collision {
+    return (&reqGetEntityGetIn1Collision{}).
+        SetInNonCompat(0).
+        SetIn1NonCompat(0)
+}
+
+func (x *reqGetEntityGetIn1Collision) GetInNonCompat() int64 {
+    return x.In
+}
+
+func (x *reqGetEntityGetIn1Collision) GetIn() int64 {
+    return x.In
+}
+
+func (x *reqGetEntityGetIn1Collision) GetIn1NonCompat() int64 {
+    return x.In1
+}
+
+func (x *reqGetEntityGetIn1Collision) GetIn1() int64 {
+    return x.In1
+}
+
+func (x *reqGetEntityGetIn1Collision) SetInNonCompat(value int64) *reqGetEntityGetIn1Collision {
+    x.In = value
+    return x
+}
+
+func (x *reqGetEntityGetIn1Collision) SetIn(value int64) *reqGetEntityGetIn1Collision {
+    x.In = value
+    return x
+}
+
+func (x *reqGetEntityGetIn1Collision) SetIn1NonCompat(value int64) *reqGetEntityGetIn1Collision {
+    x.In1 = value
+    return x
+}
+
+func (x *reqGetEntityGetIn1Collision) SetIn1(value int64) *reqGetEntityGetIn1Collision {
+    x.In1 = value
+    return x
+}
+
+func (x *reqGetEntityGetIn1Collision) writeField1(p thrift.Protocol) error {  // In
+    if err := p.WriteFieldBegin("in", thrift.I64, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetInNonCompat()
+    if err := p.WriteI64(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityGetIn1Collision) writeField2(p thrift.Protocol) error {  // In1
+    if err := p.WriteFieldBegin("in1", thrift.I64, 2); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetIn1NonCompat()
+    if err := p.WriteI64(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityGetIn1Collision) readField1(p thrift.Protocol) error {  // In
+    result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+
+    x.SetInNonCompat(result)
+    return nil
+}
+
+func (x *reqGetEntityGetIn1Collision) readField2(p thrift.Protocol) error {  // In1
+    result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+
+    x.SetIn1NonCompat(result)
+    return nil
+}
+
+func (x *reqGetEntityGetIn1Collision) toString1() string {  // In
+    return fmt.Sprintf("%v", x.GetInNonCompat())
+}
+
+func (x *reqGetEntityGetIn1Collision) toString2() string {  // In1
+    return fmt.Sprintf("%v", x.GetIn1NonCompat())
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetIn1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+type reqGetEntityGetIn1CollisionBuilder struct {
+    obj *reqGetEntityGetIn1Collision
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetIn1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func newReqGetEntityGetIn1CollisionBuilder() *reqGetEntityGetIn1CollisionBuilder {
+    return &reqGetEntityGetIn1CollisionBuilder{
+        obj: newReqGetEntityGetIn1Collision(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetIn1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *reqGetEntityGetIn1CollisionBuilder) In(value int64) *reqGetEntityGetIn1CollisionBuilder {
+    x.obj.In = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetIn1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *reqGetEntityGetIn1CollisionBuilder) In1(value int64) *reqGetEntityGetIn1CollisionBuilder {
+    x.obj.In1 = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetIn1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *reqGetEntityGetIn1CollisionBuilder) Emit() *reqGetEntityGetIn1Collision {
+    var objCopy reqGetEntityGetIn1Collision = *x.obj
+    return &objCopy
+}
+
+func (x *reqGetEntityGetIn1Collision) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("reqGetEntityGetIn1Collision"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityGetIn1Collision) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I64)):  // in
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        case (id == 2 && wireType == thrift.Type(thrift.I64)):  // in1
+            if err := x.readField2(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqGetEntityGetIn1Collision) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqGetEntityGetIn1Collision({")
+    sb.WriteString(fmt.Sprintf("In:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("In1:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+type respGetEntityGetIn1Collision struct {
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &respGetEntityGetIn1Collision{}
+var _ thrift.WritableResult = &respGetEntityGetIn1Collision{}
+
+type GetEntityGetIn1CollisionResult = respGetEntityGetIn1Collision
+
+func newRespGetEntityGetIn1Collision() *respGetEntityGetIn1Collision {
+    return (&respGetEntityGetIn1Collision{})
+}
+
+func (x *respGetEntityGetIn1Collision) GetSuccessNonCompat() *int32 {
+    return x.Success
+}
+
+func (x *respGetEntityGetIn1Collision) GetSuccess() int32 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+
+    return *x.Success
+}
+
+func (x *respGetEntityGetIn1Collision) SetSuccessNonCompat(value int32) *respGetEntityGetIn1Collision {
+    x.Success = &value
+    return x
+}
+
+func (x *respGetEntityGetIn1Collision) SetSuccess(value *int32) *respGetEntityGetIn1Collision {
+    x.Success = value
+    return x
+}
+
+func (x *respGetEntityGetIn1Collision) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respGetEntityGetIn1Collision) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := *x.GetSuccessNonCompat()
+    if err := p.WriteI32(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respGetEntityGetIn1Collision) readField0(p thrift.Protocol) error {  // Success
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.SetSuccessNonCompat(result)
+    return nil
+}
+
+func (x *respGetEntityGetIn1Collision) toString0() string {  // Success
+    if x.IsSetSuccess() {
+        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+}
+
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetIn1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+type respGetEntityGetIn1CollisionBuilder struct {
+    obj *respGetEntityGetIn1Collision
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetIn1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func newRespGetEntityGetIn1CollisionBuilder() *respGetEntityGetIn1CollisionBuilder {
+    return &respGetEntityGetIn1CollisionBuilder{
+        obj: newRespGetEntityGetIn1Collision(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetIn1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *respGetEntityGetIn1CollisionBuilder) Success(value *int32) *respGetEntityGetIn1CollisionBuilder {
+    x.obj.Success = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetIn1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *respGetEntityGetIn1CollisionBuilder) Emit() *respGetEntityGetIn1Collision {
+    var objCopy respGetEntityGetIn1Collision = *x.obj
+    return &objCopy
+}
+
+func (x *respGetEntityGetIn1Collision) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respGetEntityGetIn1Collision) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("respGetEntityGetIn1Collision"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respGetEntityGetIn1Collision) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 0 && wireType == thrift.Type(thrift.I32)):  // success
+            if err := x.readField0(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respGetEntityGetIn1Collision) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respGetEntityGetIn1Collision({")
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+type reqGetEntityGetErrCollision struct {
+    Err int64 `thrift:"err,1" json:"err" db:"err"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &reqGetEntityGetErrCollision{}
+
+type GetEntityGetErrCollisionArgs = reqGetEntityGetErrCollision
+
+func newReqGetEntityGetErrCollision() *reqGetEntityGetErrCollision {
+    return (&reqGetEntityGetErrCollision{}).
+        SetErrNonCompat(0)
+}
+
+func (x *reqGetEntityGetErrCollision) GetErrNonCompat() int64 {
+    return x.Err
+}
+
+func (x *reqGetEntityGetErrCollision) GetErr() int64 {
+    return x.Err
+}
+
+func (x *reqGetEntityGetErrCollision) SetErrNonCompat(value int64) *reqGetEntityGetErrCollision {
+    x.Err = value
+    return x
+}
+
+func (x *reqGetEntityGetErrCollision) SetErr(value int64) *reqGetEntityGetErrCollision {
+    x.Err = value
+    return x
+}
+
+func (x *reqGetEntityGetErrCollision) writeField1(p thrift.Protocol) error {  // Err
+    if err := p.WriteFieldBegin("err", thrift.I64, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetErrNonCompat()
+    if err := p.WriteI64(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityGetErrCollision) readField1(p thrift.Protocol) error {  // Err
+    result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+
+    x.SetErrNonCompat(result)
+    return nil
+}
+
+func (x *reqGetEntityGetErrCollision) toString1() string {  // Err
+    return fmt.Sprintf("%v", x.GetErrNonCompat())
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetErrCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+type reqGetEntityGetErrCollisionBuilder struct {
+    obj *reqGetEntityGetErrCollision
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetErrCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func newReqGetEntityGetErrCollisionBuilder() *reqGetEntityGetErrCollisionBuilder {
+    return &reqGetEntityGetErrCollisionBuilder{
+        obj: newReqGetEntityGetErrCollision(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetErrCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *reqGetEntityGetErrCollisionBuilder) Err(value int64) *reqGetEntityGetErrCollisionBuilder {
+    x.obj.Err = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetErrCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *reqGetEntityGetErrCollisionBuilder) Emit() *reqGetEntityGetErrCollision {
+    var objCopy reqGetEntityGetErrCollision = *x.obj
+    return &objCopy
+}
+
+func (x *reqGetEntityGetErrCollision) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("reqGetEntityGetErrCollision"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityGetErrCollision) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I64)):  // err
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqGetEntityGetErrCollision) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqGetEntityGetErrCollision({")
+    sb.WriteString(fmt.Sprintf("Err:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+type respGetEntityGetErrCollision struct {
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &respGetEntityGetErrCollision{}
+var _ thrift.WritableResult = &respGetEntityGetErrCollision{}
+
+type GetEntityGetErrCollisionResult = respGetEntityGetErrCollision
+
+func newRespGetEntityGetErrCollision() *respGetEntityGetErrCollision {
+    return (&respGetEntityGetErrCollision{})
+}
+
+func (x *respGetEntityGetErrCollision) GetSuccessNonCompat() *int32 {
+    return x.Success
+}
+
+func (x *respGetEntityGetErrCollision) GetSuccess() int32 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+
+    return *x.Success
+}
+
+func (x *respGetEntityGetErrCollision) SetSuccessNonCompat(value int32) *respGetEntityGetErrCollision {
+    x.Success = &value
+    return x
+}
+
+func (x *respGetEntityGetErrCollision) SetSuccess(value *int32) *respGetEntityGetErrCollision {
+    x.Success = value
+    return x
+}
+
+func (x *respGetEntityGetErrCollision) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respGetEntityGetErrCollision) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := *x.GetSuccessNonCompat()
+    if err := p.WriteI32(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respGetEntityGetErrCollision) readField0(p thrift.Protocol) error {  // Success
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.SetSuccessNonCompat(result)
+    return nil
+}
+
+func (x *respGetEntityGetErrCollision) toString0() string {  // Success
+    if x.IsSetSuccess() {
+        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+}
+
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetErrCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+type respGetEntityGetErrCollisionBuilder struct {
+    obj *respGetEntityGetErrCollision
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetErrCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func newRespGetEntityGetErrCollisionBuilder() *respGetEntityGetErrCollisionBuilder {
+    return &respGetEntityGetErrCollisionBuilder{
+        obj: newRespGetEntityGetErrCollision(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetErrCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *respGetEntityGetErrCollisionBuilder) Success(value *int32) *respGetEntityGetErrCollisionBuilder {
+    x.obj.Success = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetErrCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *respGetEntityGetErrCollisionBuilder) Emit() *respGetEntityGetErrCollision {
+    var objCopy respGetEntityGetErrCollision = *x.obj
+    return &objCopy
+}
+
+func (x *respGetEntityGetErrCollision) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respGetEntityGetErrCollision) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("respGetEntityGetErrCollision"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respGetEntityGetErrCollision) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 0 && wireType == thrift.Type(thrift.I32)):  // success
+            if err := x.readField0(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respGetEntityGetErrCollision) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respGetEntityGetErrCollision({")
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+type reqGetEntityGetErr1Collision struct {
+    Err int64 `thrift:"err,1" json:"err" db:"err"`
+    Err1 int64 `thrift:"err1,2" json:"err1" db:"err1"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &reqGetEntityGetErr1Collision{}
+
+type GetEntityGetErr1CollisionArgs = reqGetEntityGetErr1Collision
+
+func newReqGetEntityGetErr1Collision() *reqGetEntityGetErr1Collision {
+    return (&reqGetEntityGetErr1Collision{}).
+        SetErrNonCompat(0).
+        SetErr1NonCompat(0)
+}
+
+func (x *reqGetEntityGetErr1Collision) GetErrNonCompat() int64 {
+    return x.Err
+}
+
+func (x *reqGetEntityGetErr1Collision) GetErr() int64 {
+    return x.Err
+}
+
+func (x *reqGetEntityGetErr1Collision) GetErr1NonCompat() int64 {
+    return x.Err1
+}
+
+func (x *reqGetEntityGetErr1Collision) GetErr1() int64 {
+    return x.Err1
+}
+
+func (x *reqGetEntityGetErr1Collision) SetErrNonCompat(value int64) *reqGetEntityGetErr1Collision {
+    x.Err = value
+    return x
+}
+
+func (x *reqGetEntityGetErr1Collision) SetErr(value int64) *reqGetEntityGetErr1Collision {
+    x.Err = value
+    return x
+}
+
+func (x *reqGetEntityGetErr1Collision) SetErr1NonCompat(value int64) *reqGetEntityGetErr1Collision {
+    x.Err1 = value
+    return x
+}
+
+func (x *reqGetEntityGetErr1Collision) SetErr1(value int64) *reqGetEntityGetErr1Collision {
+    x.Err1 = value
+    return x
+}
+
+func (x *reqGetEntityGetErr1Collision) writeField1(p thrift.Protocol) error {  // Err
+    if err := p.WriteFieldBegin("err", thrift.I64, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetErrNonCompat()
+    if err := p.WriteI64(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityGetErr1Collision) writeField2(p thrift.Protocol) error {  // Err1
+    if err := p.WriteFieldBegin("err1", thrift.I64, 2); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetErr1NonCompat()
+    if err := p.WriteI64(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityGetErr1Collision) readField1(p thrift.Protocol) error {  // Err
+    result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+
+    x.SetErrNonCompat(result)
+    return nil
+}
+
+func (x *reqGetEntityGetErr1Collision) readField2(p thrift.Protocol) error {  // Err1
+    result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+
+    x.SetErr1NonCompat(result)
+    return nil
+}
+
+func (x *reqGetEntityGetErr1Collision) toString1() string {  // Err
+    return fmt.Sprintf("%v", x.GetErrNonCompat())
+}
+
+func (x *reqGetEntityGetErr1Collision) toString2() string {  // Err1
+    return fmt.Sprintf("%v", x.GetErr1NonCompat())
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetErr1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+type reqGetEntityGetErr1CollisionBuilder struct {
+    obj *reqGetEntityGetErr1Collision
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetErr1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func newReqGetEntityGetErr1CollisionBuilder() *reqGetEntityGetErr1CollisionBuilder {
+    return &reqGetEntityGetErr1CollisionBuilder{
+        obj: newReqGetEntityGetErr1Collision(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetErr1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *reqGetEntityGetErr1CollisionBuilder) Err(value int64) *reqGetEntityGetErr1CollisionBuilder {
+    x.obj.Err = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetErr1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *reqGetEntityGetErr1CollisionBuilder) Err1(value int64) *reqGetEntityGetErr1CollisionBuilder {
+    x.obj.Err1 = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetErr1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *reqGetEntityGetErr1CollisionBuilder) Emit() *reqGetEntityGetErr1Collision {
+    var objCopy reqGetEntityGetErr1Collision = *x.obj
+    return &objCopy
+}
+
+func (x *reqGetEntityGetErr1Collision) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("reqGetEntityGetErr1Collision"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityGetErr1Collision) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I64)):  // err
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        case (id == 2 && wireType == thrift.Type(thrift.I64)):  // err1
+            if err := x.readField2(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqGetEntityGetErr1Collision) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqGetEntityGetErr1Collision({")
+    sb.WriteString(fmt.Sprintf("Err:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Err1:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+type respGetEntityGetErr1Collision struct {
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &respGetEntityGetErr1Collision{}
+var _ thrift.WritableResult = &respGetEntityGetErr1Collision{}
+
+type GetEntityGetErr1CollisionResult = respGetEntityGetErr1Collision
+
+func newRespGetEntityGetErr1Collision() *respGetEntityGetErr1Collision {
+    return (&respGetEntityGetErr1Collision{})
+}
+
+func (x *respGetEntityGetErr1Collision) GetSuccessNonCompat() *int32 {
+    return x.Success
+}
+
+func (x *respGetEntityGetErr1Collision) GetSuccess() int32 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+
+    return *x.Success
+}
+
+func (x *respGetEntityGetErr1Collision) SetSuccessNonCompat(value int32) *respGetEntityGetErr1Collision {
+    x.Success = &value
+    return x
+}
+
+func (x *respGetEntityGetErr1Collision) SetSuccess(value *int32) *respGetEntityGetErr1Collision {
+    x.Success = value
+    return x
+}
+
+func (x *respGetEntityGetErr1Collision) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respGetEntityGetErr1Collision) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := *x.GetSuccessNonCompat()
+    if err := p.WriteI32(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respGetEntityGetErr1Collision) readField0(p thrift.Protocol) error {  // Success
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.SetSuccessNonCompat(result)
+    return nil
+}
+
+func (x *respGetEntityGetErr1Collision) toString0() string {  // Success
+    if x.IsSetSuccess() {
+        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+}
+
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetErr1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+type respGetEntityGetErr1CollisionBuilder struct {
+    obj *respGetEntityGetErr1Collision
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetErr1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func newRespGetEntityGetErr1CollisionBuilder() *respGetEntityGetErr1CollisionBuilder {
+    return &respGetEntityGetErr1CollisionBuilder{
+        obj: newRespGetEntityGetErr1Collision(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetErr1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *respGetEntityGetErr1CollisionBuilder) Success(value *int32) *respGetEntityGetErr1CollisionBuilder {
+    x.obj.Success = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetErr1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *respGetEntityGetErr1CollisionBuilder) Emit() *respGetEntityGetErr1Collision {
+    var objCopy respGetEntityGetErr1Collision = *x.obj
+    return &objCopy
+}
+
+func (x *respGetEntityGetErr1Collision) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respGetEntityGetErr1Collision) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("respGetEntityGetErr1Collision"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respGetEntityGetErr1Collision) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 0 && wireType == thrift.Type(thrift.I32)):  // success
+            if err := x.readField0(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respGetEntityGetErr1Collision) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respGetEntityGetErr1Collision({")
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 
 type GetEntityProcessor struct {
@@ -5155,6 +7534,12 @@ func NewGetEntityProcessor(handler GetEntity) *GetEntityProcessor {
     p.AddToProcessorMap("getLegacyStuff", &procFuncGetEntityGetLegacyStuff{handler: handler})
     p.AddToProcessorMap("getCtxCollision", &procFuncGetEntityGetCtxCollision{handler: handler})
     p.AddToProcessorMap("getCtx1Collision", &procFuncGetEntityGetCtx1Collision{handler: handler})
+    p.AddToProcessorMap("getOutCollision", &procFuncGetEntityGetOutCollision{handler: handler})
+    p.AddToProcessorMap("getOut1Collision", &procFuncGetEntityGetOut1Collision{handler: handler})
+    p.AddToProcessorMap("getInCollision", &procFuncGetEntityGetInCollision{handler: handler})
+    p.AddToProcessorMap("getIn1Collision", &procFuncGetEntityGetIn1Collision{handler: handler})
+    p.AddToProcessorMap("getErrCollision", &procFuncGetEntityGetErrCollision{handler: handler})
+    p.AddToProcessorMap("getErr1Collision", &procFuncGetEntityGetErr1Collision{handler: handler})
     p.AddToFunctionServiceMap("getEntity", "GetEntity")
     p.AddToFunctionServiceMap("getBool", "GetEntity")
     p.AddToFunctionServiceMap("getByte", "GetEntity")
@@ -5170,6 +7555,12 @@ func NewGetEntityProcessor(handler GetEntity) *GetEntityProcessor {
     p.AddToFunctionServiceMap("getLegacyStuff", "GetEntity")
     p.AddToFunctionServiceMap("getCtxCollision", "GetEntity")
     p.AddToFunctionServiceMap("getCtx1Collision", "GetEntity")
+    p.AddToFunctionServiceMap("getOutCollision", "GetEntity")
+    p.AddToFunctionServiceMap("getOut1Collision", "GetEntity")
+    p.AddToFunctionServiceMap("getInCollision", "GetEntity")
+    p.AddToFunctionServiceMap("getIn1Collision", "GetEntity")
+    p.AddToFunctionServiceMap("getErrCollision", "GetEntity")
+    p.AddToFunctionServiceMap("getErr1Collision", "GetEntity")
 
     return p
 }
@@ -5963,6 +8354,318 @@ func (p *procFuncGetEntityGetCtx1Collision) RunContext(ctx context.Context, reqS
     retval, err := p.handler.GetCtx1Collision(ctx, args.Ctx, args.Ctx1)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetCtx1Collision: " + err.Error(), err)
+        return x, x
+    }
+
+    result.Success = &retval
+    return result, nil
+}
+
+
+type procFuncGetEntityGetOutCollision struct {
+    handler GetEntity
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetOutCollision{}
+
+func (p *procFuncGetEntityGetOutCollision) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+    args := newReqGetEntityGetOutCollision()
+    if err := args.Read(iprot); err != nil {
+        return nil, err
+    }
+    iprot.ReadMessageEnd()
+    return args, nil
+}
+
+func (p *procFuncGetEntityGetOutCollision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+    var err2 error
+    messageType := thrift.REPLY
+    switch result.(type) {
+    case thrift.ApplicationException:
+        messageType = thrift.EXCEPTION
+    }
+
+    if err2 = oprot.WriteMessageBegin("getOutCollision", messageType, seqId); err2 != nil {
+        err = err2
+    }
+    if err2 = result.Write(oprot); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.Flush(); err == nil && err2 != nil {
+        err = err2
+    }
+    return err
+}
+
+func (p *procFuncGetEntityGetOutCollision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+    args := reqStruct.(*reqGetEntityGetOutCollision)
+    result := newRespGetEntityGetOutCollision()
+    retval, err := p.handler.GetOutCollision(ctx, args.Out)
+    if err != nil {
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetOutCollision: " + err.Error(), err)
+        return x, x
+    }
+
+    result.Success = &retval
+    return result, nil
+}
+
+
+type procFuncGetEntityGetOut1Collision struct {
+    handler GetEntity
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetOut1Collision{}
+
+func (p *procFuncGetEntityGetOut1Collision) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+    args := newReqGetEntityGetOut1Collision()
+    if err := args.Read(iprot); err != nil {
+        return nil, err
+    }
+    iprot.ReadMessageEnd()
+    return args, nil
+}
+
+func (p *procFuncGetEntityGetOut1Collision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+    var err2 error
+    messageType := thrift.REPLY
+    switch result.(type) {
+    case thrift.ApplicationException:
+        messageType = thrift.EXCEPTION
+    }
+
+    if err2 = oprot.WriteMessageBegin("getOut1Collision", messageType, seqId); err2 != nil {
+        err = err2
+    }
+    if err2 = result.Write(oprot); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.Flush(); err == nil && err2 != nil {
+        err = err2
+    }
+    return err
+}
+
+func (p *procFuncGetEntityGetOut1Collision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+    args := reqStruct.(*reqGetEntityGetOut1Collision)
+    result := newRespGetEntityGetOut1Collision()
+    retval, err := p.handler.GetOut1Collision(ctx, args.Out, args.Out1)
+    if err != nil {
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetOut1Collision: " + err.Error(), err)
+        return x, x
+    }
+
+    result.Success = &retval
+    return result, nil
+}
+
+
+type procFuncGetEntityGetInCollision struct {
+    handler GetEntity
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetInCollision{}
+
+func (p *procFuncGetEntityGetInCollision) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+    args := newReqGetEntityGetInCollision()
+    if err := args.Read(iprot); err != nil {
+        return nil, err
+    }
+    iprot.ReadMessageEnd()
+    return args, nil
+}
+
+func (p *procFuncGetEntityGetInCollision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+    var err2 error
+    messageType := thrift.REPLY
+    switch result.(type) {
+    case thrift.ApplicationException:
+        messageType = thrift.EXCEPTION
+    }
+
+    if err2 = oprot.WriteMessageBegin("getInCollision", messageType, seqId); err2 != nil {
+        err = err2
+    }
+    if err2 = result.Write(oprot); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.Flush(); err == nil && err2 != nil {
+        err = err2
+    }
+    return err
+}
+
+func (p *procFuncGetEntityGetInCollision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+    args := reqStruct.(*reqGetEntityGetInCollision)
+    result := newRespGetEntityGetInCollision()
+    retval, err := p.handler.GetInCollision(ctx, args.In)
+    if err != nil {
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetInCollision: " + err.Error(), err)
+        return x, x
+    }
+
+    result.Success = &retval
+    return result, nil
+}
+
+
+type procFuncGetEntityGetIn1Collision struct {
+    handler GetEntity
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetIn1Collision{}
+
+func (p *procFuncGetEntityGetIn1Collision) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+    args := newReqGetEntityGetIn1Collision()
+    if err := args.Read(iprot); err != nil {
+        return nil, err
+    }
+    iprot.ReadMessageEnd()
+    return args, nil
+}
+
+func (p *procFuncGetEntityGetIn1Collision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+    var err2 error
+    messageType := thrift.REPLY
+    switch result.(type) {
+    case thrift.ApplicationException:
+        messageType = thrift.EXCEPTION
+    }
+
+    if err2 = oprot.WriteMessageBegin("getIn1Collision", messageType, seqId); err2 != nil {
+        err = err2
+    }
+    if err2 = result.Write(oprot); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.Flush(); err == nil && err2 != nil {
+        err = err2
+    }
+    return err
+}
+
+func (p *procFuncGetEntityGetIn1Collision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+    args := reqStruct.(*reqGetEntityGetIn1Collision)
+    result := newRespGetEntityGetIn1Collision()
+    retval, err := p.handler.GetIn1Collision(ctx, args.In, args.In1)
+    if err != nil {
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetIn1Collision: " + err.Error(), err)
+        return x, x
+    }
+
+    result.Success = &retval
+    return result, nil
+}
+
+
+type procFuncGetEntityGetErrCollision struct {
+    handler GetEntity
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetErrCollision{}
+
+func (p *procFuncGetEntityGetErrCollision) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+    args := newReqGetEntityGetErrCollision()
+    if err := args.Read(iprot); err != nil {
+        return nil, err
+    }
+    iprot.ReadMessageEnd()
+    return args, nil
+}
+
+func (p *procFuncGetEntityGetErrCollision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+    var err2 error
+    messageType := thrift.REPLY
+    switch result.(type) {
+    case thrift.ApplicationException:
+        messageType = thrift.EXCEPTION
+    }
+
+    if err2 = oprot.WriteMessageBegin("getErrCollision", messageType, seqId); err2 != nil {
+        err = err2
+    }
+    if err2 = result.Write(oprot); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.Flush(); err == nil && err2 != nil {
+        err = err2
+    }
+    return err
+}
+
+func (p *procFuncGetEntityGetErrCollision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+    args := reqStruct.(*reqGetEntityGetErrCollision)
+    result := newRespGetEntityGetErrCollision()
+    retval, err := p.handler.GetErrCollision(ctx, args.Err)
+    if err != nil {
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetErrCollision: " + err.Error(), err)
+        return x, x
+    }
+
+    result.Success = &retval
+    return result, nil
+}
+
+
+type procFuncGetEntityGetErr1Collision struct {
+    handler GetEntity
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetErr1Collision{}
+
+func (p *procFuncGetEntityGetErr1Collision) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+    args := newReqGetEntityGetErr1Collision()
+    if err := args.Read(iprot); err != nil {
+        return nil, err
+    }
+    iprot.ReadMessageEnd()
+    return args, nil
+}
+
+func (p *procFuncGetEntityGetErr1Collision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+    var err2 error
+    messageType := thrift.REPLY
+    switch result.(type) {
+    case thrift.ApplicationException:
+        messageType = thrift.EXCEPTION
+    }
+
+    if err2 = oprot.WriteMessageBegin("getErr1Collision", messageType, seqId); err2 != nil {
+        err = err2
+    }
+    if err2 = result.Write(oprot); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.Flush(); err == nil && err2 != nil {
+        err = err2
+    }
+    return err
+}
+
+func (p *procFuncGetEntityGetErr1Collision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+    args := reqStruct.(*reqGetEntityGetErr1Collision)
+    result := newRespGetEntityGetErr1Collision()
+    retval, err := p.handler.GetErr1Collision(ctx, args.Err, args.Err1)
+    if err != nil {
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetErr1Collision: " + err.Error(), err)
         return x, x
     }
 

@@ -591,7 +591,7 @@ module rec Subtype : sig
   val default_subtype :
     subtype_env:Subtype_env.t ->
     this_ty:Typing_defs.locl_ty option ->
-    ?super_like:bool ->
+    super_like:bool ->
     sub_supportdyn:Reason.t option ->
     fail:Typing_error.t option ->
     Typing_env_types.env ->
@@ -665,7 +665,7 @@ end = struct
   and default_subtype
       ~subtype_env
       ~(this_ty : locl_ty option)
-      ?(super_like = false)
+      ~super_like
       ~sub_supportdyn
       ~fail
       env
@@ -3487,6 +3487,7 @@ end = struct
       ~subtype_env
       ~sub_supportdyn
       ~this_ty
+      ~super_like:false
       ~fail
       env
       ty_sub
@@ -3527,6 +3528,7 @@ end = struct
         ~subtype_env
         ~sub_supportdyn
         ~this_ty
+        ~super_like:false
         ~fail
         env
         ty_sub
@@ -3592,6 +3594,7 @@ end = struct
             ~subtype_env
             ~sub_supportdyn
             ~this_ty
+            ~super_like:false
             ~fail
             env
             ty_sub
@@ -3626,6 +3629,7 @@ end = struct
         ~subtype_env
         ~sub_supportdyn
         ~this_ty
+        ~super_like:false
         ~fail
         env
         ety_sub
@@ -3867,6 +3871,7 @@ end = struct
         ~subtype_env
         ~sub_supportdyn
         ~this_ty
+        ~super_like:false
         ~fail
         env
         ety_sub

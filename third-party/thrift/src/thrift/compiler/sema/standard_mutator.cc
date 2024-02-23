@@ -76,6 +76,18 @@ void match_type_with_const_value(
             type->get_full_name(),
             ttype->get_full_name());
       }
+      if (value->kind() == t_const_value::CV_IDENTIFIER) {
+        const std::string& id = value->get_identifier();
+        const t_const* constant = program.scope()->find_constant(id);
+        if (!constant) {
+          ctx.error(
+              value->ref_range().begin,
+              "use of undeclared identifier '{}'",
+              id);
+          return;
+        }
+        value->assign(t_const_value(*constant->value()));
+      }
       for (const auto& [map_key, map_val] : value->get_map()) {
         bool resolved = map_key->kind() != t_const_value::CV_IDENTIFIER;
         auto name =

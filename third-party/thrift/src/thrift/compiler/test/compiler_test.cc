@@ -698,6 +698,13 @@ TEST(CompilerTest, invalid_enum_constant) {
   )");
 }
 
+TEST(CompilerTest, invalid_struct_constant) {
+  check_compile(R"(
+    struct S {}
+    const list<S> c = [nonexistent.Value]; # expected-error: use of undeclared identifier 'nonexistent.Value'
+  )");
+}
+
 TEST(CompilerTest, cpp_type_compatibility) {
   check_compile(R"(
     include "thrift/annotation/cpp.thrift"

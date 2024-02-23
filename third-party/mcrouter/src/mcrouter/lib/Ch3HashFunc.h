@@ -16,8 +16,7 @@ namespace folly {
 struct dynamic;
 } // namespace folly
 
-namespace facebook {
-namespace memcache {
+namespace facebook::memcache {
 
 /* CH3 consistent hashing function object */
 class Ch3HashFunc {
@@ -43,5 +42,4 @@ class Ch3HashFunc {
  private:
   size_t n_;
 };
-} // namespace memcache
-} // namespace facebook
+} // namespace facebook::memcache

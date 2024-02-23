@@ -11,9 +11,7 @@
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/synchronization/CallOnce.h>
 
-namespace facebook {
-namespace memcache {
-namespace mcrouter {
+namespace facebook::memcache::mcrouter {
 
 /**
  * CPU Thread pool that is shared between router intances.
@@ -33,6 +31,4 @@ class AuxiliaryCPUThreadPool {
 using AuxiliaryCPUThreadPoolSingleton =
     folly::Singleton<AuxiliaryCPUThreadPool>;
 
-} // namespace mcrouter
-} // namespace memcache
-} // namespace facebook
+} // namespace facebook::memcache::mcrouter

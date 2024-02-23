@@ -10,8 +10,7 @@
 #include <folly/SpinLock.h>
 #include <folly/concurrency/CacheLocality.h>
 
-namespace facebook {
-namespace memcache {
+namespace facebook::memcache {
 
 struct CacheClientCounters {
   size_t fetchCount{0};
@@ -69,5 +68,4 @@ class CacheClientStats {
       lock_;
   CacheClientCounters counters_;
 };
-} // namespace memcache
-} // namespace facebook
+} // namespace facebook::memcache

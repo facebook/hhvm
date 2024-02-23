@@ -11,9 +11,7 @@
 #include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/synchronization/CallOnce.h>
 
-namespace facebook {
-namespace memcache {
-namespace mcrouter {
+namespace facebook::memcache::mcrouter {
 
 /**
  * IO Thread pool that is shared between router intances.
@@ -32,6 +30,4 @@ class AuxiliaryIOThreadPool {
 
 using AuxiliaryIOThreadPoolSingleton = folly::Singleton<AuxiliaryIOThreadPool>;
 
-} // namespace mcrouter
-} // namespace memcache
-} // namespace facebook
+} // namespace facebook::memcache::mcrouter

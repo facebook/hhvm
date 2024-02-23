@@ -14,9 +14,7 @@ namespace folly {
 struct dynamic;
 } // namespace folly
 
-namespace facebook {
-namespace memcache {
-namespace mcrouter {
+namespace facebook::memcache::mcrouter {
 
 /**
  * Reads mcrouter flavor file and fills the given dictionaries.
@@ -52,6 +50,4 @@ bool parse_json_options(
     const folly::dynamic& json,
     const std::string& field_name,
     std::unordered_map<std::string, std::string>& opts);
-} // namespace mcrouter
-} // namespace memcache
-} // namespace facebook
+} // namespace facebook::memcache::mcrouter

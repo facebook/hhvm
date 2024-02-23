@@ -8,9 +8,7 @@
 #include "Clocks.h"
 #include <sys/time.h>
 
-namespace facebook {
-namespace memcache {
-namespace cycles {
+namespace facebook::memcache::cycles {
 
 uint64_t getCpuCycles() noexcept {
 #if defined(__x86_64__)
@@ -53,6 +51,4 @@ uint64_t getCpuCycles() noexcept {
 #endif
 }
 
-} // namespace cycles
-} // namespace memcache
-} // namespace facebook
+} // namespace facebook::memcache::cycles

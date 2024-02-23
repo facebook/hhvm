@@ -8,9 +8,7 @@
 #include "AuxiliaryIOThreadPool.h"
 #include <folly/Singleton.h>
 
-namespace facebook {
-namespace memcache {
-namespace mcrouter {
+namespace facebook::memcache::mcrouter {
 
 // Number of IO threads to run in IO thread pool.
 constexpr size_t kNumIOThreads = 5;
@@ -29,6 +27,4 @@ folly::IOThreadPoolExecutorBase& AuxiliaryIOThreadPool::getThreadPool() {
   return *threadPool_;
 }
 
-} // namespace mcrouter
-} // namespace memcache
-} // namespace facebook
+} // namespace facebook::memcache::mcrouter

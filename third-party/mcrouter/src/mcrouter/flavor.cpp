@@ -20,9 +20,7 @@
 
 #include "mcrouter/lib/fbi/cpp/util.h"
 
-namespace facebook {
-namespace memcache {
-namespace mcrouter {
+namespace facebook::memcache::mcrouter {
 
 namespace {
 
@@ -170,6 +168,4 @@ bool parse_json_options(
 
   return true;
 }
-} // namespace mcrouter
-} // namespace memcache
-} // namespace facebook
+} // namespace facebook::memcache::mcrouter

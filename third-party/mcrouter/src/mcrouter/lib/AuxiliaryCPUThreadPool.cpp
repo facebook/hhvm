@@ -8,9 +8,7 @@
 #include "AuxiliaryCPUThreadPool.h"
 #include <folly/Singleton.h>
 
-namespace facebook {
-namespace memcache {
-namespace mcrouter {
+namespace facebook::memcache::mcrouter {
 
 // Number of CPU threads to run in CPU thread pool.
 constexpr size_t kNumCPUThreads = 5;
@@ -29,6 +27,4 @@ folly::CPUThreadPoolExecutor& AuxiliaryCPUThreadPool::getThreadPool() {
   return *threadPool_;
 }
 
-} // namespace mcrouter
-} // namespace memcache
-} // namespace facebook
+} // namespace facebook::memcache::mcrouter

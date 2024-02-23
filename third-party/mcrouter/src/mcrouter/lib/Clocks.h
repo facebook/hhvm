@@ -9,9 +9,7 @@
 
 #include <cstdint>
 
-namespace facebook {
-namespace memcache {
-namespace cycles {
+namespace facebook::memcache::cycles {
 
 /**
  * Returns the number of cpu cycles since power-on. This clock doesn't involve
@@ -25,6 +23,4 @@ namespace cycles {
  */
 uint64_t getCpuCycles() noexcept;
 
-} // namespace cycles
-} // namespace memcache
-} // namespace facebook
+} // namespace facebook::memcache::cycles

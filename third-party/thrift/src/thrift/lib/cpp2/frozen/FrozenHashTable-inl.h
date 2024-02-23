@@ -16,6 +16,7 @@
 
 // IWYU pragma: private, include "thrift/lib/cpp2/frozen/Frozen.h"
 
+#include <type_traits>
 #include <thrift/lib/cpp2/FieldRef.h>
 #include <thrift/lib/cpp2/frozen/Fast64BitRemainderCalculator.h>
 
@@ -283,8 +284,45 @@ struct HashTableLayout : public ArrayLayout<T, Item> {
     }
 
     iterator find(const KeyView& key) const {
+      size_t hash = KeyLayout::hash(key);
+      return findImpl(key, hash);
+    }
+
+    /// Finds an element with key that compares equivalent to the value `key`.
+    /// This allows finding a frozen element in the hash table without freezing
+    /// the key. Similar to heterogenous lookups in C++20.
+    template <
+        typename K,
+        class = std::enable_if_t<!std::is_convertible_v<K, KeyView>, void>>
+    iterator find(const K& key) const {
+      size_t hash = Layout<K>::hash(key);
+      return findImpl(key, hash);
+    }
+
+    size_t count(const KeyView& key) const { return count<KeyView, void>(key); }
+
+    /// Finds the number of elements with key that compares equivalent to the
+    /// value `key`. This allows finding a frozen element in the hash table
+    /// without freezing the key. Similar to heterogenous lookups in C++20.
+    template <
+        typename K,
+        class = std::enable_if_t<!std::is_convertible_v<K, KeyView>, void>>
+    size_t count(const K& key) const {
+      return find(key) == this->end() ? 0 : 1;
+    }
+
+    T thaw() const {
+      T ret;
+      static_cast<const HashTableLayout*>(this->layout_)
+          ->thaw(this->position_, ret);
+      return ret;
+    }
+
+   private:
+    template <typename K>
+    iterator findImpl(const K& key, const size_t keyHash) const {
       const auto buckets = table_.size() * Block::bits;
-      auto bucket = KeyLayout::hash(key) * 5; // spread out clumped values
+      auto bucket = keyHash * 5; // spread out clumped values
       for (size_t p = 0; p < buckets; bucket += ++p) { // quadratic probing
         bucket = remainderCalculator_.remainder(bucket, buckets);
         const auto& block = table_[bucket / Block::bits]; // major block
@@ -310,17 +348,6 @@ struct HashTableLayout : public ArrayLayout<T, Item> {
         }
       }
       return this->end();
-    }
-
-    size_t count(const KeyView& key) const {
-      return find(key) == this->end() ? 0 : 1;
-    }
-
-    T thaw() const {
-      T ret;
-      static_cast<const HashTableLayout*>(this->layout_)
-          ->thaw(this->position_, ret);
-      return ret;
     }
   };
 

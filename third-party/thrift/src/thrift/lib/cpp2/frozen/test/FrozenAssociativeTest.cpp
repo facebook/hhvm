@@ -428,6 +428,16 @@ bool Layout<test::User>::View::operator<(
       std::make_tuple(rhs.uid(), rhs.name());
 }
 
+bool operator==(const Layout<test::User>::View& lhs, const User& rhs) {
+  return std::make_tuple(lhs.uid(), rhs.name()) ==
+      std::make_tuple(*rhs.uid(), *rhs.name());
+}
+
+bool operator<(const Layout<test::User>::View& lhs, const User& rhs) {
+  return std::make_tuple(lhs.uid(), rhs.name()) <
+      std::make_tuple(*rhs.uid(), *rhs.name());
+}
+
 } // namespace apache::thrift::frozen
 
 TEST(FrozenMap, StructAsKey) {
@@ -464,14 +474,20 @@ TEST(FrozenMap, StructAsKey) {
       auto found = omap.find(fk);
       ASSERT_FALSE(found == omap.end());
       EXPECT_EQ(found->second(), v);
+      auto heterogenousFound = omap.find(k);
+      EXPECT_EQ(heterogenousFound, found);
     }
     {
       auto found = hmap.find(fk);
       ASSERT_FALSE(found == hmap.end());
       EXPECT_EQ(found->second(), v);
+      auto heterogenousFound = hmap.find(k);
+      EXPECT_EQ(heterogenousFound, found);
     }
   }
   auto fu4 = freeze(u4);
   ASSERT_TRUE(omap.find(fu4) == omap.end());
   ASSERT_TRUE(hmap.find(fu4) == hmap.end());
+  ASSERT_TRUE(omap.find(u4) == omap.end());
+  ASSERT_TRUE(hmap.find(u4) == hmap.end());
 }

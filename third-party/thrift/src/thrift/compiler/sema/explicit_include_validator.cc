@@ -92,7 +92,8 @@ void validate_explicit_include(
   visit_type(ctx, src, type, level);
 }
 
-void add_explicit_include_validators(ast_validator& validator) {
+void add_explicit_include_validators(
+    ast_validator& validator, diagnostic_level level) {
   /*
    * This function adds visitors that collectively apply the validation logic to
    * each type reference in the IDL file.
@@ -102,68 +103,65 @@ void add_explicit_include_validators(ast_validator& validator) {
    */
 
   // Structured types: field types
-  validator.add_field_visitor([](diagnostic_context& ctx, const t_field& f) {
-    if (f.is_injected()) {
-      return;
-    }
-    visit_type(ctx, f, *f.get_type(), diagnostic_level::warning);
-  });
+  validator.add_field_visitor(
+      [level](diagnostic_context& ctx, const t_field& f) {
+        if (f.is_injected()) {
+          return;
+        }
+        visit_type(ctx, f, *f.get_type(), level);
+      });
 
   // Typedefs: underlying type
   validator.add_typedef_visitor(
-      [](diagnostic_context& ctx, const t_typedef& td) {
-        visit_type(ctx, td, *td.get_type(), diagnostic_level::warning);
+      [level](diagnostic_context& ctx, const t_typedef& td) {
+        visit_type(ctx, td, *td.get_type(), level);
       });
 
   // Functions: return types, exceptions, stream/sink types
   validator.add_function_visitor(
-      [](diagnostic_context& ctx, const t_function& f) {
-        visit_type(ctx, f, *f.return_type(), diagnostic_level::warning);
+      [level](diagnostic_context& ctx, const t_function& f) {
+        visit_type(ctx, f, *f.return_type(), level);
         if (const t_type_ref& interaction = f.interaction()) {
-          visit_type(ctx, f, *interaction, diagnostic_level::warning);
+          visit_type(ctx, f, *interaction, level);
         }
         for (const t_field& param : f.params().fields()) {
-          visit_type(ctx, param, *param.get_type(), diagnostic_level::warning);
+          visit_type(ctx, param, *param.get_type(), level);
         }
       });
   validator.add_throws_visitor(
-      [](diagnostic_context& ctx, const t_throws& exns) {
+      [level](diagnostic_context& ctx, const t_throws& exns) {
         for (const t_field& ex : exns.fields()) {
-          visit_type(ctx, ex, *ex.get_type(), diagnostic_level::warning);
+          visit_type(ctx, ex, *ex.get_type(), level);
         }
       });
-  validator.add_stream_visitor([](diagnostic_context& ctx, const t_stream& s) {
+  validator.add_stream_visitor([level](
+                                   diagnostic_context& ctx, const t_stream& s) {
     visit_type(
-        ctx,
-        static_cast<const t_named&>(*ctx.parent()),
-        *s.elem_type(),
-        diagnostic_level::warning);
+        ctx, static_cast<const t_named&>(*ctx.parent()), *s.elem_type(), level);
   });
-  validator.add_sink_visitor([](diagnostic_context& ctx, const t_sink& s) {
+  validator.add_sink_visitor([level](diagnostic_context& ctx, const t_sink& s) {
     visit_type(
         ctx,
         static_cast<const t_named&>(*ctx.parent()),
         *s.final_response_type(),
-        diagnostic_level::warning);
+        level);
     visit_type(
-        ctx,
-        static_cast<const t_named&>(*ctx.parent()),
-        *s.elem_type(),
-        diagnostic_level::warning);
+        ctx, static_cast<const t_named&>(*ctx.parent()), *s.elem_type(), level);
   });
 
   // Services: base service
   validator.add_service_visitor(
-      [](diagnostic_context& ctx, const t_service& svc) {
+      [level](diagnostic_context& ctx, const t_service& svc) {
         if (const t_service* extends = svc.extends()) {
-          visit_type(ctx, svc, *extends, diagnostic_level::warning);
+          visit_type(ctx, svc, *extends, level);
         }
       });
 
   // Constants: value type
-  validator.add_const_visitor([](diagnostic_context& ctx, const t_const& c) {
-    visit_type(ctx, c, *c.type(), diagnostic_level::warning);
-  });
+  validator.add_const_visitor(
+      [level](diagnostic_context& ctx, const t_const& c) {
+        visit_type(ctx, c, *c.type(), level);
+      });
 
   // All definitions: annotations
   validator.add_definition_visitor(
@@ -175,6 +173,7 @@ void add_explicit_include_validators(ast_validator& validator) {
           return;
         }
 
+        // TODO(T180055932): upgrade this to `level`
         for (const t_const& anno : n.structured_annotations()) {
           visit_type(ctx, n, *anno.type(), diagnostic_level::warning);
         }

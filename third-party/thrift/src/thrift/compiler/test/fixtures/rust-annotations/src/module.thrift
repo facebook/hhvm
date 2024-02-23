@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/rust.thrift"
+include "thrift/annotation/scope.thrift"
 
 // --
 

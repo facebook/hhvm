@@ -37,6 +37,7 @@
 #include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/ast_validator.h>
 #include <thrift/compiler/sema/diagnostic_context.h>
+#include <thrift/compiler/sema/explicit_include_validator.h>
 
 namespace apache {
 namespace thrift {
@@ -2531,6 +2532,7 @@ void t_mstch_rust_generator::fill_validator_visitors(
       options_));
   validator.add_enum_visitor(validate_enum_annotations);
   validator.add_program_visitor(validate_program_annotations);
+  add_explicit_include_validators(validator, diagnostic_level::error);
 }
 
 THRIFT_REGISTER_GENERATOR(

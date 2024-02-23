@@ -46,6 +46,8 @@ void validate_explicit_include(
     const t_type& type,
     diagnostic_level level);
 
-void add_explicit_include_validators(ast_validator& validator);
+void add_explicit_include_validators(
+    ast_validator& validator,
+    diagnostic_level level = diagnostic_level::warning);
 
 } // namespace apache::thrift::compiler

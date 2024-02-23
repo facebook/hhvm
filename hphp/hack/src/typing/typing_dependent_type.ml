@@ -102,6 +102,12 @@ module ExprDepTy = struct
       let (env, ty) = Env.expand_type env ty in
       match deref ty with
       | (_, Tclass (_, Exact, _)) -> (env, ty)
+      (* Special case for known final generic types that don't use this in their API *)
+      | (_, Tclass ((_, x), _, _))
+        when String.equal x Naming_special_names.Collections.cVec
+             || String.equal x Naming_special_names.Collections.cDict
+             || String.equal x Naming_special_names.Collections.cKeyset ->
+        (env, ty)
       | (_, Tclass (((_, x) as c), Nonexact _, tyl)) ->
         let class_ = Env.get_class env x in
         (* If a class is both final and variant, we must treat it as non-final

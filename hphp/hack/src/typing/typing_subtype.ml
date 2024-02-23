@@ -4733,7 +4733,7 @@ and Subtype_fun : sig
     subtype_env:Subtype_env.t ->
     check_return:bool ->
     for_override:bool ->
-    ?super_like:bool ->
+    super_like:bool ->
     Typing_defs.locl_phase Typing_defs.Reason.t_ ->
     Typing_defs.locl_phase Typing_defs.ty Typing_defs.fun_type ->
     Typing_defs.locl_phase Typing_defs.Reason.t_ ->
@@ -5251,7 +5251,7 @@ end = struct
       ~(subtype_env : Subtype_env.t)
       ~(check_return : bool)
       ~(for_override : bool)
-      ?(super_like = false)
+      ~super_like
       (r_sub : Reason.t)
       (ft_sub : locl_fun_type)
       (r_super : Reason.t)
@@ -6521,6 +6521,7 @@ let subtype_funs
       ~subtype_env:(Subtype_env.create ~log_level:2 ~coerce:None on_error)
       ~check_return
       ~for_override
+      ~super_like:false
       r_sub
       ft_sub
       r_super

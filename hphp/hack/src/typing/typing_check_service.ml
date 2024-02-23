@@ -337,7 +337,9 @@ let process_one_workitem
       in
       begin
         if type_check_twice then
-          let _ignored = process_file ctx file ~decl_cap_mb in
+          let (_ignored : process_file_results) =
+            process_file ctx file ~decl_cap_mb ~log_errors:false
+          in
           ()
       end;
       let tally = ProcessFilesTally.incr_checks tally deferred_decls in

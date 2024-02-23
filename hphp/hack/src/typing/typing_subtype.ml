@@ -1220,7 +1220,7 @@ end = struct
               ~subtype_env
               ~sub_supportdyn
               ~this_ty
-              ~nullsafe:r_null
+              ~nullsafe:(Some r_null)
               ~fail
               ety_sub
               (r, has_member_ty)
@@ -1596,6 +1596,7 @@ end = struct
             ~sub_supportdyn
             ~this_ty
             ~fail
+            ~nullsafe:None
             ety_sub
             (r, has_member_ty)
             env
@@ -3772,7 +3773,7 @@ and Has_member : sig
     sub_supportdyn:Reason.t option ->
     this_ty:Typing_defs.locl_ty option ->
     fail:Typing_error.t option ->
-    ?nullsafe:Typing_defs.locl_phase Typing_defs.Reason.t_ ->
+    nullsafe:Typing_defs.locl_phase Typing_defs.Reason.t_ option ->
     Typing_defs.internal_type ->
     Typing_defs.Reason.t * Typing_defs.has_member ->
     Typing_env_types.env ->
@@ -3829,7 +3830,7 @@ end = struct
       ~sub_supportdyn
       ~this_ty
       ~fail
-      ?(nullsafe : Reason.t option)
+      ~nullsafe
       ty_sub
       (r, has_member_ty)
       env =
@@ -3945,7 +3946,7 @@ end = struct
             ~sub_supportdyn
             ~this_ty
             ~fail
-            ?nullsafe
+            ~nullsafe
             (LoclType option_ty)
             (r, has_member_ty)
             env
@@ -4101,7 +4102,7 @@ end = struct
           ~sub_supportdyn
           ~this_ty
           ~fail
-          ?nullsafe
+          ~nullsafe
           (LoclType newtype_ty)
           (r, has_member_ty)
           env

@@ -34,7 +34,7 @@ use crate::strings::StringCache;
 pub(crate) fn convert_func<'a>(
     mut func: ir::Func<'a>,
     strings: &StringCache<'a>,
-    adata: &mut AdataCache<'a>,
+    adata: &mut AdataCache,
 ) -> hhbc::Body<'a> {
     // Compute liveness and implicit block parameters.
 
@@ -156,7 +156,7 @@ pub(crate) fn convert_function<'a>(
 pub(crate) fn convert_method<'a>(
     mut method: ir::Method<'a>,
     strings: &StringCache<'a>,
-    adata: &mut AdataCache<'a>,
+    adata: &mut AdataCache,
 ) -> Method<'a> {
     trace!("convert_method {}", method.name.as_bstr(&strings.interner));
     let span = method.func.loc(method.func.loc_id).to_span();

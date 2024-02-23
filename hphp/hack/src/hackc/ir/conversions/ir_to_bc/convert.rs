@@ -81,7 +81,7 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Un
 }
 
 pub(crate) struct UnitBuilder<'a> {
-    pub adata_cache: AdataCache<'a>,
+    pub adata_cache: AdataCache,
     pub functions: Vec<hhbc::Function<'a>>,
     pub classes: Vec<hhbc::Class<'a>>,
 }
@@ -144,10 +144,10 @@ pub(crate) fn convert_attributes<'a>(
         .collect()
 }
 
-pub(crate) fn convert_typed_value<'a>(
+pub(crate) fn convert_typed_value(
     tv: &ir::TypedValue,
-    strings: &StringCache<'a>,
-) -> hhbc::TypedValue<'a> {
+    strings: &StringCache<'_>,
+) -> hhbc::TypedValue {
     match tv {
         ir::TypedValue::Uninit => hhbc::TypedValue::Uninit,
         ir::TypedValue::Int(v) => hhbc::TypedValue::Int(*v),
@@ -155,7 +155,7 @@ pub(crate) fn convert_typed_value<'a>(
         ir::TypedValue::Float(v) => hhbc::TypedValue::Float(*v),
         ir::TypedValue::String(v) => hhbc::TypedValue::intern_string(strings.lookup_ffi_str(*v)),
         ir::TypedValue::LazyClass(v) => {
-            hhbc::TypedValue::LazyClass(strings.lookup_class_name(*v).as_ffi_str())
+            hhbc::TypedValue::intern_lazy_class(strings.intern(v.id).expect("non-utf8 class name"))
         }
         ir::TypedValue::Null => hhbc::TypedValue::Null,
         ir::TypedValue::Vec(ref vs) => hhbc::TypedValue::Vec(
@@ -175,14 +175,11 @@ pub(crate) fn convert_typed_value<'a>(
     }
 }
 
-pub(crate) fn convert_array_key<'a>(
-    tv: &ir::ArrayKey,
-    strings: &StringCache<'a>,
-) -> hhbc::TypedValue<'a> {
+pub(crate) fn convert_array_key(tv: &ir::ArrayKey, strings: &StringCache<'_>) -> hhbc::TypedValue {
     match *tv {
         ir::ArrayKey::Int(v) => hhbc::TypedValue::Int(v),
         ir::ArrayKey::LazyClass(v) => {
-            hhbc::TypedValue::LazyClass(strings.lookup_class_name(v).as_ffi_str())
+            hhbc::TypedValue::intern_lazy_class(strings.intern(v.id).expect("non-utf8 class name"))
         }
         ir::ArrayKey::String(v) => hhbc::TypedValue::intern_string(strings.lookup_ffi_str(v)),
     }

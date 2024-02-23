@@ -55,14 +55,14 @@ pub(crate) struct State<'arena, 'a> {
     pub(crate) iterators: IterIdMap<IterState>,
     pub(crate) locals: HashMap<Local, Value>,
     pub(crate) stack: Vec<Value>,
-    adata: &'a HashMap<AdataId, &'a TypedValue<'arena>>,
+    adata: &'a HashMap<AdataId, &'arena TypedValue>,
 }
 
 impl<'arena, 'a> State<'arena, 'a> {
     pub(crate) fn new(
         body: &'a Body<'arena>,
         debug_name: &'static str,
-        adata: &'a HashMap<AdataId, &'a TypedValue<'arena>>,
+        adata: &'a HashMap<AdataId, &'arena TypedValue>,
     ) -> Self {
         Self {
             body,
@@ -694,8 +694,7 @@ impl<'arena, 'a> State<'arena, 'a> {
         let output = match opcode {
             Opcode::Dict(id) | Opcode::Keyset(id) | Opcode::Vec(id) => {
                 // But for an array-based constant we want to use the array data as an input.
-                let tv = self.adata[id];
-                builder.compute_value(&clean_instr, 0, &[Input::ConstantArray(tv.clone())])
+                builder.compute_value(&clean_instr, 0, &[Input::ConstantArray(self.adata[id])])
             }
             _ => builder.compute_constant(&clean_instr),
         };

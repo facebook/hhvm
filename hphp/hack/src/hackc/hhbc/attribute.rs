@@ -27,7 +27,7 @@ use crate::typed_value::TypedValue;
 #[repr(C)]
 pub struct Attribute<'arena> {
     pub name: Str<'arena>,
-    pub arguments: Vector<TypedValue<'arena>>,
+    pub arguments: Vector<TypedValue>,
 }
 
 impl<'arena> Attribute<'arena> {
@@ -161,9 +161,9 @@ pub fn has_dynamically_callable<'arena>(attrs: &[Attribute<'arena>]) -> bool {
     has(attrs, is_dynamically_callable)
 }
 
-pub fn deprecation_info<'a, 'arena>(
-    mut iter: impl Iterator<Item = &'a Attribute<'arena>>,
-) -> Option<&'a [TypedValue<'arena>]> {
+pub fn deprecation_info<'arena>(
+    mut iter: impl Iterator<Item = &'arena Attribute<'arena>>,
+) -> Option<&'arena [TypedValue]> {
     iter.find_map(|attr| {
         if attr.name.unsafe_as_str() == ua::DEPRECATED {
             Some(attr.arguments.as_ref())

@@ -72,7 +72,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     original_id: hhbc::FunctionName<'arena>,
     renamed_id: &hhbc::FunctionName<'arena>,
-    deprecation_info: Option<&[TypedValue<'arena>]>,
+    deprecation_info: Option<&[TypedValue]>,
     fd: &'a ast::FunDef,
 ) -> Result<Function<'arena>> {
     let alloc = emitter.alloc;
@@ -151,7 +151,7 @@ fn make_memoize_function_code<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
-    deprecation_info: Option<&[TypedValue<'arena>]>,
+    deprecation_info: Option<&[TypedValue]>,
     hhas_params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
     ast_params: &[ast::FunParam],
     renamed_id: hhbc::FunctionName<'arena>,
@@ -192,7 +192,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
-    deprecation_info: Option<&[TypedValue<'arena>]>,
+    deprecation_info: Option<&[TypedValue]>,
     hhas_params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
     ast_params: &[ast::FunParam],
     renamed_id: hhbc::FunctionName<'arena>,
@@ -315,7 +315,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
 fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
-    deprecation_info: Option<&[TypedValue<'arena>]>,
+    deprecation_info: Option<&[TypedValue]>,
     renamed_id: hhbc::FunctionName<'arena>,
     is_async: bool,
     should_make_ic_inaccessible: Option<bool>,

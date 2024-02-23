@@ -125,7 +125,7 @@ fn shape_field_to_entry<'arena>(
     targ_map: &BTreeMap<&str, i64>,
     type_refinement_in_hint: TypeRefinementInHint,
     sfi: &ShapeFieldInfo,
-) -> Result<DictEntry<'arena>> {
+) -> Result<DictEntry> {
     let (name, is_class_const) = shape_field_name(alloc, &sfi.name);
     let mut r = vec![];
     if is_class_const {
@@ -155,7 +155,7 @@ fn shape_info_to_typed_value<'arena>(
     targ_map: &BTreeMap<&str, i64>,
     type_refinement_in_hint: TypeRefinementInHint,
     si: &NastShapeInfo,
-) -> Result<TypedValue<'arena>> {
+) -> Result<TypedValue> {
     let info = si
         .field_map
         .iter()
@@ -166,7 +166,7 @@ fn shape_info_to_typed_value<'arena>(
     Ok(TypedValue::dict(info))
 }
 
-fn shape_allows_unknown_fields<'arena>(si: &NastShapeInfo) -> Option<DictEntry<'arena>> {
+fn shape_allows_unknown_fields(si: &NastShapeInfo) -> Option<DictEntry> {
     if si.allows_unknown_fields {
         Some(encode_entry(
             "allows_unknown_fields",
@@ -177,7 +177,7 @@ fn shape_allows_unknown_fields<'arena>(si: &NastShapeInfo) -> Option<DictEntry<'
     }
 }
 
-fn type_constant_access_list<'arena>(ids: &[aast::Sid]) -> TypedValue<'arena> {
+fn type_constant_access_list(ids: &[aast::Sid]) -> TypedValue {
     let ids: Vec<_> = ids
         .iter()
         .map(|ast_defs::Id(_, s)| TypedValue::intern_string(s))
@@ -185,11 +185,11 @@ fn type_constant_access_list<'arena>(ids: &[aast::Sid]) -> TypedValue<'arena> {
     TypedValue::vec(ids)
 }
 
-fn resolve_classname<'arena>(
-    alloc: &'arena bumpalo::Bump,
+fn resolve_classname(
+    alloc: &bumpalo::Bump,
     tparams: &[&str],
     mut s: String,
-) -> (Option<DictEntry<'arena>>, String) {
+) -> (Option<DictEntry>, String) {
     let kind = ts_kind(tparams, &s);
     let name_key = if kind != TypeStructureKind::T_typevar {
         s = hhbc::ClassName::from_ast_name_and_mangle(alloc, s.as_str()).unsafe_into_string();
@@ -205,14 +205,14 @@ fn resolve_classname<'arena>(
     (entry, s)
 }
 
-fn get_generic_types<'arena>(
-    alloc: &'arena bumpalo::Bump,
+fn get_generic_types(
+    alloc: &bumpalo::Bump,
     opts: &Options,
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
     type_refinement_in_hint: TypeRefinementInHint,
     hints: &[Hint],
-) -> Result<Vec<DictEntry<'arena>>> {
+) -> Result<Vec<DictEntry>> {
     Ok(if hints.is_empty() {
         vec![]
     } else {
@@ -230,14 +230,14 @@ fn get_generic_types<'arena>(
     })
 }
 
-fn get_union_types<'arena>(
-    alloc: &'arena bumpalo::Bump,
+fn get_union_types(
+    alloc: &bumpalo::Bump,
     opts: &Options,
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
     type_refinement_in_hint: TypeRefinementInHint,
     hints: &[Hint],
-) -> Result<Vec<DictEntry<'arena>>> {
+) -> Result<Vec<DictEntry>> {
     Ok(vec![encode_entry(
         "union_types",
         hints_to_type_constant(
@@ -251,18 +251,18 @@ fn get_union_types<'arena>(
     )])
 }
 
-fn encode_entry<'a>(key: &'a str, value: TypedValue<'a>) -> DictEntry<'a> {
+fn encode_entry(key: &str, value: TypedValue) -> DictEntry {
     DictEntry {
         key: TypedValue::intern_string(key),
         value,
     }
 }
 
-fn encode_kind(kind: TypeStructureKind) -> DictEntry<'static> {
+fn encode_kind(kind: TypeStructureKind) -> DictEntry {
     encode_entry("kind", TypedValue::Int(kind.repr as i64))
 }
 
-fn encode_root_name<'a>(alloc: &'a bumpalo::Bump, s: &str) -> DictEntry<'a> {
+fn encode_root_name(alloc: &bumpalo::Bump, s: &str) -> DictEntry {
     let s = if s == "this" {
         string_utils::prefix_namespace("HH", s)
     } else {
@@ -271,7 +271,7 @@ fn encode_root_name<'a>(alloc: &'a bumpalo::Bump, s: &str) -> DictEntry<'a> {
     encode_entry("root_name", TypedValue::intern_string(&s))
 }
 
-fn get_typevars<'arena>(tparams: &[&str]) -> Vec<DictEntry<'arena>> {
+fn get_typevars(tparams: &[&str]) -> Vec<DictEntry> {
     if tparams.is_empty() {
         vec![]
     } else {
@@ -282,14 +282,14 @@ fn get_typevars<'arena>(tparams: &[&str]) -> Vec<DictEntry<'arena>> {
     }
 }
 
-fn hint_to_type_constant_list<'arena>(
-    alloc: &'arena bumpalo::Bump,
+fn hint_to_type_constant_list(
+    alloc: &bumpalo::Bump,
     opts: &Options,
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
     type_refinement_in_hint: TypeRefinementInHint,
     Hint(_, hint): &Hint,
-) -> Result<Vec<DictEntry<'arena>>> {
+) -> Result<Vec<DictEntry>> {
     Ok(match hint.as_ref() {
         Hint_::Happly(s, hints) => {
             let ast_defs::Id(_, name) = s;
@@ -508,12 +508,12 @@ fn hint_to_type_constant_list<'arena>(
     })
 }
 
-pub(crate) fn typedef_to_type_structure<'a, 'arena>(
-    alloc: &'arena bumpalo::Bump,
+pub(crate) fn typedef_to_type_structure(
+    alloc: &bumpalo::Bump,
     opts: &Options,
     tparams: &[&str],
-    typedef: &'a ast::Typedef,
-) -> Result<TypedValue<'arena>> {
+    typedef: &ast::Typedef,
+) -> Result<TypedValue> {
     let is_case_type = typedef.vis.is_case_type();
 
     // For a case type we always want to ensure that it's wrapped in a Hunion.
@@ -546,14 +546,14 @@ pub(crate) fn typedef_to_type_structure<'a, 'arena>(
     Ok(TypedValue::dict(tconsts))
 }
 
-pub(crate) fn hint_to_type_constant<'arena>(
-    alloc: &'arena bumpalo::Bump,
+pub(crate) fn hint_to_type_constant(
+    alloc: &bumpalo::Bump,
     opts: &Options,
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
     hint: &Hint,
     type_refinement_in_hint: TypeRefinementInHint,
-) -> Result<TypedValue<'arena>> {
+) -> Result<TypedValue> {
     let tconsts = hint_to_type_constant_list(
         alloc,
         opts,
@@ -565,14 +565,14 @@ pub(crate) fn hint_to_type_constant<'arena>(
     Ok(TypedValue::dict(tconsts))
 }
 
-fn hints_to_type_constant<'arena>(
-    alloc: &'arena bumpalo::Bump,
+fn hints_to_type_constant(
+    alloc: &bumpalo::Bump,
     opts: &Options,
     tparams: &[&str],
     targ_map: &BTreeMap<&str, i64>,
     type_refinement_in_hint: TypeRefinementInHint,
     hints: &[Hint],
-) -> Result<TypedValue<'arena>> {
+) -> Result<TypedValue> {
     Ok(TypedValue::vec(
         hints
             .iter()

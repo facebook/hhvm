@@ -83,7 +83,7 @@ fn assemble_from_toks<'arena>(
 
 #[derive(Default)]
 struct UnitBuilder<'a> {
-    adatas: Vec<hhbc::Adata<'a>>,
+    adatas: Vec<hhbc::Adata>,
     class_refs: Option<Vec<hhbc::ClassName<'a>>>,
     classes: Vec<hhbc::Class<'a>>,
     constant_refs: Option<Vec<hhbc::ConstName<'a>>>,
@@ -615,10 +615,10 @@ fn determine_visibility(attr: &hhvm_types_ffi::ffi::Attr) -> Result<hhbc::Visibi
 /// Initial values are printed slightly differently from typed values:
 /// while a TV prints uninit as "uninit", initial value is printed as "uninit;""
 /// for all other typed values, initial_value is printed nested in triple quotes.
-fn assemble_property_initial_value<'arena>(
+fn assemble_property_initial_value(
     token_iter: &mut Lexer<'_>,
-    alloc: &'arena Bump,
-) -> Result<Maybe<hhbc::TypedValue<'arena>>> {
+    alloc: &Bump,
+) -> Result<Maybe<hhbc::TypedValue>> {
     Ok(parse!(token_iter,
     [
         "uninit": "uninit" { Maybe::Just(hhbc::TypedValue::Uninit) } ;
@@ -811,20 +811,17 @@ fn assemble_fatal(token_iter: &mut Lexer<'_>) -> Result<hhbc::Fatal> {
 /// A line of adata looks like:
 /// .adata id = """<tv>"""
 /// with tv being a typed value; see `assemble_typed_value` doc for what <tv> looks like.
-fn assemble_adata<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::Adata<'arena>> {
+fn assemble_adata(alloc: &Bump, token_iter: &mut Lexer<'_>) -> Result<hhbc::Adata> {
     parse!(token_iter, ".adata" <id:id> "=" <value:assemble_triple_quoted_typed_value(alloc)> ";");
     let id = hhbc::AdataId::parse(std::str::from_utf8(id.as_bytes())?)?;
     Ok(hhbc::Adata { id, value })
 }
 
 /// For use by initial value
-fn assemble_triple_quoted_typed_value<'arena>(
+fn assemble_triple_quoted_typed_value(
     token_iter: &mut Lexer<'_>,
-    alloc: &'arena Bump,
-) -> Result<hhbc::TypedValue<'arena>> {
+    alloc: &Bump,
+) -> Result<hhbc::TypedValue> {
     let (st, line) = token_iter.expect_with(Token::into_triple_str_literal_and_line)?;
     // Guaranteed st is encased by """ """
     let st = &st[3..st.len() - 3];
@@ -835,16 +832,8 @@ fn assemble_triple_quoted_typed_value<'arena>(
 /// tv can look like:
 /// uninit | N; | s:s.len():"(escaped s)"; | l:s.len():"(escaped s)"; | d:#; | i:#; | b:0; | b:1; | D:dict.len():{((tv1);(tv2);)*}
 /// | v:vec.len():{(tv;)*} | k:keyset.len():{(tv;)*}
-fn assemble_typed_value<'arena>(
-    alloc: &'arena Bump,
-    src: &[u8],
-    line: Line,
-) -> Result<hhbc::TypedValue<'arena>> {
-    fn deserialize<'arena, 'a>(
-        alloc: &'arena Bump,
-        src: &'a [u8],
-        line: Line,
-    ) -> Result<hhbc::TypedValue<'arena>> {
+fn assemble_typed_value(alloc: &Bump, src: &[u8], line: Line) -> Result<hhbc::TypedValue> {
+    fn deserialize(alloc: &Bump, src: &[u8], line: Line) -> Result<hhbc::TypedValue> {
         /// Returns s after ch if ch is the first character in s, else bails.
         fn expect<'a>(s: &'a [u8], ch: &'_ [u8]) -> Result<&'a [u8]> {
             s.strip_prefix(ch)
@@ -877,7 +866,7 @@ fn assemble_typed_value<'arena>(
         }
 
         /// i:#;
-        fn deserialize_int<'arena>(src: &[u8]) -> Result<(&[u8], hhbc::TypedValue<'arena>)> {
+        fn deserialize_int(src: &[u8]) -> Result<(&[u8], hhbc::TypedValue)> {
             let src = expect(src, b"i")?;
             let src = expect(src, b":")?;
             let (num, src) =
@@ -889,7 +878,7 @@ fn assemble_typed_value<'arena>(
 
         // r"d:[-+]?(NAN|INF|([0-9]+\.?[0-9]*([eE][-+]?[0-9]+\.?[0-9]*)?))"
         /// d:#;
-        fn deserialize_float<'arena>(src: &[u8]) -> Result<(&[u8], hhbc::TypedValue<'arena>)> {
+        fn deserialize_float(src: &[u8]) -> Result<(&[u8], hhbc::TypedValue)> {
             let src = expect(src, b"d")?;
             let src = expect(src, b":")?;
             let (num, src) = read_until(src, |c| c != b';', b";")?;
@@ -898,7 +887,7 @@ fn assemble_typed_value<'arena>(
         }
 
         /// b:0;
-        fn deserialize_bool<'arena>(src: &[u8]) -> Result<(&[u8], hhbc::TypedValue<'arena>)> {
+        fn deserialize_bool(src: &[u8]) -> Result<(&[u8], hhbc::TypedValue)> {
             let src = expect(src, b"b")?;
             let src = expect(src, b":")?;
             let val = src[0] == b'1';
@@ -907,14 +896,14 @@ fn assemble_typed_value<'arena>(
         }
 
         /// N;
-        fn deserialize_null<'arena>(src: &[u8]) -> Result<(&[u8], hhbc::TypedValue<'arena>)> {
+        fn deserialize_null(src: &[u8]) -> Result<(&[u8], hhbc::TypedValue)> {
             let src = expect(src, b"N")?;
             let src = expect(src, b";")?;
             Ok((src, hhbc::TypedValue::Null))
         }
 
         /// uninit
-        fn deserialize_uninit<'arena>(src: &[u8]) -> Result<(&[u8], hhbc::TypedValue<'arena>)> {
+        fn deserialize_uninit(src: &[u8]) -> Result<(&[u8], hhbc::TypedValue)> {
             Ok((
                 src.strip_prefix(b"uninit")
                     .ok_or_else(|| anyhow!("Expected uninit in src {:?}", src))?,
@@ -923,11 +912,10 @@ fn assemble_typed_value<'arena>(
         }
 
         /// s:s.len():"(escaped s)"; or l:s.len():"(escaped s)";
-        fn deserialize_string_or_lazyclass<'arena, 'a>(
-            alloc: &'arena Bump,
+        fn deserialize_string_or_lazyclass<'a>(
             src: &'a [u8],
             s_or_l: StringOrLazyClass,
-        ) -> Result<(&'a [u8], hhbc::TypedValue<'arena>)> {
+        ) -> Result<(&'a [u8], hhbc::TypedValue)> {
             let src = expect(src, s_or_l.prefix())?;
             let src = expect(src, b":")?;
             let (len, src) = expect_usize(src)?;
@@ -945,7 +933,7 @@ fn assemble_typed_value<'arena>(
             let src = &src[len..];
             let src = expect(src, b"\"")?;
             let src = expect(src, b";")?;
-            Ok((src, s_or_l.build(Str::new_slice(alloc, s))))
+            Ok((src, s_or_l.build(s)?))
         }
 
         #[derive(PartialEq)]
@@ -962,10 +950,12 @@ fn assemble_typed_value<'arena>(
                 }
             }
 
-            pub fn build<'arena>(&self, content: Str<'arena>) -> hhbc::TypedValue<'arena> {
+            pub fn build(&self, content: &[u8]) -> Result<hhbc::TypedValue, std::str::Utf8Error> {
                 match self {
-                    StringOrLazyClass::String => hhbc::TypedValue::intern_string(content),
-                    StringOrLazyClass::LazyClass => hhbc::TypedValue::LazyClass(content),
+                    StringOrLazyClass::String => Ok(hhbc::TypedValue::intern_string(content)),
+                    StringOrLazyClass::LazyClass => Ok(hhbc::TypedValue::intern_lazy_class(
+                        std::str::from_utf8(content)?,
+                    )),
                 }
             }
         }
@@ -984,10 +974,7 @@ fn assemble_typed_value<'arena>(
                 }
             }
 
-            pub fn build<'arena>(
-                &self,
-                content: Vec<hhbc::TypedValue<'arena>>,
-            ) -> hhbc::TypedValue<'arena> {
+            pub fn build(&self, content: Vec<hhbc::TypedValue>) -> hhbc::TypedValue {
                 match self {
                     VecOrKeyset::Vec => hhbc::TypedValue::Vec(content.into()),
                     VecOrKeyset::Keyset => hhbc::TypedValue::Keyset(content.into()),
@@ -999,7 +986,7 @@ fn assemble_typed_value<'arena>(
             alloc: &'arena Bump,
             src: &'a [u8],
             v_or_k: VecOrKeyset,
-        ) -> Result<(&'a [u8], hhbc::TypedValue<'arena>)> {
+        ) -> Result<(&'a [u8], hhbc::TypedValue)> {
             let src = expect(src, v_or_k.prefix())?;
             let src = expect(src, b":")?;
             let (len, src) = expect_usize(src)?;
@@ -1019,7 +1006,7 @@ fn assemble_typed_value<'arena>(
         fn deserialize_dict<'arena, 'a>(
             alloc: &'arena Bump,
             src: &'a [u8],
-        ) -> Result<(&'a [u8], hhbc::TypedValue<'arena>)> {
+        ) -> Result<(&'a [u8], hhbc::TypedValue)> {
             let src = expect(src, b"D")?;
             let src = expect(src, b":")?;
             let (len, src) = expect_usize(src)?;
@@ -1040,21 +1027,21 @@ fn assemble_typed_value<'arena>(
         fn deserialize_tv<'arena, 'a>(
             alloc: &'arena Bump,
             src: &'a [u8],
-        ) -> Result<(&'a [u8], hhbc::TypedValue<'arena>)> {
+        ) -> Result<(&'a [u8], hhbc::TypedValue)> {
             let (src, tr) = match src[0] {
                 b'i' => deserialize_int(src).context("Assembling a TV int")?,
                 b'b' => deserialize_bool(src).context("Assembling a TV bool")?,
                 b'd' => deserialize_float(src).context("Assembling a TV float")?,
                 b'N' => deserialize_null(src).context("Assembling a TV Null")?,
                 b'u' => deserialize_uninit(src).context("Assembling a uninit")?,
-                b's' => deserialize_string_or_lazyclass(alloc, src, StringOrLazyClass::String)
+                b's' => deserialize_string_or_lazyclass(src, StringOrLazyClass::String)
                     .context("Assembling a TV string")?,
                 b'v' => deserialize_vec_or_keyset(alloc, src, VecOrKeyset::Vec)
                     .context("Assembling a TV vec")?,
                 b'k' => deserialize_vec_or_keyset(alloc, src, VecOrKeyset::Keyset)
                     .context("Assembling a TV keyset")?,
                 b'D' => deserialize_dict(alloc, src).context("Assembling a TV dict")?,
-                b'l' => deserialize_string_or_lazyclass(alloc, src, StringOrLazyClass::LazyClass)
+                b'l' => deserialize_string_or_lazyclass(src, StringOrLazyClass::LazyClass)
                     .context("Assembling a LazyClass")?,
                 _ => bail!("Unknown tv: {}", src[0]),
             };
@@ -1311,10 +1298,10 @@ fn assemble_user_attr<'arena>(
 
 /// Printed as follows (print_attributes in bcp)
 /// "v:args.len:{args}" where args are typed values
-fn assemble_user_attr_args<'arena>(
-    alloc: &'arena Bump,
+fn assemble_user_attr_args(
+    alloc: &Bump,
     token_iter: &mut Lexer<'_>,
-) -> Result<Vec<hhbc::TypedValue<'arena>>> {
+) -> Result<Vec<hhbc::TypedValue>> {
     let tok = token_iter.peek().copied();
     if let hhbc::TypedValue::Vec(vals) = assemble_triple_quoted_typed_value(token_iter, alloc)? {
         Ok(vals.into())

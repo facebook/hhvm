@@ -10,12 +10,12 @@ use crate::AdataId;
 
 #[derive(Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
-pub struct Adata<'arena> {
+pub struct Adata {
     pub id: AdataId,
-    pub value: TypedValue<'arena>,
+    pub value: TypedValue,
 }
 
-impl Adata<'_> {
+impl Adata {
     pub const VEC_PREFIX: &'static str = "v";
     pub const DICT_PREFIX: &'static str = "D";
     pub const KEYSET_PREFIX: &'static str = "k";

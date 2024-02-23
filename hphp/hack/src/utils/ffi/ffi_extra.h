@@ -8,3 +8,4 @@
 // Forward declare bumpalo::Bump
 struct Bump;
 using BytesId = uint32_t;
+using StringId = BytesId;

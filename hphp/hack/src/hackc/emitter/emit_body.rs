@@ -56,7 +56,7 @@ pub struct Args<'a, 'arena> {
     pub ast_params: &'a Vec<ast::FunParam>,
     pub ret: Option<&'a ast::Hint>,
     pub pos: &'a Pos,
-    pub deprecation_info: &'a Option<&'a [TypedValue<'arena>]>,
+    pub deprecation_info: &'a Option<&'a [TypedValue]>,
     pub doc_comment: Option<DocComment>,
     pub default_dropthrough: Option<InstrSeq<'arena>>,
     pub call_context: Option<String>,
@@ -189,7 +189,7 @@ fn make_body_instrs<'a, 'arena, 'decl>(
     tparams: &[ast::Tparam],
     body: &[ast::Stmt],
     is_generator: bool,
-    deprecation_info: Option<&[TypedValue<'arena>]>,
+    deprecation_info: Option<&[TypedValue]>,
     pos: &Pos,
     ast_params: &[ast::FunParam],
     flags: Flags,
@@ -230,7 +230,7 @@ fn make_header_content<'a, 'arena, 'decl>(
     params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
     tparams: &[ast::Tparam],
     is_generator: bool,
-    deprecation_info: Option<&[TypedValue<'arena>]>,
+    deprecation_info: Option<&[TypedValue]>,
     pos: &Pos,
     ast_params: &[ast::FunParam],
     flags: Flags,
@@ -527,7 +527,7 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
 pub fn emit_deprecation_info<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
     scope: &Scope<'a, 'arena>,
-    deprecation_info: Option<&[TypedValue<'arena>]>,
+    deprecation_info: Option<&[TypedValue]>,
     is_systemlib: bool,
 ) -> Result<InstrSeq<'arena>> {
     Ok(match deprecation_info {

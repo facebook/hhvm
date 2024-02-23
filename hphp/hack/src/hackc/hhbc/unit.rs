@@ -23,7 +23,7 @@ use crate::Typedef;
 #[derive(Debug, Serialize)]
 #[repr(C)]
 pub struct Unit<'arena> {
-    pub adata: Vector<Adata<'arena>>,
+    pub adata: Vector<Adata>,
     pub functions: Vector<Function<'arena>>,
     pub classes: Vector<Class<'arena>>,
     pub modules: Vector<Module<'arena>>,

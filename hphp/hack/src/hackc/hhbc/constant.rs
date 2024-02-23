@@ -18,6 +18,6 @@ use crate::ConstName;
 #[repr(C)]
 pub struct Constant<'arena> {
     pub name: ConstName<'arena>,
-    pub value: Maybe<TypedValue<'arena>>,
+    pub value: Maybe<TypedValue>,
     pub attrs: Attr,
 }

@@ -140,6 +140,18 @@ impl Ord for StringId {
     }
 }
 
+impl AsRef<str> for StringId {
+    fn as_ref(&self) -> &str {
+        self.as_str()
+    }
+}
+
+impl From<StringId> for String {
+    fn from(s: StringId) -> String {
+        String::from(s.as_str())
+    }
+}
+
 // Describes types that can be viewed as a `[u8]`.
 pub trait IntoUtf8Bytes: Sized {
     type Bytes: Into<SmallBytes> + Borrow<[u8]>;

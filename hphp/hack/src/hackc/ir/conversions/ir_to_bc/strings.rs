@@ -33,6 +33,12 @@ impl<'a> StringCache<'a> {
         })
     }
 
+    pub fn intern(&self, id: UnitBytesId) -> Result<hhbc::StringId, std::str::Utf8Error> {
+        Ok(hhbc::intern(std::str::from_utf8(
+            &self.interner.lookup_bytes(id),
+        )?))
+    }
+
     pub fn lookup_class_name(&self, id: ir::ClassId) -> hhbc::ClassName<'a> {
         let s = self.lookup_ffi_str(id.id);
         hhbc::ClassName::new(s)

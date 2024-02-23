@@ -19,7 +19,7 @@ pub struct Typedef<'arena> {
     pub name: ClassName<'arena>,
     pub attributes: Vector<Attribute<'arena>>,
     pub type_info_union: Vector<TypeInfo<'arena>>,
-    pub type_structure: TypedValue<'arena>,
+    pub type_structure: TypedValue,
     pub span: Span,
     pub attrs: Attr,
     pub case_type: bool,

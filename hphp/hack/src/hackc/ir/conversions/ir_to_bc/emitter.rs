@@ -37,7 +37,7 @@ pub(crate) fn emit_func<'a>(
     func: &ir::Func<'a>,
     labeler: &mut Labeler,
     strings: &StringCache<'a>,
-    adata_cache: &mut AdataCache<'a>,
+    adata_cache: &mut AdataCache,
 ) -> (InstrSeq<'a>, Vec<Str<'a>>) {
     let adata_id_map = func
         .constants

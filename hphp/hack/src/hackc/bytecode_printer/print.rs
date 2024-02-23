@@ -246,7 +246,7 @@ fn print_symbol_ref_regions<'arena>(
     )
 }
 
-fn print_adata_region(ctx: &Context<'_>, w: &mut dyn Write, adata: &Adata<'_>) -> Result<()> {
+fn print_adata_region(ctx: &Context<'_>, w: &mut dyn Write, adata: &Adata) -> Result<()> {
     write_bytes!(w, ".adata A_{} = ", adata.id.id())?;
     triple_quotes(w, |w| print_adata(ctx, w, &adata.value))?;
     w.write_all(b";")?;
@@ -707,7 +707,7 @@ fn print_adata_collection_argument(
     w: &mut dyn Write,
     col_type: &str,
     loc: Option<&ast_defs::Pos>,
-    values: &[TypedValue<'_>],
+    values: &[TypedValue],
 ) -> Result<()> {
     print_adata_mapped_argument(ctx, w, col_type, loc, values, print_adata)
 }
@@ -717,7 +717,7 @@ fn print_adata_dict_collection_argument(
     w: &mut dyn Write,
     col_type: &str,
     loc: Option<&ast_defs::Pos>,
-    pairs: &[DictEntry<'_>],
+    pairs: &[DictEntry],
 ) -> Result<()> {
     print_adata_mapped_argument(ctx, w, col_type, loc, pairs, |ctx, w, e| {
         print_adata(ctx, w, &e.key)?;
@@ -725,7 +725,7 @@ fn print_adata_dict_collection_argument(
     })
 }
 
-fn print_adata(ctx: &Context<'_>, w: &mut dyn Write, tv: &TypedValue<'_>) -> Result<()> {
+fn print_adata(ctx: &Context<'_>, w: &mut dyn Write, tv: &TypedValue) -> Result<()> {
     match tv {
         TypedValue::Uninit => w.write_all(b"uninit"),
         TypedValue::Null => w.write_all(b"N;"),
@@ -741,8 +741,8 @@ fn print_adata(ctx: &Context<'_>, w: &mut dyn Write, tv: &TypedValue<'_>) -> Res
             write_bytes!(
                 w,
                 r#"l:{}:\"{}\";"#,
-                s.len(),
-                escaper::escape_bstr(s.as_bstr())
+                s.as_str().len(),
+                escaper::escape_bstr(s.as_bytes().as_bstr())
             )
         }
         TypedValue::Float(f) => {

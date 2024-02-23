@@ -8,30 +8,30 @@ use hhbc::AdataId;
 use hhbc::TypedValue;
 
 #[derive(Debug, Default)]
-pub struct AdataState<'a> {
-    shared: HashMap<TypedValue<'a>, AdataId>,
-    adata: Vec<Adata<'a>>,
+pub struct AdataState {
+    shared: HashMap<TypedValue, AdataId>,
+    adata: Vec<Adata>,
 }
 
-impl<'a> AdataState<'a> {
-    pub fn push(&mut self, value: TypedValue<'a>) -> AdataId {
+impl AdataState {
+    pub fn push(&mut self, value: TypedValue) -> AdataId {
         push(&mut self.adata, value)
     }
 
-    pub fn intern(&mut self, tv: TypedValue<'a>) -> AdataId {
+    pub fn intern(&mut self, tv: TypedValue) -> AdataId {
         *self
             .shared
             .entry(tv)
             .or_insert_with_key(|tv| push(&mut self.adata, tv.clone()))
     }
 
-    pub fn take_adata(&mut self) -> Vec<Adata<'a>> {
+    pub fn take_adata(&mut self) -> Vec<Adata> {
         self.shared = Default::default();
         std::mem::take(&mut self.adata)
     }
 }
 
-fn push<'a>(adata: &mut Vec<Adata<'a>>, value: TypedValue<'a>) -> AdataId {
+fn push(adata: &mut Vec<Adata>, value: TypedValue) -> AdataId {
     let id = AdataId::new(adata.len());
     adata.push(Adata { id, value });
     id

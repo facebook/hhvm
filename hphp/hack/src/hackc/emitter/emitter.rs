@@ -56,7 +56,7 @@ pub struct Emitter<'arena, 'decl> {
 
     pub alloc: &'arena bumpalo::Bump,
 
-    pub adata_state: Option<AdataState<'arena>>,
+    pub adata_state: AdataState,
     pub statement_state_: Option<StatementState<'arena>>,
     symbol_refs_state: SymbolRefsState<'arena>,
 
@@ -94,7 +94,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
             named_locals: Default::default(),
             filepath,
 
-            adata_state: None,
+            adata_state: Default::default(),
             statement_state_: None,
             symbol_refs_state: Default::default(),
             global_state_: None,
@@ -172,13 +172,6 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
 
     pub fn systemlib(&self) -> bool {
         self.systemlib
-    }
-
-    pub fn adata_state(&self) -> &AdataState<'arena> {
-        self.adata_state.as_ref().expect("uninit'd adata_state")
-    }
-    pub fn adata_state_mut(&mut self) -> &mut AdataState<'arena> {
-        self.adata_state.get_or_insert_with(Default::default)
     }
 
     pub fn statement_state(&self) -> &StatementState<'arena> {

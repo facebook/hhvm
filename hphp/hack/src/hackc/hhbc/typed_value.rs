@@ -3,9 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::Str;
 use ffi::Vector;
 use intern::string::BytesId;
+use intern::string::StringId;
 use serde::Serialize;
 
 /// Raw IEEE floating point bits. We use this rather than f64 so that
@@ -53,7 +53,7 @@ impl From<f64> for FloatBits {
 /// approach: see runtime/base/typed-value.h
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Serialize)]
 #[repr(C)]
-pub enum TypedValue<'arena> {
+pub enum TypedValue {
     /// Used for fields that are initialized in the 86pinit method
     Uninit,
     /// Hack/PHP integers are signed 64-bit
@@ -63,12 +63,13 @@ pub enum TypedValue<'arena> {
     Float(FloatBits),
     /// Hack strings are plain bytes with no utf-8 guarantee
     String(BytesId),
-    LazyClass(Str<'arena>),
+    /// Hack source code including identifiers must be valid utf-8
+    LazyClass(StringId),
     Null,
     // Hack arrays: vectors, keysets, and dictionaries
-    Vec(Vector<TypedValue<'arena>>),
-    Keyset(Vector<TypedValue<'arena>>),
-    Dict(Vector<Entry<TypedValue<'arena>, TypedValue<'arena>>>),
+    Vec(Vector<TypedValue>),
+    Keyset(Vector<TypedValue>),
+    Dict(Vector<Entry<TypedValue, TypedValue>>),
 }
 
 // This is declared as a generic type to work around cbindgen's topo-sort,
@@ -81,22 +82,26 @@ pub struct Entry<K, V> {
     pub value: V,
 }
 
-pub type DictEntry<'a> = Entry<TypedValue<'a>, TypedValue<'a>>;
+pub type DictEntry = Entry<TypedValue, TypedValue>;
 
-impl<'arena> TypedValue<'arena> {
+impl TypedValue {
     pub fn intern_string(x: impl AsRef<[u8]>) -> Self {
         Self::String(intern::string::intern_bytes(x.as_ref()))
     }
 
-    pub fn vec(x: Vec<TypedValue<'arena>>) -> Self {
+    pub fn intern_lazy_class(x: impl AsRef<str>) -> Self {
+        Self::LazyClass(intern::string::intern(x.as_ref()))
+    }
+
+    pub fn vec(x: Vec<TypedValue>) -> Self {
         Self::Vec(x.into())
     }
 
-    pub fn keyset(x: Vec<TypedValue<'arena>>) -> Self {
+    pub fn keyset(x: Vec<TypedValue>) -> Self {
         Self::Keyset(x.into())
     }
 
-    pub fn dict(x: Vec<DictEntry<'arena>>) -> Self {
+    pub fn dict(x: Vec<DictEntry>) -> Self {
         Self::Dict(x.into())
     }
 

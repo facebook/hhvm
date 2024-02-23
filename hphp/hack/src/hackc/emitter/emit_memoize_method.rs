@@ -565,7 +565,7 @@ struct Args<'r, 'ast, 'arena> {
     pub info: &'r MemoizeInfo<'arena>,
     pub method: &'r ast::Method_,
     pub scope: &'r Scope<'ast, 'arena>,
-    pub deprecation_info: Option<&'r [TypedValue<'arena>]>,
+    pub deprecation_info: Option<&'r [TypedValue]>,
     pub params: &'r [ast::FunParam],
     pub ret: Option<&'r ast::Hint>,
     pub method_id: &'r hhbc::MethodName<'arena>,

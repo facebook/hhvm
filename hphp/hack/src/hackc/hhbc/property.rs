@@ -21,7 +21,7 @@ pub struct Property<'arena> {
     pub flags: Attr,
     pub attributes: Vector<Attribute<'arena>>,
     pub visibility: Visibility,
-    pub initial_value: Maybe<TypedValue<'arena>>,
+    pub initial_value: Maybe<TypedValue>,
     pub type_info: TypeInfo<'arena>,
     pub doc_comment: Maybe<Vector<u8>>,
 }

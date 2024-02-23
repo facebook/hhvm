@@ -18,7 +18,7 @@ use hhbc::TypedValue;
 pub(crate) enum Input<'arena> {
     Class(String),
     Constant(u32),
-    ConstantArray(TypedValue<'arena>),
+    ConstantArray(&'arena TypedValue),
     // A value that appears exactly once in the stack or locals.
     Owned(u32),
     // A value that is guaranteed to be used in a read-only context.

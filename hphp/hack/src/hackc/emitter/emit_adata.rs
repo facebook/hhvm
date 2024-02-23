@@ -12,10 +12,7 @@ use hhbc::TypedValue;
 use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
 
-pub fn typed_value_into_instr<'a>(
-    e: &mut Emitter<'a, '_>,
-    tv: TypedValue<'a>,
-) -> Result<InstrSeq<'a>> {
+pub fn typed_value_into_instr<'a>(e: &mut Emitter<'a, '_>, tv: TypedValue) -> Result<InstrSeq<'a>> {
     match tv {
         TypedValue::Uninit => Err(Error::unrecoverable("rewrite_typed_value: uninit")),
         TypedValue::Null => Ok(instr::null()),
@@ -24,7 +21,7 @@ pub fn typed_value_into_instr<'a>(
         TypedValue::Int(i) => Ok(instr::int(i)),
         TypedValue::String(s) => Ok(instr::string(e.alloc, s.as_bytes())),
         TypedValue::LazyClass(s) => {
-            let classid = ClassName::from_ast_name_and_mangle(e.alloc, s.unsafe_as_str());
+            let classid = ClassName::from_ast_name_and_mangle(e.alloc, s);
             Ok(instr::lazy_class(classid))
         }
         TypedValue::Float(f) => Ok(instr::double(f)),
@@ -43,10 +40,10 @@ pub fn typed_value_into_instr<'a>(
     }
 }
 
-fn get_array_identifier<'a>(e: &mut Emitter<'a, '_>, tv: TypedValue<'a>) -> AdataId {
+fn get_array_identifier(e: &mut Emitter<'_, '_>, tv: TypedValue) -> AdataId {
     if e.options().hhbc.array_provenance {
-        e.adata_state_mut().push(tv)
+        e.adata_state.push(tv)
     } else {
-        e.adata_state_mut().intern(tv)
+        e.adata_state.intern(tv)
     }
 }

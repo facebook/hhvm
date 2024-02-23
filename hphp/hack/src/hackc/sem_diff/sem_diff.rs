@@ -180,9 +180,9 @@ fn sem_diff_attributes(
 fn sem_diff_body<'arena, 'a>(
     path: &CodePath<'_>,
     a: &'arena Body<'arena>,
-    a_adata: &'a HashMap<AdataId, &'a TypedValue<'arena>>,
+    a_adata: &'a HashMap<AdataId, &'a TypedValue>,
     b: &'arena Body<'arena>,
-    b_adata: &'a HashMap<AdataId, &'a TypedValue<'arena>>,
+    b_adata: &'a HashMap<AdataId, &'a TypedValue>,
 ) -> Result<()> {
     let Body {
         body_instrs: _,
@@ -303,9 +303,9 @@ fn sem_diff_param<'arena>(
 fn sem_diff_class<'arena, 'a>(
     path: &CodePath<'_>,
     a: &'arena Class<'arena>,
-    a_adata: &'a HashMap<AdataId, &'a TypedValue<'arena>>,
+    a_adata: &'a HashMap<AdataId, &'a TypedValue>,
     b: &'arena Class<'arena>,
-    b_adata: &'a HashMap<AdataId, &'a TypedValue<'arena>>,
+    b_adata: &'a HashMap<AdataId, &'a TypedValue>,
 ) -> Result<()> {
     let Class {
         attributes: a_attributes,
@@ -461,7 +461,7 @@ fn sem_diff_type_constant(
     Ok(())
 }
 
-fn sem_diff_typed_value(path: &CodePath<'_>, a: &TypedValue<'_>, b: &TypedValue<'_>) -> Result<()> {
+fn sem_diff_typed_value(path: &CodePath<'_>, a: &TypedValue, b: &TypedValue) -> Result<()> {
     match (a, b) {
         (TypedValue::Vec(av), TypedValue::Vec(bv)) => {
             sem_diff_iter(path, av.iter(), bv.iter(), sem_diff_typed_value)
@@ -472,8 +472,8 @@ fn sem_diff_typed_value(path: &CodePath<'_>, a: &TypedValue<'_>, b: &TypedValue<
             // order is based on the first occurance. The value is based on the
             // last occurance - this matches IndexSet::insert() (and thus
             // collect()).
-            let ad: hash::IndexSet<&TypedValue<'_>> = ak.iter().collect();
-            let bd: hash::IndexSet<&TypedValue<'_>> = bk.iter().collect();
+            let ad: hash::IndexSet<&TypedValue> = ak.iter().collect();
+            let bd: hash::IndexSet<&TypedValue> = bk.iter().collect();
             sem_diff_iter(
                 path,
                 ad.iter().copied(),
@@ -487,11 +487,11 @@ fn sem_diff_typed_value(path: &CodePath<'_>, a: &TypedValue<'_>, b: &TypedValue<
             // order is based on the first occurance. The value is based on the
             // last occurance - this matches IndexMap::insert() (and thus
             // collect()).
-            let ad: hash::IndexMap<&TypedValue<'_>, &TypedValue<'_>> = ad
+            let ad: hash::IndexMap<&TypedValue, &TypedValue> = ad
                 .iter()
                 .map(|hhbc::Entry { key, value }| (key, value))
                 .collect();
-            let bd: hash::IndexMap<&TypedValue<'_>, &TypedValue<'_>> = bd
+            let bd: hash::IndexMap<&TypedValue, &TypedValue> = bd
                 .iter()
                 .map(|hhbc::Entry { key, value }| (key, value))
                 .collect();
@@ -515,9 +515,9 @@ fn sem_diff_fatal(path: &CodePath<'_>, a: &Fatal, b: &Fatal) -> Result<()> {
 fn sem_diff_function<'arena, 'a>(
     path: &CodePath<'_>,
     a: &'arena Function<'arena>,
-    a_adata: &'a HashMap<AdataId, &'a TypedValue<'arena>>,
+    a_adata: &'a HashMap<AdataId, &'a TypedValue>,
     b: &'arena Function<'arena>,
-    b_adata: &'a HashMap<AdataId, &'a TypedValue<'arena>>,
+    b_adata: &'a HashMap<AdataId, &'a TypedValue>,
 ) -> Result<()> {
     let Function {
         attributes: a_attributes,
@@ -552,9 +552,9 @@ fn sem_diff_function<'arena, 'a>(
 fn sem_diff_method<'arena, 'a>(
     path: &CodePath<'_>,
     a: &'arena Method<'arena>,
-    a_adata: &'a HashMap<AdataId, &'a TypedValue<'arena>>,
+    a_adata: &'a HashMap<AdataId, &'a TypedValue>,
     b: &'arena Method<'arena>,
-    b_adata: &'a HashMap<AdataId, &'a TypedValue<'arena>>,
+    b_adata: &'a HashMap<AdataId, &'a TypedValue>,
 ) -> Result<()> {
     let Method {
         attributes: a_attributes,

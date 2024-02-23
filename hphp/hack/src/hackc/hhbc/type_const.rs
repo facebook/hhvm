@@ -13,6 +13,6 @@ use crate::typed_value::TypedValue;
 #[repr(C)]
 pub struct TypeConstant<'arena> {
     pub name: Str<'arena>,
-    pub initializer: Maybe<TypedValue<'arena>>,
+    pub initializer: Maybe<TypedValue>,
     pub is_abstract: bool,
 }

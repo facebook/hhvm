@@ -34,7 +34,7 @@ use crate::CmpError;
 use crate::MapName;
 use crate::Result;
 
-impl MapName for hhbc::Adata<'_> {
+impl MapName for hhbc::Adata {
     fn get_name(&self) -> String {
         self.id.to_string()
     }
@@ -476,7 +476,7 @@ fn cmp_properties(a: &Property<'_>, b: &Property<'_>) -> Result {
 // T126391106: bytecode_printer/hhbc::Unit is not consistent --
 // if there is no initial value the underlying
 // hhbc::Unit may have Just(Null) or Nothing in that slot.
-fn cmp_initial_value(a: &Maybe<TypedValue<'_>>, b: &Maybe<TypedValue<'_>>) -> Result {
+fn cmp_initial_value(a: &Maybe<TypedValue>, b: &Maybe<TypedValue>) -> Result {
     match (a, b) {
         (Maybe::Nothing, Maybe::Just(TypedValue::Null))
         | (Maybe::Just(TypedValue::Null), Maybe::Nothing) => Ok(()),

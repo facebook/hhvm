@@ -5,12 +5,12 @@ use hash::HashMap;
 use crate::strings::StringCache;
 
 /// Builder for hhbc::Unit.adata.
-pub(crate) struct AdataCache<'a> {
-    adata: Vec<hhbc::Adata<'a>>,
+pub(crate) struct AdataCache {
+    adata: Vec<hhbc::Adata>,
     lookup: HashMap<Arc<ir::TypedValue>, usize>,
 }
 
-impl<'a> AdataCache<'a> {
+impl AdataCache {
     pub(crate) fn new() -> Self {
         Self {
             adata: Default::default(),
@@ -21,7 +21,7 @@ impl<'a> AdataCache<'a> {
     pub(crate) fn intern(
         &mut self,
         tv: Arc<ir::TypedValue>,
-        strings: &StringCache<'a>,
+        strings: &StringCache<'_>,
     ) -> hhbc::AdataId {
         let idx = self.lookup.entry(tv).or_insert_with_key(|tv| {
             let idx = self.adata.len();
@@ -33,7 +33,7 @@ impl<'a> AdataCache<'a> {
         self.adata[*idx].id
     }
 
-    pub(crate) fn finish(self) -> Vec<hhbc::Adata<'a>> {
+    pub(crate) fn finish(self) -> Vec<hhbc::Adata> {
         self.adata
     }
 }

@@ -94,6 +94,8 @@ pub enum ConfigFeature {
     RepoOptionsFlag(String),
     CompilerOption(String),
     NoBind,
+    PostProcess,
+    DefaultEarly,
 }
 
 #[derive(Debug, PartialEq, Default)]
@@ -105,7 +107,9 @@ pub struct ConfigFeatures {
     pub is_unit_cache_flag: bool,
     pub repo_options_flag: Option<String>,
     pub compiler_option: Option<String>,
-    pub is_no_bind: bool,
+    pub has_no_bind: bool,
+    pub has_post_process: bool,
+    pub has_default_early: bool,
 }
 
 #[derive(Debug, PartialEq)]
@@ -418,6 +422,8 @@ fn parse_features<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                         )),
                         |(_, name)| ConfigFeature::CompilerOption(name.to_string()),
                     ),
+                    value(ConfigFeature::PostProcess, tag("postprocess")),
+                    value(ConfigFeature::DefaultEarly, tag("defaultearly")),
                 )),
             ),
         )),
@@ -432,7 +438,9 @@ fn parse_features<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                     ConfigFeature::UnitCacheFlag => features.is_unit_cache_flag = true,
                     ConfigFeature::RepoOptionsFlag(name) => features.repo_options_flag = Some(name),
                     ConfigFeature::CompilerOption(name) => features.compiler_option = Some(name),
-                    ConfigFeature::NoBind => features.is_no_bind = true,
+                    ConfigFeature::NoBind => features.has_no_bind = true,
+                    ConfigFeature::PostProcess => features.has_post_process = true,
+                    ConfigFeature::DefaultEarly => features.has_default_early = true,
                 }
             }
             features
@@ -571,6 +579,13 @@ fn generate_files(sections: Vec<ConfigSection>, output_dir: PathBuf) {
                     shortname
                 ));
             }
+            if config.features.has_post_process {
+                private_methods.push(format!(
+                    "  static void {}PostProcess({}& value);",
+                    shortname,
+                    config.type_.str(),
+                ));
+            }
         }
 
         public_methods.push("  static void Load(const IniSettingMap& ini, const Hdf& config);");
@@ -670,30 +685,38 @@ private:
                     config.type_.str(),
                     section_shortname,
                     shortname,
-                    if config.features.is_no_bind {
+                    if config.features.has_no_bind || config.features.has_default_early {
                         &default_value
                     } else {
                         config.type_.default()
                     },
                 ));
-                if !config.features.is_no_bind {
+                let used_default_value = if config.features.has_default_early {
+                    &shortname
+                } else {
+                    &default_value
+                };
+                if !config.features.has_no_bind {
                     bind_calls.push(format!(
                         r#"  Config::Bind({}, ini, config, "{}", {});"#,
                         shortname,
                         config.hdf_path(section),
-                        &default_value,
+                        used_default_value
                     ));
+                    if config.features.has_post_process {
+                        bind_calls.push(format!(r#"  {}PostProcess({});"#, shortname, shortname));
+                    }
                 }
                 debug_calls.push(format!(
                     r#"  fmt::format_to(std::back_inserter(out), "Cfg::{}::{} = {{}}\n", {});"#,
                     section_shortname, shortname, shortname,
                 ));
-            }
-            if let Some(compiler_option_name) = &config.features.compiler_option {
-                compiler_option_calls.push(format!(
-                    r#"  Config::Bind({}, ini, config, "{}", {});"#,
-                    shortname, compiler_option_name, default_value,
-                ));
+                if let Some(compiler_option_name) = &config.features.compiler_option {
+                    compiler_option_calls.push(format!(
+                        r#"  Config::Bind({}, ini, config, "{}", {});"#,
+                        shortname, compiler_option_name, used_default_value,
+                    ));
+                }
             }
         }
 

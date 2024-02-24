@@ -24,6 +24,8 @@ namespace php tmeta
 namespace go thrift.lib.thrift.metadata
 
 /*
+ * 'metadata.thrift' is currently frozen in favor of 'schema.thrift'.
+ *
  * Keep synced with : thrift/compiler/generate/t_hack_generator.cc
  */
 include "thrift/annotation/cpp.thrift"

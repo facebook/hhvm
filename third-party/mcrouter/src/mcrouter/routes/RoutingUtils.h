@@ -129,8 +129,13 @@ static std::string getRoutingKey(
 }
 
 template <class RouterInfo, class Request>
+bool hasFiberLocalRoutingKey() {
+  return mcrouter::fiber_local<RouterInfo>::getCustomRoutingKey().has_value();
+}
+
+template <class RouterInfo, class Request>
 folly::StringPiece routingKeyFiberLocal(const Request& req) {
-  if (mcrouter::fiber_local<RouterInfo>::getCustomRoutingKey().has_value()) {
+  if (hasFiberLocalRoutingKey<RouterInfo, Request>()) {
     return mcrouter::fiber_local<RouterInfo>::getCustomRoutingKey().value();
   }
   return req.key_ref()->routingKey();

@@ -15,9 +15,11 @@
 #include "mcrouter/lib/test/RouteHandleTestUtil.h"
 #include "mcrouter/lib/test/TestRouteHandle.h"
 
+#include "mcrouter/routes/KeyParseRoute.h"
 #include "mcrouter/routes/KeySplitRoute.h"
 #include "mcrouter/routes/McrouterRouteHandle.h"
 #include "mcrouter/routes/test/RouteHandleTestBase.h"
+#include "mcrouter/routes/test/RouteHandleTestUtil.h"
 
 using namespace hellogoodbye;
 using namespace facebook::memcache;
@@ -31,7 +33,10 @@ namespace memcache {
 namespace mcrouter {
 
 using TestHandle = TestHandleImpl<MemcacheRouteHandleIf>;
-using RouteHandle = McrouterRouteHandle<KeySplitRoute<MemcacheRouterInfo>>;
+using KeySplitRouteHandle =
+    McrouterRouteHandle<KeySplitRoute<MemcacheRouterInfo>>;
+using KeyParseRouteHandle =
+    McrouterRouteHandle<KeyParseRoute<MemcacheRouterInfo>>;
 
 class KeySplitRouteTest : public RouteHandleTestBase<MemcacheRouterInfo> {
  public:
@@ -71,6 +76,18 @@ class KeySplitRouteTest : public RouteHandleTestBase<MemcacheRouterInfo> {
     return true;
   }
 
+  auto getRoutingConfig(size_t numParts, std::string delimiter = ":") {
+    return fmt::format(
+        R"(
+  {{
+    "num_routing_parts": {},
+    "delimiter": "{}"
+  }}
+  )",
+        numParts,
+        delimiter);
+  }
+
   void testCreate(size_t numReplicas, bool allSync, bool firstHit = false) {
     // set up the route handle under test
     if (th_)
@@ -79,8 +96,8 @@ class KeySplitRouteTest : public RouteHandleTestBase<MemcacheRouterInfo> {
       rh_.reset();
     th_ = std::make_shared<TestHandle>(
         GetRouteTestData(carbon::Result::FOUND, "a"));
-    rh_ = std::make_shared<RouteHandle>(
-        RouteHandle(th_->rh, numReplicas, allSync, firstHit));
+    rh_ = std::make_shared<KeySplitRouteHandle>(
+        KeySplitRouteHandle(th_->rh, numReplicas, allSync, firstHit));
     replicas_ = numReplicas;
     allSync_ = allSync;
     firstHit_ = firstHit;
@@ -170,7 +187,7 @@ class KeySplitRouteTest : public RouteHandleTestBase<MemcacheRouterInfo> {
 
   static constexpr folly::StringPiece kMemcacheReplicaSeparator = "::";
   std::shared_ptr<TestHandle> th_;
-  std::shared_ptr<RouteHandle> rh_;
+  std::shared_ptr<KeySplitRouteHandle> rh_;
   std::shared_ptr<MemcacheRouteHandleIf> testRh_;
   folly::StringPiece key_;
   size_t replicas_;
@@ -398,7 +415,8 @@ TEST_F(KeySplitRouteTest, FirstHitTest) {
   th->setResultGenerator([key](std::string reqKey) {
     return reqKey == key ? carbon::Result::FOUND : carbon::Result::NOTFOUND;
   });
-  auto rh = std::make_shared<RouteHandle>(RouteHandle(th->rh, 3, true, true));
+  auto rh = std::make_shared<KeySplitRouteHandle>(
+      KeySplitRouteHandle(th->rh, 3, true, true));
 
   // create expected keys, the first key is not modified.
   std::vector<std::string> expectedKeys;
@@ -440,7 +458,8 @@ TEST_F(KeySplitRouteTest, FirstHitTestHashStop) {
   th->setResultGenerator([key](std::string reqKey) {
     return reqKey == key ? carbon::Result::FOUND : carbon::Result::NOTFOUND;
   });
-  auto rh = std::make_shared<RouteHandle>(RouteHandle(th->rh, 3, true, true));
+  auto rh = std::make_shared<KeySplitRouteHandle>(
+      KeySplitRouteHandle(th->rh, 3, true, true));
 
   // create expected keys, the first key is not modified.
   std::vector<std::string> expectedKeys;
@@ -478,7 +497,8 @@ TEST_F(KeySplitRouteTest, FirstHitWorstCaseTest) {
 
   auto th = std::make_shared<TestHandle>(
       GetRouteTestData(carbon::Result::NOTFOUND, "a"));
-  auto rh = std::make_shared<RouteHandle>(RouteHandle(th->rh, 3, true, true));
+  auto rh = std::make_shared<KeySplitRouteHandle>(
+      KeySplitRouteHandle(th->rh, 3, true, true));
 
   // create expected keys, the first key is not modified.
   std::vector<std::string> expectedKeys;
@@ -507,7 +527,8 @@ TEST_F(KeySplitRouteTest, FirstHitWorstCaseTestHashStop) {
 
   auto th = std::make_shared<TestHandle>(
       GetRouteTestData(carbon::Result::NOTFOUND, "a"));
-  auto rh = std::make_shared<RouteHandle>(RouteHandle(th->rh, 3, true, true));
+  auto rh = std::make_shared<KeySplitRouteHandle>(
+      KeySplitRouteHandle(th->rh, 3, true, true));
 
   // create expected keys, the first key is not modified.
   std::vector<std::string> expectedKeys;
@@ -562,6 +583,71 @@ TEST_F(KeySplitRouteTest, TestLongKey) {
     EXPECT_FALSE(th_->saw_keys.empty());
     EXPECT_EQ(expectedKeyReplica, th_->saw_keys[0]);
     th_->saw_keys.clear();
+  }
+}
+
+// KeyParse tests
+TEST_F(KeySplitRouteTest, NoAllSyncSetKeyParse) {
+  size_t numReplicas = 10;
+  testCreate(numReplicas, false);
+  auto keyParseRouteConfig = getRoutingConfig(3);
+  auto rh = makeKeyParseRoute<MemcacheRouterInfo>(
+      rh_, folly::parseJson(keyParseRouteConfig));
+  mockFiberContext();
+  std::string key = "abc:d:e:f:g";
+
+  for (size_t i = 0; i < numReplicas; ++i) {
+    globals::HostidMock hostidMock(i);
+
+    // single set should not use the fiber manager
+    McSetRequest reqSet(key);
+    reqSet.value_ref() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, "value");
+
+    auto reply = rh->route(reqSet);
+
+    // verify
+    auto expectedKeyReplica = folly::to<std::string>(
+        "abc:d:e:", kMemcacheReplicaSeparator, i % numReplicas);
+    EXPECT_FALSE(th_->saw_keys.empty());
+    EXPECT_FALSE(th_->sawCustomRoutingkeys.empty());
+    LOG(ERROR) << "sawCustomRoutingkeys = " << th_->sawCustomRoutingkeys.size();
+    // first replica is the original key
+    if (i == 0) {
+      EXPECT_EQ(key, th_->saw_keys[0]);
+    } else {
+      EXPECT_EQ(expectedKeyReplica, th_->sawCustomRoutingkeys[i]);
+    }
+  }
+}
+
+TEST_F(KeySplitRouteTest, GetKeyParse) {
+  for (size_t j = 0; j < 2; ++j) {
+    size_t numReplicas = 10;
+    constexpr folly::StringPiece key = "abc:d:e:f";
+    testCreate(numReplicas, j == 0);
+    auto keyParseRouteConfig = getRoutingConfig(3);
+    auto rh = makeKeyParseRoute<MemcacheRouterInfo>(
+        rh_, folly::parseJson(keyParseRouteConfig));
+    mockFiberContext();
+
+    for (size_t i = 0; i < numReplicas; ++i) {
+      globals::HostidMock hostidMock(i);
+
+      // submit get based on our replica
+      auto reply = rh->route(McGetRequest(key));
+
+      // verify
+      auto expectedKeyReplica = folly::to<std::string>(
+          "abc:d:e:", kMemcacheReplicaSeparator, i % numReplicas);
+      EXPECT_FALSE(th_->saw_keys.empty());
+
+      // first replica is the original key
+      if (i == 0) {
+        EXPECT_EQ(key, th_->saw_keys[0]);
+      } else {
+        EXPECT_EQ(expectedKeyReplica, th_->sawCustomRoutingkeys[i]);
+      }
+    }
   }
 }
 

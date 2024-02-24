@@ -18,6 +18,7 @@
 #include "mcrouter/lib/fbi/cpp/FuncGenerator.h"
 #include "mcrouter/lib/fbi/cpp/globals.h"
 #include "mcrouter/lib/network/gen/MemcacheMessages.h"
+#include "mcrouter/routes/RoutingUtils.h"
 
 namespace facebook {
 namespace memcache {
@@ -185,7 +186,13 @@ class KeySplitRoute {
   template <class Request>
   Request copyAndAugment(Request& originalReq, uint64_t replicaId) const {
     auto req = originalReq;
-    if (req.key_ref()->hasHashStop()) {
+    if (hasFiberLocalRoutingKey<RouterInfo, Request>()) {
+      auto routingKey = folly::to<std::string>(
+          routingKeyFiberLocal<RouterInfo, Request>(req),
+          kMemcacheReplicaSeparator,
+          replicaId);
+      fiber_local<RouterInfo>::setCustomRoutingKey(std::move(routingKey));
+    } else if (req.key_ref()->hasHashStop()) {
       req.key_ref() = folly::to<std::string>(
           req.key_ref()->routingKey(),
           kMemcacheReplicaSeparator,

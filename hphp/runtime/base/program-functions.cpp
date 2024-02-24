@@ -1877,6 +1877,9 @@ static int execute_program_impl(int argc, char** argv) {
     LightProcess::SetLostChildHandler([](pid_t /*child*/) {
       if (!HttpServer::Server) return;
       if (!HttpServer::Server->isStopped()) {
+        Logger::Error(
+          "Received SIGCHLD for light process, shutting down server"
+        );
         HttpServer::Server->stopOnSignal(SIGCHLD);
       }
     });

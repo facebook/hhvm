@@ -49,8 +49,10 @@
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/sync-signal.h"
+#include "hphp/util/user-info.h"
 
 #include <folly/Conv.h>
+#include <folly/FileUtil.h>
 #include <folly/Format.h>
 #include <folly/portability/Unistd.h>
 
@@ -83,7 +85,36 @@ folly::MicroSpinLock HttpServer::StatsLock;
 // signals upon which the server shuts down gracefully
 static const int kTermSignals[] = { SIGHUP, SIGINT, SIGTERM, SIGUSR1 };
 
-static void on_kill_server(int sig) {   // runs in signal handler thread.
+void log_signal(int sig, siginfo_t* info) {
+  if (!RO::EvalLogHttpServerSignalSource) return;
+
+  auto const sname = strsignal(sig);
+  std::string pname = "<unknown>";
+  std::string uname = "<unknown>";
+
+  folly::readFile(
+    folly::to<std::string>("/proc/", info->si_pid, "/cmdline").data(),
+    pname
+  );
+
+  try {
+    UserInfo user{info->si_uid};
+    uname = user.pw->pw_name;
+  } catch (const Exception&) {
+  }
+
+  Logger::Error(
+    "Received signal `%s' from %s via `%s' (UID: %i, PID: %i)",
+    sname,
+    uname.data(),
+    pname.data(),
+    info->si_uid,
+    info->si_pid
+  );
+}
+
+// runs in signal handler thread.
+static void on_kill_server(int sig, siginfo_t* info) {
   static std::atomic_flag flag = ATOMIC_FLAG_INIT;
   if (flag.test_and_set()) return;      // it was already called once.
 
@@ -92,6 +123,10 @@ static void on_kill_server(int sig) {   // runs in signal handler thread.
     // server is already shutting down, and we don't want to use the default
     // handlers which may immediately terminate the process.
     ignore_sync_signals();
+
+    // Write information to the error log to make determining the sender of the
+    // signal easier.
+    log_signal(sig, info);
 
     int zero = 0;
     HttpServer::SignalReceived.compare_exchange_strong(zero, sig);
@@ -225,7 +260,7 @@ HttpServer::HttpServer() {
   );
 
   for (auto const sig : kTermSignals) {
-    sync_signal(sig, on_kill_server);
+    sync_signal_info(sig, on_kill_server);
   }
 }
 

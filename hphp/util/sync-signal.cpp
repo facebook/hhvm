@@ -16,6 +16,7 @@
 
 #include "hphp/util/sync-signal.h"
 
+#include "hphp/util/either.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 
@@ -57,6 +58,10 @@ namespace HPHP {
 
 namespace {
 
+enum class StoredInfoState {
+  Free, Recording, Allocated
+};
+
 struct SyncSignals {
   ~SyncSignals() {
     // Ignore all signals after exit().
@@ -68,9 +73,14 @@ struct SyncSignals {
   std::atomic<pthread_t> m_handlerThread{};
   std::atomic_bool m_handlerThreadStarted{false};
 
+  std::atomic<StoredInfoState> m_siState{StoredInfoState::Free};
+  std::atomic<siginfo_t> m_storedInfo{};
+
+  using Handler = Either<sighandler_sync_t, sigaction_sync_t>;
+
   // "Synchronous" signal handlers.  This must be initialized before the handler
   // thread starts, and cannot change afterwards.
-  std::map<int, sighandler_sync_t> m_syncHandlers;
+  std::map<int, Handler> m_syncHandlers;
   // We could've called sigemptyset() to initialize it, but it just does zero
   // fill on both Linux and Mac.
   sigset_t m_syncSignals{};
@@ -82,7 +92,8 @@ SyncSignals g_state;
 // handler should be `block_and_raise()`.  Usually, the signal handler is never
 // invoked (because the signal is blocked).  But in case thread changes its own
 // mask, we change it back here.
-void block_and_raise(int signo) {
+//void block_and_raise(int signo) {
+void block_and_raise(int signo, siginfo_t* info, void* args) {
 #ifndef NDEBUG
   if (!g_state.m_syncHandlers.count(signo)) {
     abort();
@@ -91,6 +102,20 @@ void block_and_raise(int signo) {
   pthread_sigmask(SIG_BLOCK, &g_state.m_syncSignals, nullptr);
   // Send the signal to the dedicated handling thread.
   if (g_state.m_handlerThreadStarted.load(std::memory_order_acquire)) {
+    auto state = StoredInfoState::Free;
+    auto canStore = g_state.m_siState.compare_exchange_strong(
+      state,
+      StoredInfoState::Recording,
+      std::memory_order_acquire,
+      std::memory_order_relaxed
+    );
+    if (canStore) {
+      g_state.m_storedInfo.store(*info, std::memory_order::release);
+      g_state.m_siState.store(
+        StoredInfoState::Allocated,
+        std::memory_order_release
+      );
+    }
     pthread_kill(g_state.m_handlerThread.load(), signo);
   }
 }
@@ -117,22 +142,46 @@ void* handle_signals(void*) {
   param.sched_priority = sched_get_priority_min(SCHED_RR);
   sched_setscheduler(0, SCHED_RR | SCHED_RESET_ON_FORK, &param);
 #endif
-  int signo = 0;
-  while (!sigwait(&g_state.m_syncSignals, &signo)) {
-    // dispatch signo
-    auto const iter = g_state.m_syncHandlers.find(signo);
-    if (iter == g_state.m_syncHandlers.end()) {
-      Logger::FError("Cannot find handler for signal {}, ignoring", signo);
-      continue;
+  int signo;
+  siginfo_t info;
+  do {
+    while ((signo = sigwaitinfo(&g_state.m_syncSignals, &info)) != -1) {
+      // dispatch signo
+      auto const iter = g_state.m_syncHandlers.find(signo);
+      if (iter == g_state.m_syncHandlers.end()) {
+        Logger::FError("Cannot find handler for signal {}, ignoring", signo);
+        continue;
+      }
+
+      siginfo_t stored;
+      siginfo_t* infop = &info;
+      if (info.si_pid == getpid()) {
+        auto const state = g_state.m_siState.load(std::memory_order_acquire);
+        if (state == StoredInfoState::Allocated) {
+          stored = g_state.m_storedInfo.load(std::memory_order_acquire);
+          if (stored.si_signo == signo) {
+            infop = &stored;
+            g_state.m_siState.store(
+              StoredInfoState::Free,
+              std::memory_order_acquire
+            );
+          }
+        }
+      }
+
+      // Invoke the handler, which can do anything, including manipulating
+      // signal handlers/masks, raising another signal, and calling
+      // pthread_exit() to stop this thread.
+      iter->second.match(
+        [&] (auto handler) {
+          if (handler != (sighandler_sync_t)SIG_IGN) handler(signo);
+        },
+        [&] (auto action) {
+          if (action != (sigaction_sync_t)SIG_IGN) action(signo, infop);
+        }
+      );
     }
-    if (iter->second == (sighandler_sync_t)SIG_IGN) {
-      continue;
-    }
-    // Invoke the handler, which can do anything, including manipulating signal
-    // handlers/masks, raising another signal, and calling pthread_exit() to
-    // stop this thread.
-    iter->second(signo);
-  }
+  } while (errno == EINTR);
   Logger::Error("sigwait() failed");
   reset_sync_signals();
   return nullptr;
@@ -149,7 +198,12 @@ void postfork_clear() {
 void block_sync_signals() {
   pthread_sigmask(SIG_BLOCK, &g_state.m_syncSignals, nullptr);
   for (auto iter : g_state.m_syncHandlers) {
-    signal(iter.first, block_and_raise);
+    struct sigaction sa{};
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags |= SA_SIGINFO | SA_RESTART;
+    sa.sa_sigaction = &block_and_raise;
+
+    sigaction(iter.first, &sa, nullptr);
   }
   // If we ever fork(), avoid affecting child processes.
   static std::atomic_flag flag ATOMIC_FLAG_INIT;
@@ -170,6 +224,18 @@ bool sync_signal(int signo, sighandler_sync_t sync_handler) {
   // We don't support SIG_DFL here.  SIG_IGN is OK.
   if (sync_handler == (sighandler_sync_t)SIG_DFL) return false;
   g_state.m_syncHandlers[signo] = sync_handler;
+  sigaddset(&g_state.m_syncSignals, signo);
+  return true;
+}
+
+bool sync_signal_info(int signo, sigaction_sync_t sync_action) {
+  if (g_state.m_handlerThreadStarted.load(std::memory_order_acquire)) {
+    return false;
+  }
+  if (signo <= 0 || signo >= Process::kNSig) return false;
+  // We don't support SIG_DFL here.  SIG_IGN is OK.
+  if (sync_action == (sigaction_sync_t)SIG_DFL) return false;
+  g_state.m_syncHandlers[signo] = sync_action;
   sigaddset(&g_state.m_syncSignals, signo);
   return true;
 }

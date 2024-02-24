@@ -18,14 +18,19 @@
 
 #include <cstdint>
 #include <pthread.h>
+#include <signal.h>
 
 namespace HPHP {
 
 using sighandler_sync_t = void(*)(int);
+using sigaction_sync_t = void(*)(int, siginfo_t*);
 
 // Similar to signal(), but allows non-async-signal-safe functions to be used in
 // handlers. Return false upon failure.
 bool sync_signal(int signo, sighandler_sync_t h = nullptr);
+
+// Synchronous signal handling for sigaction() style handlers.
+bool sync_signal_info(int signo, sigaction_sync_t h = nullptr);
 
 // Block signals that we plan to handle synchronously, and start the thread to
 // process the signals.

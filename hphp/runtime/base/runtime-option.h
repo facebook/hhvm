@@ -1262,6 +1262,7 @@ struct RuntimeOption {
   /* Enables the non-surprise flag based implementation of
      fb_intercept2 */                                                   \
   F(bool, FastMethodIntercept, false)                                   \
+  F(bool, LogHttpServerSignalSource, true)                              \
   /* */
 
 private:

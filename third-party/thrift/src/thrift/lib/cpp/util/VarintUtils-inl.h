@@ -221,11 +221,21 @@ inline size_t readContiguousVarintMediumSlowU64BMI2(
   // first 0 continuation bit, junk (well, message data that we're not
   // interested in for varint decoding purposes).
   uint64_t bits = folly::loadUnaligned<uint64_t>(p);
-  uint64_t continuationBits = _pext_u64(bits, 0x8080808080808080ULL);
-  if (continuationBits == 0xFF) {
+
+  const uint64_t kContinuationBitMask = 0x8080808080808080ULL;
+  uint64_t continuationBits = bits & kContinuationBitMask;
+  if (continuationBits == kContinuationBitMask) {
+    // The maximum bytes of int64 would be ceil(64/7)=10, as we had used
+    // tryReadFirstTwoBytesU64 to read 2 bytes, there would be 8 bytes leftover
+    // in maximum.
+    //
+    // Overall, we don't expect the continuation bit mask would be all set.
     throwInvalidVarint();
   }
-  size_t intBytes = __builtin_ctzll(continuationBits + 1) + 1;
+  // By reset data bits and toggle the continuation bits, the tailing zeros
+  // should be intBytes*8-1
+  size_t intBytes =
+      (__builtin_ctzll(continuationBits ^ kContinuationBitMask) >> 3) + 1;
 
   uint64_t mask = (1ULL << (8 * intBytes - 1)) - 1;
   // You might think it would make more sense to to the pext first and mask

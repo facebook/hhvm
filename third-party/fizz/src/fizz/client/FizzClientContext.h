@@ -112,7 +112,7 @@ class FizzClientContext {
   /**
    * Sets the certificate to use if the server requests client authentication
    */
-  void setClientCertificate(std::shared_ptr<SelfCert> cert) {
+  void setClientCertificate(std::shared_ptr<const SelfCert> cert) {
     clientCert_ = std::move(cert);
   }
 

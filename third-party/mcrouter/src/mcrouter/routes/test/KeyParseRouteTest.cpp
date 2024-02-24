@@ -93,4 +93,37 @@ TEST(KeyParseRouteTest, testParsing) {
           testing::HasSubstr("KeyParseRoute: missing single char delimiter")));
 }
 
+TEST(KeyParseRouteTest, keyParseWithBucketRoute) {
+  std::vector<std::shared_ptr<TestHandle>> srHandleVec{
+      std::make_shared<TestHandle>(
+          GetRouteTestData(carbon::Result::FOUND, "a")),
+  };
+  auto mockSrHandle = get_route_handles(srHandleVec)[0];
+
+  constexpr folly::StringPiece kMcBucketRouteConfig = R"(
+  {
+    "bucketize": true,
+    "total_buckets": 100,
+    "bucketization_keyspace": "testRegion:testPool"
+  }
+  )";
+
+  auto rh = makeMcBucketRoute<MemcacheRouterInfo>(
+      mockSrHandle, folly::parseJson(kMcBucketRouteConfig));
+  ASSERT_TRUE(rh);
+  auto keyParseRouteConfig = getRoutingConfig(3);
+  auto json = folly::parseJson(keyParseRouteConfig);
+
+  auto keyParseRh = makeKeyParseRoute<MemcacheRouterInfo>(rh, json);
+  ASSERT_TRUE(keyParseRh);
+  mockFiberContext();
+  keyParseRh->route(McGetRequest("cache:is:key:to:scaling")); // bucketId == 80
+  keyParseRh->route(McGetRequest("cache:is:key:to:success")); // bucketId == 80
+  auto proxy = &fiber_local<MemcacheRouterInfo>::getSharedCtx()->proxy();
+  EXPECT_EQ(2, proxy->stats().getValue(bucketized_routing_stat));
+  EXPECT_EQ(2, srHandleVec[0]->sawBucketIds.size());
+  EXPECT_EQ(80, srHandleVec[0]->sawBucketIds[0]);
+  EXPECT_EQ(80, srHandleVec[0]->sawBucketIds[1]);
+}
+
 } // namespace facebook::memcache::mcrouter

@@ -22,18 +22,6 @@ namespace detail {
 std::vector<std::pair<std::string, Ch3HashFunc>> buildPrefixMap(
     const std::unordered_map<std::string, uint64_t>& map);
 
-FOLLY_ALWAYS_INLINE size_t getBucket(
-    const folly::StringPiece key,
-    const memcache::LowerBoundPrefixMap<Ch3HashFunc>& prefixMap,
-    const Ch3HashFunc& defaultCh3) {
-  if (!prefixMap.empty()) {
-    auto it = prefixMap.findPrefix(key);
-    if (it != prefixMap.end()) {
-      return defaultCh3(folly::to<std::string>(it->key(), it->value()(key)));
-    }
-  }
-  return defaultCh3(key);
-}
 } // namespace detail
 
 struct McBucketRouteSettings {
@@ -107,7 +95,7 @@ class McBucketRoute {
       return t(*rh_, req);
     }
     auto bucketId = folly::fibers::runInMainContext([this, &req]() {
-      return detail::getBucket(getRoutingKey<Request>(req), prefixMap_, ch3_);
+      return getBucket(routingKeyFiberLocal<RouterInfo, Request>(req));
     });
     if (auto* ctx = fiber_local<RouterInfo>::getTraverseCtx()) {
       ctx->recordBucketizationData(
@@ -124,7 +112,7 @@ class McBucketRoute {
   template <class Request>
   ReplyT<Request> route(const Request& req) const {
     auto bucketId = folly::fibers::runInMainContext([this, &req]() {
-      return detail::getBucket(getRoutingKey<Request>(req), prefixMap_, ch3_);
+      return getBucket(routingKeyFiberLocal<RouterInfo, Request>(req));
     });
     auto& ctx = fiber_local<RouterInfo>::getSharedCtx();
 
@@ -149,6 +137,16 @@ class McBucketRoute {
   }
 
  private:
+  FOLLY_ALWAYS_INLINE size_t getBucket(const folly::StringPiece key) const {
+    if (!prefixMap_.empty()) {
+      auto it = prefixMap_.findPrefix(key);
+      if (it != prefixMap_.end()) {
+        return ch3_(folly::to<std::string>(it->key(), it->value()(key)));
+      }
+    }
+    return ch3_(key);
+  }
+
   const RouteHandlePtr rh_;
   const size_t totalBuckets_{0};
   const Ch3HashFunc ch3_;

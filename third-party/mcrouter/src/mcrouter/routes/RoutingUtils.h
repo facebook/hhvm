@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "mcrouter/McrouterFiberContext.h"
+
 namespace facebook {
 namespace memcache {
 namespace mcrouter {
@@ -104,6 +106,34 @@ static std::string getRoutingKey(const Request& req, const std::string& salt) {
   ret += req.key_ref()->routingKey();
   ret += salt;
   return ret;
+}
+
+/**
+ * Function to append the salt to the routing key.
+ *
+ * @param(key)          - the key
+ * @param(salt)         - salt to add to the end of the key; assumed not
+ * to be an empty string (use the other overload in that case)
+ *
+ * @return(std::string) - the resulting key
+ */
+template <class Request>
+static std::string getRoutingKey(
+    const std::string& key,
+    const std::string& salt) {
+  std::string ret;
+  ret.reserve(key.size() + salt.size());
+  ret += key;
+  ret += salt;
+  return ret;
+}
+
+template <class RouterInfo, class Request>
+folly::StringPiece routingKeyFiberLocal(const Request& req) {
+  if (mcrouter::fiber_local<RouterInfo>::getCustomRoutingKey().has_value()) {
+    return mcrouter::fiber_local<RouterInfo>::getCustomRoutingKey().value();
+  }
+  return req.key_ref()->routingKey();
 }
 
 } // namespace mcrouter

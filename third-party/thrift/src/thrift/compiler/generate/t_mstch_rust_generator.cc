@@ -2405,7 +2405,7 @@ void t_mstch_rust_generator::generate_program() {
   render_to_file(prog, "client.rs", "client.rs");
   render_to_file(prog, "server.rs", "server.rs");
   render_to_file(prog, "mock.rs", "mock.rs");
-  write_output("namespace", namespace_rust);
+  write_output("namespace", namespace_rust + '\n');
   write_output("service-names", service_names);
 }
 

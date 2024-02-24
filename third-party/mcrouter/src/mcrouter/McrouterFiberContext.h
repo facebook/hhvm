@@ -89,6 +89,7 @@ class fiber_local {
     int64_t networkTransportTimeUs{0};
     ServerLoad load{0};
     std::vector<ExtraDataCallbackT> extraDataCallbacks;
+    std::optional<std::string> customRoutingKey;
     std::shared_ptr<AxonContext> axonCtx{nullptr};
     int64_t accumulatedBeforeReqInjectedLatencyUs{0};
     int64_t accumulatedAfterReqInjectedLatencyUs{0};
@@ -377,6 +378,15 @@ class fiber_local {
   static std::optional<std::string> getDistributionTargetRegion() {
     return folly::fibers::local<McrouterFiberContext>()
         .distributionTargetRegion;
+  }
+
+  static void setCustomRoutingKey(std::string&& routingKey) {
+    folly::fibers::local<McrouterFiberContext>().customRoutingKey =
+        std::move(routingKey);
+  }
+
+  static std::optional<folly::StringPiece> getCustomRoutingKey() {
+    return folly::fibers::local<McrouterFiberContext>().customRoutingKey;
   }
 };
 

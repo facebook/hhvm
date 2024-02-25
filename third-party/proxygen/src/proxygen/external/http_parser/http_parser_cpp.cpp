@@ -530,7 +530,7 @@ parse_url_char(enum state s, const char ch, int strict_flag)
 #if __cplusplus
       [[fallthrough]];
 #else /* __cplusplus */
-    /* FALLTHROUGH */
+    __attribute__((fallthrough));
 #endif /* __cplusplus */
     case s_req_server_start:
     case s_req_server:
@@ -2252,7 +2252,7 @@ http_parse_host_char(enum http_host_state s, const char ch) {
 #if __cplusplus
       [[fallthrough]];
 #else /* __cplusplus */
-    /* FALLTHROUGH */
+    __attribute__((fallthrough));
 #endif /* __cplusplus */
     case s_http_host_v6_end:
       if (ch == ':') {
@@ -2269,7 +2269,7 @@ http_parse_host_char(enum http_host_state s, const char ch) {
 #if __cplusplus
       [[fallthrough]];
 #else /* __cplusplus */
-    /* FALLTHROUGH */
+    __attribute__((fallthrough));
 #endif /* __cplusplus */
     case s_http_host_v6_start:
       if (IS_HEX(ch) || ch == ':' || ch == '.') {
@@ -2412,7 +2412,7 @@ http_parser_parse_url_options(const char *buf, size_t buflen, int is_connect,
 #if __cplusplus
         [[fallthrough]];
 #else /* __cplusplus */
-      /* FALLTHROUGH */
+      __attribute__((fallthrough));
 #endif /* __cplusplus */
       case s_req_server:
         uf = UF_HOST;

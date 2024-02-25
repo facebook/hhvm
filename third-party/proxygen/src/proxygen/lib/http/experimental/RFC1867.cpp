@@ -80,7 +80,7 @@ std::unique_ptr<IOBuf> RFC1867Codec::onIngress(std::unique_ptr<IOBuf> data) {
         input_.trimStart(boundary_.length() - 1);
         bytesProcessed_ += boundary_.length() - 1;
         state_ = ParserState::HEADERS_START;
-        // fall through
+        [[fallthrough]];
 
       case ParserState::HEADERS_START: {
         if (input_.chainLength() < 3) {
@@ -117,7 +117,7 @@ std::unique_ptr<IOBuf> RFC1867Codec::onIngress(std::unique_ptr<IOBuf> data) {
         headerParser_.onIngress(*dummyBuf);
         CHECK(!parseError_);
         state_ = ParserState::HEADERS;
-        // fall through
+        [[fallthrough]];
 
       case ParserState::HEADERS:
         while (!parseError_ && input_.front() &&

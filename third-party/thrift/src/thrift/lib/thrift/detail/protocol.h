@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <optional>
+
 #include <folly/Utility.h>
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/op/Hash.h>
@@ -173,19 +175,24 @@ struct ValueAdapter {
   }
 };
 
+std::optional<size_t> hash_value(const Value& s);
+
 } // namespace apache::thrift::protocol::detail
 
 template <>
 struct std::hash<apache::thrift::protocol::detail::Value> {
   std::size_t operator()(
       const apache::thrift::protocol::detail::Value& s) const noexcept {
+    if (auto hash = apache::thrift::protocol::detail::hash_value(s)) {
+      return *hash;
+    }
+
     // TODO(dokwon): Remove specifying op::StdHasher and use default op::hash
     // after op::StdHasherDeprecated migration.
     auto accumulator = apache::thrift::op::makeDeterministicAccumulator<
         apache::thrift::op::StdHasher>();
     apache::thrift::op::hash<apache::thrift::type::union_t<
         apache::thrift::protocol::detail::detail::Value>>(
-
         apache::thrift::protocol::detail::ValueAdapter::toThrift(s),
         accumulator);
     return std::move(accumulator.result()).getResult();

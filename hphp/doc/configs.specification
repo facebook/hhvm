@@ -360,8 +360,8 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 
 - bool PHP7.DisallowUnsafeCurlUploads = all, UNKNOWN
 
-- bool PHP7.UVS = all, UNKNOWN, repooptionsflag(Parser)
-- bool PHP7.LTRAssign = all, UNKNOWN, repooptionsflag(Parser)
+- bool PHP7.UVS = all, UNKNOWN, repooptionsflag(Parser, false)
+- bool PHP7.LTRAssign = all, UNKNOWN, repooptionsflag(Parser, false)
 
 # Server
 

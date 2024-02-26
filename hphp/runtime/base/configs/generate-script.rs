@@ -84,18 +84,39 @@ use nom::sequence::tuple;
 use nom::Err;
 use nom::IResult;
 
-#[derive(Debug, PartialEq, Clone, Eq, Hash)]
+#[derive(Debug, PartialEq, Clone)]
+pub enum ConfigValue {
+    Const(String),
+    Other(String),
+}
+
+impl ConfigValue {
+    fn string(&self) -> String {
+        match self {
+            ConfigValue::Const(v) => v.to_owned(),
+            ConfigValue::Other(v) => v.to_owned(),
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
 pub enum ConfigFeature {
     RepoSpecific,
     RequestLevel,
     Private,
     GlobalData,
     UnitCacheFlag,
-    RepoOptionsFlag(String),
+    RepoOptionsFlag(String, Option<ConfigValue>),
     CompilerOption(String),
     NoBind,
     PostProcess,
     DefaultEarly,
+}
+
+#[derive(Debug, PartialEq, Default)]
+pub struct ConfigFeatureRepoOptionFlag {
+    pub prefix: String,
+    pub default_value: Option<ConfigValue>,
 }
 
 #[derive(Debug, PartialEq, Default)]
@@ -105,7 +126,7 @@ pub struct ConfigFeatures {
     pub is_private: bool,
     pub is_global_data: bool,
     pub is_unit_cache_flag: bool,
-    pub repo_options_flag: Option<String>,
+    pub repo_options_flag: Option<ConfigFeatureRepoOptionFlag>,
     pub compiler_option: Option<String>,
     pub has_no_bind: bool,
     pub has_post_process: bool,
@@ -116,7 +137,7 @@ pub struct ConfigFeatures {
 pub struct Config {
     type_: ConfigType,
     pub name: String,
-    pub default_value: Option<String>,
+    pub default_value: Option<ConfigValue>,
     pub override_name: Option<String>,
     pub owner: Option<String>,
     pub description: Option<String>,
@@ -360,18 +381,23 @@ fn parse_num_expr<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str
     )))(input)
 }
 
-fn parse_value<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, &'a str, E> {
-    recognize(alt((
-        parse_string,
-        parse_num_expr,
-        alphanumeric1,
-        tag("{}"),
-    )))(input)
+fn parse_bool<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, &'a str, E> {
+    recognize(alt((tag("true"), tag("false"))))(input)
+}
+
+fn parse_value<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, ConfigValue, E> {
+    alt((
+        map(
+            alt((parse_string, parse_num_expr, parse_bool, tag("{}"))),
+            |v| ConfigValue::Const(v.to_string()),
+        ),
+        map(alphanumeric1, |v: &str| ConfigValue::Other(v.to_string())),
+    ))(input)
 }
 
 fn parse_default_value<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     input: &'a str,
-) -> IResult<&'a str, Option<&str>, E> {
+) -> IResult<&'a str, Option<ConfigValue>, E> {
     context(
         "default value",
         opt(preceded(
@@ -408,19 +434,26 @@ fn parse_features<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                     value(ConfigFeature::GlobalData, tag("globaldata")),
                     value(ConfigFeature::UnitCacheFlag, tag("unitcacheflag")),
                     map(
-                        tuple((
-                            tag("repooptionsflag"),
-                            delimited(tag("("), parse_name_with_optional_dot, tag(")")),
-                        )),
-                        |(_, name)| ConfigFeature::RepoOptionsFlag(name.to_string()),
+                        delimited(
+                            tag("repooptionsflag("),
+                            tuple((
+                                parse_name_with_optional_dot,
+                                opt(preceded(tuple((space0, tag(","), space0)), parse_value)),
+                            )),
+                            tag(")"),
+                        ),
+                        |(name, default_value)| {
+                            ConfigFeature::RepoOptionsFlag(name.to_string(), default_value)
+                        },
                     ),
                     value(ConfigFeature::NoBind, tag("nobind")),
                     map(
-                        tuple((
-                            tag("compileroption"),
-                            delimited(tag("("), parse_name_with_optional_dot, tag(")")),
-                        )),
-                        |(_, name)| ConfigFeature::CompilerOption(name.to_string()),
+                        delimited(
+                            tag("compileroption("),
+                            parse_name_with_optional_dot,
+                            tag(")"),
+                        ),
+                        |name| ConfigFeature::CompilerOption(name.to_string()),
                     ),
                     value(ConfigFeature::PostProcess, tag("postprocess")),
                     value(ConfigFeature::DefaultEarly, tag("defaultearly")),
@@ -436,7 +469,12 @@ fn parse_features<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
                     ConfigFeature::Private => features.is_private = true,
                     ConfigFeature::GlobalData => features.is_global_data = true,
                     ConfigFeature::UnitCacheFlag => features.is_unit_cache_flag = true,
-                    ConfigFeature::RepoOptionsFlag(name) => features.repo_options_flag = Some(name),
+                    ConfigFeature::RepoOptionsFlag(prefix, default_value) => {
+                        features.repo_options_flag = Some(ConfigFeatureRepoOptionFlag {
+                            prefix,
+                            default_value,
+                        })
+                    }
                     ConfigFeature::CompilerOption(name) => features.compiler_option = Some(name),
                     ConfigFeature::NoBind => features.has_no_bind = true,
                     ConfigFeature::PostProcess => features.has_post_process = true,
@@ -491,7 +529,7 @@ fn parse_config<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
             |(type_, name, default_value, override_name, owner, features, description)| Config {
                 type_,
                 name: name.to_string(),
-                default_value: default_value.map(|s| s.to_string()),
+                default_value,
                 override_name: override_name.map(|s| s.to_string()),
                 owner: owner.map(|s| s.to_string()),
                 features,
@@ -593,6 +631,8 @@ fn generate_files(sections: Vec<ConfigSection>, output_dir: PathBuf) {
         if has_repo_option_flags {
             public_methods.push("  static void GetRepoOptionsFlags(RepoOptionsFlags& flags, const IniSettingMap& ini, const Hdf& config);");
             public_methods.push("  static void GetRepoOptionsFlagsFromConfig(RepoOptionsFlags& flags, const Hdf& config, const RepoOptionsFlags& default_flags);");
+            public_methods
+                .push("  static void GetRepoOptionsFlagsForSystemlib(RepoOptionsFlags& flags);");
         }
 
         let has_compiler_option = section
@@ -655,13 +695,14 @@ private:
         let mut compiler_option_calls = vec![];
         let mut repo_options_flags_calls = vec![];
         let mut repo_options_flags_from_config_calls = vec![];
+        let mut repo_options_flags_for_systemlib_calls = vec![];
         for config in section.configs.iter() {
             let shortname = config.shortname(&section.name);
-            let default_value = config
-                .default_value
-                .clone()
-                .unwrap_or(format!("{}Default()", shortname));
-            if let Some(repo_option_prefix) = &config.features.repo_options_flag {
+            let default_value = match &config.default_value {
+                Some(v) => v.string(),
+                None => format!("{}Default()", shortname),
+            };
+            if let Some(repo_option_flag) = &config.features.repo_options_flag {
                 repo_options_flags_calls.push(format!(
                     r#"  Config::Bind(flags.{}, ini, config, "{}", {});"#,
                     shortname,
@@ -670,10 +711,24 @@ private:
                 ));
                 repo_options_flags_from_config_calls.push(format!(
                     r#"  hdfExtract(config, "{}.{}", flags.{}, default_flags.{});"#,
-                    repo_option_prefix,
+                    repo_option_flag.prefix,
                     config.hdf_path(section),
                     shortname,
                     shortname
+                ));
+                repo_options_flags_for_systemlib_calls.push(format!(
+                    r#"  flags.{} = {};"#,
+                    shortname,
+                    match repo_option_flag
+                        .default_value
+                        .as_ref()
+                        .or(config.default_value.as_ref())
+                        .unwrap()
+                    {
+                        ConfigValue::Const(v) => v,
+                        ConfigValue::Other(_) =>
+                            panic!("repooptionflags need a constant default value"),
+                    }
                 ));
                 debug_calls.push(format!(
                     r#"  fmt::format_to(std::back_inserter(out), "Cfg::{}::{} = Repo Option Flag so UNKNOWN!\n");"#,
@@ -731,11 +786,17 @@ void {}::GetRepoOptionsFlagsFromConfig(RepoOptionsFlags& flags, const Hdf& confi
 {}
 }}
 
+void {}::GetRepoOptionsFlagsForSystemlib(RepoOptionsFlags& flags) {{
+{}
+}}
+
 "#,
                 section_shortname,
                 repo_options_flags_calls.join("\n"),
                 section_shortname,
-                repo_options_flags_from_config_calls.join("\n")
+                repo_options_flags_from_config_calls.join("\n"),
+                section_shortname,
+                repo_options_flags_for_systemlib_calls.join("\n"),
             );
         }
 
@@ -876,6 +937,7 @@ std::string {}::Debug() {{
     let mut config_load_compiler_calls = vec![];
     let mut repo_options_flags_calls = vec![];
     let mut repo_options_flags_from_config_calls = vec![];
+    let mut repo_options_flags_for_systemlib_calls = vec![];
 
     for section in sections.iter() {
         let section_shortname = section.shortname();
@@ -907,6 +969,10 @@ std::string {}::Debug() {{
             ));
             repo_options_flags_from_config_calls.push(format!(
                 "  Cfg::{}::GetRepoOptionsFlagsFromConfig(flags, config, default_flags);",
+                section_shortname,
+            ));
+            repo_options_flags_for_systemlib_calls.push(format!(
+                "  Cfg::{}::GetRepoOptionsFlagsForSystemlib(flags);",
                 section_shortname,
             ));
         }
@@ -941,6 +1007,10 @@ void GetRepoOptionsFlagsFromConfig(RepoOptionsFlags& flags, const Hdf& config, c
 {}
 }}
 
+void GetRepoOptionsFlagsForSystemlib(RepoOptionsFlags& flags) {{
+{}
+}}
+
 }} // namespace Cfg
 
 }} // namespace HPHP
@@ -950,6 +1020,7 @@ void GetRepoOptionsFlagsFromConfig(RepoOptionsFlags& flags, const Hdf& config, c
         config_load_compiler_calls.join("\n"),
         repo_options_flags_calls.join("\n"),
         repo_options_flags_from_config_calls.join("\n"),
+        repo_options_flags_for_systemlib_calls.join("\n"),
     );
     let mut configs_load_file = output_dir.clone();
     configs_load_file.push("configs-load-generated.cpp");

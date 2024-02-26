@@ -106,8 +106,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool RepoOptions::s_init{false};
 RepoOptions RepoOptions::s_defaults;
+RepoOptions RepoOptions::s_defaultsForSystemlib;
 
 namespace {
 
@@ -518,8 +518,15 @@ void RepoOptions::calcAutoloadDB() {
 }
 
 const RepoOptions& RepoOptions::defaults() {
-  always_assert(s_init);
+  always_assert(s_defaults.m_init);
   return s_defaults;
+}
+
+const RepoOptions& RepoOptions::defaultsForSystemlib() {
+  if (!s_defaultsForSystemlib.m_init) {
+    s_defaultsForSystemlib.initDefaultsForSystemlib();
+  }
+  return s_defaultsForSystemlib;
 }
 
 void RepoOptions::filterNamespaces() {
@@ -540,8 +547,8 @@ void RepoOptions::filterNamespaces() {
   }
 }
 
-RepoOptions::RepoOptions(const char* str, const char* file) : m_path(file) {
-  always_assert(s_init);
+RepoOptions::RepoOptions(const char* str, const char* file) : m_path(file), m_init(true) {
+  always_assert(s_defaults.m_init);
   Hdf config{};
   config.fromString(str);
 
@@ -572,12 +579,22 @@ void RepoOptions::initDefaults(const Hdf& hdf, const IniSettingMap& ini) {
   m_path.clear();
   m_flags.m_packageInfo = PackageInfo::defaults();
   calcCacheKey();
+  m_init = true;
+}
+
+void RepoOptions::initDefaultsForSystemlib() {
+  Cfg::GetRepoOptionsFlagsForSystemlib(m_flags);
+
+  filterNamespaces();
+  m_path.clear();
+  m_flags.m_packageInfo = PackageInfo::defaults();
+  calcCacheKey();
+  m_init = true;
 }
 
 void RepoOptions::setDefaults(const Hdf& hdf, const IniSettingMap& ini) {
-  always_assert(!s_init);
+  always_assert(!s_defaults.m_init);
   s_defaults.initDefaults(hdf, ini);
-  s_init = true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

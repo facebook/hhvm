@@ -37,6 +37,7 @@ void LoadForCompiler(const IniSettingMap& ini, const Hdf& config);
 void GetRepoOptionsFlags(RepoOptionsFlags& flags, const IniSettingMap& ini, const Hdf& config);
 void GetRepoOptionsFlagsFromConfig(RepoOptionsFlags& flags, const Hdf& config,
                                    const RepoOptionsFlags& default_flags);
+void GetRepoOptionsFlagsForSystemlib(RepoOptionsFlags& flags);
 
 using StringStringMap = std::map<std::string, std::string>;
 using StringVector = std::vector<std::string>;

@@ -214,6 +214,7 @@ struct RepoOptions {
   bool operator!=(const RepoOptions& o) const { return !(*this == o); }
 
   static const RepoOptions& defaults();
+  static const RepoOptions& defaultsForSystemlib();
   static void setDefaults(const Hdf& hdf, const IniSettingMap& ini);
 
   static const RepoOptions& forFile(const std::string& path);
@@ -223,6 +224,7 @@ private:
 
   void filterNamespaces();
   void initDefaults(const Hdf& hdf, const IniSettingMap& ini);
+  void initDefaultsForSystemlib();
   void calcCacheKey();
   void calcDynamic();
   void calcAutoloadDB();
@@ -239,8 +241,10 @@ private:
   // The autoload DB specified by these repo options
   std::filesystem::path m_autoloadDB;
 
-  static bool s_init;
+  bool m_init = false;
+
   static RepoOptions s_defaults;
+  static RepoOptions s_defaultsForSystemlib;
 };
 
 /**

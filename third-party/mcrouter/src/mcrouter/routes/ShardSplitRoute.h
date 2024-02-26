@@ -185,11 +185,30 @@ class ShardSplitRoute {
 };
 
 template <class RouterInfo>
-std::shared_ptr<typename RouterInfo::RouteHandleIf> makeShardSplitRoute(
+std::shared_ptr<typename RouterInfo::RouteHandleIf> createShardSplitRoute(
     std::shared_ptr<typename RouterInfo::RouteHandleIf> rh,
     ShardSplitter shardSplitter) {
   return makeRouteHandleWithInfo<RouterInfo, ShardSplitRoute>(
       std::move(rh), std::move(shardSplitter));
+}
+
+template <class RouterInfo>
+std::shared_ptr<typename RouterInfo::RouteHandleIf> makeShardSplitRoute(
+    RouteHandleFactory<typename RouterInfo::RouteHandleIf>& factory,
+    const folly::dynamic& json) {
+  checkLogic(json.isObject(), "ShardSplitRoute should be an object");
+  auto jSplits = json.get_ptr("shard_splits");
+  checkLogic(
+      jSplits != nullptr && jSplits->isObject(),
+      "ShardSplitRoute: shard_splits should be an object");
+
+  checkLogic(
+      json.count("destination"), "ShardSplitRoute: no destination route");
+  auto rh = factory.create(json["destination"]);
+  checkLogic(rh != nullptr, "makeShardSplitRoute returned nullptr");
+
+  return makeRouteHandleWithInfo<RouterInfo, ShardSplitRoute>(
+      std::move(rh), ShardSplitter((*jSplits)));
 }
 
 } // namespace mcrouter

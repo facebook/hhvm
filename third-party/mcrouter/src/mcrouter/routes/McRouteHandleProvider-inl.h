@@ -553,7 +553,7 @@ McRouteHandleProvider<RouterInfo>::createSRRoute(
 
   if (!(proxy_.router().opts().disable_shard_split_route)) {
     if (auto jsplits = json.get_ptr("shard_splits")) {
-      route = makeShardSplitRoute<RouterInfo>(
+      route = createShardSplitRoute<RouterInfo>(
           std::move(route), ShardSplitter(*jsplits));
     }
   }
@@ -708,7 +708,7 @@ McRouteHandleProvider<RouterInfo>::makePoolRoute(
       }
       if (!(proxy_.router().opts().disable_shard_split_route)) {
         if (auto jsplits = json.get_ptr("shard_splits")) {
-          route = makeShardSplitRoute<RouterInfo>(
+          route = createShardSplitRoute<RouterInfo>(
               std::move(route), ShardSplitter(*jsplits));
         }
       }

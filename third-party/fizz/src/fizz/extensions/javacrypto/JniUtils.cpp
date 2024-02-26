@@ -9,6 +9,22 @@
 #include <fizz/extensions/javacrypto/JniUtils.h>
 #include <glog/logging.h>
 
+/**
+ * Annoyingly, the Android NDK `jni.h` (as of R26B, the latest version at
+ * this time of writing) differs from the OpenJDK `jni.h`.
+ *
+ * Android NDK:
+ *    jint AttachCurrentThread(JNIEnv** p_env, void* thr_args)
+ * OpenJDK (As of
+ * https://github.com/openjdk/jdk/blob/64c3642c57719940855b220025b33758950b3980/src/java.base/share/native/include/jni.h#L1949):
+ *    jint AttachCurrentThread(void **penv, void *args)
+ */
+#if __ANDROID__
+#define ATTACH_CURRENT_THREAD_ENV_ARG(arg) (&(arg))
+#else
+#define ATTACH_CURRENT_THREAD_ENV_ARG(arg) (reinterpret_cast<void**>(&(arg)))
+#endif
+
 namespace fizz {
 namespace jni {
 
@@ -29,7 +45,7 @@ JNIEnv* getEnv(bool* shouldDetach) {
 
   if (status == JNI_EDETACHED) {
     status = vm->AttachCurrentThread(
-        reinterpret_cast<void**>(&env), nullptr /*args*/);
+        ATTACH_CURRENT_THREAD_ENV_ARG(env), nullptr /*args*/);
     CHECK_EQ(status, JNI_OK);
     *shouldDetach = true;
   }

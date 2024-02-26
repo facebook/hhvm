@@ -1,6 +1,6 @@
 <?hh
 
-module MLT_A;
+module foo;
 
 internal trait T {
   internal int $myprop = 42;
@@ -24,7 +24,7 @@ internal class D {
 
 <<__EntryPoint>>
 function bar(): void {
-  include 'module_level_traits_module_a.inc';
+  include 'module.inc';
 
   $c = new C();
   $c->foo();

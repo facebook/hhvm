@@ -456,6 +456,9 @@ impl HhConfig {
                 "strict_utf8" => {
                     go.po_strict_utf8 = parse_json(&value)?;
                 }
+                "enable_function_references" => {
+                    go.tco_enable_function_references = parse_json(&value)?;
+                }
                 _ => c.unknown.push((key, value)),
             }
         }

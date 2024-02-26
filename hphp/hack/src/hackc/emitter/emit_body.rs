@@ -364,7 +364,7 @@ pub fn make_body<'a, 'arena, 'decl>(
     decl_vars: Vec<Str<'arena>>,
     is_memoize_wrapper: bool,
     is_memoize_wrapper_lsb: bool,
-    upper_bounds: Vec<UpperBound<'arena>>,
+    upper_bounds: Vec<UpperBound>,
     shadowed_tparams: Vec<String>,
     mut params: Vec<(Param<'arena>, Option<(Label, ast::Expr)>)>,
     return_type_info: Option<TypeInfo>,
@@ -685,12 +685,12 @@ fn emit_verify_out<'arena>(
     )
 }
 
-pub fn emit_generics_upper_bounds<'arena>(
-    alloc: &'arena bumpalo::Bump,
+pub fn emit_generics_upper_bounds(
+    alloc: &bumpalo::Bump,
     immediate_tparams: &[ast::Tparam],
     class_tparam_names: &[&str],
     skip_awaitable: bool,
-) -> Vec<UpperBound<'arena>> {
+) -> Vec<UpperBound> {
     let constraint_filter = |(kind, hint): &(ast_defs::ConstraintKind, ast::Hint)| {
         if let ast_defs::ConstraintKind::ConstraintAs = &kind {
             let mut tparam_names = get_tp_names(immediate_tparams);
@@ -717,7 +717,7 @@ pub fn emit_generics_upper_bounds<'arena>(
         match &ubs[..] {
             [] => None,
             _ => Some(UpperBound {
-                name: Str::new_str(alloc, get_tp_name(tparam)),
+                name: hhbc::intern(get_tp_name(tparam)),
                 bounds: ubs.into(),
             }),
         }

@@ -45,8 +45,11 @@ pub mod unit;
 
 // Re-export some types in from hhbc so users of `ir` don't have to figure out
 // which random stuff to get from `ir` and which to get elsewhere.
+pub use hhbc::intern;
+pub use hhbc::intern_bytes;
 pub use hhbc::AsTypeStructExceptionKind;
 pub use hhbc::BareThisOp;
+pub use hhbc::BytesId;
 pub use hhbc::CcParam;
 pub use hhbc::CcReified;
 pub use hhbc::CcThis;
@@ -81,6 +84,7 @@ pub use hhbc::SetRangeOp;
 pub use hhbc::SilenceOp;
 pub use hhbc::Span;
 pub use hhbc::SpecialClsRef;
+pub use hhbc::StringId;
 pub use hhbc::SwitchKind;
 pub use hhbc::SymbolRefs;
 pub use hhbc::TraitReqKind;

@@ -237,7 +237,7 @@ impl<'a> ClassParser<'a> {
 
     fn parse_upper_bound(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
         parse!(tokenizer, <name:parse_user_id> ":" "[" <bounds:parse_type_info,*> "]");
-        let name = Str::new_slice(self.alloc, &name.0);
+        let name = ir_core::intern(std::str::from_utf8(&name.0)?);
         self.class.upper_bounds.push((name, bounds));
         Ok(())
     }

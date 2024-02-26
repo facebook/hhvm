@@ -331,7 +331,7 @@ fn assemble_class<'arena>(
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::Class<'arena>> {
     parse!(token_iter, ".class"
-       <upper_bounds:assemble_upper_bounds(alloc)>
+       <upper_bounds:assemble_upper_bounds()>
        <attr:assemble_special_and_user_attrs(alloc)>
        <name:assemble_class_name(alloc)>
        <span:assemble_span>
@@ -498,7 +498,7 @@ fn assemble_method<'arena>(
     let method_tok = token_iter.peek().copied();
     token_iter.expect_str(Token::is_decl, ".method")?;
     let shadowed_tparams = assemble_shadowed_tparams(alloc, token_iter)?;
-    let upper_bounds = assemble_upper_bounds(token_iter, alloc)?;
+    let upper_bounds = assemble_upper_bounds(token_iter)?;
     let (attrs, attributes) = assemble_special_and_user_attrs(token_iter, alloc)?;
     let span = assemble_span(token_iter)?;
     let return_type_info = assemble_type_info_opt(token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
@@ -1094,7 +1094,7 @@ fn assemble_function<'arena>(
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::Function<'arena>> {
     token_iter.expect_str(Token::is_decl, ".function")?;
-    let upper_bounds = assemble_upper_bounds(token_iter, alloc)?;
+    let upper_bounds = assemble_upper_bounds(token_iter)?;
     // Special and user attrs may or may not be specified. If not specified, no [] printed
     let (attr, attributes) = assemble_special_and_user_attrs(token_iter, alloc)?;
     let span = assemble_span(token_iter)?;
@@ -1175,22 +1175,16 @@ fn assemble_span(token_iter: &mut Lexer<'_>) -> Result<hhbc::Span> {
 
 /// Ex: {(T as <"HH\\int" "HH\\int" upper_bound>)}
 /// {(id as type_info, type_info ... ), (id as type_info, type_info ...)*}
-fn assemble_upper_bounds<'arena>(
-    token_iter: &mut Lexer<'_>,
-    alloc: &'arena Bump,
-) -> Result<Vec<hhbc::UpperBound<'arena>>> {
-    parse!(token_iter, "{" <ubs:assemble_upper_bound(alloc),*> "}");
+fn assemble_upper_bounds(token_iter: &mut Lexer<'_>) -> Result<Vec<hhbc::UpperBound>> {
+    parse!(token_iter, "{" <ubs:assemble_upper_bound(),*> "}");
     Ok(ubs)
 }
 
 /// Ex: (T as <"HH\\int" "HH\\int" upper_bound>)
-fn assemble_upper_bound<'arena>(
-    token_iter: &mut Lexer<'_>,
-    alloc: &'arena Bump,
-) -> Result<hhbc::UpperBound<'arena>> {
+fn assemble_upper_bound(token_iter: &mut Lexer<'_>) -> Result<hhbc::UpperBound> {
     parse!(token_iter, "(" <id:id> "as" <tis:assemble_type_info(TypeInfoKind::NotEnumOrTypeDef),*> ")");
     Ok(hhbc::UpperBound {
-        name: id.into_ffi_str(alloc),
+        name: hhbc::intern(std::str::from_utf8(id.as_bytes())?),
         bounds: tis.into(),
     })
 }
@@ -1462,7 +1456,7 @@ fn assemble_body<'arena>(
     params: Vec<hhbc::Param<'arena>>,
     return_type_info: Maybe<hhbc::TypeInfo>,
     shadowed_tparams: Vec<Str<'arena>>,
-    upper_bounds: Vec<hhbc::UpperBound<'arena>>,
+    upper_bounds: Vec<hhbc::UpperBound>,
 ) -> Result<(hhbc::Body<'arena>, hhbc::Coeffects<'arena>)> {
     let mut doc_comment = Maybe::Nothing;
     let mut instrs = Vec::new();

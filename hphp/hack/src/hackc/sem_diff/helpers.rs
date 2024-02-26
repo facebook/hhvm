@@ -71,9 +71,9 @@ impl MapName for hhbc::Requirement<'_> {
     }
 }
 
-impl MapName for hhbc::UpperBound<'_> {
+impl MapName for hhbc::UpperBound {
     fn get_name(&self) -> &str {
-        self.name.unsafe_as_str()
+        self.name.as_str()
     }
 }
 

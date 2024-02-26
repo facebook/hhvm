@@ -350,7 +350,7 @@ fn print_class(w: &mut dyn Write, class: &Class<'_>, strings: &StringInterner) -
         writeln!(
             w,
             "  upper_bound {}: [{}]",
-            FmtIdentifier(name.as_ref()),
+            FmtIdentifier(name.as_str().as_bytes()),
             FmtSep::comma(tys.iter(), |w, ty| FmtTypeInfo(ty, strings).fmt(w))
         )?;
     }

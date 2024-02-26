@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::Str;
 use ir::class::Requirement;
 use ir::func::DefaultValue;
 use ir::func::ExFrame;
@@ -1951,8 +1950,8 @@ fn cmp_unit(a_unit: &Unit<'_>, b_unit: &Unit<'_>) -> Result {
 }
 
 fn cmp_upper_bounds(
-    (a, a_strings): (&(Str<'_>, Vec<TypeInfo>), &StringInterner),
-    (b, b_strings): (&(Str<'_>, Vec<TypeInfo>), &StringInterner),
+    (a, a_strings): (&(StringId, Vec<TypeInfo>), &StringInterner),
+    (b, b_strings): (&(StringId, Vec<TypeInfo>), &StringInterner),
 ) -> Result {
     cmp_eq(a.0, b.0).qualified("key")?;
     cmp_slice(

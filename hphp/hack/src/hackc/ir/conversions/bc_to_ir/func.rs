@@ -115,7 +115,7 @@ fn convert_body<'a>(
     let tparams: ClassIdMap<_> = upper_bounds
         .iter()
         .map(|hhbc::UpperBound { name, bounds }| {
-            let id = unit.strings.intern_bytes(name.as_ref());
+            let id = unit.strings.intern_str(name.as_str());
             let name = ir::ClassId::new(id);
             let bounds = bounds
                 .iter()

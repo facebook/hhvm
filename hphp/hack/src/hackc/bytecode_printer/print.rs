@@ -1093,30 +1093,24 @@ fn print_special_and_user_attrs(
     Ok(())
 }
 
-fn print_upper_bounds<'arena>(
-    w: &mut dyn Write,
-    ubs: impl AsRef<[UpperBound<'arena>]>,
-) -> Result<()> {
+fn print_upper_bounds(w: &mut dyn Write, ubs: impl AsRef<[UpperBound]>) -> Result<()> {
     braces(w, |w| concat_by(w, ", ", ubs, print_upper_bound))
 }
 
-fn print_upper_bound<'arena>(w: &mut dyn Write, ub: &UpperBound<'arena>) -> Result<()> {
+fn print_upper_bound(w: &mut dyn Write, ub: &UpperBound) -> Result<()> {
     paren(w, |w| {
-        write_bytes!(w, "{} as ", ub.name)?;
+        write!(w, "{} as ", ub.name)?;
         concat_by(w, ", ", &ub.bounds, print_type_info)
     })
 }
 
-fn print_upper_bounds_<'arena>(
-    w: &mut dyn Write,
-    ubs: impl AsRef<[UpperBound<'arena>]>,
-) -> Result<()> {
+fn print_upper_bounds_(w: &mut dyn Write, ubs: impl AsRef<[UpperBound]>) -> Result<()> {
     braces(w, |w| concat_by(w, ", ", ubs, print_upper_bound_))
 }
 
-fn print_upper_bound_<'arena>(w: &mut dyn Write, ub: &UpperBound<'arena>) -> Result<()> {
+fn print_upper_bound_(w: &mut dyn Write, ub: &UpperBound) -> Result<()> {
     paren(w, |w| {
-        write_bytes!(w, "{} as ", ub.name)?;
+        write!(w, "{} as ", ub.name)?;
         concat_by(w, ", ", &ub.bounds, print_type_info)
     })
 }

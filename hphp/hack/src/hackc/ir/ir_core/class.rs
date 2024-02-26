@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::Str;
+use hhbc::StringId;
 
 use crate::func::SrcLoc;
 use crate::Attr;
@@ -60,7 +60,7 @@ pub struct Class<'a> {
     pub type_constants: Vec<TypeConstant<'a>>,
 
     /// For class generics the upper bounds of each generic.
-    pub upper_bounds: Vec<(Str<'a>, Vec<TypeInfo>)>,
+    pub upper_bounds: Vec<(StringId, Vec<TypeInfo>)>,
 
     pub uses: Vec<ClassId>,
 }

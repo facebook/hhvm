@@ -89,16 +89,13 @@ pub(crate) fn convert_func<'a>(
     let doc_comment = func.doc_comment.map(|c| c.into()).into();
 
     let upper_bounds = Vec::from_iter(func.tparams.iter().map(|(name, tparam)| {
-        let name = strings.lookup_class_name(*name);
-        let bounds = Vec::from_iter(
-            tparam
+        hhbc::UpperBound {
+            name: strings.intern(name.id).expect("non-utf8 class name"),
+            bounds: tparam
                 .bounds
                 .iter()
-                .map(|ty| crate::types::convert(ty, strings).unwrap()),
-        );
-        hhbc::UpperBound {
-            name: name.as_ffi_str(),
-            bounds: bounds.into(),
+                .map(|ty| crate::types::convert(ty, strings).unwrap())
+                .collect(),
         }
     }));
 

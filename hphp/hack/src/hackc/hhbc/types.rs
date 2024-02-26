@@ -5,7 +5,6 @@
 
 use ffi::Maybe;
 use ffi::Maybe::Just;
-use ffi::Str;
 use ffi::Vector;
 use hhvm_types_ffi::ffi::TypeConstraintFlags;
 use intern::string::StringId;
@@ -26,11 +25,20 @@ pub struct Constraint {
     pub flags: TypeConstraintFlags,
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize)]
+#[derive(Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
-pub struct UpperBound<'arena> {
-    pub name: Str<'arena>,
+pub struct UpperBound {
+    pub name: StringId,
     pub bounds: Vector<TypeInfo>,
+}
+
+impl Default for UpperBound {
+    fn default() -> Self {
+        Self {
+            name: StringId::EMPTY,
+            bounds: Default::default(),
+        }
+    }
 }
 
 impl Constraint {

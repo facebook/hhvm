@@ -22,7 +22,7 @@ pub struct Body<'arena> {
     pub num_iters: usize,
     pub is_memoize_wrapper: bool,
     pub is_memoize_wrapper_lsb: bool,
-    pub upper_bounds: Vector<UpperBound<'arena>>,
+    pub upper_bounds: Vector<UpperBound>,
     pub shadowed_tparams: Vector<Str<'arena>>,
     pub params: Vector<Param<'arena>>,
     pub return_type_info: Maybe<TypeInfo>,

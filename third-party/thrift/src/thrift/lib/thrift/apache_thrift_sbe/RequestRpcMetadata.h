@@ -162,24 +162,24 @@ class RequestRpcMetadata {
    * otherMetadata.next()\n  where count - newIndex == 1  "];
    *       V0_OTHERMETADATA_N_OTHERMETADATAVALUE_DONE ->
    * V0_OTHERMETADATA_1_BLOCK [label="  otherMetadata.next()\n  where count -
-   * newIndex == 1  "]; V0_OTHERMETADATA_N -> V0_OTHERMETADATA_DONE [label="
-   * otherMetadata.resetCountToIndex()  "];
-   *       V0_OTHERMETADATA_N_OTHERMETADATAVALUE_DONE -> V0_OTHERMETADATA_DONE
-   * [label="  otherMetadata.resetCountToIndex()  "];
-   *       V0_OTHERMETADATA_1_OTHERMETADATAVALUE_DONE -> V0_OTHERMETADATA_DONE
-   * [label="  otherMetadata.resetCountToIndex()  "]; V0_OTHERMETADATA_DONE ->
+   * newIndex == 1  "]; V0_OTHERMETADATA_DONE -> V0_OTHERMETADATA_DONE [label="
+   * otherMetadata.resetCountToIndex()  "]; V0_OTHERMETADATA_N ->
    * V0_OTHERMETADATA_DONE [label="  otherMetadata.resetCountToIndex()  "];
+   *       V0_OTHERMETADATA_1_OTHERMETADATAVALUE_DONE -> V0_OTHERMETADATA_DONE
+   * [label="  otherMetadata.resetCountToIndex()  "];
+   *       V0_OTHERMETADATA_N_OTHERMETADATAVALUE_DONE -> V0_OTHERMETADATA_DONE
+   * [label="  otherMetadata.resetCountToIndex()  "]; V0_OTHERMETADATA_DONE ->
+   * V0_OTHERMETADATA_DONE [label="  nameLength()  "];
    *       V0_OTHERMETADATA_1_OTHERMETADATAVALUE_DONE ->
    * V0_OTHERMETADATA_1_OTHERMETADATAVALUE_DONE [label="  nameLength()  "];
-   *       V0_OTHERMETADATA_DONE -> V0_OTHERMETADATA_DONE [label="  nameLength()
-   * "]; V0_OTHERMETADATA_1_OTHERMETADATAVALUE_DONE -> V0_NAME_DONE [label="
-   * name(?)  "]; V0_OTHERMETADATA_DONE -> V0_NAME_DONE [label="  name(?)  "];
-   *       V0_NAME_DONE -> V0_NAME_DONE [label="  interactionMetadataLength()
-   * "]; V0_NAME_DONE -> V0_INTERACTIONMETADATA_DONE [label="
-   * interactionMetadata(?)  "]; V0_INTERACTIONMETADATA_DONE ->
-   * V0_INTERACTIONMETADATA_DONE [label="  optionalMetdataLength()  "];
-   *       V0_INTERACTIONMETADATA_DONE -> V0_OPTIONALMETDATA_DONE [label="
-   * optionalMetdata(?)  "];
+   *       V0_OTHERMETADATA_DONE -> V0_NAME_DONE [label="  name(?)  "];
+   *       V0_OTHERMETADATA_1_OTHERMETADATAVALUE_DONE -> V0_NAME_DONE [label="
+   * name(?)  "]; V0_NAME_DONE -> V0_NAME_DONE [label="
+   * interactionMetadataLength()  "]; V0_NAME_DONE ->
+   * V0_INTERACTIONMETADATA_DONE [label="  interactionMetadata(?)  "];
+   *       V0_INTERACTIONMETADATA_DONE -> V0_INTERACTIONMETADATA_DONE [label="
+   * optionalMetdataLength()  "]; V0_INTERACTIONMETADATA_DONE ->
+   * V0_OPTIONALMETDATA_DONE [label="  optionalMetdata(?)  "];
    *   }
    * }</pre>
    */
@@ -709,10 +709,10 @@ class RequestRpcMetadata {
 
     void onResetCountToIndex() {
       switch (codecState()) {
-        case CodecState::V0_OTHERMETADATA_N:
-        case CodecState::V0_OTHERMETADATA_N_OTHERMETADATAVALUE_DONE:
-        case CodecState::V0_OTHERMETADATA_1_OTHERMETADATAVALUE_DONE:
         case CodecState::V0_OTHERMETADATA_DONE:
+        case CodecState::V0_OTHERMETADATA_N:
+        case CodecState::V0_OTHERMETADATA_1_OTHERMETADATAVALUE_DONE:
+        case CodecState::V0_OTHERMETADATA_N_OTHERMETADATAVALUE_DONE:
           codecState(CodecState::V0_OTHERMETADATA_DONE);
           break;
         default:
@@ -733,10 +733,6 @@ class RequestRpcMetadata {
 
     static SBE_CONSTEXPR std::uint64_t sbeBlockLength() SBE_NOEXCEPT {
       return 0;
-    }
-
-    SBE_NODISCARD std::uint64_t sbeActingBlockLength() SBE_NOEXCEPT {
-      return m_blockLength;
     }
 
     SBE_NODISCARD std::uint64_t sbePosition() const SBE_NOEXCEPT {
@@ -1445,9 +1441,9 @@ class RequestRpcMetadata {
  private:
   void onNameLengthAccessed() const {
     switch (codecState()) {
-      case CodecState::V0_OTHERMETADATA_1_OTHERMETADATAVALUE_DONE:
-        break;
       case CodecState::V0_OTHERMETADATA_DONE:
+        break;
+      case CodecState::V0_OTHERMETADATA_1_OTHERMETADATAVALUE_DONE:
         break;
       default:
         throw AccessOrderError(
@@ -1473,8 +1469,8 @@ class RequestRpcMetadata {
  private:
   void onNameAccessed() {
     switch (codecState()) {
-      case CodecState::V0_OTHERMETADATA_1_OTHERMETADATAVALUE_DONE:
       case CodecState::V0_OTHERMETADATA_DONE:
+      case CodecState::V0_OTHERMETADATA_1_OTHERMETADATAVALUE_DONE:
         codecState(CodecState::V0_NAME_DONE);
         break;
       default:

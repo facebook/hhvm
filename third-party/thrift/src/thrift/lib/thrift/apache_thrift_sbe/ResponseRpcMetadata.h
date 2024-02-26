@@ -153,31 +153,33 @@ class ResponseRpcMetadata {
    * otherMetadata.otherMetadataValue(?)  "];
    *       V0_OTHERMETADATA_1_OTHERMETADATAKEY_DONE ->
    * V0_OTHERMETADATA_1_OTHERMETADATAVALUE_DONE [label="
-   * otherMetadata.otherMetadataValue(?)  "]; V0_OTHERMETADATA_N ->
+   * otherMetadata.otherMetadataValue(?)  "];
+   *       V0_OTHERMETADATA_N_OTHERMETADATAVALUE_DONE ->
    * V0_OTHERMETADATA_N_BLOCK [label="  otherMetadata.next()\n  where count -
-   * newIndex > 1  "]; V0_OTHERMETADATA_N_OTHERMETADATAVALUE_DONE ->
-   * V0_OTHERMETADATA_N_BLOCK [label="  otherMetadata.next()\n  where count -
-   * newIndex > 1  "]; V0_OTHERMETADATA_N -> V0_OTHERMETADATA_1_BLOCK [label="
-   * otherMetadata.next()\n  where count - newIndex == 1  "];
+   * newIndex > 1  "]; V0_OTHERMETADATA_N -> V0_OTHERMETADATA_N_BLOCK [label="
+   * otherMetadata.next()\n  where count - newIndex > 1  "];
    *       V0_OTHERMETADATA_N_OTHERMETADATAVALUE_DONE ->
    * V0_OTHERMETADATA_1_BLOCK [label="  otherMetadata.next()\n  where count -
-   * newIndex == 1  "]; V0_OTHERMETADATA_N -> V0_OTHERMETADATA_DONE [label="
-   * otherMetadata.resetCountToIndex()  "];
+   * newIndex == 1  "]; V0_OTHERMETADATA_N -> V0_OTHERMETADATA_1_BLOCK [label="
+   * otherMetadata.next()\n  where count - newIndex == 1  "];
    *       V0_OTHERMETADATA_N_OTHERMETADATAVALUE_DONE -> V0_OTHERMETADATA_DONE
-   * [label="  otherMetadata.resetCountToIndex()  "]; V0_OTHERMETADATA_DONE ->
-   * V0_OTHERMETADATA_DONE [label="  otherMetadata.resetCountToIndex()  "];
+   * [label="  otherMetadata.resetCountToIndex()  "];
    *       V0_OTHERMETADATA_1_OTHERMETADATAVALUE_DONE -> V0_OTHERMETADATA_DONE
-   * [label="  otherMetadata.resetCountToIndex()  "]; V0_OTHERMETADATA_DONE ->
-   * V0_OTHERMETADATA_DONE [label="  exceptionMetadataLength()  "];
+   * [label="  otherMetadata.resetCountToIndex()  "]; V0_OTHERMETADATA_N ->
+   * V0_OTHERMETADATA_DONE [label="  otherMetadata.resetCountToIndex()  "];
+   *       V0_OTHERMETADATA_DONE -> V0_OTHERMETADATA_DONE [label="
+   * otherMetadata.resetCountToIndex()  "];
    *       V0_OTHERMETADATA_1_OTHERMETADATAVALUE_DONE ->
    * V0_OTHERMETADATA_1_OTHERMETADATAVALUE_DONE [label="
    * exceptionMetadataLength()  "]; V0_OTHERMETADATA_DONE ->
-   * V0_EXCEPTIONMETADATA_DONE [label="  exceptionMetadata(?)  "];
+   * V0_OTHERMETADATA_DONE [label="  exceptionMetadataLength()  "];
    *       V0_OTHERMETADATA_1_OTHERMETADATAVALUE_DONE ->
    * V0_EXCEPTIONMETADATA_DONE [label="  exceptionMetadata(?)  "];
-   *       V0_EXCEPTIONMETADATA_DONE -> V0_EXCEPTIONMETADATA_DONE [label="
-   * optionalMetadataLength()  "]; V0_EXCEPTIONMETADATA_DONE ->
-   * V0_OPTIONALMETADATA_DONE [label="  optionalMetadata(?)  "];
+   *       V0_OTHERMETADATA_DONE -> V0_EXCEPTIONMETADATA_DONE [label="
+   * exceptionMetadata(?)  "]; V0_EXCEPTIONMETADATA_DONE ->
+   * V0_EXCEPTIONMETADATA_DONE [label="  optionalMetadataLength()  "];
+   *       V0_EXCEPTIONMETADATA_DONE -> V0_OPTIONALMETADATA_DONE [label="
+   * optionalMetadata(?)  "];
    *   }
    * }</pre>
    */
@@ -605,8 +607,8 @@ class ResponseRpcMetadata {
       std::uint64_t remaining = m_count - m_index;
       if (remaining > 1) {
         switch (codecState()) {
-          case CodecState::V0_OTHERMETADATA_N:
           case CodecState::V0_OTHERMETADATA_N_OTHERMETADATAVALUE_DONE:
+          case CodecState::V0_OTHERMETADATA_N:
             codecState(CodecState::V0_OTHERMETADATA_N_BLOCK);
             break;
           default:
@@ -620,8 +622,8 @@ class ResponseRpcMetadata {
         }
       } else if (1 == remaining) {
         switch (codecState()) {
-          case CodecState::V0_OTHERMETADATA_N:
           case CodecState::V0_OTHERMETADATA_N_OTHERMETADATAVALUE_DONE:
+          case CodecState::V0_OTHERMETADATA_N:
             codecState(CodecState::V0_OTHERMETADATA_1_BLOCK);
             break;
           default:
@@ -638,10 +640,10 @@ class ResponseRpcMetadata {
 
     void onResetCountToIndex() {
       switch (codecState()) {
-        case CodecState::V0_OTHERMETADATA_N:
         case CodecState::V0_OTHERMETADATA_N_OTHERMETADATAVALUE_DONE:
-        case CodecState::V0_OTHERMETADATA_DONE:
         case CodecState::V0_OTHERMETADATA_1_OTHERMETADATAVALUE_DONE:
+        case CodecState::V0_OTHERMETADATA_N:
+        case CodecState::V0_OTHERMETADATA_DONE:
           codecState(CodecState::V0_OTHERMETADATA_DONE);
           break;
         default:
@@ -662,10 +664,6 @@ class ResponseRpcMetadata {
 
     static SBE_CONSTEXPR std::uint64_t sbeBlockLength() SBE_NOEXCEPT {
       return 0;
-    }
-
-    SBE_NODISCARD std::uint64_t sbeActingBlockLength() SBE_NOEXCEPT {
-      return m_blockLength;
     }
 
     SBE_NODISCARD std::uint64_t sbePosition() const SBE_NOEXCEPT {
@@ -1380,9 +1378,9 @@ class ResponseRpcMetadata {
  private:
   void onExceptionMetadataLengthAccessed() const {
     switch (codecState()) {
-      case CodecState::V0_OTHERMETADATA_DONE:
-        break;
       case CodecState::V0_OTHERMETADATA_1_OTHERMETADATAVALUE_DONE:
+        break;
+      case CodecState::V0_OTHERMETADATA_DONE:
         break;
       default:
         throw AccessOrderError(
@@ -1408,8 +1406,8 @@ class ResponseRpcMetadata {
  private:
   void onExceptionMetadataAccessed() {
     switch (codecState()) {
-      case CodecState::V0_OTHERMETADATA_DONE:
       case CodecState::V0_OTHERMETADATA_1_OTHERMETADATAVALUE_DONE:
+      case CodecState::V0_OTHERMETADATA_DONE:
         codecState(CodecState::V0_EXCEPTIONMETADATA_DONE);
         break;
       default:

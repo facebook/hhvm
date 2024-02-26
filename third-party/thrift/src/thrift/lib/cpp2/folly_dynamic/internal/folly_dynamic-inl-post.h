@@ -242,7 +242,8 @@ struct dynamic_converter_impl<apache::thrift::type::union_t<T>> {
 
     apache::thrift::op::invoke_by_field_id<T>(
         static_cast<apache::thrift::FieldId>(input.getType()),
-        [&]<class Id>(Id) {
+        [&](auto id) {
+          using Id = decltype(id);
           using FieldTag = apache::thrift::op::get_field_tag<T, Id>;
 
           dynamic_converter_impl<FieldTag>::to(out, input, format);
@@ -273,7 +274,8 @@ struct dynamic_converter_impl<apache::thrift::type::union_t<T>> {
     const auto& [name, entry] = *input.items().begin();
 
     const bool found = apache::thrift::op::find_by_field_id<T>(
-        [&, &name = name, &entry = entry]<class Id>(Id) {
+        [&, &name = name, &entry = entry](auto id) {
+          using Id = decltype(id);
           using FieldTag = apache::thrift::op::get_field_tag<T, Id>;
 
           if (apache::thrift::op::get_name_v<T, Id> == name.stringPiece()) {
@@ -296,7 +298,8 @@ template <typename T>
 struct dynamic_converter_impl<apache::thrift::type::struct_t<T>> {
   static void to(folly::dynamic& out, T const& input, dynamic_format format) {
     out = folly::dynamic::object;
-    apache::thrift::op::for_each_field_id<T>([&]<class Id>(Id) {
+    apache::thrift::op::for_each_field_id<T>([&](auto id) {
+      using Id = decltype(id);
       using FieldTag = apache::thrift::op::get_field_tag<T, Id>;
 
       dynamic_converter_impl<FieldTag>::to(out, input, format);
@@ -308,7 +311,8 @@ struct dynamic_converter_impl<apache::thrift::type::struct_t<T>> {
       const folly::dynamic& input,
       dynamic_format format,
       format_adherence adherence) {
-    apache::thrift::op::for_each_field_id<T>([&]<class Id>(Id) {
+    apache::thrift::op::for_each_field_id<T>([&](auto id) {
+      using Id = decltype(id);
       using FieldTag = apache::thrift::op::get_field_tag<T, Id>;
 
       if (auto it = input.find(apache::thrift::op::get_name_v<T, Id>);

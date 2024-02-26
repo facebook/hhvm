@@ -72,7 +72,6 @@ let test () =
       [bar_path]
       ~root:None
       ~longlived_workers:false
-      ~use_distc:false
       ~hh_distc_fanout_threshold:None
       ~check_info
   in
@@ -85,7 +84,6 @@ let test () =
       [bar_path]
       ~root:None
       ~longlived_workers:false
-      ~use_distc:false
       ~hh_distc_fanout_threshold:None
       ~check_info
   in
@@ -99,7 +97,6 @@ let test () =
       [foo_path]
       ~root:None
       ~longlived_workers:false
-      ~use_distc:false
       ~hh_distc_fanout_threshold:None
       ~check_info
   in
@@ -112,7 +109,6 @@ let test () =
       [foo_path]
       ~root:None
       ~longlived_workers:false
-      ~use_distc:false
       ~hh_distc_fanout_threshold:None
       ~check_info
   in

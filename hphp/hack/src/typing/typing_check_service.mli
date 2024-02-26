@@ -40,8 +40,9 @@ val go :
   Relative_path.t list ->
   root:Path.t option ->
   longlived_workers:bool ->
-  use_distc:bool ->
-  hh_distc_fanout_threshold:int option ->
+  hh_distc_fanout_threshold:int option
+    (* Will use hh_distc at the given threshold if provided, otherwise will not use hh_distc.
+     * Can be `None` in dev,testing, and non-fb workflows *) ->
   check_info:Typing_service_types.check_info ->
   result
 
@@ -55,8 +56,9 @@ val go_with_interrupt :
   root:Path.t option ->
   interrupt:'env MultiWorker.interrupt_config ->
   longlived_workers:bool ->
-  use_distc:bool ->
-  hh_distc_fanout_threshold:int option ->
+  hh_distc_fanout_threshold:int option
+    (* Will use hh_distc at the given threshold if provided, otherwise will not use hh_distc
+     *  Can be `None` in dev,testing, and non-fb workflows *) ->
   check_info:Typing_service_types.check_info ->
   ('env * result) job_result
 

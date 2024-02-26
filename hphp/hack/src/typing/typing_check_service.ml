@@ -1033,7 +1033,6 @@ let go_with_interrupt
     ~(root : Path.t option)
     ~(interrupt : 'a MultiThreadedCall.interrupt_config)
     ~(longlived_workers : bool)
-    ~(use_distc : bool)
     ~(hh_distc_fanout_threshold : int option)
     ~(check_info : check_info) : (_ * result) job_result =
   let typecheck_info =
@@ -1087,8 +1086,9 @@ let go_with_interrupt
   let (typing_result, telemetry, env, cancelled_fnl_and_reason, time_first_error)
       =
     let will_use_distc =
-      use_distc
-      && BigList.length fnl > Option.value_exn hh_distc_fanout_threshold
+      match hh_distc_fanout_threshold with
+      | Some fanout_threshold -> BigList.length fnl > fanout_threshold
+      | None -> false
     in
     if check_info.log_errors then
       Server_progress.ErrorsWrite.telemetry
@@ -1159,7 +1159,6 @@ let go
     (fnl : Relative_path.t list)
     ~(root : Path.t option)
     ~(longlived_workers : bool)
-    ~(use_distc : bool)
     ~(hh_distc_fanout_threshold : int option)
     ~(check_info : check_info) : result =
   let interrupt = MultiThreadedCall.no_interrupt () in
@@ -1172,7 +1171,6 @@ let go
       ~root
       ~interrupt
       ~longlived_workers
-      ~use_distc
       ~hh_distc_fanout_threshold
       ~check_info
   in

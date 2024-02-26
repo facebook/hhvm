@@ -89,7 +89,6 @@ let test () =
       ~root:None
       ~interrupt
       ~longlived_workers:false
-      ~use_distc:false
       ~hh_distc_fanout_threshold:None
       ~check_info
   in

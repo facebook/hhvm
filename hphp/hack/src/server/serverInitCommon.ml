@@ -215,9 +215,11 @@ let defer_or_do_type_check
       let longlived_workers =
         genv.local_config.ServerLocalConfig.longlived_workers
       in
-      let use_distc = genv.local_config.ServerLocalConfig.use_distc in
       let hh_distc_fanout_threshold =
-        Some genv.local_config.ServerLocalConfig.hh_distc_fanout_threshold
+        let use_distc = genv.local_config.ServerLocalConfig.use_distc in
+        Option.some_if
+          use_distc
+          genv.local_config.ServerLocalConfig.hh_distc_fanout_threshold
       in
       let root = Some (ServerArgs.root genv.ServerEnv.options) in
       let ctx = Provider_utils.ctx_from_server_env env in
@@ -229,7 +231,6 @@ let defer_or_do_type_check
         files_to_check
         ~root
         ~longlived_workers
-        ~use_distc
         ~hh_distc_fanout_threshold
         ~check_info:
           (ServerCheckUtils.get_check_info

@@ -311,15 +311,17 @@ let do_type_checking
   let longlived_workers =
     genv.local_config.ServerLocalConfig.longlived_workers
   in
-  let use_distc =
-    (* hh_distc and hh_server may behave inconsistently in the face of
-       duplicate name errors. Eventually we'll want to make duplicate
-       name errors a typing error and this check can go away. *)
-    phys_equal (Relative_path.Set.cardinal files_with_naming_errors) 0
-    && genv.ServerEnv.local_config.ServerLocalConfig.use_distc
-  in
   let hh_distc_fanout_threshold =
-    Some genv.ServerEnv.local_config.ServerLocalConfig.hh_distc_fanout_threshold
+    let use_distc =
+      (* hh_distc and hh_server may behave inconsistently in the face of
+         duplicate name errors. Eventually we'll want to make duplicate
+         name errors a typing error and this check can go away. *)
+      Relative_path.Set.cardinal files_with_naming_errors = 0
+      && genv.ServerEnv.local_config.ServerLocalConfig.use_distc
+    in
+    Option.some_if
+      use_distc
+      genv.ServerEnv.local_config.ServerLocalConfig.hh_distc_fanout_threshold
   in
   let cgroup_typecheck_telemetry = ref None in
   let (errorl', telemetry, env, unfinished_and_reason, time_first_typing_error)
@@ -346,7 +348,6 @@ let do_type_checking
         ~root
         ~interrupt
         ~longlived_workers
-        ~use_distc
         ~hh_distc_fanout_threshold
         ~check_info:
           (ServerCheckUtils.get_check_info

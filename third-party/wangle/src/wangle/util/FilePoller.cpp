@@ -60,8 +60,6 @@ bool* FilePoller::ThreadProtector::polling() {
   return &sPolling;
 }
 
-constexpr std::chrono::milliseconds FilePoller::kDefaultPollInterval;
-
 FilePoller::FilePoller(std::chrono::milliseconds pollInterval) {
   init(pollInterval);
 }

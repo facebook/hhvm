@@ -1631,8 +1631,8 @@ fn cmp_tparam_bounds(
 }
 
 fn cmp_type_constant(
-    (a, a_strings): (&TypeConstant<'_>, &StringInterner),
-    (b, b_strings): (&TypeConstant<'_>, &StringInterner),
+    (a, a_strings): (&TypeConstant, &StringInterner),
+    (b, b_strings): (&TypeConstant, &StringInterner),
 ) -> Result {
     let TypeConstant {
         name: a_name,

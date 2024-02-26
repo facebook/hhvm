@@ -216,7 +216,7 @@ pub(crate) fn lower_class<'a>(mut class: Class<'a>, strings: Arc<StringInterner>
             initializer,
             is_abstract,
         } = tc;
-        let name = PropId::from_bytes(&name, &strings);
+        let name = PropId::from_bytes(name.as_str().as_bytes(), &strings);
         let arguments: Vec<TypedValue> = initializer
             .as_ref()
             .and_then(|init| compute_tc_attribute(init, &strings))

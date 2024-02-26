@@ -186,7 +186,7 @@ fn from_type_constant<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     tc: &'a ast::ClassTypeconstDef,
-) -> Result<TypeConstant<'arena>> {
+) -> Result<TypeConstant> {
     use ast::ClassTypeconst;
     let name = tc.name.1.to_string();
 
@@ -216,7 +216,7 @@ fn from_type_constant<'a, 'arena, 'decl>(
     };
 
     Ok(TypeConstant {
-        name: Str::new_str(alloc, &name),
+        name: hhbc::intern(name),
         initializer: Maybe::from(initializer),
         is_abstract,
     })
@@ -791,7 +791,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
     let type_constants = tconsts
         .iter()
         .map(|x| from_type_constant(alloc, emitter, x))
-        .collect::<Result<Vec<TypeConstant<'_>>>>()?;
+        .collect::<Result<Vec<_>>>()?;
     let ctx_constants = ctxconsts
         .iter()
         .map(|x| from_ctx_constant(alloc, x))

@@ -141,9 +141,9 @@ fn convert_ctx_constant<'a>(ctx: &ir::CtxConstant<'a>) -> hhbc::CtxConstant<'a> 
 }
 
 fn convert_type_constant<'a>(
-    tc: ir::TypeConstant<'a>,
+    tc: ir::TypeConstant,
     strings: &StringCache<'a>,
-) -> hhbc::TypeConstant<'a> {
+) -> hhbc::TypeConstant {
     hhbc::TypeConstant {
         name: tc.name,
         initializer: tc

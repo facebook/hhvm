@@ -354,9 +354,9 @@ fn print_requirement(ctx: &Context<'_>, w: &mut dyn Write, r: &Requirement<'_>) 
     }
 }
 
-fn print_type_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &TypeConstant<'_>) -> Result<()> {
+fn print_type_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &TypeConstant) -> Result<()> {
     ctx.newline(w)?;
-    write_bytes!(w, ".const {} isType", c.name)?;
+    write_bytes!(w, ".const {} isType", c.name.as_str())?;
     if c.is_abstract {
         w.write_all(b" isAbstract")?;
     }

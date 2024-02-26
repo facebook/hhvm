@@ -431,11 +431,7 @@ fn sem_diff_constant(path: &CodePath<'_>, a: &Constant<'_>, b: &Constant<'_>) ->
     Ok(())
 }
 
-fn sem_diff_type_constant(
-    path: &CodePath<'_>,
-    a: &TypeConstant<'_>,
-    b: &TypeConstant<'_>,
-) -> Result<()> {
+fn sem_diff_type_constant(path: &CodePath<'_>, a: &TypeConstant, b: &TypeConstant) -> Result<()> {
     let TypeConstant {
         name: a_name,
         initializer: a_initializer,

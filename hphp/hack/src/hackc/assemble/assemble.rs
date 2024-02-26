@@ -95,7 +95,7 @@ struct UnitBuilder<'a> {
     include_refs: Option<Vec<hhbc::IncludePath<'a>>>,
     module_use: Option<ModuleName<'a>>,
     modules: Vec<hhbc::Module<'a>>,
-    type_constants: Vec<hhbc::TypeConstant<'a>>,
+    type_constants: Vec<hhbc::TypeConstant>,
     typedefs: Vec<hhbc::Typedef<'a>>,
 }
 
@@ -448,14 +448,15 @@ fn assemble_const_or_type_const<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     consts: &mut Vec<hhbc::Constant<'arena>>,
-    type_consts: &mut Vec<hhbc::TypeConstant<'arena>>,
+    type_consts: &mut Vec<hhbc::TypeConstant>,
 ) -> Result<()> {
     token_iter.expect_str(Token::is_decl, ".const")?;
     let mut attrs = Attr::AttrNone;
     if token_iter.peek_is(Token::is_open_bracket) {
         attrs = assemble_special_and_user_attrs(token_iter, alloc)?.0;
     }
-    let name = token_iter.expect(Token::is_identifier)?.into_ffi_str(alloc);
+    let name = token_iter.expect(Token::is_identifier)?;
+    let name = name.as_str()?;
     if token_iter.next_is_str(Token::is_identifier, "isType") {
         //type const
         let is_abstract = token_iter.next_is_str(Token::is_identifier, "isAbstract");
@@ -465,13 +466,13 @@ fn assemble_const_or_type_const<'arena>(
             Maybe::Nothing
         };
         type_consts.push(hhbc::TypeConstant {
-            name,
+            name: hhbc::intern(name),
             initializer,
             is_abstract,
         });
     } else {
         //const
-        let name = hhbc::ConstName::new(name);
+        let name = hhbc::ConstName::new(ffi::Str::new_slice(alloc, name.as_bytes()));
         let value = if token_iter.next_is(Token::is_equal) {
             if token_iter.next_is_str(Token::is_identifier, "uninit") {
                 Maybe::Just(hhbc::TypedValue::Uninit)

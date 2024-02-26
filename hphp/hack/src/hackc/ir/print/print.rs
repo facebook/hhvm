@@ -16,6 +16,7 @@ use std::fmt::Error;
 use std::fmt::Result;
 use std::fmt::Write;
 
+use ffi::Str;
 use ir_core::class::Property;
 use ir_core::instr::BaseOp;
 use ir_core::instr::FinalOp;
@@ -2179,16 +2180,16 @@ fn print_terminator(
     Ok(())
 }
 
-fn print_type_constant(
-    w: &mut dyn Write,
-    tc: &TypeConstant<'_>,
-    strings: &StringInterner,
-) -> Result {
+fn print_type_constant(w: &mut dyn Write, tc: &TypeConstant, strings: &StringInterner) -> Result {
     write!(w, "  type_constant ")?;
     if tc.is_abstract {
         write!(w, "abstract ")?;
     }
-    write!(w, "{}", FmtIdentifier(&tc.name))?;
+    write!(
+        w,
+        "{}",
+        FmtIdentifier(&Str::new(tc.name.as_str().as_bytes()))
+    )?;
     if let Some(init) = &tc.initializer {
         write!(w, " = {}", FmtTypedValue(init, strings))?;
     }

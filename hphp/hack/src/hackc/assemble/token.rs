@@ -102,6 +102,10 @@ impl<'a> Token<'a> {
         }
     }
 
+    pub(crate) fn as_str(&self) -> Result<&str> {
+        Ok(std::str::from_utf8(self.as_bytes())?)
+    }
+
     pub(crate) fn into_ffi_str<'arena>(&self, alloc: &'arena bumpalo::Bump) -> ffi::Str<'arena> {
         ffi::Str::new_slice(alloc, self.as_bytes())
     }

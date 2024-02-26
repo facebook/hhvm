@@ -59,9 +59,9 @@ impl MapName for hhbc::Typedef<'_> {
     }
 }
 
-impl MapName for hhbc::TypeConstant<'_> {
+impl MapName for hhbc::TypeConstant {
     fn get_name(&self) -> &str {
-        self.name.unsafe_as_str()
+        self.name.as_str()
     }
 }
 

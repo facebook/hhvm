@@ -4,15 +4,15 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Maybe;
-use ffi::Str;
 use serde::Serialize;
 
 use crate::typed_value::TypedValue;
+use crate::StringId;
 
 #[derive(Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
-pub struct TypeConstant<'arena> {
-    pub name: Str<'arena>,
+pub struct TypeConstant {
+    pub name: StringId,
     pub initializer: Maybe<TypedValue>,
     pub is_abstract: bool,
 }

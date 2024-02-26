@@ -142,10 +142,7 @@ fn convert_ctx_constant<'a>(ctx: &hhbc::CtxConstant<'a>) -> ir::CtxConstant<'a> 
     }
 }
 
-fn convert_type_constant<'a>(
-    tc: &hhbc::TypeConstant<'a>,
-    strings: &StringInterner,
-) -> ir::TypeConstant<'a> {
+fn convert_type_constant(tc: &hhbc::TypeConstant, strings: &StringInterner) -> ir::TypeConstant {
     let initializer = tc
         .initializer
         .as_ref()

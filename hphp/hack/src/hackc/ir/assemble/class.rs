@@ -218,8 +218,6 @@ impl<'a> ClassParser<'a> {
 
     fn parse_type_constant(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
         parse!(tokenizer, <is_abstract:"abstract"?> <name:parse_user_id>);
-        let name = Str::new_slice(self.alloc, &name.0);
-
         let initializer = if tokenizer.next_is_identifier("=")? {
             Some(parse_typed_value(tokenizer)?)
         } else {
@@ -227,7 +225,7 @@ impl<'a> ClassParser<'a> {
         };
 
         let tc = TypeConstant {
-            name,
+            name: ir_core::intern(String::from_utf8(name.0)?),
             initializer,
             is_abstract: is_abstract.is_some(),
         };

@@ -8,18 +8,17 @@
 
 open Hh_prelude
 
-let get_context_from_hint ctx h =
+let hint_to_string ~is_ctx ctx h =
   let mode = FileInfo.Mhhi in
   let decl_env = Decl_env.{ mode; droot = None; droot_member = None; ctx } in
   let tcopt = Provider_context.get_tcopt ctx in
-  Typing_print.full_decl ~msg:false tcopt (Decl_hint.context_hint decl_env h)
-
-let get_type_from_hint ctx h =
-  let mode = FileInfo.Mhhi in
-  let decl_env = Decl_env.{ mode; droot = None; droot_member = None; ctx } in
-  let tcopt = Provider_context.get_tcopt ctx in
-  Typing_print.full_decl ~msg:false tcopt (Decl_hint.hint decl_env h)
-  |> Utils.strip_ns
+  let (pp, strip) =
+    if is_ctx then
+      (Decl_hint.context_hint decl_env, (fun x -> x))
+    else
+      (Decl_hint.hint decl_env, Utils.strip_ns)
+  in
+  pp h |> Typing_print.full_decl ~msg:false tcopt |> strip
 
 type pos = {
   start: int;
@@ -226,3 +225,41 @@ let hint_to_string_and_symbols (hint : Aast.hint) =
   in
   parse ~is_ctx:false hint;
   (Buffer.contents buf, !xrefs)
+
+let expr_to_string source_text (_, pos, _) =
+  let strip_nested_quotes str =
+    let len = String.length str in
+    let firstc = str.[0] in
+    let lastc = str.[len - 1] in
+    if
+      len >= 2
+      && ((Char.equal '"' firstc && Char.equal '"' lastc)
+         || (Char.equal '\'' firstc && Char.equal '\'' lastc))
+    then
+      String.sub str ~pos:1 ~len:(len - 2)
+    else
+      str
+  in
+  (* Replace any codepoints that are not valid UTF-8 with
+     the unrepresentable character. *)
+  let check_utf8 str =
+    let b = Buffer.create (String.length str) in
+    let replace_malformed () _index = function
+      | `Uchar u -> Uutf.Buffer.add_utf_8 b u
+      | `Malformed _ -> Uutf.Buffer.add_utf_8 b Uutf.u_rep
+    in
+    Uutf.String.fold_utf_8 replace_malformed () str;
+    Buffer.contents b
+  in
+  let source_at_span source_text pos =
+    let st = Pos.start_offset pos in
+    let fi = Pos.end_offset pos in
+    let source_text = Full_fidelity_source_text.sub source_text st (fi - st) in
+    check_utf8 source_text
+  in
+  source_at_span source_text pos |> strip_nested_quotes
+
+let strip_tparams name =
+  match String.index name '<' with
+  | None -> name
+  | Some i -> String.sub name ~pos:0 ~len:i

@@ -19,6 +19,14 @@ type pos = {
    Used to generate predicate TypeInfo *)
 val hint_to_string_and_symbols : Aast.hint -> string * (Pos.t * pos) list
 
-val get_type_from_hint : Provider_context.t -> Aast.hint -> string
+(* Pretty-printer for hints/contexts. Translate hints to types and use
+   [Typing_print] type pretty printers. TODO always use [hint_to_string_and_symbols] *)
+val hint_to_string : is_ctx:bool -> Provider_context.t -> Aast.hint -> string
 
-val get_context_from_hint : Provider_context.t -> Aast.hint -> string
+(* Pretty-printer for expressions. Fetch representation from the source.
+   Strip enclosing double/single quotes if any.
+   TODO: 1. replace with Hint_print.pp_expr. 2. why stripping? *)
+val expr_to_string : Full_fidelity_source_text.t -> ('a, 'b) Aast.expr -> string
+
+(* Convert ContainerName<TParam> to ContainerName - see D21428855 *)
+val strip_tparams : string -> string

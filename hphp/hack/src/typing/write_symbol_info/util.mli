@@ -13,28 +13,6 @@ val ends_in_newline : Full_fidelity_source_text.t -> bool
 
 val has_tabs_or_multibyte_codepoints : Full_fidelity_source_text.t -> bool
 
-(* Values pulled from source code may have quotation marks;
-   strip these when present, eg: "\"FOO\"" => "FOO" *)
-val strip_nested_quotes : string -> string
-
-(* Convert ContainerName<TParam> to ContainerName *)
-val strip_tparams : string -> string
-
-(* Split name or subnamespace from its parent namespace, and return
-   either Some (parent, name), or None if the name has no parent namespace.
-   The trailing slash is removed from the parent. *)
-val split_name : string -> (string * string) option
-
-(* hack to pretty-print an expression. Get the representation from
-   the source file, in lack of a better solution. This assumes that the
-    expr comes from the the source text parameter. Should be replaced
-    by proper pretty-printing functions. *)
-val ast_expr_to_string_stripped :
-  Full_fidelity_source_text.t -> ('a, 'b) Aast.expr -> string
-
-val ast_expr_to_string :
-  Full_fidelity_source_text.t -> ('a, 'b) Aast.expr -> string
-
 exception Ast_error
 
 exception Empty_namespace

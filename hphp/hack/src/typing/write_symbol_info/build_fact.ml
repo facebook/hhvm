@@ -24,7 +24,7 @@ let attributes source_text attrs =
       let name = Util.make_name name in
       let parameters =
         List.fold_right attr.ua_params ~init:[] ~f:(fun expr acc ->
-            Util.ast_expr_to_string_stripped source_text expr :: acc)
+            Pretty.expr_to_string source_text expr :: acc)
       in
       UserAttribute.(Key { name; parameters; qname = None }))
 
@@ -39,7 +39,7 @@ let call_arguments arguments =
   List.fold arguments ~init:([], 0) ~f |> fst |> List.rev
 
 let constraint_ ctx (kind, hint) =
-  let type_string = Pretty.get_type_from_hint ctx hint in
+  let type_string = Pretty.hint_to_string ~is_ctx:false ctx hint in
   Constraint.
     {
       constraint_kind = Util.make_constraint_kind kind;
@@ -53,7 +53,9 @@ let signature
     (ctxs_hints : Aast.contexts option)
     ~ret_ty
     ~return_info =
-  let hint_to_ctx hint = Context_.Key (Pretty.get_context_from_hint ctx hint) in
+  let hint_to_ctx hint =
+    Context_.Key (Pretty.hint_to_string ~is_ctx:true ctx hint)
+  in
   let f (_pos, hint) = List.map ~f:hint_to_ctx hint in
   let ctxs_hints = Option.map ctxs_hints ~f in
   let param (p, type_xref, ty) =
@@ -62,9 +64,7 @@ let signature
         name = Util.make_name p.param_name;
         type_ = Option.map ~f:(fun x -> Type.Key x) ty;
         default_value =
-          Option.map p.param_expr ~f:(fun expr ->
-              Util.strip_nested_quotes
-                (Util.ast_expr_to_string source_text expr));
+          Option.map p.param_expr ~f:(Pretty.expr_to_string source_text);
         is_inout =
           (match p.param_callconv with
           | Pinout _ -> true

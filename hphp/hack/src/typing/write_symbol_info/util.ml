@@ -16,41 +16,6 @@ let is_enum_or_enum_class = function
     true
   | Ast_defs.(Cinterface | Cclass _ | Ctrait) -> false
 
-(* Replace any codepoints that are not valid UTF-8 with
-   the unrepresentable character. *)
-let check_utf8 str =
-  let b = Buffer.create (String.length str) in
-  let replace_malformed () _index = function
-    | `Uchar u -> Uutf.Buffer.add_utf_8 b u
-    | `Malformed _ -> Uutf.Buffer.add_utf_8 b Uutf.u_rep
-  in
-  Uutf.String.fold_utf_8 replace_malformed () str;
-  Buffer.contents b
-
-let source_at_span source_text pos =
-  let st = Pos.start_offset pos in
-  let fi = Pos.end_offset pos in
-  let source_text = Full_fidelity_source_text.sub source_text st (fi - st) in
-  check_utf8 source_text
-
-let strip_nested_quotes str =
-  let len = String.length str in
-  let firstc = str.[0] in
-  let lastc = str.[len - 1] in
-  if
-    len >= 2
-    && ((Char.equal '"' firstc && Char.equal '"' lastc)
-       || (Char.equal '\'' firstc && Char.equal '\'' lastc))
-  then
-    String.sub str ~pos:1 ~len:(len - 2)
-  else
-    str
-
-let strip_tparams name =
-  match String.index name '<' with
-  | None -> name
-  | Some i -> String.sub name ~pos:0 ~len:i
-
 let ends_in_newline source_text =
   let last_char =
     Full_fidelity_source_text.(get source_text (source_text.length - 1))
@@ -68,6 +33,9 @@ let has_tabs_or_multibyte_codepoints source_text =
   in
   found_tab_or_malformed || num_chars < source_text.length
 
+(* Split name or subnamespace from its parent namespace, and return
+   either Some (parent, name), or None if the name has no parent namespace.
+   The trailing slash is removed from the parent. *)
 let split_name (s : string) : (string * string) option =
   match String.rindex s '\\' with
   | None -> None
@@ -81,11 +49,6 @@ let split_name (s : string) : (string * string) option =
       None
     else
       Some (parent_namespace, name)
-
-let ast_expr_to_string_stripped source_text (_, pos, _) =
-  strip_nested_quotes (source_at_span source_text pos)
-
-let ast_expr_to_string source_text (_, pos, _) = source_at_span source_text pos
 
 module Token = Full_fidelity_positioned_syntax.Token
 

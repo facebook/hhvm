@@ -52,25 +52,12 @@ SymbolMap s_modules;
 
 }
 
-void registerBuiltinSymbols(
-  const std::string& name,
-  const std::string& contents
-) {
+void registerBuiltinSymbols(const std::string& serialized_decls) {
   // We should *never* call this function unless decl driven bytecode is enabled
   assertx(RuntimeOption::EvalEnableDecl);
 
-  // Systemlib and extensions are compiled before we've even loaded HHVM
-  // options, so our recourse here is to use the defaults.
-  auto const& defaults = RepoOptions::defaults();
+  auto decls = hackc::binary_to_decls_and_blob(serialized_decls);
 
-  hackc::DeclParserConfig options;
-  defaults.flags().initDeclConfig(options);
-
-  auto decls = hackc::direct_decl_parse_and_serialize(
-      options,
-      name,
-      {(const uint8_t*)contents.data(), contents.size()}
-  );
   auto const symbols = hackc::decls_to_symbols(*decls.decls);
   auto const decls_ptr = std::make_shared<hackc::DeclsAndBlob>(std::move(decls));
   for (auto const& e : symbols.types) {

@@ -1116,12 +1116,6 @@ struct DeclExtension final : Extension {
 
     Native::registerNativeDataInfo<FileDecls>();
   }
-
-  std::vector<std::string> hackFiles() const override {
-    return {
-        "decl",
-    };
-  }
 } s_decl_extension;
 
 } // namespace HPHP

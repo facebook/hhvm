@@ -2,11 +2,6 @@
 
 readonly EXTNAME=$1
 
-if [ ${#EXTNAME} -le 12 ]; then
-  echo "ext.${EXTNAME}"
-  exit 0
-fi
-
 # Some platforms limit section names to 16 characters
 # So we'll use 'ext.' plus the first 12 characters of md5($extname)
 if builtin command -v md5 > /dev/null; then

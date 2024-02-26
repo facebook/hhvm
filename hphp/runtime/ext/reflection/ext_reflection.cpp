@@ -2474,10 +2474,10 @@ struct ReflectionExtension final : Extension {
 
   std::vector<std::string> hackFiles() const {
     return {
-      "reflection",
-      "reflection-classes",
-      "reflection-internals-functions",
-      "reflection_hni"
+      "reflection.php",
+      "reflection-classes.php",
+      "reflection-internals-functions.php",
+      "reflection_hni.php"
     };
   }
 } s_reflection_extension;

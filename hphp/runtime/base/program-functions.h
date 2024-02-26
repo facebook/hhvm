@@ -129,7 +129,8 @@ void hphp_memory_cleanup();
 void hphp_session_exit();
 void hphp_process_exit() noexcept;
 bool is_hphp_session_initialized();
-std::string get_systemlib(const std::string &section);
+
+std::string get_embedded_section(const std::string& section_name);
 
 // Helper function for stats tracking with exceptions.
 void bump_counter_and_rethrow(bool isPsp);

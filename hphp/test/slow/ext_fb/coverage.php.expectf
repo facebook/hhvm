@@ -1,5 +1,5 @@
 dict(2) {
-  ["/:systemlib.phpfb"]=>
+  ["/:ext_fb.php"]=>
   dict(1) {
     [%d]=>
     int(1)
@@ -17,9 +17,9 @@ dict(2) {
   }
 }
 dict(3) {
-  ["/:systemlib.phpstd_variable"]=>
+  ["/:ext_std_variable.php"]=>
   int(1)
-  ["/:systemlib.phpfb"]=>
+  ["/:ext_fb.php"]=>
   int(2)
   ["%s/test/slow/ext_fb/coverage.php"]=>
   int(5)

@@ -51,44 +51,6 @@ bool Extension::IsSystemlibPath(const std::string& name) {
   return !name.compare(0, 2, "/:");
 }
 
-void Extension::CompileSystemlib(const std::string &slib,
-                                 const std::string &name,
-                                 const Extension* extension) {
-  // TODO (t3443556) Bytecode repo compilation expects that any errors
-  // encountered during systemlib compilation have valid filename pointers
-  // which won't be the case for now unless these pointers are long-lived.
-  auto const moduleName = makeStaticString("/:" + name);
-  auto const unit = compile_systemlib_string(slib.c_str(), slib.size(),
-                                             moduleName->data(), extension);
-  always_assert_flog(unit, "No unit created for systemlib `{}'", moduleName);
-
-  if (auto const info = unit->getFatalInfo()) {
-    std::fprintf(stderr, "Systemlib `%s' contains a fataling unit: %s, %d\n",
-                 name.c_str(),
-                 info->m_fatalMsg.c_str(),
-                 info->m_fatalLoc.line1);
-    _Exit(HPHP_EXIT_FAILURE);
-  }
-
-  unit->merge();
-  SystemLib::addPersistentUnit(unit);
-}
-
-namespace {
-
-std::string get_section(std::string_view name) {
-  assertx(!name.empty());
-  std::string section("ext.");
-  if (name.length() > 12) {
-    section += HHVM_FN(md5)(std::string(name), false).substr(0, 12).data();
-  } else {
-    section += name;
-  }
-  return get_systemlib(section);
-}
-
-}
-
 /**
  * Loads a named systemlib section from the main binary (or DSO)
  * using the label "ext.{hash(name)}"
@@ -96,11 +58,19 @@ std::string get_section(std::string_view name) {
  * If {name} is not passed, then {m_name} is assumed.
  */
 void Extension::loadSystemlib(const std::string& name) {
-  auto const slib = get_section(name);
-  if (!slib.empty()) {
-    std::string phpname = s_systemlibPhpName + name;
-    CompileSystemlib(slib, phpname, this);
+  auto const moduleName = std::string("/:ext_"+name);
+  auto const unit = get_systemlib(moduleName, this);
+  always_assert_flog(unit, "No unit created for systemlib `{}'", moduleName);
+  if (auto const info = unit->getFatalInfo()) {
+    std::fprintf(stderr, "Systemlib `%s' contains a fataling unit: %s, %d\n",
+                 moduleName.c_str(),
+                 info->m_fatalMsg.c_str(),
+                 info->m_fatalLoc.line1);
+    _Exit(HPHP_EXIT_FAILURE);
   }
+
+  unit->merge();
+  SystemLib::addPersistentUnit(unit);
 }
 
 void Extension::moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*hdf*/)
@@ -154,7 +124,7 @@ const std::vector<StringData*>& Extension::getExtensionFunctions() const {
 }
 
 std::vector<std::string> Extension::hackFiles() const {
-  return {toLower(m_name)};
+  return {toLower(std::string(m_name) + ".php")};
 }
 
 void Extension::loadEmitters() {
@@ -170,12 +140,11 @@ void Extension::loadDecls() {
   }
 }
 
-void Extension::loadDeclsFrom(std::string_view name) {
-  auto const slib = get_section(name);
-  // We *really* ought to assert that `slib` is non-empty here, but there are
-  // some extensions that don't have any source code, such as the ones created by
-  // `IMPLEMENT_DEFAULT_EXTENSION_VERSION`
-  Native::registerBuiltinSymbols(std::string(name), slib);
+void Extension::loadDeclsFrom(const std::string& name) {
+  auto serialized_decls = get_embedded_section("/:ext_" + name + ".decls");
+  FTRACE_MOD(Trace::tmp0, 1, "Loading decls from {}\n", name.c_str());
+  always_assert(serialized_decls.size() > 0);
+  Native::registerBuiltinSymbols(serialized_decls);
 }
 
 /////////////////////////////////////////////////////////////////////////////

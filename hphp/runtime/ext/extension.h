@@ -62,13 +62,13 @@ struct Extension {
 
   // Look for "ext.{namehash}" in the binary and compile/merge it
 private:
+  void loadSystemlib() { loadSystemlib(m_name); }
+  void loadSystemlib(const char* name) {
+    loadSystemlib(std::string(name));
+  }
   void loadSystemlib(const std::string& name);
 
 public:
-  // Compile and merge an systemlib fragment
-  static void CompileSystemlib(const std::string &slib,
-                               const std::string &name,
-                               const Extension* extension);
   explicit Extension(const char name[],
                      const char version[],
                      const char oncall[]);
@@ -113,7 +113,7 @@ public:
   // by default will be passed *just* the extension name.
 
 private:
-  void loadDeclsFrom(std::string_view name);
+  void loadDeclsFrom(const std::string& name);
 
 public:
   // override this to control extension_loaded() return value

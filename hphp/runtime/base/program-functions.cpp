@@ -65,6 +65,7 @@
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/strobelight/ext_strobelight.h"
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 #include "hphp/runtime/server/admin-request-handler.h"
@@ -2246,25 +2247,20 @@ String canonicalize_path(const String& p, const char* root, int rootLen) {
   return path;
 }
 
-// Retrieve a systemlib (or mini systemlib) from the
-// current executable or another ELF object file.
-//
-// Additionally, when retrieving the main systemlib
-// from the current executable, honor the
-// HHVM_SYSTEMLIB environment variable as an override.
-std::string get_systemlib(const std::string &section) {
-  if (section == "systemlib") {
-    if (auto const file = getenv("HHVM_SYSTEMLIB")) {
-      std::ifstream ifs(file);
-      if (ifs.good()) {
-        return std::string(std::istreambuf_iterator<char>(ifs),
-                           std::istreambuf_iterator<char>());
-      }
-    }
+namespace {
+  std::string get_section_name(const std::string& path) {
+    std::string section("ext.");
+    return section + HHVM_FN(md5)(std::string(path), false).substr(0, 12).data();
   }
+}
+
+// Retrieve a embed section of the HHVM binary
+std::string get_embedded_section(const std::string& path) {
+  auto section_name = get_section_name(path);
+  FTRACE_MOD(Trace::tmp0, 1, "get_embedded_section {} {}\n", path.c_str(), section_name.c_str());
 
   embedded_data desc;
-  if (!get_embedded_data(section.c_str(), &desc)) return "";
+  if (!get_embedded_data(section_name.c_str(), &desc)) return "";
   return read_embedded_data(desc);
 }
 

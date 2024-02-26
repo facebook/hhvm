@@ -619,7 +619,9 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
 
   const bool isSystemLib = FileUtil::isSystemName(m_filepath->slice());
   const bool doVerify = kVerify || boost::ends_with(m_filepath->data(), ".hhas");
-  if (doVerify) {
+
+  // Systemlib is verified during build so we don't need to do it here.
+  if (!isSystemLib && doVerify) {
     // The verifier needs the bytecode available, but we don't want to
     // necessarily force it to load (otherwise it would defeat the
     // point of lazy loading when we're using the verifier). So, load
@@ -647,7 +649,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
       }
     }
 
-    auto const verbose = isSystemLib ? kVerifyVerboseSystem : kVerifyVerbose;
+    auto const verbose = kVerifyVerbose;
     if (!check(verbose)) {
       if (!verbose) {
         std::cerr << folly::format(
@@ -791,7 +793,8 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
 
   MemoryManager::SuppressOOM so{*tl_heap};
 
-  if (isASystemLib()) lazy = false;
+  auto is_systemlib = isASystemLib();
+  if (is_systemlib) lazy = false;
 
   // Have SerDe use this unit's string/array table for encoding or decoding.
   assertx(!BlobEncoderHelper<const StringData*>::tl_unitEmitter);
@@ -900,7 +903,7 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
           (m_fatalMsg);
       }
 
-      if (RO::EvalLoadFilepathFromUnitCache) {
+      if (!is_systemlib && RO::EvalLoadFilepathFromUnitCache) {
         assertx(!RO::RepoAuthoritative);
         /* May be different than the unit origin: e.g. for hhas files. */
         sd(m_filepath);

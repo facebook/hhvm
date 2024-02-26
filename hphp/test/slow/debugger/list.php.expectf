@@ -2,7 +2,7 @@ Program %s/list.php loaded. Type '[r]un' or '[c]ontinue' to go.
 br SplMaxHeap::insert()
 Breakpoint 1 set upon entering SplMaxHeap::insert()
 run
-Breakpoint 1 reached at SplHeap::insert() on line %d of /:systemlib.phpcore
+Breakpoint 1 reached at SplHeap::insert() on line %d of /:ext_core.php
 list myfunc
    3 function myfunc($a, $b) {
    4   error_log($a.$b);

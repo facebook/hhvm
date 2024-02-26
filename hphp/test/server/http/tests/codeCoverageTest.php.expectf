@@ -11,7 +11,7 @@ Requesting 'test_code_coverage.php?enable_code_coverage=true'
 string(%d) "Code coverage: true
 I'm FOOO
 dict(2) {
-  ["/:systemlib.phpfb"]=>
+  ["/:ext_fb.php"]=>
   dict(1) {
     [%d]=>
     int(1)
@@ -34,7 +34,7 @@ Enable Code Coverage = 2
 Requesting 'test_code_coverage.php'
 string(%d) "I'm FOOO
 dict(2) {
-  ["/:systemlib.phpfb"]=>
+  ["/:ext_fb.php"]=>
   dict(1) {
     [%d]=>
     int(1)
@@ -60,7 +60,7 @@ Requesting 'test_code_coverage.php?enable_code_coverage=true'
 string(%d) "Code coverage: true
 I'm FOOO
 dict(2) {
-  ["/:systemlib.phpfb"]=>
+  ["/:ext_fb.php"]=>
   dict(1) {
     [%d]=>
     int(1)

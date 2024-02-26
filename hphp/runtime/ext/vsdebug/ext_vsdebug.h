@@ -37,6 +37,8 @@ struct VSDebugExtension final : Extension {
   void threadShutdown() override;
   bool moduleEnabled() const override { return m_enabled; }
 
+  std::vector<std::string> hackFiles() const { return {}; }
+
   static Debugger* getDebugger() {
     std::atomic_thread_fence(std::memory_order_acquire);
     return s_debugger;
@@ -64,4 +66,3 @@ private:
 
 }
 }
-

@@ -472,6 +472,9 @@ mod ffi {
         /// Decode a binary DeclsHolder blob back to DeclsHolder
         fn binary_to_decls_holder(json: &CxxString) -> Result<Box<DeclsHolder>>;
 
+        /// Decode a binary DeclsHolder blob back to DeclsAndBlob
+        fn binary_to_decls_and_blob(json: &CxxString) -> Result<DeclsAndBlob>;
+
         /// Format facts into a human readable string for debugging.
         fn facts_debug(facts: &FileFacts) -> String;
 
@@ -813,6 +816,15 @@ fn binary_to_decls_holder(blob: &CxxString) -> bincode::Result<Box<DeclsHolder>>
         parsed_file,
         _arena: arena,
     }))
+}
+
+fn binary_to_decls_and_blob(blob: &CxxString) -> bincode::Result<ffi::DeclsAndBlob> {
+    let decls = binary_to_decls_holder(blob)?;
+    Ok(ffi::DeclsAndBlob {
+        serialized: decl_provider::serialize_decls(&decls.parsed_file.decls).unwrap(),
+        has_errors: decls.parsed_file.has_first_pass_parse_errors,
+        decls,
+    })
 }
 
 fn facts_debug(facts: &ffi::FileFacts) -> String {

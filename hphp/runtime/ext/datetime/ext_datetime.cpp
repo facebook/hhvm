@@ -1034,7 +1034,7 @@ static struct DateTimeExtension final : Extension {
   }
 
   std::vector<std::string> hackFiles() const override {
-    return {"datetime"};
+    return {"datetime.php"};
   }
 
   void threadInit() override {

@@ -16,12 +16,14 @@
 #pragma once
 
 #include <cstddef>
+#include <memory>
 
 namespace HPHP {
 
 struct AutoloadMap;
 struct Extension;
 struct Unit;
+struct UnitEmitter;
 struct SHA1;
 struct RepoOptions;
 struct LazyUnitContentsLoader;
@@ -58,7 +60,10 @@ Unit* compile_string(const char* s, size_t sz,
 
 Unit* compile_debugger_string(const char* s, size_t sz, const RepoOptions&);
 
-Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
-                               const Extension* extension);
+Unit* get_systemlib(const std::string& section, const Extension* extension);
+
+std::unique_ptr<UnitEmitter> compile_systemlib_string_to_ue(
+   const char* s, size_t sz, const char* fname,
+   const Extension* extension);
 
 }

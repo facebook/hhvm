@@ -19,11 +19,14 @@
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/recorder.h"
 #include "hphp/runtime/base/replayer.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/repo-autoload-map.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/unit-cache.h"
+
+#include "hphp/runtime/ext/string/ext_string.h"
 
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/native.h"
@@ -34,6 +37,7 @@
 #include "hphp/util/sha1.h"
 
 #include "hphp/zend/zend-string.h"
+#include "unit-emitter.h"
 
 #include <folly/Likely.h>
 #include <folly/Range.h>
@@ -193,28 +197,41 @@ Unit* compile_string(const char* s,
   )->create().release();
 }
 
-Unit* compile_systemlib_string(const char* s, size_t sz,
-                               const char* fname,
-                               const Extension* extension) {
-  assertx(fname && fname[0] == '/' && fname[1] == ':');
+Unit* get_systemlib(const std::string& path, const Extension* extension) {
+  assertx(path[0] == '/' && path[1] == ':');
 
   if (UNLIKELY(RO::EvalRecordReplay && RO::EvalRecordSampleRate)) {
-    Recorder::onCompileSystemlibString(fname);
+    Recorder::onCompileSystemlibString(path.c_str());
   }
 
   if (RuntimeOption::RepoAuthoritative &&
       !(RO::EvalRecordReplay && RO::EvalReplay)) {
-    if (auto u = lookupSyslibUnit(makeStaticString(fname))) {
+    if (auto u = lookupSyslibUnit(makeStaticString(path))) {
       return u;
     }
   }
 
+  auto buffer = get_embedded_section(path+".ue");
+
+  UnitEmitterSerdeWrapper uew;
+  BlobDecoder decoder(buffer.data(), buffer.size());
+  uew.serde(decoder, extension);
+
+  auto ue = std::move(uew.m_ue);
+  auto u = ue->create();
+  SystemLib::registerUnitEmitter(std::move(ue));
+  return u.release();
+}
+
+std::unique_ptr<UnitEmitter> compile_systemlib_string_to_ue(
+    const char* s, size_t sz, const char* fname,
+    const Extension* extension) {
+  auto const& defaults = RepoOptions::defaultsForSystemlib();
   auto const sha1 = SHA1{mangleUnitSha1(
     string_sha1(folly::StringPiece{s, sz}),
     fname,
-    RepoOptions::defaults().flags()
+    defaults.flags()
   )};
-  auto const& defaults = RepoOptions::defaults();
   LazyUnitContentsLoader loader{
     sha1,
     {s, sz},
@@ -236,10 +253,7 @@ Unit* compile_systemlib_string(const char* s, size_t sz,
     false
   );
   always_assert(ue);
-
-  auto u = ue->create();
-  SystemLib::registerUnitEmitter(std::move(ue));
-  return u.release();
+  return ue;
 }
 
 Unit* compile_debugger_string(

@@ -357,7 +357,7 @@ static struct ThriftExtension final : Extension {
   }
 
   std::vector<std::string> hackFiles() const override {
-    return {"thrift"};
+    return {"thrift.php"};
   }
 } s_thrift_extension;
 

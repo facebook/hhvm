@@ -14,33 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/extension.h"
-#include "hphp/system/systemlib.h"
+#pragma once
 
 namespace HPHP {
-namespace {
-  bool s_enabled;
 
-  struct HslSystemlibExtension final : Extension {
+int compiler_systemlib_main(int argc, char** argv);
 
-    HslSystemlibExtension() : Extension("hsl_systemlib", "1.0", NO_ONCALL_YET) {}
-
-    void moduleLoad(const IniSetting::Map& ini, const Hdf hdf) override {
-      Config::Bind(s_enabled, ini, hdf, "Eval.HSLSystemlibEnabled", true);
-    }
-
-    std::vector<std::string> hackFiles() const override {
-      if (s_enabled) {
-        return {"hsl_systemlib.hack"};
-      }
-      return {};
-    }
-
-    const DependencySet getDeps() const override {
-      return DependencySet({"string"});
-    }
-
-  } s_hsl_systemlib_extension;
-
-} // anonymous namespace
-} // namespace HPHP
+}

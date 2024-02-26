@@ -44,7 +44,7 @@ function main() :mixed{
   echo "Done enabling\n";
   f();
   $r = fb_disable_code_coverage();
-  unset($r['/:systemlib.phpfb']);
+  unset($r['/:ext_fb.php']);
   var_dump($r);
 }
 abstract final class Coverage {

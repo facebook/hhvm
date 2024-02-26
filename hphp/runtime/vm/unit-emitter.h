@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/constant.h"
 #include "hphp/runtime/vm/decl-dep.h"
 #include "hphp/runtime/vm/module.h"
+#include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/type-alias.h"
@@ -47,10 +48,6 @@ struct PreClassEmitter;
 struct StringData;
 struct TypeAliasEmitter;
 struct Extension;
-
-namespace Native {
-struct FuncTable;
-}
 
 /*
  * Whether we need to keep the extended line table (for debugging, or
@@ -389,7 +386,8 @@ struct UnitEmitterSerdeWrapper {
   /* implicit */ UnitEmitterSerdeWrapper(std::unique_ptr<UnitEmitter> ue)
       : m_ue{std::move(ue)} {}
   std::unique_ptr<UnitEmitter> m_ue;
-  template <typename SerDe> void serde(SerDe& sd);
+  template <typename SerDe> void serde(
+    SerDe& sd, const Extension* extension = nullptr);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

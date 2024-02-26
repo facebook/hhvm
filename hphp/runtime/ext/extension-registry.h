@@ -29,6 +29,8 @@ inline Extension* get(const String& name) {
 
 Array getLoaded();
 
+const std::vector<const Extension*> getExtensions();
+
 // called by RuntimeOption to initialize all configurations of extension
 void moduleLoad(const IniSetting::Map& ini, Hdf hdf);
 

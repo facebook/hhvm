@@ -125,6 +125,14 @@ Array getLoaded() {
   return ret.toArray();
 }
 
+const std::vector<const Extension*> getExtensions() {
+  std::vector<const Extension*> all;
+  for (auto& kv : (*s_exts)) {
+    all.push_back(kv.second);
+  }
+  return all;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // Lifecycle delegators
 

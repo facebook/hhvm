@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/hhvm/process-init.h"
 #include "hphp/compiler/compiler.h"
+#include "hphp/compiler/compiler-systemlib.h"
 #include "hphp/hhbbc/hhbbc.h"
 
 #include "hphp/util/embedded-data.h"
@@ -60,6 +61,11 @@ int main(int argc, char** argv) {
   if (argc > 1 && !strcmp(argv[1], "--hhbbc")) {
     argv[1] = "hhbbc";
     return HPHP::HHBBC::main(argc - 1, argv + 1);
+  }
+
+  if (argc > 1 &&!strcmp(argv[1], "--compile-systemlib")) {
+    argv[1] = "compile-systemlib";
+    return HPHP::compiler_systemlib_main(argc - 1, argv + 1);
   }
 
   if (argc > 1 && !strcmp(argv[1], HPHP::extern_worker::s_option)) {

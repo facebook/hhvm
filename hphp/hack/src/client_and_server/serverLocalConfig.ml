@@ -234,7 +234,8 @@ type t = {
   use_type_alias_heap: bool;  (** optimize type alias expansions *)
   use_server_revision_tracker_v2: bool;
       (** control serverRevisionTracker.ml watchman subscription event tracking *)
-  use_distc: bool;  (** use hh_distc instead of hulk for remote typechecking *)
+  use_distc: bool;
+      (** use remote type-checking (hh_distc) rather than only local type-checking*)
   hh_distc_fanout_threshold: int;
       (** POC: @bobren - fanout threshold where we trigger hh_distc *)
   ide_load_naming_table_on_disk: bool;

@@ -948,11 +948,6 @@ ExtFrame::ExtFrame(
       readPayload(flags_.metadata(), cursor, std::move(underlyingBuffer));
 }
 
-// Static member definition
-constexpr folly::StringPiece SetupFrame::kLegacyMimeType;
-constexpr folly::StringPiece SetupFrame::kRocketMetadataMimeType;
-constexpr folly::StringPiece SetupFrame::kRocketPayloadMimeType;
-
 } // namespace rocket
 } // namespace thrift
 } // namespace apache

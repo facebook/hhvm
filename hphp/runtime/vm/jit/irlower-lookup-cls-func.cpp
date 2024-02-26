@@ -180,7 +180,7 @@ void cgLdCls(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgLookupClsRDS(IRLS& env, const IRInstruction* inst) {
-  implLdOrLookupCls(env, inst, true, LdClsFallback::FATAL /* unused */);
+  implLdOrLookupCls(env, inst, true, LdClsFallback::Fatal /* unused */);
 }
 
 void cgLdFunc(IRLS& env, const IRInstruction* inst) {

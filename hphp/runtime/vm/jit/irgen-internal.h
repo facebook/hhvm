@@ -676,7 +676,7 @@ inline const Class* lookupUniqueClass(IRGS& env,
 
 inline SSATmp* ldCls(IRGS& env,
                      SSATmp* lazyClassOrName,
-                     LdClsFallback fallback = LdClsFallback::FATAL) {
+                     LdClsFallback fallback = LdClsFallback::Fatal) {
   auto const isLazy = lazyClassOrName->isA(TLazyCls);
   assertx(lazyClassOrName->isA(TStr) || isLazy);
   if (lazyClassOrName->hasConstVal()) {

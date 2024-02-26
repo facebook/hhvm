@@ -2918,11 +2918,11 @@ struct LdClsFallbackData : IRExtraData {
     : fallback(fallback) {}
 
   static LdClsFallbackData Fatal() {
-    return LdClsFallbackData { LdClsFallback::FATAL };
+    return LdClsFallbackData { LdClsFallback::Fatal };
   }
 
   std::string show() const {
-    return folly::sformat("fallback:{}", static_cast<uint8_t>(fallback));
+    return HPHP::jit::show(fallback);
   }
   size_t hash() const { return std::hash<LdClsFallback>()(fallback); }
   size_t stableHash() const { return std::hash<LdClsFallback>()(fallback); }

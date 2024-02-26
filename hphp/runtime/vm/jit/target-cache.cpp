@@ -148,15 +148,15 @@ rds::Handle ClassCache::alloc() {
 
 void ClassCache::loadFail(const StringData* name, const LdClsFallback fallback) {
   switch (fallback) {
-    case LdClsFallback::FATAL:
+    case LdClsFallback::Fatal:
       raise_error(Strings::UNKNOWN_CLASS, name->data());
-    case LdClsFallback::FATAL_RESOLVE_CLASS:
+    case LdClsFallback::FatalResolveClass:
       raise_error(Strings::FAILED_RESOLVE_CLASS, name->data());
-    case LdClsFallback::THROW_CLASSNAME_TO_CLASS_STRING:
-    case LdClsFallback::THROW_CLASSNAME_TO_CLASS_LAZYCLASS:
+    case LdClsFallback::ThrowClassnameToClassString:
+    case LdClsFallback::ThrowClassnameToClassLazyClass:
     {
       std::string msg;
-      auto const k = fallback == LdClsFallback::THROW_CLASSNAME_TO_CLASS_STRING
+      auto const k = fallback == LdClsFallback::ThrowClassnameToClassString
                      ? "string"
                      : "lazy class";
       string_printf(msg, Strings::CLASSNAME_TO_CLASS_NOEXIST_EXCEPTION,

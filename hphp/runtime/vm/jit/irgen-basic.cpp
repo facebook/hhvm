@@ -70,7 +70,7 @@ void emitClassGetC(IRGS& env, ClassGetCMode mode) {
         // HH\classname_to_class throws a catchable InvalidArgumentException
         // instead of raising a fatal error
         if (name->isA(TStr)) {
-          auto const cls = ldCls(env, name, LdClsFallback::THROW_CLASSNAME_TO_CLASS_STRING);
+          auto const cls = ldCls(env, name, LdClsFallback::ThrowClassnameToClassString);
           if (RO::EvalDynamicallyReferencedNoticeSampleRate > 0) {
             if (cls->hasConstVal() &&
                 !cls->clsVal()->isDynamicallyReferenced()) {
@@ -91,7 +91,7 @@ void emitClassGetC(IRGS& env, ClassGetCMode mode) {
           }
           return cls;
         } else { // TLazyCls
-          return ldCls(env, name, LdClsFallback::THROW_CLASSNAME_TO_CLASS_LAZYCLASS);
+          return ldCls(env, name, LdClsFallback::ThrowClassnameToClassLazyClass);
         }
     }
   }();
@@ -584,7 +584,7 @@ void emitBreakTraceHint(IRGS&)     {}
 //////////////////////////////////////////////////////////////////////
 
 void emitResolveClass(IRGS& env, const StringData* name) {
-  auto const cls = ldCls(env, cns(env, name), LdClsFallback::FATAL_RESOLVE_CLASS);
+  auto const cls = ldCls(env, cns(env, name), LdClsFallback::FatalResolveClass);
   emitModuleBoundaryCheck(env, cls, false);
   push(env, cls);
 }

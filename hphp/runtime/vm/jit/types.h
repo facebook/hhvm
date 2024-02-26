@@ -329,11 +329,23 @@ inline std::string show(const Reason &r) {
   return folly::sformat("{}:{}", r.file, r.line);
 }
 
+#define LDCLS_FALLBACKS                    \
+  FALLBACK(Fatal)                          \
+  FALLBACK(FatalResolveClass)              \
+  FALLBACK(ThrowClassnameToClassString)    \
+  FALLBACK(ThrowClassnameToClassLazyClass)
+
 enum class LdClsFallback: uint8_t {
-  FATAL,
-  FATAL_RESOLVE_CLASS,
-  THROW_CLASSNAME_TO_CLASS_STRING,
-  THROW_CLASSNAME_TO_CLASS_LAZYCLASS,
+  #define FALLBACK(name) name,
+  LDCLS_FALLBACKS
+  #undef FALLBACK
 };
 
+inline std::string show(LdClsFallback f) {
+  switch (f) {
+    #define FALLBACK(name) case LdClsFallback::name: return #name;
+    LDCLS_FALLBACKS
+    #undef FALLBACK
+  }
+}
 }

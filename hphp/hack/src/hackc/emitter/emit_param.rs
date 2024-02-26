@@ -241,13 +241,13 @@ impl<'ast, 'a, 'arena, 'decl> aast_visitor::Visitor<'ast> for ResolverVisitor<'a
 // Return None if it passes type check, otherwise return error msg
 fn default_type_check<'arena>(
     param_name: &str,
-    param_type_info: Option<&TypeInfo<'arena>>,
+    param_type_info: Option<&TypeInfo>,
     param_expr: Option<&a::Expr>,
 ) -> Option<String> {
     let hint_type = get_hint_display_name(
         param_type_info
             .as_ref()
-            .and_then(|ti| ti.user_type.as_ref().into()),
+            .and_then(|ti| ti.user_type.as_ref().map(|s| s.as_str()).into()),
     );
     // If matches, return None, otherwise return default_type
     let default_type = hint_type.and_then(|ht| match_default_and_hint(ht, param_expr));
@@ -264,8 +264,8 @@ fn default_type_check<'arena>(
     }))
 }
 
-fn get_hint_display_name<'arena>(hint: Option<&Str<'arena>>) -> Option<&'static str> {
-    hint.map(|h| match h.unsafe_as_str() {
+fn get_hint_display_name(hint: Option<&str>) -> Option<&'static str> {
+    hint.map(|h| match h {
         "HH\\bool" => "bool",
         "HH\\varray" => "HH\\varray",
         "HH\\darray" => "HH\\darray",

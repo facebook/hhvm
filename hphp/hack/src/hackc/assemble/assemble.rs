@@ -310,7 +310,7 @@ fn assemble_typedef<'arena>(
            <attrs:assemble_special_and_user_attrs(alloc)>
            <name:assemble_class_name(alloc)>
            "="
-           <type_info_union:assemble_type_info_union(alloc)>
+           <type_info_union:assemble_type_info_union()>
            <span:assemble_span>
            <type_structure:assemble_triple_quoted_typed_value(alloc)>
            ";");
@@ -341,7 +341,7 @@ fn assemble_class<'arena>(
        "{"
        <doc_comment:assemble_doc_comment>
        <uses:assemble_uses(alloc)>
-       <enum_type:assemble_enum_ty(alloc)>
+       <enum_type:assemble_enum_ty()>
     );
     let (flags, attributes) = attr;
 
@@ -501,8 +501,7 @@ fn assemble_method<'arena>(
     let upper_bounds = assemble_upper_bounds(token_iter, alloc)?;
     let (attrs, attributes) = assemble_special_and_user_attrs(token_iter, alloc)?;
     let span = assemble_span(token_iter)?;
-    let return_type_info =
-        assemble_type_info_opt(token_iter, alloc, TypeInfoKind::NotEnumOrTypeDef)?;
+    let return_type_info = assemble_type_info_opt(token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
     let name = assemble_method_name(alloc, token_iter)?;
     let mut decl_map = HashMap::default();
     let params = assemble_params(alloc, token_iter, &mut decl_map)?;
@@ -577,7 +576,7 @@ fn assemble_property<'arena>(
            [triple_string: <dc:assemble_unescaped_unquoted_triple_vec> { doc_comment = Maybe::Just(dc); } ;
             else: { } ;
            ]
-           <type_info:assemble_type_info(alloc, TypeInfoKind::NotEnumOrTypeDef)>
+           <type_info:assemble_type_info(TypeInfoKind::NotEnumOrTypeDef)>
            <name:assemble_prop_name(alloc)>
            "="
            <initial_value:assemble_property_initial_value(alloc)>
@@ -769,12 +768,9 @@ fn assemble_uses<'arena>(
 }
 
 /// Ex: .enum_ty <type_info>
-fn assemble_enum_ty<'arena>(
-    token_iter: &mut Lexer<'_>,
-    alloc: &'arena Bump,
-) -> Result<Maybe<hhbc::TypeInfo<'arena>>> {
+fn assemble_enum_ty(token_iter: &mut Lexer<'_>) -> Result<Maybe<hhbc::TypeInfo>> {
     parse!(token_iter, [
-        ".enum_ty": ".enum_ty" <ti:assemble_type_info_opt(alloc, TypeInfoKind::Enum)> ";" { Ok(ti) } ;
+        ".enum_ty": ".enum_ty" <ti:assemble_type_info_opt(TypeInfoKind::Enum)> ";" { Ok(ti) } ;
         else: { Ok(Maybe::Nothing) } ;
     ])
 }
@@ -1105,8 +1101,7 @@ fn assemble_function<'arena>(
     // Body may not have return type info, so check if next token is a < or not
     // Specifically if body doesn't have a return type info bytecode printer doesn't print anything
     // (doesn't print <>)
-    let return_type_info =
-        assemble_type_info_opt(token_iter, alloc, TypeInfoKind::NotEnumOrTypeDef)?;
+    let return_type_info = assemble_type_info_opt(token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
     // Assemble_name
 
     let name = assemble_function_name(token_iter, alloc)?;
@@ -1193,7 +1188,7 @@ fn assemble_upper_bound<'arena>(
     token_iter: &mut Lexer<'_>,
     alloc: &'arena Bump,
 ) -> Result<hhbc::UpperBound<'arena>> {
-    parse!(token_iter, "(" <id:id> "as" <tis:assemble_type_info(alloc, TypeInfoKind::NotEnumOrTypeDef),*> ")");
+    parse!(token_iter, "(" <id:id> "as" <tis:assemble_type_info(TypeInfoKind::NotEnumOrTypeDef),*> ")");
     Ok(hhbc::UpperBound {
         name: id.into_ffi_str(alloc),
         bounds: tis.into(),
@@ -1312,13 +1307,9 @@ pub enum TypeInfoKind {
     NotEnumOrTypeDef,
 }
 
-fn assemble_type_info<'arena>(
-    token_iter: &mut Lexer<'_>,
-    alloc: &'arena Bump,
-    tik: TypeInfoKind,
-) -> Result<hhbc::TypeInfo<'arena>> {
+fn assemble_type_info(token_iter: &mut Lexer<'_>, tik: TypeInfoKind) -> Result<hhbc::TypeInfo> {
     let loc = token_iter.peek().copied();
-    if let Maybe::Just(ti) = assemble_type_info_opt(token_iter, alloc, tik)? {
+    if let Maybe::Just(ti) = assemble_type_info_opt(token_iter, tik)? {
         Ok(ti)
     } else if let Some(loc) = loc {
         Err(loc.error("TypeInfo expected"))
@@ -1327,11 +1318,8 @@ fn assemble_type_info<'arena>(
     }
 }
 
-fn assemble_type_info_union<'arena>(
-    token_iter: &mut Lexer<'_>,
-    alloc: &'arena Bump,
-) -> Result<Vec<hhbc::TypeInfo<'arena>>> {
-    parse!(token_iter, <tis:assemble_type_info(alloc, TypeInfoKind::TypeDef),*>);
+fn assemble_type_info_union(token_iter: &mut Lexer<'_>) -> Result<Vec<hhbc::TypeInfo>> {
+    parse!(token_iter, <tis:assemble_type_info(TypeInfoKind::TypeDef),*>);
     Ok(tis)
 }
 
@@ -1339,11 +1327,10 @@ fn assemble_type_info_union<'arena>(
 /// < "user_type" "type_constraint.name" type_constraint.flags >
 /// if 'is_enum', no  type_constraint name printed
 /// if 'is_typedef', no user_type name printed
-fn assemble_type_info_opt<'arena>(
+fn assemble_type_info_opt(
     token_iter: &mut Lexer<'_>,
-    alloc: &'arena Bump,
     tik: TypeInfoKind,
-) -> Result<Maybe<hhbc::TypeInfo<'arena>>> {
+) -> Result<Maybe<hhbc::TypeInfo>> {
     if token_iter.next_is(Token::is_lt) {
         let first = token_iter.expect_with(Token::into_unquoted_str_literal)?;
         let first = escaper::unescape_literal_bytes_into_vec_bytes(first)?;
@@ -1363,7 +1350,7 @@ fn assemble_type_info_opt<'arena>(
             )?))
         };
         let user_type = if tik != TypeInfoKind::TypeDef {
-            Maybe::Just(Str::new_slice(alloc, &first))
+            Maybe::Just(hhbc::intern(std::str::from_utf8(&first)?))
         } else {
             Maybe::Nothing
         };
@@ -1373,7 +1360,7 @@ fn assemble_type_info_opt<'arena>(
         }
         token_iter.expect(Token::is_gt)?;
         let cons = hhbc::Constraint::new(type_cons_name, tcflags);
-        Ok(Maybe::Just(hhbc::TypeInfo::make(user_type, cons)))
+        Ok(Maybe::Just(hhbc::TypeInfo::new(user_type, cons)))
     } else {
         Ok(Maybe::Nothing)
     }
@@ -1433,7 +1420,7 @@ fn assemble_param<'arena>(
     let is_inout = token_iter.next_is_str(Token::is_identifier, "inout");
     let is_readonly = token_iter.next_is_str(Token::is_identifier, "readonly");
     let is_variadic = token_iter.next_is(Token::is_variadic);
-    let type_info = assemble_type_info_opt(token_iter, alloc, TypeInfoKind::NotEnumOrTypeDef)?;
+    let type_info = assemble_type_info_opt(token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
     let name = token_iter.expect_with(Token::into_variable)?;
     let name = Str::new_slice(alloc, name);
     decl_map.insert(name, decl_map.len() as u32);
@@ -1473,7 +1460,7 @@ fn assemble_body<'arena>(
     token_iter: &mut Lexer<'_>,
     decl_map: &mut DeclMap<'arena>,
     params: Vec<hhbc::Param<'arena>>,
-    return_type_info: Maybe<hhbc::TypeInfo<'arena>>,
+    return_type_info: Maybe<hhbc::TypeInfo>,
     shadowed_tparams: Vec<Str<'arena>>,
     upper_bounds: Vec<hhbc::UpperBound<'arena>>,
 ) -> Result<(hhbc::Body<'arena>, hhbc::Coeffects<'arena>)> {

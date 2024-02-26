@@ -9,7 +9,6 @@ use std::io::Result;
 use std::io::Write;
 use std::write;
 
-use bstr::BStr;
 use bstr::ByteSlice;
 use ffi::Maybe;
 use ffi::Maybe::*;
@@ -1122,7 +1121,7 @@ fn print_upper_bound_<'arena>(w: &mut dyn Write, ub: &UpperBound<'arena>) -> Res
     })
 }
 
-fn print_type_info(w: &mut dyn Write, ti: &TypeInfo<'_>) -> Result<()> {
+fn print_type_info(w: &mut dyn Write, ti: &TypeInfo) -> Result<()> {
     print_type_info_(w, false, ti)
 }
 
@@ -1130,15 +1129,7 @@ fn print_type_flags(w: &mut dyn Write, flag: TypeConstraintFlags) -> Result<()> 
     write!(w, "{}", type_flags_to_string_ffi(flag))
 }
 
-fn print_type_info_(w: &mut dyn Write, is_enum: bool, ti: &TypeInfo<'_>) -> Result<()> {
-    let print_quote_bstr = |w: &mut dyn Write, opt: Option<&BStr>| {
-        option_or(
-            w,
-            opt,
-            |w, s: &BStr| quotes(w, |w| w.write_all(escaper::escape_bstr(s).as_ref())),
-            "N",
-        )
-    };
+fn print_type_info_(w: &mut dyn Write, is_enum: bool, ti: &TypeInfo) -> Result<()> {
     let print_quote_str = |w: &mut dyn Write, opt: Option<&str>| {
         option_or(
             w,
@@ -1148,7 +1139,7 @@ fn print_type_info_(w: &mut dyn Write, is_enum: bool, ti: &TypeInfo<'_>) -> Resu
         )
     };
     angle(w, |w| {
-        print_quote_bstr(w, ti.user_type.map(|s| s.as_bstr()).into())?;
+        print_quote_str(w, ti.user_type.map(|s| s.as_str()).into())?;
         w.write_all(b" ")?;
         if !is_enum {
             print_quote_str(w, ti.type_constraint.name.map(|n| n.as_str()).into())?;
@@ -1160,7 +1151,7 @@ fn print_type_info_(w: &mut dyn Write, is_enum: bool, ti: &TypeInfo<'_>) -> Resu
 
 // T125888411: User type not printed
 // T126391106: also -- no name and "" as a name both print as "", which is ambiguous for the assembler
-fn print_typedef_info(w: &mut dyn Write, ti: &TypeInfo<'_>) -> Result<()> {
+fn print_typedef_info(w: &mut dyn Write, ti: &TypeInfo) -> Result<()> {
     angle(w, |w| {
         write_bytes!(
             w,
@@ -1181,7 +1172,7 @@ fn print_typedef_info(w: &mut dyn Write, ti: &TypeInfo<'_>) -> Result<()> {
     })
 }
 
-fn print_typedef_info_union(w: &mut dyn Write, tis: &[TypeInfo<'_>]) -> Result<()> {
+fn print_typedef_info_union(w: &mut dyn Write, tis: &[TypeInfo]) -> Result<()> {
     concat_by(w, ",", tis, print_typedef_info)
 }
 

@@ -22,7 +22,7 @@ pub struct Property<'arena> {
     pub attributes: Vector<Attribute>,
     pub visibility: Visibility,
     pub initial_value: Maybe<TypedValue>,
-    pub type_info: TypeInfo<'arena>,
+    pub type_info: TypeInfo,
     pub doc_comment: Maybe<Vector<u8>>,
 }
 

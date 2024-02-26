@@ -234,7 +234,7 @@ fn emit<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     hhas_params: Vec<(Param<'arena>, Option<(Label, ast::Expr)>)>,
-    return_type_info: TypeInfo<'arena>,
+    return_type_info: TypeInfo,
     args: &Args<'_, 'a, 'arena>,
 ) -> Result<Body<'arena>> {
     let pos = &args.method.span;
@@ -528,7 +528,7 @@ fn make_wrapper<'a, 'arena, 'decl>(
     instrs: InstrSeq<'arena>,
     params: Vec<(Param<'arena>, Option<(Label, ast::Expr)>)>,
     decl_vars: Vec<Str<'arena>>,
-    return_type_info: TypeInfo<'arena>,
+    return_type_info: TypeInfo,
     args: &Args<'_, 'a, 'arena>,
 ) -> Result<Body<'arena>> {
     emit_body::make_body(

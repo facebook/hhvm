@@ -5,7 +5,6 @@
 
 use std::fmt;
 
-use ffi::Str;
 use naming_special_names_rust as naming_special_names;
 
 use crate::newtype::ClassId;
@@ -19,49 +18,37 @@ use crate::UnitBytesId;
 
 // As a const fn, given a string removes the leading backslash.
 // r"\HH\AnyArray" -> r"HH\AnyArray".
-const fn strip_slash(name: &'static str) -> Str<'static> {
-    Str::new(name.as_bytes().split_first().unwrap().1)
+const fn strip_slash(name: &'static str) -> &'static [u8] {
+    name.as_bytes().split_first().unwrap().1
 }
 
-pub static BUILTIN_NAME_ANY_ARRAY: Str<'static> =
+pub static BUILTIN_NAME_ANY_ARRAY: &[u8] =
     strip_slash(naming_special_names::collections::ANY_ARRAY);
-pub static BUILTIN_NAME_ARRAYKEY: Str<'static> =
-    strip_slash(naming_special_names::typehints::HH_ARRAYKEY);
-pub static BUILTIN_NAME_BOOL: Str<'static> = strip_slash(naming_special_names::typehints::HH_BOOL);
-pub static BUILTIN_NAME_CLASSNAME: Str<'static> =
-    strip_slash(naming_special_names::classes::CLASS_NAME);
-pub static BUILTIN_NAME_DARRAY: Str<'static> =
-    strip_slash(naming_special_names::typehints::HH_DARRAY);
-pub static BUILTIN_NAME_DICT: Str<'static> = strip_slash(naming_special_names::collections::DICT);
-pub static BUILTIN_NAME_FLOAT: Str<'static> =
-    strip_slash(naming_special_names::typehints::HH_FLOAT);
-pub static BUILTIN_NAME_INT: Str<'static> = strip_slash(naming_special_names::typehints::HH_INT);
-pub static BUILTIN_NAME_KEYSET: Str<'static> =
-    strip_slash(naming_special_names::collections::KEYSET);
-pub static BUILTIN_NAME_NONNULL: Str<'static> =
-    strip_slash(naming_special_names::typehints::HH_NONNULL);
-pub static BUILTIN_NAME_NORETURN: Str<'static> =
-    strip_slash(naming_special_names::typehints::HH_NORETURN);
-pub static BUILTIN_NAME_NOTHING: Str<'static> =
-    strip_slash(naming_special_names::typehints::HH_NOTHING);
-pub static BUILTIN_NAME_NULL: Str<'static> = strip_slash(naming_special_names::typehints::HH_NULL);
-pub static BUILTIN_NAME_NUM: Str<'static> = strip_slash(naming_special_names::typehints::HH_NUM);
-pub static BUILTIN_NAME_RESOURCE: Str<'static> =
-    strip_slash(naming_special_names::typehints::HH_RESOURCE);
-pub static BUILTIN_NAME_STRING: Str<'static> =
-    strip_slash(naming_special_names::typehints::HH_STRING);
-pub static BUILTIN_NAME_THIS: Str<'static> = strip_slash(naming_special_names::typehints::HH_THIS);
-pub static BUILTIN_NAME_TYPENAME: Str<'static> =
-    strip_slash(naming_special_names::classes::TYPE_NAME);
-pub static BUILTIN_NAME_VARRAY: Str<'static> =
-    strip_slash(naming_special_names::typehints::HH_VARRAY);
-pub static BUILTIN_NAME_VARRAY_OR_DARRAY: Str<'static> =
+pub static BUILTIN_NAME_ARRAYKEY: &[u8] = strip_slash(naming_special_names::typehints::HH_ARRAYKEY);
+pub static BUILTIN_NAME_BOOL: &[u8] = strip_slash(naming_special_names::typehints::HH_BOOL);
+pub static BUILTIN_NAME_CLASSNAME: &[u8] = strip_slash(naming_special_names::classes::CLASS_NAME);
+pub static BUILTIN_NAME_DARRAY: &[u8] = strip_slash(naming_special_names::typehints::HH_DARRAY);
+pub static BUILTIN_NAME_DICT: &[u8] = strip_slash(naming_special_names::collections::DICT);
+pub static BUILTIN_NAME_FLOAT: &[u8] = strip_slash(naming_special_names::typehints::HH_FLOAT);
+pub static BUILTIN_NAME_INT: &[u8] = strip_slash(naming_special_names::typehints::HH_INT);
+pub static BUILTIN_NAME_KEYSET: &[u8] = strip_slash(naming_special_names::collections::KEYSET);
+pub static BUILTIN_NAME_NONNULL: &[u8] = strip_slash(naming_special_names::typehints::HH_NONNULL);
+pub static BUILTIN_NAME_NORETURN: &[u8] = strip_slash(naming_special_names::typehints::HH_NORETURN);
+pub static BUILTIN_NAME_NOTHING: &[u8] = strip_slash(naming_special_names::typehints::HH_NOTHING);
+pub static BUILTIN_NAME_NULL: &[u8] = strip_slash(naming_special_names::typehints::HH_NULL);
+pub static BUILTIN_NAME_NUM: &[u8] = strip_slash(naming_special_names::typehints::HH_NUM);
+pub static BUILTIN_NAME_RESOURCE: &[u8] = strip_slash(naming_special_names::typehints::HH_RESOURCE);
+pub static BUILTIN_NAME_STRING: &[u8] = strip_slash(naming_special_names::typehints::HH_STRING);
+pub static BUILTIN_NAME_THIS: &[u8] = strip_slash(naming_special_names::typehints::HH_THIS);
+pub static BUILTIN_NAME_TYPENAME: &[u8] = strip_slash(naming_special_names::classes::TYPE_NAME);
+pub static BUILTIN_NAME_VARRAY: &[u8] = strip_slash(naming_special_names::typehints::HH_VARRAY);
+pub static BUILTIN_NAME_VARRAY_OR_DARRAY: &[u8] =
     strip_slash(naming_special_names::typehints::HH_VARRAY_OR_DARRAY);
-pub static BUILTIN_NAME_VEC: Str<'static> = strip_slash(naming_special_names::collections::VEC);
-pub static BUILTIN_NAME_VEC_OR_DICT: Str<'static> =
+pub static BUILTIN_NAME_VEC: &[u8] = strip_slash(naming_special_names::collections::VEC);
+pub static BUILTIN_NAME_VEC_OR_DICT: &[u8] =
     strip_slash(naming_special_names::typehints::HH_VEC_OR_DICT);
-pub static BUILTIN_NAME_VOID: Str<'static> = strip_slash(naming_special_names::typehints::HH_VOID);
-pub static BUILTIN_NAME_SOFT_VOID: Str<'static> = Str::new(br"@HH\void");
+pub static BUILTIN_NAME_VOID: &[u8] = strip_slash(naming_special_names::typehints::HH_VOID);
+pub static BUILTIN_NAME_SOFT_VOID: &[u8] = br"@HH\void";
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum BaseType {

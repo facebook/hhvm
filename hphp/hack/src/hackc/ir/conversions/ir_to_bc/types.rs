@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Maybe;
-use ffi::Str;
 use hhbc::Constraint;
 use hhbc::TypeInfo;
 use ir::BaseType;
@@ -12,8 +11,10 @@ use ir::TypeConstraintFlags;
 
 use crate::strings::StringCache;
 
-fn convert_type<'a>(ty: &ir::TypeInfo, strings: &StringCache<'a>) -> TypeInfo<'a> {
-    let mut user_type = ty.user_type.map(|ut| strings.lookup_ffi_str(ut));
+fn convert_type(ty: &ir::TypeInfo, strings: &StringCache<'_>) -> TypeInfo {
+    let mut user_type = ty
+        .user_type
+        .map(|ut| strings.intern(ut).expect("non-utf8 user type"));
 
     let name = if let Some(name) = base_type_string(&ty.enforced.ty) {
         if user_type.is_none() {
@@ -23,21 +24,18 @@ fn convert_type<'a>(ty: &ir::TypeInfo, strings: &StringCache<'a>) -> TypeInfo<'a
                 .contains(TypeConstraintFlags::Nullable);
             let soft = ty.enforced.modifiers.contains(TypeConstraintFlags::Soft);
             user_type = Some(if !nullable && !soft {
-                name
+                hhbc::intern(std::str::from_utf8(name).expect("non-utf8 user type"))
             } else {
                 let len = name.len() + nullable as usize + soft as usize;
-                let p = strings.alloc.alloc_slice_fill_copy(len, 0u8);
-                let mut i = 0;
+                let mut p = String::with_capacity(len);
                 if soft {
-                    p[i] = b'@';
-                    i += 1;
+                    p.push('@');
                 }
                 if nullable {
-                    p[i] = b'?';
-                    i += 1;
+                    p.push('?');
                 }
-                p[i..].copy_from_slice(&name);
-                ffi::Slice::new(p)
+                p.push_str(std::str::from_utf8(name).expect("non-utf8 base type name"));
+                hhbc::intern(p)
             });
         }
         Some(hhbc::intern(
@@ -60,14 +58,14 @@ fn convert_type<'a>(ty: &ir::TypeInfo, strings: &StringCache<'a>) -> TypeInfo<'a
     }
 }
 
-fn convert_types<'a>(tis: &[ir::TypeInfo], strings: &StringCache<'a>) -> Vec<TypeInfo<'a>> {
+fn convert_types(tis: &[ir::TypeInfo], strings: &StringCache<'_>) -> Vec<TypeInfo> {
     tis.iter().map(|ti| convert_type(ti, strings)).collect()
 }
 
-fn base_type_string(ty: &ir::BaseType) -> Option<Str<'static>> {
+fn base_type_string(ty: &ir::BaseType) -> Option<&'static [u8]> {
     match ty {
         BaseType::Class(_) | BaseType::Mixed | BaseType::Void => None,
-        BaseType::None => Some(Str::new("".as_bytes())),
+        BaseType::None => Some(&[]),
         BaseType::AnyArray => Some(ir::types::BUILTIN_NAME_ANY_ARRAY),
         BaseType::Arraykey => Some(ir::types::BUILTIN_NAME_ARRAYKEY),
         BaseType::Bool => Some(ir::types::BUILTIN_NAME_BOOL),
@@ -93,7 +91,7 @@ fn base_type_string(ty: &ir::BaseType) -> Option<Str<'static>> {
     }
 }
 
-pub(crate) fn convert<'a>(ty: &ir::TypeInfo, strings: &StringCache<'a>) -> Maybe<TypeInfo<'a>> {
+pub(crate) fn convert(ty: &ir::TypeInfo, strings: &StringCache<'_>) -> Maybe<TypeInfo> {
     if ty.is_empty() {
         Maybe::Nothing
     } else {

@@ -342,18 +342,17 @@ fn from_class_elt_requirements<'a, 'arena>(
         .collect()
 }
 
-fn from_enum_type<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    opt: Option<&ast::Enum_>,
-) -> Result<Option<TypeInfo<'arena>>> {
+fn from_enum_type(alloc: &bumpalo::Bump, opt: Option<&ast::Enum_>) -> Result<Option<TypeInfo>> {
     use hhbc::Constraint;
     opt.map(|e| {
-        let type_info_user_type = Just(Str::new_str(
+        let type_info_user_type = Just(hhbc::intern(emit_type_hint::fmt_hint(
             alloc,
-            &emit_type_hint::fmt_hint(alloc, &[], true, &e.base)?,
-        ));
+            &[],
+            true,
+            &e.base,
+        )?));
         let type_info_type_constraint = Constraint::new(Nothing, TypeConstraintFlags::ExtendedHint);
-        Ok(TypeInfo::make(
+        Ok(TypeInfo::new(
             type_info_user_type,
             type_info_type_constraint,
         ))
@@ -461,7 +460,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
             is_inout: false,
             is_readonly: false,
             user_attributes: Default::default(),
-            type_info: Just(TypeInfo::make(Just("HH\\varray".into()), tc)),
+            type_info: Just(TypeInfo::new(Just(hhbc::intern("HH\\varray")), tc)),
             default_value: Nothing,
         }];
 

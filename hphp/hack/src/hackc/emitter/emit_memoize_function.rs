@@ -377,7 +377,7 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
 fn make_wrapper_body<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: Env<'a, 'arena>,
-    return_type_info: TypeInfo<'arena>,
+    return_type_info: TypeInfo,
     params: Vec<(Param<'arena>, Option<(Label, ast::Expr)>)>,
     decl_vars: Vec<Str<'arena>>,
     body_instrs: InstrSeq<'arena>,

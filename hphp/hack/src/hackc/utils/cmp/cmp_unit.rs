@@ -775,7 +775,7 @@ fn cmp_type_constraint(a: &hhbc::Constraint, b: &hhbc::Constraint) -> Result {
 }
 
 /// User_type isn't printed in typedef's typeinfo.
-fn cmp_typedef_typeinfo(a: &TypeInfo<'_>, b: &TypeInfo<'_>) -> Result {
+fn cmp_typedef_typeinfo(a: &TypeInfo, b: &TypeInfo) -> Result {
     let TypeInfo {
         user_type: _a_user_type,
         type_constraint: a_constraint,

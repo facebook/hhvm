@@ -6,7 +6,6 @@
 use std::sync::OnceLock;
 
 use ffi::Maybe;
-use ffi::Str;
 use hhbc::StringId;
 use ir::BaseType;
 use ir::ClassId;
@@ -17,7 +16,7 @@ use maplit::hashmap;
 use crate::convert;
 use crate::types;
 
-pub(crate) fn convert_type<'a>(ty: &hhbc::TypeInfo<'a>, strings: &StringInterner) -> ir::TypeInfo {
+pub(crate) fn convert_type(ty: &hhbc::TypeInfo, strings: &StringInterner) -> ir::TypeInfo {
     let user_type = ty.user_type.into_option();
     let name = ty.type_constraint.name.into_option();
     let constraint_ty = match name {
@@ -29,7 +28,7 @@ pub(crate) fn convert_type<'a>(ty: &hhbc::TypeInfo<'a>, strings: &StringInterner
             .as_ref()
             .and_then(|user_type| {
                 use std::collections::HashMap;
-                static UNCONSTRAINED_BY_NAME: OnceLock<HashMap<Str<'static>, BaseType>> =
+                static UNCONSTRAINED_BY_NAME: OnceLock<HashMap<&'static [u8], BaseType>> =
                     OnceLock::new();
                 let unconstrained_by_name = UNCONSTRAINED_BY_NAME.get_or_init(|| {
                     hashmap! {
@@ -38,13 +37,15 @@ pub(crate) fn convert_type<'a>(ty: &hhbc::TypeInfo<'a>, strings: &StringInterner
                     }
                 });
 
-                unconstrained_by_name.get(user_type).cloned()
+                unconstrained_by_name
+                    .get(user_type.as_bytes().as_ref())
+                    .cloned()
             })
             .unwrap_or(BaseType::Mixed),
     };
 
     ir::TypeInfo {
-        user_type: user_type.map(|u| strings.intern_bytes(u.as_ref())),
+        user_type: user_type.map(|u| strings.intern_bytes(u.as_str().as_bytes())),
         enforced: ir::EnforceableType {
             ty: constraint_ty,
             modifiers: ty.type_constraint.flags,
@@ -53,7 +54,7 @@ pub(crate) fn convert_type<'a>(ty: &hhbc::TypeInfo<'a>, strings: &StringInterner
 }
 
 pub(crate) fn convert_maybe_type<'a>(
-    ty: Maybe<&hhbc::TypeInfo<'a>>,
+    ty: Maybe<&hhbc::TypeInfo>,
     strings: &StringInterner,
 ) -> ir::TypeInfo {
     match ty {
@@ -64,7 +65,7 @@ pub(crate) fn convert_maybe_type<'a>(
 
 fn cvt_constraint_type(name: StringId, strings: &StringInterner) -> BaseType {
     use std::collections::HashMap;
-    static CONSTRAINT_BY_NAME: OnceLock<HashMap<Str<'static>, BaseType>> = OnceLock::new();
+    static CONSTRAINT_BY_NAME: OnceLock<HashMap<&'static [u8], BaseType>> = OnceLock::new();
     let constraint_by_name = CONSTRAINT_BY_NAME.get_or_init(|| {
         hashmap! {
             ir::types::BUILTIN_NAME_ANY_ARRAY => BaseType::AnyArray,

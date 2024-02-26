@@ -8,7 +8,6 @@ use error::Error;
 use error::Result;
 use ffi::Maybe;
 use ffi::Maybe::*;
-use ffi::Str;
 use hhbc::Constraint;
 use hhbc::StringId;
 use hhbc::TypeInfo;
@@ -358,29 +357,29 @@ fn try_add_nullable(
     add_nullable(nullable && can_be_nullable(h), flags)
 }
 
-fn make_type_info<'arena>(
-    alloc: &'arena bumpalo::Bump,
+fn make_type_info(
+    alloc: &bumpalo::Bump,
     tparams: &[&str],
     h: &Hint,
     tc_name: Maybe<StringId>,
     tc_flags: TypeConstraintFlags,
-) -> Result<TypeInfo<'arena>> {
+) -> Result<TypeInfo> {
     let type_info_user_type = fmt_hint(alloc, tparams, false, h)?;
     let type_info_type_constraint = Constraint::new(tc_name, tc_flags);
-    Ok(TypeInfo::make(
-        Just(Str::new_str(alloc, &type_info_user_type)),
+    Ok(TypeInfo::new(
+        Just(hhbc::intern(type_info_user_type)),
         type_info_type_constraint,
     ))
 }
 
-fn param_hint_to_type_info<'arena>(
-    alloc: &'arena bumpalo::Bump,
+fn param_hint_to_type_info(
+    alloc: &bumpalo::Bump,
     kind: &Kind,
     skipawaitable: bool,
     nullable: bool,
     tparams: &[&str],
     hint: &Hint,
-) -> Result<TypeInfo<'arena>> {
+) -> Result<TypeInfo> {
     let Hint(_, h) = hint;
     let is_simple_hint = match h.as_ref() {
         Hsoft(_) | Hoption(_) | Haccess(_, _) | Hfun(_) | Hdynamic | Hnonnull | Hmixed => false,
@@ -412,14 +411,14 @@ fn param_hint_to_type_info<'arena>(
     )
 }
 
-pub fn hint_to_type_info<'arena>(
-    alloc: &'arena bumpalo::Bump,
+pub fn hint_to_type_info(
+    alloc: &bumpalo::Bump,
     kind: &Kind,
     skipawaitable: bool,
     nullable: bool,
     tparams: &[&str],
     hint: &Hint,
-) -> Result<TypeInfo<'arena>> {
+) -> Result<TypeInfo> {
     if let Kind::Param = kind {
         return param_hint_to_type_info(alloc, kind, skipawaitable, nullable, tparams, hint);
     };
@@ -445,14 +444,14 @@ pub fn hint_to_type_info<'arena>(
 }
 
 // Used from emit_typedef for potential case types
-pub fn hint_to_type_info_union<'arena>(
-    alloc: &'arena bumpalo::Bump,
+pub fn hint_to_type_info_union(
+    alloc: &bumpalo::Bump,
     kind: &Kind,
     skipawaitable: bool,
     nullable: bool,
     tparams: &[&str],
     hint: &Hint,
-) -> Result<Vec<TypeInfo<'arena>>> {
+) -> Result<Vec<TypeInfo>> {
     let Hint(_, h) = hint;
     let mut result = vec![];
     match &**h {
@@ -489,14 +488,14 @@ pub fn hint_to_class<'arena>(alloc: &'arena bumpalo::Bump, hint: &Hint) -> hhbc:
     }
 }
 
-pub fn emit_type_constraint_for_native_function<'arena>(
+pub fn emit_type_constraint_for_native_function(
     tparams: &[&str],
     ret_opt: Option<&Hint>,
-    ti: TypeInfo<'arena>,
-) -> TypeInfo<'arena> {
+    ti: TypeInfo,
+) -> TypeInfo {
     let (name, flags) = match (&ti.user_type, ret_opt) {
         (_, None) | (Nothing, _) => (Just("HH\\void"), TypeConstraintFlags::ExtendedHint),
-        (Just(t), _) => match t.unsafe_as_str() {
+        (Just(t), _) => match t.as_str() {
             "HH\\mixed" | "callable" => (Nothing, TypeConstraintFlags::default()),
             "HH\\void" => {
                 let Hint(_, h) = ret_opt.as_ref().unwrap();
@@ -509,7 +508,7 @@ pub fn emit_type_constraint_for_native_function<'arena>(
         },
     };
     let tc = Constraint::new(name.map(hhbc::intern), flags);
-    TypeInfo::make(ti.user_type, tc)
+    TypeInfo::new(ti.user_type, tc)
 }
 
 fn get_flags(tparams: &[&str], flags: TypeConstraintFlags, hint: &Hint_) -> TypeConstraintFlags {

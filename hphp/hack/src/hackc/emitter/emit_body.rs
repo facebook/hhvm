@@ -299,14 +299,14 @@ fn make_decl_vars<'a, 'arena, 'decl>(
     Ok(decl_vars)
 }
 
-pub fn emit_return_type_info<'arena>(
-    alloc: &'arena bumpalo::Bump,
+pub fn emit_return_type_info(
+    alloc: &bumpalo::Bump,
     tp_names: &[&str],
     skip_awaitable: bool,
     ret: Option<&aast::Hint>,
-) -> Result<TypeInfo<'arena>> {
+) -> Result<TypeInfo> {
     match ret {
-        None => Ok(TypeInfo::make(Just("".into()), hhbc::Constraint::default())),
+        None => Ok(TypeInfo::empty()),
         Some(hint) => emit_type_hint::hint_to_type_info(
             alloc,
             &emit_type_hint::Kind::Return,
@@ -318,13 +318,13 @@ pub fn emit_return_type_info<'arena>(
     }
 }
 
-fn make_return_type_info<'arena>(
-    alloc: &'arena bumpalo::Bump,
+fn make_return_type_info(
+    alloc: &bumpalo::Bump,
     skip_awaitable: bool,
     is_native: bool,
     ret: Option<&aast::Hint>,
     tp_names: &[&str],
-) -> Result<TypeInfo<'arena>> {
+) -> Result<TypeInfo> {
     let return_type_info = emit_return_type_info(alloc, tp_names, skip_awaitable, ret);
     if is_native {
         return return_type_info.map(|rti| {
@@ -367,7 +367,7 @@ pub fn make_body<'a, 'arena, 'decl>(
     upper_bounds: Vec<UpperBound<'arena>>,
     shadowed_tparams: Vec<String>,
     mut params: Vec<(Param<'arena>, Option<(Label, ast::Expr)>)>,
-    return_type_info: Option<TypeInfo<'arena>>,
+    return_type_info: Option<TypeInfo>,
     doc_comment: Option<DocComment>,
     opt_env: Option<&Env<'a, 'arena>>,
 ) -> Result<Body<'arena>> {
@@ -441,7 +441,7 @@ pub fn make_body<'a, 'arena, 'decl>(
 
 pub fn has_type_constraint<'a, 'arena>(
     env: &Env<'a, 'arena>,
-    ti: Option<&TypeInfo<'_>>,
+    ti: Option<&TypeInfo>,
     ast_param: &ast::FunParam,
 ) -> (RGH::ReificationLevel, Option<ast::Hint>) {
     use RGH::ReificationLevel as L;
@@ -613,7 +613,7 @@ fn set_emit_statement_state<'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     default_return_value: InstrSeq<'arena>,
     params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
-    return_type_info: &TypeInfo<'_>,
+    return_type_info: &TypeInfo,
     return_type: Option<&ast::Hint>,
     pos: &Pos,
     default_dropthrough: Option<InstrSeq<'arena>>,
@@ -621,7 +621,7 @@ fn set_emit_statement_state<'arena, 'decl>(
     is_generator: bool,
 ) {
     let verify_return = match &return_type_info.user_type {
-        Just(s) if s.unsafe_as_str() == "" => None,
+        Just(s) if s.is_empty() => None,
         _ if return_type_info.has_type_constraint() && !is_generator => return_type.cloned(),
         _ => None,
     };
@@ -665,8 +665,8 @@ fn emit_verify_out<'arena>(
                     match p.type_info.as_ref() {
                         Just(TypeInfo { user_type, .. })
                             if user_type.as_ref().map_or(true, |t| {
-                                !(t.unsafe_as_str().ends_with("HH\\mixed")
-                                    || t.unsafe_as_str().ends_with("HH\\dynamic"))
+                                !(t.as_str().ends_with("HH\\mixed")
+                                    || t.as_str().ends_with("HH\\dynamic"))
                             }) =>
                         {
                             instr::verify_out_type(local)

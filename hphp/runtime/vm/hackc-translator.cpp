@@ -362,7 +362,7 @@ void translateSymbolInfo(const Vector<Str>& missing, const Vector<Str>& error,
 template<bool isEnum=false>
 std::pair<const StringData*, TypeConstraint> translateTypeInfo(const hhbc::TypeInfo& t) {
   auto const user_type = maybeOrElse(t.user_type,
-    [&](Str& s) {return toStaticString(s);},
+    [&](BytesId s) {return toStaticString(s);},
     [&]() {return staticEmptyString();});
 
   auto const type_name = isEnum

@@ -17,8 +17,7 @@ type pos = {
 (* Pretty-printer for hints. Also generate xrefs
    (maps symbols within types to their defining entity).
    Used to generate predicate TypeInfo *)
-val hint_to_string_and_symbols :
-  Provider_context.t -> Aast.hint -> string * (Pos.t * pos) list
+val hint_to_string_and_symbols : Aast.hint -> string * (Pos.t * pos) list
 
 val get_type_from_hint : Provider_context.t -> Aast.hint -> string
 

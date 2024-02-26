@@ -282,7 +282,7 @@ let build_signature ctx pos_map_opt source_text params ctxs ret fa =
     | None -> (None, None, fa)
     | Some hint ->
       let legacy_ty = Pretty.get_type_from_hint ctx hint in
-      let (ty, sym_pos) = Pretty.hint_to_string_and_symbols ctx hint in
+      let (ty, sym_pos) = Pretty.hint_to_string_and_symbols hint in
       let decl_json_pos =
         List.filter_map sym_pos ~f:(fun (source_pos, pos) ->
             match Xrefs.PosMap.find_opt source_pos pos_map with

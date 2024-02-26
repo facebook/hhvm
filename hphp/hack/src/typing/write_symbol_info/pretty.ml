@@ -21,85 +21,208 @@ let get_type_from_hint ctx h =
   Typing_print.full_decl ~msg:false tcopt (Decl_hint.hint decl_env h)
   |> Utils.strip_ns
 
-let get_type_from_hint_strip_ns ctx h =
-  let mode = FileInfo.Mhhi in
-  let decl_env = Decl_env.{ mode; droot = None; droot_member = None; ctx } in
-  let env = Typing_env_types.empty ctx Relative_path.default ~droot:None in
-  Typing_print.full_strip_ns_decl
-    ~msg:false
-    ~verbose_fun:false
-    env
-    (Decl_hint.hint decl_env h)
-
 type pos = {
   start: int;
   length: int;
 }
 [@@deriving ord]
 
-let string_of_type ctx (t : Aast.hint) =
-  let queue = Queue.create () in
-  let cur = ref 0 in
+let buf = Buffer.create 1024
+
+let hint_to_string_and_symbols (hint : Aast.hint) =
+  Buffer.reset buf;
   let xrefs = ref [] in
-  let enqueue ?annot str =
+  let append ?annot str =
     let length = String.length str in
-    let pos = { start = !cur; length } in
-    Queue.enqueue queue str;
-    cur := !cur + length;
+    let pos = { start = Buffer.length buf; length } in
+    Buffer.add_string buf str;
     Option.iter annot ~f:(fun file_pos -> xrefs := (file_pos, pos) :: !xrefs)
   in
-  let rec parse t =
+  let parse_gen_seq ~sep ~f = function
+    | [] -> ()
+    | [x] -> f x
+    | x :: xs ->
+      f x;
+      List.iter xs ~f:(fun x ->
+          append sep;
+          f x)
+  in
+  let rec parse ~is_ctx t =
     let open Aast in
     match snd t with
-    | Hoption t ->
-      enqueue "?";
-      parse t
-    | Hlike t ->
-      enqueue "~";
-      parse t
-    | Hsoft t ->
-      enqueue "@";
-      parse t
-    | Happly ((file_pos, cn), hs) ->
-      enqueue ~annot:file_pos (Typing_print.strip_ns cn);
-      parse_list ("<", ">") hs
-    | Htuple hs -> parse_list ("(", ")") hs
-    | Hprim p -> enqueue (Aast_defs.string_of_tprim p)
-    | Haccess (h, sids) ->
-      parse h;
+    | Hmixed -> append "mixed"
+    | Hwildcard -> append "_"
+    | Hnonnull -> append "nonnull"
+    | Hthis -> append "this"
+    | Hdynamic -> append "dynamic"
+    | Hnothing -> append "nothing"
+    | Hoption hint ->
+      append "?";
+      parse ~is_ctx hint
+    | Hlike hint ->
+      append "~";
+      parse ~is_ctx hint
+    | Hsoft hint ->
+      append "@";
+      parse ~is_ctx hint
+    | Hvar v -> append v
+    | Habstr (name, []) -> append (Typing_print.strip_ns name)
+    | Habstr (name, hints) ->
+      append (Typing_print.strip_ns name);
+      append "<";
+      parse_gen_seq ~sep:", " ~f:(parse ~is_ctx) hints;
+      append ">"
+    | Happly ((_, "\\HH\\supportdyn"), [hint]) -> parse ~is_ctx hint
+    | Happly ((file_pos, cn), []) ->
+      append ~annot:file_pos (Typing_print.strip_ns cn)
+    | Happly ((file_pos, cn), hints) ->
+      append ~annot:file_pos (Typing_print.strip_ns cn);
+      append "<";
+      parse_gen_seq ~sep:", " ~f:(parse ~is_ctx) hints;
+      append ">"
+    | Htuple hints ->
+      append "(";
+      parse_gen_seq ~sep:", " ~f:(parse ~is_ctx) hints;
+      append ")"
+    | Hprim p -> append (Aast_defs.string_of_tprim p)
+    | Haccess (hint, sids) ->
+      parse ~is_ctx hint;
       List.iter sids ~f:(fun (file_pos, sid) ->
-          enqueue "::";
-          enqueue ~annot:file_pos sid)
-    | _ ->
-      (* fall back on old pretty printer - without xrefs - for things
-         not implemented yet TODO *)
-      enqueue (get_type_from_hint_strip_ns ctx t)
-  and parse_list (op, cl) = function
-    | [] -> ()
-    | [h] ->
-      enqueue op;
-      parse h;
-      enqueue cl
-    | h :: hs ->
-      enqueue op;
-      parse h;
-      List.iter hs ~f:(fun h ->
-          enqueue ", ";
-          parse h);
-      enqueue cl
+          append "::";
+          append ~annot:file_pos sid)
+    | Hfun
+        {
+          hf_param_tys;
+          hf_param_info;
+          hf_variadic_ty;
+          hf_return_ty;
+          hf_ctxs;
+          _;
+        } ->
+      append "(function(";
+      parse_fun hf_param_tys hf_param_info hf_variadic_ty;
+      append ")";
+      Option.iter hf_ctxs ~f:(fun (_, ctxs) ->
+          append "[";
+          parse_gen_seq ~sep:", " ~f:(parse ~is_ctx:true) ctxs;
+          append "]");
+      append ": ";
+      parse ~is_ctx hf_return_ty;
+      append ")"
+    | Hfun_context name ->
+      append "ctx ";
+      append (Typing_print.strip_ns name)
+    | Hclass_args hint ->
+      append "class<";
+      parse ~is_ctx hint;
+      append ">"
+    | Hshape { nsi_allows_unknown_fields; nsi_field_map } ->
+      append "shape(";
+      parse_shape nsi_allows_unknown_fields nsi_field_map;
+      append ")"
+    | Hrefinement (hint, members) ->
+      parse ~is_ctx:false hint;
+      append " with { ";
+      parse_gen_seq ~sep:"; " ~f:parse_member members;
+      append " }"
+    | Hvec_or_dict (None, vhint) ->
+      append "vec_or_dict";
+      append "<";
+      parse ~is_ctx vhint;
+      append ">"
+    | Hvec_or_dict (Some khint, vhint) ->
+      append "vec_or_dict";
+      append "<";
+      parse ~is_ctx khint;
+      append ", ";
+      parse ~is_ctx vhint;
+      append ">"
+    | Hunion hints ->
+      append "(";
+      parse_gen_seq ~sep:"|" ~f:(parse ~is_ctx) hints;
+      append ")"
+    | Hintersection hints when is_ctx ->
+      append "[";
+      parse_gen_seq ~sep:", " ~f:(parse ~is_ctx) hints;
+      append "]"
+    | Hintersection hints ->
+      append "(";
+      parse_gen_seq ~sep:"&" ~f:(parse ~is_ctx) hints;
+      append ")"
+  and parse_bound ~is_ctx (kind, hint) =
+    let constraint_ =
+      match kind with
+      | `E -> "= "
+      | `L -> "super "
+      | `U -> "as "
+    in
+    append constraint_;
+    parse ~is_ctx hint
+  and parse_member = function
+    | Aast.Rtype (ident, ref) ->
+      append "type ";
+      append (snd ident);
+      append " ";
+      let bounds =
+        match ref with
+        | Aast.TRexact hint -> [(`E, hint)]
+        | Aast.TRloose { Aast.tr_lower; tr_upper } ->
+          List.map tr_lower ~f:(fun x -> (`L, x))
+          @ List.map tr_upper ~f:(fun x -> (`U, x))
+      in
+      parse_gen_seq ~sep:" " ~f:(parse_bound ~is_ctx:false) bounds
+    | Aast.Rctx (ident, ref) ->
+      append "ctx ";
+      append (snd ident);
+      append " ";
+      let bounds =
+        match ref with
+        | Aast.CRexact hint -> [(`E, hint)]
+        | Aast.CRloose { Aast.cr_lower; cr_upper } ->
+          let opt_map = Option.value_map ~default:[] in
+          opt_map cr_lower ~f:(fun x -> [(`L, x)])
+          @ opt_map cr_upper ~f:(fun x -> [(`U, x)])
+      in
+      parse_gen_seq ~sep:" " ~f:(parse_bound ~is_ctx:true) bounds
+  and parse_shape open_ = function
+    | [] -> if open_ then append "..."
+    | hs ->
+      parse_gen_seq ~sep:", " ~f:parse_shape_field hs;
+      if open_ then append ", ..."
+  and parse_shape_field Aast.{ sfi_optional; sfi_name; sfi_hint } =
+    if sfi_optional then append "?";
+    parse_shape_field_name sfi_name;
+    append " => ";
+    parse ~is_ctx:false sfi_hint
+  and parse_shape_field_name = function
+    | Ast_defs.SFlit_int (_, s) -> append s
+    | Ast_defs.SFlit_str (_, s) -> append ("'" ^ s ^ "'")
+    | Ast_defs.SFclass_const ((pos, c), (_, s)) ->
+      append ~annot:pos (Typing_print.strip_ns c);
+      append "::";
+      append s
+  and parse_variadic ~first variadic =
+    Option.iter variadic ~f:(fun hint ->
+        if not first then append ", ";
+        parse ~is_ctx:false hint;
+        append "...")
+  and parse_fun hf_param_tys hf_param_info variadic =
+    (* TODO check if other modifiers are needed *)
+    let hf_param_kinds =
+      List.map hf_param_info ~f:(fun i ->
+          Option.bind i ~f:(fun i ->
+              match i.Aast.hfparam_kind with
+              | Ast_defs.Pnormal -> None
+              | Ast_defs.Pinout p -> Some (Ast_defs.Pinout p)))
+    in
+    match List.zip_exn hf_param_kinds hf_param_tys with
+    | [] -> parse_variadic ~first:true variadic
+    | ats ->
+      parse_gen_seq ~sep:", " ~f:parse_annotated_hint ats;
+      parse_variadic ~first:false variadic
+  and parse_annotated_hint (a, hint) =
+    Option.iter a ~f:(fun _ -> append "inout ");
+    parse ~is_ctx:false hint
   in
-  parse t;
-  let toks = Queue.to_list queue in
-  (String.concat toks, !xrefs)
-
-let hint_to_string_and_symbols ctx h =
-  let ty_pp_ref = get_type_from_hint_strip_ns ctx h in
-  let (ty_pp, xrefs) = string_of_type ctx h in
-  match String.equal ty_pp ty_pp_ref with
-  | true -> (ty_pp, xrefs)
-  | false ->
-    (* This is triggered only for very large (truncated) types.
-       We use ty_pp_ref in that case since it guarantees an
-       upper bound on the size of types. *)
-    Hh_logger.log "pretty-printers mismatch: %s %s" ty_pp ty_pp_ref;
-    (ty_pp_ref, [])
+  parse ~is_ctx:false hint;
+  (Buffer.contents buf, !xrefs)

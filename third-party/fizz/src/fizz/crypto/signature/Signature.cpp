@@ -91,7 +91,8 @@ std::unique_ptr<folly::IOBuf> edSign(
     throw std::runtime_error(
         to<std::string>("Could not allocate EVP_MD_CTX", getOpenSSLError()));
   }
-  if (EVP_DigestSignInit(mdCtx.get(), NULL, NULL, NULL, pkey.get()) != 1) {
+  if (EVP_DigestSignInit(mdCtx.get(), nullptr, nullptr, nullptr, pkey.get()) !=
+      1) {
     throw std::runtime_error("Could not initialize digest signature");
   }
   auto out = folly::IOBuf::create(EVP_PKEY_size(pkey.get()));
@@ -122,7 +123,8 @@ void edVerify(
     throw std::runtime_error(
         to<std::string>("Could not allocate EVP_MD_CTX", getOpenSSLError()));
   }
-  if (EVP_DigestVerifyInit(mdCtx.get(), NULL, NULL, NULL, pkey.get()) != 1) {
+  if (EVP_DigestVerifyInit(
+          mdCtx.get(), nullptr, nullptr, nullptr, pkey.get()) != 1) {
     throw std::runtime_error("Could not initialize digest signature");
   }
 

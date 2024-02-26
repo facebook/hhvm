@@ -80,6 +80,7 @@
   (wrapped false)
   (modules
     remote_old_decls_ffi)
+  (libraries logging)
   (preprocess
     (pps lwt_ppx ppx_deriving.std)))
 

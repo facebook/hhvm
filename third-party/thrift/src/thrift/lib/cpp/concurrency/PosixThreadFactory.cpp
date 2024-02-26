@@ -182,7 +182,7 @@ void* PthreadThread::threadMain(void* arg) {
   delete reinterpret_cast<shared_ptr<PthreadThread>*>(arg);
 
   if (thread == nullptr) {
-    return (void*)0;
+    return (void*)nullptr;
   }
 
   // Using pthread_attr_setschedparam() at thread creation doesn't actually
@@ -209,7 +209,7 @@ void* PthreadThread::threadMain(void* arg) {
 
   thread->runnable()->run();
 
-  return (void*)0;
+  return (void*)nullptr;
 }
 
 int PosixThreadFactory::Impl::toPthreadPolicy(POLICY policy) {

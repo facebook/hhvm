@@ -260,7 +260,7 @@ static inline bool parse_pyint(
     val = AS_LONG(o);
   } else {
     PyObject* tmp = PyNumber_Long(o);
-    if (tmp == NULL) {
+    if (tmp == nullptr) {
       PyErr_Format(PyExc_TypeError, "Unable to convert %R to int()", o);
       return false;
     } else {
@@ -338,7 +338,7 @@ static bool encode_impl(
         val = PyLong_AsLongLong(value);
       } else {
         PyObject* tmp = PyNumber_Long(value);
-        if (tmp == NULL) {
+        if (tmp == nullptr) {
           PyErr_Format(PyExc_TypeError, "Unable to convert %R to int()", value);
           return false;
         } else {

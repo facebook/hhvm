@@ -26,10 +26,6 @@ namespace facebook {
 namespace common {
 namespace mysql_client {
 
-constexpr std::chrono::milliseconds PoolOptions::kCleanUpTimeout;
-constexpr Duration PoolOptions::kDefaultMaxIdleTime;
-constexpr Duration PoolOptions::kDefaultMaxAge;
-
 std::shared_ptr<AsyncConnectionPool> AsyncConnectionPool::makePool(
     std::shared_ptr<AsyncMysqlClient> mysql_client,
     PoolOptions pool_options) {

@@ -138,7 +138,7 @@ void simpleConversionDynamic(int /*count*/) {
   for (int i = 0; i < kCount; ++i) {
     uint64_t ii = q_int.isInt() ? q_int.getInt() : 0;
     double d = q_double.isDouble() ? q_double.getDouble() : 0;
-    folly::fbstring s = q_string.isString() ? q_string.getString() : 0;
+    folly::fbstring s = q_string.isString() ? q_string.getString() : nullptr;
     folly::doNotOptimizeAway(ii);
     folly::doNotOptimizeAway(d);
     auto b = q_pair.isObject();
@@ -160,7 +160,7 @@ void simpleConversionQueryArgument(int /*count*/) {
   for (int i = 0; i < kCount; ++i) {
     uint64_t ii = q_int.isInt() ? q_int.getInt() : 0;
     double d = q_double.isDouble() ? q_double.getDouble() : 0;
-    folly::fbstring s = q_string.isString() ? q_string.getString() : 0;
+    folly::fbstring s = q_string.isString() ? q_string.getString() : nullptr;
     folly::doNotOptimizeAway(ii);
     folly::doNotOptimizeAway(d);
     auto b = q_pair.isPairList();

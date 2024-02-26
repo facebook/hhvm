@@ -25,25 +25,12 @@ import traceback
 import unittest
 
 import pkg_resources
+from thrift.compiler.test import fixture_utils
 
 FIXTURE_ROOT = "."
 
 
-def ascend_find_exe(path, target):
-    if not os.path.isdir(path):
-        path = os.path.dirname(path)
-    while True:
-        test = os.path.join(path, target)
-        if os.access(test, os.X_OK):
-            return test
-        parent = os.path.dirname(path)
-        if os.path.samefile(parent, path):
-            return None
-        path = parent
-
-
-exe = os.path.join(os.getcwd(), sys.argv[0])
-thrift = pkg_resources.resource_filename(__name__, "thrift")
+thrift = fixture_utils.get_thrift_binary_path(thrift_bin_arg=None)
 assert thrift
 fixtures_root_dir = os.path.join(FIXTURE_ROOT, "thrift/compiler/test/fixtures")
 
@@ -51,11 +38,6 @@ fixtures_root_dir = os.path.join(FIXTURE_ROOT, "thrift/compiler/test/fixtures")
 def read_file(path):
     with open(path, "r") as f:
         return f.read()
-
-
-def read_lines(path):
-    with open(path, "r") as f:
-        return f.readlines()
 
 
 def read_directory_filenames(path):
@@ -149,7 +131,7 @@ class FixtureTest(unittest.TestCase):
             os.path.join(self.tmp, "thrift/lib/thrift/"),
         )
         languages = set()
-        for cmd in read_lines(os.path.join(fixture_dir, "cmd")):
+        for cmd in fixture_utils.read_lines(os.path.join(fixture_dir, "cmd")):
             # Skip commented out commands
             if cmd[0] == "#":
                 continue

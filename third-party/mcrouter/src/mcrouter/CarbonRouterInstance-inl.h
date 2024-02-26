@@ -277,7 +277,7 @@ CarbonRouterInstance<RouterInfo>::spinUp() {
 
     // create cpuStatsWorker before proxy setup
     cpuStatsWorker_ = std::make_unique<CpuStatsWorker>(
-        std::chrono::milliseconds(opts_.proxy_cpu_interval_ms),
+        std::chrono::seconds(opts_.proxy_cpu_interval_s),
         functionScheduler(),
         getIOThreadPool());
 

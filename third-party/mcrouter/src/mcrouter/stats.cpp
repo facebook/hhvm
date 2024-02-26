@@ -589,7 +589,7 @@ void prepare_stats(CarbonRouterInstanceBase& router, stat_t* stats) {
     // Set the number of proxy threads
     stat_set(stats, num_proxies_stat, router.opts().num_proxies);
     // Set avg proxy cpu
-    if (router.opts().proxy_cpu_interval_ms > 0) {
+    if (router.opts().proxy_cpu_interval_s > 0) {
       stat_set(stats, proxy_cpu_stat, router.getProxyCpu());
     }
     stat_set(

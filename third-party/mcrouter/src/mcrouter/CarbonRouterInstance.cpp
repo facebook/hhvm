@@ -43,10 +43,10 @@ void freeAllRouters() {
 }
 
 CpuStatsWorker::CpuStatsWorker(
-    std::chrono::milliseconds timeIntervalMs,
+    std::chrono::seconds timeInterval,
     std::shared_ptr<folly::FunctionScheduler> scheduler,
     const folly::IOThreadPoolExecutorBase& proxyThreads)
-    : timeIntervalMs_(timeIntervalMs),
+    : timeInterval_(timeInterval),
       scheduler_(scheduler),
       startMs_(std::chrono::steady_clock::time_point::min()),
       proxyThreads_(proxyThreads) {}
@@ -55,10 +55,13 @@ void CpuStatsWorker::schedule(bool enable) {
   std::lock_guard<std::mutex> lock(mx_);
   if (auto scheduler = scheduler_.lock()) {
     if (enable) {
-      if (timeIntervalMs_.count() > 0 && !scheduled_.exchange(true)) {
+      if (timeInterval_.count() > 0 && !scheduled_.exchange(true)) {
         scheduler->addFunction(
             [this]() { this->calculateCpuStats(); },
-            timeIntervalMs_, /* monitoring interval in ms */
+            timeInterval_.count() > kMinSchedulingInterval
+                ? timeInterval_
+                : std::chrono::seconds(
+                      kMinSchedulingInterval), /* monitoring interval in ms */
             kCpuStatsWorkerName_,
             std::chrono::milliseconds{
                 kWorkerStartDelayMs_} /* start delay in ms */);

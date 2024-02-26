@@ -42,7 +42,7 @@ class ProxyThread;
 class CpuStatsWorker {
  public:
   CpuStatsWorker(
-      std::chrono::milliseconds timeIntervalMs,
+      std::chrono::seconds timeInterval,
       std::shared_ptr<folly::FunctionScheduler> scheduler,
       const folly::IOThreadPoolExecutorBase& proxyThreads);
 
@@ -74,7 +74,7 @@ class CpuStatsWorker {
  private:
   mutable std::mutex mx_;
   std::atomic<size_t> avgCpu_{0};
-  std::chrono::milliseconds timeIntervalMs_{0};
+  std::chrono::seconds timeInterval_{0};
   std::atomic<bool> scheduled_{false};
   std::atomic<bool> firstRun_{true};
   std::weak_ptr<folly::FunctionScheduler> scheduler_;
@@ -83,6 +83,7 @@ class CpuStatsWorker {
   const folly::IOThreadPoolExecutorBase& proxyThreads_;
   static constexpr int kWorkerStartDelayMs_ = 1000;
   static constexpr std::string_view kCpuStatsWorkerName_ = "cpu-stats_worker";
+  static constexpr int kMinSchedulingInterval = 10;
 
   void calculateCpuStats();
 };

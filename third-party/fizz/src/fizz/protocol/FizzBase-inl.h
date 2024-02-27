@@ -211,6 +211,9 @@ Buf FizzBase<Derived, ActionMoveVisitor, StateMachine>::
         folly::StringPiece label,
         Buf context,
         uint16_t length) const {
+  if (!state_.cipher() || !state_.exporterMasterSecret()) {
+    return nullptr;
+  }
   return Exporter::getExportedKeyingMaterial(
       factory,
       *state_.cipher(),

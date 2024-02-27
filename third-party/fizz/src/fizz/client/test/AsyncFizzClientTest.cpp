@@ -336,9 +336,9 @@ TEST_F(AsyncFizzClientTest, TestHandshake) {
 }
 
 TEST_F(AsyncFizzClientTest, TestExporterAPI) {
-  EXPECT_THROW(
+  EXPECT_EQ(
       client_->getExportedKeyingMaterial("EXPORTER-Some-Label", nullptr, 32),
-      std::runtime_error);
+      nullptr);
   completeHandshake();
   client_->getExportedKeyingMaterial("EXPORTER-Some-Label", nullptr, 32);
 }

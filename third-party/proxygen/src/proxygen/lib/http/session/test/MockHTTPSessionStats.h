@@ -104,4 +104,24 @@ class MockHTTPSessionStats : public DummyHTTPSessionStats {
   MOCK_METHOD(void, _recordSessionPeriodicPingProbeTimeout, ());
 };
 
+class FakeSessionStats : public DummyHTTPSessionStats {
+ public:
+  ~FakeSessionStats() override {
+    EXPECT_EQ(pendingBufferedReadBytes_, 0);
+    EXPECT_EQ(pendingBufferedWriteBytes_, 0);
+  }
+
+  void recordPendingBufferedReadBytes(int64_t bufferedBytes) noexcept override {
+    pendingBufferedReadBytes_ += bufferedBytes;
+  }
+  void recordPendingBufferedWriteBytes(
+      int64_t bufferedBytes) noexcept override {
+    pendingBufferedWriteBytes_ += bufferedBytes;
+  }
+
+ protected:
+  int64_t pendingBufferedReadBytes_{0};
+  int64_t pendingBufferedWriteBytes_{0};
+};
+
 } // namespace proxygen

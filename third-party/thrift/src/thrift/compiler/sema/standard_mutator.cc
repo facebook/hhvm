@@ -379,59 +379,11 @@ void generate_runtime_schema(
   program->add_definition(std::move(schemaConst));
 }
 
-void generate_struct_schema(
-    diagnostic_context& ctx, mutator_context& mCtx, t_structured& node) {
-  generate_runtime_schema<t_structured&>(
-      ctx, mCtx, true, "facebook.com/thrift/type/Struct", node, [&]() {
-        return schematizer(mCtx.bundle).gen_schema(node);
-      });
-}
-
-void generate_union_schema(
-    diagnostic_context& ctx, mutator_context& mCtx, t_union& node) {
-  generate_runtime_schema<t_union&>(
-      ctx, mCtx, true, "facebook.com/thrift/type/Union", node, [&]() {
-        return schematizer(mCtx.bundle).gen_schema(node);
-      });
-}
-
-void generate_exception_schema(
-    diagnostic_context& ctx, mutator_context& mCtx, t_exception& node) {
-  generate_runtime_schema<t_exception&>(
-      ctx, mCtx, true, "facebook.com/thrift/type/Exception", node, [&]() {
-        return schematizer(mCtx.bundle).gen_schema(node);
-      });
-}
-
 void generate_service_schema(
     diagnostic_context& ctx, mutator_context& mCtx, t_service& node) {
   generate_runtime_schema<t_service&>(
       ctx, mCtx, true, "facebook.com/thrift/type/Schema", node, [&]() {
         return schematizer(mCtx.bundle).gen_full_schema(node);
-      });
-}
-
-void generate_const_schema(
-    diagnostic_context& ctx, mutator_context& mCtx, t_const& node) {
-  generate_runtime_schema<t_const&>(
-      ctx, mCtx, true, "facebook.com/thrift/type/Const", node, [&]() {
-        return schematizer(mCtx.bundle).gen_schema(node);
-      });
-}
-
-void generate_typedef_schema(
-    diagnostic_context& ctx, mutator_context& mCtx, t_typedef& node) {
-  generate_runtime_schema<t_typedef&>(
-      ctx, mCtx, true, "facebook.com/thrift/type/Typedef", node, [&]() {
-        return schematizer(mCtx.bundle).gen_schema(node);
-      });
-}
-
-void generate_enum_schema(
-    diagnostic_context& ctx, mutator_context& mCtx, t_enum& node) {
-  generate_runtime_schema<t_enum&>(
-      ctx, mCtx, true, "facebook.com/thrift/type/Enum", node, [&]() {
-        return schematizer(mCtx.bundle).gen_schema(node);
       });
 }
 
@@ -509,13 +461,7 @@ ast_mutators standard_mutators(bool use_legacy_type_ref_resolution) {
     main.add_struct_visitor(&mutate_terse_write_annotation_structured);
     main.add_exception_visitor(&mutate_terse_write_annotation_structured);
     main.add_struct_visitor(&mutate_inject_metadata_fields);
-    main.add_struct_visitor(&generate_struct_schema);
-    main.add_union_visitor(&generate_union_schema);
-    main.add_exception_visitor(&generate_exception_schema);
     main.add_service_visitor(&generate_service_schema);
-    main.add_const_visitor(&generate_const_schema);
-    main.add_enum_visitor(&generate_enum_schema);
-    main.add_typedef_visitor(&generate_typedef_schema);
     main.add_const_visitor(&match_const_type_with_value);
     main.add_field_visitor(&match_field_type_with_default_value);
     main.add_definition_visitor(&match_annotation_types_with_const_values);

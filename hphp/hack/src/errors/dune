@@ -25,7 +25,8 @@
     render
     message
     quickfix
-    user_error)
+    user_error
+    user_error_flags)
   (libraries
     core_kernel
     pos_or_decl

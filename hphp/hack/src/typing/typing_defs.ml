@@ -547,6 +547,18 @@ module DependentKind = struct
   let is_generic_dep_ty s =
     String.is_substring ~substring:"::" s
     || String.equal s Naming_special_names.Typehints.this
+
+  let strip_generic_dep_ty str =
+    try
+      let _ =
+        Str.search_forward
+          (Str.regexp {|<expr#[0-9]+>\:\:\(T[A-Za-z]+\)|})
+          str
+          0
+      in
+      Some (Str.matched_group 1 str)
+    with
+    | _ -> None
 end
 
 let rec is_denotable ty =

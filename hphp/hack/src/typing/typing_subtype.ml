@@ -599,6 +599,56 @@ module rec Subtype : sig
     Typing_defs.internal_type ->
     Typing_env_types.env * TL.subtype_prop
 end = struct
+  let strip_existential_help ty =
+    match deref ty with
+    | (_, Tdependent (_, ty)) -> Some ty
+    | (r, Tgeneric (nm, tys)) when DependentKind.is_generic_dep_ty nm ->
+      Option.map ~f:(fun nm -> mk (r, Tgeneric (nm, tys)))
+      @@ DependentKind.strip_generic_dep_ty nm
+    | (r, Taccess (inner_ty, pos)) ->
+      let inner_ty_opt =
+        match deref inner_ty with
+        | (_, Tdependent (_, inner_ty)) ->
+          Some (mk (r, Taccess (inner_ty, pos)))
+        | (r_inner, Tgeneric (nm, tys)) when DependentKind.is_generic_dep_ty nm
+          ->
+          Option.map ~f:(fun nm -> mk (r_inner, Tgeneric (nm, tys)))
+          @@ DependentKind.strip_generic_dep_ty nm
+        | _ -> None
+      in
+
+      Option.map
+        ~f:(fun inner_ty -> mk (r, Taccess (inner_ty, pos)))
+        inner_ty_opt
+    | _ -> None
+
+  (* For reporting purposes we remove top-level existential types and
+     existentials in type accesses when they don't occur on both subtype and
+     supertype since they don't contribute to underlying error *)
+  let strip_existential ~ity_sub ~ity_sup =
+    match (ity_sub, ity_sup) with
+    | (LoclType lty_sub, LoclType lty_sup) ->
+      (match
+         (strip_existential_help lty_sub, strip_existential_help lty_sup)
+       with
+      (* We shouldn't remove if both sub and supertype are existentially quantified *)
+      | (Some _, Some _)
+      (* There is nothing to do if neither side was existentially quantified *)
+      | (None, None) ->
+        None
+      (* If we have an existential one only side we remove it *)
+      | (Some lty_sub, _) -> Some (LoclType lty_sub, ity_sup)
+      | (_, Some lty_sup) -> Some (ity_sub, LoclType lty_sup))
+    (* The only type to appear in 'ConstraintType' is null so we can always remove
+       if we have one LoclType and on ConstraintType, for some reason *)
+    | (LoclType lty_sub, ConstraintType _) ->
+      Option.map ~f:(fun lty_sub -> (LoclType lty_sub, ity_sup))
+      @@ strip_existential_help lty_sub
+    | (ConstraintType _, LoclType lty_sup) ->
+      Option.map ~f:(fun lty_sup -> (ity_sub, LoclType lty_sup))
+      @@ strip_existential_help lty_sup
+    | (ConstraintType _, ConstraintType _) -> None
+
   (* If it's clear from the syntax of the type that null isn't in ty, return true.
  *)
   let rec null_not_subtype ty =
@@ -1111,6 +1161,11 @@ end = struct
         ~r_super:(reason ety_super)
     in
     let fail_snd_err =
+      let (ety_sub, ety_super, stripped_existential) =
+        match strip_existential ~ity_sub:ety_sub ~ity_sup:ety_super with
+        | None -> (ety_sub, ety_super, false)
+        | Some (ety_sub, ety_super) -> (ety_sub, ety_super, true)
+      in
       match subtype_env.Subtype_env.tparam_constraints with
       | [] ->
         Typing_error.Secondary.Subtyping_error
@@ -1118,6 +1173,7 @@ end = struct
             ty_sub = ety_sub;
             ty_sup = ety_super;
             is_coeffect = subtype_env.Subtype_env.is_coeffect;
+            stripped_existential;
           }
       | cstrs ->
         Typing_error.Secondary.Violated_constraint

@@ -14,6 +14,7 @@ type ('prim_pos, 'pos) t = {
   quickfixes: 'prim_pos Quickfix.t list; [@hash.ignore]
   custom_msgs: string list;
   is_fixmed: bool;
+  flags: User_error_flags.t;
 }
 [@@deriving eq, hash, ord, show]
 
@@ -22,9 +23,10 @@ let make
     ?(is_fixmed = false)
     ?(quickfixes = [])
     ?(custom_msgs = [])
+    ?(flags = User_error_flags.empty)
     claim
     reasons =
-  { code; claim; reasons; quickfixes; custom_msgs; is_fixmed }
+  { code; claim; reasons; quickfixes; custom_msgs; is_fixmed; flags }
 
 let get_code { code; _ } = code
 
@@ -39,22 +41,24 @@ let to_list_ { claim = (pos, claim); reasons; _ } =
 
 let get_messages = to_list
 
-let to_absolute { code; claim; reasons; quickfixes; custom_msgs; is_fixmed } =
+let to_absolute
+    { code; claim; reasons; quickfixes; custom_msgs; is_fixmed; flags } =
   let claim = (fst claim |> Pos.to_absolute, snd claim) in
   let reasons =
     List.map reasons ~f:(fun (p, s) ->
         (p |> Pos_or_decl.unsafe_to_raw_pos |> Pos.to_absolute, s))
   in
   let quickfixes = List.map quickfixes ~f:Quickfix.to_absolute in
-  { code; claim; reasons; quickfixes; custom_msgs; is_fixmed }
+  { code; claim; reasons; quickfixes; custom_msgs; is_fixmed; flags }
 
-let to_relative { code; claim; reasons; quickfixes; custom_msgs; is_fixmed } :
+let to_relative
+    { code; claim; reasons; quickfixes; custom_msgs; is_fixmed; flags } :
     (Pos.t, Pos.t) t =
   let claim = (fst claim, snd claim) in
   let reasons =
     List.map reasons ~f:(fun (p, s) -> (p |> Pos_or_decl.unsafe_to_raw_pos, s))
   in
-  { code; claim; reasons; quickfixes; custom_msgs; is_fixmed }
+  { code; claim; reasons; quickfixes; custom_msgs; is_fixmed; flags }
 
 let make_absolute code = function
   | [] -> failwith "an error must have at least one message"
@@ -66,6 +70,7 @@ let make_absolute code = function
       quickfixes = [];
       custom_msgs = [];
       is_fixmed = false;
+      flags = User_error_flags.empty;
     }
 
 let to_absolute_for_test
@@ -76,6 +81,7 @@ let to_absolute_for_test
       quickfixes;
       custom_msgs;
       is_fixmed;
+      flags;
     } =
   let f (p, s) =
     let p = Pos_or_decl.unsafe_to_raw_pos p in
@@ -91,7 +97,7 @@ let to_absolute_for_test
   let claim = f (Pos_or_decl.of_raw_pos claim_pos, claim_msg) in
   let reasons = List.map ~f reasons in
   let quickfixes = List.map quickfixes ~f:Quickfix.to_absolute in
-  { code; claim; reasons; quickfixes; custom_msgs; is_fixmed }
+  { code; claim; reasons; quickfixes; custom_msgs; is_fixmed; flags }
 
 let error_kind error_code =
   match error_code / 1000 with
@@ -110,7 +116,15 @@ let error_code_to_string error_code =
 
 let to_string
     report_pos_from_reason
-    { code; claim; reasons; custom_msgs; quickfixes = _; is_fixmed = _ } =
+    {
+      code;
+      claim;
+      reasons;
+      custom_msgs;
+      quickfixes = _;
+      is_fixmed = _;
+      flags = _;
+    } =
   let buf = Buffer.create 50 in
   let (pos1, msg1) = claim in
   Buffer.add_string
@@ -156,8 +170,10 @@ let to_json ~filename_to_string error =
   let custom_msgs =
     List.map ~f:(fun msg -> Hh_json.JSON_String msg) error.custom_msgs
   in
+  let flags = User_error_flags.to_json error.flags in
   Hh_json.JSON_Object
     [
       ("message", Hh_json.JSON_Array elts);
       ("custom_messages", Hh_json.JSON_Array custom_msgs);
+      ("flags", flags);
     ]

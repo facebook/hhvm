@@ -1,11 +1,7 @@
 File "sub_dep_type_variance_check.php", line 32, characters 3-22:
 Invalid assignment (Typing[4110])
-  File "sub_dep_type_variance_check.php", line 17, characters 33-36:
-  Expected `<expr#2> as C<arraykey>`
-  File "sub_dep_type_variance_check.php", line 31, characters 8-9:
-    where `<expr#2>` is a reference to this expression
-  File "sub_dep_type_variance_check.php", line 27, characters 38-38:
-    via this generic `T`
+  File "sub_dep_type_variance_check.php", line 30, characters 15-25:
+  Expected `C<arraykey>`
   File "sub_dep_type_variance_check.php", line 32, characters 18-18:
   But got `C<int>`
   File "sub_dep_type_variance_check.php", line 32, characters 18-18:

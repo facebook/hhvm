@@ -3,6 +3,4 @@ Invalid argument (Typing[4110])
   File "transitive_error_4.php", line 6, characters 35-38:
   Expected `~C<_>`
   File "transitive_error_4.php", line 12, characters 15-20:
-  But got `<expr#2> as C<int>`
-  File "transitive_error_4.php", line 17, characters 6-7:
-    where `<expr#2>` is a reference to this expression
+  But got `C<int>`

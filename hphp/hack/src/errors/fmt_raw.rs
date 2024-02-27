@@ -28,6 +28,7 @@ impl<'a> std::fmt::Display for FmtRaw<'a> {
                 custom_msgs,
                 quickfixes: _,
                 is_fixmed: _,
+                flags: _,
             },
             ctx,
             is_term,

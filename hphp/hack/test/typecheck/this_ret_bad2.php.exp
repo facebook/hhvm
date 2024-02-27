@@ -2,12 +2,10 @@ File "this_ret_bad2.php", line 35, characters 3-46:
   Foo<<expr#2> as Bar>
 File "this_ret_bad2.php", line 41, characters 16-34:
 Invalid argument (Typing[4110])
-  File "this_ret_bad2.php", line 19, characters 38-41:
-  Expected `<expr#2> as Bar`
-  File "this_ret_bad2.php", line 41, characters 16-19:
-    where `<expr#2>` is a reference to this expression
+  File "this_ret_bad2.php", line 33, characters 15-17:
+  Expected exactly the type `Bar`
   File "this_ret_bad2.php", line 25, characters 27-29:
-  But got `Bar`
+  But got the nonexact type `Bar`
   File "this_ret_bad2.php", line 25, characters 27-29:
   This type argument to `Foo` must match exactly (it is invariant)
   File "this_ret_bad2.php", line 33, characters 15-17:

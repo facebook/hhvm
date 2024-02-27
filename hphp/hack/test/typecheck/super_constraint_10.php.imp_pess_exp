@@ -3,9 +3,7 @@ Invalid argument (Typing[4110])
   File "super_constraint_10.php", line 10, characters 5-22:
   Expected `~ConstMap<_, _>`
   File "super_constraint_10.php", line 17, characters 5-22:
-  But got `<expr#7> as ConstMap<Tk2, Tv2>`
-  File "super_constraint_10.php", line 19, characters 34-38:
-    where `<expr#7>` is a reference to this expression
+  But got `ConstMap<Tk2, Tv2> where Tk2 super Tk1, Tk2 as arraykey, Tv2 super Tv1`
 File "super_constraint_10.php", line 20, characters 12-18:
 Invalid return type (Typing[4110])
   File "super_constraint_10.php", line 16, characters 14-16:

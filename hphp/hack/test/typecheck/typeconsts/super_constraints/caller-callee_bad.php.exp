@@ -15,19 +15,15 @@ Invalid argument (Typing[4110])
   File "caller-callee_bad.php", line 43, characters 22-29:
   Expected `this::TC`
   File "caller-callee_bad.php", line 34, characters 49-57:
-  But got `<expr#3> as CanAppend`
-  File "caller-callee_bad.php", line 35, characters 15-18:
-    where `<expr#3>` is a reference to this expression
+  But got `CanAppend`
 File "caller-callee_bad.php", line 36, characters 62-75:
 Invalid argument (Typing[4110])
   File "caller-callee_bad.php", line 43, characters 22-29:
   Expected `this::TC`
   File "caller-callee_bad.php", line 49, characters 19-27:
-  But got `<expr#7> as CanAppend`
+  But got `CanAppend`
   File "caller-callee_bad.php", line 57, characters 37-44:
     resulting from expanding the type constant `AppendOnly::TC`
-  File "caller-callee_bad.php", line 36, characters 62-75:
-    where `<expr#7>` is a reference to this expression
 File "caller-callee_bad.php", line 39, characters 66-83:
 Invalid argument (Typing[4110])
   File "caller-callee_bad.php", line 49, characters 19-27:

@@ -175,7 +175,8 @@ let try_with_result (f1 : unit -> 'res) (f2 : 'res -> error -> 'res) : 'res =
   | None -> result
   | Some
       User_error.
-        { code; claim; reasons; quickfixes; custom_msgs; is_fixmed = _ } ->
+        { code; claim; reasons; quickfixes; custom_msgs; flags; is_fixmed = _ }
+    ->
     (* Remove bad position sentinel if present: we might be about to add a new primary
      * error position. *)
     let (claim, reasons) =
@@ -188,7 +189,8 @@ let try_with_result (f1 : unit -> 'res) (f2 : 'res -> error -> 'res) : 'res =
       else
         (claim, reasons)
     in
-    f2 result @@ User_error.make code claim reasons ~quickfixes ~custom_msgs
+    f2 result
+    @@ User_error.make code claim reasons ~quickfixes ~custom_msgs ~flags
 
 let try_with_result_pure ~fail f g =
   let error_map_copy = !error_map in
@@ -294,6 +296,7 @@ let compare_internal
           custom_msgs = _;
           quickfixes = _;
           is_fixmed = _;
+          flags = _;
         } =
     x
   in
@@ -305,6 +308,7 @@ let compare_internal
           custom_msgs = _;
           quickfixes = _;
           is_fixmed = _;
+          flags = _;
         } =
     y
   in
@@ -640,14 +644,22 @@ let check_pos_msg :
 
 let add_error_with_fixme_error error explanation =
   let User_error.
-        { code; claim; reasons = _; quickfixes; custom_msgs; is_fixmed = _ } =
+        {
+          code;
+          claim;
+          reasons = _;
+          quickfixes;
+          custom_msgs;
+          flags;
+          is_fixmed = _;
+        } =
     error
   in
   let (pos, _) = claim in
   let pos = Option.value (!get_hh_fixme_pos pos code) ~default:pos in
   add_error_impl error;
   add_error_impl
-  @@ User_error.make code (pos, explanation) [] ~quickfixes ~custom_msgs
+  @@ User_error.make code (pos, explanation) [] ~quickfixes ~custom_msgs ~flags
 
 let add_applied_fixme error =
   let error = { error with User_error.is_fixmed = true } in
@@ -663,11 +675,14 @@ and add_list code ?quickfixes (claim : _ Message.t) reasons =
 
 and add_error (error : error) =
   let User_error.
-        { code; claim; reasons; quickfixes; custom_msgs; is_fixmed = _ } =
+        { code; claim; reasons; quickfixes; custom_msgs; flags; is_fixmed = _ }
+      =
     error
   in
   let (claim, reasons) = check_pos_msg (claim, reasons) in
-  let error = User_error.make code claim reasons ~quickfixes ~custom_msgs in
+  let error =
+    User_error.make code claim reasons ~quickfixes ~custom_msgs ~flags
+  in
 
   let pos = fst claim in
 
@@ -1142,6 +1157,7 @@ let convert_errors_to_string ?(include_filename = false) (errors : error list) :
               custom_msgs;
               quickfixes = _;
               is_fixmed = _;
+              flags = _;
             } =
         err
       in

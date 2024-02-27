@@ -3,9 +3,7 @@ Invalid argument (Typing[4110])
   File "accessloose.php", line 19, characters 32-38:
   Expected `~Ref<_>`
   File "accessloose.php", line 39, characters 15-45:
-  But got `<expr#2> as Ref<Box with { type T as int }>`
-  File "accessloose.php", line 45, characters 18-20:
-    where `<expr#2>` is a reference to this expression
+  But got `Ref<Box with { type T as int }>`
 File "accessloose.php", line 52, characters 10-16:
 A `where` type constraint is violated here (Typing[4323])
   File "accessloose.php", line 19, characters 10-16:

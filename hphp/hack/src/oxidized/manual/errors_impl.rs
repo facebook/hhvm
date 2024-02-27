@@ -12,6 +12,15 @@ use crate::quickfix::Edit;
 use crate::quickfix::QfPos;
 use crate::quickfix::Quickfix;
 use crate::user_error::UserError;
+use crate::user_error_flags::UserErrorFlags;
+
+impl Default for UserErrorFlags {
+    fn default() -> Self {
+        Self {
+            stripped_existential: false,
+        }
+    }
+}
 
 impl<PP, P> UserError<PP, P> {
     pub fn new(
@@ -20,6 +29,7 @@ impl<PP, P> UserError<PP, P> {
         reasons: Vec<Message<P>>,
         custom_msgs: Vec<String>,
         quickfixes: Vec<Quickfix<PP>>,
+        flags: UserErrorFlags,
     ) -> Self {
         Self {
             code,
@@ -28,6 +38,7 @@ impl<PP, P> UserError<PP, P> {
             quickfixes,
             custom_msgs,
             is_fixmed: false,
+            flags,
         }
     }
 
@@ -56,6 +67,7 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> UserError<PP, P> {
             custom_msgs: _,
             quickfixes: _,
             is_fixmed: _,
+            flags: _,
         } = self;
         let Self {
             code: other_code,
@@ -64,6 +76,7 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> UserError<PP, P> {
             custom_msgs: _,
             quickfixes: _,
             is_fixmed: _,
+            flags: _,
         } = other;
         let compare_code = |self_code: ErrorCode, other_code: ErrorCode| {
             if by_phase {
@@ -118,6 +131,7 @@ impl Naming {
             vec![],
             vec![],
             vec![],
+            Default::default(),
         )
     }
 
@@ -134,6 +148,7 @@ impl Naming {
                 title: format!("Change to `{}`", correct_name),
                 edits: vec![Edit(correct_name.into(), QfPos::Qpos(p))],
             }],
+            Default::default(),
         )
     }
 
@@ -166,6 +181,7 @@ impl Naming {
                     edits: vec![Edit("public ".into(), QfPos::Qpos(fix_pos))],
                 },
             ],
+            Default::default(),
         )
     }
 
@@ -179,6 +195,7 @@ impl Naming {
             vec![],
             vec![],
             vec![],
+            Default::default(),
         )
     }
 
@@ -192,6 +209,7 @@ impl Naming {
             vec![],
             vec![],
             vec![],
+            Default::default(),
         )
     }
 }
@@ -208,6 +226,7 @@ impl NastCheck {
             vec![],
             vec![],
             vec![],
+            Default::default(),
         )
     }
 
@@ -221,6 +240,7 @@ impl NastCheck {
             vec![],
             vec![],
             vec![],
+            Default::default(),
         )
     }
 
@@ -238,6 +258,7 @@ impl NastCheck {
             vec![],
             vec![],
             vec![],
+            Default::default(),
         )
     }
 }

@@ -313,6 +313,8 @@ module DependentKind : sig
   val to_string : dependent_type -> string
 
   val is_generic_dep_ty : string -> bool
+
+  val strip_generic_dep_ty : string -> string option
 end
 
 module ShapeFieldMap : sig

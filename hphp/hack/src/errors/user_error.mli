@@ -5,13 +5,15 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
 type ('prim_pos, 'pos) t = {
   code: int;
   claim: 'prim_pos Message.t;
   reasons: 'pos Message.t list;
-  quickfixes: 'prim_pos Quickfix.t list;
+  quickfixes: 'prim_pos Quickfix.t list; [@hash.ignore]
   custom_msgs: string list;
   is_fixmed: bool;
+  flags: User_error_flags.t;
 }
 [@@deriving eq, hash, ord, show]
 
@@ -20,6 +22,7 @@ val make :
   ?is_fixmed:bool ->
   ?quickfixes:'a Quickfix.t list ->
   ?custom_msgs:string list ->
+  ?flags:User_error_flags.t ->
   'a Message.t ->
   'b Message.t list ->
   ('a, 'b) t

@@ -581,7 +581,7 @@ BENCHMARK(TestWrapping_SbeBaseline) {
 }
 
 BENCHMARK(TestWrapping_SbeWithAllocation) {
-  auto buffer = folly::IOBuf::create(64);
+  auto buffer = folly::IOBuf::create(256);
   auto metadata =
       sbe::MessageWrapper<sbe::RequestRpcMetadata, sbe::MessageHeader>();
   metadata.wrapForEncode(*messageBuffer);
@@ -628,6 +628,7 @@ void do_ThriftWrapperSerialize() {
   do_SBERpcMetadataRequestSerializationBaseline();
   benchmarks::Wrapper wrapper{};
   wrapper.data() = messageBuffer->cloneOne();
+  serialize_with_protocol_writer<ProtocolWriter>(wrapper);
   thriftIOBufQueue.clearAndTryReuseLargestBuffer();
 }
 

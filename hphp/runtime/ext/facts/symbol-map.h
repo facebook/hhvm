@@ -212,7 +212,7 @@ struct SymbolMap {
    */
   std::vector<Symbol<SymKind::Type>> getAttributesOfMethod(
       Symbol<SymKind::Type> type,
-      Symbol<SymKind::Function> method);
+      Symbol<SymKind::Method> method);
   std::vector<Symbol<SymKind::Type>> getAttributesOfMethod(
       const StringData& type,
       const StringData& method);
@@ -284,7 +284,7 @@ struct SymbolMap {
 
   std::vector<folly::dynamic> getMethodAttributeArgs(
       Symbol<SymKind::Type> type,
-      Symbol<SymKind::Function> method,
+      Symbol<SymKind::Method> method,
       Symbol<SymKind::Type> attribute);
   std::vector<folly::dynamic> getMethodAttributeArgs(
       const StringData& type,

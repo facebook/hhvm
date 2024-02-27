@@ -31,6 +31,7 @@ enum class SymKind {
   Function,
   Constant,
   Module,
+  Method,
 };
 
 constexpr std::string_view toString(SymKind k) {
@@ -43,6 +44,8 @@ constexpr std::string_view toString(SymKind k) {
       return "constant";
     case SymKind::Module:
       return "module";
+    case SymKind::Method:
+      return "method";
   }
   return "unknown";
 }
@@ -54,6 +57,7 @@ constexpr bool isCaseSensitive(SymKind k) {
       return false;
     case SymKind::Constant:
     case SymKind::Module:
+    case SymKind::Method:
       return true;
   }
 }
@@ -131,6 +135,7 @@ struct Symbol {
         return m_name.fsame(o.m_name);
       case SymKind::Constant:
       case SymKind::Module:
+      case SymKind::Method:
         return m_name.same(o.m_name);
     }
   }
@@ -177,7 +182,7 @@ struct TypeDecl {
 
 struct MethodDecl {
   TypeDecl m_type;
-  Symbol<SymKind::Function> m_method;
+  Symbol<SymKind::Method> m_method;
 
   bool operator==(const MethodDecl& o) const {
     return m_type == o.m_type && m_method == o.m_method;
@@ -219,7 +224,7 @@ struct hash<typename HPHP::Facts::MethodDecl> {
   size_t operator()(const typename HPHP::Facts::MethodDecl& d) const {
     return folly::hash::hash_combine(
         std::hash<HPHP::Facts::TypeDecl>{}(d.m_type),
-        std::hash<HPHP::Facts::Symbol<HPHP::Facts::SymKind::Function>>{}(
+        std::hash<HPHP::Facts::Symbol<HPHP::Facts::SymKind::Method>>{}(
             d.m_method));
   }
 };

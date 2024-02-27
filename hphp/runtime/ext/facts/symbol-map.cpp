@@ -569,7 +569,7 @@ std::vector<Symbol<SymKind::Type>> SymbolMap::getTypeAliasesWithAttribute(
 
 std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfMethod(
     Symbol<SymKind::Type> type,
-    Symbol<SymKind::Function> method) {
+    Symbol<SymKind::Method> method) {
   auto path = getSymbolPath(type);
   if (path == nullptr) {
     return {};
@@ -613,7 +613,7 @@ std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfMethod(
     const StringData& type,
     const StringData& method) {
   return getAttributesOfMethod(
-      Symbol<SymKind::Type>{type}, Symbol<SymKind::Function>{method});
+      Symbol<SymKind::Type>{type}, Symbol<SymKind::Method>{method});
 }
 
 std::vector<MethodDecl> SymbolMap::getMethodsWithAttribute(
@@ -645,7 +645,7 @@ std::vector<MethodDecl> SymbolMap::getMethodsWithAttribute(
                   TypeDecl{
                       .m_name = Symbol<SymKind::Type>{type},
                       .m_path = Path{path}},
-              .m_method = Symbol<SymKind::Function>{method}});
+              .m_method = Symbol<SymKind::Method>{method}});
         }
         return methodDecls;
       },
@@ -855,7 +855,7 @@ std::vector<folly::dynamic> SymbolMap::getTypeAliasAttributeArgs(
 
 std::vector<folly::dynamic> SymbolMap::getMethodAttributeArgs(
     Symbol<SymKind::Type> type,
-    Symbol<SymKind::Function> method,
+    Symbol<SymKind::Method> method,
     Symbol<SymKind::Type> attr) {
   auto path = getSymbolPath(type);
   if (path == nullptr) {
@@ -887,7 +887,7 @@ std::vector<folly::dynamic> SymbolMap::getMethodAttributeArgs(
     const StringData& attribute) {
   return getMethodAttributeArgs(
       Symbol<SymKind::Type>{type},
-      Symbol<SymKind::Function>{method},
+      Symbol<SymKind::Method>{method},
       Symbol<SymKind::Type>{attribute});
 }
 
@@ -1400,6 +1400,8 @@ Path SymbolMap::getSymbolPath(Symbol<k> symbol) {
               return db->getConstantPath(symbol.slice());
             case SymKind::Module:
               return db->getModulePath(symbol.slice());
+            case SymKind::Method:
+              always_assert(false && "getSymbolPath only for toplevel symbols");
           }
         }();
 
@@ -1449,6 +1451,9 @@ typename PathToSymbolsMap<k>::PathSymbolMap::Values SymbolMap::getPathSymbols(
               return db->getPathConstants(path);
             case SymKind::Module:
               return db->getPathModules(path);
+            case SymKind::Method:
+              always_assert(
+                  false && "getPathSymbols only for toplevel symbols");
           }
         }(fs::path{std::string{path.slice()}});
 
@@ -1541,7 +1546,7 @@ void SymbolMap::Data::updatePath(
       if (!attrs.empty()) {
         MethodDecl methodDecl{
             .m_type = {.m_name = typeName, .m_path = path},
-            .m_method = Symbol<SymKind::Function>{as_slice(method.name)}};
+            .m_method = Symbol<SymKind::Method>{as_slice(method.name)}};
         m_methodAttrs.setAttributes(methodDecl, std::move(attrs));
       }
     }

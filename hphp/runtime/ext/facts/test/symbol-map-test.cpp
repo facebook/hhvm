@@ -2037,7 +2037,7 @@ TEST_F(SymbolMapTest, GetMethodsWithAttribute) {
                 .m_type =
                     {.m_name = Symbol<SymKind::Type>{StringData{"C1"}},
                      .m_path = Path{p1}},
-                .m_method = Symbol<SymKind::Function>{StringData{"m1"}}})));
+                .m_method = Symbol<SymKind::Method>{StringData{"m1"}}})));
 
     EXPECT_THAT(m.getAttributesOfMethod("C1", "m1"), ElementsAre("A1"));
     EXPECT_THAT(m.getMethodAttributeArgs("C1", "m1", "A1"), ElementsAre("1"));

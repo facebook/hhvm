@@ -228,7 +228,6 @@ void checkDebuggerIntr(IRGS& env, SrcKey sk) {
   assertx(RuntimeOption::EvalEmitDebuggerIntrCheck);
   assertx(curFunc(env) == sk.func());
   if (sk.func()->isBuiltin()) return;
-  assertx(!isInlining(env));
   auto const handle = RDSHandleData { curFunc(env)->debuggerIntrSetHandle() };
   ifElse(
     env,

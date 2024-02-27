@@ -26,8 +26,10 @@ pub struct PackageInfo {
 }
 
 impl PackageInfo {
-    pub fn from_text(filename: &str, contents: &str) -> Result<PackageInfo> {
-        let mut config: Config = toml::from_str(contents)
+    pub fn from_text(filename: &str) -> Result<PackageInfo> {
+        let contents = std::fs::read_to_string(filename)
+            .with_context(|| format!("Failed to read config file with path: {}", filename))?;
+        let mut config: Config = toml::from_str(&contents)
             .with_context(|| format!("Failed to parse config file with contents: {}", contents))?;
         let line_offsets = contents
             .char_indices()
@@ -146,10 +148,8 @@ mod test {
 
     #[test]
     fn test_parsing_basic_file() {
-        let contents = include_str!("tests/package-1.toml");
         let test_path = SRCDIR.as_path().join("tests/package-1.toml");
-
-        let info = PackageInfo::from_text(test_path.to_str().unwrap(), contents).unwrap();
+        let info = PackageInfo::from_text(test_path.to_str().unwrap()).unwrap();
         assert!(info.errors.is_empty());
 
         let foo = &info.packages()["foo"];
@@ -193,10 +193,8 @@ mod test {
 
     #[test]
     fn test_multiline_uses() {
-        let contents = include_str!("tests/package-2.toml");
         let test_path = SRCDIR.as_path().join("tests/package-2.toml");
-
-        let info = PackageInfo::from_text(test_path.to_str().unwrap(), contents).unwrap();
+        let info = PackageInfo::from_text(test_path.to_str().unwrap()).unwrap();
         assert!(info.errors.is_empty());
 
         let foo = &info.packages()["foo"];
@@ -213,10 +211,8 @@ mod test {
 
     #[test]
     fn test_config_errors1() {
-        let contents = include_str!("tests/package-3.toml");
         let test_path = SRCDIR.as_path().join("tests/package-3.toml");
-
-        let info = PackageInfo::from_text(test_path.to_str().unwrap(), contents).unwrap();
+        let info = PackageInfo::from_text(test_path.to_str().unwrap()).unwrap();
         assert_eq!(info.errors.len(), 3);
         assert_eq!(info.errors[0].msg(), "Undefined package: baz");
         assert_eq!(info.errors[1].msg(), "Undefined package: baz");
@@ -228,10 +224,8 @@ mod test {
 
     #[test]
     fn test_config_errors2() {
-        let contents = include_str!("tests/package-4.toml");
         let test_path = SRCDIR.as_path().join("tests/package-4.toml");
-
-        let info = PackageInfo::from_text(test_path.to_str().unwrap(), contents).unwrap();
+        let info = PackageInfo::from_text(test_path.to_str().unwrap()).unwrap();
         let errors = info
             .errors
             .iter()
@@ -250,10 +244,8 @@ mod test {
 
     #[test]
     fn test_soft() {
-        let contents = include_str!("tests/package-5.toml");
         let test_path = SRCDIR.as_path().join("tests/package-5.toml");
-
-        let info = PackageInfo::from_text(test_path.to_str().unwrap(), contents).unwrap();
+        let info = PackageInfo::from_text(test_path.to_str().unwrap()).unwrap();
         let c = &info.packages()["c"];
         let errors = info
             .errors
@@ -280,10 +272,8 @@ mod test {
 
     #[test]
     fn test_allow_directories1() {
-        let contents = include_str!("tests/package-6.toml");
         let test_path = SRCDIR.as_path().join("tests/package-6.toml");
-
-        let info = PackageInfo::from_text(test_path.to_str().unwrap(), contents).unwrap();
+        let info = PackageInfo::from_text(test_path.to_str().unwrap()).unwrap();
         let allow_dirs = info.packages()["foo"].allow_directories.as_ref().unwrap();
         assert_eq!(allow_dirs.len(), 2);
         assert!(
@@ -300,10 +290,8 @@ mod test {
 
     #[test]
     fn test_allow_directories2() {
-        let contents = include_str!("tests/package-6.toml");
         let test_path = SRCDIR.as_path().join("tests/package-6.toml");
-
-        let info = PackageInfo::from_text(test_path.to_str().unwrap(), contents).unwrap();
+        let info = PackageInfo::from_text(test_path.to_str().unwrap()).unwrap();
         let allow_dirs = info.packages()["bar"].allow_directories.as_ref().unwrap();
         assert_eq!(allow_dirs.len(), 3);
 
@@ -329,9 +317,8 @@ mod test {
 
     #[test]
     fn test_allow_directories_error() {
-        let contents = include_str!("tests/package-6.toml");
         let test_path = SRCDIR.as_path().join("tests/package-6.toml");
-        let info = PackageInfo::from_text(test_path.to_str().unwrap(), contents).unwrap();
+        let info = PackageInfo::from_text(test_path.to_str().unwrap()).unwrap();
 
         let errors = info
             .errors

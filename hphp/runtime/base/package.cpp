@@ -71,12 +71,7 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
   PackageMap packages;
   DeploymentMap deployments;
 
-  std::string packages_toml{
-    std::istreambuf_iterator<char>(file),
-    std::istreambuf_iterator<char>()
-  };
-
-  auto info = package::package_info(path.string(), packages_toml);
+  auto info = package::package_info(path.string());
 
   auto const convert = [&] (auto const& v) {
     hphp_vector_string_set result;

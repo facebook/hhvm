@@ -38,9 +38,7 @@ build-hack$(2):
 		src/hh_single_type_check.$(1) \
 		src/hackfmt.$(1) \
 		src/hh_parse.$(1) \
-		src/generate_full_fidelity.$(1) \
-		src/hh_fanout/hh_fanout.$(1)
-
+		src/generate_full_fidelity.$(1)
 
 copy-hack$(2)-files: build-hack$(2)
 	mkdir -p "$(HACK_BIN_DIR)"
@@ -50,7 +48,6 @@ copy-hack$(2)-files: build-hack$(2)
 	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/hack/src/hackfmt.$(1)" "$(HACK_BIN_DIR)/hackfmt$(ext)"
 	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/hack/src/hh_parse.$(1)" "$(HACK_BIN_DIR)/hh_parse$(ext)"
 	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/hack/src/generate_full_fidelity.$(1)" "$(HACK_BIN_DIR)/generate_full_fidelity$(ext)"
-	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/hack/src/hh_fanout/hh_fanout.$(1)" "$(HACK_BIN_DIR)/hh_fanout$(ext)"
 endef
 
 # Define rules for normal build / debug build

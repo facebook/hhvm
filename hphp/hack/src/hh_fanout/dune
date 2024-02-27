@@ -1,31 +1,3 @@
-(executable
- (name hh_fanout)
- (link_flags
-  (:standard
-   (:include ../dune_config/ld-opts.sexp)))
- (modes exe byte_complete)
- (libraries
-  batch_init
-  client_ide_service
-  cmdliner
-  default_injector_config
-  hh_fanout_build_rust
-  hh_fanout_dep_graph_is_subgraph_rust
-  hh_fanout_dep_graph_stats_rust
-  hhi
-  lwt
-  provider_utils
-  relative_path
-  server
-  server_command_types
-  server_env
-  server_env_build
-  sys_utils
-  temp_file
-  utils_core)
- (preprocess
-  (pps lwt_ppx ppx_let ppx_deriving.std)))
-
 (data_only_dirs
  cargo
  hh_fanout_build_rust

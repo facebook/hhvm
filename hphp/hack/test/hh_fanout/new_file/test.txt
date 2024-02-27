@@ -1,7 +1,0 @@
-write new_file.php
-  <?hh
-  // No symbols in this file at the moment.
-
-generate-saved-state
-
-calculate-fanout new_file.php

@@ -19,8 +19,6 @@ exception Integration_test_failure
 module FileMap = SMap
 module ErrorSet = SSet
 
-type error_messages_per_file = ErrorSet.t FileMap.t [@@deriving eq, show]
-
 let root = "/"
 
 let hhi = "/hhi"
@@ -48,8 +46,6 @@ let genv =
   ref { ServerEnvBuild.default_genv with ServerEnv.config = server_config }
 
 let did_init = ref false
-
-let real_hhi_files () = Hhi.get_raw_hhi_contents () |> Array.to_list
 
 (* Init part common to fresh and saved state init *)
 let test_init_common ?(hhi_files = []) () =
@@ -278,10 +274,6 @@ let assert_env_errors env expected = assert_errors env.ServerEnv.errorl expected
 
 let assert_no_errors env = assert_env_errors env ""
 
-let saved_state_filename = "test_saved_state"
-
-let saved_naming_filename = "test_saved_naming"
-
 let in_daemon f =
   let handle =
     Daemon.fork_FOR_TESTING_ON_UNIX_ONLY
@@ -293,220 +285,6 @@ let in_daemon f =
   match Unix.waitpid [] handle.Daemon.pid with
   | (_, Unix.WEXITED 0) -> ()
   | _ -> assert false
-
-let build_dep_graph ~output ~edges_dir =
-  let hh_fanout = Sys.getenv "HH_FANOUT_BIN" in
-  let cmd =
-    Printf.sprintf
-      "%s build --allow-empty --output %s --edges-dir %s"
-      (Filename.quote hh_fanout)
-      (Filename.quote output)
-      (Filename.quote edges_dir)
-  in
-  let () = assert (Sys.command cmd = 0) in
-  ()
-
-let build_dep_graph_incr ~output ~old_graph ~delta =
-  let hh_fanout = Sys.getenv "HH_FANOUT_BIN" in
-  let cmd =
-    Printf.sprintf
-      "%s build --allow-empty --output %s --incremental %s --delta %s"
-      (Filename.quote hh_fanout)
-      (Filename.quote output)
-      (Filename.quote old_graph)
-      (Filename.quote delta)
-  in
-  let () = assert (Sys.command cmd = 0) in
-  ()
-
-let save_state
-    ?(load_hhi_files = false)
-    ?(store_decls_in_saved_state =
-      ServerLocalConfig.(default.store_decls_in_saved_state))
-    ?(enable_naming_table_fallback = false)
-    ?custom_config
-    disk_changes
-    temp_dir =
-  in_daemon @@ fun () ->
-  let hhi_files =
-    if load_hhi_files then
-      real_hhi_files ()
-    else
-      []
-  in
-  let edges_dir = temp_dir ^ "/edges/" in
-  RealDisk.mkdir_p edges_dir;
-  (* We don't support multiple workers! And don't use any *)
-  Typing_deps.worker_id := Some 0;
-  let env = setup_server () ~edges_dir ?custom_config ~hhi_files in
-  let env = setup_disk env disk_changes in
-  assert_no_errors env;
-  genv :=
-    {
-      !genv with
-      ServerEnv.local_config =
-        {
-          !genv.ServerEnv.local_config with
-          ServerLocalConfig.store_decls_in_saved_state;
-          ServerLocalConfig.enable_naming_table_fallback;
-        };
-      ServerEnv.config =
-        Option.value custom_config ~default:!genv.ServerEnv.config;
-    };
-  let _edges_added =
-    ServerInit.save_state !genv env (temp_dir ^ "/" ^ saved_state_filename)
-  in
-  let output = temp_dir ^ "/" ^ saved_state_filename ^ ".hhdg" in
-  build_dep_graph ~output ~edges_dir;
-  if enable_naming_table_fallback then (
-    let _rows_added =
-      SaveStateService.go_naming
-        env.ServerEnv.naming_table
-        (temp_dir ^ "/" ^ saved_naming_filename)
-      |> Result.ok_or_failwith
-    in
-    ();
-    ()
-  )
-
-let save_state_incremental
-    env
-    ?(store_decls_in_saved_state =
-      ServerLocalConfig.(default.store_decls_in_saved_state))
-    ~old_state_dir
-    new_state_dir =
-  assert_no_errors env;
-  genv :=
-    {
-      !genv with
-      ServerEnv.local_config =
-        {
-          !genv.ServerEnv.local_config with
-          ServerLocalConfig.store_decls_in_saved_state;
-        };
-    };
-  let result =
-    ServerInit.save_state !genv env (new_state_dir ^ "/" ^ saved_state_filename)
-  in
-  let old_graph = old_state_dir ^ "/" ^ saved_state_filename ^ ".hhdg" in
-  let output = new_state_dir ^ "/" ^ saved_state_filename ^ ".hhdg" in
-  let delta =
-    new_state_dir ^ "/" ^ saved_state_filename ^ "_64bit_dep_graph.delta"
-  in
-  build_dep_graph_incr ~output ~old_graph ~delta;
-  result
-
-let save_state_with_errors disk_changes temp_dir expected_error : unit =
-  in_daemon @@ fun () ->
-  let edges_dir = temp_dir ^ "/edges/" in
-  RealDisk.mkdir_p edges_dir;
-  (* We don't support multiple workers! And don't use any *)
-  Typing_deps.worker_id := Some 0;
-  let env = setup_server ~edges_dir () in
-  let env = setup_disk env disk_changes in
-  assert_env_errors env expected_error;
-
-  let genv =
-    {
-      !genv with
-      ServerEnv.options =
-        ServerArgs.set_gen_saved_ignore_type_errors !genv.ServerEnv.options true;
-    }
-  in
-  let _edges_added =
-    ServerInit.save_state genv env (temp_dir ^ "/" ^ saved_state_filename)
-  in
-  let output = temp_dir ^ "/" ^ saved_state_filename ^ ".hhdg" in
-  build_dep_graph ~output ~edges_dir;
-  ()
-
-let load_state
-    ?(master_changes = [])
-    ?(local_changes = [])
-    ?(load_hhi_files = false)
-    ?(use_precheked_files = ServerLocalConfig.(default.prechecked_files))
-    ?(enable_naming_table_fallback = false)
-    ?custom_config
-    ~disk_state
-    saved_state_dir =
-  (* In production, saved state is only used in conjunction with lazy init
-   * right now, and I'm not convinced if it even works in any other
-   * configuration. *)
-  genv :=
-    {
-      !genv with
-      ServerEnv.local_config =
-        {
-          !genv.ServerEnv.local_config with
-          ServerLocalConfig.lazy_parse = true;
-          lazy_init = true;
-          prechecked_files = use_precheked_files;
-          predeclare_ide = true;
-          naming_sqlite_path =
-            (if enable_naming_table_fallback then
-              Some (saved_state_dir ^ "/" ^ saved_naming_filename)
-            else
-              None);
-          enable_naming_table_fallback;
-        };
-      ServerEnv.config =
-        Option.value custom_config ~default:!genv.ServerEnv.config;
-    };
-  let hhi_files =
-    if load_hhi_files then
-      real_hhi_files ()
-    else
-      []
-  in
-  test_init_common () ~hhi_files;
-
-  let disk_changes = List.map disk_state ~f:(fun (x, y) -> (root ^ x, y)) in
-  List.iter disk_changes ~f:(fun (path, contents) -> TestDisk.set path contents);
-
-  let prechecked_changes =
-    List.map master_changes ~f:(fun x ->
-        Relative_path.create_detect_prefix (root ^ x))
-  in
-  let changes =
-    List.map local_changes ~f:(fun x ->
-        Relative_path.create_detect_prefix (root ^ x))
-  in
-  let naming_table_path = saved_state_dir ^ "/" ^ saved_state_filename in
-  let deptable_fn = saved_state_dir ^ "/" ^ saved_state_filename ^ ".hhdg" in
-  let load_state_approach =
-    ServerInit.Precomputed
-      {
-        ServerArgs.naming_table_path;
-        (* in Precomputed scenario, base revision should only be used in logging,
-         * which is irrelevant in tests *)
-        corresponding_base_revision = Hg.Rev.of_string "-1";
-        deptable_fn;
-        compressed_deptable_fn = None;
-        naming_changes = [];
-        prechecked_changes;
-        changes;
-      }
-  in
-  let init_id = Random_id.short_string () in
-  let env =
-    ServerEnvBuild.make_env
-      ~init_id
-      ~deps_mode:(Typing_deps_mode.InMemoryMode (Some deptable_fn))
-      !genv.ServerEnv.config
-  in
-  match
-    ServerInit.init
-      ~init_approach:(ServerInit.Saved_state_init load_state_approach)
-      !genv
-      env
-  with
-  | (env, ServerInit.Load_state_succeeded _) -> env
-  | (_env, ServerInit.Load_state_declined s) ->
-    Printf.eprintf "> DECLINED %s\n" s;
-    assert false
-  | (_env, ServerInit.Load_state_failed (s, telemetry)) ->
-    Printf.eprintf "> FAILED %s: %s\n" s (Telemetry.to_string telemetry);
-    assert false
 
 let diagnostics_to_string (x : ServerCommandTypes.diagnostic_errors) =
   let buf = Buffer.create 1024 in

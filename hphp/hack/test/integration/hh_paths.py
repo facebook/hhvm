@@ -50,15 +50,12 @@ from typing import List
 # an absolute path. We will use os.path.abspath to cover both cases.
 
 hackfmt: str = os.path.abspath(os.getenv("HACKFMT_TEST_PATH", "?"))
-hh_fanout: str = os.path.abspath(os.getenv("HH_FANOUT_PATH", "?"))
 hh_client: str = os.path.abspath(os.getenv("HH_CLIENT_PATH", "?"))
 hh_server: str = os.path.abspath(os.getenv("HH_SERVER_PATH", "?"))
 
 errors: List[str] = []
 if not os.path.exists(hackfmt):
     errors.append("Not found HACKFMT_TEST_PATH")
-if not os.path.exists(hh_fanout):
-    errors.append("Not found HH_FANOUT_PATH")
 if not os.path.exists(hh_client):
     errors.append("Not found HH_CLIENT_PATH")
 if not os.path.exists(hh_server):
@@ -67,7 +64,6 @@ if len(errors) > 0:
     errors: List[str] = [
         "CWD=" + os.getcwd(),
         "HACKFMT_TEST_PATH=" + os.getenv("HACKFMT_TEST_PATH", "?") + " => " + hackfmt,
-        "HH_FANOUT_PATH=" + os.getenv("HH_FANOUT_PATH", "?") + " => " + hh_fanout,
         "HH_SERVER_PATH=" + os.getenv("HH_SERVER_PATH", "?") + " => " + hh_server,
         "HH_CLIENT_PATH=" + os.getenv("HH_CLIENT_PATH", "?") + " => " + hh_client,
         "-------------",

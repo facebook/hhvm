@@ -13,7 +13,14 @@ open Integration_test_base_types
 module FileMap = SMap
 module ErrorSet = SSet
 
-type error_messages_per_file = ErrorSet.t FileMap.t [@@deriving eq, show]
+val in_daemon : (unit -> unit) -> unit
+
+val default_loop_input : 'a loop_inputs
+
+val setup_disk : ServerEnv.env -> disk_changes_type -> ServerEnv.env
+
+val change_files :
+  ServerEnv.env -> disk_changes_type -> ServerEnv.env * 'a loop_outputs
 
 val setup_server :
   ?custom_config:ServerConfig.t ->
@@ -21,44 +28,6 @@ val setup_server :
   ?edges_dir:string ->
   unit ->
   ServerEnv.env
-
-val setup_disk : ServerEnv.env -> disk_changes_type -> ServerEnv.env
-
-val change_files :
-  ServerEnv.env -> disk_changes_type -> ServerEnv.env * 'a loop_outputs
-
-val save_state :
-  ?load_hhi_files:bool ->
-  ?store_decls_in_saved_state:bool ->
-  ?enable_naming_table_fallback:bool ->
-  ?custom_config:ServerConfig.t ->
-  disk_changes_type ->
-  string ->
-  unit
-
-val save_state_incremental :
-  ServerEnv.env ->
-  ?store_decls_in_saved_state:bool ->
-  old_state_dir:string ->
-  string ->
-  SaveStateServiceTypes.save_state_result option
-
-val save_state_with_errors : disk_changes_type -> string -> string -> unit
-
-val load_state :
-  ?master_changes:string list ->
-  ?local_changes:string list ->
-  ?load_hhi_files:bool ->
-  ?use_precheked_files:bool ->
-  ?enable_naming_table_fallback:bool ->
-  ?custom_config:ServerConfig.t ->
-  disk_state:disk_changes_type ->
-  string (* saved_state_dir *) ->
-  ServerEnv.env
-
-val in_daemon : (unit -> unit) -> unit
-
-val default_loop_input : 'a loop_inputs
 
 val run_loop_once :
   ServerEnv.env -> 'a loop_inputs -> ServerEnv.env * 'a loop_outputs

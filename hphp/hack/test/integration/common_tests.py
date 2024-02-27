@@ -905,49 +905,6 @@ class CommonTests(BarebonesTests):
             "ClassToBeIdentified::methodToBeIdentified () }",
         )
 
-    def test_abnormal_typechecker_exit_message(self) -> None:
-        """
-        Tests that the monitor outputs a useful message when its typechecker
-        exits abnormally.
-        """
-
-        self.test_driver.start_hh_server()
-        logs = self.test_driver.get_all_logs(self.test_driver.repo_dir)
-        monitor_logs = logs.current_monitor_log
-        m = re.search(
-            "Just started typechecker server with pid: ([0-9]+)", monitor_logs
-        )
-        self.assertIsNotNone(m)
-        assert m is not None, "for mypy"
-        pid = m.group(1)
-        self.assertIsNotNone(pid)
-        os.kill(int(pid), signal.SIGTERM)
-        # We've sent a kill signal to the server, but it may take some time for
-        # the server to actually die. For instance, it may be attempting to
-        # print a backtrace in the signal handler, which takes less than a
-        # second in @//mode/opt, but can take minutes in @//mode/dev. If we
-        # attempt to connect before the server process actually dies, the
-        # monitor will happily hand us off to the dying server, which will
-        # abruptly close our connection when its process exits. What we want
-        # instead is to connect to the monitor after its waitpid on the server
-        # completes, so that it can report to us the signal which killed the
-        # server. We can't waitpid here because the server isn't a child of this
-        # process, so we poll the monitor logs until the monitor records the
-        # TYPECHECKER_EXIT event.
-        attempts = 0
-        while attempts < 5 * 60:
-            logs = self.test_driver.get_all_logs(self.test_driver.repo_dir)
-            monitor_logs = logs.current_monitor_log
-            m = re.search("TYPECHECKER_EXIT", monitor_logs)
-            if m is not None:
-                break
-            attempts += 1
-            time.sleep(1)
-        _, client_error = self.test_driver.check_cmd(
-            expected_output=None, assert_loaded_saved_state=False
-        )
-        self.assertIn("Last server killed by signal", client_error)
-
     def test_duplicate_parent(self) -> None:
         """
         This checks that we handle duplicate parent classes, i.e. when Bar

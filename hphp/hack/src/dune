@@ -226,7 +226,6 @@
  (deps
   hackfmt.exe
   hh_client.exe
-  hh_fanout/hh_fanout.exe
   hh_parse.exe
   hh_server.exe
   hh_single_decl.exe
@@ -253,7 +252,6 @@
  (deps
   hackfmt.bc.exe
   hh_client.bc.exe
-  hh_fanout/hh_fanout.bc.exe
   hh_parse.bc.exe
   hh_server.bc.exe
   hh_single_type_check.bc.exe

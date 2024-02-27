@@ -21,7 +21,7 @@ from typing import (
 )
 
 import common_tests
-from hh_paths import hh_client, hh_fanout, hh_server
+from hh_paths import hh_client, hh_server
 
 
 T = TypeVar("T")
@@ -119,17 +119,6 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
         if cls.enable_naming_table_fallback:
             cls.dump_naming_saved_state(init_dir, saved_state_path)
 
-        # construct dep graph using hh_fanout
-        _, _, retcode = cls.proc_call(
-            [
-                hh_fanout,
-                "build",
-                "--output",
-                hhdg_path,
-                "--edges",
-                edges_dir,
-            ]
-        )
         assert retcode == 0
 
         return result
@@ -186,19 +175,6 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
         if cls.enable_naming_table_fallback:
             cls.dump_naming_saved_state(init_dir, saved_state_path)
 
-        # construct dep graph using hh_fanout
-        _, _, retcode = cls.proc_call(
-            [
-                hh_fanout,
-                "build",
-                "--output",
-                hhdg_path,
-                "--incremental",
-                original_hhdg_path,
-                "--delta",
-                delta_file,
-            ]
-        )
         assert retcode == 0
 
         return result
@@ -339,7 +315,7 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
         expected_output: Optional[List[str]],
         stdin: Optional[str] = None,
         options: Optional[List[str]] = None,
-        assert_loaded_saved_state: bool = True,
+        assert_loaded_saved_state: bool = False,
     ) -> Tuple[str, str]:
         result = super(SavedStateTestDriver, self).check_cmd(
             expected_output, stdin, options

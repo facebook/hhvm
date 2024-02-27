@@ -70,6 +70,7 @@ std::optional<std::size_t> hash_value(const Value& s) {
     case Value::Type::__EMPTY__:
       return std::nullopt;
   }
+  return std::nullopt;
 }
 
 template const char* ObjectWrapper<detail::Object>::__fbthrift_thrift_uri();

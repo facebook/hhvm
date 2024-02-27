@@ -128,12 +128,12 @@ folly::void_t<decltype(std::declval<T>().toThrift())> hydrate_const(
 void hydrate_const(protocol::Value& out, const t_const_value& val) {
   typename protocol::Value::__fbthrift_cpp2_type inner;
   hydrate_const(inner, val);
-  out = protocol::Value(inner);
+  out = protocol::Value(std::move(inner));
 }
 void hydrate_const(protocol::Object& out, const t_const_value& val) {
   typename protocol::Object::__fbthrift_cpp2_type inner;
   hydrate_const(inner, val);
-  out = protocol::Object(inner);
+  out = protocol::Object(std::move(inner));
 }
 
 // Assigns a t_const_value to a Value.

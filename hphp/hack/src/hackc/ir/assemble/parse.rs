@@ -572,7 +572,7 @@ where
     Ok(None)
 }
 
-pub(crate) fn parse_param<'a>(tokenizer: &mut Tokenizer<'_>, alloc: &'a Bump) -> Result<Param<'a>> {
+pub(crate) fn parse_param(tokenizer: &mut Tokenizer<'_>) -> Result<Param> {
     parse!(tokenizer, <inout:"inout"?> <readonly:"readonly"?> <user_attributes:parse_attributes("[")> <ty:parse_type_info>);
 
     let is_variadic = tokenizer.next_is_identifier("...")?;
@@ -580,7 +580,7 @@ pub(crate) fn parse_param<'a>(tokenizer: &mut Tokenizer<'_>, alloc: &'a Bump) ->
 
     let default_value = if tokenizer.next_is_identifier("@")? {
         parse!(tokenizer, <init:parse_bid> "(" <expr:string> ")");
-        let expr = expr.unescaped_bump_str(alloc)?;
+        let expr = ir_core::intern_bytes(expr.unescaped_string()?);
         Some(DefaultValue { init, expr })
     } else {
         None

@@ -19,7 +19,6 @@ newtype = { version = "0.0.0", path = "../../../utils/newtype" }
 print = { version = "0.0.0", path = "../print" }
 
 [dev-dependencies]
-ffi = { version = "0.0.0", path = "../../../utils/ffi" }
 hash = { version = "0.0.0", path = "../../../utils/hash" }
 rand = { version = "0.8", features = ["small_rng"] }
 testutils = { version = "0.0.0", path = "../testutils" }

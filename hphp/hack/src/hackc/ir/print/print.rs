@@ -1901,7 +1901,7 @@ pub(crate) fn print_param(
     w: &mut dyn Write,
     strings: &StringInterner,
     func: &Func<'_>,
-    param: &Param<'_>,
+    param: &Param,
 ) -> Result {
     let Param {
         is_inout,
@@ -1942,7 +1942,7 @@ pub(crate) fn print_param(
             w,
             " @ {} ({})",
             FmtBid(func, dv.init, false),
-            FmtQuotedStr(&dv.expr)
+            FmtQuotedStr(&Str::new(dv.expr.as_bytes()))
         )?;
     }
     Ok(())

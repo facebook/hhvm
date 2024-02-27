@@ -171,8 +171,6 @@ impl<'a, 'b> FunctionParser<'a, 'b> {
         unit_state: &mut crate::assemble::UnitParser<'a>,
         mut class_state: Option<&'b mut ClassState>,
     ) -> Result<Function<'a>> {
-        let alloc = unit_state.alloc;
-
         parse!(tokenizer, <name:parse_func_id>);
 
         let tparams = if tokenizer.next_is_identifier("<")? {
@@ -198,7 +196,7 @@ impl<'a, 'b> FunctionParser<'a, 'b> {
             Default::default()
         };
 
-        parse!(tokenizer, "(" <params:parse_param(alloc),*> ")" <shadowed_tparams:parse_shadowed_tparams> ":" <return_type:parse_type_info>);
+        parse!(tokenizer, "(" <params:parse_param(),*> ")" <shadowed_tparams:parse_shadowed_tparams> ":" <return_type:parse_type_info>);
         let attrs = parse_attr(tokenizer)?;
 
         if let Some(class_state) = &mut class_state {

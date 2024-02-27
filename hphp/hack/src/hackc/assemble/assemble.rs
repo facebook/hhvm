@@ -1419,7 +1419,7 @@ fn assemble_param<'arena>(
     let name = token_iter.expect_with(Token::into_variable)?;
     let name = Str::new_slice(alloc, name);
     decl_map.insert(name, decl_map.len() as u32);
-    let default_value = assemble_default_value(alloc, token_iter)?;
+    let default_value = assemble_default_value(token_iter)?;
     Ok(hhbc::Param {
         name,
         is_variadic,
@@ -1433,14 +1433,12 @@ fn assemble_param<'arena>(
 
 /// Ex: $skip_top_libcore = DV13("""true""")
 /// Parsing after the variable name
-fn assemble_default_value<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<Maybe<hhbc::DefaultValue<'arena>>> {
+fn assemble_default_value(token_iter: &mut Lexer<'_>) -> Result<Maybe<hhbc::DefaultValue>> {
     let tr = if token_iter.next_is(Token::is_equal) {
         let label = assemble_label(token_iter)?;
         token_iter.expect(Token::is_open_paren)?;
-        let expr = assemble_unescaped_unquoted_triple_str(token_iter, alloc)?;
+        let expr = assemble_unescaped_unquoted_triple_vec(token_iter)?;
+        let expr = hhbc::intern_bytes(expr.as_slice());
         token_iter.expect(Token::is_close_paren)?;
         Maybe::Just(hhbc::DefaultValue { label, expr })
     } else {
@@ -1887,14 +1885,6 @@ pub(crate) fn assemble_unescaped_unquoted_str<'arena>(
     let st = escaper::unescape_literal_bytes_into_vec_bytes(
         token_iter.expect_with(Token::into_unquoted_str_literal)?,
     )?;
-    Ok(Str::new_slice(alloc, &st))
-}
-
-fn assemble_unescaped_unquoted_triple_str<'arena>(
-    token_iter: &mut Lexer<'_>,
-    alloc: &'arena Bump,
-) -> Result<Str<'arena>> {
-    let st = assemble_unescaped_unquoted_triple_vec(token_iter)?;
     Ok(Str::new_slice(alloc, &st))
 }
 

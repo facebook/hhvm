@@ -224,7 +224,7 @@ fn convert_body<'a>(
     func
 }
 
-fn convert_param<'a, 'b>(ctx: &mut Context<'a, 'b>, param: &Param<'a>) -> ir::Param<'a> {
+fn convert_param(ctx: &mut Context<'_, '_>, param: &Param<'_>) -> ir::Param {
     let default_value = match &param.default_value {
         Maybe::Just(dv) => {
             let init = ctx.target_from_label(dv.label, 0);

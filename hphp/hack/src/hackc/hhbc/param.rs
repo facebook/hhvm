@@ -10,6 +10,7 @@ use ffi::Vector;
 use serde::Serialize;
 
 use crate::Attribute;
+use crate::BytesId;
 use crate::Constraint;
 use crate::Label;
 use crate::TypeInfo;
@@ -23,14 +24,14 @@ pub struct Param<'arena> {
     pub is_readonly: bool,
     pub user_attributes: Vector<Attribute>,
     pub type_info: Maybe<TypeInfo>,
-    pub default_value: Maybe<DefaultValue<'arena>>,
+    pub default_value: Maybe<DefaultValue>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
-pub struct DefaultValue<'arena> {
+pub struct DefaultValue {
     pub label: Label,
-    pub expr: Str<'arena>,
+    pub expr: BytesId,
 }
 
 impl<'arena> Param<'arena> {

@@ -398,8 +398,8 @@ pub fn make_body<'a, 'arena, 'decl>(
                 let expr_env = body_env.as_ref();
                 let mut buf = Vec::new();
                 let expr = print_expr::print_expr(&ctx, &mut buf, &expr_env, expr).map_or_else(
-                    |e| Str::new_str(alloc, &e.to_string()),
-                    |_| Str::from_vec(alloc, buf),
+                    |e| hhbc::intern_bytes(e.to_string().as_bytes()),
+                    |_| hhbc::intern_bytes(buf.as_ref()),
                 );
                 hhbc::DefaultValue {
                     label: *label,

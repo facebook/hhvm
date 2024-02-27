@@ -1455,8 +1455,8 @@ fn cmp_module(
 }
 
 fn cmp_param(
-    (a, a_strings): (&Param<'_>, &StringInterner),
-    (b, b_strings): (&Param<'_>, &StringInterner),
+    (a, a_strings): (&Param, &StringInterner),
+    (b, b_strings): (&Param, &StringInterner),
 ) -> Result {
     let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
 
@@ -1500,7 +1500,7 @@ fn cmp_param(
     Ok(())
 }
 
-fn cmp_default_value(a: &DefaultValue<'_>, b: &DefaultValue<'_>) -> Result {
+fn cmp_default_value(a: &DefaultValue, b: &DefaultValue) -> Result {
     let DefaultValue {
         init: a_init,
         expr: a_expr,

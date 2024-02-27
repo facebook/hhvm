@@ -168,7 +168,7 @@ mod test {
     use ir_core::StringInterner;
     use ir_core::TypeInfo;
 
-    fn mk_param<'a>(name: &str, dv: BlockId, strings: &StringInterner) -> Param<'a> {
+    fn mk_param(name: &str, dv: BlockId, strings: &StringInterner) -> Param {
         Param {
             name: strings.intern_str(name),
             is_variadic: false,
@@ -178,7 +178,7 @@ mod test {
             ty: TypeInfo::default(),
             default_value: Some(DefaultValue {
                 init: dv,
-                expr: ffi::Str::new(b"1"),
+                expr: ir_core::intern_bytes(b"1".as_ref()),
             }),
         }
     }

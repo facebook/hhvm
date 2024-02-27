@@ -5,7 +5,6 @@
 
 use std::ops::Deref;
 
-use ffi::Str;
 use newtype::newtype_int;
 use newtype::IdVec;
 
@@ -16,6 +15,7 @@ use crate::Attribute;
 use crate::Block;
 use crate::BlockId;
 use crate::BlockIdMap;
+use crate::BytesId;
 use crate::ClassId;
 use crate::ClassIdMap;
 use crate::Coeffects;
@@ -92,7 +92,7 @@ impl SrcLoc {
 
 /// Func parameters.
 #[derive(Clone, Debug)]
-pub struct Param<'a> {
+pub struct Param {
     pub name: UnitBytesId,
     pub is_variadic: bool,
     pub is_inout: bool,
@@ -107,16 +107,16 @@ pub struct Param<'a> {
     ///   function myfn(int $a = 2 + 3)
     ///
     /// The block will initialize `$a` to 5 and the string will be "2 + 3".
-    pub default_value: Option<DefaultValue<'a>>,
+    pub default_value: Option<DefaultValue>,
 }
 
 #[derive(Clone, Copy, Debug)]
-pub struct DefaultValue<'a> {
+pub struct DefaultValue {
     /// What block to jump to to initialize this default value
     pub init: BlockId,
 
     /// Source text for the default value initializer expression (for reflection).
-    pub expr: Str<'a>,
+    pub expr: BytesId,
 }
 
 newtype_int!(ExFrameId, u32, ExFrameIdMap, ExFrameIdSet);
@@ -219,7 +219,7 @@ pub struct Func<'a> {
     pub constants: IdVec<ConstantId, Constant<'a>>,
     pub locs: IdVec<LocId, SrcLoc>,
     pub num_iters: usize,
-    pub params: Vec<Param<'a>>,
+    pub params: Vec<Param>,
     pub return_type: TypeInfo,
     /// shadowed_tparams are the set of tparams on a method which shadow a
     /// tparam on the containing class.
@@ -345,7 +345,7 @@ impl<'a> Func<'a> {
         self.instrs.get_mut(iid)
     }
 
-    pub fn get_param_by_lid(&self, lid: LocalId) -> Option<&Param<'_>> {
+    pub fn get_param_by_lid(&self, lid: LocalId) -> Option<&Param> {
         match lid {
             LocalId::Named(name) => self.params.iter().find(|p| p.name == name),
             LocalId::Unnamed(_) => None,

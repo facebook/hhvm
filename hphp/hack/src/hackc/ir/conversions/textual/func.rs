@@ -155,7 +155,7 @@ fn compute_func_ty<'a>(
 }
 
 fn compute_func_params<'a, 'b>(
-    params: &Vec<ir::Param<'_>>,
+    params: &Vec<ir::Param>,
     unit_state: &'a mut UnitState,
     this_ty: textual::Ty,
 ) -> Vec<(textual::Param<'b>, LocalId)> {

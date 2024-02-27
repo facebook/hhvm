@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-package rocket
+package thrift
 
 import (
-	rsocket "github.com/rsocket/rsocket-go"
-	"github.com/rsocket/rsocket-go/core/transport"
-	"github.com/rsocket/rsocket-go/payload"
-	"github.com/rsocket/rsocket-go/rx"
-	"github.com/rsocket/rsocket-go/rx/mono"
+	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
-var _ rsocket.Client = nil
-var _ transport.AddrConn = nil
-var _ payload.Payload = nil
-var _ rx.Publisher = nil
-var _ mono.Mono = nil
+func TestRequestRPCMetadata(t *testing.T) {
+	want := &ThriftRequestRPCMetadata{
+		Name:    "test123",
+		TypeID:  CALL,
+		ProtoID: ProtocolIDCompact,
+		Zstd:    true,
+	}
+	data, err := SerializeRequestRPCMetadata(want)
+	require.NoError(t, err)
+	got, err := DeserializeRequestRPCMetadata(data)
+	require.NoError(t, err)
+	require.Equal(t, want, got)
+}

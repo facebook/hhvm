@@ -30,8 +30,8 @@ from thrift.compiler.test import fixture_utils
 FIXTURE_ROOT = "."
 
 
-thrift = fixture_utils.get_thrift_binary_path(thrift_bin_arg=None)
-assert thrift
+_THRIFT_BIN_PATH = fixture_utils.get_thrift_binary_path(thrift_bin_arg=None)
+assert _THRIFT_BIN_PATH
 fixtures_root_dir = os.path.join(FIXTURE_ROOT, "thrift/compiler/test/fixtures")
 
 
@@ -162,7 +162,7 @@ class FixtureTest(unittest.TestCase):
 
             # Generate arguments to run binary
             args = [
-                thrift,
+                _THRIFT_BIN_PATH,
                 "-r",
                 "-I",
                 self.tmp,

@@ -23,6 +23,7 @@ import shutil
 import subprocess
 import sys
 import typing
+from pathlib import Path
 
 import pkg_resources
 
@@ -113,7 +114,7 @@ def _add_processes_for_fixture(
     fixture_name: str,
     fixture_root: str,
     fixture_dir: str,
-    thrift_bin: str,
+    thrift_bin_path: Path,
     subprocess_semaphore,
     processes: list,
 ) -> None:
@@ -132,7 +133,7 @@ def _add_processes_for_fixture(
         shutil.rmtree(os.path.join(fixture_src, existing_fixture_filename))
 
     for fixture_cmd in fixture_utils.parse_fixture_cmds(
-        fixture_root, fixture_name, fixture_src, thrift_bin
+        fixture_root, fixture_name, fixture_src, thrift_bin_path
     ):
         processes.append(
             run_subprocess(
@@ -144,10 +145,10 @@ def _add_processes_for_fixture(
 async def main() -> int:
     args = parsed_args()
 
-    thrift_bin: typing.Optional[str] = fixture_utils.get_thrift_binary_path(
+    thrift_bin_path: typing.Optional[Path] = fixture_utils.get_thrift_binary_path(
         args.thrift_bin
     )
-    if thrift_bin is None:
+    if thrift_bin_path is None:
         sys.stderr.write(
             "error: cannot find the Thrift compiler ({})\n".format(args.thrift_bin)
         )
@@ -188,7 +189,7 @@ async def main() -> int:
             fixture_name,
             fixture_root,
             fixture_dir,
-            thrift_bin,
+            thrift_bin_path,
             subprocess_semaphore,
             processes,
         )

@@ -19,6 +19,7 @@ import shlex
 import sys
 import typing
 from dataclasses import dataclass
+from pathlib import Path
 
 import pkg_resources
 
@@ -29,23 +30,24 @@ class FixtureCmd:
     build_command_args: typing.List[str]
 
 
-def _ascend_find_exe(path: str, target: str) -> typing.Optional[str]:
+def _ascend_find_exe(path: Path, target: str) -> typing.Optional[Path]:
     """
     Returns path to an executable file with the `target` name, in `path` or
     any of its parent directories.
 
     If no such executable is found, returns None.
     """
-    if not os.path.isdir(path):
-        path = os.path.dirname(path)
+    if not path.is_dir():
+        path = path.parent
     while True:
-        test = os.path.join(path, target)
-        if os.access(test, os.X_OK):
-            return test
-        parent = os.path.dirname(path)
-        if os.path.samefile(parent, path):
+        candidate_path = path / target
+        if os.access(candidate_path, os.X_OK):
+            return candidate_path
+
+        parent_path = path.parent
+        if parent_path.samefile(path):
             return None
-        path = parent
+        path = parent_path
 
 
 def read_lines(path: str) -> list[str]:
@@ -96,7 +98,7 @@ def _should_build_included_files_recursively(generator_spec: str) -> bool:
 
 
 def parse_fixture_cmds(
-    fixture_root: str, fixture_name: str, fixture_src: str, thrift_bin: str
+    fixture_root: str, fixture_name: str, fixture_src: str, thrift_bin_path: Path
 ) -> list[FixtureCmd]:
     fixture_cmds = {}
 
@@ -104,7 +106,7 @@ def parse_fixture_cmds(
 
     for cmd in cmds:
         fixture_cmd = _parse_fixture_cmd(
-            cmd, fixture_root, fixture_name, fixture_src, thrift_bin
+            cmd, fixture_root, fixture_name, fixture_src, thrift_bin_path
         )
         if fixture_cmd is None:
             continue
@@ -126,7 +128,11 @@ _FIXTURE_CMD_NAME_PREFIX_PATTERN = re.compile(r"^([a-z][a-z0-9_]*):$")
 
 
 def _parse_fixture_cmd(
-    cmd: str, fixture_root: str, fixture_name: str, fixture_src: str, thrift_bin: str
+    cmd: str,
+    fixture_root: str,
+    fixture_name: str,
+    fixture_src: str,
+    thrift_bin_path: Path,
 ) -> typing.Optional[FixtureCmd]:
     """
     Parses the given line from a `cmd` file and returns the command arguments
@@ -178,7 +184,7 @@ def _parse_fixture_cmd(
         )
 
         base_args = [
-            thrift_bin,
+            thrift_bin_path,
             "-I",
             os.path.abspath(fixture_src),
             "-I",
@@ -213,7 +219,7 @@ def _parse_fixture_cmd(
 
 def get_thrift_binary_path(
     thrift_bin_arg: typing.Optional[str],
-) -> typing.Optional[str]:
+) -> typing.Optional[Path]:
     """
     Returns path to the Thrift compiler binary, or None if not be found.
 
@@ -224,7 +230,6 @@ def get_thrift_binary_path(
           its parents.
     """
     if thrift_bin_arg is None:
-        return pkg_resources.resource_filename(__name__, "thrift")
+        return Path(pkg_resources.resource_filename(__name__, "thrift"))
 
-    exe: str = os.path.join(os.getcwd(), sys.argv[0])
-    return _ascend_find_exe(exe, thrift_bin_arg)
+    return _ascend_find_exe(Path.cwd(), thrift_bin_arg)

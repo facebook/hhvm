@@ -4,7 +4,7 @@ hack: hack:json,server=1,shapes=1,shapes_allow_unknown_fields=1 src/terse_write.
 java_deprecated: java_deprecated src/terse_write.thrift
 json: json src/terse_write.thrift
 json_experimental: json_experimental src/terse_write.thrift
-cpp2: mstch_cpp2:deprecated_terse_writes src/deprecated_terse_write.thrift
+cpp2_deprecated_terse_writ: mstch_cpp2:deprecated_terse_writes src/deprecated_terse_write.thrift
 go: mstch_go src/terse_write.thrift
 cpp2: mstch_cpp2 src/terse_write.thrift
 py3: mstch_py3 src/terse_write.thrift

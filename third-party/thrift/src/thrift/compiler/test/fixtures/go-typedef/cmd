@@ -1,6 +1,6 @@
-go_deprecated: go src/module0.thrift
-go_deprecated: go src/module1.thrift
-go_deprecated: go src/module2.thrift
-go: mstch_go src/module0.thrift
-go: mstch_go src/module1.thrift
-go: mstch_go src/module2.thrift
+go_deprecated_module0: go src/module0.thrift
+go_deprecated_module1: go src/module1.thrift
+go_deprecated_module2: go src/module2.thrift
+go_module0: mstch_go src/module0.thrift
+go_module1: mstch_go src/module1.thrift
+go_module2: mstch_go src/module2.thrift

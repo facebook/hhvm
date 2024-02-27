@@ -1,2 +1,2 @@
-json_experimental: json_experimental src/ThriftdocTest.thrift
-json_experimental: json_experimental src/DemoWidgetDocs.thrift
+json_experimental_thriftdoc_test: json_experimental src/ThriftdocTest.thrift
+json_experimental_demo_widget_docs: json_experimental src/DemoWidgetDocs.thrift

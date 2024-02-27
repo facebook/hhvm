@@ -1,9 +1,9 @@
 py: py src/module.thrift
 py3: mstch_py3 src/module.thrift
-py3: mstch_py3 src/extend.thrift
+py3_extend: mstch_py3 src/extend.thrift
 python: mstch_python:root_module_prefix=python_module_root src/module.thrift
-python: mstch_python:root_module_prefix=python_module_root src/extend.thrift
-python: mstch_python:root_module_prefix=python_module_root src/hsmodule.thrift
-py3: mstch_py3 src/emptyns.thrift
-python: mstch_python src/emptyns.thrift
-python_capi: mstch_python_capi src/emptyns.thrift
+python_extend: mstch_python:root_module_prefix=python_module_root src/extend.thrift
+python_hsmodule: mstch_python:root_module_prefix=python_module_root src/hsmodule.thrift
+py3_emptyns: mstch_py3 src/emptyns.thrift
+python_emptyns: mstch_python src/emptyns.thrift
+python_capi_emptyns: mstch_python_capi src/emptyns.thrift

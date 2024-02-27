@@ -1,6 +1,6 @@
 cpp2: mstch_cpp2 src/module.thrift
-cpp2: mstch_cpp2 src/serialized_dep.thrift
+cpp2_serialized_dep: mstch_cpp2 src/serialized_dep.thrift
 python: mstch_python src/module.thrift
-python: mstch_python src/serialized_dep.thrift
+python_serialized_dep: mstch_python src/serialized_dep.thrift
 python_capi: mstch_python_capi:marshal_python_capi=1 src/module.thrift
-python_capi: mstch_python_capi src/serialized_dep.thrift
+python_capi_serialized_dep: mstch_python_capi src/serialized_dep.thrift

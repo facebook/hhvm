@@ -1,7 +1,7 @@
 cpp2: mstch_cpp2:py3cpp src/module.thrift
-cpp2: mstch_cpp2:py3cpp src/empty.thrift
+cpp2_empty: mstch_cpp2:py3cpp src/empty.thrift
 py3: mstch_py3:py3cpp,intercompatible src/module.thrift
-py3: mstch_py3:py3cpp src/empty.thrift
-python: mstch_python src/empty.thrift
+py3_empty: mstch_py3:py3cpp src/empty.thrift
+python_empty: mstch_python src/empty.thrift
 python_capi: mstch_python_capi src/empty.thrift
 python: mstch_python:base_library_package=fbcode.thrift.python,import_static src/module.thrift

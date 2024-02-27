@@ -18,8 +18,15 @@ import re
 import shlex
 import sys
 import typing
+from dataclasses import dataclass
 
 import pkg_resources
+
+
+@dataclass
+class FixtureCmd:
+    unique_name: str
+    build_command_args: typing.List[str]
 
 
 def _ascend_find_exe(path: str, target: str) -> typing.Optional[str]:
@@ -88,9 +95,39 @@ def _should_build_included_files_recursively(generator_spec: str) -> bool:
     )
 
 
-def parse_cmd(
+def parse_fixture_cmds(
+    fixture_root: str, fixture_name: str, fixture_src: str, thrift_bin: str
+) -> list[FixtureCmd]:
+    fixture_cmds = {}
+
+    cmds = read_lines(os.path.join(fixture_src, "cmd"))
+
+    for cmd in cmds:
+        fixture_cmd = _parse_fixture_cmd(
+            cmd, fixture_root, fixture_name, fixture_src, thrift_bin
+        )
+        if fixture_cmd is None:
+            continue
+
+        if fixture_cmd.unique_name in fixture_cmds:
+            raise ValueError(
+                f"Duplicate cmd name for fixture '{fixture_name}': '{fixture_cmd.unique_name}'."
+            )
+
+        fixture_cmds[fixture_cmd.unique_name] = fixture_cmd
+
+    return list(fixture_cmds.values())
+
+
+# A letter followed by 0 or more letters, digits or underscores, ending with
+# a colon. All lowercase. The part preceding the colon is meant to be the
+# unique (within a fixture) name for this cmd line. It is captured in group 1.
+_FIXTURE_CMD_NAME_PREFIX_PATTERN = re.compile(r"^([a-z][a-z0-9_]*):$")
+
+
+def _parse_fixture_cmd(
     cmd: str, fixture_root: str, fixture_name: str, fixture_src: str, thrift_bin: str
-) -> typing.Optional[list[str]]:
+) -> typing.Optional[FixtureCmd]:
     """
     Parses the given line from a `cmd` file and returns the command arguments
     to run (or None if n/a).
@@ -125,8 +162,14 @@ def parse_cmd(
         return None
 
     try:
-        (unique_name, generator_spec, target_filename) = shlex.split(cmd.strip())
-        assert re.match(r"^\w+:", unique_name)
+        (cmd_name_prefix, generator_spec, target_filename) = shlex.split(cmd.strip())
+
+        cmd_name_matcher = _FIXTURE_CMD_NAME_PREFIX_PATTERN.match(cmd_name_prefix)
+        if not cmd_name_matcher:
+            raise RuntimeError(
+                f"Invalid cmd name (must match regex '{_FIXTURE_CMD_NAME_PREFIX_PATTERN.pattern}'): '{cmd_name_prefix}'."
+            )
+        cmd_name = cmd_name_matcher.group(1)
 
         # Relative path from --fixture_root to target file, eg:
         # 'thrift/compiler/test/fixtures/adapter/src/module.thrift'
@@ -158,10 +201,13 @@ def parse_cmd(
                 os.path.join("thrift/compiler/test/fixtures", fixture_name),
             )
 
-        return base_args + [generator_spec, target_filename]
+        return FixtureCmd(
+            unique_name=cmd_name,
+            build_command_args=base_args + [generator_spec, target_filename],
+        )
     except Exception as err:
         raise RuntimeError(
-            f"Error parsing command for fixture '{fixture_name}': {cmd}"
+            f"Error parsing command for fixture '{fixture_name}': '{cmd}'."
         ) from err
 
 

@@ -9,5 +9,5 @@ py3: mstch_py3 src/module.thrift
 py: py src/module.thrift
 python: mstch_python src/module.thrift
 python_capi: mstch_python_capi src/module.thrift
-python: mstch_python src/foo.thrift
-python_capi: mstch_python_capi src/foo.thrift
+python_foo: mstch_python src/foo.thrift
+python_capi_foo: mstch_python_capi src/foo.thrift

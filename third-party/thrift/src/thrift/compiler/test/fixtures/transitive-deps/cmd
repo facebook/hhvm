@@ -1,8 +1,8 @@
-py3: mstch_py3 src/a.thrift
-py3: mstch_py3 src/s.thrift
-python: mstch_python src/s.thrift
-python_capi: mstch_python_capi src/s.thrift
-python: mstch_python src/b.thrift
-python_capi: mstch_python_capi src/b.thrift
-python: mstch_python src/c.thrift
-python_capi: mstch_python_capi src/c.thrift
+py3_a: mstch_py3 src/a.thrift
+py3_s: mstch_py3 src/s.thrift
+python_s: mstch_python src/s.thrift
+python_capi_s: mstch_python_capi src/s.thrift
+python_b: mstch_python src/b.thrift
+python_capi_b: mstch_python_capi src/b.thrift
+python_c: mstch_python src/c.thrift
+python_capi_c: mstch_python_capi src/c.thrift

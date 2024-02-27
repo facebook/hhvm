@@ -1,4 +1,4 @@
 cpp2: mstch_cpp2:single_file_service src/module.thrift
-cpp2: mstch_cpp2:single_file_service src/module_structs.thrift
+cpp2_module_structs: mstch_cpp2:single_file_service src/module_structs.thrift
 py3: mstch_py3:single_file_service src/module.thrift
-py3: mstch_py3:single_file_service src/module_structs.thrift
+py3_module_structs: mstch_py3:single_file_service src/module_structs.thrift

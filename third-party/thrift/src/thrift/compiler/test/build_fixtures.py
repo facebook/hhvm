@@ -131,17 +131,14 @@ def _add_processes_for_fixture(
             continue
         shutil.rmtree(os.path.join(fixture_src, existing_fixture_filename))
 
-    # Read commands from "cmd" file. See `_parse_cmd()` for the expected format.
-    cmds = fixture_utils.read_lines(os.path.join(fixture_src, "cmd"))
-
-    for cmd in cmds:
-        xargs = fixture_utils.parse_cmd(
-            cmd, fixture_root, fixture_name, fixture_src, thrift_bin
+    for fixture_cmd in fixture_utils.parse_fixture_cmds(
+        fixture_root, fixture_name, fixture_src, thrift_bin
+    ):
+        processes.append(
+            run_subprocess(
+                subprocess_semaphore, fixture_cmd.build_command_args, cwd=fixture_root
+            )
         )
-        if not xargs:
-            continue
-
-        processes.append(run_subprocess(subprocess_semaphore, xargs, cwd=fixture_root))
 
 
 async def main() -> int:

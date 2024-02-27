@@ -75,6 +75,9 @@ class codegen_data {
 
   bool is_current_program(const t_program* program);
 
+  std::string_view maybe_munge_ident_and_cache(
+      const t_named* named, bool exported = true, bool compact = true);
+
   std::string get_go_package_alias(const t_program* program);
   std::string go_package_alias_prefix(const t_program* program);
 
@@ -98,6 +101,28 @@ class codegen_data {
       {"metadata", 0},
       {"maps", 0},
   };
+
+  struct go_munged_names_cache_key_ {
+    using self = go_munged_names_cache_key_;
+
+    std::string_view named{};
+    bool exported{};
+    bool compact{};
+
+    auto as_tuple() const noexcept {
+      return std::tuple{named, exported, compact};
+    }
+
+    friend bool operator<(self const& a, self const& b) noexcept {
+      return a.as_tuple() < b.as_tuple();
+    }
+  };
+  struct go_munged_names_cache_entry_ {
+    std::string_view view;
+    std::string ownership;
+  };
+  std::map<go_munged_names_cache_key_, go_munged_names_cache_entry_>
+      go_munged_names_cache_;
 };
 
 // Name of the field of the response helper struct where

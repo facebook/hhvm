@@ -245,6 +245,24 @@ bool codegen_data::is_current_program(const t_program* program) {
   return (program == current_program_);
 }
 
+std::string_view codegen_data::maybe_munge_ident_and_cache(
+    const t_named* named, bool exported, bool compact) {
+  assert(named);
+
+  if (auto name = get_go_name_annotation(named)) {
+    return *name;
+  }
+
+  go_munged_names_cache_key_ key{named->name(), exported, compact};
+  auto& item = go_munged_names_cache_[key];
+  if (item.view.data() != nullptr) {
+    return item.view;
+  }
+
+  return item.view = item.ownership =
+             munge_ident(named->name(), exported, compact);
+}
+
 std::string codegen_data::get_go_package_alias(const t_program* program) {
   if (is_current_program(program)) {
     return "";

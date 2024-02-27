@@ -631,16 +631,21 @@ class mstch_go_function : public mstch_function {
   }
 
   std::string get_unique_name(std::string const& name) {
-    std::set<std::string> arg_names;
     auto& members = function_->params().get_members();
-    for (auto& member : members) {
-      arg_names.insert(go::munge_ident(member->name(), /*exported*/ false));
+
+    std::vector<std::string_view> arg_names;
+    arg_names.reserve(members.size());
+    for (auto member : members) {
+      arg_names.push_back(
+          data_.maybe_munge_ident_and_cache(member, /* exported */ false));
     }
 
     std::string unique_name = name;
     auto current_num = 0;
-    while (arg_names.count(unique_name) > 0) {
-      unique_name = std::string(name) + std::to_string(++current_num);
+    while ( //
+        std::find(arg_names.begin(), arg_names.end(), unique_name) !=
+        arg_names.end()) {
+      unique_name = name + std::to_string(++current_num);
     }
     return unique_name;
   }

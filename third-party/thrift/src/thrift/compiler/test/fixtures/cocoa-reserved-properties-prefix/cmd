@@ -1,1 +1,1 @@
-cocoa src/module.thrift
+cocoa: cocoa src/module.thrift

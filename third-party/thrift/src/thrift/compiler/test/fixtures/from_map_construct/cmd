@@ -1,1 +1,1 @@
-hack:frommap_construct=1,server=1 src/module.thrift
+hack: hack:frommap_construct=1,server=1 src/module.thrift

@@ -1,1 +1,1 @@
-mstch_java:separate_data_type_from_services src/module.thrift
+java: mstch_java:separate_data_type_from_services src/module.thrift

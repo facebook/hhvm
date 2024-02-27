@@ -1,2 +1,2 @@
-mstch_cpp2 src/simple.thrift
-mstch_cpp2:deprecated_terse_writes src/deprecated_terse_writes.thrift
+cpp2: mstch_cpp2 src/simple.thrift
+cpp2: mstch_cpp2:deprecated_terse_writes src/deprecated_terse_writes.thrift

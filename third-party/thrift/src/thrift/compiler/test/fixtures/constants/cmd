@@ -1,16 +1,16 @@
-android src/module.thrift
-py src/module.thrift
-php:lazy_constants=1 src/module.thrift
-hack:typedef,lazy_constants=1 src/module.thrift
-go src/module.thrift
-mstch_cpp2 src/module.thrift
-mstch_go src/module.thrift
-mstch_rust src/module.thrift
-mstch_java src/module.thrift
-mstch_pyi src/module.thrift
-mstch_py3 src/module.thrift
-mstch_swift src/module.thrift
-json src/module.thrift
-mstch_python src/module.thrift
-mstch_python_capi src/module.thrift
-starlark src/module.thrift
+android: android src/module.thrift
+py: py src/module.thrift
+php: php:lazy_constants=1 src/module.thrift
+hack: hack:typedef,lazy_constants=1 src/module.thrift
+go_deprecated: go src/module.thrift
+cpp2: mstch_cpp2 src/module.thrift
+go: mstch_go src/module.thrift
+rust: mstch_rust src/module.thrift
+java: mstch_java src/module.thrift
+pyi: mstch_pyi src/module.thrift
+py3: mstch_py3 src/module.thrift
+swift: mstch_swift src/module.thrift
+json: json src/module.thrift
+python: mstch_python src/module.thrift
+python_capi: mstch_python_capi src/module.thrift
+starlark: starlark src/module.thrift

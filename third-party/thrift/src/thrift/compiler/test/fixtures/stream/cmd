@@ -1,10 +1,10 @@
-mstch_cpp2 src/module.thrift
-mstch_py3 src/module.thrift
-mstch_python src/module.thrift
-mstch_python_capi src/module.thrift
-hack src/module.thrift
-mstch_java src/module.thrift
-mstch_pyi src/module.thrift
-mstch_rust src/module.thrift
-py:json src/module.thrift
-json_experimental src/module.thrift
+cpp2: mstch_cpp2 src/module.thrift
+py3: mstch_py3 src/module.thrift
+python: mstch_python src/module.thrift
+python_capi: mstch_python_capi src/module.thrift
+hack: hack src/module.thrift
+java: mstch_java src/module.thrift
+pyi: mstch_pyi src/module.thrift
+rust: mstch_rust src/module.thrift
+py: py:json src/module.thrift
+json_experimental: json_experimental src/module.thrift

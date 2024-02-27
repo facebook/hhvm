@@ -1,1 +1,1 @@
-mstch_rust:include_srcs=impl_my_things.rs:my/other/thing.rs src/module.thrift
+rust: mstch_rust:include_srcs=impl_my_things.rs:my/other/thing.rs src/module.thrift

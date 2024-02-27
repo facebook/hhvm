@@ -1,1 +1,1 @@
-py:sort_keys src/module.thrift
+py: py:sort_keys src/module.thrift

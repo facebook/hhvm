@@ -1,11 +1,11 @@
-android src/module.thrift
-go src/module.thrift
-hack:json,shapes=1 src/module.thrift
-json src/module.thrift
-mstch_cpp2 src/module.thrift
-mstch_go src/module.thrift
-mstch_pyi:json src/module.thrift
-mstch_py3 src/module.thrift
-mstch_rust src/module.thrift
-mstch_java src/module.thrift
-py:json src/module.thrift
+android: android src/module.thrift
+go_deprecated: go src/module.thrift
+hack: hack:json,shapes=1 src/module.thrift
+json: json src/module.thrift
+cpp2: mstch_cpp2 src/module.thrift
+go: mstch_go src/module.thrift
+pyi: mstch_pyi:json src/module.thrift
+py3: mstch_py3 src/module.thrift
+rust: mstch_rust src/module.thrift
+java: mstch_java src/module.thrift
+py: py:json src/module.thrift

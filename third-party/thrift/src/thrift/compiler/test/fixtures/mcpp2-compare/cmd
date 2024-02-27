@@ -1,6 +1,6 @@
-mstch_cpp2:json,deprecated_terse_writes src/module.thrift
-mstch_cpp2:json src/includes.thrift
-mstch_cpp2:json,reflection src/enums.thrift
-mstch_cpp2:json,reflection src/reflection.thrift
-mstch_cpp2:json,reflection,stack_arguments src/extra_services.thrift
-mstch_py3 src/module.thrift
+cpp2: mstch_cpp2:json,deprecated_terse_writes src/module.thrift
+cpp2: mstch_cpp2:json src/includes.thrift
+cpp2: mstch_cpp2:json,reflection src/enums.thrift
+cpp2: mstch_cpp2:json,reflection src/reflection.thrift
+cpp2: mstch_cpp2:json,reflection,stack_arguments src/extra_services.thrift
+py3: mstch_py3 src/module.thrift

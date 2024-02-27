@@ -1,1 +1,1 @@
-py:json src/test.thrift
+py: py:json src/test.thrift

@@ -1,1 +1,1 @@
-hack:mangledsvcs=1 src/module.thrift
+hack: hack:mangledsvcs=1 src/module.thrift

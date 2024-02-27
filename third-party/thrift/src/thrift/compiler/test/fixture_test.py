@@ -136,10 +136,18 @@ class FixtureTest(unittest.TestCase):
             if cmd[0] == "#":
                 continue
 
-            args = shlex.split(cmd.strip())
-            args[1] = os.path.relpath(os.path.join(fixture_dir, args[1]), FIXTURE_ROOT)
+            (unique_name, generator_spec, target_filename) = shlex.split(cmd.strip())
+            assert re.match(r"^\w+:", unique_name)
+
+            target_filename = os.path.relpath(
+                os.path.join(fixture_dir, target_filename), FIXTURE_ROOT
+            )
             # Get cmd language
-            lang = args[0].rsplit(":", 1)[0] if ":" in args[0] else args[0]
+            lang = (
+                generator_spec.rsplit(":", 1)[0]
+                if ":" in generator_spec
+                else generator_spec
+            )
 
             # Add to list of generated languages
             languages.add(lang)
@@ -149,8 +157,8 @@ class FixtureTest(unittest.TestCase):
                 # Don't use os.path.join to avoid system-specific path separators.
                 path = "thrift/compiler/test/fixtures/" + name
                 extra = "include_prefix=" + path
-                join = "," if ":" in args[0] else ":"
-                args[0] = args[0] + join + extra
+                join = "," if ":" in generator_spec else ":"
+                generator_spec = generator_spec + join + extra
 
             # Generate arguments to run binary
             args = [
@@ -161,8 +169,8 @@ class FixtureTest(unittest.TestCase):
                 "-o",
                 os.path.join(self.tmp, fixture_dir),
                 "--gen",
-                args[0],
-                *args[1:],
+                generator_spec,
+                target_filename,
             ]
 
             # Do not recurse in py generators due to a bug in the py generator

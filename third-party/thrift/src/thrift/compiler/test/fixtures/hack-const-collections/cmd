@@ -1,1 +1,1 @@
-hack:const_collections=1,server=1 src/module.thrift
+hack: hack:const_collections=1,server=1 src/module.thrift

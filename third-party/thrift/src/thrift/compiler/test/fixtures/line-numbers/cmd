@@ -1,1 +1,1 @@
-json src/module.thrift
+json: json src/module.thrift

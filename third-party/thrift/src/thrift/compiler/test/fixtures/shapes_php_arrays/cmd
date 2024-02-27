@@ -1,1 +1,1 @@
-hack:arraysets=1,array_migration=1,shapes=1,shapes_allow_unknown_fields=1,enum_extratype=1 src/module.thrift
+hack: hack:arraysets=1,array_migration=1,shapes=1,shapes_allow_unknown_fields=1,enum_extratype=1 src/module.thrift

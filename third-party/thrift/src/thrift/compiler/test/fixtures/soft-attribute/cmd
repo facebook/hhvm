@@ -1,1 +1,1 @@
-hack:frommap_construct=1,soft_attribute=1 src/module.thrift
+hack: hack:frommap_construct=1,soft_attribute=1 src/module.thrift

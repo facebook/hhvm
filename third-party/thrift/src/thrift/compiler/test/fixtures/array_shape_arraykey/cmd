@@ -1,1 +1,1 @@
-hack:arrays=1,shapes=1,shape_arraykeys=1 src/module.thrift
+hack: hack:arrays=1,shapes=1,shape_arraykeys=1 src/module.thrift

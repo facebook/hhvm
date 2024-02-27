@@ -1,1 +1,1 @@
-mstch_rust src/module.thrift
+rust: mstch_rust src/module.thrift

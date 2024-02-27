@@ -100,10 +100,14 @@ def parse_cmd(
           It is expected to have the following format:
 
           ```
-          GENERATOR_SPEC INPUT_FILE
+          UNIQUE_NAME: GENERATOR_SPEC INPUT_FILE
           ```
 
           where:
+          `UNIQUE_NAME` is a unique (within this folder) identifier for this
+          command. It is primarily used to separate the output of each command
+          (to avoid clobbering of generated content).
+
           `GENERATOR_SPEC` is a "generator spec" string suitable for the `--gen`
           option of the thrift compiler (see `_add_option_to_generator_spec()`).
 
@@ -113,7 +117,7 @@ def parse_cmd(
           Example:
 
           ```
-          hack:json,typedef,shapes=1 src/module.thrift
+          hack: hack:json,typedef,shapes=1 src/module.thrift
           ```
     """
     # Skip commented lines
@@ -121,7 +125,8 @@ def parse_cmd(
         return None
 
     try:
-        (generator_spec, target_filename) = shlex.split(cmd.strip())
+        (unique_name, generator_spec, target_filename) = shlex.split(cmd.strip())
+        assert re.match(r"^\w+:", unique_name)
 
         # Relative path from --fixture_root to target file, eg:
         # 'thrift/compiler/test/fixtures/adapter/src/module.thrift'

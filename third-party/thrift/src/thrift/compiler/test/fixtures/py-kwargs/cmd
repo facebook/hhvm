@@ -1,1 +1,1 @@
-py src/module.thrift
+py: py src/module.thrift

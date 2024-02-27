@@ -1,26 +1,26 @@
-json src/service.thrift
-py src/service.thrift
-android src/module.thrift
-cocoa:import_path=thrift src/service.thrift
-mstch_java src/service.thrift
-mstch_java src/module.thrift
-mstch_java src/includes.thrift
-mstch_java src/transitive.thrift
-mstch_cpp2 src/service.thrift
-mstch_cpp2 src/matching_module_name.thrift
-mstch_cpp2 src/module.thrift
-mstch_cpp2 src/includes.thrift
-go src/service.thrift
-go src/matching_names.thrift
-mstch_go src/service.thrift
-mstch_go src/matching_names.thrift
-mstch_py3 src/service.thrift
-mstch_py3 src/matching_struct_names.thrift
-mstch_python src/service.thrift
-mstch_python_capi src/service.thrift
-mstch_python src/module.thrift
-mstch_python_capi src/module.thrift
-mstch_python src/transitive.thrift
-mstch_python_capi src/transitive.thrift
-mstch_python src/includes.thrift
-mstch_python_capi src/includes.thrift
+json: json src/service.thrift
+py: py src/service.thrift
+android: android src/module.thrift
+cocoa: cocoa:import_path=thrift src/service.thrift
+java: mstch_java src/service.thrift
+java: mstch_java src/module.thrift
+java: mstch_java src/includes.thrift
+java: mstch_java src/transitive.thrift
+cpp2: mstch_cpp2 src/service.thrift
+cpp2: mstch_cpp2 src/matching_module_name.thrift
+cpp2: mstch_cpp2 src/module.thrift
+cpp2: mstch_cpp2 src/includes.thrift
+go_deprecated: go src/service.thrift
+go_deprecated: go src/matching_names.thrift
+go: mstch_go src/service.thrift
+go: mstch_go src/matching_names.thrift
+py3: mstch_py3 src/service.thrift
+py3: mstch_py3 src/matching_struct_names.thrift
+python: mstch_python src/service.thrift
+python_capi: mstch_python_capi src/service.thrift
+python: mstch_python src/module.thrift
+python_capi: mstch_python_capi src/module.thrift
+python: mstch_python src/transitive.thrift
+python_capi: mstch_python_capi src/transitive.thrift
+python: mstch_python src/includes.thrift
+python_capi: mstch_python_capi src/includes.thrift

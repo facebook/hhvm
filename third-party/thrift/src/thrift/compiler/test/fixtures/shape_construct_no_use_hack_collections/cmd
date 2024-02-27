@@ -1,1 +1,1 @@
-hack:shape_construct=1,arraysets=1,shapes=1,no_use_hack_collections=1 src/module.thrift
+hack: hack:shape_construct=1,arraysets=1,shapes=1,no_use_hack_collections=1 src/module.thrift

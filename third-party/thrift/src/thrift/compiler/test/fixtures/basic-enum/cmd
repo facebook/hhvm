@@ -1,7 +1,7 @@
-java_deprecated src/module.thrift
-json_experimental src/module.thrift
-mstch_cpp2 src/module.thrift
-mstch_py3 src/module.thrift
-mstch_rust src/module.thrift
-mstch_java src/module.thrift
-starlark src/module.thrift
+java_deprecated: java_deprecated src/module.thrift
+json_experimental: json_experimental src/module.thrift
+cpp2: mstch_cpp2 src/module.thrift
+py3: mstch_py3 src/module.thrift
+rust: mstch_rust src/module.thrift
+java: mstch_java src/module.thrift
+starlark: starlark src/module.thrift

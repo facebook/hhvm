@@ -1,1 +1,1 @@
-hack:array_migration=1,arraysets=1,frommap_construct=1,no_use_hack_collections=1,nullable_everything=1,server=1 src/module.thrift
+hack: hack:array_migration=1,arraysets=1,frommap_construct=1,no_use_hack_collections=1,nullable_everything=1,server=1 src/module.thrift

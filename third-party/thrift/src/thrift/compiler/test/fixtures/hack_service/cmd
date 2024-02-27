@@ -1,2 +1,2 @@
-hack src/module.thrift
-hack:server src/module2.thrift
+hack: hack src/module.thrift
+hack: hack:server src/module2.thrift

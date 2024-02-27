@@ -1,1 +1,1 @@
-mstch_rust:noserver,serde,skip_none_serialization src/module.thrift
+rust: mstch_rust:noserver,serde,skip_none_serialization src/module.thrift

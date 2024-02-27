@@ -1,2 +1,2 @@
-mstch_cpp2 src/module.thrift
-mstch_java src/module.thrift
+cpp2: mstch_cpp2 src/module.thrift
+java: mstch_java src/module.thrift

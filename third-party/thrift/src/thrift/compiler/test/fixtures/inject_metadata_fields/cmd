@@ -1,13 +1,13 @@
-java_deprecated src/module.thrift
-go src/module.thrift
-hack src/module.thrift
-mstch_cpp2 src/module.thrift
-mstch_go src/module.thrift
-mstch_rust src/module.thrift
-mstch_java src/module.thrift
-mstch_py3 src/module.thrift
-py src/module.thrift
-mstch_python src/module.thrift
-mstch_python_capi src/module.thrift
-mstch_python src/foo.thrift
-mstch_python_capi src/foo.thrift
+java_deprecated: java_deprecated src/module.thrift
+go_deprecated: go src/module.thrift
+hack: hack src/module.thrift
+cpp2: mstch_cpp2 src/module.thrift
+go: mstch_go src/module.thrift
+rust: mstch_rust src/module.thrift
+java: mstch_java src/module.thrift
+py3: mstch_py3 src/module.thrift
+py: py src/module.thrift
+python: mstch_python src/module.thrift
+python_capi: mstch_python_capi src/module.thrift
+python: mstch_python src/foo.thrift
+python_capi: mstch_python_capi src/foo.thrift

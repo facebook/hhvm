@@ -1,2 +1,2 @@
-py:cpp_transport src/module.thrift
-mstch_pyi:cpp_transport src/module.thrift
+py: py:cpp_transport src/module.thrift
+pyi: mstch_pyi:cpp_transport src/module.thrift

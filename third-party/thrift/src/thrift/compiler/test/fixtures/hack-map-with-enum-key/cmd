@@ -1,1 +1,1 @@
-hack:shapes=3,shapes_allow_unknown_fields=1,nonullables=2,stricttypes=2,array_migration=2,strict=2 src/module.thrift
+hack: hack:shapes=3,shapes_allow_unknown_fields=1,nonullables=2,stricttypes=2,array_migration=2,strict=2 src/module.thrift

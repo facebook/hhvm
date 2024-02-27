@@ -1,4 +1,4 @@
-mstch_cpp2 src/module.thrift
-mstch_py3 src/module.thrift
-mstch_python src/module.thrift
-mstch_python_capi src/module.thrift
+cpp2: mstch_cpp2 src/module.thrift
+py3: mstch_py3 src/module.thrift
+python: mstch_python src/module.thrift
+python_capi: mstch_python_capi src/module.thrift

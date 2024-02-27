@@ -1,1 +1,1 @@
-mstch_cpp2:deprecated_enforce_required src/module.thrift
+cpp2: mstch_cpp2:deprecated_enforce_required src/module.thrift

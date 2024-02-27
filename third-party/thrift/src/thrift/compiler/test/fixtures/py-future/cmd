@@ -1,1 +1,1 @@
-py:future src/test.thrift
+py: py:future src/test.thrift

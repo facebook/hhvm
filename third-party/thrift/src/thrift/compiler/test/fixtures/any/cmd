@@ -1,1 +1,1 @@
-mstch_cpp2:any src/module.thrift
+cpp2: mstch_cpp2:any src/module.thrift

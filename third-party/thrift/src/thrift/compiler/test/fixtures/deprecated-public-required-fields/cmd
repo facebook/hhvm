@@ -1,1 +1,1 @@
-mstch_cpp2:deprecated_public_required_fields src/module.thrift
+cpp2: mstch_cpp2:deprecated_public_required_fields src/module.thrift

@@ -1,2 +1,2 @@
-mstch_cpp2 src/module.thrift
-mstch_py3 src/module.thrift
+cpp2: mstch_cpp2 src/module.thrift
+py3: mstch_py3 src/module.thrift

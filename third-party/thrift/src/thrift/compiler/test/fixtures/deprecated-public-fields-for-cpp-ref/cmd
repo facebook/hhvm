@@ -1,1 +1,1 @@
-mstch_cpp2:deprecated_private_fields_for_cpp_ref src/module.thrift
+cpp2: mstch_cpp2:deprecated_private_fields_for_cpp_ref src/module.thrift

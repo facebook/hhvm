@@ -1,19 +1,19 @@
-android src/module.thrift
-go src/module.thrift
-hack:json,typedef,shapes=1 src/module.thrift
-java_deprecated src/module.thrift
-json src/module.thrift
-mstch_cpp2:includes=\"adapter_dependency.h\" src/module.thrift
-mstch_cpp2:includes=\"adapter_dependency.h\" src/module_no_uri.thrift
-mstch_go src/module.thrift
-mstch_pyi:json src/module.thrift
-mstch_py3 src/module.thrift
-mstch_python src/module.thrift
-mstch_python_capi src/module.thrift
-mstch_python src/a.thrift
-mstch_python_capi src/a.thrift
-mstch_python src/with_containers.thrift
-mstch_python_capi src/with_containers.thrift
-mstch_rust src/module.thrift
-mstch_java src/module.thrift
-py:json src/module.thrift
+android: android src/module.thrift
+go_deprecated: go src/module.thrift
+hack: hack:json,typedef,shapes=1 src/module.thrift
+java_deprecated: java_deprecated src/module.thrift
+json: json src/module.thrift
+cpp2: mstch_cpp2:includes=\"adapter_dependency.h\" src/module.thrift
+cpp2: mstch_cpp2:includes=\"adapter_dependency.h\" src/module_no_uri.thrift
+go: mstch_go src/module.thrift
+pyi: mstch_pyi:json src/module.thrift
+py3: mstch_py3 src/module.thrift
+python: mstch_python src/module.thrift
+python_capi: mstch_python_capi src/module.thrift
+python: mstch_python src/a.thrift
+python_capi: mstch_python_capi src/a.thrift
+python: mstch_python src/with_containers.thrift
+python_capi: mstch_python_capi src/with_containers.thrift
+rust: mstch_rust src/module.thrift
+java: mstch_java src/module.thrift
+py: py:json src/module.thrift

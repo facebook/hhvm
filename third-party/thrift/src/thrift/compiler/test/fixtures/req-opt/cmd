@@ -1,4 +1,4 @@
-cocoa:nullability src/module.thrift
-mstch_rust src/module.thrift
-mstch_java src/module.thrift
-mstch_py3 src/module.thrift
+cocoa: cocoa:nullability src/module.thrift
+rust: mstch_rust src/module.thrift
+java: mstch_java src/module.thrift
+py3: mstch_py3 src/module.thrift

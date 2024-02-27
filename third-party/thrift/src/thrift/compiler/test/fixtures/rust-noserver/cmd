@@ -1,1 +1,1 @@
-mstch_rust:noserver src/module.thrift
+rust: mstch_rust:noserver src/module.thrift

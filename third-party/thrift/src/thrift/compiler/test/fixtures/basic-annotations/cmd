@@ -1,11 +1,11 @@
-go src/module.thrift
-android src/module.thrift
-java_deprecated src/module.thrift
-hack:json,server=1,shapes=1,shapes_allow_unknown_fields=1 src/module.thrift
-mstch_cpp2:deprecated_unstructured_annotations_in_metadata src/module.thrift
-mstch_go src/module.thrift
-mstch_rust src/module.thrift
-mstch_java src/module.thrift
-mstch_py3 src/module.thrift
-json:annotate src/module.thrift
-py:json src/module.thrift
+go_deprecated: go src/module.thrift
+android: android src/module.thrift
+java_deprecated: java_deprecated src/module.thrift
+hack: hack:json,server=1,shapes=1,shapes_allow_unknown_fields=1 src/module.thrift
+cpp2: mstch_cpp2:deprecated_unstructured_annotations_in_metadata src/module.thrift
+go: mstch_go src/module.thrift
+rust: mstch_rust src/module.thrift
+java: mstch_java src/module.thrift
+py3: mstch_py3 src/module.thrift
+json: json:annotate src/module.thrift
+py: py:json src/module.thrift

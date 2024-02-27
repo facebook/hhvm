@@ -1,1 +1,1 @@
-hack:json,shapes,shape_arraykeys src/module.thrift
+hack: hack:json,shapes,shape_arraykeys src/module.thrift

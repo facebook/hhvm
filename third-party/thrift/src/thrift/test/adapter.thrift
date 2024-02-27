@@ -240,10 +240,10 @@ struct ApplyAdapter {}
 @ApplyAdapter
 struct TransitiveAdapted {}
 
-@cpp.Adapter{name = "::apache::thrift::test::CountingAdapter<true, int>"}
+@cpp.Adapter{name = "::apache::thrift::test::CountingAdapter<true, int64_t>"}
 typedef i64 CountingInt
 struct CountingStruct {
-  @cpp.Adapter{name = "::apache::thrift::test::CountingAdapter<false, int>"}
+  @cpp.Adapter{name = "::apache::thrift::test::CountingAdapter<false, int64_t>"}
   1: optional i64 regularInt;
   2: optional CountingInt countingInt;
   @cpp.Adapter{

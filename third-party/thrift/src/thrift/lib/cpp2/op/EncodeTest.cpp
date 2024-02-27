@@ -288,9 +288,9 @@ TEST(SerializedSizeTest, SerializedSizeAdapted) {
   testSerializedSizeAdapted<conformance::StandardProtocol::Compact>();
 }
 
-template <conformance::StandardProtocol Protocol, typename Tag, typename T>
+template <conformance::StandardProtocol Protocol, typename Tag>
 protocol::Value encodeAndParseValue(
-    T value, TType ttype, bool string_to_binary = true) {
+    type::native_type<Tag> value, TType ttype, bool string_to_binary = true) {
   protocol_writer_t<Protocol> writer;
   folly::IOBufQueue queue;
   writer.setOutput(&queue);
@@ -301,8 +301,8 @@ protocol::Value encodeAndParseValue(
   return protocol::detail::parseValue(reader, ttype, string_to_binary);
 }
 
-template <conformance::StandardProtocol Protocol, typename Tag, typename T>
-void testEncode(T value, bool string_to_binary = true) {
+template <conformance::StandardProtocol Protocol, typename Tag>
+void testEncode(type::native_type<Tag> value, bool string_to_binary = true) {
   SCOPED_TRACE(folly::pretty_name<Tag>());
   auto result = encodeAndParseValue<Protocol, Tag>(
       value, typeTagToTType<Tag>, string_to_binary);
@@ -320,10 +320,21 @@ void testEncodeBasicTypes() {
   testEncode<Protocol, type::float_t>(1.5);
   testEncode<Protocol, type::double_t>(1.5);
   testEncode<Protocol, type::string_t>(std::string("foo"), false);
-  testEncode<Protocol, type::string_t>(folly::StringPiece("foo"), false);
+  testEncode<Protocol, type::cpp_type<folly::StringPiece, type::string_t>>(
+      folly::StringPiece("foo"), false);
   testEncode<Protocol, type::string_t>("foo", false);
   testEncode<Protocol, type::binary_t>("foo");
   testEncode<Protocol, type::enum_t<int>>(1);
+}
+
+template <conformance::StandardProtocol Protocol>
+void testEncodeUnsignedTypes() {
+  SCOPED_TRACE(apache::thrift::util::enumNameSafe(Protocol));
+  testEncode<Protocol, type::cpp_type<uint8_t, type::byte_t>>(128U);
+  testEncode<Protocol, type::cpp_type<uint16_t, type::i16_t>>(32768U);
+  testEncode<Protocol, type::cpp_type<uint32_t, type::i32_t>>(2147483648UL);
+  testEncode<Protocol, type::cpp_type<uint64_t, type::i64_t>>(
+      9223372036854775808ULL);
 }
 
 template <conformance::StandardProtocol Protocol>
@@ -339,13 +350,6 @@ void testEncodeContainers() {
 template <conformance::StandardProtocol Protocol>
 void testEncodeCppType() {
   SCOPED_TRACE(apache::thrift::util::enumNameSafe(Protocol));
-  {
-    // test cpp_type with primitive type
-    auto result =
-        encodeAndParseValue<Protocol, type::cpp_type<int, type::i16_t>>(
-            1, TType::T_I16);
-    EXPECT_EQ(result, asValueStruct<type::i16_t>(1));
-  }
   {
     // test strongly typed integer
     auto result =
@@ -434,7 +438,8 @@ void testEncodeAdapted() {
     // test op::encode with adapted primitive type
     using AdaptedTag = type::adapted<test::TemplatedTestAdapter, type::i16_t>;
     auto result = encodeAndParseValue<Protocol, AdaptedTag>(
-        test::TemplatedTestAdapter::fromThrift(1), TType::T_I16);
+        test::TemplatedTestAdapter::fromThrift(static_cast<int16_t>(1)),
+        TType::T_I16);
     EXPECT_EQ(result, asValueStruct<type::i16_t>(1));
   }
   {
@@ -459,6 +464,11 @@ void testEncodeAdapted() {
 TEST(EncodeTest, EncodeBasicTypes) {
   testEncodeBasicTypes<conformance::StandardProtocol::Binary>();
   testEncodeBasicTypes<conformance::StandardProtocol::Compact>();
+}
+
+TEST(EncodeTest, EncodeUnsignedTypes) {
+  testEncodeUnsignedTypes<conformance::StandardProtocol::Binary>();
+  testEncodeUnsignedTypes<conformance::StandardProtocol::Compact>();
 }
 
 TEST(EncodeTest, EncodeContainers) {
@@ -503,8 +513,8 @@ DecodeT encodeAndDecode(EncodeT value) {
   return result;
 }
 
-template <conformance::StandardProtocol Protocol, typename Tag, typename T>
-void testDecode(T value) {
+template <conformance::StandardProtocol Protocol, typename Tag>
+void testDecode(type::native_type<Tag> value) {
   SCOPED_TRACE(folly::pretty_name<Tag>());
   EXPECT_EQ(
       (encodeAndDecode<Protocol, Tag, Tag, decltype(value)>(value)), value);
@@ -527,6 +537,16 @@ void testDecodeBasicTypes() {
 }
 
 template <conformance::StandardProtocol Protocol>
+void testDecodeUnsignedTypes() {
+  SCOPED_TRACE(apache::thrift::util::enumNameSafe(Protocol));
+  testDecode<Protocol, type::cpp_type<uint8_t, type::byte_t>>(128U);
+  testDecode<Protocol, type::cpp_type<uint16_t, type::i16_t>>(32768U);
+  testDecode<Protocol, type::cpp_type<uint32_t, type::i32_t>>(2147483648UL);
+  testDecode<Protocol, type::cpp_type<uint64_t, type::i64_t>>(
+      9223372036854775808ULL);
+}
+
+template <conformance::StandardProtocol Protocol>
 void testDecodeContainers() {
   SCOPED_TRACE(apache::thrift::util::enumNameSafe(Protocol));
   testDecode<Protocol, type::list<type::enum_t<int>>>(
@@ -534,17 +554,30 @@ void testDecodeContainers() {
   testDecode<Protocol, type::list<type::bool_t>>(
       std::vector<bool>{true, false, true});
   testDecode<Protocol, type::set<type::bool_t>>(std::set<bool>{true, false});
-  testDecode<Protocol, type::set<type::bool_t>>(
+  testDecode<
+      Protocol,
+      type::cpp_type<std::unordered_set<bool>, type::set<type::bool_t>>>(
       std::unordered_set<bool>{true, false});
   testDecode<Protocol, type::map<type::string_t, type::byte_t>>(
       std::map<std::string, int8_t>{
           {std::string("foo"), 1}, {std::string("foo"), 2}});
-  testDecode<Protocol, type::map<type::string_t, type::byte_t>>(
+  testDecode<
+      Protocol,
+      type::cpp_type<
+          std::unordered_map<std::string, int8_t>,
+          type::map<type::string_t, type::byte_t>>>(
       std::unordered_map<std::string, int8_t>{
           {std::string("foo"), 1}, {std::string("foo"), 2}});
-  testDecode<Protocol, type::set<type::byte_t>>(
+  testDecode<
+      Protocol,
+      type::
+          cpp_type<folly::sorted_vector_set<int8_t>, type::set<type::byte_t>>>(
       folly::sorted_vector_set<int8_t>{3, 1, 2});
-  testDecode<Protocol, type::map<type::string_t, type::byte_t>>(
+  testDecode<
+      Protocol,
+      type::cpp_type<
+          folly::sorted_vector_map<std::string, int8_t>,
+          type::map<type::string_t, type::byte_t>>>(
       folly::sorted_vector_map<std::string, int8_t>{
           {std::string("foo"), 1}, {std::string("foo"), 2}});
 
@@ -700,6 +733,11 @@ void testDecodeAdapted() {
 }
 
 TEST(DecodeTest, DecodeBasicTypes) {
+  testDecodeBasicTypes<conformance::StandardProtocol::Binary>();
+  testDecodeBasicTypes<conformance::StandardProtocol::Compact>();
+}
+
+TEST(DecodeTest, DecodeUnsignedTypes) {
   testDecodeBasicTypes<conformance::StandardProtocol::Binary>();
   testDecodeBasicTypes<conformance::StandardProtocol::Compact>();
 }

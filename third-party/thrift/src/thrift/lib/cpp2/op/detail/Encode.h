@@ -148,6 +148,10 @@ struct SerializedSize<ZeroCopy, type::byte_t> {
   uint32_t operator()(Protocol& prot, int8_t i) const {
     return prot.serializedSizeByte(i);
   }
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, uint8_t i) const {
+    return prot.serializedSizeByte(folly::to_signed(i));
+  }
 };
 
 template <bool ZeroCopy>
@@ -155,6 +159,10 @@ struct SerializedSize<ZeroCopy, type::i16_t> {
   template <typename Protocol>
   uint32_t operator()(Protocol& prot, int16_t i) const {
     return prot.serializedSizeI16(i);
+  }
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, uint16_t i) const {
+    return prot.serializedSizeI16(folly::to_signed(i));
   }
 };
 
@@ -164,6 +172,10 @@ struct SerializedSize<ZeroCopy, type::i32_t> {
   uint32_t operator()(Protocol& prot, int32_t i) const {
     return prot.serializedSizeI32(i);
   }
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, uint32_t i) const {
+    return prot.serializedSizeI32(folly::to_signed(i));
+  }
 };
 
 template <bool ZeroCopy>
@@ -171,6 +183,10 @@ struct SerializedSize<ZeroCopy, type::i64_t> {
   template <typename Protocol>
   uint32_t operator()(Protocol& prot, int64_t i) const {
     return prot.serializedSizeI64(i);
+  }
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, uint64_t i) const {
+    return prot.serializedSizeI64(folly::to_signed(i));
   }
 };
 
@@ -383,6 +399,10 @@ struct Encode<type::byte_t> {
   uint32_t operator()(Protocol& prot, int8_t i) const {
     return prot.writeByte(i);
   }
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, uint8_t i) const {
+    return prot.writeByte(folly::to_signed(i));
+  }
 };
 
 template <>
@@ -390,6 +410,10 @@ struct Encode<type::i16_t> {
   template <typename Protocol>
   uint32_t operator()(Protocol& prot, int16_t i) const {
     return prot.writeI16(i);
+  }
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, uint16_t i) const {
+    return prot.writeI16(folly::to_signed(i));
   }
 };
 
@@ -399,6 +423,10 @@ struct Encode<type::i32_t> {
   uint32_t operator()(Protocol& prot, int32_t i) const {
     return prot.writeI32(i);
   }
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, uint32_t i) const {
+    return prot.writeI32(folly::to_signed(i));
+  }
 };
 
 template <>
@@ -406,6 +434,10 @@ struct Encode<type::i64_t> {
   template <typename Protocol>
   uint32_t operator()(Protocol& prot, int64_t i) const {
     return prot.writeI64(i);
+  }
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, uint64_t i) const {
+    return prot.writeI64(folly::to_signed(i));
   }
 };
 
@@ -669,6 +701,12 @@ struct Decode<type::byte_t> {
   void operator()(Protocol& prot, int8_t& i) const {
     prot.readByte(i);
   }
+  template <typename Protocol>
+  void operator()(Protocol& prot, uint8_t& i) const {
+    int8_t tmp;
+    prot.readByte(tmp);
+    i = folly::to_unsigned(tmp);
+  }
 };
 
 template <>
@@ -676,6 +714,12 @@ struct Decode<type::i16_t> {
   template <typename Protocol>
   void operator()(Protocol& prot, int16_t& i) const {
     prot.readI16(i);
+  }
+  template <typename Protocol>
+  void operator()(Protocol& prot, uint16_t& i) const {
+    int16_t tmp;
+    prot.readI16(tmp);
+    i = folly::to_unsigned(tmp);
   }
 };
 
@@ -685,6 +729,12 @@ struct Decode<type::i32_t> {
   void operator()(Protocol& prot, int32_t& i) const {
     prot.readI32(i);
   }
+  template <typename Protocol>
+  void operator()(Protocol& prot, uint32_t& i) const {
+    int32_t tmp;
+    prot.readI32(tmp);
+    i = folly::to_unsigned(tmp);
+  }
 };
 
 template <>
@@ -692,6 +742,12 @@ struct Decode<type::i64_t> {
   template <typename Protocol>
   void operator()(Protocol& prot, int64_t& i) const {
     prot.readI64(i);
+  }
+  template <typename Protocol>
+  void operator()(Protocol& prot, uint64_t& i) const {
+    int64_t tmp;
+    prot.readI64(tmp);
+    i = folly::to_unsigned(tmp);
   }
 };
 

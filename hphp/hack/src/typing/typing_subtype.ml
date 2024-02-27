@@ -347,7 +347,62 @@ module Pretty : sig
     Typing_env_types.env ->
     Typing_defs.internal_type ->
     string
+
+  val strip_existential :
+    ity_sub:Typing_defs.internal_type ->
+    ity_sup:Typing_defs.internal_type ->
+    (Typing_defs.internal_type * Typing_defs.internal_type) option
 end = struct
+  let strip_existential_help ty =
+    match deref ty with
+    | (_, Tdependent (_, ty)) -> Some ty
+    | (r, Tgeneric (nm, tys)) when DependentKind.is_generic_dep_ty nm ->
+      Option.map ~f:(fun nm -> mk (r, Tgeneric (nm, tys)))
+      @@ DependentKind.strip_generic_dep_ty nm
+    | (r, Taccess (inner_ty, pos)) ->
+      let inner_ty_opt =
+        match deref inner_ty with
+        | (_, Tdependent (_, inner_ty)) ->
+          Some (mk (r, Taccess (inner_ty, pos)))
+        | (r_inner, Tgeneric (nm, tys)) when DependentKind.is_generic_dep_ty nm
+          ->
+          Option.map ~f:(fun nm -> mk (r_inner, Tgeneric (nm, tys)))
+          @@ DependentKind.strip_generic_dep_ty nm
+        | _ -> None
+      in
+
+      Option.map
+        ~f:(fun inner_ty -> mk (r, Taccess (inner_ty, pos)))
+        inner_ty_opt
+    | _ -> None
+
+  (* For reporting purposes we remove top-level existential types and
+     existentials in type accesses when they don't occur on both subtype and
+     supertype since they don't contribute to underlying error *)
+  let strip_existential ~ity_sub ~ity_sup =
+    match (ity_sub, ity_sup) with
+    | (LoclType lty_sub, LoclType lty_sup) ->
+      (match
+         (strip_existential_help lty_sub, strip_existential_help lty_sup)
+       with
+      (* We shouldn't remove if both sub and supertype are existentially quantified *)
+      | (Some _, Some _)
+      (* There is nothing to do if neither side was existentially quantified *)
+      | (None, None) ->
+        None
+      (* If we have an existential one only side we remove it *)
+      | (Some lty_sub, _) -> Some (LoclType lty_sub, ity_sup)
+      | (_, Some lty_sup) -> Some (ity_sub, LoclType lty_sup))
+    (* The only type to appear in 'ConstraintType' is null so we can always remove
+       if we have one LoclType and on ConstraintType, for some reason *)
+    | (LoclType lty_sub, ConstraintType _) ->
+      Option.map ~f:(fun lty_sub -> (LoclType lty_sub, ity_sup))
+      @@ strip_existential_help lty_sub
+    | (ConstraintType _, LoclType lty_sup) ->
+      Option.map ~f:(fun lty_sup -> (ity_sub, LoclType lty_sup))
+      @@ strip_existential_help lty_sup
+    | (ConstraintType _, ConstraintType _) -> None
+
   let describe_ty_default env ty =
     Typing_print.with_blank_tyvars (fun () ->
         Typing_print.full_strip_ns_i env ty)
@@ -599,56 +654,6 @@ module rec Subtype : sig
     Typing_defs.internal_type ->
     Typing_env_types.env * TL.subtype_prop
 end = struct
-  let strip_existential_help ty =
-    match deref ty with
-    | (_, Tdependent (_, ty)) -> Some ty
-    | (r, Tgeneric (nm, tys)) when DependentKind.is_generic_dep_ty nm ->
-      Option.map ~f:(fun nm -> mk (r, Tgeneric (nm, tys)))
-      @@ DependentKind.strip_generic_dep_ty nm
-    | (r, Taccess (inner_ty, pos)) ->
-      let inner_ty_opt =
-        match deref inner_ty with
-        | (_, Tdependent (_, inner_ty)) ->
-          Some (mk (r, Taccess (inner_ty, pos)))
-        | (r_inner, Tgeneric (nm, tys)) when DependentKind.is_generic_dep_ty nm
-          ->
-          Option.map ~f:(fun nm -> mk (r_inner, Tgeneric (nm, tys)))
-          @@ DependentKind.strip_generic_dep_ty nm
-        | _ -> None
-      in
-
-      Option.map
-        ~f:(fun inner_ty -> mk (r, Taccess (inner_ty, pos)))
-        inner_ty_opt
-    | _ -> None
-
-  (* For reporting purposes we remove top-level existential types and
-     existentials in type accesses when they don't occur on both subtype and
-     supertype since they don't contribute to underlying error *)
-  let strip_existential ~ity_sub ~ity_sup =
-    match (ity_sub, ity_sup) with
-    | (LoclType lty_sub, LoclType lty_sup) ->
-      (match
-         (strip_existential_help lty_sub, strip_existential_help lty_sup)
-       with
-      (* We shouldn't remove if both sub and supertype are existentially quantified *)
-      | (Some _, Some _)
-      (* There is nothing to do if neither side was existentially quantified *)
-      | (None, None) ->
-        None
-      (* If we have an existential one only side we remove it *)
-      | (Some lty_sub, _) -> Some (LoclType lty_sub, ity_sup)
-      | (_, Some lty_sup) -> Some (ity_sub, LoclType lty_sup))
-    (* The only type to appear in 'ConstraintType' is null so we can always remove
-       if we have one LoclType and on ConstraintType, for some reason *)
-    | (LoclType lty_sub, ConstraintType _) ->
-      Option.map ~f:(fun lty_sub -> (LoclType lty_sub, ity_sup))
-      @@ strip_existential_help lty_sub
-    | (ConstraintType _, LoclType lty_sup) ->
-      Option.map ~f:(fun lty_sup -> (ity_sub, LoclType lty_sup))
-      @@ strip_existential_help lty_sup
-    | (ConstraintType _, ConstraintType _) -> None
-
   (* If it's clear from the syntax of the type that null isn't in ty, return true.
  *)
   let rec null_not_subtype ty =
@@ -1162,7 +1167,7 @@ end = struct
     in
     let fail_snd_err =
       let (ety_sub, ety_super, stripped_existential) =
-        match strip_existential ~ity_sub:ety_sub ~ity_sup:ety_super with
+        match Pretty.strip_existential ~ity_sub:ety_sub ~ity_sup:ety_super with
         | None -> (ety_sub, ety_super, false)
         | Some (ety_sub, ety_super) -> (ety_sub, ety_super, true)
       in
@@ -1232,449 +1237,18 @@ end = struct
     match ety_super with
     (* First deal with internal constraint types *)
     | ConstraintType cty_super ->
-      let using_new_method_call_inference =
-        TypecheckerOptions.method_call_inference (Env.get_tcopt env)
-      in
-      begin
-        match deref_constraint_type cty_super with
-        | (_, TCintersection (lty, cty)) ->
-          (match ety_sub with
-          | LoclType t when is_union t -> default_subtype_help env
-          | ConstraintType t when is_constraint_type_union t ->
-            default_subtype_help env
-          | _ ->
-            env
-            |> simplify_subtype_i
-                 ~subtype_env
-                 ~sub_supportdyn
-                 ~this_ty:None
-                 ~super_like:false
-                 ~super_supportdyn:false
-                 ty_sub
-                 (LoclType lty)
-            &&& simplify_subtype_i
-                  ~subtype_env
-                  ~sub_supportdyn
-                  ~this_ty:None
-                  ~super_like:false
-                  ~super_supportdyn:false
-                  ty_sub
-                  (ConstraintType cty))
-        | (_, TCunion (maybe_null, maybe_has_member))
-          when using_new_method_call_inference
-               && is_has_member maybe_has_member
-               &&
-               let (_, maybe_null) = Env.expand_type env maybe_null in
-               is_prim Aast.Tnull maybe_null ->
-          (* `LHS <: Thas_member(...) | null` is morally a null-safe object access *)
-          let (env, null_ty) = Env.expand_type env maybe_null in
-          let r_null = get_reason null_ty in
-          let (r, has_member_ty) = deref_constraint_type maybe_has_member in
-          (match has_member_ty with
-          | Thas_member has_member_ty ->
-            Has_member.simplify_subtype_has_member
-              ~subtype_env
-              ~sub_supportdyn
-              ~this_ty
-              ~nullsafe:(Some r_null)
-              ~fail
-              ety_sub
-              (r, has_member_ty)
-              env
-          | _ -> invalid_env env (* Not possible due to guard in parent match *))
-        | (_, TCunion (lty_super, cty_super)) ->
-          (match ety_sub with
-          | ConstraintType cty when is_constraint_type_union cty ->
-            default_subtype_help env
-          | ConstraintType _ ->
-            env
-            |> simplify_subtype_i
-                 ~subtype_env
-                 ~sub_supportdyn
-                 ~this_ty:None
-                 ~super_like:false
-                 ~super_supportdyn:false
-                 ty_sub
-                 (ConstraintType cty_super)
-            ||| simplify_subtype_i
-                  ~subtype_env
-                  ~sub_supportdyn
-                  ~this_ty:None
-                  ~super_like:false
-                  ~super_supportdyn:false
-                  ty_sub
-                  (LoclType lty_super)
-            ||| default_subtype_help
-          | LoclType lty ->
-            (match deref lty with
-            | (r, Toption ty) ->
-              let ty_null = MakeType.null r in
-              if_unsat
-                invalid_env
-                (simplify_subtype_i
-                   ~subtype_env
-                   ~sub_supportdyn
-                   ~this_ty
-                   ~super_like:false
-                   ~super_supportdyn:false
-                   (LoclType ty_null)
-                   ty_super
-                   env)
-              &&& simplify_subtype_i
-                    ~subtype_env
-                    ~sub_supportdyn
-                    ~this_ty
-                    ~super_like:false
-                    ~super_supportdyn:false
-                    (LoclType ty)
-                    ty_super
-            | (_, (Tintersection _ | Tunion _ | Tvar _)) ->
-              default_subtype_help env
-            | _ ->
-              env
-              |> simplify_subtype_i
-                   ~subtype_env
-                   ~sub_supportdyn
-                   ~this_ty:None
-                   ~super_like:false
-                   ~super_supportdyn:false
-                   ty_sub
-                   (ConstraintType cty_super)
-              ||| simplify_subtype_i
-                    ~subtype_env
-                    ~sub_supportdyn
-                    ~this_ty:None
-                    ~super_like:false
-                    ~super_supportdyn:false
-                    ty_sub
-                    (LoclType lty_super)
-              ||| default_subtype_help))
-        | (r_super, Tdestructure { d_required; d_optional; d_variadic; d_kind })
-          ->
-          (* List destructuring *)
-          let destructure_array ~sub_supportdyn t env =
-            (* If this is a splat, there must be a variadic box to receive the elements
-             * but for list(...) destructuring this is not required. Example:
-             *
-             * function f(int $i): void {}
-             * function g(vec<int> $v): void {
-             *   list($a) = $v; // ok (but may throw)
-             *   f(...$v); // error
-             * } *)
-            let fpos =
-              match r_super with
-              | Reason.Runpack_param (_, fpos, _) -> fpos
-              | _ -> Reason.to_pos r_super
-            in
-            match (d_kind, d_required, d_variadic) with
-            | (SplatUnpack, _ :: _, _) ->
-              (* return the env so as not to discard the type variable that might
-                 have been created for the Traversable type created below. *)
-              invalid_env_with
-                env
-                (Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
-                     Typing_error.(
-                       apply_reasons ~on_error
-                       @@ Secondary.Unpack_array_required_argument
-                            { pos = Reason.to_pos r_super; decl_pos = fpos })))
-            | (SplatUnpack, [], None) ->
-              invalid_env_with
-                env
-                (Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
-                     Typing_error.(
-                       apply_reasons ~on_error
-                       @@ Secondary.Unpack_array_variadic_argument
-                            { pos = Reason.to_pos r_super; decl_pos = fpos })))
-            | (SplatUnpack, [], Some _)
-            | (ListDestructure, _, _) ->
-              List.fold d_required ~init:(env, TL.valid) ~f:(fun res ty_dest ->
-                  res
-                  &&& simplify_subtype
-                        ~subtype_env
-                        ~sub_supportdyn
-                        ~this_ty
-                        ~super_like:false
-                        ~super_supportdyn:false
-                        t
-                        ty_dest)
-              &&& fun env ->
-              List.fold d_optional ~init:(env, TL.valid) ~f:(fun res ty_dest ->
-                  res
-                  &&& simplify_subtype
-                        ~subtype_env
-                        ~sub_supportdyn
-                        ~this_ty
-                        ~super_like:false
-                        ~super_supportdyn:false
-                        t
-                        ty_dest)
-              &&& fun env ->
-              Option.value_map
-                ~default:(env, TL.valid)
-                d_variadic
-                ~f:(fun vty ->
-                  simplify_subtype
-                    ~subtype_env
-                    ~sub_supportdyn
-                    ~this_ty
-                    ~super_like:false
-                    ~super_supportdyn:false
-                    t
-                    vty
-                    env)
-          in
-
-          let destructure_tuple r ts env =
-            (* First fill the required elements. If there are insufficient elements, an error is reported.
-             * Fill as many of the optional elements as possible, and the remainder are unioned into the
-             * variadic element. Example:
-             *
-             * (float, bool, string, int) <: Tdestructure(#1, opt#2, ...#3) =>
-             * float <: #1 /\ bool <: #2 /\ string <: #3 /\ int <: #3
-             *
-             * (float, bool) <: Tdestructure(#1, #2, opt#3) =>
-             * float <: #1 /\ bool <: #2
-             *)
-            let len_ts = List.length ts in
-            let len_required = List.length d_required in
-            let arity_error f =
-              let (epos, fpos, prefix) =
-                match r_super with
-                | Reason.Runpack_param (epos, fpos, c) ->
-                  (Pos_or_decl.of_raw_pos epos, fpos, c)
-                | _ -> (Reason.to_pos r_super, Reason.to_pos r, 0)
-              in
-              invalid_env_with
-                env
-                (f
-                   (prefix + len_required)
-                   (prefix + len_ts)
-                   epos
-                   fpos
-                   subtype_env.Subtype_env.on_error)
-            in
-            if len_ts < len_required then
-              arity_error (fun expected actual pos decl_pos on_error_opt ->
-                  Option.map on_error_opt ~f:(fun on_error ->
-                      let base_err =
-                        Typing_error.Secondary.Typing_too_few_args
-                          { pos; decl_pos; expected; actual }
-                      in
-                      Typing_error.(apply_reasons ~on_error base_err)))
-            else
-              let len_optional = List.length d_optional in
-              let (ts_required, remain) = List.split_n ts len_required in
-              let (ts_optional, ts_variadic) =
-                List.split_n remain len_optional
-              in
-              List.fold2_exn
-                ts_required
-                d_required
-                ~init:(env, TL.valid)
-                ~f:(fun res ty ty_dest ->
-                  res
-                  &&& simplify_subtype
-                        ~subtype_env
-                        ~sub_supportdyn
-                        ~this_ty
-                        ~super_like:false
-                        ~super_supportdyn:false
-                        ty
-                        ty_dest)
-              &&& fun env ->
-              let len_ts_opt = List.length ts_optional in
-              let d_optional_part =
-                if len_ts_opt < len_optional then
-                  List.take d_optional len_ts_opt
-                else
-                  d_optional
-              in
-              List.fold2_exn
-                ts_optional
-                d_optional_part
-                ~init:(env, TL.valid)
-                ~f:(fun res ty ty_dest ->
-                  res
-                  &&& simplify_subtype
-                        ~subtype_env
-                        ~sub_supportdyn
-                        ~this_ty
-                        ~super_like:false
-                        ~super_supportdyn:false
-                        ty
-                        ty_dest)
-              &&& fun env ->
-              match (ts_variadic, d_variadic) with
-              | (vars, Some vty) ->
-                List.fold vars ~init:(env, TL.valid) ~f:(fun res ty ->
-                    res
-                    &&& simplify_subtype
-                          ~subtype_env
-                          ~sub_supportdyn
-                          ~this_ty
-                          ~super_like:false
-                          ~super_supportdyn:false
-                          ty
-                          vty)
-              | ([], None) -> valid env
-              | (_, None) ->
-                (* Elements remain but we have nowhere to put them *)
-                arity_error (fun expected actual pos decl_pos on_error_opt ->
-                    Option.map on_error_opt ~f:(fun on_error ->
-                        Typing_error.(
-                          apply_reasons ~on_error
-                          @@ Secondary.Typing_too_many_args
-                               { pos; decl_pos; expected; actual })))
-          in
-
-          let destructure_dynamic t env =
-            if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
-              List.fold d_required ~init:(env, TL.valid) ~f:(fun res ty_dest ->
-                  res
-                  &&& simplify_subtype
-                        ~subtype_env
-                        ~sub_supportdyn
-                        ~this_ty
-                        ~super_like:false
-                        ~super_supportdyn:false
-                        t
-                        ty_dest)
-              &&& fun env ->
-              List.fold d_optional ~init:(env, TL.valid) ~f:(fun res ty_dest ->
-                  res
-                  &&& simplify_subtype
-                        ~subtype_env
-                        ~sub_supportdyn
-                        ~this_ty
-                        ~super_like:false
-                        ~super_supportdyn:false
-                        t
-                        ty_dest)
-              &&& fun env ->
-              Option.value_map
-                ~default:(env, TL.valid)
-                d_variadic
-                ~f:(fun vty ->
-                  simplify_subtype
-                    ~subtype_env
-                    ~sub_supportdyn
-                    ~this_ty
-                    ~super_like:false
-                    ~super_supportdyn:false
-                    t
-                    vty
-                    env)
-            else
-              env |> destructure_array ~sub_supportdyn t
-          in
-          begin
-            match ety_sub with
-            | ConstraintType _ -> default_subtype_help env
-            | LoclType ty_sub ->
-              (match deref ty_sub with
-              | (r, Ttuple tyl) -> env |> destructure_tuple r tyl
-              | (r, Tclass ((_, x), _, tyl))
-                when String.equal x SN.Collections.cPair ->
-                env |> destructure_tuple r tyl
-              | (_, Tclass ((_, x), _, [elt_type]))
-                when String.equal x SN.Collections.cVector
-                     || String.equal x SN.Collections.cImmVector
-                     || String.equal x SN.Collections.cVec
-                     || String.equal x SN.Collections.cConstVector ->
-                env |> destructure_array ~sub_supportdyn elt_type
-              | (_, Tdynamic) -> env |> destructure_dynamic ty_sub
-              | (_, (Tunion _ | Tintersection _ | Tgeneric _ | Tvar _)) ->
-                (* TODO(T69551141) handle type arguments of Tgeneric? *)
-                default_subtype_help env
-              | _ -> begin
-                match d_kind with
-                | SplatUnpack ->
-                  (* Allow splatting of arbitrary Traversables *)
-                  let (env, ty_inner) = Env.fresh_type env Pos.none in
-                  let traversable = MakeType.traversable r_super ty_inner in
-                  env
-                  |> simplify_subtype
-                       ~subtype_env
-                       ~sub_supportdyn
-                       ~this_ty
-                       ~super_like:false
-                       ~super_supportdyn:false
-                       ty_sub
-                       traversable
-                  &&& destructure_array ~sub_supportdyn:None ty_inner
-                | ListDestructure ->
-                  let ty_sub_descr =
-                    lazy
-                      (Typing_print.with_blank_tyvars (fun () ->
-                           Typing_print.full_strip_ns env ty_sub))
-                  in
-                  default_subtype_help env
-                  |> if_unsat @@ fun env ->
-                     invalid_env_with
-                       env
-                       (Option.map
-                          subtype_env.Subtype_env.on_error
-                          ~f:
-                            Typing_error.(
-                              fun on_error ->
-                                apply_reasons ~on_error
-                                @@ Secondary.Invalid_destructure
-                                     {
-                                       pos = Reason.to_pos r_super;
-                                       decl_pos = get_pos ty_sub;
-                                       ty_name = ty_sub_descr;
-                                     }))
-              end)
-          end
-        | (r, Tcan_index ci) ->
-          Can_index.simplify_subtype_can_index
-            ~subtype_env
-            ~sub_supportdyn
-            ~this_ty
-            ~fail
-            ety_sub
-            ety_super
-            (r, ci)
-            env
-        | (r, Tcan_traverse ct) ->
-          Can_traverse.simplify_subtype_can_traverse
-            ~subtype_env
-            ~sub_supportdyn
-            ~this_ty
-            ~fail
-            ety_sub
-            ety_super
-            (r, ct)
-            env
-        | (r, Thas_member has_member_ty) ->
-          Has_member.simplify_subtype_has_member
-            ~subtype_env
-            ~sub_supportdyn
-            ~this_ty
-            ~fail
-            ~nullsafe:None
-            ety_sub
-            (r, has_member_ty)
-            env
-        | (r, Thas_type_member htm) ->
-          (* Contextualize errors that may be generated when
-           * checking refinement bounds. *)
-          let on_error =
-            Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
-                let open Typing_error.Reasons_callback in
-                prepend_on_apply on_error fail_snd_err)
-          in
-          let subtype_env = Subtype_env.set_on_error subtype_env on_error in
-          Has_type_member.simplify_subtype_has_type_member
-            ~subtype_env
-            ~sub_supportdyn
-            ~this_ty
-            ~fail
-            ety_sub
-            (r, htm)
-            env
-      end
-    (* Next deal with all locl types *)
+      Subtype_constraint_super.simplify_subtype_cty_super
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        ty_sub
+        ety_sub
+        ty_super
+        cty_super
+        env
+      (* Next deal with all locl types *)
     | LoclType ty_super ->
       (match deref ty_super with
       | (_, Tvar var_super) ->
@@ -6015,6 +5589,507 @@ end = struct
       env
       prop
       subtype_env.Subtype_env.on_error
+end
+
+and Subtype_constraint_super : sig
+  val simplify_subtype_cty_super :
+    subtype_env:Subtype_env.t ->
+    sub_supportdyn:Reason.t option ->
+    this_ty:Typing_defs.locl_ty option ->
+    super_like:bool ->
+    fail:Typing_error.t option ->
+    Typing_defs.internal_type ->
+    Typing_defs.internal_type ->
+    Typing_defs.internal_type ->
+    Typing_defs.constraint_type ->
+    Typing_env_types.env ->
+    Typing_env_types.env * TL.subtype_prop
+end = struct
+  let simplify_subtype_cty_super
+      ~(subtype_env : Subtype_env.t)
+      ~(sub_supportdyn : Reason.t option)
+      ~(this_ty : locl_ty option)
+      ~(super_like : bool)
+      ~fail
+      (ty_sub : internal_type)
+      (ety_sub : internal_type)
+      (ty_super : internal_type)
+      (cty_super : constraint_type)
+      env =
+    (* | ConstraintType cty_super -> *)
+    let using_new_method_call_inference =
+      TypecheckerOptions.method_call_inference (Env.get_tcopt env)
+    in
+    let ety_super = ConstraintType cty_super in
+    let default_subtype_help env =
+      Subtype.default_subtype
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        env
+        ety_sub
+        ety_super
+    in
+    let invalid_env env = invalid ~fail env in
+    let invalid_env_with env f = invalid ~fail:f env in
+    let ( ||| ) = ( ||| ) ~fail in
+    let fail_snd_err =
+      let (ety_sub, ety_super, stripped_existential) =
+        match Pretty.strip_existential ~ity_sub:ety_sub ~ity_sup:ety_super with
+        | None -> (ety_sub, ety_super, false)
+        | Some (ety_sub, ety_super) -> (ety_sub, ety_super, true)
+      in
+      match subtype_env.Subtype_env.tparam_constraints with
+      | [] ->
+        Typing_error.Secondary.Subtyping_error
+          {
+            ty_sub = ety_sub;
+            ty_sup = ety_super;
+            is_coeffect = subtype_env.Subtype_env.is_coeffect;
+            stripped_existential;
+          }
+      | cstrs ->
+        Typing_error.Secondary.Violated_constraint
+          {
+            cstrs;
+            ty_sub = ety_sub;
+            ty_sup = ety_super;
+            is_coeffect = subtype_env.Subtype_env.is_coeffect;
+          }
+    in
+    begin
+      match deref_constraint_type cty_super with
+      | (_, TCintersection (lty, cty)) ->
+        (match ety_sub with
+        | LoclType t when is_union t -> default_subtype_help env
+        | ConstraintType t when is_constraint_type_union t ->
+          default_subtype_help env
+        | _ ->
+          env
+          |> Subtype.simplify_subtype_i
+               ~subtype_env
+               ~sub_supportdyn
+               ~this_ty:None
+               ~super_like:false
+               ~super_supportdyn:false
+               ty_sub
+               (LoclType lty)
+          &&& Subtype.simplify_subtype_i
+                ~subtype_env
+                ~sub_supportdyn
+                ~this_ty:None
+                ~super_like:false
+                ~super_supportdyn:false
+                ty_sub
+                (ConstraintType cty))
+      | (_, TCunion (maybe_null, maybe_has_member))
+        when using_new_method_call_inference
+             && is_has_member maybe_has_member
+             &&
+             let (_, maybe_null) = Env.expand_type env maybe_null in
+             is_prim Aast.Tnull maybe_null ->
+        (* `LHS <: Thas_member(...) | null` is morally a null-safe object access *)
+        let (env, null_ty) = Env.expand_type env maybe_null in
+        let r_null = get_reason null_ty in
+        let (r, has_member_ty) = deref_constraint_type maybe_has_member in
+        (match has_member_ty with
+        | Thas_member has_member_ty ->
+          Has_member.simplify_subtype_has_member
+            ~subtype_env
+            ~sub_supportdyn
+            ~this_ty
+            ~nullsafe:(Some r_null)
+            ~fail
+            ety_sub
+            (r, has_member_ty)
+            env
+        | _ -> invalid_env env (* Not possible due to guard in parent match *))
+      | (_, TCunion (lty_super, cty_super)) ->
+        (match ety_sub with
+        | ConstraintType cty when is_constraint_type_union cty ->
+          default_subtype_help env
+        | ConstraintType _ ->
+          env
+          |> Subtype.simplify_subtype_i
+               ~subtype_env
+               ~sub_supportdyn
+               ~this_ty:None
+               ~super_like:false
+               ~super_supportdyn:false
+               ty_sub
+               (ConstraintType cty_super)
+          ||| Subtype.simplify_subtype_i
+                ~subtype_env
+                ~sub_supportdyn
+                ~this_ty:None
+                ~super_like:false
+                ~super_supportdyn:false
+                ty_sub
+                (LoclType lty_super)
+          ||| default_subtype_help
+        | LoclType lty ->
+          (match deref lty with
+          | (r, Toption ty) ->
+            let ty_null = MakeType.null r in
+            if_unsat
+              invalid_env
+              (Subtype.simplify_subtype_i
+                 ~subtype_env
+                 ~sub_supportdyn
+                 ~this_ty
+                 ~super_like:false
+                 ~super_supportdyn:false
+                 (LoclType ty_null)
+                 ty_super
+                 env)
+            &&& Subtype.simplify_subtype_i
+                  ~subtype_env
+                  ~sub_supportdyn
+                  ~this_ty
+                  ~super_like:false
+                  ~super_supportdyn:false
+                  (LoclType ty)
+                  ty_super
+          | (_, (Tintersection _ | Tunion _ | Tvar _)) ->
+            default_subtype_help env
+          | _ ->
+            env
+            |> Subtype.simplify_subtype_i
+                 ~subtype_env
+                 ~sub_supportdyn
+                 ~this_ty:None
+                 ~super_like:false
+                 ~super_supportdyn:false
+                 ty_sub
+                 (ConstraintType cty_super)
+            ||| Subtype.simplify_subtype_i
+                  ~subtype_env
+                  ~sub_supportdyn
+                  ~this_ty:None
+                  ~super_like:false
+                  ~super_supportdyn:false
+                  ty_sub
+                  (LoclType lty_super)
+            ||| default_subtype_help))
+      | (r_super, Tdestructure { d_required; d_optional; d_variadic; d_kind })
+        ->
+        (* List destructuring *)
+        let destructure_array ~sub_supportdyn t env =
+          (* If this is a splat, there must be a variadic box to receive the elements
+           * but for list(...) destructuring this is not required. Example:
+           *
+           * function f(int $i): void {}
+           * function g(vec<int> $v): void {
+           *   list($a) = $v; // ok (but may throw)
+           *   f(...$v); // error
+           * } *)
+          let fpos =
+            match r_super with
+            | Reason.Runpack_param (_, fpos, _) -> fpos
+            | _ -> Reason.to_pos r_super
+          in
+          match (d_kind, d_required, d_variadic) with
+          | (SplatUnpack, _ :: _, _) ->
+            (* return the env so as not to discard the type variable that might
+               have been created for the Traversable type created below. *)
+            invalid_env_with
+              env
+              (Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
+                   Typing_error.(
+                     apply_reasons ~on_error
+                     @@ Secondary.Unpack_array_required_argument
+                          { pos = Reason.to_pos r_super; decl_pos = fpos })))
+          | (SplatUnpack, [], None) ->
+            invalid_env_with
+              env
+              (Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
+                   Typing_error.(
+                     apply_reasons ~on_error
+                     @@ Secondary.Unpack_array_variadic_argument
+                          { pos = Reason.to_pos r_super; decl_pos = fpos })))
+          | (SplatUnpack, [], Some _)
+          | (ListDestructure, _, _) ->
+            List.fold d_required ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+                res
+                &&& Subtype.simplify_subtype
+                      ~subtype_env
+                      ~sub_supportdyn
+                      ~this_ty
+                      ~super_like:false
+                      ~super_supportdyn:false
+                      t
+                      ty_dest)
+            &&& fun env ->
+            List.fold d_optional ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+                res
+                &&& Subtype.simplify_subtype
+                      ~subtype_env
+                      ~sub_supportdyn
+                      ~this_ty
+                      ~super_like:false
+                      ~super_supportdyn:false
+                      t
+                      ty_dest)
+            &&& fun env ->
+            Option.value_map ~default:(env, TL.valid) d_variadic ~f:(fun vty ->
+                Subtype.simplify_subtype
+                  ~subtype_env
+                  ~sub_supportdyn
+                  ~this_ty
+                  ~super_like:false
+                  ~super_supportdyn:false
+                  t
+                  vty
+                  env)
+        in
+
+        let destructure_tuple r ts env =
+          (* First fill the required elements. If there are insufficient elements, an error is reported.
+           * Fill as many of the optional elements as possible, and the remainder are unioned into the
+           * variadic element. Example:
+           *
+           * (float, bool, string, int) <: Tdestructure(#1, opt#2, ...#3) =>
+           * float <: #1 /\ bool <: #2 /\ string <: #3 /\ int <: #3
+           *
+           * (float, bool) <: Tdestructure(#1, #2, opt#3) =>
+           * float <: #1 /\ bool <: #2
+           *)
+          let len_ts = List.length ts in
+          let len_required = List.length d_required in
+          let arity_error f =
+            let (epos, fpos, prefix) =
+              match r_super with
+              | Reason.Runpack_param (epos, fpos, c) ->
+                (Pos_or_decl.of_raw_pos epos, fpos, c)
+              | _ -> (Reason.to_pos r_super, Reason.to_pos r, 0)
+            in
+            invalid_env_with
+              env
+              (f
+                 (prefix + len_required)
+                 (prefix + len_ts)
+                 epos
+                 fpos
+                 subtype_env.Subtype_env.on_error)
+          in
+          if len_ts < len_required then
+            arity_error (fun expected actual pos decl_pos on_error_opt ->
+                Option.map on_error_opt ~f:(fun on_error ->
+                    let base_err =
+                      Typing_error.Secondary.Typing_too_few_args
+                        { pos; decl_pos; expected; actual }
+                    in
+                    Typing_error.(apply_reasons ~on_error base_err)))
+          else
+            let len_optional = List.length d_optional in
+            let (ts_required, remain) = List.split_n ts len_required in
+            let (ts_optional, ts_variadic) = List.split_n remain len_optional in
+            List.fold2_exn
+              ts_required
+              d_required
+              ~init:(env, TL.valid)
+              ~f:(fun res ty ty_dest ->
+                res
+                &&& Subtype.simplify_subtype
+                      ~subtype_env
+                      ~sub_supportdyn
+                      ~this_ty
+                      ~super_like:false
+                      ~super_supportdyn:false
+                      ty
+                      ty_dest)
+            &&& fun env ->
+            let len_ts_opt = List.length ts_optional in
+            let d_optional_part =
+              if len_ts_opt < len_optional then
+                List.take d_optional len_ts_opt
+              else
+                d_optional
+            in
+            List.fold2_exn
+              ts_optional
+              d_optional_part
+              ~init:(env, TL.valid)
+              ~f:(fun res ty ty_dest ->
+                res
+                &&& Subtype.simplify_subtype
+                      ~subtype_env
+                      ~sub_supportdyn
+                      ~this_ty
+                      ~super_like:false
+                      ~super_supportdyn:false
+                      ty
+                      ty_dest)
+            &&& fun env ->
+            match (ts_variadic, d_variadic) with
+            | (vars, Some vty) ->
+              List.fold vars ~init:(env, TL.valid) ~f:(fun res ty ->
+                  res
+                  &&& Subtype.simplify_subtype
+                        ~subtype_env
+                        ~sub_supportdyn
+                        ~this_ty
+                        ~super_like:false
+                        ~super_supportdyn:false
+                        ty
+                        vty)
+            | ([], None) -> valid env
+            | (_, None) ->
+              (* Elements remain but we have nowhere to put them *)
+              arity_error (fun expected actual pos decl_pos on_error_opt ->
+                  Option.map on_error_opt ~f:(fun on_error ->
+                      Typing_error.(
+                        apply_reasons ~on_error
+                        @@ Secondary.Typing_too_many_args
+                             { pos; decl_pos; expected; actual })))
+        in
+
+        let destructure_dynamic t env =
+          if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
+            List.fold d_required ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+                res
+                &&& Subtype.simplify_subtype
+                      ~subtype_env
+                      ~sub_supportdyn
+                      ~this_ty
+                      ~super_like:false
+                      ~super_supportdyn:false
+                      t
+                      ty_dest)
+            &&& fun env ->
+            List.fold d_optional ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+                res
+                &&& Subtype.simplify_subtype
+                      ~subtype_env
+                      ~sub_supportdyn
+                      ~this_ty
+                      ~super_like:false
+                      ~super_supportdyn:false
+                      t
+                      ty_dest)
+            &&& fun env ->
+            Option.value_map ~default:(env, TL.valid) d_variadic ~f:(fun vty ->
+                Subtype.simplify_subtype
+                  ~subtype_env
+                  ~sub_supportdyn
+                  ~this_ty
+                  ~super_like:false
+                  ~super_supportdyn:false
+                  t
+                  vty
+                  env)
+          else
+            env |> destructure_array ~sub_supportdyn t
+        in
+        begin
+          match ety_sub with
+          | ConstraintType _ -> default_subtype_help env
+          | LoclType ty_sub ->
+            (match deref ty_sub with
+            | (r, Ttuple tyl) -> env |> destructure_tuple r tyl
+            | (r, Tclass ((_, x), _, tyl))
+              when String.equal x SN.Collections.cPair ->
+              env |> destructure_tuple r tyl
+            | (_, Tclass ((_, x), _, [elt_type]))
+              when String.equal x SN.Collections.cVector
+                   || String.equal x SN.Collections.cImmVector
+                   || String.equal x SN.Collections.cVec
+                   || String.equal x SN.Collections.cConstVector ->
+              env |> destructure_array ~sub_supportdyn elt_type
+            | (_, Tdynamic) -> env |> destructure_dynamic ty_sub
+            | (_, (Tunion _ | Tintersection _ | Tgeneric _ | Tvar _)) ->
+              (* TODO(T69551141) handle type arguments of Tgeneric? *)
+              default_subtype_help env
+            | _ -> begin
+              match d_kind with
+              | SplatUnpack ->
+                (* Allow splatting of arbitrary Traversables *)
+                let (env, ty_inner) = Env.fresh_type env Pos.none in
+                let traversable = MakeType.traversable r_super ty_inner in
+                env
+                |> Subtype.simplify_subtype
+                     ~subtype_env
+                     ~sub_supportdyn
+                     ~this_ty
+                     ~super_like:false
+                     ~super_supportdyn:false
+                     ty_sub
+                     traversable
+                &&& destructure_array ~sub_supportdyn:None ty_inner
+              | ListDestructure ->
+                let ty_sub_descr =
+                  lazy
+                    (Typing_print.with_blank_tyvars (fun () ->
+                         Typing_print.full_strip_ns env ty_sub))
+                in
+                default_subtype_help env
+                |> if_unsat @@ fun env ->
+                   invalid_env_with
+                     env
+                     (Option.map
+                        subtype_env.Subtype_env.on_error
+                        ~f:
+                          Typing_error.(
+                            fun on_error ->
+                              apply_reasons ~on_error
+                              @@ Secondary.Invalid_destructure
+                                   {
+                                     pos = Reason.to_pos r_super;
+                                     decl_pos = get_pos ty_sub;
+                                     ty_name = ty_sub_descr;
+                                   }))
+            end)
+        end
+      | (r, Tcan_index ci) ->
+        Can_index.simplify_subtype_can_index
+          ~subtype_env
+          ~sub_supportdyn
+          ~this_ty
+          ~fail
+          ety_sub
+          ety_super
+          (r, ci)
+          env
+      | (r, Tcan_traverse ct) ->
+        Can_traverse.simplify_subtype_can_traverse
+          ~subtype_env
+          ~sub_supportdyn
+          ~this_ty
+          ~fail
+          ety_sub
+          ety_super
+          (r, ct)
+          env
+      | (r, Thas_member has_member_ty) ->
+        Has_member.simplify_subtype_has_member
+          ~subtype_env
+          ~sub_supportdyn
+          ~this_ty
+          ~fail
+          ~nullsafe:None
+          ety_sub
+          (r, has_member_ty)
+          env
+      | (r, Thas_type_member htm) ->
+        (* Contextualize errors that may be generated when
+         * checking refinement bounds. *)
+        let on_error =
+          Option.map subtype_env.Subtype_env.on_error ~f:(fun on_error ->
+              let open Typing_error.Reasons_callback in
+              prepend_on_apply on_error fail_snd_err)
+        in
+        let subtype_env = Subtype_env.set_on_error subtype_env on_error in
+        Has_type_member.simplify_subtype_has_type_member
+          ~subtype_env
+          ~sub_supportdyn
+          ~this_ty
+          ~fail
+          ety_sub
+          (r, htm)
+          env
+    end
 end
 
 (* == API =================================================================== *)

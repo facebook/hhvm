@@ -23,9 +23,9 @@ impl MapName for hhbc::Constant<'_> {
     }
 }
 
-impl MapName for hhbc::CtxConstant<'_> {
+impl MapName for hhbc::CtxConstant {
     fn get_name(&self) -> &str {
-        self.name.unsafe_as_str()
+        self.name.as_str()
     }
 }
 

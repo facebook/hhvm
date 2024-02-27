@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Maybe;
-use ffi::Str;
 use hhbc::Attribute;
 use hhbc::Body;
 use hhbc::Class;
@@ -53,9 +52,9 @@ impl MapName for hhbc::Constant<'_> {
     }
 }
 
-impl MapName for hhbc::CtxConstant<'_> {
+impl MapName for hhbc::CtxConstant {
     fn get_name(&self) -> String {
-        self.name.unsafe_as_str().to_string()
+        self.name.to_string()
     }
 }
 
@@ -514,18 +513,18 @@ fn cmp_fatal(a: &Fatal, b: &Fatal) -> Result {
     Ok(())
 }
 
-fn is_pure(sc: &[naming_special_names_rust::coeffects::Ctx], usc: &[Str<'_>]) -> bool {
+fn is_pure(sc: &[naming_special_names_rust::coeffects::Ctx], usc: &[StringId]) -> bool {
     (sc.len() == 1
         && sc.contains(&naming_special_names_rust::coeffects::Ctx::Pure)
         && usc.is_empty())
-        || (sc.is_empty() && usc.len() == 1 && usc.iter().all(|usc| usc.as_bstr() == "pure"))
+        || (sc.is_empty() && usc.len() == 1 && usc.iter().all(|usc| usc.as_str() == "pure"))
 }
 
 fn cmp_static_coeffects(
     a_sc: &[naming_special_names_rust::coeffects::Ctx],
-    a_usc: &[Str<'_>],
+    a_usc: &[StringId],
     b_sc: &[naming_special_names_rust::coeffects::Ctx],
-    b_usc: &[Str<'_>],
+    b_usc: &[StringId],
 ) -> Result {
     // T126548142 -- odd "pure" behavior
     if is_pure(a_sc, a_usc) && is_pure(b_sc, b_usc) {
@@ -537,7 +536,7 @@ fn cmp_static_coeffects(
     }
 }
 
-fn cmp_coeffects(a: &hhbc::Coeffects<'_>, b: &hhbc::Coeffects<'_>) -> Result {
+fn cmp_coeffects(a: &hhbc::Coeffects, b: &hhbc::Coeffects) -> Result {
     let hhbc::Coeffects {
         static_coeffects: a_sc,
         unenforced_static_coeffects: a_usc,

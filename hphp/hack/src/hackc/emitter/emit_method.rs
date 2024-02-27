@@ -192,7 +192,6 @@ pub fn from_ast<'a, 'arena, 'decl>(
         parent_coeffects.map_or(Coeffects::default(), |pc| pc.inherit_to_child_closure())
     } else {
         Coeffects::from_ast(
-            emitter.alloc,
             method.ctxs.as_ref(),
             &method.params,
             &method.tparams,

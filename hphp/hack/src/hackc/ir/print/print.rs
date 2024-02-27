@@ -403,7 +403,7 @@ fn print_class(w: &mut dyn Write, class: &Class<'_>, strings: &StringInterner) -
     writeln!(w)
 }
 
-pub(crate) fn print_coeffects(w: &mut dyn Write, coeffects: &Coeffects<'_>) -> Result {
+pub(crate) fn print_coeffects(w: &mut dyn Write, coeffects: &Coeffects) -> Result {
     if !coeffects.static_coeffects.is_empty() || !coeffects.unenforced_static_coeffects.is_empty() {
         write!(
             w,
@@ -415,7 +415,7 @@ pub(crate) fn print_coeffects(w: &mut dyn Write, coeffects: &Coeffects<'_>) -> R
                 w,
                 " unenforced({})",
                 FmtSep::comma(coeffects.unenforced_static_coeffects.iter(), |f, v| {
-                    FmtIdentifier(v).fmt(f)
+                    FmtIdentifier(v.as_str().as_bytes()).fmt(f)
                 })
             )?;
         }
@@ -434,7 +434,7 @@ pub(crate) fn print_coeffects(w: &mut dyn Write, coeffects: &Coeffects<'_>) -> R
         writeln!(
             w,
             ".coeffects_cc_param {index} {}",
-            FmtQuotedStr(&ffi::Str::new(ctx_name.as_ref()))
+            FmtQuotedStr(&Str::new(ctx_name.as_str().as_bytes()))
         )?;
     }
 
@@ -442,7 +442,9 @@ pub(crate) fn print_coeffects(w: &mut dyn Write, coeffects: &Coeffects<'_>) -> R
         writeln!(
             w,
             ".coeffects_cc_this {}",
-            FmtSep::comma(types.iter(), |f, v| { FmtQuotedStr(v).fmt(f) })
+            FmtSep::comma(types.iter(), |f, v| {
+                FmtQuotedStr(&Str::new(v.as_str().as_bytes())).fmt(f)
+            })
         )?;
     }
 
@@ -457,7 +459,10 @@ pub(crate) fn print_coeffects(w: &mut dyn Write, coeffects: &Coeffects<'_>) -> R
             "  .coeffects_cc_reified {}{} {}",
             if *is_class { "is_class " } else { "" },
             index,
-            FmtSep::new("", "::", "", types.iter(), |w, qn| FmtIdentifier(qn).fmt(w))
+            FmtSep::new("", "::", "", types.iter(), |w, qn| FmtIdentifierStr(
+                qn.as_str()
+            )
+            .fmt(w))
         )?;
     }
 
@@ -476,13 +481,15 @@ pub(crate) fn print_coeffects(w: &mut dyn Write, coeffects: &Coeffects<'_>) -> R
     Ok(())
 }
 
-fn print_ctx_constant(w: &mut dyn Write, ctx: &CtxConstant<'_>) -> Result {
+fn print_ctx_constant(w: &mut dyn Write, ctx: &CtxConstant) -> Result {
     writeln!(
         w,
         "  ctx_constant {} [{}] [{}]{}",
-        FmtIdentifier(&ctx.name),
-        FmtSep::comma(ctx.recognized.iter(), |w, i| FmtIdentifier(i).fmt(w)),
-        FmtSep::comma(ctx.unrecognized.iter(), |w, i| FmtIdentifier(i).fmt(w)),
+        FmtIdentifierStr(ctx.name.as_str()),
+        FmtSep::comma(ctx.recognized.iter(), |w, i| FmtIdentifierStr(i.as_str())
+            .fmt(w)),
+        FmtSep::comma(ctx.unrecognized.iter(), |w, i| FmtIdentifierStr(i.as_str())
+            .fmt(w)),
         if ctx.is_abstract { " abstract" } else { "" }
     )
 }

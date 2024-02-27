@@ -94,7 +94,7 @@ fn convert_body<'a>(
     body: &Body<'a>,
     attributes: &[hhbc::Attribute],
     attrs: ir::Attr,
-    coeffects: &hhbc::Coeffects<'a>,
+    coeffects: &hhbc::Coeffects,
     src_loc: ir::SrcLoc,
     unit_state: &UnitState,
 ) -> ir::Func<'a> {
@@ -256,7 +256,7 @@ fn convert_param<'a, 'b>(ctx: &mut Context<'a, 'b>, param: &Param<'a>) -> ir::Pa
     }
 }
 
-fn convert_coeffects<'a>(coeffects: &hhbc::Coeffects<'a>) -> ir::Coeffects<'a> {
+fn convert_coeffects(coeffects: &hhbc::Coeffects) -> ir::Coeffects {
     ir::Coeffects {
         static_coeffects: coeffects.static_coeffects.clone(),
         unenforced_static_coeffects: coeffects.unenforced_static_coeffects.clone(),

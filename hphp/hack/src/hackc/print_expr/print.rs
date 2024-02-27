@@ -41,17 +41,17 @@ use crate::write;
 use crate::write::Error;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct HhasBodyEnv<'a, 'arena> {
+pub struct HhasBodyEnv<'a> {
     pub is_namespaced: bool,
-    pub scope: &'a Scope<'a, 'arena>,
+    pub scope: &'a Scope<'a>,
 }
 
-pub type ExprEnv<'arena, 'e> = Option<&'e HhasBodyEnv<'e, 'arena>>;
+pub type ExprEnv<'e> = Option<&'e HhasBodyEnv<'e>>;
 
 fn print_key_value(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    env: &ExprEnv<'_, '_>,
+    env: &ExprEnv<'_>,
     k: &ast::Expr,
     v: &ast::Expr,
 ) -> Result<()> {
@@ -61,13 +61,13 @@ fn print_key_value(
 fn print_key_value_<K, KeyPrinter>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    env: &ExprEnv<'_, '_>,
+    env: &ExprEnv<'_>,
     k: K,
     mut kp: KeyPrinter,
     v: &ast::Expr,
 ) -> Result<()>
 where
-    KeyPrinter: FnMut(&Context<'_>, &mut dyn Write, &ExprEnv<'_, '_>, K) -> Result<()>,
+    KeyPrinter: FnMut(&Context<'_>, &mut dyn Write, &ExprEnv<'_>, K) -> Result<()>,
 {
     kp(ctx, w, env, k)?;
     w.write_all(b" => ")?;
@@ -77,7 +77,7 @@ where
 fn print_field(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    env: &ExprEnv<'_, '_>,
+    env: &ExprEnv<'_>,
     field: &ast::Field,
 ) -> Result<()> {
     print_key_value(ctx, w, env, &field.0, &field.1)
@@ -86,7 +86,7 @@ fn print_field(
 fn print_afield(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    env: &ExprEnv<'_, '_>,
+    env: &ExprEnv<'_>,
     afield: &ast::Afield,
 ) -> Result<()> {
     use ast::Afield as A;
@@ -99,7 +99,7 @@ fn print_afield(
 fn print_afields(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    env: &ExprEnv<'_, '_>,
+    env: &ExprEnv<'_>,
     afields: impl AsRef<[ast::Afield]>,
 ) -> Result<()> {
     write::concat_by(w, ", ", afields, |w, i| print_afield(ctx, w, env, i))
@@ -124,12 +124,12 @@ fn print_uop(w: &mut dyn Write, op: ast::Uop) -> Result<()> {
 fn print_key_values_<K, KeyPrinter>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    env: &ExprEnv<'_, '_>,
+    env: &ExprEnv<'_>,
     mut kp: KeyPrinter,
     kvs: impl AsRef<[(K, ast::Expr)]>,
 ) -> Result<()>
 where
-    KeyPrinter: Fn(&Context<'_>, &mut dyn Write, &ExprEnv<'_, '_>, &K) -> Result<()>,
+    KeyPrinter: Fn(&Context<'_>, &mut dyn Write, &ExprEnv<'_>, &K) -> Result<()>,
 {
     write::concat_by(w, ", ", kvs, |w, (k, v)| {
         print_key_value_(ctx, w, env, k, &mut kp, v)
@@ -139,12 +139,12 @@ where
 fn print_expr_darray<K, KeyPrinter>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    env: &ExprEnv<'_, '_>,
+    env: &ExprEnv<'_>,
     kp: KeyPrinter,
     kvs: impl AsRef<[(K, ast::Expr)]>,
 ) -> Result<()>
 where
-    KeyPrinter: Fn(&Context<'_>, &mut dyn Write, &ExprEnv<'_, '_>, &K) -> Result<()>,
+    KeyPrinter: Fn(&Context<'_>, &mut dyn Write, &ExprEnv<'_>, &K) -> Result<()>,
 {
     write::wrap_by_(w, "darray[", "]", |w| {
         print_key_values_(ctx, w, env, kp, kvs)
@@ -154,7 +154,7 @@ where
 fn print_expr_varray(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    env: &ExprEnv<'_, '_>,
+    env: &ExprEnv<'_>,
     varray: &[ast::Expr],
 ) -> Result<()> {
     write::wrap_by_(w, "varray[", "]", |w| {
@@ -165,7 +165,7 @@ fn print_expr_varray(
 fn print_shape_field_name(
     _: &Context<'_>,
     w: &mut dyn Write,
-    _: &ExprEnv<'_, '_>,
+    _: &ExprEnv<'_>,
     field: &ast::ShapeFieldName,
 ) -> Result<()> {
     use ast::ShapeFieldName as S;
@@ -206,11 +206,7 @@ fn print_expr_string(w: &mut dyn Write, s: &[u8]) -> Result<()> {
     })
 }
 
-fn print_expr_to_string(
-    ctx: &Context<'_>,
-    env: &ExprEnv<'_, '_>,
-    expr: &ast::Expr,
-) -> Result<BString> {
+fn print_expr_to_string(ctx: &Context<'_>, env: &ExprEnv<'_>, expr: &ast::Expr) -> Result<BString> {
     let mut buf = Vec::new();
     print_expr(ctx, &mut buf, env, expr).map_err(|e| match write::into_error(e) {
         Error::NotImpl(m) => Error::NotImpl(m),
@@ -223,10 +219,10 @@ fn print_expr_to_string(
 fn print_expr(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    env: &ExprEnv<'_, '_>,
+    env: &ExprEnv<'_>,
     ast::Expr(_, _, expr): &ast::Expr,
 ) -> Result<()> {
-    fn adjust_id<'a>(env: &ExprEnv<'_, '_>, id: &'a str) -> Cow<'a, str> {
+    fn adjust_id<'a>(env: &ExprEnv<'_>, id: &'a str) -> Cow<'a, str> {
         match env {
             Some(env) => {
                 if env.is_namespaced
@@ -244,7 +240,7 @@ fn print_expr(
             _ => id.into(),
         }
     }
-    fn print_expr_id<'a>(w: &mut dyn Write, env: &ExprEnv<'_, '_>, s: &'a str) -> Result<()> {
+    fn print_expr_id<'a>(w: &mut dyn Write, env: &ExprEnv<'_>, s: &'a str) -> Result<()> {
         w.write_all(adjust_id(env, s).as_bytes())
     }
     fn fmt_class_name<'a>(is_class_constant: bool, id: Cow<'a, str>) -> Cow<'a, str> {
@@ -262,7 +258,7 @@ fn print_expr(
     }
     fn get_class_name_from_id<'e>(
         ctx: &Context<'_>,
-        env: &ExprEnv<'_, 'e>,
+        env: &ExprEnv<'e>,
         should_format: bool,
         is_class_constant: bool,
         id: &'e str,
@@ -293,7 +289,7 @@ fn print_expr(
     fn handle_possible_colon_colon_class_expr(
         ctx: &Context<'_>,
         w: &mut dyn Write,
-        env: &ExprEnv<'_, '_>,
+        env: &ExprEnv<'_>,
         e_: &ast::Expr_,
     ) -> Result<Option<()>> {
         match e_.as_class_const() {
@@ -713,7 +709,7 @@ fn print_expr(
 fn print_xml(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    env: &ExprEnv<'_, '_>,
+    env: &ExprEnv<'_>,
     id: &str,
     es: &[ast::Expr],
 ) -> Result<()> {
@@ -726,7 +722,7 @@ fn print_xml(
     fn print_xhp_attr(
         ctx: &Context<'_>,
         w: &mut dyn Write,
-        env: &ExprEnv<'_, '_>,
+        env: &ExprEnv<'_>,
         attr: &(ast_defs::ShapeFieldName, ast::Expr),
     ) -> Result<()> {
         match attr {
@@ -767,7 +763,7 @@ fn print_xml(
 fn print_efun(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    env: &ExprEnv<'_, '_>,
+    env: &ExprEnv<'_>,
     efun: &ast::Efun,
 ) -> Result<()> {
     let f = &efun.fun;
@@ -800,7 +796,7 @@ fn print_efun(
 fn print_block(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    env: &ExprEnv<'_, '_>,
+    env: &ExprEnv<'_>,
     block: &[ast::Stmt],
 ) -> Result<()> {
     match block {
@@ -816,7 +812,7 @@ fn print_block(
 fn print_block_(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    env: &ExprEnv<'_, '_>,
+    env: &ExprEnv<'_>,
     block: &[ast::Stmt],
 ) -> Result<()> {
     write::wrap_by_(w, "{\n", "}\n", |w| {
@@ -833,7 +829,7 @@ fn print_block_(
 fn print_statement(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    env: &ExprEnv<'_, '_>,
+    env: &ExprEnv<'_>,
     stmt: &ast::Stmt,
 ) -> Result<()> {
     use ast::Stmt_ as S_;
@@ -882,7 +878,7 @@ fn print_statement(
 fn print_fparam(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    env: &ExprEnv<'_, '_>,
+    env: &ExprEnv<'_>,
     param: &ast::FunParam,
 ) -> Result<()> {
     if param.callconv.is_pinout() {
@@ -981,7 +977,7 @@ pub fn expr_to_string_lossy(mut ctx: Context<'_>, expr: &ast::Expr) -> String {
 pub fn external_print_expr(
     ctx: &Context<'_>,
     w: &mut dyn std::io::Write,
-    env: &ExprEnv<'_, '_>,
+    env: &ExprEnv<'_>,
     expr: &ast::Expr,
 ) -> std::result::Result<(), Error> {
     print_expr(ctx, w, env, expr).map_err(write::into_error)?;

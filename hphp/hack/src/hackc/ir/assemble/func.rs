@@ -9,7 +9,6 @@ use anyhow::anyhow;
 use anyhow::Context;
 use anyhow::Result;
 use bumpalo::Bump;
-use ffi::Str;
 use ir_core::func::ExFrame;
 use ir_core::instr;
 use ir_core::instr::BaseOp;
@@ -1112,12 +1111,11 @@ impl FunctionParser<'_, '_> {
 
     fn parse_coeffects_cc_param(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
         parse!(tokenizer, <index:parse_u32> <ctx_name:string>);
-        let ctx_name = Str::new_slice(self.alloc, &ctx_name.unescaped_string()?);
-        self.builder
-            .func
-            .coeffects
-            .cc_param
-            .push(CcParam { index, ctx_name });
+        let ctx_name = ctx_name.unescaped_string()?;
+        self.builder.func.coeffects.cc_param.push(CcParam {
+            index,
+            ctx_name: ir_core::intern(String::from_utf8(ctx_name)?),
+        });
         Ok(())
     }
 
@@ -1128,7 +1126,7 @@ impl FunctionParser<'_, '_> {
         let mut types = Vec::new();
         loop {
             let (id, _) = parse_user_id(tokenizer)?;
-            types.push(Str::new_slice(self.alloc, &id));
+            types.push(ir_core::intern(std::str::from_utf8(&id)?));
             if !tokenizer.next_is_identifier("::")? {
                 break;
             }
@@ -1146,7 +1144,11 @@ impl FunctionParser<'_, '_> {
         parse!(tokenizer, <types:string,*>);
         let types = types
             .into_iter()
-            .map(|t| Ok(Str::new_slice(self.alloc, &t.unescaped_string()?)))
+            .map(|t| {
+                Ok(ir_core::intern(std::str::from_utf8(
+                    &t.unescaped_string()?,
+                )?))
+            })
             .collect::<Result<Vec<_>>>()?
             .into();
         self.builder.func.coeffects.cc_this.push(CcThis { types });
@@ -1182,8 +1184,8 @@ impl FunctionParser<'_, '_> {
             parse!(tokenizer, "(" <unenforced_static_coeffects:parse_user_id,*> ")");
             unenforced_static_coeffects
                 .into_iter()
-                .map(|(ctx, _)| Str::new_slice(self.alloc, &ctx))
-                .collect()
+                .map(|(ctx, _)| Ok(ir_core::intern(std::str::from_utf8(&ctx)?)))
+                .collect::<Result<Vec<_>>>()?
         } else {
             Vec::new()
         };

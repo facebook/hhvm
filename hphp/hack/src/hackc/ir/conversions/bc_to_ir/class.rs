@@ -133,11 +133,11 @@ fn convert_property(prop: &hhbc::Property<'_>, strings: &ir::StringInterner) -> 
     }
 }
 
-fn convert_ctx_constant<'a>(ctx: &hhbc::CtxConstant<'a>) -> ir::CtxConstant<'a> {
+fn convert_ctx_constant(ctx: &hhbc::CtxConstant) -> ir::CtxConstant {
     ir::CtxConstant {
         name: ctx.name,
-        recognized: Vec::from_iter(ctx.recognized.iter().cloned()).into(),
-        unrecognized: Vec::from_iter(ctx.unrecognized.iter().cloned()).into(),
+        recognized: ctx.recognized.clone(),
+        unrecognized: ctx.unrecognized.clone(),
         is_abstract: ctx.is_abstract,
     }
 }

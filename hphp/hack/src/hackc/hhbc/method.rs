@@ -23,7 +23,7 @@ pub struct Method<'arena> {
     pub name: MethodName<'arena>,
     pub body: Body<'arena>,
     pub span: Span,
-    pub coeffects: Coeffects<'arena>,
+    pub coeffects: Coeffects,
     pub flags: MethodFlags,
     pub attrs: Attr,
 }

@@ -19,26 +19,26 @@ pub use crate::ast_scope_item::Method;
 pub use crate::ast_scope_item::ScopeItem;
 
 #[derive(Clone, Default, Debug, Eq, PartialEq)]
-pub struct Scope<'a, 'arena> {
-    items: Vec<ScopeItem<'a, 'arena>>,
+pub struct Scope<'a> {
+    items: Vec<ScopeItem<'a>>,
     class_cache: Option<Class<'a>>,
 }
 
-impl<'a, 'arena> Scope<'a, 'arena> {
-    pub fn with_item(item: ScopeItem<'a, 'arena>) -> Self {
+impl<'a> Scope<'a> {
+    pub fn with_item(item: ScopeItem<'a>) -> Self {
         let mut scope = Self::default();
         scope.push_item(item);
         scope
     }
 
-    pub fn push_item(&mut self, s: ScopeItem<'a, 'arena>) {
+    pub fn push_item(&mut self, s: ScopeItem<'a>) {
         if let ScopeItem::Class(cd) = &s {
             self.class_cache = Some(cd.clone());
         }
         self.items.push(s)
     }
 
-    pub fn pop_item(&mut self) -> Option<ScopeItem<'a, 'arena>> {
+    pub fn pop_item(&mut self) -> Option<ScopeItem<'a>> {
         let s = self.items.pop();
         if let Some(ScopeItem::Class(_)) = &s {
             self.class_cache = None;
@@ -46,19 +46,19 @@ impl<'a, 'arena> Scope<'a, 'arena> {
         s
     }
 
-    pub fn items(&self) -> &[ScopeItem<'a, 'arena>] {
+    pub fn items(&self) -> &[ScopeItem<'a>] {
         &self.items
     }
 
-    pub fn iter(&self) -> impl ExactSizeIterator<Item = &ScopeItem<'a, 'arena>> {
+    pub fn iter(&self) -> impl ExactSizeIterator<Item = &ScopeItem<'a>> {
         self.items.iter().rev()
     }
 
-    pub fn iter_subscopes(&self) -> impl Iterator<Item = &[ScopeItem<'a, 'arena>]> {
+    pub fn iter_subscopes(&self) -> impl Iterator<Item = &[ScopeItem<'a>]> {
         (0..self.items.len()).rev().map(move |i| &self.items[..i])
     }
 
-    pub fn top(&self) -> Option<&ScopeItem<'a, 'arena>> {
+    pub fn top(&self) -> Option<&ScopeItem<'a>> {
         self.items.last()
     }
 
@@ -189,7 +189,7 @@ impl<'a, 'arena> Scope<'a, 'arena> {
         self.items.last().map_or(false, ScopeItem::is_in_lambda)
     }
 
-    pub fn coeffects_of_scope(&self, alloc: &'arena bumpalo::Bump) -> Coeffects<'arena> {
+    pub fn coeffects_of_scope(&self) -> Coeffects {
         for scope_item in self.iter() {
             match scope_item {
                 ScopeItem::Class(_) => {
@@ -197,7 +197,6 @@ impl<'a, 'arena> Scope<'a, 'arena> {
                 }
                 ScopeItem::Method(m) => {
                     return Coeffects::from_ast(
-                        alloc,
                         m.get_ctxs(),
                         m.get_params(),
                         m.get_tparams(),
@@ -206,7 +205,6 @@ impl<'a, 'arena> Scope<'a, 'arena> {
                 }
                 ScopeItem::Function(f) => {
                     return Coeffects::from_ast(
-                        alloc,
                         f.get_ctxs(),
                         f.get_params(),
                         f.get_tparams(),

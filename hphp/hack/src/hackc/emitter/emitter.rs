@@ -61,7 +61,7 @@ pub struct Emitter<'arena, 'decl> {
     symbol_refs_state: SymbolRefsState<'arena>,
 
     /// State is also frozen and set after closure conversion
-    pub global_state_: Option<GlobalState<'arena>>,
+    pub global_state_: Option<GlobalState>,
 
     /// Controls whether we call the decl provider for testing purposes.
     /// Some(provider) => use the given DeclProvider, which may return NotFound.
@@ -184,10 +184,10 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
             .get_or_insert_with(StatementState::init)
     }
 
-    pub fn global_state(&self) -> &GlobalState<'arena> {
+    pub fn global_state(&self) -> &GlobalState {
         self.global_state_.as_ref().expect("uninit'd global_state")
     }
-    pub fn global_state_mut(&mut self) -> &mut GlobalState<'arena> {
+    pub fn global_state_mut(&mut self) -> &mut GlobalState {
         self.global_state_.get_or_insert_with(GlobalState::init)
     }
 
@@ -230,7 +230,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
 }
 
 impl<'arena, 'decl> print_expr::SpecialClassResolver for Emitter<'arena, 'decl> {
-    fn resolve<'a>(&self, scope_opt: Option<&'a Scope<'_, '_>>, id: &'a str) -> Cow<'a, str> {
+    fn resolve<'a>(&self, scope_opt: Option<&'a Scope<'_>>, id: &'a str) -> Cow<'a, str> {
         let class_expr = ClassExpr::expr_to_class_expr(
             self,
             scope_opt.unwrap_or(&ast_scope::Scope::default()),

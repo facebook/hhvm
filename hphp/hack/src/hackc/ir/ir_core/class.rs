@@ -32,7 +32,7 @@ pub struct Class<'a> {
     pub constants: Vec<HackConstant>,
 
     // TODO: (doc coeffect constants)
-    pub ctx_constants: Vec<CtxConstant<'a>>,
+    pub ctx_constants: Vec<CtxConstant>,
 
     /// Doc comment for the class.
     pub doc_comment: Option<Vec<u8>>,

@@ -78,7 +78,7 @@ fn cmp_block(a_block: &Block, b_block: &Block) -> Result {
     Ok(())
 }
 
-fn cmp_cc_reified(a: &CcReified<'_>, b: &CcReified<'_>) -> Result {
+fn cmp_cc_reified(a: &CcReified, b: &CcReified) -> Result {
     let CcReified {
         is_class: a_is_class,
         index: a_index,
@@ -95,7 +95,7 @@ fn cmp_cc_reified(a: &CcReified<'_>, b: &CcReified<'_>) -> Result {
     Ok(())
 }
 
-fn cmp_cc_this(a: &CcThis<'_>, b: &CcThis<'_>) -> Result {
+fn cmp_cc_this(a: &CcThis, b: &CcThis) -> Result {
     let CcThis { types: a_types } = a;
     let CcThis { types: b_types } = b;
     cmp_slice(a_types, b_types, cmp_eq).qualified("types")?;
@@ -222,7 +222,7 @@ fn cmp_class(
     Ok(())
 }
 
-fn cmp_coeffects(a: &Coeffects<'_>, b: &Coeffects<'_>) -> Result {
+fn cmp_coeffects(a: &Coeffects, b: &Coeffects) -> Result {
     let Coeffects {
         static_coeffects: a_static_coeffects,
         unenforced_static_coeffects: a_unenforced_static_coeffects,
@@ -328,7 +328,7 @@ fn cmp_constant(
     Ok(())
 }
 
-fn cmp_ctx_constant(a: &CtxConstant<'_>, b: &CtxConstant<'_>) -> Result {
+fn cmp_ctx_constant(a: &CtxConstant, b: &CtxConstant) -> Result {
     let CtxConstant {
         name: a_name,
         recognized: a_recognized,

@@ -8,7 +8,6 @@ use std::io::Write;
 
 use hhbc::Coeffects;
 use write_bytes::write_bytes;
-use write_bytes::DisplayBytes;
 
 use crate::context::Context;
 use crate::context::FmtIndent;
@@ -18,7 +17,7 @@ use crate::write::fmt_separated_with;
 pub(crate) fn coeffects_to_hhas(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    coeffects: &Coeffects<'_>,
+    coeffects: &Coeffects,
 ) -> Result<()> {
     let indent = FmtIndent(ctx);
 
@@ -33,12 +32,8 @@ pub(crate) fn coeffects_to_hhas(
                 " ",
                 static_coeffects
                     .iter()
-                    .map(|co| co as &dyn DisplayBytes)
-                    .chain(
-                        unenforced_static_coeffects
-                            .iter()
-                            .map(|co| co as &dyn DisplayBytes),
-                    ),
+                    .map(|co| co.to_string())
+                    .chain(unenforced_static_coeffects.iter().map(|co| co.to_string())),
             ),
         )?;
     }
@@ -60,7 +55,10 @@ pub(crate) fn coeffects_to_hhas(
             "\n{}.coeffects_cc_param {};",
             indent,
             fmt_separated_with(" ", cc_params, |w, c| write_bytes!(
-                w, "{} {}", c.index, c.ctx_name
+                w,
+                "{} {}",
+                c.index,
+                c.ctx_name.as_str().as_bytes()
             ))
         )?;
     }
@@ -70,7 +68,7 @@ pub(crate) fn coeffects_to_hhas(
             w,
             "\n{}.coeffects_cc_this {};",
             indent,
-            fmt_separated(" ", v.types.iter())
+            fmt_separated(" ", v.types.iter().map(|s| s.as_str()))
         )?;
     }
 
@@ -81,7 +79,7 @@ pub(crate) fn coeffects_to_hhas(
             indent,
             if v.is_class { "isClass " } else { "" },
             v.index,
-            fmt_separated(" ", v.types.iter())
+            fmt_separated(" ", v.types.iter().map(|s| s.as_str()))
         )?;
     }
 

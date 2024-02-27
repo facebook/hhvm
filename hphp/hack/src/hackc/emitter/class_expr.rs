@@ -27,7 +27,7 @@ pub enum ClassExpr {
 impl ClassExpr {
     fn get_original_class_name(
         emitter: &Emitter<'_, '_>,
-        scope: &Scope<'_, '_>,
+        scope: &Scope<'_>,
         check_traits: bool,
         resolve_self: bool,
     ) -> Option<String> {
@@ -61,7 +61,7 @@ impl ClassExpr {
 
     fn get_original_parent_class_name(
         emitter: &Emitter<'_, '_>,
-        scope: &Scope<'_, '_>,
+        scope: &Scope<'_>,
         check_traits: bool,
         resolve_self: bool,
     ) -> Option<String> {
@@ -87,7 +87,7 @@ impl ClassExpr {
 
     pub fn expr_to_class_expr(
         emitter: &Emitter<'_, '_>,
-        scope: &Scope<'_, '_>,
+        scope: &Scope<'_>,
         check_traits: bool,
         resolve_self: bool,
         expr: ast::Expr,
@@ -125,7 +125,7 @@ impl ClassExpr {
 
     pub fn class_id_to_class_expr<'a, 'decl>(
         emitter: &Emitter<'_, 'decl>,
-        scope: &Scope<'a, '_>,
+        scope: &Scope<'a>,
         check_traits: bool,
         resolve_self: bool,
         cid: &ast::ClassId,
@@ -141,10 +141,7 @@ impl ClassExpr {
         Self::expr_to_class_expr(emitter, scope, check_traits, resolve_self, expr)
     }
 
-    pub fn get_reified_tparam<'a>(
-        scope: &Scope<'a, '_>,
-        name: &str,
-    ) -> Option<(ReifiedTparam, bool)> {
+    pub fn get_reified_tparam<'a>(scope: &Scope<'a>, name: &str) -> Option<(ReifiedTparam, bool)> {
         fn soft(tp: &ast::Tparam) -> bool {
             tp.user_attributes
                 .iter()
@@ -163,7 +160,7 @@ impl ClassExpr {
         None
     }
 
-    pub fn is_reified_tparam<'a>(scope: &Scope<'a, '_>, name: &str) -> bool {
+    pub fn is_reified_tparam<'a>(scope: &Scope<'a>, name: &str) -> bool {
         Self::get_reified_tparam(scope, name).is_some()
     }
 }

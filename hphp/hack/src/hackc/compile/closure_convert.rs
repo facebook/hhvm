@@ -96,9 +96,9 @@ struct ClassSummary<'b> {
     tparams: &'b [Tparam],
 }
 
-struct FunctionSummary<'b, 'arena> {
+struct FunctionSummary<'b> {
     // Unfortunately hhbc::Coeffects has to be owned for now.
-    coeffects: Coeffects<'arena>,
+    coeffects: Coeffects,
     fun_kind: FunKind,
     mode: Mode,
     name: &'b Sid,
@@ -106,17 +106,17 @@ struct FunctionSummary<'b, 'arena> {
     tparams: &'b [Tparam],
 }
 
-struct LambdaSummary<'b, 'arena> {
+struct LambdaSummary<'b> {
     // Unfortunately hhbc::Coeffects has to be owned for now.
-    coeffects: Coeffects<'arena>,
+    coeffects: Coeffects,
     explicit_capture: Option<&'b [CaptureLid]>,
     fun_kind: FunKind,
     span: &'b Pos,
 }
 
-struct MethodSummary<'b, 'arena> {
+struct MethodSummary<'b> {
     // Unfortunately hhbc::Coeffects has to be owned for now.
-    coeffects: Coeffects<'arena>,
+    coeffects: Coeffects,
     fun_kind: FunKind,
     name: &'b Sid,
     span: &'b Pos,
@@ -124,15 +124,15 @@ struct MethodSummary<'b, 'arena> {
     tparams: &'b [Tparam],
 }
 
-enum ScopeSummary<'b, 'arena> {
+enum ScopeSummary<'b> {
     TopLevel,
     Class(ClassSummary<'b>),
-    Function(FunctionSummary<'b, 'arena>),
-    Method(MethodSummary<'b, 'arena>),
-    Lambda(LambdaSummary<'b, 'arena>),
+    Function(FunctionSummary<'b>),
+    Method(MethodSummary<'b>),
+    Lambda(LambdaSummary<'b>),
 }
 
-impl<'b, 'arena> ScopeSummary<'b, 'arena> {
+impl<'b> ScopeSummary<'b> {
     fn span(&self) -> Option<&Pos> {
         match self {
             ScopeSummary::TopLevel => None,
@@ -146,20 +146,20 @@ impl<'b, 'arena> ScopeSummary<'b, 'arena> {
 
 /// The environment for a scope. This tracks the summary information and
 /// variables used within a scope.
-struct Scope<'b, 'arena> {
-    parent: Option<&'b Scope<'b, 'arena>>,
+struct Scope<'b> {
+    parent: Option<&'b Scope<'b>>,
 
     /// Number of closures created in the current function
     closure_cnt_per_fun: u32,
     /// Are we immediately in a using statement?
     in_using: bool,
     /// What is the current context?
-    summary: ScopeSummary<'b, 'arena>,
+    summary: ScopeSummary<'b>,
     /// What variables are defined in this scope?
     variables: Variables,
 }
 
-impl<'b, 'arena> Scope<'b, 'arena> {
+impl<'b> Scope<'b> {
     fn toplevel(defs: &[Def]) -> Result<Self> {
         let all_vars = compute_vars(&[], &defs)?;
 
@@ -222,7 +222,7 @@ impl<'b, 'arena> Scope<'b, 'arena> {
         self.as_class_summary().map_or(&[], |cd| cd.tparams)
     }
 
-    fn coeffects_of_scope<'c>(&'c self) -> Option<&'c Coeffects<'arena>> {
+    fn coeffects_of_scope<'c>(&'c self) -> Option<&'c Coeffects> {
         for scope in self.walk_scope() {
             match &scope.summary {
                 ScopeSummary::Class(_) => break,
@@ -325,9 +325,9 @@ impl<'b, 'arena> Scope<'b, 'arena> {
     /// Create a new Env which uses `self` as its parent.
     fn new_child<'s>(
         &'s self,
-        summary: ScopeSummary<'s, 'arena>,
+        summary: ScopeSummary<'s>,
         variables: Variables,
-    ) -> Result<Scope<'s, 'arena>> {
+    ) -> Result<Scope<'s>> {
         Ok(Scope {
             in_using: self.in_using,
             closure_cnt_per_fun: self.closure_cnt_per_fun,
@@ -395,7 +395,7 @@ impl<'b, 'arena> Scope<'b, 'arena> {
         }
     }
 
-    fn walk_scope<'s>(&'s self) -> ScopeIter<'b, 's, 'arena> {
+    fn walk_scope<'s>(&'s self) -> ScopeIter<'b, 's> {
         ScopeIter(Some(self))
     }
 
@@ -411,10 +411,10 @@ impl<'b, 'arena> Scope<'b, 'arena> {
     }
 }
 
-struct ScopeIter<'b, 'c, 'arena>(Option<&'c Scope<'b, 'arena>>);
+struct ScopeIter<'b, 'c>(Option<&'c Scope<'b>>);
 
-impl<'b, 'c, 'arena> Iterator for ScopeIter<'b, 'c, 'arena> {
-    type Item = &'c Scope<'c, 'arena>;
+impl<'b, 'c> Iterator for ScopeIter<'b, 'c> {
+    type Item = &'c Scope<'c>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(cur) = self.0.take() {
@@ -447,19 +447,19 @@ struct ReadOnlyState<'a> {
 
 /// Mutable state used during visiting in ClosureVisitor. It's mutable and owned
 /// so it needs to be moved as we push and pop scopes.
-struct State<'arena> {
+struct State {
     capture_state: CaptureState,
     // Closure classes
     closures: Vec<Class_>,
     // accumulated information about program
-    global_state: GlobalState<'arena>,
+    global_state: GlobalState,
     /// Hoisted meth_caller functions
     named_hoisted_functions: SMap<FunDef>,
     // The current namespace environment
     namespace: Arc<namespace_env::Env>,
 }
 
-impl<'arena> State<'arena> {
+impl State {
     fn initial_state(empty_namespace: Arc<namespace_env::Env>) -> Self {
         Self {
             capture_state: Default::default(),
@@ -470,7 +470,7 @@ impl<'arena> State<'arena> {
         }
     }
 
-    fn record_function_state(&mut self, key: String, coeffects_of_scope: Coeffects<'arena>) {
+    fn record_function_state(&mut self, key: String, coeffects_of_scope: Coeffects) {
         if !coeffects_of_scope.get_static_coeffects().is_empty() {
             self.global_state
                 .lambda_coeffects_of_scope
@@ -490,7 +490,7 @@ impl<'arena> State<'arena> {
     }
 
     /// Add a variable to the captured variables
-    fn add_var<'s>(&mut self, scope: &Scope<'_, '_>, var: impl Into<Cow<'s, str>>) {
+    fn add_var<'s>(&mut self, scope: &Scope<'_>, var: impl Into<Cow<'s, str>>) {
         let var = var.into();
 
         // Don't bother if it's $this, as this is captured implicitly
@@ -506,7 +506,7 @@ impl<'arena> State<'arena> {
         }
     }
 
-    fn add_generic(&mut self, scope: &mut Scope<'_, '_>, var: &str) {
+    fn add_generic(&mut self, scope: &mut Scope<'_>, var: &str) {
         let reified_var_position = |is_fun| {
             let is_reified_var =
                 |param: &Tparam| param.reified != ReifyKind::Erased && param.name.1 == var;
@@ -546,7 +546,7 @@ fn make_class_name(name: &ClassName) -> String {
     string_utils::mangle_xhp_id(strip_id(name).to_string())
 }
 
-fn make_closure_name(scope: &Scope<'_, '_>, state: &State<'_>) -> String {
+fn make_closure_name(scope: &Scope<'_>, state: &State) -> String {
     let per_fun_idx = scope.closure_cnt_per_fun;
     let name = scope.make_scope_name(&state.namespace);
     string_utils::closures::mangle_closure(&name, per_fun_idx)
@@ -554,8 +554,8 @@ fn make_closure_name(scope: &Scope<'_, '_>, state: &State<'_>) -> String {
 
 fn make_closure(
     p: Pos,
-    scope: &Scope<'_, '_>,
-    state: &State<'_>,
+    scope: &Scope<'_>,
+    state: &State,
     ro_state: &ReadOnlyState<'_>,
     lambda_vars: Vec<String>,
     fun_tparams: Vec<Tparam>,
@@ -650,7 +650,7 @@ fn make_closure(
 /// Translate special identifiers `__CLASS__`, `__METHOD__` and `__FUNCTION__`
 /// into literal strings. It's necessary to do this before closure conversion
 /// because the enclosing class will be changed.
-fn convert_id(scope: &Scope<'_, '_>, Id(p, s): Id) -> Expr_ {
+fn convert_id(scope: &Scope<'_>, Id(p, s): Id) -> Expr_ {
     let ret = Expr_::mk_string;
     let name = |c: &ClassName| {
         Expr_::mk_string(string_utils::mangle_xhp_id(strip_id(c).to_string()).into())
@@ -845,7 +845,7 @@ fn add_reified_property(tparams: &[Tparam], vars: &mut Vec<ClassVar>) {
 
 struct ClosureVisitor<'a, 'b, 'arena> {
     alloc: &'arena bumpalo::Bump,
-    state: Option<State<'arena>>,
+    state: Option<State>,
     ro_state: &'a ReadOnlyState<'a>,
     // We need 'b to be a real lifetime so that our `type Params` can refer to
     // it - but we don't actually have any fields that use it - so we need a
@@ -854,19 +854,18 @@ struct ClosureVisitor<'a, 'b, 'arena> {
 }
 
 impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b, 'arena> {
-    type Params = AstParams<Scope<'b, 'arena>, Error>;
+    type Params = AstParams<Scope<'b>, Error>;
 
     fn object(&mut self) -> &mut dyn VisitorMut<'ast, Params = Self::Params> {
         self
     }
 
-    fn visit_method_(&mut self, scope: &mut Scope<'b, 'arena>, md: &mut Method_) -> Result<()> {
+    fn visit_method_(&mut self, scope: &mut Scope<'b>, md: &mut Method_) -> Result<()> {
         let cd = scope.as_class_summary().ok_or_else(|| {
             Error::unrecoverable("unexpected scope shape - method is not inside the class")
         })?;
         let variables = Self::compute_variables_from_fun(&md.params, &md.body.fb_ast, None)?;
         let coeffects = Coeffects::from_ast(
-            self.alloc,
             md.ctxs.as_ref(),
             &md.params,
             &md.tparams,
@@ -892,7 +891,7 @@ impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b, '
         Ok(())
     }
 
-    fn visit_class_(&mut self, scope: &mut Scope<'b, 'arena>, cd: &mut Class_) -> Result<()> {
+    fn visit_class_(&mut self, scope: &mut Scope<'b>, cd: &mut Class_) -> Result<()> {
         let variables = Variables::default();
         let si = ScopeSummary::Class(ClassSummary {
             extends: &cd.extends,
@@ -914,20 +913,15 @@ impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b, '
         Ok(())
     }
 
-    fn visit_def(&mut self, scope: &mut Scope<'b, 'arena>, def: &mut Def) -> Result<()> {
+    fn visit_def(&mut self, scope: &mut Scope<'b>, def: &mut Def) -> Result<()> {
         match def {
             // need to handle it ourselvses, because visit_fun_ is
             // called both for toplevel functions and lambdas
             Def::Fun(fd) => {
                 let variables =
                     Self::compute_variables_from_fun(&fd.fun.params, &fd.fun.body.fb_ast, None)?;
-                let coeffects = Coeffects::from_ast(
-                    self.alloc,
-                    fd.fun.ctxs.as_ref(),
-                    &fd.fun.params,
-                    &fd.tparams,
-                    &[],
-                );
+                let coeffects =
+                    Coeffects::from_ast(fd.fun.ctxs.as_ref(), &fd.fun.params, &fd.tparams, &[]);
                 let si = ScopeSummary::Function(FunctionSummary {
                     coeffects,
                     fun_kind: fd.fun.fun_kind,
@@ -952,14 +946,14 @@ impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b, '
         }
     }
 
-    fn visit_hint_(&mut self, scope: &mut Scope<'b, 'arena>, hint: &mut Hint_) -> Result<()> {
+    fn visit_hint_(&mut self, scope: &mut Scope<'b>, hint: &mut Hint_) -> Result<()> {
         if let Hint_::Happly(id, _) = hint {
             self.state_mut().add_generic(scope, id.name())
         };
         hint.recurse(scope, self)
     }
 
-    fn visit_stmt_(&mut self, scope: &mut Scope<'b, 'arena>, stmt: &mut Stmt_) -> Result<()> {
+    fn visit_stmt_(&mut self, scope: &mut Scope<'b>, stmt: &mut Stmt_) -> Result<()> {
         match stmt {
             Stmt_::Awaitall(x) => {
                 scope.check_if_in_async_context()?;
@@ -1019,11 +1013,7 @@ impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b, '
         }
     }
 
-    fn visit_expr(
-        &mut self,
-        scope: &mut Scope<'b, 'arena>,
-        Expr(_, pos, e): &mut Expr,
-    ) -> Result<()> {
+    fn visit_expr(&mut self, scope: &mut Scope<'b>, Expr(_, pos, e): &mut Expr) -> Result<()> {
         stack_limit::maybe_grow(|| {
             *e = match strip_unsafe_casts(e) {
                 Expr_::Efun(x) => self.convert_lambda(scope, x.fun, Some(x.use_))?,
@@ -1111,14 +1101,14 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
     /// Calls a function in the scope of a sub-Scope as a child of `scope`.
     fn with_subscope<'s, F, R>(
         &mut self,
-        scope: &'s Scope<'b, 'arena>,
-        si: ScopeSummary<'s, 'arena>,
+        scope: &'s Scope<'b>,
+        si: ScopeSummary<'s>,
         variables: Variables,
         f: F,
     ) -> Result<(R, u32)>
     where
         'b: 's,
-        F: FnOnce(&mut ClosureVisitor<'a, 's, 'arena>, &mut Scope<'s, 'arena>) -> Result<R>,
+        F: FnOnce(&mut ClosureVisitor<'a, 's, 'arena>, &mut Scope<'s>) -> Result<R>,
     {
         let mut scope = scope.new_child(si, variables)?;
 
@@ -1133,18 +1123,18 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
         Ok((res?, scope.closure_cnt_per_fun))
     }
 
-    fn state(&self) -> &State<'arena> {
+    fn state(&self) -> &State {
         self.state.as_ref().unwrap()
     }
 
-    fn state_mut(&mut self) -> &mut State<'arena> {
+    fn state_mut(&mut self) -> &mut State {
         self.state.as_mut().unwrap()
     }
 
     #[inline(never)]
     fn visit_dyn_meth_caller(
         &mut self,
-        scope: &mut Scope<'b, 'arena>,
+        scope: &mut Scope<'b>,
         mut x: Box<CallExpr>,
         pos: &Pos,
     ) -> Result<Expr_> {
@@ -1169,7 +1159,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
     #[inline(never)]
     fn visit_meth_caller_funcptr(
         &mut self,
-        scope: &mut Scope<'b, 'arena>,
+        scope: &mut Scope<'b>,
         mut x: Box<CallExpr>,
         pos: &Pos,
     ) -> Result<Expr_> {
@@ -1238,11 +1228,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
     }
 
     #[inline(never)]
-    fn visit_meth_caller(
-        &mut self,
-        scope: &mut Scope<'b, 'arena>,
-        mut x: Box<CallExpr>,
-    ) -> Result<Expr_> {
+    fn visit_meth_caller(&mut self, scope: &mut Scope<'b>, mut x: Box<CallExpr>) -> Result<Expr_> {
         if let [(pk_cls, Expr(_, pc, cls)), (pk_f, Expr(_, pf, func))] = &mut *x.args {
             error::ensure_normal_paramkind(pk_cls)?;
             error::ensure_normal_paramkind(pk_f)?;
@@ -1286,7 +1272,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
         }
     }
 
-    fn visit_class_id(&mut self, scope: &mut Scope<'b, 'arena>, cid: &mut ClassId) -> Result<()> {
+    fn visit_class_id(&mut self, scope: &mut Scope<'b>, cid: &mut ClassId) -> Result<()> {
         if let ClassId(_, _, ClassId_::CIexpr(e)) = cid {
             self.visit_expr(scope, e)?;
         }
@@ -1297,7 +1283,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
     // if there is an explicit `use` clause.
     fn convert_lambda(
         &mut self,
-        scope: &mut Scope<'b, 'arena>,
+        scope: &mut Scope<'b>,
         mut fd: Fun_,
         use_vars_opt: Option<Vec<CaptureLid>>,
     ) -> Result<Expr_> {
@@ -1328,7 +1314,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
         });
         let variables =
             Self::compute_variables_from_fun(&fd.params, &fd.body.fb_ast, explicit_capture)?;
-        let coeffects = Coeffects::from_ast(self.alloc, fd.ctxs.as_ref(), &fd.params, &[], &[]);
+        let coeffects = Coeffects::from_ast(fd.ctxs.as_ref(), &fd.params, &[], &[]);
         let si = ScopeSummary::Lambda(LambdaSummary {
             coeffects,
             explicit_capture: use_vars_opt.as_deref(),
@@ -1487,7 +1473,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
 
     fn convert_meth_caller_to_func_ptr(
         &mut self,
-        scope: &Scope<'_, '_>,
+        scope: &Scope<'_>,
         pos: &Pos,
         pc: &Pos,
         cls: &str,

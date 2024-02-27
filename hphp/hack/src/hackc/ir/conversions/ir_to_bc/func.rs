@@ -174,7 +174,7 @@ pub(crate) fn convert_method<'a>(
     }
 }
 
-fn convert_coeffects<'a>(coeffects: &ir::Coeffects<'a>) -> hhbc::Coeffects<'a> {
+fn convert_coeffects(coeffects: &ir::Coeffects) -> hhbc::Coeffects {
     let static_coeffects = coeffects.static_coeffects.clone();
     let unenforced_static_coeffects = coeffects.unenforced_static_coeffects.clone();
     let fun_param = coeffects.fun_param.clone();

@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::Str;
 use ffi::Vector;
 use hhbc_string_utils::strip_ns;
 use naming_special_names_rust::coeffects as c;
@@ -15,58 +14,60 @@ use oxidized::aast_defs::Hint_;
 use oxidized::ast_defs::Id;
 use serde::Serialize;
 
+use crate::StringId;
+
 #[derive(Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
-pub struct CtxConstant<'arena> {
-    pub name: Str<'arena>,
-    pub recognized: Vector<Str<'arena>>,
-    pub unrecognized: Vector<Str<'arena>>,
+pub struct CtxConstant {
+    pub name: StringId,
+    pub recognized: Vector<StringId>,
+    pub unrecognized: Vector<StringId>,
     pub is_abstract: bool,
 }
 
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
-pub struct CcParam<'arena> {
+pub struct CcParam {
     pub index: u32,
-    pub ctx_name: Str<'arena>,
+    pub ctx_name: StringId,
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 #[repr(C)]
-pub struct CcThis<'arena> {
-    pub types: Vector<Str<'arena>>,
+pub struct CcThis {
+    pub types: Vector<StringId>,
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 #[repr(C)]
-pub struct CcReified<'arena> {
+pub struct CcReified {
     pub is_class: bool,
     pub index: u32,
-    pub types: Vector<Str<'arena>>,
+    pub types: Vector<StringId>,
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 #[repr(C)]
-pub struct Coeffects<'arena> {
+pub struct Coeffects {
     pub static_coeffects: Vector<Ctx>,
-    pub unenforced_static_coeffects: Vector<Str<'arena>>,
+    pub unenforced_static_coeffects: Vector<StringId>,
     pub fun_param: Vector<u32>,
-    pub cc_param: Vector<CcParam<'arena>>,
-    pub cc_this: Vector<CcThis<'arena>>,
-    pub cc_reified: Vector<CcReified<'arena>>,
+    pub cc_param: Vector<CcParam>,
+    pub cc_this: Vector<CcThis>,
+    pub cc_reified: Vector<CcReified>,
     pub closure_parent_scope: bool,
     pub generator_this: bool,
     pub caller: bool,
 }
 
-impl<'arena> Coeffects<'arena> {
+impl Coeffects {
     pub fn new(
         static_coeffects: Vec<Ctx>,
-        unenforced_static_coeffects: Vec<Str<'arena>>,
+        unenforced_static_coeffects: Vec<StringId>,
         fun_param: Vec<u32>,
-        cc_param: Vec<CcParam<'arena>>,
-        cc_this: Vec<CcThis<'arena>>,
-        cc_reified: Vec<CcReified<'arena>>,
+        cc_param: Vec<CcParam>,
+        cc_this: Vec<CcThis>,
+        cc_reified: Vec<CcReified>,
         closure_parent_scope: bool,
         generator_this: bool,
         caller: bool,
@@ -84,7 +85,7 @@ impl<'arena> Coeffects<'arena> {
         }
     }
 
-    pub fn from_static_coeffects(scs: Vec<Ctx>) -> Coeffects<'arena> {
+    pub fn from_static_coeffects(scs: Vec<Ctx>) -> Coeffects {
         Coeffects {
             static_coeffects: scs.into(),
             ..Default::default()
@@ -155,18 +156,17 @@ impl<'arena> Coeffects<'arena> {
     }
 
     pub fn from_ast<Ex, En>(
-        alloc: &'arena bumpalo::Bump,
         ctxs_opt: Option<&a::Contexts>,
         params: impl AsRef<[a::FunParam<Ex, En>]>,
         fun_tparams: impl AsRef<[a::Tparam<Ex, En>]>,
         cls_tparams: impl AsRef<[a::Tparam<Ex, En>]>,
     ) -> Self {
         let mut static_coeffects = vec![];
-        let mut unenforced_static_coeffects: Vec<Str<'arena>> = vec![];
+        let mut unenforced_static_coeffects = vec![];
         let mut fun_param = vec![];
-        let mut cc_param: Vec<CcParam<'arena>> = vec![];
-        let mut cc_this: Vec<CcThis<'arena>> = vec![];
-        let mut cc_reified: Vec<CcReified<'arena>> = vec![];
+        let mut cc_param: Vec<CcParam> = vec![];
+        let mut cc_this: Vec<CcThis> = vec![];
+        let mut cc_reified: Vec<CcReified> = vec![];
 
         let get_arg_pos = |name: &String| -> u32 {
             if let Some(pos) = params.as_ref().iter().position(|x| x.name == *name) {
@@ -199,8 +199,7 @@ impl<'arena> Coeffects<'arena> {
                         if let Some(c) = Coeffects::from_type_static(ctx) {
                             static_coeffects.push(c)
                         } else {
-                            unenforced_static_coeffects
-                                .push(alloc.alloc_str(strip_ns(id.as_str())).into());
+                            unenforced_static_coeffects.push(crate::intern(strip_ns(id.as_str())));
                         }
                     }
                     Hint_::HfunContext(name) => fun_param.push(get_arg_pos(name)),
@@ -209,7 +208,7 @@ impl<'arena> Coeffects<'arena> {
                             if strip_ns(id.as_str()) == sn::typehints::THIS {
                                 cc_this.push(CcThis {
                                     types: Vec::from_iter(
-                                        sids.iter().map(|Id(_, id)| alloc.alloc_str(id).into()),
+                                        sids.iter().map(|Id(_, id)| crate::intern(id)),
                                     )
                                     .into(),
                                 });
@@ -218,7 +217,7 @@ impl<'arena> Coeffects<'arena> {
                                     is_class: false,
                                     index: idx as u32,
                                     types: Vec::from_iter(
-                                        sids.iter().map(|Id(_, id)| alloc.alloc_str(id).into()),
+                                        sids.iter().map(|Id(_, id)| crate::intern(id)),
                                     )
                                     .into(),
                                 });
@@ -227,7 +226,7 @@ impl<'arena> Coeffects<'arena> {
                                     is_class: true,
                                     index: idx as u32,
                                     types: Vec::from_iter(
-                                        sids.iter().map(|Id(_, id)| alloc.alloc_str(id).into()),
+                                        sids.iter().map(|Id(_, id)| crate::intern(id)),
                                     )
                                     .into(),
                                 });
@@ -236,7 +235,7 @@ impl<'arena> Coeffects<'arena> {
                         Hint_::Hvar(name) if sids.len() == 1 => {
                             let index = get_arg_pos(name);
                             let Id(_, sid_name) = &sids[0];
-                            let ctx_name = alloc.alloc_str(sid_name).into();
+                            let ctx_name = crate::intern(sid_name);
                             cc_param.push(CcParam { index, ctx_name });
                         }
                         _ => {}
@@ -277,14 +276,14 @@ impl<'arena> Coeffects<'arena> {
 
     pub fn with_backdoor(&self) -> Self {
         Self {
-            unenforced_static_coeffects: vec![Str::from(c::BACKDOOR)].into(),
+            unenforced_static_coeffects: vec![crate::intern(c::BACKDOOR)].into(),
             ..self.clone()
         }
     }
 
     pub fn with_backdoor_globals_leak_safe(&self) -> Self {
         Self {
-            unenforced_static_coeffects: vec![Str::from(c::BACKDOOR_GLOBALS_LEAK_SAFE)].into(),
+            unenforced_static_coeffects: vec![crate::intern(c::BACKDOOR_GLOBALS_LEAK_SAFE)].into(),
             ..self.clone()
         }
     }
@@ -333,7 +332,7 @@ impl<'arena> Coeffects<'arena> {
         self.static_coeffects.as_ref()
     }
 
-    pub fn get_unenforced_static_coeffects(&self) -> &[Str<'arena>] {
+    pub fn get_unenforced_static_coeffects(&self) -> &[StringId] {
         self.unenforced_static_coeffects.as_ref()
     }
 
@@ -341,15 +340,15 @@ impl<'arena> Coeffects<'arena> {
         self.fun_param.as_ref()
     }
 
-    pub fn get_cc_param(&self) -> &[CcParam<'arena>] {
+    pub fn get_cc_param(&self) -> &[CcParam] {
         self.cc_param.as_ref()
     }
 
-    pub fn get_cc_this(&self) -> &[CcThis<'arena>] {
+    pub fn get_cc_this(&self) -> &[CcThis] {
         self.cc_this.as_ref()
     }
 
-    pub fn get_cc_reified(&self) -> &[CcReified<'arena>] {
+    pub fn get_cc_reified(&self) -> &[CcReified] {
         self.cc_reified.as_ref()
     }
 
@@ -383,7 +382,7 @@ impl<'arena> Coeffects<'arena> {
         !self.has_coeffect_rules()
             && self.static_coeffects.is_empty()
             && self.unenforced_static_coeffects.len() == 1
-            && self.unenforced_static_coeffects.as_ref()[0]
-                == hhbc_string_utils::coeffects::CALLER.into()
+            && self.unenforced_static_coeffects.as_ref()[0].as_str()
+                == hhbc_string_utils::coeffects::CALLER
     }
 }

@@ -11,6 +11,5 @@ license = "MIT"
 path = "../../ast_scope.rs"
 
 [dependencies]
-bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }

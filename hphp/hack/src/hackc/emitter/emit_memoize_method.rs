@@ -144,7 +144,6 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
     // __Memoize is not allowed on lambdas, so we never need to inherit the rx
     // level from the declaring scope when we're in a Memoize wrapper
     let coeffects = Coeffects::from_ast(
-        alloc,
         method.ctxs.as_ref(),
         &method.params,
         &method.tparams,
@@ -564,7 +563,7 @@ fn call_cls_method<'a, 'arena>(
 struct Args<'r, 'ast, 'arena> {
     pub info: &'r MemoizeInfo<'arena>,
     pub method: &'r ast::Method_,
-    pub scope: &'r Scope<'ast, 'arena>,
+    pub scope: &'r Scope<'ast>,
     pub deprecation_info: Option<&'r [TypedValue]>,
     pub params: &'r [ast::FunParam],
     pub ret: Option<&'r ast::Hint>,

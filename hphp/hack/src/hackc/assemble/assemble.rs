@@ -20,6 +20,7 @@ use ffi::Str;
 use ffi::Vector;
 use hash::HashMap;
 use hhbc::ModuleName;
+use hhbc::StringId;
 use hhvm_types_ffi::Attr;
 use log::trace;
 use naming_special_names_rust::coeffects::Ctx;
@@ -354,7 +355,7 @@ fn assemble_class<'arena>(
     while let Some(tok @ Token::Decl(txt, _)) = token_iter.peek() {
         match *txt {
             b".require" => requirements.push(assemble_requirement(alloc, token_iter)?),
-            b".ctx" => ctx_constants.push(assemble_ctx_constant(alloc, token_iter)?),
+            b".ctx" => ctx_constants.push(assemble_ctx_constant(token_iter)?),
             b".property" => properties.push(assemble_property(alloc, token_iter)?),
             b".method" => methods.push(assemble_method(alloc, token_iter)?),
             b".const" => assemble_const_or_type_const(
@@ -392,11 +393,11 @@ fn assemble_class<'arena>(
 }
 
 /// Defined in 'hack/src/naming/naming_special_names.rs`
-fn is_enforced_static_coeffect(d: &[u8]) -> bool {
+fn is_enforced_static_coeffect(d: &str) -> bool {
     match d {
-        b"pure" | b"defaults" | b"rx" | b"zoned" | b"write_props" | b"rx_local" | b"zoned_with"
-        | b"zoned_local" | b"zoned_shallow" | b"leak_safe_local" | b"leak_safe_shallow"
-        | b"leak_safe" | b"read_globals" | b"globals" | b"write_this_props" | b"rx_shallow" => true,
+        "pure" | "defaults" | "rx" | "zoned" | "write_props" | "rx_local" | "zoned_with"
+        | "zoned_local" | "zoned_shallow" | "leak_safe_local" | "leak_safe_shallow"
+        | "leak_safe" | "read_globals" | "globals" | "write_this_props" | "rx_shallow" => true,
         _ => false,
     }
 }
@@ -405,23 +406,22 @@ fn is_enforced_static_coeffect(d: &[u8]) -> bool {
 /// .ctx C isAbstract;
 /// .ctx Clazy pure;
 /// .ctx Cdebug isAbstract;
-fn assemble_ctx_constant<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::CtxConstant<'arena>> {
+fn assemble_ctx_constant(token_iter: &mut Lexer<'_>) -> Result<hhbc::CtxConstant> {
     parse!(token_iter, ".ctx" <name:id> <is_abstract:"isAbstract"?> <tokens:id*> ";");
-    let name = name.into_ffi_str(alloc);
 
     // .ctx has slice of recognized and unrecognized constants.
     // Making an assumption that recognized ~~ static coeffects and
     // unrecognized ~~ unenforced static coeffects
-    let (r, u): (Vec<_>, Vec<_>) = tokens
+    let ids = tokens
         .into_iter()
-        .map(|tok| tok.into_ffi_str(alloc))
-        .partition(|s| is_enforced_static_coeffect(s));
+        .map(|tok| Ok(hhbc::intern(tok.as_str()?)))
+        .collect::<Result<Vec<_>>>()?;
+    let (r, u): (Vec<_>, Vec<_>) = ids
+        .into_iter()
+        .partition(|s| is_enforced_static_coeffect(s.as_str()));
 
     Ok(hhbc::CtxConstant {
-        name,
+        name: hhbc::intern(name.as_str()?),
         recognized: r.into(),
         unrecognized: u.into(),
         is_abstract,
@@ -1458,7 +1458,7 @@ fn assemble_body<'arena>(
     return_type_info: Maybe<hhbc::TypeInfo>,
     shadowed_tparams: Vec<Str<'arena>>,
     upper_bounds: Vec<hhbc::UpperBound>,
-) -> Result<(hhbc::Body<'arena>, hhbc::Coeffects<'arena>)> {
+) -> Result<(hhbc::Body<'arena>, hhbc::Coeffects)> {
     let mut doc_comment = Maybe::Nothing;
     let mut instrs = Vec::new();
     let mut decl_vars = Vec::new();
@@ -1495,7 +1495,7 @@ fn assemble_body<'arena>(
             }
             decl_vars = assemble_decl_vars(alloc, token_iter, decl_map)?;
         } else if token_iter.peek_is(is_coeffects_decl) {
-            coeff = assemble_coeffects(alloc, token_iter)?;
+            coeff = assemble_coeffects(token_iter)?;
         } else {
             break;
         }
@@ -1540,10 +1540,7 @@ fn is_coeffects_decl(tok: &Token<'_>) -> bool {
 /// .coeffects_closure_parent_scope;
 /// .coeffects_generator_this;
 /// .coeffects_caller;
-fn assemble_coeffects<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::Coeffects<'arena>> {
+fn assemble_coeffects(token_iter: &mut Lexer<'_>) -> Result<hhbc::Coeffects> {
     let mut scs = Vec::new();
     let mut uscs = Vec::new();
     let mut fun_param = Vec::new();
@@ -1555,19 +1552,19 @@ fn assemble_coeffects<'arena>(
     let mut caller = false;
     while token_iter.peek_is(is_coeffects_decl) {
         if token_iter.peek_is_str(Token::is_decl, ".coeffects_static") {
-            assemble_static_coeffects(alloc, token_iter, &mut scs, &mut uscs)?;
+            assemble_static_coeffects(token_iter, &mut scs, &mut uscs)?;
         }
         if token_iter.peek_is_str(Token::is_decl, ".coeffects_fun_param") {
             assemble_coeffects_fun_param(token_iter, &mut fun_param)?;
         }
         if token_iter.peek_is_str(Token::is_decl, ".coeffects_cc_param") {
-            assemble_coeffects_cc_param(alloc, token_iter, &mut cc_param)?;
+            assemble_coeffects_cc_param(token_iter, &mut cc_param)?;
         }
         if token_iter.peek_is_str(Token::is_decl, ".coeffects_cc_this") {
-            assemble_coeffects_cc_this(alloc, token_iter, &mut cc_this)?;
+            assemble_coeffects_cc_this(token_iter, &mut cc_this)?;
         }
         if token_iter.peek_is_str(Token::is_decl, ".coeffects_cc_reified") {
-            assemble_coeffects_cc_reified(alloc, token_iter, &mut cc_reified)?;
+            assemble_coeffects_cc_reified(token_iter, &mut cc_reified)?;
         }
         closure_parent_scope =
             token_iter.next_is_str(Token::is_decl, ".coeffects_closure_parent_scope");
@@ -1598,11 +1595,10 @@ fn assemble_coeffects<'arena>(
 }
 
 /// Ex: .coeffects_static pure
-fn assemble_static_coeffects<'arena>(
-    alloc: &'arena Bump,
+fn assemble_static_coeffects(
     token_iter: &mut Lexer<'_>,
     scs: &mut Vec<Ctx>,
-    uscs: &mut Vec<Str<'arena>>,
+    uscs: &mut Vec<StringId>,
 ) -> Result<()> {
     token_iter.expect_str(Token::is_decl, ".coeffects_static")?;
     while !token_iter.peek_is(Token::is_semicolon) {
@@ -1623,7 +1619,7 @@ fn assemble_static_coeffects<'arena>(
             b"globals" => scs.push(Ctx::Globals),
             b"write_this_props" => scs.push(Ctx::WriteThisProps),
             b"rx_shallow" => scs.push(Ctx::RxShallow),
-            d => uscs.push(Str::new_slice(alloc, d)), //If unknown Ctx, is a unenforce_static_coeffect (ex: output)
+            d => uscs.push(hhbc::intern(std::str::from_utf8(d)?)), //If unknown Ctx, is a unenforce_static_coeffect (ex: output)
         }
     }
     token_iter.expect(Token::is_semicolon)?;
@@ -1646,15 +1642,14 @@ fn assemble_coeffects_fun_param(
 
 /// Ex:
 /// .coeffects_cc_param 0 C 0 Cdebug;
-fn assemble_coeffects_cc_param<'arena>(
-    alloc: &'arena Bump,
+fn assemble_coeffects_cc_param(
     token_iter: &mut Lexer<'_>,
-    cc_param: &mut Vec<hhbc::CcParam<'arena>>,
+    cc_param: &mut Vec<hhbc::CcParam>,
 ) -> Result<()> {
     token_iter.expect_str(Token::is_decl, ".coeffects_cc_param")?;
     while !token_iter.peek_is(Token::is_semicolon) {
         let index = token_iter.expect_and_get_number()?;
-        let ctx_name = token_iter.expect(Token::is_identifier)?.into_ffi_str(alloc);
+        let ctx_name = hhbc::intern(token_iter.expect(Token::is_identifier)?.as_str()?);
         cc_param.push(hhbc::CcParam { index, ctx_name });
     }
     token_iter.expect(Token::is_semicolon)?;
@@ -1663,15 +1658,16 @@ fn assemble_coeffects_cc_param<'arena>(
 
 /// Ex:
 /// .coeffects_cc_this Cdebug;
-fn assemble_coeffects_cc_this<'arena>(
-    alloc: &'arena Bump,
+fn assemble_coeffects_cc_this(
     token_iter: &mut Lexer<'_>,
-    cc_this: &mut Vec<hhbc::CcThis<'arena>>,
+    cc_this: &mut Vec<hhbc::CcThis>,
 ) -> Result<()> {
     token_iter.expect_str(Token::is_decl, ".coeffects_cc_this")?;
     let mut params = Vec::new();
     while !token_iter.peek_is(Token::is_semicolon) {
-        params.push(token_iter.expect(Token::is_identifier)?.into_ffi_str(alloc));
+        params.push(hhbc::intern(
+            token_iter.expect(Token::is_identifier)?.as_str()?,
+        ));
     }
     token_iter.expect(Token::is_semicolon)?;
     cc_this.push(hhbc::CcThis {
@@ -1681,17 +1677,18 @@ fn assemble_coeffects_cc_this<'arena>(
 }
 
 /// .coeffects_cc_reified 0 C;
-fn assemble_coeffects_cc_reified<'arena>(
-    alloc: &'arena Bump,
+fn assemble_coeffects_cc_reified(
     token_iter: &mut Lexer<'_>,
-    cc_reified: &mut Vec<hhbc::CcReified<'arena>>,
+    cc_reified: &mut Vec<hhbc::CcReified>,
 ) -> Result<()> {
     token_iter.expect_str(Token::is_decl, ".coeffects_cc_reified")?;
     let is_class = token_iter.next_is_str(Token::is_identifier, "isClass");
     let index = token_iter.expect_and_get_number()?;
     let mut types = Vec::new();
     while !token_iter.peek_is(Token::is_semicolon) {
-        types.push(token_iter.expect(Token::is_identifier)?.into_ffi_str(alloc));
+        types.push(hhbc::intern(
+            token_iter.expect(Token::is_identifier)?.as_str()?,
+        ));
     }
     token_iter.expect(Token::is_semicolon)?;
     cc_reified.push(hhbc::CcReified {

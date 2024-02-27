@@ -210,7 +210,7 @@ pub struct Func<'a> {
     pub attributes: Vec<Attribute>,
     pub attrs: Attr,
     pub blocks: IdVec<BlockId, Block>,
-    pub coeffects: Coeffects<'a>,
+    pub coeffects: Coeffects,
     pub doc_comment: Option<Vec<u8>>,
     pub ex_frames: ExFrameIdMap<ExFrame>,
     pub instrs: IdVec<InstrId, Instr>,

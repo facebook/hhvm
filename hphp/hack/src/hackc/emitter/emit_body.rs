@@ -82,7 +82,7 @@ pub fn emit_body<'b, 'arena, 'decl>(
     namespace: Arc<namespace_env::Env>,
     body: &'b [ast::Stmt],
     return_value: InstrSeq<'arena>,
-    scope: Scope<'_, 'arena>,
+    scope: Scope<'_>,
     args: Args<'_, 'arena>,
 ) -> Result<(Body<'arena>, bool, bool)> {
     let tparams: Vec<ast::Tparam> = scope.get_tparams().into_iter().cloned().collect();
@@ -260,7 +260,7 @@ fn make_header_content<'a, 'arena, 'decl>(
 
 fn make_decl_vars<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    scope: &Scope<'a, 'arena>,
+    scope: &Scope<'a>,
     immediate_tparams: &[ast::Tparam],
     params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
     body: &[ast::Stmt],
@@ -337,7 +337,7 @@ fn make_return_type_info(
 pub fn make_env<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
     namespace: Arc<namespace_env::Env>,
-    scope: Scope<'a, 'arena>,
+    scope: Scope<'a>,
     call_context: Option<String>,
 ) -> Env<'a, 'arena> {
     let mut env = Env::default(alloc, namespace);
@@ -350,7 +350,7 @@ fn make_params<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     tp_names: &mut Vec<&str>,
     ast_params: &[ast::FunParam],
-    scope: &Scope<'a, 'arena>,
+    scope: &Scope<'a>,
     flags: Flags,
 ) -> Result<Vec<(Param<'arena>, Option<(Label, ast::Expr)>)>> {
     let generate_defaults = !flags.contains(Flags::MEMOIZE);
@@ -526,7 +526,7 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
 
 pub fn emit_deprecation_info<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
-    scope: &Scope<'a, 'arena>,
+    scope: &Scope<'a>,
     deprecation_info: Option<&[TypedValue]>,
     is_systemlib: bool,
 ) -> Result<InstrSeq<'arena>> {

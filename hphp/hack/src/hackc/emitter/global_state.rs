@@ -31,14 +31,14 @@ impl Default for ClosureEnclosingClassInfo {
 }
 
 #[derive(Default, Debug)]
-pub struct GlobalState<'arena> {
+pub struct GlobalState {
     pub explicit_use_set: SSet,
     pub closure_namespaces: SMap<Arc<NamespaceEnv>>,
     pub closure_enclosing_classes: SMap<ClosureEnclosingClassInfo>,
-    pub lambda_coeffects_of_scope: SMap<Coeffects<'arena>>,
+    pub lambda_coeffects_of_scope: SMap<Coeffects>,
 }
 
-impl<'arena> GlobalState<'arena> {
+impl GlobalState {
     pub fn init() -> Self {
         GlobalState::default()
     }
@@ -47,7 +47,7 @@ impl<'arena> GlobalState<'arena> {
         &self,
         class_name: &str,
         meth_name: &str,
-    ) -> Option<&Coeffects<'arena>> {
+    ) -> Option<&Coeffects> {
         let key = get_unique_id_for_method(class_name, meth_name);
         self.lambda_coeffects_of_scope.get(&key)
     }

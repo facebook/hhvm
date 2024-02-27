@@ -91,7 +91,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
         scope.push_item(ScopeItem::Function(ast_scope::Fun::new_ref(fd)));
     }
 
-    let mut coeffects = Coeffects::from_ast(alloc, f.ctxs.as_ref(), &f.params, &fd.tparams, vec![]);
+    let mut coeffects = Coeffects::from_ast(f.ctxs.as_ref(), &f.params, &fd.tparams, vec![]);
     if is_meth_caller {
         coeffects = coeffects.with_caller()
     }

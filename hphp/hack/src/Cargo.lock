@@ -292,7 +292,6 @@ dependencies = [
 name = "ast_scope"
 version = "0.0.0"
 dependencies = [
- "bumpalo",
  "hhbc",
  "oxidized",
 ]

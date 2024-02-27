@@ -131,7 +131,7 @@ fn convert_property<'a>(src: ir::Property, strings: &StringCache<'a>) -> hhbc::P
     }
 }
 
-fn convert_ctx_constant<'a>(ctx: &ir::CtxConstant<'a>) -> hhbc::CtxConstant<'a> {
+fn convert_ctx_constant(ctx: &ir::CtxConstant) -> hhbc::CtxConstant {
     hhbc::CtxConstant {
         name: ctx.name,
         recognized: ctx.recognized.clone().into(),

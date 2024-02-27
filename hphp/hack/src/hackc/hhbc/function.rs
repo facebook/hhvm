@@ -23,7 +23,7 @@ pub struct Function<'arena> {
     pub body: Body<'arena>,
 
     pub span: Span,
-    pub coeffects: Coeffects<'arena>,
+    pub coeffects: Coeffects,
     pub flags: FunctionFlags,
     pub attrs: Attr,
 }

@@ -84,7 +84,7 @@ fn make_86method<'arena, 'decl>(
     visibility: Visibility,
     is_abstract: bool,
     span: Span,
-    coeffects: Coeffects<'arena>,
+    coeffects: Coeffects,
     instrs: InstrSeq<'arena>,
 ) -> Result<Method<'arena>> {
     // TODO: move this. We just know that there are no iterators in 86methods
@@ -222,12 +222,9 @@ fn from_type_constant<'a, 'arena, 'decl>(
     })
 }
 
-fn from_ctx_constant<'a, 'arena>(
-    alloc: &'arena bumpalo::Bump,
-    tc: &'a ast::ClassTypeconstDef,
-) -> Result<CtxConstant<'arena>> {
+fn from_ctx_constant(tc: &ast::ClassTypeconstDef) -> Result<CtxConstant> {
     use ast::ClassTypeconst;
-    let name = tc.name.1.to_string();
+    let ast::Id(_, name) = &tc.name;
     let (recognized, unrecognized) = match &tc.kind {
         ClassTypeconst::TCAbstract(ast::ClassAbstractTypeconst { default: None, .. }) => {
             (vec![], vec![])
@@ -237,12 +234,12 @@ fn from_ctx_constant<'a, 'arena>(
             ..
         })
         | ClassTypeconst::TCConcrete(ast::ClassConcreteTypeconst { c_tc_type: hint }) => {
-            let x = Coeffects::from_ctx_constant(hint);
-            let r: Vec<Str<'_>> =
-                x.0.iter()
-                    .map(|ctx| Str::new_str(alloc, &ctx.to_string()))
-                    .collect();
-            let u: Vec<Str<'_>> = x.1.iter().map(|s| Str::new_str(alloc, s)).collect();
+            let (static_co, unenforced) = Coeffects::from_ctx_constant(hint);
+            let r: Vec<_> = static_co
+                .iter()
+                .map(|ctx| hhbc::intern(ctx.to_string()))
+                .collect();
+            let u: Vec<_> = unenforced.iter().map(hhbc::intern).collect();
             (r, u)
         }
     };
@@ -251,7 +248,7 @@ fn from_ctx_constant<'a, 'arena>(
         _ => true,
     };
     Ok(CtxConstant {
-        name: Str::new_str(alloc, &name),
+        name: hhbc::intern(name),
         recognized: recognized.into(),
         unrecognized: unrecognized.into(),
         is_abstract,
@@ -794,8 +791,8 @@ pub fn emit_class<'a, 'arena, 'decl>(
         .collect::<Result<Vec<_>>>()?;
     let ctx_constants = ctxconsts
         .iter()
-        .map(|x| from_ctx_constant(alloc, x))
-        .collect::<Result<Vec<CtxConstant<'_>>>>()?;
+        .map(|x| from_ctx_constant(x))
+        .collect::<Result<Vec<CtxConstant>>>()?;
     let upper_bounds = emit_body::emit_generics_upper_bounds(alloc, &ast_class.tparams, &[], false);
 
     if !no_xhp_attributes {

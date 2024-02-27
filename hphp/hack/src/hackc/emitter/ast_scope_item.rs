@@ -11,22 +11,22 @@ use oxidized::file_info;
 use oxidized::pos::Pos;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Lambda<'arena> {
+pub struct Lambda {
     pub is_long: bool,
     pub is_async: bool,
-    pub coeffects: Coeffects<'arena>,
+    pub coeffects: Coeffects,
     pub pos: Pos,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum ScopeItem<'a, 'arena> {
+pub enum ScopeItem<'a> {
     Class(Class<'a>),
     Function(Fun<'a>),
     Method(Method<'a>),
-    Lambda(Lambda<'arena>),
+    Lambda(Lambda),
 }
 
-impl<'a, 'arena> ScopeItem<'a, 'arena> {
+impl<'a> ScopeItem<'a> {
     pub fn get_span(&self) -> &Pos {
         match self {
             ScopeItem::Class(cd) => cd.get_span(),

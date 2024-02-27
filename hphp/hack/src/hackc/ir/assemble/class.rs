@@ -7,8 +7,6 @@ use std::sync::Arc;
 
 use anyhow::Context;
 use anyhow::Result;
-use bumpalo::Bump;
-use ffi::Str;
 use ir_core::class::Requirement;
 use ir_core::Class;
 use ir_core::ClassId;
@@ -35,7 +33,6 @@ use crate::parse::parse_visibility;
 use crate::tokenizer::Tokenizer;
 
 pub(crate) struct ClassParser<'a> {
-    alloc: &'a Bump,
     class: Class<'a>,
     strings: Arc<StringInterner>,
 }
@@ -52,7 +49,6 @@ impl<'a> ClassParser<'a> {
         let src_loc = unit_state.get_cur_src_loc();
 
         let mut state = ClassParser {
-            alloc: unit_state.alloc,
             strings: Arc::clone(&unit_state.unit.strings),
             class: Class {
                 attributes: Default::default(),
@@ -119,15 +115,15 @@ impl<'a> ClassParser<'a> {
                "[" <recognized:parse_user_id,*> "]"
                "[" <unrecognized:parse_user_id,*> "]"
                <is_abstract:"abstract"?>);
-        let name = Str::new_slice(self.alloc, &name.0);
+        let name = ir_core::intern(std::str::from_utf8(&name.0)?);
         let recognized = recognized
             .into_iter()
-            .map(|(name, _)| Str::new_slice(self.alloc, &name))
-            .collect();
+            .map(|(name, _)| Ok(ir_core::intern(std::str::from_utf8(&name)?)))
+            .collect::<Result<_>>()?;
         let unrecognized = unrecognized
             .into_iter()
-            .map(|(name, _)| Str::new_slice(self.alloc, &name))
-            .collect();
+            .map(|(name, _)| Ok(ir_core::intern(std::str::from_utf8(&name)?)))
+            .collect::<Result<_>>()?;
         let is_abstract = is_abstract.is_some();
         let ctx = CtxConstant {
             name,

@@ -49,7 +49,7 @@ pub struct Class<'arena> {
     pub properties: Vector<Property<'arena>>,
     pub constants: Vector<Constant<'arena>>,
     pub type_constants: Vector<TypeConstant>,
-    pub ctx_constants: Vector<CtxConstant<'arena>>,
+    pub ctx_constants: Vector<CtxConstant>,
     pub requirements: Vector<Requirement<'arena>>,
     pub upper_bounds: Vector<UpperBound>,
     pub doc_comment: Maybe<Vector<u8>>,

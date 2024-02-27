@@ -44,7 +44,7 @@ pub fn from_asts<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     tparams: &mut Vec<&str>,
     generate_defaults: bool,
-    scope: &Scope<'a, 'arena>,
+    scope: &Scope<'a>,
     ast_params: &[a::FunParam],
 ) -> Result<Vec<(Param<'arena>, Option<(Label, a::Expr)>)>> {
     ast_params
@@ -95,7 +95,7 @@ fn from_ast<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     tparams: &mut Vec<&str>,
     generate_defaults: bool,
-    scope: &Scope<'a, 'arena>,
+    scope: &Scope<'a>,
     param: &a::FunParam,
 ) -> Result<Option<(Param<'arena>, Option<(Label, a::Expr)>)>> {
     if param.is_variadic && param.name == "..." {
@@ -222,7 +222,7 @@ struct ResolverVisitor<'a, 'arena: 'a, 'decl: 'a> {
 #[allow(dead_code)]
 struct Ctx<'a, 'arena, 'decl> {
     emitter: &'a mut Emitter<'arena, 'decl>,
-    scope: &'a Scope<'a, 'arena>,
+    scope: &'a Scope<'a>,
 }
 
 impl<'ast, 'a, 'arena, 'decl> aast_visitor::Visitor<'ast> for ResolverVisitor<'a, 'arena, 'decl> {

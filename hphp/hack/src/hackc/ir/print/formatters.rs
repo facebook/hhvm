@@ -298,6 +298,14 @@ impl Display for FmtFuncParams<'_> {
     }
 }
 
+pub(crate) struct FmtIdentifierStr<'a>(pub(crate) &'a str);
+
+impl Display for FmtIdentifierStr<'_> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        FmtIdentifier(self.0.as_bytes()).fmt(f)
+    }
+}
+
 pub(crate) struct FmtIdentifier<'a>(pub(crate) &'a [u8]);
 
 impl Display for FmtIdentifier<'_> {

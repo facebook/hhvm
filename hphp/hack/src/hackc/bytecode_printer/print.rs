@@ -367,19 +367,27 @@ fn print_type_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &TypeConstant) -
     w.write_all(b";")
 }
 
-fn print_ctx_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &CtxConstant<'_>) -> Result<()> {
+fn print_ctx_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &CtxConstant) -> Result<()> {
     ctx.newline(w)?;
-    write_bytes!(w, ".ctx {}", c.name)?;
+    write_bytes!(w, ".ctx {}", c.name.as_str())?;
     if c.is_abstract {
         w.write_all(b" isAbstract")?;
     }
     let recognized = c.recognized.as_ref();
     if !recognized.is_empty() {
-        write_bytes!(w, " {}", fmt_separated(" ", recognized))?;
+        write_bytes!(
+            w,
+            " {}",
+            fmt_separated(" ", recognized.iter().map(|s| s.as_str()))
+        )?;
     }
     let unrecognized = c.unrecognized.as_ref();
     if !unrecognized.is_empty() {
-        write_bytes!(w, " {}", fmt_separated(" ", unrecognized))?;
+        write_bytes!(
+            w,
+            " {}",
+            fmt_separated(" ", unrecognized.iter().map(|s| s.as_str()))
+        )?;
     }
     w.write_all(b";")?;
     Ok(())
@@ -826,7 +834,7 @@ fn print_body(
     ctx: &Context<'_>,
     w: &mut dyn Write,
     body: &Body<'_>,
-    coeffects: &Coeffects<'_>,
+    coeffects: &Coeffects,
     dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     print_doc_comment(ctx, w, body.doc_comment.as_ref())?;

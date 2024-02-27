@@ -117,7 +117,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
         should_emit_implicit_context,
         should_make_ic_inaccessible,
     )?;
-    let coeffects = Coeffects::from_ast(alloc, f.ctxs.as_ref(), &f.params, &fd.tparams, vec![]);
+    let coeffects = Coeffects::from_ast(f.ctxs.as_ref(), &f.params, &fd.tparams, vec![]);
     let body = make_wrapper_body(
         emitter,
         env,

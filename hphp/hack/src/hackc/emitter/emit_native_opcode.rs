@@ -20,7 +20,7 @@ use crate::emit_param;
 
 pub fn emit_body<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    scope: &Scope<'a, 'arena>,
+    scope: &Scope<'a>,
     class_name: &ast::Sid,
     class_attrs: &[ast::UserAttribute],
     name: &ast::Sid,

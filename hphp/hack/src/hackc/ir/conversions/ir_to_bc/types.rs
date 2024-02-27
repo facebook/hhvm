@@ -24,7 +24,7 @@ fn convert_type(ty: &ir::TypeInfo, strings: &StringCache<'_>) -> TypeInfo {
                 .contains(TypeConstraintFlags::Nullable);
             let soft = ty.enforced.modifiers.contains(TypeConstraintFlags::Soft);
             user_type = Some(if !nullable && !soft {
-                hhbc::intern(std::str::from_utf8(name).expect("non-utf8 user type"))
+                hhbc::intern(name)
             } else {
                 let len = name.len() + nullable as usize + soft as usize;
                 let mut p = String::with_capacity(len);
@@ -34,13 +34,11 @@ fn convert_type(ty: &ir::TypeInfo, strings: &StringCache<'_>) -> TypeInfo {
                 if nullable {
                     p.push('?');
                 }
-                p.push_str(std::str::from_utf8(name).expect("non-utf8 base type name"));
+                p.push_str(name);
                 hhbc::intern(p)
             });
         }
-        Some(hhbc::intern(
-            std::str::from_utf8(&name).expect("non-utf8 constraint"),
-        ))
+        Some(hhbc::intern(name))
     } else {
         match ty.enforced.ty {
             BaseType::Mixed | BaseType::Void => None,
@@ -62,10 +60,10 @@ fn convert_types(tis: &[ir::TypeInfo], strings: &StringCache<'_>) -> Vec<TypeInf
     tis.iter().map(|ti| convert_type(ti, strings)).collect()
 }
 
-fn base_type_string(ty: &ir::BaseType) -> Option<&'static [u8]> {
+fn base_type_string(ty: &ir::BaseType) -> Option<&'static str> {
     match ty {
         BaseType::Class(_) | BaseType::Mixed | BaseType::Void => None,
-        BaseType::None => Some(&[]),
+        BaseType::None => Some(""),
         BaseType::AnyArray => Some(ir::types::BUILTIN_NAME_ANY_ARRAY),
         BaseType::Arraykey => Some(ir::types::BUILTIN_NAME_ARRAYKEY),
         BaseType::Bool => Some(ir::types::BUILTIN_NAME_BOOL),

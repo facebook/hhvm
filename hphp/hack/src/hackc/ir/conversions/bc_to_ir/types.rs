@@ -28,7 +28,7 @@ pub(crate) fn convert_type(ty: &hhbc::TypeInfo, strings: &StringInterner) -> ir:
             .as_ref()
             .and_then(|user_type| {
                 use std::collections::HashMap;
-                static UNCONSTRAINED_BY_NAME: OnceLock<HashMap<&'static [u8], BaseType>> =
+                static UNCONSTRAINED_BY_NAME: OnceLock<HashMap<&'static str, BaseType>> =
                     OnceLock::new();
                 let unconstrained_by_name = UNCONSTRAINED_BY_NAME.get_or_init(|| {
                     hashmap! {
@@ -37,9 +37,7 @@ pub(crate) fn convert_type(ty: &hhbc::TypeInfo, strings: &StringInterner) -> ir:
                     }
                 });
 
-                unconstrained_by_name
-                    .get(user_type.as_bytes().as_ref())
-                    .cloned()
+                unconstrained_by_name.get(user_type.as_str()).cloned()
             })
             .unwrap_or(BaseType::Mixed),
     };
@@ -65,7 +63,7 @@ pub(crate) fn convert_maybe_type<'a>(
 
 fn cvt_constraint_type(name: StringId, strings: &StringInterner) -> BaseType {
     use std::collections::HashMap;
-    static CONSTRAINT_BY_NAME: OnceLock<HashMap<&'static [u8], BaseType>> = OnceLock::new();
+    static CONSTRAINT_BY_NAME: OnceLock<HashMap<&'static str, BaseType>> = OnceLock::new();
     let constraint_by_name = CONSTRAINT_BY_NAME.get_or_init(|| {
         hashmap! {
             ir::types::BUILTIN_NAME_ANY_ARRAY => BaseType::AnyArray,
@@ -94,7 +92,7 @@ fn cvt_constraint_type(name: StringId, strings: &StringInterner) -> BaseType {
     });
 
     constraint_by_name
-        .get(name.as_str().as_bytes())
+        .get(name.as_str())
         .cloned()
         .unwrap_or_else(|| {
             let name = ClassId::new(strings.intern_str(name.as_str()));

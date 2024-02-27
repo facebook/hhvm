@@ -120,39 +120,44 @@ def parse_cmd(
     if re.match(r"^\s*#", cmd):
         return None
 
-    (generator_spec, target_filename) = shlex.split(cmd.strip())
+    try:
+        (generator_spec, target_filename) = shlex.split(cmd.strip())
 
-    # Relative path from --fixture_root to target file, eg:
-    # 'thrift/compiler/test/fixtures/adapter/src/module.thrift'
-    target_filename = os.path.relpath(
-        os.path.join(fixture_src, target_filename), fixture_root
-    )
-
-    base_args = [
-        thrift_bin,
-        "-I",
-        os.path.abspath(fixture_src),
-        "-I",
-        os.path.abspath(fixture_root),
-    ]
-    if _should_build_included_files_recursively(generator_spec):
-        base_args.append("-r")
-
-    base_args += [
-        "-o",
-        os.path.abspath(fixture_src),
-        "--gen",
-    ]
-
-    # Add include_prefix for mstch_cpp* generators
-    if "mstch_cpp" in generator_spec:
-        generator_spec = _add_option_to_generator_spec(
-            generator_spec,
-            "include_prefix",
-            os.path.join("thrift/compiler/test/fixtures", fixture_name),
+        # Relative path from --fixture_root to target file, eg:
+        # 'thrift/compiler/test/fixtures/adapter/src/module.thrift'
+        target_filename = os.path.relpath(
+            os.path.join(fixture_src, target_filename), fixture_root
         )
 
-    return base_args + [generator_spec, target_filename]
+        base_args = [
+            thrift_bin,
+            "-I",
+            os.path.abspath(fixture_src),
+            "-I",
+            os.path.abspath(fixture_root),
+        ]
+        if _should_build_included_files_recursively(generator_spec):
+            base_args.append("-r")
+
+        base_args += [
+            "-o",
+            os.path.abspath(fixture_src),
+            "--gen",
+        ]
+
+        # Add include_prefix for mstch_cpp* generators
+        if "mstch_cpp" in generator_spec:
+            generator_spec = _add_option_to_generator_spec(
+                generator_spec,
+                "include_prefix",
+                os.path.join("thrift/compiler/test/fixtures", fixture_name),
+            )
+
+        return base_args + [generator_spec, target_filename]
+    except Exception as err:
+        raise RuntimeError(
+            f"Error parsing command for fixture '{fixture_name}': {cmd}"
+        ) from err
 
 
 def get_thrift_binary_path(

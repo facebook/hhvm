@@ -10,7 +10,6 @@ use ffi::Vector;
 use serde::Serialize;
 
 use crate::Attribute;
-use crate::BytesId;
 use crate::Constraint;
 use crate::Label;
 use crate::TypeInfo;
@@ -31,7 +30,7 @@ pub struct Param<'arena> {
 #[repr(C)]
 pub struct DefaultValue {
     pub label: Label,
-    pub expr: BytesId,
+    pub expr: Vector<u8>,
 }
 
 impl<'arena> Param<'arena> {

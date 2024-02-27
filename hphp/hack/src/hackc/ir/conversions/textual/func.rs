@@ -280,7 +280,10 @@ fn split_default_func<'a>(
             arguments: Vec::new(),
         });
 
-        let target_bid = func.params[param_count].default_value.map(|dv| dv.init);
+        let target_bid = func.params[param_count]
+            .default_value
+            .as_ref()
+            .map(|dv| dv.init);
         func.params.truncate(param_count);
         for i in min_params..param_count {
             func.params[i].default_value = None;

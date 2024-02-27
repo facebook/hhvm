@@ -71,7 +71,7 @@ pub(crate) fn convert_func<'a>(
                 let label = labeler.lookup_bid(dv.init);
                 hhbc::DefaultValue {
                     label,
-                    expr: dv.expr,
+                    expr: dv.expr.into(),
                 }
             })
             .into();

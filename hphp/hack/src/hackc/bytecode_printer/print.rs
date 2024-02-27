@@ -18,7 +18,6 @@ use hash::HashSet;
 use hhbc::Adata;
 use hhbc::Attribute;
 use hhbc::Body;
-use hhbc::BytesId;
 use hhbc::Class;
 use hhbc::ClassName;
 use hhbc::Coeffects;
@@ -1027,14 +1026,14 @@ fn print_param<'arena>(
     })?;
     w.write_all(&param.name)?;
     option(w, param.default_value.as_ref(), |w, dv: &DefaultValue| {
-        print_param_default_value(w, dv.label, dv.expr, dv_labels)
+        print_param_default_value(w, dv.label, &dv.expr, dv_labels)
     })
 }
 
 fn print_param_default_value<'arena>(
     w: &mut dyn Write,
     label: Label,
-    php_code: BytesId,
+    php_code: &[u8],
     dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     w.write_all(b" = ")?;

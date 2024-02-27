@@ -230,7 +230,7 @@ fn convert_param(ctx: &mut Context<'_, '_>, param: &Param<'_>) -> ir::Param {
             let init = ctx.target_from_label(dv.label, 0);
             Some(DefaultValue {
                 init,
-                expr: dv.expr,
+                expr: dv.expr.to_vec(),
             })
         }
         Maybe::Nothing => None,

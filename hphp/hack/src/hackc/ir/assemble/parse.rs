@@ -580,7 +580,7 @@ pub(crate) fn parse_param(tokenizer: &mut Tokenizer<'_>) -> Result<Param> {
 
     let default_value = if tokenizer.next_is_identifier("@")? {
         parse!(tokenizer, <init:parse_bid> "(" <expr:string> ")");
-        let expr = ir_core::intern_bytes(expr.unescaped_string()?);
+        let expr = expr.unescaped_string()?;
         Some(DefaultValue { init, expr })
     } else {
         None

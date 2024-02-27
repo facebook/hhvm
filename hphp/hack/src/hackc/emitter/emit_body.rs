@@ -397,13 +397,11 @@ pub fn make_body<'a, 'arena, 'decl>(
                 let ctx = Context::new(emitter);
                 let expr_env = body_env.as_ref();
                 let mut buf = Vec::new();
-                let expr = print_expr::print_expr(&ctx, &mut buf, &expr_env, expr).map_or_else(
-                    |e| hhbc::intern_bytes(e.to_string().as_bytes()),
-                    |_| hhbc::intern_bytes(buf.as_ref()),
-                );
+                let expr = print_expr::print_expr(&ctx, &mut buf, &expr_env, expr)
+                    .map_or_else(|e| e.to_string().into_bytes(), |_| buf);
                 hhbc::DefaultValue {
                     label: *label,
-                    expr,
+                    expr: expr.into(),
                 }
             }));
             p

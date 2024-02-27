@@ -1438,7 +1438,6 @@ fn assemble_default_value(token_iter: &mut Lexer<'_>) -> Result<Maybe<hhbc::Defa
         let label = assemble_label(token_iter)?;
         token_iter.expect(Token::is_open_paren)?;
         let expr = assemble_unescaped_unquoted_triple_vec(token_iter)?;
-        let expr = hhbc::intern_bytes(expr.as_slice());
         token_iter.expect(Token::is_close_paren)?;
         Maybe::Just(hhbc::DefaultValue { label, expr })
     } else {

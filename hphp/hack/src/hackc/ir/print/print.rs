@@ -1909,7 +1909,7 @@ pub(crate) fn print_param(
         is_variadic,
         ref ty,
         name,
-        default_value,
+        ref default_value,
         ref user_attributes,
     } = *param;
 
@@ -1942,7 +1942,7 @@ pub(crate) fn print_param(
             w,
             " @ {} ({})",
             FmtBid(func, dv.init, false),
-            FmtQuotedStr(&Str::new(dv.expr.as_bytes()))
+            FmtEscapedString(&dv.expr)
         )?;
     }
     Ok(())

@@ -46,7 +46,7 @@ pub fn run(func: &mut Func<'_>) -> bool {
 
     // Function params
     for idx in 0..func.params.len() {
-        if let Some(dv) = func.params[idx].default_value {
+        if let Some(dv) = &func.params[idx].default_value {
             if let Some(target) = forward_edge(func, dv.init, 1, &predecessors) {
                 changed = true;
                 predecessors[dv.init] -= 1;
@@ -178,7 +178,7 @@ mod test {
             ty: TypeInfo::default(),
             default_value: Some(DefaultValue {
                 init: dv,
-                expr: ir_core::intern_bytes(b"1".as_ref()),
+                expr: b"1".to_vec(),
             }),
         }
     }

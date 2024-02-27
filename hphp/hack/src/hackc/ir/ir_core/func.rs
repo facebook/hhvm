@@ -15,7 +15,6 @@ use crate::Attribute;
 use crate::Block;
 use crate::BlockId;
 use crate::BlockIdMap;
-use crate::BytesId;
 use crate::ClassId;
 use crate::ClassIdMap;
 use crate::Coeffects;
@@ -110,13 +109,13 @@ pub struct Param {
     pub default_value: Option<DefaultValue>,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct DefaultValue {
     /// What block to jump to to initialize this default value
     pub init: BlockId,
 
     /// Source text for the default value initializer expression (for reflection).
-    pub expr: BytesId,
+    pub expr: Vec<u8>,
 }
 
 newtype_int!(ExFrameId, u32, ExFrameIdMap, ExFrameIdSet);

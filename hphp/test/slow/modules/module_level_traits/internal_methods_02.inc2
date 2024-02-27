@@ -1,0 +1,11 @@
+<?hh
+
+module MLT_A;
+
+class C {
+  use T1;
+
+  public function foo() {
+    $this->bar();
+  }
+}

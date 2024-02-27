@@ -2228,9 +2228,17 @@ void Class::setMethods() {
     // Public traits cannot define internal methods, as the jit would not
     // handle correctly a call into an internal method, unless they have
     // the <<__ModuleLevelTrait>> attribute.
+    // Remark: in repo mode the condition `method->isFromTrait()` ensures that
+    // the method has been inlined from an internal or a module level trait.
+    // Indeed in repo mode, an internal method must have passed the
+    // well-formedness checks on the original trait, to be inlined in the current
+    // trait from another trait. These ensured that the original trait was an
+    // internal or module level trait. Otherwise, if the well-formedness checks
+    // had failed, the method would not have been inlined in the current trait.
     if (isPublicTrait &&
         (m_preClass->userAttributes().count(s___ModuleLevelTrait.get()) == 0)
-        && method->isInternal()) {
+        && method->isInternal()
+        && !(method->isFromTrait())) {
       raise_error(
         "Trait %s is public and therefore cannot define the internal method %s",
         m_preClass->name()->data(), method->name()->data());

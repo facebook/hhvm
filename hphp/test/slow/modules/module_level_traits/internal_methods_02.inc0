@@ -1,0 +1,8 @@
+<?hh
+
+module MLT_A;
+
+<<__ModuleLevelTrait>>
+public trait T {
+  internal function bar() { echo "bar in T\n"; }
+}

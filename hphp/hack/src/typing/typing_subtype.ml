@@ -5616,9 +5616,6 @@ end = struct
       (ty_super : internal_type)
       (cty_super : constraint_type)
       env =
-    let using_new_method_call_inference =
-      TypecheckerOptions.method_call_inference (Env.get_tcopt env)
-    in
     let ety_super = ConstraintType cty_super in
     let default_subtype_help env =
       Subtype.default_subtype
@@ -5631,9 +5628,7 @@ end = struct
         ety_sub
         ety_super
     in
-    let invalid_env env = invalid ~fail env in
     let invalid_env_with env f = invalid ~fail:f env in
-    let ( ||| ) = ( ||| ) ~fail in
     let fail_snd_err =
       let (ety_sub, ety_super, stripped_existential) =
         match Pretty.strip_existential ~ity_sub:ety_sub ~ity_sup:ety_super with
@@ -5672,95 +5667,19 @@ end = struct
           r_sup
           (lty_sup, cty_sup)
           env
-      | (_, TCunion (maybe_null, maybe_has_member))
-        when using_new_method_call_inference
-             && is_has_member maybe_has_member
-             &&
-             let (_, maybe_null) = Env.expand_type env maybe_null in
-             is_prim Aast.Tnull maybe_null ->
-        (* `LHS <: Thas_member(...) | null` is morally a null-safe object access *)
-        let (env, null_ty) = Env.expand_type env maybe_null in
-        let r_null = get_reason null_ty in
-        let (r, has_member_ty) = deref_constraint_type maybe_has_member in
-        (match has_member_ty with
-        | Thas_member has_member_ty ->
-          Has_member.simplify_subtype_has_member
-            ~subtype_env
-            ~sub_supportdyn
-            ~this_ty
-            ~nullsafe:(Some r_null)
-            ~fail
-            ety_sub
-            (r, has_member_ty)
-            env
-        | _ -> invalid_env env (* Not possible due to guard in parent match *))
-      | (_, TCunion (lty_super, cty_super)) ->
-        (match ety_sub with
-        | ConstraintType cty when is_constraint_type_union cty ->
-          default_subtype_help env
-        | ConstraintType _ ->
+      | (r_sup, TCunion (lty_sup, cty_sup)) ->
+        TCunion.simplify_subtype_tcunion_super
+          ~subtype_env
+          ~sub_supportdyn
+          ~this_ty
+          ~super_like
+          ~fail
+          ty_sub
+          ety_sub
+          ty_super
+          r_sup
+          (lty_sup, cty_sup)
           env
-          |> Subtype.simplify_subtype_i
-               ~subtype_env
-               ~sub_supportdyn
-               ~this_ty:None
-               ~super_like:false
-               ~super_supportdyn:false
-               ty_sub
-               (ConstraintType cty_super)
-          ||| Subtype.simplify_subtype_i
-                ~subtype_env
-                ~sub_supportdyn
-                ~this_ty:None
-                ~super_like:false
-                ~super_supportdyn:false
-                ty_sub
-                (LoclType lty_super)
-          ||| default_subtype_help
-        | LoclType lty ->
-          (match deref lty with
-          | (r, Toption ty) ->
-            let ty_null = MakeType.null r in
-            if_unsat
-              invalid_env
-              (Subtype.simplify_subtype_i
-                 ~subtype_env
-                 ~sub_supportdyn
-                 ~this_ty
-                 ~super_like:false
-                 ~super_supportdyn:false
-                 (LoclType ty_null)
-                 ty_super
-                 env)
-            &&& Subtype.simplify_subtype_i
-                  ~subtype_env
-                  ~sub_supportdyn
-                  ~this_ty
-                  ~super_like:false
-                  ~super_supportdyn:false
-                  (LoclType ty)
-                  ty_super
-          | (_, (Tintersection _ | Tunion _ | Tvar _)) ->
-            default_subtype_help env
-          | _ ->
-            env
-            |> Subtype.simplify_subtype_i
-                 ~subtype_env
-                 ~sub_supportdyn
-                 ~this_ty:None
-                 ~super_like:false
-                 ~super_supportdyn:false
-                 ty_sub
-                 (ConstraintType cty_super)
-            ||| Subtype.simplify_subtype_i
-                  ~subtype_env
-                  ~sub_supportdyn
-                  ~this_ty:None
-                  ~super_like:false
-                  ~super_supportdyn:false
-                  ty_sub
-                  (LoclType lty_super)
-            ||| default_subtype_help))
       | (r_super, Tdestructure { d_required; d_optional; d_variadic; d_kind })
         ->
         (* List destructuring *)
@@ -6142,6 +6061,143 @@ end = struct
             ~super_supportdyn:false
             ty_sub
             (ConstraintType cty_sup)
+end
+
+and TCunion : sig
+  val simplify_subtype_tcunion_super :
+    subtype_env:Subtype_env.t ->
+    sub_supportdyn:Reason.t option ->
+    this_ty:Typing_defs.locl_ty option ->
+    super_like:bool ->
+    fail:Typing_error.t option ->
+    Typing_defs.internal_type ->
+    Typing_defs.internal_type ->
+    Typing_defs.internal_type ->
+    Typing_defs.Reason.t ->
+    Typing_defs.locl_ty * Typing_defs.constraint_type ->
+    Typing_env_types.env ->
+    Typing_env_types.env * TL.subtype_prop
+end = struct
+  let simplify_subtype_tcunion_super
+      ~subtype_env
+      ~sub_supportdyn
+      ~this_ty
+      ~super_like
+      ~fail
+      ty_sub
+      ety_sub
+      ty_super
+      r_sup
+      (lty_sup, cty_sup)
+      env =
+    let using_new_method_call_inference =
+      TypecheckerOptions.method_call_inference (Env.get_tcopt env)
+    in
+    let cty_super = mk_constraint_type (r_sup, TCunion (lty_sup, cty_sup)) in
+    let ety_super = ConstraintType cty_super in
+    let default_subtype_help env =
+      Subtype.default_subtype
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        env
+        ety_sub
+        ety_super
+    in
+    let invalid_env env = invalid ~fail env in
+    let ( ||| ) = ( ||| ) ~fail in
+
+    match (lty_sup, cty_sup) with
+    | (maybe_null, maybe_has_member)
+      when using_new_method_call_inference
+           && is_has_member maybe_has_member
+           &&
+           let (_, maybe_null) = Env.expand_type env maybe_null in
+           is_prim Aast.Tnull maybe_null ->
+      (* `LHS <: Thas_member(...) | null` is morally a null-safe object access *)
+      let (env, null_ty) = Env.expand_type env maybe_null in
+      let r_null = get_reason null_ty in
+      let (r, has_member_ty) = deref_constraint_type maybe_has_member in
+      (match has_member_ty with
+      | Thas_member has_member_ty ->
+        Has_member.simplify_subtype_has_member
+          ~subtype_env
+          ~sub_supportdyn
+          ~this_ty
+          ~nullsafe:(Some r_null)
+          ~fail
+          ety_sub
+          (r, has_member_ty)
+          env
+      | _ -> invalid_env env (* Not possible due to guard in parent match *))
+    | (lty_super, cty_super) ->
+      (match ety_sub with
+      | ConstraintType cty when is_constraint_type_union cty ->
+        default_subtype_help env
+      | ConstraintType _ ->
+        env
+        |> Subtype.simplify_subtype_i
+             ~subtype_env
+             ~sub_supportdyn
+             ~this_ty:None
+             ~super_like:false
+             ~super_supportdyn:false
+             ty_sub
+             (ConstraintType cty_super)
+        ||| Subtype.simplify_subtype_i
+              ~subtype_env
+              ~sub_supportdyn
+              ~this_ty:None
+              ~super_like:false
+              ~super_supportdyn:false
+              ty_sub
+              (LoclType lty_super)
+        ||| default_subtype_help
+      | LoclType lty ->
+        (match deref lty with
+        | (r, Toption ty) ->
+          let ty_null = MakeType.null r in
+          if_unsat
+            invalid_env
+            (Subtype.simplify_subtype_i
+               ~subtype_env
+               ~sub_supportdyn
+               ~this_ty
+               ~super_like:false
+               ~super_supportdyn:false
+               (LoclType ty_null)
+               ty_super
+               env)
+          &&& Subtype.simplify_subtype_i
+                ~subtype_env
+                ~sub_supportdyn
+                ~this_ty
+                ~super_like:false
+                ~super_supportdyn:false
+                (LoclType ty)
+                ty_super
+        | (_, (Tintersection _ | Tunion _ | Tvar _)) -> default_subtype_help env
+        | _ ->
+          env
+          |> Subtype.simplify_subtype_i
+               ~subtype_env
+               ~sub_supportdyn
+               ~this_ty:None
+               ~super_like:false
+               ~super_supportdyn:false
+               ty_sub
+               (ConstraintType cty_super)
+          ||| Subtype.simplify_subtype_i
+                ~subtype_env
+                ~sub_supportdyn
+                ~this_ty:None
+                ~super_like:false
+                ~super_supportdyn:false
+                ty_sub
+                (LoclType lty_super)
+          ||| default_subtype_help))
 end
 
 (* == API =================================================================== *)

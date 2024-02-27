@@ -67,12 +67,12 @@ MyStructNestedAnnotation::MyStructNestedAnnotation() {
 
 MyStructNestedAnnotation::~MyStructNestedAnnotation() {}
 
-MyStructNestedAnnotation::MyStructNestedAnnotation(FOLLY_MAYBE_UNUSED MyStructNestedAnnotation&& other) noexcept :
+MyStructNestedAnnotation::MyStructNestedAnnotation([[maybe_unused]] MyStructNestedAnnotation&& other) noexcept :
     __fbthrift_field_name(std::move(other.__fbthrift_field_name)),
     __isset(other.__isset) {
 }
 
-MyStructNestedAnnotation& MyStructNestedAnnotation::operator=(FOLLY_MAYBE_UNUSED MyStructNestedAnnotation&& other) noexcept {
+MyStructNestedAnnotation& MyStructNestedAnnotation::operator=([[maybe_unused]] MyStructNestedAnnotation&& other) noexcept {
     this->__fbthrift_field_name = std::move(other.__fbthrift_field_name);
     __isset = other.__isset;
     return *this;
@@ -98,16 +98,16 @@ bool MyStructNestedAnnotation::__fbthrift_is_empty() const {
   return false;
 }
 
-bool MyStructNestedAnnotation::operator==(FOLLY_MAYBE_UNUSED const MyStructNestedAnnotation& rhs) const {
+bool MyStructNestedAnnotation::operator==([[maybe_unused]] const MyStructNestedAnnotation& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStructNestedAnnotation::operator<(FOLLY_MAYBE_UNUSED const MyStructNestedAnnotation& rhs) const {
+bool MyStructNestedAnnotation::operator<([[maybe_unused]] const MyStructNestedAnnotation& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyStructNestedAnnotation& a, FOLLY_MAYBE_UNUSED MyStructNestedAnnotation& b) {
+void swap([[maybe_unused]] MyStructNestedAnnotation& a, [[maybe_unused]] MyStructNestedAnnotation& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_name, b.__fbthrift_field_name);
   swap(a.__isset, b.__isset);
@@ -217,7 +217,7 @@ bool YourUnion::operator==(const YourUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool YourUnion::operator<(FOLLY_MAYBE_UNUSED const YourUnion& rhs) const {
+bool YourUnion::operator<([[maybe_unused]] const YourUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
@@ -280,8 +280,8 @@ YourException::YourException() {
 
 YourException::~YourException() {}
 
-YourException::YourException(FOLLY_MAYBE_UNUSED YourException&& other) noexcept{}
-YourException& YourException::operator=(FOLLY_MAYBE_UNUSED YourException&& other) noexcept {
+YourException::YourException([[maybe_unused]] YourException&& other) noexcept{}
+YourException& YourException::operator=([[maybe_unused]] YourException&& other) noexcept {
     return *this;
 }
 
@@ -300,16 +300,16 @@ bool YourException::__fbthrift_is_empty() const {
   return true;
 }
 
-bool YourException::operator==(FOLLY_MAYBE_UNUSED const YourException& rhs) const {
+bool YourException::operator==([[maybe_unused]] const YourException& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool YourException::operator<(FOLLY_MAYBE_UNUSED const YourException& rhs) const {
+bool YourException::operator<([[maybe_unused]] const YourException& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED YourException& a, FOLLY_MAYBE_UNUSED YourException& b) {
+void swap([[maybe_unused]] YourException& a, [[maybe_unused]] YourException& b) {
   using ::std::swap;
 }
 
@@ -391,7 +391,7 @@ YourStruct::YourStruct() :
 
 YourStruct::~YourStruct() {}
 
-YourStruct::YourStruct(FOLLY_MAYBE_UNUSED YourStruct&& other) noexcept :
+YourStruct::YourStruct([[maybe_unused]] YourStruct&& other) noexcept :
     __fbthrift_field_majorVer(std::move(other.__fbthrift_field_majorVer)),
     __fbthrift_field_abstract(std::move(other.__fbthrift_field_abstract)),
     __fbthrift_field_annotation_with_quote(std::move(other.__fbthrift_field_annotation_with_quote)),
@@ -405,7 +405,7 @@ YourStruct::YourStruct(FOLLY_MAYBE_UNUSED YourStruct&& other) noexcept :
   ::apache::thrift::adapt_detail::construct<::StaticCast, 9>(__fbthrift_field_my_union, *this);
 }
 
-YourStruct& YourStruct::operator=(FOLLY_MAYBE_UNUSED YourStruct&& other) noexcept {
+YourStruct& YourStruct::operator=([[maybe_unused]] YourStruct&& other) noexcept {
     this->__fbthrift_field_majorVer = std::move(other.__fbthrift_field_majorVer);
     this->__fbthrift_field_abstract = std::move(other.__fbthrift_field_abstract);
     this->__fbthrift_field_annotation_with_quote = std::move(other.__fbthrift_field_annotation_with_quote);
@@ -463,11 +463,11 @@ bool YourStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool YourStruct::operator==(FOLLY_MAYBE_UNUSED const YourStruct& rhs) const {
+bool YourStruct::operator==([[maybe_unused]] const YourStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool YourStruct::operator<(FOLLY_MAYBE_UNUSED const YourStruct& rhs) const {
+bool YourStruct::operator<([[maybe_unused]] const YourStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -480,7 +480,7 @@ const ::cpp2::list_string_6884& YourStruct::get_cpp_type_annotation() const& {
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED YourStruct& a, FOLLY_MAYBE_UNUSED YourStruct& b) {
+void swap([[maybe_unused]] YourStruct& a, [[maybe_unused]] YourStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_majorVer, b.__fbthrift_field_majorVer);
   swap(a.__fbthrift_field_abstract, b.__fbthrift_field_abstract);
@@ -553,13 +553,13 @@ SecretStruct::SecretStruct() :
 
 SecretStruct::~SecretStruct() {}
 
-SecretStruct::SecretStruct(FOLLY_MAYBE_UNUSED SecretStruct&& other) noexcept :
+SecretStruct::SecretStruct([[maybe_unused]] SecretStruct&& other) noexcept :
     __fbthrift_field_id(std::move(other.__fbthrift_field_id)),
     __fbthrift_field_password(std::move(other.__fbthrift_field_password)),
     __isset(other.__isset) {
 }
 
-SecretStruct& SecretStruct::operator=(FOLLY_MAYBE_UNUSED SecretStruct&& other) noexcept {
+SecretStruct& SecretStruct::operator=([[maybe_unused]] SecretStruct&& other) noexcept {
     this->__fbthrift_field_id = std::move(other.__fbthrift_field_id);
     this->__fbthrift_field_password = std::move(other.__fbthrift_field_password);
     __isset = other.__isset;
@@ -589,16 +589,16 @@ bool SecretStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool SecretStruct::operator==(FOLLY_MAYBE_UNUSED const SecretStruct& rhs) const {
+bool SecretStruct::operator==([[maybe_unused]] const SecretStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool SecretStruct::operator<(FOLLY_MAYBE_UNUSED const SecretStruct& rhs) const {
+bool SecretStruct::operator<([[maybe_unused]] const SecretStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED SecretStruct& a, FOLLY_MAYBE_UNUSED SecretStruct& b) {
+void swap([[maybe_unused]] SecretStruct& a, [[maybe_unused]] SecretStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_id, b.__fbthrift_field_id);
   swap(a.__fbthrift_field_password, b.__fbthrift_field_password);
@@ -618,7 +618,7 @@ template uint32_t SecretStruct::serializedSizeZC<>(apache::thrift::CompactProtoc
 } // cpp2
 
 namespace cpp2 { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::StaticCast, 9, ::cpp2::detail::YourUnion, ::cpp2::detail::YourStruct>();
   ::apache::thrift::adapt_detail::validateAdapter<::StaticCast, ::cpp2::detail::YourStruct>();
   ::apache::thrift::adapt_detail::validateAdapter<::StaticCast, ::cpp2::detail::YourStruct>();

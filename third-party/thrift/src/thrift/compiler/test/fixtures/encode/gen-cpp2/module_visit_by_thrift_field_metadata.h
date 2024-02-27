@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct VisitByFieldId<::facebook::thrift::test::Foo> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field_ref());
@@ -29,7 +29,7 @@ struct VisitByFieldId<::facebook::thrift::test::Foo> {
 template <>
 struct VisitByFieldId<::facebook::thrift::test::Bar> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).list_field_ref());
@@ -42,7 +42,7 @@ struct VisitByFieldId<::facebook::thrift::test::Bar> {
 template <>
 struct VisitByFieldId<::facebook::thrift::test::Baz> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).list_field_ref());
@@ -57,7 +57,7 @@ struct VisitByFieldId<::facebook::thrift::test::Baz> {
 template <>
 struct VisitByFieldId<::facebook::thrift::test::OpEncodeStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).int_field_ref());

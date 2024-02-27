@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::facebook::thrift::test::InterceptedFields> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).access_field_ref()...);
     f(1, static_cast<T&&>(t).access_shared_field_ref()...);
     f(2, static_cast<T&&>(t).access_optional_shared_field_ref()...);

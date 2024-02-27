@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::py3::simple::SimpleException> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).err_code_ref()...);
   }
 };
@@ -24,7 +24,7 @@ struct ForEachField<::py3::simple::SimpleException> {
 template <>
 struct ForEachField<::py3::simple::OptionalRefStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).optional_blob_ref()...);
   }
 };
@@ -32,7 +32,7 @@ struct ForEachField<::py3::simple::OptionalRefStruct> {
 template <>
 struct ForEachField<::py3::simple::SimpleStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).is_on_ref()...);
     f(1, static_cast<T&&>(t).tiny_int_ref()...);
     f(2, static_cast<T&&>(t).small_int_ref()...);
@@ -47,7 +47,7 @@ struct ForEachField<::py3::simple::SimpleStruct> {
 template <>
 struct ForEachField<::py3::simple::HiddenTypeFieldsStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).field1_ref()...);
     f(1, static_cast<T&&>(t).field2_ref()...);
     f(2, static_cast<T&&>(t).field3_ref()...);
@@ -57,7 +57,7 @@ struct ForEachField<::py3::simple::HiddenTypeFieldsStruct> {
 template <>
 struct ForEachField<::py3::simple::detail::AdaptedUnion> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).best_ref()...);
   }
 };
@@ -65,7 +65,7 @@ struct ForEachField<::py3::simple::detail::AdaptedUnion> {
 template <>
 struct ForEachField<::py3::simple::HiddenException> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).test_ref()...);
   }
 };
@@ -73,7 +73,7 @@ struct ForEachField<::py3::simple::HiddenException> {
 template <>
 struct ForEachField<::py3::simple::ComplexStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).structOne_ref()...);
     f(1, static_cast<T&&>(t).structTwo_ref()...);
     f(2, static_cast<T&&>(t).an_integer_ref()...);
@@ -89,7 +89,7 @@ struct ForEachField<::py3::simple::ComplexStruct> {
 template <>
 struct ForEachField<::py3::simple::BinaryUnion> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).iobuf_val_ref()...);
   }
 };
@@ -97,7 +97,7 @@ struct ForEachField<::py3::simple::BinaryUnion> {
 template <>
 struct ForEachField<::py3::simple::BinaryUnionStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).u_ref()...);
   }
 };

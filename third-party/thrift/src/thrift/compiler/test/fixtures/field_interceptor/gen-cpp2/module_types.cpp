@@ -58,7 +58,7 @@ InterceptedFields::InterceptedFields() :
 
 InterceptedFields::~InterceptedFields() {}
 
-InterceptedFields::InterceptedFields(FOLLY_MAYBE_UNUSED InterceptedFields&& other) noexcept :
+InterceptedFields::InterceptedFields([[maybe_unused]] InterceptedFields&& other) noexcept :
     __fbthrift_field_access_field(std::move(other.__fbthrift_field_access_field)),
     __fbthrift_field_access_shared_field(std::move(other.__fbthrift_field_access_shared_field)),
     __fbthrift_field_access_optional_shared_field(std::move(other.__fbthrift_field_access_optional_shared_field)),
@@ -68,7 +68,7 @@ InterceptedFields::InterceptedFields(FOLLY_MAYBE_UNUSED InterceptedFields&& othe
     __isset(other.__isset) {
 }
 
-InterceptedFields& InterceptedFields::operator=(FOLLY_MAYBE_UNUSED InterceptedFields&& other) noexcept {
+InterceptedFields& InterceptedFields::operator=([[maybe_unused]] InterceptedFields&& other) noexcept {
     this->__fbthrift_field_access_field = std::move(other.__fbthrift_field_access_field);
     this->__fbthrift_field_access_shared_field = std::move(other.__fbthrift_field_access_shared_field);
     this->__fbthrift_field_access_optional_shared_field = std::move(other.__fbthrift_field_access_optional_shared_field);
@@ -109,16 +109,16 @@ bool InterceptedFields::__fbthrift_is_empty() const {
   return false;
 }
 
-bool InterceptedFields::operator==(FOLLY_MAYBE_UNUSED const InterceptedFields& rhs) const {
+bool InterceptedFields::operator==([[maybe_unused]] const InterceptedFields& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool InterceptedFields::operator<(FOLLY_MAYBE_UNUSED const InterceptedFields& rhs) const {
+bool InterceptedFields::operator<([[maybe_unused]] const InterceptedFields& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED InterceptedFields& a, FOLLY_MAYBE_UNUSED InterceptedFields& b) {
+void swap([[maybe_unused]] InterceptedFields& a, [[maybe_unused]] InterceptedFields& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_access_field, b.__fbthrift_field_access_field);
   swap(a.__fbthrift_field_access_shared_field, b.__fbthrift_field_access_shared_field);
@@ -142,7 +142,7 @@ template uint32_t InterceptedFields::serializedSizeZC<>(apache::thrift::CompactP
 }}} // facebook::thrift::test
 
 namespace facebook { namespace thrift { namespace test { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }}}} // facebook::thrift::test
 namespace apache::thrift::detail::annotation {

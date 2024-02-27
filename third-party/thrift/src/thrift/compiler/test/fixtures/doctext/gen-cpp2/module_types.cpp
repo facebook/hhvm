@@ -79,16 +79,16 @@ bool A::__fbthrift_is_empty() const {
   return false;
 }
 
-bool A::operator==(FOLLY_MAYBE_UNUSED const A& rhs) const {
+bool A::operator==([[maybe_unused]] const A& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool A::operator<(FOLLY_MAYBE_UNUSED const A& rhs) const {
+bool A::operator<([[maybe_unused]] const A& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED A& a, FOLLY_MAYBE_UNUSED A& b) {
+void swap([[maybe_unused]] A& a, [[maybe_unused]] A& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_useless_field, b.__fbthrift_field_useless_field);
   swap(a.__isset, b.__isset);
@@ -218,7 +218,7 @@ bool U::operator==(const U& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool U::operator<(FOLLY_MAYBE_UNUSED const U& rhs) const {
+bool U::operator<([[maybe_unused]] const U& rhs) const {
   return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
@@ -279,12 +279,12 @@ Bang::Bang() {
 
 Bang::~Bang() {}
 
-Bang::Bang(FOLLY_MAYBE_UNUSED Bang&& other) noexcept :
+Bang::Bang([[maybe_unused]] Bang&& other) noexcept :
     __fbthrift_field_message(std::move(other.__fbthrift_field_message)),
     __isset(other.__isset) {
 }
 
-Bang& Bang::operator=(FOLLY_MAYBE_UNUSED Bang&& other) noexcept {
+Bang& Bang::operator=([[maybe_unused]] Bang&& other) noexcept {
     this->__fbthrift_field_message = std::move(other.__fbthrift_field_message);
     __isset = other.__isset;
     return *this;
@@ -310,16 +310,16 @@ bool Bang::__fbthrift_is_empty() const {
   return false;
 }
 
-bool Bang::operator==(FOLLY_MAYBE_UNUSED const Bang& rhs) const {
+bool Bang::operator==([[maybe_unused]] const Bang& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Bang::operator<(FOLLY_MAYBE_UNUSED const Bang& rhs) const {
+bool Bang::operator<([[maybe_unused]] const Bang& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Bang& a, FOLLY_MAYBE_UNUSED Bang& b) {
+void swap([[maybe_unused]] Bang& a, [[maybe_unused]] Bang& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_message, b.__fbthrift_field_message);
   swap(a.__isset, b.__isset);
@@ -338,7 +338,7 @@ template uint32_t Bang::serializedSizeZC<>(apache::thrift::CompactProtocolWriter
 } // cpp2
 
 namespace cpp2 { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }} // cpp2
 namespace apache::thrift::detail::annotation {

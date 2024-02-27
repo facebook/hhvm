@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::test::fixtures::basic::MyStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).MyIntField_ref()...);
     f(1, static_cast<T&&>(t).MyStringField_ref()...);
     f(2, static_cast<T&&>(t).MyDataField_ref()...);
@@ -32,14 +32,14 @@ struct ForEachField<::test::fixtures::basic::MyStruct> {
 template <>
 struct ForEachField<::test::fixtures::basic::MyDataItem> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
   }
 };
 
 template <>
 struct ForEachField<::test::fixtures::basic::MyUnion> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).myEnum_ref()...);
     f(1, static_cast<T&&>(t).myStruct_ref()...);
     f(2, static_cast<T&&>(t).myDataItem_ref()...);
@@ -50,7 +50,7 @@ struct ForEachField<::test::fixtures::basic::MyUnion> {
 template <>
 struct ForEachField<::test::fixtures::basic::ReservedKeyword> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).reserved_field_ref()...);
   }
 };
@@ -58,7 +58,7 @@ struct ForEachField<::test::fixtures::basic::ReservedKeyword> {
 template <>
 struct ForEachField<::test::fixtures::basic::UnionToBeRenamed> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).reserved_field_ref()...);
   }
 };

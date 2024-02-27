@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::test::fixtures::python_capi::SerializedStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).s_ref()...);
     f(1, static_cast<T&&>(t).i_ref()...);
     f(2, static_cast<T&&>(t).os_ref()...);
@@ -27,7 +27,7 @@ struct ForEachField<::test::fixtures::python_capi::SerializedStruct> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::SerializedUnion> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).s_ref()...);
     f(1, static_cast<T&&>(t).i_ref()...);
   }
@@ -36,7 +36,7 @@ struct ForEachField<::test::fixtures::python_capi::SerializedUnion> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::SerializedError> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).msg_ref()...);
     f(1, static_cast<T&&>(t).os_ref()...);
     f(2, static_cast<T&&>(t).rs_ref()...);
@@ -46,7 +46,7 @@ struct ForEachField<::test::fixtures::python_capi::SerializedError> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::MarshalStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).s_ref()...);
     f(1, static_cast<T&&>(t).i_ref()...);
     f(2, static_cast<T&&>(t).os_ref()...);
@@ -57,7 +57,7 @@ struct ForEachField<::test::fixtures::python_capi::MarshalStruct> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::MarshalUnion> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).s_ref()...);
     f(1, static_cast<T&&>(t).i_ref()...);
   }
@@ -66,7 +66,7 @@ struct ForEachField<::test::fixtures::python_capi::MarshalUnion> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::MarshalError> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).msg_ref()...);
     f(1, static_cast<T&&>(t).os_ref()...);
     f(2, static_cast<T&&>(t).rs_ref()...);

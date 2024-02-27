@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::test::fixtures::python_capi::MyStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).inty_ref()...);
     f(1, static_cast<T&&>(t).stringy_ref()...);
     f(2, static_cast<T&&>(t).myItemy_ref()...);
@@ -31,7 +31,7 @@ struct ForEachField<::test::fixtures::python_capi::MyStruct> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::MyDataItem> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).s_ref()...);
   }
 };
@@ -39,14 +39,14 @@ struct ForEachField<::test::fixtures::python_capi::MyDataItem> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::TransitiveDoubler> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
   }
 };
 
 template <>
 struct ForEachField<::test::fixtures::python_capi::detail::DoubledPair> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).s_ref()...);
     f(1, static_cast<T&&>(t).x_ref()...);
   }
@@ -55,7 +55,7 @@ struct ForEachField<::test::fixtures::python_capi::detail::DoubledPair> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::StringPair> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).normal_ref()...);
     f(1, static_cast<T&&>(t).doubled_ref()...);
   }
@@ -64,14 +64,14 @@ struct ForEachField<::test::fixtures::python_capi::StringPair> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::VapidStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
   }
 };
 
 template <>
 struct ForEachField<::test::fixtures::python_capi::PrimitiveStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).booly_ref()...);
     f(1, static_cast<T&&>(t).charry_ref()...);
     f(2, static_cast<T&&>(t).shortay_ref()...);
@@ -94,7 +94,7 @@ struct ForEachField<::test::fixtures::python_capi::PrimitiveStruct> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::AdaptedFields> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).adapted_int_ref()...);
     f(1, static_cast<T&&>(t).list_adapted_int_ref()...);
     f(2, static_cast<T&&>(t).set_adapted_int_ref()...);
@@ -105,7 +105,7 @@ struct ForEachField<::test::fixtures::python_capi::AdaptedFields> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::ListStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).boolz_ref()...);
     f(1, static_cast<T&&>(t).intz_ref()...);
     f(2, static_cast<T&&>(t).stringz_ref()...);
@@ -121,7 +121,7 @@ struct ForEachField<::test::fixtures::python_capi::ListStruct> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::SetStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).enumz_ref()...);
     f(1, static_cast<T&&>(t).intz_ref()...);
     f(2, static_cast<T&&>(t).binnaz_ref()...);
@@ -135,7 +135,7 @@ struct ForEachField<::test::fixtures::python_capi::SetStruct> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::MapStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).enumz_ref()...);
     f(1, static_cast<T&&>(t).intz_ref()...);
     f(2, static_cast<T&&>(t).binnaz_ref()...);
@@ -152,7 +152,7 @@ struct ForEachField<::test::fixtures::python_capi::MapStruct> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::ComposeStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).enum__ref()...);
     f(1, static_cast<T&&>(t).renamed__ref()...);
     f(2, static_cast<T&&>(t).primitive_ref()...);
@@ -169,7 +169,7 @@ struct ForEachField<::test::fixtures::python_capi::ComposeStruct> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::Shallot> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).myEnum_ref()...);
     f(1, static_cast<T&&>(t).myStruct_ref()...);
     f(2, static_cast<T&&>(t).intSet_ref()...);
@@ -183,7 +183,7 @@ struct ForEachField<::test::fixtures::python_capi::Shallot> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::MyStructPatchStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).assign_ref()...);
     f(1, static_cast<T&&>(t).clear_ref()...);
     f(2, static_cast<T&&>(t).patchPrior_ref()...);
@@ -196,7 +196,7 @@ struct ForEachField<::test::fixtures::python_capi::MyStructPatchStruct> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::MyStructField4PatchStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).assign_ref()...);
     f(1, static_cast<T&&>(t).clear_ref()...);
   }
@@ -205,7 +205,7 @@ struct ForEachField<::test::fixtures::python_capi::MyStructField4PatchStruct> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::MyStructField6PatchStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).assign_ref()...);
     f(1, static_cast<T&&>(t).clear_ref()...);
     f(2, static_cast<T&&>(t).prepend_ref()...);
@@ -216,7 +216,7 @@ struct ForEachField<::test::fixtures::python_capi::MyStructField6PatchStruct> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::MyStructField7PatchStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).assign_ref()...);
     f(1, static_cast<T&&>(t).clear_ref()...);
     f(2, static_cast<T&&>(t).patchPrior_ref()...);
@@ -230,7 +230,7 @@ struct ForEachField<::test::fixtures::python_capi::MyStructField7PatchStruct> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::MyStructField8PatchStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).assign_ref()...);
     f(1, static_cast<T&&>(t).clear_ref()...);
     f(2, static_cast<T&&>(t).remove_ref()...);
@@ -241,7 +241,7 @@ struct ForEachField<::test::fixtures::python_capi::MyStructField8PatchStruct> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::MyStructFieldPatchStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).inty_ref()...);
     f(1, static_cast<T&&>(t).stringy_ref()...);
     f(2, static_cast<T&&>(t).myItemy_ref()...);
@@ -256,7 +256,7 @@ struct ForEachField<::test::fixtures::python_capi::MyStructFieldPatchStruct> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::MyStructEnsureStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).inty_ref()...);
     f(1, static_cast<T&&>(t).stringy_ref()...);
     f(2, static_cast<T&&>(t).myItemy_ref()...);
@@ -271,7 +271,7 @@ struct ForEachField<::test::fixtures::python_capi::MyStructEnsureStruct> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::MyDataItemPatchStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).assign_ref()...);
     f(1, static_cast<T&&>(t).clear_ref()...);
     f(2, static_cast<T&&>(t).patchPrior_ref()...);
@@ -284,7 +284,7 @@ struct ForEachField<::test::fixtures::python_capi::MyDataItemPatchStruct> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::MyDataItemFieldPatchStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).s_ref()...);
   }
 };
@@ -292,7 +292,7 @@ struct ForEachField<::test::fixtures::python_capi::MyDataItemFieldPatchStruct> {
 template <>
 struct ForEachField<::test::fixtures::python_capi::MyDataItemEnsureStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).s_ref()...);
   }
 };

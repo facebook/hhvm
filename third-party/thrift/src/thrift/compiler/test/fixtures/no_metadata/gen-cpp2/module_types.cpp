@@ -69,7 +69,7 @@ MyStruct::MyStruct() :
 
 MyStruct::~MyStruct() {}
 
-MyStruct::MyStruct(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept :
+MyStruct::MyStruct([[maybe_unused]] MyStruct&& other) noexcept :
     __fbthrift_field_MyIntField(std::move(other.__fbthrift_field_MyIntField)),
     __fbthrift_field_MyStringField(std::move(other.__fbthrift_field_MyStringField)),
     __fbthrift_field_MyDataField(std::move(other.__fbthrift_field_MyDataField)),
@@ -77,7 +77,7 @@ MyStruct::MyStruct(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept :
     __isset(other.__isset) {
 }
 
-MyStruct& MyStruct::operator=(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept {
+MyStruct& MyStruct::operator=([[maybe_unused]] MyStruct&& other) noexcept {
     this->__fbthrift_field_MyIntField = std::move(other.__fbthrift_field_MyIntField);
     this->__fbthrift_field_MyStringField = std::move(other.__fbthrift_field_MyStringField);
     this->__fbthrift_field_MyDataField = std::move(other.__fbthrift_field_MyDataField);
@@ -114,11 +114,11 @@ bool MyStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
+bool MyStruct::operator==([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
+bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -131,7 +131,7 @@ const ::cpp2::MyDataItem& MyStruct::get_MyDataField() const& {
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyStruct& a, FOLLY_MAYBE_UNUSED MyStruct& b) {
+void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_MyIntField, b.__fbthrift_field_MyIntField);
   swap(a.__fbthrift_field_MyStringField, b.__fbthrift_field_MyStringField);
@@ -204,16 +204,16 @@ bool MyDataItem::__fbthrift_is_empty() const {
   return true;
 }
 
-bool MyDataItem::operator==(FOLLY_MAYBE_UNUSED const MyDataItem& rhs) const {
+bool MyDataItem::operator==([[maybe_unused]] const MyDataItem& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyDataItem::operator<(FOLLY_MAYBE_UNUSED const MyDataItem& rhs) const {
+bool MyDataItem::operator<([[maybe_unused]] const MyDataItem& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyDataItem& a, FOLLY_MAYBE_UNUSED MyDataItem& b) {
+void swap([[maybe_unused]] MyDataItem& a, [[maybe_unused]] MyDataItem& b) {
   using ::std::swap;
 }
 
@@ -350,7 +350,7 @@ bool MyUnion::operator==(const MyUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool MyUnion::operator<(FOLLY_MAYBE_UNUSED const MyUnion& rhs) const {
+bool MyUnion::operator<([[maybe_unused]] const MyUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
@@ -385,7 +385,7 @@ static_assert(
 } // cpp2
 
 namespace cpp2 { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }} // cpp2
 namespace apache::thrift::detail::annotation {

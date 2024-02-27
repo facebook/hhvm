@@ -153,7 +153,7 @@ PyObject* Constructor<::test::fixtures::python_capi::MyStruct>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::python_capi::MyStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::python_capi::MyStruct& val) {
+    [[maybe_unused]] const ::test::fixtures::python_capi::MyStruct& val) {
   StrongRef fbthrift_data(createStructTuple(8));
   StrongRef _fbthrift__inty(
     Constructor<int64_t>{}
@@ -302,7 +302,7 @@ PyObject* Constructor<::test::fixtures::python_capi::MyDataItem>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::python_capi::MyDataItem>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::python_capi::MyDataItem& val) {
+    [[maybe_unused]] const ::test::fixtures::python_capi::MyDataItem& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__s(
     Constructor<Bytes>{}
@@ -372,7 +372,7 @@ PyObject* Constructor<::test::fixtures::python_capi::TransitiveDoubler>::operato
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::python_capi::TransitiveDoubler>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::python_capi::TransitiveDoubler& val) {
+    [[maybe_unused]] const ::test::fixtures::python_capi::TransitiveDoubler& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
@@ -445,7 +445,7 @@ PyObject* Constructor<::test::fixtures::python_capi::detail::DoubledPair>::opera
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::python_capi::detail::DoubledPair>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::python_capi::detail::DoubledPair& val) {
+    [[maybe_unused]] const ::test::fixtures::python_capi::detail::DoubledPair& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__s(
     Constructor<Bytes>{}
@@ -538,7 +538,7 @@ PyObject* Constructor<::test::fixtures::python_capi::StringPair>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::python_capi::StringPair>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::python_capi::StringPair& val) {
+    [[maybe_unused]] const ::test::fixtures::python_capi::StringPair& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__normal(
     Constructor<Bytes>{}
@@ -618,7 +618,7 @@ PyObject* Constructor<::test::fixtures::python_capi::VapidStruct>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::python_capi::VapidStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::python_capi::VapidStruct& val) {
+    [[maybe_unused]] const ::test::fixtures::python_capi::VapidStruct& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
@@ -747,7 +747,7 @@ PyObject* Constructor<::test::fixtures::python_capi::PrimitiveStruct>::operator(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::python_capi::PrimitiveStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::python_capi::PrimitiveStruct& val) {
+    [[maybe_unused]] const ::test::fixtures::python_capi::PrimitiveStruct& val) {
   StrongRef fbthrift_data(createStructTuple(16));
   StrongRef _fbthrift__booly(
     Constructor<bool>{}
@@ -1016,7 +1016,7 @@ PyObject* Constructor<::test::fixtures::python_capi::AdaptedFields>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::python_capi::AdaptedFields>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::python_capi::AdaptedFields& val) {
+    [[maybe_unused]] const ::test::fixtures::python_capi::AdaptedFields& val) {
   StrongRef fbthrift_data(createStructTuple(4));
   StrongRef _fbthrift__adapted_int(
     Constructor<::apache::thrift::python::capi::AdaptedThrift<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, int64_t>>{}
@@ -1157,7 +1157,7 @@ PyObject* Constructor<::test::fixtures::python_capi::ListStruct>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::python_capi::ListStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::python_capi::ListStruct& val) {
+    [[maybe_unused]] const ::test::fixtures::python_capi::ListStruct& val) {
   StrongRef fbthrift_data(createStructTuple(9));
   StrongRef _fbthrift__boolz(
     Constructor<list<bool>>{}
@@ -1354,7 +1354,7 @@ PyObject* Constructor<::test::fixtures::python_capi::SetStruct>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::python_capi::SetStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::python_capi::SetStruct& val) {
+    [[maybe_unused]] const ::test::fixtures::python_capi::SetStruct& val) {
   StrongRef fbthrift_data(createStructTuple(7));
   StrongRef _fbthrift__enumz(
     Constructor<set<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::python_capi::MyEnum>>>{}
@@ -1543,7 +1543,7 @@ PyObject* Constructor<::test::fixtures::python_capi::MapStruct>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::python_capi::MapStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::python_capi::MapStruct& val) {
+    [[maybe_unused]] const ::test::fixtures::python_capi::MapStruct& val) {
   StrongRef fbthrift_data(createStructTuple(10));
   StrongRef _fbthrift__enumz(
     Constructor<map<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::python_capi::MyEnum>, Bytes>>{}
@@ -1762,7 +1762,7 @@ PyObject* Constructor<::test::fixtures::python_capi::ComposeStruct>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::python_capi::ComposeStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::python_capi::ComposeStruct& val) {
+    [[maybe_unused]] const ::test::fixtures::python_capi::ComposeStruct& val) {
   StrongRef fbthrift_data(createStructTuple(10));
   StrongRef _fbthrift__enum_(
     Constructor<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::python_capi::MyEnum>>{}
@@ -1963,7 +1963,7 @@ PyObject* Constructor<::test::fixtures::python_capi::Shallot>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::python_capi::Shallot>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::python_capi::Shallot& val) {
+    [[maybe_unused]] const ::test::fixtures::python_capi::Shallot& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
   switch (type_key) {

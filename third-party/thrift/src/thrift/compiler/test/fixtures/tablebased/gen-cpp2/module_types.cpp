@@ -124,7 +124,7 @@ TrivialTypesStruct::TrivialTypesStruct() :
 
 TrivialTypesStruct::~TrivialTypesStruct() {}
 
-TrivialTypesStruct::TrivialTypesStruct(FOLLY_MAYBE_UNUSED TrivialTypesStruct&& other) noexcept :
+TrivialTypesStruct::TrivialTypesStruct([[maybe_unused]] TrivialTypesStruct&& other) noexcept :
     __fbthrift_field_fieldA(std::move(other.__fbthrift_field_fieldA)),
     __fbthrift_field_fieldB(std::move(other.__fbthrift_field_fieldB)),
     __fbthrift_field_fieldC(std::move(other.__fbthrift_field_fieldC)),
@@ -133,7 +133,7 @@ TrivialTypesStruct::TrivialTypesStruct(FOLLY_MAYBE_UNUSED TrivialTypesStruct&& o
     __isset(other.__isset) {
 }
 
-TrivialTypesStruct& TrivialTypesStruct::operator=(FOLLY_MAYBE_UNUSED TrivialTypesStruct&& other) noexcept {
+TrivialTypesStruct& TrivialTypesStruct::operator=([[maybe_unused]] TrivialTypesStruct&& other) noexcept {
     this->__fbthrift_field_fieldA = std::move(other.__fbthrift_field_fieldA);
     this->__fbthrift_field_fieldB = std::move(other.__fbthrift_field_fieldB);
     this->__fbthrift_field_fieldC = std::move(other.__fbthrift_field_fieldC);
@@ -175,16 +175,16 @@ bool TrivialTypesStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool TrivialTypesStruct::operator==(FOLLY_MAYBE_UNUSED const TrivialTypesStruct& rhs) const {
+bool TrivialTypesStruct::operator==([[maybe_unused]] const TrivialTypesStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool TrivialTypesStruct::operator<(FOLLY_MAYBE_UNUSED const TrivialTypesStruct& rhs) const {
+bool TrivialTypesStruct::operator<([[maybe_unused]] const TrivialTypesStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED TrivialTypesStruct& a, FOLLY_MAYBE_UNUSED TrivialTypesStruct& b) {
+void swap([[maybe_unused]] TrivialTypesStruct& a, [[maybe_unused]] TrivialTypesStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_fieldA, b.__fbthrift_field_fieldA);
   swap(a.__fbthrift_field_fieldB, b.__fbthrift_field_fieldB);
@@ -277,7 +277,7 @@ ContainerStruct::ContainerStruct() {
 
 ContainerStruct::~ContainerStruct() {}
 
-ContainerStruct::ContainerStruct(FOLLY_MAYBE_UNUSED ContainerStruct&& other) noexcept :
+ContainerStruct::ContainerStruct([[maybe_unused]] ContainerStruct&& other) noexcept :
     __fbthrift_field_fieldA(std::move(other.__fbthrift_field_fieldA)),
     __fbthrift_field_fieldB(std::move(other.__fbthrift_field_fieldB)),
     __fbthrift_field_fieldC(std::move(other.__fbthrift_field_fieldC)),
@@ -289,7 +289,7 @@ ContainerStruct::ContainerStruct(FOLLY_MAYBE_UNUSED ContainerStruct&& other) noe
     __isset(other.__isset) {
 }
 
-ContainerStruct& ContainerStruct::operator=(FOLLY_MAYBE_UNUSED ContainerStruct&& other) noexcept {
+ContainerStruct& ContainerStruct::operator=([[maybe_unused]] ContainerStruct&& other) noexcept {
     this->__fbthrift_field_fieldA = std::move(other.__fbthrift_field_fieldA);
     this->__fbthrift_field_fieldB = std::move(other.__fbthrift_field_fieldB);
     this->__fbthrift_field_fieldC = std::move(other.__fbthrift_field_fieldC);
@@ -343,7 +343,7 @@ bool ContainerStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool ContainerStruct::operator==(FOLLY_MAYBE_UNUSED const ContainerStruct& rhs) const {
+bool ContainerStruct::operator==([[maybe_unused]] const ContainerStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
@@ -412,7 +412,7 @@ const ::std::vector<::test::fixtures::tablebased::TrivialTypesStruct>& Container
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED ContainerStruct& a, FOLLY_MAYBE_UNUSED ContainerStruct& b) {
+void swap([[maybe_unused]] ContainerStruct& a, [[maybe_unused]] ContainerStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_fieldA, b.__fbthrift_field_fieldA);
   swap(a.__fbthrift_field_fieldB, b.__fbthrift_field_fieldB);
@@ -680,7 +680,7 @@ static_assert(
 }}} // test::fixtures::tablebased
 
 namespace test { namespace fixtures { namespace tablebased { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }}}} // test::fixtures::tablebased
 

@@ -16,14 +16,14 @@ namespace detail {
 template <>
 struct ForEachField<::facebook::thrift::test::terse_write::MyStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
   }
 };
 
 template <>
 struct ForEachField<::facebook::thrift::test::terse_write::MyUnion> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).bool_field_ref()...);
     f(1, static_cast<T&&>(t).byte_field_ref()...);
     f(2, static_cast<T&&>(t).short_field_ref()...);
@@ -44,7 +44,7 @@ struct ForEachField<::facebook::thrift::test::terse_write::MyUnion> {
 template <>
 struct ForEachField<::facebook::thrift::test::terse_write::MyStructWithCustomDefault> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).field1_ref()...);
   }
 };
@@ -52,7 +52,7 @@ struct ForEachField<::facebook::thrift::test::terse_write::MyStructWithCustomDef
 template <>
 struct ForEachField<::facebook::thrift::test::terse_write::StructLevelTerseStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).bool_field_ref()...);
     f(1, static_cast<T&&>(t).byte_field_ref()...);
     f(2, static_cast<T&&>(t).short_field_ref()...);
@@ -74,7 +74,7 @@ struct ForEachField<::facebook::thrift::test::terse_write::StructLevelTerseStruc
 template <>
 struct ForEachField<::facebook::thrift::test::terse_write::FieldLevelTerseStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).terse_bool_field_ref()...);
     f(1, static_cast<T&&>(t).terse_byte_field_ref()...);
     f(2, static_cast<T&&>(t).terse_short_field_ref()...);
@@ -111,7 +111,7 @@ struct ForEachField<::facebook::thrift::test::terse_write::FieldLevelTerseStruct
 template <>
 struct ForEachField<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).bool_field_ref()...);
     f(1, static_cast<T&&>(t).byte_field_ref()...);
     f(2, static_cast<T&&>(t).short_field_ref()...);
@@ -132,7 +132,7 @@ struct ForEachField<::facebook::thrift::test::terse_write::TerseStructWithCustom
 template <>
 struct ForEachField<::facebook::thrift::test::terse_write::AdaptedFields> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).field1_ref()...);
     f(1, static_cast<T&&>(t).field2_ref()...);
     f(2, static_cast<T&&>(t).field3_ref()...);
@@ -142,7 +142,7 @@ struct ForEachField<::facebook::thrift::test::terse_write::AdaptedFields> {
 template <>
 struct ForEachField<::facebook::thrift::test::terse_write::WrappedFields> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).field1_ref()...);
   }
 };
@@ -150,7 +150,7 @@ struct ForEachField<::facebook::thrift::test::terse_write::WrappedFields> {
 template <>
 struct ForEachField<::facebook::thrift::test::terse_write::TerseException> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).msg_ref()...);
   }
 };

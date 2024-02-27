@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct VisitByFieldId<::facebook::thrift::test::terse_write::MyStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
       throwInvalidThriftId(fieldId, "::facebook::thrift::test::terse_write::MyStruct");
@@ -27,7 +27,7 @@ struct VisitByFieldId<::facebook::thrift::test::terse_write::MyStruct> {
 template <>
 struct VisitByFieldId<::facebook::thrift::test::terse_write::MyUnion> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).bool_field_ref());
@@ -66,7 +66,7 @@ struct VisitByFieldId<::facebook::thrift::test::terse_write::MyUnion> {
 template <>
 struct VisitByFieldId<::facebook::thrift::test::terse_write::MyStructWithCustomDefault> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field1_ref());
@@ -79,7 +79,7 @@ struct VisitByFieldId<::facebook::thrift::test::terse_write::MyStructWithCustomD
 template <>
 struct VisitByFieldId<::facebook::thrift::test::terse_write::StructLevelTerseStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).bool_field_ref());
@@ -120,7 +120,7 @@ struct VisitByFieldId<::facebook::thrift::test::terse_write::StructLevelTerseStr
 template <>
 struct VisitByFieldId<::facebook::thrift::test::terse_write::FieldLevelTerseStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).terse_bool_field_ref());
@@ -191,7 +191,7 @@ struct VisitByFieldId<::facebook::thrift::test::terse_write::FieldLevelTerseStru
 template <>
 struct VisitByFieldId<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).bool_field_ref());
@@ -230,7 +230,7 @@ struct VisitByFieldId<::facebook::thrift::test::terse_write::TerseStructWithCust
 template <>
 struct VisitByFieldId<::facebook::thrift::test::terse_write::AdaptedFields> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field1_ref());
@@ -247,7 +247,7 @@ struct VisitByFieldId<::facebook::thrift::test::terse_write::AdaptedFields> {
 template <>
 struct VisitByFieldId<::facebook::thrift::test::terse_write::WrappedFields> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field1_ref());
@@ -260,7 +260,7 @@ struct VisitByFieldId<::facebook::thrift::test::terse_write::WrappedFields> {
 template <>
 struct VisitByFieldId<::facebook::thrift::test::terse_write::TerseException> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).msg_ref());

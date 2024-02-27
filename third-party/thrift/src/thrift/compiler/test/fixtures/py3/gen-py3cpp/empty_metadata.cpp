@@ -38,7 +38,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NullService>>::gen
   response.context() = std::move(context);
 }
 
-const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NullService>>::genRecurse(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NullService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService empty_NullService;
   empty_NullService.name() = "empty.NullService";
   // We need to keep the index around because a reference or iterator could be invalidated.

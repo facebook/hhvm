@@ -78,16 +78,16 @@ bool MyStruct::__fbthrift_is_empty() const {
   return true;
 }
 
-bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
+bool MyStruct::operator==([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
+bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyStruct& a, FOLLY_MAYBE_UNUSED MyStruct& b) {
+void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   using ::std::swap;
 }
 
@@ -327,7 +327,7 @@ bool MyUnion::operator==(const MyUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool MyUnion::operator<(FOLLY_MAYBE_UNUSED const MyUnion& rhs) const {
+bool MyUnion::operator<([[maybe_unused]] const MyUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
@@ -410,16 +410,16 @@ bool MyStructWithCustomDefault::__fbthrift_is_empty() const {
   return false;
 }
 
-bool MyStructWithCustomDefault::operator==(FOLLY_MAYBE_UNUSED const MyStructWithCustomDefault& rhs) const {
+bool MyStructWithCustomDefault::operator==([[maybe_unused]] const MyStructWithCustomDefault& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStructWithCustomDefault::operator<(FOLLY_MAYBE_UNUSED const MyStructWithCustomDefault& rhs) const {
+bool MyStructWithCustomDefault::operator<([[maybe_unused]] const MyStructWithCustomDefault& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyStructWithCustomDefault& a, FOLLY_MAYBE_UNUSED MyStructWithCustomDefault& b) {
+void swap([[maybe_unused]] MyStructWithCustomDefault& a, [[maybe_unused]] MyStructWithCustomDefault& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field1, b.__fbthrift_field_field1);
   swap(a.__isset, b.__isset);
@@ -488,7 +488,7 @@ StructLevelTerseStruct::StructLevelTerseStruct() :
 
 StructLevelTerseStruct::~StructLevelTerseStruct() {}
 
-StructLevelTerseStruct::StructLevelTerseStruct(FOLLY_MAYBE_UNUSED StructLevelTerseStruct&& other) noexcept :
+StructLevelTerseStruct::StructLevelTerseStruct([[maybe_unused]] StructLevelTerseStruct&& other) noexcept :
     __fbthrift_field_bool_field(std::move(other.__fbthrift_field_bool_field)),
     __fbthrift_field_byte_field(std::move(other.__fbthrift_field_byte_field)),
     __fbthrift_field_short_field(std::move(other.__fbthrift_field_short_field)),
@@ -506,7 +506,7 @@ StructLevelTerseStruct::StructLevelTerseStruct(FOLLY_MAYBE_UNUSED StructLevelTer
     __fbthrift_field_union_field(std::move(other.__fbthrift_field_union_field)) {
 }
 
-StructLevelTerseStruct& StructLevelTerseStruct::operator=(FOLLY_MAYBE_UNUSED StructLevelTerseStruct&& other) noexcept {
+StructLevelTerseStruct& StructLevelTerseStruct::operator=([[maybe_unused]] StructLevelTerseStruct&& other) noexcept {
     this->__fbthrift_field_bool_field = std::move(other.__fbthrift_field_bool_field);
     this->__fbthrift_field_byte_field = std::move(other.__fbthrift_field_byte_field);
     this->__fbthrift_field_short_field = std::move(other.__fbthrift_field_short_field);
@@ -598,11 +598,11 @@ bool StructLevelTerseStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::union_t<::facebook::thrift::test::terse_write::MyUnion>>(this->__fbthrift_field_union_field);
 }
 
-bool StructLevelTerseStruct::operator==(FOLLY_MAYBE_UNUSED const StructLevelTerseStruct& rhs) const {
+bool StructLevelTerseStruct::operator==([[maybe_unused]] const StructLevelTerseStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool StructLevelTerseStruct::operator<(FOLLY_MAYBE_UNUSED const StructLevelTerseStruct& rhs) const {
+bool StructLevelTerseStruct::operator<([[maybe_unused]] const StructLevelTerseStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -647,7 +647,7 @@ const ::facebook::thrift::test::terse_write::MyUnion& StructLevelTerseStruct::ge
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED StructLevelTerseStruct& a, FOLLY_MAYBE_UNUSED StructLevelTerseStruct& b) {
+void swap([[maybe_unused]] StructLevelTerseStruct& a, [[maybe_unused]] StructLevelTerseStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_bool_field, b.__fbthrift_field_bool_field);
   swap(a.__fbthrift_field_byte_field, b.__fbthrift_field_byte_field);
@@ -749,7 +749,7 @@ FieldLevelTerseStruct::FieldLevelTerseStruct() :
 
 FieldLevelTerseStruct::~FieldLevelTerseStruct() {}
 
-FieldLevelTerseStruct::FieldLevelTerseStruct(FOLLY_MAYBE_UNUSED FieldLevelTerseStruct&& other) noexcept :
+FieldLevelTerseStruct::FieldLevelTerseStruct([[maybe_unused]] FieldLevelTerseStruct&& other) noexcept :
     __fbthrift_field_terse_bool_field(std::move(other.__fbthrift_field_terse_bool_field)),
     __fbthrift_field_terse_byte_field(std::move(other.__fbthrift_field_terse_byte_field)),
     __fbthrift_field_terse_short_field(std::move(other.__fbthrift_field_terse_short_field)),
@@ -783,7 +783,7 @@ FieldLevelTerseStruct::FieldLevelTerseStruct(FOLLY_MAYBE_UNUSED FieldLevelTerseS
     __isset(other.__isset) {
 }
 
-FieldLevelTerseStruct& FieldLevelTerseStruct::operator=(FOLLY_MAYBE_UNUSED FieldLevelTerseStruct&& other) noexcept {
+FieldLevelTerseStruct& FieldLevelTerseStruct::operator=([[maybe_unused]] FieldLevelTerseStruct&& other) noexcept {
     this->__fbthrift_field_terse_bool_field = std::move(other.__fbthrift_field_terse_bool_field);
     this->__fbthrift_field_terse_byte_field = std::move(other.__fbthrift_field_terse_byte_field);
     this->__fbthrift_field_terse_short_field = std::move(other.__fbthrift_field_terse_short_field);
@@ -922,11 +922,11 @@ bool FieldLevelTerseStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool FieldLevelTerseStruct::operator==(FOLLY_MAYBE_UNUSED const FieldLevelTerseStruct& rhs) const {
+bool FieldLevelTerseStruct::operator==([[maybe_unused]] const FieldLevelTerseStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool FieldLevelTerseStruct::operator<(FOLLY_MAYBE_UNUSED const FieldLevelTerseStruct& rhs) const {
+bool FieldLevelTerseStruct::operator<([[maybe_unused]] const FieldLevelTerseStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -1011,7 +1011,7 @@ const ::facebook::thrift::test::terse_write::MyUnion& FieldLevelTerseStruct::get
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED FieldLevelTerseStruct& a, FOLLY_MAYBE_UNUSED FieldLevelTerseStruct& b) {
+void swap([[maybe_unused]] FieldLevelTerseStruct& a, [[maybe_unused]] FieldLevelTerseStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_terse_bool_field, b.__fbthrift_field_terse_bool_field);
   swap(a.__fbthrift_field_terse_byte_field, b.__fbthrift_field_terse_byte_field);
@@ -1138,7 +1138,7 @@ TerseStructWithCustomDefault::TerseStructWithCustomDefault() :
 
 TerseStructWithCustomDefault::~TerseStructWithCustomDefault() {}
 
-TerseStructWithCustomDefault::TerseStructWithCustomDefault(FOLLY_MAYBE_UNUSED TerseStructWithCustomDefault&& other) noexcept :
+TerseStructWithCustomDefault::TerseStructWithCustomDefault([[maybe_unused]] TerseStructWithCustomDefault&& other) noexcept :
     __fbthrift_field_bool_field(std::move(other.__fbthrift_field_bool_field)),
     __fbthrift_field_byte_field(std::move(other.__fbthrift_field_byte_field)),
     __fbthrift_field_short_field(std::move(other.__fbthrift_field_short_field)),
@@ -1155,7 +1155,7 @@ TerseStructWithCustomDefault::TerseStructWithCustomDefault(FOLLY_MAYBE_UNUSED Te
     __fbthrift_field_struct_field(std::move(other.__fbthrift_field_struct_field)) {
 }
 
-TerseStructWithCustomDefault& TerseStructWithCustomDefault::operator=(FOLLY_MAYBE_UNUSED TerseStructWithCustomDefault&& other) noexcept {
+TerseStructWithCustomDefault& TerseStructWithCustomDefault::operator=([[maybe_unused]] TerseStructWithCustomDefault&& other) noexcept {
     this->__fbthrift_field_bool_field = std::move(other.__fbthrift_field_bool_field);
     this->__fbthrift_field_byte_field = std::move(other.__fbthrift_field_byte_field);
     this->__fbthrift_field_short_field = std::move(other.__fbthrift_field_short_field);
@@ -1244,11 +1244,11 @@ bool TerseStructWithCustomDefault::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>>(this->__fbthrift_field_struct_field);
 }
 
-bool TerseStructWithCustomDefault::operator==(FOLLY_MAYBE_UNUSED const TerseStructWithCustomDefault& rhs) const {
+bool TerseStructWithCustomDefault::operator==([[maybe_unused]] const TerseStructWithCustomDefault& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool TerseStructWithCustomDefault::operator<(FOLLY_MAYBE_UNUSED const TerseStructWithCustomDefault& rhs) const {
+bool TerseStructWithCustomDefault::operator<([[maybe_unused]] const TerseStructWithCustomDefault& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -1285,7 +1285,7 @@ const ::facebook::thrift::test::terse_write::MyStructWithCustomDefault& TerseStr
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED TerseStructWithCustomDefault& a, FOLLY_MAYBE_UNUSED TerseStructWithCustomDefault& b) {
+void swap([[maybe_unused]] TerseStructWithCustomDefault& a, [[maybe_unused]] TerseStructWithCustomDefault& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_bool_field, b.__fbthrift_field_bool_field);
   swap(a.__fbthrift_field_byte_field, b.__fbthrift_field_byte_field);
@@ -1371,7 +1371,7 @@ AdaptedFields& AdaptedFields::operator=(const AdaptedFields& other) {
   return *this;
 }
 
-AdaptedFields::AdaptedFields(FOLLY_MAYBE_UNUSED AdaptedFields&& other) noexcept :
+AdaptedFields::AdaptedFields([[maybe_unused]] AdaptedFields&& other) noexcept :
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
     __fbthrift_field_field2(std::move(other.__fbthrift_field_field2)),
     __fbthrift_field_field3(std::move(other.__fbthrift_field_field3)) {
@@ -1380,7 +1380,7 @@ AdaptedFields::AdaptedFields(FOLLY_MAYBE_UNUSED AdaptedFields&& other) noexcept 
   ::apache::thrift::adapt_detail::construct<::my::Adapter, 3>(__fbthrift_field_field3, *this);
 }
 
-AdaptedFields& AdaptedFields::operator=(FOLLY_MAYBE_UNUSED AdaptedFields&& other) noexcept {
+AdaptedFields& AdaptedFields::operator=([[maybe_unused]] AdaptedFields&& other) noexcept {
     this->__fbthrift_field_field1 = std::move(other.__fbthrift_field_field1);
     this->__fbthrift_field_field2 = std::move(other.__fbthrift_field_field2);
     this->__fbthrift_field_field3 = std::move(other.__fbthrift_field_field3);
@@ -1417,16 +1417,16 @@ bool AdaptedFields::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<AdaptedFields, ::apache::thrift::field_id<3>>>(this->__fbthrift_field_field3);
 }
 
-bool AdaptedFields::operator==(FOLLY_MAYBE_UNUSED const AdaptedFields& rhs) const {
+bool AdaptedFields::operator==([[maybe_unused]] const AdaptedFields& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool AdaptedFields::operator<(FOLLY_MAYBE_UNUSED const AdaptedFields& rhs) const {
+bool AdaptedFields::operator<([[maybe_unused]] const AdaptedFields& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED AdaptedFields& a, FOLLY_MAYBE_UNUSED AdaptedFields& b) {
+void swap([[maybe_unused]] AdaptedFields& a, [[maybe_unused]] AdaptedFields& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field1, b.__fbthrift_field_field1);
   swap(a.__fbthrift_field_field2, b.__fbthrift_field_field2);
@@ -1499,16 +1499,16 @@ bool WrappedFields::__fbthrift_is_empty() const {
   return ::apache::thrift::op::isEmpty<::apache::thrift::type::i32_t>(this->__fbthrift_field_field1);
 }
 
-bool WrappedFields::operator==(FOLLY_MAYBE_UNUSED const WrappedFields& rhs) const {
+bool WrappedFields::operator==([[maybe_unused]] const WrappedFields& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool WrappedFields::operator<(FOLLY_MAYBE_UNUSED const WrappedFields& rhs) const {
+bool WrappedFields::operator<([[maybe_unused]] const WrappedFields& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED WrappedFields& a, FOLLY_MAYBE_UNUSED WrappedFields& b) {
+void swap([[maybe_unused]] WrappedFields& a, [[maybe_unused]] WrappedFields& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field1, b.__fbthrift_field_field1);
 }
@@ -1572,11 +1572,11 @@ TerseException::TerseException(std::string __message) : TerseException() {
 
 TerseException::~TerseException() {}
 
-TerseException::TerseException(FOLLY_MAYBE_UNUSED TerseException&& other) noexcept :
+TerseException::TerseException([[maybe_unused]] TerseException&& other) noexcept :
     __fbthrift_field_msg(std::move(other.__fbthrift_field_msg)) {
 }
 
-TerseException& TerseException::operator=(FOLLY_MAYBE_UNUSED TerseException&& other) noexcept {
+TerseException& TerseException::operator=([[maybe_unused]] TerseException&& other) noexcept {
     this->__fbthrift_field_msg = std::move(other.__fbthrift_field_msg);
     return *this;
 }
@@ -1600,16 +1600,16 @@ bool TerseException::__fbthrift_is_empty() const {
   return ::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_msg);
 }
 
-bool TerseException::operator==(FOLLY_MAYBE_UNUSED const TerseException& rhs) const {
+bool TerseException::operator==([[maybe_unused]] const TerseException& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool TerseException::operator<(FOLLY_MAYBE_UNUSED const TerseException& rhs) const {
+bool TerseException::operator<([[maybe_unused]] const TerseException& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED TerseException& a, FOLLY_MAYBE_UNUSED TerseException& b) {
+void swap([[maybe_unused]] TerseException& a, [[maybe_unused]] TerseException& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_msg, b.__fbthrift_field_msg);
 }
@@ -1627,7 +1627,7 @@ template uint32_t TerseException::serializedSizeZC<>(apache::thrift::CompactProt
 }}}} // facebook::thrift::test::terse_write
 
 namespace facebook { namespace thrift { namespace test { namespace terse_write { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 1, ::std::int32_t, ::facebook::thrift::test::terse_write::AdaptedFields>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 2, ::std::int32_t, ::facebook::thrift::test::terse_write::AdaptedFields>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 3, ::std::int32_t, ::facebook::thrift::test::terse_write::AdaptedFields>();

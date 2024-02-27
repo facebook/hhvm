@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct VisitByFieldId<::py3::simple::SimpleException> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).err_code_ref());
@@ -29,7 +29,7 @@ struct VisitByFieldId<::py3::simple::SimpleException> {
 template <>
 struct VisitByFieldId<::py3::simple::OptionalRefStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).optional_blob_ref());
@@ -42,7 +42,7 @@ struct VisitByFieldId<::py3::simple::OptionalRefStruct> {
 template <>
 struct VisitByFieldId<::py3::simple::SimpleStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).is_on_ref());
@@ -69,7 +69,7 @@ struct VisitByFieldId<::py3::simple::SimpleStruct> {
 template <>
 struct VisitByFieldId<::py3::simple::HiddenTypeFieldsStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field1_ref());
@@ -86,7 +86,7 @@ struct VisitByFieldId<::py3::simple::HiddenTypeFieldsStruct> {
 template <>
 struct VisitByFieldId<::py3::simple::detail::AdaptedUnion> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).best_ref());
@@ -99,7 +99,7 @@ struct VisitByFieldId<::py3::simple::detail::AdaptedUnion> {
 template <>
 struct VisitByFieldId<::py3::simple::HiddenException> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).test_ref());
@@ -112,7 +112,7 @@ struct VisitByFieldId<::py3::simple::HiddenException> {
 template <>
 struct VisitByFieldId<::py3::simple::ComplexStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).structOne_ref());
@@ -141,7 +141,7 @@ struct VisitByFieldId<::py3::simple::ComplexStruct> {
 template <>
 struct VisitByFieldId<::py3::simple::BinaryUnion> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).iobuf_val_ref());
@@ -154,7 +154,7 @@ struct VisitByFieldId<::py3::simple::BinaryUnion> {
 template <>
 struct VisitByFieldId<::py3::simple::BinaryUnionStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).u_ref());

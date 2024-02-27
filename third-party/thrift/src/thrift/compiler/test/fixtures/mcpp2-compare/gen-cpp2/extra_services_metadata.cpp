@@ -63,7 +63,7 @@ StructMetadata<::extra::svc::containerStruct2>::gen(ThriftMetadata& metadata) {
   return res.first->second;
 }
 
-void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_simple_function(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_simple_function([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "simple_function";
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE);
@@ -71,7 +71,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService
   func.is_oneway() = false;
   service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_throws_function(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_throws_function([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "throws_function";
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
@@ -95,7 +95,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService
   func.is_oneway() = false;
   service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_throws_function2(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_throws_function2([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "throws_function2";
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE);
@@ -126,7 +126,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService
   func.is_oneway() = false;
   service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_throws_function3(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_throws_function3([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "throws_function3";
   auto func_ret_type = std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE));
@@ -164,7 +164,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService
   func.is_oneway() = false;
   service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_oneway_void_ret(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_oneway_void_ret([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "oneway_void_ret";
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
@@ -172,7 +172,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService
   func.is_oneway() = true;
   service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_oneway_void_ret_i32_i32_i32_i32_i32_param(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_oneway_void_ret_i32_i32_i32_i32_i32_param([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "oneway_void_ret_i32_i32_i32_i32_i32_param";
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
@@ -215,7 +215,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService
   func.is_oneway() = true;
   service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_oneway_void_ret_map_setlist_param(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_oneway_void_ret_map_setlist_param([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "oneway_void_ret_map_setlist_param";
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
@@ -237,7 +237,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService
   func.is_oneway() = true;
   service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_oneway_void_ret_struct_param(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_oneway_void_ret_struct_param([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "oneway_void_ret_struct_param";
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
@@ -252,7 +252,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService
   func.is_oneway() = true;
   service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_oneway_void_ret_listunion_param(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_oneway_void_ret_listunion_param([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "oneway_void_ret_listunion_param";
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
@@ -278,7 +278,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService
   response.context() = std::move(context);
 }
 
-const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::genRecurse(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService extra_services_ExtraService;
   extra_services_ExtraService.name() = "extra_services.ExtraService";
   static const ThriftFunctionGenerator functions[] = {

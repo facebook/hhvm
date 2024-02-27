@@ -204,7 +204,7 @@ PyObject* Constructor<{{struct:cpp_name}}>::operator()(
 {{#struct:marshal_capi?}}
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         {{struct:cpp_name}}>>::operator()(
-    FOLLY_MAYBE_UNUSED const {{struct:cpp_name}}& val) {
+    [[maybe_unused]] const {{struct:cpp_name}}& val) {
   {{^struct:union?}}
   StrongRef fbthrift_data(createStructTuple({{struct:fields_size}}));
   {{#struct:fields}}

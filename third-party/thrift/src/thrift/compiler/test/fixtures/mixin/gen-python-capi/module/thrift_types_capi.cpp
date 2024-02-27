@@ -102,7 +102,7 @@ PyObject* Constructor<::cpp2::Mixin1>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::Mixin1>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::Mixin1& val) {
+    [[maybe_unused]] const ::cpp2::Mixin1& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__field1(
     Constructor<Bytes>{}
@@ -185,7 +185,7 @@ PyObject* Constructor<::cpp2::Mixin2>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::Mixin2>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::Mixin2& val) {
+    [[maybe_unused]] const ::cpp2::Mixin2& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__m1(
     Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Mixin1>>{}
@@ -281,7 +281,7 @@ PyObject* Constructor<::cpp2::Mixin3Base>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::Mixin3Base>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::Mixin3Base& val) {
+    [[maybe_unused]] const ::cpp2::Mixin3Base& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__field3(
     Constructor<Bytes>{}
@@ -368,7 +368,7 @@ PyObject* Constructor<::cpp2::Foo>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::Foo>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::Foo& val) {
+    [[maybe_unused]] const ::cpp2::Foo& val) {
   StrongRef fbthrift_data(createStructTuple(3));
   StrongRef _fbthrift__field4(
     Constructor<Bytes>{}

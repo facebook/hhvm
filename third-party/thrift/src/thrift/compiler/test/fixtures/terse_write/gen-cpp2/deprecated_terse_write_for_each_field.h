@@ -16,14 +16,14 @@ namespace detail {
 template <>
 struct ForEachField<::facebook::thrift::test::terse_write::deprecated::MyStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
   }
 };
 
 template <>
 struct ForEachField<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).bool_field_ref()...);
     f(1, static_cast<T&&>(t).byte_field_ref()...);
     f(2, static_cast<T&&>(t).short_field_ref()...);
@@ -44,7 +44,7 @@ struct ForEachField<::facebook::thrift::test::terse_write::deprecated::StructLev
 template <>
 struct ForEachField<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).terse_bool_field_ref()...);
     f(1, static_cast<T&&>(t).terse_byte_field_ref()...);
     f(2, static_cast<T&&>(t).terse_short_field_ref()...);

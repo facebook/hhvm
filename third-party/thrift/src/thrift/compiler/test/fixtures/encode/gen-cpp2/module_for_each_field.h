@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::facebook::thrift::test::Foo> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).field_ref()...);
   }
 };
@@ -24,7 +24,7 @@ struct ForEachField<::facebook::thrift::test::Foo> {
 template <>
 struct ForEachField<::facebook::thrift::test::Bar> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).list_field_ref()...);
   }
 };
@@ -32,7 +32,7 @@ struct ForEachField<::facebook::thrift::test::Bar> {
 template <>
 struct ForEachField<::facebook::thrift::test::Baz> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).list_field_ref()...);
     f(1, static_cast<T&&>(t).nested_list_field_ref()...);
   }
@@ -41,7 +41,7 @@ struct ForEachField<::facebook::thrift::test::Baz> {
 template <>
 struct ForEachField<::facebook::thrift::test::OpEncodeStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).int_field_ref()...);
     f(1, static_cast<T&&>(t).enum_field_ref()...);
     f(2, static_cast<T&&>(t).foo_field_ref()...);

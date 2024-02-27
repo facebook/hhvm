@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct VisitByFieldId<::cpp2::Empty> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
       throwInvalidThriftId(fieldId, "::cpp2::Empty");
@@ -27,7 +27,7 @@ struct VisitByFieldId<::cpp2::Empty> {
 template <>
 struct VisitByFieldId<::cpp2::Nada> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
       throwInvalidThriftId(fieldId, "::cpp2::Nada");

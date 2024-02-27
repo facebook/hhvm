@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct VisitByFieldId<::cpp2::Fields> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 100:
       return f(0, static_cast<T&&>(t).injected_field_ref());
@@ -29,7 +29,7 @@ struct VisitByFieldId<::cpp2::Fields> {
 template <>
 struct VisitByFieldId<::cpp2::FieldsInjectedToEmptyStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case -1100:
       return f(0, static_cast<T&&>(t).injected_field_ref());
@@ -42,7 +42,7 @@ struct VisitByFieldId<::cpp2::FieldsInjectedToEmptyStruct> {
 template <>
 struct VisitByFieldId<::cpp2::FieldsInjectedToStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).string_field_ref());
@@ -57,7 +57,7 @@ struct VisitByFieldId<::cpp2::FieldsInjectedToStruct> {
 template <>
 struct VisitByFieldId<::cpp2::FieldsInjectedWithIncludedStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).string_field_ref());

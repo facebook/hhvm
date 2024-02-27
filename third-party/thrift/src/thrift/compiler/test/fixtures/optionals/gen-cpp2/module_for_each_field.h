@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::cpp2::Color> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).red_ref()...);
     f(1, static_cast<T&&>(t).green_ref()...);
     f(2, static_cast<T&&>(t).blue_ref()...);
@@ -27,7 +27,7 @@ struct ForEachField<::cpp2::Color> {
 template <>
 struct ForEachField<::cpp2::Vehicle> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).color_ref()...);
     f(1, static_cast<T&&>(t).licensePlate_ref()...);
     f(2, static_cast<T&&>(t).description_ref()...);
@@ -39,7 +39,7 @@ struct ForEachField<::cpp2::Vehicle> {
 template <>
 struct ForEachField<::cpp2::Person> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).id_ref()...);
     f(1, static_cast<T&&>(t).name_ref()...);
     f(2, static_cast<T&&>(t).age_ref()...);

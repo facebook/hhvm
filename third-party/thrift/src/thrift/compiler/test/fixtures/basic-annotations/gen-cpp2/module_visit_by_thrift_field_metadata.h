@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct VisitByFieldId<::cpp2::MyStructNestedAnnotation> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).name_ref());
@@ -29,7 +29,7 @@ struct VisitByFieldId<::cpp2::MyStructNestedAnnotation> {
 template <>
 struct VisitByFieldId<::cpp2::detail::YourUnion> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
       throwInvalidThriftId(fieldId, "::cpp2::detail::YourUnion");
@@ -40,7 +40,7 @@ struct VisitByFieldId<::cpp2::detail::YourUnion> {
 template <>
 struct VisitByFieldId<::cpp2::detail::YourException> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
       throwInvalidThriftId(fieldId, "::cpp2::detail::YourException");
@@ -51,7 +51,7 @@ struct VisitByFieldId<::cpp2::detail::YourException> {
 template <>
 struct VisitByFieldId<::cpp2::detail::YourStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 2:
       return f(0, static_cast<T&&>(t).majorVer_ref());
@@ -80,7 +80,7 @@ struct VisitByFieldId<::cpp2::detail::YourStruct> {
 template <>
 struct VisitByFieldId<::cpp2::SecretStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).id_ref());

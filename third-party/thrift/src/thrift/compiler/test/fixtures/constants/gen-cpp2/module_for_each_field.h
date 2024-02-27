@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::cpp2::Internship> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).weeks_ref()...);
     f(1, static_cast<T&&>(t).title_ref()...);
     f(2, static_cast<T&&>(t).employer_ref()...);
@@ -28,7 +28,7 @@ struct ForEachField<::cpp2::Internship> {
 template <>
 struct ForEachField<::cpp2::Range> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).min_ref()...);
     f(1, static_cast<T&&>(t).max_ref()...);
   }
@@ -37,7 +37,7 @@ struct ForEachField<::cpp2::Range> {
 template <>
 struct ForEachField<::cpp2::struct1> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).a_ref()...);
     f(1, static_cast<T&&>(t).b_ref()...);
   }
@@ -46,7 +46,7 @@ struct ForEachField<::cpp2::struct1> {
 template <>
 struct ForEachField<::cpp2::struct2> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).a_ref()...);
     f(1, static_cast<T&&>(t).b_ref()...);
     f(2, static_cast<T&&>(t).c_ref()...);
@@ -57,7 +57,7 @@ struct ForEachField<::cpp2::struct2> {
 template <>
 struct ForEachField<::cpp2::struct3> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).a_ref()...);
     f(1, static_cast<T&&>(t).b_ref()...);
     f(2, static_cast<T&&>(t).c_ref()...);
@@ -67,7 +67,7 @@ struct ForEachField<::cpp2::struct3> {
 template <>
 struct ForEachField<::cpp2::struct4> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).a_ref()...);
     f(1, static_cast<T&&>(t).b_ref()...);
     f(2, static_cast<T&&>(t).c_ref()...);
@@ -77,7 +77,7 @@ struct ForEachField<::cpp2::struct4> {
 template <>
 struct ForEachField<::cpp2::union1> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).i_ref()...);
     f(1, static_cast<T&&>(t).d_ref()...);
   }
@@ -86,7 +86,7 @@ struct ForEachField<::cpp2::union1> {
 template <>
 struct ForEachField<::cpp2::union2> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).i_ref()...);
     f(1, static_cast<T&&>(t).d_ref()...);
     f(2, static_cast<T&&>(t).s_ref()...);

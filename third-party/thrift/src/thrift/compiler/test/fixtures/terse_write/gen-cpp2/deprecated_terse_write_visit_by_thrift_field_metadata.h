@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct VisitByFieldId<::facebook::thrift::test::terse_write::deprecated::MyStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
       throwInvalidThriftId(fieldId, "::facebook::thrift::test::terse_write::deprecated::MyStruct");
@@ -27,7 +27,7 @@ struct VisitByFieldId<::facebook::thrift::test::terse_write::deprecated::MyStruc
 template <>
 struct VisitByFieldId<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).bool_field_ref());
@@ -66,7 +66,7 @@ struct VisitByFieldId<::facebook::thrift::test::terse_write::deprecated::StructL
 template <>
 struct VisitByFieldId<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).terse_bool_field_ref());

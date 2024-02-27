@@ -18,7 +18,7 @@ namespace facebook { namespace thrift { namespace compiler { namespace test { na
 // To include in statically-linked libraries, link whole (e.g. --whole-archive)
 // `module_sinit.cpp`.
 void __fbthrift_static_init_MyStruct() {
-  FOLLY_MAYBE_UNUSED static bool init = (
+  [[maybe_unused]] static bool init = (
     apache::thrift::conformance::detail::registerGeneratedStruct<
         MyStruct,
         apache::thrift::conformance::StandardProtocol::Compact,
@@ -26,7 +26,7 @@ void __fbthrift_static_init_MyStruct() {
     false);
 }
 void __fbthrift_static_init_MyUnion() {
-  FOLLY_MAYBE_UNUSED static bool init = (
+  [[maybe_unused]] static bool init = (
     apache::thrift::conformance::detail::registerGeneratedStruct<
         MyUnion,
         apache::thrift::conformance::StandardProtocol::Compact,
@@ -34,7 +34,7 @@ void __fbthrift_static_init_MyUnion() {
     false);
 }
 void __fbthrift_static_init_MyException() {
-  FOLLY_MAYBE_UNUSED static bool init = (
+  [[maybe_unused]] static bool init = (
     apache::thrift::conformance::detail::registerGeneratedStruct<
         MyException,
         apache::thrift::conformance::StandardProtocol::Compact,
@@ -87,12 +87,12 @@ MyStruct::MyStruct() {
 
 MyStruct::~MyStruct() {}
 
-MyStruct::MyStruct(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept :
+MyStruct::MyStruct([[maybe_unused]] MyStruct&& other) noexcept :
     __fbthrift_field_myString(std::move(other.__fbthrift_field_myString)),
     __isset(other.__isset) {
 }
 
-MyStruct& MyStruct::operator=(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept {
+MyStruct& MyStruct::operator=([[maybe_unused]] MyStruct&& other) noexcept {
     this->__fbthrift_field_myString = std::move(other.__fbthrift_field_myString);
     __isset = other.__isset;
     return *this;
@@ -118,16 +118,16 @@ bool MyStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
+bool MyStruct::operator==([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
+bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyStruct& a, FOLLY_MAYBE_UNUSED MyStruct& b) {
+void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_myString, b.__fbthrift_field_myString);
   swap(a.__isset, b.__isset);
@@ -253,7 +253,7 @@ bool MyUnion::operator==(const MyUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool MyUnion::operator<(FOLLY_MAYBE_UNUSED const MyUnion& rhs) const {
+bool MyUnion::operator<([[maybe_unused]] const MyUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
@@ -318,12 +318,12 @@ MyException::MyException() {
 
 MyException::~MyException() {}
 
-MyException::MyException(FOLLY_MAYBE_UNUSED MyException&& other) noexcept :
+MyException::MyException([[maybe_unused]] MyException&& other) noexcept :
     __fbthrift_field_myString(std::move(other.__fbthrift_field_myString)),
     __isset(other.__isset) {
 }
 
-MyException& MyException::operator=(FOLLY_MAYBE_UNUSED MyException&& other) noexcept {
+MyException& MyException::operator=([[maybe_unused]] MyException&& other) noexcept {
     this->__fbthrift_field_myString = std::move(other.__fbthrift_field_myString);
     __isset = other.__isset;
     return *this;
@@ -349,16 +349,16 @@ bool MyException::__fbthrift_is_empty() const {
   return false;
 }
 
-bool MyException::operator==(FOLLY_MAYBE_UNUSED const MyException& rhs) const {
+bool MyException::operator==([[maybe_unused]] const MyException& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyException::operator<(FOLLY_MAYBE_UNUSED const MyException& rhs) const {
+bool MyException::operator<([[maybe_unused]] const MyException& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyException& a, FOLLY_MAYBE_UNUSED MyException& b) {
+void swap([[maybe_unused]] MyException& a, [[maybe_unused]] MyException& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_myString, b.__fbthrift_field_myString);
   swap(a.__isset, b.__isset);
@@ -377,7 +377,7 @@ template uint32_t MyException::serializedSizeZC<>(apache::thrift::CompactProtoco
 }}}}}} // facebook::thrift::compiler::test::fixtures::any
 
 namespace facebook { namespace thrift { namespace compiler { namespace test { namespace fixtures { namespace any { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }}}}}}} // facebook::thrift::compiler::test::fixtures::any
 namespace apache::thrift::detail::annotation {

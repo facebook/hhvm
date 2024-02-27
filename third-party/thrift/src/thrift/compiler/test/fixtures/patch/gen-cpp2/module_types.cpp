@@ -72,12 +72,12 @@ MyData::MyData() :
 
 MyData::~MyData() {}
 
-MyData::MyData(FOLLY_MAYBE_UNUSED MyData&& other) noexcept :
+MyData::MyData([[maybe_unused]] MyData&& other) noexcept :
     __fbthrift_field_data1(std::move(other.__fbthrift_field_data1)),
     __fbthrift_field_data2(std::move(other.__fbthrift_field_data2)) {
 }
 
-MyData& MyData::operator=(FOLLY_MAYBE_UNUSED MyData&& other) noexcept {
+MyData& MyData::operator=([[maybe_unused]] MyData&& other) noexcept {
     this->__fbthrift_field_data1 = std::move(other.__fbthrift_field_data1);
     this->__fbthrift_field_data2 = std::move(other.__fbthrift_field_data2);
     return *this;
@@ -106,16 +106,16 @@ bool MyData::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::i32_t>(this->__fbthrift_field_data2);
 }
 
-bool MyData::operator==(FOLLY_MAYBE_UNUSED const MyData& rhs) const {
+bool MyData::operator==([[maybe_unused]] const MyData& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyData::operator<(FOLLY_MAYBE_UNUSED const MyData& rhs) const {
+bool MyData::operator<([[maybe_unused]] const MyData& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyData& a, FOLLY_MAYBE_UNUSED MyData& b) {
+void swap([[maybe_unused]] MyData& a, [[maybe_unused]] MyData& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_data1, b.__fbthrift_field_data1);
   swap(a.__fbthrift_field_data2, b.__fbthrift_field_data2);
@@ -178,12 +178,12 @@ MyDataWithCustomDefault::MyDataWithCustomDefault() :
 
 MyDataWithCustomDefault::~MyDataWithCustomDefault() {}
 
-MyDataWithCustomDefault::MyDataWithCustomDefault(FOLLY_MAYBE_UNUSED MyDataWithCustomDefault&& other) noexcept :
+MyDataWithCustomDefault::MyDataWithCustomDefault([[maybe_unused]] MyDataWithCustomDefault&& other) noexcept :
     __fbthrift_field_data1(std::move(other.__fbthrift_field_data1)),
     __fbthrift_field_data2(std::move(other.__fbthrift_field_data2)) {
 }
 
-MyDataWithCustomDefault& MyDataWithCustomDefault::operator=(FOLLY_MAYBE_UNUSED MyDataWithCustomDefault&& other) noexcept {
+MyDataWithCustomDefault& MyDataWithCustomDefault::operator=([[maybe_unused]] MyDataWithCustomDefault&& other) noexcept {
     this->__fbthrift_field_data1 = std::move(other.__fbthrift_field_data1);
     this->__fbthrift_field_data2 = std::move(other.__fbthrift_field_data2);
     return *this;
@@ -212,16 +212,16 @@ bool MyDataWithCustomDefault::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::i32_t>(this->__fbthrift_field_data2);
 }
 
-bool MyDataWithCustomDefault::operator==(FOLLY_MAYBE_UNUSED const MyDataWithCustomDefault& rhs) const {
+bool MyDataWithCustomDefault::operator==([[maybe_unused]] const MyDataWithCustomDefault& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyDataWithCustomDefault::operator<(FOLLY_MAYBE_UNUSED const MyDataWithCustomDefault& rhs) const {
+bool MyDataWithCustomDefault::operator<([[maybe_unused]] const MyDataWithCustomDefault& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyDataWithCustomDefault& a, FOLLY_MAYBE_UNUSED MyDataWithCustomDefault& b) {
+void swap([[maybe_unused]] MyDataWithCustomDefault& a, [[maybe_unused]] MyDataWithCustomDefault& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_data1, b.__fbthrift_field_data1);
   swap(a.__fbthrift_field_data2, b.__fbthrift_field_data2);
@@ -346,7 +346,7 @@ bool InnerUnion::operator==(const InnerUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool InnerUnion::operator<(FOLLY_MAYBE_UNUSED const InnerUnion& rhs) const {
+bool InnerUnion::operator<([[maybe_unused]] const InnerUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
@@ -493,7 +493,7 @@ bool MyUnion::operator==(const MyUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool MyUnion::operator<(FOLLY_MAYBE_UNUSED const MyUnion& rhs) const {
+bool MyUnion::operator<([[maybe_unused]] const MyUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
@@ -582,7 +582,7 @@ MyStruct::MyStruct() :
 
 MyStruct::~MyStruct() {}
 
-MyStruct::MyStruct(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept :
+MyStruct::MyStruct([[maybe_unused]] MyStruct&& other) noexcept :
     __fbthrift_field_boolVal(std::move(other.__fbthrift_field_boolVal)),
     __fbthrift_field_byteVal(std::move(other.__fbthrift_field_byteVal)),
     __fbthrift_field_i16Val(std::move(other.__fbthrift_field_i16Val)),
@@ -619,7 +619,7 @@ MyStruct::MyStruct(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept :
     __isset(other.__isset) {
 }
 
-MyStruct& MyStruct::operator=(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept {
+MyStruct& MyStruct::operator=([[maybe_unused]] MyStruct&& other) noexcept {
     this->__fbthrift_field_boolVal = std::move(other.__fbthrift_field_boolVal);
     this->__fbthrift_field_byteVal = std::move(other.__fbthrift_field_byteVal);
     this->__fbthrift_field_i16Val = std::move(other.__fbthrift_field_i16Val);
@@ -802,11 +802,11 @@ bool MyStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyData>>(this->__fbthrift_field_structWithFieldCustomDefault);
 }
 
-bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
+bool MyStruct::operator==([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
+bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -907,7 +907,7 @@ const ::test::fixtures::patch::MyData& MyStruct::get_structWithFieldCustomDefaul
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyStruct& a, FOLLY_MAYBE_UNUSED MyStruct& b) {
+void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_boolVal, b.__fbthrift_field_boolVal);
   swap(a.__fbthrift_field_byteVal, b.__fbthrift_field_byteVal);
@@ -1049,16 +1049,16 @@ bool LateDefStruct::__fbthrift_is_empty() const {
   return true;
 }
 
-bool LateDefStruct::operator==(FOLLY_MAYBE_UNUSED const LateDefStruct& rhs) const {
+bool LateDefStruct::operator==([[maybe_unused]] const LateDefStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool LateDefStruct::operator<(FOLLY_MAYBE_UNUSED const LateDefStruct& rhs) const {
+bool LateDefStruct::operator<([[maybe_unused]] const LateDefStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED LateDefStruct& a, FOLLY_MAYBE_UNUSED LateDefStruct& b) {
+void swap([[maybe_unused]] LateDefStruct& a, [[maybe_unused]] LateDefStruct& b) {
   using ::std::swap;
 }
 
@@ -1117,11 +1117,11 @@ Recursive::Recursive() {
 
 Recursive::~Recursive() {}
 
-Recursive::Recursive(FOLLY_MAYBE_UNUSED Recursive&& other) noexcept :
+Recursive::Recursive([[maybe_unused]] Recursive&& other) noexcept :
     __fbthrift_field_nodes(std::move(other.__fbthrift_field_nodes)) {
 }
 
-Recursive& Recursive::operator=(FOLLY_MAYBE_UNUSED Recursive&& other) noexcept {
+Recursive& Recursive::operator=([[maybe_unused]] Recursive&& other) noexcept {
     this->__fbthrift_field_nodes = std::move(other.__fbthrift_field_nodes);
     return *this;
 }
@@ -1145,11 +1145,11 @@ bool Recursive::__fbthrift_is_empty() const {
   return ::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::struct_t<::test::fixtures::patch::Recursive>>>(this->__fbthrift_field_nodes);
 }
 
-bool Recursive::operator==(FOLLY_MAYBE_UNUSED const Recursive& rhs) const {
+bool Recursive::operator==([[maybe_unused]] const Recursive& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Recursive::operator<(FOLLY_MAYBE_UNUSED const Recursive& rhs) const {
+bool Recursive::operator<([[maybe_unused]] const Recursive& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -1162,7 +1162,7 @@ const ::std::map<::std::string, ::test::fixtures::patch::Recursive>& Recursive::
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Recursive& a, FOLLY_MAYBE_UNUSED Recursive& b) {
+void swap([[maybe_unused]] Recursive& a, [[maybe_unused]] Recursive& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_nodes, b.__fbthrift_field_nodes);
 }
@@ -1238,11 +1238,11 @@ Bar::Bar() :
 
 Bar::~Bar() {}
 
-Bar::Bar(FOLLY_MAYBE_UNUSED Bar&& other) noexcept :
+Bar::Bar([[maybe_unused]] Bar&& other) noexcept :
     __fbthrift_field_loop(std::move(other.__fbthrift_field_loop)) {
 }
 
-Bar& Bar::operator=(FOLLY_MAYBE_UNUSED Bar&& other) noexcept {
+Bar& Bar::operator=([[maybe_unused]] Bar&& other) noexcept {
     this->__fbthrift_field_loop = std::move(other.__fbthrift_field_loop);
     return *this;
 }
@@ -1266,16 +1266,16 @@ bool Bar::__fbthrift_is_empty() const {
   return this->__fbthrift_field_loop && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::Loop>>(*this->__fbthrift_field_loop);
 }
 
-bool Bar::operator==(FOLLY_MAYBE_UNUSED const Bar& rhs) const {
+bool Bar::operator==([[maybe_unused]] const Bar& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Bar::operator<(FOLLY_MAYBE_UNUSED const Bar& rhs) const {
+bool Bar::operator<([[maybe_unused]] const Bar& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Bar& a, FOLLY_MAYBE_UNUSED Bar& b) {
+void swap([[maybe_unused]] Bar& a, [[maybe_unused]] Bar& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_loop, b.__fbthrift_field_loop);
 }
@@ -1335,11 +1335,11 @@ const folly::StringPiece Loop::__fbthrift_get_class_name() {
 
 Loop::Loop(const Loop&) = default;
 Loop& Loop::operator=(const Loop&) = default;
-Loop::Loop(FOLLY_MAYBE_UNUSED Loop&& other) noexcept :
+Loop::Loop([[maybe_unused]] Loop&& other) noexcept :
     __fbthrift_field_bar(std::move(other.__fbthrift_field_bar)) {
 }
 
-Loop& Loop::operator=(FOLLY_MAYBE_UNUSED Loop&& other) noexcept {
+Loop& Loop::operator=([[maybe_unused]] Loop&& other) noexcept {
     this->__fbthrift_field_bar = std::move(other.__fbthrift_field_bar);
     return *this;
 }
@@ -1363,11 +1363,11 @@ bool Loop::__fbthrift_is_empty() const {
   return ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::Bar>>(this->__fbthrift_field_bar);
 }
 
-bool Loop::operator==(FOLLY_MAYBE_UNUSED const Loop& rhs) const {
+bool Loop::operator==([[maybe_unused]] const Loop& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Loop::operator<(FOLLY_MAYBE_UNUSED const Loop& rhs) const {
+bool Loop::operator<([[maybe_unused]] const Loop& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -1380,7 +1380,7 @@ const ::test::fixtures::patch::Bar& Loop::get_bar() const& {
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Loop& a, FOLLY_MAYBE_UNUSED Loop& b) {
+void swap([[maybe_unused]] Loop& a, [[maybe_unused]] Loop& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_bar, b.__fbthrift_field_bar);
 }
@@ -1465,7 +1465,7 @@ RefFields::RefFields() :
 
 RefFields::~RefFields() {}
 
-RefFields::RefFields(FOLLY_MAYBE_UNUSED RefFields&& other) noexcept :
+RefFields::RefFields([[maybe_unused]] RefFields&& other) noexcept :
     __fbthrift_field_unique(std::move(other.__fbthrift_field_unique)),
     __fbthrift_field_shared_const(std::move(other.__fbthrift_field_shared_const)),
     __fbthrift_field_shared_mustable(std::move(other.__fbthrift_field_shared_mustable)),
@@ -1475,7 +1475,7 @@ RefFields::RefFields(FOLLY_MAYBE_UNUSED RefFields&& other) noexcept :
     __fbthrift_field_opt_box(std::move(other.__fbthrift_field_opt_box)) {
 }
 
-RefFields& RefFields::operator=(FOLLY_MAYBE_UNUSED RefFields&& other) noexcept {
+RefFields& RefFields::operator=([[maybe_unused]] RefFields&& other) noexcept {
     this->__fbthrift_field_unique = std::move(other.__fbthrift_field_unique);
     this->__fbthrift_field_shared_const = std::move(other.__fbthrift_field_shared_const);
     this->__fbthrift_field_shared_mustable = std::move(other.__fbthrift_field_shared_mustable);
@@ -1525,16 +1525,16 @@ bool RefFields::__fbthrift_is_empty() const {
  !(this->__fbthrift_field_opt_box);
 }
 
-bool RefFields::operator==(FOLLY_MAYBE_UNUSED const RefFields& rhs) const {
+bool RefFields::operator==([[maybe_unused]] const RefFields& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool RefFields::operator<(FOLLY_MAYBE_UNUSED const RefFields& rhs) const {
+bool RefFields::operator<([[maybe_unused]] const RefFields& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED RefFields& a, FOLLY_MAYBE_UNUSED RefFields& b) {
+void swap([[maybe_unused]] RefFields& a, [[maybe_unused]] RefFields& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_unique, b.__fbthrift_field_unique);
   swap(a.__fbthrift_field_shared_const, b.__fbthrift_field_shared_const);
@@ -1620,7 +1620,7 @@ MyDataPatchStruct::MyDataPatchStruct() :
 
 MyDataPatchStruct::~MyDataPatchStruct() {}
 
-MyDataPatchStruct::MyDataPatchStruct(FOLLY_MAYBE_UNUSED MyDataPatchStruct&& other) noexcept :
+MyDataPatchStruct::MyDataPatchStruct([[maybe_unused]] MyDataPatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
     __fbthrift_field_patchPrior(std::move(other.__fbthrift_field_patchPrior)),
@@ -1632,7 +1632,7 @@ MyDataPatchStruct::MyDataPatchStruct(FOLLY_MAYBE_UNUSED MyDataPatchStruct&& othe
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
-MyDataPatchStruct& MyDataPatchStruct::operator=(FOLLY_MAYBE_UNUSED MyDataPatchStruct&& other) noexcept {
+MyDataPatchStruct& MyDataPatchStruct::operator=([[maybe_unused]] MyDataPatchStruct&& other) noexcept {
     this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
     this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
     this->__fbthrift_field_patchPrior = std::move(other.__fbthrift_field_patchPrior);
@@ -1683,11 +1683,11 @@ bool MyDataPatchStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldIdListToSetAdapter, ::apache::thrift::type::list<::apache::thrift::type::i16_t>>>(this->__fbthrift_field_remove);
 }
 
-bool MyDataPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyDataPatchStruct& rhs) const {
+bool MyDataPatchStruct::operator==([[maybe_unused]] const MyDataPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyDataPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyDataPatchStruct& rhs) const {
+bool MyDataPatchStruct::operator<([[maybe_unused]] const MyDataPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -1700,7 +1700,7 @@ const ::test::fixtures::patch::MyDataEnsureStruct& MyDataPatchStruct::get_ensure
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyDataPatchStruct& a, FOLLY_MAYBE_UNUSED MyDataPatchStruct& b) {
+void swap([[maybe_unused]] MyDataPatchStruct& a, [[maybe_unused]] MyDataPatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
   swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
@@ -1802,14 +1802,14 @@ MyDataFieldPatchStruct::MyDataFieldPatchStruct() :
 
 MyDataFieldPatchStruct::~MyDataFieldPatchStruct() {}
 
-MyDataFieldPatchStruct::MyDataFieldPatchStruct(FOLLY_MAYBE_UNUSED MyDataFieldPatchStruct&& other) noexcept :
+MyDataFieldPatchStruct::MyDataFieldPatchStruct([[maybe_unused]] MyDataFieldPatchStruct&& other) noexcept :
     __fbthrift_field_data1(std::move(other.__fbthrift_field_data1)),
     __fbthrift_field_data2(std::move(other.__fbthrift_field_data2)) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, 1>(*__fbthrift_field_data1, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, 2>(*__fbthrift_field_data2, *this);
 }
 
-MyDataFieldPatchStruct& MyDataFieldPatchStruct::operator=(FOLLY_MAYBE_UNUSED MyDataFieldPatchStruct&& other) noexcept {
+MyDataFieldPatchStruct& MyDataFieldPatchStruct::operator=([[maybe_unused]] MyDataFieldPatchStruct&& other) noexcept {
     this->__fbthrift_field_data1 = std::move(other.__fbthrift_field_data1);
     this->__fbthrift_field_data2 = std::move(other.__fbthrift_field_data2);
     return *this;
@@ -1840,16 +1840,16 @@ bool MyDataFieldPatchStruct::__fbthrift_is_empty() const {
  (this->__fbthrift_field_data2.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I32PatchStruct>>>() || ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I32PatchStruct>>>(*this->__fbthrift_field_data2));
 }
 
-bool MyDataFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyDataFieldPatchStruct& rhs) const {
+bool MyDataFieldPatchStruct::operator==([[maybe_unused]] const MyDataFieldPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyDataFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyDataFieldPatchStruct& rhs) const {
+bool MyDataFieldPatchStruct::operator<([[maybe_unused]] const MyDataFieldPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyDataFieldPatchStruct& a, FOLLY_MAYBE_UNUSED MyDataFieldPatchStruct& b) {
+void swap([[maybe_unused]] MyDataFieldPatchStruct& a, [[maybe_unused]] MyDataFieldPatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_data1, b.__fbthrift_field_data1);
   swap(a.__fbthrift_field_data2, b.__fbthrift_field_data2);
@@ -1923,13 +1923,13 @@ MyDataEnsureStruct::MyDataEnsureStruct() :
 
 MyDataEnsureStruct::~MyDataEnsureStruct() {}
 
-MyDataEnsureStruct::MyDataEnsureStruct(FOLLY_MAYBE_UNUSED MyDataEnsureStruct&& other) noexcept :
+MyDataEnsureStruct::MyDataEnsureStruct([[maybe_unused]] MyDataEnsureStruct&& other) noexcept :
     __fbthrift_field_data1(std::move(other.__fbthrift_field_data1)),
     __fbthrift_field_data2(std::move(other.__fbthrift_field_data2)),
     __isset(other.__isset) {
 }
 
-MyDataEnsureStruct& MyDataEnsureStruct::operator=(FOLLY_MAYBE_UNUSED MyDataEnsureStruct&& other) noexcept {
+MyDataEnsureStruct& MyDataEnsureStruct::operator=([[maybe_unused]] MyDataEnsureStruct&& other) noexcept {
     this->__fbthrift_field_data1 = std::move(other.__fbthrift_field_data1);
     this->__fbthrift_field_data2 = std::move(other.__fbthrift_field_data2);
     __isset = other.__isset;
@@ -1960,16 +1960,16 @@ bool MyDataEnsureStruct::__fbthrift_is_empty() const {
  !(this->__isset.get(1));
 }
 
-bool MyDataEnsureStruct::operator==(FOLLY_MAYBE_UNUSED const MyDataEnsureStruct& rhs) const {
+bool MyDataEnsureStruct::operator==([[maybe_unused]] const MyDataEnsureStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyDataEnsureStruct::operator<(FOLLY_MAYBE_UNUSED const MyDataEnsureStruct& rhs) const {
+bool MyDataEnsureStruct::operator<([[maybe_unused]] const MyDataEnsureStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyDataEnsureStruct& a, FOLLY_MAYBE_UNUSED MyDataEnsureStruct& b) {
+void swap([[maybe_unused]] MyDataEnsureStruct& a, [[maybe_unused]] MyDataEnsureStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_data1, b.__fbthrift_field_data1);
   swap(a.__fbthrift_field_data2, b.__fbthrift_field_data2);
@@ -2051,7 +2051,7 @@ MyDataWithCustomDefaultPatchStruct::MyDataWithCustomDefaultPatchStruct() :
 
 MyDataWithCustomDefaultPatchStruct::~MyDataWithCustomDefaultPatchStruct() {}
 
-MyDataWithCustomDefaultPatchStruct::MyDataWithCustomDefaultPatchStruct(FOLLY_MAYBE_UNUSED MyDataWithCustomDefaultPatchStruct&& other) noexcept :
+MyDataWithCustomDefaultPatchStruct::MyDataWithCustomDefaultPatchStruct([[maybe_unused]] MyDataWithCustomDefaultPatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
     __fbthrift_field_patchPrior(std::move(other.__fbthrift_field_patchPrior)),
@@ -2063,7 +2063,7 @@ MyDataWithCustomDefaultPatchStruct::MyDataWithCustomDefaultPatchStruct(FOLLY_MAY
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
-MyDataWithCustomDefaultPatchStruct& MyDataWithCustomDefaultPatchStruct::operator=(FOLLY_MAYBE_UNUSED MyDataWithCustomDefaultPatchStruct&& other) noexcept {
+MyDataWithCustomDefaultPatchStruct& MyDataWithCustomDefaultPatchStruct::operator=([[maybe_unused]] MyDataWithCustomDefaultPatchStruct&& other) noexcept {
     this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
     this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
     this->__fbthrift_field_patchPrior = std::move(other.__fbthrift_field_patchPrior);
@@ -2114,11 +2114,11 @@ bool MyDataWithCustomDefaultPatchStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldIdListToSetAdapter, ::apache::thrift::type::list<::apache::thrift::type::i16_t>>>(this->__fbthrift_field_remove);
 }
 
-bool MyDataWithCustomDefaultPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyDataWithCustomDefaultPatchStruct& rhs) const {
+bool MyDataWithCustomDefaultPatchStruct::operator==([[maybe_unused]] const MyDataWithCustomDefaultPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyDataWithCustomDefaultPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyDataWithCustomDefaultPatchStruct& rhs) const {
+bool MyDataWithCustomDefaultPatchStruct::operator<([[maybe_unused]] const MyDataWithCustomDefaultPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -2131,7 +2131,7 @@ const ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct& MyDataWithCu
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyDataWithCustomDefaultPatchStruct& a, FOLLY_MAYBE_UNUSED MyDataWithCustomDefaultPatchStruct& b) {
+void swap([[maybe_unused]] MyDataWithCustomDefaultPatchStruct& a, [[maybe_unused]] MyDataWithCustomDefaultPatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
   swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
@@ -2233,14 +2233,14 @@ MyDataWithCustomDefaultFieldPatchStruct::MyDataWithCustomDefaultFieldPatchStruct
 
 MyDataWithCustomDefaultFieldPatchStruct::~MyDataWithCustomDefaultFieldPatchStruct() {}
 
-MyDataWithCustomDefaultFieldPatchStruct::MyDataWithCustomDefaultFieldPatchStruct(FOLLY_MAYBE_UNUSED MyDataWithCustomDefaultFieldPatchStruct&& other) noexcept :
+MyDataWithCustomDefaultFieldPatchStruct::MyDataWithCustomDefaultFieldPatchStruct([[maybe_unused]] MyDataWithCustomDefaultFieldPatchStruct&& other) noexcept :
     __fbthrift_field_data1(std::move(other.__fbthrift_field_data1)),
     __fbthrift_field_data2(std::move(other.__fbthrift_field_data2)) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, 1>(*__fbthrift_field_data1, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, 2>(*__fbthrift_field_data2, *this);
 }
 
-MyDataWithCustomDefaultFieldPatchStruct& MyDataWithCustomDefaultFieldPatchStruct::operator=(FOLLY_MAYBE_UNUSED MyDataWithCustomDefaultFieldPatchStruct&& other) noexcept {
+MyDataWithCustomDefaultFieldPatchStruct& MyDataWithCustomDefaultFieldPatchStruct::operator=([[maybe_unused]] MyDataWithCustomDefaultFieldPatchStruct&& other) noexcept {
     this->__fbthrift_field_data1 = std::move(other.__fbthrift_field_data1);
     this->__fbthrift_field_data2 = std::move(other.__fbthrift_field_data2);
     return *this;
@@ -2271,16 +2271,16 @@ bool MyDataWithCustomDefaultFieldPatchStruct::__fbthrift_is_empty() const {
  (this->__fbthrift_field_data2.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I32PatchStruct>>>() || ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I32PatchStruct>>>(*this->__fbthrift_field_data2));
 }
 
-bool MyDataWithCustomDefaultFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyDataWithCustomDefaultFieldPatchStruct& rhs) const {
+bool MyDataWithCustomDefaultFieldPatchStruct::operator==([[maybe_unused]] const MyDataWithCustomDefaultFieldPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyDataWithCustomDefaultFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyDataWithCustomDefaultFieldPatchStruct& rhs) const {
+bool MyDataWithCustomDefaultFieldPatchStruct::operator<([[maybe_unused]] const MyDataWithCustomDefaultFieldPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyDataWithCustomDefaultFieldPatchStruct& a, FOLLY_MAYBE_UNUSED MyDataWithCustomDefaultFieldPatchStruct& b) {
+void swap([[maybe_unused]] MyDataWithCustomDefaultFieldPatchStruct& a, [[maybe_unused]] MyDataWithCustomDefaultFieldPatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_data1, b.__fbthrift_field_data1);
   swap(a.__fbthrift_field_data2, b.__fbthrift_field_data2);
@@ -2354,13 +2354,13 @@ MyDataWithCustomDefaultEnsureStruct::MyDataWithCustomDefaultEnsureStruct() :
 
 MyDataWithCustomDefaultEnsureStruct::~MyDataWithCustomDefaultEnsureStruct() {}
 
-MyDataWithCustomDefaultEnsureStruct::MyDataWithCustomDefaultEnsureStruct(FOLLY_MAYBE_UNUSED MyDataWithCustomDefaultEnsureStruct&& other) noexcept :
+MyDataWithCustomDefaultEnsureStruct::MyDataWithCustomDefaultEnsureStruct([[maybe_unused]] MyDataWithCustomDefaultEnsureStruct&& other) noexcept :
     __fbthrift_field_data1(std::move(other.__fbthrift_field_data1)),
     __fbthrift_field_data2(std::move(other.__fbthrift_field_data2)),
     __isset(other.__isset) {
 }
 
-MyDataWithCustomDefaultEnsureStruct& MyDataWithCustomDefaultEnsureStruct::operator=(FOLLY_MAYBE_UNUSED MyDataWithCustomDefaultEnsureStruct&& other) noexcept {
+MyDataWithCustomDefaultEnsureStruct& MyDataWithCustomDefaultEnsureStruct::operator=([[maybe_unused]] MyDataWithCustomDefaultEnsureStruct&& other) noexcept {
     this->__fbthrift_field_data1 = std::move(other.__fbthrift_field_data1);
     this->__fbthrift_field_data2 = std::move(other.__fbthrift_field_data2);
     __isset = other.__isset;
@@ -2391,16 +2391,16 @@ bool MyDataWithCustomDefaultEnsureStruct::__fbthrift_is_empty() const {
  !(this->__isset.get(1));
 }
 
-bool MyDataWithCustomDefaultEnsureStruct::operator==(FOLLY_MAYBE_UNUSED const MyDataWithCustomDefaultEnsureStruct& rhs) const {
+bool MyDataWithCustomDefaultEnsureStruct::operator==([[maybe_unused]] const MyDataWithCustomDefaultEnsureStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyDataWithCustomDefaultEnsureStruct::operator<(FOLLY_MAYBE_UNUSED const MyDataWithCustomDefaultEnsureStruct& rhs) const {
+bool MyDataWithCustomDefaultEnsureStruct::operator<([[maybe_unused]] const MyDataWithCustomDefaultEnsureStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyDataWithCustomDefaultEnsureStruct& a, FOLLY_MAYBE_UNUSED MyDataWithCustomDefaultEnsureStruct& b) {
+void swap([[maybe_unused]] MyDataWithCustomDefaultEnsureStruct& a, [[maybe_unused]] MyDataWithCustomDefaultEnsureStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_data1, b.__fbthrift_field_data1);
   swap(a.__fbthrift_field_data2, b.__fbthrift_field_data2);
@@ -2480,7 +2480,7 @@ InnerUnionPatchStruct::InnerUnionPatchStruct() :
 
 InnerUnionPatchStruct::~InnerUnionPatchStruct() {}
 
-InnerUnionPatchStruct::InnerUnionPatchStruct(FOLLY_MAYBE_UNUSED InnerUnionPatchStruct&& other) noexcept :
+InnerUnionPatchStruct::InnerUnionPatchStruct([[maybe_unused]] InnerUnionPatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
     __fbthrift_field_patchPrior(std::move(other.__fbthrift_field_patchPrior)),
@@ -2490,7 +2490,7 @@ InnerUnionPatchStruct::InnerUnionPatchStruct(FOLLY_MAYBE_UNUSED InnerUnionPatchS
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::InnerUnionFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
 }
 
-InnerUnionPatchStruct& InnerUnionPatchStruct::operator=(FOLLY_MAYBE_UNUSED InnerUnionPatchStruct&& other) noexcept {
+InnerUnionPatchStruct& InnerUnionPatchStruct::operator=([[maybe_unused]] InnerUnionPatchStruct&& other) noexcept {
     this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
     this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
     this->__fbthrift_field_patchPrior = std::move(other.__fbthrift_field_patchPrior);
@@ -2535,16 +2535,16 @@ bool InnerUnionPatchStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::InnerUnionFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::InnerUnionFieldPatchStruct>>>(this->__fbthrift_field_patch);
 }
 
-bool InnerUnionPatchStruct::operator==(FOLLY_MAYBE_UNUSED const InnerUnionPatchStruct& rhs) const {
+bool InnerUnionPatchStruct::operator==([[maybe_unused]] const InnerUnionPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool InnerUnionPatchStruct::operator<(FOLLY_MAYBE_UNUSED const InnerUnionPatchStruct& rhs) const {
+bool InnerUnionPatchStruct::operator<([[maybe_unused]] const InnerUnionPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED InnerUnionPatchStruct& a, FOLLY_MAYBE_UNUSED InnerUnionPatchStruct& b) {
+void swap([[maybe_unused]] InnerUnionPatchStruct& a, [[maybe_unused]] InnerUnionPatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
   swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
@@ -2642,12 +2642,12 @@ InnerUnionFieldPatchStruct::InnerUnionFieldPatchStruct() :
 
 InnerUnionFieldPatchStruct::~InnerUnionFieldPatchStruct() {}
 
-InnerUnionFieldPatchStruct::InnerUnionFieldPatchStruct(FOLLY_MAYBE_UNUSED InnerUnionFieldPatchStruct&& other) noexcept :
+InnerUnionFieldPatchStruct::InnerUnionFieldPatchStruct([[maybe_unused]] InnerUnionFieldPatchStruct&& other) noexcept :
     __fbthrift_field_innerOption(std::move(other.__fbthrift_field_innerOption)) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>, 1>(*__fbthrift_field_innerOption, *this);
 }
 
-InnerUnionFieldPatchStruct& InnerUnionFieldPatchStruct::operator=(FOLLY_MAYBE_UNUSED InnerUnionFieldPatchStruct&& other) noexcept {
+InnerUnionFieldPatchStruct& InnerUnionFieldPatchStruct::operator=([[maybe_unused]] InnerUnionFieldPatchStruct&& other) noexcept {
     this->__fbthrift_field_innerOption = std::move(other.__fbthrift_field_innerOption);
     return *this;
 }
@@ -2672,16 +2672,16 @@ bool InnerUnionFieldPatchStruct::__fbthrift_is_empty() const {
   return (this->__fbthrift_field_innerOption.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BinaryPatchStruct>>>() || ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BinaryPatchStruct>>>(*this->__fbthrift_field_innerOption));
 }
 
-bool InnerUnionFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const InnerUnionFieldPatchStruct& rhs) const {
+bool InnerUnionFieldPatchStruct::operator==([[maybe_unused]] const InnerUnionFieldPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool InnerUnionFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const InnerUnionFieldPatchStruct& rhs) const {
+bool InnerUnionFieldPatchStruct::operator<([[maybe_unused]] const InnerUnionFieldPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED InnerUnionFieldPatchStruct& a, FOLLY_MAYBE_UNUSED InnerUnionFieldPatchStruct& b) {
+void swap([[maybe_unused]] InnerUnionFieldPatchStruct& a, [[maybe_unused]] InnerUnionFieldPatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_innerOption, b.__fbthrift_field_innerOption);
 }
@@ -2765,7 +2765,7 @@ MyUnionPatchStruct::MyUnionPatchStruct() :
 
 MyUnionPatchStruct::~MyUnionPatchStruct() {}
 
-MyUnionPatchStruct::MyUnionPatchStruct(FOLLY_MAYBE_UNUSED MyUnionPatchStruct&& other) noexcept :
+MyUnionPatchStruct::MyUnionPatchStruct([[maybe_unused]] MyUnionPatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
     __fbthrift_field_patchPrior(std::move(other.__fbthrift_field_patchPrior)),
@@ -2775,7 +2775,7 @@ MyUnionPatchStruct::MyUnionPatchStruct(FOLLY_MAYBE_UNUSED MyUnionPatchStruct&& o
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyUnionFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
 }
 
-MyUnionPatchStruct& MyUnionPatchStruct::operator=(FOLLY_MAYBE_UNUSED MyUnionPatchStruct&& other) noexcept {
+MyUnionPatchStruct& MyUnionPatchStruct::operator=([[maybe_unused]] MyUnionPatchStruct&& other) noexcept {
     this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
     this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
     this->__fbthrift_field_patchPrior = std::move(other.__fbthrift_field_patchPrior);
@@ -2820,16 +2820,16 @@ bool MyUnionPatchStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyUnionFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyUnionFieldPatchStruct>>>(this->__fbthrift_field_patch);
 }
 
-bool MyUnionPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyUnionPatchStruct& rhs) const {
+bool MyUnionPatchStruct::operator==([[maybe_unused]] const MyUnionPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyUnionPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyUnionPatchStruct& rhs) const {
+bool MyUnionPatchStruct::operator<([[maybe_unused]] const MyUnionPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyUnionPatchStruct& a, FOLLY_MAYBE_UNUSED MyUnionPatchStruct& b) {
+void swap([[maybe_unused]] MyUnionPatchStruct& a, [[maybe_unused]] MyUnionPatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
   swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
@@ -2933,7 +2933,7 @@ MyUnionFieldPatchStruct::MyUnionFieldPatchStruct() :
 
 MyUnionFieldPatchStruct::~MyUnionFieldPatchStruct() {}
 
-MyUnionFieldPatchStruct::MyUnionFieldPatchStruct(FOLLY_MAYBE_UNUSED MyUnionFieldPatchStruct&& other) noexcept :
+MyUnionFieldPatchStruct::MyUnionFieldPatchStruct([[maybe_unused]] MyUnionFieldPatchStruct&& other) noexcept :
     __fbthrift_field_option1(std::move(other.__fbthrift_field_option1)),
     __fbthrift_field_option2(std::move(other.__fbthrift_field_option2)),
     __fbthrift_field_option3(std::move(other.__fbthrift_field_option3)) {
@@ -2942,7 +2942,7 @@ MyUnionFieldPatchStruct::MyUnionFieldPatchStruct(FOLLY_MAYBE_UNUSED MyUnionField
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::UnionPatchAdapter<::test::fixtures::patch::InnerUnionPatchStruct>, 3>(*__fbthrift_field_option3, *this);
 }
 
-MyUnionFieldPatchStruct& MyUnionFieldPatchStruct::operator=(FOLLY_MAYBE_UNUSED MyUnionFieldPatchStruct&& other) noexcept {
+MyUnionFieldPatchStruct& MyUnionFieldPatchStruct::operator=([[maybe_unused]] MyUnionFieldPatchStruct&& other) noexcept {
     this->__fbthrift_field_option1 = std::move(other.__fbthrift_field_option1);
     this->__fbthrift_field_option2 = std::move(other.__fbthrift_field_option2);
     this->__fbthrift_field_option3 = std::move(other.__fbthrift_field_option3);
@@ -2979,16 +2979,16 @@ bool MyUnionFieldPatchStruct::__fbthrift_is_empty() const {
  (this->__fbthrift_field_option3.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::UnionPatchAdapter<::test::fixtures::patch::InnerUnionPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::InnerUnionPatchStruct>>>() || ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::UnionPatchAdapter<::test::fixtures::patch::InnerUnionPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::InnerUnionPatchStruct>>>(*this->__fbthrift_field_option3));
 }
 
-bool MyUnionFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyUnionFieldPatchStruct& rhs) const {
+bool MyUnionFieldPatchStruct::operator==([[maybe_unused]] const MyUnionFieldPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyUnionFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyUnionFieldPatchStruct& rhs) const {
+bool MyUnionFieldPatchStruct::operator<([[maybe_unused]] const MyUnionFieldPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyUnionFieldPatchStruct& a, FOLLY_MAYBE_UNUSED MyUnionFieldPatchStruct& b) {
+void swap([[maybe_unused]] MyUnionFieldPatchStruct& a, [[maybe_unused]] MyUnionFieldPatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_option1, b.__fbthrift_field_option1);
   swap(a.__fbthrift_field_option2, b.__fbthrift_field_option2);
@@ -3088,7 +3088,7 @@ MyStructPatchStruct::MyStructPatchStruct() :
 
 MyStructPatchStruct::~MyStructPatchStruct() {}
 
-MyStructPatchStruct::MyStructPatchStruct(FOLLY_MAYBE_UNUSED MyStructPatchStruct&& other) noexcept :
+MyStructPatchStruct::MyStructPatchStruct([[maybe_unused]] MyStructPatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
     __fbthrift_field_patchPrior(std::move(other.__fbthrift_field_patchPrior)),
@@ -3100,7 +3100,7 @@ MyStructPatchStruct::MyStructPatchStruct(FOLLY_MAYBE_UNUSED MyStructPatchStruct&
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
-MyStructPatchStruct& MyStructPatchStruct::operator=(FOLLY_MAYBE_UNUSED MyStructPatchStruct&& other) noexcept {
+MyStructPatchStruct& MyStructPatchStruct::operator=([[maybe_unused]] MyStructPatchStruct&& other) noexcept {
     this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
     this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
     this->__fbthrift_field_patchPrior = std::move(other.__fbthrift_field_patchPrior);
@@ -3151,11 +3151,11 @@ bool MyStructPatchStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldIdListToSetAdapter, ::apache::thrift::type::list<::apache::thrift::type::i16_t>>>(this->__fbthrift_field_remove);
 }
 
-bool MyStructPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructPatchStruct& rhs) const {
+bool MyStructPatchStruct::operator==([[maybe_unused]] const MyStructPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStructPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructPatchStruct& rhs) const {
+bool MyStructPatchStruct::operator<([[maybe_unused]] const MyStructPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -3168,7 +3168,7 @@ const ::test::fixtures::patch::MyStructEnsureStruct& MyStructPatchStruct::get_en
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyStructPatchStruct& a, FOLLY_MAYBE_UNUSED MyStructPatchStruct& b) {
+void swap([[maybe_unused]] MyStructPatchStruct& a, [[maybe_unused]] MyStructPatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
   swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
@@ -3273,16 +3273,16 @@ bool MyStructField10PatchStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_clear);
 }
 
-bool MyStructField10PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructField10PatchStruct& rhs) const {
+bool MyStructField10PatchStruct::operator==([[maybe_unused]] const MyStructField10PatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStructField10PatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructField10PatchStruct& rhs) const {
+bool MyStructField10PatchStruct::operator<([[maybe_unused]] const MyStructField10PatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyStructField10PatchStruct& a, FOLLY_MAYBE_UNUSED MyStructField10PatchStruct& b) {
+void swap([[maybe_unused]] MyStructField10PatchStruct& a, [[maybe_unused]] MyStructField10PatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
   swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
@@ -3360,16 +3360,16 @@ bool MyStructField23PatchStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_clear);
 }
 
-bool MyStructField23PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructField23PatchStruct& rhs) const {
+bool MyStructField23PatchStruct::operator==([[maybe_unused]] const MyStructField23PatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStructField23PatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructField23PatchStruct& rhs) const {
+bool MyStructField23PatchStruct::operator<([[maybe_unused]] const MyStructField23PatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyStructField23PatchStruct& a, FOLLY_MAYBE_UNUSED MyStructField23PatchStruct& b) {
+void swap([[maybe_unused]] MyStructField23PatchStruct& a, [[maybe_unused]] MyStructField23PatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
   swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
@@ -3432,7 +3432,7 @@ MyStructField26PatchStruct::MyStructField26PatchStruct() :
 
 MyStructField26PatchStruct::~MyStructField26PatchStruct() {}
 
-MyStructField26PatchStruct::MyStructField26PatchStruct(FOLLY_MAYBE_UNUSED MyStructField26PatchStruct&& other) noexcept :
+MyStructField26PatchStruct::MyStructField26PatchStruct([[maybe_unused]] MyStructField26PatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
     __fbthrift_field_prepend(std::move(other.__fbthrift_field_prepend)),
@@ -3440,7 +3440,7 @@ MyStructField26PatchStruct::MyStructField26PatchStruct(FOLLY_MAYBE_UNUSED MyStru
     __isset(other.__isset) {
 }
 
-MyStructField26PatchStruct& MyStructField26PatchStruct::operator=(FOLLY_MAYBE_UNUSED MyStructField26PatchStruct&& other) noexcept {
+MyStructField26PatchStruct& MyStructField26PatchStruct::operator=([[maybe_unused]] MyStructField26PatchStruct&& other) noexcept {
     this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
     this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
     this->__fbthrift_field_prepend = std::move(other.__fbthrift_field_prepend);
@@ -3481,11 +3481,11 @@ bool MyStructField26PatchStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_append);
 }
 
-bool MyStructField26PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructField26PatchStruct& rhs) const {
+bool MyStructField26PatchStruct::operator==([[maybe_unused]] const MyStructField26PatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStructField26PatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructField26PatchStruct& rhs) const {
+bool MyStructField26PatchStruct::operator<([[maybe_unused]] const MyStructField26PatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -3514,7 +3514,7 @@ const ::std::vector<::std::int16_t>& MyStructField26PatchStruct::get_append() co
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyStructField26PatchStruct& a, FOLLY_MAYBE_UNUSED MyStructField26PatchStruct& b) {
+void swap([[maybe_unused]] MyStructField26PatchStruct& a, [[maybe_unused]] MyStructField26PatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
   swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
@@ -3579,7 +3579,7 @@ MyStructField27PatchStruct::MyStructField27PatchStruct() :
 
 MyStructField27PatchStruct::~MyStructField27PatchStruct() {}
 
-MyStructField27PatchStruct::MyStructField27PatchStruct(FOLLY_MAYBE_UNUSED MyStructField27PatchStruct&& other) noexcept :
+MyStructField27PatchStruct::MyStructField27PatchStruct([[maybe_unused]] MyStructField27PatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
     __fbthrift_field_remove(std::move(other.__fbthrift_field_remove)),
@@ -3587,7 +3587,7 @@ MyStructField27PatchStruct::MyStructField27PatchStruct(FOLLY_MAYBE_UNUSED MyStru
     __isset(other.__isset) {
 }
 
-MyStructField27PatchStruct& MyStructField27PatchStruct::operator=(FOLLY_MAYBE_UNUSED MyStructField27PatchStruct&& other) noexcept {
+MyStructField27PatchStruct& MyStructField27PatchStruct::operator=([[maybe_unused]] MyStructField27PatchStruct&& other) noexcept {
     this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
     this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
     this->__fbthrift_field_remove = std::move(other.__fbthrift_field_remove);
@@ -3628,11 +3628,11 @@ bool MyStructField27PatchStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::string_t>>(this->__fbthrift_field_add);
 }
 
-bool MyStructField27PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructField27PatchStruct& rhs) const {
+bool MyStructField27PatchStruct::operator==([[maybe_unused]] const MyStructField27PatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStructField27PatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructField27PatchStruct& rhs) const {
+bool MyStructField27PatchStruct::operator<([[maybe_unused]] const MyStructField27PatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -3661,7 +3661,7 @@ const ::std::set<::std::string>& MyStructField27PatchStruct::get_add() const& {
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyStructField27PatchStruct& a, FOLLY_MAYBE_UNUSED MyStructField27PatchStruct& b) {
+void swap([[maybe_unused]] MyStructField27PatchStruct& a, [[maybe_unused]] MyStructField27PatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
   swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
@@ -3726,7 +3726,7 @@ MyStructField28PatchStruct::MyStructField28PatchStruct() :
 
 MyStructField28PatchStruct::~MyStructField28PatchStruct() {}
 
-MyStructField28PatchStruct::MyStructField28PatchStruct(FOLLY_MAYBE_UNUSED MyStructField28PatchStruct&& other) noexcept :
+MyStructField28PatchStruct::MyStructField28PatchStruct([[maybe_unused]] MyStructField28PatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
     __fbthrift_field_patchPrior(std::move(other.__fbthrift_field_patchPrior)),
@@ -3737,7 +3737,7 @@ MyStructField28PatchStruct::MyStructField28PatchStruct(FOLLY_MAYBE_UNUSED MyStru
     __isset(other.__isset) {
 }
 
-MyStructField28PatchStruct& MyStructField28PatchStruct::operator=(FOLLY_MAYBE_UNUSED MyStructField28PatchStruct&& other) noexcept {
+MyStructField28PatchStruct& MyStructField28PatchStruct::operator=([[maybe_unused]] MyStructField28PatchStruct&& other) noexcept {
     this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
     this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
     this->__fbthrift_field_patchPrior = std::move(other.__fbthrift_field_patchPrior);
@@ -3793,11 +3793,11 @@ bool MyStructField28PatchStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::string_t>>(this->__fbthrift_field_put);
 }
 
-bool MyStructField28PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructField28PatchStruct& rhs) const {
+bool MyStructField28PatchStruct::operator==([[maybe_unused]] const MyStructField28PatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStructField28PatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructField28PatchStruct& rhs) const {
+bool MyStructField28PatchStruct::operator<([[maybe_unused]] const MyStructField28PatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -3850,7 +3850,7 @@ const ::std::map<::std::string, ::std::string>& MyStructField28PatchStruct::get_
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyStructField28PatchStruct& a, FOLLY_MAYBE_UNUSED MyStructField28PatchStruct& b) {
+void swap([[maybe_unused]] MyStructField28PatchStruct& a, [[maybe_unused]] MyStructField28PatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
   swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
@@ -3930,7 +3930,7 @@ MyStructField29PatchStruct::MyStructField29PatchStruct() :
 
 MyStructField29PatchStruct::~MyStructField29PatchStruct() {}
 
-MyStructField29PatchStruct::MyStructField29PatchStruct(FOLLY_MAYBE_UNUSED MyStructField29PatchStruct&& other) noexcept :
+MyStructField29PatchStruct::MyStructField29PatchStruct([[maybe_unused]] MyStructField29PatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
     __fbthrift_field_prepend(std::move(other.__fbthrift_field_prepend)),
@@ -3938,7 +3938,7 @@ MyStructField29PatchStruct::MyStructField29PatchStruct(FOLLY_MAYBE_UNUSED MyStru
     __isset(other.__isset) {
 }
 
-MyStructField29PatchStruct& MyStructField29PatchStruct::operator=(FOLLY_MAYBE_UNUSED MyStructField29PatchStruct&& other) noexcept {
+MyStructField29PatchStruct& MyStructField29PatchStruct::operator=([[maybe_unused]] MyStructField29PatchStruct&& other) noexcept {
     this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
     this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
     this->__fbthrift_field_prepend = std::move(other.__fbthrift_field_prepend);
@@ -3979,11 +3979,11 @@ bool MyStructField29PatchStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>>(this->__fbthrift_field_append);
 }
 
-bool MyStructField29PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructField29PatchStruct& rhs) const {
+bool MyStructField29PatchStruct::operator==([[maybe_unused]] const MyStructField29PatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStructField29PatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructField29PatchStruct& rhs) const {
+bool MyStructField29PatchStruct::operator<([[maybe_unused]] const MyStructField29PatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -4012,7 +4012,7 @@ const ::std::vector<::std::map<::std::string, ::std::int32_t>>& MyStructField29P
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyStructField29PatchStruct& a, FOLLY_MAYBE_UNUSED MyStructField29PatchStruct& b) {
+void swap([[maybe_unused]] MyStructField29PatchStruct& a, [[maybe_unused]] MyStructField29PatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
   swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
@@ -4077,7 +4077,7 @@ MyStructField30PatchStruct::MyStructField30PatchStruct() :
 
 MyStructField30PatchStruct::~MyStructField30PatchStruct() {}
 
-MyStructField30PatchStruct::MyStructField30PatchStruct(FOLLY_MAYBE_UNUSED MyStructField30PatchStruct&& other) noexcept :
+MyStructField30PatchStruct::MyStructField30PatchStruct([[maybe_unused]] MyStructField30PatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
     __fbthrift_field_patchPrior(std::move(other.__fbthrift_field_patchPrior)),
@@ -4088,7 +4088,7 @@ MyStructField30PatchStruct::MyStructField30PatchStruct(FOLLY_MAYBE_UNUSED MyStru
     __isset(other.__isset) {
 }
 
-MyStructField30PatchStruct& MyStructField30PatchStruct::operator=(FOLLY_MAYBE_UNUSED MyStructField30PatchStruct&& other) noexcept {
+MyStructField30PatchStruct& MyStructField30PatchStruct::operator=([[maybe_unused]] MyStructField30PatchStruct&& other) noexcept {
     this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
     this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
     this->__fbthrift_field_patchPrior = std::move(other.__fbthrift_field_patchPrior);
@@ -4144,11 +4144,11 @@ bool MyStructField30PatchStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>>(this->__fbthrift_field_put);
 }
 
-bool MyStructField30PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructField30PatchStruct& rhs) const {
+bool MyStructField30PatchStruct::operator==([[maybe_unused]] const MyStructField30PatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStructField30PatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructField30PatchStruct& rhs) const {
+bool MyStructField30PatchStruct::operator<([[maybe_unused]] const MyStructField30PatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -4201,7 +4201,7 @@ const ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>& MySt
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyStructField30PatchStruct& a, FOLLY_MAYBE_UNUSED MyStructField30PatchStruct& b) {
+void swap([[maybe_unused]] MyStructField30PatchStruct& a, [[maybe_unused]] MyStructField30PatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
   swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
@@ -4281,7 +4281,7 @@ MyStructField30Patch1Struct::MyStructField30Patch1Struct() :
 
 MyStructField30Patch1Struct::~MyStructField30Patch1Struct() {}
 
-MyStructField30Patch1Struct::MyStructField30Patch1Struct(FOLLY_MAYBE_UNUSED MyStructField30Patch1Struct&& other) noexcept :
+MyStructField30Patch1Struct::MyStructField30Patch1Struct([[maybe_unused]] MyStructField30Patch1Struct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
     __fbthrift_field_patchPrior(std::move(other.__fbthrift_field_patchPrior)),
@@ -4292,7 +4292,7 @@ MyStructField30Patch1Struct::MyStructField30Patch1Struct(FOLLY_MAYBE_UNUSED MySt
     __isset(other.__isset) {
 }
 
-MyStructField30Patch1Struct& MyStructField30Patch1Struct::operator=(FOLLY_MAYBE_UNUSED MyStructField30Patch1Struct&& other) noexcept {
+MyStructField30Patch1Struct& MyStructField30Patch1Struct::operator=([[maybe_unused]] MyStructField30Patch1Struct&& other) noexcept {
     this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
     this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
     this->__fbthrift_field_patchPrior = std::move(other.__fbthrift_field_patchPrior);
@@ -4348,11 +4348,11 @@ bool MyStructField30Patch1Struct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>(this->__fbthrift_field_put);
 }
 
-bool MyStructField30Patch1Struct::operator==(FOLLY_MAYBE_UNUSED const MyStructField30Patch1Struct& rhs) const {
+bool MyStructField30Patch1Struct::operator==([[maybe_unused]] const MyStructField30Patch1Struct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStructField30Patch1Struct::operator<(FOLLY_MAYBE_UNUSED const MyStructField30Patch1Struct& rhs) const {
+bool MyStructField30Patch1Struct::operator<([[maybe_unused]] const MyStructField30Patch1Struct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -4405,7 +4405,7 @@ const ::std::map<::std::string, ::std::int32_t>& MyStructField30Patch1Struct::ge
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyStructField30Patch1Struct& a, FOLLY_MAYBE_UNUSED MyStructField30Patch1Struct& b) {
+void swap([[maybe_unused]] MyStructField30Patch1Struct& a, [[maybe_unused]] MyStructField30Patch1Struct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
   swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
@@ -4590,7 +4590,7 @@ MyStructFieldPatchStruct::MyStructFieldPatchStruct() :
 
 MyStructFieldPatchStruct::~MyStructFieldPatchStruct() {}
 
-MyStructFieldPatchStruct::MyStructFieldPatchStruct(FOLLY_MAYBE_UNUSED MyStructFieldPatchStruct&& other) noexcept :
+MyStructFieldPatchStruct::MyStructFieldPatchStruct([[maybe_unused]] MyStructFieldPatchStruct&& other) noexcept :
     __fbthrift_field_structWithCustomDefault(std::move(other.__fbthrift_field_structWithCustomDefault)),
     __fbthrift_field_i32WithCustomDefault(std::move(other.__fbthrift_field_i32WithCustomDefault)),
     __fbthrift_field_mapMap(std::move(other.__fbthrift_field_mapMap)),
@@ -4659,7 +4659,7 @@ MyStructFieldPatchStruct::MyStructFieldPatchStruct(FOLLY_MAYBE_UNUSED MyStructFi
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataPatchStruct>, 1>(*__fbthrift_field_structWithFieldCustomDefault, *this);
 }
 
-MyStructFieldPatchStruct& MyStructFieldPatchStruct::operator=(FOLLY_MAYBE_UNUSED MyStructFieldPatchStruct&& other) noexcept {
+MyStructFieldPatchStruct& MyStructFieldPatchStruct::operator=([[maybe_unused]] MyStructFieldPatchStruct&& other) noexcept {
     this->__fbthrift_field_structWithCustomDefault = std::move(other.__fbthrift_field_structWithCustomDefault);
     this->__fbthrift_field_i32WithCustomDefault = std::move(other.__fbthrift_field_i32WithCustomDefault);
     this->__fbthrift_field_mapMap = std::move(other.__fbthrift_field_mapMap);
@@ -4876,16 +4876,16 @@ bool MyStructFieldPatchStruct::__fbthrift_is_empty() const {
  (this->__fbthrift_field_structWithFieldCustomDefault.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataPatchStruct>>>() || ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataPatchStruct>>>(*this->__fbthrift_field_structWithFieldCustomDefault));
 }
 
-bool MyStructFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructFieldPatchStruct& rhs) const {
+bool MyStructFieldPatchStruct::operator==([[maybe_unused]] const MyStructFieldPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStructFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructFieldPatchStruct& rhs) const {
+bool MyStructFieldPatchStruct::operator<([[maybe_unused]] const MyStructFieldPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyStructFieldPatchStruct& a, FOLLY_MAYBE_UNUSED MyStructFieldPatchStruct& b) {
+void swap([[maybe_unused]] MyStructFieldPatchStruct& a, [[maybe_unused]] MyStructFieldPatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_structWithCustomDefault, b.__fbthrift_field_structWithCustomDefault);
   swap(a.__fbthrift_field_i32WithCustomDefault, b.__fbthrift_field_i32WithCustomDefault);
@@ -5192,7 +5192,7 @@ MyStructEnsureStruct::MyStructEnsureStruct() :
 
 MyStructEnsureStruct::~MyStructEnsureStruct() {}
 
-MyStructEnsureStruct::MyStructEnsureStruct(FOLLY_MAYBE_UNUSED MyStructEnsureStruct&& other) noexcept :
+MyStructEnsureStruct::MyStructEnsureStruct([[maybe_unused]] MyStructEnsureStruct&& other) noexcept :
     __fbthrift_field_structWithCustomDefault(std::move(other.__fbthrift_field_structWithCustomDefault)),
     __fbthrift_field_i32WithCustomDefault(std::move(other.__fbthrift_field_i32WithCustomDefault)),
     __fbthrift_field_mapMap(std::move(other.__fbthrift_field_mapMap)),
@@ -5229,7 +5229,7 @@ MyStructEnsureStruct::MyStructEnsureStruct(FOLLY_MAYBE_UNUSED MyStructEnsureStru
     __isset(other.__isset) {
 }
 
-MyStructEnsureStruct& MyStructEnsureStruct::operator=(FOLLY_MAYBE_UNUSED MyStructEnsureStruct&& other) noexcept {
+MyStructEnsureStruct& MyStructEnsureStruct::operator=([[maybe_unused]] MyStructEnsureStruct&& other) noexcept {
     this->__fbthrift_field_structWithCustomDefault = std::move(other.__fbthrift_field_structWithCustomDefault);
     this->__fbthrift_field_i32WithCustomDefault = std::move(other.__fbthrift_field_i32WithCustomDefault);
     this->__fbthrift_field_mapMap = std::move(other.__fbthrift_field_mapMap);
@@ -5406,11 +5406,11 @@ bool MyStructEnsureStruct::__fbthrift_is_empty() const {
  !(this->__fbthrift_field_structWithFieldCustomDefault);
 }
 
-bool MyStructEnsureStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructEnsureStruct& rhs) const {
+bool MyStructEnsureStruct::operator==([[maybe_unused]] const MyStructEnsureStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStructEnsureStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructEnsureStruct& rhs) const {
+bool MyStructEnsureStruct::operator<([[maybe_unused]] const MyStructEnsureStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -5455,7 +5455,7 @@ const ::std::vector<::std::int16_t>* MyStructEnsureStruct::get_optListVal() cons
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyStructEnsureStruct& a, FOLLY_MAYBE_UNUSED MyStructEnsureStruct& b) {
+void swap([[maybe_unused]] MyStructEnsureStruct& a, [[maybe_unused]] MyStructEnsureStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_structWithCustomDefault, b.__fbthrift_field_structWithCustomDefault);
   swap(a.__fbthrift_field_i32WithCustomDefault, b.__fbthrift_field_i32WithCustomDefault);
@@ -5610,7 +5610,7 @@ LateDefStructPatchStruct::LateDefStructPatchStruct() :
 
 LateDefStructPatchStruct::~LateDefStructPatchStruct() {}
 
-LateDefStructPatchStruct::LateDefStructPatchStruct(FOLLY_MAYBE_UNUSED LateDefStructPatchStruct&& other) noexcept :
+LateDefStructPatchStruct::LateDefStructPatchStruct([[maybe_unused]] LateDefStructPatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
     __fbthrift_field_patchPrior(std::move(other.__fbthrift_field_patchPrior)),
@@ -5622,7 +5622,7 @@ LateDefStructPatchStruct::LateDefStructPatchStruct(FOLLY_MAYBE_UNUSED LateDefStr
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
-LateDefStructPatchStruct& LateDefStructPatchStruct::operator=(FOLLY_MAYBE_UNUSED LateDefStructPatchStruct&& other) noexcept {
+LateDefStructPatchStruct& LateDefStructPatchStruct::operator=([[maybe_unused]] LateDefStructPatchStruct&& other) noexcept {
     this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
     this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
     this->__fbthrift_field_patchPrior = std::move(other.__fbthrift_field_patchPrior);
@@ -5666,11 +5666,11 @@ bool LateDefStructPatchStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldIdListToSetAdapter, ::apache::thrift::type::list<::apache::thrift::type::i16_t>>>(this->__fbthrift_field_remove);
 }
 
-bool LateDefStructPatchStruct::operator==(FOLLY_MAYBE_UNUSED const LateDefStructPatchStruct& rhs) const {
+bool LateDefStructPatchStruct::operator==([[maybe_unused]] const LateDefStructPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool LateDefStructPatchStruct::operator<(FOLLY_MAYBE_UNUSED const LateDefStructPatchStruct& rhs) const {
+bool LateDefStructPatchStruct::operator<([[maybe_unused]] const LateDefStructPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -5683,7 +5683,7 @@ const ::test::fixtures::patch::LateDefStructEnsureStruct& LateDefStructPatchStru
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED LateDefStructPatchStruct& a, FOLLY_MAYBE_UNUSED LateDefStructPatchStruct& b) {
+void swap([[maybe_unused]] LateDefStructPatchStruct& a, [[maybe_unused]] LateDefStructPatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
   swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
@@ -5779,16 +5779,16 @@ bool LateDefStructFieldPatchStruct::__fbthrift_is_empty() const {
   return true;
 }
 
-bool LateDefStructFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const LateDefStructFieldPatchStruct& rhs) const {
+bool LateDefStructFieldPatchStruct::operator==([[maybe_unused]] const LateDefStructFieldPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool LateDefStructFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const LateDefStructFieldPatchStruct& rhs) const {
+bool LateDefStructFieldPatchStruct::operator<([[maybe_unused]] const LateDefStructFieldPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED LateDefStructFieldPatchStruct& a, FOLLY_MAYBE_UNUSED LateDefStructFieldPatchStruct& b) {
+void swap([[maybe_unused]] LateDefStructFieldPatchStruct& a, [[maybe_unused]] LateDefStructFieldPatchStruct& b) {
   using ::std::swap;
 }
 
@@ -5854,16 +5854,16 @@ bool LateDefStructEnsureStruct::__fbthrift_is_empty() const {
   return true;
 }
 
-bool LateDefStructEnsureStruct::operator==(FOLLY_MAYBE_UNUSED const LateDefStructEnsureStruct& rhs) const {
+bool LateDefStructEnsureStruct::operator==([[maybe_unused]] const LateDefStructEnsureStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool LateDefStructEnsureStruct::operator<(FOLLY_MAYBE_UNUSED const LateDefStructEnsureStruct& rhs) const {
+bool LateDefStructEnsureStruct::operator<([[maybe_unused]] const LateDefStructEnsureStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED LateDefStructEnsureStruct& a, FOLLY_MAYBE_UNUSED LateDefStructEnsureStruct& b) {
+void swap([[maybe_unused]] LateDefStructEnsureStruct& a, [[maybe_unused]] LateDefStructEnsureStruct& b) {
   using ::std::swap;
 }
 
@@ -5942,7 +5942,7 @@ RecursivePatchStruct::RecursivePatchStruct() :
 
 RecursivePatchStruct::~RecursivePatchStruct() {}
 
-RecursivePatchStruct::RecursivePatchStruct(FOLLY_MAYBE_UNUSED RecursivePatchStruct&& other) noexcept :
+RecursivePatchStruct::RecursivePatchStruct([[maybe_unused]] RecursivePatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
     __fbthrift_field_patchPrior(std::move(other.__fbthrift_field_patchPrior)),
@@ -5954,7 +5954,7 @@ RecursivePatchStruct::RecursivePatchStruct(FOLLY_MAYBE_UNUSED RecursivePatchStru
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
-RecursivePatchStruct& RecursivePatchStruct::operator=(FOLLY_MAYBE_UNUSED RecursivePatchStruct&& other) noexcept {
+RecursivePatchStruct& RecursivePatchStruct::operator=([[maybe_unused]] RecursivePatchStruct&& other) noexcept {
     this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
     this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
     this->__fbthrift_field_patchPrior = std::move(other.__fbthrift_field_patchPrior);
@@ -6005,11 +6005,11 @@ bool RecursivePatchStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldIdListToSetAdapter, ::apache::thrift::type::list<::apache::thrift::type::i16_t>>>(this->__fbthrift_field_remove);
 }
 
-bool RecursivePatchStruct::operator==(FOLLY_MAYBE_UNUSED const RecursivePatchStruct& rhs) const {
+bool RecursivePatchStruct::operator==([[maybe_unused]] const RecursivePatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool RecursivePatchStruct::operator<(FOLLY_MAYBE_UNUSED const RecursivePatchStruct& rhs) const {
+bool RecursivePatchStruct::operator<([[maybe_unused]] const RecursivePatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -6022,7 +6022,7 @@ const ::test::fixtures::patch::RecursiveEnsureStruct& RecursivePatchStruct::get_
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED RecursivePatchStruct& a, FOLLY_MAYBE_UNUSED RecursivePatchStruct& b) {
+void swap([[maybe_unused]] RecursivePatchStruct& a, [[maybe_unused]] RecursivePatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
   swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
@@ -6112,13 +6112,13 @@ RecursiveField1PatchStruct::RecursiveField1PatchStruct() :
 
 RecursiveField1PatchStruct::~RecursiveField1PatchStruct() {}
 
-RecursiveField1PatchStruct::RecursiveField1PatchStruct(FOLLY_MAYBE_UNUSED RecursiveField1PatchStruct&& other) noexcept :
+RecursiveField1PatchStruct::RecursiveField1PatchStruct([[maybe_unused]] RecursiveField1PatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
     __isset(other.__isset) {
 }
 
-RecursiveField1PatchStruct& RecursiveField1PatchStruct::operator=(FOLLY_MAYBE_UNUSED RecursiveField1PatchStruct&& other) noexcept {
+RecursiveField1PatchStruct& RecursiveField1PatchStruct::operator=([[maybe_unused]] RecursiveField1PatchStruct&& other) noexcept {
     this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
     this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
     __isset = other.__isset;
@@ -6149,11 +6149,11 @@ bool RecursiveField1PatchStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_clear);
 }
 
-bool RecursiveField1PatchStruct::operator==(FOLLY_MAYBE_UNUSED const RecursiveField1PatchStruct& rhs) const {
+bool RecursiveField1PatchStruct::operator==([[maybe_unused]] const RecursiveField1PatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool RecursiveField1PatchStruct::operator<(FOLLY_MAYBE_UNUSED const RecursiveField1PatchStruct& rhs) const {
+bool RecursiveField1PatchStruct::operator<([[maybe_unused]] const RecursiveField1PatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -6166,7 +6166,7 @@ const ::std::map<::std::string, ::test::fixtures::patch::Recursive>* RecursiveFi
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED RecursiveField1PatchStruct& a, FOLLY_MAYBE_UNUSED RecursiveField1PatchStruct& b) {
+void swap([[maybe_unused]] RecursiveField1PatchStruct& a, [[maybe_unused]] RecursiveField1PatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
   swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
@@ -6244,12 +6244,12 @@ RecursiveFieldPatchStruct::RecursiveFieldPatchStruct() :
 
 RecursiveFieldPatchStruct::~RecursiveFieldPatchStruct() {}
 
-RecursiveFieldPatchStruct::RecursiveFieldPatchStruct(FOLLY_MAYBE_UNUSED RecursiveFieldPatchStruct&& other) noexcept :
+RecursiveFieldPatchStruct::RecursiveFieldPatchStruct([[maybe_unused]] RecursiveFieldPatchStruct&& other) noexcept :
     __fbthrift_field_nodes(std::move(other.__fbthrift_field_nodes)) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::RecursiveField1PatchStruct>, -1>(*__fbthrift_field_nodes, *this);
 }
 
-RecursiveFieldPatchStruct& RecursiveFieldPatchStruct::operator=(FOLLY_MAYBE_UNUSED RecursiveFieldPatchStruct&& other) noexcept {
+RecursiveFieldPatchStruct& RecursiveFieldPatchStruct::operator=([[maybe_unused]] RecursiveFieldPatchStruct&& other) noexcept {
     this->__fbthrift_field_nodes = std::move(other.__fbthrift_field_nodes);
     return *this;
 }
@@ -6274,16 +6274,16 @@ bool RecursiveFieldPatchStruct::__fbthrift_is_empty() const {
   return (this->__fbthrift_field_nodes.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::RecursiveField1PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveField1PatchStruct>>>() || ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::RecursiveField1PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveField1PatchStruct>>>(*this->__fbthrift_field_nodes));
 }
 
-bool RecursiveFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const RecursiveFieldPatchStruct& rhs) const {
+bool RecursiveFieldPatchStruct::operator==([[maybe_unused]] const RecursiveFieldPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool RecursiveFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const RecursiveFieldPatchStruct& rhs) const {
+bool RecursiveFieldPatchStruct::operator<([[maybe_unused]] const RecursiveFieldPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED RecursiveFieldPatchStruct& a, FOLLY_MAYBE_UNUSED RecursiveFieldPatchStruct& b) {
+void swap([[maybe_unused]] RecursiveFieldPatchStruct& a, [[maybe_unused]] RecursiveFieldPatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_nodes, b.__fbthrift_field_nodes);
 }
@@ -6349,12 +6349,12 @@ RecursiveEnsureStruct::RecursiveEnsureStruct() {
 
 RecursiveEnsureStruct::~RecursiveEnsureStruct() {}
 
-RecursiveEnsureStruct::RecursiveEnsureStruct(FOLLY_MAYBE_UNUSED RecursiveEnsureStruct&& other) noexcept :
+RecursiveEnsureStruct::RecursiveEnsureStruct([[maybe_unused]] RecursiveEnsureStruct&& other) noexcept :
     __fbthrift_field_nodes(std::move(other.__fbthrift_field_nodes)),
     __isset(other.__isset) {
 }
 
-RecursiveEnsureStruct& RecursiveEnsureStruct::operator=(FOLLY_MAYBE_UNUSED RecursiveEnsureStruct&& other) noexcept {
+RecursiveEnsureStruct& RecursiveEnsureStruct::operator=([[maybe_unused]] RecursiveEnsureStruct&& other) noexcept {
     this->__fbthrift_field_nodes = std::move(other.__fbthrift_field_nodes);
     __isset = other.__isset;
     return *this;
@@ -6380,11 +6380,11 @@ bool RecursiveEnsureStruct::__fbthrift_is_empty() const {
   return !(this->__isset.get(0));
 }
 
-bool RecursiveEnsureStruct::operator==(FOLLY_MAYBE_UNUSED const RecursiveEnsureStruct& rhs) const {
+bool RecursiveEnsureStruct::operator==([[maybe_unused]] const RecursiveEnsureStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool RecursiveEnsureStruct::operator<(FOLLY_MAYBE_UNUSED const RecursiveEnsureStruct& rhs) const {
+bool RecursiveEnsureStruct::operator<([[maybe_unused]] const RecursiveEnsureStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -6397,7 +6397,7 @@ const ::std::map<::std::string, ::test::fixtures::patch::Recursive>* RecursiveEn
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED RecursiveEnsureStruct& a, FOLLY_MAYBE_UNUSED RecursiveEnsureStruct& b) {
+void swap([[maybe_unused]] RecursiveEnsureStruct& a, [[maybe_unused]] RecursiveEnsureStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_nodes, b.__fbthrift_field_nodes);
   swap(a.__isset, b.__isset);
@@ -6484,7 +6484,7 @@ BarPatchStruct::BarPatchStruct() :
 
 BarPatchStruct::~BarPatchStruct() {}
 
-BarPatchStruct::BarPatchStruct(FOLLY_MAYBE_UNUSED BarPatchStruct&& other) noexcept :
+BarPatchStruct::BarPatchStruct([[maybe_unused]] BarPatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
     __fbthrift_field_patchPrior(std::move(other.__fbthrift_field_patchPrior)),
@@ -6496,7 +6496,7 @@ BarPatchStruct::BarPatchStruct(FOLLY_MAYBE_UNUSED BarPatchStruct&& other) noexce
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
-BarPatchStruct& BarPatchStruct::operator=(FOLLY_MAYBE_UNUSED BarPatchStruct&& other) noexcept {
+BarPatchStruct& BarPatchStruct::operator=([[maybe_unused]] BarPatchStruct&& other) noexcept {
     this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
     this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
     this->__fbthrift_field_patchPrior = std::move(other.__fbthrift_field_patchPrior);
@@ -6547,11 +6547,11 @@ bool BarPatchStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldIdListToSetAdapter, ::apache::thrift::type::list<::apache::thrift::type::i16_t>>>(this->__fbthrift_field_remove);
 }
 
-bool BarPatchStruct::operator==(FOLLY_MAYBE_UNUSED const BarPatchStruct& rhs) const {
+bool BarPatchStruct::operator==([[maybe_unused]] const BarPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool BarPatchStruct::operator<(FOLLY_MAYBE_UNUSED const BarPatchStruct& rhs) const {
+bool BarPatchStruct::operator<([[maybe_unused]] const BarPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -6564,7 +6564,7 @@ const ::test::fixtures::patch::BarEnsureStruct& BarPatchStruct::get_ensure() con
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED BarPatchStruct& a, FOLLY_MAYBE_UNUSED BarPatchStruct& b) {
+void swap([[maybe_unused]] BarPatchStruct& a, [[maybe_unused]] BarPatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
   swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
@@ -6663,12 +6663,12 @@ BarFieldPatchStruct::BarFieldPatchStruct() :
 
 BarFieldPatchStruct::~BarFieldPatchStruct() {}
 
-BarFieldPatchStruct::BarFieldPatchStruct(FOLLY_MAYBE_UNUSED BarFieldPatchStruct&& other) noexcept :
+BarFieldPatchStruct::BarFieldPatchStruct([[maybe_unused]] BarFieldPatchStruct&& other) noexcept :
     __fbthrift_field_loop(std::move(other.__fbthrift_field_loop)) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::LoopPatchStruct>, -1>(*__fbthrift_field_loop, *this);
 }
 
-BarFieldPatchStruct& BarFieldPatchStruct::operator=(FOLLY_MAYBE_UNUSED BarFieldPatchStruct&& other) noexcept {
+BarFieldPatchStruct& BarFieldPatchStruct::operator=([[maybe_unused]] BarFieldPatchStruct&& other) noexcept {
     this->__fbthrift_field_loop = std::move(other.__fbthrift_field_loop);
     return *this;
 }
@@ -6693,16 +6693,16 @@ bool BarFieldPatchStruct::__fbthrift_is_empty() const {
   return (this->__fbthrift_field_loop.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::LoopPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::LoopPatchStruct>>>() || ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::LoopPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::LoopPatchStruct>>>(*this->__fbthrift_field_loop));
 }
 
-bool BarFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const BarFieldPatchStruct& rhs) const {
+bool BarFieldPatchStruct::operator==([[maybe_unused]] const BarFieldPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool BarFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const BarFieldPatchStruct& rhs) const {
+bool BarFieldPatchStruct::operator<([[maybe_unused]] const BarFieldPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED BarFieldPatchStruct& a, FOLLY_MAYBE_UNUSED BarFieldPatchStruct& b) {
+void swap([[maybe_unused]] BarFieldPatchStruct& a, [[maybe_unused]] BarFieldPatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_loop, b.__fbthrift_field_loop);
 }
@@ -6768,11 +6768,11 @@ BarEnsureStruct::BarEnsureStruct() {
 
 BarEnsureStruct::~BarEnsureStruct() {}
 
-BarEnsureStruct::BarEnsureStruct(FOLLY_MAYBE_UNUSED BarEnsureStruct&& other) noexcept :
+BarEnsureStruct::BarEnsureStruct([[maybe_unused]] BarEnsureStruct&& other) noexcept :
     __fbthrift_field_loop(std::move(other.__fbthrift_field_loop)) {
 }
 
-BarEnsureStruct& BarEnsureStruct::operator=(FOLLY_MAYBE_UNUSED BarEnsureStruct&& other) noexcept {
+BarEnsureStruct& BarEnsureStruct::operator=([[maybe_unused]] BarEnsureStruct&& other) noexcept {
     this->__fbthrift_field_loop = std::move(other.__fbthrift_field_loop);
     return *this;
 }
@@ -6795,16 +6795,16 @@ bool BarEnsureStruct::__fbthrift_is_empty() const {
   return !(this->__fbthrift_field_loop);
 }
 
-bool BarEnsureStruct::operator==(FOLLY_MAYBE_UNUSED const BarEnsureStruct& rhs) const {
+bool BarEnsureStruct::operator==([[maybe_unused]] const BarEnsureStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool BarEnsureStruct::operator<(FOLLY_MAYBE_UNUSED const BarEnsureStruct& rhs) const {
+bool BarEnsureStruct::operator<([[maybe_unused]] const BarEnsureStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED BarEnsureStruct& a, FOLLY_MAYBE_UNUSED BarEnsureStruct& b) {
+void swap([[maybe_unused]] BarEnsureStruct& a, [[maybe_unused]] BarEnsureStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_loop, b.__fbthrift_field_loop);
 }
@@ -6871,12 +6871,12 @@ LoopPatchStruct::LoopPatchStruct() :
 
 LoopPatchStruct::~LoopPatchStruct() {}
 
-LoopPatchStruct::LoopPatchStruct(FOLLY_MAYBE_UNUSED LoopPatchStruct&& other) noexcept :
+LoopPatchStruct::LoopPatchStruct([[maybe_unused]] LoopPatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)) {
 }
 
-LoopPatchStruct& LoopPatchStruct::operator=(FOLLY_MAYBE_UNUSED LoopPatchStruct&& other) noexcept {
+LoopPatchStruct& LoopPatchStruct::operator=([[maybe_unused]] LoopPatchStruct&& other) noexcept {
     this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
     this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
     return *this;
@@ -6904,16 +6904,16 @@ bool LoopPatchStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_clear);
 }
 
-bool LoopPatchStruct::operator==(FOLLY_MAYBE_UNUSED const LoopPatchStruct& rhs) const {
+bool LoopPatchStruct::operator==([[maybe_unused]] const LoopPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool LoopPatchStruct::operator<(FOLLY_MAYBE_UNUSED const LoopPatchStruct& rhs) const {
+bool LoopPatchStruct::operator<([[maybe_unused]] const LoopPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED LoopPatchStruct& a, FOLLY_MAYBE_UNUSED LoopPatchStruct& b) {
+void swap([[maybe_unused]] LoopPatchStruct& a, [[maybe_unused]] LoopPatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
   swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
@@ -7000,7 +7000,7 @@ RefFieldsPatchStruct::RefFieldsPatchStruct() :
 
 RefFieldsPatchStruct::~RefFieldsPatchStruct() {}
 
-RefFieldsPatchStruct::RefFieldsPatchStruct(FOLLY_MAYBE_UNUSED RefFieldsPatchStruct&& other) noexcept :
+RefFieldsPatchStruct::RefFieldsPatchStruct([[maybe_unused]] RefFieldsPatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
     __fbthrift_field_patchPrior(std::move(other.__fbthrift_field_patchPrior)),
@@ -7012,7 +7012,7 @@ RefFieldsPatchStruct::RefFieldsPatchStruct(FOLLY_MAYBE_UNUSED RefFieldsPatchStru
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
-RefFieldsPatchStruct& RefFieldsPatchStruct::operator=(FOLLY_MAYBE_UNUSED RefFieldsPatchStruct&& other) noexcept {
+RefFieldsPatchStruct& RefFieldsPatchStruct::operator=([[maybe_unused]] RefFieldsPatchStruct&& other) noexcept {
     this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
     this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
     this->__fbthrift_field_patchPrior = std::move(other.__fbthrift_field_patchPrior);
@@ -7063,11 +7063,11 @@ bool RefFieldsPatchStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldIdListToSetAdapter, ::apache::thrift::type::list<::apache::thrift::type::i16_t>>>(this->__fbthrift_field_remove);
 }
 
-bool RefFieldsPatchStruct::operator==(FOLLY_MAYBE_UNUSED const RefFieldsPatchStruct& rhs) const {
+bool RefFieldsPatchStruct::operator==([[maybe_unused]] const RefFieldsPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool RefFieldsPatchStruct::operator<(FOLLY_MAYBE_UNUSED const RefFieldsPatchStruct& rhs) const {
+bool RefFieldsPatchStruct::operator<([[maybe_unused]] const RefFieldsPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -7080,7 +7080,7 @@ const ::test::fixtures::patch::RefFieldsEnsureStruct& RefFieldsPatchStruct::get_
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED RefFieldsPatchStruct& a, FOLLY_MAYBE_UNUSED RefFieldsPatchStruct& b) {
+void swap([[maybe_unused]] RefFieldsPatchStruct& a, [[maybe_unused]] RefFieldsPatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
   swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
@@ -7170,7 +7170,7 @@ RefFieldsField1PatchStruct::RefFieldsField1PatchStruct() :
 
 RefFieldsField1PatchStruct::~RefFieldsField1PatchStruct() {}
 
-RefFieldsField1PatchStruct::RefFieldsField1PatchStruct(FOLLY_MAYBE_UNUSED RefFieldsField1PatchStruct&& other) noexcept :
+RefFieldsField1PatchStruct::RefFieldsField1PatchStruct([[maybe_unused]] RefFieldsField1PatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
     __fbthrift_field_prepend(std::move(other.__fbthrift_field_prepend)),
@@ -7178,7 +7178,7 @@ RefFieldsField1PatchStruct::RefFieldsField1PatchStruct(FOLLY_MAYBE_UNUSED RefFie
     __isset(other.__isset) {
 }
 
-RefFieldsField1PatchStruct& RefFieldsField1PatchStruct::operator=(FOLLY_MAYBE_UNUSED RefFieldsField1PatchStruct&& other) noexcept {
+RefFieldsField1PatchStruct& RefFieldsField1PatchStruct::operator=([[maybe_unused]] RefFieldsField1PatchStruct&& other) noexcept {
     this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
     this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
     this->__fbthrift_field_prepend = std::move(other.__fbthrift_field_prepend);
@@ -7219,11 +7219,11 @@ bool RefFieldsField1PatchStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_append);
 }
 
-bool RefFieldsField1PatchStruct::operator==(FOLLY_MAYBE_UNUSED const RefFieldsField1PatchStruct& rhs) const {
+bool RefFieldsField1PatchStruct::operator==([[maybe_unused]] const RefFieldsField1PatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool RefFieldsField1PatchStruct::operator<(FOLLY_MAYBE_UNUSED const RefFieldsField1PatchStruct& rhs) const {
+bool RefFieldsField1PatchStruct::operator<([[maybe_unused]] const RefFieldsField1PatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -7252,7 +7252,7 @@ const ::std::vector<::std::int32_t>& RefFieldsField1PatchStruct::get_append() co
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED RefFieldsField1PatchStruct& a, FOLLY_MAYBE_UNUSED RefFieldsField1PatchStruct& b) {
+void swap([[maybe_unused]] RefFieldsField1PatchStruct& a, [[maybe_unused]] RefFieldsField1PatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
   swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
@@ -7317,7 +7317,7 @@ RefFieldsField4PatchStruct::RefFieldsField4PatchStruct() :
 
 RefFieldsField4PatchStruct::~RefFieldsField4PatchStruct() {}
 
-RefFieldsField4PatchStruct::RefFieldsField4PatchStruct(FOLLY_MAYBE_UNUSED RefFieldsField4PatchStruct&& other) noexcept :
+RefFieldsField4PatchStruct::RefFieldsField4PatchStruct([[maybe_unused]] RefFieldsField4PatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
     __fbthrift_field_prepend(std::move(other.__fbthrift_field_prepend)),
@@ -7325,7 +7325,7 @@ RefFieldsField4PatchStruct::RefFieldsField4PatchStruct(FOLLY_MAYBE_UNUSED RefFie
     __isset(other.__isset) {
 }
 
-RefFieldsField4PatchStruct& RefFieldsField4PatchStruct::operator=(FOLLY_MAYBE_UNUSED RefFieldsField4PatchStruct&& other) noexcept {
+RefFieldsField4PatchStruct& RefFieldsField4PatchStruct::operator=([[maybe_unused]] RefFieldsField4PatchStruct&& other) noexcept {
     this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
     this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
     this->__fbthrift_field_prepend = std::move(other.__fbthrift_field_prepend);
@@ -7366,11 +7366,11 @@ bool RefFieldsField4PatchStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_append);
 }
 
-bool RefFieldsField4PatchStruct::operator==(FOLLY_MAYBE_UNUSED const RefFieldsField4PatchStruct& rhs) const {
+bool RefFieldsField4PatchStruct::operator==([[maybe_unused]] const RefFieldsField4PatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool RefFieldsField4PatchStruct::operator<(FOLLY_MAYBE_UNUSED const RefFieldsField4PatchStruct& rhs) const {
+bool RefFieldsField4PatchStruct::operator<([[maybe_unused]] const RefFieldsField4PatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -7399,7 +7399,7 @@ const ::std::vector<::std::int32_t>& RefFieldsField4PatchStruct::get_append() co
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED RefFieldsField4PatchStruct& a, FOLLY_MAYBE_UNUSED RefFieldsField4PatchStruct& b) {
+void swap([[maybe_unused]] RefFieldsField4PatchStruct& a, [[maybe_unused]] RefFieldsField4PatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
   swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
@@ -7464,7 +7464,7 @@ RefFieldsField7PatchStruct::RefFieldsField7PatchStruct() :
 
 RefFieldsField7PatchStruct::~RefFieldsField7PatchStruct() {}
 
-RefFieldsField7PatchStruct::RefFieldsField7PatchStruct(FOLLY_MAYBE_UNUSED RefFieldsField7PatchStruct&& other) noexcept :
+RefFieldsField7PatchStruct::RefFieldsField7PatchStruct([[maybe_unused]] RefFieldsField7PatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
     __fbthrift_field_prepend(std::move(other.__fbthrift_field_prepend)),
@@ -7472,7 +7472,7 @@ RefFieldsField7PatchStruct::RefFieldsField7PatchStruct(FOLLY_MAYBE_UNUSED RefFie
     __isset(other.__isset) {
 }
 
-RefFieldsField7PatchStruct& RefFieldsField7PatchStruct::operator=(FOLLY_MAYBE_UNUSED RefFieldsField7PatchStruct&& other) noexcept {
+RefFieldsField7PatchStruct& RefFieldsField7PatchStruct::operator=([[maybe_unused]] RefFieldsField7PatchStruct&& other) noexcept {
     this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
     this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
     this->__fbthrift_field_prepend = std::move(other.__fbthrift_field_prepend);
@@ -7513,11 +7513,11 @@ bool RefFieldsField7PatchStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_append);
 }
 
-bool RefFieldsField7PatchStruct::operator==(FOLLY_MAYBE_UNUSED const RefFieldsField7PatchStruct& rhs) const {
+bool RefFieldsField7PatchStruct::operator==([[maybe_unused]] const RefFieldsField7PatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool RefFieldsField7PatchStruct::operator<(FOLLY_MAYBE_UNUSED const RefFieldsField7PatchStruct& rhs) const {
+bool RefFieldsField7PatchStruct::operator<([[maybe_unused]] const RefFieldsField7PatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -7546,7 +7546,7 @@ const ::std::vector<::std::int32_t>& RefFieldsField7PatchStruct::get_append() co
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED RefFieldsField7PatchStruct& a, FOLLY_MAYBE_UNUSED RefFieldsField7PatchStruct& b) {
+void swap([[maybe_unused]] RefFieldsField7PatchStruct& a, [[maybe_unused]] RefFieldsField7PatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
   swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
@@ -7626,7 +7626,7 @@ RefFieldsFieldPatchStruct::RefFieldsFieldPatchStruct() :
 
 RefFieldsFieldPatchStruct::~RefFieldsFieldPatchStruct() {}
 
-RefFieldsFieldPatchStruct::RefFieldsFieldPatchStruct(FOLLY_MAYBE_UNUSED RefFieldsFieldPatchStruct&& other) noexcept :
+RefFieldsFieldPatchStruct::RefFieldsFieldPatchStruct([[maybe_unused]] RefFieldsFieldPatchStruct&& other) noexcept :
     __fbthrift_field_unique(std::move(other.__fbthrift_field_unique)),
     __fbthrift_field_opt_unique(std::move(other.__fbthrift_field_opt_unique)),
     __fbthrift_field_opt_box(std::move(other.__fbthrift_field_opt_box)) {
@@ -7635,7 +7635,7 @@ RefFieldsFieldPatchStruct::RefFieldsFieldPatchStruct(FOLLY_MAYBE_UNUSED RefField
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField7PatchStruct>, 7>(*__fbthrift_field_opt_box, *this);
 }
 
-RefFieldsFieldPatchStruct& RefFieldsFieldPatchStruct::operator=(FOLLY_MAYBE_UNUSED RefFieldsFieldPatchStruct&& other) noexcept {
+RefFieldsFieldPatchStruct& RefFieldsFieldPatchStruct::operator=([[maybe_unused]] RefFieldsFieldPatchStruct&& other) noexcept {
     this->__fbthrift_field_unique = std::move(other.__fbthrift_field_unique);
     this->__fbthrift_field_opt_unique = std::move(other.__fbthrift_field_opt_unique);
     this->__fbthrift_field_opt_box = std::move(other.__fbthrift_field_opt_box);
@@ -7672,16 +7672,16 @@ bool RefFieldsFieldPatchStruct::__fbthrift_is_empty() const {
  (this->__fbthrift_field_opt_box.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField7PatchStruct>>>() || ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::RefFieldsField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RefFieldsField7PatchStruct>>>(*this->__fbthrift_field_opt_box));
 }
 
-bool RefFieldsFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const RefFieldsFieldPatchStruct& rhs) const {
+bool RefFieldsFieldPatchStruct::operator==([[maybe_unused]] const RefFieldsFieldPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool RefFieldsFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const RefFieldsFieldPatchStruct& rhs) const {
+bool RefFieldsFieldPatchStruct::operator<([[maybe_unused]] const RefFieldsFieldPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED RefFieldsFieldPatchStruct& a, FOLLY_MAYBE_UNUSED RefFieldsFieldPatchStruct& b) {
+void swap([[maybe_unused]] RefFieldsFieldPatchStruct& a, [[maybe_unused]] RefFieldsFieldPatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_unique, b.__fbthrift_field_unique);
   swap(a.__fbthrift_field_opt_unique, b.__fbthrift_field_opt_unique);
@@ -7761,7 +7761,7 @@ RefFieldsEnsureStruct::RefFieldsEnsureStruct() {
 
 RefFieldsEnsureStruct::~RefFieldsEnsureStruct() {}
 
-RefFieldsEnsureStruct::RefFieldsEnsureStruct(FOLLY_MAYBE_UNUSED RefFieldsEnsureStruct&& other) noexcept :
+RefFieldsEnsureStruct::RefFieldsEnsureStruct([[maybe_unused]] RefFieldsEnsureStruct&& other) noexcept :
     __fbthrift_field_unique(std::move(other.__fbthrift_field_unique)),
     __fbthrift_field_shared_const(std::move(other.__fbthrift_field_shared_const)),
     __fbthrift_field_shared_mustable(std::move(other.__fbthrift_field_shared_mustable)),
@@ -7772,7 +7772,7 @@ RefFieldsEnsureStruct::RefFieldsEnsureStruct(FOLLY_MAYBE_UNUSED RefFieldsEnsureS
     __isset(other.__isset) {
 }
 
-RefFieldsEnsureStruct& RefFieldsEnsureStruct::operator=(FOLLY_MAYBE_UNUSED RefFieldsEnsureStruct&& other) noexcept {
+RefFieldsEnsureStruct& RefFieldsEnsureStruct::operator=([[maybe_unused]] RefFieldsEnsureStruct&& other) noexcept {
     this->__fbthrift_field_unique = std::move(other.__fbthrift_field_unique);
     this->__fbthrift_field_shared_const = std::move(other.__fbthrift_field_shared_const);
     this->__fbthrift_field_shared_mustable = std::move(other.__fbthrift_field_shared_mustable);
@@ -7828,11 +7828,11 @@ bool RefFieldsEnsureStruct::__fbthrift_is_empty() const {
  !(this->__isset.get(6));
 }
 
-bool RefFieldsEnsureStruct::operator==(FOLLY_MAYBE_UNUSED const RefFieldsEnsureStruct& rhs) const {
+bool RefFieldsEnsureStruct::operator==([[maybe_unused]] const RefFieldsEnsureStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool RefFieldsEnsureStruct::operator<(FOLLY_MAYBE_UNUSED const RefFieldsEnsureStruct& rhs) const {
+bool RefFieldsEnsureStruct::operator<([[maybe_unused]] const RefFieldsEnsureStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -7893,7 +7893,7 @@ const ::std::vector<::std::int32_t>* RefFieldsEnsureStruct::get_opt_box() const&
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED RefFieldsEnsureStruct& a, FOLLY_MAYBE_UNUSED RefFieldsEnsureStruct& b) {
+void swap([[maybe_unused]] RefFieldsEnsureStruct& a, [[maybe_unused]] RefFieldsEnsureStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_unique, b.__fbthrift_field_unique);
   swap(a.__fbthrift_field_shared_const, b.__fbthrift_field_shared_const);
@@ -7918,7 +7918,7 @@ template uint32_t RefFieldsEnsureStruct::serializedSizeZC<>(apache::thrift::Comp
 }}} // test::fixtures::patch
 
 namespace test { namespace fixtures { namespace patch { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataFieldPatchStruct>, 3, ::test::fixtures::patch::MyDataFieldPatchStruct, ::test::fixtures::patch::MyDataPatchStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataFieldPatchStruct>, 6, ::test::fixtures::patch::MyDataFieldPatchStruct, ::test::fixtures::patch::MyDataPatchStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7, ::std::vector<::std::int16_t>, ::test::fixtures::patch::MyDataPatchStruct>();

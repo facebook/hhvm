@@ -108,7 +108,7 @@ PyObject* Constructor<::test::fixtures::enums::SomeStruct>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::enums::SomeStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::enums::SomeStruct& val) {
+    [[maybe_unused]] const ::test::fixtures::enums::SomeStruct& val) {
   StrongRef fbthrift_data(createStructTuple(4));
   StrongRef _fbthrift__reasonable(
     Constructor<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::enums::Metasyntactic>>{}
@@ -229,7 +229,7 @@ PyObject* Constructor<::test::fixtures::enums::MyStruct>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::enums::MyStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::enums::MyStruct& val) {
+    [[maybe_unused]] const ::test::fixtures::enums::MyStruct& val) {
   StrongRef fbthrift_data(createStructTuple(4));
   StrongRef _fbthrift__me2_3(
     Constructor<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::enums::MyEnum2>>{}

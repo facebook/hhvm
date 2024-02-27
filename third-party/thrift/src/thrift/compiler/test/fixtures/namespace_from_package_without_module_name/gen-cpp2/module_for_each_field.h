@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::test::namespace_from_package_without_module_name::Foo> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).MyInt_ref()...);
   }
 };

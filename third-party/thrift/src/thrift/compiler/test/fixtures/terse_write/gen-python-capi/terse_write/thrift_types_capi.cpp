@@ -99,7 +99,7 @@ PyObject* Constructor<::facebook::thrift::test::terse_write::MyStruct>::operator
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::terse_write::MyStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::terse_write::MyStruct& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::terse_write::MyStruct& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
@@ -228,7 +228,7 @@ PyObject* Constructor<::facebook::thrift::test::terse_write::MyUnion>::operator(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::terse_write::MyUnion>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::terse_write::MyUnion& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::terse_write::MyUnion& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
   switch (type_key) {
@@ -377,7 +377,7 @@ PyObject* Constructor<::facebook::thrift::test::terse_write::MyStructWithCustomD
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::terse_write::MyStructWithCustomDefault>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::terse_write::MyStructWithCustomDefault& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::terse_write::MyStructWithCustomDefault& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__field1(
     Constructor<int64_t>{}
@@ -512,7 +512,7 @@ PyObject* Constructor<::facebook::thrift::test::terse_write::StructLevelTerseStr
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::terse_write::StructLevelTerseStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::terse_write::StructLevelTerseStruct& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::terse_write::StructLevelTerseStruct& val) {
   StrongRef fbthrift_data(createStructTuple(15));
   StrongRef _fbthrift__bool_field(
     Constructor<bool>{}
@@ -847,7 +847,7 @@ PyObject* Constructor<::facebook::thrift::test::terse_write::FieldLevelTerseStru
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::terse_write::FieldLevelTerseStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::terse_write::FieldLevelTerseStruct& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::terse_write::FieldLevelTerseStruct& val) {
   StrongRef fbthrift_data(createStructTuple(30));
   StrongRef _fbthrift__terse_bool_field(
     Constructor<bool>{}
@@ -1268,7 +1268,7 @@ PyObject* Constructor<::facebook::thrift::test::terse_write::TerseStructWithCust
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::terse_write::TerseStructWithCustomDefault& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::terse_write::TerseStructWithCustomDefault& val) {
   StrongRef fbthrift_data(createStructTuple(14));
   StrongRef _fbthrift__bool_field(
     Constructor<bool>{}
@@ -1551,7 +1551,7 @@ PyObject* Constructor<::facebook::thrift::test::terse_write::WrappedFields>::ope
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::terse_write::WrappedFields>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::terse_write::WrappedFields& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::terse_write::WrappedFields& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__field1(
     Constructor<int32_t>{}
@@ -1630,7 +1630,7 @@ PyObject* Constructor<::facebook::thrift::test::terse_write::TerseException>::op
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::terse_write::TerseException>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::terse_write::TerseException& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::terse_write::TerseException& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__msg(
     Constructor<Bytes>{}

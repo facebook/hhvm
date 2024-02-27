@@ -80,7 +80,7 @@ StructWithDefaultStruct::StructWithDefaultStruct() :
 
 StructWithDefaultStruct::~StructWithDefaultStruct() {}
 
-StructWithDefaultStruct::StructWithDefaultStruct(FOLLY_MAYBE_UNUSED StructWithDefaultStruct&& other) noexcept :
+StructWithDefaultStruct::StructWithDefaultStruct([[maybe_unused]] StructWithDefaultStruct&& other) noexcept :
     __fbthrift_field_bool_field(std::move(other.__fbthrift_field_bool_field)),
     __fbthrift_field_byte_field(std::move(other.__fbthrift_field_byte_field)),
     __fbthrift_field_short_field(std::move(other.__fbthrift_field_short_field)),
@@ -97,7 +97,7 @@ StructWithDefaultStruct::StructWithDefaultStruct(FOLLY_MAYBE_UNUSED StructWithDe
     __isset(other.__isset) {
 }
 
-StructWithDefaultStruct& StructWithDefaultStruct::operator=(FOLLY_MAYBE_UNUSED StructWithDefaultStruct&& other) noexcept {
+StructWithDefaultStruct& StructWithDefaultStruct::operator=([[maybe_unused]] StructWithDefaultStruct&& other) noexcept {
     this->__fbthrift_field_bool_field = std::move(other.__fbthrift_field_bool_field);
     this->__fbthrift_field_byte_field = std::move(other.__fbthrift_field_byte_field);
     this->__fbthrift_field_short_field = std::move(other.__fbthrift_field_short_field);
@@ -171,11 +171,11 @@ bool StructWithDefaultStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool StructWithDefaultStruct::operator==(FOLLY_MAYBE_UNUSED const StructWithDefaultStruct& rhs) const {
+bool StructWithDefaultStruct::operator==([[maybe_unused]] const StructWithDefaultStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool StructWithDefaultStruct::operator<(FOLLY_MAYBE_UNUSED const StructWithDefaultStruct& rhs) const {
+bool StructWithDefaultStruct::operator<([[maybe_unused]] const StructWithDefaultStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -204,7 +204,7 @@ const ::std::map<::std::int16_t, ::std::int16_t>& StructWithDefaultStruct::get_m
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED StructWithDefaultStruct& a, FOLLY_MAYBE_UNUSED StructWithDefaultStruct& b) {
+void swap([[maybe_unused]] StructWithDefaultStruct& a, [[maybe_unused]] StructWithDefaultStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_bool_field, b.__fbthrift_field_bool_field);
   swap(a.__fbthrift_field_byte_field, b.__fbthrift_field_byte_field);
@@ -235,7 +235,7 @@ template uint32_t StructWithDefaultStruct::serializedSizeZC<>(apache::thrift::Co
 }}} // apache::thrift::test
 
 namespace apache { namespace thrift { namespace test { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }}}} // apache::thrift::test
 namespace apache::thrift::detail::annotation {

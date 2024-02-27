@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::test_cpp2::cpp_reflection::union1> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).ui_ref()...);
     f(1, static_cast<T&&>(t).ud_ref()...);
     f(2, static_cast<T&&>(t).us_ref()...);
@@ -27,7 +27,7 @@ struct ForEachField<::test_cpp2::cpp_reflection::union1> {
 template <>
 struct ForEachField<::test_cpp2::cpp_reflection::union2> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).ui_2_ref()...);
     f(1, static_cast<T&&>(t).ud_2_ref()...);
     f(2, static_cast<T&&>(t).us_2_ref()...);
@@ -38,7 +38,7 @@ struct ForEachField<::test_cpp2::cpp_reflection::union2> {
 template <>
 struct ForEachField<::test_cpp2::cpp_reflection::union3> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).ui_3_ref()...);
     f(1, static_cast<T&&>(t).ud_3_ref()...);
     f(2, static_cast<T&&>(t).us_3_ref()...);
@@ -49,7 +49,7 @@ struct ForEachField<::test_cpp2::cpp_reflection::union3> {
 template <>
 struct ForEachField<::test_cpp2::cpp_reflection::structA> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).a_ref()...);
     f(1, static_cast<T&&>(t).b_ref()...);
   }
@@ -58,7 +58,7 @@ struct ForEachField<::test_cpp2::cpp_reflection::structA> {
 template <>
 struct ForEachField<::test_cpp2::cpp_reflection::unionA> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).i_ref()...);
     f(1, static_cast<T&&>(t).d_ref()...);
     f(2, static_cast<T&&>(t).s_ref()...);
@@ -70,7 +70,7 @@ struct ForEachField<::test_cpp2::cpp_reflection::unionA> {
 template <>
 struct ForEachField<::test_cpp2::cpp_reflection::structB> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).c_ref()...);
     f(1, static_cast<T&&>(t).d_ref()...);
   }
@@ -79,7 +79,7 @@ struct ForEachField<::test_cpp2::cpp_reflection::structB> {
 template <>
 struct ForEachField<::test_cpp2::cpp_reflection::structC> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).a_ref()...);
     f(1, static_cast<T&&>(t).b_ref()...);
     f(2, static_cast<T&&>(t).c_ref()...);
@@ -116,7 +116,7 @@ struct ForEachField<::test_cpp2::cpp_reflection::structC> {
 template <>
 struct ForEachField<::test_cpp2::cpp_reflection::struct1> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).field0_ref()...);
     f(1, static_cast<T&&>(t).field1_ref()...);
     f(2, static_cast<T&&>(t).field2_ref()...);
@@ -129,7 +129,7 @@ struct ForEachField<::test_cpp2::cpp_reflection::struct1> {
 template <>
 struct ForEachField<::test_cpp2::cpp_reflection::struct2> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).fieldA_ref()...);
     f(1, static_cast<T&&>(t).fieldB_ref()...);
     f(2, static_cast<T&&>(t).fieldC_ref()...);
@@ -143,7 +143,7 @@ struct ForEachField<::test_cpp2::cpp_reflection::struct2> {
 template <>
 struct ForEachField<::test_cpp2::cpp_reflection::struct3> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).fieldA_ref()...);
     f(1, static_cast<T&&>(t).fieldB_ref()...);
     f(2, static_cast<T&&>(t).fieldC_ref()...);
@@ -168,7 +168,7 @@ struct ForEachField<::test_cpp2::cpp_reflection::struct3> {
 template <>
 struct ForEachField<::test_cpp2::cpp_reflection::struct4> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).field0_ref()...);
     f(1, static_cast<T&&>(t).field1_ref()...);
     f(2, static_cast<T&&>(t).field2_ref()...);
@@ -179,7 +179,7 @@ struct ForEachField<::test_cpp2::cpp_reflection::struct4> {
 template <>
 struct ForEachField<::test_cpp2::cpp_reflection::struct5> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).field0_ref()...);
     f(1, static_cast<T&&>(t).field1_ref()...);
     f(2, static_cast<T&&>(t).field2_ref()...);
@@ -191,7 +191,7 @@ struct ForEachField<::test_cpp2::cpp_reflection::struct5> {
 template <>
 struct ForEachField<::test_cpp2::cpp_reflection::struct_binary> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).bi_ref()...);
   }
 };
@@ -199,7 +199,7 @@ struct ForEachField<::test_cpp2::cpp_reflection::struct_binary> {
 template <>
 struct ForEachField<::test_cpp2::cpp_reflection::dep_A_struct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).b_ref()...);
     f(1, static_cast<T&&>(t).c_ref()...);
     f(2, static_cast<T&&>(t).i_a_ref()...);
@@ -209,7 +209,7 @@ struct ForEachField<::test_cpp2::cpp_reflection::dep_A_struct> {
 template <>
 struct ForEachField<::test_cpp2::cpp_reflection::dep_B_struct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).b_ref()...);
     f(1, static_cast<T&&>(t).c_ref()...);
     f(2, static_cast<T&&>(t).i_a_ref()...);
@@ -219,7 +219,7 @@ struct ForEachField<::test_cpp2::cpp_reflection::dep_B_struct> {
 template <>
 struct ForEachField<::test_cpp2::cpp_reflection::annotated> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).a_ref()...);
   }
 };
@@ -227,7 +227,7 @@ struct ForEachField<::test_cpp2::cpp_reflection::annotated> {
 template <>
 struct ForEachField<::test_cpp2::cpp_reflection::union_with_special_names> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).get_ref()...);
     f(1, static_cast<T&&>(t).getter_ref()...);
     f(2, static_cast<T&&>(t).lists_ref()...);
@@ -262,7 +262,7 @@ struct ForEachField<::test_cpp2::cpp_reflection::union_with_special_names> {
 template <>
 struct ForEachField<::test_cpp2::cpp_reflection::struct_with_special_names> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).get_ref()...);
     f(1, static_cast<T&&>(t).getter_ref()...);
     f(2, static_cast<T&&>(t).lists_ref()...);
@@ -297,7 +297,7 @@ struct ForEachField<::test_cpp2::cpp_reflection::struct_with_special_names> {
 template <>
 struct ForEachField<::test_cpp2::cpp_reflection::struct_with_indirections> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).real_ref()...);
     f(1, static_cast<T&&>(t).fake_ref()...);
     f(2, static_cast<T&&>(t).number_ref()...);

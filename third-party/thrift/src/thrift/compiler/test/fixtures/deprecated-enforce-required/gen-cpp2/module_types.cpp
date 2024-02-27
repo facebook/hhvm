@@ -61,16 +61,16 @@ bool Foo::__fbthrift_is_empty() const {
   return false;
 }
 
-bool Foo::operator==(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
+bool Foo::operator==([[maybe_unused]] const Foo& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Foo::operator<(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
+bool Foo::operator<([[maybe_unused]] const Foo& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Foo& a, FOLLY_MAYBE_UNUSED Foo& b) {
+void swap([[maybe_unused]] Foo& a, [[maybe_unused]] Foo& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_bar, b.__fbthrift_field_bar);
 }
@@ -88,7 +88,7 @@ template uint32_t Foo::serializedSizeZC<>(apache::thrift::CompactProtocolWriter 
 } // cpp2
 
 namespace cpp2 { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }} // cpp2
 namespace apache::thrift::detail::annotation {

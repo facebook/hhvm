@@ -14,7 +14,7 @@ namespace cpp2 {
 typedef apache::thrift::ThriftPresult<false> MyServicePrioChild_pang_pargs;
 typedef apache::thrift::ThriftPresult<true> MyServicePrioChild_pang_presult;
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MyServicePrioChildAsyncProcessor::setUpAndProcess_pang(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, FOLLY_MAYBE_UNUSED apache::thrift::concurrency::ThreadManager* tm) {
+void MyServicePrioChildAsyncProcessor::setUpAndProcess_pang(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
   if (!setUpRequestProcessing(req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, iface_)) {
     return;
   }
@@ -68,7 +68,7 @@ apache::thrift::SerializedResponse MyServicePrioChildAsyncProcessor::return_pang
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MyServicePrioChildAsyncProcessor::throw_wrapped_pang(apache::thrift::ResponseChannelRequest::UniquePtr req,FOLLY_MAYBE_UNUSED int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MyServicePrioChildAsyncProcessor::throw_wrapped_pang(apache::thrift::ResponseChannelRequest::UniquePtr req,[[maybe_unused]] int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }

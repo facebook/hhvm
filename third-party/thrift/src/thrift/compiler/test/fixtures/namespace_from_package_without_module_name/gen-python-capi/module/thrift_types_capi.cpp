@@ -93,7 +93,7 @@ PyObject* Constructor<::test::namespace_from_package_without_module_name::Foo>::
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::namespace_from_package_without_module_name::Foo>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::namespace_from_package_without_module_name::Foo& val) {
+    [[maybe_unused]] const ::test::namespace_from_package_without_module_name::Foo& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__MyInt(
     Constructor<int64_t>{}

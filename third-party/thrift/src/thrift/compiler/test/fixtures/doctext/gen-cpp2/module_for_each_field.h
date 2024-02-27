@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::cpp2::A> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).useless_field_ref()...);
   }
 };
@@ -24,7 +24,7 @@ struct ForEachField<::cpp2::A> {
 template <>
 struct ForEachField<::cpp2::U> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).i_ref()...);
     f(1, static_cast<T&&>(t).s_ref()...);
   }
@@ -33,7 +33,7 @@ struct ForEachField<::cpp2::U> {
 template <>
 struct ForEachField<::cpp2::Bang> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).message_ref()...);
   }
 };

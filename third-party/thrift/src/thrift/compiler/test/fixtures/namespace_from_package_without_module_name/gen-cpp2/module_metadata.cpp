@@ -51,7 +51,7 @@ StructMetadata<::test::namespace_from_package_without_module_name::Foo>::gen(Thr
   return res.first->second;
 }
 
-void ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_package_without_module_name::TestService>>::gen_init(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_package_without_module_name::TestService>>::gen_init([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "init";
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
@@ -77,7 +77,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_pac
   response.context() = std::move(context);
 }
 
-const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_package_without_module_name::TestService>>::genRecurse(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_package_without_module_name::TestService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_TestService;
   module_TestService.name() = "module.TestService";
   static const ThriftFunctionGenerator functions[] = {

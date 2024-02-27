@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::cpp2::InitialResponse> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).content_ref()...);
   }
 };
@@ -24,7 +24,7 @@ struct ForEachField<::cpp2::InitialResponse> {
 template <>
 struct ForEachField<::cpp2::FinalResponse> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).content_ref()...);
   }
 };
@@ -32,7 +32,7 @@ struct ForEachField<::cpp2::FinalResponse> {
 template <>
 struct ForEachField<::cpp2::SinkPayload> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).content_ref()...);
   }
 };
@@ -40,7 +40,7 @@ struct ForEachField<::cpp2::SinkPayload> {
 template <>
 struct ForEachField<::cpp2::CompatibleWithKeywordSink> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).sink_ref()...);
   }
 };
@@ -48,7 +48,7 @@ struct ForEachField<::cpp2::CompatibleWithKeywordSink> {
 template <>
 struct ForEachField<::cpp2::InitialException> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).reason_ref()...);
   }
 };
@@ -56,7 +56,7 @@ struct ForEachField<::cpp2::InitialException> {
 template <>
 struct ForEachField<::cpp2::SinkException1> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).reason_ref()...);
   }
 };
@@ -64,7 +64,7 @@ struct ForEachField<::cpp2::SinkException1> {
 template <>
 struct ForEachField<::cpp2::SinkException2> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).reason_ref()...);
   }
 };

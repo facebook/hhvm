@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::apache::thrift::test::A> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).some_map_ref()...);
   }
 };
@@ -24,7 +24,7 @@ struct ForEachField<::apache::thrift::test::A> {
 template <>
 struct ForEachField<::apache::thrift::test::B> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).field_ref()...);
   }
 };

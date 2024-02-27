@@ -23,7 +23,7 @@ void swap(Struct& a, Struct& b) {
   swap(a.element, b.element);
 }
 
-%>void swap(FOLLY_MAYBE_UNUSED <%struct:cpp_underlying_name%>& a, FOLLY_MAYBE_UNUSED <%struct:cpp_underlying_name%>& b) {
+%>void swap([[maybe_unused]] <%struct:cpp_underlying_name%>& a, [[maybe_unused]] <%struct:cpp_underlying_name%>& b) {
   using ::std::swap;
 <%#struct:lazy_fields?%>
   const auto relaxed = std::memory_order_relaxed;

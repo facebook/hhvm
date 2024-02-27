@@ -29,7 +29,7 @@
 <%/struct:is_large?%>
 <%^struct:is_eligible_for_constexpr?%>
 <%struct:cpp_underlying_name%>::<% > module_types_cpp/move_ctor%>
-<%struct:cpp_underlying_name%>& <%struct:cpp_underlying_name%>::operator=(FOLLY_MAYBE_UNUSED <%struct:cpp_underlying_name%>&& other) noexcept {
+<%struct:cpp_underlying_name%>& <%struct:cpp_underlying_name%>::operator=([[maybe_unused]] <%struct:cpp_underlying_name%>&& other) noexcept {
 <%#struct:lazy_fields?%>
     const auto relaxed = std::memory_order_relaxed;
     __fbthrift_protocol_ = other.__fbthrift_protocol_;

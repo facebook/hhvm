@@ -115,7 +115,7 @@ bool RefUnion::operator==(const RefUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool RefUnion::operator<(FOLLY_MAYBE_UNUSED const RefUnion& rhs) const {
+bool RefUnion::operator<([[maybe_unused]] const RefUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
@@ -138,7 +138,7 @@ template uint32_t RefUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWr
 } // cpp2
 
 namespace cpp2 { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::std::string, ::cpp2::RefUnion>();
 }
 }} // cpp2

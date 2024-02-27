@@ -27,7 +27,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 
 
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyRoot>>::gen_do_root(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyRoot>>::gen_do_root([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "do_root";
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
@@ -46,7 +46,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyRoot>>::gen(::ap
   response.context() = std::move(context);
 }
 
-const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyRoot>>::genRecurse(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyRoot>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_MyRoot;
   module_MyRoot.name() = "module.MyRoot";
   static const ThriftFunctionGenerator functions[] = {
@@ -66,7 +66,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   context.module() = std::move(module);
   return &context;
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyNode>>::gen_do_mid(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyNode>>::gen_do_mid([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "do_mid";
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
@@ -85,7 +85,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyNode>>::gen(::ap
   response.context() = std::move(context);
 }
 
-const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyNode>>::genRecurse(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyNode>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_MyNode;
   module_MyNode.name() = "module.MyNode";
   static const ThriftFunctionGenerator functions[] = {
@@ -107,7 +107,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   context.module() = std::move(module);
   return &context;
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyLeaf>>::gen_do_leaf(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyLeaf>>::gen_do_leaf([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "do_leaf";
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
@@ -126,7 +126,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyLeaf>>::gen(::ap
   response.context() = std::move(context);
 }
 
-const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyLeaf>>::genRecurse(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyLeaf>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_MyLeaf;
   module_MyLeaf.name() = "module.MyLeaf";
   static const ThriftFunctionGenerator functions[] = {

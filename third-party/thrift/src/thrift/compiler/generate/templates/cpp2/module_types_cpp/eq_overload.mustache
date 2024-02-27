@@ -15,6 +15,6 @@
   limitations under the License.
 
 %>
-bool <%struct:cpp_underlying_name%>::operator==(FOLLY_MAYBE_UNUSED const <%struct:cpp_underlying_name%>& rhs) const {
+bool <%struct:cpp_underlying_name%>::operator==([[maybe_unused]] const <%struct:cpp_underlying_name%>& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }

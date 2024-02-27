@@ -83,7 +83,7 @@ void ExceptionMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {
     module_CustomException.fields()->push_back(std::move(field));
   }
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen_init(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen_init([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "init";
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
@@ -105,7 +105,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>
   func.is_oneway() = false;
   service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen_method_that_throws(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen_method_that_throws([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "method_that_throws";
   auto func_ret_type = std::make_unique<Enum<::cpp2::Result>>("module.Result");
@@ -121,7 +121,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>
   func.is_oneway() = false;
   service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen_return_void_method(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen_return_void_method([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "return_void_method";
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
@@ -147,7 +147,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>
   response.context() = std::move(context);
 }
 
-const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::genRecurse(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_PrimitivesService;
   module_PrimitivesService.name() = "module.PrimitivesService";
   static const ThriftFunctionGenerator functions[] = {

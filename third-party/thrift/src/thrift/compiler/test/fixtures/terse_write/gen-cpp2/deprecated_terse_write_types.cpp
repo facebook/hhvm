@@ -78,16 +78,16 @@ bool MyStruct::__fbthrift_is_empty() const {
   return true;
 }
 
-bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
+bool MyStruct::operator==([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
+bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyStruct& a, FOLLY_MAYBE_UNUSED MyStruct& b) {
+void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   using ::std::swap;
 }
 
@@ -154,7 +154,7 @@ StructLevelTerseStruct::StructLevelTerseStruct() :
 
 StructLevelTerseStruct::~StructLevelTerseStruct() {}
 
-StructLevelTerseStruct::StructLevelTerseStruct(FOLLY_MAYBE_UNUSED StructLevelTerseStruct&& other) noexcept :
+StructLevelTerseStruct::StructLevelTerseStruct([[maybe_unused]] StructLevelTerseStruct&& other) noexcept :
     __fbthrift_field_bool_field(std::move(other.__fbthrift_field_bool_field)),
     __fbthrift_field_byte_field(std::move(other.__fbthrift_field_byte_field)),
     __fbthrift_field_short_field(std::move(other.__fbthrift_field_short_field)),
@@ -171,7 +171,7 @@ StructLevelTerseStruct::StructLevelTerseStruct(FOLLY_MAYBE_UNUSED StructLevelTer
     __fbthrift_field_struct_field(std::move(other.__fbthrift_field_struct_field)) {
 }
 
-StructLevelTerseStruct& StructLevelTerseStruct::operator=(FOLLY_MAYBE_UNUSED StructLevelTerseStruct&& other) noexcept {
+StructLevelTerseStruct& StructLevelTerseStruct::operator=([[maybe_unused]] StructLevelTerseStruct&& other) noexcept {
     this->__fbthrift_field_bool_field = std::move(other.__fbthrift_field_bool_field);
     this->__fbthrift_field_byte_field = std::move(other.__fbthrift_field_byte_field);
     this->__fbthrift_field_short_field = std::move(other.__fbthrift_field_short_field);
@@ -258,11 +258,11 @@ bool StructLevelTerseStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>>(this->__fbthrift_field_struct_field);
 }
 
-bool StructLevelTerseStruct::operator==(FOLLY_MAYBE_UNUSED const StructLevelTerseStruct& rhs) const {
+bool StructLevelTerseStruct::operator==([[maybe_unused]] const StructLevelTerseStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool StructLevelTerseStruct::operator<(FOLLY_MAYBE_UNUSED const StructLevelTerseStruct& rhs) const {
+bool StructLevelTerseStruct::operator<([[maybe_unused]] const StructLevelTerseStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -299,7 +299,7 @@ const ::facebook::thrift::test::terse_write::deprecated::MyStruct& StructLevelTe
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED StructLevelTerseStruct& a, FOLLY_MAYBE_UNUSED StructLevelTerseStruct& b) {
+void swap([[maybe_unused]] StructLevelTerseStruct& a, [[maybe_unused]] StructLevelTerseStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_bool_field, b.__fbthrift_field_bool_field);
   swap(a.__fbthrift_field_byte_field, b.__fbthrift_field_byte_field);
@@ -394,7 +394,7 @@ FieldLevelTerseStruct::FieldLevelTerseStruct() :
 
 FieldLevelTerseStruct::~FieldLevelTerseStruct() {}
 
-FieldLevelTerseStruct::FieldLevelTerseStruct(FOLLY_MAYBE_UNUSED FieldLevelTerseStruct&& other) noexcept :
+FieldLevelTerseStruct::FieldLevelTerseStruct([[maybe_unused]] FieldLevelTerseStruct&& other) noexcept :
     __fbthrift_field_terse_bool_field(std::move(other.__fbthrift_field_terse_bool_field)),
     __fbthrift_field_terse_byte_field(std::move(other.__fbthrift_field_terse_byte_field)),
     __fbthrift_field_terse_short_field(std::move(other.__fbthrift_field_terse_short_field)),
@@ -426,7 +426,7 @@ FieldLevelTerseStruct::FieldLevelTerseStruct(FOLLY_MAYBE_UNUSED FieldLevelTerseS
     __isset(other.__isset) {
 }
 
-FieldLevelTerseStruct& FieldLevelTerseStruct::operator=(FOLLY_MAYBE_UNUSED FieldLevelTerseStruct&& other) noexcept {
+FieldLevelTerseStruct& FieldLevelTerseStruct::operator=([[maybe_unused]] FieldLevelTerseStruct&& other) noexcept {
     this->__fbthrift_field_terse_bool_field = std::move(other.__fbthrift_field_terse_bool_field);
     this->__fbthrift_field_terse_byte_field = std::move(other.__fbthrift_field_terse_byte_field);
     this->__fbthrift_field_terse_short_field = std::move(other.__fbthrift_field_terse_short_field);
@@ -557,11 +557,11 @@ bool FieldLevelTerseStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool FieldLevelTerseStruct::operator==(FOLLY_MAYBE_UNUSED const FieldLevelTerseStruct& rhs) const {
+bool FieldLevelTerseStruct::operator==([[maybe_unused]] const FieldLevelTerseStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool FieldLevelTerseStruct::operator<(FOLLY_MAYBE_UNUSED const FieldLevelTerseStruct& rhs) const {
+bool FieldLevelTerseStruct::operator<([[maybe_unused]] const FieldLevelTerseStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -630,7 +630,7 @@ const ::facebook::thrift::test::terse_write::deprecated::MyStruct& FieldLevelTer
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED FieldLevelTerseStruct& a, FOLLY_MAYBE_UNUSED FieldLevelTerseStruct& b) {
+void swap([[maybe_unused]] FieldLevelTerseStruct& a, [[maybe_unused]] FieldLevelTerseStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_terse_bool_field, b.__fbthrift_field_terse_bool_field);
   swap(a.__fbthrift_field_terse_byte_field, b.__fbthrift_field_terse_byte_field);
@@ -688,7 +688,7 @@ static_assert(
 }}}}} // facebook::thrift::test::terse_write::deprecated
 
 namespace facebook { namespace thrift { namespace test { namespace terse_write { namespace deprecated { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }}}}}} // facebook::thrift::test::terse_write::deprecated
 namespace apache::thrift::detail::annotation {

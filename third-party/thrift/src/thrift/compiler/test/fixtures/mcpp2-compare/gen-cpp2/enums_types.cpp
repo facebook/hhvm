@@ -143,16 +143,16 @@ bool SomeStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool SomeStruct::operator==(FOLLY_MAYBE_UNUSED const SomeStruct& rhs) const {
+bool SomeStruct::operator==([[maybe_unused]] const SomeStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool SomeStruct::operator<(FOLLY_MAYBE_UNUSED const SomeStruct& rhs) const {
+bool SomeStruct::operator<([[maybe_unused]] const SomeStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED SomeStruct& a, FOLLY_MAYBE_UNUSED SomeStruct& b) {
+void swap([[maybe_unused]] SomeStruct& a, [[maybe_unused]] SomeStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_fieldA, b.__fbthrift_field_fieldA);
   swap(a.__isset, b.__isset);
@@ -175,7 +175,7 @@ template uint32_t SomeStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProto
 }}} // facebook::ns::qwerty
 
 namespace facebook { namespace ns { namespace qwerty { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }}}} // facebook::ns::qwerty
 namespace apache::thrift::detail::annotation {

@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::module2::Struct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).first_ref()...);
     f(1, static_cast<T&&>(t).second_ref()...);
   }
@@ -25,7 +25,7 @@ struct ForEachField<::module2::Struct> {
 template <>
 struct ForEachField<::module2::BigStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).s_ref()...);
     f(1, static_cast<T&&>(t).id_ref()...);
   }

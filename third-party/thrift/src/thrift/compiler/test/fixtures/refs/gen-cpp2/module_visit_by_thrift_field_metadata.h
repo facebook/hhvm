@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct VisitByFieldId<::cpp2::MyUnion> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).anInteger_ref());
@@ -31,7 +31,7 @@ struct VisitByFieldId<::cpp2::MyUnion> {
 template <>
 struct VisitByFieldId<::cpp2::NonTriviallyDestructibleUnion> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).int_field_ref());
@@ -44,7 +44,7 @@ struct VisitByFieldId<::cpp2::NonTriviallyDestructibleUnion> {
 template <>
 struct VisitByFieldId<::cpp2::MyField> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).opt_value_ref());
@@ -73,7 +73,7 @@ struct VisitByFieldId<::cpp2::MyField> {
 template <>
 struct VisitByFieldId<::cpp2::MyStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).opt_ref_ref());
@@ -90,7 +90,7 @@ struct VisitByFieldId<::cpp2::MyStruct> {
 template <>
 struct VisitByFieldId<::cpp2::StructWithUnion> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).u_ref());
@@ -107,7 +107,7 @@ struct VisitByFieldId<::cpp2::StructWithUnion> {
 template <>
 struct VisitByFieldId<::cpp2::RecursiveStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).mes_ref());
@@ -120,7 +120,7 @@ struct VisitByFieldId<::cpp2::RecursiveStruct> {
 template <>
 struct VisitByFieldId<::cpp2::StructWithContainers> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).list_ref_ref());
@@ -143,7 +143,7 @@ struct VisitByFieldId<::cpp2::StructWithContainers> {
 template <>
 struct VisitByFieldId<::cpp2::StructWithSharedConst> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).opt_shared_const_ref());
@@ -160,7 +160,7 @@ struct VisitByFieldId<::cpp2::StructWithSharedConst> {
 template <>
 struct VisitByFieldId<::cpp2::Empty> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
       throwInvalidThriftId(fieldId, "::cpp2::Empty");
@@ -171,7 +171,7 @@ struct VisitByFieldId<::cpp2::Empty> {
 template <>
 struct VisitByFieldId<::cpp2::StructWithRef> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).def_field_ref());
@@ -188,7 +188,7 @@ struct VisitByFieldId<::cpp2::StructWithRef> {
 template <>
 struct VisitByFieldId<::cpp2::StructWithBox> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).a_ref());
@@ -205,7 +205,7 @@ struct VisitByFieldId<::cpp2::StructWithBox> {
 template <>
 struct VisitByFieldId<::cpp2::StructWithInternBox> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field1_ref());
@@ -220,7 +220,7 @@ struct VisitByFieldId<::cpp2::StructWithInternBox> {
 template <>
 struct VisitByFieldId<::cpp2::StructWithTerseInternBox> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field1_ref());
@@ -235,7 +235,7 @@ struct VisitByFieldId<::cpp2::StructWithTerseInternBox> {
 template <>
 struct VisitByFieldId<::cpp2::AdaptedStructWithInternBox> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field1_ref());
@@ -250,7 +250,7 @@ struct VisitByFieldId<::cpp2::AdaptedStructWithInternBox> {
 template <>
 struct VisitByFieldId<::cpp2::AdaptedStructWithTerseInternBox> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field1_ref());
@@ -265,7 +265,7 @@ struct VisitByFieldId<::cpp2::AdaptedStructWithTerseInternBox> {
 template <>
 struct VisitByFieldId<::cpp2::StructWithRefTypeUnique> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).def_field_ref());
@@ -282,7 +282,7 @@ struct VisitByFieldId<::cpp2::StructWithRefTypeUnique> {
 template <>
 struct VisitByFieldId<::cpp2::StructWithRefTypeShared> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).def_field_ref());
@@ -299,7 +299,7 @@ struct VisitByFieldId<::cpp2::StructWithRefTypeShared> {
 template <>
 struct VisitByFieldId<::cpp2::StructWithRefTypeSharedConst> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).def_field_ref());
@@ -316,7 +316,7 @@ struct VisitByFieldId<::cpp2::StructWithRefTypeSharedConst> {
 template <>
 struct VisitByFieldId<::cpp2::StructWithRefAndAnnotCppNoexceptMoveCtor> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).def_field_ref());
@@ -329,7 +329,7 @@ struct VisitByFieldId<::cpp2::StructWithRefAndAnnotCppNoexceptMoveCtor> {
 template <>
 struct VisitByFieldId<::cpp2::StructWithString> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).def_unique_string_ref_ref());

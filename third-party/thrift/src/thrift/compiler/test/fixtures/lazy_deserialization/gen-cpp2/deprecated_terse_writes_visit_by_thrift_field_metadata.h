@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct VisitByFieldId<::apache::thrift::test::TerseFoo> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field1_ref());
@@ -35,7 +35,7 @@ struct VisitByFieldId<::apache::thrift::test::TerseFoo> {
 template <>
 struct VisitByFieldId<::apache::thrift::test::TerseLazyFoo> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field1_ref());
@@ -54,7 +54,7 @@ struct VisitByFieldId<::apache::thrift::test::TerseLazyFoo> {
 template <>
 struct VisitByFieldId<::apache::thrift::test::TerseOptionalFoo> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field1_ref());
@@ -73,7 +73,7 @@ struct VisitByFieldId<::apache::thrift::test::TerseOptionalFoo> {
 template <>
 struct VisitByFieldId<::apache::thrift::test::TerseOptionalLazyFoo> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field1_ref());

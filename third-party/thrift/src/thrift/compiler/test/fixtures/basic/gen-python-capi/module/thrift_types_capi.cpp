@@ -128,7 +128,7 @@ PyObject* Constructor<::test::fixtures::basic::MyStruct>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::basic::MyStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::basic::MyStruct& val) {
+    [[maybe_unused]] const ::test::fixtures::basic::MyStruct& val) {
   StrongRef fbthrift_data(createStructTuple(9));
   StrongRef _fbthrift__MyIntField(
     Constructor<int64_t>{}
@@ -278,7 +278,7 @@ PyObject* Constructor<::test::fixtures::basic::MyDataItem>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::basic::MyDataItem>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::basic::MyDataItem& val) {
+    [[maybe_unused]] const ::test::fixtures::basic::MyDataItem& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
@@ -367,7 +367,7 @@ PyObject* Constructor<::test::fixtures::basic::MyUnion>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::basic::MyUnion>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::basic::MyUnion& val) {
+    [[maybe_unused]] const ::test::fixtures::basic::MyUnion& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
   switch (type_key) {
@@ -466,7 +466,7 @@ PyObject* Constructor<::test::fixtures::basic::ReservedKeyword>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::basic::ReservedKeyword>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::basic::ReservedKeyword& val) {
+    [[maybe_unused]] const ::test::fixtures::basic::ReservedKeyword& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__reserved_field(
     Constructor<int32_t>{}
@@ -553,7 +553,7 @@ PyObject* Constructor<::test::fixtures::basic::UnionToBeRenamed>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::basic::UnionToBeRenamed>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::basic::UnionToBeRenamed& val) {
+    [[maybe_unused]] const ::test::fixtures::basic::UnionToBeRenamed& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
   switch (type_key) {

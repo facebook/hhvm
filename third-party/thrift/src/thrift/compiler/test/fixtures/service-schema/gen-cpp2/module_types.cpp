@@ -67,12 +67,12 @@ CustomException::CustomException() {
 
 CustomException::~CustomException() {}
 
-CustomException::CustomException(FOLLY_MAYBE_UNUSED CustomException&& other) noexcept :
+CustomException::CustomException([[maybe_unused]] CustomException&& other) noexcept :
     __fbthrift_field_name(std::move(other.__fbthrift_field_name)),
     __isset(other.__isset) {
 }
 
-CustomException& CustomException::operator=(FOLLY_MAYBE_UNUSED CustomException&& other) noexcept {
+CustomException& CustomException::operator=([[maybe_unused]] CustomException&& other) noexcept {
     this->__fbthrift_field_name = std::move(other.__fbthrift_field_name);
     __isset = other.__isset;
     return *this;
@@ -98,16 +98,16 @@ bool CustomException::__fbthrift_is_empty() const {
   return false;
 }
 
-bool CustomException::operator==(FOLLY_MAYBE_UNUSED const CustomException& rhs) const {
+bool CustomException::operator==([[maybe_unused]] const CustomException& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool CustomException::operator<(FOLLY_MAYBE_UNUSED const CustomException& rhs) const {
+bool CustomException::operator<([[maybe_unused]] const CustomException& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED CustomException& a, FOLLY_MAYBE_UNUSED CustomException& b) {
+void swap([[maybe_unused]] CustomException& a, [[maybe_unused]] CustomException& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_name, b.__fbthrift_field_name);
   swap(a.__isset, b.__isset);
@@ -126,7 +126,7 @@ template uint32_t CustomException::serializedSizeZC<>(apache::thrift::CompactPro
 } // cpp2
 
 namespace cpp2 { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }} // cpp2
 namespace apache::thrift::detail::annotation {

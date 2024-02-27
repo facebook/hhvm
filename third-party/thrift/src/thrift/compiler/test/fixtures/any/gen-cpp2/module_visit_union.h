@@ -17,7 +17,7 @@ template <>
 struct VisitUnion<::facebook::thrift::compiler::test::fixtures::any::MyUnion> {
 
   template <typename F, typename T>
-  decltype(auto) operator()(FOLLY_MAYBE_UNUSED F&& f, T&& t) const {
+  decltype(auto) operator()([[maybe_unused]] F&& f, T&& t) const {
     using Union = std::remove_reference_t<T>;
     switch (t.getType()) {
     case Union::Type::myString:

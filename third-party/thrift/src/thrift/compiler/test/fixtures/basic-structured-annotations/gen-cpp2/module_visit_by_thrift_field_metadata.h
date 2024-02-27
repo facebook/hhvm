@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct VisitByFieldId<::test::fixtures::basic-structured-annotations::runtime_annotation> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::basic-structured-annotations::runtime_annotation");
@@ -27,7 +27,7 @@ struct VisitByFieldId<::test::fixtures::basic-structured-annotations::runtime_an
 template <>
 struct VisitByFieldId<::test::fixtures::basic-structured-annotations::structured_annotation_inline> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).count_ref());
@@ -42,7 +42,7 @@ struct VisitByFieldId<::test::fixtures::basic-structured-annotations::structured
 template <>
 struct VisitByFieldId<::test::fixtures::basic-structured-annotations::structured_annotation_with_default> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).name_ref());
@@ -55,7 +55,7 @@ struct VisitByFieldId<::test::fixtures::basic-structured-annotations::structured
 template <>
 struct VisitByFieldId<::test::fixtures::basic-structured-annotations::structured_annotation_recursive> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).name_ref());
@@ -72,7 +72,7 @@ struct VisitByFieldId<::test::fixtures::basic-structured-annotations::structured
 template <>
 struct VisitByFieldId<::test::fixtures::basic-structured-annotations::structured_annotation_forward> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).count_ref());
@@ -85,7 +85,7 @@ struct VisitByFieldId<::test::fixtures::basic-structured-annotations::structured
 template <>
 struct VisitByFieldId<::test::fixtures::basic-structured-annotations::structured_annotation_nested> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).name_ref());
@@ -100,7 +100,7 @@ struct VisitByFieldId<::test::fixtures::basic-structured-annotations::structured
 template <>
 struct VisitByFieldId<::test::fixtures::basic-structured-annotations::MyStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).annotated_field_ref());
@@ -119,7 +119,7 @@ struct VisitByFieldId<::test::fixtures::basic-structured-annotations::MyStruct> 
 template <>
 struct VisitByFieldId<::test::fixtures::basic-structured-annotations::MyException> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).context_ref());
@@ -132,7 +132,7 @@ struct VisitByFieldId<::test::fixtures::basic-structured-annotations::MyExceptio
 template <>
 struct VisitByFieldId<::test::fixtures::basic-structured-annotations::MyUnion> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).first_ref());

@@ -51,12 +51,12 @@ Fields::Fields() {
 
 Fields::~Fields() {}
 
-Fields::Fields(FOLLY_MAYBE_UNUSED Fields&& other) noexcept :
+Fields::Fields([[maybe_unused]] Fields&& other) noexcept :
     __fbthrift_field_injected_field(std::move(other.__fbthrift_field_injected_field)),
     __isset(other.__isset) {
 }
 
-Fields& Fields::operator=(FOLLY_MAYBE_UNUSED Fields&& other) noexcept {
+Fields& Fields::operator=([[maybe_unused]] Fields&& other) noexcept {
     this->__fbthrift_field_injected_field = std::move(other.__fbthrift_field_injected_field);
     __isset = other.__isset;
     return *this;
@@ -82,16 +82,16 @@ bool Fields::__fbthrift_is_empty() const {
   return false;
 }
 
-bool Fields::operator==(FOLLY_MAYBE_UNUSED const Fields& rhs) const {
+bool Fields::operator==([[maybe_unused]] const Fields& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Fields::operator<(FOLLY_MAYBE_UNUSED const Fields& rhs) const {
+bool Fields::operator<([[maybe_unused]] const Fields& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Fields& a, FOLLY_MAYBE_UNUSED Fields& b) {
+void swap([[maybe_unused]] Fields& a, [[maybe_unused]] Fields& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_injected_field, b.__fbthrift_field_injected_field);
   swap(a.__isset, b.__isset);
@@ -148,12 +148,12 @@ FieldsInjectedToEmptyStruct::FieldsInjectedToEmptyStruct() {
 
 FieldsInjectedToEmptyStruct::~FieldsInjectedToEmptyStruct() {}
 
-FieldsInjectedToEmptyStruct::FieldsInjectedToEmptyStruct(FOLLY_MAYBE_UNUSED FieldsInjectedToEmptyStruct&& other) noexcept :
+FieldsInjectedToEmptyStruct::FieldsInjectedToEmptyStruct([[maybe_unused]] FieldsInjectedToEmptyStruct&& other) noexcept :
     __fbthrift_field_injected_field(std::move(other.__fbthrift_field_injected_field)),
     __isset(other.__isset) {
 }
 
-FieldsInjectedToEmptyStruct& FieldsInjectedToEmptyStruct::operator=(FOLLY_MAYBE_UNUSED FieldsInjectedToEmptyStruct&& other) noexcept {
+FieldsInjectedToEmptyStruct& FieldsInjectedToEmptyStruct::operator=([[maybe_unused]] FieldsInjectedToEmptyStruct&& other) noexcept {
     this->__fbthrift_field_injected_field = std::move(other.__fbthrift_field_injected_field);
     __isset = other.__isset;
     return *this;
@@ -179,16 +179,16 @@ bool FieldsInjectedToEmptyStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool FieldsInjectedToEmptyStruct::operator==(FOLLY_MAYBE_UNUSED const FieldsInjectedToEmptyStruct& rhs) const {
+bool FieldsInjectedToEmptyStruct::operator==([[maybe_unused]] const FieldsInjectedToEmptyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool FieldsInjectedToEmptyStruct::operator<(FOLLY_MAYBE_UNUSED const FieldsInjectedToEmptyStruct& rhs) const {
+bool FieldsInjectedToEmptyStruct::operator<([[maybe_unused]] const FieldsInjectedToEmptyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED FieldsInjectedToEmptyStruct& a, FOLLY_MAYBE_UNUSED FieldsInjectedToEmptyStruct& b) {
+void swap([[maybe_unused]] FieldsInjectedToEmptyStruct& a, [[maybe_unused]] FieldsInjectedToEmptyStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_injected_field, b.__fbthrift_field_injected_field);
   swap(a.__isset, b.__isset);
@@ -245,13 +245,13 @@ FieldsInjectedToStruct::FieldsInjectedToStruct() {
 
 FieldsInjectedToStruct::~FieldsInjectedToStruct() {}
 
-FieldsInjectedToStruct::FieldsInjectedToStruct(FOLLY_MAYBE_UNUSED FieldsInjectedToStruct&& other) noexcept :
+FieldsInjectedToStruct::FieldsInjectedToStruct([[maybe_unused]] FieldsInjectedToStruct&& other) noexcept :
     __fbthrift_field_string_field(std::move(other.__fbthrift_field_string_field)),
     __fbthrift_field_injected_field(std::move(other.__fbthrift_field_injected_field)),
     __isset(other.__isset) {
 }
 
-FieldsInjectedToStruct& FieldsInjectedToStruct::operator=(FOLLY_MAYBE_UNUSED FieldsInjectedToStruct&& other) noexcept {
+FieldsInjectedToStruct& FieldsInjectedToStruct::operator=([[maybe_unused]] FieldsInjectedToStruct&& other) noexcept {
     this->__fbthrift_field_string_field = std::move(other.__fbthrift_field_string_field);
     this->__fbthrift_field_injected_field = std::move(other.__fbthrift_field_injected_field);
     __isset = other.__isset;
@@ -281,16 +281,16 @@ bool FieldsInjectedToStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool FieldsInjectedToStruct::operator==(FOLLY_MAYBE_UNUSED const FieldsInjectedToStruct& rhs) const {
+bool FieldsInjectedToStruct::operator==([[maybe_unused]] const FieldsInjectedToStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool FieldsInjectedToStruct::operator<(FOLLY_MAYBE_UNUSED const FieldsInjectedToStruct& rhs) const {
+bool FieldsInjectedToStruct::operator<([[maybe_unused]] const FieldsInjectedToStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED FieldsInjectedToStruct& a, FOLLY_MAYBE_UNUSED FieldsInjectedToStruct& b) {
+void swap([[maybe_unused]] FieldsInjectedToStruct& a, [[maybe_unused]] FieldsInjectedToStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_string_field, b.__fbthrift_field_string_field);
   swap(a.__fbthrift_field_injected_field, b.__fbthrift_field_injected_field);
@@ -348,7 +348,7 @@ FieldsInjectedWithIncludedStruct::FieldsInjectedWithIncludedStruct() {
 
 FieldsInjectedWithIncludedStruct::~FieldsInjectedWithIncludedStruct() {}
 
-FieldsInjectedWithIncludedStruct::FieldsInjectedWithIncludedStruct(FOLLY_MAYBE_UNUSED FieldsInjectedWithIncludedStruct&& other) noexcept :
+FieldsInjectedWithIncludedStruct::FieldsInjectedWithIncludedStruct([[maybe_unused]] FieldsInjectedWithIncludedStruct&& other) noexcept :
     __fbthrift_field_string_field(std::move(other.__fbthrift_field_string_field)),
     __fbthrift_field_injected_field(std::move(other.__fbthrift_field_injected_field)),
     __fbthrift_field_injected_structured_annotation_field(std::move(other.__fbthrift_field_injected_structured_annotation_field)),
@@ -356,7 +356,7 @@ FieldsInjectedWithIncludedStruct::FieldsInjectedWithIncludedStruct(FOLLY_MAYBE_U
     __isset(other.__isset) {
 }
 
-FieldsInjectedWithIncludedStruct& FieldsInjectedWithIncludedStruct::operator=(FOLLY_MAYBE_UNUSED FieldsInjectedWithIncludedStruct&& other) noexcept {
+FieldsInjectedWithIncludedStruct& FieldsInjectedWithIncludedStruct::operator=([[maybe_unused]] FieldsInjectedWithIncludedStruct&& other) noexcept {
     this->__fbthrift_field_string_field = std::move(other.__fbthrift_field_string_field);
     this->__fbthrift_field_injected_field = std::move(other.__fbthrift_field_injected_field);
     this->__fbthrift_field_injected_structured_annotation_field = std::move(other.__fbthrift_field_injected_structured_annotation_field);
@@ -392,16 +392,16 @@ bool FieldsInjectedWithIncludedStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool FieldsInjectedWithIncludedStruct::operator==(FOLLY_MAYBE_UNUSED const FieldsInjectedWithIncludedStruct& rhs) const {
+bool FieldsInjectedWithIncludedStruct::operator==([[maybe_unused]] const FieldsInjectedWithIncludedStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool FieldsInjectedWithIncludedStruct::operator<(FOLLY_MAYBE_UNUSED const FieldsInjectedWithIncludedStruct& rhs) const {
+bool FieldsInjectedWithIncludedStruct::operator<([[maybe_unused]] const FieldsInjectedWithIncludedStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED FieldsInjectedWithIncludedStruct& a, FOLLY_MAYBE_UNUSED FieldsInjectedWithIncludedStruct& b) {
+void swap([[maybe_unused]] FieldsInjectedWithIncludedStruct& a, [[maybe_unused]] FieldsInjectedWithIncludedStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_string_field, b.__fbthrift_field_string_field);
   swap(a.__fbthrift_field_injected_field, b.__fbthrift_field_injected_field);
@@ -423,7 +423,7 @@ template uint32_t FieldsInjectedWithIncludedStruct::serializedSizeZC<>(apache::t
 } // cpp2
 
 namespace cpp2 { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }} // cpp2
 namespace apache::thrift::detail::annotation {

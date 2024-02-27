@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct VisitByFieldId<::cpp2::ComplexUnion> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).intValue_ref());
@@ -39,7 +39,7 @@ struct VisitByFieldId<::cpp2::ComplexUnion> {
 template <>
 struct VisitByFieldId<::cpp2::ListUnion> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 2:
       return f(0, static_cast<T&&>(t).intListValue_ref());
@@ -54,7 +54,7 @@ struct VisitByFieldId<::cpp2::ListUnion> {
 template <>
 struct VisitByFieldId<::cpp2::DataUnion> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).binaryData_ref());
@@ -69,7 +69,7 @@ struct VisitByFieldId<::cpp2::DataUnion> {
 template <>
 struct VisitByFieldId<::cpp2::Val> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).strVal_ref());
@@ -86,7 +86,7 @@ struct VisitByFieldId<::cpp2::Val> {
 template <>
 struct VisitByFieldId<::cpp2::ValUnion> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).v1_ref());
@@ -101,7 +101,7 @@ struct VisitByFieldId<::cpp2::ValUnion> {
 template <>
 struct VisitByFieldId<::cpp2::VirtualComplexUnion> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).thingOne_ref());
@@ -116,7 +116,7 @@ struct VisitByFieldId<::cpp2::VirtualComplexUnion> {
 template <>
 struct VisitByFieldId<::cpp2::NonCopyableStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).num_ref());
@@ -129,7 +129,7 @@ struct VisitByFieldId<::cpp2::NonCopyableStruct> {
 template <>
 struct VisitByFieldId<::cpp2::NonCopyableUnion> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).s_ref());

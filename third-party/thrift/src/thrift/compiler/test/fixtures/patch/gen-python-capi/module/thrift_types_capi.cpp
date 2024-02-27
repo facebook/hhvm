@@ -114,7 +114,7 @@ PyObject* Constructor<::test::fixtures::patch::MyData>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::MyData>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::patch::MyData& val) {
+    [[maybe_unused]] const ::test::fixtures::patch::MyData& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__data1(
     Constructor<Bytes>{}
@@ -207,7 +207,7 @@ PyObject* Constructor<::test::fixtures::patch::MyDataWithCustomDefault>::operato
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::MyDataWithCustomDefault>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::patch::MyDataWithCustomDefault& val) {
+    [[maybe_unused]] const ::test::fixtures::patch::MyDataWithCustomDefault& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__data1(
     Constructor<Bytes>{}
@@ -304,7 +304,7 @@ PyObject* Constructor<::test::fixtures::patch::InnerUnion>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::InnerUnion>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::patch::InnerUnion& val) {
+    [[maybe_unused]] const ::test::fixtures::patch::InnerUnion& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
   switch (type_key) {
@@ -404,7 +404,7 @@ PyObject* Constructor<::test::fixtures::patch::MyUnion>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::MyUnion>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::patch::MyUnion& val) {
+    [[maybe_unused]] const ::test::fixtures::patch::MyUnion& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
   switch (type_key) {
@@ -563,7 +563,7 @@ PyObject* Constructor<::test::fixtures::patch::LateDefStruct>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::LateDefStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::patch::LateDefStruct& val) {
+    [[maybe_unused]] const ::test::fixtures::patch::LateDefStruct& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
@@ -632,7 +632,7 @@ PyObject* Constructor<::test::fixtures::patch::Recursive>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::Recursive>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::patch::Recursive& val) {
+    [[maybe_unused]] const ::test::fixtures::patch::Recursive& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__nodes(
     Constructor<map<Bytes, ::apache::thrift::python::capi::ComposedStruct<::test::fixtures::patch::Recursive>>>{}
@@ -711,7 +711,7 @@ PyObject* Constructor<::test::fixtures::patch::Bar>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::Bar>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::patch::Bar& val) {
+    [[maybe_unused]] const ::test::fixtures::patch::Bar& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__loop(
     Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::patch::Loop>>{}
@@ -790,7 +790,7 @@ PyObject* Constructor<::test::fixtures::patch::Loop>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::Loop>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::patch::Loop& val) {
+    [[maybe_unused]] const ::test::fixtures::patch::Loop& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__bar(
     Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::patch::Bar>>{}
@@ -893,7 +893,7 @@ PyObject* Constructor<::test::fixtures::patch::RefFields>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::RefFields>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::patch::RefFields& val) {
+    [[maybe_unused]] const ::test::fixtures::patch::RefFields& val) {
   StrongRef fbthrift_data(createStructTuple(7));
   StrongRef _fbthrift__unique(
     Constructor<list<int32_t>>{}

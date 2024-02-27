@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct VisitByFieldId<::test::fixtures::basic::MyStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).MyIntField_ref());
@@ -45,7 +45,7 @@ struct VisitByFieldId<::test::fixtures::basic::MyStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::basic::MyDataItem> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::basic::MyDataItem");
@@ -56,7 +56,7 @@ struct VisitByFieldId<::test::fixtures::basic::MyDataItem> {
 template <>
 struct VisitByFieldId<::test::fixtures::basic::MyUnion> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).myEnum_ref());
@@ -75,7 +75,7 @@ struct VisitByFieldId<::test::fixtures::basic::MyUnion> {
 template <>
 struct VisitByFieldId<::test::fixtures::basic::ReservedKeyword> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).reserved_field_ref());
@@ -88,7 +88,7 @@ struct VisitByFieldId<::test::fixtures::basic::ReservedKeyword> {
 template <>
 struct VisitByFieldId<::test::fixtures::basic::UnionToBeRenamed> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).reserved_field_ref());

@@ -142,7 +142,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::empty_struct>::operator
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::empty_struct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::empty_struct& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::empty_struct& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
@@ -211,7 +211,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::decorated_struct>::oper
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::decorated_struct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::decorated_struct& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::decorated_struct& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__field(
     Constructor<Bytes>{}
@@ -438,7 +438,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::VirtualStruct>::operato
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::VirtualStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::VirtualStruct& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::VirtualStruct& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__MyIntField(
     Constructor<int64_t>{}
@@ -521,7 +521,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::MyStructWithForwardRefE
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::MyStructWithForwardRefEnum& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::MyStructWithForwardRefEnum& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__a(
     Constructor<::apache::thrift::python::capi::ComposedEnum<::apache::thrift::fixtures::types::MyForwardRefEnum>>{}
@@ -614,7 +614,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::TrivialNumeric>::operat
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::TrivialNumeric>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::TrivialNumeric& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::TrivialNumeric& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__a(
     Constructor<int32_t>{}
@@ -707,7 +707,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::TrivialNestedWithDefaul
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::TrivialNestedWithDefault>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::TrivialNestedWithDefault& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::TrivialNestedWithDefault& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__z(
     Constructor<int32_t>{}
@@ -800,7 +800,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::ComplexString>::operato
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::ComplexString>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::ComplexString& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::ComplexString& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__a(
     Constructor<Bytes>{}
@@ -893,7 +893,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::ComplexNestedWithDefaul
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::ComplexNestedWithDefault>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::ComplexNestedWithDefault& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::ComplexNestedWithDefault& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__z(
     Constructor<Bytes>{}
@@ -998,7 +998,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::MinPadding>::operator()
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::MinPadding>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::MinPadding& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::MinPadding& val) {
   StrongRef fbthrift_data(createStructTuple(5));
   StrongRef _fbthrift__small(
     Constructor<int8_t>{}
@@ -1203,7 +1203,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::MyStruct>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::MyStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::MyStruct& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::MyStruct& val) {
   StrongRef fbthrift_data(createStructTuple(4));
   StrongRef _fbthrift__MyIntField(
     Constructor<int64_t>{}
@@ -1303,7 +1303,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::MyDataItem>::operator()
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::MyDataItem>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::MyDataItem& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::MyDataItem& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
@@ -1372,7 +1372,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::Renamed>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::Renamed>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::Renamed& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::Renamed& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__foo(
     Constructor<int64_t>{}
@@ -1455,7 +1455,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::AnnotatedTypes>::operat
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::AnnotatedTypes>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::AnnotatedTypes& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::AnnotatedTypes& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__binary_field(
     Constructor<Bytes>{}
@@ -1548,7 +1548,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::ForwardUsageRoot>::oper
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::ForwardUsageRoot>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::ForwardUsageRoot& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::ForwardUsageRoot& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__ForwardUsageStruct(
     Constructor<::apache::thrift::python::capi::ComposedStruct<::apache::thrift::fixtures::types::ForwardUsageStruct>>{}
@@ -1651,7 +1651,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::ForwardUsageStruct>::op
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::ForwardUsageStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::ForwardUsageStruct& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::ForwardUsageStruct& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__foo(
     Constructor<::apache::thrift::python::capi::ComposedStruct<::apache::thrift::fixtures::types::ForwardUsageRoot>>{}
@@ -1737,7 +1737,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::ForwardUsageByRef>::ope
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::ForwardUsageByRef>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::ForwardUsageByRef& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::ForwardUsageByRef& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__foo(
     Constructor<::apache::thrift::python::capi::ComposedStruct<::apache::thrift::fixtures::types::ForwardUsageRoot>>{}
@@ -1823,7 +1823,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::IncompleteMap>::operato
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::IncompleteMap>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::IncompleteMap& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::IncompleteMap& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__field(
     Constructor<map<int32_t, ::apache::thrift::python::capi::ComposedStruct<::apache::thrift::fixtures::types::IncompleteMapDep>>>{}
@@ -1900,7 +1900,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::IncompleteMapDep>::oper
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::IncompleteMapDep>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::IncompleteMapDep& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::IncompleteMapDep& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
@@ -2034,7 +2034,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::CompleteMapDep>::operat
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::CompleteMapDep>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::CompleteMapDep& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::CompleteMapDep& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
@@ -2168,7 +2168,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::IncompleteListDep>::ope
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::IncompleteListDep>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::IncompleteListDep& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::IncompleteListDep& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
@@ -2302,7 +2302,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::CompleteListDep>::opera
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::CompleteListDep>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::CompleteListDep& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::CompleteListDep& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
@@ -2445,7 +2445,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::detail::AdaptedListDep>
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::detail::AdaptedListDep>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::detail::AdaptedListDep& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::detail::AdaptedListDep& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__field(
     Constructor<::apache::thrift::python::capi::ComposedStruct<::apache::thrift::fixtures::types::AdaptedList>>{}
@@ -2598,7 +2598,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::detail::DependentAdapte
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::detail::DependentAdaptedListDep& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::detail::DependentAdaptedListDep& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__field(
     Constructor<int16_t>{}
@@ -2708,7 +2708,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::AllocatorAware>::operat
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::AllocatorAware>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::AllocatorAware& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::AllocatorAware& val) {
   StrongRef fbthrift_data(createStructTuple(7));
   StrongRef _fbthrift__aa_list(
     Constructor<list<int32_t>>{}
@@ -2851,7 +2851,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::AllocatorAware2>::opera
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::AllocatorAware2>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::AllocatorAware2& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::AllocatorAware2& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__not_a_container(
     Constructor<int32_t>{}
@@ -3021,7 +3021,7 @@ PyObject* Constructor<::apache::thrift::fixtures::types::StructWithDoubleUndersc
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::apache::thrift::fixtures::types::StructWithDoubleUnderscores>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::apache::thrift::fixtures::types::StructWithDoubleUnderscores& val) {
+    [[maybe_unused]] const ::apache::thrift::fixtures::types::StructWithDoubleUnderscores& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift____field(
     Constructor<int32_t>{}

@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::cpp2::MyStructFloatFieldThrowExp> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).myLongField_ref()...);
     f(1, static_cast<T&&>(t).MyByteField_ref()...);
     f(2, static_cast<T&&>(t).myStringField_ref()...);
@@ -27,7 +27,7 @@ struct ForEachField<::cpp2::MyStructFloatFieldThrowExp> {
 template <>
 struct ForEachField<::cpp2::MyStructMapFloatThrowExp> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).myLongField_ref()...);
     f(1, static_cast<T&&>(t).mapListOfFloats_ref()...);
   }
@@ -36,7 +36,7 @@ struct ForEachField<::cpp2::MyStructMapFloatThrowExp> {
 template <>
 struct ForEachField<::cpp2::MyStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).MyIntField_ref()...);
     f(1, static_cast<T&&>(t).MyStringField_ref()...);
     f(2, static_cast<T&&>(t).MyDataField_ref()...);
@@ -71,7 +71,7 @@ struct ForEachField<::cpp2::MyStruct> {
 template <>
 struct ForEachField<::cpp2::SimpleStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).age_ref()...);
     f(1, static_cast<T&&>(t).name_ref()...);
   }
@@ -80,7 +80,7 @@ struct ForEachField<::cpp2::SimpleStruct> {
 template <>
 struct ForEachField<::cpp2::defaultStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).myLongDFset_ref()...);
     f(1, static_cast<T&&>(t).myLongDF_ref()...);
     f(2, static_cast<T&&>(t).portDFset_ref()...);
@@ -109,7 +109,7 @@ struct ForEachField<::cpp2::defaultStruct> {
 template <>
 struct ForEachField<::cpp2::MyStructTypeDef> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).myLongField_ref()...);
     f(1, static_cast<T&&>(t).myLongTypeDef_ref()...);
     f(2, static_cast<T&&>(t).myStringField_ref()...);
@@ -125,14 +125,14 @@ struct ForEachField<::cpp2::MyStructTypeDef> {
 template <>
 struct ForEachField<::cpp2::MyDataItem> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
   }
 };
 
 template <>
 struct ForEachField<::cpp2::MyUnion> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).myEnum_ref()...);
     f(1, static_cast<T&&>(t).myStruct_ref()...);
     f(2, static_cast<T&&>(t).myDataItem_ref()...);
@@ -145,7 +145,7 @@ struct ForEachField<::cpp2::MyUnion> {
 template <>
 struct ForEachField<::cpp2::MyUnionFloatFieldThrowExp> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).myEnum_ref()...);
     f(1, static_cast<T&&>(t).setFloat_ref()...);
     f(2, static_cast<T&&>(t).myDataItem_ref()...);
@@ -156,7 +156,7 @@ struct ForEachField<::cpp2::MyUnionFloatFieldThrowExp> {
 template <>
 struct ForEachField<::cpp2::ComplexNestedStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).setOfSetOfInt_ref()...);
     f(1, static_cast<T&&>(t).listofListOfListOfListOfEnum_ref()...);
     f(2, static_cast<T&&>(t).listOfListOfMyStruct_ref()...);
@@ -181,7 +181,7 @@ struct ForEachField<::cpp2::ComplexNestedStruct> {
 template <>
 struct ForEachField<::cpp2::TypeRemapped> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).lsMap_ref()...);
     f(1, static_cast<T&&>(t).ioMap_ref()...);
     f(2, static_cast<T&&>(t).BigInteger_ref()...);
@@ -192,14 +192,14 @@ struct ForEachField<::cpp2::TypeRemapped> {
 template <>
 struct ForEachField<::cpp2::emptyXcep> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
   }
 };
 
 template <>
 struct ForEachField<::cpp2::reqXcep> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).message_ref()...);
     f(1, static_cast<T&&>(t).errorCode_ref()...);
   }
@@ -208,7 +208,7 @@ struct ForEachField<::cpp2::reqXcep> {
 template <>
 struct ForEachField<::cpp2::optXcep> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).message_ref()...);
     f(1, static_cast<T&&>(t).errorCode_ref()...);
   }
@@ -217,7 +217,7 @@ struct ForEachField<::cpp2::optXcep> {
 template <>
 struct ForEachField<::cpp2::complexException> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).message_ref()...);
     f(1, static_cast<T&&>(t).listStrings_ref()...);
     f(2, static_cast<T&&>(t).errorEnum_ref()...);

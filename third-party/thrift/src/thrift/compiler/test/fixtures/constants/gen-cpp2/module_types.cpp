@@ -102,7 +102,7 @@ Internship::Internship() :
 
 Internship::~Internship() {}
 
-Internship::Internship(FOLLY_MAYBE_UNUSED Internship&& other) noexcept :
+Internship::Internship([[maybe_unused]] Internship&& other) noexcept :
     __fbthrift_field_weeks(std::move(other.__fbthrift_field_weeks)),
     __fbthrift_field_title(std::move(other.__fbthrift_field_title)),
     __fbthrift_field_employer(std::move(other.__fbthrift_field_employer)),
@@ -111,7 +111,7 @@ Internship::Internship(FOLLY_MAYBE_UNUSED Internship&& other) noexcept :
     __isset(other.__isset) {
 }
 
-Internship& Internship::operator=(FOLLY_MAYBE_UNUSED Internship&& other) noexcept {
+Internship& Internship::operator=([[maybe_unused]] Internship&& other) noexcept {
     this->__fbthrift_field_weeks = std::move(other.__fbthrift_field_weeks);
     this->__fbthrift_field_title = std::move(other.__fbthrift_field_title);
     this->__fbthrift_field_employer = std::move(other.__fbthrift_field_employer);
@@ -152,16 +152,16 @@ bool Internship::__fbthrift_is_empty() const {
   return false;
 }
 
-bool Internship::operator==(FOLLY_MAYBE_UNUSED const Internship& rhs) const {
+bool Internship::operator==([[maybe_unused]] const Internship& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Internship::operator<(FOLLY_MAYBE_UNUSED const Internship& rhs) const {
+bool Internship::operator<([[maybe_unused]] const Internship& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Internship& a, FOLLY_MAYBE_UNUSED Internship& b) {
+void swap([[maybe_unused]] Internship& a, [[maybe_unused]] Internship& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_weeks, b.__fbthrift_field_weeks);
   swap(a.__fbthrift_field_title, b.__fbthrift_field_title);
@@ -234,16 +234,16 @@ bool Range::__fbthrift_is_empty() const {
   return false;
 }
 
-bool Range::operator==(FOLLY_MAYBE_UNUSED const Range& rhs) const {
+bool Range::operator==([[maybe_unused]] const Range& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Range::operator<(FOLLY_MAYBE_UNUSED const Range& rhs) const {
+bool Range::operator<([[maybe_unused]] const Range& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Range& a, FOLLY_MAYBE_UNUSED Range& b) {
+void swap([[maybe_unused]] Range& a, [[maybe_unused]] Range& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_min, b.__fbthrift_field_min);
   swap(a.__fbthrift_field_max, b.__fbthrift_field_max);
@@ -302,13 +302,13 @@ struct1::struct1() :
 
 struct1::~struct1() {}
 
-struct1::struct1(FOLLY_MAYBE_UNUSED struct1&& other) noexcept :
+struct1::struct1([[maybe_unused]] struct1&& other) noexcept :
     __fbthrift_field_a(std::move(other.__fbthrift_field_a)),
     __fbthrift_field_b(std::move(other.__fbthrift_field_b)),
     __isset(other.__isset) {
 }
 
-struct1& struct1::operator=(FOLLY_MAYBE_UNUSED struct1&& other) noexcept {
+struct1& struct1::operator=([[maybe_unused]] struct1&& other) noexcept {
     this->__fbthrift_field_a = std::move(other.__fbthrift_field_a);
     this->__fbthrift_field_b = std::move(other.__fbthrift_field_b);
     __isset = other.__isset;
@@ -338,16 +338,16 @@ bool struct1::__fbthrift_is_empty() const {
   return false;
 }
 
-bool struct1::operator==(FOLLY_MAYBE_UNUSED const struct1& rhs) const {
+bool struct1::operator==([[maybe_unused]] const struct1& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool struct1::operator<(FOLLY_MAYBE_UNUSED const struct1& rhs) const {
+bool struct1::operator<([[maybe_unused]] const struct1& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED struct1& a, FOLLY_MAYBE_UNUSED struct1& b) {
+void swap([[maybe_unused]] struct1& a, [[maybe_unused]] struct1& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_a, b.__fbthrift_field_a);
   swap(a.__fbthrift_field_b, b.__fbthrift_field_b);
@@ -406,7 +406,7 @@ struct2::struct2() :
 
 struct2::~struct2() {}
 
-struct2::struct2(FOLLY_MAYBE_UNUSED struct2&& other) noexcept :
+struct2::struct2([[maybe_unused]] struct2&& other) noexcept :
     __fbthrift_field_a(std::move(other.__fbthrift_field_a)),
     __fbthrift_field_b(std::move(other.__fbthrift_field_b)),
     __fbthrift_field_c(std::move(other.__fbthrift_field_c)),
@@ -414,7 +414,7 @@ struct2::struct2(FOLLY_MAYBE_UNUSED struct2&& other) noexcept :
     __isset(other.__isset) {
 }
 
-struct2& struct2::operator=(FOLLY_MAYBE_UNUSED struct2&& other) noexcept {
+struct2& struct2::operator=([[maybe_unused]] struct2&& other) noexcept {
     this->__fbthrift_field_a = std::move(other.__fbthrift_field_a);
     this->__fbthrift_field_b = std::move(other.__fbthrift_field_b);
     this->__fbthrift_field_c = std::move(other.__fbthrift_field_c);
@@ -452,11 +452,11 @@ bool struct2::__fbthrift_is_empty() const {
   return false;
 }
 
-bool struct2::operator==(FOLLY_MAYBE_UNUSED const struct2& rhs) const {
+bool struct2::operator==([[maybe_unused]] const struct2& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool struct2::operator<(FOLLY_MAYBE_UNUSED const struct2& rhs) const {
+bool struct2::operator<([[maybe_unused]] const struct2& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -477,7 +477,7 @@ const ::std::vector<::std::int32_t>& struct2::get_d() const& {
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED struct2& a, FOLLY_MAYBE_UNUSED struct2& b) {
+void swap([[maybe_unused]] struct2& a, [[maybe_unused]] struct2& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_a, b.__fbthrift_field_a);
   swap(a.__fbthrift_field_b, b.__fbthrift_field_b);
@@ -544,14 +544,14 @@ struct3::struct3() :
 
 struct3::~struct3() {}
 
-struct3::struct3(FOLLY_MAYBE_UNUSED struct3&& other) noexcept :
+struct3::struct3([[maybe_unused]] struct3&& other) noexcept :
     __fbthrift_field_a(std::move(other.__fbthrift_field_a)),
     __fbthrift_field_b(std::move(other.__fbthrift_field_b)),
     __fbthrift_field_c(std::move(other.__fbthrift_field_c)),
     __isset(other.__isset) {
 }
 
-struct3& struct3::operator=(FOLLY_MAYBE_UNUSED struct3&& other) noexcept {
+struct3& struct3::operator=([[maybe_unused]] struct3&& other) noexcept {
     this->__fbthrift_field_a = std::move(other.__fbthrift_field_a);
     this->__fbthrift_field_b = std::move(other.__fbthrift_field_b);
     this->__fbthrift_field_c = std::move(other.__fbthrift_field_c);
@@ -585,11 +585,11 @@ bool struct3::__fbthrift_is_empty() const {
   return false;
 }
 
-bool struct3::operator==(FOLLY_MAYBE_UNUSED const struct3& rhs) const {
+bool struct3::operator==([[maybe_unused]] const struct3& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool struct3::operator<(FOLLY_MAYBE_UNUSED const struct3& rhs) const {
+bool struct3::operator<([[maybe_unused]] const struct3& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -602,7 +602,7 @@ const ::cpp2::struct2& struct3::get_c() const& {
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED struct3& a, FOLLY_MAYBE_UNUSED struct3& b) {
+void swap([[maybe_unused]] struct3& a, [[maybe_unused]] struct3& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_a, b.__fbthrift_field_a);
   swap(a.__fbthrift_field_b, b.__fbthrift_field_b);
@@ -661,14 +661,14 @@ const folly::StringPiece struct4::__fbthrift_get_class_name() {
 
 struct4::struct4(const struct4&) = default;
 struct4& struct4::operator=(const struct4&) = default;
-struct4::struct4(FOLLY_MAYBE_UNUSED struct4&& other) noexcept :
+struct4::struct4([[maybe_unused]] struct4&& other) noexcept :
     __fbthrift_field_a(std::move(other.__fbthrift_field_a)),
     __fbthrift_field_b(std::move(other.__fbthrift_field_b)),
     __fbthrift_field_c(std::move(other.__fbthrift_field_c)),
     __isset(other.__isset) {
 }
 
-struct4& struct4::operator=(FOLLY_MAYBE_UNUSED struct4&& other) noexcept {
+struct4& struct4::operator=([[maybe_unused]] struct4&& other) noexcept {
     this->__fbthrift_field_a = std::move(other.__fbthrift_field_a);
     this->__fbthrift_field_b = std::move(other.__fbthrift_field_b);
     this->__fbthrift_field_c = std::move(other.__fbthrift_field_c);
@@ -702,16 +702,16 @@ bool struct4::__fbthrift_is_empty() const {
   return false;
 }
 
-bool struct4::operator==(FOLLY_MAYBE_UNUSED const struct4& rhs) const {
+bool struct4::operator==([[maybe_unused]] const struct4& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool struct4::operator<(FOLLY_MAYBE_UNUSED const struct4& rhs) const {
+bool struct4::operator<([[maybe_unused]] const struct4& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED struct4& a, FOLLY_MAYBE_UNUSED struct4& b) {
+void swap([[maybe_unused]] struct4& a, [[maybe_unused]] struct4& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_a, b.__fbthrift_field_a);
   swap(a.__fbthrift_field_b, b.__fbthrift_field_b);
@@ -840,7 +840,7 @@ bool union1::operator==(const union1& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool union1::operator<(FOLLY_MAYBE_UNUSED const union1& rhs) const {
+bool union1::operator<([[maybe_unused]] const union1& rhs) const {
   return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
@@ -992,7 +992,7 @@ bool union2::operator==(const union2& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool union2::operator<(FOLLY_MAYBE_UNUSED const union2& rhs) const {
+bool union2::operator<([[maybe_unused]] const union2& rhs) const {
   return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
@@ -1027,7 +1027,7 @@ static_assert(
 } // cpp2
 
 namespace cpp2 { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }} // cpp2
 namespace apache::thrift::detail::annotation {

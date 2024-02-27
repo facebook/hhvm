@@ -79,16 +79,16 @@ bool AStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool AStruct::operator==(FOLLY_MAYBE_UNUSED const AStruct& rhs) const {
+bool AStruct::operator==([[maybe_unused]] const AStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool AStruct::operator<(FOLLY_MAYBE_UNUSED const AStruct& rhs) const {
+bool AStruct::operator<([[maybe_unused]] const AStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED AStruct& a, FOLLY_MAYBE_UNUSED AStruct& b) {
+void swap([[maybe_unused]] AStruct& a, [[maybe_unused]] AStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_FieldA, b.__fbthrift_field_FieldA);
   swap(a.__isset, b.__isset);
@@ -150,11 +150,11 @@ AStructB::AStructB() :
 
 AStructB::~AStructB() {}
 
-AStructB::AStructB(FOLLY_MAYBE_UNUSED AStructB&& other) noexcept :
+AStructB::AStructB([[maybe_unused]] AStructB&& other) noexcept :
     __fbthrift_field_FieldA(std::move(other.__fbthrift_field_FieldA)) {
 }
 
-AStructB& AStructB::operator=(FOLLY_MAYBE_UNUSED AStructB&& other) noexcept {
+AStructB& AStructB::operator=([[maybe_unused]] AStructB&& other) noexcept {
     this->__fbthrift_field_FieldA = std::move(other.__fbthrift_field_FieldA);
     return *this;
 }
@@ -177,16 +177,16 @@ bool AStructB::__fbthrift_is_empty() const {
   return false;
 }
 
-bool AStructB::operator==(FOLLY_MAYBE_UNUSED const AStructB& rhs) const {
+bool AStructB::operator==([[maybe_unused]] const AStructB& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool AStructB::operator<(FOLLY_MAYBE_UNUSED const AStructB& rhs) const {
+bool AStructB::operator<([[maybe_unused]] const AStructB& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED AStructB& a, FOLLY_MAYBE_UNUSED AStructB& b) {
+void swap([[maybe_unused]] AStructB& a, [[maybe_unused]] AStructB& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_FieldA, b.__fbthrift_field_FieldA);
 }
@@ -214,7 +214,7 @@ static_assert(
 }}} // a::different::ns
 
 namespace a { namespace different { namespace ns { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }}}} // a::different::ns
 namespace apache::thrift::detail::annotation {

@@ -103,7 +103,7 @@ PyObject* Constructor<::cpp2::Fields>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::Fields>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::Fields& val) {
+    [[maybe_unused]] const ::cpp2::Fields& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__injected_field(
     Constructor<Bytes>{}
@@ -182,7 +182,7 @@ PyObject* Constructor<::cpp2::FieldsInjectedToEmptyStruct>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::FieldsInjectedToEmptyStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::FieldsInjectedToEmptyStruct& val) {
+    [[maybe_unused]] const ::cpp2::FieldsInjectedToEmptyStruct& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__injected_field(
     Constructor<Bytes>{}
@@ -265,7 +265,7 @@ PyObject* Constructor<::cpp2::FieldsInjectedToStruct>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::FieldsInjectedToStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::FieldsInjectedToStruct& val) {
+    [[maybe_unused]] const ::cpp2::FieldsInjectedToStruct& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__string_field(
     Constructor<Bytes>{}
@@ -366,7 +366,7 @@ PyObject* Constructor<::cpp2::FieldsInjectedWithIncludedStruct>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::FieldsInjectedWithIncludedStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::FieldsInjectedWithIncludedStruct& val) {
+    [[maybe_unused]] const ::cpp2::FieldsInjectedWithIncludedStruct& val) {
   StrongRef fbthrift_data(createStructTuple(4));
   StrongRef _fbthrift__string_field(
     Constructor<Bytes>{}

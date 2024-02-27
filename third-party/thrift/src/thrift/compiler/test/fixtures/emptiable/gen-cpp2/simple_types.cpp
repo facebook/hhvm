@@ -74,16 +74,16 @@ bool MyStruct::__fbthrift_is_empty() const {
   return true;
 }
 
-bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
+bool MyStruct::operator==([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
+bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyStruct& a, FOLLY_MAYBE_UNUSED MyStruct& b) {
+void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   using ::std::swap;
 }
 
@@ -146,7 +146,7 @@ EmptiableStruct::EmptiableStruct() :
 
 EmptiableStruct::~EmptiableStruct() {}
 
-EmptiableStruct::EmptiableStruct(FOLLY_MAYBE_UNUSED EmptiableStruct&& other) noexcept :
+EmptiableStruct::EmptiableStruct([[maybe_unused]] EmptiableStruct&& other) noexcept :
     __fbthrift_field_bool_field(std::move(other.__fbthrift_field_bool_field)),
     __fbthrift_field_byte_field(std::move(other.__fbthrift_field_byte_field)),
     __fbthrift_field_short_field(std::move(other.__fbthrift_field_short_field)),
@@ -164,7 +164,7 @@ EmptiableStruct::EmptiableStruct(FOLLY_MAYBE_UNUSED EmptiableStruct&& other) noe
     __isset(other.__isset) {
 }
 
-EmptiableStruct& EmptiableStruct::operator=(FOLLY_MAYBE_UNUSED EmptiableStruct&& other) noexcept {
+EmptiableStruct& EmptiableStruct::operator=([[maybe_unused]] EmptiableStruct&& other) noexcept {
     this->__fbthrift_field_bool_field = std::move(other.__fbthrift_field_bool_field);
     this->__fbthrift_field_byte_field = std::move(other.__fbthrift_field_byte_field);
     this->__fbthrift_field_short_field = std::move(other.__fbthrift_field_short_field);
@@ -254,11 +254,11 @@ bool EmptiableStruct::__fbthrift_is_empty() const {
  !(this->__isset.get(13));
 }
 
-bool EmptiableStruct::operator==(FOLLY_MAYBE_UNUSED const EmptiableStruct& rhs) const {
+bool EmptiableStruct::operator==([[maybe_unused]] const EmptiableStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool EmptiableStruct::operator<(FOLLY_MAYBE_UNUSED const EmptiableStruct& rhs) const {
+bool EmptiableStruct::operator<([[maybe_unused]] const EmptiableStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -295,7 +295,7 @@ const ::apache::thrift::test::MyStruct* EmptiableStruct::get_struct_field() cons
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED EmptiableStruct& a, FOLLY_MAYBE_UNUSED EmptiableStruct& b) {
+void swap([[maybe_unused]] EmptiableStruct& a, [[maybe_unused]] EmptiableStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_bool_field, b.__fbthrift_field_bool_field);
   swap(a.__fbthrift_field_byte_field, b.__fbthrift_field_byte_field);
@@ -379,7 +379,7 @@ EmptiableTerseStruct::EmptiableTerseStruct() :
 
 EmptiableTerseStruct::~EmptiableTerseStruct() {}
 
-EmptiableTerseStruct::EmptiableTerseStruct(FOLLY_MAYBE_UNUSED EmptiableTerseStruct&& other) noexcept :
+EmptiableTerseStruct::EmptiableTerseStruct([[maybe_unused]] EmptiableTerseStruct&& other) noexcept :
     __fbthrift_field_bool_field(std::move(other.__fbthrift_field_bool_field)),
     __fbthrift_field_byte_field(std::move(other.__fbthrift_field_byte_field)),
     __fbthrift_field_short_field(std::move(other.__fbthrift_field_short_field)),
@@ -396,7 +396,7 @@ EmptiableTerseStruct::EmptiableTerseStruct(FOLLY_MAYBE_UNUSED EmptiableTerseStru
     __fbthrift_field_struct_field(std::move(other.__fbthrift_field_struct_field)) {
 }
 
-EmptiableTerseStruct& EmptiableTerseStruct::operator=(FOLLY_MAYBE_UNUSED EmptiableTerseStruct&& other) noexcept {
+EmptiableTerseStruct& EmptiableTerseStruct::operator=([[maybe_unused]] EmptiableTerseStruct&& other) noexcept {
     this->__fbthrift_field_bool_field = std::move(other.__fbthrift_field_bool_field);
     this->__fbthrift_field_byte_field = std::move(other.__fbthrift_field_byte_field);
     this->__fbthrift_field_short_field = std::move(other.__fbthrift_field_short_field);
@@ -483,11 +483,11 @@ bool EmptiableTerseStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::apache::thrift::test::MyStruct>>(this->__fbthrift_field_struct_field);
 }
 
-bool EmptiableTerseStruct::operator==(FOLLY_MAYBE_UNUSED const EmptiableTerseStruct& rhs) const {
+bool EmptiableTerseStruct::operator==([[maybe_unused]] const EmptiableTerseStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool EmptiableTerseStruct::operator<(FOLLY_MAYBE_UNUSED const EmptiableTerseStruct& rhs) const {
+bool EmptiableTerseStruct::operator<([[maybe_unused]] const EmptiableTerseStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -524,7 +524,7 @@ const ::apache::thrift::test::MyStruct& EmptiableTerseStruct::get_struct_field()
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED EmptiableTerseStruct& a, FOLLY_MAYBE_UNUSED EmptiableTerseStruct& b) {
+void swap([[maybe_unused]] EmptiableTerseStruct& a, [[maybe_unused]] EmptiableTerseStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_bool_field, b.__fbthrift_field_bool_field);
   swap(a.__fbthrift_field_byte_field, b.__fbthrift_field_byte_field);
@@ -607,7 +607,7 @@ NotEmptiableStruct::NotEmptiableStruct() :
 
 NotEmptiableStruct::~NotEmptiableStruct() {}
 
-NotEmptiableStruct::NotEmptiableStruct(FOLLY_MAYBE_UNUSED NotEmptiableStruct&& other) noexcept :
+NotEmptiableStruct::NotEmptiableStruct([[maybe_unused]] NotEmptiableStruct&& other) noexcept :
     __fbthrift_field_bool_field(std::move(other.__fbthrift_field_bool_field)),
     __fbthrift_field_byte_field(std::move(other.__fbthrift_field_byte_field)),
     __fbthrift_field_short_field(std::move(other.__fbthrift_field_short_field)),
@@ -625,7 +625,7 @@ NotEmptiableStruct::NotEmptiableStruct(FOLLY_MAYBE_UNUSED NotEmptiableStruct&& o
     __isset(other.__isset) {
 }
 
-NotEmptiableStruct& NotEmptiableStruct::operator=(FOLLY_MAYBE_UNUSED NotEmptiableStruct&& other) noexcept {
+NotEmptiableStruct& NotEmptiableStruct::operator=([[maybe_unused]] NotEmptiableStruct&& other) noexcept {
     this->__fbthrift_field_bool_field = std::move(other.__fbthrift_field_bool_field);
     this->__fbthrift_field_byte_field = std::move(other.__fbthrift_field_byte_field);
     this->__fbthrift_field_short_field = std::move(other.__fbthrift_field_short_field);
@@ -702,11 +702,11 @@ bool NotEmptiableStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool NotEmptiableStruct::operator==(FOLLY_MAYBE_UNUSED const NotEmptiableStruct& rhs) const {
+bool NotEmptiableStruct::operator==([[maybe_unused]] const NotEmptiableStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool NotEmptiableStruct::operator<(FOLLY_MAYBE_UNUSED const NotEmptiableStruct& rhs) const {
+bool NotEmptiableStruct::operator<([[maybe_unused]] const NotEmptiableStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -743,7 +743,7 @@ const ::apache::thrift::test::MyStruct* NotEmptiableStruct::get_struct_field() c
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED NotEmptiableStruct& a, FOLLY_MAYBE_UNUSED NotEmptiableStruct& b) {
+void swap([[maybe_unused]] NotEmptiableStruct& a, [[maybe_unused]] NotEmptiableStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_bool_field, b.__fbthrift_field_bool_field);
   swap(a.__fbthrift_field_byte_field, b.__fbthrift_field_byte_field);
@@ -781,7 +781,7 @@ static_assert(
 }}} // apache::thrift::test
 
 namespace apache { namespace thrift { namespace test { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }}}} // apache::thrift::test
 namespace apache::thrift::detail::annotation {

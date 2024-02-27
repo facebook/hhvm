@@ -862,7 +862,7 @@ StructMetadata<::facebook::thrift::test::Person2>::gen(ThriftMetadata& metadata)
   return res.first->second;
 }
 
-void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::Service>>::gen_func(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::Service>>::gen_func([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "func";
   auto func_ret_type = std::make_unique<Typedef>("module.MyI32_4873", std::make_unique<Typedef>("module.MyI32", std::make_unique<Typedef>("module.MyI32", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{*cvStruct("hack.Adapter", {{"name", cvString("\\Adapter1")}}).cv_struct_ref(), *cvStruct("cpp.Adapter", {{"name", cvString("::my::Adapter1")}}).cv_struct_ref(), *cvStruct("rust.Adapter", {{"name", cvString("::my::Adapter1")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{});
@@ -905,7 +905,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
   response.context() = std::move(context);
 }
 
-const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::Service>>::genRecurse(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::Service>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_Service;
   module_Service.name() = "module.Service";
   static const ThriftFunctionGenerator functions[] = {
@@ -925,7 +925,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   context.module() = std::move(module);
   return &context;
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>>::gen_count(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>>::gen_count([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "count";
   auto func_ret_type = std::make_unique<Struct<::facebook::thrift::test::CountingStruct>>("module.CountingStruct");
@@ -933,7 +933,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
   func.is_oneway() = false;
   service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>>::gen_adaptedTypes(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>>::gen_adaptedTypes([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "adaptedTypes";
   auto func_ret_type = std::make_unique<Struct<::facebook::thrift::test::detail::HeapAllocated>>("module.HeapAllocated");
@@ -959,7 +959,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
   response.context() = std::move(context);
 }
 
-const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>>::genRecurse(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_AdapterService;
   module_AdapterService.name() = "module.AdapterService";
   static const ThriftFunctionGenerator functions[] = {

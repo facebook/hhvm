@@ -83,16 +83,16 @@ bool Foo::__fbthrift_is_empty() const {
   return false;
 }
 
-bool Foo::operator==(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
+bool Foo::operator==([[maybe_unused]] const Foo& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Foo::operator<(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
+bool Foo::operator<([[maybe_unused]] const Foo& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Foo& a, FOLLY_MAYBE_UNUSED Foo& b) {
+void swap([[maybe_unused]] Foo& a, [[maybe_unused]] Foo& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field, b.__fbthrift_field_field);
   swap(a.__isset, b.__isset);
@@ -153,12 +153,12 @@ Bar::Bar() {
 
 Bar::~Bar() {}
 
-Bar::Bar(FOLLY_MAYBE_UNUSED Bar&& other) noexcept :
+Bar::Bar([[maybe_unused]] Bar&& other) noexcept :
     __fbthrift_field_list_field(std::move(other.__fbthrift_field_list_field)),
     __isset(other.__isset) {
 }
 
-Bar& Bar::operator=(FOLLY_MAYBE_UNUSED Bar&& other) noexcept {
+Bar& Bar::operator=([[maybe_unused]] Bar&& other) noexcept {
     this->__fbthrift_field_list_field = std::move(other.__fbthrift_field_list_field);
     __isset = other.__isset;
     return *this;
@@ -184,11 +184,11 @@ bool Bar::__fbthrift_is_empty() const {
   return false;
 }
 
-bool Bar::operator==(FOLLY_MAYBE_UNUSED const Bar& rhs) const {
+bool Bar::operator==([[maybe_unused]] const Bar& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Bar::operator<(FOLLY_MAYBE_UNUSED const Bar& rhs) const {
+bool Bar::operator<([[maybe_unused]] const Bar& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -201,7 +201,7 @@ const ::std::vector<::facebook::thrift::test::AdaptedFoo>& Bar::get_list_field()
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Bar& a, FOLLY_MAYBE_UNUSED Bar& b) {
+void swap([[maybe_unused]] Bar& a, [[maybe_unused]] Bar& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_list_field, b.__fbthrift_field_list_field);
   swap(a.__isset, b.__isset);
@@ -262,13 +262,13 @@ Baz::Baz() {
 
 Baz::~Baz() {}
 
-Baz::Baz(FOLLY_MAYBE_UNUSED Baz&& other) noexcept :
+Baz::Baz([[maybe_unused]] Baz&& other) noexcept :
     __fbthrift_field_list_field(std::move(other.__fbthrift_field_list_field)),
     __fbthrift_field_nested_list_field(std::move(other.__fbthrift_field_nested_list_field)),
     __isset(other.__isset) {
 }
 
-Baz& Baz::operator=(FOLLY_MAYBE_UNUSED Baz&& other) noexcept {
+Baz& Baz::operator=([[maybe_unused]] Baz&& other) noexcept {
     this->__fbthrift_field_list_field = std::move(other.__fbthrift_field_list_field);
     this->__fbthrift_field_nested_list_field = std::move(other.__fbthrift_field_nested_list_field);
     __isset = other.__isset;
@@ -298,11 +298,11 @@ bool Baz::__fbthrift_is_empty() const {
   return false;
 }
 
-bool Baz::operator==(FOLLY_MAYBE_UNUSED const Baz& rhs) const {
+bool Baz::operator==([[maybe_unused]] const Baz& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Baz::operator<(FOLLY_MAYBE_UNUSED const Baz& rhs) const {
+bool Baz::operator<([[maybe_unused]] const Baz& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -323,7 +323,7 @@ const ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>& Baz::g
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Baz& a, FOLLY_MAYBE_UNUSED Baz& b) {
+void swap([[maybe_unused]] Baz& a, [[maybe_unused]] Baz& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_list_field, b.__fbthrift_field_list_field);
   swap(a.__fbthrift_field_nested_list_field, b.__fbthrift_field_nested_list_field);
@@ -411,7 +411,7 @@ OpEncodeStruct::OpEncodeStruct() :
 
 OpEncodeStruct::~OpEncodeStruct() {}
 
-OpEncodeStruct::OpEncodeStruct(FOLLY_MAYBE_UNUSED OpEncodeStruct&& other) noexcept :
+OpEncodeStruct::OpEncodeStruct([[maybe_unused]] OpEncodeStruct&& other) noexcept :
     __fbthrift_field_int_field(std::move(other.__fbthrift_field_int_field)),
     __fbthrift_field_enum_field(std::move(other.__fbthrift_field_enum_field)),
     __fbthrift_field_foo_field(std::move(other.__fbthrift_field_foo_field)),
@@ -429,7 +429,7 @@ OpEncodeStruct::OpEncodeStruct(FOLLY_MAYBE_UNUSED OpEncodeStruct&& other) noexce
   ::apache::thrift::adapt_detail::construct<::FieldAdapter, 12>(__fbthrift_field_adapted_list_field, *this);
 }
 
-OpEncodeStruct& OpEncodeStruct::operator=(FOLLY_MAYBE_UNUSED OpEncodeStruct&& other) noexcept {
+OpEncodeStruct& OpEncodeStruct::operator=([[maybe_unused]] OpEncodeStruct&& other) noexcept {
     this->__fbthrift_field_int_field = std::move(other.__fbthrift_field_int_field);
     this->__fbthrift_field_enum_field = std::move(other.__fbthrift_field_enum_field);
     this->__fbthrift_field_foo_field = std::move(other.__fbthrift_field_foo_field);
@@ -500,11 +500,11 @@ bool OpEncodeStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool OpEncodeStruct::operator==(FOLLY_MAYBE_UNUSED const OpEncodeStruct& rhs) const {
+bool OpEncodeStruct::operator==([[maybe_unused]] const OpEncodeStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool OpEncodeStruct::operator<(FOLLY_MAYBE_UNUSED const OpEncodeStruct& rhs) const {
+bool OpEncodeStruct::operator<([[maybe_unused]] const OpEncodeStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -565,7 +565,7 @@ const ::facebook::thrift::test::Bar& OpEncodeStruct::get_bar_field() const& {
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED OpEncodeStruct& a, FOLLY_MAYBE_UNUSED OpEncodeStruct& b) {
+void swap([[maybe_unused]] OpEncodeStruct& a, [[maybe_unused]] OpEncodeStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_int_field, b.__fbthrift_field_int_field);
   swap(a.__fbthrift_field_enum_field, b.__fbthrift_field_enum_field);
@@ -613,7 +613,7 @@ static_assert(
 }}} // facebook::thrift::test
 
 namespace facebook { namespace thrift { namespace test { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 4, ::facebook::thrift::test::Foo, ::facebook::thrift::test::OpEncodeStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::Foo>, ::facebook::thrift::test::OpEncodeStruct>();
 }

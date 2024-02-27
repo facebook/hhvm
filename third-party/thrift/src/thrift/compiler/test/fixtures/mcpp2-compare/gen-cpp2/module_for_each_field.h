@@ -16,14 +16,14 @@ namespace detail {
 template <>
 struct ForEachField<::some::valid::ns::Empty> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
   }
 };
 
 template <>
 struct ForEachField<::some::valid::ns::ASimpleStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).boolField_ref()...);
   }
 };
@@ -31,7 +31,7 @@ struct ForEachField<::some::valid::ns::ASimpleStruct> {
 template <>
 struct ForEachField<::some::valid::ns::ASimpleStructNoexcept> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).boolField_ref()...);
   }
 };
@@ -39,7 +39,7 @@ struct ForEachField<::some::valid::ns::ASimpleStructNoexcept> {
 template <>
 struct ForEachField<::some::valid::ns::MyStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).MyBoolField_ref()...);
     f(1, static_cast<T&&>(t).MyIntField_ref()...);
     f(2, static_cast<T&&>(t).MyStringField_ref()...);
@@ -57,7 +57,7 @@ struct ForEachField<::some::valid::ns::MyStruct> {
 template <>
 struct ForEachField<::some::valid::ns::SimpleUnion> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).intValue_ref()...);
     f(1, static_cast<T&&>(t).stringValue_ref()...);
   }
@@ -66,7 +66,7 @@ struct ForEachField<::some::valid::ns::SimpleUnion> {
 template <>
 struct ForEachField<::some::valid::ns::ComplexUnion> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).intValue_ref()...);
     f(1, static_cast<T&&>(t).opt_intValue_ref()...);
     f(2, static_cast<T&&>(t).stringValue_ref()...);
@@ -101,7 +101,7 @@ struct ForEachField<::some::valid::ns::ComplexUnion> {
 template <>
 struct ForEachField<::some::valid::ns::AnException> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).code_ref()...);
     f(1, static_cast<T&&>(t).req_code_ref()...);
     f(2, static_cast<T&&>(t).message2_ref()...);
@@ -125,7 +125,7 @@ struct ForEachField<::some::valid::ns::AnException> {
 template <>
 struct ForEachField<::some::valid::ns::AnotherException> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).code_ref()...);
     f(1, static_cast<T&&>(t).req_code_ref()...);
     f(2, static_cast<T&&>(t).message_ref()...);
@@ -135,7 +135,7 @@ struct ForEachField<::some::valid::ns::AnotherException> {
 template <>
 struct ForEachField<::some::valid::ns::containerStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).fieldA_ref()...);
     f(1, static_cast<T&&>(t).req_fieldA_ref()...);
     f(2, static_cast<T&&>(t).opt_fieldA_ref()...);
@@ -188,7 +188,7 @@ struct ForEachField<::some::valid::ns::containerStruct> {
 template <>
 struct ForEachField<::some::valid::ns::MyIncludedStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).MyIncludedInt_ref()...);
     f(1, static_cast<T&&>(t).MyIncludedStruct_ref()...);
     f(2, static_cast<T&&>(t).ARefField_ref()...);
@@ -199,7 +199,7 @@ struct ForEachField<::some::valid::ns::MyIncludedStruct> {
 template <>
 struct ForEachField<::some::valid::ns::AnnotatedStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).no_annotation_ref()...);
     f(1, static_cast<T&&>(t).cpp_unique_ref_ref()...);
     f(2, static_cast<T&&>(t).cpp2_unique_ref_ref()...);
@@ -246,7 +246,7 @@ struct ForEachField<::some::valid::ns::AnnotatedStruct> {
 template <>
 struct ForEachField<::some::valid::ns::ComplexContainerStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).map_of_iobufs_ref()...);
     f(1, static_cast<T&&>(t).map_of_iobuf_ptrs_ref()...);
   }
@@ -255,7 +255,7 @@ struct ForEachField<::some::valid::ns::ComplexContainerStruct> {
 template <>
 struct ForEachField<::some::valid::ns::FloatStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).floatField_ref()...);
     f(1, static_cast<T&&>(t).doubleField_ref()...);
   }
@@ -264,7 +264,7 @@ struct ForEachField<::some::valid::ns::FloatStruct> {
 template <>
 struct ForEachField<::some::valid::ns::FloatUnion> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).floatSide_ref()...);
     f(1, static_cast<T&&>(t).doubleSide_ref()...);
   }
@@ -273,7 +273,7 @@ struct ForEachField<::some::valid::ns::FloatUnion> {
 template <>
 struct ForEachField<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).intField_ref()...);
   }
 };

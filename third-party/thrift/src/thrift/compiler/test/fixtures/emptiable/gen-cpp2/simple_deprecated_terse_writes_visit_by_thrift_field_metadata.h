@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct VisitByFieldId<::apache::thrift::test::MyStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
       throwInvalidThriftId(fieldId, "::apache::thrift::test::MyStruct");
@@ -27,7 +27,7 @@ struct VisitByFieldId<::apache::thrift::test::MyStruct> {
 template <>
 struct VisitByFieldId<::apache::thrift::test::EmptiableStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).bool_field_ref());
@@ -66,7 +66,7 @@ struct VisitByFieldId<::apache::thrift::test::EmptiableStruct> {
 template <>
 struct VisitByFieldId<::apache::thrift::test::NotEmptiableStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).bool_field_ref());

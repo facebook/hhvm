@@ -124,7 +124,7 @@ PyObject* Constructor<::cpp2::Internship>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::Internship>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::Internship& val) {
+    [[maybe_unused]] const ::cpp2::Internship& val) {
   StrongRef fbthrift_data(createStructTuple(5));
   StrongRef _fbthrift__weeks(
     Constructor<int32_t>{}
@@ -268,7 +268,7 @@ PyObject* Constructor<::cpp2::Range>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::Range>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::Range& val) {
+    [[maybe_unused]] const ::cpp2::Range& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__min(
     Constructor<int32_t>{}
@@ -361,7 +361,7 @@ PyObject* Constructor<::cpp2::struct1>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::struct1>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::struct1& val) {
+    [[maybe_unused]] const ::cpp2::struct1& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__a(
     Constructor<int32_t>{}
@@ -462,7 +462,7 @@ PyObject* Constructor<::cpp2::struct2>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::struct2>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::struct2& val) {
+    [[maybe_unused]] const ::cpp2::struct2& val) {
   StrongRef fbthrift_data(createStructTuple(4));
   StrongRef _fbthrift__a(
     Constructor<int32_t>{}
@@ -579,7 +579,7 @@ PyObject* Constructor<::cpp2::struct3>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::struct3>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::struct3& val) {
+    [[maybe_unused]] const ::cpp2::struct3& val) {
   StrongRef fbthrift_data(createStructTuple(3));
   StrongRef _fbthrift__a(
     Constructor<Bytes>{}
@@ -686,7 +686,7 @@ PyObject* Constructor<::cpp2::struct4>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::struct4>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::struct4& val) {
+    [[maybe_unused]] const ::cpp2::struct4& val) {
   StrongRef fbthrift_data(createStructTuple(3));
   StrongRef _fbthrift__a(
     Constructor<int32_t>{}
@@ -811,7 +811,7 @@ PyObject* Constructor<::cpp2::union1>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::union1>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::union1& val) {
+    [[maybe_unused]] const ::cpp2::union1& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
   switch (type_key) {
@@ -920,7 +920,7 @@ PyObject* Constructor<::cpp2::union2>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::union2>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::union2& val) {
+    [[maybe_unused]] const ::cpp2::union2& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
   switch (type_key) {

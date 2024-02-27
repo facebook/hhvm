@@ -61,12 +61,12 @@ Foo::Foo() {
 
 Foo::~Foo() {}
 
-Foo::Foo(FOLLY_MAYBE_UNUSED Foo&& other) noexcept :
+Foo::Foo([[maybe_unused]] Foo&& other) noexcept :
     __fbthrift_field_foo(std::move(other.__fbthrift_field_foo)),
     __fbthrift_field_bar(std::move(other.__fbthrift_field_bar)) {
 }
 
-Foo& Foo::operator=(FOLLY_MAYBE_UNUSED Foo&& other) noexcept {
+Foo& Foo::operator=([[maybe_unused]] Foo&& other) noexcept {
     this->__fbthrift_field_foo = std::move(other.__fbthrift_field_foo);
     this->__fbthrift_field_bar = std::move(other.__fbthrift_field_bar);
     return *this;
@@ -93,16 +93,16 @@ bool Foo::__fbthrift_is_empty() const {
  !(this->__fbthrift_field_bar);
 }
 
-bool Foo::operator==(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
+bool Foo::operator==([[maybe_unused]] const Foo& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Foo::operator<(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
+bool Foo::operator<([[maybe_unused]] const Foo& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Foo& a, FOLLY_MAYBE_UNUSED Foo& b) {
+void swap([[maybe_unused]] Foo& a, [[maybe_unused]] Foo& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_foo, b.__fbthrift_field_foo);
   swap(a.__fbthrift_field_bar, b.__fbthrift_field_bar);
@@ -133,7 +133,7 @@ static_assert(
 } // cpp2
 
 namespace cpp2 { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }} // cpp2
 namespace apache::thrift::detail::annotation {

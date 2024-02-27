@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::empty_struct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
       throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::empty_struct");
@@ -27,7 +27,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::empty_struct> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::decorated_struct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field_ref());
@@ -40,7 +40,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::decorated_struct> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::ContainerStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 12:
       return f(0, static_cast<T&&>(t).fieldA_ref());
@@ -67,7 +67,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::ContainerStruct> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::CppTypeStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).fieldA_ref());
@@ -80,7 +80,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::CppTypeStruct> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::VirtualStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).MyIntField_ref());
@@ -93,7 +93,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::VirtualStruct> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).a_ref());
@@ -108,7 +108,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::MyStructWithForwardRefE
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::TrivialNumeric> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).a_ref());
@@ -123,7 +123,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::TrivialNumeric> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::TrivialNestedWithDefault> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).z_ref());
@@ -138,7 +138,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::TrivialNestedWithDefaul
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::ComplexString> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).a_ref());
@@ -153,7 +153,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::ComplexString> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::ComplexNestedWithDefault> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).z_ref());
@@ -168,7 +168,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::ComplexNestedWithDefaul
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::MinPadding> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).small_ref());
@@ -189,7 +189,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::MinPadding> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::MinPaddingWithCustomType> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).small_ref());
@@ -210,7 +210,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::MinPaddingWithCustomTyp
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::MyStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).MyIntField_ref());
@@ -229,7 +229,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::MyStruct> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::MyDataItem> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
       throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::MyDataItem");
@@ -240,7 +240,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::MyDataItem> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::Renamed> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).bar_ref());
@@ -253,7 +253,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::Renamed> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::AnnotatedTypes> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).binary_field_ref());
@@ -268,7 +268,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::AnnotatedTypes> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::ForwardUsageRoot> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).ForwardUsageStruct_ref());
@@ -283,7 +283,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::ForwardUsageRoot> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::ForwardUsageStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).foo_ref());
@@ -296,7 +296,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::ForwardUsageStruct> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::ForwardUsageByRef> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).foo_ref());
@@ -309,7 +309,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::ForwardUsageByRef> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::IncompleteMap> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field_ref());
@@ -322,7 +322,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::IncompleteMap> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::IncompleteMapDep> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
       throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::IncompleteMapDep");
@@ -333,7 +333,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::IncompleteMapDep> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::CompleteMap> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field_ref());
@@ -346,7 +346,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::CompleteMap> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::CompleteMapDep> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
       throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::CompleteMapDep");
@@ -357,7 +357,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::CompleteMapDep> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::IncompleteList> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field_ref());
@@ -370,7 +370,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::IncompleteList> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::IncompleteListDep> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
       throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::IncompleteListDep");
@@ -381,7 +381,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::IncompleteListDep> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::CompleteList> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field_ref());
@@ -394,7 +394,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::CompleteList> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::CompleteListDep> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
       throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::CompleteListDep");
@@ -405,7 +405,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::CompleteListDep> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::AdaptedList> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field_ref());
@@ -418,7 +418,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::AdaptedList> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::detail::AdaptedListDep> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field_ref());
@@ -431,7 +431,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::detail::AdaptedListDep>
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::DependentAdaptedList> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field_ref());
@@ -444,7 +444,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::DependentAdaptedList> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field_ref());
@@ -457,7 +457,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::detail::DependentAdapte
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::AllocatorAware> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).aa_list_ref());
@@ -482,7 +482,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::AllocatorAware> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::AllocatorAware2> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).not_a_container_ref());
@@ -497,7 +497,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::AllocatorAware2> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::TypedefStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).i32_field_ref());
@@ -514,7 +514,7 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::TypedefStruct> {
 template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::StructWithDoubleUnderscores> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).__field_ref());

@@ -58,16 +58,16 @@ bool Empty::__fbthrift_is_empty() const {
   return true;
 }
 
-bool Empty::operator==(FOLLY_MAYBE_UNUSED const Empty& rhs) const {
+bool Empty::operator==([[maybe_unused]] const Empty& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Empty::operator<(FOLLY_MAYBE_UNUSED const Empty& rhs) const {
+bool Empty::operator<([[maybe_unused]] const Empty& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Empty& a, FOLLY_MAYBE_UNUSED Empty& b) {
+void swap([[maybe_unused]] Empty& a, [[maybe_unused]] Empty& b) {
   using ::std::swap;
 }
 
@@ -174,7 +174,7 @@ bool Nada::operator==(const Nada& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool Nada::operator<(FOLLY_MAYBE_UNUSED const Nada& rhs) const {
+bool Nada::operator<([[maybe_unused]] const Nada& rhs) const {
   return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
@@ -197,7 +197,7 @@ template uint32_t Nada::serializedSizeZC<>(apache::thrift::CompactProtocolWriter
 } // cpp2
 
 namespace cpp2 { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }} // cpp2
 namespace apache::thrift::detail::annotation {

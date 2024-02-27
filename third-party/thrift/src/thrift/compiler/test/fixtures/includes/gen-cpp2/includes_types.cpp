@@ -66,11 +66,11 @@ bool Included::__fbthrift_is_empty() const {
   return false;
 }
 
-bool Included::operator==(FOLLY_MAYBE_UNUSED const Included& rhs) const {
+bool Included::operator==([[maybe_unused]] const Included& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Included::operator<(FOLLY_MAYBE_UNUSED const Included& rhs) const {
+bool Included::operator<([[maybe_unused]] const Included& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -83,7 +83,7 @@ const ::cpp2::Foo& Included::get_MyTransitiveField() const& {
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Included& a, FOLLY_MAYBE_UNUSED Included& b) {
+void swap([[maybe_unused]] Included& a, [[maybe_unused]] Included& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_MyIntField, b.__fbthrift_field_MyIntField);
   swap(a.__fbthrift_field_MyTransitiveField, b.__fbthrift_field_MyTransitiveField);
@@ -109,7 +109,7 @@ static_assert(
 } // cpp2
 
 namespace cpp2 { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }} // cpp2
 namespace apache::thrift::detail::annotation {

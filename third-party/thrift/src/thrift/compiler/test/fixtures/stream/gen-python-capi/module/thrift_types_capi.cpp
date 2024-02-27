@@ -81,7 +81,7 @@ PyObject* Constructor<::cpp2::FooStreamEx>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::FooStreamEx>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::FooStreamEx& val) {
+    [[maybe_unused]] const ::cpp2::FooStreamEx& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
@@ -141,7 +141,7 @@ PyObject* Constructor<::cpp2::FooEx>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::FooEx>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::FooEx& val) {
+    [[maybe_unused]] const ::cpp2::FooEx& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
@@ -201,7 +201,7 @@ PyObject* Constructor<::cpp2::FooEx2>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::FooEx2>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::FooEx2& val) {
+    [[maybe_unused]] const ::cpp2::FooEx2& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }

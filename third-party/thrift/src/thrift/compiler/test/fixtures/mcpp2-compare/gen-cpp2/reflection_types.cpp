@@ -63,16 +63,16 @@ bool ReflectionStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool ReflectionStruct::operator==(FOLLY_MAYBE_UNUSED const ReflectionStruct& rhs) const {
+bool ReflectionStruct::operator==([[maybe_unused]] const ReflectionStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool ReflectionStruct::operator<(FOLLY_MAYBE_UNUSED const ReflectionStruct& rhs) const {
+bool ReflectionStruct::operator<([[maybe_unused]] const ReflectionStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED ReflectionStruct& a, FOLLY_MAYBE_UNUSED ReflectionStruct& b) {
+void swap([[maybe_unused]] ReflectionStruct& a, [[maybe_unused]] ReflectionStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_fieldA, b.__fbthrift_field_fieldA);
   swap(a.__isset, b.__isset);
@@ -95,7 +95,7 @@ template uint32_t ReflectionStruct::serializedSizeZC<>(apache::thrift::SimpleJSO
 } // cpp2
 
 namespace cpp2 { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }} // cpp2
 namespace apache::thrift::detail::annotation {

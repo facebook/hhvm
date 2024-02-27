@@ -103,7 +103,7 @@ PyObject* Constructor<::cpp2::MyStruct>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::MyStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::MyStruct& val) {
+    [[maybe_unused]] const ::cpp2::MyStruct& val) {
   StrongRef fbthrift_data(createStructTuple(3));
   StrongRef _fbthrift__a(
     Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::B>>{}

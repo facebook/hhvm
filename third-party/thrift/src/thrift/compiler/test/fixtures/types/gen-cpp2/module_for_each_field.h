@@ -16,14 +16,14 @@ namespace detail {
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::empty_struct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
   }
 };
 
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::decorated_struct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).field_ref()...);
   }
 };
@@ -31,7 +31,7 @@ struct ForEachField<::apache::thrift::fixtures::types::decorated_struct> {
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::ContainerStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).fieldA_ref()...);
     f(1, static_cast<T&&>(t).fieldB_ref()...);
     f(2, static_cast<T&&>(t).fieldC_ref()...);
@@ -46,7 +46,7 @@ struct ForEachField<::apache::thrift::fixtures::types::ContainerStruct> {
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::CppTypeStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).fieldA_ref()...);
   }
 };
@@ -54,7 +54,7 @@ struct ForEachField<::apache::thrift::fixtures::types::CppTypeStruct> {
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::VirtualStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).MyIntField_ref()...);
   }
 };
@@ -62,7 +62,7 @@ struct ForEachField<::apache::thrift::fixtures::types::VirtualStruct> {
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).a_ref()...);
     f(1, static_cast<T&&>(t).b_ref()...);
   }
@@ -71,7 +71,7 @@ struct ForEachField<::apache::thrift::fixtures::types::MyStructWithForwardRefEnu
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::TrivialNumeric> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).a_ref()...);
     f(1, static_cast<T&&>(t).b_ref()...);
   }
@@ -80,7 +80,7 @@ struct ForEachField<::apache::thrift::fixtures::types::TrivialNumeric> {
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::TrivialNestedWithDefault> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).z_ref()...);
     f(1, static_cast<T&&>(t).n_ref()...);
   }
@@ -89,7 +89,7 @@ struct ForEachField<::apache::thrift::fixtures::types::TrivialNestedWithDefault>
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::ComplexString> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).a_ref()...);
     f(1, static_cast<T&&>(t).b_ref()...);
   }
@@ -98,7 +98,7 @@ struct ForEachField<::apache::thrift::fixtures::types::ComplexString> {
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::ComplexNestedWithDefault> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).z_ref()...);
     f(1, static_cast<T&&>(t).n_ref()...);
   }
@@ -107,7 +107,7 @@ struct ForEachField<::apache::thrift::fixtures::types::ComplexNestedWithDefault>
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::MinPadding> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).small_ref()...);
     f(1, static_cast<T&&>(t).big_ref()...);
     f(2, static_cast<T&&>(t).medium_ref()...);
@@ -119,7 +119,7 @@ struct ForEachField<::apache::thrift::fixtures::types::MinPadding> {
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::MinPaddingWithCustomType> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).small_ref()...);
     f(1, static_cast<T&&>(t).big_ref()...);
     f(2, static_cast<T&&>(t).medium_ref()...);
@@ -131,7 +131,7 @@ struct ForEachField<::apache::thrift::fixtures::types::MinPaddingWithCustomType>
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::MyStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).MyIntField_ref()...);
     f(1, static_cast<T&&>(t).MyStringField_ref()...);
     f(2, static_cast<T&&>(t).majorVer_ref()...);
@@ -142,14 +142,14 @@ struct ForEachField<::apache::thrift::fixtures::types::MyStruct> {
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::MyDataItem> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
   }
 };
 
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::Renamed> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).bar_ref()...);
   }
 };
@@ -157,7 +157,7 @@ struct ForEachField<::apache::thrift::fixtures::types::Renamed> {
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::AnnotatedTypes> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).binary_field_ref()...);
     f(1, static_cast<T&&>(t).list_field_ref()...);
   }
@@ -166,7 +166,7 @@ struct ForEachField<::apache::thrift::fixtures::types::AnnotatedTypes> {
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::ForwardUsageRoot> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).ForwardUsageStruct_ref()...);
     f(1, static_cast<T&&>(t).ForwardUsageByRef_ref()...);
   }
@@ -175,7 +175,7 @@ struct ForEachField<::apache::thrift::fixtures::types::ForwardUsageRoot> {
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::ForwardUsageStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).foo_ref()...);
   }
 };
@@ -183,7 +183,7 @@ struct ForEachField<::apache::thrift::fixtures::types::ForwardUsageStruct> {
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::ForwardUsageByRef> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).foo_ref()...);
   }
 };
@@ -191,7 +191,7 @@ struct ForEachField<::apache::thrift::fixtures::types::ForwardUsageByRef> {
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::IncompleteMap> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).field_ref()...);
   }
 };
@@ -199,14 +199,14 @@ struct ForEachField<::apache::thrift::fixtures::types::IncompleteMap> {
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::IncompleteMapDep> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
   }
 };
 
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::CompleteMap> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).field_ref()...);
   }
 };
@@ -214,14 +214,14 @@ struct ForEachField<::apache::thrift::fixtures::types::CompleteMap> {
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::CompleteMapDep> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
   }
 };
 
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::IncompleteList> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).field_ref()...);
   }
 };
@@ -229,14 +229,14 @@ struct ForEachField<::apache::thrift::fixtures::types::IncompleteList> {
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::IncompleteListDep> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
   }
 };
 
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::CompleteList> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).field_ref()...);
   }
 };
@@ -244,14 +244,14 @@ struct ForEachField<::apache::thrift::fixtures::types::CompleteList> {
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::CompleteListDep> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
   }
 };
 
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::AdaptedList> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).field_ref()...);
   }
 };
@@ -259,7 +259,7 @@ struct ForEachField<::apache::thrift::fixtures::types::AdaptedList> {
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::detail::AdaptedListDep> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).field_ref()...);
   }
 };
@@ -267,7 +267,7 @@ struct ForEachField<::apache::thrift::fixtures::types::detail::AdaptedListDep> {
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::DependentAdaptedList> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).field_ref()...);
   }
 };
@@ -275,7 +275,7 @@ struct ForEachField<::apache::thrift::fixtures::types::DependentAdaptedList> {
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).field_ref()...);
   }
 };
@@ -283,7 +283,7 @@ struct ForEachField<::apache::thrift::fixtures::types::detail::DependentAdaptedL
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::AllocatorAware> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).aa_list_ref()...);
     f(1, static_cast<T&&>(t).aa_set_ref()...);
     f(2, static_cast<T&&>(t).aa_map_ref()...);
@@ -297,7 +297,7 @@ struct ForEachField<::apache::thrift::fixtures::types::AllocatorAware> {
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::AllocatorAware2> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).not_a_container_ref()...);
     f(1, static_cast<T&&>(t).box_field_ref()...);
   }
@@ -306,7 +306,7 @@ struct ForEachField<::apache::thrift::fixtures::types::AllocatorAware2> {
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::TypedefStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).i32_field_ref()...);
     f(1, static_cast<T&&>(t).IntTypedef_field_ref()...);
     f(2, static_cast<T&&>(t).UintTypedef_field_ref()...);
@@ -316,7 +316,7 @@ struct ForEachField<::apache::thrift::fixtures::types::TypedefStruct> {
 template <>
 struct ForEachField<::apache::thrift::fixtures::types::StructWithDoubleUnderscores> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).__field_ref()...);
   }
 };

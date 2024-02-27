@@ -18,7 +18,7 @@
 namespace apache { namespace thrift {
 template<>
 size_t Freezer<<%struct:cpp_fullname%>, void>::extraSizeImpl(
-    FOLLY_MAYBE_UNUSED const Freezer<<%struct:cpp_fullname%>, void>::ThawedType& src) {
+    [[maybe_unused]] const Freezer<<%struct:cpp_fullname%>, void>::ThawedType& src) {
   return 0<%!
 %><%#struct:fields%><%!
 %><%#field:type%><%!
@@ -31,9 +31,9 @@ size_t Freezer<<%struct:cpp_fullname%>, void>::extraSizeImpl(
 
 template<>
 void Freezer<<%struct:cpp_fullname%>, void>::freezeImpl(
-    FOLLY_MAYBE_UNUSED const Freezer<<%struct:cpp_fullname%>, void>::ThawedType& src,
-    FOLLY_MAYBE_UNUSED Freezer<<%struct:cpp_fullname%>, void>::FrozenType& dst,
-    FOLLY_MAYBE_UNUSED byte*& buffer) {
+    [[maybe_unused]] const Freezer<<%struct:cpp_fullname%>, void>::ThawedType& src,
+    [[maybe_unused]] Freezer<<%struct:cpp_fullname%>, void>::FrozenType& dst,
+    [[maybe_unused]] byte*& buffer) {
 <%#struct:fields%>
 <%#field:type%>
 <%#type:bool?%>
@@ -53,8 +53,8 @@ void Freezer<<%struct:cpp_fullname%>, void>::freezeImpl(
 
 template<>
 void Freezer<<%struct:cpp_fullname%>, void>::thawImpl(
-    FOLLY_MAYBE_UNUSED const Freezer<<%struct:cpp_fullname%>, void>::FrozenType& src,
-    FOLLY_MAYBE_UNUSED Freezer<<%struct:cpp_fullname%>, void>::ThawedType& dst) {
+    [[maybe_unused]] const Freezer<<%struct:cpp_fullname%>, void>::FrozenType& src,
+    [[maybe_unused]] Freezer<<%struct:cpp_fullname%>, void>::ThawedType& dst) {
 <%#struct:fields%>
 <%#field:type%>
 <%#type:bool?%>

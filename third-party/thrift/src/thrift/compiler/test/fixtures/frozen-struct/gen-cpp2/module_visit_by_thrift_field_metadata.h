@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct VisitByFieldId<::some::ns::ModuleA> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).i32Field_ref());
@@ -39,7 +39,7 @@ struct VisitByFieldId<::some::ns::ModuleA> {
 template <>
 struct VisitByFieldId<::some::ns::ModuleB> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).i32Field_ref());
@@ -54,7 +54,7 @@ struct VisitByFieldId<::some::ns::ModuleB> {
 template <>
 struct VisitByFieldId<::some::ns::detail::DirectlyAdapted> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field_ref());
@@ -67,7 +67,7 @@ struct VisitByFieldId<::some::ns::detail::DirectlyAdapted> {
 template <>
 struct VisitByFieldId<::some::ns::CppRef> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).shared_field_ref());

@@ -14,7 +14,7 @@ namespace cpp2 {
 typedef apache::thrift::ThriftPresult<false> MyNode_do_mid_pargs;
 typedef apache::thrift::ThriftPresult<true> MyNode_do_mid_presult;
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MyNodeAsyncProcessor::setUpAndProcess_do_mid(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, FOLLY_MAYBE_UNUSED apache::thrift::concurrency::ThreadManager* tm) {
+void MyNodeAsyncProcessor::setUpAndProcess_do_mid(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
   if (!setUpRequestProcessing(req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, iface_)) {
     return;
   }
@@ -68,7 +68,7 @@ apache::thrift::SerializedResponse MyNodeAsyncProcessor::return_do_mid(apache::t
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MyNodeAsyncProcessor::throw_wrapped_do_mid(apache::thrift::ResponseChannelRequest::UniquePtr req,FOLLY_MAYBE_UNUSED int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MyNodeAsyncProcessor::throw_wrapped_do_mid(apache::thrift::ResponseChannelRequest::UniquePtr req,[[maybe_unused]] int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }

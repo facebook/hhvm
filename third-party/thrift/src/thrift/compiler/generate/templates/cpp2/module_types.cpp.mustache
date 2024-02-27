@@ -35,7 +35,7 @@
 <%#program:split_structs%>
 <%#struct:any?%>
 void __fbthrift_static_init_<%struct:cpp_underlying_name%>() {
-  FOLLY_MAYBE_UNUSED static bool init = (
+  [[maybe_unused]] static bool init = (
     apache::thrift::conformance::detail::registerGeneratedStruct<
         <%struct:cpp_underlying_name%>,
 <%#program:json?%>
@@ -259,7 +259,7 @@ static_assert(
 %><%! Validate adapters in typedefs and fields. %>
 
 <% > common/namespace_cpp2_begin%> namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 <%#program:split_structs%><%#struct:fields%>
 <%#field:cpp_first_adapter%><%#field:type%>
   ::apache::thrift::adapt_detail::validateFieldAdapter<<%!

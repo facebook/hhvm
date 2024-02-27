@@ -162,7 +162,7 @@ bool ComplexUnion::operator==(const ComplexUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool ComplexUnion::operator<(FOLLY_MAYBE_UNUSED const ComplexUnion& rhs) const {
+bool ComplexUnion::operator<([[maybe_unused]] const ComplexUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
@@ -296,7 +296,7 @@ bool ListUnion::operator==(const ListUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool ListUnion::operator<(FOLLY_MAYBE_UNUSED const ListUnion& rhs) const {
+bool ListUnion::operator<([[maybe_unused]] const ListUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
@@ -430,7 +430,7 @@ bool DataUnion::operator==(const DataUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool DataUnion::operator<(FOLLY_MAYBE_UNUSED const DataUnion& rhs) const {
+bool DataUnion::operator<([[maybe_unused]] const DataUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
@@ -492,14 +492,14 @@ Val::Val() :
 
 Val::~Val() {}
 
-Val::Val(FOLLY_MAYBE_UNUSED Val&& other) noexcept :
+Val::Val([[maybe_unused]] Val&& other) noexcept :
     __fbthrift_field_strVal(std::move(other.__fbthrift_field_strVal)),
     __fbthrift_field_intVal(std::move(other.__fbthrift_field_intVal)),
     __fbthrift_field_typedefValue(std::move(other.__fbthrift_field_typedefValue)),
     __isset(other.__isset) {
 }
 
-Val& Val::operator=(FOLLY_MAYBE_UNUSED Val&& other) noexcept {
+Val& Val::operator=([[maybe_unused]] Val&& other) noexcept {
     this->__fbthrift_field_strVal = std::move(other.__fbthrift_field_strVal);
     this->__fbthrift_field_intVal = std::move(other.__fbthrift_field_intVal);
     this->__fbthrift_field_typedefValue = std::move(other.__fbthrift_field_typedefValue);
@@ -533,11 +533,11 @@ bool Val::__fbthrift_is_empty() const {
   return false;
 }
 
-bool Val::operator==(FOLLY_MAYBE_UNUSED const Val& rhs) const {
+bool Val::operator==([[maybe_unused]] const Val& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Val::operator<(FOLLY_MAYBE_UNUSED const Val& rhs) const {
+bool Val::operator<([[maybe_unused]] const Val& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -550,7 +550,7 @@ const ::cpp2::containerTypedef& Val::get_typedefValue() const& {
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Val& a, FOLLY_MAYBE_UNUSED Val& b) {
+void swap([[maybe_unused]] Val& a, [[maybe_unused]] Val& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_strVal, b.__fbthrift_field_strVal);
   swap(a.__fbthrift_field_intVal, b.__fbthrift_field_intVal);
@@ -682,7 +682,7 @@ bool ValUnion::operator==(const ValUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool ValUnion::operator<(FOLLY_MAYBE_UNUSED const ValUnion& rhs) const {
+bool ValUnion::operator<([[maybe_unused]] const ValUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
@@ -828,7 +828,7 @@ bool VirtualComplexUnion::operator==(const VirtualComplexUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool VirtualComplexUnion::operator<(FOLLY_MAYBE_UNUSED const VirtualComplexUnion& rhs) const {
+bool VirtualComplexUnion::operator<([[maybe_unused]] const VirtualComplexUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
@@ -901,16 +901,16 @@ bool NonCopyableStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool NonCopyableStruct::operator==(FOLLY_MAYBE_UNUSED const NonCopyableStruct& rhs) const {
+bool NonCopyableStruct::operator==([[maybe_unused]] const NonCopyableStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool NonCopyableStruct::operator<(FOLLY_MAYBE_UNUSED const NonCopyableStruct& rhs) const {
+bool NonCopyableStruct::operator<([[maybe_unused]] const NonCopyableStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED NonCopyableStruct& a, FOLLY_MAYBE_UNUSED NonCopyableStruct& b) {
+void swap([[maybe_unused]] NonCopyableStruct& a, [[maybe_unused]] NonCopyableStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_num, b.__fbthrift_field_num);
   swap(a.__isset, b.__isset);
@@ -1003,7 +1003,7 @@ bool NonCopyableUnion::operator==(const NonCopyableUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool NonCopyableUnion::operator<(FOLLY_MAYBE_UNUSED const NonCopyableUnion& rhs) const {
+bool NonCopyableUnion::operator<([[maybe_unused]] const NonCopyableUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
@@ -1032,7 +1032,7 @@ static_assert(
 } // cpp2
 
 namespace cpp2 { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }} // cpp2
 namespace apache::thrift::detail::annotation {

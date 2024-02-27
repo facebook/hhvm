@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct VisitByFieldId<::test::fixtures::python_capi::SerializedStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).s_ref());
@@ -35,7 +35,7 @@ struct VisitByFieldId<::test::fixtures::python_capi::SerializedStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::python_capi::SerializedUnion> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).s_ref());
@@ -50,7 +50,7 @@ struct VisitByFieldId<::test::fixtures::python_capi::SerializedUnion> {
 template <>
 struct VisitByFieldId<::test::fixtures::python_capi::SerializedError> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).msg_ref());
@@ -67,7 +67,7 @@ struct VisitByFieldId<::test::fixtures::python_capi::SerializedError> {
 template <>
 struct VisitByFieldId<::test::fixtures::python_capi::MarshalStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).s_ref());
@@ -86,7 +86,7 @@ struct VisitByFieldId<::test::fixtures::python_capi::MarshalStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::python_capi::MarshalUnion> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).s_ref());
@@ -101,7 +101,7 @@ struct VisitByFieldId<::test::fixtures::python_capi::MarshalUnion> {
 template <>
 struct VisitByFieldId<::test::fixtures::python_capi::MarshalError> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).msg_ref());

@@ -16,7 +16,7 @@
 
 %><%#service:functions%><%#function:return_type%><%^function:starts_interaction?%>
 template <typename ProtocolIn_, typename ProtocolOut_>
-void <%service:parent_service_cpp_name%>AsyncProcessor::setUpAndProcess_<%function:prefixed_name%>(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, FOLLY_MAYBE_UNUSED apache::thrift::concurrency::ThreadManager* tm) {
+void <%service:parent_service_cpp_name%>AsyncProcessor::setUpAndProcess_<%function:prefixed_name%>(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
   if (!setUpRequestProcessing(req, ctx, eb, <%^function:eb%>tm<%/function:eb%><%#function:eb%>nullptr<%/function:eb%>, <% > types/function_kind%>, iface_<%#service:interaction?%>, "<%service:name%>"<%/service:interaction?%><%#function:creates_interaction?%>, "<%function:created_interaction%>", true<%/function:creates_interaction?%>)) {
     return;
   }
@@ -233,7 +233,7 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void <%service:parent_service_cpp_name%>AsyncProcessor::throw_wrapped_<%function:prefixed_name%>(apache::thrift::ResponseChannelRequest::UniquePtr req,FOLLY_MAYBE_UNUSED int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void <%service:parent_service_cpp_name%>AsyncProcessor::throw_wrapped_<%function:prefixed_name%>(apache::thrift::ResponseChannelRequest::UniquePtr req,[[maybe_unused]] int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }

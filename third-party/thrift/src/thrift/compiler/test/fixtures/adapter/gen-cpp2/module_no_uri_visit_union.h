@@ -17,7 +17,7 @@ template <>
 struct VisitUnion<::cpp2::RefUnion> {
 
   template <typename F, typename T>
-  decltype(auto) operator()(FOLLY_MAYBE_UNUSED F&& f, T&& t) const {
+  decltype(auto) operator()([[maybe_unused]] F&& f, T&& t) const {
     using Union = std::remove_reference_t<T>;
     switch (t.getType()) {
     case Union::Type::field1:

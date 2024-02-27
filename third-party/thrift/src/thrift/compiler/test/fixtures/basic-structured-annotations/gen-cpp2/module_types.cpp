@@ -78,16 +78,16 @@ bool runtime_annotation::__fbthrift_is_empty() const {
   return true;
 }
 
-bool runtime_annotation::operator==(FOLLY_MAYBE_UNUSED const runtime_annotation& rhs) const {
+bool runtime_annotation::operator==([[maybe_unused]] const runtime_annotation& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool runtime_annotation::operator<(FOLLY_MAYBE_UNUSED const runtime_annotation& rhs) const {
+bool runtime_annotation::operator<([[maybe_unused]] const runtime_annotation& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED runtime_annotation& a, FOLLY_MAYBE_UNUSED runtime_annotation& b) {
+void swap([[maybe_unused]] runtime_annotation& a, [[maybe_unused]] runtime_annotation& b) {
   using ::std::swap;
 }
 
@@ -148,13 +148,13 @@ structured_annotation_inline::structured_annotation_inline() :
 
 structured_annotation_inline::~structured_annotation_inline() {}
 
-structured_annotation_inline::structured_annotation_inline(FOLLY_MAYBE_UNUSED structured_annotation_inline&& other) noexcept :
+structured_annotation_inline::structured_annotation_inline([[maybe_unused]] structured_annotation_inline&& other) noexcept :
     __fbthrift_field_count(std::move(other.__fbthrift_field_count)),
     __fbthrift_field_name(std::move(other.__fbthrift_field_name)),
     __isset(other.__isset) {
 }
 
-structured_annotation_inline& structured_annotation_inline::operator=(FOLLY_MAYBE_UNUSED structured_annotation_inline&& other) noexcept {
+structured_annotation_inline& structured_annotation_inline::operator=([[maybe_unused]] structured_annotation_inline&& other) noexcept {
     this->__fbthrift_field_count = std::move(other.__fbthrift_field_count);
     this->__fbthrift_field_name = std::move(other.__fbthrift_field_name);
     __isset = other.__isset;
@@ -184,16 +184,16 @@ bool structured_annotation_inline::__fbthrift_is_empty() const {
   return false;
 }
 
-bool structured_annotation_inline::operator==(FOLLY_MAYBE_UNUSED const structured_annotation_inline& rhs) const {
+bool structured_annotation_inline::operator==([[maybe_unused]] const structured_annotation_inline& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool structured_annotation_inline::operator<(FOLLY_MAYBE_UNUSED const structured_annotation_inline& rhs) const {
+bool structured_annotation_inline::operator<([[maybe_unused]] const structured_annotation_inline& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED structured_annotation_inline& a, FOLLY_MAYBE_UNUSED structured_annotation_inline& b) {
+void swap([[maybe_unused]] structured_annotation_inline& a, [[maybe_unused]] structured_annotation_inline& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_count, b.__fbthrift_field_count);
   swap(a.__fbthrift_field_name, b.__fbthrift_field_name);
@@ -256,12 +256,12 @@ structured_annotation_with_default::structured_annotation_with_default() :
 
 structured_annotation_with_default::~structured_annotation_with_default() {}
 
-structured_annotation_with_default::structured_annotation_with_default(FOLLY_MAYBE_UNUSED structured_annotation_with_default&& other) noexcept :
+structured_annotation_with_default::structured_annotation_with_default([[maybe_unused]] structured_annotation_with_default&& other) noexcept :
     __fbthrift_field_name(std::move(other.__fbthrift_field_name)),
     __isset(other.__isset) {
 }
 
-structured_annotation_with_default& structured_annotation_with_default::operator=(FOLLY_MAYBE_UNUSED structured_annotation_with_default&& other) noexcept {
+structured_annotation_with_default& structured_annotation_with_default::operator=([[maybe_unused]] structured_annotation_with_default&& other) noexcept {
     this->__fbthrift_field_name = std::move(other.__fbthrift_field_name);
     __isset = other.__isset;
     return *this;
@@ -287,16 +287,16 @@ bool structured_annotation_with_default::__fbthrift_is_empty() const {
   return false;
 }
 
-bool structured_annotation_with_default::operator==(FOLLY_MAYBE_UNUSED const structured_annotation_with_default& rhs) const {
+bool structured_annotation_with_default::operator==([[maybe_unused]] const structured_annotation_with_default& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool structured_annotation_with_default::operator<(FOLLY_MAYBE_UNUSED const structured_annotation_with_default& rhs) const {
+bool structured_annotation_with_default::operator<([[maybe_unused]] const structured_annotation_with_default& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED structured_annotation_with_default& a, FOLLY_MAYBE_UNUSED structured_annotation_with_default& b) {
+void swap([[maybe_unused]] structured_annotation_with_default& a, [[maybe_unused]] structured_annotation_with_default& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_name, b.__fbthrift_field_name);
   swap(a.__isset, b.__isset);
@@ -369,14 +369,14 @@ structured_annotation_recursive::structured_annotation_recursive() {
 
 structured_annotation_recursive::~structured_annotation_recursive() {}
 
-structured_annotation_recursive::structured_annotation_recursive(FOLLY_MAYBE_UNUSED structured_annotation_recursive&& other) noexcept :
+structured_annotation_recursive::structured_annotation_recursive([[maybe_unused]] structured_annotation_recursive&& other) noexcept :
     __fbthrift_field_name(std::move(other.__fbthrift_field_name)),
     __fbthrift_field_recurse(std::move(other.__fbthrift_field_recurse)),
     __fbthrift_field_forward(std::move(other.__fbthrift_field_forward)),
     __isset(other.__isset) {
 }
 
-structured_annotation_recursive& structured_annotation_recursive::operator=(FOLLY_MAYBE_UNUSED structured_annotation_recursive&& other) noexcept {
+structured_annotation_recursive& structured_annotation_recursive::operator=([[maybe_unused]] structured_annotation_recursive&& other) noexcept {
     this->__fbthrift_field_name = std::move(other.__fbthrift_field_name);
     this->__fbthrift_field_recurse = std::move(other.__fbthrift_field_recurse);
     this->__fbthrift_field_forward = std::move(other.__fbthrift_field_forward);
@@ -409,11 +409,11 @@ bool structured_annotation_recursive::__fbthrift_is_empty() const {
   return false;
 }
 
-bool structured_annotation_recursive::operator==(FOLLY_MAYBE_UNUSED const structured_annotation_recursive& rhs) const {
+bool structured_annotation_recursive::operator==([[maybe_unused]] const structured_annotation_recursive& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool structured_annotation_recursive::operator<(FOLLY_MAYBE_UNUSED const structured_annotation_recursive& rhs) const {
+bool structured_annotation_recursive::operator<([[maybe_unused]] const structured_annotation_recursive& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -426,7 +426,7 @@ const ::test::fixtures::basic-structured-annotations::structured_annotation_forw
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED structured_annotation_recursive& a, FOLLY_MAYBE_UNUSED structured_annotation_recursive& b) {
+void swap([[maybe_unused]] structured_annotation_recursive& a, [[maybe_unused]] structured_annotation_recursive& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_name, b.__fbthrift_field_name);
   swap(a.__fbthrift_field_recurse, b.__fbthrift_field_recurse);
@@ -513,16 +513,16 @@ bool structured_annotation_forward::__fbthrift_is_empty() const {
   return false;
 }
 
-bool structured_annotation_forward::operator==(FOLLY_MAYBE_UNUSED const structured_annotation_forward& rhs) const {
+bool structured_annotation_forward::operator==([[maybe_unused]] const structured_annotation_forward& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool structured_annotation_forward::operator<(FOLLY_MAYBE_UNUSED const structured_annotation_forward& rhs) const {
+bool structured_annotation_forward::operator<([[maybe_unused]] const structured_annotation_forward& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED structured_annotation_forward& a, FOLLY_MAYBE_UNUSED structured_annotation_forward& b) {
+void swap([[maybe_unused]] structured_annotation_forward& a, [[maybe_unused]] structured_annotation_forward& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_count, b.__fbthrift_field_count);
   swap(a.__isset, b.__isset);
@@ -583,13 +583,13 @@ structured_annotation_nested::structured_annotation_nested() {
 
 structured_annotation_nested::~structured_annotation_nested() {}
 
-structured_annotation_nested::structured_annotation_nested(FOLLY_MAYBE_UNUSED structured_annotation_nested&& other) noexcept :
+structured_annotation_nested::structured_annotation_nested([[maybe_unused]] structured_annotation_nested&& other) noexcept :
     __fbthrift_field_name(std::move(other.__fbthrift_field_name)),
     __fbthrift_field_nest(std::move(other.__fbthrift_field_nest)),
     __isset(other.__isset) {
 }
 
-structured_annotation_nested& structured_annotation_nested::operator=(FOLLY_MAYBE_UNUSED structured_annotation_nested&& other) noexcept {
+structured_annotation_nested& structured_annotation_nested::operator=([[maybe_unused]] structured_annotation_nested&& other) noexcept {
     this->__fbthrift_field_name = std::move(other.__fbthrift_field_name);
     this->__fbthrift_field_nest = std::move(other.__fbthrift_field_nest);
     __isset = other.__isset;
@@ -619,11 +619,11 @@ bool structured_annotation_nested::__fbthrift_is_empty() const {
   return false;
 }
 
-bool structured_annotation_nested::operator==(FOLLY_MAYBE_UNUSED const structured_annotation_nested& rhs) const {
+bool structured_annotation_nested::operator==([[maybe_unused]] const structured_annotation_nested& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool structured_annotation_nested::operator<(FOLLY_MAYBE_UNUSED const structured_annotation_nested& rhs) const {
+bool structured_annotation_nested::operator<([[maybe_unused]] const structured_annotation_nested& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -636,7 +636,7 @@ const ::test::fixtures::basic-structured-annotations::structured_annotation_with
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED structured_annotation_nested& a, FOLLY_MAYBE_UNUSED structured_annotation_nested& b) {
+void swap([[maybe_unused]] structured_annotation_nested& a, [[maybe_unused]] structured_annotation_nested& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_name, b.__fbthrift_field_name);
   swap(a.__fbthrift_field_nest, b.__fbthrift_field_nest);
@@ -706,7 +706,7 @@ MyStruct::MyStruct() :
 
 MyStruct::~MyStruct() {}
 
-MyStruct::MyStruct(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept :
+MyStruct::MyStruct([[maybe_unused]] MyStruct&& other) noexcept :
     __fbthrift_field_annotated_field(std::move(other.__fbthrift_field_annotated_field)),
     __fbthrift_field_annotated_type(std::move(other.__fbthrift_field_annotated_type)),
     __fbthrift_field_annotated_recursive(std::move(other.__fbthrift_field_annotated_recursive)),
@@ -714,7 +714,7 @@ MyStruct::MyStruct(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept :
     __isset(other.__isset) {
 }
 
-MyStruct& MyStruct::operator=(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept {
+MyStruct& MyStruct::operator=([[maybe_unused]] MyStruct&& other) noexcept {
     this->__fbthrift_field_annotated_field = std::move(other.__fbthrift_field_annotated_field);
     this->__fbthrift_field_annotated_type = std::move(other.__fbthrift_field_annotated_type);
     this->__fbthrift_field_annotated_recursive = std::move(other.__fbthrift_field_annotated_recursive);
@@ -752,16 +752,16 @@ bool MyStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
+bool MyStruct::operator==([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
+bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyStruct& a, FOLLY_MAYBE_UNUSED MyStruct& b) {
+void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_annotated_field, b.__fbthrift_field_annotated_field);
   swap(a.__fbthrift_field_annotated_type, b.__fbthrift_field_annotated_type);
@@ -825,12 +825,12 @@ MyException::MyException() {
 
 MyException::~MyException() {}
 
-MyException::MyException(FOLLY_MAYBE_UNUSED MyException&& other) noexcept :
+MyException::MyException([[maybe_unused]] MyException&& other) noexcept :
     __fbthrift_field_context(std::move(other.__fbthrift_field_context)),
     __isset(other.__isset) {
 }
 
-MyException& MyException::operator=(FOLLY_MAYBE_UNUSED MyException&& other) noexcept {
+MyException& MyException::operator=([[maybe_unused]] MyException&& other) noexcept {
     this->__fbthrift_field_context = std::move(other.__fbthrift_field_context);
     __isset = other.__isset;
     return *this;
@@ -856,16 +856,16 @@ bool MyException::__fbthrift_is_empty() const {
   return false;
 }
 
-bool MyException::operator==(FOLLY_MAYBE_UNUSED const MyException& rhs) const {
+bool MyException::operator==([[maybe_unused]] const MyException& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyException::operator<(FOLLY_MAYBE_UNUSED const MyException& rhs) const {
+bool MyException::operator<([[maybe_unused]] const MyException& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MyException& a, FOLLY_MAYBE_UNUSED MyException& b) {
+void swap([[maybe_unused]] MyException& a, [[maybe_unused]] MyException& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_context, b.__fbthrift_field_context);
   swap(a.__isset, b.__isset);
@@ -999,7 +999,7 @@ bool MyUnion::operator==(const MyUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool MyUnion::operator<(FOLLY_MAYBE_UNUSED const MyUnion& rhs) const {
+bool MyUnion::operator<([[maybe_unused]] const MyUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
@@ -1022,7 +1022,7 @@ template uint32_t MyUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWri
 }}} // test::fixtures::basic-structured-annotations
 
 namespace test { namespace fixtures { namespace basic-structured-annotations { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }}}} // test::fixtures::basic-structured-annotations
 namespace apache::thrift::detail::annotation {

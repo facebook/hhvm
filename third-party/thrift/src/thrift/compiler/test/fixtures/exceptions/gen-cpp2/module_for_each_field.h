@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::cpp2::Fiery> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).message_ref()...);
   }
 };
@@ -24,7 +24,7 @@ struct ForEachField<::cpp2::Fiery> {
 template <>
 struct ForEachField<::cpp2::Serious> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).sonnet_ref()...);
   }
 };
@@ -32,7 +32,7 @@ struct ForEachField<::cpp2::Serious> {
 template <>
 struct ForEachField<::cpp2::ComplexFieldNames> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).error_message_ref()...);
     f(1, static_cast<T&&>(t).internal_error_message_ref()...);
   }
@@ -41,7 +41,7 @@ struct ForEachField<::cpp2::ComplexFieldNames> {
 template <>
 struct ForEachField<::cpp2::CustomFieldNames> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).error_message_ref()...);
     f(1, static_cast<T&&>(t).internal_error_message_ref()...);
   }
@@ -50,7 +50,7 @@ struct ForEachField<::cpp2::CustomFieldNames> {
 template <>
 struct ForEachField<::cpp2::ExceptionWithPrimitiveField> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).message_ref()...);
     f(1, static_cast<T&&>(t).error_code_ref()...);
   }
@@ -59,7 +59,7 @@ struct ForEachField<::cpp2::ExceptionWithPrimitiveField> {
 template <>
 struct ForEachField<::cpp2::ExceptionWithStructuredAnnotation> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).message_field_ref()...);
     f(1, static_cast<T&&>(t).error_code_ref()...);
   }
@@ -68,7 +68,7 @@ struct ForEachField<::cpp2::ExceptionWithStructuredAnnotation> {
 template <>
 struct ForEachField<::cpp2::Banal> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
   }
 };
 } // namespace detail

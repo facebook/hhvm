@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct VisitByFieldId<::test::fixtures::tablebased::TrivialTypesStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).fieldA_ref());
@@ -37,7 +37,7 @@ struct VisitByFieldId<::test::fixtures::tablebased::TrivialTypesStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::tablebased::ContainerStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 12:
       return f(0, static_cast<T&&>(t).fieldA_ref());
@@ -64,7 +64,7 @@ struct VisitByFieldId<::test::fixtures::tablebased::ContainerStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::tablebased::ExampleUnion> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).fieldA_ref());

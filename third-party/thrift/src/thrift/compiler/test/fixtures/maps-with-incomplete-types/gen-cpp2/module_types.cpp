@@ -51,12 +51,12 @@ A::A() {
 
 A::~A() {}
 
-A::A(FOLLY_MAYBE_UNUSED A&& other) noexcept :
+A::A([[maybe_unused]] A&& other) noexcept :
     __fbthrift_field_some_map(std::move(other.__fbthrift_field_some_map)),
     __isset(other.__isset) {
 }
 
-A& A::operator=(FOLLY_MAYBE_UNUSED A&& other) noexcept {
+A& A::operator=([[maybe_unused]] A&& other) noexcept {
     this->__fbthrift_field_some_map = std::move(other.__fbthrift_field_some_map);
     __isset = other.__isset;
     return *this;
@@ -82,7 +82,7 @@ bool A::__fbthrift_is_empty() const {
   return !(this->__isset.get(0));
 }
 
-bool A::operator==(FOLLY_MAYBE_UNUSED const A& rhs) const {
+bool A::operator==([[maybe_unused]] const A& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
@@ -95,7 +95,7 @@ std::unordered_map<::std::int32_t, ::apache::thrift::test::B>* A::get_some_map()
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED A& a, FOLLY_MAYBE_UNUSED A& b) {
+void swap([[maybe_unused]] A& a, [[maybe_unused]] A& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_some_map, b.__fbthrift_field_some_map);
   swap(a.__isset, b.__isset);
@@ -170,16 +170,16 @@ bool B::__fbthrift_is_empty() const {
   return !(this->__isset.get(0));
 }
 
-bool B::operator==(FOLLY_MAYBE_UNUSED const B& rhs) const {
+bool B::operator==([[maybe_unused]] const B& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool B::operator<(FOLLY_MAYBE_UNUSED const B& rhs) const {
+bool B::operator<([[maybe_unused]] const B& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED B& a, FOLLY_MAYBE_UNUSED B& b) {
+void swap([[maybe_unused]] B& a, [[maybe_unused]] B& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field, b.__fbthrift_field_field);
   swap(a.__isset, b.__isset);
@@ -198,7 +198,7 @@ template uint32_t B::serializedSizeZC<>(apache::thrift::CompactProtocolWriter co
 }}} // apache::thrift::test
 
 namespace apache { namespace thrift { namespace test { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }}}} // apache::thrift::test
 namespace apache::thrift::detail::annotation {

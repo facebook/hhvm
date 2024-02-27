@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::cpp2::SmallStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).small_A_ref()...);
     f(1, static_cast<T&&>(t).small_B_ref()...);
   }
@@ -25,7 +25,7 @@ struct ForEachField<::cpp2::SmallStruct> {
 template <>
 struct ForEachField<::cpp2::containerStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).fieldA_ref()...);
     f(1, static_cast<T&&>(t).fieldB_ref()...);
     f(2, static_cast<T&&>(t).fieldC_ref()...);

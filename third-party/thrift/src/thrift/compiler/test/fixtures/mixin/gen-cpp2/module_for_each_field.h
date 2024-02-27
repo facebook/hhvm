@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::cpp2::Mixin1> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).field1_ref()...);
   }
 };
@@ -24,7 +24,7 @@ struct ForEachField<::cpp2::Mixin1> {
 template <>
 struct ForEachField<::cpp2::Mixin2> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).m1_ref()...);
     f(1, static_cast<T&&>(t).field2_ref()...);
   }
@@ -33,7 +33,7 @@ struct ForEachField<::cpp2::Mixin2> {
 template <>
 struct ForEachField<::cpp2::Mixin3Base> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).field3_ref()...);
   }
 };
@@ -41,7 +41,7 @@ struct ForEachField<::cpp2::Mixin3Base> {
 template <>
 struct ForEachField<::cpp2::Foo> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).field4_ref()...);
     f(1, static_cast<T&&>(t).m2_ref()...);
     f(2, static_cast<T&&>(t).m3_ref()...);

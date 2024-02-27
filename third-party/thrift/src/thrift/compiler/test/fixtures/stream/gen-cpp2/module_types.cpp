@@ -51,8 +51,8 @@ FooStreamEx::FooStreamEx() {
 
 FooStreamEx::~FooStreamEx() {}
 
-FooStreamEx::FooStreamEx(FOLLY_MAYBE_UNUSED FooStreamEx&& other) noexcept{}
-FooStreamEx& FooStreamEx::operator=(FOLLY_MAYBE_UNUSED FooStreamEx&& other) noexcept {
+FooStreamEx::FooStreamEx([[maybe_unused]] FooStreamEx&& other) noexcept{}
+FooStreamEx& FooStreamEx::operator=([[maybe_unused]] FooStreamEx&& other) noexcept {
     return *this;
 }
 
@@ -71,16 +71,16 @@ bool FooStreamEx::__fbthrift_is_empty() const {
   return true;
 }
 
-bool FooStreamEx::operator==(FOLLY_MAYBE_UNUSED const FooStreamEx& rhs) const {
+bool FooStreamEx::operator==([[maybe_unused]] const FooStreamEx& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool FooStreamEx::operator<(FOLLY_MAYBE_UNUSED const FooStreamEx& rhs) const {
+bool FooStreamEx::operator<([[maybe_unused]] const FooStreamEx& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED FooStreamEx& a, FOLLY_MAYBE_UNUSED FooStreamEx& b) {
+void swap([[maybe_unused]] FooStreamEx& a, [[maybe_unused]] FooStreamEx& b) {
   using ::std::swap;
 }
 
@@ -135,8 +135,8 @@ FooEx::FooEx() {
 
 FooEx::~FooEx() {}
 
-FooEx::FooEx(FOLLY_MAYBE_UNUSED FooEx&& other) noexcept{}
-FooEx& FooEx::operator=(FOLLY_MAYBE_UNUSED FooEx&& other) noexcept {
+FooEx::FooEx([[maybe_unused]] FooEx&& other) noexcept{}
+FooEx& FooEx::operator=([[maybe_unused]] FooEx&& other) noexcept {
     return *this;
 }
 
@@ -155,16 +155,16 @@ bool FooEx::__fbthrift_is_empty() const {
   return true;
 }
 
-bool FooEx::operator==(FOLLY_MAYBE_UNUSED const FooEx& rhs) const {
+bool FooEx::operator==([[maybe_unused]] const FooEx& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool FooEx::operator<(FOLLY_MAYBE_UNUSED const FooEx& rhs) const {
+bool FooEx::operator<([[maybe_unused]] const FooEx& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED FooEx& a, FOLLY_MAYBE_UNUSED FooEx& b) {
+void swap([[maybe_unused]] FooEx& a, [[maybe_unused]] FooEx& b) {
   using ::std::swap;
 }
 
@@ -219,8 +219,8 @@ FooEx2::FooEx2() {
 
 FooEx2::~FooEx2() {}
 
-FooEx2::FooEx2(FOLLY_MAYBE_UNUSED FooEx2&& other) noexcept{}
-FooEx2& FooEx2::operator=(FOLLY_MAYBE_UNUSED FooEx2&& other) noexcept {
+FooEx2::FooEx2([[maybe_unused]] FooEx2&& other) noexcept{}
+FooEx2& FooEx2::operator=([[maybe_unused]] FooEx2&& other) noexcept {
     return *this;
 }
 
@@ -239,16 +239,16 @@ bool FooEx2::__fbthrift_is_empty() const {
   return true;
 }
 
-bool FooEx2::operator==(FOLLY_MAYBE_UNUSED const FooEx2& rhs) const {
+bool FooEx2::operator==([[maybe_unused]] const FooEx2& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool FooEx2::operator<(FOLLY_MAYBE_UNUSED const FooEx2& rhs) const {
+bool FooEx2::operator<([[maybe_unused]] const FooEx2& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED FooEx2& a, FOLLY_MAYBE_UNUSED FooEx2& b) {
+void swap([[maybe_unused]] FooEx2& a, [[maybe_unused]] FooEx2& b) {
   using ::std::swap;
 }
 
@@ -265,7 +265,7 @@ template uint32_t FooEx2::serializedSizeZC<>(apache::thrift::CompactProtocolWrit
 } // cpp2
 
 namespace cpp2 { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }} // cpp2
 namespace apache::thrift::detail::annotation {

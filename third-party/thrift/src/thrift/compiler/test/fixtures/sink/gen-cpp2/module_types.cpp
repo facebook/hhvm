@@ -51,12 +51,12 @@ InitialResponse::InitialResponse() {
 
 InitialResponse::~InitialResponse() {}
 
-InitialResponse::InitialResponse(FOLLY_MAYBE_UNUSED InitialResponse&& other) noexcept :
+InitialResponse::InitialResponse([[maybe_unused]] InitialResponse&& other) noexcept :
     __fbthrift_field_content(std::move(other.__fbthrift_field_content)),
     __isset(other.__isset) {
 }
 
-InitialResponse& InitialResponse::operator=(FOLLY_MAYBE_UNUSED InitialResponse&& other) noexcept {
+InitialResponse& InitialResponse::operator=([[maybe_unused]] InitialResponse&& other) noexcept {
     this->__fbthrift_field_content = std::move(other.__fbthrift_field_content);
     __isset = other.__isset;
     return *this;
@@ -82,16 +82,16 @@ bool InitialResponse::__fbthrift_is_empty() const {
   return false;
 }
 
-bool InitialResponse::operator==(FOLLY_MAYBE_UNUSED const InitialResponse& rhs) const {
+bool InitialResponse::operator==([[maybe_unused]] const InitialResponse& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool InitialResponse::operator<(FOLLY_MAYBE_UNUSED const InitialResponse& rhs) const {
+bool InitialResponse::operator<([[maybe_unused]] const InitialResponse& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED InitialResponse& a, FOLLY_MAYBE_UNUSED InitialResponse& b) {
+void swap([[maybe_unused]] InitialResponse& a, [[maybe_unused]] InitialResponse& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_content, b.__fbthrift_field_content);
   swap(a.__isset, b.__isset);
@@ -148,12 +148,12 @@ FinalResponse::FinalResponse() {
 
 FinalResponse::~FinalResponse() {}
 
-FinalResponse::FinalResponse(FOLLY_MAYBE_UNUSED FinalResponse&& other) noexcept :
+FinalResponse::FinalResponse([[maybe_unused]] FinalResponse&& other) noexcept :
     __fbthrift_field_content(std::move(other.__fbthrift_field_content)),
     __isset(other.__isset) {
 }
 
-FinalResponse& FinalResponse::operator=(FOLLY_MAYBE_UNUSED FinalResponse&& other) noexcept {
+FinalResponse& FinalResponse::operator=([[maybe_unused]] FinalResponse&& other) noexcept {
     this->__fbthrift_field_content = std::move(other.__fbthrift_field_content);
     __isset = other.__isset;
     return *this;
@@ -179,16 +179,16 @@ bool FinalResponse::__fbthrift_is_empty() const {
   return false;
 }
 
-bool FinalResponse::operator==(FOLLY_MAYBE_UNUSED const FinalResponse& rhs) const {
+bool FinalResponse::operator==([[maybe_unused]] const FinalResponse& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool FinalResponse::operator<(FOLLY_MAYBE_UNUSED const FinalResponse& rhs) const {
+bool FinalResponse::operator<([[maybe_unused]] const FinalResponse& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED FinalResponse& a, FOLLY_MAYBE_UNUSED FinalResponse& b) {
+void swap([[maybe_unused]] FinalResponse& a, [[maybe_unused]] FinalResponse& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_content, b.__fbthrift_field_content);
   swap(a.__isset, b.__isset);
@@ -245,12 +245,12 @@ SinkPayload::SinkPayload() {
 
 SinkPayload::~SinkPayload() {}
 
-SinkPayload::SinkPayload(FOLLY_MAYBE_UNUSED SinkPayload&& other) noexcept :
+SinkPayload::SinkPayload([[maybe_unused]] SinkPayload&& other) noexcept :
     __fbthrift_field_content(std::move(other.__fbthrift_field_content)),
     __isset(other.__isset) {
 }
 
-SinkPayload& SinkPayload::operator=(FOLLY_MAYBE_UNUSED SinkPayload&& other) noexcept {
+SinkPayload& SinkPayload::operator=([[maybe_unused]] SinkPayload&& other) noexcept {
     this->__fbthrift_field_content = std::move(other.__fbthrift_field_content);
     __isset = other.__isset;
     return *this;
@@ -276,16 +276,16 @@ bool SinkPayload::__fbthrift_is_empty() const {
   return false;
 }
 
-bool SinkPayload::operator==(FOLLY_MAYBE_UNUSED const SinkPayload& rhs) const {
+bool SinkPayload::operator==([[maybe_unused]] const SinkPayload& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool SinkPayload::operator<(FOLLY_MAYBE_UNUSED const SinkPayload& rhs) const {
+bool SinkPayload::operator<([[maybe_unused]] const SinkPayload& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED SinkPayload& a, FOLLY_MAYBE_UNUSED SinkPayload& b) {
+void swap([[maybe_unused]] SinkPayload& a, [[maybe_unused]] SinkPayload& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_content, b.__fbthrift_field_content);
   swap(a.__isset, b.__isset);
@@ -342,12 +342,12 @@ CompatibleWithKeywordSink::CompatibleWithKeywordSink() {
 
 CompatibleWithKeywordSink::~CompatibleWithKeywordSink() {}
 
-CompatibleWithKeywordSink::CompatibleWithKeywordSink(FOLLY_MAYBE_UNUSED CompatibleWithKeywordSink&& other) noexcept :
+CompatibleWithKeywordSink::CompatibleWithKeywordSink([[maybe_unused]] CompatibleWithKeywordSink&& other) noexcept :
     __fbthrift_field_sink(std::move(other.__fbthrift_field_sink)),
     __isset(other.__isset) {
 }
 
-CompatibleWithKeywordSink& CompatibleWithKeywordSink::operator=(FOLLY_MAYBE_UNUSED CompatibleWithKeywordSink&& other) noexcept {
+CompatibleWithKeywordSink& CompatibleWithKeywordSink::operator=([[maybe_unused]] CompatibleWithKeywordSink&& other) noexcept {
     this->__fbthrift_field_sink = std::move(other.__fbthrift_field_sink);
     __isset = other.__isset;
     return *this;
@@ -373,16 +373,16 @@ bool CompatibleWithKeywordSink::__fbthrift_is_empty() const {
   return false;
 }
 
-bool CompatibleWithKeywordSink::operator==(FOLLY_MAYBE_UNUSED const CompatibleWithKeywordSink& rhs) const {
+bool CompatibleWithKeywordSink::operator==([[maybe_unused]] const CompatibleWithKeywordSink& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool CompatibleWithKeywordSink::operator<(FOLLY_MAYBE_UNUSED const CompatibleWithKeywordSink& rhs) const {
+bool CompatibleWithKeywordSink::operator<([[maybe_unused]] const CompatibleWithKeywordSink& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED CompatibleWithKeywordSink& a, FOLLY_MAYBE_UNUSED CompatibleWithKeywordSink& b) {
+void swap([[maybe_unused]] CompatibleWithKeywordSink& a, [[maybe_unused]] CompatibleWithKeywordSink& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_sink, b.__fbthrift_field_sink);
   swap(a.__isset, b.__isset);
@@ -439,12 +439,12 @@ InitialException::InitialException() {
 
 InitialException::~InitialException() {}
 
-InitialException::InitialException(FOLLY_MAYBE_UNUSED InitialException&& other) noexcept :
+InitialException::InitialException([[maybe_unused]] InitialException&& other) noexcept :
     __fbthrift_field_reason(std::move(other.__fbthrift_field_reason)),
     __isset(other.__isset) {
 }
 
-InitialException& InitialException::operator=(FOLLY_MAYBE_UNUSED InitialException&& other) noexcept {
+InitialException& InitialException::operator=([[maybe_unused]] InitialException&& other) noexcept {
     this->__fbthrift_field_reason = std::move(other.__fbthrift_field_reason);
     __isset = other.__isset;
     return *this;
@@ -470,16 +470,16 @@ bool InitialException::__fbthrift_is_empty() const {
   return false;
 }
 
-bool InitialException::operator==(FOLLY_MAYBE_UNUSED const InitialException& rhs) const {
+bool InitialException::operator==([[maybe_unused]] const InitialException& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool InitialException::operator<(FOLLY_MAYBE_UNUSED const InitialException& rhs) const {
+bool InitialException::operator<([[maybe_unused]] const InitialException& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED InitialException& a, FOLLY_MAYBE_UNUSED InitialException& b) {
+void swap([[maybe_unused]] InitialException& a, [[maybe_unused]] InitialException& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_reason, b.__fbthrift_field_reason);
   swap(a.__isset, b.__isset);
@@ -536,12 +536,12 @@ SinkException1::SinkException1() {
 
 SinkException1::~SinkException1() {}
 
-SinkException1::SinkException1(FOLLY_MAYBE_UNUSED SinkException1&& other) noexcept :
+SinkException1::SinkException1([[maybe_unused]] SinkException1&& other) noexcept :
     __fbthrift_field_reason(std::move(other.__fbthrift_field_reason)),
     __isset(other.__isset) {
 }
 
-SinkException1& SinkException1::operator=(FOLLY_MAYBE_UNUSED SinkException1&& other) noexcept {
+SinkException1& SinkException1::operator=([[maybe_unused]] SinkException1&& other) noexcept {
     this->__fbthrift_field_reason = std::move(other.__fbthrift_field_reason);
     __isset = other.__isset;
     return *this;
@@ -567,16 +567,16 @@ bool SinkException1::__fbthrift_is_empty() const {
   return false;
 }
 
-bool SinkException1::operator==(FOLLY_MAYBE_UNUSED const SinkException1& rhs) const {
+bool SinkException1::operator==([[maybe_unused]] const SinkException1& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool SinkException1::operator<(FOLLY_MAYBE_UNUSED const SinkException1& rhs) const {
+bool SinkException1::operator<([[maybe_unused]] const SinkException1& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED SinkException1& a, FOLLY_MAYBE_UNUSED SinkException1& b) {
+void swap([[maybe_unused]] SinkException1& a, [[maybe_unused]] SinkException1& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_reason, b.__fbthrift_field_reason);
   swap(a.__isset, b.__isset);
@@ -634,12 +634,12 @@ SinkException2::SinkException2() :
 
 SinkException2::~SinkException2() {}
 
-SinkException2::SinkException2(FOLLY_MAYBE_UNUSED SinkException2&& other) noexcept :
+SinkException2::SinkException2([[maybe_unused]] SinkException2&& other) noexcept :
     __fbthrift_field_reason(std::move(other.__fbthrift_field_reason)),
     __isset(other.__isset) {
 }
 
-SinkException2& SinkException2::operator=(FOLLY_MAYBE_UNUSED SinkException2&& other) noexcept {
+SinkException2& SinkException2::operator=([[maybe_unused]] SinkException2&& other) noexcept {
     this->__fbthrift_field_reason = std::move(other.__fbthrift_field_reason);
     __isset = other.__isset;
     return *this;
@@ -665,16 +665,16 @@ bool SinkException2::__fbthrift_is_empty() const {
   return false;
 }
 
-bool SinkException2::operator==(FOLLY_MAYBE_UNUSED const SinkException2& rhs) const {
+bool SinkException2::operator==([[maybe_unused]] const SinkException2& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool SinkException2::operator<(FOLLY_MAYBE_UNUSED const SinkException2& rhs) const {
+bool SinkException2::operator<([[maybe_unused]] const SinkException2& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED SinkException2& a, FOLLY_MAYBE_UNUSED SinkException2& b) {
+void swap([[maybe_unused]] SinkException2& a, [[maybe_unused]] SinkException2& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_reason, b.__fbthrift_field_reason);
   swap(a.__isset, b.__isset);
@@ -693,7 +693,7 @@ template uint32_t SinkException2::serializedSizeZC<>(apache::thrift::CompactProt
 } // cpp2
 
 namespace cpp2 { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }} // cpp2
 namespace apache::thrift::detail::annotation {

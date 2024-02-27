@@ -100,12 +100,12 @@ SimpleException::SimpleException() :
 
 SimpleException::~SimpleException() {}
 
-SimpleException::SimpleException(FOLLY_MAYBE_UNUSED SimpleException&& other) noexcept :
+SimpleException::SimpleException([[maybe_unused]] SimpleException&& other) noexcept :
     __fbthrift_field_err_code(std::move(other.__fbthrift_field_err_code)),
     __isset(other.__isset) {
 }
 
-SimpleException& SimpleException::operator=(FOLLY_MAYBE_UNUSED SimpleException&& other) noexcept {
+SimpleException& SimpleException::operator=([[maybe_unused]] SimpleException&& other) noexcept {
     this->__fbthrift_field_err_code = std::move(other.__fbthrift_field_err_code);
     __isset = other.__isset;
     return *this;
@@ -131,16 +131,16 @@ bool SimpleException::__fbthrift_is_empty() const {
   return false;
 }
 
-bool SimpleException::operator==(FOLLY_MAYBE_UNUSED const SimpleException& rhs) const {
+bool SimpleException::operator==([[maybe_unused]] const SimpleException& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool SimpleException::operator<(FOLLY_MAYBE_UNUSED const SimpleException& rhs) const {
+bool SimpleException::operator<([[maybe_unused]] const SimpleException& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED SimpleException& a, FOLLY_MAYBE_UNUSED SimpleException& b) {
+void swap([[maybe_unused]] SimpleException& a, [[maybe_unused]] SimpleException& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_err_code, b.__fbthrift_field_err_code);
   swap(a.__isset, b.__isset);
@@ -207,12 +207,12 @@ OptionalRefStruct::OptionalRefStruct() {
 
 OptionalRefStruct::~OptionalRefStruct() {}
 
-OptionalRefStruct::OptionalRefStruct(FOLLY_MAYBE_UNUSED OptionalRefStruct&& other) noexcept :
+OptionalRefStruct::OptionalRefStruct([[maybe_unused]] OptionalRefStruct&& other) noexcept :
     __fbthrift_field_optional_blob(std::move(other.__fbthrift_field_optional_blob)),
     __isset(other.__isset) {
 }
 
-OptionalRefStruct& OptionalRefStruct::operator=(FOLLY_MAYBE_UNUSED OptionalRefStruct&& other) noexcept {
+OptionalRefStruct& OptionalRefStruct::operator=([[maybe_unused]] OptionalRefStruct&& other) noexcept {
     this->__fbthrift_field_optional_blob = std::move(other.__fbthrift_field_optional_blob);
     __isset = other.__isset;
     return *this;
@@ -238,16 +238,16 @@ bool OptionalRefStruct::__fbthrift_is_empty() const {
   return !(this->__isset.get(0));
 }
 
-bool OptionalRefStruct::operator==(FOLLY_MAYBE_UNUSED const OptionalRefStruct& rhs) const {
+bool OptionalRefStruct::operator==([[maybe_unused]] const OptionalRefStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool OptionalRefStruct::operator<(FOLLY_MAYBE_UNUSED const OptionalRefStruct& rhs) const {
+bool OptionalRefStruct::operator<([[maybe_unused]] const OptionalRefStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED OptionalRefStruct& a, FOLLY_MAYBE_UNUSED OptionalRefStruct& b) {
+void swap([[maybe_unused]] OptionalRefStruct& a, [[maybe_unused]] OptionalRefStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_optional_blob, b.__fbthrift_field_optional_blob);
   swap(a.__isset, b.__isset);
@@ -298,7 +298,7 @@ const folly::StringPiece SimpleStruct::__fbthrift_get_class_name() {
 
 SimpleStruct::SimpleStruct(const SimpleStruct&) = default;
 SimpleStruct& SimpleStruct::operator=(const SimpleStruct&) = default;
-SimpleStruct::SimpleStruct(FOLLY_MAYBE_UNUSED SimpleStruct&& other) noexcept :
+SimpleStruct::SimpleStruct([[maybe_unused]] SimpleStruct&& other) noexcept :
     __fbthrift_field_is_on(std::move(other.__fbthrift_field_is_on)),
     __fbthrift_field_tiny_int(std::move(other.__fbthrift_field_tiny_int)),
     __fbthrift_field_small_int(std::move(other.__fbthrift_field_small_int)),
@@ -310,7 +310,7 @@ SimpleStruct::SimpleStruct(FOLLY_MAYBE_UNUSED SimpleStruct&& other) noexcept :
     __isset(other.__isset) {
 }
 
-SimpleStruct& SimpleStruct::operator=(FOLLY_MAYBE_UNUSED SimpleStruct&& other) noexcept {
+SimpleStruct& SimpleStruct::operator=([[maybe_unused]] SimpleStruct&& other) noexcept {
     this->__fbthrift_field_is_on = std::move(other.__fbthrift_field_is_on);
     this->__fbthrift_field_tiny_int = std::move(other.__fbthrift_field_tiny_int);
     this->__fbthrift_field_small_int = std::move(other.__fbthrift_field_small_int);
@@ -364,16 +364,16 @@ bool SimpleStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool SimpleStruct::operator==(FOLLY_MAYBE_UNUSED const SimpleStruct& rhs) const {
+bool SimpleStruct::operator==([[maybe_unused]] const SimpleStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool SimpleStruct::operator<(FOLLY_MAYBE_UNUSED const SimpleStruct& rhs) const {
+bool SimpleStruct::operator<([[maybe_unused]] const SimpleStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED SimpleStruct& a, FOLLY_MAYBE_UNUSED SimpleStruct& b) {
+void swap([[maybe_unused]] SimpleStruct& a, [[maybe_unused]] SimpleStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_is_on, b.__fbthrift_field_is_on);
   swap(a.__fbthrift_field_tiny_int, b.__fbthrift_field_tiny_int);
@@ -450,7 +450,7 @@ HiddenTypeFieldsStruct::HiddenTypeFieldsStruct() {
 
 HiddenTypeFieldsStruct::~HiddenTypeFieldsStruct() {}
 
-HiddenTypeFieldsStruct::HiddenTypeFieldsStruct(FOLLY_MAYBE_UNUSED HiddenTypeFieldsStruct&& other) noexcept :
+HiddenTypeFieldsStruct::HiddenTypeFieldsStruct([[maybe_unused]] HiddenTypeFieldsStruct&& other) noexcept :
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
     __fbthrift_field_field2(std::move(other.__fbthrift_field_field2)),
     __fbthrift_field_field3(std::move(other.__fbthrift_field_field3)),
@@ -458,7 +458,7 @@ HiddenTypeFieldsStruct::HiddenTypeFieldsStruct(FOLLY_MAYBE_UNUSED HiddenTypeFiel
   ::apache::thrift::adapt_detail::construct<Adapter, 1>(__fbthrift_field_field1, *this);
 }
 
-HiddenTypeFieldsStruct& HiddenTypeFieldsStruct::operator=(FOLLY_MAYBE_UNUSED HiddenTypeFieldsStruct&& other) noexcept {
+HiddenTypeFieldsStruct& HiddenTypeFieldsStruct::operator=([[maybe_unused]] HiddenTypeFieldsStruct&& other) noexcept {
     this->__fbthrift_field_field1 = std::move(other.__fbthrift_field_field1);
     this->__fbthrift_field_field2 = std::move(other.__fbthrift_field_field2);
     this->__fbthrift_field_field3 = std::move(other.__fbthrift_field_field3);
@@ -493,7 +493,7 @@ bool HiddenTypeFieldsStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool HiddenTypeFieldsStruct::operator==(FOLLY_MAYBE_UNUSED const HiddenTypeFieldsStruct& rhs) const {
+bool HiddenTypeFieldsStruct::operator==([[maybe_unused]] const HiddenTypeFieldsStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
@@ -514,7 +514,7 @@ const ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>& Hidde
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED HiddenTypeFieldsStruct& a, FOLLY_MAYBE_UNUSED HiddenTypeFieldsStruct& b) {
+void swap([[maybe_unused]] HiddenTypeFieldsStruct& a, [[maybe_unused]] HiddenTypeFieldsStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field1, b.__fbthrift_field_field1);
   swap(a.__fbthrift_field_field2, b.__fbthrift_field_field2);
@@ -641,7 +641,7 @@ bool AdaptedUnion::operator==(const AdaptedUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool AdaptedUnion::operator<(FOLLY_MAYBE_UNUSED const AdaptedUnion& rhs) const {
+bool AdaptedUnion::operator<([[maybe_unused]] const AdaptedUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
@@ -704,12 +704,12 @@ HiddenException::HiddenException() :
 
 HiddenException::~HiddenException() {}
 
-HiddenException::HiddenException(FOLLY_MAYBE_UNUSED HiddenException&& other) noexcept :
+HiddenException::HiddenException([[maybe_unused]] HiddenException&& other) noexcept :
     __fbthrift_field_test(std::move(other.__fbthrift_field_test)),
     __isset(other.__isset) {
 }
 
-HiddenException& HiddenException::operator=(FOLLY_MAYBE_UNUSED HiddenException&& other) noexcept {
+HiddenException& HiddenException::operator=([[maybe_unused]] HiddenException&& other) noexcept {
     this->__fbthrift_field_test = std::move(other.__fbthrift_field_test);
     __isset = other.__isset;
     return *this;
@@ -735,16 +735,16 @@ bool HiddenException::__fbthrift_is_empty() const {
   return false;
 }
 
-bool HiddenException::operator==(FOLLY_MAYBE_UNUSED const HiddenException& rhs) const {
+bool HiddenException::operator==([[maybe_unused]] const HiddenException& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool HiddenException::operator<(FOLLY_MAYBE_UNUSED const HiddenException& rhs) const {
+bool HiddenException::operator<([[maybe_unused]] const HiddenException& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED HiddenException& a, FOLLY_MAYBE_UNUSED HiddenException& b) {
+void swap([[maybe_unused]] HiddenException& a, [[maybe_unused]] HiddenException& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_test, b.__fbthrift_field_test);
   swap(a.__isset, b.__isset);
@@ -803,7 +803,7 @@ ComplexStruct::ComplexStruct() :
 
 ComplexStruct::~ComplexStruct() {}
 
-ComplexStruct::ComplexStruct(FOLLY_MAYBE_UNUSED ComplexStruct&& other) noexcept :
+ComplexStruct::ComplexStruct([[maybe_unused]] ComplexStruct&& other) noexcept :
     __fbthrift_field_structOne(std::move(other.__fbthrift_field_structOne)),
     __fbthrift_field_structTwo(std::move(other.__fbthrift_field_structTwo)),
     __fbthrift_field_an_integer(std::move(other.__fbthrift_field_an_integer)),
@@ -816,7 +816,7 @@ ComplexStruct::ComplexStruct(FOLLY_MAYBE_UNUSED ComplexStruct&& other) noexcept 
     __isset(other.__isset) {
 }
 
-ComplexStruct& ComplexStruct::operator=(FOLLY_MAYBE_UNUSED ComplexStruct&& other) noexcept {
+ComplexStruct& ComplexStruct::operator=([[maybe_unused]] ComplexStruct&& other) noexcept {
     this->__fbthrift_field_structOne = std::move(other.__fbthrift_field_structOne);
     this->__fbthrift_field_structTwo = std::move(other.__fbthrift_field_structTwo);
     this->__fbthrift_field_an_integer = std::move(other.__fbthrift_field_an_integer);
@@ -874,11 +874,11 @@ bool ComplexStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool ComplexStruct::operator==(FOLLY_MAYBE_UNUSED const ComplexStruct& rhs) const {
+bool ComplexStruct::operator==([[maybe_unused]] const ComplexStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool ComplexStruct::operator<(FOLLY_MAYBE_UNUSED const ComplexStruct& rhs) const {
+bool ComplexStruct::operator<([[maybe_unused]] const ComplexStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -899,7 +899,7 @@ const ::py3::simple::SimpleStruct& ComplexStruct::get_structTwo() const& {
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED ComplexStruct& a, FOLLY_MAYBE_UNUSED ComplexStruct& b) {
+void swap([[maybe_unused]] ComplexStruct& a, [[maybe_unused]] ComplexStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_structOne, b.__fbthrift_field_structOne);
   swap(a.__fbthrift_field_structTwo, b.__fbthrift_field_structTwo);
@@ -1088,12 +1088,12 @@ const folly::StringPiece BinaryUnionStruct::__fbthrift_get_class_name() {
 
 BinaryUnionStruct::BinaryUnionStruct(const BinaryUnionStruct&) = default;
 BinaryUnionStruct& BinaryUnionStruct::operator=(const BinaryUnionStruct&) = default;
-BinaryUnionStruct::BinaryUnionStruct(FOLLY_MAYBE_UNUSED BinaryUnionStruct&& other) noexcept :
+BinaryUnionStruct::BinaryUnionStruct([[maybe_unused]] BinaryUnionStruct&& other) noexcept :
     __fbthrift_field_u(std::move(other.__fbthrift_field_u)),
     __isset(other.__isset) {
 }
 
-BinaryUnionStruct& BinaryUnionStruct::operator=(FOLLY_MAYBE_UNUSED BinaryUnionStruct&& other) noexcept {
+BinaryUnionStruct& BinaryUnionStruct::operator=([[maybe_unused]] BinaryUnionStruct&& other) noexcept {
     this->__fbthrift_field_u = std::move(other.__fbthrift_field_u);
     __isset = other.__isset;
     return *this;
@@ -1130,7 +1130,7 @@ const ::py3::simple::BinaryUnion& BinaryUnionStruct::get_u() const& {
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED BinaryUnionStruct& a, FOLLY_MAYBE_UNUSED BinaryUnionStruct& b) {
+void swap([[maybe_unused]] BinaryUnionStruct& a, [[maybe_unused]] BinaryUnionStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_u, b.__fbthrift_field_u);
   swap(a.__isset, b.__isset);
@@ -1155,7 +1155,7 @@ static_assert(
 }} // py3::simple
 
 namespace py3 { namespace simple { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<Adapter, 1, ::py3::simple::SimpleStruct, ::py3::simple::HiddenTypeFieldsStruct>();
   ::apache::thrift::adapt_detail::validateAdapter<Adapter, ::py3::simple::detail::AdaptedUnion>();
 }

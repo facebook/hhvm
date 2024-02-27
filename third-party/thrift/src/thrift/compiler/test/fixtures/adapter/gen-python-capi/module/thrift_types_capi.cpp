@@ -130,7 +130,7 @@ PyObject* Constructor<::facebook::thrift::test::MyAnnotation>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::MyAnnotation>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::MyAnnotation& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::MyAnnotation& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__signature(
     Constructor<Bytes>{}
@@ -441,7 +441,7 @@ PyObject* Constructor<::facebook::thrift::test::detail::DirectlyAdapted>::operat
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::detail::DirectlyAdapted>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::detail::DirectlyAdapted& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::detail::DirectlyAdapted& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__field(
     Constructor<int32_t>{}
@@ -520,7 +520,7 @@ PyObject* Constructor<::facebook::thrift::test::detail::IndependentDirectlyAdapt
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::detail::IndependentDirectlyAdapted>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::detail::IndependentDirectlyAdapted& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::detail::IndependentDirectlyAdapted& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__field(
     Constructor<int32_t>{}
@@ -812,7 +812,7 @@ PyObject* Constructor<::facebook::thrift::test::A>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::A>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::A& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::A& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
@@ -881,7 +881,7 @@ PyObject* Constructor<::facebook::thrift::test::Config>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::Config>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::Config& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::Config& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__path(
     Constructor<Bytes>{}
@@ -1182,7 +1182,7 @@ PyObject* Constructor<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>:
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::AdaptTemplatedNestedTestStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::AdaptTemplatedNestedTestStruct& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::AdaptTemplatedNestedTestStruct& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__adaptedStruct(
     Constructor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::AdaptTemplatedTestStruct>>{}
@@ -1335,7 +1335,7 @@ PyObject* Constructor<::facebook::thrift::test::ThriftAdaptedStruct>::operator()
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::ThriftAdaptedStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::ThriftAdaptedStruct& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::ThriftAdaptedStruct& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__data(
     Constructor<int64_t>{}
@@ -1414,7 +1414,7 @@ PyObject* Constructor<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::detail::DirectlyAdaptedStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::detail::DirectlyAdaptedStruct& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::detail::DirectlyAdaptedStruct& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__data(
     Constructor<int64_t>{}
@@ -1567,7 +1567,7 @@ PyObject* Constructor<::facebook::thrift::test::CircularAdaptee>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::CircularAdaptee>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::CircularAdaptee& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::CircularAdaptee& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__field(
     Constructor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::CircularStruct>>{}
@@ -1785,7 +1785,7 @@ PyObject* Constructor<::facebook::thrift::test::detail::DeclaredAfterStruct>::op
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::detail::DeclaredAfterStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::detail::DeclaredAfterStruct& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::detail::DeclaredAfterStruct& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
@@ -1854,7 +1854,7 @@ PyObject* Constructor<::facebook::thrift::test::UnderlyingRenamedStruct>::operat
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::UnderlyingRenamedStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::UnderlyingRenamedStruct& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::UnderlyingRenamedStruct& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__data(
     Constructor<int64_t>{}
@@ -1933,7 +1933,7 @@ PyObject* Constructor<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::UnderlyingSameNamespaceStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::UnderlyingSameNamespaceStruct& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::UnderlyingSameNamespaceStruct& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__data(
     Constructor<int64_t>{}
@@ -2003,7 +2003,7 @@ PyObject* Constructor<::facebook::thrift::test::detail::HeapAllocated>::operator
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::detail::HeapAllocated>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::detail::HeapAllocated& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::detail::HeapAllocated& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
@@ -2211,7 +2211,7 @@ PyObject* Constructor<::facebook::thrift::test::ApplyAdapter>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::ApplyAdapter>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::ApplyAdapter& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::ApplyAdapter& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
@@ -2271,7 +2271,7 @@ PyObject* Constructor<::facebook::thrift::test::detail::TransitiveAdapted>::oper
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::detail::TransitiveAdapted>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::detail::TransitiveAdapted& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::detail::TransitiveAdapted& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
@@ -2414,7 +2414,7 @@ PyObject* Constructor<::facebook::thrift::test::Person>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::Person>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::Person& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::Person& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__name(
     Constructor<Bytes>{}
@@ -2493,7 +2493,7 @@ PyObject* Constructor<::facebook::thrift::test::Person2>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::Person2>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::Person2& val) {
+    [[maybe_unused]] const ::facebook::thrift::test::Person2& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__name(
     Constructor<Bytes>{}

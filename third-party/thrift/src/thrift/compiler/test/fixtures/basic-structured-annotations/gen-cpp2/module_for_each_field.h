@@ -16,14 +16,14 @@ namespace detail {
 template <>
 struct ForEachField<::test::fixtures::basic-structured-annotations::runtime_annotation> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
   }
 };
 
 template <>
 struct ForEachField<::test::fixtures::basic-structured-annotations::structured_annotation_inline> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).count_ref()...);
     f(1, static_cast<T&&>(t).name_ref()...);
   }
@@ -32,7 +32,7 @@ struct ForEachField<::test::fixtures::basic-structured-annotations::structured_a
 template <>
 struct ForEachField<::test::fixtures::basic-structured-annotations::structured_annotation_with_default> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).name_ref()...);
   }
 };
@@ -40,7 +40,7 @@ struct ForEachField<::test::fixtures::basic-structured-annotations::structured_a
 template <>
 struct ForEachField<::test::fixtures::basic-structured-annotations::structured_annotation_recursive> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).name_ref()...);
     f(1, static_cast<T&&>(t).recurse_ref()...);
     f(2, static_cast<T&&>(t).forward_ref()...);
@@ -50,7 +50,7 @@ struct ForEachField<::test::fixtures::basic-structured-annotations::structured_a
 template <>
 struct ForEachField<::test::fixtures::basic-structured-annotations::structured_annotation_forward> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).count_ref()...);
   }
 };
@@ -58,7 +58,7 @@ struct ForEachField<::test::fixtures::basic-structured-annotations::structured_a
 template <>
 struct ForEachField<::test::fixtures::basic-structured-annotations::structured_annotation_nested> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).name_ref()...);
     f(1, static_cast<T&&>(t).nest_ref()...);
   }
@@ -67,7 +67,7 @@ struct ForEachField<::test::fixtures::basic-structured-annotations::structured_a
 template <>
 struct ForEachField<::test::fixtures::basic-structured-annotations::MyStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).annotated_field_ref()...);
     f(1, static_cast<T&&>(t).annotated_type_ref()...);
     f(2, static_cast<T&&>(t).annotated_recursive_ref()...);
@@ -78,7 +78,7 @@ struct ForEachField<::test::fixtures::basic-structured-annotations::MyStruct> {
 template <>
 struct ForEachField<::test::fixtures::basic-structured-annotations::MyException> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).context_ref()...);
   }
 };
@@ -86,7 +86,7 @@ struct ForEachField<::test::fixtures::basic-structured-annotations::MyException>
 template <>
 struct ForEachField<::test::fixtures::basic-structured-annotations::MyUnion> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).first_ref()...);
     f(1, static_cast<T&&>(t).second_ref()...);
   }

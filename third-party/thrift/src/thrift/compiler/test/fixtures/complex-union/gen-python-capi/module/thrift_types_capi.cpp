@@ -124,7 +124,7 @@ PyObject* Constructor<::cpp2::ComplexUnion>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::ComplexUnion>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::ComplexUnion& val) {
+    [[maybe_unused]] const ::cpp2::ComplexUnion& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
   switch (type_key) {
@@ -245,7 +245,7 @@ PyObject* Constructor<::cpp2::ListUnion>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::ListUnion>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::ListUnion& val) {
+    [[maybe_unused]] const ::cpp2::ListUnion& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
   switch (type_key) {
@@ -346,7 +346,7 @@ PyObject* Constructor<::cpp2::DataUnion>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::DataUnion>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::DataUnion& val) {
+    [[maybe_unused]] const ::cpp2::DataUnion& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
   switch (type_key) {
@@ -443,7 +443,7 @@ PyObject* Constructor<::cpp2::Val>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::Val>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::Val& val) {
+    [[maybe_unused]] const ::cpp2::Val& val) {
   StrongRef fbthrift_data(createStructTuple(3));
   StrongRef _fbthrift__strVal(
     Constructor<Bytes>{}
@@ -554,7 +554,7 @@ PyObject* Constructor<::cpp2::ValUnion>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::ValUnion>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::ValUnion& val) {
+    [[maybe_unused]] const ::cpp2::ValUnion& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
   switch (type_key) {
@@ -655,7 +655,7 @@ PyObject* Constructor<::cpp2::VirtualComplexUnion>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::VirtualComplexUnion>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::VirtualComplexUnion& val) {
+    [[maybe_unused]] const ::cpp2::VirtualComplexUnion& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
   switch (type_key) {
@@ -744,7 +744,7 @@ PyObject* Constructor<::cpp2::NonCopyableStruct>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::NonCopyableStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::NonCopyableStruct& val) {
+    [[maybe_unused]] const ::cpp2::NonCopyableStruct& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__num(
     Constructor<int64_t>{}
@@ -831,7 +831,7 @@ PyObject* Constructor<::cpp2::NonCopyableUnion>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::NonCopyableUnion>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::NonCopyableUnion& val) {
+    [[maybe_unused]] const ::cpp2::NonCopyableUnion& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
   switch (type_key) {

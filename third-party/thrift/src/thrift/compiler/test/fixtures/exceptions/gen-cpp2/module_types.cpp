@@ -55,11 +55,11 @@ Fiery::Fiery(std::string __message) : Fiery() {
 
 Fiery::~Fiery() {}
 
-Fiery::Fiery(FOLLY_MAYBE_UNUSED Fiery&& other) noexcept :
+Fiery::Fiery([[maybe_unused]] Fiery&& other) noexcept :
     __fbthrift_field_message(std::move(other.__fbthrift_field_message)) {
 }
 
-Fiery& Fiery::operator=(FOLLY_MAYBE_UNUSED Fiery&& other) noexcept {
+Fiery& Fiery::operator=([[maybe_unused]] Fiery&& other) noexcept {
     this->__fbthrift_field_message = std::move(other.__fbthrift_field_message);
     return *this;
 }
@@ -82,16 +82,16 @@ bool Fiery::__fbthrift_is_empty() const {
   return false;
 }
 
-bool Fiery::operator==(FOLLY_MAYBE_UNUSED const Fiery& rhs) const {
+bool Fiery::operator==([[maybe_unused]] const Fiery& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Fiery::operator<(FOLLY_MAYBE_UNUSED const Fiery& rhs) const {
+bool Fiery::operator<([[maybe_unused]] const Fiery& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Fiery& a, FOLLY_MAYBE_UNUSED Fiery& b) {
+void swap([[maybe_unused]] Fiery& a, [[maybe_unused]] Fiery& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_message, b.__fbthrift_field_message);
 }
@@ -151,12 +151,12 @@ Serious::Serious(std::string __message) : Serious() {
 
 Serious::~Serious() {}
 
-Serious::Serious(FOLLY_MAYBE_UNUSED Serious&& other) noexcept :
+Serious::Serious([[maybe_unused]] Serious&& other) noexcept :
     __fbthrift_field_sonnet(std::move(other.__fbthrift_field_sonnet)),
     __isset(other.__isset) {
 }
 
-Serious& Serious::operator=(FOLLY_MAYBE_UNUSED Serious&& other) noexcept {
+Serious& Serious::operator=([[maybe_unused]] Serious&& other) noexcept {
     this->__fbthrift_field_sonnet = std::move(other.__fbthrift_field_sonnet);
     __isset = other.__isset;
     return *this;
@@ -182,16 +182,16 @@ bool Serious::__fbthrift_is_empty() const {
   return !(this->__isset.get(0));
 }
 
-bool Serious::operator==(FOLLY_MAYBE_UNUSED const Serious& rhs) const {
+bool Serious::operator==([[maybe_unused]] const Serious& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Serious::operator<(FOLLY_MAYBE_UNUSED const Serious& rhs) const {
+bool Serious::operator<([[maybe_unused]] const Serious& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Serious& a, FOLLY_MAYBE_UNUSED Serious& b) {
+void swap([[maybe_unused]] Serious& a, [[maybe_unused]] Serious& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_sonnet, b.__fbthrift_field_sonnet);
   swap(a.__isset, b.__isset);
@@ -252,13 +252,13 @@ ComplexFieldNames::ComplexFieldNames(std::string __message) : ComplexFieldNames(
 
 ComplexFieldNames::~ComplexFieldNames() {}
 
-ComplexFieldNames::ComplexFieldNames(FOLLY_MAYBE_UNUSED ComplexFieldNames&& other) noexcept :
+ComplexFieldNames::ComplexFieldNames([[maybe_unused]] ComplexFieldNames&& other) noexcept :
     __fbthrift_field_error_message(std::move(other.__fbthrift_field_error_message)),
     __fbthrift_field_internal_error_message(std::move(other.__fbthrift_field_internal_error_message)),
     __isset(other.__isset) {
 }
 
-ComplexFieldNames& ComplexFieldNames::operator=(FOLLY_MAYBE_UNUSED ComplexFieldNames&& other) noexcept {
+ComplexFieldNames& ComplexFieldNames::operator=([[maybe_unused]] ComplexFieldNames&& other) noexcept {
     this->__fbthrift_field_error_message = std::move(other.__fbthrift_field_error_message);
     this->__fbthrift_field_internal_error_message = std::move(other.__fbthrift_field_internal_error_message);
     __isset = other.__isset;
@@ -288,16 +288,16 @@ bool ComplexFieldNames::__fbthrift_is_empty() const {
   return false;
 }
 
-bool ComplexFieldNames::operator==(FOLLY_MAYBE_UNUSED const ComplexFieldNames& rhs) const {
+bool ComplexFieldNames::operator==([[maybe_unused]] const ComplexFieldNames& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool ComplexFieldNames::operator<(FOLLY_MAYBE_UNUSED const ComplexFieldNames& rhs) const {
+bool ComplexFieldNames::operator<([[maybe_unused]] const ComplexFieldNames& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED ComplexFieldNames& a, FOLLY_MAYBE_UNUSED ComplexFieldNames& b) {
+void swap([[maybe_unused]] ComplexFieldNames& a, [[maybe_unused]] ComplexFieldNames& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_error_message, b.__fbthrift_field_error_message);
   swap(a.__fbthrift_field_internal_error_message, b.__fbthrift_field_internal_error_message);
@@ -359,13 +359,13 @@ CustomFieldNames::CustomFieldNames(std::string __message) : CustomFieldNames() {
 
 CustomFieldNames::~CustomFieldNames() {}
 
-CustomFieldNames::CustomFieldNames(FOLLY_MAYBE_UNUSED CustomFieldNames&& other) noexcept :
+CustomFieldNames::CustomFieldNames([[maybe_unused]] CustomFieldNames&& other) noexcept :
     __fbthrift_field_error_message(std::move(other.__fbthrift_field_error_message)),
     __fbthrift_field_internal_error_message(std::move(other.__fbthrift_field_internal_error_message)),
     __isset(other.__isset) {
 }
 
-CustomFieldNames& CustomFieldNames::operator=(FOLLY_MAYBE_UNUSED CustomFieldNames&& other) noexcept {
+CustomFieldNames& CustomFieldNames::operator=([[maybe_unused]] CustomFieldNames&& other) noexcept {
     this->__fbthrift_field_error_message = std::move(other.__fbthrift_field_error_message);
     this->__fbthrift_field_internal_error_message = std::move(other.__fbthrift_field_internal_error_message);
     __isset = other.__isset;
@@ -395,16 +395,16 @@ bool CustomFieldNames::__fbthrift_is_empty() const {
   return false;
 }
 
-bool CustomFieldNames::operator==(FOLLY_MAYBE_UNUSED const CustomFieldNames& rhs) const {
+bool CustomFieldNames::operator==([[maybe_unused]] const CustomFieldNames& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool CustomFieldNames::operator<(FOLLY_MAYBE_UNUSED const CustomFieldNames& rhs) const {
+bool CustomFieldNames::operator<([[maybe_unused]] const CustomFieldNames& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED CustomFieldNames& a, FOLLY_MAYBE_UNUSED CustomFieldNames& b) {
+void swap([[maybe_unused]] CustomFieldNames& a, [[maybe_unused]] CustomFieldNames& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_error_message, b.__fbthrift_field_error_message);
   swap(a.__fbthrift_field_internal_error_message, b.__fbthrift_field_internal_error_message);
@@ -467,13 +467,13 @@ ExceptionWithPrimitiveField::ExceptionWithPrimitiveField(std::string __message) 
 
 ExceptionWithPrimitiveField::~ExceptionWithPrimitiveField() {}
 
-ExceptionWithPrimitiveField::ExceptionWithPrimitiveField(FOLLY_MAYBE_UNUSED ExceptionWithPrimitiveField&& other) noexcept :
+ExceptionWithPrimitiveField::ExceptionWithPrimitiveField([[maybe_unused]] ExceptionWithPrimitiveField&& other) noexcept :
     __fbthrift_field_message(std::move(other.__fbthrift_field_message)),
     __fbthrift_field_error_code(std::move(other.__fbthrift_field_error_code)),
     __isset(other.__isset) {
 }
 
-ExceptionWithPrimitiveField& ExceptionWithPrimitiveField::operator=(FOLLY_MAYBE_UNUSED ExceptionWithPrimitiveField&& other) noexcept {
+ExceptionWithPrimitiveField& ExceptionWithPrimitiveField::operator=([[maybe_unused]] ExceptionWithPrimitiveField&& other) noexcept {
     this->__fbthrift_field_message = std::move(other.__fbthrift_field_message);
     this->__fbthrift_field_error_code = std::move(other.__fbthrift_field_error_code);
     __isset = other.__isset;
@@ -503,16 +503,16 @@ bool ExceptionWithPrimitiveField::__fbthrift_is_empty() const {
   return false;
 }
 
-bool ExceptionWithPrimitiveField::operator==(FOLLY_MAYBE_UNUSED const ExceptionWithPrimitiveField& rhs) const {
+bool ExceptionWithPrimitiveField::operator==([[maybe_unused]] const ExceptionWithPrimitiveField& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool ExceptionWithPrimitiveField::operator<(FOLLY_MAYBE_UNUSED const ExceptionWithPrimitiveField& rhs) const {
+bool ExceptionWithPrimitiveField::operator<([[maybe_unused]] const ExceptionWithPrimitiveField& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED ExceptionWithPrimitiveField& a, FOLLY_MAYBE_UNUSED ExceptionWithPrimitiveField& b) {
+void swap([[maybe_unused]] ExceptionWithPrimitiveField& a, [[maybe_unused]] ExceptionWithPrimitiveField& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_message, b.__fbthrift_field_message);
   swap(a.__fbthrift_field_error_code, b.__fbthrift_field_error_code);
@@ -575,13 +575,13 @@ ExceptionWithStructuredAnnotation::ExceptionWithStructuredAnnotation(std::string
 
 ExceptionWithStructuredAnnotation::~ExceptionWithStructuredAnnotation() {}
 
-ExceptionWithStructuredAnnotation::ExceptionWithStructuredAnnotation(FOLLY_MAYBE_UNUSED ExceptionWithStructuredAnnotation&& other) noexcept :
+ExceptionWithStructuredAnnotation::ExceptionWithStructuredAnnotation([[maybe_unused]] ExceptionWithStructuredAnnotation&& other) noexcept :
     __fbthrift_field_message_field(std::move(other.__fbthrift_field_message_field)),
     __fbthrift_field_error_code(std::move(other.__fbthrift_field_error_code)),
     __isset(other.__isset) {
 }
 
-ExceptionWithStructuredAnnotation& ExceptionWithStructuredAnnotation::operator=(FOLLY_MAYBE_UNUSED ExceptionWithStructuredAnnotation&& other) noexcept {
+ExceptionWithStructuredAnnotation& ExceptionWithStructuredAnnotation::operator=([[maybe_unused]] ExceptionWithStructuredAnnotation&& other) noexcept {
     this->__fbthrift_field_message_field = std::move(other.__fbthrift_field_message_field);
     this->__fbthrift_field_error_code = std::move(other.__fbthrift_field_error_code);
     __isset = other.__isset;
@@ -611,16 +611,16 @@ bool ExceptionWithStructuredAnnotation::__fbthrift_is_empty() const {
   return false;
 }
 
-bool ExceptionWithStructuredAnnotation::operator==(FOLLY_MAYBE_UNUSED const ExceptionWithStructuredAnnotation& rhs) const {
+bool ExceptionWithStructuredAnnotation::operator==([[maybe_unused]] const ExceptionWithStructuredAnnotation& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool ExceptionWithStructuredAnnotation::operator<(FOLLY_MAYBE_UNUSED const ExceptionWithStructuredAnnotation& rhs) const {
+bool ExceptionWithStructuredAnnotation::operator<([[maybe_unused]] const ExceptionWithStructuredAnnotation& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED ExceptionWithStructuredAnnotation& a, FOLLY_MAYBE_UNUSED ExceptionWithStructuredAnnotation& b) {
+void swap([[maybe_unused]] ExceptionWithStructuredAnnotation& a, [[maybe_unused]] ExceptionWithStructuredAnnotation& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_message_field, b.__fbthrift_field_message_field);
   swap(a.__fbthrift_field_error_code, b.__fbthrift_field_error_code);
@@ -678,8 +678,8 @@ Banal::Banal() {
 
 Banal::~Banal() {}
 
-Banal::Banal(FOLLY_MAYBE_UNUSED Banal&& other) noexcept{}
-Banal& Banal::operator=(FOLLY_MAYBE_UNUSED Banal&& other) noexcept {
+Banal::Banal([[maybe_unused]] Banal&& other) noexcept{}
+Banal& Banal::operator=([[maybe_unused]] Banal&& other) noexcept {
     return *this;
 }
 
@@ -698,16 +698,16 @@ bool Banal::__fbthrift_is_empty() const {
   return true;
 }
 
-bool Banal::operator==(FOLLY_MAYBE_UNUSED const Banal& rhs) const {
+bool Banal::operator==([[maybe_unused]] const Banal& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Banal::operator<(FOLLY_MAYBE_UNUSED const Banal& rhs) const {
+bool Banal::operator<([[maybe_unused]] const Banal& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Banal& a, FOLLY_MAYBE_UNUSED Banal& b) {
+void swap([[maybe_unused]] Banal& a, [[maybe_unused]] Banal& b) {
   using ::std::swap;
 }
 
@@ -724,7 +724,7 @@ template uint32_t Banal::serializedSizeZC<>(apache::thrift::CompactProtocolWrite
 } // cpp2
 
 namespace cpp2 { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }} // cpp2
 namespace apache::thrift::detail::annotation {

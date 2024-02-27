@@ -69,16 +69,16 @@ bool Foo::__fbthrift_is_empty() const {
   return false;
 }
 
-bool Foo::operator==(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
+bool Foo::operator==([[maybe_unused]] const Foo& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Foo::operator<(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
+bool Foo::operator<([[maybe_unused]] const Foo& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Foo& a, FOLLY_MAYBE_UNUSED Foo& b) {
+void swap([[maybe_unused]] Foo& a, [[maybe_unused]] Foo& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field1, b.__fbthrift_field_field1);
   swap(a.__fbthrift_field_field2, b.__fbthrift_field_field2);
@@ -155,16 +155,16 @@ bool Foo2::__fbthrift_is_empty() const {
   return false;
 }
 
-bool Foo2::operator==(FOLLY_MAYBE_UNUSED const Foo2& rhs) const {
+bool Foo2::operator==([[maybe_unused]] const Foo2& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Foo2::operator<(FOLLY_MAYBE_UNUSED const Foo2& rhs) const {
+bool Foo2::operator<([[maybe_unused]] const Foo2& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Foo2& a, FOLLY_MAYBE_UNUSED Foo2& b) {
+void swap([[maybe_unused]] Foo2& a, [[maybe_unused]] Foo2& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field1, b.__fbthrift_field_field1);
   swap(a.__fbthrift_field_field2, b.__fbthrift_field_field2);
@@ -185,7 +185,7 @@ template uint32_t Foo2::serializedSizeZC<>(apache::thrift::CompactProtocolWriter
 } // cpp2
 
 namespace cpp2 { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }} // cpp2
 namespace apache::thrift::detail::annotation {

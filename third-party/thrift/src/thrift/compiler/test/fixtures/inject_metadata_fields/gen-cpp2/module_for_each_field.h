@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::cpp2::Fields> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).injected_field_ref()...);
   }
 };
@@ -24,7 +24,7 @@ struct ForEachField<::cpp2::Fields> {
 template <>
 struct ForEachField<::cpp2::FieldsInjectedToEmptyStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).injected_field_ref()...);
   }
 };
@@ -32,7 +32,7 @@ struct ForEachField<::cpp2::FieldsInjectedToEmptyStruct> {
 template <>
 struct ForEachField<::cpp2::FieldsInjectedToStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).string_field_ref()...);
     f(1, static_cast<T&&>(t).injected_field_ref()...);
   }
@@ -41,7 +41,7 @@ struct ForEachField<::cpp2::FieldsInjectedToStruct> {
 template <>
 struct ForEachField<::cpp2::FieldsInjectedWithIncludedStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).string_field_ref()...);
     f(1, static_cast<T&&>(t).injected_field_ref()...);
     f(2, static_cast<T&&>(t).injected_structured_annotation_field_ref()...);

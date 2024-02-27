@@ -14,7 +14,7 @@ namespace test { namespace fixtures { namespace basic {
 typedef apache::thrift::ThriftPresult<false> FooService_simple_rpc_pargs;
 typedef apache::thrift::ThriftPresult<true> FooService_simple_rpc_presult;
 template <typename ProtocolIn_, typename ProtocolOut_>
-void FooServiceAsyncProcessor::setUpAndProcess_simple_rpc(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, FOLLY_MAYBE_UNUSED apache::thrift::concurrency::ThreadManager* tm) {
+void FooServiceAsyncProcessor::setUpAndProcess_simple_rpc(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
   if (!setUpRequestProcessing(req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, iface_)) {
     return;
   }
@@ -68,7 +68,7 @@ apache::thrift::SerializedResponse FooServiceAsyncProcessor::return_simple_rpc(a
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void FooServiceAsyncProcessor::throw_wrapped_simple_rpc(apache::thrift::ResponseChannelRequest::UniquePtr req,FOLLY_MAYBE_UNUSED int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void FooServiceAsyncProcessor::throw_wrapped_simple_rpc(apache::thrift::ResponseChannelRequest::UniquePtr req,[[maybe_unused]] int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }

@@ -93,7 +93,7 @@ PyObject* Constructor<::cpp2::CustomException>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::CustomException>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::CustomException& val) {
+    [[maybe_unused]] const ::cpp2::CustomException& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__message(
     Constructor<Bytes>{}

@@ -58,7 +58,7 @@ void EnumMetadata<<% > common/namespace_cpp2%><%enum:cpp_name%>>::gen(ThriftMeta
 
 <%#program:structs%>
 <%#program:unstructured_annotations_in_metadata?%>
-void StructMetadata<<%struct:cpp_fullname%>>::unstructured_annotations(FOLLY_MAYBE_UNUSED ::apache::thrift::metadata::ThriftStruct& thriftStruct){
+void StructMetadata<<%struct:cpp_fullname%>>::unstructured_annotations([[maybe_unused]] ::apache::thrift::metadata::ThriftStruct& thriftStruct){
   <%#struct:fields%>
   thriftStruct.fields()[<%field:index%>].unstructured_annotations() = <% > metadata/unstructured_field_gen%>;
   <%/struct:fields%>
@@ -137,7 +137,7 @@ void ExceptionMetadata<<%struct:cpp_fullname%>>::gen(ThriftMetadata& metadata) {
 <%/program:structs%>
 <%#program:services%>
 <%#service:functions%><%^function:starts_interaction?%>
-void ServiceMetadata<::<% > service_common/service_class_name%>>::gen_<%function:cpp_name%>(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::<% > service_common/service_class_name%>>::gen_<%function:cpp_name%>([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "<%function:name%>";
 <%#function:return_type%>
@@ -177,7 +177,7 @@ void ServiceMetadata<::<% > service_common/service_class_name%>>::gen(::apache::
   response.context() = std::move(context);
 }
 
-const ThriftServiceContextRef* ServiceMetadata<::<% > service_common/service_class_name%>>::genRecurse(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+const ThriftServiceContextRef* ServiceMetadata<::<% > service_common/service_class_name%>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService <%service:metadata_name%>;
   <%service:metadata_name%>.name() = "<%program:name%>.<%service:name%>";
 <%#service:functions?%>

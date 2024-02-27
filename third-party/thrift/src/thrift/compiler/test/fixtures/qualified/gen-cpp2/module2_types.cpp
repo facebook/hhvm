@@ -45,13 +45,13 @@ const folly::StringPiece Struct::__fbthrift_get_class_name() {
 
 Struct::Struct(const Struct&) = default;
 Struct& Struct::operator=(const Struct&) = default;
-Struct::Struct(FOLLY_MAYBE_UNUSED Struct&& other) noexcept :
+Struct::Struct([[maybe_unused]] Struct&& other) noexcept :
     __fbthrift_field_first(std::move(other.__fbthrift_field_first)),
     __fbthrift_field_second(std::move(other.__fbthrift_field_second)),
     __isset(other.__isset) {
 }
 
-Struct& Struct::operator=(FOLLY_MAYBE_UNUSED Struct&& other) noexcept {
+Struct& Struct::operator=([[maybe_unused]] Struct&& other) noexcept {
     this->__fbthrift_field_first = std::move(other.__fbthrift_field_first);
     this->__fbthrift_field_second = std::move(other.__fbthrift_field_second);
     __isset = other.__isset;
@@ -81,11 +81,11 @@ bool Struct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool Struct::operator==(FOLLY_MAYBE_UNUSED const Struct& rhs) const {
+bool Struct::operator==([[maybe_unused]] const Struct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Struct::operator<(FOLLY_MAYBE_UNUSED const Struct& rhs) const {
+bool Struct::operator<([[maybe_unused]] const Struct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -106,7 +106,7 @@ const ::module1::Struct& Struct::get_second() const& {
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Struct& a, FOLLY_MAYBE_UNUSED Struct& b) {
+void swap([[maybe_unused]] Struct& a, [[maybe_unused]] Struct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_first, b.__fbthrift_field_first);
   swap(a.__fbthrift_field_second, b.__fbthrift_field_second);
@@ -170,13 +170,13 @@ const folly::StringPiece BigStruct::__fbthrift_get_class_name() {
 
 BigStruct::BigStruct(const BigStruct&) = default;
 BigStruct& BigStruct::operator=(const BigStruct&) = default;
-BigStruct::BigStruct(FOLLY_MAYBE_UNUSED BigStruct&& other) noexcept :
+BigStruct::BigStruct([[maybe_unused]] BigStruct&& other) noexcept :
     __fbthrift_field_s(std::move(other.__fbthrift_field_s)),
     __fbthrift_field_id(std::move(other.__fbthrift_field_id)),
     __isset(other.__isset) {
 }
 
-BigStruct& BigStruct::operator=(FOLLY_MAYBE_UNUSED BigStruct&& other) noexcept {
+BigStruct& BigStruct::operator=([[maybe_unused]] BigStruct&& other) noexcept {
     this->__fbthrift_field_s = std::move(other.__fbthrift_field_s);
     this->__fbthrift_field_id = std::move(other.__fbthrift_field_id);
     __isset = other.__isset;
@@ -206,11 +206,11 @@ bool BigStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool BigStruct::operator==(FOLLY_MAYBE_UNUSED const BigStruct& rhs) const {
+bool BigStruct::operator==([[maybe_unused]] const BigStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool BigStruct::operator<(FOLLY_MAYBE_UNUSED const BigStruct& rhs) const {
+bool BigStruct::operator<([[maybe_unused]] const BigStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -223,7 +223,7 @@ const ::module2::Struct& BigStruct::get_s() const& {
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED BigStruct& a, FOLLY_MAYBE_UNUSED BigStruct& b) {
+void swap([[maybe_unused]] BigStruct& a, [[maybe_unused]] BigStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_s, b.__fbthrift_field_s);
   swap(a.__fbthrift_field_id, b.__fbthrift_field_id);
@@ -249,7 +249,7 @@ static_assert(
 } // module2
 
 namespace module2 { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }} // module2
 namespace apache::thrift::detail::annotation {

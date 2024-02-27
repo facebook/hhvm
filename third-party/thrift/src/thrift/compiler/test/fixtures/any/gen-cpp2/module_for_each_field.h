@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).myString_ref()...);
   }
 };
@@ -24,7 +24,7 @@ struct ForEachField<::facebook::thrift::compiler::test::fixtures::any::detail::M
 template <>
 struct ForEachField<::facebook::thrift::compiler::test::fixtures::any::MyUnion> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).myString_ref()...);
   }
 };
@@ -32,7 +32,7 @@ struct ForEachField<::facebook::thrift::compiler::test::fixtures::any::MyUnion> 
 template <>
 struct ForEachField<::facebook::thrift::compiler::test::fixtures::any::MyException> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).myString_ref()...);
   }
 };

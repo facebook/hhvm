@@ -56,7 +56,7 @@ SerializedStruct::SerializedStruct() :
 
 SerializedStruct::~SerializedStruct() {}
 
-SerializedStruct::SerializedStruct(FOLLY_MAYBE_UNUSED SerializedStruct&& other) noexcept :
+SerializedStruct::SerializedStruct([[maybe_unused]] SerializedStruct&& other) noexcept :
     __fbthrift_field_s(std::move(other.__fbthrift_field_s)),
     __fbthrift_field_i(std::move(other.__fbthrift_field_i)),
     __fbthrift_field_os(std::move(other.__fbthrift_field_os)),
@@ -64,7 +64,7 @@ SerializedStruct::SerializedStruct(FOLLY_MAYBE_UNUSED SerializedStruct&& other) 
     __isset(other.__isset) {
 }
 
-SerializedStruct& SerializedStruct::operator=(FOLLY_MAYBE_UNUSED SerializedStruct&& other) noexcept {
+SerializedStruct& SerializedStruct::operator=([[maybe_unused]] SerializedStruct&& other) noexcept {
     this->__fbthrift_field_s = std::move(other.__fbthrift_field_s);
     this->__fbthrift_field_i = std::move(other.__fbthrift_field_i);
     this->__fbthrift_field_os = std::move(other.__fbthrift_field_os);
@@ -101,16 +101,16 @@ bool SerializedStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool SerializedStruct::operator==(FOLLY_MAYBE_UNUSED const SerializedStruct& rhs) const {
+bool SerializedStruct::operator==([[maybe_unused]] const SerializedStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool SerializedStruct::operator<(FOLLY_MAYBE_UNUSED const SerializedStruct& rhs) const {
+bool SerializedStruct::operator<([[maybe_unused]] const SerializedStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED SerializedStruct& a, FOLLY_MAYBE_UNUSED SerializedStruct& b) {
+void swap([[maybe_unused]] SerializedStruct& a, [[maybe_unused]] SerializedStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_s, b.__fbthrift_field_s);
   swap(a.__fbthrift_field_i, b.__fbthrift_field_i);
@@ -247,7 +247,7 @@ bool SerializedUnion::operator==(const SerializedUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool SerializedUnion::operator<(FOLLY_MAYBE_UNUSED const SerializedUnion& rhs) const {
+bool SerializedUnion::operator<([[maybe_unused]] const SerializedUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
@@ -312,14 +312,14 @@ SerializedError::SerializedError() {
 
 SerializedError::~SerializedError() {}
 
-SerializedError::SerializedError(FOLLY_MAYBE_UNUSED SerializedError&& other) noexcept :
+SerializedError::SerializedError([[maybe_unused]] SerializedError&& other) noexcept :
     __fbthrift_field_msg(std::move(other.__fbthrift_field_msg)),
     __fbthrift_field_os(std::move(other.__fbthrift_field_os)),
     __fbthrift_field_rs(std::move(other.__fbthrift_field_rs)),
     __isset(other.__isset) {
 }
 
-SerializedError& SerializedError::operator=(FOLLY_MAYBE_UNUSED SerializedError&& other) noexcept {
+SerializedError& SerializedError::operator=([[maybe_unused]] SerializedError&& other) noexcept {
     this->__fbthrift_field_msg = std::move(other.__fbthrift_field_msg);
     this->__fbthrift_field_os = std::move(other.__fbthrift_field_os);
     this->__fbthrift_field_rs = std::move(other.__fbthrift_field_rs);
@@ -352,16 +352,16 @@ bool SerializedError::__fbthrift_is_empty() const {
   return false;
 }
 
-bool SerializedError::operator==(FOLLY_MAYBE_UNUSED const SerializedError& rhs) const {
+bool SerializedError::operator==([[maybe_unused]] const SerializedError& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool SerializedError::operator<(FOLLY_MAYBE_UNUSED const SerializedError& rhs) const {
+bool SerializedError::operator<([[maybe_unused]] const SerializedError& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED SerializedError& a, FOLLY_MAYBE_UNUSED SerializedError& b) {
+void swap([[maybe_unused]] SerializedError& a, [[maybe_unused]] SerializedError& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_msg, b.__fbthrift_field_msg);
   swap(a.__fbthrift_field_os, b.__fbthrift_field_os);
@@ -425,7 +425,7 @@ MarshalStruct::MarshalStruct() :
 
 MarshalStruct::~MarshalStruct() {}
 
-MarshalStruct::MarshalStruct(FOLLY_MAYBE_UNUSED MarshalStruct&& other) noexcept :
+MarshalStruct::MarshalStruct([[maybe_unused]] MarshalStruct&& other) noexcept :
     __fbthrift_field_s(std::move(other.__fbthrift_field_s)),
     __fbthrift_field_i(std::move(other.__fbthrift_field_i)),
     __fbthrift_field_os(std::move(other.__fbthrift_field_os)),
@@ -433,7 +433,7 @@ MarshalStruct::MarshalStruct(FOLLY_MAYBE_UNUSED MarshalStruct&& other) noexcept 
     __isset(other.__isset) {
 }
 
-MarshalStruct& MarshalStruct::operator=(FOLLY_MAYBE_UNUSED MarshalStruct&& other) noexcept {
+MarshalStruct& MarshalStruct::operator=([[maybe_unused]] MarshalStruct&& other) noexcept {
     this->__fbthrift_field_s = std::move(other.__fbthrift_field_s);
     this->__fbthrift_field_i = std::move(other.__fbthrift_field_i);
     this->__fbthrift_field_os = std::move(other.__fbthrift_field_os);
@@ -470,16 +470,16 @@ bool MarshalStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool MarshalStruct::operator==(FOLLY_MAYBE_UNUSED const MarshalStruct& rhs) const {
+bool MarshalStruct::operator==([[maybe_unused]] const MarshalStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MarshalStruct::operator<(FOLLY_MAYBE_UNUSED const MarshalStruct& rhs) const {
+bool MarshalStruct::operator<([[maybe_unused]] const MarshalStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MarshalStruct& a, FOLLY_MAYBE_UNUSED MarshalStruct& b) {
+void swap([[maybe_unused]] MarshalStruct& a, [[maybe_unused]] MarshalStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_s, b.__fbthrift_field_s);
   swap(a.__fbthrift_field_i, b.__fbthrift_field_i);
@@ -616,7 +616,7 @@ bool MarshalUnion::operator==(const MarshalUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool MarshalUnion::operator<(FOLLY_MAYBE_UNUSED const MarshalUnion& rhs) const {
+bool MarshalUnion::operator<([[maybe_unused]] const MarshalUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
@@ -681,14 +681,14 @@ MarshalError::MarshalError() {
 
 MarshalError::~MarshalError() {}
 
-MarshalError::MarshalError(FOLLY_MAYBE_UNUSED MarshalError&& other) noexcept :
+MarshalError::MarshalError([[maybe_unused]] MarshalError&& other) noexcept :
     __fbthrift_field_msg(std::move(other.__fbthrift_field_msg)),
     __fbthrift_field_os(std::move(other.__fbthrift_field_os)),
     __fbthrift_field_rs(std::move(other.__fbthrift_field_rs)),
     __isset(other.__isset) {
 }
 
-MarshalError& MarshalError::operator=(FOLLY_MAYBE_UNUSED MarshalError&& other) noexcept {
+MarshalError& MarshalError::operator=([[maybe_unused]] MarshalError&& other) noexcept {
     this->__fbthrift_field_msg = std::move(other.__fbthrift_field_msg);
     this->__fbthrift_field_os = std::move(other.__fbthrift_field_os);
     this->__fbthrift_field_rs = std::move(other.__fbthrift_field_rs);
@@ -721,16 +721,16 @@ bool MarshalError::__fbthrift_is_empty() const {
   return false;
 }
 
-bool MarshalError::operator==(FOLLY_MAYBE_UNUSED const MarshalError& rhs) const {
+bool MarshalError::operator==([[maybe_unused]] const MarshalError& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MarshalError::operator<(FOLLY_MAYBE_UNUSED const MarshalError& rhs) const {
+bool MarshalError::operator<([[maybe_unused]] const MarshalError& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED MarshalError& a, FOLLY_MAYBE_UNUSED MarshalError& b) {
+void swap([[maybe_unused]] MarshalError& a, [[maybe_unused]] MarshalError& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_msg, b.__fbthrift_field_msg);
   swap(a.__fbthrift_field_os, b.__fbthrift_field_os);
@@ -751,7 +751,7 @@ template uint32_t MarshalError::serializedSizeZC<>(apache::thrift::CompactProtoc
 }}} // test::fixtures::python_capi
 
 namespace test { namespace fixtures { namespace python_capi { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }}}} // test::fixtures::python_capi
 namespace apache::thrift::detail::annotation {

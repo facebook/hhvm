@@ -51,7 +51,7 @@ TerseFoo::TerseFoo() {
 
 TerseFoo::~TerseFoo() {}
 
-TerseFoo::TerseFoo(FOLLY_MAYBE_UNUSED TerseFoo&& other) noexcept :
+TerseFoo::TerseFoo([[maybe_unused]] TerseFoo&& other) noexcept :
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
     __fbthrift_field_field2(std::move(other.__fbthrift_field_field2)),
     __fbthrift_field_field3(std::move(other.__fbthrift_field_field3)),
@@ -59,7 +59,7 @@ TerseFoo::TerseFoo(FOLLY_MAYBE_UNUSED TerseFoo&& other) noexcept :
     __isset(other.__isset) {
 }
 
-TerseFoo& TerseFoo::operator=(FOLLY_MAYBE_UNUSED TerseFoo&& other) noexcept {
+TerseFoo& TerseFoo::operator=([[maybe_unused]] TerseFoo&& other) noexcept {
     this->__fbthrift_field_field1 = std::move(other.__fbthrift_field_field1);
     this->__fbthrift_field_field2 = std::move(other.__fbthrift_field_field2);
     this->__fbthrift_field_field3 = std::move(other.__fbthrift_field_field3);
@@ -100,11 +100,11 @@ bool TerseFoo::__fbthrift_is_empty() const {
  !(!::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_field4));
 }
 
-bool TerseFoo::operator==(FOLLY_MAYBE_UNUSED const TerseFoo& rhs) const {
+bool TerseFoo::operator==([[maybe_unused]] const TerseFoo& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool TerseFoo::operator<(FOLLY_MAYBE_UNUSED const TerseFoo& rhs) const {
+bool TerseFoo::operator<([[maybe_unused]] const TerseFoo& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -141,7 +141,7 @@ const ::std::vector<::std::int32_t>& TerseFoo::get_field4() const& {
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED TerseFoo& a, FOLLY_MAYBE_UNUSED TerseFoo& b) {
+void swap([[maybe_unused]] TerseFoo& a, [[maybe_unused]] TerseFoo& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field1, b.__fbthrift_field_field1);
   swap(a.__fbthrift_field_field2, b.__fbthrift_field_field2);
@@ -226,7 +226,7 @@ TerseLazyFoo::TerseLazyFoo() {
 
 TerseLazyFoo::~TerseLazyFoo() {}
 
-TerseLazyFoo::TerseLazyFoo(FOLLY_MAYBE_UNUSED TerseLazyFoo&& other) noexcept :
+TerseLazyFoo::TerseLazyFoo([[maybe_unused]] TerseLazyFoo&& other) noexcept :
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
     __fbthrift_field_field2(std::move(other.__fbthrift_field_field2)),
     __fbthrift_field_field3(std::move(other.__fbthrift_field_field3)),
@@ -247,7 +247,7 @@ TerseLazyFoo::TerseLazyFoo(FOLLY_MAYBE_UNUSED TerseLazyFoo&& other) noexcept :
   }
 }
 
-TerseLazyFoo& TerseLazyFoo::operator=(FOLLY_MAYBE_UNUSED TerseLazyFoo&& other) noexcept {
+TerseLazyFoo& TerseLazyFoo::operator=([[maybe_unused]] TerseLazyFoo&& other) noexcept {
     const auto relaxed = std::memory_order_relaxed;
     __fbthrift_protocol_ = other.__fbthrift_protocol_;
     __fbthrift_serializedData_ = std::move(other.__fbthrift_serializedData_);
@@ -378,11 +378,11 @@ bool TerseLazyFoo::__fbthrift_is_empty() const {
  !(!::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_field4));
 }
 
-bool TerseLazyFoo::operator==(FOLLY_MAYBE_UNUSED const TerseLazyFoo& rhs) const {
+bool TerseLazyFoo::operator==([[maybe_unused]] const TerseLazyFoo& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool TerseLazyFoo::operator<(FOLLY_MAYBE_UNUSED const TerseLazyFoo& rhs) const {
+bool TerseLazyFoo::operator<([[maybe_unused]] const TerseLazyFoo& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -403,7 +403,7 @@ const ::std::vector<::std::int32_t>& TerseLazyFoo::get_field2() const& {
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED TerseLazyFoo& a, FOLLY_MAYBE_UNUSED TerseLazyFoo& b) {
+void swap([[maybe_unused]] TerseLazyFoo& a, [[maybe_unused]] TerseLazyFoo& b) {
   using ::std::swap;
   const auto relaxed = std::memory_order_relaxed;
   swap(a.__fbthrift_protocol_, b.__fbthrift_protocol_);
@@ -468,7 +468,7 @@ TerseOptionalFoo::TerseOptionalFoo() {
 
 TerseOptionalFoo::~TerseOptionalFoo() {}
 
-TerseOptionalFoo::TerseOptionalFoo(FOLLY_MAYBE_UNUSED TerseOptionalFoo&& other) noexcept :
+TerseOptionalFoo::TerseOptionalFoo([[maybe_unused]] TerseOptionalFoo&& other) noexcept :
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
     __fbthrift_field_field2(std::move(other.__fbthrift_field_field2)),
     __fbthrift_field_field3(std::move(other.__fbthrift_field_field3)),
@@ -476,7 +476,7 @@ TerseOptionalFoo::TerseOptionalFoo(FOLLY_MAYBE_UNUSED TerseOptionalFoo&& other) 
     __isset(other.__isset) {
 }
 
-TerseOptionalFoo& TerseOptionalFoo::operator=(FOLLY_MAYBE_UNUSED TerseOptionalFoo&& other) noexcept {
+TerseOptionalFoo& TerseOptionalFoo::operator=([[maybe_unused]] TerseOptionalFoo&& other) noexcept {
     this->__fbthrift_field_field1 = std::move(other.__fbthrift_field_field1);
     this->__fbthrift_field_field2 = std::move(other.__fbthrift_field_field2);
     this->__fbthrift_field_field3 = std::move(other.__fbthrift_field_field3);
@@ -517,11 +517,11 @@ bool TerseOptionalFoo::__fbthrift_is_empty() const {
  !(this->__isset.get(3));
 }
 
-bool TerseOptionalFoo::operator==(FOLLY_MAYBE_UNUSED const TerseOptionalFoo& rhs) const {
+bool TerseOptionalFoo::operator==([[maybe_unused]] const TerseOptionalFoo& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool TerseOptionalFoo::operator<(FOLLY_MAYBE_UNUSED const TerseOptionalFoo& rhs) const {
+bool TerseOptionalFoo::operator<([[maybe_unused]] const TerseOptionalFoo& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -558,7 +558,7 @@ const ::std::vector<::std::int32_t>* TerseOptionalFoo::get_field4() const& {
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED TerseOptionalFoo& a, FOLLY_MAYBE_UNUSED TerseOptionalFoo& b) {
+void swap([[maybe_unused]] TerseOptionalFoo& a, [[maybe_unused]] TerseOptionalFoo& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field1, b.__fbthrift_field_field1);
   swap(a.__fbthrift_field_field2, b.__fbthrift_field_field2);
@@ -643,7 +643,7 @@ TerseOptionalLazyFoo::TerseOptionalLazyFoo() {
 
 TerseOptionalLazyFoo::~TerseOptionalLazyFoo() {}
 
-TerseOptionalLazyFoo::TerseOptionalLazyFoo(FOLLY_MAYBE_UNUSED TerseOptionalLazyFoo&& other) noexcept :
+TerseOptionalLazyFoo::TerseOptionalLazyFoo([[maybe_unused]] TerseOptionalLazyFoo&& other) noexcept :
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
     __fbthrift_field_field2(std::move(other.__fbthrift_field_field2)),
     __fbthrift_field_field3(std::move(other.__fbthrift_field_field3)),
@@ -664,7 +664,7 @@ TerseOptionalLazyFoo::TerseOptionalLazyFoo(FOLLY_MAYBE_UNUSED TerseOptionalLazyF
   }
 }
 
-TerseOptionalLazyFoo& TerseOptionalLazyFoo::operator=(FOLLY_MAYBE_UNUSED TerseOptionalLazyFoo&& other) noexcept {
+TerseOptionalLazyFoo& TerseOptionalLazyFoo::operator=([[maybe_unused]] TerseOptionalLazyFoo&& other) noexcept {
     const auto relaxed = std::memory_order_relaxed;
     __fbthrift_protocol_ = other.__fbthrift_protocol_;
     __fbthrift_serializedData_ = std::move(other.__fbthrift_serializedData_);
@@ -795,11 +795,11 @@ bool TerseOptionalLazyFoo::__fbthrift_is_empty() const {
  !(this->__isset.get(3));
 }
 
-bool TerseOptionalLazyFoo::operator==(FOLLY_MAYBE_UNUSED const TerseOptionalLazyFoo& rhs) const {
+bool TerseOptionalLazyFoo::operator==([[maybe_unused]] const TerseOptionalLazyFoo& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool TerseOptionalLazyFoo::operator<(FOLLY_MAYBE_UNUSED const TerseOptionalLazyFoo& rhs) const {
+bool TerseOptionalLazyFoo::operator<([[maybe_unused]] const TerseOptionalLazyFoo& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -820,7 +820,7 @@ const ::std::vector<::std::int32_t>* TerseOptionalLazyFoo::get_field2() const& {
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED TerseOptionalLazyFoo& a, FOLLY_MAYBE_UNUSED TerseOptionalLazyFoo& b) {
+void swap([[maybe_unused]] TerseOptionalLazyFoo& a, [[maybe_unused]] TerseOptionalLazyFoo& b) {
   using ::std::swap;
   const auto relaxed = std::memory_order_relaxed;
   swap(a.__fbthrift_protocol_, b.__fbthrift_protocol_);
@@ -847,7 +847,7 @@ template uint32_t TerseOptionalLazyFoo::serializedSizeZC<>(apache::thrift::Compa
 }}} // apache::thrift::test
 
 namespace apache { namespace thrift { namespace test { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }}}} // apache::thrift::test
 namespace apache::thrift::detail::annotation {

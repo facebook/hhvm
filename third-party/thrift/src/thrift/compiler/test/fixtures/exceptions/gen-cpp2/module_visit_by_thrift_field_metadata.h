@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct VisitByFieldId<::cpp2::Fiery> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).message_ref());
@@ -29,7 +29,7 @@ struct VisitByFieldId<::cpp2::Fiery> {
 template <>
 struct VisitByFieldId<::cpp2::Serious> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).sonnet_ref());
@@ -42,7 +42,7 @@ struct VisitByFieldId<::cpp2::Serious> {
 template <>
 struct VisitByFieldId<::cpp2::ComplexFieldNames> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).error_message_ref());
@@ -57,7 +57,7 @@ struct VisitByFieldId<::cpp2::ComplexFieldNames> {
 template <>
 struct VisitByFieldId<::cpp2::CustomFieldNames> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).error_message_ref());
@@ -72,7 +72,7 @@ struct VisitByFieldId<::cpp2::CustomFieldNames> {
 template <>
 struct VisitByFieldId<::cpp2::ExceptionWithPrimitiveField> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).message_ref());
@@ -87,7 +87,7 @@ struct VisitByFieldId<::cpp2::ExceptionWithPrimitiveField> {
 template <>
 struct VisitByFieldId<::cpp2::ExceptionWithStructuredAnnotation> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).message_field_ref());
@@ -102,7 +102,7 @@ struct VisitByFieldId<::cpp2::ExceptionWithStructuredAnnotation> {
 template <>
 struct VisitByFieldId<::cpp2::Banal> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
       throwInvalidThriftId(fieldId, "::cpp2::Banal");

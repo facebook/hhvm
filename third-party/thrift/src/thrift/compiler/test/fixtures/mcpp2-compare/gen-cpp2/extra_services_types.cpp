@@ -69,7 +69,7 @@ containerStruct2::containerStruct2() :
 
 containerStruct2::~containerStruct2() {}
 
-containerStruct2::containerStruct2(FOLLY_MAYBE_UNUSED containerStruct2&& other) noexcept :
+containerStruct2::containerStruct2([[maybe_unused]] containerStruct2&& other) noexcept :
     __fbthrift_field_fieldA(std::move(other.__fbthrift_field_fieldA)),
     __fbthrift_field_req_fieldA(std::move(other.__fbthrift_field_req_fieldA)),
     __fbthrift_field_opt_fieldA(std::move(other.__fbthrift_field_opt_fieldA)),
@@ -86,7 +86,7 @@ containerStruct2::containerStruct2(FOLLY_MAYBE_UNUSED containerStruct2&& other) 
     __isset(other.__isset) {
 }
 
-containerStruct2& containerStruct2::operator=(FOLLY_MAYBE_UNUSED containerStruct2&& other) noexcept {
+containerStruct2& containerStruct2::operator=([[maybe_unused]] containerStruct2&& other) noexcept {
     this->__fbthrift_field_fieldA = std::move(other.__fbthrift_field_fieldA);
     this->__fbthrift_field_req_fieldA = std::move(other.__fbthrift_field_req_fieldA);
     this->__fbthrift_field_opt_fieldA = std::move(other.__fbthrift_field_opt_fieldA);
@@ -156,11 +156,11 @@ bool containerStruct2::__fbthrift_is_empty() const {
   return false;
 }
 
-bool containerStruct2::operator==(FOLLY_MAYBE_UNUSED const containerStruct2& rhs) const {
+bool containerStruct2::operator==([[maybe_unused]] const containerStruct2& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool containerStruct2::operator<(FOLLY_MAYBE_UNUSED const containerStruct2& rhs) const {
+bool containerStruct2::operator<([[maybe_unused]] const containerStruct2& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -213,7 +213,7 @@ const ::std::set<::std::int32_t>* containerStruct2::get_opt_fieldC() const& {
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED containerStruct2& a, FOLLY_MAYBE_UNUSED containerStruct2& b) {
+void swap([[maybe_unused]] containerStruct2& a, [[maybe_unused]] containerStruct2& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_fieldA, b.__fbthrift_field_fieldA);
   swap(a.__fbthrift_field_req_fieldA, b.__fbthrift_field_req_fieldA);
@@ -248,7 +248,7 @@ template uint32_t containerStruct2::serializedSizeZC<>(apache::thrift::SimpleJSO
 }} // extra::svc
 
 namespace extra { namespace svc { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }}} // extra::svc
 namespace apache::thrift::detail::annotation {

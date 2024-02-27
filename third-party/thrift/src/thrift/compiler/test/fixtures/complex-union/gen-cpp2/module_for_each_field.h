@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::cpp2::ComplexUnion> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).intValue_ref()...);
     f(1, static_cast<T&&>(t).stringValue_ref()...);
     f(2, static_cast<T&&>(t).intListValue_ref()...);
@@ -29,7 +29,7 @@ struct ForEachField<::cpp2::ComplexUnion> {
 template <>
 struct ForEachField<::cpp2::ListUnion> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).intListValue_ref()...);
     f(1, static_cast<T&&>(t).stringListValue_ref()...);
   }
@@ -38,7 +38,7 @@ struct ForEachField<::cpp2::ListUnion> {
 template <>
 struct ForEachField<::cpp2::DataUnion> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).binaryData_ref()...);
     f(1, static_cast<T&&>(t).stringData_ref()...);
   }
@@ -47,7 +47,7 @@ struct ForEachField<::cpp2::DataUnion> {
 template <>
 struct ForEachField<::cpp2::Val> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).strVal_ref()...);
     f(1, static_cast<T&&>(t).intVal_ref()...);
     f(2, static_cast<T&&>(t).typedefValue_ref()...);
@@ -57,7 +57,7 @@ struct ForEachField<::cpp2::Val> {
 template <>
 struct ForEachField<::cpp2::ValUnion> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).v1_ref()...);
     f(1, static_cast<T&&>(t).v2_ref()...);
   }
@@ -66,7 +66,7 @@ struct ForEachField<::cpp2::ValUnion> {
 template <>
 struct ForEachField<::cpp2::VirtualComplexUnion> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).thingOne_ref()...);
     f(1, static_cast<T&&>(t).thingTwo_ref()...);
   }
@@ -75,7 +75,7 @@ struct ForEachField<::cpp2::VirtualComplexUnion> {
 template <>
 struct ForEachField<::cpp2::NonCopyableStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).num_ref()...);
   }
 };
@@ -83,7 +83,7 @@ struct ForEachField<::cpp2::NonCopyableStruct> {
 template <>
 struct ForEachField<::cpp2::NonCopyableUnion> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).s_ref()...);
   }
 };

@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::a::different::ns::AStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).FieldA_ref()...);
   }
 };
@@ -24,7 +24,7 @@ struct ForEachField<::a::different::ns::AStruct> {
 template <>
 struct ForEachField<::a::different::ns::AStructB> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).FieldA_ref()...);
   }
 };

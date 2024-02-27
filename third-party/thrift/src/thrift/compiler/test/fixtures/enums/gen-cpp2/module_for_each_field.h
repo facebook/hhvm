@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::test::fixtures::enums::SomeStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).reasonable_ref()...);
     f(1, static_cast<T&&>(t).fine_ref()...);
     f(2, static_cast<T&&>(t).questionable_ref()...);
@@ -27,7 +27,7 @@ struct ForEachField<::test::fixtures::enums::SomeStruct> {
 template <>
 struct ForEachField<::test::fixtures::enums::MyStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).me2_3_ref()...);
     f(1, static_cast<T&&>(t).me3_n3_ref()...);
     f(2, static_cast<T&&>(t).me1_t1_ref()...);

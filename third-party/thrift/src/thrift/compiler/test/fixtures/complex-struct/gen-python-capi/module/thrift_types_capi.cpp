@@ -135,7 +135,7 @@ PyObject* Constructor<::cpp2::MyStructFloatFieldThrowExp>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::MyStructFloatFieldThrowExp>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::MyStructFloatFieldThrowExp& val) {
+    [[maybe_unused]] const ::cpp2::MyStructFloatFieldThrowExp& val) {
   StrongRef fbthrift_data(createStructTuple(4));
   StrongRef _fbthrift__myLongField(
     Constructor<int64_t>{}
@@ -248,7 +248,7 @@ PyObject* Constructor<::cpp2::MyStructMapFloatThrowExp>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::MyStructMapFloatThrowExp>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::MyStructMapFloatThrowExp& val) {
+    [[maybe_unused]] const ::cpp2::MyStructMapFloatThrowExp& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__myLongField(
     Constructor<int64_t>{}
@@ -445,7 +445,7 @@ PyObject* Constructor<::cpp2::MyStruct>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::MyStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::MyStruct& val) {
+    [[maybe_unused]] const ::cpp2::MyStruct& val) {
   StrongRef fbthrift_data(createStructTuple(28));
   StrongRef _fbthrift__MyIntField(
     Constructor<int64_t>{}
@@ -798,7 +798,7 @@ PyObject* Constructor<::cpp2::SimpleStruct>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::SimpleStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::SimpleStruct& val) {
+    [[maybe_unused]] const ::cpp2::SimpleStruct& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__age(
     Constructor<int64_t>{}
@@ -971,7 +971,7 @@ PyObject* Constructor<::cpp2::defaultStruct>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::defaultStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::defaultStruct& val) {
+    [[maybe_unused]] const ::cpp2::defaultStruct& val) {
   StrongRef fbthrift_data(createStructTuple(22));
   StrongRef _fbthrift__myLongDFset(
     Constructor<int64_t>{}
@@ -1292,7 +1292,7 @@ PyObject* Constructor<::cpp2::MyStructTypeDef>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::MyStructTypeDef>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::MyStructTypeDef& val) {
+    [[maybe_unused]] const ::cpp2::MyStructTypeDef& val) {
   StrongRef fbthrift_data(createStructTuple(9));
   StrongRef _fbthrift__myLongField(
     Constructor<int64_t>{}
@@ -1442,7 +1442,7 @@ PyObject* Constructor<::cpp2::MyDataItem>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::MyDataItem>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::MyDataItem& val) {
+    [[maybe_unused]] const ::cpp2::MyDataItem& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
@@ -1539,7 +1539,7 @@ PyObject* Constructor<::cpp2::MyUnion>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::MyUnion>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::MyUnion& val) {
+    [[maybe_unused]] const ::cpp2::MyUnion& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
   switch (type_key) {
@@ -1668,7 +1668,7 @@ PyObject* Constructor<::cpp2::MyUnionFloatFieldThrowExp>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::MyUnionFloatFieldThrowExp>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::MyUnionFloatFieldThrowExp& val) {
+    [[maybe_unused]] const ::cpp2::MyUnionFloatFieldThrowExp& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
   switch (type_key) {
@@ -1835,7 +1835,7 @@ PyObject* Constructor<::cpp2::ComplexNestedStruct>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::ComplexNestedStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::ComplexNestedStruct& val) {
+    [[maybe_unused]] const ::cpp2::ComplexNestedStruct& val) {
   StrongRef fbthrift_data(createStructTuple(18));
   StrongRef _fbthrift__setOfSetOfInt(
     Constructor<set<set<int32_t>>>{}
@@ -2096,7 +2096,7 @@ PyObject* Constructor<::cpp2::TypeRemapped>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::TypeRemapped>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::TypeRemapped& val) {
+    [[maybe_unused]] const ::cpp2::TypeRemapped& val) {
   StrongRef fbthrift_data(createStructTuple(4));
   StrongRef _fbthrift__lsMap(
     Constructor<map<int64_t, Bytes>>{}
@@ -2196,7 +2196,7 @@ PyObject* Constructor<::cpp2::emptyXcep>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::emptyXcep>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::emptyXcep& val) {
+    [[maybe_unused]] const ::cpp2::emptyXcep& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
@@ -2269,7 +2269,7 @@ PyObject* Constructor<::cpp2::reqXcep>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::reqXcep>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::reqXcep& val) {
+    [[maybe_unused]] const ::cpp2::reqXcep& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__message(
     Constructor<Bytes>{}
@@ -2362,7 +2362,7 @@ PyObject* Constructor<::cpp2::optXcep>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::optXcep>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::optXcep& val) {
+    [[maybe_unused]] const ::cpp2::optXcep& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__message(
     Constructor<Bytes>{}
@@ -2485,7 +2485,7 @@ PyObject* Constructor<::cpp2::complexException>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::complexException>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::complexException& val) {
+    [[maybe_unused]] const ::cpp2::complexException& val) {
   StrongRef fbthrift_data(createStructTuple(6));
   StrongRef _fbthrift__message(
     Constructor<Bytes>{}

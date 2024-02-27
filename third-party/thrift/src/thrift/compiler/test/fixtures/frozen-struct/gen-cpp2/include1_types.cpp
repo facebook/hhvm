@@ -52,13 +52,13 @@ IncludedA::IncludedA() :
 
 IncludedA::~IncludedA() {}
 
-IncludedA::IncludedA(FOLLY_MAYBE_UNUSED IncludedA&& other) noexcept :
+IncludedA::IncludedA([[maybe_unused]] IncludedA&& other) noexcept :
     __fbthrift_field_i32Field(std::move(other.__fbthrift_field_i32Field)),
     __fbthrift_field_strField(std::move(other.__fbthrift_field_strField)),
     __isset(other.__isset) {
 }
 
-IncludedA& IncludedA::operator=(FOLLY_MAYBE_UNUSED IncludedA&& other) noexcept {
+IncludedA& IncludedA::operator=([[maybe_unused]] IncludedA&& other) noexcept {
     this->__fbthrift_field_i32Field = std::move(other.__fbthrift_field_i32Field);
     this->__fbthrift_field_strField = std::move(other.__fbthrift_field_strField);
     __isset = other.__isset;
@@ -88,16 +88,16 @@ bool IncludedA::__fbthrift_is_empty() const {
   return false;
 }
 
-bool IncludedA::operator==(FOLLY_MAYBE_UNUSED const IncludedA& rhs) const {
+bool IncludedA::operator==([[maybe_unused]] const IncludedA& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool IncludedA::operator<(FOLLY_MAYBE_UNUSED const IncludedA& rhs) const {
+bool IncludedA::operator<([[maybe_unused]] const IncludedA& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED IncludedA& a, FOLLY_MAYBE_UNUSED IncludedA& b) {
+void swap([[maybe_unused]] IncludedA& a, [[maybe_unused]] IncludedA& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_i32Field, b.__fbthrift_field_i32Field);
   swap(a.__fbthrift_field_strField, b.__fbthrift_field_strField);
@@ -117,7 +117,7 @@ template uint32_t IncludedA::serializedSizeZC<>(apache::thrift::CompactProtocolW
 }} // some::ns
 
 namespace some { namespace ns { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }}} // some::ns
 namespace apache::thrift::detail::annotation {

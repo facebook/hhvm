@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::apache::thrift::test::StructWithDefaultStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).bool_field_ref()...);
     f(1, static_cast<T&&>(t).byte_field_ref()...);
     f(2, static_cast<T&&>(t).short_field_ref()...);

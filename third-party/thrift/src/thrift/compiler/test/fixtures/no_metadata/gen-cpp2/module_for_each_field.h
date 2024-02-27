@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::cpp2::MyStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).MyIntField_ref()...);
     f(1, static_cast<T&&>(t).MyStringField_ref()...);
     f(2, static_cast<T&&>(t).MyDataField_ref()...);
@@ -27,14 +27,14 @@ struct ForEachField<::cpp2::MyStruct> {
 template <>
 struct ForEachField<::cpp2::MyDataItem> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
   }
 };
 
 template <>
 struct ForEachField<::cpp2::MyUnion> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).myEnum_ref()...);
     f(1, static_cast<T&&>(t).myStruct_ref()...);
     f(2, static_cast<T&&>(t).myDataItem_ref()...);

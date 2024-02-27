@@ -51,12 +51,12 @@ Mixin1::Mixin1() {
 
 Mixin1::~Mixin1() {}
 
-Mixin1::Mixin1(FOLLY_MAYBE_UNUSED Mixin1&& other) noexcept :
+Mixin1::Mixin1([[maybe_unused]] Mixin1&& other) noexcept :
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
     __isset(other.__isset) {
 }
 
-Mixin1& Mixin1::operator=(FOLLY_MAYBE_UNUSED Mixin1&& other) noexcept {
+Mixin1& Mixin1::operator=([[maybe_unused]] Mixin1&& other) noexcept {
     this->__fbthrift_field_field1 = std::move(other.__fbthrift_field_field1);
     __isset = other.__isset;
     return *this;
@@ -82,16 +82,16 @@ bool Mixin1::__fbthrift_is_empty() const {
   return false;
 }
 
-bool Mixin1::operator==(FOLLY_MAYBE_UNUSED const Mixin1& rhs) const {
+bool Mixin1::operator==([[maybe_unused]] const Mixin1& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Mixin1::operator<(FOLLY_MAYBE_UNUSED const Mixin1& rhs) const {
+bool Mixin1::operator<([[maybe_unused]] const Mixin1& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Mixin1& a, FOLLY_MAYBE_UNUSED Mixin1& b) {
+void swap([[maybe_unused]] Mixin1& a, [[maybe_unused]] Mixin1& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field1, b.__fbthrift_field_field1);
   swap(a.__isset, b.__isset);
@@ -148,13 +148,13 @@ Mixin2::Mixin2() {
 
 Mixin2::~Mixin2() {}
 
-Mixin2::Mixin2(FOLLY_MAYBE_UNUSED Mixin2&& other) noexcept :
+Mixin2::Mixin2([[maybe_unused]] Mixin2&& other) noexcept :
     __fbthrift_field_m1(std::move(other.__fbthrift_field_m1)),
     __fbthrift_field_field2(std::move(other.__fbthrift_field_field2)),
     __isset(other.__isset) {
 }
 
-Mixin2& Mixin2::operator=(FOLLY_MAYBE_UNUSED Mixin2&& other) noexcept {
+Mixin2& Mixin2::operator=([[maybe_unused]] Mixin2&& other) noexcept {
     this->__fbthrift_field_m1 = std::move(other.__fbthrift_field_m1);
     this->__fbthrift_field_field2 = std::move(other.__fbthrift_field_field2);
     __isset = other.__isset;
@@ -184,11 +184,11 @@ bool Mixin2::__fbthrift_is_empty() const {
   return false;
 }
 
-bool Mixin2::operator==(FOLLY_MAYBE_UNUSED const Mixin2& rhs) const {
+bool Mixin2::operator==([[maybe_unused]] const Mixin2& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Mixin2::operator<(FOLLY_MAYBE_UNUSED const Mixin2& rhs) const {
+bool Mixin2::operator<([[maybe_unused]] const Mixin2& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -201,7 +201,7 @@ const ::cpp2::Mixin1& Mixin2::get_m1() const& {
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Mixin2& a, FOLLY_MAYBE_UNUSED Mixin2& b) {
+void swap([[maybe_unused]] Mixin2& a, [[maybe_unused]] Mixin2& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_m1, b.__fbthrift_field_m1);
   swap(a.__fbthrift_field_field2, b.__fbthrift_field_field2);
@@ -265,12 +265,12 @@ Mixin3Base::Mixin3Base() {
 
 Mixin3Base::~Mixin3Base() {}
 
-Mixin3Base::Mixin3Base(FOLLY_MAYBE_UNUSED Mixin3Base&& other) noexcept :
+Mixin3Base::Mixin3Base([[maybe_unused]] Mixin3Base&& other) noexcept :
     __fbthrift_field_field3(std::move(other.__fbthrift_field_field3)),
     __isset(other.__isset) {
 }
 
-Mixin3Base& Mixin3Base::operator=(FOLLY_MAYBE_UNUSED Mixin3Base&& other) noexcept {
+Mixin3Base& Mixin3Base::operator=([[maybe_unused]] Mixin3Base&& other) noexcept {
     this->__fbthrift_field_field3 = std::move(other.__fbthrift_field_field3);
     __isset = other.__isset;
     return *this;
@@ -296,16 +296,16 @@ bool Mixin3Base::__fbthrift_is_empty() const {
   return false;
 }
 
-bool Mixin3Base::operator==(FOLLY_MAYBE_UNUSED const Mixin3Base& rhs) const {
+bool Mixin3Base::operator==([[maybe_unused]] const Mixin3Base& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Mixin3Base::operator<(FOLLY_MAYBE_UNUSED const Mixin3Base& rhs) const {
+bool Mixin3Base::operator<([[maybe_unused]] const Mixin3Base& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Mixin3Base& a, FOLLY_MAYBE_UNUSED Mixin3Base& b) {
+void swap([[maybe_unused]] Mixin3Base& a, [[maybe_unused]] Mixin3Base& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field3, b.__fbthrift_field_field3);
   swap(a.__isset, b.__isset);
@@ -362,14 +362,14 @@ Foo::Foo() {
 
 Foo::~Foo() {}
 
-Foo::Foo(FOLLY_MAYBE_UNUSED Foo&& other) noexcept :
+Foo::Foo([[maybe_unused]] Foo&& other) noexcept :
     __fbthrift_field_field4(std::move(other.__fbthrift_field_field4)),
     __fbthrift_field_m2(std::move(other.__fbthrift_field_m2)),
     __fbthrift_field_m3(std::move(other.__fbthrift_field_m3)),
     __isset(other.__isset) {
 }
 
-Foo& Foo::operator=(FOLLY_MAYBE_UNUSED Foo&& other) noexcept {
+Foo& Foo::operator=([[maybe_unused]] Foo&& other) noexcept {
     this->__fbthrift_field_field4 = std::move(other.__fbthrift_field_field4);
     this->__fbthrift_field_m2 = std::move(other.__fbthrift_field_m2);
     this->__fbthrift_field_m3 = std::move(other.__fbthrift_field_m3);
@@ -403,11 +403,11 @@ bool Foo::__fbthrift_is_empty() const {
   return false;
 }
 
-bool Foo::operator==(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
+bool Foo::operator==([[maybe_unused]] const Foo& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Foo::operator<(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
+bool Foo::operator<([[maybe_unused]] const Foo& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -428,7 +428,7 @@ const ::cpp2::Mixin3& Foo::get_m3() const& {
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Foo& a, FOLLY_MAYBE_UNUSED Foo& b) {
+void swap([[maybe_unused]] Foo& a, [[maybe_unused]] Foo& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field4, b.__fbthrift_field_field4);
   swap(a.__fbthrift_field_m2, b.__fbthrift_field_m2);
@@ -461,7 +461,7 @@ static_assert(
 } // cpp2
 
 namespace cpp2 { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }} // cpp2
 namespace apache::thrift::detail::annotation {

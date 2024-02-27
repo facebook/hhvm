@@ -17,7 +17,7 @@ template <>
 struct VisitUnion<::test_cpp2::cpp_reflection::union1> {
 
   template <typename F, typename T>
-  decltype(auto) operator()(FOLLY_MAYBE_UNUSED F&& f, T&& t) const {
+  decltype(auto) operator()([[maybe_unused]] F&& f, T&& t) const {
     using Union = std::remove_reference_t<T>;
     switch (t.getType()) {
     case Union::Type::ui:
@@ -37,7 +37,7 @@ template <>
 struct VisitUnion<::test_cpp2::cpp_reflection::union2> {
 
   template <typename F, typename T>
-  decltype(auto) operator()(FOLLY_MAYBE_UNUSED F&& f, T&& t) const {
+  decltype(auto) operator()([[maybe_unused]] F&& f, T&& t) const {
     using Union = std::remove_reference_t<T>;
     switch (t.getType()) {
     case Union::Type::ui_2:
@@ -57,7 +57,7 @@ template <>
 struct VisitUnion<::test_cpp2::cpp_reflection::union3> {
 
   template <typename F, typename T>
-  decltype(auto) operator()(FOLLY_MAYBE_UNUSED F&& f, T&& t) const {
+  decltype(auto) operator()([[maybe_unused]] F&& f, T&& t) const {
     using Union = std::remove_reference_t<T>;
     switch (t.getType()) {
     case Union::Type::ui_3:
@@ -77,7 +77,7 @@ template <>
 struct VisitUnion<::test_cpp2::cpp_reflection::unionA> {
 
   template <typename F, typename T>
-  decltype(auto) operator()(FOLLY_MAYBE_UNUSED F&& f, T&& t) const {
+  decltype(auto) operator()([[maybe_unused]] F&& f, T&& t) const {
     using Union = std::remove_reference_t<T>;
     switch (t.getType()) {
     case Union::Type::i:
@@ -99,7 +99,7 @@ template <>
 struct VisitUnion<::test_cpp2::cpp_reflection::union_with_special_names> {
 
   template <typename F, typename T>
-  decltype(auto) operator()(FOLLY_MAYBE_UNUSED F&& f, T&& t) const {
+  decltype(auto) operator()([[maybe_unused]] F&& f, T&& t) const {
     using Union = std::remove_reference_t<T>;
     switch (t.getType()) {
     case Union::Type::get:
@@ -167,7 +167,7 @@ template <>
 struct VisitUnion<::test_cpp2::cpp_reflection::UnionWithTypedefFieldAdapter> {
 
   template <typename F, typename T>
-  decltype(auto) operator()(FOLLY_MAYBE_UNUSED F&& f, T&& t) const {
+  decltype(auto) operator()([[maybe_unused]] F&& f, T&& t) const {
     using Union = std::remove_reference_t<T>;
     switch (t.getType()) {
     case Union::Type::field:

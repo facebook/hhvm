@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct ForEachField<::cpp2::MyStructNestedAnnotation> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).name_ref()...);
   }
 };
@@ -24,21 +24,21 @@ struct ForEachField<::cpp2::MyStructNestedAnnotation> {
 template <>
 struct ForEachField<::cpp2::detail::YourUnion> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
   }
 };
 
 template <>
 struct ForEachField<::cpp2::detail::YourException> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
   }
 };
 
 template <>
 struct ForEachField<::cpp2::detail::YourStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).majorVer_ref()...);
     f(1, static_cast<T&&>(t).abstract_ref()...);
     f(2, static_cast<T&&>(t).annotation_with_quote_ref()...);
@@ -54,7 +54,7 @@ struct ForEachField<::cpp2::detail::YourStruct> {
 template <>
 struct ForEachField<::cpp2::SecretStruct> {
   template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).id_ref()...);
     f(1, static_cast<T&&>(t).password_ref()...);
   }

@@ -108,7 +108,7 @@ PyObject* Constructor<::cpp2::Fiery>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::Fiery>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::Fiery& val) {
+    [[maybe_unused]] const ::cpp2::Fiery& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__message(
     Constructor<Bytes>{}
@@ -187,7 +187,7 @@ PyObject* Constructor<::cpp2::Serious>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::Serious>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::Serious& val) {
+    [[maybe_unused]] const ::cpp2::Serious& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__sonnet(
     Constructor<Bytes>{}
@@ -277,7 +277,7 @@ PyObject* Constructor<::cpp2::ComplexFieldNames>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::ComplexFieldNames>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::ComplexFieldNames& val) {
+    [[maybe_unused]] const ::cpp2::ComplexFieldNames& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__error_message(
     Constructor<Bytes>{}
@@ -370,7 +370,7 @@ PyObject* Constructor<::cpp2::CustomFieldNames>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::CustomFieldNames>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::CustomFieldNames& val) {
+    [[maybe_unused]] const ::cpp2::CustomFieldNames& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__error_message(
     Constructor<Bytes>{}
@@ -463,7 +463,7 @@ PyObject* Constructor<::cpp2::ExceptionWithPrimitiveField>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::ExceptionWithPrimitiveField>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::ExceptionWithPrimitiveField& val) {
+    [[maybe_unused]] const ::cpp2::ExceptionWithPrimitiveField& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__message(
     Constructor<Bytes>{}
@@ -556,7 +556,7 @@ PyObject* Constructor<::cpp2::ExceptionWithStructuredAnnotation>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::ExceptionWithStructuredAnnotation>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::ExceptionWithStructuredAnnotation& val) {
+    [[maybe_unused]] const ::cpp2::ExceptionWithStructuredAnnotation& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__message_field(
     Constructor<Bytes>{}
@@ -636,7 +636,7 @@ PyObject* Constructor<::cpp2::Banal>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::Banal>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::Banal& val) {
+    [[maybe_unused]] const ::cpp2::Banal& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }

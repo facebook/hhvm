@@ -88,16 +88,16 @@ bool Color::__fbthrift_is_empty() const {
   return false;
 }
 
-bool Color::operator==(FOLLY_MAYBE_UNUSED const Color& rhs) const {
+bool Color::operator==([[maybe_unused]] const Color& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Color::operator<(FOLLY_MAYBE_UNUSED const Color& rhs) const {
+bool Color::operator<([[maybe_unused]] const Color& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Color& a, FOLLY_MAYBE_UNUSED Color& b) {
+void swap([[maybe_unused]] Color& a, [[maybe_unused]] Color& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_red, b.__fbthrift_field_red);
   swap(a.__fbthrift_field_green, b.__fbthrift_field_green);
@@ -158,7 +158,7 @@ Vehicle::Vehicle() :
 
 Vehicle::~Vehicle() {}
 
-Vehicle::Vehicle(FOLLY_MAYBE_UNUSED Vehicle&& other) noexcept :
+Vehicle::Vehicle([[maybe_unused]] Vehicle&& other) noexcept :
     __fbthrift_field_color(std::move(other.__fbthrift_field_color)),
     __fbthrift_field_licensePlate(std::move(other.__fbthrift_field_licensePlate)),
     __fbthrift_field_description(std::move(other.__fbthrift_field_description)),
@@ -167,7 +167,7 @@ Vehicle::Vehicle(FOLLY_MAYBE_UNUSED Vehicle&& other) noexcept :
     __isset(other.__isset) {
 }
 
-Vehicle& Vehicle::operator=(FOLLY_MAYBE_UNUSED Vehicle&& other) noexcept {
+Vehicle& Vehicle::operator=([[maybe_unused]] Vehicle&& other) noexcept {
     this->__fbthrift_field_color = std::move(other.__fbthrift_field_color);
     this->__fbthrift_field_licensePlate = std::move(other.__fbthrift_field_licensePlate);
     this->__fbthrift_field_description = std::move(other.__fbthrift_field_description);
@@ -209,11 +209,11 @@ bool Vehicle::__fbthrift_is_empty() const {
   return false;
 }
 
-bool Vehicle::operator==(FOLLY_MAYBE_UNUSED const Vehicle& rhs) const {
+bool Vehicle::operator==([[maybe_unused]] const Vehicle& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Vehicle::operator<(FOLLY_MAYBE_UNUSED const Vehicle& rhs) const {
+bool Vehicle::operator<([[maybe_unused]] const Vehicle& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -226,7 +226,7 @@ const ::cpp2::Color& Vehicle::get_color() const& {
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Vehicle& a, FOLLY_MAYBE_UNUSED Vehicle& b) {
+void swap([[maybe_unused]] Vehicle& a, [[maybe_unused]] Vehicle& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_color, b.__fbthrift_field_color);
   swap(a.__fbthrift_field_licensePlate, b.__fbthrift_field_licensePlate);
@@ -297,7 +297,7 @@ Person::Person() :
 
 Person::~Person() {}
 
-Person::Person(FOLLY_MAYBE_UNUSED Person&& other) noexcept :
+Person::Person([[maybe_unused]] Person&& other) noexcept :
     __fbthrift_field_id(std::move(other.__fbthrift_field_id)),
     __fbthrift_field_name(std::move(other.__fbthrift_field_name)),
     __fbthrift_field_age(std::move(other.__fbthrift_field_age)),
@@ -311,7 +311,7 @@ Person::Person(FOLLY_MAYBE_UNUSED Person&& other) noexcept :
     __isset(other.__isset) {
 }
 
-Person& Person::operator=(FOLLY_MAYBE_UNUSED Person&& other) noexcept {
+Person& Person::operator=([[maybe_unused]] Person&& other) noexcept {
     this->__fbthrift_field_id = std::move(other.__fbthrift_field_id);
     this->__fbthrift_field_name = std::move(other.__fbthrift_field_name);
     this->__fbthrift_field_age = std::move(other.__fbthrift_field_age);
@@ -373,11 +373,11 @@ bool Person::__fbthrift_is_empty() const {
   return false;
 }
 
-bool Person::operator==(FOLLY_MAYBE_UNUSED const Person& rhs) const {
+bool Person::operator==([[maybe_unused]] const Person& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Person::operator<(FOLLY_MAYBE_UNUSED const Person& rhs) const {
+bool Person::operator<([[maybe_unused]] const Person& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
@@ -414,7 +414,7 @@ const ::std::vector<::cpp2::Vehicle>* Person::get_vehicles() const& {
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED Person& a, FOLLY_MAYBE_UNUSED Person& b) {
+void swap([[maybe_unused]] Person& a, [[maybe_unused]] Person& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_id, b.__fbthrift_field_id);
   swap(a.__fbthrift_field_name, b.__fbthrift_field_name);
@@ -454,7 +454,7 @@ static_assert(
 } // cpp2
 
 namespace cpp2 { namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
 }} // cpp2
 namespace apache::thrift::detail::annotation {

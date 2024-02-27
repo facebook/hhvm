@@ -100,7 +100,7 @@ PyObject* Constructor<::cpp2::AnnotationWithContainers>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::AnnotationWithContainers>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::AnnotationWithContainers& val) {
+    [[maybe_unused]] const ::cpp2::AnnotationWithContainers& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__names(
     Constructor<list<Bytes>>{}
@@ -189,7 +189,7 @@ PyObject* Constructor<::cpp2::MyStruct>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::MyStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::MyStruct& val) {
+    [[maybe_unused]] const ::cpp2::MyStruct& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__abc(
     Constructor<int32_t>{}

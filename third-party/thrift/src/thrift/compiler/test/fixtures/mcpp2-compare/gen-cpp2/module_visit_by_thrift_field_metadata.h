@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct VisitByFieldId<::some::valid::ns::Empty> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
       throwInvalidThriftId(fieldId, "::some::valid::ns::Empty");
@@ -27,7 +27,7 @@ struct VisitByFieldId<::some::valid::ns::Empty> {
 template <>
 struct VisitByFieldId<::some::valid::ns::ASimpleStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).boolField_ref());
@@ -40,7 +40,7 @@ struct VisitByFieldId<::some::valid::ns::ASimpleStruct> {
 template <>
 struct VisitByFieldId<::some::valid::ns::ASimpleStructNoexcept> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).boolField_ref());
@@ -53,7 +53,7 @@ struct VisitByFieldId<::some::valid::ns::ASimpleStructNoexcept> {
 template <>
 struct VisitByFieldId<::some::valid::ns::MyStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).MyBoolField_ref());
@@ -86,7 +86,7 @@ struct VisitByFieldId<::some::valid::ns::MyStruct> {
 template <>
 struct VisitByFieldId<::some::valid::ns::SimpleUnion> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 7:
       return f(0, static_cast<T&&>(t).intValue_ref());
@@ -101,7 +101,7 @@ struct VisitByFieldId<::some::valid::ns::SimpleUnion> {
 template <>
 struct VisitByFieldId<::some::valid::ns::ComplexUnion> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).intValue_ref());
@@ -168,7 +168,7 @@ struct VisitByFieldId<::some::valid::ns::ComplexUnion> {
 template <>
 struct VisitByFieldId<::some::valid::ns::AnException> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).code_ref());
@@ -213,7 +213,7 @@ struct VisitByFieldId<::some::valid::ns::AnException> {
 template <>
 struct VisitByFieldId<::some::valid::ns::AnotherException> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).code_ref());
@@ -230,7 +230,7 @@ struct VisitByFieldId<::some::valid::ns::AnotherException> {
 template <>
 struct VisitByFieldId<::some::valid::ns::containerStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).fieldA_ref());
@@ -333,7 +333,7 @@ struct VisitByFieldId<::some::valid::ns::containerStruct> {
 template <>
 struct VisitByFieldId<::some::valid::ns::MyIncludedStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).MyIncludedInt_ref());
@@ -352,7 +352,7 @@ struct VisitByFieldId<::some::valid::ns::MyIncludedStruct> {
 template <>
 struct VisitByFieldId<::some::valid::ns::AnnotatedStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).no_annotation_ref());
@@ -443,7 +443,7 @@ struct VisitByFieldId<::some::valid::ns::AnnotatedStruct> {
 template <>
 struct VisitByFieldId<::some::valid::ns::ComplexContainerStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).map_of_iobufs_ref());
@@ -458,7 +458,7 @@ struct VisitByFieldId<::some::valid::ns::ComplexContainerStruct> {
 template <>
 struct VisitByFieldId<::some::valid::ns::FloatStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).floatField_ref());
@@ -473,7 +473,7 @@ struct VisitByFieldId<::some::valid::ns::FloatStruct> {
 template <>
 struct VisitByFieldId<::some::valid::ns::FloatUnion> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).floatSide_ref());
@@ -488,7 +488,7 @@ struct VisitByFieldId<::some::valid::ns::FloatUnion> {
 template <>
 struct VisitByFieldId<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).intField_ref());

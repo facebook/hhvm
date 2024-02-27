@@ -330,7 +330,7 @@ PyObject* Constructor<::test::fixtures::python_capi::MarshalStruct>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::python_capi::MarshalStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::python_capi::MarshalStruct& val) {
+    [[maybe_unused]] const ::test::fixtures::python_capi::MarshalStruct& val) {
   StrongRef fbthrift_data(createStructTuple(4));
   StrongRef _fbthrift__s(
     Constructor<Bytes>{}
@@ -458,7 +458,7 @@ PyObject* Constructor<::test::fixtures::python_capi::MarshalUnion>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::python_capi::MarshalUnion>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::python_capi::MarshalUnion& val) {
+    [[maybe_unused]] const ::test::fixtures::python_capi::MarshalUnion& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
   switch (type_key) {
@@ -555,7 +555,7 @@ PyObject* Constructor<::test::fixtures::python_capi::MarshalError>::operator()(
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::python_capi::MarshalError>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::fixtures::python_capi::MarshalError& val) {
+    [[maybe_unused]] const ::test::fixtures::python_capi::MarshalError& val) {
   StrongRef fbthrift_data(createStructTuple(3));
   StrongRef _fbthrift__msg(
     Constructor<Bytes>{}

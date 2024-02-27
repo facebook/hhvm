@@ -16,7 +16,7 @@ namespace detail {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::MyData> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).data1_ref());
@@ -31,7 +31,7 @@ struct VisitByFieldId<::test::fixtures::patch::MyData> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::MyDataWithCustomDefault> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).data1_ref());
@@ -46,7 +46,7 @@ struct VisitByFieldId<::test::fixtures::patch::MyDataWithCustomDefault> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::InnerUnion> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).innerOption_ref());
@@ -59,7 +59,7 @@ struct VisitByFieldId<::test::fixtures::patch::InnerUnion> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::MyUnion> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).option1_ref());
@@ -76,7 +76,7 @@ struct VisitByFieldId<::test::fixtures::patch::MyUnion> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::MyStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case -1:
       return f(0, static_cast<T&&>(t).boolVal_ref());
@@ -153,7 +153,7 @@ struct VisitByFieldId<::test::fixtures::patch::MyStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::LateDefStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::patch::LateDefStruct");
@@ -164,7 +164,7 @@ struct VisitByFieldId<::test::fixtures::patch::LateDefStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::Recursive> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case -1:
       return f(0, static_cast<T&&>(t).nodes_ref());
@@ -177,7 +177,7 @@ struct VisitByFieldId<::test::fixtures::patch::Recursive> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::Bar> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case -1:
       return f(0, static_cast<T&&>(t).loop_ref());
@@ -190,7 +190,7 @@ struct VisitByFieldId<::test::fixtures::patch::Bar> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::Loop> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case -1:
       return f(0, static_cast<T&&>(t).bar_ref());
@@ -203,7 +203,7 @@ struct VisitByFieldId<::test::fixtures::patch::Loop> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::RefFields> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).unique_ref());
@@ -228,7 +228,7 @@ struct VisitByFieldId<::test::fixtures::patch::RefFields> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::MyDataPatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).assign_ref());
@@ -251,7 +251,7 @@ struct VisitByFieldId<::test::fixtures::patch::MyDataPatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::MyDataFieldPatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).data1_ref());
@@ -266,7 +266,7 @@ struct VisitByFieldId<::test::fixtures::patch::MyDataFieldPatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::MyDataEnsureStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).data1_ref());
@@ -281,7 +281,7 @@ struct VisitByFieldId<::test::fixtures::patch::MyDataEnsureStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).assign_ref());
@@ -304,7 +304,7 @@ struct VisitByFieldId<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruc
 template <>
 struct VisitByFieldId<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).data1_ref());
@@ -319,7 +319,7 @@ struct VisitByFieldId<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatch
 template <>
 struct VisitByFieldId<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).data1_ref());
@@ -334,7 +334,7 @@ struct VisitByFieldId<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStru
 template <>
 struct VisitByFieldId<::test::fixtures::patch::InnerUnionPatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).assign_ref());
@@ -355,7 +355,7 @@ struct VisitByFieldId<::test::fixtures::patch::InnerUnionPatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::InnerUnionFieldPatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).innerOption_ref());
@@ -368,7 +368,7 @@ struct VisitByFieldId<::test::fixtures::patch::InnerUnionFieldPatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::MyUnionPatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).assign_ref());
@@ -389,7 +389,7 @@ struct VisitByFieldId<::test::fixtures::patch::MyUnionPatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::MyUnionFieldPatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).option1_ref());
@@ -406,7 +406,7 @@ struct VisitByFieldId<::test::fixtures::patch::MyUnionFieldPatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::MyStructPatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).assign_ref());
@@ -429,7 +429,7 @@ struct VisitByFieldId<::test::fixtures::patch::MyStructPatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::MyStructField10PatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).assign_ref());
@@ -444,7 +444,7 @@ struct VisitByFieldId<::test::fixtures::patch::MyStructField10PatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::MyStructField23PatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).assign_ref());
@@ -459,7 +459,7 @@ struct VisitByFieldId<::test::fixtures::patch::MyStructField23PatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::MyStructField26PatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).assign_ref());
@@ -478,7 +478,7 @@ struct VisitByFieldId<::test::fixtures::patch::MyStructField26PatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::MyStructField27PatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).assign_ref());
@@ -497,7 +497,7 @@ struct VisitByFieldId<::test::fixtures::patch::MyStructField27PatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::MyStructField28PatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).assign_ref());
@@ -522,7 +522,7 @@ struct VisitByFieldId<::test::fixtures::patch::MyStructField28PatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::MyStructField29PatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).assign_ref());
@@ -541,7 +541,7 @@ struct VisitByFieldId<::test::fixtures::patch::MyStructField29PatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::MyStructField30PatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).assign_ref());
@@ -566,7 +566,7 @@ struct VisitByFieldId<::test::fixtures::patch::MyStructField30PatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::MyStructField30Patch1Struct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).assign_ref());
@@ -591,7 +591,7 @@ struct VisitByFieldId<::test::fixtures::patch::MyStructField30Patch1Struct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::MyStructFieldPatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case -32:
       return f(0, static_cast<T&&>(t).structWithCustomDefault_ref());
@@ -668,7 +668,7 @@ struct VisitByFieldId<::test::fixtures::patch::MyStructFieldPatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::MyStructEnsureStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case -32:
       return f(0, static_cast<T&&>(t).structWithCustomDefault_ref());
@@ -745,7 +745,7 @@ struct VisitByFieldId<::test::fixtures::patch::MyStructEnsureStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::LateDefStructPatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).assign_ref());
@@ -768,7 +768,7 @@ struct VisitByFieldId<::test::fixtures::patch::LateDefStructPatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::LateDefStructFieldPatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::patch::LateDefStructFieldPatchStruct");
@@ -779,7 +779,7 @@ struct VisitByFieldId<::test::fixtures::patch::LateDefStructFieldPatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::LateDefStructEnsureStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::patch::LateDefStructEnsureStruct");
@@ -790,7 +790,7 @@ struct VisitByFieldId<::test::fixtures::patch::LateDefStructEnsureStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::RecursivePatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).assign_ref());
@@ -813,7 +813,7 @@ struct VisitByFieldId<::test::fixtures::patch::RecursivePatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::RecursiveField1PatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).assign_ref());
@@ -828,7 +828,7 @@ struct VisitByFieldId<::test::fixtures::patch::RecursiveField1PatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::RecursiveFieldPatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case -1:
       return f(0, static_cast<T&&>(t).nodes_ref());
@@ -841,7 +841,7 @@ struct VisitByFieldId<::test::fixtures::patch::RecursiveFieldPatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::RecursiveEnsureStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case -1:
       return f(0, static_cast<T&&>(t).nodes_ref());
@@ -854,7 +854,7 @@ struct VisitByFieldId<::test::fixtures::patch::RecursiveEnsureStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::BarPatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).assign_ref());
@@ -877,7 +877,7 @@ struct VisitByFieldId<::test::fixtures::patch::BarPatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::BarFieldPatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case -1:
       return f(0, static_cast<T&&>(t).loop_ref());
@@ -890,7 +890,7 @@ struct VisitByFieldId<::test::fixtures::patch::BarFieldPatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::BarEnsureStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case -1:
       return f(0, static_cast<T&&>(t).loop_ref());
@@ -903,7 +903,7 @@ struct VisitByFieldId<::test::fixtures::patch::BarEnsureStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::LoopPatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).assign_ref());
@@ -918,7 +918,7 @@ struct VisitByFieldId<::test::fixtures::patch::LoopPatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::RefFieldsPatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).assign_ref());
@@ -941,7 +941,7 @@ struct VisitByFieldId<::test::fixtures::patch::RefFieldsPatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::RefFieldsField1PatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).assign_ref());
@@ -960,7 +960,7 @@ struct VisitByFieldId<::test::fixtures::patch::RefFieldsField1PatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::RefFieldsField4PatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).assign_ref());
@@ -979,7 +979,7 @@ struct VisitByFieldId<::test::fixtures::patch::RefFieldsField4PatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::RefFieldsField7PatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).assign_ref());
@@ -998,7 +998,7 @@ struct VisitByFieldId<::test::fixtures::patch::RefFieldsField7PatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::RefFieldsFieldPatchStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).unique_ref());
@@ -1015,7 +1015,7 @@ struct VisitByFieldId<::test::fixtures::patch::RefFieldsFieldPatchStruct> {
 template <>
 struct VisitByFieldId<::test::fixtures::patch::RefFieldsEnsureStruct> {
   template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).unique_ref());

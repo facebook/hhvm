@@ -5616,7 +5616,6 @@ end = struct
       (ty_super : internal_type)
       (cty_super : constraint_type)
       env =
-    (* | ConstraintType cty_super -> *)
     let using_new_method_call_inference =
       TypecheckerOptions.method_call_inference (Env.get_tcopt env)
     in
@@ -5661,29 +5660,18 @@ end = struct
     in
     begin
       match deref_constraint_type cty_super with
-      | (_, TCintersection (lty, cty)) ->
-        (match ety_sub with
-        | LoclType t when is_union t -> default_subtype_help env
-        | ConstraintType t when is_constraint_type_union t ->
-          default_subtype_help env
-        | _ ->
+      | (r_sup, TCintersection (lty_sup, cty_sup)) ->
+        TCintersection.simplify_subtype_tcintersection_super
+          ~subtype_env
+          ~sub_supportdyn
+          ~this_ty
+          ~super_like
+          ~fail
+          ty_sub
+          ety_sub
+          r_sup
+          (lty_sup, cty_sup)
           env
-          |> Subtype.simplify_subtype_i
-               ~subtype_env
-               ~sub_supportdyn
-               ~this_ty:None
-               ~super_like:false
-               ~super_supportdyn:false
-               ty_sub
-               (LoclType lty)
-          &&& Subtype.simplify_subtype_i
-                ~subtype_env
-                ~sub_supportdyn
-                ~this_ty:None
-                ~super_like:false
-                ~super_supportdyn:false
-                ty_sub
-                (ConstraintType cty))
       | (_, TCunion (maybe_null, maybe_has_member))
         when using_new_method_call_inference
              && is_has_member maybe_has_member
@@ -6090,6 +6078,70 @@ end = struct
           (r, htm)
           env
     end
+end
+
+and TCintersection : sig
+  val simplify_subtype_tcintersection_super :
+    subtype_env:Subtype_env.t ->
+    sub_supportdyn:Reason.t option ->
+    this_ty:Typing_defs.locl_ty option ->
+    super_like:bool ->
+    fail:Typing_error.t option ->
+    Typing_defs.internal_type ->
+    Typing_defs.internal_type ->
+    Typing_defs.Reason.t ->
+    Typing_defs.locl_ty * Typing_defs.constraint_type ->
+    Typing_env_types.env ->
+    Typing_env_types.env * TL.subtype_prop
+end = struct
+  let simplify_subtype_tcintersection_super
+      ~subtype_env
+      ~sub_supportdyn
+      ~this_ty
+      ~super_like
+      ~fail
+      ty_sub
+      ety_sub
+      r_sup
+      (lty_sup, cty_sup)
+      env =
+    let cty_super =
+      mk_constraint_type (r_sup, TCintersection (lty_sup, cty_sup))
+    in
+    let ety_super = ConstraintType cty_super in
+    let default_subtype_help env =
+      Subtype.default_subtype
+        ~subtype_env
+        ~sub_supportdyn
+        ~this_ty
+        ~super_like
+        ~fail
+        env
+        ety_sub
+        ety_super
+    in
+    match ety_sub with
+    | LoclType t when is_union t -> default_subtype_help env
+    | ConstraintType t when is_constraint_type_union t ->
+      default_subtype_help env
+    | _ ->
+      env
+      |> Subtype.simplify_subtype_i
+           ~subtype_env
+           ~sub_supportdyn
+           ~this_ty:None
+           ~super_like:false
+           ~super_supportdyn:false
+           ty_sub
+           (LoclType lty_sup)
+      &&& Subtype.simplify_subtype_i
+            ~subtype_env
+            ~sub_supportdyn
+            ~this_ty:None
+            ~super_like:false
+            ~super_supportdyn:false
+            ty_sub
+            (ConstraintType cty_sup)
 end
 
 (* == API =================================================================== *)

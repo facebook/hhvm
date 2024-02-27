@@ -339,6 +339,23 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 - bool Jit.ProfileGuardTypes = false, UNKNOWN
 - uint32_t Jit.FilterLease = 1, UNKNOWN
 
+# PCRE (Eval.PCRE)
+
+- uint32_t PCRE.TableSize = 96 * 1024, UNKNOWN, defaultearly
+
+  Need to be defaultearly because it is used in the init of a static
+  variable. It will then be reinited after we read the config
+
+- uint64_t PCRE.ExpireInterval = 2 * 60 * 60, UNKNOWN, defaultearly
+
+  Need to be defaultearly because it is used in the init of a static
+  variable. It will then be reinited after we read the config
+
+- std::string PCRE.CacheType = "static", UNKNOWN, defaultearly
+
+  Need to be defaultearly because it is used in the init of a static
+  variable. It will then be reinited after we read the config
+
 # PHP7
 
 - bool PHP7.all, UNKNOWN, private

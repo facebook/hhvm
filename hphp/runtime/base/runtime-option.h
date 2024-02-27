@@ -652,8 +652,6 @@ struct RuntimeOption {
 
   static hphp_string_map<TypedValue> ConstantFunctions;
 
-  static const uint32_t kPCREInitialTableSize = 96 * 1024;
-
   static std::vector<std::string> TzdataSearchPaths;
 
 #define EVALFLAGS()                                                     \
@@ -903,9 +901,6 @@ struct RuntimeOption {
   F(std::string, ArtilleryTracePolicy, "")                              \
   /* Opaque tag to add to each trace. Useful for aggregation */         \
   F(std::string, TracingTagId, "")                                      \
-  F(uint32_t, PCRETableSize, kPCREInitialTableSize)                     \
-  F(uint64_t, PCREExpireInterval, 2 * 60 * 60)                          \
-  F(string, PCRECacheType, std::string("static"))                       \
   F(bool, EnableCompactBacktrace, true)                                 \
   F(bool, EnableNuma, (numa_num_nodes > 1) && ServerExecutionMode())    \
   F(bool, EnableCallBuiltin, true)                                      \

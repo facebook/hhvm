@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/configs/jit.h"
+#include "hphp/runtime/base/configs/pcre.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/ini-setting.h"
@@ -387,8 +388,7 @@ bool pcre_literal_data::matches(const StringData* subject,
 PCRECache::StaticCache* PCRECache::CreateStatic() {
   StaticCache::Config config;
   config.maxLoadFactor = 0.5;
-  return StaticCache::create(
-      RuntimeOption::EvalPCRETableSize, config).release();
+  return StaticCache::create(Cfg::PCRE::TableSize, config).release();
 }
 
 void PCRECache::DestroyStatic(StaticCache* cache) {
@@ -427,14 +427,14 @@ void PCRECache::reinit(CacheKind kind) {
   switch (kind) {
     case CacheKind::Static:
       m_staticCache = CreateStatic();
-      m_expire = time(nullptr) + RuntimeOption::EvalPCREExpireInterval;
+      m_expire = time(nullptr) + Cfg::PCRE::ExpireInterval;
       break;
     case CacheKind::Lru:
-      m_lruCache.reset(new LRUCache(RuntimeOption::EvalPCRETableSize));
+      m_lruCache.reset(new LRUCache(Cfg::PCRE::TableSize));
       break;
     case CacheKind::Scalable:
       m_scalableCache.reset(
-        new ScalableCache(RuntimeOption::EvalPCRETableSize));
+        new ScalableCache(Cfg::PCRE::TableSize));
       break;
   }
 }
@@ -477,7 +477,7 @@ void PCRECache::clearStatic() {
   std::unique_lock<std::mutex> lock(m_clearMutex, std::try_to_lock);
   if (!lock) return;
 
-  auto newExpire = time(nullptr) + RuntimeOption::EvalPCREExpireInterval;
+  auto newExpire = time(nullptr) + Cfg::PCRE::ExpireInterval;
   m_expire.store(newExpire, std::memory_order_relaxed);
 
   auto tmpMap = CreateStatic();
@@ -578,11 +578,11 @@ size_t PCRECache::size() const {
 
 void pcre_reinit() {
   PCRECache::CacheKind kind;
-  if (RuntimeOption::EvalPCRECacheType == "static") {
+  if (Cfg::PCRE::CacheType == "static") {
     kind = PCRECache::CacheKind::Static;
-  } else if (RuntimeOption::EvalPCRECacheType == "lru") {
+  } else if (Cfg::PCRE::CacheType == "lru") {
     kind = PCRECache::CacheKind::Lru;
-  } else if (RuntimeOption::EvalPCRECacheType == "scalable") {
+  } else if (Cfg::PCRE::CacheType == "scalable") {
     kind = PCRECache::CacheKind::Scalable;
   } else {
     Logger::Warning("Eval.PCRECacheType should be either static, "

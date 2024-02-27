@@ -1,1 +1,1 @@
-hack: src/module.thrift
+hack src/module.thrift

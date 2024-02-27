@@ -1,1 +1,1 @@
-mstch_cpp2:types_cpp_splits=3,service_cpp_splits={MyService:3,DbMixedStackArguments:2}  src/module.thrift
+mstch_cpp2:types_cpp_splits=3,service_cpp_splits={MyService:3,DbMixedStackArguments:2} src/module.thrift

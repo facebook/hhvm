@@ -13,6 +13,11 @@
 namespace HPHP {
 namespace Decl {
 
+struct ExtractorConfig {
+  int cacheSize;
+  bool enableExternExtractor;
+};
+
 struct DeclBinaryString {
   std::string value;
 };
@@ -64,7 +69,8 @@ std::string readFile(const std::string& filePath);
  */
 rust::Box<hackc::DeclsHolder> decl_from_path(
     const std::filesystem::path& root,
-    const Facts::PathAndOptionalHash& pathAndHash);
+    const Facts::PathAndOptionalHash& pathAndHash,
+    bool enableExternExtractor);
 
 } // namespace Decl
 } // namespace HPHP

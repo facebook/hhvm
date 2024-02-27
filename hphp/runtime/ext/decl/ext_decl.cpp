@@ -38,6 +38,7 @@ TRACE_SET_MOD(decl);
 namespace HPHP {
 
 namespace {
+Decl::ExtractorConfig s_extractorConfig{};
 // File
 const StaticString s_typedefs("typedefs");
 const StaticString s_functions("functions");
@@ -670,7 +671,7 @@ Array populateTypeStructure(const hackc::ExtDeclTypeStructure& ts) {
 using FileDeclsCacheEntry =
     std::pair<SHA1, std::shared_ptr<rust::Box<hackc::DeclsHolder>>>;
 using FileDeclsCache = ConcurrentLRUCache<std::string, FileDeclsCacheEntry>;
-static FileDeclsCache fileDeclsCache(RuntimeOption::DeclExtensionCacheSize);
+static std::unique_ptr<FileDeclsCache> declCachePtr;
 
 /*
   The native implementation of the FileDecls class. The class is accessible
@@ -718,7 +719,7 @@ Object HHVM_STATIC_METHOD(FileDecls, parsePath, const String& path) {
   auto const [sha1, textOpt] = computeSHA1(filePath, root);
   {
     FileDeclsCache::ConstAccessor acc;
-    if (fileDeclsCache.find(acc, filePath.native())) {
+    if (declCachePtr->find(acc, filePath.native())) {
       FileDeclsCacheEntry entry = *acc;
       auto& [expectedSha1, decls] = entry;
       if (expectedSha1 == sha1) {
@@ -736,14 +737,15 @@ Object HHVM_STATIC_METHOD(FileDecls, parsePath, const String& path) {
   auto data = Native::data<FileDecls>(obj);
   auto config = initDeclConfig(root);
   try {
-    data->declsHolder = std::make_shared<rust::Box<hackc::DeclsHolder>>(
-        Decl::decl_from_path(filePath, pathAndHash));
+    data->declsHolder =
+        std::make_shared<rust::Box<hackc::DeclsHolder>>(Decl::decl_from_path(
+            filePath, pathAndHash, s_extractorConfig.enableExternExtractor));
   } catch (const std::exception& ex) {
     data->error = ex.what();
   }
 
   auto ptr = data->declsHolder;
-  fileDeclsCache.insert(filePath.native(), {sha1, ptr});
+  declCachePtr->insert(filePath.native(), {sha1, ptr});
   return obj;
 }
 
@@ -1076,6 +1078,14 @@ struct DeclExtension final : Extension {
   const DependencySet getDeps() const override {
     // ensure ext_facts initializes and loads first.
     return DependencySet({"facts"});
+  }
+
+  void moduleLoad(const IniSetting::Map& ini, Hdf hdf) override {
+    s_extractorConfig.enableExternExtractor =
+        Config::GetBool(ini, hdf, "Ext.Decl.EnableExternExtractor", false);
+    s_extractorConfig.cacheSize =
+        Config::GetInt32(ini, hdf, "Ext.Decl.CacheSize", 500000);
+    declCachePtr.reset(new FileDeclsCache(s_extractorConfig.cacheSize));
   }
 
   void moduleRegisterNative() override {

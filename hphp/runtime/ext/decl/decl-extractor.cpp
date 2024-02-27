@@ -92,10 +92,12 @@ void setExtractorFactory(ExtractorFactory* factory) {
   s_extractorFactory = factory;
 }
 
-std::unique_ptr<Extractor> makeExtractor(folly::Executor& exec) {
+std::unique_ptr<Extractor> makeExtractor(
+    folly::Executor& exec,
+    bool enableExternExtractor) {
   // If we defined an external Extractor in closed-source code, use that.
   // Otherwise use the SimpleExtractor.
-  if (s_extractorFactory && RuntimeOption::DeclExtensionEnableExternExtractor) {
+  if (s_extractorFactory && enableExternExtractor) {
     // TODO(nzthomas) restore logging without breaking tests
     // XLOG(INFO) << "Creating a external HPHP::Decl::Extractor.";
     return s_extractorFactory->make(exec);
@@ -106,13 +108,14 @@ std::unique_ptr<Extractor> makeExtractor(folly::Executor& exec) {
 
 rust::Box<hackc::DeclsHolder> decl_from_path(
     const std::filesystem::path& root,
-    const Facts::PathAndOptionalHash& pathAndHash) {
+    const Facts::PathAndOptionalHash& pathAndHash,
+    bool enableExternExtractor) {
   folly::CPUThreadPoolExecutor exec{
       1, Facts::make_thread_factory("DeclExtractor")};
 
   // If we defined an external Extractor in closed-source code, use that.
   // Otherwise use the SimpleExtractor.
-  auto extractor = makeExtractor(exec);
+  auto extractor = makeExtractor(exec, enableExternExtractor);
 
   auto path = pathAndHash.m_path.is_relative() ? root / pathAndHash.m_path
                                                : pathAndHash.m_path;

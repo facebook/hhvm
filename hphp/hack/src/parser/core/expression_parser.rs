@@ -1137,15 +1137,21 @@ where
         // SPEC:
         // package package-name
         let package_kw = self.next_token();
-        let package_name = self.parse_expression_with_operator_precedence(
-            Operator::prefix_unary_from_token(package_kw.kind()),
-        );
-        if !package_name.is_name() {
-            self.with_error(Errors::error1004, Vec::new());
+        if self.peek_token_kind() == TokenKind::Default {
+            let default = self.assert_token(TokenKind::Default);
+            let package_kw = self.sc_mut().make_token(package_kw);
+            self.sc_mut().make_package_expression(package_kw, default)
+        } else {
+            let package_name = self.parse_expression_with_operator_precedence(
+                Operator::prefix_unary_from_token(package_kw.kind()),
+            );
+            if !package_name.is_name() {
+                self.with_error(Errors::error1004, Vec::new());
+            }
+            let package_kw = self.sc_mut().make_token(package_kw);
+            self.sc_mut()
+                .make_package_expression(package_kw, package_name)
         }
-        let package_kw = self.sc_mut().make_token(package_kw);
-        self.sc_mut()
-            .make_package_expression(package_kw, package_name)
     }
 
     fn parse_nameof(&mut self) -> S::Output {

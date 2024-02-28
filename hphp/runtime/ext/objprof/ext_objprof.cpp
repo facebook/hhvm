@@ -881,6 +881,45 @@ void attributeStaticMemoizedFootprint(hphp_fast_map<ClassProp, ObjprofMetrics>* 
     }
   });
 }
+
+void attributeStaticPropFootprint(hphp_fast_map<ClassProp, ObjprofMetrics>* histogram,
+                                      bool objprof_props_mode, ObjprofState& env) {
+  NamedType::foreach_class([&](Class* cls) {
+    if (cls->needsInitSProps()) {
+      return;
+    }
+    auto const static_props = cls->staticProperties();
+    auto const n_SProps = cls->numStaticProperties();
+    for (Slot i = 0; i < n_SProps; ++i) {
+      auto const& prop = static_props[i];
+      auto tv = cls->getSPropData(i);
+      if (tv == nullptr || tv->m_type == KindOfUninit) {
+        continue;
+      }
+      if (tv->m_data.num == 0) {
+        continue;
+      }
+
+      auto size_pair = tvGetSize(*tv, env);
+      auto histogram_key = objprof_props_mode ?
+                           std::make_pair(cls->name()->toCppString(),
+                           prop.name->toCppString()) :
+                           std::make_pair(cls->name()->toCppString(), "SPropCache");
+      auto& metrics = (*histogram)[histogram_key];
+      metrics.instances = 1;
+      if(objprof_props_mode) {
+        metrics.bytes = size_pair.first;
+        metrics.bytes_rel = size_pair.first;
+      }
+      else {
+        // Class level aggregation, increment
+        metrics.bytes += size_pair.first;
+        metrics.bytes_rel += size_pair.first;
+      }
+    }
+  });
+}
+
 } // anonymous namespace
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -958,10 +997,10 @@ Array HHVM_FUNCTION(objprof_get_data_extended,
   };
   // Finished iterating over objects, now gather static memoized functions
   attributeStaticMemoizedFootprint(&histogram, objprof_props_mode, env);
+  attributeStaticPropFootprint(&histogram, objprof_props_mode, env);
 
   // Create response
   DictInit objs(histogram.size() + 1);
-  size_t total_bytes = 0, total_instances = 0;
   for (auto const& it : histogram) {
     auto c = it.first;
     auto cls = c.first;
@@ -970,9 +1009,6 @@ Array HHVM_FUNCTION(objprof_get_data_extended,
     if (prop != "") {
       key += "::" + c.second;
     }
-
-    total_bytes += it.second.bytes;
-    total_instances += it.second.instances;
 
     auto metrics_val = make_dict_array(
       s_instances, Variant(it.second.instances),
@@ -983,14 +1019,6 @@ Array HHVM_FUNCTION(objprof_get_data_extended,
 
     objs.set(StrNR(key), Variant(metrics_val));
   }
-    auto metrics_val_sum = make_dict_array(
-      s_instances, Variant(total_instances),
-      s_bytes, Variant(total_bytes),
-      s_bytes_rel, total_bytes,
-      s_paths, init_null()
-    );
-
-  objs.set(StringData::Make("Total"), Variant(metrics_val_sum));
 
   return objs.toArray();
 

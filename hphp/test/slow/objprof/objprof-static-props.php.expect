@@ -1,0 +1,12 @@
+Pass: Instance count of A::SPropCache should be 1
+Pass: Instance count of B::SPropCache should be 1
+Pass: Static prop instance count should be 1
+Pass: Static prop instance count should be 1
+Pass: Static prop instance count should be 1
+Pass: Static prop instance count should be 1
+Pass: The normalized size of A should be greater than 400
+Pass: The normalized size of B should be greater than 100
+Pass: The normalized size of A::pub_sprop_static should be greater than 300
+Pass: The normalized size of B::pub_sprop_static should be greater than 100
+Pass: The normalized size of A::pub_sprop_static should be greater than 100
+Pass: The normalized size of A::pub_sprop_int should be greater than 8

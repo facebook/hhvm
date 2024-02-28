@@ -75,7 +75,7 @@ folly::coro::Task<void> Tile::co_onTermination() {
 #endif
 
 void Tile::onTermination(
-    FOLLY_MAYBE_UNUSED TilePtr ptr, FOLLY_MAYBE_UNUSED folly::EventBase& eb) {
+    [[maybe_unused]] TilePtr ptr, [[maybe_unused]] folly::EventBase& eb) {
 #if FOLLY_HAS_COROUTINES
   eb.dcheckIsInEventBaseThread();
   auto* tile = ptr.get();

@@ -1477,7 +1477,7 @@ void HQSession::applySettings(const SettingsList& settings) {
   uint32_t blocked = kDefaultIngressQpackBlockedStream;
   bool datagram = false;
   bool hasWT = false;
-  FOLLY_MAYBE_UNUSED uint32_t numPlaceholders = kDefaultIngressNumPlaceHolders;
+  [[maybe_unused]] uint32_t numPlaceholders = kDefaultIngressNumPlaceHolders;
   for (auto& setting : settings) {
     auto id = httpToHqSettingsId(setting.id);
     if (id) {

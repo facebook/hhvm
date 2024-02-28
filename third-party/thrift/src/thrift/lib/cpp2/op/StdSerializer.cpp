@@ -23,7 +23,7 @@ namespace apache {
 namespace thrift {
 namespace type {
 namespace {
-FOLLY_MAYBE_UNUSED const auto registerPrimitiveTypes = [] {
+[[maybe_unused]] const auto registerPrimitiveTypes = [] {
   auto registry = [](auto tag) {
     op::registerStdSerializers<
         decltype(tag),

@@ -33,7 +33,7 @@ void do_import() {
 } // namespace
 
 std::unique_ptr<folly::IOBuf> PythonAsyncProcessor::getPythonMetadata() {
-  FOLLY_MAYBE_UNUSED static bool done = (do_import(), false);
+  [[maybe_unused]] static bool done = (do_import(), false);
   return getSerializedPythonMetadata(python_server_);
 }
 
@@ -43,7 +43,7 @@ void PythonAsyncProcessor::handlePythonServerCallback(
     folly::Promise<std::unique_ptr<folly::IOBuf>> promise,
     apache::thrift::SerializedRequest serializedRequest,
     apache::thrift::RpcKind kind) {
-  FOLLY_MAYBE_UNUSED static bool done = (do_import(), false);
+  [[maybe_unused]] static bool done = (do_import(), false);
   handleServerCallback(
       functions_.at(context->getMethodName()).second,
       serviceName_ + "." + context->getMethodName(),
@@ -62,7 +62,7 @@ void PythonAsyncProcessor::handlePythonServerCallbackStreaming(
         std::unique_ptr<::folly::IOBuf>>> promise,
     apache::thrift::SerializedRequest serializedRequest,
     apache::thrift::RpcKind kind) {
-  FOLLY_MAYBE_UNUSED static bool done = (do_import(), false);
+  [[maybe_unused]] static bool done = (do_import(), false);
   handleServerStreamCallback(
       functions_.at(context->getMethodName()).second,
       serviceName_ + "." + context->getMethodName(),
@@ -79,7 +79,7 @@ void PythonAsyncProcessor::handlePythonServerCallbackOneway(
     folly::Promise<folly::Unit> promise,
     apache::thrift::SerializedRequest serializedRequest,
     apache::thrift::RpcKind kind) {
-  FOLLY_MAYBE_UNUSED static bool done = (do_import(), false);
+  [[maybe_unused]] static bool done = (do_import(), false);
   handleServerCallbackOneway(
       functions_.at(context->getMethodName()).second,
       serviceName_ + "." + context->getMethodName(),
@@ -122,7 +122,7 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessorFactory::callLifecycle(
   if (ind < lifecycleFuncs_.size()) {
     if (auto func = lifecycleFuncs_[ind]) {
       auto [promise, future] = folly::makePromiseContract<folly::Unit>();
-      FOLLY_MAYBE_UNUSED static bool done = (do_import(), false);
+      [[maybe_unused]] static bool done = (do_import(), false);
       handleLifecycleCallback(
           func, getLifecycleFuncName(funcType), std::move(promise));
       return std::move(future);

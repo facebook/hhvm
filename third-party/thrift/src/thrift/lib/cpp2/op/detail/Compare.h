@@ -324,7 +324,7 @@ struct CompareWith<
     : CheckIOBufOp<LUTag, RUTag>, folly::IOBufCompare {};
 
 template <class T, class Comp>
-FOLLY_MAYBE_UNUSED bool sortAndLexicographicalCompare(
+[[maybe_unused]] bool sortAndLexicographicalCompare(
     const T& lhs, const T& rhs, Comp&& comp) {
   std::vector<decltype(lhs.begin())> l, r;
   for (auto i = lhs.begin(); i != lhs.end(); ++i) {

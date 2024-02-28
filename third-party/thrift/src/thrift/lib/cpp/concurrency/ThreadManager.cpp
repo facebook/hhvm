@@ -999,8 +999,8 @@ void ThreadManager::Impl::reportTaskStats(
     const std::chrono::steady_clock::time_point& workBegin,
     const std::chrono::steady_clock::time_point& workEnd) {
   auto queueBegin = task.getQueueBeginTime();
-  FOLLY_MAYBE_UNUSED auto waitTime = workBegin - queueBegin;
-  FOLLY_MAYBE_UNUSED auto runTime = workEnd - workBegin;
+  [[maybe_unused]] auto waitTime = workBegin - queueBegin;
+  [[maybe_unused]] auto runTime = workEnd - workBegin;
 
   // Times in this USDT use granularity of std::chrono::steady_clock::duration,
   // which is platform dependent. On Facebook servers, the granularity is

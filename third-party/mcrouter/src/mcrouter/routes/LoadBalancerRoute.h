@@ -135,7 +135,7 @@ class LoadBalancerRoute {
     const int64_t now = nowUs();
     auto loadMedian = getLoadComplementsMedian();
     size_t i = 0;
-    for (FOLLY_MAYBE_UNUSED const auto& v : children_) {
+    for ([[maybe_unused]] const auto& v : children_) {
       if (expTimes_[i].count() != 0 && expTimes_[i].count() <= now) {
         expTimes_[i] = std::chrono::microseconds(0);
         loadComplements_[i] = loadMedian;

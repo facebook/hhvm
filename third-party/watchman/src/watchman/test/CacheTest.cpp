@@ -20,7 +20,7 @@ static constexpr const std::chrono::milliseconds kErrorTTL(1000);
 
 namespace watchman::lrucache {
 template <typename... A>
-FOLLY_MAYBE_UNUSED static std::ostream& operator<<(
+[[maybe_unused]] static std::ostream& operator<<(
     std::ostream& out,
     Node<A...> const& node) {
   return out << (const void*)&node;

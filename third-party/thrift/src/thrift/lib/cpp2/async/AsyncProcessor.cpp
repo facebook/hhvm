@@ -796,7 +796,7 @@ void HandlerCallbackBase::sendReply(
 }
 
 void HandlerCallbackBase::sendReply(
-    FOLLY_MAYBE_UNUSED std::pair<
+    [[maybe_unused]] std::pair<
         SerializedResponse,
         apache::thrift::detail::SinkConsumerImpl>&& responseAndSinkConsumer) {
 #if FOLLY_HAS_COROUTINES

@@ -1520,8 +1520,8 @@ template <
     typename SinkType,
     typename FinalResponseType>
 apache::thrift::detail::SinkConsumerImpl toSinkConsumerImpl(
-    FOLLY_MAYBE_UNUSED SinkConsumer<SinkType, FinalResponseType>&& sinkConsumer,
-    FOLLY_MAYBE_UNUSED folly::Executor::KeepAlive<> executor) {
+    [[maybe_unused]] SinkConsumer<SinkType, FinalResponseType>&& sinkConsumer,
+    [[maybe_unused]] folly::Executor::KeepAlive<> executor) {
 #if FOLLY_HAS_COROUTINES
   auto consumer =
       [innerConsumer = std::move(sinkConsumer.consumer)](

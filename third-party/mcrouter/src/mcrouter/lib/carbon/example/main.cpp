@@ -128,7 +128,7 @@ AsyncMcServer::Options getOpts(uint16_t port) {
   return opts;
 }
 
-FOLLY_MAYBE_UNUSED void testClientServer() {
+[[maybe_unused]] void testClientServer() {
   // Run simple HelloGoodbye server
   AsyncMcServer server(getOpts(kPort));
   spawnServer(server);
@@ -194,7 +194,7 @@ void sendHelloRequestSync(
   baton.wait();
 }
 
-FOLLY_MAYBE_UNUSED void testRouter() {
+[[maybe_unused]] void testRouter() {
   // Run 2 simple HelloGoodbye server
   AsyncMcServer server1(getOpts(kPort));
   spawnServer(server1);
@@ -245,7 +245,7 @@ FOLLY_MAYBE_UNUSED void testRouter() {
   }
 }
 
-FOLLY_MAYBE_UNUSED void testCarbonLookasideRouter() {
+[[maybe_unused]] void testCarbonLookasideRouter() {
   // Run 2 simple HelloGoodbye server
   AsyncMcServer server1(getOpts(kPort));
   spawnServer(server1);
@@ -320,7 +320,7 @@ std::thread startThriftServer(
   return serverThread;
 }
 
-FOLLY_MAYBE_UNUSED void testCarbonThriftServer() {
+[[maybe_unused]] void testCarbonThriftServer() {
   // Run one simple HelloGoodbye thrift server.
   auto server1 = std::make_shared<apache::thrift::ThriftServer>();
   auto server2 = std::make_shared<apache::thrift::ThriftServer>();

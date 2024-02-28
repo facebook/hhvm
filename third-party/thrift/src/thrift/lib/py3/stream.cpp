@@ -37,7 +37,7 @@ void do_import() {
 } // namespace
 
 void cancelPythonIterator(PyObject* iter) {
-  FOLLY_MAYBE_UNUSED static bool done = (do_import(), false);
+  [[maybe_unused]] static bool done = (do_import(), false);
   cancelAsyncGenerator(iter);
 }
 

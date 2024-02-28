@@ -61,12 +61,12 @@ int parseArguments(
   return 0;
 }
 std::unique_ptr<folly::EventBaseBackendBase> setupBackend(
-    FOLLY_MAYBE_UNUSED bool uring,
-    FOLLY_MAYBE_UNUSED bool uringAsync,
-    FOLLY_MAYBE_UNUSED bool uringRegisterFds,
-    FOLLY_MAYBE_UNUSED int32_t uringCapacity,
-    FOLLY_MAYBE_UNUSED int32_t uringMaxSubmit,
-    FOLLY_MAYBE_UNUSED int32_t uringMaxGet) {
+    [[maybe_unused]] bool uring,
+    [[maybe_unused]] bool uringAsync,
+    [[maybe_unused]] bool uringRegisterFds,
+    [[maybe_unused]] int32_t uringCapacity,
+    [[maybe_unused]] int32_t uringMaxSubmit,
+    [[maybe_unused]] int32_t uringMaxGet) {
 #ifdef FIZZ_TOOL_ENABLE_IO_URING
   if (uring) {
     try {

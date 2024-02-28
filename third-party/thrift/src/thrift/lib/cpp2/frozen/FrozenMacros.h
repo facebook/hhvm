@@ -102,14 +102,14 @@
   pos = root.layoutField(self, pos, this->NAME##Field, *x.NAME##_ref());
 #define FROZEN_LAYOUT_FIELD_REF(NAME) \
   pos = root.layoutField(self, pos, this->NAME##Field, x.NAME##_ref());
-#define FROZEN_LAYOUT(TYPE, ...)                \
-  FieldPosition Layout<TYPE>::layout(           \
-      FOLLY_MAYBE_UNUSED LayoutRoot& root,      \
-      FOLLY_MAYBE_UNUSED const T& x,            \
-      FOLLY_MAYBE_UNUSED LayoutPosition self) { \
-    FieldPosition pos = startFieldPosition();   \
-    __VA_ARGS__;                                \
-    return pos;                                 \
+#define FROZEN_LAYOUT(TYPE, ...)              \
+  FieldPosition Layout<TYPE>::layout(         \
+      [[maybe_unused]] LayoutRoot& root,      \
+      [[maybe_unused]] const T& x,            \
+      [[maybe_unused]] LayoutPosition self) { \
+    FieldPosition pos = startFieldPosition(); \
+    __VA_ARGS__;                              \
+    return pos;                               \
   }
 
 #define FROZEN_FREEZE_FIELD(NAME) \
@@ -121,12 +121,12 @@
 #define FROZEN_FREEZE_FIELD_REF(NAME) \
   root.freezeField(self, this->NAME##Field, x.NAME##_ref());
 
-#define FROZEN_FREEZE(TYPE, ...)                      \
-  void Layout<TYPE>::freeze(                          \
-      FOLLY_MAYBE_UNUSED FreezeRoot& root,            \
-      FOLLY_MAYBE_UNUSED const T& x,                  \
-      FOLLY_MAYBE_UNUSED FreezePosition self) const { \
-    __VA_ARGS__;                                      \
+#define FROZEN_FREEZE(TYPE, ...)                    \
+  void Layout<TYPE>::freeze(                        \
+      [[maybe_unused]] FreezeRoot& root,            \
+      [[maybe_unused]] const T& x,                  \
+      [[maybe_unused]] FreezePosition self) const { \
+    __VA_ARGS__;                                    \
   }
 
 #define FROZEN_THAW_FIELD(NAME)                                  \
@@ -141,10 +141,10 @@
 #define FROZEN_THAW_FIELD_REF(NAME) \
   thawField(self, this->NAME##Field, out.NAME##_ref());
 
-#define FROZEN_THAW(TYPE, ...)                                                 \
-  void Layout<TYPE>::thaw(                                                     \
-      FOLLY_MAYBE_UNUSED ViewPosition self, FOLLY_MAYBE_UNUSED T& out) const { \
-    __VA_ARGS__;                                                               \
+#define FROZEN_THAW(TYPE, ...)                                             \
+  void Layout<TYPE>::thaw(                                                 \
+      [[maybe_unused]] ViewPosition self, [[maybe_unused]] T& out) const { \
+    __VA_ARGS__;                                                           \
   }
 #define FROZEN_DEBUG_FIELD(NAME) this->NAME##Field.print(os, level + 1);
 #define FROZEN_DEBUG(TYPE, ...)                                 \

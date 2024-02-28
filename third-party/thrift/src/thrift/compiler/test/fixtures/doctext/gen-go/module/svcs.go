@@ -154,7 +154,8 @@ type reqCF struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqCF{}
 
-type CFArgs = reqCF
+// Deprecated: CFArgsDeprecated is deprecated, since it is supposed to be internal.
+type CFArgsDeprecated = reqCF
 
 func newReqCF() *reqCF {
     return (&reqCF{})
@@ -249,7 +250,8 @@ type respCF struct {
 var _ thrift.Struct = &respCF{}
 var _ thrift.WritableResult = &respCF{}
 
-type CFResult = respCF
+// Deprecated: CFResultDeprecated is deprecated, since it is supposed to be internal.
+type CFResultDeprecated = respCF
 
 func newRespCF() *respCF {
     return (&respCF{})
@@ -350,7 +352,8 @@ type reqCThing struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqCThing{}
 
-type CThingArgs = reqCThing
+// Deprecated: CThingArgsDeprecated is deprecated, since it is supposed to be internal.
+type CThingArgsDeprecated = reqCThing
 
 func newReqCThing() *reqCThing {
     return (&reqCThing{}).
@@ -679,7 +682,8 @@ type respCThing struct {
 var _ thrift.Struct = &respCThing{}
 var _ thrift.WritableResult = &respCThing{}
 
-type CThingResult = respCThing
+// Deprecated: CThingResultDeprecated is deprecated, since it is supposed to be internal.
+type CThingResultDeprecated = respCThing
 
 func newRespCThing() *respCThing {
     return (&respCThing{})

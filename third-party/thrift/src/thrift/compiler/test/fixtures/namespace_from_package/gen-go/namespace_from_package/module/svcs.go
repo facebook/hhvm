@@ -129,7 +129,8 @@ type reqTestServiceInit struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqTestServiceInit{}
 
-type TestServiceInitArgs = reqTestServiceInit
+// Deprecated: TestServiceInitArgsDeprecated is deprecated, since it is supposed to be internal.
+type TestServiceInitArgsDeprecated = reqTestServiceInit
 
 func newReqTestServiceInit() *reqTestServiceInit {
     return (&reqTestServiceInit{}).
@@ -290,7 +291,8 @@ type respTestServiceInit struct {
 var _ thrift.Struct = &respTestServiceInit{}
 var _ thrift.WritableResult = &respTestServiceInit{}
 
-type TestServiceInitResult = respTestServiceInit
+// Deprecated: TestServiceInitResultDeprecated is deprecated, since it is supposed to be internal.
+type TestServiceInitResultDeprecated = respTestServiceInit
 
 func newRespTestServiceInit() *respTestServiceInit {
     return (&respTestServiceInit{})

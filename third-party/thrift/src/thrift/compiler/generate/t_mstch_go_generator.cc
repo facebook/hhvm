@@ -486,11 +486,12 @@ class mstch_go_struct : public mstch_struct {
         boost::algorithm::starts_with(struct_->name(), "req");
   }
   mstch::node go_public_req_name() {
-    return boost::algorithm::erase_first_copy(struct_->name(), "req") + "Args";
+    return boost::algorithm::erase_first_copy(struct_->name(), "req") +
+        "ArgsDeprecated";
   }
   mstch::node go_public_resp_name() {
     return boost::algorithm::erase_first_copy(struct_->name(), "resp") +
-        "Result";
+        "ResultDeprecated";
   }
   mstch::node fields_sorted() {
     return make_mstch_fields(struct_->get_sorted_members());

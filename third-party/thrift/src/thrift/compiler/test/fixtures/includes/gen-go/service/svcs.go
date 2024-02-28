@@ -159,7 +159,8 @@ type reqMyServiceQuery struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceQuery{}
 
-type MyServiceQueryArgs = reqMyServiceQuery
+// Deprecated: MyServiceQueryArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyServiceQueryArgsDeprecated = reqMyServiceQuery
 
 func newReqMyServiceQuery() *reqMyServiceQuery {
     return (&reqMyServiceQuery{}).
@@ -426,7 +427,8 @@ type respMyServiceQuery struct {
 var _ thrift.Struct = &respMyServiceQuery{}
 var _ thrift.WritableResult = &respMyServiceQuery{}
 
-type MyServiceQueryResult = respMyServiceQuery
+// Deprecated: MyServiceQueryResultDeprecated is deprecated, since it is supposed to be internal.
+type MyServiceQueryResultDeprecated = respMyServiceQuery
 
 func newRespMyServiceQuery() *respMyServiceQuery {
     return (&respMyServiceQuery{})
@@ -526,7 +528,8 @@ type reqMyServiceHasArgDocs struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceHasArgDocs{}
 
-type MyServiceHasArgDocsArgs = reqMyServiceHasArgDocs
+// Deprecated: MyServiceHasArgDocsArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyServiceHasArgDocsArgsDeprecated = reqMyServiceHasArgDocs
 
 func newReqMyServiceHasArgDocs() *reqMyServiceHasArgDocs {
     return (&reqMyServiceHasArgDocs{}).
@@ -793,7 +796,8 @@ type respMyServiceHasArgDocs struct {
 var _ thrift.Struct = &respMyServiceHasArgDocs{}
 var _ thrift.WritableResult = &respMyServiceHasArgDocs{}
 
-type MyServiceHasArgDocsResult = respMyServiceHasArgDocs
+// Deprecated: MyServiceHasArgDocsResultDeprecated is deprecated, since it is supposed to be internal.
+type MyServiceHasArgDocsResultDeprecated = respMyServiceHasArgDocs
 
 func newRespMyServiceHasArgDocs() *respMyServiceHasArgDocs {
     return (&respMyServiceHasArgDocs{})

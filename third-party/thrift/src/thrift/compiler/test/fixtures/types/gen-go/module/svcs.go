@@ -154,7 +154,8 @@ type reqSomeServiceBounceMap struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqSomeServiceBounceMap{}
 
-type SomeServiceBounceMapArgs = reqSomeServiceBounceMap
+// Deprecated: SomeServiceBounceMapArgsDeprecated is deprecated, since it is supposed to be internal.
+type SomeServiceBounceMapArgsDeprecated = reqSomeServiceBounceMap
 
 func newReqSomeServiceBounceMap() *reqSomeServiceBounceMap {
     return (&reqSomeServiceBounceMap{}).
@@ -324,7 +325,8 @@ type respSomeServiceBounceMap struct {
 var _ thrift.Struct = &respSomeServiceBounceMap{}
 var _ thrift.WritableResult = &respSomeServiceBounceMap{}
 
-type SomeServiceBounceMapResult = respSomeServiceBounceMap
+// Deprecated: SomeServiceBounceMapResultDeprecated is deprecated, since it is supposed to be internal.
+type SomeServiceBounceMapResultDeprecated = respSomeServiceBounceMap
 
 func newRespSomeServiceBounceMap() *respSomeServiceBounceMap {
     return (&respSomeServiceBounceMap{})
@@ -500,7 +502,8 @@ type reqSomeServiceBinaryKeyedMap struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqSomeServiceBinaryKeyedMap{}
 
-type SomeServiceBinaryKeyedMapArgs = reqSomeServiceBinaryKeyedMap
+// Deprecated: SomeServiceBinaryKeyedMapArgsDeprecated is deprecated, since it is supposed to be internal.
+type SomeServiceBinaryKeyedMapArgsDeprecated = reqSomeServiceBinaryKeyedMap
 
 func newReqSomeServiceBinaryKeyedMap() *reqSomeServiceBinaryKeyedMap {
     return (&reqSomeServiceBinaryKeyedMap{}).
@@ -698,7 +701,8 @@ type respSomeServiceBinaryKeyedMap struct {
 var _ thrift.Struct = &respSomeServiceBinaryKeyedMap{}
 var _ thrift.WritableResult = &respSomeServiceBinaryKeyedMap{}
 
-type SomeServiceBinaryKeyedMapResult = respSomeServiceBinaryKeyedMap
+// Deprecated: SomeServiceBinaryKeyedMapResultDeprecated is deprecated, since it is supposed to be internal.
+type SomeServiceBinaryKeyedMapResultDeprecated = respSomeServiceBinaryKeyedMap
 
 func newRespSomeServiceBinaryKeyedMap() *respSomeServiceBinaryKeyedMap {
     return (&respSomeServiceBinaryKeyedMap{})

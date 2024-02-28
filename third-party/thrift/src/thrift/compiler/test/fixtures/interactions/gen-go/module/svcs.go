@@ -127,7 +127,8 @@ type reqMyServiceFoo struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceFoo{}
 
-type MyServiceFooArgs = reqMyServiceFoo
+// Deprecated: MyServiceFooArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyServiceFooArgsDeprecated = reqMyServiceFoo
 
 func newReqMyServiceFoo() *reqMyServiceFoo {
     return (&reqMyServiceFoo{})
@@ -222,7 +223,8 @@ type respMyServiceFoo struct {
 var _ thrift.Struct = &respMyServiceFoo{}
 var _ thrift.WritableResult = &respMyServiceFoo{}
 
-type MyServiceFooResult = respMyServiceFoo
+// Deprecated: MyServiceFooResultDeprecated is deprecated, since it is supposed to be internal.
+type MyServiceFooResultDeprecated = respMyServiceFoo
 
 func newRespMyServiceFoo() *respMyServiceFoo {
     return (&respMyServiceFoo{})

@@ -584,7 +584,8 @@ type reqGetEntityGetEntity struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetEntity{}
 
-type GetEntityGetEntityArgs = reqGetEntityGetEntity
+// Deprecated: GetEntityGetEntityArgsDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetEntityArgsDeprecated = reqGetEntityGetEntity
 
 func newReqGetEntityGetEntity() *reqGetEntityGetEntity {
     return (&reqGetEntityGetEntity{}).
@@ -766,7 +767,8 @@ type respGetEntityGetEntity struct {
 var _ thrift.Struct = &respGetEntityGetEntity{}
 var _ thrift.WritableResult = &respGetEntityGetEntity{}
 
-type GetEntityGetEntityResult = respGetEntityGetEntity
+// Deprecated: GetEntityGetEntityResultDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetEntityResultDeprecated = respGetEntityGetEntity
 
 func newRespGetEntityGetEntity() *respGetEntityGetEntity {
     return (&respGetEntityGetEntity{})
@@ -949,7 +951,8 @@ type reqGetEntityGetBool struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetBool{}
 
-type GetEntityGetBoolArgs = reqGetEntityGetBool
+// Deprecated: GetEntityGetBoolArgsDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetBoolArgsDeprecated = reqGetEntityGetBool
 
 func newReqGetEntityGetBool() *reqGetEntityGetBool {
     return (&reqGetEntityGetBool{})
@@ -1045,7 +1048,8 @@ type respGetEntityGetBool struct {
 var _ thrift.Struct = &respGetEntityGetBool{}
 var _ thrift.WritableResult = &respGetEntityGetBool{}
 
-type GetEntityGetBoolResult = respGetEntityGetBool
+// Deprecated: GetEntityGetBoolResultDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetBoolResultDeprecated = respGetEntityGetBool
 
 func newRespGetEntityGetBool() *respGetEntityGetBool {
     return (&respGetEntityGetBool{})
@@ -1223,7 +1227,8 @@ type reqGetEntityGetByte struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetByte{}
 
-type GetEntityGetByteArgs = reqGetEntityGetByte
+// Deprecated: GetEntityGetByteArgsDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetByteArgsDeprecated = reqGetEntityGetByte
 
 func newReqGetEntityGetByte() *reqGetEntityGetByte {
     return (&reqGetEntityGetByte{})
@@ -1319,7 +1324,8 @@ type respGetEntityGetByte struct {
 var _ thrift.Struct = &respGetEntityGetByte{}
 var _ thrift.WritableResult = &respGetEntityGetByte{}
 
-type GetEntityGetByteResult = respGetEntityGetByte
+// Deprecated: GetEntityGetByteResultDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetByteResultDeprecated = respGetEntityGetByte
 
 func newRespGetEntityGetByte() *respGetEntityGetByte {
     return (&respGetEntityGetByte{})
@@ -1498,7 +1504,8 @@ type reqGetEntityGetI16 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetI16{}
 
-type GetEntityGetI16Args = reqGetEntityGetI16
+// Deprecated: GetEntityGetI16ArgsDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetI16ArgsDeprecated = reqGetEntityGetI16
 
 func newReqGetEntityGetI16() *reqGetEntityGetI16 {
     return (&reqGetEntityGetI16{})
@@ -1594,7 +1601,8 @@ type respGetEntityGetI16 struct {
 var _ thrift.Struct = &respGetEntityGetI16{}
 var _ thrift.WritableResult = &respGetEntityGetI16{}
 
-type GetEntityGetI16Result = respGetEntityGetI16
+// Deprecated: GetEntityGetI16ResultDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetI16ResultDeprecated = respGetEntityGetI16
 
 func newRespGetEntityGetI16() *respGetEntityGetI16 {
     return (&respGetEntityGetI16{})
@@ -1772,7 +1780,8 @@ type reqGetEntityGetI32 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetI32{}
 
-type GetEntityGetI32Args = reqGetEntityGetI32
+// Deprecated: GetEntityGetI32ArgsDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetI32ArgsDeprecated = reqGetEntityGetI32
 
 func newReqGetEntityGetI32() *reqGetEntityGetI32 {
     return (&reqGetEntityGetI32{})
@@ -1868,7 +1877,8 @@ type respGetEntityGetI32 struct {
 var _ thrift.Struct = &respGetEntityGetI32{}
 var _ thrift.WritableResult = &respGetEntityGetI32{}
 
-type GetEntityGetI32Result = respGetEntityGetI32
+// Deprecated: GetEntityGetI32ResultDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetI32ResultDeprecated = respGetEntityGetI32
 
 func newRespGetEntityGetI32() *respGetEntityGetI32 {
     return (&respGetEntityGetI32{})
@@ -2046,7 +2056,8 @@ type reqGetEntityGetI64 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetI64{}
 
-type GetEntityGetI64Args = reqGetEntityGetI64
+// Deprecated: GetEntityGetI64ArgsDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetI64ArgsDeprecated = reqGetEntityGetI64
 
 func newReqGetEntityGetI64() *reqGetEntityGetI64 {
     return (&reqGetEntityGetI64{})
@@ -2142,7 +2153,8 @@ type respGetEntityGetI64 struct {
 var _ thrift.Struct = &respGetEntityGetI64{}
 var _ thrift.WritableResult = &respGetEntityGetI64{}
 
-type GetEntityGetI64Result = respGetEntityGetI64
+// Deprecated: GetEntityGetI64ResultDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetI64ResultDeprecated = respGetEntityGetI64
 
 func newRespGetEntityGetI64() *respGetEntityGetI64 {
     return (&respGetEntityGetI64{})
@@ -2320,7 +2332,8 @@ type reqGetEntityGetDouble struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetDouble{}
 
-type GetEntityGetDoubleArgs = reqGetEntityGetDouble
+// Deprecated: GetEntityGetDoubleArgsDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetDoubleArgsDeprecated = reqGetEntityGetDouble
 
 func newReqGetEntityGetDouble() *reqGetEntityGetDouble {
     return (&reqGetEntityGetDouble{})
@@ -2416,7 +2429,8 @@ type respGetEntityGetDouble struct {
 var _ thrift.Struct = &respGetEntityGetDouble{}
 var _ thrift.WritableResult = &respGetEntityGetDouble{}
 
-type GetEntityGetDoubleResult = respGetEntityGetDouble
+// Deprecated: GetEntityGetDoubleResultDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetDoubleResultDeprecated = respGetEntityGetDouble
 
 func newRespGetEntityGetDouble() *respGetEntityGetDouble {
     return (&respGetEntityGetDouble{})
@@ -2594,7 +2608,8 @@ type reqGetEntityGetString struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetString{}
 
-type GetEntityGetStringArgs = reqGetEntityGetString
+// Deprecated: GetEntityGetStringArgsDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetStringArgsDeprecated = reqGetEntityGetString
 
 func newReqGetEntityGetString() *reqGetEntityGetString {
     return (&reqGetEntityGetString{})
@@ -2690,7 +2705,8 @@ type respGetEntityGetString struct {
 var _ thrift.Struct = &respGetEntityGetString{}
 var _ thrift.WritableResult = &respGetEntityGetString{}
 
-type GetEntityGetStringResult = respGetEntityGetString
+// Deprecated: GetEntityGetStringResultDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetStringResultDeprecated = respGetEntityGetString
 
 func newRespGetEntityGetString() *respGetEntityGetString {
     return (&respGetEntityGetString{})
@@ -2868,7 +2884,8 @@ type reqGetEntityGetBinary struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetBinary{}
 
-type GetEntityGetBinaryArgs = reqGetEntityGetBinary
+// Deprecated: GetEntityGetBinaryArgsDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetBinaryArgsDeprecated = reqGetEntityGetBinary
 
 func newReqGetEntityGetBinary() *reqGetEntityGetBinary {
     return (&reqGetEntityGetBinary{})
@@ -2964,7 +2981,8 @@ type respGetEntityGetBinary struct {
 var _ thrift.Struct = &respGetEntityGetBinary{}
 var _ thrift.WritableResult = &respGetEntityGetBinary{}
 
-type GetEntityGetBinaryResult = respGetEntityGetBinary
+// Deprecated: GetEntityGetBinaryResultDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetBinaryResultDeprecated = respGetEntityGetBinary
 
 func newRespGetEntityGetBinary() *respGetEntityGetBinary {
     return (&respGetEntityGetBinary{})
@@ -3138,7 +3156,8 @@ type reqGetEntityGetMap struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetMap{}
 
-type GetEntityGetMapArgs = reqGetEntityGetMap
+// Deprecated: GetEntityGetMapArgsDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetMapArgsDeprecated = reqGetEntityGetMap
 
 func newReqGetEntityGetMap() *reqGetEntityGetMap {
     return (&reqGetEntityGetMap{})
@@ -3234,7 +3253,8 @@ type respGetEntityGetMap struct {
 var _ thrift.Struct = &respGetEntityGetMap{}
 var _ thrift.WritableResult = &respGetEntityGetMap{}
 
-type GetEntityGetMapResult = respGetEntityGetMap
+// Deprecated: GetEntityGetMapResultDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetMapResultDeprecated = respGetEntityGetMap
 
 func newRespGetEntityGetMap() *respGetEntityGetMap {
     return (&respGetEntityGetMap{})
@@ -3454,7 +3474,8 @@ type reqGetEntityGetSet struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetSet{}
 
-type GetEntityGetSetArgs = reqGetEntityGetSet
+// Deprecated: GetEntityGetSetArgsDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetSetArgsDeprecated = reqGetEntityGetSet
 
 func newReqGetEntityGetSet() *reqGetEntityGetSet {
     return (&reqGetEntityGetSet{})
@@ -3550,7 +3571,8 @@ type respGetEntityGetSet struct {
 var _ thrift.Struct = &respGetEntityGetSet{}
 var _ thrift.WritableResult = &respGetEntityGetSet{}
 
-type GetEntityGetSetResult = respGetEntityGetSet
+// Deprecated: GetEntityGetSetResultDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetSetResultDeprecated = respGetEntityGetSet
 
 func newRespGetEntityGetSet() *respGetEntityGetSet {
     return (&respGetEntityGetSet{})
@@ -3753,7 +3775,8 @@ type reqGetEntityGetList struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetList{}
 
-type GetEntityGetListArgs = reqGetEntityGetList
+// Deprecated: GetEntityGetListArgsDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetListArgsDeprecated = reqGetEntityGetList
 
 func newReqGetEntityGetList() *reqGetEntityGetList {
     return (&reqGetEntityGetList{})
@@ -3849,7 +3872,8 @@ type respGetEntityGetList struct {
 var _ thrift.Struct = &respGetEntityGetList{}
 var _ thrift.WritableResult = &respGetEntityGetList{}
 
-type GetEntityGetListResult = respGetEntityGetList
+// Deprecated: GetEntityGetListResultDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetListResultDeprecated = respGetEntityGetList
 
 func newRespGetEntityGetList() *respGetEntityGetList {
     return (&respGetEntityGetList{})
@@ -4055,7 +4079,8 @@ type reqGetEntityGetLegacyStuff struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetLegacyStuff{}
 
-type GetEntityGetLegacyStuffArgs = reqGetEntityGetLegacyStuff
+// Deprecated: GetEntityGetLegacyStuffArgsDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetLegacyStuffArgsDeprecated = reqGetEntityGetLegacyStuff
 
 func newReqGetEntityGetLegacyStuff() *reqGetEntityGetLegacyStuff {
     return (&reqGetEntityGetLegacyStuff{}).
@@ -4346,7 +4371,8 @@ type respGetEntityGetLegacyStuff struct {
 var _ thrift.Struct = &respGetEntityGetLegacyStuff{}
 var _ thrift.WritableResult = &respGetEntityGetLegacyStuff{}
 
-type GetEntityGetLegacyStuffResult = respGetEntityGetLegacyStuff
+// Deprecated: GetEntityGetLegacyStuffResultDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetLegacyStuffResultDeprecated = respGetEntityGetLegacyStuff
 
 func newRespGetEntityGetLegacyStuff() *respGetEntityGetLegacyStuff {
     return (&respGetEntityGetLegacyStuff{})
@@ -4525,7 +4551,8 @@ type reqGetEntityGetCtxCollision struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetCtxCollision{}
 
-type GetEntityGetCtxCollisionArgs = reqGetEntityGetCtxCollision
+// Deprecated: GetEntityGetCtxCollisionArgsDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetCtxCollisionArgsDeprecated = reqGetEntityGetCtxCollision
 
 func newReqGetEntityGetCtxCollision() *reqGetEntityGetCtxCollision {
     return (&reqGetEntityGetCtxCollision{}).
@@ -4686,7 +4713,8 @@ type respGetEntityGetCtxCollision struct {
 var _ thrift.Struct = &respGetEntityGetCtxCollision{}
 var _ thrift.WritableResult = &respGetEntityGetCtxCollision{}
 
-type GetEntityGetCtxCollisionResult = respGetEntityGetCtxCollision
+// Deprecated: GetEntityGetCtxCollisionResultDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetCtxCollisionResultDeprecated = respGetEntityGetCtxCollision
 
 func newRespGetEntityGetCtxCollision() *respGetEntityGetCtxCollision {
     return (&respGetEntityGetCtxCollision{})
@@ -4866,7 +4894,8 @@ type reqGetEntityGetCtx1Collision struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetCtx1Collision{}
 
-type GetEntityGetCtx1CollisionArgs = reqGetEntityGetCtx1Collision
+// Deprecated: GetEntityGetCtx1CollisionArgsDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetCtx1CollisionArgsDeprecated = reqGetEntityGetCtx1Collision
 
 func newReqGetEntityGetCtx1Collision() *reqGetEntityGetCtx1Collision {
     return (&reqGetEntityGetCtx1Collision{}).
@@ -5092,7 +5121,8 @@ type respGetEntityGetCtx1Collision struct {
 var _ thrift.Struct = &respGetEntityGetCtx1Collision{}
 var _ thrift.WritableResult = &respGetEntityGetCtx1Collision{}
 
-type GetEntityGetCtx1CollisionResult = respGetEntityGetCtx1Collision
+// Deprecated: GetEntityGetCtx1CollisionResultDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetCtx1CollisionResultDeprecated = respGetEntityGetCtx1Collision
 
 func newRespGetEntityGetCtx1Collision() *respGetEntityGetCtx1Collision {
     return (&respGetEntityGetCtx1Collision{})
@@ -5271,7 +5301,8 @@ type reqGetEntityGetOutCollision struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetOutCollision{}
 
-type GetEntityGetOutCollisionArgs = reqGetEntityGetOutCollision
+// Deprecated: GetEntityGetOutCollisionArgsDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetOutCollisionArgsDeprecated = reqGetEntityGetOutCollision
 
 func newReqGetEntityGetOutCollision() *reqGetEntityGetOutCollision {
     return (&reqGetEntityGetOutCollision{}).
@@ -5432,7 +5463,8 @@ type respGetEntityGetOutCollision struct {
 var _ thrift.Struct = &respGetEntityGetOutCollision{}
 var _ thrift.WritableResult = &respGetEntityGetOutCollision{}
 
-type GetEntityGetOutCollisionResult = respGetEntityGetOutCollision
+// Deprecated: GetEntityGetOutCollisionResultDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetOutCollisionResultDeprecated = respGetEntityGetOutCollision
 
 func newRespGetEntityGetOutCollision() *respGetEntityGetOutCollision {
     return (&respGetEntityGetOutCollision{})
@@ -5612,7 +5644,8 @@ type reqGetEntityGetOut1Collision struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetOut1Collision{}
 
-type GetEntityGetOut1CollisionArgs = reqGetEntityGetOut1Collision
+// Deprecated: GetEntityGetOut1CollisionArgsDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetOut1CollisionArgsDeprecated = reqGetEntityGetOut1Collision
 
 func newReqGetEntityGetOut1Collision() *reqGetEntityGetOut1Collision {
     return (&reqGetEntityGetOut1Collision{}).
@@ -5838,7 +5871,8 @@ type respGetEntityGetOut1Collision struct {
 var _ thrift.Struct = &respGetEntityGetOut1Collision{}
 var _ thrift.WritableResult = &respGetEntityGetOut1Collision{}
 
-type GetEntityGetOut1CollisionResult = respGetEntityGetOut1Collision
+// Deprecated: GetEntityGetOut1CollisionResultDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetOut1CollisionResultDeprecated = respGetEntityGetOut1Collision
 
 func newRespGetEntityGetOut1Collision() *respGetEntityGetOut1Collision {
     return (&respGetEntityGetOut1Collision{})
@@ -6017,7 +6051,8 @@ type reqGetEntityGetInCollision struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetInCollision{}
 
-type GetEntityGetInCollisionArgs = reqGetEntityGetInCollision
+// Deprecated: GetEntityGetInCollisionArgsDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetInCollisionArgsDeprecated = reqGetEntityGetInCollision
 
 func newReqGetEntityGetInCollision() *reqGetEntityGetInCollision {
     return (&reqGetEntityGetInCollision{}).
@@ -6178,7 +6213,8 @@ type respGetEntityGetInCollision struct {
 var _ thrift.Struct = &respGetEntityGetInCollision{}
 var _ thrift.WritableResult = &respGetEntityGetInCollision{}
 
-type GetEntityGetInCollisionResult = respGetEntityGetInCollision
+// Deprecated: GetEntityGetInCollisionResultDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetInCollisionResultDeprecated = respGetEntityGetInCollision
 
 func newRespGetEntityGetInCollision() *respGetEntityGetInCollision {
     return (&respGetEntityGetInCollision{})
@@ -6358,7 +6394,8 @@ type reqGetEntityGetIn1Collision struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetIn1Collision{}
 
-type GetEntityGetIn1CollisionArgs = reqGetEntityGetIn1Collision
+// Deprecated: GetEntityGetIn1CollisionArgsDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetIn1CollisionArgsDeprecated = reqGetEntityGetIn1Collision
 
 func newReqGetEntityGetIn1Collision() *reqGetEntityGetIn1Collision {
     return (&reqGetEntityGetIn1Collision{}).
@@ -6584,7 +6621,8 @@ type respGetEntityGetIn1Collision struct {
 var _ thrift.Struct = &respGetEntityGetIn1Collision{}
 var _ thrift.WritableResult = &respGetEntityGetIn1Collision{}
 
-type GetEntityGetIn1CollisionResult = respGetEntityGetIn1Collision
+// Deprecated: GetEntityGetIn1CollisionResultDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetIn1CollisionResultDeprecated = respGetEntityGetIn1Collision
 
 func newRespGetEntityGetIn1Collision() *respGetEntityGetIn1Collision {
     return (&respGetEntityGetIn1Collision{})
@@ -6763,7 +6801,8 @@ type reqGetEntityGetErrCollision struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetErrCollision{}
 
-type GetEntityGetErrCollisionArgs = reqGetEntityGetErrCollision
+// Deprecated: GetEntityGetErrCollisionArgsDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetErrCollisionArgsDeprecated = reqGetEntityGetErrCollision
 
 func newReqGetEntityGetErrCollision() *reqGetEntityGetErrCollision {
     return (&reqGetEntityGetErrCollision{}).
@@ -6924,7 +6963,8 @@ type respGetEntityGetErrCollision struct {
 var _ thrift.Struct = &respGetEntityGetErrCollision{}
 var _ thrift.WritableResult = &respGetEntityGetErrCollision{}
 
-type GetEntityGetErrCollisionResult = respGetEntityGetErrCollision
+// Deprecated: GetEntityGetErrCollisionResultDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetErrCollisionResultDeprecated = respGetEntityGetErrCollision
 
 func newRespGetEntityGetErrCollision() *respGetEntityGetErrCollision {
     return (&respGetEntityGetErrCollision{})
@@ -7104,7 +7144,8 @@ type reqGetEntityGetErr1Collision struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetErr1Collision{}
 
-type GetEntityGetErr1CollisionArgs = reqGetEntityGetErr1Collision
+// Deprecated: GetEntityGetErr1CollisionArgsDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetErr1CollisionArgsDeprecated = reqGetEntityGetErr1Collision
 
 func newReqGetEntityGetErr1Collision() *reqGetEntityGetErr1Collision {
     return (&reqGetEntityGetErr1Collision{}).
@@ -7330,7 +7371,8 @@ type respGetEntityGetErr1Collision struct {
 var _ thrift.Struct = &respGetEntityGetErr1Collision{}
 var _ thrift.WritableResult = &respGetEntityGetErr1Collision{}
 
-type GetEntityGetErr1CollisionResult = respGetEntityGetErr1Collision
+// Deprecated: GetEntityGetErr1CollisionResultDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetErr1CollisionResultDeprecated = respGetEntityGetErr1Collision
 
 func newRespGetEntityGetErr1Collision() *respGetEntityGetErr1Collision {
     return (&respGetEntityGetErr1Collision{})

@@ -127,7 +127,8 @@ type reqMyRootDoRoot struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyRootDoRoot{}
 
-type MyRootDoRootArgs = reqMyRootDoRoot
+// Deprecated: MyRootDoRootArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyRootDoRootArgsDeprecated = reqMyRootDoRoot
 
 func newReqMyRootDoRoot() *reqMyRootDoRoot {
     return (&reqMyRootDoRoot{})
@@ -222,7 +223,8 @@ type respMyRootDoRoot struct {
 var _ thrift.Struct = &respMyRootDoRoot{}
 var _ thrift.WritableResult = &respMyRootDoRoot{}
 
-type MyRootDoRootResult = respMyRootDoRoot
+// Deprecated: MyRootDoRootResultDeprecated is deprecated, since it is supposed to be internal.
+type MyRootDoRootResultDeprecated = respMyRootDoRoot
 
 func newRespMyRootDoRoot() *respMyRootDoRoot {
     return (&respMyRootDoRoot{})
@@ -532,7 +534,8 @@ type reqMyNodeDoMid struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyNodeDoMid{}
 
-type MyNodeDoMidArgs = reqMyNodeDoMid
+// Deprecated: MyNodeDoMidArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyNodeDoMidArgsDeprecated = reqMyNodeDoMid
 
 func newReqMyNodeDoMid() *reqMyNodeDoMid {
     return (&reqMyNodeDoMid{})
@@ -627,7 +630,8 @@ type respMyNodeDoMid struct {
 var _ thrift.Struct = &respMyNodeDoMid{}
 var _ thrift.WritableResult = &respMyNodeDoMid{}
 
-type MyNodeDoMidResult = respMyNodeDoMid
+// Deprecated: MyNodeDoMidResultDeprecated is deprecated, since it is supposed to be internal.
+type MyNodeDoMidResultDeprecated = respMyNodeDoMid
 
 func newRespMyNodeDoMid() *respMyNodeDoMid {
     return (&respMyNodeDoMid{})
@@ -911,7 +915,8 @@ type reqMyLeafDoLeaf struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyLeafDoLeaf{}
 
-type MyLeafDoLeafArgs = reqMyLeafDoLeaf
+// Deprecated: MyLeafDoLeafArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyLeafDoLeafArgsDeprecated = reqMyLeafDoLeaf
 
 func newReqMyLeafDoLeaf() *reqMyLeafDoLeaf {
     return (&reqMyLeafDoLeaf{})
@@ -1006,7 +1011,8 @@ type respMyLeafDoLeaf struct {
 var _ thrift.Struct = &respMyLeafDoLeaf{}
 var _ thrift.WritableResult = &respMyLeafDoLeaf{}
 
-type MyLeafDoLeafResult = respMyLeafDoLeaf
+// Deprecated: MyLeafDoLeafResultDeprecated is deprecated, since it is supposed to be internal.
+type MyLeafDoLeafResultDeprecated = respMyLeafDoLeaf
 
 func newRespMyLeafDoLeaf() *respMyLeafDoLeaf {
     return (&respMyLeafDoLeaf{})

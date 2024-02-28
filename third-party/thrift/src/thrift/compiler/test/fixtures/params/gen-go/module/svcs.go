@@ -221,7 +221,8 @@ type reqNestedContainersMapList struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqNestedContainersMapList{}
 
-type NestedContainersMapListArgs = reqNestedContainersMapList
+// Deprecated: NestedContainersMapListArgsDeprecated is deprecated, since it is supposed to be internal.
+type NestedContainersMapListArgsDeprecated = reqNestedContainersMapList
 
 func newReqNestedContainersMapList() *reqNestedContainersMapList {
     return (&reqNestedContainersMapList{}).
@@ -464,7 +465,8 @@ type respNestedContainersMapList struct {
 var _ thrift.Struct = &respNestedContainersMapList{}
 var _ thrift.WritableResult = &respNestedContainersMapList{}
 
-type NestedContainersMapListResult = respNestedContainersMapList
+// Deprecated: NestedContainersMapListResultDeprecated is deprecated, since it is supposed to be internal.
+type NestedContainersMapListResultDeprecated = respNestedContainersMapList
 
 func newRespNestedContainersMapList() *respNestedContainersMapList {
     return (&respNestedContainersMapList{})
@@ -563,7 +565,8 @@ type reqNestedContainersMapSet struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqNestedContainersMapSet{}
 
-type NestedContainersMapSetArgs = reqNestedContainersMapSet
+// Deprecated: NestedContainersMapSetArgsDeprecated is deprecated, since it is supposed to be internal.
+type NestedContainersMapSetArgsDeprecated = reqNestedContainersMapSet
 
 func newReqNestedContainersMapSet() *reqNestedContainersMapSet {
     return (&reqNestedContainersMapSet{}).
@@ -806,7 +809,8 @@ type respNestedContainersMapSet struct {
 var _ thrift.Struct = &respNestedContainersMapSet{}
 var _ thrift.WritableResult = &respNestedContainersMapSet{}
 
-type NestedContainersMapSetResult = respNestedContainersMapSet
+// Deprecated: NestedContainersMapSetResultDeprecated is deprecated, since it is supposed to be internal.
+type NestedContainersMapSetResultDeprecated = respNestedContainersMapSet
 
 func newRespNestedContainersMapSet() *respNestedContainersMapSet {
     return (&respNestedContainersMapSet{})
@@ -905,7 +909,8 @@ type reqNestedContainersListMap struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqNestedContainersListMap{}
 
-type NestedContainersListMapArgs = reqNestedContainersListMap
+// Deprecated: NestedContainersListMapArgsDeprecated is deprecated, since it is supposed to be internal.
+type NestedContainersListMapArgsDeprecated = reqNestedContainersListMap
 
 func newReqNestedContainersListMap() *reqNestedContainersListMap {
     return (&reqNestedContainersListMap{}).
@@ -1148,7 +1153,8 @@ type respNestedContainersListMap struct {
 var _ thrift.Struct = &respNestedContainersListMap{}
 var _ thrift.WritableResult = &respNestedContainersListMap{}
 
-type NestedContainersListMapResult = respNestedContainersListMap
+// Deprecated: NestedContainersListMapResultDeprecated is deprecated, since it is supposed to be internal.
+type NestedContainersListMapResultDeprecated = respNestedContainersListMap
 
 func newRespNestedContainersListMap() *respNestedContainersListMap {
     return (&respNestedContainersListMap{})
@@ -1247,7 +1253,8 @@ type reqNestedContainersListSet struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqNestedContainersListSet{}
 
-type NestedContainersListSetArgs = reqNestedContainersListSet
+// Deprecated: NestedContainersListSetArgsDeprecated is deprecated, since it is supposed to be internal.
+type NestedContainersListSetArgsDeprecated = reqNestedContainersListSet
 
 func newReqNestedContainersListSet() *reqNestedContainersListSet {
     return (&reqNestedContainersListSet{}).
@@ -1473,7 +1480,8 @@ type respNestedContainersListSet struct {
 var _ thrift.Struct = &respNestedContainersListSet{}
 var _ thrift.WritableResult = &respNestedContainersListSet{}
 
-type NestedContainersListSetResult = respNestedContainersListSet
+// Deprecated: NestedContainersListSetResultDeprecated is deprecated, since it is supposed to be internal.
+type NestedContainersListSetResultDeprecated = respNestedContainersListSet
 
 func newRespNestedContainersListSet() *respNestedContainersListSet {
     return (&respNestedContainersListSet{})
@@ -1572,7 +1580,8 @@ type reqNestedContainersTurtles struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqNestedContainersTurtles{}
 
-type NestedContainersTurtlesArgs = reqNestedContainersTurtles
+// Deprecated: NestedContainersTurtlesArgsDeprecated is deprecated, since it is supposed to be internal.
+type NestedContainersTurtlesArgsDeprecated = reqNestedContainersTurtles
 
 func newReqNestedContainersTurtles() *reqNestedContainersTurtles {
     return (&reqNestedContainersTurtles{}).
@@ -1919,7 +1928,8 @@ type respNestedContainersTurtles struct {
 var _ thrift.Struct = &respNestedContainersTurtles{}
 var _ thrift.WritableResult = &respNestedContainersTurtles{}
 
-type NestedContainersTurtlesResult = respNestedContainersTurtles
+// Deprecated: NestedContainersTurtlesResultDeprecated is deprecated, since it is supposed to be internal.
+type NestedContainersTurtlesResultDeprecated = respNestedContainersTurtles
 
 func newRespNestedContainersTurtles() *respNestedContainersTurtles {
     return (&respNestedContainersTurtles{})

@@ -405,9 +405,7 @@ std::string munge_ident(const std::string& ident, bool exported, bool compat) {
   // with New. (to avoid name collisions with constructors and helper
   // arg/result structs)
   bool starts_with_new = boost::algorithm::starts_with(result, "New");
-  bool ends_with_args = boost::algorithm::ends_with(result, "Args");
-  bool ends_with_rslt = boost::algorithm::ends_with(result, "Result");
-  if (compat && (starts_with_new || ends_with_args || ends_with_rslt)) {
+  if (compat && starts_with_new) {
     result += '_';
   }
 

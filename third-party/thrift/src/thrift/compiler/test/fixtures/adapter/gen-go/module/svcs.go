@@ -133,7 +133,8 @@ type reqServiceFunc struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqServiceFunc{}
 
-type ServiceFuncArgs = reqServiceFunc
+// Deprecated: ServiceFuncArgsDeprecated is deprecated, since it is supposed to be internal.
+type ServiceFuncArgsDeprecated = reqServiceFunc
 
 func newReqServiceFunc() *reqServiceFunc {
     return (&reqServiceFunc{}).
@@ -446,7 +447,8 @@ type respServiceFunc struct {
 var _ thrift.Struct = &respServiceFunc{}
 var _ thrift.WritableResult = &respServiceFunc{}
 
-type ServiceFuncResult = respServiceFunc
+// Deprecated: ServiceFuncResultDeprecated is deprecated, since it is supposed to be internal.
+type ServiceFuncResultDeprecated = respServiceFunc
 
 func newRespServiceFunc() *respServiceFunc {
     return (&respServiceFunc{})
@@ -850,7 +852,8 @@ type reqAdapterServiceCount struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqAdapterServiceCount{}
 
-type AdapterServiceCountArgs = reqAdapterServiceCount
+// Deprecated: AdapterServiceCountArgsDeprecated is deprecated, since it is supposed to be internal.
+type AdapterServiceCountArgsDeprecated = reqAdapterServiceCount
 
 func newReqAdapterServiceCount() *reqAdapterServiceCount {
     return (&reqAdapterServiceCount{})
@@ -946,7 +949,8 @@ type respAdapterServiceCount struct {
 var _ thrift.Struct = &respAdapterServiceCount{}
 var _ thrift.WritableResult = &respAdapterServiceCount{}
 
-type AdapterServiceCountResult = respAdapterServiceCount
+// Deprecated: AdapterServiceCountResultDeprecated is deprecated, since it is supposed to be internal.
+type AdapterServiceCountResultDeprecated = respAdapterServiceCount
 
 func newRespAdapterServiceCount() *respAdapterServiceCount {
     return (&respAdapterServiceCount{})
@@ -1130,7 +1134,8 @@ type reqAdapterServiceAdaptedTypes struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqAdapterServiceAdaptedTypes{}
 
-type AdapterServiceAdaptedTypesArgs = reqAdapterServiceAdaptedTypes
+// Deprecated: AdapterServiceAdaptedTypesArgsDeprecated is deprecated, since it is supposed to be internal.
+type AdapterServiceAdaptedTypesArgsDeprecated = reqAdapterServiceAdaptedTypes
 
 func newReqAdapterServiceAdaptedTypes() *reqAdapterServiceAdaptedTypes {
     return (&reqAdapterServiceAdaptedTypes{}).
@@ -1312,7 +1317,8 @@ type respAdapterServiceAdaptedTypes struct {
 var _ thrift.Struct = &respAdapterServiceAdaptedTypes{}
 var _ thrift.WritableResult = &respAdapterServiceAdaptedTypes{}
 
-type AdapterServiceAdaptedTypesResult = respAdapterServiceAdaptedTypes
+// Deprecated: AdapterServiceAdaptedTypesResultDeprecated is deprecated, since it is supposed to be internal.
+type AdapterServiceAdaptedTypesResultDeprecated = respAdapterServiceAdaptedTypes
 
 func newRespAdapterServiceAdaptedTypes() *respAdapterServiceAdaptedTypes {
     return (&respAdapterServiceAdaptedTypes{})

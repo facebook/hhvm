@@ -127,7 +127,8 @@ type reqFooServiceSimpleRPC struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqFooServiceSimpleRPC{}
 
-type FooServiceSimpleRPCArgs = reqFooServiceSimpleRPC
+// Deprecated: FooServiceSimpleRPCArgsDeprecated is deprecated, since it is supposed to be internal.
+type FooServiceSimpleRPCArgsDeprecated = reqFooServiceSimpleRPC
 
 func newReqFooServiceSimpleRPC() *reqFooServiceSimpleRPC {
     return (&reqFooServiceSimpleRPC{})
@@ -222,7 +223,8 @@ type respFooServiceSimpleRPC struct {
 var _ thrift.Struct = &respFooServiceSimpleRPC{}
 var _ thrift.WritableResult = &respFooServiceSimpleRPC{}
 
-type FooServiceSimpleRPCResult = respFooServiceSimpleRPC
+// Deprecated: FooServiceSimpleRPCResultDeprecated is deprecated, since it is supposed to be internal.
+type FooServiceSimpleRPCResultDeprecated = respFooServiceSimpleRPC
 
 func newRespFooServiceSimpleRPC() *respFooServiceSimpleRPC {
     return (&respFooServiceSimpleRPC{})
@@ -522,7 +524,8 @@ type reqFB303ServiceSimpleRPC struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqFB303ServiceSimpleRPC{}
 
-type FB303ServiceSimpleRPCArgs = reqFB303ServiceSimpleRPC
+// Deprecated: FB303ServiceSimpleRPCArgsDeprecated is deprecated, since it is supposed to be internal.
+type FB303ServiceSimpleRPCArgsDeprecated = reqFB303ServiceSimpleRPC
 
 func newReqFB303ServiceSimpleRPC() *reqFB303ServiceSimpleRPC {
     return (&reqFB303ServiceSimpleRPC{}).
@@ -683,7 +686,8 @@ type respFB303ServiceSimpleRPC struct {
 var _ thrift.Struct = &respFB303ServiceSimpleRPC{}
 var _ thrift.WritableResult = &respFB303ServiceSimpleRPC{}
 
-type FB303ServiceSimpleRPCResult = respFB303ServiceSimpleRPC
+// Deprecated: FB303ServiceSimpleRPCResultDeprecated is deprecated, since it is supposed to be internal.
+type FB303ServiceSimpleRPCResultDeprecated = respFB303ServiceSimpleRPC
 
 func newRespFB303ServiceSimpleRPC() *respFB303ServiceSimpleRPC {
     return (&respFB303ServiceSimpleRPC{})
@@ -1269,7 +1273,8 @@ type reqMyServicePing struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServicePing{}
 
-type MyServicePingArgs = reqMyServicePing
+// Deprecated: MyServicePingArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyServicePingArgsDeprecated = reqMyServicePing
 
 func newReqMyServicePing() *reqMyServicePing {
     return (&reqMyServicePing{})
@@ -1364,7 +1369,8 @@ type respMyServicePing struct {
 var _ thrift.Struct = &respMyServicePing{}
 var _ thrift.WritableResult = &respMyServicePing{}
 
-type MyServicePingResult = respMyServicePing
+// Deprecated: MyServicePingResultDeprecated is deprecated, since it is supposed to be internal.
+type MyServicePingResultDeprecated = respMyServicePing
 
 func newRespMyServicePing() *respMyServicePing {
     return (&respMyServicePing{})
@@ -1462,7 +1468,8 @@ type reqMyServiceGetRandomData struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceGetRandomData{}
 
-type MyServiceGetRandomDataArgs = reqMyServiceGetRandomData
+// Deprecated: MyServiceGetRandomDataArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyServiceGetRandomDataArgsDeprecated = reqMyServiceGetRandomData
 
 func newReqMyServiceGetRandomData() *reqMyServiceGetRandomData {
     return (&reqMyServiceGetRandomData{})
@@ -1558,7 +1565,8 @@ type respMyServiceGetRandomData struct {
 var _ thrift.Struct = &respMyServiceGetRandomData{}
 var _ thrift.WritableResult = &respMyServiceGetRandomData{}
 
-type MyServiceGetRandomDataResult = respMyServiceGetRandomData
+// Deprecated: MyServiceGetRandomDataResultDeprecated is deprecated, since it is supposed to be internal.
+type MyServiceGetRandomDataResultDeprecated = respMyServiceGetRandomData
 
 func newRespMyServiceGetRandomData() *respMyServiceGetRandomData {
     return (&respMyServiceGetRandomData{})
@@ -1737,7 +1745,8 @@ type reqMyServiceSink struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceSink{}
 
-type MyServiceSinkArgs = reqMyServiceSink
+// Deprecated: MyServiceSinkArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyServiceSinkArgsDeprecated = reqMyServiceSink
 
 func newReqMyServiceSink() *reqMyServiceSink {
     return (&reqMyServiceSink{}).
@@ -1897,7 +1906,8 @@ type respMyServiceSink struct {
 var _ thrift.Struct = &respMyServiceSink{}
 var _ thrift.WritableResult = &respMyServiceSink{}
 
-type MyServiceSinkResult = respMyServiceSink
+// Deprecated: MyServiceSinkResultDeprecated is deprecated, since it is supposed to be internal.
+type MyServiceSinkResultDeprecated = respMyServiceSink
 
 func newRespMyServiceSink() *respMyServiceSink {
     return (&respMyServiceSink{})
@@ -1997,7 +2007,8 @@ type reqMyServicePutDataById struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServicePutDataById{}
 
-type MyServicePutDataByIdArgs = reqMyServicePutDataById
+// Deprecated: MyServicePutDataByIdArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyServicePutDataByIdArgsDeprecated = reqMyServicePutDataById
 
 func newReqMyServicePutDataById() *reqMyServicePutDataById {
     return (&reqMyServicePutDataById{}).
@@ -2222,7 +2233,8 @@ type respMyServicePutDataById struct {
 var _ thrift.Struct = &respMyServicePutDataById{}
 var _ thrift.WritableResult = &respMyServicePutDataById{}
 
-type MyServicePutDataByIdResult = respMyServicePutDataById
+// Deprecated: MyServicePutDataByIdResultDeprecated is deprecated, since it is supposed to be internal.
+type MyServicePutDataByIdResultDeprecated = respMyServicePutDataById
 
 func newRespMyServicePutDataById() *respMyServicePutDataById {
     return (&respMyServicePutDataById{})
@@ -2321,7 +2333,8 @@ type reqMyServiceHasDataById struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceHasDataById{}
 
-type MyServiceHasDataByIdArgs = reqMyServiceHasDataById
+// Deprecated: MyServiceHasDataByIdArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyServiceHasDataByIdArgsDeprecated = reqMyServiceHasDataById
 
 func newReqMyServiceHasDataById() *reqMyServiceHasDataById {
     return (&reqMyServiceHasDataById{}).
@@ -2482,7 +2495,8 @@ type respMyServiceHasDataById struct {
 var _ thrift.Struct = &respMyServiceHasDataById{}
 var _ thrift.WritableResult = &respMyServiceHasDataById{}
 
-type MyServiceHasDataByIdResult = respMyServiceHasDataById
+// Deprecated: MyServiceHasDataByIdResultDeprecated is deprecated, since it is supposed to be internal.
+type MyServiceHasDataByIdResultDeprecated = respMyServiceHasDataById
 
 func newRespMyServiceHasDataById() *respMyServiceHasDataById {
     return (&respMyServiceHasDataById{})
@@ -2661,7 +2675,8 @@ type reqMyServiceGetDataById struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceGetDataById{}
 
-type MyServiceGetDataByIdArgs = reqMyServiceGetDataById
+// Deprecated: MyServiceGetDataByIdArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyServiceGetDataByIdArgsDeprecated = reqMyServiceGetDataById
 
 func newReqMyServiceGetDataById() *reqMyServiceGetDataById {
     return (&reqMyServiceGetDataById{}).
@@ -2822,7 +2837,8 @@ type respMyServiceGetDataById struct {
 var _ thrift.Struct = &respMyServiceGetDataById{}
 var _ thrift.WritableResult = &respMyServiceGetDataById{}
 
-type MyServiceGetDataByIdResult = respMyServiceGetDataById
+// Deprecated: MyServiceGetDataByIdResultDeprecated is deprecated, since it is supposed to be internal.
+type MyServiceGetDataByIdResultDeprecated = respMyServiceGetDataById
 
 func newRespMyServiceGetDataById() *respMyServiceGetDataById {
     return (&respMyServiceGetDataById{})
@@ -3001,7 +3017,8 @@ type reqMyServiceDeleteDataById struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceDeleteDataById{}
 
-type MyServiceDeleteDataByIdArgs = reqMyServiceDeleteDataById
+// Deprecated: MyServiceDeleteDataByIdArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyServiceDeleteDataByIdArgsDeprecated = reqMyServiceDeleteDataById
 
 func newReqMyServiceDeleteDataById() *reqMyServiceDeleteDataById {
     return (&reqMyServiceDeleteDataById{}).
@@ -3161,7 +3178,8 @@ type respMyServiceDeleteDataById struct {
 var _ thrift.Struct = &respMyServiceDeleteDataById{}
 var _ thrift.WritableResult = &respMyServiceDeleteDataById{}
 
-type MyServiceDeleteDataByIdResult = respMyServiceDeleteDataById
+// Deprecated: MyServiceDeleteDataByIdResultDeprecated is deprecated, since it is supposed to be internal.
+type MyServiceDeleteDataByIdResultDeprecated = respMyServiceDeleteDataById
 
 func newRespMyServiceDeleteDataById() *respMyServiceDeleteDataById {
     return (&respMyServiceDeleteDataById{})
@@ -3261,7 +3279,8 @@ type reqMyServiceLobDataById struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceLobDataById{}
 
-type MyServiceLobDataByIdArgs = reqMyServiceLobDataById
+// Deprecated: MyServiceLobDataByIdArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyServiceLobDataByIdArgsDeprecated = reqMyServiceLobDataById
 
 func newReqMyServiceLobDataById() *reqMyServiceLobDataById {
     return (&reqMyServiceLobDataById{}).
@@ -3486,7 +3505,8 @@ type respMyServiceLobDataById struct {
 var _ thrift.Struct = &respMyServiceLobDataById{}
 var _ thrift.WritableResult = &respMyServiceLobDataById{}
 
-type MyServiceLobDataByIdResult = respMyServiceLobDataById
+// Deprecated: MyServiceLobDataByIdResultDeprecated is deprecated, since it is supposed to be internal.
+type MyServiceLobDataByIdResultDeprecated = respMyServiceLobDataById
 
 func newRespMyServiceLobDataById() *respMyServiceLobDataById {
     return (&respMyServiceLobDataById{})
@@ -3584,7 +3604,8 @@ type reqMyServiceInvalidReturnForHack struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceInvalidReturnForHack{}
 
-type MyServiceInvalidReturnForHackArgs = reqMyServiceInvalidReturnForHack
+// Deprecated: MyServiceInvalidReturnForHackArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyServiceInvalidReturnForHackArgsDeprecated = reqMyServiceInvalidReturnForHack
 
 func newReqMyServiceInvalidReturnForHack() *reqMyServiceInvalidReturnForHack {
     return (&reqMyServiceInvalidReturnForHack{})
@@ -3680,7 +3701,8 @@ type respMyServiceInvalidReturnForHack struct {
 var _ thrift.Struct = &respMyServiceInvalidReturnForHack{}
 var _ thrift.WritableResult = &respMyServiceInvalidReturnForHack{}
 
-type MyServiceInvalidReturnForHackResult = respMyServiceInvalidReturnForHack
+// Deprecated: MyServiceInvalidReturnForHackResultDeprecated is deprecated, since it is supposed to be internal.
+type MyServiceInvalidReturnForHackResultDeprecated = respMyServiceInvalidReturnForHack
 
 func newRespMyServiceInvalidReturnForHack() *respMyServiceInvalidReturnForHack {
     return (&respMyServiceInvalidReturnForHack{})
@@ -3883,7 +3905,8 @@ type reqMyServiceRpcSkippedCodegen struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceRpcSkippedCodegen{}
 
-type MyServiceRpcSkippedCodegenArgs = reqMyServiceRpcSkippedCodegen
+// Deprecated: MyServiceRpcSkippedCodegenArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyServiceRpcSkippedCodegenArgsDeprecated = reqMyServiceRpcSkippedCodegen
 
 func newReqMyServiceRpcSkippedCodegen() *reqMyServiceRpcSkippedCodegen {
     return (&reqMyServiceRpcSkippedCodegen{})
@@ -3978,7 +4001,8 @@ type respMyServiceRpcSkippedCodegen struct {
 var _ thrift.Struct = &respMyServiceRpcSkippedCodegen{}
 var _ thrift.WritableResult = &respMyServiceRpcSkippedCodegen{}
 
-type MyServiceRpcSkippedCodegenResult = respMyServiceRpcSkippedCodegen
+// Deprecated: MyServiceRpcSkippedCodegenResultDeprecated is deprecated, since it is supposed to be internal.
+type MyServiceRpcSkippedCodegenResultDeprecated = respMyServiceRpcSkippedCodegen
 
 func newRespMyServiceRpcSkippedCodegen() *respMyServiceRpcSkippedCodegen {
     return (&respMyServiceRpcSkippedCodegen{})
@@ -4778,7 +4802,8 @@ type reqDbMixedStackArgumentsGetDataByKey0 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqDbMixedStackArgumentsGetDataByKey0{}
 
-type DbMixedStackArgumentsGetDataByKey0Args = reqDbMixedStackArgumentsGetDataByKey0
+// Deprecated: DbMixedStackArgumentsGetDataByKey0ArgsDeprecated is deprecated, since it is supposed to be internal.
+type DbMixedStackArgumentsGetDataByKey0ArgsDeprecated = reqDbMixedStackArgumentsGetDataByKey0
 
 func newReqDbMixedStackArgumentsGetDataByKey0() *reqDbMixedStackArgumentsGetDataByKey0 {
     return (&reqDbMixedStackArgumentsGetDataByKey0{}).
@@ -4939,7 +4964,8 @@ type respDbMixedStackArgumentsGetDataByKey0 struct {
 var _ thrift.Struct = &respDbMixedStackArgumentsGetDataByKey0{}
 var _ thrift.WritableResult = &respDbMixedStackArgumentsGetDataByKey0{}
 
-type DbMixedStackArgumentsGetDataByKey0Result = respDbMixedStackArgumentsGetDataByKey0
+// Deprecated: DbMixedStackArgumentsGetDataByKey0ResultDeprecated is deprecated, since it is supposed to be internal.
+type DbMixedStackArgumentsGetDataByKey0ResultDeprecated = respDbMixedStackArgumentsGetDataByKey0
 
 func newRespDbMixedStackArgumentsGetDataByKey0() *respDbMixedStackArgumentsGetDataByKey0 {
     return (&respDbMixedStackArgumentsGetDataByKey0{})
@@ -5114,7 +5140,8 @@ type reqDbMixedStackArgumentsGetDataByKey1 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqDbMixedStackArgumentsGetDataByKey1{}
 
-type DbMixedStackArgumentsGetDataByKey1Args = reqDbMixedStackArgumentsGetDataByKey1
+// Deprecated: DbMixedStackArgumentsGetDataByKey1ArgsDeprecated is deprecated, since it is supposed to be internal.
+type DbMixedStackArgumentsGetDataByKey1ArgsDeprecated = reqDbMixedStackArgumentsGetDataByKey1
 
 func newReqDbMixedStackArgumentsGetDataByKey1() *reqDbMixedStackArgumentsGetDataByKey1 {
     return (&reqDbMixedStackArgumentsGetDataByKey1{}).
@@ -5275,7 +5302,8 @@ type respDbMixedStackArgumentsGetDataByKey1 struct {
 var _ thrift.Struct = &respDbMixedStackArgumentsGetDataByKey1{}
 var _ thrift.WritableResult = &respDbMixedStackArgumentsGetDataByKey1{}
 
-type DbMixedStackArgumentsGetDataByKey1Result = respDbMixedStackArgumentsGetDataByKey1
+// Deprecated: DbMixedStackArgumentsGetDataByKey1ResultDeprecated is deprecated, since it is supposed to be internal.
+type DbMixedStackArgumentsGetDataByKey1ResultDeprecated = respDbMixedStackArgumentsGetDataByKey1
 
 func newRespDbMixedStackArgumentsGetDataByKey1() *respDbMixedStackArgumentsGetDataByKey1 {
     return (&respDbMixedStackArgumentsGetDataByKey1{})

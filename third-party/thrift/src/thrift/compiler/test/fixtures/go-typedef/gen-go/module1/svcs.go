@@ -177,7 +177,8 @@ type reqFinderByPlate struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqFinderByPlate{}
 
-type FinderByPlateArgs = reqFinderByPlate
+// Deprecated: FinderByPlateArgsDeprecated is deprecated, since it is supposed to be internal.
+type FinderByPlateArgsDeprecated = reqFinderByPlate
 
 func newReqFinderByPlate() *reqFinderByPlate {
     return (&reqFinderByPlate{}).
@@ -339,7 +340,8 @@ type respFinderByPlate struct {
 var _ thrift.Struct = &respFinderByPlate{}
 var _ thrift.WritableResult = &respFinderByPlate{}
 
-type FinderByPlateResult = respFinderByPlate
+// Deprecated: FinderByPlateResultDeprecated is deprecated, since it is supposed to be internal.
+type FinderByPlateResultDeprecated = respFinderByPlate
 
 func newRespFinderByPlate() *respFinderByPlate {
     return (&respFinderByPlate{})
@@ -523,7 +525,8 @@ type reqFinderAliasByPlate struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqFinderAliasByPlate{}
 
-type FinderAliasByPlateArgs = reqFinderAliasByPlate
+// Deprecated: FinderAliasByPlateArgsDeprecated is deprecated, since it is supposed to be internal.
+type FinderAliasByPlateArgsDeprecated = reqFinderAliasByPlate
 
 func newReqFinderAliasByPlate() *reqFinderAliasByPlate {
     return (&reqFinderAliasByPlate{}).
@@ -685,7 +688,8 @@ type respFinderAliasByPlate struct {
 var _ thrift.Struct = &respFinderAliasByPlate{}
 var _ thrift.WritableResult = &respFinderAliasByPlate{}
 
-type FinderAliasByPlateResult = respFinderAliasByPlate
+// Deprecated: FinderAliasByPlateResultDeprecated is deprecated, since it is supposed to be internal.
+type FinderAliasByPlateResultDeprecated = respFinderAliasByPlate
 
 func newRespFinderAliasByPlate() *respFinderAliasByPlate {
     return (&respFinderAliasByPlate{})
@@ -869,7 +873,8 @@ type reqFinderPreviousPlate struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqFinderPreviousPlate{}
 
-type FinderPreviousPlateArgs = reqFinderPreviousPlate
+// Deprecated: FinderPreviousPlateArgsDeprecated is deprecated, since it is supposed to be internal.
+type FinderPreviousPlateArgsDeprecated = reqFinderPreviousPlate
 
 func newReqFinderPreviousPlate() *reqFinderPreviousPlate {
     return (&reqFinderPreviousPlate{}).
@@ -1031,7 +1036,8 @@ type respFinderPreviousPlate struct {
 var _ thrift.Struct = &respFinderPreviousPlate{}
 var _ thrift.WritableResult = &respFinderPreviousPlate{}
 
-type FinderPreviousPlateResult = respFinderPreviousPlate
+// Deprecated: FinderPreviousPlateResultDeprecated is deprecated, since it is supposed to be internal.
+type FinderPreviousPlateResultDeprecated = respFinderPreviousPlate
 
 func newRespFinderPreviousPlate() *respFinderPreviousPlate {
     return (&respFinderPreviousPlate{})

@@ -31,10 +31,12 @@ var _ thrift.Struct = &{{struct:go_name}}{}
 var _ thrift.WritableResult = &{{struct:go_name}}{}
 
 {{! TODO: resp struct is an internal implementation detail. Can we unexport it? }}
+// Deprecated: {{struct:go_public_resp_name}} is deprecated, since it is supposed to be internal.
 type {{struct:go_public_resp_name}} = {{struct:go_name}}
 {{/struct:resp?}}{{!
 }}{{#struct:req?}}
 
 {{! TODO: req struct is an internal implementation detail. Can we unexport it? }}
+// Deprecated: {{struct:go_public_req_name}} is deprecated, since it is supposed to be internal.
 type {{struct:go_public_req_name}} = {{struct:go_name}}
 {{/struct:req?}}

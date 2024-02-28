@@ -205,7 +205,8 @@ type reqRaiserDoBland struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqRaiserDoBland{}
 
-type RaiserDoBlandArgs = reqRaiserDoBland
+// Deprecated: RaiserDoBlandArgsDeprecated is deprecated, since it is supposed to be internal.
+type RaiserDoBlandArgsDeprecated = reqRaiserDoBland
 
 func newReqRaiserDoBland() *reqRaiserDoBland {
     return (&reqRaiserDoBland{})
@@ -300,7 +301,8 @@ type respRaiserDoBland struct {
 var _ thrift.Struct = &respRaiserDoBland{}
 var _ thrift.WritableResult = &respRaiserDoBland{}
 
-type RaiserDoBlandResult = respRaiserDoBland
+// Deprecated: RaiserDoBlandResultDeprecated is deprecated, since it is supposed to be internal.
+type RaiserDoBlandResultDeprecated = respRaiserDoBland
 
 func newRespRaiserDoBland() *respRaiserDoBland {
     return (&respRaiserDoBland{})
@@ -398,7 +400,8 @@ type reqRaiserDoRaise struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqRaiserDoRaise{}
 
-type RaiserDoRaiseArgs = reqRaiserDoRaise
+// Deprecated: RaiserDoRaiseArgsDeprecated is deprecated, since it is supposed to be internal.
+type RaiserDoRaiseArgsDeprecated = reqRaiserDoRaise
 
 func newReqRaiserDoRaise() *reqRaiserDoRaise {
     return (&reqRaiserDoRaise{})
@@ -496,7 +499,8 @@ type respRaiserDoRaise struct {
 var _ thrift.Struct = &respRaiserDoRaise{}
 var _ thrift.WritableResult = &respRaiserDoRaise{}
 
-type RaiserDoRaiseResult = respRaiserDoRaise
+// Deprecated: RaiserDoRaiseResultDeprecated is deprecated, since it is supposed to be internal.
+type RaiserDoRaiseResultDeprecated = respRaiserDoRaise
 
 func newRespRaiserDoRaise() *respRaiserDoRaise {
     return (&respRaiserDoRaise{})
@@ -858,7 +862,8 @@ type reqRaiserGet200 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqRaiserGet200{}
 
-type RaiserGet200Args = reqRaiserGet200
+// Deprecated: RaiserGet200ArgsDeprecated is deprecated, since it is supposed to be internal.
+type RaiserGet200ArgsDeprecated = reqRaiserGet200
 
 func newReqRaiserGet200() *reqRaiserGet200 {
     return (&reqRaiserGet200{})
@@ -954,7 +959,8 @@ type respRaiserGet200 struct {
 var _ thrift.Struct = &respRaiserGet200{}
 var _ thrift.WritableResult = &respRaiserGet200{}
 
-type RaiserGet200Result = respRaiserGet200
+// Deprecated: RaiserGet200ResultDeprecated is deprecated, since it is supposed to be internal.
+type RaiserGet200ResultDeprecated = respRaiserGet200
 
 func newRespRaiserGet200() *respRaiserGet200 {
     return (&respRaiserGet200{})
@@ -1132,7 +1138,8 @@ type reqRaiserGet500 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqRaiserGet500{}
 
-type RaiserGet500Args = reqRaiserGet500
+// Deprecated: RaiserGet500ArgsDeprecated is deprecated, since it is supposed to be internal.
+type RaiserGet500ArgsDeprecated = reqRaiserGet500
 
 func newReqRaiserGet500() *reqRaiserGet500 {
     return (&reqRaiserGet500{})
@@ -1231,7 +1238,8 @@ type respRaiserGet500 struct {
 var _ thrift.Struct = &respRaiserGet500{}
 var _ thrift.WritableResult = &respRaiserGet500{}
 
-type RaiserGet500Result = respRaiserGet500
+// Deprecated: RaiserGet500ResultDeprecated is deprecated, since it is supposed to be internal.
+type RaiserGet500ResultDeprecated = respRaiserGet500
 
 func newRespRaiserGet500() *respRaiserGet500 {
     return (&respRaiserGet500{})

@@ -19,7 +19,8 @@
 namespace HPHP {
 
 void logSboxEvent(uint32_t sample_rate, std::string_view source,
-    std::string_view event, std::string_view key, uint64_t duration_us) {
+    std::string_view event, std::string_view key, uint64_t duration_us,
+    HPHP::Optional<std::string_view> error_msg) {
   if (!getenv("INSIDE_RE_WORKER")) {
     StructuredLogEntry ent;
     ent.force_init = true;
@@ -29,6 +30,12 @@ void logSboxEvent(uint32_t sample_rate, std::string_view source,
     ent.setStr("event", event);
     ent.setStr("key", key);
     ent.setInt("duration_us", duration_us);
+    if (error_msg.has_value()) {
+      ent.setStr("error_what", error_msg.value());
+      ent.setInt("error", 1);
+    } else {
+      ent.setInt("error", 0);
+    }
     StructuredLog::log("hhvm_sandbox_events", ent);
   }
 }
@@ -36,7 +43,7 @@ void logSboxEvent(uint32_t sample_rate, std::string_view source,
 void rareSboxEvent(std::string_view source, std::string_view event,
                    std::string_view key) {
   if (Cfg::Autoload::PerfSampleRate != 0) {
-    logSboxEvent(1, source, event, key, 0);
+    logSboxEvent(1, source, event, key, 0, std::nullopt);
   }
 }
 

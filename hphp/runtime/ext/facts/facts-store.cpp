@@ -892,7 +892,8 @@ struct FactsStoreImpl final
               "facts-store",
               "watchman query",
               m_root.native(),
-              queryMicros);
+              queryMicros,
+              std::nullopt);
           XLOGF(
               DBG0,
               "update waited {}ms for a Watchman query to return.",

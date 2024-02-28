@@ -85,6 +85,9 @@ FactsStore* getFactsForRequest() {
 
   try {
     tracing::Block _{"autoload-ensure-updated"};
+    // We do not need to log in the catch block to hhvm_sandbox_events
+    // because this call itself calls into PerfLogger under the hood,
+    // where we do timing and exception logging.
     map->ensureUpdated();
     if (UNLIKELY(RO::EvalRecordReplay && RO::EvalRecordSampleRate)) {
       Recorder::onGetFactsForRequest(map);
@@ -92,9 +95,6 @@ FactsStore* getFactsForRequest() {
     return map;
   } catch (const std::exception& e) {
     auto repoRoot = repoOptions->dir();
-    rareSboxEvent("autoload-handler",
-        folly::sformat("getFactsForRequest: {}", e.what()),
-        repoRoot.native());
     Logger::FError(
         "Failed to update native autoloader, not natively autoloading {}. {}\n",
         repoRoot.native(),

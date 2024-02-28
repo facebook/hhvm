@@ -720,9 +720,9 @@ template <typename K> struct MemoCache : MemoCacheBase {
   MemoCache& operator=(const MemoCache&) = delete;
   MemoCache& operator=(MemoCache&&) = delete;
 
-  void heapSizesPerCacheEntry(std::vector<std::pair<FuncId, size_t>>& entries) const override {
+  void heapSizesPerCacheEntry(std::vector<PerCacheInfo>& entries) const override {
     for (auto const& p : cache) {
-      entries.push_back({p.first.getFuncId(), tvHeapSize(p.second.value) + sizeof(p)});
+      entries.push_back({p.first.getFuncId(), sizeof(p), p.second.value});
     }
   }
   TYPE_SCAN_CUSTOM() {
@@ -751,9 +751,9 @@ struct SharedOnlyMemoCache : MemoCacheBase {
   SharedOnlyMemoCache& operator=(const SharedOnlyMemoCache&) = delete;
   SharedOnlyMemoCache& operator=(SharedOnlyMemoCache&&) = delete;
 
-  void heapSizesPerCacheEntry(std::vector<std::pair<FuncId, size_t>>& entries) const override {
+  void heapSizesPerCacheEntry(std::vector<PerCacheInfo>& entries) const override {
     for (auto const& p : cache) {
-      entries.push_back({unmakeSharedOnlyKey(p.first), tvHeapSize(p.second.value) + sizeof(p)});
+      entries.push_back({unmakeSharedOnlyKey(p.first), sizeof(p), p.second.value});
     }
   }
   TYPE_SCAN_CUSTOM() {

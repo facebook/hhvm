@@ -59,6 +59,12 @@
 
 namespace HPHP {
 
+struct PerCacheInfo {
+  FuncId funcId;
+  size_t keySize;
+  TypedValue cacheEntry;
+};
+
 /*
  * The actual implementation of the memo-caches are private to memo-cache.cpp
  * (since they involve a lot of templates). The rest of the runtime interacts
@@ -69,12 +75,12 @@ namespace HPHP {
  */
 struct MemoCacheBase {
   virtual ~MemoCacheBase() = default;
-  /* Returns a vector of key value pair where first value is FuncId and second
-  *  value is the memory footprint for that entry. Puts one entry in the vector
+  /* Returns a vector of PerCacheInfo structs where first value is FuncId, second
+  *  is key size and third is actual TypedValue. Puts one entry in the vector
   *  per cache entry. The vector reference is supplied by the caller, so the
   *  caller has the option to group together multiple caches.
   */
-  virtual void heapSizesPerCacheEntry(std::vector<std::pair<FuncId, size_t>>&) const = 0;
+  virtual void heapSizesPerCacheEntry(std::vector<PerCacheInfo>&) const = 0;
 };
 
 ////////////////////////////////////////////////////////////

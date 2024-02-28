@@ -133,3 +133,7 @@ Pass: Total number of instances of threeParams1 should be 1
 Pass: The normalized size of fourParams1 should be greater than 100
 
 Pass: Total number of instances of fourParams1 should be 1
+
+Pass: The normalized size of getDictOfStrings should be greater than 10000
+
+Pass: Total number of instances of getDictOfStrings should be 1

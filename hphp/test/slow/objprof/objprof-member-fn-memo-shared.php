@@ -144,6 +144,14 @@ class A {
       $this->myDict[$i] = 'ABC';
     }
   }
+  <<__Memoize>>
+  public function getDictOfStrings(): void {
+    $t = dict[];
+    for ($i = 0; $i < 100; $i++) {
+      $t[$i] = str_repeat('k', 100);
+    }
+    return $t;
+  }
   public function getStr(int $len): string {
     return str_repeat('X', $len);
   }
@@ -238,6 +246,7 @@ function main(): void {
     $a->threeParams1('c','d','e');
     $a->fourParams1('c','d','e','f');
     $a->initDict();
+    $a->getDictOfStrings();
     $prof = objprof_get_data_extended();
     $prof_per_prop = objprof_get_data_extended(OBJPROF_FLAGS_PER_PROPERTY);
 
@@ -410,6 +419,11 @@ function main(): void {
     check_and_print($prof_per_prop["A::fourParams1"]["bytes_normalized"] > 100, "The normalized size of fourParams1 should be greater than 100");
     echo "\n";
     check_and_print($prof_per_prop["A::fourParams1"]["instances"] == 1, "Total number of instances of fourParams1 should be 1");
+    echo "\n";
+
+    check_and_print($prof_per_prop["A::getDictOfStrings"]["bytes_normalized"] > 10000, "The normalized size of getDictOfStrings should be greater than 10000");
+    echo "\n";
+    check_and_print($prof_per_prop["A::getDictOfStrings"]["instances"] == 1, "Total number of instances of getDictOfStrings should be 1");
     echo "\n";
 
 }

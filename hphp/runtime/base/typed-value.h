@@ -238,12 +238,6 @@ constexpr size_t kTVSimdAlign = 0x10;
  */
 bool tvIsPlausible(TypedValue);
 
-/*
-* Given a TypedValue, returns the memory footprint of the value
-* heapSize() for refTypes
-*/
-size_t tvHeapSize(TypedValue);
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

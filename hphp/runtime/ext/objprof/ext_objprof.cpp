@@ -681,7 +681,6 @@ Array HHVM_FUNCTION(objprof_get_data,
     if (prop != "") {
       key += "::" + c.second;
     }
-
     auto metrics_val = make_dict_array(
       s_instances, Variant(it.second.instances),
       s_bytes, Variant(it.second.bytes),
@@ -691,7 +690,6 @@ Array HHVM_FUNCTION(objprof_get_data,
 
     objs.set(StrNR(key), Variant(metrics_val));
   }
-
   return objs.toArray();
 }
 
@@ -701,7 +699,8 @@ namespace {
 */
 void attributeMemoizedFootprint(const ObjectData* obj, hphp_fast_map<ClassProp, ObjprofMetrics>* histogram,
                                 bool objprof_props_mode,
-                                hphp_fast_set<const HPHP::MemoCacheBase*>& seen_caches) {
+                                hphp_fast_set<const HPHP::MemoCacheBase*>& seen_caches,
+                                ObjprofState& env) {
   auto cls = obj->getVMClass();
   auto clsName = cls->name()->toCppString();
   auto method_count = cls->numMethods();
@@ -720,17 +719,18 @@ void attributeMemoizedFootprint(const ObjectData* obj, hphp_fast_map<ClassProp, 
           if(!cache || (seen_caches.find(cache) != seen_caches.end())) {
             continue;
           }
-          std::vector<std::pair<FuncId, size_t>> cache_mem_footprints;
+          std::vector<PerCacheInfo> cache_mem_footprints;
           cache->heapSizesPerCacheEntry(cache_mem_footprints);
           std::string func_name;
           for (auto e : cache_mem_footprints) {
-            if(e.first == FuncId::Invalid) {
+            auto tv_size = tvGetSize(e.cacheEntry, env);
+            if(e.funcId == FuncId::Invalid) {
               // this should only happen if cache is non-shared
               assertx(!isShared);
               func_name = m->name()->toCppString();
             }
             else {
-              func_name = Func::fromFuncId(e.first)->name()->toCppString();
+              func_name = Func::fromFuncId(e.funcId)->name()->toCppString();
             }
             auto histogram_key = objprof_props_mode ?
                                   std::make_pair(clsName, func_name) :
@@ -743,14 +743,14 @@ void attributeMemoizedFootprint(const ObjectData* obj, hphp_fast_map<ClassProp, 
             if(objprof_props_mode) {
               metrics.instances += 1;
             }
-            metrics.bytes += e.second;
+            metrics.bytes += e.keySize + tv_size.first;
             metrics.bytes_rel = metrics.bytes / metrics.instances;
           }
           seen_caches.insert(cache);
         }
         else {
           // value type
-          size_t size = tvHeapSize(*(memoslot->getValue()));
+          auto tv_size = tvGetSize(*(memoslot->getValue()), env);
           auto histogram_key = objprof_props_mode ?
                               std::make_pair(clsName, m->name()->toCppString()) :
                               std::make_pair(clsName, "");
@@ -758,7 +758,7 @@ void attributeMemoizedFootprint(const ObjectData* obj, hphp_fast_map<ClassProp, 
           if(objprof_props_mode) {
               metrics.instances += 1;
             }
-          metrics.bytes += size;
+          metrics.bytes += tv_size.first;
           metrics.bytes_rel = metrics.bytes / metrics.instances;
         }
       }
@@ -777,6 +777,7 @@ struct RDSVisitorParams {
   hphp_fast_map<ClassProp, ObjprofMetrics>* histogram;
   bool objprof_props_mode;
   const void* h;
+  ObjprofState env;
 };
 
 
@@ -793,6 +794,7 @@ struct StaticAndMemoProps : public boost::static_visitor<> {
     auto histogram = params_.histogram;
     bool objprof_props_mode = params_.objprof_props_mode;
     const void* h = params_.h;
+    auto env = params_.env;
     auto tv = reinterpret_cast<const TypedValue*>(h);
     assertx(tv);
     auto func = Func::fromFuncId(actualType.funcId);
@@ -803,6 +805,7 @@ struct StaticAndMemoProps : public boost::static_visitor<> {
                           std::make_pair(clsName, func->name()->toCppString()) :
                           std::make_pair(clsName, "Static");
     auto& metrics = (*histogram)[histogram_key];
+    auto tv_size = tvGetSize(*tv, env);
 
     /*
     * Here, we either want per prop data or account for everything at the class level
@@ -812,13 +815,13 @@ struct StaticAndMemoProps : public boost::static_visitor<> {
     */
     metrics.instances = 1;
     if(objprof_props_mode) {
-      metrics.bytes = tvHeapSize(*tv);
-      metrics.bytes_rel = tvHeapSize(*tv);
+      metrics.bytes = tv_size.first;
+      metrics.bytes_rel = tv_size.first;
 
     }
     else {
-      metrics.bytes += tvHeapSize(*tv);
-      metrics.bytes_rel += tvHeapSize(*tv);
+      metrics.bytes += tv_size.first;
+      metrics.bytes_rel += tv_size.first;
     }
   }
   void operator()(const rds::StaticMemoCache& actualType) const {
@@ -826,11 +829,12 @@ struct StaticAndMemoProps : public boost::static_visitor<> {
     auto histogram = params_.histogram;
     bool objprof_props_mode = params_.objprof_props_mode;
     const void* h = params_.h;
+    auto env = params_.env;
     assertx(h);
     auto cacheAddress = reinterpret_cast<const uint64_t*>(h);
     // the pointer stored in the cache address should point to the MemoCacheBase
     auto cache = reinterpret_cast<const MemoCacheBase*>(*cacheAddress);
-    std::vector<std::pair<FuncId, size_t>> cacheMemFootprints;
+    std::vector<PerCacheInfo> cacheMemFootprints;
     cache->heapSizesPerCacheEntry(cacheMemFootprints);
     for (auto e : cacheMemFootprints) {
       assertx(actualType.funcId != FuncId::Invalid);
@@ -838,6 +842,7 @@ struct StaticAndMemoProps : public boost::static_visitor<> {
       auto clsName = cls ? cls->name()->toCppString() : "NoClass";
       auto func = Func::fromFuncId(actualType.funcId);
       assertx(func);
+      auto tv_size = tvGetSize(e.cacheEntry, env);
 
       auto histogram_key = objprof_props_mode ?
                             std::make_pair(clsName, func->name()->toCppString()) :
@@ -845,13 +850,13 @@ struct StaticAndMemoProps : public boost::static_visitor<> {
       auto& metrics = (*histogram)[histogram_key];
       metrics.instances = 1;
       if(objprof_props_mode) {
-        metrics.bytes = e.second;
-        metrics.bytes_rel = e.second;
+        metrics.bytes = tv_size.first + e.keySize;
+        metrics.bytes_rel = tv_size.first + e.keySize;
       }
       else {
         // Class level aggregation, increment
-        metrics.bytes += e.second;
-        metrics.bytes_rel += e.second;
+        metrics.bytes += tv_size.first + e.keySize;
+        metrics.bytes_rel += tv_size.first + e.keySize;
       }
     }
   }
@@ -860,7 +865,7 @@ private:
 };
 
 void attributeStaticMemoizedFootprint(hphp_fast_map<ClassProp, ObjprofMetrics>* histogram,
-                                      bool objprof_props_mode) {
+                                      bool objprof_props_mode, ObjprofState& env) {
   /*
   *  To get the static memoized methods cache sizes, we need to iterate RDS roots
   *  and find the static memo caches and values.
@@ -870,7 +875,7 @@ void attributeStaticMemoizedFootprint(hphp_fast_map<ClassProp, ObjprofMetrics>* 
     uint64_t rdsOffset = reinterpret_cast<uint64_t>(h) - reinterpret_cast<uint64_t>(rds::tl_base);
     auto sym = rds::reverseLinkExact(rdsOffset);
     if (sym.has_value()) {
-      RDSVisitorParams params{histogram, objprof_props_mode, h};
+      RDSVisitorParams params{histogram, objprof_props_mode, h, env};
       // pass everything to the visitor, it'll do the rest
       boost::apply_visitor(StaticAndMemoProps(params), sym.value());
     }
@@ -938,15 +943,25 @@ Array HHVM_FUNCTION(objprof_get_data_extended,
       metrics.bytes_rel += objsizePair.second;
     }
     // Gather Memoized methods data
-    attributeMemoizedFootprint(obj, &histogram, objprof_props_mode, seen_caches);
+    attributeMemoizedFootprint(obj, &histogram, objprof_props_mode, seen_caches, env);
   });
   issueWarnings(deferred_warnings);
 
+  ObjprofState env{
+    .source = nullptr,
+    .stack = std::nullopt,
+    .paths = std::nullopt,
+    .val_stack = ObjprofValuePtrStack{},
+    .exclude_classes = exclude_classes,
+    .flags = (ObjprofFlags)flags,
+    .deferred_warnings = deferred_warnings
+  };
   // Finished iterating over objects, now gather static memoized functions
-  attributeStaticMemoizedFootprint(&histogram, objprof_props_mode);
+  attributeStaticMemoizedFootprint(&histogram, objprof_props_mode, env);
 
   // Create response
-  DictInit objs(histogram.size());
+  DictInit objs(histogram.size() + 1);
+  size_t total_bytes = 0, total_instances = 0;
   for (auto const& it : histogram) {
     auto c = it.first;
     auto cls = c.first;
@@ -955,6 +970,9 @@ Array HHVM_FUNCTION(objprof_get_data_extended,
     if (prop != "") {
       key += "::" + c.second;
     }
+
+    total_bytes += it.second.bytes;
+    total_instances += it.second.instances;
 
     auto metrics_val = make_dict_array(
       s_instances, Variant(it.second.instances),
@@ -965,6 +983,14 @@ Array HHVM_FUNCTION(objprof_get_data_extended,
 
     objs.set(StrNR(key), Variant(metrics_val));
   }
+    auto metrics_val_sum = make_dict_array(
+      s_instances, Variant(total_instances),
+      s_bytes, Variant(total_bytes),
+      s_bytes_rel, total_bytes,
+      s_paths, init_null()
+    );
+
+  objs.set(StringData::Make("Total"), Variant(metrics_val_sum));
 
   return objs.toArray();
 

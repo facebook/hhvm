@@ -40,6 +40,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/core/ext_core_closure.h"
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
@@ -773,97 +774,6 @@ template<class Fn> void iterateRDSRoots(const Fn& fn) {
   rds::local::iterateRoots(fn);
 }
 
-struct RDSVisitorParams {
-  hphp_fast_map<ClassProp, ObjprofMetrics>* histogram;
-  bool objprof_props_mode;
-  const void* h;
-  ObjprofState env;
-};
-
-
-// Helper to selectively process RDS types we are interested in
-// (e.g. static memo caches) and ignore other RDS types
-struct StaticAndMemoProps : public boost::static_visitor<> {
-  explicit StaticAndMemoProps(RDSVisitorParams p) : params_(p) {}
-  template<typename T>
-  void operator()(UNUSED const T& actualType) const {
-    // Do nothing for the types we're not explicitly interested in
-  }
-  void operator()(const rds::StaticMemoValue& actualType) const {
-    // Process the StaticMemoValue type, simply a pointer to TV
-    auto histogram = params_.histogram;
-    bool objprof_props_mode = params_.objprof_props_mode;
-    const void* h = params_.h;
-    auto env = params_.env;
-    auto tv = reinterpret_cast<const TypedValue*>(h);
-    assertx(tv);
-    auto func = Func::fromFuncId(actualType.funcId);
-    assertx(func);
-
-    auto clsName = func->cls() ? func->cls()->name()->toCppString() : "NoClass";
-    auto histogram_key = objprof_props_mode ?
-                          std::make_pair(clsName, func->name()->toCppString()) :
-                          std::make_pair(clsName, "Static");
-    auto& metrics = (*histogram)[histogram_key];
-    auto tv_size = tvGetSize(*tv, env);
-
-    /*
-    * Here, we either want per prop data or account for everything at the class level
-    * In either case, the instance count will always be 1 (due to static)
-    * If we want per prop data, we simply assign it into bytes/bytes_rel
-    * If we want class level data, we increment it as there can be many static methods per class
-    */
-    metrics.instances = 1;
-    if(objprof_props_mode) {
-      metrics.bytes = tv_size.first;
-      metrics.bytes_rel = tv_size.first;
-
-    }
-    else {
-      metrics.bytes += tv_size.first;
-      metrics.bytes_rel += tv_size.first;
-    }
-  }
-  void operator()(const rds::StaticMemoCache& actualType) const {
-    // Process the StaticMemoCache type, which is a pointer to a MemoCacheBase
-    auto histogram = params_.histogram;
-    bool objprof_props_mode = params_.objprof_props_mode;
-    const void* h = params_.h;
-    auto env = params_.env;
-    assertx(h);
-    auto cacheAddress = reinterpret_cast<const uint64_t*>(h);
-    // the pointer stored in the cache address should point to the MemoCacheBase
-    auto cache = reinterpret_cast<const MemoCacheBase*>(*cacheAddress);
-    std::vector<PerCacheInfo> cacheMemFootprints;
-    cache->heapSizesPerCacheEntry(cacheMemFootprints);
-    for (auto e : cacheMemFootprints) {
-      assertx(actualType.funcId != FuncId::Invalid);
-      auto cls = Func::fromFuncId(actualType.funcId)->cls();
-      auto clsName = cls ? cls->name()->toCppString() : "NoClass";
-      auto func = Func::fromFuncId(actualType.funcId);
-      assertx(func);
-      auto tv_size = tvGetSize(e.cacheEntry, env);
-
-      auto histogram_key = objprof_props_mode ?
-                            std::make_pair(clsName, func->name()->toCppString()) :
-                            std::make_pair(clsName, "Static");
-      auto& metrics = (*histogram)[histogram_key];
-      metrics.instances = 1;
-      if(objprof_props_mode) {
-        metrics.bytes = tv_size.first + e.keySize;
-        metrics.bytes_rel = tv_size.first + e.keySize;
-      }
-      else {
-        // Class level aggregation, increment
-        metrics.bytes += tv_size.first + e.keySize;
-        metrics.bytes_rel += tv_size.first + e.keySize;
-      }
-    }
-  }
-private:
-  RDSVisitorParams params_;
-};
-
 void attributeStaticMemoizedFootprint(hphp_fast_map<ClassProp, ObjprofMetrics>* histogram,
                                       bool objprof_props_mode, ObjprofState& env) {
   /*
@@ -872,12 +782,79 @@ void attributeStaticMemoizedFootprint(hphp_fast_map<ClassProp, ObjprofMetrics>* 
   */
   iterateRDSRoots([&](const void* h, UNUSED size_t size, UNUSED type_scan::Index tyindex) {
     // get the offset from rds::tl_base so we can lookup the reverse link
-    uint64_t rdsOffset = reinterpret_cast<uint64_t>(h) - reinterpret_cast<uint64_t>(rds::tl_base);
+    rds::Handle rdsOffset = rds::ptrToHandle<rds::Mode::NonPersistent>(h);
     auto sym = rds::reverseLinkExact(rdsOffset);
     if (sym.has_value()) {
-      RDSVisitorParams params{histogram, objprof_props_mode, h, env};
-      // pass everything to the visitor, it'll do the rest
-      boost::apply_visitor(StaticAndMemoProps(params), sym.value());
+      match<void>(
+      sym.value(),
+      [&] (const rds::StaticMemoValue& memo_value) {
+        auto tv = reinterpret_cast<const TypedValue*>(h);
+        assertx(tv);
+        auto func = Func::fromFuncId(memo_value.funcId);
+        assertx(func);
+
+        auto clsName = func->cls() ? func->cls()->name()->toCppString() : "NoClass";
+        auto histogram_key = objprof_props_mode ?
+                              std::make_pair(clsName, func->name()->toCppString()) :
+                              std::make_pair(clsName, "Static");
+        auto& metrics = (*histogram)[histogram_key];
+        auto tv_size = tvGetSize(*tv, env);
+
+        /*
+        * Here, we either want per prop data or account for everything at the class level
+        * In either case, the instance count will always be 1 (due to static)
+        * If we want per prop data, we simply assign it into bytes/bytes_rel
+        * If we want class level data, we increment it as there can be many static methods per class
+        */
+        metrics.instances = 1;
+        if(objprof_props_mode) {
+          metrics.bytes = tv_size.first;
+          metrics.bytes_rel = tv_size.first;
+
+        }
+        else {
+          metrics.bytes += tv_size.first;
+          metrics.bytes_rel += tv_size.first;
+        }
+      }, // rds::StaticMemoValue end
+
+      [&] (const rds::StaticMemoCache& memo_cache) {
+        // Process the StaticMemoCache type, which is a pointer to a MemoCacheBase
+        assertx(h);
+        auto cacheAddress = reinterpret_cast<const uint64_t*>(h);
+        // the pointer stored in the cache address should point to the MemoCacheBase
+        auto cache = reinterpret_cast<const MemoCacheBase*>(*cacheAddress);
+        std::vector<PerCacheInfo> cacheMemFootprints;
+        cache->heapSizesPerCacheEntry(cacheMemFootprints);
+        for (auto e : cacheMemFootprints) {
+          assertx(memo_cache.funcId != FuncId::Invalid);
+          auto cls = Func::fromFuncId(memo_cache.funcId)->cls();
+          auto clsName = cls ? cls->name()->toCppString() : "NoClass";
+          auto func = Func::fromFuncId(memo_cache.funcId);
+          assertx(func);
+          auto tv_size = tvGetSize(e.cacheEntry, env);
+
+          auto histogram_key = objprof_props_mode ?
+                                std::make_pair(clsName, func->name()->toCppString()) :
+                                std::make_pair(clsName, "Static");
+          auto& metrics = (*histogram)[histogram_key];
+          metrics.instances = 1;
+          if(objprof_props_mode) {
+            metrics.bytes = tv_size.first + e.keySize;
+            metrics.bytes_rel = tv_size.first + e.keySize;
+          }
+          else {
+            // Class level aggregation, increment
+            metrics.bytes += tv_size.first + e.keySize;
+            metrics.bytes_rel += tv_size.first + e.keySize;
+          }
+        }
+      },
+      [&](auto const& param) {
+        // ignore other types for now
+        // Note: we could potentially process SPropCache here but only when we
+        // bind that in rds.cpp inside bindOnLinkImpl
+      });
     }
   });
 }

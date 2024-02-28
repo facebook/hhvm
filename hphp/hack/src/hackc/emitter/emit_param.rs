@@ -13,12 +13,11 @@ use error::Error;
 use error::Result;
 use ffi::Maybe;
 use ffi::Nothing;
-use ffi::Str;
-use hash::HashMap;
-use hash::HashSet;
 use hhbc::Label;
 use hhbc::Local;
 use hhbc::Param;
+use hhbc::StringIdMap;
+use hhbc::StringIdSet;
 use hhbc::TypeInfo;
 use hhbc_string_utils::locals::strip_dollar;
 use instruction_sequence::instr;
@@ -36,7 +35,7 @@ use oxidized::pos::Pos;
 use crate::emit_attribute;
 use crate::emit_expression;
 
-pub fn has_variadic(params: &[Param<'_>]) -> bool {
+pub fn has_variadic(params: &[Param]) -> bool {
     params.iter().any(|v| v.is_variadic)
 }
 
@@ -46,7 +45,7 @@ pub fn from_asts<'a, 'arena, 'decl>(
     generate_defaults: bool,
     scope: &Scope<'a>,
     ast_params: &[a::FunParam],
-) -> Result<Vec<(Param<'arena>, Option<(Label, a::Expr)>)>> {
+) -> Result<Vec<(Param, Option<(Label, a::Expr)>)>> {
     ast_params
         .iter()
         .map(|param| from_ast(emitter, tparams, generate_defaults, scope, param))
@@ -57,27 +56,26 @@ pub fn from_asts<'a, 'arena, 'decl>(
                 .filter_map(|p| p.to_owned())
                 .collect::<Vec<_>>()
         })
-        .map(|params| rename_params(emitter.alloc, params))
+        .map(rename_params)
 }
 
 fn rename_params<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    mut params: Vec<(Param<'arena>, Option<(Label, a::Expr)>)>,
-) -> Vec<(Param<'arena>, Option<(Label, a::Expr)>)> {
-    let mut param_counts = HashMap::default();
-    let names: HashSet<&[u8]> = params.iter().map(|(p, _)| p.name.as_arena_ref()).collect();
+    mut params: Vec<(Param, Option<(Label, a::Expr)>)>,
+) -> Vec<(Param, Option<(Label, a::Expr)>)> {
+    let mut param_counts = StringIdMap::default();
+    let names: StringIdSet = params.iter().map(|(p, _)| p.name).collect();
     for (param, _) in params.iter_mut() {
         use std::collections::hash_map::Entry;
         'inner: loop {
-            match param_counts.entry(param.name.as_arena_ref()) {
+            match param_counts.entry(param.name) {
                 Entry::Vacant(e) => {
                     e.insert(0);
                 }
                 Entry::Occupied(mut e) => {
-                    let newname = format!("{}{}", param.name.unsafe_as_str(), e.get());
-                    let newname = Str::new_str(alloc, &newname);
+                    let newname = format!("{}{}", param.name, e.get());
+                    let newname = hhbc::intern(newname);
                     *e.get_mut() += 1;
-                    if names.contains(newname.as_ref()) {
+                    if names.contains(&newname) {
                         // collision - try again
                         continue 'inner;
                     } else {
@@ -97,7 +95,7 @@ fn from_ast<'a, 'arena, 'decl>(
     generate_defaults: bool,
     scope: &Scope<'a>,
     param: &a::FunParam,
-) -> Result<Option<(Param<'arena>, Option<(Label, a::Expr)>)>> {
+) -> Result<Option<(Param, Option<(Label, a::Expr)>)>> {
     if param.is_variadic && param.name == "..." {
         return Ok(None);
     };
@@ -163,7 +161,7 @@ fn from_ast<'a, 'arena, 'decl>(
     let attrs = emit_attribute::from_asts(emitter, &param.user_attributes)?;
     Ok(Some((
         Param {
-            name: Str::new_str(emitter.alloc, &param.name),
+            name: hhbc::intern(&param.name),
             is_variadic: param.is_variadic,
             is_inout: param.callconv.is_pinout(),
             is_readonly,
@@ -182,7 +180,7 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    params: &[(Param<'arena>, Option<(Label, a::Expr)>)],
+    params: &[(Param, Option<(Label, a::Expr)>)],
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
     let setters = params
         .iter()

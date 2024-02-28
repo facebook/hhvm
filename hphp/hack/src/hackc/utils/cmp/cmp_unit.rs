@@ -334,7 +334,7 @@ fn cmp_instr(a: &Instruct<'_>, b: &Instruct<'_>) -> Result {
     )
 }
 
-fn cmp_param(a: &Param<'_>, b: &Param<'_>) -> Result {
+fn cmp_param(a: &Param, b: &Param) -> Result {
     let Param {
         name: a_name,
         is_variadic: a_is_variadic,

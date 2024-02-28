@@ -10,7 +10,6 @@ use emit_pos::emit_pos_then;
 use env::emitter::Emitter;
 use env::Env;
 use error::Result;
-use ffi::Str;
 use hhbc::Attribute;
 use hhbc::Body;
 use hhbc::Coeffects;
@@ -23,6 +22,7 @@ use hhbc::Local;
 use hhbc::LocalRange;
 use hhbc::Param;
 use hhbc::Span;
+use hhbc::StringId;
 use hhbc::TypeInfo;
 use hhbc::TypedValue;
 use hhbc_string_utils::reified;
@@ -148,14 +148,14 @@ fn make_memoize_function_code<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
     deprecation_info: Option<&[TypedValue]>,
-    hhas_params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
+    hhas_params: &[(Param, Option<(Label, ast::Expr)>)],
     ast_params: &[ast::FunParam],
     renamed_id: hhbc::FunctionName<'arena>,
     is_async: bool,
     is_reified: bool,
     should_emit_implicit_context: bool,
     should_make_ic_inaccessible: Option<bool>,
-) -> Result<(InstrSeq<'arena>, Vec<Str<'arena>>)> {
+) -> Result<(InstrSeq<'arena>, Vec<StringId>)> {
     let (fun, decl_vars) = if hhas_params.is_empty() && !is_reified && !should_emit_implicit_context
     {
         make_memoize_function_no_params_code(
@@ -189,14 +189,14 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
     deprecation_info: Option<&[TypedValue]>,
-    hhas_params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
+    hhas_params: &[(Param, Option<(Label, ast::Expr)>)],
     ast_params: &[ast::FunParam],
     renamed_id: hhbc::FunctionName<'arena>,
     is_async: bool,
     is_reified: bool,
     should_emit_implicit_context: bool,
     should_make_ic_inaccessible: Option<bool>,
-) -> Result<(InstrSeq<'arena>, Vec<Str<'arena>>)> {
+) -> Result<(InstrSeq<'arena>, Vec<StringId>)> {
     let alloc = e.alloc;
     let param_count = hhas_params.len();
     let notfound = e.label_gen_mut().next_regular();
@@ -208,7 +208,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
     let add_implicit_context = usize::from(should_emit_implicit_context);
     let generics_local = Local::new(param_count); // only used if is_reified == true.
     let decl_vars = match is_reified {
-        true => vec![reified::GENERICS_LOCAL_NAME.into()],
+        true => vec![hhbc::intern(reified::GENERICS_LOCAL_NAME)],
         false => Vec::new(),
     };
     e.init_named_locals(
@@ -315,7 +315,7 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
     renamed_id: hhbc::FunctionName<'arena>,
     is_async: bool,
     should_make_ic_inaccessible: Option<bool>,
-) -> Result<(InstrSeq<'arena>, Vec<Str<'arena>>)> {
+) -> Result<(InstrSeq<'arena>, Vec<StringId>)> {
     let alloc = e.alloc;
     let notfound = e.label_gen_mut().next_regular();
     let suspended_get = e.label_gen_mut().next_regular();
@@ -378,8 +378,8 @@ fn make_wrapper_body<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: Env<'a, 'arena>,
     return_type_info: TypeInfo,
-    params: Vec<(Param<'arena>, Option<(Label, ast::Expr)>)>,
-    decl_vars: Vec<Str<'arena>>,
+    params: Vec<(Param, Option<(Label, ast::Expr)>)>,
+    decl_vars: Vec<StringId>,
     body_instrs: InstrSeq<'arena>,
 ) -> Result<Body<'arena>> {
     emit_body::make_body(

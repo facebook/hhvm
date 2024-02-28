@@ -63,7 +63,7 @@ fn assemble_opcode_impl(_input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
             alloc: &'arena Bump,
             tok: &'_ [u8],
             token_iter: &mut Lexer<'_>,
-            decl_map: &HashMap<Str<'arena>, u32>,
+            decl_map: &StringIdMap<u32>,
         ) -> Result<hhbc::Instruct<'arena>>{
             match tok {
                 #(#body)*
@@ -81,7 +81,7 @@ fn assemble_opcode_impl(_input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
 /// turns into a handler for A, B, and C that looks something like:
 ///
 /// impl AssembleImm<'_, $ret_ty> for Lexer<'_> {
-///   fn assemble_imm(&mut self, _alloc: &'_ Bump, _decl_map: &DeclMap<'_>) -> Result<$ret_ty> {
+///   fn assemble_imm(&mut self, _alloc: &'_ Bump, _decl_map: &DeclMap) -> Result<$ret_ty> {
 ///     use $ret_ty;
 ///     match self.expect(Token::into_identifier)? {
 ///       b"A" => E::A,
@@ -152,7 +152,7 @@ pub fn assemble_imm_for_enum(tokens: proc_macro::TokenStream) -> proc_macro::Tok
 
     let output = quote! {
         impl AssembleImm<'_, #ret_ty> for Lexer<'_> {
-            fn assemble_imm(&mut self, _: &'_ Bump, _: &DeclMap<'_>) -> Result<#ret_ty> {
+            fn assemble_imm(&mut self, _: &'_ Bump, _: &DeclMap) -> Result<#ret_ty> {
                 use #ret_ty;
                 let tok = self.expect_token()?;
                 let id = tok.into_identifier()?;

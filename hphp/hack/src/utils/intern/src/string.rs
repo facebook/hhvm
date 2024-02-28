@@ -114,6 +114,10 @@ impl StringId {
     pub fn is_empty(self) -> bool {
         self == Self::EMPTY
     }
+
+    pub fn get_interned(s: &str) -> Option<Self> {
+        BytesId::get_interned(&s.as_bytes()).map(Self)
+    }
 }
 
 impl fmt::Display for StringId {
@@ -205,6 +209,7 @@ impl FromStr for StringId {
 
 pub type StringIdMap<V> = HashMap<StringId, V, BuildIdHasher<u32>>;
 pub type StringIdSet = HashSet<StringId, BuildIdHasher<u32>>;
+pub type StringIdIndexSet = indexmap::IndexSet<StringId, BuildIdHasher<u32>>;
 
 // A copy-on-write object that can be an interned string, a reference to a
 // string, or an owned but uninterned string.

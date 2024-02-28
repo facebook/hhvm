@@ -3,7 +3,6 @@ use std::rc::Rc;
 use anyhow::bail;
 use anyhow::Context;
 use anyhow::Result;
-use ffi::Str;
 use hash::HashMap;
 use hhbc::AdataId;
 use hhbc::Instruct;
@@ -12,6 +11,7 @@ use hhbc::Local;
 use hhbc::Opcode;
 use hhbc::Pseudo;
 use hhbc::SrcLoc;
+use hhbc::StringId;
 use hhbc::TypedValue;
 use hhbc_gen::OpcodeData;
 use newtype::IdVec;
@@ -123,7 +123,7 @@ impl<'arena> Body<'arena> {
         self.try_catch.get(&ip).copied().unwrap_or(InstrPtr::None)
     }
 
-    pub(crate) fn local_name(&self, local: Local) -> Option<Str<'arena>> {
+    pub(crate) fn local_name(&self, local: Local) -> Option<StringId> {
         let mut n = local.as_usize();
         let p = self.hhbc_body.params.len();
         if n < p {

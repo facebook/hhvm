@@ -12,7 +12,6 @@ use env::emitter::Emitter;
 use env::Env;
 use error::Error;
 use error::Result;
-use ffi::Str;
 use hhbc::Body;
 use hhbc::Coeffects;
 use hhbc::FCallArgs;
@@ -25,6 +24,7 @@ use hhbc::MethodFlags;
 use hhbc::Param;
 use hhbc::Span;
 use hhbc::SpecialClsRef;
+use hhbc::StringId;
 use hhbc::TypeInfo;
 use hhbc::TypedValue;
 use hhbc::Visibility;
@@ -232,7 +232,7 @@ fn emit_memoize_wrapper_body<'a, 'arena, 'decl>(
 fn emit<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
-    hhas_params: Vec<(Param<'arena>, Option<(Label, ast::Expr)>)>,
+    hhas_params: Vec<(Param, Option<(Label, ast::Expr)>)>,
     return_type_info: TypeInfo,
     args: &Args<'_, 'a, 'arena>,
 ) -> Result<Body<'arena>> {
@@ -254,9 +254,9 @@ fn make_memoize_method_code<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
-    hhas_params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
+    hhas_params: &[(Param, Option<(Label, ast::Expr)>)],
     args: &Args<'_, 'a, 'arena>,
-) -> Result<(InstrSeq<'arena>, Vec<Str<'arena>>)> {
+) -> Result<(InstrSeq<'arena>, Vec<StringId>)> {
     if args.params.is_empty()
         && !args.flags.contains(Flags::IS_REIFIED)
         && !args.flags.contains(Flags::SHOULD_EMIT_IMPLICIT_CONTEXT)
@@ -272,9 +272,9 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
-    hhas_params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
+    hhas_params: &[(Param, Option<(Label, ast::Expr)>)],
     args: &Args<'_, 'a, 'arena>,
-) -> Result<(InstrSeq<'arena>, Vec<Str<'arena>>)> {
+) -> Result<(InstrSeq<'arena>, Vec<StringId>)> {
     let alloc = env.arena;
     let param_count = hhas_params.len();
     let notfound = emitter.label_gen_mut().next_regular();
@@ -289,7 +289,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
     let first_unnamed_idx = param_count + add_reified;
     let generics_local = Local::new(param_count); // only used if is_reified == true.
     let decl_vars = match is_reified {
-        true => vec![reified::GENERICS_LOCAL_NAME.into()],
+        true => vec![hhbc::intern(reified::GENERICS_LOCAL_NAME)],
         false => Vec::new(),
     };
     emitter.init_named_locals(
@@ -427,7 +427,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
 fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     args: &Args<'_, 'a, 'arena>,
-) -> Result<(InstrSeq<'arena>, Vec<Str<'arena>>)> {
+) -> Result<(InstrSeq<'arena>, Vec<StringId>)> {
     let notfound = emitter.label_gen_mut().next_regular();
     let suspended_get = emitter.label_gen_mut().next_regular();
     let eager_set = emitter.label_gen_mut().next_regular();
@@ -525,8 +525,8 @@ fn make_wrapper<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     instrs: InstrSeq<'arena>,
-    params: Vec<(Param<'arena>, Option<(Label, ast::Expr)>)>,
-    decl_vars: Vec<Str<'arena>>,
+    params: Vec<(Param, Option<(Label, ast::Expr)>)>,
+    decl_vars: Vec<StringId>,
     return_type_info: TypeInfo,
     args: &Args<'_, 'a, 'arena>,
 ) -> Result<Body<'arena>> {

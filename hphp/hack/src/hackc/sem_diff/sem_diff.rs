@@ -252,11 +252,7 @@ fn sem_diff_body<'arena, 'a>(
     crate::body::compare_bodies(path, a, a_adata, b, b_adata)
 }
 
-fn sem_diff_param<'arena>(
-    path: &CodePath<'_>,
-    a: &'arena Param<'arena>,
-    b: &'arena Param<'arena>,
-) -> Result<()> {
+fn sem_diff_param(path: &CodePath<'_>, a: &Param, b: &Param) -> Result<()> {
     let Param {
         name: a_name,
         is_variadic: a_is_variadic,

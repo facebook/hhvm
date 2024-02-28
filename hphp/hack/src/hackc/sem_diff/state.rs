@@ -272,7 +272,7 @@ impl<'arena, 'a> State<'arena, 'a> {
         if !local.is_valid() {
             "NV".to_string()
         } else if let Some(name) = self.body.local_name(local) {
-            format!("{}({})", name.as_bstr(), local)
+            format!("{}({})", name.as_str(), local)
         } else {
             format!("{}", local)
         }

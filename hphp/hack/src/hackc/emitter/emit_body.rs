@@ -24,6 +24,7 @@ use hhbc::IsTypeOp;
 use hhbc::Label;
 use hhbc::Local;
 use hhbc::Param;
+use hhbc::StringId;
 use hhbc::TypeInfo;
 use hhbc::TypedValue;
 use hhbc::UpperBound;
@@ -117,10 +118,6 @@ pub fn emit_body<'b, 'arena, 'decl>(
         body,
         args.flags,
     )?;
-    let decl_vars: Vec<Str<'arena>> = decl_vars
-        .into_iter()
-        .map(|name| Str::new_str(alloc, &name))
-        .collect();
     let mut env = make_env(alloc, namespace, scope, args.call_context);
 
     set_emit_statement_state(
@@ -145,10 +142,7 @@ pub fn emit_body<'b, 'arena, 'decl>(
         local_gen.reserve_retval_and_label_id_locals();
     };
     emitter.init_named_locals(
-        params
-            .iter()
-            .map(|(param, _)| param.name)
-            .chain(decl_vars.iter().copied()),
+        (params.iter().map(|(param, _)| param.name)).chain(decl_vars.iter().copied()),
     );
     let body_instrs = make_body_instrs(
         emitter,
@@ -185,7 +179,7 @@ pub fn emit_body<'b, 'arena, 'decl>(
 fn make_body_instrs<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
-    params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
+    params: &[(Param, Option<(Label, ast::Expr)>)],
     tparams: &[ast::Tparam],
     body: &[ast::Stmt],
     is_generator: bool,
@@ -227,7 +221,7 @@ fn make_body_instrs<'a, 'arena, 'decl>(
 fn make_header_content<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
-    params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
+    params: &[(Param, Option<(Label, ast::Expr)>)],
     tparams: &[ast::Tparam],
     is_generator: bool,
     deprecation_info: Option<&[TypedValue]>,
@@ -262,10 +256,10 @@ fn make_decl_vars<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     scope: &Scope<'a>,
     immediate_tparams: &[ast::Tparam],
-    params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
+    params: &[(Param, Option<(Label, ast::Expr)>)],
     body: &[ast::Stmt],
     arg_flags: Flags,
-) -> Result<Vec<String>> {
+) -> Result<Vec<StringId>> {
     let explicit_use_set = &emitter.global_state().explicit_use_set;
 
     let mut decl_vars =
@@ -296,7 +290,7 @@ fn make_decl_vars<'a, 'arena, 'decl>(
     {
         decl_vars.insert(0, string_utils::reified::GENERICS_LOCAL_NAME.into());
     }
-    Ok(decl_vars)
+    Ok(decl_vars.into_iter().map(hhbc::intern).collect())
 }
 
 pub fn emit_return_type_info(
@@ -352,7 +346,7 @@ fn make_params<'a, 'arena, 'decl>(
     ast_params: &[ast::FunParam],
     scope: &Scope<'a>,
     flags: Flags,
-) -> Result<Vec<(Param<'arena>, Option<(Label, ast::Expr)>)>> {
+) -> Result<Vec<(Param, Option<(Label, ast::Expr)>)>> {
     let generate_defaults = !flags.contains(Flags::MEMOIZE);
     emit_param::from_asts(emitter, tp_names, generate_defaults, scope, ast_params)
 }
@@ -361,12 +355,12 @@ pub fn make_body<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     mut body_instrs: InstrSeq<'arena>,
-    decl_vars: Vec<Str<'arena>>,
+    decl_vars: Vec<StringId>,
     is_memoize_wrapper: bool,
     is_memoize_wrapper_lsb: bool,
     upper_bounds: Vec<UpperBound>,
     shadowed_tparams: Vec<String>,
-    mut params: Vec<(Param<'arena>, Option<(Label, ast::Expr)>)>,
+    mut params: Vec<(Param, Option<(Label, ast::Expr)>)>,
     return_type_info: Option<TypeInfo>,
     doc_comment: Option<DocComment>,
     opt_env: Option<&Env<'a, 'arena>>,
@@ -457,54 +451,55 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
-    params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
+    params: &[(Param, Option<(Label, ast::Expr)>)],
     ast_params: &[ast::FunParam],
     tparams: &[ast::Tparam],
 ) -> Result<InstrSeq<'arena>> {
-    let mut make_param_instr =
-        |param: &Param<'arena>, ast_param: &ast::FunParam| -> Result<InstrSeq<'arena>> {
-            if param.is_variadic {
-                Ok(instr::empty())
-            } else {
-                use RGH::ReificationLevel as L;
-                let param_local = emitter.named_local(param.name);
-                match has_type_constraint(env, Option::from(param.type_info.as_ref()), ast_param) {
-                    (L::Unconstrained, _) => Ok(instr::empty()),
-                    (L::Not, _) => Ok(instr::empty()),
-                    (L::Maybe, Some(h)) => {
-                        if !RGH::happly_decl_has_reified_generics(env, emitter, &h) {
-                            Ok(instr::empty())
-                        } else {
-                            Ok(InstrSeq::gather(vec![
-                                emit_expression::get_type_structure_for_hint(
-                                    emitter,
-                                    tparams
-                                        .iter()
-                                        .map(|fp| fp.name.1.as_str())
-                                        .collect::<Vec<_>>()
-                                        .as_slice(),
-                                    &IndexSet::new(),
-                                    TypeRefinementInHint::Allowed,
-                                    &h,
-                                )?,
-                                instr::verify_param_type_ts(param_local),
-                            ]))
-                        }
+    let mut make_param_instr = |param: &Param,
+                                ast_param: &ast::FunParam|
+     -> Result<InstrSeq<'arena>> {
+        if param.is_variadic {
+            Ok(instr::empty())
+        } else {
+            use RGH::ReificationLevel as L;
+            let param_local = emitter.interned_local(param.name);
+            match has_type_constraint(env, Option::from(param.type_info.as_ref()), ast_param) {
+                (L::Unconstrained, _) => Ok(instr::empty()),
+                (L::Not, _) => Ok(instr::empty()),
+                (L::Maybe, Some(h)) => {
+                    if !RGH::happly_decl_has_reified_generics(env, emitter, &h) {
+                        Ok(instr::empty())
+                    } else {
+                        Ok(InstrSeq::gather(vec![
+                            emit_expression::get_type_structure_for_hint(
+                                emitter,
+                                tparams
+                                    .iter()
+                                    .map(|fp| fp.name.1.as_str())
+                                    .collect::<Vec<_>>()
+                                    .as_slice(),
+                                &IndexSet::new(),
+                                TypeRefinementInHint::Allowed,
+                                &h,
+                            )?,
+                            instr::verify_param_type_ts(param_local),
+                        ]))
                     }
-                    (L::Definitely, Some(h)) => {
-                        if !RGH::happly_decl_has_reified_generics(env, emitter, &h) {
-                            Ok(instr::empty())
-                        } else {
-                            let check =
-                                instr::is_type_l(emitter.named_local(param.name), IsTypeOp::Null);
-                            let verify_instr = instr::verify_param_type_ts(param_local);
-                            RGH::simplify_verify_type(emitter, env, pos, check, &h, verify_instr)
-                        }
-                    }
-                    _ => Err(Error::unrecoverable("impossible")),
                 }
+                (L::Definitely, Some(h)) => {
+                    if !RGH::happly_decl_has_reified_generics(env, emitter, &h) {
+                        Ok(instr::empty())
+                    } else {
+                        let check =
+                            instr::is_type_l(emitter.interned_local(param.name), IsTypeOp::Null);
+                        let verify_instr = instr::verify_param_type_ts(param_local);
+                        RGH::simplify_verify_type(emitter, env, pos, check, &h, verify_instr)
+                    }
+                }
+                _ => Err(Error::unrecoverable("impossible")),
             }
-        };
+        }
+    };
 
     let ast_params = ast_params
         .iter()
@@ -610,7 +605,7 @@ pub fn emit_deprecation_info<'a, 'arena>(
 fn set_emit_statement_state<'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     default_return_value: InstrSeq<'arena>,
-    params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
+    params: &[(Param, Option<(Label, ast::Expr)>)],
     return_type_info: &TypeInfo,
     return_type: Option<&ast::Hint>,
     pos: &Pos,
@@ -650,7 +645,7 @@ fn set_emit_statement_state<'arena, 'decl>(
 }
 
 fn emit_verify_out<'arena>(
-    params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
+    params: &[(Param, Option<(Label, ast::Expr)>)],
 ) -> (usize, InstrSeq<'arena>) {
     let param_instrs: Vec<InstrSeq<'arena>> = params
         .iter()

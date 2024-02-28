@@ -10,6 +10,7 @@ use serde::Serialize;
 
 use crate::Instruct;
 use crate::Param;
+use crate::StringId;
 use crate::TypeInfo;
 use crate::UpperBound;
 
@@ -18,13 +19,13 @@ use crate::UpperBound;
 pub struct Body<'arena> {
     /// Must have been compacted with InstrSeq::compact_iter().
     pub body_instrs: Vector<Instruct<'arena>>,
-    pub decl_vars: Vector<Str<'arena>>,
+    pub decl_vars: Vector<StringId>,
     pub num_iters: usize,
     pub is_memoize_wrapper: bool,
     pub is_memoize_wrapper_lsb: bool,
     pub upper_bounds: Vector<UpperBound>,
     pub shadowed_tparams: Vector<Str<'arena>>,
-    pub params: Vector<Param<'arena>>,
+    pub params: Vector<Param>,
     pub return_type_info: Maybe<TypeInfo>,
     pub doc_comment: Maybe<Vector<u8>>,
     /// The statically computed stack depth for this Body. This can be computed

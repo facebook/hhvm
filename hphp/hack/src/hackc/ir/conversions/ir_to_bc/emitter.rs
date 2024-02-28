@@ -25,6 +25,7 @@ use ir::BlockId;
 use ir::BlockIdMap;
 use ir::FCallArgsFlags;
 use ir::LocalId;
+use ir::StringId;
 use itertools::Itertools;
 use log::trace;
 
@@ -38,7 +39,7 @@ pub(crate) fn emit_func<'a>(
     labeler: &mut Labeler,
     strings: &StringCache<'a>,
     adata_cache: &mut AdataCache,
-) -> (InstrSeq<'a>, Vec<Str<'a>>) {
+) -> (InstrSeq<'a>, Vec<StringId>) {
     let adata_id_map = func
         .constants
         .iter()
@@ -68,12 +69,15 @@ pub(crate) fn emit_func<'a>(
 
     ctx.convert_frame_vec(root);
     // Collect the decl_vars - these are all the named locals after the params.
-    let decl_vars: Vec<Str<'a>> = ctx
+    let decl_vars: Vec<StringId> = ctx
         .locals
         .iter()
         .sorted_by_key(|(_, v)| *v)
         .filter_map(|(k, _)| match *k {
-            LocalId::Named(name) => Some(strings.lookup_ffi_str(name)),
+            LocalId::Named(name) => Some(ir::intern(
+                std::str::from_utf8(strings.lookup_ffi_str(name).as_ref())
+                    .expect("non-utf8 local name"),
+            )),
             LocalId::Unnamed(_) => None,
         })
         .skip(func.params.len())

@@ -195,17 +195,17 @@ assemble_imm_for_enum!(
 );
 
 pub(crate) trait AssembleImm<'arena, T> {
-    fn assemble_imm(&mut self, alloc: &'arena Bump, decl_map: &DeclMap<'arena>) -> Result<T>;
+    fn assemble_imm(&mut self, alloc: &'arena Bump, decl_map: &DeclMap) -> Result<T>;
 }
 
 impl AssembleImm<'_, i64> for Lexer<'_> {
-    fn assemble_imm(&mut self, _: &'_ Bump, _: &DeclMap<'_>) -> Result<i64> {
+    fn assemble_imm(&mut self, _: &'_ Bump, _: &DeclMap) -> Result<i64> {
         self.expect_and_get_number()
     }
 }
 
 impl<'arena> AssembleImm<'arena, hhbc::AdataId> for Lexer<'_> {
-    fn assemble_imm(&mut self, _: &'arena Bump, _: &DeclMap<'arena>) -> Result<hhbc::AdataId> {
+    fn assemble_imm(&mut self, _: &'arena Bump, _: &DeclMap) -> Result<hhbc::AdataId> {
         let adata_id = self.expect_with(Token::into_global)?;
         debug_assert!(adata_id[0] == b'@');
         Ok(hhbc::AdataId::parse(std::str::from_utf8(&adata_id[1..])?)?)
@@ -216,7 +216,7 @@ impl<'arena> AssembleImm<'arena, hhbc::ClassName<'arena>> for Lexer<'_> {
     fn assemble_imm(
         &mut self,
         alloc: &'arena Bump,
-        _: &DeclMap<'arena>,
+        _: &DeclMap,
     ) -> Result<hhbc::ClassName<'arena>> {
         Ok(hhbc::ClassName::new(
             assemble::assemble_unescaped_unquoted_str(alloc, self)?,
@@ -228,7 +228,7 @@ impl<'arena> AssembleImm<'arena, hhbc::ConstName<'arena>> for Lexer<'_> {
     fn assemble_imm(
         &mut self,
         alloc: &'arena Bump,
-        _: &DeclMap<'arena>,
+        _: &DeclMap,
     ) -> Result<hhbc::ConstName<'arena>> {
         Ok(hhbc::ConstName::new(
             assemble::assemble_unescaped_unquoted_str(alloc, self)?,
@@ -240,7 +240,7 @@ impl<'arena> AssembleImm<'arena, hhbc::FCallArgs<'arena>> for Lexer<'_> {
     fn assemble_imm(
         &mut self,
         alloc: &'arena Bump,
-        _: &DeclMap<'arena>,
+        _: &DeclMap,
     ) -> Result<hhbc::FCallArgs<'arena>> {
         // <(fcargflags)*> numargs numrets inouts readonly async_eager_target context
         let fcargflags = assemble::assemble_fcallargsflags(self)?;
@@ -264,7 +264,7 @@ impl<'arena> AssembleImm<'arena, hhbc::FCallArgs<'arena>> for Lexer<'_> {
 }
 
 impl AssembleImm<'_, hhbc::FloatBits> for Lexer<'_> {
-    fn assemble_imm(&mut self, _: &'_ Bump, _: &DeclMap<'_>) -> Result<hhbc::FloatBits> {
+    fn assemble_imm(&mut self, _: &'_ Bump, _: &DeclMap) -> Result<hhbc::FloatBits> {
         Ok(hhbc::FloatBits(self.expect_and_get_number()?))
     }
 }
@@ -273,7 +273,7 @@ impl<'arena> AssembleImm<'arena, hhbc::FunctionName<'arena>> for Lexer<'_> {
     fn assemble_imm(
         &mut self,
         alloc: &'arena Bump,
-        _: &DeclMap<'arena>,
+        _: &DeclMap,
     ) -> Result<hhbc::FunctionName<'arena>> {
         Ok(hhbc::FunctionName::new(
             assemble::assemble_unescaped_unquoted_str(alloc, self)?,
@@ -282,7 +282,7 @@ impl<'arena> AssembleImm<'arena, hhbc::FunctionName<'arena>> for Lexer<'_> {
 }
 
 impl AssembleImm<'_, hhbc::IterArgs> for Lexer<'_> {
-    fn assemble_imm(&mut self, alloc: &'_ Bump, decl_map: &DeclMap<'_>) -> Result<hhbc::IterArgs> {
+    fn assemble_imm(&mut self, alloc: &'_ Bump, decl_map: &DeclMap) -> Result<hhbc::IterArgs> {
         // IterArg { iter_id: IterId (~u32), key_id: Local, val_id: Local}
         // Ex: 0 NK V:$v
         let idx: u32 = self.expect_and_get_number()?;
@@ -308,7 +308,7 @@ impl AssembleImm<'_, hhbc::IterArgs> for Lexer<'_> {
 }
 
 impl AssembleImm<'_, hhbc::IterId> for Lexer<'_> {
-    fn assemble_imm(&mut self, _: &'_ Bump, _: &DeclMap<'_>) -> Result<hhbc::IterId> {
+    fn assemble_imm(&mut self, _: &'_ Bump, _: &DeclMap) -> Result<hhbc::IterId> {
         Ok(hhbc::IterId {
             idx: self.expect_and_get_number()?,
         })
@@ -316,13 +316,13 @@ impl AssembleImm<'_, hhbc::IterId> for Lexer<'_> {
 }
 
 impl AssembleImm<'_, hhbc::Label> for Lexer<'_> {
-    fn assemble_imm(&mut self, _: &'_ Bump, _: &DeclMap<'_>) -> Result<hhbc::Label> {
+    fn assemble_imm(&mut self, _: &'_ Bump, _: &DeclMap) -> Result<hhbc::Label> {
         assemble::assemble_label(self)
     }
 }
 
 impl AssembleImm<'_, hhbc::Local> for Lexer<'_> {
-    fn assemble_imm(&mut self, _: &'_ Bump, decl_map: &DeclMap<'_>) -> Result<hhbc::Local> {
+    fn assemble_imm(&mut self, _: &'_ Bump, decl_map: &DeclMap) -> Result<hhbc::Local> {
         // Returns the local (u32 idx) a var or unnamed corresponds to.
         // This information is based on the position of the var in parameters of a function/.declvars
         // or, if an unnamed, just the idx referenced (_1 -> idx 1)
@@ -330,7 +330,8 @@ impl AssembleImm<'_, hhbc::Local> for Lexer<'_> {
         // _3 -> 3
         match self.next() {
             Some(Token::Variable(v, p)) => {
-                if let Some(idx) = decl_map.get(v) {
+                let v = hhbc::intern(std::str::from_utf8(v)?);
+                if let Some(idx) = decl_map.get(&v) {
                     Ok(hhbc::Local { idx: *idx })
                 } else {
                     bail!("Unknown local var: {:?} at {:?}", v, p);
@@ -349,7 +350,7 @@ impl AssembleImm<'_, hhbc::Local> for Lexer<'_> {
 }
 
 impl AssembleImm<'_, hhbc::LocalRange> for Lexer<'_> {
-    fn assemble_imm(&mut self, _: &'_ Bump, _: &DeclMap<'_>) -> Result<hhbc::LocalRange> {
+    fn assemble_imm(&mut self, _: &'_ Bump, _: &DeclMap) -> Result<hhbc::LocalRange> {
         self.expect_str(Token::is_identifier, "L")?;
         self.expect(Token::is_colon)?;
         let start = hhbc::Local {
@@ -365,7 +366,7 @@ impl<'arena> AssembleImm<'arena, hhbc::MemberKey<'arena>> for Lexer<'_> {
     fn assemble_imm(
         &mut self,
         alloc: &'arena Bump,
-        decl_map: &DeclMap<'arena>,
+        decl_map: &DeclMap,
     ) -> Result<hhbc::MemberKey<'arena>> {
         // EC: stackIndex readOnlyOp | EL: local readOnlyOp | ET: string readOnlyOp | EI: int readOnlyOp
         // PC: stackIndex readOnlyOp | PL: local readOnlyOp | PT: propName readOnlyOp | QT: propName readOnlyOp
@@ -443,7 +444,7 @@ impl<'arena> AssembleImm<'arena, hhbc::MethodName<'arena>> for Lexer<'_> {
     fn assemble_imm(
         &mut self,
         alloc: &'arena Bump,
-        _: &DeclMap<'arena>,
+        _: &DeclMap,
     ) -> Result<hhbc::MethodName<'arena>> {
         Ok(hhbc::MethodName::new(
             assemble::assemble_unescaped_unquoted_str(alloc, self)?,
@@ -452,11 +453,7 @@ impl<'arena> AssembleImm<'arena, hhbc::MethodName<'arena>> for Lexer<'_> {
 }
 
 impl<'arena> AssembleImm<'arena, hhbc::PropName<'arena>> for Lexer<'_> {
-    fn assemble_imm(
-        &mut self,
-        alloc: &'arena Bump,
-        _: &DeclMap<'arena>,
-    ) -> Result<hhbc::PropName<'arena>> {
+    fn assemble_imm(&mut self, alloc: &'arena Bump, _: &DeclMap) -> Result<hhbc::PropName<'arena>> {
         Ok(hhbc::PropName::new(
             assemble::assemble_unescaped_unquoted_str(alloc, self)?,
         ))
@@ -464,11 +461,7 @@ impl<'arena> AssembleImm<'arena, hhbc::PropName<'arena>> for Lexer<'_> {
 }
 
 impl<'arena> AssembleImm<'arena, Vector<hhbc::Label>> for Lexer<'_> {
-    fn assemble_imm(
-        &mut self,
-        _: &'arena Bump,
-        _: &DeclMap<'arena>,
-    ) -> Result<Vector<hhbc::Label>> {
+    fn assemble_imm(&mut self, _: &'arena Bump, _: &DeclMap) -> Result<Vector<hhbc::Label>> {
         let mut labels = Vec::new();
         self.expect(Token::is_lt)?;
         while !self.peek_is(Token::is_gt) {
@@ -480,11 +473,7 @@ impl<'arena> AssembleImm<'arena, Vector<hhbc::Label>> for Lexer<'_> {
 }
 
 impl<'arena> AssembleImm<'arena, Vector<Str<'arena>>> for Lexer<'_> {
-    fn assemble_imm(
-        &mut self,
-        alloc: &'arena Bump,
-        _: &DeclMap<'arena>,
-    ) -> Result<Vector<Str<'arena>>> {
+    fn assemble_imm(&mut self, alloc: &'arena Bump, _: &DeclMap) -> Result<Vector<Str<'arena>>> {
         self.expect(Token::is_lt)?;
         let mut d = Vec::new();
         while !self.peek_is(Token::is_gt) {
@@ -496,20 +485,20 @@ impl<'arena> AssembleImm<'arena, Vector<Str<'arena>>> for Lexer<'_> {
 }
 
 impl AssembleImm<'_, hhbc::StackIndex> for Lexer<'_> {
-    fn assemble_imm(&mut self, _: &'_ Bump, _: &DeclMap<'_>) -> Result<hhbc::StackIndex> {
+    fn assemble_imm(&mut self, _: &'_ Bump, _: &DeclMap) -> Result<hhbc::StackIndex> {
         // StackIndex : u32
         self.expect_and_get_number()
     }
 }
 
 impl<'arena> AssembleImm<'arena, Str<'arena>> for Lexer<'_> {
-    fn assemble_imm(&mut self, alloc: &'arena Bump, _: &DeclMap<'arena>) -> Result<Str<'arena>> {
+    fn assemble_imm(&mut self, alloc: &'arena Bump, _: &DeclMap) -> Result<Str<'arena>> {
         assemble::assemble_unescaped_unquoted_str(alloc, self)
     }
 }
 
 impl AssembleImm<'_, hhbc::SwitchKind> for Lexer<'_> {
-    fn assemble_imm(&mut self, _: &'_ Bump, _: &DeclMap<'_>) -> Result<hhbc::SwitchKind> {
+    fn assemble_imm(&mut self, _: &'_ Bump, _: &DeclMap) -> Result<hhbc::SwitchKind> {
         let tok = self.expect_token()?;
         match tok.into_identifier()? {
             b"Unbounded" => Ok(hhbc::SwitchKind::Unbounded),

@@ -498,7 +498,7 @@ fn emit_using<'a, 'arena, 'decl>(
             let (local, preamble) = match &(using.exprs.1[0].2) {
                 ast::Expr_::Binop(binop) => match (&binop.bop, (binop.lhs).2.as_lvar()) {
                     (ast_defs::Bop::Eq(None), Some(ast::Lid(_, id))) => (
-                        e.named_local(local_id::get_name(id).into()),
+                        e.named_local(local_id::get_name(id)),
                         InstrSeq::gather(vec![
                             emit_expr::emit_expr(e, env, &(using.exprs.1[0]))?,
                             emit_pos(&block_pos),
@@ -518,7 +518,7 @@ fn emit_using<'a, 'arena, 'decl>(
                     }
                 },
                 ast::Expr_::Lvar(lid) => (
-                    e.named_local(local_id::get_name(&lid.1).into()),
+                    e.named_local(local_id::get_name(&lid.1)),
                     InstrSeq::gather(vec![
                         emit_expr::emit_expr(e, env, &(using.exprs.1[0]))?,
                         emit_pos(&block_pos),
@@ -964,7 +964,7 @@ fn emit_catch<'a, 'arena, 'decl>(
         instr::dup(),
         instr::instance_of_d(class_id),
         instr::jmp_z(next_catch),
-        instr::set_l(e.named_local(local_id::get_name(catch_local_id).into())),
+        instr::set_l(e.named_local(local_id::get_name(catch_local_id))),
         instr::pop_c(),
         emit_stmts(e, env, catch_block)?,
         emit_pos(pos),
@@ -1136,8 +1136,8 @@ fn emit_iterator_key_value_storage<'a, 'arena, 'decl>(
                 get_id_of_simple_lvar_opt(&v.2)?,
             ) {
                 (Some(key_id), Some(val_id)) => (
-                    Some(e.named_local(key_id.into())),
-                    e.named_local(val_id.into()),
+                    Some(e.named_local(key_id)),
+                    e.named_local(val_id),
                     instr::empty(),
                 ),
                 _ => {
@@ -1168,7 +1168,7 @@ fn emit_iterator_key_value_storage<'a, 'arena, 'decl>(
             },
         ),
         A::AsV(v) => Ok(match get_id_of_simple_lvar_opt(&v.2)? {
-            Some(val_id) => (None, e.named_local(val_id.into()), instr::empty()),
+            Some(val_id) => (None, e.named_local(val_id), instr::empty()),
             None => {
                 let val_local = e.local_gen_mut().get_unnamed();
                 let (val_preamble, val_load) = emit_iterator_lvalue_storage(e, env, v, val_local)?;
@@ -1276,7 +1276,7 @@ fn emit_load_list_element<'a, 'arena, 'decl>(
         ast::Expr_::Lvar(lid) => {
             let load_value = InstrSeq::gather(vec![
                 query_value(path),
-                instr::set_l(e.named_local(local_id::get_name(&lid.1).into())),
+                instr::set_l(e.named_local(local_id::get_name(&lid.1))),
                 instr::pop_c(),
             ]);
             (vec![], vec![load_value])

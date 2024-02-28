@@ -66,7 +66,7 @@ impl<'arena> Function<'arena> {
         ret
     }
 
-    pub fn params(&self) -> &[Param<'arena>] {
+    pub fn params(&self) -> &[Param] {
         self.body.params.as_ref()
     }
 }

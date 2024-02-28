@@ -26,7 +26,7 @@ pub type Result<T, E = Error> = std::result::Result<T, E>;
 /// Given an hhbc::Body compute the maximum stack needed when executing that
 /// body. In general dead code will not be tracked however all catch blocks are
 /// assumed to start out live.
-pub fn compute_stack_depth(params: &[Param<'_>], body_instrs: &[Instruct<'_>]) -> Result<usize> {
+pub fn compute_stack_depth(params: &[Param], body_instrs: &[Instruct<'_>]) -> Result<usize> {
     let mut csd = ComputeStackDepth {
         body_instrs,
         labels: Default::default(),
@@ -87,7 +87,7 @@ struct ComputeStackDepth<'a> {
 }
 
 impl ComputeStackDepth<'_> {
-    fn run(&mut self, params: &[Param<'_>], body_instrs: &[Instruct<'_>]) -> Result<()> {
+    fn run(&mut self, params: &[Param], body_instrs: &[Instruct<'_>]) -> Result<()> {
         debug!("ComputeStackDepth::run");
         self.precompute(body_instrs);
 

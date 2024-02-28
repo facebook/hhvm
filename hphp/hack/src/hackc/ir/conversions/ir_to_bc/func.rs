@@ -63,7 +63,10 @@ pub(crate) fn convert_func<'a>(
     let return_type_info = crate::types::convert(&func.return_type, strings);
 
     let params = Vec::from_iter(func.params.into_iter().map(|param| {
-        let name = strings.lookup_ffi_str(param.name);
+        let name = hhbc::intern(
+            std::str::from_utf8(strings.lookup_ffi_str(param.name).as_ref())
+                .expect("non-utf8 param name"),
+        );
         let user_attributes = convert::convert_attributes(param.user_attributes, strings);
         let default_value = param
             .default_value

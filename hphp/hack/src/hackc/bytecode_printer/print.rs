@@ -854,6 +854,7 @@ fn print_body(
         ctx.newline(w)?;
         w.write_all(b".declvars ")?;
         concat_by(w, " ", &body.decl_vars, |w, var| {
+            let var = var.as_str().as_bytes();
             if var.iter().all(is_bareword_char) {
                 w.write_all(var)
             } else {
@@ -863,7 +864,7 @@ fn print_body(
         w.write_all(b";")?;
     }
     coeffects::coeffects_to_hhas(ctx, w, coeffects)?;
-    let local_names: Vec<Str<'_>> = body
+    let local_names: Vec<_> = body
         .params
         .iter()
         .map(|param| param.name)
@@ -877,7 +878,7 @@ fn print_instructions<'a, 'b>(
     w: &mut dyn Write,
     instrs: &'b [Instruct<'a>],
     dv_labels: &'b HashSet<Label>,
-    local_names: &'b [Str<'a>],
+    local_names: &'b [StringId],
 ) -> Result<()> {
     let mut ctx = ctx.clone();
     for instr in instrs {
@@ -977,7 +978,7 @@ fn print_instr<'a, 'b>(
     w: &mut dyn Write,
     instr: &'b Instruct<'a>,
     dv_labels: &'b HashSet<Label>,
-    local_names: &'b [Str<'a>],
+    local_names: &'b [StringId],
 ) -> Result<()> {
     match instr {
         Instruct::Opcode(opcode) => {
@@ -989,7 +990,7 @@ fn print_instr<'a, 'b>(
 
 /// Build a set containing the labels for param default-value initializers
 /// so they can be formatted as `DV123` instead of `L123`.
-fn find_dv_labels(params: &[Param<'_>]) -> HashSet<Label> {
+fn find_dv_labels(params: &[Param]) -> HashSet<Label> {
     params
         .iter()
         .filter_map(|param| match &param.default_value {
@@ -1002,7 +1003,7 @@ fn find_dv_labels(params: &[Param<'_>]) -> HashSet<Label> {
 fn print_params<'arena>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    params: &[Param<'arena>],
+    params: &[Param],
     dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     paren(w, |w| {
@@ -1013,7 +1014,7 @@ fn print_params<'arena>(
 fn print_param<'arena>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    param: &Param<'arena>,
+    param: &Param,
     dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     print_param_user_attributes(ctx, w, param)?;
@@ -1024,7 +1025,7 @@ fn print_param<'arena>(
         print_type_info(w, ty)?;
         w.write_all(b" ")
     })?;
-    w.write_all(&param.name)?;
+    w.write_all(param.name.as_str().as_bytes())?;
     option(w, param.default_value.as_ref(), |w, dv: &DefaultValue| {
         print_param_default_value(w, dv.label, &dv.expr, dv_labels)
     })
@@ -1058,11 +1059,7 @@ pub(crate) fn print_int<T: std::fmt::Display>(w: &mut dyn Write, i: T) -> Result
     write!(w, "{}", i)
 }
 
-fn print_param_user_attributes(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    param: &Param<'_>,
-) -> Result<()> {
+fn print_param_user_attributes(ctx: &Context<'_>, w: &mut dyn Write, param: &Param) -> Result<()> {
     match param.user_attributes.as_ref()[..] {
         [] => Ok(()),
         _ => square(w, |w| print_attributes(ctx, w, &param.user_attributes)),

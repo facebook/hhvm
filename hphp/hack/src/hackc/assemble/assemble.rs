@@ -18,9 +18,9 @@ use bumpalo::Bump;
 use ffi::Maybe;
 use ffi::Str;
 use ffi::Vector;
-use hash::HashMap;
 use hhbc::ModuleName;
 use hhbc::StringId;
+use hhbc::StringIdMap;
 use hhvm_types_ffi::Attr;
 use log::trace;
 use naming_special_names_rust::coeffects::Ctx;
@@ -31,7 +31,7 @@ use crate::lexer::Lexer;
 use crate::token::Line;
 use crate::token::Token;
 
-pub(crate) type DeclMap<'a> = HashMap<Str<'a>, u32>;
+pub(crate) type DeclMap = StringIdMap<u32>;
 
 /// Assembles the hhas within f to a hhbc::Unit
 pub fn assemble<'arena>(alloc: &'arena Bump, f: &Path) -> Result<(hhbc::Unit<'arena>, PathBuf)> {
@@ -54,7 +54,7 @@ pub fn assemble_from_bytes<'arena>(
 /// where we want to assemble each bytecode as it is being executed.
 pub fn assemble_single_instruction<'arena>(
     alloc: &'arena Bump,
-    decl_map: &mut DeclMap<'arena>,
+    decl_map: &mut DeclMap,
     s: &[u8],
 ) -> Result<hhbc::Instruct<'arena>> {
     let mut lex = Lexer::from_slice(s, Line(1));
@@ -504,7 +504,7 @@ fn assemble_method<'arena>(
     let span = assemble_span(token_iter)?;
     let return_type_info = assemble_type_info_opt(token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
     let name = assemble_method_name(alloc, token_iter)?;
-    let mut decl_map = HashMap::default();
+    let mut decl_map = DeclMap::default();
     let params = assemble_params(alloc, token_iter, &mut decl_map)?;
     let flags = assemble_method_flags(token_iter)?;
     let (body, coeffects) = assemble_body(
@@ -1107,7 +1107,7 @@ fn assemble_function<'arena>(
 
     let name = assemble_function_name(token_iter, alloc)?;
     // Will store decls in this order: params, decl_vars, unnamed
-    let mut decl_map = HashMap::default();
+    let mut decl_map = DeclMap::default();
     let params = assemble_params(alloc, token_iter, &mut decl_map)?;
     let flags = assemble_function_flags(name, token_iter)?;
     let shadowed_tparams = Default::default();
@@ -1381,11 +1381,11 @@ fn assemble_type_constraint(
 }
 
 /// ((a, )*a) | () where a is a param
-fn assemble_params<'arena>(
-    alloc: &'arena Bump,
+fn assemble_params(
+    alloc: &Bump,
     token_iter: &mut Lexer<'_>,
-    decl_map: &mut DeclMap<'arena>,
-) -> Result<Vec<hhbc::Param<'arena>>> {
+    decl_map: &mut DeclMap,
+) -> Result<Vec<hhbc::Param>> {
     token_iter.expect(Token::is_open_paren)?;
     let mut params = Vec::new();
     while !token_iter.peek_is(Token::is_close_paren) {
@@ -1399,11 +1399,11 @@ fn assemble_params<'arena>(
 }
 
 /// a: [user_attributes]? inout? readonly? ...?<type_info>?name (= default_value)?
-fn assemble_param<'arena>(
-    alloc: &'arena Bump,
+fn assemble_param(
+    alloc: &Bump,
     token_iter: &mut Lexer<'_>,
-    decl_map: &mut DeclMap<'arena>,
-) -> Result<hhbc::Param<'arena>> {
+    decl_map: &mut DeclMap,
+) -> Result<hhbc::Param> {
     let mut ua_vec = Vec::new();
     if token_iter.peek_is(Token::is_open_bracket) {
         token_iter.expect(Token::is_open_bracket)?;
@@ -1417,7 +1417,7 @@ fn assemble_param<'arena>(
     let is_variadic = token_iter.next_is(Token::is_variadic);
     let type_info = assemble_type_info_opt(token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
     let name = token_iter.expect_with(Token::into_variable)?;
-    let name = Str::new_slice(alloc, name);
+    let name = hhbc::intern(std::str::from_utf8(name)?);
     decl_map.insert(name, decl_map.len() as u32);
     let default_value = assemble_default_value(token_iter)?;
     Ok(hhbc::Param {
@@ -1450,8 +1450,8 @@ fn assemble_default_value(token_iter: &mut Lexer<'_>) -> Result<Maybe<hhbc::Defa
 fn assemble_body<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    decl_map: &mut DeclMap<'arena>,
-    params: Vec<hhbc::Param<'arena>>,
+    decl_map: &mut DeclMap,
+    params: Vec<hhbc::Param>,
     return_type_info: Maybe<hhbc::TypeInfo>,
     shadowed_tparams: Vec<Str<'arena>>,
     upper_bounds: Vec<hhbc::UpperBound>,
@@ -1490,7 +1490,7 @@ fn assemble_body<'arena>(
                     token_iter.error("Cannot have more than one .declvars per function body")
                 );
             }
-            decl_vars = assemble_decl_vars(alloc, token_iter, decl_map)?;
+            decl_vars = assemble_decl_vars(token_iter, decl_map)?;
         } else if token_iter.peek_is(is_coeffects_decl) {
             coeff = assemble_coeffects(token_iter)?;
         } else {
@@ -1705,16 +1705,12 @@ fn assemble_numiters(token_iter: &mut Lexer<'_>) -> Result<usize> {
 }
 
 /// Expects .declvars ($x)+;
-fn assemble_decl_vars<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-    decl_map: &mut DeclMap<'arena>,
-) -> Result<Vec<Str<'arena>>> {
+fn assemble_decl_vars(token_iter: &mut Lexer<'_>, decl_map: &mut DeclMap) -> Result<Vec<StringId>> {
     token_iter.expect_str(Token::is_decl, ".declvars")?;
     let mut var_names = Vec::new();
     while !token_iter.peek_is(Token::is_semicolon) {
         let var_nm = token_iter.expect_var()?;
-        let var_nm = Str::new_slice(alloc, &var_nm);
+        let var_nm = hhbc::intern(std::str::from_utf8(&var_nm)?);
         var_names.push(var_nm);
         decl_map.insert(var_nm, decl_map.len().try_into().unwrap());
     }
@@ -1727,7 +1723,7 @@ fn assemble_opcode<'arena>(
     alloc: &'arena Bump,
     tok: &'_ [u8],
     token_iter: &mut Lexer<'_>,
-    decl_map: &mut DeclMap<'arena>,
+    decl_map: &mut DeclMap,
 ) -> Result<hhbc::Instruct<'arena>> {
     // This is filled in by the macro.
 }
@@ -1737,7 +1733,7 @@ fn assemble_opcode<'arena>(
 fn assemble_instr<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    decl_map: &mut DeclMap<'arena>,
+    decl_map: &mut DeclMap,
     tcb_count: &mut usize, // Increase this when get TryCatchBegin, decrease when TryCatchEnd
 ) -> Result<hhbc::Instruct<'arena>> {
     if let Some(mut sl_lexer) = token_iter.split_at_newline() {

@@ -178,7 +178,7 @@ fn convert_body<'a>(
     }
 
     for decl in decl_vars.as_ref() {
-        let id = ctx.strings.intern_bytes(decl.as_ref());
+        let id = ctx.strings.intern_bytes(decl.as_str().as_bytes());
         ctx.named_local_lookup.push(LocalId::Named(id));
     }
 
@@ -224,7 +224,7 @@ fn convert_body<'a>(
     func
 }
 
-fn convert_param(ctx: &mut Context<'_, '_>, param: &Param<'_>) -> ir::Param {
+fn convert_param(ctx: &mut Context<'_, '_>, param: &Param) -> ir::Param {
     let default_value = match &param.default_value {
         Maybe::Just(dv) => {
             let init = ctx.target_from_label(dv.label, 0);
@@ -236,7 +236,7 @@ fn convert_param(ctx: &mut Context<'_, '_>, param: &Param<'_>) -> ir::Param {
         Maybe::Nothing => None,
     };
 
-    let name = ctx.strings.intern_bytes(param.name.as_ref());
+    let name = ctx.strings.intern_bytes(param.name.as_str().as_bytes());
     ctx.named_local_lookup.push(LocalId::Named(name));
 
     let user_attributes = param

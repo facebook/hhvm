@@ -211,7 +211,7 @@ mod inout_locals {
     ) -> bool {
         let name = e.local_name(local);
         aliases
-            .get(name.unsafe_as_str())
+            .get(name.as_str())
             .map_or(true, |alias| alias.has_single_ref())
     }
 
@@ -836,7 +836,8 @@ fn emit_lambda<'a, 'arena, 'decl>(
                         Some(i) => {
                             if is_in_lambda {
                                 let name = string_utils::reified::reified_generic_captured_name(i);
-                                Ok(instr::c_get_l(e.named_local(name.as_str().into())))
+                                let name = hhbc::intern(name);
+                                Ok(instr::c_get_l(e.interned_local(name)))
                             } else {
                                 Ok(emit_reified_generic_instrs(e, &Pos::NONE, i))
                             }
@@ -1831,7 +1832,7 @@ where
     }
     Ok(
         if !is_in_lambda && same_as_targs(targs.clone(), current_fun_tparams) {
-            instr::c_get_l(e.named_local(string_utils::reified::GENERICS_LOCAL_NAME.into()))
+            instr::c_get_l(e.named_local(string_utils::reified::GENERICS_LOCAL_NAME))
         } else if !is_in_lambda && same_as_targs(targs.clone(), current_cls_tparams) {
             InstrSeq::gather(vec![
                 instr::check_this(),
@@ -2134,7 +2135,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
             let cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, false, cid);
             let emit_meth_name = |e: &mut Emitter<'arena, 'decl>| match &cls_get_expr {
                 ast::ClassGetExpr::CGstring((pos, id)) => {
-                    Ok(emit_pos_then(pos, instr::c_get_l(e.named_local(id.into()))))
+                    Ok(emit_pos_then(pos, instr::c_get_l(e.named_local(id))))
                 }
                 ast::ClassGetExpr::CGexpr(expr) => emit_expr(e, env, expr),
             };
@@ -2711,7 +2712,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
         {
             error::ensure_normal_paramkind(pk)?;
             Ok(Some(InstrSeq::gather(vec![
-                instr::c_get_l(e.named_local(local_id::get_name(&param.1).into())),
+                instr::c_get_l(e.named_local(local_id::get_name(&param.1))),
                 instr::wh_result(),
             ])))
         }
@@ -3309,7 +3310,7 @@ fn emit_call_expr<'a, 'arena, 'decl>(
             Ok(InstrSeq::gather(vec![
                 emit_expr(e, env, arg1)?,
                 emit_pos(pos),
-                instr::pop_l(e.named_local("$86metadata".into())),
+                instr::pop_l(e.named_local("$86metadata")),
                 instr::null(),
             ]))
         }
@@ -3321,7 +3322,7 @@ fn emit_call_expr<'a, 'arena, 'decl>(
             Ok(InstrSeq::gather(vec![
                 emit_expr(e, env, arg1)?,
                 emit_pos(pos),
-                instr::pop_l(e.named_local("$86productAttributionData".into())),
+                instr::pop_l(e.named_local("$86productAttributionData")),
                 instr::null(),
             ]))
         }
@@ -3392,7 +3393,7 @@ pub fn emit_reified_generic_instrs<'arena>(
     let seq = match index {
         ReifiedTparam::Fun(i) => InstrSeq::gather(vec![
             instr::base_l(
-                e.named_local(string_utils::reified::GENERICS_LOCAL_NAME.into()),
+                e.named_local(string_utils::reified::GENERICS_LOCAL_NAME),
                 MOpMode::Warn,
                 ReadonlyOp::Any,
             ),
@@ -3420,11 +3421,7 @@ fn emit_reified_type<'a, 'arena>(
     let is_in_lambda = env.scope.is_in_lambda();
     let cget_instr = |i| {
         instr::c_get_l(
-            e.named_local(
-                string_utils::reified::reified_generic_captured_name(i)
-                    .as_str()
-                    .into(),
-            ),
+            e.named_local(string_utils::reified::reified_generic_captured_name(i).as_str()),
         )
     };
     match ClassExpr::get_reified_tparam(&env.scope, name) {
@@ -6504,7 +6501,7 @@ pub fn get_local<'a, 'arena, 'decl>(
     } else if special_idents::is_tmp_var(s) {
         Ok(*e.local_gen().get_unnamed_for_tempname(s))
     } else {
-        Ok(e.named_local(s.into()))
+        Ok(e.named_local(s))
     }
 }
 

@@ -46,6 +46,7 @@ use hhbc::SetRangeOp;
 use hhbc::SilenceOp;
 use hhbc::SpecialClsRef;
 use hhbc::StackIndex;
+use hhbc::StringId;
 use hhbc::SwitchKind;
 use hhbc::TypeStructEnforceKind;
 use hhbc::TypeStructResolveOp;
@@ -60,14 +61,14 @@ use crate::print;
 pub struct PrintOpcode<'a, 'b> {
     pub(crate) opcode: &'b Opcode<'a>,
     pub(crate) dv_labels: &'b HashSet<Label>,
-    pub(crate) local_names: &'b [Str<'a>],
+    pub(crate) local_names: &'b [StringId],
 }
 
 impl<'a, 'b> PrintOpcode<'a, 'b> {
     pub fn new(
         opcode: &'b Opcode<'a>,
         dv_labels: &'b HashSet<Label>,
-        local_names: &'b [Str<'a>],
+        local_names: &'b [StringId],
     ) -> Self {
         Self {
             opcode,
@@ -220,7 +221,11 @@ fn print_function_name(w: &mut dyn Write, id: &FunctionName<'_>) -> Result<()> {
     print_quoted_str(w, &id.as_ffi_str())
 }
 
-fn print_iter_args(w: &mut dyn Write, iter_args: &IterArgs, local_names: &[Str<'_>]) -> Result<()> {
+fn print_iter_args(
+    w: &mut dyn Write,
+    iter_args: &IterArgs,
+    local_names: &[StringId],
+) -> Result<()> {
     print_iterator_id(w, &iter_args.iter_id)?;
     if iter_args.key_id.is_valid() {
         w.write_all(b" K:")?;
@@ -236,9 +241,9 @@ fn print_iterator_id(w: &mut dyn Write, i: &IterId) -> Result<()> {
     write!(w, "{}", i)
 }
 
-fn print_local(w: &mut dyn Write, local: &Local, local_names: &[Str<'_>]) -> Result<()> {
+fn print_local(w: &mut dyn Write, local: &Local, local_names: &[StringId]) -> Result<()> {
     match local_names.get(local.idx as usize) {
-        Some(name) => write!(w, "{}", name.unsafe_as_str()),
+        Some(name) => write!(w, "{}", name.as_str()),
         None => write!(w, "_{}", local.idx),
     }
 }
@@ -247,7 +252,7 @@ fn print_local_range(w: &mut dyn Write, locrange: &LocalRange) -> Result<()> {
     write!(w, "L:{}+{}", locrange.start, locrange.len)
 }
 
-fn print_member_key(w: &mut dyn Write, mk: &MemberKey<'_>, local_names: &[Str<'_>]) -> Result<()> {
+fn print_member_key(w: &mut dyn Write, mk: &MemberKey<'_>, local_names: &[StringId]) -> Result<()> {
     use MemberKey as M;
     match mk {
         M::EC(si, op) => {

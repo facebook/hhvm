@@ -13,15 +13,15 @@ use std::sync::Arc;
 use ast_scope::Scope;
 use decl_provider::DeclProvider;
 use decl_provider::MemoProvider;
-use ffi::Str;
 use global_state::GlobalState;
-use hash::IndexSet;
 use hhbc::ClassName;
 use hhbc::ConstName;
 use hhbc::FunctionName;
 use hhbc::IncludePath;
 use hhbc::IncludePathSet;
 use hhbc::Local;
+use hhbc::StringId;
+use hhbc::StringIdIndexSet;
 use hhbc::SymbolRefs;
 use options::Options;
 use oxidized::ast;
@@ -48,7 +48,7 @@ pub struct Emitter<'arena, 'decl> {
     label_gen: LabelGen,
     local_gen: LocalGen,
     iterator: IterGen,
-    named_locals: IndexSet<Str<'arena>>,
+    named_locals: StringIdIndexSet,
 
     pub filepath: RelativePath,
 
@@ -129,7 +129,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
     /// puts the parameters first in left-to-right order, then local varables
     /// that have names from the source text. In HHAS those names must appear
     /// in the `.decl_vars` directive.
-    pub fn init_named_locals(&mut self, names: impl IntoIterator<Item = Str<'arena>>) {
+    pub fn init_named_locals(&mut self, names: impl IntoIterator<Item = StringId>) {
         assert!(self.named_locals.is_empty());
         self.named_locals = names.into_iter().collect();
     }
@@ -141,15 +141,35 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
     /// Given a name, return corresponding local. Panic if the local is unknown,
     /// indicating a logic bug in the compiler; all params and named locals must
     /// be provided in advance to init_named_locals().
-    pub fn named_local(&self, name: Str<'_>) -> Local {
+    pub fn named_local(&self, name: impl AsRef<str>) -> Local {
+        let name = name.as_ref();
+        match StringId::get_interned(name)
+            .and_then(|name| self.named_locals.get_index_of(&name).map(Local::new))
+        {
+            Some(local) => local,
+            None => panic!(
+                "{}: local not found among {:#?}",
+                name,
+                self.named_locals
+                    .iter()
+                    .map(|name| name.as_str())
+                    .collect::<Vec<_>>()
+            ),
+        }
+    }
+
+    /// Given a name, return corresponding local. Panic if the local is unknown,
+    /// indicating a logic bug in the compiler; all params and named locals must
+    /// be provided in advance to init_named_locals().
+    pub fn interned_local(&self, name: StringId) -> Local {
         match self.named_locals.get_index_of(&name).map(Local::new) {
             Some(local) => local,
             None => panic!(
                 "{}: local not found among {:#?}",
-                name.unsafe_as_str(),
+                name,
                 self.named_locals
                     .iter()
-                    .map(|name| name.unsafe_as_str())
+                    .map(|name| name.as_str())
                     .collect::<Vec<_>>()
             ),
         }
@@ -157,8 +177,8 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
 
     /// Given a named local, return its name. Panic for unnamed locals
     /// indicating a logic bug in the compiler.
-    pub fn local_name(&self, local: Local) -> &Str<'_> {
-        self.named_locals.get_index(local.idx as usize).unwrap()
+    pub fn local_name(&self, local: Local) -> StringId {
+        *self.named_locals.get_index(local.idx as usize).unwrap()
     }
 
     pub fn local_scope<R, F: FnOnce(&mut Self) -> R>(&mut self, f: F) -> R {

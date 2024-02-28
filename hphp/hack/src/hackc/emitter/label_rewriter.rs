@@ -31,10 +31,10 @@ fn create_label_to_offset_map<'arena>(instrseq: &InstrSeq<'arena>) -> HashMap<La
         .collect()
 }
 
-fn create_label_ref_map<'arena>(
+fn create_label_ref_map(
     label_to_offset: &HashMap<Label, u32>,
-    params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
-    body: &InstrSeq<'arena>,
+    params: &[(Param, Option<(Label, ast::Expr)>)],
+    body: &InstrSeq<'_>,
 ) -> (HashSet<Label>, HashMap<u32, Label>) {
     let mut label_gen = LabelGen::new();
     let mut used = HashSet::default();
@@ -68,7 +68,7 @@ fn rewrite_params_and_body<'arena>(
     label_to_offset: &HashMap<Label, u32>,
     used: &HashSet<Label>,
     offset_to_label: &HashMap<u32, Label>,
-    params: &mut [(Param<'arena>, Option<(Label, ast::Expr)>)],
+    params: &mut [(Param, Option<(Label, ast::Expr)>)],
     body: &mut InstrSeq<'arena>,
 ) {
     let relabel = |id: Label| {
@@ -98,9 +98,9 @@ fn rewrite_params_and_body<'arena>(
     });
 }
 
-pub fn relabel_function<'arena>(
-    params: &mut [(Param<'arena>, Option<(Label, ast::Expr)>)],
-    body: &mut InstrSeq<'arena>,
+pub fn relabel_function(
+    params: &mut [(Param, Option<(Label, ast::Expr)>)],
+    body: &mut InstrSeq<'_>,
 ) {
     let label_to_offset = create_label_to_offset_map(body);
     let (used, offset_to_label) = create_label_ref_map(&label_to_offset, params, body);

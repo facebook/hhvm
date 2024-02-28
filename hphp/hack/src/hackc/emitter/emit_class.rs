@@ -79,7 +79,7 @@ fn make_86method<'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     name: hhbc::MethodName<'arena>,
-    params: Vec<Param<'arena>>,
+    params: Vec<Param>,
     is_static: bool,
     visibility: Visibility,
     is_abstract: bool,
@@ -452,7 +452,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
         let tc = Constraint::intern("HH\\varray", TypeConstraintFlags::NoFlags);
         let param_local = Local::new(0);
         let params = vec![Param {
-            name: Str::new_str(alloc, string_utils::reified::INIT_METH_PARAM_NAME),
+            name: hhbc::intern(string_utils::reified::INIT_METH_PARAM_NAME),
             is_variadic: false,
             is_inout: false,
             is_readonly: false,
@@ -707,10 +707,9 @@ pub fn emit_class<'a, 'arena, 'decl>(
     let cinit_method = if initialized_constants.is_empty() {
         None
     } else {
-        let param_name = Str::new_str(alloc, "$constName");
         let param_local = Local::new(0);
         let params = vec![Param {
-            name: param_name,
+            name: hhbc::intern("$constName"),
             is_variadic: false,
             is_inout: false,
             is_readonly: false,

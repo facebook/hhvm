@@ -178,7 +178,7 @@ def _parse_fixture_cmd(
         return None
 
     try:
-        (cmd_name_prefix, generator_spec, target_filename) = shlex.split(cmd.strip())
+        (cmd_name_prefix, generator_spec, target_file_name) = shlex.split(cmd.strip())
 
         cmd_name_matcher = _FIXTURE_CMD_NAME_PREFIX_PATTERN.match(cmd_name_prefix)
         if not cmd_name_matcher:
@@ -187,10 +187,10 @@ def _parse_fixture_cmd(
             )
         cmd_name = cmd_name_matcher.group(1)
 
-        # Relative path from repo_root_dir_abspath to target file, eg:
-        # 'thrift/compiler/test/fixtures/adapter/src/module.thrift'
-        target_filename = os.path.relpath(
-            fixture_dir_abspath / target_filename, repo_root_dir_abspath
+        # target_file_name: "src/module.thrift" ->
+        # target_file_relpath: "thrift/compiler/test/fixtures/foobar/src/module.thrift"
+        target_file_relpath = (fixture_dir_abspath / target_file_name).relative_to(
+            repo_root_dir_abspath
         )
 
         base_args = [
@@ -219,7 +219,7 @@ def _parse_fixture_cmd(
 
         return FixtureCmd(
             unique_name=cmd_name,
-            build_command_args=base_args + [generator_spec, target_filename],
+            build_command_args=base_args + [generator_spec, target_file_relpath],
         )
     except Exception as err:
         raise RuntimeError(

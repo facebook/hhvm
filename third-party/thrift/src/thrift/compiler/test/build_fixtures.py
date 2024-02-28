@@ -85,7 +85,7 @@ def parsed_args():
 has_errors = False
 
 
-async def run_subprocess(sem: asyncio.Semaphore, cmd: list[str], *, cwd: str) -> None:
+async def _run_subprocess(sem: asyncio.Semaphore, cmd: list[str], *, cwd: Path) -> None:
     """Runs a subprocess for the given `cmd`.
 
     If the subprocess fails (i.e., returns a non-0 code), sets the global
@@ -152,7 +152,7 @@ def _add_processes_for_fixture(
         repo_root_dir_abspath, fixture_name, fixture_dir_abspath, thrift_bin_path
     ):
         processes.append(
-            run_subprocess(
+            _run_subprocess(
                 subprocess_semaphore,
                 fixture_cmd.build_command_args,
                 cwd=repo_root_dir_abspath,

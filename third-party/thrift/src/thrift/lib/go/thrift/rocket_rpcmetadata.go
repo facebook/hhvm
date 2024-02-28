@@ -20,16 +20,16 @@ import (
 	"fmt"
 )
 
-// ThriftRequestRPCMetadata is a thrift library version of the generated RequestRpcMetadata
-type ThriftRequestRPCMetadata struct {
+// requestRPCMetadata is a thrift library version of the generated RequestRpcMetadata
+type requestRPCMetadata struct {
 	Name    string
 	TypeID  MessageType
 	ProtoID ProtocolID
 	Zstd    bool
 }
 
-// SerializeRequestRPCMetadata sets the given arguments into a RequestRpcMetadata struct and serializes it into bytes
-func SerializeRequestRPCMetadata(request *ThriftRequestRPCMetadata) ([]byte, error) {
+// serializeRequestRPCMetadata sets the given arguments into a RequestRpcMetadata struct and serializes it into bytes
+func serializeRequestRPCMetadata(request *requestRPCMetadata) ([]byte, error) {
 	metadata, err := newRPCMetadataRequest(request)
 	if err != nil {
 		return nil, err
@@ -38,8 +38,8 @@ func SerializeRequestRPCMetadata(request *ThriftRequestRPCMetadata) ([]byte, err
 	return compactSerializer.Write(metadata)
 }
 
-// DeserializeRequestRPCMetadata deserializes the given bytes into a ResponseRpcMetadata struct
-func DeserializeRequestRPCMetadata(metadataBytes []byte) (*ThriftRequestRPCMetadata, error) {
+// deserializeRequestRPCMetadata deserializes the given bytes into a ResponseRpcMetadata struct
+func deserializeRequestRPCMetadata(metadataBytes []byte) (*requestRPCMetadata, error) {
 	metadata := &RequestRpcMetadata{}
 	compactDeserializer := NewCompactDeserializer()
 	err := compactDeserializer.Read(metadata, metadataBytes)
@@ -49,7 +49,7 @@ func DeserializeRequestRPCMetadata(metadataBytes []byte) (*ThriftRequestRPCMetad
 	return newRequestRPCMetadata(metadata)
 }
 
-func newRequestRPCMetadata(request *RequestRpcMetadata) (*ThriftRequestRPCMetadata, error) {
+func newRequestRPCMetadata(request *RequestRpcMetadata) (*requestRPCMetadata, error) {
 	name := request.GetName()
 	typeID, err := rpcKindToMessageType(request.GetKind())
 	if err != nil {
@@ -60,7 +60,7 @@ func newRequestRPCMetadata(request *RequestRpcMetadata) (*ThriftRequestRPCMetada
 		return nil, err
 	}
 	zstd := request.GetCompression() == CompressionAlgorithm_ZSTD
-	return &ThriftRequestRPCMetadata{
+	return &requestRPCMetadata{
 		Name:    name,
 		TypeID:  typeID,
 		ProtoID: protoID,
@@ -68,7 +68,7 @@ func newRequestRPCMetadata(request *RequestRpcMetadata) (*ThriftRequestRPCMetada
 	}, nil
 }
 
-func newRPCMetadataRequest(request *ThriftRequestRPCMetadata) (*RequestRpcMetadata, error) {
+func newRPCMetadataRequest(request *requestRPCMetadata) (*RequestRpcMetadata, error) {
 	metadata := NewRequestRpcMetadata()
 	metadata.SetName(&request.Name)
 	rpcProtocolID, err := protocolIDToRPCProtocolID(request.ProtoID)

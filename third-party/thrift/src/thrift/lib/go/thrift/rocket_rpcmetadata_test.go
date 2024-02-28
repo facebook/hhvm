@@ -23,15 +23,15 @@ import (
 )
 
 func TestRequestRPCMetadata(t *testing.T) {
-	want := &ThriftRequestRPCMetadata{
+	want := &requestRPCMetadata{
 		Name:    "test123",
 		TypeID:  CALL,
 		ProtoID: ProtocolIDCompact,
 		Zstd:    true,
 	}
-	data, err := SerializeRequestRPCMetadata(want)
+	data, err := serializeRequestRPCMetadata(want)
 	require.NoError(t, err)
-	got, err := DeserializeRequestRPCMetadata(data)
+	got, err := deserializeRequestRPCMetadata(data)
 	require.NoError(t, err)
 	require.Equal(t, want, got)
 }

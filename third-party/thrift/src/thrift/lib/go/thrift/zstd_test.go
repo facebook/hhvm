@@ -68,3 +68,21 @@ func TestHeaderZstd(t *testing.T) {
 		t.Fatalf("data sent was not compressed on frame %d", n)
 	}
 }
+
+func TestZstd(t *testing.T) {
+	want := []byte{0x28, 0xb5, 0x2f, 0xfd}
+	compressed, err := compressZstd(want)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Equal(compressed, want) {
+		t.Fatal("zstd compression failed")
+	}
+	got, err := decompressZstd(compressed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(got, want) {
+		t.Fatalf("zstd roundtrip failed: got %v, want %v", got, want)
+	}
+}

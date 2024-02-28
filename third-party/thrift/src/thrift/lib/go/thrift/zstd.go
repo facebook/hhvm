@@ -46,3 +46,24 @@ func zstdWriter(tmpbuf *bytes.Buffer, buf *bytes.Buffer) error {
 	}
 	return nil
 }
+
+// ## Request Compression
+// Requests may be compressed by the client after they have been serialized as described in #Request-serialization. If the request was compressed, the compression algorithm must be specified in the request metadata.
+// Reference: https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/server/interface/#request-compression
+func compressZstd(data []byte) ([]byte, error) {
+	z, err := zstd.NewWriter(nil)
+	if err != nil {
+		return nil, err
+	}
+	defer z.Close()
+	return z.EncodeAll(data, nil), nil
+}
+
+func decompressZstd(data []byte) ([]byte, error) {
+	z, err := zstd.NewReader(nil)
+	if err != nil {
+		return nil, err
+	}
+	defer z.Close()
+	return z.DecodeAll(data, nil)
+}

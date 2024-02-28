@@ -2312,9 +2312,15 @@ module EnumClassLabelOps = struct
           | (r, Tapply ((p, _), args)) -> mk (r, Tapply ((p, ctor), args))
           | _ -> dty
         in
-        let ((env, ty_err_opt), lty) =
-          Phase.localize_no_subst env ~ignore_errors:true dty
+        let ety_env =
+          {
+            empty_expand_env with
+            this_ty =
+              MakeType.class_type (Reason.Rwitness (fst enum_id)) enum_name [];
+          }
         in
+        let ((env, ty_err_opt), lty) = Phase.localize env ~ety_env dty in
+
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
         let hi = lty in
         let qualifier =

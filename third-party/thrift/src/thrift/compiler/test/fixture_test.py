@@ -23,6 +23,7 @@ import sys
 import tempfile
 import traceback
 import unittest
+from pathlib import Path
 
 import pkg_resources
 from thrift.compiler.test import fixture_utils
@@ -32,6 +33,7 @@ FIXTURE_ROOT = "."
 
 _THRIFT_BIN_PATH = fixture_utils.get_thrift_binary_path(thrift_bin_arg=None)
 assert _THRIFT_BIN_PATH
+
 fixtures_root_dir = os.path.join(FIXTURE_ROOT, "thrift/compiler/test/fixtures")
 
 
@@ -131,7 +133,7 @@ class FixtureTest(unittest.TestCase):
             os.path.join(self.tmp, "thrift/lib/thrift/"),
         )
         languages = set()
-        for cmd in fixture_utils.read_lines(os.path.join(fixture_dir, "cmd")):
+        for cmd in fixture_utils.read_lines(Path(fixture_dir) / "cmd"):
             # Skip commented out commands
             if cmd[0] == "#":
                 continue

@@ -50,8 +50,8 @@ def _ascend_find_exe(path: Path, target: str) -> typing.Optional[Path]:
         path = parent_path
 
 
-def read_lines(path: str) -> list[str]:
-    with open(path, "r") as f:
+def read_lines(path: Path) -> list[str]:
+    with path.open() as f:
         return f.readlines()
 
 
@@ -98,15 +98,25 @@ def _should_build_included_files_recursively(generator_spec: str) -> bool:
 
 
 def parse_fixture_cmds(
-    fixture_root: str, fixture_name: str, fixture_src: str, thrift_bin_path: Path
+    repo_root_dir_abspath: Path,
+    fixture_name: str,
+    fixture_dir_abspath: Path,
+    thrift_bin_path: Path,
 ) -> list[FixtureCmd]:
+    assert repo_root_dir_abspath.is_absolute()
+    assert fixture_dir_abspath.is_absolute()
+
     fixture_cmds = {}
 
-    cmds = read_lines(os.path.join(fixture_src, "cmd"))
+    cmds = read_lines(fixture_dir_abspath / "cmd")
 
     for cmd in cmds:
         fixture_cmd = _parse_fixture_cmd(
-            cmd, fixture_root, fixture_name, fixture_src, thrift_bin_path
+            cmd,
+            repo_root_dir_abspath,
+            fixture_name,
+            fixture_dir_abspath,
+            thrift_bin_path,
         )
         if fixture_cmd is None:
             continue
@@ -129,9 +139,9 @@ _FIXTURE_CMD_NAME_PREFIX_PATTERN = re.compile(r"^([a-z][a-z0-9_]*):$")
 
 def _parse_fixture_cmd(
     cmd: str,
-    fixture_root: str,
+    repo_root_dir_abspath: Path,
     fixture_name: str,
-    fixture_src: str,
+    fixture_dir_abspath: Path,
     thrift_bin_path: Path,
 ) -> typing.Optional[FixtureCmd]:
     """
@@ -177,25 +187,25 @@ def _parse_fixture_cmd(
             )
         cmd_name = cmd_name_matcher.group(1)
 
-        # Relative path from --fixture_root to target file, eg:
+        # Relative path from repo_root_dir_abspath to target file, eg:
         # 'thrift/compiler/test/fixtures/adapter/src/module.thrift'
         target_filename = os.path.relpath(
-            os.path.join(fixture_src, target_filename), fixture_root
+            fixture_dir_abspath / target_filename, repo_root_dir_abspath
         )
 
         base_args = [
             thrift_bin_path,
             "-I",
-            os.path.abspath(fixture_src),
+            fixture_dir_abspath,
             "-I",
-            os.path.abspath(fixture_root),
+            repo_root_dir_abspath,
         ]
         if _should_build_included_files_recursively(generator_spec):
             base_args.append("-r")
 
         base_args += [
             "-o",
-            os.path.abspath(fixture_src),
+            fixture_dir_abspath,
             "--gen",
         ]
 
@@ -233,3 +243,28 @@ def get_thrift_binary_path(
         return Path(pkg_resources.resource_filename(__name__, "thrift"))
 
     return _ascend_find_exe(Path.cwd(), thrift_bin_arg)
+
+
+def get_all_fixture_names(fixtures_root_dir_path: Path) -> list[str]:
+    """ "
+    Returns the (simple) names of all the fixture directories in the given
+    directory (which should typically correspond to the
+    `thrift/compiler/test/fixtures/` directory in a given repository).
+
+    The returned list contains the sorted "base names" of the fixture
+    directories, without any parent path, eg:
+
+    ```
+    [ 'any', 'basic', ...]
+    ```
+    """
+
+    assert fixtures_root_dir_path.is_dir()
+
+    fixture_dirs = (
+        fixture_dir
+        for fixture_dir in fixtures_root_dir_path.iterdir()
+        if (fixture_dir / "cmd").is_file()
+    )
+
+    return sorted((fixture_dir.name for fixture_dir in fixture_dirs))

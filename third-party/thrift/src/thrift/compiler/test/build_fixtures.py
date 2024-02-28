@@ -60,10 +60,12 @@ def parsed_args():
     )
     parser.add_argument(
         "--fixture-root",
-        dest="fixture_root",
+        dest="repo_root_dir",
         help=(
-            "$FIXTUREROOT/thrift/compiler/test/fixtures is where the"
-            " fixtures are located, defaults to the current working dir"
+            "Path to the root of the 'repository' that contains all files "
+            "related to thrift fixtures, i.e. "
+            "$FIXTUREROOT/thrift/compiler/test/fixtures is where the "
+            "fixtures are located. Defaults to the current working dir."
         ),
         type=str,
         default=DEFAULT_FIXTURE_ROOT,
@@ -112,8 +114,8 @@ async def run_subprocess(sem: asyncio.Semaphore, cmd: list[str], *, cwd: str) ->
 
 def _add_processes_for_fixture(
     fixture_name: str,
-    fixture_root: str,
-    fixture_dir: str,
+    repo_root_dir_abspath: Path,
+    fixtures_root_dir_abspath: Path,
     thrift_bin_path: Path,
     subprocess_semaphore,
     processes: list,
@@ -121,25 +123,48 @@ def _add_processes_for_fixture(
     """
     Handles the generation of the given fixture, adding any pending coroutine
     to the given `processes` list.
+
+
+    Args:
+        fixture_name: Name of the fixture, which must correspond to the name
+          of a directory directly under `fixtures_root_dir_abspath`.
+
+        repo_root_dir_abspath: Absolute path of the root of the 'repository',
+          i.e. the directory that contains the `thrift/compiler/...` file
+          hierarchy.
+
+        fixtures_root_dir_abspath: Absolute path of the parent directory of all
+          fixtures. The given `fixture_name` must be a directory immediately
+          under this directory.
     """
-    # FIXTURE_ROOT/thrift/compiler/test/fixtures/FIXTURE_NAME
-    # eg. './thrift/compiler/test/fixtures/adapter'
-    fixture_src = os.path.join(fixture_dir, fixture_name)
+    fixture_dir_abspath = fixtures_root_dir_abspath / fixture_name
 
     # Delete all existing fixture files (except "cmd", "src", ".*")
-    for existing_fixture_filename in set(os.listdir(fixture_src)) - {"cmd", "src"}:
+    for existing_fixture_filename in {p.name for p in fixture_dir_abspath.iterdir()} - {
+        "cmd",
+        "src",
+    }:
         if existing_fixture_filename.startswith("."):
             continue
-        shutil.rmtree(os.path.join(fixture_src, existing_fixture_filename))
+        shutil.rmtree(fixture_dir_abspath / existing_fixture_filename)
 
     for fixture_cmd in fixture_utils.parse_fixture_cmds(
-        fixture_root, fixture_name, fixture_src, thrift_bin_path
+        repo_root_dir_abspath, fixture_name, fixture_dir_abspath, thrift_bin_path
     ):
         processes.append(
             run_subprocess(
-                subprocess_semaphore, fixture_cmd.build_command_args, cwd=fixture_root
+                subprocess_semaphore,
+                fixture_cmd.build_command_args,
+                cwd=repo_root_dir_abspath,
             )
         )
+
+
+async def _get_fixture_names(args, fixtures_root_dir_path: Path) -> list[str]:
+    if args.fixture_names is not None:
+        return args.fixture_names
+
+    return fixture_utils.get_all_fixture_names(fixtures_root_dir_path)
 
 
 async def main() -> int:
@@ -154,19 +179,13 @@ async def main() -> int:
         )
         return 1
 
-    fixture_root: str = args.fixture_root
-    # Directory that contains all fixture directories (one fixture per sub-dir).
-    fixture_dir: str = os.path.join(fixture_root, "thrift/compiler/test/fixtures")
+    repo_root_dir_abspath = Path(args.repo_root_dir).resolve(strict=True)
+    assert repo_root_dir_abspath.is_dir()
 
-    fixture_names = (
-        args.fixture_names
-        if args.fixture_names is not None
-        else sorted(
-            f
-            for f in os.listdir(fixture_dir)
-            if os.path.isfile(os.path.join(fixture_dir, f, "cmd"))
-        )
-    )
+    # Directory that contains all fixture directories (one fixture per sub-dir).
+    fixtures_root_dir_abspath = repo_root_dir_abspath / "thrift/compiler/test/fixtures"
+
+    fixture_names = await _get_fixture_names(args, fixtures_root_dir_abspath)
 
     # Semaphore to limit the number of concurrent fixture builds.
     # Otherwise, a swarm of compiler processes results in too much
@@ -187,8 +206,8 @@ async def main() -> int:
 
         _add_processes_for_fixture(
             fixture_name,
-            fixture_root,
-            fixture_dir,
+            repo_root_dir_abspath,
+            fixtures_root_dir_abspath,
             thrift_bin_path,
             subprocess_semaphore,
             processes,

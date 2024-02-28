@@ -178,7 +178,7 @@ Maps contain a variable encoded length followed by the key and value types encod
 #### Varint Encoding
 
 Varint encoding is a variable length encoding for integer values.
-Unsigned integers are simplest. They are divided into 7-bit groups, from least to most significant, until there are no more non-zero groups. Each group is encoded as `1xxxxxxx` until the last group which is `0xxxxxxx`. So `0x12` - `00010010` in binary - would be literally encoded that way, since it's only a single group. `0x37f0` is `00_1111101_1110000` in binary (using `_` as a visual separator to show the 7 bit groups), so would be encoded as `1_1110000` `0_1111101` (again, `_` as visual separator).
+Unsigned integers are simplest. They are divided into 7-bit groups, from least to most significant, until there are no more non-zero groups. Each group is encoded as `1xxxxxxx` until the last group which is `0xxxxxxx`. So `0x12` - `00010010` in binary - would be literally encoded that way, since it's only a single group. `0x3ef0` is `00_1111101_1110000` in binary (using `_` as a visual separator to show the 7 bit groups), so would be encoded as `1_1110000` `0_1111101` (again, `_` as visual separator).
 Signed integers could be treated the same as unsigned, but it would result in all negative values being treated as large positive numbers, with correspondingly large encodings. It would be better to encode numbers with small absolute values more compactly, regardless of sign. Varint does this via "zigzag" encoding, where all numbers are mapped to a positive value before encoding:
 
 | Original | Encoded as |

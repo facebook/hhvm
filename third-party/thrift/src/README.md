@@ -153,3 +153,7 @@ Information regarding C++ Static Reflection support can be found under the [stat
 To collect runtime stats from a Thrift server, e.g. the number of active requests/connections, the C++ Thrift server supports an observer API that installs callbacks at a set of specific execution points in the server.
 
 To expose collected metrics out of the server process, one way is to use `fb303` interfaces, see [fb303 Github repo](https://github.com/facebook/fb303).
+
+## License
+
+Facebook Thrift is [Apache 2.0 licensed](LICENSE).

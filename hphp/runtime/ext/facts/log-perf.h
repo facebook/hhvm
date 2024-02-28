@@ -25,11 +25,13 @@ struct FactsLogger final : public FactsStore,
   static std::shared_ptr<FactsStore> wrap(
       std::shared_ptr<FactsStore> inner,
       std::string_view impl,
-      uint32_t sampleRate);
+      uint32_t sampleRate,
+      uint32_t errorSampleRate);
   FactsLogger(
       std::shared_ptr<FactsStore> inner,
       std::string_view impl,
-      uint32_t sampleRate);
+      uint32_t sampleRate,
+      uint32_t errorSampleRate);
   ~FactsLogger() override = default;
 
   FactsLogger(const FactsLogger&) = delete;
@@ -95,6 +97,7 @@ struct FactsLogger final : public FactsStore,
   std::shared_ptr<FactsStore> m_inner;
   std::string m_impl;
   uint32_t m_sampleRate;
+  uint32_t m_errorSampleRate;
 };
 
 } // namespace HPHP::Facts

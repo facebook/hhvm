@@ -24,16 +24,22 @@ namespace HPHP::Facts {
 FactsLogger::FactsLogger(
     std::shared_ptr<FactsStore> inner,
     std::string_view impl,
-    uint32_t sampleRate)
-    : m_inner{std::move(inner)}, m_impl{impl}, m_sampleRate{sampleRate} {}
+    uint32_t sampleRate,
+    uint32_t errorSampleRate)
+    : m_inner{std::move(inner)},
+      m_impl{impl},
+      m_sampleRate{sampleRate},
+      m_errorSampleRate{errorSampleRate} {}
 
 std::shared_ptr<FactsStore> FactsLogger::wrap(
     std::shared_ptr<FactsStore> inner,
     std::string_view impl,
-    uint32_t sampleRate) {
+    uint32_t sampleRate,
+    uint32_t errorSampleRate) {
   if (sampleRate != 0) {
     XLOGF(DBG0, "FactsLogger enabled for {}", impl);
-    return std::make_shared<FactsLogger>(std::move(inner), impl, sampleRate);
+    return std::make_shared<FactsLogger>(
+        std::move(inner), impl, sampleRate, errorSampleRate);
   } else {
     return inner;
   }
@@ -48,8 +54,13 @@ auto FactsLogger::logPerf(
     std::string_view method,
     std::string_view key,
     F&& func) const {
-  return timeSboxEvent(
-      m_sampleRate, m_impl, method, key, std::forward<F>(func));
+  return recordSboxEventWithTimingAndError(
+      m_sampleRate,
+      m_errorSampleRate,
+      m_impl,
+      method,
+      key,
+      std::forward<F>(func));
 }
 
 void FactsLogger::ensureUpdated() {

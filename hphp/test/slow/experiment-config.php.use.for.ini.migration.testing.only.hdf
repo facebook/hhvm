@@ -1,0 +1,118 @@
+Tiers {
+  AlwaysOnTier {
+    Experiment {
+      name = Always On
+      rate = 1
+    }
+    overwrite {
+      CustomSettings.AlwaysOn = 42
+    }
+  }
+
+  AlwaysOnTierFlipped {
+    Experiment {
+      name = Always On Flipped
+      rate = 1
+      flip = 1
+    }
+    overwrite {
+      CustomSettings.AlwaysOnFlip = 42
+    }
+  }
+
+  AlwaysOffTier {
+    Experiment {
+      name = Always Off
+      rate = 0
+    }
+    overwrite {
+      CustomSettings.AlwaysOff = 24
+    }
+  }
+
+  AlwaysOffTierFlip {
+    Experiment {
+      name = Always Off Flipped
+      rate = 0
+      flip = 1
+    }
+    overwrite {
+      CustomSettings.AlwaysOffFlip = 24
+    }
+  }
+
+  AlwaysWrongTier {
+    machine = /NOPE/
+    Experiment {
+      name = Wrong
+      rate = 1
+    }
+    overwrite {
+      CustomSettings.Wrong = EEEP
+    }
+  }
+
+  PassesCheck {
+    Experiment {
+      # This should hash to 0x370fe44bbda5768c (3967640810692114060)
+      name = test_config_0
+    }
+    overwrite {
+      CustomSettings.cfg0 = PASS
+    }
+  }
+
+  PassesCheckFlip {
+    Experiment {
+      name = test_config_0
+      flip = 1
+    }
+    overwrite {
+      CustomSettings.cfg0_flip = FAIL
+    }
+  }
+
+  FailsCheck {
+    Experiment {
+      # This should hash to 0xb44eae8491cc1b57 (-5454230214294103209)
+      name = test_config_1
+    }
+    overwrite {
+      CustomSettings.cfg1 = FAIL
+    }
+  }
+
+  FailsCheckFlip {
+    Experiment {
+      name = test_config_1
+      flip = 1
+    }
+    overwrite {
+      CustomSettings.cfg1_flip = PASS
+    }
+  }
+
+  FailsCheck2 {
+    Experiment {
+      # This should hash to 0x5977f69039c40389 (6446892490909025161)
+      name = test_config_2
+    }
+    overwrite {
+      CustomSettings.cfg2 = FAIL
+    }
+  }
+
+  FailsCheck2Flip {
+    Experiment {
+      name = test_config_2
+      flip = 1
+    }
+    overwrite {
+      CustomSettings.cfg2_flip = PASS
+    }
+  }
+}
+
+CustomSettings {
+  setting = hello
+}

@@ -1535,6 +1535,18 @@ bool HHVM_FUNCTION(package_exists, StringArg name) {
   return packageInfo.isPackageInActiveDeployment(name.get());
 }
 
+Array HHVM_FUNCTION(active_config_experiments) {
+  VecInit v{RO::ActiveExperiments.size()};
+  for (auto& s : RO::ActiveExperiments) v.append(String(s));
+  return v.toArray();
+}
+
+Array HHVM_FUNCTION(inactive_config_experiments) {
+  VecInit v{RO::InactiveExperiments.size()};
+  for (auto& s : RO::InactiveExperiments) v.append(String(s));
+  return v.toArray();
+}
+
 static struct HHExtension final : Extension {
   HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) { }
   void moduleRegisterNative() override {
@@ -1579,6 +1591,8 @@ static struct HHExtension final : Extension {
     X(get_all_packages);
     X(get_all_deployments);
     X(package_exists);
+    X(active_config_experiments);
+    X(inactive_config_experiments);
 #undef X
 #define X(nm) HHVM_NAMED_FE(HH\\rqtrace\\nm, HHVM_FN(nm))
     X(is_enabled);

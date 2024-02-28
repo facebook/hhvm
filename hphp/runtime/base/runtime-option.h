@@ -654,6 +654,9 @@ struct RuntimeOption {
 
   static std::vector<std::string> TzdataSearchPaths;
 
+  static hphp_fast_string_set ActiveExperiments;
+  static hphp_fast_string_set InactiveExperiments;
+
 #define EVALFLAGS()                                                     \
   /* F(type, name, defaultVal) */                                       \
   /*                                                                    \

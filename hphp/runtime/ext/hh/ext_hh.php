@@ -350,6 +350,12 @@ function get_all_deployments(
 <<__Native>>
 function package_exists(string $name): bool;
 
+<<__Native>>
+function active_config_experiments(): vec<string>;
+
+<<__Native>>
+function inactive_config_experiments(): vec<string>;
+
 } // HH
 
 namespace HH\Rx {

@@ -46,6 +46,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/ext/extension-registry.h"
+#include "hphp/runtime/ext/hash/hash_murmur.h"
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/files-match.h"
@@ -645,6 +646,8 @@ int RuntimeOption::ForceErrorReportingLevel = 0;
 
 std::string RuntimeOption::ServerUser;
 std::vector<std::string> RuntimeOption::TzdataSearchPaths;
+hphp_fast_string_set RuntimeOption::ActiveExperiments;
+hphp_fast_string_set RuntimeOption::InactiveExperiments;
 
 int RuntimeOption::RaiseDebuggingFrequency = 1;
 int64_t RuntimeOption::SerializationSizeLimit = StringData::MaxSize;
@@ -1223,12 +1226,68 @@ static bool matchShard(
   return seed % nshards <= shard;
 }
 
+static Optional<uint64_t> hostNumber(const std::string& hostname) {
+  auto const pos = hostname.find_first_of("0123456789");
+  if (pos == std::string::npos) return {};
+
+  try {
+    return std::stoll(hostname.substr(pos));
+  } catch (const std::invalid_argument&) {
+  } catch (const std::out_of_range&) {
+  }
+
+  return {};
+}
+
+static bool matchExperiment(
+  bool enableShards,
+  const std::string& hostname,
+  const IniSetting::Map& ini, Hdf& config,
+  std::vector<std::string>& messages
+) {
+  if (!config.exists("Experiment")) return true;
+  if (!config.exists("Experiment.name")) {
+    config["Experiment"].setVisited();
+    messages.push_back(
+      "Detected misconfigured experiment with no name, skipping"
+    );
+    return false;
+  }
+
+  if (!enableShards) {
+    config["Experiment"].setVisited();
+    return false;
+  }
+
+  auto const rate = Config::GetInt64(ini, config, "Experiment.rate", 2);
+  auto const flip = Config::GetBool(ini, config, "Experiment.flip", false);
+  auto const name = Config::GetString(ini, config, "Experiment.name");
+
+  if (rate == 0) return flip;
+  if (rate == 1) return !flip;
+
+  auto const num  = hostNumber(hostname).value_or(12345678);
+  auto const hash = murmur_hash_64A(name.data(), name.size(), num);
+  auto const res  = hash % rate == 0;
+
+  messages.push_back(folly::sformat(
+    "Checking Experiment `{}'; hostname = {}; Seed = {}; Hash = {}; Flip = {}",
+    name, hostname, num, hash, flip ? "true" : "false"
+  ));
+
+  return flip ? !res : res;
+}
+
 // A machine can belong to a tier, which can overwrite
 // various settings, even if they are set in the same
 // hdf file. However, CLI overrides still win the day over
 // everything.
-static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
-                                                  Hdf& config) {
+static std::vector<std::string> getTierOverwrites(
+  IniSetting::Map& ini,
+  Hdf& config,
+  hphp_fast_string_set& active_exps,
+  hphp_fast_string_set& inactive_exps
+) {
 
   // Machine metrics
   string hostname, tier, task, cpu, tiers, tags;
@@ -1302,7 +1361,11 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
                                 "cpu='{}', tiers='{}', tags='{}'",
                                 hostname, tier, task, cpu, tiers, tags));
       }
-      if (matchesTier(hdf)) {
+      auto const matches = matchesTier(hdf);
+      auto const matches_exp = matchExperiment(
+        enableShards, hostname, ini, hdf, messages
+      );
+      if (matches && matches_exp) {
         messages.emplace_back(folly::sformat(
                                 "Matched tier: {}", hdf.getName()));
         if (enableShards && hdf["DisableShards"].configGetBool()) {
@@ -1316,8 +1379,13 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
             config.remove(s);
           }
         }
+        if (hdf.exists("Experiment.name")) {
+          active_exps.emplace(Config::GetString(ini, hdf, "Experiment.name"));
+        }
         config.copy(hdf["overwrite"]);
         // no break here, so we can continue to match more overwrites
+      } else if (matches && !matches_exp && hdf.exists("Experiment.name")) {
+        inactive_exps.emplace(Config::GetString(ini, hdf, "Experiment.name"));
       }
       // Avoid lint errors about unvisited nodes when the tier does not match.
       hdf["DisableShards"].setVisited();
@@ -1366,7 +1434,8 @@ void RuntimeOption::Load(
   }
 
   // See if there are any Tier-based overrides
-  auto m = getTierOverwrites(ini, config);
+  auto m = getTierOverwrites(ini, config, ActiveExperiments,
+                             InactiveExperiments);
   if (messages) *messages = std::move(m);
 
   // RelativeConfigs can be set by commandline flags and tier overwrites, they
@@ -1405,7 +1474,8 @@ void RuntimeOption::Load(
       if (found) newConfigs.emplace_back(std::move(fullpath));
     }
     if (!newConfigs.empty()) {
-      auto m2 = getTierOverwrites(ini, config);
+      auto m2 = getTierOverwrites(ini, config, ActiveExperiments,
+                                  InactiveExperiments);
       if (messages) *messages = std::move(m2);
       if (s_RelativeConfigs != original) {
         relConfigsError = folly::sformat(

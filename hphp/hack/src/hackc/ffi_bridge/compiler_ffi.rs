@@ -78,6 +78,7 @@ mod ffi {
         optimize_param_lifetimes: bool,
         optimize_local_lifetimes: bool,
         optimize_local_iterators: bool,
+        optimize_is_type_checks: bool,
     }
 
     struct ParserFlags {
@@ -610,6 +611,7 @@ impl ffi::NativeEnv {
                 optimize_param_lifetimes: self.hhbc_flags.optimize_param_lifetimes,
                 optimize_local_lifetimes: self.hhbc_flags.optimize_local_lifetimes,
                 optimize_local_iterators: self.hhbc_flags.optimize_local_iterators,
+                optimize_is_type_checks: self.hhbc_flags.optimize_is_type_checks,
                 ..Default::default()
             },
             flags: EnvFlags {

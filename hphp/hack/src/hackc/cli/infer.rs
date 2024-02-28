@@ -154,6 +154,10 @@ fn build_ir<'a, 'arena>(
     // implemented in the IR
     env.hhbc_flags.optimize_local_iterators = false;
 
+    // And here again for IsTypeC optimizations as this changes the structure of
+    // the code in some of the tests
+    env.hhbc_flags.optimize_is_type_checks = false;
+
     let decl_provider = SelfProvider::wrap_existing_provider(
         None,
         env.to_decl_parser_options(),

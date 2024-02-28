@@ -318,6 +318,7 @@ void RepoOptionsFlags::initHhbcFlags(hackc::HhbcFlags& flags) const {
   flags.optimize_param_lifetimes = OptimizeParamLifetimes;
   flags.optimize_local_lifetimes = OptimizeLocalLifetimes;
   flags.optimize_local_iterators = OptimizeLocalIterators;
+  flags.optimize_is_type_checks = OptimizeIsTypeChecks;
 }
 
 void RepoOptionsFlags::initParserFlags(hackc::ParserFlags& flags) const {

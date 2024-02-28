@@ -119,6 +119,11 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
   course of the loop is either not modified, or is only modified at the $key
   location.
 
+- bool Hack.Lang.OptimizeIsTypeChecks = false, paulbiss, repooptionsflag(Parser)
+
+  Controls whether hackc will attempt to emit IsTypeC instructions in place of
+  IsTypeStructC for primitive types that are trivially checkable.
+
 - bool Hack.Lang.LookForTypechecker = false, UNKNOWN
 - bool Hack.Lang.AutoTypecheck = LookForTypechecker, UNKNOWN
 

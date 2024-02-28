@@ -53,6 +53,7 @@ use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
 use itertools::Itertools;
 use lazy_static::lazy_static;
+use naming_special_names_rust::collections;
 use naming_special_names_rust::emitter_special_functions;
 use naming_special_names_rust::fb;
 use naming_special_names_rust::pseudo_consts;
@@ -2977,6 +2978,36 @@ fn emit_is_shallow<'a, 'arena, 'decl>(
     emit_is_with_kind(e, env, pos, h, hhbc::TypeStructEnforceKind::Shallow)
 }
 
+fn hint_to_type_op<'arena, 'decl>(e: &Emitter<'arena, 'decl>, h: &ast::Hint) -> Option<IsTypeOp> {
+    use aast_defs::Hint_::*;
+    use aast_defs::Tprim;
+
+    if !e.options().hhbc.optimize_is_type_checks {
+        return None;
+    }
+
+    let ast::Hint(_, inner) = h;
+    match inner.as_ref() {
+        Hprim(Tprim::Tnull) => Some(IsTypeOp::Null),
+        Hprim(Tprim::Tint) => Some(IsTypeOp::Int),
+        Hprim(Tprim::Tfloat) => Some(IsTypeOp::Dbl),
+        Hprim(Tprim::Tbool) => Some(IsTypeOp::Bool),
+        Hprim(Tprim::Tstring) => Some(IsTypeOp::Str),
+        Happly(ast::Id(_, id), _) => match id.as_str() {
+            typehints::HH_INT => Some(IsTypeOp::Int),
+            typehints::HH_NULL => Some(IsTypeOp::Null),
+            typehints::HH_FLOAT => Some(IsTypeOp::Dbl),
+            typehints::HH_BOOL => Some(IsTypeOp::Bool),
+            typehints::HH_STRING => Some(IsTypeOp::Str),
+            collections::DICT => Some(IsTypeOp::Dict),
+            collections::VEC => Some(IsTypeOp::Vec),
+            collections::KEYSET => Some(IsTypeOp::Keyset),
+            _ => None,
+        },
+        _ => None,
+    }
+}
+
 fn emit_is_with_kind<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
@@ -2984,6 +3015,10 @@ fn emit_is_with_kind<'a, 'arena, 'decl>(
     h: &ast::Hint,
     kind: hhbc::TypeStructEnforceKind,
 ) -> Result<InstrSeq<'arena>> {
+    if let Some(op) = hint_to_type_op(e, h) {
+        return Ok(instr::is_type_c(op));
+    }
+
     let (ts_instrs, is_static) = emit_reified_arg(e, env, pos, true, h)?;
     Ok(if is_static {
         match &*h.1 {
@@ -4953,11 +4988,6 @@ fn emit_as<'a, 'arena, 'decl>(
         enforce_deep,
     } = as_;
     e.local_scope(|e| {
-        let arg_local = e.local_gen_mut().get_unnamed();
-        let type_struct_local = e.local_gen_mut().get_unnamed();
-        let (ts_instrs, is_static) = emit_reified_arg(e, env, pos, true, hint)?;
-        let then_label = e.label_gen_mut().next_regular();
-        let done_label = e.label_gen_mut().next_regular();
         let (enforcement, exception) = if *enforce_deep {
             (
                 hhbc::TypeStructEnforceKind::Deep,
@@ -4969,6 +4999,30 @@ fn emit_as<'a, 'arena, 'decl>(
                 AsTypeStructExceptionKind::Error,
             )
         };
+        let done_label = e.label_gen_mut().next_regular();
+
+        if let Some(op) = hint_to_type_op(e, hint) {
+            return Ok(InstrSeq::gather(vec![
+                emit_expr(e, env, expr)?,
+                instr::dup(),
+                instr::is_type_c(op),
+                instr::jmp_nz(done_label),
+                if *is_nullable {
+                    InstrSeq::gather(vec![instr::pop_c(), instr::null(), instr::jmp(done_label)])
+                } else {
+                    InstrSeq::gather(vec![
+                        emit_reified_arg(e, env, pos, true, hint)?.0,
+                        instr::throw_as_type_struct_exception(exception),
+                    ])
+                },
+                instr::label(done_label),
+            ]));
+        }
+
+        let arg_local = e.local_gen_mut().get_unnamed();
+        let type_struct_local = e.local_gen_mut().get_unnamed();
+        let (ts_instrs, is_static) = emit_reified_arg(e, env, pos, true, hint)?;
+        let then_label = e.label_gen_mut().next_regular();
         let main_block = |ts_instrs, resolve| {
             InstrSeq::gather(vec![
                 ts_instrs,

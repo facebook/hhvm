@@ -91,6 +91,7 @@ pub struct HhbcFlags {
     pub optimize_param_lifetimes: bool,
     pub optimize_local_lifetimes: bool,
     pub optimize_local_iterators: bool,
+    pub optimize_is_type_checks: bool,
 }
 
 impl Default for HhbcFlags {
@@ -111,6 +112,7 @@ impl Default for HhbcFlags {
             optimize_param_lifetimes: true,
             optimize_local_lifetimes: true,
             optimize_local_iterators: true,
+            optimize_is_type_checks: true,
         }
     }
 }

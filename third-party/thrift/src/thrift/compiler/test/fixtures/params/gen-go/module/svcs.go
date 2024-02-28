@@ -128,7 +128,7 @@ func (c *NestedContainersChannelClient) MapList(ctx context.Context, foo map[int
 }
 
 func (c *NestedContainersClient) MapList(foo map[int32][]int32) (error) {
-    return c.chClient.MapList(nil, foo)
+    return c.chClient.MapList(context.Background(), foo)
 }
 
 func (c *NestedContainersClient) MapListContext(ctx context.Context, foo map[int32][]int32) (error) {
@@ -148,7 +148,7 @@ func (c *NestedContainersChannelClient) MapSet(ctx context.Context, foo map[int3
 }
 
 func (c *NestedContainersClient) MapSet(foo map[int32][]int32) (error) {
-    return c.chClient.MapSet(nil, foo)
+    return c.chClient.MapSet(context.Background(), foo)
 }
 
 func (c *NestedContainersClient) MapSetContext(ctx context.Context, foo map[int32][]int32) (error) {
@@ -168,7 +168,7 @@ func (c *NestedContainersChannelClient) ListMap(ctx context.Context, foo []map[i
 }
 
 func (c *NestedContainersClient) ListMap(foo []map[int32]int32) (error) {
-    return c.chClient.ListMap(nil, foo)
+    return c.chClient.ListMap(context.Background(), foo)
 }
 
 func (c *NestedContainersClient) ListMapContext(ctx context.Context, foo []map[int32]int32) (error) {
@@ -188,7 +188,7 @@ func (c *NestedContainersChannelClient) ListSet(ctx context.Context, foo [][]int
 }
 
 func (c *NestedContainersClient) ListSet(foo [][]int32) (error) {
-    return c.chClient.ListSet(nil, foo)
+    return c.chClient.ListSet(context.Background(), foo)
 }
 
 func (c *NestedContainersClient) ListSetContext(ctx context.Context, foo [][]int32) (error) {
@@ -208,7 +208,7 @@ func (c *NestedContainersChannelClient) Turtles(ctx context.Context, foo [][]map
 }
 
 func (c *NestedContainersClient) Turtles(foo [][]map[int32]map[int32][]int32) (error) {
-    return c.chClient.Turtles(nil, foo)
+    return c.chClient.Turtles(context.Background(), foo)
 }
 
 func (c *NestedContainersClient) TurtlesContext(ctx context.Context, foo [][]map[int32]map[int32][]int32) (error) {

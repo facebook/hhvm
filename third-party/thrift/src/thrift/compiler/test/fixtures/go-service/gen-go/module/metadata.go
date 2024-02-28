@@ -252,6 +252,19 @@ var serviceMetadatas = []*metadata.ThriftService{
         },
     ),
             metadata.NewThriftFunction().
+    SetName("getContextCollision").
+    SetIsOneway(false).
+    SetReturnType(premadeThriftType_i32).
+    SetArguments(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("context").
+    SetIsOptional(false).
+    SetType(premadeThriftType_i64),
+        },
+    ),
+            metadata.NewThriftFunction().
     SetName("getOutCollision").
     SetIsOneway(false).
     SetReturnType(premadeThriftType_i32).

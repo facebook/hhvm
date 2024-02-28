@@ -118,7 +118,7 @@ func (c *CChannelClient) F(ctx context.Context) (error) {
 }
 
 func (c *CClient) F() (error) {
-    return c.chClient.F(nil)
+    return c.chClient.F(context.Background())
 }
 
 func (c *CClient) FContext(ctx context.Context) (error) {
@@ -142,7 +142,7 @@ func (c *CChannelClient) Thing(ctx context.Context, a int32, b string, c []int32
 }
 
 func (c *CClient) Thing(a int32, b string, c []int32) (string, error) {
-    return c.chClient.Thing(nil, a, b, c)
+    return c.chClient.Thing(context.Background(), a, b, c)
 }
 
 func (c *CClient) ThingContext(ctx context.Context, a int32, b string, c []int32) (string, error) {

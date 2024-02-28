@@ -40,6 +40,7 @@ type GetEntity interface {
     GetLegacyStuff(ctx context.Context, numPos int64, numNeg1 int64, numNeg2 int64) (int32, error)
     GetCtxCollision(ctx1 context.Context, ctx int64) (int32, error)
     GetCtx1Collision(ctx2 context.Context, ctx int64, ctx1 int64) (int32, error)
+    GetContextCollision(ctx context.Context, context_ int64) (int32, error)
     GetOutCollision(ctx context.Context, out int64) (int32, error)
     GetOut1Collision(ctx context.Context, out int64, out1 int64) (int32, error)
     GetInCollision(ctx context.Context, in int64) (int32, error)
@@ -70,6 +71,7 @@ type GetEntityClientInterface interface {
     GetLegacyStuff(numPos int64, numNeg1 int64, numNeg2 int64) (int32, error)
     GetCtxCollision(ctx int64) (int32, error)
     GetCtx1Collision(ctx int64, ctx1 int64) (int32, error)
+    GetContextCollision(context_ int64) (int32, error)
     GetOutCollision(out int64) (int32, error)
     GetOut1Collision(out int64, out1 int64) (int32, error)
     GetInCollision(in int64) (int32, error)
@@ -95,6 +97,7 @@ type GetEntityContextClientInterface interface {
     GetLegacyStuffContext(ctx context.Context, numPos int64, numNeg1 int64, numNeg2 int64) (int32, error)
     GetCtxCollisionContext(ctx1 context.Context, ctx int64) (int32, error)
     GetCtx1CollisionContext(ctx2 context.Context, ctx int64, ctx1 int64) (int32, error)
+    GetContextCollisionContext(ctx context.Context, context_ int64) (int32, error)
     GetOutCollisionContext(ctx context.Context, out int64) (int32, error)
     GetOut1CollisionContext(ctx context.Context, out int64, out1 int64) (int32, error)
     GetInCollisionContext(ctx context.Context, in int64) (int32, error)
@@ -176,7 +179,7 @@ func (c *GetEntityChannelClient) GetEntity(ctx context.Context, r *GetEntityRequ
 }
 
 func (c *GetEntityClient) GetEntity(r *GetEntityRequest) (*GetEntityResponse, error) {
-    return c.chClient.GetEntity(nil, r)
+    return c.chClient.GetEntity(context.Background(), r)
 }
 
 func (c *GetEntityClient) GetEntityContext(ctx context.Context, r *GetEntityRequest) (*GetEntityResponse, error) {
@@ -195,7 +198,7 @@ func (c *GetEntityChannelClient) GetBool(ctx context.Context) (bool, error) {
 }
 
 func (c *GetEntityClient) GetBool() (bool, error) {
-    return c.chClient.GetBool(nil)
+    return c.chClient.GetBool(context.Background())
 }
 
 func (c *GetEntityClient) GetBoolContext(ctx context.Context) (bool, error) {
@@ -214,7 +217,7 @@ func (c *GetEntityChannelClient) GetByte(ctx context.Context) (int8, error) {
 }
 
 func (c *GetEntityClient) GetByte() (int8, error) {
-    return c.chClient.GetByte(nil)
+    return c.chClient.GetByte(context.Background())
 }
 
 func (c *GetEntityClient) GetByteContext(ctx context.Context) (int8, error) {
@@ -233,7 +236,7 @@ func (c *GetEntityChannelClient) GetI16(ctx context.Context) (int16, error) {
 }
 
 func (c *GetEntityClient) GetI16() (int16, error) {
-    return c.chClient.GetI16(nil)
+    return c.chClient.GetI16(context.Background())
 }
 
 func (c *GetEntityClient) GetI16Context(ctx context.Context) (int16, error) {
@@ -252,7 +255,7 @@ func (c *GetEntityChannelClient) GetI32(ctx context.Context) (int32, error) {
 }
 
 func (c *GetEntityClient) GetI32() (int32, error) {
-    return c.chClient.GetI32(nil)
+    return c.chClient.GetI32(context.Background())
 }
 
 func (c *GetEntityClient) GetI32Context(ctx context.Context) (int32, error) {
@@ -271,7 +274,7 @@ func (c *GetEntityChannelClient) GetI64(ctx context.Context) (int64, error) {
 }
 
 func (c *GetEntityClient) GetI64() (int64, error) {
-    return c.chClient.GetI64(nil)
+    return c.chClient.GetI64(context.Background())
 }
 
 func (c *GetEntityClient) GetI64Context(ctx context.Context) (int64, error) {
@@ -290,7 +293,7 @@ func (c *GetEntityChannelClient) GetDouble(ctx context.Context) (float64, error)
 }
 
 func (c *GetEntityClient) GetDouble() (float64, error) {
-    return c.chClient.GetDouble(nil)
+    return c.chClient.GetDouble(context.Background())
 }
 
 func (c *GetEntityClient) GetDoubleContext(ctx context.Context) (float64, error) {
@@ -309,7 +312,7 @@ func (c *GetEntityChannelClient) GetString(ctx context.Context) (string, error) 
 }
 
 func (c *GetEntityClient) GetString() (string, error) {
-    return c.chClient.GetString(nil)
+    return c.chClient.GetString(context.Background())
 }
 
 func (c *GetEntityClient) GetStringContext(ctx context.Context) (string, error) {
@@ -328,7 +331,7 @@ func (c *GetEntityChannelClient) GetBinary(ctx context.Context) ([]byte, error) 
 }
 
 func (c *GetEntityClient) GetBinary() ([]byte, error) {
-    return c.chClient.GetBinary(nil)
+    return c.chClient.GetBinary(context.Background())
 }
 
 func (c *GetEntityClient) GetBinaryContext(ctx context.Context) ([]byte, error) {
@@ -347,7 +350,7 @@ func (c *GetEntityChannelClient) GetMap(ctx context.Context) (map[string]string,
 }
 
 func (c *GetEntityClient) GetMap() (map[string]string, error) {
-    return c.chClient.GetMap(nil)
+    return c.chClient.GetMap(context.Background())
 }
 
 func (c *GetEntityClient) GetMapContext(ctx context.Context) (map[string]string, error) {
@@ -366,7 +369,7 @@ func (c *GetEntityChannelClient) GetSet(ctx context.Context) ([]string, error) {
 }
 
 func (c *GetEntityClient) GetSet() ([]string, error) {
-    return c.chClient.GetSet(nil)
+    return c.chClient.GetSet(context.Background())
 }
 
 func (c *GetEntityClient) GetSetContext(ctx context.Context) ([]string, error) {
@@ -385,7 +388,7 @@ func (c *GetEntityChannelClient) GetList(ctx context.Context) ([]string, error) 
 }
 
 func (c *GetEntityClient) GetList() ([]string, error) {
-    return c.chClient.GetList(nil)
+    return c.chClient.GetList(context.Background())
 }
 
 func (c *GetEntityClient) GetListContext(ctx context.Context) ([]string, error) {
@@ -407,7 +410,7 @@ func (c *GetEntityChannelClient) GetLegacyStuff(ctx context.Context, numPos int6
 }
 
 func (c *GetEntityClient) GetLegacyStuff(numPos int64, numNeg1 int64, numNeg2 int64) (int32, error) {
-    return c.chClient.GetLegacyStuff(nil, numPos, numNeg1, numNeg2)
+    return c.chClient.GetLegacyStuff(context.Background(), numPos, numNeg1, numNeg2)
 }
 
 func (c *GetEntityClient) GetLegacyStuffContext(ctx context.Context, numPos int64, numNeg1 int64, numNeg2 int64) (int32, error) {
@@ -427,7 +430,7 @@ func (c *GetEntityChannelClient) GetCtxCollision(ctx1 context.Context, ctx int64
 }
 
 func (c *GetEntityClient) GetCtxCollision(ctx int64) (int32, error) {
-    return c.chClient.GetCtxCollision(nil, ctx)
+    return c.chClient.GetCtxCollision(context.Background(), ctx)
 }
 
 func (c *GetEntityClient) GetCtxCollisionContext(ctx1 context.Context, ctx int64) (int32, error) {
@@ -448,11 +451,31 @@ func (c *GetEntityChannelClient) GetCtx1Collision(ctx2 context.Context, ctx int6
 }
 
 func (c *GetEntityClient) GetCtx1Collision(ctx int64, ctx1 int64) (int32, error) {
-    return c.chClient.GetCtx1Collision(nil, ctx, ctx1)
+    return c.chClient.GetCtx1Collision(context.Background(), ctx, ctx1)
 }
 
 func (c *GetEntityClient) GetCtx1CollisionContext(ctx2 context.Context, ctx int64, ctx1 int64) (int32, error) {
     return c.chClient.GetCtx1Collision(ctx2, ctx, ctx1)
+}
+
+func (c *GetEntityChannelClient) GetContextCollision(ctx context.Context, context_ int64) (int32, error) {
+    in := &reqGetEntityGetContextCollision{
+        Context: context_,
+    }
+    out := newRespGetEntityGetContextCollision()
+    err := c.ch.Call(ctx, "getContextCollision", in, out)
+    if err != nil {
+        return 0, err
+    }
+    return out.GetSuccess(), nil
+}
+
+func (c *GetEntityClient) GetContextCollision(context_ int64) (int32, error) {
+    return c.chClient.GetContextCollision(context.Background(), context_)
+}
+
+func (c *GetEntityClient) GetContextCollisionContext(ctx context.Context, context_ int64) (int32, error) {
+    return c.chClient.GetContextCollision(ctx, context_)
 }
 
 func (c *GetEntityChannelClient) GetOutCollision(ctx context.Context, out int64) (int32, error) {
@@ -468,7 +491,7 @@ func (c *GetEntityChannelClient) GetOutCollision(ctx context.Context, out int64)
 }
 
 func (c *GetEntityClient) GetOutCollision(out int64) (int32, error) {
-    return c.chClient.GetOutCollision(nil, out)
+    return c.chClient.GetOutCollision(context.Background(), out)
 }
 
 func (c *GetEntityClient) GetOutCollisionContext(ctx context.Context, out int64) (int32, error) {
@@ -489,7 +512,7 @@ func (c *GetEntityChannelClient) GetOut1Collision(ctx context.Context, out int64
 }
 
 func (c *GetEntityClient) GetOut1Collision(out int64, out1 int64) (int32, error) {
-    return c.chClient.GetOut1Collision(nil, out, out1)
+    return c.chClient.GetOut1Collision(context.Background(), out, out1)
 }
 
 func (c *GetEntityClient) GetOut1CollisionContext(ctx context.Context, out int64, out1 int64) (int32, error) {
@@ -509,7 +532,7 @@ func (c *GetEntityChannelClient) GetInCollision(ctx context.Context, in int64) (
 }
 
 func (c *GetEntityClient) GetInCollision(in int64) (int32, error) {
-    return c.chClient.GetInCollision(nil, in)
+    return c.chClient.GetInCollision(context.Background(), in)
 }
 
 func (c *GetEntityClient) GetInCollisionContext(ctx context.Context, in int64) (int32, error) {
@@ -530,7 +553,7 @@ func (c *GetEntityChannelClient) GetIn1Collision(ctx context.Context, in int64, 
 }
 
 func (c *GetEntityClient) GetIn1Collision(in int64, in1 int64) (int32, error) {
-    return c.chClient.GetIn1Collision(nil, in, in1)
+    return c.chClient.GetIn1Collision(context.Background(), in, in1)
 }
 
 func (c *GetEntityClient) GetIn1CollisionContext(ctx context.Context, in int64, in1 int64) (int32, error) {
@@ -550,7 +573,7 @@ func (c *GetEntityChannelClient) GetErrCollision(ctx context.Context, err int64)
 }
 
 func (c *GetEntityClient) GetErrCollision(err int64) (int32, error) {
-    return c.chClient.GetErrCollision(nil, err)
+    return c.chClient.GetErrCollision(context.Background(), err)
 }
 
 func (c *GetEntityClient) GetErrCollisionContext(ctx context.Context, err int64) (int32, error) {
@@ -571,7 +594,7 @@ func (c *GetEntityChannelClient) GetErr1Collision(ctx context.Context, err int64
 }
 
 func (c *GetEntityClient) GetErr1Collision(err int64, err1 int64) (int32, error) {
-    return c.chClient.GetErr1Collision(nil, err, err1)
+    return c.chClient.GetErr1Collision(context.Background(), err, err1)
 }
 
 func (c *GetEntityClient) GetErr1CollisionContext(ctx context.Context, err int64, err1 int64) (int32, error) {
@@ -5295,6 +5318,348 @@ func (x *respGetEntityGetCtx1Collision) String() string {
 
     return sb.String()
 }
+type reqGetEntityGetContextCollision struct {
+    Context int64 `thrift:"context,1" json:"context" db:"context"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &reqGetEntityGetContextCollision{}
+
+// Deprecated: GetEntityGetContextCollisionArgsDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetContextCollisionArgsDeprecated = reqGetEntityGetContextCollision
+
+func newReqGetEntityGetContextCollision() *reqGetEntityGetContextCollision {
+    return (&reqGetEntityGetContextCollision{}).
+        SetContextNonCompat(0)
+}
+
+func (x *reqGetEntityGetContextCollision) GetContextNonCompat() int64 {
+    return x.Context
+}
+
+func (x *reqGetEntityGetContextCollision) GetContext() int64 {
+    return x.Context
+}
+
+func (x *reqGetEntityGetContextCollision) SetContextNonCompat(value int64) *reqGetEntityGetContextCollision {
+    x.Context = value
+    return x
+}
+
+func (x *reqGetEntityGetContextCollision) SetContext(value int64) *reqGetEntityGetContextCollision {
+    x.Context = value
+    return x
+}
+
+func (x *reqGetEntityGetContextCollision) writeField1(p thrift.Protocol) error {  // Context
+    if err := p.WriteFieldBegin("context", thrift.I64, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetContextNonCompat()
+    if err := p.WriteI64(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityGetContextCollision) readField1(p thrift.Protocol) error {  // Context
+    result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+
+    x.SetContextNonCompat(result)
+    return nil
+}
+
+func (x *reqGetEntityGetContextCollision) toString1() string {  // Context
+    return fmt.Sprintf("%v", x.GetContextNonCompat())
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetContextCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+type reqGetEntityGetContextCollisionBuilder struct {
+    obj *reqGetEntityGetContextCollision
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetContextCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func newReqGetEntityGetContextCollisionBuilder() *reqGetEntityGetContextCollisionBuilder {
+    return &reqGetEntityGetContextCollisionBuilder{
+        obj: newReqGetEntityGetContextCollision(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetContextCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *reqGetEntityGetContextCollisionBuilder) Context(value int64) *reqGetEntityGetContextCollisionBuilder {
+    x.obj.Context = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetContextCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *reqGetEntityGetContextCollisionBuilder) Emit() *reqGetEntityGetContextCollision {
+    var objCopy reqGetEntityGetContextCollision = *x.obj
+    return &objCopy
+}
+
+func (x *reqGetEntityGetContextCollision) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("reqGetEntityGetContextCollision"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityGetContextCollision) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I64)):  // context
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqGetEntityGetContextCollision) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqGetEntityGetContextCollision({")
+    sb.WriteString(fmt.Sprintf("Context:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+type respGetEntityGetContextCollision struct {
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &respGetEntityGetContextCollision{}
+var _ thrift.WritableResult = &respGetEntityGetContextCollision{}
+
+// Deprecated: GetEntityGetContextCollisionResultDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityGetContextCollisionResultDeprecated = respGetEntityGetContextCollision
+
+func newRespGetEntityGetContextCollision() *respGetEntityGetContextCollision {
+    return (&respGetEntityGetContextCollision{})
+}
+
+func (x *respGetEntityGetContextCollision) GetSuccessNonCompat() *int32 {
+    return x.Success
+}
+
+func (x *respGetEntityGetContextCollision) GetSuccess() int32 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+
+    return *x.Success
+}
+
+func (x *respGetEntityGetContextCollision) SetSuccessNonCompat(value int32) *respGetEntityGetContextCollision {
+    x.Success = &value
+    return x
+}
+
+func (x *respGetEntityGetContextCollision) SetSuccess(value *int32) *respGetEntityGetContextCollision {
+    x.Success = value
+    return x
+}
+
+func (x *respGetEntityGetContextCollision) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respGetEntityGetContextCollision) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := *x.GetSuccessNonCompat()
+    if err := p.WriteI32(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respGetEntityGetContextCollision) readField0(p thrift.Protocol) error {  // Success
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.SetSuccessNonCompat(result)
+    return nil
+}
+
+func (x *respGetEntityGetContextCollision) toString0() string {  // Success
+    if x.IsSetSuccess() {
+        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
+}
+
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetContextCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+type respGetEntityGetContextCollisionBuilder struct {
+    obj *respGetEntityGetContextCollision
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetContextCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func newRespGetEntityGetContextCollisionBuilder() *respGetEntityGetContextCollisionBuilder {
+    return &respGetEntityGetContextCollisionBuilder{
+        obj: newRespGetEntityGetContextCollision(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetContextCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *respGetEntityGetContextCollisionBuilder) Success(value *int32) *respGetEntityGetContextCollisionBuilder {
+    x.obj.Success = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetContextCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *respGetEntityGetContextCollisionBuilder) Emit() *respGetEntityGetContextCollision {
+    var objCopy respGetEntityGetContextCollision = *x.obj
+    return &objCopy
+}
+
+func (x *respGetEntityGetContextCollision) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respGetEntityGetContextCollision) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("respGetEntityGetContextCollision"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respGetEntityGetContextCollision) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 0 && wireType == thrift.Type(thrift.I32)):  // success
+            if err := x.readField0(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respGetEntityGetContextCollision) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respGetEntityGetContextCollision({")
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqGetEntityGetOutCollision struct {
     Out int64 `thrift:"out,1" json:"out" db:"out"`
 }
@@ -7576,6 +7941,7 @@ func NewGetEntityProcessor(handler GetEntity) *GetEntityProcessor {
     p.AddToProcessorMap("getLegacyStuff", &procFuncGetEntityGetLegacyStuff{handler: handler})
     p.AddToProcessorMap("getCtxCollision", &procFuncGetEntityGetCtxCollision{handler: handler})
     p.AddToProcessorMap("getCtx1Collision", &procFuncGetEntityGetCtx1Collision{handler: handler})
+    p.AddToProcessorMap("getContextCollision", &procFuncGetEntityGetContextCollision{handler: handler})
     p.AddToProcessorMap("getOutCollision", &procFuncGetEntityGetOutCollision{handler: handler})
     p.AddToProcessorMap("getOut1Collision", &procFuncGetEntityGetOut1Collision{handler: handler})
     p.AddToProcessorMap("getInCollision", &procFuncGetEntityGetInCollision{handler: handler})
@@ -7597,6 +7963,7 @@ func NewGetEntityProcessor(handler GetEntity) *GetEntityProcessor {
     p.AddToFunctionServiceMap("getLegacyStuff", "GetEntity")
     p.AddToFunctionServiceMap("getCtxCollision", "GetEntity")
     p.AddToFunctionServiceMap("getCtx1Collision", "GetEntity")
+    p.AddToFunctionServiceMap("getContextCollision", "GetEntity")
     p.AddToFunctionServiceMap("getOutCollision", "GetEntity")
     p.AddToFunctionServiceMap("getOut1Collision", "GetEntity")
     p.AddToFunctionServiceMap("getInCollision", "GetEntity")
@@ -8396,6 +8763,58 @@ func (p *procFuncGetEntityGetCtx1Collision) RunContext(ctx context.Context, reqS
     retval, err := p.handler.GetCtx1Collision(ctx, args.Ctx, args.Ctx1)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetCtx1Collision: " + err.Error(), err)
+        return x, x
+    }
+
+    result.Success = &retval
+    return result, nil
+}
+
+
+type procFuncGetEntityGetContextCollision struct {
+    handler GetEntity
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetContextCollision{}
+
+func (p *procFuncGetEntityGetContextCollision) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+    args := newReqGetEntityGetContextCollision()
+    if err := args.Read(iprot); err != nil {
+        return nil, err
+    }
+    iprot.ReadMessageEnd()
+    return args, nil
+}
+
+func (p *procFuncGetEntityGetContextCollision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+    var err2 error
+    messageType := thrift.REPLY
+    switch result.(type) {
+    case thrift.ApplicationException:
+        messageType = thrift.EXCEPTION
+    }
+
+    if err2 = oprot.WriteMessageBegin("getContextCollision", messageType, seqId); err2 != nil {
+        err = err2
+    }
+    if err2 = result.Write(oprot); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.Flush(); err == nil && err2 != nil {
+        err = err2
+    }
+    return err
+}
+
+func (p *procFuncGetEntityGetContextCollision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+    args := reqStruct.(*reqGetEntityGetContextCollision)
+    result := newRespGetEntityGetContextCollision()
+    retval, err := p.handler.GetContextCollision(ctx, args.Context)
+    if err != nil {
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetContextCollision: " + err.Error(), err)
         return x, x
     }
 

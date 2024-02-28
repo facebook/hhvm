@@ -115,7 +115,7 @@ func (c *MyRootChannelClient) DoRoot(ctx context.Context) (error) {
 }
 
 func (c *MyRootClient) DoRoot() (error) {
-    return c.chClient.DoRoot(nil)
+    return c.chClient.DoRoot(context.Background())
 }
 
 func (c *MyRootClient) DoRootContext(ctx context.Context) (error) {
@@ -522,7 +522,7 @@ func (c *MyNodeChannelClient) DoMid(ctx context.Context) (error) {
 }
 
 func (c *MyNodeClient) DoMid() (error) {
-    return c.chClient.DoMid(nil)
+    return c.chClient.DoMid(context.Background())
 }
 
 func (c *MyNodeClient) DoMidContext(ctx context.Context) (error) {
@@ -903,7 +903,7 @@ func (c *MyLeafChannelClient) DoLeaf(ctx context.Context) (error) {
 }
 
 func (c *MyLeafClient) DoLeaf() (error) {
-    return c.chClient.DoLeaf(nil)
+    return c.chClient.DoLeaf(context.Background())
 }
 
 func (c *MyLeafClient) DoLeafContext(ctx context.Context) (error) {

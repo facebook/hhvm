@@ -49,6 +49,8 @@ service GetEntity {
   i32 getCtxCollision(1: i64 ctx);
   i32 getCtx1Collision(1: i64 ctx, 2: i64 ctx1);
 
+  i32 getContextCollision(1: i64 context);
+
   i32 getOutCollision(1: i64 out);
   i32 getOut1Collision(1: i64 out, 2: i64 out1);
 

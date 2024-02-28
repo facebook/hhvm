@@ -124,7 +124,7 @@ func (c *MyServiceChannelClient) Query(ctx context.Context, s *module.MyStruct, 
 }
 
 func (c *MyServiceClient) Query(s *module.MyStruct, i *includes.Included) (error) {
-    return c.chClient.Query(nil, s, i)
+    return c.chClient.Query(context.Background(), s, i)
 }
 
 func (c *MyServiceClient) QueryContext(ctx context.Context, s *module.MyStruct, i *includes.Included) (error) {
@@ -145,7 +145,7 @@ func (c *MyServiceChannelClient) HasArgDocs(ctx context.Context, s *module.MyStr
 }
 
 func (c *MyServiceClient) HasArgDocs(s *module.MyStruct, i *includes.Included) (error) {
-    return c.chClient.HasArgDocs(nil, s, i)
+    return c.chClient.HasArgDocs(context.Background(), s, i)
 }
 
 func (c *MyServiceClient) HasArgDocsContext(ctx context.Context, s *module.MyStruct, i *includes.Included) (error) {

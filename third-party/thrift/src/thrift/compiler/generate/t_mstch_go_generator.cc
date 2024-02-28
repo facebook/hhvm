@@ -326,7 +326,12 @@ class mstch_go_field : public mstch_field {
     return setter_name;
   }
   mstch::node go_arg_name() {
-    return go::munge_ident(field_->name(), /*exported*/ false);
+    auto arg_name = go::munge_ident(field_->name(), /*exported*/ false);
+    // Avoid 'context' package import collision
+    if (arg_name == "context") {
+      arg_name += "_";
+    }
+    return arg_name;
   }
   mstch::node is_pointer() {
     // See comment in the private method for details.

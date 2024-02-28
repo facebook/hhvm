@@ -118,7 +118,7 @@ func (c *ServiceChannelClient) Func(ctx context.Context, arg1 StringWithAdapter_
 }
 
 func (c *ServiceClient) Func(arg1 StringWithAdapter_7208, arg2 string, arg3 *Foo) (MyI32_4873, error) {
-    return c.chClient.Func(nil, arg1, arg2, arg3)
+    return c.chClient.Func(context.Background(), arg1, arg2, arg3)
 }
 
 func (c *ServiceClient) FuncContext(ctx context.Context, arg1 StringWithAdapter_7208, arg2 string, arg3 *Foo) (MyI32_4873, error) {
@@ -820,7 +820,7 @@ func (c *AdapterServiceChannelClient) Count(ctx context.Context) (*CountingStruc
 }
 
 func (c *AdapterServiceClient) Count() (*CountingStruct, error) {
-    return c.chClient.Count(nil)
+    return c.chClient.Count(context.Background())
 }
 
 func (c *AdapterServiceClient) CountContext(ctx context.Context) (*CountingStruct, error) {
@@ -840,7 +840,7 @@ func (c *AdapterServiceChannelClient) AdaptedTypes(ctx context.Context, arg *Hea
 }
 
 func (c *AdapterServiceClient) AdaptedTypes(arg *HeapAllocated) (*HeapAllocated, error) {
-    return c.chClient.AdaptedTypes(nil, arg)
+    return c.chClient.AdaptedTypes(context.Background(), arg)
 }
 
 func (c *AdapterServiceClient) AdaptedTypesContext(ctx context.Context, arg *HeapAllocated) (*HeapAllocated, error) {

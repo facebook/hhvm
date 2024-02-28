@@ -121,7 +121,7 @@ func (c *SomeServiceChannelClient) BounceMap(ctx context.Context, m included.Som
 }
 
 func (c *SomeServiceClient) BounceMap(m included.SomeMap) (included.SomeMap, error) {
-    return c.chClient.BounceMap(nil, m)
+    return c.chClient.BounceMap(context.Background(), m)
 }
 
 func (c *SomeServiceClient) BounceMapContext(ctx context.Context, m included.SomeMap) (included.SomeMap, error) {
@@ -141,7 +141,7 @@ func (c *SomeServiceChannelClient) BinaryKeyedMap(ctx context.Context, r []int64
 }
 
 func (c *SomeServiceClient) BinaryKeyedMap(r []int64) (map[*TBinary]int64, error) {
-    return c.chClient.BinaryKeyedMap(nil, r)
+    return c.chClient.BinaryKeyedMap(context.Background(), r)
 }
 
 func (c *SomeServiceClient) BinaryKeyedMapContext(ctx context.Context, r []int64) (map[*TBinary]int64, error) {

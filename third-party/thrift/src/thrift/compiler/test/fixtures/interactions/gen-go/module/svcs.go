@@ -115,7 +115,7 @@ func (c *MyServiceChannelClient) Foo(ctx context.Context) (error) {
 }
 
 func (c *MyServiceClient) Foo() (error) {
-    return c.chClient.Foo(nil)
+    return c.chClient.Foo(context.Background())
 }
 
 func (c *MyServiceClient) FooContext(ctx context.Context) (error) {

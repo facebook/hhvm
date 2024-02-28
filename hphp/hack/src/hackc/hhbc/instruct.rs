@@ -12,6 +12,7 @@ use crate::FCallArgsFlags;
 use crate::PropName;
 use crate::ReadonlyOp;
 use crate::SrcLoc;
+use crate::StringId;
 
 /// see runtime/base/repo-auth-type.h
 pub type RepoAuthType<'arena> = Str<'arena>;
@@ -66,17 +67,17 @@ pub const NUM_ACT_REC_CELLS: usize = 2;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize)]
 #[repr(C)]
-pub struct FCallArgs<'arena> {
+pub struct FCallArgs {
     pub flags: FCallArgsFlags,
     pub async_eager_target: Label,
     pub num_args: NumParams,
     pub num_rets: NumParams,
     pub inouts: ByRefs,
     pub readonly: ByRefs,
-    pub context: Str<'arena>,
+    pub context: StringId,
 }
 
-impl<'arena> FCallArgs<'arena> {
+impl FCallArgs {
     pub fn new(
         mut flags: FCallArgsFlags,
         num_rets: NumParams,
@@ -84,7 +85,7 @@ impl<'arena> FCallArgs<'arena> {
         inouts: Vec<bool>,
         readonly: Vec<bool>,
         async_eager_target: Option<Label>,
-        context: Option<&'arena str>,
+        context: Option<StringId>,
     ) -> Self {
         assert!(
             inouts.is_empty() || inouts.len() == num_args as usize,
@@ -115,7 +116,7 @@ impl<'arena> FCallArgs<'arena> {
             inouts: inouts.into(),
             readonly: readonly.into(),
             async_eager_target,
-            context: Str::new(context.unwrap_or("").as_bytes()),
+            context: context.unwrap_or(StringId::EMPTY),
         }
     }
 

@@ -203,7 +203,7 @@ fn cmp_fcallargflags(a: &hhbc::FCallArgsFlags, b: &hhbc::FCallArgsFlags) -> Resu
     Ok(())
 }
 
-fn cmp_fcallargs(a: &hhbc::FCallArgs<'_>, b: &hhbc::FCallArgs<'_>) -> Result {
+fn cmp_fcallargs(a: &hhbc::FCallArgs, b: &hhbc::FCallArgs) -> Result {
     let hhbc::FCallArgs {
         flags: a_flags,
         async_eager_target: a_aet,

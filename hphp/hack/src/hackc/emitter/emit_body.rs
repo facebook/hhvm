@@ -60,7 +60,7 @@ pub struct Args<'a, 'arena> {
     pub deprecation_info: &'a Option<&'a [TypedValue]>,
     pub doc_comment: Option<DocComment>,
     pub default_dropthrough: Option<InstrSeq<'arena>>,
-    pub call_context: Option<String>,
+    pub call_context: Option<StringId>,
     pub flags: Flags,
 }
 
@@ -332,7 +332,7 @@ pub fn make_env<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
     namespace: Arc<namespace_env::Env>,
     scope: Scope<'a>,
-    call_context: Option<String>,
+    call_context: Option<StringId>,
 ) -> Env<'a, 'arena> {
     let mut env = Env::default(alloc, namespace);
     env.call_context = call_context;

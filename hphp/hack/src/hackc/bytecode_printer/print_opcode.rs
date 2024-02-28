@@ -92,7 +92,7 @@ impl<'a, 'b> PrintOpcode<'a, 'b> {
         w.write_all(b">")
     }
 
-    fn print_fcall_args(&self, w: &mut dyn Write, args: &FCallArgs<'_>) -> Result<()> {
+    fn print_fcall_args(&self, w: &mut dyn Write, args: &FCallArgs) -> Result<()> {
         print::print_fcall_args(w, args, self.dv_labels)
     }
 

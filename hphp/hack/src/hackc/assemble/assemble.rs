@@ -1864,13 +1864,10 @@ pub(crate) fn assemble_async_eager_target(
 }
 
 /// Just a string literal
-pub(crate) fn assemble_fcall_context<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<Str<'arena>> {
+pub(crate) fn assemble_fcall_context(token_iter: &mut Lexer<'_>) -> Result<StringId> {
     let st = token_iter.expect_with(Token::into_str_literal)?;
     debug_assert!(st[0] == b'"' && st[st.len() - 1] == b'"');
-    Ok(Str::new_slice(alloc, &st[1..st.len() - 1])) // if not hugged by "", won't pass into_str_literal
+    Ok(hhbc::intern(std::str::from_utf8(&st[1..st.len() - 1])?)) // if not hugged by "", won't pass into_str_literal
 }
 
 pub(crate) fn assemble_unescaped_unquoted_str<'arena>(

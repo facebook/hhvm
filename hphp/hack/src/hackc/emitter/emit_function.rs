@@ -61,16 +61,15 @@ pub fn emit_function<'a, 'arena, 'decl>(
                     params,
                 },
             ] if s == "__MethCaller" => match &params[..] {
-                [ast::Expr(_, _, ast::Expr_::String(ref ctx))] if !ctx.is_empty() => Some(
-                    ClassName::from_ast_name_and_mangle(
-                        alloc,
-                        // FIXME: This is not safe--string literals are binary strings.
-                        // There's no guarantee that they're valid UTF-8.
-                        unsafe { std::str::from_utf8_unchecked(ctx.as_slice()) },
-                    )
-                    .unsafe_as_str()
-                    .into(),
-                ),
+                [ast::Expr(_, _, ast::Expr_::String(ref ctx))] if !ctx.is_empty() => {
+                    match std::str::from_utf8(ctx) {
+                        Ok(ctx) => Some(ClassName::mangle(ctx.to_owned())),
+                        Err(_) => {
+                            // non-utf8 classname cant be a valid context
+                            None
+                        }
+                    }
+                }
                 _ => None,
             },
             _ => None,

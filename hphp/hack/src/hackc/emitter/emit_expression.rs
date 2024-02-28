@@ -44,6 +44,7 @@ use hhbc::SetOpOp;
 use hhbc::SetRangeOp;
 use hhbc::SpecialClsRef;
 use hhbc::StackIndex;
+use hhbc::StringId;
 use hhbc::TypeStructResolveOp;
 use hhbc::TypedValue;
 use hhbc_string_utils as string_utils;
@@ -1737,11 +1738,10 @@ fn emit_call<'a, 'arena, 'decl>(
         _ => false,
     };
     let fcall_args = get_fcall_args(
-        alloc,
         args,
         uarg,
         async_eager_label,
-        env.call_context.clone(),
+        env.call_context,
         false,
         readonly_return,
         readonly_this,
@@ -1768,7 +1768,7 @@ fn emit_call_default<'a, 'arena, 'decl>(
     targs: &[ast::Targ],
     args: &[(ParamKind, ast::Expr)],
     uarg: Option<&ast::Expr>,
-    fcall_args: FCallArgs<'arena>,
+    fcall_args: FCallArgs,
 ) -> Result<InstrSeq<'arena>> {
     scope::with_unnamed_locals(e, |em| {
         let FCallArgs { num_rets, .. } = &fcall_args;
@@ -1912,7 +1912,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     expr: &ast::Expr,
-    mut fcall_args: FCallArgs<'arena>,
+    mut fcall_args: FCallArgs,
     targs: &[ast::Targ],
     caller_readonly_opt: Option<&Pos>,
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
@@ -1920,21 +1920,20 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
     use ast::Expr;
     use ast::Expr_;
     let alloc = env.arena;
-    let emit_generics =
-        |e: &mut Emitter<'arena, 'decl>, env, fcall_args: &mut FCallArgs<'arena>| {
-            let does_not_have_non_tparam_generics = !has_non_tparam_generics_targs(env, targs);
-            if does_not_have_non_tparam_generics {
-                Ok(instr::empty())
-            } else {
-                fcall_args.flags |= FCallArgsFlags::HasGenerics;
-                emit_reified_targs(e, env, pos, targs.iter().map(|targ| &targ.1))
-            }
-        };
+    let emit_generics = |e: &mut Emitter<'arena, 'decl>, env, fcall_args: &mut FCallArgs| {
+        let does_not_have_non_tparam_generics = !has_non_tparam_generics_targs(env, targs);
+        if does_not_have_non_tparam_generics {
+            Ok(instr::empty())
+        } else {
+            fcall_args.flags |= FCallArgsFlags::HasGenerics;
+            emit_reified_targs(e, env, pos, targs.iter().map(|targ| &targ.1))
+        }
+    };
 
     let emit_fcall_func = |e: &mut Emitter<'arena, 'decl>,
                            env,
                            expr: &ast::Expr,
-                           fcall_args: FCallArgs<'arena>,
+                           fcall_args: FCallArgs,
                            caller_readonly_opt: Option<&Pos>|
      -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
         let tmp = e.local_gen_mut().get_unnamed();
@@ -2407,18 +2406,17 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
 /// This function abstracts over these two kinds of calls: given a list of arguments and two
 /// predicates (is this an `inout` argument, is this `readonly`) we build up an `FCallArgs` for the
 /// given function call.
-fn get_fcall_args_common<'arena, T>(
-    alloc: &'arena bumpalo::Bump,
+fn get_fcall_args_common<T>(
     args: &[T],
     uarg: Option<&ast::Expr>,
     async_eager_label: Option<Label>,
-    context: Option<String>,
+    context: Option<StringId>,
     lock_while_unwinding: bool,
     readonly_return: bool,
     readonly_this: bool,
     readonly_predicate: fn(&T) -> bool,
     is_inout_arg: fn(&T) -> bool,
-) -> FCallArgs<'arena> {
+) -> FCallArgs {
     let mut flags = FCallArgsFlags::default();
     flags.set(FCallArgsFlags::HasUnpack, uarg.is_some());
     flags.set(FCallArgsFlags::LockWhileUnwinding, lock_while_unwinding);
@@ -2436,23 +2434,20 @@ fn get_fcall_args_common<'arena, T>(
         args.iter().map(is_inout_arg).collect(),
         readonly_args,
         async_eager_label,
-        context
-            .map(|s| bumpalo::collections::String::from_str_in(s.as_str(), alloc).into_bump_str()),
+        context,
     )
 }
 
-fn get_fcall_args_no_inout<'arena>(
-    alloc: &'arena bumpalo::Bump,
+fn get_fcall_args_no_inout(
     args: &[ast::Expr],
     uarg: Option<&ast::Expr>,
     async_eager_label: Option<Label>,
-    context: Option<String>,
+    context: Option<StringId>,
     lock_while_unwinding: bool,
     readonly_return: bool,
     readonly_this: bool,
-) -> FCallArgs<'arena> {
+) -> FCallArgs {
     get_fcall_args_common(
-        alloc,
         args,
         uarg,
         async_eager_label,
@@ -2465,18 +2460,16 @@ fn get_fcall_args_no_inout<'arena>(
     )
 }
 
-fn get_fcall_args<'arena>(
-    alloc: &'arena bumpalo::Bump,
+fn get_fcall_args(
     args: &[(ParamKind, ast::Expr)],
     uarg: Option<&ast::Expr>,
     async_eager_label: Option<Label>,
-    context: Option<String>,
+    context: Option<StringId>,
     lock_while_unwinding: bool,
     readonly_return: bool,
     readonly_this: bool,
-) -> FCallArgs<'arena> {
+) -> FCallArgs {
     get_fcall_args_common(
-        alloc,
         args,
         uarg,
         async_eager_label,
@@ -3575,7 +3568,6 @@ fn emit_new<'a, 'arena, 'decl>(
             ]),
         };
         scope::with_unnamed_locals(e, |e| {
-            let alloc = e.alloc;
             let instr_args = emit_exprs(e, env, args)?;
             let instr_uargs = match uarg {
                 None => instr::empty(),
@@ -3591,11 +3583,10 @@ fn emit_new<'a, 'arena, 'decl>(
                     instr_uargs,
                     emit_pos(pos),
                     instr::f_call_ctor(get_fcall_args_no_inout(
-                        alloc,
                         args,
                         uarg.as_ref(),
                         None,
-                        env.call_context.clone(),
+                        env.call_context,
                         true,
                         true,  // we do not need to enforce readonly return for constructors
                         false, // we do not need to enforce readonly this for constructors

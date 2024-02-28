@@ -8,7 +8,7 @@ use std::borrow::Cow;
 use bstr::BStr;
 use hash::IndexSet;
 use newtype::newtype_int;
-use parking_lot::MappedRwLockReadGuard;
+pub use parking_lot::MappedRwLockReadGuard;
 use parking_lot::RwLock;
 use parking_lot::RwLockReadGuard;
 

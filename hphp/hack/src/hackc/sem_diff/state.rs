@@ -805,7 +805,7 @@ impl<'arena, 'a> State<'arena, 'a> {
     ) -> Result<()> {
         let data = crate::body::lookup_data_for_opcode(opcode);
 
-        fn sanitize_fca<'arena>(
+        fn sanitize_fca(
             FCallArgs {
                 flags,
                 async_eager_target: _,
@@ -814,8 +814,8 @@ impl<'arena, 'a> State<'arena, 'a> {
                 inouts,
                 readonly,
                 context,
-            }: &FCallArgs<'arena>,
-        ) -> FCallArgs<'arena> {
+            }: &FCallArgs,
+        ) -> FCallArgs {
             // Turn a non-empty, all-false slice into an empty slice.
             let inouts = if !inouts.is_empty() && !inouts.iter().any(|x| *x) {
                 Default::default()

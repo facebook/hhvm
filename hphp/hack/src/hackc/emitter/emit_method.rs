@@ -103,7 +103,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
                     params: _,
                 },
             ] if s.eq_ignore_ascii_case("__DynamicMethCallerForce") => {
-                Some("__SystemLib\\DynamicContextOverrideUnsafe".to_string())
+                Some(hhbc::intern("__SystemLib\\DynamicContextOverrideUnsafe"))
             }
             _ => None,
         }

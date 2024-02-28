@@ -587,9 +587,7 @@ fn emit_using<'a, 'arena, 'decl>(
                             vec![],
                             vec![],
                             async_eager_label,
-                            env.call_context
-                                .as_ref()
-                                .map(|s| -> &str { alloc.alloc_str(s.as_ref()) }),
+                            env.call_context,
                         ),
                         fn_name,
                     ),

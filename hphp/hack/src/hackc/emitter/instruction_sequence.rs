@@ -252,10 +252,7 @@ pub mod instr {
         dim(MOpMode::Warn, MemberKey::PT(key, readonly_op))
     }
 
-    pub fn f_call_cls_method<'a>(
-        log: IsLogAsDynamicCallOp,
-        fcall_args: FCallArgs<'a>,
-    ) -> InstrSeq<'a> {
+    pub fn f_call_cls_method<'a>(log: IsLogAsDynamicCallOp, fcall_args: FCallArgs) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::FCallClsMethod(
             fcall_args,
             Default::default(),
@@ -265,7 +262,7 @@ pub mod instr {
 
     pub fn f_call_cls_method_m<'a>(
         log: IsLogAsDynamicCallOp,
-        fcall_args: FCallArgs<'a>,
+        fcall_args: FCallArgs,
         method: MethodName<'a>,
     ) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::FCallClsMethodM(
@@ -277,7 +274,7 @@ pub mod instr {
     }
 
     pub fn f_call_cls_method_d<'a>(
-        fcall_args: FCallArgs<'a>,
+        fcall_args: FCallArgs,
         method: MethodName<'a>,
         class: ClassName<'a>,
     ) -> InstrSeq<'a> {
@@ -286,10 +283,7 @@ pub mod instr {
         )))
     }
 
-    pub fn f_call_cls_method_s<'a>(
-        fcall_args: FCallArgs<'a>,
-        clsref: SpecialClsRef,
-    ) -> InstrSeq<'a> {
+    pub fn f_call_cls_method_s<'a>(fcall_args: FCallArgs, clsref: SpecialClsRef) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::FCallClsMethodS(
             fcall_args,
             Default::default(),
@@ -298,7 +292,7 @@ pub mod instr {
     }
 
     pub fn f_call_cls_method_sd<'a>(
-        fcall_args: FCallArgs<'a>,
+        fcall_args: FCallArgs,
         clsref: SpecialClsRef,
         method: MethodName<'a>,
     ) -> InstrSeq<'a> {
@@ -310,14 +304,14 @@ pub mod instr {
         )))
     }
 
-    pub fn f_call_ctor<'a>(fcall_args: FCallArgs<'a>) -> InstrSeq<'a> {
+    pub fn f_call_ctor<'a>(fcall_args: FCallArgs) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::FCallCtor(
             fcall_args,
             Default::default(),
         )))
     }
 
-    pub fn f_call_obj_method<'a>(fcall_args: FCallArgs<'a>, flavor: ObjMethodOp) -> InstrSeq<'a> {
+    pub fn f_call_obj_method<'a>(fcall_args: FCallArgs, flavor: ObjMethodOp) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::FCallObjMethod(
             fcall_args,
             Default::default(),
@@ -326,7 +320,7 @@ pub mod instr {
     }
 
     pub fn f_call_obj_method_d_<'a>(
-        fcall_args: FCallArgs<'a>,
+        fcall_args: FCallArgs,
         method: MethodName<'a>,
         flavor: ObjMethodOp,
     ) -> InstrSeq<'a> {
@@ -338,10 +332,7 @@ pub mod instr {
         )))
     }
 
-    pub fn f_call_obj_method_d<'a>(
-        fcall_args: FCallArgs<'a>,
-        method: MethodName<'a>,
-    ) -> InstrSeq<'a> {
+    pub fn f_call_obj_method_d<'a>(fcall_args: FCallArgs, method: MethodName<'a>) -> InstrSeq<'a> {
         f_call_obj_method_d_(fcall_args, method, ObjMethodOp::NullThrows)
     }
 

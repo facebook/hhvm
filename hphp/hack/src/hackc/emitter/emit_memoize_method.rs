@@ -548,7 +548,7 @@ fn make_wrapper<'a, 'arena, 'decl>(
 
 fn call_cls_method<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
-    fcall_args: FCallArgs<'arena>,
+    fcall_args: FCallArgs,
     args: &Args<'_, 'a, 'arena>,
 ) -> InstrSeq<'arena> {
     let method_id =

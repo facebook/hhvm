@@ -466,11 +466,7 @@ fn is_cow_instr(instr: &NodeInstr<'_>) -> bool {
     }
 }
 
-fn sem_diff_fca<'arena>(
-    path: &CodePath<'_>,
-    fca0: &hhbc::FCallArgs<'arena>,
-    fca1: &hhbc::FCallArgs<'arena>,
-) -> Result<()> {
+fn sem_diff_fca(path: &CodePath<'_>, fca0: &hhbc::FCallArgs, fca1: &hhbc::FCallArgs) -> Result<()> {
     let hhbc::FCallArgs {
         flags: flags0,
         async_eager_target: _,

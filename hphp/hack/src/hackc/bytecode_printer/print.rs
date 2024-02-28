@@ -923,7 +923,7 @@ pub(crate) fn print_fcall_args(
         readonly,
         async_eager_target,
         context,
-    }: &FCallArgs<'_>,
+    }: &FCallArgs,
     dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     angle(w, |w| {
@@ -953,7 +953,7 @@ pub(crate) fn print_fcall_args(
         w.write_all(b"-")?;
     }
     w.write_all(b" ")?;
-    quotes(w, |w| w.write_all(context))
+    quotes(w, |w| w.write_all(context.as_str().as_bytes()))
 }
 
 fn print_pseudo(w: &mut dyn Write, instr: &Pseudo, dv_labels: &HashSet<Label>) -> Result<()> {

@@ -21,6 +21,7 @@ use emitter::Emitter;
 use hhbc::IterId;
 use hhbc::Label;
 use hhbc::Local;
+use hhbc::StringId;
 pub use iterator::*;
 pub use label::*;
 pub use local::*;
@@ -45,7 +46,7 @@ pub struct Env<'a, 'arena> {
     pub jump_targets_gen: jump_targets::Gen,
     pub scope: Scope<'a>,
     pub namespace: Arc<NamespaceEnv>,
-    pub call_context: Option<String>,
+    pub call_context: Option<StringId>,
     pub pipe_var: Option<Local>,
 }
 

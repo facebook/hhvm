@@ -217,7 +217,7 @@ fn convert_call<'a, 'b>(ctx: &mut Context<'a, 'b>, call: &Opcode<'a>) {
         _ => unreachable!(),
     };
 
-    let context = ctx.intern_ffi_str(fcall_args.context);
+    let context = ctx.intern_string_id(fcall_args.context);
 
     let mut num_args = fcall_args.num_args;
     // These first two stack entries correspond to an HHVM ActRec (in

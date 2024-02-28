@@ -236,12 +236,8 @@ impl<'arena> AssembleImm<'arena, hhbc::ConstName<'arena>> for Lexer<'_> {
     }
 }
 
-impl<'arena> AssembleImm<'arena, hhbc::FCallArgs<'arena>> for Lexer<'_> {
-    fn assemble_imm(
-        &mut self,
-        alloc: &'arena Bump,
-        _: &DeclMap,
-    ) -> Result<hhbc::FCallArgs<'arena>> {
+impl<'arena> AssembleImm<'arena, hhbc::FCallArgs> for Lexer<'_> {
+    fn assemble_imm(&mut self, _: &'arena Bump, _: &DeclMap) -> Result<hhbc::FCallArgs> {
         // <(fcargflags)*> numargs numrets inouts readonly async_eager_target context
         let fcargflags = assemble::assemble_fcallargsflags(self)?;
         let num_args = self.expect_and_get_number()?;
@@ -249,7 +245,7 @@ impl<'arena> AssembleImm<'arena, hhbc::FCallArgs<'arena>> for Lexer<'_> {
         let inouts = assemble::assemble_inouts_or_readonly(self)?;
         let readonly = assemble::assemble_inouts_or_readonly(self)?;
         let async_eager_target = assemble::assemble_async_eager_target(self)?;
-        let context = assemble::assemble_fcall_context(alloc, self)?;
+        let context = assemble::assemble_fcall_context(self)?;
         let fcargs = hhbc::FCallArgs::new(
             fcargflags,
             num_rets,

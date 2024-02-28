@@ -637,7 +637,7 @@ void Unit::mergeImpl() {
         // Anonymous classes doesn't need to be defined because they will be
         // defined when used
         auto pcName = preClass->name();
-        if (PreClassEmitter::IsAnonymousClassName(pcName->toCppString())) {
+        if (PreClassEmitter::IsAnonymousClassName(pcName->slice())) {
           return true;
         }
         assertx(preClass->isPersistent() ==

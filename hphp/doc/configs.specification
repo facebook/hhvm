@@ -31,6 +31,7 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 - bool Autoload.AllowLoggingPropagation = false, UNKNOWN
 - bool Autoload.RethrowExceptions = true, UNKNOWN
 - uint32_t Autoload.PerfSampleRate = 0, UNKNOWN
+- uint32_t Autoload.ErrorSampleRate = 1, UNKNOWN
 
   Sample rate for Autoload & Facts API latency logging
 

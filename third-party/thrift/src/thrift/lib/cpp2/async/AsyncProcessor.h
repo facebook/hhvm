@@ -428,7 +428,7 @@ class ServerRequest {
         serializedRequest_(std::move(serializedRequest)),
         ctx_(ctx),
         protocol_(protocol),
-        follyRequestContext_(follyRequestContext),
+        follyRequestContext_(std::move(follyRequestContext)),
         asyncProcessor_(asyncProcessor),
         methodMetadata_(methodMetadata) {}
 

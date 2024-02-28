@@ -140,6 +140,7 @@ impl AssembleOpts {
             content,
             &self.common.single_file_opts,
             &mut compile_profile,
+            false,
         )?;
 
         let mut output: Vec<u8> = Vec::new();
@@ -195,6 +196,7 @@ impl CompileOpts {
             content,
             &self.common.single_file_opts,
             &mut compile_profile,
+            false,
         )?;
 
         profile.fold_with(ProfileAcc {
@@ -239,6 +241,7 @@ impl IrOpts {
             content,
             &self.common.single_file_opts,
             &mut compile_profile,
+            true,
         )?;
 
         let post_alloc = bumpalo::Bump::default();
@@ -324,6 +327,7 @@ impl InferOpts {
             content,
             &self.common.single_file_opts,
             &mut compile_profile,
+            true,
         )?;
         let (ir, bc_to_ir_t) = Timing::time(path, || bc_to_ir::bc_to_ir(&unit, path));
 
@@ -419,10 +423,11 @@ fn compile_php_file<'a, 'arena>(
     content: Vec<u8>,
     single_file_opts: &'a SingleFileOpts,
     profile: &mut compile::Profile,
+    for_ir: bool,
 ) -> Result<(compile::NativeEnv, hhbc::Unit<'arena>)> {
     let filepath = RelativePath::make(Prefix::Dummy, path.to_path_buf());
     let source_text = SourceText::make(Arc::new(filepath.clone()), &content);
-    let env = crate::compile::native_env(filepath, single_file_opts)
+    let mut env = crate::compile::native_env(filepath, single_file_opts)
         .map_err(|err| VerifyError::CompileError(err.to_string()))?;
     let decl_arena = bumpalo::Bump::new();
     let decl_provider = SelfProvider::wrap_existing_provider(
@@ -431,6 +436,14 @@ fn compile_php_file<'a, 'arena>(
         source_text.clone(),
         &decl_arena,
     );
+
+    if for_ir {
+        // The LIter(Init,Next,Free) instructions have not yet been implemented
+        // for the IR. This optimization should have no affect on program
+        // behavior.
+        env.hhbc_flags.optimize_local_iterators = false;
+    }
+
     let unit = compile::unit_from_text(alloc, source_text, &env, decl_provider, profile)
         .map_err(|err| VerifyError::CompileError(err.to_string()))?;
     Ok((env, unit))

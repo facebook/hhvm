@@ -6,7 +6,6 @@ use env::emitter::Emitter;
 use env::LabelGen;
 use error::Result;
 use hhbc::Instruct;
-use hhbc::IterId;
 use hhbc::Label;
 use hhbc::Local;
 use hhbc::Opcode;
@@ -99,19 +98,19 @@ where
 {
     let local_counter = e.local_gen().counter;
     e.local_gen_mut().dedicated.temp_map.push();
-    let next_iterator = e.iterator().next;
+    let next_iterator = e.iterator().next();
 
     let (before, inner, after) = emit(e)?;
 
     e.local_gen_mut().dedicated.temp_map.pop();
 
-    if local_counter == e.local_gen().counter && next_iterator == e.iterator().next {
+    if local_counter == e.local_gen().counter && next_iterator == e.iterator().next() {
         Ok(InstrSeq::gather(vec![before, inner, after]))
     } else {
         let unset_locals = unset_unnamed_locals(local_counter.next, e.local_gen().counter.next);
         e.local_gen_mut().counter = local_counter;
-        let free_iters = free_iterators(next_iterator, e.iterator().next);
-        e.iterator_mut().next = next_iterator;
+        let num_iters = e.iterator().next() - next_iterator;
+        let free_iters = e.iterator_mut().free(num_iters as usize);
         Ok(wrap_inner_in_try_catch(
             e.label_gen_mut(),
             (before, inner, after),
@@ -155,14 +154,6 @@ fn unset_unnamed_locals<'arena>(start: Local, end: Local) -> InstrSeq<'arena> {
     InstrSeq::gather(
         (start.idx..end.idx)
             .map(|idx| instr::unset_l(Local::new(idx as usize)))
-            .collect(),
-    )
-}
-
-fn free_iterators<'arena>(start: IterId, end: IterId) -> InstrSeq<'arena> {
-    InstrSeq::gather(
-        (start.idx..end.idx)
-            .map(|idx| instr::iter_free(IterId { idx }))
             .collect(),
     )
 }

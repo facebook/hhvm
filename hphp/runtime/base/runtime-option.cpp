@@ -317,6 +317,7 @@ void RepoOptionsFlags::initHhbcFlags(hackc::HhbcFlags& flags) const {
   flags.stress_folded_decl_deps = StressFoldedDeclDeps;
   flags.optimize_param_lifetimes = OptimizeParamLifetimes;
   flags.optimize_local_lifetimes = OptimizeLocalLifetimes;
+  flags.optimize_local_iterators = OptimizeLocalIterators;
 }
 
 void RepoOptionsFlags::initParserFlags(hackc::ParserFlags& flags) const {

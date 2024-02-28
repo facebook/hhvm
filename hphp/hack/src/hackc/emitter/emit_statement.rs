@@ -23,9 +23,13 @@ use hhbc::SetRangeOp;
 use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
 use lazy_static::lazy_static;
+use naming_special_names_rust::pseudo_functions;
 use naming_special_names_rust::special_idents;
 use naming_special_names_rust::superglobals;
 use oxidized::aast as a;
+use oxidized::aast_visitor;
+use oxidized::aast_visitor::Node;
+use oxidized::aast_visitor::Visitor;
 use oxidized::ast;
 use oxidized::ast_defs;
 use oxidized::local_id;
@@ -988,6 +992,209 @@ fn emit_foreach<'a, 'arena, 'decl>(
     })
 }
 
+/// Determine whether or not an LIter can be used rather than a traditional
+/// Iter, and return the Local to be iterated. Generally LIter is only safe when
+/// the iterated value is:
+///  - Stored in a local, $L
+///  - Not modified, -or- only modified by writing to $L[$k] when iterated by
+///    key $k
+///  - If iterated by key, $k, the key is not mutated
+///
+/// The AST is scanned to look for modifications to $L, in general we're looking
+/// for any reference to $K or $k in an Lval position, specifically:
+///  - Lval op= ...
+///  - Lval[..]..[..] op= ...
+///  - list(..., Lval, ...) op= ...
+///  - ++Lval, --Lval, Lval++, Lval--
+///  - unset(Lval)
+///  - ..(..., inout Lval, ...)
+///  - Lval->... (which would mutate an object collection)
+///  - foreach (.. as Lval => Lval); foreach (.. as Lval)
+fn check_l_iter<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    env: &mut Env<'a, 'arena>,
+    pos: &Pos,
+    collection: &ast::Expr,
+    iterator: &ast::AsExpr,
+    body: &[ast::Stmt],
+) -> Result<Option<Local>> {
+    if !e.options().hhbc.optimize_local_iterators {
+        return Ok(None);
+    }
+    let ast::Expr(_, _, ast::Expr_::Lvar(arr_lid)) = collection else {
+        return Ok(None);
+    };
+
+    let arr_loc = local_id::get_name(&arr_lid.1);
+    let key_loc = match iterator {
+        ast::AsExpr::AsKv(ast::Expr(_, _, ast::Expr_::Lvar(k)), _) => {
+            Some(local_id::get_name(&k.1))
+        }
+        _ => None,
+    };
+
+    if arr_loc == special_idents::THIS || superglobals::is_superglobal(arr_loc) {
+        return Ok(None);
+    }
+
+    if key_loc.map_or(false, |k| {
+        *k == special_idents::THIS || superglobals::is_superglobal(k)
+    }) {
+        return Ok(None);
+    }
+
+    struct Visitor<'a> {
+        saw_write: bool,
+        arr_loc: &'a String,
+        key_loc: Option<&'a String>,
+    }
+
+    impl<'a> Visitor<'a> {
+        fn visit_lval(&mut self, expr: &ast::Expr, is_unset: bool) {
+            if !self.saw_write && self.check_lval(expr, is_unset) {
+                self.saw_write = true;
+            }
+        }
+
+        fn is_key(&self, name: &str) -> bool {
+            self.key_loc.map_or(false, |kl| *kl == *name)
+        }
+
+        fn check_lval(&self, expr: &ast::Expr, is_unset: bool) -> bool {
+            let ast::Expr(_, _, e) = expr;
+            match e {
+                ast::Expr_::Lvar(lid) => {
+                    let name = local_id::get_name(&lid.1);
+                    *name == *self.arr_loc || self.is_key(name)
+                }
+                ast::Expr_::List(exprs) => exprs.iter().any(|expr| self.check_lval(expr, is_unset)),
+                ast::Expr_::ArrayGet(box (base, Some(index))) => {
+                    let ast::Expr(_, _, b) = base;
+                    let ast::Expr(_, _, i) = index;
+
+                    match (b, i) {
+                        (ast::Expr_::Lvar(base_lid), ast::Expr_::Lvar(key_lid)) => {
+                            let bname = local_id::get_name(&base_lid.1);
+                            let kname = local_id::get_name(&key_lid.1);
+                            (bname == self.arr_loc && (is_unset || !self.is_key(kname)))
+                                || self.is_key(bname)
+                        }
+                        _ => self.check_lval(base, is_unset),
+                    }
+                }
+                ast::Expr_::ArrayGet(box (base, None)) => self.check_lval(base, is_unset),
+                _ => false,
+            }
+        }
+    }
+
+    impl<'node, 'a> aast_visitor::Visitor<'node> for Visitor<'a> {
+        type Params = aast_visitor::AstParams<(), ()>;
+
+        fn object(&mut self) -> &mut dyn aast_visitor::Visitor<'node, Params = Self::Params> {
+            self
+        }
+
+        fn visit_as_expr(&mut self, _c: &mut (), ae: &ast::AsExpr) -> Result<(), ()> {
+            match ae {
+                ast::AsExpr::AsV(v) | ast::AsExpr::AwaitAsV(_, v) => {
+                    self.visit_lval(v, false);
+                }
+                ast::AsExpr::AsKv(k, v) | ast::AsExpr::AwaitAsKv(_, k, v) => {
+                    self.visit_lval(k, false);
+                    self.visit_lval(v, false);
+                }
+            }
+
+            ae.recurse(&mut (), self.object())
+        }
+
+        fn visit_expr_(&mut self, _c: &mut (), p: &ast::Expr_) -> Result<(), ()> {
+            use ast_defs::Bop;
+            use ast_defs::Uop;
+
+            if self.saw_write {
+                return Ok(());
+            }
+
+            match p {
+                ast::Expr_::Unop(box (Uop::Uincr | Uop::Udecr | Uop::Upincr | Uop::Updecr, e)) => {
+                    self.visit_lval(e, false)
+                }
+
+                ast::Expr_::Binop(e) => {
+                    let ast::Binop { bop, lhs: left, .. } = &**e;
+                    if let Bop::Eq(_) = bop {
+                        self.visit_lval(left, false);
+                    }
+                }
+
+                ast::Expr_::Call(expr) => {
+                    let ast::CallExpr { func, args, .. } = &**expr;
+
+                    let is_unset = if let ast::Expr(_, _, ast::Expr_::Id(fid)) = func {
+                        fid.1.eq_ignore_ascii_case(pseudo_functions::UNSET)
+                    } else {
+                        false
+                    };
+
+                    for (pk, arg) in args {
+                        match (is_unset, pk) {
+                            (true, _) | (_, ast_defs::ParamKind::Pinout(_)) => {
+                                self.visit_lval(arg, is_unset)
+                            }
+                            _ => (),
+                        };
+                    }
+                }
+
+                ast::Expr_::ObjGet(box (lhs, _, _, _)) => self.visit_lval(lhs, false),
+
+                _ => (),
+            }
+
+            p.recurse(&mut (), self.object())
+        }
+    }
+
+    let mut visitor = Visitor {
+        saw_write: false,
+        arr_loc,
+        key_loc,
+    };
+    match (key_loc, iterator) {
+        (Some(_), ast::AsExpr::AsKv(_, v)) => {
+            visitor.visit_lval(v, false);
+            visitor.visit_expr(&mut (), v).unwrap();
+        }
+        (None, ast::AsExpr::AsKv(k, v)) => {
+            visitor.visit_lval(k, false);
+            visitor.visit_lval(v, false);
+            visitor.visit_expr(&mut (), k).unwrap();
+            visitor.visit_expr(&mut (), v).unwrap();
+        }
+        (_, ast::AsExpr::AsV(v)) => {
+            visitor.visit_lval(v, false);
+            visitor.visit_expr(&mut (), v).unwrap();
+        }
+        _ => {
+            return Ok(None);
+        }
+    };
+    if visitor.saw_write {
+        return Ok(None);
+    };
+
+    for stmt in body {
+        aast_visitor::visit(&mut visitor, &mut (), stmt).unwrap();
+        if visitor.saw_write {
+            return Ok(None);
+        }
+    }
+
+    Ok(Some(emit_expr::get_local(e, env, pos, arr_loc)?))
+}
+
 fn emit_foreach_<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
@@ -996,9 +1203,18 @@ fn emit_foreach_<'a, 'arena, 'decl>(
     iterator: &ast::AsExpr,
     block: &[ast::Stmt],
 ) -> Result<InstrSeq<'arena>> {
-    let collection_instrs = emit_expr::emit_expr(e, env, collection)?;
+    let liter_local = check_l_iter(e, env, pos, collection, iterator, block)?;
+    let collection_instrs = if liter_local.is_none() {
+        emit_expr::emit_expr(e, env, collection)?
+    } else {
+        instr::empty()
+    };
     scope::with_unnamed_locals_and_iterators(e, |e| {
-        let iter_id = e.iterator_mut().get();
+        let iter_id = if let Some(loc) = liter_local {
+            e.iterator_mut().gen_liter(loc)
+        } else {
+            e.iterator_mut().gen_iter()
+        };
         let loop_break_label = e.label_gen_mut().next_regular();
         let loop_continue_label = e.label_gen_mut().next_regular();
         let loop_head_label = e.label_gen_mut().next_regular();
@@ -1016,18 +1232,29 @@ fn emit_foreach_<'a, 'arena, 'decl>(
             block,
             emit_block,
         )?;
-        let iter_init = InstrSeq::gather(vec![
-            collection_instrs,
-            emit_pos(&collection.1),
-            instr::iter_init(iter_args.clone(), loop_break_label),
-        ]);
+        let iter_init = if let Some(loc) = liter_local {
+            InstrSeq::gather(vec![
+                emit_pos(&collection.1),
+                instr::l_iter_init(iter_args.clone(), loc, loop_break_label),
+            ])
+        } else {
+            InstrSeq::gather(vec![
+                collection_instrs,
+                emit_pos(&collection.1),
+                instr::iter_init(iter_args.clone(), loop_break_label),
+            ])
+        };
         let iterate = InstrSeq::gather(vec![
             instr::label(loop_head_label),
             preamble,
             body,
             instr::label(loop_continue_label),
             emit_pos(pos),
-            instr::iter_next(iter_args, loop_head_label),
+            if let Some(loc) = liter_local {
+                instr::l_iter_next(iter_args, loc, loop_head_label)
+            } else {
+                instr::iter_next(iter_args, loop_head_label)
+            },
         ]);
         let iter_done = instr::label(loop_break_label);
         Ok((iter_init, iterate, iter_done))

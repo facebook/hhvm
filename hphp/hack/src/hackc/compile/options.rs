@@ -90,6 +90,7 @@ pub struct HhbcFlags {
     pub enable_native_enum_class_labels: bool,
     pub optimize_param_lifetimes: bool,
     pub optimize_local_lifetimes: bool,
+    pub optimize_local_iterators: bool,
 }
 
 impl Default for HhbcFlags {
@@ -109,6 +110,7 @@ impl Default for HhbcFlags {
             enable_native_enum_class_labels: false,
             optimize_param_lifetimes: true,
             optimize_local_lifetimes: true,
+            optimize_local_iterators: true,
         }
     }
 }

@@ -149,6 +149,11 @@ fn build_ir<'a, 'arena>(
     // make testing difficult but does not change the program meaningfully
     env.hhbc_flags.optimize_local_lifetimes = false;
 
+    // Similarly this flag should have no affect on program function but causes
+    // us to generate LIter(Init,Next,Free) bytecodes which have not yet been
+    // implemented in the IR
+    env.hhbc_flags.optimize_local_iterators = false;
+
     let decl_provider = SelfProvider::wrap_existing_provider(
         None,
         env.to_decl_parser_options(),

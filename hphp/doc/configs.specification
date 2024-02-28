@@ -112,6 +112,13 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
   mean that values that are no longer needed by the program may not be visible
   to the debugger anymore.
 
+- bool Hack.Lang.OptimizeLocalIterators = false, paulbiss, repooptionsflag(Parser)
+
+  When set the frontend will attempt to emit LIter bytecodes when compiling
+  foreach style loops where the iterand is stored in a local, which during the
+  course of the loop is either not modified, or is only modified at the $key
+  location.
+
 - bool Hack.Lang.LookForTypechecker = false, UNKNOWN
 - bool Hack.Lang.AutoTypecheck = LookForTypechecker, UNKNOWN
 

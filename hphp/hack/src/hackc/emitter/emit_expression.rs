@@ -933,7 +933,7 @@ fn inline_gena_call<'a, 'arena, 'decl>(
             instr::await_(),
             instr::label(async_eager_label),
             instr::pop_c(),
-            emit_iter(e, instr::c_get_l(arr_local), |val_local, key_local| {
+            emit_liter(e, &arr_local, |val_local, key_local| {
                 InstrSeq::gather(vec![
                     instr::c_get_l(val_local),
                     instr::wh_result(),
@@ -954,13 +954,18 @@ fn inline_gena_call<'a, 'arena, 'decl>(
     })
 }
 
-fn emit_iter<'arena, 'decl, F: FnOnce(Local, Local) -> InstrSeq<'arena>>(
+fn emit_liter<'arena, 'decl, F: FnOnce(Local, Local) -> InstrSeq<'arena>>(
     e: &mut Emitter<'arena, 'decl>,
-    collection: InstrSeq<'arena>,
+    collection: &Local,
     f: F,
 ) -> Result<InstrSeq<'arena>> {
+    let use_liter = e.options().hhbc.optimize_local_iterators;
     scope::with_unnamed_locals_and_iterators(e, |e| {
-        let iter_id = e.iterator_mut().get();
+        let iter_id = if use_liter {
+            e.iterator_mut().gen_liter(*collection)
+        } else {
+            e.iterator_mut().gen_iter()
+        };
         let val_id = e.local_gen_mut().get_unnamed();
         let key_id = e.local_gen_mut().get_unnamed();
         let loop_end = e.label_gen_mut().next_regular();
@@ -970,14 +975,26 @@ fn emit_iter<'arena, 'decl, F: FnOnce(Local, Local) -> InstrSeq<'arena>>(
             key_id,
             val_id,
         };
-        let iter_init = InstrSeq::gather(vec![
-            collection,
-            instr::iter_init(iter_args.clone(), loop_end),
-        ]);
+        let iter_init = if use_liter {
+            InstrSeq::gather(vec![instr::l_iter_init(
+                iter_args.clone(),
+                *collection,
+                loop_end,
+            )])
+        } else {
+            InstrSeq::gather(vec![
+                instr::c_get_l(*collection),
+                instr::iter_init(iter_args.clone(), loop_end),
+            ])
+        };
         let iterate = InstrSeq::gather(vec![
             instr::label(loop_next),
             f(val_id, key_id),
-            instr::iter_next(iter_args, loop_next),
+            if use_liter {
+                instr::l_iter_next(iter_args, *collection, loop_next)
+            } else {
+                instr::iter_next(iter_args, loop_next)
+            },
         ]);
         let iter_done = InstrSeq::gather(vec![
             instr::unset_l(val_id),

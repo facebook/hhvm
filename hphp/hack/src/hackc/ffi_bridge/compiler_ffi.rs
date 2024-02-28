@@ -77,6 +77,7 @@ mod ffi {
         enable_native_enum_class_labels: bool,
         optimize_param_lifetimes: bool,
         optimize_local_lifetimes: bool,
+        optimize_local_iterators: bool,
     }
 
     struct ParserFlags {
@@ -608,6 +609,7 @@ impl ffi::NativeEnv {
                 enable_native_enum_class_labels: self.hhbc_flags.enable_native_enum_class_labels,
                 optimize_param_lifetimes: self.hhbc_flags.optimize_param_lifetimes,
                 optimize_local_lifetimes: self.hhbc_flags.optimize_local_lifetimes,
+                optimize_local_iterators: self.hhbc_flags.optimize_local_iterators,
                 ..Default::default()
             },
             flags: EnvFlags {

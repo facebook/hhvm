@@ -2255,8 +2255,23 @@ void in(ISS& env, const bc::PushL& op) {
     }
   }
 
-  if (auto val = tv(peekLocRaw(env, op.loc1))) {
-    return reduce(env, bc::UnsetL { op.loc1 }, gen_constant(*val));
+  auto const& ty = peekLocRaw(env, op.loc1);
+  if (ty.subtypeOf(BUninit)) {
+    // It's unsafe to ever perform a PushL on an uninit location, but we may
+    // have generated a PushL in the HackC if we determined that a CGetL
+    // could only be reached if the local it referenced was initialized, and
+    // now that we know the local is uninitialized we know it must be
+    // unreachable.
+    //
+    // This can happen because the liveness analysis in HackC is much more
+    // primitive than HHBBC. If we see a CGetL instruction HackC will assume the
+    // local must be initialized afterwards (or it would have thrown) but make
+    // no attempt to detect cases where we would unconditionally throw.
+    unreachable(env);
+  } else {
+    if (auto val = tv(peekLocRaw(env, op.loc1))) {
+      return reduce(env, bc::UnsetL { op.loc1 }, gen_constant(*val));
+    }
   }
 
   impl(env, bc::CGetQuietL { op.loc1 }, bc::UnsetL { op.loc1 });

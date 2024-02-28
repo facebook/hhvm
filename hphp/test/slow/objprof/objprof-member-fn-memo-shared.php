@@ -249,6 +249,7 @@ function main(): void {
     $a->getDictOfStrings();
     $prof = objprof_get_data_extended();
     $prof_per_prop = objprof_get_data_extended(OBJPROF_FLAGS_PER_PROPERTY);
+    __hhvm_intrinsics\launder_value($a);
 
     check_and_print($prof["A"]["bytes_normalized"] > 100, "The normalized size of A should be greater than 100");
     echo "\n";

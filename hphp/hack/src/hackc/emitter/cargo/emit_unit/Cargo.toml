@@ -12,6 +12,8 @@ path = "../../emit_unit.rs"
 
 [dependencies]
 ast_scope = { version = "0.0.0", path = "../ast_scope" }
+bit-set = "0.5"
+bit-vec = "0.6"
 bitflags = { version = "2.4", features = ["serde"] }
 bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
 bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
@@ -39,9 +41,11 @@ options = { version = "0.0.0", path = "../../../compile/cargo/options" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 oxidized_by_ref = { version = "0.0.0", path = "../../../../oxidized_by_ref" }
 print_expr = { version = "0.0.0", path = "../../../print_expr" }
+priority-queue = "1.2.2"
 regex = "1.9.2"
 scope = { version = "0.0.0", path = "../scope" }
 serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }
+smallvec = { version = "1.6.1", features = ["serde", "specialization", "union"] }
 stack_depth = { version = "0.0.0", path = "../../../utils/cargo/stack_depth" }
 stack_limit = { version = "0.0.0", path = "../../../../utils/stack_limit" }
 statement_state = { version = "0.0.0", path = "../statement_state" }

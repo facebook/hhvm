@@ -141,9 +141,14 @@ fn build_ir<'a, 'arena>(
 ) -> Result<ir::Unit<'arena>> {
     let filepath = RelativePath::make(Prefix::Dummy, path.to_path_buf());
     let source_text = SourceText::make(Arc::new(filepath.clone()), content);
-    let env = crate::compile::native_env(filepath, &opts.single_file_opts)?;
+    let mut env = crate::compile::native_env(filepath, &opts.single_file_opts)?;
     let mut profile = Profile::default();
     let decl_arena = bumpalo::Bump::new();
+
+    // Don't optimize local lifetimes as it can cause us to drop writes that may
+    // make testing difficult but does not change the program meaningfully
+    env.hhbc_flags.optimize_local_lifetimes = false;
+
     let decl_provider = SelfProvider::wrap_existing_provider(
         None,
         env.to_decl_parser_options(),

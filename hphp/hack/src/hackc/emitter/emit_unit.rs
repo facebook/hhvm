@@ -27,6 +27,7 @@ mod emit_type_constant;
 mod emit_typedef;
 mod emit_xhp;
 mod generator;
+mod opt_body;
 mod reified_generics_helpers;
 mod try_finally_rewriter;
 mod xhp_attribute;

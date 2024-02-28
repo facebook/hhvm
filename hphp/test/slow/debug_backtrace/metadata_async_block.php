@@ -12,6 +12,6 @@ async function foo($options) :Awaitable<mixed>{
 
 <<__EntryPoint>>
 async function main(): Awaitable<void> {
-  await foo(0);
-  await foo(DEBUG_BACKTRACE_PROVIDE_METADATA);
+  await foo(DEBUG_BACKTRACE_IGNORE_ARGS);
+  await foo(DEBUG_BACKTRACE_PROVIDE_METADATA | DEBUG_BACKTRACE_IGNORE_ARGS);
 }

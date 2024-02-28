@@ -102,6 +102,16 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
   name hard-fails rather than emitting, e.g., CgetG
 
 - std::map<std::string,std::string> Hack.Lang.AliasedNamespaces = {} (AliasedNamespaces), UNKNOWN, repooptionsflag(Parser)
+
+- bool Hack.Lang.OptimizeParamLifetimes = false, paulbiss, repooptionsflag(Parser)
+- bool Hack.Lang.OptimizeLocalLifetimes = false, paulbiss, repooptionsflag(Parser)
+
+  When set the frontend compiler will attempt to shorten the live ranges of
+  parameter and non-parameter named locals when these flags are set. This may
+  allow for better copy-on-write behavior of certain value types but will also
+  mean that values that are no longer needed by the program may not be visible
+  to the debugger anymore.
+
 - bool Hack.Lang.LookForTypechecker = false, UNKNOWN
 - bool Hack.Lang.AutoTypecheck = LookForTypechecker, UNKNOWN
 

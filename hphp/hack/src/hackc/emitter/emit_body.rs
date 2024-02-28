@@ -46,6 +46,7 @@ use crate::emit_expression;
 use crate::emit_param;
 use crate::emit_statement;
 use crate::generator;
+use crate::opt_body;
 use crate::reified_generics_helpers as RGH;
 
 static THIS: &str = "$this";
@@ -405,8 +406,8 @@ pub fn make_body<'a, 'arena, 'decl>(
     // Now that we're done with this function, clear the named_local table.
     emitter.clear_named_locals();
 
-    let body_instrs = body_instrs.to_vec();
-    let stack_depth = stack_depth::compute_stack_depth(params.as_ref(), &body_instrs)
+    let body_instrs = opt_body::optimize_body(emitter, body_instrs, params.len(), &decl_vars);
+    let stack_depth = stack_depth::compute_stack_depth(params.as_ref(), body_instrs.as_ref())
         .map_err(error::Error::from_error)?;
 
     Ok(Body {

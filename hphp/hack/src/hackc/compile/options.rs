@@ -88,6 +88,8 @@ pub struct HhbcFlags {
     pub stress_shallow_decl_deps: bool,
     pub stress_folded_decl_deps: bool,
     pub enable_native_enum_class_labels: bool,
+    pub optimize_param_lifetimes: bool,
+    pub optimize_local_lifetimes: bool,
 }
 
 impl Default for HhbcFlags {
@@ -105,6 +107,8 @@ impl Default for HhbcFlags {
             stress_shallow_decl_deps: false,
             stress_folded_decl_deps: false,
             enable_native_enum_class_labels: false,
+            optimize_param_lifetimes: true,
+            optimize_local_lifetimes: true,
         }
     }
 }

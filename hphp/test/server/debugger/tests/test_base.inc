@@ -49,7 +49,8 @@ function runTest($testName, $testController) {
 
     $serverPort = $adminPort = $debugPort = null;
     $serverProc = startServer(inout $serverPort, inout $adminPort, inout $debugPort,
-                              __DIR__.'/..', __DIR__.'/../debugger');
+                              __DIR__.'/..', __DIR__.'/../debugger',
+                              '-vHack.Lang.OptimizeLocalLifetimes=0');
     $pipes = null;
     startDebuggerClient($debugPort, "/debugger/$testName.in", inout $pipes);
     $clientProcessId = getClientProcessId($pipes[1]);

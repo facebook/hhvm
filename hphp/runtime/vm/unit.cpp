@@ -562,7 +562,13 @@ void Unit::logDeclInfo() const {
 }
 
 template <typename T, typename I>
-static bool defineSymbols(const T& symbols, boost::dynamic_bitset<>& define, bool failIsFatal, Stats::StatCounter counter, I lambda) {
+static bool defineSymbols(
+    const T& symbols,
+    boost::dynamic_bitset<>& define,
+    bool failIsFatal,
+    Stats::StatCounter counter,
+    I lambda
+) {
   auto i = define.find_first();
   if (failIsFatal) {
     if (i == define.npos) i = define.find_first();
@@ -584,12 +590,13 @@ static bool defineSymbols(const T& symbols, boost::dynamic_bitset<>& define, boo
 
 template<bool mergeOnlyNonPersistentFuncs>
 void Unit::mergeImpl() {
-  assertx(m_mergeState.load(std::memory_order_relaxed) >= MergeState::InitialMerged);
+  assertx(m_mergeState.load(std::memory_order_relaxed) >=
+          MergeState::InitialMerged);
   autoTypecheck(this);
 
   FTRACE(1, "Merging unit {} ({} funcs, {} constants, {} typealiases, {} classes, {} modules)\n",
-         this->m_origFilepath->data(), m_funcs.size(), m_constants.size(), m_typeAliases.size(),
-         m_preClasses.size(), m_modules.size());
+         this->m_origFilepath->data(), m_funcs.size(), m_constants.size(),
+         m_typeAliases.size(), m_preClasses.size(), m_modules.size());
 
   for (auto func : funcs()) {
     Stats::inc(Stats::UnitMerge_mergeable_function);
@@ -604,7 +611,8 @@ void Unit::mergeImpl() {
     Stats::inc(Stats::UnitMerge_mergeable);
     Stats::inc(Stats::UnitMerge_mergeable_define);
 
-    assertx((!!(constant.attrs & AttrPersistent)) == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
+    assertx((!!(constant.attrs & AttrPersistent)) ==
+        (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
     Constant::def(&constant);
   }
 
@@ -623,25 +631,32 @@ void Unit::mergeImpl() {
 
   bool failIsFatal = false;
   do {
-    bool madeProgress = false;
-    madeProgress = defineSymbols(m_preClasses, preClasses, failIsFatal,
-                                  Stats::UnitMerge_mergeable_class,
-                                  [&](const PreClassPtr& preClass) {
-                                    // Anonymous classes doesn't need to be defined because they will be defined when used
-                                    if (PreClassEmitter::IsAnonymousClassName(preClass->name()->toCppString())) {
-                                      return true;
-                                    }
-                                    assertx(preClass->isPersistent() == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
-                                    return Class::def(preClass.get(), failIsFatal) != nullptr;
-                                  }) || madeProgress;
+    bool madeProgress = defineSymbols(
+      m_preClasses, preClasses, failIsFatal, Stats::UnitMerge_mergeable_class,
+      [&](const PreClassPtr& preClass) {
+        // Anonymous classes doesn't need to be defined because they will be
+        // defined when used
+        auto pcName = preClass->name();
+        if (PreClassEmitter::IsAnonymousClassName(pcName->toCppString())) {
+          return true;
+        }
+        assertx(preClass->isPersistent() ==
+                (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
+        return Class::def(preClass.get(), failIsFatal) != nullptr;
+      });
 
-    // We do type alias last because they may depend on classes that needs to be define first
-    madeProgress = defineSymbols(m_typeAliases, typeAliases, failIsFatal,
-                                  Stats::UnitMerge_mergeable_typealias,
-                                  [&](const PreTypeAlias& typeAlias) {
-                                    assertx(typeAlias.isPersistent() == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
-                                    return TypeAlias::def(&typeAlias, failIsFatal);
-                                  }) || madeProgress;
+    // We do type alias last because they may depend on classes that needs to
+    // be defined first
+    madeProgress |= defineSymbols(m_typeAliases, typeAliases, failIsFatal,
+      Stats::UnitMerge_mergeable_typealias,
+      [&](const PreTypeAlias& typeAlias) {
+        assertx(typeAlias.isPersistent() ==
+              (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
+        return TypeAlias::def(&typeAlias, failIsFatal);
+      });
+
+    // If we did not make progress then there is an undefined symbol or a
+    // class definition cycle that spans files.
     if (!madeProgress) failIsFatal = true;
   } while (typeAliases.any() || preClasses.any());
 }

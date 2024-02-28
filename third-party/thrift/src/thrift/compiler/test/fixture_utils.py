@@ -101,10 +101,13 @@ def parse_fixture_cmds(
     repo_root_dir_abspath: Path,
     fixture_name: str,
     fixture_dir_abspath: Path,
+    fixture_output_root_dir_abspath: Path,
     thrift_bin_path: Path,
 ) -> list[FixtureCmd]:
     assert repo_root_dir_abspath.is_absolute()
     assert fixture_dir_abspath.is_absolute()
+    assert fixture_output_root_dir_abspath.is_absolute()
+    assert fixture_output_root_dir_abspath.is_dir()
 
     fixture_cmds = {}
 
@@ -116,6 +119,7 @@ def parse_fixture_cmds(
             repo_root_dir_abspath,
             fixture_name,
             fixture_dir_abspath,
+            fixture_output_root_dir_abspath,
             thrift_bin_path,
         )
         if fixture_cmd is None:
@@ -142,6 +146,7 @@ def _parse_fixture_cmd(
     repo_root_dir_abspath: Path,
     fixture_name: str,
     fixture_dir_abspath: Path,
+    fixture_output_root_dir_abspath: Path,
     thrift_bin_path: Path,
 ) -> typing.Optional[FixtureCmd]:
     """
@@ -205,7 +210,7 @@ def _parse_fixture_cmd(
 
         base_args += [
             "-o",
-            fixture_dir_abspath,
+            fixture_output_root_dir_abspath,
             "--gen",
         ]
 

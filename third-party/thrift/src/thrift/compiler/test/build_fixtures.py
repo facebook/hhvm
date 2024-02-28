@@ -149,7 +149,11 @@ def _add_processes_for_fixture(
         shutil.rmtree(fixture_dir_abspath / existing_fixture_filename)
 
     for fixture_cmd in fixture_utils.parse_fixture_cmds(
-        repo_root_dir_abspath, fixture_name, fixture_dir_abspath, thrift_bin_path
+        repo_root_dir_abspath,
+        fixture_name,
+        fixture_dir_abspath,
+        fixture_dir_abspath,  # fixture_output_root_dir_abspath
+        thrift_bin_path,
     ):
         processes.append(
             _run_subprocess(

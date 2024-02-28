@@ -63,7 +63,7 @@ from s.clients_wrapper cimport cTestServiceAsyncClient, cTestServiceClientWrappe
 cdef void TestService_test_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException[_c_types.cE]():
         try:

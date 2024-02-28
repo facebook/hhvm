@@ -300,7 +300,7 @@ cdef api void call_cy_MyService_hasDataById(
     Cpp2RequestContext* ctx,
     cFollyPromise[cbool] cPromise,
     cint64_t id
-):
+) noexcept:
     cdef Promise__sa_cbool __promise = Promise__sa_cbool._fbthrift_create(cmove(cPromise))
     arg_id = id
     __context = RequestContext._fbthrift_create(ctx)
@@ -318,7 +318,7 @@ cdef api void call_cy_MyService_getDataById(
     Cpp2RequestContext* ctx,
     cFollyPromise[string] cPromise,
     cint64_t id
-):
+) noexcept:
     cdef Promise__sa_string __promise = Promise__sa_string._fbthrift_create(cmove(cPromise))
     arg_id = id
     __context = RequestContext._fbthrift_create(ctx)
@@ -337,7 +337,7 @@ cdef api void call_cy_MyService_putDataById(
     cFollyPromise[cFollyUnit] cPromise,
     cint64_t id,
     string data
-):
+) noexcept:
     cdef Promise__sa_cFollyUnit __promise = Promise__sa_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_id = id
     arg_data = data.data().decode('UTF-8')
@@ -358,7 +358,7 @@ cdef api void call_cy_MyService_lobDataById(
     cFollyPromise[cFollyUnit] cPromise,
     cint64_t id,
     string data
-):
+) noexcept:
     cdef Promise__sa_cFollyUnit __promise = Promise__sa_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_id = id
     arg_data = data.data().decode('UTF-8')
@@ -376,7 +376,7 @@ cdef api void call_cy_MyService_lobDataById(
 cdef api void call_cy_MyService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise__sa_cFollyUnit __promise = Promise__sa_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         MyService_onStartServing_coro(
@@ -387,7 +387,7 @@ cdef api void call_cy_MyService_onStartServing(
 cdef api void call_cy_MyService_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise__sa_cFollyUnit __promise = Promise__sa_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         MyService_onStopRequested_coro(
@@ -580,7 +580,7 @@ cdef api void call_cy_MyServiceFast_hasDataById(
     Cpp2RequestContext* ctx,
     cFollyPromise[cbool] cPromise,
     cint64_t id
-):
+) noexcept:
     cdef Promise__sa_cbool __promise = Promise__sa_cbool._fbthrift_create(cmove(cPromise))
     arg_id = id
     __context = RequestContext._fbthrift_create(ctx)
@@ -598,7 +598,7 @@ cdef api void call_cy_MyServiceFast_getDataById(
     Cpp2RequestContext* ctx,
     cFollyPromise[string] cPromise,
     cint64_t id
-):
+) noexcept:
     cdef Promise__sa_string __promise = Promise__sa_string._fbthrift_create(cmove(cPromise))
     arg_id = id
     __context = RequestContext._fbthrift_create(ctx)
@@ -617,7 +617,7 @@ cdef api void call_cy_MyServiceFast_putDataById(
     cFollyPromise[cFollyUnit] cPromise,
     cint64_t id,
     string data
-):
+) noexcept:
     cdef Promise__sa_cFollyUnit __promise = Promise__sa_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_id = id
     arg_data = data.data().decode('UTF-8')
@@ -638,7 +638,7 @@ cdef api void call_cy_MyServiceFast_lobDataById(
     cFollyPromise[cFollyUnit] cPromise,
     cint64_t id,
     string data
-):
+) noexcept:
     cdef Promise__sa_cFollyUnit __promise = Promise__sa_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_id = id
     arg_data = data.data().decode('UTF-8')
@@ -656,7 +656,7 @@ cdef api void call_cy_MyServiceFast_lobDataById(
 cdef api void call_cy_MyServiceFast_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise__sa_cFollyUnit __promise = Promise__sa_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         MyServiceFast_onStartServing_coro(
@@ -667,7 +667,7 @@ cdef api void call_cy_MyServiceFast_onStartServing(
 cdef api void call_cy_MyServiceFast_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise__sa_cFollyUnit __promise = Promise__sa_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         MyServiceFast_onStopRequested_coro(
@@ -860,7 +860,7 @@ cdef api void call_cy_DbMixedStackArguments_getDataByKey0(
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[string]] cPromise,
     unique_ptr[string] key
-):
+) noexcept:
     cdef Promise_binary __promise = Promise_binary._fbthrift_create(cmove(cPromise))
     arg_key = (deref(key)).data().decode('UTF-8')
     __context = RequestContext._fbthrift_create(ctx)
@@ -878,7 +878,7 @@ cdef api void call_cy_DbMixedStackArguments_getDataByKey1(
     Cpp2RequestContext* ctx,
     cFollyPromise[string] cPromise,
     string key
-):
+) noexcept:
     cdef Promise__sa_binary __promise = Promise__sa_binary._fbthrift_create(cmove(cPromise))
     arg_key = key.data().decode('UTF-8')
     __context = RequestContext._fbthrift_create(ctx)
@@ -894,7 +894,7 @@ cdef api void call_cy_DbMixedStackArguments_getDataByKey1(
 cdef api void call_cy_DbMixedStackArguments_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise__sa_cFollyUnit __promise = Promise__sa_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         DbMixedStackArguments_onStartServing_coro(
@@ -905,7 +905,7 @@ cdef api void call_cy_DbMixedStackArguments_onStartServing(
 cdef api void call_cy_DbMixedStackArguments_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise__sa_cFollyUnit __promise = Promise__sa_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         DbMixedStackArguments_onStopRequested_coro(

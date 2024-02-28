@@ -121,7 +121,7 @@ async def runGenerator_B_stream_stuff(object generator, Promise_cint32_t_Stream 
     else:
         promise.cPromise.setValue(optional[cint32_t](<cint32_t?>item))
 
-cdef void getNextGenerator_B_stream_stuff(object generator, cFollyPromise[optional[cint32_t]] cPromise):
+cdef void getNextGenerator_B_stream_stuff(object generator, cFollyPromise[optional[cint32_t]] cPromise) noexcept:
     cdef Promise_cint32_t_Stream __promise = Promise_cint32_t_Stream._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         runGenerator_B_stream_stuff(
@@ -304,7 +304,7 @@ cdef api void call_cy_A_foo(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[_module_types.cFoo]] cPromise
-):
+) noexcept:
     cdef Promise__module_types_cFoo __promise = Promise__module_types_cFoo._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -318,7 +318,7 @@ cdef api void call_cy_A_foo(
 cdef api void call_cy_A_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         A_onStartServing_coro(
@@ -329,7 +329,7 @@ cdef api void call_cy_A_onStartServing(
 cdef api void call_cy_A_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         A_onStopRequested_coro(
@@ -426,7 +426,7 @@ cdef api void call_cy_B_bar(
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise,
     unique_ptr[_module_types.cFoo] foo
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_foo = _module_types.Foo._fbthrift_create(shared_ptr[_module_types.cFoo](foo.release()))
     __context = RequestContext._fbthrift_create(ctx)
@@ -443,7 +443,7 @@ cdef api void call_cy_B_stream_stuff(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cServerStream[cint32_t]] cPromise
-):
+) noexcept:
     cdef Promise_cServerStream__cint32_t __promise = Promise_cServerStream__cint32_t._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -457,7 +457,7 @@ cdef api void call_cy_B_stream_stuff(
 cdef api void call_cy_B_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         B_onStartServing_coro(
@@ -468,7 +468,7 @@ cdef api void call_cy_B_onStartServing(
 cdef api void call_cy_B_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         B_onStopRequested_coro(
@@ -597,7 +597,7 @@ async def B_onStopRequested_coro(
 cdef api void call_cy_C_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         C_onStartServing_coro(
@@ -608,7 +608,7 @@ cdef api void call_cy_C_onStartServing(
 cdef api void call_cy_C_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         C_onStopRequested_coro(

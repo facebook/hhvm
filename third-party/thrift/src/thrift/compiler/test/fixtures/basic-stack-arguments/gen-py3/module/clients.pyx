@@ -61,7 +61,7 @@ from module.clients_wrapper cimport cDbMixedStackArgumentsAsyncClient, cDbMixedS
 cdef void MyService_hasDataById_callback(
     cFollyTry[cbool]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -74,7 +74,7 @@ cdef void MyService_hasDataById_callback(
 cdef void MyService_getDataById_callback(
     cFollyTry[string]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -87,7 +87,7 @@ cdef void MyService_getDataById_callback(
 cdef void MyService_putDataById_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -100,7 +100,7 @@ cdef void MyService_putDataById_callback(
 cdef void MyService_lobDataById_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -113,7 +113,7 @@ cdef void MyService_lobDataById_callback(
 cdef void MyServiceFast_hasDataById_callback(
     cFollyTry[cbool]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -126,7 +126,7 @@ cdef void MyServiceFast_hasDataById_callback(
 cdef void MyServiceFast_getDataById_callback(
     cFollyTry[string]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -139,7 +139,7 @@ cdef void MyServiceFast_getDataById_callback(
 cdef void MyServiceFast_putDataById_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -152,7 +152,7 @@ cdef void MyServiceFast_putDataById_callback(
 cdef void MyServiceFast_lobDataById_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -165,7 +165,7 @@ cdef void MyServiceFast_lobDataById_callback(
 cdef void DbMixedStackArguments_getDataByKey0_callback(
     cFollyTry[string]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -178,7 +178,7 @@ cdef void DbMixedStackArguments_getDataByKey0_callback(
 cdef void DbMixedStackArguments_getDataByKey1_callback(
     cFollyTry[string]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))

@@ -62,7 +62,7 @@ from test.fixtures.basic.module.clients_wrapper cimport cDbMixedStackArgumentsAs
 cdef void FooService_simple_rpc_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -75,7 +75,7 @@ cdef void FooService_simple_rpc_callback(
 cdef void FB303Service_simple_rpc_callback(
     cFollyTry[_test_fixtures_basic_module_types.cReservedKeyword]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -88,7 +88,7 @@ cdef void FB303Service_simple_rpc_callback(
 cdef void MyService_ping_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -101,7 +101,7 @@ cdef void MyService_ping_callback(
 cdef void MyService_getRandomData_callback(
     cFollyTry[string]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -114,7 +114,7 @@ cdef void MyService_getRandomData_callback(
 cdef void MyService_sink_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -127,7 +127,7 @@ cdef void MyService_sink_callback(
 cdef void MyService_putDataById_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -140,7 +140,7 @@ cdef void MyService_putDataById_callback(
 cdef void MyService_hasDataById_callback(
     cFollyTry[cbool]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -153,7 +153,7 @@ cdef void MyService_hasDataById_callback(
 cdef void MyService_getDataById_callback(
     cFollyTry[string]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -166,7 +166,7 @@ cdef void MyService_getDataById_callback(
 cdef void MyService_deleteDataById_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -179,7 +179,7 @@ cdef void MyService_deleteDataById_callback(
 cdef void MyService_lobDataById_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -192,7 +192,7 @@ cdef void MyService_lobDataById_callback(
 cdef void MyService_invalid_return_for_hack_callback(
     cFollyTry[cset[float]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -205,7 +205,7 @@ cdef void MyService_invalid_return_for_hack_callback(
 cdef void MyService_rpc_skipped_codegen_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -218,7 +218,7 @@ cdef void MyService_rpc_skipped_codegen_callback(
 cdef void DbMixedStackArguments_getDataByKey0_callback(
     cFollyTry[string]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -231,7 +231,7 @@ cdef void DbMixedStackArguments_getDataByKey0_callback(
 cdef void DbMixedStackArguments_getDataByKey1_callback(
     cFollyTry[string]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))

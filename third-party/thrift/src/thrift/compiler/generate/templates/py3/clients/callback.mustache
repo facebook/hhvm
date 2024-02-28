@@ -30,7 +30,7 @@ executed in the asyncio loop.
 cdef void {{service:name}}_{{function:name}}_callback(
     cFollyTry[{{#function:return_type}}{{> clients/cython_return_type_cpp_type}}{{/function:return_type}}]&& result,
     PyObject* userdata
-):
+) noexcept:
     {{> clients/callback_body}}
 
 
@@ -40,7 +40,7 @@ cdef void {{service:name}}_{{function:name}}_callback(
 cdef void {{service:parent_service_name}}_{{service:name}}_{{function:name}}_callback(
     cFollyTry[{{#function:return_type}}{{> clients/cython_return_type_cpp_type}}{{/function:return_type}}]&& result,
     PyObject* userdata
-):
+) noexcept:
     {{> clients/callback_body}}
 
 

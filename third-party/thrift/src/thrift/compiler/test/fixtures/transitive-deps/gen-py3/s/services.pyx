@@ -127,7 +127,7 @@ cdef api void call_cy_TestService_test(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -141,7 +141,7 @@ cdef api void call_cy_TestService_test(
 cdef api void call_cy_TestService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         TestService_onStartServing_coro(
@@ -152,7 +152,7 @@ cdef api void call_cy_TestService_onStartServing(
 cdef api void call_cy_TestService_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         TestService_onStopRequested_coro(

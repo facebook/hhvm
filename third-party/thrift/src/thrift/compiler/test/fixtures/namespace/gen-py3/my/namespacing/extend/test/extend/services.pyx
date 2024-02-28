@@ -145,7 +145,7 @@ cdef api void call_cy_ExtendTestService_check(
     Cpp2RequestContext* ctx,
     cFollyPromise[cbool] cPromise,
     unique_ptr[_my_namespacing_test_hsmodule_types.cHsFoo] struct1
-):
+) noexcept:
     cdef Promise_cbool __promise = Promise_cbool._fbthrift_create(cmove(cPromise))
     arg_struct1 = _my_namespacing_test_hsmodule_types.HsFoo._fbthrift_create(shared_ptr[_my_namespacing_test_hsmodule_types.cHsFoo](struct1.release()))
     __context = RequestContext._fbthrift_create(ctx)
@@ -161,7 +161,7 @@ cdef api void call_cy_ExtendTestService_check(
 cdef api void call_cy_ExtendTestService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         ExtendTestService_onStartServing_coro(
@@ -172,7 +172,7 @@ cdef api void call_cy_ExtendTestService_onStartServing(
 cdef api void call_cy_ExtendTestService_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         ExtendTestService_onStopRequested_coro(

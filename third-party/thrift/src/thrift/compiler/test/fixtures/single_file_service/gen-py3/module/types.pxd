@@ -105,7 +105,7 @@ cdef class ClientBufferedStream__i32(ClientBufferedStream):
     cdef void callback(
         cFollyTry[__cOptional[cint32_t]]&& res,
         PyObject* userdata,
-    )
+    ) noexcept
 
 cdef class ServerStream__i32(ServerStream):
     pass

@@ -43,7 +43,7 @@ cdef api void call_cy_{{service:name}}_{{function:name}}(
             }}{{^function:stack_arguments?}}{{> services/cython_field_type}}{{/function:stack_arguments?}}{{!
             }}{{#function:stack_arguments?}}{{> types/cython_cpp_type}}{{/function:stack_arguments?}}{{!
         }}{{/field:type}} {{field:py_name}}{{/function:args}}
-):{{! Gets called from a python Executor }}
+) noexcept:{{! Gets called from a python Executor }}
     {{#function:return_type}}
     cdef {{> services/promise_name}} __promise = {{> services/promise_name}}._fbthrift_create(cmove(cPromise))
     {{/function:return_type}}
@@ -71,7 +71,7 @@ cdef api void call_cy_{{service:name}}_{{function:name}}(
             }}{{> services/cython_return_type_cpp_type}}{{!
         }}{{/function:return_type}}]{{!
     }} cPromise
-):
+) noexcept:
     {{#function:return_type}}
     cdef {{> services/promise_name}} __promise = {{> services/promise_name}}._fbthrift_create(cmove(cPromise))
     {{/function:return_type}}

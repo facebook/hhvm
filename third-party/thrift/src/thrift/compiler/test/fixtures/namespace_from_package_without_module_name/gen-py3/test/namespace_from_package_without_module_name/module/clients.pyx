@@ -59,7 +59,7 @@ from test.namespace_from_package_without_module_name.module.clients_wrapper cimp
 cdef void TestService_init_callback(
     cFollyTry[cint64_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))

@@ -64,7 +64,7 @@ from my.namespacing.test.hsmodule.clients_wrapper cimport cHsTestServiceClientWr
 cdef void ExtendTestService_check_callback(
     cFollyTry[cbool]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))

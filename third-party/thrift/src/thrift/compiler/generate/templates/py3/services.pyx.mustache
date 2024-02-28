@@ -178,7 +178,7 @@ async def runGenerator_{{service:name}}_{{function:name}}(object generator, Prom
     else:
         promise.cPromise.setValue(optional[{{> types/cython_cpp_type}}](<{{> types/cython_cpp_type}}?>{{> types/cython_python_to_cpp_item}}))
 
-cdef void getNextGenerator_{{service:name}}_{{function:name}}(object generator, cFollyPromise[optional[{{> types/cython_cpp_type}}]] cPromise):
+cdef void getNextGenerator_{{service:name}}_{{function:name}}(object generator, cFollyPromise[optional[{{> types/cython_cpp_type}}]] cPromise) noexcept:
     cdef Promise_{{> types/cython_cpp_type_ident}}_Stream __promise = Promise_{{> types/cython_cpp_type_ident}}_Stream._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         runGenerator_{{service:name}}_{{function:name}}(

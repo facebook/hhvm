@@ -369,7 +369,7 @@ cdef class ClientBufferedStream__i32(ClientBufferedStream):
     cdef void callback(
         cFollyTry[__cOptional[cint32_t]]&& result,
         PyObject* userdata,
-    ):
+    ) noexcept:
         cdef __cOptional[cint32_t] opt_val
         cdef cint32_t _value
         stream, pyfuture, rpc_options = <object> userdata

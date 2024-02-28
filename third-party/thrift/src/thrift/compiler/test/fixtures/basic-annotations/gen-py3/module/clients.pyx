@@ -64,7 +64,7 @@ from module.clients_wrapper cimport cFooBarBazServiceAsyncClient, cFooBarBazServ
 cdef void MyService_ping_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException[_module_types.cMyException]():
         try:
@@ -84,7 +84,7 @@ cdef void MyService_ping_callback(
 cdef void MyService_getRandomData_callback(
     cFollyTry[string]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -97,7 +97,7 @@ cdef void MyService_getRandomData_callback(
 cdef void MyService_hasDataById_callback(
     cFollyTry[cbool]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -110,7 +110,7 @@ cdef void MyService_hasDataById_callback(
 cdef void MyService_getDataById_callback(
     cFollyTry[string]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -123,7 +123,7 @@ cdef void MyService_getDataById_callback(
 cdef void MyService_putDataById_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -136,7 +136,7 @@ cdef void MyService_putDataById_callback(
 cdef void MyService_lobDataById_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -149,7 +149,7 @@ cdef void MyService_lobDataById_callback(
 cdef void MyService_doNothing_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -162,7 +162,7 @@ cdef void MyService_doNothing_callback(
 cdef void MyServicePrioParent_ping_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -175,7 +175,7 @@ cdef void MyServicePrioParent_ping_callback(
 cdef void MyServicePrioParent_pong_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -188,7 +188,7 @@ cdef void MyServicePrioParent_pong_callback(
 cdef void MyServicePrioChild_pang_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -201,7 +201,7 @@ cdef void MyServicePrioChild_pang_callback(
 cdef void BadService_bar_callback(
     cFollyTry[cint32_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -214,7 +214,7 @@ cdef void BadService_bar_callback(
 cdef void BadService_BadInteraction_foo_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -227,7 +227,7 @@ cdef void BadService_BadInteraction_foo_callback(
 cdef void FooBarBazService_foo_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -240,7 +240,7 @@ cdef void FooBarBazService_foo_callback(
 cdef void FooBarBazService_bar_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -253,7 +253,7 @@ cdef void FooBarBazService_bar_callback(
 cdef void FooBarBazService_baz_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))

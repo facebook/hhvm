@@ -59,7 +59,7 @@ from module.clients_wrapper cimport cNestedContainersAsyncClient, cNestedContain
 cdef void NestedContainers_mapList_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -72,7 +72,7 @@ cdef void NestedContainers_mapList_callback(
 cdef void NestedContainers_mapSet_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -85,7 +85,7 @@ cdef void NestedContainers_mapSet_callback(
 cdef void NestedContainers_listMap_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -98,7 +98,7 @@ cdef void NestedContainers_listMap_callback(
 cdef void NestedContainers_listSet_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -111,7 +111,7 @@ cdef void NestedContainers_listSet_callback(
 cdef void NestedContainers_turtles_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))

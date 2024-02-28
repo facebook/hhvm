@@ -65,7 +65,7 @@ from service.clients_wrapper cimport cMyServiceAsyncClient, cMyServiceClientWrap
 cdef void MyService_query_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -78,7 +78,7 @@ cdef void MyService_query_callback(
 cdef void MyService_has_arg_docs_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))

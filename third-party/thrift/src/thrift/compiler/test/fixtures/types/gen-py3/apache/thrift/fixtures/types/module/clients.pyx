@@ -61,7 +61,7 @@ from apache.thrift.fixtures.types.module.clients_wrapper cimport cSomeServiceAsy
 cdef void SomeService_bounce_map_callback(
     cFollyTry[_apache_thrift_fixtures_types_module_types.std_unordered_map[cint32_t,string]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -74,7 +74,7 @@ cdef void SomeService_bounce_map_callback(
 cdef void SomeService_binary_keyed_map_callback(
     cFollyTry[cmap[string,cint64_t]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))

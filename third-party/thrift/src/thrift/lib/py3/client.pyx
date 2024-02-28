@@ -264,7 +264,7 @@ def get_client(
 cdef void interactions_callback(
     cFollyTry[unique_ptr[cClientWrapper]]&& result,
     PyObject* userData,
-):
+) noexcept:
     cdef Client client = <object> userData
     future = client._connect_future
     if result.hasException():
@@ -276,7 +276,7 @@ cdef void interactions_callback(
 cdef void requestchannel_callback(
     cFollyTry[cRequestChannel_ptr]&& result,
     PyObject* userData,
-):
+) noexcept:
     cdef Client client = <object> userData
     future = client._connect_future
     if result.hasException():

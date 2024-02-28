@@ -64,7 +64,7 @@ from module.clients_wrapper cimport cCClientWrapper_IInteractionWrapper
 cdef void A_foo_callback(
     cFollyTry[_module_types.cFoo]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -77,7 +77,7 @@ cdef void A_foo_callback(
 cdef void A_I_interact_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -90,7 +90,7 @@ cdef void A_I_interact_callback(
 cdef void B_bar_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -103,7 +103,7 @@ cdef void B_bar_callback(
 cdef void B_stream_stuff_callback(
     cFollyTry[cClientBufferedStream[cint32_t]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -116,7 +116,7 @@ cdef void B_stream_stuff_callback(
 cdef void C_I_interact_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))

@@ -139,7 +139,7 @@ cdef api void call_cy_MyService_query(
     cFollyPromise[cFollyUnit] cPromise,
     unique_ptr[_module_types.cMyStruct] s,
     unique_ptr[_includes_types.cIncluded] i
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_s = _module_types.MyStruct._fbthrift_create(shared_ptr[_module_types.cMyStruct](s.release()))
     arg_i = _includes_types.Included._fbthrift_create(shared_ptr[_includes_types.cIncluded](i.release()))
@@ -160,7 +160,7 @@ cdef api void call_cy_MyService_has_arg_docs(
     cFollyPromise[cFollyUnit] cPromise,
     unique_ptr[_module_types.cMyStruct] s,
     unique_ptr[_includes_types.cIncluded] i
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_s = _module_types.MyStruct._fbthrift_create(shared_ptr[_module_types.cMyStruct](s.release()))
     arg_i = _includes_types.Included._fbthrift_create(shared_ptr[_includes_types.cIncluded](i.release()))
@@ -178,7 +178,7 @@ cdef api void call_cy_MyService_has_arg_docs(
 cdef api void call_cy_MyService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         MyService_onStartServing_coro(
@@ -189,7 +189,7 @@ cdef api void call_cy_MyService_onStartServing(
 cdef api void call_cy_MyService_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         MyService_onStopRequested_coro(

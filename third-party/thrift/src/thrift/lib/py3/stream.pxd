@@ -51,7 +51,7 @@ cdef extern from "thrift/lib/cpp2/async/ServerStream.h" namespace "::apache::thr
         R response
         cServerStream[S] stream
 
-ctypedef void (*emptyFunc)() # This typedef is necessary because otherwise cython gets a syntax error
+ctypedef void (*emptyFunc)() noexcept # This typedef is necessary because otherwise cython gets a syntax error
 cdef extern from "thrift/lib/py3/stream.h" namespace "::thrift::py3":
     cdef cppclass cClientBufferedStreamWrapper "::thrift::py3::ClientBufferedStreamWrapper"[T]:
         cClientBufferedStreamWrapper() except +

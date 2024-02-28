@@ -151,7 +151,7 @@ cdef api void call_cy_Raiser_doBland(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -166,7 +166,7 @@ cdef api void call_cy_Raiser_doRaise(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -181,7 +181,7 @@ cdef api void call_cy_Raiser_get200(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[string]] cPromise
-):
+) noexcept:
     cdef Promise_string __promise = Promise_string._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -196,7 +196,7 @@ cdef api void call_cy_Raiser_get500(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[string]] cPromise
-):
+) noexcept:
     cdef Promise_string __promise = Promise_string._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -210,7 +210,7 @@ cdef api void call_cy_Raiser_get500(
 cdef api void call_cy_Raiser_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         Raiser_onStartServing_coro(
@@ -221,7 +221,7 @@ cdef api void call_cy_Raiser_onStartServing(
 cdef api void call_cy_Raiser_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         Raiser_onStopRequested_coro(

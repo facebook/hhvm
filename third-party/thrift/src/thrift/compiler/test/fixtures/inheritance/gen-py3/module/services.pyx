@@ -193,7 +193,7 @@ cdef api void call_cy_MyRoot_do_root(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -207,7 +207,7 @@ cdef api void call_cy_MyRoot_do_root(
 cdef api void call_cy_MyRoot_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         MyRoot_onStartServing_coro(
@@ -218,7 +218,7 @@ cdef api void call_cy_MyRoot_onStartServing(
 cdef api void call_cy_MyRoot_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         MyRoot_onStopRequested_coro(
@@ -314,7 +314,7 @@ cdef api void call_cy_MyNode_do_mid(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -328,7 +328,7 @@ cdef api void call_cy_MyNode_do_mid(
 cdef api void call_cy_MyNode_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         MyNode_onStartServing_coro(
@@ -339,7 +339,7 @@ cdef api void call_cy_MyNode_onStartServing(
 cdef api void call_cy_MyNode_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         MyNode_onStopRequested_coro(
@@ -435,7 +435,7 @@ cdef api void call_cy_MyLeaf_do_leaf(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -449,7 +449,7 @@ cdef api void call_cy_MyLeaf_do_leaf(
 cdef api void call_cy_MyLeaf_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         MyLeaf_onStartServing_coro(
@@ -460,7 +460,7 @@ cdef api void call_cy_MyLeaf_onStartServing(
 cdef api void call_cy_MyLeaf_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         MyLeaf_onStopRequested_coro(

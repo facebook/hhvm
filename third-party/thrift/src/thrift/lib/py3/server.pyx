@@ -129,7 +129,7 @@ def getServiceName(ServiceInterface svc not None):
     return (<bytes>name).decode('utf-8')
 
 
-cdef void handleAddressCallback(PyObject* future, cfollySocketAddress address):
+cdef void handleAddressCallback(PyObject* future, cfollySocketAddress address) noexcept:
     (<object>future).set_result(_get_SocketAddress(&address))
 
 

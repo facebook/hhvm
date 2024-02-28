@@ -63,7 +63,7 @@ from module.clients_wrapper cimport cParamServiceAsyncClient, cParamServiceClien
 cdef void ReturnService_noReturn_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -76,7 +76,7 @@ cdef void ReturnService_noReturn_callback(
 cdef void ReturnService_boolReturn_callback(
     cFollyTry[cbool]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -89,7 +89,7 @@ cdef void ReturnService_boolReturn_callback(
 cdef void ReturnService_i16Return_callback(
     cFollyTry[cint16_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -102,7 +102,7 @@ cdef void ReturnService_i16Return_callback(
 cdef void ReturnService_i32Return_callback(
     cFollyTry[cint32_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -115,7 +115,7 @@ cdef void ReturnService_i32Return_callback(
 cdef void ReturnService_i64Return_callback(
     cFollyTry[cint64_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -128,7 +128,7 @@ cdef void ReturnService_i64Return_callback(
 cdef void ReturnService_floatReturn_callback(
     cFollyTry[float]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -141,7 +141,7 @@ cdef void ReturnService_floatReturn_callback(
 cdef void ReturnService_doubleReturn_callback(
     cFollyTry[double]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -154,7 +154,7 @@ cdef void ReturnService_doubleReturn_callback(
 cdef void ReturnService_stringReturn_callback(
     cFollyTry[string]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -167,7 +167,7 @@ cdef void ReturnService_stringReturn_callback(
 cdef void ReturnService_binaryReturn_callback(
     cFollyTry[string]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -180,7 +180,7 @@ cdef void ReturnService_binaryReturn_callback(
 cdef void ReturnService_mapReturn_callback(
     cFollyTry[cmap[string,cint64_t]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -193,7 +193,7 @@ cdef void ReturnService_mapReturn_callback(
 cdef void ReturnService_simpleTypedefReturn_callback(
     cFollyTry[cint32_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -206,7 +206,7 @@ cdef void ReturnService_simpleTypedefReturn_callback(
 cdef void ReturnService_complexTypedefReturn_callback(
     cFollyTry[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -219,7 +219,7 @@ cdef void ReturnService_complexTypedefReturn_callback(
 cdef void ReturnService_list_mostComplexTypedefReturn_callback(
     cFollyTry[vector[vector[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -232,7 +232,7 @@ cdef void ReturnService_list_mostComplexTypedefReturn_callback(
 cdef void ReturnService_enumReturn_callback(
     cFollyTry[_module_types.cMyEnumA]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -245,7 +245,7 @@ cdef void ReturnService_enumReturn_callback(
 cdef void ReturnService_list_EnumReturn_callback(
     cFollyTry[vector[_module_types.cMyEnumA]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -258,7 +258,7 @@ cdef void ReturnService_list_EnumReturn_callback(
 cdef void ReturnService_structReturn_callback(
     cFollyTry[_module_types.cMyStruct]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -271,7 +271,7 @@ cdef void ReturnService_structReturn_callback(
 cdef void ReturnService_set_StructReturn_callback(
     cFollyTry[cset[_module_types.cMyStruct]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -284,7 +284,7 @@ cdef void ReturnService_set_StructReturn_callback(
 cdef void ReturnService_unionReturn_callback(
     cFollyTry[_module_types.cComplexUnion]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -297,7 +297,7 @@ cdef void ReturnService_unionReturn_callback(
 cdef void ReturnService_list_UnionReturn_callback(
     cFollyTry[vector[_module_types.cComplexUnion]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -310,7 +310,7 @@ cdef void ReturnService_list_UnionReturn_callback(
 cdef void ReturnService_readDataEb_callback(
     cFollyTry[_fbthrift_iobuf.cIOBuf]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -323,7 +323,7 @@ cdef void ReturnService_readDataEb_callback(
 cdef void ReturnService_readData_callback(
     cFollyTry[unique_ptr[_fbthrift_iobuf.cIOBuf]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -336,7 +336,7 @@ cdef void ReturnService_readData_callback(
 cdef void ParamService_void_ret_i16_param_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -349,7 +349,7 @@ cdef void ParamService_void_ret_i16_param_callback(
 cdef void ParamService_void_ret_byte_i16_param_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -362,7 +362,7 @@ cdef void ParamService_void_ret_byte_i16_param_callback(
 cdef void ParamService_void_ret_map_param_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -375,7 +375,7 @@ cdef void ParamService_void_ret_map_param_callback(
 cdef void ParamService_void_ret_map_setlist_param_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -388,7 +388,7 @@ cdef void ParamService_void_ret_map_setlist_param_callback(
 cdef void ParamService_void_ret_map_typedef_param_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -401,7 +401,7 @@ cdef void ParamService_void_ret_map_typedef_param_callback(
 cdef void ParamService_void_ret_enum_param_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -414,7 +414,7 @@ cdef void ParamService_void_ret_enum_param_callback(
 cdef void ParamService_void_ret_struct_param_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -427,7 +427,7 @@ cdef void ParamService_void_ret_struct_param_callback(
 cdef void ParamService_void_ret_listunion_param_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -440,7 +440,7 @@ cdef void ParamService_void_ret_listunion_param_callback(
 cdef void ParamService_bool_ret_i32_i64_param_callback(
     cFollyTry[cbool]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -453,7 +453,7 @@ cdef void ParamService_bool_ret_i32_i64_param_callback(
 cdef void ParamService_bool_ret_map_param_callback(
     cFollyTry[cbool]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -466,7 +466,7 @@ cdef void ParamService_bool_ret_map_param_callback(
 cdef void ParamService_bool_ret_union_param_callback(
     cFollyTry[cbool]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -479,7 +479,7 @@ cdef void ParamService_bool_ret_union_param_callback(
 cdef void ParamService_i64_ret_float_double_param_callback(
     cFollyTry[cint64_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -492,7 +492,7 @@ cdef void ParamService_i64_ret_float_double_param_callback(
 cdef void ParamService_i64_ret_string_typedef_param_callback(
     cFollyTry[cint64_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -505,7 +505,7 @@ cdef void ParamService_i64_ret_string_typedef_param_callback(
 cdef void ParamService_i64_ret_i32_i32_i32_i32_i32_param_callback(
     cFollyTry[cint64_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -518,7 +518,7 @@ cdef void ParamService_i64_ret_i32_i32_i32_i32_i32_param_callback(
 cdef void ParamService_double_ret_setstruct_param_callback(
     cFollyTry[double]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -531,7 +531,7 @@ cdef void ParamService_double_ret_setstruct_param_callback(
 cdef void ParamService_string_ret_string_param_callback(
     cFollyTry[string]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -544,7 +544,7 @@ cdef void ParamService_string_ret_string_param_callback(
 cdef void ParamService_binary_ret_binary_param_callback(
     cFollyTry[string]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -557,7 +557,7 @@ cdef void ParamService_binary_ret_binary_param_callback(
 cdef void ParamService_map_ret_bool_param_callback(
     cFollyTry[cmap[string,cint64_t]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -570,7 +570,7 @@ cdef void ParamService_map_ret_bool_param_callback(
 cdef void ParamService_list_ret_map_setlist_param_callback(
     cFollyTry[vector[cbool]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -583,7 +583,7 @@ cdef void ParamService_list_ret_map_setlist_param_callback(
 cdef void ParamService_mapsetlistmapliststring_ret_listlistlist_param_callback(
     cFollyTry[cmap[cset[vector[cint32_t]],cmap[vector[cset[string]],string]]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -596,7 +596,7 @@ cdef void ParamService_mapsetlistmapliststring_ret_listlistlist_param_callback(
 cdef void ParamService_typedef_ret_i32_param_callback(
     cFollyTry[cint32_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -609,7 +609,7 @@ cdef void ParamService_typedef_ret_i32_param_callback(
 cdef void ParamService_listtypedef_ret_typedef_param_callback(
     cFollyTry[vector[cint32_t]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -622,7 +622,7 @@ cdef void ParamService_listtypedef_ret_typedef_param_callback(
 cdef void ParamService_enum_ret_double_param_callback(
     cFollyTry[_module_types.cMyEnumA]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -635,7 +635,7 @@ cdef void ParamService_enum_ret_double_param_callback(
 cdef void ParamService_enum_ret_double_enum_param_callback(
     cFollyTry[_module_types.cMyEnumA]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -648,7 +648,7 @@ cdef void ParamService_enum_ret_double_enum_param_callback(
 cdef void ParamService_listenum_ret_map_param_callback(
     cFollyTry[vector[_module_types.cMyEnumA]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -661,7 +661,7 @@ cdef void ParamService_listenum_ret_map_param_callback(
 cdef void ParamService_struct_ret_i16_param_callback(
     cFollyTry[_module_types.cMyStruct]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -674,7 +674,7 @@ cdef void ParamService_struct_ret_i16_param_callback(
 cdef void ParamService_setstruct_ret_set_param_callback(
     cFollyTry[cset[_module_types.cMyStruct]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -687,7 +687,7 @@ cdef void ParamService_setstruct_ret_set_param_callback(
 cdef void ParamService_union_ret_i32_i32_param_callback(
     cFollyTry[_module_types.cComplexUnion]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -700,7 +700,7 @@ cdef void ParamService_union_ret_i32_i32_param_callback(
 cdef void ParamService_listunion_string_param_callback(
     cFollyTry[vector[_module_types.cComplexUnion]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))

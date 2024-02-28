@@ -59,7 +59,7 @@ from module.clients_wrapper cimport cRaiserAsyncClient, cRaiserClientWrapper
 cdef void Raiser_doBland_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -72,7 +72,7 @@ cdef void Raiser_doBland_callback(
 cdef void Raiser_doRaise_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException[_module_types.cBanal]():
         try:
@@ -106,7 +106,7 @@ cdef void Raiser_doRaise_callback(
 cdef void Raiser_get200_callback(
     cFollyTry[string]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -119,7 +119,7 @@ cdef void Raiser_get200_callback(
 cdef void Raiser_get500_callback(
     cFollyTry[string]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException[_module_types.cFiery]():
         try:

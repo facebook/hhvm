@@ -61,7 +61,7 @@ from module.clients_wrapper cimport cRederivedServiceAsyncClient, cRederivedServ
 cdef void SimpleService_get_five_callback(
     cFollyTry[cint32_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -74,7 +74,7 @@ cdef void SimpleService_get_five_callback(
 cdef void SimpleService_add_five_callback(
     cFollyTry[cint32_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -87,7 +87,7 @@ cdef void SimpleService_add_five_callback(
 cdef void SimpleService_do_nothing_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -100,7 +100,7 @@ cdef void SimpleService_do_nothing_callback(
 cdef void SimpleService_concat_callback(
     cFollyTry[string]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -113,7 +113,7 @@ cdef void SimpleService_concat_callback(
 cdef void SimpleService_get_value_callback(
     cFollyTry[cint32_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -126,7 +126,7 @@ cdef void SimpleService_get_value_callback(
 cdef void SimpleService_negate_callback(
     cFollyTry[cbool]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -139,7 +139,7 @@ cdef void SimpleService_negate_callback(
 cdef void SimpleService_tiny_callback(
     cFollyTry[cint8_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -152,7 +152,7 @@ cdef void SimpleService_tiny_callback(
 cdef void SimpleService_small_callback(
     cFollyTry[cint16_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -165,7 +165,7 @@ cdef void SimpleService_small_callback(
 cdef void SimpleService_big_callback(
     cFollyTry[cint64_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -178,7 +178,7 @@ cdef void SimpleService_big_callback(
 cdef void SimpleService_two_callback(
     cFollyTry[double]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -191,7 +191,7 @@ cdef void SimpleService_two_callback(
 cdef void SimpleService_expected_exception_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException[_module_types.cSimpleException]():
         try:
@@ -211,7 +211,7 @@ cdef void SimpleService_expected_exception_callback(
 cdef void SimpleService_unexpected_exception_callback(
     cFollyTry[cint32_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -224,7 +224,7 @@ cdef void SimpleService_unexpected_exception_callback(
 cdef void SimpleService_sum_i16_list_callback(
     cFollyTry[cint32_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -237,7 +237,7 @@ cdef void SimpleService_sum_i16_list_callback(
 cdef void SimpleService_sum_i32_list_callback(
     cFollyTry[cint32_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -250,7 +250,7 @@ cdef void SimpleService_sum_i32_list_callback(
 cdef void SimpleService_sum_i64_list_callback(
     cFollyTry[cint32_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -263,7 +263,7 @@ cdef void SimpleService_sum_i64_list_callback(
 cdef void SimpleService_concat_many_callback(
     cFollyTry[string]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -276,7 +276,7 @@ cdef void SimpleService_concat_many_callback(
 cdef void SimpleService_count_structs_callback(
     cFollyTry[cint32_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -289,7 +289,7 @@ cdef void SimpleService_count_structs_callback(
 cdef void SimpleService_sum_set_callback(
     cFollyTry[cint32_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -302,7 +302,7 @@ cdef void SimpleService_sum_set_callback(
 cdef void SimpleService_contains_word_callback(
     cFollyTry[cbool]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -315,7 +315,7 @@ cdef void SimpleService_contains_word_callback(
 cdef void SimpleService_get_map_value_callback(
     cFollyTry[string]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -328,7 +328,7 @@ cdef void SimpleService_get_map_value_callback(
 cdef void SimpleService_map_length_callback(
     cFollyTry[cint16_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -341,7 +341,7 @@ cdef void SimpleService_map_length_callback(
 cdef void SimpleService_sum_map_values_callback(
     cFollyTry[cint16_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -354,7 +354,7 @@ cdef void SimpleService_sum_map_values_callback(
 cdef void SimpleService_complex_sum_i32_callback(
     cFollyTry[cint32_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -367,7 +367,7 @@ cdef void SimpleService_complex_sum_i32_callback(
 cdef void SimpleService_repeat_name_callback(
     cFollyTry[string]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -380,7 +380,7 @@ cdef void SimpleService_repeat_name_callback(
 cdef void SimpleService_get_struct_callback(
     cFollyTry[_module_types.cSimpleStruct]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -393,7 +393,7 @@ cdef void SimpleService_get_struct_callback(
 cdef void SimpleService_fib_callback(
     cFollyTry[vector[cint32_t]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -406,7 +406,7 @@ cdef void SimpleService_fib_callback(
 cdef void SimpleService_unique_words_callback(
     cFollyTry[cset[string]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -419,7 +419,7 @@ cdef void SimpleService_unique_words_callback(
 cdef void SimpleService_words_count_callback(
     cFollyTry[cmap[string,cint16_t]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -432,7 +432,7 @@ cdef void SimpleService_words_count_callback(
 cdef void SimpleService_set_enum_callback(
     cFollyTry[_module_types.cAnEnum]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -445,7 +445,7 @@ cdef void SimpleService_set_enum_callback(
 cdef void SimpleService_list_of_lists_callback(
     cFollyTry[vector[vector[cint32_t]]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -458,7 +458,7 @@ cdef void SimpleService_list_of_lists_callback(
 cdef void SimpleService_word_character_frequency_callback(
     cFollyTry[cmap[string,cmap[string,cint32_t]]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -471,7 +471,7 @@ cdef void SimpleService_word_character_frequency_callback(
 cdef void SimpleService_list_of_sets_callback(
     cFollyTry[vector[cset[string]]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -484,7 +484,7 @@ cdef void SimpleService_list_of_sets_callback(
 cdef void SimpleService_nested_map_argument_callback(
     cFollyTry[cint32_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -497,7 +497,7 @@ cdef void SimpleService_nested_map_argument_callback(
 cdef void SimpleService_make_sentence_callback(
     cFollyTry[string]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -510,7 +510,7 @@ cdef void SimpleService_make_sentence_callback(
 cdef void SimpleService_get_union_callback(
     cFollyTry[cset[cint32_t]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -523,7 +523,7 @@ cdef void SimpleService_get_union_callback(
 cdef void SimpleService_get_keys_callback(
     cFollyTry[cset[string]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -536,7 +536,7 @@ cdef void SimpleService_get_keys_callback(
 cdef void SimpleService_lookup_double_callback(
     cFollyTry[double]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -549,7 +549,7 @@ cdef void SimpleService_lookup_double_callback(
 cdef void SimpleService_retrieve_binary_callback(
     cFollyTry[string]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -562,7 +562,7 @@ cdef void SimpleService_retrieve_binary_callback(
 cdef void SimpleService_contain_binary_callback(
     cFollyTry[cset[string]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -575,7 +575,7 @@ cdef void SimpleService_contain_binary_callback(
 cdef void SimpleService_contain_enum_callback(
     cFollyTry[vector[_module_types.cAnEnum]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -588,7 +588,7 @@ cdef void SimpleService_contain_enum_callback(
 cdef void SimpleService_get_binary_union_struct_callback(
     cFollyTry[_module_types.cBinaryUnionStruct]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -601,7 +601,7 @@ cdef void SimpleService_get_binary_union_struct_callback(
 cdef void DerivedService_get_six_callback(
     cFollyTry[cint32_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -614,7 +614,7 @@ cdef void DerivedService_get_six_callback(
 cdef void RederivedService_get_seven_callback(
     cFollyTry[cint32_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))

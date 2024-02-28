@@ -145,7 +145,7 @@ cdef api void call_cy_NestedContainers_mapList(
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise,
     unique_ptr[cmap[cint32_t,vector[cint32_t]]] foo
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_foo = _module_types.Map__i32_List__i32._fbthrift_create(__to_shared_ptr(cmove(foo)))
     __context = RequestContext._fbthrift_create(ctx)
@@ -163,7 +163,7 @@ cdef api void call_cy_NestedContainers_mapSet(
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise,
     unique_ptr[cmap[cint32_t,cset[cint32_t]]] foo
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_foo = _module_types.Map__i32_Set__i32._fbthrift_create(__to_shared_ptr(cmove(foo)))
     __context = RequestContext._fbthrift_create(ctx)
@@ -181,7 +181,7 @@ cdef api void call_cy_NestedContainers_listMap(
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise,
     unique_ptr[vector[cmap[cint32_t,cint32_t]]] foo
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_foo = _module_types.List__Map__i32_i32._fbthrift_create(__to_shared_ptr(cmove(foo)))
     __context = RequestContext._fbthrift_create(ctx)
@@ -199,7 +199,7 @@ cdef api void call_cy_NestedContainers_listSet(
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise,
     unique_ptr[vector[cset[cint32_t]]] foo
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_foo = _module_types.List__Set__i32._fbthrift_create(__to_shared_ptr(cmove(foo)))
     __context = RequestContext._fbthrift_create(ctx)
@@ -217,7 +217,7 @@ cdef api void call_cy_NestedContainers_turtles(
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise,
     unique_ptr[vector[vector[cmap[cint32_t,cmap[cint32_t,cset[cint32_t]]]]]] foo
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_foo = _module_types.List__List__Map__i32_Map__i32_Set__i32._fbthrift_create(__to_shared_ptr(cmove(foo)))
     __context = RequestContext._fbthrift_create(ctx)
@@ -233,7 +233,7 @@ cdef api void call_cy_NestedContainers_turtles(
 cdef api void call_cy_NestedContainers_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         NestedContainers_onStartServing_coro(
@@ -244,7 +244,7 @@ cdef api void call_cy_NestedContainers_onStartServing(
 cdef api void call_cy_NestedContainers_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         NestedContainers_onStopRequested_coro(

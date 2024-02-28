@@ -777,7 +777,7 @@ cdef class ParamServiceInterface(
 cdef api void call_cy_EmptyService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         EmptyService_onStartServing_coro(
@@ -788,7 +788,7 @@ cdef api void call_cy_EmptyService_onStartServing(
 cdef api void call_cy_EmptyService_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         EmptyService_onStopRequested_coro(
@@ -856,7 +856,7 @@ cdef api void call_cy_ReturnService_noReturn(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -871,7 +871,7 @@ cdef api void call_cy_ReturnService_boolReturn(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cbool] cPromise
-):
+) noexcept:
     cdef Promise_cbool __promise = Promise_cbool._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -886,7 +886,7 @@ cdef api void call_cy_ReturnService_i16Return(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cint16_t] cPromise
-):
+) noexcept:
     cdef Promise_cint16_t __promise = Promise_cint16_t._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -901,7 +901,7 @@ cdef api void call_cy_ReturnService_i32Return(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cint32_t] cPromise
-):
+) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -916,7 +916,7 @@ cdef api void call_cy_ReturnService_i64Return(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cint64_t] cPromise
-):
+) noexcept:
     cdef Promise_cint64_t __promise = Promise_cint64_t._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -931,7 +931,7 @@ cdef api void call_cy_ReturnService_floatReturn(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[float] cPromise
-):
+) noexcept:
     cdef Promise_float __promise = Promise_float._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -946,7 +946,7 @@ cdef api void call_cy_ReturnService_doubleReturn(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[double] cPromise
-):
+) noexcept:
     cdef Promise_double __promise = Promise_double._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -961,7 +961,7 @@ cdef api void call_cy_ReturnService_stringReturn(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[string]] cPromise
-):
+) noexcept:
     cdef Promise_string __promise = Promise_string._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -976,7 +976,7 @@ cdef api void call_cy_ReturnService_binaryReturn(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[string]] cPromise
-):
+) noexcept:
     cdef Promise_binary __promise = Promise_binary._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -991,7 +991,7 @@ cdef api void call_cy_ReturnService_mapReturn(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[cmap[string,cint64_t]]] cPromise
-):
+) noexcept:
     cdef Promise_cmap__string_cint64_t __promise = Promise_cmap__string_cint64_t._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -1006,7 +1006,7 @@ cdef api void call_cy_ReturnService_simpleTypedefReturn(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cint32_t] cPromise
-):
+) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -1021,7 +1021,7 @@ cdef api void call_cy_ReturnService_complexTypedefReturn(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]] cPromise
-):
+) noexcept:
     cdef Promise_vector__cmap___module_types_cEmpty__module_types_cMyStruct __promise = Promise_vector__cmap___module_types_cEmpty__module_types_cMyStruct._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -1036,7 +1036,7 @@ cdef api void call_cy_ReturnService_list_mostComplexTypedefReturn(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[vector[vector[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]]]] cPromise
-):
+) noexcept:
     cdef Promise_vector__vector__vector__cmap___module_types_cEmpty__module_types_cMyStruct __promise = Promise_vector__vector__vector__cmap___module_types_cEmpty__module_types_cMyStruct._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -1051,7 +1051,7 @@ cdef api void call_cy_ReturnService_enumReturn(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[_module_types.cMyEnumA] cPromise
-):
+) noexcept:
     cdef Promise__module_types_cMyEnumA __promise = Promise__module_types_cMyEnumA._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -1066,7 +1066,7 @@ cdef api void call_cy_ReturnService_list_EnumReturn(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[vector[_module_types.cMyEnumA]]] cPromise
-):
+) noexcept:
     cdef Promise_vector___module_types_cMyEnumA __promise = Promise_vector___module_types_cMyEnumA._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -1081,7 +1081,7 @@ cdef api void call_cy_ReturnService_structReturn(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[_module_types.cMyStruct]] cPromise
-):
+) noexcept:
     cdef Promise__module_types_cMyStruct __promise = Promise__module_types_cMyStruct._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -1096,7 +1096,7 @@ cdef api void call_cy_ReturnService_set_StructReturn(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[cset[_module_types.cMyStruct]]] cPromise
-):
+) noexcept:
     cdef Promise_cset___module_types_cMyStruct __promise = Promise_cset___module_types_cMyStruct._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -1111,7 +1111,7 @@ cdef api void call_cy_ReturnService_unionReturn(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[_module_types.cComplexUnion]] cPromise
-):
+) noexcept:
     cdef Promise__module_types_cComplexUnion __promise = Promise__module_types_cComplexUnion._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -1126,7 +1126,7 @@ cdef api void call_cy_ReturnService_list_UnionReturn(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[vector[_module_types.cComplexUnion]]] cPromise
-):
+) noexcept:
     cdef Promise_vector___module_types_cComplexUnion __promise = Promise_vector___module_types_cComplexUnion._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -1142,7 +1142,7 @@ cdef api void call_cy_ReturnService_readDataEb(
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[_fbthrift_iobuf.cIOBuf]] cPromise,
     cint64_t size
-):
+) noexcept:
     cdef Promise___iobuf_cIOBuf __promise = Promise___iobuf_cIOBuf._fbthrift_create(cmove(cPromise))
     arg_size = size
     __context = RequestContext._fbthrift_create(ctx)
@@ -1160,7 +1160,7 @@ cdef api void call_cy_ReturnService_readData(
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[unique_ptr[_fbthrift_iobuf.cIOBuf]]] cPromise,
     cint64_t size
-):
+) noexcept:
     cdef Promise_unique_ptr__iobuf_cIOBuf __promise = Promise_unique_ptr__iobuf_cIOBuf._fbthrift_create(cmove(cPromise))
     arg_size = size
     __context = RequestContext._fbthrift_create(ctx)
@@ -1176,7 +1176,7 @@ cdef api void call_cy_ReturnService_readData(
 cdef api void call_cy_ReturnService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         ReturnService_onStartServing_coro(
@@ -1187,7 +1187,7 @@ cdef api void call_cy_ReturnService_onStartServing(
 cdef api void call_cy_ReturnService_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         ReturnService_onStopRequested_coro(
@@ -1854,7 +1854,7 @@ cdef api void call_cy_ParamService_void_ret_i16_param(
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise,
     cint16_t param1
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_param1 = param1
     __context = RequestContext._fbthrift_create(ctx)
@@ -1873,7 +1873,7 @@ cdef api void call_cy_ParamService_void_ret_byte_i16_param(
     cFollyPromise[cFollyUnit] cPromise,
     cint8_t param1,
     cint16_t param2
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_param1 = param1
     arg_param2 = param2
@@ -1893,7 +1893,7 @@ cdef api void call_cy_ParamService_void_ret_map_param(
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise,
     unique_ptr[cmap[string,cint64_t]] param1
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.Map__string_i64._fbthrift_create(__to_shared_ptr(cmove(param1)))
     __context = RequestContext._fbthrift_create(ctx)
@@ -1912,7 +1912,7 @@ cdef api void call_cy_ParamService_void_ret_map_setlist_param(
     cFollyPromise[cFollyUnit] cPromise,
     unique_ptr[cmap[string,cint64_t]] param1,
     unique_ptr[cset[vector[string]]] param2
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.Map__string_i64._fbthrift_create(__to_shared_ptr(cmove(param1)))
     arg_param2 = _module_types.Set__List__string._fbthrift_create(__to_shared_ptr(cmove(param2)))
@@ -1932,7 +1932,7 @@ cdef api void call_cy_ParamService_void_ret_map_typedef_param(
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise,
     cint32_t param1
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_param1 = param1
     __context = RequestContext._fbthrift_create(ctx)
@@ -1950,7 +1950,7 @@ cdef api void call_cy_ParamService_void_ret_enum_param(
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise,
     _module_types.cMyEnumA param1
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.MyEnumA(<int> param1)
     __context = RequestContext._fbthrift_create(ctx)
@@ -1968,7 +1968,7 @@ cdef api void call_cy_ParamService_void_ret_struct_param(
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise,
     unique_ptr[_module_types.cMyStruct] param1
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.MyStruct._fbthrift_create(shared_ptr[_module_types.cMyStruct](param1.release()))
     __context = RequestContext._fbthrift_create(ctx)
@@ -1986,7 +1986,7 @@ cdef api void call_cy_ParamService_void_ret_listunion_param(
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise,
     unique_ptr[vector[_module_types.cComplexUnion]] param1
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.List__ComplexUnion._fbthrift_create(__to_shared_ptr(cmove(param1)))
     __context = RequestContext._fbthrift_create(ctx)
@@ -2005,7 +2005,7 @@ cdef api void call_cy_ParamService_bool_ret_i32_i64_param(
     cFollyPromise[cbool] cPromise,
     cint32_t param1,
     cint64_t param2
-):
+) noexcept:
     cdef Promise_cbool __promise = Promise_cbool._fbthrift_create(cmove(cPromise))
     arg_param1 = param1
     arg_param2 = param2
@@ -2025,7 +2025,7 @@ cdef api void call_cy_ParamService_bool_ret_map_param(
     Cpp2RequestContext* ctx,
     cFollyPromise[cbool] cPromise,
     unique_ptr[cmap[string,cint64_t]] param1
-):
+) noexcept:
     cdef Promise_cbool __promise = Promise_cbool._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.Map__string_i64._fbthrift_create(__to_shared_ptr(cmove(param1)))
     __context = RequestContext._fbthrift_create(ctx)
@@ -2043,7 +2043,7 @@ cdef api void call_cy_ParamService_bool_ret_union_param(
     Cpp2RequestContext* ctx,
     cFollyPromise[cbool] cPromise,
     unique_ptr[_module_types.cComplexUnion] param1
-):
+) noexcept:
     cdef Promise_cbool __promise = Promise_cbool._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.ComplexUnion._fbthrift_create(shared_ptr[_module_types.cComplexUnion](param1.release()))
     __context = RequestContext._fbthrift_create(ctx)
@@ -2062,7 +2062,7 @@ cdef api void call_cy_ParamService_i64_ret_float_double_param(
     cFollyPromise[cint64_t] cPromise,
     float param1,
     double param2
-):
+) noexcept:
     cdef Promise_cint64_t __promise = Promise_cint64_t._fbthrift_create(cmove(cPromise))
     arg_param1 = param1
     arg_param2 = param2
@@ -2083,7 +2083,7 @@ cdef api void call_cy_ParamService_i64_ret_string_typedef_param(
     cFollyPromise[cint64_t] cPromise,
     unique_ptr[string] param1,
     unique_ptr[cset[vector[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]]] param2
-):
+) noexcept:
     cdef Promise_cint64_t __promise = Promise_cint64_t._fbthrift_create(cmove(cPromise))
     arg_param1 = (deref(param1)).data().decode('UTF-8')
     arg_param2 = _module_types.Set__List__List__Map__Empty_MyStruct._fbthrift_create(__to_shared_ptr(cmove(param2)))
@@ -2107,7 +2107,7 @@ cdef api void call_cy_ParamService_i64_ret_i32_i32_i32_i32_i32_param(
     cint32_t param3,
     cint32_t param4,
     cint32_t param5
-):
+) noexcept:
     cdef Promise_cint64_t __promise = Promise_cint64_t._fbthrift_create(cmove(cPromise))
     arg_param1 = param1
     arg_param2 = param2
@@ -2133,7 +2133,7 @@ cdef api void call_cy_ParamService_double_ret_setstruct_param(
     Cpp2RequestContext* ctx,
     cFollyPromise[double] cPromise,
     unique_ptr[cset[_module_types.cMyStruct]] param1
-):
+) noexcept:
     cdef Promise_double __promise = Promise_double._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.Set__MyStruct._fbthrift_create(__to_shared_ptr(cmove(param1)))
     __context = RequestContext._fbthrift_create(ctx)
@@ -2151,7 +2151,7 @@ cdef api void call_cy_ParamService_string_ret_string_param(
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[string]] cPromise,
     unique_ptr[string] param1
-):
+) noexcept:
     cdef Promise_string __promise = Promise_string._fbthrift_create(cmove(cPromise))
     arg_param1 = (deref(param1)).data().decode('UTF-8')
     __context = RequestContext._fbthrift_create(ctx)
@@ -2169,7 +2169,7 @@ cdef api void call_cy_ParamService_binary_ret_binary_param(
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[string]] cPromise,
     unique_ptr[string] param1
-):
+) noexcept:
     cdef Promise_binary __promise = Promise_binary._fbthrift_create(cmove(cPromise))
     arg_param1 = (deref(param1))
     __context = RequestContext._fbthrift_create(ctx)
@@ -2187,7 +2187,7 @@ cdef api void call_cy_ParamService_map_ret_bool_param(
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[cmap[string,cint64_t]]] cPromise,
     cbool param1
-):
+) noexcept:
     cdef Promise_cmap__string_cint64_t __promise = Promise_cmap__string_cint64_t._fbthrift_create(cmove(cPromise))
     arg_param1 = param1
     __context = RequestContext._fbthrift_create(ctx)
@@ -2206,7 +2206,7 @@ cdef api void call_cy_ParamService_list_ret_map_setlist_param(
     cFollyPromise[unique_ptr[vector[cbool]]] cPromise,
     unique_ptr[cmap[cint32_t,vector[string]]] param1,
     unique_ptr[vector[string]] param2
-):
+) noexcept:
     cdef Promise_vector__cbool __promise = Promise_vector__cbool._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.Map__i32_List__string._fbthrift_create(__to_shared_ptr(cmove(param1)))
     arg_param2 = _module_types.List__string._fbthrift_create(__to_shared_ptr(cmove(param2)))
@@ -2226,7 +2226,7 @@ cdef api void call_cy_ParamService_mapsetlistmapliststring_ret_listlistlist_para
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[cmap[cset[vector[cint32_t]],cmap[vector[cset[string]],string]]]] cPromise,
     unique_ptr[vector[vector[vector[vector[cint32_t]]]]] param1
-):
+) noexcept:
     cdef Promise_cmap__cset__vector__cint32_t_cmap__vector__cset__string_string __promise = Promise_cmap__cset__vector__cint32_t_cmap__vector__cset__string_string._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.List__List__List__List__i32._fbthrift_create(__to_shared_ptr(cmove(param1)))
     __context = RequestContext._fbthrift_create(ctx)
@@ -2244,7 +2244,7 @@ cdef api void call_cy_ParamService_typedef_ret_i32_param(
     Cpp2RequestContext* ctx,
     cFollyPromise[cint32_t] cPromise,
     cint32_t param1
-):
+) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
     arg_param1 = param1
     __context = RequestContext._fbthrift_create(ctx)
@@ -2262,7 +2262,7 @@ cdef api void call_cy_ParamService_listtypedef_ret_typedef_param(
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[vector[cint32_t]]] cPromise,
     unique_ptr[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]] param1
-):
+) noexcept:
     cdef Promise_vector__cint32_t __promise = Promise_vector__cint32_t._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.List__Map__Empty_MyStruct._fbthrift_create(__to_shared_ptr(cmove(param1)))
     __context = RequestContext._fbthrift_create(ctx)
@@ -2280,7 +2280,7 @@ cdef api void call_cy_ParamService_enum_ret_double_param(
     Cpp2RequestContext* ctx,
     cFollyPromise[_module_types.cMyEnumA] cPromise,
     double param1
-):
+) noexcept:
     cdef Promise__module_types_cMyEnumA __promise = Promise__module_types_cMyEnumA._fbthrift_create(cmove(cPromise))
     arg_param1 = param1
     __context = RequestContext._fbthrift_create(ctx)
@@ -2299,7 +2299,7 @@ cdef api void call_cy_ParamService_enum_ret_double_enum_param(
     cFollyPromise[_module_types.cMyEnumA] cPromise,
     double param1,
     _module_types.cMyEnumA param2
-):
+) noexcept:
     cdef Promise__module_types_cMyEnumA __promise = Promise__module_types_cMyEnumA._fbthrift_create(cmove(cPromise))
     arg_param1 = param1
     arg_param2 = _module_types.MyEnumA(<int> param2)
@@ -2319,7 +2319,7 @@ cdef api void call_cy_ParamService_listenum_ret_map_param(
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[vector[_module_types.cMyEnumA]]] cPromise,
     unique_ptr[cmap[string,cint64_t]] param1
-):
+) noexcept:
     cdef Promise_vector___module_types_cMyEnumA __promise = Promise_vector___module_types_cMyEnumA._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.Map__string_i64._fbthrift_create(__to_shared_ptr(cmove(param1)))
     __context = RequestContext._fbthrift_create(ctx)
@@ -2337,7 +2337,7 @@ cdef api void call_cy_ParamService_struct_ret_i16_param(
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[_module_types.cMyStruct]] cPromise,
     cint16_t param1
-):
+) noexcept:
     cdef Promise__module_types_cMyStruct __promise = Promise__module_types_cMyStruct._fbthrift_create(cmove(cPromise))
     arg_param1 = param1
     __context = RequestContext._fbthrift_create(ctx)
@@ -2355,7 +2355,7 @@ cdef api void call_cy_ParamService_setstruct_ret_set_param(
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[cset[_module_types.cMyStruct]]] cPromise,
     unique_ptr[cset[string]] param1
-):
+) noexcept:
     cdef Promise_cset___module_types_cMyStruct __promise = Promise_cset___module_types_cMyStruct._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.Set__string._fbthrift_create(__to_shared_ptr(cmove(param1)))
     __context = RequestContext._fbthrift_create(ctx)
@@ -2374,7 +2374,7 @@ cdef api void call_cy_ParamService_union_ret_i32_i32_param(
     cFollyPromise[unique_ptr[_module_types.cComplexUnion]] cPromise,
     cint32_t param1,
     cint32_t param2
-):
+) noexcept:
     cdef Promise__module_types_cComplexUnion __promise = Promise__module_types_cComplexUnion._fbthrift_create(cmove(cPromise))
     arg_param1 = param1
     arg_param2 = param2
@@ -2394,7 +2394,7 @@ cdef api void call_cy_ParamService_listunion_string_param(
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[vector[_module_types.cComplexUnion]]] cPromise,
     unique_ptr[string] param1
-):
+) noexcept:
     cdef Promise_vector___module_types_cComplexUnion __promise = Promise_vector___module_types_cComplexUnion._fbthrift_create(cmove(cPromise))
     arg_param1 = (deref(param1)).data().decode('UTF-8')
     __context = RequestContext._fbthrift_create(ctx)
@@ -2410,7 +2410,7 @@ cdef api void call_cy_ParamService_listunion_string_param(
 cdef api void call_cy_ParamService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         ParamService_onStartServing_coro(
@@ -2421,7 +2421,7 @@ cdef api void call_cy_ParamService_onStartServing(
 cdef api void call_cy_ParamService_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         ParamService_onStopRequested_coro(

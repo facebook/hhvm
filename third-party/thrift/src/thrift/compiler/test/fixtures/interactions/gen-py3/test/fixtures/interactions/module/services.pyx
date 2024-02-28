@@ -144,7 +144,7 @@ async def runGenerator_MyService_serialize(object generator, Promise_cint32_t_St
     else:
         promise.cPromise.setValue(optional[cint32_t](<cint32_t?>item))
 
-cdef void getNextGenerator_MyService_serialize(object generator, cFollyPromise[optional[cint32_t]] cPromise):
+cdef void getNextGenerator_MyService_serialize(object generator, cFollyPromise[optional[cint32_t]] cPromise) noexcept:
     cdef Promise_cint32_t_Stream __promise = Promise_cint32_t_Stream._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         runGenerator_MyService_serialize(
@@ -297,7 +297,7 @@ cdef api void call_cy_MyService_foo(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -313,7 +313,7 @@ cdef api void call_cy_MyService_interact(
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise,
     cint32_t arg
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_arg = arg
     __context = RequestContext._fbthrift_create(ctx)
@@ -330,7 +330,7 @@ cdef api void call_cy_MyService_interactFast(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cint32_t] cPromise
-):
+) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -345,7 +345,7 @@ cdef api void call_cy_MyService_serialize(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cResponseAndServerStream[cint32_t,cint32_t]] cPromise
-):
+) noexcept:
     cdef Promise_cResponseAndServerStream__cint32_t_cint32_t __promise = Promise_cResponseAndServerStream__cint32_t_cint32_t._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -359,7 +359,7 @@ cdef api void call_cy_MyService_serialize(
 cdef api void call_cy_MyService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         MyService_onStartServing_coro(
@@ -370,7 +370,7 @@ cdef api void call_cy_MyService_onStartServing(
 cdef api void call_cy_MyService_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         MyService_onStopRequested_coro(

@@ -118,7 +118,7 @@ cdef class SinkServiceInterface(
 cdef api void call_cy_SinkService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         SinkService_onStartServing_coro(
@@ -129,7 +129,7 @@ cdef api void call_cy_SinkService_onStartServing(
 cdef api void call_cy_SinkService_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         SinkService_onStopRequested_coro(

@@ -867,7 +867,7 @@ cdef class ClientBufferedStream__{{type:flat_name}}(ClientBufferedStream):
     cdef void callback(
         cFollyTry[__cOptional[{{> types/cython_cpp_type}}]]&& result,
         PyObject* userdata,
-    ):
+    ) noexcept:
         cdef __cOptional[{{> types/cython_cpp_type}}] opt_val
         cdef {{> types/cython_cpp_type}} _value
         stream, pyfuture, rpc_options = <object> userdata

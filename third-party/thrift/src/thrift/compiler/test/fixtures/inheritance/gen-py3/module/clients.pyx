@@ -61,7 +61,7 @@ from module.clients_wrapper cimport cMyLeafAsyncClient, cMyLeafClientWrapper
 cdef void MyRoot_do_root_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -74,7 +74,7 @@ cdef void MyRoot_do_root_callback(
 cdef void MyNode_do_mid_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -87,7 +87,7 @@ cdef void MyNode_do_mid_callback(
 cdef void MyLeaf_do_leaf_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))

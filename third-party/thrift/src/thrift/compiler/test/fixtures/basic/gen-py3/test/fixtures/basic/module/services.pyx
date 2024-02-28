@@ -359,7 +359,7 @@ cdef api void call_cy_FooService_simple_rpc(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -373,7 +373,7 @@ cdef api void call_cy_FooService_simple_rpc(
 cdef api void call_cy_FooService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         FooService_onStartServing_coro(
@@ -384,7 +384,7 @@ cdef api void call_cy_FooService_onStartServing(
 cdef api void call_cy_FooService_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         FooService_onStopRequested_coro(
@@ -481,7 +481,7 @@ cdef api void call_cy_FB303Service_simple_rpc(
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[_test_fixtures_basic_module_types.cReservedKeyword]] cPromise,
     cint32_t int_parameter
-):
+) noexcept:
     cdef Promise__test_fixtures_basic_module_types_cReservedKeyword __promise = Promise__test_fixtures_basic_module_types_cReservedKeyword._fbthrift_create(cmove(cPromise))
     arg_int_parameter = int_parameter
     __context = RequestContext._fbthrift_create(ctx)
@@ -497,7 +497,7 @@ cdef api void call_cy_FB303Service_simple_rpc(
 cdef api void call_cy_FB303Service_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         FB303Service_onStartServing_coro(
@@ -508,7 +508,7 @@ cdef api void call_cy_FB303Service_onStartServing(
 cdef api void call_cy_FB303Service_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         FB303Service_onStopRequested_coro(
@@ -606,7 +606,7 @@ cdef api void call_cy_MyService_ping(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -621,7 +621,7 @@ cdef api void call_cy_MyService_getRandomData(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[string]] cPromise
-):
+) noexcept:
     cdef Promise_string __promise = Promise_string._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -637,7 +637,7 @@ cdef api void call_cy_MyService_sink(
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise,
     cint64_t sink
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_sink = sink
     __context = RequestContext._fbthrift_create(ctx)
@@ -656,7 +656,7 @@ cdef api void call_cy_MyService_putDataById(
     cFollyPromise[cFollyUnit] cPromise,
     cint64_t id,
     unique_ptr[string] data
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_id = id
     arg_data = (deref(data)).data().decode('UTF-8')
@@ -676,7 +676,7 @@ cdef api void call_cy_MyService_hasDataById(
     Cpp2RequestContext* ctx,
     cFollyPromise[cbool] cPromise,
     cint64_t id
-):
+) noexcept:
     cdef Promise_cbool __promise = Promise_cbool._fbthrift_create(cmove(cPromise))
     arg_id = id
     __context = RequestContext._fbthrift_create(ctx)
@@ -694,7 +694,7 @@ cdef api void call_cy_MyService_getDataById(
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[string]] cPromise,
     cint64_t id
-):
+) noexcept:
     cdef Promise_string __promise = Promise_string._fbthrift_create(cmove(cPromise))
     arg_id = id
     __context = RequestContext._fbthrift_create(ctx)
@@ -712,7 +712,7 @@ cdef api void call_cy_MyService_deleteDataById(
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise,
     cint64_t id
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_id = id
     __context = RequestContext._fbthrift_create(ctx)
@@ -731,7 +731,7 @@ cdef api void call_cy_MyService_lobDataById(
     cFollyPromise[cFollyUnit] cPromise,
     cint64_t id,
     unique_ptr[string] data
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_id = id
     arg_data = (deref(data)).data().decode('UTF-8')
@@ -750,7 +750,7 @@ cdef api void call_cy_MyService_invalid_return_for_hack(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[cset[float]]] cPromise
-):
+) noexcept:
     cdef Promise_cset__float __promise = Promise_cset__float._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -765,7 +765,7 @@ cdef api void call_cy_MyService_rpc_skipped_codegen(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -779,7 +779,7 @@ cdef api void call_cy_MyService_rpc_skipped_codegen(
 cdef api void call_cy_MyService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         MyService_onStartServing_coro(
@@ -790,7 +790,7 @@ cdef api void call_cy_MyService_onStartServing(
 cdef api void call_cy_MyService_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         MyService_onStopRequested_coro(
@@ -1156,7 +1156,7 @@ cdef api void call_cy_DbMixedStackArguments_getDataByKey0(
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[string]] cPromise,
     unique_ptr[string] key
-):
+) noexcept:
     cdef Promise_binary __promise = Promise_binary._fbthrift_create(cmove(cPromise))
     arg_key = (deref(key)).data().decode('UTF-8')
     __context = RequestContext._fbthrift_create(ctx)
@@ -1174,7 +1174,7 @@ cdef api void call_cy_DbMixedStackArguments_getDataByKey1(
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[string]] cPromise,
     unique_ptr[string] key
-):
+) noexcept:
     cdef Promise_binary __promise = Promise_binary._fbthrift_create(cmove(cPromise))
     arg_key = (deref(key)).data().decode('UTF-8')
     __context = RequestContext._fbthrift_create(ctx)
@@ -1190,7 +1190,7 @@ cdef api void call_cy_DbMixedStackArguments_getDataByKey1(
 cdef api void call_cy_DbMixedStackArguments_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         DbMixedStackArguments_onStartServing_coro(
@@ -1201,7 +1201,7 @@ cdef api void call_cy_DbMixedStackArguments_onStartServing(
 cdef api void call_cy_DbMixedStackArguments_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         DbMixedStackArguments_onStopRequested_coro(

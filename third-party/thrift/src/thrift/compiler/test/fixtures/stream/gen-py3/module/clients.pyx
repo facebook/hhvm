@@ -60,7 +60,7 @@ from module.clients_wrapper cimport cPubSubStreamingServiceAsyncClient, cPubSubS
 cdef void PubSubStreamingService_returnstream_callback(
     cFollyTry[cClientBufferedStream[cint32_t]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -73,7 +73,7 @@ cdef void PubSubStreamingService_returnstream_callback(
 cdef void PubSubStreamingService_streamthrows_callback(
     cFollyTry[cClientBufferedStream[cint32_t]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -86,7 +86,7 @@ cdef void PubSubStreamingService_streamthrows_callback(
 cdef void PubSubStreamingService_servicethrows_callback(
     cFollyTry[cClientBufferedStream[cint32_t]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException[_module_types.cFooEx]():
         try:
@@ -106,7 +106,7 @@ cdef void PubSubStreamingService_servicethrows_callback(
 cdef void PubSubStreamingService_servicethrows2_callback(
     cFollyTry[cClientBufferedStream[cint32_t]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException[_module_types.cFooEx]():
         try:
@@ -133,7 +133,7 @@ cdef void PubSubStreamingService_servicethrows2_callback(
 cdef void PubSubStreamingService_boththrows_callback(
     cFollyTry[cClientBufferedStream[cint32_t]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException[_module_types.cFooEx]():
         try:
@@ -153,7 +153,7 @@ cdef void PubSubStreamingService_boththrows_callback(
 cdef void PubSubStreamingService_responseandstreamstreamthrows_callback(
     cFollyTry[cResponseAndClientBufferedStream[cint32_t,cint32_t]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -166,7 +166,7 @@ cdef void PubSubStreamingService_responseandstreamstreamthrows_callback(
 cdef void PubSubStreamingService_responseandstreamservicethrows_callback(
     cFollyTry[cResponseAndClientBufferedStream[cint32_t,cint32_t]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException[_module_types.cFooEx]():
         try:
@@ -186,7 +186,7 @@ cdef void PubSubStreamingService_responseandstreamservicethrows_callback(
 cdef void PubSubStreamingService_responseandstreamboththrows_callback(
     cFollyTry[cResponseAndClientBufferedStream[cint32_t,cint32_t]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException[_module_types.cFooEx]():
         try:
@@ -206,7 +206,7 @@ cdef void PubSubStreamingService_responseandstreamboththrows_callback(
 cdef void PubSubStreamingService_returnstreamFast_callback(
     cFollyTry[cClientBufferedStream[cint32_t]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))

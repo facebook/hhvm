@@ -353,7 +353,7 @@ cdef api void call_cy_MyService_ping(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -368,7 +368,7 @@ cdef api void call_cy_MyService_getRandomData(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[string]] cPromise
-):
+) noexcept:
     cdef Promise_string __promise = Promise_string._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -384,7 +384,7 @@ cdef api void call_cy_MyService_hasDataById(
     Cpp2RequestContext* ctx,
     cFollyPromise[cbool] cPromise,
     cint64_t id
-):
+) noexcept:
     cdef Promise_cbool __promise = Promise_cbool._fbthrift_create(cmove(cPromise))
     arg_id = id
     __context = RequestContext._fbthrift_create(ctx)
@@ -402,7 +402,7 @@ cdef api void call_cy_MyService_getDataById(
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[string]] cPromise,
     cint64_t id
-):
+) noexcept:
     cdef Promise_string __promise = Promise_string._fbthrift_create(cmove(cPromise))
     arg_id = id
     __context = RequestContext._fbthrift_create(ctx)
@@ -421,7 +421,7 @@ cdef api void call_cy_MyService_putDataById(
     cFollyPromise[cFollyUnit] cPromise,
     cint64_t id,
     unique_ptr[string] data
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_id = id
     arg_data = (deref(data)).data().decode('UTF-8')
@@ -442,7 +442,7 @@ cdef api void call_cy_MyService_lobDataById(
     cFollyPromise[cFollyUnit] cPromise,
     cint64_t id,
     unique_ptr[string] data
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_id = id
     arg_data = (deref(data)).data().decode('UTF-8')
@@ -461,7 +461,7 @@ cdef api void call_cy_MyService_doNothing(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -475,7 +475,7 @@ cdef api void call_cy_MyService_doNothing(
 cdef api void call_cy_MyService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         MyService_onStartServing_coro(
@@ -486,7 +486,7 @@ cdef api void call_cy_MyService_onStartServing(
 cdef api void call_cy_MyService_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         MyService_onStopRequested_coro(
@@ -764,7 +764,7 @@ cdef api void call_cy_MyServicePrioParent_ping(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -779,7 +779,7 @@ cdef api void call_cy_MyServicePrioParent_pong(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -793,7 +793,7 @@ cdef api void call_cy_MyServicePrioParent_pong(
 cdef api void call_cy_MyServicePrioParent_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         MyServicePrioParent_onStartServing_coro(
@@ -804,7 +804,7 @@ cdef api void call_cy_MyServicePrioParent_onStartServing(
 cdef api void call_cy_MyServicePrioParent_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         MyServicePrioParent_onStopRequested_coro(
@@ -928,7 +928,7 @@ cdef api void call_cy_MyServicePrioChild_pang(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -942,7 +942,7 @@ cdef api void call_cy_MyServicePrioChild_pang(
 cdef api void call_cy_MyServicePrioChild_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         MyServicePrioChild_onStartServing_coro(
@@ -953,7 +953,7 @@ cdef api void call_cy_MyServicePrioChild_onStartServing(
 cdef api void call_cy_MyServicePrioChild_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         MyServicePrioChild_onStopRequested_coro(
@@ -1049,7 +1049,7 @@ cdef api void call_cy_BadService_bar(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cint32_t] cPromise
-):
+) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -1063,7 +1063,7 @@ cdef api void call_cy_BadService_bar(
 cdef api void call_cy_BadService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         BadService_onStartServing_coro(
@@ -1074,7 +1074,7 @@ cdef api void call_cy_BadService_onStartServing(
 cdef api void call_cy_BadService_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         BadService_onStopRequested_coro(
@@ -1170,7 +1170,7 @@ cdef api void call_cy_FooBarBazService_foo(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -1185,7 +1185,7 @@ cdef api void call_cy_FooBarBazService_bar(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -1200,7 +1200,7 @@ cdef api void call_cy_FooBarBazService_baz(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -1214,7 +1214,7 @@ cdef api void call_cy_FooBarBazService_baz(
 cdef api void call_cy_FooBarBazService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         FooBarBazService_onStartServing_coro(
@@ -1225,7 +1225,7 @@ cdef api void call_cy_FooBarBazService_onStartServing(
 cdef api void call_cy_FooBarBazService_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         FooBarBazService_onStopRequested_coro(

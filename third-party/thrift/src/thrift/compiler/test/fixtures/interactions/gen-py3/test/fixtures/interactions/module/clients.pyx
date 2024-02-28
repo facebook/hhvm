@@ -63,7 +63,7 @@ from test.fixtures.interactions.module.clients_wrapper cimport cMyServiceClientW
 cdef void MyService_foo_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -76,7 +76,7 @@ cdef void MyService_foo_callback(
 cdef void MyService_interact_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -89,7 +89,7 @@ cdef void MyService_interact_callback(
 cdef void MyService_interactFast_callback(
     cFollyTry[cint32_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -102,7 +102,7 @@ cdef void MyService_interactFast_callback(
 cdef void MyService_serialize_callback(
     cFollyTry[cResponseAndClientBufferedStream[cint32_t,cint32_t]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -115,7 +115,7 @@ cdef void MyService_serialize_callback(
 cdef void MyService_MyInteraction_frobnicate_callback(
     cFollyTry[cint32_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException[_test_fixtures_interactions_module_types.cCustomException]():
         try:
@@ -135,7 +135,7 @@ cdef void MyService_MyInteraction_frobnicate_callback(
 cdef void MyService_MyInteraction_ping_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -148,7 +148,7 @@ cdef void MyService_MyInteraction_ping_callback(
 cdef void MyService_MyInteraction_truthify_callback(
     cFollyTry[cClientBufferedStream[cbool]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -161,7 +161,7 @@ cdef void MyService_MyInteraction_truthify_callback(
 cdef void MyService_MyInteractionFast_frobnicate_callback(
     cFollyTry[cint32_t]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -174,7 +174,7 @@ cdef void MyService_MyInteractionFast_frobnicate_callback(
 cdef void MyService_MyInteractionFast_ping_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -187,7 +187,7 @@ cdef void MyService_MyInteractionFast_ping_callback(
 cdef void MyService_MyInteractionFast_truthify_callback(
     cFollyTry[cClientBufferedStream[cbool]]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
@@ -200,7 +200,7 @@ cdef void MyService_MyInteractionFast_truthify_callback(
 cdef void MyService_SerialInteraction_frobnicate_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
-):
+) noexcept:
     client, pyfuture, options = <object> userdata  
     if result.hasException():
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))

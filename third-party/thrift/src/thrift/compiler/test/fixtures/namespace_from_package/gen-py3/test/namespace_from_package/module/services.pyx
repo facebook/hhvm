@@ -141,7 +141,7 @@ cdef api void call_cy_TestService_init(
     Cpp2RequestContext* ctx,
     cFollyPromise[cint64_t] cPromise,
     cint64_t int1
-):
+) noexcept:
     cdef Promise_cint64_t __promise = Promise_cint64_t._fbthrift_create(cmove(cPromise))
     arg_int1 = int1
     __context = RequestContext._fbthrift_create(ctx)
@@ -157,7 +157,7 @@ cdef api void call_cy_TestService_init(
 cdef api void call_cy_TestService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         TestService_onStartServing_coro(
@@ -168,7 +168,7 @@ cdef api void call_cy_TestService_onStartServing(
 cdef api void call_cy_TestService_onStopRequested(
     object self,
     cFollyPromise[cFollyUnit] cPromise
-):
+) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         TestService_onStopRequested_coro(

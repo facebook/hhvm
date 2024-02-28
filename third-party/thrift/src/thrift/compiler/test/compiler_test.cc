@@ -387,7 +387,7 @@ TEST(CompilerTest, const_wrong_type) {
     const set<string> wrongSet = {1: 2};
       # expected-warning@-1: type error: const `wrongSet` was declared as set. This will become an error in future versions of thrift.
     const map<i32, i32> wrongMap = [1,32,3];
-      # expected-warning@-1: type error: const `wrongMap` was declared as map. This will become an error in future versions of thrift.
+      # expected-error@-1: type error: const `wrongMap` was declared as map.
     const map<i32, i32> weirdMap = [];
       # expected-warning@-1: type error: map `weirdMap` initialized with empty list.
     const set<i32> weirdSet = {};

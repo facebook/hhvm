@@ -335,7 +335,7 @@ class const_checker {
       return;
     }
     if (value->kind() != t_const_value::CV_MAP) {
-      report_type_mismatch_warning("map");
+      report_type_mismatch("map");
       return;
     }
     const t_type* k_type = &type->key_type().deref();

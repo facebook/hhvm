@@ -1,3 +1,3 @@
-Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Unable to find class.' in %s:5
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Unable to find class: A' in %s:5
 Stack trace:
 %A

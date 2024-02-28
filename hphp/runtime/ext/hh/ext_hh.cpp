@@ -1351,17 +1351,27 @@ void HHVM_FUNCTION(check_dynamically_callable_inst_method, StringArg cls,
 
 namespace {
 
+[[noreturn]] void throwGetClassError(const folly::StringPiece cls) {
+  SystemLib::throwInvalidArgumentExceptionObject(
+    folly::sformat("Unable to find class: {}", cls)
+  );
+};
+
 Class* getClass(TypedValue cls) {
   switch (cls.m_type) {
     case KindOfPersistentString:
     case KindOfString:
-      return Class::load(cls.m_data.pstr);
+      if (auto const c = Class::load(cls.m_data.pstr)) return c;
+      throwGetClassError(cls.m_data.pstr->slice());
     case KindOfClass:
-      return cls.m_data.pclass;
+      if (auto const c = cls.m_data.pclass) return c;
+      throwGetClassError("Unknown classname for KindOfClass");
     case KindOfLazyClass:
-      return Class::load(cls.m_data.plazyclass.name());
+      if (auto const c = Class::load(cls.m_data.plazyclass.name())) return c;
+      throwGetClassError(cls.m_data.plazyclass.name()->slice());
     case KindOfObject:
-      return cls.m_data.pobj->getVMClass();
+      if (auto const c = cls.m_data.pobj->getVMClass()) return c;
+      throwGetClassError(cls.m_data.pobj->getClassName().get()->slice());
     case KindOfUninit:
     case KindOfNull:
     case KindOfBoolean:
@@ -1415,41 +1425,21 @@ TypedValue HHVM_FUNCTION(class_to_classname, TypedValue cls) {
 
 bool HHVM_FUNCTION(reflection_class_is_abstract, TypedValue cls) {
   auto const c = getClass(cls);
-  if (!c) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("Unable to find class.")
-    );
-  }
   return isAbstract(c);
 }
 
-String HHVM_FUNCTION(reflection_class_get_name, TypedValue classname) {
-  auto const cls = getClass(classname);
-  if (!cls) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("Unable to find class.")
-    );
-  }
-  return cls->name()->data();
+String HHVM_FUNCTION(reflection_class_get_name, TypedValue cls) {
+  auto const c = getClass(cls);
+  return c->name()->data();
 }
 
 bool HHVM_FUNCTION(reflection_class_is_final, TypedValue cls) {
   auto const c = getClass(cls);
-  if (!c) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("Unable to find class.")
-    );
-  }
   return c->attrs() & AttrFinal;
 }
 
 bool HHVM_FUNCTION(reflection_class_is_interface, TypedValue cls) {
   auto const c = getClass(cls);
-  if (!c) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("Unable to find class.")
-    );
-  }
   return isInterface(c);
 }
 

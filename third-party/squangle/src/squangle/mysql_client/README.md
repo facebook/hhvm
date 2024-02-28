@@ -33,7 +33,7 @@ for example usage.
       "type", "pusheen",
       "awesomeness", MAX, INF);
 
-    DbLocator dblocator(XDB_MACROS, db::InstanceRequirement::Closest);
+    DbLocator dblocator(XDB_MACROS, db::InstanceRequirement::Any);
 
     auto conn_op = FbAsyncMysqlClient::defaultClient()->beginConnection(dblocator);
     conn_op->run()->wait();

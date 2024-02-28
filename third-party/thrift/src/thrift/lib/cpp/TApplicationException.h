@@ -64,6 +64,17 @@ class FOLLY_EXPORT TApplicationException : public TException {
   explicit TApplicationException(TApplicationExceptionType type)
       : type_(type) {}
 
+  TApplicationException(const TApplicationException&) = default;
+  TApplicationException(TApplicationException&& other) noexcept
+      : message_(std::move(other.message_)), type_(other.type_) {}
+
+  TApplicationException& operator=(const TApplicationException&) = default;
+  TApplicationException& operator=(TApplicationException&& other) noexcept {
+    message_ = std::move(other.message_);
+    type_ = other.type_;
+    return *this;
+  }
+
   explicit TApplicationException(const std::string& message)
       : message_(message), type_(UNKNOWN) {}
 

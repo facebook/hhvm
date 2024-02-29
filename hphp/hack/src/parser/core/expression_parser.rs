@@ -2004,7 +2004,11 @@ where
         let dollar = self.assert_token(TokenKind::Dollar);
         let operand = match self.peek_token_kind() {
             TokenKind::LeftBrace if is_term => {
-                return self.parse_et_splice_expression(dollar);
+                let old_in_expr_tree = self.in_expression_tree;
+                self.in_expression_tree = false;
+                let res = self.parse_et_splice_expression(dollar);
+                self.in_expression_tree = old_in_expr_tree;
+                return res;
             }
             TokenKind::LeftBrace => self.parse_braced_expression(),
             TokenKind::Variable if self.env.php5_compat_mode => {

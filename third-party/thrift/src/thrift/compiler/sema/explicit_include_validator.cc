@@ -165,7 +165,7 @@ void add_explicit_include_validators(
 
   // All definitions: annotations
   validator.add_definition_visitor(
-      [](diagnostic_context& ctx, const t_named& n) {
+      [level](diagnostic_context& ctx, const t_named& n) {
         // Temporary workaround for patch generator
         if (n.generated() ||
             (ctx.parent() &&
@@ -173,9 +173,8 @@ void add_explicit_include_validators(
           return;
         }
 
-        // TODO(T180055932): upgrade this to `level`
         for (const t_const& anno : n.structured_annotations()) {
-          visit_type(ctx, n, *anno.type(), diagnostic_level::warning);
+          visit_type(ctx, n, *anno.type(), level);
         }
       });
 }

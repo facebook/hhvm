@@ -591,6 +591,7 @@ class t_hack_generator : public t_concat_generator {
     IMMUTABLE_COLLECTIONS = 3,
     IGNORE_WRAPPER = 6,
     RECURSIVE_IGNORE_WRAPPER = 7,
+    IGNORE_TYPEDEF_OPTION = 8,
   };
 
   std::string declare_field(
@@ -633,7 +634,8 @@ class t_hack_generator : public t_concat_generator {
           {TypeToTypehintVariations::IMMUTABLE_COLLECTIONS, false},
           {TypeToTypehintVariations::IS_ANY_SHAPE, false},
           {TypeToTypehintVariations::IGNORE_WRAPPER, false},
-          {TypeToTypehintVariations::RECURSIVE_IGNORE_WRAPPER, false}});
+          {TypeToTypehintVariations::RECURSIVE_IGNORE_WRAPPER, false},
+          {TypeToTypehintVariations::IGNORE_TYPEDEF_OPTION, false}});
   std::string typedef_to_typehint(
       const t_typedef* ttypedef,
       std::map<TypeToTypehintVariations, bool> variations);
@@ -5853,7 +5855,12 @@ void t_hack_generator::generate_process_function(
   indent_down();
   int exc_num = 0;
   for (const t_field& x : get_elems(tfunction->exceptions())) {
-    f_service_ << indent() << "} catch (" << type_to_typehint(x.get_type())
+    f_service_ << indent() << "} catch ("
+               << type_to_typehint(
+                      x.get_type(),
+                      // Type aliases are not supported in `catch` clauses. Hack
+                      // expects the name of a class.
+                      {{TypeToTypehintVariations::IGNORE_TYPEDEF_OPTION, true}})
                << " $exc" << exc_num << ") {\n";
     if (tfunction->qualifier() != t_function_qualifier::oneway) {
       indent_up();
@@ -6597,17 +6604,20 @@ std::string t_hack_generator::typedef_to_typehint(
     }
   }
 
+  bool typedef_option =
+      !variations[TypeToTypehintVariations::IGNORE_TYPEDEF_OPTION] && typedef_;
   if (wrapper) {
     bool ignore_wrapper =
         variations[TypeToTypehintVariations::RECURSIVE_IGNORE_WRAPPER] ||
         variations[TypeToTypehintVariations::IGNORE_WRAPPER];
     if (ignore_wrapper) {
-      return typedef_ ? hack_wrapped_type_name(name, ns) : typehint;
+      return typedef_option ? hack_wrapped_type_name(name, ns) : typehint;
     } else {
-      return typedef_ ? hack_name(ttypedef) : (*wrapper + "<" + typehint + ">");
+      return typedef_option ? hack_name(ttypedef)
+                            : (*wrapper + "<" + typehint + ">");
     }
   } else {
-    return typedef_ ? hack_name(ttypedef) : typehint;
+    return typedef_option ? hack_name(ttypedef) : typehint;
   }
 }
 

@@ -393,7 +393,7 @@ fn print_ctx_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &CtxConstant) -> 
     Ok(())
 }
 
-fn print_property_doc_comment(w: &mut dyn Write, p: &Property<'_>) -> Result<()> {
+fn print_property_doc_comment(w: &mut dyn Write, p: &Property) -> Result<()> {
     if let Just(s) = p.doc_comment.as_ref() {
         write_bytes!(w, r#""""{}""""#, escaper::escape_bstr(s.as_bstr()))?;
         w.write_all(b" ")?;
@@ -401,12 +401,12 @@ fn print_property_doc_comment(w: &mut dyn Write, p: &Property<'_>) -> Result<()>
     Ok(())
 }
 
-fn print_property_type_info(w: &mut dyn Write, p: &Property<'_>) -> Result<()> {
+fn print_property_type_info(w: &mut dyn Write, p: &Property) -> Result<()> {
     print_type_info(w, &p.type_info)?;
     w.write_all(b" ")
 }
 
-fn print_property(ctx: &Context<'_>, w: &mut dyn Write, property: &Property<'_>) -> Result<()> {
+fn print_property(ctx: &Context<'_>, w: &mut dyn Write, property: &Property) -> Result<()> {
     newline(w)?;
     w.write_all(b"  .property ")?;
     print_special_and_user_attrs(

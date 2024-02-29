@@ -46,7 +46,7 @@ pub struct Class<'arena> {
     pub uses: Vector<ClassName<'arena>>,
     pub enum_type: Maybe<TypeInfo>,
     pub methods: Vector<Method<'arena>>,
-    pub properties: Vector<Property<'arena>>,
+    pub properties: Vector<Property>,
     pub constants: Vector<Constant<'arena>>,
     pub type_constants: Vector<TypeConstant>,
     pub ctx_constants: Vector<CtxConstant>,

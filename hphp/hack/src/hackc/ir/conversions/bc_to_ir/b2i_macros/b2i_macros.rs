@@ -288,7 +288,7 @@ fn parse_convert_simple(
             ImmType::OAL(n) if *n == "ParamName" => {
                 convert(quote_spanned!(span=> ir::ParamId::from_hhbc(#imm, #strings) ));
             }
-            ImmType::OAL(n) if *n == "PropName" => {
+            ImmType::OA(n) if *n == "PropName" => {
                 convert(quote_spanned!(span=> ir::PropId::from_hhbc(*#imm, #strings) ));
             }
             ImmType::AA

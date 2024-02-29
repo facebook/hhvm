@@ -144,7 +144,7 @@ impl<'a, 'b> PrintOpcode<'a, 'b> {
 
         w.write_all(b"SSwitch <")?;
         for (case, target) in iter {
-            print_quoted_str(w, case)?;
+            print_quoted_ffi_str(w, case)?;
             w.write_all(b":")?;
             self.print_label(w, target)?;
             w.write_all(b" ")?;
@@ -206,11 +206,11 @@ fn print_adata_id(w: &mut dyn Write, id: &AdataId) -> Result<()> {
 }
 
 fn print_class_name(w: &mut dyn Write, id: &ClassName<'_>) -> Result<()> {
-    print_quoted_str(w, &id.as_ffi_str())
+    print_quoted_ffi_str(w, &id.as_ffi_str())
 }
 
 fn print_const_name(w: &mut dyn Write, id: &ConstName<'_>) -> Result<()> {
-    print_quoted_str(w, &id.as_ffi_str())
+    print_quoted_ffi_str(w, &id.as_ffi_str())
 }
 
 fn print_float(w: &mut dyn Write, d: FloatBits) -> Result<()> {
@@ -218,7 +218,7 @@ fn print_float(w: &mut dyn Write, d: FloatBits) -> Result<()> {
 }
 
 fn print_function_name(w: &mut dyn Write, id: &FunctionName<'_>) -> Result<()> {
-    print_quoted_str(w, &id.as_ffi_str())
+    print_quoted_ffi_str(w, &id.as_ffi_str())
 }
 
 fn print_iter_args(
@@ -269,7 +269,7 @@ fn print_member_key(w: &mut dyn Write, mk: &MemberKey<'_>, local_names: &[String
         }
         M::ET(s, op) => {
             w.write_all(b"ET:")?;
-            print_quoted_str(w, s)?;
+            print_quoted_ffi_str(w, s)?;
             w.write_all(b" ")?;
             print_readonly_op(w, op)
         }
@@ -306,14 +306,25 @@ fn print_member_key(w: &mut dyn Write, mk: &MemberKey<'_>, local_names: &[String
 }
 
 fn print_method_name(w: &mut dyn Write, id: &MethodName<'_>) -> Result<()> {
-    print_quoted_str(w, &id.as_ffi_str())
+    print_quoted_bytes(w, id.as_bytes())
 }
 
-pub(crate) fn print_prop_name(w: &mut dyn Write, id: &PropName<'_>) -> Result<()> {
-    print_quoted_str(w, &id.as_ffi_str())
+pub(crate) fn print_prop_name(w: &mut dyn Write, id: &PropName) -> Result<()> {
+    print_quoted_str(w, id.as_str())
 }
 
-fn print_quoted_str(w: &mut dyn Write, s: &ffi::Str<'_>) -> Result<()> {
+fn print_quoted_ffi_str<'a>(w: &mut dyn Write, s: &Str<'a>) -> Result<()> {
+    print_quoted_bytes(w, s.as_ref())
+}
+
+fn print_quoted_str(w: &mut dyn Write, s: &str) -> Result<()> {
+    w.write_all(b"\"")?;
+    w.write_all(escaper::escape(s).as_bytes())?;
+    w.write_all(b"\"")
+}
+
+fn print_quoted_bytes(w: &mut dyn Write, s: &[u8]) -> Result<()> {
+    use bstr::ByteSlice as BS;
     w.write_all(b"\"")?;
     w.write_all(&escaper::escape_bstr(s.as_bstr()))?;
     w.write_all(b"\"")
@@ -325,7 +336,7 @@ fn print_shape_fields(w: &mut dyn Write, keys: &[ffi::Str<'_>]) -> Result<()> {
         if i != 0 {
             w.write_all(b" ")?;
         }
-        print_quoted_str(w, key)?;
+        print_quoted_ffi_str(w, key)?;
     }
     w.write_all(b">")
 }

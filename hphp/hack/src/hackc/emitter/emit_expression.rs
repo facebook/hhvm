@@ -83,6 +83,7 @@ use string_utils::reified::ReifiedTparam;
 
 use super::TypeRefinementInHint;
 use crate::emit_adata;
+use crate::emit_class::REIFIED_PROP_NAME;
 use crate::emit_fatal;
 use crate::emit_type_constant;
 
@@ -1830,7 +1831,6 @@ pub fn emit_reified_targs<'a, 'arena, 'decl, I>(
 where
     I: Iterator<Item = &'a ast::Hint> + ExactSizeIterator + Clone,
 {
-    let alloc = env.arena;
     let current_fun_tparams = env.scope.get_fun_tparams();
     let current_cls_tparams = env.scope.get_class_tparams();
     let is_in_lambda = env.scope.is_in_lambda();
@@ -1858,10 +1858,7 @@ where
                 instr::query_m(
                     0,
                     QueryMOp::CGet,
-                    MemberKey::PT(
-                        hhbc::PropName::from_raw_string(alloc, string_utils::reified::PROP_NAME),
-                        ReadonlyOp::Any,
-                    ),
+                    MemberKey::PT(*REIFIED_PROP_NAME, ReadonlyOp::Any),
                 ),
             ])
         } else {
@@ -3447,10 +3444,7 @@ pub fn emit_reified_generic_instrs<'arena>(
         ReifiedTparam::Class(i) => InstrSeq::gather(vec![
             instr::check_this(),
             instr::base_h(),
-            instr::dim_warn_pt(
-                hhbc::PropName::from_raw_string(e.alloc, string_utils::reified::PROP_NAME),
-                ReadonlyOp::Any,
-            ),
+            instr::dim_warn_pt(*REIFIED_PROP_NAME, ReadonlyOp::Any),
             q(i),
         ]),
     };
@@ -3934,8 +3928,6 @@ fn emit_prop_expr<'a, 'arena, 'decl>(
     null_coalesce_assignment: bool,
     readonly_op: ReadonlyOp,
 ) -> Result<(MemberKey<'arena>, InstrSeq<'arena>, StackIndex)> {
-    let alloc = env.arena;
-
     let mk = match &prop.2 {
         ast::Expr_::Id(id) => {
             let ast_defs::Id(pos, name) = &**id;
@@ -3943,10 +3935,7 @@ fn emit_prop_expr<'a, 'arena, 'decl>(
                 MemberKey::PL(get_local(e, env, pos, name)?, readonly_op)
             } else {
                 // Special case for known property name
-                let pid = hhbc::PropName::<'arena>::from_ast_name(
-                    alloc,
-                    string_utils::strip_global_ns(name),
-                );
+                let pid = hhbc::PropName::from_ast_name(string_utils::strip_global_ns(name));
                 match nullflavor {
                     ast_defs::OgNullFlavor::OGNullthrows => MemberKey::PT(pid, readonly_op),
                     ast_defs::OgNullFlavor::OGNullsafe => MemberKey::QT(pid, readonly_op),
@@ -3954,20 +3943,20 @@ fn emit_prop_expr<'a, 'arena, 'decl>(
             }
         }
         // Special case for known property name
-        ast::Expr_::String(name) => {
-            let pid: hhbc::PropName<'arena> = hhbc::PropName::<'arena>::from_ast_name(
-                alloc,
-                string_utils::strip_global_ns(
-                    // FIXME: This is not safe--string literals are binary strings.
-                    // There's no guarantee that they're valid UTF-8.
-                    unsafe { std::str::from_utf8_unchecked(name.as_slice()) },
-                ),
-            );
-            match nullflavor {
-                ast_defs::OgNullFlavor::OGNullthrows => MemberKey::PT(pid, readonly_op),
-                ast_defs::OgNullFlavor::OGNullsafe => MemberKey::QT(pid, readonly_op),
+        ast::Expr_::String(name) => match std::str::from_utf8(name.as_slice()) {
+            Ok(name) => {
+                let pid: hhbc::PropName =
+                    hhbc::PropName::from_ast_name(string_utils::strip_global_ns(name));
+                match nullflavor {
+                    ast_defs::OgNullFlavor::OGNullthrows => MemberKey::PT(pid, readonly_op),
+                    ast_defs::OgNullFlavor::OGNullsafe => MemberKey::QT(pid, readonly_op),
+                }
             }
-        }
+            Err(_) => {
+                // non-utf8 string literal property name uses general case
+                MemberKey::PC(stack_index, readonly_op)
+            }
+        },
         ast::Expr_::Lvar(lid) if !(is_local_this(env, &lid.1)) => MemberKey::PL(
             get_local(e, env, &lid.0, local_id::get_name(&lid.1))?,
             readonly_op,

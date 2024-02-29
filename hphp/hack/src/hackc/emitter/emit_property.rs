@@ -41,7 +41,7 @@ pub struct FromAstArgs<'ast> {
 /// A Property and its initializer instructions
 #[derive(Debug)]
 pub struct PropAndInit<'a> {
-    pub prop: Property<'a>,
+    pub prop: Property,
     pub init: Option<InstrSeq<'a>>,
 }
 
@@ -55,7 +55,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
 ) -> Result<PropAndInit<'arena>> {
     let alloc = emitter.alloc;
     let ast_defs::Id(pos, cv_name) = args.id;
-    let pid = hhbc::PropName::from_ast_name(alloc, cv_name);
+    let pid = hhbc::PropName::from_ast_name(cv_name);
     let attributes = emit_attribute::from_asts(emitter, args.user_attributes)?;
 
     let is_const = (!args.is_static && class_is_const)
@@ -94,7 +94,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
             format!(
                 "Invalid property type hint for '{}::${}'",
                 string_utils::strip_global_ns(&class.name.1),
-                pid.unsafe_as_str()
+                pid.as_str()
             ),
         ));
     };
@@ -115,7 +115,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
                 format!(
                     "<<__LateInit>> property '{}::${}' cannot have an initial value",
                     string_utils::strip_global_ns(&class.name.1),
-                    pid.unsafe_as_str()
+                    pid.as_str()
                 ),
             ));
         }

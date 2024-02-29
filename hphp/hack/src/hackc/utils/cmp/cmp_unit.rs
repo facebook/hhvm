@@ -76,9 +76,9 @@ impl MapName for hhbc::Module<'_> {
     }
 }
 
-impl MapName for hhbc::Property<'_> {
+impl MapName for hhbc::Property {
     fn get_name(&self) -> String {
-        self.name.unsafe_as_str().to_string()
+        self.name.into_string()
     }
 }
 
@@ -444,7 +444,7 @@ fn cmp_class(a: &Class<'_>, b: &Class<'_>) -> Result {
     Ok(())
 }
 
-fn cmp_properties(a: &Property<'_>, b: &Property<'_>) -> Result {
+fn cmp_properties(a: &Property, b: &Property) -> Result {
     let Property {
         name: a_name,
         flags: a_flags,

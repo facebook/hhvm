@@ -564,10 +564,7 @@ fn assemble_method_flags(token_iter: &mut Lexer<'_>) -> Result<hhbc::MethodFlags
     Ok(flag)
 }
 
-fn assemble_property<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::Property<'arena>> {
+fn assemble_property(alloc: &Bump, token_iter: &mut Lexer<'_>) -> Result<hhbc::Property> {
     let prop_tok = token_iter.peek().copied();
     // A doc comment is just a triple string literal : """{}"""
     let mut doc_comment = Maybe::Nothing;
@@ -578,7 +575,7 @@ fn assemble_property<'arena>(
             else: { } ;
            ]
            <type_info:assemble_type_info(TypeInfoKind::NotEnumOrTypeDef)>
-           <name:assemble_prop_name(alloc)>
+           <name:assemble_prop_name()>
            "="
            <initial_value:assemble_property_initial_value(alloc)>
            ";"
@@ -643,33 +640,27 @@ fn assemble_module_name<'arena>(
     Ok(hhbc::ModuleName::new(id.into_ffi_str(alloc)))
 }
 
-pub(crate) fn assemble_prop_name_from_str<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::PropName<'arena>> {
-    Ok(hhbc::PropName::new(assemble_unescaped_unquoted_str(
-        alloc, token_iter,
+pub(crate) fn assemble_prop_name_from_str(token_iter: &mut Lexer<'_>) -> Result<hhbc::PropName> {
+    Ok(hhbc::PropName::new(assemble_unescaped_unquoted_intern_str(
+        token_iter,
     )?))
 }
 
-fn assemble_prop_name<'arena>(
-    token_iter: &mut Lexer<'_>,
-    alloc: &'arena Bump,
-) -> Result<hhbc::PropName<'arena>> {
+fn assemble_prop_name(token_iter: &mut Lexer<'_>) -> Result<hhbc::PropName> {
     // Only properties that can start with #s start with 0 or
     // 86 and are compiler added ones
-    let nm = if token_iter.peek_is_str(Token::is_number, "86")
+    let name = if token_iter.peek_is_str(Token::is_number, "86")
         || token_iter.peek_is_str(Token::is_number, "0")
     {
         let num_prefix = token_iter.expect_with(Token::into_number)?;
         let name = token_iter.expect_with(Token::into_identifier)?;
         let mut num_prefix = num_prefix.to_vec();
         num_prefix.extend_from_slice(name);
-        Str::new_slice(alloc, &num_prefix)
+        hhbc::intern(std::str::from_utf8(&num_prefix)?)
     } else {
-        token_iter.expect(Token::is_identifier)?.into_ffi_str(alloc)
+        hhbc::intern(token_iter.expect(Token::is_identifier)?.as_str()?)
     };
-    Ok(hhbc::PropName::new(nm))
+    Ok(hhbc::PropName::new(name))
 }
 
 fn assemble_method_name<'arena>(
@@ -1868,6 +1859,15 @@ pub(crate) fn assemble_fcall_context(token_iter: &mut Lexer<'_>) -> Result<Strin
     let st = token_iter.expect_with(Token::into_str_literal)?;
     debug_assert!(st[0] == b'"' && st[st.len() - 1] == b'"');
     Ok(hhbc::intern(std::str::from_utf8(&st[1..st.len() - 1])?)) // if not hugged by "", won't pass into_str_literal
+}
+
+pub(crate) fn assemble_unescaped_unquoted_intern_str(
+    token_iter: &mut Lexer<'_>,
+) -> Result<StringId> {
+    let st = escaper::unescape_literal_bytes_into_vec_bytes(
+        token_iter.expect_with(Token::into_unquoted_str_literal)?,
+    )?;
+    Ok(hhbc::intern(std::str::from_utf8(&st)?))
 }
 
 pub(crate) fn assemble_unescaped_unquoted_str<'arena>(

@@ -228,8 +228,8 @@ pub enum MemberKey<'arena> {
     EI(i64, ReadonlyOp),
     PC(StackIndex, ReadonlyOp),
     PL(Local, ReadonlyOp),
-    PT(PropName<'arena>, ReadonlyOp),
-    QT(PropName<'arena>, ReadonlyOp),
+    PT(PropName, ReadonlyOp),
+    QT(PropName, ReadonlyOp),
     W,
 }
 

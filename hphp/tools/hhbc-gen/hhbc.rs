@@ -239,7 +239,7 @@ mod fixups {
                 replace_imm("arg2", ImmType::IVA, ImmType::OA("StackIndex"))
             ],
             "CheckProp" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("PropName")),
+                replace_imm("str1", ImmType::SA, ImmType::OA("PropName")),
             ],
             "ClsCns" => vec![
                 replace_imm("str1", ImmType::SA, ImmType::OAL("ConstName"))
@@ -275,7 +275,7 @@ mod fixups {
                 replace_imm("arg1", ImmType::IVA, ImmType::OA("StackIndex")),
             ],
             "InitProp" => vec![
-                replace_imm("str1", ImmType::SA, ImmType::OAL("PropName")),
+                replace_imm("str1", ImmType::SA, ImmType::OA("PropName")),
             ],
             "InstanceOfD" => vec![
                 replace_imm("str1", ImmType::SA, ImmType::OAL("ClassName")),

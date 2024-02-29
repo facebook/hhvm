@@ -849,7 +849,7 @@ Str getStrfromSA(const MethodName& m) {
 Str getStrfromSA(const ConstName& c) {
   return c._0;
 }
-Str getStrfromSA(const PropName& p) {
+StringId getStrfromSA(const PropName& p) {
   return p._0;
 }
 Str getStrfromSA(const Str& s) {

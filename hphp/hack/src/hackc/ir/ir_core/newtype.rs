@@ -51,6 +51,47 @@ macro_rules! interned_hhbc_id {
     };
 }
 
+macro_rules! interned_hhbc_intern_id {
+    ($name: ident, $hhbc: ident) => {
+        #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+        pub struct $name {
+            pub id: UnitBytesId,
+        }
+
+        impl $name {
+            pub fn new(id: UnitBytesId) -> Self {
+                Self { id }
+            }
+
+            pub fn from_hhbc(id: hhbc::$hhbc, strings: &StringInterner) -> Self {
+                Self::new(strings.intern_bytes(id.as_bytes()))
+            }
+
+            pub fn from_str(name: &str, strings: &StringInterner) -> Self {
+                Self::new(strings.intern_str(name))
+            }
+
+            pub fn from_bytes(name: &[u8], strings: &StringInterner) -> Self {
+                Self::new(strings.intern_bytes(name))
+            }
+
+            pub fn as_bytes<'a>(
+                self,
+                strings: &'a StringInterner,
+            ) -> MappedRwLockReadGuard<'a, [u8]> {
+                strings.lookup_bytes(self.id)
+            }
+
+            pub fn as_bstr<'a>(
+                self,
+                strings: &'a StringInterner,
+            ) -> MappedRwLockReadGuard<'a, BStr> {
+                strings.lookup_bstr(self.id)
+            }
+        }
+    };
+}
+
 interned_hhbc_id!(ClassId, ClassName);
 pub type ClassIdMap<T> = indexmap::map::IndexMap<ClassId, T, newtype::BuildIdHasher<u32>>;
 
@@ -102,7 +143,7 @@ impl MethodId {
     }
 }
 
-interned_hhbc_id!(PropId, PropName);
+interned_hhbc_intern_id!(PropId, PropName);
 
 // A BlockId represents a Block within a Func.
 newtype_int!(BlockId, u32, BlockIdMap, BlockIdSet);

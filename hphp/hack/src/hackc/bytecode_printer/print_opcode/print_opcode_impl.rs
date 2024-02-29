@@ -236,7 +236,7 @@ fn convert_immediate(name: &str, imm: &ImmType) -> TokenStream {
             quote!(#handler(w, #name)?;)
         }
         ImmType::RATA => quote!(print_str(w, #name)?;),
-        ImmType::SA => quote!(print_quoted_str(w, #name)?;),
+        ImmType::SA => quote!(print_quoted_ffi_str(w, #name)?;),
         ImmType::SLA => quote!(print_switch_labels(w, #name)?;),
         ImmType::VSA => quote!(print_shape_fields(w, #name)?;),
     }
@@ -310,21 +310,21 @@ mod tests {
                             }
                             Opcode::TestOneImm(str1) => {
                                 w.write_all(b"TestOneImm ")?;
-                                print_quoted_str(w, str1)?;
+                                print_quoted_ffi_str(w, str1)?;
                             }
                             Opcode::TestTwoImm(str1, str2) => {
                                 w.write_all(b"TestTwoImm ")?;
-                                print_quoted_str(w, str1)?;
+                                print_quoted_ffi_str(w, str1)?;
                                 w.write_all(b" ")?;
-                                print_quoted_str(w, str2)?;
+                                print_quoted_ffi_str(w, str2)?;
                             }
                             Opcode::TestThreeImm(str1, str2, str3) => {
                                 w.write_all(b"TestThreeImm ")?;
-                                print_quoted_str(w, str1)?;
+                                print_quoted_ffi_str(w, str1)?;
                                 w.write_all(b" ")?;
-                                print_quoted_str(w, str2)?;
+                                print_quoted_ffi_str(w, str2)?;
                                 w.write_all(b" ")?;
-                                print_quoted_str(w, str3)?;
+                                print_quoted_ffi_str(w, str3)?;
                             }
                             Opcode::TestAA(arr1) => {
                                 w.write_all(b"TestAA ")?;
@@ -404,7 +404,7 @@ mod tests {
                             }
                             Opcode::TestSA(str1) => {
                                 w.write_all(b"TestSA ")?;
-                                print_quoted_str(w, str1)?;
+                                print_quoted_ffi_str(w, str1)?;
                             }
                             Opcode::TestSLA(targets) => {
                                 w.write_all(b"TestSLA ")?;

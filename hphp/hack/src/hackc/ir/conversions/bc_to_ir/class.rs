@@ -112,7 +112,7 @@ pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, filename: ir::Filename,
     });
 }
 
-fn convert_property(prop: &hhbc::Property<'_>, strings: &ir::StringInterner) -> ir::Property {
+fn convert_property(prop: &hhbc::Property, strings: &ir::StringInterner) -> ir::Property {
     let attributes = prop
         .attributes
         .iter()

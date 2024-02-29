@@ -10,8 +10,9 @@
 use bstr::BStr;
 use bstr::ByteSlice;
 use ffi::Str;
-use intern::string::StringId;
 use serde::Serialize;
+
+use crate::StringId;
 
 macro_rules! impl_id {
     ($type: ident) => {
@@ -66,6 +67,56 @@ macro_rules! impl_id {
         impl<'arena> std::fmt::Debug for $type<'arena> {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 write!(f, "{}({})", module_path!(), self.unsafe_as_str())
+            }
+        }
+    };
+}
+
+macro_rules! impl_intern_id {
+    ($type: ident) => {
+        impl $type {
+            pub const fn new(s: StringId) -> Self {
+                Self(s)
+            }
+
+            pub fn empty() -> Self {
+                Self(StringId::EMPTY)
+            }
+
+            pub fn is_empty(self) -> bool {
+                self.0 == StringId::EMPTY
+            }
+
+            pub fn into_string(self) -> std::string::String {
+                self.0.as_str().into()
+            }
+
+            pub fn as_str(&self) -> &'static str {
+                self.0.as_str()
+            }
+
+            pub fn as_bstr(&self) -> &'static BStr {
+                self.as_bytes().as_bstr()
+            }
+
+            pub fn as_bytes(&self) -> &'static [u8] {
+                self.0.as_str().as_bytes()
+            }
+
+            pub fn intern(s: &str) -> $type {
+                $type(crate::intern(s))
+            }
+        }
+
+        impl write_bytes::DisplayBytes for $type {
+            fn fmt(&self, f: &mut write_bytes::BytesFormatter<'_>) -> std::io::Result<()> {
+                self.as_bytes().fmt(f)
+            }
+        }
+
+        impl std::fmt::Debug for $type {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                write!(f, "{}({})", module_path!(), self.as_str())
             }
         }
     };
@@ -165,13 +216,13 @@ impl_id!(ModuleName);
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, Serialize)]
 #[repr(C)]
-pub struct PropName<'arena>(Str<'arena>);
+pub struct PropName(StringId);
 
-impl_id!(PropName);
+impl_intern_id!(PropName);
 
-impl<'arena> PropName<'arena> {
-    pub fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> PropName<'arena> {
-        PropName(Str::new_str(alloc, hhbc_string_utils::strip_global_ns(s)))
+impl PropName {
+    pub fn from_ast_name(s: &str) -> Self {
+        Self::intern(hhbc_string_utils::strip_global_ns(s))
     }
 }
 

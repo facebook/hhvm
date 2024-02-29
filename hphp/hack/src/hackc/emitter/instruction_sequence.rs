@@ -248,7 +248,7 @@ pub mod instr {
         cont_check(ContCheckOp::IgnoreStarted)
     }
 
-    pub fn dim_warn_pt<'a>(key: PropName<'a>, readonly_op: ReadonlyOp) -> InstrSeq<'a> {
+    pub fn dim_warn_pt<'a>(key: PropName, readonly_op: ReadonlyOp) -> InstrSeq<'a> {
         dim(MOpMode::Warn, MemberKey::PT(key, readonly_op))
     }
 
@@ -362,7 +362,7 @@ pub mod instr {
 
     pub fn set_m_pt<'a>(
         num_params: NumParams,
-        key: PropName<'a>,
+        key: PropName,
         readonly_op: ReadonlyOp,
     ) -> InstrSeq<'a> {
         set_m(num_params, MemberKey::PT(key, readonly_op))

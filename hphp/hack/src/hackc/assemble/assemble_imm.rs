@@ -419,14 +419,14 @@ impl<'arena> AssembleImm<'arena, hhbc::MemberKey<'arena>> for Lexer<'_> {
             b"PT" => {
                 self.expect(Token::is_colon)?;
                 Ok(hhbc::MemberKey::PT(
-                    assemble::assemble_prop_name_from_str(alloc, self)?,
+                    assemble::assemble_prop_name_from_str(self)?,
                     self.assemble_imm(alloc, decl_map)?,
                 ))
             }
             b"QT" => {
                 self.expect(Token::is_colon)?;
                 Ok(hhbc::MemberKey::QT(
-                    assemble::assemble_prop_name_from_str(alloc, self)?,
+                    assemble::assemble_prop_name_from_str(self)?,
                     self.assemble_imm(alloc, decl_map)?,
                 ))
             }
@@ -448,10 +448,10 @@ impl<'arena> AssembleImm<'arena, hhbc::MethodName<'arena>> for Lexer<'_> {
     }
 }
 
-impl<'arena> AssembleImm<'arena, hhbc::PropName<'arena>> for Lexer<'_> {
-    fn assemble_imm(&mut self, alloc: &'arena Bump, _: &DeclMap) -> Result<hhbc::PropName<'arena>> {
+impl<'arena> AssembleImm<'arena, hhbc::PropName> for Lexer<'_> {
+    fn assemble_imm(&mut self, _: &'arena Bump, _: &DeclMap) -> Result<hhbc::PropName> {
         Ok(hhbc::PropName::new(
-            assemble::assemble_unescaped_unquoted_str(alloc, self)?,
+            assemble::assemble_unescaped_unquoted_intern_str(self)?,
         ))
     }
 }

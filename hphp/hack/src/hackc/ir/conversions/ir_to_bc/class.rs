@@ -116,7 +116,7 @@ pub(crate) fn convert_class<'a>(
     unit.classes.push(class);
 }
 
-fn convert_property<'a>(src: ir::Property, strings: &StringCache<'a>) -> hhbc::Property<'a> {
+fn convert_property<'a>(src: ir::Property, strings: &StringCache<'a>) -> hhbc::Property {
     hhbc::Property {
         name: strings.lookup_prop_name(src.name),
         flags: src.flags,

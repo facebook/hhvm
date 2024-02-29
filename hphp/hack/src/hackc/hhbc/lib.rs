@@ -40,6 +40,7 @@ pub use instruct::*;
 pub use intern::string::intern;
 pub use intern::string::intern_bytes;
 pub use intern::string::BytesId;
+pub use intern::string::Lazy;
 pub use intern::string::StringId;
 pub use intern::string::StringIdIndexSet;
 pub use intern::string::StringIdMap;

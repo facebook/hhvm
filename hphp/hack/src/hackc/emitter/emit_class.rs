@@ -25,6 +25,7 @@ use hhbc::Local;
 use hhbc::Method;
 use hhbc::MethodFlags;
 use hhbc::Param;
+use hhbc::PropName;
 use hhbc::Property;
 use hhbc::ReadonlyOp;
 use hhbc::Requirement;
@@ -378,6 +379,9 @@ fn emit_reified_extends_params<'a, 'arena, 'decl>(
     emit_adata::typed_value_into_instr(e, tv)
 }
 
+pub(crate) static REIFIED_PROP_NAME: hhbc::Lazy<PropName> =
+    hhbc::Lazy::new(|| PropName::intern(string_utils::reified::PROP_NAME));
+
 fn emit_reified_init_body<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
@@ -386,7 +390,6 @@ fn emit_reified_init_body<'a, 'arena, 'decl>(
     init_meth_param_local: Local,
 ) -> Result<InstrSeq<'arena>> {
     use string_utils::reified::INIT_METH_NAME;
-    use string_utils::reified::PROP_NAME;
 
     let alloc = env.arena;
     let check_length = InstrSeq::gather(vec![
@@ -401,11 +404,7 @@ fn emit_reified_init_body<'a, 'arena, 'decl>(
             instr::check_this(),
             instr::c_get_l(init_meth_param_local),
             instr::base_h(),
-            instr::set_m_pt(
-                0,
-                hhbc::PropName::from_raw_string(alloc, PROP_NAME),
-                ReadonlyOp::Any,
-            ),
+            instr::set_m_pt(0, *REIFIED_PROP_NAME, ReadonlyOp::Any),
             instr::pop_c(),
         ])
     };
@@ -483,7 +482,7 @@ fn make_init_method<'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     properties: &mut [PropAndInit<'arena>],
-    filter: impl Fn(&Property<'arena>) -> bool,
+    filter: impl Fn(&Property) -> bool,
     name: &'static str,
     span: Span,
 ) -> Result<Option<Method<'arena>>> {

@@ -16,8 +16,8 @@ use crate::Visibility;
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
-pub struct Property<'arena> {
-    pub name: PropName<'arena>,
+pub struct Property {
+    pub name: PropName,
     pub flags: Attr,
     pub attributes: Vector<Attribute>,
     pub visibility: Visibility,
@@ -26,7 +26,7 @@ pub struct Property<'arena> {
     pub doc_comment: Maybe<Vector<u8>>,
 }
 
-impl<'arena> Property<'arena> {
+impl Property {
     pub fn is_private(&self) -> bool {
         self.visibility == Visibility::Private
     }

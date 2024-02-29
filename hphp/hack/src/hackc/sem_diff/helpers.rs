@@ -47,9 +47,9 @@ impl MapName for hhbc::Module<'_> {
     }
 }
 
-impl MapName for hhbc::Property<'_> {
+impl MapName for hhbc::Property {
     fn get_name(&self) -> &str {
-        self.name.unsafe_as_str()
+        self.name.as_str()
     }
 }
 

@@ -379,6 +379,35 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
   Need to be defaultearly because it is used in the init of a static
   variable. It will then be reinited after we read the config
 
+# PageletServer
+
+- int PageletServer.ThreadCount = 0, UNKNOWN
+- int PageletServer.HugeThreadCount = 0, UNKNOWN
+- int PageletServer.ThreadDropCacheTimeoutSeconds = 0, UNKNOWN
+- int PageletServer.QueueLimit = 0, UNKNOWN
+- bool PageletServer.ThreadDropStack = false, UNKNOWN
+- uint64_t PageletServer.HeaderCheck = 0 (Eval.PageletServerHeaderCheck), UNKNOWN
+
+  When starting a pagelet server the specified headers are passed as
+  a dictionary that can contain both "key => value" fields and
+  "#index => 'key: value'" fields from which key value pairs are
+  parsed. The latter form is deprecated and this option controls
+  errors and warnings for its use.
+  0 - do nothing
+  1 - raise a warning if a header is set via the deprecated "key: value"
+      format
+  2 - throw if any header is set using the deprecated "key: value"
+      format
+
+- uint64_t PageletServer.HeaderCollide = 0 (Eval.PageletServerHeaderCollide), UNKNOWN
+
+  Similar to the above option this setting controls the behavior of
+  hhvm when collisions occur in the pagelet header fields.
+  0 - do nothing, favor last mentioned field in insertion order
+  1 - raise a warning, preserve existing ordering
+  2 - raise a warning, prefer the "key => value" field
+  3 - throw an exception
+
 # PHP7
 
 - bool PHP7.all, UNKNOWN, private
@@ -425,3 +454,12 @@ The format can be found in hphp/runtime/base/configs/generate-script.rs
 - int Server.InternalWarmupThreads = 0, UNKNOWN
 - boost::container::flat_set<std::string> Server.HighPriorityEndPoints = {}, UNKNOWN
 - bool Server.ExitOnBindFail = false, UNKNOWN
+
+# Xbox
+
+- int Xbox.ServerInfo.ThreadCount = 10, UNKNOWN
+- int Xbox.ServerInfo.MaxQueueLength = INT_MAX, UNKNOWN, postprocess
+- std::string Xbox.ServerInfo.RequestInitFunction = "", UNKNOWN
+- std::string Xbox.ServerInfo.RequestInitDocument = "", UNKNOWN
+- bool Xbox.ServerInfo.LogInfo = false, UNKNOWN
+- std::string Xbox.ProcessMessageFunc = "xbox_process_message", UNKNOWN

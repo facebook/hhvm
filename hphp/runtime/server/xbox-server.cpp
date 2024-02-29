@@ -17,6 +17,7 @@
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/configs/server.h"
+#include "hphp/runtime/base/configs/xbox.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/xbox-request-handler.h"
@@ -48,7 +49,7 @@ const char *XboxTransport::getUrl() {
   if (!m_reqInitDoc.empty()) {
     return "xbox_process_call_message";
   }
-  return RuntimeOption::XboxProcessMessageFunc.c_str();
+  return Cfg::Xbox::ProcessMessageFunc.c_str();
 }
 
 std::string XboxTransport::getHeader(const char *name) {
@@ -140,7 +141,7 @@ private:
       *s_xbox_server_info = std::make_shared<XboxServerInfo>();
     }
 
-    s_xbox_request_handler->setLogInfo(RuntimeOption::XboxServerLogInfo);
+    s_xbox_request_handler->setLogInfo(Cfg::Xbox::ServerInfoLogInfo);
     s_xbox_request_handler->setServerInfo(*s_xbox_server_info);
     return s_xbox_request_handler.get();
   }
@@ -166,17 +167,17 @@ static Mutex s_dispatchMutex;
 void XboxServer::Restart() {
   Stop();
 
-  if (RuntimeOption::XboxServerThreadCount > 0) {
+  if (Cfg::Xbox::ServerInfoThreadCount > 0) {
     {
       Lock l(s_dispatchMutex);
       s_dispatcher = new JobQueueDispatcher<XboxWorker>
-        (RuntimeOption::XboxServerThreadCount,
-         RuntimeOption::XboxServerThreadCount,
+        (Cfg::Xbox::ServerInfoThreadCount,
+         Cfg::Xbox::ServerInfoThreadCount,
          RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
          Cfg::Server::ThreadDropStack,
          nullptr);
     }
-    if (RuntimeOption::XboxServerLogInfo) {
+    if (Cfg::Xbox::ServerInfoLogInfo) {
       Logger::Info("xbox server started");
     }
     s_dispatcher->start();
@@ -262,9 +263,9 @@ OptResource XboxServer::TaskStart(const String& msg,
     Lock l(s_dispatchMutex);
     if (s_dispatcher &&
         (s_dispatcher->getActiveWorker() <
-         RuntimeOption::XboxServerThreadCount ||
+         Cfg::Xbox::ServerInfoThreadCount ||
          s_dispatcher->getQueuedJobs() <
-         RuntimeOption::XboxServerMaxQueueLength)) {
+         Cfg::Xbox::ServerInfoMaxQueueLength)) {
       auto task = req::make<XboxTask>(msg, reqInitDoc);
       XboxTransport *job = task->getJob();
       job->incRefCount(); // paired with worker's decRefCount()
@@ -287,7 +288,7 @@ OptResource XboxServer::TaskStart(const String& msg,
     }
   }
 
-  auto hasXbox = RuntimeOption::XboxServerThreadCount > 0;
+  auto hasXbox = Cfg::Xbox::ServerInfoThreadCount > 0;
   const char* errMsg;
   if (hasXbox && !s_dispatcher) {
     errMsg = "Cannot create Xbox task because Xbox server is shut down";

@@ -688,11 +688,6 @@ bool RuntimeOption::AlwaysDecodePostDataDefault = true;
 bool RuntimeOption::SetChunkedTransferEncoding = true;
 bool RuntimeOption::ServerForkEnabled = true;
 bool RuntimeOption::ServerForkLogging = false;
-int RuntimeOption::PageletServerThreadCount = 0;
-int RuntimeOption::PageletServerHugeThreadCount = 0;
-int RuntimeOption::PageletServerThreadDropCacheTimeoutSeconds = 0;
-int RuntimeOption::PageletServerQueueLimit = 0;
-bool RuntimeOption::PageletServerThreadDropStack = false;
 int RuntimeOption::RequestTimeoutSeconds = 0;
 int RuntimeOption::PspTimeoutSeconds = 0;
 int RuntimeOption::PspCpuTimeoutSeconds = 0;
@@ -790,13 +785,6 @@ std::vector<std::shared_ptr<SatelliteServerInfo>>
   RuntimeOption::SatelliteServerInfos;
 
 bool RuntimeOption::AllowRunAsRoot = false; // Allow running hhvm as root.
-
-int RuntimeOption::XboxServerThreadCount = 10;
-int RuntimeOption::XboxServerMaxQueueLength = INT_MAX;
-std::string RuntimeOption::XboxServerInfoReqInitFunc;
-std::string RuntimeOption::XboxServerInfoReqInitDoc;
-bool RuntimeOption::XboxServerLogInfo = false;
-std::string RuntimeOption::XboxProcessMessageFunc = "xbox_process_message";
 
 std::string RuntimeOption::SourceRoot = Process::GetCurrentDirectory() + '/';
 std::vector<std::string> RuntimeOption::IncludeSearchPaths;
@@ -2325,35 +2313,6 @@ void RuntimeOption::Load(
   }
   {
     ReadSatelliteInfo(ini, config, SatelliteServerInfos);
-  }
-  {
-    // Xbox
-    Config::Bind(XboxServerThreadCount, ini, config,
-                 "Xbox.ServerInfo.ThreadCount", 10);
-    Config::Bind(XboxServerMaxQueueLength, ini, config,
-                 "Xbox.ServerInfo.MaxQueueLength", INT_MAX);
-    if (XboxServerMaxQueueLength < 0) XboxServerMaxQueueLength = INT_MAX;
-    Config::Bind(XboxServerInfoReqInitFunc, ini, config,
-                 "Xbox.ServerInfo.RequestInitFunction", "");
-    Config::Bind(XboxServerInfoReqInitDoc, ini, config,
-                 "Xbox.ServerInfo.RequestInitDocument", "");
-    Config::Bind(XboxServerLogInfo, ini, config, "Xbox.ServerInfo.LogInfo",
-                 false);
-    Config::Bind(XboxProcessMessageFunc, ini, config, "Xbox.ProcessMessageFunc",
-                 "xbox_process_message");
-  }
-  {
-    // Pagelet Server
-    Config::Bind(PageletServerThreadCount, ini, config,
-                 "PageletServer.ThreadCount", 0);
-    Config::Bind(PageletServerHugeThreadCount, ini, config,
-                 "PageletServer.HugeThreadCount", 0);
-    Config::Bind(PageletServerThreadDropStack, ini, config,
-                 "PageletServer.ThreadDropStack");
-    Config::Bind(PageletServerThreadDropCacheTimeoutSeconds, ini, config,
-                 "PageletServer.ThreadDropCacheTimeoutSeconds", 0);
-    Config::Bind(PageletServerQueueLimit, ini, config,
-                 "PageletServer.QueueLimit", 0);
   }
   {
     // Static File

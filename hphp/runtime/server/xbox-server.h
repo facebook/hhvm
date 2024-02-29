@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "hphp/runtime/base/configs/xbox.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/server/cli-server.h"
@@ -64,9 +65,9 @@ struct XboxServerInfo : SatelliteServerInfo {
   }
 
   void reload() {
-    m_threadCount = RuntimeOption::XboxServerThreadCount;
-    m_reqInitFunc = RuntimeOption::XboxServerInfoReqInitFunc;
-    m_reqInitDoc  = RuntimeOption::XboxServerInfoReqInitDoc;
+    m_threadCount = Cfg::Xbox::ServerInfoThreadCount;
+    m_reqInitFunc = Cfg::Xbox::ServerInfoRequestInitFunction;
+    m_reqInitDoc  = Cfg::Xbox::ServerInfoRequestInitDocument;
   }
 };
 

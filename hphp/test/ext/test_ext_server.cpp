@@ -21,6 +21,8 @@
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/configs/pageletserver.h"
+#include "hphp/runtime/base/configs/xbox.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 
@@ -35,11 +37,11 @@ bool TestExtServer::RunTests(const std::string &which) {
                      "/test/ext/";
 
   RuntimeOption::SourceRoot = root;
-  RuntimeOption::PageletServerThreadCount = 10;
+  Cfg::PageletServer::ThreadCount = 10;
   PageletServer::Restart();
 
-  RuntimeOption::XboxServerThreadCount = 10;
-  RuntimeOption::XboxServerInfoReqInitDoc = root + "test_xbox_init.php";
+  Cfg::Xbox::ServerInfoThreadCount = 10;
+  Cfg::Xbox::ServerInfoRequestInitDocument = root + "test_xbox_init.php";
   XboxServer::Restart();
 
   RUN_TEST(test_pagelet_server_task_start);

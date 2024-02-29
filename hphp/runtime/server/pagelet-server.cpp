@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/configs/pageletserver.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/server/ext_server.h"
@@ -62,13 +63,13 @@ PageletTransport::PageletTransport(
     if (key.isString() && !key.toString().empty()) {
       m_requestHeaders[key.toString().data()].push_back(header.data());
     } else {
-      if (RO::EvalPageletServerHeaderCheck == 1) {
+      if (Cfg::PageletServer::HeaderCheck == 1) {
         raise_warning(
           "Specifying Pagelet headers using \"key: value\" syntax "
           "is deprecated: %s",
           header.data()
         );
-      } else if (RO::EvalPageletServerHeaderCheck == 2) {
+      } else if (Cfg::PageletServer::HeaderCheck == 2) {
         SystemLib::throwInvalidArgumentExceptionObject(folly::sformat(
           "Specifying Pagelet headers using \"key: value\" syntax "
           "is disabled: {}",
@@ -80,19 +81,19 @@ PageletTransport::PageletTransport(
         std::string name = header.substr(0, pos).data();
         std::string value = header.substr(pos + 2).data();
 
-        if (RO::EvalPageletServerHeaderCollide > 0 &&
+        if (Cfg::PageletServer::HeaderCollide > 0 &&
             headers->exists(String(name))) {
           auto const msg = folly::sformat(
             "Detected Pagelet header specified using both \"key: value\" "
             "and key => \"value\" syntax: {}",
             name
           );
-          if (RO::EvalPageletServerHeaderCollide == 3) {
+          if (Cfg::PageletServer::HeaderCollide == 3) {
             SystemLib::throwInvalidArgumentExceptionObject(msg);
           }
 
           raise_warning("%s", msg.data());
-          if (RO::EvalPageletServerHeaderCollide == 2) continue;
+          if (Cfg::PageletServer::HeaderCollide == 2) continue;
         }
 
         m_requestHeaders[name].push_back(value);
@@ -412,17 +413,17 @@ bool PageletServer::Enabled() {
 
 void PageletServer::Restart() {
   Stop();
-  if (RuntimeOption::PageletServerThreadCount > 0) {
+  if (Cfg::PageletServer::ThreadCount > 0) {
     {
       Lock l(s_dispatchMutex);
       s_dispatcher = new JobQueueDispatcher<PageletWorker>
-        (RuntimeOption::PageletServerThreadCount,
-         RuntimeOption::PageletServerThreadCount,
-         RuntimeOption::PageletServerThreadDropCacheTimeoutSeconds,
-         RuntimeOption::PageletServerThreadDropStack,
+        (Cfg::PageletServer::ThreadCount,
+         Cfg::PageletServer::ThreadCount,
+         Cfg::PageletServer::ThreadDropCacheTimeoutSeconds,
+         Cfg::PageletServer::ThreadDropStack,
          nullptr);
       s_dispatcher->setHugePageConfig(
-        RuntimeOption::PageletServerHugeThreadCount,
+        Cfg::PageletServer::HugeThreadCount,
         RuntimeOption::ServerHugeStackKb);
       auto monitor = getSingleton<HostHealthMonitor>();
       monitor->subscribe(s_dispatcher);
@@ -462,9 +463,9 @@ OptResource PageletServer::TaskStart(
     if (!s_dispatcher) {
       return OptResource();
     }
-    if (RuntimeOption::PageletServerQueueLimit > 0) {
+    if (Cfg::PageletServer::QueueLimit > 0) {
       auto num_queued_jobs = s_dispatcher->getQueuedJobs();
-      if (num_queued_jobs > RuntimeOption::PageletServerQueueLimit) {
+      if (num_queued_jobs > Cfg::PageletServer::QueueLimit) {
         pageletOverflowCounter->addValue(1);
         return OptResource();
       }

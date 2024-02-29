@@ -388,7 +388,13 @@ fn parse_bool<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, &'
 fn parse_value<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, ConfigValue, E> {
     alt((
         map(
-            alt((parse_string, parse_num_expr, parse_bool, tag("{}"))),
+            alt((
+                tag("INT_MAX"),
+                tag("{}"),
+                parse_string,
+                parse_num_expr,
+                parse_bool,
+            )),
             |v| ConfigValue::Const(v.to_string()),
         ),
         map(alphanumeric1, |v: &str| ConfigValue::Other(v.to_string())),

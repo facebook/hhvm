@@ -356,11 +356,6 @@ struct RuntimeOption {
   static bool SetChunkedTransferEncoding;
   static bool ServerForkEnabled;
   static bool ServerForkLogging;
-  static int PageletServerThreadCount;
-  static int PageletServerHugeThreadCount;
-  static int PageletServerThreadDropCacheTimeoutSeconds;
-  static int PageletServerQueueLimit;
-  static bool PageletServerThreadDropStack;
 
   static int RequestTimeoutSeconds;
   static int PspTimeoutSeconds;
@@ -491,13 +486,6 @@ struct RuntimeOption {
   static uint32_t ClientAuthLogSampleBase;
   static uint32_t ClientAuthSuccessLogSampleRatio;
   static uint32_t ClientAuthFailureLogSampleRatio;
-
-  static int XboxServerThreadCount;
-  static int XboxServerMaxQueueLength;
-  static std::string XboxServerInfoReqInitFunc;
-  static std::string XboxServerInfoReqInitDoc;
-  static bool XboxServerLogInfo;
-  static std::string XboxProcessMessageFunc;
 
   static std::string SourceRoot;
   static std::vector<std::string> IncludeSearchPaths;
@@ -1232,26 +1220,6 @@ struct RuntimeOption {
   F(bool, AutoloadEagerSyncUnitCache, true)                             \
   F(bool, AutoloadEagerReloadUnitCache, true)                           \
   F(bool, AutoloadInitEarly, false)                                     \
-  /* When starting a pagelet server the specified headers are passed as
-     a dictionary that can contain both "key => value" fields and
-     "#index => 'key: value'" fields from which key value pairs are
-     parsed. The latter form is deprecated and this option controls
-     errors and warnings for its use.
-
-     0 - do nothing
-     1 - raise a warning if a header is set via the deprecated "key: value"
-         format
-     2 - throw if any header is set using the deprecated "key: value"
-         format */                                                      \
-  F(uint64_t, PageletServerHeaderCheck, 0)                              \
-  /* Similar to the above option this setting controls the behavior of
-     hhvm when collisions occur in the pagelet header fields.
-
-     0 - do nothing, favor last mentioned field in insertion order
-     1 - raise a warning, preserve existing ordering
-     2 - raise a warning, prefer the "key => value" field
-     3 - throw an exception */                                          \
-  F(uint64_t, PageletServerHeaderCollide, 0)                            \
   /* Whether we should dump the request headers into $_SERVER */        \
   F(bool, SetHeadersInServerSuperGlobal, true)                          \
   /* Whether we should stop parsing cookies out of the headers and

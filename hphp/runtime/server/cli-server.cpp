@@ -131,6 +131,7 @@ way to determine how much progress the server made.
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/configs/server.h"
+#include "hphp/runtime/base/configs/xbox.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/file-util.h"
@@ -2013,11 +2014,11 @@ CLIContext CLIContext::initFromClient(int client) {
 
   if (proxy_xbox) {
     FTRACE(2, "{}({}): Sending xbox-init: ThreadCount = {}\n",
-           __func__, client, RO::XboxServerThreadCount);
+           __func__, client, Cfg::Xbox::ServerInfoThreadCount);
     cli_write(
       client,
       "xbox-init",
-      RO::XboxServerThreadCount,
+      Cfg::Xbox::ServerInfoThreadCount,
       RO::ServerThreadDropCacheTimeoutSeconds,
       Cfg::Server::ThreadDropStack
     );

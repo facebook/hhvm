@@ -1,0 +1,6 @@
+-vEval.ClassAsStringVarDump=false
+-vEval.ClassAsStringVarExport=false
+-vEval.RaiseClassConversionNoticeSampleRate=1
+-vEval.ClassStringHintNoticesSampleRate=1
+-vEval.RaiseStrToClsConversionNoticeSampleRate=1
+-vEval.CheckBuiltinParamTypeHints=2

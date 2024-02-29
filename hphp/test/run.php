@@ -958,7 +958,12 @@ function hhvm_cmd(
   $hdf = file_exists($test.$hdf_suffix)
        ? '-c ' . $test . $hdf_suffix
        : "";
-  $extra_opts = read_opts_file(find_test_ext($test, 'opts'));
+
+  $config_opts = read_opts_file(
+    find_file_for_dir(dirname($test), 'config.opts')
+  );
+  $file_opts = read_opts_file("{$test}.opts");
+
   $config = find_test_ext($test, 'ini');
   invariant($config is nonnull, "%s", __METHOD__);
   $cmds = hhvm_cmd_impl(
@@ -968,7 +973,8 @@ function hhvm_cmd(
     Status::getTestWorkingDir($test) . '/autoloadDB',
     $hdf,
     find_debug_config($test, 'hphpd.ini'),
-    $extra_opts,
+    $config_opts,
+    $file_opts,
     $is_temp_file ? " --temp-file" : "",
     '--file',
     escapeshellarg($test_run),

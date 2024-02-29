@@ -23,7 +23,7 @@ from libcpp.utility cimport move
 from thrift.python.util cimport toAsyncGenerator
 
 # TODO: (pyamane) This is here just to validate the types are correct for now
-cdef void generator(object iterator, cFollyPromise[optional[unique_ptr[cIOBuf]]] promise):
+cdef void generator(object iterator, cFollyPromise[optional[unique_ptr[cIOBuf]]] promise) noexcept:
   pass
 
 cdef class ClientSink:

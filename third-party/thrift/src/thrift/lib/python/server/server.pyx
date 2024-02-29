@@ -95,7 +95,7 @@ async def runGenerator(object generator, Promise_Optional_IOBuf promise):
     else:
         promise.complete(item)
 
-cdef void genNextValue(object generator, cFollyPromise[optional[unique_ptr[cIOBuf]]] cPromise):
+cdef void genNextValue(object generator, cFollyPromise[optional[unique_ptr[cIOBuf]]] cPromise) noexcept:
     cdef Promise_Optional_IOBuf __promise = Promise_Optional_IOBuf.create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         runGenerator(

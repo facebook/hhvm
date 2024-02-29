@@ -30,7 +30,7 @@ from libcpp.memory cimport unique_ptr
 from libcpp.utility cimport move as cmove
 from thrift.python.server cimport ThriftServer
 
-cdef void serialized_metadata_callback(cFollyTry[unique_ptr[cIOBuf]]&& result, PyObject* userdata):
+cdef void serialized_metadata_callback(cFollyTry[unique_ptr[cIOBuf]]&& result, PyObject* userdata) noexcept:
     pyfuture = <object> userdata
     pyfuture.set_result(from_unique_ptr(cmove(result.value())))
 

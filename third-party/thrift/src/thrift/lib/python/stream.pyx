@@ -32,7 +32,7 @@ from thrift.python.serializer import deserialize
 cdef void client_stream_callback(
     cFollyTry[cOptional[cIOBuf]]&& result,
     PyObject* userdata,
-):
+) noexcept:
     cdef cOptional[cIOBuf] opt_val
     cdef ClientBufferedStream stream
     stream, pyfuture = <object> userdata

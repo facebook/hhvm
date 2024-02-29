@@ -183,7 +183,7 @@ cdef class _AsyncResolveCtxManager:
 cdef void requestchannel_callback(
     cFollyTry[cRequestChannel_ptr]&& result,
     PyObject* userData,
-):
+) noexcept:
     cdef AsyncClient client = <object> userData
     future = client._connect_future
     if result.hasException():

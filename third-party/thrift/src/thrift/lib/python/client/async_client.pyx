@@ -196,7 +196,7 @@ cdef class AsyncClient:
 cdef void _async_client_send_request_callback(
     cFollyTry[cOmniClientResponseWithHeaders]&& result,
     PyObject* userdata,
-):
+) noexcept:
     pyfuture, response_cls, protocol, rpc_options = <object> userdata
     cdef cOmniClientResponseWithHeaders resp = cmove(result.value())
 
@@ -226,7 +226,7 @@ cdef void _async_client_send_request_callback(
     pyfuture.set_result(py_resp if py_stream is None else (py_resp, py_stream))
 
 cdef void _interaction_client_callback(cFollyTry[unique_ptr[cOmniInteractionClient]]&& result,
-    PyObject* userData,):
+    PyObject* userData,) noexcept:
     cdef AsyncClient client = <object> userData
     future = client._connect_future
     if result.hasException():

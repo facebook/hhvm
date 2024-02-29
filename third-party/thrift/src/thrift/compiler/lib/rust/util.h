@@ -38,6 +38,7 @@ struct rust_crate {
 
 struct rust_crate_map {
   bool multifile_mode = false;
+  std::string label;
   std::map<std::string, rust_crate> cratemap;
 };
 

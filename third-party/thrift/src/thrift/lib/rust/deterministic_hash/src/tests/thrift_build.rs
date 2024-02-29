@@ -15,7 +15,7 @@ fn main() {
     let out_dir: &Path = out_dir.as_ref();
     fs::write(
         out_dir.join("cratemap"),
-        "test_structs crate",
+        "test_structs crate //thrift/lib/rust/deterministic_hash/src/tests:teststructs-rust",
     ).expect("Failed to write cratemap");
 
     let conf = {

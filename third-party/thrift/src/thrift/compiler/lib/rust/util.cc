@@ -84,6 +84,7 @@ rust_crate_map load_crate_map(const std::string& path) {
     // begin with `crate::module` rather than `::depenency::module`.
     if (crate_name == "crate") {
       ret.multifile_mode = multifile;
+      ret.label = label;
     }
 
     if (multifile) {

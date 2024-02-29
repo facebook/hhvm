@@ -15,7 +15,7 @@ fn main() {
     let out_dir: &Path = out_dir.as_ref();
     fs::write(
         out_dir.join("cratemap"),
-        "test_deprecated_optional_with_default_is_some crate",
+        "test_deprecated_optional_with_default_is_some crate //thrift/lib/rust/src/dep_tests:test_deprecated_optional_with_default_is_some_if-rust",
     ).expect("Failed to write cratemap");
 
     let conf = {

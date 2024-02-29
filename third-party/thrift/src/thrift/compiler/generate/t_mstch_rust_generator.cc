@@ -52,6 +52,10 @@ struct rust_codegen_options {
   std::string clients_crate;
   std::string services_crate;
 
+  // Buck target label that identifies the Rust library built from the sources
+  // currently being generated.
+  std::string label;
+
   // Key: package name according to Thrift.
   // Value: determines the path used by generated code to name the crate.
   std::map<std::string, rust_crate> cratemap;
@@ -721,6 +725,9 @@ class rust_mstch_program : public mstch_program {
     return includes;
   }
   mstch::node rust_label() {
+    if (program_ == options_.current_program) {
+      return options_.label;
+    }
     auto crate = options_.cratemap.find(program_->name());
     if (crate != options_.cratemap.end()) {
       return crate->second.label;
@@ -2323,6 +2330,7 @@ void t_mstch_rust_generator::generate_program() {
   if (auto cratemap_flag = get_option("cratemap")) {
     auto cratemap = load_crate_map(*cratemap_flag);
     options_.multifile_mode = cratemap.multifile_mode;
+    options_.label = std::move(cratemap.label);
     options_.cratemap = std::move(cratemap.cratemap);
   }
 

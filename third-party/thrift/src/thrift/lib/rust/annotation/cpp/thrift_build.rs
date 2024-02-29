@@ -15,7 +15,7 @@ fn main() {
     let out_dir: &Path = out_dir.as_ref();
     fs::write(
         out_dir.join("cratemap"),
-        "cpp crate
+        "cpp crate //thrift/annotation:cpp-rust
 scope scope //thrift/annotation:scope-rust
 thrift thrift //thrift/annotation:thrift-rust",
     ).expect("Failed to write cratemap");

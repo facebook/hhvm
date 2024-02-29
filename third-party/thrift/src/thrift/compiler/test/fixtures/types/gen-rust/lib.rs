@@ -15,9 +15,23 @@ pub use :: as types;
 
 #[doc(inline)]
 pub use ::::services as services;
-#[doc(inline)]
-pub use ::::{self as client, mock};
-#[doc(inline)]
-pub use :: as server;
+
+/// Client implementation for each service in `module`.
+pub mod client {
+    #[doc(inline)]
+    pub use ::::*;
+}
+
+/// Mock clients for `module`.
+pub mod mock {
+    #[doc(inline)]
+    pub use ::::mock::*;
+}
+
+/// Server traits for each service in `module`.
+pub mod server {
+    #[doc(inline)]
+    pub use ::::*;
+}
 #[doc(inline)]
 pub use ::::errors as errors;

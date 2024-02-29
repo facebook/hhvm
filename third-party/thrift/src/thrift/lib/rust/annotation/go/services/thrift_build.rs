@@ -15,7 +15,7 @@ fn main() {
     let out_dir: &Path = out_dir.as_ref();
     fs::write(
         out_dir.join("cratemap"),
-        "go crate
+        "go crate //thrift/annotation:go-rust
 scope scope //thrift/annotation:scope-rust",
     ).expect("Failed to write cratemap");
 

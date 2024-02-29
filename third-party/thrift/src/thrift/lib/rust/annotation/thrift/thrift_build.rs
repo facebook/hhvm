@@ -16,7 +16,7 @@ fn main() {
     fs::write(
         out_dir.join("cratemap"),
         "scope scope //thrift/annotation:scope-rust
-thrift crate",
+thrift crate //thrift/annotation:thrift-rust",
     ).expect("Failed to write cratemap");
 
     let conf = {

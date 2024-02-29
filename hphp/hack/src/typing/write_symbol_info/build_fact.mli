@@ -25,7 +25,6 @@ val attributes :
 (* params come with the string representation for their type
    and an option type_xref fact *)
 val signature :
-  Provider_context.t ->
   Full_fidelity_source_text.t ->
   (('a, 'b) Aast.fun_param * Fact_id.t option * string option) list ->
   Aast.contexts option ->
@@ -34,10 +33,7 @@ val signature :
   Signature.t
 
 val type_param :
-  Provider_context.t ->
-  Full_fidelity_source_text.t ->
-  ('a, 'b) Aast.tparam ->
-  TypeParameter.t
+  Full_fidelity_source_text.t -> ('a, 'b) Aast.tparam -> TypeParameter.t
 
 val xrefs : (XRefTarget.t * Pos.t list) Fact_id.Map.t -> XRef.t list
 

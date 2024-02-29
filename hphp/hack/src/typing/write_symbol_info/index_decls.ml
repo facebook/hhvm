@@ -96,7 +96,7 @@ let process_member_cluster mc fa =
        mc.File_info.class_constants
 
 let process_container_decl
-    ctx path source_text con member_clusters (xrefs, all_decls, fa) =
+    path source_text con member_clusters (xrefs, all_decls, fa) =
   let (con_pos, con_name) = con.c_name in
   let parent_kind = Predicate.get_parent_kind con.c_kind in
   let decl_pred = Predicate.parent_decl_predicate parent_kind in
@@ -107,7 +107,7 @@ let process_container_decl
         let (decl_id, fa) =
           process_decl_loc
             (Add_fact.property_decl parent_kind con_decl_id)
-            (Add_fact.property_defn ctx source_text)
+            (Add_fact.property_defn source_text)
             (fun x -> Declaration.Property_ (PropertyDeclaration.Id x))
             ~path
             pos
@@ -125,7 +125,7 @@ let process_container_decl
         let (decl_id, fa) =
           process_decl_loc
             (Add_fact.class_const_decl parent_kind con_decl_id)
-            (Add_fact.class_const_defn ctx source_text)
+            (Add_fact.class_const_defn source_text)
             (fun x -> Declaration.ClassConst (ClassConstDeclaration.Id x))
             ~path
             pos
@@ -143,7 +143,7 @@ let process_container_decl
         let (decl_id, fa) =
           process_decl_loc
             (Add_fact.type_const_decl parent_kind con_decl_id)
-            (Add_fact.type_const_defn ctx source_text)
+            (Add_fact.type_const_defn source_text)
             (fun x -> Declaration.TypeConst (TypeConstDeclaration.Id x))
             ~path
             pos
@@ -161,7 +161,7 @@ let process_container_decl
         let (decl_id, fa) =
           process_decl_loc
             (Add_fact.method_decl parent_kind con_decl_id)
-            (Add_fact.method_defn ctx source_text)
+            (Add_fact.method_defn source_text)
             (fun x -> Declaration.Method (MethodDeclaration.Id x))
             ~path
             pos
@@ -196,7 +196,7 @@ let process_container_decl
       fa
   in
   let (_, fa) =
-    Add_fact.container_defn ctx source_text con con_decl_id members fa
+    Add_fact.container_defn source_text con con_decl_id members fa
   in
   let ref = Predicate.container_ref parent_kind con_decl_id in
   let fa = process_loc_span path con_pos con.c_span ref fa in
@@ -204,7 +204,7 @@ let process_container_decl
   let fa = process_doc_comment con.c_doc_comment path ref fa in
   (xrefs, all_decls, fa)
 
-let process_enum_decl ctx path source_text enm (xrefs, all_decls, fa) =
+let process_enum_decl path source_text enm (xrefs, all_decls, fa) =
   let (pos, id) = enm.c_name in
   match enm.c_enum with
   | None ->
@@ -233,18 +233,18 @@ let process_enum_decl ctx path source_text enm (xrefs, all_decls, fa) =
           (decl_id :: decls, ref :: refs, fa))
     in
     let (_, fa) =
-      Add_fact.enum_defn ctx source_text enm enum_id enum_data enumerators fa
+      Add_fact.enum_defn source_text enm enum_id enum_data enumerators fa
     in
     let fa = process_doc_comment enm.c_doc_comment path enum_decl_ref fa in
     (xrefs, all_decls @ (enum_decl_ref :: decl_refs), fa)
 
-let process_func_decl ctx path source_text fd (xrefs, all_decls, fa) =
+let process_func_decl path source_text fd (xrefs, all_decls, fa) =
   let elem = fd.fd_fun in
   let (pos, id) = fd.fd_name in
   let (decl_id, fa) =
     process_decl_loc
       Add_fact.func_decl
-      (Add_fact.func_defn ctx source_text)
+      (Add_fact.func_defn source_text)
       (fun x -> Declaration.Function_ (FunctionDeclaration.Id x))
       ~path
       pos
@@ -258,12 +258,12 @@ let process_func_decl ctx path source_text fd (xrefs, all_decls, fa) =
     all_decls @ [Declaration.Function_ (FunctionDeclaration.Id decl_id)],
     fa )
 
-let process_gconst_decl ctx path source_text elem (xrefs, all_decls, fa) =
+let process_gconst_decl path source_text elem (xrefs, all_decls, fa) =
   let (pos, id) = elem.cst_name in
   let (decl_id, fa) =
     process_decl_loc
       Add_fact.gconst_decl
-      (Add_fact.gconst_defn ctx source_text)
+      (Add_fact.gconst_defn source_text)
       (fun x -> Declaration.GlobalConst (GlobalConstDeclaration.Id x))
       ~path
       pos
@@ -277,12 +277,12 @@ let process_gconst_decl ctx path source_text elem (xrefs, all_decls, fa) =
     all_decls @ [Declaration.GlobalConst (GlobalConstDeclaration.Id decl_id)],
     fa )
 
-let process_typedef_decl ctx path source_text elem (xrefs, all_decls, fa) =
+let process_typedef_decl path source_text elem (xrefs, all_decls, fa) =
   let (pos, id) = elem.t_name in
   let (decl_id, fa) =
     process_decl_loc
       Add_fact.typedef_decl
-      (Add_fact.typedef_defn ctx source_text)
+      (Add_fact.typedef_defn source_text)
       (fun x -> Declaration.Typedef_ (TypedefDeclaration.Id x))
       ~path
       pos
@@ -294,12 +294,12 @@ let process_typedef_decl ctx path source_text elem (xrefs, all_decls, fa) =
   in
   (xrefs, all_decls @ [Declaration.Typedef_ (TypedefDeclaration.Id decl_id)], fa)
 
-let process_module_decl ctx path source_text elem (xrefs, all_decls, fa) =
+let process_module_decl path source_text elem (xrefs, all_decls, fa) =
   let (pos, id) = elem.md_name in
   let (decl_id, fa) =
     process_decl_loc
       Add_fact.module_decl
-      (Add_fact.module_defn ctx source_text)
+      (Add_fact.module_defn source_text)
       (fun x -> Declaration.Module (ModuleDeclaration.Id x))
       ~path
       pos
@@ -364,27 +364,27 @@ let process_mod_xref fa xrefs (pos, id) =
   in
   (Xrefs.add xrefs target_id pos Xrefs.{ target; receiver_type = None }, fa)
 
-let process_tast_decls ctx ~path tast source_text (decls, fa) =
+let process_tast_decls ~path tast source_text (decls, fa) =
   List.fold tast ~init:(Xrefs.empty, decls, fa) ~f:(fun acc (def, im) ->
       match def with
       | Class en when Util.is_enum_or_enum_class en.c_kind ->
-        process_enum_decl ctx path source_text en acc
-      | Class cd -> process_container_decl ctx path source_text cd im acc
-      | Constant gd -> process_gconst_decl ctx path source_text gd acc
-      | Fun fd -> process_func_decl ctx path source_text fd acc
-      | Typedef td -> process_typedef_decl ctx path source_text td acc
-      | Module md -> process_module_decl ctx path source_text md acc
+        process_enum_decl path source_text en acc
+      | Class cd -> process_container_decl path source_text cd im acc
+      | Constant gd -> process_gconst_decl path source_text gd acc
+      | Fun fd -> process_func_decl path source_text fd acc
+      | Typedef td -> process_typedef_decl path source_text td acc
+      | Module md -> process_module_decl path source_text md acc
       | SetModule sm ->
         let (xrefs, _, fa) = acc in
         let (xrefs, fa) = process_mod_xref fa xrefs sm in
         (xrefs, decls, fa)
       | _ -> acc)
 
-let process_decls ctx fa File_info.{ path; tast; source_text; cst; _ } =
+let process_decls fa File_info.{ path; tast; source_text; cst; _ } =
   Fact_acc.set_ownership_unit fa (Some path);
   let (_, fa) = Add_fact.file_lines ~path source_text fa in
   let (mod_xrefs, decls, fa) =
-    process_tast_decls ctx ~path tast source_text ([], fa)
+    process_tast_decls ~path tast source_text ([], fa)
   in
   let (decls, fa) = process_cst_decls source_text path cst (decls, fa) in
   (mod_xrefs, Add_fact.file_decls ~path decls fa |> snd)

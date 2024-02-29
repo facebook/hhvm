@@ -49,35 +49,31 @@ let container_decl decl_pred name fa =
   in
   Fact_acc.add_fact decl_pred json fa
 
-let parent_decls ctx decls pred fa =
+let parent_decls decls pred fa =
   List.fold decls ~init:([], fa) ~f:(fun (decl_refs, fa) decl ->
-      let name =
-        Pretty.(hint_to_string ~is_ctx:false ctx decl |> strip_tparams)
-      in
+      let name = Pretty.(hint_to_string ~is_ctx:false decl |> strip_tparams) in
       let (decl_id, fa) = container_decl pred name fa in
       (decl_id :: decl_refs, fa))
 
-let parent_decls_enum ctx decls fa =
-  let (fact_ids, fa) =
-    parent_decls ctx decls Predicate.(Hack EnumDeclaration) fa
-  in
+let parent_decls_enum decls fa =
+  let (fact_ids, fa) = parent_decls decls Predicate.(Hack EnumDeclaration) fa in
   (List.map ~f:(fun x -> EnumDeclaration.Id x) fact_ids, fa)
 
-let parent_decls_class ctx decls fa =
+let parent_decls_class decls fa =
   let (fact_ids, fa) =
-    parent_decls ctx decls Predicate.(Hack ClassDeclaration) fa
+    parent_decls decls Predicate.(Hack ClassDeclaration) fa
   in
   (List.map ~f:(fun x -> ClassDeclaration.Id x) fact_ids, fa)
 
-let parent_decls_trait ctx decls fa =
+let parent_decls_trait decls fa =
   let (fact_ids, fa) =
-    parent_decls ctx decls Predicate.(Hack TraitDeclaration) fa
+    parent_decls decls Predicate.(Hack TraitDeclaration) fa
   in
   (List.map ~f:(fun x -> TraitDeclaration.Id x) fact_ids, fa)
 
-let parent_decls_interface ctx decls fa =
+let parent_decls_interface decls fa =
   let (fact_ids, fa) =
-    parent_decls ctx decls Predicate.(Hack InterfaceDeclaration) fa
+    parent_decls decls Predicate.(Hack InterfaceDeclaration) fa
   in
   (List.map ~f:(fun x -> InterfaceDeclaration.Id x) fact_ids, fa)
 
@@ -110,10 +106,10 @@ let inherited_members ~container_type ~container_id ~member_clusters fa =
   in
   Fact_acc.add_fact Predicate.(Hack InheritedMembers) json fa
 
-let container_defn ctx source_text clss decl_id members fa =
+let container_defn source_text clss decl_id members fa =
   let fa = namespace_decl_opt clss.c_namespace fa in
   let type_params =
-    List.map clss.c_tparams ~f:(Build_fact.type_param ctx source_text)
+    List.map clss.c_tparams ~f:(Build_fact.type_param source_text)
   in
   let (module_, fa) = module_field clss.c_module clss.c_internal fa in
   let attributes = Build_fact.attributes source_text clss.c_user_attributes in
@@ -121,17 +117,17 @@ let container_defn ctx source_text clss decl_id members fa =
     Aast.partition_map_require_kind ~f:(fun x -> x) clss.c_reqs
   in
   let (require_extends, fa) =
-    parent_decls_class ctx (List.map req_extends_hints ~f:fst) fa
+    parent_decls_class (List.map req_extends_hints ~f:fst) fa
   in
   let (require_implements, fa) =
-    parent_decls_interface ctx (List.map req_implements_hints ~f:fst) fa
+    parent_decls_interface (List.map req_implements_hints ~f:fst) fa
   in
   let (require_class, fa) =
-    parent_decls_class ctx (List.map req_class_hints ~f:fst) fa
+    parent_decls_class (List.map req_class_hints ~f:fst) fa
   in
   match Predicate.get_parent_kind clss.c_kind with
   | Predicate.InterfaceContainer ->
-    let (extends_, fa) = parent_decls_interface ctx clss.c_extends fa in
+    let (extends_, fa) = parent_decls_interface clss.c_extends fa in
     let json =
       InterfaceDefinition.(
         {
@@ -147,8 +143,8 @@ let container_defn ctx source_text clss decl_id members fa =
     in
     Fact_acc.add_fact Predicate.(Hack InterfaceDefinition) json fa
   | Predicate.TraitContainer ->
-    let (implements_, fa) = parent_decls_interface ctx clss.c_implements fa in
-    let (uses, fa) = parent_decls_trait ctx clss.c_uses fa in
+    let (implements_, fa) = parent_decls_interface clss.c_implements fa in
+    let (uses, fa) = parent_decls_trait clss.c_uses fa in
     let json =
       TraitDefinition.(
         {
@@ -167,15 +163,15 @@ let container_defn ctx source_text clss decl_id members fa =
     in
     Fact_acc.add_fact Predicate.(Hack TraitDefinition) json fa
   | Predicate.ClassContainer ->
-    let (implements_, fa) = parent_decls_interface ctx clss.c_implements fa in
-    let (uses, fa) = parent_decls_trait ctx clss.c_uses fa in
+    let (implements_, fa) = parent_decls_interface clss.c_implements fa in
+    let (uses, fa) = parent_decls_trait clss.c_uses fa in
     let (extends_, fa) =
       match clss.c_extends with
       | [] -> (None, fa)
       | [parent] ->
         let (decl_id, fa) =
           let parent_clss =
-            Pretty.(hint_to_string ~is_ctx:false ctx parent |> strip_tparams)
+            Pretty.(hint_to_string ~is_ctx:false parent |> strip_tparams)
           in
           let qname = Util.make_qname parent_clss in
           let json = ClassDeclaration.(to_json_key { name = qname }) in
@@ -273,7 +269,7 @@ let aggregate_pos (json_pos_list : (XRefTarget.t * Pretty.pos) list) :
   in
   Map.Poly.to_alist jmap
 
-let build_signature ctx pos_map_opt source_text params ctxs ret fa =
+let build_signature pos_map_opt source_text params ctxs ret fa =
   let pos_map =
     match pos_map_opt with
     | Some pos_map -> pos_map
@@ -283,8 +279,9 @@ let build_signature ctx pos_map_opt source_text params ctxs ret fa =
     match hint_of_type_hint h with
     | None -> (None, None, fa)
     | Some hint ->
-      let legacy_ty = Pretty.hint_to_string ~is_ctx:false ctx hint in
-      let (ty, sym_pos) = Pretty.hint_to_string_and_symbols hint in
+      let (ty, sym_pos) =
+        Pretty.hint_to_string_and_symbols ~is_ctx:false hint
+      in
       let decl_json_pos =
         List.filter_map sym_pos ~f:(fun (source_pos, pos) ->
             match Xrefs.PosMap.find_opt source_pos pos_map with
@@ -293,7 +290,7 @@ let build_signature ctx pos_map_opt source_text params ctxs ret fa =
       in
       let decl_json_aggr_pos = aggregate_pos decl_json_pos in
       let (fact_id, fa) = type_info ~ty decl_json_aggr_pos fa in
-      (Some legacy_ty, Some fact_id, fa)
+      (Some ty, Some fact_id, fa)
   in
   let (params, fa) =
     List.fold params ~init:([], fa) ~f:(fun (t_params, fa) p ->
@@ -303,18 +300,15 @@ let build_signature ctx pos_map_opt source_text params ctxs ret fa =
   let params = List.rev params in
   let (ret_ty, return_info, fa) = hint_to_str_opt ret fa in
   let signature =
-    Build_fact.signature ctx source_text params ctxs ~ret_ty ~return_info
+    Build_fact.signature source_text params ctxs ~ret_ty ~return_info
   in
   (signature, fa)
 
-let method_defn ctx source_text meth decl_id fa =
+let method_defn source_text meth decl_id fa =
   let m_tparams = Util.remove_generated_tparams meth.m_tparams in
-  let type_params =
-    List.map m_tparams ~f:(Build_fact.type_param ctx source_text)
-  in
+  let type_params = List.map m_tparams ~f:(Build_fact.type_param source_text) in
   let (signature, fa) =
     build_signature
-      ctx
       (Fact_acc.get_pos_map fa)
       source_text
       meth.m_params
@@ -362,10 +356,10 @@ let method_overrides
   in
   Fact_acc.add_fact Predicate.(Hack MethodOverrides) json fa
 
-let property_defn ctx source_text prop decl_id fa =
+let property_defn source_text prop decl_id fa =
   let type_ =
     Option.map
-      ~f:(fun x -> Type.Key (Pretty.hint_to_string ~is_ctx:false ctx x))
+      ~f:(fun x -> Type.Key (Pretty.hint_to_string ~is_ctx:false x))
       (hint_of_type_hint prop.cv_type)
   in
   let json =
@@ -383,7 +377,7 @@ let property_defn ctx source_text prop decl_id fa =
   in
   Fact_acc.add_fact Predicate.(Hack PropertyDefinition) json fa
 
-let class_const_defn ctx source_text const decl_id fa =
+let class_const_defn source_text const decl_id fa =
   let value =
     match const.cc_kind with
     | CCAbstract None -> None
@@ -393,7 +387,7 @@ let class_const_defn ctx source_text const decl_id fa =
   in
   let type_ =
     Option.map
-      ~f:(fun x -> Type.Key (Pretty.hint_to_string ~is_ctx:false ctx x))
+      ~f:(fun x -> Type.Key (Pretty.hint_to_string ~is_ctx:false x))
       const.cc_type
   in
   let json =
@@ -403,14 +397,14 @@ let class_const_defn ctx source_text const decl_id fa =
   in
   Fact_acc.add_fact Predicate.(Hack ClassConstDefinition) json fa
 
-let type_const_defn ctx source_text tc decl_id fa =
+let type_const_defn source_text tc decl_id fa =
   (* TODO(T88552052) should the default of an abstract type constant be used
      * as a value here *)
   let type_ =
     match tc.c_tconst_kind with
     | TCConcrete { c_tc_type = h }
     | TCAbstract { c_atc_default = Some h; _ } ->
-      Some (Type.Key (Pretty.hint_to_string ~is_ctx:false ctx h))
+      Some (Type.Key (Pretty.hint_to_string ~is_ctx:false h))
     | TCAbstract { c_atc_default = None; _ } -> None
   in
   let json =
@@ -430,21 +424,21 @@ let enum_decl name fa =
   let json = EnumDeclaration.({ name = Util.make_qname name } |> to_json_key) in
   Fact_acc.add_fact Predicate.(Hack EnumDeclaration) json fa
 
-let enum_defn ctx source_text enm enum_id enum_data enumerators fa =
+let enum_defn source_text enm enum_id enum_data enumerators fa =
   let enumerators = List.map enumerators ~f:(fun x -> Enumerator.Id x) in
   let fa = namespace_decl_opt enm.c_namespace fa in
-  let (includes, fa) = parent_decls_enum ctx enum_data.e_includes fa in
+  let (includes, fa) = parent_decls_enum enum_data.e_includes fa in
   let (module_, fa) = module_field enm.c_module enm.c_internal fa in
   let enum_constraint =
     Option.map enum_data.e_constraint ~f:(fun x ->
-        Type.Key (Pretty.hint_to_string ~is_ctx:false ctx x))
+        Type.Key (Pretty.hint_to_string ~is_ctx:false x))
   in
   let json =
     EnumDefinition.(
       {
         declaration = EnumDeclaration.Id enum_id;
         enum_base =
-          Type.Key (Pretty.hint_to_string ~is_ctx:false ctx enum_data.e_base);
+          Type.Key (Pretty.hint_to_string ~is_ctx:false enum_data.e_base);
         enumerators;
         attributes = Build_fact.attributes source_text enm.c_user_attributes;
         includes;
@@ -473,17 +467,16 @@ let func_decl name fa =
   in
   Fact_acc.add_fact Predicate.(Hack FunctionDeclaration) json fa
 
-let func_defn ctx source_text fd decl_id fa =
+let func_defn source_text fd decl_id fa =
   let elem = fd.fd_fun in
   let fa = namespace_decl_opt fd.fd_namespace fa in
   let fd_tparams = Util.remove_generated_tparams fd.fd_tparams in
   let type_params =
-    List.map fd_tparams ~f:(Build_fact.type_param ctx source_text)
+    List.map fd_tparams ~f:(Build_fact.type_param source_text)
   in
   let (module_, fa) = module_field fd.fd_module fd.fd_internal fa in
   let (signature, fa) =
     build_signature
-      ctx
       (Fact_acc.get_pos_map fa)
       source_text
       elem.f_params
@@ -509,7 +502,7 @@ let func_defn ctx source_text fd decl_id fa =
   in
   Fact_acc.add_fact Predicate.(Hack FunctionDefinition) json fa
 
-let module_defn _ctx source_text elem decl_id fa =
+let module_defn source_text elem decl_id fa =
   let json =
     ModuleDefinition.(
       {
@@ -526,7 +519,7 @@ let typedef_decl name fa =
   in
   Fact_acc.add_fact Predicate.(Hack TypedefDeclaration) json fa
 
-let typedef_defn ctx source_text elem decl_id fa =
+let typedef_defn source_text elem decl_id fa =
   let fa = namespace_decl_opt elem.t_namespace fa in
   let is_transparent =
     match elem.t_vis with
@@ -537,7 +530,7 @@ let typedef_defn ctx source_text elem decl_id fa =
       false
   in
   let type_params =
-    List.map elem.t_tparams ~f:(Build_fact.type_param ctx source_text)
+    List.map elem.t_tparams ~f:(Build_fact.type_param source_text)
   in
   let (module_, fa) = module_field elem.t_module elem.t_internal fa in
   let json =
@@ -559,12 +552,12 @@ let gconst_decl name fa =
   in
   Fact_acc.add_fact Predicate.(Hack GlobalConstDeclaration) json fa
 
-let gconst_defn ctx source_text elem decl_id fa =
+let gconst_defn source_text elem decl_id fa =
   let fa = namespace_decl_opt elem.cst_namespace fa in
   let value = Pretty.expr_to_string source_text elem.cst_value in
   let type_ =
     Option.map elem.cst_type ~f:(fun x ->
-        Type.Key (Pretty.hint_to_string ~is_ctx:false ctx x))
+        Type.Key (Pretty.hint_to_string ~is_ctx:false x))
   in
   let json =
     GlobalConstDefinition.(

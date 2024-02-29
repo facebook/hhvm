@@ -8,18 +8,6 @@
 
 open Hh_prelude
 
-let hint_to_string ~is_ctx ctx h =
-  let mode = FileInfo.Mhhi in
-  let decl_env = Decl_env.{ mode; droot = None; droot_member = None; ctx } in
-  let tcopt = Provider_context.get_tcopt ctx in
-  let (pp, strip) =
-    if is_ctx then
-      (Decl_hint.context_hint decl_env, (fun x -> x))
-    else
-      (Decl_hint.hint decl_env, Utils.strip_ns)
-  in
-  pp h |> Typing_print.full_decl ~msg:false tcopt |> strip
-
 type pos = {
   start: int;
   length: int;
@@ -28,7 +16,7 @@ type pos = {
 
 let buf = Buffer.create 1024
 
-let hint_to_string_and_symbols (hint : Aast.hint) =
+let hint_to_string_and_symbols ~is_ctx (hint : Aast.hint) =
   Buffer.reset buf;
   let xrefs = ref [] in
   let append ?annot str =
@@ -223,8 +211,11 @@ let hint_to_string_and_symbols (hint : Aast.hint) =
     Option.iter a ~f:(fun _ -> append "inout ");
     parse ~is_ctx:false hint
   in
-  parse ~is_ctx:false hint;
+  parse ~is_ctx hint;
   (Buffer.contents buf, !xrefs)
+
+let hint_to_string ~is_ctx (hint : Aast.hint) =
+  hint_to_string_and_symbols ~is_ctx hint |> fst
 
 let expr_to_string source_text (_, pos, _) =
   let strip_nested_quotes str =

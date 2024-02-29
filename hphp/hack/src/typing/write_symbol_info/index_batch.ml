@@ -44,7 +44,7 @@ let build_json ctx files_info ~ownership =
     let fa = process_source_text ctx fa file_info in
     let (fa, xrefs) = Index_xrefs.process_xrefs_and_calls ctx fa file_info in
     Fact_acc.set_pos_map fa xrefs.Xrefs.pos_map;
-    let (mod_xrefs, fa) = Index_decls.process_decls ctx fa file_info in
+    let (mod_xrefs, fa) = Index_decls.process_decls fa file_info in
     let fact_map_xrefs = xrefs.Xrefs.fact_map in
     let fact_map_module_xrefs = mod_xrefs.Xrefs.fact_map in
     let merge _ x _ = Some x in

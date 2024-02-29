@@ -38,8 +38,8 @@ let call_arguments arguments =
   in
   List.fold arguments ~init:([], 0) ~f |> fst |> List.rev
 
-let constraint_ ctx (kind, hint) =
-  let type_string = Pretty.hint_to_string ~is_ctx:false ctx hint in
+let constraint_ (kind, hint) =
+  let type_string = Pretty.hint_to_string ~is_ctx:false hint in
   Constraint.
     {
       constraint_kind = Util.make_constraint_kind kind;
@@ -47,14 +47,10 @@ let constraint_ ctx (kind, hint) =
     }
 
 let signature
-    ctx
-    source_text
-    params
-    (ctxs_hints : Aast.contexts option)
-    ~ret_ty
-    ~return_info =
+    source_text params (ctxs_hints : Aast.contexts option) ~ret_ty ~return_info
+    =
   let hint_to_ctx hint =
-    Context_.Key (Pretty.hint_to_string ~is_ctx:true ctx hint)
+    Context_.Key (Pretty.hint_to_string ~is_ctx:true hint)
   in
   let f (_pos, hint) = List.map ~f:hint_to_ctx hint in
   let ctxs_hints = Option.map ctxs_hints ~f in
@@ -86,10 +82,10 @@ let signature
         returns_type_info = Option.map ~f:(fun x -> TypeInfo.Id x) return_info;
       })
 
-let type_param ctx source_text tp =
+let type_param source_text tp =
   let (_, name) = tp.tp_name in
   let name = Util.make_name name in
-  let constraints = List.map tp.tp_constraints ~f:(constraint_ ctx) in
+  let constraints = List.map tp.tp_constraints ~f:constraint_ in
   TypeParameter.
     {
       name;

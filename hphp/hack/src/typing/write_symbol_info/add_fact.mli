@@ -31,7 +31,6 @@ val inherited_members :
   Fact_id.t * Fact_acc.t
 
 val container_defn :
-  Provider_context.t ->
   Full_fidelity_source_text.t ->
   ('a, 'b) Aast.class_ ->
   Fact_id.t ->
@@ -68,7 +67,6 @@ val method_decl :
   Fact_id.t * Fact_acc.t
 
 val method_defn :
-  Provider_context.t ->
   Full_fidelity_source_text.t ->
   ('a, 'b) Aast.method_ ->
   Fact_id.t ->
@@ -85,7 +83,6 @@ val method_overrides :
   Fact_id.t * Fact_acc.t
 
 val property_defn :
-  Provider_context.t ->
   Full_fidelity_source_text.t ->
   ('a, 'b) Aast.class_var ->
   Fact_id.t ->
@@ -93,7 +90,6 @@ val property_defn :
   Fact_id.t * Fact_acc.t
 
 val class_const_defn :
-  Provider_context.t ->
   Full_fidelity_source_text.t ->
   ('a, 'b) Aast.class_const ->
   Fact_id.t ->
@@ -101,7 +97,6 @@ val class_const_defn :
   Fact_id.t * Fact_acc.t
 
 val type_const_defn :
-  Provider_context.t ->
   Full_fidelity_source_text.t ->
   ('a, 'b) Aast.class_typeconst_def ->
   Fact_id.t ->
@@ -111,7 +106,6 @@ val type_const_defn :
 val enum_decl : string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
 val enum_defn :
-  Provider_context.t ->
   Full_fidelity_source_text.t ->
   ('a, 'b) Aast.class_ ->
   Fact_id.t ->
@@ -125,7 +119,6 @@ val enumerator : Fact_id.t -> string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 val func_decl : string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
 val func_defn :
-  Provider_context.t ->
   Full_fidelity_source_text.t ->
   ('a, 'b) Aast.fun_def ->
   Fact_id.t ->
@@ -135,7 +128,6 @@ val func_defn :
 val typedef_decl : string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
 val typedef_defn :
-  Provider_context.t ->
   Full_fidelity_source_text.t ->
   ('a, 'b) Aast.typedef ->
   Fact_id.t ->
@@ -145,7 +137,6 @@ val typedef_defn :
 val module_decl : string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
 val module_defn :
-  Provider_context.t ->
   Full_fidelity_source_text.t ->
   ('a, 'b) Aast.module_def ->
   Fact_id.t ->
@@ -155,7 +146,6 @@ val module_defn :
 val gconst_decl : string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
 val gconst_defn :
-  Provider_context.t ->
   Full_fidelity_source_text.t ->
   ('a, 'b) Aast.gconst ->
   Fact_id.t ->
